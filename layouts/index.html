@@ -4,14 +4,40 @@
 {{- $socialImage := "images/silo-social-card.png" | absURL -}}
 {{- $socialAlt := cond $zh "SILO — Pigsty 持续维护的 MinIO 社区分支" "SILO — community-maintained MinIO fork by Pigsty" -}}
 {{- $evidenceProjects := slice
-  (dict "name" "Dokploy" "kind" "PRODUCT TEMPLATE" "kindZh" "产品模板内置" "logo" "images/projects/dokploy.webp" "href" "https://github.com/Dokploy/templates/pull/1012")
-  (dict "name" "Grafana Loki" "kind" "HELM · BUNDLED SERVICE" "kindZh" "Helm 随附服务" "logo" "images/projects/grafana-loki.webp" "href" "https://github.com/grafana/loki/issues/21925")
-  (dict "name" "Pigsty" "kind" "PG BACKUP REPO" "kindZh" "PG 备份仓库" "logo" "images/projects/pigsty.svg" "href" "https://pigsty.io/docs/minio/")
+  (dict "name" "Dokploy" "kind" "PRODUCT TEMPLATE" "kindZh" "产品模板内置" "logo" "images/projects/dokploy.webp" "href" "https://docs.dokploy.com/docs/templates/minio")
   (dict "name" "RAGFlow" "kind" "DEFAULT COMPOSE" "kindZh" "默认 Compose 编排" "logo" "images/projects/ragflow.webp" "href" "https://github.com/infiniflow/ragflow/commit/384fa6f")
+  (dict "name" "Grafana Loki" "kind" "HELM · BUNDLED SERVICE" "kindZh" "Helm 随附服务" "logo" "images/projects/grafana-loki.webp" "href" "https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml")
+  (dict "name" "Omnia" "kind" "HPC PLATFORM RUNTIME" "kindZh" "HPC 平台运行时" "logo" "images/projects/omnia.webp" "href" "https://omnia.readthedocs.io/en/latest/Operations/log_management.html")
+  (dict "name" "nixpkgs" "kind" "DISTRIBUTION PACKAGE" "kindZh" "发行版软件包" "logo" "images/projects/nixos.webp" "href" "https://github.com/NixOS/nixpkgs/pull/525650")
+  (dict "name" "Pigsty" "kind" "PG BACKUP REPO" "kindZh" "PG 备份仓库" "logo" "images/projects/pigsty.svg" "href" "https://pigsty.io/docs/minio/")
+  (dict "name" "DaoCloud" "kind" "PUBLIC IMAGE MIRROR" "kindZh" "公共镜像加速" "logo" "images/projects/daocloud.webp" "href" "https://github.com/DaoCloud/public-image-mirror/commit/8c60532")
   (dict "name" "ModelarDB" "kind" "CI · INTEGRATION" "kindZh" "CI 集成测试" "logo" "images/projects/modelardb.webp" "href" "https://github.com/ModelarData/ModelarDB-RS/commit/495bb6c")
-  (dict "name" "AgentsMesh" "kind" "COMPOSE · CI" "kindZh" "Compose 编排 · CI" "logo" "images/projects/agentsmesh.webp" "href" "https://github.com/AgentsMesh/AgentsMesh/commit/95f557e")
   (dict "name" "Measure" "kind" "BACKEND DEPLOYMENT" "kindZh" "后端部署组件" "logo" "images/projects/measure.webp" "href" "https://github.com/measure-sh/measure/commit/ec62d87")
+  (dict "name" "AgentsMesh" "kind" "COMPOSE · CI" "kindZh" "Compose 编排 · CI" "logo" "images/projects/agentsmesh.webp" "href" "https://github.com/AgentsMesh/AgentsMesh/commit/95f557e")
   (dict "name" "Firemoot" "kind" "REFERENCE COMPOSE · CI" "kindZh" "参考编排 · CI" "logo" "images/projects/firemoot.webp" "href" "https://github.com/firemoot/firemoot/commit/e72907e241a4320a036b59f49dcf0c15cf5e74e5")
+  (dict "name" "buun-stack" "kind" "KUBERNETES STACK" "kindZh" "Kubernetes 技术栈" "logo" "images/projects/buun-stack.webp" "href" "https://github.com/buun-ch/buun-stack/commit/1d2a52d")
+  (dict "name" "Open-Lutra" "kind" "S3 DEV PROFILE" "kindZh" "S3 开发环境" "logo" "images/projects/open-lutra.webp" "href" "https://github.com/fastlabel/open-lutra/commit/5ac1998")
+  (dict "name" "Kukan" "kind" "COMPOSE MIGRATION" "kindZh" "Compose 镜像切换" "logo" "images/projects/kukan.webp" "href" "https://github.com/kukan-project/kukan/commit/260ead4")
+-}}
+{{/* Public third-party traces: forum posts, issue threads, project docs, and migration commits.
+     Every quote is copied verbatim from the linked source; dates are the source's own. */}}
+{{- $voiceRowA := slice
+  (dict "who" "Yingfeng" "role" "Founder @ InfiniFlow · RAGFlow" "roleZh" "InfiniFlow · RAGFlow 创始人" "face" "images/voices/yingfeng.webp" "src" "GitHub · RAGFlow #13840 · 2026-03-31" "quote" "Using pgsty/minio's fork as the default storage is a reasonable solution right now." "href" "https://github.com/infiniflow/ragflow/issues/13840")
+  (dict "who" "Mauricio Siu" "role" "Creator of Dokploy" "roleZh" "Dokploy 作者" "face" "images/voices/siumauricio.webp" "src" "GitHub · Dokploy templates #1012 · 2026-07-15" "quote" "Drop-in replacement: same env vars, same server command, same /data on-disk format, and it restores the full web console upstream had gutted." "href" "https://github.com/Dokploy/templates/pull/1012")
+  (dict "who" "Debjeet Biswas" "role" "Building measure.sh" "roleZh" "measure.sh 维护者" "face" "images/voices/detj.webp" "src" "GitHub · measure #3831 · 2026-06-06" "quote" "This PR switches to a community trusted minio image." "href" "https://github.com/measure-sh/measure/pull/3831")
+  (dict "who" "chalukyaj" "role" "Author of Silo Operator" "roleZh" "Silo Operator 作者" "face" "images/voices/chalukyaj.webp" "src" "GitHub · pgsty/minio #30 · 2026-04-19" "quote" "To discover that the community maintained version not only exists, but has had a recent release which outperforms the last published minio image was a delight." "href" "https://github.com/pgsty/minio/issues/30")
+  (dict "who" "Clayton Auld" "role" "Engineer @ GCI" "roleZh" "GCI 工程师" "face" "images/voices/clayauld.webp" "src" "GitHub · Notesnook #79 · 2026-02-24" "quote" "Looks like a community fork of MinIO may be the real solution here … this is likely the easiest migration path." "href" "https://github.com/streetwriters/notesnook-sync-server/pull/79")
+  (dict "who" "kuma_3838" "role" "Qiita Author" "roleZh" "Qiita 作者" "face" "images/voices/kuma_3838.webp" "src" "Qiita · 2026-02-25" "lang" "ja" "quote" "最小限の変更で済むため、直近の対応としては最も手軽です。" "href" "https://qiita.com/kuma_3838/items/b9073cce25766508485a")
+  (dict "who" "Grafana Loki" "role" "Helm chart · values.yaml" "roleZh" "Helm Chart · values.yaml" "face" "images/projects/grafana-loki.webp" "src" "GitHub · grafana/loki" "quote" "Override the upstream MinIO, Inc. images with the Pigsty (pgsty) community fork to mitigate the unresolved CVE in the abandoned MinIO images." "href" "https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml")
+-}}
+{{- $voiceRowB := slice
+  (dict "who" "Søren Kejser Jensen" "role" "ModelarDB · Aalborg University" "roleZh" "ModelarDB · 奥尔堡大学" "face" "images/voices/skejserjensen.webp" "src" "GitHub · ModelarDB-RS #400 · 2026-06-22" "quote" "Switching from minio/minio to pgsty/minio as neither RustFS and VersityGW seems suitable for a production deployment." "href" "https://github.com/ModelarData/ModelarDB-RS/pull/400")
+  (dict "who" "Łukasz Różewicz" "role" "RAGFlow Community" "roleZh" "RAGFlow 社区" "face" "images/voices/lrozewicz.webp" "src" "GitHub · RAGFlow #13840 · 2026-03-28" "quote" "A community fork of MinIO … that restores the admin console and ships patched binaries." "href" "https://github.com/infiniflow/ragflow/issues/13840")
+  (dict "who" "Du" "role" "Software Engineer" "roleZh" "软件工程师" "face" "images/voices/meesudzu.webp" "src" "GitHub · pgsty/minio #42 · 2026-07-21" "quote" "The fork keeps the wire protocol, on-disk format, and mc client compatible with upstream." "href" "https://github.com/pgsty/minio/issues/42")
+  (dict "who" "ekko" "role" "1Panel Community" "roleZh" "1Panel 社区" "face" "images/voices/7freezingpoint.webp" "src" "GitHub · 1Panel #12753 · 2026-05-18" "lang" "zh" "quote" "原 minio 官方已不再维护，pgsty 开源社区 fork 重新维护的版本是否考虑" "href" "https://github.com/1Panel-dev/1Panel/issues/12753")
+  (dict "who" "buun-stack" "role" "Kubernetes Home Lab" "roleZh" "Kubernetes 家庭实验室" "face" "images/projects/buun-stack.webp" "src" "GitHub · buun-ch/buun-stack · 2026-06-21" "quote" "Uses the pgsty/minio image, since MinIO's upstream Community Edition is archived/EOL; the embedded admin console is restored." "href" "https://github.com/buun-ch/buun-stack")
+  (dict "who" "Upendra N" "role" "GitHub Community" "roleZh" "GitHub 社区" "face" "images/voices/turborails.webp" "src" "GitHub · pgsty/minio #7 · 2026-03-20" "quote" "Thank you for the initiative. Just name it S4 — the next version of S3 😅" "href" "https://github.com/pgsty/minio/issues/7")
+  (dict "who" "Dokploy Templates" "role" "Template documentation" "roleZh" "官方模板文档" "face" "images/projects/dokploy.webp" "src" "docs.dokploy.com · 2026-07" "quote" "This template uses pgsty/minio, the actively maintained community fork." "href" "https://docs.dokploy.com/docs/templates/minio")
 -}}
 <!DOCTYPE html>
 <html lang="{{ $locale }}" class="no-js">
@@ -107,10 +133,11 @@
 
   <link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
   <link rel="stylesheet" href="{{ "vendor/fontawesome/css/all.min.css" | relURL }}">
-  <link rel="stylesheet" href="{{ "css/landing-v3.css" | relURL }}">
-  <link rel="stylesheet" href="{{ "css/silo-v3.css" | relURL }}">
-  <link rel="stylesheet" href="{{ "css/download.css" | relURL }}">
-  <link rel="stylesheet" href="{{ "css/silo-footer.css" | relURL }}">
+  {{/* Content hash in the query string: static/ assets are served with long cache
+       lifetimes, so an edited stylesheet must change its URL to be picked up. */}}
+  {{- range slice "css/landing-v3.css" "css/silo-v3.css" "css/download.css" "css/silo-footer.css" }}
+  <link rel="stylesheet" href="{{ . | relURL }}?v={{ substr (md5 (readFile (path.Join "static" .))) 0 8 }}">
+  {{- end }}
   {{ if hugo.IsProduction }}{{ partial "google_analytics.html" . }}{{ end }}
 </head>
 <body class="landing-page">
@@ -170,8 +197,8 @@
             </p>
 
             <h1 class="hero-title silo-hero-title anim" style="--d:1">
-              <span class="hero-title-line"><b class="ini ini-t">S</b>3-<b class="ini ini-i">I</b>nterface</span>
-              <span class="hero-title-line"><b class="ini ini-y">L</b>ocal-<b class="ini ini-g">O</b>bjects</span>
+              <span class="hero-title-line"><b class="ini ini-t">S</b>3 <b class="ini ini-i">I</b>nterface</span>
+              <span class="hero-title-line"><b class="ini ini-y">L</b>ibre <b class="ini ini-g">O</b>bject</span>
             </h1>
 
             <p class="hero-sub anim" style="--d:2">
@@ -448,9 +475,9 @@
     <section class="landing-section operator-voices" id="voices">
       <div class="landing-container">
         <div class="section-head" data-reveal>
-          <p class="section-eyebrow"><span class="silkscreen">OPERATOR VOICES</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}用户之声{{ else }}USER VOICES{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title">{{ if $zh }}真实迁移反馈，也保留现实提醒{{ else }}Real migration reports, with the caveat intact{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}以下均为 2026 年 4–5 月第三方公开反馈，只代表各自环境，不构成通用兼容性或生产保证。{{ else }}Public third-party reports from April–May 2026. They describe individual environments, not universal compatibility or production guarantees.{{ end }}</p>
+          <p class="section-subtitle">{{ if $zh }}以下均为 2026 年 2–7 月的第三方公开记录，只代表各自环境，不构成通用兼容性或生产保证。{{ else }}Public third-party records from February–July 2026. They describe individual environments, not universal compatibility or production guarantees.{{ end }}</p>
         </div>
 
         <div class="operator-voices-grid" data-reveal>
@@ -482,6 +509,27 @@
             <footer><strong>Kevin_Lee</strong><span>Grist Creators · 2026-04-30</span><i aria-hidden="true">↗</i></footer>
           </a>
         </div>
+      </div>
+
+      <div class="landing-container">
+        <div class="voice-wall-head" data-reveal>
+          <span class="silkscreen">{{ if $zh }}更多社区反馈 · 悬停暂停 · 点击查看原文{{ else }}MORE FROM THE COMMUNITY · HOVER TO PAUSE · CLICK FOR THE SOURCE{{ end }}</span>
+        </div>
+      </div>
+
+      <div class="testimonials-marquee voice-wall" data-reveal aria-label="{{ if $zh }}第三方公开提及 SILO 的记录{{ else }}Public third-party mentions of SILO{{ end }}">
+        {{ range $i, $row := (slice $voiceRowA $voiceRowB) }}
+        <div class="testimonials-row" data-direction="{{ cond (eq $i 0) "left" "right" }}">
+          <div class="testimonials-content">
+            <div class="voice-set">
+              {{ range $row }}{{ partial "voice-card.html" (dict "voice" . "static" false) }}{{ end }}
+            </div>
+            <div class="voice-set" aria-hidden="true">
+              {{ range $row }}{{ partial "voice-card.html" (dict "voice" . "static" true) }}{{ end }}
+            </div>
+          </div>
+        </div>
+        {{ end }}
       </div>
     </section>
 
@@ -549,6 +597,6 @@
 
   {{ partial "footer.html" . }}
 
-  <script src="{{ "js/landing-v3.js" | relURL }}"></script>
+  <script src="{{ "js/landing-v3.js" | relURL }}?v={{ substr (md5 (readFile "static/js/landing-v3.js")) 0 8 }}"></script>
 </body>
 </html>

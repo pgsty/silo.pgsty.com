@@ -278,7 +278,8 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
 }
 .adoption-logos .logos-marquee-content {
   gap: 0;
-  animation-duration: 52s;
+  /* Duration covers the whole strip, so it scales with the number of logos. */
+  animation-duration: 92s;
 }
 .evidence-logo-set {
   display: flex;
@@ -411,6 +412,16 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 
 /* Adoption evidence note */
 
+/* Noto Sans SC draws U+2018–U+201D at CJK full width, which blows a hole through
+   Latin quotes ("I’m" renders as "I’ m"). Borrow just those glyphs from a Latin
+   face; if none is installed the stack falls back to the CJK face as before. */
+@font-face {
+  font-family: 'Latin Quotes';
+  src: local('Helvetica Neue'), local('Helvetica'), local('Arial'), local('Segoe UI'), local('Roboto'), local('Liberation Sans'), local('DejaVu Sans');
+  unicode-range: U+2018-201F, U+2032-2033, U+2039-203A;
+  font-display: swap;
+}
+
 /* Public operator reports */
 .operator-voices { position: relative; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--pg) 3%, transparent), transparent); }
 .operator-voices-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -436,11 +447,70 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 .voice-kind { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; color: var(--ink-mute); }
 .voice-kind i { width: 7px; height: 7px; border-radius: 50%; background: var(--voice-accent); box-shadow: 0 0 12px color-mix(in srgb, var(--voice-accent) 58%, transparent); }
 .operator-voice blockquote { position: relative; z-index: 1; max-width: 720px; margin: 0 0 16px; font-family: var(--font-head); font-size: clamp(1.25rem, 2vw, 1.7rem); font-weight: 650; line-height: 1.42; letter-spacing: -0.018em; color: var(--ink); }
+/* CJK quotes stay full width where that is correct typography ([lang] is set there). */
+.operator-voice blockquote:not([lang]) { font-family: 'Latin Quotes', var(--font-head); }
 .operator-voice p { margin: 0 0 28px; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.72; }
 .operator-voice footer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line); }
 .operator-voice footer strong { color: var(--ink); font-size: 0.85rem; }
 .operator-voice footer span { font-family: var(--font-mono); font-size: 0.6rem; color: var(--ink-mute); }
 .operator-voice footer i { color: var(--voice-accent); font-style: normal; }
+
+/* Community testimonial marquee — avatar, person, identity, quote.
+   Rides on the shared .testimonials-* marquee from landing-v3.css; the card
+   itself is a plain block so it still reads as a card without this file. */
+.voice-wall-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: clamp(38px, 4.6vw, 60px) 0 clamp(16px, 2vw, 22px);
+  color: var(--ink-mute);
+}
+.voice-wall-head::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line-strong), transparent);
+}
+.voice-wall .testimonials-content { gap: 0; }
+.voice-set { display: flex; align-items: stretch; gap: 16px; padding-right: 16px; }
+.voice-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px 26px;
+}
+.voice-card .testimonial-avatar { background: var(--bg-elev-2); }
+.voice-card .testimonial-info { min-width: 0; }
+.voice-card .testimonial-name,
+.voice-card .testimonial-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.voice-card .testimonial-text:not([lang]) { font-family: 'Latin Quotes', var(--font-body); }
+/* Whole card is the link; the source label sits at the bottom edge. */
+.voice-source {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 20px 14px;
+  border-radius: var(--radius-md);
+  color: inherit !important;
+  text-decoration: none;
+}
+.voice-source span {
+  overflow: hidden;
+  max-width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-mute);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.voice-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-sm); }
+.voice-card:hover .voice-source span,
+.voice-source:focus-visible span { opacity: 1; }
+.voice-card:hover .testimonial-name { color: var(--pg-strong); }
 
 /* Maintenance boundary */
 .promise { background: linear-gradient(180deg, transparent, rgba(65, 158, 219, 0.025), transparent); }
@@ -524,6 +594,8 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
   .evidence-logo-copy strong { font-size: 0.9rem; }
   .evidence-logo-copy small { font-size: 0.48rem; }
   .operator-voices-grid { grid-template-columns: 1fr; }
+  .voice-card { padding: 15px 16px 24px; }
+  .voice-source { padding: 0 16px 12px; }
   .download-entry-head { align-items: flex-start; flex-direction: column; }
 }
 

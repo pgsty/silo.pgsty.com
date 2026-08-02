@@ -8,7 +8,7 @@
           <img src="{{ "img/silo.svg" | relURL }}" alt="" width="28" height="28">
           <span>SILO</span>
         </a>
-        <p class="silo-footer__tagline"><b class="ini ini-t">S</b>3 <b class="ini ini-i">I</b>nterface · <b class="ini ini-y">L</b>ocal <b class="ini ini-g">O</b>bjects Storage<br><b class="ini ini-t">S</b>imple, <b class="ini ini-i">I</b>ntact, <b class="ini ini-y">L</b>ibra &amp; <b class="ini ini-g">O</b>pen-Source</p>
+        <p class="silo-footer__tagline"><b class="ini ini-t">S</b>3 <b class="ini ini-i">I</b>nterface, <b class="ini ini-y">L</b>ibre <b class="ini ini-g">O</b>bject Store<br>{{ if $zh }}<span class="silo-footer__tagline-zh">接口照旧，对象归你</span>{{ else }}Keep the interface. Own the objects.{{ end }}</p>
         <p class="silo-footer__origin">{{ if $zh }}一个由 <a href="https://pigsty.cc/" target="_blank" rel="noopener">PIGSTY</a> 社区维护的 <a href="https://github.com/minio/minio" target="_blank" rel="noopener">MinIO</a> 分支{{ else }}A <a href="https://github.com/minio/minio" target="_blank" rel="noopener">MinIO</a> fork maintained by the <a href="https://pigsty.io/" target="_blank" rel="noopener">PIGSTY</a>.{{ end }}</p>
         <p class="silo-footer__legal">{{ if $zh }}MinIO<sup>®</sup> 是 MinIO, Inc. 的 <a href="{{ relLangURL "about/trademark/" }}">注册商标</a><br>Silo 并非其关联、或背书的项目。{{ else }}MinIO<sup>®</sup> is a <a href="{{ relLangURL "about/trademark/" }}">registered trademark</a> of <a href="https://www.min.io/about" target="_blank" rel="noopener">MinIO, Inc.</a><br>Silo is not affiliated with, or endorsed by it.{{ end }}</p>
       </div>

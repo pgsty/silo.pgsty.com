@@ -109,6 +109,9 @@
 .silo-footer__tagline .ini-t { color: var(--brand-t, #de372c); font-weight: 700; }
 .silo-footer__tagline .ini-y { color: var(--brand-y, #53ac79); font-weight: 700; }
 
+/* 中文第二行只有八个字，比英文短一截，字号略放大以撑住这一行 */
+.silo-footer__tagline-zh { font-size: 1.12em; letter-spacing: 0.02em; }
+
 .silo-footer__origin {
   margin: 0 0 0.35rem;
   font-size: 0.8rem;
