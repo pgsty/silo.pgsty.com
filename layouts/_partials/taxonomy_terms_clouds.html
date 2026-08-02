@@ -1,0 +1,45 @@
+{{ $context := . -}}
+{{ $isDocsPage := eq .Type "docs" -}}
+{{ $isBlogPage := eq .Type "blog" -}}
+
+{{ if .Site.Params.taxonomy -}}
+  {{ if .Site.Params.Taxonomy.taxonomyCloud -}}
+    {{ range $index, $taxo := .Site.Params.Taxonomy.taxonomyCloud -}}
+      {{ $taxoName := lower (printf "%v" $taxo) -}}
+      {{ $showTaxo := not $isDocsPage -}}
+      {{ if and $isBlogPage (ne $taxoName "tags") -}}
+        {{ $showTaxo = false -}}
+      {{ end -}}
+      {{ if $showTaxo -}}
+        {{ if $.Site.Params.Taxonomy.taxonomyCloudTitle -}}
+          {{ $.Scratch.Set "title" (index $.Site.Params.Taxonomy.taxonomyCloudTitle $index) -}}
+        {{ else -}}
+          {{ $.Scratch.Set "title" (humanize $taxo) -}}
+        {{ end -}}
+        {{ partial "taxonomy_terms_cloud.html" (dict "context" $context "taxo" $taxo "title" ($.Scratch.Get "title")) -}}
+      {{ end -}}
+    {{ end -}}
+  {{ else -}}
+    {{ range $taxo, $taxoMap := .Site.Taxonomies -}}
+      {{ $taxoName := lower (printf "%v" $taxo) -}}
+      {{ $showTaxo := not $isDocsPage -}}
+      {{ if and $isBlogPage (ne $taxoName "tags") -}}
+        {{ $showTaxo = false -}}
+      {{ end -}}
+      {{ if $showTaxo -}}
+        {{ partial "taxonomy_terms_cloud.html" (dict "context" $context "taxo" $taxo "title" (humanize $taxo)) -}}
+      {{ end -}}
+    {{ end -}}
+  {{ end -}}
+{{ else -}}
+  {{ range $taxo, $taxoMap := .Site.Taxonomies -}}
+    {{ $taxoName := lower (printf "%v" $taxo) -}}
+    {{ $showTaxo := not $isDocsPage -}}
+    {{ if and $isBlogPage (ne $taxoName "tags") -}}
+      {{ $showTaxo = false -}}
+    {{ end -}}
+    {{ if $showTaxo -}}
+      {{ partial "taxonomy_terms_cloud.html" (dict "context" $context "taxo" $taxo "title" (humanize $taxo)) -}}
+    {{ end -}}
+  {{ end -}}
+{{ end -}}

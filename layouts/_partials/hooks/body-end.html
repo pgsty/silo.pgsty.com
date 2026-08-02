@@ -1,0 +1,4 @@
+{{- if .HasShortcode "doc-carousel" -}}
+  {{- $carousel := resources.Get "js/doc-carousel.js" | minify | fingerprint -}}
+  <script src="{{ $carousel.RelPermalink }}" integrity="{{ $carousel.Data.Integrity }}" defer></script>
+{{- end -}}

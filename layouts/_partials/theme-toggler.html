@@ -1,0 +1,37 @@
+{{- /* Direct light/dark switch matching the landing-page navigation. */ -}}
+<button type="button" class="nav-link silo-navbar-util silo-theme-cycle" id="silo-theme-cycle" aria-label="Toggle theme">
+  <i class="fa-solid fa-moon" aria-hidden="true"></i>
+</button>
+<script>
+  (function () {
+    var KEY = 'td-color-theme';
+    var btn = document.getElementById('silo-theme-cycle');
+    if (!btn) return;
+
+    function current() {
+      return document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
+    }
+
+    function render() {
+      var isLight = current() === 'light';
+      var icon = btn.querySelector('i');
+      icon.classList.toggle('fa-moon', isLight);
+      icon.classList.toggle('fa-sun', !isLight);
+      var label = isLight ? 'Switch to dark mode' : 'Switch to light mode';
+      btn.setAttribute('title', label);
+      btn.setAttribute('aria-label', label);
+    }
+
+    function apply(theme) {
+      document.documentElement.setAttribute('data-bs-theme', theme);
+      try { localStorage.setItem(KEY, theme); } catch (e) { /* ignore */ }
+      render();
+    }
+
+    btn.addEventListener('click', function () {
+      apply(current() === 'light' ? 'dark' : 'light');
+    });
+
+    render();
+  })();
+</script>

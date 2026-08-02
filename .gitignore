@@ -1,0 +1,10 @@
+public/
+resources/_gen/
+tmp/
+.hugo_build.lock
+.DS_Store
+.idea/
+node_modules/
+npm-debug.log*
+scripts/**/__pycache__/
+*.py[cod]

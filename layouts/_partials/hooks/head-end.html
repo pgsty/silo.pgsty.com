@@ -1,0 +1,20 @@
+{{- $outputFormat := partial "outputformat.html" . -}}
+{{- if ne $outputFormat "print" }}
+<link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
+{{- /* 全站统一页脚，首页与下载页也 link 同一份，见 static/css/silo-footer.css */}}
+<link rel="stylesheet" href="{{ "css/silo-footer.css" | relURL }}">
+<link rel="canonical" href="{{ .Permalink }}">
+{{- range .AllTranslations }}
+<link rel="alternate" hreflang="{{ .Language.Locale | default .Language.Lang }}" href="{{ .Permalink }}">
+{{- end }}
+{{- range where .AllTranslations "Language.Lang" "en" }}
+<link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
+{{- end }}
+{{- range .Translations }}
+<meta property="og:locale:alternate" content="{{ replace (.Language.Locale | default .Language.Lang) "-" "_" }}">
+{{- end }}
+{{- $author := "Pigsty and SILO contributors" -}}
+{{- with .Params.author }}{{ $author = . | markdownify | plainify }}{{ end }}
+<meta name="author" content="{{ $author }}">
+<meta name="application-name" content="SILO">
+{{- end }}

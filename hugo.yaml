@@ -1,0 +1,219 @@
+#=======================================#
+# Basics
+#=======================================#
+baseURL: https://silo.pgsty.com/
+title: SILO - MinIO Fork by Pigsty
+defaultContentLanguage: en
+defaultContentLanguageInSubdir: false
+enableRobotsTXT: true
+enableGitInfo: true
+hasCJKLanguage: true
+
+services:
+  googleAnalytics:
+    id: G-JVPFK6E3P5
+
+#=======================================#
+# Hugo Module
+#=======================================#
+module:
+  proxy: direct
+  hugoVersion:
+    extended: true
+    min: "0.155.0"
+  imports:
+    - path: github.com/google/docsy
+      disable: false
+
+#=======================================#
+# Languages and navigation
+#=======================================#
+languages:
+  en:
+    label: English
+    locale: en
+    weight: 1
+    title: SILO
+    params:
+      description: MinIO fork by Pigsty
+      time_format_blog: 'January 02, 2006'
+    menu:
+      main:
+        - identifier: docs
+          name: Docs
+          weight: 10
+          url: /docs/
+          pre: <i class='fa-solid fa-book'></i>
+        - identifier: blog
+          name: Blog
+          weight: 20
+          url: /blog/
+          pre: <i class='fa-solid fa-blog'></i>
+        - identifier: download
+          name: Download
+          weight: 25
+          url: /download/
+          pre: <i class='fa-solid fa-download'></i>
+        - identifier: pigsty
+          name: Pigsty
+          weight: 30
+          url: https://pigsty.io
+          pre: <i class='fa-solid fa-database'></i>
+        - identifier: github
+          name: GitHub
+          weight: 40
+          url: https://github.com/pgsty/minio
+          pre: <i class='fa-brands fa-github'></i>
+  zh:
+    label: 简体中文
+    locale: zh-CN
+    weight: 2
+    title: SILO
+    params:
+      description: MinIO 分支，由 Pigsty 持续维护
+      time_format_blog: '2006年01月02日'
+    menu:
+      main:
+        - identifier: docs
+          name: 文档
+          weight: 10
+          url: /zh/docs/
+          pre: <i class='fa-solid fa-book'></i>
+        - identifier: blog
+          name: 博客
+          weight: 20
+          url: /zh/blog/
+          pre: <i class='fa-solid fa-blog'></i>
+        - identifier: download
+          name: 下载
+          weight: 25
+          url: /zh/download/
+          pre: <i class='fa-solid fa-download'></i>
+        - identifier: pigsty
+          name: Pigsty
+          weight: 30
+          url: https://pigsty.cc
+          pre: <i class='fa-solid fa-database'></i>
+        - identifier: github
+          name: GitHub
+          weight: 40
+          url: https://github.com/pgsty/minio
+          pre: <i class='fa-brands fa-github'></i>
+
+#=======================================#
+# Taxonomies and blog URLs
+#=======================================#
+taxonomies:
+  module: module
+  categories: categories
+  tags: tags
+
+permalinks:
+  blog: '/:sections/:contentbasename/'
+
+#=======================================#
+# Markdown and syntax highlighting
+#=======================================#
+markup:
+  goldmark:
+    parser:
+      attribute:
+        block: true
+      autoHeadingID: true
+      autoHeadingIDType: github
+    renderer:
+      unsafe: true
+    extensions:
+      footnote: true
+      linkify: true
+      table: true
+      taskList: true
+      typographer: true
+      # 数学公式。分隔符是按语料实际情况挑的，别改成常见的那几个：
+      #   $...$   正文里有货币金额（$126M、$1B），会被吞成公式
+      #   \[...\] 正文里有大量转义方括号（\[`PutObject`\]，RST 转换残留）
+      # 剩下 \(...\) 与 $$...$$ 在全部语料里零出现，是安全的。
+      # 渲染由页面 front matter 的 math: true 控制，见 layouts/_markup/render-passthrough.html
+      passthrough:
+        enable: true
+        delimiters:
+          inline:
+            - ['\(', '\)']
+          block:
+            - ['$$', '$$']
+  highlight:
+    style: tango
+    codeFences: true
+    noClasses: false
+  tableOfContents:
+    startLevel: 2
+    endLevel: 4
+
+#=======================================#
+# Outputs
+#=======================================#
+outputs:
+  home: [HTML, RSS, JSON]
+  page: [HTML]
+  section: [HTML, RSS]
+
+#=======================================#
+# Site parameters
+#=======================================#
+params:
+  description: MinIO fork by Pigsty, Community-maintained with security updates, restored console, and supply chain continuity.
+  images:
+    - images/silo-social-card.png
+  version: 0.1.0
+  copyright:
+    authors: PIGSTY & SILO Contributors
+    from_year: 2020
+    url: https://pgsty.com
+
+  archived_version: false
+  url_latest_version: https://silo.pgsty.com
+  github_repo: https://github.com/pgsty/silo-docs
+  github_project_repo: https://github.com/pgsty/minio
+  github_branch: main
+
+  offlineSearch: true
+  prism_syntax_highlighting: false
+
+  ui:
+    breadcrumb_disable: false
+    navbar_logo: true
+    navbar_translucent_over_cover_disable: false
+    navbar_theme: dark
+    sidebar_menu_compact: true
+    sidebar_search_disable: false
+    sidebar_menu_foldable: true
+    sidebar_menu_truncate: 2000
+    sidebar_cache_limit: 1000
+    sidebar_root_enabled: true
+    sidebar_lang_menu: true
+    ul_show: 2
+    showLightDarkModeMenu: true
+    feedback:
+      enable: false
+    readingtime:
+      enable: false
+
+  links:
+    user:
+      - name: Silo source
+        url: https://github.com/pgsty/minio
+        icon: fab fa-github
+        desc: Silo source repository
+      - name: Pigsty
+        url: https://pigsty.io
+        icon: fa fa-database
+        desc: Pigsty project
+    developer:
+      - name: Releases
+        url: https://github.com/pgsty/minio/releases
+        icon: fa fa-box-archive
+        desc: Silo release artifacts
+      - name: Documentation source
+        url: https://github.com/pgsty/silo-docs
+        icon: fab fa-github
+        desc: Silo documentation repository

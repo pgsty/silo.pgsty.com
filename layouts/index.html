@@ -1,0 +1,554 @@
+{{- $zh := eq .Site.Language.Lang "zh" -}}
+{{- $description := .Description | default .Site.Params.description -}}
+{{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
+{{- $socialImage := "images/silo-social-card.png" | absURL -}}
+{{- $socialAlt := cond $zh "SILO — Pigsty 持续维护的 MinIO 社区分支" "SILO — community-maintained MinIO fork by Pigsty" -}}
+{{- $evidenceProjects := slice
+  (dict "name" "Dokploy" "kind" "PRODUCT TEMPLATE" "kindZh" "产品模板内置" "logo" "images/projects/dokploy.webp" "href" "https://github.com/Dokploy/templates/pull/1012")
+  (dict "name" "Grafana Loki" "kind" "HELM · BUNDLED SERVICE" "kindZh" "Helm 随附服务" "logo" "images/projects/grafana-loki.webp" "href" "https://github.com/grafana/loki/issues/21925")
+  (dict "name" "Pigsty" "kind" "PG BACKUP REPO" "kindZh" "PG 备份仓库" "logo" "images/projects/pigsty.svg" "href" "https://pigsty.io/docs/minio/")
+  (dict "name" "RAGFlow" "kind" "DEFAULT COMPOSE" "kindZh" "默认 Compose 编排" "logo" "images/projects/ragflow.webp" "href" "https://github.com/infiniflow/ragflow/commit/384fa6f")
+  (dict "name" "ModelarDB" "kind" "CI · INTEGRATION" "kindZh" "CI 集成测试" "logo" "images/projects/modelardb.webp" "href" "https://github.com/ModelarData/ModelarDB-RS/commit/495bb6c")
+  (dict "name" "AgentsMesh" "kind" "COMPOSE · CI" "kindZh" "Compose 编排 · CI" "logo" "images/projects/agentsmesh.webp" "href" "https://github.com/AgentsMesh/AgentsMesh/commit/95f557e")
+  (dict "name" "Measure" "kind" "BACKEND DEPLOYMENT" "kindZh" "后端部署组件" "logo" "images/projects/measure.webp" "href" "https://github.com/measure-sh/measure/commit/ec62d87")
+  (dict "name" "Firemoot" "kind" "REFERENCE COMPOSE · CI" "kindZh" "参考编排 · CI" "logo" "images/projects/firemoot.webp" "href" "https://github.com/firemoot/firemoot/commit/e72907e241a4320a036b59f49dcf0c15cf5e74e5")
+-}}
+<!DOCTYPE html>
+<html lang="{{ $locale }}" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ .Title }}</title>
+  <meta name="description" content="{{ $description }}">
+  {{ if hugo.IsProduction -}}
+  <meta name="robots" content="index, follow">
+  {{ else -}}
+  <meta name="robots" content="noindex, nofollow">
+  {{ end -}}
+  <meta name="author" content="Pigsty and SILO contributors">
+  <meta name="application-name" content="SILO">
+  <meta name="theme-color" content="#0b1119">
+  <meta name="color-scheme" content="dark light">
+
+  <link rel="icon" type="image/svg+xml" href="{{ "img/silo.svg" | relURL }}">
+  <link rel="canonical" href="{{ .Permalink }}">
+  {{ range .AllTranslations -}}
+  <link rel="alternate" hreflang="{{ .Language.Locale | default .Language.Lang }}" href="{{ .Permalink }}">
+  {{ end -}}
+  {{ range where .AllTranslations "Language.Lang" "en" -}}
+  <link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
+  {{ end -}}
+  {{ with .OutputFormats.Get "rss" -}}
+  <link rel="alternate" type="{{ .MediaType.Type }}" title="{{ $.Site.Title }} RSS" href="{{ .Permalink }}">
+  {{ end }}
+
+  <meta property="og:title" content="{{ .Title }}">
+  <meta property="og:description" content="{{ $description }}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ .Permalink }}">
+  <meta property="og:site_name" content="SILO">
+  <meta property="og:locale" content="{{ replace $locale "-" "_" }}">
+  {{ range .Translations -}}
+  <meta property="og:locale:alternate" content="{{ replace (.Language.Locale | default .Language.Lang) "-" "_" }}">
+  {{ end -}}
+  <meta property="og:image" content="{{ $socialImage }}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ $socialAlt }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ .Title }}">
+  <meta name="twitter:description" content="{{ $description }}">
+  <meta name="twitter:image" content="{{ $socialImage }}">
+  <meta name="twitter:image:alt" content="{{ $socialAlt }}">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SILO",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Linux",
+    "url": {{ .Site.BaseURL | jsonify | safeJS }},
+    "image": {{ $socialImage | jsonify | safeJS }},
+    "inLanguage": {{ $locale | jsonify | safeJS }},
+    "downloadUrl": "https://github.com/pgsty/minio/releases",
+    "codeRepository": "https://github.com/pgsty/minio",
+    "license": "https://www.gnu.org/licenses/agpl-3.0.html",
+    "isAccessibleForFree": true,
+    "maintainer": {
+      "@type": "Organization",
+      "name": "Pigsty",
+      "url": "https://pigsty.io/"
+    },
+    "sameAs": [
+      "https://github.com/pgsty/minio",
+      "https://hub.docker.com/r/pgsty/minio"
+    ],
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": {{ $description | jsonify | safeJS }}
+  }
+  </script>
+
+  <script>
+    (function () {
+      var theme = null;
+      try { theme = window.localStorage.getItem('silo-landing-theme'); } catch (error) {}
+      if (theme !== 'light' && theme !== 'dark') {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.remove('no-js');
+      document.documentElement.classList.add('js');
+    })();
+  </script>
+
+  <link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
+  <link rel="stylesheet" href="{{ "vendor/fontawesome/css/all.min.css" | relURL }}">
+  <link rel="stylesheet" href="{{ "css/landing-v3.css" | relURL }}">
+  <link rel="stylesheet" href="{{ "css/silo-v3.css" | relURL }}">
+  <link rel="stylesheet" href="{{ "css/download.css" | relURL }}">
+  <link rel="stylesheet" href="{{ "css/silo-footer.css" | relURL }}">
+  {{ if hugo.IsProduction }}{{ partial "google_analytics.html" . }}{{ end }}
+</head>
+<body class="landing-page">
+  <a class="skip-link" href="#main">{{ if $zh }}跳到正文{{ else }}Skip to content{{ end }}</a>
+
+  <header class="landing-header" data-header>
+    <div class="landing-container">
+      <nav class="landing-nav" aria-label="{{ if $zh }}主导航{{ else }}Main navigation{{ end }}">
+        <a href="{{ relLangURL "" }}" class="nav-brand" aria-label="{{ if $zh }}SILO 首页{{ else }}SILO home{{ end }}">
+          <img src="{{ "img/silo.svg" | relURL }}" alt="" class="nav-logo">
+          <span class="nav-title">SILO</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="{{ relLangURL "docs/" }}" class="nav-link">{{ if $zh }}文档{{ else }}Docs{{ end }}</a>
+          <a href="{{ relLangURL "blog/" }}" class="nav-link">{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
+          <a href="{{ relLangURL "download/" }}" class="nav-link">{{ if $zh }}下载{{ else }}Download{{ end }}</a>
+          <a href="#about" class="nav-link">{{ if $zh }}关于{{ else }}About{{ end }}</a>
+          <button type="button" class="nav-util" data-theme-toggle title="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}" aria-label="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}">
+            <i class="fas fa-moon" aria-hidden="true"></i>
+          </button>
+          {{ range .Translations }}
+          <a href="{{ .RelPermalink }}" class="nav-util" title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}"><i class="fas fa-language" aria-hidden="true"></i></a>
+          {{ end }}
+          <a href="https://github.com/pgsty/minio" class="nav-github" target="_blank" rel="noopener" title="GitHub">
+            <i class="fab fa-github" aria-hidden="true"></i>
+            <span class="nav-count">1.9k</span>
+          </a>
+        </div>
+
+        <button class="mobile-menu-toggle" type="button" aria-label="{{ if $zh }}打开菜单{{ else }}Open menu{{ end }}" aria-expanded="false" data-menu-toggle>
+          <span></span><span></span><span></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="mobile-menu" data-mobile-menu>
+    <a href="{{ relLangURL "docs/" }}" class="mobile-menu-link">{{ if $zh }}文档{{ else }}Docs{{ end }}</a>
+    <a href="{{ relLangURL "blog/" }}" class="mobile-menu-link">{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
+    <a href="{{ relLangURL "download/" }}" class="mobile-menu-link"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Download &amp; Install{{ end }}</a>
+    <a href="#about" class="mobile-menu-link">{{ if $zh }}关于{{ else }}About{{ end }}</a>
+    {{ range .Translations }}<a href="{{ .RelPermalink }}" class="mobile-menu-link"><i class="fas fa-language" aria-hidden="true"></i> {{ .Language.Label }}</a>{{ end }}
+    <button type="button" class="mobile-menu-link mobile-menu-link--btn" data-theme-toggle><i class="fas fa-moon" aria-hidden="true"></i> {{ if $zh }}浅色 / 深色{{ else }}Light / Dark{{ end }}</button>
+    <a href="https://github.com/pgsty/minio" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · 1.9k</a>
+  </div>
+
+  <main id="main">
+    <section class="hero" id="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="landing-container">
+        <div class="hero-grid">
+          <div class="hero-copy" id="about">
+            <p class="hero-eyebrow anim" style="--d:0">
+              <span class="eyebrow-mark" aria-hidden="true"></span>
+              <span class="eyebrow-en">{{ if $zh }}开源的 S3/MinIO 兼容对象存储{{ else }}OPEN-SOURCE S3/MINIO-COMPATIBLE OBJECT STORAGE{{ end }}</span>
+            </p>
+
+            <h1 class="hero-title silo-hero-title anim" style="--d:1">
+              <span class="hero-title-line"><b class="ini ini-t">S</b>3-<b class="ini ini-i">I</b>nterface</span>
+              <span class="hero-title-line"><b class="ini ini-y">L</b>ocal-<b class="ini ini-g">O</b>bjects</span>
+            </h1>
+
+            <p class="hero-sub anim" style="--d:2">
+              {{ if $zh }}
+              <span>一个由 <a href="https://pigsty.cc" target="_blank" rel="noopener">Pigsty 社区</a>维护的 <a href="https://github.com/minio/minio" target="_blank" rel="noopener">MinIO</a> 分支</span>
+              <span>关注供应链持续性并提供后续安全更新</span>
+              {{ else }}
+              <span>A <a href="https://github.com/minio/minio" target="_blank" rel="noopener">MinIO</a> fork maintained by the <a href="https://pigsty.io" target="_blank" rel="noopener">Pigsty Community</a></span>
+              <span>With supply-chain continuity and security updates</span>
+              {{ end }}
+            </p>
+
+            <div class="hero-ctas anim" style="--d:3">
+              <a href="{{ relLangURL "docs/" }}" class="btn btn-primary"><i class="fas fa-book-open" aria-hidden="true"></i> {{ if $zh }}浏览文档{{ else }}Documentation{{ end }}</a>
+              <a href="{{ relLangURL "download/" }}" class="btn btn-ghost"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Download &amp; Install{{ end }}</a>
+            </div>
+
+          </div>
+
+          <div class="hero-board anim" style="--d:2">
+            <figure class="board-stage silo-board-stage" data-board aria-label="{{ if $zh }}SILO 对象存储节点结构图{{ else }}SILO object storage node board{{ end }}">
+              <div class="silo-board">
+                <div class="silo-board-top">
+                  <span><i aria-hidden="true"></i>SILO // STORAGE NODE</span>
+                  <b>PGSTY-01</b>
+                </div>
+                <div class="silo-board-canvas">
+                  <div class="silo-board-core">
+                    <div class="silo-port silo-port--api"><small>S3 API</small><strong>:9000</strong><span>APPLICATION TRAFFIC</span></div>
+                    <div class="silo-chip">
+                      <small>OBJECT STORAGE CORE</small>
+                      <strong>SILO</strong>
+                      <span>MINIO-COMPATIBLE</span>
+                    </div>
+                    <div class="silo-port silo-port--console"><small>CONSOLE</small><strong>:9001</strong><span>OPERATOR ACCESS</span></div>
+                  </div>
+                  <div class="silo-disks">
+                    <p>ERASURE SET // DISTRIBUTED DISKS</p>
+                    <div><span><i></i><b>D01</b><small>ONLINE</small></span><span><i></i><b>D02</b><small>ONLINE</small></span><span><i></i><b>D03</b><small>ONLINE</small></span><span><i></i><b>D04</b><small>ONLINE</small></span></div>
+                  </div>
+                </div>
+                <div class="silo-board-foot"><span>COMMUNITY FORK</span><span><i aria-hidden="true"></i>MAINTAINED BY PIGSTY</span></div>
+              </div>
+
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section key-metrics" id="metrics" aria-labelledby="metrics-title">
+      <div class="landing-container">
+        <div class="section-head section-head--compact" data-reveal>
+          <p class="section-eyebrow"><span class="silkscreen">KEY METRICS</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title section-title--sm" id="metrics-title">{{ if $zh }}持续维护，广泛采用{{ else }}Maintained in public, visible at a glance{{ end }}</h2>
+        </div>
+
+        <div class="stats-grid" data-reveal>
+          <a href="https://hub.docker.com/r/pgsty/minio" target="_blank" rel="noopener" class="stat-item">
+            <span class="stat-value" data-count="479169">479,169</span>
+            <span class="stat-label">Docker Pulls</span>
+          </a>
+          <a href="https://github.com/pgsty/minio/stargazers" target="_blank" rel="noopener" class="stat-item">
+            <span class="stat-value" data-count="1925">1,925</span>
+            <span class="stat-label">GitHub Stars</span>
+          </a>
+          <a href="{{ relLangURL "blog/security/" }}" class="stat-item">
+            <span class="stat-value" data-count="19">19</span>
+            <span class="stat-label">Security Fixes</span>
+          </a>
+          <a href="{{ relLangURL "blog/release/" }}" class="stat-item">
+            <span class="stat-value" data-count="7">7</span>
+            <span class="stat-label">Releases</span>
+          </a>
+        </div>
+
+        <div class="logos-marquee adoption-logos" data-reveal aria-label="{{ if $zh }}采用 SILO 镜像并带有公开证据的开源项目{{ else }}Open-source projects with public SILO adoption evidence{{ end }}">
+          <div class="logos-marquee-row" data-direction="left">
+            <div class="logos-marquee-content">
+              <div class="evidence-logo-set">
+                {{ range $evidenceProjects }}
+                <a class="logo-item evidence-logo-item" href="{{ .href }}" target="_blank" rel="noopener" aria-label="{{ .name }} — {{ if $zh }}查看采用证据{{ else }}view adoption evidence{{ end }}">
+                  <img src="{{ .logo | relURL }}" alt="" loading="lazy">
+                  <span class="evidence-logo-copy"><strong>{{ .name }}</strong><small>{{ if $zh }}{{ .kindZh }}{{ else }}{{ .kind }}{{ end }}</small></span>
+                </a>
+                {{ end }}
+              </div>
+              <div class="evidence-logo-set" aria-hidden="true">
+                {{ range $evidenceProjects }}
+                <span class="logo-item evidence-logo-item">
+                  <img src="{{ .logo | relURL }}" alt="" loading="lazy">
+                  <span class="evidence-logo-copy"><strong>{{ .name }}</strong><small>{{ if $zh }}{{ .kindZh }}{{ else }}{{ .kind }}{{ end }}</small></span>
+                </span>
+                {{ end }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section modules" id="value">
+      <div class="landing-container">
+        <div class="section-head" data-reveal>
+          <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}价值主张{{ else }}VALUE PROPOSITION{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title">{{ if $zh }}保留成熟能力，维护关键价值{{ else }}Keep what works. Maintain what matters{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}面向需要延续性的运维者，提供聚焦的下游维护，而不是重新发明对象存储。{{ else }}A focused downstream for operators who need continuity—not a new storage experiment.{{ end }}</p>
+        </div>
+
+        <div class="module-row" data-reveal>
+          <div class="module-content">
+            <p class="module-ref silkscreen">01 · {{ if $zh }}保守维护{{ else }}CONSERVATIVE MAINTENANCE{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "blog/release/" }}">{{ if $zh }}以保守为设计原则{{ else }}Conservative by Design{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">◇</span> {{ if $zh }}克制变更，延续运行{{ else }}Narrow changes. Durable operations{{ end }}</p>
+            <ul class="module-list">
+              <li>{{ if $zh }}聚焦构建、依赖与运行时维护{{ else }}Focused build, dependency, and runtime maintenance{{ end }}</li>
+              <li>{{ if $zh }}吸收适用于当前发行线的安全修复{{ else }}Applicable security fixes for the active release line{{ end }}</li>
+              <li>{{ if $zh }}只为可复现缺陷进行目标明确的修补{{ else }}Targeted repairs for reproducible defects{{ end }}</li>
+            </ul>
+            <p class="module-value">{{ if $zh }}最小化下游差异，最大化运维连续性{{ else }}Minimize downstream delta. Maximize continuity{{ end }}</p>
+          </div>
+          <div class="module-visual">
+            <a href="{{ relLangURL "operations/concepts/erasure-coding/" }}" class="module-img silo-figure">
+              <img src="{{ "images/erasure-code.jpg" | relURL }}" alt="{{ if $zh }}纠删码数据块与校验块示意图{{ else }}Erasure-coded data and parity blocks{{ end }}" loading="lazy">
+            </a>
+          </div>
+        </div>
+
+        <div class="module-row module-row--reverse" data-reveal>
+          <div class="module-content">
+            <p class="module-ref silkscreen">02 · {{ if $zh }}兼容接口{{ else }}COMPATIBLE INTERFACE{{ end }}</p>
+            <h3 class="module-title"><a href="#interface">{{ if $zh }}熟悉的运维界面{{ else }}Familiar Operational Surface{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">↔</span> {{ if $zh }}评估升级，而不是重做迁移{{ else }}Evaluate an upgrade—not a migration{{ end }}</p>
+            <ul class="module-list">
+              <li>{{ if $zh }}保留 <strong>minio</strong> 可执行文件与 S3 API{{ else }}Preserves the <strong>minio</strong> executable and S3 APIs{{ end }}</li>
+              <li>{{ if $zh }}延续环境变量、CLI 约定与发行标签{{ else }}Keeps environment variables, CLI conventions, and release tags{{ end }}</li>
+              <li>{{ if $zh }}适配常见部署流程与现有自动化{{ else }}Fits common deployment workflows and existing automation{{ end }}</li>
+            </ul>
+            <p class="module-value">{{ if $zh }}接口优先，迁移成本可控{{ else }}Interface first. Migration cost contained{{ end }}</p>
+          </div>
+          <div class="module-visual">
+            <a href="#interface" class="code-plate compatibility-plate">
+              <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">compatibility.contract</span></span>
+              <pre class="code-body"><span class="c"># Expected continuity</span>
+<span class="k">executable</span>: <span class="s">minio</span>
+<span class="k">object_api</span>: <span class="s">S3 compatible</span>
+<span class="k">environment</span>: <span class="s">MINIO_*</span>
+<span class="k">release_tag</span>: <span class="s">RELEASE.*</span>
+<span class="k">client</span>: <span class="s">mc / mcli</span>
+<span class="k">policy</span>: <span class="v">test before rollout</span></pre>
+            </a>
+          </div>
+        </div>
+
+        <div class="module-row" id="releases" data-reveal>
+          <div class="module-content">
+            <p class="module-ref silkscreen">03 · {{ if $zh }}完整交付{{ else }}COMPLETE DELIVERY{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "download/" }}">{{ if $zh }}完整的发行制品{{ else }}Release Artifacts Included{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">▦</span> {{ if $zh }}从源码到可运行制品{{ else }}From source to runnable artifacts{{ end }}</p>
+            <ul class="module-list">
+              <li>{{ if $zh }}版本化二进制、校验和与发布说明{{ else }}Versioned binaries, checksums, and release notes{{ end }}</li>
+              <li>{{ if $zh }}RPM、DEB、APK 与多架构容器镜像{{ else }}RPM, DEB, APK, and multi-architecture container images{{ end }}</li>
+              <li>{{ if $zh }}持续维护的控制台与兼容客户端{{ else }}A maintained Console and compatible client{{ end }}</li>
+            </ul>
+            <p class="module-value">{{ if $zh }}不只维护源码，也维护交付面{{ else }}Maintain the delivery surface—not just the source{{ end }}</p>
+          </div>
+          <div class="module-visual">
+            <a href="{{ relLangURL "download/" }}" class="artifact-plate" aria-label="{{ if $zh }}浏览发行制品{{ else }}Browse release artifacts{{ end }}">
+              <span class="artifact-plate-head"><b>SILO // RELEASE SURFACE</b><small>VERSIONED · CHECKSUMMED</small></span>
+              <span class="artifact-grid">
+                <i><b>OCI</b><small>amd64 · arm64</small></i>
+                <i><b>RPM</b><small>EL compatible</small></i>
+                <i><b>DEB</b><small>Debian · Ubuntu</small></i>
+                <i><b>APK</b><small>Alpine Linux</small></i>
+                <i><b>BIN</b><small>server · client</small></i>
+                <i><b>SUM</b><small>SHA256 checksums</small></i>
+              </span>
+              <span class="artifact-plate-foot"><i></i> ACTIVE RELEASE LINE <b>→</b></span>
+            </a>
+          </div>
+        </div>
+
+        <div class="module-row module-row--reverse" data-reveal>
+          <div class="module-content">
+            <p class="module-ref silkscreen">04 · {{ if $zh }}可查安全{{ else }}VISIBLE SECURITY{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "blog/security/" }}">{{ if $zh }}公开可查的安全记录{{ else }}Visible Security Record{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}政策、公告与代码放在一起{{ else }}Policy, advisories, and code in one place{{ end }}</p>
+            <ul class="module-list">
+              <li>{{ if $zh }}公开安全策略与私下漏洞报告流程{{ else }}Public security policy and private reporting path{{ end }}</li>
+              <li>{{ if $zh }}分支安全注记对应当前活跃发行线{{ else }}Fork security notes target the active release line{{ end }}</li>
+              <li>{{ if $zh }}发布前保留审阅、固定版本、测试与回滚路径{{ else }}Review, pin, test, and retain a rollback path before rollout{{ end }}</li>
+            </ul>
+            <p class="module-value">{{ if $zh }}把维护边界写清楚，也把风险写清楚{{ else }}Make maintenance—and its limits—auditable{{ end }}</p>
+          </div>
+          <div class="module-visual">
+            <a href="{{ relLangURL "blog/security/" }}" class="code-plate security-plate">
+              <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">SECURITY.md</span></span>
+              <pre class="code-body"><span class="c"># Active release line</span>
+<span class="k">report</span>: <span class="s">privately</span>
+<span class="k">triage</span>: <span class="s">reproducible issues</span>
+<span class="k">advisories</span>: <span class="s">published with code</span>
+<span class="k">compatibility</span>: <span class="v">goal, not guarantee</span>
+
+<span class="c"># Pin · Review · Test · Roll back</span></pre>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section ecosystem" id="interface">
+      <div class="landing-container">
+        <div class="section-head" data-reveal>
+          <p class="section-eyebrow"><span class="silkscreen">S3 INTERFACE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title">{{ if $zh }}沿用你已经依赖的接口{{ else }}The interface your stack already speaks{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}SILO 延续 MinIO 已建立的应用与运维接口，让升级评估围绕兼容性测试展开，而不是重新设计存储接入。{{ else }}SILO follows MinIO's established application and operational surface, so evaluation centers on compatibility testing—not redesigning storage access.{{ end }}</p>
+          <div class="section-links">
+            <a href="{{ relLangURL "developers/minio-drivers/" }}">{{ if $zh }}S3 客户端{{ else }}S3 Clients{{ end }} →</a>
+            <a href="{{ relLangURL "reference/minio-server/settings/" }}">{{ if $zh }}环境变量{{ else }}Environment Variables{{ end }} →</a>
+            <a href="{{ relLangURL "reference/minio-mc/" }}">{{ if $zh }}命令行客户端{{ else }}Command-Line Client{{ end }} →</a>
+          </div>
+        </div>
+
+        <div class="kernel-grid interface-grid" data-reveal>
+          <a href="{{ relLangURL "developers/minio-drivers/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">S3</span><span class="kernel-name">S3 API</span><span class="kernel-desc">Application interface</span></a>
+          <a href="{{ relLangURL "reference/minio-server/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">$</span><span class="kernel-name">minio</span><span class="kernel-desc">Server executable</span></a>
+          <a href="{{ relLangURL "reference/minio-server/settings/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">ENV</span><span class="kernel-name">MINIO_*</span><span class="kernel-desc">Configuration surface</span></a>
+          <a href="{{ relLangURL "blog/release/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">REL</span><span class="kernel-name">RELEASE.*</span><span class="kernel-desc">Version tags</span></a>
+          <a href="{{ relLangURL "reference/minio-mc/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">MC</span><span class="kernel-name">mc / mcli</span><span class="kernel-desc">Operator workflow</span></a>
+          <a href="{{ relLangURL "administration/identity-access-management/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">IAM</span><span class="kernel-name">IAM + TLS</span><span class="kernel-desc">Security controls</span></a>
+        </div>
+
+        <div class="extbus-head" data-reveal><span class="silkscreen">OBJECT STORAGE CAPABILITIES</span></div>
+        <div class="extensions-marquee" data-reveal aria-label="Object storage capabilities">
+          <div class="marquee-row" data-direction="left"><div class="marquee-content">
+            <a href="{{ relLangURL "administration/object-management/" }}" class="ext-pill">Buckets</a><a href="{{ relLangURL "administration/object-management/object-versioning/" }}" class="ext-pill">Versioning</a><a href="{{ relLangURL "administration/object-management/object-retention/" }}" class="ext-pill">Object Lock</a><a href="{{ relLangURL "administration/server-side-encryption/" }}" class="ext-pill">Encryption</a><a href="{{ relLangURL "operations/monitoring/" }}" class="ext-pill">Metrics</a><a href="{{ relLangURL "administration/identity-access-management/" }}" class="ext-pill">Policies</a><a href="{{ relLangURL "administration/bucket-replication/" }}" class="ext-pill">Replication</a><a href="{{ relLangURL "administration/object-management/object-lifecycle-management/" }}" class="ext-pill">Lifecycle</a>
+            <a href="{{ relLangURL "administration/object-management/" }}" class="ext-pill">Buckets</a><a href="{{ relLangURL "administration/object-management/object-versioning/" }}" class="ext-pill">Versioning</a><a href="{{ relLangURL "administration/object-management/object-retention/" }}" class="ext-pill">Object Lock</a><a href="{{ relLangURL "administration/server-side-encryption/" }}" class="ext-pill">Encryption</a><a href="{{ relLangURL "operations/monitoring/" }}" class="ext-pill">Metrics</a><a href="{{ relLangURL "administration/identity-access-management/" }}" class="ext-pill">Policies</a><a href="{{ relLangURL "administration/bucket-replication/" }}" class="ext-pill">Replication</a><a href="{{ relLangURL "administration/object-management/object-lifecycle-management/" }}" class="ext-pill">Lifecycle</a>
+          </div></div>
+          <div class="marquee-row" data-direction="right"><div class="marquee-content">
+            <a href="{{ relLangURL "operations/deployments/baremetal-deploy-minio-server/" }}" class="ext-pill">Distributed</a><a href="{{ relLangURL "operations/concepts/erasure-coding/" }}" class="ext-pill">Erasure Code</a><a href="{{ relLangURL "operations/concepts/thresholds/" }}" class="ext-pill">Quorum</a><a href="{{ relLangURL "operations/replication/multi-site-replication/" }}" class="ext-pill">Site Replication</a><a href="{{ relLangURL "reference/minio-mc/mc-sql/" }}" class="ext-pill">S3 Select</a><a href="{{ relLangURL "administration/monitoring/" }}" class="ext-pill">Audit Logs</a><a href="{{ relLangURL "administration/object-management/object-lifecycle-management/" }}" class="ext-pill">Tiering</a><a href="{{ relLangURL "administration/minio-console/" }}" class="ext-pill">Console</a>
+            <a href="{{ relLangURL "operations/deployments/baremetal-deploy-minio-server/" }}" class="ext-pill">Distributed</a><a href="{{ relLangURL "operations/concepts/erasure-coding/" }}" class="ext-pill">Erasure Code</a><a href="{{ relLangURL "operations/concepts/thresholds/" }}" class="ext-pill">Quorum</a><a href="{{ relLangURL "operations/replication/multi-site-replication/" }}" class="ext-pill">Site Replication</a><a href="{{ relLangURL "reference/minio-mc/mc-sql/" }}" class="ext-pill">S3 Select</a><a href="{{ relLangURL "administration/monitoring/" }}" class="ext-pill">Audit Logs</a><a href="{{ relLangURL "administration/object-management/object-lifecycle-management/" }}" class="ext-pill">Tiering</a><a href="{{ relLangURL "administration/minio-console/" }}" class="ext-pill">Console</a>
+          </div></div>
+        </div>
+        <div class="extbus-cta" data-reveal><a href="{{ relLangURL "docs/" }}" class="btn btn-line">{{ if $zh }}浏览完整文档{{ else }}Browse the Documentation{{ end }} →</a></div>
+      </div>
+    </section>
+
+    <section class="dashwall" aria-label="{{ if $zh }}控制台与监控画廊{{ else }}Console and monitoring gallery{{ end }}">
+      <div class="landing-container">
+        <div class="dashwall-head" data-reveal>
+          <p class="section-eyebrow"><span class="silkscreen">OPERATIONS</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title section-title--sm">{{ if $zh }}熟悉的控制台、监控与复制工作流{{ else }}Familiar Console, monitoring, and replication workflows{{ end }}</h2>
+          <a href="{{ relLangURL "administration/minio-console/" }}" class="dashwall-link">{{ if $zh }}打开控制台文档{{ else }}Open Console Docs{{ end }} ↗</a>
+        </div>
+      </div>
+      <div class="dashboard-gallery-marquee" data-reveal>
+        <div class="dashboard-gallery-track">
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-object-browser.png" | relURL }}" data-alt="Object Browser"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-bucket-manage.png" | relURL }}" data-alt="Bucket Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-iam.png" | relURL }}" data-alt="Identity and Access Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-settings-site-replication.png" | relURL }}" data-alt="Site Replication"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-minio.png" | relURL }}" data-alt="Grafana MinIO Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-replication.png" | relURL }}" data-alt="Grafana Replication Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-object-browser.png" | relURL }}" data-alt="Object Browser"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-bucket-manage.png" | relURL }}" data-alt="Bucket Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-iam.png" | relURL }}" data-alt="Identity and Access Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-settings-site-replication.png" | relURL }}" data-alt="Site Replication"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-minio.png" | relURL }}" data-alt="Grafana MinIO Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-replication.png" | relURL }}" data-alt="Grafana Replication Dashboard"></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section operator-voices" id="voices">
+      <div class="landing-container">
+        <div class="section-head" data-reveal>
+          <p class="section-eyebrow"><span class="silkscreen">OPERATOR VOICES</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title">{{ if $zh }}真实迁移反馈，也保留现实提醒{{ else }}Real migration reports, with the caveat intact{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}以下均为 2026 年 4–5 月第三方公开反馈，只代表各自环境，不构成通用兼容性或生产保证。{{ else }}Public third-party reports from April–May 2026. They describe individual environments, not universal compatibility or production guarantees.{{ end }}</p>
+        </div>
+
+        <div class="operator-voices-grid" data-reveal>
+          <a class="operator-voice operator-voice--lead" href="https://community.getgrist.com/t/alternatives-to-minio/13882/3" target="_blank" rel="noopener">
+            <span class="voice-kind silkscreen"><i aria-hidden="true"></i>{{ if $zh }}原地迁移{{ else }}IN-PLACE MIGRATION{{ end }}</span>
+            <blockquote>“I’m happy to report it was seamless!”</blockquote>
+            <p>{{ if $zh }}停止容器、替换 Quadlet 镜像并重新启动；管理 Web UI 同时恢复。{{ else }}Stopped the container, changed the Quadlet image, and restarted—with the admin Web UI restored.{{ end }}</p>
+            <footer><strong>maclm</strong><span>Grist Creators · 2026-04-29</span><i aria-hidden="true">↗</i></footer>
+          </a>
+
+          <a class="operator-voice" href="https://discourse.nixos.org/t/question-on-silo-pkg-minio-fork/77900" target="_blank" rel="noopener">
+            <span class="voice-kind silkscreen"><i aria-hidden="true"></i>{{ if $zh }}生产运行{{ else }}PRODUCTION USE{{ end }}</span>
+            <blockquote>“I have this running on a nixos server in my production environment”</blockquote>
+            <p>{{ if $zh }}x86_64-linux 构建已在实际服务器运行；Nixpkgs 收录仍处于社区提案阶段。{{ else }}An x86_64-linux build was running on a real server; Nixpkgs inclusion remained a community proposal.{{ end }}</p>
+            <footer><strong>randoneering</strong><span>NixOS Discourse · 2026-05-29</span><i aria-hidden="true">↗</i></footer>
+          </a>
+
+          <a class="operator-voice" href="https://dev.classmethod.jp/articles/litellm-s3-log-minio-local/" target="_blank" rel="noopener">
+            <span class="voice-kind silkscreen"><i aria-hidden="true"></i>{{ if $zh }}复现实验{{ else }}REPRODUCED GUIDE{{ end }}</span>
+            <blockquote lang="ja">“本記事の手順そのままで動作することが確認できています。”</blockquote>
+            <p>{{ if $zh }}LiteLLM hands-on 切换到 pgsty/minio 与 pgsty/mc 后，原有步骤仍可运行。{{ else }}The LiteLLM hands-on kept working as written after switching to pgsty/minio and pgsty/mc.{{ end }}</p>
+            <footer><strong>{{ if $zh }}桑野翔{{ else }}Sho Kuwano{{ end }}</strong><span>DevelopersIO · 2026-05-15</span><i aria-hidden="true">↗</i></footer>
+          </a>
+
+          <a class="operator-voice operator-voice--caution" href="https://community.getgrist.com/t/alternatives-to-minio/13882/4" target="_blank" rel="noopener">
+            <span class="voice-kind silkscreen"><i aria-hidden="true"></i>{{ if $zh }}持续性提醒{{ else }}MAINTENANCE CAVEAT{{ end }}</span>
+            <blockquote>“it might lack long-term maintenance in the future, so just keep an eye on it.”</blockquote>
+            <p>{{ if $zh }}当前可用不等于长期承诺；请固定版本、跟踪公告，并持续验证自己的工作负载。{{ else }}Useful now is not a lifetime promise: pin releases, follow advisories, and keep validating your own workload.{{ end }}</p>
+            <footer><strong>Kevin_Lee</strong><span>Grist Creators · 2026-04-30</span><i aria-hidden="true">↗</i></footer>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section promise" id="maintenance">
+      <div class="landing-container">
+        <div class="section-head" data-reveal>
+          <p class="section-eyebrow"><span class="silkscreen">MAINTENANCE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title">{{ if $zh }}一项刻意收窄的承诺{{ else }}A deliberately narrow promise{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}SILO 服务于现有 MinIO 兼容部署的连续性；它不是无限范围的产品路线图。{{ else }}SILO exists for continuity across existing MinIO-compatible deployments—not an unlimited product roadmap.{{ end }}</p>
+        </div>
+        <div class="promise-grid" data-reveal>
+          <article class="promise-card promise-card--yes">
+            <p class="silkscreen">{{ if $zh }}维护范围{{ else }}MAINTAINED SURFACE{{ end }}</p>
+            <h3>{{ if $zh }}我们持续维护{{ else }}What stays maintained{{ end }}</h3>
+            <ul><li>{{ if $zh }}活跃发行线的构建与依赖{{ else }}Builds and dependencies for the active release line{{ end }}</li><li>{{ if $zh }}适用的安全修复与公告{{ else }}Applicable security fixes and advisories{{ end }}</li><li>{{ if $zh }}可复现缺陷的聚焦修复{{ else }}Focused fixes for reproducible defects{{ end }}</li><li>{{ if $zh }}版本化交付制品与文档{{ else }}Versioned artifacts and documentation{{ end }}</li></ul>
+          </article>
+          <article class="promise-card promise-card--no">
+            <p class="silkscreen">{{ if $zh }}明确边界{{ else }}EXPLICIT BOUNDARY{{ end }}</p>
+            <h3>{{ if $zh }}我们不做保证{{ else }}What is not promised{{ end }}</h3>
+            <ul><li>{{ if $zh }}完整复刻上游产品路线图{{ else }}A full continuation of the upstream roadmap{{ end }}</li><li>{{ if $zh }}历史版本或多条长期支持分支{{ else }}Historical releases or multiple support branches{{ end }}</li><li>{{ if $zh }}未经验证的逐项兼容保证{{ else }}Untested, item-by-item compatibility guarantees{{ end }}</li><li>{{ if $zh }}响应、修复或发行时限 SLA{{ else }}Response, remediation, or release-time SLAs{{ end }}</li></ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section download" id="download">
+      <div class="landing-container">
+        <div class="section-head" data-reveal>
+          <p class="section-eyebrow"><span class="silkscreen">DOWNLOAD</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title">{{ if $zh }}获取 SILO{{ else }}Get SILO{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}先选择服务端或管理客户端，再选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Choose the server or admin client first, then use the install path that matches your operating system, architecture, and deployment model.{{ end }}</p>
+        </div>
+
+        <div class="product-choice-grid" aria-label="{{ if $zh }}选择下载产品{{ else }}Choose a product{{ end }}">
+          <a class="product-choice-card product-choice-card--server" href="{{ relLangURL "download/" }}#server" data-reveal>
+            <div class="product-choice-top">
+              <div>
+                <p class="silkscreen">{{ if $zh }}数据服务{{ else }}DATA SERVICE{{ end }}</p>
+                <h2>SILO Server</h2>
+              </div>
+              <span class="product-choice-icon"><i class="fas fa-server" aria-hidden="true"></i></span>
+            </div>
+            <p>{{ if $zh }}服务端二进制、容器镜像、Linux 软件包、源码，以及 Pigsty Ansible 自动化部署。{{ else }}Server binaries, container images, Linux packages, source, and Pigsty Ansible automation.{{ end }}</p>
+            <div class="product-platforms"><span>Linux</span><span>Docker</span><span>Kubernetes</span><span>Ansible</span><span>macOS</span><span>Windows</span></div>
+            <strong>{{ if $zh }}选择安装方式{{ else }}Choose install method{{ end }} <i aria-hidden="true">↗</i></strong>
+          </a>
+
+          <a class="product-choice-card product-choice-card--client" href="{{ relLangURL "download/" }}#client" data-reveal>
+            <div class="product-choice-top">
+              <div>
+                <p class="silkscreen">{{ if $zh }}管理客户端{{ else }}ADMIN CLI{{ end }}</p>
+                <h2>mcli Client</h2>
+              </div>
+              <span class="product-choice-icon"><i class="fas fa-terminal" aria-hidden="true"></i></span>
+            </div>
+            <p>{{ if $zh }}用于存储桶、对象、身份、集群管理与日常运维的兼容命令行客户端。{{ else }}A compatible command-line client for buckets, objects, identity, cluster administration, and daily operations.{{ end }}</p>
+            <div class="product-platforms"><span>Linux</span><span>macOS</span><span>Windows</span><span>Docker</span><span>Source</span></div>
+            <strong>{{ if $zh }}选择安装方式{{ else }}Choose install method{{ end }} <i aria-hidden="true">↗</i></strong>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  {{ partial "footer.html" . }}
+
+  <script src="{{ "js/landing-v3.js" | relURL }}"></script>
+</body>
+</html>

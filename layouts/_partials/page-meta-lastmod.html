@@ -1,0 +1,12 @@
+{{/* Docsy's last-modified block, followed by the per-page origin attribution. */ -}}
+{{ if and .GitInfo .Site.Params.github_repo -}}
+<div class="td-page-meta__lastmod">
+  {{ T "post_last_mod" }} {{ .Lastmod.Format .Site.Params.time_format_default -}}
+  {{ with .GitInfo }}: {{/* Trim WS */ -}}
+    <a data-proofer-ignore href="{{ $.Site.Params.github_repo }}/commit/{{ .Hash }}">
+      {{- .Subject }} ({{ .AbbreviatedHash }}) {{- /* Trim WS */ -}}
+    </a>
+  {{- end }}
+</div>
+{{ end -}}
+{{ partial "page-origin-notice.html" . -}}
