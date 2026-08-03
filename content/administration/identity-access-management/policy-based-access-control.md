@@ -3,7 +3,7 @@ title: "Access Management"
 url: "/administration/identity-access-management/policy-based-access-control/"
 weight: 50
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="access-management"></a>
@@ -24,7 +24,9 @@ The [`mc admin policy`](/reference/minio-mc-admin/mc-admin-policy/#command-mc.ad
 
 Policies can use conditions to limit a user’s access only to objects with a [specific tag](/administration/object-management/#minio-object-tagging).
 
-MinIO supports [tag-based conditionals](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html) for policies for [selected actions](#minio-selected-conditional-actions). Use the `s3:ExistingObjectTag/<key>` in the `Condition` statement of the policy.
+MinIO supports [tag-based conditions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html) for [selected actions](#minio-selected-conditional-actions). `s3:ExistingObjectTag/<key>` evaluates tags stored on the target object when that API path loads the object metadata before authorization. `s3:RequestObjectTag/<key>` and `s3:RequestObjectTagKeys` are client-supplied request values, not evidence of stored object state. `PutObject`, `CreateMultipartUpload`, and `PutObjectTagging` explicitly bind them to the tag input those handlers consume; other action paths retain the historical `X-Amz-Tagging` Header mapping for compatibility, so use request-tag conditions only where the API actually consumes tags.
+
+Bucket tags are separate from object tags. `PutBucketTagging` does not populate the `s3:RequestObjectTag*` condition keys from its XML body.
 {{% /alert %}}
 
 <a id="minio-policy-built-in"></a>
@@ -228,6 +230,12 @@ Controls access to the [ListBuckets](https://docs.aws.amazon.com/AmazonS3/latest
 
 Controls access to the [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html) S3 API operation.
 
+Supports the following additional [condition key](#minio-policy-conditions):
+
+```shell
+s3:versionid
+```
+
 <a id="policy-action.s3:GetObject"></a>
 
 #### `s3:GetObject` {#policy-action.s3-GetObject}
@@ -241,6 +249,7 @@ Supports the following additional [condition keys](#minio-policy-conditions):
 ```shell
 s3:x-amz-server-side-encryption
 s3:x-amz-server-side-encryption-customer-algorithm
+s3:x-amz-server-side-encryption-aws-kms-key-id
 s3:ExistingObjectTag/<key>
 s3:versionid
 ```
@@ -253,6 +262,14 @@ s3:versionid
 
 Controls access to the [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html) S3 API operation.
 
+The policy parser admits the following condition key for this action:
+
+```shell
+s3:ExistingObjectTag/<key>
+```
+
+The current handler authorizes before it loads object metadata, however, so that condition value is absent for this operation.
+
 <a id="policy-action.s3:GetObjectVersionAttributes"></a>
 
 #### `s3:GetObjectVersionAttributes` {#policy-action.s3-GetObjectVersionAttributes}
@@ -260,6 +277,15 @@ Controls access to the [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS
 *policy-action*
 
 Controls access to the [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html) S3 API operations on versioned objects.
+
+Supports the following additional [condition keys](#minio-policy-conditions):
+
+```shell
+s3:versionid
+s3:ExistingObjectTag/<key>
+```
+
+The version ID comes from the request query. The current handler authorizes before it loads object metadata, so `s3:ExistingObjectTag/<key>` is admitted by the policy parser but absent at evaluation time for this operation.
 
 <a id="policy-action.s3:RestoreObject"></a>
 
@@ -299,6 +325,7 @@ Supports the following additional [condition keys](#minio-policy-conditions):
 s3:x-amz-copy-source
 s3:x-amz-server-side-encryption
 s3:x-amz-server-side-encryption-customer-algorithm
+s3:x-amz-server-side-encryption-aws-kms-key-id
 s3:x-amz-metadata-directive
 s3:x-amz-storage-class
 s3:versionid
@@ -398,12 +425,14 @@ Controls access to the [GetBucketTagging](https://docs.aws.amazon.com/AmazonS3/l
 
 Controls access to the [PutBucketTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketTagging.html) S3 API operation.
 
-Supports the following additional [condition keys](#minio-policy-conditions):
+The policy parser retains the following condition keys for compatibility:
 
 ```shell
 s3:RequestObjectTagKeys
 s3:RequestObjectTag/<key>
 ```
+
+The handler does **not** populate them from the bucket-tagging XML body. Only the historical, client-supplied `X-Amz-Tagging` Header fallback can populate them, and that Header does not constrain the bucket tags stored from the body. Do not use these keys to enforce the contents of a `PutBucketTagging` request.
 
 <a id="policy-action.s3:GetBucketPolicyStatus"></a>
 
@@ -469,7 +498,6 @@ Supports the following additional [condition keys](#minio-policy-conditions):
 
 ```shell
 s3:versionid
-s3:ExistingObjectTag/<key>
 ```
 
 <a id="policy-action.s3:ListBucketVersions"></a>
@@ -591,9 +619,10 @@ Supports the following additional [condition keys](#minio-policy-conditions):
 ```shell
 s3:x-amz-server-side-encryption
 s3:x-amz-server-side-encryption-customer-algorithm
-s3:x-amz-object-lock-remaining-retention-days
-s3:x-amz-object-lock-retain-until-date
-s3:x-amz-object-lock-mode
+s3:x-amz-server-side-encryption-aws-kms-key-id
+s3:object-lock-remaining-retention-days
+s3:object-lock-retain-until-date
+s3:object-lock-mode
 s3:versionid
 ```
 
@@ -612,6 +641,7 @@ Supports the following additional [condition keys](#minio-policy-conditions):
 ```shell
 s3:x-amz-server-side-encryption
 s3:x-amz-server-side-encryption-customer-algorithm
+s3:x-amz-server-side-encryption-aws-kms-key-id
 s3:versionid
 ```
 
@@ -640,6 +670,7 @@ Supports the following additional [condition keys](#minio-policy-conditions):
 ```shell
 s3:x-amz-server-side-encryption
 s3:x-amz-server-side-encryption-customer-algorithm
+s3:x-amz-server-side-encryption-aws-kms-key-id
 s3:object-lock-legal-hold
 s3:versionid
 ```
@@ -840,16 +871,33 @@ MinIO supports the following condition keys for all supported [actions](#minio-p
 - `aws:PrincipalType`
 - `aws:userid`
 - `aws:username`
-- `x-amz-content-sha256`
+- `s3:x-amz-content-sha256`
 - `s3:signatureAge`
 
 {{% alert color="danger" %}}
 **Warning**
 
-The `aws:Referer`, `aws:SourceIp`, and `aws.UserAgent` keys may be easily spoofed and therefore pose a potential security risk. MinIO recommends only using these condition keys to *deny* access as a secondary security measure.
+The `aws:Referer`, `aws:SourceIp`, and `aws:UserAgent` keys may be spoofed and therefore pose a potential security risk. `aws:SourceIp` is only as trustworthy as the proxy boundary that supplies or overwrites forwarding headers. MinIO recommends only using these condition keys to *deny* access as a secondary security measure.
 
 **Never** use these three keys to grant access by themselves.
 {{% /alert %}}
+
+### Condition Value Sources and Precedence {#condition-value-sources}
+
+Silo constructs the condition-value map from semantic request sources instead of treating every header and query parameter as interchangeable. A raw header or query parameter whose name resembles an internal condition key cannot replace a value calculated by the server or create one that the server did not provide.
+
+| Condition family | Source used for policy evaluation | Precedence and compatibility |
+| :-- | :-- | :-- |
+| Identity, time, transport, authentication, `s3:versionid`, `s3:LocationConstraint`, LDAP, and JWT values | Authenticated credentials and claims, the server clock and transport, or the API field parsed for that operation | Same-named raw headers and query parameters cannot add or replace these values. `aws:Referer` and `aws:UserAgent` remain client-controlled by definition; see the warning above for `aws:SourceIp`. |
+| `s3:signatureAge` | Elapsed time calculated by the SigV4 presigned-request verifier | Available only for a verified SigV4 presigned request. A client-supplied `x-amz-signature-age` Header on any other request type is ignored. |
+| `s3:prefix`, `s3:delimiter`, `s3:max-keys` | Query string only | A similarly named request header is ignored for these list conditions. |
+| `s3:x-amz-content-sha256`, `s3:x-amz-copy-source`, `s3:x-amz-metadata-directive`, and server-side-encryption keys | Their corresponding HTTP headers only | Query-string substitutes do not satisfy these conditions. In particular, the `X-Amz-Content-Sha256` query value used while verifying a presigned request is not exposed as the policy condition value. |
+| `s3:x-amz-storage-class` | `X-Amz-Storage-Class` header, with a compatible query-string fallback | Header presence wins even when the header value is empty. The query form remains available for compatibility with existing upload paths. |
+| `s3:RequestObjectTag/<key>` and `s3:RequestObjectTagKeys` | The `X-Amz-Tagging` Header by default; an explicitly supplied effective tag set on tag-aware handlers | `PutObject` and `CreateMultipartUpload` accept the Header or their compatible query fallback, with Header presence winning. `PutObjectTagging` uses the parsed XML request body. Query tagging is ignored on unrelated operations. The historical Header fallback remains for compatibility on actions whose policy map admits these keys, so outside the three handlers above a request-tag condition does not by itself prove that the operation consumes or stores those tags. |
+| `s3:ExistingObjectTag/<key>` | Tags loaded from the stored target object | Request headers and query parameters never provide existing-object tags. The value is available only on API paths that load those tags before authorization, including object GET/HEAD and object-tagging handlers. |
+| Object-lock condition keys | Object-lock request headers or retention values calculated by the handler | Query-string fields with the same names are ignored. |
+
+If an API path does not load or calculate a listed source, that condition key is absent. Its result then follows the semantics of the policy operator in use; do not assume that merely listing a key for an action causes the server to synthesize a value.
 
 For additional keys supported by a specific S3 action, see the reference documentation for that action.
 

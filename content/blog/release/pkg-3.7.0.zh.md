@@ -16,9 +16,9 @@ aliases:
 这是 `pgsty/silo-pkg` 以新仓库名发布的第一个版本。该版本修复了一处策略条件键解析顺序导致的策略绕过，修复了 LDAP 连接路径上的三个缺陷（其中两个由本分支自己在 v3.6.2/v3.6.3 中引入），清理了证书文件监听器泄漏，并把模块的最低 Go 版本要求从 `1.26.1` 降回到实际需要的 `1.25.0`。
 
 {{% alert color="warning" %}}
-**必须与服务端一同升级**
+**完整修复需要服务端配套更新**
 
-本版本中的策略条件键改动与服务端 `getConditionValues` 中保留内部条件键名的改动各自覆盖问题的一半，**单独升级任何一侧都不完整**。请随对应的 SILO 服务端发布一同升级，不要只更新这个库。
+本版本中的策略条件键改动与服务端 `getConditionValues` 中保留内部条件键名、按真实来源构造条件值的改动各自覆盖问题的一半，**单独升级任何一侧都不完整**。请使用包含这项[配套修复](https://github.com/pgsty/minio/commit/1a6d5b415f2e7e013a5339f6d60c3c6f371a1a03)的 SILO 服务端版本；具体兼容行为见[条件值来源与优先级](/zh/administration/identity-access-management/policy-based-access-control/#condition-value-sources)。
 {{% /alert %}}
 
 ## 这个仓库是什么 {#what-is-this}
@@ -47,7 +47,7 @@ replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.7.0
 
 修复是把顺序反过来：先精确匹配条件键本身的拼写，规范形式仅作为回退，供真正命名请求头的条件键（`s3:x-amz-*` 一族）使用。这是上游 [minio/pkg#226](https://github.com/minio/pkg/pull/226) 的移植，并补充了上游没有携带的回归测试。
 
-一个附带的行为变化：当同一个值既出现在查询参数、又出现在请求头中时，现在查询参数优先。两者都由客户端控制，就这个库而言没有信任边界发生移动。
+在库的原始 map 查找层，如果生产者同时以“条件键原名”和“规范 MIME 名”存入同一个逻辑字段，现在精确名称会优先。这只是库级查找规则，不应被理解为 S3 协议规定“查询参数优先”。SILO 服务端会先按字段的真实来源归一化条件值：对于仍兼容 Header 与 query 两种形式的存储类别和上传标签，**Header 只要存在就优先（包括空值）**，否则才回退到 query。
 
 ## LDAP 连接路径 {#ldap}
 
@@ -75,11 +75,14 @@ replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.7.0
 - **`xtime.Duration` 的 JSON 线格式发生变化**，从纳秒整数变成时长字符串（如 `"2h"`、`"30m"`）。此前以数字形式持久化过这些字段的数据将无法读回。MinIO 与 `mc` 中未发现此类用法：批处理作业定义以 YAML 持久化，msgp 路径仍是 int64。
 - **同时打开 `ServerInsecure` 与 `ServerStartTLS`、且 LDAP 服务端不支持 StartTLS 的部署**，此前（仅在 v3.6.2/v3.6.3 上）以明文连接成功，现在会连接失败。这是正确结果，但它在 connect 时才暴露，而非配置校验时。请为这类服务端关闭 `ServerStartTLS`。
 
-## 服务端侧仍需注意 {#server-side}
+## 服务端配套行为 {#server-side}
 
-- 本版本的策略改动**必须**与服务端保留内部条件键名的改动配套，见文首提示。
+- 本版本的策略改动**必须**与服务端保留内部条件键名、按语义来源填值的改动配套，见文首提示。
+- `s3:signatureAge` 只在 SigV4 预签名请求校验器完成计算后提供；其他请求类型中客户端自行提供的 `x-amz-signature-age` Header 会被忽略。
+- `s3:prefix`、`s3:delimiter`、`s3:max-keys` 只来自 query；内容哈希、复制源、元数据指令、SSE 与对象锁条件只来自对应 Header。预签名校验消费的 `X-Amz-Content-Sha256` query 值不会进入策略条件。
+- `s3:x-amz-storage-class` 继续兼容 query；`PutObject` 与 `CreateMultipartUpload` 的请求标签也保留既有 query 形式。两类字段均以 Header 是否存在为优先级，只有 Header 不存在时才回退到 query。
+- `s3:ExistingObjectTag/*` 只来自服务端读取到的已有对象标签，请求自己的 `X-Amz-Tagging` 不能再冒充已有对象状态。`PutObject`、`CreateMultipartUpload` 与 `PutObjectTagging` 会把 `s3:RequestObjectTag/*` 绑定到各自实际消费的标签输入；无关 query 标签会被忽略。为了兼容，其他 action 路径仍保留历史 `X-Amz-Tagging` Header 回退，因此只能在 API 确实消费标签时把请求标签条件当作约束。完整矩阵见[条件值来源与优先级](/zh/administration/identity-access-management/policy-based-access-control/#condition-value-sources)。
 - `aws:SourceIp` 由 `X-Forwarded-For`、`X-Real-IP` 与 `Forwarded` 计算得出，没有受信代理边界，其中第一个默认启用、后两个完全不设限。因此在可被直接访问的部署上，`IpAddress` 条件是**不可强制执行**的。请把 MinIO 放在会覆写这些请求头的反向代理之后。
-- 条件键取值来源方面还有若干问题只能在服务端解决，不在这个库的能力范围内。相关细节将随对应的服务端发布一并说明。在此之前，请不要把针对请求头的条件键当作可靠的强制手段。
 
 ## 依赖与工程 {#deps-and-tooling}
 
