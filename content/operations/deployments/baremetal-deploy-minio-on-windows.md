@@ -1,5 +1,5 @@
 ---
-title: "Deploy MinIO on Windows"
+title: "Deploy Silo on Windows"
 url: "/operations/deployments/baremetal-deploy-minio-on-windows/"
 weight: 50
 minio_origin: true
@@ -12,25 +12,13 @@ silo_modified: true
 - [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
 - [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
 
-This page documents deploying MinIO onto Microsoft Windows hosts.
+This page documents deploying Silo onto Microsoft Windows hosts for development and evaluation.
 
-MinIO officially supports Windows operating systems in the Active Support of the Microsoft Modern Lifecycle Policy.
-
-At the time of writing, that includes:
-
-- Windows Server 23H2 (**Recommended**)
-- Windows Server 2022 LTSC
-- Windows 11 Enterprise/Workstation 23H2
-- Windows 11 Enterprise/Workstation 22H2
-- Windows 10 Enterprise 21H2 (LTS)
-- Windows 10 IoT 21H2 (LTS)
-- Windows 10 Enterprise 22H2
-
-MinIO *may* run on older or out-of-support Windows releases, with limited support or troubleshooting from either MinIO or Microsoft.
+Silo publishes Windows archives for x86-64 and ARM64. The current project CI runs on Linux and does not provide Windows runtime coverage, so the old upstream list of “officially supported” Windows releases has been removed. Validate the exact Windows edition, filesystem, service wrapper, and workload before relying on it in production.
 
 The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and Single-Node Single-Drive (SNSD) topologies in support of early development and evaluation environments.
 
-MinIO does not officially support Multi-Node Multi-Drive (MNMD) “Distributed” configurations on Windows hosts.
+This guide does not validate Multi-Node Multi-Drive (MNMD) distributed configurations on Windows hosts.
 
 ## Considerations {#considerations}
 
@@ -48,15 +36,11 @@ While you can change erasure parity settings at any time, objects written with a
 
 ## Procedure {#procedure}
 
-### 1. Download the MinIO Binary {#download-the-minio-binary}
+### 1. Download the Silo Binary {#download-the-minio-binary}
 
-Download the MinIO executable from the following URL:
+Download the Windows archive for your architecture from [Download & Install](/download/#server), verify it against the checksum published with the same release, and extract `minio.exe`.
 
-```shell
-https://dl.min.io/server/minio/release/windows-amd64/minio.exe
-```
-
-The next step includes instructions for running the executable. You cannot run the executable from the Explorer or by double clicking the file. Instead, you call the executable to launch the server.
+The next step includes instructions for running the executable. Launch the server from PowerShell or the Command Prompt rather than by double-clicking it in Explorer.
 
 ### 2. Launch the MinIO Server {#launch-the-minio-server}
 
@@ -137,28 +121,26 @@ You can use the MinIO Console for general administration tasks like Identity and
 
 For more information, see the [MinIO Console](/administration/minio-console/#minio-console) documentation.
 
-### 4. *(Optional)* Install the MinIO Client {#optional-install-the-minio-client}
+### 4. *(Optional)* Install the Silo Client {#optional-install-the-minio-client}
 
-The [MinIO Client](/reference/minio-mc/#minio-client) allows you to work with your MinIO deployment from Powershell.
+The [Silo client](/reference/minio-mc/#minio-client) allows you to work with the deployment from PowerShell.
 
-Download the standalone MinIO client for Windows from the following link:
+Download the Windows client archive from [Download & Install](/download/#client), verify its checksum, and extract `mcli.exe`.
 
-[https://dl.min.io/client/mc/release/windows-amd64/mc.exe](https://dl.min.io/client/mc/release/windows-amd64/mc.exe)
-
-Double click on the file to run it. Or, run the following in the Command Prompt or PowerShell.
+Run it from the Command Prompt or PowerShell:
 
 ```
-\path\to\mc.exe --help
+\path\to\mcli.exe --help
 ```
 
-Use [`mc.exe alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) to quickly authenticate and connect to the MinIO deployment.
+Use [`mc alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) through the installed `mcli.exe` command to authenticate and connect to the deployment.
 
 ```shell
-mc.exe alias set local http://127.0.0.1:9000 minioadmin minioadmin
-mc.exe admin info local
+mcli.exe alias set local http://127.0.0.1:9000 minioadmin minioadmin
+mcli.exe admin info local
 ```
 
-The [`mc.exe alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) takes four arguments:
+The [`mc alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) command takes four arguments:
 
 - The name of the alias
 - The hostname or IP address and port of the MinIO server

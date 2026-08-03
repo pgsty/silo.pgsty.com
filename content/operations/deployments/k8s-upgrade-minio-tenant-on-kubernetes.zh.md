@@ -1,15 +1,19 @@
 ---
-title: "升级 MinIO Tenant"
+title: "升级 Silo Tenant"
 url: "/zh/operations/deployments/k8s-upgrade-minio-tenant-on-kubernetes/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-tenant"></a>
 <a id="minio-k8s-upgrade-minio-tenant"></a>
 
-以下步骤用于升级单个 MinIO Tenant，可选择使用 Kustomize 或 Helm。 MinIO 建议你在升级生产 Tenant 之前，先在 Dev 或 QA 等较低环境中测试升级流程。
+以下步骤用于使用 Kustomize 或 Helm 升级单个 Silo Tenant。请先在非生产 Tenant 中测试确切的服务端镜像、Operator/Chart 版本与回滚流程。
+
+{{% alert color="danger" %}}
+服务端镜像必须保持为 `pgsty/minio`，并仅使用 [Silo 下载页](/zh/download/#server) 已发布的标签或摘要。上游 Tenant 默认值使用 MinIO 镜像。同时保留 `MINIO_UPDATE=off`；继承的原地更新器仍指向上游 MinIO 发布源，不是 Silo 升级路径。
+{{% /alert %}}
 
 {{% alert color="warning" %}}
 **重要**
@@ -93,12 +97,15 @@ metadata:
   namespace: my-tenant-ns
 
 spec:
-  image: minio/minio:MINIOLATEST
+  image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+  env:
+    - name: MINIO_UPDATE
+      value: "off"
 ```
 
 该文件会指示 Kustomize 使用指定镜像升级 Tenant。 该文件名 `upgrade-minio-tenant.yaml` 必须与上一步创建的 `kustomization.yaml` 中 `patches.path` 指定的文件名一致。
 
-将 `my-tenant` 和 `my-tenant-ns` 替换为待升级 Tenant 的名称和命名空间。 在 `image:` 中指定要升级到的 MinIO 版本。
+将 `my-tenant` 和 `my-tenant-ns` 替换为待升级 Tenant 的名称和命名空间。仅当更新的 Silo 发布已公开发布且经过验证时，才替换示例镜像标签。
 
 或者，你也可以按照本地流程直接更新基础配置。 更多信息请参阅 [Kustomize Documentation](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization)。
 
@@ -122,7 +129,7 @@ spec:
 
 如果你是通过 Kustomize 部署 Tenant，请改用 [使用 Kustomize 升级 Tenant](#minio-upgrade-tenant-kustomize) 步骤。
 
-1. 验证现有 MinIO Tenant 安装。
+1. 验证现有 Silo Tenant 安装。
 
    使用 `kubectl get all -n TENANT_NAMESPACE` 验证所有 Tenant pod 和 service 的健康状态。
 
@@ -158,16 +165,28 @@ spec:
    ```
 
    `minio-operator/minio-operator` 是旧版 chart，正常情况下**不应**安装。
-3. 运行 `helm upgrade`
+3. 保留并审查 Tenant values
 
-   Helm 会使用最新 chart 升级 Tenant：
+   导出当前发布由用户提供的 values，然后确认该文件保留了所有拓扑、存储、TLS、凭据与调度设置：
 
    ```shell
-   helm upgrade -n minio-tenant \
+   helm get values CHART_NAME -n TENANT_NAMESPACE -o yaml > values.yaml
+   ```
+
+   将 `tenant.image.repository` 设为 `pgsty/minio`，将 `tenant.image.tag` 固定为经测试的已发布 Silo 版本，并确保 `tenant.env` 包含 `MINIO_UPDATE=off`。不得让 Chart 升级默默恢复上游镜像默认值。
+
+4. 运行已固定的 `helm upgrade`
+
+   Chart 版本与 Silo 服务端镜像应分别固定，并传入经过审查的 values 文件：
+
+   ```shell
+   helm upgrade -n TENANT_NAMESPACE \
+     --version 7.1.1 \
+     --values values.yaml \
      CHART_NAME minio-operator/tenant
    ```
 
    命令结果应返回成功，并且 `REVISION` 值会递增。
-4. 验证 Tenant 升级
+5. 验证 Tenant 升级
 
-   检查所有 service 和 pod 是否都已在线并正常工作。
+   检查所有 service 和 pod 是否都已在线，确认实际运行的镜像摘要，并执行经过认证的 S3 读写冒烟测试后再完成发布。

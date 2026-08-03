@@ -4,7 +4,7 @@ url: "/zh/operations/monitoring/metrics-and-alerts/"
 weight: 10
 icon: fa-solid fa-gauge-high
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-metrics-and-alerts"></a>
@@ -108,15 +108,15 @@ http://HOSTNAME:PORT/minio/metrics/v3/audit
 
 MinIO 为集群、API 请求、存储桶以及 MinIO 服务的其他方面发布多类指标：
 
-- [API 指标](#minio-available-v3-api-metrics)
-- [审计指标](#minio-available-v3-audit-metrics)
-- [集群指标](#minio-available-v3-cluster-metrics)
-- [调试指标](#minio-available-v3-debug-metrics)
-- [ILM 指标](#minio-available-v3-ilm-metrics)
-- [日志 Webhook 指标](#minio-available-v3-logger-webhook-metrics)
-- [通知指标](#minio-available-v3-notification-metrics)
-- [复制指标](#minio-available-v3-replication-metrics)
-- [扫描器指标](#minio-available-v3-scanner-metrics)
-- [系统指标](#minio-available-v3-system-metrics)
+- [API 指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-api-metrics)
+- [审计指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-audit-metrics)
+- [集群指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-cluster-metrics)
+- [调试指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-debug-metrics)
+- [ILM 指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-ilm-metrics)
+- [日志 Webhook 指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-logger-webhook-metrics)
+- [通知指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-notification-metrics)
+- [复制指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-replication-metrics)
+- [扫描器指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-scanner-metrics)
+- [系统指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-system-metrics)
 
 许多指标都包含标签，用于标识生成该指标的资源及其他相关信息。

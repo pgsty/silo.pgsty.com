@@ -1,9 +1,9 @@
 ---
-title: "MinIO Access Management Plugin Settings"
+title: "Silo Access Management Plugin Settings"
 url: "/reference/minio-server/settings/iam/minio-access-plugin/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-access-management-plugin-settings"></a>

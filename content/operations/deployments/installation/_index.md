@@ -1,7 +1,7 @@
 ---
 title: "Installation and Management"
 url: "/operations/deployments/installation/"
-description: "MinIO Deployment Topologies and Installation Instructions"
+description: "Silo deployment topologies and installation instructions"
 weight: 10
 icon: fa-solid fa-download
 minio_origin: true
@@ -15,15 +15,13 @@ silo_modified: true
 <a id="minio-mnmd"></a>
 <a id="deploy-minio-distributed"></a>
 
-This section documents steps for installing and managing the AGPLv3-licensed Community MinIO Object Storage on [Kubernetes](/operations/deployments/kubernetes/#minio-kubernetes) and [Baremetal](/operations/deployments/baremetal/#minio-baremetal) infrastructures.
+This section documents installing and managing the AGPLv3-licensed Silo object storage server on [Kubernetes](/operations/deployments/kubernetes/#minio-kubernetes) and [bare-metal or virtualized](/operations/deployments/baremetal/#minio-baremetal) infrastructure.
 
-- [Installing and Running MinIO on Linux](https://www.youtube.com/watch?v=74usXkZpNt8&list=PLFOIsHSSYIK1BnzVY66pCL-iJ30Ht9t1o)
-- [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
-- [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
+The `minio` executable, `MINIO_*` environment variables, S3 and Admin APIs, on-disk format, and MinIO Operator resource names are compatibility contracts. The prose uses the Silo brand, while commands and identifiers retain their compatible names.
 
-MinIO is a software-defined high performance distributed object storage server. You can run MinIO on consumer or enterprise-grade hardware and a variety of operating systems and architectures.
+Silo is an S3-compatible, software-defined distributed object storage server. The [download page](/download/) is the source of truth for currently published operating-system and architecture artifacts.
 
-All MinIO deployments implement [Erasure Coding](/operations/concepts/erasure-coding/#minio-erasure-coding) backends. You can deploy MinIO using one of the following topologies:
+Silo uses [Erasure Coding](/operations/concepts/erasure-coding/#minio-erasure-coding) for object data. You can deploy it using one of the following topologies:
 
 **[Single-Node Single-Drive](#minio-snsd) (SNSD or “Standalone”)**
 
@@ -49,33 +47,26 @@ All MinIO deployments implement [Erasure Coding](/operations/concepts/erasure-co
 
 ## Kubernetes {#kubernetes}
 
-MinIO provides a Kubernetes-native Operator framework for managing and deploying Tenants onto your managed infrastructure.
+The archived MinIO Kubernetes Operator `v7.1.1` can manage Tenant resources that run a Silo server image. The Operator, its charts, CRDs, and `Tenant` kind retain their upstream names; its upstream release lifecycle is now frozen.
 
-MinIO fully supports upstream Kubernetes and most flavors which inherit from the upstream as a base. This includes, but is not limited to, RedHat Openshift, SUSE Rancher, VMWare Tanzu. MinIO also fully supports cloud-based Kubernetes engines such as Elastic Kubernetes Engine, Google Kubernetes Service, and Azure Kubernetes Service.
+These retained Operator guides describe a compatibility snapshot. The upstream repository was archived on 2026-03-20, so verify `v7.1.1` against your Kubernetes distribution and override the Tenant image to `pgsty/minio`; the Silo project does not claim the former upstream vendor's platform support matrix.
 
-Select the link most appropriate for your Kubernetes infrastructure. If your provider is not listed, use the Kubernetes Upstream documentation as a baseline and modify as needed based on your provider’s guidance or divergence from upstream semantics and behavior.
-
-- [Deploy MinIO on Kubernetes (Upstream)](/operations/deployments/kubernetes/#deploy-operator-kubernetes)
-- [Deploy MinIO on Openshift Kubernetes](/operations/deployments/kubernetes/#deploy-operator-openshift)
-- [Deploy MinIO on SUSE Rancher Kubernetes](/operations/deployments/kubernetes/#deploy-operator-rancher)
-- [Deploy MinIO on Elastic Kubernetes Service](/operations/deployments/kubernetes/#deploy-operator-eks)
-- [Deploy MinIO on Google Kubernetes Engine](/operations/deployments/kubernetes/#deploy-operator-gke)
-- [Deploy MinIO on Azure Kubernetes Service](/operations/deployments/kubernetes/#deploy-operator-aks)
+- [Deploy a Silo Tenant with Helm](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)
+- [Deploy the MinIO Operator](/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/)
+- [Review Kubernetes deployment guidance](/operations/deployments/kubernetes/)
 
 ## Baremetal {#baremetal}
 
-MinIO supports deploying onto baremetal infrastructure - physical machines or virtualized hosts - running Linux, MacOS, and Windows. You can also deploy MinIO as a container onto supported Operating Systems.
+Silo can run on physical machines, virtualized hosts, or in a container. Consult the current download matrix and each platform page for the verified artifact and scope.
 
-- [Deploy MinIO onto RedHat Linux](/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#deploy-minio-rhel)
-- [Deploy MinIO onto Ubuntu Linux](/operations/deployments/baremetal-deploy-minio-on-ubuntu-linux/#deploy-minio-ubuntu)
-- [Deploy MinIO as a Container](/operations/deployments/baremetal-deploy-minio-as-a-container/#deploy-minio-container)
-- [Deploy MinIO onto MacOS](/operations/deployments/baremetal-deploy-minio-on-macos/#deploy-minio-macos)
-- [Deploy MinIO onto Windows](/operations/deployments/baremetal-deploy-minio-on-windows/#deploy-minio-windows)
+- [Deploy Silo on Red Hat Linux](/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#deploy-minio-rhel)
+- [Deploy Silo on Ubuntu Linux](/operations/deployments/baremetal-deploy-minio-on-ubuntu-linux/#deploy-minio-ubuntu)
+- [Deploy Silo as a Container](/operations/deployments/baremetal-deploy-minio-as-a-container/#deploy-minio-container)
+- [Deploy Silo on macOS](/operations/deployments/baremetal-deploy-minio-on-macos/#deploy-minio-macos)
+- [Deploy Silo on Windows](/operations/deployments/baremetal-deploy-minio-on-windows/#deploy-minio-windows)
 
 {{% alert color="warning" %}}
 **Important**
 
-MinIO strongly recommends [Linux (RHEL, Ubuntu)](https://silo.pgsty.com/operations/deployments/baremetal/) or [Kubernetes (Upstream, OpenShift)](https://silo.pgsty.com/operations/deployments/kubernetes/) for long-term development and production environments.
-
-MinIO provides no guarantee of support for <abbr title="Single-Node Multi-Drive">SNMD</abbr> or <abbr title="Multi-Node Multi-Drive">MNMD</abbr> topologies on MacOS, Windows, or Containerized deployments.
+Published artifacts do not establish equal production validation across platforms. Prefer a tested Linux or Kubernetes deployment for long-running workloads, pin exact package/image versions, and validate storage, failure domains, upgrade, and recovery behavior for the chosen topology.
 {{% /alert %}}

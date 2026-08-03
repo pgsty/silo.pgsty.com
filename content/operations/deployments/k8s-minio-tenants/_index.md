@@ -1,10 +1,10 @@
 ---
-title: "MinIO Tenants on Kubernetes"
+title: "Silo Tenants with MinIO Operator"
 url: "/operations/deployments/k8s-minio-tenants/"
 weight: 20
 icon: fa-solid fa-cubes
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-tenants-on-kubernetes"></a>
@@ -15,11 +15,11 @@ This documentation assumes a [MinIO Operator installation](/operations/deploymen
 
 ## Prerequisites {#prerequisites}
 
-Your Kubernetes infrastructure must meet the following pre-requisites for deploying MinIO Tenants.
+Your Kubernetes infrastructure must meet the following prerequisites for deploying MinIO Tenants.
 
 ### MinIO Kubernetes Operator {#minio-kubernetes-operator}
 
-The procedures on this page *requires* a valid installation of the MinIO Kubernetes Operator and assumes the local host has a matching installation of the MinIO Kubernetes Operator. This procedure assumes the latest stable Operator, version 7.1.1.
+The procedures on this page *require* a valid installation of the MinIO Kubernetes Operator and assume the local host has a matching Operator installation. They use `v7.1.1`, the final upstream release before the repository was archived, as a frozen compatibility baseline.
 
 See [Deploy MinIO on Kubernetes](/operations/deployments/kubernetes/#deploy-operator-kubernetes) for complete documentation on deploying the MinIO Operator.
 
@@ -29,7 +29,7 @@ MinIO **strongly recommends** deploying Tenants onto Kubernetes worker nodes wit
 
 The Worker Nodes should meet MinIO’s [hardware checklist](/operations/checklists/hardware/#minio-hardware-checklist) for production environments.
 
-Avoid colocating MinIO tenants onto worker nodes hosting other high-performance softwares, and where necessary to do so ensure you configure the appropriate limits and constraints to guarantee MinIO access to the necessary compute and storage resources.
+Avoid colocating MinIO tenants on worker nodes that host other high-performance software. Where colocation is necessary, configure appropriate limits and constraints to guarantee MinIO access to the required compute and storage resources.
 
 <a id="deploy-minio-tenant-pv"></a>
 

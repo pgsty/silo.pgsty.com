@@ -1,9 +1,9 @@
 ---
-title: "MinIO 外部访问管理插件"
+title: "Silo 外部访问管理插件"
 url: "/zh/administration/identity-access-management/pluggable-authorization/"
 weight: 60
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>

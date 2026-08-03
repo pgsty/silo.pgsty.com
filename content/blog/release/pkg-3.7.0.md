@@ -19,7 +19,7 @@ This is the first `pgsty/silo-pkg` release under its new repository name. It fix
 {{% alert color="warning" %}}
 **The complete fix requires the matching server update**
 
-The policy lookup change in this release and the server changes that reserve internal condition-key names and construct condition values from their real sources each cover one half of the problem. **Upgrading either side alone is incomplete.** Use a SILO server release that includes the [companion fix](https://github.com/pgsty/minio/commit/1a6d5b415f2e7e013a5339f6d60c3c6f371a1a03). See [Condition Value Sources and Precedence](/administration/identity-access-management/policy-based-access-control/#condition-value-sources) for the compatibility contract.
+The policy lookup change in this release and the server changes that reserve internal condition-key names and construct condition values from their real sources each cover one half of the problem. **Upgrading either side alone is incomplete.** The companion server work exists in local `pgsty/minio` commit `1a6d5b415`, but as of 2026-08-03 it is not on public `origin/master` and no published Silo server release contains it. Do not treat v3.7.0 alone as the complete fix; verify that a later server release explicitly includes the companion change. See [Condition Value Sources and Precedence](/administration/identity-access-management/policy-based-access-control/#condition-value-sources) for the compatibility contract.
 {{% /alert %}}
 
 ## What This Repository Is {#what-is-this}
@@ -48,7 +48,7 @@ There was a second consequence: when the server stored a value under one spellin
 
 The fix reverses the lookup order: match the condition key's exact name first, then use the canonical spelling only as a fallback for condition keys that genuinely name request headers, such as the `s3:x-amz-*` family. This ports [minio/pkg#226](https://github.com/minio/pkg/pull/226) and adds regression coverage that the upstream change did not carry.
 
-At the library's raw-map layer, if a producer stores one logical field under both the exact condition name and its canonical MIME name, the exact name now wins. This is a library lookup rule, not an S3 wire-protocol rule that says query parameters take precedence. The SILO server first normalizes condition values by their real source. For storage class and upload tagging, where both Header and query forms remain compatible, **Header presence wins, including an empty value**; query is only the fallback.
+At the library's raw-map layer, if a producer stores one logical field under both the exact condition name and its canonical MIME name, the exact name now wins. This is a library lookup rule, not an S3 wire-protocol rule that says query parameters take precedence. The Silo server first normalizes condition values by their real source. For storage class and upload tagging, where both Header and query forms remain compatible, **Header presence wins, including an empty value**; query is only the fallback.
 
 ## LDAP Connection Path {#ldap}
 

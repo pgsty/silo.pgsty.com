@@ -1,5 +1,5 @@
 ---
-title: "在 Windows 上部署 MinIO"
+title: "在 Windows 上部署 Silo"
 url: "/zh/operations/deployments/baremetal-deploy-minio-on-windows/"
 weight: 50
 minio_origin: true
@@ -12,25 +12,13 @@ silo_modified: true
 - [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
 - [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
 
-本页介绍如何在 Microsoft Windows 主机上部署 MinIO。
+本页介绍如何在 Microsoft Windows 主机上部署 Silo，用于开发与评估。
 
-MinIO 正式支持处于 Microsoft Modern Lifecycle Policy“Active Support”阶段的 Windows 操作系统。
-
-在撰写本文时，包括：
-
-- Windows Server 23H2（**推荐**）
-- Windows Server 2022 LTSC
-- Windows 11 Enterprise/Workstation 23H2
-- Windows 11 Enterprise/Workstation 22H2
-- Windows 10 Enterprise 21H2 (LTS)
-- Windows 10 IoT 21H2 (LTS)
-- Windows 10 Enterprise 22H2
-
-MinIO *可能* 也能在更旧或已停止支持的 Windows 版本上运行，但 MinIO 或 Microsoft 仅能提供有限的支持或故障排查。
+Silo 为 x86-64 与 ARM64 发布 Windows 归档。当前项目 CI 在 Linux 上运行，没有覆盖 Windows 实机运行时，因此已删除继承自上游、已经过时的“正式支持 Windows 版本”清单。在生产使用前，请验证精确的 Windows 版本、文件系统、服务包装方式与工作负载。
 
 本步骤包含对 单机多盘 (SNMD) 和 单机单盘 (SNSD) 拓扑的指导，适用于早期开发和评估环境。
 
-MinIO 不正式支持在 Windows 主机上运行 多机多盘 (MNMD)“Distributed”配置。
+本指南没有验证 Windows 主机上的多机多盘（MNMD）分布式配置。
 
 ## 注意事项 {#id2}
 
@@ -48,15 +36,11 @@ MinIO 会根据拓扑中的节点和驱动器总数，自动为集群确定默�
 
 ## 步骤 {#id5}
 
-### 1. 下载 MinIO 二进制文件 {#minio}
+### 1. 下载 Silo 二进制文件 {#minio}
 
-从以下 URL 下载 MinIO 可执行文件：
+从[下载与安装](/zh/download/#server)获取与架构对应的 Windows 归档，使用同一发布随附的校验和核验后，解压得到 `minio.exe`。
 
-```shell
-https://dl.min.io/server/minio/release/windows-amd64/minio.exe
-```
-
-下一步包含运行该可执行文件的说明。 你不能通过资源管理器或双击文件来运行它。 相反，你需要通过命令调用该可执行文件来启动 server。
+下一步说明如何运行该文件。请从 PowerShell 或命令提示符启动服务端，不要在资源管理器中双击运行。
 
 ### 2. 启动 MinIO Server {#minio-server}
 
@@ -137,28 +121,26 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 
 更多信息请参阅 [MinIO 控制台](/zh/administration/minio-console/#minio-console) 文档。
 
-### 4. *(Optional)* 安装 MinIO Client {#optional-minio-client}
+### 4. *(可选)* 安装 Silo 客户端 {#optional-minio-client}
 
-[MinIO Client](/zh/reference/minio-mc/#minio-client) 允许你从 PowerShell 与 MinIO 部署交互。
+[Silo 客户端](/zh/reference/minio-mc/#minio-client)允许你从 PowerShell 与部署交互。
 
-从以下链接下载 Windows 独立版 MinIO client：
+从[下载与安装](/zh/download/#client)获取 Windows 客户端归档，校验后解压得到 `mcli.exe`。
 
-[https://dl.min.io/client/mc/release/windows-amd64/mc.exe](https://dl.min.io/client/mc/release/windows-amd64/mc.exe)
-
-双击文件即可运行。 或者，在命令提示符或 PowerShell 中运行以下命令。
+在命令提示符或 PowerShell 中运行：
 
 ```
-\path\to\mc.exe --help
+\path\to\mcli.exe --help
 ```
 
-使用 [`mc.exe alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 可以快速认证并连接到 MinIO 部署。
+通过已安装的 `mcli.exe` 执行 [`mc alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set)，即可认证并连接到部署。
 
 ```shell
-mc.exe alias set local http://127.0.0.1:9000 minioadmin minioadmin
-mc.exe admin info local
+mcli.exe alias set local http://127.0.0.1:9000 minioadmin minioadmin
+mcli.exe admin info local
 ```
 
-[`mc.exe alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 需要四个参数：
+[`mc alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 需要四个参数：
 
 - 别名名称
 - MinIO server 的主机名或 IP 地址及端口

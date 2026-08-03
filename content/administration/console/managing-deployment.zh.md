@@ -3,7 +3,7 @@ title: "管理部署"
 url: "/zh/administration/console/managing-deployment/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-console-managing-deployment"></a>
@@ -72,7 +72,7 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 
 ### 加密 {#id9}
 
-**Encryption** 部分允许你查看已配置 [Key Encryption Service](https://docs.min.io/community/minio-kes/) 提供方的状态和指标。
+**Encryption** 部分允许你查看已配置 [Key Encryption Service](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) 提供方的状态和指标。
 
 <a id="id10"></a>
 

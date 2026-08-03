@@ -1,21 +1,21 @@
 ---
-title: "MinIO Server"
+title: "Silo Server (`minio`)"
 url: "/reference/minio-server/"
 weight: 30
 aliases:
   - "/reference/minio-server/minio-server/"
 icon: fa-solid fa-database
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-server"></a>
 
 <a id="command-minio"></a>
 
-## MinIO Server {#id1}
+## Silo Server {#id1}
 
-The [`minio server`](#command-minio.server) command starts the MinIO server process:
+The [`minio server`](#command-minio.server) command starts the Silo server process. The executable and subcommand names remain `minio server` as a compatibility contract:
 
 ```shell
 minio server /mnt/disk{1...4}
@@ -23,7 +23,7 @@ minio server /mnt/disk{1...4}
 
 For examples of deploying [`minio server`](#command-minio.server) on a bare metal environment, see [Installation and Management](/operations/deployments/installation/#minio-installation).
 
-For examples of deploying [`minio server`](#command-minio.server) on a Kubernetes environment, see [Deploying a MinIO Tenant](/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant).
+For examples of deploying [`minio server`](#command-minio.server) on Kubernetes, see [Deploying a Silo Tenant](/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant).
 
 <a id="syntax"></a>
 <a id="minio-server-parameters"></a>
@@ -50,7 +50,7 @@ For standalone deployments, this field is *optional*. You can start a standalone
 
 For distributed deployments, specify the hostname of each [`minio server`](#command-minio.server) in the deployment. The group of [`minio server`](#command-minio.server) processes represent a single [Server Pool](/operations/concepts/#minio-intro-server-pool).
 
-[`HOSTNAME`](#minio.server.HOSTNAME) supports MinIO expansion notation `{x...y}` to denote a sequential series of hostnames. MinIO *requires* sequential hostnames to identify each [`minio server`](#command-minio.server) process in the set.
+[`HOSTNAME`](#minio.server.HOSTNAME) supports expansion notation `{x...y}` to denote a sequential series of hostnames. Silo *requires* sequential hostnames to identify each [`minio server`](#command-minio.server) process in the set.
 
 For example, `https://minio{1...4}.example.net` expands to:
 
@@ -61,7 +61,7 @@ For example, `https://minio{1...4}.example.net` expands to:
 
 You must run the [`minio server`](#command-minio.server) command with the *same* combination of [`HOSTNAME`](#minio.server.HOSTNAME) and [`DIRECTORIES`](#minio.server.DIRECTORIES) on each host in the Server Pool.
 
-Each additional `HOSTNAME/DIRECTORIES` pair denotes an additional Server Set for the purpose of horizontal expansion of the MinIO deployment. For more information on Server Pools, see [Server Pool](/operations/concepts/#minio-intro-server-pool).
+Each additional `HOSTNAME/DIRECTORIES` pair denotes an additional Server Set for horizontal expansion of the Silo deployment. For more information on Server Pools, see [Server Pool](/operations/concepts/#minio-intro-server-pool).
 
 ##### `DIRECTORIES` {#minio.server.DIRECTORIES}
 
@@ -71,7 +71,7 @@ Each additional `HOSTNAME/DIRECTORIES` pair denotes an additional Server Set for
 
 The directories or drives the [`minio server`](#command-minio.server) process uses as the storage backend.
 
-[`DIRECTORIES`](#minio.server.DIRECTORIES) supports MinIO expansion notation `{x...y}` to denote a sequential series of folders or drives. For example, `/mnt/disk{1...4}` expands to:
+[`DIRECTORIES`](#minio.server.DIRECTORIES) supports expansion notation `{x...y}` to denote a sequential series of folders or drives. For example, `/mnt/disk{1...4}` expands to:
 
 - `/mnt/disk1`
 - `/mnt/disk2`
@@ -85,11 +85,11 @@ The [`minio server`](#command-minio.server) process requires *at least* 4 drives
 {{% alert color="warning" %}}
 **Important**
 
-MinIO recommends locally-attached drives, where the [`DIRECTORIES`](#minio.server.DIRECTORIES) path points to each drive on the host machine. MinIO recommends *against* using network-attached storage, as network latency reduces performance of those drives compared to locally-attached storage.
+Silo recommends locally attached drives, where the [`DIRECTORIES`](#minio.server.DIRECTORIES) path points to each drive on the host machine. Avoid network-attached storage for primary object data unless the complete stack has been validated, because network latency and failure semantics differ from locally attached storage.
 
 For development or evaluation, you can specify multiple logical directories or partitions on a single physical volume to enable erasure coding on the deployment.
 
-For production environments, MinIO does **not recommend** using multiple logical directories or partitions on a single physical disk. While MinIO supports those configurations, the potential cost savings come at the risk of decreased reliability.
+For production environments, do **not** treat multiple logical directories or partitions on one physical disk as independent failure domains. The apparent drive count does not provide physical-disk redundancy.
 {{% /alert %}}
 
 ##### `--address` {#minio.server.-address}

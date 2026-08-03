@@ -4,7 +4,7 @@ url: "/developers/java/minio-java/"
 weight: 40
 icon: fa-brands fa-java
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="java-quickstart-guide"></a>
@@ -14,7 +14,7 @@ silo_modified: false
 
 MinIO Java SDK 是一个 Simple Storage Service（即 S3）客户端，可用于在任意兼容 Amazon S3 的对象存储服务上执行存储桶和对象操作。
 
-有关完整的 API 和示例列表，请参阅 [Java Client API Reference](https://min.io/docs/minio/linux/developers/java/API.html) 文档。
+有关完整的 API 和示例列表，请参阅 [Java Client API Reference](https://github.com/minio/minio-java/blob/master/docs/API.md) 文档。
 
 ### 最低要求 {#id1}
 
@@ -131,13 +131,13 @@ $ mc ls play/asiatrip/
 
 ### 更多参考 {#id4}
 
-- [Java Client API Reference](https://min.io/docs/minio/linux/developers/java/API.html)
+- [Java Client API Reference](https://github.com/minio/minio-java/blob/master/docs/API.md)
 - [Javadoc](https://minio-java.min.io/)
 - [示例](https://github.com/minio/minio-java/tree/release/examples)
 
 ### 深入了解 {#id5}
 
-- [完整文档](https://min.io/docs/minio/kubernetes/upstream/index.html)
+- [Java SDK 源码与当前文档](https://github.com/minio/minio-java)
 - [构建自己的 Photo API 服务 - 完整应用示例](https://github.com/minio/minio-java-rest-example)
 
 ### 贡献 {#id6}

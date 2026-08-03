@@ -4,7 +4,7 @@ url: "/zh/administration/object-management/"
 weight: 120
 icon: fa-solid fa-box-archive
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="id1"></a>
@@ -13,6 +13,8 @@ silo_modified: false
 - [Object locking and retention overview](https://youtu.be/Hk9Z-sltUu8?ref=docs)
 - [MinIO Object Lifecycle Management Part I](https://youtu.be/Exg2KsfzHzI?ref=docs)
 - [MinIO Object Lifecycle Management Part II](https://youtu.be/5fz3rE3wjGg?ref=docs)
+
+<a id="objects"></a>
 
 [对象](#objects) 是二进制数据，例如图像、音频文件、电子表格，甚至二进制可执行代码。 “Binary Large Object” 或 “blob” 这一术语有时会与对象存储关联使用，不过 blob 的大小可以从几个字节到数 TB 不等。 像 MinIO 这样的对象存储平台提供专用工具和能力，用于通过标准的 S3 兼容 API 存储、列出和获取对象。
 
@@ -23,6 +25,8 @@ MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权�
 
 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 {{% /alert %}}
+
+<a id="buckets"></a>
 
 MinIO 对象存储使用 [存储桶](#buckets) 组织对象。 存储桶类似于文件系统中的顶层驱动器、文件夹或目录（`/mnt/data` 或 `C:\`），每个存储桶都可以容纳任意数量的对象。
 

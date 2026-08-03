@@ -1,5 +1,5 @@
 ---
-title: "使用 Certbot 为 MinIO 生成 Let’s Encrypt 证书"
+title: "使用 Certbot 为 Silo 生成 Let’s Encrypt 证书"
 url: "/zh/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/"
 weight: 60
 minio_origin: true

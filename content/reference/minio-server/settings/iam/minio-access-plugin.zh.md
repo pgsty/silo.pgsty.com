@@ -1,9 +1,9 @@
 ---
-title: "MinIO 访问管理插件设置"
+title: "Silo 访问管理插件设置"
 url: "/zh/reference/minio-server/settings/iam/minio-access-plugin/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>

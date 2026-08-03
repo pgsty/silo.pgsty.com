@@ -1,9 +1,9 @@
 ---
-title: "MinIO Identity Management Plugin Settings"
+title: "Silo Identity Management Plugin Settings"
 url: "/reference/minio-server/settings/iam/minio-identity-plugin/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-identity-management-plugin-settings"></a>

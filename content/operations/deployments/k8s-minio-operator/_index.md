@@ -4,22 +4,21 @@ url: "/operations/deployments/k8s-minio-operator/"
 weight: 10
 icon: fa-solid fa-dharmachakra
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-kubernetes-operator"></a>
 <a id="deploy-minio-operator"></a>
 
-MinIO is a Kubernetes-native high performance object store with an S3-compatible API. The MinIO Kubernetes Operator supports deploying MinIO Tenants onto private and public cloud infrastructures (“Hybrid” Cloud).
+Silo is an S3-compatible object store. MinIO Operator is an upstream Kubernetes component whose repository was archived and made read-only on 2026-03-20. Its final release, `v7.1.1`, can manage a Silo server image through the Tenant CRD. The Operator name, API groups, CRD kinds, resource names, image names, and environment variables remain upstream contracts and are not rebranded here.
 
-The MinIO Operator installs a [Custom Resource Definition (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#customresourcedefinitions) to support describing MinIO tenants as a Kubernetes [object](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/).
+MinIO Operator installs [Custom Resource Definitions (CRDs)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#customresourcedefinitions), including the `Tenant` kind used to describe managed object-storage workloads as Kubernetes [objects](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/).
 
-The MinIO Operator exists in its own namespace. Within the Operator’s namespace, the MinIO Operator utilizes two pods:
+The pinned v7.1.1 Kustomize manifest deploys the Operator in the `minio-operator` namespace as one `minio-operator` Deployment with two controller replicas. It does not deploy a separate Operator Console pod.
 
-- The Operator pod for the base Operator functions to deploy, manage, modify, and maintain tenants.
-- Console pod for the Operator’s Graphical User Interface, the Operator Console.
+This site verifies the Silo image override used by its deployment examples. The archived Operator has no ongoing upstream platform-support or commercial-support commitment, and this site does not create one.
 
-See the MinIO Operator [CRD Reference](https://github.com/minio/operator/blob/master/docs/tenant_crd.adoc) for complete documentation on the MinIO CRD.
+See the pinned MinIO Operator v7.1.1 [CRD Reference](https://github.com/minio/operator/blob/v7.1.1/docs/tenant_crd.adoc) for the upstream CRD contract.
 
 <a id="minio-operator-prerequisites"></a>
 
@@ -27,7 +26,7 @@ See the MinIO Operator [CRD Reference](https://github.com/minio/operator/blob/ma
 
 ### Kubernetes Version {#kubernetes-version}
 
-MinIO supports [maintained Kubernetes APIs](https://kubernetes.io/releases/) for deploying the Operator.
+The archived v7.1.1 README requires Kubernetes 1.30.0 or later. Use a currently maintained Kubernetes release whose APIs remain compatible, and validate the exact combination in your own cluster. See the [maintained Kubernetes releases](https://kubernetes.io/releases/) and the [Operator v7.1.1 release](https://github.com/minio/operator/releases/tag/v7.1.1); Silo does not publish a broader Kubernetes support matrix.
 
 Kubernetes infrastructure running end-of-life API versions may exhibit unexpected or undesired behavior if used for deploying the Operator.
 
@@ -37,7 +36,7 @@ Kubernetes infrastructure running end-of-life API versions may exhibit unexpecte
 
 This procedure assumes that your local host machine has both the matching version of `kubectl` for your Kubernetes cluster *and* the necessary access to that cluster to create new resources.
 
-The [default MinIO Operator Kustomize template](https://github.com/minio/operator/blob/master/kustomization.yaml) provides a starting point for customizing configurations for your local environment. You can modify the default Kustomization file or apply your own [patches](https://datatracker.ietf.org/doc/html/rfc6902) to customize the Operator deployment for your Kubernetes cluster.
+The pinned [MinIO Operator v7.1.1 Kustomize template](https://github.com/minio/operator/blob/v7.1.1/kustomization.yaml) provides a reproducible starting point. You can modify that Kustomization file or apply your own [patches](https://datatracker.ietf.org/doc/html/rfc6902) for your cluster. Do not infer that a newer supported upstream release exists; review any fork or replacement independently.
 
 <a id="minio-k8s-deploy-operator-tls"></a>
 
@@ -46,7 +45,7 @@ The [default MinIO Operator Kustomize template](https://github.com/minio/operato
 The MinIO Operator manages TLS Certificate Signing Requests (CSR) using the Kubernetes `certificates.k8s.io` [TLS certificate management API](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/) to create signed TLS certificates in the following circumstances:
 
 - When `autoCert` is enabled.
-- For the MinIO Console when the [`MINIO_CONSOLE_TLS_ENABLE`](/reference/operator-environment-variables/#envvar.MINIO_CONSOLE_TLS_ENABLE) environment variable is set to `on`.
+- For the Tenant Console when the [`MINIO_CONSOLE_TLS_ENABLE`](/reference/operator-environment-variables/#envvar.MINIO_CONSOLE_TLS_ENABLE) environment variable is set to `on`.
 - For [STS service](/developers/security-token-service/#minio-security-token-service) when [`OPERATOR_STS_ENABLED`](/reference/operator-environment-variables/#envvar.OPERATOR_STS_ENABLED) environment variable is set to `on`.
 - For retrieving the health of the cluster.
 
@@ -57,7 +56,7 @@ For any of these circumstances, the MinIO Operator *requires* that the Kubernete
 - `--cluster-signing-key-file` - Specify the PEM-encoded RSA or ECDSA private key used to sign cluster-scoped certificates.
 - `--cluster-signing-cert-file` - Specify the PEM-encoded x.509 Certificate Authority certificate used to issue cluster-scoped certificates.
 
-The Kubernetes TLS API uses the CA signature algorithm for generating new TLS certificate. MinIO recommends ECDSA (e.g. [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)) or EdDSA (e.g. <a id="index-0"></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)) TLS private keys/certificates due to their lower computation requirements compared to RSA. See [Supported TLS Cipher Suites](/operations/network-encryption/#minio-tls-supported-cipher-suites) for a complete list of supported TLS Cipher Suites.
+The Kubernetes TLS API uses the CA signature algorithm when generating a new certificate. ECDSA (for example, the [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)) or EdDSA (for example, <a id="index-0"></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)) can require less computation than RSA. See [Supported TLS Cipher Suites](/operations/network-encryption/#minio-tls-supported-cipher-suites) for the Silo server's supported suites.
 
 If the Kubernetes cluster is not configured to respond to a generated <abbr title="Certificate Signing Request">CSR</abbr>, the Operator cannot complete initialization. Some Kubernetes providers do not specify these configuration values by default.
 
@@ -92,9 +91,9 @@ Confirm that the output contains the highlighted lines. The output of the exampl
 {{% alert color="warning" %}}
 **Important**
 
-The MinIO Operator automatically generates TLS certificates for all MinIO Tenant pods using the specified Certificate Authority (CA). Clients external to the Kubernetes cluster must trust the Kubernetes cluster CA to connect to the MinIO Operator or MinIO Tenants.
+MinIO Operator can generate TLS certificates for Tenant pods using the specified Certificate Authority (CA). Clients external to the Kubernetes cluster must trust that CA to connect to the Silo Tenant endpoints.
 
-Clients which cannot trust the Kubernetes cluster CA can disable TLS validation for connections to the MinIO Operator or a MinIO Tenant.
+Disabling TLS validation is suitable only for controlled testing. Production clients should trust the issuing CA or use certificates issued by a CA they already trust.
 
-Alternatively, you can generate x.509 TLS certificates signed by a known and trusted CA and pass those certificates to MinIO Tenants. See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more complete documentation.
+Alternatively, generate x.509 TLS certificates signed by a known and trusted CA and pass those certificates through the Tenant CRD. See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more complete documentation.
 {{% /alert %}}

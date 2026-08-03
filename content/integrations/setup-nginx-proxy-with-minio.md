@@ -1,9 +1,9 @@
 ---
-title: "Configure NGINX Proxy for MinIO Server"
+title: "Configure NGINX Proxy for Silo Server"
 url: "/integrations/setup-nginx-proxy-with-minio/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="configure-nginx-proxy-for-minio-server"></a>

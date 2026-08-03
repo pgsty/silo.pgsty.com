@@ -1,10 +1,10 @@
 ---
 title: "Deployment Architecture"
 url: "/operations/concepts/architecture/"
-description: "Information on MinIO Deployment architecture and topology in production environments"
+description: "Silo production deployment architecture and topology"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="deployment-architecture"></a>

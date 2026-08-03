@@ -1,5 +1,5 @@
 ---
-title: "AWS CLI with MinIO Server"
+title: "AWS CLI with Silo Server"
 url: "/integrations/aws-cli-with-minio/"
 weight: 30
 minio_origin: true

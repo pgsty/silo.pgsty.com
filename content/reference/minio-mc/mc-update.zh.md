@@ -3,7 +3,7 @@ title: "mc update"
 url: "/zh/reference/minio-mc/mc-update/"
 weight: 420
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="mc-update"></a>
@@ -12,13 +12,13 @@ silo_modified: false
 
 ## 语法 {#id2}
 
-[`mc update`](#command-mc.update) 命令会自动将 **`mc`** 二进制更新到最新稳定版本。
+Pigsty 维护版客户端为保持命令行兼容而保留 [`mc update`](#command-mc.update)，但**刻意禁用了自更新**。该命令不会访问发布源、下载二进制，也不会替换已安装的 `mc`/`mcli`；它会打印错误并以状态码 `1` 退出。
 
-运行此命令等同于手动下载最新稳定版二进制文件，并使用该文件替换主机上 现有的 `mc` 安装。
+请通过[下载与安装](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
-以下命令会更新本地主机上的 **`mc`** 二进制文件：
+以下命令会报告自更新已禁用，并以状态码 `1` 退出：
 
 ```shell
 mc update
@@ -28,18 +28,21 @@ mc update
 该命令的语法如下：
 
 ```shell
-mc [GLOBALFLAGS] update
+mc [GLOBALFLAGS] update [--json] [RELEASE-URL]
 ```
 
 - 方括号 `[]` 表示可选参数。
-- 同一行中的参数彼此相互依赖。
-- 使用管道符 `|` 分隔的参数彼此互斥。
+- `RELEASE-URL` 仅为兼容性而接受，不会被访问。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 {{% /tab %}}
 {{< /tabpane >}}
 
-更新 **`minio`** 服务器二进制后，请使用 [`mc update`](#command-mc.update)， 以确保行为一致性和兼容性。
+非 JSON 模式的错误文本为：
+
+```text
+Self-update is disabled in the Pigsty mc fork; upgrade only through the Pigsty package repository or https://github.com/pgsty/mc/releases.
+```
 
 ### 全局参数 {#id3}
 
@@ -49,10 +52,10 @@ mc [GLOBALFLAGS] update
 
 *Optional*
 
-启用 [JSON lines](http://jsonlines.org/)<a id="json-lines"></a> 格式的控制台输出。
+把“更新已禁用”的错误格式化为一条 [JSON Lines](https://jsonlines.org/)<a id="json-lines"></a> 对象。该参数不会启用更新。
 
 例如：
 
 ```shell
-mc --json COMMAND
+mc update --json
 ```

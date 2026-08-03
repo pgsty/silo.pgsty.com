@@ -1,6 +1,6 @@
 ---
-title: "SILO：Pigsty 持续维护的 MinIO 社区分支"
-description: "由 Pigsty 持续维护的 MinIO 社区分支，提供安全更新、版本化发行、S3 接口兼容与现有部署的运维连续性。"
+title: "SILO：Pigsty 持续维护的 S3 兼容对象存储"
+description: "由 Pigsty 持续维护的 S3 兼容对象存储，提供安全更新、版本化发行、完整控制台与现有部署的运维连续性。"
 url: "/zh/"
 weight: 1
 type: home
@@ -23,8 +23,7 @@ silo_modified: true
 - [对象存储基础](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
 - [如何使用 JavaScript 连接到 MinIO](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
 
-MinIO 是一个 Kubernetes 原生、兼容 S3 的对象存储解决方案，旨在部署到应用所在的任何位置，包括本地环境、私有云、公有云和边缘基础设施。 MinIO 专为现代应用负载模式设计，以支持高性能分布式计算与 PB 级存储需求的结合。
-本站点提供受支持平台上 SILO 社区版对象存储部署的运维、管理和开发文档。
+Silo 是由 Pigsty 社区持续维护的 S3 兼容对象存储，为需要开放发布与安全维护路径的现有部署提供连续性。本站记录 Silo 的运维、管理、开发、下载、发布边界与兼容契约。
 
 ## 快速开始 {#id2}
 
@@ -49,10 +48,10 @@ mc stat play/mynewbucket/prefix/filename.extension
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="裸金属" %}}
-1. 下载适用于你的操作系统的 MinIO 服务端进程
+1. 下载适用于你的操作系统的 Silo 服务端
 
-   按照 [MinIO 下载页面](https://min.io/downloads?ref=docs) 中与你的操作系统对应的说明，下载并安装 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程。
-2. 创建供 MinIO 使用的文件夹
+   从[下载与安装](/zh/download/#server)选择已经公开发布的 Silo 软件包或归档，并校验摘要。可执行文件刻意保留 [`minio server`](/zh/reference/minio-server/#command-minio.server) 命令契约。
+2. 创建对象数据目录
 
    例如，在 Linux/MacOS 上创建 `~/minio` 文件夹，或在 Windows 上创建 `C:\minio`。
 3. 启动 MinIO Server
@@ -61,23 +60,12 @@ mc stat play/mynewbucket/prefix/filename.extension
 
    ```shell
    minio server ~/minio --console-address :9001
-   # For windows, use minio.exe server ~/minio --console-address :9001`
+   # Windows 请使用 minio.exe server ~/minio --console-address :9001
    ```
 
    输出中会包含 [`mc`](/zh/reference/minio-mc/#command-mc) 的连接说明，以及如何通过浏览器连接到 Console 的说明。
 {{% /tab %}}
 {{% tab header="Kubernetes" %}}
-将 [minio-dev.yaml](https://raw.githubusercontent.com/minio/docs/master/source/extra/examples/minio-dev.yaml) 下载到你的主机：
-
-```shell
-curl https://raw.githubusercontent.com/minio/docs/master/source/extra/examples/minio-dev.yaml -O
-```
-
-该文件描述了两个 Kubernetes 资源：
-
-- 一个新的命名空间 `minio-dev`，以及
-- 一个使用 Worker 节点上的驱动器或卷来提供数据服务的 MinIO Pod
-
-使用 `kubectl port-forward` 访问该 Pod，或者为该 Pod 创建 Service，以便配置 Ingress、负载均衡或其他 Kubernetes 层网络功能。
+使用 [`pgsty/minio`](https://hub.docker.com/r/pgsty/minio) 镜像，并遵循 [Silo Tenant 部署指南](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)。生产环境应固定经过测试的发布标签或摘要，不要把 `latest` 当作版本契约。
 {{% /tab %}}
 {{< /tabpane >}}

@@ -1,10 +1,10 @@
 ---
 title: "Availability and Resiliency"
 url: "/operations/concepts/availability-and-resiliency/"
-description: "Information on MinIO Availability and Resiliency features in production environments"
+description: "Silo availability and resiliency in production environments"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="availability-and-resiliency"></a>

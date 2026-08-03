@@ -1,19 +1,19 @@
 ---
-title: "MinIO Admin Client"
+title: "Silo Client Administration"
 url: "/reference/minio-mc-admin/"
 weight: 20
 icon: fa-solid fa-user-gear
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-admin-client"></a>
 
 <a id="command-mc.admin"></a>
 
-The MinIO Client [`mc`](/reference/minio-mc/#command-mc) command line tool provides the [`mc admin`](#command-mc.admin) command for performing administrative tasks on your MinIO deployments.
+The Silo client [`mc`](/reference/minio-mc/#command-mc) provides the [`mc admin`](#command-mc.admin) command for performing administrative tasks on Silo and compatible MinIO deployments.
 
-While [`mc`](/reference/minio-mc/#command-mc) supports any S3-compatible service, [`mc admin`](#command-mc.admin) *only* supports MinIO deployments.
+While [`mc`](/reference/minio-mc/#command-mc) supports general S3-compatible services, [`mc admin`](#command-mc.admin) uses MinIO-specific administration APIs and therefore only supports Silo or compatible MinIO deployments.
 
 [`mc admin`](#command-mc.admin) has the following syntax:
 
@@ -124,90 +124,7 @@ The command also supports using a private mirror server for environments where t
 
 ## Installation {#installation}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Linux" %}}
-The following commands add a *temporary* extension to your system PATH for running the `mc` utility. Defer to your operating system instructions for making permanent modifications to your system PATH.
-
-Alternatively, execute `mc` by navigating to the parent folder and running `./mc --help`
-
-**64-bit Intel**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-amd64/mc \
-  --create-dirs \
-  -o $HOME/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
-
-**64-bit PPC**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-ppc64le/mc \
-  --create-dirs \
-  -o ~/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
-
-**ARM64**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-arm64/mc \
-  --create-dirs \
-  -o ~/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
-
-{{% alert color="info" %}}
-**Install from the MinIO Download Page**
-
-MinIO does not officially publish its binaries to common Linux repositories or package managers (Ubuntu, RHEL, Archlinux/AUR). The only official source of MinIO binaries is the [MinIO Download Page](https://dl.min.io/client/mc/release/).
-
-MinIO does not recommend installation through a package manager, as upstream repositories may install the incorrect package or a renamed package.
-
-All documentation assumes the installation of the *official* `mc` client binary through the download page *only*, with no changes to binary naming.
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="macOS" %}}
-```shell
-brew install minio/stable/mc
-mc --help
-```
-{{% /tab %}}
-{{% tab header="Windows" %}}
-Open the following file in a browser:
-
-[https://dl.min.io/client/mc/release/windows-amd64/mc.exe](https://dl.min.io/client/mc/release/windows-amd64/mc.exe)
-
-Execute the file by double clicking on it, *or* by running the following in the command prompt or powershell:
-
-```powershell
-\path\to\mc.exe --help
-```
-{{% /tab %}}
-{{% tab header="Source" %}}
-Installation from source is intended for developers and advanced users and requires a working Golang environment. See [How to install Golang](https://golang.org/doc/install).
-
-Run the following commands in a terminal environment to install `mc` from source:
-
-```shell
-go install github.com/minio/mc@latest
-```
-
-[`mc update`](/reference/minio-mc/mc-update/#command-mc.update) does not support source-based installations.
-{{% /tab %}}
-{{< /tabpane >}}
+Install the maintained client from [Download & Install](/download/#client), or follow the source-build instructions in the [`mc` reference](/reference/minio-mc/#install-mc). Standalone archives and Linux packages use the `mcli` command name; substitute `mcli admin` for `mc admin` in the examples when that is the installed name.
 
 ## Quickstart {#quickstart}
 

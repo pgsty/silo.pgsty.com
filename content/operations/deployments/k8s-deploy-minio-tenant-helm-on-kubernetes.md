@@ -1,9 +1,9 @@
 ---
-title: "Deploy a MinIO Tenant with Helm Charts"
+title: "Deploy a Silo Tenant with Helm Charts"
 url: "/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="deploy-a-minio-tenant-with-helm-charts"></a>
@@ -18,11 +18,7 @@ This procedure requires the Kubernetes cluster have a valid [Operator](/operatio
 {{% alert color="warning" %}}
 **Important**
 
-The MinIO Operator Tenant Chart is *distinct* from the community-managed [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio).
-
-The Community Helm Chart is built, maintained, and supported by the community. MinIO does not guarantee support for any given bug, feature request, or update referencing that chart.
-
-The [Operator Tenant Chart](/reference/tenant-chart-values/#minio-tenant-chart-values) is officially maintained and supported by MinIO. MinIO strongly recommends the official Helm Chart for [Operator](/reference/operator-chart-values/#minio-operator-chart-values) and [Tenants](/reference/tenant-chart-values/#minio-tenant-chart-values) for production environments.
+The MinIO Operator Tenant Chart is distinct from the server repository's legacy community [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio). This guide uses the Operator Tenant Chart because it exposes an explicit Tenant image override. The upstream Operator repository was archived on March 20, 2026, so this guide pins its final `v7.1.1` chart as a frozen compatibility baseline. Silo does not inherit upstream vendor support commitments.
 {{% /alert %}}
 
 ## Prerequisites {#prerequisites}
@@ -39,7 +35,7 @@ This procedure assumes your Kubernetes cluster access grants you broad administr
 
 For more about Tenant installation requirements, including supported Kubernetes versions and TLS certificates, see the [Tenant deployment prerequisites](/operations/checklists/hardware/#minio-hardware-checklist-storage).
 
-This procedure assumes familiarity the with referenced Kubernetes concepts and utilities. While this documentation may provide guidance for configuring or deploying Kubernetes-related resources on a best-effort basis, it is not a replacement for the official [Kubernetes Documentation](https://kubernetes.io/docs/).
+This procedure assumes familiarity with the referenced Kubernetes concepts and utilities. While this documentation may provide guidance for configuring or deploying Kubernetes-related resources on a best-effort basis, it is not a replacement for the official [Kubernetes Documentation](https://kubernetes.io/docs/).
 
 ### Namespace {#namespace}
 
@@ -47,11 +43,11 @@ The tenant must use its own namespace and cannot share a namespace with another 
 
 <a id="deploy-tenant-helm-repo"></a>
 
-## Deploy a MinIO Tenant using Helm Charts {#deploy-a-minio-tenant-using-helm-charts}
+## Deploy a Silo Tenant using Helm Charts {#deploy-a-minio-tenant-using-helm-charts}
 
 The following procedure deploys a MinIO Tenant using the MinIO Operator Chart Repository. This method supports a simplified installation path compared to the [local chart installation](#deploy-tenant-helm-local).
 
-The following procedure uses Helm to deploy a MinIO Tenant using the official MinIO Tenant Chart.
+The following procedure uses Helm to deploy a MinIO Tenant with the archived upstream Tenant Chart at `v7.1.1`.
 
 {{% alert color="warning" %}}
 **Important**
@@ -63,7 +59,7 @@ This procedure is not exhaustive of all possible configuration options available
 
 1. Verify your MinIO Operator Repo Configuration
 
-   MinIO maintains a Helm-compatible repository at [https://operator.min.io](https://operator.min.io). If the repository does not already exist in your local Helm configuration, add it before continuing:
+   The archived project's endpoint at [https://operator.min.io](https://operator.min.io) currently serves the `v7.1.1` chart. If the repository does not already exist in your local Helm configuration, add it before continuing:
 
    ```shell
    helm repo add minio-operator https://operator.min.io
@@ -86,10 +82,23 @@ This procedure is not exhaustive of all possible configuration options available
 2. Create a local copy of the Helm `values.yaml` for modification
 
    ```shell
-   curl -sLo values.yaml https://raw.githubusercontent.com/minio/operator/master/helm/tenant/values.yaml
+   curl -sLo values.yaml https://raw.githubusercontent.com/minio/operator/v7.1.1/helm/tenant/values.yaml
    ```
 
-   Open the `values.yaml` object in your preferred text editor.
+   Open `values.yaml` in your preferred text editor. Before continuing, replace the upstream server image defaults and disable the inherited in-place updater:
+
+   ```yaml
+   tenant:
+     image:
+       repository: pgsty/minio
+       tag: RELEASE.2026-06-18T00-00-00Z
+       pullPolicy: IfNotPresent
+     env:
+       - name: MINIO_UPDATE
+         value: "off"
+   ```
+
+   Use a newer tag only after it is published on the [Silo download page](/download/#server) and validated for your deployment. Do not leave `quay.io/minio/minio` or `latest` in a Silo production values file.
 3. Configure the Tenant topology
 
    The following fields share the `tenant.pools[0]` prefix and control the number of servers, volumes per server, and storage class of all pods deployed in the Tenant:
@@ -109,7 +118,7 @@ This procedure is not exhaustive of all possible configuration options available
        <tr>
          <td><p><code>volumesPerServer</code></p></td>
          <td><p>The number of persistent volumes to attach to each MinIO pod (<code>servers</code>).
-   The Operator generates <code>volumesPerServer x servers</code> Persistant Volume Claims for the Tenant.</p></td>
+   The Operator generates <code>volumesPerServer x servers</code> Persistent Volume Claims for the Tenant.</p></td>
        </tr>
        <tr>
          <td><p><code>storageClassName</code></p></td>
@@ -161,9 +170,9 @@ This procedure is not exhaustive of all possible configuration options available
        </tr>
      </tbody>
    </table>
-6. Configure MinIO Environment Variables
+6. Configure Silo Environment Variables
 
-   You can set MinIO Server environment variables using the `tenant.configuration` field.
+   You can set the server's `MINIO_*` environment variables using the `tenant.configuration` field. These names are MinIO-compatible contracts and must not be renamed.
 
    <table>
      <thead>
@@ -192,6 +201,7 @@ This procedure is not exhaustive of all possible configuration options available
    helm install \
    --namespace TENANT-NAMESPACE \
    --create-namespace \
+   --version 7.1.1 \
    --values values.yaml \
    TENANT-NAME minio-operator/tenant
    ```
@@ -235,15 +245,16 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
 
 1. Download the Helm charts
 
-   On your local host, download the Tenant Helm charts to a convenient directory:
+   On your local host, pull the pinned Tenant chart and extract its default values into a separate override file:
 
    ```shell
-   curl -O https://raw.githubusercontent.com/minio/operator/master/helm-releases/tenant-7.1.1.tgz
+   helm pull minio-operator/tenant --version 7.1.1
+   helm show values tenant-7.1.1.tgz > values.yaml
    ```
 
    Each chart contains a `values.yaml` file you can customize to suit your needs. For details on the options available in the MinIO Tenant `values.yaml`, see [Tenant Helm Charts](/reference/tenant-chart-values/#minio-tenant-chart-values).
 
-   Open the `values.yaml` object in your preferred text editor.
+   Open `values.yaml` in your preferred text editor. Set `tenant.image.repository` to `pgsty/minio`, pin `tenant.image.tag` to a published Silo release, and add `MINIO_UPDATE=off` to `tenant.env`, exactly as shown in the [repository-based procedure](#deploy-tenant-helm-repo).
 2. Configure the Tenant topology
 
    The following fields share the `tenant.pools[0]` prefix and control the number of servers, volumes per server, and storage class of all pods deployed in the Tenant:
@@ -263,7 +274,7 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
        <tr>
          <td><p><code>volumesPerServer</code></p></td>
          <td><p>The number of persistent volumes to attach to each MinIO pod (<code>servers</code>).
-   The Operator generates <code>volumesPerServer x servers</code> Persistant Volume Claims for the Tenant.</p></td>
+   The Operator generates <code>volumesPerServer x servers</code> Persistent Volume Claims for the Tenant.</p></td>
        </tr>
        <tr>
          <td><p><code>storageClassName</code></p></td>
@@ -295,21 +306,22 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
    | `tenant.certificate.certConfig` | Controls the settings for [automatic TLS](/operations/network-encryption/#minio-tls). Requires `spec.requestAutoCert: true` |
    | `tenant.certificate.externalCertSecret` | Specify one or more Kubernetes secrets of type `kubernetes.io/tls` or `cert-manager`. MinIO uses these certificates for performing TLS handshakes based on hostname (Server Name Indication). |
    | `tenant.certificate.externalCACertSecret` | Specify one or more Kubernetes secrets of type `kubernetes.io/tls` with the Certificate Authority (CA) chains which the Tenant must trust for allowing client TLS connections. |
-5. Configure MinIO Environment Variables
+5. Configure Silo Environment Variables
 
-   You can set MinIO Server environment variables using the `tenant.configuration` field.
+   You can set the server's `MINIO_*` environment variables using the `tenant.configuration` field. These names remain compatibility contracts.
 
    The field must specify a Kubernetes opaque secret whose data payload `config.env` contains each MinIO environment variable you want to set.
 
    The YAML includes an object `kind: Secret` with `metadata.name: storage-configuration` that sets the root username, password, erasure parity settings, and enables Tenant Console.
 
    Modify this as needed to reflect your Tenant requirements.
-6. The following Helm command creates a MinIO Tenant using the standard chart:
+6. The following Helm command creates a Silo Tenant using the pinned local chart and reviewed values:
 
    ```shell
    helm install \
    --namespace TENANT-NAMESPACE \
    --create-namespace \
+   --values values.yaml \
    TENANT-NAME tenant-7.1.1.tgz
    ```
 
@@ -329,9 +341,7 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
      mc alias set myminio https://localhost:9000 minio minio123 --insecure
      ```
 
-     This example uses the non-TLS `myminio-hl` service, which requires the `--insecure` option..
-
-     If you have a TLS cert configured, omit `--insecure` and use `svc/minio` instead.
+     This example uses HTTPS with a certificate that the local client may not trust, so it includes `--insecure`. If the Tenant presents a certificate trusted by the client, omit that flag. Confirm the service name generated for your Tenant instead of assuming a fixed `svc/minio` name.
 
    You can use [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb) to create a bucket on the Tenant:
 

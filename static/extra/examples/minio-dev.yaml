@@ -1,4 +1,4 @@
-# Deploys a new Namespace for the MinIO Pod
+# Deploys a namespace for a development Silo pod.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -6,7 +6,7 @@ metadata:
   labels:
     name: minio-dev # Change this value to match metadata.name
 ---
-# Deploys a new MinIO Pod into the metadata.namespace Kubernetes namespace
+# Deploys a Silo pod into the metadata.namespace Kubernetes namespace.
 #
 # The `spec.containers[0].args` contains the command run on the pod
 # The `/data` directory corresponds to the `spec.containers[0].volumeMounts[0].mountPath`
@@ -22,7 +22,10 @@ metadata:
 spec:
   containers:
   - name: minio
-    image: quay.io/minio/minio:latest
+    image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+    env:
+    - name: MINIO_UPDATE
+      value: "off"
     command:
     - /bin/bash
     - -c
@@ -35,6 +38,6 @@ spec:
     kubernetes.io/hostname: kubealpha.local # Specify a node label associated to the Worker Node on which you want to deploy the pod.
   volumes:
   - name: localvolume
-    hostPath: # MinIO generally recommends using locally-attached volumes
+    hostPath: # Prefer locally attached storage for this development example.
       path: /mnt/disk1/data # Specify a path to a local drive or volume on the Kubernetes worker node
       type: DirectoryOrCreate # The path to the last directory must exist

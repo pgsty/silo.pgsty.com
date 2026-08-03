@@ -222,6 +222,7 @@
 docker run -d --name silo --restart unless-stopped \
   -p 9000:9000 -p 9001:9001 \
   -v /data/minio:/data \
+  -e MINIO_UPDATE=off \
   -e MINIO_ROOT_USER=silo-admin \
   -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
   pgsty/minio:latest server /data --console-address :9001</code></pre>
@@ -230,7 +231,7 @@ docker run -d --name silo --restart unless-stopped \
                     <a class="btn btn-primary" href="https://hub.docker.com/r/pgsty/minio" target="_blank" rel="noopener"><i class="fab fa-docker" aria-hidden="true"></i> Docker Hub</a>
                     <a class="btn btn-line" href="{{ relLangURL "operations/deployments/baremetal-deploy-minio-as-a-container/" }}">{{ if $zh }}容器部署文档{{ else }}Container guide{{ end }} →</a>
                   </div>
-                  <div class="security-note"><i class="fas fa-shield-halved" aria-hidden="true"></i><span>{{ if $zh }}默认示例凭据仅用于本地测试；上线前启用 TLS、唯一强凭据并验证恢复流程。{{ else }}Example credentials are for local testing only. Enable TLS, use unique strong credentials, and test recovery before production.{{ end }}</span></div>
+                  <div class="security-note"><i class="fas fa-shield-halved" aria-hidden="true"></i><span>{{ if $zh }}默认示例凭据仅用于本地测试；上线前启用 TLS、唯一强凭据并验证恢复流程。<code>MINIO_UPDATE=off</code> 禁用会指向上游 MinIO 的原地更新路径；请通过替换已验证镜像升级。{{ else }}Example credentials are for local testing only. Enable TLS, use unique strong credentials, and test recovery before production. <code>MINIO_UPDATE=off</code> disables the in-place path that still targets upstream MinIO; upgrade by replacing the image with a verified Silo build.{{ end }}</span></div>
                 </div>
               </div>
             </section>
@@ -249,13 +250,16 @@ docker run -d --name silo --restart unless-stopped \
   image:
     repository: pgsty/minio
     tag: latest
-    pullPolicy: IfNotPresent</code></pre>
+    pullPolicy: IfNotPresent
+  env:
+    - name: MINIO_UPDATE
+      value: "off"</code></pre>
                   </div>
                   <div class="method-actions">
                     <a class="btn btn-primary" href="{{ relLangURL "operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/" }}"><i class="fas fa-book-open" aria-hidden="true"></i> {{ if $zh }}Tenant 部署文档{{ else }}Tenant deployment guide{{ end }}</a>
-                    <a class="btn btn-line" href="https://github.com/minio/operator/tree/master/helm/tenant" target="_blank" rel="noopener">{{ if $zh }}查看 Helm Chart{{ else }}View Helm chart{{ end }} ↗</a>
+                    <a class="btn btn-line" href="https://github.com/minio/operator/tree/v7.1.1/helm/tenant" target="_blank" rel="noopener">{{ if $zh }}查看 Helm Chart{{ else }}View Helm chart{{ end }} ↗</a>
                   </div>
-                  <div class="security-note"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>{{ if $zh }}示例中的 <code>latest</code> 仅用于演示。生产环境应固定已验证的标签或摘要，并在安装前检查存储池、StorageClass、反亲和、TLS 与租户凭据。{{ else }}The <code>latest</code> tag is illustrative. In production, pin a tested tag or digest and review pools, StorageClass, anti-affinity, TLS, and tenant credentials before installation.{{ end }}</span></div>
+                  <div class="security-note"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>{{ if $zh }}示例中的 <code>latest</code> 仅用于演示。生产环境应固定已验证的标签或摘要，并在安装前检查存储池、StorageClass、反亲和、TLS 与租户凭据。<code>MINIO_UPDATE=off</code> 避免 Operator 管理的容器通过上游更新源原地替换二进制。上游 Operator 仓库已归档；请将 <code>v7.1.1</code> 视为冻结的兼容基线。{{ else }}The <code>latest</code> tag is illustrative. In production, pin a tested tag or digest and review pools, StorageClass, anti-affinity, TLS, and tenant credentials before installation. <code>MINIO_UPDATE=off</code> prevents an Operator-managed container from replacing its binary through the upstream update feed. The upstream Operator repository is archived; treat <code>v7.1.1</code> as a frozen compatibility baseline.{{ end }}</span></div>
                 </div>
               </div>
             </section>

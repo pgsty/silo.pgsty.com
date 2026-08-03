@@ -1,9 +1,9 @@
 ---
-title: "Monitor a MinIO Server with Grafana"
+title: "Monitor a Silo Server with Grafana"
 url: "/operations/monitoring/grafana/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="monitor-a-minio-server-with-grafana"></a>

@@ -1,10 +1,10 @@
 ---
 title: "Erasure Coding"
 url: "/operations/concepts/erasure-coding/"
-description: "Information on MinIO Erasure Coding"
+description: "Silo erasure coding"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="erasure-coding"></a>

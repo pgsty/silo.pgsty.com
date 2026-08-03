@@ -9,9 +9,13 @@ silo_modified: true
 <a id="helm-charts"></a>
 <a id="minio-tenant-chart-values"></a>
 
-MinIO 为 [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/helm/operator) 和 [Helm Tenant Charts](https://github.com/minio/operator/tree/v7.1.1/helm/tenant) 发布了 [Helm Charts](https://github.com/minio/operator/tree/v7.1.1/helm)。 你可以使用这些 Chart 通过 Helm 部署 MinIO Operator 和受管租户。
+已归档的 MinIO Operator 项目曾发布 [Operator Chart](https://github.com/minio/operator/tree/v7.1.1/helm/operator) 与 [Tenant Chart](https://github.com/minio/operator/tree/v7.1.1/helm/tenant)。本页记录其最终 `v7.1.1` Tenant Chart。
 
 以下页面说明 MinIO 租户的 `values.yaml` Chart。 有关 MinIO Operator Chart 的文档，请参阅 [Operator Helm 图表](/zh/reference/operator-chart-values/#minio-operator-chart-values)
+
+{{% alert color="warning" %}}
+上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。本页是其最终 `v7.1.1` Chart 的保留参考快照，不代表上游仍在维护或提供支持。默认值已对照该标签核验；内部文档链接改为本站路由，并把上游陈旧的 `existingSecret` 注释校正为 Chart 实际使用的 `tenant.configSecret.name` 输入。下文的 `quay.io/minio/minio` 是上游 Chart 默认值，不是 Silo 品牌名称，也不是推荐的 Silo 镜像。要运行 Silo，请将 `tenant.image.repository` 覆盖为 `pgsty/minio`，并固定经过测试的 [已发布标签或镜像摘要](/zh/download/#server)。
+{{% /alert %}}
 
 <a id="minio-tenant-chart-operator-values"></a>
 
@@ -29,12 +33,12 @@ MinIO 为 [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/h
 >
 > **image**
 >
-> > Specify the Operator container image to use for the deployment. `image.tag` For example, the following sets the image to the `quay.io/minio/operator` repo and the v7.0.0 tag. The container pulls the image if not already present:
+> > Specify the Operator container image to use for the deployment. `image.tag` For example, the following sets the image to the `quay.io/minio/operator` repo and the v7.1.1 tag. The container pulls the image if not already present:
 > >
 > > ```yaml
 > > image:
 > >    repository: quay.io/minio/minio
-> >    tag: RELEASE.2024-11-07T00-52-20Z
+> >    tag: RELEASE.2025-04-08T15-41-24Z
 > >    pullPolicy: IfNotPresent
 > > ```
 > >
@@ -80,13 +84,10 @@ MinIO 为 [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/h
 > >
 > > Specify an empty dictionary `{}` to dispatch pods with the default scheduler.
 >
-> **configuration**
->
-> > The Kubernetes secret name that contains MinIO environment variable configurations. The secret is expected to have a key named config.env containing environment variables exports.
->
 > **configSecret**
 >
 > > Root key for dynamically creating a secret for use with configuring root MinIO User Specify the `name` and then a list of environment variables.
+> > 若要复用包含 `config.env` 的现有 Secret，请将 `tenant.configSecret.name` 设为该 Secret，并把 `tenant.configSecret.existingSecret` 设为 `true`。
 > >
 > > {{% alert color="warning" %}}
 > > **重要**
@@ -99,7 +100,7 @@ MinIO 为 [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/h
 > > ```yaml
 > > name: myminio-env-configuration
 > > accessKey: minio
-> >   secretKey: minio123
+> > secretKey: minio123
 > > ```
 >
 > **poolsMetadata**
@@ -372,14 +373,14 @@ tenant:
   ###
   # Specify the Operator container image to use for the deployment.
   # ``image.tag`` 
-  # For example, the following sets the image to the ``quay.io/minio/operator`` repo and the v7.0.0 tag.
+  # For example, the following sets the image to the ``quay.io/minio/operator`` repo and the v7.1.1 tag.
   # The container pulls the image if not already present:
   #
   # .. code-block:: yaml
   # 
   #    image:
   #       repository: quay.io/minio/minio
-  #       tag: RELEASE.2024-11-07T00-52-20Z
+  #       tag: RELEASE.2025-04-08T15-41-24Z
   #       pullPolicy: IfNotPresent
   #
   # The chart also supports specifying an image based on digest value:
@@ -394,7 +395,7 @@ tenant:
   #
   image:
     repository: quay.io/minio/minio
-    tag: RELEASE.2024-11-07T00-52-20Z
+    tag: RELEASE.2025-04-08T15-41-24Z
     pullPolicy: IfNotPresent
   ###
   #
@@ -431,11 +432,6 @@ tenant:
   # Specify an empty dictionary ``{}`` to dispatch pods with the default scheduler.
   scheduler: { }
   ###
-  # The Kubernetes secret name that contains MinIO environment variable configurations.
-  # The secret is expected to have a key named config.env containing environment variables exports.
-  configuration:
-    name: myminio-env-configuration
-  ###
   # Root key for dynamically creating a secret for use with configuring root MinIO User
   # Specify the ``name`` and then a list of environment variables.
   #
@@ -450,7 +446,7 @@ tenant:
   #
   #    name: myminio-env-configuration
   #    accessKey: minio
-  #      secretKey: minio123
+  #    secretKey: minio123
   #
   configSecret:
     name: myminio-env-configuration
@@ -470,7 +466,7 @@ tenant:
 
   ###
   # If this variable is set to true, then enable the usage of an existing Kubernetes secret to set environment variables for the Tenant.
-  # The existing Kubernetes secret name must be placed under .tenant.configuration.name e.g. existing-minio-env-configuration
+  # Set the existing Kubernetes secret name under .tenant.configSecret.name, for example existing-minio-env-configuration.
   # The secret must contain a key ``config.env``.
   # The values should be a series of export statements to set environment variables for the Tenant.
   # For example:
@@ -750,14 +746,14 @@ tenant:
   #  # Image from tag (original behavior), for example:
   #  # image:
   #  #   repository: quay.io/minio/kes
-  #  #   tag: 2024-11-25T13-44-31Z
+  #  #   tag: 2025-03-12T09-35-18Z
   #  # Image from digest (added after original behavior), for example:
   #  # image:
   #  #   repository: quay.io/minio/kes@sha256
   #  #   digest: fb15af611149892f357a8a99d1bcd8bf5dae713bd64c15e6eb27fbdb88fc208b
   #  image:
   #    repository: quay.io/minio/kes
-  #    tag: 2024-11-25T13-44-31Z
+  #    tag: 2025-03-12T09-35-18Z
   #    pullPolicy: IfNotPresent
   #  env: [ ]
   #  replicas: 2

@@ -1,5 +1,5 @@
 ---
-title: "在 RedHat Linux 上部署 MinIO"
+title: "在 RHEL 兼容 Linux 上部署 Silo"
 url: "/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/"
 weight: 10
 minio_origin: true
@@ -9,16 +9,9 @@ silo_modified: true
 <a id="redhat-linux-minio"></a>
 <a id="deploy-minio-rhel"></a>
 
-本页介绍如何在 RedHat Linux 操作系统上部署 MinIO，包括与 RHEL 二进制兼容的发行版。 本页不特别区分 RHEL 与这些发行版；为 RHEL 提供的指导通常也适用于这些发行版。
+本页介绍如何在 RHEL 及其二进制兼容 Linux 发行版上部署 Silo。
 
-MinIO 强烈建议生产部署使用处于 Red Hat 生命周期 **Full Support** 或 **Maintenance Support** 阶段的 RHEL 版本。 在撰写本文时，包括：
-
-- RHEL 9.5+（**推荐**）
-- RHEL 8.10+
-
-你的组织应具备与 Red Hat 相关的必要服务合同，以确保部署获得端到端支持。
-
-MinIO *可能* 也能在不再受 Red Hat Linux 支持的 RHEL 版本上运行，但 MinIO 或 RedHat 仅能提供有限的支持或故障排查。
+Silo 为 x86-64 与 ARM64 发布 RPM 软件包和独立 Linux 归档。项目没有单独发布 RHEL 支持生命周期矩阵，因此已删除继承文档中的时间点版本清单。请选择仍处于发行商支持期内的版本，保持内核与系统库更新，并在生产使用前验证精确的存储与工作负载配置。
 
 本步骤重点介绍生产级 多机多盘 (MNMD)“Distributed”配置。 <abbr title="多机多盘">MNMD</abbr> 部署可提供企业级性能、可用性和可扩展性，是所有生产工作负载的推荐拓扑。
 
@@ -50,37 +43,15 @@ MinIO 建议在存储使用率达到 70% 之前，预先规划足以存放 **至
 
 ## 步骤 {#id6}
 
-### 1. 下载 MinIO RPM 包 {#minio-rpm}
+### 1. 下载 Silo RPM 包 {#minio-rpm}
 
-MinIO 为以下架构提供构建：
+从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 RPM，校验发布摘要后安装：
 
-- AMD64
-- ARM64
-- PowerPC 64 LE
-- S390X
-
-使用以下命令下载适用于主机架构的最新稳定版 MinIO RPM 并完成安装。
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="AMD64" %}}
 ```shell
-wget RPMURL -O minio.rpm
-sudo dnf install minio.rpm
+sudo dnf install ./minio-*.rpm
 ```
-{{% /tab %}}
-{{% tab header="ARM64" %}}
-```shell
-wget RPMARM64URL -O minio.rpm
-sudo dnf install minio.rpm
-```
-{{% /tab %}}
-{{% tab header="PPC64LE" %}}
-```shell
-wget RPMPPC64LEURL -O minio.rpm
-sudo dnf install minio.rpm
-```
-{{% /tab %}}
-{{< /tabpane >}}
+
+当前 Silo 发布不提供继承文档中提到的 `ppc64le` 或 `s390x` 软件包变体。
 
 ### 2. 查看 `systemd` 服务文件 {#systemd}
 
@@ -95,6 +66,8 @@ After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio
 
 [Service]
+Type=notify
+
 WorkingDirectory=/usr/local
 
 User=minio-user
@@ -102,25 +75,26 @@ Group=minio-user
 ProtectProc=invisible
 
 EnvironmentFile=-/etc/default/minio
-ExecStartPre=/bin/bash -c "if [ -z \"${MINIO_VOLUMES}\" ]; then echo \"Variable MINIO_VOLUMES not set in /etc/default/minio\"; exit 1; fi"
 ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
-
-# MinIO RELEASE.2023-05-04T21-44-30Z adds support for Type=notify (https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=)
-# This may improve systemctl setups where other services use `After=minio.server`
-# Uncomment the line to enable the functionality
-# Type=notify
 
 # Let systemd restart this service always
 Restart=always
 
 # Specifies the maximum file descriptor number that can be opened by this process
-LimitNOFILE=65536
+LimitNOFILE=1048576
+
+# Turn-off memory accounting by systemd, which is buggy.
+MemoryAccounting=no
 
 # Specifies the maximum number of threads this process can create
 TasksMax=infinity
 
 # Disable timeout logic and wait until process is stopped
-TimeoutStopSec=infinity
+TimeoutSec=infinity
+
+# Disable killing of MinIO by the kernel's OOM killer
+OOMScoreAdjust=-1000
+
 SendSIGKILL=no
 
 [Install]

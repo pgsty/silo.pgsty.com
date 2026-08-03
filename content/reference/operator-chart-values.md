@@ -3,15 +3,19 @@ title: "Operator Helm Charts"
 url: "/reference/operator-chart-values/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="operator-helm-charts"></a>
 <a id="minio-operator-chart-values"></a>
 
-MinIO publishes [Helm Charts](https://github.com/minio/operator/tree/v7.1.1/helm) for the [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/helm/operator) and [Helm Tenant Charts](https://github.com/minio/operator/tree/v7.1.1/helm/tenant). You can use these charts to deploy the MinIO Operator and managed Tenants through Helm.
+The archived MinIO Operator project published an [Operator Chart](https://github.com/minio/operator/tree/v7.1.1/helm/operator) and [Tenant Chart](https://github.com/minio/operator/tree/v7.1.1/helm/tenant). This page documents its final `v7.1.1` Operator Chart.
 
 The following page documents the `values.yaml` chart for the MinIO Operator. For documentation on the chart for a MinIO Tenant, see [Tenant Helm Charts](/reference/tenant-chart-values/#minio-tenant-chart-values)
+
+{{% alert color="warning" %}}
+The upstream MinIO Operator repository was archived on March 20, 2026. Treat these values as a frozen `v7.1.1` reference snapshot, not as evidence of ongoing upstream maintenance or support.
+{{% /alert %}}
 
 <a id="minio-operator-chart-operator-values"></a>
 
@@ -39,16 +43,16 @@ The following page documents the `values.yaml` chart for the MinIO Operator. For
 > >   value: "OpenShift"
 > > ```
 > >
-> > See [Operator environment variables](https://github.com/minio/operator/blob/master/docs/env-variables.md) for a list of all supported values.
+> > See [Operator environment variables](https://github.com/minio/operator/blob/v7.1.1/docs/env-variables.md) for a list of all supported values.
 >
 > **image**
 >
-> > Specify the Operator container image to use for the deployment. `image.tag` For example, the following sets the image to the `quay.io/minio/operator` repo and the v7.0.0 tag. The container pulls the image if not already present:
+> > Specify the Operator container image to use for the deployment. `image.tag` For example, the following sets the image to the `quay.io/minio/operator` repo and the v7.1.1 tag. The container pulls the image if not already present:
 > >
 > > ```yaml
 > > image:
 > >   repository: quay.io/minio/operator
-> >   tag: v7.0.0
+> >   tag: v7.1.1
 > >   pullPolicy: IfNotPresent
 > > ```
 > >
@@ -63,12 +67,12 @@ The following page documents the `values.yaml` chart for the MinIO Operator. For
 >
 > **sidecarImage**
 >
-> > Specify the sidecar container image to deploy on tenant pods for init container and sidecar. Only need to change this if want to use a different version that the default, or want to set a custom registry. `sidecarImage.tag` For example, the following sets the image to the `quay.io/minio/operator-sidecar` repo and the v7.0.0 tag. The container pulls the image if not already present:
+> > Specify the sidecar container image to deploy on tenant pods for init container and sidecar. Only need to change this if want to use a different version that the default, or want to set a custom registry. `sidecarImage.tag` For example, the following sets the image to the `quay.io/minio/operator-sidecar` repo and the v7.1.1 tag. The container pulls the image if not already present:
 > >
 > > ```yaml
 > > sidecarImage:
 > >   repository: quay.io/minio/operator-sidecar
-> >   tag: v7.0.0
+> >   tag: v7.1.1
 > >   pullPolicy: IfNotPresent
 > > ```
 > >
@@ -186,7 +190,7 @@ operator:
   #    - name: MINIO_OPERATOR_RUNTIME
   #      value: "OpenShift"
   #
-  # See `Operator environment variables <https://github.com/minio/operator/blob/master/docs/env-variables.md>`__ for a list of all supported values.
+  # See `Operator environment variables <https://github.com/minio/operator/blob/v7.1.1/docs/env-variables.md>`__ for a list of all supported values.
   env:
     - name: OPERATOR_STS_ENABLED
       value: "on"
@@ -197,14 +201,14 @@ operator:
   ###
   # Specify the Operator container image to use for the deployment.
   # ``image.tag``
-  # For example, the following sets the image to the ``quay.io/minio/operator`` repo and the v7.0.0 tag.
+  # For example, the following sets the image to the ``quay.io/minio/operator`` repo and the v7.1.1 tag.
   # The container pulls the image if not already present:
   #
   # .. code-block:: yaml
   #
   #    image:
   #      repository: quay.io/minio/operator
-  #      tag: v7.0.0
+  #      tag: v7.1.1
   #      pullPolicy: IfNotPresent
   #
   # The chart also supports specifying an image based on digest value:
@@ -218,20 +222,20 @@ operator:
   #
   image:
     repository: quay.io/minio/operator
-    tag: v7.0.0
+    tag: v7.1.1
     pullPolicy: IfNotPresent
   ###
   # Specify the sidecar container image to deploy on tenant pods for init container and sidecar.
   # Only need to change this if want to use a different version that the default, or want to set a custom registry.
   # ``sidecarImage.tag``
-  # For example, the following sets the image to the ``quay.io/minio/operator-sidecar`` repo and the v7.0.0 tag.
+  # For example, the following sets the image to the ``quay.io/minio/operator-sidecar`` repo and the v7.1.1 tag.
   # The container pulls the image if not already present:
   #
   # .. code-block:: yaml
   #
   #    sidecarImage:
   #      repository: quay.io/minio/operator-sidecar
-  #      tag: v7.0.0
+  #      tag: v7.1.1
   #      pullPolicy: IfNotPresent
   #
   # The chart also supports specifying an image based on digest value:

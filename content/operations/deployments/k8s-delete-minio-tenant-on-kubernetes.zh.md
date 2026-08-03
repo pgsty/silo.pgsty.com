@@ -1,9 +1,9 @@
 ---
-title: "删除 MinIO Tenant"
+title: "删除 Silo Tenant"
 url: "/zh/operations/deployments/k8s-delete-minio-tenant-on-kubernetes/"
 weight: 60
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-tenant"></a>
@@ -13,7 +13,7 @@ silo_modified: false
 
 ### MinIO Kubernetes Operator {#minio-kubernetes-operator}
 
-本页步骤 *要求* 已正确安装 MinIO Kubernetes Operator，并假定本地主机也安装了与之匹配的 MinIO Kubernetes Operator。 本步骤默认使用最新稳定版 Operator，即版本 7.1.1。
+本页步骤 *要求* 已正确安装 MinIO Kubernetes Operator，并假定本地主机也安装了与之匹配的 Operator。本页使用仓库归档前的最终上游版本 `v7.1.1`，仅作为冻结的兼容基线。
 
 有关部署 MinIO Operator 的完整文档，请参阅 [在 Kubernetes 上部署 MinIO](/zh/operations/deployments/kubernetes/#deploy-operator-kubernetes)。
 

@@ -1,5 +1,5 @@
 ---
-title: "Modify a MinIO Tenant"
+title: "Modify a Silo Tenant"
 url: "/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/"
 weight: 30
 minio_origin: true

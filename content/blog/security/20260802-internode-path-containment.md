@@ -10,7 +10,7 @@ draft: true
 url: "/blog/security/internode-path-containment/"
 ---
 
-**Status:** Fixed, **not disclosed** (no CVE/GHSA requested; the upstream repository is archived)
+**Status:** Fixed on the local `pgsty/minio` branch, **unreleased and not disclosed** (no CVE/GHSA requested; the upstream repository is archived)
 **Affected scope:** Distributed erasure only; cluster-root / internode JWT required
 **Prerequisite reading:** [CVE-2026-42600 · ReadMultiple](/blog/security/cve-2026-42600/)
 
@@ -159,17 +159,21 @@ Our own review did find two in the same period (the `WithDeadline` log amplifica
 
 The hit rate says something plain: **the last gate before merge should be independent acceptance, not the author's own conclusion.** During this work the author judged the change ready to ship four times and was overturned three.
 
-## Still open {#open}
+## Follow-up status {#open}
 
-Listed honestly rather than folded into "fixed":
+The first draft listed two implementation gaps. Both are now closed on the local branch, but none of these follow-up commits is in a published server release as of 2026-08-03:
 
-- **`ReadFileHandler` allocates without an upper bound.** Legitimate values reach hundreds of MiB, so **no small safe cap exists**; a clean fix means stat-then-clamp and needs its own caller audit. We will not guess a bound that might reject legitimate requests inside a security patch.
-- **The metadata write path does not validate part sizes.** A malicious peer can write poisoned `xl.meta`, after which a local heal silently skips repair. The complete rule requires confirming that `Erasure.BlockSize` is always non-zero for legitimate objects, and `FileInfo.IsValid()` **does not check it**.
+- **`ReadFileHandler` is bounded.** Commit `5e11208cb` rejects a declared read length above 5 GiB, the maximum size of the S3 part represented by this legacy whole-file bitrot path. Legitimate GiB-scale reads can still allocate on that scale; the change removes caller-controlled allocation above the format's real ceiling rather than pretending large reads are cheap.
+- **Negative part sizes cannot be persisted or trusted.** Commit `ef565d013` rejects them at the `AddVersion` write funnel and again in `CheckParts` and `VerifyFile`, so both new poison and already-written metadata are covered. The internode boundary check uses the same predicate.
+- **Non-positive erasure block sizes are rejected at construction.** Commit `052d2a11b` validates `blockSize` in `NewErasure`, covering the other offset and decode divisions that a single downstream `ShardFileSize` guard could not. Rebalance's separate division is guarded at its own boundary.
+
+Two limitations remain and should not be folded into a stronger claim:
+
 - **No Windows CI.** Windows builds are published; tests run on Ubuntu only. The Windows rule is reasoned from documented Win32 behaviour and has not been verified on the platform.
-- **Symlinks.** The check is lexical, as upstream's is.
+- **Symlinks.** The containment check is lexical, as upstream's is.
 
 ## Closing {#closing}
 
-The previous entry said that closing an endpoint and closing a defect class are two different conclusions. This time we finished the audit of the class, at the cost of four self-inflicted regressions and three overturned declarations that it was ready to ship.
+The previous entry said that closing an endpoint and closing a defect class are two different conclusions. This time the known sinks are closed on the local branch, at the cost of four self-inflicted regressions and three overturned declarations that it was ready to ship. Publication remains a separate gate: the fixes above are not in a released server build yet.
 
 If only one sentence survives: **the vulnerability was upstream's; our mistake was treating a point fix as a closure.** And what prevents a third occurrence is not a more careful person — it is a test that fails.

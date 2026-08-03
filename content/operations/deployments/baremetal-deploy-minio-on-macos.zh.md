@@ -1,5 +1,5 @@
 ---
-title: "在 MacOS 上部署 MinIO"
+title: "在 macOS 上部署 Silo"
 url: "/zh/operations/deployments/baremetal-deploy-minio-on-macos/"
 weight: 40
 minio_origin: true
@@ -12,21 +12,13 @@ silo_modified: true
 - [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
 - [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
 
-本页介绍如何在 Apple MacOS 主机上部署 MinIO。
+本页介绍如何在 Apple macOS 主机上部署 Silo，用于开发与评估。
 
-MinIO 正式支持仍处于服务期内的 MacOS 操作系统，该期限通常为自首次发布起 3 年。 在撰写本文时，包括：
-
-- macOS 14 (Sonoma)（**推荐**）
-- macOS 13 (Ventura)
-- macOS 12 (Monterey)
-
-MinIO *可能* 也能在更旧或已停止支持的 macOS 版本上运行，但 MinIO 或 RedHat 仅能提供有限的支持或故障排查。
-
-MinIO 同时支持基于 Intel 和 ARM 的 macOS 硬件，并为每种架构分别提供二进制文件。 请根据主机系统文档下载正确的二进制文件。
+Silo 分别为 Intel 与 Apple Silicon 发布 macOS 归档。当前项目 CI 在 Linux 上运行，不能据此建立 macOS 支持生命周期保证，因此已删除继承自上游、已经过时的“支持版本”清单。在生产使用前，请验证精确的操作系统版本与工作负载。
 
 本步骤包含对 单机多盘 (SNMD) 和 单机单盘 (SNSD) 拓扑的指导，适用于早期开发和评估环境。
 
-MinIO 不正式支持在 MacOS 主机上运行 多机多盘 (MNMD)“Distributed”配置。
+本指南没有验证 macOS 主机上的多机多盘（MNMD）分布式配置。
 
 ## 注意事项 {#id1}
 
@@ -44,46 +36,17 @@ MinIO 会根据拓扑中的节点和驱动器总数，自动为集群确定默�
 
 ## 步骤 {#id4}
 
-### 1. 下载 MinIO 二进制文件 {#minio}
+### 1. 下载 Silo 二进制文件 {#minio}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Homebrew" %}}
-打开终端，并运行以下命令使用 [Homebrew](https://brew.sh)<a id="homebrew"></a> 安装最新稳定版 MinIO 软件包。
+从[下载与安装](/zh/download/#server)选择 Intel（`darwin_amd64`）或 Apple Silicon（`darwin_arm64`）归档。使用同一发布随附的校验和核验后，解压并安装 `minio` 兼容二进制：
 
 ```shell
-brew install minio/stable/minio
+tar -xzf minio_*_darwin_*.tar.gz
+sudo install -m 0755 ./minio /usr/local/bin/minio
+minio --version
 ```
 
-{{% alert color="warning" %}}
-**重要**
-
-如果你之前使用 `brew install minio` 安装过 MinIO server，建议改为从 `minio/stable/minio` 重新安装。
-
-```shell
-brew uninstall minio
-brew install minio/stable/minio
-```
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="Binary - arm64" %}}
-打开终端，然后使用以下命令下载最新稳定版 MinIO 二进制文件、赋予执行权限，并将其安装到系统 `$PATH`：
-
-> ```shell
-> curl -O https://dl.min.io/server/minio/release/darwin-arm64/minio
-> chmod +x ./minio
-> sudo mv ./minio /usr/local/bin/
-> ```
-{{% /tab %}}
-{{% tab header="Binary - amd64" %}}
-打开终端，然后使用以下命令下载最新稳定版 MinIO 二进制文件、赋予执行权限，并将其安装到系统 `$PATH`：
-
-> ```shell
-> curl -O https://dl.min.io/server/minio/release/darwin-amd64/minio
-> chmod +x ./minio
-> sudo mv ./minio /usr/local/bin/
-> ```
-{{% /tab %}}
-{{< /tabpane >}}
+本页原有 Homebrew 命令安装的是上游 MinIO formula，而不是 Silo，因此已经删除。
 
 ### 2. 启用 TLS 连接 {#tls}
 

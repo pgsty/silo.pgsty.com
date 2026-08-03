@@ -1,7 +1,7 @@
 ---
 title: "使用 KES 进行服务端对象加密"
 url: "/zh/operations/server-side-encryption/configure-minio-kes/"
-description: "Deploy MinIO with Server-Side Object Encryption"
+description: "为 Silo 部署服务端对象加密"
 weight: 10
 minio_origin: true
 silo_modified: true
@@ -13,20 +13,24 @@ silo_modified: true
 <a id="minio-sse-gcp"></a>
 <a id="minio-sse-vault"></a>
 
+{{% alert color="warning" %}}
+社区版 KES 及其文档均已弃用并归档。下方 Kubernetes 页签还引用了在 MinIO Operator 6.0.0 中移除的 Operator Console；该内容仅作为历史迁移参考保留，并不是适用于当前 `v7.1.1` 的部署流程。新部署在启用不可逆的服务端加密前，应选择仍受维护的 KMS 集成，并验证迁移或替代方案。
+{{% /alert %}}
+
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
-本流程假定你可以访问一个已经安装并启用了 MinIO Operator 的 Kubernetes 集群。 关于如何运行 KES，请参见 [KES 文档](https://docs.min.io/community/minio-kes/tutorials/getting-started/)。
+本流程假定你可以访问一个已经安装并启用了 MinIO Operator 的 Kubernetes 集群。 关于如何运行 KES，请参见 [KES 文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md)。
 
 在本流程中，你将完成：
 
 1. 创建或修改一个通过 <abbr title="Key Encryption Service">KES</abbr> 支持 <abbr title="Server-Side Encryption">SSE</abbr> 的 MinIO 部署。 关于生产可用 MinIO 部署的指导，请参见 [部署分布式 MinIO](/zh/operations/deployments/installation/#minio-mnmd) 教程。
 2. 使用 MinIO Operator Console 创建或管理一个 MinIO 租户。
-3. 进入该租户的 **Encryption** 设置，并通过 [受支持的 Key Management System](https://docs.min.io/community/minio-kes/#supported-kms-targets) 配置 <abbr title="Server-Side Encryption">SSE</abbr>。
+3. 进入该租户的 **Encryption** 设置，并通过 [受支持的 Key Management System](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) 配置 <abbr title="Server-Side Encryption">SSE</abbr>。
 4. 创建一个新的 <abbr title="External Key">EK</abbr> 供 <abbr title="Server-Side Encryption">SSE</abbr> 使用。
 5. 配置自动化的存储桶默认 [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms)。
 {{% /tab %}}
 {{% tab header="裸金属" %}}
-本流程说明如何部署已配置 KES 并启用 [服务端加密](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 的 MinIO。 关于如何运行 KES，请参见 [KES 文档](https://docs.min.io/community/minio-kes/tutorials/getting-started/)。
+本流程说明如何部署已配置 KES 并启用 [服务端加密](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 的 MinIO。 关于如何运行 KES，请参见 [KES 文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md)。
 
 在本流程中，你将完成：
 
@@ -67,7 +71,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
-本流程假定已经存在一个可从 Kubernetes 集群访问的 [受支持 KMS 安装](https://docs.min.io/community/minio-kes/#supported-kms-targets)。
+本流程假定已经存在一个可从 Kubernetes 集群访问的 [受支持 KMS 安装](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets)。
 
 - 对于与 MinIO 租户位于同一 Kubernetes 集群的部署，你可以使用 Kubernetes service 名称，让 MinIO 租户连接到目标 KMS 服务。
 - 对于位于 Kubernetes 集群外部的部署，你必须确保该集群支持 Kubernetes services、pods 与外部网络之间的通信路由。 这可能需要配置或部署额外的 Kubernetes 网络组件，和/或启用访问公网的能力。
@@ -75,7 +79,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 关于部署和配置的指导，请以你所选 KMS 方案的文档为准。
 {{% /tab %}}
 {{% tab header="裸金属" %}}
-本流程假定已经存在一个 KES 安装，并已连接到受支持的 <abbr title="Key Management System">KMS</abbr> 安装，且二者都可从本地主机访问。 请参照你所选 [受支持 KMS 目标](https://docs.min.io/community/minio-kes/#supported-kms-targets) 的安装说明，部署 KES 并将其连接到对应 KMS 方案。
+本流程假定已经存在一个 KES 安装，并已连接到受支持的 <abbr title="Key Management System">KMS</abbr> 安装，且二者都可从本地主机访问。 请参照你所选 [受支持 KMS 目标](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) 的安装说明，部署 KES 并将其连接到对应 KMS 方案。
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -89,19 +93,19 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 关于是否需要执行 unseal 的更多信息，请参见你所选 <abbr title="Key Management System">KMS</abbr> 方案的文档。
 {{% /alert %}}
 
-对于你所选的受支持 <abbr title="Key Management System">KMS</abbr>，请参照 [KES 文档](https://docs.min.io/community/minio-kes/) 中的配置说明：
+对于你所选的受支持 <abbr title="Key Management System">KMS</abbr>，请参照 [KES 文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) 中的配置说明：
 
-- [AWS Secrets Manager](https://docs.min.io/community/minio-kes/integrations/aws-secrets-manager/)
-- [Azure KeyVault](https://docs.min.io/community/minio-kes/integrations/azure-keyvault/)
-- [Entrust KeyControl](https://docs.min.io/community/minio-kes/integrations/entrust-keycontrol/)
-- [Fortanix SDKMS](https://docs.min.io/community/minio-kes/integrations/fortanix-sdkms/)
-- [Google Cloud Secret Manager](https://docs.min.io/community/minio-kes/integrations/google-cloud-secret-manager/)
-- [HashiCorp Vault](https://docs.min.io/community/minio-kes/integrations/hashicorp-vault-keystore/)
-- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://docs.min.io/community/minio-kes/integrations/thales-ciphertrust/)
+- [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
+- [Azure KeyVault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
+- [Entrust KeyControl](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/entrust-keycontrol.md)
+- [Fortanix SDKMS](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/fortanix-sdkms.md)
+- [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
+- [HashiCorp Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
+- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
 ## 流程 {#id3}
 
-本流程说明如何在生产环境中使用你所选的 [受支持 KMS 方案](https://docs.min.io/community/minio-kes/#supported-kms-targets) 配置并启用服务端加密。 具体来说，本流程假定满足以下条件：
+本流程说明如何在生产环境中使用你所选的 [受支持 KMS 方案](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) 配置并启用服务端加密。 具体来说，本流程假定满足以下条件：
 
 - 已有一个生产级 KMS 目标
 - 一个或多个已连接到该 KMS 目标的 KES 服务器
@@ -130,7 +134,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 
    `kes-configuration` secret 必须引用一个 Kubernetes Opaque Secret， 其中的 `stringData` 对象需要以 `server-config.yaml` 的形式包含完整 KES 配置。 `keystore` 字段必须包含你所选 Key Management System 的完整配置。
 
-   更多说明请参阅 [该 Kustomize 示例](https://github.com/minio/operator/blob/master/examples/kustomization/tenant-kes-encryption/kes-configuration-secret.yaml)。
+   更多说明请参阅 [固定到 `v7.1.1` 的 Kustomize 示例](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/tenant-kes-encryption/kes-configuration-secret.yaml)。
 3. 创建或修改 Tenant YAML，按需设置 `TenantSpec.configuration` 的值。
 
    TODO
@@ -209,13 +213,13 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 {{% tab header="裸金属" %}}
 1. 生成供 MinIO 使用的 KES API Key
 
-   使用 [kes identity new](https://docs.min.io/community/minio-kes/cli/kes-identity/new) 命令， 为 MinIO Server 生成新的 API key：
+   使用 [kes identity new](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/kes-identity/new.md) 命令， 为 MinIO Server 生成新的 API key：
 
    ```shell
    kes identity new
    ```
 
-   输出同时包含供 MinIO 使用的 API Key， 以及供 [KES Policy 配置](https://docs.min.io/community/minio-kes/tutorials/configuration/#policy-configuration) 使用的 Identity hash。
+   输出同时包含供 MinIO 使用的 API Key， 以及供 [KES Policy 配置](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/configuration.md#policy-configuration) 使用的 Identity hash。
 2. 配置 MinIO 环境文件
 
    为目标部署中的所有主机创建或修改 MinIO Server 环境文件， 使其包含以下环境变量：
@@ -255,7 +259,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 
    根据你选择的 KMS 方案， 你可能需要先将密钥实例解封，才能执行正常的加密操作，包括密钥创建或读取。 KES 需要已解封的密钥目标才能执行这些操作。
 
-   关于该实例在运行时是否需要 sealed/unsealed， 请参阅你所选 [KMS 方案文档](https://docs.min.io/community/minio-kes/#supported-kms-targets)。
+   关于该实例在运行时是否需要 sealed/unsealed， 请参阅你所选 [KMS 方案文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets)。
 
    你必须先启动 KES，再启动 MinIO。 MinIO 部署在启动过程中需要访问 KES。
    {{% /alert %}}

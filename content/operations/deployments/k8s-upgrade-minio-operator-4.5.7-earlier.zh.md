@@ -4,7 +4,7 @@ url: "/zh/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier/"
 weight: 9118
 toc_hide: true
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-operator"></a>
@@ -474,7 +474,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```
 5. 升级到 7.1.1
 
-   按照 [将 MinIO Operator 从 5.0.15 升级到 7.1.1](/zh/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure) 中的流程，升级到最新稳定版 Operator。
+   按照 [将 MinIO Operator 从 5.0.15 升级到 7.1.1](/zh/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure) 中的流程，升级到仓库归档前的最终上游版本 `v7.1.1`。
 
 ## 将 MinIO Operator 3.0.0 到 3.0.29 升级到 4.2.2 {#minio-operator-3-0-0-3-0-29-4-2-2}
 

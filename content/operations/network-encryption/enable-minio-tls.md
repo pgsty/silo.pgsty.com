@@ -1,9 +1,9 @@
 ---
-title: "Enable TLS for MinIO"
+title: "Enable TLS for Silo"
 url: "/operations/network-encryption/enable-minio-tls/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="enable-tls-for-minio"></a>
@@ -100,7 +100,7 @@ The following steps apply to both new and existing MinIO Deployments using `Kust
           - '*.minio-tenant.domain.tld'
    ```
 
-   See the [Kustomize Tenant base YAML](https://github.com/minio/operator/blob/master/examples/kustomization/base/tenant.yaml) for a baseline template for guidance in creating or modifying your Tenant resource.
+   See the [pinned `v7.1.1` Kustomize Tenant base YAML](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/base/tenant.yaml) for a baseline template for guidance in creating or modifying your Tenant resource.
 3. Apply the new Kustomization template
 
    Once you apply the changes, the MinIO Operator automatically redeploys the Tenant with the updated configuration.

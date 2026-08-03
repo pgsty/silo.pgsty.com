@@ -1,9 +1,9 @@
 ---
-title: "MinIO Object Locking"
+title: "Silo Object Locking"
 url: "/administration/object-management/object-retention/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-object-retention"></a>

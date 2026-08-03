@@ -1,9 +1,9 @@
 ---
-title: "MinIO Console Settings"
+title: "Silo Console Settings"
 url: "/reference/minio-server/settings/console/"
 weight: 50
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-console-settings"></a>

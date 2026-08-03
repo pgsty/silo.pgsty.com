@@ -4,7 +4,7 @@ url: "/developers/javascript/minio-javascript/"
 weight: 50
 icon: fa-brands fa-js
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="javascript-quickstart-guide"></a>
@@ -16,7 +16,7 @@ silo_modified: false
 
 MinIO JavaScript Client SDK 提供了高级 API，可用于访问任何兼容 Amazon S3 的对象存储服务器。
 
-本指南介绍如何安装 client SDK 并执行一个 JavaScript 示例程序。 如需完整的 API 与示例列表，请参阅 [JavaScript Client API Reference](https://docs.min.io/enterprise/aistor-object-store/developers/minio-drivers/#javascript) 文档。
+本指南介绍如何安装 client SDK 并执行一个 JavaScript 示例程序。 如需完整的 API 与示例列表，请参阅 [JavaScript Client API Reference](https://github.com/minio/minio-js/blob/master/docs/API.md) 文档。
 
 本文档假定你已具备可用的 [Node.js](http://nodejs.org/) 开发环境，支持的 LTS 版本为 v16、v18 或 v20。
 
@@ -132,7 +132,7 @@ File /tmp/test-file.txt uploaded successfully as my-test-file.txt to bucket js-t
 
 ```
 
-使用 [`mc`](https://min.io/docs/minio/linux/reference/minio-mc.html) 验证对象已创建：
+使用 [`mc`](/reference/minio-mc/#command-mc) 验证对象已创建：
 
 ```
 mc ls play/js-test-bucket
@@ -144,60 +144,60 @@ mc ls play/js-test-bucket
 
 完整的 API 参考可在此查看：
 
-- [MinIO JavaScript API Reference](https://min.io/docs/minio/linux/developers/javascript/API.html)
+- [MinIO JavaScript API Reference](https://github.com/minio/minio-js/blob/master/docs/API.md)
 
 #### 存储桶操作 {#id4}
 
-- [`makeBucket`](https://min.io/docs/minio/linux/developers/javascript/API.html#makeBucket)
-- [`listBuckets`](https://min.io/docs/minio/linux/developers/javascript/API.html#listBuckets)
-- [`bucketExists`](https://min.io/docs/minio/linux/developers/javascript/API.html#bucketExists)
-- [`removeBucket`](https://min.io/docs/minio/linux/developers/javascript/API.html#removeBucket)
-- [`listObjects`](https://min.io/docs/minio/linux/developers/javascript/API.html#listObjects)
-- [`listObjectsV2`](https://min.io/docs/minio/linux/developers/javascript/API.html#listObjectsV2)
-- [`listObjectsV2WithMetadata`](https://min.io/docs/minio/linux/developers/javascript/API.html#listObjectsV2WithMetadata) (Extension)
-- [`listIncompleteUploads`](https://min.io/docs/minio/linux/developers/javascript/API.html#listIncompleteUploads)
-- [`getBucketVersioning`](https://min.io/docs/minio/linux/developers/javascript/API.html#getBucketVersioning)
-- [`setBucketVersioning`](https://min.io/docs/minio/linux/developers/javascript/API.html#setBucketVersioning)
-- [`setBucketLifecycle`](https://min.io/docs/minio/linux/developers/javascript/API.html#setBucketLifecycle)
-- [`getBucketLifecycle`](https://min.io/docs/minio/linux/developers/javascript/API.html#getBucketLifecycle)
-- [`removeBucketLifecycle`](https://min.io/docs/minio/linux/developers/javascript/API.html#removeBucketLifecycle)
-- [`getObjectLockConfig`](https://min.io/docs/minio/linux/developers/javascript/API.html#getObjectLockConfig)
-- [`setObjectLockConfig`](https://min.io/docs/minio/linux/developers/javascript/API.html#setObjectLockConfig)
+- [`makeBucket`](https://github.com/minio/minio-js/blob/master/docs/API.md#makeBucket)
+- [`listBuckets`](https://github.com/minio/minio-js/blob/master/docs/API.md#listBuckets)
+- [`bucketExists`](https://github.com/minio/minio-js/blob/master/docs/API.md#bucketExists)
+- [`removeBucket`](https://github.com/minio/minio-js/blob/master/docs/API.md#removeBucket)
+- [`listObjects`](https://github.com/minio/minio-js/blob/master/docs/API.md#listObjects)
+- [`listObjectsV2`](https://github.com/minio/minio-js/blob/master/docs/API.md#listObjectsV2)
+- [`listObjectsV2WithMetadata`](https://github.com/minio/minio-js/blob/master/docs/API.md#listObjectsV2WithMetadata) (Extension)
+- [`listIncompleteUploads`](https://github.com/minio/minio-js/blob/master/docs/API.md#listIncompleteUploads)
+- [`getBucketVersioning`](https://github.com/minio/minio-js/blob/master/docs/API.md#getBucketVersioning)
+- [`setBucketVersioning`](https://github.com/minio/minio-js/blob/master/docs/API.md#setBucketVersioning)
+- [`setBucketLifecycle`](https://github.com/minio/minio-js/blob/master/docs/API.md#setBucketLifecycle)
+- [`getBucketLifecycle`](https://github.com/minio/minio-js/blob/master/docs/API.md#getBucketLifecycle)
+- [`removeBucketLifecycle`](https://github.com/minio/minio-js/blob/master/docs/API.md#removeBucketLifecycle)
+- [`getObjectLockConfig`](https://github.com/minio/minio-js/blob/master/docs/API.md#getObjectLockConfig)
+- [`setObjectLockConfig`](https://github.com/minio/minio-js/blob/master/docs/API.md#setObjectLockConfig)
 
 #### 文件对象操作 {#id5}
 
-- [`fPutObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#fPutObject)
-- [`fGetObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#fGetObject)
+- [`fPutObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#fPutObject)
+- [`fGetObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#fGetObject)
 
 #### 对象操作 {#id6}
 
-- [`getObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#getObject)
-- [`putObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#putObject)
-- [`copyObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#copyObject)
-- [`statObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#statObject)
-- [`removeObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#removeObject)
-- [`removeObjects`](https://min.io/docs/minio/linux/developers/javascript/API.html#removeObjects)
-- [`removeIncompleteUpload`](https://min.io/docs/minio/linux/developers/javascript/API.html#removeIncompleteUpload)
-- [`selectObjectContent`](https://min.io/docs/minio/linux/developers/javascript/API.html#selectObjectContent)
+- [`getObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#getObject)
+- [`putObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#putObject)
+- [`copyObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#copyObject)
+- [`statObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#statObject)
+- [`removeObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#removeObject)
+- [`removeObjects`](https://github.com/minio/minio-js/blob/master/docs/API.md#removeObjects)
+- [`removeIncompleteUpload`](https://github.com/minio/minio-js/blob/master/docs/API.md#removeIncompleteUpload)
+- [`selectObjectContent`](https://github.com/minio/minio-js/blob/master/docs/API.md#selectObjectContent)
 
 #### Presigned 操作 {#presigned}
 
-- [`presignedUrl`](https://min.io/docs/minio/linux/developers/javascript/API.html#presignedUrl)
-- [`presignedGetObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#presignedGetObject)
-- [`presignedPutObject`](https://min.io/docs/minio/linux/developers/javascript/API.html#presignedPutObject)
-- [`presignedPostPolicy`](https://min.io/docs/minio/linux/developers/javascript/API.html#presignedPostPolicy)
+- [`presignedUrl`](https://github.com/minio/minio-js/blob/master/docs/API.md#presignedUrl)
+- [`presignedGetObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#presignedGetObject)
+- [`presignedPutObject`](https://github.com/minio/minio-js/blob/master/docs/API.md#presignedPutObject)
+- [`presignedPostPolicy`](https://github.com/minio/minio-js/blob/master/docs/API.md#presignedPostPolicy)
 
 #### 存储桶通知操作 {#id7}
 
-- [`getBucketNotification`](https://min.io/docs/minio/linux/developers/javascript/API.html#getBucketNotification)
-- [`setBucketNotification`](https://min.io/docs/minio/linux/developers/javascript/API.html#setBucketNotification)
-- [`removeAllBucketNotification`](https://min.io/docs/minio/linux/developers/javascript/API.html#removeAllBucketNotification)
-- [`listenBucketNotification`](https://min.io/docs/minio/linux/developers/javascript/API.html#listenBucketNotification) (MinIO Extension)
+- [`getBucketNotification`](https://github.com/minio/minio-js/blob/master/docs/API.md#getBucketNotification)
+- [`setBucketNotification`](https://github.com/minio/minio-js/blob/master/docs/API.md#setBucketNotification)
+- [`removeAllBucketNotification`](https://github.com/minio/minio-js/blob/master/docs/API.md#removeAllBucketNotification)
+- [`listenBucketNotification`](https://github.com/minio/minio-js/blob/master/docs/API.md#listenBucketNotification) (MinIO Extension)
 
 #### 存储桶策略操作 {#id8}
 
-- [`getBucketPolicy`](https://min.io/docs/minio/linux/developers/javascript/API.html#getBucketPolicy)
-- [`setBucketPolicy`](https://min.io/docs/minio/linux/developers/javascript/API.html#setBucketPolicy)
+- [`getBucketPolicy`](https://github.com/minio/minio-js/blob/master/docs/API.md#getBucketPolicy)
+- [`setBucketPolicy`](https://github.com/minio/minio-js/blob/master/docs/API.md#setBucketPolicy)
 
 ### 示例 {#id9}
 
@@ -279,8 +279,8 @@ mc ls play/js-test-bucket
 
 ### 深入了解 {#id17}
 
-- [Complete Documentation](https://min.io/docs/minio/kubernetes/upstream/index.html)
-- [MinIO JavaScript Client SDK API Reference](https://min.io/docs/minio/linux/developers/javascript/API.html)
+- [JavaScript SDK source and current documentation](https://github.com/minio/minio-js)
+- [MinIO JavaScript Client SDK API Reference](https://github.com/minio/minio-js/blob/master/docs/API.md)
 
 ### 贡献 {#id18}
 

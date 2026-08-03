@@ -1,25 +1,22 @@
 ---
-title: "MinIO Client"
+title: "Silo Client (mcli / mc)"
 url: "/reference/minio-mc/"
 weight: 10
 icon: fa-solid fa-terminal
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-client"></a>
 <a id="id1"></a>
 
-- [Introduction to the MinIO Client (MC) Commands](https://www.youtube.com/watch?v=pukQgDdXfqA)
-- [Installing and Running MinIO on Linux](https://www.youtube.com/watch?v=74usXkZpNt8&list=PLFOIsHSSYIK1BnzVY66pCL-iJ30Ht9t1o)
-
 <a id="command-mc"></a>
 
-The MinIO Client [`mc`](#command-mc) command line tool provides a modern alternative to UNIX commands like `ls`, `cat`, `cp`, `mirror`, and `diff` with support for both filesystems and Amazon S3-compatible cloud storage services.
+The Pigsty-maintained client is distributed as **`mcli`** in standalone archives and Linux packages. Its source build, container entrypoint, configuration directory, module path, and command syntax retain **`mc`** for compatibility. It provides familiar commands such as `ls`, `cat`, `cp`, `mirror`, and `diff` for filesystems and Amazon S3-compatible object storage.
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
+The **`mc`** command-line tool is built for compatibility with the AWS S3 API. Its current source retains compatibility with Silo, upstream MinIO, and AWS S3.
 
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+The Silo project cannot guarantee behavior against every other S3-compatible service because implementations differ. Test the operations your workload relies on before treating another service as compatible.
 
 [`mc`](#command-mc) has the following syntax:
 
@@ -31,106 +28,40 @@ See [Command Quick Reference](#minio-mc-commands) for a list of supported comman
 
 <a id="mc-client-versioning"></a>
 
-## Version Alignment with MinIO Server {#version-alignment-with-minio-server}
+## Version Alignment with Silo Server {#version-alignment-with-minio-server}
 
-The MinIO Client releases separately from the MinIO Server.
+The client releases separately from the Silo server.
 
-For best functionality and compatibility, use a MinIO Client version released closely to your MinIO Server version. For example, a MinIO Client released the same day or later than your MinIO Server version.
+For best functionality and compatibility, use a client version released close to your Silo or MinIO server version. A client released on the same day or later than the server is generally the safer choice.
 
-You can install a version of the MinIO Client that is more recent than the MinIO Server version. However, if the MinIO Client version skews too far from the MinIO Server version, you may see increased warnings or errors as a result of the differences. For example, while core S3 APIs around copying ([`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp)) may remain unchanged, some features or flags may only be available or stable if the client and server versions are aligned.
+You can install a client newer than the server. If the versions skew too far apart, however, administrative features or flags may differ even when core S3 operations such as [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) remain compatible.
 
 <a id="mc-install"></a>
 
 ## Quickstart {#quickstart}
 
-### 1) Install `mc` {#install-mc}
+### 1) Install the client {#install-mc}
 
-Install the **`mc`** command line tool onto the host machine. Click the tab that corresponds to the host machine operating system or environment:
+Use [Download & Install](/download/#client) to select a Linux package, an archive for Linux, macOS, or Windows, or the client container. Versioned artifacts and checksums are also available from [GitHub Releases](https://github.com/pgsty/mc/releases).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Linux" %}}
-The following commands add a *temporary* extension to your system PATH for running the `mc` utility. Defer to your operating system instructions for making permanent modifications to your system PATH.
+Standalone archives and Linux packages install the command as **`mcli`**. The container and source build retain **`mc`**. The commands are aliases of the same client; when this reference shows `mc`, substitute `mcli` if that is the name installed on your host.
 
-Alternatively, execute `mc` by navigating to the parent folder and running `./mc --help`
-
-**64-bit Intel**
+To build the maintained fork from source:
 
 ```shell
-curl https://dl.min.io/client/mc/release/linux-amd64/mc \
-  --create-dirs \
-  -o $HOME/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
+git clone https://github.com/pgsty/mc.git
+cd mc
+make build
+./mc --version
 ```
 
-**64-bit PPC**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-ppc64le/mc \
-  --create-dirs \
-  -o ~/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
-
-**ARM64**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-arm64/mc \
-  --create-dirs \
-  -o ~/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
+{{% alert color="warning" %}}
+[`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is intentionally disabled in the Pigsty fork. Upgrade through the [Silo download page](/download/#client), the [Pigsty package repository](https://pigsty.io/docs/repo/infra/list/#object-storage), or [GitHub Releases](https://github.com/pgsty/mc/releases).
+{{% /alert %}}
 
 {{% alert color="info" %}}
-**Install from the MinIO Download Page**
-
-MinIO does not officially publish its binaries to common Linux repositories or package managers (Ubuntu, RHEL, Archlinux/AUR). The only official source of MinIO binaries is the [MinIO Download Page](https://dl.min.io/client/mc/release/).
-
-MinIO does not recommend installation through a package manager, as upstream repositories may install the incorrect package or a renamed package.
-
-All documentation assumes the installation of the *official* `mc` client binary through the download page *only*, with no changes to binary naming.
+The current `pgsty/mc` source still registers the `mc license` and `mc support` command trees. Those commands integrate with upstream MinIO SUBNET and its commercial licensing/support service; they are not Silo services. Their command names, protocol fields, SUBNET wording, and MinIO pricing/license links are retained as upstream contracts and must not be rebranded.
 {{% /alert %}}
-{{% /tab %}}
-{{% tab header="macOS" %}}
-```shell
-brew install minio/stable/mc
-mc --help
-```
-{{% /tab %}}
-{{% tab header="Windows" %}}
-Open the following file in a browser:
-
-[https://dl.min.io/client/mc/release/windows-amd64/mc.exe](https://dl.min.io/client/mc/release/windows-amd64/mc.exe)
-
-Execute the file by double clicking on it, *or* by running the following in the command prompt or powershell:
-
-```powershell
-\path\to\mc.exe --help
-```
-{{% /tab %}}
-{{% tab header="Source" %}}
-Installation from source is intended for developers and advanced users and requires a working Golang environment. See [How to install Golang](https://golang.org/doc/install).
-
-Run the following commands in a terminal environment to install `mc` from source:
-
-```shell
-go install github.com/minio/mc@latest
-```
-
-[`mc update`](/reference/minio-mc/mc-update/#command-mc.update) does not support source-based installations.
-{{% /tab %}}
-{{< /tabpane >}}
 
 ### 2) Create an Alias for the S3-Compatible Service {#create-an-alias-for-the-s3-compatible-service}
 
@@ -157,9 +88,9 @@ Replace each argument with the required values. If you omit the `ACCESS_KEY` and
 Each of the following tabs contains a provider-specific example:
 
 {{< tabpane text=true persist=header >}}
-{{% tab header="MinIO Server" %}}
+{{% tab header="Silo Server" %}}
 ```shell
-mc alias set myminio https://minioserver.example.net ACCESS_KEY SECRET_KEY
+mc alias set silo https://silo.example.net ACCESS_KEY SECRET_KEY
 ```
 {{% /tab %}}
 {{% tab header="AWS S3 Storage" %}}
@@ -176,10 +107,10 @@ mc alias set myGCS https://storage.googleapis.com/endpoint ACCESS_KEY SECRET_KEY
 
 ### 3) Test the Connection {#test-the-connection}
 
-Use the [`mc admin info`](/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) command to test the connection to the newly added MinIO deployment:
+Use the [`mc admin info`](/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) command to test the connection to the newly added Silo deployment:
 
 ```shell
-mc admin info myminio
+mc admin info silo
 ```
 
 The command returns information on the S3 service if successful. If unsuccessful, check each of the following:
@@ -198,7 +129,7 @@ The following table lists [`mc`](#command-mc) commands:
 {{% alert color="info" %}}
 **Note**
 
-The MinIO Client also includes an administration extension for managing MinIO deployments. See [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) for more complete documentation.
+The client also includes an administration extension for managing Silo and compatible MinIO deployments. See [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) for more complete documentation.
 
 The below table does not include those commands.
 {{% /alert %}}
@@ -391,8 +322,7 @@ at each prefix, including the bucket root.</p></td>
     </tr>
     <tr>
       <td><p><a href="/reference/minio-mc/mc-update/#command-mc.update"><code>mc update</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-update/#command-mc.update"><code>mc update</code></a> command automatically updates the <strong>mc</strong> binary to
-the latest stable version.</p></td>
+      <td><p>The <a href="/reference/minio-mc/mc-update/#command-mc.update"><code>mc update</code></a> compatibility command reports that self-update is disabled. Upgrade through the Silo download page, the Pigsty package repository, or GitHub Releases.</p></td>
     </tr>
     <tr>
       <td><a href="/reference/minio-mc/mc-version-enable/#command-mc.version.enable"><code>mc version enable</code></a><br /><a href="/reference/minio-mc/mc-version-info/#command-mc.version.info"><code>mc version info</code></a><br /><a href="/reference/minio-mc/mc-version-suspend/#command-mc.version.suspend"><code>mc version suspend</code></a><br /></td>

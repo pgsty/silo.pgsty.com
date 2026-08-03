@@ -4,7 +4,7 @@ url: "/developers/dotnet/minio-dotnet/"
 weight: 30
 icon: fa-brands fa-microsoft
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="net-quickstart-guide"></a>
@@ -12,7 +12,7 @@ silo_modified: false
 
 ## 适用于 .NET 的 MinIO Client SDK {#net-minio-client-sdk}
 
-MinIO Client SDK 为 MinIO 和兼容 Amazon S3 的对象存储服务提供高级 API。有关完整 API 列表和示例，请参阅 [Dotnet Client API Reference](https://min.io/docs/minio/linux/developers/dotnet/API.html)。本文档假设你已具备可用的 Visual Studio 开发环境。
+MinIO Client SDK 为 MinIO 和兼容 Amazon S3 的对象存储服务提供高级 API。有关完整 API 列表和示例，请参阅 [Dotnet Client API Reference](https://github.com/minio/minio-dotnet/blob/master/README.md)。本文档假设你已具备可用的 Visual Studio 开发环境。
 
 [![Slack](https://slack.min.io/slack?type=svg)](https://slack.min.io) [![Github Actions](https://github.com/minio/minio-dotnet/actions/workflows/minio-dotnet.yml/badge.svg)](https://github.com/minio/minio-dotnet/actions) [![Nuget](https://img.shields.io/nuget/dt/Minio?logo=nuget&label=nuget&link=https%3A%2F%2Fwww.nuget.org%2Fpackages%2FMinio)](https://www.nuget.org/packages/Minio/) [![GitHub tag (with filter)](https://img.shields.io/github/v/tag/minio/minio-dotnet?label=latest%20release)](https://github.com/minio/minio-dotnet/releases)
 
@@ -335,5 +335,5 @@ dotnet test ./Minio.Tests/Minio.Tests.csproj
 
 ### 进一步了解 {#id9}
 
-- [完整文档](https://min.io/docs/minio/kubernetes/upstream/index.html)
-- [MinIO .NET SDK API 参考](https://min.io/docs/minio/linux/developers/dotnet/API.html)
+- [.NET SDK 源码与当前文档](https://github.com/minio/minio-dotnet)
+- [MinIO .NET SDK API 参考](https://github.com/minio/minio-dotnet/blob/master/README.md)

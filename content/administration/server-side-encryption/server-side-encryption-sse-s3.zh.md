@@ -3,7 +3,7 @@ title: "部署级服务端加密密钥（SSE-S3）"
 url: "/zh/administration/server-side-encryption/server-side-encryption-sse-s3/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="sse-s3"></a>
@@ -11,7 +11,7 @@ silo_modified: false
 
 MinIO 服务端加密（SSE）在写入操作期间保护对象，使客户端能够利用服务端的处理能力， 在存储层保护对象（静态加密）。SSE 还为围绕安全锁定和擦除的监管与合规要求提供关键能力。
 
-MinIO SSE 使用 [MinIO Key Encryption Service (KES)](https://docs.min.io/community/minio-kes/) 和外部 Key Management Service (KMS) 以安全方式大规模执行加密操作。MinIO 还支持 客户端自主管理密钥，即由应用全权负责创建和管理供 MinIO SSE 使用的加密密钥。
+MinIO SSE 使用 [MinIO Key Encryption Service (KES)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) 和外部 Key Management Service (KMS) 以安全方式大规模执行加密操作。MinIO 还支持 客户端自主管理密钥，即由应用全权负责创建和管理供 MinIO SSE 使用的加密密钥。
 
 MinIO SSE-S3 使用由 Key Management System (KMS) 管理的 <abbr title="External Key">EK</abbr> 对对象进行加/解密。 你必须在启动 MinIO 服务器时通过 [`MINIO_KMS_KES_KEY_NAME`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) 环境变量指定 该 <abbr title="External Key">EK</abbr>。对于 *所有* SSE-S3 加密操作，MinIO 都使用同一个 EK。
 
@@ -25,13 +25,13 @@ mc encrypt set sse-s3 play/mybucket
 
 MinIO SSE-S3 在功能上兼容 AWS S3 [Server-Side Encryption with Amazon S3-Managed Keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingServerSideEncryption.html)， 同时将支持扩展到以下 KMS 提供商：
 
-- [AWS Secrets Manager](https://docs.min.io/community/minio-kes/integrations/aws-secrets-manager/)
-- [Azure KeyVault](https://docs.min.io/community/minio-kes/integrations/azure-keyvault/)
-- [Entrust KeyControl](https://docs.min.io/community/minio-kes/integrations/entrust-keycontrol/)
-- [Fortanix SDKMS](https://docs.min.io/community/minio-kes/integrations/fortanix-sdkms/)
-- [Google Cloud Secret Manager](https://docs.min.io/community/minio-kes/integrations/google-cloud-secret-manager/)
-- [HashiCorp Vault](https://docs.min.io/community/minio-kes/integrations/hashicorp-vault-keystore/)
-- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://docs.min.io/community/minio-kes/integrations/thales-ciphertrust/)
+- [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
+- [Azure KeyVault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
+- [Entrust KeyControl](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/entrust-keycontrol.md)
+- [Fortanix SDKMS](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/fortanix-sdkms.md)
+- [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
+- [HashiCorp Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
+- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
 <a id="id2"></a>
 
@@ -49,13 +49,13 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 
 对于较长期的开发环境或生产环境，请使用以下受支持的外部 Key Management Services (KMS) 之一：
 
-- [AWS Secrets Manager](https://docs.min.io/community/minio-kes/integrations/aws-secrets-manager/)
-- [Azure KeyVault](https://docs.min.io/community/minio-kes/integrations/azure-keyvault/)
-- [Entrust KeyControl](https://docs.min.io/community/minio-kes/integrations/entrust-keycontrol/)
-- [Fortanix SDKMS](https://docs.min.io/community/minio-kes/integrations/fortanix-sdkms/)
-- [Google Cloud Secret Manager](https://docs.min.io/community/minio-kes/integrations/google-cloud-secret-manager/)
-- [HashiCorp Vault](https://docs.min.io/community/minio-kes/integrations/hashicorp-vault-keystore/)
-- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://docs.min.io/community/minio-kes/integrations/thales-ciphertrust/)
+- [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
+- [Azure KeyVault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
+- [Entrust KeyControl](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/entrust-keycontrol.md)
+- [Fortanix SDKMS](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/fortanix-sdkms.md)
+- [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
+- [HashiCorp Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
+- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
 {{% alert color="warning" %}}
 **重要**
@@ -70,11 +70,11 @@ MinIO KES `Play` sandbox 是公开环境， 并会为所有创建的 External Ke
 此流程需要以下组件：
 
 - 在一台能够通过网络访问源部署的机器上安装 [`mc`](/zh/reference/minio-mc/#command-mc)。 有关下载和安装 `mc` 的说明，请参阅 `mc` [Installation Quickstart](/zh/reference/minio-mc/#mc-install)。
-- 在一台可访问互联网的机器上安装 [MinIO Key Encryption Service (KES)](https://docs.min.io/community/minio-kes/)。 有关下载、安装和配置 KES 的说明，请参阅 KES [Getting Started](https://docs.min.io/community/minio-kes/tutorials/getting-started/) 指南。
+- 在一台可访问互联网的机器上安装 [MinIO Key Encryption Service (KES)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md)。 有关下载、安装和配置 KES 的说明，请参阅 KES [Getting Started](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md) 指南。
 
 ### 1) 为 SSE-S3 加密创建加密密钥 {#id3}
 
-使用 [kes](https://docs.min.io/community/minio-kes/cli) 命令行工具创建一个新的 <abbr title="External Key">EK</abbr>，供 SSE-S3 加密使用。
+使用 [kes](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/_index.md) 命令行工具创建一个新的 <abbr title="External Key">EK</abbr>，供 SSE-S3 加密使用。
 
 以下命令获取已连接到 KES `play` 沙箱的 KES 服务器的 root [identity](https://github.com/minio/kes/wiki/Configuration#policy-configuration)：
 
@@ -95,22 +95,22 @@ export KES_CLIENT_CERT=root.cert
   <tbody>
     <tr>
       <td><p><code>KES_CLIENT_KEY</code></p></td>
-      <td><p>KES 服务器上某个 <a href="https://docs.min.io/community/minio-kes/concepts/#authorization">identity</a> 的私钥。
+      <td><p>KES 服务器上某个 <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/_index.md#authorization">identity</a> 的私钥。
 该 identity 至少必须被授予对 <code>/v1/create</code>、<code>/v1/generate</code> 和
-<code>/v1/list</code> <a href="https://docs.min.io/community/minio-kes/concepts/server-api/">API endpoints</a> 的访问权限。
+<code>/v1/list</code> <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/server-api.md">API endpoints</a> 的访问权限。
 此步骤使用 MinIO <code>play</code> KES 沙箱的 <code>root</code> identity，它可访问
 KES 服务器上的所有操作。</p></td>
     </tr>
     <tr>
       <td><p><code>KES_CLIENT_CERT</code></p></td>
-      <td><p>KES 服务器上该 <a href="https://docs.min.io/community/minio-kes/concepts/#authorization">identity</a> 对应的证书。
+      <td><p>KES 服务器上该 <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/_index.md#authorization">identity</a> 对应的证书。
 此步骤使用 MinIO <code>play</code> KES 沙箱的 <code>root</code> identity，它可访问
 KES 服务器上的所有操作。</p></td>
     </tr>
   </tbody>
 </table>
 
-以下命令通过 [KES CLI](https://docs.min.io/community/minio-kes/cli/kes-key/create/) 创建一个新的 <abbr title="External Key">EK</abbr>：
+以下命令通过 [KES CLI](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/kes-key/create.md) 创建一个新的 <abbr title="External Key">EK</abbr>：
 
 ```shell
 kes key create my-minio-sse-s3-key

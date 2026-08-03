@@ -1,19 +1,19 @@
 ---
-title: "MinIO 管理客户端"
+title: "Silo 客户端管理"
 url: "/zh/reference/minio-mc-admin/"
 weight: 20
 icon: fa-solid fa-user-gear
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>
 
 <a id="command-mc.admin"></a>
 
-MinIO 客户端 [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具提供 [`mc admin`](#command-mc.admin) 命令， 用于在 MinIO 部署上执行管理任务。
+Silo 客户端 [`mc`](/zh/reference/minio-mc/#command-mc) 提供 [`mc admin`](#command-mc.admin) 命令，用于在 Silo 与兼容的 MinIO 部署上执行管理任务。
 
-虽然 [`mc`](/zh/reference/minio-mc/#command-mc) 支持任意兼容 S3 的服务， [`mc admin`](#command-mc.admin) *仅* 支持 MinIO 部署。
+虽然 [`mc`](/zh/reference/minio-mc/#command-mc) 支持通用 S3 兼容服务，但 [`mc admin`](#command-mc.admin) 使用 MinIO 专用管理 API，因此仅支持 Silo 或兼容的 MinIO 部署。
 
 [`mc admin`](#command-mc.admin) 语法如下：
 
@@ -122,90 +122,7 @@ MinIO PBAC 使用与 IAM 兼容的策略 JSON 文档来定义访问 MinIO 服务
 
 ## 安装 {#mc-admin-install}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Linux" %}}
-以下命令会向系统 PATH *临时* 追加一项，以便运行 `mc` 工具。 若要永久修改系统 PATH，请遵循你的操作系统说明。
-
-或者，你也可以进入 `mc` 所在目录并运行 `./mc --help`。
-
-**64 位 Intel**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-amd64/mc \
-  --create-dirs \
-  -o $HOME/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
-
-**64 位 PPC**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-ppc64le/mc \
-  --create-dirs \
-  -o ~/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
-
-**ARM64**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-arm64/mc \
-  --create-dirs \
-  -o ~/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
-
-{{% alert color="info" %}}
-**从 MinIO 下载页面安装**
-
-MinIO 不会通过常见 Linux 软件仓库或包管理器 （Ubuntu、RHEL、Archlinux/AUR）正式发布其二进制文件。 MinIO 二进制文件唯一的官方来源是 [MinIO Download Page](https://dl.min.io/client/mc/release/)。
-
-MinIO 不建议通过包管理器安装，因为上游仓库可能会安装错误的软件包， 或安装被重命名的软件包。
-
-所有文档都假定你 *仅* 通过下载页面安装 *官方* `mc` 客户端二进制文件， 且二进制名称未做任何修改。
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="macOS" %}}
-```shell
-brew install minio/stable/mc
-mc --help
-```
-{{% /tab %}}
-{{% tab header="Windows" %}}
-在浏览器中打开以下文件：
-
-[https://dl.min.io/client/mc/release/windows-amd64/mc.exe](https://dl.min.io/client/mc/release/windows-amd64/mc.exe)
-
-双击该文件即可执行，*或者* 在命令提示符或 PowerShell 中运行以下命令：
-
-```powershell
-\path\to\mc.exe --help
-```
-{{% /tab %}}
-{{% tab header="Source" %}}
-从源码安装适用于开发者和高级用户，并要求具备可用的 Golang 环境。请参阅 [How to install Golang](https://golang.org/doc/install).
-
-在终端环境中运行以下命令，从源码安装 `mc`：
-
-```shell
-go install github.com/minio/mc@latest
-```
-
-[`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update) 不支持源码安装方式。
-{{% /tab %}}
-{{< /tabpane >}}
+请从[下载与安装](/zh/download/#client)获取维护版客户端，或按 [`mc` 参考文档](/zh/reference/minio-mc/#mc)中的源码构建说明操作。独立归档与 Linux 软件包使用 `mcli` 命令名；若主机安装的是该名称，请在示例中把 `mc admin` 替换为 `mcli admin`。
 
 ## 快速开始 {#id4}
 

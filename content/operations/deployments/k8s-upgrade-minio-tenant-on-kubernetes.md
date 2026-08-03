@@ -1,15 +1,19 @@
 ---
-title: "Upgrade a MinIO Tenant"
+title: "Upgrade a Silo Tenant"
 url: "/operations/deployments/k8s-upgrade-minio-tenant-on-kubernetes/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="upgrade-a-minio-tenant"></a>
 <a id="minio-k8s-upgrade-minio-tenant"></a>
 
-The following procedures upgrade a single MinIO Tenant, using either Kustomize or Helm. MinIO recommends you test upgrades in a lower environment such as a Dev or QA Tenant, before upgrading production Tenants.
+The following procedures upgrade a single Silo Tenant using either Kustomize or Helm. Test the exact server image, Operator/chart version, and rollback procedure in a non-production Tenant first.
+
+{{% alert color="danger" %}}
+Keep the server image on `pgsty/minio` and use only a tag or digest published on the [Silo download page](/download/#server). The upstream Tenant defaults use a MinIO image. Also keep `MINIO_UPDATE=off`; the inherited in-place updater still targets the upstream MinIO feed and is not a Silo upgrade path.
+{{% /alert %}}
 
 {{% alert color="warning" %}}
 **Important**
@@ -93,12 +97,15 @@ metadata:
   namespace: my-tenant-ns
 
 spec:
-  image: minio/minio:MINIOLATEST
+  image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+  env:
+    - name: MINIO_UPDATE
+      value: "off"
 ```
 
 This file instructs Kustomize to upgrade the tenant using the specified image. The name of this file, `upgrade-minio-tenant.yaml`, must match the `patches.path` filename specified in the `kustomization.yaml` file created in the previous step.
 
-Replace `my-tenant` and `my-tenant-ns` with the name and namespace of the Tenant to upgrade. Specify the MinIO version to upgrade to in `image:`.
+Replace `my-tenant` and `my-tenant-ns` with the name and namespace of the Tenant to upgrade. Replace the sample image tag only with a newer published Silo release that you have validated.
 
 Alternatively, you can update the base configuration directly, according to your local procedures. Refer to the [Kustomize Documentation](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization) for more information.
 
@@ -122,7 +129,7 @@ This procedure upgrades an existing MinIO Tenant using Helm Charts.
 
 If you deployed the Tenant using Kustomize, use the [Upgrade a Tenant using Kustomize](#minio-upgrade-tenant-kustomize) procedure instead.
 
-1. Verify the existing MinIO Tenant installation.
+1. Verify the existing Silo Tenant installation.
 
    Use `kubectl get all -n TENANT_NAMESPACE` to verify the health and status of all Tenant pods and services.
 
@@ -158,16 +165,28 @@ If you deployed the Tenant using Kustomize, use the [Upgrade a Tenant using Kust
    ```
 
    The `minio-operator/minio-operator` is a legacy chart and should **not** be installed under normal circumstances.
-3. Run `helm upgrade`
+3. Preserve and review the Tenant values
 
-   Helm uses the latest chart to upgrade the Tenant:
+   Export the release's current user-supplied values, then verify that the file retains all topology, storage, TLS, credentials, and scheduling settings:
 
    ```shell
-   helm upgrade -n minio-tenant \
+   helm get values CHART_NAME -n TENANT_NAMESPACE -o yaml > values.yaml
+   ```
+
+   Set `tenant.image.repository` to `pgsty/minio`, pin `tenant.image.tag` to a tested published Silo release, and ensure `tenant.env` includes `MINIO_UPDATE=off`. Never allow a chart upgrade to silently restore the upstream image default.
+
+4. Run the pinned `helm upgrade`
+
+   Pin the chart version separately from the Silo server image and pass the reviewed values file:
+
+   ```shell
+   helm upgrade -n TENANT_NAMESPACE \
+     --version 7.1.1 \
+     --values values.yaml \
      CHART_NAME minio-operator/tenant
    ```
 
    The command results should return success with a bump in the `REVISION` value.
-4. Validate the Tenant Upgrade
+5. Validate the Tenant Upgrade
 
-   Check that all services and pods are online and functioning normally.
+   Check that all services and pods are online, confirm the running image digest, and perform an authenticated S3 read/write smoke test before completing the rollout.

@@ -1,9 +1,9 @@
 ---
-title: "配置 MinIO 使用 Active Directory / LDAP 进行认证"
+title: "配置 Silo 使用 Active Directory / LDAP 进行认证"
 url: "/zh/operations/external-iam/configure-ad-ldap-external-identity-management/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-active-directory-ldap"></a>

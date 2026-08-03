@@ -1,5 +1,5 @@
 ---
-title: "在 Ubuntu Linux 上部署 MinIO"
+title: "在 Ubuntu Linux 上部署 Silo"
 url: "/zh/operations/deployments/baremetal-deploy-minio-on-ubuntu-linux/"
 weight: 20
 minio_origin: true
@@ -12,18 +12,9 @@ silo_modified: true
 - [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
 - [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
 
-本页介绍如何在 Ubuntu Linux 操作系统上部署 MinIO。
+本页介绍如何在 Ubuntu Linux 上部署 Silo。
 
-MinIO 正式支持处于 Ubuntu 生命周期 **Standard** 或 **Ubuntu Pro** 支持阶段的 Ubuntu Long Term Support (LTS) 版本。 为获得最佳性能，MinIO 强烈建议仅使用包含 Linux 5.X 及以上内核的版本。 在撰写本文时，包括：
-
-- Ubuntu 24.04+ LTS (Noble Numbat)（**推荐**）
-- Ubuntu 22.04+ LTS (Jammy Jellyfish)
-- Ubuntu 20.04+ LTS (Focal Fossa)
-- Ubuntu 18.04.5 LTS (Bionic Beaver)（**仅 Ubuntu Pro**）
-
-上述列表假定你的组织已具备与 Ubuntu 相关的必要服务合同，以确保在该版本整个生命周期内获得端到端支持。
-
-MinIO *可能* 也能在使用更旧内核、已停止支持或处于遗留支持阶段的 Ubuntu 版本上运行，但 MinIO 或 RedHat 仅能提供有限的支持或故障排查。
+Silo 为 x86-64 与 ARM64 发布 DEB 软件包和独立 Linux 归档。项目没有单独发布 Ubuntu 支持生命周期矩阵，因此已删除继承文档中的时间点版本清单。请选择仍处于发行商支持期内的 Ubuntu 版本，保持内核与系统库更新，并在生产使用前验证精确的存储与工作负载配置。
 
 本步骤重点介绍生产级 多机多盘 (MNMD)“Distributed”配置。 <abbr title="多机多盘">MNMD</abbr> 部署可提供企业级性能、可用性和可扩展性，是所有生产工作负载的推荐拓扑。
 
@@ -53,13 +44,12 @@ MinIO 建议在存储使用率达到 70% 之前，预先规划足以存放 **至
 
 ## 步骤 {#id6}
 
-### 1. 下载 MinIO DEB 包 {#minio-deb}
+### 1. 下载 Silo DEB 包 {#minio-deb}
 
-使用以下命令下载最新稳定版 MinIO DEB 包并完成安装。
+从[下载与安装](/zh/download/#server)获取对应架构的 DEB，校验发布摘要后安装。ARM64 主机请使用名称中带 `arm64` 的文件。
 
 ```shell
-wget DEBURL -O minio.deb
-sudo dpkg -i minio.deb
+sudo dpkg -i ./minio_*_amd64.deb
 ```
 
 ### 2. 查看 `systemd` 服务文件 {#systemd}
@@ -75,6 +65,8 @@ After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio
 
 [Service]
+Type=notify
+
 WorkingDirectory=/usr/local
 
 User=minio-user
@@ -82,25 +74,26 @@ Group=minio-user
 ProtectProc=invisible
 
 EnvironmentFile=-/etc/default/minio
-ExecStartPre=/bin/bash -c "if [ -z \"${MINIO_VOLUMES}\" ]; then echo \"Variable MINIO_VOLUMES not set in /etc/default/minio\"; exit 1; fi"
 ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
-
-# MinIO RELEASE.2023-05-04T21-44-30Z adds support for Type=notify (https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=)
-# This may improve systemctl setups where other services use `After=minio.server`
-# Uncomment the line to enable the functionality
-# Type=notify
 
 # Let systemd restart this service always
 Restart=always
 
 # Specifies the maximum file descriptor number that can be opened by this process
-LimitNOFILE=65536
+LimitNOFILE=1048576
+
+# Turn-off memory accounting by systemd, which is buggy.
+MemoryAccounting=no
 
 # Specifies the maximum number of threads this process can create
 TasksMax=infinity
 
 # Disable timeout logic and wait until process is stopped
-TimeoutStopSec=infinity
+TimeoutSec=infinity
+
+# Disable killing of MinIO by the kernel's OOM killer
+OOMScoreAdjust=-1000
+
 SendSIGKILL=no
 
 [Install]

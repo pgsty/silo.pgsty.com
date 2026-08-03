@@ -1,5 +1,5 @@
 ---
-title: "Generate Let’s Encrypt certificate using Certbot for MinIO"
+title: "Generate a Let’s Encrypt Certificate for Silo with Certbot"
 url: "/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/"
 weight: 60
 minio_origin: true

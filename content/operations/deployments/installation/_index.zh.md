@@ -1,7 +1,7 @@
 ---
 title: "安装与管理"
 url: "/zh/operations/deployments/installation/"
-description: "MinIO Deployment Topologies and Installation Instructions"
+description: "Silo 部署拓扑与安装说明"
 weight: 10
 icon: fa-solid fa-download
 minio_origin: true
@@ -15,15 +15,13 @@ silo_modified: true
 <a id="deploy-minio-distributed"></a>
 <a id="id1"></a>
 
-本节介绍如何在 [Kubernetes](/zh/operations/deployments/kubernetes/#minio-kubernetes) 和 [裸金属](/zh/operations/deployments/baremetal/#minio-baremetal) 基础设施上安装和管理采用 AGPLv3 许可的 Community MinIO 对象存储。
+本节介绍如何在 [Kubernetes](/zh/operations/deployments/kubernetes/#minio-kubernetes) 和 [裸机或虚拟化](/zh/operations/deployments/baremetal/#minio-baremetal) 基础设施上安装与管理采用 AGPLv3 许可的 Silo 对象存储服务端。
 
-- [Installing and Running MinIO on Linux](https://www.youtube.com/watch?v=74usXkZpNt8&list=PLFOIsHSSYIK1BnzVY66pCL-iJ30Ht9t1o)
-- [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
-- [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
+`minio` 可执行文件、`MINIO_*` 环境变量、S3 与 Admin API、盘上格式，以及 MinIO Operator 资源名都是兼容契约。叙述使用 Silo 品牌，命令和标识符则保留兼容名称。
 
-MinIO 是一个软件定义的高性能分布式对象存储服务器。 你可以在消费级或企业级硬件上，以及多种操作系统和架构上运行 MinIO。
+Silo 是兼容 S3 的软件定义分布式对象存储服务端。[下载页面](/zh/download/) 是当前已发布操作系统与架构制品的事实来源。
 
-所有 MinIO 部署都实现了 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) 后端。 你可以使用以下拓扑之一部署 MinIO：
+Silo 使用 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) 保护对象数据。你可以选择以下拓扑：
 
 **[单机单盘](#minio-snsd) （SNSD，即”单机”模式）**
 
@@ -49,33 +47,26 @@ MinIO 是一个软件定义的高性能分布式对象存储服务器。 你可�
 
 ## Kubernetes {#kubernetes}
 
-MinIO 提供 Kubernetes 原生的 Operator 框架，用于在你的托管基础设施上管理和部署 Tenant。
+已经归档的 MinIO Kubernetes Operator `v7.1.1` 可以管理运行 Silo 服务端镜像的 Tenant 资源。Operator、Chart、CRD 与 `Tenant` Kind 保留上游名称；其上游发布周期现已冻结。
 
-MinIO 完全支持上游 Kubernetes，以及多数基于上游构建的发行版。 其中包括但不限于 RedHat Openshift、SUSE Rancher 和 VMWare Tanzu。 MinIO 也完全支持云厂商提供的 Kubernetes 引擎，例如 Elastic Kubernetes Engine、Google Kubernetes Service 和 Azure Kubernetes Service。
+这些保留的 Operator 指南描述一份兼容快照。上游仓库已于 2026-03-20 归档，因此请根据 Kubernetes 发行版验证 `v7.1.1`，并将 Tenant 镜像覆盖为 `pgsty/minio`；Silo 项目不继承上游原厂商曾经的平台支持矩阵声明。
 
-请选择最适合你的 Kubernetes 基础设施的链接。 如果你的提供商未列出，请以上游 Kubernetes 文档为基线，并根据提供商的指导或其与上游语义和行为的差异进行调整。
-
-- [在 Kubernetes (Upstream) 上部署 MinIO](/zh/operations/deployments/kubernetes/#deploy-operator-kubernetes)
-- [在 Openshift Kubernetes 上部署 MinIO](/zh/operations/deployments/kubernetes/#deploy-operator-openshift)
-- [在 SUSE Rancher Kubernetes 上部署 MinIO](/zh/operations/deployments/kubernetes/#deploy-operator-rancher)
-- [在 Elastic Kubernetes Service 上部署 MinIO](/zh/operations/deployments/kubernetes/#deploy-operator-eks)
-- [在 Google Kubernetes Engine 上部署 MinIO](/zh/operations/deployments/kubernetes/#deploy-operator-gke)
-- [在 Azure Kubernetes Service 上部署 MinIO](/zh/operations/deployments/kubernetes/#deploy-operator-aks)
+- [使用 Helm 部署 Silo Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)
+- [部署 MinIO Operator](/zh/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/)
+- [查看 Kubernetes 部署说明](/zh/operations/deployments/kubernetes/)
 
 ## 裸金属 {#id3}
 
-MinIO 支持部署到裸机基础设施上，包括运行 Linux、MacOS 和 Windows 的物理机或虚拟化主机。 你也可以在受支持的操作系统上以容器方式部署 MinIO。
+Silo 可以运行在物理机、虚拟化主机或容器中。请查阅当前下载矩阵和各平台页面，确认已验证的制品与范围。
 
-- [在 RedHat Linux 上部署 MinIO](/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#deploy-minio-rhel)
-- [在 Ubuntu Linux 上部署 MinIO](/zh/operations/deployments/baremetal-deploy-minio-on-ubuntu-linux/#deploy-minio-ubuntu)
-- [以容器方式部署 MinIO](/zh/operations/deployments/baremetal-deploy-minio-as-a-container/#deploy-minio-container)
-- [在 MacOS 上部署 MinIO](/zh/operations/deployments/baremetal-deploy-minio-on-macos/#deploy-minio-macos)
-- [在 Windows 上部署 MinIO](/zh/operations/deployments/baremetal-deploy-minio-on-windows/#deploy-minio-windows)
+- [在 Red Hat Linux 上部署 Silo](/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#deploy-minio-rhel)
+- [在 Ubuntu Linux 上部署 Silo](/zh/operations/deployments/baremetal-deploy-minio-on-ubuntu-linux/#deploy-minio-ubuntu)
+- [以容器方式部署 Silo](/zh/operations/deployments/baremetal-deploy-minio-as-a-container/#deploy-minio-container)
+- [在 macOS 上部署 Silo](/zh/operations/deployments/baremetal-deploy-minio-on-macos/#deploy-minio-macos)
+- [在 Windows 上部署 Silo](/zh/operations/deployments/baremetal-deploy-minio-on-windows/#deploy-minio-windows)
 
 {{% alert color="warning" %}}
 **重要**
 
-MinIO 强烈建议在长期开发和生产环境中使用 [Linux (RHEL, Ubuntu)](https://silo.pgsty.com/zh/operations/deployments/baremetal/) 或 [Kubernetes (Upstream, OpenShift)](https://silo.pgsty.com/zh/operations/deployments/kubernetes/)。
-
-对于 MacOS、Windows 或容器化部署上的 <abbr title="单机多盘">SNMD</abbr> 和 <abbr title="多机多盘">MNMD</abbr> 拓扑，MinIO 不保证提供支持。
+发布制品的存在不代表所有平台都有同等的生产验证范围。长期工作负载应优先使用经过测试的 Linux 或 Kubernetes 部署，固定确切的软件包/镜像版本，并根据所选拓扑验证存储、故障域、升级与恢复行为。
 {{% /alert %}}

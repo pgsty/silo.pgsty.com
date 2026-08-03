@@ -19,6 +19,8 @@ Replication can be done in any of the following ways:
 
 Ensure you meet the following prerequisites before you set up any of these replication configurations.
 
+<a id="minio-bucket-replication-serverside-oneway-permissions"></a>
+
 ## Permissions Required for Setting Up Bucket Replication {#permissions-required-for-setting-up-bucket-replication}
 
 Bucket replication requires specific permissions on the source and destination deployments to configure and enable replication rules.

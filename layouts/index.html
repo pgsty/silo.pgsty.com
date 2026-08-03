@@ -5,7 +5,7 @@
 {{- $evidenceProjects := hugo.Data.home.projects -}}
 {{- $voices := hugo.Data.home.voices -}}
 {{- $socialImage := "images/silo-social-card.png" | absURL -}}
-{{- $socialAlt := cond $zh "SILO — Pigsty 持续维护的 MinIO 社区分支" "SILO — community-maintained MinIO fork by Pigsty" -}}
+{{- $socialAlt := cond $zh "SILO — Pigsty 持续维护的 S3 兼容对象存储" "SILO — S3-compatible object storage maintained by Pigsty" -}}
 <!DOCTYPE html>
 <html lang="{{ $locale }}" class="no-js">
 <head>
@@ -160,7 +160,7 @@
           <div class="hero-copy" id="about">
             <p class="hero-eyebrow anim" style="--d:0">
               <span class="eyebrow-mark" aria-hidden="true"></span>
-              <span class="eyebrow-en">{{ if $zh }}开源的 S3/MinIO 兼容对象存储{{ else }}OPEN-SOURCE S3/MINIO-COMPATIBLE OBJECT STORAGE{{ end }}</span>
+              <span class="eyebrow-en">{{ if $zh }}开源 S3 兼容对象存储{{ else }}OPEN-SOURCE S3-COMPATIBLE OBJECT STORAGE{{ end }}</span>
             </p>
 
             <h1 class="hero-title silo-hero-title anim" style="--d:1">
@@ -170,10 +170,10 @@
 
             <p class="hero-sub anim" style="--d:2">
               {{ if $zh }}
-              <span>一个由 <a href="https://pigsty.cc" target="_blank" rel="noopener">Pigsty 社区</a>维护的 <a href="https://github.com/minio/minio" target="_blank" rel="noopener">MinIO</a> 分支</span>
+              <span>Silo 由 <a href="https://pigsty.cc" target="_blank" rel="noopener">Pigsty 社区</a>持续维护</span>
               <span>关注供应链持续性并提供后续安全更新</span>
               {{ else }}
-              <span>A <a href="https://github.com/minio/minio" target="_blank" rel="noopener">MinIO</a> fork maintained by the <a href="https://pigsty.io" target="_blank" rel="noopener">Pigsty Community</a></span>
+              <span>Silo is maintained by the <a href="https://pigsty.io" target="_blank" rel="noopener">Pigsty Community</a></span>
               <span>With supply-chain continuity and security updates</span>
               {{ end }}
             </p>
@@ -198,7 +198,7 @@
                     <div class="silo-chip">
                       <small>OBJECT STORAGE CORE</small>
                       <strong>SILO</strong>
-                      <span>MINIO-COMPATIBLE</span>
+                      <span>S3-COMPATIBLE</span>
                     </div>
                     <div class="silo-port silo-port--console"><small>CONSOLE</small><strong>:9001</strong><span>OPERATOR ACCESS</span></div>
                   </div>

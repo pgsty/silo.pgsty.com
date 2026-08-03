@@ -1,9 +1,9 @@
 ---
-title: "为 MinIO Server 配置 NGINX 代理"
+title: "为 Silo 服务端配置 NGINX 代理"
 url: "/zh/integrations/setup-nginx-proxy-with-minio/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-server-nginx"></a>

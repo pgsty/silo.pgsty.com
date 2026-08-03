@@ -1,5 +1,5 @@
 ---
-title: "Deploy MinIO on MacOS"
+title: "Deploy Silo on macOS"
 url: "/operations/deployments/baremetal-deploy-minio-on-macos/"
 weight: 40
 minio_origin: true
@@ -12,21 +12,13 @@ silo_modified: true
 - [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
 - [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
 
-This page documents deploying MinIO onto Apple MacOS hosts.
+This page documents deploying Silo onto Apple macOS hosts for development and evaluation.
 
-MinIO officially supports MacOS operating systems in service status, which is typically 3 years from initial release. At the time of writing, that includes:
-
-- macOS 14 (Sonoma) (**Recommended**)
-- macOS 13 (Ventura)
-- macOS 12 (Monterey)
-
-MinIO *may* run on older or out-of-support macOS releases, with limited support or troubleshooting from either MinIO or RedHat.
-
-MinIO supports both Intel and ARM-based macOS hardware and provides distinct binaries for each architecture. Ensure you download the correct binary as per the documentation for your host system.
+Silo publishes separate macOS archives for Intel and Apple Silicon. The current project CI runs on Linux and does not establish a macOS support-lifecycle guarantee, so the inherited, dated list of “supported” macOS releases has been removed. Validate the exact operating-system version and workload before production use.
 
 The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and Single-Node Single-Drive (SNSD) topologies in support of early development and evaluation environments.
 
-MinIO does not officially support Multi-Node Multi-Drive (MNMD) “Distributed” configurations on MacOS hosts.
+This guide does not validate Multi-Node Multi-Drive (MNMD) distributed configurations on macOS hosts.
 
 ## Considerations {#considerations}
 
@@ -44,46 +36,17 @@ While you can change erasure parity settings at any time, objects written with a
 
 ## Procedure {#procedure}
 
-### 1. Download the MinIO Binary {#download-the-minio-binary}
+### 1. Download the Silo Binary {#download-the-minio-binary}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Homebrew" %}}
-Open a Terminal and run the following command to install the latest stable MinIO package using [Homebrew](https://brew.sh)<a id="homebrew"></a>.
+Choose the Intel (`darwin_amd64`) or Apple Silicon (`darwin_arm64`) archive from [Download & Install](/download/#server). Verify the archive against the checksum published with the same release, extract it, and install the `minio` compatibility binary:
 
 ```shell
-brew install minio/stable/minio
+tar -xzf minio_*_darwin_*.tar.gz
+sudo install -m 0755 ./minio /usr/local/bin/minio
+minio --version
 ```
 
-{{% alert color="warning" %}}
-**Important**
-
-If you previously installed the MinIO server using `brew install minio`, then we recommend that you reinstall from `minio/stable/minio` instead.
-
-```shell
-brew uninstall minio
-brew install minio/stable/minio
-```
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="Binary - arm64" %}}
-Open a Terminal, then use the following commands to download the latest stable MinIO binary, set it to executable, and install it to the system `$PATH`:
-
-> ```shell
-> curl -O https://dl.min.io/server/minio/release/darwin-arm64/minio
-> chmod +x ./minio
-> sudo mv ./minio /usr/local/bin/
-> ```
-{{% /tab %}}
-{{% tab header="Binary - amd64" %}}
-Open a Terminal, then use the following commands to download the latest stable MinIO binary, set it to executable, and install it to the system `$PATH`:
-
-> ```shell
-> curl -O https://dl.min.io/server/minio/release/darwin-amd64/minio
-> chmod +x ./minio
-> sudo mv ./minio /usr/local/bin/
-> ```
-{{% /tab %}}
-{{< /tabpane >}}
+The old Homebrew commands on this page installed the upstream MinIO formula, not Silo, and have therefore been removed.
 
 ### 2. Enable TLS Connectivity {#enable-tls-connectivity}
 

@@ -1,9 +1,9 @@
 ---
-title: "Enable Multiple Domain TLS for MinIO"
+title: "Enable Multiple-Domain TLS for Silo"
 url: "/operations/network-encryption/enable-multiple-domain-minio-tls/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="enable-multiple-domain-tls-for-minio"></a>
@@ -107,7 +107,7 @@ The following steps apply to both new and existing MinIO Deployments using `Kust
 
    The `spec.certConfig.dnsNames` should contain a list of <abbr title="Subject Alternate Names">SAN</abbr> the TLS certificate covers.
 
-   See the [Kustomize Tenant base YAML](https://github.com/minio/operator/blob/master/examples/kustomization/base/tenant.yaml) for a baseline template for guidance in creating or modifying your Tenant resource.
+   See the [pinned `v7.1.1` Kustomize Tenant base YAML](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/base/tenant.yaml) for a baseline template for guidance in creating or modifying your Tenant resource.
 3. Apply the new Kustomization template
 
    Once you apply the changes, the MinIO Operator automatically redeploys the Tenant with the updated configuration.

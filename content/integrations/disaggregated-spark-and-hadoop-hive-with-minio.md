@@ -1,5 +1,5 @@
 ---
-title: "Disaggregated HDP Spark and Hive with MinIO"
+title: "Disaggregated HDP Spark and Hive with Silo"
 url: "/integrations/disaggregated-spark-and-hadoop-hive-with-minio/"
 weight: 20
 minio_origin: true

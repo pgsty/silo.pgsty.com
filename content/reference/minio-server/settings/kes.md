@@ -3,7 +3,7 @@ title: "Key Encryption Service Settings"
 url: "/reference/minio-server/settings/kes/"
 weight: 100
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="key-encryption-service-settings"></a>
@@ -27,7 +27,7 @@ Each configuration setting controls fundamental MinIO behavior and functionality
 
 ## Key Encryption Service {#key-encryption-service}
 
-Define the following variables to use the Key Encryption Service (KES) to connect to a [supported 3rd party Key Management Service provider](https://docs.min.io/community/minio-kes/#supported-kms-targets).
+Define the following variables to use the Key Encryption Service (KES) to connect to a [supported 3rd party Key Management Service provider](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets).
 
 #### `MINIO_KMS_KES_ENDPOINT` {#envvar.MINIO_KMS_KES_ENDPOINT}
 
@@ -57,7 +57,7 @@ MinIO *requires* access to KES and the external KMS to decrypt the backend and s
 
 *envvar*
 
-Preferred method for authenticating with the encryption service using the KES API key obtained from the [kes identity new](https://docs.min.io/community/minio-kes/cli/kes-identity/new/) command.
+Preferred method for authenticating with the encryption service using the KES API key obtained from the [kes identity new](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/kes-identity/new.md) command.
 
 This environment variable is mutually exclusive with the [`MINIO_KMS_KES_KEY_FILE`](#envvar.MINIO_KMS_KES_KEY_FILE) and [`MINIO_KMS_KES_CERT_FILE`](#envvar.MINIO_KMS_KES_CERT_FILE) environment variables.
 

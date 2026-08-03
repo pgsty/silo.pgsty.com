@@ -1,5 +1,5 @@
 ---
-title: "扩展分布式 MinIO 部署"
+title: "扩展分布式 Silo 部署"
 url: "/zh/operations/deployments/baremetal-expand-minio-deployment/"
 weight: 30
 minio_origin: true
@@ -10,7 +10,7 @@ math: true
 <a id="minio"></a>
 <a id="expand-minio-distributed"></a>
 
-MinIO 支持通过添加新的 [服务器池](/zh/operations/concepts/#minio-intro-server-pool) 来扩展现有的分布式部署。 每个 Pool 都会扩展集群的总可用存储容量。
+Silo 支持通过添加新的[服务器池](/zh/operations/concepts/#minio-intro-server-pool)扩展现有分布式部署。每个 pool 都会增加集群的总可用存储容量。
 
 扩容并不能提供 Business Continuity/Disaster Recovery (BC/DR) 级别的保护。 虽然每个 pool 都是一组相互独立的服务器，并通过各自的 [纠删码集合](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set) 提供可用性，但只要其中一个 pool 完全丢失，MinIO 就会停止该部署中所有 pool 的 I/O。 同样地，只要某个 pool 中的某个纠删码集合失去 quorum，该集合中存储的对象就会发生数据丢失，而不受其他纠删码集合或 pool 数量的影响。
 
@@ -191,82 +191,33 @@ MinIO 建议预先规划足以存放 **至少** 2 年数据的存储容量，并
 
 在 [退役旧硬件 pool](/zh/operations/deployments/baremetal-decommission-server-pool/#minio-decommissioning) 之前，请先完成所有计划中的硬件扩容。
 
-### 1) 在新 服务器池 的每个节点上安装 MinIO 二进制文件 {#id15}
+### 1) 在新服务器池的每个节点上安装 Silo 二进制 {#id15}
 
-以下选项卡给出了在 64 位 Linux 操作系统上通过 RPM、DEB 或二进制方式安装 MinIO 的示例。 RPM 和 DEB 软件包会自动将 MinIO 安装到所需系统路径， 并为 `systemctl` 创建 `minio` 服务。 MinIO 强烈建议优先使用 RPM 或 DEB 安装方式。 如需更新由 `systemctl` 管理的部署，请参阅 [升级由 systemctl 管理的 MinIO 部署](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl)。
-
-{{% details title="amd64 (Intel 或 AMD 64 位处理器)" closed="false" %}}
-对于运行 Linux 且使用 Intel 或 AMD 64 位处理器的机器， 请使用以下任一方式下载 MinIO server 安装文件。
+安装与现有 pool **完全相同的公开 Silo 版本**。从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 的 RPM、DEB 或独立归档，并在安装前校验摘要。当前 Silo 发布只提供这两种 Linux 架构，因此已删除继承文档中指向未发布 `ppc64le` 与 `s390x` 制品的说明。
 
 {{< tabpane text=true persist=header >}}
-{{% tab header="RPM (RHEL)" %}}
-使用以下命令下载最新稳定版 MinIO RPM 并完成安装。
-
+{{% tab header="RPM（RHEL 系）" %}}
 ```shell
-wget RPMURL -O minio.rpm
-sudo dnf install minio.rpm
+sudo dnf install ./minio-*.rpm
 ```
 {{% /tab %}}
-{{% tab header="DEB (Debian/Ubuntu)" %}}
-使用以下命令下载最新稳定版 MinIO DEB 并完成安装：
-
+{{% tab header="DEB（Debian/Ubuntu）" %}}
 ```shell
-wget DEBURL -O minio.deb
-sudo dpkg -i minio.deb
+sudo dpkg -i ./minio_*_amd64.deb
 ```
-{{% /tab %}}
-{{% tab header="Binary" %}}
-使用以下命令下载最新稳定版 MinIO 二进制文件， 并将其安装到系统 `$PATH` 中：
 
+ARM64 主机请使用名称中带 `arm64` 的软件包。
+{{% /tab %}}
+{{% tab header="独立归档" %}}
 ```shell
-wget https://dl.min.io/server/minio/release/linux-amd64/minio
-chmod +x minio
-sudo mv minio /usr/local/bin/
+tar -xzf minio_*_linux_*.tar.gz
+sudo install -m 0755 ./minio /usr/local/bin/minio
+minio --version
 ```
 {{% /tab %}}
 {{< /tabpane >}}
-{{% /details %}}
 
-{{% details title="arm64 (ARM 64 位处理器)" closed="true" %}}
-对于运行 Linux 且使用 ARM 64 位处理器的机器， 请使用以下任一方式下载 MinIO server 安装文件。
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="RPM (RHEL)" %}}
-使用以下命令下载最新稳定版 MinIO RPM 并完成安装。
-
-```shell
-wget |minio-rpmarm64| -O minio.rpm
-sudo dnf install minio.rpm
-```
-{{% /tab %}}
-{{% tab header="DEB (Debian/Ubuntu)" %}}
-使用以下命令下载最新稳定版 MinIO DEB 并完成安装：
-
-```shell
-wget |minio-debarm64| -O minio.deb
-sudo dpkg -i minio.deb
-```
-{{% /tab %}}
-{{% tab header="Binary" %}}
-使用以下命令下载最新稳定版 MinIO 二进制文件， 并将其安装到系统 `$PATH` 中：
-
-```shell
-wget https://dl.min.io/server/minio/release/linux-arm64/minio
-chmod +x minio
-MINIO_ROOT_USER=admin MINIO_ROOT_PASSWORD=password ./minio server /mnt/data --console-address ":9001"
-```
-{{% /tab %}}
-{{< /tabpane >}}
-{{% /details %}}
-
-{{% details title="其他架构" closed="true" %}}
-MinIO 还支持以下架构：
-
-- ppc64le
-- s390x
-
-如需获取这些架构对应的二进制、RPM 或 DEB 文件下载说明， 请参阅 [MinIO download page](https://min.io/download#/linux?ref=docs-install)。
-{{% /details %}}
+在每个新节点运行 `minio --version` 并与现有 pool 比对；不要把版本不同的节点加入集群。需要升级时，请遵循[`systemctl` 管理的 Silo 升级流程](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl)。
 
 ### 2) 添加 TLS/SSL 证书 {#tls-ssl}
 
@@ -302,6 +253,8 @@ After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio
 
 [Service]
+Type=notify
+
 WorkingDirectory=/usr/local
 
 User=minio-user
@@ -309,25 +262,26 @@ Group=minio-user
 ProtectProc=invisible
 
 EnvironmentFile=-/etc/default/minio
-ExecStartPre=/bin/bash -c "if [ -z \"${MINIO_VOLUMES}\" ]; then echo \"Variable MINIO_VOLUMES not set in /etc/default/minio\"; exit 1; fi"
 ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
-
-# MinIO RELEASE.2023-05-04T21-44-30Z adds support for Type=notify (https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=)
-# This may improve systemctl setups where other services use `After=minio.server`
-# Uncomment the line to enable the functionality
-# Type=notify
 
 # Let systemd restart this service always
 Restart=always
 
 # Specifies the maximum file descriptor number that can be opened by this process
-LimitNOFILE=65536
+LimitNOFILE=1048576
+
+# Turn-off memory accounting by systemd, which is buggy.
+MemoryAccounting=no
 
 # Specifies the maximum number of threads this process can create
 TasksMax=infinity
 
 # Disable timeout logic and wait until process is stopped
-TimeoutStopSec=infinity
+TimeoutSec=infinity
+
+# Disable killing of MinIO by the kernel's OOM killer
+OOMScoreAdjust=-1000
+
 SendSIGKILL=no
 
 [Install]

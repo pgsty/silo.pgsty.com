@@ -3,7 +3,7 @@ title: "Metrics version 2"
 url: "/zh/operations/monitoring/metrics-v2/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="metrics-version-2"></a>
@@ -15,9 +15,9 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 Metrics version 2 将指标划分为以下三个类别：
 
-- [集群指标](#minio-available-cluster-metrics)
-- [存储桶指标](#minio-available-bucket-metrics)
-- [资源指标](#minio-available-resource-metrics)
+- [集群指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics)
+- [存储桶指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)
+- [资源指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-resource-metrics)
 
 每个 v2 端点都会返回其所属类别的全部指标。 例如，抓取以下端点会返回所有集群指标：
 
@@ -39,7 +39,7 @@ MinIO 提供两个 [Grafana 仪表板](/zh/operations/monitoring/grafana/#minio-
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="集群指标" %}}
-你可以使用以下 URL 端点抓取 [集群级指标](#minio-available-cluster-metrics)：
+你可以使用以下 URL 端点抓取[集群级指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics)：
 
 ```shell
 http://HOSTNAME:PORT/minio/v2/metrics/cluster
@@ -59,7 +59,7 @@ RELEASE.2023-07-21T21-12-44Z
 {{% alert color="info" %}}
 **变更: RELEASE.2023-08-31T15-31-16Z**
 
-你可以使用以下 URL 端点抓取 [存储桶级指标](#minio-available-bucket-metrics)：
+你可以使用以下 URL 端点抓取[存储桶级指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)：
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -80,7 +80,7 @@ http://HOSTNAME:PORT/minio/v2/metrics/bucket
 
 {{% /alert %}}
 
-你可以使用以下 URL 端点抓取 [资源指标](#minio-available-resource-metrics)：
+你可以使用以下 URL 端点抓取[资源指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-resource-metrics)：
 
 ```shell
 http://HOSTNAME:PORT/minio/v2/metrics/resource
@@ -90,9 +90,9 @@ http://HOSTNAME:PORT/minio/v2/metrics/resource
 {{% /tab %}}
 {{< /tabpane >}}
 
-- [集群指标](#minio-available-cluster-metrics)
-- [存储桶指标](#minio-available-bucket-metrics)
-- [资源指标](#minio-available-resource-metrics)
+- [集群指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics)
+- [存储桶指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)
+- [资源指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-resource-metrics)
 
 > {{% alert color="info" %}}
 > **变更: RELEASE.2025-03-12T17-29-24Z**

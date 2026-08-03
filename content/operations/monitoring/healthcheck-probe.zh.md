@@ -3,7 +3,7 @@ title: "健康检查 API"
 url: "/zh/operations/monitoring/healthcheck-probe/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="api"></a>
@@ -23,7 +23,7 @@ curl -I https://minio.example.net:9000/minio/health/live
 
 返回 `200 OK` 表示该 MinIO server 在线且工作正常。 任何其他 HTTP 状态码都表示访问该 server 存在问题，例如临时网络故障或潜在停机。
 
-单靠 healthcheck probe 无法判断某个 MinIO server 是否离线。 它只能判断当前主机是否能够访问该 server。 建议配置 Prometheus [告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)，使用 [metrics v3](/zh/operations/monitoring/metrics-and-alerts/#minio-available-v3-cluster-metrics) 的 `minio_cluster_health_nodes_offline_count` 或 [metrics v2](/zh/operations/monitoring/metrics-v2/#minio-available-cluster-metrics) 的 `minio_cluster_nodes_offline_total`，以检测一个或多个 MinIO 节点是否离线。
+单靠 healthcheck probe 无法判断某个 MinIO server 是否离线。 它只能判断当前主机是否能够访问该 server。 建议配置 Prometheus [告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)，使用 [metrics v3（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-cluster-metrics) 的 `minio_cluster_health_nodes_offline_count` 或 [metrics v2（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics) 的 `minio_cluster_nodes_offline_total`，以检测一个或多个 MinIO 节点是否离线。
 
 <a id="id3"></a>
 

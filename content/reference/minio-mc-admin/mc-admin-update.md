@@ -3,7 +3,7 @@ title: "mc admin update"
 url: "/reference/minio-mc-admin/mc-admin-update/"
 weight: 180
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="mc-admin-update"></a>
@@ -12,25 +12,33 @@ silo_modified: false
 
 ## Description {#description}
 
-The [`mc admin update`](#command-mc.admin.update) command updates all MinIO servers in the deployment. The command also supports using a private mirror server for environments where the deployment does not have public internet access.
+The [`mc admin update`](#command-mc.admin.update) command invokes the MinIO-compatible server-side in-place update API. The client can pass an optional release mirror URL, and the server distributes the selected binary to all nodes.
 
 After running the command, a prompt displays to confirm the update. Type `y` and `[ENTER]` to confirm and proceed with the update.
 
 The user **must** have `write` permissions for the target location where the binary installs.
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
+{{% alert color="danger" %}}
+**Do not use the default update path on Silo**
 
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+As of 2026-08-03, both the latest published Silo server (`RELEASE.2026-06-18T00-00-00Z`) and the current local `pgsty/minio` branch still resolve an omitted `MIRROR_URL` through the upstream `dl.min.io` release feed and retain the upstream MinIO signing key. Running `mc admin update ALIAS` against an update-enabled Silo server can therefore replace Silo with an upstream MinIO binary.
+
+Set `MINIO_UPDATE=off` on Silo servers and upgrade through [Download & Install](/download/#server), a trusted package repository, or a manually verified Silo artifact. This page retains the command contract for compatibility; it is not the recommended Silo upgrade procedure.
+{{% /alert %}}
+
+{{% alert color="info" %}}
+**Use `mc admin` on Silo or compatible MinIO deployments only**
+
+[`mc admin`](/reference/minio-mc-admin/#command-mc.admin) uses MinIO-specific administration APIs. General S3 API compatibility alone does not imply that another object store supports these commands.
 {{% /alert %}}
 
 ## Considerations {#considerations}
 
-### Updates are Non-Disruptive {#updates-are-non-disruptive}
+### Coordinated Restart {#updates-are-non-disruptive}
 
-[`mc admin update`](#command-mc.admin.update) updates the binary and restarts all MinIO servers in the deployment simultaneously. MinIO operations are atomic and strictly consistent and as such the restart process is non-disruptive to applications.
+[`mc admin update`](#command-mc.admin.update) updates the binary and restarts all servers in the deployment simultaneously. Applications should expect a temporary loss of availability and retry failed or interrupted requests; atomic object operations do not make a full-cluster restart invisible.
 
-MinIO strongly recommends only performing simultaneous upgrade-and-restart procedures. Do not perform “rolling” (that is, one node at a time) upgrade procedures.
+Use a coordinated upgrade-and-restart procedure. Do not perform a rolling (one node at a time) binary replacement unless the release documentation explicitly states that mixed versions are supported.
 
 ### Permissions {#permissions}
 
@@ -38,13 +46,13 @@ The user running the command **must** have `write` permissions to the target pat
 
 ## Examples {#examples}
 
-Use [`mc admin update`](#command-mc.admin.update) to update each [`minio`](/reference/minio-server/#command-minio) server process in the MinIO deployment:
+The inherited default form below is shown only to identify the command contract. **Do not run it against Silo**, because omitting `MIRROR_URL` selects the upstream MinIO update feed:
 
 ```shell
 mc admin update ALIAS
 ```
 
-Replace [`ALIAS`](#mc.admin.update.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment.
+Replace [`ALIAS`](#mc.admin.update.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the target deployment.
 
 After running the command, answer yes to the prompt to confirm and process the update.
 
@@ -74,7 +82,7 @@ Use [`mc alias list`](/reference/minio-mc/mc-alias-list/#command-mc.alias.list) 
 
 *mc-cmd*
 
-The mirror URL of the `minio` server binary to use for updating MinIO servers in the [`ALIAS`](#mc.admin.update.ALIAS) deployment.
+The release-manifest URL used by the target server to locate the `minio` binary. Supplying a URL does not make an artifact trusted; verify the complete update and signature contract before using this compatibility path. Silo operators should prefer the documented package or manual upgrade procedure.
 
 #### `--yes, -y` {#mc.admin.update.-yes}
 

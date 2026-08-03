@@ -1,9 +1,9 @@
 ---
-title: "MinIO Client Settings"
+title: "Silo Client Settings"
 url: "/reference/minio-mc/minio-client-settings/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-client-settings"></a>

@@ -1,9 +1,9 @@
 ---
-title: "MinIO 客户端设置"
+title: "Silo 客户端设置"
 url: "/zh/reference/minio-mc/minio-client-settings/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>

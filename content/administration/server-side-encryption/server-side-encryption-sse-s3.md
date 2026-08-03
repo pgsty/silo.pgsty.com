@@ -3,7 +3,7 @@ title: "Server-Side Encryption Per-Deployment Key (SSE-S3)"
 url: "/administration/server-side-encryption/server-side-encryption-sse-s3/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="server-side-encryption-per-deployment-key-sse-s3"></a>
@@ -11,7 +11,7 @@ silo_modified: false
 
 MinIO Server-Side Encryption (SSE) protects objects as part of write operations, allowing clients to take advantage of server processing power to secure objects at the storage layer (encryption-at-rest). SSE also provides key functionality to regulatory and compliance requirements around secure locking and erasure.
 
-MinIO SSE uses the [MinIO Key Encryption Service (KES)](https://docs.min.io/community/minio-kes/) and an external Key Management Service (KMS) for performing secured cryptographic operations at scale. MinIO also supports client-managed key management, where the application takes full responsibility for creating and managing encryption keys for use with MinIO SSE.
+MinIO SSE uses the [MinIO Key Encryption Service (KES)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) and an external Key Management Service (KMS) for performing secured cryptographic operations at scale. MinIO also supports client-managed key management, where the application takes full responsibility for creating and managing encryption keys for use with MinIO SSE.
 
 MinIO SSE-S3 en/decrypts objects using an External Key (EK) managed by a Key Management System (KMS). You must specify the <abbr title="External Key">EK</abbr> using the [`MINIO_KMS_KES_KEY_NAME`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) environment variable when starting up the MinIO server. MinIO uses the same EK for *all* SSE-S3 cryptographic operations.
 
@@ -25,13 +25,13 @@ mc encrypt set sse-s3 play/mybucket
 
 MinIO SSE-S3 is functionally compatible with AWS S3 [Server-Side Encryption with Amazon S3-Managed Keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingServerSideEncryption.html) while expanding support to include the following KMS providers:
 
-- [AWS Secrets Manager](https://docs.min.io/community/minio-kes/integrations/aws-secrets-manager/)
-- [Azure KeyVault](https://docs.min.io/community/minio-kes/integrations/azure-keyvault/)
-- [Entrust KeyControl](https://docs.min.io/community/minio-kes/integrations/entrust-keycontrol/)
-- [Fortanix SDKMS](https://docs.min.io/community/minio-kes/integrations/fortanix-sdkms/)
-- [Google Cloud Secret Manager](https://docs.min.io/community/minio-kes/integrations/google-cloud-secret-manager/)
-- [HashiCorp Vault](https://docs.min.io/community/minio-kes/integrations/hashicorp-vault-keystore/)
-- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://docs.min.io/community/minio-kes/integrations/thales-ciphertrust/)
+- [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
+- [Azure KeyVault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
+- [Entrust KeyControl](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/entrust-keycontrol.md)
+- [Fortanix SDKMS](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/fortanix-sdkms.md)
+- [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
+- [HashiCorp Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
+- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
 <a id="minio-encryption-sse-s3-quickstart"></a>
 
@@ -49,13 +49,13 @@ The following procedure uses the `play` MinIO <abbr title="Key Encryption Servic
 
 For extended development or production environments, use one of the following supported external Key Management Services (KMS):
 
-- [AWS Secrets Manager](https://docs.min.io/community/minio-kes/integrations/aws-secrets-manager/)
-- [Azure KeyVault](https://docs.min.io/community/minio-kes/integrations/azure-keyvault/)
-- [Entrust KeyControl](https://docs.min.io/community/minio-kes/integrations/entrust-keycontrol/)
-- [Fortanix SDKMS](https://docs.min.io/community/minio-kes/integrations/fortanix-sdkms/)
-- [Google Cloud Secret Manager](https://docs.min.io/community/minio-kes/integrations/google-cloud-secret-manager/)
-- [HashiCorp Vault](https://docs.min.io/community/minio-kes/integrations/hashicorp-vault-keystore/)
-- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://docs.min.io/community/minio-kes/integrations/thales-ciphertrust/)
+- [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
+- [Azure KeyVault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
+- [Entrust KeyControl](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/entrust-keycontrol.md)
+- [Fortanix SDKMS](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/fortanix-sdkms.md)
+- [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
+- [HashiCorp Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
+- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
 {{% alert color="warning" %}}
 **Important**
@@ -70,11 +70,11 @@ The MinIO KES `Play` sandbox is public and grants root access to all created Ext
 This procedure requires the following components:
 
 - Install [`mc`](/reference/minio-mc/#command-mc) on a machine with network access to the source deployment. See the `mc` [Installation Quickstart](/reference/minio-mc/#mc-install) for instructions on downloading and installing `mc`.
-- Install [MinIO Key Encryption Service (KES)](https://docs.min.io/community/minio-kes/) on a machine with internet access. See the KES [Getting Started](https://docs.min.io/community/minio-kes/tutorials/getting-started/) guide for instructions on downloading, installing, and configuring KES.
+- Install [MinIO Key Encryption Service (KES)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) on a machine with internet access. See the KES [Getting Started](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md) guide for instructions on downloading, installing, and configuring KES.
 
 ### 1) Create an Encryption Key for SSE-S3 Encryption {#create-an-encryption-key-for-sse-s3-encryption}
 
-Use the [kes](https://docs.min.io/community/minio-kes/cli) command line tool to create a new External Key (EK) for use with SSE-S3 Encryption.
+Use the [kes](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/_index.md) command line tool to create a new External Key (EK) for use with SSE-S3 Encryption.
 
 The following command retrieves the root [identity](https://github.com/minio/kes/wiki/Configuration#policy-configuration) for the KES server connected to the KES `play` sandbox:
 
@@ -95,19 +95,19 @@ export KES_CLIENT_CERT=root.cert
   <tbody>
     <tr>
       <td><p><code>KES_CLIENT_KEY</code></p></td>
-      <td><p>The private key for an <a href="https://docs.min.io/community/minio-kes/concepts/#authorization">identity</a> on the KES server.
-The identity must grant access to at minimum the <code>/v1/create</code>, <code>/v1/generate</code>, and <code>/v1/list</code> <a href="https://docs.min.io/community/minio-kes/concepts/server-api/">API endpoints</a>.
+      <td><p>The private key for an <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/_index.md#authorization">identity</a> on the KES server.
+The identity must grant access to at minimum the <code>/v1/create</code>, <code>/v1/generate</code>, and <code>/v1/list</code> <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/server-api.md">API endpoints</a>.
 This step uses the <code>root</code> identity for the MinIO <code>play</code> KES sandbox, which provides access to all operations on the KES server.</p></td>
     </tr>
     <tr>
       <td><p><code>KES_CLIENT_CERT</code></p></td>
-      <td><p>The corresponding certificate for the <a href="https://docs.min.io/community/minio-kes/concepts/#authorization">identity</a> on the KES server.
+      <td><p>The corresponding certificate for the <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/_index.md#authorization">identity</a> on the KES server.
 This step uses the <code>root</code> identity for the MinIO <code>play</code> KES sandbox, which provides access to all operations on the KES server.</p></td>
     </tr>
   </tbody>
 </table>
 
-The following command creates a new <abbr title="External Key">EK</abbr> through the [KES CLI](https://docs.min.io/community/minio-kes/cli/kes-key/create/):
+The following command creates a new <abbr title="External Key">EK</abbr> through the [KES CLI](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/kes-key/create.md):
 
 ```shell
 kes key create my-minio-sse-s3-key

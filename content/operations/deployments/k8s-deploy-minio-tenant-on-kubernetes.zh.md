@@ -1,28 +1,28 @@
 ---
-title: "部署一个 MinIO Tenant"
+title: "部署 Silo Tenant"
 url: "/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-tenant"></a>
 <a id="deploy-minio-tenant-redhat-openshift"></a>
 <a id="minio-k8s-deploy-minio-tenant"></a>
 
-本步骤说明如何使用 MinIO Operator 部署 MinIO Tenant。
+本步骤说明如何使用 MinIO Operator v7.1.1 管理运行 Silo 服务端镜像的 Tenant。上游 Operator 仓库已于 2026-03-20 归档并设为只读，因此这是一份冻结的兼容基线，而不是仍在维护的 Operator 路径。`MinIO Operator`、`Tenant`、`minio.min.io` API 组以及 CRD 字段名属于上游 Kubernetes 契约，因此保留原名。
 
-部署 Single-Node 拓扑需要额外配置，而这些内容不在本文档覆盖范围内。 如果只是用于本地测试或评估，你也可以根据需要使用简单的 Kubernetes YAML 对象来描述 Single-Node 拓扑。 MinIO 不建议，也不支持在生产环境中使用单节点部署拓扑。
+下文验证过的基线会创建一个四服务端 Tenant。单节点拓扑适合本地测试，但其生产故障模型与存储布局不在本文档覆盖范围内。
 
 本文档默认你已经熟悉所有被引用的 Kubernetes 概念、工具和操作流程。 虽然本文档 *可能* 会以 best-effort 方式提供 Kubernetes 相关资源的配置或部署指导，但它不能替代官方 [Kubernetes Documentation](https://kubernetes.io/docs/)。
 
 <a id="minio-k8s-deploy-minio-tenant-security"></a>
 
-## 使用 Kustomize 部署 MinIO Tenant {#kustomize-minio-tenant}
+## 使用 Kustomize 部署 Silo Tenant {#kustomize-minio-tenant}
 
-以下步骤使用 `kubectl -k`，基于 [MinIO Operator Github 仓库](https://github.com/minio/operator/tree/master/examples/kustomization/base) 中的 `base` Kustomization 模板来部署 MinIO Tenant。
+以下步骤使用 [MinIO Operator v7.1.1 仓库](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/base) 中的 `base` Kustomization 模板，然后将其中默认的上游 MinIO 镜像替换为固定版本的 Silo 镜像。
 
-你也可以从该 [仓库](https://github.com/minio/operator/tree/master/examples/kustomization/) 选择其他 base 或预构建模板作为起点，或者依据 [MinIO Custom Resource Documentation](/zh/reference/operator-crd/#minio-operator-crd) 自行构建 Kustomization 资源。
+你也可以从 v7.1.1 的其他 [示例](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/) 中选择起点，或者依据 [MinIO Custom Resource Documentation](/zh/reference/operator-crd/#minio-operator-crd) 自行构建资源。上游没有更晚的受支持版本；离开此固定快照前，应独立审查任何分支、替代实现或 CRD 变化。
 
 {{% alert color="warning" %}}
 **重要**
@@ -34,18 +34,31 @@ silo_modified: false
 
 1. 为 Tenant 创建 YAML 对象
 
-   使用 `kubectl kustomize` 命令生成一个 YAML 文件，其中包含部署 `base` Tenant 所需的全部 Kubernetes 资源：
+   克隆固定版本的 Operator，并使用 `kubectl kustomize` 生成一个 YAML 文件，其中包含部署 `base` Tenant 所需的全部 Kubernetes 资源：
 
    ```shell
-   kubectl kustomize https://github.com/minio/operator/examples/kustomization/base/ > tenant-base.yaml
+   git clone --branch v7.1.1 --depth 1 https://github.com/minio/operator.git
+   kubectl kustomize operator/examples/kustomization/base > tenant-base.yaml
    ```
 
    该命令会创建一个单独的 YAML 文件，多个对象之间使用 `---` 分隔。 请使用你偏好的编辑器打开此文件。
 
+   上游模板默认使用 `quay.io/minio/minio`。应用前，请在 `kind: Tenant` 对象中把 `spec.image` 改为已验证的 Silo 版本，并关闭继承而来的原地更新器：
+
+   ```yaml
+   spec:
+     image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+     env:
+       - name: MINIO_UPDATE
+         value: "off"
+   ```
+
+   请按标签或摘要固定镜像。若选择更新的 Silo 镜像，应单独审查并测试该版本，而不是沿用 Operator 模板中的上游镜像。
+
    下文各步骤将根据对象的 `kind` 和 `metadata.name` 字段来引用这些对象：
 2. 配置 Tenant 拓扑
 
-   `kind: Tenant` 对象用于描述 MinIO Tenant。
+   `kind: Tenant` 对象用于描述由 MinIO Operator 管理的 Silo 工作负载。
 
    以下字段都带有 `spec.pools[0]` 前缀，用于控制 Tenant 中所有 pod 的 server 数量、每个 server 的卷数量以及存储类：
 
@@ -59,11 +72,11 @@ silo_modified: false
      <tbody>
        <tr>
          <td><p><code>servers</code></p></td>
-         <td><p>要在 服务器池 中部署的 MinIO pod 数量。</p></td>
+         <td><p>要在服务器池中部署的 Silo pod 数量。</p></td>
        </tr>
        <tr>
          <td><p><code>volumesPerServer</code></p></td>
-         <td><p>每个 MinIO pod（<code>servers</code>）要挂载的持久卷数量。
+         <td><p>每个 Silo pod（<code>servers</code>）要挂载的持久卷数量。
    Operator 会为该 Tenant 生成 <code>volumesPerServer x servers</code> 个 Persistent Volume Claim。</p></td>
        </tr>
        <tr>
@@ -84,12 +97,12 @@ silo_modified: false
    - Pod Affinity (`spec.pools[n].podAffinity`)
    - Pod Anti-Affinity (`spec.pools[n].podAntiAffinity`)
 
-   MinIO 建议为 Tenant 配置 Pod Anti-Affinity，以确保 Kubernetes 调度器不会将多个 pod 调度到同一个 worker node 上。
+   生产环境应为 Tenant 配置 Pod Anti-Affinity，避免 Kubernetes 调度器将多个 Tenant pod 放到同一个 worker node 上。
 
    如果你希望将 Tenant 部署到特定 worker node 上，请将对应的 node label 或过滤条件传入 `nodeAffinity` 字段，以约束调度器仅在这些节点上放置 pod。
 4. 配置网络加密
 
-   MinIO Tenant CRD 提供了以下字段，你可以通过它们配置 Tenant 的 TLS 网络加密：
+   MinIO Tenant CRD 提供以下字段，用于配置 Tenant 的 TLS 网络加密：
 
    <table>
      <thead>
@@ -100,26 +113,26 @@ silo_modified: false
      </thead>
      <tbody>
        <tr>
-         <td><p><code>tenant.certificate.requestAutoCert</code></p></td>
-         <td><p>启用或禁用 MinIO <a href="/zh/operations/network-encryption/#minio-tls">自动 TLS 证书生成</a></p><p>若省略该字段，默认值为 <code>true</code>，即启用。</p></td>
+         <td><p><code>spec.requestAutoCert</code></p></td>
+         <td><p>启用或禁用 Silo <a href="/zh/operations/network-encryption/#minio-tls">自动 TLS 证书生成</a>。</p><p>若省略该字段，默认值为 <code>true</code>。</p></td>
        </tr>
        <tr>
-         <td><p><code>tenant.certificate.certConfig</code></p></td>
+         <td><p><code>spec.certConfig</code></p></td>
          <td><p>在启用的情况下，自定义 <a href="/zh/operations/network-encryption/#minio-tls">自动 TLS</a> 的行为。</p></td>
        </tr>
        <tr>
-         <td><p><code>tenant.certificate.externalCertSecret</code></p></td>
+         <td><p><code>spec.externalCertSecret</code></p></td>
          <td><p>通过 Server Name Indication (SNI) 为多个主机名启用 TLS</p><p>指定一个或多个类型为 <code>kubernetes.io/tls</code> 或 <code>cert-manager</code> 的 Kubernetes secret。</p></td>
        </tr>
        <tr>
-         <td><p><code>tenant.certificate.externalCACertSecret</code></p></td>
+         <td><p><code>spec.externalCaCertSecret</code></p></td>
          <td><p>启用对由未知、第三方或内部 Certificate Authorities (CA) 签发的客户端 TLS 证书的校验。</p><p>指定一个或多个类型为 <code>kubernetes.io/tls</code> 的 Kubernetes secret，其中包含某个 CA 的完整证书链。</p></td>
        </tr>
      </tbody>
    </table>
-5. 配置 MinIO 环境变量
+5. 配置 Silo 环境变量
 
-   你可以使用 `tenant.configuration` 字段设置 MinIO Server 环境变量。
+   Silo 保留上游 `MINIO_*` 环境变量契约。你可以通过 Tenant CRD 的 `spec.configuration` 字段所引用的 Secret 提供这些变量，也可以使用 `spec.env` 设置 `MINIO_UPDATE` 等单项变量。
 
    <table>
      <thead>
@@ -130,9 +143,8 @@ silo_modified: false
      </thead>
      <tbody>
        <tr>
-         <td><p><code>tenant.configuration</code></p></td>
-         <td><p>指定一个 Kubernetes opaque secret，其数据负载 <code>config.env</code> 包含你希望设置的每一个 MinIO 环境变量。</p><p><code>config.env</code> 数据负载 <strong>必须</strong> 是一个 base64 编码字符串。
-   你可以先创建一个本地文件，在其中设置环境变量，再通过 <code>cat LOCALFILE | base64</code> 生成该负载。</p></td>
+         <td><p><code>spec.configuration.name</code></p></td>
+         <td><p>指定一个 Kubernetes opaque Secret，其 <code>config.env</code> 键包含要设置的上游兼容环境变量。</p><p>按 v7.1.1 基础模板使用 <code>stringData.config.env</code> 时填写明文；若改用 <code>data.config.env</code>，其值必须经过 base64 编码。</p></td>
        </tr>
      </tbody>
    </table>
@@ -160,11 +172,11 @@ silo_modified: false
    ```shell
    watch kubectl get all -n minio-tenant
    ```
-8. 暴露 Tenant 的 MinIO S3 API 端口
+8. 暴露 Tenant 的 S3 API 端口
 
-   若要在本地机器上测试 MinIO Client [`mc`](/zh/reference/minio-mc/#command-mc)，请转发 MinIO 端口并创建别名。
+   若要在本地机器上测试 Silo 客户端 [`mc`](/zh/reference/minio-mc/#command-mc)，请转发 S3 API 端口并创建别名。
 
-   - 转发 Tenant 的 MinIO 端口：
+   - 转发 Tenant 的 S3 API 端口：
 
    ```shell
    kubectl port-forward svc/MINIO_TENANT_NAME-hl 9000 -n MINIO_TENANT_NAMESPACE
@@ -182,7 +194,7 @@ silo_modified: false
    mc mb myminio/mybucket --insecure
    ```
 
-   如果你为 MinIO Tenant 部署的是由受信任 Certificate Authority (CA) 签发的 TLS 证书，则可以省略 `--insecure` 参数。
+   如果你为 Tenant 部署的是由受信任 Certificate Authority (CA) 签发的 TLS 证书，则可以省略 `--insecure` 参数。
 
    具体说明请参阅 [连接到 Tenant](#create-tenant-connect-tenant)。
 
@@ -190,7 +202,7 @@ silo_modified: false
 
 ## 连接到 Tenant {#tenant}
 
-MinIO Operator 会为 MinIO Tenant 创建服务。
+MinIO Operator 会为 Silo Tenant 创建 Kubernetes Service；这些生成名称仍属于 Operator 契约。
 
 使用 `kubectl get svc -n NAMESPACE` 命令查看已部署的服务。 如果你的 Kubernetes 环境使用自定义的 `kubectl` 替代程序，也可以替换为对应程序名。
 
@@ -205,8 +217,8 @@ TENANT-NAMESPACE-console           LoadBalancer   10.106.103.247   <pending>    
 TENANT-NAMESPACE-hl                ClusterIP      None             <none>        9000/TCP         2d3h
 ```
 
-- `minio` 服务对应 MinIO Tenant 服务。 应用程序应通过该服务对 MinIO Tenant 执行操作。
-- `*-console` 服务对应 [MinIO Console](https://github.com/minio/console)。 管理员应通过该服务访问 MinIO Console，并对 MinIO Tenant 执行管理操作。
+- `minio` 服务暴露 Tenant S3 API。应用程序应通过该服务对 Silo 执行 S3 操作。
+- `*-console` 服务暴露 [Silo Console](/zh/administration/minio-console/)。管理员可以通过该服务进行浏览器管理。
 
 其余服务用于支撑 Tenant 内部操作，并不面向用户或管理员直接使用。
 

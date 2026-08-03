@@ -1,5 +1,5 @@
 ---
-title: "使用 MinIO 的解耦 HDP Spark 和 Hive"
+title: "使用 Silo 的解耦 HDP Spark 和 Hive"
 url: "/zh/integrations/disaggregated-spark-and-hadoop-hive-with-minio/"
 weight: 20
 minio_origin: true

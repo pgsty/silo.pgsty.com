@@ -1,5 +1,5 @@
 ---
-title: "Using MinIO with Veeam"
+title: "Using Silo with Veeam"
 url: "/integrations/using-minio-with-veeam/"
 weight: 10
 minio_origin: true
@@ -8,15 +8,15 @@ silo_modified: true
 
 <a id="using-minio-with-veeam"></a>
 
-When using Veeam Backup and Replication, you can use S3 compatible object storage such as MinIO as a capacity tier for backups. This disaggregates storage for the Veeam infrastructure and allows you to retain control of your data. With the ease of use of setup and administration of MinIO, it allows a Veeam backup admin to easily deploy their own object store for capacity tiering.
+When using Veeam Backup and Replication, you can use S3-compatible object storage such as Silo as a capacity tier for backups. This disaggregates storage for the Veeam infrastructure and allows you to retain control of your data. Silo's straightforward setup and administration let a Veeam backup administrator deploy an object store for capacity tiering.
 
 ## Prerequisites {#prerequisites}
 
 - One or both of Veeam Backup and Replication with support for S3 compatible object store (e.g. 9.5.4) and Veeam Backup for Office365 (VBO)
-- MinIO object storage set up per [https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure](https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure)
+- Silo object storage set up according to the [deployment procedure](/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure)
 - Veeam requires TLS connections to the object storage. Configure TLS using the [network encryption guide](https://silo.pgsty.com/operations/network-encryption/).
 - The S3 bucket, Access Key and Secret Key have to be created before and outside of Veeam.
-- Configure the MinIO Client for the Veeam MinIO endpoint using the [`mc` command reference](https://silo.pgsty.com/reference/minio-mc/).
+- Configure the Silo client for the Veeam Silo endpoint using the [`mc` command reference](/reference/minio-mc/).
 
 ## Setting up an S3 compatible object store for Veeam Backup and Replication {#setting-up-an-s3-compatible-object-store-for-veeam-backup-and-replication}
 
@@ -36,11 +36,11 @@ mc mb -l myminio/veeambackup
 
 ```
 
-> Object locking requires erasure coding on the MinIO server. See the [erasure coding documentation](https://silo.pgsty.com/operations/concepts/erasure-coding/) for more information.
+> Object locking requires erasure coding on the silo server. See the [erasure coding documentation](/operations/concepts/erasure-coding/) for more information.
 
-### Add MinIO as an object store for Veeam {#add-minio-as-an-object-store-for-veeam}
+### Add Silo as an object store for Veeam {#add-minio-as-an-object-store-for-veeam}
 
-Follow the steps from the Veeam documentation for adding MinIO as an object store - [https://helpcenter.veeam.com/docs/backup/vsphere/adding_s3c_object_storage.html?ver=100](https://helpcenter.veeam.com/docs/backup/vsphere/adding_s3c_object_storage.html?ver=100)
+Follow the Veeam documentation for adding S3-compatible object storage: [Add Object Storage](https://helpcenter.veeam.com/docs/backup/vsphere/adding_s3c_object_storage.html?ver=100).
 
 For Veeam Backup with Immutability, choose the amount of days you want to make backups immutable for
 
@@ -79,7 +79,7 @@ mc mb -l myminio/vbo
 
 - Follow through the wizard as above for Veeam Backup and Replication as the steps are the same between both products
 - Under Backup Infrastructure -&gt; Backup Repositories, right click and “Add Backup Repository”
-- Follow the wizard. Under the “Object Storage Backup Repository” section, choose the MinIO object storage you created above
+- Follow the wizard. Under the “Object Storage Backup Repository” section, choose the Silo object storage you created above
 
 ![Adding Object Storage to VBO Backup Repository](/images/integrations/veeam/6_add_sobr_with_object_store.png)
 
@@ -87,7 +87,7 @@ mc mb -l myminio/vbo
 
 ## Test the setup {#test-the-setup}
 
-The next time the backup job runs, you can use the `mc admin trace myminio` command and verify traffic is flowing to the MinIO nodes. For Veeam Backup and Replication you will need to wait for the backup to complete to the performance tier before it migrates data to the capacity tier (i.e., MinIO).
+The next time the backup job runs, you can use the `mc admin trace myminio` command and verify traffic is flowing to the Silo nodes. For Veeam Backup and Replication you will need to wait for the backup to complete to the performance tier before it migrates data to the Silo capacity tier.
 
 ```
 20:09:10.216 [200 OK] s3.GetObject veeam-minio01:9000/vbo/Veeam/Backup365/vbotest/Organizations/6571606ecbc4455dbfe23b83f6f45597/Webs/ca2d0986229b4ec88e3a217ef8f04a1d/Items/efaa67764b304e77badb213d131beab6/f4f0cf600f494c3eb702d8eafe0fabcc.aac07493e6cd4c71845d2495a4e1e19b 139.178.68.158    9.789ms      ↑ 90 B ↓ 8.5 KiB

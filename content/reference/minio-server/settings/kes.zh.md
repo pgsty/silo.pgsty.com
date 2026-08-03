@@ -3,7 +3,7 @@ title: "密钥加密服务设置"
 url: "/zh/reference/minio-server/settings/kes/"
 weight: 100
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-server-envvar-kes"></a>
@@ -27,7 +27,7 @@ MinIO Server 提供三组环境变量，用于管理 MinIO Server 与 Key Encryp
 
 ## Key Encryption Service {#key-encryption-service}
 
-定义以下变量以使用 Key Encryption Service (KES) 连接到 [受支持的第三方 Key Management Service 提供商](https://docs.min.io/community/minio-kes/#supported-kms-targets)。
+定义以下变量以使用 Key Encryption Service (KES) 连接到 [受支持的第三方 Key Management Service 提供商](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets)。
 
 #### `MINIO_KMS_KES_ENDPOINT` {#envvar.MINIO_KMS_KES_ENDPOINT}
 
@@ -57,7 +57,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 
 *envvar*
 
-使用通过 [kes identity new](https://docs.min.io/community/minio-kes/cli/kes-identity/new/) 命令获取的 KES API key 与加密服务进行身份认证的首选方式。
+使用通过 [kes identity new](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/kes-identity/new.md) 命令获取的 KES API key 与加密服务进行身份认证的首选方式。
 
 此环境变量与 [`MINIO_KMS_KES_KEY_FILE`](#envvar.MINIO_KMS_KES_KEY_FILE) 和 [`MINIO_KMS_KES_CERT_FILE`](#envvar.MINIO_KMS_KES_CERT_FILE) 环境变量互斥。
 

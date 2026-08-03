@@ -1,5 +1,5 @@
 ---
-title: "MinIO 客户端"
+title: "Silo 客户端（mcli / mc）"
 url: "/zh/reference/minio-mc/"
 weight: 10
 icon: fa-solid fa-terminal
@@ -10,16 +10,13 @@ silo_modified: true
 <a id="minio"></a>
 <a id="minio-client"></a>
 
-- [MinIO 客户端 (MC) 命令简介](https://www.youtube.com/watch?v=pukQgDdXfqA)
-- [在 Linux 上安装和运行 MinIO](https://www.youtube.com/watch?v=74usXkZpNt8&list=PLFOIsHSSYIK1BnzVY66pCL-iJ30Ht9t1o)
-
 <a id="command-mc"></a>
 
-MinIO Client [`mc`](#command-mc) 命令行工具为 `ls`、`cat`、`cp`、`mirror` 和 `diff` 等 UNIX 命令提供了现代替代方案，同时支持文件系统和兼容 Amazon S3 的云存储服务。
+Pigsty 维护的客户端在独立归档与 Linux 软件包中以 **`mcli`** 发布；源码构建、容器入口点、配置目录、模块路径和命令语法则为兼容性保留 **`mc`**。它为文件系统和兼容 Amazon S3 的对象存储提供 `ls`、`cat`、`cp`、`mirror`、`diff` 等熟悉的命令。
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
+**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建。当前源码保留与 Silo、上游 MinIO 和 AWS S3 的兼容性。
 
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+Silo 项目无法保证它与每一种其他 S3 兼容服务的行为，因为各家实现存在差异。在将其他服务视为兼容对象前，请先测试工作负载依赖的操作。
 
 [`mc`](#command-mc) 的语法如下：
 
@@ -31,13 +28,13 @@ mc [GLOBALFLAGS] COMMAND --help
 
 <a id="id2"></a>
 
-## 与 MinIO 服务端的版本对齐 {#mc-client-versioning}
+## 与 Silo 服务端的版本对齐 {#mc-client-versioning}
 
-MinIO 客户端与 MinIO 服务端独立发布。
+客户端与 Silo 服务端独立发布。
 
-为获得最佳功能与兼容性，建议使用与 MinIO 服务端版本发布时间接近的 MinIO 客户端版本。 例如，使用与 MinIO 服务端同一天发布或晚于 MinIO 服务端版本发布的 MinIO 客户端。
+为获得最佳功能与兼容性，建议使用与 Silo 或 MinIO 服务端发布时间接近的客户端版本。通常，选择与服务端同日或更晚发布的客户端更稳妥。
 
-可以安装比 MinIO 服务端 更新的 MinIO 客户端版本。 但如果 MinIO 客户端与 MinIO 服务端的版本偏差过大，可能因差异导致更多告警或错误。 例如，虽然复制相关的核心 S3 API（[`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）可能保持不变，但某些功能或 flag 仅在客户端与服务端版本对齐时才可用或稳定。
+可以安装比服务端更新的客户端。但如果版本偏差过大，即使 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp) 等核心 S3 操作仍兼容，管理功能或 flag 也可能存在差异。
 
 <a id="id3"></a>
 
@@ -45,94 +42,28 @@ MinIO 客户端与 MinIO 服务端独立发布。
 
 ## 快速开始 {#mc-install}
 
-### 1) 安装 `mc` {#mc}
+### 1) 安装客户端 {#mc}
 
-在主机上安装 **`mc`** 命令行工具。点击与主机操作系统或环境对应的标签页：
+请从[下载与安装](/zh/download/#client)页面选择 Linux 软件包、适用于 Linux/macOS/Windows 的归档文件或客户端容器。版本化制品与校验和也可从 [GitHub Releases](https://github.com/pgsty/mc/releases) 获取。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Linux" %}}
-以下命令会向系统 PATH *临时* 追加一项，以便运行 `mc` 工具。 若要永久修改系统 PATH，请遵循你的操作系统说明。
+独立归档与 Linux 软件包安装的命令名是 **`mcli`**，容器与源码构建则保留 **`mc`**。两者是同一个客户端的别名；本文档示例使用 `mc`，若主机上安装的是 `mcli`，请直接替换命令名。
 
-或者，你也可以进入 `mc` 所在目录并运行 `./mc --help`。
-
-**64 位 Intel**
+从源码构建维护分支：
 
 ```shell
-curl https://dl.min.io/client/mc/release/linux-amd64/mc \
-  --create-dirs \
-  -o $HOME/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
+git clone https://github.com/pgsty/mc.git
+cd mc
+make build
+./mc --version
 ```
 
-**64 位 PPC**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-ppc64le/mc \
-  --create-dirs \
-  -o ~/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
-
-**ARM64**
-
-```shell
-curl https://dl.min.io/client/mc/release/linux-arm64/mc \
-  --create-dirs \
-  -o ~/minio-binaries/mc
-
-chmod +x $HOME/minio-binaries/mc
-export PATH=$PATH:$HOME/minio-binaries/
-
-mc --help
-```
+{{% alert color="warning" %}}
+Pigsty 分支刻意禁用了 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update)。请通过 [Silo 下载页](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
+{{% /alert %}}
 
 {{% alert color="info" %}}
-**从 MinIO 下载页面安装**
-
-MinIO 不会通过常见 Linux 软件仓库或包管理器 （Ubuntu、RHEL、Archlinux/AUR）正式发布其二进制文件。 MinIO 二进制文件唯一的官方来源是 [MinIO Download Page](https://dl.min.io/client/mc/release/)。
-
-MinIO 不建议通过包管理器安装，因为上游仓库可能会安装错误的软件包， 或安装被重命名的软件包。
-
-所有文档都假定你 *仅* 通过下载页面安装 *官方* `mc` 客户端二进制文件， 且二进制名称未做任何修改。
+当前 `pgsty/mc` 源码仍注册 `mc license` 与 `mc support` 命令树。这些命令集成的是上游 MinIO SUBNET 及其商业许可/支持服务，而不是 Silo 服务。它们的命令名、协议字段、SUBNET 措辞以及 MinIO 价格/许可证链接属于上游契约，不应更名。
 {{% /alert %}}
-{{% /tab %}}
-{{% tab header="macOS" %}}
-```shell
-brew install minio/stable/mc
-mc --help
-```
-{{% /tab %}}
-{{% tab header="Windows" %}}
-在浏览器中打开以下文件：
-
-[https://dl.min.io/client/mc/release/windows-amd64/mc.exe](https://dl.min.io/client/mc/release/windows-amd64/mc.exe)
-
-双击该文件即可执行，*或者* 在命令提示符或 PowerShell 中运行以下命令：
-
-```powershell
-\path\to\mc.exe --help
-```
-{{% /tab %}}
-{{% tab header="Source" %}}
-从源码安装适用于开发者和高级用户，并要求具备可用的 Golang 环境。请参阅 [How to install Golang](https://golang.org/doc/install).
-
-在终端环境中运行以下命令，从源码安装 `mc`：
-
-```shell
-go install github.com/minio/mc@latest
-```
-
-[`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update) 不支持源码安装方式。
-{{% /tab %}}
-{{< /tabpane >}}
 
 ### 2) 为兼容 S3 的服务创建别名 {#s3}
 
@@ -159,9 +90,9 @@ bash -o history
 以下每个标签页都包含一个特定提供商示例：
 
 {{< tabpane text=true persist=header >}}
-{{% tab header="MinIO 服务端" %}}
+{{% tab header="Silo 服务端" %}}
 ```shell
-mc alias set myminio https://minioserver.example.net ACCESS_KEY SECRET_KEY
+mc alias set silo https://silo.example.net ACCESS_KEY SECRET_KEY
 ```
 {{% /tab %}}
 {{% tab header="AWS S3 Storage" %}}
@@ -178,10 +109,10 @@ mc alias set myGCS https://storage.googleapis.com/endpoint ACCESS_KEY SECRET_KEY
 
 ### 3) 测试连接 {#id4}
 
-使用 [`mc admin info`](/zh/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) 命令测试与 新添加 MinIO 部署的连接：
+使用 [`mc admin info`](/zh/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) 命令测试与新添加 Silo 部署的连接：
 
 ```shell
-mc admin info myminio
+mc admin info silo
 ```
 
 如果命令执行成功，会返回该 S3 服务的信息。 如果失败，请检查以下各项：
@@ -200,7 +131,7 @@ mc admin info myminio
 {{% alert color="info" %}}
 **说明**
 
-MinIO 客户端还包含用于管理 MinIO 部署的管理扩展。 更完整文档参见 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin)。
+客户端还包含用于管理 Silo 与兼容 MinIO 部署的管理扩展。更完整文档参见 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin)。
 
 下表不包含这些命令。
 {{% /alert %}}
@@ -386,7 +317,7 @@ MinIO 会使用指定的 SSE 模式自动加密对象。</p></td>
     </tr>
     <tr>
       <td><p><a href="/zh/reference/minio-mc/mc-update/#command-mc.update"><code>mc update</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-update/#command-mc.update"><code>mc update</code></a> 命令会自动将 <strong>mc</strong> 二进制更新到最新稳定版本。</p></td>
+      <td><p><a href="/zh/reference/minio-mc/mc-update/#command-mc.update"><code>mc update</code></a> 兼容命令会报告自更新已禁用。请通过 Silo 下载页、Pigsty 软件仓库或 GitHub Releases 升级。</p></td>
     </tr>
     <tr>
       <td><a href="/zh/reference/minio-mc/mc-version-enable/#command-mc.version.enable"><code>mc version enable</code></a><br /><a href="/zh/reference/minio-mc/mc-version-info/#command-mc.version.info"><code>mc version info</code></a><br /><a href="/zh/reference/minio-mc/mc-version-suspend/#command-mc.version.suspend"><code>mc version suspend</code></a><br /></td>

@@ -3,7 +3,7 @@ title: "Managing Your Deployment"
 url: "/administration/console/managing-deployment/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="managing-your-deployment"></a>
@@ -72,7 +72,7 @@ The **Watch** section displays S3 events as they occur on the selected bucket. T
 
 ### Encryption {#encryption}
 
-The **Encryption** section allows you to view the status and metrics for configured [Key Encryption Service](https://docs.min.io/community/minio-kes/) providers.
+The **Encryption** section allows you to view the status and metrics for configured [Key Encryption Service](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) providers.
 
 <a id="minio-console-notifications"></a>
 

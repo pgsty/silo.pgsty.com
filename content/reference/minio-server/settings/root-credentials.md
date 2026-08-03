@@ -3,7 +3,7 @@ title: "Root Access Settings"
 url: "/reference/minio-server/settings/root-credentials/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="root-access-settings"></a>
@@ -11,7 +11,7 @@ silo_modified: false
 
 This page covers settings that control root (superuser) access for the MinIO process. The root user has complete access and permissions to perform operations on the MinIO deployment.
 
-Root User and Root Password are required even if you use the [MinIO Key Encryption Service](https://docs.min.io/community/minio-kes/) or other key management utility.
+Root User and Root Password are required even if you use the [MinIO Key Encryption Service](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) or other key management utility.
 
 You can establish or modify settings by defining:
 
@@ -120,14 +120,14 @@ RELEASE.2024-03-03T17-50-39Z
 
 MinIO automatically generates unique root credentials if all of the following conditions are true:
 
-- [KES](https://docs.min.io/community/minio-kes/tutorials/getting-started/) Release 2024-03-01T18-06-46Z or later running
+- [KES](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md) Release 2024-03-01T18-06-46Z or later running
 - **Have not** defined:
 
   - `MINIO_ROOT_USER` variable
   - `MINIO_ROOT_PASSWORD` variable
 - **Have**:
 
-  - set up KES with a [supported KMS target](https://docs.min.io/community/minio-kes/#supported-kms-targets)
+  - set up KES with a [supported KMS target](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets)
   - disabled root access with the [MinIO environment variable](#minio-disable-root-access)
 
 When those conditions are met at startup, MinIO uses the KMS to generate unique root credentials for the deployment using a [hash-based message authentication code (HMAC)](https://en.wikipedia.org/wiki/HMAC).

@@ -1,9 +1,9 @@
 ---
-title: "使用 Grafana 监控 MinIO Server"
+title: "使用 Grafana 监控 Silo 服务端"
 url: "/zh/operations/monitoring/grafana/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="grafana-minio-server"></a>

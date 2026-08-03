@@ -1,9 +1,9 @@
 ---
-title: "MinIO 身份管理插件设置"
+title: "Silo 身份管理插件设置"
 url: "/zh/reference/minio-server/settings/iam/minio-identity-plugin/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>

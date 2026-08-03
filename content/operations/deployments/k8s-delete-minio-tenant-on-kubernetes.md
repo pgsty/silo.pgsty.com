@@ -1,9 +1,9 @@
 ---
-title: "Delete a MinIO Tenant"
+title: "Delete a Silo Tenant"
 url: "/operations/deployments/k8s-delete-minio-tenant-on-kubernetes/"
 weight: 60
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="delete-a-minio-tenant"></a>
@@ -13,7 +13,7 @@ silo_modified: false
 
 ### MinIO Kubernetes Operator {#minio-kubernetes-operator}
 
-This procedures on this page *requires* a valid installation of the MinIO Kubernetes Operator and assumes the local host has a matching installation of the MinIO Kubernetes Operator. This procedure assumes the latest stable Operator, version 7.1.1.
+The procedures on this page *require* a valid installation of the MinIO Kubernetes Operator and assume the local host has a matching Operator installation. They use `v7.1.1`, the final upstream release before the repository was archived, as a frozen compatibility baseline.
 
 See [Deploy MinIO on Kubernetes](/operations/deployments/kubernetes/#deploy-operator-kubernetes) for complete documentation on deploying the MinIO Operator.
 

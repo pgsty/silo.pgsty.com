@@ -3,7 +3,7 @@ title: "Metrics version 2"
 url: "/operations/monitoring/metrics-v2/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="metrics-version-2"></a>
@@ -177,7 +177,7 @@ Replace `HOSTNAME:PORT` with the hostname of your MinIO deployment. For deployme
 
 #### Cluster Replication Metrics {#cluster-replication-metrics}
 
-Metrics marked as `Site Replication Only` only populate on deployments with [Site Replication](https://docs.min.io/community/minio-object-store/operations/install-deploy-manage/multi-site-replication.html) configurations. For deployments with [bucket](https://docs.min.io/community/minio-object-store/administration/bucket-replication.html) or [batch](https://docs.min.io/community/minio-object-store/administration/batch-framework.html#replicate) configurations, these metrics populate instead under the [Bucket Metrics](#bucket-metrics) endpoint.
+Metrics marked as `Site Replication Only` only populate on deployments with [Site Replication](/operations/replication/multi-site-replication/) configurations. For deployments with [bucket](/administration/bucket-replication/) or [batch](/administration/batch-framework-job-replicate/) replication configurations, these metrics populate instead under the [Bucket Metrics](#bucket-metrics) endpoint.
 
 | Name | Description |
 | --- | --- |
@@ -205,7 +205,7 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 
 #### Node Replication Metrics {#node-replication-metrics}
 
-Metrics marked as `Site Replication Only` only populate on deployments with [Site Replication](https://docs.min.io/community/minio-object-store/operations/install-deploy-manage/multi-site-replication.html) configurations. For deployments with [bucket](https://docs.min.io/community/minio-object-store/administration/bucket-replication.html) or [batch](https://docs.min.io/community/minio-object-store/administration/batch-framework.html#replicate) configurations, these metrics populate instead under the [Bucket Metrics](#bucket-metrics) endpoint.
+Metrics marked as `Site Replication Only` only populate on deployments with [Site Replication](/operations/replication/multi-site-replication/) configurations. For deployments with [bucket](/administration/bucket-replication/) or [batch](/administration/batch-framework-job-replicate/) replication configurations, these metrics populate instead under the [Bucket Metrics](#bucket-metrics) endpoint.
 
 | Name | Description |
 | --- | --- |
@@ -374,6 +374,8 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 > v2 metrics have a limit of 100 buckets for performance reasons. For metrics across a higher number of buckets, use [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics) instead.
 > {{% /alert %}}
 
+<a id="minio-available-bucket-metrics"></a>
+
 ### Bucket Metrics {#bucket-metrics}
 
 MinIO collects the following metrics at the bucket level. Each metric includes the `bucket` label to identify the corresponding bucket. Metrics may include one or more additional labels, such as the server that calculated that metric.
@@ -396,7 +398,7 @@ Replace `HOSTNAME:PORT` with the hostname of your MinIO deployment. For deployme
 
 #### Replication Metrics {#replication-metrics}
 
-These metrics only populate on deployments with [Bucket Replication](https://docs.min.io/community/minio-object-store/administration/bucket-replication.html) or [Batch Replication](https://docs.min.io/community/minio-object-store/administration/batch-framework.html) configurations. For deployments with [Site Replication](https://docs.min.io/community/minio-object-store/operations/install-deploy-manage/multi-site-replication.html) configured, select metrics populate under the [Cluster Metrics](#cluster-metrics) endpoint.
+These metrics only populate on deployments with [Bucket Replication](/administration/bucket-replication/) or [Batch Replication](/administration/batch-framework-job-replicate/) configurations. For deployments with [Site Replication](/operations/replication/multi-site-replication/) configured, select metrics populate under the [Cluster Metrics](#cluster-metrics) endpoint.
 
 | Name | Description |
 | --- | --- |

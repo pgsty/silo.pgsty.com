@@ -1,5 +1,5 @@
 ---
-title: "AWS CLI 与 MinIO Server"
+title: "AWS CLI 与 Silo 服务端"
 url: "/zh/integrations/aws-cli-with-minio/"
 weight: 30
 minio_origin: true

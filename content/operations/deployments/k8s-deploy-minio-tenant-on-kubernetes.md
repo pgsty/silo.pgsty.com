@@ -1,28 +1,28 @@
 ---
-title: "Deploy a MinIO Tenant"
+title: "Deploy a Silo Tenant"
 url: "/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="deploy-a-minio-tenant"></a>
 <a id="deploy-minio-tenant-redhat-openshift"></a>
 <a id="minio-k8s-deploy-minio-tenant"></a>
 
-This procedure documents deploying a MinIO Tenant using the MinIO Operator.
+This procedure deploys a Silo server image as a Tenant managed by MinIO Operator v7.1.1. The upstream Operator repository was archived and made read-only on 2026-03-20, so this is a frozen compatibility baseline rather than an actively maintained Operator path. `MinIO Operator`, `Tenant`, the `minio.min.io` API group, and the CRD field names are upstream Kubernetes contracts and therefore retain their original names.
 
-Deploying Single-Node topologies requires additional configurations not covered in this documentation. You can alternatively use a simple Kubernetes YAML object to describe a Single-Node topology for local testing and evaluation as necessary. MinIO does not recommend nor support single-node deployment topologies for production environments.
+The verified baseline below creates a four-server Tenant. A single-node topology is useful for local testing, but its production failure model and storage layout are outside the scope of this procedure.
 
 This documentation assumes familiarity with all referenced Kubernetes concepts, utilities, and procedures. While this documentation *may* provide guidance for configuring or deploying Kubernetes-related resources on a best-effort basis, it is not a replacement for the official [Kubernetes Documentation](https://kubernetes.io/docs/).
 
 <a id="minio-k8s-deploy-minio-tenant-security"></a>
 
-## Deploy a MinIO Tenant using Kustomize {#deploy-a-minio-tenant-using-kustomize}
+## Deploy a Silo Tenant using Kustomize {#deploy-a-minio-tenant-using-kustomize}
 
-The following procedure uses `kubectl -k` to deploy a MinIO Tenant using the `base` Kustomization template in the [MinIO Operator Github repository](https://github.com/minio/operator/tree/master/examples/kustomization/base).
+The following procedure uses the `base` Kustomization template from the [MinIO Operator v7.1.1 repository](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/base), then replaces its upstream MinIO image default with a pinned Silo image.
 
-You can select a different base or pre-built template from the [repository](https://github.com/minio/operator/tree/master/examples/kustomization/) as your starting point, or build your own Kustomization resources using the [MinIO Custom Resource Documentation](/reference/operator-crd/#minio-operator-crd).
+You can select a different v7.1.1 [example](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/) as your starting point, or build your own resources using the [MinIO Custom Resource Documentation](/reference/operator-crd/#minio-operator-crd). No later supported upstream release exists; review any fork, replacement, or CRD change independently before departing from this pinned snapshot.
 
 {{% alert color="warning" %}}
 **Important**
@@ -34,18 +34,31 @@ This procedure is not exhaustive of all possible configuration options available
 
 1. Create a YAML object for the Tenant
 
-   Use the `kubectl kustomize` command to produce a YAML file containing all Kubernetes resources necessary to deploy the `base` Tenant:
+   Clone the pinned Operator release and use `kubectl kustomize` to produce a YAML file containing all Kubernetes resources necessary to deploy the `base` Tenant:
 
    ```shell
-   kubectl kustomize https://github.com/minio/operator/examples/kustomization/base/ > tenant-base.yaml
+   git clone --branch v7.1.1 --depth 1 https://github.com/minio/operator.git
+   kubectl kustomize operator/examples/kustomization/base > tenant-base.yaml
    ```
 
    The command creates a single YAML file with multiple objects separated by the `---` line. Open the file in your preferred editor.
 
-   The following steps reference each object based on it’s `kind` and `metadata.name` fields:
+   The upstream template defaults to `quay.io/minio/minio`. Before applying it, set the `kind: Tenant` object's `spec.image` to the verified Silo release and disable the inherited in-place updater:
+
+   ```yaml
+   spec:
+     image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+     env:
+       - name: MINIO_UPDATE
+         value: "off"
+   ```
+
+   Pin the image by tag or digest. If you choose a newer Silo image, review and test that release explicitly instead of inheriting the Operator template's upstream image.
+
+   The following steps reference each object based on its `kind` and `metadata.name` fields:
 2. Configure the Tenant topology
 
-   The `kind: Tenant` object describes the MinIO Tenant.
+   The `kind: Tenant` object describes the Silo workload managed by MinIO Operator.
 
    The following fields share the `spec.pools[0]` prefix and control the number of servers, volumes per server, and storage class of all pods deployed in the Tenant:
 
@@ -59,12 +72,12 @@ This procedure is not exhaustive of all possible configuration options available
      <tbody>
        <tr>
          <td><p><code>servers</code></p></td>
-         <td><p>The number of MinIO pods to deploy in the Server Pool.</p></td>
+         <td><p>The number of Silo pods to deploy in the Server Pool.</p></td>
        </tr>
        <tr>
          <td><p><code>volumesPerServer</code></p></td>
-         <td><p>The number of persistent volumes to attach to each MinIO pod (<code>servers</code>).
-   The Operator generates <code>volumesPerServer x servers</code> Persistant Volume Claims for the Tenant.</p></td>
+         <td><p>The number of persistent volumes to attach to each Silo pod (<code>servers</code>).
+   The Operator generates <code>volumesPerServer x servers</code> Persistent Volume Claims for the Tenant.</p></td>
        </tr>
        <tr>
          <td><p><code>volumeClaimTemplate.spec.storageClassName</code></p></td>
@@ -84,12 +97,12 @@ This procedure is not exhaustive of all possible configuration options available
    - Pod Affinity (`spec.pools[n].podAffinity`)
    - Pod Anti-Affinity (`spec.pools[n].podAntiAffinity`)
 
-   MinIO recommends configuring Tenants with Pod Anti-Affinity to ensure that the Kubernetes schedule does not schedule multiple pods on the same worker node.
+   For production, configure Pod Anti-Affinity so that the Kubernetes scheduler does not place multiple Tenant pods on the same worker node.
 
    If you have specific worker nodes on which you want to deploy the tenant, pass those node labels or filters to the `nodeAffinity` field to constrain the scheduler to place pods on those nodes.
 4. Configure Network Encryption
 
-   The MinIO Tenant CRD provides the following fields from which you can configure tenant TLS network encryption:
+   The MinIO Tenant CRD provides the following fields for configuring Tenant TLS network encryption:
 
    <table>
      <thead>
@@ -100,26 +113,26 @@ This procedure is not exhaustive of all possible configuration options available
      </thead>
      <tbody>
        <tr>
-         <td><p><code>tenant.certificate.requestAutoCert</code></p></td>
-         <td><p>Enable or disable MinIO <a href="/operations/network-encryption/#minio-tls">automatic TLS certificate generation</a></p><p>Defaults to <code>true</code> or enabled if omitted.</p></td>
+         <td><p><code>spec.requestAutoCert</code></p></td>
+         <td><p>Enable or disable Silo <a href="/operations/network-encryption/#minio-tls">automatic TLS certificate generation</a>.</p><p>Defaults to <code>true</code> if omitted.</p></td>
        </tr>
        <tr>
-         <td><p><code>tenant.certificate.certConfig</code></p></td>
+         <td><p><code>spec.certConfig</code></p></td>
          <td><p>Customize the behavior of <a href="/operations/network-encryption/#minio-tls">automatic TLS</a>, if enabled.</p></td>
        </tr>
        <tr>
-         <td><p><code>tenant.certificate.externalCertSecret</code></p></td>
+         <td><p><code>spec.externalCertSecret</code></p></td>
          <td><p>Enable TLS for multiple hostnames via Server Name Indication (SNI)</p><p>Specify one or more Kubernetes secrets of type <code>kubernetes.io/tls</code> or <code>cert-manager</code>.</p></td>
        </tr>
        <tr>
-         <td><p><code>tenant.certificate.externalCACertSecret</code></p></td>
+         <td><p><code>spec.externalCaCertSecret</code></p></td>
          <td><p>Enable validation of client TLS certificates signed by unknown, third-party, or internal Certificate Authorities (CA).</p><p>Specify one or more Kubernetes secrets of type <code>kubernetes.io/tls</code> containing the full chain of CA certificates for a given authority.</p></td>
        </tr>
      </tbody>
    </table>
-5. Configure MinIO Environment Variables
+5. Configure Silo Environment Variables
 
-   You can set MinIO Server environment variables using the `tenant.configuration` field.
+   Silo preserves the upstream `MINIO_*` environment-variable contract. You can supply these variables using the Secret referenced by the Tenant CRD's `spec.configuration` field, or use `spec.env` for individual values such as `MINIO_UPDATE`.
 
    <table>
      <thead>
@@ -130,9 +143,8 @@ This procedure is not exhaustive of all possible configuration options available
      </thead>
      <tbody>
        <tr>
-         <td><p><code>tenant.configuration</code></p></td>
-         <td><p>Specify a Kubernetes opaque secret whose data payload <code>config.env</code> contains each MinIO environment variable you want to set.</p><p>The <code>config.env</code> data payload <strong>must</strong> be a base64-encoded string.
-   You can create a local file, set your environment variables, and then use <code>cat LOCALFILE | base64</code> to create the payload.</p></td>
+         <td><p><code>spec.configuration.name</code></p></td>
+         <td><p>Specify a Kubernetes opaque Secret whose <code>config.env</code> key contains the upstream-compatible environment variables to set.</p><p>Use plain text under <code>stringData.config.env</code>, as in the v7.1.1 base template. If you use <code>data.config.env</code> instead, its value must be base64-encoded.</p></td>
        </tr>
      </tbody>
    </table>
@@ -160,11 +172,11 @@ This procedure is not exhaustive of all possible configuration options available
    ```shell
    watch kubectl get all -n minio-tenant
    ```
-8. Expose the Tenant MinIO S3 API port
+8. Expose the Tenant S3 API port
 
-   To test the MinIO Client [`mc`](/reference/minio-mc/#command-mc) from your local machine, forward the MinIO port and create an alias.
+   To test the Silo client [`mc`](/reference/minio-mc/#command-mc) from your local machine, forward the S3 API port and create an alias.
 
-   - Forward the Tenant’s MinIO port:
+   - Forward the Tenant's S3 API port:
 
    ```shell
    kubectl port-forward svc/MINIO_TENANT_NAME-hl 9000 -n MINIO_TENANT_NAMESPACE
@@ -182,7 +194,7 @@ This procedure is not exhaustive of all possible configuration options available
    mc mb myminio/mybucket --insecure
    ```
 
-   If you deployed your MinIO Tenant using TLS certificates minted by a trusted Certificate Authority (CA) you can omit the `--insecure` flag.
+   If you deployed the Tenant using TLS certificates minted by a trusted Certificate Authority (CA), you can omit the `--insecure` flag.
 
    See [Connect to the Tenant](#create-tenant-connect-tenant) for specific instructions.
 
@@ -190,7 +202,7 @@ This procedure is not exhaustive of all possible configuration options available
 
 ## Connect to the Tenant {#connect-to-the-tenant}
 
-The MinIO Operator creates services for the MinIO Tenant.
+MinIO Operator creates Kubernetes Services for the Silo Tenant. Their generated names remain part of the Operator contract.
 
 Use the `kubectl get svc -n NAMESPACE` command to review the deployed services. For Kubernetes services which use a custom `kubectl` analog, you can substitute the name of that program.
 
@@ -205,8 +217,8 @@ TENANT-NAMESPACE-console           LoadBalancer   10.106.103.247   <pending>    
 TENANT-NAMESPACE-hl                ClusterIP      None             <none>        9000/TCP         2d3h
 ```
 
-- The `minio` service corresponds to the MinIO Tenant service. Applications should use this service for performing operations against the MinIO Tenant.
-- The `*-console` service corresponds to the [MinIO Console](https://github.com/minio/console). Administrators should use this service for accessing the MinIO Console and performing administrative operations on the MinIO Tenant.
+- The `minio` service exposes the Tenant S3 API. Applications should use this service for S3 operations against Silo.
+- The `*-console` service exposes the [Silo Console](/administration/minio-console/). Administrators can use this service for browser-based management.
 
 The remaining services support Tenant operations and are not intended for consumption by users or administrators.
 

@@ -18,7 +18,7 @@ aliases:
 {{% alert color="warning" %}}
 **完整修复需要服务端配套更新**
 
-本版本中的策略条件键改动与服务端 `getConditionValues` 中保留内部条件键名、按真实来源构造条件值的改动各自覆盖问题的一半，**单独升级任何一侧都不完整**。请使用包含这项[配套修复](https://github.com/pgsty/minio/commit/1a6d5b415f2e7e013a5339f6d60c3c6f371a1a03)的 SILO 服务端版本；具体兼容行为见[条件值来源与优先级](/zh/administration/identity-access-management/policy-based-access-control/#condition-value-sources)。
+本版本中的策略条件键改动与服务端 `getConditionValues` 中保留内部条件键名、按真实来源构造条件值的改动各自覆盖问题的一半，**单独升级任何一侧都不完整**。服务端配套改动目前存在于本地 `pgsty/minio` 提交 `1a6d5b415`；截至 2026-08-03，它尚未进入公开 `origin/master`，也没有任何已发布 Silo 服务端版本包含它。请勿把 v3.7.0 单独视为完整修复；应确认后续服务端发布说明明确包含该配套改动。具体兼容行为见[条件值来源与优先级](/zh/administration/identity-access-management/policy-based-access-control/#condition-value-sources)。
 {{% /alert %}}
 
 ## 这个仓库是什么 {#what-is-this}
@@ -47,7 +47,7 @@ replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.7.0
 
 修复是把顺序反过来：先精确匹配条件键本身的拼写，规范形式仅作为回退，供真正命名请求头的条件键（`s3:x-amz-*` 一族）使用。这是上游 [minio/pkg#226](https://github.com/minio/pkg/pull/226) 的移植，并补充了上游没有携带的回归测试。
 
-在库的原始 map 查找层，如果生产者同时以“条件键原名”和“规范 MIME 名”存入同一个逻辑字段，现在精确名称会优先。这只是库级查找规则，不应被理解为 S3 协议规定“查询参数优先”。SILO 服务端会先按字段的真实来源归一化条件值：对于仍兼容 Header 与 query 两种形式的存储类别和上传标签，**Header 只要存在就优先（包括空值）**，否则才回退到 query。
+在库的原始 map 查找层，如果生产者同时以“条件键原名”和“规范 MIME 名”存入同一个逻辑字段，现在精确名称会优先。这只是库级查找规则，不应被理解为 S3 协议规定“查询参数优先”。Silo 服务端会先按字段的真实来源归一化条件值：对于仍兼容 Header 与 query 两种形式的存储类别和上传标签，**Header 只要存在就优先（包括空值）**，否则才回退到 query。
 
 ## LDAP 连接路径 {#ldap}
 

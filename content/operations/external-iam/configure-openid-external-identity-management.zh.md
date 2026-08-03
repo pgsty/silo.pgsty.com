@@ -1,9 +1,9 @@
 ---
-title: "配置 MinIO 使用 OpenID 进行认证"
+title: "配置 Silo 使用 OpenID 进行认证"
 url: "/zh/operations/external-iam/configure-openid-external-identity-management/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-openid"></a>

@@ -1,7 +1,7 @@
 ---
 title: "Server-Side Object Encryption with KES"
 url: "/operations/server-side-encryption/configure-minio-kes/"
-description: "Deploy MinIO with Server-Side Object Encryption"
+description: "Deploy Silo with server-side object encryption"
 weight: 10
 minio_origin: true
 silo_modified: true
@@ -13,20 +13,24 @@ silo_modified: true
 <a id="minio-sse-gcp"></a>
 <a id="minio-sse-vault"></a>
 
+{{% alert color="warning" %}}
+Community KES and its documentation are deprecated and archived. The Kubernetes tab below also refers to the Operator Console, which was removed in MinIO Operator 6.0.0; it is retained only as a historical migration reference and is not a current `v7.1.1` deployment procedure. For a new deployment, select a maintained KMS integration and validate a migration or replacement plan before enabling irreversible server-side encryption.
+{{% /alert %}}
+
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
-This procedure assumes you have access to a Kubernetes cluster with an active MinIO Operator installation. For instructions on running KES, see the [KES docs](https://docs.min.io/community/minio-kes/tutorials/getting-started/).
+This procedure assumes you have access to a Kubernetes cluster with an active MinIO Operator installation. For instructions on running KES, see the [KES docs](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md).
 
 As part of this procedure, you will:
 
 1. Create or modify a MinIO deployment with support for <abbr title="Server-Side Encryption">SSE</abbr> using <abbr title="Key Encryption Service">KES</abbr>. Defer to the [Deploy Distributed MinIO](/operations/deployments/installation/#minio-mnmd) tutorial for guidance on production-ready MinIO deployments.
 2. Use the MinIO Operator Console to create or manage a MinIO Tenant.
-3. Access the **Encryption** settings for that tenant and configure <abbr title="Server-Side Encryption">SSE</abbr> using a [supported Key Management System](https://docs.min.io/community/minio-kes/#supported-kms-targets).
+3. Access the **Encryption** settings for that tenant and configure <abbr title="Server-Side Encryption">SSE</abbr> using a [supported Key Management System](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets).
 4. Create a new <abbr title="External Key">EK</abbr> for use with <abbr title="Server-Side Encryption">SSE</abbr>.
 5. Configure automatic bucket-default [SSE-KMS](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms).
 {{% /tab %}}
 {{% tab header="Baremetal" %}}
-This procedure provides guidance for deploying MinIO configured to use KES and enable [Server Side Encryption](/operations/server-side-encryption/#minio-sse-data-encryption). For instructions on running KES, see the [KES docs](https://docs.min.io/community/minio-kes/tutorials/getting-started/).
+This procedure provides guidance for deploying MinIO configured to use KES and enable [Server Side Encryption](/operations/server-side-encryption/#minio-sse-data-encryption). For instructions on running KES, see the [KES docs](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md).
 
 As part of this procedure, you will:
 
@@ -67,7 +71,7 @@ This procedure assumes a configured [`alias`](/reference/minio-mc/mc-alias/#comm
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
-This procedure assumes an existing [supported KMS installation](https://docs.min.io/community/minio-kes/#supported-kms-targets) accessible from the Kubernetes cluster.
+This procedure assumes an existing [supported KMS installation](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) accessible from the Kubernetes cluster.
 
 - For deployments within the same Kubernetes cluster as the MinIO Tenant, you can use Kubernetes service names to allow the MinIO Tenant to establish connectivity to the target KMS service.
 - For deployments external to the Kubernetes cluster, you must ensure the cluster supports routing communications between Kubernetes services and pods and the external network. This may require configuration or deployment of additional Kubernetes network components and/or enabling access to the public internet.
@@ -75,7 +79,7 @@ This procedure assumes an existing [supported KMS installation](https://docs.min
 Defer to the documentation for your chosen KMS solution for guidance on deployment and configuration.
 {{% /tab %}}
 {{% tab header="Baremetal" %}}
-This procedure assumes an existing KES installation connected to a supported <abbr title="Key Management System">KMS</abbr> installation accessible, both accessible from the local host. Refer to the installation instructions for your [supported KMS target](https://docs.min.io/community/minio-kes/#supported-kms-targets) to deploy KES and connect it to a KMS solution.
+This procedure assumes an existing KES installation connected to a supported <abbr title="Key Management System">KMS</abbr> installation accessible, both accessible from the local host. Refer to the installation instructions for your [supported KMS target](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) to deploy KES and connect it to a KMS solution.
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -89,19 +93,19 @@ If you restart or otherwise seal your vault instance, KES cannot perform any cry
 See the documentation for your chosen <abbr title="Key Management System">KMS</abbr> solution for more information on whether unsealing may be required.
 {{% /alert %}}
 
-Refer to the configuration instruction in the [KES documentation](https://docs.min.io/community/minio-kes/) for your chosen supported <abbr title="Key Management System">KMS</abbr>:
+Refer to the configuration instruction in the [KES documentation](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) for your chosen supported <abbr title="Key Management System">KMS</abbr>:
 
-- [AWS Secrets Manager](https://docs.min.io/community/minio-kes/integrations/aws-secrets-manager/)
-- [Azure KeyVault](https://docs.min.io/community/minio-kes/integrations/azure-keyvault/)
-- [Entrust KeyControl](https://docs.min.io/community/minio-kes/integrations/entrust-keycontrol/)
-- [Fortanix SDKMS](https://docs.min.io/community/minio-kes/integrations/fortanix-sdkms/)
-- [Google Cloud Secret Manager](https://docs.min.io/community/minio-kes/integrations/google-cloud-secret-manager/)
-- [HashiCorp Vault](https://docs.min.io/community/minio-kes/integrations/hashicorp-vault-keystore/)
-- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://docs.min.io/community/minio-kes/integrations/thales-ciphertrust/)
+- [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
+- [Azure KeyVault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
+- [Entrust KeyControl](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/entrust-keycontrol.md)
+- [Fortanix SDKMS](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/fortanix-sdkms.md)
+- [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
+- [HashiCorp Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
+- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
 ## Procedure {#procedure}
 
-This procedure provides instructions for configuring and enabling Server-Side Encryption using your selected [supported KMS solution](https://docs.min.io/community/minio-kes/#supported-kms-targets) in production environments. Specifically, this procedure assumes the following:
+This procedure provides instructions for configuring and enabling Server-Side Encryption using your selected [supported KMS solution](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) in production environments. Specifically, this procedure assumes the following:
 
 - An existing production-grade KMS target
 - One or more KES servers connected to the KMS target
@@ -130,7 +134,7 @@ This procedure provides instructions for configuring and enabling Server-Side En
 
    The `kes-configuration` secret must reference a Kubernetes Opaque Secret which contains a `stringData` object with the full KES configuration as `server-config.yaml`. The `keystore` field must contain the full configuration associated with your preferred Key Management System.
 
-   Reference [the Kustomize example](https://github.com/minio/operator/blob/master/examples/kustomization/tenant-kes-encryption/kes-configuration-secret.yaml) for additional guidance.
+   Reference [the pinned `v7.1.1` Kustomize example](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/tenant-kes-encryption/kes-configuration-secret.yaml) for additional guidance.
 3. Create or Modify your Tenant YAML to set the values of `TenantSpec.configuration` as necessary.
 
    TODO
@@ -209,13 +213,13 @@ This procedure provides instructions for configuring and enabling Server-Side En
 {{% tab header="Baremetal" %}}
 1. Generate a KES API Key for use by MinIO
 
-   Use the [kes identity new](https://docs.min.io/community/minio-kes/cli/kes-identity/new) command to generate a new API key for use by the MinIO Server:
+   Use the [kes identity new](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/kes-identity/new.md) command to generate a new API key for use by the MinIO Server:
 
    ```shell
    kes identity new
    ```
 
-   The output includes both the API Key for use with MinIO and the Identity hash for use with the [KES Policy configuration](https://docs.min.io/community/minio-kes/tutorials/configuration/#policy-configuration).
+   The output includes both the API Key for use with MinIO and the Identity hash for use with the [KES Policy configuration](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/configuration.md#policy-configuration).
 2. Configure the MinIO Environment File
 
    Create or modify the MinIO Server environment file for all hosts in the target deployment to include the following environment variables:
@@ -255,7 +259,7 @@ This procedure provides instructions for configuring and enabling Server-Side En
 
    Depending on your selected KMS solution, you may need to unseal the key instance to allow normal cryptographic operations, including key creation or retrieval. KES requires an unsealed key target to perform its operations.
 
-   Refer to the [documentation for your chosen KMS solution](https://docs.min.io/community/minio-kes/#supported-kms-targets) for information regarding whether sealing and unsealing the instance is required for operations.
+   Refer to the [documentation for your chosen KMS solution](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) for information regarding whether sealing and unsealing the instance is required for operations.
 
    You must start KES *before* starting MinIO. The MinIO deployment requires access to KES as part of its startup.
    {{% /alert %}}

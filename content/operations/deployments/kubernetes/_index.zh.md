@@ -1,10 +1,10 @@
 ---
-title: "在 Kubernetes 上部署 MinIO"
+title: "在 Kubernetes 上部署 Silo"
 url: "/zh/operations/deployments/kubernetes/"
 weight: 10
 icon: fa-solid fa-dharmachakra
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="kubernetes-minio"></a>
@@ -17,17 +17,17 @@ silo_modified: false
 <a id="deploy-operator-kubernetes"></a>
 <a id="minio-kubernetes"></a>
 
-MinIO 是一个 Kubernetes 原生的高性能对象存储，提供兼容 S3 的 API。 MinIO Kubernetes Operator 支持将 MinIO 租户部署到私有云和公有云基础设施（“Hybrid” Cloud）上。
+Silo 是可在 Kubernetes 中运行的 S3 兼容对象存储服务端。MinIO Kubernetes Operator 的最后一个上游版本 `v7.1.1` 可以部署使用 Silo 镜像的 `Tenant`：将 `tenant.image.repository` 覆盖为 `pgsty/minio`，并固定经过测试的标签或摘要。
 
-所有文档都默认你已经熟悉所引用的 Kubernetes 概念、工具和操作流程。 虽然 MinIO 文档 *可能* 会以 best-effort 方式提供 Kubernetes 相关资源的配置或部署指导，但它不能替代官方 [Kubernetes Documentation](https://kubernetes.io/docs/)。
+这些指南默认你熟悉所引用的 Kubernetes 概念、工具和操作流程。它们不能替代官方 [Kubernetes Documentation](https://kubernetes.io/docs/)；Silo 项目也不继承原 MinIO 厂商针对各 Kubernetes 发行版的支持矩阵。
 
-MinIO Operator 是 MinIO 官方提供的 Kubernetes 原生 Operator，用于管理 MinIO 租户在 Kubernetes 基础设施上的部署。
+MinIO Operator、Helm Chart、CRD 与 `Tenant` Kind 都是独立于 Silo 发布的上游契约。上游 `minio/operator` 仓库已于 2026-03-20 归档并设为只读，因此其发布周期已经冻结，这些指南只是一份兼容快照。
 
-该 Operator 提供以 MinIO 为核心的租户管理功能，包括对所有 MinIO 核心特性的配置支持。
+归档的 Operator 代码提供 MinIO 兼容的 Tenant 管理与配置功能。在部署或升级前，请针对实际集群验证固定的 Operator 与 Chart；上游不再提供持续的兼容性或支持承诺。
 
-你可以通过 MinIO 的 [Custom Resource Definition (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#customresourcedefinitions) 或 Operator Console UI 与 Operator 交互。
+你可以通过 Operator 的 [Custom Resource Definition (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#customresourcedefinitions) 与其交互。
 
-CRD 为使用 Kustomize 等工具部署租户提供了高度可定制的入口。 你也可以使用 MinIO Operator Console 这一功能完整的 Web UI 来部署和配置 MinIO 租户。
+CRD 为 Kustomize、Helm 和 `kubectl` 等工具部署与管理使用 Silo 镜像的 Tenant 提供可定制入口。
 
 {{% alert color="warning" %}}
 **重要**

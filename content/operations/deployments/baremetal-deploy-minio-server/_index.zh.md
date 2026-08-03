@@ -1,13 +1,13 @@
 ---
-title: "安装 MinIO Server"
+title: "安装 Silo Server"
 url: "/zh/operations/deployments/baremetal-deploy-minio-server/"
 weight: 10
 icon: fa-solid fa-hard-drive
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-server"></a>
 <a id="deploy-minio-standalone"></a>
 
-MinIO 支持部署到裸机基础设施上，包括运行 Linux、MacOS 和 Windows 的物理机或虚拟化主机。
+请使用当前的 [服务端制品](/zh/download/#server) 与本节的平台说明，在物理机或虚拟化主机上安装 Silo。可执行文件、服务、软件包与环境变量契约仍保留 MinIO 兼容名称。

@@ -1,5 +1,5 @@
 ---
-title: "Expand a Distributed MinIO Deployment"
+title: "Expand a Distributed Silo Deployment"
 url: "/operations/deployments/baremetal-expand-minio-deployment/"
 weight: 30
 minio_origin: true
@@ -10,7 +10,7 @@ math: true
 <a id="expand-a-distributed-minio-deployment"></a>
 <a id="expand-minio-distributed"></a>
 
-MinIO supports expanding an existing distributed deployment by adding a new [Server Pool](/operations/concepts/#minio-intro-server-pool). Each Pool expands the total available storage capacity of the cluster.
+Silo supports expanding an existing distributed deployment by adding a new [Server Pool](/operations/concepts/#minio-intro-server-pool). Each pool expands the total available storage capacity of the cluster.
 
 Expansion does not provide Business Continuity/Disaster Recovery (BC/DR)-grade protections. While each pool is an independent set of servers with distinct [erasure sets](/operations/concepts/erasure-coding/#minio-ec-erasure-set) for availability, the complete loss of one pool results in MinIO stopping I/O for all pools in the deployment. Similarly, an erasure set which loses quorum in one pool represents data loss of objects stored in that set, regardless of the number of other erasure sets or pools.
 
@@ -191,82 +191,33 @@ Review the [Prerequisites](#expand-minio-distributed-prereqs) before starting th
 
 Complete any planned hardware expansion prior to [decommissioning older hardware pools](/operations/deployments/baremetal-decommission-server-pool/#minio-decommissioning).
 
-### 1) Install the MinIO Binary on Each Node in the New Server Pool {#install-the-minio-binary-on-each-node-in-the-new-server-pool}
+### 1) Install the Silo Binary on Each Node in the New Server Pool {#install-the-minio-binary-on-each-node-in-the-new-server-pool}
 
-The following tabs provide examples of installing MinIO onto 64-bit Linux operating systems using RPM, DEB, or binary. The RPM and DEB packages automatically install MinIO to the necessary system paths and create a `minio` service for `systemctl`. MinIO strongly recommends using the RPM or DEB installation routes. To update deployments managed using `systemctl`, see [Update systemctl-Managed MinIO Deployments](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl).
-
-{{% details title="amd64 (Intel or AMD 64-bit processors)" closed="false" %}}
-Use one of the following options to download the MinIO server installation file for a machine running Linux on an Intel or AMD 64-bit processor.
+Install the **same published Silo release** used by the existing pool. Download the x86-64 or ARM64 RPM, DEB, or standalone archive from [Download & Install](/download/#server), and verify its checksum before installation. The Silo release currently publishes those two Linux architectures; inherited references to unsupported `ppc64le` and `s390x` downloads have been removed.
 
 {{< tabpane text=true persist=header >}}
-{{% tab header="RPM (RHEL)" %}}
-Use the following commands to download the latest stable MinIO RPM and install it.
-
+{{% tab header="RPM (RHEL family)" %}}
 ```shell
-wget RPMURL -O minio.rpm
-sudo dnf install minio.rpm
+sudo dnf install ./minio-*.rpm
 ```
 {{% /tab %}}
 {{% tab header="DEB (Debian/Ubuntu)" %}}
-Use the following commands to download the latest stable MinIO DEB and install it:
-
 ```shell
-wget DEBURL -O minio.deb
-sudo dpkg -i minio.deb
+sudo dpkg -i ./minio_*_amd64.deb
 ```
-{{% /tab %}}
-{{% tab header="Binary" %}}
-Use the following commands to download the latest stable MinIO binary and install it to the system `$PATH`:
 
+Use the `arm64` package name on ARM64 hosts.
+{{% /tab %}}
+{{% tab header="Standalone archive" %}}
 ```shell
-wget https://dl.min.io/server/minio/release/linux-amd64/minio
-chmod +x minio
-sudo mv minio /usr/local/bin/
+tar -xzf minio_*_linux_*.tar.gz
+sudo install -m 0755 ./minio /usr/local/bin/minio
+minio --version
 ```
 {{% /tab %}}
 {{< /tabpane >}}
-{{% /details %}}
 
-{{% details title="arm64 (ARM 64-bit processors)" closed="true" %}}
-Use one of the following options to download the MinIO server installation file for a machine running Linux on an ARM 64-bit processor.
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="RPM (RHEL)" %}}
-Use the following commands to download the latest stable MinIO RPM and install it.
-
-```shell
-wget |minio-rpmarm64| -O minio.rpm
-sudo dnf install minio.rpm
-```
-{{% /tab %}}
-{{% tab header="DEB (Debian/Ubuntu)" %}}
-Use the following commands to download the latest stable MinIO DEB and install it:
-
-```shell
-wget |minio-debarm64| -O minio.deb
-sudo dpkg -i minio.deb
-```
-{{% /tab %}}
-{{% tab header="Binary" %}}
-Use the following commands to download the latest stable MinIO binary and install it to the system `$PATH`:
-
-```shell
-wget https://dl.min.io/server/minio/release/linux-arm64/minio
-chmod +x minio
-MINIO_ROOT_USER=admin MINIO_ROOT_PASSWORD=password ./minio server /mnt/data --console-address ":9001"
-```
-{{% /tab %}}
-{{< /tabpane >}}
-{{% /details %}}
-
-{{% details title="Other Architectures" closed="true" %}}
-MinIO also supports additional architectures:
-
-- ppc64le
-- s390x
-
-For instructions to download the binary, RPM, or DEB files for those architectures, see the [MinIO download page](https://min.io/download#/linux?ref=docs-install).
-{{% /details %}}
+Run `minio --version` on every new node and compare it with the existing pool. Do not join a node running a different release. For upgrades, follow the [`systemctl`-managed Silo procedure](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl).
 
 ### 2) Add TLS/SSL Certificates {#add-tls-ssl-certificates}
 
@@ -302,6 +253,8 @@ After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio
 
 [Service]
+Type=notify
+
 WorkingDirectory=/usr/local
 
 User=minio-user
@@ -309,25 +262,26 @@ Group=minio-user
 ProtectProc=invisible
 
 EnvironmentFile=-/etc/default/minio
-ExecStartPre=/bin/bash -c "if [ -z \"${MINIO_VOLUMES}\" ]; then echo \"Variable MINIO_VOLUMES not set in /etc/default/minio\"; exit 1; fi"
 ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
-
-# MinIO RELEASE.2023-05-04T21-44-30Z adds support for Type=notify (https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=)
-# This may improve systemctl setups where other services use `After=minio.server`
-# Uncomment the line to enable the functionality
-# Type=notify
 
 # Let systemd restart this service always
 Restart=always
 
 # Specifies the maximum file descriptor number that can be opened by this process
-LimitNOFILE=65536
+LimitNOFILE=1048576
+
+# Turn-off memory accounting by systemd, which is buggy.
+MemoryAccounting=no
 
 # Specifies the maximum number of threads this process can create
 TasksMax=infinity
 
 # Disable timeout logic and wait until process is stopped
-TimeoutStopSec=infinity
+TimeoutSec=infinity
+
+# Disable killing of MinIO by the kernel's OOM killer
+OOMScoreAdjust=-1000
+
 SendSIGKILL=no
 
 [Install]

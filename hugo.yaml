@@ -2,7 +2,7 @@
 # Basics
 #=======================================#
 baseURL: https://silo.pgsty.com/
-title: SILO - MinIO Fork by Pigsty
+title: SILO - S3-Compatible Object Storage by Pigsty
 defaultContentLanguage: en
 defaultContentLanguageInSubdir: false
 enableRobotsTXT: true
@@ -35,7 +35,7 @@ languages:
     weight: 1
     title: SILO
     params:
-      description: MinIO fork by Pigsty
+      description: S3-compatible object storage maintained by Pigsty
       time_format_blog: 'January 02, 2006'
     menu:
       main:
@@ -70,7 +70,7 @@ languages:
     weight: 2
     title: SILO
     params:
-      description: MinIO 分支，由 Pigsty 持续维护
+      description: 由 Pigsty 持续维护的 S3 兼容对象存储
       time_format_blog: '2006年01月02日'
     menu:
       main:
@@ -161,7 +161,7 @@ outputs:
 # Site parameters
 #=======================================#
 params:
-  description: MinIO fork by Pigsty, Community-maintained with security updates, restored console, and supply chain continuity.
+  description: S3-compatible object storage maintained by Pigsty, with security updates, a restored console, and supply-chain continuity.
   images:
     - images/silo-social-card.png
   version: 0.1.0

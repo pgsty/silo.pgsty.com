@@ -1,10 +1,10 @@
 ---
 title: "可用性与韧性"
 url: "/zh/operations/concepts/availability-and-resiliency/"
-description: "Information on MinIO Availability and Resiliency features in production environments"
+description: "Silo 生产环境的可用性与韧性"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-availability-resiliency"></a>

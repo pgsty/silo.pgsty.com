@@ -1,10 +1,10 @@
 ---
 title: "部署架构"
 url: "/zh/operations/concepts/architecture/"
-description: "Information on MinIO Deployment architecture and topology in production environments"
+description: "Silo 生产部署架构与拓扑"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-architecture"></a>

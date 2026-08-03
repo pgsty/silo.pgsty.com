@@ -1,9 +1,9 @@
 ---
-title: "Configure MinIO for Authentication using OpenID"
+title: "Configure Silo Authentication with OpenID"
 url: "/operations/external-iam/configure-openid-external-identity-management/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="configure-minio-for-authentication-using-openid"></a>

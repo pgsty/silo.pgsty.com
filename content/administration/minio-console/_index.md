@@ -1,10 +1,10 @@
 ---
-title: "MinIO Console"
+title: "Silo Console"
 url: "/administration/minio-console/"
 weight: 110
 icon: fa-solid fa-display
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-console"></a>

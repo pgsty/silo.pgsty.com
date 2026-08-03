@@ -1,5 +1,5 @@
 ---
-title: "将 MinIO 与 Veeam 搭配使用"
+title: "将 Silo 与 Veeam 搭配使用"
 url: "/zh/integrations/using-minio-with-veeam/"
 weight: 10
 minio_origin: true
@@ -8,15 +8,15 @@ silo_modified: true
 
 <a id="minio-veeam"></a>
 
-在使用 Veeam Backup and Replication 时，可以将 MinIO 这类 S3 兼容对象存储用作备份的容量层。这会将 Veeam 基础设施中的存储解耦，并让你继续掌控自己的数据。借助 MinIO 在部署与管理上的易用性，Veeam 备份管理员可以轻松部署自己的对象存储用于容量分层。
+在使用 Veeam Backup and Replication 时，可以将 Silo 这类 S3 兼容对象存储用作备份容量层。这会将 Veeam 基础设施中的存储解耦，并让你继续掌控自己的数据。Silo 简洁的部署与管理方式，便于 Veeam 备份管理员自行部署容量分层所需的对象存储。
 
 ## 前置条件 {#id1}
 
 - 安装以下一个或两个产品：支持 S3 兼容对象存储的 Veeam Backup and Replication（例如 9.5.4），以及 Veeam Backup for Office365（VBO）
-- 按照 [https://silo.pgsty.com/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure](https://silo.pgsty.com/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure) 完成 MinIO 对象存储部署
+- 按照[部署流程](/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure)完成 Silo 对象存储部署
 - Veeam 要求到对象存储的连接使用 TLS。请按照[网络加密指南](https://silo.pgsty.com/zh/operations/network-encryption/)配置 TLS。
 - 必须在 Veeam 之外、且在接入前先创建好 S3 存储桶、Access Key 和 Secret Key。
-- 按照 [`mc` 命令参考](https://silo.pgsty.com/zh/reference/minio-mc/)为 Veeam 对接的 MinIO endpoint 配置 MinIO Client。
+- 按照 [`mc` 命令参考](/zh/reference/minio-mc/)为 Veeam 对接的 Silo endpoint 配置 Silo 客户端。
 
 ## 为 Veeam Backup and Replication 设置 S3 兼容对象存储 {#veeam-backup-and-replication-s3}
 
@@ -36,11 +36,11 @@ mc mb -l myminio/veeambackup
 
 ```
 
-> Object Lock 依赖 MinIO Server 启用纠删码。更多信息见[纠删码文档](https://silo.pgsty.com/zh/operations/concepts/erasure-coding/)。
+> Object Lock 依赖 Silo Server 启用纠删码。更多信息见[纠删码文档](/zh/operations/concepts/erasure-coding/)。
 
-### 将 MinIO 添加为 Veeam 的对象存储 {#id2}
+### 将 Silo 添加为 Veeam 的对象存储 {#id2}
 
-按照 Veeam 文档中的步骤将 MinIO 添加为对象存储：[https://helpcenter.veeam.com/docs/backup/vsphere/adding_s3c_object_storage.html?ver=100](https://helpcenter.veeam.com/docs/backup/vsphere/adding_s3c_object_storage.html?ver=100)
+按照 Veeam 文档中的[添加对象存储](https://helpcenter.veeam.com/docs/backup/vsphere/adding_s3c_object_storage.html?ver=100)流程，将 Silo 作为 S3 兼容对象存储接入。
 
 对于启用 Immutability 的 Veeam Backup，选择希望备份保持不可变的天数
 
@@ -79,7 +79,7 @@ mc mb -l myminio/vbo
 
 - 按照上文 Veeam Backup and Replication 的向导继续执行，这两个产品的步骤相同
 - 在 Backup Infrastructure -&gt; Backup Repositories 下，右键并选择 “Add Backup Repository”
-- 按向导操作。在 “Object Storage Backup Repository” 部分，选择你上面创建的 MinIO 对象存储
+- 按向导操作。在 “Object Storage Backup Repository” 部分，选择你上面创建的 Silo 对象存储
 
 ![Adding Object Storage to VBO Backup Repository](/images/integrations/veeam/6_add_sobr_with_object_store.png)
 
@@ -87,7 +87,7 @@ mc mb -l myminio/vbo
 
 ## 测试设置 {#id4}
 
-下次备份作业运行时，你可以使用 `mc admin trace myminio` 命令，确认流量正在进入 MinIO 节点。对于 Veeam Backup and Replication，需要先等待备份在性能层完成，然后数据才会迁移到容量层（即 MinIO）。
+下次备份作业运行时，你可以使用 `mc admin trace myminio` 命令，确认流量正在进入 Silo 节点。对于 Veeam Backup and Replication，需要先等待备份在性能层完成，然后数据才会迁移到 Silo 容量层。
 
 ```
 20:09:10.216 [200 OK] s3.GetObject veeam-minio01:9000/vbo/Veeam/Backup365/vbotest/Organizations/6571606ecbc4455dbfe23b83f6f45597/Webs/ca2d0986229b4ec88e3a217ef8f04a1d/Items/efaa67764b304e77badb213d131beab6/f4f0cf600f494c3eb702d8eafe0fabcc.aac07493e6cd4c71845d2495a4e1e19b 139.178.68.158    9.789ms      ↑ 90 B ↓ 8.5 KiB

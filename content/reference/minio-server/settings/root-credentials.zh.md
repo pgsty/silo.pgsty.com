@@ -3,7 +3,7 @@ title: "Root 访问设置"
 url: "/zh/reference/minio-server/settings/root-credentials/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="root"></a>
@@ -11,7 +11,7 @@ silo_modified: false
 
 本页介绍用于控制 MinIO 进程 root（超级用户）访问权限的设置。 root 用户具有完整访问权限，可在 MinIO 部署上执行操作。
 
-即使使用 [MinIO Key Encryption Service](https://docs.min.io/community/minio-kes/) 或其他密钥管理工具，也必须配置 Root User 和 Root Password。
+即使使用 [MinIO Key Encryption Service](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) 或其他密钥管理工具，也必须配置 Root User 和 Root Password。
 
 你可以通过以下方式建立或修改设置：
 
@@ -120,14 +120,14 @@ RELEASE.2024-03-03T17-50-39Z
 
 如果同时满足以下所有条件，MinIO 会自动生成唯一的 root 凭证：
 
-- [KES](https://docs.min.io/community/minio-kes/tutorials/getting-started/) Release 2024-03-01T18-06-46Z or later running
+- [KES](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md) Release 2024-03-01T18-06-46Z or later running
 - **未** 定义：
 
   - `MINIO_ROOT_USER` 变量
   - `MINIO_ROOT_PASSWORD` 变量
 - **已**：
 
-  - 使用 [受支持的 KMS 目标](https://docs.min.io/community/minio-kes/#supported-kms-targets) 完成 KES 配置
+  - 使用 [受支持的 KMS 目标](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) 完成 KES 配置
   - 通过 [MinIO 环境变量](#minio-disable-root-access) 禁用 root 访问
 
 当这些条件在启动时满足后， MinIO 会使用 KMS 和 [hash-based message authentication code (HMAC)](https://en.wikipedia.org/wiki/HMAC) 为该部署生成唯一的 root 凭证。

@@ -1,5 +1,5 @@
 ---
-title: "Deploy MinIO on RedHat Linux"
+title: "Deploy Silo on RHEL-Compatible Linux"
 url: "/operations/deployments/baremetal-deploy-minio-on-redhat-linux/"
 weight: 10
 minio_origin: true
@@ -9,16 +9,9 @@ silo_modified: true
 <a id="deploy-minio-on-redhat-linux"></a>
 <a id="deploy-minio-rhel"></a>
 
-This page documents deploying MinIO on RedHat Linux operating systems, including distributions that are binary-compatible with RHEL. This page makes no distinction or special remarks between RHEL and those distributions, and guidance given for RHEL can typically be applied to those distributions.
+This page documents deploying Silo on RHEL and binary-compatible Linux distributions.
 
-MinIO strongly recommends that production deployments use RHEL versions in the **Full Support** or **Maintenance Support** phases of the Red Hat life cycle. At the time of writing, that includes:
-
-- RHEL 9.5+ (**Recommended**)
-- RHEL 8.10+
-
-Your organization should have the necessary service contracts with Red Hat to ensure end-to-end supportability of your deployments.
-
-MinIO *may* run on versions of RHEL no longer supported by Red Hat Linux, with limited support or troubleshooting from either MinIO or RedHat.
+Silo publishes RPM packages and standalone Linux archives for x86-64 and ARM64. The project does not publish a separate RHEL support-lifecycle matrix, so the inherited point-in-time release list has been removed. Use a distribution release still supported by its vendor, keep the kernel and system libraries current, and validate the exact storage and workload configuration before production use.
 
 The procedure focuses on production-grade Multi-Node Multi-Drive (MNMD) “Distributed” configurations. <abbr title="Multi-Node Multi-Drive">MNMD</abbr> deployments provide enterprise-grade performance, availability, and scalability and are the recommended topology for all production workloads.
 
@@ -48,37 +41,15 @@ Consider using the MinIO [Erasure Code Calculator](https://min.io/product/erasur
 
 ## Procedure {#procedure}
 
-### 1. Download the MinIO RPM {#download-the-minio-rpm}
+### 1. Download the Silo RPM {#download-the-minio-rpm}
 
-MinIO provides builds for the following architectures:
+Download the x86-64 or ARM64 RPM from [Download & Install](/download/#server), verify its published checksum, and install it:
 
-- AMD64
-- ARM64
-- PowerPC 64 LE
-- S390X
-
-Use the following commands to download the latest stable MinIO RPM for your host architecture and install it.
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="AMD64" %}}
 ```shell
-wget RPMURL -O minio.rpm
-sudo dnf install minio.rpm
+sudo dnf install ./minio-*.rpm
 ```
-{{% /tab %}}
-{{% tab header="ARM64" %}}
-```shell
-wget RPMARM64URL -O minio.rpm
-sudo dnf install minio.rpm
-```
-{{% /tab %}}
-{{% tab header="PPC64LE" %}}
-```shell
-wget RPMPPC64LEURL -O minio.rpm
-sudo dnf install minio.rpm
-```
-{{% /tab %}}
-{{< /tabpane >}}
+
+Current Silo releases do not publish the inherited `ppc64le` or `s390x` package variants.
 
 ### 2. Review the `systemd` Service File {#review-the-systemd-service-file}
 
@@ -93,6 +64,8 @@ After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio
 
 [Service]
+Type=notify
+
 WorkingDirectory=/usr/local
 
 User=minio-user
@@ -100,25 +73,26 @@ Group=minio-user
 ProtectProc=invisible
 
 EnvironmentFile=-/etc/default/minio
-ExecStartPre=/bin/bash -c "if [ -z \"${MINIO_VOLUMES}\" ]; then echo \"Variable MINIO_VOLUMES not set in /etc/default/minio\"; exit 1; fi"
 ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
-
-# MinIO RELEASE.2023-05-04T21-44-30Z adds support for Type=notify (https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=)
-# This may improve systemctl setups where other services use `After=minio.server`
-# Uncomment the line to enable the functionality
-# Type=notify
 
 # Let systemd restart this service always
 Restart=always
 
 # Specifies the maximum file descriptor number that can be opened by this process
-LimitNOFILE=65536
+LimitNOFILE=1048576
+
+# Turn-off memory accounting by systemd, which is buggy.
+MemoryAccounting=no
 
 # Specifies the maximum number of threads this process can create
 TasksMax=infinity
 
 # Disable timeout logic and wait until process is stopped
-TimeoutStopSec=infinity
+TimeoutSec=infinity
+
+# Disable killing of MinIO by the kernel's OOM killer
+OOMScoreAdjust=-1000
+
 SendSIGKILL=no
 
 [Install]

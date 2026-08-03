@@ -1,9 +1,9 @@
 ---
-title: "Configure MinIO for Authentication using Active Directory / LDAP"
+title: "Configure Silo Authentication with Active Directory / LDAP"
 url: "/operations/external-iam/configure-ad-ldap-external-identity-management/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="configure-minio-for-authentication-using-active-directory-ldap"></a>

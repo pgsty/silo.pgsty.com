@@ -1,21 +1,21 @@
 ---
-title: "MinIO 服务端"
+title: "Silo 服务端（`minio`）"
 url: "/zh/reference/minio-server/"
 weight: 30
 aliases:
   - "/zh/reference/minio-server/minio-server/"
 icon: fa-solid fa-database
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>
 
 <a id="command-minio"></a>
 
-## MinIO Server {#minio-server}
+## Silo 服务端 {#minio-server}
 
-[`minio server`](#command-minio.server) 命令用于启动 MinIO server 进程：
+[`minio server`](#command-minio.server) 命令用于启动 Silo 服务端进程。可执行文件与子命令名称 `minio server` 属于兼容契约：
 
 ```shell
 minio server /mnt/disk{1...4}
@@ -23,7 +23,7 @@ minio server /mnt/disk{1...4}
 
 有关在裸金属环境中部署 [`minio server`](#command-minio.server) 的示例，请参阅 [安装与管理](/zh/operations/deployments/installation/#minio-installation)。
 
-有关在 Kubernetes 环境中部署 [`minio server`](#command-minio.server) 的示例，请参阅 [Deploying a MinIO Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant)。
+有关在 Kubernetes 环境中部署 [`minio server`](#command-minio.server) 的示例，请参阅 [部署 Silo Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant)。
 
 <a id="id2"></a>
 <a id="minio-server-parameters"></a>
@@ -50,7 +50,7 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 
 对于分布式部署，请指定部署中每个 [`minio server`](#command-minio.server) 的主机名。 这一组 [`minio server`](#command-minio.server) 进程共同表示一个 [服务器池](/zh/operations/concepts/#minio-intro-server-pool)。
 
-[`HOSTNAME`](#minio.server.HOSTNAME) 支持 MinIO 扩展记法 `{x...y}`，用于表示按顺序排列的一组主机名。 MinIO *要求* 使用连续主机名，以识别该集合中的每个 [`minio server`](#command-minio.server) 进程。
+[`HOSTNAME`](#minio.server.HOSTNAME) 支持扩展记法 `{x...y}`，用于表示按顺序排列的一组主机名。Silo *要求* 使用连续主机名，以识别该集合中的每个 [`minio server`](#command-minio.server) 进程。
 
 例如，`https://minio{1...4}.example.net` 会扩展为：
 
@@ -61,7 +61,7 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 
 你必须在 服务器池 中每台主机上，使用 *相同* 的 [`HOSTNAME`](#minio.server.HOSTNAME) 和 [`DIRECTORIES`](#minio.server.DIRECTORIES) 组合来运行 [`minio server`](#command-minio.server) 命令。
 
-每增加一个 `HOSTNAME/DIRECTORIES` 对，就表示增加一个 Server Set，以用于 MinIO 部署的水平扩展。 有关 服务器池s 的更多信息，请参阅 [服务器池](/zh/operations/concepts/#minio-intro-server-pool)。
+每增加一个 `HOSTNAME/DIRECTORIES` 对，就表示增加一个 Server Set，用于 Silo 部署的水平扩展。有关服务器池的更多信息，请参阅 [服务器池](/zh/operations/concepts/#minio-intro-server-pool)。
 
 ##### `DIRECTORIES` {#minio.server.DIRECTORIES}
 
@@ -71,7 +71,7 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 
 [`minio server`](#command-minio.server) 进程用作存储后端的目录或驱动器。
 
-[`DIRECTORIES`](#minio.server.DIRECTORIES) 支持 MinIO 扩展记法 `{x...y}`，用于表示按顺序排列的一组文件夹或驱动器。 例如，`/mnt/disk{1...4}` 会扩展为：
+[`DIRECTORIES`](#minio.server.DIRECTORIES) 支持扩展记法 `{x...y}`，用于表示按顺序排列的一组文件夹或驱动器。例如，`/mnt/disk{1...4}` 会扩展为：
 
 - `/mnt/disk1`
 - `/mnt/disk2`
@@ -85,11 +85,11 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 {{% alert color="warning" %}}
 **重要**
 
-MinIO 建议使用本地直连驱动器，即 [`DIRECTORIES`](#minio.server.DIRECTORIES) 路径应指向主机上的各个驱动器。 MinIO *不建议* 使用网络附加存储，因为与本地直连存储相比，网络延迟会降低这些驱动器的性能。
+Silo 建议使用本地直连驱动器，即 [`DIRECTORIES`](#minio.server.DIRECTORIES) 路径指向主机上的各个驱动器。除非已验证完整技术栈，应避免把网络附加存储用作主对象数据存储，因为其网络延迟和故障语义与本地直连存储不同。
 
 在开发或评估场景中，你可以在单个物理卷上指定多个逻辑目录或分区，以便在部署中启用纠删码。
 
-对于生产环境，MinIO **不建议** 在单个物理磁盘上使用多个逻辑目录或分区。 虽然 MinIO 支持这些配置，但潜在的成本节省伴随着可靠性下降的风险。
+对于生产环境，**不要** 把同一物理磁盘上的多个逻辑目录或分区当作独立故障域。表面上的驱动器数量不能提供物理磁盘冗余。
 {{% /alert %}}
 
 ##### `--address` {#minio.server.-address}

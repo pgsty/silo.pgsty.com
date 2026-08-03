@@ -4,7 +4,7 @@ url: "/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier/"
 weight: 9118
 toc_hide: true
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="upgrade-legacy-minio-operators"></a>
@@ -474,7 +474,7 @@ There is no direct upgrade path for 4.0.0 - 4.2.2 installations to 7.1.1.
    ```
 5. Upgrade to 7.1.1
 
-   Follow the [Upgrade MinIO Operator 5.0.15 to 7.1.1](/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure) procedure to upgrade to the latest stable Operator version.
+   Follow the [Upgrade MinIO Operator 5.0.15 to 7.1.1](/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure) procedure to upgrade to `v7.1.1`, the final upstream release before the repository was archived.
 
 ## Upgrade MinIO Operator 3.0.0 through 3.0.29 to 4.2.2 {#upgrade-minio-operator-3-0-0-through-3-0-29-to-4-2-2}
 

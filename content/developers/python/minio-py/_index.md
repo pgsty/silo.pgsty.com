@@ -4,7 +4,7 @@ url: "/developers/python/minio-py/"
 weight: 20
 icon: fa-brands fa-python
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="python-quickstart-guide"></a>
@@ -19,12 +19,12 @@ MinIO Python Client SDK 提供高级 API，可用于访问任意 MinIO 对象存
 以下示例使用：
 
 - [Python version 3.7+](https://www.python.org/downloads/)
-- [MinIO `mc` 命令行工具](https://min.io/docs/minio/linux/reference/minio-mc.html)
+- [Silo `mc`/`mcli` 命令行工具](/reference/minio-mc/#command-mc)
 - MinIO `play` 测试服务器
 
 `play` 服务器是位于 [https://play.min.io](https://play.min.io) 的公开 MinIO 集群。 该集群运行 MinIO 的最新稳定版本，可用于测试与开发。 示例中的访问凭证对公众开放，上传到 `play` 的所有数据都应视为公开且全网可读。
 
-如需查看完整的 API 与示例列表，请参阅 [Python Client API Reference](https://min.io/docs/minio/linux/developers/python/API.html)
+如需查看完整的 API 与示例列表，请参阅 [Python Client API Reference](https://github.com/minio/minio-py/blob/master/docs/API.md)
 
 ### 安装 MinIO Python SDK {#minio-python-sdk}
 
@@ -75,7 +75,7 @@ client = Minio("play.min.io",
 - 使用提供的凭证连接到 MinIO `play` 服务器。
 - 如果不存在名为 `python-test-bucket` 的存储桶，则创建该存储桶。
 - 从 `/tmp` 上传名为 `test-file.txt` 的文件，并将其重命名为 `my-test-file.txt`。
-- 使用 [`mc ls`](https://min.io/docs/minio/linux/reference/minio-mc/mc-ls.html) 验证文件已创建。
+- 使用 [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) 验证文件已创建。
 
 #### `file_uploader.py` {#file-uploader-py}
 
@@ -152,12 +152,12 @@ mc ls play/python-test-bucket
 
 ### 更多参考 {#id2}
 
-- [Python Client API Reference](https://min.io/docs/minio/linux/developers/python/API.html)
+- [Python Client API Reference](https://github.com/minio/minio-py/blob/master/docs/API.md)
 - [Examples](https://github.com/minio/minio-py/tree/master/examples)
 
 ### 进一步了解 {#id3}
 
-- [Complete Documentation](https://min.io/docs/minio/kubernetes/upstream/index.html)
+- [Python SDK source and current documentation](https://github.com/minio/minio-py)
 
 ### 参与贡献 {#id4}
 

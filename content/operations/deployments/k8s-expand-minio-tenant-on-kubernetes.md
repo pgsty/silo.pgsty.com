@@ -1,9 +1,9 @@
 ---
-title: "Expand a MinIO Tenant"
+title: "Expand a Silo Tenant"
 url: "/operations/deployments/k8s-expand-minio-tenant-on-kubernetes/"
 weight: 50
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="expand-a-minio-tenant"></a>
@@ -23,7 +23,7 @@ See [Modify a MinIO Tenant](/operations/deployments/k8s-modify-minio-tenant-on-k
 
 ### MinIO Kubernetes Operator {#minio-kubernetes-operator}
 
-This procedure on this page *requires* a valid installation of the MinIO Kubernetes Operator and assumes the local host has a matching installation of the MinIO Kubernetes Operator. This procedure assumes the latest stable Operator, version 7.1.1.
+This procedure *requires* a valid installation of the MinIO Kubernetes Operator and assumes the local host has a matching Operator installation. It uses `v7.1.1`, the final upstream release before the repository was archived, as a frozen compatibility baseline.
 
 See [Deploy MinIO on Kubernetes](/operations/deployments/kubernetes/#deploy-operator-kubernetes) for complete documentation on deploying the MinIO Operator.
 

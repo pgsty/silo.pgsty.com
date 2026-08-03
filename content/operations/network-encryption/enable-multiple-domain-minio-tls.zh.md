@@ -1,9 +1,9 @@
 ---
-title: "为 MinIO 启用多域 TLS"
+title: "为 Silo 启用多域 TLS"
 url: "/zh/operations/network-encryption/enable-multiple-domain-minio-tls/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-tls"></a>
@@ -107,7 +107,7 @@ MinIO Operator 支持通过三种方式管理 MinIO 租户上的 TLS 证书：
 
    `spec.certConfig.dnsNames` 应包含 TLS 证书所覆盖的 <abbr title="Subject Alternate Names">SAN</abbr> 列表。
 
-   创建或修改租户资源时，可参考 [Kustomize Tenant base YAML](https://github.com/minio/operator/blob/master/examples/kustomization/base/tenant.yaml) 作为基线模板。
+   创建或修改租户资源时，可参考 [固定到 `v7.1.1` 的 Kustomize Tenant base YAML](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/base/tenant.yaml) 作为基线模板。
 3. 应用新的 Kustomization 模板
 
    一旦应用这些更改，MinIO Operator 会使用更新后的配置自动重新部署该租户。

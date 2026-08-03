@@ -1,5 +1,5 @@
 ---
-title: "Deploy MinIO on Ubuntu Linux"
+title: "Deploy Silo on Ubuntu Linux"
 url: "/operations/deployments/baremetal-deploy-minio-on-ubuntu-linux/"
 weight: 20
 minio_origin: true
@@ -12,18 +12,9 @@ silo_modified: true
 - [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
 - [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
 
-This page documents deploying MinIO on Ubuntu Linux operating systems.
+This page documents deploying Silo on Ubuntu Linux.
 
-MinIO officially supports Ubuntu Long Term Support (LTS) releases in the **Standard** or **Ubuntu Pro** support phases of the Ubuntu life cycle. MinIO strongly recommends only those releases that include the Linux 5.X kernel and above for best performance. At the time of writing, that includes:
-
-- Ubuntu 24.04+ LTS (Noble Numbat) (**Recommended**)
-- Ubuntu 22.04+ LTS (Jammy Jellyfish)
-- Ubuntu 20.04+ LTS (Focal Fossa)
-- Ubuntu 18.04.5 LTS (Bionic Beaver) (**Ubuntu Pro Only**)
-
-The above list assumes your organization has the necessary service contracts with Ubuntu to ensure end-to-end supportability throughout the release’s lifespan.
-
-MinIO *may* run on versions of Ubuntu that use older kernels, are out of support, or are in legacy support phases, with limited support or troubleshooting from either MinIO or RedHat.
+Silo publishes DEB packages and standalone Linux archives for x86-64 and ARM64. The project does not publish a separate Ubuntu support-lifecycle matrix, so the inherited point-in-time release list has been removed. Use an Ubuntu release still supported by its distributor, keep the kernel and system libraries current, and validate the exact storage and workload configuration before production use.
 
 The procedure focuses on production-grade Multi-Node Multi-Drive (MNMD) “Distributed” configurations. <abbr title="Multi-Node Multi-Drive">MNMD</abbr> deployments provide enterprise-grade performance, availability, and scalability and are the recommended topology for all production workloads.
 
@@ -53,13 +44,12 @@ Consider using the MinIO [Erasure Code Calculator](https://min.io/product/erasur
 
 ## Procedure {#procedure}
 
-### 1. Download the MinIO RPM {#download-the-minio-rpm}
+### 1. Download the Silo DEB {#download-the-minio-rpm}
 
-Use the following commands to download the latest stable MinIO DEB and install it.
+Download the DEB for your architecture from [Download & Install](/download/#server), verify its published checksum, and install it. Use the `arm64` filename on ARM64 hosts.
 
 ```shell
-wget DEBURL -O minio.deb
-sudo dpkg -i minio.deb
+sudo dpkg -i ./minio_*_amd64.deb
 ```
 
 ### 2. Review the `systemd` Service File {#review-the-systemd-service-file}
@@ -75,6 +65,8 @@ After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio
 
 [Service]
+Type=notify
+
 WorkingDirectory=/usr/local
 
 User=minio-user
@@ -82,25 +74,26 @@ Group=minio-user
 ProtectProc=invisible
 
 EnvironmentFile=-/etc/default/minio
-ExecStartPre=/bin/bash -c "if [ -z \"${MINIO_VOLUMES}\" ]; then echo \"Variable MINIO_VOLUMES not set in /etc/default/minio\"; exit 1; fi"
 ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
-
-# MinIO RELEASE.2023-05-04T21-44-30Z adds support for Type=notify (https://www.freedesktop.org/software/systemd/man/systemd.service.html#Type=)
-# This may improve systemctl setups where other services use `After=minio.server`
-# Uncomment the line to enable the functionality
-# Type=notify
 
 # Let systemd restart this service always
 Restart=always
 
 # Specifies the maximum file descriptor number that can be opened by this process
-LimitNOFILE=65536
+LimitNOFILE=1048576
+
+# Turn-off memory accounting by systemd, which is buggy.
+MemoryAccounting=no
 
 # Specifies the maximum number of threads this process can create
 TasksMax=infinity
 
 # Disable timeout logic and wait until process is stopped
-TimeoutStopSec=infinity
+TimeoutSec=infinity
+
+# Disable killing of MinIO by the kernel's OOM killer
+OOMScoreAdjust=-1000
+
 SendSIGKILL=no
 
 [Install]

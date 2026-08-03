@@ -19,6 +19,8 @@ silo_modified: true
 
 在设置这些复制配置之前，请确保满足以下前提条件。
 
+<a id="minio-bucket-replication-serverside-oneway-permissions"></a>
+
 ## 设置存储桶复制所需的权限 {#id3}
 
 要配置和启用复制规则，存储桶复制要求源端和目标端部署具备特定权限。

@@ -1,9 +1,9 @@
 ---
-title: "MinIO External Access Management Plugin"
+title: "Silo External Access Management Plugin"
 url: "/administration/identity-access-management/pluggable-authorization/"
 weight: 60
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-external-access-management-plugin"></a>

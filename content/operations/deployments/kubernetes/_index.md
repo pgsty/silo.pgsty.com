@@ -1,10 +1,10 @@
 ---
-title: "Deploy MinIO on Kubernetes"
+title: "Deploy Silo on Kubernetes"
 url: "/operations/deployments/kubernetes/"
 weight: 10
 icon: fa-solid fa-dharmachakra
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="deploy-minio-on-kubernetes"></a>
@@ -17,17 +17,17 @@ silo_modified: false
 <a id="deploy-operator-kubernetes"></a>
 <a id="minio-kubernetes"></a>
 
-MinIO is a Kubernetes-native high performance object store with an S3-compatible API. The MinIO Kubernetes Operator supports deploying MinIO Tenants onto private and public cloud infrastructures (“Hybrid” Cloud).
+Silo is an S3-compatible object storage server that can run in Kubernetes. The final upstream MinIO Kubernetes Operator release, `v7.1.1`, can deploy a `Tenant` with the Silo image when `tenant.image.repository` is overridden to `pgsty/minio` and a tested tag or digest is pinned.
 
-All documentation assumes familiarity with referenced Kubernetes concepts, utilities, and procedures. While MinIO documentation *may* provide guidance for configuring or deploying Kubernetes-related resources on a best-effort basis, it is not a replacement for the official [Kubernetes Documentation](https://kubernetes.io/docs/).
+These guides assume familiarity with the referenced Kubernetes concepts, utilities, and procedures. They are not a replacement for the official [Kubernetes Documentation](https://kubernetes.io/docs/), and the Silo project does not inherit the former MinIO vendor support matrix for Kubernetes distributions.
 
-The MinIO Operator is a first-party Kubernetes-native operator that manages the deployment of MinIO Tenants onto Kubernetes infrastructure.
+The MinIO Operator, its Helm charts, CRDs, and `Tenant` kind remain upstream contracts independent of Silo releases. The upstream `minio/operator` repository was archived and made read-only on 2026-03-20, so its release lifecycle is frozen and these guides are a compatibility snapshot.
 
-The Operator provides MinIO-centric functionality around Tenant management, including support for configuring all core MinIO features.
+The archived Operator code provides MinIO-compatible Tenant management and configuration. Validate the pinned Operator and chart against your cluster before deployment or upgrade; there is no ongoing upstream compatibility or support promise.
 
-You can interact with the Operator through the MinIO [Custom Resource Definition (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#customresourcedefinitions), or through the Operator Console UI.
+You can interact with the Operator through its [Custom Resource Definition (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/#customresourcedefinitions).
 
-The CRD provides a highly customizable entry point for using tools like Kustomize for deploying Tenants. You can also use the MinIO Operator Console, a rich web-based UI that has complete support for deploying and configuring MinIO Tenants.
+The CRD provides a customizable entry point for tools such as Kustomize, Helm, and `kubectl` to deploy and manage Silo-backed Tenants.
 
 {{% alert color="warning" %}}
 **Important**

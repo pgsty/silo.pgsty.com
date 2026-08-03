@@ -4,7 +4,7 @@ url: "/administration/object-management/"
 weight: 120
 icon: fa-solid fa-box-archive
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="object-management"></a>
@@ -13,6 +13,8 @@ silo_modified: false
 - [Object locking and retention overview](https://youtu.be/Hk9Z-sltUu8?ref=docs)
 - [MinIO Object Lifecycle Management Part I](https://youtu.be/Exg2KsfzHzI?ref=docs)
 - [MinIO Object Lifecycle Management Part II](https://youtu.be/5fz3rE3wjGg?ref=docs)
+
+<a id="objects"></a>
 
 An [object](#objects) is binary data, such as images, audio files, spreadsheets, or even binary executable code. The term “Binary Large Object” or “blob” is sometimes associated to object storage, although blobs can be anywhere from a few bytes to several terabytes in size. Object Storage platforms like MinIO provide dedicated tools and capabilities for storing, listing, and retrieving objects using a standard S3-compatible API.
 
@@ -23,6 +25,8 @@ MinIO **requires** *exclusive* access to the drives or volumes provided for obje
 
 Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 {{% /alert %}}
+
+<a id="buckets"></a>
 
 MinIO Object Storage uses [buckets](#buckets) to organize objects. A bucket is similar to a top-level drive, folder, or directory in a filesystem (`/mnt/data` or `C:\`), where each bucket can hold an arbitrary number of objects.
 

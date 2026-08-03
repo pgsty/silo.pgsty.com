@@ -1,10 +1,10 @@
 ---
-title: "MinIO 控制台"
+title: "Silo 控制台"
 url: "/zh/administration/minio-console/"
 weight: 110
 icon: fa-solid fa-display
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>

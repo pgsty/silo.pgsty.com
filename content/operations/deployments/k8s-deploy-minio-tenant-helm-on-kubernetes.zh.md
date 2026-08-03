@@ -1,9 +1,9 @@
 ---
-title: "使用 Helm Charts 部署 MinIO Tenant"
+title: "使用 Helm Charts 部署 Silo Tenant"
 url: "/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="helm-charts-minio-tenant"></a>
@@ -18,11 +18,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 {{% alert color="warning" %}}
 **重要**
 
-MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio) *不同*。
-
-社区 Helm Chart 由社区构建、维护并提供支持。 对于引用该 chart 的任何 bug、功能请求或更新，MinIO 均不保证提供支持。
-
-[Operator Tenant Chart](/zh/reference/tenant-chart-values/#minio-tenant-chart-values) 由 MinIO 官方维护并提供支持。 对于生产环境，MinIO 强烈建议为 [Operator](/zh/reference/operator-chart-values/#minio-operator-chart-values) 和 [Tenant](/zh/reference/tenant-chart-values/#minio-tenant-chart-values) 使用官方 Helm Chart。
+MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio) *不同*。本指南使用 Operator Tenant Chart，因为它提供明确的 Tenant 镜像覆盖。上游 Operator 仓库已于 2026 年 3 月 20 日归档，因此本文固定其最终 `v7.1.1` Chart，仅作为冻结的兼容基线；Silo 不继承上游厂商的支持承诺。
 {{% /alert %}}
 
 ## 前提条件 {#id3}
@@ -47,11 +43,11 @@ MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/
 
 <a id="id5"></a>
 
-## 使用 Helm Charts 部署 MinIO Tenant {#deploy-tenant-helm-repo}
+## 使用 Helm Charts 部署 Silo Tenant {#deploy-tenant-helm-repo}
 
 以下步骤使用 MinIO Operator Chart Repository 部署 MinIO Tenant。 与 [本地 chart 安装](#deploy-tenant-helm-local) 相比，这种方式的安装路径更简单。
 
-以下步骤使用 Helm 通过官方 MinIO Tenant Chart 部署 MinIO Tenant。
+以下步骤使用 Helm 通过已归档上游项目的 `v7.1.1` Tenant Chart 部署 MinIO Tenant。
 
 {{% alert color="warning" %}}
 **重要**
@@ -63,7 +59,7 @@ MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/
 
 1. 验证 MinIO Operator Repo 配置
 
-   MinIO 在 [https://operator.min.io](https://operator.min.io) 维护了一个兼容 Helm 的仓库。 如果该仓库尚未存在于本地 Helm 配置中，请先添加后再继续：
+   已归档项目的端点 [https://operator.min.io](https://operator.min.io) 当前仍提供 `v7.1.1` Chart。 如果该仓库尚未存在于本地 Helm 配置中，请先添加后再继续：
 
    ```shell
    helm repo add minio-operator https://operator.min.io
@@ -86,10 +82,23 @@ MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/
 2. 创建 Helm `values.yaml` 的本地副本以供修改
 
    ```shell
-   curl -sLo values.yaml https://raw.githubusercontent.com/minio/operator/master/helm/tenant/values.yaml
+   curl -sLo values.yaml https://raw.githubusercontent.com/minio/operator/v7.1.1/helm/tenant/values.yaml
    ```
 
-   请使用你偏好的文本编辑器打开 `values.yaml` 文件。
+   请使用文本编辑器打开 `values.yaml`。继续之前，替换上游服务端镜像默认值，并禁用继承的原地更新器：
+
+   ```yaml
+   tenant:
+     image:
+       repository: pgsty/minio
+       tag: RELEASE.2026-06-18T00-00-00Z
+       pullPolicy: IfNotPresent
+     env:
+       - name: MINIO_UPDATE
+         value: "off"
+   ```
+
+   仅当更新标签已在 [Silo 下载页](/zh/download/#server) 发布，并通过你的部署验证后才应使用。Silo 生产环境的 values 文件不应保留 `quay.io/minio/minio` 或 `latest`。
 3. 配置 Tenant 拓扑
 
    以下字段都带有 `tenant.pools[0]` 前缀，用于控制 Tenant 中所有 pod 的 server 数量、每个 server 的卷数量以及存储类：
@@ -161,9 +170,9 @@ MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/
        </tr>
      </tbody>
    </table>
-6. 配置 MinIO 环境变量
+6. 配置 Silo 环境变量
 
-   你可以使用 `tenant.configuration` 字段设置 MinIO Server 环境变量。
+   你可以使用 `tenant.configuration` 字段设置服务端 `MINIO_*` 环境变量。这些名称属于 MinIO 兼容契约，不得改名。
 
    <table>
      <thead>
@@ -192,6 +201,7 @@ MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/
    helm install \
    --namespace TENANT-NAMESPACE \
    --create-namespace \
+   --version 7.1.1 \
    --values values.yaml \
    TENANT-NAME minio-operator/tenant
    ```
@@ -235,15 +245,16 @@ MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/
 
 1. 下载 Helm charts
 
-   在本地主机上，将 Tenant Helm charts 下载到一个合适的目录：
+   在本地主机上拉取已固定的 Tenant Chart，并将默认 values 提取为单独覆盖文件：
 
    ```shell
-   curl -O https://raw.githubusercontent.com/minio/operator/master/helm-releases/tenant-7.1.1.tgz
+   helm pull minio-operator/tenant --version 7.1.1
+   helm show values tenant-7.1.1.tgz > values.yaml
    ```
 
    每个 chart 都包含一个可按需定制的 `values.yaml` 文件。 有关 MinIO Tenant `values.yaml` 可用选项的详细信息，请参阅 [租户 Helm Charts](/zh/reference/tenant-chart-values/#minio-tenant-chart-values)。
 
-   请使用你偏好的文本编辑器打开 `values.yaml` 文件。
+   请使用文本编辑器打开 `values.yaml`：将 `tenant.image.repository` 设为 `pgsty/minio`，将 `tenant.image.tag` 固定为已发布 Silo 版本，并在 `tenant.env` 中加入 `MINIO_UPDATE=off`，与 [基于仓库的流程](#deploy-tenant-helm-repo) 中的示例一致。
 2. 配置 Tenant 拓扑
 
    以下字段都带有 `tenant.pools[0]` 前缀，用于控制 Tenant 中所有 pod 的 server 数量、每个 server 的卷数量以及存储类：
@@ -295,21 +306,22 @@ MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/
    | `tenant.certificate.certConfig` | 控制 [自动 TLS](/zh/operations/network-encryption/#minio-tls) 的设置。 需要 `spec.requestAutoCert: true` |
    | `tenant.certificate.externalCertSecret` | 指定一个或多个类型为 `kubernetes.io/tls` 或 `cert-manager` 的 Kubernetes secret。 MinIO 会基于主机名（Server Name Indication）使用这些证书执行 TLS 握手。 |
    | `tenant.certificate.externalCACertSecret` | 指定一个或多个类型为 `kubernetes.io/tls` 的 Kubernetes secret，其中包含 Tenant 为允许客户端 TLS 连接而必须信任的 Certificate Authority (CA) 证书链。 |
-5. 配置 MinIO 环境变量
+5. 配置 Silo 环境变量
 
-   你可以使用 `tenant.configuration` 字段设置 MinIO Server 环境变量。
+   你可以使用 `tenant.configuration` 字段设置服务端 `MINIO_*` 环境变量。这些名称仍属兼容契约。
 
    该字段必须指定一个 Kubernetes opaque secret，其数据负载 `config.env` 包含你希望设置的每一个 MinIO 环境变量。
 
    该 YAML 中包含一个 `kind: Secret` 且 `metadata.name: storage-configuration` 的对象，用于设置 root 用户名、密码、纠删码校验设置，以及启用 Tenant Console。
 
    请根据 Tenant 的实际需求修改这些值。
-6. 以下 Helm 命令会使用标准 chart 创建 MinIO Tenant：
+6. 以下 Helm 命令使用已固定的本地 Chart 与经审查 values 创建 Silo Tenant：
 
    ```shell
    helm install \
    --namespace TENANT-NAMESPACE \
    --create-namespace \
+   --values values.yaml \
    TENANT-NAME tenant-7.1.1.tgz
    ```
 
@@ -329,9 +341,7 @@ MinIO Operator Tenant Chart 与社区维护的 [MinIO Chart](https://github.com/
      mc alias set myminio https://localhost:9000 minio minio123 --insecure
      ```
 
-     该示例使用非 TLS 的 `myminio-hl` 服务，因此需要 `--insecure` 参数。
-
-     如果你已经配置了 TLS 证书，请省略 `--insecure`，并改用 `svc/minio`。
+     该示例使用 HTTPS，但本地客户端可能不信任 Tenant 提供的证书，因此包含 `--insecure`。如果 Tenant 提供客户端信任的证书，请省略该参数。应确认当前 Tenant 实际生成的服务名，而不要假定固定为 `svc/minio`。
 
    你可以使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 在 Tenant 上创建存储桶：
 

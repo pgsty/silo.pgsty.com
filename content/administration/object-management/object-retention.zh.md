@@ -1,9 +1,9 @@
 ---
-title: "MinIO 对象锁定"
+title: "Silo 对象锁定"
 url: "/zh/administration/object-management/object-retention/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>

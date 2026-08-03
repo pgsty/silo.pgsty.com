@@ -1,6 +1,6 @@
 ---
-title: "SILO: Community-Maintained MinIO Fork by Pigsty"
-description: "A community-maintained MinIO fork providing security updates, versioned releases, S3 compatibility, and operational continuity for existing deployments."
+title: "SILO: S3-Compatible Object Storage by Pigsty"
+description: "S3-compatible object storage maintained by Pigsty, with security updates, versioned releases, a restored console, and operational continuity."
 url: "/"
 weight: 1
 type: home
@@ -23,8 +23,7 @@ and its content is forked from the upstream MinIO documentation project [`minio/
 - [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
 - [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
 
-MinIO is a Kubernetes-native S3-compatible object storage solution designed to deploy wherever your applications are - on premises, in the private cloud, in the public cloud, and edge infrastructure. MinIO is designed to support modern application workload patterns where high performance distributed computing meets petabyte-scale storage requirements.
-This site documents Operations, Administration, and Development of SILO Community Object Storage deployments on supported platforms.
+Silo is S3-compatible object storage maintained by the Pigsty community for existing deployments that need an open release and security-maintenance path. This site documents Silo operations, administration, development, downloads, release boundaries, and compatibility contracts.
 
 ## Quickstart {#quickstart}
 
@@ -49,10 +48,10 @@ mc stat play/mynewbucket/prefix/filename.extension
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="Baremetal" %}}
-1. Download the MinIO Server Process for your Operating System
+1. Download the Silo server for your operating system
 
-   Follow the instructions on the [MinIO Download Page](https://min.io/downloads?ref=docs) for your operating system to download and install the [`minio server`](/reference/minio-server/#command-minio.server) process.
-2. Create a folder for use with MinIO
+   Use [Download & Install](/download/#server) to select a published Silo package or archive, then verify its checksum. The executable intentionally retains the [`minio server`](/reference/minio-server/#command-minio.server) command contract.
+2. Create a folder for object data
 
    For example, create a folder `~/minio` in Linux/MacOS or `C:\minio` in Windows.
 3. Start the MinIO Server
@@ -61,23 +60,12 @@ mc stat play/mynewbucket/prefix/filename.extension
 
    ```shell
    minio server ~/minio --console-address :9001
-   # For windows, use minio.exe server ~/minio --console-address :9001`
+   # For Windows, use minio.exe server ~/minio --console-address :9001
    ```
 
    The output includes connection instructions for both [`mc`](/reference/minio-mc/#command-mc) and connecting to the Console using your browser.
 {{% /tab %}}
 {{% tab header="Kubernetes" %}}
-Download [minio-dev.yaml](https://raw.githubusercontent.com/minio/docs/master/source/extra/examples/minio-dev.yaml) to your host machine:
-
-```shell
-curl https://raw.githubusercontent.com/minio/docs/master/source/extra/examples/minio-dev.yaml -O
-```
-
-The file describes two Kubernetes resources:
-
-- A new namespace `minio-dev`, and
-- A MinIO pod using a drive or volume on the Worker Node for serving data
-
-Use `kubectl port-forward` to access the Pod, or create a service for the pod for which you can configure Ingress, Load Balancing, or similar Kubernetes-level networking.
+Use the [`pgsty/minio`](https://hub.docker.com/r/pgsty/minio) image and follow the [Silo tenant deployment guide](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/). Pin a tested release tag or digest; do not treat `latest` as a production version contract.
 {{% /tab %}}
 {{< /tabpane >}}

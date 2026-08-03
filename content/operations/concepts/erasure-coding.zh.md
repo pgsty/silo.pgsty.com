@@ -1,10 +1,10 @@
 ---
 title: "纠删码"
 url: "/zh/operations/concepts/erasure-coding/"
-description: "Information on MinIO Erasure Coding"
+description: "Silo 纠删码"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-erasure-coding"></a>

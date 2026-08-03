@@ -11,3 +11,4 @@ build:
 check:
 	go mod verify
 	$(HUGO) build --minify --cleanDestinationDir --printPathWarnings --printI18nWarnings --panicOnWarning
+	python3 bin/check_internal_links.py public

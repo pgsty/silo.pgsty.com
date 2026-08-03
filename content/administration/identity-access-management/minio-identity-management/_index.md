@@ -1,10 +1,10 @@
 ---
-title: "MinIO Identity Management"
+title: "Silo Identity Management"
 url: "/administration/identity-access-management/minio-identity-management/"
 weight: 10
 icon: fa-solid fa-user-shield
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-identity-management"></a>

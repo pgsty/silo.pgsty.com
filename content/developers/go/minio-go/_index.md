@@ -4,7 +4,7 @@ url: "/developers/go/minio-go/"
 weight: 10
 icon: fa-brands fa-golang
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="go-quickstart-guide"></a>
@@ -14,9 +14,9 @@ silo_modified: false
 
 MinIO Go Client SDK 提供简洁直观的 API，用于访问任何兼容 Amazon S3 的对象存储。
 
-本快速入门指南介绍如何安装 MinIO Client SDK、连接 MinIO，并创建一个示例文件上传器。完整 API 列表和示例请参见 [godoc 文档](https://pkg.go.dev/github.com/minio/minio-go/v7) 或 [Go Client API 参考](https://min.io/docs/minio/linux/developers/go/API.html)。
+本快速入门指南介绍如何安装 MinIO Client SDK、连接 MinIO，并创建一个示例文件上传器。完整 API 列表和示例请参见 [godoc 文档](https://pkg.go.dev/github.com/minio/minio-go/v7) 或 [Go Client API 参考](https://pkg.go.dev/github.com/minio/minio-go/v7)。
 
-这些示例假定你已具备可用的 [Go 开发环境](https://golang.org/doc/install) 和 [MinIO `mc` 命令行工具](https://min.io/docs/minio/linux/reference/minio-mc.html)。
+这些示例假定你已具备可用的 [Go 开发环境](https://go.dev/doc/install) 和 [Silo `mc`/`mcli` 命令行工具](/reference/minio-mc/#command-mc)。
 
 ### 从 GitHub 下载 {#github}
 
@@ -201,152 +201,148 @@ mc ls play/testbucket
 完整 API 参考可在此处查看。
 
 - ```text
-    [完整 API 参考](https://min.io/docs/minio/linux/developers/go/API.html)
+    [完整 API 参考](https://pkg.go.dev/github.com/minio/minio-go/v7)
 
   ```
 
 #### API 参考：存储桶操作 {#id2}
 
 - ```text
-    [`MakeBucket`](https://min.io/docs/minio/linux/developers/go/API.html#MakeBucket)
+    [`MakeBucket`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.MakeBucket)
 
   ```
 - ```text
-    [`ListBuckets`](https://min.io/docs/minio/linux/developers/go/API.html#ListBuckets)
+    [`ListBuckets`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListBuckets)
 
   ```
 - ```text
-    [`BucketExists`](https://min.io/docs/minio/linux/developers/go/API.html#BucketExists)
+    [`BucketExists`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.BucketExists)
 
   ```
 - ```text
-    [`RemoveBucket`](https://min.io/docs/minio/linux/developers/go/API.html#RemoveBucket)
+    [`RemoveBucket`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveBucket)
 
   ```
 - ```text
-    [`ListObjects`](https://min.io/docs/minio/linux/developers/go/API.html#ListObjects)
+    [`ListObjects`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListObjects)
 
   ```
 - ```text
-    [`ListIncompleteUploads`](https://min.io/docs/minio/linux/developers/go/API.html#ListIncompleteUploads)
+    [`ListIncompleteUploads`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListIncompleteUploads)
 
   ```
 
 #### API 参考：存储桶策略操作 {#id3}
 
 - ```text
-    [`SetBucketPolicy`](https://min.io/docs/minio/linux/developers/go/API.html#SetBucketPolicy)
+    [`SetBucketPolicy`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.SetBucketPolicy)
 
   ```
 - ```text
-    [`GetBucketPolicy`](https://min.io/docs/minio/linux/developers/go/API.html#GetBucketPolicy)
+    [`GetBucketPolicy`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.GetBucketPolicy)
 
   ```
 
 #### API 参考：存储桶通知操作 {#id4}
 
 - ```text
-    [`SetBucketNotification`](https://min.io/docs/minio/linux/developers/go/API.html#SetBucketNotification)
+    [`SetBucketNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.SetBucketNotification)
 
   ```
 - ```text
-    [`GetBucketNotification`](https://min.io/docs/minio/linux/developers/go/API.html#GetBucketNotification)
+    [`GetBucketNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.GetBucketNotification)
 
   ```
 - ```text
-    [`RemoveAllBucketNotification`](https://min.io/docs/minio/linux/developers/go/API.html#RemoveAllBucketNotification)
+    [`RemoveAllBucketNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveAllBucketNotification)
 
   ```
 - ```text
-    [`ListenBucketNotification`](https://min.io/docs/minio/linux/developers/go/API.html#ListenBucketNotification) (MinIO 扩展)
+    [`ListenBucketNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListenBucketNotification) (MinIO 扩展)
 
   ```
 - ```text
-    [`ListenNotification`](https://min.io/docs/minio/linux/developers/go/API.html#ListenNotification) (MinIO 扩展)
+    [`ListenNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListenNotification) (MinIO 扩展)
 
   ```
 
 #### API 参考：文件对象操作 {#id5}
 
 - ```text
-    [`FPutObject`](https://min.io/docs/minio/linux/developers/go/API.html#FPutObject)
+    [`FPutObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.FPutObject)
 
   ```
 - ```text
-    [`FGetObject`](https://min.io/docs/minio/linux/developers/go/API.html#FGetObject)
+    [`FGetObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.FGetObject)
 
   ```
 
 #### API 参考：对象操作 {#id6}
 
 - ```text
-    [`GetObject`](https://min.io/docs/minio/linux/developers/go/API.html#GetObject)
+    [`GetObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.GetObject)
 
   ```
 - ```text
-    [`PutObject`](https://min.io/docs/minio/linux/developers/go/API.html#PutObject)
+    [`PutObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PutObject)
 
   ```
 - ```text
-    [`PutObjectStreaming`](https://min.io/docs/minio/linux/developers/go/API.html#PutObjectStreaming)
+    [`StatObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.StatObject)
 
   ```
 - ```text
-    [`StatObject`](https://min.io/docs/minio/linux/developers/go/API.html#StatObject)
+    [`CopyObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.CopyObject)
 
   ```
 - ```text
-    [`CopyObject`](https://min.io/docs/minio/linux/developers/go/API.html#CopyObject)
+    [`RemoveObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveObject)
 
   ```
 - ```text
-    [`RemoveObject`](https://min.io/docs/minio/linux/developers/go/API.html#RemoveObject)
+    [`RemoveObjects`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveObjects)
 
   ```
 - ```text
-    [`RemoveObjects`](https://min.io/docs/minio/linux/developers/go/API.html#RemoveObjects)
+    [`RemoveIncompleteUpload`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveIncompleteUpload)
 
   ```
 - ```text
-    [`RemoveIncompleteUpload`](https://min.io/docs/minio/linux/developers/go/API.html#RemoveIncompleteUpload)
-
-  ```
-- ```text
-    [`SelectObjectContent`](https://min.io/docs/minio/linux/developers/go/API.html#SelectObjectContent)
+    [`SelectObjectContent`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.SelectObjectContent)
 
   ```
 
 #### API 参考：预签名操作 {#id7}
 
 - ```text
-    [`PresignedGetObject`](https://min.io/docs/minio/linux/developers/go/API.html#PresignedGetObject)
+    [`PresignedGetObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject)
 
   ```
 - ```text
-    [`PresignedPutObject`](https://min.io/docs/minio/linux/developers/go/API.html#PresignedPutObject)
+    [`PresignedPutObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedPutObject)
 
   ```
 - ```text
-    [`PresignedHeadObject`](https://min.io/docs/minio/linux/developers/go/API.html#PresignedHeadObject)
+    [`PresignedHeadObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedHeadObject)
 
   ```
 - ```text
-    [`PresignedPostPolicy`](https://min.io/docs/minio/linux/developers/go/API.html#PresignedPostPolicy)
+    [`PresignedPostPolicy`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedPostPolicy)
 
   ```
 
 #### API 参考：客户端自定义设置 {#id8}
 
 - ```text
-    [`SetAppInfo`](https://min.io/docs/minio/linux/developers/go/API.html#SetAppInfo)
+    [`SetAppInfo`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.SetAppInfo)
 
   ```
 - ```text
-    [`TraceOn`](https://min.io/docs/minio/linux/developers/go/API.html#TraceOn)
+    [`TraceOn`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.TraceOn)
 
   ```
 - ```text
-    [`TraceOff`](https://min.io/docs/minio/linux/developers/go/API.html#TraceOff)
+    [`TraceOff`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.TraceOff)
 
   ```
 
@@ -545,11 +541,11 @@ mc ls play/testbucket
 
   ```
 - ```text
-    [完整文档](https://min.io/docs/minio/kubernetes/upstream/index.html)
+    [Go SDK 源码与当前文档](https://github.com/minio/minio-go)
 
   ```
 - ```text
-    [MinIO Go Client SDK API 参考](https://min.io/docs/minio/linux/developers/go/API.html)
+    [MinIO Go Client SDK API 参考](https://pkg.go.dev/github.com/minio/minio-go/v7)
 
   ```
 
