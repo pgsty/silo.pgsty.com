@@ -1,6 +1,7 @@
 {{- $zh := eq .Site.Language.Lang "zh" -}}
 {{- $description := .Description | default .Site.Params.description -}}
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
+{{- $metrics := hugo.Data.home.metrics -}}
 {{- $socialImage := "images/silo-social-card.png" | absURL -}}
 {{- $serverTag := "RELEASE.2026-06-18T00-00-00Z" -}}
 {{- $serverBuild := "20260618000000.0.0" -}}
@@ -115,7 +116,7 @@
           {{ end }}
           <a href="https://github.com/pgsty/minio" class="nav-github" target="_blank" rel="noopener" title="GitHub">
             <i class="fab fa-github" aria-hidden="true"></i>
-            <span class="nav-count">1.9k</span>
+            <span class="nav-count">{{ partial "compact-number.html" $metrics.github_stars }}</span>
           </a>
         </div>
 
@@ -133,7 +134,7 @@
     <a href="{{ relLangURL "" }}#about" class="mobile-menu-link">{{ if $zh }}关于{{ else }}About{{ end }}</a>
     {{ range .Translations }}<a href="{{ .RelPermalink }}" class="mobile-menu-link"><i class="fas fa-language" aria-hidden="true"></i> {{ .Language.Label }}</a>{{ end }}
     <button type="button" class="mobile-menu-link mobile-menu-link--btn" data-theme-toggle><i class="fas fa-moon" aria-hidden="true"></i> {{ if $zh }}浅色 / 深色{{ else }}Light / Dark{{ end }}</button>
-    <a href="https://github.com/pgsty/minio" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · 1.9k</a>
+    <a href="https://github.com/pgsty/minio" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · {{ partial "compact-number.html" $metrics.github_stars }}</a>
   </div>
 
   <main id="main">
