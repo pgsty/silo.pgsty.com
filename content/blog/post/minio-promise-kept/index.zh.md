@@ -148,8 +148,8 @@ MinIO 是 Pigsty 的生产依赖。我需要可用的二进制、完整的控制
 - **Docker 镜像**：把 `minio/minio` 换成 `pgsty/minio`，一行的事。
 - **RPM / DEB**：[GitHub Release](https://github.com/pgsty/minio/releases) 里都有，或者用 `pig` 一键装。
 - **源代码仓库**：[pgsty/minio](https://github.com/pgsty/minio)
-- **文档镜像站**：[silo.pigsty.cc](https://silo.pigsty.cc)
-- **英文文档**：[silo.pigsty.io](https://silo.pigsty.io)
+- **中文文档**：[silo.pgsty.com/zh/](https://silo.pgsty.com/zh/)
+- **英文文档**：[silo.pgsty.com](https://silo.pgsty.com/)
 
 ![pigsty-module.webp](pigsty-module.webp)
 

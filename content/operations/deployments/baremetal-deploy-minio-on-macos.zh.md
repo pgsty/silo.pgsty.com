@@ -3,7 +3,7 @@ title: "在 MacOS 上部署 MinIO"
 url: "/zh/operations/deployments/baremetal-deploy-minio-on-macos/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="macos-minio"></a>
@@ -228,10 +228,10 @@ WebUI: https://minio-1.example.net:9001 https://203.0.113.10:9001 https://127.0.
    RootUser: minioadmin
    RootPass: minioadmin
 
-CLI: https://silo.pigsty.cc/reference/minio-mc.html#quickstart
+CLI: https://silo.pgsty.com/zh/reference/minio-mc/#quickstart
    $ mc alias set 'myminio' 'https://minio-1.example.net:9000' 'minioadmin' 'minioadmin'
 
-Docs: https://silo.pigsty.cc/index.html
+Docs: https://silo.pgsty.com/zh/docs/
 Status:         1 Online, 0 Offline.
 ```
 

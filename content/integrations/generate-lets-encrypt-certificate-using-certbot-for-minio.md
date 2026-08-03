@@ -3,7 +3,7 @@ title: "Generate Let’s Encrypt certificate using Certbot for MinIO"
 url: "/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/"
 weight: 60
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="generate-let-s-encrypt-certificate-using-certbot-for-minio"></a>
@@ -18,7 +18,7 @@ In this recipe, we will generate a Let’s Encypt certificate using Certbot. Thi
 
 ## 1. Prerequisites {#prerequisites}
 
-- Install MinIO Server from [here](https://silo.pigsty.io/index.html#procedure).
+- Install MinIO Server from [here](https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure).
 - Install Certbot from [here](https://certbot.eff.org/)
 
 ## 2. Dependencies {#dependencies}

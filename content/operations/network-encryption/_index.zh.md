@@ -4,7 +4,7 @@ url: "/zh/operations/network-encryption/"
 weight: 70
 icon: fa-solid fa-shield-halved
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="tls"></a>
@@ -59,6 +59,8 @@ MinIO Kubernetes Operator 为 MinIO 租户提供三种 TLS 配置方式：
 > Tenant CRD 规范中的 `spec.externalCertsSecret` 支持引用类型为 `opaque` 或 `kubernetes.io/tls` 的 [secret](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types)，其中包含用于 TLS 的 `private.key` 和 `public.crt`。
 >
 > 你可以指定多张证书，以支持分配了多个主机名的租户。
+
+<a id="self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates"></a>
 
 ### 自签名、内部、私有证书以及带中间证书的公共 CA {#ca}
 

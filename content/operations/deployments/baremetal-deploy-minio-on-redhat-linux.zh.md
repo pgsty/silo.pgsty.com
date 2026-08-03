@@ -3,7 +3,7 @@ title: "在 RedHat Linux 上部署 MinIO"
 url: "/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="redhat-linux-minio"></a>
@@ -46,6 +46,8 @@ MinIO 建议在存储使用率达到 70% 之前，预先规划足以存放 **至
 
 建议使用 MinIO [纠删码计算器](https://min.io/product/erasure-code-calculator)，围绕具体纠删码设置进行容量规划。
 
+<a id="procedure"></a>
+
 ## 步骤 {#id6}
 
 ### 1. 下载 MinIO RPM 包 {#minio-rpm}
@@ -87,7 +89,7 @@ sudo dnf install minio.rpm
 ```shell
 [Unit]
 Description=MinIO
-Documentation=https://silo.pigsty.cc/index.html
+Documentation=https://silo.pgsty.com/zh/docs/
 Wants=network-online.target
 After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio
@@ -328,10 +330,10 @@ WebUI: https://minio-1.example.net:9001 https://203.0.113.10:9001 https://127.0.
    RootUser: minioadmin
    RootPass: minioadmin
 
-CLI: https://silo.pigsty.cc/reference/minio-mc.html#quickstart
+CLI: https://silo.pgsty.com/zh/reference/minio-mc/#quickstart
    $ mc alias set 'myminio' 'https://minio-1.example.net:9000' 'minioadmin' 'minioadmin'
 
-Docs: https://silo.pigsty.cc/index.html
+Docs: https://silo.pgsty.com/zh/docs/
 Status:         16 Online, 0 Offline.
 ```
 

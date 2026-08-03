@@ -5,7 +5,7 @@ description: "MinIO Deployment Topologies and Installation Instructions"
 weight: 10
 icon: fa-solid fa-download
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="installation-and-management"></a>
@@ -75,7 +75,7 @@ MinIO supports deploying onto baremetal infrastructure - physical machines or vi
 {{% alert color="warning" %}}
 **Important**
 
-MinIO strongly recommends [Linux (RHEL, Ubuntu)](https://silo.pigsty.io/minio/linux/index.html) or [Kubernetes (Upstream, OpenShift)](https://silo.pigsty.io/minio/kubernetes/upstream/index.html) for long-term development and production environments.
+MinIO strongly recommends [Linux (RHEL, Ubuntu)](https://silo.pgsty.com/operations/deployments/baremetal/) or [Kubernetes (Upstream, OpenShift)](https://silo.pgsty.com/operations/deployments/kubernetes/) for long-term development and production environments.
 
 MinIO provides no guarantee of support for <abbr title="Single-Node Multi-Drive">SNMD</abbr> or <abbr title="Multi-Node Multi-Drive">MNMD</abbr> topologies on MacOS, Windows, or Containerized deployments.
 {{% /alert %}}

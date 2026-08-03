@@ -4,7 +4,7 @@ url: "/operations/replication/multi-site-replication/"
 weight: 20
 icon: fa-solid fa-arrows-rotate
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="site-replication-overview"></a>
@@ -23,7 +23,7 @@ Site replication assumes the use of either the included MinIO identity provider 
 
 For more information on site replication architecture and deployment concepts, see [Deployment Architecture: Replicated MinIO Deployments](/operations/concepts/architecture/#minio-deployment-architecture-replicated).
 
-MinIO does not recommend using MacOS, Windows, or non-orchestrated Containerized deployments for site replication outside of early development, evaluation, or general experimentation. For production, use [Linux](https://silo.pigsty.io/minio/linux/operations/install-deploy-manage/multi-site-replication.html) or [Kubernetes](https://silo.pigsty.io/minio/kubernetes/upstream/operations/install-deploy-manage/multi-site-replication.html)
+MinIO does not recommend using MacOS, Windows, or non-orchestrated container deployments for site replication outside of early development, evaluation, or general experimentation. For production, use a supported [Linux](/operations/deployments/baremetal/) or [Kubernetes](/operations/deployments/kubernetes/) deployment and follow the site-replication procedure on this page.
 
 ## Overview {#overview}
 

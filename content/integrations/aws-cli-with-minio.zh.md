@@ -3,7 +3,7 @@ title: "AWS CLI 与 MinIO Server"
 url: "/zh/integrations/aws-cli-with-minio/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="aws-cli-minio-server"></a>
@@ -16,7 +16,7 @@ AWS CLI 是一个用于管理 AWS 服务的统一工具。它也常用于在 AWS
 
 ## 1. 前提条件 {#id1}
 
-从[这里](https://silo.pigsty.cc/operations/deployments/installation.html)安装 MinIO Server。
+从[这里](https://silo.pgsty.com/zh/operations/deployments/installation/)安装 MinIO Server。
 
 ## 2. 安装 {#id2}
 

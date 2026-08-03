@@ -3,7 +3,7 @@ title: "MinIO 自定义资源定义"
 url: "/zh/reference/operator-crd/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="poolstate"></a>
@@ -17,7 +17,7 @@ MinIO Operator 会安装一个 [Custom Resource Definition (CRD)](https://kubern
 
 ## Operator CRD v2 参考 {#operator-crd-v2}
 
-Package v2 - 本页提供 MinIO Operator `Operator CRD v2 Reference` CRD 的自动生成快速参考。 如需更完整的 MinIO Operator CRD 文档，请参阅 [MinIO Kubernetes Documentation](https://silo.pigsty.cc/operations/deployments/kubernetes.html)。
+Package v2 - 本页提供 MinIO Operator `Operator CRD v2 Reference` CRD 的自动生成快速参考。 如需更完整的 MinIO Operator CRD 文档，请参阅 [MinIO Kubernetes Documentation](https://silo.pgsty.com/zh/operations/deployments/kubernetes/)。
 
 `Operator CRD v2 Reference` API 随 MinIO Operator v4.0.0 一同发布。 MinIO Operator 会自动将使用 `/v1` API 的现有租户转换为 `/v2`。
 
@@ -458,7 +458,7 @@ TLS secret</a>。MinIO Operator 会将指定证书复制到租户中的每个 Mi
 </ul>
 <p>有关为 MinIO 租户配置 TLS 的示例和更完整文档，
 请参阅 <a
-href="https://silo.pigsty.cc/reference/operator-crd.html">MinIO
+href="https://silo.pgsty.com/zh/reference/operator-crd/">MinIO
 Operator CRD</a> 参考。</p></td>
 </tr>
 <tr class="odd">
@@ -704,7 +704,7 @@ Logging 描述 MinIO 租户的日志记录。
 
 Pool (`pools`) 定义租户上的一个 MinIO server pool。 每个 pool 由一组 MinIO server Pod 组成， 这些 Pod 通过“池化”其存储资源来支持对象存储和检索请求。 每个 server pool 都独立于其他 pool， 并支持对 MinIO 租户中可用存储资源进行水平扩展。
 
-有关 `pools` 对象的示例和更完整文档，请参阅 [MinIO Operator CRD](https://silo.pigsty.cc/reference/operator-crd.html) 参考。
+有关 `pools` 对象的示例和更完整文档，请参阅 [MinIO Operator CRD](https://silo.pgsty.com/zh/reference/operator-crd/) 参考。
 
 - [TenantSpec](#tenantspec)
 
@@ -1237,7 +1237,7 @@ TenantSpec (`spec`) 定义 MinIO 租户对象的配置。
 
 以下参数特指作为 MinIO Operator v4.0.0 一部分引入的 `Operator CRD v2 Reference` MinIO CRD API `spec` 定义。
 
-有关该对象的更完整文档，请参阅 [MinIO Kubernetes Documentation](https://silo.pigsty.cc/operations/deployments/kubernetes.html)。
+有关该对象的更完整文档，请参阅 [MinIO Kubernetes Documentation](https://silo.pgsty.com/zh/operations/deployments/kubernetes/)。
 
 - [Tenant](#tenant)
 
@@ -1269,7 +1269,7 @@ array</em></p></td>
 </p>
 <p>有关 <code>pools</code> 对象的示例和更完整文档，
 请参阅 <a
-href="https://silo.pigsty.cc/reference/operator-crd.html#tenant">MinIO
+href="https://silo.pgsty.com/zh/reference/operator-crd/#tenant">MinIO
 Operator CRD</a> 参考。</p></td>
 </tr>
 <tr class="even">
@@ -1337,7 +1337,7 @@ server Pod。当 MinIO Pod/Service 响应 TLS 连接请求时，会使用 SNI �
 </ul>
 <p>有关为 MinIO 租户配置 TLS 的示例和更完整文档，
 请参阅 <a
-href="https://silo.pigsty.cc/reference/operator-crd.html#tenantspec">MinIO
+href="https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec">MinIO
 Operator CRD</a> 参考。</p></td>
 </tr>
 <tr class="odd">
@@ -1366,7 +1366,7 @@ server Pod。<br />
 </ul>
 <p>有关为 MinIO 租户配置 TLS 的示例和更完整文档，
 请参阅 <a
-href="https://silo.pigsty.cc/reference/operator-crd.html#tenantspec">MinIO
+href="https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec">MinIO
 Operator CRD</a> 参考。</p></td>
 </tr>
 <tr class="even">
@@ -1403,7 +1403,7 @@ href="#kesconfig"><code>kes</code></a>
 </p>
 <p>有关为 MinIO 租户配置 TLS 的示例和更完整文档，
 请参阅 <a
-href="https://silo.pigsty.cc/reference/operator-crd.html#tenantspec">MinIO
+href="https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec">MinIO
 Operator CRD</a> 参考。</p></td>
 </tr>
 <tr class="odd">
@@ -1488,7 +1488,7 @@ href="https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/">基于 Ku
 则 MinIO 租户会在 <strong>未启用</strong> TLS 的情况下部署。</p>
 <p>有关为 MinIO 租户配置 TLS 的示例和更完整文档，
 请参阅 <a
-href="https://silo.pigsty.cc/reference/operator-crd.html#tenantspec">MinIO
+href="https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec">MinIO
 Operator CRD</a> 参考。</p></td>
 </tr>
 <tr class="odd">

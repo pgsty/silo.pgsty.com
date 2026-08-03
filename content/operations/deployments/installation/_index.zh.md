@@ -5,7 +5,7 @@ description: "MinIO Deployment Topologies and Installation Instructions"
 weight: 10
 icon: fa-solid fa-download
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-snsd"></a>
@@ -75,7 +75,7 @@ MinIO 支持部署到裸机基础设施上，包括运行 Linux、MacOS 和 Wind
 {{% alert color="warning" %}}
 **重要**
 
-MinIO 强烈建议在长期开发和生产环境中使用 [Linux (RHEL, Ubuntu)](https://silo.pigsty.cc/minio/linux/index.html) 或 [Kubernetes (Upstream, OpenShift)](https://silo.pigsty.cc/minio/kubernetes/upstream/index.html)。
+MinIO 强烈建议在长期开发和生产环境中使用 [Linux (RHEL, Ubuntu)](https://silo.pgsty.com/zh/operations/deployments/baremetal/) 或 [Kubernetes (Upstream, OpenShift)](https://silo.pgsty.com/zh/operations/deployments/kubernetes/)。
 
 对于 MacOS、Windows 或容器化部署上的 <abbr title="单机多盘">SNMD</abbr> 和 <abbr title="多机多盘">MNMD</abbr> 拓扑，MinIO 不保证提供支持。
 {{% /alert %}}

@@ -3,7 +3,7 @@ title: "Object Healing"
 url: "/operations/concepts/healing/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="object-healing"></a>
@@ -59,6 +59,6 @@ Consult with MinIO Engineers before manually starting a healing process on a dep
 
 ## Healing metrics {#healing-metrics}
 
-MinIO provides several [healing metrics](https://silo.pigsty.io/operations/monitoring/metrics-v2.html#healing-metrics) to monitor the status of healing processes on a deployment.
+MinIO provides several [healing metrics](https://silo.pgsty.com/operations/monitoring/metrics-v2/#healing-metrics) to monitor the status of healing processes on a deployment.
 
 Refer to the [Metrics and alerts](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) for more information on available endpoints and configuration.

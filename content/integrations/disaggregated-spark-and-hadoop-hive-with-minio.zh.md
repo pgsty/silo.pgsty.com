@@ -3,7 +3,7 @@ title: "使用 MinIO 的解耦 HDP Spark 和 Hive"
 url: "/zh/integrations/disaggregated-spark-and-hadoop-hive-with-minio/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-hdp-spark-hive"></a>
@@ -26,8 +26,8 @@ MinIO 还支持类似 AWS 区域与层级的多集群、多站点联邦。通过
   - [Installing Spark](https://docs.hortonworks.com/HDPDocuments/HDP3/HDP-3.0.1/installing-spark/content/installing_spark.html)
 - 使用以下任一指南安装 MinIO Distributed Server。
 
-  - [Deployment based on Kubernetes](https://silo.pigsty.cc/operations/deployments/kubernetes.html)
-  - [Deployment based on MinIO Helm Chart](https://silo.pigsty.cc/operations/deployments/k8s-deploy-operator-helm-on-kubernetes.html)
+  - [Deployment based on Kubernetes](https://silo.pgsty.com/zh/operations/deployments/kubernetes/)
+  - [Deployment based on MinIO Helm Chart](https://silo.pgsty.com/zh/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/)
 
 ## **3. 配置 Hadoop、Spark、Hive 使用 MinIO** {#hadoopsparkhive-minio}
 

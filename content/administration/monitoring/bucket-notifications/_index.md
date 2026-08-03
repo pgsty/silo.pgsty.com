@@ -4,7 +4,7 @@ url: "/administration/monitoring/bucket-notifications/"
 weight: 10
 icon: fa-solid fa-bell
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="bucket-notifications"></a>
@@ -327,7 +327,7 @@ MinIO supports triggering notifications on the following S3 [scanner](/operation
 
 ### Global events {#global-events}
 
-MinIO supports triggering notifications on the following global events. You can only listen to these events through the [ListenNotification](https://silo.pigsty.io/developers/go/API.html#listennotification-context-context-context-prefix-suffix-string-events-string-chan-notification-info) API:
+MinIO supports triggering notifications on the following global events. You can only listen to these events through the [ListenNotification](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListenNotification) API:
 
 <a id="data.s3:BucketCreated"></a>
 

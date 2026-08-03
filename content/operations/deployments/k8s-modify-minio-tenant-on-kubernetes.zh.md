@@ -3,7 +3,7 @@ title: "修改 MinIO Tenant"
 url: "/zh/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-tenant"></a>
@@ -59,7 +59,7 @@ helm upgrade TENANT-NAME minio-operator/tenant -f values.yaml -n TENANT-NAMESPAC
 
 ### 退役租户 服务器池 {#id2}
 
-MinIO Operator 4.4.13 及更高版本支持退役租户中的 服务器池。 具体而言，你可以遵循 [Decommission a Server pool](https://silo.pigsty.cc/minio/linux/operations/install-deploy-manage/decommission-server-pool.html) 步骤先从租户中移除该 pool，然后编辑租户 YAML，将该 pool 从 StatefulSet 中移除。 移除租户 pool 时，请确保所有剩余 pool 的 `spec.pools.[n].name` 字段都具有明确取值。
+MinIO Operator 4.4.13 及更高版本支持退役租户中的 服务器池。 具体而言，你可以遵循 [Decommission a Server pool](https://silo.pgsty.com/zh/operations/deployments/baremetal-decommission-server-pool/) 步骤先从租户中移除该 pool，然后编辑租户 YAML，将该 pool 从 StatefulSet 中移除。 移除租户 pool 时，请确保所有剩余 pool 的 `spec.pools.[n].name` 字段都具有明确取值。
 
 {{% alert color="info" %}}
 **先下线再新增时保持 pool 顺序**

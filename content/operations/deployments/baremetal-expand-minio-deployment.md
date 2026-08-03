@@ -3,7 +3,7 @@ title: "Expand a Distributed MinIO Deployment"
 url: "/operations/deployments/baremetal-expand-minio-deployment/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 math: true
 ---
 
@@ -296,7 +296,7 @@ Refer to the [man page for systemd.unit](https://www.man7.org/linux/man-pages/ma
 ```shell
 [Unit]
 Description=MinIO
-Documentation=https://silo.pigsty.io/index.html
+Documentation=https://silo.pgsty.com/docs/
 Wants=network-online.target
 After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio

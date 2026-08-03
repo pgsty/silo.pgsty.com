@@ -173,7 +173,7 @@ Just works as usual.
 
 MinIO's official documentation was also at risk — links had started redirecting to their commercial product, [AIStor](https://docs.min.io/).
 
-We forked [`minio/docs`](https://github.com/pgsty/minio-docs), fixed broken links, restored removed console documentation, and deployed it [here](https://silo.pigsty.io).
+We forked [`minio/docs`](https://github.com/pgsty/minio-docs), fixed broken links, restored removed console documentation, and deployed it [here](https://silo.pgsty.com).
 
 The docs use the same CC Attribution 4.0 license as the original, with necessary maintenance.
 

@@ -4,7 +4,7 @@ url: "/developers/minio-drivers/"
 weight: 190
 icon: fa-solid fa-cubes
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="software-development-kits-sdk"></a>
@@ -31,7 +31,7 @@ Latest Version: GOVERSION
 
 Quickstart Guide: [Go Quickstart Guide](/developers/go/minio-go/)
 
-Reference: [/developers/go/API](https://silo.pigsty.io/developers/go/API.html)
+Reference: [MinIO Go SDK API](https://pkg.go.dev/github.com/minio/minio-go/v7)
 
 Download from GitHub
 
@@ -49,7 +49,7 @@ Latest Version: PYTHONVERSION
 
 Quickstart Guide: [Python Quickstart Guide](/developers/python/minio-py/)
 
-Reference: [/developers/python/API](https://silo.pigsty.io/developers/python/API.html)
+Reference: [MinIO Python SDK](https://github.com/minio/minio-py)
 
 **Install Methods**
 
@@ -76,7 +76,7 @@ Latest version: JAVAVERSION
 
 Quickstart Guide: [Java Quickstart Guide](/developers/java/minio-java/#minio-java-quickstart)
 
-Reference: [/developers/java/API](https://silo.pigsty.io/developers/java/API.html)
+Reference: [MinIO Java SDK](https://github.com/minio/minio-java)
 
 **Install methods**
 
@@ -110,7 +110,7 @@ Latest Version: DOTNETVERSION
 
 Quickstart Guide: [.NET Quickstart Guide](/developers/dotnet/minio-dotnet/)
 
-Reference: [/developers/dotnet/API](https://silo.pigsty.io/developers/dotnet/API.html)
+Reference: [MinIO .NET SDK](https://github.com/minio/minio-dotnet)
 
 **Download from NuGet**
 
@@ -130,7 +130,7 @@ Latest Version: JAVASCRIPTVERSION
 
 Quickstart Guide: [JavaScript Quickstart Guide](/developers/javascript/minio-javascript/)
 
-Reference: [/developers/javascript/API](https://silo.pigsty.io/developers/javascript/API.html)
+Reference: [MinIO JavaScript SDK](https://github.com/minio/minio-js)
 
 **Install**
 

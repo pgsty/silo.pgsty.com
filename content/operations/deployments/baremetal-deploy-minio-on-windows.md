@@ -3,7 +3,7 @@ title: "Deploy MinIO on Windows"
 url: "/operations/deployments/baremetal-deploy-minio-on-windows/"
 weight: 50
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="deploy-minio-on-windows"></a>
@@ -81,10 +81,10 @@ Console: http://192.0.2.10:9001 http://127.0.0.1:9001
 RootUser: minioadmin
 RootPass: minioadmin
 
-Command-line: https://silo.pigsty.io/reference/minio-mc.html
+Command-line: https://silo.pgsty.com/reference/minio-mc/
    $ mc alias set myminio http://192.0.2.10:9000 minioadmin minioadmin
 
-Documentation: https://silo.pigsty.io/index.html
+Documentation: https://silo.pgsty.com/docs/
 
 WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that you change these values with 'MINIO_ROOT_USER' and 'MINIO_ROOT_PASSWORD' environment variables.
 ```
@@ -109,10 +109,10 @@ Console: http://192.0.2.10:9001 http://127.0.0.1:9001
 RootUser: minioadmin
 RootPass: minioadmin
 
-Command-line: https://silo.pigsty.io/reference/minio-mc.html
+Command-line: https://silo.pgsty.com/reference/minio-mc/
    $ mc alias set myminio http://192.0.2.10:9000 minioadmin minioadmin
 
-Documentation: https://silo.pigsty.io/index.html
+Documentation: https://silo.pgsty.com/docs/
 
 WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that you change these values with 'MINIO_ROOT_USER' and 'MINIO_ROOT_PASSWORD' environment variables.
 ```

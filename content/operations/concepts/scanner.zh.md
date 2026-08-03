@@ -3,7 +3,7 @@ title: "对象扫描器"
 url: "/zh/operations/concepts/scanner/"
 weight: 50
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-concepts-scanner"></a>
@@ -54,7 +54,7 @@ MinIO 将扫描器视为后台任务，并会暂停它以优先完成集群中�
 
 ## 扫描器指标 {#id6}
 
-MinIO 提供了若干 [与扫描器相关的指标](https://silo.pigsty.cc/operations/monitoring/metrics-v2.html#scanner-metrics)。
+MinIO 提供了若干[与扫描器相关的指标（英文）](https://silo.pgsty.com/operations/monitoring/metrics-v2/#scanner-metrics)。
 
 使用 `mc admin scanner info` 可以查看扫描器当前状态，以及距离上次完整扫描所经过的时间。 这有助于理解扫描器操作提供的各项指标。
 

@@ -3,7 +3,7 @@ title: "Object Scanner"
 url: "/operations/concepts/scanner/"
 weight: 50
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="object-scanner"></a>
@@ -54,7 +54,7 @@ You can adjust how MinIO balances the scanner performance with read/write operat
 
 ## Scanner Metrics {#scanner-metrics}
 
-MinIO provides a number of [metrics related to the scanner](https://silo.pigsty.io/operations/monitoring/metrics-v2.html#scanner-metrics).
+MinIO provides a number of [metrics related to the scanner](https://silo.pgsty.com/operations/monitoring/metrics-v2/#scanner-metrics).
 
 Use `mc admin scanner info` to see the current status of the scanner and the time since the last full scan. This can help in understanding the metrics provided by the scanner operation.
 

@@ -3,7 +3,7 @@ title: "AWS CLI with MinIO Server"
 url: "/integrations/aws-cli-with-minio/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="aws-cli-with-minio-server"></a>
@@ -16,7 +16,7 @@ In this recipe we will learn how to configure and use AWS CLI to manage data wit
 
 ## 1. Prerequisites {#prerequisites}
 
-Install MinIO Server from [here](https://silo.pigsty.io/operations/deployments/installation.html).
+Install MinIO Server from [here](https://silo.pgsty.com/operations/deployments/installation/).
 
 ## 2. Installation {#installation}
 

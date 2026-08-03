@@ -3,7 +3,7 @@ title: "Disaggregated HDP Spark and Hive with MinIO"
 url: "/integrations/disaggregated-spark-and-hadoop-hive-with-minio/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="disaggregated-hdp-spark-and-hive-with-minio"></a>
@@ -26,8 +26,8 @@ MinIO also supports multi-cluster, multi-site federation similar to AWS regions 
   - [Installing Spark](https://docs.hortonworks.com/HDPDocuments/HDP3/HDP-3.0.1/installing-spark/content/installing_spark.html)
 - Install MinIO Distributed Server using one of the guides below.
 
-  - [Deployment based on Kubernetes](https://silo.pigsty.io/operations/deployments/kubernetes.html)
-  - [Deployment based on MinIO Helm Chart](https://silo.pigsty.io/operations/deployments/k8s-deploy-operator-helm-on-kubernetes.html)
+  - [Deployment based on Kubernetes](https://silo.pgsty.com/operations/deployments/kubernetes/)
+  - [Deployment based on MinIO Helm Chart](https://silo.pgsty.com/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/)
 
 ## **3. Configure Hadoop, Spark, Hive to use MinIO** {#configure-hadoop-spark-hive-to-use-minio}
 

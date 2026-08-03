@@ -3,7 +3,7 @@ title: "设置存储桶复制的要求"
 url: "/zh/administration/bucket-replication/bucket-replication-requirements/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-bucket-replication-requirements"></a>
@@ -71,7 +71,7 @@ silo_modified: false
 下列代码使用所需策略创建一个 [MinIO 管理用户](/zh/administration/identity-access-management/minio-user-management/#minio-users)。 将 `TARGET` 替换为你要配置复制的 MinIO 部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)：
 
 ```shell
-wget -O - https://silo.pigsty.cc/examples/ReplicationAdminPolicy.json | \
+wget -O - https://silo.pgsty.com/extra/examples/ReplicationAdminPolicy.json | \
 mc admin policy create TARGET ReplicationAdminPolicy /dev/stdin
 mc admin user add TARGET ReplicationAdmin LongRandomSecretKey
 mc admin policy attach TARGET ReplicationAdminPolicy --user=ReplicationAdmin
@@ -134,7 +134,7 @@ mc admin policy attach TARGET ReplicationAdminPolicy --user=ReplicationAdmin
 下列代码使用所需策略创建一个 [MinIO 管理用户](/zh/administration/identity-access-management/minio-user-management/#minio-users)。 将 `TARGET` 替换为你要配置复制的 MinIO 部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)：
 
 ```shell
-wget -O - https://silo.pigsty.cc/examples/ReplicationRemoteUserPolicy.json | \
+wget -O - https://silo.pgsty.com/extra/examples/ReplicationRemoteUserPolicy.json | \
 mc admin policy create TARGET ReplicationRemoteUserPolicy /dev/stdin
 mc admin user add TARGET ReplicationRemoteUser LongRandomSecretKey
 mc admin policy attach TARGET ReplicationRemoteUserPolicy --user=ReplicationRemoteUser

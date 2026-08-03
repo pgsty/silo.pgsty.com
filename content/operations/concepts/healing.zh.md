@@ -3,7 +3,7 @@ title: "对象自愈"
 url: "/zh/operations/concepts/healing/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-concepts-healing"></a>
@@ -59,6 +59,6 @@ MinIO 使用 [对象扫描器](/zh/operations/concepts/scanner/#minio-concepts-s
 
 ## 自愈指标 {#id7}
 
-MinIO 提供了若干 [自愈指标](https://silo.pigsty.cc/operations/monitoring/metrics-v2.html#healing-metrics)，用于监控部署中的自愈过程状态。
+MinIO 提供了若干[自愈指标（英文）](https://silo.pgsty.com/operations/monitoring/metrics-v2/#healing-metrics)，用于监控部署中的自愈过程状态。
 
 有关可用 endpoint 和配置的更多信息，请参阅 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。

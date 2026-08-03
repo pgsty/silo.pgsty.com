@@ -51,6 +51,12 @@ The product homepage lives at `/`; the documentation overview lives at `/docs/`.
 
 The English and Chinese corpus was converted deterministically from frozen Sphinx RST/MyST source. The upstream revisions it was frozen from are recorded in [NOTICE.md](NOTICE.md).
 
+## URL policy
+
+Use `https://silo.pgsty.com/` as the canonical public origin for Silo pages. English pages live at the site root and Chinese pages use the `/zh/` prefix. Within this repository, prefer root-relative links for site content so local previews and both language trees remain portable; use absolute `https://silo.pgsty.com/...` URLs in downloadable examples, repository READMEs, service metadata, and other content consumed outside the rendered site.
+
+Do not rewrite primary external sources as Silo URLs. AWS specifications, SDK API references, source repositories, releases, and third-party products should continue to link to their authoritative upstream locations.
+
 ## Page provenance
 
 Pages carried over from the MinIO documentation declare it in their front matter, which drives the attribution notice rendered at the bottom of the page:

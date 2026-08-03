@@ -3,7 +3,7 @@ title: "将对象迁移到远程 MinIO 部署"
 url: "/zh/administration/object-management/transition-objects-to-minio/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>
@@ -149,7 +149,7 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 以下示例使用 `Alpha` 作为 MinIO 部署 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) 的占位符。 请将其替换为配置生命周期管理规则时所使用的 MinIO 部署别名。 同时，请按照所在组织的密码生成最佳实践， 将密码 `LongRandomSecretKey` 替换为足够长、随机且安全的密钥。
 
 ```shell
-wget -O - https://silo.pigsty.cc/examples/LifecycleManagementAdmin.json | \
+wget -O - https://silo.pgsty.com/extra/examples/LifecycleManagementAdmin.json | \
 mc admin policy create Alpha LifecycleAdminPolicy /dev/stdin
 mc admin user add Alpha alphaLifecycleAdmin LongRandomSecretKey
 mc admin policy attach Alpha LifecycleAdminPolicy --user=alphaLifecycleAdmin

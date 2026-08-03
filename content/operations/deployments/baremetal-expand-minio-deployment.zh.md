@@ -3,7 +3,7 @@ title: "扩展分布式 MinIO 部署"
 url: "/zh/operations/deployments/baremetal-expand-minio-deployment/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 math: true
 ---
 
@@ -296,7 +296,7 @@ MinIO 还支持以下架构：
 ```shell
 [Unit]
 Description=MinIO
-Documentation=https://silo.pigsty.cc/index.html
+Documentation=https://silo.pgsty.com/zh/docs/
 Wants=network-online.target
 After=network-online.target
 AssertFileIsExecutable=/usr/local/bin/minio

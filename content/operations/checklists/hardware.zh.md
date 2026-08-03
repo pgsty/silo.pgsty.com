@@ -3,7 +3,7 @@ title: "硬件检查清单"
 url: "/zh/operations/checklists/hardware/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 math: true
 ---
 
@@ -273,7 +273,7 @@ MinIO 不建议在生产环境中使用 HDD 存储。 HDD 存储通常无法提�
 {{% tab header="Kubernetes" %}}
 虽然 MinIO Tenant 可以使用远程 Persistent Volume (PV) 资源，但通过网络执行 I/O 的成本通常会限制整体性能。
 
-MinIO 强烈建议使用能够将存储配置到 Kubernetes 调度 MinIO pods 所在 worker 节点上的 CSI，例如 [MinIO DirectPV](https://silo.pigsty.cc/directpv)。
+MinIO 强烈建议使用能够将存储配置到 Kubernetes 调度 MinIO pods 所在 worker 节点上的 CSI，例如 [MinIO DirectPV](https://github.com/minio/directpv)。
 
 在其他场景中，也应尽可能选择能让 MinIO 像访问本地挂载文件系统一样访问存储的 CSI。 在 MinIO 与操作系统级存储访问 API 之间增加软件层或转换层的 CSI，必然会增加系统复杂度，并可能带来意料之外或不期望的行为。
 {{% /tab %}}
@@ -542,7 +542,7 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
 {{% alert color="warning" %}}
 **重要**
 
-本节提到的工具 **需要** MinIO 订阅。 MinIO 强烈建议所有生产部署结合其 SUBNET 许可证使用 [AIStor Object Store](https://silo.pigsty.cc/index.html)。 更多信息请参见 [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs)。
+本节提到的工具 **需要** MinIO 订阅。MinIO 强烈建议所有生产部署结合其 SUBNET 许可证使用 [AIStor Object Store](https://www.min.io/product/aistor/object-data-store)。更多信息请参见 [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs)。
 {{% /alert %}}
 
 1. 健康诊断工具

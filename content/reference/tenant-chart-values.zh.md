@@ -3,7 +3,7 @@ title: "租户 Helm Charts"
 url: "/zh/reference/tenant-chart-values/"
 weight: 40
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="helm-charts"></a>
@@ -118,7 +118,7 @@ MinIO 为 [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/h
 >
 > > Top level key for configuring MinIO Pool(s) in this Tenant.
 > >
-> > See [Operator CRD: Pools](https://silo.pigsty.cc/reference/operator-crd.html#pool) for more information on all subfields.
+> > See [Operator CRD: Pools](https://silo.pgsty.com/zh/reference/operator-crd/#pool) for more information on all subfields.
 > >
 > > **servers**
 > >
@@ -222,7 +222,7 @@ MinIO 为 [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/h
 > >
 > > > Specify an array of Kubernetes TLS secrets, where each entry corresponds to a secret the TLS private key and public certificate pair.
 > > >
-> > > This is used by MinIO to verify TLS connections from clients using those CAs If you omit this and have clients using TLS certificates minted by an external CA, those connections may fail with warnings around certificate verification. See [Operator CRD: TenantSpec](https://silo.pigsty.cc/reference/operator-crd.html#tenantspec).
+> > > This is used by MinIO to verify TLS connections from clients using those CAs If you omit this and have clients using TLS certificates minted by an external CA, those connections may fail with warnings around certificate verification. See [Operator CRD: TenantSpec](https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec).
 > >
 > > **externalCertSecret**
 > >
@@ -232,14 +232,14 @@ MinIO 为 [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/h
 > > >
 > > > If you omit this field *and* set `requestAutoCert` to false, the Tenant starts without TLS.
 > > >
-> > > See [Operator CRD: TenantSpec](https://silo.pigsty.cc/reference/operator-crd.html#tenantspec).
+> > > See [Operator CRD: TenantSpec](https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec).
 > > >
 > > > {{% alert color="warning" %}}
 > > > **重要**
 > > >
 > > > The MinIO Operator may output TLS connectivity errors if it cannot trust the Certificate Authority (CA) which minted the custom certificates.
 > > >
-> > > You can pass the CA to the Operator to allow it to trust that cert. See [Self-Signed, Internal, and Private Certificates](https://silo.pigsty.cc/operations/network-encryption.html#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates) for more information. This step may also be necessary for globally trusted CAs where you must provide intermediate certificates to the Operator to help build the full chain of trust.
+> > > You can pass the CA to the Operator to allow it to trust that cert. See [Self-Signed, Internal, and Private Certificates](https://silo.pgsty.com/zh/operations/network-encryption/#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates) for more information. This step may also be necessary for globally trusted CAs where you must provide intermediate certificates to the Operator to help build the full chain of trust.
 > > > {{% /alert %}}
 > >
 > > **requestAutoCert**
@@ -250,11 +250,11 @@ MinIO 为 [Helm Operator Charts](https://github.com/minio/operator/blob/v7.1.1/h
 > >
 > > > This field is used only when `requestAutoCert: true`. Use this field to set CommonName for the auto-generated certificate. MinIO defaults to using the internal Kubernetes DNS name for the pod The default DNS name format is typically `*.minio.default.svc.cluster.local`.
 > > >
-> > > See [Operator CRD: CertificateConfig](https://silo.pigsty.cc/reference/operator-crd.html#certificateconfig)
+> > > See [Operator CRD: CertificateConfig](https://silo.pgsty.com/zh/reference/operator-crd/#certificateconfig)
 >
 > **features**
 >
-> > MinIO features to enable or disable in the MinIO Tenant See [Operator CRD: Features](https://silo.pigsty.cc/reference/operator-crd.html#features).
+> > MinIO features to enable or disable in the MinIO Tenant See [Operator CRD: Features](https://silo.pgsty.com/zh/reference/operator-crd/#features).
 >
 > **buckets**
 >
@@ -486,7 +486,7 @@ tenant:
   ###
   # Top level key for configuring MinIO Pool(s) in this Tenant.
   #
-  # See `Operator CRD: Pools <https://silo.pigsty.cc/reference/operator-crd.html#pool>`__ for more information on all subfields.
+  # See `Operator CRD: Pools <https://silo.pgsty.com/zh/reference/operator-crd/#pool>`__ for more information on all subfields.
   pools:
     ###
     # The number of MinIO Tenant Pods / Servers in this pool.
@@ -608,7 +608,7 @@ tenant:
     #
     # This is used by MinIO to verify TLS connections from clients using those CAs
     # If you omit this and have clients using TLS certificates minted by an external CA, those connections may fail with warnings around certificate verification.
-    # See `Operator CRD: TenantSpec <https://silo.pigsty.cc/reference/operator-crd.html#tenantspec>`__.
+    # See `Operator CRD: TenantSpec <https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec>`__.
     externalCaCertSecret: [ ]
     ###
     # Specify an array of Kubernetes secrets, where each entry corresponds to a secret contains the TLS private key and public certificate pair.
@@ -617,14 +617,14 @@ tenant:
     # 
     # If you omit this field *and* set ``requestAutoCert`` to false, the Tenant starts without TLS.
     #
-    # See `Operator CRD: TenantSpec <https://silo.pigsty.cc/reference/operator-crd.html#tenantspec>`__.
+    # See `Operator CRD: TenantSpec <https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec>`__.
     #
     # .. important::
     #
     #    The MinIO Operator may output TLS connectivity errors if it cannot trust the Certificate Authority (CA) which minted the custom certificates.
     #
     #    You can pass the CA to the Operator to allow it to trust that cert.
-    #    See `Self-Signed, Internal, and Private Certificates <https://silo.pigsty.cc/operations/network-encryption.html#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates>`__ for more information.
+    #    See `Self-Signed, Internal, and Private Certificates <https://silo.pgsty.com/zh/operations/network-encryption/#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates>`__ for more information.
     #    This step may also be necessary for globally trusted CAs where you must provide intermediate certificates to the Operator to help build the full chain of trust.
     externalCertSecret: [ ]
     ###
@@ -640,11 +640,11 @@ tenant:
     # MinIO defaults to using the internal Kubernetes DNS name for the pod
     # The default DNS name format is typically ``*.minio.default.svc.cluster.local``.
     #
-    # See `Operator CRD: CertificateConfig <https://silo.pigsty.cc/reference/operator-crd.html#certificateconfig>`__
+    # See `Operator CRD: CertificateConfig <https://silo.pgsty.com/zh/reference/operator-crd/#certificateconfig>`__
     certConfig: { }
   ###
   # MinIO features to enable or disable in the MinIO Tenant
-  # See `Operator CRD: Features <https://silo.pigsty.cc/reference/operator-crd.html#features>`__.
+  # See `Operator CRD: Features <https://silo.pgsty.com/zh/reference/operator-crd/#features>`__.
   features:
     bucketDNS: false
     domains: { }

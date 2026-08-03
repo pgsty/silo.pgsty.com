@@ -3,7 +3,7 @@ title: "Requirements to Set Up Bucket Replication"
 url: "/administration/bucket-replication/bucket-replication-requirements/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="requirements-to-set-up-bucket-replication"></a>
@@ -71,7 +71,7 @@ The following policy provides permissions for configuring and enabling replicati
 The following code creates a [MinIO-managed user](/administration/identity-access-management/minio-user-management/#minio-users) with the necessary policy. Replace the `TARGET` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment on which you are configuring replication:
 
 ```shell
-wget -O - https://silo.pigsty.io/examples/ReplicationAdminPolicy.json | \
+wget -O - https://silo.pgsty.com/extra/examples/ReplicationAdminPolicy.json | \
 mc admin policy create TARGET ReplicationAdminPolicy /dev/stdin
 mc admin user add TARGET ReplicationAdmin LongRandomSecretKey
 mc admin policy attach TARGET ReplicationAdminPolicy --user=ReplicationAdmin
@@ -134,7 +134,7 @@ The following policy provides permissions for enabling synchronization of replic
 The following code creates a [MinIO-managed user](/administration/identity-access-management/minio-user-management/#minio-users) with the necessary policy. Replace `TARGET` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment on which you are configuring replication:
 
 ```shell
-wget -O - https://silo.pigsty.io/examples/ReplicationRemoteUserPolicy.json | \
+wget -O - https://silo.pgsty.com/extra/examples/ReplicationRemoteUserPolicy.json | \
 mc admin policy create TARGET ReplicationRemoteUserPolicy /dev/stdin
 mc admin user add TARGET ReplicationRemoteUser LongRandomSecretKey
 mc admin policy attach TARGET ReplicationRemoteUserPolicy --user=ReplicationRemoteUser

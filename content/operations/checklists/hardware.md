@@ -3,7 +3,7 @@ title: "Hardware Checklist"
 url: "/operations/checklists/hardware/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 math: true
 ---
 
@@ -273,7 +273,7 @@ MinIO does not recommends HDD storage for production environments. HDD storage t
 {{% tab header="Kubernetes" %}}
 While MinIO Tenants can make use of remote Persistent Volume (PV) resources, the cost of performing I/O over the network typically constrains overall performance.
 
-MinIO strongly recommends using CSIs which can provision storage attached to the worker node on which Kubernetes schedules your MinIO pods, such as [MinIO DirectPV](https://silo.pigsty.io/directpv).
+MinIO strongly recommends using CSIs which can provision storage attached to the worker node on which Kubernetes schedules your MinIO pods, such as [MinIO DirectPV](https://github.com/minio/directpv).
 
 For all other cases, make every effort possible to select a CSI which presents the storage to MinIO as if it were a locally-attached filesystem. CSIs which add layers of software or translations between MinIO and the OS-level storage access APIs necessarily increase the complexity of the syste and can contribute to unexpected or undesired behavior.
 {{% /tab %}}
@@ -542,7 +542,7 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
 {{% alert color="warning" %}}
 **Important**
 
-The tools noted in this section **require** a MinIO subscription. MinIO strongly recommends all production deployments use [AIStor Object Store](https://silo.pigsty.io/index.html) with their SUBNET license. For more information, see the [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs).
+The tools noted in this section **require** a MinIO subscription. MinIO strongly recommends all production deployments use [AIStor Object Store](https://www.min.io/product/aistor/object-data-store) with their SUBNET license. For more information, see the [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs).
 {{% /alert %}}
 
 1. Health diagnostic tool

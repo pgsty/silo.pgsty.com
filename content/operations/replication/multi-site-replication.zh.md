@@ -4,7 +4,7 @@ url: "/zh/operations/replication/multi-site-replication/"
 weight: 20
 icon: fa-solid fa-arrows-rotate
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-site-replication-overview"></a>
@@ -23,7 +23,7 @@ silo_modified: false
 
 有关站点复制架构和部署概念的更多信息，请参阅 [Deployment Architecture: Replicated MinIO Deployments](/zh/operations/concepts/architecture/#minio-deployment-architecture-replicated)。
 
-除早期开发、评估或一般性实验外，MinIO 不建议在站点复制中使用 MacOS、Windows 或未编排的容器化部署。 生产环境请使用 [Linux](https://silo.pigsty.cc/minio/linux/operations/install-deploy-manage/multi-site-replication.html) 或 [Kubernetes](https://silo.pigsty.cc/minio/kubernetes/upstream/operations/install-deploy-manage/multi-site-replication.html)
+除早期开发、评估或一般性实验外，MinIO 不建议在站点复制中使用 macOS、Windows 或未编排的容器部署。生产环境请使用受支持的 [Linux](/zh/operations/deployments/baremetal/) 或 [Kubernetes](/zh/operations/deployments/kubernetes/) 部署，并按照本页的站点复制流程操作。
 
 ## 概览 {#id3}
 

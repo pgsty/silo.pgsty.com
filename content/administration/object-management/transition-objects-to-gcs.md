@@ -3,7 +3,7 @@ title: "Transition Objects from MinIO to GCS"
 url: "/administration/object-management/transition-objects-to-gcs/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="transition-objects-from-minio-to-gcs"></a>
@@ -114,7 +114,7 @@ This step creates users and policies on the MinIO deployment for supporting life
 The following example uses `Alpha` as a placeholder [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) for the MinIO deployment. Replace this value with the appropriate alias for the MinIO deployment on which you are configuring lifecycle management rules. Replace the password `LongRandomSecretKey` with a long, random, and secure secret key as per your organizations best practices for password generation.
 
 ```shell
-wget -O - https://silo.pigsty.io/examples/LifecycleManagementAdmin.json | \
+wget -O - https://silo.pgsty.com/extra/examples/LifecycleManagementAdmin.json | \
 mc admin policy create Alpha LifecycleAdminPolicy /dev/stdin
 mc admin user add Alpha alphaLifecycleAdmin LongRandomSecretKey
 mc admin policy attach Alpha LifecycleAdminPolicy --user=alphaLifecycleAdmin

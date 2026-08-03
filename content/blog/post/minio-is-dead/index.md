@@ -166,5 +166,5 @@ If I have to sum up my feelings, I'd borrow a line from *The Hitchhiker's Guide 
 —— **"So long, and thanks for all the fish."**
 
 > 2026-02-14 Update: [MinIO's official repo has been fully archived and is no longer maintained](/blog/post/minio-resurrect/).
-> Besides, I've personally maintained an oss fork of minio: [`pgsty/minio`](https://github.com/pgsty/minio) / Docs: [https://silo.pigsty.io](https://silo.pigsty.io).
+> Besides, I've personally maintained an oss fork of minio: [`pgsty/minio`](https://github.com/pgsty/minio) / Docs: [https://silo.pgsty.com](https://silo.pgsty.com).
 > Which based on the last upstream version 2025-12-03 with restored console capabilities.

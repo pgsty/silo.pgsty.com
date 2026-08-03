@@ -155,5 +155,5 @@ MinIO 享受了十年的社区红利，靠着“全球下载量第一”的虚�
 
 
 > 题外话与更新（2026-02-14），[MinIO 官方仓库已经彻底归档并不再维护](/zh/blog/post/minio-resurrect/)。
-> 我创建了一个 Fork：[`pgsty/minio`](https://github.com/pgsty/minio) / 文档 [https://silo.pigsty.io](https://silo.pigsty.io)。
+> 我创建了一个 Fork：[`pgsty/minio`](https://github.com/pgsty/minio) / 文档 [https://silo.pgsty.com/zh/](https://silo.pgsty.com/zh/)。
 > 搭建了 CI/CD 提供 RPM/DEB 二进制包与 Docker 镜像，基于最后的上游版本 2025-12-03 构建，恢复了 2025-05 阉割的控制台能力。

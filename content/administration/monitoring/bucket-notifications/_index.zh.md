@@ -4,7 +4,7 @@ url: "/zh/administration/monitoring/bucket-notifications/"
 weight: 10
 icon: fa-solid fa-bell
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-bucket-notifications"></a>
@@ -327,7 +327,7 @@ MinIO 支持在以下 S3 [scanner](/zh/operations/concepts/scanner/#minio-concep
 
 ### 全局事件 {#id7}
 
-MinIO 支持在以下全局事件上触发通知。 只能通过 [ListenNotification](https://silo.pigsty.cc/developers/go/API.html#listennotification-context-context-context-prefix-suffix-string-events-string-chan-notification-info) API 监听这些事件：
+MinIO 支持在以下全局事件上触发通知。 只能通过 [ListenNotification](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListenNotification) API 监听这些事件：
 
 <a id="data.s3:BucketCreated"></a>
 

@@ -3,7 +3,7 @@ title: "Modify a MinIO Tenant"
 url: "/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/"
 weight: 30
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="modify-a-minio-tenant"></a>
@@ -59,7 +59,7 @@ When adding a new pool or modifying an existing pool for a tenant, you can speci
 
 ### Decommission a Tenant Server Pool {#decommission-a-tenant-server-pool}
 
-MinIO Operator 4.4.13 and later support decommissioning a server pool in a Tenant. Specifically, you can follow the [Decommission a Server pool](https://silo.pigsty.io/minio/linux/operations/install-deploy-manage/decommission-server-pool.html) procedure to remove the pool from the tenant, then edit the tenant YAML to drop the pool from the StatefulSet. When removing the Tenant pool, ensure the `spec.pools.[n].name` fields have values for all remaining pools.
+MinIO Operator 4.4.13 and later support decommissioning a server pool in a Tenant. Specifically, you can follow the [Decommission a Server pool](https://silo.pgsty.com/operations/deployments/baremetal-decommission-server-pool/) procedure to remove the pool from the tenant, then edit the tenant YAML to drop the pool from the StatefulSet. When removing the Tenant pool, ensure the `spec.pools.[n].name` fields have values for all remaining pools.
 
 {{% alert color="info" %}}
 **Maintain pool order when decommissioning and then adding**

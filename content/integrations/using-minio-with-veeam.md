@@ -3,7 +3,7 @@ title: "Using MinIO with Veeam"
 url: "/integrations/using-minio-with-veeam/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="using-minio-with-veeam"></a>
@@ -13,10 +13,10 @@ When using Veeam Backup and Replication, you can use S3 compatible object storag
 ## Prerequisites {#prerequisites}
 
 - One or both of Veeam Backup and Replication with support for S3 compatible object store (e.g. 9.5.4) and Veeam Backup for Office365 (VBO)
-- MinIO object storage set up per [https://silo.pigsty.io/index.html#procedure](https://silo.pigsty.io/index.html#procedure)
-- Veeam requires TLS connections to the object storage. This can be configured per [https://silo.pigsty.io/operations/network-encryption.html](https://silo.pigsty.io/operations/network-encryption.html)
+- MinIO object storage set up per [https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure](https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure)
+- Veeam requires TLS connections to the object storage. Configure TLS using the [network encryption guide](https://silo.pgsty.com/operations/network-encryption/).
 - The S3 bucket, Access Key and Secret Key have to be created before and outside of Veeam.
-- Configure the MinIO Client for the Veeam MinIO endpoint - [https://silo.pigsty.io/reference/minio-mc.html](https://silo.pigsty.io/reference/minio-mc.html)
+- Configure the MinIO Client for the Veeam MinIO endpoint using the [`mc` command reference](https://silo.pgsty.com/reference/minio-mc/).
 
 ## Setting up an S3 compatible object store for Veeam Backup and Replication {#setting-up-an-s3-compatible-object-store-for-veeam-backup-and-replication}
 
@@ -36,7 +36,7 @@ mc mb -l myminio/veeambackup
 
 ```
 
-> Object locking requires erasure coding enabled on the minio server. For more information see [https://silo.pigsty.io/operations/concepts/erasure-coding.html](https://silo.pigsty.io/operations/concepts/erasure-coding.html).
+> Object locking requires erasure coding on the MinIO server. See the [erasure coding documentation](https://silo.pgsty.com/operations/concepts/erasure-coding/) for more information.
 
 ### Add MinIO as an object store for Veeam {#add-minio-as-an-object-store-for-veeam}
 

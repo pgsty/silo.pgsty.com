@@ -112,7 +112,7 @@ If you're already running OSS MinIO, migration is cheap:
 - **Docker**: swap `minio/minio` for `pgsty/minio`.
 - **RPM / DEB**: on [GitHub Releases](https://github.com/pgsty/minio/releases), or via `pig`.
 - **Source**: [pgsty/minio](https://github.com/pgsty/minio)
-- **Docs**: [silo.pigsty.io](https://silo.pigsty.io)
+- **Docs**: [silo.pgsty.com](https://silo.pgsty.com/)
 
 You don't need to replace anything around it or relearn the API. In most cases, you're just pointing a compatible binary at the same deployment. 
 If you want a full HA production setup, [Pigsty](https://pigsty.io/docs/minio) ships one for free.

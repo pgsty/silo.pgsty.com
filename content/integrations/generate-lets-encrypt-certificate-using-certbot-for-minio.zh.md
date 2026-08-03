@@ -3,7 +3,7 @@ title: "使用 Certbot 为 MinIO 生成 Let’s Encrypt 证书"
 url: "/zh/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/"
 weight: 60
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="certbot-minio-let-s-encrypt"></a>
@@ -18,7 +18,7 @@ silo_modified: false
 
 ## 1. 前置条件 {#id1}
 
-- 从[这里](https://silo.pigsty.cc/index.html#procedure)安装 MinIO Server。
+- 从[这里](https://silo.pgsty.com/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure)安装 MinIO Server。
 - 从[这里](https://certbot.eff.org/)安装 Certbot
 
 ## 2. 依赖要求 {#id2}

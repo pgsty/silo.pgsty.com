@@ -164,7 +164,7 @@ pig repo set; pig install minio
 
 MinIO 的官方文档同样面临风险 —— 原本的链接已指向它们的商业产品 AIStor。
 
-所以我们基于 `minio/docs` 进行了 Fork，修复了失效链接，恢复了被删除的控制台文档，部署在：[https://silo.pigsty.io](https://silo.pigsty.io)
+所以我们基于 `minio/docs` 进行了 Fork，修复了失效链接，恢复了被删除的控制台文档，部署在：[https://silo.pgsty.com/zh/](https://silo.pgsty.com/zh/)
 
 文档采用与原版相同的 Creative Commons Attribution 4.0 协议，完整保留了所有内容，并持续进行必要的维护更新。
 

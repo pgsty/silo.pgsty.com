@@ -4,7 +4,7 @@ url: "/zh/developers/minio-drivers/"
 weight: 190
 icon: fa-solid fa-cubes
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="sdk"></a>
@@ -31,7 +31,7 @@ GitHub: [minio/minio-go](https://github.com/minio/minio-go)
 
 快速入门：[Go 快速入门指南](/zh/developers/go/minio-go/)
 
-参考：[/developers/go/API](https://silo.pigsty.io/developers/go/API.html)
+参考：[MinIO Go SDK API](https://pkg.go.dev/github.com/minio/minio-go/v7)
 
 通过 GitHub 下载
 
@@ -49,7 +49,7 @@ GitHub: [minio/minio-py](https://github.com/minio/minio-py)
 
 快速入门：[Python 快速入门指南](/zh/developers/python/minio-py/)
 
-参考：[/developers/python/API](https://silo.pigsty.io/developers/python/API.html)
+参考：[MinIO Python SDK](https://github.com/minio/minio-py)
 
 **安装**
 
@@ -76,7 +76,7 @@ GitHub: [minio/minio-java](https://github.com/minio/minio-java)
 
 快速入门：[Java 快速入门指南](/zh/developers/java/minio-java/#minio-java-quickstart)
 
-参考：[/developers/java/API](https://silo.pigsty.io/developers/java/API.html)
+参考：[MinIO Java SDK](https://github.com/minio/minio-java)
 
 **安装**
 
@@ -110,7 +110,7 @@ GitHub: [minio/minio-dotnet](https://github.com/minio/minio-dotnet)
 
 快速入门：[.NET 快速入门指南](/zh/developers/dotnet/minio-dotnet/)
 
-参考：[/developers/dotnet/API](https://silo.pigsty.io/developers/dotnet/API.html)
+参考：[MinIO .NET SDK](https://github.com/minio/minio-dotnet)
 
 **从 NuGet 下载**
 
@@ -130,7 +130,7 @@ GitHub: [minio/minio-js](https://github.com/minio/minio-js)
 
 快速入门：[JavaScript 快速入门指南](/zh/developers/javascript/minio-javascript/)
 
-参考：[/developers/javascript/API](https://silo.pigsty.io/developers/javascript/API.html)
+参考：[MinIO JavaScript SDK](https://github.com/minio/minio-js)
 
 **安装**
 

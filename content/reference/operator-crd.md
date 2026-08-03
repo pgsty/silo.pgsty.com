@@ -3,7 +3,7 @@ title: "MinIO Custom Resource Definition"
 url: "/reference/operator-crd/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="poolstate"></a>
@@ -17,7 +17,7 @@ This page documents the CRD reference for use in customizing Operator-deployed T
 
 ## Operator CRD v2 Reference {#operator-crd-v2-reference}
 
-Package v2 - This page provides a quick automatically generated reference for the MinIO Operator `Operator CRD v2 Reference` CRD. For more complete documentation on the MinIO Operator CRD, see [MinIO Kubernetes Documentation](https://silo.pigsty.io/operations/deployments/kubernetes.html).
+Package v2 - This page provides a quick automatically generated reference for the MinIO Operator `Operator CRD v2 Reference` CRD. For more complete documentation on the MinIO Operator CRD, see [MinIO Kubernetes Documentation](https://silo.pgsty.com/operations/deployments/kubernetes/).
 
 The `Operator CRD v2 Reference` API was released with the v4.0.0 MinIO Operator. The MinIO Operator automatically converts existing tenants using the `/v1` API to `/v2`.
 
@@ -465,7 +465,7 @@ containing the TLS certificate.<br />
 </p></li>
 </ul>
 <p>See the <a
-href="https://silo.pigsty.io/reference/operator-crd.html">MinIO
+href="https://silo.pgsty.com/reference/operator-crd/">MinIO
 Operator CRD</a> reference for examples and more complete documentation
 on configuring TLS for MinIO Tenants.</p></td>
 </tr>
@@ -720,7 +720,7 @@ Logging describes Logging for MinIO tenants.
 
 Pool (`pools`) defines a MinIO server pool on a Tenant. Each pool consists of a set of MinIO server pods which “pool” their storage resources for supporting object storage and retrieval requests. Each server pool is independent of all others and supports horizontal scaling of available storage resources in the MinIO Tenant.
 
-See the [MinIO Operator CRD](https://silo.pigsty.io/reference/operator-crd.html) reference for the `pools` object for examples and more complete documentation.
+See the [MinIO Operator CRD](https://silo.pgsty.com/reference/operator-crd/) reference for the `pools` object for examples and more complete documentation.
 
 - [TenantSpec](#tenantspec)
 
@@ -1264,7 +1264,7 @@ TenantSpec (`spec`) defines the configuration of a MinIO Tenant object.
 
 The following parameters are specific to the `Operator CRD v2 Reference` MinIO CRD API `spec` definition added as part of the MinIO Operator v4.0.0.
 
-For more complete documentation on this object, see the [MinIO Kubernetes Documentation](https://silo.pigsty.io/operations/deployments/kubernetes.html).
+For more complete documentation on this object, see the [MinIO Kubernetes Documentation](https://silo.pgsty.com/operations/deployments/kubernetes/).
 
 - [Tenant](#tenant)
 
@@ -1299,7 +1299,7 @@ least <strong>one</strong> element in the <code>pools</code>
 array.<br />
 </p>
 <p>See the <a
-href="https://silo.pigsty.io/reference/operator-crd.html#tenant">MinIO
+href="https://silo.pgsty.com/reference/operator-crd/#tenant">MinIO
 Operator CRD</a> reference for the <code>pools</code> object for
 examples and more complete documentation.</p></td>
 </tr>
@@ -1371,7 +1371,7 @@ containing the TLS certificate.<br />
 </p></li>
 </ul>
 <p>See the <a
-href="https://silo.pigsty.io/reference/operator-crd.html#tenantspec">MinIO
+href="https://silo.pgsty.com/reference/operator-crd/#tenantspec">MinIO
 Operator CRD</a> reference for examples and more complete documentation
 on configuring TLS for MinIO Tenants.</p></td>
 </tr>
@@ -1403,7 +1403,7 @@ containing the Certificate Authority.<br />
 </p></li>
 </ul>
 <p>See the <a
-href="https://silo.pigsty.io/reference/operator-crd.html#tenantspec">MinIO
+href="https://silo.pgsty.com/reference/operator-crd/#tenantspec">MinIO
 Operator CRD</a> reference for examples and more complete documentation
 on configuring TLS for MinIO Tenants.</p></td>
 </tr>
@@ -1443,7 +1443,7 @@ href="#kesconfig"><code>kes</code></a>
 object specification.<br />
 </p>
 <p>See the <a
-href="https://silo.pigsty.io/reference/operator-crd.html#tenantspec">MinIO
+href="https://silo.pgsty.com/reference/operator-crd/#tenantspec">MinIO
 Operator CRD</a> reference for examples and more complete documentation
 on configuring TLS for MinIO Tenants.</p></td>
 </tr>
@@ -1535,7 +1535,7 @@ generation.<br />
 <strong>and</strong> <code>externalCertSecret</code> is omitted, the
 MinIO Tenant deploys <strong>without</strong> TLS enabled.</p>
 <p>See the <a
-href="https://silo.pigsty.io/reference/operator-crd.html#tenantspec">MinIO
+href="https://silo.pgsty.com/reference/operator-crd/#tenantspec">MinIO
 Operator CRD</a> reference for examples and more complete documentation
 on configuring TLS for MinIO Tenants.</p></td>
 </tr>

@@ -4,7 +4,7 @@ url: "/zh/operations/server-side-encryption/configure-minio-kes/"
 description: "Deploy MinIO with Server-Side Object Encryption"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="kes"></a>
@@ -111,7 +111,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 {{% tab header="Kubernetes" %}}
 1. 查看 Tenant CRD
 
-   查看 [Tenant CRD](/zh/reference/operator-crd/#minio-operator-crd) 中的 `TenantSpec.kes` 对象、 `TenantSpec.configuration` 对象，以及 [KES Configuration 参考](https://silo.pigsty.cc//kes/tutorials/configuration)。
+   查看 [Tenant CRD](/zh/reference/operator-crd/#minio-operator-crd) 中的 `TenantSpec.kes` 对象、 `TenantSpec.configuration` 对象，以及 [KES Configuration 参考](https://github.com/minio/kes/wiki/Configuration)。
 
    在继续之前，你必须先准备好所选外部 Key Management Service 所需的全部配置。
 2. 创建或修改 Tenant YAML，按需设置 `KesConfig` 的值：

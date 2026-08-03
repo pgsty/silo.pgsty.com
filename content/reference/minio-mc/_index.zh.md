@@ -4,7 +4,7 @@ url: "/zh/reference/minio-mc/"
 weight: 10
 icon: fa-solid fa-terminal
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio"></a>
@@ -40,6 +40,8 @@ MinIO 客户端与 MinIO 服务端独立发布。
 可以安装比 MinIO 服务端 更新的 MinIO 客户端版本。 但如果 MinIO 客户端与 MinIO 服务端的版本偏差过大，可能因差异导致更多告警或错误。 例如，虽然复制相关的核心 S3 API（[`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）可能保持不变，但某些功能或 flag 仅在客户端与服务端版本对齐时才可用或稳定。
 
 <a id="id3"></a>
+
+<a id="quickstart"></a>
 
 ## 快速开始 {#mc-install}
 

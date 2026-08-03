@@ -4,7 +4,7 @@ url: "/operations/server-side-encryption/configure-minio-kes/"
 description: "Deploy MinIO with Server-Side Object Encryption"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="server-side-object-encryption-with-kes"></a>
@@ -111,7 +111,7 @@ This procedure provides instructions for configuring and enabling Server-Side En
 {{% tab header="Kubernetes" %}}
 1. Review the Tenant CRD
 
-   Review the [Tenant CRD](/reference/operator-crd/#minio-operator-crd) `TenantSpec.kes` object, the `TenantSpec.configuration` object, and the [KES Configuration reference](https://silo.pigsty.io//kes/tutorials/configuration).
+   Review the [Tenant CRD](/reference/operator-crd/#minio-operator-crd) `TenantSpec.kes` object, the `TenantSpec.configuration` object, and the [KES Configuration reference](https://github.com/minio/kes/wiki/Configuration).
 
    You must prepare all necessary configurations associated to your external Key Management Service of choice before proceeding.
 2. Create or Modify your Tenant YAML to set the values of `KesConfig` as necessary:
