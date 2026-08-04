@@ -1,7 +1,7 @@
 ---
 title: Silo 博客
 linkTitle: 博客
-description: 关于 MinIO、S3 兼容对象存储与 Silo 社区分支的新闻与文章
+description: 文章、发布注记与安全公告
 weight: 40
 type: blog
 sidebar_root_for: self

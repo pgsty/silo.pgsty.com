@@ -5,7 +5,7 @@ author: |
   [Feng Ruohang](https://vonng.com) ([@Vonng](https://vonng.com/en/)) | [WeChat](https://mp.weixin.qq.com/s/A7bAFSAk3dte7QfXu5qHQw)
 summary: >
   MinIO just entered maintenance mode. What replaces it? Can RustFS step in? I tested the contenders so you don’t have to.
-tags: [Database, MinIO]
+tags: [post, minio]
 weight: 30
 url: "/blog/post/minio-alternative/"
 aliases:
@@ -27,7 +27,7 @@ Ignoring commercial clouds, here’s the OSS menu:
 
 - **Ceph** – arguably the best choice for enterprises, but brutally complex. Most folks don’t need block + file + object in one, and it requires extras like Podmon. MinIO’s single binary spoiled us.
 - **SeaweedFS** – optimized for oceans of small files; O(1) disk seeks make it absurdly fast there. But it relies on an external metadata store. If you want a general-purpose object store, that dependency is annoying.
-- **Garage** – built by Deuxfleurs with NGI funding. Delightfully light (10 MB), great for self-hosters and edge nodes. But S3 compatibility is thin: no versioning, no cross-region replication, no IAM. Enterprises will laugh.
+- **Garage** – built by Deuxfleurs with NGI funding. Delightfully light (10 MB), great for self-hosters and edge nodes. But S3 compatibility is thin: no versioning, no cross-region replication, no IAM. Enterprises will laugh.
 - **RustFS** – the only project explicitly chasing “drop-in MinIO,” but it’s still alpha.
 
 ## RustFS vs. MinIO

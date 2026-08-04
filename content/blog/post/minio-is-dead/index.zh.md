@@ -4,7 +4,7 @@ date: 2025-12-04
 author: 冯若航
 summary: >
   MinIO官方宣布开源项目进入"维护模式"，基本上宣告了MinIO作为一个开源项目的死亡。屠龙勇者成为新的恶龙——MinIO是如何从S3开源替代变成一家普通的商业软件公司的。
-tags: [对象存储, MinIO, S3, 开源]
+tags: [post, minio]
 weight: 40
 url: "/zh/blog/post/minio-is-dead/"
 aliases:

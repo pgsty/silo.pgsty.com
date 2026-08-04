@@ -4,7 +4,7 @@ linkTitle: "silo-pkg 3.7.0 Released"
 date: 2026-08-03
 author: "Vonng"
 description: "The first silo-pkg release under its new repository name fixes a policy condition-key bypass and three LDAP connection defects, and restores the module's actual minimum Go version."
-tags: [silo-pkg, Silo, MinIO, release]
+tags: [Release, pkg]
 weight: 5
 url: "/blog/release/pkg-3.7.0/"
 aliases:

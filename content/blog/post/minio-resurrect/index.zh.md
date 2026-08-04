@@ -4,7 +4,7 @@ date: 2026-02-14
 author: 冯若航
 summary: >
   MinIO 仓库正式归档并彻底放弃维护，开源对象存储用户将何去何从？AI Agent 如何助力 MinIO 起死回生？
-tags: [对象存储, MinIO, S3, 开源]
+tags: [post, minio]
 weight: 20
 url: "/zh/blog/post/minio-resurrect/"
 aliases:

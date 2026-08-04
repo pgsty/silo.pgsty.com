@@ -5,7 +5,7 @@ author: Ruohang Feng
 summary: >
   MinIO's repo is officially archived and abandoned. And how AI Agents helped bring it back from the dead.
   This post explains how a community fork restores the admin console and ships binaries via CI/CD pipeline.
-tags: [MinIO, S3, Open-Source]
+tags: [post, minio]
 weight: 20
 url: "/blog/post/minio-resurrect/"
 aliases:

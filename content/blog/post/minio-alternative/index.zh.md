@@ -4,7 +4,7 @@ date: 2025-12-08
 author: 冯若航
 summary: >
   MinIO进入维护模式，有什么替代品？Ceph、RustFS、SeaweedFS、Garage各有各的问题。老冯把这些方案都打好了包挨个试了一遍，总结一句话：没有完美替代。
-tags: [对象存储, MinIO, S3, 开源]
+tags: [post, minio]
 weight: 30
 url: "/zh/blog/post/minio-alternative/"
 aliases:

@@ -1,7 +1,7 @@
 ---
 title: Silo Blog
 linkTitle: Blog
-description: News and essays about MinIO, S3-compatible object storage, and the Silo community fork
+description: News, Release & Security Notes
 weight: 40
 type: blog
 sidebar_root_for: self

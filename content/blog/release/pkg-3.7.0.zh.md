@@ -4,13 +4,14 @@ linkTitle: "silo-pkg 3.7.0 发布"
 date: 2026-08-03
 author: "冯若航"
 description: "silo-pkg 以新仓库名发布的首个版本：修复策略条件键解析顺序导致的策略绕过，修复 LDAP 连接路径的三个缺陷，并降低模块的最低 Go 版本要求。"
-tags: [silo-pkg, Silo, MinIO, 发布]
+tags: [发布, pkg]
 weight: 5
 url: "/zh/blog/release/pkg-3.7.0/"
 aliases:
   - /blog/pkg-3.7.0/
   - /releases/pkg-3.7.0/
 ---
+
 **发布日期：** 2026-08-03 · **版本：** [v3.7.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.7.0) · **仓库：** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
 这是 `pgsty/silo-pkg` 以新仓库名发布的第一个版本。该版本修复了一处策略条件键解析顺序导致的策略绕过，修复了 LDAP 连接路径上的三个缺陷（其中两个由本分支自己在 v3.6.2/v3.6.3 中引入），清理了证书文件监听器泄漏，并把模块的最低 Go 版本要求从 `1.26.1` 降回到实际需要的 `1.25.0`。

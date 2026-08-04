@@ -5,7 +5,7 @@ author: Ruohang Feng
 summary: >
   Two months after forking MinIO, pgsty/minio ships patches for four CVEs and related security issues. 
   No new features — just working builds, a restored console, and timely security fixes.
-tags: [MinIO, S3, Security, OSS]
+tags: [post, minio]
 weight: 10
 url: "/blog/post/minio-promise-kept/"
 ---

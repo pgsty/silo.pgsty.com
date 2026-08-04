@@ -4,7 +4,7 @@ date: 2026-04-17
 author: 冯若航
 summary: >
   `pgsty/minio` 在三天内修复并发布多项高危漏洞补丁。兑现了“继续维护开源 MinIO 分支”的承诺。
-tags: [对象存储, MinIO, 安全, 开源]
+tags: [post, minio]
 weight: 10
 url: "/zh/blog/post/minio-promise-kept/"
 aliases:

@@ -1,6 +1,6 @@
 ---
 title: SILO Security Chronicle
-linkTitle: Security Chronicle
+linkTitle: Security
 description: A chronological account of every application-level CVE investigated by the SILO fork, one incident per article.
 weight: 30
 icon: fa-solid fa-shield-halved
