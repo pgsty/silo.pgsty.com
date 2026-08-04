@@ -163,9 +163,9 @@ url: "/zh/blog/security/internode-path-containment/"
 
 初稿列出的两个实现缺口现已在本地分支关闭；但截至 2026-08-03，下面这些后续提交都尚未进入公开服务端版本：
 
-- **`ReadFileHandler` 已有上界。** 提交 `5e11208cb` 会拒绝超过 5 GiB 的声明读取长度；这是该旧式整文件 bitrot 路径所代表 S3 part 的最大尺寸。合法的 GiB 级读取仍可能按相同量级分配内存；这里消除的是超过格式真实上限、由调用方任意指定的分配，并没有假装大读取毫无成本。
-- **负数 part size 既不能写入，也不能被信任。** 提交 `ef565d013` 在 `AddVersion` 写入收口点拒绝该值，并在 `CheckParts` 与 `VerifyFile` 再次校验，因此既覆盖新写入的毒化元数据，也覆盖已经落盘的历史元数据。内部节点边界使用同一个谓词。
-- **非正数 erasure block size 在构造时即被拒绝。** 提交 `052d2a11b` 在 `NewErasure` 校验 `blockSize`，覆盖单独给 `ShardFileSize` 加守卫无法覆盖的其他 offset 与 decode 除法；rebalance 中独立的除法在自身边界另行校验。
+- **`ReadFileHandler` 已有上界。** 提交 `b6f70ab08` 会拒绝超过 5 GiB 的声明读取长度；这是该旧式整文件 bitrot 路径所代表 S3 part 的最大尺寸。合法的 GiB 级读取仍可能按相同量级分配内存；这里消除的是超过格式真实上限、由调用方任意指定的分配，并没有假装大读取毫无成本。
+- **负数 part size 既不能写入，也不能被信任。** 提交 `80e8eaa42` 在 `AddVersion` 写入收口点拒绝该值，并在 `CheckParts` 与 `VerifyFile` 再次校验，因此既覆盖新写入的毒化元数据，也覆盖已经落盘的历史元数据。内部节点边界使用同一个谓词。
+- **非正数 erasure block size 在构造时即被拒绝。** 提交 `80e8eaa42` 在 `NewErasure` 校验 `blockSize`，覆盖单独给 `ShardFileSize` 加守卫无法覆盖的其他 offset 与 decode 除法；rebalance 中独立的除法在自身边界另行校验。
 
 仍有两项限制，不能被打包进更强的结论：
 

@@ -163,9 +163,9 @@ The hit rate says something plain: **the last gate before merge should be indepe
 
 The first draft listed two implementation gaps. Both are now closed on the local branch, but none of these follow-up commits is in a published server release as of 2026-08-03:
 
-- **`ReadFileHandler` is bounded.** Commit `5e11208cb` rejects a declared read length above 5 GiB, the maximum size of the S3 part represented by this legacy whole-file bitrot path. Legitimate GiB-scale reads can still allocate on that scale; the change removes caller-controlled allocation above the format's real ceiling rather than pretending large reads are cheap.
-- **Negative part sizes cannot be persisted or trusted.** Commit `ef565d013` rejects them at the `AddVersion` write funnel and again in `CheckParts` and `VerifyFile`, so both new poison and already-written metadata are covered. The internode boundary check uses the same predicate.
-- **Non-positive erasure block sizes are rejected at construction.** Commit `052d2a11b` validates `blockSize` in `NewErasure`, covering the other offset and decode divisions that a single downstream `ShardFileSize` guard could not. Rebalance's separate division is guarded at its own boundary.
+- **`ReadFileHandler` is bounded.** Commit `b6f70ab08` rejects a declared read length above 5 GiB, the maximum size of the S3 part represented by this legacy whole-file bitrot path. Legitimate GiB-scale reads can still allocate on that scale; the change removes caller-controlled allocation above the format's real ceiling rather than pretending large reads are cheap.
+- **Negative part sizes cannot be persisted or trusted.** Commit `80e8eaa42` rejects them at the `AddVersion` write funnel and again in `CheckParts` and `VerifyFile`, so both new poison and already-written metadata are covered. The internode boundary check uses the same predicate.
+- **Non-positive erasure block sizes are rejected at construction.** Commit `80e8eaa42` validates `blockSize` in `NewErasure`, covering the other offset and decode divisions that a single downstream `ShardFileSize` guard could not. Rebalance's separate division is guarded at its own boundary.
 
 Two limitations remain and should not be folded into a stronger claim:
 

@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/source-address-trust/"
 ---
 
-**Status:** Landed on `pgsty/minio` `master` as `7b47d3943`, **unreleased**
+**Status:** Landed on `pgsty/minio` `master` as `fe6dc4780`, **unreleased**
 **Classification:** Opt-in hardening plus a documentation defect, **not a vulnerability and not a regression**; no CVE assigned. The underlying weakness is inherited from upstream and its default behaviour is unchanged here
 **Affected scope:** `aws:SourceIp` policy conditions, the audit log `remotehost` field, S3 event notification `Host`, and the client shown by `mc admin trace` — on any deployment whose S3 API port is reachable without passing through a header-sanitising proxy
 **Upstream:** nothing to file — `minio/minio` is archived. Prior art there: [PR #4736](https://github.com/minio/minio/pull/4736) (2017, the concern raised and half-addressed), [discussion #17878](https://github.com/minio/minio/discussions/17878) (2023, maintainer marks it working as intended), [PR #20977](https://github.com/minio/minio/pull/20977) (2025, the partial switch)

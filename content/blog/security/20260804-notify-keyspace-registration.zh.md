@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/notify-keyspace-registration/"
 ---
 
-**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `cc78701a1`，**尚未发布**
+**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `162ded343`，**尚未发布**
 **定级：** 配置 Schema 一致性与可用性问题，**不是漏洞**；附带一项防御性加固（验证报错不再回显凭据值）
 **影响范围：** `notify_nats` 的 JWT/NKey/TLS-handshake-first 选项、`notify_amqp` 的 `immediate`，以及任何带着启用状态 NATS 目标从 2020 年前配置迁移上来的部署——它的失败会连带压掉**所有**通知后端
 **跟踪：** `pgsty/minio` issue #39
@@ -109,7 +109,7 @@ config.KV{
 
 ## 修复 {#the-fix}
 
-约一百行生产代码变更，由九百行测试托着（`cc78701a1`：8 个文件，+1029/−7）。
+约一百行生产代码变更，由九百行测试托着（`162ded343`：8 个文件，+1029/−7）。
 
 **注册。** 四个键全部进入所属默认 KVS 和帮助 Schema，摆在操作者会去找的位置（`user_credentials` 挨着 `username`，`nkey_seed` 排在 `token` 后，`tls_handshake_first` 跟在 `tls_skip_verify` 后，`immediate` 挨着 `mandatory`）。注册同时决定可见性：这四个键现在会出现在 `mc admin config get` 的输出里，此前不会。
 

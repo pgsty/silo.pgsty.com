@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/s3-versionid-conditions/"
 ---
 
-**Status:** Fixed on the local `pgsty/minio` branch as `09168d6f0`, **unreleased**
+**Status:** Fixed on the local `pgsty/minio` branch as `744a9dcd7`, **unreleased**
 **Classification:** Policy-enforcement correctness — a fail-**closed** report, a fail-**open** trap avoided, and one narrow trim bypass closed. **Not a headline CVE** — see [How we classify this](#not-a-cve)
 **Affected scope:** Any deployment with a bucket/IAM policy using `Null` or `StringEquals` on `s3:versionid`; the reported break is on `DeleteObject`/`DeleteObjects`
 **Tracking:** upstream `minio/minio` issue #21735 (reporter iTrooz, 2026-01-10); upstream repository archived read-only since 2026-04-25

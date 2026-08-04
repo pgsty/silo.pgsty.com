@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/s3-versionid-conditions/"
 ---
 
-**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `09168d6f0`，**尚未发布**
+**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `744a9dcd7`，**尚未发布**
 **定级：** 策略执行正确性——一个 fail-**closed** 的报告、一个被避免的 fail-**open** 陷阱、以及顺手关掉的一处窄绕过。**不是重点 CVE**——见[我们如何定级](#not-a-cve)
 **影响范围：** 任何在 `s3:versionid` 上使用 `Null` 或 `StringEquals` 的桶/IAM 策略；报告中的失效发生在 `DeleteObject`/`DeleteObjects`
 **跟踪：** 上游 `minio/minio` issue #21735（报告者 iTrooz，2026-01-10）；上游仓库自 2026-04-25 起归档只读

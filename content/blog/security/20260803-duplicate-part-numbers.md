@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/duplicate-part-numbers/"
 ---
 
-**Status:** Fixed on the local `pgsty/minio` branch as `a0d073c5c`, **unreleased**
+**Status:** Fixed on the local `pgsty/minio` branch as `22c1e41fd`, **unreleased**
 **Classification:** Data correctness, **not a vulnerability** — see [Why this is not a CVE](#not-a-cve)
 **Affected scope:** All backends, any authenticated S3 client, on its own upload
 **Tracking:** `pgsty/minio` issue #49

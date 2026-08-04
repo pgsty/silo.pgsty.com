@@ -8,22 +8,20 @@ tags: [发布, pkg]
 weight: 5
 url: "/zh/blog/release/pkg-3.11.0/"
 aliases:
-  - /zh/blog/release/pkg-3.7.0/
   - /zh/blog/pkg-3.11.0/
   - /zh/releases/pkg-3.11.0/
 ---
 
 **发布日期：** 2026-08-04 · **版本：** [v3.11.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.11.0) · **提交：** [`d8b1fa7`](https://github.com/pgsty/silo-pkg/commit/d8b1fa7) · **仓库：** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
-这是本分支的**第一个定版**。它恢复了上游 [minio/minio#20449](https://github.com/minio/minio/issues/20449) 所报告的 IAM 桶/对象资源边界，并包含已撤回的 v3.7.0 标签中的全部内容：策略条件键绕过修复、三个 LDAP 连接缺陷、证书监听器泄漏、有种子 RNG 的缺陷，以及模块真实的最低 Go 版本。
+这是本分支的**第一个定版**。它恢复了上游 [minio/minio#20449](https://github.com/minio/minio/issues/20449) 所报告的 IAM 桶/对象资源边界：策略条件键绕过修复、三个 LDAP 连接缺陷、证书监听器泄漏、有种子 RNG 的缺陷，以及模块真实的最低 Go 版本。
 
-它同时**取代并替换了已被删除的 v3.7.0、v3.8.0、v3.8.1 三个标签**。在锁定依赖前请先阅读[版本号为何变更](#renumbering)。
 
 {{% alert color="warning" %}}
 **升级前需要确认两件事**
 
 1. **本版本收紧了鉴权。** 十二个桶级写操作不再能通过 `arn:aws:s3:::bucket/*` 这样的对象级资源模式被授权。如果你自己编写桶级策略，请阅读 [IAM 桶/对象边界](#bucket-boundary)——受影响者只需改一行策略，而 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` 可完整恢复原有行为。
-2. **条件键修复仍需服务端另一半。** 本版本的策略解析改动与服务端"保留内部条件键名"的改动各自覆盖问题的一半。服务端配套改动位于 `pgsty/minio` 提交 `1a6d5b415`，但尚未进入公开的 `origin/master`，也没有任何已发布的 Silo 服务端版本包含它。请确认后续服务端发布说明明确包含该改动。
+2. **条件键修复仍需服务端另一半。** 本版本的策略解析改动与服务端"保留内部条件键名"的改动各自覆盖问题的一半。服务端配套改动位于 `pgsty/minio` 提交 `2f55347f7`，但尚未进入公开的 `origin/master`，也没有任何已发布的 Silo 服务端版本包含它。请确认后续服务端发布说明明确包含该改动。
 {{% /alert %}}
 
 ## 这个仓库是什么 {#what-is-this}
@@ -38,19 +36,6 @@ replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.11.0
 
 `/v3` 后缀是模块的主版本号，不是目录名，不可省略。这也正是本次发布编号为 `v3.11.0` 而非 `v4.0.0` 的原因：Go 要求标签的主版本必须与 `go.mod` 中声明的主版本后缀一致，因此在一个 `.../v3` 模块上打 `v4.0.0` 会被工具链直接拒绝。真要发布 `v4`，就必须修改模块路径，并改写服务端、`mc` 与 Console 中约 395 处 import——那等于放弃"保留上游路径"所换来的直接替换能力，而这正是保持上游路径的意义所在。
 
-## 版本号为何变更 {#renumbering}
-
-此前的 `v3.7.0`、`v3.8.0`、`v3.8.1` 三个标签已**从 GitHub 删除**，本次发布改为跟随上游当前的版本线编号。
-
-原因是命名撞车，而不是那些标签所指向的代码有问题。上游 `minio/pkg` 仍在活跃维护，它自己也发布了 `v3.7.0`、`v3.8.0`、`v3.8.1`、`v3.9.x`、`v3.10.x` 与 `v3.11.0`——也就是说，本分支铸造的三个版本号与上游完全同名，内容却完全不同。对一个以供应链清晰度为价值的分支来说，这是很糟的性质；而且它并非理论风险：把上游的标签 fetch 进 `silo-pkg` 的克隆里，它们会在同一命名空间内直接按名字冲突。
-
-有两条结论值得记录下来，因为它们约束了"重新编号"这件事能做到什么程度。
-
-**删除标签并不能撤回一个版本。** `proxy.golang.org` 与 `sum.golang.org` 已经永久缓存了 `v3.7.0`、`v3.8.0`、`v3.8.1`。今天执行 `go get github.com/pgsty/silo-pkg/v3@v3.8.1` 仍然能够解析成功，将来也一样。删除标签只是移除了 GitHub 上的页面，仅此而已。已经锁定这些版本的用户不受影响，而读到这里的人仍应迁移到 `v3.11.0`。
-
-**一个版本号不能被复用于不同的内容。** 把 `v3.7.0` 重新打到当前代码树上的方案被考虑过并被否决：`sum.golang.org` 已经把该版本的哈希（`h1:kHVauRCzpd1xDJUw/R3iyOH2lcGH1EprwpGLz0Do+PE=`）与旧代码树绑定记录在案。移动标签会让所有开启校验和验证的构建报出 `SECURITY ERROR: checksum mismatch`——而这恰恰是供应链投毒表现出来的样子。一个退役的版本号，就让它永远退役。
-
-版本号跟随上游的线，是为了让运维大致看出某个发布对应上游的哪一代。这是**与"线"的对应，不是内容的等价**——实测差异见[与上游 v3.11.0 的差异](#divergence)。
 
 ## IAM 桶/对象边界 {#bucket-boundary}
 
@@ -85,12 +70,12 @@ if args.ObjectName != "" {
 
 **不再接受对象级授权的十二个动作：**
 
-| 动作 | 入选理由 |
-| :-- | :-- |
-| `PutBucketPolicy`、`DeleteBucketPolicy` | 能把访问权发给别的主体（包括匿名），也能给调用者自己补上从未授予的桶级动作。自我提权与公开暴露。 |
-| `PutBucketObjectLockConfiguration`、`PutBucketVersioning` | 击穿的恰恰是专门用来"防住有写权限的人销毁数据"的保护。 |
-| `PutReplicationConfiguration`、`PutLifecycleConfiguration` | 以服务端凭据运行，并在调用者权限被吊销后继续生效。 |
-| `DeleteBucket`、`ForceDeleteBucket` | 不可逆地销毁桶实体及其配置。上游 issue 的原始复现动作。 |
+| 动作                                                                            | 入选理由                                                                                        |
+|:------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------|
+| `PutBucketPolicy`、`DeleteBucketPolicy`                                        | 能把访问权发给别的主体（包括匿名），也能给调用者自己补上从未授予的桶级动作。自我提权与公开暴露。                                            |
+| `PutBucketObjectLockConfiguration`、`PutBucketVersioning`                      | 击穿的恰恰是专门用来"防住有写权限的人销毁数据"的保护。                                                                |
+| `PutReplicationConfiguration`、`PutLifecycleConfiguration`                     | 以服务端凭据运行，并在调用者权限被吊销后继续生效。                                                                   |
+| `DeleteBucket`、`ForceDeleteBucket`                                            | 不可逆地销毁桶实体及其配置。上游 issue 的原始复现动作。                                                             |
 | `PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration` | 在今天的服务端没有挂任何行为——要么根本没有 handler，要么 handler 在鉴权之后直接返回 `NotImplemented`。收走它们不影响任何能用的东西，并且提前覆盖。 |
 
 **刻意不予保护**，并且有测试对此做出断言——于是把其中任何一个加回去，都是一次带可见代价的明确决定，而不是往列表里添一行：
@@ -123,11 +108,11 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 
 这条性质是被验证的，不是被论证的。我们生成了一份 **27000 条鉴权判定**的语料——15 种资源模式 × 3 个桶 × 5 种对象名 × 20 个动作 × 6 种语句形式——分别在加固前基线与本版本上执行，并逐条比对：
 
-| 迁移方向 | 条数 |
-| :-- | --: |
+| 迁移方向               |    条数 |
+|:-------------------|------:|
 | `false → true`（变宽） | **0** |
-| `true → false`（收窄） | 144 |
-| 不变 | 26856 |
+| `true → false`（收窄） |   144 |
+| 不变                 | 26856 |
 
 那 144 条收窄全部落在设计意图之内，没有一条溢出：动作恰好是受保护的十二个；语句形式只有三种 `Allow`，`Deny`、`NotResource` 排除与 deny-`NotResource` 三种形式**零变化**；资源模式只有四种对象级模式；请求只有桶级请求，对象级请求完全未被触碰。12 × 4 × 3 = 144，严丝合缝。
 
@@ -191,19 +176,19 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 
 版本号跟随上游的线，不声称内容一致。以 `policy/` 下的动作字符串常量为口径，实测差异如下：
 
-| | 数量 |
-| :-- | --: |
+|                        |  数量 |
+|:-----------------------|----:|
 | 上游 `minio/pkg` v3.11.0 | 291 |
-| `silo-pkg` v3.11.0 | 270 |
+| `silo-pkg` v3.11.0     | 270 |
 
 **有 24 个动作只存在于上游：** 6 个 `s3:*ObjectAnnotation*`、5 个 `admin:` 动作（`DistJobStatus`、`Get`/`SetBucketCompression`、两个 `TablesReplication*`），以及 13 个覆盖函数 CRUD 与打标签的 `s3tables:` 动作。它们属于本分支刻意不采纳的 AIStor 词表，因为社区版服务端并不实现这些功能。
 
 **有 3 个动作在两侧名称不同。** 上游对它们做了改名与拆分，本分支保留较早的名称：
 
-| `silo-pkg` v3.11.0 | 上游 `minio/pkg` v3.11.0 |
-| :-- | :-- |
-| `s3tables:TagResource` | `s3tables:TagTable`、`s3tables:TagWarehouse` |
-| `s3tables:UntagResource` | `s3tables:UntagTable`、`s3tables:UntagWarehouse` |
+| `silo-pkg` v3.11.0             | 上游 `minio/pkg` v3.11.0                                      |
+|:-------------------------------|:------------------------------------------------------------|
+| `s3tables:TagResource`         | `s3tables:TagTable`、`s3tables:TagWarehouse`                 |
+| `s3tables:UntagResource`       | `s3tables:UntagTable`、`s3tables:UntagWarehouse`             |
 | `s3tables:ListTagsForResource` | `s3tables:ListTagsForTable`、`s3tables:ListTagsForWarehouse` |
 
 因此，一条写了这六个动作名之一的策略，在两者之间**只有一个**能通过校验。Silo 服务端、`mc` 与 Console 都没有引用它们，所以在本生态内没有影响；但从上游 v3.11.0 切换过来的消费者应当知道，动作词表并不可互换。

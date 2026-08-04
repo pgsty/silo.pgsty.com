@@ -1,9 +1,9 @@
 ---
 title: "SILO Console 2.0.0 发布"
 linkTitle: "silo-console 2.0.0 发布"
-date: 2026-08-03
+date: 2026-08-04
 author: "冯若航"
-description: "SILO Console 完成独立品牌、仓库与发布链路迁移，同时保留 Go 模块、环境变量、管理接口与 systemd 服务名等兼容契约。"
+description: "SILO Console 首个独立主版本：完成品牌与发布链路迁移，全面重塑登录页与控制台界面，嵌入资产从约 10MB 压缩到 3.5MB，清零已知依赖漏洞，并修复多处上游遗留缺陷。"
 tags: [发布, console]
 weight: 4
 url: "/zh/blog/release/console-2.0.0/"
@@ -11,11 +11,15 @@ aliases:
   - /blog/console-2.0.0/
   - /releases/console-2.0.0/
 ---
-**发布日期：** 2026-08-03 · **版本：** [v2.0.0](https://github.com/pgsty/silo-console/releases/tag/v2.0.0) · **仓库：** [pgsty/silo-console](https://github.com/pgsty/silo-console)
+**发布日期：** 2026-08-04 · **版本：** [v2.0.0](https://github.com/pgsty/silo-console/releases/tag/v2.0.0) · **仓库：** [pgsty/silo-console](https://github.com/pgsty/silo-console)
 
-SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发布的第一个主版本。它从 `georgmangold/console` 的 v1.9.1 维护线继续演进，正式建立 **SILO Console** 的产品名称、视觉系统、文档入口、源码归属和发布链路。
+SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发布的第一个主版本。它从 `georgmangold/console` 的 v1.9.1 维护线继续演进，完成了三件事：
 
-这次升级不只是替换 Logo。用户可见界面、帮助内容、授权与来源说明、命令行元数据、二进制与容器名称、软件包及发布资产都已经纳入 SILO 项目体系；与此同时，Go 模块路径、既有环境变量、协议字段和部分安装标识被有意保留，以避免一次品牌迁移演变成没有必要的接口破坏。
+1. **建立独立身份**——产品名称、视觉系统、文档入口、源码归属与发布链路全部迁移到 SILO 项目体系，同时刻意保留 Go 模块路径、环境变量等兼容契约；
+2. **重塑用户界面**——登录页、主题系统、仪表盘与全站细节按统一的设计语言重新打磨，配套全新的品牌图标集；
+3. **强化工程质量**——嵌入式前端资产从约 10MB 压缩到 3.5MB，已知依赖漏洞清零，并修复了包括运行时数据竞争在内的一批上游遗留缺陷。
+
+发布前，本版本经过了两轮独立审查：一轮完整的代码审查与提交历史重组，以及一轮对抗性复核（穷举资产校验、HTTP 语义探测、全站路由回归与发布产物冒烟测试）。
 
 {{% alert color="warning" %}}
 **升级前先看兼容边界**
@@ -29,31 +33,26 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 
 版本号从 v1.9.1 提升到 v2.0.0，主要是因为以下对外契约同时发生变化：
 
-- 产品名称从通用的 Console/旧品牌表述统一为 **SILO Console**；
-- 主仓库迁移到 [`pgsty/silo-console`](https://github.com/pgsty/silo-console)；
-- 正式发布二进制从 `console` 改为 `silo-console`；
-- 容器镜像迁移到 `ghcr.io/pgsty/silo-console`；
+- 产品名称统一为 **SILO Console**，主仓库迁移到 [`pgsty/silo-console`](https://github.com/pgsty/silo-console)；
+- 正式发布二进制从 `console` 改为 `silo-console`，容器镜像迁移到 `ghcr.io/pgsty/silo-console`；
 - 发布资产、校验和、软件包元数据、命令行说明与项目链接全部切换到 SILO；
 - 界面中的项目身份、帮助入口、版权归属、源代码供应与商标说明重新建立。
 
-这足以构成一个需要运维人员明确感知的主版本升级，但并不意味着对底层兼容接口进行一次机械式改名。2.0.0 采取的是“对外身份清晰、对内兼容克制”的迁移策略。
+2.0.0 采取的是"对外身份清晰、对内兼容克制"的迁移策略：需要运维人员明确感知，但不对底层兼容接口做机械式改名。
 
 ## 名称与交付契约 {#naming-and-delivery}
-
-本版本的主要名称映射如下：
 
 | 范围             | 旧名称或旧位置                           | 2.0.0 契约                                  |
 |:---------------|:----------------------------------|:------------------------------------------|
 | 产品             | Console / MinIO Console 的遗留表述     | **SILO Console**                          |
 | 源码仓库           | `georgmangold/console`            | `pgsty/silo-console`                      |
-| GoReleaser 项目名 | `console`                         | `silo-console`                            |
 | 正式二进制          | `console`                         | `silo-console`                            |
 | 容器镜像           | `ghcr.io/georgmangold/console`    | `ghcr.io/pgsty/silo-console`              |
 | 二进制资产          | `console-<os>-<arch>`             | `silo-console-<os>-<arch>`                |
 | 校验和文件          | `console_<version>_checksums.txt` | `silo-console_<version>_checksums.txt`    |
 | 网站与文档          | 上游或前维护者入口                         | `silo.pgsty.com` 与 `silo.pgsty.com/docs/` |
 
-命令行程序的作者、用途、帮助文本和项目描述也已经切换为 Pigsty 与 SILO Console。发行版中的可执行文件安装到 `/usr/local/bin/silo-console`，DEB/RPM 的厂商、维护者、主页、描述和许可证元数据相应更新。
+命令行程序的作者、用途、帮助文本和项目描述已切换为 Pigsty 与 SILO Console。DEB/RPM/APK 软件包的厂商、维护者、主页、描述与许可证元数据相应更新，可执行文件安装到 `/usr/local/bin/silo-console`。
 
 ## 刻意保留的兼容标识 {#retained-compatibility-contracts}
 
@@ -72,158 +71,151 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 
 因此，升级脚本不能简单执行全仓库或全配置的 `minio → silo`、`console → silo-console` 替换。未来若要迁移这些兼容接口，需要提供别名、弃用周期和明确的双读策略；2.0.0 不做这件事。
 
-## 视觉与界面重塑 {#visual-rebranding}
+## 全新界面 {#redesigned-interface}
 
-2.0.0 引入了统一的 SILO 徽标与字标组件，并把品牌重塑覆盖到控制台的完整用户旅程：
+2.0.0 不是换个 Logo 的品牌迁移，而是对整套界面的重新设计。
 
-- 登录页与 OIDC 回调页采用 SILO 视觉和社区项目说明；
-- 浏览器标题、页面描述、favicon、Apple Touch Icon、Android Icon、Web App Manifest 与 Safari Pinned Tab 全部更新；
-- 侧边栏、折叠菜单、加载状态、错误页、健康检查、性能测试和许可证页面使用统一的 SILO 标识；
-- 桶、对象、生命周期、复制、通知、存储分层、用户、策略、身份源、KMS、日志、诊断等界面的产品文案完成审阅；
-- 深色主题、窄屏布局和侧边栏折叠状态下的品牌呈现同步调整。
+### 登录页 {#login-page}
 
-这里的原则是只替换“产品是谁”的表达，不改写真正描述协议、配置或上游兼容性的技术名词。例如，MinIO-compatible Admin API、`minio` 类型枚举和继承代码中的 import path 仍然保留。
+登录页完全重写：左侧品牌面板以纯 Canvas 生成缓慢流动的正弦光网动画（零外部依赖，遵循 `prefers-reduced-motion`，切至后台标签页时暂停），文案以 "Keep the S3 Interface / Own the Object Store" 呈现项目主张，底部保留完整的 MinIO 商标声明；右侧表单功能与既有自动化测试选择器完全不变。SILO 字标所用的 Chakra Petch 字体以约 20KB 的本地子集打包，不产生任何外部网络请求。
 
-## 帮助、文档与社区入口 {#help-and-community}
+### 统一主题系统 {#theme-system}
 
-控制台内置帮助系统已经从旧项目入口迁移到 SILO 内容体系：
+控制台的全部颜色收敛到一个亮暗两套的主题层：中性灰阶承载正文与边框，品牌钢蓝色承载主操作与选中态，侧边栏在明暗模式下统一使用与登录页同源的深色系。表单控件与卡片采用统一的圆角与过渡，输入框获得键盘焦点光环，模态框有入场动画（同样遵循 reduced-motion）。服务端下发自定义样式（customStyles）的优先级保持不变。
 
-- 文档按钮、菜单链接和各功能页帮助链接统一指向 [SILO 文档](https://silo.pgsty.com/docs/)；
-- 帮助面板新增 SILO Blog 内容，从站点 RSS Feed 读取最新文章，并在网络不可用时使用本地回退内容；
-- Feed 中的跳转链接只接受 `https://silo.pgsty.com`，避免远端内容把用户导向未经声明的地址；
-- 视频页暂时保留对功能仍有参考价值的上游 MinIO 视频，并明确标注为上游兼容性资料；
-- 帮助面板的宽度与侧边栏状态联动，改善窄屏和折叠菜单下的阅读体验。
+### 控制台细节 {#console-polish}
 
-SILO Console 不是通用 S3 文件浏览器。桶和对象操作使用 S3 API，但集群配置、用户与策略、复制、健康检查、日志、诊断等管理功能还依赖 SILO 实现的 MinIO-compatible Admin API。
+- **仪表盘（Metrics）**：统计卡片按统一语法重构——弱化标签、等宽数字、状态圆点对齐；环形图与信息条接入主题；移除了上游实现中的绝对定位布局。
+- **空态统一**：Watch、Trace、桶事件/复制/生命周期等所有数据面板的占位文本统一为居中弱化样式，不再是左上角的裸文本。
+- **垂直选项卡**：桶详情等页面的选项卡从带边框的灰色矩阵改为安静的药丸列表，并消除了栏底的空白残留格。
+- **许可证页**：新增 VERSION 区，同时显示所连接服务端的版本与 Console 自身版本；无 `admin:ServerInfo` 权限的账号不会发起请求，该行自动隐藏。页面同时集中说明 AGPLv3 授权、AGPL 第 13 节下的源码获取权利、来源谱系与商标边界。
+- **一批交互修复**：移动端首次加载即收起侧边栏（原先要等窗口 resize 事件）；侧边栏底部导航不再在窗口高度变化时延迟跟随；桶列表手风琴的高亮条铺满整行；仪表盘在窄屏下不再产生隐式横向溢出；帮助面板改为真正的按需加载——登录页不再向任何外部站点发起请求。
 
-## 授权、来源与商标说明 {#license-attribution-trademark}
+### 品牌图标集 {#brand-icons}
 
-2.0.0 将授权与来源信息从附带文本提升为产品界面中的一等内容。许可证页面现在集中说明：
+favicon、PWA 与 Apple Touch 图标此前仍是上一代手绘徽标的 PNG 导出。2.0.0 将全部尺寸（ico 16+32、favicon 16/32/96、apple 180、manifest 192/512）从官方 `silo.svg` 矢量徽标重新光栅化，主屏尺寸带防裁切安全边距；Web App Manifest 裁剪为现代图标集，移除 2014 时代的 legacy density 条目。图标总体积从 473KB 降至 160KB，浏览器标签页图标从此与站内品牌完全一致。
 
-- SILO 服务端、客户端与 Console 均采用 AGPLv3；SILO Console 的 SPDX 口径为 `AGPL-3.0-or-later`；
-- 当前运行版本的 Console 源代码地址，以及 SILO 服务端、客户端、上游 MinIO 和前维护分支的来源关系；
-- AGPL 第 13 节下，网络用户获取对应源代码的权利；
-- SILO 贡献者、MinIO, Inc. 与历代 Console 维护者各自保留的版权；
-- 仓库中的 [`NOTICE`](https://github.com/pgsty/silo-console/blob/main/NOTICE) 与 [`CREDITS`](https://github.com/pgsty/silo-console/blob/main/CREDITS)；
-- MinIO 商标只用于说明代码来源和兼容性，SILO 与 SILO Console 并非 MinIO, Inc. 的产品，也未得到其关联、赞助或背书。
+## 更小、更快 {#smaller-and-faster}
 
-现有源文件中的上游版权头、依赖路径和归属声明被保留。这些内容是许可证合规与历史来源的一部分，不是需要清除的旧品牌残留。
+嵌入式交付是这套控制台的核心形态——前端资产通过 `go:embed` 打进二进制。2.0.0 对这条链路做了系统性优化：
 
-## 发布产物与平台矩阵 {#release-artifacts}
+- **嵌入负载从约 9.6MB 降至 3.5MB**。文本资产（JS/CSS/SVG 等）在构建期以确定性 gzip 预压缩后嵌入；仅被现代浏览器忽略的 legacy WOFF 字体（约 1.25MB）、以及一批完全未被引用的孤儿图片资产被移除。
+- **首屏传输从约 5.7MB 降至约 1.7MB**。此前静态资产完全未压缩传输；现在预压缩资产直接以 `Content-Encoding: gzip` 发出（零运行时压缩开销），对极少数不接受 gzip 的客户端动态解压回退。
+- **正确的 HTTP 语义**。Accept-Encoding 按 RFC 9110 完整解析 q 值（`gzip;q=0` 会得到未压缩内容），响应携带 `Vary: Accept-Encoding`；静态路径与 SPA 入口对非 GET/HEAD 请求返回 405 并带 `Allow` 头。
+- **可复现构建**。压缩使用纯 JS 实现（fflate）以保证跨平台字节级确定性；发布流水线新增强制门禁——在干净环境重建嵌入资产后必须与提交内容零差异。
 
-2.0.0 重新建立了 GoReleaser 交付配置。正式发布提供以下独立二进制：
+发布二进制（含全部前端资产、strip 后）约 35–40MB；对下游 SILO 服务端而言，内嵌这套控制台的体积代价从约 10MB 降到约 3.5MB。
 
-| 操作系统    | 架构                    |
-|:--------|:----------------------|
-| Linux   | `amd64`、`arm64`、`arm` |
-| macOS   | `amd64`、`arm64`       |
-| Windows | `amd64`               |
+## 安全与依赖 {#security-and-dependencies}
 
-Linux 同时生成 DEB 与 RPM 软件包；发布流水线将容器镜像推送到 `ghcr.io/pgsty/silo-console`，支持 `linux/amd64` 与 `linux/arm64`。OCI 镜像标签中记录项目名称、版本、提交、源码地址、厂商和 `AGPL-3.0-or-later` 许可证信息。发布核验时，镜像已经上传，但 `pgsty` 组织当前禁用了公开包可见性，因此匿名拉取仍不可用；这不影响 GitHub Release 中的二进制、校验和与 DEB/RPM 软件包。
+**Go 侧**：构建基线升级到 Go 1.26.5，`golang.org/x` 系列全部更新至最新。`govulncheck` 报告的全部可达漏洞已清零：
 
-发布二进制统一使用 `silo-console-<os>-<arch>` 命名，Windows 资产带 `.exe` 后缀，校验和文件使用 `silo-console_<version>_checksums.txt`。这套命名是 2.0.0 起供安装脚本和镜像编排使用的公开契约。
+| 依赖                                | 修复版本      | 公告                                            |
+|:----------------------------------|:----------|:----------------------------------------------|
+| `google.golang.org/grpc`          | v1.82.1   | GO-2026-6061                                  |
+| `github.com/prometheus/prometheus`| v0.311.3  | GO-2026-5710 / -5662 / -5381 / -5264（含远程读 DoS）|
+| `github.com/klauspost/compress`   | v1.18.7   | GO-2026-5841                                  |
+
+唯一剩余公告位于 `golang.org/x/crypto`，官方尚未发布修复且代码路径不可达，作为已知事项记录。
+
+**前端侧**：生产与开发依赖树的完整审计清零，包括 `form-data` 的高危 CRLF 注入、DOMPurify 与 qs 的多项公告；React Router 迁移至 7.18.2（保留 v6 兼容的声明式 API，全站路由经过完整回归验证）。唯一被显式豁免的公告仅涉及本项目未使用的 unstable API。
+
+**运行时正确性**：修复了 HTTP 日志目标在初始化与关闭之间的真实数据竞争，以及测试套件中共享 mock 的竞态；受支持的 Go 包全量通过 `-race` 检测。作为附带收益，`go-m1cpu` 升级修复了新版 macOS 上本地 `go run` 的 cgo 崩溃。
 
 ## 更新检查与默认网络行为 {#updates-and-network-behavior}
 
-本版本对升级和版本目录功能采取更保守的默认策略：
+本版本对升级和版本目录功能采取保守默认：
 
-- `silo-console update` 的实现暂时保留，但自动自更新被禁用；命令只给出提示，不会下载或替换当前二进制；
-- 运行者应通过 GitHub Release、DEB/RPM 或容器镜像执行显式升级，并自行保留回滚版本；
-- 版本目录新增 `SILO_RELEASE_SERVICE_HOST` 配置；原有 `RELEASE_SERVICE_HOST` 作为兼容回退继续有效；
-- 两个变量都未设置时，不再连接预置的远端版本服务，而是返回空目录；
-- 显式配置目录服务时，地址尾部斜杠会被规范化后再访问 `/releases`。
+- `silo-console update` 的自动自更新被禁用，命令只给出提示，不会下载或替换二进制；
+- 版本目录新增 `SILO_RELEASE_SERVICE_HOST` 配置，原有 `RELEASE_SERVICE_HOST` 作为兼容回退；两者均未设置时不连接任何远端版本服务；
+- 帮助面板的 Blog 内容仅在用户打开时按需拉取，跳转链接只接受 `https://silo.pgsty.com`。
 
-自动更新会在发布资产命名、校验、签名和回滚链路稳定后再重新评估。在此之前，禁用隐式下载比保留一个尚未重新建立信任链的更新通道更符合生产环境预期。
+自动更新会在发布资产签名与回滚链路稳定后再重新评估。
 
-## 前端构建与工程整理 {#frontend-and-engineering}
+## 发布产物与平台矩阵 {#release-artifacts}
 
-本轮同时重新生成了由 Go 后端嵌入的生产前端。仓库中旧的 CRA 风格 `asset-manifest/static` 构建结果被 Vite 的 `assets` 布局取代，因此提交中出现了大量带哈希静态文件的删除与新增；这主要是构建产物布局变化，并不代表数百个彼此独立的功能改写。
+正式发布包含 16 个资产：
 
-其他值得记录的工程调整包括：
+| 类型      | 覆盖范围                                           |
+|:--------|:-----------------------------------------------|
+| 独立二进制   | Linux `amd64/arm64/arm`、macOS `amd64/arm64`、Windows `amd64` |
+| 系统软件包   | DEB / RPM / APK × `amd64/arm64/armv6`          |
+| 校验和     | `silo-console_2.0.0_checksums.txt`（SHA-256）    |
 
-- 开发代理为 `/api` 启用 WebSocket 转发，保证本地开发与预览中的实时连接可用；
-- 移除不再使用的 `tinycolor2` 依赖并收敛锁文件；
-- 更新 Swagger 示例中的外部 OAuth 占位地址，避免继续引用旧品牌域名；
-- 将配置帮助链接切换到 SILO 文档；
-- 补充版本目录、禁用自动更新与发布资产命名相关的测试；
-- 将访问拒绝场景的测试期望与实际 HTTP `403` 语义对齐。
-
-完整重塑提交共涉及 413 个文件，其中 382 个位于 `web-app`；大部分文件数量来自前端品牌资源和重新生成的静态构建产物。
+容器镜像推送到 `ghcr.io/pgsty/silo-console`（`linux/amd64` 与 `linux/arm64`）。发布流水线在 tag 推送时触发，工作流的第三方 Action 已固定到具体提交，并在构建前强制执行"干净检出 + 资产重建零差异"门禁。
 
 ## 升级指南 {#upgrade-guide}
 
 ### 独立二进制 {#upgrade-binary}
-
-将安装脚本和服务启动命令中的正式可执行文件改为 `silo-console`。例如 Linux amd64：
 
 ```bash
 install -m 0755 silo-console-linux-amd64 /usr/local/bin/silo-console
 /usr/local/bin/silo-console server
 ```
 
-从源码构建时，`make console` 仍然生成 `./console`；用于正式 systemd 服务前，应按发布名称安装：
+从源码构建时，`make console` 仍生成 `./console`；用于正式服务前按发布名称安装。
 
-```bash
-make console
-install -m 0755 ./console /usr/local/bin/silo-console
-```
+### DEB/RPM/APK 与 systemd {#upgrade-packages}
 
-### DEB/RPM 与 systemd {#upgrade-packages}
-
-软件包继续安装 `/etc/systemd/system/minio-console.service`，但单元内部启动 `/usr/local/bin/silo-console`。`EnvironmentFile=/etc/default/console`、`console-user` 和既有 `CONSOLE_*` 变量不变。
-
-这个保留是为了让软件包升级继续作用于原有服务，而不是在同一台机器上平行创建一个新服务。手工安装仓库中的 `systemd/console.service` 时，服务名则是 `console.service`；请区分软件包升级与手工部署，不要同时启用两个单元。
+软件包继续安装 `/etc/systemd/system/minio-console.service`，单元内部启动 `/usr/local/bin/silo-console`。`EnvironmentFile=/etc/default/console`、`console-user` 与既有 `CONSOLE_*` 变量不变。这个保留让软件包升级继续作用于原有服务，而不是平行创建一个新服务。
 
 ### 容器 {#upgrade-container}
-
-将镜像引用切换为：
 
 ```bash
 docker pull ghcr.io/pgsty/silo-console:v2.0.0
 ```
 
-原有端口、挂载和 `CONSOLE_*` 环境变量可以继续使用。请在自己的编排系统中固定明确版本，不要把 `latest` 当作可回滚的版本标识。
+原有端口、挂载和 `CONSOLE_*` 环境变量继续可用。请固定明确版本，不要把 `latest` 当作可回滚标识。
 
 ### 配置与集成 {#upgrade-configuration}
 
 - 不要重命名 `CONSOLE_MINIO_SERVER` 或 `CONSOLE_MINIO_REGION`；
 - 不要修改 Go import 中的 `github.com/minio/console`；
-- 若使用自建版本目录，优先迁移到 `SILO_RELEASE_SERVICE_HOST`，旧的 `RELEASE_SERVICE_HOST` 仍可用；
-- 若脚本依赖 `console update`，改为显式下载、校验并部署发布资产；
-- 若监控或资产清单按进程路径识别服务，更新为 `/usr/local/bin/silo-console`；
-- 若镜像策略按仓库白名单放行，加入 `ghcr.io/pgsty/silo-console`。
+- 自建版本目录优先迁移到 `SILO_RELEASE_SERVICE_HOST`；
+- 依赖 `console update` 的脚本改为显式下载、校验并部署发布资产；
+- 按进程路径识别服务的监控更新为 `/usr/local/bin/silo-console`；
+- 镜像白名单加入 `ghcr.io/pgsty/silo-console`。
 
-本版本不改变对象数据布局，也不要求对存储桶和对象执行迁移。控制台连接的服务端仍需提供相应的 S3 与 MinIO-compatible Admin API。
+本版本不改变对象数据布局，也不要求对存储桶和对象执行迁移。
 
-## 验证范围 {#validation}
+## 双重审查与验证范围 {#review-and-validation}
 
-本轮变更在当前提交上完成了以下本地验证：
+2.0.0 在发布前经过两轮独立审查。第一轮完成了全量代码审查、缺陷修复与提交历史重组（13 个过程提交整理为 8 个逻辑提交），并执行了 Go 全包 `-race`、`go vet`、`golangci-lint`、`govulncheck`、前端类型检查、生产构建、Prettier、死代码检查与完整依赖审计。第二轮为对抗性复核，独立重跑核心门禁并补充：
 
-- Go 单元测试、格式检查和 `golangci-lint`；
-- TypeScript 类型检查、Vite 生产构建、Prettier 与未使用代码检查；
-- GoReleaser 配置检查与跨平台 snapshot 构建；
-- Linux DEB/RPM 的二进制路径、systemd 单元与配置文件引用检查；
-- 登录、对象浏览、帮助文档、Blog、视频说明、许可证页面、深色主题、窄屏与折叠菜单的浏览器检查；
-- SILO 帮助链接及页内锚点检查。
+- 对全部 184 个嵌入文件各发起 gzip 客户端、普通客户端与 HEAD 三种请求，响应体与嵌入源做逐一哈希比对；
+- RFC 语义探测（含 `gzip;q=0, *;q=0.5` 等组合 q 值）、方法限制、OIDC 回调与 SPA 深链；
+- React Router 7 全站路由回归：深链、客户端导航、桶详情选项卡切换与浏览器历史后退；
+- 移动端首屏侧边栏行为、登录页外部请求监听、明暗主题全站巡回；
+- 下载正式发布资产验证校验和逐字节匹配、二进制版本自报一致，并用发布产物直连真实服务端完成冒烟测试；
+- macOS 与 Linux 双平台的资产重建零差异验证。
 
-这些验证说明源码与本地发布产物能够按新的命名和打包契约构建和运行。`v2.0.0` 标签、GitHub Release、13 个上传资产、校验和文件以及资产摘要已经完成远端核验；多架构容器镜像也已由发布流水线成功推送。GHCR 的公开匿名拉取仍受上述组织可见性策略限制。
+改写前的完整历史保留在仓库的备份引用中，可随时回滚。
 
 ## 已知限制 {#known-limitations}
 
-- 自动自更新暂时禁用，升级需要由运维人员显式执行；
-- 默认不配置远端版本目录，因此相关列表可能为空；
-- 2.0.0 容器镜像已经上传，但在 `pgsty` 组织允许公开包并将该包切换为 Public 前，匿名拉取不可用；
+- 2.0.0 容器镜像已上传，但在 `pgsty` 组织将该包切换为 Public 前，匿名拉取不可用；GitHub Release 中的二进制、校验和与软件包不受影响；
+- 自动自更新暂时禁用，升级需要显式执行；
+- SSO 端到端测试套件依赖外部 OpenLDAP/Dex/MinIO 拓扑，本轮未在该环境中运行（OIDC 代码路径已由单元测试与 HTTP 层验证覆盖）；
+- `golang.org/x/crypto` 存在一条官方尚未发布修复、且代码路径不可达的公告；
 - SILO 尚未维护独立的视频资料库，帮助面板中的视频是明确标注的上游兼容性资料；
 - 管理能力依赖 MinIO-compatible Admin API，不能把 SILO Console 当作适用于任意 S3 服务的通用浏览器；
 - 保留的 Go 模块、环境变量、协议字段和 systemd 服务名仍会在代码、配置和进程管理界面中出现。
 
 ## 关联提交与链接 {#related-links}
 
-- [`8a0e348`](https://github.com/pgsty/silo-console/commit/8a0e348729c818287aab2476a3a659d50b4b1317)：rebrand console as SILO Console
-- [SILO Console 源代码](https://github.com/pgsty/silo-console)
-- [SILO Console Releases](https://github.com/pgsty/silo-console/releases)
-- [SILO 网站](https://silo.pgsty.com/zh/)
-- [SILO 文档](https://silo.pgsty.com/zh/docs/)
-- [授权说明](https://silo.pgsty.com/zh/about/license/)
-- [来源归属](https://silo.pgsty.com/zh/about/attribution/)
-- [商标说明](https://silo.pgsty.com/zh/about/trademark/)
+v2.0.0 的完整变更由以下 8 个逻辑提交构成：
+
+- [`50797de`](https://github.com/pgsty/silo-console/commit/50797de) — feat: establish SILO Console identity and compatibility
+- [`23ae6e8`](https://github.com/pgsty/silo-console/commit/23ae6e8) — feat: redesign and harden the SILO Console web app
+- [`7a83a77`](https://github.com/pgsty/silo-console/commit/7a83a77) — build: update Go toolchain and dependencies
+- [`1330d25`](https://github.com/pgsty/silo-console/commit/1330d25) — fix: eliminate logger shutdown and test mock races
+- [`06b3a34`](https://github.com/pgsty/silo-console/commit/06b3a34) — docs: publish the SILO Console v2.0.0 guide
+- [`4b24372`](https://github.com/pgsty/silo-console/commit/4b24372) — build: regenerate optimized embedded web assets
+- [`c38eb64`](https://github.com/pgsty/silo-console/commit/c38eb64) — ci: package and publish SILO Console v2 releases
+- [`b952a12`](https://github.com/pgsty/silo-console/commit/b952a12) — brand: regenerate the icon set from the official silo.svg emblem
+
+相关链接：
+
+- [SILO Console 源代码](https://github.com/pgsty/silo-console) · [Releases](https://github.com/pgsty/silo-console/releases)
+- [SILO 网站](https://silo.pgsty.com/zh/) · [文档](https://silo.pgsty.com/zh/docs/)
+- [授权说明](https://silo.pgsty.com/zh/about/license/) · [来源归属](https://silo.pgsty.com/zh/about/attribution/) · [商标说明](https://silo.pgsty.com/zh/about/trademark/)

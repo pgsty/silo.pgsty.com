@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/source-address-trust/"
 ---
 
-**状态：** 已合入 `pgsty/minio` `master`，提交 `7b47d3943`，**尚未发布**
+**状态：** 已合入 `pgsty/minio` `master`，提交 `fe6dc4780`，**尚未发布**
 **定级：** 可选加固 + 文档缺陷，**不是漏洞，也不是回归**；未申请 CVE。底层弱点继承自上游，本次未改变其默认行为
 **影响范围：** `aws:SourceIp` 策略条件、审计日志 `remotehost` 字段、S3 事件通知的 `Host`、`mc admin trace` 显示的客户端——凡是 S3 API 端口无需经过清洗请求头的代理即可抵达的部署
 **上游：** 无处可报——`minio/minio` 已归档。上游既有记录：[PR #4736](https://github.com/minio/minio/pull/4736)（2017，疑虑被提出并被半途解决）、[discussion #17878](https://github.com/minio/minio/discussions/17878)（2023，维护者标记为符合预期）、[PR #20977](https://github.com/minio/minio/pull/20977)（2025，那个只管一半的开关）
@@ -31,12 +31,12 @@ url: "/zh/blog/security/source-address-trust/"
 
 值来自同一个函数 `handlers.GetSourceIPFromHeaders`。把它的下游追一遍，问题的性质就从"日志细节"变成了"安全问题"：
 
-| 消费方 | 为什么要紧 |
-| :-- | :-- |
+| 消费方                                    | 为什么要紧                                |
+|:---------------------------------------|:-------------------------------------|
 | `aws:SourceIp`（`cmd/bucket-policy.go`） | 决定 `IpAddress` / `NotIpAddress` 策略条件 |
-| 审计 `remotehost` | 调查其它一切事故时所依据的那条记录 |
-| 事件通知 `Host` | 作为事实流向下游消费者 |
-| `mc admin trace` 客户端 | 运维实时观察"谁在做什么"的视图 |
+| 审计 `remotehost`                        | 调查其它一切事故时所依据的那条记录                    |
+| 事件通知 `Host`                            | 作为事实流向下游消费者                          |
+| `mc admin trace` 客户端                   | 运维实时观察"谁在做什么"的视图                     |
 
 其中两项在不同意义上与安全相关。伪造 `aws:SourceIp` 是活的访问控制绕过：本意把某个主体限制在办公网段的 `IpAddress` 条件，只要声称一个该网段内的地址就满足了；`NotIpAddress` 的拒绝规则，只要声称一个范围外的地址就规避了。伪造审计地址更安静，也可以说更糟——它是回溯性地污染记录，即使不存在任何基于 IP 的策略也照样成立，而且直到需要查日志的那天才会有人发现。
 
@@ -113,11 +113,11 @@ proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
 一个设置选定模式：
 
-| 模式 | `MINIO_API_TRUSTED_PROXIES` | 源地址 |
-| :-- | :-- | :-- |
-| 不设防（默认） | 未设置 | 与今天完全一致 |
-| 谁都不信 | `none` | 一律为 TCP peer |
-| 白名单 | 地址与 CIDR 块列表 | 采信转发头，但仅限名单内 peer |
+| 模式      | `MINIO_API_TRUSTED_PROXIES` | 源地址               |
+|:--------|:----------------------------|:------------------|
+| 不设防（默认） | 未设置                         | 与今天完全一致           |
+| 谁都不信    | `none`                      | 一律为 TCP peer      |
+| 白名单     | 地址与 CIDR 块列表                | 采信转发头，但仅限名单内 peer |
 
 白名单模式下，`X-Forwarded-For` 与 `Forwarded` 从右向左读，跨过名单内代理的条目，第一个剩下的地址胜出。每一跳代理都会追加它实际看到的 peer，所以客户端注入的条目一定位于其代理写入的条目**左侧**，走链在到达它之前就停住了。追加式代理由此变得安全。
 

@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/notify-keyspace-registration/"
 ---
 
-**Status:** Fixed on the local `pgsty/minio` branch as `cc78701a1`, **unreleased**
+**Status:** Fixed on the local `pgsty/minio` branch as `162ded343`, **unreleased**
 **Classification:** Configuration-schema consistency and availability, **not a vulnerability**; includes one defensive hardening (credential values no longer echoed in validation errors)
 **Affected scope:** `notify_nats` JWT/NKey/TLS-handshake-first options, `notify_amqp` `immediate`, and any pre-2020 config migrated with an enabled NATS target — whose failure then silences **every** notification backend
 **Tracking:** `pgsty/minio` issue #39
@@ -109,7 +109,7 @@ We considered changing this to per-subsystem isolation and **decided not to**, i
 
 ## The fix {#the-fix}
 
-About a hundred lines of production change, carried by nine hundred lines of tests (`cc78701a1`: 8 files, +1029/−7).
+About a hundred lines of production change, carried by nine hundred lines of tests (`162ded343`: 8 files, +1029/−7).
 
 **Registration.** All four keys enter their default KVS and help schema, placed where an operator would look for them (`user_credentials` beside `username`, `nkey_seed` after `token`, `tls_handshake_first` after `tls_skip_verify`, `immediate` beside `mandatory`). Registration is also what makes a key *visible*: all four now appear in `mc admin config get` output where they previously did not.
 

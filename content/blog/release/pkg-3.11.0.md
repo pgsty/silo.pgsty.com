@@ -8,24 +8,20 @@ tags: [Release, pkg]
 weight: 5
 url: "/blog/release/pkg-3.11.0/"
 aliases:
-  - /blog/release/pkg-3.7.0/
-  - /blog/pkg-3.7.0/
-  - /releases/pkg-3.7.0/
   - /blog/pkg-3.11.0/
   - /releases/pkg-3.11.0/
 ---
 
 **Release date:** 2026-08-04 · **Version:** [v3.11.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.11.0) · **Commit:** [`d8b1fa7`](https://github.com/pgsty/silo-pkg/commit/d8b1fa7) · **Repository:** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
-This is the fork's **first pinned release**. It restores the IAM bucket/object resource boundary reported as upstream [minio/minio#20449](https://github.com/minio/minio/issues/20449), and carries everything the withdrawn v3.7.0 tag contained: a policy condition-key bypass fix, three LDAP connection defects, a certificate watcher leak, a seeded-RNG defect, and the module's real minimum Go version.
+This is the fork's **first pinned release**. It restores the IAM bucket/object resource boundary reported as upstream [minio/minio#20449](https://github.com/minio/minio/issues/20449): a policy condition-key bypass fix, three LDAP connection defects, a certificate watcher leak, a seeded-RNG defect, and the module's real minimum Go version.
 
-It also **supersedes and replaces the v3.7.0, v3.8.0 and v3.8.1 tags**, which have been deleted. Read [Why the version numbers changed](#renumbering) before pinning.
 
 {{% alert color="warning" %}}
 **Two things to check before upgrading**
 
 1. **This release tightens authorization.** Twelve bucket-level write actions are no longer reachable through an object-only resource pattern such as `arn:aws:s3:::bucket/*`. If you write your own bucket-scoped policies, read [The IAM bucket/object boundary](#bucket-boundary) — the fix is one line of policy for anyone affected, and `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` restores the previous behaviour in full.
-2. **The condition-key fix still needs its server half.** The policy lookup change and the server changes that reserve internal condition-key names each cover one half of that problem. The companion server work exists in `pgsty/minio` commit `1a6d5b415` but is not yet on public `origin/master`, and no published Silo server release contains it. Verify that a later server release explicitly includes it.
+2. **The condition-key fix still needs its server half.** The policy lookup change and the server changes that reserve internal condition-key names each cover one half of that problem. The companion server work exists in `pgsty/minio` commit `2f55347f7` but is not yet on public `origin/master`, and no published Silo server release contains it. Verify that a later server release explicitly includes it.
 {{% /alert %}}
 
 ## What This Repository Is {#what-is-this}
@@ -39,20 +35,6 @@ replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.11.0
 ```
 
 The `/v3` suffix is the module's major version, not a directory name, and must not be omitted. It is also why this release is numbered `v3.11.0` rather than `v4.0.0`: Go requires the major version of a tag to match the major-version suffix declared in `go.mod`, so a `v4.0.0` tag on a `.../v3` module is rejected by the toolchain. Publishing a real `v4` would mean changing the module path and rewriting roughly 395 import sites across the server, `mc` and Console — abandoning the drop-in property that is the point of keeping upstream's path.
-
-## Why the Version Numbers Changed {#renumbering}
-
-The earlier `v3.7.0`, `v3.8.0` and `v3.8.1` tags have been **deleted from GitHub**, and this release is numbered to follow upstream's current line instead.
-
-The reason is a naming collision, not a defect in the code they pointed at. Upstream `minio/pkg` is alive and has itself published `v3.7.0`, `v3.8.0`, `v3.8.1`, `v3.9.x`, `v3.10.x` and `v3.11.0` — so the fork had minted three version numbers that upstream also uses, for entirely different content. That is a poor property for a fork whose value is supply-chain clarity, and it is not theoretical: fetching upstream's tags into a `silo-pkg` clone makes them collide by name in the same namespace.
-
-Two consequences are worth recording, because they constrain what a renumbering can do.
-
-**Deleting a tag does not withdraw a version.** `proxy.golang.org` and `sum.golang.org` have permanently cached `v3.7.0`, `v3.8.0` and `v3.8.1`. `go get github.com/pgsty/silo-pkg/v3@v3.8.1` still resolves today and will keep resolving. Deleting the tags removes the GitHub pages, nothing more. Anyone who pinned those versions is unaffected, and anyone reading this should still move to `v3.11.0`.
-
-**A version number cannot be reused for different content.** Retagging `v3.7.0` onto the current tree was considered and rejected: `sum.golang.org` has already recorded that version's hash (`h1:kHVauRCzpd1xDJUw/R3iyOH2lcGH1EprwpGLz0Do+PE=`) against the old tree. Moving the tag would make every checksum-verifying build fail with `SECURITY ERROR: checksum mismatch` — which is exactly how a supply-chain compromise presents. A retired version number stays retired.
-
-Version numbers follow upstream's line so operators can see roughly which upstream generation a release corresponds to. That is **correspondence to the line, not equivalence of content** — see [Divergence from upstream v3.11.0](#divergence) for the measured delta.
 
 ## The IAM Bucket/Object Boundary {#bucket-boundary}
 
@@ -87,12 +69,12 @@ That question is the right one because of how the defect fires. Resource matchin
 
 **Withheld from object-only grants (twelve actions):**
 
-| Action | Why it qualifies |
-| :-- | :-- |
-| `PutBucketPolicy`, `DeleteBucketPolicy` | Hand access to other principals, anonymous included, and can grant the caller bucket-level actions it was never given. Self-escalation and public exposure. |
-| `PutBucketObjectLockConfiguration`, `PutBucketVersioning` | Defeat protections that exist precisely to stop a holder of write access from destroying data. |
-| `PutReplicationConfiguration`, `PutLifecycleConfiguration` | Act under server credentials and keep acting after the caller's access is revoked. |
-| `DeleteBucket`, `ForceDeleteBucket` | Destroy the bucket entity and its configuration irreversibly. The reproduction in the upstream issue. |
+| Action                                                                           | Why it qualifies                                                                                                                                                                                         |
+|:---------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `PutBucketPolicy`, `DeleteBucketPolicy`                                          | Hand access to other principals, anonymous included, and can grant the caller bucket-level actions it was never given. Self-escalation and public exposure.                                              |
+| `PutBucketObjectLockConfiguration`, `PutBucketVersioning`                        | Defeat protections that exist precisely to stop a holder of write access from destroying data.                                                                                                           |
+| `PutReplicationConfiguration`, `PutLifecycleConfiguration`                       | Act under server credentials and keep acting after the caller's access is revoked.                                                                                                                       |
+| `DeleteBucket`, `ForceDeleteBucket`                                              | Destroy the bucket entity and its configuration irreversibly. The reproduction in the upstream issue.                                                                                                    |
 | `PutBucketCors`, `DeleteBucketCors`, `PutBucketQOS`, `PutInventoryConfiguration` | No server behaviour is attached to these today — no handler at all, or a handler that returns `NotImplemented` after the authorization check. Withholding them costs nothing and covers them in advance. |
 
 **Deliberately not withheld**, and asserted by a test so that adding one is a deliberate act with a visible cost rather than an edit to a list:
@@ -125,11 +107,11 @@ Two lessons are worth carrying forward. **A correctness fix in an authorization 
 
 The property is verified rather than argued. A decision corpus of **27,000 authorization outcomes** — 15 resource patterns × 3 buckets × 5 object names × 20 actions × 6 statement forms — was generated against both the pre-hardening baseline and this release and compared entry by entry:
 
-| Transition | Count |
-| :-- | --: |
-| `false → true` (broadening) | **0** |
-| `true → false` (narrowing) | 144 |
-| unchanged | 26,856 |
+| Transition                  |  Count |
+|:----------------------------|-------:|
+| `false → true` (broadening) |  **0** |
+| `true → false` (narrowing)  |    144 |
+| unchanged                   | 26,856 |
 
 Every one of the 144 narrowed outcomes falls inside the design intent, with nothing outside it: exactly the twelve protected actions; only the three `Allow` statement forms, with zero transitions for `Deny`, `NotResource`-excluded or deny-`NotResource` forms; only four object-only resource patterns; and only bucket-level requests, with object-level requests entirely untouched. 12 × 4 × 3 = 144, fully accounted for.
 
@@ -193,19 +175,19 @@ This release restores the upstream semantics: the two switches are **additive, n
 
 The version number follows upstream's line and makes no claim of identical content. The measured delta, comparing action-string constants across `policy/`:
 
-| | Count |
-| :-- | --: |
-| Upstream `minio/pkg` v3.11.0 | 291 |
-| `silo-pkg` v3.11.0 | 270 |
+|                              | Count |
+|:-----------------------------|------:|
+| Upstream `minio/pkg` v3.11.0 |   291 |
+| `silo-pkg` v3.11.0           |   270 |
 
 **24 actions exist only upstream:** six `s3:*ObjectAnnotation*` actions, five `admin:` actions (`DistJobStatus`, `Get`/`SetBucketCompression`, two `TablesReplication*`), and thirteen `s3tables:` actions covering function CRUD and tagging. These belong to the AIStor vocabulary this fork deliberately does not carry, because the community server does not implement them.
 
 **Three actions are named differently on each side.** Upstream renamed and split these; this fork retains the earlier names:
 
-| `silo-pkg` v3.11.0 | upstream `minio/pkg` v3.11.0 |
-| :-- | :-- |
-| `s3tables:TagResource` | `s3tables:TagTable`, `s3tables:TagWarehouse` |
-| `s3tables:UntagResource` | `s3tables:UntagTable`, `s3tables:UntagWarehouse` |
+| `silo-pkg` v3.11.0             | upstream `minio/pkg` v3.11.0                                 |
+|:-------------------------------|:-------------------------------------------------------------|
+| `s3tables:TagResource`         | `s3tables:TagTable`, `s3tables:TagWarehouse`                 |
+| `s3tables:UntagResource`       | `s3tables:UntagTable`, `s3tables:UntagWarehouse`             |
 | `s3tables:ListTagsForResource` | `s3tables:ListTagsForTable`, `s3tables:ListTagsForWarehouse` |
 
 A policy naming any of these six action strings therefore validates on exactly one of the two. Nothing in the Silo server, `mc` or Console references them, so there is no impact inside this ecosystem — but a consumer swapping upstream v3.11.0 for this release should know the vocabulary is not interchangeable.

@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/duplicate-part-numbers/"
 ---
 
-**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `a0d073c5c`，**尚未发布**
+**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `22c1e41fd`，**尚未发布**
 **定级：** 数据正确性问题，**不是漏洞**——见[为什么这不是 CVE](#not-a-cve)
 **影响范围：** 所有后端；任何已认证的 S3 客户端，作用于它自己的上传
 **跟踪：** `pgsty/minio` issue #49
