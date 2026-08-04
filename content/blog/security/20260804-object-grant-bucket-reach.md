@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/object-grant-bucket-reach/"
 ---
 
-**Status:** Fixed on `pgsty/silo-pkg` `main` (`3c24ad1`, extended by `1f97549`, scoped to its final twelve actions in `v3.8.1`), **released as `silo-pkg v3.8.1`**; consumed by `pgsty/minio`
+**Status:** Fixed on `pgsty/silo-pkg` `main` (`3c24ad1`, extended by `1f97549`, scoped to its final twelve actions in `d8b1fa7`), **released as `silo-pkg v3.11.0`**; consumed by `pgsty/minio`
 **Classification:** Access-control hardening — a privilege boundary, narrowly restored
 **Affected scope:** IAM users/roles/service accounts granted only object-scoped (`arn:aws:s3:::bucket/*`) access, in deployments that share a cluster across tenants
 **Tracking:** upstream `minio/minio` issue [#20449](https://github.com/minio/minio/issues/20449) (public since 2024, still open)
@@ -107,7 +107,7 @@ By that test, three groups fall out:
 
 **Deliberately not protected.** `PutBucketTagging`, `PutBucketEncryption`, and `PutBucketNotification` are bucket-level writes, and the first draft of this pass did protect them. They came back out. None of the three gives the caller access it does not already hold — the harm is to the owner's posture, not to the access boundary — while a tenant handed `s3:*` on `bucket/*` and told "this bucket is yours" may quite reasonably tag it, set default encryption, or wire up event notifications. Low security gain against a real compatibility cost is the wrong trade for a maintenance release. They keep the historical matching, and a test now asserts that they are unprotected, so putting any of them back is a deliberate act with a visible cost rather than an edit to a list.
 
-That leaves twelve actions, shipped as `silo-pkg v3.8.1`. Two older boundaries stand unchanged: **`CreateBucket`** keeps the historical matching (it targets a bucket that does not exist yet, and provisioning flows commonly create a tenant's bucket with that tenant's own credentials), and the **read/list family** still waits for the migration-gated change.
+That leaves twelve actions, shipped as `silo-pkg v3.11.0`. Two older boundaries stand unchanged: **`CreateBucket`** keeps the historical matching (it targets a bucket that does not exist yet, and provisioning flows commonly create a tenant's bucket with that tenant's own credentials), and the **read/list family** still waits for the migration-gated change.
 
 The choice of what to break, in other words, was made by asking *would an administrator ever write this on purpose* — not by ranking the actions by how dangerous they sound. The first question predicts which upgrades break; the second only sets urgency.
 
@@ -125,7 +125,7 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 
 `?` matches exactly one character. Against the historical nine-character `"mybucket/"` it does not match, so this statement never authorized the bucket-level write. Against the new eight-character `"mybucket"` it matches, so the hardening **granted** something the buggy matcher refused. Small in reach — you have to write a length-sensitive pattern — but it is precisely the class of defect the property was supposed to exclude, shipped in a release whose notes claimed the property held.
 
-The fix is not another special case. On the protected path the matcher now requires **both** forms to match: the bare bucket name *and* the historical `"bucket/"`. The result is an intersection with the historical decision, so it is monotone **by construction** — there is no pattern it can newly satisfy, and no argument to get wrong next time. `mybucket*` still grants (it matched both all along); `mybucket/*` is still withheld; `mybucke?` is refused exactly as it always was. That shipped as `silo-pkg v3.8.1`.
+The fix is not another special case. On the protected path the matcher now requires **both** forms to match: the bare bucket name *and* the historical `"bucket/"`. The result is an intersection with the historical decision, so it is monotone **by construction** — there is no pattern it can newly satisfy, and no argument to get wrong next time. `mybucket*` still grants (it matched both all along); `mybucket/*` is still withheld; `mybucke?` is refused exactly as it always was. That shipped as `silo-pkg v3.11.0`.
 
 Two things are worth taking from this beyond the patch itself. **A correctness fix in an authorization path must never make anything newly allowed** — and the only way to know is to test both directions, because the reasoning feels airtight in both cases where it wasn't. And when a security property is load-bearing, **build it out of an operation that cannot violate it** rather than out of a case analysis you believe is complete.
 
