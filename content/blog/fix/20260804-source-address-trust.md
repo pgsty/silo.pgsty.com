@@ -10,10 +10,10 @@ draft: false
 url: "/blog/security/source-address-trust/"
 ---
 
-**Status:** Fixed on the local `pgsty/minio` branch, **uncommitted and unreleased**
-**Classification:** Security hardening plus a documentation defect, **not a regression**; the underlying weakness is inherited from upstream and its default behaviour is unchanged here
+**Status:** Landed on `pgsty/minio` `master` as `7b47d3943`, **unreleased**
+**Classification:** Opt-in hardening plus a documentation defect, **not a vulnerability and not a regression**; no CVE assigned. The underlying weakness is inherited from upstream and its default behaviour is unchanged here
 **Affected scope:** `aws:SourceIp` policy conditions, the audit log `remotehost` field, S3 event notification `Host`, and the client shown by `mc admin trace` — on any deployment whose S3 API port is reachable without passing through a header-sanitising proxy
-**Tracking:** none upstream; `minio/minio` is archived
+**Upstream:** nothing to file — `minio/minio` is archived. Prior art there: [PR #4736](https://github.com/minio/minio/pull/4736) (2017, the concern raised and half-addressed), [discussion #17878](https://github.com/minio/minio/discussions/17878) (2023, maintainer marks it working as intended), [PR #20977](https://github.com/minio/minio/pull/20977) (2025, the partial switch)
 
 > This article states plainly that an `IpAddress` policy condition is not enforceable on a directly-reachable MinIO deployment, and that this remains true by default after the change. That is a property of upstream MinIO as shipped, not a defect introduced by the fork, and it has never been documented anywhere. Publishing it is the point.
 
@@ -68,6 +68,22 @@ Where did it come from? Upstream PR [minio/minio#20977](https://github.com/minio
 > Customer request to disable all XFF header handling, ping me in Slack for more details.
 
 No security rationale, no mention of `X-Real-IP` or `Forwarded`, no public discussion of why one header was gated and two were not. The narrowness is an oversight, not a considered scope. That mattered for the design, because it meant nobody had decided the other two should stay trusted — but as we will see, it did *not* end up justifying a change to the switch.
+
+### Upstream knew, in 2017 {#upstream-history}
+
+The most interesting thing found while writing this up is that none of it is news to upstream. The history is a small lesson in how a security decision decays.
+
+**August 2017.** `IpAddress` / `NotIpAddress` condition support is added in [PR #4736](https://github.com/minio/minio/pull/4736). During review the maintainer, @harshavardhana, raises exactly the concern this article is about: `X-Forwarded-For` is trivially spoofed, the left-most entry is the client's own, and using it for a security decision would let a malicious client reach objects. The contributor accepts it and **removes `X-Forwarded-For` support entirely**, leaving only `X-Real-IP`, on the stated reasoning that a proxy sets it and a client cannot manipulate it. Merged five days later.
+
+That reasoning is half right, and its unstated half is the whole problem: `X-Real-IP` is untamperable *only if the proxy in front overwrites it*. Nothing enforced that, and nothing told operators it was load-bearing.
+
+**Today.** `X-Forwarded-For` is read first, ahead of `X-Real-IP`. The 2017 decision did not survive; it dissolved across later refactors of the condition-value plumbing rather than being reversed on purpose. There is no commit that says "we are re-admitting the spoofable header into policy decisions" — which is precisely how this class of decay happens.
+
+**August 2023.** In [discussion #17878](https://github.com/minio/minio/discussions/17878) an operator reports that source IPs behind a load balancer are unreliable. The maintainer's answer is unambiguous: without reliable source-IP visibility, IP-based restrictions are impractical, and the recommendation is to compartmentalise by tag or namespace instead. Marked working as intended.
+
+So upstream's own position — stated by a maintainer, in public — is **do not rely on `aws:SourceIp`**. That is a defensible engineering stance. What is missing is anywhere an operator would encounter it: it is not in the policy documentation, not in the condition-key reference, and not near the setting that appears to make it safe. An `IpAddress` condition is accepted without complaint and behaves as though it works.
+
+That gap is the actual defect being fixed here, and it reframes the change. The allow-list is not overturning an upstream judgement; it is offering the mechanism that would make the 2017 concern answerable, to the deployments that want it. The documentation is doing the heavier lifting: writing down a contract that has been implicit since 2017 and contradicted by its own switch since 2025.
 
 ## Why "put it behind a proxy" is not the answer {#proxy-is-not-enough}
 
@@ -197,7 +213,7 @@ The change was deliberately structured so that risk is not spread evenly across 
 | Forwarder sanitises `X-Real-IP` / `Forwarded` | code path does not execute in default mode | none |
 | Startup failure on a malformed value | only those who set it, incorrectly | none |
 | Policy re-read after environment-file load | same result when nothing is set | none |
-| LDAP parser extracted for sharing | deployments that set `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES` — matching widened, see below | small, fail-closed direction only |
+| LDAP parser extracted for sharing | nobody — pure code motion, verified identical | none |
 | `_MINIO_API_XFF_HEADER` semantics | **nobody — reverted** | none |
 | `_MINIO_API_XFF_HEADER` read timing | **nobody — upstream timing kept deliberately** | none |
 
@@ -205,7 +221,11 @@ The change was deliberately structured so that risk is not spread evenly across 
 
 **A subtlety self-review caught.** The new setting is read after `MINIO_CONFIG_ENV_FILE` is loaded, which is what makes it work in packaged deployments. The obvious tidiness move is to read `_MINIO_API_XFF_HEADER` in the same place — and that would have been a behaviour change, because upstream reads it at package initialisation, *before* environment files exist. An operator who wrote it into an environment file has it silently ignored today; picking it up would make an already-deployed setting suddenly start working, flipping their source addresses from the left-most `X-Forwarded-For` entry to `X-Real-IP`. The old switch therefore keeps upstream's read timing along with upstream's semantics, and a test pins that so nobody tidies it later. The quirk is documented instead: set it in the process environment if you want it honoured.
 
-**The one place something did change for an existing setting.** Sharing the list parser with the LDAP STS allow-list widened what that allow-list matches, for deployments that set `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES`. Differential testing found 18 matching differences, all of the same kind: a peer arriving in IPv4-mapped form (`::ffff:10.0.0.1`) now matches a plain `10.0.0.1` entry, a zoned peer (`fe80::1%eth0`) now matches `fe80::/10`, and a mapped prefix now denotes the IPv4 prefix it spells. Each pair denotes the same host, so these are corrections rather than a loosening of intent — and the LDAP call path canonicalises its peer address before matching anyway, so the reachable behaviour is unchanged. One entry spelling the entire IPv4 space in mapped form (`::ffff:0:0/96`) is now rejected at startup rather than accepted and matching nothing. A mapped prefix shorter than `/96` denotes no IPv4 range at all; it is still accepted and still matches nothing, which is fail-closed and was left alone.
+**The defensive code that was not defending anything.** Sharing the parser initially came with two extras: allow-list entries written in IPv4-mapped form were rewritten to the IPv4 prefix they denote, and the address being matched was unmapped and de-zoned. Both looked like corrections — an entry written `::ffff:192.168.1.10` is otherwise accepted and then matches nothing, which is a silent failure worth removing.
+
+They were removed anyway, and the reason is worth recording. Both call paths reduce the address through `net.ParseIP(...).String()` before matching, and that already collapses `::ffff:10.0.0.1` to `10.0.0.1`; a dual-stack listener reports an IPv4 peer in plain form regardless. So neither extra could be reached by a real request. Their only observable effect was on what the *shared* function meant for the LDAP STS allow-list that had been using it first — 18 differences that a test could see by calling the function directly and no deployment could.
+
+Worse, one of them manufactured the fail-open described below: rewriting `::ffff:0:0/96` turned a `/96` into `0.0.0.0/0`. Deleting the rewrite removes the bug's cause rather than ordering around it. What remains is pure code motion, verified identical to the previous implementation across every combination of 37 allow-list values and 21 peer addresses — zero parse differences, zero match differences. The wart it declined to fix (a mapped-form entry matches nothing) is the pre-existing behaviour, fails closed, and is now stated in the function's own comment so the next person does not re-derive the same tempting fix.
 
 **The one residual risk worth naming.** The default mode's *code path* did change: there is now a switch and a function call in front of the original body. If that plumbing were wrong it would affect everyone, not just opt-in users. The parity testing above is why we believe it is not, but "verified equivalent over 21 cases" is a different claim from "provably identical", and the honest version is the former.
 
@@ -229,7 +249,9 @@ Two further defects were found while writing the documentation rather than the c
 
 Reworking the setting warranted a second adversarial pass, which was worth running: differential testing found **zero** behavioural differences against `HEAD` across 4,745,520 source-IP resolutions and 345,600 forwarder rewrites, but it also found three more ways to fail open — one of them introduced by the first round's own fix.
 
-**A catch-all smuggled in as an IPv4-mapped prefix.** `MINIO_API_TRUSTED_PROXIES=::ffff:0:0/96` is a `/96` as written, so it passed the catch-all check; the fix that unmaps IPv4-mapped entries then rewrote it to `0.0.0.0/0`, trusting every peer. The breadth check was simply running on the wrong side of the unmapping, and now runs after it. This one is worth dwelling on: it was created by a fix for an unrelated fail-*closed* bug, which is a reminder that hardening changes deserve the same adversarial treatment as the original.
+**A catch-all smuggled in as an IPv4-mapped prefix.** `MINIO_API_TRUSTED_PROXIES=::ffff:0:0/96` is a `/96` as written, so it passed the catch-all check; the rewrite that unmapped IPv4-mapped entries then turned it into `0.0.0.0/0`, trusting every peer. The first fix moved the breadth check to the far side of the rewrite. The eventual fix deleted the rewrite, once it became clear it was unreachable by any real request — which removes the cause instead of guarding its output.
+
+This is the one most worth dwelling on. The fail-open was manufactured by a fix for an unrelated fail-*closed* bug, and the fix for the fail-open was a reordering that left the manufacturing step in place. Two rounds of correction, both defensible, neither addressing the fact that the code should not have been there. Hardening changes deserve the same adversarial treatment as the code they harden, and "is this reachable at all?" belongs near the front of that treatment.
 
 **A deliberate value naming nobody.** `MINIO_API_TRUSTED_PROXIES=","` parsed to an empty list and fell back to the permissive default. An empty *unset* variable must mean "default", but a value the operator actually typed which names no proxy is a mistake, and answering it with trust-everyone is the one behaviour they cannot have wanted. It is now a startup error. Whitespace-only remains equivalent to unset, since that is what an empty shell variable expands to.
 
@@ -245,7 +267,7 @@ Both earlier passes attacked the resolver as a unit. Two things that neither cou
 
 Also corrected in this pass: the deployment contract was stated too narrowly. "The proxy must overwrite whichever headers it sets" misses the case that actually bites — a proxy that correctly authors only `X-Real-IP` or only `Forwarded` still relays the client's `X-Forwarded-For`, and that is the header read first. The general rule, now stated as such, is to strip every source-address header the proxy does not itself write.
 
-One reported finding was reviewed and **not** treated as a defect: `::ffff:0:0/97` unmaps to `0.0.0.0/1`, which is accepted. That is consistent — it is exactly what writing `0.0.0.0/1` directly does, and the documentation already states that only `/0` is rejected and that the check is a guardrail rather than a proof. Tightening it would mean rejecting broad-but-not-`/0` prefixes in the parser now shared with the LDAP allow-list, newly failing configurations that are valid today, to defend against a value no deployment realistically holds.
+One reported finding was reviewed and **not** treated as a defect: the catch-all guard rejects `/0` and nothing else, so `0.0.0.0/1,128.0.0.0/1` covers the same ground and is accepted. Tightening it would mean rejecting broad-but-not-`/0` prefixes in the parser now shared with the LDAP allow-list, newly failing configurations that are valid today, to defend against a value no deployment realistically holds. The documentation states plainly that the check is a guardrail rather than a proof, and the callout about naming proxies instead of subnets is where the real defence lives.
 
 ## Recommendations {#recommendations}
 
