@@ -27,6 +27,7 @@ silo_modified: true
 4. **阅读跨越的全部发布说明。** 特别关注格式、身份认证、配置和降级限制。
 5. **在低环境验证完全相同的升级。** 上生产前覆盖代表性的读写、策略、生命周期、复制、通知与恢复流程。
 6. **禁用继承的原地更新器。** 在服务端环境中设置 `MINIO_UPDATE=off`，并重启服务让配置生效。
+7. **检查桶级策略中的对象级资源。** 在导出的 IAM 配置里，查找那些把十二个桶级写动作之一（或 `s3:*`）授在含 `/` 的资源模式上、且同一个桶没有裸桶 ARN 的语句。这些语句不再授权那些动作。请在对象模式旁边补上裸桶 ARN，参见[存储桶资源与对象资源](/zh/administration/identity-access-management/policy-based-access-control/#bucket-and-object-resources)。内置策略以及任何使用 `arn:aws:s3:::*` 的语句都不受影响。
 
 {{% alert color="danger" %}}
 **不要对 Silo 使用 `mc admin update ALIAS`**

@@ -27,6 +27,7 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 4. **Read every intervening release note.** Pay particular attention to format, identity, configuration, and downgrade warnings.
 5. **Test the exact upgrade in a lower environment.** Exercise representative reads, writes, policies, lifecycle rules, replication, notifications, and recovery procedures before production.
 6. **Disable the inherited in-place updater.** Set `MINIO_UPDATE=off` in the server environment and restart the service so the setting takes effect.
+7. **Check bucket-scoped policies for object-only resources.** In the exported IAM configuration, look for statements that grant one of twelve bucket-level write actions — or `s3:*` — on a resource pattern containing `/`, with no bare bucket ARN for the same bucket. Those statements no longer authorize those actions. Add the bare ARN alongside the object pattern; see [Bucket and Object Resources](/administration/identity-access-management/policy-based-access-control/#bucket-and-object-resources). Built-in policies and any statement using `arn:aws:s3:::*` are unaffected.
 
 {{% alert color="danger" %}}
 **Do not use `mc admin update ALIAS` for Silo**

@@ -164,7 +164,36 @@ The maximum size for any single policy document is 20KiB. There is no limit to t
 - For the `Statement.Resource` key, specify the bucket or bucket prefix to which to restrict the policy. You can use `*` and `?` wildcard characters as per the [S3 Resource Spec](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-arn-format.html).
 
   The `*` wildcard may result in unintended application of a policy to multiple buckets or prefixes based on the [pattern match](/reference/minio-mc/#minio-wildcard-matching). For example, `arn:aws:s3:::data*` would match the buckets `data`, `data_private`, and `data_internal`. Specifying only `*` as the resource key applies the policy to all buckets and prefixes on the deployment.
+
+  An object pattern and a bucket ARN are **not** interchangeable. See [Bucket and Object Resources](#bucket-and-object-resources).
 - For the `Statement.Condition` key, you can specify one or more [supported Conditions](#minio-policy-conditions).
+
+### Bucket and Object Resources {#bucket-and-object-resources}
+
+A resource ARN either names a bucket or names objects within it, and the two forms authorize different operations:
+
+- `arn:aws:s3:::mybucket` names **the bucket itself**, and authorizes bucket-level operations such as `ListBucket` or `PutBucketPolicy`.
+- `arn:aws:s3:::mybucket/*` names **the objects in the bucket**, and authorizes object operations such as `GetObject` or `PutObject`.
+
+Grant both when a principal needs both, which is the conventional form for a policy that manages a bucket and its contents:
+
+```json
+"Resource": ["arn:aws:s3:::mybucket", "arn:aws:s3:::mybucket/*"]
+```
+
+{{% alert color="warning" %}}
+**Twelve bucket-level writes require the bucket ARN**
+
+An object-only pattern such as `arn:aws:s3:::mybucket/*` does **not** authorize the following actions, even when the statement grants `s3:*`:
+
+`PutBucketPolicy`, `DeleteBucketPolicy`, `PutBucketObjectLockConfiguration`, `PutBucketVersioning`, `PutReplicationConfiguration`, `PutLifecycleConfiguration`, `DeleteBucket`, `ForceDeleteBucket`, `PutBucketCors`, `DeleteBucketCors`, `PutBucketQOS`, `PutInventoryConfiguration`
+
+Each of these hands the caller something an object-scoped grant does not otherwise provide — access for other principals, defeat of a protection aimed at write-holders, activity that outlives the grant, or destruction of the bucket entity. Add the bare bucket ARN alongside the object pattern to grant them.
+
+Earlier releases authorized these through the object pattern as well, because a bucket-level request was matched against the string `mybucket/`, which `mybucket/*` also matches. That was an over-grant; see upstream [minio/minio#20449](https://github.com/minio/minio/issues/20449). Set [`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`](/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH) to `on` to restore the previous behaviour while you adjust policies.
+{{% /alert %}}
+
+Everything else is unchanged. `ListBucket`, `GetBucketLocation`, the bucket configuration *reads*, and `CreateBucket` are still authorized through an object pattern, so listing and provisioning flows written that way keep working. `Deny` statements and `NotResource` exclusions match as they always did, so no restriction written against `mybucket/*` is weakened. The built-in `readwrite`, `readonly`, `writeonly` and `diagnostics` policies use `arn:aws:s3:::*` and are unaffected.
 
 <a id="minio-policy-actions"></a>
 

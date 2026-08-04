@@ -164,7 +164,36 @@ MinIO 策略文档使用与 [AWS IAM Policy](https://docs.aws.amazon.com/IAM/lat
 - 对于 `Statement.Resource` 键，指定要对策略进行限制的存储桶或存储桶前缀。 可以按照 [S3 Resource Spec](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-arn-format.html) 使用 `*` 和 `?` 通配符。
 
   `*` 通配符可能会基于 [模式匹配](/zh/reference/minio-mc/#minio-wildcard-matching)，导致策略被意外应用到多个存储桶或前缀。 例如，`arn:aws:s3:::data*` 会匹配存储桶 `data`、`data_private` 和 `data_internal`。 如果资源键仅指定 `*`，则该策略会应用到部署上的所有存储桶和前缀。
+
+  对象模式与存储桶 ARN **不可互换**，参见[存储桶资源与对象资源](#bucket-and-object-resources)。
 - 对于 `Statement.Condition` 键，可以指定一个或多个 [受支持的 Conditions](#minio-policy-conditions)。
+
+### 存储桶资源与对象资源 {#bucket-and-object-resources}
+
+一个资源 ARN 要么指代存储桶本身，要么指代桶内的对象，两种形式授权的是不同的操作：
+
+- `arn:aws:s3:::mybucket` 指代**存储桶本身**，授权 `ListBucket`、`PutBucketPolicy` 这类桶级操作。
+- `arn:aws:s3:::mybucket/*` 指代**桶内的对象**，授权 `GetObject`、`PutObject` 这类对象操作。
+
+当一个主体两者都需要时，就把两者都授予——这也是"既管理存储桶、又管理其内容"的策略的惯例写法：
+
+```json
+"Resource": ["arn:aws:s3:::mybucket", "arn:aws:s3:::mybucket/*"]
+```
+
+{{% alert color="warning" %}}
+**十二个桶级写操作需要存储桶 ARN**
+
+`arn:aws:s3:::mybucket/*` 这样的对象级模式**不会**授权以下动作，即使语句授予的是 `s3:*`：
+
+`PutBucketPolicy`、`DeleteBucketPolicy`、`PutBucketObjectLockConfiguration`、`PutBucketVersioning`、`PutReplicationConfiguration`、`PutLifecycleConfiguration`、`DeleteBucket`、`ForceDeleteBucket`、`PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration`
+
+这些动作中的每一个，都能让调用者拿到对象级授权本来给不了的东西——把访问权发给别的主体、击穿专门针对写权限持有者的保护、在授权被吊销后仍持续生效，或者销毁存储桶实体本身。要授予它们，请在对象模式旁边补上裸的存储桶 ARN。
+
+早期版本也会通过对象模式授权这些动作，因为桶级请求被拿去与字符串 `mybucket/` 匹配，而 `mybucket/*` 同样命中它。那是一种过度授予，参见上游 [minio/minio#20449](https://github.com/minio/minio/issues/20449)。在调整策略期间，可将 [`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`](/zh/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH) 设为 `on` 恢复此前的行为。
+{{% /alert %}}
+
+其余行为一律不变。`ListBucket`、`GetBucketLocation`、各类存储桶配置**读取**以及 `CreateBucket` 仍然可以通过对象模式获得授权，因此按这种写法配置的列举与供应流程照常工作。`Deny` 语句与 `NotResource` 排除的匹配方式一如既往，所以任何写在 `mybucket/*` 上的限制都不会被削弱。内置的 `readwrite`、`readonly`、`writeonly`、`diagnostics` 策略使用 `arn:aws:s3:::*`，不受影响。
 
 <a id="minio-policy-actions"></a>
 

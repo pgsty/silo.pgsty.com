@@ -394,3 +394,59 @@ MinIO versions from ```RELEASE.2023-08-04T17-40-21Z``to ``RELEASE.2024-03-26T22-
 Arbitrarily high versions per objects may cause performance degradation on some operations, such as `LIST`. This is especially true on systems running budget hardware or spinning drives (HDD). Applications or workloads which produce thousands or more versions per object may require design or architecture review to mitigate potential performance degradations.
 
 Setting a limit of no more than `100` should provide enough versions for most typical use cases.
+
+## Client Source Address Trust {#client-source-address-trust}
+
+{{< tabpane text=true persist=header >}}
+{{% tab header="Environment Variable" %}}
+#### `MINIO_API_TRUSTED_PROXIES` {#envvar.MINIO_API_TRUSTED_PROXIES}
+
+*envvar*
+
+Specifies which peers may tell the server where a request came from.
+
+By default MinIO believes the `X-Forwarded-For`, `X-Real-IP` and RFC 7239 `Forwarded` headers from any peer, so a client with direct network access to the API port can set its own apparent source address. That address feeds `aws:SourceIp` policy conditions, the audit log `remotehost` field, and event notification `Host` fields.
+
+Set this to a comma-separated list of addresses or CIDR blocks to believe forwarded headers **only** from those peers. The forwarding chain is then read right to left past listed hops, which also discards the client-supplied left-most entry that an appending proxy leaves in place — the stock nginx `$proxy_add_x_forwarded_for` recipe and HAProxy's added second header line both produce one.
+
+Set this to `none` to believe no forwarding header at all and always use the peer address.
+
+{{% alert color="info" %}}
+**Note**
+
+Unset is the default and preserves the historical behaviour, so this setting is inert until you configure it.
+
+List **the proxies themselves, not the subnet they sit in.** Listed entries are skipped while walking the chain, so a range that also covers clients lets those clients forge. Multi-node deployments must include their own node addresses, because MinIO forwards some requests between nodes. Loopback is always trusted as a peer so FTP and SFTP keep attributing their sessions. A malformed value, or one that names no proxy at all, stops startup.
+{{% /alert %}}
+
+If you use `IpAddress` or `NotIpAddress` policy conditions, they are not enforceable until this setting names your proxies, or the deployment is otherwise unreachable except through them.
+{{% /tab %}}
+{{% tab header="Configuration Setting" %}}
+This setting does not have a configuration setting option.
+{{% /tab %}}
+{{< /tabpane >}}
+
+## Legacy Bucket Resource Matching {#legacy-bucket-resource-matching}
+
+{{< tabpane text=true persist=header >}}
+{{% tab header="Environment Variable" %}}
+#### `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH` {#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH}
+
+*envvar*
+
+Set to `on` to restore the historical matching of IAM policy resources for bucket-level requests.
+
+By default, twelve bucket-level write actions are not authorized through an object-only resource pattern such as `arn:aws:s3:::mybucket/*`. See [Bucket and Object Resources](/administration/identity-access-management/policy-based-access-control/#bucket-and-object-resources) for the action list and for the policy change that grants them properly.
+
+Setting this to `on` returns to matching bucket-level requests against the string `mybucket/`, which an object pattern also matches. It is read once at startup and is intended as a temporary measure while stored policies are updated.
+
+{{% alert color="warning" %}}
+**This restores an over-grant**
+
+The historical matching is what allowed a principal holding only `s3:*` on `arn:aws:s3:::mybucket/*` to rewrite the bucket policy — including making the bucket public — or to delete the bucket. The switch is all-or-nothing: enabling it for one action reopens all twelve.
+{{% /alert %}}
+{{% /tab %}}
+{{% tab header="Configuration Setting" %}}
+This setting does not have a configuration setting option.
+{{% /tab %}}
+{{< /tabpane >}}

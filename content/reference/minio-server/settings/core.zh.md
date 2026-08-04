@@ -398,3 +398,59 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 为对象设置任意高的版本数可能导致某些操作（如 `LIST`）性能下降。 在使用低成本硬件或机械硬盘（HDD）的系统上，这一点尤为明显。 对于每个对象会生成数千个或更多版本的应用或工作负载，可能需要进行设计或架构评审，以缓解潜在的性能下降。
 
 将上限设置为不超过 `100`，通常可满足大多数常见使用场景。
+
+## 客户端源地址信任 {#client-source-address-trust}
+
+{{< tabpane text=true persist=header >}}
+{{% tab header="环境变量" %}}
+#### `MINIO_API_TRUSTED_PROXIES` {#envvar.MINIO_API_TRUSTED_PROXIES}
+
+*envvar*
+
+指定哪些对端有资格告诉服务器"请求来自哪里"。
+
+默认情况下，MinIO 会采信来自任何对端的 `X-Forwarded-For`、`X-Real-IP` 与 RFC 7239 `Forwarded` 头，因此一个能直接连到 API 端口的客户端可以自行设定它表面上的源地址。该地址会流入 `aws:SourceIp` 策略条件、审计日志的 `remotehost` 字段，以及事件通知的 `Host` 字段。
+
+将其设为以逗号分隔的地址或 CIDR 列表，则**只**采信名单内对端送来的转发头。此时转发链会从右向左、跳过名单内的跳数来解析，这也会丢弃"追加型代理"在链首留下的、由客户端自己提供的那一项——nginx 默认的 `$proxy_add_x_forwarded_for` 写法与 HAProxy 追加的第二行头都会产生这一项。
+
+将其设为 `none`，则完全不采信任何转发头，始终使用对端地址。
+
+{{% alert color="info" %}}
+**说明**
+
+不设置是默认值，保持历史行为，因此在你主动配置之前该设置完全惰性。
+
+要列出**代理本身，而不是它们所在的网段**。名单内的条目在遍历转发链时会被跳过，因此一个同时覆盖了客户端的网段，等于让那些客户端可以伪造。多节点部署必须把自己各节点的地址也列进去，因为 MinIO 会在节点之间转发部分请求。回环地址始终被视为可信对端，以便 FTP 与 SFTP 能正确归属其会话。取值格式错误、或没有指向任何代理，都会阻止启动。
+{{% /alert %}}
+
+如果你使用 `IpAddress` 或 `NotIpAddress` 策略条件，那么在此设置指明你的代理之前（或部署本身除代理外不可达之前），这些条件是无法强制执行的。
+{{% /tab %}}
+{{% tab header="配置项" %}}
+此设置没有对应的配置项。
+{{% /tab %}}
+{{< /tabpane >}}
+
+## 旧版存储桶资源匹配 {#legacy-bucket-resource-matching}
+
+{{< tabpane text=true persist=header >}}
+{{% tab header="环境变量" %}}
+#### `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH` {#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH}
+
+*envvar*
+
+设为 `on` 可恢复桶级请求在 IAM 策略资源匹配上的历史行为。
+
+默认情况下，有十二个桶级写操作不再能通过 `arn:aws:s3:::mybucket/*` 这样的对象级资源模式获得授权。动作清单以及正确授予它们的策略改法，见[存储桶资源与对象资源](/zh/administration/identity-access-management/policy-based-access-control/#bucket-and-object-resources)。
+
+设为 `on` 会回到"把桶级请求与字符串 `mybucket/` 相匹配"的做法，而对象模式同样命中该字符串。该值在启动时读取一次，仅用作更新存量策略期间的临时手段。
+
+{{% alert color="warning" %}}
+**这会恢复一处过度授予**
+
+正是这种历史匹配方式，让一个只持有 `arn:aws:s3:::mybucket/*` 上 `s3:*` 的主体能够改写桶策略（包括把桶变为公开），或者直接删除该桶。这个开关是全有全无的：为了一个动作打开它，会把十二个动作一并放开。
+{{% /alert %}}
+{{% /tab %}}
+{{% tab header="配置项" %}}
+此设置没有对应的配置项。
+{{% /tab %}}
+{{< /tabpane >}}
