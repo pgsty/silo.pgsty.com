@@ -1,12 +1,16 @@
 {{/* Docsy's last-modified block, followed by the per-page origin attribution. */ -}}
 {{ if and .GitInfo .Site.Params.github_repo -}}
 <div class="td-page-meta__lastmod">
-  {{ T "post_last_mod" }} {{ .Lastmod.Format .Site.Params.time_format_default -}}
+  {{/* 统一 ISO 日期（YYYY-MM-DD）；样式与下方来源说明行一致（图标列对齐）。 */ -}}
+  <span class="silo-origin__icon"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i></span>
+  <span>
+  {{- T "post_last_mod" }}{{ if eq .Site.Language.Lang "zh" }}：{{ else }}: {{ end }}{{ .Lastmod.Format "2006-01-02" -}}
   {{ with .GitInfo }}: {{/* Trim WS */ -}}
     <a data-proofer-ignore href="{{ $.Site.Params.github_repo }}/commit/{{ .Hash }}">
       {{- .Subject }} ({{ .AbbreviatedHash }}) {{- /* Trim WS */ -}}
     </a>
-  {{- end }}
+  {{- end -}}
+  </span>
 </div>
 {{ end -}}
 {{ partial "page-origin-notice.html" . -}}

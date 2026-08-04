@@ -41,6 +41,12 @@
   {{ end -}}
 {{ end -}}
 
+{{/* blog 语境但不在 /blog/ 树内的页面（如 /tags/ 索引页）：树根兜底到博客根，
+     避免退化为站点全树。 */ -}}
+{{ if and (eq .Type "blog") (eq $sidebarRoot .Site.Home) -}}
+  {{ with .Site.GetPage "/blog" }}{{ $sidebarRoot = . }}{{ end -}}
+{{ end -}}
+
 {{ $sidebarRootID := $sidebarRoot.RelPermalink -}}
 {{ $args := dict
     "context" .
@@ -54,13 +60,12 @@
   <script>
     $(function() {
     $("#td-section-nav a").removeClass("active");
-    $("#td-section-nav #{{ $mid }}").addClass("active");
-    $("#td-section-nav #{{ $mid }}-li span").addClass("td-sidebar-nav-active-item");
-    $("#td-section-nav #{{ $mid }}").parents("li").addClass("active-path");
-    $("#td-section-nav li.active-path").addClass("show");
+    $("#td-section-nav .silo-tree__row").removeClass("silo-active");
+    var $link = $("#td-section-nav #{{ $mid }}");
+    $link.addClass("active").attr("aria-current", "page");
+    $link.closest(".silo-tree__row").addClass("silo-active");
+    $link.parents("li").addClass("active-path");
     $("#td-section-nav li.active-path").children("input").prop('checked', true);
-    $("#td-section-nav #{{ $mid }}-li").siblings("li").addClass("show");
-    $("#td-section-nav #{{ $mid }}-li").children("ul").children("li").addClass("show");
     $("#td-sidebar-menu").toggleClass("d-none");
     });
   </script>

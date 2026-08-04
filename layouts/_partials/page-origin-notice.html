@@ -1,5 +1,7 @@
 {{/* Per-page attribution for content derived from the MinIO documentation.
-     Driven by the `minio_origin` and `silo_modified` front matter fields. */ -}}
+     Driven by the `minio_origin` and `silo_modified` front matter fields.
+     四类补充信息行（与上方「最后修改」行同款样式，图标对齐、每行等长克制）：
+       (C) MinIO 版权来源  (M) 已被 Silo 修改  (A) 翻译声明（仅 zh） */ -}}
 {{ if .Params.minio_origin -}}
 {{ $zh := eq .Site.Language.Lang "zh" -}}
 {{ $license := "https://creativecommons.org/licenses/by/4.0/" -}}
@@ -12,33 +14,31 @@
 {{ end -}}
 <div class="silo-page-origin">
   <p>
-    <i class="fa-solid fa-copyright fa-fw"></i>
+    <span class="silo-origin__icon"><i class="fa-solid fa-copyright" aria-hidden="true"></i></span>
     {{ if $zh -}}
-      本页部分内容改编自 <a href="{{ $upstream }}" target="_blank" rel="noopener">MinIO 对象存储文档</a>，&copy;&nbsp;2020&ndash;至今 MinIO,&nbsp;Inc.，依据 <a href="{{ $license }}" target="_blank" rel="noopener">CC&nbsp;BY&nbsp;4.0</a> 授权，由 Silo 项目转换与维护。<a href="{{ $attribution }}">归属与署名</a>
+      本页部分内容改编自 <a href="{{ $upstream }}" target="_blank" rel="noopener">minio/docs</a>，&copy;&nbsp;2020&ndash;至今 <a href="https://min.io/" target="_blank" rel="noopener">MinIO,&nbsp;Inc.</a> 依 <a href="{{ $license }}" target="_blank" rel="noopener">CC&nbsp;BY&nbsp;4.0</a> 授权改编，<a href="{{ $attribution }}">归属与署名</a>见此。
     {{- else -}}
-      Portions of this page are adapted from the <a href="{{ $upstream }}" target="_blank" rel="noopener">MinIO Object Storage Documentation</a>, &copy;&nbsp;2020&ndash;Present MinIO,&nbsp;Inc., licensed under <a href="{{ $license }}" target="_blank" rel="noopener">CC&nbsp;BY&nbsp;4.0</a>, converted and maintained by the Silo project. <a href="{{ $attribution }}">Attribution</a>
+      Portions adapted from <a href="{{ $upstream }}" target="_blank" rel="noopener">minio/docs</a>, &copy;&nbsp;2020&ndash;Present <a href="https://min.io/" target="_blank" rel="noopener">MinIO,&nbsp;Inc.</a> Licensed under <a href="{{ $license }}" target="_blank" rel="noopener">CC&nbsp;BY&nbsp;4.0</a> &mdash; see <a href="{{ $attribution }}">Attribution</a>.
     {{- end }}
   </p>
+  {{ if .Params.silo_modified -}}
+  <p>
+    <span class="silo-origin__icon"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></span>
+    {{ if $zh -}}
+      本页内容已由 Silo 项目修改，{{ with $history }}<a href="{{ . }}" target="_blank" rel="noopener">查看修改历史</a>{{ else }}详见仓库提交记录{{ end }}。
+    {{- else -}}
+      This page was modified by the Silo project{{ with $history }} — <a href="{{ . }}" target="_blank" rel="noopener">view the change history</a>{{ end }}.
+    {{- end }}
+  </p>
+  {{ end -}}
   {{ if $zh -}}
   {{ $en := "" -}}
   {{ range .AllTranslations -}}
     {{ if eq .Language.Lang "en" }}{{ $en = .RelPermalink }}{{ end -}}
   {{ end -}}
   <p>
-    <i class="fa-solid fa-language fa-fw"></i>
-    本页为非官方中文翻译。如与
-    {{- with $en }}<a href="{{ . }}">英文原文</a>{{ else }}英文原文{{ end -}}
-    有出入，以英文原文为准。
-  </p>
-  {{ end -}}
-  {{ if .Params.silo_modified -}}
-  <p>
-    <i class="fa-solid fa-code-branch fa-fw"></i>
-    {{ if $zh -}}
-      本页内容已由 Silo 项目修改。{{ with $history }}<a href="{{ . }}" target="_blank" rel="noopener">查看本页修改历史</a>{{ end }}
-    {{- else -}}
-      This page has been modified by the Silo project. {{ with $history }}<a href="{{ . }}" target="_blank" rel="noopener">View the change history for this page</a>{{ end }}
-    {{- end }}
+    <span class="silo-origin__icon">{{ partialCached "silo/icon.html" "languages" "languages" }}</span>
+    本页由英文文档翻译而来，权威版本请参考{{ with $en }}<a href="{{ . }}">英文原文</a>{{ else }}英文原文{{ end }}。
   </p>
   {{ end -}}
 </div>

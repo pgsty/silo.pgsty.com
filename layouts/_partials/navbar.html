@@ -1,17 +1,7 @@
+{{- /* 顶栏已从 docs/blog chrome 退场（fumadocs v16 完全体：一切入口在侧栏）。
+       本 partial 现仅供 print 输出等非 chrome 路径使用。 */ -}}
 {{- $baseURL := urls.Parse .Site.BaseURL -}}
 {{- $page := . -}}
-{{- $languageTarget := "" -}}
-{{- $languageLabel := "" -}}
-{{- range .Translations -}}
-  {{- $languageTarget = .RelPermalink -}}
-  {{- $languageLabel = default .Language.Lang .Language.Label -}}
-{{- end -}}
-{{- if not $languageTarget -}}
-  {{- range .Site.Home.Translations -}}
-    {{- $languageTarget = .RelPermalink -}}
-    {{- $languageLabel = default .Language.Lang .Language.Label -}}
-  {{- end -}}
-{{- end -}}
 
 <nav class="td-navbar js-navbar-scroll">
   <div class="td-navbar-container container-fluid flex-column flex-md-row">
@@ -51,21 +41,6 @@
           {{- end -}}
         {{- end -}}
 
-        {{- $darkMode := partialCached "dark-mode-config.html" "dark-mode-global" -}}
-        {{- if $darkMode.showMenu -}}
-          <li class="nav-item td-navbar__light-dark-menu">
-            {{ partial "theme-toggler.html" . }}
-          </li>
-        {{- end -}}
-
-        {{- if $languageTarget -}}
-          <li class="nav-item td-navbar__lang-menu">
-            <a class="nav-link silo-navbar-util" href="{{ $languageTarget }}" title="{{ $languageLabel }}" aria-label="{{ $languageLabel }}">
-              <i class="fa-solid fa-language" aria-hidden="true"></i>
-            </a>
-          </li>
-        {{- end -}}
-
         <li class="nav-item">
           <a class="nav-link silo-navbar-util silo-navbar-github" href="{{ .Site.Params.github_project_repo }}" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">
             <i class="fa-brands fa-github" aria-hidden="true"></i>
@@ -73,10 +48,6 @@
         </li>
       </ul>
       <div class="scroll-indicator scroll-right"></div>
-    </div>
-
-    <div class="d-none d-lg-block td-navbar__search">
-      {{ partial "search-input.html" . }}
     </div>
   </div>
 </nav>

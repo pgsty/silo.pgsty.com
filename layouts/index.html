@@ -122,15 +122,15 @@
           <a href="{{ relLangURL "docs/" }}" class="nav-link">{{ if $zh }}文档{{ else }}Docs{{ end }}</a>
           <a href="{{ relLangURL "blog/" }}" class="nav-link">{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
           <a href="{{ relLangURL "download/" }}" class="nav-link">{{ if $zh }}下载{{ else }}Download{{ end }}</a>
-          <a href="#about" class="nav-link">{{ if $zh }}关于{{ else }}About{{ end }}</a>
           <button type="button" class="nav-util" data-theme-toggle title="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}" aria-label="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}">
-            <i class="fas fa-moon" aria-hidden="true"></i>
+            {{- partialCached "silo/icon.html" "sun" "sun" -}}
+            {{- partialCached "silo/icon.html" "moon" "moon" -}}
           </button>
           {{ range .Translations }}
-          <a href="{{ .RelPermalink }}" class="nav-util" title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}"><i class="fas fa-language" aria-hidden="true"></i></a>
+          <a href="{{ .RelPermalink }}" class="nav-util" title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}">{{ partialCached "silo/icon.html" "languages" "languages" }}</a>
           {{ end }}
           <a href="https://github.com/pgsty/minio" class="nav-github" target="_blank" rel="noopener" title="GitHub">
-            <i class="fab fa-github" aria-hidden="true"></i>
+            {{ partialCached "silo/icon.html" "github" "github" }}
             <span class="nav-count">{{ partial "compact-number.html" $metrics.github_stars }}</span>
           </a>
         </div>
@@ -146,7 +146,6 @@
     <a href="{{ relLangURL "docs/" }}" class="mobile-menu-link">{{ if $zh }}文档{{ else }}Docs{{ end }}</a>
     <a href="{{ relLangURL "blog/" }}" class="mobile-menu-link">{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
     <a href="{{ relLangURL "download/" }}" class="mobile-menu-link"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Download &amp; Install{{ end }}</a>
-    <a href="#about" class="mobile-menu-link">{{ if $zh }}关于{{ else }}About{{ end }}</a>
     {{ range .Translations }}<a href="{{ .RelPermalink }}" class="mobile-menu-link"><i class="fas fa-language" aria-hidden="true"></i> {{ .Language.Label }}</a>{{ end }}
     <button type="button" class="mobile-menu-link mobile-menu-link--btn" data-theme-toggle><i class="fas fa-moon" aria-hidden="true"></i> {{ if $zh }}浅色 / 深色{{ else }}Light / Dark{{ end }}</button>
     <a href="https://github.com/pgsty/minio" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · {{ partial "compact-number.html" $metrics.github_stars }}</a>

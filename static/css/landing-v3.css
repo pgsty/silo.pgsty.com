@@ -314,13 +314,14 @@ main { display: block; }
 /* ------------------------------------------------------------
    4. Navigation
    ------------------------------------------------------------ */
+/* 与文档站 chrome（fumadocs 风格）对齐：56px 高、8px 毛玻璃、小号字标。 */
 .landing-header {
   position: sticky;
   top: 0;
   z-index: 100;
   background: var(--header-bg);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
   transition: box-shadow 200ms ease;
 }
@@ -330,23 +331,23 @@ main { display: block; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 62px;
+  height: 56px;
 }
 
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   color: var(--ink) !important;
 }
-.nav-logo { width: 30px; height: 30px; }
+.nav-logo { width: 22px; height: 22px; }
 .nav-title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.32rem;
-  letter-spacing: 0.18em;
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
   /* 抵消末位字距，让渐变正好收在 O 上 */
-  margin-right: -0.18em;
+  margin-right: -0.14em;
   line-height: 1;
   background: var(--wordmark-gradient);
   -webkit-background-clip: text;
@@ -364,11 +365,12 @@ main { display: block; }
 .nav-links { display: flex; align-items: center; gap: 4px; }
 
 .nav-link {
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 0.95rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--ink-soft) !important;
+  transition: background-color 100ms ease, color 100ms ease;
 }
 .nav-link:hover { color: var(--ink) !important; background: var(--bg-elev); }
 
@@ -376,30 +378,44 @@ main { display: block; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 36px;
-  height: 36px;
+  min-width: 34px;
+  height: 34px;
   padding: 0 8px;
-  margin-left: 2px;
+  margin-left: 0;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   color: var(--ink-mute) !important;
-  font-size: 0.95rem;
+  font-size: 1rem;
   cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
 }
 .nav-util:hover { color: var(--ink) !important; background: var(--bg-elev); }
+
+/* 与文档站同款 lucide/simple-icons 图标（18px）。 */
+.nav-util .silo-icon,
+.nav-github .silo-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+/* 亮暗直切钮显示「目标模式」图标：亮色下出月亮，点击即切暗。 */
+[data-theme-toggle] .silo-icon--sun { display: none; }
+html[data-theme='dark'] [data-theme-toggle] .silo-icon--moon { display: none; }
+html[data-theme='dark'] [data-theme-toggle] .silo-icon--sun { display: block; }
 
 .nav-github {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 6px;
-  padding: 7px 12px;
-  border-radius: 6px;
-  color: var(--ink) !important;
-  font-size: 1.05rem;
+  gap: 5px;
+  margin-left: 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: var(--ink-mute) !important;
+  font-size: 1rem;
+  transition: background-color 100ms ease, color 100ms ease;
 }
-.nav-github:hover { background: var(--bg-elev); }
+.nav-github:hover { color: var(--ink) !important; background: var(--bg-elev); }
 .nav-star {
   font-family: var(--font-body);
   font-size: 0.9rem;

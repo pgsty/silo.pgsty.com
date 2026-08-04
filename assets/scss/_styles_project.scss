@@ -123,114 +123,19 @@
   }
 }
 
-// 覆盖 Docsy 默认的内容最大宽度（从 80% 改为 90%）
-// 影响：段落、代码块、blockquote、表格、asciinema 播放器等
+// 内容最大宽度交给 .silo-article 的 860px 列（见 silo/_layout.scss），
+// 这里放开 Docsy 默认的 80% 限制。
 .td-max-width-on-larger-screens {
   @include media-breakpoint-up(lg) {
-    max-width: 90%;
+    max-width: 100%;
   }
 }
-
-// Force blog sidebar to expand all menu items
-// body.td-blog nav.foldable-nav ul.foldable {
-//   display: block !important;
-// }
 
 // Add spacing and separator before feedback section
 .feedback--title {
   margin-top: 3rem;
   padding-top: 2rem;
   border-top: 1px solid #dee2e6;
-}
-
-// Docs / Blog 左侧导航栏比原始 2/12 增宽 30%，并限制超宽屏增长。
-@include media-breakpoint-up(xl) {
-  .td-main > .row > .td-sidebar {
-    flex: 0 0 clamp(260px, 21.66666667%, 416px);
-    width: clamp(260px, 21.66666667%, 416px);
-  }
-
-  // 右侧 TOC 保持 2/12，正文自动填满剩余空间。
-  .td-main > .row > main {
-    flex: 1 1 0;
-    width: auto;
-    min-width: 0;
-  }
-}
-
-// 侧边栏分割线样式
-.td-sidebar-nav__section.sidebar-divider {
-  margin-top: 2rem;
-  margin-bottom: 0.5rem;
-  padding-top: 0;
-  padding-bottom: 0;
-  border: none;
-}
-
-// 分割线链接样式（不可点击）
-.td-sidebar-link__divider {
-  cursor: default !important;
-  pointer-events: none;
-  display: block !important;
-  font-weight: 600 !important;
-  font-size: 0.75rem !important;
-  color: #6c757d !important;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  padding: 0.75rem 0 0.5rem 0 !important;
-  margin: 0 !important;
-  position: relative;
-  background: transparent !important;
-
-  // 深色模式下的文字颜色
-  @media (prefers-color-scheme: dark) {
-    color: #adb5bd !important;
-  }
-
-  // 文字上方的分割线
-  &::before {
-    content: '';
-    display: block;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(
-      to right,
-      rgba(108, 117, 125, 0.4) 0%,
-      rgba(108, 117, 125, 0.2) 70%,
-      rgba(108, 117, 125, 0) 100%
-    );
-    margin-bottom: 0.75rem;
-
-    @media (prefers-color-scheme: dark) {
-      background: linear-gradient(
-        to right,
-        rgba(173, 181, 189, 0.3) 0%,
-        rgba(173, 181, 189, 0.15) 70%,
-        rgba(173, 181, 189, 0) 100%
-      );
-    }
-  }
-
-  // 移除 hover 效果
-  &:hover {
-    background: transparent !important;
-    color: #6c757d !important;
-
-    @media (prefers-color-scheme: dark) {
-      color: #adb5bd !important;
-    }
-  }
-
-  // 移除图标（如果有）
-  i {
-    display: none;
-  }
-
-  // 文字容器
-  span {
-    display: block;
-    white-space: nowrap;
-  }
 }
 
 // 全宽表格样式（与正文宽度对齐，大屏幕上 90%）
@@ -240,7 +145,7 @@
   display: table;
 
   @include media-breakpoint-up(lg) {
-    max-width: 90%;
+    max-width: 100%;
   }
 }
 
@@ -259,7 +164,7 @@
   display: table;
 
   @include media-breakpoint-up(lg) {
-    max-width: 90%;
+    max-width: 100%;
   }
 }
 
@@ -280,7 +185,7 @@
   table-layout: auto;
 
   @include media-breakpoint-up(lg) {
-    max-width: 90%;
+    max-width: 100%;
   }
 
   // 除最后一列外，所有列收缩到内容宽度
@@ -423,18 +328,8 @@ a {
   --silo-mark-to: #e0a35c;
 }
 
-// 全页低噪点覆铜网格（首页同款，克制的 44px 格点）
-body.td-section,
-body.td-page,
-body.td-home,
-body.td-taxonomy,
-body.td-404 {
-  background-image:
-    linear-gradient(var(--silo-grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--silo-grid-line) 1px, transparent 1px);
-  background-size: 44px 44px;
-  background-attachment: fixed;
-}
+// 文档/博客页背景保持纯平（fumadocs 基调）；覆铜网格背景仅保留在
+// 落地页与下载页（各自独立的 static css，不经由本文件）。
 
 // ---- 导航栏：毛玻璃电路板顶盖 ----------------------------------
 .td-navbar {
@@ -531,162 +426,44 @@ body.td-404 {
     font-size: 1.05rem;
   }
 
-  // 搜索框：药丸形，随主题
-  .td-search__input,
-  .form-control {
-    background: var(--silo-elev);
-    border: 1px solid var(--bs-border-color);
-    border-radius: 999px;
-    color: var(--bs-body-color);
-
-    &::placeholder {
-      color: var(--bs-tertiary-color);
-    }
-
-    &:focus {
-      border-color: var(--bs-link-color);
-      box-shadow: 0 0 0 3px rgba(var(--bs-link-color-rgb), 0.15);
-      background: var(--silo-elev);
-      color: var(--bs-body-color);
-    }
-  }
-
-  .td-search {
-    background: transparent;
-
-    &__icon,
-    .fa-magnifying-glass,
-    .fa-search {
-      color: var(--bs-tertiary-color);
-    }
-  }
-
-  // 二态主题按钮：与首页导航的月亮/太阳切换保持一致。
-  .silo-theme-cycle {
-    cursor: pointer;
-
-    i {
-      display: inline-block;
-      width: 1.15em;
-      text-align: center;
-    }
-
+  // 搜索、主题、语言控件已全部移入左侧栏（见 silo/_sidebar.scss）。
+  // 顶栏仅保留：品牌 + 主导航 + GitHub + 移动端汉堡/搜索图标钮。
+  .silo-navbar-util .silo-icon {
+    width: 18px;
+    height: 18px;
   }
 }
 
-// ---- 左侧边栏：目录树 ------------------------------------------
-.td-sidebar {
+// 移动端汉堡钮（打开抽屉侧栏），仅 < md 显示（d-md-none）。
+.silo-navbar-hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
   background: transparent;
-
-  @include media-breakpoint-up(md) {
-    border-right: 1px solid var(--bs-border-color);
-    padding-top: 1rem;
-  }
-
-  .td-sidebar__search .td-search__input {
-    background: var(--silo-elev);
-    border: 1px solid var(--bs-border-color);
-    border-radius: 8px;
-    color: var(--bs-body-color);
-
-    &:focus {
-      border-color: var(--bs-link-color);
-      box-shadow: 0 0 0 3px rgba(var(--bs-link-color-rgb), 0.12);
-    }
-  }
-}
-
-.td-sidebar-nav {
-  .td-sidebar-link > i {
-    display: inline-block;
-    width: 1.25em;
-    margin-right: 0.4rem;
-    color: var(--bs-tertiary-color);
-    text-align: center;
-    opacity: 0.9;
-  }
-
-  a.td-sidebar-link {
-    color: var(--bs-secondary-color);
-    transition: color 120ms ease;
-
-    &:hover {
-      color: var(--bs-body-color);
-    }
-
-    // 当前页：加粗 + PG 蓝（无背景板，不动排版）
-    &.active,
-    &.active:hover {
-      color: var(--bs-link-color);
-      font-weight: 700;
-      background: transparent;
-
-      > i {
-        color: inherit;
-        opacity: 1;
-      }
-    }
-  }
-
-  // 章节标题（一级条目）
-  &__section-title > a.td-sidebar-link {
-    color: var(--bs-body-color);
-    font-weight: 600;
-  }
-
-  .foldable > input:checked ~ label > a {
-    color: var(--bs-body-color);
-  }
-}
-
-// Blog entries use their complete article titles in the flat sidebar.
-.td-blog .td-sidebar-nav a.td-sidebar-link > span {
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-// 侧边栏分区丝印（既有 divider 机制，换成等宽丝印体 + 铜色圆点）
-.td-sidebar-link__divider {
-  font-family: var(--bs-font-monospace) !important;
-  font-size: 0.68rem !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.16em !important;
-  color: var(--silo-silk) !important;
-
-  &::before {
-    background: linear-gradient(to right, var(--silo-copper-dim), transparent 85%) !important;
-    height: 1px;
-    opacity: 0.6;
-  }
-
-  &:hover {
-    color: var(--silo-silk) !important;
-  }
-}
-
-// ---- 右侧 TOC 与页面元信息 --------------------------------------
-.td-toc {
-  border-left: 1px solid var(--bs-border-color);
-
-  #TableOfContents {
-    a {
-      color: var(--bs-tertiary-color);
-      transition: color 120ms ease;
-
-      &:hover {
-        color: var(--bs-link-color);
-      }
-    }
-  }
-}
-
-.td-page-meta a {
   color: var(--bs-secondary-color);
 
+  .silo-icon {
+    width: 20px;
+    height: 20px;
+  }
+
   &:hover {
-    color: var(--bs-link-color);
+    color: var(--bs-body-color);
+    background: var(--silo-elev);
   }
 }
+
+// 左侧边栏 / 右侧 TOC / 搜索弹窗的全部样式见文件尾部导入的
+// silo/_layout.scss、silo/_sidebar.scss、silo/_toc.scss、silo/_search.scss。
 
 // ---- 正文排版 ---------------------------------------------------
 .td-content {
@@ -865,27 +642,62 @@ body.td-404 {
   color: var(--bs-tertiary-color);
 }
 
+// 页底补充信息区（最后修改 + 来源声明）：唯一分割线由 Docsy 给
+// lastmod 的 border-top 提供；四类行统一为「图标列 + 文本」flex 结构。
+.td-content .td-page-meta__lastmod {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45em;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--bs-tertiary-color) !important; // 压过 .text-body-secondary
+  margin-top: 2.75rem !important;
+  padding-top: 0.9rem !important;
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+
+    &:hover {
+      color: var(--bs-link-hover-color);
+    }
+  }
+}
+
+// 图标列：FA 与 lucide SVG 共用，等宽居中对齐、弱化。
+.silo-origin__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  justify-content: center;
+  width: 1.25em;
+  opacity: 0.65;
+
+  .silo-icon {
+    width: 1.05em;
+    height: 1.05em;
+    align-self: center;
+  }
+}
+
 // ---- 页面来源署名：MinIO 衍生页正文末尾的归属 / 许可 / 翻译声明 ----
 // 由 front matter 的 minio_origin / silo_modified 驱动，见 page-origin-notice.html
 .silo-page-origin {
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--bs-border-color);
+  // 分割线由上方 lastmod 行统一提供（整个补充信息区只此一条）。
+  margin-top: 0.3rem;
   color: var(--bs-tertiary-color);
   font-size: 0.8rem;
   line-height: 1.65;
 
   p {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45em;
     margin-bottom: 0.35rem;
 
     &:last-child {
       margin-bottom: 0;
     }
-  }
-
-  i {
-    margin-right: 0.1rem;
-    opacity: 0.65;
   }
 
   // 全局去下划线后，法律声明里的链接需要显式恢复可见性。
@@ -1230,3 +1042,14 @@ a.silo-doc-card {
     scroll-behavior: auto;
   }
 }
+
+// ============================================================
+// Fumadocs 风格文档 chrome（侧栏 / TOC / 搜索弹窗 / 布局壳）
+// 置于文件最末，享有整个样式管线的最高级联优先级。
+// ============================================================
+@import 'silo/tokens';
+@import 'silo/layout';
+@import 'silo/sidebar';
+@import 'silo/toc';
+@import 'silo/search';
+@import 'silo/blog';

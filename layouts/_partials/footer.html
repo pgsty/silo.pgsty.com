@@ -55,9 +55,14 @@
     </div>
 
     <div class="silo-footer__bottom">
-      <span>&copy; {{ .Site.Params.copyright.from_year }}-{{ now.Year }} {{ if $zh }}<a href="https://vonng.com/en" target="_blank" rel="noopener">冯若航</a>{{ else }}<a href="https://vonng.com/" target="_blank" rel="noopener">Ruohang Feng</a>{{ end }} / <a href="https://github.com/Vonng" target="_blank" rel="noopener">Vonng</a> @ <a href="https://github.com/pgsty/" target="_blank" rel="noopener">PGSTY</a> &amp; <a href="https://github.com/pgsty/minio" target="_blank" rel="noopener">{{ if $zh }}SILO 贡献者{{ else }}SILO Contributors{{ end }}</a></span>
+      {{/* 底行与文档站单行页脚（silo/footer-line.html）保持同一格式。 */ -}}
+      <span>&copy; {{ .Site.Params.copyright.from_year }}-{{ now.Year }} <a href="https://vonng.com" target="_blank" rel="noopener">{{ T "silo_footer_author" }}</a> (<a href="https://github.com/Vonng" target="_blank" rel="noopener">Vonng</a>) @ <a href="https://pgsty.com" target="_blank" rel="noopener">PGSTY</a></span>
+      {{ with .Site.Params.footer_icp -}}
+      <span class="silo-footer__icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ . }}</a></span>
+      {{- end }}
+      {{/* 单向语言切换：只显示「对面语言」（与 docs 单行页脚同约定）。 */ -}}
       <span class="silo-footer__lang">
-        {{- range .Site.Home.AllTranslations -}}
+        {{- range .Site.Home.Translations -}}
           <a href="{{ .RelPermalink }}" lang="{{ .Language.Locale }}">{{ .Language.Label }}</a>
         {{- end -}}
       </span>

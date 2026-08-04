@@ -8,6 +8,8 @@ defaultContentLanguageInSubdir: false
 enableRobotsTXT: true
 enableGitInfo: true
 hasCJKLanguage: true
+# 标签等列表页标题保留作者原始大小写（不要把 silo-pkg 渲染成 Silo-Pkg）。
+capitalizeListTitles: false
 
 services:
   googleAnalytics:
@@ -170,13 +172,23 @@ params:
     from_year: 2020
     url: https://pgsty.com
 
+  # 正文列宽模式：normal（1050px，默认）| wide（1300px）| full（占满可用宽）。
+  # 页面 front matter 可单页覆盖（page_width: wide），栏目可经 cascade 继承。
+  page_width: normal
+  # ICP 备案号（单行页脚居中显示，链接到 beian.miit.gov.cn；留空则不渲染）。
+  # 示例：footer_icp: 浙ICP备15016890号-2
+  footer_icp: ""
+
   archived_version: false
   url_latest_version: https://silo.pgsty.com
-  github_repo: https://github.com/pgsty/silo-docs
+  github_repo: https://github.com/pgsty/silo.pgsty.com
   github_project_repo: https://github.com/pgsty/minio
   github_branch: main
 
-  offlineSearch: true
+  # 站内搜索由项目自有的 ⌘K 弹窗实现（lunr 自托管 + 按语言索引），
+  # 必须关闭 Docsy offlineSearch：否则其 offline-search.js 在页面上找不到
+  # .td-search input 时会 $.ajax(undefined) 抓当前页 HTML 并抛错。
+  offlineSearch: false
   prism_syntax_highlighting: false
 
   ui:
@@ -185,14 +197,29 @@ params:
     navbar_translucent_over_cover_disable: false
     navbar_theme: dark
     sidebar_menu_compact: true
-    sidebar_search_disable: false
     sidebar_menu_foldable: true
     sidebar_menu_truncate: 2000
     sidebar_cache_limit: 1000
     sidebar_root_enabled: true
-    sidebar_lang_menu: true
     ul_show: 2
     showLightDarkModeMenu: true
+    # TOC 高亮由 silo-docs.js 的 IntersectionObserver 实现；Docsy 的
+    # Bootstrap ScrollSpy 注入路径（td/scrollspy-attr.txt）存在属性转义
+    # bug，本就从未生效，禁用后顺带从 bundle 中去掉 scrollspy-patch.js。
+    scrollSpy:
+      disable: true
+    # ---- Fumadocs 式侧栏定制（silo chrome）----
+    # 搜索框下方的根节点下拉：列出 docs 根 + 所有 sidebar_root_for: self
+    # 的 section；若无 self 根 section 则自动隐藏。
+    sidebar_root_menu: true
+    # 侧栏宽度（px）：默认宽随断点 268/286，可拖拽调整并持久化；
+    # min/max 为拖拽钳制范围，可在栏目 front matter 中经 cascade 覆盖
+    # （params.ui.sidebar_width_min / sidebar_width_max）。
+    sidebar_width_min: 220
+    sidebar_width_max: 480
+    # 侧栏条目文字溢出策略：ellipsis（省略号，默认）| wrap（换行）。
+    # 可在栏目 front matter 中经 cascade 覆盖（params.ui.sidebar_item_overflow）。
+    sidebar_item_overflow: ellipsis
     feedback:
       enable: false
     readingtime:
@@ -214,6 +241,6 @@ params:
         icon: fa fa-box-archive
         desc: Silo release artifacts
       - name: Documentation source
-        url: https://github.com/pgsty/silo-docs
+        url: https://github.com/pgsty/silo.pgsty.com
         icon: fab fa-github
         desc: Silo documentation repository
