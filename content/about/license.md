@@ -16,7 +16,7 @@ Silo carries two separate licenses. The software and the documentation are distr
 | :-- | :-- | :-- |
 | `silo` server | GNU AGPLv3 | [`pgsty/minio`](https://github.com/pgsty/minio/blob/master/LICENSE) |
 | `mcli` client | GNU AGPLv3 | [`pgsty/mc`](https://github.com/pgsty/mc/blob/master/LICENSE) |
-| This documentation | CC BY 4.0 | [`pgsty/silo-docs`](https://github.com/pgsty/silo-docs/blob/main/LICENSE) |
+| This documentation | CC BY 4.0 | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
 
 ## Software: AGPLv3 {#software}
 
@@ -29,7 +29,7 @@ Read the [full license text](https://www.gnu.org/licenses/agpl-3.0.html) before 
 ## Documentation: CC BY 4.0 {#documentation}
 
 Everything published on this site is licensed under the
-[Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0) — the same license the upstream MinIO documentation used. The [full legal text](https://github.com/pgsty/silo-docs/blob/main/LICENSE) is reproduced verbatim in the documentation repository.
+[Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0) — the same license the upstream MinIO documentation used. The [full legal text](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) is reproduced verbatim in the documentation repository.
 
 You are free to share and adapt this documentation, including commercially, provided you give appropriate credit, link to the license, and indicate whether changes were made. You may not impose legal or technological measures that restrict others from doing anything the license permits.
 

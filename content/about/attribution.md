@@ -26,11 +26,11 @@ Both layers apply at once. A translated or modified page carries MinIO's copyrig
 ## License {#license}
 
 All documentation content on this site is licensed under the
-[Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0) — the same license as the upstream work. The full legal text is in [LICENSE](https://github.com/pgsty/silo-docs/blob/main/LICENSE). The Silo software itself is licensed separately; see [License](/about/license/).
+[Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0) — the same license as the upstream work. The full legal text is in [LICENSE](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE). The Silo software itself is licensed separately; see [License](/about/license/).
 
 ## Derivation {#derivation}
 
-Portions of this documentation are derived from the [MinIO Object Storage Documentation](https://github.com/minio/docs). The work has been modified from the original: rebranding to Silo, restoration of documentation for features removed upstream, conversion of the frozen RST/MyST source to bilingual Markdown, replacement of the Sphinx presentation layer with Hugo and Docsy, link and build fixes, ongoing maintenance, and translation into Chinese. The [commit history](https://github.com/pgsty/silo-docs/commits/main/) is the complete record of changes.
+Portions of this documentation are derived from the [MinIO Object Storage Documentation](https://github.com/minio/docs). The work has been modified from the original: rebranding to Silo, restoration of documentation for features removed upstream, conversion of the frozen RST/MyST source to bilingual Markdown, replacement of the Sphinx presentation layer with Hugo and Docsy, link and build fixes, ongoing maintenance, and translation into Chinese. The [commit history](https://github.com/pgsty/silo.pgsty.com/commits/main/) is the complete record of changes.
 
 Not every page is derived from MinIO. The blog, download and release pages, this section, and Silo-specific content are original works of the Silo project. Pages that do carry upstream material say so in a notice at the bottom of the page, and pages that Silo has changed beyond the format conversion link to their own change history.
 

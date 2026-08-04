@@ -18,7 +18,7 @@ silo_modified: false
 未公开披露的高危漏洞请通过私密渠道报告，不要发在公开 issue 里。
 
 - **Silo 服务端与 `mcli` 客户端** —— 建议通过 [`pgsty/minio` 的 GitHub Security Advisories](https://github.com/pgsty/minio/security/advisories/new) 提交私密报告。
-- **本文档** —— 请在 [`pgsty/silo-docs`](https://github.com/pgsty/silo-docs/issues) 提交 issue；如果内容本身披露了某个弱点，请改用私密渠道。
+- **本文档** —— 请在 [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/issues) 提交 issue；如果内容本身披露了某个弱点，请改用私密渠道。
 
 请注明受影响的版本、影响描述，以及复现步骤（如果有），这将帮助我们更快地确认问题。
 

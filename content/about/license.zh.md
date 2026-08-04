@@ -16,7 +16,7 @@ Silo 涉及两套彼此独立的许可协议：软件与文档的分发条款不
 |:-----------|:-----------|:--------------------------------------------------------------------------|
 | `silo` 服务端 | GNU AGPLv3 | [`pgsty/minio`](https://github.com/pgsty/minio/blob/master/LICENSE)       |
 | `mcli` 客户端 | GNU AGPLv3 | [`pgsty/mc`](https://github.com/pgsty/mc/blob/master/LICENSE)             |
-| 本文档        | CC BY 4.0  | [`pgsty/silo-docs`](https://github.com/pgsty/silo-docs/blob/main/LICENSE) |
+| 本文档        | CC BY 4.0  | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
 
 ## 软件：AGPLv3 {#software}
 
@@ -36,7 +36,7 @@ Silo 沿用同一许可：不重新授权、不附加限制、不做开源核心
 
 本站发布的全部内容依据
 [知识共享署名 4.0 国际许可协议](https://creativecommons.org/licenses/by/4.0/deed.zh)（CC BY 4.0）授权，
-与上游 MinIO 文档使用的许可一致。[完整法律文本](https://github.com/pgsty/silo-docs/blob/main/LICENSE)
+与上游 MinIO 文档使用的许可一致。[完整法律文本](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE)
 以原样形式保存在文档仓库中。
 
 你可以自由地共享与演绎本文档，包括用于商业目的，前提是给出适当的署名、提供许可协议链接，

@@ -27,14 +27,14 @@ MinIO 对象存储文档原作。
 本站所有文档内容依据
 [知识共享署名 4.0 国际许可协议](https://creativecommons.org/licenses/by/4.0/deed.zh)（CC BY 4.0）授权，
 与上游原作使用同一许可证。完整法律文本见
-[LICENSE](https://github.com/pgsty/silo-docs/blob/main/LICENSE)。
+[LICENSE](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE)。
 Silo 软件本身另行授权，参见[许可协议](/zh/about/license/)。
 
 ## 衍系 {#derivation}
 
 本文档的部分内容衍生自 [MinIO 对象存储文档](https://github.com/minio/docs)，相对原作，本文档已进行若干修改：
 更名为 Silo、恢复上游已移除功能的文档、将冻结的 RST/MyST 源码转换为双语 Markdown、
-以 Hugo 与 Docsy 替换 Sphinx 呈现层、修复链接与构建问题、持续维护，以及翻译为中文。完整的变更记录见[提交历史](https://github.com/pgsty/silo-docs/commits/main/)。
+以 Hugo 与 Docsy 替换 Sphinx 呈现层、修复链接与构建问题、持续维护，以及翻译为中文。完整的变更记录见[提交历史](https://github.com/pgsty/silo.pgsty.com/commits/main/)。
 
 并非所有页面都衍生自 MinIO。博客、下载与发行页面、本节内容，以及 Silo 专属内容，
 均为 Silo 项目的原创作品。凡包含上游素材的页面，都会在页面底部标注来源；
