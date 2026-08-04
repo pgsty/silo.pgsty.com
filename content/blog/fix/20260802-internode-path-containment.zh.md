@@ -4,9 +4,9 @@ linkTitle: "内部节点路径 containment 审计"
 date: 2026-08-02
 author: "冯若航"
 description: "上一篇明说删除 endpoint 不等于关闭缺陷类别。这次我们做了那次审计，找到四个协议面、十二项缺陷，并在修复过程中自己制造了四次回归。"
-tags: [Silo, MinIO, 安全, Storage REST, Grid RPC, 路径穿越, 工程复盘]
+tags: [安全, Path Containment]
 weight: 90
-draft: true
+draft: false
 url: "/zh/blog/security/internode-path-containment/"
 ---
 

@@ -4,9 +4,9 @@ linkTitle: "Internode Path Containment Audit"
 date: 2026-08-02
 author: "Ruohang Feng"
 description: "The previous entry said plainly that deleting an endpoint is not the same as closing a defect class. This is that audit: four protocol surfaces, twelve defects, and four regressions we caused ourselves while fixing them."
-tags: [Silo, MinIO, Security, Storage REST, Grid RPC, Path Traversal, Engineering Retrospective]
+tags: [Security, Path Containment]
 weight: 90
-draft: true
+draft: false
 url: "/blog/security/internode-path-containment/"
 ---
 

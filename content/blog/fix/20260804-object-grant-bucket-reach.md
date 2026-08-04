@@ -4,9 +4,9 @@ linkTitle: "Object Grant, Bucket Reach"
 date: 2026-08-04
 author: "Ruohang Feng"
 description: "A trailing slash let an object-only IAM grant of 'arn:aws:s3:::bucket/*' reach bucket-level actions — including PutBucketPolicy, the one that can make a bucket public. We shipped a narrow, deny-safe fix for the dangerous writes and deliberately left the rest for a migration-gated change."
-tags: [Silo, MinIO, Security, IAM, Access Control, S3]
+tags: [Security, Object Grant]
 weight: 100
-draft: true
+draft: false
 url: "/blog/security/object-grant-bucket-reach/"
 ---
 

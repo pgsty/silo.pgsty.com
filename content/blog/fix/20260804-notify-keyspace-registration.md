@@ -4,9 +4,9 @@ linkTitle: "Notify Keyspace Registration"
 date: 2026-08-04
 author: "Ruohang Feng"
 description: "NATS JWT credentials were rejected as an invalid key by the very server that reads them. The same gap was wired into the legacy migration, so an upgraded config failed validation at every boot — and one failing subsystem zeroes the whole notification list. Three upstream feature PRs each forgot the same registration; a fourth surface corrupted values silently."
-tags: [Silo, MinIO, Configuration, Bucket Notifications, Reliability, Engineering Retrospective]
+tags: [Security, Bucket Notifications]
 weight: 100
-draft: true
+draft: false
 url: "/blog/security/notify-keyspace-registration/"
 ---
 

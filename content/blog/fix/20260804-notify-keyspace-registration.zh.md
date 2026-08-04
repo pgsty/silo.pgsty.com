@@ -4,9 +4,9 @@ linkTitle: "通知键空间注册缺口"
 date: 2026-08-04
 author: "冯若航"
 description: "NATS 的 JWT 凭据被读取它的那台服务器判为非法键。同样的缺口被写进了旧配置迁移，升级后的配置在每次启动时验证失败——而一个子系统失败就会清空整张通知列表。上游三个功能 PR 各自忘掉了同一次注册；第四个表面则在无声地写错值。"
-tags: [Silo, MinIO, 配置系统, 存储桶通知, 可靠性, 工程复盘]
+tags: [安全, Bucket Notifications]
 weight: 100
-draft: true
+draft: false
 url: "/zh/blog/security/notify-keyspace-registration/"
 ---
 

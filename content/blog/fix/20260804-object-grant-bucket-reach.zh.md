@@ -4,9 +4,9 @@ linkTitle: "对象授权越界到桶"
 date: 2026-08-04
 author: "冯若航"
 description: "一个尾部斜杠,让一条只该管对象的 IAM 授权 arn:aws:s3:::bucket/* 触及了桶级操作——包括能把桶变公开的 PutBucketPolicy。我们只为最危险的写入动作做了一个窄的、对 Deny 无损的修复,其余刻意留给一次带迁移路径的变更。"
-tags: [Silo, MinIO, 安全, IAM, 访问控制, S3]
+tags: [安全, Object Grant]
 weight: 100
-draft: true
+draft: false
 url: "/zh/blog/security/object-grant-bucket-reach/"
 ---
 
