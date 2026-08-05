@@ -21,7 +21,7 @@ silo_modified: true
 {{% alert color="danger" %}}
 **不要在 Silo 上使用默认更新路径**
 
-截至 2026-08-03，最新公开 Silo 服务端 `RELEASE.2026-06-18T00-00-00Z` 与当前本地 `pgsty/minio` 分支，在省略 `MIRROR_URL` 时仍会解析到上游 `dl.min.io` 发布源，并保留上游 MinIO 签名密钥。对已启用更新的 Silo 服务端运行 `mc admin update ALIAS`，因此可能会把 Silo 替换成上游 MinIO 二进制。
+截至 2026-08-05，最新公开 Silo 服务端 `RELEASE.2026-08-04T00-00-00Z` 在省略 `MIRROR_URL` 时仍会解析到上游 `dl.min.io` 发布源，并保留上游 MinIO 签名密钥。对已启用更新的 Silo 服务端运行 `mc admin update ALIAS`，因此可能会把 Silo 替换成上游 MinIO 二进制。
 
 请在 Silo 服务端设置 `MINIO_UPDATE=off`，并通过[下载与安装](/zh/download/#server)、可信软件仓库或手工校验的 Silo 制品升级。本页保留命令契约是为了兼容，并不表示这是推荐的 Silo 升级流程。
 {{% /alert %}}

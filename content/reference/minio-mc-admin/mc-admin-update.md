@@ -21,7 +21,7 @@ The user **must** have `write` permissions for the target location where the bin
 {{% alert color="danger" %}}
 **Do not use the default update path on Silo**
 
-As of 2026-08-03, both the latest published Silo server (`RELEASE.2026-06-18T00-00-00Z`) and the current local `pgsty/minio` branch still resolve an omitted `MIRROR_URL` through the upstream `dl.min.io` release feed and retain the upstream MinIO signing key. Running `mc admin update ALIAS` against an update-enabled Silo server can therefore replace Silo with an upstream MinIO binary.
+As of 2026-08-05, the latest published Silo server (`RELEASE.2026-08-04T00-00-00Z`) still resolves an omitted `MIRROR_URL` through the upstream `dl.min.io` release feed and retains the upstream MinIO signing key. Running `mc admin update ALIAS` against an update-enabled Silo server can therefore replace Silo with an upstream MinIO binary.
 
 Set `MINIO_UPDATE=off` on Silo servers and upgrade through [Download & Install](/download/#server), a trusted package repository, or a manually verified Silo artifact. This page retains the command contract for compatibility; it is not the recommended Silo upgrade procedure.
 {{% /alert %}}

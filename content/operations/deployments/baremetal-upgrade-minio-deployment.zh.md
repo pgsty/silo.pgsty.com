@@ -32,7 +32,7 @@ silo_modified: true
 {{% alert color="danger" %}}
 **不要对 Silo 使用 `mc admin update ALIAS`**
 
-截至 2026-08-03，最新公开 Silo 服务端与当前本地 `pgsty/minio` 分支在省略更新 URL 时，仍会选择上游 `dl.min.io` 发布源和上游 MinIO 签名密钥。因此该命令可能把 Silo 替换成上游二进制。请使用下面经过校验的软件包或二进制流程。另一个客户端命令 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update) 已被禁用，不能执行升级。
+截至 2026-08-05，最新公开 Silo 服务端在省略更新 URL 时，仍会选择上游 `dl.min.io` 发布源和上游 MinIO 签名密钥。因此该命令可能把 Silo 替换成上游二进制。请使用下面经过校验的软件包或二进制流程。另一个客户端命令 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update) 已被禁用，不能执行升级。
 {{% /alert %}}
 
 <a id="minio-upgrade-systemctl"></a>

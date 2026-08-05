@@ -3,11 +3,11 @@
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
 {{- $metrics := hugo.Data.home.metrics -}}
 {{- $socialImage := "images/silo-social-card.png" | absURL -}}
-{{- $serverTag := "RELEASE.2026-06-18T00-00-00Z" -}}
-{{- $serverBuild := "20260618000000.0.0" -}}
+{{- $serverTag := "RELEASE.2026-08-04T00-00-00Z" -}}
+{{- $serverBuild := "20260804000000.0.0" -}}
 {{- $serverBase := printf "https://github.com/pgsty/minio/releases/download/%s" $serverTag -}}
-{{- $clientTag := "RELEASE.2026-04-17T00-00-00Z" -}}
-{{- $clientBuild := "20260417000000.0.0" -}}
+{{- $clientTag := "RELEASE.2026-08-04T00-00-00Z" -}}
+{{- $clientBuild := "20260804000000.0.0" -}}
 {{- $clientBase := printf "https://github.com/pgsty/mc/releases/download/%s" $clientTag -}}
 <!DOCTYPE html>
 <html lang="{{ $locale }}" class="no-js">
@@ -147,7 +147,7 @@
           <div class="download-release-line">
             <span class="release-live"><i aria-hidden="true"></i>{{ if $zh }}当前服务端发行版{{ else }}CURRENT SERVER RELEASE{{ end }}</span>
             <a href="https://github.com/pgsty/minio/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
-            <span>2026-06-18 · amd64 / arm64</span>
+            <span>2026-08-04 · amd64 / arm64</span>
           </div>
         </div>
 
@@ -191,7 +191,7 @@
           </div>
           <a class="version-card" href="https://github.com/pgsty/minio/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">
             <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
-            <strong>2026-06-18</strong>
+            <strong>2026-08-04</strong>
             <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
           </a>
         </div>
@@ -420,7 +420,7 @@ make build
           </div>
           <a class="version-card version-card--client" href="https://github.com/pgsty/mc/releases/tag/{{ $clientTag }}" target="_blank" rel="noopener">
             <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
-            <strong>2026-04-17</strong>
+            <strong>2026-08-04</strong>
             <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
           </a>
         </div>

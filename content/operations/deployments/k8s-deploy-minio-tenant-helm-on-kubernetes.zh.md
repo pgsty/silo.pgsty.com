@@ -91,7 +91,7 @@ MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](http
    tenant:
      image:
        repository: pgsty/minio
-       tag: RELEASE.2026-06-18T00-00-00Z
+       tag: RELEASE.2026-08-04T00-00-00Z
        pullPolicy: IfNotPresent
      env:
        - name: MINIO_UPDATE

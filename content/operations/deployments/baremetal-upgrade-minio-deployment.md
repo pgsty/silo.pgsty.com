@@ -32,7 +32,7 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 {{% alert color="danger" %}}
 **Do not use `mc admin update ALIAS` for Silo**
 
-As of 2026-08-03, an omitted update URL still selects the upstream `dl.min.io` feed and upstream MinIO signing key in both the latest published Silo server and the current local `pgsty/minio` branch. The command can therefore replace Silo with an upstream binary. Use the verified package or binary procedure below. The separate client command [`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is disabled and cannot perform an upgrade.
+As of 2026-08-05, an omitted update URL still selects the upstream `dl.min.io` feed and upstream MinIO signing key in the latest published Silo server. The command can therefore replace Silo with an upstream binary. Use the verified package or binary procedure below. The separate client command [`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is disabled and cannot perform an upgrade.
 {{% /alert %}}
 
 <a id="minio-upgrade-systemctl"></a>

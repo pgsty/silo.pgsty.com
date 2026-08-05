@@ -91,7 +91,7 @@ This procedure is not exhaustive of all possible configuration options available
    tenant:
      image:
        repository: pgsty/minio
-       tag: RELEASE.2026-06-18T00-00-00Z
+       tag: RELEASE.2026-08-04T00-00-00Z
        pullPolicy: IfNotPresent
      env:
        - name: MINIO_UPDATE

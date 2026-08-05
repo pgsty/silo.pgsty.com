@@ -47,7 +47,7 @@ This procedure is not exhaustive of all possible configuration options available
 
    ```yaml
    spec:
-     image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+     image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
      env:
        - name: MINIO_UPDATE
          value: "off"
