@@ -1,6 +1,6 @@
 ---
-title: "MCLI Compatibility Notes"
-linkTitle: "MCLI"
+title: "MCLI Client Compatibility Notes"
+linkTitle: "MC Client"
 description: "Differences between the pgsty/mc and upstream minio/mc"
 url: "/compatibility/mcli/"
 weight: 20
@@ -35,12 +35,12 @@ For many users nothing changes here: the container image keeps `mc` as its entry
 
 Neither name is hardcoded anywhere. Since 2016 the upstream client has derived its runtime identity from the name it is invoked as, and `mcli` is the exact rename upstream's own `CONFLICT.md` recommended ([issue #873](https://github.com/minio/mc/issues/873#issuecomment-267583013)) for the Midnight Commander clash — this fork merely promoted that suggestion to the official shipping name, with zero code changes. What that mechanism means in practice:
 
-| Follows the invoked name | Fixed, regardless of the name |
-| :-- | :-- |
-| Configuration directory: `~/.mc` vs `~/.mcli` (Windows: `%USERPROFILE%\mc\` vs `…\mcli\`) | Environment variables: always `MC_*` — there is no `MCLI_CONFIG_DIR` |
-| Program name shown in help and usage text | `config.json` format — identical and interchangeable in both directions |
-| Shell-completion registration | All commands, flags, JSON output, exit codes |
-| User-Agent application suffix (`mc/…` vs `mcli/…`) | `--config-dir` and `MC_CONFIG_DIR` overrides |
+| Follows the invoked name                                                                  | Fixed, regardless of the name                                           |
+|:------------------------------------------------------------------------------------------|:------------------------------------------------------------------------|
+| Configuration directory: `~/.mc` vs `~/.mcli` (Windows: `%USERPROFILE%\mc\` vs `…\mcli\`) | Environment variables: always `MC_*` — there is no `MCLI_CONFIG_DIR`    |
+| Program name shown in help and usage text                                                 | `config.json` format — identical and interchangeable in both directions |
+| Shell-completion registration                                                             | All commands, flags, JSON output, exit codes                            |
+| User-Agent application suffix (`mc/…` vs `mcli/…`)                                        | `--config-dir` and `MC_CONFIG_DIR` overrides                            |
 
 The one real trap: **run `mcli` for the first time and your existing `mc` aliases are not there** — it starts from an empty `~/.mcli`. Either keep invoking it as `mc` (a symlink suffices — argv[0] is what counts), or copy the state once with `cp -a ~/.mc ~/.mcli`. For automation and configuration templates, set `MC_CONFIG_DIR` explicitly: the environment prefix does not follow the name, so one template serves both. Details in [Migration](#migration).
 
@@ -56,13 +56,13 @@ Self-update is removed. `mcli update` never contacts the network and never repla
 
 Everything that reached MinIO SUBNET is disabled at build time. Affected commands keep their names and flags, print a stable notice — *"MinIO SUBNET services (registration, licensing, uploads) are disabled in this Silo build of mc; diagnostics remain available locally."* — and exit `1`:
 
-| Command | Behavior now | Use instead |
-| :-- | :-- | :-- |
-| `mcli license register` | notice, exit `1` | — |
+| Command                                      | Behavior now     | Use instead                                                    |
+|:---------------------------------------------|:-----------------|:---------------------------------------------------------------|
+| `mcli license register`                      | notice, exit `1` | —                                                              |
 | `mcli license update ALIAS` (online renewal) | notice, exit `1` | `mcli license update ALIAS license.key` (offline, still works) |
-| `mcli support upload` | notice, exit `1` | share files through your own channels |
-| `mcli support proxy set` | notice, exit `1` | `proxy remove` still clears a legacy setting |
-| `mcli support callhome enable` | notice, exit `1` | `disable` / `status` still work |
+| `mcli support upload`                        | notice, exit `1` | share files through your own channels                          |
+| `mcli support proxy set`                     | notice, exit `1` | `proxy remove` still clears a legacy setting                   |
+| `mcli support callhome enable`               | notice, exit `1` | `disable` / `status` still work                                |
 
 The diagnostics themselves stay: `mcli support diag` / `perf` / `profile` / `inspect` always run in local (airgap) mode — results are written to local files, nothing is uploaded, and SUBNET registration is no longer a prerequisite. Two related hardening changes: `inspect` no longer falls back to encrypting output with an embedded MinIO public key (your archives stay decryptable by you), and since 20260804 `--debug` output redacts SUBNET credentials — if you ever shared debug logs from older builds, rotate the keys in them. `mcli license info` and `unregister` work locally.
 
@@ -98,7 +98,6 @@ Moving from an official `mc` binary to `mcli`:
 ## See also {#see-also}
 
 - [Silo vs. MinIO](/compatibility/server/) — how the `silo` server compares to `minio`
-- [Console](/compatibility/console/) — how the Silo Console compares to the MinIO Console
 
 [20260313]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-13T08-57-32Z
 [20260321]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-21T00-00-00Z

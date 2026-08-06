@@ -1,6 +1,6 @@
 ---
-title: "MCLI 兼容性注记"
-linkTitle: "MCLI"
+title: "MCLI 客户端兼容性注记"
+linkTitle: "客户端 MC"
 description: "pgsty/mc 与上游 minio/mc 的差异"
 url: "/zh/compatibility/mcli/"
 weight: 20
@@ -98,7 +98,6 @@ silo_modified: false
 ## 参考阅读 {#see-also}
 
 - [Silo 与 MinIO](/zh/compatibility/server/) —— `silo` 服务端与 `minio` 的对比
-- [控制台](/zh/compatibility/console/) —— Silo 控制台与 MinIO 控制台的对比
 
 [20260313]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-13T08-57-32Z
 [20260321]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-21T00-00-00Z

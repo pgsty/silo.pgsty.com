@@ -67,18 +67,29 @@
     });
   }
 
+  // Tab groups can nest (e.g. image-variant sub-tabs inside an install-method
+  // panel), so every lookup is scoped to elements whose nearest group is the
+  // group being operated on - descendants owned by a nested group are ignored.
+  function ownedBy(group, selector) {
+    return Array.prototype.filter.call(group.querySelectorAll(selector), function (el) {
+      return el.closest('[data-download-tabs]') === group;
+    });
+  }
+
   function activateTab(group, targetId, updateHash) {
-    var button = group.querySelector('[data-download-tab="' + targetId + '"]');
-    var panel = group.querySelector('#' + targetId);
+    var button = ownedBy(group, '[data-download-tab="' + targetId + '"]')[0];
+    var panel = ownedBy(group, '[role="tabpanel"]').filter(function (el) {
+      return el.id === targetId;
+    })[0];
     if (!button || !panel) return false;
 
-    group.querySelectorAll('[data-download-tab]').forEach(function (item) {
+    ownedBy(group, '[data-download-tab]').forEach(function (item) {
       var active = item === button;
       item.setAttribute('aria-selected', active ? 'true' : 'false');
       item.setAttribute('tabindex', active ? '0' : '-1');
     });
 
-    group.querySelectorAll('[role="tabpanel"]').forEach(function (item) {
+    ownedBy(group, '[role="tabpanel"]').forEach(function (item) {
       item.hidden = item !== panel;
     });
 
@@ -92,7 +103,7 @@
     var groups = Array.prototype.slice.call(document.querySelectorAll('[data-download-tabs]'));
 
     groups.forEach(function (group) {
-      var buttons = Array.prototype.slice.call(group.querySelectorAll('[data-download-tab]'));
+      var buttons = ownedBy(group, '[data-download-tab]');
 
       buttons.forEach(function (button, index) {
         button.addEventListener('click', function () {

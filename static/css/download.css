@@ -1656,3 +1656,30 @@
     transition: none;
   }
 }
+
+/* Nested image-variant sub-tabs (Standard / Distroless) inside a panel. */
+.download-subtabs .download-tablist--sub {
+  padding: 0;
+  gap: 8px;
+  margin: 0 0 12px;
+  border-bottom: 0;
+  background: transparent;
+}
+
+.download-tablist--sub button {
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.74rem;
+}
+
+.download-tablist--sub button::after {
+  display: none;
+}
+
+.download-tablist--sub button[aria-selected="true"] {
+  border-color: var(--copper);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--copper) 10%, transparent);
+}

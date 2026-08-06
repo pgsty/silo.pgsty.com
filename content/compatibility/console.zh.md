@@ -5,6 +5,7 @@ description: "Silo 控制台与 MinIO 控制台的对比：恢复的功能、移
 url: "/zh/compatibility/console/"
 weight: 30
 type: docs
+draft: true
 icon: fa-solid fa-display
 minio_origin: false
 silo_modified: false

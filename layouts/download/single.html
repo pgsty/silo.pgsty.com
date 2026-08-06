@@ -3,11 +3,11 @@
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
 {{- $metrics := hugo.Data.home.metrics -}}
 {{- $socialImage := "images/silo-social-card.png" | absURL -}}
-{{- $serverTag := "RELEASE.2026-08-04T00-00-00Z" -}}
-{{- $serverBuild := "20260804000000.0.0" -}}
-{{- $serverBase := printf "https://github.com/pgsty/minio/releases/download/%s" $serverTag -}}
-{{- $clientTag := "RELEASE.2026-08-04T00-00-00Z" -}}
-{{- $clientBuild := "20260804000000.0.0" -}}
+{{- $serverTag := "RELEASE.2026-08-06T00-00-00Z" -}}
+{{- $serverBuild := "20260806000000.0.0" -}}
+{{- $serverBase := printf "https://github.com/pgsty/silo/releases/download/%s" $serverTag -}}
+{{- $clientTag := "RELEASE.2026-08-06T00-00-00Z" -}}
+{{- $clientBuild := "20260806000000.0.0" -}}
 {{- $clientBase := printf "https://github.com/pgsty/mc/releases/download/%s" $clientTag -}}
 <!DOCTYPE html>
 <html lang="{{ $locale }}" class="no-js">
@@ -58,8 +58,8 @@
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Linux, macOS, Windows",
     "softwareVersion": {{ $serverTag | jsonify | safeJS }},
-    "downloadUrl": "https://github.com/pgsty/minio/releases/latest",
-    "codeRepository": "https://github.com/pgsty/minio",
+    "downloadUrl": "https://github.com/pgsty/silo/releases/latest",
+    "codeRepository": "https://github.com/pgsty/silo",
     "license": "https://www.gnu.org/licenses/agpl-3.0.html",
     "isAccessibleForFree": true,
     "maintainer": {
@@ -114,7 +114,7 @@
           {{ range .Translations }}
           <a href="{{ .RelPermalink }}" class="nav-util" title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}">{{ partialCached "silo/icon.html" "languages" "languages" }}</a>
           {{ end }}
-          <a href="https://github.com/pgsty/minio" class="nav-github" target="_blank" rel="noopener" title="GitHub">
+          <a href="https://github.com/pgsty/silo" class="nav-github" target="_blank" rel="noopener" title="GitHub">
             {{ partialCached "silo/icon.html" "github" "github" }}
             <span class="nav-count">{{ partial "compact-number.html" $metrics.github_stars }}</span>
           </a>
@@ -133,7 +133,7 @@
     <a href="{{ relLangURL "download/" }}" class="mobile-menu-link active"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Download &amp; Install{{ end }}</a>
     {{ range .Translations }}<a href="{{ .RelPermalink }}" class="mobile-menu-link"><i class="fas fa-language" aria-hidden="true"></i> {{ .Language.Label }}</a>{{ end }}
     <button type="button" class="mobile-menu-link mobile-menu-link--btn" data-theme-toggle><i class="fas fa-moon" aria-hidden="true"></i> {{ if $zh }}浅色 / 深色{{ else }}Light / Dark{{ end }}</button>
-    <a href="https://github.com/pgsty/minio" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · {{ partial "compact-number.html" $metrics.github_stars }}</a>
+    <a href="https://github.com/pgsty/silo" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · {{ partial "compact-number.html" $metrics.github_stars }}</a>
   </div>
 
   <main id="main">
@@ -146,8 +146,8 @@
           <p>{{ if $zh }}先选择服务端或管理客户端，再选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Choose the server or admin client first, then use the install path that matches your operating system, architecture, and deployment model.{{ end }}</p>
           <div class="download-release-line">
             <span class="release-live"><i aria-hidden="true"></i>{{ if $zh }}当前服务端发行版{{ else }}CURRENT SERVER RELEASE{{ end }}</span>
-            <a href="https://github.com/pgsty/minio/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
-            <span>2026-08-04 · amd64 / arm64</span>
+            <a href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
+            <span>2026-08-06 · amd64 / arm64</span>
           </div>
         </div>
 
@@ -156,11 +156,11 @@
             <div class="product-choice-top">
               <div>
                 <p class="silkscreen">{{ if $zh }}数据服务{{ else }}DATA SERVICE{{ end }}</p>
-                <h2>SILO Server</h2>
+                <h2>SILO server</h2>
               </div>
               <span class="product-choice-icon"><i class="fas fa-server" aria-hidden="true"></i></span>
             </div>
-            <p>{{ if $zh }}服务端二进制、容器镜像、Linux 软件包、源码，以及 Pigsty Ansible 自动化部署。{{ else }}Server binaries, container images, Linux packages, source, and Pigsty Ansible automation.{{ end }}</p>
+            <p>{{ if $zh }}服务端二进制、容器镜像、Linux 软件包、源码，以及 Ansible 部署。{{ else }}Server binaries, container images, Linux packages, source, and Ansible playbook.{{ end }}</p>
             <div class="product-platforms"><span>Linux</span><span>Docker</span><span>Kubernetes</span><span>Ansible</span><span>macOS</span><span>Windows</span></div>
             <strong>{{ if $zh }}选择安装方式{{ else }}Choose install method{{ end }} <i aria-hidden="true">↗</i></strong>
           </a>
@@ -169,7 +169,7 @@
             <div class="product-choice-top">
               <div>
                 <p class="silkscreen">{{ if $zh }}管理客户端{{ else }}ADMIN CLI{{ end }}</p>
-                <h2>mcli Client</h2>
+                <h2>MCLI Client</h2>
               </div>
               <span class="product-choice-icon"><i class="fas fa-terminal" aria-hidden="true"></i></span>
             </div>
@@ -186,18 +186,18 @@
         <div class="download-section-head" data-reveal>
           <div>
             <p class="section-eyebrow"><span class="silkscreen">01 / DATA SERVICE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-            <h2 id="server-title">SILO Server</h2>
+            <h2 id="server-title">SILO server</h2>
             <p>{{ if $zh }}从本地验证到多节点生产集群，选择与你的控制边界相匹配的交付方式。{{ else }}From local validation to a multi-node production cluster, choose the delivery path that matches your control boundary.{{ end }}</p>
           </div>
-          <a class="version-card" href="https://github.com/pgsty/minio/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">
+          <a class="version-card" href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">
             <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
-            <strong>2026-08-04</strong>
+            <strong>2026-08-06</strong>
             <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
           </a>
         </div>
 
         <div class="download-tabs" data-download-tabs data-reveal>
-          <div class="download-tablist" role="tablist" aria-label="{{ if $zh }}SILO Server 安装方式{{ else }}SILO Server install methods{{ end }}">
+          <div class="download-tablist" role="tablist" aria-label="{{ if $zh }}SILO server 安装方式{{ else }}SILO server install methods{{ end }}">
             <button type="button" role="tab" id="tab-server-docker" aria-controls="server-docker" aria-selected="true" data-download-tab="server-docker"><i class="fab fa-docker" aria-hidden="true"></i> Docker</button>
             <button type="button" role="tab" id="tab-server-kubernetes" aria-controls="server-kubernetes" aria-selected="false" tabindex="-1" data-download-tab="server-kubernetes"><i class="fas fa-dharmachakra" aria-hidden="true"></i> Kubernetes</button>
             <button type="button" role="tab" id="tab-server-packages" aria-controls="server-packages" aria-selected="false" tabindex="-1" data-download-tab="server-packages"><i class="fas fa-box" aria-hidden="true"></i> {{ if $zh }}Linux 软件包{{ else }}Linux Packages{{ end }}</button>
@@ -210,27 +210,47 @@
             <section class="download-panel" id="server-docker" role="tabpanel" aria-labelledby="tab-server-docker">
               <div class="method-heading">
                 <div><span class="method-kicker">CONTAINER / MULTI-ARCH</span><h3>{{ if $zh }}几分钟内启动一个可持久化实例{{ else }}Run a persistent instance in minutes{{ end }}</h3></div>
-                <div class="method-tags"><span>linux/amd64</span><span>linux/arm64</span><span>Docker</span><span>Podman</span></div>
+                <div class="method-tags"><span>linux/amd64</span><span>linux/arm64</span><span>Docker</span><span>Podman</span><span>Distroless</span></div>
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}适合本地评估、开发环境和已经以容器为交付边界的部署。生产环境请固定镜像标签、替换凭据并使用持久卷。{{ else }}Best for local evaluation, development, and deployments that already use containers as the delivery boundary. Pin the image tag, replace credentials, and use persistent storage in production.{{ end }}</p>
-                  <div class="download-code">
-                    <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> shell</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Docker 命令{{ else }}Copy Docker command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                    <pre><code>docker pull pgsty/minio:latest
+                  <p>{{ if $zh }}适合本地评估、开发环境和已经以容器为交付边界的部署。标准镜像附带 <code>mcli</code>、<code>curl</code> 与 shell；Distroless 变体只含 <code>silo</code> 二进制，内置 <code>silo healthcheck</code> 健康检查，支持任意 <code>--user</code> 运行。{{ else }}Best for local evaluation, development, and deployments that already use containers as the delivery boundary. The standard image bundles <code>mcli</code>, <code>curl</code>, and a shell; the distroless variant ships the <code>silo</code> binary only, with a built-in <code>silo healthcheck</code> and support for any <code>--user</code>.{{ end }}</p>
+                  <div class="download-subtabs" data-download-tabs>
+                    <div class="download-tablist download-tablist--sub" role="tablist" aria-label="{{ if $zh }}镜像变体{{ else }}Image variant{{ end }}">
+                      <button type="button" role="tab" id="tab-server-docker-standard" aria-controls="server-docker-standard" aria-selected="true" data-download-tab="server-docker-standard">Standard</button>
+                      <button type="button" role="tab" id="tab-server-docker-distroless" aria-controls="server-docker-distroless" aria-selected="false" tabindex="-1" data-download-tab="server-docker-distroless">Distroless</button>
+                    </div>
+                    <section role="tabpanel" id="server-docker-standard" aria-labelledby="tab-server-docker-standard">
+                      <div class="download-code">
+                        <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> shell</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Docker 命令{{ else }}Copy Docker command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+                        <pre><code>docker pull pgsty/silo:{{ $serverTag }}
 docker run -d --name silo --restart unless-stopped \
   -p 9000:9000 -p 9001:9001 \
-  -v /data/minio:/data \
-  -e MINIO_UPDATE=off \
+  -v /data/silo:/data \
   -e MINIO_ROOT_USER=silo-admin \
   -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
-  pgsty/minio:latest server /data --console-address :9001</code></pre>
+  pgsty/silo:{{ $serverTag }} server /data --console-address :9001</code></pre>
+                      </div>
+                    </section>
+                    <section role="tabpanel" id="server-docker-distroless" aria-labelledby="tab-server-docker-distroless" hidden>
+                      <div class="download-code">
+                        <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> shell</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Distroless Docker 命令{{ else }}Copy distroless Docker command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+                        <pre><code>docker pull pgsty/silo:{{ $serverTag }}-distroless
+docker run -d --name silo --restart unless-stopped \
+  -p 9000:9000 -p 9001:9001 \
+  -v /data/silo:/data \
+  -e MINIO_ROOT_USER=silo-admin \
+  -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
+  pgsty/silo:{{ $serverTag }}-distroless server /data --console-address :9001</code></pre>
+                      </div>
+                    </section>
                   </div>
                   <div class="method-actions">
-                    <a class="btn btn-primary" href="https://hub.docker.com/r/pgsty/minio" target="_blank" rel="noopener"><i class="fab fa-docker" aria-hidden="true"></i> Docker Hub</a>
+                    <a class="btn btn-primary" href="https://hub.docker.com/r/pgsty/silo" target="_blank" rel="noopener"><i class="fab fa-docker" aria-hidden="true"></i> Docker Hub</a>
+                    <a class="btn btn-line" href="{{ relLangURL "compatibility/migration/" }}">{{ if $zh }}迁移指南{{ else }}Migration guide{{ end }} →</a>
                     <a class="btn btn-line" href="{{ relLangURL "operations/deployments/baremetal-deploy-minio-as-a-container/" }}">{{ if $zh }}容器部署文档{{ else }}Container guide{{ end }} →</a>
                   </div>
-                  <div class="security-note"><i class="fas fa-shield-halved" aria-hidden="true"></i><span>{{ if $zh }}默认示例凭据仅用于本地测试；上线前启用 TLS、唯一强凭据并验证恢复流程。<code>MINIO_UPDATE=off</code> 禁用会指向上游 MinIO 的原地更新路径；请通过替换已验证镜像升级。{{ else }}Example credentials are for local testing only. Enable TLS, use unique strong credentials, and test recovery before production. <code>MINIO_UPDATE=off</code> disables the in-place path that still targets upstream MinIO; upgrade by replacing the image with a verified Silo build.{{ end }}</span></div>
+                  <div class="security-note"><i class="fas fa-shield-halved" aria-hidden="true"></i><span>{{ if $zh }}默认示例凭据仅用于本地测试；上线前启用 TLS、使用唯一强凭据并验证恢复流程。原地自更新在 SILO 中已被禁用；请通过替换固定标签的镜像升级。{{ else }}Example credentials are for local testing only. Enable TLS, use unique strong credentials, and test recovery before production. In-place self-update is disabled in SILO; upgrade by replacing the pinned image tag.{{ end }}</span></div>
                 </div>
               </div>
             </section>
@@ -242,23 +262,20 @@ docker run -d --name silo --restart unless-stopped \
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}当前 MinIO Operator Tenant Chart 支持覆盖租户镜像仓库、标签或摘要。下载官方 <code>values.yaml</code> 后，将 <code>tenant.image</code> 指向 <code>pgsty/minio</code>，再按故障域配置存储池与 PVC。{{ else }}The current MinIO Operator Tenant Chart supports overriding the tenant image repository, tag, or digest. Download the official <code>values.yaml</code>, point <code>tenant.image</code> at <code>pgsty/minio</code>, then configure pools and PVCs for your failure domains.{{ end }}</p>
+                  <p>{{ if $zh }}当前 MinIO Operator Tenant Chart 支持覆盖租户镜像仓库、标签或摘要。下载官方 <code>values.yaml</code> 后，将 <code>tenant.image</code> 指向 <code>pgsty/silo</code>，再按故障域配置存储池与 PVC。{{ else }}The current MinIO Operator Tenant Chart supports overriding the tenant image repository, tag, or digest. Download the official <code>values.yaml</code>, point <code>tenant.image</code> at <code>pgsty/silo</code>, then configure pools and PVCs for your failure domains.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fas fa-file-code" aria-hidden="true"></i> values.yaml</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Kubernetes 镜像配置{{ else }}Copy Kubernetes image configuration{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
                     <pre><code>tenant:
   image:
-    repository: pgsty/minio
-    tag: latest
-    pullPolicy: IfNotPresent
-  env:
-    - name: MINIO_UPDATE
-      value: "off"</code></pre>
+    repository: pgsty/silo
+    tag: {{ $serverTag }}
+    pullPolicy: IfNotPresent</code></pre>
                   </div>
                   <div class="method-actions">
                     <a class="btn btn-primary" href="{{ relLangURL "operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/" }}"><i class="fas fa-book-open" aria-hidden="true"></i> {{ if $zh }}Tenant 部署文档{{ else }}Tenant deployment guide{{ end }}</a>
                     <a class="btn btn-line" href="https://github.com/minio/operator/tree/v7.1.1/helm/tenant" target="_blank" rel="noopener">{{ if $zh }}查看 Helm Chart{{ else }}View Helm chart{{ end }} ↗</a>
                   </div>
-                  <div class="security-note"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>{{ if $zh }}示例中的 <code>latest</code> 仅用于演示。生产环境应固定已验证的标签或摘要，并在安装前检查存储池、StorageClass、反亲和、TLS 与租户凭据。<code>MINIO_UPDATE=off</code> 避免 Operator 管理的容器通过上游更新源原地替换二进制。上游 Operator 仓库已归档；请将 <code>v7.1.1</code> 视为冻结的兼容基线。{{ else }}The <code>latest</code> tag is illustrative. In production, pin a tested tag or digest and review pools, StorageClass, anti-affinity, TLS, and tenant credentials before installation. <code>MINIO_UPDATE=off</code> prevents an Operator-managed container from replacing its binary through the upstream update feed. The upstream Operator repository is archived; treat <code>v7.1.1</code> as a frozen compatibility baseline.{{ end }}</span></div>
+                  <div class="security-note"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>{{ if $zh }}生产环境应固定已验证的标签或摘要，并在安装前检查存储池、StorageClass、反亲和、TLS 与租户凭据。原地自更新在 SILO 中已被禁用。上游 Operator 仓库已归档；请将 <code>v7.1.1</code> 视为冻结的兼容基线。{{ else }}In production, pin a tested tag or digest and review pools, StorageClass, anti-affinity, TLS, and tenant credentials before installation. In-place self-update is disabled in SILO. The upstream Operator repository is archived; treat <code>v7.1.1</code> as a frozen compatibility baseline.{{ end }}</span></div>
                 </div>
               </div>
             </section>
@@ -272,23 +289,23 @@ docker run -d --name silo --restart unless-stopped \
               <div class="asset-family-grid">
                 <article class="asset-family">
                   <div class="asset-family-head"><span>RPM</span><p>RHEL · Rocky · Alma · Fedora</p></div>
-                  <a href="{{ printf "%s/minio-%s-1.x86_64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>minio · rpm</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/minio-%s-1.aarch64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>minio · rpm</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo-%s-1.x86_64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>silo · rpm</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo-%s-1.aarch64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>silo · rpm</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>DEB</span><p>Debian · Ubuntu</p></div>
-                  <a href="{{ printf "%s/minio_%s_amd64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>minio · deb</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/minio_%s_arm64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>minio · deb</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_amd64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>silo · deb</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_arm64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>silo · deb</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>APK</span><p>Alpine Linux</p></div>
-                  <a href="{{ printf "%s/minio_%s_x86_64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>minio · apk</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/minio_%s_aarch64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>minio · apk</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_x86_64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>silo · apk</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_aarch64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>silo · apk</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="package-footer">
-                <a href="{{ printf "%s/minio_%s_checksums.txt" $serverBase $serverBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}校验和{{ else }}checksums{{ end }}</a>
-                <a href="https://github.com/pgsty/minio/releases" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}全部发行制品{{ else }}All release artifacts{{ end }}</a>
+                <a href="{{ printf "%s/silo_%s_checksums.txt" $serverBase $serverBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}校验和{{ else }}checksums{{ end }}</a>
+                <a href="https://github.com/pgsty/silo/releases" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}全部发行制品{{ else }}All release artifacts{{ end }}</a>
               </div>
             </section>
 
@@ -301,26 +318,26 @@ docker run -d --name silo --restart unless-stopped \
               <div class="binary-grid">
                 <article class="binary-platform" data-platform="linux">
                   <div><span class="platform-icon"><i class="fab fa-linux" aria-hidden="true"></i></span><h4>Linux</h4><small>GNU / musl environments</small></div>
-                  <a href="{{ printf "%s/minio_%s_linux_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">x86_64 <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/minio_%s_linux_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">ARM64 <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_linux_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">x86_64 <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_linux_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">ARM64 <i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="binary-platform" data-platform="macos">
                   <div><span class="platform-icon"><i class="fab fa-apple" aria-hidden="true"></i></span><h4>macOS</h4><small>Intel / Apple Silicon</small></div>
-                  <a href="{{ printf "%s/minio_%s_darwin_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">Intel <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/minio_%s_darwin_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">Apple Silicon <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_darwin_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">Intel <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_darwin_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">Apple Silicon <i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="binary-platform" data-platform="windows">
                   <div><span class="platform-icon"><i class="fab fa-windows" aria-hidden="true"></i></span><h4>Windows</h4><small>PowerShell / Windows Server</small></div>
-                  <a href="{{ printf "%s/minio_%s_windows_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">x86_64 <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/minio_%s_windows_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">ARM64 <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_windows_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">x86_64 <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_windows_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">ARM64 <i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="download-code download-code--compact">
                 <div class="download-code-head"><span><i class="fab fa-linux" aria-hidden="true"></i> Linux x86_64</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制安装命令{{ else }}Copy install command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                <pre><code>curl -fLO {{ printf "%s/minio_%s_linux_amd64.tar.gz" $serverBase $serverBuild }}
-tar -xzf {{ printf "minio_%s_linux_amd64.tar.gz" $serverBuild }}
-sudo install -m 0755 minio /usr/local/bin/minio
-minio --version</code></pre>
+                <pre><code>curl -fLO {{ printf "%s/silo_%s_linux_amd64.tar.gz" $serverBase $serverBuild }}
+tar -xzf {{ printf "silo_%s_linux_amd64.tar.gz" $serverBuild }}
+sudo install -m 0755 silo /usr/local/bin/silo
+silo --version</code></pre>
               </div>
             </section>
 
@@ -381,23 +398,23 @@ mcli ls sss/</code></pre>
               </div>
               <div class="method-grid">
                 <div class="method-main">
-                  <p>{{ if $zh }}适合审计、二次开发或需要自定义构建参数的场景。构建结果是当前平台的 <code>minio</code> 可执行文件。{{ else }}Use this path for auditing, development, or custom build flags. The result is a native <code>minio</code> executable for the current platform.{{ end }}</p>
+                  <p>{{ if $zh }}适合审计、二次开发或需要自定义构建参数的场景。构建结果是当前平台的 <code>silo</code> 可执行文件。{{ else }}Use this path for auditing, development, or custom build flags. The result is a native <code>silo</code> executable for the current platform.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fab fa-git-alt" aria-hidden="true"></i> git + make</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制源码构建命令{{ else }}Copy source build command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                    <pre><code>git clone https://github.com/pgsty/minio.git
-cd minio
+                    <pre><code>git clone https://github.com/pgsty/silo.git
+cd silo
 make build
-./minio --version</code></pre>
+./silo --version</code></pre>
                   </div>
                   <div class="method-actions">
-                    <a class="btn btn-primary" href="https://github.com/pgsty/minio" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}浏览源码{{ else }}Browse source{{ end }}</a>
-                    <a class="btn btn-line" href="https://github.com/pgsty/minio/blob/master/CONTRIBUTING.md" target="_blank" rel="noopener">{{ if $zh }}贡献指南{{ else }}Contributing{{ end }} →</a>
+                    <a class="btn btn-primary" href="https://github.com/pgsty/silo" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}浏览源码{{ else }}Browse source{{ end }}</a>
+                    <a class="btn btn-line" href="https://github.com/pgsty/silo/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">{{ if $zh }}贡献指南{{ else }}Contributing{{ end }} →</a>
                   </div>
                 </div>
                 <aside class="method-aside">
                   <div class="build-plate" aria-hidden="true">
                     <span>BUILD TARGET</span>
-                    <strong>minio</strong>
+                    <strong>silo</strong>
                     <div><i></i><b>GOOS</b><em>native</em></div>
                     <div><i></i><b>GOARCH</b><em>native</em></div>
                     <div><i></i><b>CGO</b><em>disabled</em></div>
@@ -420,21 +437,21 @@ make build
           </div>
           <a class="version-card version-card--client" href="https://github.com/pgsty/mc/releases/tag/{{ $clientTag }}" target="_blank" rel="noopener">
             <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
-            <strong>2026-08-04</strong>
+            <strong>2026-08-06</strong>
             <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
           </a>
         </div>
 
         <div class="download-tabs" data-download-tabs data-reveal>
-          <div class="download-tablist" role="tablist" aria-label="{{ if $zh }}mcli 安装方式{{ else }}mcli install methods{{ end }}">
-            <button type="button" role="tab" id="tab-client-packages" aria-controls="client-packages" aria-selected="true" data-download-tab="client-packages"><i class="fas fa-box" aria-hidden="true"></i> {{ if $zh }}Linux 软件包{{ else }}Linux Packages{{ end }}</button>
+          <div class="download-tablist" role="tablist" aria-label="{{ if $zh }}MCLI Client 安装方式{{ else }}MCLI Client install methods{{ end }}">
+            <button type="button" role="tab" id="tab-client-container" aria-controls="client-container" aria-selected="true" data-download-tab="client-container"><i class="fab fa-docker" aria-hidden="true"></i> Docker</button>
+            <button type="button" role="tab" id="tab-client-packages" aria-controls="client-packages" aria-selected="false" tabindex="-1" data-download-tab="client-packages"><i class="fas fa-box" aria-hidden="true"></i> {{ if $zh }}Linux 软件包{{ else }}Linux Packages{{ end }}</button>
             <button type="button" role="tab" id="tab-client-binary" aria-controls="client-binary" aria-selected="false" tabindex="-1" data-download-tab="client-binary"><i class="fas fa-terminal" aria-hidden="true"></i> {{ if $zh }}二进制{{ else }}Binaries{{ end }}</button>
-            <button type="button" role="tab" id="tab-client-container" aria-controls="client-container" aria-selected="false" tabindex="-1" data-download-tab="client-container"><i class="fab fa-docker" aria-hidden="true"></i> Container</button>
             <button type="button" role="tab" id="tab-client-source" aria-controls="client-source" aria-selected="false" tabindex="-1" data-download-tab="client-source"><i class="fas fa-code" aria-hidden="true"></i> {{ if $zh }}源码{{ else }}Source{{ end }}</button>
           </div>
 
           <div class="download-tabpanels">
-            <section class="download-panel" id="client-packages" role="tabpanel" aria-labelledby="tab-client-packages">
+            <section class="download-panel" id="client-packages" role="tabpanel" aria-labelledby="tab-client-packages" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">MCLI / NATIVE PACKAGES</span><h3>{{ if $zh }}安装与你的 Linux 发行版匹配的软件包{{ else }}Install the package for your Linux distribution{{ end }}</h3></div>
                 <div class="method-tags"><span>RPM</span><span>DEB</span><span>APK</span><span>SHA-256</span></div>
@@ -491,7 +508,7 @@ make build
               </div>
             </section>
 
-            <section class="download-panel" id="client-container" role="tabpanel" aria-labelledby="tab-client-container" hidden>
+            <section class="download-panel" id="client-container" role="tabpanel" aria-labelledby="tab-client-container">
               <div class="method-heading">
                 <div><span class="method-kicker">CONTAINER CLIENT</span><h3>{{ if $zh }}无需在宿主机安装即可运行 mcli{{ else }}Run mcli without installing it on the host{{ end }}</h3></div>
                 <div class="method-tags"><span>linux/amd64</span><span>linux/arm64</span><span>mc entrypoint</span></div>
@@ -501,8 +518,8 @@ make build
                   <p>{{ if $zh }}容器镜像保留熟悉的 <code>mc</code> 入口点；独立归档与 Linux 软件包则使用 <code>mcli</code>。{{ else }}The container retains the familiar <code>mc</code> entrypoint, while standalone archives and Linux packages use <code>mcli</code>.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fab fa-docker" aria-hidden="true"></i> Docker</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制容器客户端命令{{ else }}Copy container client command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                    <pre><code>docker run --rm pgsty/mc:latest --version
-docker run --rm pgsty/mc:latest ls play</code></pre>
+                    <pre><code>docker run --rm pgsty/mc:{{ $clientTag }} --version
+docker run --rm pgsty/mc:{{ $clientTag }} ls play</code></pre>
                   </div>
                   <div class="method-actions"><a class="btn btn-primary" href="https://hub.docker.com/r/pgsty/mc" target="_blank" rel="noopener"><i class="fab fa-docker" aria-hidden="true"></i> Docker Hub</a></div>
                 </div>
@@ -556,14 +573,14 @@ make build
             <div class="topology-head"><span>SNSD</span><small>01 × 01</small></div>
             <h3>{{ if $zh }}单节点 · 单磁盘{{ else }}Single node · single disk{{ end }}</h3>
             <p>{{ if $zh }}个人实验、本地开发与可丢弃的非生产验证。没有数据冗余。{{ else }}Personal labs, local development, and disposable non-production validation. No data redundancy.{{ end }}</p>
-            <code>minio server /data</code>
+            <code>silo server /data</code>
             <b>{{ if $zh }}开发 / 测试{{ else }}DEV / TEST{{ end }}</b>
           </article>
           <article>
             <div class="topology-head"><span>SNMD</span><small>01 × 04+</small></div>
             <h3>{{ if $zh }}单节点 · 多磁盘{{ else }}Single node · multiple disks{{ end }}</h3>
             <p>{{ if $zh }}资源受限时的折中方案，可承受部分磁盘故障，但无法承受节点故障。{{ else }}A resource-constrained compromise that can tolerate some disk failures, but not node failure.{{ end }}</p>
-            <code>minio server /data{1...4}</code>
+            <code>silo server /data{1...4}</code>
             <b>{{ if $zh }}资源受限{{ else }}CONSTRAINED{{ end }}</b>
           </article>
           <article class="topology-featured">
@@ -591,7 +608,7 @@ make build
             <p>{{ if $zh }}配置、部署、S3 客户端、安全与运维指南。{{ else }}Configuration, deployment, S3 clients, security, and operations guidance.{{ end }}</p>
             <b>{{ if $zh }}浏览文档{{ else }}Browse documentation{{ end }} ↗</b>
           </a>
-          <a href="https://github.com/pgsty/minio/issues" target="_blank" rel="noopener">
+          <a href="https://github.com/pgsty/silo/issues" target="_blank" rel="noopener">
             <span><i class="fab fa-github" aria-hidden="true"></i></span>
             <h3>{{ if $zh }}报告问题{{ else }}Report an issue{{ end }}</h3>
             <p>{{ if $zh }}提交兼容性反馈、安装障碍或可复现的运维问题。{{ else }}Share compatibility feedback, installation friction, or reproducible operational issues.{{ end }}</p>

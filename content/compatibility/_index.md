@@ -10,6 +10,6 @@ minio_origin: false
 silo_modified: false
 ---
 
-Silo is a community fork of MinIO, so the two remain close relatives rather than separate products. This section records, component by component, what Silo keeps from MinIO, where it deliberately differs, and what either means if you are moving between them.
+Silo is a community fork of MinIO. This section records what Silo keeps from MinIO, where it deliberately differs, and what either means when moving between them.
 
-One page per component: the `silo` server, the `mcli` client, and the web Console. The [Feature Notes](/compatibility/feature/) subsection covers the opposite direction — design notes for capabilities Silo adds beyond upstream.
+Contents, in reading order: the [migration guide](/compatibility/migration/) (scope and Docker), [native package migration](/compatibility/binary/) (RPM/DEB), the [server compatibility audit](/compatibility/server/), and the [mcli client notes](/compatibility/mcli/). The [Feature Notes](/compatibility/feature/) subsection covers the opposite direction: design records for capabilities Silo adds beyond upstream.

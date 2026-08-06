@@ -3671,9 +3671,22 @@
       "/compatibility/",
       "/compatibility/mcli/"
     ],
-    "/compatibility/console/": [
+    "/compatibility/migration/": [
       "/compatibility/",
-      "/compatibility/console/"
+      "/compatibility/migration/"
+    ],
+    "/compatibility/binary/": [
+      "/compatibility/",
+      "/compatibility/binary/"
+    ],
+    "/compatibility/feature/": [
+      "/compatibility/",
+      "/compatibility/feature/"
+    ],
+    "/compatibility/feature/healthcheck/": [
+      "/compatibility/",
+      "/compatibility/feature/",
+      "/compatibility/feature/healthcheck/"
     ]
   },
   "sections": [
@@ -3681,14 +3694,14 @@
       "page": "docs",
       "url": "/docs/",
       "title_en": "Documentation",
-      "title_zh": "文档",
+      "title_zh": "\u6587\u6863",
       "children": []
     },
     {
       "page": "about",
       "url": "/about/",
       "title_en": "About",
-      "title_zh": "关于",
+      "title_zh": "\u5173\u4e8e",
       "children": [
         {
           "page": "about/license",
@@ -3716,8 +3729,18 @@
       "page": "compatibility",
       "url": "/compatibility/",
       "title_en": "Compatibility",
-      "title_zh": "兼容性",
+      "title_zh": "\u517c\u5bb9\u6027",
       "children": [
+        {
+          "page": "compatibility/migration",
+          "url": "/compatibility/migration/",
+          "children": []
+        },
+        {
+          "page": "compatibility/binary",
+          "url": "/compatibility/binary/",
+          "children": []
+        },
         {
           "page": "compatibility/server",
           "url": "/compatibility/server/",
@@ -3729,9 +3752,15 @@
           "children": []
         },
         {
-          "page": "compatibility/console",
-          "url": "/compatibility/console/",
-          "children": []
+          "page": "compatibility/feature",
+          "url": "/compatibility/feature/",
+          "children": [
+            {
+              "page": "compatibility/feature/healthcheck",
+              "url": "/compatibility/feature/healthcheck/",
+              "children": []
+            }
+          ]
         }
       ]
     },
@@ -3739,7 +3768,7 @@
       "page": "operations",
       "url": "/operations/",
       "title_en": "Operations",
-      "title_zh": "运维",
+      "title_zh": "\u8fd0\u7ef4",
       "children": [
         {
           "source_doc": "operations/deployments/installation",
@@ -4129,7 +4158,7 @@
       "page": "administration",
       "url": "/administration/",
       "title_en": "Administration",
-      "title_zh": "管理",
+      "title_zh": "\u7ba1\u7406",
       "children": [
         {
           "source_doc": "administration/minio-console",
@@ -4459,7 +4488,7 @@
       "page": "developers",
       "url": "/developers/",
       "title_en": "Developers",
-      "title_zh": "开发",
+      "title_zh": "\u5f00\u53d1",
       "children": [
         {
           "source_doc": "developers/minio-drivers",
@@ -4559,7 +4588,7 @@
       "page": "reference",
       "url": "/reference/",
       "title_en": "Reference",
-      "title_zh": "参考",
+      "title_zh": "\u53c2\u8003",
       "children": [
         {
           "source_doc": "reference/kubernetes",
@@ -6135,7 +6164,7 @@
       "page": "integrations",
       "url": "/integrations/",
       "title_en": "Integrations",
-      "title_zh": "集成",
+      "title_zh": "\u96c6\u6210",
       "children": [
         {
           "source_doc": "integrations/using-minio-with-veeam",

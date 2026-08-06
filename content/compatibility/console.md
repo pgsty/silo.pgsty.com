@@ -5,6 +5,7 @@ description: "How the Silo Console compares to the MinIO Console: restored featu
 url: "/compatibility/console/"
 weight: 30
 type: docs
+draft: true
 icon: fa-solid fa-display
 minio_origin: false
 silo_modified: false
