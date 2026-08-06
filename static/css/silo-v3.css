@@ -526,6 +526,52 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 .promise-card li { position: relative; padding-left: 22px; color: var(--ink-soft); }
 .promise-card li::before { content: "+"; position: absolute; top: 0; left: 1px; font-family: var(--font-mono); font-weight: 600; color: var(--ok); }
 .promise-card--no li::before { content: "–"; color: var(--copper); }
+.promise-cta { margin-top: 26px; text-align: center; }
+
+/* FAQ：原生 details 互斥手风琴（name 属性），无 JS */
+.faq-list { max-width: 880px; margin: 0 auto; }
+.faq-item {
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 180ms ease;
+  interpolate-size: allow-keywords;
+}
+.faq-item[open] { border-color: var(--card-hover-border); }
+.faq-item summary {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  list-style: none;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-num { flex: none; width: 26px; color: var(--copper); font-size: 0.68rem; }
+.faq-q { flex: 1; min-width: 0; font-family: var(--font-head); font-weight: 700; font-size: 1.02rem; color: var(--ink); transition: color 150ms ease; }
+.faq-item summary:hover .faq-q { color: var(--pg-strong); }
+.faq-toggle { position: relative; flex: none; width: 14px; height: 14px; align-self: center; }
+.faq-toggle::before,
+.faq-toggle::after { content: ""; position: absolute; inset: 0; margin: auto; background: var(--copper); transition: transform 200ms ease; }
+.faq-toggle::before { width: 14px; height: 2px; }
+.faq-toggle::after { width: 2px; height: 14px; }
+.faq-item[open] .faq-toggle::after { transform: rotate(90deg); }
+.faq-a { padding: 0 46px 18px 60px; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.75; }
+.faq-a p { margin: 0; }
+.faq-a a { color: var(--pg); text-decoration: underline; text-underline-offset: 3px; }
+.faq-a a:hover { color: var(--pg-strong); }
+.faq-a code { padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.85em; color: var(--ink); background: color-mix(in srgb, var(--line) 40%, transparent); }
+/* 展开动画：支持 ::details-content 的浏览器渐进增强，其余浏览器直接显隐 */
+.faq-item::details-content {
+  opacity: 0;
+  block-size: 0;
+  overflow: clip;
+  transition: block-size 260ms ease, opacity 260ms ease, content-visibility 260ms allow-discrete;
+}
+.faq-item[open]::details-content { opacity: 1; block-size: auto; }
+@media (max-width: 640px) { .faq-a { padding: 0 20px 16px; } }
 
 /* Quick start */
 .silo-steps { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); }

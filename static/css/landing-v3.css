@@ -673,6 +673,21 @@ html[data-theme="dark"] .ini-s { color: #8b93a0; }
 
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 30px; }
 
+/* Hero 下方的宣言入口 */
+.hero-manifesto { margin: -12px 0 0; }
+.hero-manifesto a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  transition: color 150ms ease;
+}
+.hero-manifesto a i { color: var(--copper); font-size: 0.9em; }
+.hero-manifesto a:hover { color: var(--ink); }
+
 /* — 安装命令框：宽度贴合命令本身，收窄时折行而非截断 — */
 .command-box {
   display: inline-flex;

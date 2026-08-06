@@ -14,18 +14,17 @@ Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub 
 
 ## 文件布局 {#layout}
 
-| MinIO 安装 | Silo 软件包 |
-|:--|:--|
-| `/usr/bin/minio` | `/usr/bin/silo`（同时提供 `silo healthcheck`） |
-| `minio.service` | `/usr/lib/systemd/system/silo.service` |
-| `/etc/default/minio` | 仍然优先读取；`/etc/default/silo` 按变量覆盖（`noreplace`/conffile，升级不覆盖修改） |
-| 服务账号 `minio-user`（上游）/ `minio`（Pigsty） | `silo:silo`，声明于 `/usr/lib/sysusers.d/silo.conf`，安装时创建 |
-| — | `/usr/share/doc/silo/LICENSE`、`NOTICE`（AGPL-3.0-or-later） |
+| MinIO 安装             | Silo 软件包                                                     |
+|:---------------------|:-------------------------------------------------------------|
+| `/usr/bin/minio`     | `/usr/bin/silo`（同时提供 `silo healthcheck`）                     |
+| `minio.service`      | `/usr/lib/systemd/system/silo.service`                       |
+| `/etc/default/minio` | 仍然优先读取；`/etc/default/silo` 按变量覆盖（`noreplace/conffile`，升级不覆盖） |
+| OS User `minio-user` | `silo:silo`，声明于 `/usr/lib/sysusers.d/silo.conf`，安装时创建        |
+| -                    | `/usr/share/doc/silo/LICENSE`、`NOTICE`（AGPL-3.0-or-later）    |
 
-软件包的两个性质：
+Silo 提供的 RPM DEB 包可以与 minio 包并存安装，且不会覆盖原有文件。DEB 包不提供安装自动启动。
 
-- 安装不启动、不启用服务；`postinstall` 仅创建 `silo` 账号并重载 systemd。
-- 与 `minio` 软件包并存安装，无文件冲突，旧包保留可随时回滚。
+
 
 ## 服务账号 {#user}
 

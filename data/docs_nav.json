@@ -3687,6 +3687,10 @@
       "/compatibility/",
       "/compatibility/feature/",
       "/compatibility/feature/healthcheck/"
+    ],
+    "/about/manifesto/": [
+      "/about/",
+      "/about/manifesto/"
     ]
   },
   "sections": [
@@ -3703,6 +3707,11 @@
       "title_en": "About",
       "title_zh": "\u5173\u4e8e",
       "children": [
+        {
+          "page": "about/manifesto",
+          "url": "/about/manifesto/",
+          "children": []
+        },
         {
           "page": "about/license",
           "url": "/about/license/",
