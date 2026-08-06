@@ -10,7 +10,7 @@ minio_origin: false
 silo_modified: false
 ---
 
-> **状态**：设计已定稿，待实现 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）
+> **状态**：P1（子命令，`2ff594f4b`）与 P2（distroless 镜像 + CI 门禁，`4c34d2309`）已在 `pgsty/silo` 落地；P3（Helm 探针）与 P4（文档）待办 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）
 
 Silo 将新增一个原生的 `silo healthcheck` 子命令，并在现有容器镜像之外发布一个新的 **Distroless** 镜像变体——里面真正要紧的文件只有一个：`silo` 二进制。本文在动手实现之前把推理过程和设计决策记录下来，让代码有一份可以对照检验的规格，也让"为什么要做成这样"永远有出处可查。
 

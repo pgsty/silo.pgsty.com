@@ -10,7 +10,7 @@ minio_origin: false
 silo_modified: false
 ---
 
-> **Status**: accepted design, pending implementation · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)
+> **Status**: P1 (subcommand, `2ff594f4b`) and P2 (distroless image + CI gate, `4c34d2309`) implemented in `pgsty/silo`; P3 (Helm probes) and P4 (docs) pending · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)
 
 Silo is getting a native `silo healthcheck` subcommand and, alongside the existing container image, a new **distroless** image variant that contains exactly one file that matters: the `silo` binary. This note records the reasoning and the design decisions before implementation, so the code has a specification to be checked against — and so that "why is it built this way?" has a permanent answer.
 
