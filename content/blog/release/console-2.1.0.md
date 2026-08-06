@@ -1,6 +1,6 @@
 ---
-title: "SILO Console 2.1.0 Released"
-linkTitle: "silo-console 2.1.0 Released"
+title: "Silo Console 2.1.0 Released"
+linkTitle: "silo/console 2.1.0"
 date: 2026-08-06
 author: "Ruohang Feng"
 description: "A bilingual console: a zero-dependency English/Chinese interface across every screen, the dashboard migrated to MinIO Metrics V3 with explicit zero-state semantics, and a batch of correctness fixes including escape-proof placeholders and a select-all that cannot lie."

@@ -210,7 +210,7 @@ Status:         1 Online, 0 Offline.
 
 使用上一步中的 **MINIO_ROOT_USER** 和 **MINIO_ROOT_PASSWORD** 登录。
 
-<img src="/images/minio-console/console-login.png" alt="MinIO Console 登录页" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-login.webp" alt="MinIO Console 登录页" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
 
 你可以使用 MinIO Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。 每个 MinIO server 都包含自身内嵌的 MinIO Console。
 {{% /tab %}}

@@ -3659,6 +3659,21 @@
     "/about/security/": [
       "/about/",
       "/about/security/"
+    ],
+    "/compatibility/": [
+      "/compatibility/"
+    ],
+    "/compatibility/server/": [
+      "/compatibility/",
+      "/compatibility/server/"
+    ],
+    "/compatibility/mcli/": [
+      "/compatibility/",
+      "/compatibility/mcli/"
+    ],
+    "/compatibility/console/": [
+      "/compatibility/",
+      "/compatibility/console/"
     ]
   },
   "sections": [
@@ -3693,6 +3708,29 @@
         {
           "page": "about/security",
           "url": "/about/security/",
+          "children": []
+        }
+      ]
+    },
+    {
+      "page": "compatibility",
+      "url": "/compatibility/",
+      "title_en": "Compatibility",
+      "title_zh": "兼容性",
+      "children": [
+        {
+          "page": "compatibility/server",
+          "url": "/compatibility/server/",
+          "children": []
+        },
+        {
+          "page": "compatibility/mcli",
+          "url": "/compatibility/mcli/",
+          "children": []
+        },
+        {
+          "page": "compatibility/console",
+          "url": "/compatibility/console/",
           "children": []
         }
       ]

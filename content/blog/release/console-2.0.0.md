@@ -1,6 +1,6 @@
 ---
-title: "SILO Console 2.0.0 Released"
-linkTitle: "silo-console 2.0.0 Released"
+title: "Silo Console 2.0.0 Released"
+linkTitle: "silo/console 2.0.0"
 date: 2026-08-04
 author: "Ruohang Feng"
 description: "The first independent major release of SILO Console: full identity and delivery migration, a redesigned login page and console UI, embedded assets cut from ~10MB to 3.5MB, zero known dependency vulnerabilities, and a batch of inherited bug fixes."

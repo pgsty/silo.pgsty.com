@@ -1,6 +1,6 @@
 ---
-title: "silo-pkg 3.11.0 发布"
-linkTitle: "silo-pkg 3.11.0 发布"
+title: "Silo Pkg 3.11.0 发布"
+linkTitle: "silo/pkg 3.11.0"
 date: 2026-08-04
 author: "冯若航"
 description: "本分支的首个定版：恢复被打破的 IAM 桶/对象资源边界——一条只该管对象的授权曾能触及桶级写操作；同时包含策略条件键绕过与三个 LDAP 连接缺陷的修复；并在发现旧标签与上游同号版本撞车后，重新编号到上游的 3.11 线。"
@@ -8,7 +8,6 @@ tags: [发布, pkg]
 weight: 5
 url: "/zh/blog/release/pkg-3.11.0/"
 aliases:
-  - /zh/blog/pkg-3.11.0/
   - /zh/releases/pkg-3.11.0/
 ---
 

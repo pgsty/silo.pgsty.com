@@ -113,11 +113,11 @@ While port `9000` is used for connecting to the API, MinIO automatically redirec
 
 Log in to the Console with the `RootUser` and `RootPass` user credentials displayed in the output. These default to `minioadmin | minioadmin`.
 
-<img src="/images/minio-console/console-login.png" alt="MinIO Console displaying login screen" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-login.webp" alt="MinIO Console displaying login screen" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
 
 You can use the MinIO Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration. Each MinIO server includes its own embedded MinIO Console.
 
-<img src="/images/minio-console/minio-console.png" alt="MinIO Console displaying bucket start screen" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console displaying bucket start screen" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
 
 For more information, see the [MinIO Console](/administration/minio-console/#minio-console) documentation.
 

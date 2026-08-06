@@ -270,66 +270,66 @@
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}价值主张{{ else }}VALUE PROPOSITION{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}保留成熟能力，维护关键价值{{ else }}Keep what works. Maintain what matters{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}面向需要延续性的运维者，提供聚焦的下游维护，而不是重新发明对象存储。{{ else }}A focused downstream for operators who need continuity—not a new storage experiment.{{ end }}</p>
+          <h2 class="section-title">{{ if $zh }}上游放下的，SILO 接住{{ else }}What upstream dropped, SILO picks up{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}MinIO 社区版阉割了控制台、停发了预编译制品、归档了安全更新。SILO 把这三样都补回来——同一套代码，同样的性能。{{ else }}MinIO's community edition gutted its console, stopped shipping binaries, and archived its security updates. SILO restores all three—on the same code, at the same performance.{{ end }}</p>
         </div>
 
         <div class="module-row" data-reveal>
           <div class="module-content">
-            <p class="module-ref silkscreen">01 · {{ if $zh }}保守维护{{ else }}CONSERVATIVE MAINTENANCE{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "blog/release/" }}">{{ if $zh }}以保守为设计原则{{ else }}Conservative by Design{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">◇</span> {{ if $zh }}克制变更，延续运行{{ else }}Narrow changes. Durable operations{{ end }}</p>
+            <p class="module-ref silkscreen">{{ if $zh }}控制台{{ else }}WEB CONSOLE{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "administration/minio-console/" }}">{{ if $zh }}完整控制台，找回来了{{ else }}The full console, restored{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">◇</span> {{ if $zh }}在浏览器里重新管理桶、身份、监控与复制{{ else }}Manage buckets, identity, monitoring, and replication in the browser again{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}聚焦构建、依赖与运行时维护{{ else }}Focused build, dependency, and runtime maintenance{{ end }}</li>
-              <li>{{ if $zh }}吸收适用于当前发行线的安全修复{{ else }}Applicable security fixes for the active release line{{ end }}</li>
-              <li>{{ if $zh }}只为可复现缺陷进行目标明确的修补{{ else }}Targeted repairs for reproducible defects{{ end }}</li>
+              <li>{{ if $zh }}上游把 AGPL 版 Web 控制台阉割成了残桩{{ else }}Upstream stripped the AGPL web console down to a stub{{ end }}</li>
+              <li>{{ if $zh }}SILO 交付完整管理界面：<strong>桶、IAM、监控、站点复制</strong>{{ else }}SILO ships the full management UI: <strong>buckets, IAM, monitoring, site replication</strong>{{ end }}</li>
+              <li>{{ if $zh }}没有付费墙，没有功能闸——运维者记得的那个控制台{{ else }}No paywall, no feature gate—the console every operator remembers{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}最小化下游差异，最大化运维连续性{{ else }}Minimize downstream delta. Maximize continuity{{ end }}</p>
+            <p class="module-value">{{ if $zh }}上游拿走的控制台，回到你的浏览器{{ else }}The console upstream took away, back in your browser{{ end }}</p>
           </div>
           <div class="module-visual">
-            <a href="{{ relLangURL "operations/concepts/erasure-coding/" }}" class="module-img silo-figure">
-              <img src="{{ "images/erasure-code.jpg" | relURL }}" alt="{{ if $zh }}纠删码数据块与校验块示意图{{ else }}Erasure-coded data and parity blocks{{ end }}" loading="lazy">
+            <a href="{{ relLangURL "administration/minio-console/" }}" class="module-img silo-figure">
+              <img src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" alt="{{ if $zh }}SILO 控制台监控页，显示服务器、驱动器与容量{{ else }}SILO Console monitoring page showing servers, drives, and capacity{{ end }}" loading="lazy">
             </a>
           </div>
         </div>
 
         <div class="module-row module-row--reverse" data-reveal>
           <div class="module-content">
-            <p class="module-ref silkscreen">02 · {{ if $zh }}兼容接口{{ else }}COMPATIBLE INTERFACE{{ end }}</p>
-            <h3 class="module-title"><a href="#interface">{{ if $zh }}熟悉的运维界面{{ else }}Familiar Operational Surface{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">↔</span> {{ if $zh }}评估升级，而不是重做迁移{{ else }}Evaluate an upgrade—not a migration{{ end }}</p>
+            <p class="module-ref silkscreen">{{ if $zh }}安全补丁{{ else }}SECURITY PATCHES{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "blog/security/" }}">{{ if $zh }}持续修补，而非搁置{{ else }}Patched, not abandoned{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}CVE 在这里被修复，公告与代码同处一地{{ else }}CVEs get fixed here, with advisories next to the code{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}保留 <strong>minio</strong> 可执行文件与 S3 API{{ else }}Preserves the <strong>minio</strong> executable and S3 APIs{{ end }}</li>
-              <li>{{ if $zh }}延续环境变量、CLI 约定与发行标签{{ else }}Keeps environment variables, CLI conventions, and release tags{{ end }}</li>
-              <li>{{ if $zh }}适配常见部署流程与现有自动化{{ else }}Fits common deployment workflows and existing automation{{ end }}</li>
+              <li>{{ if $zh }}上游社区版已归档——新 CVE 落到无人处理{{ else }}Upstream's community edition is archived—new CVEs land on no one's desk{{ end }}</li>
+              <li>{{ if $zh }}活跃发行线已交付 <strong>19 项安全修复</strong>，每项都附公告{{ else }}<strong>19 security fixes</strong> shipped on the active release line, each with an advisory{{ end }}</li>
+              <li>{{ if $zh }}私下报告、可复现地分诊、透明地公开{{ else }}Report privately, triage reproducibly, publish transparently{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}接口优先，迁移成本可控{{ else }}Interface first. Migration cost contained{{ end }}</p>
+            <p class="module-value">{{ if $zh }}不停摆的安全维护{{ else }}Security that keeps moving{{ end }}</p>
           </div>
           <div class="module-visual">
-            <a href="#interface" class="code-plate compatibility-plate">
-              <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">compatibility.contract</span></span>
-              <pre class="code-body"><span class="c"># Expected continuity</span>
-<span class="k">executable</span>: <span class="s">minio</span>
-<span class="k">object_api</span>: <span class="s">S3 compatible</span>
-<span class="k">environment</span>: <span class="s">MINIO_*</span>
-<span class="k">release_tag</span>: <span class="s">RELEASE.*</span>
-<span class="k">client</span>: <span class="s">mc / mcli</span>
-<span class="k">policy</span>: <span class="v">test before rollout</span></pre>
+            <a href="{{ relLangURL "blog/security/" }}" class="code-plate security-plate">
+              <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">SECURITY.md</span></span>
+              <pre class="code-body"><span class="c"># Active release line · 19 fixes shipped</span>
+<span class="k">report</span>: <span class="s">privately</span>
+<span class="k">triage</span>: <span class="s">reproducible issues</span>
+<span class="k">advisories</span>: <span class="s">published with code</span>
+<span class="k">packages</span>: <span class="s">GPG-signed</span>
+
+<span class="c"># Pin · Review · Test · Roll back</span></pre>
             </a>
           </div>
         </div>
 
         <div class="module-row" id="releases" data-reveal>
           <div class="module-content">
-            <p class="module-ref silkscreen">03 · {{ if $zh }}完整交付{{ else }}COMPLETE DELIVERY{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "download/" }}">{{ if $zh }}完整的发行制品{{ else }}Release Artifacts Included{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">▦</span> {{ if $zh }}从源码到可运行制品{{ else }}From source to runnable artifacts{{ end }}</p>
+            <p class="module-ref silkscreen">{{ if $zh }}发行制品{{ else }}RELEASE ARTIFACTS{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "download/" }}">{{ if $zh }}真正能下载的制品{{ else }}Binaries you can actually download{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">▦</span> {{ if $zh }}从源码到签名、可运行的软件包{{ else }}From source to signed, runnable packages{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}版本化二进制、校验和与发布说明{{ else }}Versioned binaries, checksums, and release notes{{ end }}</li>
-              <li>{{ if $zh }}RPM、DEB、APK 与多架构容器镜像{{ else }}RPM, DEB, APK, and multi-architecture container images{{ end }}</li>
-              <li>{{ if $zh }}持续维护的控制台与兼容客户端{{ else }}A maintained Console and compatible client{{ end }}</li>
+              <li>{{ if $zh }}无需自行构建，也不必绕道闭源商业下载{{ else }}No self-build requirement, no detour through a closed commercial download{{ end }}</li>
+              <li>{{ if $zh }}版本化二进制、<strong>RPM / DEB / APK</strong> 与多架构容器镜像{{ else }}Versioned binaries, <strong>RPM / DEB / APK</strong>, and multi-arch container images{{ end }}</li>
+              <li>{{ if $zh }}GPG 签名软件包，附公开校验和{{ else }}GPG-signed packages with published checksums{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}不只维护源码，也维护交付面{{ else }}Maintain the delivery surface—not just the source{{ end }}</p>
+            <p class="module-value">{{ if $zh }}交付面，持续维护{{ else }}The delivery surface, maintained{{ end }}</p>
           </div>
           <div class="module-visual">
             <a href="{{ relLangURL "download/" }}" class="artifact-plate" aria-label="{{ if $zh }}浏览发行制品{{ else }}Browse release artifacts{{ end }}">
@@ -349,26 +349,19 @@
 
         <div class="module-row module-row--reverse" data-reveal>
           <div class="module-content">
-            <p class="module-ref silkscreen">04 · {{ if $zh }}可查安全{{ else }}VISIBLE SECURITY{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "blog/security/" }}">{{ if $zh }}公开可查的安全记录{{ else }}Visible Security Record{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}政策、公告与代码放在一起{{ else }}Policy, advisories, and code in one place{{ end }}</p>
+            <p class="module-ref silkscreen">{{ if $zh }}性能{{ else }}PERFORMANCE{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "operations/concepts/erasure-coding/" }}">{{ if $zh }}性能零损耗{{ else }}No performance tax{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">↯</span> {{ if $zh }}与上游同一条热路径——只做维护{{ else }}The same hot path as upstream—maintenance only{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}公开安全策略与私下漏洞报告流程{{ else }}Public security policy and private reporting path{{ end }}</li>
-              <li>{{ if $zh }}分支安全注记对应当前活跃发行线{{ else }}Fork security notes target the active release line{{ end }}</li>
-              <li>{{ if $zh }}发布前保留审阅、固定版本、测试与回滚路径{{ else }}Review, pin, test, and retain a rollback path before rollout{{ end }}</li>
+              <li>{{ if $zh }}SILO 跟随上游代码，存储与 S3 热路径保持不变{{ else }}SILO tracks upstream's code; the storage and S3 hot paths are unchanged{{ end }}</li>
+              <li>{{ if $zh }}改动只限于构建、依赖、安全与正确性，而非重写{{ else }}Changes are build, dependency, security, and correctness—not rewrites{{ end }}</li>
+              <li>{{ if $zh }}纠删码、并行度与吞吐与你熟悉的版本一致{{ else }}Erasure coding, parallelism, and throughput match the version you know{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}把维护边界写清楚，也把风险写清楚{{ else }}Make maintenance—and its limits—auditable{{ end }}</p>
+            <p class="module-value">{{ if $zh }}不用延迟买单的分支{{ else }}A fork you don't pay for in latency{{ end }}</p>
           </div>
           <div class="module-visual">
-            <a href="{{ relLangURL "blog/security/" }}" class="code-plate security-plate">
-              <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">SECURITY.md</span></span>
-              <pre class="code-body"><span class="c"># Active release line</span>
-<span class="k">report</span>: <span class="s">privately</span>
-<span class="k">triage</span>: <span class="s">reproducible issues</span>
-<span class="k">advisories</span>: <span class="s">published with code</span>
-<span class="k">compatibility</span>: <span class="v">goal, not guarantee</span>
-
-<span class="c"># Pin · Review · Test · Roll back</span></pre>
+            <a href="{{ relLangURL "operations/concepts/erasure-coding/" }}" class="module-img silo-figure">
+              <img src="{{ "images/erasure-code.jpg" | relURL }}" alt="{{ if $zh }}纠删码数据块与校验块示意图{{ else }}Erasure-coded data and parity blocks{{ end }}" loading="lazy">
             </a>
           </div>
         </div>
@@ -422,18 +415,18 @@
       </div>
       <div class="dashboard-gallery-marquee" data-reveal>
         <div class="dashboard-gallery-track">
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-object-browser.png" | relURL }}" data-alt="Object Browser"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-bucket-manage.png" | relURL }}" data-alt="Bucket Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-iam.png" | relURL }}" data-alt="Identity and Access Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-settings-site-replication.png" | relURL }}" data-alt="Site Replication"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-minio.png" | relURL }}" data-alt="Grafana MinIO Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-replication.png" | relURL }}" data-alt="Grafana Replication Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-object-browser.png" | relURL }}" data-alt="Object Browser"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-bucket-manage.png" | relURL }}" data-alt="Bucket Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-iam.png" | relURL }}" data-alt="Identity and Access Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/minio-console/console-settings-site-replication.png" | relURL }}" data-alt="Site Replication"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-minio.png" | relURL }}" data-alt="Grafana MinIO Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-replication.png" | relURL }}" data-alt="Grafana Replication Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-minio.png" | relURL }}" data-alt="MinIO Overview Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-replication.png" | relURL }}" data-alt="Replication Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-bucket.png" | relURL }}" data-alt="Bucket Metrics Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-node.png" | relURL }}" data-alt="Node Metrics Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-minio.png" | relURL }}" data-alt="MinIO Overview Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-replication.png" | relURL }}" data-alt="Replication Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-bucket.png" | relURL }}" data-alt="Bucket Metrics Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/grafana-node.png" | relURL }}" data-alt="Node Metrics Dashboard"></a>
         </div>
       </div>
     </section>
@@ -484,12 +477,12 @@
         </div>
         <div class="promise-grid" data-reveal>
           <article class="promise-card promise-card--yes">
-            <p class="silkscreen">{{ if $zh }}维护范围{{ else }}MAINTAINED SURFACE{{ end }}</p>
+            <p class="silkscreen"><span class="promise-mark" aria-hidden="true">✓</span>{{ if $zh }}维护范围{{ else }}MAINTAINED SURFACE{{ end }}</p>
             <h3>{{ if $zh }}我们持续维护{{ else }}What stays maintained{{ end }}</h3>
             <ul><li>{{ if $zh }}活跃发行线的构建与依赖{{ else }}Builds and dependencies for the active release line{{ end }}</li><li>{{ if $zh }}适用的安全修复与公告{{ else }}Applicable security fixes and advisories{{ end }}</li><li>{{ if $zh }}可复现缺陷的聚焦修复{{ else }}Focused fixes for reproducible defects{{ end }}</li><li>{{ if $zh }}版本化交付制品与文档{{ else }}Versioned artifacts and documentation{{ end }}</li></ul>
           </article>
           <article class="promise-card promise-card--no">
-            <p class="silkscreen">{{ if $zh }}明确边界{{ else }}EXPLICIT BOUNDARY{{ end }}</p>
+            <p class="silkscreen"><span class="promise-mark" aria-hidden="true">✕</span>{{ if $zh }}明确边界{{ else }}EXPLICIT BOUNDARY{{ end }}</p>
             <h3>{{ if $zh }}我们不做保证{{ else }}What is not promised{{ end }}</h3>
             <ul><li>{{ if $zh }}完整复刻上游产品路线图{{ else }}A full continuation of the upstream roadmap{{ end }}</li><li>{{ if $zh }}历史版本或多条长期支持分支{{ else }}Historical releases or multiple support branches{{ end }}</li><li>{{ if $zh }}未经验证的逐项兼容保证{{ else }}Untested, item-by-item compatibility guarantees{{ end }}</li><li>{{ if $zh }}响应、修复或发行时限 SLA{{ else }}Response, remediation, or release-time SLAs{{ end }}</li></ul>
           </article>

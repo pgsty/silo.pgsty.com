@@ -1,6 +1,6 @@
 ---
-title: "SILO Console 2.0.0 发布"
-linkTitle: "silo-console 2.0.0 发布"
+title: "Silo Console 2.0.0 发布"
+linkTitle: "silo/console 2.0.0"
 date: 2026-08-04
 author: "冯若航"
 description: "SILO Console 首个独立主版本：完成品牌与发布链路迁移，全面重塑登录页与控制台界面，嵌入资产从约 10MB 压缩到 3.5MB，清零已知依赖漏洞，并修复多处上游遗留缺陷。"

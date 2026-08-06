@@ -12,7 +12,7 @@ silo_modified: true
 
 The MinIO Console is a rich graphical user interface that provides similar functionality to the [`mc`](/reference/minio-mc/#command-mc) command line tool.
 
-<img src="/images/minio-console/minio-console.png" alt="MinIO Console Landing Page provides a view of the Object Browser for the authenticated user" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console Landing Page provides a view of the Object Browser for the authenticated user" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
 
 This page provides an overview of the MinIO Console and describes configuration options and instructions for logging in.
 

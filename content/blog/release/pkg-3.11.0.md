@@ -1,6 +1,6 @@
 ---
-title: "silo-pkg 3.11.0 Released"
-linkTitle: "silo-pkg 3.11.0 Released"
+title: "Silo Pkg 3.11.0 Released"
+linkTitle: "silo/pkg 3.11.0"
 date: 2026-08-04
 author: "Vonng"
 description: "The fork's first pinned release restores the IAM bucket/object resource boundary that let an object-only grant reach bucket-level writes, fixes a policy condition-key bypass and three LDAP connection defects, and renumbers onto upstream's 3.11 line after the earlier tags were found to collide with upstream releases of the same numbers."
@@ -8,7 +8,6 @@ tags: [Release, pkg]
 weight: 5
 url: "/blog/release/pkg-3.11.0/"
 aliases:
-  - /blog/pkg-3.11.0/
   - /releases/pkg-3.11.0/
 ---
 

@@ -424,15 +424,15 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 
 /* Public operator reports */
 .operator-voices { position: relative; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--pg) 3%, transparent), transparent); }
-.operator-voices-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.operator-voices-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 .operator-voice {
   --voice-accent: var(--pg);
   position: relative;
   display: flex;
-  min-height: 285px;
+  min-height: 176px;
   flex-direction: column;
   overflow: hidden;
-  padding: clamp(24px, 3.2vw, 36px);
+  padding: clamp(20px, 1.6vw, 26px);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--bg-elev);
@@ -444,9 +444,9 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 .operator-voice:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--voice-accent) 36%, var(--line-strong)); box-shadow: var(--shadow-md); }
 .operator-voice--lead { --voice-accent: var(--ok); }
 .operator-voice--caution { --voice-accent: var(--copper); }
-.voice-kind { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; color: var(--ink-mute); }
+.voice-kind { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 13px; color: var(--ink-mute); }
 .voice-kind i { width: 7px; height: 7px; border-radius: 50%; background: var(--voice-accent); box-shadow: 0 0 12px color-mix(in srgb, var(--voice-accent) 58%, transparent); }
-.operator-voice blockquote { position: relative; z-index: 1; max-width: 720px; margin: 0 0 16px; font-family: var(--font-head); font-size: clamp(1.25rem, 2vw, 1.7rem); font-weight: 650; line-height: 1.42; letter-spacing: -0.018em; color: var(--ink); }
+.operator-voice blockquote { position: relative; z-index: 1; max-width: 720px; margin: 0 0 14px; font-family: var(--font-head); font-size: clamp(1.02rem, 1.15vw, 1.2rem); font-weight: 650; line-height: 1.4; letter-spacing: -0.016em; color: var(--ink); }
 /* CJK quotes stay full width where that is correct typography ([lang] is set there). */
 .operator-voice blockquote:not([lang]) { font-family: 'Latin Quotes', var(--font-head); }
 .operator-voice p { margin: 0 0 28px; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.72; }
@@ -518,7 +518,9 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 .promise-card { position: relative; overflow: hidden; padding: clamp(24px, 3.5vw, 38px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-elev); box-shadow: var(--shadow-sm); }
 .promise-card::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: var(--ok); opacity: 0.72; }
 .promise-card--no::before { background: var(--copper); }
-.promise-card > p { margin: 0 0 12px; color: var(--copper); }
+.promise-card > p { display: flex; align-items: center; margin: 0 0 14px; color: var(--copper); }
+.promise-card--yes > p { color: var(--ok); }
+.promise-mark { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 18px; height: 18px; margin-right: 9px; border-radius: 50%; font-size: 0.66rem; font-weight: 700; line-height: 1; background: color-mix(in srgb, currentColor 15%, transparent); }
 .promise-card h3 { margin: 0 0 18px; font-family: var(--font-head); font-size: 1.35rem; color: var(--ink); }
 .promise-card ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .promise-card li { position: relative; padding-left: 22px; color: var(--ink-soft); }
@@ -572,6 +574,7 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
   .interface-grid { grid-template-columns: repeat(3, 1fr); }
   .silo-steps { grid-template-columns: 1fr; }
   .download-entry .install-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .operator-voices-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 768px) {

@@ -1,6 +1,6 @@
 ---
-title: "SILO Console 2.1.0 发布"
-linkTitle: "silo-console 2.1.0 发布"
+title: "Silo Console 2.1.0 发布"
+linkTitle: "silo/console 2.1.0 发布"
 date: 2026-08-06
 author: "冯若航"
 description: "双语控制台：零依赖的中英文界面覆盖全部页面，仪表盘迁移到 MinIO Metrics V3 并显式处理零值语义，另有一批正确性修复——包括转义安全的占位符替换，以及不会说谎的全选框。"

@@ -210,7 +210,7 @@ Open your browser and access any of the MinIO hostnames at port `:9001` to open 
 
 Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previous step.
 
-<img src="/images/minio-console/console-login.png" alt="MinIO Console Login Page" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
 
 You can use the MinIO Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration. Each MinIO server includes its own embedded MinIO Console.
 {{% /tab %}}

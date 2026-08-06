@@ -12,7 +12,7 @@ silo_modified: true
 
 MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具类似的功能。
 
-<img src="/images/minio-console/minio-console.png" alt="MinIO Console 登录页为已认证用户提供 Object Browser 视图" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console 登录页为已认证用户提供 Object Browser 视图" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
 
 本页面概述了 MinIO Console，并说明其配置选项和登录方法。
 

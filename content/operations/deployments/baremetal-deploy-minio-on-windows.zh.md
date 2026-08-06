@@ -113,11 +113,11 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 
 使用输出中显示的 `RootUser` 和 `RootPass` 用户凭证登录 Console。 默认值为 `minioadmin | minioadmin`。
 
-<img src="/images/minio-console/console-login.png" alt="MinIO Console 显示登录界面" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-login.webp" alt="MinIO Console 显示登录界面" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
 
 你可以使用 MinIO Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。 每个 MinIO server 都包含自身内嵌的 MinIO Console。
 
-<img src="/images/minio-console/minio-console.png" alt="MinIO Console 显示存储桶起始界面" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console 显示存储桶起始界面" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
 
 更多信息请参阅 [MinIO 控制台](/zh/administration/minio-console/#minio-console) 文档。
 
