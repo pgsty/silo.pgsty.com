@@ -64,7 +64,7 @@ languages:
         - identifier: github
           name: GitHub
           weight: 40
-          url: https://github.com/pgsty/minio
+          url: https://github.com/pgsty/silo
           pre: <i class='fa-brands fa-github'></i>
   zh:
     label: 简体中文
@@ -99,7 +99,7 @@ languages:
         - identifier: github
           name: GitHub
           weight: 40
-          url: https://github.com/pgsty/minio
+          url: https://github.com/pgsty/silo
           pre: <i class='fa-brands fa-github'></i>
 
 #=======================================#
@@ -182,7 +182,7 @@ params:
   archived_version: false
   url_latest_version: https://silo.pgsty.com
   github_repo: https://github.com/pgsty/silo.pgsty.com
-  github_project_repo: https://github.com/pgsty/minio
+  github_project_repo: https://github.com/pgsty/silo
   github_branch: main
 
   # 站内搜索由项目自有的 ⌘K 弹窗实现（lunr 自托管 + 按语言索引），
@@ -228,7 +228,7 @@ params:
   links:
     user:
       - name: Silo source
-        url: https://github.com/pgsty/minio
+        url: https://github.com/pgsty/silo
         icon: fab fa-github
         desc: Silo source repository
       - name: Pigsty
@@ -237,7 +237,7 @@ params:
         desc: Pigsty project
     developer:
       - name: Releases
-        url: https://github.com/pgsty/minio/releases
+        url: https://github.com/pgsty/silo/releases
         icon: fa fa-box-archive
         desc: Silo release artifacts
       - name: Documentation source

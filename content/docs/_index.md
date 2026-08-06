@@ -1,7 +1,7 @@
 ---
 title: "Silo Documentation"
 linkTitle: "Docs"
-description: "Silo 20260818 Documentation"
+description: "Silo 20260806 Documentation"
 url: "/docs/"
 weight: 1
 type: docs
@@ -12,3 +12,4 @@ silo_modified: false
 ---
 
 {{< home-docs >}}
+没编辑的文件是我修改的，你修改完之后直接提交、推送到远程就好了

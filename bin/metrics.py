@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch pgsty/minio metrics and optionally update Hugo's data file."""
+"""Fetch pgsty/silo metrics and optionally update Hugo's data file."""
 
 from __future__ import annotations
 
@@ -15,7 +15,11 @@ import urllib.request
 from typing import Any, Sequence
 
 
-GITHUB_API = "https://api.github.com/repos/pgsty/minio"
+GITHUB_API = "https://api.github.com/repos/pgsty/silo"
+
+# GitHub carried the stars across the pgsty/minio -> pgsty/silo rename; Docker Hub
+# did not. The pull history lives in the archived pgsty/minio repository, which the
+# landing page keeps reporting while linking to the current pgsty/silo image.
 DOCKER_HUB_API = "https://hub.docker.com/v2/namespaces/pgsty/repositories/minio"
 TIMEOUT_SECONDS = 15
 USER_AGENT = "pgsty-metrics/1.0"
@@ -29,7 +33,7 @@ class MetricsError(RuntimeError):
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Print pgsty/minio GitHub stars and Docker Hub pulls."
+        description="Print pgsty/silo GitHub stars and Docker Hub pulls."
     )
     parser.add_argument(
         "command",

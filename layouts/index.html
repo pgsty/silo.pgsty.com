@@ -67,8 +67,8 @@
     "url": {{ .Site.BaseURL | jsonify | safeJS }},
     "image": {{ $socialImage | jsonify | safeJS }},
     "inLanguage": {{ $locale | jsonify | safeJS }},
-    "downloadUrl": "https://github.com/pgsty/minio/releases",
-    "codeRepository": "https://github.com/pgsty/minio",
+    "downloadUrl": "https://github.com/pgsty/silo/releases",
+    "codeRepository": "https://github.com/pgsty/silo",
     "license": "https://www.gnu.org/licenses/agpl-3.0.html",
     "isAccessibleForFree": true,
     "maintainer": {
@@ -77,8 +77,8 @@
       "url": "https://pigsty.io/"
     },
     "sameAs": [
-      "https://github.com/pgsty/minio",
-      "https://hub.docker.com/r/pgsty/minio"
+      "https://github.com/pgsty/silo",
+      "https://hub.docker.com/r/pgsty/silo"
     ],
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "description": {{ $description | jsonify | safeJS }}
@@ -129,7 +129,7 @@
           {{ range .Translations }}
           <a href="{{ .RelPermalink }}" class="nav-util" title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}">{{ partialCached "silo/icon.html" "languages" "languages" }}</a>
           {{ end }}
-          <a href="https://github.com/pgsty/minio" class="nav-github" target="_blank" rel="noopener" title="GitHub">
+          <a href="https://github.com/pgsty/silo" class="nav-github" target="_blank" rel="noopener" title="GitHub">
             {{ partialCached "silo/icon.html" "github" "github" }}
             <span class="nav-count">{{ partial "compact-number.html" $metrics.github_stars }}</span>
           </a>
@@ -148,7 +148,7 @@
     <a href="{{ relLangURL "download/" }}" class="mobile-menu-link"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Download &amp; Install{{ end }}</a>
     {{ range .Translations }}<a href="{{ .RelPermalink }}" class="mobile-menu-link"><i class="fas fa-language" aria-hidden="true"></i> {{ .Language.Label }}</a>{{ end }}
     <button type="button" class="mobile-menu-link mobile-menu-link--btn" data-theme-toggle><i class="fas fa-moon" aria-hidden="true"></i> {{ if $zh }}浅色 / 深色{{ else }}Light / Dark{{ end }}</button>
-    <a href="https://github.com/pgsty/minio" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · {{ partial "compact-number.html" $metrics.github_stars }}</a>
+    <a href="https://github.com/pgsty/silo" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · {{ partial "compact-number.html" $metrics.github_stars }}</a>
   </div>
 
   <main id="main">
@@ -227,11 +227,14 @@
         </div>
 
         <div class="stats-grid" data-reveal>
-          <a href="https://hub.docker.com/r/pgsty/minio" target="_blank" rel="noopener" class="stat-item">
+          {{/* Docker Hub does not redirect a renamed repository, so the count still
+               comes from the archived pgsty/minio image (bin/metrics.py) while the
+               link points at the current one. */}}
+          <a href="https://hub.docker.com/r/pgsty/silo" target="_blank" rel="noopener" class="stat-item" title="{{ if $zh }}镜像拉取总量，含改名前的 pgsty/minio 镜像{{ else }}Total image pulls, including the pre-rename pgsty/minio image{{ end }}">
             <span class="stat-value" data-count="{{ $metrics.docker_pulls }}">{{ lang.FormatNumber 0 $metrics.docker_pulls }}</span>
             <span class="stat-label">Docker Pulls</span>
           </a>
-          <a href="https://github.com/pgsty/minio/stargazers" target="_blank" rel="noopener" class="stat-item">
+          <a href="https://github.com/pgsty/silo/stargazers" target="_blank" rel="noopener" class="stat-item">
             <span class="stat-value" data-count="{{ $metrics.github_stars }}">{{ lang.FormatNumber 0 $metrics.github_stars }}</span>
             <span class="stat-label">GitHub Stars</span>
           </a>
