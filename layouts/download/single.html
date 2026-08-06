@@ -156,7 +156,7 @@
             <div class="product-choice-top">
               <div>
                 <p class="silkscreen">{{ if $zh }}数据服务{{ else }}DATA SERVICE{{ end }}</p>
-                <h2>SILO server</h2>
+                <h2>SILO Server</h2>
               </div>
               <span class="product-choice-icon"><i class="fas fa-server" aria-hidden="true"></i></span>
             </div>
@@ -186,7 +186,7 @@
         <div class="download-section-head" data-reveal>
           <div>
             <p class="section-eyebrow"><span class="silkscreen">01 / DATA SERVICE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-            <h2 id="server-title">SILO server</h2>
+            <h2 id="server-title">SILO Server</h2>
             <p>{{ if $zh }}从本地验证到多节点生产集群，选择与你的控制边界相匹配的交付方式。{{ else }}From local validation to a multi-node production cluster, choose the delivery path that matches your control boundary.{{ end }}</p>
           </div>
           <a class="version-card" href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">
@@ -197,7 +197,7 @@
         </div>
 
         <div class="download-tabs" data-download-tabs data-reveal>
-          <div class="download-tablist" role="tablist" aria-label="{{ if $zh }}SILO server 安装方式{{ else }}SILO server install methods{{ end }}">
+          <div class="download-tablist" role="tablist" aria-label="{{ if $zh }}SILO Server 安装方式{{ else }}SILO Server install methods{{ end }}">
             <button type="button" role="tab" id="tab-server-docker" aria-controls="server-docker" aria-selected="true" data-download-tab="server-docker"><i class="fab fa-docker" aria-hidden="true"></i> Docker</button>
             <button type="button" role="tab" id="tab-server-kubernetes" aria-controls="server-kubernetes" aria-selected="false" tabindex="-1" data-download-tab="server-kubernetes"><i class="fas fa-dharmachakra" aria-hidden="true"></i> Kubernetes</button>
             <button type="button" role="tab" id="tab-server-packages" aria-controls="server-packages" aria-selected="false" tabindex="-1" data-download-tab="server-packages"><i class="fas fa-box" aria-hidden="true"></i> {{ if $zh }}Linux 软件包{{ else }}Linux Packages{{ end }}</button>
@@ -432,7 +432,7 @@ make build
         <div class="download-section-head" data-reveal>
           <div>
             <p class="section-eyebrow"><span class="silkscreen">02 / ADMIN CLI</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-            <h2 id="client-title">mcli Client</h2>
+            <h2 id="client-title">MCLI Client</h2>
             <p>{{ if $zh }}为 SILO、MinIO 和通用 S3 兼容对象存储提供文件传输与管理命令。独立制品使用 <code>mcli</code> 命令名。{{ else }}File transfer and administration commands for SILO, MinIO, and general S3-compatible storage. Standalone artifacts use the <code>mcli</code> command name.{{ end }}</p>
           </div>
           <a class="version-card version-card--client" href="https://github.com/pgsty/mc/releases/tag/{{ $clientTag }}" target="_blank" rel="noopener">

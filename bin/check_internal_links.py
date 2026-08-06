@@ -18,7 +18,7 @@ import urllib.parse
 
 
 SITE_HOSTS = {"silo.pgsty.com", "www.silo.pgsty.com"}
-LINK_ATTRIBUTES = {"href", "src"}
+LINK_ATTRIBUTES = {"href", "src", "data-src"}
 SKIP_SCHEMES = {"data", "javascript", "mailto", "tel", "blob"}
 
 

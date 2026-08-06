@@ -1059,6 +1059,61 @@ html[data-theme="light"] .module-img img {
 .code-body .k { color: #6fb1e8; }
 .code-body .v { color: #e0a35c; }
 .code-body .s { color: #7fd39a; }
+.code-body .del { color: #e07a72; }
+.code-body .add { color: #7fd39a; }
+
+/* 模块列表内联链接（导向兼容性审计 / 迁移指南） */
+.module-list a {
+  color: var(--pg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--pg) 45%, transparent);
+}
+.module-list a:hover { color: var(--pg-strong); text-decoration-color: currentColor; }
+
+/* 安全纪事图版：可滚动的公告列表 */
+.advisory-plate { display: flex; flex-direction: column; }
+.advisory-list {
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+  max-height: 296px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 176, 210, 0.35) transparent;
+}
+.advisory-list a {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 16px;
+  color: #c9d6e8;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  transition: background 150ms ease, color 150ms ease;
+}
+.advisory-list a:hover { background: rgba(148, 176, 210, 0.09); color: #ffffff; }
+.advisory-list time {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: #64748b;
+}
+.advisory-list a:hover time { color: #8ea3bd; }
+.advisory-list span { min-width: 0; }
+.advisory-foot {
+  display: block;
+  padding: 9px 16px;
+  border-top: 1px solid rgba(148, 176, 210, 0.14);
+  background: rgba(148, 176, 210, 0.05);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: rgba(200, 215, 235, 0.6);
+  transition: color 150ms ease;
+}
+.advisory-foot:hover { color: #ffffff; }
 
 /* ------------------------------------------------------------
    8. Kernels & Extension Bus
