@@ -63,7 +63,7 @@ FLAGS：
   --address value   探测目标 host:port（EnvVar: MINIO_ADDRESS；默认 ":9000"，
                     空 host 补全为 127.0.0.1）
   --url value       完整基址覆盖（http[s]://host:port）；优先于 --address
-                    与 TLS 自动判定
+                    与 TLS 自动判定（EnvVar: MINIO_HEALTHCHECK_URL）
   --maintenance     仅 cluster 有效：附加 ?maintenance=true——问"现在把这个
                     节点下线安全吗？"（HTTP 412 = 不安全，会破坏高可用）
   --timeout value   总超时；默认：live/ready 5s，cluster* 15s
@@ -89,7 +89,7 @@ FLAGS：
 - **请求必须严格匿名。**健康路由之所以能豁免保留路径守卫，仅限于被服务器判定为匿名的请求；带上 `Authorization` 头会改变请求的分类，结果不是得到应答而是被*拒绝*（`ErrAllAccessDisabled`）。
 - **HTTP 传输层必须设置 `Proxy: nil`。**容器经常继承 `HTTP_PROXY` 却没有把 `127.0.0.1` 写进 `NO_PROXY`；环回探测绝不能被路由进公司代理。（Traefik 的 healthcheck 出于同样的原因特意这样做了。）
 
-还有一个看似随意、实则不然的数字：cluster 检查的默认超时是 15 秒，因为服务端评估集群健康时自身受 10 秒 `cluster_deadline` 约束——客户端若在 5 秒就放弃，等不到服务器深思熟虑后给出的 503，连同所有诊断头一起丢失。
+还有一个看似随意、实则不然的数字：cluster 检查的默认超时是 15 秒，因为服务端评估集群健康时自身受 10 秒 `cluster_deadline` 约束——客户端若在 5 秒就放弃，等不到服务器深思熟虑后给出的 503，连同所有诊断头一起丢失。对抗性评审后补充了两个细节：`--url` 支持环境变量（`MINIO_HEALTHCHECK_URL`），因为探针进程看不到服务端的命令行——当服务端的地址或 TLS 配置来自 CLI 参数时，这是矫正内置 `HEALTHCHECK` 的正式途径；另外任何外层（Docker）超时都必须大于探针自身的截止时间，否则探针会在打印诊断行之前先被 SIGKILL。
 
 ## 这些端点到底在做什么 {#endpoints}
 
@@ -119,7 +119,7 @@ ENV HOME=/tmp
 # 这里已经没有入口脚本可以在运行时修补属主了。
 VOLUME ["/data"]
 EXPOSE 9000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=2m --start-interval=2s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=2m --start-interval=2s --retries=3 \
   CMD ["/usr/bin/silo", "healthcheck", "ready"]
 ENTRYPOINT ["/usr/bin/silo"]
 ```

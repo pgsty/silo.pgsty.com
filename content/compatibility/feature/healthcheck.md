@@ -63,7 +63,7 @@ FLAGS:
   --address value   target host:port  (EnvVar: MINIO_ADDRESS; default ":9000",
                     an empty host is completed to 127.0.0.1)
   --url value       full base URL override (http[s]://host:port); wins over
-                    --address and TLS auto-detection
+                    --address and TLS auto-detection (EnvVar: MINIO_HEALTHCHECK_URL)
   --maintenance     cluster only: appends ?maintenance=true — asks "is it safe
                     to take this node down?" (HTTP 412 = no, it would break HA)
   --timeout value   overall deadline; defaults: 5s for live/ready, 15s for cluster*
@@ -89,7 +89,7 @@ Two implementation constraints, discovered in the source, that are load-bearing 
 - **The request must be strictly anonymous.** The health routes are exempted from the reserved-path guard only for requests the server classifies as anonymous; attaching an `Authorization` header reclassifies the request and gets it *rejected* (`ErrAllAccessDisabled`) instead of answered.
 - **The HTTP transport must set `Proxy: nil`.** Containers routinely inherit `HTTP_PROXY` without a `NO_PROXY` entry for `127.0.0.1`; a loopback probe must never route through a corporate proxy. (Traefik's healthcheck does this deliberately, for the same reason.)
 
-And one number that looks arbitrary but is not: the 15-second default timeout for cluster checks exists because the server evaluates cluster health under its own 10-second `cluster_deadline` — a client that gives up at 5s abandons the request before the server delivers its considered 503, losing every diagnostic header with it.
+And one number that looks arbitrary but is not: the 15-second default timeout for cluster checks exists because the server evaluates cluster health under its own 10-second `cluster_deadline` — a client that gives up at 5s abandons the request before the server delivers its considered 503, losing every diagnostic header with it. Two details were added after adversarial review: `--url` is environment-backed (`MINIO_HEALTHCHECK_URL`) because a probe process cannot see the server's command line — it is the documented way to point a baked-in `HEALTHCHECK` at a server whose address or TLS setup comes from CLI arguments; and any outer (Docker) timeout must exceed the probe's own deadline, or the probe is SIGKILLed before it can print its diagnostic line.
 
 ## What the endpoints really do {#endpoints}
 
@@ -119,7 +119,7 @@ ENV HOME=/tmp
 # there is no entrypoint left to repair ownership at runtime.
 VOLUME ["/data"]
 EXPOSE 9000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=2m --start-interval=2s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=2m --start-interval=2s --retries=3 \
   CMD ["/usr/bin/silo", "healthcheck", "ready"]
 ENTRYPOINT ["/usr/bin/silo"]
 ```
