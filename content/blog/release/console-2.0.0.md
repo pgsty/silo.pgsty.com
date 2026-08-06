@@ -8,7 +8,6 @@ tags: [Release, console]
 weight: 4
 url: "/blog/release/console-2.0.0/"
 aliases:
-  - /blog/console-2.0.0/
   - /releases/console-2.0.0/
 ---
 **Published:** 2026-08-04 · **Version:** [v2.0.0](https://github.com/pgsty/silo-console/releases/tag/v2.0.0) · **Repository:** [pgsty/silo-console](https://github.com/pgsty/silo-console)
@@ -42,15 +41,15 @@ The migration strategy is "clear external identity, restrained internal compatib
 
 ## Naming and Delivery Contracts {#naming-and-delivery}
 
-| Scope            | Previous name or location          | 2.0.0 contract                             |
-|:-----------------|:-----------------------------------|:-------------------------------------------|
-| Product          | Console / legacy MinIO Console     | **SILO Console**                           |
-| Repository       | `georgmangold/console`             | `pgsty/silo-console`                       |
-| Release binary   | `console`                          | `silo-console`                             |
-| Container image  | `ghcr.io/georgmangold/console`     | `ghcr.io/pgsty/silo-console`               |
-| Binary assets    | `console-<os>-<arch>`              | `silo-console-<os>-<arch>`                 |
-| Checksums        | `console_<version>_checksums.txt`  | `silo-console_<version>_checksums.txt`     |
-| Website and docs | upstream / previous maintainer     | `silo.pgsty.com` and `silo.pgsty.com/docs/`|
+| Scope            | Previous name or location         | 2.0.0 contract                              |
+|:-----------------|:----------------------------------|:--------------------------------------------|
+| Product          | Console / legacy MinIO Console    | **SILO Console**                            |
+| Repository       | `georgmangold/console`            | `pgsty/silo-console`                        |
+| Release binary   | `console`                         | `silo-console`                              |
+| Container image  | `ghcr.io/georgmangold/console`    | `ghcr.io/pgsty/silo-console`                |
+| Binary assets    | `console-<os>-<arch>`             | `silo-console-<os>-<arch>`                  |
+| Checksums        | `console_<version>_checksums.txt` | `silo-console_<version>_checksums.txt`      |
+| Website and docs | upstream / previous maintainer    | `silo.pgsty.com` and `silo.pgsty.com/docs/` |
 
 CLI authorship, usage text, and project descriptions now identify Pigsty and SILO Console. DEB/RPM/APK vendor, maintainer, homepage, description, and license metadata are updated accordingly; the executable installs to `/usr/local/bin/silo-console`.
 
@@ -58,16 +57,16 @@ CLI authorship, usage text, and project descriptions now identify Pigsty and SIL
 
 The following names still contain `minio` or the old `console`, but they are interface, protocol, or installation compatibility layers — not leftover branding:
 
-| Surface                  | State in 2.0.0                                | Reason                                        |
-|:-------------------------|:-----------------------------------------------|:----------------------------------------------|
-| Go module                | `github.com/minio/console` retained            | changing it breaks every Go import            |
-| Server endpoint          | `CONSOLE_MINIO_SERVER` retained                | widely used by existing deployments           |
-| Server region            | `CONSOLE_MINIO_REGION` retained                | existing compatibility contract               |
-| Other configuration      | existing `CONSOLE_*` variables remain valid    | avoids migration with no benefit              |
-| S3/Admin API names       | MinIO-compatible fields and enums retained     | they describe the actual protocol             |
-| Development build        | `make console` still produces `./console`      | keeps developer workflows working             |
-| Package systemd unit     | `minio-console.service` retained               | avoids duplicate services on upgrade          |
-| systemd user and config  | `console-user` and `/etc/default/console`      | avoids unnecessary account/config migration   |
+| Surface                 | State in 2.0.0                              | Reason                                      |
+|:------------------------|:--------------------------------------------|:--------------------------------------------|
+| Go module               | `github.com/minio/console` retained         | changing it breaks every Go import          |
+| Server endpoint         | `CONSOLE_MINIO_SERVER` retained             | widely used by existing deployments         |
+| Server region           | `CONSOLE_MINIO_REGION` retained             | existing compatibility contract             |
+| Other configuration     | existing `CONSOLE_*` variables remain valid | avoids migration with no benefit            |
+| S3/Admin API names      | MinIO-compatible fields and enums retained  | they describe the actual protocol           |
+| Development build       | `make console` still produces `./console`   | keeps developer workflows working           |
+| Package systemd unit    | `minio-console.service` retained            | avoids duplicate services on upgrade        |
+| systemd user and config | `console-user` and `/etc/default/console`   | avoids unnecessary account/config migration |
 
 Upgrade scripts therefore must not run repository-wide `minio → silo` or `console → silo-console` replacements. Migrating these compatibility interfaces in the future will require aliases, deprecation windows, and an explicit dual-read strategy; 2.0.0 does none of that.
 
@@ -110,11 +109,11 @@ Release binaries (all frontend assets included, stripped) weigh roughly 35–40M
 
 **Go:** the build baseline moves to Go 1.26.5 and the `golang.org/x` family is fully refreshed. Every reachable vulnerability reported by `govulncheck` is resolved:
 
-| Dependency                          | Fixed version | Advisories                                        |
-|:------------------------------------|:--------------|:--------------------------------------------------|
-| `google.golang.org/grpc`            | v1.82.1       | GO-2026-6061                                      |
-| `github.com/prometheus/prometheus`  | v0.311.3      | GO-2026-5710 / -5662 / -5381 / -5264 (incl. remote-read DoS) |
-| `github.com/klauspost/compress`     | v1.18.7       | GO-2026-5841                                      |
+| Dependency                         | Fixed version | Advisories                                                   |
+|:-----------------------------------|:--------------|:-------------------------------------------------------------|
+| `google.golang.org/grpc`           | v1.82.1       | GO-2026-6061                                                 |
+| `github.com/prometheus/prometheus` | v0.311.3      | GO-2026-5710 / -5662 / -5381 / -5264 (incl. remote-read DoS) |
+| `github.com/klauspost/compress`    | v1.18.7       | GO-2026-5841                                                 |
 
 The single remaining advisory sits in `golang.org/x/crypto`, has no upstream fix yet, and is unreachable from this codebase; it is tracked as a known item.
 
@@ -142,7 +141,7 @@ The release ships 16 assets:
 | System packages   | DEB / RPM / APK × `amd64/arm64/armv6`                           |
 | Checksums         | `silo-console_2.0.0_checksums.txt` (SHA-256)                    |
 
-Container images are pushed to `ghcr.io/pgsty/silo-console` (`linux/amd64` and `linux/arm64`). The pipeline triggers on tag pushes, pins third-party Actions to commit SHAs, and enforces the clean-checkout and zero-diff asset-rebuild gates before GoReleaser runs.
+The pipeline triggers on tag pushes, pins third-party Actions to commit SHAs, and enforces the clean-checkout and zero-diff asset-rebuild gates before GoReleaser runs.
 
 ## Upgrade Guide {#upgrade-guide}
 
@@ -159,22 +158,13 @@ When building from source, `make console` still produces `./console`; install it
 
 Packages continue to install `/etc/systemd/system/minio-console.service`, whose unit starts `/usr/local/bin/silo-console`. `EnvironmentFile=/etc/default/console`, `console-user`, and existing `CONSOLE_*` variables are unchanged. This retention lets package upgrades keep acting on the existing service instead of creating a parallel one.
 
-### Container {#upgrade-container}
-
-```bash
-docker pull ghcr.io/pgsty/silo-console:v2.0.0
-```
-
-Existing ports, mounts, and `CONSOLE_*` variables keep working. Pin explicit versions; do not treat `latest` as a rollback identifier.
-
 ### Configuration and integrations {#upgrade-configuration}
 
 - do not rename `CONSOLE_MINIO_SERVER` or `CONSOLE_MINIO_REGION`;
 - do not touch `github.com/minio/console` in Go imports;
 - prefer `SILO_RELEASE_SERVICE_HOST` for self-hosted release catalogs;
 - replace any reliance on `console update` with explicit download, verification, and deployment;
-- update process-path-based monitoring to `/usr/local/bin/silo-console`;
-- add `ghcr.io/pgsty/silo-console` to image allowlists.
+- update process-path-based monitoring to `/usr/local/bin/silo-console`.
 
 This release does not change the object data layout and requires no bucket or object migration.
 
@@ -193,7 +183,6 @@ The complete pre-rewrite history is preserved in backup refs for rollback.
 
 ## Known Limitations {#known-limitations}
 
-- the 2.0.0 container image is uploaded, but anonymous pulls remain unavailable until the `pgsty` organization switches the package to Public; the GitHub Release binaries, checksums, and packages are unaffected;
 - automatic self-update is disabled; upgrades are explicit;
 - the SSO end-to-end suite requires an external OpenLDAP/Dex/MinIO topology and was not run in that environment this cycle (the OIDC code paths are covered by unit tests and HTTP-level checks);
 - one `golang.org/x/crypto` advisory has no upstream fix yet and is unreachable from this codebase;

@@ -8,7 +8,6 @@ tags: [发布, console]
 weight: 4
 url: "/zh/blog/release/console-2.0.0/"
 aliases:
-  - /blog/console-2.0.0/
   - /releases/console-2.0.0/
 ---
 **发布日期：** 2026-08-04 · **版本：** [v2.0.0](https://github.com/pgsty/silo-console/releases/tag/v2.0.0) · **仓库：** [pgsty/silo-console](https://github.com/pgsty/silo-console)
@@ -136,13 +135,13 @@ favicon、PWA 与 Apple Touch 图标此前仍是上一代手绘徽标的 PNG 导
 
 正式发布包含 16 个资产：
 
-| 类型      | 覆盖范围                                           |
-|:--------|:-----------------------------------------------|
-| 独立二进制   | Linux `amd64/arm64/arm`、macOS `amd64/arm64`、Windows `amd64` |
-| 系统软件包   | DEB / RPM / APK × `amd64/arm64/armv6`          |
-| 校验和     | `silo-console_2.0.0_checksums.txt`（SHA-256）    |
+| 类型    | 覆盖范围                                                        |
+|:------|:------------------------------------------------------------|
+| 独立二进制 | Linux `amd64/arm64/arm`、macOS `amd64/arm64`、Windows `amd64` |
+| 系统软件包 | DEB / RPM / APK × `amd64/arm64/armv6`                       |
+| 校验和   | `silo-console_2.0.0_checksums.txt`（SHA-256）                 |
 
-容器镜像推送到 `ghcr.io/pgsty/silo-console`（`linux/amd64` 与 `linux/arm64`）。发布流水线在 tag 推送时触发，工作流的第三方 Action 已固定到具体提交，并在构建前强制执行"干净检出 + 资产重建零差异"门禁。
+发布流水线在 tag 推送时触发，工作流的第三方 Action 已固定到具体提交，并在构建前强制执行"干净检出 + 资产重建零差异"门禁。
 
 ## 升级指南 {#upgrade-guide}
 
@@ -159,22 +158,13 @@ install -m 0755 silo-console-linux-amd64 /usr/local/bin/silo-console
 
 软件包继续安装 `/etc/systemd/system/minio-console.service`，单元内部启动 `/usr/local/bin/silo-console`。`EnvironmentFile=/etc/default/console`、`console-user` 与既有 `CONSOLE_*` 变量不变。这个保留让软件包升级继续作用于原有服务，而不是平行创建一个新服务。
 
-### 容器 {#upgrade-container}
-
-```bash
-docker pull ghcr.io/pgsty/silo-console:v2.0.0
-```
-
-原有端口、挂载和 `CONSOLE_*` 环境变量继续可用。请固定明确版本，不要把 `latest` 当作可回滚标识。
-
 ### 配置与集成 {#upgrade-configuration}
 
 - 不要重命名 `CONSOLE_MINIO_SERVER` 或 `CONSOLE_MINIO_REGION`；
 - 不要修改 Go import 中的 `github.com/minio/console`；
 - 自建版本目录优先迁移到 `SILO_RELEASE_SERVICE_HOST`；
 - 依赖 `console update` 的脚本改为显式下载、校验并部署发布资产；
-- 按进程路径识别服务的监控更新为 `/usr/local/bin/silo-console`；
-- 镜像白名单加入 `ghcr.io/pgsty/silo-console`。
+- 按进程路径识别服务的监控更新为 `/usr/local/bin/silo-console`。
 
 本版本不改变对象数据布局，也不要求对存储桶和对象执行迁移。
 
@@ -193,7 +183,6 @@ docker pull ghcr.io/pgsty/silo-console:v2.0.0
 
 ## 已知限制 {#known-limitations}
 
-- 2.0.0 容器镜像已上传，但在 `pgsty` 组织将该包切换为 Public 前，匿名拉取不可用；GitHub Release 中的二进制、校验和与软件包不受影响；
 - 自动自更新暂时禁用，升级需要显式执行；
 - SSO 端到端测试套件依赖外部 OpenLDAP/Dex/MinIO 拓扑，本轮未在该环境中运行（OIDC 代码路径已由单元测试与 HTTP 层验证覆盖）；
 - `golang.org/x/crypto` 存在一条官方尚未发布修复、且代码路径不可达的公告；
