@@ -1,6 +1,6 @@
 ---
 title: "SILO: S3-Compatible Object Storage by Pigsty"
-description: "S3-compatible object storage maintained by Pigsty, with security updates, versioned releases, a restored console, and operational continuity."
+description: "S3-compatible object storage, forked from MinIO and maintained by the Pigsty community: versioned releases, signed packages, the full web console, and security fixes with public advisories."
 url: "/"
 weight: 1
 type: home

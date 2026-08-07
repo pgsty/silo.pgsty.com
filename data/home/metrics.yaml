@@ -1,7 +1,7 @@
 # Remote counters; refresh with: bin/metrics.py update
-github_stars: 1957
-docker_pulls: 502788
+github_stars: 1984
+docker_pulls: 503609
 
 # Editorial counters; maintain these values here.
-security_fixes: 19
-releases: 7
+security_fixes: 14
+releases: 9

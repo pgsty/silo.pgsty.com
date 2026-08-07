@@ -172,8 +172,8 @@
               <span>Silo 由 <a href="https://pigsty.cc" target="_blank" rel="noopener">Pigsty 社区</a>持续维护</span>
               <span>关注供应链持续性并提供后续安全更新</span>
               {{ else }}
-              <span>Silo is maintained by the <a href="https://pigsty.io" target="_blank" rel="noopener">Pigsty Community</a></span>
-              <span>With supply-chain continuity and security updates</span>
+              <span>A MinIO fork, maintained by the <a href="https://pigsty.io" target="_blank" rel="noopener">Pigsty community</a></span>
+              <span>Versioned releases, signed packages, security fixes</span>
               {{ end }}
             </p>
 
@@ -183,7 +183,7 @@
             </div>
 
             <p class="hero-manifesto anim" style="--d:4">
-              <a href="{{ relLangURL "about/manifesto/" }}"><i class="fas fa-scroll" aria-hidden="true"></i> {{ if $zh }}我们承诺什么，不承诺什么——Silo 宣言{{ else }}What we promise, and what we won't — the Silo Manifesto{{ end }} →</a>
+              <a href="{{ relLangURL "about/manifesto/" }}"><i class="fas fa-scroll" aria-hidden="true"></i> {{ if $zh }}我们承诺什么，不承诺什么——Silo 宣言{{ else }}The Silo Manifesto: our commitments, and their limits{{ end }} →</a>
             </p>
 
           </div>
@@ -223,7 +223,7 @@
       <div class="landing-container">
         <div class="section-head section-head--compact" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">KEY METRICS</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title section-title--sm" id="metrics-title">{{ if $zh }}持续维护，广泛采用{{ else }}Maintained in public, visible at a glance{{ end }}</h2>
+          <h2 class="section-title section-title--sm" id="metrics-title">{{ if $zh }}持续维护，广泛采用{{ else }}Numbers you can check yourself{{ end }}</h2>
         </div>
 
         <div class="stats-grid" data-reveal>
@@ -276,22 +276,22 @@
     <section class="landing-section modules" id="value">
       <div class="landing-container">
         <div class="section-head" data-reveal>
-          <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}价值主张{{ else }}VALUE PROPOSITION{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}上游放弃，SILO 接盘{{ else }}What upstream dropped, SILO picks up{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}MinIO 社区版阉割了控制台、停发了预编译制品、归档了安全更新。SILO 把这三样都补回来——同一套代码，同样的性能。{{ else }}MinIO's community edition gutted its console, stopped shipping binaries, and archived its security updates. SILO restores all three—on the same code, at the same performance.{{ end }}</p>
+          <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}价值主张{{ else }}WHAT SILO MAINTAINS{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title">{{ if $zh }}上游放弃，SILO 接盘{{ else }}Silo publishes what upstream stopped shipping{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}MinIO 社区版阉割了控制台、停发了预编译制品、归档了安全更新。SILO 把这三样都补回来——同一套代码，同样的性能。{{ else }}MinIO's community edition is source-only now: the web console was cut back to a stub, prebuilt binaries stopped, and the server repository is archived. Silo builds from that same code and keeps publishing the console, the packages, and the security fixes.{{ end }}</p>
         </div>
 
         <div class="module-row" data-reveal>
           <div class="module-content">
             <p class="module-ref silkscreen">{{ if $zh }}控制台{{ else }}WEB CONSOLE{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "administration/minio-console/" }}">{{ if $zh }}完整控制台，找回来了{{ else }}The full console, restored{{ end }}</a></h3>
+            <h3 class="module-title"><a href="{{ relLangURL "administration/minio-console/" }}">{{ if $zh }}完整控制台，找回来了{{ else }}The complete web console{{ end }}</a></h3>
             <p class="module-motto"><span aria-hidden="true">◇</span> {{ if $zh }}在浏览器里重新管理桶、身份、监控与复制{{ else }}Manage buckets, identity, monitoring, and replication in the browser{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}上游把 AGPL 版 Web 控制台阉割成了残桩{{ else }}Upstream stripped the AGPL web console down to a stub{{ end }}</li>
-              <li>{{ if $zh }}SILO 交付完整管理界面：<strong>桶、IAM、监控、站点复制</strong>{{ else }}SILO ships the full management UI: <strong>buckets, IAM, monitoring, site replication</strong>{{ end }}</li>
-              <li>{{ if $zh }}没有付费墙，没有功能闸——运维者记得的那个控制台{{ else }}No paywall, no feature gate—the console every operator remembers{{ end }}</li>
+              <li>{{ if $zh }}上游把 AGPL 版 Web 控制台阉割成了残桩{{ else }}Upstream reduced the AGPL console to a stub{{ end }}</li>
+              <li>{{ if $zh }}SILO 交付完整管理界面：<strong>桶、IAM、监控、站点复制</strong>{{ else }}Silo ships the full management UI: <strong>buckets, IAM, monitoring, site replication</strong>{{ end }}</li>
+              <li>{{ if $zh }}没有付费墙，没有功能闸——运维者记得的那个控制台{{ else }}All of it is in the AGPL build. No paywall, no feature gate{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}上游拿走的控制台，回到你的浏览器{{ else }}The console upstream took away, back in your browser{{ end }}</p>
+            <p class="module-value">{{ if $zh }}上游拿走的控制台，回到你的浏览器{{ else }}No screens missing{{ end }}</p>
           </div>
           <div class="module-visual">
             <a href="{{ relLangURL "administration/minio-console/" }}" class="module-img silo-figure">
@@ -303,14 +303,15 @@
         <div class="module-row module-row--reverse" data-reveal>
           <div class="module-content">
             <p class="module-ref silkscreen">{{ if $zh }}安全补丁{{ else }}SECURITY PATCHES{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "blog/security/" }}">{{ if $zh }}持续修补，而非搁置{{ else }}Patched, not abandoned{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}CVE 在这里被修复，公告与代码同处一地{{ else }}CVEs get fixed here, advisories next to the code{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "blog/security/" }}">{{ if $zh }}持续修补，而非搁置{{ else }}Somewhere to report a CVE{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}CVE 在这里被修复，公告与代码同处一地{{ else }}Reports go to a private channel; fixes ship with an advisory{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}上游社区版已归档——新 CVE 落到无人处理{{ else }}Upstream's community edition is archived—new CVEs land on no one's desk{{ end }}</li>
-              <li>{{ if $zh }}活跃发行线已交付 <strong>19 项安全修复</strong>，每项都附公告{{ else }}<strong>19 security fixes</strong> shipped on the active release line, each with an advisory{{ end }}</li>
-              <li>{{ if $zh }}私下报告、可复现地分诊、透明地公开{{ else }}Report privately, triage reproducibly, publish transparently{{ end }}</li>
+              <li>{{ if $zh }}上游社区版已归档——新 CVE 落到无人处理{{ else }}The upstream server repository is archived and read-only{{ end }}</li>
+              {{/* Same counter as the metrics band above, so the two cannot drift apart. */ -}}
+              <li>{{ if $zh }}活跃发行线已交付 <strong>{{ $metrics.security_fixes }} 项安全修复</strong>，每项都附公告{{ else }}<strong>{{ $metrics.security_fixes }} security fixes</strong> on the active release line, each published with an advisory{{ end }}</li>
+              <li>{{ if $zh }}私下报告、可复现地分诊、透明地公开{{ else }}Reports are triaged privately; details go public once the fix ships{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}不停摆的安全维护{{ else }}Security that keeps moving{{ end }}</p>
+            <p class="module-value">{{ if $zh }}不停摆的安全维护{{ else }}Somebody is still reading this code{{ end }}</p>
           </div>
           <div class="module-visual">
             {{- $security := .Site.GetPage "/blog/security" }}
@@ -319,10 +320,10 @@
               <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">blog/security · {{ len $advisories }} {{ if $zh }}篇记录{{ else }}ENTRIES{{ end }}</span></span>
               <ul class="advisory-list">
                 {{- range $advisories }}
-                <li><a href="{{ .RelPermalink }}"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time><span>{{ .Title }}</span></a></li>
+                <li><a href="{{ .RelPermalink }}"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time><span>{{ .LinkTitle }}</span></a></li>
                 {{- end }}
               </ul>
-              <a class="advisory-foot" href="{{ relLangURL "blog/security/" }}">{{ if $zh }}查看完整安全纪事{{ else }}BROWSE THE SECURITY CHRONICLE{{ end }} →</a>
+              <a class="advisory-foot" href="{{ relLangURL "blog/security/" }}">{{ if $zh }}查看完整安全纪事{{ else }}ALL SECURITY ADVISORIES{{ end }} →</a>
             </div>
           </div>
         </div>
@@ -330,18 +331,18 @@
         <div class="module-row" id="releases" data-reveal>
           <div class="module-content">
             <p class="module-ref silkscreen">{{ if $zh }}发行制品{{ else }}RELEASE ARTIFACTS{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "download/" }}">{{ if $zh }}真正能下载的制品{{ else }}Binaries, prebuilt and signed{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">▦</span> {{ if $zh }}从源码到签名、可运行的软件包{{ else }}From source to signed, runnable packages{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "download/" }}">{{ if $zh }}真正能下载的制品{{ else }}Prebuilt, signed binaries{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">▦</span> {{ if $zh }}从源码到签名、可运行的软件包{{ else }}Packages you can install without building anything{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}无需自行构建，也不必绕道闭源商业下载{{ else }}No self-build requirement, no detour through a closed commercial download{{ end }}</li>
+              <li>{{ if $zh }}无需自行构建，也不必绕道闭源商业下载{{ else }}Every release ships binaries, packages, and images. No build step{{ end }}</li>
               <li>{{ if $zh }}版本化二进制、<strong>RPM / DEB / APK</strong> 与多架构容器镜像{{ else }}Versioned binaries, <strong>RPM / DEB / APK</strong>, and multi-arch container images{{ end }}</li>
-              <li>{{ if $zh }}GPG 签名软件包，附公开校验和{{ else }}GPG-signed packages with published checksums{{ end }}</li>
+              <li>{{ if $zh }}GPG 签名软件包，附公开校验和{{ else }}GPG signatures, SHA-256 checksums, SBOMs, and build provenance{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}交付面，持续维护{{ else }}The delivery surface, maintained{{ end }}</p>
+            <p class="module-value">{{ if $zh }}交付面，持续维护{{ else }}Download it and run it{{ end }}</p>
           </div>
           <div class="module-visual">
             <a href="{{ relLangURL "download/" }}" class="artifact-plate" aria-label="{{ if $zh }}浏览发行制品{{ else }}Browse release artifacts{{ end }}">
-              <span class="artifact-plate-head"><b>SILO // RELEASE SURFACE</b><small>VERSIONED · CHECKSUMMED</small></span>
+              <span class="artifact-plate-head"><b>SILO // RELEASE ARTIFACTS</b><small>VERSIONED · CHECKSUMMED</small></span>
               <span class="artifact-grid">
                 <i><b>OCI</b><small>amd64 · arm64</small></i>
                 <i><b>RPM</b><small>EL compatible</small></i>
@@ -358,14 +359,14 @@
         <div class="module-row module-row--reverse" data-reveal>
           <div class="module-content">
             <p class="module-ref silkscreen">{{ if $zh }}兼容性{{ else }}COMPATIBILITY{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}原地替换 MinIO{{ else }}A drop-in replacement{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">⇄</span> {{ if $zh }}换一个镜像名即可迁移，数据原地不动{{ else }}Swap the image name; your data stays in place{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}原地替换 MinIO{{ else }}Your config and your data stay put{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">⇄</span> {{ if $zh }}换一个镜像名即可迁移，数据原地不动{{ else }}Change the image name; the volume and the config stay as they are{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}产品与交付物改名为 <strong>silo</strong>，协议与数据格式保持不变{{ else }}The delivery surface is renamed <strong>silo</strong>; the protocol and data are not{{ end }}</li>
+              <li>{{ if $zh }}产品与交付物改名为 <strong>silo</strong>，协议与数据格式保持不变{{ else }}Only the names change: the product and its packages become <strong>silo</strong>{{ end }}</li>
               <li>{{ if $zh }}S3 API、<strong>MINIO_* 变量</strong>、指标、路由与磁盘格式原样保留{{ else }}S3 API, <strong>MINIO_* variables</strong>, metrics, routes, and disk format unchanged{{ end }}</li>
-              <li>{{ if $zh }}参见<a href="{{ relLangURL "compatibility/server/" }}">兼容性审计</a>与<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>，回滚路径同样在册{{ else }}See the <a href="{{ relLangURL "compatibility/server/" }}">compatibility audit</a> and <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a>, rollback included{{ end }}</li>
+              <li>{{ if $zh }}参见<a href="{{ relLangURL "compatibility/server/" }}">兼容性审计</a>与<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>，回滚路径同样在册{{ else }}Version-by-version differences and the tested rollback path: <a href="{{ relLangURL "compatibility/server/" }}">compatibility audit</a>, <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a>{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}把镜像换成 pgsty/silo，其余一切照旧{{ else }}Point the image at pgsty/silo—everything else stays{{ end }}</p>
+            <p class="module-value">{{ if $zh }}把镜像换成 pgsty/silo，其余一切照旧{{ else }}Point the image at pgsty/silo{{ end }}</p>
           </div>
           <div class="module-visual">
             <a href="{{ relLangURL "compatibility/migration/" }}" class="code-plate migrate-plate" aria-label="{{ if $zh }}查看从 MinIO 迁移到 Silo 的指南{{ else }}Read the MinIO to Silo migration guide{{ end }}">
@@ -387,8 +388,8 @@
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">S3 INTERFACE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}沿用你已经依赖的接口{{ else }}The interface your stack already speaks{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}Silo 只重命名产品与交付物，不改动协议：S3 API、MINIO_* 配置与磁盘格式保持原样，逐项差异记录在兼容性审计中。{{ else }}Silo renames the product and its delivery surfaces—never the protocol. The S3 API, MINIO_* configuration, and on-disk format stay as your stack expects, with every difference recorded in the compatibility audit.{{ end }}</p>
+          <h2 class="section-title">{{ if $zh }}沿用你已经依赖的接口{{ else }}The interface your clients already use{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}Silo 只重命名产品与交付物，不改动协议：S3 API、MINIO_* 配置与磁盘格式保持原样，逐项差异记录在兼容性审计中。{{ else }}Silo renames the product and its packages, not the protocol. The S3 API, MINIO_* configuration, and on-disk format are preserved; the differences that do exist are listed per version in the compatibility audit.{{ end }}</p>
           <div class="section-links">
             <a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}兼容性说明{{ else }}Compatibility Notes{{ end }} →</a>
             <a href="{{ relLangURL "developers/minio-drivers/" }}">{{ if $zh }}S3 客户端{{ else }}S3 Clients{{ end }} →</a>
@@ -400,9 +401,9 @@
         <div class="kernel-grid interface-grid" data-reveal>
           <a href="{{ relLangURL "developers/minio-drivers/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">S3</span><span class="kernel-name">S3 API</span><span class="kernel-desc">Application interface</span></a>
           <a href="{{ relLangURL "reference/minio-server/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">$</span><span class="kernel-name">silo</span><span class="kernel-desc">Server executable</span></a>
-          <a href="{{ relLangURL "reference/minio-server/settings/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">ENV</span><span class="kernel-name">MINIO_*</span><span class="kernel-desc">Configuration surface</span></a>
+          <a href="{{ relLangURL "reference/minio-server/settings/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">ENV</span><span class="kernel-name">MINIO_*</span><span class="kernel-desc">Environment variables</span></a>
           <a href="{{ relLangURL "blog/release/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">REL</span><span class="kernel-name">RELEASE.*</span><span class="kernel-desc">Version tags</span></a>
-          <a href="{{ relLangURL "reference/minio-mc/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">MC</span><span class="kernel-name">mcli / mc</span><span class="kernel-desc">Operator workflow</span></a>
+          <a href="{{ relLangURL "reference/minio-mc/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">MC</span><span class="kernel-name">mcli / mc</span><span class="kernel-desc">Command-line client</span></a>
           <a href="{{ relLangURL "administration/identity-access-management/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">IAM</span><span class="kernel-name">IAM + TLS</span><span class="kernel-desc">Security controls</span></a>
         </div>
 
@@ -425,7 +426,7 @@
       <div class="landing-container">
         <div class="dashwall-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">OPERATIONS</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title section-title--sm">{{ if $zh }}熟悉的控制台、监控与复制工作流{{ else }}Familiar Console, monitoring, and replication workflows{{ end }}</h2>
+          <h2 class="section-title section-title--sm">{{ if $zh }}熟悉的控制台、监控与复制工作流{{ else }}Console screens and Grafana dashboards{{ end }}</h2>
           <a href="{{ relLangURL "administration/minio-console/" }}" class="dashwall-link">{{ if $zh }}打开控制台文档{{ else }}Open Console Docs{{ end }} ↗</a>
         </div>
       </div>
@@ -454,21 +455,13 @@
     <section class="landing-section operator-voices" id="voices">
       <div class="landing-container">
         <div class="section-head" data-reveal>
-          <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}用户之声{{ else }}USER VOICES{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}真实迁移反馈，也保留现实提醒{{ else }}Real migration reports, with the caveat intact{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}以下均为 2026 年 2–7 月的第三方公开记录，只代表各自环境，不构成通用兼容性或生产保证。{{ else }}Public third-party records from February–July 2026. They describe individual environments, not universal compatibility or production guarantees.{{ end }}</p>
+          <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}用户之声{{ else }}THIRD-PARTY REPORTS{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
+          <h2 class="section-title">{{ if $zh }}真实迁移反馈，也保留现实提醒{{ else }}Migration reports we didn't write{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}以下均为 2026 年 2–7 月的第三方公开记录，只代表各自环境，不构成通用兼容性或生产保证。{{ else }}Public records from February to July 2026, quoted verbatim and linked to their source. Each describes one environment; none of them is a compatibility or production guarantee.{{ end }}</p>
         </div>
 
-        <div class="operator-voices-grid" data-reveal>
-          {{ range $voices.featured }}
-          {{ partial "operator-voice.html" (dict "voice" . "zh" $zh) }}
-          {{ end }}
-        </div>
-      </div>
-
-      <div class="landing-container">
         <div class="voice-wall-head" data-reveal>
-          <span class="silkscreen">{{ if $zh }}更多社区反馈 · 悬停暂停 · 点击查看原文{{ else }}MORE FROM THE COMMUNITY · HOVER TO PAUSE · CLICK FOR THE SOURCE{{ end }}</span>
+          <span class="silkscreen">{{ if $zh }}悬停暂停 · 点击查看原文{{ else }}HOVER TO PAUSE · CLICK FOR THE SOURCE{{ end }}</span>
         </div>
       </div>
 
@@ -492,19 +485,19 @@
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">MAINTENANCE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}一项刻意收窄的承诺{{ else }}A deliberately narrow promise{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}SILO 服务于现有 MinIO 兼容部署的连续性；它不是无限范围的产品路线图。每一条承诺与拒绝都写在《Silo 宣言》里。{{ else }}SILO exists for continuity across existing MinIO-compatible deployments—not an unlimited product roadmap. Every promise and every refusal is written down in the Silo Manifesto.{{ end }}</p>
+          <h2 class="section-title">{{ if $zh }}一项刻意收窄的承诺{{ else }}The scope is deliberately small{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}SILO 服务于现有 MinIO 兼容部署的连续性；它不是无限范围的产品路线图。每一条承诺与拒绝都写在《Silo 宣言》里。{{ else }}Silo keeps existing MinIO-compatible deployments running. It is not a product roadmap, and it does not try to be. The commitments and the exclusions are both written down in the Silo Manifesto.{{ end }}</p>
         </div>
         <div class="promise-grid" data-reveal>
           <article class="promise-card promise-card--yes">
-            <p class="silkscreen"><span class="promise-mark" aria-hidden="true">✓</span>{{ if $zh }}维护范围{{ else }}MAINTAINED SURFACE{{ end }}</p>
-            <h3>{{ if $zh }}我们持续维护{{ else }}What stays maintained{{ end }}</h3>
-            <ul><li>{{ if $zh }}活跃发行线的构建与依赖{{ else }}Builds and dependencies for the active release line{{ end }}</li><li>{{ if $zh }}适用的安全修复与公告{{ else }}Applicable security fixes and advisories{{ end }}</li><li>{{ if $zh }}可复现缺陷的聚焦修复{{ else }}Focused fixes for reproducible defects{{ end }}</li><li>{{ if $zh }}版本化交付制品与文档{{ else }}Versioned artifacts and documentation{{ end }}</li><li>{{ if $zh }}通常每 1–2 个月一版，最长一个季度{{ else }}A release typically every 1–2 months, at most a quarter{{ end }}</li></ul>
+            <p class="silkscreen"><span class="promise-mark" aria-hidden="true">✓</span>{{ if $zh }}维护范围{{ else }}IN SCOPE{{ end }}</p>
+            <h3>{{ if $zh }}我们持续维护{{ else }}What we maintain{{ end }}</h3>
+            <ul><li>{{ if $zh }}活跃发行线的构建与依赖{{ else }}Builds and dependencies for the active release line{{ end }}</li><li>{{ if $zh }}适用的安全修复与公告{{ else }}Applicable security fixes, each with an advisory{{ end }}</li><li>{{ if $zh }}可复现缺陷的聚焦修复{{ else }}Fixes for defects we can reproduce{{ end }}</li><li>{{ if $zh }}版本化交付制品与文档{{ else }}Versioned artifacts and documentation{{ end }}</li><li>{{ if $zh }}通常每 1–2 个月一版，最长一个季度{{ else }}A release every one to two months, at most a quarter apart{{ end }}</li></ul>
           </article>
           <article class="promise-card promise-card--no">
-            <p class="silkscreen"><span class="promise-mark" aria-hidden="true">✕</span>{{ if $zh }}明确边界{{ else }}EXPLICIT BOUNDARY{{ end }}</p>
-            <h3>{{ if $zh }}我们不做保证{{ else }}What is not promised{{ end }}</h3>
-            <ul><li>{{ if $zh }}完整复刻上游产品路线图{{ else }}A full continuation of the upstream roadmap{{ end }}</li><li>{{ if $zh }}历史版本或多条长期支持分支{{ else }}Historical releases or multiple support branches{{ end }}</li><li>{{ if $zh }}未经验证的逐项兼容保证{{ else }}Untested, item-by-item compatibility guarantees{{ end }}</li><li>{{ if $zh }}响应与修复时限 SLA{{ else }}Response or remediation-time SLAs{{ end }}</li></ul>
+            <p class="silkscreen"><span class="promise-mark" aria-hidden="true">✕</span>{{ if $zh }}明确边界{{ else }}OUT OF SCOPE{{ end }}</p>
+            <h3>{{ if $zh }}我们不做保证{{ else }}What we don't promise{{ end }}</h3>
+            <ul><li>{{ if $zh }}完整复刻上游产品路线图{{ else }}A full continuation of the upstream roadmap{{ end }}</li><li>{{ if $zh }}历史版本或多条长期支持分支{{ else }}Historical releases or multiple support branches{{ end }}</li><li>{{ if $zh }}未经验证的逐项兼容保证{{ else }}Compatibility guarantees we have not tested{{ end }}</li><li>{{ if $zh }}响应与修复时限 SLA{{ else }}Response or remediation-time SLAs{{ end }}</li></ul>
           </article>
         </div>
         <div class="promise-cta" data-reveal>
@@ -517,59 +510,59 @@
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">FAQ</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title" id="faq-title">{{ if $zh }}常见问题，直接回答{{ else }}Common questions, answered straight{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}简短的回答，附上通往详细版本的链接。{{ else }}Short answers, with links to the long ones.{{ end }}</p>
+          <h2 class="section-title" id="faq-title">{{ if $zh }}常见问题，直接回答{{ else }}Questions we get asked{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}简短的回答，附上通往详细版本的链接。{{ else }}Short answers. The details are behind the links.{{ end }}</p>
         </div>
 
         <div class="faq-list" data-reveal>
           <details class="faq-item" name="silo-faq" open>
             <summary><span class="faq-num silkscreen">Q1</span><span class="faq-q">{{ if $zh }}这个项目为什么存在？{{ else }}Why does this project exist?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}因为上游收缩了社区版：控制台被削减、预编译制品停发、社区仓库被归档。Silo 的存在是为了让一个持续维护、功能完整的 S3 兼容社区对象存储继续存在——Pigsty 自己在生产环境用它承载 PostgreSQL 备份。完整的理由与承诺见<a href="{{ relLangURL "about/manifesto/" }}">《Silo 宣言》</a>。{{ else }}Because upstream wound down its community edition: the web console was stripped, prebuilt binaries stopped, and the repository was archived. Silo exists so that a maintained, feature-complete, S3-compatible community object storage keeps existing—Pigsty runs it in production as its PostgreSQL backup storage. The full reasoning lives in the <a href="{{ relLangURL "about/manifesto/" }}">Silo Manifesto</a>.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}因为上游收缩了社区版：控制台被削减、预编译制品停发、社区仓库被归档。Silo 的存在是为了让一个持续维护、功能完整的 S3 兼容社区对象存储继续存在——Pigsty 自己在生产环境用它承载 PostgreSQL 备份。完整的理由与承诺见<a href="{{ relLangURL "about/manifesto/" }}">《Silo 宣言》</a>。{{ else }}Upstream wound down its community edition: the web console was cut back to a stub, prebuilt binaries stopped, and the server repository was archived. Pigsty runs its own PostgreSQL backups on this code, so it needed a maintainer either way. Everything else follows from that. The reasoning is written out in the <a href="{{ relLangURL "about/manifesto/" }}">Silo Manifesto</a>.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q2</span><span class="faq-q">{{ if $zh }}它解决什么问题？{{ else }}What problem does it solve?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}让既有的 MinIO 兼容部署继续可用：可直接<a href="{{ relLangURL "download/" }}">下载</a>的版本化二进制与软件包、附公告的<a href="{{ relLangURL "blog/security/" }}">安全修复</a>、完整的 Web 控制台——不需要自行构建，也不需要商业许可。它做的是维护与延续，不是新的产品路线图。{{ else }}It keeps existing MinIO-compatible deployments viable: versioned binaries and packages you can <a href="{{ relLangURL "download/" }}">download</a>, <a href="{{ relLangURL "blog/security/" }}">security fixes</a> with public advisories, and the full web console—no self-building, no commercial license. It is maintenance and continuity, not a new product roadmap.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}让既有的 MinIO 兼容部署继续可用：可直接<a href="{{ relLangURL "download/" }}">下载</a>的版本化二进制与软件包、附公告的<a href="{{ relLangURL "blog/security/" }}">安全修复</a>、完整的 Web 控制台——不需要自行构建，也不需要商业许可。它做的是维护与延续，不是新的产品路线图。{{ else }}It keeps existing MinIO-compatible deployments running: versioned binaries and packages you can <a href="{{ relLangURL "download/" }}">download</a>, <a href="{{ relLangURL "blog/security/" }}">security fixes</a> with public advisories, and the full web console. No build step and no commercial license. This is maintenance work, not a new product.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q3</span><span class="faq-q">{{ if $zh }}你们承诺什么？{{ else }}What do you promise?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}一份刻意收窄的清单：永远 AGPLv3 且无 CLA（仅 DCO）；无付费墙、无注册墙、无遥测；通常每 1–2 个月发一版，最长一个季度；每项安全修复都附公开公告。我们拒绝承诺的——修复时限 SLA、上游路线图的延续——也以同样的认真写在<a href="{{ relLangURL "about/manifesto/" }}">《宣言》</a>里。{{ else }}A deliberately narrow list: AGPLv3 forever with no CLA (DCO only); no paywalls, registration walls, or telemetry; a release typically every 1–2 months, at most a quarter; and a public advisory for every security fix. What we refuse to promise—fix-time SLAs, an upstream roadmap continuation—is written down with the same care in the <a href="{{ relLangURL "about/manifesto/" }}">Manifesto</a>.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}一份刻意收窄的清单：永远 AGPLv3 且无 CLA（仅 DCO）；无付费墙、无注册墙、无遥测；通常每 1–2 个月发一版，最长一个季度；每项安全修复都附公开公告。我们拒绝承诺的——修复时限 SLA、上游路线图的延续——也以同样的认真写在<a href="{{ relLangURL "about/manifesto/" }}">《宣言》</a>里。{{ else }}A short list, kept short on purpose. AGPLv3 with no CLA: contributions come in under DCO sign-off, so copyright stays with each author. No paywalls, no registration walls, no telemetry. A release every one to two months, at most a quarter apart. A public advisory for every security fix we ship. The <a href="{{ relLangURL "about/manifesto/" }}">Manifesto</a> also lists what we refuse to promise, such as fix-time SLAs.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q4</span><span class="faq-q">{{ if $zh }}谁在维护这个分叉？{{ else }}Who maintains this fork?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}实名回答：这个分叉以 <a href="https://github.com/pgsty" target="_blank" rel="noopener">PGSTY</a> 组织的名义维护，实际维护者是 <a href="https://vonng.com/" target="_blank" rel="noopener">冯若航（Vonng）</a>——PostgreSQL 发行版 Pigsty 的作者。他曾部署并管理 25PB 规模的 MinIO 集群，并拥有资深的软件打包经验。延续性安排提前写在<a href="{{ relLangURL "about/manifesto/" }}#continuity">《宣言》第九条</a>。{{ else }}A straight answer, with names: the fork is maintained under the <a href="https://github.com/pgsty" target="_blank" rel="noopener">PGSTY</a> organization by <a href="https://vonng.com/en/" target="_blank" rel="noopener">Ruohang Feng (Vonng)</a>—author of the Pigsty PostgreSQL distribution. He has deployed and managed a 25 PB MinIO cluster and brings deep packaging experience. The continuity arrangements are written down in advance in <a href="{{ relLangURL "about/manifesto/" }}#continuity">Article 9 of the Manifesto</a>.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}实名回答：这个分叉以 <a href="https://github.com/pgsty" target="_blank" rel="noopener">PGSTY</a> 组织的名义维护，实际维护者是 <a href="https://vonng.com/" target="_blank" rel="noopener">冯若航（Vonng）</a>——PostgreSQL 发行版 Pigsty 的作者。他曾部署并管理 25PB 规模的 MinIO 集群，并拥有资深的软件打包经验。延续性安排提前写在<a href="{{ relLangURL "about/manifesto/" }}#continuity">《宣言》第九条</a>。{{ else }}One person, named. The fork is maintained under the <a href="https://github.com/pgsty" target="_blank" rel="noopener">PGSTY</a> organization by <a href="https://vonng.com/en/" target="_blank" rel="noopener">Ruohang Feng (Vonng)</a>, who wrote the Pigsty PostgreSQL distribution. He has deployed and run a 25 PB MinIO cluster, and does the packaging and releases here. <a href="{{ relLangURL "about/manifesto/" }}#continuity">Article 9 of the Manifesto</a> says in advance what happens if that arrangement ends.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q5</span><span class="faq-q">{{ if $zh }}Coding Agent 在项目中扮演什么角色？{{ else }}What role do coding agents play?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}Agent 是功能开发与代码 Review 的主力。与之配套的承诺是：每一个变更都必须通过 CI 与人工审核，所有建设性变更都要经过人类的利弊权衡才会合入；Agent 的完整思考记录会归档留存，其利弊权衡也会作为设计文档归档，以备查阅。<a href="{{ relLangURL "blog/security/" }}">安全纪事</a>与<a href="{{ relLangURL "blog/release/" }}">发布说明</a>里可以看到这套工作方式的公开产出。{{ else }}Agents are the main workforce for feature development and code review. The commitment that comes with that: every change must pass CI and human review, and every constructive change is merged only after a human has weighed its trade-offs. The agents' full reasoning records are archived, and their trade-off analyses are preserved as design documents for future reference; the <a href="{{ relLangURL "blog/security/" }}">security chronicle</a> and <a href="{{ relLangURL "blog/release/" }}">release notes</a> show this way of working and its output in public.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}Agent 是功能开发与代码 Review 的主力。与之配套的承诺是：每一个变更都必须通过 CI 与人工审核，所有建设性变更都要经过人类的利弊权衡才会合入；Agent 的完整思考记录会归档留存，其利弊权衡也会作为设计文档归档，以备查阅。<a href="{{ relLangURL "blog/security/" }}">安全纪事</a>与<a href="{{ relLangURL "blog/release/" }}">发布说明</a>里可以看到这套工作方式的公开产出。{{ else }}Most of the code, and most of the first-pass review, is written by coding agents. A human reads every diff, decides the trade-offs, and merges; nothing lands without CI and that review. We keep the agents' working notes and trade-off write-ups, because when a fix turns out to be wrong, the reasoning behind it is the thing you want. The <a href="{{ relLangURL "blog/security/" }}">security advisories</a> and <a href="{{ relLangURL "blog/release/" }}">release notes</a> are what this arrangement produces in public. Judge it on those.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q6</span><span class="faq-q">{{ if $zh }}磁盘格式会变化吗？{{ else }}Will the on-disk format change?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}不会。<code>.minio.sys</code> 元数据目录与对象布局保持上游原样，由 CI 兼容性门禁冻结，与 MinIO 双向互通。新增能力默认不触碰磁盘格式；任何例外都将是显式可选、启用前明确标注的。参见<a href="{{ relLangURL "compatibility/server/" }}">兼容性审计</a>。{{ else }}No. The <code>.minio.sys</code> metadata directory and object layout stay as upstream left them, frozen by a CI compatibility guard, and remain interoperable with MinIO in both directions. New capabilities do not touch the disk format by default; any exception would be opt-in and flagged before you enable it. See the <a href="{{ relLangURL "compatibility/server/" }}">compatibility audit</a>.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}不会。<code>.minio.sys</code> 元数据目录与对象布局保持上游原样，由 CI 兼容性门禁冻结，与 MinIO 双向互通。新增能力默认不触碰磁盘格式；任何例外都将是显式可选、启用前明确标注的。参见<a href="{{ relLangURL "compatibility/server/" }}">兼容性审计</a>。{{ else }}No. The <code>.minio.sys</code> metadata directory and the object layout are unchanged from upstream, held in place by a CI compatibility check, and tested for interoperability with MinIO. New features do not touch the on-disk format; if one ever has to, it will be opt-in and marked non-reversible before you can turn it on. The <a href="{{ relLangURL "compatibility/server/" }}">compatibility audit</a> has the details.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q7</span><span class="faq-q">{{ if $zh }}兼容性怎么样？{{ else }}How compatible is it?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}可以原地替换：S3 API、<code>MINIO_*</code> 环境变量、<code>minio_*</code> 指标、<code>x-minio-*</code> 头与 <code>/minio/*</code> 路由全部不变——容器部署里迁移只需改一个镜像名，且有经过演练的回滚路径。所有差异逐版本记录在<a href="{{ relLangURL "compatibility/" }}">兼容性说明</a>中；<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>覆盖 Docker 与软件包安装。{{ else }}It is a drop-in replacement: the S3 API, <code>MINIO_*</code> environment variables, <code>minio_*</code> metrics, <code>x-minio-*</code> headers, and <code>/minio/*</code> routes are unchanged—in a container deployment, migration is one image-name change, with a rehearsed rollback path. Every difference is recorded in the <a href="{{ relLangURL "compatibility/" }}">compatibility notes</a>; the <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a> covers Docker and packages.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}可以原地替换：S3 API、<code>MINIO_*</code> 环境变量、<code>minio_*</code> 指标、<code>x-minio-*</code> 头与 <code>/minio/*</code> 路由全部不变——容器部署里迁移只需改一个镜像名，且有经过演练的回滚路径。所有差异逐版本记录在<a href="{{ relLangURL "compatibility/" }}">兼容性说明</a>中；<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>覆盖 Docker 与软件包安装。{{ else }}The S3 API, <code>MINIO_*</code> environment variables, <code>minio_*</code> metrics, <code>x-minio-*</code> headers, and <code>/minio/*</code> routes are unchanged. For a container deployment that usually means changing the image name and keeping the same volume. The differences that do exist are recorded per version in the <a href="{{ relLangURL "compatibility/" }}">compatibility notes</a>, and the <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a> covers Docker, packages, and the rollback path.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q8</span><span class="faq-q">{{ if $zh }}可以用于生产环境吗？{{ else }}Can I run it in production?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}可以——这就是我们自己在生产环境中使用的版本：Pigsty 的生产 PostgreSQL 备份就跑在 Silo 上，你下载的制品与我们线上运行的是同一批。本页还列出了<a href="#voices">带公开出处的第三方采用记录</a>；照例建议锁定版本、先用自己的负载验证，并保留<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>中演练过的回滚路径。{{ else }}Yes—this is the very build we run in production ourselves: Pigsty's production PostgreSQL backups sit on Silo, so the artifacts you download are the ones we operate. This page also lists <a href="#voices">third-party adoption reports with public sources</a>; as always, pin a release, validate against your own workload first, and keep the rehearsed rollback path from the <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a>.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}可以——这就是我们自己在生产环境中使用的版本：Pigsty 的生产 PostgreSQL 备份就跑在 Silo 上，你下载的制品与我们线上运行的是同一批。本页还列出了<a href="#voices">带公开出处的第三方采用记录</a>；照例建议锁定版本、先用自己的负载验证，并保留<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>中演练过的回滚路径。{{ else }}Yes, with the usual caveats. Pigsty's production PostgreSQL backups run on Silo, and this page links <a href="#voices">third-party reports</a> from people running it elsewhere. That is evidence, not a warranty. Pin a release, test it against your own workload, and rehearse the rollback in the <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a> before you need it.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q9</span><span class="faq-q">{{ if $zh }}AGPL 对我的应用意味着什么？{{ else }}What does the AGPL mean for my app?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}先说结论：我们承诺永远不会以 AGPLv3 对你发起追索，也绝不会拿协议为难你。Silo 与上游一样采用 <a href="{{ relLangURL "about/license/" }}">AGPLv3</a> 且永不变更；我们公开的立场（立场，而非法律意见）是：通过 S3 API 使用 Silo 不构成衍生作品。由于没有 CLA、只接受 DCO 签署的贡献，连重新授权本身都在结构上不可能——见<a href="{{ relLangURL "about/manifesto/" }}#license">《宣言》第三条</a>。{{ else }}The short version: we pledge never to pursue AGPL claims against you, and never to use the license to make your life difficult. Silo is <a href="{{ relLangURL "about/license/" }}">AGPLv3</a> like the upstream it forked, and will never change license; our stated position (a position, not legal advice) is that using Silo through its S3 API does not make your application a derivative work. With no CLA and DCO-only contributions, even relicensing is structurally impossible—see <a href="{{ relLangURL "about/manifesto/" }}#license">Article 3 of the Manifesto</a>.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}先说结论：我们承诺永远不会以 AGPLv3 对你发起追索，也绝不会拿协议为难你。Silo 与上游一样采用 <a href="{{ relLangURL "about/license/" }}">AGPLv3</a> 且永不变更；我们公开的立场（立场，而非法律意见）是：通过 S3 API 使用 Silo 不构成衍生作品。由于没有 CLA、只接受 DCO 签署的贡献，连重新授权本身都在结构上不可能——见<a href="{{ relLangURL "about/manifesto/" }}#license">《宣言》第三条</a>。{{ else }}Silo carries <a href="{{ relLangURL "about/license/" }}">AGPLv3</a>, the same license as the upstream it forked. Our position (a position, not legal advice) is that using Silo through its S3 API does not make your application a derivative work, and we will not use the license as a threat or a sales instrument. We also could not relicense it if we wanted to: there is no CLA, contributions come in under DCO, and copyright stays spread across everyone who wrote a line. <a href="{{ relLangURL "about/manifesto/" }}#license">Article 3 of the Manifesto</a> has the full statement.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q10</span><span class="faq-q">{{ if $zh }}如果项目停止维护会怎样？{{ else }}What if maintenance stops one day?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}我们会尽最大努力，确保所有已发布的制品与文档持续可用。构建过程完整文档化并附溯源证明，任何人都能在没有我们的情况下从源码重建等价制品；若停止积极维护超过六个月，我们会公开声明并妥善归档——完整的退出安排见<a href="{{ relLangURL "about/manifesto/" }}#continuity">《宣言》第九条</a>。{{ else }}We will make our best effort to keep every released artifact and document available. The build is documented and provenance-attested, so anyone can rebuild equivalent artifacts from source without us; and if active maintenance ever stops for six months, we will say so publicly and archive the project tidily—the full exit arrangements are in <a href="{{ relLangURL "about/manifesto/" }}#continuity">Article 9 of the Manifesto</a>.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}我们会尽最大努力，确保所有已发布的制品与文档持续可用。构建过程完整文档化并附溯源证明，任何人都能在没有我们的情况下从源码重建等价制品；若停止积极维护超过六个月，我们会公开声明并妥善归档——完整的退出安排见<a href="{{ relLangURL "about/manifesto/" }}#continuity">《宣言》第九条</a>。{{ else }}Released artifacts and documentation are meant to stay up, and we will keep them up as long as we can. The build is documented and provenance-attested, so anyone can rebuild equivalent artifacts from source without us. That part does not depend on us being around. If active maintenance stops for six months, we will say so publicly and archive the project rather than let it go quiet. <a href="{{ relLangURL "about/manifesto/" }}#continuity">Article 9 of the Manifesto</a> has the exit plan.{{ end }}</p></div>
           </details>
         </div>
       </div>
@@ -580,7 +573,7 @@
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">DOWNLOAD</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title">{{ if $zh }}获取 SILO{{ else }}Get SILO{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Choose the server or admin client first, then use the install path that matches your operating system, architecture, and deployment model.{{ end }}</p>
+          <p class="section-subtitle">{{ if $zh }}选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Pick the server or the admin client, then your platform and install method.{{ end }}</p>
         </div>
 
         <div class="product-choice-grid" aria-label="{{ if $zh }}选择下载产品{{ else }}Choose a product{{ end }}">
@@ -601,11 +594,11 @@
             <div class="product-choice-top">
               <div>
                 <p class="silkscreen">{{ if $zh }}管理客户端{{ else }}ADMIN CLI{{ end }}</p>
-                <h2>MCLI Client</h2>
+                <h2>MCLI</h2>
               </div>
               <span class="product-choice-icon"><i class="fas fa-terminal" aria-hidden="true"></i></span>
             </div>
-            <p>{{ if $zh }}用于存储桶、对象、身份、集群管理与日常运维的兼容命令行客户端。{{ else }}A compatible command-line client for buckets, objects, identity, cluster administration, and daily operations.{{ end }}</p>
+            <p>{{ if $zh }}用于存储桶、对象、身份、集群管理与日常运维的兼容命令行客户端。{{ else }}The <code>mc</code>-compatible command-line client for buckets, objects, identity, and cluster administration.{{ end }}</p>
             <div class="product-platforms"><span>Linux</span><span>macOS</span><span>Windows</span><span>Docker</span><span>Source</span></div>
             <strong>{{ if $zh }}选择安装方式{{ else }}Choose install method{{ end }} <i aria-hidden="true">↗</i></strong>
           </a>
