@@ -481,6 +481,20 @@
         </div>
         {{ end }}
       </div>
+
+      {{- $codeCount := len $contributors.code -}}
+      {{- $totalCount := add $codeCount (add (len $contributors.proposed) (len $contributors.reports)) -}}
+      <div class="landing-container">
+        <div class="contrib-strip" data-reveal id="contributors">
+          <p class="contrib-lead">{{ if $zh }}还有共同参与的 {{ $totalCount }} 位贡献者——带环的 {{ $codeCount }} 位，代码已合入 <code>main</code>。{{ else }}And the {{ $totalCount }} contributors who built it with us — the ringed {{ $codeCount }} have code merged into <code>main</code>.{{ end }}</p>
+          <div class="contrib-wall">
+            {{ range $contributors.code }}{{ partial "contributor-avatar.html" (dict "c" . "code" true) }}{{ end }}
+            {{ range $contributors.proposed }}{{ partial "contributor-avatar.html" (dict "c" . "code" false) }}{{ end }}
+            {{ range $contributors.reports }}{{ partial "contributor-avatar.html" (dict "c" . "code" false) }}{{ end }}
+            <a class="btn btn-line contrib-more" href="https://github.com/pgsty/silo/blob/main/CONTRIBUTORS.md" target="_blank" rel="noopener">{{ if $zh }}完整署名记录{{ else }}Full attribution record{{ end }} →</a>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="landing-section promise" id="maintenance">
@@ -604,40 +618,6 @@
             <div class="product-platforms"><span>Linux</span><span>macOS</span><span>Windows</span><span>Docker</span><span>Source</span></div>
             <strong>{{ if $zh }}选择安装方式{{ else }}Choose install method{{ end }} <i aria-hidden="true">↗</i></strong>
           </a>
-        </div>
-      </div>
-    </section>
-
-    {{- $codeCount := len $contributors.code -}}
-    {{- $wallCount := add (len $contributors.proposed) (len $contributors.reports) -}}
-    <section class="landing-section contributors" id="contributors" aria-labelledby="contributors-title">
-      <div class="landing-container">
-        <div class="section-head" data-reveal>
-          <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}贡献者{{ else }}CONTRIBUTORS{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title" id="contributors-title">{{ if $zh }}这些发行版背后的人{{ else }}The people behind these releases{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}{{ $codeCount }} 位贡献者的代码已合入 main，另有 {{ $wallCount }} 位提交过 Pull Request，或报告了塑造这些发行版的缺陷与兼容性问题。{{ else }}{{ $codeCount }} contributors have code merged into <code>main</code>. Another {{ $wallCount }} opened pull requests, or filed the bug reports and compatibility findings that shaped these releases.{{ end }}</p>
-        </div>
-
-        <div class="contrib-code" data-reveal>
-          {{ range $contributors.code }}
-          <article class="contrib-card">
-            <a class="contrib-handle" href="https://github.com/{{ .handle }}" rel="noopener">@{{ .handle }}</a>
-            <p class="contrib-what">{{ if $zh }}{{ .whatZh }}{{ else }}{{ .what }}{{ end }}</p>
-            <p class="contrib-meta">
-              <a href="https://github.com/pgsty/silo/pull/{{ .pr }}" rel="noopener">#{{ .pr }}</a>
-              <code>{{ substr .commit 0 7 }}</code>
-            </p>
-          </article>
-          {{ end }}
-        </div>
-
-        <div class="contrib-wall" data-reveal aria-label="{{ if $zh }}提交过 Pull Request 或报告问题的贡献者{{ else }}Contributors who opened pull requests or filed reports{{ end }}">
-          {{ range $contributors.proposed }}<a class="contrib-chip" href="https://github.com/pgsty/silo/pull/{{ .pr }}" rel="noopener">@{{ .handle }}</a>{{ end }}
-          {{ range $contributors.reports }}<a class="contrib-chip" href="https://github.com/pgsty/silo/issues/{{ .issue }}" rel="noopener">@{{ .handle }}</a>{{ end }}
-        </div>
-
-        <div class="contrib-cta" data-reveal>
-          <a href="https://github.com/pgsty/silo/blob/main/CONTRIBUTORS.md" class="btn btn-line" rel="noopener">{{ if $zh }}完整署名记录{{ else }}The full attribution record{{ end }} →</a>
         </div>
       </div>
     </section>

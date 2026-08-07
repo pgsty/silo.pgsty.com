@@ -1,8 +1,12 @@
 # People who have contributed to the pgsty/silo fork since it was established in 2026.
 # Mirrors CONTRIBUTORS.md in the server repository; update both together at each release.
 # GitHub generates no contributor graph for forks, so this list is maintained by hand.
+#
+# `name` is the account's GitHub display name, shown on hover; it falls back to the handle
+# when the account has not set one. Avatars live in static/images/contributors/<handle>.webp
+# and are refreshed with `python3 bin/contributor_avatars.py`.
 
-# Merged into main. `commit` is the commit that carries their authorship.
+# Merged into main. Rendered first and ringed on the landing page; `what` shows on hover.
 code:
   - handle: "ZouhairCharef"
     pr: 18
@@ -10,16 +14,19 @@ code:
     what: "Patched CVE-2026-34986 in go-jose"
     whatZh: "修复 go-jose 中的 CVE-2026-34986"
   - handle: "mfredenhagen"
+    name: "Mario Fredenhagen"
     pr: 19
     commit: "1869bd30b"
     what: "Patched CVE-2026-39883 in OpenTelemetry"
     whatZh: "修复 OpenTelemetry 中的 CVE-2026-39883"
   - handle: "pinginfo"
+    name: "ping"
     pr: 34
     commit: "65795ee1f"
     what: "Repaired bucket notification streaming"
     whatZh: "修复桶通知的流式输出"
   - handle: "waterkip"
+    name: "Wesley Schwengle"
     pr: 41
     commit: "d495d30d5"
     what: "Repointed the documentation links"
@@ -28,15 +35,12 @@ code:
 # Pull requests open for review, or closed after informing work that shipped differently.
 proposed:
   - handle: "magicxor"
-    pr: 12
+    name: "Ilia Burakov"
   - handle: "ycjlin"
-    pr: 37
   - handle: "davinkevin"
-    pr: 21
+    name: "Davin Kevin"
   - handle: "lem21h"
-    pr: 36
   - handle: "sulin37392"
-    pr: 8
 
 # Bug reports, compatibility findings, and proposals filed against this fork.
 # Deduplicated against `proposed`: @magicxor (#10) and @davinkevin (#20) also filed issues but are
@@ -44,42 +48,32 @@ proposed:
 # non-deduplicated breakdown — 5 pull requests and 22 reports across 25 distinct people.
 reports:
   - handle: "mosesdd"
-    issue: 1
   - handle: "Xavier-777"
-    issue: 2
   - handle: "jiadzh"
-    issue: 3
   - handle: "TLINDEN"
-    issue: 4
+    name: "T.v.Dein"
   - handle: "AntonOfTheWoods"
-    issue: 5
+    name: "Anton Melser"
   - handle: "zylpsrs"
-    issue: 6
   - handle: "nsanitate"
-    issue: 7
+    name: "Nicola Sanitate"
   - handle: "makinikm"
-    issue: 9
   - handle: "spaceg00se-r"
-    issue: 11
   - handle: "heroes1412"
-    issue: 13
   - handle: "vampywiz17"
-    issue: 15
+    name: "Vamp"
   - handle: "chalukyaj"
-    issue: 30
   - handle: "cbornet"
-    issue: 31
+    name: "Christophe Bornet"
   - handle: "jvasile"
-    issue: 33
+    name: "James Vasile"
   - handle: "Kesavaambati"
-    issue: 35
   - handle: "redfoxfox"
-    issue: 38
+    name: "yingzhou Wang"
   - handle: "kuldeep-link11"
-    issue: 39
   - handle: "meesudzu"
-    issue: 42
+    name: "Du"
   - handle: "pmezhuev"
-    issue: 43
+    name: "Pavel Mezhuev"
   - handle: "kh0mka"
-    issue: 51
+    name: "khomenokk"

@@ -1,0 +1,12 @@
+{{- /* One circular contributor avatar for the landing-page wall.
+       Params: .c (an entry from data/home/contributors.yaml), .code (bool — merged-code tier).
+       Merged-code entries are ringed and carry their change on the hover label. */ -}}
+{{- $c := .c -}}
+{{- $zh := eq site.Language.Lang "zh" -}}
+{{- $name := default $c.handle $c.name -}}
+{{- $what := cond $zh (default $c.what $c.whatZh) $c.what -}}
+{{- $who := cond (eq $name $c.handle) (printf "@%s" $c.handle) (printf "%s (@%s)" $name $c.handle) -}}
+<a class="contrib-avatar{{ if .code }} contrib-avatar--code{{ end }}" href="https://github.com/{{ $c.handle }}" target="_blank" rel="noopener" aria-label="{{ $who }}{{ with $what }} — {{ . }}{{ end }}">
+  <img src="{{ printf "images/contributors/%s.webp" $c.handle | relURL }}" alt="" width="48" height="48" loading="lazy">
+  <span class="contrib-tip" aria-hidden="true"><strong>{{ $name }}</strong>{{ with $what }}<em>{{ . }}</em>{{ end }}</span>
+</a>

@@ -577,22 +577,33 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 
 .footer-logo img { object-fit: contain; }
 
-/* Contributors：合入代码的贡献者用卡片，其余用丝印铭牌墙 */
-.contributors { background: linear-gradient(180deg, transparent, rgba(224, 163, 92, 0.03), transparent); }
-.contrib-code { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-.contrib-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: clamp(20px, 2.4vw, 26px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-elev); box-shadow: var(--shadow-sm); transition: border-color 180ms ease; }
-.contrib-card::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: var(--pg); opacity: 0.72; }
-.contrib-card:hover { border-color: var(--line-strong); }
-.landing-page .contrib-handle { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; color: var(--pg-strong); overflow-wrap: anywhere; }
-.landing-page .contrib-handle:hover { color: var(--copper); }
-.contrib-what { flex: 1; margin: 0; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.5; }
-.contrib-meta { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--font-mono); font-size: 0.76rem; }
-.landing-page .contrib-meta a { color: var(--copper); font-weight: 600; }
-.contrib-meta code { padding: 2px 6px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--bg-elev-2) 80%, transparent); color: var(--ink-mute); font-size: 0.72rem; }
-.contrib-wall { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 22px; }
-.landing-page .contrib-chip { padding: 6px 12px; border: 1px dashed var(--line-strong); border-radius: 999px; background: color-mix(in srgb, var(--bg-elev) 70%, transparent); color: var(--ink-mute); font-family: var(--font-mono); font-size: 0.78rem; transition: color 160ms ease, border-color 160ms ease, background 160ms ease; }
-.landing-page .contrib-chip:hover { border-style: solid; border-color: var(--copper-dim); background: rgba(224, 163, 92, 0.08); color: var(--copper); }
-.contrib-cta { margin-top: 26px; text-align: center; }
+/* Contributors：用户之声下方的头像墙。合入代码的四位加铜环并排在最前，
+   其余压暗去饱和作陪衬；悬停浮出姓名，"完整署名记录" 按钮随行内排布不另起一行。 */
+.contrib-strip { margin-top: clamp(34px, 4vw, 52px); padding-top: clamp(26px, 3vw, 38px); border-top: 1px solid var(--line); }
+.contrib-lead { max-width: 640px; margin: 0 auto 28px; text-align: center; color: var(--ink-mute); font-size: 0.92rem; line-height: 1.6; }
+.contrib-lead code { padding: 1px 5px; border-radius: 5px; background: color-mix(in srgb, var(--bg-elev-2) 80%, transparent); color: var(--ink-soft); font-family: var(--font-mono); font-size: 0.85em; }
+/* 宽度收在 1000px：29 个头像均分两行，且第二行留得下尾随的按钮——
+   撑满 1280 会排成 22+7 的跛脚两行，收到 920 又会把按钮挤到第三行。 */
+.contrib-wall { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; max-width: 1000px; margin: 0 auto; }
+
+.contrib-avatar { position: relative; display: block; width: 44px; height: 44px; border-radius: 50%; transition: transform 180ms ease; }
+.contrib-avatar img { display: block; width: 100%; height: 100%; border-radius: 50%; background: var(--bg-elev-2); object-fit: cover; filter: grayscale(0.45); opacity: 0.86; transition: filter 180ms ease, opacity 180ms ease; }
+.contrib-avatar::after { content: ""; position: absolute; inset: 0; border: 1px solid var(--line-strong); border-radius: 50%; pointer-events: none; }
+.contrib-avatar:hover, .contrib-avatar:focus-visible { z-index: 3; transform: translateY(-3px) scale(1.1); }
+.contrib-avatar:hover img, .contrib-avatar:focus-visible img { filter: none; opacity: 1; }
+
+/* 合入代码的一档：更大、满色、铜环 */
+.contrib-avatar--code { width: 54px; height: 54px; }
+.contrib-avatar--code img { filter: none; opacity: 1; }
+.contrib-avatar--code::after { border: 2px solid var(--copper); box-shadow: 0 0 0 3px color-mix(in srgb, var(--copper) 16%, transparent); }
+
+/* 悬停铭牌 */
+.contrib-tip { position: absolute; bottom: calc(100% + 10px); left: 50%; z-index: 4; display: flex; flex-direction: column; gap: 2px; width: max-content; max-width: 210px; padding: 7px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--bg-elev-2); box-shadow: var(--shadow-sm); opacity: 0; text-align: center; transform: translate(-50%, 4px); transition: opacity 160ms ease, transform 160ms ease; pointer-events: none; }
+.contrib-tip strong { color: var(--ink); font-size: 0.8rem; font-weight: 600; line-height: 1.3; }
+.contrib-tip em { color: var(--copper); font-size: 0.72rem; font-style: normal; line-height: 1.35; }
+.contrib-avatar:hover .contrib-tip, .contrib-avatar:focus-visible .contrib-tip { opacity: 1; transform: translate(-50%, 0); }
+
+.landing-page .contrib-more { margin-left: 6px; padding: 8px 16px; font-size: 0.8rem; }
 
 @media (max-width: 1120px) {
   .nav-link { padding-right: 9px; padding-left: 9px; }
@@ -607,7 +618,6 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
   .interface-grid { grid-template-columns: repeat(3, 1fr); }
   .silo-steps { grid-template-columns: 1fr; }
   .download-entry .install-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .contrib-code { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 768px) {
@@ -637,7 +647,12 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 @media (max-width: 480px) {
   .silo-hero-title { font-size: clamp(2.1rem, 11vw, 2.9rem); }
   .eyebrow-zh { display: none; }
-  .contrib-code { grid-template-columns: 1fr; }
+  /* 窄屏收紧头像墙，避免 29 张头像撑成过多行 */
+  .contrib-wall { gap: 7px; }
+  .contrib-avatar { width: 38px; height: 38px; }
+  .contrib-avatar--code { width: 46px; height: 46px; }
+  .contrib-tip { max-width: 170px; }
+  .landing-page .contrib-more { margin-left: 0; margin-top: 6px; }
   .silo-board { grid-template-rows: auto minmax(212px, 1fr) auto; min-height: 296px; }
   .silo-board-top,
   .silo-board-foot { font-size: 0.56rem; }
