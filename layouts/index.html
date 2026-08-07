@@ -482,16 +482,15 @@
         {{ end }}
       </div>
 
-      {{- $codeCount := len $contributors.code -}}
-      {{- $totalCount := add $codeCount (add (len $contributors.proposed) (len $contributors.reports)) -}}
+      {{- $totalCount := add (len $contributors.code) (add (len $contributors.proposed) (len $contributors.reports)) -}}
+      {{- $record := "https://github.com/pgsty/silo/blob/main/CONTRIBUTORS.md" -}}
       <div class="landing-container">
         <div class="contrib-strip" data-reveal id="contributors">
-          <p class="contrib-lead">{{ if $zh }}还有共同参与的 {{ $totalCount }} 位贡献者——带环的 {{ $codeCount }} 位，代码已合入 <code>main</code>。{{ else }}And the {{ $totalCount }} contributors who built it with us — the ringed {{ $codeCount }} have code merged into <code>main</code>.{{ end }}</p>
+          <p class="contrib-lead">{{ if $zh }}参与贡献的 {{ $totalCount }} 位提交者，<a href="{{ $record }}" target="_blank" rel="noopener">完整贡献记录</a>{{ else }}{{ $totalCount }} contributors, <a href="{{ $record }}" target="_blank" rel="noopener">full contribution record</a>{{ end }}</p>
           <div class="contrib-wall">
             {{ range $contributors.code }}{{ partial "contributor-avatar.html" (dict "c" . "code" true) }}{{ end }}
             {{ range $contributors.proposed }}{{ partial "contributor-avatar.html" (dict "c" . "code" false) }}{{ end }}
             {{ range $contributors.reports }}{{ partial "contributor-avatar.html" (dict "c" . "code" false) }}{{ end }}
-            <a class="btn btn-line contrib-more" href="https://github.com/pgsty/silo/blob/main/CONTRIBUTORS.md" target="_blank" rel="noopener">{{ if $zh }}完整署名记录{{ else }}Full attribution record{{ end }} →</a>
           </div>
         </div>
       </div>
