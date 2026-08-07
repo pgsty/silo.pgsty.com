@@ -214,34 +214,80 @@
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}适合本地评估、开发环境和已经以容器为交付边界的部署。标准镜像附带 <code>mcli</code>、<code>curl</code> 与 shell；Distroless 变体只含 <code>silo</code> 二进制，内置 <code>silo healthcheck</code> 健康检查，支持任意 <code>--user</code> 运行。{{ else }}Best for local evaluation, development, and deployments that already use containers as the delivery boundary. The standard image bundles <code>mcli</code>, <code>curl</code>, and a shell; the distroless variant ships the <code>silo</code> binary only, with a built-in <code>silo healthcheck</code> and support for any <code>--user</code>.{{ end }}</p>
+                  <p>{{ if $zh }}适合本地评估、开发环境和已经以容器为交付边界的部署。标准镜像附带 <code>mcli</code>、<code>curl</code> 与 shell。{{ else }}Best for local evaluation, development, and deployments that already use containers as the delivery boundary. The standard image bundles <code>mcli</code>, <code>curl</code>, and a shell.{{ end }}</p>
+                  <p>{{ if $zh }}Distroless 变体只含 <code>silo</code> 二进制，内置 <code>silo healthcheck</code> 健康检查，支持任意 <code>--user</code> 运行。{{ else }}The distroless variant ships the <code>silo</code> binary only, with a built-in <code>silo healthcheck</code> and support for any <code>--user</code>.{{ end }}</p>
                   <div class="download-subtabs" data-download-tabs>
                     <div class="download-tablist download-tablist--sub" role="tablist" aria-label="{{ if $zh }}镜像变体{{ else }}Image variant{{ end }}">
                       <button type="button" role="tab" id="tab-server-docker-standard" aria-controls="server-docker-standard" aria-selected="true" data-download-tab="server-docker-standard">Standard</button>
                       <button type="button" role="tab" id="tab-server-docker-distroless" aria-controls="server-docker-distroless" aria-selected="false" tabindex="-1" data-download-tab="server-docker-distroless">Distroless</button>
+                      <button type="button" role="tab" id="tab-server-docker-standard-compose" aria-controls="server-docker-standard-compose" aria-selected="false" tabindex="-1" data-download-tab="server-docker-standard-compose">Standard Compose</button>
+                      <button type="button" role="tab" id="tab-server-docker-distroless-compose" aria-controls="server-docker-distroless-compose" aria-selected="false" tabindex="-1" data-download-tab="server-docker-distroless-compose">Distroless Compose</button>
                     </div>
                     <section role="tabpanel" id="server-docker-standard" aria-labelledby="tab-server-docker-standard">
                       <div class="download-code">
                         <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> shell</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Docker 命令{{ else }}Copy Docker command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                        <pre><code>docker pull pgsty/silo:{{ $serverTag }}
-docker run -d --name silo --restart unless-stopped \
-  -p 9000:9000 -p 9001:9001 \
-  -v /data/silo:/data \
-  -e MINIO_ROOT_USER=silo-admin \
-  -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
-  pgsty/silo:{{ $serverTag }} server /data --console-address :9001</code></pre>
+                        <pre><code><span class="k">docker</span> pull <span class="s">pgsty/silo:{{ $serverTag }}</span>
+<span class="k">docker</span> run <span class="v">-d</span> <span class="v">--name</span> silo <span class="v">--restart</span> unless-stopped \
+  <span class="v">-p</span> 9000:9000 <span class="v">-p</span> 9001:9001 \
+  <span class="v">-v</span> /data/silo:/data \
+  <span class="v">-e</span> MINIO_ROOT_USER=<span class="s">silo-admin</span> \
+  <span class="v">-e</span> MINIO_ROOT_PASSWORD=<span class="s">replace-with-a-strong-secret</span> \
+  <span class="s">pgsty/silo:{{ $serverTag }}</span> server /data <span class="v">--console-address</span> :9001</code></pre>
                       </div>
                     </section>
                     <section role="tabpanel" id="server-docker-distroless" aria-labelledby="tab-server-docker-distroless" hidden>
                       <div class="download-code">
                         <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> shell</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Distroless Docker 命令{{ else }}Copy distroless Docker command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                        <pre><code>docker pull pgsty/silo:{{ $serverTag }}-distroless
-docker run -d --name silo --restart unless-stopped \
-  -p 9000:9000 -p 9001:9001 \
-  -v /data/silo:/data \
-  -e MINIO_ROOT_USER=silo-admin \
-  -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
-  pgsty/silo:{{ $serverTag }}-distroless server /data --console-address :9001</code></pre>
+                        <pre><code><span class="k">docker</span> pull <span class="s">pgsty/silo:{{ $serverTag }}-distroless</span>
+<span class="k">docker</span> run <span class="v">-d</span> <span class="v">--name</span> silo <span class="v">--restart</span> unless-stopped \
+  <span class="v">-p</span> 9000:9000 <span class="v">-p</span> 9001:9001 \
+  <span class="v">-v</span> /data/silo:/data \
+  <span class="v">-e</span> MINIO_ROOT_USER=<span class="s">silo-admin</span> \
+  <span class="v">-e</span> MINIO_ROOT_PASSWORD=<span class="s">replace-with-a-strong-secret</span> \
+  <span class="s">pgsty/silo:{{ $serverTag }}-distroless</span> server /data <span class="v">--console-address</span> :9001</code></pre>
+                      </div>
+                    </section>
+                    <section role="tabpanel" id="server-docker-standard-compose" aria-labelledby="tab-server-docker-standard-compose" hidden>
+                      <div class="download-code">
+                        <div class="download-code-head"><span><i class="fas fa-file-code" aria-hidden="true"></i> docker-compose.yml</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Compose 配置{{ else }}Copy Compose file{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+                        <pre><code><span class="c"># {{ if $zh }}docker compose up -d 启动{{ else }}start with: docker compose up -d{{ end }}</span>
+<span class="k">services</span>:
+  <span class="k">silo</span>:
+    <span class="k">image</span>: <span class="s">pgsty/silo:{{ $serverTag }}</span>
+    <span class="k">container_name</span>: <span class="s">silo</span>
+    <span class="k">restart</span>: <span class="s">unless-stopped</span>
+    <span class="k">command</span>: <span class="s">server /data --console-address ":9001"</span>
+    <span class="k">ports</span>: <span class="s">["9000:9000", "9001:9001"]</span>
+    <span class="k">environment</span>:
+      <span class="k">MINIO_ROOT_USER</span>: <span class="s">silo-admin</span>
+      <span class="k">MINIO_ROOT_PASSWORD</span>: <span class="s">replace-with-a-strong-secret</span>
+    <span class="k">volumes</span>:
+      - <span class="s">silo-data:/data</span>
+    <span class="k">healthcheck</span>:
+      <span class="k">test</span>: <span class="s">["CMD", "silo", "healthcheck", "ready"]</span>
+      <span class="k">interval</span>: <span class="s">30s</span>
+<span class="k">volumes</span>:
+  <span class="k">silo-data</span>:</code></pre>
+                      </div>
+                    </section>
+                    <section role="tabpanel" id="server-docker-distroless-compose" aria-labelledby="tab-server-docker-distroless-compose" hidden>
+                      <div class="download-code">
+                        <div class="download-code-head"><span><i class="fas fa-file-code" aria-hidden="true"></i> docker-compose.yml</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Distroless Compose 配置{{ else }}Copy distroless Compose file{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+                        <pre><code><span class="c"># {{ if $zh }}镜像自带 HEALTHCHECK，无需 healthcheck 配置块{{ else }}the image carries its own HEALTHCHECK; no healthcheck: block needed{{ end }}</span>
+<span class="k">services</span>:
+  <span class="k">silo</span>:
+    <span class="k">image</span>: <span class="s">pgsty/silo:{{ $serverTag }}-distroless</span>
+    <span class="k">container_name</span>: <span class="s">silo</span>
+    <span class="k">restart</span>: <span class="s">unless-stopped</span>
+    <span class="k">command</span>: <span class="s">server /data --console-address ":9001"</span>
+    <span class="k">ports</span>: <span class="s">["9000:9000", "9001:9001"]</span>
+    <span class="k">environment</span>:
+      <span class="k">MINIO_ROOT_USER</span>: <span class="s">silo-admin</span>
+      <span class="k">MINIO_ROOT_PASSWORD</span>: <span class="s">replace-with-a-strong-secret</span>
+    <span class="k">volumes</span>:
+      - <span class="s">silo-data:/data</span>
+<span class="k">volumes</span>:
+  <span class="k">silo-data</span>:</code></pre>
                       </div>
                     </section>
                   </div>
@@ -289,18 +335,18 @@ docker run -d --name silo --restart unless-stopped \
               <div class="asset-family-grid">
                 <article class="asset-family">
                   <div class="asset-family-head"><span>RPM</span><p>RHEL · Rocky · Alma · Fedora</p></div>
-                  <a href="{{ printf "%s/silo-%s-1.x86_64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>silo · rpm</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo-%s-1.aarch64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>silo · rpm</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo-%s-1.x86_64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo-%s-1.x86_64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo-%s-1.aarch64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo-%s-1.aarch64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>DEB</span><p>Debian · Ubuntu</p></div>
-                  <a href="{{ printf "%s/silo_%s_amd64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>silo · deb</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_arm64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>silo · deb</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_amd64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>{{ printf "silo_%s_amd64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_arm64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_arm64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>APK</span><p>Alpine Linux</p></div>
-                  <a href="{{ printf "%s/silo_%s_x86_64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>silo · apk</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_aarch64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>silo · apk</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_x86_64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_x86_64.apk" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_aarch64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_aarch64.apk" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="package-footer">
@@ -318,18 +364,18 @@ docker run -d --name silo --restart unless-stopped \
               <div class="binary-grid">
                 <article class="binary-platform" data-platform="linux">
                   <div><span class="platform-icon"><i class="fab fa-linux" aria-hidden="true"></i></span><h4>Linux</h4><small>GNU / musl environments</small></div>
-                  <a href="{{ printf "%s/silo_%s_linux_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">x86_64 <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_linux_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">ARM64 <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_linux_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_linux_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_linux_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_linux_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="binary-platform" data-platform="macos">
                   <div><span class="platform-icon"><i class="fab fa-apple" aria-hidden="true"></i></span><h4>macOS</h4><small>Intel / Apple Silicon</small></div>
-                  <a href="{{ printf "%s/silo_%s_darwin_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">Intel <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_darwin_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">Apple Silicon <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_darwin_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>Intel</b><small>{{ printf "silo_%s_darwin_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_darwin_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>Apple Silicon</b><small>{{ printf "silo_%s_darwin_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="binary-platform" data-platform="windows">
                   <div><span class="platform-icon"><i class="fab fa-windows" aria-hidden="true"></i></span><h4>Windows</h4><small>PowerShell / Windows Server</small></div>
-                  <a href="{{ printf "%s/silo_%s_windows_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">x86_64 <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_windows_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener">ARM64 <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_windows_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_windows_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s_windows_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_windows_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="download-code download-code--compact">
@@ -459,18 +505,18 @@ make build
               <div class="asset-family-grid">
                 <article class="asset-family">
                   <div class="asset-family-head"><span>RPM</span><p>RHEL · Rocky · Alma · Fedora</p></div>
-                  <a href="{{ printf "%s/mcli-%s-1.x86_64.rpm" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>mcli · rpm</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/mcli-%s-1.aarch64.rpm" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>mcli · rpm</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli-%s-1.x86_64.rpm" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "mcli-%s-1.x86_64.rpm" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli-%s-1.aarch64.rpm" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "mcli-%s-1.aarch64.rpm" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>DEB</span><p>Debian · Ubuntu</p></div>
-                  <a href="{{ printf "%s/mcli_%s_amd64.deb" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>mcli · deb</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/mcli_%s_arm64.deb" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>mcli · deb</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_amd64.deb" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>{{ printf "mcli_%s_amd64.deb" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_arm64.deb" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "mcli_%s_arm64.deb" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>APK</span><p>Alpine Linux</p></div>
-                  <a href="{{ printf "%s/mcli_%s_x86_64.apk" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>mcli · apk</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/mcli_%s_aarch64.apk" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>mcli · apk</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_x86_64.apk" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "mcli_%s_x86_64.apk" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_aarch64.apk" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "mcli_%s_aarch64.apk" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="package-footer">
@@ -487,18 +533,18 @@ make build
               <div class="binary-grid">
                 <article class="binary-platform" data-platform="linux">
                   <div><span class="platform-icon"><i class="fab fa-linux" aria-hidden="true"></i></span><h4>Linux</h4><small>server &amp; workstation</small></div>
-                  <a href="{{ printf "%s/mcli_%s_linux_amd64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener">x86_64 <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/mcli_%s_linux_arm64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener">ARM64 <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_linux_amd64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "mcli_%s_linux_amd64.tar.gz" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_linux_arm64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "mcli_%s_linux_arm64.tar.gz" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="binary-platform" data-platform="macos">
                   <div><span class="platform-icon"><i class="fab fa-apple" aria-hidden="true"></i></span><h4>macOS</h4><small>Intel / Apple Silicon</small></div>
-                  <a href="{{ printf "%s/mcli_%s_darwin_amd64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener">Intel <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/mcli_%s_darwin_arm64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener">Apple Silicon <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_darwin_amd64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>Intel</b><small>{{ printf "mcli_%s_darwin_amd64.tar.gz" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_darwin_arm64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>Apple Silicon</b><small>{{ printf "mcli_%s_darwin_arm64.tar.gz" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="binary-platform" data-platform="windows">
                   <div><span class="platform-icon"><i class="fab fa-windows" aria-hidden="true"></i></span><h4>Windows</h4><small>desktop / server</small></div>
-                  <a href="{{ printf "%s/mcli_%s_windows_amd64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener">x86_64 <i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/mcli_%s_windows_arm64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener">ARM64 <i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_windows_amd64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "mcli_%s_windows_amd64.tar.gz" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_windows_arm64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "mcli_%s_windows_arm64.tar.gz" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="client-quick-command">
@@ -518,8 +564,8 @@ make build
                   <p>{{ if $zh }}容器镜像保留熟悉的 <code>mc</code> 入口点；独立归档与 Linux 软件包则使用 <code>mcli</code>。{{ else }}The container retains the familiar <code>mc</code> entrypoint, while standalone archives and Linux packages use <code>mcli</code>.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fab fa-docker" aria-hidden="true"></i> Docker</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制容器客户端命令{{ else }}Copy container client command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                    <pre><code>docker run --rm pgsty/mc:{{ $clientTag }} --version
-docker run --rm pgsty/mc:{{ $clientTag }} ls play</code></pre>
+                    <pre><code><span class="k">docker</span> run <span class="v">--rm</span> <span class="s">pgsty/mc:{{ $clientTag }}</span> <span class="v">--version</span>
+<span class="k">docker</span> run <span class="v">--rm</span> <span class="s">pgsty/mc:{{ $clientTag }}</span> ls play</code></pre>
                   </div>
                   <div class="method-actions"><a class="btn btn-primary" href="https://hub.docker.com/r/pgsty/mc" target="_blank" rel="noopener"><i class="fab fa-docker" aria-hidden="true"></i> Docker Hub</a></div>
                 </div>
@@ -528,7 +574,7 @@ docker run --rm pgsty/mc:{{ $clientTag }} ls play</code></pre>
                     <span class="aside-icon"><i class="fas fa-box-open" aria-hidden="true"></i></span>
                     <p class="silkscreen">BUNDLED CLIENT</p>
                     <h4>{{ if $zh }}SILO 镜像内置 mcli{{ else }}mcli ships inside the SILO image{{ end }}</h4>
-                    <p>{{ if $zh }}服务端镜像同时提供 <code>mcli</code> 与兼容别名 <code>mc</code>。{{ else }}The server image includes both <code>mcli</code> and the compatibility alias <code>mc</code>.{{ end }}</p>
+                    <p>{{ if $zh }}默认服务端镜像已提供 <code>mc</code> 命令。{{ else }}The default server image already ships the <code>mc</code> command.{{ end }}</p>
                   </div>
                 </aside>
               </div>
@@ -565,7 +611,7 @@ make build
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">DEPLOYMENT TOPOLOGY</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title" id="topology-title">{{ if $zh }}先确定故障域，再选择拓扑{{ else }}Pick topology after you know the failure domain{{ end }}</h2>
+          <h2 class="section-title" id="topology-title">{{ if $zh }}灵活的部署方案支持{{ else }}Flexible deployment topology{{ end }}</h2>
           <p class="section-subtitle">{{ if $zh }}SILO 可以从一台机器开始，但生产规划应明确磁盘、节点、冗余和恢复预期。{{ else }}SILO can start on one machine, but production planning should be explicit about disks, nodes, redundancy, and recovery expectations.{{ end }}</p>
         </div>
         <div class="topology-grid" data-reveal>

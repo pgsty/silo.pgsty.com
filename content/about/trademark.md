@@ -13,11 +13,11 @@ silo_modified: false
 > [!WARNING]
 > Every appearance of the MinIO name in this documentation is descriptive use, and implies no commercial relationship.
 >
-> Silo is a fork maintained independently by the PIGSTY community. It is **not** affiliated with, endorsed by, or sponsored by MinIO, Inc.
+> PGSTY SILO is a fork maintained independently by the PIGSTY community. It is **not** affiliated with, endorsed by, or sponsored by MinIO, Inc.
 
 ## What the project does to avoid confusion {#confusion}
 
-- The fork is published under its own name, **Silo**, not under MinIO's.
+- The fork is published under its own name, **PGSTY SILO**, not under MinIO's.
 - Every page of this site carries a trademark disclaimer in the footer.
 - It is labeled a community fork across every distribution channel — repositories, container images, release artifacts, and this documentation.
 - No claim of affiliation, endorsement, certification, or commercial relationship with MinIO, Inc. is ever made.
@@ -35,7 +35,8 @@ The MinIO name appears in this documentation to identify the upstream project th
 
 ## Other marks {#other}
 
-"Pigsty" and "PGSTY" refer to the [Pigsty](https://pgsty.com) project and its maintainers, who publish Silo. Amazon S3 is a trademark of Amazon.com, Inc. or its affiliates; references to S3 describe protocol compatibility only. All other trademarks are the property of their respective owners.
+"Pigsty" and "PGSTY" refer to the [Pigsty](https://pgsty.com) project and its maintainers, who publish PGSTY SILO.
+Amazon S3 is a trademark of Amazon.com, Inc. or its affiliates; references to S3 describe protocol compatibility only. All other trademarks are the property of their respective owners.
 
 ## See also {#see-also}
 

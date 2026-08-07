@@ -12,17 +12,18 @@ silo_modified: false
 
 Silo carries two separate licenses. The software and the documentation are distributed under different terms, and each inherits the license its upstream work already used.
 
-| What | License | Where |
-| :-- | :-- | :-- |
-| `silo` server | GNU AGPLv3 | [`pgsty/minio`](https://github.com/pgsty/minio/blob/master/LICENSE) |
-| `mcli` client | GNU AGPLv3 | [`pgsty/mc`](https://github.com/pgsty/mc/blob/master/LICENSE) |
-| This documentation | CC BY 4.0 | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
+| What               | License    | Where                                                                               |
+|:-------------------|:-----------|:------------------------------------------------------------------------------------|
+| `silo` server      | GNU AGPLv3 | [`pgsty/silo`](https://github.com/pgsty/silo/blob/main/LICENSE)                     |
+| `mcli` client      | GNU AGPLv3 | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE)                         |
+| This documentation | CC BY 4.0  | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
 
 ## Software: AGPLv3 {#software}
 
-Silo is a fork of MinIO, which has been distributed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html) since 2021. That license is irrevocable for code already released under it — the legal basis on which this fork exists. Silo keeps the same license: no relicensing, no added restrictions, no open-core carve-outs.
+PGSTY SILO is a fork of MinIO, which has been distributed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html) since 2021. 
+That license is irrevocable for code already released under it — the legal basis on which this fork exists. PGSTY SILO keeps the same license: no relicensing, no added restrictions, no open-core carve-outs.
 
-In practice, AGPLv3 lets you run, study, modify, and redistribute Silo; if you offer a modified Silo to users over a network, you must offer those users the corresponding source of your modified version.
+In practice, AGPLv3 lets you run, study, modify, and redistribute PGSTY SILO; if you offer a modified PGSTY SILO to users over a network, you must offer those users the corresponding source of your modified version.
 
 Read the [full license text](https://www.gnu.org/licenses/agpl-3.0.html) before acting on any summary, including this one.
 

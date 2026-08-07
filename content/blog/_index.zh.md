@@ -1,5 +1,5 @@
 ---
-title: Silo 博客
+title: PGSTY SILO 博客
 linkTitle: 博客
 description: 文章、发布注记与安全公告
 weight: 40

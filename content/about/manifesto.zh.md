@@ -1,7 +1,7 @@
 ---
-title: "Silo 宣言"
+title: "PGSTY SILO 宣言"
 linkTitle: "宣言"
-description: "Silo 承诺什么、刻意拒绝承诺什么，以及两者的公开证据——项目的十一条公开承诺。"
+description: "PGSTY SILO 承诺什么、刻意拒绝承诺什么，以及两者的公开证据——项目的十一条公开承诺。"
 url: "/zh/about/manifesto/"
 aliases:
   - /zh/about/manifest/
@@ -13,7 +13,7 @@ minio_origin: false
 silo_modified: false
 ---
 
-Silo 的存在目的：让一个可信、可维护、功能完整的 S3 兼容社区版对象存储继续存在，确保其软件供应链的持续性。
+PGSTY SILO 的存在目的：让一个可信、可维护、功能完整的 S3 兼容社区版对象存储继续存在，确保其软件供应链的持续性。
 
 本页是项目的公开承诺，通篇遵循一项纪律：**这里的每一条，要么是我们已经在做、且有公开证据的事实；要么是我们刻意拒绝承诺的事。** 一个兑现不了的承诺，比没有承诺更糟。
 

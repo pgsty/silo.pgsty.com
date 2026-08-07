@@ -1,7 +1,7 @@
 ---
 title: "Security Policy"
 linkTitle: "Security"
-description: "How to report a vulnerability in Silo, and where fixed issues are published."
+description: "How to report a vulnerability in PGSTY SILO, and where fixed issues are published."
 url: "/about/security/"
 weight: 40
 type: docs

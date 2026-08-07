@@ -1,7 +1,7 @@
 ---
-title: "About Silo"
+title: "About PGSTY Silo"
 linkTitle: "About"
-description: "The Silo manifesto, license, trademark, attribution, and security policy for the project and its documentation."
+description: "The PGSTY SILO manifesto, license, trademark, attribution, and security policy for the project and its documentation."
 url: "/about/"
 weight: 5
 type: docs

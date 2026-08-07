@@ -1,7 +1,7 @@
 ---
-title: "Silo Documentation"
+title: "PGSTY SILO Documentation"
 linkTitle: "Docs"
-description: "Silo 20260806 Documentation"
+description: "pgsty/silo 20260806 Documentation"
 url: "/docs/"
 weight: 1
 type: docs

@@ -1,7 +1,7 @@
 ---
 title: "署名归属"
 linkTitle: "署名归属"
-description: "Silo 文档的版权、衍生关系与翻译声明，以及复用时应当如何署名。"
+description: "PGSTY SILO 文档的版权、衍生关系与翻译声明，以及复用时应当如何署名。"
 url: "/zh/about/attribution/"
 aliases:
   - /attribution/ # Hugo prefixes the language code, so this resolves to /zh/attribution/
@@ -17,10 +17,10 @@ silo_modified: false
 **Copyright © 2020–至今 MinIO, Inc.**
 MinIO 对象存储文档原作。
 
-**Copyright © 2026–至今 [PIGSTY & SILO Contributors](https://pgsty.com)**
+**Copyright © 2026–至今 [PIGSTY SILO Contributors](https://pgsty.com)**
 分支维护、格式转换、内容修改、恢复与新增的文档，以及中文翻译。
 
-两层版权同时存在。经过翻译或修改的页面，底层表达的版权属于 MinIO，翻译与修改部分的版权属于 Silo 项目，二者互不取代。
+两层版权同时存在。经过翻译或修改的页面，底层表达的版权属于 MinIO，翻译与修改部分的版权属于 PGSTY SILO 项目，二者互不取代。
 
 ## 许可 {#license}
 
@@ -28,7 +28,7 @@ MinIO 对象存储文档原作。
 [知识共享署名 4.0 国际许可协议](https://creativecommons.org/licenses/by/4.0/deed.zh)（CC BY 4.0）授权，
 与上游原作使用同一许可证。完整法律文本见
 [LICENSE](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE)。
-Silo 软件本身另行授权，参见[许可协议](/zh/about/license/)。
+PGSTY SILO 软件本身另行授权，参见[许可协议](/zh/about/license/)。
 
 ## 衍系 {#derivation}
 
@@ -50,13 +50,13 @@ Silo 软件本身另行授权，参见[许可协议](/zh/about/license/)。
 如果你复用本站内容，按下面这样署名即可满足 CC BY 4.0 的要求：
 
 ```
-[Silo 文档](https://silo.pgsty.com/zh)，作者 PIGSTY 与 MinIO. Inc，依据 CC BY 4.0 授权。
+[PGSTY SILO 文档](https://silo.pgsty.com/zh)，作者 PGSTY 与 MinIO. Inc，依据 CC BY 4.0 授权。
 ```
 
 英文场景可使用：
 
 ```
-[Silo Documentation](https://silo.pgsty.com) by PIGSTY and MinIO. Inc, licensed under CC BY 4.0.
+[PGSTY SILO Documentation](https://silo.pgsty.com) by PGSTY and MinIO. Inc, licensed under CC BY 4.0.
 ```
 
 ## 声明 {#disclaimer}

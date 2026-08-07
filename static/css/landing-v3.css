@@ -243,6 +243,8 @@ main { display: block; }
   color: var(--ink-soft);
   font-size: clamp(1rem, 1.25vw, 1.15rem);
 }
+/* 单行说明：放开 720px 的行宽限制，让整句在一行内排完 */
+.section-subtitle--wide { max-width: 100%; }
 
 .section-links {
   display: flex;
@@ -1103,7 +1105,7 @@ html[data-theme="light"] .module-img img {
   gap: 12px;
   padding: 7px 16px;
   color: #c9d6e8;
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   line-height: 1.5;
   transition: background 150ms ease, color 150ms ease;
 }
@@ -1116,7 +1118,7 @@ html[data-theme="light"] .module-img img {
   color: #64748b;
 }
 .advisory-list a:hover time { color: #8ea3bd; }
-.advisory-list span { min-width: 0; }
+.advisory-list span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .advisory-foot {
   display: block;
   padding: 9px 16px;
@@ -1255,6 +1257,7 @@ html[data-theme="light"] .module-img img {
   margin-bottom: 34px;
 }
 .dashwall-head .section-eyebrow { grid-column: 1 / -1; margin-bottom: 10px; }
+.dashwall-head .section-subtitle { grid-column: 1; margin-top: 10px; }
 .landing-page .dashwall-link {
   font-family: var(--font-mono);
   font-size: 0.88rem;

@@ -835,6 +835,13 @@
   white-space: pre;
 }
 
+/* 代码高亮 token：与首页 code-plate 同一套配色。终端板在深浅主题下都是深色，
+   所以这些颜色不随主题切换。 */
+.download-code pre .c { color: #64748b; }
+.download-code pre .k { color: #6fb1e8; }
+.download-code pre .v { color: #e0a35c; }
+.download-code pre .s { color: #7fd39a; }
+
 .download-code--compact {
   margin-top: 24px;
 }
@@ -885,12 +892,17 @@
   font-size: 0.57rem;
 }
 
+/* 下载行：架构在上，完整文件名在下，图标纵向居中跨两行 */
 .asset-family > a {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "arch icon"
+    "file icon";
   align-items: center;
-  gap: 10px;
-  padding: 15px 18px;
+  gap: 4px 12px;
+  min-height: 64px;
+  padding: 13px 18px;
   border-bottom: 1px solid var(--line);
   color: inherit !important;
   transition: background 150ms ease;
@@ -905,16 +917,23 @@
 }
 
 .asset-family > a b {
+  grid-area: arch;
   color: var(--ink);
   font: 600 0.76rem/1 var(--font-mono);
 }
 
 .asset-family > a small {
+  grid-area: file;
+  overflow-wrap: anywhere;
   color: var(--ink-mute);
-  font-size: 0.66rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1.35;
 }
 
 .asset-family > a i {
+  grid-area: icon;
+  align-self: center;
   color: var(--pg-strong);
   font-size: 0.76rem;
 }
@@ -961,16 +980,6 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 7%, transparent);
 }
 
-.binary-platform.detected-platform::before {
-  content: "DETECTED";
-  display: block;
-  padding: 5px 16px;
-  background: color-mix(in srgb, var(--ok) 10%, transparent);
-  color: var(--ok);
-  font: 600 0.49rem/1.2 var(--font-mono);
-  letter-spacing: 0.12em;
-}
-
 .binary-platform > div {
   min-height: 142px;
   padding: 22px;
@@ -1006,13 +1015,33 @@
 }
 
 .binary-platform > a {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "arch icon"
+    "file icon";
   align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
+  gap: 4px 12px;
+  min-height: 64px;
+  padding: 13px 18px;
   border-bottom: 1px solid var(--line);
   color: var(--ink-soft);
   font: 600 0.72rem/1 var(--font-mono);
+}
+
+.binary-platform > a b {
+  grid-area: arch;
+  font-weight: 600;
+}
+
+.binary-platform > a small {
+  grid-area: file;
+  overflow-wrap: anywhere;
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .binary-platform > a:last-child {
@@ -1025,6 +1054,8 @@
 }
 
 .binary-platform > a i {
+  grid-area: icon;
+  align-self: center;
   font-size: 0.72rem;
 }
 
@@ -1659,6 +1690,8 @@
 
 /* Nested image-variant sub-tabs (Standard / Distroless) inside a panel. */
 .download-subtabs .download-tablist--sub {
+  flex-wrap: wrap;
+  overflow-x: visible;
   padding: 0;
   gap: 8px;
   margin: 0 0 12px;

@@ -17,7 +17,7 @@ silo_modified: false
 
 ## 项目为避免混淆所做的事 {#confusion}
 
-- 本分支以自己的名称 **Silo** 发布，而非冒用 MinIO 之名。
+- 本分支以自己的名称 **PGSTY SILO** 发布，而非冒用 MinIO 之名。
 - 本站每一个页面的页脚都带有商标免责声明。
 - 在所有分发渠道——代码仓库、容器镜像、发行制品与本文档——均明确标注为社区分支。
 - 从不宣称与 MinIO, Inc. 存在关联、认可、认证或商业合作关系。
@@ -38,7 +38,7 @@ silo_modified: false
 
 ## 其他商标 {#other}
 
-“Pigsty” 与 “PGSTY” 指 [Pigsty](https://pgsty.com) 项目及其维护者，Silo 由其发布。
+“Pigsty” 与 “PGSTY” 指 [Pigsty](https://pgsty.com) 项目及其维护者，PGSTY SILO 由其发布。
 Amazon S3 是 Amazon.com, Inc. 或其关联公司的商标，文中提及 S3 仅用于说明协议兼容性。
 其余商标均归各自所有者所有。
 

@@ -5,7 +5,7 @@
 {{- $evidenceProjects := hugo.Data.home.projects -}}
 {{- $voices := hugo.Data.home.voices -}}
 {{- $socialImage := "images/silo-social-card.png" | absURL -}}
-{{- $socialAlt := cond $zh "SILO : MinIO/S3 兼容的对象存储" "SILO — S3/MinIO-Compatible Object Storage" -}}
+{{- $socialAlt := cond $zh "PGSTY SILO : MinIO/S3 兼容的对象存储" "SILO — S3/MinIO-Compatible Object Storage" -}}
 <!DOCTYPE html>
 <html lang="{{ $locale }}" class="no-js">
 <head>
@@ -169,10 +169,10 @@
 
             <p class="hero-sub anim" style="--d:2">
               {{ if $zh }}
-              <span>Silo 由 <a href="https://pigsty.cc" target="_blank" rel="noopener">Pigsty 社区</a>持续维护</span>
-              <span>维护安全补丁，恢复控制台，关注供应链持续性</span>
+              <span>PGSTY SILO 是一个 MinIO 分支，由 <a href="https://pigsty.cc" target="_blank" rel="noopener">PGSTY</a> 维护</span>
+              <span>提供管理控制台，二进制软件制品与持续安全更新</span>
               {{ else }}
-              <span>A MinIO fork, maintained by the <a href="https://pigsty.io" target="_blank" rel="noopener">Pigsty community</a></span>
+              <span>PGSTY SILO is a MinIO fork maintained by <a href="https://pigsty.io" target="_blank" rel="noopener">PGSTY</a></span>
               <span>Provide packages, images, console, and CVE fixes</span>
               {{ end }}
             </p>
@@ -183,7 +183,7 @@
             </div>
 
             <p class="hero-manifesto anim" style="--d:4">
-              <a href="{{ relLangURL "about/manifesto/" }}"><i class="fas fa-scroll" aria-hidden="true"></i> {{ if $zh }}我们承诺什么，不承诺什么：Silo 宣言{{ else }}The Silo Manifesto: our commitments, and limits{{ end }} →</a>
+              <a href="{{ relLangURL "about/manifesto/" }}"><i class="fas fa-scroll" aria-hidden="true"></i> {{ if $zh }}我们承诺什么，不承诺什么：PGSTY SILO 宣言{{ else }}The PGSTY SILO Manifesto: our commitments, and limits{{ end }} →</a>
             </p>
 
           </div>
@@ -199,7 +199,7 @@
                   <div class="silo-board-core">
                     <div class="silo-port silo-port--api"><small>S3 API</small><strong>:9000</strong><span>APPLICATION TRAFFIC</span></div>
                     <div class="silo-chip">
-                      <small>OBJECT STORAGE CORE</small>
+                      <small>OBJECT STORAGE</small>
                       <strong>SILO</strong>
                       <span>S3-COMPATIBLE</span>
                     </div>
@@ -224,12 +224,13 @@
         <div class="section-head section-head--compact" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">KEY METRICS</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title section-title--sm" id="metrics-title">{{ if $zh }}持续维护，广泛采用{{ else }}Maintained in public, visible at a glance{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}下面每个数字都来自你可以自己核对的公开来源。{{ else }}Every number here comes from a public source you can check yourself.{{ end }}</p>
         </div>
 
         <div class="stats-grid" data-reveal>
-          {{/* Docker Hub does not redirect a renamed repository, so the count still
-               comes from the archived pgsty/minio image (bin/metrics.py) while the
-               link points at the current one. */}}
+          {{/* Docker Hub does not carry pull counts across a rename, so this is the
+               sum of the archived pgsty/minio image and the current pgsty silo one
+               (bin/metrics.py). */}}
           <a href="https://hub.docker.com/r/pgsty/silo" target="_blank" rel="noopener" class="stat-item" title="{{ if $zh }}镜像拉取总量，含改名前的 pgsty/minio 镜像{{ else }}Total image pulls, including the pre-rename pgsty/minio image{{ end }}">
             <span class="stat-value" data-count="{{ $metrics.docker_pulls }}">{{ lang.FormatNumber 0 $metrics.docker_pulls }}</span>
             <span class="stat-label">Docker Pulls</span>
@@ -277,13 +278,13 @@
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}价值主张{{ else }}VALUE PROPOSITION{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}上游放弃，SILO 接盘{{ else }}What upstream dropped, SILO picks up{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}MinIO 社区版阉割了控制台、停发了预编译制品、归档了安全更新。SILO 把这三样都补回来——同一套代码，同样的性能。{{ else }}MinIO's community edition gutted its console, stopped shipping binaries, and archived its security updates. SILO restores all three—on the same code, at the same performance.{{ end }}</p>
+          <h2 class="section-title">{{ if $zh }}上游放弃，SILO 接盘{{ else }}What upstream dropped, PGSTY SILO picks up{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}MinIO 社区版阉割了控制台、停发了预编译制品、不再发布安全更新。<br>SILO 把这三样都补回来 —— 同一套代码库，持续的安全修复与维护。{{ else }}MinIO's OSS edition gutted its console, stopped shipping binaries, and archived its security updates. Silo restores all these — on the same codebase, with CI/CD pipe{{ end }}</p>
         </div>
 
         <div class="module-row" data-reveal>
           <div class="module-content">
-            <p class="module-ref silkscreen">{{ if $zh }}控制台{{ else }}WEB CONSOLE{{ end }}</p>
+            <p class="module-ref silkscreen">{{ if $zh }}控制台{{ else }}ADMIN CONSOLE{{ end }}</p>
             <h3 class="module-title"><a href="{{ relLangURL "administration/minio-console/" }}">{{ if $zh }}完整控制台，找回来了{{ else }}The full console, restored{{ end }}</a></h3>
             <p class="module-motto"><span aria-hidden="true">◇</span> {{ if $zh }}在浏览器里重新管理桶、身份、监控与复制{{ else }}Manage buckets, identity, monitoring, and replication in the browser{{ end }}</p>
             <ul class="module-list">
@@ -303,18 +304,18 @@
         <div class="module-row module-row--reverse" data-reveal>
           <div class="module-content">
             <p class="module-ref silkscreen">{{ if $zh }}安全补丁{{ else }}SECURITY PATCHES{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "blog/security/" }}">{{ if $zh }}持续修补，而非搁置{{ else }}Patched, not abandoned{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}CVE 在这里被修复，公告与代码同处一地{{ else }}CVEs get fixed here, advisories next to the code{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "blog/security/" }}">{{ if $zh }}修复 CVE，发布补丁{{ else }}CVEs fixed, patches shipped{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}公告与修复它的代码放在同一个地方{{ else }}Advisories published next to the code that fixes them{{ end }}</p>
             <ul class="module-list">
               <li>{{ if $zh }}上游社区版已归档——新 CVE 落到无人处理{{ else }}Upstream's community edition is archived—new CVEs land on no one's desk{{ end }}</li>
-              <li>{{ if $zh }}活跃发行线已交付 <strong>19 项安全修复</strong>，每项都附公告{{ else }}<strong>19 security fixes</strong> shipped on the active release line, each with an advisory{{ end }}</li>
+              <li>{{ if $zh }}活跃发行线已交付 <strong>19 项安全修复</strong>，每项都附公告{{ else }}<strong>14 security fixes</strong> shipped on the active release line, each with an advisory{{ end }}</li>
               <li>{{ if $zh }}私下报告、可复现地分诊、透明地公开{{ else }}Report privately, triage reproducibly, publish transparently{{ end }}</li>
             </ul>
             <p class="module-value">{{ if $zh }}不停摆的安全维护{{ else }}Security that keeps moving{{ end }}</p>
           </div>
           <div class="module-visual">
             {{- $security := .Site.GetPage "/blog/security" }}
-            {{- $advisories := $security.RegularPages.ByDate.Reverse }}
+            {{- $advisories := $security.RegularPages.ByDate }}
             <div class="code-plate security-plate advisory-plate">
               <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">blog/security · {{ len $advisories }} {{ if $zh }}篇记录{{ else }}ENTRIES{{ end }}</span></span>
               <ul class="advisory-list">
@@ -358,19 +359,19 @@
         <div class="module-row module-row--reverse" data-reveal>
           <div class="module-content">
             <p class="module-ref silkscreen">{{ if $zh }}兼容性{{ else }}COMPATIBILITY{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}原地替换 MinIO{{ else }}A drop-in replacement{{ end }}</a></h3>
+            <h3 class="module-title"><a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}原地替换 MinIO{{ else }}A drop-in MinIO replacement{{ end }}</a></h3>
             <p class="module-motto"><span aria-hidden="true">⇄</span> {{ if $zh }}换一个镜像名即可迁移，数据原地不动{{ else }}Swap the image name; your data stays in place{{ end }}</p>
             <ul class="module-list">
               <li>{{ if $zh }}产品与交付物改名为 <strong>silo</strong>，协议与数据格式保持不变{{ else }}The delivery surface is renamed <strong>silo</strong>; the protocol and data are not{{ end }}</li>
               <li>{{ if $zh }}S3 API、<strong>MINIO_* 变量</strong>、指标、路由与磁盘格式原样保留{{ else }}S3 API, <strong>MINIO_* variables</strong>, metrics, routes, and disk format unchanged{{ end }}</li>
               <li>{{ if $zh }}参见<a href="{{ relLangURL "compatibility/server/" }}">兼容性审计</a>与<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>，回滚路径同样在册{{ else }}See the <a href="{{ relLangURL "compatibility/server/" }}">compatibility audit</a> and <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a>, rollback included{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}把镜像换成 pgsty/silo，其余一切照旧{{ else }}Point the image at pgsty/silo—everything else stays{{ end }}</p>
+            <p class="module-value">{{ if $zh }}把镜像换成 pgsty/silo，其余一切照旧{{ else }}Point the image at pgsty/silo — everything else stays{{ end }}</p>
           </div>
           <div class="module-visual">
-            <a href="{{ relLangURL "compatibility/migration/" }}" class="code-plate migrate-plate" aria-label="{{ if $zh }}查看从 MinIO 迁移到 Silo 的指南{{ else }}Read the MinIO to Silo migration guide{{ end }}">
+            <a href="{{ relLangURL "compatibility/migration/" }}" class="code-plate migrate-plate" aria-label="{{ if $zh }}查看从 MinIO 迁移到 PGSTY SILO 的指南{{ else }}Read the MinIO to PGSTY SILO migration guide{{ end }}">
               <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">docker-compose.yml</span></span>
-              <pre class="code-body"><span class="c"># {{ if $zh }}从 MinIO 迁移到 Silo{{ else }}Migrate from MinIO to Silo{{ end }}</span>
+              <pre class="code-body"><span class="c"># {{ if $zh }}从 MinIO 迁移到 PGSTY SILO{{ else }}Migrate from MinIO to PGSTY SILO{{ end }}</span>
 <span class="k">services</span>:
   <span class="k">minio</span>:
 <span class="del">-   image: minio/minio:latest</span>
@@ -387,8 +388,8 @@
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">S3 INTERFACE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}沿用你已经依赖的接口{{ else }}The interface your clients already use{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}Silo 只重命名产品与交付物，不改动协议：S3 API、MINIO_* 配置与磁盘格式保持原样，逐项差异记录在兼容性审计中。{{ else }}Silo renames the product and its packages, not the protocol. The S3 API, MINIO_* configuration, and on-disk format are preserved; the differences that do exist are listed per version in the compatibility audit.{{ end }}</p>
+          <h2 class="section-title">{{ if $zh }}还是那套接口{{ else }}Same interface{{ end }}</h2>
+          <p class="section-subtitle section-subtitle--wide">{{ if $zh }}客户端、SDK 与脚本都不用改：同样的 S3 API，同样的 MINIO_* 配置，同样的指标，同样的磁盘格式。{{ else }}Your clients, SDKs, and scripts keep working: same S3 API, same MINIO_* variables, same metrics, same on-disk format.{{ end }}</p>
           <div class="section-links">
             <a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}兼容性说明{{ else }}Compatibility Notes{{ end }} →</a>
             <a href="{{ relLangURL "developers/minio-drivers/" }}">{{ if $zh }}S3 客户端{{ else }}S3 Clients{{ end }} →</a>
@@ -425,8 +426,9 @@
       <div class="landing-container">
         <div class="dashwall-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">OPERATIONS</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title section-title--sm">{{ if $zh }}熟悉的控制台、监控与复制工作流{{ else }}Familiar Console, monitoring, and replication workflows{{ end }}</h2>
+          <h2 class="section-title">{{ if $zh }}熟悉的控制台回来了！{{ else }}Console is back, even better!{{ end }}</h2>
           <a href="{{ relLangURL "administration/minio-console/" }}" class="dashwall-link">{{ if $zh }}打开控制台文档{{ else }}Open Console Docs{{ end }} ↗</a>
+          <p class="section-subtitle">{{ if $zh }}我们把被阉掉的控制台搬了回来，补上双语界面，并重做了视觉呈现。{{ else }}We put the gutted console back, added a bilingual UI, and cleaned up the visuals.{{ end }}</p>
         </div>
       </div>
       <div class="dashboard-gallery-marquee" data-reveal>
@@ -455,8 +457,8 @@
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}用户之声{{ else }}THIRD-PARTY REPORTS{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}真实迁移反馈，也保留现实提醒{{ else }}Migration reports we didn't write{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}以下为 2026 年 2–7 月的三方评论{{ else }}Public records from February to July 2026, quoted verbatim and linked to their source.{{ end }}</p>
+          <h2 class="section-title">{{ if $zh }}人们怎么说 SILO{{ else }}What people say about silo{{ end }}</h2>
+          <p class="section-subtitle">{{ if $zh }}2026 年 2–7 月的公开发言，原文引用。{{ else }}Public posts from February to July 2026, quoted verbatim.{{ end }}</p>
         </div>
       </div>
 
@@ -481,7 +483,7 @@
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">MAINTENANCE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title">{{ if $zh }}一项刻意收窄的承诺{{ else }}A deliberately narrow promise{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}SILO 服务于现有 MinIO 兼容部署的连续性；它不是无限范围的产品路线图。每一条承诺与拒绝都写在《Silo 宣言》里。{{ else }}SILO exists for continuity across existing MinIO-compatible deployments—not an unlimited product roadmap. Every promise and every refusal is written down in the Silo Manifesto.{{ end }}</p>
+          <p class="section-subtitle">{{ if $zh }}SILO 只为现有 MinIO 部署的连续性而存在，不做更多承诺。{{ else }}SILO exists to keep existing MinIO deployments running, nothing broader.{{ end }}</p>
         </div>
         <div class="promise-grid" data-reveal>
           <article class="promise-card promise-card--yes">
@@ -567,7 +569,7 @@
       <div class="landing-container">
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">DOWNLOAD</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
-          <h2 class="section-title">{{ if $zh }}获取 SILO{{ else }}Get SILO{{ end }}</h2>
+          <h2 class="section-title">{{ if $zh }}获取 SILO{{ else }}Get PGSTY SILO{{ end }}</h2>
           <p class="section-subtitle">{{ if $zh }}选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Pick the server or the admin client, then your platform and install method.{{ end }}</p>
         </div>
 

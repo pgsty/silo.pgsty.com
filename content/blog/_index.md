@@ -1,5 +1,5 @@
 ---
-title: Silo Blog
+title: PGSTY SILO Blog
 linkTitle: Blog
 description: News, Release & Security Notes
 weight: 40

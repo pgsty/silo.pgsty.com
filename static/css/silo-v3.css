@@ -150,7 +150,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: clamp(8px, 1.4vw, 16px);
+  gap: clamp(16px, 3vw, 40px);
 }
 
 .silo-port {
@@ -166,20 +166,9 @@
   font-family: var(--font-mono);
 }
 
-/* 端口伸向芯片的一小段虚线走线 */
-.silo-port::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: clamp(10px, 2.4vw, 30px);
-  height: 1px;
-  background: repeating-linear-gradient(90deg, var(--copper-dim) 0 5px, transparent 5px 10px);
-}
-
-.silo-port--api { justify-self: start; }
-.silo-port--api::after { left: 100%; }
-.silo-port--console { justify-self: end; text-align: right; }
-.silo-port--console::after { right: 100%; }
+/* 两侧端口向中间芯片靠拢 */
+.silo-port--api { justify-self: end; }
+.silo-port--console { justify-self: start; text-align: right; }
 .silo-port small { font-size: 0.6rem; letter-spacing: 0.14em; color: var(--copper); }
 .silo-port strong { font-size: 1.25rem; line-height: 1.25; color: var(--ink); }
 .silo-port span { font-size: 0.5rem; letter-spacing: 0.08em; color: var(--ink-mute); }
@@ -625,7 +614,6 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
   .silo-board-foot { font-size: 0.56rem; }
   /* 窄屏让端口跟随栅格收缩，宁可压扁也不要把画布顶出视口 */
   .silo-port { min-width: 0; padding: 7px; justify-self: stretch; }
-  .silo-port::after { display: none; }
   .silo-port strong { font-size: 0.88rem; }
   .silo-port span { display: none; }
   .silo-chip { width: 108px; min-height: 94px; }

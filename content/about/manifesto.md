@@ -1,7 +1,7 @@
 ---
-title: "The Silo Manifesto"
+title: "The PGSTY SILO Manifesto"
 linkTitle: "Manifesto"
-description: "Silo's commitments in eleven articles: what the project maintains, what it refuses to promise, and where to check both."
+description: "PGSTY SILO's commitments in eleven articles: what the project maintains, what it refuses to promise, and where to check both."
 url: "/about/manifesto/"
 aliases:
   - /about/manifest/
@@ -13,7 +13,7 @@ minio_origin: false
 silo_modified: false
 ---
 
-Silo keeps an open-source, feature-complete, S3-compatible object store maintained and installable, with a build and release chain anyone can inspect. That is the whole scope.
+PGSTY SILO keeps an open-source, feature-complete, S3-compatible object store maintained and installable, with a build and release chain anyone can inspect. That is the whole scope.
 
 This page is the project's public commitment, and it follows one rule: **every article below is either something we already do, with public evidence, or something we explicitly refuse to promise.** A promise we could not keep would be worse than no promise.
 

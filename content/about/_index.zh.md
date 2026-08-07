@@ -1,7 +1,7 @@
 ---
-title: "关于 Silo"
+title: "关于 PGSTY SILO"
 linkTitle: "关于"
-description: "Silo 宣言、许可协议、商标声明、归属署名与安全政策。"
+description: "PGSTY SILO 宣言、许可协议、商标声明、归属署名与安全政策。"
 url: "/zh/about/"
 weight: 5
 type: docs

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Fetch pgsty/silo metrics and optionally update Hugo's data file."""
+"""Fetch pgsty/silo metrics and update Hugo's data file."""
 
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
@@ -15,12 +16,17 @@ import urllib.request
 from typing import Any, Sequence
 
 
-GITHUB_API = "https://api.github.com/repos/pgsty/silo"
+GITHUB_REPO = "pgsty/silo"
+GITHUB_API = f"https://api.github.com/repos/{GITHUB_REPO}"
 
 # GitHub carried the stars across the pgsty/minio -> pgsty/silo rename; Docker Hub
-# did not. The pull history lives in the archived pgsty/minio repository, which the
-# landing page keeps reporting while linking to the current pgsty/silo image.
-DOCKER_HUB_API = "https://hub.docker.com/v2/namespaces/pgsty/repositories/minio"
+# did not. The pull history stays on the archived pgsty/minio repository while
+# pgsty/silo collects everything published after the rename, so the landing page
+# reports the sum of both.
+DOCKER_NAMESPACE = "pgsty"
+DOCKER_REPOS = ("minio", "silo")
+DOCKER_HUB_API = "https://hub.docker.com/v2/namespaces/{namespace}/repositories/{repo}"
+
 TIMEOUT_SECONDS = 15
 USER_AGENT = "pgsty-metrics/1.0"
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -31,15 +37,32 @@ class MetricsError(RuntimeError):
     """Raised when metrics cannot be fetched, validated, or written."""
 
 
+@dataclass(frozen=True)
+class Metrics:
+    """Remote counters mirrored into data/home/metrics.yaml."""
+
+    github_stars: int
+    docker_pulls_by_repo: dict[str, int]
+
+    @property
+    def docker_pulls(self) -> int:
+        return sum(self.docker_pulls_by_repo.values())
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Print pgsty/silo GitHub stars and Docker Hub pulls."
+        description=(
+            "Fetch pgsty/silo GitHub stars and Docker Hub pulls "
+            f"({', '.join(f'{DOCKER_NAMESPACE}/{repo}' for repo in DOCKER_REPOS)} "
+            "combined), then refresh data/home/metrics.yaml."
+        )
     )
     parser.add_argument(
         "command",
         nargs="?",
-        choices=("update",),
-        help="update data/home/metrics.yaml after fetching both metrics",
+        default="update",
+        choices=("update", "show"),
+        help="update (default) writes data/home/metrics.yaml; show only prints",
     )
     return parser.parse_args(argv)
 
@@ -89,26 +112,38 @@ def read_counter(payload: dict[str, Any], key: str, source: str) -> int:
     return value
 
 
-def fetch_metrics() -> tuple[int, int]:
-    opener = build_opener()
-    github_headers = {
+def fetch_github_stars(opener: urllib.request.OpenerDirector) -> int:
+    headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": USER_AGENT,
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    github_token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    if github_token:
-        github_headers["Authorization"] = f"Bearer {github_token}"
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
 
-    github = fetch_json(opener, GITHUB_API, github_headers)
-    docker_hub = fetch_json(
-        opener,
-        DOCKER_HUB_API,
-        {"Accept": "application/json", "User-Agent": USER_AGENT},
-    )
-    return (
-        read_counter(github, "stargazers_count", GITHUB_API),
-        read_counter(docker_hub, "pull_count", DOCKER_HUB_API),
+    payload = fetch_json(opener, GITHUB_API, headers)
+    return read_counter(payload, "stargazers_count", GITHUB_API)
+
+
+def fetch_docker_pulls(opener: urllib.request.OpenerDirector) -> dict[str, int]:
+    """Return the pull count of every tracked Docker Hub repository."""
+    headers = {"Accept": "application/json", "User-Agent": USER_AGENT}
+    pulls: dict[str, int] = {}
+
+    for repo in DOCKER_REPOS:
+        url = DOCKER_HUB_API.format(namespace=DOCKER_NAMESPACE, repo=repo)
+        payload = fetch_json(opener, url, headers)
+        pulls[f"{DOCKER_NAMESPACE}/{repo}"] = read_counter(payload, "pull_count", url)
+
+    return pulls
+
+
+def fetch_metrics() -> Metrics:
+    opener = build_opener()
+    return Metrics(
+        github_stars=fetch_github_stars(opener),
+        docker_pulls_by_repo=fetch_docker_pulls(opener),
     )
 
 
@@ -129,7 +164,7 @@ def replace_yaml_counter(content: str, key: str, value: int) -> str:
     return updated
 
 
-def update_metrics_file(github_stars: int, docker_pulls: int) -> bool:
+def update_metrics_file(metrics: Metrics) -> bool:
     temporary_path: Path | None = None
 
     try:
@@ -137,8 +172,8 @@ def update_metrics_file(github_stars: int, docker_pulls: int) -> bool:
             raise MetricsError(f"{METRICS_FILE}: metrics data file does not exist")
 
         content = METRICS_FILE.read_text(encoding="utf-8")
-        updated = replace_yaml_counter(content, "github_stars", github_stars)
-        updated = replace_yaml_counter(updated, "docker_pulls", docker_pulls)
+        updated = replace_yaml_counter(content, "github_stars", metrics.github_stars)
+        updated = replace_yaml_counter(updated, "docker_pulls", metrics.docker_pulls)
         if updated == content:
             return False
 
@@ -168,13 +203,15 @@ def update_metrics_file(github_stars: int, docker_pulls: int) -> bool:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    github_stars, docker_pulls = fetch_metrics()
+    metrics = fetch_metrics()
 
-    print(f"github_stars={github_stars}")
-    print(f"docker_pulls={docker_pulls}")
+    print(f"github_stars={metrics.github_stars}")
+    for repo, pulls in metrics.docker_pulls_by_repo.items():
+        print(f"docker_pulls[{repo}]={pulls}")
+    print(f"docker_pulls={metrics.docker_pulls}")
 
     if args.command == "update":
-        changed = update_metrics_file(github_stars, docker_pulls)
+        changed = update_metrics_file(metrics)
         status = "updated" if changed else "unchanged"
         print(f"{status}={METRICS_FILE.relative_to(REPO_ROOT)}")
     return 0

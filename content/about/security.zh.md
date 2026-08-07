@@ -1,7 +1,7 @@
 ---
 title: "安全政策"
 linkTitle: "安全政策"
-description: "如何报告 Silo 的安全漏洞，以及已修复问题的公布渠道。"
+description: "如何报告 PGSTY SILO 的安全漏洞，以及已修复问题的公布渠道。"
 url: "/zh/about/security/"
 weight: 40
 type: docs
