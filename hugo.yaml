@@ -11,6 +11,10 @@ hasCJKLanguage: true
 # 标签等列表页标题保留作者原始大小写（不要把 silo-pkg 渲染成 Silo-Pkg）。
 capitalizeListTitles: false
 
+# 列表页每页条目数（博客列表、标签页等）。Hugo 默认 10，这里放宽到 20。
+pagination:
+  pagerSize: 20
+
 services:
   googleAnalytics:
     id: G-JVPFK6E3P5

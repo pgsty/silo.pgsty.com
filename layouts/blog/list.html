@@ -32,13 +32,9 @@
 {{ if .Pages -}}
 <div class="td-blog-posts">
   {{ $blogPages := $.Scratch.Get "blog-pages" -}}
+  {{/* 所有博客列表统一按时间倒序：年份分组从新到旧，组内文章同样从新到旧。
+       GroupByDate 默认即为 desc，安全编年史此前的 "asc" 特例已取消。 */}}
   {{ $groupedPages := $blogPages.GroupByDate "2006" -}}
-  {{ $isSecurity := false -}}
-  {{ with .File }}{{ $isSecurity = eq .Dir "blog/security/" }}{{ end -}}
-  {{ if $isSecurity -}}
-    {{ $blogPages = $blogPages.ByDate -}}
-    {{ $groupedPages = $blogPages.GroupByDate "2006" "asc" -}}
-  {{ end -}}
   {{ $pager := .Paginate $groupedPages -}}
   {{ range $pager.PageGroups -}}
   <div class="h2">{{ T "post_posts_in" }} {{ .Key }}</div>

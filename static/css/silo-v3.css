@@ -424,36 +424,6 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 
 /* Public operator reports */
 .operator-voices { position: relative; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--pg) 3%, transparent), transparent); }
-.operator-voices-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.operator-voice {
-  --voice-accent: var(--pg);
-  position: relative;
-  display: flex;
-  min-height: 176px;
-  flex-direction: column;
-  overflow: hidden;
-  padding: clamp(20px, 1.6vw, 26px);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elev);
-  color: inherit !important;
-  box-shadow: var(--shadow-sm);
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-}
-.operator-voice::before { content: "“"; position: absolute; top: -22px; right: 18px; font-family: Georgia, serif; font-size: 9rem; line-height: 1; color: color-mix(in srgb, var(--voice-accent) 8%, transparent); pointer-events: none; }
-.operator-voice:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--voice-accent) 36%, var(--line-strong)); box-shadow: var(--shadow-md); }
-.operator-voice--lead { --voice-accent: var(--ok); }
-.operator-voice--caution { --voice-accent: var(--copper); }
-.voice-kind { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 13px; color: var(--ink-mute); }
-.voice-kind i { width: 7px; height: 7px; border-radius: 50%; background: var(--voice-accent); box-shadow: 0 0 12px color-mix(in srgb, var(--voice-accent) 58%, transparent); }
-.operator-voice blockquote { position: relative; z-index: 1; max-width: 720px; margin: 0 0 14px; font-family: var(--font-head); font-size: clamp(1.02rem, 1.15vw, 1.2rem); font-weight: 650; line-height: 1.4; letter-spacing: -0.016em; color: var(--ink); }
-/* CJK quotes stay full width where that is correct typography ([lang] is set there). */
-.operator-voice blockquote:not([lang]) { font-family: 'Latin Quotes', var(--font-head); }
-.operator-voice p { margin: 0 0 28px; color: var(--ink-soft); font-size: 0.9rem; line-height: 1.72; }
-.operator-voice footer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line); }
-.operator-voice footer strong { color: var(--ink); font-size: 0.85rem; }
-.operator-voice footer span { font-family: var(--font-mono); font-size: 0.6rem; color: var(--ink-mute); }
-.operator-voice footer i { color: var(--voice-accent); font-style: normal; }
 
 /* Community testimonial marquee — avatar, person, identity, quote.
    Rides on the shared .testimonials-* marquee from landing-v3.css; the card
@@ -621,7 +591,6 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
   .interface-grid { grid-template-columns: repeat(3, 1fr); }
   .silo-steps { grid-template-columns: 1fr; }
   .download-entry .install-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .operator-voices-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 768px) {
@@ -643,7 +612,6 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
   .adoption-logos .evidence-logo-item img { width: 58px; height: 58px; border-radius: 13px; }
   .evidence-logo-copy strong { font-size: 0.9rem; }
   .evidence-logo-copy small { font-size: 0.48rem; }
-  .operator-voices-grid { grid-template-columns: 1fr; }
   .voice-card { padding: 15px 16px 24px; }
   .voice-source { padding: 0 16px 12px; }
   .download-entry-head { align-items: flex-start; flex-direction: column; }
@@ -668,9 +636,5 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
   .silo-disks > div > span { display: flex; flex-direction: column; gap: 2px; text-align: center; }
   .silo-disks i { width: 5px; height: 5px; }
   .artifact-plate-head small { display: none; }
-  .operator-voice { min-height: 0; }
-  .operator-voice footer { grid-template-columns: 1fr auto; }
-  .operator-voice footer span { grid-column: 1 / -1; grid-row: 2; }
-  .operator-voice footer i { grid-column: 2; grid-row: 1; }
   .download-entry .install-options { grid-template-columns: 1fr; }
 }
