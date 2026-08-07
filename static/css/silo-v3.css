@@ -577,6 +577,23 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 
 .footer-logo img { object-fit: contain; }
 
+/* Contributors：合入代码的贡献者用卡片，其余用丝印铭牌墙 */
+.contributors { background: linear-gradient(180deg, transparent, rgba(224, 163, 92, 0.03), transparent); }
+.contrib-code { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.contrib-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: clamp(20px, 2.4vw, 26px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-elev); box-shadow: var(--shadow-sm); transition: border-color 180ms ease; }
+.contrib-card::before { content: ""; position: absolute; top: 0; right: 0; left: 0; height: 3px; background: var(--pg); opacity: 0.72; }
+.contrib-card:hover { border-color: var(--line-strong); }
+.landing-page .contrib-handle { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; color: var(--pg-strong); overflow-wrap: anywhere; }
+.landing-page .contrib-handle:hover { color: var(--copper); }
+.contrib-what { flex: 1; margin: 0; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.5; }
+.contrib-meta { display: flex; align-items: center; gap: 10px; margin: 0; font-family: var(--font-mono); font-size: 0.76rem; }
+.landing-page .contrib-meta a { color: var(--copper); font-weight: 600; }
+.contrib-meta code { padding: 2px 6px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--bg-elev-2) 80%, transparent); color: var(--ink-mute); font-size: 0.72rem; }
+.contrib-wall { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 22px; }
+.landing-page .contrib-chip { padding: 6px 12px; border: 1px dashed var(--line-strong); border-radius: 999px; background: color-mix(in srgb, var(--bg-elev) 70%, transparent); color: var(--ink-mute); font-family: var(--font-mono); font-size: 0.78rem; transition: color 160ms ease, border-color 160ms ease, background 160ms ease; }
+.landing-page .contrib-chip:hover { border-style: solid; border-color: var(--copper-dim); background: rgba(224, 163, 92, 0.08); color: var(--copper); }
+.contrib-cta { margin-top: 26px; text-align: center; }
+
 @media (max-width: 1120px) {
   .nav-link { padding-right: 9px; padding-left: 9px; }
   .nav-star { display: none; }
@@ -590,6 +607,7 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
   .interface-grid { grid-template-columns: repeat(3, 1fr); }
   .silo-steps { grid-template-columns: 1fr; }
   .download-entry .install-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .contrib-code { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 768px) {
@@ -619,6 +637,7 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 @media (max-width: 480px) {
   .silo-hero-title { font-size: clamp(2.1rem, 11vw, 2.9rem); }
   .eyebrow-zh { display: none; }
+  .contrib-code { grid-template-columns: 1fr; }
   .silo-board { grid-template-rows: auto minmax(212px, 1fr) auto; min-height: 296px; }
   .silo-board-top,
   .silo-board-foot { font-size: 0.56rem; }
