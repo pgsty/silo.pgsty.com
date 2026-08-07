@@ -224,7 +224,8 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
 
 .key-metrics {
   padding-top: clamp(54px, 6vw, 78px);
-  padding-bottom: clamp(44px, 5vw, 68px);
+  /* The logo wall already ends in whitespace, so it sits closer to what follows. */
+  padding-bottom: clamp(26px, 3vw, 40px);
   border-top: 1px solid var(--line);
   background: linear-gradient(180deg, color-mix(in srgb, var(--pg) 3%, transparent), transparent);
 }
@@ -265,11 +266,20 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
+/* Three rows travelling against each other — left, right, left. Durations are
+   staggered so the rows never lock step into a single moving block. */
+.key-metrics .adoption-logos {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.1vw, 28px);
+}
 .adoption-logos .logos-marquee-content {
   gap: 0;
   /* Duration covers the whole strip, so it scales with the number of logos. */
-  animation-duration: 92s;
+  animation-duration: 68s;
 }
+.adoption-logos .logos-marquee-row:nth-of-type(2) .logos-marquee-content { animation-duration: 77s; }
+.adoption-logos .logos-marquee-row:nth-of-type(3) .logos-marquee-content { animation-duration: 72s; }
 .evidence-logo-set {
   display: flex;
   align-items: center;

@@ -1316,6 +1316,7 @@ html[data-theme="light"] .module-img img {
   width: max-content;
   animation: scroll-left 55s linear infinite;
 }
+.logos-marquee-row[data-direction="right"] .logos-marquee-content { animation-name: scroll-right; }
 .logos-marquee-row:hover .logos-marquee-content { animation-play-state: paused; }
 
 .logo-item { flex: none; display: flex; align-items: center; }

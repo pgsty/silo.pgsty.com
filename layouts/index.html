@@ -228,10 +228,10 @@
         </div>
 
         <div class="stats-grid" data-reveal>
-          {{/* Docker Hub does not carry pull counts across a rename, so this is the
-               sum of the archived pgsty/minio image and the current pgsty silo one
-               (bin/metrics.py). */}}
-          <a href="https://hub.docker.com/r/pgsty/silo" target="_blank" rel="noopener" class="stat-item" title="{{ if $zh }}镜像拉取总量，含改名前的 pgsty/minio 镜像{{ else }}Total image pulls, including the pre-rename pgsty/minio image{{ end }}">
+          {{/* 拉取量的绝大部分沉淀在改名前的 pgsty/minio 仓库上（Docker Hub 改名不迁移
+               计数），所以这张卡片固定指向 pgsty/minio —— 不要改成 pgsty/silo。
+               数字本身是两个仓库的合计，见 bin/metrics.py。 */}}
+          <a href="https://hub.docker.com/r/pgsty/minio" target="_blank" rel="noopener" class="stat-item" title="{{ if $zh }}镜像拉取总量，含改名后的 pgsty/silo 镜像{{ else }}Total image pulls, including the renamed pgsty/silo image{{ end }}">
             <span class="stat-value" data-count="{{ $metrics.docker_pulls }}">{{ lang.FormatNumber 0 $metrics.docker_pulls }}</span>
             <span class="stat-label">Docker Pulls</span>
           </a>
@@ -250,26 +250,30 @@
         </div>
 
         <div class="logos-marquee adoption-logos" data-reveal aria-label="{{ if $zh }}采用 SILO 镜像并带有公开证据的开源项目{{ else }}Open-source projects with public SILO adoption evidence{{ end }}">
-          <div class="logos-marquee-row" data-direction="left">
+          {{ range $i, $row := $evidenceProjects.rows }}
+          <div class="logos-marquee-row" data-direction="{{ cond (eq (mod $i 2) 0) "left" "right" }}">
             <div class="logos-marquee-content">
               <div class="evidence-logo-set">
-                {{ range $evidenceProjects }}
+                {{ range $row }}
                 <a class="logo-item evidence-logo-item" href="{{ .href }}" target="_blank" rel="noopener" aria-label="{{ .name }} — {{ if $zh }}查看采用证据{{ else }}view adoption evidence{{ end }}">
                   <img src="{{ .logo | relURL }}" alt="" loading="lazy">
                   <span class="evidence-logo-copy"><strong>{{ .name }}</strong><small>{{ if $zh }}{{ .kindZh }}{{ else }}{{ .kind }}{{ end }}</small></span>
                 </a>
                 {{ end }}
               </div>
+              {{/* The duplicated half is hidden from assistive tech, but it is on
+                   screen half the time, so it still has to be clickable. */}}
               <div class="evidence-logo-set" aria-hidden="true">
-                {{ range $evidenceProjects }}
-                <span class="logo-item evidence-logo-item">
+                {{ range $row }}
+                <a class="logo-item evidence-logo-item" href="{{ .href }}" target="_blank" rel="noopener" tabindex="-1">
                   <img src="{{ .logo | relURL }}" alt="" loading="lazy">
                   <span class="evidence-logo-copy"><strong>{{ .name }}</strong><small>{{ if $zh }}{{ .kindZh }}{{ else }}{{ .kind }}{{ end }}</small></span>
-                </span>
+                </a>
                 {{ end }}
               </div>
             </div>
           </div>
+          {{ end }}
         </div>
       </div>
     </section>
@@ -498,7 +502,7 @@
           </article>
         </div>
         <div class="promise-cta" data-reveal>
-          <a href="{{ relLangURL "about/manifesto/" }}" class="btn btn-line">{{ if $zh }}阅读《Silo 宣言》{{ else }}Read the Silo Manifesto{{ end }} →</a>
+          <a href="{{ relLangURL "about/manifesto/" }}" class="btn btn-line">{{ if $zh }}阅读《Silo 宣言》{{ else }}Read the PGSTY SILO Manifesto{{ end }} →</a>
         </div>
       </div>
     </section>
@@ -514,7 +518,7 @@
         <div class="faq-list" data-reveal>
           <details class="faq-item" name="silo-faq" open>
             <summary><span class="faq-num silkscreen">Q1</span><span class="faq-q">{{ if $zh }}这个项目为什么存在？{{ else }}Why does this project exist?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}因为上游收缩了社区版：控制台被削减、预编译制品停发、社区仓库被归档。Silo 的存在是为了让一个持续维护、功能完整的 S3 兼容社区对象存储继续存在——Pigsty 自己在生产环境用它承载 PostgreSQL 备份。完整的理由与承诺见<a href="{{ relLangURL "about/manifesto/" }}">《Silo 宣言》</a>。{{ else }}Upstream wound down its community edition: the web console was cut back to a stub, prebuilt binaries stopped, and the server repository was archived. Pigsty runs its own PostgreSQL backups on this code, so it needed a maintainer either way. Everything else follows from that. The reasoning is written out in the <a href="{{ relLangURL "about/manifesto/" }}">Silo Manifesto</a>.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}因为上游收缩了社区版：控制台被削减、预编译制品停发、社区仓库被归档。Silo 的存在是为了让一个持续维护、功能完整的 S3 兼容社区对象存储继续存在——Pigsty 自己在生产环境用它承载 PostgreSQL 备份。完整的理由与承诺见<a href="{{ relLangURL "about/manifesto/" }}">《Silo 宣言》</a>。{{ else }}Upstream wound down its community edition: the web console was cut back to a stub, prebuilt binaries stopped, and the server repository was archived. Pigsty runs its own PostgreSQL backups on this code, so it needed a maintainer either way. Everything else follows from that. The reasoning is written out in the <a href="{{ relLangURL "about/manifesto/" }}">PGSTY SILO Manifesto</a>.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
