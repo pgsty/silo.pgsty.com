@@ -23,13 +23,11 @@ services:
 # Hugo Module
 #=======================================#
 module:
-  proxy: direct
   hugoVersion:
     extended: true
-    min: "0.155.0"
+    min: "0.160.1"
   imports:
-    - path: github.com/google/docsy
-      disable: false
+    - path: github.com/pgsty/oink
 
 #=======================================#
 # Languages and navigation
@@ -159,15 +157,16 @@ markup:
 # Outputs
 #=======================================#
 outputs:
-  home: [HTML, RSS, JSON]
-  page: [HTML]
-  section: [HTML, RSS]
+  home: [HTML, markdown, LLMS]
+  page: [HTML, markdown]
+  section: [HTML, RSS, print, markdown]
 
 #=======================================#
 # Site parameters
 #=======================================#
 params:
   description: S3-compatible object storage maintained by Pigsty, with security updates, a restored console, and supply-chain continuity.
+  logo: img/silo.svg
   images:
     - images/silo-social-card.png
   version: 0.1.0
@@ -189,13 +188,18 @@ params:
   github_project_repo: https://github.com/pgsty/silo
   github_branch: main
 
-  # 站内搜索由项目自有的 ⌘K 弹窗实现（lunr 自托管 + 按语言索引），
-  # 必须关闭 Docsy offlineSearch：否则其 offline-search.js 在页面上找不到
-  # .td-search input 时会 $.ajax(undefined) 抓当前页 HTML 并抛错。
-  offlineSearch: false
+  # OINK 提供自托管的 Lunr、按语言生成的索引与 ⌘K 搜索弹窗。
+  offlineSearch: true
+  offlineSearchIndex: content
+  offlineSearchSummaryLength: 90
+  offlineSearchMaxResults: 10
   prism_syntax_highlighting: false
 
   ui:
+    quick_links: [docs, blog]
+    page_context_menu:
+      enable: true
+      links: []
     breadcrumb_disable: false
     navbar_logo: true
     navbar_translucent_over_cover_disable: false
@@ -207,12 +211,10 @@ params:
     sidebar_root_enabled: true
     ul_show: 2
     showLightDarkModeMenu: true
-    # TOC 高亮由 silo-docs.js 的 IntersectionObserver 实现；Docsy 的
-    # Bootstrap ScrollSpy 注入路径（td/scrollspy-attr.txt）存在属性转义
-    # bug，本就从未生效，禁用后顺带从 bundle 中去掉 scrollspy-patch.js。
+    # OINK 的文档壳自行维护 TOC 高亮，不需要 Bootstrap ScrollSpy。
     scrollSpy:
       disable: true
-    # ---- Fumadocs 式侧栏定制（silo chrome）----
+    # ---- OINK 文档壳 ----
     # 搜索框下方的根节点下拉：列出 docs 根 + 所有 sidebar_root_for: self
     # 的 section；若无 self 根 section 则自动隐藏。
     sidebar_root_menu: true

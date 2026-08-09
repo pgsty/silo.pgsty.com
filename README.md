@@ -1,14 +1,10 @@
 # Silo Documentation
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [Docsy](https://www.docsy.dev/), with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and the [OINK](https://github.com/pgsty/oink) engineering-documentation theme, with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Local development
 
-Install Hugo Extended, Go, Node.js, and npm. Install the pinned PostCSS toolchain once, then run the local server:
-
-```bash
-npm ci
-```
+Install Hugo Extended 0.160.1 or newer, Go, and Git. OINK vendors the browser and styling dependencies required by the site, so a Node.js toolchain is not needed.
 
 ```bash
 make dev
@@ -26,7 +22,7 @@ Run the module verification and warning-strict production build with:
 make check
 ```
 
-Docsy is pinned as a Hugo Module. Project-specific layouts and SCSS extend the theme without vendoring its source.
+OINK is pinned as a Hugo Module. The project keeps only Silo-specific layouts and styles; documentation chrome, search, content components, and blocks come from the theme.
 
 ## Content convention
 

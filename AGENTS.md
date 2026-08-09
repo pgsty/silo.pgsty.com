@@ -22,3 +22,5 @@ silo.pgsty.com —— SILO 官网（Hugo）。给 AI agent 的项目约定，改
 - 改完模板或 CSS 跑 `hugo --quiet` 验证构建；`static/css/*` 靠 md5 query string 破缓存，
   不需要手动改版本号。
 - 指标数据别手写，跑 `bin/metrics.py`。
+- 通用文档壳、搜索、短代码和 blocks 来自 `github.com/pgsty/oink`；不要把 OINK
+  模板重新复制回项目。这里只保留 SILO 首页、下载页、来源声明等产品专属覆盖。

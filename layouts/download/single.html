@@ -108,14 +108,14 @@
           <a href="{{ relLangURL "blog/" }}" class="nav-link">{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
           <a href="{{ relLangURL "download/" }}" class="nav-link active" aria-current="page">{{ if $zh }}下载{{ else }}Download{{ end }}</a>
           <button type="button" class="nav-util" data-theme-toggle title="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}" aria-label="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}">
-            {{- partialCached "silo/icon.html" "sun" "sun" -}}
-            {{- partialCached "silo/icon.html" "moon" "moon" -}}
+            {{- partialCached "shell/icon.html" "sun" "sun" -}}
+            {{- partialCached "shell/icon.html" "moon" "moon" -}}
           </button>
           {{ range .Translations }}
-          <a href="{{ .RelPermalink }}" class="nav-util" title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}">{{ partialCached "silo/icon.html" "languages" "languages" }}</a>
+          <a href="{{ .RelPermalink }}" class="nav-util" title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}">{{ partialCached "shell/icon.html" "languages" "languages" }}</a>
           {{ end }}
           <a href="https://github.com/pgsty/silo" class="nav-github" target="_blank" rel="noopener" title="GitHub">
-            {{ partialCached "silo/icon.html" "github" "github" }}
+            {{ partialCached "shell/icon.html" "github" "github" }}
             <span class="nav-count">{{ partial "compact-number.html" $metrics.github_stars }}</span>
           </a>
         </div>
