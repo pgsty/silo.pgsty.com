@@ -25,6 +25,7 @@ silo_modified: false
 | RELEASE.2020-11-17T00-39-14Z | `mc admin subnet health` | 命令改为 SUBNET 子命令 |
 | RELEASE.2020-10-03T02-54-56Z | `mc admin health` | 命令重命名为 health |
 | Original Command | `mc admin obd` | 命令重命名为 `mc admin health` |
+
 {{% /details %}}
 
 ## 描述 {#id2}

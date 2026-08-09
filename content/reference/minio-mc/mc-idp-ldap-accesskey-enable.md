@@ -22,6 +22,7 @@ The [`mc idp ldap accesskey enable`](#command-mc.idp.ldap.accesskey.enable) enab
 ```shell
 mc idp ldap accesskey enable minio/ mykey
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

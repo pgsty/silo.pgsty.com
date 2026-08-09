@@ -24,6 +24,7 @@ The following command retrieves HTTP URLs for the `mydata` bucket on the `mymini
 ```shell
 mc anonymous links --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

@@ -117,13 +117,13 @@ Specify the credentials, destination deployment, and bucket of the remote locati
 
 For example, a URL based target might look like the following:
 
-```
+```text
 https://user:secret@myminio.cloudprovider.tld:9001/bucket
 ```
 
 An alias based target might look like the following:
 
-```
+```text
 --remote-bucket minio-target/my-bucket
 ```
 
@@ -145,7 +145,7 @@ Limit bandwidth rates to no more than the specified rate in KiB/s, MiB/s, or GiB
 
 For example, to limit bandwidth rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-upload 1Gi
 ```
 
@@ -207,7 +207,7 @@ Limit download rates to no more than a specified rate in KiB/s, MiB/s, or GiB/s.
 
 For example, to limit download rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -231,7 +231,7 @@ Limit upload rates to no more than the specified rate in KiB/s, MiB/s, or GiB/s.
 
 For example, to limit upload rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-upload 1G
 ```
 

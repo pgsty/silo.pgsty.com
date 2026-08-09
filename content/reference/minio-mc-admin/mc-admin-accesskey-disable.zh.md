@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc admin accesskey disable myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

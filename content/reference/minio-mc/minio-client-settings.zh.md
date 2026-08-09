@@ -51,14 +51,18 @@ silo_modified: true
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="语法" %}}
+
 ```shell
 export MC_HOST_<alias>=https://<Access Key>:<Secret Key>@<YOUR-S3-ENDPOINT>
 ```
+
 {{% /tab %}}
 {{% tab header="示例" %}}
+
 ```shell
 export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG@play.min.io
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -66,14 +70,18 @@ export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifI
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="语法" %}}
+
 ```shell
 export MC_HOST_<alias>=https://<Access Key>:<Secret Key>:<Session Token>@<YOUR-S3-ENDPOINT>
 ```
+
 {{% /tab %}}
 {{% tab header="示例" %}}
+
 ```shell
 export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG:eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJOVUlCT1JaWVRWMkhHMkJNUlNYUiIsImF1ZCI6IlBvRWdYUDZ1Vk80NUlzRU5SbmdEWGo1QXU1WWEiLCJhenAiOiJQb0VnWFA2dVZPNDVJc0VOUm5nRFhqNUF1NVlhIiwiZXhwIjoxNTM0ODk2NjI5LCJpYXQiOjE1MzQ4OTMwMjksImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0Ojk0NDMvb2F1dGgyL3Rva2VuIiwianRpIjoiNjY2OTZjZTctN2U1Ny00ZjU5LWI0MWQtM2E1YTMzZGZiNjA4In0.eJONnVaSVHypiXKEARSMnSKgr-2mlC2Sr4fEGJitLcJF_at3LeNdTHv0_oHsv6ZZA3zueVGgFlVXMlREgr9LXA@play.min.io
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -106,6 +114,7 @@ RELEASE.2023-12-02T02-03-28Z
 ```shell
 export MC_STS_ENDPOINT_myalias=https://sts.minio-operator.svc.cluster.local:4223/sts/ns-1
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
 此设置没有对应的配置项。
@@ -141,6 +150,7 @@ RELEASE.2023-12-02T02-03-28Z
 ```shell
 export MC_WEB_IDENTITY_TOKEN_FILE_myalias=/var/run/secrets/kubernetes.io/serviceaccount/token
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
 此设置没有对应的配置项。
@@ -153,6 +163,7 @@ export MC_WEB_IDENTITY_TOKEN_FILE_myalias=/var/run/secrets/kubernetes.io/service
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_CONFIG_DIR` {#envvar.MC_CONFIG_DIR}
 
 *envvar*
@@ -168,6 +179,7 @@ export MC_WEB_IDENTITY_TOKEN_FILE_myalias=/var/run/secrets/kubernetes.io/service
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_QUIET` {#envvar.MC_QUIET}
 
 *envvar*
@@ -189,6 +201,7 @@ RELEASE.2024-04-29T09-56-05Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_DISABLE_PAGER` {#envvar.MC_DISABLE_PAGER}
 
 *envvar*
@@ -204,6 +217,7 @@ RELEASE.2024-04-29T09-56-05Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_NO_COLOR` {#envvar.MC_NO_COLOR}
 
 *envvar*
@@ -219,6 +233,7 @@ RELEASE.2024-04-29T09-56-05Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_JSON` {#envvar.MC_JSON}
 
 *envvar*
@@ -234,6 +249,7 @@ RELEASE.2024-04-29T09-56-05Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_DEBUG` {#envvar.MC_DEBUG}
 
 *envvar*
@@ -249,6 +265,7 @@ RELEASE.2024-04-29T09-56-05Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_INSECURE` {#envvar.MC_INSECURE}
 
 *envvar*
@@ -264,6 +281,7 @@ RELEASE.2024-04-29T09-56-05Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_LIMIT_DOWNLOAD` {#envvar.MC_LIMIT_DOWNLOAD}
 
 *envvar*
@@ -299,6 +317,7 @@ export MC_LIMIT_DOWNLOAD=1G
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_LIMIT_UPLOAD` {#envvar.MC_LIMIT_UPLOAD}
 
 *envvar*
@@ -334,6 +353,7 @@ export MC_LIMIT_UPLOAD=1G
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_ENC_KMS` {#envvar.MC_ENC_KMS}
 
 *envvar*
@@ -351,6 +371,7 @@ export MC_LIMIT_UPLOAD=1G
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MC_ENC_S3` {#envvar.MC_ENC_S3}
 
 *envvar*

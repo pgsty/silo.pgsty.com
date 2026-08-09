@@ -26,6 +26,7 @@ silo_modified: false
 ```shell
 mc event ls myminio myminio/mydata arn:aws:sqs::primary:target
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -85,8 +86,10 @@ MinIO 服务器在启动时会为每个已配置的通知目标输出一个 ARN�
 ```shell
 mc event ls myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc event ls ALIAS ARN
 ```

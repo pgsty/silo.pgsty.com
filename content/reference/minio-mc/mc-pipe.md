@@ -21,6 +21,7 @@ The following command writes contents of `STDIN` to an S3 compatible storage.
 ```shell
 echo "My Meeting Notes" | mc pipe s3/engineering/meeting-notes.txt
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

@@ -116,7 +116,7 @@ mc replicate update --id "c75nrap4b0talo3ipthg" [FLAGS]
 
 例如，要将带宽速率限制为不超过 1 GiB/s，可使用：
 
-```
+```text
 --limit-upload 1Gi
 ```
 
@@ -150,7 +150,7 @@ mc replicate update --id "c75nrap4b0talo3ipthg" [FLAGS]
 
 例如，要将下载速率限制为不超过 1 GiB/s，可使用：
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -174,7 +174,7 @@ mc replicate update --id "c75nrap4b0talo3ipthg" [FLAGS]
 
 例如，要将上传速率限制为不超过 1 GiB/s，可使用：
 
-```
+```text
 --limit-upload 1G
 ```
 
@@ -202,7 +202,7 @@ mc replicate update --id "c75nrap4b0talo3ipthg" [FLAGS]
 
 *Optional*
 
-指定复制规则的整数优先级。 该值 *必须* 在源存储桶的所有其他规则中唯一。 数值越高，优先级越*高*。
+指定复制规则的整数优先级。 该值 *必须* 在源存储桶的所有其他规则中唯一。 数值越高，优先级越 *高*。
 
 ##### `--proxy` {#mc.replicate.update.-proxy}
 
@@ -229,13 +229,13 @@ mc replicate update --id "c75nrap4b0talo3ipthg" [FLAGS]
 
 例如，基于 URL 的目标可能如下：
 
-```
+```text
 --remote-bucket https://user:secret@myminio.cloudprovider.tld:9001/bucket
 ```
 
 基于 alias 的目标可能如下：
 
-```
+```text
 --remote-bucket minio-target/my-bucket
 ```
 
@@ -363,7 +363,7 @@ mc replicate update ALIAS/PATH \
 
 MinIO 需要启用 [现有对象复制](/zh/administration/bucket-replication/#minio-replication-behavior-existing-objects)，才能同步在禁用复制规则后写入或删除的对象。
 
-对于*未*启用现有对象复制的规则，MinIO 仅同步复制规则处于*启用*状态期间发生的写入或删除操作。
+对于 *未* 启用现有对象复制的规则，MinIO 仅同步复制规则处于 *启用* 状态期间发生的写入或删除操作。
 {{% /alert %}}
 
 ## 行为 {#id9}
@@ -415,12 +415,12 @@ MinIO 强烈建议创建专门用于支持存储桶复制操作的用户。 有�
 ```
 
 - `"EnableRemoteBucketConfiguration"` 语句授予创建远端目标以支持复制的权限。
-- `"EnableReplicationRuleConfiguration"` 语句授予在存储桶上创建复制规则的权限。`"arn:aws:s3:::*` 资源将复制权限应用到源部署上的*任意*存储桶。你可以按需将用户策略限制到特定存储桶。
+- `"EnableReplicationRuleConfiguration"` 语句授予在存储桶上创建复制规则的权限。`"arn:aws:s3:::*` 资源将复制权限应用到源部署上的 *任意* 存储桶。你可以按需将用户策略限制到特定存储桶。
 
 使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 将该策略添加到每个作为复制源的部署。使用 [`mc admin user add`](/zh/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) 在部署上创建用户，并使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将该策略关联到该新用户。
 {{% /tab %}}
 {{% tab header="复制远端用户" %}}
-以下策略提供将复制数据同步*到*该部署所需的权限。
+以下策略提供将复制数据同步 *到* 该部署所需的权限。
 
 ```json
 {
@@ -468,8 +468,8 @@ MinIO 强烈建议创建专门用于支持存储桶复制操作的用户。 有�
 }
 ```
 
-- `"EnableReplicationOnBucket"` 语句授予远端目标检索存储桶级配置的权限，以支持对 MinIO 部署中*所有*存储桶执行复制操作。 若要将策略限制到特定存储桶，可在 `Resource` 数组中以 `"arn:aws:s3:::bucketName"` 形式指定这些存储桶。
-- `"EnableReplicatingDataIntoBucket"` 语句授予远端目标将数据同步到 MinIO 部署中*任意*存储桶的权限。 若要将策略限制到特定存储桶，可在 `Resource` 数组中以 `"arn:aws:s3:::bucketName/*"` 形式指定这些存储桶。
+- `"EnableReplicationOnBucket"` 语句授予远端目标检索存储桶级配置的权限，以支持对 MinIO 部署中 *所有* 存储桶执行复制操作。 若要将策略限制到特定存储桶，可在 `Resource` 数组中以 `"arn:aws:s3:::bucketName"` 形式指定这些存储桶。
+- `"EnableReplicatingDataIntoBucket"` 语句授予远端目标将数据同步到 MinIO 部署中 *任意* 存储桶的权限。 若要将策略限制到特定存储桶，可在 `Resource` 数组中以 `"arn:aws:s3:::bucketName/*"` 形式指定这些存储桶。
 
 使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 将该策略添加到每个作为复制目标的部署。使用 [`mc admin user add`](/zh/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) 在部署上创建用户，并使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将该策略关联到该新用户。
 {{% /tab %}}

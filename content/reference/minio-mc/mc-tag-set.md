@@ -24,6 +24,7 @@ The following command sets tags for the `mydata` bucket on the `myminio` MinIO d
 ```shell
 mc tag set myminio/mydata "tag1=value1&tag2=value2"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -88,7 +89,7 @@ When used with [`--recursive`](#mc.tag.set.-recursive), causes [`mc tag set`](#c
 
 The following example applies the tag `destination=international` to objects at `vacation-photos/cancun/` but not `vacation-photos/cancun/ocean/` or other prefixes.
 
-For example, the above would add the tags to the object at``vacation-photos/cancun/pretty-beach.jpg`` but not to the object at``vacation-photos/cancun/ocean/tropical-fish.jpg``.
+For example, the above would add the tags to the object at `vacation-photos/cancun/pretty-beach.jpg` but not to the object at `vacation-photos/cancun/ocean/tropical-fish.jpg`.
 
 ```shell
 mc tag set myminio/vacation-photos/cancun "destination=international" --exclude-folders --recursive

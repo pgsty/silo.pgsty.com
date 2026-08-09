@@ -22,6 +22,7 @@ The following command returns the default encryption setting for the `mydata` bu
 ```shell
 mc encrypt info myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -60,11 +61,14 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Example" %}}
+
 ```shell
  mc encrypt info myminio/data
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc encrypt info ALIAS
 ```

@@ -28,6 +28,7 @@ silo_modified: false
 ```shell
 mc admin user rm myminio myuser
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 在目标 MinIO 部署上移除用户。

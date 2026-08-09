@@ -30,6 +30,7 @@ The following command exports all bucket metadata for the `myminio` deployment.
 ```shell
 mc admin cluster bucket export myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

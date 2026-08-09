@@ -32,6 +32,7 @@ The following command restores a copy of a transitioned object from the remote t
 ```shell
 mc ilm restore myminio/mybucket/object.txt
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

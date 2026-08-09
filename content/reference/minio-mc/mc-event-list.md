@@ -26,6 +26,7 @@ The following command lists all configured event notifications for the specified
 ```shell
 mc event ls myminio myminio/mydata arn:aws:sqs::primary:target
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -85,8 +86,10 @@ The following command lists all event notification triggers on a bucket.
 ```shell
 mc event ls myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc event ls ALIAS ARN
 ```

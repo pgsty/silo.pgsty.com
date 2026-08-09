@@ -38,6 +38,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 #### `MINIO_PROMETHEUS_AUTH_TYPE` {#envvar.MINIO_PROMETHEUS_AUTH_TYPE}
 
 *envvar*
@@ -67,6 +68,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_LOGGER_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_PRIMARY="TOKEN"
@@ -76,8 +78,10 @@ export MINIO_LOGGER_WEBHOOK_ENABLE_SECONDARY="on"
 export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_SECONDARY="TOKEN"
 export MINIO_LOGGER_WEBHOOK_ENDPOINT_SECONDARY="http://webhook-2.example.net"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ```shell
 mc admin config set logger_webhook:primary \
    endpoint="http://webhook-01.example.net" [ARGUMENTS=VALUE ...]
@@ -85,6 +89,7 @@ mc admin config set logger_webhook:primary \
 mc admin config set logger_webhook:secondary \
    endpoint="http://webhook-02.example.net" [ARGUMENTS=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -94,6 +99,7 @@ mc admin config set logger_webhook:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_ENABLE` {#envvar.MINIO_LOGGER_WEBHOOK_ENABLE}
 
 *envvar*
@@ -103,6 +109,7 @@ mc admin config set logger_webhook:secondary \
 需要同时指定 [`MINIO_LOGGER_WEBHOOK_ENDPOINT`](#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT)。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook` {#mc-conf.logger_webhook}
 
 *mc-conf*
@@ -117,11 +124,13 @@ mc admin config set logger_webhook:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_ENDPOINT` {#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook endpoint` {#mc-conf.logger_webhook.endpoint}
 
 *mc-conf*
@@ -136,13 +145,14 @@ webhook 的 HTTP 端点。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_LOGGER_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
 
 端点所需类型的认证 token。 对于不需要认证的端点可省略。
 
-为支持多种 token 类型，MinIO 会使用*完全按原样指定*的值构造请求认证头。 具体端点可能要求你附加额外信息。
+为支持多种 token 类型，MinIO 会使用 *完全按原样指定* 的值构造请求认证头。 具体端点可能要求你附加额外信息。
 
 例如：对于 Bearer token，请添加前缀 `Bearer`：
 
@@ -161,13 +171,14 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 该环境变量对应 [`logger_webhook auth_token`](#mc-conf.logger_webhook.auth_token) 配置项。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook auth_token` {#mc-conf.logger_webhook.auth_token}
 
 *mc-conf*
 
 端点所需类型的认证 token。 对于不需要认证的端点可省略。
 
-为支持多种 token 类型，MinIO 会使用*完全按原样指定*的值构造请求认证头。 具体端点可能要求你附加额外信息。
+为支持多种 token 类型，MinIO 会使用 *完全按原样指定* 的值构造请求认证头。 具体端点可能要求你附加额外信息。
 
 例如：对于 Bearer token，请添加前缀 `Bearer`：
 
@@ -201,11 +212,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_BATCH_SIZE` {#envvar.MINIO_LOGGER_WEBHOOK_BATCH_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook batch_size` {#mc-conf.logger_webhook.batch_size}
 
 *mc-conf*
@@ -222,11 +235,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_LOGGER_WEBHOOK_CLIENT_CERT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook client_cert` {#mc-conf.logger_webhook.client_cert}
 
 *mc-conf*
@@ -243,11 +258,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_LOGGER_WEBHOOK_CLIENT_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook client_key` {#mc-conf.logger_webhook.client_key}
 
 *mc-conf*
@@ -262,11 +279,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_PROXY` {#envvar.MINIO_LOGGER_WEBHOOK_PROXY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook proxy` {#mc-conf.logger_webhook.proxy}
 
 *mc-conf*
@@ -292,11 +311,13 @@ RELEASE.2023-02-22T18-23-45Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_LOGGER_WEBHOOK_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook queue_dir` {#mc-conf.logger_webhook.queue_dir}
 
 *mc-conf*
@@ -313,11 +334,13 @@ RELEASE.2023-02-22T18-23-45Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_QUEUE_SIZE` {#envvar.MINIO_LOGGER_WEBHOOK_QUEUE_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `logger_webhook queue_size` {#mc-conf.logger_webhook.queue_size}
 
 *mc-conf*
@@ -341,6 +364,7 @@ RELEASE.2023-02-22T18-23-45Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_AUDIT_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_PRIMARY="TOKEN"
@@ -354,8 +378,10 @@ export MINIO_AUDIT_WEBHOOK_ENDPOINT_SECONDARY="http://webhook-1.example.net"
 export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_SECONDARY="/tmp/cert.pem"
 export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_SECONDARY="/tmp/key.pem"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `audit_webhook` {#mc-conf.audit_webhook}
 
 *mc-conf*
@@ -379,6 +405,7 @@ mc admin config set audit_webhook:primary \
 mc admin config set audit_webhook:secondary \
    endpoint="http://webhook-02.example.net" [ARGUMENTS=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -388,6 +415,7 @@ mc admin config set audit_webhook:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_ENABLE` {#envvar.MINIO_AUDIT_WEBHOOK_ENABLE}
 
 *envvar*
@@ -407,11 +435,13 @@ mc admin config set audit_webhook:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_ENDPOINT` {#envvar.MINIO_AUDIT_WEBHOOK_ENDPOINT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_webhook endpoint` {#mc-conf.audit_webhook.endpoint}
 
 *mc-conf*
@@ -426,11 +456,13 @@ webhook 的 HTTP 端点。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_AUDIT_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_webhook auth_token` {#mc-conf.audit_webhook.auth_token}
 
 *mc-conf*
@@ -439,7 +471,7 @@ webhook 的 HTTP 端点。
 
 端点所需类型的认证 token。 对于不需要认证的端点可省略。
 
-为支持多种 token 类型，MinIO 会使用*完全按原样指定*的值构造请求认证头。 具体端点可能要求你附加额外信息。
+为支持多种 token 类型，MinIO 会使用 *完全按原样指定* 的值构造请求认证头。 具体端点可能要求你附加额外信息。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
@@ -456,8 +488,10 @@ export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
 ```shell
 export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ```shell
 mc admin config set myminio audit_webhook       \
          endpoint="http://webhook.example.net"  \
@@ -473,6 +507,7 @@ mc admin config set myminio audit_webhook       \
          endpoint="http://webhook.example.net"  \
          auth_token="ServiceXYZ 1a2b3c4f5e"
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -490,11 +525,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_BATCH_SIZE` {#envvar.MINIO_AUDIT_WEBHOOK_BATCH_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_webhook batch_size` {#mc-conf.audit_webhook.batch_size}
 
 *mc-conf*
@@ -509,6 +546,7 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_CERT}
 
 *envvar*
@@ -516,6 +554,7 @@ Server RELEASE.2024-03-10T02-53-48Z
 还需要同时指定 [`MINIO_AUDIT_WEBHOOK_CLIENT_KEY`](#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_KEY)。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_webhook client_cert` {#mc-conf.audit_webhook.client_cert}
 
 *mc-conf*
@@ -532,6 +571,7 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_KEY}
 
 *envvar*
@@ -539,6 +579,7 @@ Server RELEASE.2024-03-10T02-53-48Z
 还需要同时指定 [`MINIO_AUDIT_WEBHOOK_CLIENT_CERT`](#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_CERT)。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_webhook client_key` {#mc-conf.audit_webhook.client_key}
 
 *mc-conf*
@@ -555,11 +596,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_AUDIT_WEBHOOK_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_webhook queue_dir` {#mc-conf.audit_webhook.queue_dir}
 
 *mc-conf*
@@ -581,11 +624,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_QUEUE_SIZE` {#envvar.MINIO_AUDIT_WEBHOOK_QUEUE_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_webhook queue_size` {#mc-conf.audit_webhook.queue_size}
 
 *mc-conf*
@@ -622,6 +667,7 @@ mc admin config set audit_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ###### `MINIO_AUDIT_KAFKA_ENABLE` {#envvar.MINIO_AUDIT_KAFKA_ENABLE}
 
 *envvar*
@@ -641,11 +687,13 @@ mc admin config set audit_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_BROKERS` {#envvar.MINIO_AUDIT_KAFKA_BROKERS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka brokers` {#mc-conf.audit_kafka.brokers}
 
 *mc-conf*
@@ -666,11 +714,13 @@ brokers="https://kafka-1.example.net:9092,https://kafka-2.example.net:9092"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_TOPIC` {#envvar.MINIO_AUDIT_KAFKA_TOPIC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka topic` {#mc-conf.audit_kafka.topic}
 
 *mc-conf*
@@ -685,11 +735,13 @@ brokers="https://kafka-1.example.net:9092,https://kafka-2.example.net:9092"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_TLS` {#envvar.MINIO_AUDIT_KAFKA_TLS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka tls` {#mc-conf.audit_kafka.tls}
 
 *mc-conf*
@@ -706,11 +758,13 @@ brokers="https://kafka-1.example.net:9092,https://kafka-2.example.net:9092"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY` {#envvar.MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka tls_skip_verify` {#mc-conf.audit_kafka.tls_skip_verify}
 
 *mc-conf*
@@ -721,7 +775,7 @@ brokers="https://kafka-1.example.net:9092,https://kafka-2.example.net:9092"
 
 你可以使用该选项连接使用未知签发方 TLS 证书的 Kafka brokers，例如自签名证书或企业内部 CA（Certificate Authorities）签发的证书。
 
-默认情况下，MinIO 会同时使用系统信任库*以及* MinIO [CA directory](/zh/operations/network-encryption/#minio-tls) 中的内容来校验远端客户端 TLS 证书。
+默认情况下，MinIO 会同时使用系统信任库 *以及* MinIO [CA directory](/zh/operations/network-encryption/#minio-tls) 中的内容来校验远端客户端 TLS 证书。
 
 默认值为 `"off"`，即严格校验 TLS 证书。
 
@@ -731,6 +785,7 @@ brokers="https://kafka-1.example.net:9092,https://kafka-2.example.net:9092"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_SASL` {#envvar.MINIO_AUDIT_KAFKA_SASL}
 
 *envvar*
@@ -738,6 +793,7 @@ brokers="https://kafka-1.example.net:9092,https://kafka-2.example.net:9092"
 需要指定 [`MINIO_AUDIT_KAFKA_SASL_USERNAME`](#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME) 和 [`MINIO_AUDIT_KAFKA_SASL_PASSWORD`](#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD)。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka sasl` {#mc-conf.audit_kafka.sasl}
 
 *mc-conf*
@@ -754,6 +810,7 @@ brokers="https://kafka-1.example.net:9092,https://kafka-2.example.net:9092"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_SASL_USERNAME` {#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME}
 
 *envvar*
@@ -761,6 +818,7 @@ brokers="https://kafka-1.example.net:9092,https://kafka-2.example.net:9092"
 需要指定 [`MINIO_AUDIT_KAFKA_SASL`](#envvar.MINIO_AUDIT_KAFKA_SASL) 和 [`MINIO_AUDIT_KAFKA_SASL_PASSWORD`](#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD)。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka sasl_username` {#mc-conf.audit_kafka.sasl_username}
 
 *mc-conf*
@@ -777,6 +835,7 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 用户名。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_SASL_PASSWORD` {#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD}
 
 *envvar*
@@ -784,6 +843,7 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 用户名。
 需要指定 [`MINIO_AUDIT_KAFKA_SASL`](#envvar.MINIO_AUDIT_KAFKA_SASL) 和 [`MINIO_AUDIT_KAFKA_SASL_USERNAME`](#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME)。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka sasl_password` {#mc-conf.audit_kafka.sasl_password}
 
 *mc-conf*
@@ -800,6 +860,7 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 密码。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_SASL_MECHANISM` {#envvar.MINIO_AUDIT_KAFKA_SASL_MECHANISM}
 
 *envvar*
@@ -811,6 +872,7 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 密码。
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka sasl_mechanism` {#mc-conf.audit_kafka.sasl_mechanism}
 
 *mc-conf*
@@ -833,6 +895,7 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 机制。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH` {#envvar.MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH}
 
 *envvar*
@@ -840,6 +903,7 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 机制。
 需要指定 [`MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT`](#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT) 和 [`MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY`](#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY)。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka tls_client_auth` {#mc-conf.audit_kafka.tls_client_auth}
 
 *mc-conf*
@@ -856,11 +920,13 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 机制。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT` {#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka client_tls_cert` {#mc-conf.audit_kafka.client_tls_cert}
 
 *mc-conf*
@@ -875,11 +941,13 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 机制。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY` {#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka client_tls_key` {#mc-conf.audit_kafka.client_tls_key}
 
 *mc-conf*
@@ -894,11 +962,13 @@ MinIO 用于对 Kafka brokers 进行认证的 SASL 机制。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_VERSION` {#envvar.MINIO_AUDIT_KAFKA_VERSION}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka version` {#mc-conf.audit_kafka.version}
 
 *mc-conf*
@@ -915,11 +985,13 @@ MinIO 在指定端点期望的 Kafka broker 版本。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_COMMENT` {#envvar.MINIO_AUDIT_KAFKA_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka comment` {#mc-conf.audit_kafka.comment}
 
 *mc-conf*
@@ -934,11 +1006,13 @@ MinIO 在指定端点期望的 Kafka broker 版本。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_QUEUE_DIR` {#envvar.MINIO_AUDIT_KAFKA_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka queue_dir` {#mc-conf.audit_kafka.queue_dir}
 
 *mc-conf*
@@ -955,11 +1029,13 @@ MinIO 在指定端点期望的 Kafka broker 版本。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ###### `MINIO_AUDIT_KAFKA_QUEUE_SIZE` {#envvar.MINIO_AUDIT_KAFKA_QUEUE_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ###### `audit_kafka queue_size` {#mc-conf.audit_kafka.queue_size}
 
 *mc-conf*

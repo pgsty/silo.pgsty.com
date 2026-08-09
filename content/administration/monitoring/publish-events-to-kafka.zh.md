@@ -58,6 +58,7 @@ MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/n
    set MINIO_NOTIFY_KAFKA_VERSION_<IDENTIFIER>="<string>"
    set MINIO_NOTIFY_KAFKA_COMMENT_<IDENTIFIER>="<string>"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -81,6 +82,7 @@ MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/n
    export MINIO_NOTIFY_KAFKA_VERSION_<IDENTIFIER>="<string>"
    export MINIO_NOTIFY_KAFKA_COMMENT_<IDENTIFIER>="<string>"
 ```
+
 {{% /alert %}}
 
 - 将 `<IDENTIFIER>` 替换为该 Kafka 服务端点的唯一描述性字符串。 与新目标服务端点相关的所有环境变量都应使用相同的 `<IDENTIFIER>` 值。 以下示例假定标识符为 `PRIMARY`。
@@ -156,6 +158,7 @@ SQS ARNs: arn:minio:sqs::primary:kafka
    ```shell
    mc admin info --json ALIAS
    ```
+
 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
 
    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。

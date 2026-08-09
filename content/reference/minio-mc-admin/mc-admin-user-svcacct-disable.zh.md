@@ -32,6 +32,7 @@ silo_modified: false
 ```shell
 mc admin user svcacct disable myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 命令语法如下：

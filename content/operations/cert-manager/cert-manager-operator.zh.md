@@ -38,6 +38,7 @@ MinIO Operator 负责管理 `minio-operator` 命名空间中各服务的 TLS 证
    ```shell
    kubectl create ns minio-operator
    ```
+
 2. 申请一个新的 `Certificate`，并设置 `spec.isCA: true`。
 
    该证书将作为 `minio-operator` 命名空间的 <abbr title="Certificate Authority">CA</abbr> 使用。
@@ -101,6 +102,7 @@ Kubernetes 会在 `minio-operator` 命名空间中创建一个名为 `operator-c
      ca:
        secretName: operator-ca-tls
    ```
+
 2. 应用该资源：
 
    ```shell
@@ -211,6 +213,7 @@ cert-manager 签发的证书必须对以下 DNS 名称有效：
                    - name: OPERATOR_STS_ENABLED
                      value: "on"
    ```
+
 2. 将该 kustomization 资源应用到集群：
 
    ```shell

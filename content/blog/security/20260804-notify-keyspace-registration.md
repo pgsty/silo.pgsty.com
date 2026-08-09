@@ -47,7 +47,7 @@ Two things in that error are wrong in ways the command cannot explain. The inval
 
 The second oddity is the whole case. Our reviewer established that the `mc admin config set` path **cannot even carry an unregistered key**: the server-side tokenizer, `kvFields`, splits the input line by searching for *registered* key names, so an unknown token never becomes a key at all — it is absorbed into the preceding key's value. Probed directly:
 
-```
+```text
 input:  subject=s MINIO_NOTIFY_NATS_USER_CREDENTIALS=/jwt/x.creds
 stored: subject="s MINIO_NOTIFY_NATS_USER_CREDENTIALS=/jwt/x.creds"
 ```

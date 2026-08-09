@@ -44,16 +44,21 @@ As of 2026-08-05, an omitted update URL still selects the upstream `dl.min.io` f
 
    {{< tabpane text=true persist=header >}}
    {{% tab header="RPM (RHEL family)" %}}
+
    ```shell
    sudo dnf install /path/to/minio.rpm
    ```
+
    {{% /tab %}}
    {{% tab header="DEB (Debian/Ubuntu)" %}}
+
    ```shell
    sudo dpkg -i /path/to/minio.deb
    ```
+
    {{% /tab %}}
    {{% tab header="Binary" %}}
+
    ```shell
    sha256sum ./minio
    sudo install -m 0755 ./minio /usr/local/bin/minio

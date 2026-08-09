@@ -31,6 +31,7 @@ The following command removes multiple objects from the `mydata` bucket on the `
 ```shell
 mc rm --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

@@ -36,6 +36,7 @@ If passing the `--json` [global flag](/reference/minio-mc/#minio-mc-global-optio
   "elapsed": "314ms"
 }
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

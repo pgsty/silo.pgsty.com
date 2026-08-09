@@ -30,6 +30,7 @@ The following command lists all users on the `myminio` MinIO deployment:
 ```shell
 mc admin user ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

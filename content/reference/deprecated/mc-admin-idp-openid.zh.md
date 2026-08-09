@@ -66,6 +66,7 @@ silo_modified: false
     redirect_uri="http://127.0.0.1:10000/oauth_callback"                      \
     role_policy="consoleAdmin"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -101,6 +102,7 @@ mc admin idp openid update                      \
                     scopes="openid,groups"      \
                     role_policy="consoleAdmin"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -132,6 +134,7 @@ mc [GLOBALFLAGS] admin idp openid update           \
 ```shell
 mc admin idp openid rm myminio test_config
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -160,6 +163,7 @@ mc [GLOBALFLAGS] admin idp openid rm     \
 ```shell
 mc admin idp openid ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -185,6 +189,7 @@ mc [GLOBALFLAGS] admin idp openid ls ALIAS
 ```shell
 mc admin idp openid info myminio test_config
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -215,6 +220,7 @@ mc admin idp openid enable       \
                     myminio      \
                     test_config
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -245,6 +251,7 @@ mc admin idp openid disable      \
                     myminio      \
                     test_config
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

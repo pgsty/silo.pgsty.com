@@ -29,6 +29,7 @@ The following command attaches the `readonly` policy to the user `james` on the 
 ```shell
 mc admin policy attach myminio readonly --user james
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

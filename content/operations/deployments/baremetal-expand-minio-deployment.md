@@ -197,11 +197,14 @@ Install the **same published Silo release** used by the existing pool. Download 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="RPM (RHEL family)" %}}
+
 ```shell
 sudo dnf install ./minio-*.rpm
 ```
+
 {{% /tab %}}
 {{% tab header="DEB (Debian/Ubuntu)" %}}
+
 ```shell
 sudo dpkg -i ./minio_*_amd64.deb
 ```
@@ -209,11 +212,13 @@ sudo dpkg -i ./minio_*_amd64.deb
 Use the `arm64` package name on ARM64 hosts.
 {{% /tab %}}
 {{% tab header="Standalone archive" %}}
+
 ```shell
 tar -xzf minio_*_linux_*.tar.gz
 sudo install -m 0755 ./minio /usr/local/bin/minio
 minio --version
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -325,6 +330,7 @@ The following examples assumes that:
   /mnt/disk1/minio   /mnt/disk3/minio
   /mnt/disk2/minio   /mnt/disk4/minio
   ```
+
 - The new server pool consists of eight new MinIO hosts with sequential hostnames:
 
   ```shell
@@ -333,6 +339,7 @@ The following examples assumes that:
   minio7.example.com   minio11.example.com
   minio8.example.com   minio12.example.com
   ```
+
 - All hosts have eight locally-attached drives with sequential mount-points:
 
   ```shell
@@ -341,6 +348,7 @@ The following examples assumes that:
   /mnt/disk3/minio  /mnt/disk7/minio
   /mnt/disk4/minio  /mnt/disk8/minio
   ```
+
 - The deployment has a load balancer running at `https://minio.example.net` that manages connections across all MinIO hosts. The load balancer should not be routing requests to the new hosts at this step, but should have the necessary configuration updates planned.
 
 Modify the example to reflect your deployment topology:

@@ -25,6 +25,7 @@ The following command generates a new presigned upload URL for the `mydata` buck
 ```shell
 mc share upload --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

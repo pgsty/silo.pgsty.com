@@ -35,6 +35,7 @@ You can specify multiple Elasticsearch service endpoints by appending a unique i
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_NOTIFY_ELASTICSEARCH_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_ELASTICSEARCH_URL_PRIMARY="https://user:password@elasticsearch-endpoint.example.net:9200"
@@ -46,8 +47,10 @@ export MINIO_NOTIFY_ELASTICSEARCH_URL_SECONDARY="https://user:password@elasticse
 export MINIO_NOTIFY_ELASTICSEARCH_INDEX_SECONDARY="bucketevents"
 export MINIO_NOTIFY_ELASTICSEARCH_FORMAT_SECONDARY="namespace"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
+
 ```shell
 mc admin config set notify_elasticsearch:primary \
    url="user:password@https://elasticsearch-endpoint.example.net:9200" \
@@ -74,6 +77,7 @@ Notice that for configuration settings, the unique identifier appends to `notify
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_ENABLE` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_ENABLE}
 
 *envvar*
@@ -89,6 +93,7 @@ Requires specifying the following additional environment variables if set to `on
 - [`MINIO_NOTIFY_ELASTICSEARCH_FORMAT`](#envvar.MINIO_NOTIFY_ELASTICSEARCH_FORMAT)
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch` {#mc-conf.notify_elasticsearch}
 
 *mc-conf*
@@ -108,6 +113,7 @@ mc admin config set notify_elasticsearch \
   url="https://user:password@elasticsearch.example.com:9200" \
   [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -117,11 +123,13 @@ mc admin config set notify_elasticsearch \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_URL` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch url` {#mc-conf.notify_elasticsearch.url}
 
 *mc-conf*
@@ -144,11 +152,13 @@ MinIO checks the health of the specified URL (if it is resolvable and reachable)
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_INDEX` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_INDEX}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch index` {#mc-conf.notify_elasticsearch.index}
 
 *mc-conf*
@@ -163,11 +173,13 @@ Specify the name of the Elasticsearch index in which to store or update MinIO bu
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_FORMAT` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_FORMAT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch format` {#mc-conf.notify_elasticsearch.format}
 
 *mc-conf*
@@ -190,11 +202,13 @@ Specify the format of event data written to the Elasticsearch index. MinIO suppo
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_USERNAME` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_USERNAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch username` {#mc-conf.notify_elasticsearch.username}
 
 *mc-conf*
@@ -209,11 +223,13 @@ The username for connecting to an Elasticsearch service endpoint which enforces 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_PASSWORD` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch password` {#mc-conf.notify_elasticsearch.password}
 
 *mc-conf*
@@ -234,11 +250,13 @@ MinIO redacts this value when returned as part of [`mc admin config get`](/refer
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch queue_dir` {#mc-conf.notify_elasticsearch.queue_dir}
 
 *mc-conf*
@@ -255,11 +273,13 @@ MinIO stores undelivered events in the specified store while the Elasticsearch s
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch queue_limit` {#mc-conf.notify_elasticsearch.queue_limit}
 
 *mc-conf*
@@ -274,11 +294,13 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_COMMENT` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_elasticsearch comment` {#mc-conf.notify_elasticsearch.comment}
 
 *mc-conf*

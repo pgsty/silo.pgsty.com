@@ -33,6 +33,7 @@ You can specify multiple MQTT service endpoints by appending a unique identifier
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_NOTIFY_MQTT_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_MQTT_BROKER_PRIMARY="tcp://user:password@mqtt-endpoint.example.net:1883"
@@ -40,8 +41,10 @@ export MINIO_NOTIFY_MQTT_BROKER_PRIMARY="tcp://user:password@mqtt-endpoint.examp
 export MINIO_NOTIFY_MQTT_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_MQTT_BROKER_SECONDARY="tcp://user:password@mqtt-endpoint.example.net:1883"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ```shell
 mc admin config set notify_mqtt:primary \
    broker="tcp://endpoint:port" \
@@ -57,6 +60,7 @@ mc admin config set notify_mqtt:secondary \
    password="password" \
    [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -70,6 +74,7 @@ With these settings, [`MINIO_NOTIFY_MQTT_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_M
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_ENABLE` {#envvar.MINIO_NOTIFY_MQTT_ENABLE}
 
 *envvar*
@@ -79,6 +84,7 @@ Specify `on` to enable publishing bucket notifications to an MQTT endpoint.
 Defaults to `off`.
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt` {#mc-conf.notify_mqtt}
 
 *mc-conf*
@@ -102,6 +108,7 @@ mc admin config set notify_mqtt \
    password="password" \
    [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -111,11 +118,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_BROKER` {#envvar.MINIO_NOTIFY_MQTT_BROKER}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt broker` {#mc-conf.notify_mqtt.broker}
 
 *mc-conf*
@@ -140,11 +149,13 @@ MinIO checks the health of the specified URL (if it is resolvable and reachable)
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_TOPIC` {#envvar.MINIO_NOTIFY_MQTT_TOPIC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt topic` {#mc-conf.notify_mqtt.topic}
 
 *mc-conf*
@@ -159,11 +170,13 @@ Specify the name of the MQTT topic to associate with events published by MinIO t
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_USERNAME` {#envvar.MINIO_NOTIFY_MQTT_USERNAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt username` {#mc-conf.notify_mqtt.username}
 
 *mc-conf*
@@ -178,11 +191,13 @@ Specify the MQTT username MinIO should use to authenticate to the MQTT server/br
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_PASSWORD` {#envvar.MINIO_NOTIFY_MQTT_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt password` {#mc-conf.notify_mqtt.password}
 
 *mc-conf*
@@ -203,11 +218,13 @@ MinIO redacts this value when returned as part of [`mc admin config get`](/refer
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_QOS` {#envvar.MINIO_NOTIFY_MQTT_QOS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt qos` {#mc-conf.notify_mqtt.qos}
 
 *mc-conf*
@@ -224,11 +241,13 @@ Defaults to `0`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_KEEP_ALIVE_INTERVAL` {#envvar.MINIO_NOTIFY_MQTT_KEEP_ALIVE_INTERVAL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt keep_alive_interval` {#mc-conf.notify_mqtt.keep_alive_interval}
 
 *mc-conf*
@@ -248,11 +267,13 @@ Specify the keep-alive interval for the MQTT connections. MinIO supports the fol
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_RECONNECT_INTERVAL` {#envvar.MINIO_NOTIFY_MQTT_RECONNECT_INTERVAL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt reconnect_interval` {#mc-conf.notify_mqtt.reconnect_interval}
 
 *mc-conf*
@@ -272,11 +293,13 @@ Specify the reconnect interval for the MQTT connections. MinIO supports the foll
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_QUEUE_DIR` {#envvar.MINIO_NOTIFY_MQTT_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt queue_dir` {#mc-conf.notify_mqtt.queue_dir}
 
 *mc-conf*
@@ -293,11 +316,13 @@ MinIO stores undelivered events in the specified store while the MQTT server/bro
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_MQTT_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt queue_limit` {#mc-conf.notify_mqtt.queue_limit}
 
 *mc-conf*
@@ -312,11 +337,13 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_MQTT_COMMENT` {#envvar.MINIO_NOTIFY_MQTT_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_mqtt comment` {#mc-conf.notify_mqtt.comment}
 
 *mc-conf*

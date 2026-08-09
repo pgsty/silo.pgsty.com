@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc encrypt set sse-kms "minio-encryption-key" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -87,8 +88,10 @@ mc encrypt set ENCRYPTION [KMSKEY] play/mybucket
 ```shell
  mc encrypt set sse-kms minio-encryption-key myminio/data
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc encrypt set ENCRYPTION KMSKEY TARGET
 ```

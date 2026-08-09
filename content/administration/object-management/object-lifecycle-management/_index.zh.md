@@ -54,7 +54,7 @@ $ mc ls play/mybucket
 
 MinIO 对象迁移支持这类成本优化策略：将较旧或陈旧的数据移动到成本优化的远程存储层，例如云存储或高密度 HDD 存储。
 
-MinIO 对象迁移**不**提供备份与恢复功能。 在 MinIO 发生数据丢失时，您不能将远程层用作恢复源。
+MinIO 对象迁移 **不** 提供备份与恢复功能。 在 MinIO 发生数据丢失时，您不能将远程层用作恢复源。
 
 如需支持备份/恢复或 <abbr title="Business Continuity / Disaster Recovery">BC/DR</abbr> 需求，请使用 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 或 [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication)。
 {{% /alert %}}
@@ -84,7 +84,7 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 
 ### 启用版本控制的存储桶 {#id5}
 
-对于已启用 [版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 的存储桶迁移规则，MinIO 采用 [S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide/intro-lifecycle-rules.html#intro-lifecycle-rules-actions)。 具体来说，MinIO 默认将迁移操作应用于对象的*当前*版本。
+对于已启用 [版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 的存储桶迁移规则，MinIO 采用 [S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide/intro-lifecycle-rules.html#intro-lifecycle-rules-actions)。 具体来说，MinIO 默认将迁移操作应用于对象的 *当前* 版本。
 
 如需迁移对象的非当前版本，请在创建迁移规则时指定 [`--noncurrent-transition-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-days) 和 [`--noncurrent-transition-tier`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-tier) 选项。
 
@@ -102,7 +102,7 @@ MinIO 生命周期管理支持对存储桶中的对象执行过期操作。 对�
 
 对于已启用 [版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 的存储桶过期规则，MinIO 采用 [S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide/intro-lifecycle-rules.html#intro-lifecycle-rules-actions)。 对于启用版本控制的存储桶，MinIO 具有以下默认行为：
 
-- MinIO 仅将过期选项应用于对象的*当前*版本，具体方式是像版本化删除的常规行为一样创建 `DeleteMarker`。
+- MinIO 仅将过期选项应用于对象的 *当前* 版本，具体方式是像版本化删除的常规行为一样创建 `DeleteMarker`。
 
   如需让对象的非当前版本过期，请在创建过期规则时指定 [`--noncurrent-expire-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-expire-days) 选项。
 - MinIO 不会让 `DeleteMarkers` 过期，即使该对象已不存在其他版本。
@@ -124,4 +124,4 @@ MinIO 生命周期管理支持对存储桶中的对象执行过期操作。 对�
 
 MinIO 使用内置的 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 主动检查对象是否符合所有已配置的生命周期管理规则。
 
-扫描器是一个低优先级进程，在 <abbr title="Input / Output">I/O</abbr> 负载较高时会让出资源，以避免因规则触发时机导致性能尖峰。 因此，扫描器可能要到生命周期规则周期已经过去*之后*，才会检测到某个对象已满足配置的迁移或过期生命周期规则条件。
+扫描器是一个低优先级进程，在 <abbr title="Input / Output">I/O</abbr> 负载较高时会让出资源，以避免因规则触发时机导致性能尖峰。 因此，扫描器可能要到生命周期规则周期已经过去 *之后*，才会检测到某个对象已满足配置的迁移或过期生命周期规则条件。

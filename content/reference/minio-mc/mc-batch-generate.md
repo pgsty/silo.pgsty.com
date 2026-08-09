@@ -32,6 +32,7 @@ The following command creates a basic YAML file for a replicate job on the `mybu
 ```shell
 mc batch generate myminio replicate
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

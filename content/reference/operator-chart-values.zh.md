@@ -170,7 +170,8 @@ silo_modified: true
 > > These settings can control the minimum and maximum resources requested for each pod. If no worker nodes can meet the specified requests, the Operator may fail to deploy.
 {{% /tab %}}
 {{% tab header="YAML" %}}
-```
+
+```text
 ###
 # Root key for Operator Helm Chart
 operator:
@@ -360,5 +361,6 @@ operator:
       ephemeral-storage: 500Mi
 
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}

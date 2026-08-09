@@ -24,6 +24,7 @@ The following command lists all anonymous access policies for the `mydata` bucke
 ```shell
 mc anonymous list myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

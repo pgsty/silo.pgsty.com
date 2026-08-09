@@ -40,6 +40,7 @@ The following command imports the IAM metadata of the specified file onto the `m
 ```shell
 mc admin cluster iam import myminio ~/minio-metadata-backup/myminio-cluster.zip
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

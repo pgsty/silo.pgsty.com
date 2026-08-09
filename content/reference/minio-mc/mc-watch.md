@@ -23,6 +23,7 @@ The following command watches for [events](/reference/minio-mc/mc-event-add/#mc-
 ```shell
 mc watch --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

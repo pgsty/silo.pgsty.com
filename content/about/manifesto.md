@@ -17,7 +17,6 @@ PGSTY SILO keeps an open-source, feature-complete, S3-compatible object store ma
 
 This page is the project's public commitment, and it follows one rule: **every article below is either something we already do, with public evidence, or something we explicitly refuse to promise.** A promise we could not keep would be worse than no promise.
 
-
 ## Article 1 · Reason to exist, and an exit clause {#exit}
 
 This project started when upstream wound down its community edition: the web console was cut back to a stub, prebuilt community binaries stopped, and the community repository was archived.
@@ -26,11 +25,11 @@ Silo keeps existing MinIO-compatible deployments running. [Pigsty](https://pigst
 The fork is a means, not an identity. If upstream restores its community edition, we will narrow our scope and offer our fixes back.
 
 > Background:
+>
 > - [MinIO is Dead](/blog/post/minio-is-dead/) (2025-12) — what upstream removed, and when.
 > - [MinIO Is Dead. Which Next?](/blog/post/minio-alternative/) (2025-12) — the alternatives, evaluated.
 > - [MinIO Is Dead, Long Live MinIO](/blog/post/minio-resurrect/) (2026-02) — the fork, announced.
 > - [MinIO Fork, Promise Kept](/blog/post/minio-promise-kept/) (2026-04) — the first months of receipts.
-
 
 ## Article 2 · The compatibility contract {#compatibility}
 
@@ -49,13 +48,11 @@ That is not a verbal promise not to relicense. It means nobody here, ourselves i
 Our reading of the AGPL boundary is a position, not legal advice: using Silo through its S3 API does not make your application a derivative work.
 We will not use the license as a threat or a sales instrument.
 
-
 ## Article 4 · Change discipline {#changes}
 
 Changes relative to the upstream baseline fall into four classes only: security fixes, defect fixes, restored community features, and optional additions.
 Existing API semantics change only when a security fix demands it, and every such compatibility cost is recorded in the advisory that caused it.
 Every divergence from upstream is listed in the code-verified [compatibility audit](/compatibility/server/).
-
 
 ## Article 5 · The never list {#never}
 
@@ -70,7 +67,6 @@ Silo will never:
 
 This list is append-only: entries may be added, never removed.
 
-
 ## Article 6 · Security discipline {#security}
 
 - Vulnerabilities are reported through a [private channel](/about/security/) and triaged reproducibly. Writeups are held until the fixed release ships.
@@ -80,14 +76,12 @@ This list is append-only: entries may be added, never removed.
 
 Severe, remotely exploitable issues are expedited on a best-effort basis, but we do not commit to a specific fix-time SLA.
 
-
 ## Article 7 · Release cadence {#releases}
 
 Releases ship typically every one to two months, and at most a quarter apart. Security and defect fixes are batched into these releases. The history is [public](/blog/release/); judge the promise against it.
 
 Version tags keep the `RELEASE.YYYY-MM-DDTHH-MM-SSZ` format, and each release documents its upstream baseline.
 Deprecations get at least six months' notice and a migration path. The exception is a removal that security requires immediately; the removal and its justification are then published in the [security advisories](/blog/security/).
-
 
 ## Article 8 · Upstream relations {#upstream}
 
@@ -104,7 +98,6 @@ If upstream resumes accepting contributions, applicable fixes will be offered ba
 ## Article 10 · The commercial boundary {#commercial}
 
 Everything in the Silo repositories is complete and free of charge: the server, the client, the console, and the released artifacts. That does not change.
-
 
 ## Article 11 · Amendment discipline {#amendments}
 

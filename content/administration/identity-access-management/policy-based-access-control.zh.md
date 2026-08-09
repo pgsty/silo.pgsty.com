@@ -172,8 +172,8 @@ MinIO 策略文档使用与 [AWS IAM Policy](https://docs.aws.amazon.com/IAM/lat
 
 一个资源 ARN 要么指代存储桶本身，要么指代桶内的对象，两种形式授权的是不同的操作：
 
-- `arn:aws:s3:::mybucket` 指代**存储桶本身**，授权 `ListBucket`、`PutBucketPolicy` 这类桶级操作。
-- `arn:aws:s3:::mybucket/*` 指代**桶内的对象**，授权 `GetObject`、`PutObject` 这类对象操作。
+- `arn:aws:s3:::mybucket` 指代 **存储桶本身**，授权 `ListBucket`、`PutBucketPolicy` 这类桶级操作。
+- `arn:aws:s3:::mybucket/*` 指代 **桶内的对象**，授权 `GetObject`、`PutObject` 这类对象操作。
 
 当一个主体两者都需要时，就把两者都授予——这也是"既管理存储桶、又管理其内容"的策略的惯例写法：
 
@@ -184,7 +184,7 @@ MinIO 策略文档使用与 [AWS IAM Policy](https://docs.aws.amazon.com/IAM/lat
 {{% alert color="warning" %}}
 **十二个桶级写操作需要存储桶 ARN**
 
-`arn:aws:s3:::mybucket/*` 这样的对象级模式**不会**授权以下动作，即使语句授予的是 `s3:*`：
+`arn:aws:s3:::mybucket/*` 这样的对象级模式 **不会** 授权以下动作，即使语句授予的是 `s3:*`：
 
 `PutBucketPolicy`、`DeleteBucketPolicy`、`PutBucketObjectLockConfiguration`、`PutBucketVersioning`、`PutReplicationConfiguration`、`PutLifecycleConfiguration`、`DeleteBucket`、`ForceDeleteBucket`、`PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration`
 
@@ -193,7 +193,7 @@ MinIO 策略文档使用与 [AWS IAM Policy](https://docs.aws.amazon.com/IAM/lat
 早期版本也会通过对象模式授权这些动作，因为桶级请求被拿去与字符串 `mybucket/` 匹配，而 `mybucket/*` 同样命中它。那是一种过度授予，参见上游 [minio/minio#20449](https://github.com/minio/minio/issues/20449)。在调整策略期间，可将 [`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`](/zh/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH) 设为 `on` 恢复此前的行为。
 {{% /alert %}}
 
-其余行为一律不变。`ListBucket`、`GetBucketLocation`、各类存储桶配置**读取**以及 `CreateBucket` 仍然可以通过对象模式获得授权，因此按这种写法配置的列举与供应流程照常工作。`Deny` 语句与 `NotResource` 排除的匹配方式一如既往，所以任何写在 `mybucket/*` 上的限制都不会被削弱。内置的 `readwrite`、`readonly`、`writeonly`、`diagnostics` 策略使用 `arn:aws:s3:::*`，不受影响。
+其余行为一律不变。`ListBucket`、`GetBucketLocation`、各类存储桶配置 **读取** 以及 `CreateBucket` 仍然可以通过对象模式获得授权，因此按这种写法配置的列举与供应流程照常工作。`Deny` 语句与 `NotResource` 排除的匹配方式一如既往，所以任何写在 `mybucket/*` 上的限制都不会被削弱。内置的 `readwrite`、`readonly`、`writeonly`、`diagnostics` 策略使用 `arn:aws:s3:::*`，不受影响。
 
 <a id="minio-policy-actions"></a>
 
@@ -461,7 +461,7 @@ s3:RequestObjectTagKeys
 s3:RequestObjectTag/<key>
 ```
 
-处理器**不会**从存储桶标签 XML 正文填充这些键；只有历史兼容的客户端 `X-Amz-Tagging` Header 回退可以填充它们，而这个 Header 并不能约束最终从正文写入的存储桶标签。不要用这些键强制约束 `PutBucketTagging` 请求的内容。
+处理器 **不会** 从存储桶标签 XML 正文填充这些键；只有历史兼容的客户端 `X-Amz-Tagging` Header 回退可以填充它们，而这个 Header 并不能约束最终从正文写入的存储桶标签。不要用这些键强制约束 `PutBucketTagging` 请求的内容。
 
 <a id="policy-action.s3:GetBucketPolicyStatus"></a>
 
@@ -1473,6 +1473,7 @@ KMS action 可以按资源或资源前缀进行限制。 可以使用通配符 `
     ]
 }
 ```
+
 {{% /alert %}}
 
 ## `mc admin` 策略条件键 {#mc-admin}

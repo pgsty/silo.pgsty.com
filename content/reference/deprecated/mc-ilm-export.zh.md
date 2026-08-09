@@ -30,6 +30,7 @@ silo_modified: false
 ```shell
 mc ilm export myminio/mydata > mydata-lifecycle-config.json
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -73,8 +74,10 @@ mc ilm export myminio/mydata > bucket-lifecycle.json
 ```shell
 mc ilm export myminio/mybucket > bucket-lifecycle.json
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc ilm export ALIAS > file.json
 ```

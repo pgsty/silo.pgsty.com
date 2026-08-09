@@ -141,9 +141,11 @@ minio server --certs-dir /opt/minio/certs ...
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="默认证书路径" %}}
+
 ```shell
 mv myCA.crt ${HOME}/.minio/certs/CAs
 ```
+
 {{% /tab %}}
 {{% tab header="自定义证书路径" %}}
 以下示例假设 MinIO Server 以 `--certs dir /opt/minio/certs` 启动：
@@ -151,6 +153,7 @@ mv myCA.crt ${HOME}/.minio/certs/CAs
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -168,9 +171,11 @@ MinIO Server 会使用主机系统中的受信任根证书存储来校验每个�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="默认证书路径" %}}
+
 ```shell
 mv myCA.crt ${HOME}/certs/CAs
 ```
+
 {{% /tab %}}
 {{% tab header="自定义证书路径" %}}
 以下示例假设 MinIO Server 以 `--certs dir /opt/minio/certs` 启动：
@@ -178,6 +183,7 @@ mv myCA.crt ${HOME}/certs/CAs
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -193,6 +199,7 @@ MinIO 支持以下由 [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="TLS 1.3" %}}
+
 - `TLS_CHACHA20_POLY1305_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_AES_128_GCM_SHA256`
 - `TLS_AES_256_GCM_SHA384`

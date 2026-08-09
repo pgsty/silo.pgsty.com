@@ -21,6 +21,7 @@ The following command displays the contents of the `writeonly` policy on the [al
 ```shell
  mc admin policy info myminio writeonly
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

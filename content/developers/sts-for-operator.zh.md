@@ -97,6 +97,7 @@ MinIO Operator 的 STS 需要满足以下条件：
    ```shell
    kubectl apply -k path/to/yaml/file.yaml
    ```
+
 5. 使用支持 `AssumeRoleWithWebIdentity` 类行为的 SDK，从你的应用程序向部署发送调用
 
    STS API 要求 Kubernetes 环境中存在该 Service Account 的 JWT。 当该 Service Account 关联到 Pod 时（例如通过 deployment 的 `.spec.spec.serviceAccountName` 字段），Kubernetes 会从已知位置挂载该 Service Account 的 <abbr title="JSON Web Token">JWT</abbr>，例如 `/var/run/secrets/kubernetes.io/serviceaccount/token`。

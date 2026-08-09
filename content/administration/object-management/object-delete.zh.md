@@ -51,7 +51,7 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 {{% alert color="danger" %}}
 **警告**
 
-在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且**无法**恢复。
+在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且 **无法** 恢复。
 {{% /alert %}}
 
 ### 删除先前版本 {#id8}
@@ -61,12 +61,12 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 {{% alert color="danger" %}}
 **警告**
 
-在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且**无法**恢复。
+在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且 **无法** 恢复。
 {{% /alert %}}
 
 ### 删除所有版本 {#id9}
 
-使用 [`mc rm --versions`](/zh/reference/minio-mc/mc-rm/#mc.rm.-versions) 删除对象的*所有*版本。 此操作不可逆。
+使用 [`mc rm --versions`](/zh/reference/minio-mc/mc-rm/#mc.rm.-versions) 删除对象的 *所有* 版本。 此操作不可逆。
 
 ## 生命周期管理过期 {#id10}
 
@@ -110,18 +110,18 @@ MinIO 会保护受 [锁定规则](/zh/administration/object-management/object-re
 
 通过 [存储桶复制](/zh/administration/bucket-replication/#minio-bucket-replication)，MinIO 支持在源存储桶与配置好的远程存储桶之间复制删除操作。 MinIO 会同步删除特定对象版本以及新的 [delete markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-marker-replication.html)。 删除操作复制使用与其他所有复制操作相同的 [复制流程](/zh/administration/bucket-replication/#minio-replication-process)。
 
-MinIO 要求*显式启用*带版本删除和 delete marker 复制。 使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 字段指定 `delete`、`delete-marker` 或两者，以分别启用带版本删除和 delete marker 复制。 如需同时启用两者，请使用逗号分隔这两个字符串：`delete,delete-marker`。
+MinIO 要求 *显式启用* 带版本删除和 delete marker 复制。 使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 字段指定 `delete`、`delete-marker` 或两者，以分别启用带版本删除和 delete marker 复制。 如需同时启用两者，请使用逗号分隔这两个字符串：`delete,delete-marker`。
 
 对于 delete marker 复制，MinIO 会在删除操作创建 delete marker 后启动复制流程。 MinIO 使用 `X-Minio-Replication-DeleteMarker-Status` 元数据字段跟踪 delete marker 的复制状态。 在 [active-active](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 复制配置中，如果两个集群并发为某个对象创建 delete marker，或者在复制事件同步前一个或两个集群处于宕机状态，MinIO 可能会产生重复的 delete marker。
 
 对于复制特定对象版本的删除，MinIO 会将该对象版本标记为 `PENDING`，直到复制完成。 一旦远程目标删除了该对象版本，MinIO 就会删除源端的该对象版本。 虽然此过程可确保版本删除近似同步，但它也可能导致在初始删除操作之后，列表操作仍返回该对象版本。 MinIO 使用 `X-Minio-Replication-Delete-Status` 跟踪删除版本的复制状态。
 
-MinIO 只复制由客户端显式触发的删除操作。 MinIO *不会* 复制由 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 删除的对象。 对于 [active-active](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 配置，应在*所有*复制存储桶上设置相同的过期规则，以确保对象过期行为一致。
+MinIO 只复制由客户端显式触发的删除操作。 MinIO *不会* 复制由 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 删除的对象。 对于 [active-active](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 配置，应在 *所有* 复制存储桶上设置相同的过期规则，以确保对象过期行为一致。
 
 {{% details title="MinIO 会清理源存储桶和远程存储桶中的空对象前缀" closed="true" %}}
-如果某次删除操作移除了某个存储桶前缀中的最后一个对象，MinIO 会递归删除该前缀中直到存储桶根为止的每一个空层级。 MinIO 仅对作为对象写入操作一部分而*隐式*创建的前缀执行这种递归删除。 对于使用显式目录创建命令（例如 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb)）创建的前缀，MinIO 不会递归删除。
+如果某次删除操作移除了某个存储桶前缀中的最后一个对象，MinIO 会递归删除该前缀中直到存储桶根为止的每一个空层级。 MinIO 仅对作为对象写入操作一部分而 *隐式* 创建的前缀执行这种递归删除。 对于使用显式目录创建命令（例如 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb)）创建的前缀，MinIO 不会递归删除。
 
-如果复制规则启用了删除操作复制，则复制过程在目标 MinIO 集群上*同样*会应用这种隐式前缀清理行为。
+如果复制规则启用了删除操作复制，则复制过程在目标 MinIO 集群上 *同样* 会应用这种隐式前缀清理行为。
 
 例如，考虑一个名为 `photos` 的存储桶，其中包含以下对象前缀：
 
@@ -129,9 +129,9 @@ MinIO 只复制由客户端显式触发的删除操作。 MinIO *不会* 复制�
 - `photos/2021/february/myotherphoto.jpg` // `2021/february/` 根据对象名隐式创建
 - `photos/NYE21/NewYears.jpg` // `NYE21/` 在存储桶中显式创建
 
-`photos/NYE21` 是*唯一*使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 显式创建的前缀。 其他所有前缀都是在写入位于该前缀下的对象时*隐式*创建的。
+`photos/NYE21` 是 *唯一* 使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 显式创建的前缀。 其他所有前缀都是在写入位于该前缀下的对象时 *隐式* 创建的。
 
 - 某个命令删除了 `myphoto.jpg`。 MinIO 会自动清理空的 `/january/` 前缀。
 - 某个命令随后删除了 `myotherphoto.jpg`。 MinIO 会自动清理 `/february/` 前缀，以及此时已为空的 `/2021` 前缀。
-- 某个命令删除了 `NewYears.jpg` 对象。 由于 `/NYE21/` 是*显式*创建的，MinIO 会保留该前缀。
+- 某个命令删除了 `NewYears.jpg` 对象。 由于 `/NYE21/` 是 *显式* 创建的，MinIO 会保留该前缀。
 {{% /details %}}

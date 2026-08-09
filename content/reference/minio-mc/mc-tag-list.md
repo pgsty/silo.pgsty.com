@@ -22,6 +22,7 @@ The following command lists tags for the `mydata` bucket on the `myminio` MinIO 
 ```shell
 mc tag list myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

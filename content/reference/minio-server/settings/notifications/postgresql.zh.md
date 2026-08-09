@@ -33,6 +33,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_POSTGRES_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_PRIMARY="host=postgresql-endpoint.example.net port=4222..."
@@ -44,8 +45,10 @@ export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_SECONDARY="host=postgresql-endpoi
 export MINIO_NOTIFY_POSTGRES_TABLE_SECONDARY="minioevents"
 export MINIO_NOTIFY_POSTGRES_FORMAT_SECONDARY="namespace"
 ```
+
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ```shell
 mc admin config set notify_postgres:primary \
    connection_string="host=postgresql.example.com port=5432..."
@@ -59,6 +62,7 @@ mc admin config set notify_postgres:secondary \
    format="namespace" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -72,6 +76,7 @@ mc admin config set notify_postgres:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_ENABLE` {#envvar.MINIO_NOTIFY_POSTGRES_ENABLE}
 
 *envvar*
@@ -87,13 +92,14 @@ mc admin config set notify_postgres:secondary \
 - [`MINIO_NOTIFY_POSTGRES_FORMAT`](#envvar.MINIO_NOTIFY_POSTGRES_FORMAT)
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_postgres` {#mc-conf.notify_postgres}
 
 *mc-conf*
 
 用于定义 PostgreSQL 服务端点的顶层配置键，可用于 [MinIO bucket notifications](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 PostgreSQL 服务端点。 每个目标都*必须*提供以下参数：
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 PostgreSQL 服务端点。 每个目标都 *必须* 提供以下参数：
 
 - [`connection_string`](#mc-conf.notify_postgres.connection_string)
 - [`table`](#mc-conf.notify_postgres.table)
@@ -108,6 +114,7 @@ mc admin config set notify_postgres                            \
   format="namespace"                                           \
   [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -117,11 +124,13 @@ mc admin config set notify_postgres                            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_CONNECTION_STRING` {#envvar.MINIO_NOTIFY_POSTGRES_CONNECTION_STRING}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_postgres connection_string` {#mc-conf.notify_postgres.connection_string}
 
 *mc-conf*
@@ -146,11 +155,13 @@ mc admin config set notify_postgres                            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_TABLE` {#envvar.MINIO_NOTIFY_POSTGRES_TABLE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_postgres table` {#mc-conf.notify_postgres.table}
 
 *mc-conf*
@@ -165,11 +176,13 @@ mc admin config set notify_postgres                            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_FORMAT` {#envvar.MINIO_NOTIFY_POSTGRES_FORMAT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_postgres format` {#mc-conf.notify_postgres.format}
 
 *mc-conf*
@@ -192,11 +205,13 @@ mc admin config set notify_postgres                            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS` {#envvar.MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_postgres max_open_connections` {#mc-conf.notify_postgres.max_open_connections}
 
 *mc-conf*
@@ -213,11 +228,13 @@ mc admin config set notify_postgres                            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_QUEUE_DIR` {#envvar.MINIO_NOTIFY_POSTGRES_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_postgres queue_dir` {#mc-conf.notify_postgres.queue_dir}
 
 *mc-conf*
@@ -234,11 +251,13 @@ mc admin config set notify_postgres                            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_postgres queue_limit` {#mc-conf.notify_postgres.queue_limit}
 
 *mc-conf*
@@ -253,11 +272,13 @@ mc admin config set notify_postgres                            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_COMMENT` {#envvar.MINIO_NOTIFY_POSTGRES_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_postgres comment` {#mc-conf.notify_postgres.comment}
 
 *mc-conf*

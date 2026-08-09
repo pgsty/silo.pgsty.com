@@ -30,6 +30,7 @@ silo_modified: false
 ```shell
 mc admin cluster bucket export myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令使用以下语法：

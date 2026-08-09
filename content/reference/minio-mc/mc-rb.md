@@ -31,6 +31,7 @@ The following command removes the `mydata` bucket on the `myminio` MinIO deploym
 ```shell
 mc rb --force myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

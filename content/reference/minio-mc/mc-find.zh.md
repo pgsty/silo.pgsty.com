@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc find myminio/mydata --name "*.jpg"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令的语法如下：

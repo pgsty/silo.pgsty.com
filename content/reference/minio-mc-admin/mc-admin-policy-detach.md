@@ -23,6 +23,7 @@ The following command detaches the policy `readonly` from the user `james` on th
 ```shell
 mc admin policy detach myminio readonly --user james
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

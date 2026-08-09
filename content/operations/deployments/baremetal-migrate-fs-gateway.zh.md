@@ -103,7 +103,7 @@ Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](http
    以下 filesystem 模式步骤默认现有 MinIO Client 支持所需的导出命令。 如果不支持，请在新部署上使用新的 MinIO 客户端 手动重建用户、策略、生命周期规则和存储桶。
    {{% /alert %}}
 
-   1. 导出现有部署的**配置**。
+   1. 导出现有部署的 **配置**。
 
       使用现有 MinIO Client 运行 [`mc admin config export`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.export)，导出现有 standalone MinIO 部署中定义的配置。
 
@@ -113,7 +113,7 @@ Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](http
 
       - 使用现有 MinIO Client。
       - 将 `ALIAS` 替换为现有 standalone 部署的别名，也就是你要从中导出配置的目标。
-   2. 使用新的 MinIO 客户端将现有 standalone 部署的**配置**导入到新部署。
+   2. 使用新的 MinIO 客户端将现有 standalone 部署的 **配置** 导入到新部署。
 
       ```shell
       mc admin config import ALIAS < config.txt
@@ -131,7 +131,7 @@ Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](http
 
       - 使用新的 MinIO 客户端。
       - 将 `ALIAS` 替换为新部署的别名。
-   4. 使用现有 MinIO Client 导出现有 standalone 部署的**存储桶元数据**。
+   4. 使用现有 MinIO Client 导出现有 standalone 部署的 **存储桶元数据**。
 
       以下命令会将现有部署中的存储桶元数据导出到一个 `.zip` 文件中。
 
@@ -154,7 +154,7 @@ Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](http
       - 将 `ALIAS` 替换为现有部署的别名。
 
       此命令会生成 `cluster-metadata.zip` 文件，其中包含每个存储桶的元数据。
-   5. 使用新的 MinIO 客户端将**存储桶元数据**导入到新部署。
+   5. 使用新的 MinIO 客户端将 **存储桶元数据** 导入到新部署。
 
       以下命令会读取导出的存储桶 `.zip` 文件内容，并在新部署上创建具有相同配置的存储桶。
 
@@ -166,7 +166,7 @@ Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](http
       - 将 `ALIAS` 替换为新部署的别名。
 
       该命令会依据现有部署导出的 .zip 文件中的元数据，在新部署上创建具有相同配置的存储桶。
-   6. 使用现有 MinIO 客户端将现有 standalone 部署的**IAM 设置**导出到新部署。
+   6. 使用现有 MinIO 客户端将现有 standalone 部署的 **IAM 设置** 导出到新部署。
 
       如果你使用的是外部身份与访问管理提供方，请在新部署中重建这些设置及所有关联策略。
 
@@ -185,7 +185,7 @@ Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](http
       - 将 `ALIAS` 替换为现有部署的别名。
 
       此命令会生成包含 IAM 数据的 `ALIAS-iam-info.zip` 文件。
-   7. 使用新的 MinIO 客户端将**IAM 设置**导入到新部署。
+   7. 使用新的 MinIO 客户端将 **IAM 设置** 导入到新部署。
 
       使用导出的文件在新部署上创建 IAM 设置。
 

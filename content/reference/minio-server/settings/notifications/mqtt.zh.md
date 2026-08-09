@@ -33,6 +33,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_MQTT_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_MQTT_BROKER_PRIMARY="tcp://user:password@mqtt-endpoint.example.net:1883"
@@ -40,8 +41,10 @@ export MINIO_NOTIFY_MQTT_BROKER_PRIMARY="tcp://user:password@mqtt-endpoint.examp
 export MINIO_NOTIFY_MQTT_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_MQTT_BROKER_SECONDARY="tcp://user:password@mqtt-endpoint.example.net:1883"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ```shell
 mc admin config set notify_mqtt:primary \
    broker="tcp://endpoint:port" \
@@ -57,6 +60,7 @@ mc admin config set notify_mqtt:secondary \
    password="password" \
    [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -70,6 +74,7 @@ mc admin config set notify_mqtt:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_ENABLE` {#envvar.MINIO_NOTIFY_MQTT_ENABLE}
 
 *envvar*
@@ -79,13 +84,14 @@ mc admin config set notify_mqtt:secondary \
 默认为 `off`。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt` {#mc-conf.notify_mqtt}
 
 *mc-conf*
 
 用于定义 MQTT server/broker 端点的顶层配置键，可用于 [MinIO 存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 MQTT server/broker 端点。 每个端点都*必须*包含以下参数：
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 MQTT server/broker 端点。 每个端点都 *必须* 包含以下参数：
 
 - [`broker`](#mc-conf.notify_mqtt.broker)
 - [`topic`](#mc-conf.notify_mqtt.topic)
@@ -102,6 +108,7 @@ mc admin config set notify_mqtt \
    password="password" \
    [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -111,11 +118,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_BROKER` {#envvar.MINIO_NOTIFY_MQTT_BROKER}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt broker` {#mc-conf.notify_mqtt.broker}
 
 *mc-conf*
@@ -140,11 +149,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_TOPIC` {#envvar.MINIO_NOTIFY_MQTT_TOPIC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt topic` {#mc-conf.notify_mqtt.topic}
 
 *mc-conf*
@@ -159,11 +170,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_USERNAME` {#envvar.MINIO_NOTIFY_MQTT_USERNAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt username` {#mc-conf.notify_mqtt.username}
 
 *mc-conf*
@@ -178,11 +191,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_PASSWORD` {#envvar.MINIO_NOTIFY_MQTT_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt password` {#mc-conf.notify_mqtt.password}
 
 *mc-conf*
@@ -203,11 +218,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_QOS` {#envvar.MINIO_NOTIFY_MQTT_QOS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt qos` {#mc-conf.notify_mqtt.qos}
 
 *mc-conf*
@@ -224,11 +241,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_KEEP_ALIVE_INTERVAL` {#envvar.MINIO_NOTIFY_MQTT_KEEP_ALIVE_INTERVAL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt keep_alive_interval` {#mc-conf.notify_mqtt.keep_alive_interval}
 
 *mc-conf*
@@ -248,11 +267,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_RECONNECT_INTERVAL` {#envvar.MINIO_NOTIFY_MQTT_RECONNECT_INTERVAL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt reconnect_interval` {#mc-conf.notify_mqtt.reconnect_interval}
 
 *mc-conf*
@@ -272,11 +293,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_QUEUE_DIR` {#envvar.MINIO_NOTIFY_MQTT_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt queue_dir` {#mc-conf.notify_mqtt.queue_dir}
 
 *mc-conf*
@@ -293,11 +316,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_MQTT_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt queue_limit` {#mc-conf.notify_mqtt.queue_limit}
 
 *mc-conf*
@@ -312,11 +337,13 @@ mc admin config set notify_mqtt \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MQTT_COMMENT` {#envvar.MINIO_NOTIFY_MQTT_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_mqtt comment` {#mc-conf.notify_mqtt.comment}
 
 *mc-conf*

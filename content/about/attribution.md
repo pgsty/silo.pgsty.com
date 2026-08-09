@@ -42,13 +42,13 @@ Chinese translations are unofficial and are maintained by the PGSTY SILO project
 
 If you reuse content from this site, the following credit line satisfies CC BY 4.0:
 
-```
+```text
 [PGSTY SILO Documentation](https://silo.pgsty.com) by PGSTY and MinIO. Inc, licensed under CC BY 4.0.
 ```
 
 For Chinese-language contexts:
 
-```
+```text
 [PGSTY SILO 文档](https://silo.pgsty.com/zh)，作者 PGSTY 与 MinIO. Inc，依据 CC BY 4.0 授权。
 ```
 

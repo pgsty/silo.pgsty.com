@@ -29,6 +29,7 @@ The following downloads the file `logo.png` from an s3 source to the local file 
 ```shell
 mc get minio/marketing/logo.png ~/images/collateral
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

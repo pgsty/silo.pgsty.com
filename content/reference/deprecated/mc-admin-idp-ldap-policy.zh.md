@@ -56,6 +56,7 @@ silo_modified: false
                                  policy2                                                \
                                  --user='uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -100,6 +101,7 @@ mc [GLOBALFLAGS] admin idp ldap policy attach     \
                                  policy2                                                \
                                  --user='uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -137,6 +139,7 @@ mc [GLOBALFLAGS] admin idp ldap policy detach     \
                               --user 'uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'  \
                               --group 'cn=projectb,ou=groups,ou=swengg,dc=min,dc=io'
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

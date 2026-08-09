@@ -87,7 +87,7 @@ MinIO 要为其添加新访问密钥的用户名。 如果未指定，MinIO 会�
 
 作为此账户 access key 使用的字符串。 若省略，MinIO 会自动生成一个随机的 20 字符值。
 
-Access Key 名称在所有用户之间*必须*唯一。
+Access Key 名称在所有用户之间 *必须* 唯一。
 
 ##### `--description` {#mc.admin.accesskey.create.-description}
 
@@ -125,7 +125,7 @@ access key 保持有效的时长。 有效时间单位为 “ns”、”us”（
 
 以下示例会让凭证在 30 天后过期：
 
-```
+```text
 --expiry-duration 720h
 ```
 
@@ -193,7 +193,7 @@ mc admin accesskey create myminio/ miniouser --expiry-duration 24h
 mc admin accesskey create myminio/ --expiry 2025-01-15
 ```
 
-指定的日期**必须**是未来日期。 有关有效的日期时间格式，请参见 [`--expiry`](#mc.admin.accesskey.create.-expiry) 标志。
+指定的日期 **必须** 是未来日期。 有关有效的日期时间格式，请参见 [`--expiry`](#mc.admin.accesskey.create.-expiry) 标志。
 
 ### 为不同用户创建具有自定义访问权限的 access key / secret key 对 {#id9}
 
@@ -203,7 +203,7 @@ mc admin accesskey create myminio/ --expiry 2025-01-15
 mc admin accesskey create myminio/ miniouser --policy /path/to/policy.json
 ```
 
-指定的策略文件**不得**授予 `miniouser` 当前尚未拥有的任何访问权限。
+指定的策略文件 **不得** 授予 `miniouser` 当前尚未拥有的任何访问权限。
 
 ## 行为 {#id10}
 

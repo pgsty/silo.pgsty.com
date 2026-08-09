@@ -62,6 +62,7 @@ The following command lists all lifecycle management rules for the `mydata` buck
 ```shell
 mc ilm ls myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The [`mc ilm ls`](#command-mc.ilm.ls) command has the following syntax:

@@ -47,6 +47,7 @@ MinIO 部署默认包含以下 [内置策略](/zh/administration/identity-access
 ```shell
 mc admin policy create myminio listmybuckets /tmp/listmybuckets.json
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令的语法如下：

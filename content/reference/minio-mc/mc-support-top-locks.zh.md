@@ -36,6 +36,7 @@ Since                 Type    Owner                 Resource
 ```shell
 mc support top locks myminio/
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令使用以下语法：

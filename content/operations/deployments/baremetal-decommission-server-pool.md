@@ -340,7 +340,7 @@ The third and fourth pools can absorb all objects stored on the first pool witho
 {{% alert color="warning" %}}
 **Important**
 
-Complete any server expansion to add new storage resources _before_ beginning a decommission process.
+Complete any server expansion to add new storage resources *before* beginning a decommission process.
 {{% /alert %}}
 
 ### 2) Start the Decommissioning Process {#id2}
@@ -363,7 +363,7 @@ The example command begins decommissioning the two listed matching server pools 
 
 During the decommissioning process, MinIO continues routing read operations (`GET`, `LIST`, `HEAD`) operations to the pools for those objects not yet migrated. MinIO routes all new write operations (`PUT`) to the remaining pools in the deployment not scheduled for decommissioning.
 
-Draining of decommissioned pools happens one pool at a time, completing the decommission of each pool in sequence. Draining does _not_ happen concurrently for all decommissioning pools.
+Draining of decommissioned pools happens one pool at a time, completing the decommission of each pool in sequence. Draining does *not* happen concurrently for all decommissioning pools.
 
 Load balancers, reverse proxy, or other network control components which manage connections to the deployment do not need to modify their configurations at this time.
 

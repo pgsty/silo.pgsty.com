@@ -23,6 +23,7 @@ silo_modified: false
 ```shell
 mc retention clear --default myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：
@@ -139,6 +140,7 @@ mc retention clear play/mybucket/object.txt
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="单个对象" %}}
+
 ```shell
 mc retention clear ALIAS/PATH
 ```

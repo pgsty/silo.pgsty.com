@@ -22,6 +22,7 @@ The following command concatenates the contents of an object on a MinIO deployme
 ```shell
 mc cat play/mybucket/myobject.txt
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The [`mc cat`](#command-mc.cat) command has the following syntax:

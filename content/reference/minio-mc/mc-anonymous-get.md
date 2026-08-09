@@ -26,6 +26,7 @@ The following command retrieves the anonymous access policy for the `mydata` buc
 ```shell
 mc anonymous get myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

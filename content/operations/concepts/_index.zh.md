@@ -98,7 +98,7 @@ MinIO [分布式部署](/zh/operations/deployments/installation/#minio-mnmd) 支
 
 如果你在多 pool 部署中下线了一个 pool，就不能在新 pool 中复用相同的节点编号序列。 例如，假设某个部署包含以下几个 pool：
 
-```
+```text
 https://minio-{1...4}.example.net/mnt/drive-{1...4}
 https://minio-{5...8}.example.net/mnt/drive-{1...4}
 https://minio-{9...12}.example.net/mnt/drive-{1...4}
@@ -106,11 +106,12 @@ https://minio-{9...12}.example.net/mnt/drive-{1...4}
 
 如果你下线了 `minio-{5...8}` 这个 pool，就不能再用相同的节点编号新增一个 pool。你必须将新 pool 添加在 `minio-{9...12}` *之后*：
 
-```
+```text
 https://minio-{1...4}.example.net/mnt/drive-{1...4}
 https://minio-{9...12}.example.net/mnt/drive-{1...4}
 https://minio-{13...16}.example.net/mnt/drive-{1...4}
 ```
+
 {{% /alert %}}
 
 ### 如何管理一个或多个 MinIO 实例或集群？ {#id7}

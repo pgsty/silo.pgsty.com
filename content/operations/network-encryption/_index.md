@@ -143,9 +143,11 @@ Place the CA certificates in the `/certs/CAs` folder. The root path for this fol
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Default Certificate Path" %}}
+
 ```shell
 mv myCA.crt ${HOME}/.minio/certs/CAs
 ```
+
 {{% /tab %}}
 {{% tab header="Custom Certificate Path" %}}
 The following example assumes the MinIO Server was started with `--certs dir /opt/minio/certs`:
@@ -153,6 +155,7 @@ The following example assumes the MinIO Server was started with `--certs dir /op
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -170,9 +173,11 @@ Place the CA certificates in the `/certs/CAs` folder. The root path for this fol
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Default Certificate Path" %}}
+
 ```shell
 mv myCA.crt ${HOME}/certs/CAs
 ```
+
 {{% /tab %}}
 {{% tab header="Custom Certificate Path" %}}
 The following example assumes the MinIO Server was started with `--certs dir /opt/minio/certs`:
@@ -180,6 +185,7 @@ The following example assumes the MinIO Server was started with `--certs dir /op
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -195,6 +201,7 @@ MinIO supports the following TLS 1.2 and 1.3 cipher suites as supported by [Go](
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="TLS 1.3" %}}
+
 - `TLS_CHACHA20_POLY1305_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_AES_128_GCM_SHA256`
 - `TLS_AES_256_GCM_SHA384`

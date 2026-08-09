@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc cat play/mybucket/myobject.txt
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 [`mc cat`](#command-mc.cat) 命令语法如下：

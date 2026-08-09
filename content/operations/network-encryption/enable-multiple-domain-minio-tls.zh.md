@@ -140,6 +140,7 @@ MinIO Operator 支持通过三种方式管理 MinIO 租户上的 TLS 证书：
          - name: external-domain
            type: cert-manager.io/v1
    ```
+
 3. 应用新的 Kustomization 模板
 
    一旦应用这些更改，MinIO Operator 会使用更新后的配置自动重新部署该租户。
@@ -170,6 +171,7 @@ MinIO Operator 支持通过三种方式管理 MinIO 租户上的 TLS 证书：
       - name: domain-certificate-2
       type: kubernetes.io/tls
    ```
+
 3. 应用新的 Kustomization 模板
 
    一旦应用这些更改，MinIO Operator 会使用更新后的配置自动重新部署该租户。
@@ -217,5 +219,6 @@ minio server --certs-dir /opt/minio/certs ...
       private.key
       public.crt
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}

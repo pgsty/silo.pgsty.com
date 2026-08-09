@@ -80,14 +80,17 @@ func main() {
     使用提供的凭证连接到 MinIO `play` 服务器。
 
   ```
+
 - ```text
     创建一个名为 `testbucket` 的存储桶。
 
   ```
+
 - ```text
     从 `/tmp` 上传名为 `testdata` 的文件。
 
   ```
+
 - ````text
     使用 `mc ls` 验证文件已创建。
 
@@ -211,22 +214,27 @@ mc ls play/testbucket
     [`MakeBucket`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.MakeBucket)
 
   ```
+
 - ```text
     [`ListBuckets`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListBuckets)
 
   ```
+
 - ```text
     [`BucketExists`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.BucketExists)
 
   ```
+
 - ```text
     [`RemoveBucket`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveBucket)
 
   ```
+
 - ```text
     [`ListObjects`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListObjects)
 
   ```
+
 - ```text
     [`ListIncompleteUploads`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListIncompleteUploads)
 
@@ -238,6 +246,7 @@ mc ls play/testbucket
     [`SetBucketPolicy`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.SetBucketPolicy)
 
   ```
+
 - ```text
     [`GetBucketPolicy`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.GetBucketPolicy)
 
@@ -249,18 +258,22 @@ mc ls play/testbucket
     [`SetBucketNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.SetBucketNotification)
 
   ```
+
 - ```text
     [`GetBucketNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.GetBucketNotification)
 
   ```
+
 - ```text
     [`RemoveAllBucketNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveAllBucketNotification)
 
   ```
+
 - ```text
     [`ListenBucketNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListenBucketNotification) (MinIO 扩展)
 
   ```
+
 - ```text
     [`ListenNotification`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.ListenNotification) (MinIO 扩展)
 
@@ -272,6 +285,7 @@ mc ls play/testbucket
     [`FPutObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.FPutObject)
 
   ```
+
 - ```text
     [`FGetObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.FGetObject)
 
@@ -283,30 +297,37 @@ mc ls play/testbucket
     [`GetObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.GetObject)
 
   ```
+
 - ```text
     [`PutObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PutObject)
 
   ```
+
 - ```text
     [`StatObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.StatObject)
 
   ```
+
 - ```text
     [`CopyObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.CopyObject)
 
   ```
+
 - ```text
     [`RemoveObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveObject)
 
   ```
+
 - ```text
     [`RemoveObjects`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveObjects)
 
   ```
+
 - ```text
     [`RemoveIncompleteUpload`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.RemoveIncompleteUpload)
 
   ```
+
 - ```text
     [`SelectObjectContent`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.SelectObjectContent)
 
@@ -318,14 +339,17 @@ mc ls play/testbucket
     [`PresignedGetObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject)
 
   ```
+
 - ```text
     [`PresignedPutObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedPutObject)
 
   ```
+
 - ```text
     [`PresignedHeadObject`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedHeadObject)
 
   ```
+
 - ```text
     [`PresignedPostPolicy`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedPostPolicy)
 
@@ -337,10 +361,12 @@ mc ls play/testbucket
     [`SetAppInfo`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.SetAppInfo)
 
   ```
+
 - ```text
     [`TraceOn`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.TraceOn)
 
   ```
+
 - ```text
     [`TraceOff`](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.TraceOff)
 
@@ -354,26 +380,32 @@ mc ls play/testbucket
     [makebucket.go](https://github.com/minio/minio-go/blob/master/examples/s3/makebucket.go)
 
   ```
+
 - ```text
     [listbuckets.go](https://github.com/minio/minio-go/blob/master/examples/s3/listbuckets.go)
 
   ```
+
 - ```text
     [bucketexists.go](https://github.com/minio/minio-go/blob/master/examples/s3/bucketexists.go)
 
   ```
+
 - ```text
     [removebucket.go](https://github.com/minio/minio-go/blob/master/examples/s3/removebucket.go)
 
   ```
+
 - ```text
     [listobjects.go](https://github.com/minio/minio-go/blob/master/examples/s3/listobjects.go)
 
   ```
+
 - ```text
     [listobjectsV2.go](https://github.com/minio/minio-go/blob/master/examples/s3/listobjectsV2.go)
 
   ```
+
 - ```text
     [listincompleteuploads.go](https://github.com/minio/minio-go/blob/master/examples/s3/listincompleteuploads.go)
 
@@ -385,10 +417,12 @@ mc ls play/testbucket
     [setbucketpolicy.go](https://github.com/minio/minio-go/blob/master/examples/s3/setbucketpolicy.go)
 
   ```
+
 - ```text
     [getbucketpolicy.go](https://github.com/minio/minio-go/blob/master/examples/s3/getbucketpolicy.go)
 
   ```
+
 - ```text
     [listbucketpolicies.go](https://github.com/minio/minio-go/blob/master/examples/s3/listbucketpolicies.go)
 
@@ -400,6 +434,7 @@ mc ls play/testbucket
     [setbucketlifecycle.go](https://github.com/minio/minio-go/blob/master/examples/s3/setbucketlifecycle.go)
 
   ```
+
 - ```text
     [getbucketlifecycle.go](https://github.com/minio/minio-go/blob/master/examples/s3/getbucketlifecycle.go)
 
@@ -411,10 +446,12 @@ mc ls play/testbucket
     [setbucketencryption.go](https://github.com/minio/minio-go/blob/master/examples/s3/setbucketencryption.go)
 
   ```
+
 - ```text
     [getbucketencryption.go](https://github.com/minio/minio-go/blob/master/examples/s3/getbucketencryption.go)
 
   ```
+
 - ```text
     [removebucketencryption.go](https://github.com/minio/minio-go/blob/master/examples/s3/removebucketencryption.go)
 
@@ -426,10 +463,12 @@ mc ls play/testbucket
     [setbucketreplication.go](https://github.com/minio/minio-go/blob/master/examples/s3/setbucketreplication.go)
 
   ```
+
 - ```text
     [getbucketreplication.go](https://github.com/minio/minio-go/blob/master/examples/s3/getbucketreplication.go)
 
   ```
+
 - ```text
     [removebucketreplication.go](https://github.com/minio/minio-go/blob/master/examples/s3/removebucketreplication.go)
 
@@ -441,18 +480,22 @@ mc ls play/testbucket
     [setbucketnotification.go](https://github.com/minio/minio-go/blob/master/examples/s3/setbucketnotification.go)
 
   ```
+
 - ```text
     [getbucketnotification.go](https://github.com/minio/minio-go/blob/master/examples/s3/getbucketnotification.go)
 
   ```
+
 - ```text
     [removeallbucketnotification.go](https://github.com/minio/minio-go/blob/master/examples/s3/removeallbucketnotification.go)
 
   ```
+
 - ```text
     [listenbucketnotification.go](https://github.com/minio/minio-go/blob/master/examples/minio/listenbucketnotification.go) (MinIO 扩展)
 
   ```
+
 - ```text
     [listennotification.go](https://github.com/minio/minio-go/blob/master/examples/minio/listen-notification.go) (MinIO 扩展)
 
@@ -464,6 +507,7 @@ mc ls play/testbucket
     [fputobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/fputobject.go)
 
   ```
+
 - ```text
     [fgetobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/fgetobject.go)
 
@@ -475,26 +519,32 @@ mc ls play/testbucket
     [putobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/putobject.go)
 
   ```
+
 - ```text
     [getobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/getobject.go)
 
   ```
+
 - ```text
     [statobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/statobject.go)
 
   ```
+
 - ```text
     [copyobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/copyobject.go)
 
   ```
+
 - ```text
     [removeobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/removeobject.go)
 
   ```
+
 - ```text
     [removeincompleteupload.go](https://github.com/minio/minio-go/blob/master/examples/s3/removeincompleteupload.go)
 
   ```
+
 - ```text
     [removeobjects.go](https://github.com/minio/minio-go/blob/master/examples/s3/removeobjects.go)
 
@@ -506,10 +556,12 @@ mc ls play/testbucket
     [put-encrypted-object.go](https://github.com/minio/minio-go/blob/master/examples/s3/put-encrypted-object.go)
 
   ```
+
 - ```text
     [get-encrypted-object.go](https://github.com/minio/minio-go/blob/master/examples/s3/get-encrypted-object.go)
 
   ```
+
 - ```text
     [fput-encrypted-object.go](https://github.com/minio/minio-go/blob/master/examples/s3/fputencrypted-object.go)
 
@@ -521,14 +573,17 @@ mc ls play/testbucket
     [presignedgetobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/presignedgetobject.go)
 
   ```
+
 - ```text
     [presignedputobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/presignedputobject.go)
 
   ```
+
 - ```text
     [presignedheadobject.go](https://github.com/minio/minio-go/blob/master/examples/s3/presignedheadobject.go)
 
   ```
+
 - ```text
     [presignedpostpolicy.go](https://github.com/minio/minio-go/blob/master/examples/s3/presignedpostpolicy.go)
 
@@ -540,10 +595,12 @@ mc ls play/testbucket
     [Godoc 文档](https://pkg.go.dev/github.com/minio/minio-go/v7)
 
   ```
+
 - ```text
     [Go SDK 源码与当前文档](https://github.com/minio/minio-go)
 
   ```
+
 - ```text
     [MinIO Go Client SDK API 参考](https://pkg.go.dev/github.com/minio/minio-go/v7)
 

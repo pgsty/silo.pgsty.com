@@ -30,6 +30,7 @@ The following command copies files from a local filesystem directory to the `myd
 ```shell
 mc cp --recursive ~/mydata/ myminio/mydata/
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The [`mc cp`](#command-mc.cp) command has the following syntax:
@@ -289,7 +290,7 @@ Limit client-side download rates to no more than a specified rate in KiB/s, MiB/
 
 For example, to limit download rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -315,7 +316,7 @@ Limit client-side upload rates to no more than the specified rate in KiB/s, MiB/
 
 For example, to limit upload rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-upload 1G
 ```
 
@@ -459,6 +460,7 @@ Use [`mc cp`](#command-mc.cp) to copy an object to an S3-compatible host:
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Filesystem to S3" %}}
+
 ```shell
 mc cp SOURCE ALIAS/PATH
 ```
@@ -468,6 +470,7 @@ mc cp SOURCE ALIAS/PATH
 - Replace [`PATH`](#mc.cp.TARGET) with the path to the object on the S3-compatible host. You can specify a different object name to “rename” the object on copy.
 {{% /tab %}}
 {{% tab header="S3 to S3" %}}
+
 ```shell
 mc cp SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
@@ -485,6 +488,7 @@ Use [`mc cp --recursive`](#mc.cp.-recursive) to recursively copy objects to an S
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Filesystem to S3" %}}
+
 ```shell
 mc cp --recursive SOURCE ALIAS/PATH
 ```
@@ -494,6 +498,7 @@ mc cp --recursive SOURCE ALIAS/PATH
 - Replace [`PATH`](#mc.cp.TARGET) with the path to the object on the S3-compatible host. [`mc cp`](#command-mc.cp) uses the `SOURCE` filenames when creating the objects on the target host.
 {{% /tab %}}
 {{% tab header="S3 to S3" %}}
+
 ```shell
 mc cp --recursive SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
@@ -561,7 +566,7 @@ mc cp --attr="content-type=CONTENT-TYPE" SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 
 The following example sets a `content-type` of `application/json`:
 
-```
+```text
  mc cp data.ndjson --attr="content-type=application/json" myminio/mybucket
 ```
 

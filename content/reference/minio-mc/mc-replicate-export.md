@@ -22,6 +22,7 @@ The following command exports the replication configuration for the `mydata` buc
 ```shell
 mc replicate export myminio/mydata > mydata-replication.json
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

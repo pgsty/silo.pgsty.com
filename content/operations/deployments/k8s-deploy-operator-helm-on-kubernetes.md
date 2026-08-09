@@ -75,6 +75,7 @@ If you use Helm charts to install the Operator, you must use Helm to manage that
      --version 7.1.1 \
      operator minio-operator/operator
    ```
+
 3. Verify the Operator installation
 
    Check the contents of the specified namespace (`minio-operator`) to ensure all pods and services have started successfully.
@@ -116,6 +117,7 @@ The following procedure installs the Operator using a local copy of the Helm Cha
    ```shell
    curl -O https://operator.min.io/helm-releases/operator-7.1.1.tgz
    ```
+
 2. (Optional) Modify the `values.yaml`
 
    The chart contains a `values.yaml` file you can customize to suit your needs. For details on the options available in the MinIO Operator `values.yaml`, see [Operator Helm Charts](/reference/operator-chart-values/#minio-operator-chart-values).
@@ -133,6 +135,7 @@ The following procedure installs the Operator using a local copy of the Helm Cha
    --create-namespace \
    minio-operator ./operator-7.1.1.tgz
    ```
+
 4. To verify the installation, run the following command:
 
    ```shell

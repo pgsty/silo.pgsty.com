@@ -68,6 +68,7 @@ After enabling site replication, identity and access management (IAM) settings s
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="MinIO IDP" %}}
+
 1. Policies
 2. User accounts (for local users)
 3. Groups
@@ -230,6 +231,7 @@ The three sites use aliases, `minio1`, `minio2`, and `minio3`, and only `minio1`
    export MC_HOST_minio2=https://adminuser:adminpassword@minio2.example.com
    export MC_HOST_minio3=https://adminuser:adminpassword@minio3.example.com
    ```
+
 3. Add site replication configuration
 
    ```shell
@@ -305,6 +307,7 @@ The new site must meet the following requirements:
    ```shell
    export MC_HOST_minio4=https://adminuser:adminpassword@minio4.example.com
    ```
+
 3. Add site replication configuration
 
    Use the [`mc admin replicate add`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add) command to expand the site replication configuration with the new peer site. Specify the alias of *all* existing peer sites, then the alias of the new site to add.
@@ -335,6 +338,7 @@ If a peer site changes its hostname, you can modify the replication configuratio
    ```shell
    mc admin replicate info <ALIAS>
    ```
+
 2. Update the site’s endpoint with [`mc admin replicate update`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update)
 
    ```shell
@@ -388,7 +392,7 @@ For example:
 
   The output resembles the following:
 
-  ```
+  ```text
   ●  Bucket config replication summary for: images
 
   Bucket          | MINIO2          | MINIO3          | MINIO4
@@ -399,13 +403,14 @@ For example:
   Encryption      |                 |                 |
   Replication     | ✔               | ✔               | ✔
   ```
+
 - `mc admin replicate status minio3 --all`
 
   Displays the replication status summary for all replication sites of which `minio3` is part.
 
   The output resembles the following:
 
-  ```
+  ```text
   Bucket replication status:
   ●  1/1 Buckets in sync
 

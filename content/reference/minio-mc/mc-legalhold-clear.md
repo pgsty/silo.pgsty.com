@@ -24,6 +24,7 @@ The following command removes the legal hold on all objects in the `mydata` buck
 ```shell
 mc legalhold clear --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

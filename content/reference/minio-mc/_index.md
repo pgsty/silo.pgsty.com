@@ -89,19 +89,25 @@ Each of the following tabs contains a provider-specific example:
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Silo Server" %}}
+
 ```shell
 mc alias set silo https://silo.example.net ACCESS_KEY SECRET_KEY
 ```
+
 {{% /tab %}}
 {{% tab header="AWS S3 Storage" %}}
+
 ```shell
 mc alias set myS3 https://s3.{your-region-code}.amazonaws.com/endpoint ACCESS_KEY SECRET_KEY
 ```
+
 {{% /tab %}}
 {{% tab header="Google Cloud Storage" %}}
+
 ```shell
 mc alias set myGCS https://storage.googleapis.com/endpoint ACCESS_KEY SECRET_KEY
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

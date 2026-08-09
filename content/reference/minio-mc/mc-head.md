@@ -24,6 +24,7 @@ The following command returns the first 10 lines of an object in the `mydata` bu
 ```shell
 mc head myminio/mydata/myobject.txt
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

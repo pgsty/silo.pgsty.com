@@ -26,6 +26,7 @@ The following command disables user `myuser` on the `myminio` MinIO deployment:
 ```shell
 mc admin user disable myminio myuser
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

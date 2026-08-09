@@ -26,6 +26,7 @@ The following command removes a configured event notifications for the specified
 ```shell
 mc event rm myminio/mydata arn:aws:sqs::primary:target
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -155,8 +156,10 @@ The following command removes all event notification triggers on a bucket. The c
 ```shell
 mc event rm myminio/mydata arn:minio:sqs::primary:webhook
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc event rm ALIAS ARN
 ```

@@ -37,6 +37,7 @@ For example, the following commands set two distinct AMQP service endpoints as `
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_NOTIFY_AMQP_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_AMQP_URL_PRIMARY="amqp://user:password@amqp-endpoint.example.net:5672"
@@ -48,6 +49,7 @@ export MINIO_NOTIFY_AMQP_URL_SECONDARY="amqp://user:password@amqp-endpoint.examp
 For example, [`MINIO_NOTIFY_AMQP_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_AMQP_ENABLE) indicates the environment variable is associated to an AMQP service endpoint with ID of `PRIMARY`.
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
+
 ```shell
 mc admin config set notify_amqp:primary \
    url="user:password@amqp://amqp-endpoint.example.net:5672" [ARGUMENT=VALUE ...]
@@ -66,6 +68,7 @@ Notice that for configuration settings, the unique identifier appends to `amqp` 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MINIO_NOTIFY_AMQP_ENABLE` {#envvar.MINIO_NOTIFY_AMQP_ENABLE}
 
 *envvar*
@@ -77,6 +80,7 @@ Specify `on` to enable publishing bucket notifications to an AMQP endpoint.
 Defaults to `off`.
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp` {#mc-conf.notify_amqp}
 
 *mc-conf*
@@ -90,6 +94,7 @@ mc admin config set notify_amqp \
   url="amqp://user:password@endpoint:port" \
   [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -99,11 +104,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_URL` {#envvar.MINIO_NOTIFY_AMQP_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp url` {#mc-conf.notify_amqp.url}
 
 *mc-conf*
@@ -124,11 +131,13 @@ MinIO checks the health of the specified URL (if it is resolvable and reachable)
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_EXCHANGE` {#envvar.MINIO_NOTIFY_AMQP_EXCHANGE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp exchange` {#mc-conf.notify_amqp.exchange}
 
 *mc-conf*
@@ -143,11 +152,13 @@ Specify the name of the AMQP exchange to use.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_EXCHANGE_TYPE` {#envvar.MINIO_NOTIFY_AMQP_EXCHANGE_TYPE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp exchange_type` {#mc-conf.notify_amqp.exchange_type}
 
 *mc-conf*
@@ -162,11 +173,13 @@ Specify the type of the AMQP exchange.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_ROUTING_KEY` {#envvar.MINIO_NOTIFY_AMQP_ROUTING_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp routing_key` {#mc-conf.notify_amqp.routing_key}
 
 *mc-conf*
@@ -181,11 +194,13 @@ Specify the routing key for publishing events.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_MANDATORY` {#envvar.MINIO_NOTIFY_AMQP_MANDATORY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp mandatory` {#mc-conf.notify_amqp.mandatory}
 
 *mc-conf*
@@ -200,11 +215,13 @@ Specify `off` to ignore undelivered messages errors. Defaults to `on`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_DURABLE` {#envvar.MINIO_NOTIFY_AMQP_DURABLE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp durable` {#mc-conf.notify_amqp.durable}
 
 *mc-conf*
@@ -219,11 +236,13 @@ Specify `on` to persist the message queue across broker restarts. Defaults to `o
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_NO_WAIT` {#envvar.MINIO_NOTIFY_AMQP_NO_WAIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp no_wait` {#mc-conf.notify_amqp.no_wait}
 
 *mc-conf*
@@ -238,11 +257,13 @@ Specify `on` to enable non-blocking message delivery. Defaults to `off`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_INTERNAL` {#envvar.MINIO_NOTIFY_AMQP_INTERNAL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp internal` {#mc-conf.notify_amqp.internal}
 
 *mc-conf*
@@ -257,11 +278,13 @@ Specify `on` to use the exchange only if it is bound to other exchanges. See the
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_AUTO_DELETED` {#envvar.MINIO_NOTIFY_AMQP_AUTO_DELETED}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp auto_deleted` {#mc-conf.notify_amqp.auto_deleted}
 
 *mc-conf*
@@ -276,11 +299,13 @@ Specify `on` to automatically delete the message queue if there are no consumers
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_DELIVERY_MODE` {#envvar.MINIO_NOTIFY_AMQP_DELIVERY_MODE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp delivery_mode` {#mc-conf.notify_amqp.delivery_mode}
 
 *mc-conf*
@@ -297,11 +322,13 @@ Specify `2` to set the delivery mode to persistent queue.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_QUEUE_DIR` {#envvar.MINIO_NOTIFY_AMQP_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp queue_dir` {#mc-conf.notify_amqp.queue_dir}
 
 *mc-conf*
@@ -318,11 +345,13 @@ MinIO stores undelivered events in the specified store while the AMQP service is
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_AMQP_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp queue_limit` {#mc-conf.notify_amqp.queue_limit}
 
 *mc-conf*
@@ -337,11 +366,13 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_AMQP_COMMENT` {#envvar.MINIO_NOTIFY_AMQP_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_amqp comment` {#mc-conf.notify_amqp.comment}
 
 *mc-conf*

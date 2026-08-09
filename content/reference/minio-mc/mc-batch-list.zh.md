@@ -28,6 +28,7 @@ RELEASE.2022-10-08T20-11-00Z or later
 ```shell
 mc batch list myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -71,7 +72,7 @@ mc [GLOBALFLAGS] batch list TARGET           \
 
 ### 列出所有 `replicate` 类型的批处理作业 {#replicate}
 
-以下命令列出 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) `myminio` 所对应部署上的 `` replicate` `` 类型作业：
+以下命令列出 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) `myminio` 所对应部署上的 `replicate` 类型作业：
 
 ```shell
 mc batch list myminio --type "replicate"

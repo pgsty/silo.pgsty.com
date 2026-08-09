@@ -197,11 +197,14 @@ MinIO 建议预先规划足以存放 **至少** 2 年数据的存储容量，并
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="RPM（RHEL 系）" %}}
+
 ```shell
 sudo dnf install ./minio-*.rpm
 ```
+
 {{% /tab %}}
 {{% tab header="DEB（Debian/Ubuntu）" %}}
+
 ```shell
 sudo dpkg -i ./minio_*_amd64.deb
 ```
@@ -209,11 +212,13 @@ sudo dpkg -i ./minio_*_amd64.deb
 ARM64 主机请使用名称中带 `arm64` 的软件包。
 {{% /tab %}}
 {{% tab header="独立归档" %}}
+
 ```shell
 tar -xzf minio_*_linux_*.tar.gz
 sudo install -m 0755 ./minio /usr/local/bin/minio
 minio --version
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -325,6 +330,7 @@ To update deployments managed using `systemctl`, see [升级由 systemctl 管理
   /mnt/disk1/minio   /mnt/disk3/minio
   /mnt/disk2/minio   /mnt/disk4/minio
   ```
+
 - 新的 服务器池 由八台使用连续主机名的新 MinIO 主机构成：
 
   ```shell
@@ -333,6 +339,7 @@ To update deployments managed using `systemctl`, see [升级由 systemctl 管理
   minio7.example.com   minio11.example.com
   minio8.example.com   minio12.example.com
   ```
+
 - 所有主机都具有八块本地直连驱动器，挂载点连续：
 
   ```shell
@@ -341,6 +348,7 @@ To update deployments managed using `systemctl`, see [升级由 systemctl 管理
   /mnt/disk3/minio  /mnt/disk7/minio
   /mnt/disk4/minio  /mnt/disk8/minio
   ```
+
 - 该部署有一个运行在 `https://minio.example.net` 的负载均衡器，用于管理到所有 MinIO 主机的连接。 在此步骤中，负载均衡器不应将请求路由到新主机，但应已准备好所需的配置更新计划。
 
 请根据你的部署拓扑修改示例：
@@ -391,7 +399,7 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 
 ### 5) 使用扩展后的配置重启 MinIO 部署 {#id17}
 
-在部署中的每个节点上**同时**执行以下命令，以重启 MinIO 服务：
+在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 
 ```shell
 sudo systemctl restart minio.service

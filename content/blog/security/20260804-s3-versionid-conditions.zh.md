@@ -19,10 +19,10 @@ url: "/zh/blog/security/s3-versionid-conditions/"
 
 ## 结论先行 {#summary}
 
-- 策略引擎判定 `Null` 看的是**切片长度**，不是内容。MinIO **无条件**往条件 map 里写了 `"versionid": {""}`，于是一个未指定版本的请求仍然呈现出一个长度为 1 的切片。`Null:{s3:versionid:true}`——"仅当键不存在时命中"——因此**永远不可能**命中，而 `Null:false` **永远**命中。报告者那条"只允许删除当前对象"的策略，把每一次当前对象删除都拒了（HTTP 200 外壳，逐对象 `AccessDenied`）。
-- **那一行修复是个陷阱。** "只在非空时写入这个键"修好了报告，同时打开了一个更糟的口子。`DeleteObjects` 把每个对象的版本放在 **XML body** 里；条件构造器只读**查询串**。去掉那个空键，body 里的版本就直接从 map 里消失了——被读成不存在，也就是 null——于是一条本意保护旧版本的策略会**授权删除某个指定版本**。fail-closed 的缺陷，遇上 fail-open 的绕过。
-- 真正的修复有两部分：只在指定了版本时写入这个键，**并且**对 `DeleteObject` 把它绑定到**服务端解析出的有效版本**（`ReqInfo.VersionID`）——即 DeleteObjects 循环里已经逐对象解析好的 body 值——而不是查询串里碰巧带的任何东西。
-- 顺路关掉的第三个相邻口子：构造器读版本时**没有 trim**，而对象层会 trim，于是一个带尾空格的 `?versionId=V%20` 能在读/打标签/复制这些路径上绕过 `Deny StringEquals s3:versionid "V"`。
+- 策略引擎判定 `Null` 看的是 **切片长度**，不是内容。MinIO **无条件** 往条件 map 里写了 `"versionid": {""}`，于是一个未指定版本的请求仍然呈现出一个长度为 1 的切片。`Null:{s3:versionid:true}`——"仅当键不存在时命中"——因此 **永远不可能** 命中，而 `Null:false` **永远** 命中。报告者那条"只允许删除当前对象"的策略，把每一次当前对象删除都拒了（HTTP 200 外壳，逐对象 `AccessDenied`）。
+- **那一行修复是个陷阱。** "只在非空时写入这个键"修好了报告，同时打开了一个更糟的口子。`DeleteObjects` 把每个对象的版本放在 **XML body** 里；条件构造器只读 **查询串**。去掉那个空键，body 里的版本就直接从 map 里消失了——被读成不存在，也就是 null——于是一条本意保护旧版本的策略会 **授权删除某个指定版本**。fail-closed 的缺陷，遇上 fail-open 的绕过。
+- 真正的修复有两部分：只在指定了版本时写入这个键，**并且** 对 `DeleteObject` 把它绑定到 **服务端解析出的有效版本**（`ReqInfo.VersionID`）——即 DeleteObjects 循环里已经逐对象解析好的 body 值——而不是查询串里碰巧带的任何东西。
+- 顺路关掉的第三个相邻口子：构造器读版本时 **没有 trim**，而对象层会 trim，于是一个带尾空格的 `?versionId=V%20` 能在读/打标签/复制这些路径上绕过 `Deny StringEquals s3:versionid "V"`。
 - **继承自上游，且无法在上游修。** `minio/minio` 已归档只读，修复只能落在 fork 里；这正是我们在[条件来源加固](#source)里加固过的那个 `getConditionValues`。
 
 ## 缺失不是空 {#the-defect}
@@ -39,7 +39,7 @@ func (f nullFunc) evaluate(values map[string][]string) bool {
 }
 ```
 
-字符串的内容从不被读取。切片 `{""}` 的长度是 1。对这个函数来说，一个**存在但为空**的值，与一个真实版本 ID 无从区分，而两者都是**不存在**的反面。
+字符串的内容从不被读取。切片 `{""}` 的长度是 1。对这个函数来说，一个 **存在但为空** 的值，与一个真实版本 ID 无从区分，而两者都是 **不存在** 的反面。
 
 再看喂给它的那个值，继承下来的样子（`cmd/bucket-policy.go`，`getConditionValues`）：
 
@@ -67,7 +67,7 @@ args := map[string][]string{
 
 显而易见的修复是只在非空时写入这个键，对单个 `DeleteObject` 这完全正确：没有版本 → 不存在 → `Null:true` 命中。但只发这一条，Multi-Delete 就会把它变成一个授权绕过。
 
-`DeleteObjects`（`POST /{bucket}?delete`）不把版本放在查询串里。每个对象各自把它可选的版本放在**请求体**里：
+`DeleteObjects`（`POST /{bucket}?delete`）不把版本放在查询串里。每个对象各自把它可选的版本放在 **请求体** 里：
 
 ```xml
 <Delete>
@@ -76,9 +76,9 @@ args := map[string][]string{
 </Delete>
 ```
 
-条件构造器读的是 `r.Form`——**查询串**——而没有任何地方把 XML body 并进去。于是在那个天真的修复下，一个在 body 里指定了版本 `a1b2…` 的条目，产出的是**空的**查询版本，键被省略，引擎看到的是**不存在**——null。一条本意只允许删除 null 版本的策略现在命中了，运维本想保护的那个特定旧版本被删掉。报告里那个 fail-closed 的小麻烦，变成了 fail-open——而且恰好发生在最需要逐对象限定的那个操作上。
+条件构造器读的是 `r.Form`——**查询串**——而没有任何地方把 XML body 并进去。于是在那个天真的修复下，一个在 body 里指定了版本 `a1b2…` 的条目，产出的是 **空的** 查询版本，键被省略，引擎看到的是 **不存在**——null。一条本意只允许删除 null 版本的策略现在命中了，运维本想保护的那个特定旧版本被删掉。报告里那个 fail-closed 的小麻烦，变成了 fail-open——而且恰好发生在最需要逐对象限定的那个操作上。
 
-这正是报告者那个简单例子掩盖的关键：条件值必须是**服务端将要为这个对象实际操作的那个版本**，而对 Multi-Delete 来说，那个值待在一条构造器从没看过的通道上。
+这正是报告者那个简单例子掩盖的关键：条件值必须是 **服务端将要为这个对象实际操作的那个版本**，而对 Multi-Delete 来说，那个值待在一条构造器从没看过的通道上。
 
 ## 修复：有效版本，而非顺手的版本 {#the-fix}
 
@@ -112,7 +112,7 @@ conditionValuesForAuth := func(lc string, cred auth.Credentials) map[string][]st
 
 一个端到端测试在 DeleteObjects 的 URL 上挂了一个 **`&versionId=query-level-decoy`**，并断言它绝不进入任何条目的判定——逐对象的 body 值胜出，诱饵被剥掉。
 
-**为什么只对 `DeleteObjectAction`，而不是无差别地用 `ReqInfo` 重绑。** 那个诱人的简化——"永远用 `ReqInfo.VersionID`"——会弄坏复制。对 `CopyObject`，源读取是以 `GetObject` 针对源的版本来授权的，而那个版本走在 `x-amz-copy-source` 头里，`getConditionValues` 已经从那里提取；复制时的 `ReqInfo.VersionID` 装的是*目标*查询串（通常为空）。无差别重绑会用错误的版本覆盖掉正确的源版本。每一个非删除的版本相关操作（Get、Head、打标签、保留、复制源读取）都把版本放在查询串或复制源头里，两者构造器都读，而对单个对象来说两者*就是*有效版本。只有 Multi-Delete 会分叉。所以这个覆盖恰好和分叉一样宽，不多一分。
+**为什么只对 `DeleteObjectAction`，而不是无差别地用 `ReqInfo` 重绑。** 那个诱人的简化——"永远用 `ReqInfo.VersionID`"——会弄坏复制。对 `CopyObject`，源读取是以 `GetObject` 针对源的版本来授权的，而那个版本走在 `x-amz-copy-source` 头里，`getConditionValues` 已经从那里提取；复制时的 `ReqInfo.VersionID` 装的是 *目标* 查询串（通常为空）。无差别重绑会用错误的版本覆盖掉正确的源版本。每一个非删除的版本相关操作（Get、Head、打标签、保留、复制源读取）都把版本放在查询串或复制源头里，两者构造器都读，而对单个对象来说两者 *就是* 有效版本。只有 Multi-Delete 会分叉。所以这个覆盖恰好和分叉一样宽，不多一分。
 
 ## 服务端据以操作的，是 trim 过的那个版本 {#trim}
 
@@ -122,7 +122,7 @@ conditionValuesForAuth := func(lc string, cred auth.Credentials) map[string][]st
 vid := r.Form.Get(xhttp.VersionID) // 未 trim
 ```
 
-而每一条真正*使用*版本的路径都会先 trim——`newContext`（`cmd/utils.go:806`）和 `getOpts`（`cmd/object-api-options.go:101`）都 `strings.TrimSpace`。于是在非删除的版本相关操作上，一个带尾空格的 `?versionId=V%20` 把 `"V "` 呈给策略引擎，而对象层读取/打标签/保留的是版本 `"V"`。一条以 `StringEquals s3:versionid "V"` 为键的 `Deny`——"保护这个确切版本"——看到的是 `"V "`，匹配不上，不生效；对 `"V"` 的操作照常进行。窄绕过（攻击者必须知道版本、且知道一个空格在下游不改变任何东西），但确实存在。
+而每一条真正 *使用* 版本的路径都会先 trim——`newContext`（`cmd/utils.go:806`）和 `getOpts`（`cmd/object-api-options.go:101`）都 `strings.TrimSpace`。于是在非删除的版本相关操作上，一个带尾空格的 `?versionId=V%20` 把 `"V "` 呈给策略引擎，而对象层读取/打标签/保留的是版本 `"V"`。一条以 `StringEquals s3:versionid "V"` 为键的 `Deny`——"保护这个确切版本"——看到的是 `"V "`，匹配不上，不生效；对 `"V"` 的操作照常进行。窄绕过（攻击者必须知道版本、且知道一个空格在下游不改变任何东西），但确实存在。
 
 修复对两处读取都 trim，让条件值与有效版本对齐：
 
@@ -151,8 +151,8 @@ vid := strings.TrimSpace(r.Form.Get(xhttp.VersionID))
 
 两个方向的影响，因严重程度不同而分开陈述：
 
-- **功能性（报告本身）：** 未指定版本的删除被错误地*拒绝*。fail-closed——一个可用性与易用性缺陷，不是放行。
-- **安全性（陷阱与 trim）：** 那个天真的修复会在 Multi-Delete 上*放行*对受保护版本的删除（fail-open）；而未 trim 的值在读/标签/复制上放过了一处窄的 `Deny` 绕过。修复在第一个能存在之前就关掉了它，在第二个已存在的地方关掉了它。
+- **功能性（报告本身）：** 未指定版本的删除被错误地 *拒绝*。fail-closed——一个可用性与易用性缺陷，不是放行。
+- **安全性（陷阱与 trim）：** 那个天真的修复会在 Multi-Delete 上 *放行* 对受保护版本的删除（fail-open）；而未 trim 的值在读/标签/复制上放过了一处窄的 `Deny` 绕过。修复在第一个能存在之前就关掉了它，在第二个已存在的地方关掉了它。
 
 ## 我们如何定级 {#not-a-cve}
 
@@ -160,7 +160,7 @@ vid := strings.TrimSpace(r.Form.Get(xhttp.VersionID))
 
 报告者提交的行为是 fail-**closed**：MinIO 拒绝了策略本意允许的操作。一个过于严格的系统不泄露任何东西，也不放行任何东西；它是正确性与易用性缺陷，把一次误拒膨胀成漏洞，会让[这个编年史](/zh/blog/security/)里每一条真实条目贬值——它左右两边是认证绕过和路径穿越。
 
-真正带安全分量的不是报告，而是它的邻近区域。Multi-Delete 上的 fail-open 是真实的，但那是我们**本会引入**的隐患，不是已发布的——两段式设计的价值，正在于那个危险版本从未存在于任何构建中。trim 绕过*确实*存在过，但很窄：它要求一条以确切 `s3:versionid` 为键的 `Deny`、一个知道版本的攻击者，且只影响非删除路径。我们关掉它，是因为它触手可及，而不是因为它是头条。
+真正带安全分量的不是报告，而是它的邻近区域。Multi-Delete 上的 fail-open 是真实的，但那是我们 **本会引入** 的隐患，不是已发布的——两段式设计的价值，正在于那个危险版本从未存在于任何构建中。trim 绕过 *确实* 存在过，但很窄：它要求一条以确切 `s3:versionid` 为键的 `Deny`、一个知道版本的攻击者，且只影响非删除路径。我们关掉它，是因为它触手可及，而不是因为它是头条。
 
 所以：策略执行正确性，归档在这里，因为我们把静默的执行失效记在这里；安全意义如实记录，而非包装。
 
@@ -169,11 +169,11 @@ vid := strings.TrimSpace(r.Form.Get(xhttp.VersionID))
 两个同类残留仍在，记录下来而非静默留置：
 
 - **Multi-Delete 里的治理绕过。** 当某个条目带对象锁时，`enforceRetentionBypassForDelete` 会以 `BypassGovernanceRetentionAction` 重新授权（`cmd/bucket-object-lock.go:153`）。那个动作不是 `DeleteObjectAction`，所以有效版本覆盖不生效，它的 `s3:versionid` 仍是查询值——在正常 Multi-Delete 里为空——而不是被绕过锁的那个逐条目版本。
-- **Snowball tar 解包。** `PutObjectExtract` 在逐文件授权**之后**才从 tar PAX 记录 `minio.versionId` 取每个成员的版本，于是一个从未出现在任何条件值里的指定版本可能被写入。
+- **Snowball tar 解包。** `PutObjectExtract` 在逐文件授权 **之后** 才从 tar PAX 记录 `minio.versionId` 取每个成员的版本，于是一个从未出现在任何条件值里的指定版本可能被写入。
 
 两者都窄、都是既有行为，且都会把改动从"修好报告里的那个键"扩大成"把每个动作的版本都重新接进 `ReqInfo`"。我们限定在报告的这个面上，把欠条写在这里，理由和[上一篇](/zh/blog/security/duplicate-part-numbers/)记录它对象层省略时一样：**一个没有记录的刻意省略，半年后与疏忽无法区分。**
 
-一个相关的、被否决的决定：`username`、`userid`、`signatureversion`、`authType` 这几个同类键仍然被**无条件写空**，带着 `versionid` 刚摆脱的那个存在但为空的缺陷——`Null:{aws:username:true}` 永远为 false，包括对它本该命中的匿名调用者。修它们每个都是一行，却是四十个调用方的影响面，而且有些（`principaltype` 从不为空）根本不带这个 bug。我们没有把一次广泛的存在性清理塞进一个 versionid 修复里；它作为下一根要拉的线头，记在这里。
+一个相关的、被否决的决定：`username`、`userid`、`signatureversion`、`authType` 这几个同类键仍然被 **无条件写空**，带着 `versionid` 刚摆脱的那个存在但为空的缺陷——`Null:{aws:username:true}` 永远为 false，包括对它本该命中的匿名调用者。修它们每个都是一行，却是四十个调用方的影响面，而且有些（`principaltype` 从不为空）根本不带这个 bug。我们没有把一次广泛的存在性清理塞进一个 versionid 修复里；它作为下一根要拉的线头，记在这里。
 
 ## 证伪 {#verification}
 

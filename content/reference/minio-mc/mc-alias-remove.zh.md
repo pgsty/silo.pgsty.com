@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc alias remove myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 [`mc alias remove`](#command-mc.alias.remove) 命令的语法如下：
@@ -63,8 +64,10 @@ mc [GLOBALFLAGS] alias remove ALIAS
 ```shell
 mc alias remove myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc alias remove ALIAS
 ```

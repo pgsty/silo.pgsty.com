@@ -23,6 +23,7 @@ silo_modified: false
 ```shell
 mc mv --recursive myminio/mydata myminio/archive
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：
@@ -77,7 +78,7 @@ TARGET
 > mc mv ~/mydata/object.txt play/mybucket/object.txt
 > ```
 >
-> 指定多个 `SOURCE` 路径可将多个对象移动到指定的 [`TARGET`](#mc.mv.TARGET)。[`mc rm`](/zh/reference/minio-mc/mc-rm/#command-mc.rm) 将*最后一个*指定的 alias 或文件系统路径 视为 `TARGET`。例如：
+> 指定多个 `SOURCE` 路径可将多个对象移动到指定的 [`TARGET`](#mc.mv.TARGET)。[`mc rm`](/zh/reference/minio-mc/mc-rm/#command-mc.rm) 将 *最后一个* 指定的 alias 或文件系统路径 视为 `TARGET`。例如：
 >
 > ```shell
 > mc mv ~/mydata/object.txt play/mydata/otherobject.txt myminio/mydata
@@ -259,7 +260,7 @@ MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-k
 
 例如，如需将下载速率限制为不超过 1 GiB/s，请使用以下命令：
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -285,7 +286,7 @@ MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-k
 
 例如，如需将上传速率限制为不超过 1 GiB/s，请使用以下命令：
 
-```
+```text
 --limit-upload 1G
 ```
 
@@ -353,7 +354,7 @@ mc mv [--recursive] FILEPATH ALIAS/PATH
 
   如果指定的是目录路径，请包含 [`--recursive`](#mc.mv.-recursive) 标志。
 
-  [`mc mv`](#command-mc.mv) 在成功移动到目标后，会从源中*移除*这些文件。
+  [`mc mv`](#command-mc.mv) 在成功移动到目标后，会从源中 *移除* 这些文件。
 - 将 [`ALIAS`](#mc.mv.TARGET) 替换为已配置 S3-compatible host 的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.mv.TARGET) 替换为目标存储桶。
 
@@ -365,7 +366,7 @@ mc mv [--recursive] FILEPATH ALIAS/PATH
 mc mv --attr "ATTRIBUTES" FILEPATH ALIAS/PATH
 ```
 
-- 将 [`FILEPATH`](#mc.mv.SOURCE) 替换为要移动文件的完整文件路径。 [`mc mv`](#command-mc.mv) 在成功移动到目标后，会从源中*移除*该文件。
+- 将 [`FILEPATH`](#mc.mv.SOURCE) 替换为要移动文件的完整文件路径。 [`mc mv`](#command-mc.mv) 在成功移动到目标后，会从源中 *移除* 该文件。
 - 将 [`ALIAS`](#mc.mv.TARGET) 替换为已配置 S3-compatible host 的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.mv.TARGET) 替换为目标存储桶。
 - 将 [`ATTRIBUTES`](#mc.mv.-attr) 替换为一个或多个逗号分隔的 键值对 `KEY=VALUE`。每个键值对表示一个属性键及其值。
@@ -377,7 +378,7 @@ mc mv --attr "ATTRIBUTES" FILEPATH ALIAS/PATH
 ```
 
 - 将 [`SRCALIAS`](#mc.mv.SOURCE) 替换为已配置 S3-compatible host 的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
-- 将 [`SRCPATH`](#mc.mv.SOURCE) 替换为存储桶路径。 [`mc mv`](#command-mc.mv) 在成功移动到目标后，会从源中*移除*该存储桶及其内容。
+- 将 [`SRCPATH`](#mc.mv.SOURCE) 替换为存储桶路径。 [`mc mv`](#command-mc.mv) 在成功移动到目标后，会从源中 *移除* 该存储桶及其内容。
 - 将 [`TGTALIAS`](#mc.mv.TARGET) 替换为已配置 S3-compatible host 的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`TGTPATH`](#mc.mv.TARGET) 替换为存储桶路径。
 
@@ -390,7 +391,7 @@ mc mv --storage-class CLASS FILEPATH ALIAS/PATH
 ```
 
 - 将 [`CLASS`](#mc.mv.-storage-class) 替换为要 关联到文件的存储类别。
-- 将 [`FILEPATH`](#mc.mv.SOURCE) 替换为要移动文件的完整文件路径。 [`mc mv`](#command-mc.mv) 在成功移动到目标后，会从源中*移除*该文件。
+- 将 [`FILEPATH`](#mc.mv.SOURCE) 替换为要移动文件的完整文件路径。 [`mc mv`](#command-mc.mv) 在成功移动到目标后，会从源中 *移除* 该文件。
 - 将 [`ALIAS`](#mc.mv.TARGET) 替换为已配置 S3-compatible host 的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.mv.TARGET) 替换为目标存储桶。
 - 将 [`ATTRIBUTES`](#mc.mv.-attr) 替换为一个或多个逗号分隔的 键值对 `KEY=VALUE`。每个键值对表示一个属性键及其值。

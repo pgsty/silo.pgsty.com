@@ -33,7 +33,7 @@ Java 1.8 或更高版本。
 
 ### Gradle 用法 {#gradle}
 
-```
+```text
 dependencies {
     implementation("io.minio:minio:8.6.0")
 }
@@ -42,7 +42,7 @@ dependencies {
 
 ### JAR 下载 {#jar}
 
-可从[这里](https://repo1.maven.org/maven2/io/minio/minio/8.6.0/)下载 JAR。
+可从 [Maven Central](https://repo1.maven.org/maven2/io/minio/minio/8.6.0/) 下载 JAR。
 
 ### 快速开始示例 - 文件上传器 {#id2}
 

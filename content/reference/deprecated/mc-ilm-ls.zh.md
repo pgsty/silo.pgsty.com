@@ -62,6 +62,7 @@ silo_modified: false
 ```shell
 mc ilm ls myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 [`mc ilm ls`](#command-mc.ilm.ls) 命令的语法如下：

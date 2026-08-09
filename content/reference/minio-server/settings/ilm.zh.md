@@ -30,11 +30,13 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_ILM_EXPIRATION_WORKERS` {#envvar.MINIO_ILM_EXPIRATION_WORKERS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `ilm expiration_workers` {#mc-conf.ilm.expiration_workers}
 
 *mc-conf*

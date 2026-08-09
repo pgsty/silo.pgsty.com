@@ -72,6 +72,7 @@ The output of the command might resemble the following:
 │ rule-2 │ Enabled │ logs/  │ -                   │              1 │             3 │
 └────────┴─────────┴────────┴─────────────────────┴────────────────┴───────────────┘
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The [`mc ilm rule ls`](#command-mc.ilm.rule.ls) command has the following syntax:

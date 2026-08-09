@@ -72,6 +72,7 @@ MinIO [OpenID 环境变量](/zh/reference/minio-server/settings/iam/openid/#mini
     redirect_uri="http://127.0.0.1:10000/oauth_callback"                      \
     role_policy="consoleAdmin"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -107,6 +108,7 @@ mc idp openid update                      \
               scopes="openid,groups"      \
               role_policy="consoleAdmin"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -138,6 +140,7 @@ mc [GLOBALFLAGS] idp openid update           \
 ```shell
 mc idp openid rm myminio test_config
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -166,6 +169,7 @@ mc [GLOBALFLAGS] idp openid rm          \
 ```shell
 mc idp openid ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -191,6 +195,7 @@ mc [GLOBALFLAGS] idp openid ls ALIAS
 ```shell
 mc idp openid info myminio test_config
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -221,6 +226,7 @@ mc idp openid enable       \
               myminio      \
               test_config
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -251,6 +257,7 @@ mc idp openid disable      \
               myminio      \
               test_config
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

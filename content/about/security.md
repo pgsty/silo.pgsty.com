@@ -29,10 +29,10 @@ Silo is a fork, so the vast majority of findings apply to `minio/minio` as well.
 
 ## Where fixes are published {#published}
 
-* [Security Chronicle](/blog/security/) —
+- [Security Chronicle](/blog/security/) —
   one article per investigated CVE: the original threat model, the back-and-forth of the review, the rejected alternatives, the invariant finally settled on, the verifying evidence, and the compatibility cost.
 
-* [Release Notes](/blog/release/) —
+- [Release Notes](/blog/release/) —
   the release each fix first shipped in and became publicly available.
 
 ## Hardening your own deployment {#hardening}

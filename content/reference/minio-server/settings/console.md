@@ -44,6 +44,7 @@ The following settings control behavior for the embedded MinIO Console.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_BROWSER` {#envvar.MINIO_BROWSER}
 
 *envvar*
@@ -61,6 +62,7 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_BROWSER_LOGIN_ANIMATION` {#envvar.MINIO_BROWSER_LOGIN_ANIMATION}
 
 *envvar*
@@ -84,6 +86,7 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_BROWSER_REDIRECT` {#envvar.MINIO_BROWSER_REDIRECT}
 
 *envvar*
@@ -107,6 +110,7 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_BROWSER_REDIRECT_URL` {#envvar.MINIO_BROWSER_REDIRECT_URL}
 
 *envvar*
@@ -130,6 +134,7 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_BROWSER_SESSION_DURATION` {#envvar.MINIO_BROWSER_SESSION_DURATION}
 
 *envvar*
@@ -162,6 +167,7 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_LOG_QUERY_URL` {#envvar.MINIO_LOG_QUERY_URL}
 
 *envvar*
@@ -181,6 +187,7 @@ Configure MinIO Console to generate a [Content-Security-Policy](https://en.wikip
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_BROWSER_CONTENT_SECURITY_POLICY` {#envvar.MINIO_BROWSER_CONTENT_SECURITY_POLICY}
 
 *envvar*
@@ -188,8 +195,10 @@ Configure MinIO Console to generate a [Content-Security-Policy](https://en.wikip
 ```shell
 export MINIO_BROWSER_CONTENT_SECURITY_POLICY="default-src 'self' 'unsafe-eval' 'unsafe-inline';"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `browser csp_policy` {#mc-conf.browser.csp_policy}
 
 *mc-conf*
@@ -199,6 +208,7 @@ mc admin config set browser \
    csp_policy="default-src 'self' 'unsafe-eval' 'unsafe-inline';" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -212,6 +222,7 @@ To generate the header, you **must** set a duration using either [`MINIO_BROWSER
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ##### `MINIO_BROWSER_HSTS_SECONDS` {#envvar.MINIO_BROWSER_HSTS_SECONDS}
 
 *envvar*
@@ -241,6 +252,7 @@ Set to `on` to direct the client browser to add the MinIO Console domain to its 
 ```shell
 export MINIO_BROWSER_HSTS_PRELOAD="on"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
 The following configuration settings require a service restart to take effect. To restart the service, use [`mc admin service restart`](/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart).
@@ -282,6 +294,7 @@ mc admin config set browser \
    hsts_seconds="31536000" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -327,6 +340,7 @@ Configure MinIO Console to generate a [Referrer-Policy](https://www.w3.org/TR/re
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_BROWSER_REFERRER_POLICY` {#envvar.MINIO_BROWSER_REFERRER_POLICY}
 
 *envvar*
@@ -334,8 +348,10 @@ Configure MinIO Console to generate a [Referrer-Policy](https://www.w3.org/TR/re
 ```shell
 export MINIO_BROWSER_REFERRER_POLICY="strict-origin-when-cross-origin"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `browser referrer_policy` {#mc-conf.browser.referrer_policy}
 
 *mc-conf*
@@ -345,6 +361,7 @@ mc admin config set browser \
    referrer_policy="strict-origin-when-cross-origin" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -358,6 +375,7 @@ The following settings manage how MinIO interacts with your Prometheus service.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_PROMETHEUS_URL` {#envvar.MINIO_PROMETHEUS_URL}
 
 *envvar*
@@ -379,6 +397,7 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_PROMETHEUS_JOB_ID` {#envvar.MINIO_PROMETHEUS_JOB_ID}
 
 *envvar*
@@ -400,6 +419,7 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_PROMETHEUS_AUTH_TOKEN` {#envvar.MINIO_PROMETHEUS_AUTH_TOKEN}
 
 *envvar*

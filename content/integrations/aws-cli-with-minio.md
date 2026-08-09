@@ -16,7 +16,7 @@ In this recipe we will learn how to configure and use AWS CLI to manage data wit
 
 ## 1. Prerequisites {#prerequisites}
 
-Install MinIO Server from [here](https://silo.pgsty.com/operations/deployments/installation/).
+Install MinIO Server using the [SILO installation guide](https://silo.pgsty.com/operations/deployments/installation/).
 
 ## 2. Installation {#installation}
 

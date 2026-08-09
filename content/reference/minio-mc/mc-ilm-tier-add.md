@@ -269,12 +269,14 @@ Select the tab corresponding to the `TIER_TYPE` for a list of supported values f
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="minio" %}}
+
 - `STANDARD` *Recommended*
 - `REDUCED`
 
 For more information, see [Erasure Coding storage class](/reference/minio-server/settings/storage-class/#minio-ec-storage-class).
 {{% /tab %}}
 {{% tab header="s3" %}}
+
 - `STANDARD`
 - `STANDARD-IA`
 - `ONEZONE-IA`
@@ -282,6 +284,7 @@ For more information, see [Erasure Coding storage class](/reference/minio-server
 For more information, see [Using Amazon S3 storage classes](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html).
 {{% /tab %}}
 {{% tab header="gcs" %}}
+
 - `STANDARD`
 - `NEARLINE`
 - `COLDLINE`
@@ -289,6 +292,7 @@ For more information, see [Using Amazon S3 storage classes](https://docs.aws.ama
 For more information, see [GCS storage class](https://cloud.google.com/storage/docs/storage-classes).
 {{% /tab %}}
 {{% tab header="azure" %}}
+
 - `Hot`
 - `Cool`
 

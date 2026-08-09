@@ -50,7 +50,7 @@ MinIO 用户可以生成任意数量的访问密钥。 这使应用所有者可�
 - [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER)
 - [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD)
 
-轮换 root 用户凭证时，需要为部署中的所有 MinIO 服务器更新其中一个或两个变量。 root 凭证应指定为*长、唯一且随机*的字符串。 存储访问密钥和密钥时应采取一切可能的防护措施，确保只有已知且受信任、并且*确实需要*该部署超级用户访问权限的人员才能获取 `root` 凭证。
+轮换 root 用户凭证时，需要为部署中的所有 MinIO 服务器更新其中一个或两个变量。 root 凭证应指定为 *长、唯一且随机* 的字符串。 存储访问密钥和密钥时应采取一切可能的防护措施，确保只有已知且受信任、并且 *确实需要* 该部署超级用户访问权限的人员才能获取 `root` 凭证。
 
 - MinIO *强烈不建议* 在任何环境中（开发、预发或生产）使用 `root` 用户进行常规客户端访问。
 - MinIO *强烈建议* 创建用户时，使每个客户端仅拥有执行其分配工作负载所需的最小操作和资源集合。

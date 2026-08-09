@@ -23,6 +23,7 @@ silo_modified: false
 ```shell
 mc admin policy detach myminio readonly --user james
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

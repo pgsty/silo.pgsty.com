@@ -41,9 +41,9 @@ silo_modified: false
 
 你可以通过安装 [`mc`](/zh/reference/minio-mc/#command-mc) 并使用命令行访问这些部署。 使用 [`mc alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 命令为每个 MinIO 部署创建别名。
 
-创建别名时，需要指定该部署上某个用户的 access key。 该用户**必须**具有在该部署上创建和管理用户及策略的权限。
+创建别名时，需要指定该部署上某个用户的 access key。 该用户 **必须** 具有在该部署上创建和管理用户及策略的权限。
 
-具体来说，请确保该用户*至少*具有以下权限：
+具体来说，请确保该用户 *至少* 具有以下权限：
 
 - [`admin:CreateUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-CreateUser)
 - [`admin:ListUsers`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-ListUsers)
@@ -64,7 +64,7 @@ MinIO 支持自定义复制配置，以启用或禁用以下复制行为：
 - 复制现有对象
 - 复制仅元数据变更
 
-为存储桶配置复制规则时，请确保参与多站点复制的所有 MinIO 部署使用*相同*的复制行为，以保证对象同步的一致性和可预测性。
+为存储桶配置复制规则时，请确保参与多站点复制的所有 MinIO 部署使用 *相同* 的复制行为，以保证对象同步的一致性和可预测性。
 {{% /details %}}
 
 {{% details title="现有对象复制" closed="true" %}}

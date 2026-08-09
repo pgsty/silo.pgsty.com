@@ -59,6 +59,7 @@ The MinIO Operator supports expanding a MinIO Tenant by adding additional pools.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kustomization" %}}
+
 1. Review the Kustomization object which describes the Tenant object (`tenant.yaml`).
 
    The `spec.pools` array describes the current pool topology.

@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc undo myminio/data/file.zip --last 3
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

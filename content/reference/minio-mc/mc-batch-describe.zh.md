@@ -30,6 +30,7 @@ RELEASE.2022-10-08T20-11-00Z or later
 ```shell
 mc batch describe myminio KwSysDpxcBU9FNhGkn2dCf
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 此命令的语法如下：

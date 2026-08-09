@@ -32,6 +32,7 @@ The following command lists all enabled replication rules for the `mydata` bucke
 ```shell
 mc replicate ls --status "enabled" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

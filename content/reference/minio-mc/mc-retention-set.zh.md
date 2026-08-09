@@ -17,7 +17,7 @@ silo_modified: false
 
 要在 [legal hold](/zh/administration/object-management/object-retention/#minio-object-locking-legalhold) 下锁定对象， 请使用 [`mc legalhold set`](/zh/reference/minio-mc/mc-legalhold-set/#command-mc.legalhold.set)。
 
-[`mc retention set`](#command-mc.retention.set) *要求* 指定存储桶已启用对象锁定。 你**只能**在创建存储桶时启用对象锁定。有关启用对象锁定创建存储桶的文档，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock)。
+[`mc retention set`](#command-mc.retention.set) *要求* 指定存储桶已启用对象锁定。 你 **只能** 在创建存储桶时启用对象锁定。有关启用对象锁定创建存储桶的文档，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock)。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
@@ -26,6 +26,7 @@ silo_modified: false
 ```shell
 mc retention set --default GOVERNANCE "30d" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -226,7 +227,7 @@ mc retention set --versions  MODE DURATION ALIAS/PATH
 
 ### 对象版本的保留 {#id9}
 
-对于启用了 [`versioning`](/zh/reference/minio-mc/mc-version/#command-mc.version) 的存储桶，[`mc retention set`](#command-mc.retention.set) 默认对目标对象（一个或多个）的*最新*版本执行操作。 [`mc retention set`](#command-mc.retention.set) 包含若干特定选项，在*显式*指定时， 可指示命令对特定对象版本*或*对象的所有版本执行操作：
+对于启用了 [`versioning`](/zh/reference/minio-mc/mc-version/#command-mc.version) 的存储桶，[`mc retention set`](#command-mc.retention.set) 默认对目标对象（一个或多个）的 *最新* 版本执行操作。 [`mc retention set`](#command-mc.retention.set) 包含若干特定选项，在 *显式* 指定时， 可指示命令对特定对象版本 *或* 对象的所有版本执行操作：
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="特定对象版本" %}}
@@ -237,7 +238,7 @@ mc retention set --versions  MODE DURATION ALIAS/PATH
 - [`mc retention set --version-id`](#mc.retention.set.-version-id)
 {{% /tab %}}
 {{% tab header="所有对象版本" %}}
-要让 [`mc retention set`](#command-mc.retention.set) 对对象的*所有*版本执行操作， 请包含 `--versions` 参数：
+要让 [`mc retention set`](#command-mc.retention.set) 对对象的 *所有* 版本执行操作， 请包含 `--versions` 参数：
 
 - [`mc retention set --versions`](#mc.retention.set.-versions)
 - [`mc retention set --versions`](#mc.retention.set.-versions)
@@ -249,7 +250,7 @@ mc retention set --versions  MODE DURATION ALIAS/PATH
 
 锁定对象会阻止对该对象进行任何修改或删除， 与 [`COMPLIANCE`](#mc.retention.set.MODE) 对象锁定模式类似。 对象可以同时具有基于保留的锁和 legal hold 锁。
 
-legal hold 锁会*覆盖*任何保留锁定，这意味着处于 legal hold 下的对象 即使保留期到期也会保持锁定。对处于 legal hold 下对象的保留设置进行设置、 修改或清除，在 legal hold 到期或被显式禁用之前均不会生效。
+legal hold 锁会 *覆盖* 任何保留锁定，这意味着处于 legal hold 下的对象 即使保留期到期也会保持锁定。对处于 legal hold 下对象的保留设置进行设置、 修改或清除，在 legal hold 到期或被显式禁用之前均不会生效。
 
 有关对象 legal hold 的更多信息，请参见 [`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold)。
 

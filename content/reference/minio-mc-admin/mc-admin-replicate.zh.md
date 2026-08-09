@@ -80,6 +80,7 @@ mc admin replicate add minio1 minio2 minio3 minio4 minio5
 ```shell
 mc admin replicate add minio1 minio2 minio3 --replicate-ilm-expiry
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -91,6 +92,7 @@ mc [GLOBALFLAGS] admin replicate add      \
                             [ALIAS3 ...]  \
                             [--replicate-ilm-expiry]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -134,12 +136,14 @@ RELEASE.2023-12-02T02-03-28Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
+
 ```shell
 mc admin replicate update                                                   \
                    minio2                                                 \
                    --deployment-id c1758167-4426-454f-9aae-5c3dfdf6df64   \
                    --endpoint https://minio2:9000
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -153,6 +157,7 @@ mc [GLOBALFLAGS] admin replicate update                     \
                             --enable-ilm-expiry-replication \
                             --disable-ilm-expiry-replication
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -292,6 +297,7 @@ mc admin replicate rm      \
                    minio6  \
                    --force
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -304,6 +310,7 @@ mc [GLOBALFLAGS] admin rm          \
                        --all       \
                        --force
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -347,14 +354,18 @@ mc [GLOBALFLAGS] admin rm          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
+
 ```shell
 mc admin replicate info minio1
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc [GLOBALFLAGS] admin replicate info ALIAS
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -444,8 +455,10 @@ mc admin replicate status minio1 --ilm-expiry-rule ckok9v5b4dtgofkbi6tg
 ILMExpiryRule   | MINIO1          | MINIO2
 ILM Expiry Rule | ✔               | ✔
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc [GLOBALFLAGS] admin replicate status          \
                    TARGET                        \
@@ -461,6 +474,7 @@ mc [GLOBALFLAGS] admin replicate status          \
                    [--users]                     \
                    [--user accessKey]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -601,8 +615,10 @@ mc admin replicate resync status minio1 minio2
 ```shell
 mc admin replicate resync cancel minio1 minio2
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc [GLOBALFLAGS] admin replicate resync start|status|cancel ALIAS1 ALIAS2
 ```

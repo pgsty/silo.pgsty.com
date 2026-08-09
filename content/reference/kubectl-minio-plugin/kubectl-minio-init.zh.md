@@ -27,6 +27,7 @@ silo_modified: false
 ```shell
 kubectl minio init
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -46,6 +47,7 @@ kubectl minio init                      \
               [--prometheus-name]       \
               [--prometheus-namespace]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -116,7 +118,7 @@ kubectl minio init                      \
 
 用于拉取 [`--image`](#kubectl.minio.init.-image) 的 Secret 密钥。
 
-由 MinIO 托管的 `minio/operator` 镜像*不*受密码保护。 仅当使用受密码保护的非 MinIO 镜像源时才需要此选项。
+由 MinIO 托管的 `minio/operator` 镜像 *不* 受密码保护。 仅当使用受密码保护的非 MinIO 镜像源时才需要此选项。
 
 #### `--namespace` {#kubectl.minio.init.-namespace}
 
@@ -132,7 +134,7 @@ kubectl minio init                      \
 
 *Optional*
 
-operator 监听 MinIO 租户的命名空间。 默认为 `""`，表示*所有命名空间*。
+operator 监听 MinIO 租户的命名空间。 默认为 `""`，表示 *所有命名空间*。
 
 #### `--output` {#kubectl.minio.init.-output}
 

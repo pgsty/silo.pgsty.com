@@ -149,6 +149,7 @@ mc alias set myminio https://minio.example.net miniouser miniopassword
 If the `myminio` alias already exists, the [`mc alias set`](#command-mc.alias.set) command overwrites that alias with the specified arguments.
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 ```

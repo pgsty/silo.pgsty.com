@@ -24,6 +24,7 @@ MinIO 支持为对象最多添加 10 个自定义标签。
 ```shell
 mc tag set myminio/mydata "tag1=value1&tag2=value2"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -84,7 +85,7 @@ mc tag set myminio/mybucket/object.txt "key1=value1&key2=value2"
 
 {{% /alert %}}
 
-与 [`--recursive`](#mc.tag.set.-recursive) 一起使用时，[`mc tag set`](#command-mc.tag.set) 将**不会**遍历子前缀。 标签仅应用于指定路径下的对象。 需要 [`--recursive`](#mc.tag.set.-recursive)。
+与 [`--recursive`](#mc.tag.set.-recursive) 一起使用时，[`mc tag set`](#command-mc.tag.set) 将 **不会** 遍历子前缀。 标签仅应用于指定路径下的对象。 需要 [`--recursive`](#mc.tag.set.-recursive)。
 
 以下示例将 `destination=international` 标签应用到 `vacation-photos/cancun/` 下的对象，但不应用到 `vacation-photos/cancun/ocean/` 或其他前缀。
 

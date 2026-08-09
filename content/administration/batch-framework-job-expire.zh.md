@@ -27,7 +27,7 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
 
 ### 过期资格在批处理运行时确定 {#id5}
 
-批量过期按存储桶工作，并且每次运行都会一次性执行直至完成。 该作业在运行时判断对象是否符合过期条件，并且*不会*定期重新扫描或重新检查新对象。
+批量过期按存储桶工作，并且每次运行都会一次性执行直至完成。 该作业在运行时判断对象是否符合过期条件，并且 *不会* 定期重新扫描或重新检查新对象。
 
 如果要处理任何新近满足过期条件的对象，请重新运行该批处理作业。
 
@@ -67,7 +67,7 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
     </tr>
     <tr>
       <td><p><code>rules.[n].type</code></p></td>
-      <td><p><em>必需</em></p><p>支持以下两个值之一：</p><ul><li><p><code>object</code> - 仅应用于当前版本**不是** <code>DeleteMarker</code> 的对象。</p></li><li><p><code>deleted</code> - 仅应用于当前版本**是** <code>DeleteMarker</code> 的对象。</p></li></ul><p>有关 <code>DeleteMarker</code> 或版本控制存储桶中删除操作的更完整文档，请参见 <a href="/zh/administration/object-management/object-delete/#minio-object-delete">对象删除</a>。</p></td>
+      <td><p><em>必需</em></p><p>支持以下两个值之一：</p><ul><li><p><code>object</code> - 仅应用于当前版本<strong>不是</strong> <code>DeleteMarker</code> 的对象。</p></li><li><p><code>deleted</code> - 仅应用于当前版本<strong>是</strong> <code>DeleteMarker</code> 的对象。</p></li></ul><p>有关 <code>DeleteMarker</code> 或版本控制存储桶中删除操作的更完整文档，请参见 <a href="/zh/administration/object-management/object-delete/#minio-object-delete">对象删除</a>。</p></td>
     </tr>
     <tr>
       <td><p><code>rules.[n].name</code></p></td>
@@ -80,7 +80,7 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
     </tr>
     <tr>
       <td><p><code>rules.[n].createdBefore</code></p></td>
-      <td><p><em>可选</em></p><p>指定一个 <a href="https://datatracker.ietf.org/doc/html/rfc3339.html"><strong>RFC3339</strong></a> 日期时间来过滤对象。</p><p>该规则仅应用于在指定时间戳*之前*创建的对象。</p></td>
+      <td><p><em>可选</em></p><p>指定一个 <a href="https://datatracker.ietf.org/doc/html/rfc3339.html"><strong>RFC3339</strong></a> 日期时间来过滤对象。</p><p>该规则仅应用于在指定时间戳<em>之前</em>创建的对象。</p></td>
     </tr>
     <tr>
       <td><p><code>rules.[n].tags</code></p></td>

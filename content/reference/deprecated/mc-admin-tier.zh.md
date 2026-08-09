@@ -131,7 +131,7 @@ MinIO 还需要在集群上具备以下管理权限，用于为对象过渡生�
 {{% alert color="warning" %}}
 **重要**
 
-MinIO 不支持移除远程存储层。在将其添加为远程层目标*之前*，请先确保该存储后端能够满足预期工作负载。
+MinIO 不支持移除远程存储层。在将其添加为远程层目标 *之前*，请先确保该存储后端能够满足预期工作负载。
 {{% /alert %}}
 
 命令语法如下：
@@ -148,7 +148,7 @@ mc admin tier add TIER_TYPE TARGET TIER_NAME [FLAGS]
 
 *Required*
 
-MinIO 用于过渡对象的云服务提供商存储后端（“Tier”）。请在以下受支持值中指定*一个*：
+MinIO 用于过渡对象的云服务提供商存储后端（“Tier”）。请在以下受支持值中指定 *一个*：
 
 <table>
   <tbody>
@@ -181,9 +181,9 @@ MinIO 用于过渡对象的云服务提供商存储后端（“Tier”）。请�
 
 *Required*
 
-与新远程层关联的名称。该名称在 MinIO 集群所有已配置层中*必须*唯一。
+与新远程层关联的名称。该名称在 MinIO 集群所有已配置层中 *必须* 唯一。
 
-你**必须**使用全大写指定 tier，例如 `WARM_TIER`。
+你 **必须** 使用全大写指定 tier，例如 `WARM_TIER`。
 
 #### `--endpoint` {#mc.admin.tier.add.-endpoint}
 
@@ -223,7 +223,7 @@ MinIO 用于过渡对象的云服务提供商存储后端（“Tier”）。请�
 
 当 [`TIER_TYPE`](#mc.admin.tier.add.TIER_TYPE) 为 `azure` 时必填。 对 `TIER_TYPE` 的其他取值，此选项无效。
 
-MinIO *不*支持修改与 Azure 远程层关联的 account name。Azure 存储后端与账号绑定，修改账号会改变存储后端，并导致无法访问已过渡到原账号/后端的任何对象。
+MinIO *不* 支持修改与 Azure 远程层关联的 account name。Azure 存储后端与账号绑定，修改账号会改变存储后端，并导致无法访问已过渡到原账号/后端的任何对象。
 
 #### `--account-key` {#mc.admin.tier.add.-account-key}
 

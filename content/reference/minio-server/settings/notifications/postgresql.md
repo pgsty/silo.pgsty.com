@@ -33,6 +33,7 @@ You can specify multiple PostgreSQL service endpoints by appending a unique iden
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_NOTIFY_POSTGRES_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_PRIMARY="host=postgresql-endpoint.example.net port=4222..."
@@ -44,8 +45,10 @@ export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_SECONDARY="host=postgresql-endpoi
 export MINIO_NOTIFY_POSTGRES_TABLE_SECONDARY="minioevents"
 export MINIO_NOTIFY_POSTGRES_FORMAT_SECONDARY="namespace"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
+
 ```shell
 mc admin config set notify_postgres:primary \
    connection_string="host=postgresql.example.com port=5432..."
@@ -59,6 +62,7 @@ mc admin config set notify_postgres:secondary \
    format="namespace" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -72,6 +76,7 @@ With these settings, [`MINIO_NOTIFY_POSTGRES_ENABLE_PRIMARY`](#envvar.MINIO_NOTI
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_ENABLE` {#envvar.MINIO_NOTIFY_POSTGRES_ENABLE}
 
 *envvar*
@@ -87,6 +92,7 @@ Requires specifying the following additional environment variables if set to `on
 - [`MINIO_NOTIFY_POSTGRES_FORMAT`](#envvar.MINIO_NOTIFY_POSTGRES_FORMAT)
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_postgres` {#mc-conf.notify_postgres}
 
 *mc-conf*
@@ -108,6 +114,7 @@ mc admin config set notify_postgres                            \
   format="namespace"                                           \
   [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -117,11 +124,13 @@ mc admin config set notify_postgres                            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_CONNECTION_STRING` {#envvar.MINIO_NOTIFY_POSTGRES_CONNECTION_STRING}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_postgres connection_string` {#mc-conf.notify_postgres.connection_string}
 
 *mc-conf*
@@ -146,11 +155,13 @@ MinIO checks the health of the specified URL (if it is resolvable and reachable)
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_TABLE` {#envvar.MINIO_NOTIFY_POSTGRES_TABLE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_postgres table` {#mc-conf.notify_postgres.table}
 
 *mc-conf*
@@ -165,11 +176,13 @@ Specify the name of the PostgreSQL table to which MinIO publishes event notifica
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_FORMAT` {#envvar.MINIO_NOTIFY_POSTGRES_FORMAT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_postgres format` {#mc-conf.notify_postgres.format}
 
 *mc-conf*
@@ -192,11 +205,13 @@ Specify the format of event data written to the PostgreSQL service endpoint. Min
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS` {#envvar.MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_postgres max_open_connections` {#mc-conf.notify_postgres.max_open_connections}
 
 *mc-conf*
@@ -213,11 +228,13 @@ Defaults to `2`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_QUEUE_DIR` {#envvar.MINIO_NOTIFY_POSTGRES_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_postgres queue_dir` {#mc-conf.notify_postgres.queue_dir}
 
 *mc-conf*
@@ -234,11 +251,13 @@ MinIO stores undelivered events in the specified store while the PostgreSQL serv
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_postgres queue_limit` {#mc-conf.notify_postgres.queue_limit}
 
 *mc-conf*
@@ -253,11 +272,13 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_POSTGRES_COMMENT` {#envvar.MINIO_NOTIFY_POSTGRES_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_postgres comment` {#mc-conf.notify_postgres.comment}
 
 *mc-conf*

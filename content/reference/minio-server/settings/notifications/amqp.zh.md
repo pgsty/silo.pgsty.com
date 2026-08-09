@@ -37,6 +37,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_AMQP_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_AMQP_URL_PRIMARY="amqp://user:password@amqp-endpoint.example.net:5672"
@@ -48,6 +49,7 @@ export MINIO_NOTIFY_AMQP_URL_SECONDARY="amqp://user:password@amqp-endpoint.examp
 例如，[`MINIO_NOTIFY_AMQP_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_AMQP_ENABLE) 表示该环境变量关联到 ID 为 `PRIMARY` 的 AMQP 服务端点。
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ```shell
 mc admin config set notify_amqp:primary \
    url="user:password@amqp://amqp-endpoint.example.net:5672" [ARGUMENT=VALUE ...]
@@ -66,6 +68,7 @@ mc admin config set notify_amqp:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MINIO_NOTIFY_AMQP_ENABLE` {#envvar.MINIO_NOTIFY_AMQP_ENABLE}
 
 *envvar*
@@ -77,19 +80,21 @@ mc admin config set notify_amqp:secondary \
 默认值为 `off`。
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp` {#mc-conf.notify_amqp}
 
 *mc-conf*
 
 用于定义 AMQP 服务端点以供 [MinIO 存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 使用的顶层配置键。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 AMQP 服务端点。 对于每个目标，[`url`](#mc-conf.notify_amqp.url) 参数都是*必需*的。 以空白字符（`" "`）分隔的列表形式指定其他可选参数。
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 AMQP 服务端点。 对于每个目标，[`url`](#mc-conf.notify_amqp.url) 参数都是 *必需* 的。 以空白字符（`" "`）分隔的列表形式指定其他可选参数。
 
 ```shell
 mc admin config set notify_amqp \
   url="amqp://user:password@endpoint:port" \
   [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -99,11 +104,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_URL` {#envvar.MINIO_NOTIFY_AMQP_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp url` {#mc-conf.notify_amqp.url}
 
 *mc-conf*
@@ -124,11 +131,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_EXCHANGE` {#envvar.MINIO_NOTIFY_AMQP_EXCHANGE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp exchange` {#mc-conf.notify_amqp.exchange}
 
 *mc-conf*
@@ -143,11 +152,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_EXCHANGE_TYPE` {#envvar.MINIO_NOTIFY_AMQP_EXCHANGE_TYPE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp exchange_type` {#mc-conf.notify_amqp.exchange_type}
 
 *mc-conf*
@@ -162,11 +173,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_ROUTING_KEY` {#envvar.MINIO_NOTIFY_AMQP_ROUTING_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp routing_key` {#mc-conf.notify_amqp.routing_key}
 
 *mc-conf*
@@ -181,11 +194,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_MANDATORY` {#envvar.MINIO_NOTIFY_AMQP_MANDATORY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp mandatory` {#mc-conf.notify_amqp.mandatory}
 
 *mc-conf*
@@ -200,11 +215,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_DURABLE` {#envvar.MINIO_NOTIFY_AMQP_DURABLE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp durable` {#mc-conf.notify_amqp.durable}
 
 *mc-conf*
@@ -219,11 +236,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_NO_WAIT` {#envvar.MINIO_NOTIFY_AMQP_NO_WAIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp no_wait` {#mc-conf.notify_amqp.no_wait}
 
 *mc-conf*
@@ -238,11 +257,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_INTERNAL` {#envvar.MINIO_NOTIFY_AMQP_INTERNAL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp internal` {#mc-conf.notify_amqp.internal}
 
 *mc-conf*
@@ -257,11 +278,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_AUTO_DELETED` {#envvar.MINIO_NOTIFY_AMQP_AUTO_DELETED}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp auto_deleted` {#mc-conf.notify_amqp.auto_deleted}
 
 *mc-conf*
@@ -276,11 +299,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_DELIVERY_MODE` {#envvar.MINIO_NOTIFY_AMQP_DELIVERY_MODE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp delivery_mode` {#mc-conf.notify_amqp.delivery_mode}
 
 *mc-conf*
@@ -297,11 +322,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_QUEUE_DIR` {#envvar.MINIO_NOTIFY_AMQP_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp queue_dir` {#mc-conf.notify_amqp.queue_dir}
 
 *mc-conf*
@@ -318,11 +345,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_AMQP_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp queue_limit` {#mc-conf.notify_amqp.queue_limit}
 
 *mc-conf*
@@ -337,11 +366,13 @@ mc admin config set notify_amqp \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_AMQP_COMMENT` {#envvar.MINIO_NOTIFY_AMQP_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_amqp comment` {#mc-conf.notify_amqp.comment}
 
 *mc-conf*

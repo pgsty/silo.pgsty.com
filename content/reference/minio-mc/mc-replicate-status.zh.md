@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc replicate status myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令具有以下语法：
@@ -72,7 +73,7 @@ mc replicate status myminio/mybucket
 
 例如，要将下载速率限制为不超过 1 GiB/s，可使用以下参数：
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -96,7 +97,7 @@ mc replicate status myminio/mybucket
 
 例如，要将上传速率限制为不超过 1 GiB/s，可使用以下参数：
 
-```
+```text
 --limit-upload 1G
 ```
 
@@ -133,4 +134,4 @@ RELEASE.2023-03-20T17-17-53Z
 
 如需列出所有 ARN（包括不再属于当前复制配置的 ARN），请使用 `--json` 标志。 `json` 输出会持续显示在旧 ARN 下复制的数据。 如果某个 ARN 在同一存储桶上被移除后又重新添加，这些信息会很有价值。
 
-新的 ARN **不会**触发对先前已同步对象的重新复制。
+新的 ARN **不会** 触发对先前已同步对象的重新复制。

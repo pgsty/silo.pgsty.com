@@ -29,6 +29,7 @@ RELEASE.2023-12-23T08-47-21Z
 ```shell
 mc idp ldap accesskey create minio/
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令具有以下语法：
@@ -77,7 +78,7 @@ mc idp ldap accesskey create minio
 
 *Optional*
 
-用于该账户的访问密钥。 访问密钥不能包含 ``` =``（等号）或  ```,``（逗号）字符。
+用于该账户的访问密钥。 访问密钥不能包含 `=`（等号）或 `,`（逗号）字符。
 
 需要 [`--secret-key`](#mc.idp.ldap.accesskey.create.-secret-key)
 

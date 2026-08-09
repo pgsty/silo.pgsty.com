@@ -126,9 +126,9 @@ mc ilm edit --prefix "meetingnotes/" myminio/mydata/ --expiry-days "90"
 
 对象创建后保留的天数。达到指定天数后，MinIO 会将对象标记为待删除。
 
-使用此选项时请谨慎，其行为可能导致已上传对象立即过期。任何在指定过期日期*之后*创建的对象都会自动满足过期条件。 同样地，如果指定的日历日期*早于*当前系统主机时间日期，则规则覆盖的所有对象都会被标记为删除。 一旦指定日历日期已过，建议立即移除使用此选项的 ILM 规则。
+使用此选项时请谨慎，其行为可能导致已上传对象立即过期。任何在指定过期日期 *之后* 创建的对象都会自动满足过期条件。 同样地，如果指定的日历日期 *早于* 当前系统主机时间日期，则规则覆盖的所有对象都会被标记为删除。 一旦指定日历日期已过，建议立即移除使用此选项的 ILM 规则。
 
-对于启用版本控制的存储桶，过期规则仅适用于*当前*对象版本。 使用 [`--noncurrentversion-expiration-days`](#mc.ilm.edit.-noncurrentversion-expiration-days) 选项可将过期行为应用于非当前对象版本。
+对于启用版本控制的存储桶，过期规则仅适用于 *当前* 对象版本。 使用 [`--noncurrentversion-expiration-days`](#mc.ilm.edit.-noncurrentversion-expiration-days) 选项可将过期行为应用于非当前对象版本。
 
 MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-scanner) 根据已配置的全部生命周期管理规则检查对象。 高 IO 负载或系统资源受限导致的扫描变慢，可能会延迟生命周期管理规则的生效。 更多信息请参见 [生命周期管理对象扫描器](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-scanner)。
 
@@ -159,7 +159,7 @@ MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-s
 
 *Optional*
 
-对象版本变为*非当前*（即该对象的另一个版本现在是 *HEAD*）后保留的天数。 达到指定天数后，MinIO 会将非当前对象版本标记为待删除。
+对象版本变为 *非当前*（即该对象的另一个版本现在是 *HEAD*）后保留的天数。 达到指定天数后，MinIO 会将非当前对象版本标记为待删除。
 
 此选项的行为与 S3 `NoncurrentVersionExpiration` 操作一致。
 
@@ -229,7 +229,7 @@ MinIO *不会* 自动将对象从先前指定的远程层迁移到新的远程�
 
 对象创建后经过的日历天数，超过该值后 MinIO 会将对象标记为可转移。 MinIO 会将对象转移到 [`--tier`](#mc.ilm.edit.-tier) 指定的远程存储层。
 
-对于启用版本控制的存储桶，转移规则仅适用于*当前*对象版本。 使用 [`--noncurrentversion-transition-days`](#mc.ilm.edit.-noncurrentversion-transition-days) 选项可将转移行为应用于非当前对象版本。
+对于启用版本控制的存储桶，转移规则仅适用于 *当前* 对象版本。 使用 [`--noncurrentversion-transition-days`](#mc.ilm.edit.-noncurrentversion-transition-days) 选项可将转移行为应用于非当前对象版本。
 
 必须同时指定 [`--tier`](#mc.ilm.edit.-tier)。
 

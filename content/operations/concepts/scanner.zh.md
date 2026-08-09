@@ -62,7 +62,7 @@ MinIO 提供了若干[与扫描器相关的指标（英文）](https://silo.pgst
 
 输出类似如下：
 
-```
+```text
 Overall Statistics
 ------------------
 Last full scan time:   0d0h14m; Estimated 2885.28/month

@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc alias list
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 [`mc alias list`](#command-mc.alias.list) 命令语法如下：
@@ -63,11 +64,14 @@ mc [GLOBALFLAGS] alias list [ALIAS]
 ```shell
 mc alias list
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc alias list
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -80,8 +84,10 @@ mc alias list
 ```shell
 mc alias list myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc alias list ALIAS
 ```

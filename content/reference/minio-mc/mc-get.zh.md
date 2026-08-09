@@ -29,6 +29,7 @@ RELEASE.2024-02-24T01-33-20Z
 ```shell
 mc get minio/marketing/logo.png ~/images/collateral
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

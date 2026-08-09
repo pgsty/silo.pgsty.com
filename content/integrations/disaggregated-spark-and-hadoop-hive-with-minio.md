@@ -45,7 +45,7 @@ Navigate to **Custom core-site** to configure MinIO parameters for `_s3a_` conne
 
 ![s3a-config](/images/integrations/spark/image5.png)
 
-```
+```text
 sudo pip install yq
 alias kv-pairify='yq ".configuration[]" | jq ".[]" | jq -r ".name + \"=\" + .value"'
 
@@ -53,7 +53,7 @@ alias kv-pairify='yq ".configuration[]" | jq ".[]" | jq -r ".name + \"=\" + .val
 
 Let’s take for example a set of 12 compute nodes with an aggregate memory of *1.2TiB*, we need to do following settings for optimal results. Add the following optimal entries for *core-site.xml* to configure *s3a* with **MinIO**. Most important options here are
 
-```
+```text
 cat ${HADOOP_CONF_DIR}/core-site.xml | kv-pairify | grep "mapred"
 
 mapred.maxthreads.generate.mapoutput=2 # Num threads to write map outputs
@@ -72,7 +72,7 @@ S3A is the connector to use S3 and other S3-compatible object stores such as Min
 
 It was found that the directory staging committer was the fastest among the three, S3A connector should be configured with the following parameters for optimal results:
 
-```
+```text
 cat ${HADOOP_CONF_DIR}/core-site.xml | kv-pairify | grep "s3a"
 
 fs.s3a.access.key=minio
@@ -127,7 +127,7 @@ Navigate to “**Custom spark-defaults**” to configure MinIO parameters for `_
 
 Add the following optimal entries for *spark-defaults.conf* to configure Spark with **MinIO**.
 
-```
+```text
 spark.hadoop.fs.s3a.access.key minio
 spark.hadoop.fs.s3a.secret.key minio123
 spark.hadoop.fs.s3a.path.style.access true
@@ -174,7 +174,7 @@ Navigate to “**Custom hive-site**” to configure MinIO parameters for `_s3a_`
 
 Add the following optimal entries for `hive-site.xml` to configure Hive with **MinIO**.
 
-```
+```text
 hive.blobstore.use.blobstore.as.scratchdir=true
 hive.exec.input.listing.max.threads=50
 hive.load.dynamic.partitions.thread=25
@@ -206,7 +206,7 @@ Follow these steps to run the Spark Pi example:
 - When the job runs, the library can now use **MinIO** during intermediate processing.
 - Navigate to a node with the Spark client and access the spark2-client directory:
 
-```
+```text
 cd /usr/hdp/current/spark2-client
 su spark
 
@@ -214,7 +214,7 @@ su spark
 
 - Run the Apache Spark Pi job in yarn-client mode, using code from **org.apache.spark**:
 
-```
+```text
 ./bin/spark-submit --class org.apache.spark.examples.SparkPi \
     --master yarn-client \
     --num-executors 1 \
@@ -227,7 +227,7 @@ su spark
 
 The job should produce an output as shown below. Note the value of pi in the output.
 
-```
+```text
 17/03/22 23:21:10 INFO DAGScheduler: Job 0 finished: reduce at SparkPi.scala:38, took 1.302805 s
 Pi is roughly 3.1445191445191445
 
@@ -245,7 +245,7 @@ The following example submits WordCount code to the Scala shell. Select an input
 - When the job runs, the library can now use **MinIO** during intermediate processing.
 - Navigate to a node with Spark client and access the spark2-client directory:
 
-```
+```text
 cd /usr/hdp/current/spark2-client
 su spark
 
@@ -255,7 +255,7 @@ The following example uses *log4j.properties* as the input file:
 
 #### **4.2.1 Upload the input file to HDFS:** {#upload-the-input-file-to-hdfs}
 
-```
+```text
 hadoop fs -copyFromLocal /etc/hadoop/conf/log4j.properties
           s3a://testbucket/testdata
 
@@ -263,14 +263,14 @@ hadoop fs -copyFromLocal /etc/hadoop/conf/log4j.properties
 
 #### **4.2.2 Run the Spark shell:** {#run-the-spark-shell}
 
-```
+```text
 ./bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m
 
 ```
 
 The command should produce an output as shown below. (with additional status messages):
 
-```
+```text
 Spark context Web UI available at http://172.26.236.247:4041
 Spark context available as 'sc' (master = yarn, app id = application_1490217230866_0002).
 Spark session available as 'spark'.
@@ -293,7 +293,7 @@ scala>
 
 - At the *scala&gt;* prompt, submit the job by typing the following commands, Replace node names, file name, and file location with your values:
 
-```
+```text
 scala> val file = sc.textFile("s3a://testbucket/testdata")
 file: org.apache.spark.rdd.RDD[String] = s3a://testbucket/testdata MapPartitionsRDD[1] at textFile at <console>:24
 
@@ -308,7 +308,7 @@ Use one of the following approaches to view job output:
 
 View output in the Scala shell:
 
-```
+```text
 scala> counts.count()
 364
 
@@ -316,14 +316,14 @@ scala> counts.count()
 
 To view the output from MinIO exit the Scala shell. View WordCount job status:
 
-```
+```text
 hadoop fs -ls s3a://testbucket/wordcount
 
 ```
 
 The output should be similar to the following:
 
-```
+```text
 Found 3 items
 -rw-rw-rw-   1 spark spark          0 2019-05-04 01:36 s3a://testbucket/wordcount/_SUCCESS
 -rw-rw-rw-   1 spark spark       4956 2019-05-04 01:36 s3a://testbucket/wordcount/part-00000

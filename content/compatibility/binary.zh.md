@@ -24,8 +24,6 @@ Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub 
 
 Silo 提供的 RPM DEB 包可以与 minio 包并存安装，且不会覆盖原有文件。DEB 包不提供安装自动启动。
 
-
-
 ## 服务账号 {#user}
 
 unit 默认 `User=silo`，而现有数据、TLS 私钥与 KMS 凭据属于原 MinIO 用户。不要 chown 数据，用 drop-in 让 Silo 以现属主运行：
@@ -89,8 +87,8 @@ sudo systemctl enable  --now minio.service
 
 ## 注意事项 {#caveats}
 
-- **集群所有节点一起切换。**任意两个不同的二进制都无法组成集群——MinIO 与 Silo 之间如此，两个不同版本的 Silo 之间亦然；混跑节点无限停在 `activating`（[细节](/zh/compatibility/migration/#one-binary)）。先在所有节点完成准备（装包、建 drop-in），再快速连续翻转所有节点：`systemctl disable --now minio && systemctl enable --now --no-block silo`。回滚与将来的升级同理，所有节点一起。
+- **集群所有节点一起切换。** 任意两个不同的二进制都无法组成集群——MinIO 与 Silo 之间如此，两个不同版本的 Silo 之间亦然；混跑节点无限停在 `activating`（[细节](/zh/compatibility/migration/#one-binary)）。先在所有节点完成准备（装包、建 drop-in），再快速连续翻转所有节点：`systemctl disable --now minio && systemctl enable --now --no-block silo`。回滚与将来的升级同理，所有节点一起。
 - **非软件包安装同样适用。**`/usr/local/bin/minio` 加自定义 unit 的部署以相同方式被接管，只要其配置位于 `/etc/default/minio`。
-- **崩溃循环有频率限制。**配置错误（如缺证书）时 `Restart=always` 反复重启，直至触发 systemd 启动限制（`Start request repeated too quickly`）。修复根因后执行 `systemctl reset-failed silo && systemctl start silo`。
-- **保留回滚窗口。**验证完成前保留 `minio` 软件包、unit 与二进制；已禁用的 unit 没有开销，之后可按需移除旧包。
+- **崩溃循环有频率限制。** 配置错误（如缺证书）时 `Restart=always` 反复重启，直至触发 systemd 启动限制（`Start request repeated too quickly`）。修复根因后执行 `systemctl reset-failed silo && systemctl start silo`。
+- **保留回滚窗口。** 验证完成前保留 `minio` 软件包、unit 与二进制；已禁用的 unit 没有开销，之后可按需移除旧包。
 - **迁移后的滚动重启**：每次重启前用 `silo healthcheck --maintenance cluster` 把关；退出码 `0` 表示停掉本节点仍保有写 quorum，HTTP `412` 表示不能停。

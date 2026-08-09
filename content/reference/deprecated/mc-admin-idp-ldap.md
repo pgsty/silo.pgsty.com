@@ -71,6 +71,7 @@ The following example sets the AD/LDAP configuration settings for the `myminio` 
       group_search_base_dn=ou=swengg,dc=min,dc=io                    \
       group_search_filter="(&(objectclass=groupofnames)(member=%d))"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -103,6 +104,7 @@ mc admin idp ldap update                                \
                   lookup_bind_dn=cn=admin,dc=min,dc=io  \
                   lookup_bind_password=somesecret
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -132,6 +134,7 @@ The following example lists the AD/LDAP configuration settings for the `myminio`
 ```shell
 mc admin idp ldap ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -157,6 +160,7 @@ The following example removes the AD/LDAP provider settings for the `myminio` de
 ```shell
 mc admin idp ldap rm myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -183,6 +187,7 @@ The following example outputs the AD/LDAP configuration settings on the `myminio
 ```shell
 mc admin idp ldap info myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -210,6 +215,7 @@ The following example enables the AD/LDAP configuration on the `myminio` deploym
 mc admin idp ldap enable       \
                   myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -237,6 +243,7 @@ The following example disables the AD/LDAP configurations on the `myminio` deplo
 mc admin idp ldap disable      \
                   myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

@@ -35,6 +35,7 @@ The cluster `myminio` is unreachable: Get "http://myminio.example.com:9000/minio
 ```text
 The cluster `myminio` is ready
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：

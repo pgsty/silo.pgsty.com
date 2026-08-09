@@ -43,6 +43,7 @@ MinIO 建议使用 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-m
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 MINIO_IDENTITY_LDAP_SERVER_ADDR="ldapserver.com:636"
 ```
@@ -56,6 +57,7 @@ MINIO_IDENTITY_LDAP_SERVER_ADDR="ldapserver.com:636"
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 #### `identity_ldap` {#mc-conf.identity_ldap}
 
 *mc-conf*
@@ -78,6 +80,7 @@ mc admin config set identity_ldap                        \
    user_dn_search_base_dn="dc=example,dc=net"            \
    user_dn_search_filter="(&(objectCategory=user)(sAMAccountName=%s))"
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -89,6 +92,7 @@ mc admin config set identity_ldap                        \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_SERVER_ADDR` {#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR}
 
 *envvar*
@@ -106,6 +110,7 @@ ldapserver.com:636
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap server_addr` {#mc-conf.identity_ldap.server_addr}
 
 *mc-conf*
@@ -130,11 +135,13 @@ ldapserver.com:636
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN` {#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap lookup_bind_dn` {#mc-conf.identity_ldap.lookup_bind_dn}
 
 *mc-conf*
@@ -151,11 +158,13 @@ ldapserver.com:636
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD` {#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap lookup_bind_password` {#mc-conf.identity_ldap.lookup_bind_password}
 
 *mc-conf*
@@ -176,11 +185,13 @@ ldapserver.com:636
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap user_dn_search_base_dn` {#mc-conf.identity_ldap.user_dn_search_base_dn}
 
 *mc-conf*
@@ -205,11 +216,13 @@ cn=miniousers,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap user_dn_search_filter` {#mc-conf.identity_ldap.user_dn_search_filter}
 
 *mc-conf*
@@ -230,11 +243,13 @@ cn=miniousers,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_USER_DN_ATTRIBUTES` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_ATTRIBUTES}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap user_dn_attributes` {#mc-conf.identity_ldap.user_dn_attributes}
 
 *mc-conf*
@@ -265,6 +280,7 @@ mc idp ldap update ALIAS user_dn_attributes=sshPublicKey
 此设置没有环境变量选项。 请改用配置设置。
 {{% /tab %}}
 {{% tab header="配置设置" selected=true %}}
+
 ##### `identity_ldap enabled` {#mc-conf.identity_ldap.enabled}
 
 *mc-conf*
@@ -283,11 +299,13 @@ mc idp ldap update ALIAS user_dn_attributes=sshPublicKey
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER` {#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap group_search_filter` {#mc-conf.identity_ldap.group_search_filter}
 
 *mc-conf*
@@ -314,11 +332,13 @@ mc idp ldap update ALIAS user_dn_attributes=sshPublicKey
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN` {#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap group_search_base_dn` {#mc-conf.identity_ldap.group_search_base_dn}
 
 *mc-conf*
@@ -339,11 +359,13 @@ cn=miniogroups,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` {#envvar.MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap tls_skip_verify` {#mc-conf.identity_ldap.tls_skip_verify}
 
 *mc-conf*
@@ -360,11 +382,13 @@ cn=miniogroups,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_SERVER_INSECURE` {#envvar.MINIO_IDENTITY_LDAP_SERVER_INSECURE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap server_insecure` {#mc-conf.identity_ldap.server_insecure}
 
 *mc-conf*
@@ -383,11 +407,13 @@ MinIO 会以明文形式将 AD/LDAP 用户凭证发送到 AD/LDAP server，因�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_SERVER_STARTTLS` {#envvar.MINIO_IDENTITY_LDAP_SERVER_STARTTLS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap server_starttls` {#mc-conf.identity_ldap.server_starttls}
 
 *mc-conf*
@@ -411,11 +437,13 @@ MinIO 会以明文形式将 AD/LDAP 用户凭证发送到 AD/LDAP server，因�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_SRV_RECORD_NAME` {#envvar.MINIO_IDENTITY_LDAP_SRV_RECORD_NAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap srv_record_name` {#mc-conf.identity_ldap.srv_record_name}
 
 *mc-conf*
@@ -462,11 +490,13 @@ _ldaps._tcp.example.com
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_LDAP_COMMENT` {#envvar.MINIO_IDENTITY_LDAP_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `identity_ldap identity_ldap comment` {#mc-conf.identity_ldap.identity_ldap.comment}
 
 *mc-conf*

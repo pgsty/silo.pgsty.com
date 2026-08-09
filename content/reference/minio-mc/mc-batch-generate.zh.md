@@ -32,6 +32,7 @@ MinIO 创建该文件后，请在你偏好的文本编辑器中打开并进一�
 ```shell
 mc batch generate myminio replicate
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：

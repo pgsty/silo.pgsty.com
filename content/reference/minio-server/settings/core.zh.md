@@ -30,6 +30,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_OPTS` {#envvar.MINIO_OPTS}
 
 *envvar*
@@ -74,6 +75,7 @@ minio server $MINIO_OPTS ...
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_VOLUMES` {#envvar.MINIO_VOLUMES}
 
 *envvar*
@@ -91,6 +93,7 @@ minio server $MINIO_OPTS ...
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_CONFIG_ENV_FILE` {#envvar.MINIO_CONFIG_ENV_FILE}
 
 *envvar*
@@ -108,6 +111,7 @@ minio server $MINIO_OPTS ...
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_ILM_EXPIRY_WORKERS` {#envvar.MINIO_ILM_EXPIRY_WORKERS}
 
 *envvar*
@@ -123,6 +127,7 @@ minio server $MINIO_OPTS ...
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_DOMAIN` {#envvar.MINIO_DOMAIN}
 
 *envvar*
@@ -139,9 +144,9 @@ minio server $MINIO_OPTS ...
 {{% alert color="warning" %}}
 **重要**
 
-如果配置了 `MINIO_DOMAIN`，你**必须**将指定 FQDN 的所有子域名视为专用于存储桶名称。 任何与这些域名冲突的 MinIO 服务（例如复制目标）都可能因为冲突而表现出意外或非预期行为。
+如果配置了 `MINIO_DOMAIN`，你 **必须** 将指定 FQDN 的所有子域名视为专用于存储桶名称。 任何与这些域名冲突的 MinIO 服务（例如复制目标）都可能因为冲突而表现出意外或非预期行为。
 
-例如，若设置 `MINIO_DOMAIN=minio.example.net`，则**不能**将 `minio.example.net` 的任何子域名（即 `*.minio.example.net` 形式）分配给任何 MinIO 服务或目标。 这包括用于 [bucket](/zh/administration/bucket-replication/#minio-bucket-replication)、[batch](/zh/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job) 或 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 的主机名。
+例如，若设置 `MINIO_DOMAIN=minio.example.net`，则 **不能** 将 `minio.example.net` 的任何子域名（即 `*.minio.example.net` 形式）分配给任何 MinIO 服务或目标。 这包括用于 [bucket](/zh/administration/bucket-replication/#minio-bucket-replication)、[batch](/zh/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job) 或 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 的主机名。
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="配置项" %}}
@@ -155,11 +160,13 @@ minio server $MINIO_OPTS ...
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_SCANNER_SPEED` {#envvar.MINIO_SCANNER_SPEED}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `scanner speed` {#mc-conf.scanner.speed}
 
 *mc-conf*
@@ -228,11 +235,13 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_COMPRESSION_ENABLE` {#envvar.MINIO_COMPRESSION_ENABLE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `compression enable` {#mc-conf.compression.enable}
 
 *mc-conf*
@@ -249,11 +258,13 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_COMPRESSION_ALLOW_ENCRYPTION` {#envvar.MINIO_COMPRESSION_ALLOW_ENCRYPTION}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `compression allow_encryption` {#mc-conf.compression.allow_encryption}
 
 *mc-conf*
@@ -274,11 +285,13 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_COMPRESSION_EXTENSIONS` {#envvar.MINIO_COMPRESSION_EXTENSIONS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `compression extensions` {#mc-conf.compression.extensions}
 
 *mc-conf*
@@ -301,11 +314,13 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_COMPRESSION_MIME_TYPES` {#envvar.MINIO_COMPRESSION_MIME_TYPES}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `compression mime_types` {#mc-conf.compression.mime_types}
 
 *mc-conf*
@@ -329,6 +344,7 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 此设置没有环境变量选项。 请改用配置项。
 {{% /tab %}}
 {{% tab header="配置项" selected=true %}}
+
 ##### `compression comment` {#envvar.compression.comment}
 
 *envvar*
@@ -343,6 +359,7 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_ERASURE_SET_DRIVE_COUNT` {#envvar.MINIO_ERASURE_SET_DRIVE_COUNT}
 
 *envvar*
@@ -356,14 +373,14 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 应用于指定 [服务器池](/zh/glossary/#term-43) 中所有驱动器的 [erasure set size](/zh/operations/concepts/erasure-coding/#minio-ec-basics)。
 
-如果设置此值，你**必须**在初始化集群*之前*完成设置。 集群初始化后，所选条带大小为**不可变**，并会影响后续添加到集群中的所有 服务器池。
+如果设置此值，你 **必须** 在初始化集群 *之前* 完成设置。 集群初始化后，所选条带大小为 **不可变**，并会影响后续添加到集群中的所有 服务器池。
 
 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 用户应先登录并提交 issue，讨论条带大小设置后再在任何环境中实施。
 
 {{% alert color="danger" %}}
 **警告**
 
-除非 MinIO 工程团队明确指导，否则**不要**更改条带大小设置。
+除非 MinIO 工程团队明确指导，否则 **不要** 更改条带大小设置。
 
 条带大小变更会对部署功能、可用性、性能和行为产生重大影响。 MinIO 的条带选择算法已为大多数工作负载设置了适当默认值。 偏离该默认值来调整条带大小并不常见，通常也没有必要或不被建议。
 {{% /alert %}}
@@ -372,11 +389,13 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_API_OBJECT_MAX_VERSIONS` {#envvar.MINIO_API_OBJECT_MAX_VERSIONS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `api object_max_versions` {#mc-conf.api.object_max_versions}
 
 *mc-conf*
@@ -403,6 +422,7 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_API_TRUSTED_PROXIES` {#envvar.MINIO_API_TRUSTED_PROXIES}
 
 *envvar*
@@ -411,7 +431,7 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 默认情况下，MinIO 会采信来自任何对端的 `X-Forwarded-For`、`X-Real-IP` 与 RFC 7239 `Forwarded` 头，因此一个能直接连到 API 端口的客户端可以自行设定它表面上的源地址。该地址会流入 `aws:SourceIp` 策略条件、审计日志的 `remotehost` 字段，以及事件通知的 `Host` 字段。
 
-将其设为以逗号分隔的地址或 CIDR 列表，则**只**采信名单内对端送来的转发头。此时转发链会从右向左、跳过名单内的跳数来解析，这也会丢弃"追加型代理"在链首留下的、由客户端自己提供的那一项——nginx 默认的 `$proxy_add_x_forwarded_for` 写法与 HAProxy 追加的第二行头都会产生这一项。
+将其设为以逗号分隔的地址或 CIDR 列表，则 **只** 采信名单内对端送来的转发头。此时转发链会从右向左、跳过名单内的跳数来解析，这也会丢弃"追加型代理"在链首留下的、由客户端自己提供的那一项——nginx 默认的 `$proxy_add_x_forwarded_for` 写法与 HAProxy 追加的第二行头都会产生这一项。
 
 将其设为 `none`，则完全不采信任何转发头，始终使用对端地址。
 
@@ -420,7 +440,7 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 不设置是默认值，保持历史行为，因此在你主动配置之前该设置完全惰性。
 
-要列出**代理本身，而不是它们所在的网段**。名单内的条目在遍历转发链时会被跳过，因此一个同时覆盖了客户端的网段，等于让那些客户端可以伪造。多节点部署必须把自己各节点的地址也列进去，因为 MinIO 会在节点之间转发部分请求。回环地址始终被视为可信对端，以便 FTP 与 SFTP 能正确归属其会话。取值格式错误、或没有指向任何代理，都会阻止启动。
+要列出 **代理本身，而不是它们所在的网段**。名单内的条目在遍历转发链时会被跳过，因此一个同时覆盖了客户端的网段，等于让那些客户端可以伪造。多节点部署必须把自己各节点的地址也列进去，因为 MinIO 会在节点之间转发部分请求。回环地址始终被视为可信对端，以便 FTP 与 SFTP 能正确归属其会话。取值格式错误、或没有指向任何代理，都会阻止启动。
 {{% /alert %}}
 
 如果你使用 `IpAddress` 或 `NotIpAddress` 策略条件，那么在此设置指明你的代理之前（或部署本身除代理外不可达之前），这些条件是无法强制执行的。
@@ -434,6 +454,7 @@ MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH` {#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH}
 
 *envvar*

@@ -36,6 +36,7 @@ mc batch start myminio jobfile.yaml
 ```shell
 Successfully start 'replicate' job `B34HHqnNMcg1taynaPfxu` on '2022-10-24 17:19:06.296974771 -0700 PDT'
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令具有以下语法：

@@ -38,6 +38,7 @@ This CA certificate **must** exist *before* installing MinIO Operator.
    ```shell
    kubectl create ns minio-operator
    ```
+
 2. Request a new Certificate with `spec.isCA: true` specified.
 
    This certificate serves as the <abbr title="Certificate Authority">CA</abbr> for the *minio-operator* namespace.
@@ -101,6 +102,7 @@ Use the `operator-ca-tls` secret to add an `Issuer` resource for the `minio-oper
      ca:
        secretName: operator-ca-tls
    ```
+
 2. Apply the resource:
 
    ```shell
@@ -211,6 +213,7 @@ There are various methods to define an environment variable depending on how you
                    - name: OPERATOR_STS_ENABLED
                      value: "on"
    ```
+
 2. Apply the kustomization resource to the cluster:
 
    ```shell

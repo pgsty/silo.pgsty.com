@@ -45,6 +45,7 @@ NATS Streaming 已弃用。 请迁移到 [JetStream](https://docs.nats.io/nats-c
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_NATS_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_NATS_ADDRESS_PRIMARY="nats-endpoint.example.net:4222"
@@ -56,6 +57,7 @@ export MINIO_NOTIFY_NATS_ADDRESS_SECONDARY="nats-endpoint.example.net:4222"
 在这些设置中，[`MINIO_NOTIFY_NATS_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_NATS_ENABLE) 表示该环境变量关联到 ID 为 `PRIMARY` 的 NATS 服务端点。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ```shell
 mc admin config set notify_nats:primary \
    address="nats-endpoint.example.com:4222" \
@@ -67,6 +69,7 @@ mc admin config set notify_nats:secondary \
    subject="minioevents" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -78,6 +81,7 @@ mc admin config set notify_nats:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_ENABLE` {#envvar.MINIO_NOTIFY_NATS_ENABLE}
 
 *envvar*
@@ -87,13 +91,14 @@ mc admin config set notify_nats:secondary \
 默认为 `off`。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats` {#mc-conf.notify_nats}
 
 *mc-conf*
 
 用于定义 NATS 服务端点并将其用于 [MinIO bucket notifications](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 的顶层配置键。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 NATS 服务端点。 对于每个目标，[`address`](#mc-conf.notify_nats.address) 和 [`subject`](#mc-conf.notify_nats.subject) 参数均为*必填*。 其他可选参数请使用空白字符（`" "`）分隔的列表指定。
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 NATS 服务端点。 对于每个目标，[`address`](#mc-conf.notify_nats.address) 和 [`subject`](#mc-conf.notify_nats.subject) 参数均为 *必填*。 其他可选参数请使用空白字符（`" "`）分隔的列表指定。
 
 ```shell
 mc admin config set notify_nats \
@@ -101,6 +106,7 @@ mc admin config set notify_nats \
   subject="minioevents" \
   [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -110,11 +116,13 @@ mc admin config set notify_nats \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_ADDRESS` {#envvar.MINIO_NOTIFY_NATS_ADDRESS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats address` {#mc-conf.notify_nats.address}
 
 *mc-conf*
@@ -135,11 +143,13 @@ mc admin config set notify_nats \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_SUBJECT` {#envvar.MINIO_NOTIFY_NATS_SUBJECT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats subject` {#mc-conf.notify_nats.subject}
 
 *mc-conf*
@@ -154,11 +164,13 @@ mc admin config set notify_nats \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_USERNAME` {#envvar.MINIO_NOTIFY_NATS_USERNAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats username` {#mc-conf.notify_nats.username}
 
 *mc-conf*
@@ -173,11 +185,13 @@ mc admin config set notify_nats \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_PASSWORD` {#envvar.MINIO_NOTIFY_NATS_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats password` {#mc-conf.notify_nats.password}
 
 *mc-conf*
@@ -198,11 +212,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_TOKEN` {#envvar.MINIO_NOTIFY_NATS_TOKEN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats token` {#mc-conf.notify_nats.token}
 
 *mc-conf*
@@ -223,18 +239,20 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_USER_CREDENTIALS` {#envvar.MINIO_NOTIFY_NATS_USER_CREDENTIALS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats user_credentials` {#mc-conf.notify_nats.user_credentials}
 
 *mc-conf*
 {{% /tab %}}
 {{< /tabpane >}}
 
-指定用于连接 NATS 服务端点的 *user credentials file &lt;https://docs.nats.io/using-nats/developer/connecting/creds&gt;*。
+指定用于连接 NATS 服务端点的 [user credentials file](https://docs.nats.io/using-nats/developer/connecting/creds)。
 
 ### TLS {#tls}
 
@@ -242,11 +260,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_TLS` {#envvar.MINIO_NOTIFY_NATS_TLS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats tls` {#mc-conf.notify_nats.tls}
 
 *mc-conf*
@@ -261,11 +281,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY` {#envvar.MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats tls_skip_verify` {#mc-conf.notify_nats.tls_skip_verify}
 
 *mc-conf*
@@ -283,11 +305,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_PING_INTERVAL` {#envvar.MINIO_NOTIFY_NATS_PING_INTERVAL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats ping_interval` {#mc-conf.notify_nats.ping_interval}
 
 *mc-conf*
@@ -307,11 +331,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_JETSTREAM` {#envvar.MINIO_NOTIFY_NATS_JETSTREAM}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats jetstream` {#mc-conf.notify_nats.jetstream}
 
 *mc-conf*
@@ -328,11 +354,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_STREAMING` {#envvar.MINIO_NOTIFY_NATS_STREAMING}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats streaming` {#mc-conf.notify_nats.streaming}
 
 *mc-conf*
@@ -349,11 +377,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_STREAMING_ASYNC` {#envvar.MINIO_NOTIFY_NATS_STREAMING_ASYNC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats streaming_async` {#mc-conf.notify_nats.streaming_async}
 
 *mc-conf*
@@ -370,11 +400,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_STREAMING_MAX_PUB_ACKS_IN_FLIGHT` {#envvar.MINIO_NOTIFY_NATS_STREAMING_MAX_PUB_ACKS_IN_FLIGHT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats streaming_max_pub_acks_in_flight` {#mc-conf.notify_nats.streaming_max_pub_acks_in_flight}
 
 *mc-conf*
@@ -391,11 +423,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_STREAMING_CLUSTER_ID` {#envvar.MINIO_NOTIFY_NATS_STREAMING_CLUSTER_ID}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats streaming_cluster_id` {#mc-conf.notify_nats.streaming_cluster_id}
 
 *mc-conf*
@@ -410,11 +444,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_CERT_AUTHORITY` {#envvar.MINIO_NOTIFY_NATS_CERT_AUTHORITY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats cert_authority` {#mc-conf.notify_nats.cert_authority}
 
 *mc-conf*
@@ -429,11 +465,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_CLIENT_CERT` {#envvar.MINIO_NOTIFY_NATS_CLIENT_CERT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats client_cert` {#mc-conf.notify_nats.client_cert}
 
 *mc-conf*
@@ -448,11 +486,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_CLIENT_KEY` {#envvar.MINIO_NOTIFY_NATS_CLIENT_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats client_key` {#mc-conf.notify_nats.client_key}
 
 *mc-conf*
@@ -467,11 +507,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_QUEUE_DIR` {#envvar.MINIO_NOTIFY_NATS_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats queue_dir` {#mc-conf.notify_nats.queue_dir}
 
 *mc-conf*
@@ -488,11 +530,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_NATS_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats queue_limit` {#mc-conf.notify_nats.queue_limit}
 
 *mc-conf*
@@ -507,11 +551,13 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NATS_COMMENT` {#envvar.MINIO_NOTIFY_NATS_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nats comment` {#mc-conf.notify_nats.comment}
 
 *mc-conf*

@@ -149,6 +149,7 @@ mc alias set myminio https://minio.example.net miniouser miniopassword
 如果 `myminio` 别名已存在， [`mc alias set`](#command-mc.alias.set) 命令会使用指定参数覆盖该别名。
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 ```

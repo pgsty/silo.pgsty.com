@@ -25,6 +25,7 @@ mc idp ldap update                                \
             lookup_bind_dn=cn=admin,dc=min,dc=io  \
             lookup_bind_password=somesecret
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令使用以下语法：

@@ -24,6 +24,7 @@ mc idp ldap policy attach myminio                                               
                           userpolicy                                               \
                           --user='uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令的语法如下：

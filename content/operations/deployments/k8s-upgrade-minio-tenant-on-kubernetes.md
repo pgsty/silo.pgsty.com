@@ -38,6 +38,7 @@ Choose a tab below depending on how the tenant was deployed:
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Operator Console-Deployed Tenant" selected=true %}}
+
 1. Create the base configuration file:
 
    1. In a convenient directory, save the current Tenant configuration to a file using `kubectl get`:
@@ -66,6 +67,7 @@ Choose a tab below depending on how the tenant was deployed:
       >   resourceVersion: "4699"
       >   uid: d5b8e468-3bed-4aa3-8ddb-dfe1ee0362da
       > ```
+
    2. In the same directory, create a `kustomization.yaml` file with contents resembling the following:
 
       ```shell
@@ -145,6 +147,7 @@ If you deployed the Tenant using Kustomize, use the [Upgrade a Tenant using Kust
    NAME            NAMESPACE         REVISION        UPDATED                                 STATUS          CHART           APP VERSION
    CHART_NAME      TENANT_NAMESPACE  1               2023-11-01 15:49:58.810412732 -0400 EDT deployed        tenant-5.0.x   v5.0.x
    ```
+
 2. Update the Operator Repository
 
    Use `helm repo update minio-operator` to update the MinIO Operator repo. If you set a different alias for the MinIO Operator repository, specify that to the command. You can use `helm repo list` to review your installed repositories.

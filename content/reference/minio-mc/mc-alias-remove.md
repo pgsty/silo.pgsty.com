@@ -22,6 +22,7 @@ The following command removes the `myminio` [alias](/reference/minio-mc/mc-alias
 ```shell
 mc alias remove myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The [`mc alias remove`](#command-mc.alias.remove) command has the following syntax:
@@ -63,8 +64,10 @@ The following command removes the `myminio` alias.
 ```shell
 mc alias remove myminio
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc alias remove ALIAS
 ```

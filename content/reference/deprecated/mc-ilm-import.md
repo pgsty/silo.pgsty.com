@@ -30,6 +30,7 @@ The following command imports the lifecycle management configuration from `mydat
 ```shell
 mc ilm import myminio/mydata < mydata-lifecycle-config.json
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -73,8 +74,10 @@ The following command imports the bucket lifecycle management configuration from
 ```shell
 mc ilm import myminio/mybucket < bucket-lifecycle.json
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc ilm import ALIAS < file.json
 ```

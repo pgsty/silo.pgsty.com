@@ -72,6 +72,7 @@ mc ilm rule ls myminio/mydata
 │ rule-2 │ Enabled │ logs/  │ -                   │              1 │             3 │
 └────────┴─────────┴────────┴─────────────────────┴────────────────┴───────────────┘
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 [`mc ilm rule ls`](#command-mc.ilm.rule.ls) 命令语法如下：

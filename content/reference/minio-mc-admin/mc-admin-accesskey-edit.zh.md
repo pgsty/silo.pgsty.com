@@ -27,6 +27,7 @@ mc admin accesskey edit                                             \
                    --secret-key "myuserserviceaccountnewsecretkey"  \
                    --policy "/path/to/new/policy.json"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -105,7 +106,7 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 若要让凭证在 30 天后过期，请使用：
 
-```
+```text
 --expiry-duration 720h
 ```
 

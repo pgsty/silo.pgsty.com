@@ -77,6 +77,7 @@ The following example removes an existing remote tier called `WARM-TIER` on the 
 ```shell
  mc ilm tier rm myminio WARM-TIER
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -84,6 +85,7 @@ The command has the following syntax:
 ```shell
 mc ilm tier info TARGET TIER_NAME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

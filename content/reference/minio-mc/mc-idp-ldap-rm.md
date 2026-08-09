@@ -27,6 +27,7 @@ The following example removes the AD/LDAP provider settings for the `myminio` de
 mc idp ldap rm       \
             myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

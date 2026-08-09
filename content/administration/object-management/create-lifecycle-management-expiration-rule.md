@@ -93,6 +93,7 @@ mc ilm rule add ALIAS/PATH \
   mc ilm rule add ALIAS/PATH \
      --expire-all-object-versions
   ```
+
 - Replace [`ALIAS`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the S3-compatible host.
 - Replace [`PATH`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.ALIAS) with the path to the bucket on the S3-compatible host.
 - Replace [`NONCURRENT_DAYS`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-expire-days) with the number of days after which to expire noncurrent object versions. For example, specify `30d` to expire a version after it has been noncurrent for at least 30 days.

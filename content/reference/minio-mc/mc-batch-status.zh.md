@@ -36,6 +36,7 @@ Batch status 会显示活动且正在进行的作业，或前 3（三）天内�
 ```shell
 mc batch status myminio "KwSysDpxcBU9FNhGkn2dCf"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

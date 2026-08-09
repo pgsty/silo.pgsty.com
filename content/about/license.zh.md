@@ -30,8 +30,6 @@ PGSTY SILO 沿用同一许可：不重新授权、不附加限制、不做开源
 
 在依据任何摘要（包括本段）行事之前，请阅读[许可证全文](https://www.gnu.org/licenses/agpl-3.0.html)。
 
-
-
 ## 文档：CC BY 4.0 {#documentation}
 
 本站发布的全部内容依据

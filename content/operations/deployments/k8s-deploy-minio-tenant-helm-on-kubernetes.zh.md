@@ -79,6 +79,7 @@ MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](http
    minio-operator/operator         7.1.1           v7.1.1          A Helm chart for MinIO Operator
    minio-operator/tenant           7.1.1           v7.1.1          A Helm chart for MinIO Operator
    ```
+
 2. 创建 Helm `values.yaml` 的本地副本以供修改
 
    ```shell
@@ -211,6 +212,7 @@ MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](http
    ```shell
    watch kubectl get all -n TENANT-NAMESPACE
    ```
+
 8. 暴露 Tenant 的 MinIO S3 API 端口
 
    若要在本地机器上测试 MinIO Client [`mc`](/zh/reference/minio-mc/#command-mc)，请转发 MinIO 端口并创建别名。
@@ -306,6 +308,7 @@ MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](http
    | `tenant.certificate.certConfig` | 控制 [自动 TLS](/zh/operations/network-encryption/#minio-tls) 的设置。 需要 `spec.requestAutoCert: true` |
    | `tenant.certificate.externalCertSecret` | 指定一个或多个类型为 `kubernetes.io/tls` 或 `cert-manager` 的 Kubernetes secret。 MinIO 会基于主机名（Server Name Indication）使用这些证书执行 TLS 握手。 |
    | `tenant.certificate.externalCACertSecret` | 指定一个或多个类型为 `kubernetes.io/tls` 的 Kubernetes secret，其中包含 Tenant 为允许客户端 TLS 连接而必须信任的 Certificate Authority (CA) 证书链。 |
+
 5. 配置 Silo 环境变量
 
    你可以使用 `tenant.configuration` 字段设置服务端 `MINIO_*` 环境变量。这些名称仍属兼容契约。
@@ -335,6 +338,7 @@ MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](http
      ```shell
      kubectl port-forward svc/TENANT-NAME-hl 9000 -n TENANT-NAMESPACE
      ```
+
    - 为 Tenant 服务创建别名：
 
      ```shell

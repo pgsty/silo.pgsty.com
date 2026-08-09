@@ -12,7 +12,7 @@ silo_modified: true
 
 ## 语法 {#id2}
 
-Pigsty 维护版客户端为保持命令行兼容而保留 [`mc update`](#command-mc.update)，但**刻意禁用了自更新**。该命令不会访问发布源、下载二进制，也不会替换已安装的 `mc`/`mcli`；它会打印错误并以状态码 `1` 退出。
+Pigsty 维护版客户端为保持命令行兼容而保留 [`mc update`](#command-mc.update)，但 **刻意禁用了自更新**。该命令不会访问发布源、下载二进制，也不会替换已安装的 `mc`/`mcli`；它会打印错误并以状态码 `1` 退出。
 
 请通过[下载与安装](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
 
@@ -23,6 +23,7 @@ Pigsty 维护版客户端为保持命令行兼容而保留 [`mc update`](#comman
 ```shell
 mc update
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

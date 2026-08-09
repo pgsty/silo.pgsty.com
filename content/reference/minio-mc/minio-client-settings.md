@@ -51,14 +51,18 @@ Use [`mc alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) to 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Syntax" %}}
+
 ```shell
 export MC_HOST_<alias>=https://<Access Key>:<Secret Key>@<YOUR-S3-ENDPOINT>
 ```
+
 {{% /tab %}}
 {{% tab header="Example" %}}
+
 ```shell
 export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG@play.min.io
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -66,14 +70,18 @@ export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifI
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Syntax" %}}
+
 ```shell
 export MC_HOST_<alias>=https://<Access Key>:<Secret Key>:<Session Token>@<YOUR-S3-ENDPOINT>
 ```
+
 {{% /tab %}}
 {{% tab header="Example" %}}
+
 ```shell
 export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG:eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJOVUlCT1JaWVRWMkhHMkJNUlNYUiIsImF1ZCI6IlBvRWdYUDZ1Vk80NUlzRU5SbmdEWGo1QXU1WWEiLCJhenAiOiJQb0VnWFA2dVZPNDVJc0VOUm5nRFhqNUF1NVlhIiwiZXhwIjoxNTM0ODk2NjI5LCJpYXQiOjE1MzQ4OTMwMjksImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0Ojk0NDMvb2F1dGgyL3Rva2VuIiwianRpIjoiNjY2OTZjZTctN2U1Ny00ZjU5LWI0MWQtM2E1YTMzZGZiNjA4In0.eJONnVaSVHypiXKEARSMnSKgr-2mlC2Sr4fEGJitLcJF_at3LeNdTHv0_oHsv6ZZA3zueVGgFlVXMlREgr9LXA@play.min.io
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -106,6 +114,7 @@ Supports adding multiple environment variables by alias.
 ```shell
 export MC_STS_ENDPOINT_myalias=https://sts.minio-operator.svc.cluster.local:4223/sts/ns-1
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
 This setting does not have a configuration setting option.
@@ -141,6 +150,7 @@ Supports adding multiple environment variables by alias.
 ```shell
 export MC_WEB_IDENTITY_TOKEN_FILE_myalias=/var/run/secrets/kubernetes.io/serviceaccount/token
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
 This setting does not have a configuration setting option.
@@ -153,6 +163,7 @@ Specify the path to the configuration folder the MinIO Client should use.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_CONFIG_DIR` {#envvar.MC_CONFIG_DIR}
 
 *envvar*
@@ -168,6 +179,7 @@ Disable the MinIO Client progress bar.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_QUIET` {#envvar.MC_QUIET}
 
 *envvar*
@@ -189,6 +201,7 @@ Disable the pager functionality of the MinIO Client in the CLI. When used, outpu
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_DISABLE_PAGER` {#envvar.MC_DISABLE_PAGER}
 
 *envvar*
@@ -204,6 +217,7 @@ Disable the color theme used for MinIO Client output.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_NO_COLOR` {#envvar.MC_NO_COLOR}
 
 *envvar*
@@ -219,6 +233,7 @@ Enable formatting the output as JSON lines.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_JSON` {#envvar.MC_JSON}
 
 *envvar*
@@ -234,6 +249,7 @@ Enable the debug output.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_DEBUG` {#envvar.MC_DEBUG}
 
 *envvar*
@@ -249,6 +265,7 @@ Disable SSL certificate verification.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_INSECURE` {#envvar.MC_INSECURE}
 
 *envvar*
@@ -264,6 +281,7 @@ Limit the download bandwidth the MinIO Client uses for certain commands.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_LIMIT_DOWNLOAD` {#envvar.MC_LIMIT_DOWNLOAD}
 
 *envvar*
@@ -299,6 +317,7 @@ Limit the upload bandwidth the MinIO Client uses for certain commands.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_LIMIT_UPLOAD` {#envvar.MC_LIMIT_UPLOAD}
 
 *envvar*
@@ -334,6 +353,7 @@ Encrypt and decrypt options using [SSE-KMS](/operations/server-side-encryption/#
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_ENC_KMS` {#envvar.MC_ENC_KMS}
 
 *envvar*
@@ -351,6 +371,7 @@ Encrypt and decrypt options using [SSE-KMS](/operations/server-side-encryption/#
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ##### `MC_ENC_S3` {#envvar.MC_ENC_S3}
 
 *envvar*

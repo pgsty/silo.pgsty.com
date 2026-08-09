@@ -172,6 +172,7 @@ This procedure is not exhaustive of all possible configuration options available
    ```shell
    watch kubectl get all -n minio-tenant
    ```
+
 8. Expose the Tenant S3 API port
 
    To test the Silo client [`mc`](/reference/minio-mc/#command-mc) from your local machine, forward the S3 API port and create an alias.

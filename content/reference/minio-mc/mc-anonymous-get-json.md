@@ -24,6 +24,7 @@ The following command retrieves the JSON-formatted anonymous policy for the `myd
 ```shell
 mc anonymous get-json myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

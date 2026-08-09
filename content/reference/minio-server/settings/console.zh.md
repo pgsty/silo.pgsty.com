@@ -44,6 +44,7 @@ Console 现在仅提供对象浏览能力，类似于通过 [`mc`](/zh/reference
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_BROWSER` {#envvar.MINIO_BROWSER}
 
 *envvar*
@@ -61,6 +62,7 @@ Console 现在仅提供对象浏览能力，类似于通过 [`mc`](/zh/reference
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_BROWSER_LOGIN_ANIMATION` {#envvar.MINIO_BROWSER_LOGIN_ANIMATION}
 
 *envvar*
@@ -84,6 +86,7 @@ Server RELEASE.2023-05-04T21-44-30Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_BROWSER_REDIRECT` {#envvar.MINIO_BROWSER_REDIRECT}
 
 *envvar*
@@ -107,6 +110,7 @@ Server RELEASE.2023-09-16T01-01-47Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_BROWSER_REDIRECT_URL` {#envvar.MINIO_BROWSER_REDIRECT_URL}
 
 *envvar*
@@ -130,6 +134,7 @@ Server RELEASE.2023-09-16T01-01-47Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_BROWSER_SESSION_DURATION` {#envvar.MINIO_BROWSER_SESSION_DURATION}
 
 *envvar*
@@ -162,6 +167,7 @@ MinIO 支持以下时间单位：
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_LOG_QUERY_URL` {#envvar.MINIO_LOG_QUERY_URL}
 
 *envvar*
@@ -181,6 +187,7 @@ MinIO 支持以下时间单位：
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_BROWSER_CONTENT_SECURITY_POLICY` {#envvar.MINIO_BROWSER_CONTENT_SECURITY_POLICY}
 
 *envvar*
@@ -188,8 +195,10 @@ MinIO 支持以下时间单位：
 ```shell
 export MINIO_BROWSER_CONTENT_SECURITY_POLICY="default-src 'self' 'unsafe-eval' 'unsafe-inline';"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `browser csp_policy` {#mc-conf.browser.csp_policy}
 
 *mc-conf*
@@ -199,6 +208,7 @@ mc admin config set browser \
    csp_policy="default-src 'self' 'unsafe-eval' 'unsafe-inline';" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -208,15 +218,16 @@ mc admin config set browser \
 
 将 MinIO Console 配置为在 HTTP 响应中生成 [Strict-Transport-Security](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) 头。
 
-要生成该头，你**必须**使用 [`MINIO_BROWSER_HSTS_SECONDS`](#envvar.MINIO_BROWSER_HSTS_SECONDS) 或 [`hsts_seconds`](#mc-conf.browser.hsts_seconds) 设置持续时间。 其他 HSTS 设置是可选的。
+要生成该头，你 **必须** 使用 [`MINIO_BROWSER_HSTS_SECONDS`](#envvar.MINIO_BROWSER_HSTS_SECONDS) 或 [`hsts_seconds`](#mc-conf.browser.hsts_seconds) 设置持续时间。 其他 HSTS 设置是可选的。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_BROWSER_HSTS_SECONDS` {#envvar.MINIO_BROWSER_HSTS_SECONDS}
 
 *envvar*
 
-已配置策略生效的 `max_age`（秒）。 默认为 `0`，即禁用。 你**必须**配置*非零*时长，才能启用 `Strict-Transport-Security` 头。
+已配置策略生效的 `max_age`（秒）。 默认为 `0`，即禁用。 你 **必须** 配置 *非零* 时长，才能启用 `Strict-Transport-Security` 头。
 
 ```shell
 export MINIO_BROWSER_HSTS_SECONDS=31536000
@@ -241,6 +252,7 @@ export MINIO_BROWSER_HSTS_INCLUDE_SUB_DOMAINS="on"
 ```shell
 export MINIO_BROWSER_HSTS_PRELOAD="on"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
 以下配置项需要重启服务后才会生效。 要重启服务，请使用 [`mc admin service restart`](/zh/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart)。
@@ -249,7 +261,7 @@ export MINIO_BROWSER_HSTS_PRELOAD="on"
 
 *mc-conf*
 
-已配置策略生效的 `max_age`（秒）。 默认为 `0`，即禁用。 你**必须**配置*非零*时长，才能启用 `Strict-Transport-Security` 头。
+已配置策略生效的 `max_age`（秒）。 默认为 `0`，即禁用。 你 **必须** 配置 *非零* 时长，才能启用 `Strict-Transport-Security` 头。
 
 ```shell
 mc admin config set browser \
@@ -282,6 +294,7 @@ mc admin config set browser \
    hsts_seconds="31536000" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -327,6 +340,7 @@ mc admin config set browser \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_BROWSER_REFERRER_POLICY` {#envvar.MINIO_BROWSER_REFERRER_POLICY}
 
 *envvar*
@@ -334,8 +348,10 @@ mc admin config set browser \
 ```shell
 export MINIO_BROWSER_REFERRER_POLICY="strict-origin-when-cross-origin"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `browser referrer_policy` {#mc-conf.browser.referrer_policy}
 
 *mc-conf*
@@ -345,6 +361,7 @@ mc admin config set browser \
    referrer_policy="strict-origin-when-cross-origin" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -358,6 +375,7 @@ mc admin config set browser \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_PROMETHEUS_URL` {#envvar.MINIO_PROMETHEUS_URL}
 
 *envvar*
@@ -379,6 +397,7 @@ MinIO Console 使用 `minio-job` Prometheus 抓取作业，将集群指标填充
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_PROMETHEUS_JOB_ID` {#envvar.MINIO_PROMETHEUS_JOB_ID}
 
 *envvar*
@@ -400,6 +419,7 @@ MinIO 默认为 `minio-job`。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_PROMETHEUS_AUTH_TOKEN` {#envvar.MINIO_PROMETHEUS_AUTH_TOKEN}
 
 *envvar*

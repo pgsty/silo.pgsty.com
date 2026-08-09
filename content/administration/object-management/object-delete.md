@@ -56,7 +56,7 @@ Specifying a `version-id` in a DELETE operation is irreversible. MinIO removes t
 
 ### Delete operations on a prior version {#delete-operations-on-a-prior-version}
 
-To delete prior versions of an object, specify the version’s UUID. You can retrieve the version UUID with [`mc ls --versions`](/reference/minio-mc/mc-ls/#mc.ls.-versions). When the `DELETE` request specifies a `version-id` and the user has the correct permissions to delete the object version`, MinIO permanently removes the specified version from the drive.
+To delete prior versions of an object, specify the version’s UUID. You can retrieve the version UUID with [`mc ls --versions`](/reference/minio-mc/mc-ls/#mc.ls.-versions). When the `DELETE` request specifies a `version-id` and the user has the correct permissions to delete the object version, MinIO permanently removes the specified version from the drive.
 
 {{% alert color="danger" %}}
 **Warning**

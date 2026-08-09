@@ -28,6 +28,7 @@ The following command removes user `myuser` on the `myminio` MinIO deployment:
 ```shell
 mc admin user rm myminio myuser
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 Removes a user on the target MinIO deployment.

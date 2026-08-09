@@ -23,6 +23,7 @@ The following command removes the default object lock configuration for the `myd
 ```shell
 mc retention clear --default myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -139,6 +140,7 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Specific Object" %}}
+
 ```shell
 mc retention clear ALIAS/PATH
 ```

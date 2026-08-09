@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc admin user add myminio newuser newusersecret
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：
@@ -69,9 +70,9 @@ mc [GLOBALFLAGS] admin user add        \
 
 新用户的 secret key。创建 secret key 时请参考以下建议：
 
-- 密钥应为*唯一*值
-- 密钥应足够*长*（超过 12 个字符）
-- 密钥应具备*复杂性*（混合使用字符、数字和符号）
+- 密钥应为 *唯一* 值
+- 密钥应足够 *长*（超过 12 个字符）
+- 密钥应具备 *复杂性*（混合使用字符、数字和符号）
 
 ### 全局标志 {#id4}
 
@@ -89,7 +90,7 @@ mc [GLOBALFLAGS] admin user add        \
 
 - 将 [`ALIAS`](#mc.admin.user.add.ALIAS) 替换为 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`ACCESSKEY`](#mc.admin.user.add.ACCESSKEY) 替换为该用户的 access key。
-- 将 [`SECRETKEY`](#mc.admin.user.add.SECRETKEY) 替换为该用户的 secret key。 MinIO *不*提供任何在设置后检索 secret key 的方法。
+- 将 [`SECRETKEY`](#mc.admin.user.add.SECRETKEY) 替换为该用户的 secret key。 MinIO *不* 提供任何在设置后检索 secret key 的方法。
 
 请为 `ACCESSKEY` 和 `SECRETKEY` 都指定唯一、随机且足够长的字符串。 组织在生成用于 access key 或 secret key 的值时，可能存在特定的内部或监管要求。
 
@@ -97,7 +98,7 @@ mc [GLOBALFLAGS] admin user add        \
 
 ### 新用户默认没有策略 {#id10}
 
-新创建的用户默认*没有*任何策略，因此无法在 MinIO 部署上执行任何操作。 要配置用户的已分配策略，你可以执行以下一项或两项操作：
+新创建的用户默认 *没有* 任何策略，因此无法在 MinIO 部署上执行任何操作。 要配置用户的已分配策略，你可以执行以下一项或两项操作：
 
 - 使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将一个或多个策略关联到用户。
 - 使用 [`mc admin group add`](/zh/reference/minio-mc-admin/mc-admin-group/#mc.admin.group.add) 将用户关联到组。 用户会继承分配给该组的所有策略。

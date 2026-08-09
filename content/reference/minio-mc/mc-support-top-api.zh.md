@@ -27,6 +27,7 @@ silo_modified: false
 ```shell
 mc support top api myminio/
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

@@ -23,6 +23,7 @@ silo_modified: false
 ```shell
 mc mb --with-locks myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -95,7 +96,7 @@ mc mb ~/mydata/mydir
 {{% alert color="warning" %}}
 **重要**
 
-你*只能*在创建存储桶时启用对象锁定。 未启用对象锁定创建的存储桶无法使用 [存储桶生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 或 [存储桶对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 功能。
+你 *只能* 在创建存储桶时启用对象锁定。 未启用对象锁定创建的存储桶无法使用 [存储桶生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 或 [存储桶对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 功能。
 {{% /alert %}}
 
 ##### `--with-versioning` {#mc.mb.-with-versioning}
@@ -157,9 +158,9 @@ MinIO 对象存储部署不限制每个用户可创建的 存储桶数量。
 
 ### 在创建存储桶时启用对象锁定 {#id11}
 
-MinIO 遵循 [AWS S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html#object-lock-bucket-config)， 要求你*必须*在创建存储桶时启用 [对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking)。 未启用对象锁定创建的存储桶*永远*无法启用对象保留或锁定。
+MinIO 遵循 [AWS S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html#object-lock-bucket-config)， 要求你 *必须* 在创建存储桶时启用 [对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking)。 未启用对象锁定创建的存储桶 *永远* 无法启用对象保留或锁定。
 
-启用存储桶锁定并*不会*设置任何对象锁定或保留配置。 建议将启用存储桶锁定作为标准实践。
+启用存储桶锁定并 *不会* 设置任何对象锁定或保留配置。 建议将启用存储桶锁定作为标准实践。
 
 ### S3 兼容性 {#s3}
 

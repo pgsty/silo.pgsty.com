@@ -59,6 +59,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="Nodes" %}}
 The following command scrapes metrics for a node on the MinIO Server.
@@ -81,6 +82,7 @@ scrape_configs:
      static_configs:
      - targets: [minio-1.example.net, minio-2.example.net, minio-N.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="Buckets" %}}
 The following command scrapes metrics for buckets on the MinIO Server.
@@ -103,6 +105,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="Resources" %}}
 {{% alert color="info" %}}
@@ -130,6 +133,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -167,6 +171,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="Nodes" %}}
 Node metrics are specific for node-level monitoring. You need to list all MinIO nodes for this configuration.
@@ -183,8 +188,10 @@ scrape_configs:
      static_configs:
      - targets: [minio-1.example.net, minio-2.example.net, minio-N.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="Bucket" %}}
+
 ```yaml
 global:
    scrape_interval: 60s
@@ -197,8 +204,10 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="Resource" %}}
+
 ```yaml
 global:
    scrape_interval: 60s
@@ -211,6 +220,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -247,6 +257,7 @@ minio_node_drive_errors_availability{job="minio-job"}[5m]
 
 minio_node_drive_io_waiting{job="minio-job"}[5m]
 ```
+
 {{% /tab %}}
 {{% tab header="Recommended Metrics" %}}
 MinIO recommends the following as a basic set of metrics to monitor.
@@ -266,6 +277,7 @@ See [Metrics and alerts](/operations/monitoring/metrics-and-alerts/#minio-metric
 | `minio_node_drive_errors_timeout` | Total number of drive timeout errors since server start. |
 | `minio_node_drive_errors_availability` | Total number of drive I/O errors, permission denied and timeouts since server start. |
 | `minio_node_drive_io_waiting` | Total number of I/O operations waiting on drive. |
+
 {{% /tab %}}
 {{< /tabpane >}}
 

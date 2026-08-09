@@ -79,6 +79,7 @@ This procedure is not exhaustive of all possible configuration options available
    minio-operator/operator         7.1.1           v7.1.1          A Helm chart for MinIO Operator
    minio-operator/tenant           7.1.1           v7.1.1          A Helm chart for MinIO Operator
    ```
+
 2. Create a local copy of the Helm `values.yaml` for modification
 
    ```shell
@@ -211,6 +212,7 @@ This procedure is not exhaustive of all possible configuration options available
    ```shell
    watch kubectl get all -n TENANT-NAMESPACE
    ```
+
 8. Expose the Tenant MinIO S3 API port
 
    To test the MinIO Client [`mc`](/reference/minio-mc/#command-mc) from your local machine, forward the MinIO port and create an alias.
@@ -306,6 +308,7 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
    | `tenant.certificate.certConfig` | Controls the settings for [automatic TLS](/operations/network-encryption/#minio-tls). Requires `spec.requestAutoCert: true` |
    | `tenant.certificate.externalCertSecret` | Specify one or more Kubernetes secrets of type `kubernetes.io/tls` or `cert-manager`. MinIO uses these certificates for performing TLS handshakes based on hostname (Server Name Indication). |
    | `tenant.certificate.externalCACertSecret` | Specify one or more Kubernetes secrets of type `kubernetes.io/tls` with the Certificate Authority (CA) chains which the Tenant must trust for allowing client TLS connections. |
+
 5. Configure Silo Environment Variables
 
    You can set the server's `MINIO_*` environment variables using the `tenant.configuration` field. These names remain compatibility contracts.
@@ -335,6 +338,7 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
      ```shell
      kubectl port-forward svc/TENANT-NAME-hl 9000 -n TENANT-NAMESPACE
      ```
+
    - Create an alias for the Tenant service:
 
      ```shell

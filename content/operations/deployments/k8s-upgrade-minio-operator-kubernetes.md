@@ -93,6 +93,7 @@ If you installed the Operator using [Helm](/operations/deployments/k8s-deploy-op
    service/sts unchanged
    deployment.apps/minio-operator configured
    ```
+
 4. Validate the Operator upgrade
 
    You can check the new Operator version with the same `kubectl` command used previously:
@@ -100,6 +101,7 @@ If you installed the Operator using [Helm](/operations/deployments/k8s-deploy-op
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
+
 {{% /tab %}}
 {{% tab header="Upgrade using Helm" %}}
 The following procedure upgrades an existing MinIO Operator Installation using Helm.
@@ -127,6 +129,7 @@ If you installed the Operator using Kustomize, use the **Upgrade using Kustomize
    NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
    operator        minio-operator  1               2023-11-01 15:49:54.539724775 -0400 EDT deployed        operator-5.0.x v5.0.x
    ```
+
 3. Update the Operator Repository
 
    Use `helm repo update minio-operator` to update the MinIO Operator repo. If you set a different alias for the MinIO Operator repository, specify that in the command instead of `minio-operator`. You can use `helm repo list` to review your installed repositories.
@@ -168,5 +171,6 @@ If you installed the Operator using Kustomize, use the **Upgrade using Kustomize
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
+
 {{% /tab %}}
 {{< /tabpane >}}

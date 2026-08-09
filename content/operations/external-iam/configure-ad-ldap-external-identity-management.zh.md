@@ -55,6 +55,7 @@ MinIO 支持配置单个 Active Directory / LDAP 连接，用于对用户身份�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 - 如果 AD/LDAP 部署与 MinIO Tenant 位于同一 Kubernetes 集群内，你可以使用 Kubernetes service 名称，让 MinIO Tenant 能够连接到 AD/LDAP 服务。
 - 如果 AD/LDAP 部署位于 Kubernetes 集群外部，则必须确保该集群支持 Kubernetes services、pods 与外部网络之间的通信路由。 这可能需要配置或部署额外的 Kubernetes 网络组件，和/或启用访问公网的能力。
 {{% /tab %}}
@@ -123,7 +124,7 @@ MinIO 需要一组只读访问凭证，以便通过 [bind](/zh/operations/extern
    {{% /alert %}}
    {{% /tab %}}
    {{% tab header="环境变量" %}}
-   MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 指定 AD/LDAP 提供方设置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时应用这些设置。 对于分布式部署，请在部署中的所有节点上使用*相同*的值设置这些变量。 节点之间的配置不一致会导致启动或配置失败。
+   MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 指定 AD/LDAP 提供方设置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时应用这些设置。 对于分布式部署，请在部署中的所有节点上使用 *相同* 的值设置这些变量。 节点之间的配置不一致会导致启动或配置失败。
 
    以下示例代码设置了外部身份管理所需的全部 AD/LDAP 相关环境变量。 至少需要以下变量：
 

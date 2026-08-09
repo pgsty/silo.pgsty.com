@@ -62,7 +62,7 @@ Scanner metrics, including usage metrics, reflect the last completed scan. `PUT`
 
 The output resembles the following:
 
-```
+```text
 Overall Statistics
 ------------------
 Last full scan time:   0d0h14m; Estimated 2885.28/month

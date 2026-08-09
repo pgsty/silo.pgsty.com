@@ -47,6 +47,7 @@ The following command creates a new policy called `listmybuckets` on the [alias]
 ```shell
 mc admin policy create myminio listmybuckets /tmp/listmybuckets.json
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

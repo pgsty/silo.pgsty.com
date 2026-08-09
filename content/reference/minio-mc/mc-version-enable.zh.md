@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
  mc version enable myminio/mybucket
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：

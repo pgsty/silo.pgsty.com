@@ -10,7 +10,7 @@ minio_origin: false
 silo_modified: false
 ---
 
-Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端和磁盘数据的兼容性，但**绝不是一次在运维层面完全无感的二进制改名**。本页是从上游基线迁移到 2026-08-06 所准备 Silo 源码时的兼容性契约。
+Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端和磁盘数据的兼容性，但 **绝不是一次在运维层面完全无感的二进制改名**。本页是从上游基线迁移到 2026-08-06 所准备 Silo 源码时的兼容性契约。
 
 {{% alert color="warning" %}}
 **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
@@ -99,7 +99,7 @@ replace github.com/minio/pkg/v3  => github.com/pgsty/silo-pkg/v3 v3.11.0
 | 温层探针            | 临时对象内容为 `MinIO`                   | 同长度探针内容为 `Silo!`                                                                      | 只可能通过后端检查或清理失败残留观察到；协议语义不变                       |
 | 日志轮转默认名         | `minio-*.log`                     | `silo-*.log`                                                                          | 按文件名匹配的采集器需要修改                                   |
 
-被删除的 `/api/health/upload` 引用是一个**出站 SUBNET URL 路径**，并不是 Silo 本地 HTTP 路由。正确的兼容性描述是“Silo 不再发起该 POST”，不能写成“删除了服务端 API”。
+被删除的 `/api/health/upload` 引用是一个 **出站 SUBNET URL 路径**，并不是 Silo 本地 HTTP 路由。正确的兼容性描述是“Silo 不再发起该 POST”，不能写成“删除了服务端 API”。
 
 ### 默认配置目录选择 {#config-dir}
 
@@ -147,7 +147,7 @@ Linux amd64/arm64 软件包名为 `silo`，关键载荷如下：
 /usr/share/doc/silo/NOTICE
 ```
 
-软件包会创建无 home 的系统账号 `silo:silo`。它**不会** chown 既有数据、迁移所有权、在安装时停止运行中的 MinIO 服务，也不会在包管理器层面对 `minio` 声明 `Provides`、`Obsoletes`、`Replaces` 或 `Conflicts`。因此两个包可以同时安装，但使用随附 unit 时两个服务不能同时运行。
+软件包会创建无 home 的系统账号 `silo:silo`。它 **不会** chown 既有数据、迁移所有权、在安装时停止运行中的 MinIO 服务，也不会在包管理器层面对 `minio` 声明 `Provides`、`Obsoletes`、`Replaces` 或 `Conflicts`。因此两个包可以同时安装，但使用随附 unit 时两个服务不能同时运行。
 
 `silo.service` 声明 `Conflicts=minio.service`，以 `silo:silo` 运行，先读 `/etc/default/minio`，再读 `/etc/default/silo`。随包的 Silo 文件没有有效赋值，所以管理员在后一个文件显式覆盖前，旧文件仍然生效。启动命令为：
 
@@ -217,7 +217,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 | OIDC JWT 校验（`d24f449e0`）                                     | client secret 不再作为验签 key。只接受非对称 JWKS 算法 `RS256/384/512`、`ES256/384/512`、`RS3256/3384/3512`、`ES3256/3384/3512`。`HS256/384/512` 失败；未知 `kid` 仍走既有 JWKS 刷新/重试 | 使用 HMAC 为 Silo token 签名的 IdP 必须迁移到非对称 JWKS key                                                  |
 | LDAP STS 错误（`3b950f8fa`）                                     | 未知用户与错误密码共享同一个外部 `InvalidParameterValue` 认证失败；LDAP 基础设施错误仍是服务端错误并记日志                                                                                      | 客户端不能再从响应文本判断账号是否存在                                                                             |
 | LDAP STS 限流（`18b712d49`、`9e10f6d9a`、`f44110890`、`5e40665ac`） | 每来源、每节点内存桶：突发 10 次，每 6 秒补 1 个 token，空闲 TTL 15 分钟。只有认证失败消耗 token，成功与基础设施失败会退回。耗尽返回 HTTP 429、`ThrottlingException`、`Retry-After: 6`                         | 代理应配置独立的 `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES`                                              |
-| LDAP 可信代理来源                                                  | socket peer 在允许列表中时，优先干净的 `X-Real-IP`；否则从右向左遍历 XFF 并跳过可信 hop。忽略 RFC 7239 `Forwarded`。代理**必须覆盖** X-Real-IP                                                 | 审核 Ingress 头部清洗；该限流不是分布式账号锁                                                                     |
+| LDAP 可信代理来源                                                  | socket peer 在允许列表中时，优先干净的 `X-Real-IP`；否则从右向左遍历 XFF 并跳过可信 hop。忽略 RFC 7239 `Forwarded`。代理 **必须覆盖** X-Real-IP                                                 | 审核 Ingress 头部清洗；该限流不是分布式账号锁                                                                     |
 | LDAP service-account 查找                                      | 对“User DN not found”的匹配改为大小写不敏感，依赖消息大小写变化时仍能得到预期 Admin no-such-user / login-name 错误分类                                                                     | 只有依赖偶然错误分类的脆弱客户端会观察到变化                                                                          |
 | 桶/对象 IAM 边界（`97b7d2804`）                                     | 12 个受保护桶写操作不再仅因 `arn:aws:s3:::bucket/*` Allow 而获准，必须有裸桶 ARN。Deny/NotResource 与内置 `*` 策略语义不变                                                               | 自定义策略中确实需要桶写操作时加入 `arn:aws:s3:::bucket`；或临时使用全局逃生开关 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` |
 | 受保护操作                                                        | 删除/强删桶；写/删桶策略；写复制、生命周期、对象锁、版本、CORS；删 CORS；写桶 QoS 或 Inventory 配置                                                                                           | 读/list、创建桶、标签、加密与通知仍沿用历史匹配行为                                                                    |

@@ -27,7 +27,7 @@ MinIO 依赖于 MySQL 5.7.8 中引入的功能。
 
 ### 1) 将 MySQL 端点添加到 MinIO {#mysql-minio}
 
-你可以使用环境变量*或*设置运行时配置设置来配置新的 MySQL 服务端点。
+你可以使用环境变量 *或* 设置运行时配置设置来配置新的 MySQL 服务端点。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
@@ -53,6 +53,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
    set MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
    set MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -68,11 +69,12 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
    export MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
    export MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
 ```
+
 {{% /alert %}}
 
 - 将 `<IDENTIFIER>` 替换为该 MySQL 服务端点的唯一描述性字符串。对于与新目标服务端点相关的所有环境变量，请使用相同的 `<IDENTIFIER>` 值。 以下示例假定标识符为 `PRIMARY`。
 
-  如果指定的 `<IDENTIFIER>` 与 MinIO 部署中现有的 MySQL 服务 端点匹配，则新设置会*覆盖*该端点的任何现有设置。使用 [`mc admin config get notify_mysql`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署上当前配置的 MySQL 端点。
+  如果指定的 `<IDENTIFIER>` 与 MinIO 部署中现有的 MySQL 服务 端点匹配，则新设置会 *覆盖* 该端点的任何现有设置。使用 [`mc admin config get notify_mysql`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署上当前配置的 MySQL 端点。
 - 将 `<ENDPOINT>` 替换为 MySQL 服务端点的 DSN。 MinIO 期望采用以下格式：
 
   `<user>:<password>@tcp(<host>:<port>)/<database>`
@@ -105,7 +107,7 @@ mc admin config set ALIAS/ notify_mysql:IDENTIFIER \
 
 - 将 `IDENTIFIER` 替换为该 MySQL 服务端点的唯一描述性字符串。 本过程中的以下示例假定标识符为 `PRIMARY`。
 
-  如果指定的 `IDENTIFIER` 与 MinIO 部署中现有的 MySQL 服务 端点匹配，则新设置会*覆盖*该端点的任何现有设置。使用 [`mc admin config get notify_mysql`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署上当前配置的 MySQL 端点。
+  如果指定的 `IDENTIFIER` 与 MinIO 部署中现有的 MySQL 服务 端点匹配，则新设置会 *覆盖* 该端点的任何现有设置。使用 [`mc admin config get notify_mysql`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署上当前配置的 MySQL 端点。
 - 将 `<ENDPOINT>` 替换为 MySQL 服务端点的 DSN。 MinIO 期望采用以下格式：
 
   `<user>:<password>@tcp(<host>:<port>)/<database>`
@@ -148,6 +150,7 @@ SQS ARNs: arn:minio:sqs::primary:mysql
    ```shell
    mc admin info --json ALIAS
    ```
+
 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
 
    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
@@ -245,13 +248,13 @@ mc admin config set ALIAS/ notify_mysql:IDENTIFIER \
    comment="<string>"
 ```
 
-以下配置设置是 MySQL 服务端点的*最小必需*项：
+以下配置设置是 MySQL 服务端点的 *最小必需* 项：
 
 - [`notify_mysql dsn_string`](/zh/reference/minio-server/settings/notifications/mysql/#mc-conf.notify_mysql.dsn_string)
 - [`notify_mysql table`](/zh/reference/minio-server/settings/notifications/mysql/#mc-conf.notify_mysql.table)
 - [`notify_mysql format`](/zh/reference/minio-server/settings/notifications/mysql/#mc-conf.notify_mysql.format)
 
-所有其他配置设置均为*可选*。有关 MySQL 配置设置的完整列表，请参阅 [MySQL 通知设置](/zh/reference/minio-server/settings/notifications/mysql/#minio-server-config-bucket-notification-mysql)。
+所有其他配置设置均为 *可选*。有关 MySQL 配置设置的完整列表，请参阅 [MySQL 通知设置](/zh/reference/minio-server/settings/notifications/mysql/#minio-server-config-bucket-notification-mysql)。
 
 ### 3) 重启 MinIO 部署 {#id11}
 

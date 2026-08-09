@@ -30,6 +30,7 @@ silo_modified: false
 ```shell
 mc admin cluster bucket import myminio ~/minio-metadata-backup/myminio-cluster.zip
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

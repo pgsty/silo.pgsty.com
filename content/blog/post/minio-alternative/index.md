@@ -64,7 +64,7 @@ Use the latest build, not the April 22, 2025 edition with the GUI. There’s a s
 
 - **CVE-2025-62506** – privilege escalation via session-policy bypass (HIGH). Low-privilege users can mint new accounts and escalate.
 
-In a locked-down intranet the risk is manageable, but you still want the fix, which landed in the 2025‑10‑15 release. MinIO pulled the prebuilt binaries starting with that version, offering source only. Annoying, but it’s Go—`go build` and you’re done. I forked MinIO, ran their packager, and produced RPM/DEBs for 2025‑12‑03 so I’m not deploying vulnerable bits: https://github.com/pgsty/minio
+In a locked-down intranet the risk is manageable, but you still want the fix, which landed in the 2025‑10‑15 release. MinIO pulled the prebuilt binaries starting with that version, offering source only. Annoying, but it’s Go—`go build` and you’re done. I forked MinIO, ran their packager, and produced RPM/DEBs for 2025‑12‑03 so I’m not deploying vulnerable bits: <https://github.com/pgsty/minio>
 
 ![minio.png](minio.png)
 

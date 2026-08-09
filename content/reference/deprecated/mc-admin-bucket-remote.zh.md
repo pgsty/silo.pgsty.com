@@ -160,9 +160,9 @@ http(s)://ACCESSKEY:SECRETKEY@DESTHOSTNAME/DESTBUCKET
 
 *mc-cmd*
 
-启用同步复制模式，MinIO 会在返回 PUT 对象响应*之前*尝试复制对象。 同步复制可能会增加等待 PUT 操作成功返回的时间。
+启用同步复制模式，MinIO 会在返回 PUT 对象响应 *之前* 尝试复制对象。 同步复制可能会增加等待 PUT 操作成功返回的时间。
 
-默认情况下，[`mc admin bucket remote add`](#mc.admin.bucket.remote.add) 以异步模式运行， MinIO 会在返回 PUT 对象响应*之后*尝试复制对象。
+默认情况下，[`mc admin bucket remote add`](#mc.admin.bucket.remote.add) 以异步模式运行， MinIO 会在返回 PUT 对象响应 *之后* 尝试复制对象。
 
 #### `mc admin bucket remote ls` {#mc.admin.bucket.remote.ls}
 

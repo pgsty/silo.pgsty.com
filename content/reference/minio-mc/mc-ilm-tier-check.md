@@ -26,6 +26,7 @@ The following example displays the configuration for an existing remote tier cal
 ```shell
  mc ilm tier check myminio WARM-TIER
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

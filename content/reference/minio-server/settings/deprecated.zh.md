@@ -30,7 +30,7 @@ silo_modified: false
 
 ## 环境变量 {#id3}
 
-以下*环境变量*已弃用。 此处仅为历史参考而列出。
+以下 *环境变量* 已弃用。 此处仅为历史参考而列出。
 
 #### `MINIO_SECRET_KEY` {#envvar.MINIO_SECRET_KEY}
 
@@ -43,14 +43,14 @@ silo_modified: false
 
 [root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户的 secret key。
 
-该环境变量已*弃用*，请改用 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 环境变量。
+该环境变量已 *弃用*，请改用 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 环境变量。
 
 {{% alert color="danger" %}}
 **警告**
 
 如果未设置 [`MINIO_SECRET_KEY`](#envvar.MINIO_SECRET_KEY)，[`minio`](/zh/reference/minio-server/#command-minio) 默认使用 `minioadmin`。
 
-在生产环境中**绝不要**使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) 指定唯一、足够长且随机的值。
+在生产环境中 **绝不要** 使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) 指定唯一、足够长且随机的值。
 {{% /alert %}}
 
 #### `MINIO_ACCESS_KEY` {#envvar.MINIO_ACCESS_KEY}
@@ -64,14 +64,14 @@ silo_modified: false
 
 [root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户的 access key。
 
-> 该环境变量已*弃用*，请改用 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 环境变量。
+> 该环境变量已 *弃用*，请改用 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 环境变量。
 
 {{% alert color="danger" %}}
 **警告**
 
 如果未设置 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY)，[`minio`](/zh/reference/minio-server/#command-minio) 默认使用 `minioadmin`。
 
-在生产环境中**绝不要**使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) 指定唯一、足够长且随机的值。
+在生产环境中 **绝不要** 使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) 指定唯一、足够长且随机的值。
 {{% /alert %}}
 
 #### `MINIO_ACCESS_KEY_OLD` {#envvar.MINIO_ACCESS_KEY_OLD}
@@ -121,9 +121,9 @@ silo_modified: false
 
 MinIO Console 用于连接 MinIO Server 的 [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) (FQDN)。
 
-为确保 Console 正常工作，MinIO server URL *必须*是主机的 FQDN，且可解析并可达。
+为确保 Console 正常工作，MinIO server URL *必须* 是主机的 FQDN，且可解析并可达。
 
-如果指定值无法解析到 MinIO server，通过 MinIO Console 登录将失败，并在等待一段时间后返回网络错误。 较旧版本的 Console 可能会返回通用的“Invalid Login”错误。 可通过取消设置该值*或*解决 FQDN 解析问题来恢复 Console 登录。 在以下情况下可能需要该设置：
+如果指定值无法解析到 MinIO server，通过 MinIO Console 登录将失败，并在等待一段时间后返回网络错误。 较旧版本的 Console 可能会返回通用的“Invalid Login”错误。 可通过取消设置该值 *或* 解决 FQDN 解析问题来恢复 Console 登录。 在以下情况下可能需要该设置：
 
 - MinIO Server 使用的 TLS 证书在 Subject Alternative Name (SAN) 中未包含主机本地 IP。
 

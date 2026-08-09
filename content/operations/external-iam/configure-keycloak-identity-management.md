@@ -76,6 +76,7 @@ This procedure assumes a configured [`alias`](/reference/minio-mc/mc-alias/#comm
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 1. Configure or Create a Client for Accessing Keycloak
 
    Authenticate to the Keycloak **Administrative Console** and navigate to **Clients**.
@@ -356,6 +357,7 @@ Check the MinIO logs and verify that startup succeeded with no errors related to
 
       client.list_buckets()
       ```
+
 2. Next Steps
 
 Applications should implement the [STS AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) flow using their [SDK](/developers/minio-drivers/#minio-drivers) of choice. When STS credentials expire, applications should have logic in place to regenerate the JWT token, STS token, and MinIO credentials before retrying and continuing operations.
@@ -363,6 +365,7 @@ Applications should implement the [STS AssumeRoleWithWebIdentity](/developers/se
 Alternatively, users can generate [access keys](/administration/identity-access-management/minio-user-management/#minio-id-access-keys) through the MinIO Console for the purpose of creating long-lived API-key like access using their Keycloak credentials.
 {{% /tab %}}
 {{% tab header="Baremetal" %}}
+
 1. Configure or Create a Client for Accessing Keycloak
 
    Authenticate to the Keycloak **Administrative Console** and navigate to **Clients**.
@@ -702,6 +705,7 @@ Alternatively, users can generate [access keys](/administration/identity-access-
 
       client.list_buckets()
       ```
+
 6. Next Steps
 
    Applications should implement the [STS AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) flow using their [SDK](/developers/minio-drivers/#minio-drivers) of choice. When STS credentials expire, applications should have logic in place to regenerate the JWT token, STS token, and MinIO credentials before retrying and continuing operations.
@@ -760,6 +764,7 @@ You can validate the functionality by using the Admin REST API with the MinIO cl
         -d "grant_type=password" \
         http://keycloak-url:port/admin/realms/REALM/protocol/openid-connect/token
    ```
+
 2. Use the value returned as the `access_token` to access the Admin API:
 
    ```shell

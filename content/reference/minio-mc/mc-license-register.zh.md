@@ -31,6 +31,7 @@ silo_modified: false
 ```shell
 mc license register minio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -42,6 +43,7 @@ mc [GLOBALFLAGS] license register ALIAS                      \
                          [--license <path to license file>]  \
                          [--name <value>]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

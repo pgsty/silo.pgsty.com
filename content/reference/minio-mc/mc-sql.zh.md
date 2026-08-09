@@ -23,6 +23,7 @@ silo_modified: false
 ```shell
 mc sql --recursive --query "select * from S3Object" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

@@ -30,6 +30,7 @@ The following command outputs the job definition for the job identified as `KwSy
 ```shell
 mc batch describe myminio KwSysDpxcBU9FNhGkn2dCf
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

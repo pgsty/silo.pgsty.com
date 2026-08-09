@@ -38,6 +38,7 @@ silo_modified: true
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Operator Console-Deployed Tenant" selected=true %}}
+
 1. 创建基础配置文件：
 
    1. 在一个合适的目录中，使用 `kubectl get` 将当前 Tenant 配置保存到文件：
@@ -66,6 +67,7 @@ silo_modified: true
       >   resourceVersion: "4699"
       >   uid: d5b8e468-3bed-4aa3-8ddb-dfe1ee0362da
       > ```
+
    2. 在同一目录中，创建一个 `kustomization.yaml` 文件，其内容类似如下：
 
       ```shell
@@ -145,6 +147,7 @@ spec:
    NAME            NAMESPACE         REVISION        UPDATED                                 STATUS          CHART           APP VERSION
    CHART_NAME      TENANT_NAMESPACE  1               2023-11-01 15:49:58.810412732 -0400 EDT deployed        tenant-5.0.x   v5.0.x
    ```
+
 2. 更新 Operator 仓库
 
    使用 `helm repo update minio-operator` 更新 MinIO Operator 仓库。 如果你为 MinIO Operator 仓库设置了不同的别名，请在命令中指定该别名。 你可以使用 `helm repo list` 查看已安装的仓库列表。
@@ -164,7 +167,7 @@ spec:
    minio-operator/tenant           7.1.1          v7.1.1         A Helm chart for MinIO Operator
    ```
 
-   `minio-operator/minio-operator` 是旧版 chart，正常情况下**不应**安装。
+   `minio-operator/minio-operator` 是旧版 chart，正常情况下 **不应** 安装。
 3. 保留并审查 Tenant values
 
    导出当前发布由用户提供的 values，然后确认该文件保留了所有拓扑、存储、TLS、凭据与调度设置：

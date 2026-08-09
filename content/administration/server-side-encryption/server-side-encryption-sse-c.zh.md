@@ -11,7 +11,7 @@ silo_modified: false
 
 MinIO Server-Side Encryption (SSE) 在写入操作过程中保护对象， 使客户端能够利用服务端处理能力在存储层实现对象保护 （静态加密，encryption-at-rest）。SSE 还提供满足安全锁定与擦除相关 监管和合规要求所需的关键能力。
 
-本页中的步骤用于配置并启用使用客户端管理密钥的服务端加密 （SSE-C）。MinIO SSE-C 支持由客户端在对象写入磁盘*之前* 驱动对象加密。客户端在执行读取操作时必须提供正确的密钥 才能解密对象。
+本页中的步骤用于配置并启用使用客户端管理密钥的服务端加密 （SSE-C）。MinIO SSE-C 支持由客户端在对象写入磁盘 *之前* 驱动对象加密。客户端在执行读取操作时必须提供正确的密钥 才能解密对象。
 
 MinIO SSE-C 在功能上兼容 Amazon [Server-Side Encryption with Customer-Provided Keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerSideEncryptionCustomerKeys.html).
 

@@ -27,6 +27,7 @@ mc admin accesskey edit                                             \
                    --secret-key "myuserserviceaccountnewsecretkey"  \
                    --policy "/path/to/new/policy.json"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -105,7 +106,7 @@ Length of time for which the accesskey remains valid. Valid time units are “ns
 
 To expire the credentials after 30 days, use:
 
-```
+```text
 --expiry-duration 720h
 ```
 

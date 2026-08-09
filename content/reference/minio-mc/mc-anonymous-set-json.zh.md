@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc anonymous set-json ~/mydata-anonymous.json myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

@@ -24,6 +24,7 @@ The following command applies the JSON-formatted anonymous policy to the `mydata
 ```shell
 mc anonymous set-json ~/mydata-anonymous.json myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

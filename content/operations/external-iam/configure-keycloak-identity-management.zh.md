@@ -76,6 +76,7 @@ MinIO 部署必须与目标 OIDC 服务保持双向访问。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 1. 配置或创建用于访问 Keycloak 的 Client
 
    认证到 Keycloak **Administrative Console**，然后进入 **Clients**。
@@ -357,6 +358,7 @@ Keycloak 会使用提供的 URI 将已认证用户返回到 Console。</p><p>对
 
       client.list_buckets()
       ```
+
 2. 后续步骤
 
 应用程序应使用其选择的 [SDK](/zh/developers/minio-drivers/#minio-drivers) 实现 [STS AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) 流程。 当 STS 凭证过期时，应用程序应具备在重试并继续操作之前重新生成 JWT token、 STS token 和 MinIO 凭证的逻辑。
@@ -364,6 +366,7 @@ Keycloak 会使用提供的 URI 将已认证用户返回到 Console。</p><p>对
 或者，用户也可以通过 MinIO Console 使用其 Keycloak 凭证生成 [access keys](/zh/administration/identity-access-management/minio-user-management/#minio-id-access-keys)， 以创建类似长期 API key 的访问方式。
 {{% /tab %}}
 {{% tab header="裸金属" %}}
+
 1. 配置或创建用于访问 Keycloak 的 Client
 
    认证到 Keycloak **Administrative Console**，然后进入 **Clients**。
@@ -705,6 +708,7 @@ Keycloak 会使用提供的 URI 将已认证用户返回到 Console。</p><p>对
 
       client.list_buckets()
       ```
+
 6. 后续步骤
 
    应用程序应使用所选 [SDK](/zh/developers/minio-drivers/#minio-drivers) 实现 [STS AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) 流程。 当 STS 凭证过期时，应用程序应具备在重试并继续操作之前重新生成 JWT token、 STS token 和 MinIO 凭证的逻辑。
@@ -763,6 +767,7 @@ MinIO 支持使用 Keycloak Admin REST API 检查认证用户是否存在，*以
         -d "grant_type=password" \
         http://keycloak-url:port/admin/realms/REALM/protocol/openid-connect/token
    ```
+
 2. 使用返回结果中的 `access_token` 访问 Admin API：
 
    ```shell

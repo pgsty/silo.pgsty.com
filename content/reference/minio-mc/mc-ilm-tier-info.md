@@ -67,6 +67,7 @@ The following example outputs the configuration for an existing remote tier call
 ```shell
  mc ilm tier info myminio WARM-TIER
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -74,6 +75,7 @@ The command has the following syntax:
 ```shell
 mc ilm tier info TARGET TIER_NAME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

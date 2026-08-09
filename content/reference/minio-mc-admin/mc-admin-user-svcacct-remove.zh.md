@@ -38,6 +38,7 @@ silo_modified: false
 ```shell
 mc admin user svcacct rm myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

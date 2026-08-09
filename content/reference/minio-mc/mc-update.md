@@ -23,6 +23,7 @@ The following command reports that self-update is disabled and exits with status
 ```shell
 mc update
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

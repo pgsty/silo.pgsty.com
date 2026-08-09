@@ -55,6 +55,7 @@ This procedure assumes an existing Active Directory or LDAP service. Instruction
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 - For AD/LDAP deployments within the same Kubernetes cluster as the MinIO Tenant, you can use Kubernetes service names to allow the MinIO Tenant to establish connectivity to the AD/LDAP service.
 - For AD/LDAP deployments external to the Kubernetes cluster, you must ensure the cluster supports routing communications between Kubernetes services and pods and the external network. This may require configuration or deployment of additional Kubernetes network components and/or enabling access to the public internet.
 {{% /tab %}}

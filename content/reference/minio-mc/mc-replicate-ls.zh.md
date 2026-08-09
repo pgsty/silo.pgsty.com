@@ -32,6 +32,7 @@ silo_modified: false
 ```shell
 mc replicate ls --status "enabled" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc encrypt clear myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -60,11 +61,14 @@ mc encrypt clear play/mybucket
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
+
 ```shell
  mc encrypt clear myminio/data
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc encrypt clear ALIAS
 ```

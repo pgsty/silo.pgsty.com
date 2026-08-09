@@ -31,6 +31,7 @@ silo_modified: false
 ```shell
 mc rm --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

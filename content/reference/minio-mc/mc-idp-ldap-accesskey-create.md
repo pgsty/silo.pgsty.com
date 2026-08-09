@@ -29,6 +29,7 @@ The [`mc idp ldap accesskey create`](#command-mc.idp.ldap.accesskey.create) allo
 ```shell
 mc idp ldap accesskey create minio/
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

@@ -23,6 +23,7 @@ The following example outputs the AD/LDAP configuration settings on the `myminio
 mc idp ldap info     \
             myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

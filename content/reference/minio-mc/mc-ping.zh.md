@@ -31,6 +31,7 @@ mc ping play --count 5
 4: https://play.min.io   min=61.26ms    max=213.00ms   average=102.20ms   errors=0   roundtrip=61.26ms
 5: https://play.min.io   min=61.26ms    max=213.00ms   average=95.03ms    errors=0   roundtrip=66.36ms
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

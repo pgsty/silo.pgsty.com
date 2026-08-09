@@ -45,6 +45,7 @@ The following command returns information on the specified access key:
 ```shell
 mc admin user svcacct info myminio myuseraccesskey
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

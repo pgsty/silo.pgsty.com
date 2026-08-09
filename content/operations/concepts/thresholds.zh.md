@@ -107,12 +107,12 @@ MinIO 建议生产工作负载使用基于 XFS 文件系统的 Linux 操作系�
 
 例如，以下操作会创建命名空间冲突：
 
-```
+```text
 PUT data/invoices/2024/january/vendors.csv
 PUT data/invoices/2024/january <- collides with existing object prefix
 ```
 
-```
+```text
 PUT data/invoices/2024/january
 PUT data/invoices/2024/january/vendors.csv <- collides with existing object
 ```

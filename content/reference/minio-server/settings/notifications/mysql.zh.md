@@ -37,6 +37,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_MYSQL_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_MYSQL_DSN_STRING_PRIMARY="username:password@tcp(mysql.example.com:3306)/miniodb"
@@ -52,6 +53,7 @@ export MINIO_NOTIFY_MYSQL_FORMAT_SECONDARY="namespace"
 在这些设置中，[`MINIO_NOTIFY_MYSQL_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_MYSQL_ENABLE) 表示该环境变量关联到 ID 为 `PRIMARY` 的 MySQL 服务端点。
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ```shell
 mc admin config set notify_mysql:primary \
    dsn_string="username:password@tcp(mysql.example.com:3306)/miniodb"
@@ -65,6 +67,7 @@ mc admin config set notify_mysql:secondary \
    format="namespace" \
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -76,6 +79,7 @@ mc admin config set notify_mysql:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MYSQL_ENABLE` {#envvar.MINIO_NOTIFY_MYSQL_ENABLE}
 
 *envvar*
@@ -91,13 +95,14 @@ mc admin config set notify_mysql:secondary \
 - [`MINIO_NOTIFY_MYSQL_FORMAT`](#envvar.MINIO_NOTIFY_MYSQL_FORMAT)
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_mysql` {#mc-conf.notify_mysql}
 
 *mc-conf*
 
 用于定义 MySQL 服务端点以配合 [MinIO bucket notifications](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 使用的顶层配置键。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 MySQL 服务端点。 每个目标都*必需*以下参数：
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 MySQL 服务端点。 每个目标都 *必需* 以下参数：
 
 - [`dsn_string`](#mc-conf.notify_mysql.dsn_string)
 - [`table`](#mc-conf.notify_mysql.table)
@@ -112,6 +117,7 @@ mc admin config set notify_mysql \
   format="namespace" \
   [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -121,11 +127,13 @@ mc admin config set notify_mysql \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MYSQL_DSN_STRING` {#envvar.MINIO_NOTIFY_MYSQL_DSN_STRING}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_mysql dsn_string` {#mc-conf.notify_mysql.dsn_string}
 
 *mc-conf*
@@ -152,11 +160,13 @@ mc admin config set notify_mysql \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MYSQL_TABLE` {#envvar.MINIO_NOTIFY_MYSQL_TABLE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_mysql table` {#mc-conf.notify_mysql.table}
 
 *mc-conf*
@@ -171,11 +181,13 @@ mc admin config set notify_mysql \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MYSQL_FORMAT` {#envvar.MINIO_NOTIFY_MYSQL_FORMAT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_mysql format` {#mc-conf.notify_mysql.format}
 
 *mc-conf*
@@ -198,11 +210,13 @@ mc admin config set notify_mysql \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS` {#envvar.MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_mysql max_open_connections` {#mc-conf.notify_mysql.max_open_connections}
 
 *mc-conf*
@@ -219,11 +233,13 @@ mc admin config set notify_mysql \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MYSQL_QUEUE_DIR` {#envvar.MINIO_NOTIFY_MYSQL_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_mysql queue_dir` {#mc-conf.notify_mysql.queue_dir}
 
 *mc-conf*
@@ -240,11 +256,13 @@ mc admin config set notify_mysql \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MYSQL_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_MYSQL_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_mysql queue_limit` {#mc-conf.notify_mysql.queue_limit}
 
 *mc-conf*
@@ -259,11 +277,13 @@ mc admin config set notify_mysql \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_MYSQL_COMMENT` {#envvar.MINIO_NOTIFY_MYSQL_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_mysql comment` {#mc-conf.notify_mysql.comment}
 
 *mc-conf*

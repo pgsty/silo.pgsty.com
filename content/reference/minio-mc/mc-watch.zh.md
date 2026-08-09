@@ -23,6 +23,7 @@ silo_modified: false
 ```shell
 mc watch --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：

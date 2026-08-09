@@ -22,6 +22,7 @@ The following command searches for all objects matching the specified pattern in
 ```shell
 mc find myminio/mydata --name "*.jpg"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

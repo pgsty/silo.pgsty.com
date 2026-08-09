@@ -56,6 +56,7 @@ The following example attaches the policy, `userpolicy`, to the user `bobfisher`
                                  policy2                                                \
                                  --user='uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -100,6 +101,7 @@ The following example detaches the policy, `userpolicy`, from the user `bobfishe
                                  policy2                                                \
                                  --user='uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -137,6 +139,7 @@ Specifically, it lists - Users mapped to the `finteam-policy` policy. - Policies
                               --user 'uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'  \
                               --group 'cn=projectb,ou=groups,ou=swengg,dc=min,dc=io'
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

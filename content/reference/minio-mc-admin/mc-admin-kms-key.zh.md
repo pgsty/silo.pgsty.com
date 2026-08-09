@@ -42,7 +42,7 @@ mc admin kms key create TARGET [KEY_NAME]
 
 指定已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
-`TARGET` 部署**必须**包含已配置的 MinIO Key Encryption Service (KES) 服务器。
+`TARGET` 部署 **必须** 包含已配置的 MinIO Key Encryption Service (KES) 服务器。
 
 #### `KEY_NAME` {#mc.admin.kms.key.create.KEY_NAME}
 
@@ -70,7 +70,7 @@ mc admin kms key status TARGET [KEY_NAME]
 
 指定已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
-`TARGET` 部署**必须**包含已配置的 MinIO Key Encryption Service (KES) 服务器。
+`TARGET` 部署 **必须** 包含已配置的 MinIO Key Encryption Service (KES) 服务器。
 
 #### `KEY_NAME` {#mc.admin.kms.key.status.KEY_NAME}
 
@@ -100,4 +100,4 @@ mc admin kms key list TARGET
 
 指定已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
-`TARGET` 部署**必须**包含已配置的 MinIO Key Encryption Service (KES) 服务器。
+`TARGET` 部署 **必须** 包含已配置的 MinIO Key Encryption Service (KES) 服务器。

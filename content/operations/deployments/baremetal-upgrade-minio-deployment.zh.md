@@ -40,20 +40,25 @@ silo_modified: true
 ## `systemctl` 管理的部署 {#systemctl-minio}
 
 1. 从[下载与安装](/zh/download/#server)为每个节点下载同一个公开服务端版本，并校验其摘要。
-2. 在**不单独重启部分集群**的前提下，在每个节点安装软件包或替换二进制：
+2. 在 **不单独重启部分集群** 的前提下，在每个节点安装软件包或替换二进制：
 
    {{< tabpane text=true persist=header >}}
    {{% tab header="RPM（RHEL 系）" %}}
+
    ```shell
    sudo dnf install /path/to/minio.rpm
    ```
+
    {{% /tab %}}
    {{% tab header="DEB（Debian/Ubuntu）" %}}
+
    ```shell
    sudo dpkg -i /path/to/minio.deb
    ```
+
    {{% /tab %}}
    {{% tab header="二进制" %}}
+
    ```shell
    sha256sum ./minio
    sudo install -m 0755 ./minio /usr/local/bin/minio

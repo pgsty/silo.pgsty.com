@@ -13,8 +13,8 @@ silo_modified: false
 
 你可以通过定义以下项来建立或修改设置：
 
-- 在启动或重启 MinIO Server 之前，在主机系统上设置*环境变量*。 有关如何定义环境变量，请参阅操作系统文档。
-- 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置*配置项*。
+- 在启动或重启 MinIO Server 之前，在主机系统上设置 *环境变量*。 有关如何定义环境变量，请参阅操作系统文档。
+- 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置 *配置项*。
 
 如果同时定义了环境变量和对应的配置项，MinIO 使用环境变量的值。
 
@@ -30,6 +30,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_ENABLE` {#envvar.MINIO_LAMBDA_WEBHOOK_ENABLE}
 
 *envvar*
@@ -44,8 +45,10 @@ silo_modified: false
 export MINIO_LAMBDA_WEBHOOK_ENABLE_myfunction="on"
 export MINIO_LAMBDA_WEBHOOK_ENABLE_yourfunction="on"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `lambda_webhook enable` {#mc-conf.lambda_webhook.enable}
 
 *mc-conf*
@@ -59,6 +62,7 @@ export MINIO_LAMBDA_WEBHOOK_ENABLE_yourfunction="on"
 ```shell
 mc admin config set myminio lambda_webhook:myfunction endpoint="https://example.com/" enable=on
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -66,6 +70,7 @@ mc admin config set myminio lambda_webhook:myfunction endpoint="https://example.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_ENDPOINT` {#envvar.MINIO_LAMBDA_WEBHOOK_ENDPOINT}
 
 *envvar*
@@ -78,8 +83,10 @@ mc admin config set myminio lambda_webhook:myfunction endpoint="https://example.
 export MINIO_LAMBDA_WEBHOOK_ENDPOINT_myfunction="http://webhook-1.example.com"
 export MINIO_LAMBDA_WEBHOOK_ENDPOINT_yourfunction="http://webhook-2.example.com"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `lambda_webhook endpoint` {#mc-conf.lambda_webhook.endpoint}
 
 *mc-conf*
@@ -94,6 +101,7 @@ export MINIO_LAMBDA_WEBHOOK_ENDPOINT_yourfunction="http://webhook-2.example.com"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
@@ -114,6 +122,7 @@ export MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN_yourfunction="1a2b3c4d5e"
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `lambda_webhook auth_token` {#mc-conf.lambda_webhook.auth_token}
 
 *mc-conf*
@@ -134,6 +143,7 @@ export MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN_yourfunction="1a2b3c4d5e"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_LAMBDA_WEBHOOK_CLIENT_CERT}
 
 *envvar*
@@ -146,8 +156,10 @@ export MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN_yourfunction="1a2b3c4d5e"
 export MINIO_LAMBDA_WEBHOOK_CLIENT_CERT_myfunction="/path/to/cert1"
 export MINIO_LAMBDA_WEBHOOK_CLIENT_CERT_yourfunction="/path/to/cert2"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `lambda_webhook client_cert` {#mc-conf.lambda_webhook.client_cert}
 
 *mc-conf*
@@ -162,6 +174,7 @@ export MINIO_LAMBDA_WEBHOOK_CLIENT_CERT_yourfunction="/path/to/cert2"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_LAMBDA_WEBHOOK_CLIENT_KEY}
 
 *envvar*
@@ -174,8 +187,10 @@ export MINIO_LAMBDA_WEBHOOK_CLIENT_CERT_yourfunction="/path/to/cert2"
 export MINIO_LAMBDA_WEBHOOK_CLIENT_KEY_myfunction="/path/to/key1"
 export MINIO_LAMBDA_WEBHOOK_CLIENT_KEY_yourfunction="/path/to/key2"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `lambda_webhook client_key` {#mc-conf.lambda_webhook.client_key}
 
 *mc-conf*

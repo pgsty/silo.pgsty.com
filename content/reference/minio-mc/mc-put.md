@@ -29,6 +29,7 @@ The following uploads the file `logo.png` from the local file system at path `~/
 ```shell
 mc put ~/images/collateral/logo.png minio/marketing
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

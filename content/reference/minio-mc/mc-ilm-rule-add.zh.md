@@ -140,7 +140,7 @@ RELEASE.2024-02-24T01-33-20Z
 RELEASE.2024-05-01T01-11-10Z
 {{% /alert %}}
 
-此标志*仅*适用于最新版本**不是**删除标记的对象。
+此标志 *仅* 适用于最新版本 **不是** 删除标记的对象。
 
 ##### `--expire-days` {#mc.ilm.rule.add.-expire-days}
 
@@ -150,7 +150,7 @@ RELEASE.2024-05-01T01-11-10Z
 
 对象创建后保留的天数。 达到指定天数后，MinIO 会将对象标记为待删除。 使用整数指定天数，例如 `30` 表示 30 天。
 
-对于启用版本控制的存储桶，过期规则仅适用于对象的*当前*版本。 使用 [`--noncurrent-expire-days`](#mc.ilm.rule.add.-noncurrent-expire-days) 或 [`--expire-all-object-versions`](#mc.ilm.rule.add.-expire-all-object-versions) 标志，可将过期行为应用于对象的非当前版本。
+对于启用版本控制的存储桶，过期规则仅适用于对象的 *当前* 版本。 使用 [`--noncurrent-expire-days`](#mc.ilm.rule.add.-noncurrent-expire-days) 或 [`--expire-all-object-versions`](#mc.ilm.rule.add.-expire-all-object-versions) 标志，可将过期行为应用于对象的非当前版本。
 
 MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-scanner) 根据所有已配置的生命周期管理规则检查对象。 在高 IO 负载或系统资源受限时，扫描变慢可能导致生命周期管理规则应用延迟。 更多信息请参见 [生命周期管理对象扫描器](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-scanner)。
 
@@ -185,7 +185,7 @@ MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-s
 
 对象创建后经过多少个日历日，MinIO 将对象标记为可迁移。 MinIO 会将对象迁移到由 [`--transition-tier`](#mc.ilm.rule.add.-transition-tier) 指定的远程层。 使用整数指定天数，例如 `30` 表示 30 天。 如果远程层是另一个 MinIO 部署，可将该值设为 `0`，使新对象立即具备迁移到远程层的资格。
 
-对于启用版本控制的存储桶，迁移规则仅适用于对象的*当前*版本。 使用 [`--noncurrent-transition-days`](#mc.ilm.rule.add.-noncurrent-transition-days) 选项可将迁移行为应用于对象的非当前版本。
+对于启用版本控制的存储桶，迁移规则仅适用于对象的 *当前* 版本。 使用 [`--noncurrent-transition-days`](#mc.ilm.rule.add.-noncurrent-transition-days) 选项可将迁移行为应用于对象的非当前版本。
 
 需要同时指定 [`--transition-tier`](#mc.ilm.rule.add.-transition-tier)。
 
@@ -209,7 +209,7 @@ MinIO [transition objects](/zh/administration/object-management/object-lifecycle
 
 *Optional*
 
-对象版本变为*非当前*后（即该对象已有其他版本成为 *HEAD*）保留的天数。 达到指定天数后，MinIO 会将非当前对象版本标记为待删除。
+对象版本变为 *非当前* 后（即该对象已有其他版本成为 *HEAD*）保留的天数。 达到指定天数后，MinIO 会将非当前对象版本标记为待删除。
 
 此选项与 S3 `NoncurrentVersionExpiration` 操作行为一致。
 

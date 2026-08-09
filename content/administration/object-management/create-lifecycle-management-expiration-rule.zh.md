@@ -93,6 +93,7 @@ mc ilm rule add ALIAS/PATH \
   mc ilm rule add ALIAS/PATH \
      --expire-all-object-versions
   ```
+
 - 将 [`ALIAS`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.ALIAS) 替换为 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.ALIAS) 替换为 S3 兼容主机上该存储桶的 路径。
 - 将 [`NONCURRENT_DAYS`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-expire-days) 替换为非当前对象版本过期前的 天数。例如，指定 `30d` 表示某个版本在成为非当前版本至少 30 天后过期。

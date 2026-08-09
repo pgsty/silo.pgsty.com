@@ -22,6 +22,7 @@ The following command reverts the last three uploads and/or deletions of the `fi
 ```shell
 mc undo myminio/data/file.zip --last 3
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

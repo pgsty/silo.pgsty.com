@@ -23,6 +23,7 @@ The following command queries all objects in the `mydata` bucket on the `myminio
 ```shell
 mc sql --recursive --query "select * from S3Object" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

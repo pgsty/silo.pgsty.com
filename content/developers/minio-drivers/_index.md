@@ -58,6 +58,7 @@ Reference: [MinIO Python SDK](https://github.com/minio/minio-py)
 >   ```shell
 >   pip3 install minio
 >   ```
+>
 > - source
 >
 >   ```shell
@@ -89,6 +90,7 @@ Reference: [MinIO Java SDK](https://github.com/minio/minio-java)
 >       <version>JAVAVERSION</version>
 >   </dependency>
 >   ```
+>
 > - Gradle
 >
 >   ```java
@@ -96,6 +98,7 @@ Reference: [MinIO Java SDK](https://github.com/minio/minio-java)
 >       implementation("io.minio:minio:JAVAVERSION")
 >   }
 >   ```
+>
 > - JAR
 >
 >   Download the latest JAR file for version JAVAVERSION of the SDK from the Sonatype Maven Central Repository.
@@ -139,6 +142,7 @@ Reference: [MinIO JavaScript SDK](https://github.com/minio/minio-js)
 >   ```shell
 >   npm install --save minio
 >   ```
+>
 > - Source
 >
 >   ```shell
@@ -181,6 +185,7 @@ Reference: [MinIO C++ SDK Reference](https://minio-cpp.min.io/)
 >   ```shell
 >   vcpkg install minio-cpp
 >   ```
+>
 > - Source
 >
 >   ```shell

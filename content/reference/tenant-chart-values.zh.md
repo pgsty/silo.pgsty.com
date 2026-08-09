@@ -362,7 +362,8 @@ silo_modified: true
 > Set the keys to conform to the Ingress controller and configuration of your choice.
 {{% /tab %}}
 {{% tab header="YAML" %}}
-```
+
+```text
 # Root key for MinIO Tenant Chart
 tenant:
   ###
@@ -875,5 +876,6 @@ ingress:
 #        export MINIO_ROOT_PASSWORD='minio123'
 
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}

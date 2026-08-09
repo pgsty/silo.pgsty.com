@@ -32,6 +32,7 @@ RELEASE.2023-04-12T02-21-51Z
 ```shell
 mc ilm restore myminio/mybucket/object.txt
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

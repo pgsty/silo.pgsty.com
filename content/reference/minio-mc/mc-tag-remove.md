@@ -22,6 +22,7 @@ The following command removes tags for the `mydata` bucket on the `myminio` MinI
 ```shell
 mc tag remove myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

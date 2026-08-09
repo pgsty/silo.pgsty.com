@@ -25,7 +25,7 @@ silo_modified: false
 
 ### 支持的 S3 服务 {#s3}
 
-[`mc ilm tier add`](#command-mc.ilm.tier.add) *仅*支持以下 S3 兼容服务作为对象分层的远程目标：
+[`mc ilm tier add`](#command-mc.ilm.tier.add) *仅* 支持以下 S3 兼容服务作为对象分层的远程目标：
 
 - MinIO
 - Amazon S3
@@ -110,7 +110,7 @@ mc ilm tier add TIER_TYPE                    \
                 [--storage-class value]
 ```
 
-**^注意：**每个受支持的存储供应商使用不同的认证方式。 用于认证的标志因存储供应商而异。 详见下方 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE)。
+**注意：** 每个受支持的存储供应商使用不同的认证方式。 用于认证的标志因存储供应商而异。 详见下方 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE)。
 
 - 方括号 `[]` 表示可选参数。
 - 同一行中的参数彼此相互依赖。
@@ -167,9 +167,9 @@ MinIO 将对象转换到的云服务提供商存储后端（”Tier”）。 指
 
 *Required*
 
-与新远程层关联的名称。 该名称**必须**在 MinIO 集群所有已配置层中唯一。
+与新远程层关联的名称。 该名称 **必须** 在 MinIO 集群所有已配置层中唯一。
 
-你**必须**使用全大写指定 tier，例如 `WARM_TIER`。
+你 **必须** 使用全大写指定 tier，例如 `WARM_TIER`。
 
 ##### `--endpoint` {#mc.ilm.tier.add.-endpoint}
 
@@ -177,7 +177,7 @@ MinIO 将对象转换到的云服务提供商存储后端（”Tier”）。 指
 
 *Optional*
 
-S3 或 MinIO 存储的 URL endpoint。 URL endpoint **必须**解析到 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) 指定的提供方。
+S3 或 MinIO 存储的 URL endpoint。 URL endpoint **必须** 解析到 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) 指定的提供方。
 
 对 `s3` 或 `minio` tier 类型为必需，对 `azure` 为可选。 对 `TIER_TYPE` 的任何其他取值，该选项均无效。
 
@@ -211,7 +211,7 @@ S3 或 MinIO 存储的 URL endpoint。 URL endpoint **必须**解析到 [`TIER_T
 
 当 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) 为 `azure` 时必需。 对 `TIER_TYPE` 的任何其他取值，该选项均无效。
 
-MinIO *不*支持更改与 Azure 远程 tier 关联的存储账户名。 Azure 存储后端绑定到存储账户，因此更改该值会更换存储后端，并导致无法访问已转换到原账户/后端的任何对象。
+MinIO *不* 支持更改与 Azure 远程 tier 关联的存储账户名。 Azure 存储后端绑定到存储账户，因此更改该值会更换存储后端，并导致无法访问已转换到原账户/后端的任何对象。
 
 ##### `--account-key` {#mc.ilm.tier.add.-account-key}
 
@@ -263,18 +263,20 @@ MinIO 将对象转换到指定 [`--bucket`](#mc.ilm.tier.add.-bucket) 的前缀�
 
 MinIO 应用于转换到远程存储桶对象的 storage class（在 Microsoft Azure 中称为 “access tier”）。
 
-应用于 MinIO 转换到远程存储桶对象的 storage class。 MinIO 分层行为依赖远程存储在请求后立即返回对象（毫秒到秒级）。 因此 MinIO *无法*支持需要 rehydration、等待周期或手动干预的远程存储。
+应用于 MinIO 转换到远程存储桶对象的 storage class。 MinIO 分层行为依赖远程存储在请求后立即返回对象（毫秒到秒级）。 因此 MinIO *无法* 支持需要 rehydration、等待周期或手动干预的远程存储。
 
 选择与 `TIER_TYPE` 对应的选项卡，查看各层支持的值：
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="minio" %}}
+
 - `STANDARD` *推荐*
 - `REDUCED`
 
 更多信息请参见 [纠删码存储类](/zh/reference/minio-server/settings/storage-class/#minio-ec-storage-class)。
 {{% /tab %}}
 {{% tab header="s3" %}}
+
 - `STANDARD`
 - `STANDARD-IA`
 - `ONEZONE-IA`
@@ -282,6 +284,7 @@ MinIO 应用于转换到远程存储桶对象的 storage class（在 Microsoft A
 更多信息请参见 [使用 Amazon S3 存储类](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html)。
 {{% /tab %}}
 {{% tab header="gcs" %}}
+
 - `STANDARD`
 - `NEARLINE`
 - `COLDLINE`
@@ -289,6 +292,7 @@ MinIO 应用于转换到远程存储桶对象的 storage class（在 Microsoft A
 更多信息请参见 [GCS 存储类](https://cloud.google.com/storage/docs/storage-classes)。
 {{% /tab %}}
 {{% tab header="azure" %}}
+
 - `Hot`
 - `Cool`
 
@@ -326,7 +330,7 @@ MinIO 应用于转换到远程存储桶对象的 storage class（在 Microsoft A
 
 转换对象时要使用的 AWS S3 角色名称。
 
-该选项仅在 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) 为 `s3` **且**源端是 Amazon EKS 上的 MinIO pod 时生效。
+该选项仅在 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) 为 `s3` **且** 源端是 Amazon EKS 上的 MinIO pod 时生效。
 
 ##### `--aws-web-identity-file` {#mc.ilm.tier.add.-aws-web-identity-file}
 
@@ -336,7 +340,7 @@ MinIO 应用于转换到远程存储桶对象的 storage class（在 Microsoft A
 
 指定转换对象时使用的 web identity token 文件。
 
-该选项仅在 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) 为 `s3` **且**源端是 Amazon EKS 上的 MinIO pod 时生效。
+该选项仅在 [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) 为 `s3` **且** 源端是 Amazon EKS 上的 MinIO pod 时生效。
 
 ##### `--azure-sp-tenant-id` {#mc.ilm.tier.add.-azure-sp-tenant-id}
 

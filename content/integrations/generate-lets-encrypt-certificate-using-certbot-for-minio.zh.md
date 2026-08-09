@@ -18,8 +18,8 @@ silo_modified: true
 
 ## 1. 前置条件 {#id1}
 
-- 从[这里](https://silo.pgsty.com/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure)安装 MinIO Server。
-- 从[这里](https://certbot.eff.org/)安装 Certbot
+- 按照 [Red Hat Linux 部署指南](https://silo.pgsty.com/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure) 安装 MinIO Server。
+- 从 [Certbot 官网](https://certbot.eff.org/) 安装 Certbot。
 
 ## 2. 依赖要求 {#id2}
 
@@ -31,7 +31,7 @@ silo_modified: true
 
 ### 第 1 步：安装 Certbot {#certbot}
 
-请按照 https://certbot.eff.org/ 上的文档安装 Certbot。
+请按照 <https://certbot.eff.org/> 上的文档安装 Certbot。
 
 ### 第 2 步：生成 Let’s Encrypt 证书 {#let-s-encrypt}
 

@@ -1,5 +1,5 @@
 ---
-title: "Silo 服务端（`minio`）"
+title: "Silo 服务端（minio）"
 url: "/zh/reference/minio-server/"
 weight: 30
 aliases:
@@ -117,6 +117,7 @@ Silo 建议使用本地直连驱动器，即 [`DIRECTORIES`](#minio.server.DIREC
 ```shell
 minio server --address "minioip:9000" ~/miniodirectory
 ```
+
 {{% /alert %}}
 
 若省略该参数，[`minio`](#command-minio.server) 会绑定到主机上所有已配置 IPv4 地址、IPv6 地址和主机名的 `9000` 端口。

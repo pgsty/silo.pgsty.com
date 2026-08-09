@@ -80,7 +80,7 @@ mc [GLOBALFLAGS] alias import ALIAS PATH|STDIN
 
 ### JSON 格式 {#json}
 
-JSON 对象**必须**采用以下格式：
+JSON 对象 **必须** 采用以下格式：
 
 ```json
 {

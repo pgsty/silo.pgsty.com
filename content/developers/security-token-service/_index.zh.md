@@ -12,7 +12,7 @@ silo_modified: false
 
 MinIO Security Token Service (STS) APIs 允许应用程序生成用于访问 MinIO 部署的临时凭证。
 
-对于配置为使用外部身份管理器的 MinIO 部署，STS API 是*必需*的，因为该 API 可将外部 IDP 凭证转换为兼容 AWS Signature v4 的凭证。
+对于配置为使用外部身份管理器的 MinIO 部署，STS API 是 *必需* 的，因为该 API 可将外部 IDP 凭证转换为兼容 AWS Signature v4 的凭证。
 
 ## STS API 端点 {#sts-api}
 

@@ -35,6 +35,7 @@ The following command prints cluster metrics from the deployment at [alias](/glo
 ```shell
 mc admin prometheus metrics myminio cluster
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

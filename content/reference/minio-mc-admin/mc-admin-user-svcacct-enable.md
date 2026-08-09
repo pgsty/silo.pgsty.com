@@ -32,6 +32,7 @@ The following command enables the specified access key:
 ```shell
 mc admin user svcacct enable myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

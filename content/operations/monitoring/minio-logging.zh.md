@@ -41,6 +41,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
    set MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
    set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -51,6 +52,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
    export MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
    export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
 ```
+
 {{% /alert %}}
 
 - 将 `<IDENTIFIER>` 替换为该 HTTP Webhook 端点的唯一描述字符串。 与新日志 HTTP Webhook 相关的所有环境变量都应使用同一个 `<IDENTIFIER>`。
@@ -69,6 +71,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
   ```shell
   set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   {{% alert color="info" %}}
@@ -77,6 +80,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
   ```shell
   export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   请根据端点要求调整该值。 自定义认证格式可能类似如下：
@@ -87,6 +91,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
   ```shell
   set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   {{% alert color="info" %}}
@@ -95,6 +100,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
   ```shell
   export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   详情请参阅目标服务的文档。
@@ -165,6 +171,7 @@ set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
 set MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
 set MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -177,6 +184,7 @@ export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
 export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
 export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
 ```
+
 {{% /alert %}}
 
 - 将 `<IDENTIFIER>` 替换为该 HTTP Webhook 端点的唯一描述字符串。 与新审计日志 HTTP Webhook 相关的所有环境变量都应使用同一个 `<IDENTIFIER>`。
@@ -195,6 +203,7 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
   ```shell
   set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   {{% alert color="info" %}}
@@ -203,6 +212,7 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
   ```shell
   export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   请根据端点要求调整该值。 自定义认证格式可能类似如下：
@@ -213,6 +223,7 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
   ```shell
   set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   {{% alert color="info" %}}
@@ -221,6 +232,7 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
   ```shell
   export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   详情请参阅目标服务的文档。

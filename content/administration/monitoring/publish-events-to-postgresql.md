@@ -52,6 +52,7 @@ The following example code sets *all* environment variables related to configuri
    set MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
    set MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -67,6 +68,7 @@ The following example code sets *all* environment variables related to configuri
    export MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
    export MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
 ```
+
 {{% /alert %}}
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the PostgreSQL service endpoint. Use the same `<IDENTIFIER>` value for all environment variables related to the new target service endpoint. The following examples assume an identifier of `PRIMARY`.
@@ -143,6 +145,7 @@ You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notif
    ```shell
    mc admin info --json ALIAS
    ```
+
 2. In the JSON output, look for the key `info.sqsARN`.
 
    The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.

@@ -29,7 +29,7 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 {{% tab header="环境变量" %}}
 MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/webhook-service/#minio-server-envvar-bucket-notification-webhook) 指定 Webhook 服务端点及其相关配置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时 应用这些设置。
 
-以下示例代码设置了配置 Webhook 服务端点所需的*全部*环境变量。 最低*必需*变量为 [`MINIO_NOTIFY_WEBHOOK_ENABLE`](/zh/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENABLE) 和 [`MINIO_NOTIFY_WEBHOOK_ENDPOINT`](/zh/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENDPOINT)：
+以下示例代码设置了配置 Webhook 服务端点所需的 *全部* 环境变量。 最低 *必需* 变量为 [`MINIO_NOTIFY_WEBHOOK_ENABLE`](/zh/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENABLE) 和 [`MINIO_NOTIFY_WEBHOOK_ENDPOINT`](/zh/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENDPOINT)：
 
 {{% alert color="info" %}}
 **Windows**
@@ -43,6 +43,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
    set MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
    set MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -57,11 +58,12 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
    export MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
    export MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
 ```
+
 {{% /alert %}}
 
 - 将 `<IDENTIFIER>` 替换为该 Webhook 服务端点的唯一描述性字符串。 对于与新目标服务端点相关的所有环境变量，请使用相同的 `<IDENTIFIER>` 值。以下示例假设该标识符为 `PRIMARY`。
 
-  如果指定的 `<IDENTIFIER>` 与 MinIO 部署中现有的 Webhook 服务端点匹配，新设置会*覆盖*该端点的任何现有设置。可使用 [`mc admin config get notify_webhook`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署当前配置的 Webhook 端点。
+  如果指定的 `<IDENTIFIER>` 与 MinIO 部署中现有的 Webhook 服务端点匹配，新设置会 *覆盖* 该端点的任何现有设置。可使用 [`mc admin config get notify_webhook`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署当前配置的 Webhook 端点。
 - 将 `<ENDPOINT>` 替换为 Webhook 服务端点的 URL。例如：
 
   `https://webhook.example.com`
@@ -71,7 +73,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 {{% tab header="配置设置" %}}
 MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_webhook`](/zh/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook) 配置键来添加或更新 Webhook 端点。 你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的 配置设置。
 
-以下示例代码设置了配置 Webhook 服务端点所需的*全部*设置。 最低*必需*设置为 [`notify_webhook endpoint`](/zh/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook.endpoint)：
+以下示例代码设置了配置 Webhook 服务端点所需的 *全部* 设置。 最低 *必需* 设置为 [`notify_webhook endpoint`](/zh/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook.endpoint)：
 
 ```shell
 mc admin config set ALIAS/ notify_webhook:IDENTIFIER \
@@ -85,7 +87,7 @@ mc admin config set ALIAS/ notify_webhook:IDENTIFIER \
 
 - 将 `IDENTIFIER` 替换为该 Webhook 服务端点的唯一描述性字符串。 本过程后续示例假设该标识符为 `PRIMARY`。
 
-  如果指定的 `IDENTIFIER` 与 MinIO 部署中现有的 Webhook 服务端点匹配，新设置会*覆盖*该端点的任何现有设置。可使用 [`mc admin config get notify_webhook`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署当前配置的 Webhook 端点。
+  如果指定的 `IDENTIFIER` 与 MinIO 部署中现有的 Webhook 服务端点匹配，新设置会 *覆盖* 该端点的任何现有设置。可使用 [`mc admin config get notify_webhook`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署当前配置的 Webhook 端点。
 - 将 `ENDPOINT` 替换为 Webhook 服务端点的 URL。例如：
 
   `https://webhook.example.com`
@@ -124,6 +126,7 @@ SQS ARNs: arn:minio:sqs::primary:webhook
    ```shell
    mc admin info --json ALIAS
    ```
+
 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
 
    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
@@ -216,7 +219,7 @@ mc admin config set ALIAS/ notify_webhook:IDENTIFIER \
    client_key="<string>"
 ```
 
-[`notify_webhook endpoint`](/zh/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook.endpoint) 配置设置 是 Webhook 服务端点的*最低*必需项。其他所有配置设置均为*可选*。 有关 Webhook 配置设置的完整列表，请参见 [Webhook 服务通知设置](/zh/reference/minio-server/settings/notifications/webhook-service/#minio-server-config-bucket-notification-webhook)。
+[`notify_webhook endpoint`](/zh/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook.endpoint) 配置设置 是 Webhook 服务端点的 *最低* 必需项。其他所有配置设置均为 *可选*。 有关 Webhook 配置设置的完整列表，请参见 [Webhook 服务通知设置](/zh/reference/minio-server/settings/notifications/webhook-service/#minio-server-config-bucket-notification-webhook)。
 
 ### 3) 重启 MinIO 部署 {#id11}
 

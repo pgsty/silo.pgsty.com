@@ -113,6 +113,7 @@ This procedure provides instructions for configuring and enabling Server-Side En
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 1. Review the Tenant CRD
 
    Review the [Tenant CRD](/reference/operator-crd/#minio-operator-crd) `TenantSpec.kes` object, the `TenantSpec.configuration` object, and the [KES Configuration reference](https://github.com/minio/kes/wiki/Configuration).
@@ -178,6 +179,7 @@ This procedure provides instructions for configuring and enabling Server-Side En
    # Replace my-new-key with the name of the key you want to use for SSE-KMS
    mc admin kms key create k8s encrypted-bucket-key
    ```
+
 5. Enable SSE-KMS for a Bucket
 
    You can use either the MinIO Tenant Console or the MinIO [`mc`](/reference/minio-mc/#command-mc) CLI to enable bucket-default SSE-KMS with the generated key:
@@ -269,6 +271,7 @@ This procedure provides instructions for configuring and enabling Server-Side En
    ```shell
    mc admin service restart ALIAS
    ```
+
 4. Generate a New Encryption Key
 
    MinIO requires that the <abbr title="External Key">EK</abbr> exist on the KMS *before* performing <abbr title="Server-Side Encryption">SSE</abbr> operations using that key. Use `kes key create` *or* [`mc admin kms key create`](/reference/minio-mc-admin/mc-admin-kms-key/#mc.admin.kms.key.create) to add a new <abbr title="External Key">EK</abbr> for use with <abbr title="Server-Side Encryption">SSE</abbr>.
@@ -278,6 +281,7 @@ This procedure provides instructions for configuring and enabling Server-Side En
    ```shell
    mc admin kms key create ALIAS KEYNAME
    ```
+
 5. Enable SSE-KMS for a Bucket
 
    Use the MinIO [`mc`](/reference/minio-mc/#command-mc) CLI to enable bucket-default SSE-KMS with the generated key:

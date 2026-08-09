@@ -23,6 +23,7 @@ The following example enables the AD/LDAP configurations on the `myminio` deploy
 mc idp ldap enable   \
             myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

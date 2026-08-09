@@ -134,7 +134,7 @@ File /tmp/test-file.txt uploaded successfully as my-test-file.txt to bucket js-t
 
 使用 [`mc`](/reference/minio-mc/#command-mc) 验证对象已创建：
 
-```
+```text
 mc ls play/js-test-bucket
 [2023-11-10 17:52:20 UTC]  20KiB STANDARD my-test-file.txt
 

@@ -23,6 +23,7 @@ The following command prints a complete tree of all objects at any depth in the 
 ```shell
 mc tree --files myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

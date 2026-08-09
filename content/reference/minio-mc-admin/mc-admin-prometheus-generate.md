@@ -33,6 +33,7 @@ The following command generates a Prometheus scrape configuration that collects 
 ```shell
 mc admin prometheus generate myminio bucket
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

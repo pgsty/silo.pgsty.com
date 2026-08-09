@@ -175,6 +175,7 @@ For Operator versions 5.0.1 to 5.0.14 installed with the MinIO Kubernetes Plugin
    deployment.apps/console configured
    deployment.apps/minio-operator configured
    ```
+
 4. Validate the Operator upgrade
 
    You can check the new Operator version with the same `kubectl` command used previously:
@@ -182,6 +183,7 @@ For Operator versions 5.0.1 to 5.0.14 installed with the MinIO Kubernetes Plugin
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
+
 {{% /tab %}}
 {{% tab header="Upgrade using Helm" %}}
 The following procedure upgrades an existing MinIO Operator Installation using Helm.
@@ -274,6 +276,7 @@ If you installed the Operator using Kustomize, use the **Upgrade using Kustomize
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -327,6 +330,7 @@ This procedure upgrades MinIO Operator release 4.2.3 through 4.5.7 to release 4.
       "name": "minio-operator"
    }
    ```
+
 3. Download the Latest Stable Version of the MinIO Kubernetes Plugin
 
    You can install the MinIO plugin using either the Kubernetes Krew plugin manager or manually by downloading and installing the plugin binary to your local host:
@@ -347,6 +351,7 @@ This procedure upgrades MinIO Operator release 4.2.3 through 4.5.7 to release 4.
    ```shell
    kubectl krew upgrade minio
    ```
+
    {{% /tab %}}
    {{% tab header="Manual (Linux, MacOS)" %}}
    You can download the MinIO `kubectl` plugin to your local system path. The `kubectl` CLI automatically discovers and runs compatible plugins.
@@ -396,6 +401,7 @@ This procedure upgrades MinIO Operator release 4.2.3 through 4.5.7 to release 4.
    ```shell
    kubectl minio init
    ```
+
 5. Validate the Operator upgrade
 
    You can check the Operator version by reviewing the object specification for an Operator Pod using a previous step.
@@ -462,6 +468,7 @@ There is no direct upgrade path for 4.0.0 - 4.2.2 installations to 7.1.1.
    chmod +x kubectl-minio_4.2.3
    ./kubectl-minio_4.2.3 init
    ```
+
 4. Validate all Tenants and Operator pods
 
    Check the Operator and MinIO Tenant namespaces to ensure all pods and services started successfully.
@@ -472,6 +479,7 @@ There is no direct upgrade path for 4.0.0 - 4.2.2 installations to 7.1.1.
    kubectl get all -n minio-operator
    kubectl get pods -l "v1.min.io/tenant" --all-namespaces
    ```
+
 5. Upgrade to 7.1.1
 
    Follow the [Upgrade MinIO Operator 5.0.15 to 7.1.1](/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure) procedure to upgrade to `v7.1.1`, the final upstream release before the repository was archived.
@@ -557,6 +565,7 @@ There is no direct upgrade path from a 3.X.X series installation to 7.1.1.
    ```shell
    kubectl edit tenants <TENANT-NAME> -n <TENANT-NAMESPACE>
    ```
+
 3. Upgrade to Operator 4.2.2
 
    Download the MinIO Kubernetes Plugin 4.2.2 and use it to upgrade the Operator. Open [https://github.com/minio/operator/releases/tag/v4.2.2](https://github.com/minio/operator/releases/tag/v4.2.2) in a browser and download the binary that corresponds to your local host OS. For example, Linux hosts running an Intel or AMD processor can run the following commands:
@@ -567,6 +576,7 @@ There is no direct upgrade path from a 3.X.X series installation to 7.1.1.
 
    ./kubectl-minio_4.2.2 init
    ```
+
 4. Validate all Tenants and Operator pods
 
    Check the Operator and MinIO Tenant namespaces to ensure all pods and services started successfully.
@@ -578,6 +588,7 @@ There is no direct upgrade path from a 3.X.X series installation to 7.1.1.
 
    kubectl get pods -l "v1.min.io/tenant" --all-namespaces
    ```
+
 5. Upgrade to 4.2.3
 
    Follow the [Upgrade MinIO Operator 4.0.0 through 4.2.2 to 4.2.3](#minio-k8s-upgrade-minio-operator-4-2-2-procedure) procedure to upgrade to Operator 4.2.3. You can then upgrade to 7.1.1.

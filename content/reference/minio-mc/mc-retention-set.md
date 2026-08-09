@@ -26,6 +26,7 @@ The following command sets a default 30 day [GOVERNANCE](/administration/object-
 ```shell
 mc retention set --default GOVERNANCE "30d" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

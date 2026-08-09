@@ -206,7 +206,7 @@ MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、�
 
 若要计算每个请求使用的 RAM，请使用以下公式：
 
-> \(((2MiB + 128KiB) * driveCount) + (2 * 10MiB) + (2 * 1 MiB)\)
+> \(((2MiB + 128KiB) \times driveCount) + (2 \times 10MiB) + (2 \times 1MiB)\)
 >
 > 10MiB 是默认的 erasure block size v1。 1 MiB 是默认的 erasure block size v2。
 
@@ -312,7 +312,7 @@ mkfs.xfs /dev/sde -L MINIODRIVE4
 
 MinIO **要求** 驱动器在重启后仍保持其挂载位置上的顺序不变。 MinIO **不支持** 将已有 MinIO 数据的驱动器任意迁移到新的挂载位置，无论这是人工操作还是操作系统行为导致。
 
-你**必须**使用 `/etc/fstab` 或类似的挂载控制系统，将驱动器挂载到固定路径。 例如：
+你 **必须** 使用 `/etc/fstab` 或类似的挂载控制系统，将驱动器挂载到固定路径。 例如：
 
 ```shell
 $ nano /etc/fstab
@@ -376,6 +376,7 @@ exit 0
 ```shell
 @reboot /opt/minio/xfs-retry-settings.sh
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -397,7 +398,7 @@ exit 0
 
    此测试通过按指定块数、每次最多写入指定字节数的方式向驱动器写入新数据（非缓存），以模拟驱动器在写入非缓存数据时的实际工作方式。 这可以让你在保持文件 I/O 一致的前提下，观察驱动器的真实写入性能。
 
-   ```
+   ```text
    dd if=/dev/zero of=/mnt/driveN/testfile bs=128k count=80000 oflag=direct conv=fdatasync > dd-write-drive1.txt
    ```
 
@@ -443,7 +444,7 @@ exit 0
    该操作会返回已写入文件数量、总写入字节数、操作总耗时（秒）以及某种字节每秒表示的写入速度。
 2. 测试驱动器读取性能
 
-   ```
+   ```text
    dd if=/mnt/driveN/testfile of=/dev/null bs=128k iflag=direct > dd-read-drive1.txt
    ```
 
@@ -561,6 +562,7 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
    ```shell
    mc support perf net minio1
    ```
+
 3. 驱动器测试
 
    对 alias 为 `minio1` 的集群，在所有节点上的所有驱动器执行读写性能测量。 该命令使用默认的 4MiB blocksize。
@@ -568,6 +570,7 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
    ```shell
    mc support perf drive minio1
    ```
+
 4. 对象测试
 
    对 alias 为 `minio1` 的对象执行 S3 读写性能测量。 MinIO 会自动调优并发度，以获得最大吞吐量和 IOPS（Input/Output Per Second）。

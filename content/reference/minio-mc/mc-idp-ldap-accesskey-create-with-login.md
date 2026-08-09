@@ -28,6 +28,7 @@ The [`mc idp ldap accesskey create-with-login`](#command-mc.idp.ldap.accesskey.c
 ```shell
 mc idp ldap accesskey create-with-login https://minio.example.net/
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -98,7 +99,7 @@ Requires [`--access-key`](#mc.idp.ldap.accesskey.create-with-login.-access-key)
 
 *Optional*
 
-File path to the JSON-formatted [policy](/administration/identity-access-management/policy-based-access-control/#minio-policy) to use for the account. This policy _cannot_ grant additional privileges beyond the privileges associated with the authenticated AD/LDAP user.
+File path to the JSON-formatted [policy](/administration/identity-access-management/policy-based-access-control/#minio-policy) to use for the account. This policy *cannot* grant additional privileges beyond the privileges associated with the authenticated AD/LDAP user.
 
 Omit to use the AD/LDAP user policies.
 

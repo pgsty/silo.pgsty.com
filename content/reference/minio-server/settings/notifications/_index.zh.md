@@ -34,11 +34,13 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_API_SYNC_EVENTS` {#envvar.MINIO_API_SYNC_EVENTS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `api sync_events` {#mc-conf.api.sync_events}
 
 *mc-conf*

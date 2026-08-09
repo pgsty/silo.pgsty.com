@@ -25,6 +25,7 @@ The following command displays a list of the policies currently current on the [
 ```shell
 mc admin policy ls play
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

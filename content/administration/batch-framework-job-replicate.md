@@ -170,7 +170,7 @@ RELEASE.2024-08-03T04-33-23Z
 
 This release introduces a new version of the Batch Job Replicate API, `v2`. The updated API allows you to list multiple prefixes on the source to replicate from. To replicate multiple prefixes from a source, specify `replicate.apiVersion` as `v2`.
 
-```
+```text
 replicate:
   apiVersion: v1
   source:
@@ -181,6 +181,7 @@ replicate:
       - prefix2
 ...
 ```
+
 {{% /alert %}}
 
 For the **source deployment**

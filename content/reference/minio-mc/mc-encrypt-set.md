@@ -24,6 +24,7 @@ The following command sets the default [SSE-KMS encryption key](/administration/
 ```shell
 mc encrypt set sse-kms "minio-encryption-key" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -87,8 +88,10 @@ The following commands assumes that:
 ```shell
  mc encrypt set sse-kms minio-encryption-key myminio/data
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc encrypt set ENCRYPTION KMSKEY TARGET
 ```

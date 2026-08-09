@@ -38,6 +38,7 @@ This setting controls how MinIO authenticates to Prometheus.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 #### `MINIO_PROMETHEUS_AUTH_TYPE` {#envvar.MINIO_PROMETHEUS_AUTH_TYPE}
 
 *envvar*
@@ -67,6 +68,7 @@ You can specify multiple webhook endpoints as log targets by appending a unique 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_LOGGER_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_PRIMARY="TOKEN"
@@ -76,8 +78,10 @@ export MINIO_LOGGER_WEBHOOK_ENABLE_SECONDARY="on"
 export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_SECONDARY="TOKEN"
 export MINIO_LOGGER_WEBHOOK_ENDPOINT_SECONDARY="http://webhook-2.example.net"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ```shell
 mc admin config set logger_webhook:primary \
    endpoint="http://webhook-01.example.net" [ARGUMENTS=VALUE ...]
@@ -85,6 +89,7 @@ mc admin config set logger_webhook:primary \
 mc admin config set logger_webhook:secondary \
    endpoint="http://webhook-02.example.net" [ARGUMENTS=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -94,6 +99,7 @@ mc admin config set logger_webhook:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_ENABLE` {#envvar.MINIO_LOGGER_WEBHOOK_ENABLE}
 
 *envvar*
@@ -103,6 +109,7 @@ Specify `"on"` to enable publishing [`minio server`](/reference/minio-server/#co
 Requires specifying [`MINIO_LOGGER_WEBHOOK_ENDPOINT`](#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT).
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook` {#mc-conf.logger_webhook}
 
 *mc-conf*
@@ -117,11 +124,13 @@ The top level key for the configuration settings to configure logging to an HTTP
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_ENDPOINT` {#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook endpoint` {#mc-conf.logger_webhook.endpoint}
 
 *mc-conf*
@@ -136,6 +145,7 @@ The HTTP endpoint of the webhook.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_LOGGER_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
@@ -161,6 +171,7 @@ Consult the documentation for the desired service for more details.
 This environment variable corresponds with the [`logger_webhook auth_token`](#mc-conf.logger_webhook.auth_token) configuration setting.
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook auth_token` {#mc-conf.logger_webhook.auth_token}
 
 *mc-conf*
@@ -201,11 +212,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_BATCH_SIZE` {#envvar.MINIO_LOGGER_WEBHOOK_BATCH_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook batch_size` {#mc-conf.logger_webhook.batch_size}
 
 *mc-conf*
@@ -222,11 +235,13 @@ Requires also setting the *Client Key*.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_LOGGER_WEBHOOK_CLIENT_CERT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook client_cert` {#mc-conf.logger_webhook.client_cert}
 
 *mc-conf*
@@ -243,11 +258,13 @@ Required if you define the *Client Certificate*.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_LOGGER_WEBHOOK_CLIENT_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook client_key` {#mc-conf.logger_webhook.client_key}
 
 *mc-conf*
@@ -262,11 +279,13 @@ The path to the mTLS certificate key to use to authenticate with the webhook log
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_PROXY` {#envvar.MINIO_LOGGER_WEBHOOK_PROXY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook proxy` {#mc-conf.logger_webhook.proxy}
 
 *mc-conf*
@@ -292,11 +311,13 @@ Define a proxy to use for the webhook logger when communicating from MinIO to ex
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_LOGGER_WEBHOOK_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook queue_dir` {#mc-conf.logger_webhook.queue_dir}
 
 *mc-conf*
@@ -313,11 +334,13 @@ MinIO stores undelivered events in the specified store while the webhook service
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_LOGGER_WEBHOOK_QUEUE_SIZE` {#envvar.MINIO_LOGGER_WEBHOOK_QUEUE_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `logger_webhook queue_size` {#mc-conf.logger_webhook.queue_size}
 
 *mc-conf*
@@ -341,6 +364,7 @@ For example, the following commands set two distinct audit log webhook endpoints
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_AUDIT_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_PRIMARY="TOKEN"
@@ -354,8 +378,10 @@ export MINIO_AUDIT_WEBHOOK_ENDPOINT_SECONDARY="http://webhook-1.example.net"
 export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_SECONDARY="/tmp/cert.pem"
 export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_SECONDARY="/tmp/key.pem"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `audit_webhook` {#mc-conf.audit_webhook}
 
 *mc-conf*
@@ -379,6 +405,7 @@ mc admin config set audit_webhook:primary \
 mc admin config set audit_webhook:secondary \
    endpoint="http://webhook-02.example.net" [ARGUMENTS=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -388,6 +415,7 @@ mc admin config set audit_webhook:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_ENABLE` {#envvar.MINIO_AUDIT_WEBHOOK_ENABLE}
 
 *envvar*
@@ -407,11 +435,13 @@ Configure an audit webhook to enable it. There is *not* a separate `enable` conf
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_ENDPOINT` {#envvar.MINIO_AUDIT_WEBHOOK_ENDPOINT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_webhook endpoint` {#mc-conf.audit_webhook.endpoint}
 
 *mc-conf*
@@ -426,11 +456,13 @@ The HTTP endpoint of the webhook.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_AUDIT_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_webhook auth_token` {#mc-conf.audit_webhook.auth_token}
 
 *mc-conf*
@@ -456,8 +488,10 @@ A custom authentication format could resemble the following:
 ```shell
 export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ```shell
 mc admin config set myminio audit_webhook       \
          endpoint="http://webhook.example.net"  \
@@ -473,6 +507,7 @@ mc admin config set myminio audit_webhook       \
          endpoint="http://webhook.example.net"  \
          auth_token="ServiceXYZ 1a2b3c4f5e"
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -490,11 +525,13 @@ Server RELEASE.2024-03-10T02-53-48Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_BATCH_SIZE` {#envvar.MINIO_AUDIT_WEBHOOK_BATCH_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_webhook batch_size` {#mc-conf.audit_webhook.batch_size}
 
 *mc-conf*
@@ -509,6 +546,7 @@ Collect and send the specified number of events to the webhook as a batch. If no
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_CERT}
 
 *envvar*
@@ -516,6 +554,7 @@ Collect and send the specified number of events to the webhook as a batch. If no
 Requires also specifying [`MINIO_AUDIT_WEBHOOK_CLIENT_KEY`](#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_KEY).
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_webhook client_cert` {#mc-conf.audit_webhook.client_cert}
 
 *mc-conf*
@@ -532,6 +571,7 @@ The x.509 client certificate to present to the HTTP webhook. Omit for webhooks w
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_KEY}
 
 *envvar*
@@ -539,6 +579,7 @@ The x.509 client certificate to present to the HTTP webhook. Omit for webhooks w
 Requires also specifying [`MINIO_AUDIT_WEBHOOK_CLIENT_CERT`](#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_CERT).
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_webhook client_key` {#mc-conf.audit_webhook.client_key}
 
 *mc-conf*
@@ -555,11 +596,13 @@ The x.509 private key to present to the HTTP webhook. Omit for webhooks which do
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_AUDIT_WEBHOOK_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_webhook queue_dir` {#mc-conf.audit_webhook.queue_dir}
 
 *mc-conf*
@@ -581,11 +624,13 @@ MinIO stores undelivered events in the specified store while the webhook service
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_WEBHOOK_QUEUE_SIZE` {#envvar.MINIO_AUDIT_WEBHOOK_QUEUE_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_webhook queue_size` {#mc-conf.audit_webhook.queue_size}
 
 *mc-conf*
@@ -622,6 +667,7 @@ mc admin config set audit_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 ###### `MINIO_AUDIT_KAFKA_ENABLE` {#envvar.MINIO_AUDIT_KAFKA_ENABLE}
 
 *envvar*
@@ -641,11 +687,13 @@ There is not a configuration setting for this value. Use the environment variabl
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_BROKERS` {#envvar.MINIO_AUDIT_KAFKA_BROKERS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka brokers` {#mc-conf.audit_kafka.brokers}
 
 *mc-conf*
@@ -666,11 +714,13 @@ At least one broker must be online and reachable by the MinIO server to initiali
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_TOPIC` {#envvar.MINIO_AUDIT_KAFKA_TOPIC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka topic` {#mc-conf.audit_kafka.topic}
 
 *mc-conf*
@@ -685,11 +735,13 @@ The name of the Kafka topic to associate to MinIO audit log events.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_TLS` {#envvar.MINIO_AUDIT_KAFKA_TLS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka tls` {#mc-conf.audit_kafka.tls}
 
 *mc-conf*
@@ -706,11 +758,13 @@ Defaults to `"off"`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY` {#envvar.MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka tls_skip_verify` {#mc-conf.audit_kafka.tls_skip_verify}
 
 *mc-conf*
@@ -731,6 +785,7 @@ Defaults to `"off"` for strict verification of TLS certificates.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_SASL` {#envvar.MINIO_AUDIT_KAFKA_SASL}
 
 *envvar*
@@ -738,6 +793,7 @@ Defaults to `"off"` for strict verification of TLS certificates.
 Requires specifying [`MINIO_AUDIT_KAFKA_SASL_USERNAME`](#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME) and [`MINIO_AUDIT_KAFKA_SASL_PASSWORD`](#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD).
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka sasl` {#mc-conf.audit_kafka.sasl}
 
 *mc-conf*
@@ -754,6 +810,7 @@ Set to `"on"` to direct MinIO to use SASL to authenticate against the Kafka brok
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_SASL_USERNAME` {#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME}
 
 *envvar*
@@ -761,6 +818,7 @@ Set to `"on"` to direct MinIO to use SASL to authenticate against the Kafka brok
 Requires specifying [`MINIO_AUDIT_KAFKA_SASL`](#envvar.MINIO_AUDIT_KAFKA_SASL) and [`MINIO_AUDIT_KAFKA_SASL_PASSWORD`](#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD).
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka sasl_username` {#mc-conf.audit_kafka.sasl_username}
 
 *mc-conf*
@@ -777,6 +835,7 @@ The SASL username MinIO uses for authentication against the Kafka brokers.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_SASL_PASSWORD` {#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD}
 
 *envvar*
@@ -784,6 +843,7 @@ The SASL username MinIO uses for authentication against the Kafka brokers.
 Requires specifying [`MINIO_AUDIT_KAFKA_SASL`](#envvar.MINIO_AUDIT_KAFKA_SASL) and [`MINIO_AUDIT_KAFKA_SASL_USERNAME`](#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME).
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka sasl_password` {#mc-conf.audit_kafka.sasl_password}
 
 *mc-conf*
@@ -800,6 +860,7 @@ The SASL password MinIO uses for authentication against the Kafka brokers.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_SASL_MECHANISM` {#envvar.MINIO_AUDIT_KAFKA_SASL_MECHANISM}
 
 *envvar*
@@ -811,6 +872,7 @@ The `PLAIN` authentication mechanism sends credentials in plain text over the ne
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka sasl_mechanism` {#mc-conf.audit_kafka.sasl_mechanism}
 
 *mc-conf*
@@ -833,6 +895,7 @@ Defaults to `plain`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH` {#envvar.MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH}
 
 *envvar*
@@ -840,6 +903,7 @@ Defaults to `plain`.
 Requires specifying [`MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT`](#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT) and [`MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY`](#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY).
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka tls_client_auth` {#mc-conf.audit_kafka.tls_client_auth}
 
 *mc-conf*
@@ -856,11 +920,13 @@ Set to `"on"` to direct MinIO to use mTLS to authenticate against the Kafka brok
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT` {#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka client_tls_cert` {#mc-conf.audit_kafka.client_tls_cert}
 
 *mc-conf*
@@ -875,11 +941,13 @@ The path to the TLS client certificate to use for mTLS authentication.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY` {#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka client_tls_key` {#mc-conf.audit_kafka.client_tls_key}
 
 *mc-conf*
@@ -894,11 +962,13 @@ The path to the TLS client private key to use for mTLS authentication.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_VERSION` {#envvar.MINIO_AUDIT_KAFKA_VERSION}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka version` {#mc-conf.audit_kafka.version}
 
 *mc-conf*
@@ -915,11 +985,13 @@ MinIO returns an error if the Kakfa broker version does not match those specifie
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_COMMENT` {#envvar.MINIO_AUDIT_KAFKA_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka comment` {#mc-conf.audit_kafka.comment}
 
 *mc-conf*
@@ -934,11 +1006,13 @@ A comment to associate with the configuration.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_QUEUE_DIR` {#envvar.MINIO_AUDIT_KAFKA_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka queue_dir` {#mc-conf.audit_kafka.queue_dir}
 
 *mc-conf*
@@ -955,11 +1029,13 @@ MinIO stores undelivered events in the specified store while the Kafka service i
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ###### `MINIO_AUDIT_KAFKA_QUEUE_SIZE` {#envvar.MINIO_AUDIT_KAFKA_QUEUE_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ###### `audit_kafka queue_size` {#mc-conf.audit_kafka.queue_size}
 
 *mc-conf*

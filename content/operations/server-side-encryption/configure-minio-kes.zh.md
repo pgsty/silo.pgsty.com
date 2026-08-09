@@ -113,6 +113,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 1. 查看 Tenant CRD
 
    查看 [Tenant CRD](/zh/reference/operator-crd/#minio-operator-crd) 中的 `TenantSpec.kes` 对象、 `TenantSpec.configuration` 对象，以及 [KES Configuration 参考](https://github.com/minio/kes/wiki/Configuration)。
@@ -178,6 +179,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    # Replace my-new-key with the name of the key you want to use for SSE-KMS
    mc admin kms key create k8s encrypted-bucket-key
    ```
+
 5. 为存储桶启用 SSE-KMS
 
    你可以使用 MinIO Tenant Console 或 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) CLI， 通过生成的密钥启用存储桶默认 SSE-KMS：
@@ -269,6 +271,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    ```shell
    mc admin service restart ALIAS
    ```
+
 4. 生成新的加密密钥
 
    MinIO 要求在使用某个 <abbr title="External Key">EK</abbr> 执行 <abbr title="Server-Side Encryption">SSE</abbr> 操作之前， 该 <abbr title="External Key">EK</abbr> 必须已存在于 KMS 中。 使用 `kes key create` *或* [`mc admin kms key create`](/zh/reference/minio-mc-admin/mc-admin-kms-key/#mc.admin.kms.key.create) 为 <abbr title="Server-Side Encryption">SSE</abbr> 添加新的 <abbr title="External Key">EK</abbr>。
@@ -278,6 +281,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    ```shell
    mc admin kms key create ALIAS KEYNAME
    ```
+
 5. 为存储桶启用 SSE-KMS
 
    使用 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) CLI， 通过生成的密钥启用存储桶默认 SSE-KMS：

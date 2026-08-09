@@ -32,6 +32,7 @@ silo_modified: false
 ```shell
 mc admin accesskey rm myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

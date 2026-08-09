@@ -107,12 +107,12 @@ Applications must assign non-conflicting, unique keys for all objects. This incl
 
 For example, the following operations create a namespace conflicts
 
-```
+```text
 PUT data/invoices/2024/january/vendors.csv
 PUT data/invoices/2024/january <- collides with existing object prefix
 ```
 
-```
+```text
 PUT data/invoices/2024/january
 PUT data/invoices/2024/january/vendors.csv <- collides with existing object
 ```

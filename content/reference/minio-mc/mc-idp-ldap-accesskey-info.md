@@ -28,6 +28,7 @@ MinIO supports using [AssumeRoleWithLDAPIdentity](/developers/security-token-ser
 ```shell
 mc idp ldap accesskey info minio/ mykey
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

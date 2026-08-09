@@ -26,6 +26,7 @@ silo_modified: false
 ```shell
 mc event rm myminio/mydata arn:aws:sqs::primary:target
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 命令语法如下：
@@ -84,7 +85,7 @@ MinIO 服务器在启动时会为每个已配置的通知目标输出一个 ARN�
 
 *Optional*
 
-添加事件时指定的事件类型。 这些条目**必须**与添加事件时使用的值一致。 如果没有事件与事件类型列表匹配，命令将返回 `no notification configuration matched` 错误。
+添加事件时指定的事件类型。 这些条目 **必须** 与添加事件时使用的值一致。 如果没有事件与事件类型列表匹配，命令将返回 `no notification configuration matched` 错误。
 
 使用逗号 `,` 分隔可指定多个事件。 支持的事件类型请参见 [支持的存储桶事件](/zh/reference/minio-mc/mc-event-add/#mc-event-supported-events)。
 
@@ -155,8 +156,10 @@ mc event rm alias/bucket arn:minio:sqs::mytest:webhook --event get,put
 ```shell
 mc event rm myminio/mydata arn:minio:sqs::primary:webhook
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc event rm ALIAS ARN
 ```

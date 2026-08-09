@@ -53,7 +53,7 @@ MinIO 会根据对象路径隐式推断前缀。 显式创建前缀通常只会�
 
 ### 版本控制按命名空间生效 {#id5}
 
-MinIO 使用对象的完整命名空间（即存储桶和对象路径）来判断对象的唯一性。 例如，下列所有命名空间都对应“唯一”对象，对其中任一对象的变更，都会在*该命名空间下*创建新的对象版本：
+MinIO 使用对象的完整命名空间（即存储桶和对象路径）来判断对象的唯一性。 例如，下列所有命名空间都对应“唯一”对象，对其中任一对象的变更，都会在 *该命名空间下* 创建新的对象版本：
 
 ```shell
 databucket/object.blob
@@ -118,7 +118,7 @@ MinIO 可以利用 [生命周期管理过期规则](/zh/administration/object-ma
 MinIO 与标准 S3 实现不同，会避免这种潜在的删除标记重复。 处理未指定版本标识符的 `Delete` 请求时，MinIO 最多只会为指定对象创建一个 Delete Marker。 MinIO **不会** 像 S3 那样创建多个连续的删除标记。
 {{% /alert %}}
 
-若要永久删除某个对象版本，请执行 `DELETE` 操作并指定待删除对象的版本 ID。 这种删除操作**不可逆**。
+若要永久删除某个对象版本，请执行 `DELETE` 操作并指定待删除对象的版本 ID。 这种删除操作 **不可逆**。
 
 {{< doc-carousel >}}
 {{< doc-card title="删除对象" image="/images/retention/minio-versioning-delete-object.svg" alt="删除对象" >}}
@@ -131,7 +131,7 @@ MinIO 与标准 S3 实现不同，会避免这种潜在的删除标记重复。 
 即使“最新”版本是 `DeleteMarker`，客户端仍可通过指定版本 ID 获取该对象的任意先前版本。
 {{< /doc-card >}}
 {{< doc-card title="删除特定对象版本" image="/images/retention/minio-versioning-delete-specific-version.svg" alt="获取已删除对象的版本" >}}
-客户端可在 `DELETE` 操作中指定版本 ID，以删除某个特定对象版本。 删除特定版本属于**永久**删除，不会创建 `DeleteMarker`。
+客户端可在 `DELETE` 操作中指定版本 ID，以删除某个特定对象版本。 删除特定版本属于 **永久** 删除，不会创建 `DeleteMarker`。
 {{< /doc-card >}}
 {{< /doc-carousel >}}
 
@@ -140,7 +140,7 @@ MinIO 与标准 S3 实现不同，会避免这种潜在的删除标记重复。 
 - 使用 [`mc ls --versions`](/zh/reference/minio-mc/mc-ls/#mc.ls.-versions) 查看对象的所有版本，包括删除标记。
 - 使用 [`mc cp --version-id=UUID ...`](/zh/reference/minio-mc/mc-cp/#mc.cp.-version-id) 获取 `UUID` 匹配的“已删除”对象版本。
 - 使用 [`mc rm --version-id=UUID ...`](/zh/reference/minio-mc/mc-rm/#mc.rm.-version-id) 删除 `UUID` 匹配的对象版本。
-- 使用 [`mc rm --versions`](/zh/reference/minio-mc/mc-rm/#mc.rm.-versions) 删除对象的*所有*版本。
+- 使用 [`mc rm --versions`](/zh/reference/minio-mc/mc-rm/#mc.rm.-versions) 删除对象的 *所有* 版本。
 
 ## 教程 {#id8}
 

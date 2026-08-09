@@ -23,6 +23,7 @@ silo_modified: false
 ```shell
 mc stat --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令具有以下语法：
@@ -68,7 +69,7 @@ mc stat myminio/mybucket/myobject.txt
 mc stat myminio/mybucket/myobject.txt myminio/mybucket/myobject.txt
 ```
 
-如果指定的是存储桶路径或存储桶前缀路径，则**必须**包含 [`mc stat --recursive`](#mc.stat.-recursive) 标志：
+如果指定的是存储桶路径或存储桶前缀路径，则 **必须** 包含 [`mc stat --recursive`](#mc.stat.-recursive) 标志：
 
 ```shell
 mc stat --recursive myminio/mybucket/

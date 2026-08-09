@@ -44,11 +44,13 @@ AWS Storage Classes 指将给定对象存储到的特定存储层级，例如 `h
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_STORAGE_CLASS_STANDARD` {#envvar.MINIO_STORAGE_CLASS_STANDARD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `storage_class standard` {#mc-conf.storage_class.standard}
 
 *mc-conf*
@@ -91,11 +93,13 @@ AWS Storage Classes 指将给定对象存储到的特定存储层级，例如 `h
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_STORAGE_CLASS_RRS` {#envvar.MINIO_STORAGE_CLASS_RRS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `storage_class rrs` {#mc-conf.storage_class.rrs}
 
 *mc-conf*
@@ -108,7 +112,7 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 请使用 `EC:M` 记法指定该值，其中 `M` 表示要为对象创建的校验块数量。
 
-该值**必须**小于或等于 [`MINIO_STORAGE_CLASS_STANDARD`](#envvar.MINIO_STORAGE_CLASS_STANDARD)。
+该值 **必须** 小于或等于 [`MINIO_STORAGE_CLASS_STANDARD`](#envvar.MINIO_STORAGE_CLASS_STANDARD)。
 
 对于纠删集合大小小于 2 的部署，不能设置此值。 纠删集合大小大于 1 的部署默认值为 `EC:1`。 纠删集合大小为 1 的部署默认值为 `EC:0`。
 
@@ -116,18 +120,20 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_STORAGE_CLASS_OPTIMIZE` {#envvar.MINIO_STORAGE_CLASS_OPTIMIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `storage_class optimize` {#mc-conf.storage_class.optimize}
 
 *mc-conf*
 {{% /tab %}}
 {{< /tabpane >}}
 
-默认情况下，如果目标纠删集合维持写入法定人数（write quorum）*但*有一个或多个驱动器离线，MinIO 会自动“升级”对象的校验。 该行为有助于确保给定对象与写入健康纠删集合的对象保持相同可用性。
+默认情况下，如果目标纠删集合维持写入法定人数（write quorum）*但* 有一个或多个驱动器离线，MinIO 会自动“升级”对象的校验。 该行为有助于确保给定对象与写入健康纠删集合的对象保持相同可用性。
 
 将该设置指定为 `capacity`，可指示 MinIO 不为对象创建任何额外校验。 这会优先保障集群总体容量，但代价是当该纠删集合中更多驱动器故障时，对象可用性可能降低。
 
@@ -135,6 +141,7 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_STORAGE_CLASS_COMMENT` {#envvar.MINIO_STORAGE_CLASS_COMMENT}
 
 *envvar*

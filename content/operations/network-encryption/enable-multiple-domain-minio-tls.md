@@ -140,6 +140,7 @@ The following steps apply to both new and existing MinIO Deployments using `Kust
          - name: external-domain
            type: cert-manager.io/v1
    ```
+
 3. Apply the new Kustomization Template
 
    Once you apply the changes, the MinIO Operator automatically redeploys the Tenant with the updated configuration.
@@ -170,6 +171,7 @@ The following steps apply to both new and existing MinIO deployments using `Kust
       - name: domain-certificate-2
       type: kubernetes.io/tls
    ```
+
 3. Apply the new Kustomization Template
 
    Once you apply the changes, the MinIO Operator automatically redeploys the Tenant with the updated configuration.
@@ -217,5 +219,6 @@ Place the certificates in the `/certs` folder, creating a subfolder in `/certs` 
       private.key
       public.crt
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}

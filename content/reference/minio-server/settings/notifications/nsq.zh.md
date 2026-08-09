@@ -33,6 +33,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_NSQ_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_NSQ_NSQD_ADDRESS_PRIMARY="https://user:password@nsq-endpoint.example.net:9200"
@@ -42,8 +43,10 @@ export MINIO_NOTIFY_NSQ_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_NSQ_NSQD_ADDRESS_SECONDARY="https://user:password@nsq-endpoint.example.net:9200"
 export MINIO_NOTIFY_NSQ_TOPIC_SECONDARY="bucketevents"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ```shell
 mc admin config set notify_nsq:primary \
    nsqd_address="ENDPOINT" \
@@ -55,6 +58,7 @@ mc admin config set notify_nsq:secondary \
    topic="<string>" \
    [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -66,6 +70,7 @@ mc admin config set notify_nsq:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NSQ_ENABLE` {#envvar.MINIO_NOTIFY_NSQ_ENABLE}
 
 *envvar*
@@ -73,13 +78,14 @@ mc admin config set notify_nsq:secondary \
 指定 `on` 以启用将存储桶通知发布到 NSQ 端点。
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nsq` {#mc-conf.notify_nsq}
 
 *mc-conf*
 
 用于定义 NSQ server/broker 端点的顶层配置键，供 [MinIO 存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 使用。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 NSQ server/broker 端点。 每个端点都*必须*包含以下参数：
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 NSQ server/broker 端点。 每个端点都 *必须* 包含以下参数：
 
 - [`nsqd_address`](#mc-conf.notify_nsq.nsqd_address)
 - [`topic`](#mc-conf.notify_nsq.topic)
@@ -92,6 +98,7 @@ mc admin config set notify_nsq                          \
    topic="<string>"                                     \
    [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -101,11 +108,13 @@ mc admin config set notify_nsq                          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NSQ_NSQD_ADDRESS` {#envvar.MINIO_NOTIFY_NSQ_NSQD_ADDRESS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nsq nsqd_address` {#mc-conf.notify_nsq.nsqd_address}
 
 *mc-conf*
@@ -128,11 +137,13 @@ mc admin config set notify_nsq                          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NSQ_TOPIC` {#envvar.MINIO_NOTIFY_NSQ_TOPIC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nsq topic` {#mc-conf.notify_nsq.topic}
 
 *mc-conf*
@@ -147,11 +158,13 @@ mc admin config set notify_nsq                          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NSQ_TLS` {#envvar.MINIO_NOTIFY_NSQ_TLS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nsq tls` {#mc-conf.notify_nsq.tls}
 
 *mc-conf*
@@ -166,11 +179,13 @@ mc admin config set notify_nsq                          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NSQ_TLS_SKIP_VERIFY` {#envvar.MINIO_NOTIFY_NSQ_TLS_SKIP_VERIFY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nsq tls_skip_verify` {#mc-conf.notify_nsq.tls_skip_verify}
 
 *mc-conf*
@@ -188,11 +203,13 @@ mc admin config set notify_nsq                          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NSQ_QUEUE_DIR` {#envvar.MINIO_NOTIFY_NSQ_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nsq queue_dir` {#mc-conf.notify_nsq.queue_dir}
 
 *mc-conf*
@@ -209,11 +226,13 @@ mc admin config set notify_nsq                          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NSQ_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_NSQ_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nsq queue_limit` {#mc-conf.notify_nsq.queue_limit}
 
 *mc-conf*
@@ -228,11 +247,13 @@ mc admin config set notify_nsq                          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_NSQ_COMMENT` {#envvar.MINIO_NOTIFY_NSQ_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_nsq comment` {#mc-conf.notify_nsq.comment}
 
 *mc-conf*

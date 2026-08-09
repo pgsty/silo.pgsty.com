@@ -139,8 +139,10 @@ The following command adds a new event notification trigger for all S3 `PUT`, `G
 ```shell
 mc event add myminio/mydata arn:minio:sqs::primary:webhook
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc event add ALIAS ARN
 ```

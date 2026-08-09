@@ -32,11 +32,14 @@ silo_modified: true
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 MINIO_POLICY_PLUGIN_URL="https://authzservice.example.net:8080/authz"
 ```
+
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `policy_plugin` {#mc-conf.policy_plugin}
 
 *mc-conf*
@@ -48,6 +51,7 @@ mc admin config set policy_plugin                     \
    url="https://authzservice.example.net:8080/authz"  \
    [ARGUMENT=VALUE] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -59,11 +63,13 @@ mc admin config set policy_plugin                     \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_POLICY_PLUGIN_URL` {#envvar.MINIO_POLICY_PLUGIN_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `policy_plugin url` {#mc-conf.policy_plugin.url}
 
 *mc-conf*
@@ -78,11 +84,13 @@ mc admin config set policy_plugin                     \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_POLICY_PLUGIN_AUTH_TOKEN` {#envvar.MINIO_POLICY_PLUGIN_AUTH_TOKEN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `policy_plugin auth_token` {#mc-conf.policy_plugin.auth_token}
 
 *mc-conf*
@@ -99,11 +107,13 @@ mc admin config set policy_plugin                     \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_POLICY_PLUGIN_ENABLE_HTTP2` {#envvar.MINIO_POLICY_PLUGIN_ENABLE_HTTP2}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `policy_plugin enable_http2` {#mc-conf.policy_plugin.enable_http2}
 
 *mc-conf*
@@ -120,11 +130,13 @@ mc admin config set policy_plugin                     \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_POLICY_PLUGIN_COMMENT` {#envvar.MINIO_POLICY_PLUGIN_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `policy_plugin comment` {#mc-conf.policy_plugin.comment}
 
 *mc-conf*

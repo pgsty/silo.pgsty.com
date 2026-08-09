@@ -15,7 +15,6 @@ aliases:
 
 This is the fork's **first pinned release**. It restores the IAM bucket/object resource boundary reported as upstream [minio/minio#20449](https://github.com/minio/minio/issues/20449): a policy condition-key bypass fix, three LDAP connection defects, a certificate watcher leak, a seeded-RNG defect, and the module's real minimum Go version.
 
-
 {{% alert color="warning" %}}
 **Two things to check before upgrading**
 
@@ -92,7 +91,7 @@ The first attempt let the withheld slash reach the **`NotResource`** match as we
 
 The second attempt fixed that and shipped saying the result was provably monotone. An independent adversarial review of that release produced a counterexample. Withholding the slash does not merely remove a match — it changes *which string patterns are matched against*, and a pattern can match `"mybucket"` without ever having matched `"mybucket/"`. A fixed-width wildcard is the clean case:
 
-```
+```text
 Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 ```
 

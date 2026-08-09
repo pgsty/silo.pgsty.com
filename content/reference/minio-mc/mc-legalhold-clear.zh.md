@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc legalhold clear --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令的语法如下：

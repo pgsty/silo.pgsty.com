@@ -30,6 +30,7 @@ silo_modified: false
 ```shell
 mc cp --recursive ~/mydata/ myminio/mydata/
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 [`mc cp`](#command-mc.cp) 命令的语法如下：
@@ -290,7 +291,7 @@ MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-k
 
 例如，如需将下载速率限制为不超过 1 GiB/s，请使用以下命令：
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -316,7 +317,7 @@ MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-k
 
 例如，如需将上传速率限制为不超过 1 GiB/s，请使用以下命令：
 
-```
+```text
 --limit-upload 1G
 ```
 
@@ -460,6 +461,7 @@ MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-k
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="文件系统到 S3" %}}
+
 ```shell
 mc cp SOURCE ALIAS/PATH
 ```
@@ -469,6 +471,7 @@ mc cp SOURCE ALIAS/PATH
 - 将 [`PATH`](#mc.cp.TARGET) 替换为 S3 兼容主机上的对象路径。 你可以指定不同的对象名称，以便在复制时“重命名”对象。
 {{% /tab %}}
 {{% tab header="S3 到 S3" %}}
+
 ```shell
 mc cp SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
@@ -486,6 +489,7 @@ mc cp SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="文件系统到 S3" %}}
+
 ```shell
 mc cp --recursive SOURCE ALIAS/PATH
 ```
@@ -495,6 +499,7 @@ mc cp --recursive SOURCE ALIAS/PATH
 - 将 [`PATH`](#mc.cp.TARGET) 替换为 S3 兼容主机上的对象路径。 [`mc cp`](#command-mc.cp) 在目标主机创建对象时会使用 `SOURCE` 的文件名。
 {{% /tab %}}
 {{% tab header="S3 到 S3" %}}
+
 ```shell
 mc cp --recursive SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
@@ -562,7 +567,7 @@ mc cp --attr="content-type=CONTENT-TYPE" SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 
 以下示例将 `content-type` 设置为 `application/json`：
 
-```
+```text
  mc cp data.ndjson --attr="content-type=application/json" myminio/mybucket
 ```
 

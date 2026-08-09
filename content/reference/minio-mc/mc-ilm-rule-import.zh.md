@@ -30,6 +30,7 @@ silo_modified: false
 ```shell
 mc ilm rule import myminio/mydata < mydata-lifecycle-config.json
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -75,8 +76,10 @@ mc ilm rule import myminio/mydata < bucket-lifecycle.json
 ```shell
 mc ilm rule import myminio/mybucket < bucket-lifecycle.json
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc ilm rule import ALIAS < file.json
 ```

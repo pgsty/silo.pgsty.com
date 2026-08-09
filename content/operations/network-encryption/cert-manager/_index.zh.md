@@ -78,6 +78,7 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
    spec:
      selfSigned: {}
    ```
+
 2. 将该资源应用到集群：
 
    ```shell

@@ -16,7 +16,7 @@ silo_modified: false
 
 如需基于 [legal hold](/zh/administration/object-management/object-retention/#minio-object-locking-legalhold) 锁定对象， 请使用 [`mc legalhold set`](/zh/reference/minio-mc/mc-legalhold-set/#command-mc.legalhold.set)。
 
-[`mc retention info`](#command-mc.retention.info) *要求* 指定存储桶已启用对象锁定。 你**只能**在创建存储桶时启用对象锁定。有关创建启用对象锁定的存储桶，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
+[`mc retention info`](#command-mc.retention.info) *要求* 指定存储桶已启用对象锁定。 你 **只能** 在创建存储桶时启用对象锁定。有关创建启用对象锁定的存储桶，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
@@ -25,6 +25,7 @@ silo_modified: false
 ```shell
 mc retention info --default myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：
@@ -141,6 +142,7 @@ mc retention info play/mybucket/object.txt
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="指定对象" %}}
+
 ```shell
 mc retention info ALIAS/PATH
 ```

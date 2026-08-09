@@ -30,6 +30,7 @@ silo_modified: false
 mc share ls upload myminio/mydata
 mc share ls download myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

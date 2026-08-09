@@ -28,6 +28,7 @@ The following command outputs a list of all jobs currently in progress on the `m
 ```shell
 mc batch list myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -71,7 +72,7 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### List all `replicate` type batch jobs {#list-all-replicate-type-batch-jobs}
 
-The following command lists the `` replicate` `` type job(s) on the deployment at [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) `myminio`:
+The following command lists the `replicate` type job(s) on the deployment at [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) `myminio`:
 
 ```shell
 mc batch list myminio --type "replicate"

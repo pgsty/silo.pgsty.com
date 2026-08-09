@@ -48,6 +48,7 @@ mc stat play/mynewbucket/prefix/filename.extension
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="裸金属" %}}
+
 1. 下载适用于你的操作系统的 Silo 服务端
 
    从[下载与安装](/zh/download/#server)选择已经公开发布的 Silo 软件包或归档，并校验摘要。可执行文件刻意保留 [`minio server`](/zh/reference/minio-server/#command-minio.server) 命令契约。

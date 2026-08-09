@@ -46,6 +46,7 @@ From 127.0.0.1:9005       5     0.3ms   1s ago    0        0     ->0      0->   
  To  127.0.0.1:9006       5     0.3ms   1s ago    0        0     ->0      0->    3185    3221
 From 127.0.0.1:9006       5     0.6ms   1s ago    0        0     ->0      0->    3222    3185
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

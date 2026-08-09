@@ -32,6 +32,7 @@ Each configuration setting controls fundamental MinIO behavior and functionality
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_ROOT_USER` {#envvar.MINIO_ROOT_USER}
 
 *envvar*
@@ -55,6 +56,7 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" selected=true %}}
+
 #### `MINIO_ROOT_PASSWORD` {#envvar.MINIO_ROOT_PASSWORD}
 
 *envvar*
@@ -80,11 +82,13 @@ This setting does not have a configuration variable setting. Use the Environment
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_API_ROOT_ACCESS` {#envvar.MINIO_API_ROOT_ACCESS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `api root-access` {#mc-conf.api.root-access}
 
 *mc-conf*

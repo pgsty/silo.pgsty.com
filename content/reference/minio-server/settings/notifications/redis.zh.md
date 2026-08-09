@@ -33,6 +33,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_REDIS_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_REDIS_ADDRESS_PRIMARY="redis-endpoint.example.net:9200"
@@ -45,8 +46,10 @@ export MINIO_NOTIFY_REDIS_REDIS_ADDRESS_SECONDARY="redis-endpoint2.example.net:9
 export MINIO_NOTIFY_REDIS_KEY_SECONDARY="bucketevents"
 export MINIO_NOTIFY_REDIS_FORMAT_SECONDARY="namespace"
 ```
+
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ```shell
 mc admin config set notify_redis:primary              \
    address="redis-endpoint.example.net:9200"  \
@@ -60,6 +63,7 @@ mc admin config set notify_redis:secondary            \
    format="namespace"                                 \
    [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -71,6 +75,7 @@ mc admin config set notify_redis:secondary            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_ENABLE` {#envvar.MINIO_NOTIFY_REDIS_ENABLE}
 
 *envvar*
@@ -86,13 +91,14 @@ mc admin config set notify_redis:secondary            \
 - [`MINIO_NOTIFY_REDIS_FORMAT`](#envvar.MINIO_NOTIFY_REDIS_FORMAT)
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis` {#mc-conf.notify_redis}
 
 *mc-conf*
 
 用于定义 Redis server/broker 端点并供 [MinIO bucket notifications](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 使用的顶层配置键。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 Redis server/broker 端点。 对于每个端点，以下参数为*必需*：
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 Redis server/broker 端点。 对于每个端点，以下参数为 *必需*：
 
 - [`address`](#mc-conf.notify_redis.address)
 - [`key`](#mc-conf.notify_redis.key)
@@ -107,6 +113,7 @@ mc admin config set notify_redis \
    format="<string>" \
    [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -116,11 +123,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_ADDRESS` {#envvar.MINIO_NOTIFY_REDIS_ADDRESS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis address` {#mc-conf.notify_redis.address}
 
 *mc-conf*
@@ -141,11 +150,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_KEY` {#envvar.MINIO_NOTIFY_REDIS_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis key` {#mc-conf.notify_redis.key}
 
 *mc-conf*
@@ -160,11 +171,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_FORMAT` {#envvar.MINIO_NOTIFY_REDIS_FORMAT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis format` {#mc-conf.notify_redis.format}
 
 *mc-conf*
@@ -187,11 +200,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_PASSWORD` {#envvar.MINIO_NOTIFY_REDIS_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis password` {#mc-conf.notify_redis.password}
 
 *mc-conf*
@@ -217,11 +232,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_USER` {#envvar.MINIO_NOTIFY_REDIS_USER}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis user` {#mc-conf.notify_redis.user}
 
 *mc-conf*
@@ -236,11 +253,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_QUEUE_DIR` {#envvar.MINIO_NOTIFY_REDIS_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis queue_dir` {#mc-conf.notify_redis.queue_dir}
 
 *mc-conf*
@@ -257,11 +276,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_REDIS_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis queue_limit` {#mc-conf.notify_redis.queue_limit}
 
 *mc-conf*
@@ -276,11 +297,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_REDIS_COMMENT` {#envvar.MINIO_NOTIFY_REDIS_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_redis comment` {#mc-conf.notify_redis.comment}
 
 *mc-conf*

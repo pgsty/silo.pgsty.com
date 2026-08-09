@@ -52,6 +52,7 @@ Check Replication:     3 versions; Avg: 892ns
 Verify Deleted:        0 folders; Avg: 0ms
 Yield:                 18ms total; Avg: 6ms/obj
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

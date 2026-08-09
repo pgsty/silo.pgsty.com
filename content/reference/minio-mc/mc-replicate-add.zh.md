@@ -23,7 +23,7 @@ MinIO 会根据给定的文件路径或资源位置（例如 IP 或 DNS 地址�
 
 [`mc replicate add`](#command-mc.replicate.add) 命令会为 MinIO 部署中的存储桶创建一条新的 [服务端复制](/zh/administration/bucket-replication/#minio-bucket-replication-serverside) 规则。
 
-远程存储桶**必须**位于与本地部署运行相同 MinIO 版本的 MinIO 部署上。
+远程存储桶 **必须** 位于与本地部署运行相同 MinIO 版本的 MinIO 部署上。
 
 {{% alert color="info" %}}
 **说明**
@@ -117,13 +117,13 @@ RELEASE.2024-03-03T00-13-08Z
 
 例如，基于 URL 的目标可能如下所示：
 
-```
+```text
 https://user:secret@myminio.cloudprovider.tld:9001/bucket
 ```
 
 基于 alias 的目标可能如下所示：
 
-```
+```text
 --remote-bucket minio-target/my-bucket
 ```
 
@@ -145,7 +145,7 @@ https://user:secret@myminio.cloudprovider.tld:9001/bucket
 
 例如，要将带宽速率限制为不超过 1 GiB/s，可使用以下参数：
 
-```
+```text
 --limit-upload 1Gi
 ```
 
@@ -207,7 +207,7 @@ https://user:secret@myminio.cloudprovider.tld:9001/bucket
 
 例如，要将下载速率限制为不超过 1 GiB/s，可使用以下参数：
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -231,7 +231,7 @@ https://user:secret@myminio.cloudprovider.tld:9001/bucket
 
 例如，要将上传速率限制为不超过 1 GiB/s，可使用以下参数：
 
-```
+```text
 --limit-upload 1G
 ```
 
@@ -259,7 +259,7 @@ https://user:secret@myminio.cloudprovider.tld:9001/bucket
 
 *Optional*
 
-指定复制规则的整数优先级。 该值*必须*在源存储桶的所有其他规则中保持唯一。 值越高表示优先级*越高*。
+指定复制规则的整数优先级。 该值 *必须* 在源存储桶的所有其他规则中保持唯一。 值越高表示优先级 *越高*。
 
 默认值为 `0`。
 
@@ -360,7 +360,7 @@ mc replicate add myminio/mybucket \
 
 ### 服务端复制要求源端和目标端均为 MinIO {#minio}
 
-MinIO 服务端复制仅适用于 MinIO 部署之间。 源端和目标端部署都*必须*运行 MinIO。
+MinIO 服务端复制仅适用于 MinIO 部署之间。 源端和目标端部署都 *必须* 运行 MinIO。
 
 若要在任意兼容 S3 的服务之间配置复制，请使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror)。
 
@@ -368,7 +368,7 @@ MinIO 服务端复制仅适用于 MinIO 部署之间。 源端和目标端部署
 
 MinIO 依赖版本控制提供的不可变性保护，在源端与复制目标之间同步对象。
 
-在开始此流程前，使用 [`mc version enable`](/zh/reference/minio-mc/mc-version-enable/#command-mc.version.enable) 命令在源存储桶和目标存储桶*两端*启用版本控制：
+在开始此流程前，使用 [`mc version enable`](/zh/reference/minio-mc/mc-version-enable/#command-mc.version.enable) 命令在源存储桶和目标存储桶 *两端* 启用版本控制：
 
 ```shell
 mc version enable ALIAS/PATH
@@ -424,12 +424,12 @@ MinIO 强烈建议专门创建用于支持存储桶复制操作的用户。 关�
 ```
 
 - `"EnableRemoteBucketConfiguration"` 语句授予创建远程目标以支持复制的权限。
-- `"EnableReplicationRuleConfiguration"` 语句授予在存储桶上创建复制规则的权限。 `"arn:aws:s3:::*` 资源将复制权限应用到源部署上的*任意*存储桶。 你可以按需将用户策略限制到特定存储桶。
+- `"EnableReplicationRuleConfiguration"` 语句授予在存储桶上创建复制规则的权限。 `"arn:aws:s3:::*` 资源将复制权限应用到源部署上的 *任意* 存储桶。 你可以按需将用户策略限制到特定存储桶。
 
 使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 将该策略添加到每个作为复制源的部署。 使用 [`mc admin user add`](/zh/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) 在部署上创建用户，并使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将策略关联到该新用户。
 {{% /tab %}}
 {{% tab header="复制远程用户" %}}
-以下策略提供将复制数据同步*到*该部署所需的权限。
+以下策略提供将复制数据同步 *到* 该部署所需的权限。
 
 ```json
 {
@@ -477,8 +477,8 @@ MinIO 强烈建议专门创建用于支持存储桶复制操作的用户。 关�
 }
 ```
 
-- `"EnableReplicationOnBucket"` 语句授予远程目标检索存储桶级配置的权限，以支持在 MinIO 部署中*所有*存储桶上的复制操作。 若要将策略限制到特定存储桶，请在 `Resource` 数组中按 `"arn:aws:s3:::bucketName"` 形式指定这些存储桶。
-- `"EnableReplicatingDataIntoBucket"` 语句授予远程目标将数据同步到 MinIO 部署中*任意*存储桶的权限。 若要将策略限制到特定存储桶，请在 `Resource` 数组中按 `"arn:aws:s3:::bucketName/*"` 形式指定这些存储桶。
+- `"EnableReplicationOnBucket"` 语句授予远程目标检索存储桶级配置的权限，以支持在 MinIO 部署中 *所有* 存储桶上的复制操作。 若要将策略限制到特定存储桶，请在 `Resource` 数组中按 `"arn:aws:s3:::bucketName"` 形式指定这些存储桶。
+- `"EnableReplicatingDataIntoBucket"` 语句授予远程目标将数据同步到 MinIO 部署中 *任意* 存储桶的权限。 若要将策略限制到特定存储桶，请在 `Resource` 数组中按 `"arn:aws:s3:::bucketName/*"` 形式指定这些存储桶。
 
 使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 将该策略添加到每个作为复制目标的部署。 使用 [`mc admin user add`](/zh/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) 在部署上创建用户，并使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将策略关联到该新用户。
 {{% /tab %}}
@@ -489,7 +489,7 @@ MinIO 强烈建议专门创建用于支持存储桶复制操作的用户。 关�
 从 [`mc`](/zh/reference/minio-mc/#command-mc) [RELEASE.2021-06-13T17-48-22Z](https://github.com/minio/mc/releases/tag/RELEASE.2021-06-13T17-48-22Z) 和 [`minio`](/zh/reference/minio-server/#command-minio) [RELEASE.2021-06-07T21-40-51Z](https://github.com/minio/minio/releases/tag/RELEASE.2021-06-07T21-40-51Z) 开始，MinIO 支持自动复制存储桶中的现有对象。 MinIO 的现有对象复制实现了类似 [AWS Replicating existing objects between S3 buckets](https://aws.amazon.com/blogs/storage/replicating-existing-objects-between-s3-buckets/) 的能力，而无需联系技术支持的额外开销。
 
 - 若要在创建新复制规则时启用现有对象复制，请在传给 [`mc replicate add --replicate`](#mc.replicate.add.-replicate) 的复制功能列表中包含 `"existing-objects"`。
-- 若要为已有复制规则启用现有对象复制，请使用 [`mc replicate add --replicate`](#mc.replicate.add.-replicate) 将 `"existing-objects"` 添加到现有复制功能列表中。 编辑复制规则时，你必须指定*所有*期望的复制功能。
+- 若要为已有复制规则启用现有对象复制，请使用 [`mc replicate add --replicate`](#mc.replicate.add.-replicate) 将 `"existing-objects"` 添加到现有复制功能列表中。 编辑复制规则时，你必须指定 *所有* 期望的复制功能。
 
 有关此行为的更完整文档，请参见 [现有对象的复制](/zh/administration/bucket-replication/#minio-replication-behavior-existing-objects)。
 
@@ -508,17 +508,17 @@ MinIO 支持将删除操作复制到目标存储桶。 具体来说，MinIO 可�
 - 对对象执行删除操作时，MinIO 复制也会在目标存储桶创建删除标记。
 - 对对象版本执行删除操作时，MinIO 复制也会删除目标存储桶中的对应版本。
 
-对于因 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 被删除的对象，MinIO *不会*进行复制。 MinIO 仅复制由客户端显式触发的删除操作。
+对于因 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 被删除的对象，MinIO *不会* 进行复制。 MinIO 仅复制由客户端显式触发的删除操作。
 
 MinIO 要求使用 [`mc replicate add --replicate`](#mc.replicate.add.-replicate) 参数显式启用删除操作复制。 本流程包含启用删除操作和删除标记复制所需的参数。 有关此行为的更完整文档，请参见 [删除操作的复制](/zh/administration/bucket-replication/#minio-replication-behavior-delete)。
 
 ### 加密对象复制 {#id16}
 
-MinIO 支持复制使用自动 Server-Side Encryption (SSE-S3) 加密的对象。 要复制加密对象，源存储桶和目标存储桶都*必须*启用自动 SSE-S3。
+MinIO 支持复制使用自动 Server-Side Encryption (SSE-S3) 加密的对象。 要复制加密对象，源存储桶和目标存储桶都 *必须* 启用自动 SSE-S3。
 
-作为复制流程的一部分，MinIO 会在源存储桶上*解密*对象，并传输未加密对象。 目标 MinIO 部署随后会使用目标存储桶的 SSE-S3 配置重新加密该对象。 MinIO *强烈建议*在源端和目标端部署上都 [启用 TLS](/zh/operations/network-encryption/#minio-tls)，以确保对象在传输过程中的安全。
+作为复制流程的一部分，MinIO 会在源存储桶上 *解密* 对象，并传输未加密对象。 目标 MinIO 部署随后会使用目标存储桶的 SSE-S3 配置重新加密该对象。 MinIO *强烈建议* 在源端和目标端部署上都 [启用 TLS](/zh/operations/network-encryption/#minio-tls)，以确保对象在传输过程中的安全。
 
-MinIO *不*支持复制客户端侧加密对象（SSE-C）。
+MinIO *不* 支持复制客户端侧加密对象（SSE-C）。
 
 ### S3 兼容性 {#s3}
 

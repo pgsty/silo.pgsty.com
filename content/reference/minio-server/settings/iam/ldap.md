@@ -43,6 +43,7 @@ Each configuration setting controls fundamental MinIO behavior and functionality
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ```shell
 MINIO_IDENTITY_LDAP_SERVER_ADDR="ldapserver.com:636"
 ```
@@ -56,6 +57,7 @@ If your AD/LDAP server uses `DNS SRV Records`, do *not* append the port number t
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `identity_ldap` {#mc-conf.identity_ldap}
 
 *mc-conf*
@@ -78,6 +80,7 @@ mc admin config set identity_ldap                        \
    user_dn_search_base_dn="dc=example,dc=net"            \
    user_dn_search_filter="(&(objectCategory=user)(sAMAccountName=%s))"
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -89,6 +92,7 @@ mc admin config set identity_ldap                        \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_SERVER_ADDR` {#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR}
 
 *envvar*
@@ -106,6 +110,7 @@ If your AD/LDAP server uses [`DNS SRV Records`](/reference/minio-mc/mc-idp-ldap-
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap server_addr` {#mc-conf.identity_ldap.server_addr}
 
 *mc-conf*
@@ -130,11 +135,13 @@ If your AD/LDAP server uses [`DNS SRV Records`](/reference/minio-mc/mc-idp-ldap-
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN` {#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap lookup_bind_dn` {#mc-conf.identity_ldap.lookup_bind_dn}
 
 *mc-conf*
@@ -151,11 +158,13 @@ The DN account should be a read-only access keys with sufficient privileges to s
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD` {#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap lookup_bind_password` {#mc-conf.identity_ldap.lookup_bind_password}
 
 *mc-conf*
@@ -176,11 +185,13 @@ MinIO redacts this value when returned as part of [`mc admin config get`](/refer
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap user_dn_search_base_dn` {#mc-conf.identity_ldap.user_dn_search_base_dn}
 
 *mc-conf*
@@ -205,11 +216,13 @@ Supports [Lookup-Bind](/operations/external-iam/#minio-external-identity-managem
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap user_dn_search_filter` {#mc-conf.identity_ldap.user_dn_search_filter}
 
 *mc-conf*
@@ -230,11 +243,13 @@ Use the `%s` substitution character to insert the client-specified username into
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_USER_DN_ATTRIBUTES` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_ATTRIBUTES}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap user_dn_attributes` {#mc-conf.identity_ldap.user_dn_attributes}
 
 *mc-conf*
@@ -265,6 +280,7 @@ mc idp ldap update ALIAS user_dn_attributes=sshPublicKey
 This setting does not have an environment variable option. Use the configuration setting instead.
 {{% /tab %}}
 {{% tab header="Configuration Setting" selected=true %}}
+
 ##### `identity_ldap enabled` {#mc-conf.identity_ldap.enabled}
 
 *mc-conf*
@@ -283,11 +299,13 @@ Defaults to `true` or “enabled”.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER` {#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap group_search_filter` {#mc-conf.identity_ldap.group_search_filter}
 
 *mc-conf*
@@ -314,11 +332,13 @@ When providing an AD/LDAP group search filter, configure a filter that returns t
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN` {#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap group_search_base_dn` {#mc-conf.identity_ldap.group_search_base_dn}
 
 *mc-conf*
@@ -339,11 +359,13 @@ cn=miniogroups,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` {#envvar.MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap tls_skip_verify` {#mc-conf.identity_ldap.tls_skip_verify}
 
 *mc-conf*
@@ -360,11 +382,13 @@ Defaults to `off`
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_SERVER_INSECURE` {#envvar.MINIO_IDENTITY_LDAP_SERVER_INSECURE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap server_insecure` {#mc-conf.identity_ldap.server_insecure}
 
 *mc-conf*
@@ -383,11 +407,13 @@ Defaults to `off`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_SERVER_STARTTLS` {#envvar.MINIO_IDENTITY_LDAP_SERVER_STARTTLS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap server_starttls` {#mc-conf.identity_ldap.server_starttls}
 
 *mc-conf*
@@ -411,11 +437,13 @@ For more about `StartTLS`, refer to section 4.14 of the [LDAP RFC 4511 specifica
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_SRV_RECORD_NAME` {#envvar.MINIO_IDENTITY_LDAP_SRV_RECORD_NAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap srv_record_name` {#mc-conf.identity_ldap.srv_record_name}
 
 *mc-conf*
@@ -462,11 +490,13 @@ See [`server_addr`](#mc-conf.identity_ldap.server_addr) or [`MINIO_IDENTITY_LDAP
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_LDAP_COMMENT` {#envvar.MINIO_IDENTITY_LDAP_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_ldap identity_ldap comment` {#mc-conf.identity_ldap.identity_ldap.comment}
 
 *mc-conf*

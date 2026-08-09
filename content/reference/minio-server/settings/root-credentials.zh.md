@@ -32,6 +32,7 @@ silo_modified: true
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_ROOT_USER` {#envvar.MINIO_ROOT_USER}
 
 *envvar*
@@ -43,7 +44,7 @@ silo_modified: true
 
 如果未设置 [`MINIO_ROOT_USER`](#envvar.MINIO_ROOT_USER)，[`minio`](/zh/reference/minio-server/#command-minio) 默认使用 `minioadmin`。
 
-在生产环境中**绝不要**使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ROOT_USER`](#envvar.MINIO_ROOT_USER) 指定唯一、足够长且随机的值。
+在生产环境中 **绝不要** 使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ROOT_USER`](#envvar.MINIO_ROOT_USER) 指定唯一、足够长且随机的值。
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="配置项" %}}
@@ -55,6 +56,7 @@ silo_modified: true
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 #### `MINIO_ROOT_PASSWORD` {#envvar.MINIO_ROOT_PASSWORD}
 
 *envvar*
@@ -66,7 +68,7 @@ silo_modified: true
 
 如果未设置 [`MINIO_ROOT_PASSWORD`](#envvar.MINIO_ROOT_PASSWORD)，[`minio`](/zh/reference/minio-server/#command-minio) 默认使用 `minioadmin`。
 
-在生产环境中**绝不要**使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ROOT_PASSWORD`](#envvar.MINIO_ROOT_PASSWORD) 指定唯一、足够长且随机的值。
+在生产环境中 **绝不要** 使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ROOT_PASSWORD`](#envvar.MINIO_ROOT_PASSWORD) 指定唯一、足够长且随机的值。
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="配置项" %}}
@@ -80,11 +82,13 @@ silo_modified: true
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 #### `MINIO_API_ROOT_ACCESS` {#envvar.MINIO_API_ROOT_ACCESS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 #### `api root-access` {#mc-conf.api.root-access}
 
 *mc-conf*
@@ -102,7 +106,7 @@ Server RELEASE.2023-05-04T21-44-30Z
 {{% alert color="warning" %}}
 **重要**
 
-如果通过此设置禁用 root API 访问，你**仍然必须**为内部使用设置 root user 和 root password。
+如果通过此设置禁用 root API 访问，你 **仍然必须** 为内部使用设置 root user 和 root password。
 {{% /alert %}}
 
 在禁用 root 账号之前，请确保至少存在一个其他管理员用户，例如具备 [`consoleAdmin`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.consoleAdmin) 策略的用户。 如果没有其他管理员用户，禁用 root 账号会导致该部署的管理访问被锁定。

@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc anonymous list myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令具有以下语法：

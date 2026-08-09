@@ -28,7 +28,7 @@ See [Availability and Resiliency](/operations/concepts/availability-and-resilien
 The diagrams and content in this section present a simplified view of MinIO erasure coding operations and are not intended to represent the complexities of MinIO’s full erasure coding implementation.
 {{% /alert %}}
 
-**MinIO groups drives in each [server pool](/glossary/#term-server-pool) into one or more **Erasure Sets** of the same size.**
+**MinIO groups drives in each [server pool](/glossary/#term-server-pool) into one or more Erasure Sets of the same size.**
 
 > <figure>
 >   <img src="/images/erasure/erasure-coding-erasure-set.svg" alt="Diagram of erasure set covering 4 nodes and 16 drives" />
@@ -38,7 +38,7 @@ The diagrams and content in this section present a simplified view of MinIO eras
 >
 > MinIO determines the optimal number and size of erasure sets when initializing a [server pool](/glossary/#term-server-pool). You cannot modify these settings after this initial setup.
 
-**For each write operation, MinIO partitions the object into **data** and **parity** shards.**
+**For each write operation, MinIO partitions the object into data and parity shards.**
 
 > Erasure set stripe size dictates the maximum possible [parity](#minio-ec-parity) of the deployment. The formula for determining the number of data and parity shards to generate is:
 >
@@ -62,7 +62,7 @@ The diagrams and content in this section present a simplified view of MinIO eras
 >
 > Objects written with a given parity settings do not automatically update if you change the parity values later.
 
-**MinIO requires a minimum of `K` shards of any type to **read** an object.**
+**MinIO requires a minimum of `K` shards of any type to read an object.**
 
 > The value `K` here constitutes the **read quorum** for the deployment. The erasure set must therefore have at least `K` healthy drives in the erasure set to support read operations.
 >
@@ -75,7 +75,7 @@ The diagrams and content in this section present a simplified view of MinIO eras
 >
 > MinIO cannot reconstruct an object that has lost read quorum. Such objects may be recovered through other means such as [replication resynchronization](/administration/bucket-replication/server-side-replication-resynchronize-remote/#minio-bucket-replication-resynchronize).
 
-**MinIO requires a minimum of `K` erasure set drives to **write** an object.**
+**MinIO requires a minimum of `K` erasure set drives to write an object.**
 
 > The value `K` here constitutes the **write quorum** for the deployment. The erasure set must therefore have at least `K` available drives online to support write operations.
 >
@@ -86,12 +86,12 @@ The diagrams and content in this section present a simplified view of MinIO eras
 > This erasure set maintains write quorum and MinIO can use it for write operations.</figcaption>
 > </figure>
 
-**If Parity `EC:M` is exactly 1/2 the erasure set size, **write quorum** is `K+1`**
+**If Parity `EC:M` is exactly 1/2 the erasure set size, write quorum is `K+1`**
 
 > This prevents a split-brain type scenario, such as one where a network issue isolates exactly half the erasure set drives from the other.
 >
 > <figure>
->   <img src="/images/erasure/erasure-coding-shard-split-brain.svg" alt="Diagram of an erasure set with where Parity ``EC:M`` is 1/2 the set size" />
+>   <img src="/images/erasure/erasure-coding-shard-split-brain.svg" alt="Diagram of an erasure set where parity EC:M is 1/2 the set size" />
 >   <figcaption>This deployment has two nodes offline due to a transient network failure.
 > A client writes an object with <code>EC:8</code> parity settings where the erasure set has a write quorum of <code>K=9</code>.
 > This erasure set has lost write quorum and MinIO cannot use it for write operations.</figcaption>
@@ -99,7 +99,7 @@ The diagrams and content in this section present a simplified view of MinIO eras
 >
 > The `K+1` logic ensures that a client could not potentially write the same object twice - once to each “half” of the erasure set.
 
-**For an object maintaining **read quorum**, MinIO can use any data or parity shard to [heal](/operations/concepts/healing/#minio-concepts-healing) damaged shards.**
+**For an object maintaining read quorum, MinIO can use any data or parity shard to [heal](/operations/concepts/healing/#minio-concepts-healing) damaged shards.**
 
 > <figure>
 >   <img src="/images/erasure/erasure-coding-shard-healing.svg" alt="Diagram of MinIO using parity shards to heal lost data shards on a node." />

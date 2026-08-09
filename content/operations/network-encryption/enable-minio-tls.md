@@ -129,6 +129,7 @@ The following steps apply to both new and existing MinIO Deployments using `Kust
          - name: myminio-tls
             type: cert-manager.io/v1
    ```
+
 3. Apply the new Kustomization Template
 
    Once you apply the changes, the MinIO Operator automatically redeploys the Tenant with the updated configuration.
@@ -157,6 +158,7 @@ The following steps apply to both new and existing MinIO deployments using `Kust
       - name: domain-certificate
         type: kubernetes.io/tls
    ```
+
 3. Apply the new Kustomization Template
 
    Once you apply the changes, the MinIO Operator automatically redeploys the Tenant with the updated configuration.

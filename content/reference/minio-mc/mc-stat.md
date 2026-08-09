@@ -23,6 +23,7 @@ The following command displays information on all objects in the `mydata` bucket
 ```shell
 mc stat --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

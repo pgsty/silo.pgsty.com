@@ -21,6 +21,7 @@ silo_modified: false
 ```shell
 echo "My Meeting Notes" | mc pipe s3/engineering/meeting-notes.txt
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：

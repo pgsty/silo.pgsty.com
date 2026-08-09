@@ -30,6 +30,7 @@ RELEASE.2023-03-20T17-17-53Z
 ```shell
 mc batch cancel myminio KwSysDpxcBU9FNhGkn2dCf
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令使用以下语法：

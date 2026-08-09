@@ -139,8 +139,10 @@ MinIO 生成存储桶通知所依据的事件。
 ```shell
 mc event add myminio/mydata arn:minio:sqs::primary:webhook
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc event add ALIAS ARN
 ```

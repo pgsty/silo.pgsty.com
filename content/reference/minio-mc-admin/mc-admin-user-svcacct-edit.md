@@ -35,6 +35,7 @@ mc admin user svcacct edit                                             \
                       --policy "/path/to/new/policy.json"              \
                       myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

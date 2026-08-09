@@ -23,6 +23,7 @@ The following example disables the AD/LDAP configurations on the `myminio` deplo
 mc idp ldap disable  \
             myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

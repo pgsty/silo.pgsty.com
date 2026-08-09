@@ -18,8 +18,8 @@ In this recipe, we will generate a Let’s Encypt certificate using Certbot. Thi
 
 ## 1. Prerequisites {#prerequisites}
 
-- Install MinIO Server from [here](https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure).
-- Install Certbot from [here](https://certbot.eff.org/)
+- Install MinIO Server using the [Red Hat Linux deployment guide](https://silo.pgsty.com/operations/deployments/baremetal-deploy-minio-on-redhat-linux/#procedure).
+- Install Certbot from the [Certbot website](https://certbot.eff.org/).
 
 ## 2. Dependencies {#dependencies}
 
@@ -31,7 +31,7 @@ In this recipe, we will generate a Let’s Encypt certificate using Certbot. Thi
 
 ### Step 1: Install Certbot {#step-1-install-certbot}
 
-Install Certbot by following the documentation at https://certbot.eff.org/
+Install Certbot by following the documentation at <https://certbot.eff.org/>.
 
 ### Step 2: Generate Let’s Encrypt cert {#step-2-generate-let-s-encrypt-cert}
 

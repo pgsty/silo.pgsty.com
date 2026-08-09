@@ -62,6 +62,7 @@ MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 
 ```shell
 mc admin rebalance start minio1
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令的语法如下：
@@ -84,9 +85,11 @@ mc [GLOBALFLAGS] admin rebalance start ALIAS
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="EXAMPLE" %}}
+
 ```shell
 mc admin rebalance status minio1
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令的语法如下：
@@ -107,9 +110,11 @@ mc [GLOBALFLAGS] admin rebalance ALIAS
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="EXAMPLES" %}}
+
 ```shell
 mc admin rebalance stop minio1
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令的语法如下：

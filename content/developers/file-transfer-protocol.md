@@ -96,6 +96,7 @@ The SFTP protocol does not require any of the `admin:*` [permissions](/administr
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 - MinIO Operator v5.0.7 or later.
 - Enable an SFTP port (8022) for the server.
 - A port to use for the SFTP commands and a range of ports to allow the SFTP server to request to use for the data transfer.
@@ -111,6 +112,7 @@ The SFTP protocol does not require any of the `admin:*` [permissions](/administr
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 1. Enable SFTP for the desired Tenant:
 
    Use the following Kubectl command to edit the Tenant YAML configuration:
@@ -155,6 +157,7 @@ The SFTP protocol does not require any of the `admin:*` [permissions](/administr
    ```console
    enableSFTP: true
    ```
+
 4. Use your preferred SFTP client to connect to the MinIO deployment. You must connect as a user whose [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) allow access to the desired buckets and objects.
 
    The specifics of connecting to the MinIO deployment depend on your SFTP client. Refer to the documentation for your client.
@@ -182,8 +185,10 @@ If SFTP is enabled, the output resembles the following:
 ```console
 enableSFTP: true
 ```
+
 {{% /tab %}}
 {{% tab header="Baremetal" %}}
+
 1. Start MinIO with an FTP and/or SFTP port enabled.
 
    {{< tabpane text=true persist=header >}}
@@ -206,6 +211,7 @@ enableSFTP: true
    {{% /alert %}}
    {{% /tab %}}
    {{% tab header="SFTP/FTP" %}}
+
    ```shell
    minio server http://server{1...4}/disk{1...4}        \
    --ftp="address=:8021"                                \
@@ -223,6 +229,7 @@ enableSFTP: true
    MinIO FTP Server listening on :8021
    MinIO SFTP Server listening on :8022
    ```
+
    {{% /tab %}}
    {{< /tabpane >}}
 2. Use your preferred FTP client to connect to the MinIO deployment. You must connect as a user whose [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) allow access to the desired buckets and objects.
@@ -243,6 +250,7 @@ enableSFTP: true
    sftp> ls runner/
    chunkdocs  testdir
    ```
+
    {{% /tab %}}
    {{% tab header="FTPS" %}}
    The following uses the Linux uses the [FTP CLI client](https://linux.die.net/man/1/ftp) to connect to the MinIO server using `minio` credentials to list contents in a bucket named `runner`
@@ -264,6 +272,7 @@ enableSFTP: true
    drwxrwxrwx 1 nobody nobody            0 Jan  1 00:00 testdir/
    ...
    ```
+
    {{% /tab %}}
    {{< /tabpane >}}
 4. Download an Object
@@ -283,6 +292,7 @@ enableSFTP: true
    metadata                               100%  226    16.6KB/s   00:00
    sftp>
    ```
+
    {{% /tab %}}
    {{% tab header="FTPS" %}}
    This example lists items in a bucket, then downloads the contents of the bucket.
@@ -312,6 +322,7 @@ enableSFTP: true
    45 bytes received in 00:00 (3.55 KiB/s)
    ...
    ```
+
    {{% /tab %}}
    {{< /tabpane >}}
 {{% /tab %}}

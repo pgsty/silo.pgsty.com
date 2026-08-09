@@ -59,6 +59,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="节点" %}}
 以下命令用于抓取 MinIO Server 上某个节点的指标。
@@ -81,6 +82,7 @@ scrape_configs:
      static_configs:
      - targets: [minio-1.example.net, minio-2.example.net, minio-N.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="存储桶" %}}
 以下命令用于抓取 MinIO Server 上存储桶的指标。
@@ -103,6 +105,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="资源" %}}
 {{% alert color="info" %}}
@@ -130,6 +133,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -167,6 +171,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="节点" %}}
 节点指标专用于节点级监控。该配置需要列出所有 MinIO 节点。
@@ -183,8 +188,10 @@ scrape_configs:
      static_configs:
      - targets: [minio-1.example.net, minio-2.example.net, minio-N.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="存储桶" %}}
+
 ```yaml
 global:
    scrape_interval: 60s
@@ -197,8 +204,10 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{% tab header="资源" %}}
+
 ```yaml
 global:
    scrape_interval: 60s
@@ -211,6 +220,7 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -247,6 +257,7 @@ minio_node_drive_errors_availability{job="minio-job"}[5m]
 
 minio_node_drive_io_waiting{job="minio-job"}[5m]
 ```
+
 {{% /tab %}}
 {{% tab header="推荐指标" %}}
 MinIO 建议将以下指标作为基础监控项。
@@ -266,6 +277,7 @@ MinIO 建议将以下指标作为基础监控项。
 | `minio_node_drive_errors_timeout` | 自 server 启动以来驱动器超时错误的总数。 |
 | `minio_node_drive_errors_availability` | 自 server 启动以来驱动器 I/O 错误、权限拒绝和超时的总数。 |
 | `minio_node_drive_io_waiting` | 驱动器上等待中的 I/O 操作总数。 |
+
 {{% /tab %}}
 {{< /tabpane >}}
 

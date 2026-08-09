@@ -27,6 +27,7 @@ The following command initializes a new MinIO Operator deployment running 7.1.1.
 ```shell
 kubectl minio init
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -46,6 +47,7 @@ kubectl minio init                      \
               [--prometheus-name]       \
               [--prometheus-namespace]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

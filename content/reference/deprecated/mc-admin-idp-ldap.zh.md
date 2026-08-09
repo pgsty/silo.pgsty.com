@@ -26,7 +26,7 @@ silo_modified: false
 {{% alert color="info" %}}
 **说明**
 
-配置设置**不会**覆盖通过环境变量配置的设置。
+配置设置 **不会** 覆盖通过环境变量配置的设置。
 {{% /alert %}}
 
 [`mc admin idp ldap`](#command-mc.admin.idp.ldap) 命令包含以下子命令：
@@ -71,6 +71,7 @@ silo_modified: false
       group_search_base_dn=ou=swengg,dc=min,dc=io                    \
       group_search_filter="(&(objectclass=groupofnames)(member=%d))"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：
@@ -103,6 +104,7 @@ mc admin idp ldap update                                \
                   lookup_bind_dn=cn=admin,dc=min,dc=io  \
                   lookup_bind_password=somesecret
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：
@@ -132,6 +134,7 @@ mc [GLOBALFLAGS] admin idp ldap update           \
 ```shell
 mc admin idp ldap ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：
@@ -157,6 +160,7 @@ mc [GLOBALFLAGS] admin idp ldap ls ALIAS
 ```shell
 mc admin idp ldap rm myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：
@@ -183,6 +187,7 @@ mc [GLOBALFLAGS] admin idp ldap rm     \
 ```shell
 mc admin idp ldap info myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：
@@ -210,6 +215,7 @@ mc [GLOBALFLAGS] admin idp ldap info     \
 mc admin idp ldap enable       \
                   myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：
@@ -237,6 +243,7 @@ mc [GLOBALFLAGS] admin idp ldap enable     \
 mc admin idp ldap disable      \
                   myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：

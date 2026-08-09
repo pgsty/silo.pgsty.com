@@ -32,6 +32,7 @@ The following command removes a single lifecycle management rule from the `mydat
 ```shell
 mc ilm rm --id "bgrt1ghju" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

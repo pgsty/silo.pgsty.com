@@ -29,6 +29,7 @@ silo_modified: false
 ```shell
 mc admin policy attach myminio readonly --user james
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令使用以下语法：

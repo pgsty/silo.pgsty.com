@@ -33,6 +33,7 @@ MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 
 ```shell
 mc admin prometheus generate myminio bucket
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：

@@ -145,7 +145,7 @@ RELEASE.2024-02-24T01-33-20Z
 RELEASE.2024-05-01T01-11-10Z
 {{% /alert %}}
 
-该标志*仅*适用于最新版本**不**是 delete marker 的对象。
+该标志 *仅* 适用于最新版本 **不** 是 delete marker 的对象。
 
 ##### `--expire-days` {#mc.ilm.rule.edit.-expire-days}
 
@@ -155,9 +155,9 @@ RELEASE.2024-05-01T01-11-10Z
 
 对象创建后保留的天数。达到指定天数后，MinIO 会将对象标记为待删除。
 
-使用该选项时请谨慎，其行为可能导致已上传对象立即过期。任何在指定过期日期*之后* 创建的对象都会自动满足过期条件。同样地，若指定的日历日期*早于*当前系统主机时间， 该规则覆盖的所有对象都会被标记为删除。指定日历日期过后，请考虑立即移除使用该选项的 ILM 规则。
+使用该选项时请谨慎，其行为可能导致已上传对象立即过期。任何在指定过期日期 *之后* 创建的对象都会自动满足过期条件。同样地，若指定的日历日期 *早于* 当前系统主机时间， 该规则覆盖的所有对象都会被标记为删除。指定日历日期过后，请考虑立即移除使用该选项的 ILM 规则。
 
-对于启用版本控制的存储桶，过期规则仅适用于*当前* 对象版本。使用 [`--noncurrent-expire-days`](#mc.ilm.rule.edit.-noncurrent-expire-days) 选项 可将过期行为应用于非当前对象版本。
+对于启用版本控制的存储桶，过期规则仅适用于 *当前* 对象版本。使用 [`--noncurrent-expire-days`](#mc.ilm.rule.edit.-noncurrent-expire-days) 选项 可将过期行为应用于非当前对象版本。
 
 MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-scanner) 根据所有已配置的 生命周期管理规则检查对象。高 IO 负载或系统资源受限导致的扫描变慢，可能会延迟 生命周期管理规则的生效。更多信息请参阅 [生命周期管理对象扫描器](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-scanner)。
 
@@ -171,7 +171,7 @@ MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-s
 
 *Optional*
 
-指定该选项可让 MinIO 删除没有剩余对象版本的对象的 delete marker。 具体来说，delete marker 是给定对象*唯一*剩余的“版本”。
+指定该选项可让 MinIO 删除没有剩余对象版本的对象的 delete marker。 具体来说，delete marker 是给定对象 *唯一* 剩余的“版本”。
 
 该选项与以下选项互斥：
 
@@ -226,7 +226,7 @@ MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-s
 
 MinIO [transitions noncurrent objects versions](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) 所使用的远程存储层。 指定一个通过 [`mc ilm tier add`](/zh/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add) 创建的远程存储层。
 
-MinIO *不会*自动将对象从先前指定的远程层迁移到新的远程层。 MinIO 会继续将存储在旧远程层上的对象请求路由到旧远程层。
+MinIO *不会* 自动将对象从先前指定的远程层迁移到新的远程层。 MinIO 会继续将存储在旧远程层上的对象请求路由到旧远程层。
 
 ##### `--tags` {#mc.ilm.rule.edit.-tags}
 
@@ -248,7 +248,7 @@ MinIO *不会*自动将对象从先前指定的远程层迁移到新的远程层
 
 对象创建后经过多少个日历天，MinIO 会将对象标记为可迁移。 MinIO 会将对象迁移到 [`--transition-tier`](#mc.ilm.rule.edit.-transition-tier) 指定的远程存储层。 以整数指定天数，例如 `30` 表示 30 天。 如果远程层是另一个 MinIO 部署，可将值设置为 `0`，使新对象立即满足迁移到远程层的条件。
 
-对于启用版本控制的存储桶，迁移规则仅适用于*当前* 对象版本。使用 [`--noncurrent-transition-days`](#mc.ilm.rule.edit.-noncurrent-transition-days) 选项 可将迁移行为应用于非当前对象版本。
+对于启用版本控制的存储桶，迁移规则仅适用于 *当前* 对象版本。使用 [`--noncurrent-transition-days`](#mc.ilm.rule.edit.-noncurrent-transition-days) 选项 可将迁移行为应用于非当前对象版本。
 
 需要指定 [`--transition-tier`](#mc.ilm.rule.edit.-transition-tier)。
 
@@ -264,7 +264,7 @@ MinIO [transition objects](/zh/administration/object-management/object-lifecycle
 
 如果指定 [`--transition-days`](#mc.ilm.rule.edit.-transition-days)，则该选项必填。
 
-MinIO *不会*自动将对象从先前指定的远程层迁移到新的远程层。 MinIO 会继续将存储在旧远程层上的对象请求路由到旧远程层。
+MinIO *不会* 自动将对象从先前指定的远程层迁移到新的远程层。 MinIO 会继续将存储在旧远程层上的对象请求路由到旧远程层。
 
 ### 全局参数 {#id10}
 

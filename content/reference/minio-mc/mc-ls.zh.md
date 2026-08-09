@@ -18,7 +18,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
-以下命令列出 `myminio` MinIO 部署中 `mydata` 存储桶内的所有对象*及*对象版本：
+以下命令列出 `myminio` MinIO 部署中 `mydata` 存储桶内的所有对象 *及* 对象版本：
 
 ```shell
 mc ls --recursive --versions myminio/mydata

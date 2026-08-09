@@ -36,6 +36,7 @@ The following command outputs the status of the specified job with JobID `KwSysD
 ```shell
 mc batch status myminio "KwSysDpxcBU9FNhGkn2dCf"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

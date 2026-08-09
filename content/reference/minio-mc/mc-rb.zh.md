@@ -19,7 +19,7 @@ silo_modified: false
 {{% alert color="warning" %}}
 **重要**
 
-[`mc rb`](#command-mc.rb) 会在目标部署上*永久删除存储桶*， 包括所有 [对象版本](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 以及存储桶配置，例如 [生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 或 [复制](/zh/administration/bucket-replication/#minio-bucket-replication-serverside)。
+[`mc rb`](#command-mc.rb) 会在目标部署上 *永久删除存储桶*， 包括所有 [对象版本](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 以及存储桶配置，例如 [生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 或 [复制](/zh/administration/bucket-replication/#minio-bucket-replication-serverside)。
 {{% /alert %}}
 
 你也可以对本地文件系统使用 [`mc rb`](#command-mc.rb)，其效果与 `rm --rf` 命令行工具类似。
@@ -31,6 +31,7 @@ silo_modified: false
 ```shell
 mc rb --force myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 命令语法如下：
@@ -62,7 +63,7 @@ mc [GLOBALFLAGS] rb             \
 mc rb --force myminio/mydata
 ```
 
-省略存储桶路径可对 MinIO 部署执行站点范围的存储桶删除操作。 此操作*必须*指定 [`--dangerous`](#mc.rb.-dangerous)，以明确确认会永久删除该部署上的*全部*数据。例如：
+省略存储桶路径可对 MinIO 部署执行站点范围的存储桶删除操作。 此操作 *必须* 指定 [`--dangerous`](#mc.rb.-dangerous)，以明确确认会永久删除该部署上的 *全部* 数据。例如：
 
 ```text
 mc rb --force --dangerous myminio
@@ -74,7 +75,7 @@ mc rb --force --dangerous myminio
 mc rb ~/data/myolddata
 ```
 
-你可以指定多个 `ALIAS` 目标，目标可以是 MinIO 或本地文件系统目录。 命令会尝试删除*所有*指定目标。例如：
+你可以指定多个 `ALIAS` 目标，目标可以是 MinIO 或本地文件系统目录。 命令会尝试删除 *所有* 指定目标。例如：
 
 ```text
 mc rb --force myminio/mydata ~/data/myolddata
@@ -90,7 +91,7 @@ mc rb --force myminio/mydata ~/data/myolddata
 
 *mc-cmd*
 
-*可选* 指示 [`mc rb`](#command-mc.rb) 在每个指定的 ``` ``myminio/` ```）上执行站点范围的全部存储桶删除。
+*可选* 指示 [`mc rb`](#command-mc.rb) 在每个指定的 [`ALIAS`](#mc.rb.ALIAS)（例如 `myminio/`）上执行站点范围的全部存储桶删除。
 
 如果任一 `ALIAS` 指定的是文件系统目录，此选项会删除该目录路径下的所有子目录和文件，效果类似 `rm --rf`。
 

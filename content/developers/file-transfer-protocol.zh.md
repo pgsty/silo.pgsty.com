@@ -52,7 +52,7 @@ MinIO Operator 仅支持配置 SSH 文件传输协议 (SFTP)。
 
   不加密的文件传输。
 
-  MinIO **不**建议使用未加密的 FTP 进行文件传输。
+  MinIO **不** 建议使用未加密的 FTP 进行文件传输。
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -86,7 +86,7 @@ SFTP 访问与其他 S3 客户端一样，使用相同的身份验证机制。 M
 - [Active Directory/LDAP](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) 用户及其服务账户
 - [OpenID/OIDC](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) 服务账户
 
-[STS](/zh/developers/security-token-service/#minio-security-token-service) 凭证**不能**通过 SFTP 访问存储桶或对象。
+[STS](/zh/developers/security-token-service/#minio-security-token-service) 凭证 **不能** 通过 SFTP 访问存储桶或对象。
 
 已通过身份验证的用户可依据分配给该用户或其父用户账号的 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 访问存储桶和对象。
 
@@ -96,6 +96,7 @@ SFTP 协议不需要任何 `admin:*` [权限](/zh/administration/identity-access
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 - MinIO Operator v5.0.7 或更高版本。
 - 为服务器启用一个 SFTP 端口 (8022)。
 - 一个用于 SFTP 命令的端口，以及一个端口范围，用于允许 SFTP 服务器在数据传输期间按需请求使用。
@@ -111,6 +112,7 @@ SFTP 协议不需要任何 `admin:*` [权限](/zh/administration/identity-access
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kubernetes" %}}
+
 1. 为目标 Tenant 启用 SFTP：
 
    使用以下 Kubectl 命令编辑 Tenant YAML 配置：
@@ -155,6 +157,7 @@ SFTP 协议不需要任何 `admin:*` [权限](/zh/administration/identity-access
    ```console
    enableSFTP: true
    ```
+
 4. 使用你偏好的 SFTP 客户端连接到 MinIO 部署。 你必须以其 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 允许访问目标存储桶和对象的用户身份进行连接。
 
    连接到 MinIO 部署的具体方式取决于所使用的 SFTP 客户端。 请参阅该客户端的文档。
@@ -182,8 +185,10 @@ kubectl get tenants/my-tenant -n my-tenant-ns -o yaml | yq '.spec.features'
 ```console
 enableSFTP: true
 ```
+
 {{% /tab %}}
 {{% tab header="裸金属" %}}
+
 1. 启动 MinIO 并启用 FTP 和/或 SFTP 端口。
 
    {{< tabpane text=true persist=header >}}
@@ -206,6 +211,7 @@ enableSFTP: true
    {{% /alert %}}
    {{% /tab %}}
    {{% tab header="SFTP/FTP" %}}
+
    ```shell
    minio server http://server{1...4}/disk{1...4}        \
    --ftp="address=:8021"                                \
@@ -223,6 +229,7 @@ enableSFTP: true
    MinIO FTP Server listening on :8021
    MinIO SFTP Server listening on :8022
    ```
+
    {{% /tab %}}
    {{< /tabpane >}}
 2. 使用你偏好的 FTP 客户端连接到 MinIO 部署。 你必须使用其 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 允许访问目标存储桶和对象的用户身份进行连接。
@@ -243,6 +250,7 @@ enableSFTP: true
    sftp> ls runner/
    chunkdocs  testdir
    ```
+
    {{% /tab %}}
    {{% tab header="FTPS" %}}
    以下示例使用 Linux 的 [FTP CLI client](https://linux.die.net/man/1/ftp)，通过 `minio` 凭证连接到 MinIO 服务器，并列出名为 `runner` 的存储桶内容。
@@ -264,6 +272,7 @@ enableSFTP: true
    drwxrwxrwx 1 nobody nobody            0 Jan  1 00:00 testdir/
    ...
    ```
+
    {{% /tab %}}
    {{< /tabpane >}}
 4. 下载对象
@@ -283,6 +292,7 @@ enableSFTP: true
    metadata                               100%  226    16.6KB/s   00:00
    sftp>
    ```
+
    {{% /tab %}}
    {{% tab header="FTPS" %}}
    本示例先列出存储桶中的条目，然后下载该存储桶中的内容。
@@ -312,6 +322,7 @@ enableSFTP: true
    45 bytes received in 00:00 (3.55 KiB/s)
    ...
    ```
+
    {{% /tab %}}
    {{< /tabpane >}}
 {{% /tab %}}

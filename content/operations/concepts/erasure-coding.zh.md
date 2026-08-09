@@ -28,7 +28,7 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 本节中的图示和内容仅用于说明 MinIO 纠删码操作的简化视图，并不完整呈现 MinIO 纠删码实现的全部复杂性。
 {{% /alert %}}
 
-**MinIO 会将每个 [服务器池](/zh/glossary/#term-43) 中的驱动器分组为一个或多个相同大小的 **纠删码集合**。**
+**MinIO 会将每个 [服务器池](/zh/glossary/#term-43) 中的驱动器分组为一个或多个相同大小的纠删码集合。**
 
 > <figure>
 >   <img src="/images/erasure/erasure-coding-erasure-set.svg" alt="Diagram of erasure set covering 4 nodes and 16 drives" />
@@ -38,7 +38,7 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 >
 > MinIO 会在初始化 [服务器池](/zh/glossary/#term-43) 时确定纠删码集合的最佳数量和大小。 初次设置完成后，便无法再修改这些参数。
 
-**对于每次写操作，MinIO 都会将对象切分为 **数据** 和 **校验** 分片。**
+**对于每次写操作，MinIO 都会将对象切分为数据和校验分片。**
 
 > 纠删码集合的条带大小决定了部署可用的最大 [校验](#minio-ec-parity) 值。 生成数据分片和校验分片数量的公式如下：
 >
@@ -91,7 +91,7 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 > 这样可以防止 split-brain 场景，例如网络故障导致纠删码集合中的一半驱动器与另一半完全隔离。
 >
 > <figure>
->   <img src="/images/erasure/erasure-coding-shard-split-brain.svg" alt="Diagram of an erasure set with where Parity ``EC:M`` is 1/2 the set size" />
+>   <img src="/images/erasure/erasure-coding-shard-split-brain.svg" alt="Diagram of an erasure set where parity EC:M is 1/2 the set size" />
 >   <figcaption>该部署中有两个节点因临时网络故障而离线。
 > 客户端按 <code>EC:8</code> 校验设置写入对象，此时该纠删码集合的写仲裁为 <code>K=9</code>。
 > 该纠删码集合已经失去写仲裁，因此 MinIO 无法将其用于写操作。</figcaption>

@@ -31,6 +31,7 @@ MINIO_POLICY_PLUGIN_AUTH_TOKEN="Bearer TOKEN"
 MINIO_POLICY_PLUGIN_ENABLE_HTTP2="OFF"
 MINIO_POLICY_PLUGIN_COMMENT="External Access Management using PROVIDER"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
 Set the following configuration settings using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command:
@@ -44,6 +45,7 @@ mc admin config set policy_plugin \
    enable_http2="off" \
    comment="External Access Management using PROVIDER"
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

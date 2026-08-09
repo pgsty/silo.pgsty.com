@@ -41,6 +41,7 @@ A handler function should perform the following steps:
    | `inputS3Url` | A [presigned URL](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject) for the original object. The calling application generates the URL and sends it in the original request. This allows the handler to access the original object without the MinIO credentials usually required. The URL is valid for one hour. |
    | `outputRoute` | A token that allows MinIO to validate the destination for the transformed object. Return this value with the response in an `x-amz-request-route` header. |
    | `outputToken` | A token that allows MinIO to validate the response. Return this value in the response in an `x-amz-request-token` header. |
+
 2. Retrieve the original object from MinIO.
 
    Use the presigned URL to retrieve the object from the MinIO deployment. The contents of the object are in the body of the response.
@@ -230,6 +231,7 @@ To test the Lambda handler function, first create an object to transform. Then i
    EOF
    mc cp testobject myminio/myfunctionbucket/
    ```
+
 2. Invoke the Handler
 
    The following Go code uses the [The MinIO Go SDK](/developers/go/minio-go/) to generate a presigned URL and print it to `stdout`.

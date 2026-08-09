@@ -36,6 +36,7 @@ The following example outputs a list of the existing remote tiers on the `mymini
 ```shell
  mc ilm tier ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -43,6 +44,7 @@ The command has the following syntax:
 ```shell
 mc ilm tier ls TARGET TIER_NAME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

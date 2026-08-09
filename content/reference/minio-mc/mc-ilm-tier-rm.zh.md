@@ -77,6 +77,7 @@ MinIO 还要求在集群上具备以下管理权限，该集群用于为对象�
 ```shell
  mc ilm tier rm myminio WARM-TIER
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令具有以下语法：
@@ -84,6 +85,7 @@ MinIO 还要求在集群上具备以下管理权限，该集群用于为对象�
 ```shell
 mc ilm tier info TARGET TIER_NAME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -107,7 +109,7 @@ mc ilm tier info TARGET TIER_NAME
 
 要移除的现有远程层名称。
 
-你**必须**使用全大写指定该层，例如 `WARM_TIER`。
+你 **必须** 使用全大写指定该层，例如 `WARM_TIER`。
 
 不能有任何对象已转换到该层。
 

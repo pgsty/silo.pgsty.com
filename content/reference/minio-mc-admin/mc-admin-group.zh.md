@@ -24,9 +24,9 @@ MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 
 
 ### 组与基于策略的访问控制 {#id3}
 
-MinIO 使用 基于策略的访问控制 (PBAC) 对已成功在部署上 *认证* 的用户执行*授权*。每条策略都包含规则，用于规定该部署上 允许或拒绝的操作/资源。可以为一个组分配一个或多个 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。属于该组的用户会继承该组已分配的策略。用户的 总权限集合包括其显式分配的策略，*以及* 通过组成员关系继承的策略。
+MinIO 使用 基于策略的访问控制 (PBAC) 对已成功在部署上 *认证* 的用户执行 *授权*。每条策略都包含规则，用于规定该部署上 允许或拒绝的操作/资源。可以为一个组分配一个或多个 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。属于该组的用户会继承该组已分配的策略。用户的 总权限集合包括其显式分配的策略，*以及* 通过组成员关系继承的策略。
 
-新创建的组默认*不*包含任何策略。要配置组的已分配策略，请使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 命令。
+新创建的组默认 *不* 包含任何策略。要配置组的已分配策略，请使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 命令。
 
 有关 MinIO 用户和组的更多信息，请参见 [用户管理](/zh/administration/identity-access-management/minio-user-management/#minio-users) 和 [组管理](/zh/administration/identity-access-management/minio-group-management/#minio-groups)。有关 MinIO 策略的更多信息， 请参见 [MinIO Policy Based Access Control](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
 
@@ -158,7 +158,7 @@ mc admin group add TARGET GROUPNAME MEMBERS
 
 组名。如果组尚不存在，该命令会创建组。可使用 [`mc admin group ls`](#mc.admin.group.ls) 查看部署上的现有组。
 
-组名不能包含 ``` =``（等号）或  ```,``（逗号）字符。
+组名不能包含 `=`（等号）或 `,`（逗号）字符。
 
 #### `MEMBERS` {#mc.admin.group.add.MEMBERS}
 
@@ -166,7 +166,7 @@ mc admin group add TARGET GROUPNAME MEMBERS
 
 要添加到组中的用户名。
 
-该用户*必须*存在于 [`TARGET`](#mc.admin.group.add.TARGET) MinIO 部署上。可使用 [`mc admin user ls`](/zh/reference/minio-mc-admin/mc-admin-user-list/#command-mc.admin.user.ls) 查看部署上的可用 用户。
+该用户 *必须* 存在于 [`TARGET`](#mc.admin.group.add.TARGET) MinIO 部署上。可使用 [`mc admin user ls`](/zh/reference/minio-mc-admin/mc-admin-user-list/#command-mc.admin.user.ls) 查看部署上的可用 用户。
 
 #### `mc admin group info` {#mc.admin.group.info}
 
@@ -214,7 +214,7 @@ mc admin group ls TARGET
 
 *mc-cmd*
 
-删除目标 MinIO 部署上的组。删除组*不会* 删除该组中的任何成员用户。请使用 [`mc admin user rm`](/zh/reference/minio-mc-admin/mc-admin-user-remove/#command-mc.admin.user.rm) 从组中移除用户。
+删除目标 MinIO 部署上的组。删除组 *不会* 删除该组中的任何成员用户。请使用 [`mc admin user rm`](/zh/reference/minio-mc-admin/mc-admin-user-remove/#command-mc.admin.user.rm) 从组中移除用户。
 
 命令语法如下：
 

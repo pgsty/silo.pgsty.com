@@ -24,7 +24,7 @@ The command output includes information about the [erasure code](/operations/con
 
 The output of the command resembles the following:
 
-```
+```text
 ●  play.min.io
    Uptime: 2 hours
    Version: 2024-05-10T08:24:14Z

@@ -131,13 +131,13 @@ For example:
 
 On site A, to mirror from A to B
 
-```
+```text
 mc mirror --active-active siteA siteB
 ```
 
 On site B, to mirror from B to A
 
-```
+```text
 mc mirror --active-active siteB siteA
 ```
 
@@ -343,7 +343,7 @@ Limit client-side download rates to no more than a specified rate in KiB/s, MiB/
 
 For example, to limit download rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -369,7 +369,7 @@ Limit client-side upload rates to no more than the specified rate in KiB/s, MiB/
 
 For example, to limit upload rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-upload 1G
 ```
 
@@ -537,7 +537,7 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 Use [`mc mirror`](#command-mc.mirror) to mirror files from a filesystem to an S3 Host:
 
-```
+```text
 mc mirror FILEPATH ALIAS/PATH
 ```
 
@@ -549,7 +549,7 @@ mc mirror FILEPATH ALIAS/PATH
 
 Use [`mc mirror`](#command-mc.mirror) with [`--watch`](#mc.mirror.-watch) to continuously mirror files from a filesystem to an S3-compatible host where objects added to or deleted from the filesystem are added to or deleted from the host:
 
-```
+```text
 mc mirror --watch FILEPATH ALIAS/PATH
 ```
 
@@ -561,7 +561,7 @@ mc mirror --watch FILEPATH ALIAS/PATH
 
 Use [`mc mirror`](#command-mc.mirror) with [`--watch`](#mc.mirror.-watch) to continuously mirror objects in a bucket on one S3-compatible host to another S3-compatible host where objects added to or deleted from the bucket are added to or deleted from the host.
 
-```
+```text
 mc mirror --watch SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
 
@@ -574,7 +574,7 @@ mc mirror --watch SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 
 Use [`mc mirror`](#command-mc.mirror) with [`--exclude-storageclass`](#mc.mirror.-exclude-storageclass) to mirror objects from AWS S3 to MinIO without mirroring objects in GLACIER or DEEP_ARCHIVE storage.
 
-```
+```text
 mc mirror --exclude-storageclass GLACIER  \
    --exclude-storageclass DEEP_ARCHIVE SRCALIAS/SRCPATH TGALIAS/TGPATH
 ```

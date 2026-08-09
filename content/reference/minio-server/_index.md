@@ -1,5 +1,5 @@
 ---
-title: "Silo Server (`minio`)"
+title: "Silo Server (minio)"
 url: "/reference/minio-server/"
 weight: 30
 aliases:
@@ -117,6 +117,7 @@ A command like the following would listen for API calls on port `9000` on both c
 ```shell
 minio server --address "minioip:9000" ~/miniodirectory
 ```
+
 {{% /alert %}}
 
 If omitted, [`minio`](#command-minio.server) binds to port `9000` on all configured IPv4 addresses, IPv6 addresses, and hostnames on the host machine.

@@ -29,6 +29,7 @@ RELEASE.2024-02-24T01-33-20Z
 ```shell
 mc put ~/images/collateral/logo.png minio/marketing
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

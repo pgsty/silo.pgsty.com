@@ -24,6 +24,7 @@ The following command enables legalhold WORM locking on all existing objects in 
 ```shell
 mc legalhold set --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

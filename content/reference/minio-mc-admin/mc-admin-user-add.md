@@ -24,6 +24,7 @@ The following command creates a new user `newuser` on the `myminio` MinIO deploy
 ```shell
 mc admin user add myminio newuser newusersecret
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

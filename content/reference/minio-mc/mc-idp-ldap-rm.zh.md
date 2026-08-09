@@ -27,6 +27,7 @@ silo_modified: false
 mc idp ldap rm       \
             myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

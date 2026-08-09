@@ -175,6 +175,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    deployment.apps/console configured
    deployment.apps/minio-operator configured
    ```
+
 4. 验证 Operator 升级结果
 
    你可以使用前面相同的 `kubectl` 命令检查新的 Operator 版本：
@@ -182,6 +183,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
+
 {{% /tab %}}
 {{% tab header="使用 Helm 升级" %}}
 以下步骤使用 Helm 升级现有的 MinIO Operator 安装。
@@ -252,7 +254,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    minio-operator/tenant           7.1.1          v7.1.1         A Helm chart for MinIO Operator
    ```
 
-   `minio-operator/minio-operator` 是旧版 chart，正常情况下**不应**安装。
+   `minio-operator/minio-operator` 是旧版 chart，正常情况下 **不应** 安装。
 4. 运行 `helm upgrade`
 
    Helm 会使用最新 chart 升级 MinIO Operator：
@@ -274,6 +276,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -327,6 +330,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
       "name": "minio-operator"
    }
    ```
+
 3. 下载最新稳定版 MinIO Kubernetes Plugin
 
    你可以通过 Kubernetes Krew 插件管理器安装 MinIO 插件， 也可以手动下载插件二进制并安装到本地主机：
@@ -347,6 +351,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```shell
    kubectl krew upgrade minio
    ```
+
    {{% /tab %}}
    {{% tab header="Manual (Linux, MacOS)" %}}
    你可以将 MinIO `kubectl` 插件下载到本地系统路径中。 `kubectl` CLI 会自动发现并运行兼容插件。
@@ -396,6 +401,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```shell
    kubectl minio init
    ```
+
 5. 验证 Operator 升级结果
 
    你可以通过前一步中查看 Operator Pod 对象规范的方法，确认升级后的 Operator 版本。
@@ -462,6 +468,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    chmod +x kubectl-minio_4.2.3
    ./kubectl-minio_4.2.3 init
    ```
+
 4. 验证所有 Tenant 和 Operator pod
 
    检查 Operator 和 MinIO Tenant 命名空间，确保所有 pod 和 service 都已成功启动。
@@ -472,6 +479,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    kubectl get all -n minio-operator
    kubectl get pods -l "v1.min.io/tenant" --all-namespaces
    ```
+
 5. 升级到 7.1.1
 
    按照 [将 MinIO Operator 从 5.0.15 升级到 7.1.1](/zh/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure) 中的流程，升级到仓库归档前的最终上游版本 `v7.1.1`。
@@ -557,6 +565,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```shell
    kubectl edit tenants <TENANT-NAME> -n <TENANT-NAMESPACE>
    ```
+
 3. 升级到 Operator 4.2.2
 
    下载 MinIO Kubernetes Plugin 4.2.2，并使用它升级 Operator。 在浏览器中打开 [https://github.com/minio/operator/releases/tag/v4.2.2](https://github.com/minio/operator/releases/tag/v4.2.2)，下载与你本地主机操作系统匹配的二进制文件。 例如，使用 Intel 或 AMD 处理器的 Linux 主机可以运行以下命令：
@@ -567,6 +576,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
    ./kubectl-minio_4.2.2 init
    ```
+
 4. 验证所有 Tenant 和 Operator pod
 
    检查 Operator 和 MinIO Tenant 命名空间，确保所有 pod 和 service 都已成功启动。
@@ -578,6 +588,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
    kubectl get pods -l "v1.min.io/tenant" --all-namespaces
    ```
+
 5. 升级到 4.2.3
 
    按照 [将 MinIO Operator 4.0.0 到 4.2.2 升级到 4.2.3](#minio-k8s-upgrade-minio-operator-4-2-2-procedure) 中的流程升级到 Operator 4.2.3。 随后你可以继续升级到 7.1.1。

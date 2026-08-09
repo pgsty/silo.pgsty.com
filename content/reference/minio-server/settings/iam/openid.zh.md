@@ -31,22 +31,26 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 MINIO_IDENTITY_OPENID_CONFIG_URL="https://openid-provider.example.net/.well-known/openid-configuration"
 ```
+
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 #### `identity_openid` {#mc-conf.identity_openid}
 
 *mc-conf*
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 OpenID 配置。 [`config_url`](#mc-conf.identity_openid.config_url) 参数为*必需*。 其他可选参数请以空白字符（`" "`）分隔的列表形式指定。
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 OpenID 配置。 [`config_url`](#mc-conf.identity_openid.config_url) 参数为 *必需*。 其他可选参数请以空白字符（`" "`）分隔的列表形式指定。
 
 ```shell
 mc admin config set identity_openid                                               \
   config_url="https://openid-provider.example.net/.well-known/openid-configuration" \
   [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -58,11 +62,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_CONFIG_URL` {#envvar.MINIO_IDENTITY_OPENID_CONFIG_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid config_url` {#mc-conf.identity_openid.config_url}
 
 *mc-conf*
@@ -84,6 +90,7 @@ mc admin config set identity_openid                                             
 此设置没有环境变量选项。 请改用配置项。
 {{% /tab %}}
 {{% tab header="配置项" selected=true %}}
+
 ##### `identity_openid enabled` {#mc-conf.identity_openid.enabled}
 
 *mc-conf*
@@ -102,11 +109,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_CLIENT_ID` {#envvar.MINIO_IDENTITY_OPENID_CLIENT_ID}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid client_id` {#mc-conf.identity_openid.client_id}
 
 *mc-conf*
@@ -121,11 +130,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_CLIENT_SECRET` {#envvar.MINIO_IDENTITY_OPENID_CLIENT_SECRET}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid client_secret` {#mc-conf.identity_openid.client_secret}
 
 *mc-conf*
@@ -148,11 +159,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_ROLE_POLICY` {#envvar.MINIO_IDENTITY_OPENID_ROLE_POLICY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid role_policy` {#mc-conf.identity_openid.role_policy}
 
 *mc-conf*
@@ -171,11 +184,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_CLAIM_NAME` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_NAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid claim_name` {#mc-conf.identity_openid.claim_name}
 
 *mc-conf*
@@ -196,11 +211,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_CLAIM_PREFIX` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_PREFIX}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid claim_prefix` {#mc-conf.identity_openid.claim_prefix}
 
 *mc-conf*
@@ -215,11 +232,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_DISPLAY_NAME` {#envvar.MINIO_IDENTITY_OPENID_DISPLAY_NAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid display_name` {#mc-conf.identity_openid.display_name}
 
 *mc-conf*
@@ -234,11 +253,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_SCOPES` {#envvar.MINIO_IDENTITY_OPENID_SCOPES}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid scopes` {#mc-conf.identity_openid.scopes}
 
 *mc-conf*
@@ -255,11 +276,13 @@ mc admin config set identity_openid                                             
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_REDIRECT_URI` {#envvar.MINIO_IDENTITY_OPENID_REDIRECT_URI}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid redirect_uri` {#mc-conf.identity_openid.redirect_uri}
 
 *mc-conf*
@@ -288,11 +311,13 @@ http://minio.example.net:consoleport/oauth_callback
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC` {#envvar.MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid redirect_uri_dynamic` {#mc-conf.identity_openid.redirect_uri_dynamic}
 
 *mc-conf*
@@ -309,11 +334,13 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_CLAIM_USERINFO` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_USERINFO}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid claim_userinfo` {#mc-conf.identity_openid.claim_userinfo}
 
 *mc-conf*
@@ -330,11 +357,13 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_VENDOR` {#envvar.MINIO_IDENTITY_OPENID_VENDOR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid vendor` {#mc-conf.identity_openid.vendor}
 
 *mc-conf*
@@ -355,11 +384,13 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_KEYCLOAK_REALM` {#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_REALM}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid keycloak_realm` {#mc-conf.identity_openid.keycloak_realm}
 
 *mc-conf*
@@ -376,11 +407,13 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL` {#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid keycloak_admin_url` {#mc-conf.identity_openid.keycloak_admin_url}
 
 *mc-conf*
@@ -395,11 +428,13 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_OPENID_COMMENT` {#envvar.MINIO_IDENTITY_OPENID_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_openid comment` {#mc-conf.identity_openid.comment}
 
 *mc-conf*

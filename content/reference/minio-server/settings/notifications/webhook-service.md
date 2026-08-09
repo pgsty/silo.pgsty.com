@@ -34,6 +34,7 @@ You can specify multiple Webhook service endpoints by appending a unique identif
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_NOTIFY_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY="https://webhook1.example.net"
@@ -41,8 +42,10 @@ export MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY="https://webhook1.example.net"
 export MINIO_NOTIFY_WEBHOOK_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_WEBHOOK_ENDPOINT_SECONDARY="https://webhook1.example.net"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
+
 ```shell
 mc admin config set notify_webhook:primary \
    endpoint="https://webhook1.example.net"
@@ -52,6 +55,7 @@ mc admin config set notify_webhook:secondary \
    endpoint="https://webhook2.example.net
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -63,6 +67,7 @@ mc admin config set notify_webhook:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_ENABLE` {#envvar.MINIO_NOTIFY_WEBHOOK_ENABLE}
 
 *envvar*
@@ -72,6 +77,7 @@ Specify `on` to enable publishing bucket notifications to a Webhook service endp
 Defaults to `off`.
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_webhook` {#mc-conf.notify_webhook}
 
 *mc-conf*
@@ -85,6 +91,7 @@ mc admin config set notify_webhook \
   endpoint="https://webhook.example.net"
   [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -94,11 +101,13 @@ mc admin config set notify_webhook \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_ENDPOINT` {#envvar.MINIO_NOTIFY_WEBHOOK_ENDPOINT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_webhook endpoint` {#mc-conf.notify_webhook.endpoint}
 
 *mc-conf*
@@ -119,6 +128,7 @@ MinIO checks the health of the specified URL (if it is resolvable and reachable)
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
@@ -142,6 +152,7 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 Consult the documentation for the desired service for more details.
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_webhook auth_token` {#mc-conf.notify_webhook.auth_token}
 
 *mc-conf*
@@ -183,11 +194,13 @@ MinIO redacts this value when returned as part of [`mc admin config get`](/refer
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_NOTIFY_WEBHOOK_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_webhook queue_dir` {#mc-conf.notify_webhook.queue_dir}
 
 *mc-conf*
@@ -204,11 +217,13 @@ MinIO stores undelivered events in the specified store while the webhook service
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_webhook queue_limit` {#mc-conf.notify_webhook.queue_limit}
 
 *mc-conf*
@@ -223,11 +238,13 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_NOTIFY_WEBHOOK_CLIENT_CERT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_webhook client_cert` {#mc-conf.notify_webhook.client_cert}
 
 *mc-conf*
@@ -242,11 +259,13 @@ Specify the path to the client certificate to use for performing mTLS authentica
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_NOTIFY_WEBHOOK_CLIENT_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_webhook client_key` {#mc-conf.notify_webhook.client_key}
 
 *mc-conf*

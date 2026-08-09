@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc idp ldap accesskey edit myminio/ mykey --secret-key 'xxxxxxx'
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

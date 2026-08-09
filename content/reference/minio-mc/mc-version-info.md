@@ -22,6 +22,7 @@ The following command returns the versioning status for the `mybucket` bucket on
 ```shell
 mc version info myminio/mybucket
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

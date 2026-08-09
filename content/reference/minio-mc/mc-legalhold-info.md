@@ -24,6 +24,7 @@ The following command retrieves the current legalhold status for objects in the 
 ```shell
 mc legalhold info --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

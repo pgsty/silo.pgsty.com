@@ -62,6 +62,7 @@ The [`mc admin rebalance`](#command-mc.admin.rebalance) command shifts objects f
 ```shell
 mc admin rebalance start minio1
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -84,9 +85,11 @@ The status returns the ID of the rebalance operation, the time of the operation,
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="EXAMPLE" %}}
+
 ```shell
 mc admin rebalance status minio1
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -107,9 +110,11 @@ Ends an in-progress rebalance job on the specified deployment.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="EXAMPLES" %}}
+
 ```shell
 mc admin rebalance stop minio1
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

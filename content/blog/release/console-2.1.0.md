@@ -179,7 +179,7 @@ The Metrics V3 migration was additionally reviewed adversarially by an independe
 2.1.0 closes every issue filed against 2.0.0. Each carries a comment on the tracker describing the fix, the commits, and the coverage added.
 
 | Issue | Resolution |
-|---|---|
+| --- | --- |
 | [#1](https://github.com/pgsty/silo-console/issues/1) — unauthenticated deep routes recurse `/login` | Absolute, base-path-aware login destination; deep-link and subpath test coverage |
 | [#2](https://github.com/pgsty/silo-console/issues/2) — stale Uptime, malformed legends, cramped menus | Uptime derived from real server state, legends resolve on the V3 `name` label, 32 px chart controls, popup width floors |
 | [#3](https://github.com/pgsty/silo-console/issues/3) — 390 px viewport clips content | Scrollable metrics tab strip; bucket table with a deliberate mobile column budget |

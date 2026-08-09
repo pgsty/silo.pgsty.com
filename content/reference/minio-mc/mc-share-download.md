@@ -26,6 +26,7 @@ The following command generates a new presigned download URL for the `mydata` bu
 ```shell
 mc share download --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

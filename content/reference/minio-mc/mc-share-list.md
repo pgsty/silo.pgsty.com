@@ -30,6 +30,7 @@ The following command lists all upload and download presigned URLs respectively 
 mc share ls upload myminio/mydata
 mc share ls download myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

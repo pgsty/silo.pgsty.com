@@ -24,6 +24,7 @@ The following command retrieves information on the STS credentials with specifie
 ```shell
 mc admin user sts info myminio/ "J123C4ZXEQN8RK6ND35I"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

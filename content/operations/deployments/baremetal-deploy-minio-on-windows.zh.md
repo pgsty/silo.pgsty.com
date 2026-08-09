@@ -50,7 +50,7 @@ MinIO 会根据拓扑中的节点和驱动器总数，自动为集群确定默�
 {{% tab header="Multi-Drive" %}}
 对于带有多个驱动器的 Windows 主机，你可以指定一组顺序驱动器，以便在 单机多盘 (SNMD) 拓扑中配置 MinIO：
 
-```
+```text
 .\minio.exe server {D...G}:\minio --console-address :9001
 ```
 
@@ -78,7 +78,7 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 {{% tab header="Single-Drive" %}}
 使用此命令在 `C:\minio` 文件夹中启动本地 MinIO 实例。 你可以将 `C:\minio` 替换为本地主机上的其他驱动器或文件夹路径。
 
-```
+```text
 .\minio.exe server C:\minio --console-address :9001
 ```
 
@@ -129,7 +129,7 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 
 在命令提示符或 PowerShell 中运行：
 
-```
+```text
 \path\to\mcli.exe --help
 ```
 

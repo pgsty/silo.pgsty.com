@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc admin user sts info myminio/ "J123C4ZXEQN8RK6ND35I"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

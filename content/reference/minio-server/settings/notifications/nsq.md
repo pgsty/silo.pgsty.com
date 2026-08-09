@@ -33,6 +33,7 @@ You can specify multiple NSQ service endpoints by appending a unique identifier 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_NOTIFY_NSQ_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_NSQ_NSQD_ADDRESS_PRIMARY="https://user:password@nsq-endpoint.example.net:9200"
@@ -42,8 +43,10 @@ export MINIO_NOTIFY_NSQ_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_NSQ_NSQD_ADDRESS_SECONDARY="https://user:password@nsq-endpoint.example.net:9200"
 export MINIO_NOTIFY_NSQ_TOPIC_SECONDARY="bucketevents"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
+
 ```shell
 mc admin config set notify_nsq:primary \
    nsqd_address="ENDPOINT" \
@@ -55,6 +58,7 @@ mc admin config set notify_nsq:secondary \
    topic="<string>" \
    [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -66,6 +70,7 @@ mc admin config set notify_nsq:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_NSQ_ENABLE` {#envvar.MINIO_NOTIFY_NSQ_ENABLE}
 
 *envvar*
@@ -73,6 +78,7 @@ mc admin config set notify_nsq:secondary \
 Specify `on` to enable publishing bucket notifications to an NSQ endpoint.
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_nsq` {#mc-conf.notify_nsq}
 
 *mc-conf*
@@ -92,6 +98,7 @@ mc admin config set notify_nsq                          \
    topic="<string>"                                     \
    [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -101,11 +108,13 @@ mc admin config set notify_nsq                          \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_NSQ_NSQD_ADDRESS` {#envvar.MINIO_NOTIFY_NSQ_NSQD_ADDRESS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_nsq nsqd_address` {#mc-conf.notify_nsq.nsqd_address}
 
 *mc-conf*
@@ -128,11 +137,13 @@ MinIO checks the health of the specified URL (if it is resolvable and reachable)
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_NSQ_TOPIC` {#envvar.MINIO_NOTIFY_NSQ_TOPIC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_nsq topic` {#mc-conf.notify_nsq.topic}
 
 *mc-conf*
@@ -147,11 +158,13 @@ Specify the name of the NSQ topic MinIO uses when publishing events to the broke
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_NSQ_TLS` {#envvar.MINIO_NOTIFY_NSQ_TLS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_nsq tls` {#mc-conf.notify_nsq.tls}
 
 *mc-conf*
@@ -166,11 +179,13 @@ Specify `on` to enable TLS connectivity to the NSQ service broker.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_NSQ_TLS_SKIP_VERIFY` {#envvar.MINIO_NOTIFY_NSQ_TLS_SKIP_VERIFY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_nsq tls_skip_verify` {#mc-conf.notify_nsq.tls_skip_verify}
 
 *mc-conf*
@@ -188,11 +203,13 @@ Enables or disables TLS verification of the NSQ service broker TLS certificates.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_NSQ_QUEUE_DIR` {#envvar.MINIO_NOTIFY_NSQ_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_nsq queue_dir` {#mc-conf.notify_nsq.queue_dir}
 
 *mc-conf*
@@ -209,11 +226,13 @@ MinIO stores undelivered events in the specified store while the NSQ server/brok
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_NSQ_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_NSQ_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_nsq queue_limit` {#mc-conf.notify_nsq.queue_limit}
 
 *mc-conf*
@@ -228,11 +247,13 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_NSQ_COMMENT` {#envvar.MINIO_NOTIFY_NSQ_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_nsq comment` {#mc-conf.notify_nsq.comment}
 
 *mc-conf*

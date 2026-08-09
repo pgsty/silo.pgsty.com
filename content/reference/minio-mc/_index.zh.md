@@ -91,19 +91,25 @@ bash -o history
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Silo 服务端" %}}
+
 ```shell
 mc alias set silo https://silo.example.net ACCESS_KEY SECRET_KEY
 ```
+
 {{% /tab %}}
 {{% tab header="AWS S3 Storage" %}}
+
 ```shell
 mc alias set myS3 https://s3.{your-region-code}.amazonaws.com/endpoint ACCESS_KEY SECRET_KEY
 ```
+
 {{% /tab %}}
 {{% tab header="Google Cloud Storage" %}}
+
 ```shell
 mc alias set myGCS https://storage.googleapis.com/endpoint ACCESS_KEY SECRET_KEY
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -172,7 +178,7 @@ mc admin info silo
       <td><p><a href="/zh/reference/minio-mc/mc-diff/#command-mc.diff"><code>mc diff</code></a></p></td>
       <td><p><a href="/zh/reference/minio-mc/mc-diff/#command-mc.diff"><code>mc diff</code></a> 命令用于计算两个文件系统目录或 MinIO 存储桶之间的差异。
 <a href="/zh/reference/minio-mc/mc-diff/#command-mc.diff"><code>mc diff</code></a> 仅列出缺失的对象或大小不同的对象。<a href="/zh/reference/minio-mc/mc-diff/#command-mc.diff"><code>mc diff</code></a>
-**不会**比较对象内容。</p></td>
+<strong>不会</strong>比较对象内容。</p></td>
     </tr>
     <tr>
       <td><p><a href="/zh/reference/minio-mc/mc-du/#command-mc.du"><code>mc du</code></a></p></td>

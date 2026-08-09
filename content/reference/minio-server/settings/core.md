@@ -30,6 +30,7 @@ Each configuration setting controls fundamental MinIO behavior and functionality
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_OPTS` {#envvar.MINIO_OPTS}
 
 *envvar*
@@ -74,6 +75,7 @@ The `minio server` command does not read `$MINIO_OPTS` directly. The variable on
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_VOLUMES` {#envvar.MINIO_VOLUMES}
 
 *envvar*
@@ -91,6 +93,7 @@ This setting does not have a configuration setting option.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_CONFIG_ENV_FILE` {#envvar.MINIO_CONFIG_ENV_FILE}
 
 *envvar*
@@ -108,6 +111,7 @@ This setting does not have a configuration setting option.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_ILM_EXPIRY_WORKERS` {#envvar.MINIO_ILM_EXPIRY_WORKERS}
 
 *envvar*
@@ -123,6 +127,7 @@ This setting does not have a configuration setting option.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_DOMAIN` {#envvar.MINIO_DOMAIN}
 
 *envvar*
@@ -155,11 +160,13 @@ This setting does not have a configuration setting option.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_SCANNER_SPEED` {#envvar.MINIO_SCANNER_SPEED}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `scanner speed` {#mc-conf.scanner.speed}
 
 *mc-conf*
@@ -224,11 +231,13 @@ All of the settings in this section fall under the following top-level key:
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_COMPRESSION_ENABLE` {#envvar.MINIO_COMPRESSION_ENABLE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `compression enable` {#mc-conf.compression.enable}
 
 *mc-conf*
@@ -245,11 +254,13 @@ Enabling or disabling data compression does not change existing objects.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_COMPRESSION_ALLOW_ENCRYPTION` {#envvar.MINIO_COMPRESSION_ALLOW_ENCRYPTION}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `compression allow_encryption` {#mc-conf.compression.allow_encryption}
 
 *mc-conf*
@@ -270,11 +281,13 @@ MinIO strongly recommends against encrypting compressed objects. If you require 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_COMPRESSION_EXTENSIONS` {#envvar.MINIO_COMPRESSION_EXTENSIONS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `compression extensions` {#mc-conf.compression.extensions}
 
 *mc-conf*
@@ -297,11 +310,13 @@ MinIO does not support compressing file types on the [Excluded File Types](/admi
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_COMPRESSION_MIME_TYPES` {#envvar.MINIO_COMPRESSION_MIME_TYPES}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Variable" %}}
+
 ##### `compression mime_types` {#mc-conf.compression.mime_types}
 
 *mc-conf*
@@ -325,6 +340,7 @@ Some types of files cannot be significantly reduced in size. MinIO will *not* co
 This setting does not have an environment variable option. Use the configuration setting instead.
 {{% /tab %}}
 {{% tab header="Configuration Setting" selected=true %}}
+
 ##### `compression comment` {#envvar.compression.comment}
 
 *envvar*
@@ -339,6 +355,7 @@ Specify a comment to associate with the data compression configuration.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_ERASURE_SET_DRIVE_COUNT` {#envvar.MINIO_ERASURE_SET_DRIVE_COUNT}
 
 *envvar*
@@ -368,11 +385,13 @@ Changes to stripe size have significant impact to deployment functionality, avai
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_API_OBJECT_MAX_VERSIONS` {#envvar.MINIO_API_OBJECT_MAX_VERSIONS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `api object_max_versions` {#mc-conf.api.object_max_versions}
 
 *mc-conf*
@@ -388,7 +407,7 @@ By default, MinIO allows up to the maximum value of an Int64 versions per object
 {{% alert color="info" %}}
 **Note**
 
-MinIO versions from ```RELEASE.2023-08-04T17-40-21Z``to ``RELEASE.2024-03-26T22-10-45Z``` had a default limit of 10,000 object versions. This setting can be used to override that limit to another value.
+MinIO versions from `RELEASE.2023-08-04T17-40-21Z` to `RELEASE.2024-03-26T22-10-45Z` had a default limit of 10,000 object versions. This setting can be used to override that limit to another value.
 {{% /alert %}}
 
 Arbitrarily high versions per objects may cause performance degradation on some operations, such as `LIST`. This is especially true on systems running budget hardware or spinning drives (HDD). Applications or workloads which produce thousands or more versions per object may require design or architecture review to mitigate potential performance degradations.
@@ -399,6 +418,7 @@ Setting a limit of no more than `100` should provide enough versions for most ty
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_API_TRUSTED_PROXIES` {#envvar.MINIO_API_TRUSTED_PROXIES}
 
 *envvar*
@@ -430,6 +450,7 @@ This setting does not have a configuration setting option.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH` {#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH}
 
 *envvar*

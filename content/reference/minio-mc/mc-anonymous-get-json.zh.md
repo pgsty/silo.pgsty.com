@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc anonymous get-json myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令使用以下语法：

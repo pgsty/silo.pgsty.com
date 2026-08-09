@@ -22,6 +22,7 @@ The following command enables versioning for the `mybucket` bucket on the `mymin
 ```shell
  mc version enable myminio/mybucket
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

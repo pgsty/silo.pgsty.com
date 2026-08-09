@@ -143,7 +143,7 @@ style="text-align: left;"><p><strong><code>customCertificates</code></strong>
 <em><a
 href="#customcertificates">CustomCertificates</a></em></p></td>
 <td style="text-align: left;"><p>Provides the output of the
-<code>client</code>, <code>minio</code>, and`minioCAs` custom TLS
+<code>client</code>, <code>minio</code>, and <code>minioCAs</code> custom TLS
 certificates manually added to the Operator.</p></td>
 </tr>
 </tbody>
@@ -1459,28 +1459,17 @@ array</em></p></td>
 Tenant pods Multiple client certificates will be mounted using the
 following folder structure:<br />
 </p>
-<ul>
-<li><p>certs<br />
-</p></li>
-<li><p>* client-0<br />
-</p></li>
-<li><p>* * client.crt<br />
-</p></li>
-<li><p>* * client.key<br />
-</p></li>
-<li><p>* client-1<br />
-</p></li>
-<li><p>* * client.crt<br />
-</p></li>
-<li><p>* * client.key<br />
-</p></li>
-<li><p>* * client-2<br />
-</p></li>
-<li><p>* client.crt<br />
-</p></li>
-<li><p>* * client.key<br />
-</p></li>
-</ul>
+<pre><code>certs/
+├── client-0/
+│   ├── client.crt
+│   └── client.key
+├── client-1/
+│   ├── client.crt
+│   └── client.key
+└── client-2/
+    ├── client.crt
+    └── client.key
+</code></pre>
 <p>Specify a <a
 href="https://kubernetes.io/docs/concepts/configuration/secret/">Kubernetes
 TLS secrets</a>. The MinIO Operator copies the specified certificate to
@@ -1510,7 +1499,7 @@ the TLS certificate.<br />
 <td style="text-align: left;"><p><strong>Optional</strong><br />
 </p>
 <p>Subpath inside mount path. This is the directory where MinIO stores
-data. Default to <code>""`</code> (empty)</p></td>
+data. Default to <code>""</code> (empty)</p></td>
 </tr>
 <tr class="even">
 <td

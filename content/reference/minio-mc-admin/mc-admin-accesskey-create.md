@@ -125,7 +125,7 @@ Length of time for which the accesskey remains valid. Valid time units are “ns
 
 The following expires the credentials after 30 days:
 
-```
+```text
 --expiry-duration 720h
 ```
 

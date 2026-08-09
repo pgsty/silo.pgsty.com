@@ -28,6 +28,7 @@ silo_modified: false
 ```shell
 mc admin cluster iam export myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 命令语法如下：

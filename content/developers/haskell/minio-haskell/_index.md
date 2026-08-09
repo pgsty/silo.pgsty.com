@@ -67,7 +67,7 @@ $ stack ghci
 
 该示例程序会连接到 MinIO 对象存储服务器，在服务器上创建一个存储桶，然后将文件上传到该存储桶。
 
-本示例使用部署在 https://play.min.io 的 MinIO 服务器。你可以使用该服务进行测试和开发。访问凭证已内置在库中，且为公开信息。
+本示例使用部署在 <https://play.min.io> 的 MinIO 服务器。你可以使用该服务进行测试和开发。访问凭证已内置在库中，且为公开信息。
 
 #### FileUploader.hs {#fileuploader-hs}
 

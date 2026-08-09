@@ -131,13 +131,13 @@ mc mirror SOURCE play/mybucket
 
 在站点 A 上，将 A 镜像到 B
 
-```
+```text
 mc mirror --active-active siteA siteB
 ```
 
 在站点 B 上，将 B 镜像到 A
 
-```
+```text
 mc mirror --active-active siteB siteA
 ```
 
@@ -344,7 +344,7 @@ RELEASE.2024-03-03T00-13-08Z
 
 例如，如需将下载速率限制为不超过 1 GiB/s，请使用以下命令：
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -370,7 +370,7 @@ RELEASE.2024-03-03T00-13-08Z
 
 例如，如需将上传速率限制为不超过 1 GiB/s，请使用以下命令：
 
-```
+```text
 --limit-upload 1G
 ```
 
@@ -538,7 +538,7 @@ RELEASE.2024-01-28T16-23-14Z
 
 使用 [`mc mirror`](#command-mc.mirror) 将文件从文件系统镜像到 S3 主机：
 
-```
+```text
 mc mirror FILEPATH ALIAS/PATH
 ```
 
@@ -550,7 +550,7 @@ mc mirror FILEPATH ALIAS/PATH
 
 将 [`mc mirror`](#command-mc.mirror) 与 [`--watch`](#mc.mirror.-watch) 一起使用，可持续将文件从文件系统镜像到 S3 兼容主机；文件系统中新增或删除的对象会在主机端同步新增或删除：
 
-```
+```text
 mc mirror --watch FILEPATH ALIAS/PATH
 ```
 
@@ -562,7 +562,7 @@ mc mirror --watch FILEPATH ALIAS/PATH
 
 将 [`mc mirror`](#command-mc.mirror) 与 [`--watch`](#mc.mirror.-watch) 一起使用，可持续将一个 S3 兼容主机上某个存储桶中的对象镜像到另一个 S3 兼容主机；存储桶中新增或删除的对象会同步到目标主机。
 
-```
+```text
 mc mirror --watch SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
 
@@ -575,7 +575,7 @@ mc mirror --watch SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 
 将 [`mc mirror`](#command-mc.mirror) 与 [`--exclude-storageclass`](#mc.mirror.-exclude-storageclass) 一起使用，可将对象从 AWS S3 镜像到 MinIO，同时不镜像 GLACIER 或 DEEP_ARCHIVE 存储中的对象。
 
-```
+```text
 mc mirror --exclude-storageclass GLACIER  \
    --exclude-storageclass DEEP_ARCHIVE SRCALIAS/SRCPATH TGALIAS/TGPATH
 ```

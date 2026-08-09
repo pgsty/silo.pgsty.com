@@ -63,7 +63,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
    minio-operator/tenant           7.1.1           v7.1.1          A Helm chart for MinIO Operator
    ```
 
-   `minio-operator/minio-operator` 是旧版 chart，正常情况下**不应**安装。
+   `minio-operator/minio-operator` 是旧版 chart，正常情况下 **不应** 安装。
 2. 安装 Operator
 
    运行 `helm install` 命令安装 Operator。 以下命令会指定并创建一个专用命名空间 `minio-operator` 用于安装。 MinIO 强烈建议为 Operator 使用专用命名空间。
@@ -75,6 +75,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
      --version 7.1.1 \
      operator minio-operator/operator
    ```
+
 3. 验证 Operator 安装
 
    检查指定命名空间（`minio-operator`）中的内容，确保所有 pod 和 service 均已成功启动。
@@ -116,6 +117,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
    ```shell
    curl -O https://operator.min.io/helm-releases/operator-7.1.1.tgz
    ```
+
 2. （可选）修改 `values.yaml`
 
    该 chart 包含一个可按需定制的 `values.yaml` 文件。 有关 MinIO Operator `values.yaml` 可用选项的详细信息，请参阅 [Operator Helm 图表](/zh/reference/operator-chart-values/#minio-operator-chart-values)。
@@ -133,6 +135,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
    --create-namespace \
    minio-operator ./operator-7.1.1.tgz
    ```
+
 4. 要验证安装，请运行以下命令：
 
    ```shell

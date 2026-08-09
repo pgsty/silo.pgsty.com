@@ -32,6 +32,7 @@ mc idp ldap add                                                            \
             group_search_base_dn=ou=swengg,dc=min,dc=io                    \
             group_search_filter="(&(objectclass=groupofnames)(member=%d))"
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

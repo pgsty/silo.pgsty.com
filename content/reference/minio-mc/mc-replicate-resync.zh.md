@@ -17,7 +17,7 @@ silo_modified: false
 
 [`mc replicate resync`](#command-mc.replicate.resync) 命令会将指定 MinIO 存储桶中的所有对象， 重新同步到远端 [replication](/zh/administration/bucket-replication/#minio-bucket-replication-serverside) 目标。
 
-此命令*要求*先使用 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 命令配置远端存储桶目标。 执行 [`mc replicate resync`](#command-mc.replicate.resync) 时，必须指定由此生成的远端 ARN。
+此命令 *要求* 先使用 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 命令配置远端存储桶目标。 执行 [`mc replicate resync`](#command-mc.replicate.resync) 时，必须指定由此生成的远端 ARN。
 
 此命令支持使用 active-active 复制的远端作为“备份”来源来重建 MinIO 部署。 有关 active-active 复制的更多信息，请参阅以下教程：
 
@@ -33,6 +33,7 @@ mc replicate resync start \
    --remote-bucket "arn:minio:replication::d3c086c7-1d64-40c2-954b-fe8222907033:mydata" \
    myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

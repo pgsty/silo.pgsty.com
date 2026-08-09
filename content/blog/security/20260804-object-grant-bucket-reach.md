@@ -119,7 +119,7 @@ The first pass withheld the slash from the **`NotResource`** match as well — a
 
 An independent adversarial review of that release produced a counterexample within the hour. Withholding the slash does not merely remove a match — it changes *which string patterns are matched against*, and a pattern can match `"mybucket"` without ever having matched `"mybucket/"`. The clean case is a fixed-width wildcard:
 
-```
+```text
 Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 ```
 

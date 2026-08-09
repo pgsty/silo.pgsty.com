@@ -23,6 +23,7 @@ silo_modified: false
 mc idp ldap disable  \
             myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令具有以下语法：

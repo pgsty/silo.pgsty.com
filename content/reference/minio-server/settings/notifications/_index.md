@@ -34,11 +34,13 @@ Each configuration setting controls fundamental MinIO behavior and functionality
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_API_SYNC_EVENTS` {#envvar.MINIO_API_SYNC_EVENTS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `api sync_events` {#mc-conf.api.sync_events}
 
 *mc-conf*

@@ -52,6 +52,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
    set MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
    set MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -67,6 +68,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
    export MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
    export MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
 ```
+
 {{% /alert %}}
 
 - 将 `<IDENTIFIER>` 替换为 PostgreSQL 服务端点的唯一描述性字符串。 对于与新目标服务端点相关的所有环境变量，请使用相同的 `<IDENTIFIER>` 值。 以下示例假定标识符为 `PRIMARY`。
@@ -143,6 +145,7 @@ SQS ARNs: arn:minio:sqs::primary:postgresql
    ```shell
    mc admin info --json ALIAS
    ```
+
 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
 
    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。

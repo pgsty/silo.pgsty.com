@@ -30,11 +30,13 @@ Each configuration setting controls fundamental MinIO behavior and functionality
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_ILM_EXPIRATION_WORKERS` {#envvar.MINIO_ILM_EXPIRATION_WORKERS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `ilm expiration_workers` {#mc-conf.ilm.expiration_workers}
 
 *mc-conf*

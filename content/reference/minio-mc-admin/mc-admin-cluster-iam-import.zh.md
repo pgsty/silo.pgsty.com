@@ -40,6 +40,7 @@ RELEASE.2024-09-09T07-53-10Z
 ```shell
 mc admin cluster iam import myminio ~/minio-metadata-backup/myminio-cluster.zip
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

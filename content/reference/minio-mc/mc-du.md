@@ -28,6 +28,7 @@ The output resembles the following:
 ```shell
 825KiB 3 objects        mybucket
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The [`mc du`](#command-mc.du) command has the following syntax:

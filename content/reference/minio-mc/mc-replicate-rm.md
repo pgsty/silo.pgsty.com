@@ -36,6 +36,7 @@ The following command removes the replication rule with specified id from the `m
 ```shell
 mc replicate rm --id "c76um9h4b0t1ijr36mug" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

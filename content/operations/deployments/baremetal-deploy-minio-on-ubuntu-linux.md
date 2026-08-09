@@ -198,6 +198,7 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
+
 {{% /tab %}}
 {{% tab header="Single-Node Multi-Drive" %}}
 Use Single-Node Multi-Drive deployments in development and evaluation environments. You can also use them for smaller storage workloads which can tolerate data loss or unavailability due to node downtime.
@@ -238,6 +239,7 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
+
 {{% /tab %}}
 {{% tab header="Single-Node Single-Drive" %}}
 Use Single-Node Single-Drive (“Standalone”) deployments in early development and evaluation environments. MinIO does not recommend Standalone deployments in production, as the loss of the node or its storage medium results in data loss.
@@ -278,6 +280,7 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

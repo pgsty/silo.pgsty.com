@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc admin user info myminio myuser
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：

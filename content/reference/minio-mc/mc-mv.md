@@ -23,6 +23,7 @@ The following command moves objects from the `mydata` bucket to the `archive` bu
 ```shell
 mc mv --recursive myminio/mydata myminio/archive
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -258,7 +259,7 @@ Limit client-side download rates to no more than a specified rate in KiB/s, MiB/
 
 For example, to limit download rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -284,7 +285,7 @@ Limit client-side upload rates to no more than the specified rate in KiB/s, MiB/
 
 For example, to limit upload rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-upload 1G
 ```
 

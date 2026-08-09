@@ -32,6 +32,7 @@ MINIO_IDENTITY_PLUGIN_TOKEN="Bearer TOKEN"
 MINIO_IDENTITY_PLUGIN_ROLE_ID="external-auth-provider"
 MINIO_IDENTITY_PLUGIN_COMMENT="External Identity Management using PROVIDER"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
 Set the following configuration settings using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command:
@@ -46,6 +47,7 @@ mc admin config set identity_plugin \
    role_id="external-auth-provider" \
    comment="External Identity Management using PROVIDER"
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

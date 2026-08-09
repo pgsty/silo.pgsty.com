@@ -78,6 +78,7 @@ The `Cluster Issuer` is the top level Issuer from which all other certificates i
    spec:
      selfSigned: {}
    ```
+
 2. Apply the resource to the cluster:
 
    ```shell

@@ -28,6 +28,7 @@ mc du play/mybucket
 ```shell
 825KiB 3 objects        mybucket
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 [`mc du`](#command-mc.du) 命令语法如下：

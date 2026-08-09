@@ -37,6 +37,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ```shell
 export MINIO_NOTIFY_KAFKA_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_KAFKA_BROKERS_PRIMARY="https://kafka1.example.net:9200, https://kafka2.example.net:9200"
@@ -44,8 +45,10 @@ export MINIO_NOTIFY_KAFKA_BROKERS_PRIMARY="https://kafka1.example.net:9200, http
 export MINIO_NOTIFY_KAFKA_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_KAFKA_BROKERS_SECONDARY="https://kafka1.example.net:9200, https://kafka2.example.net:9200"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ```shell
 mc admin config set notify_kafka:primary \
    brokers="https://kafka1.example.net:9200, https://kafka2.example.net:9200"
@@ -68,6 +71,7 @@ mc admin config set notify_kafka:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_ENABLE` {#envvar.MINIO_NOTIFY_KAFKA_ENABLE}
 
 *envvar*
@@ -77,19 +81,21 @@ mc admin config set notify_kafka:secondary \
 默认为 `off`。
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka` {#mc-conf.notify_kafka}
 
 *mc-conf*
 
 用于定义 Kafka 服务端点并与 [MinIO bucket notifications](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 配合使用的顶层配置键。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 Kafka 服务端点。 对于每个目标，[`brokers`](#mc-conf.notify_kafka.brokers) 参数都是*必需*的。 其他可选参数请以空白字符（`" "`）分隔的列表形式指定。
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 Kafka 服务端点。 对于每个目标，[`brokers`](#mc-conf.notify_kafka.brokers) 参数都是 *必需* 的。 其他可选参数请以空白字符（`" "`）分隔的列表形式指定。
 
 ```shell
 mc admin config set notify_kafka \
   brokers="https://kafka1.example.net:9200, https://kafka2.example.net:9200"
   [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -99,11 +105,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_BROKERS` {#envvar.MINIO_NOTIFY_KAFKA_BROKERS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka brokers` {#mc-conf.notify_kafka.brokers}
 
 *mc-conf*
@@ -126,11 +134,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_TOPIC` {#envvar.MINIO_NOTIFY_KAFKA_TOPIC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka topic` {#mc-conf.notify_kafka.topic}
 
 *mc-conf*
@@ -145,11 +155,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_SASL` {#envvar.MINIO_NOTIFY_KAFKA_SASL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka sasl` {#mc-conf.notify_kafka.sasl}
 
 *mc-conf*
@@ -164,11 +176,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_SASL_USERNAME` {#envvar.MINIO_NOTIFY_KAFKA_SASL_USERNAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka sasl_username` {#mc-conf.notify_kafka.sasl_username}
 
 *mc-conf*
@@ -183,11 +197,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_SASL_PASSWORD` {#envvar.MINIO_NOTIFY_KAFKA_SASL_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka sasl_password` {#mc-conf.notify_kafka.sasl_password}
 
 *mc-conf*
@@ -208,11 +224,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_SASL_MECHANISM` {#envvar.MINIO_NOTIFY_KAFKA_SASL_MECHANISM}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka sasl_mechanism` {#mc-conf.notify_kafka.sasl_mechanism}
 
 *mc-conf*
@@ -231,11 +249,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_TLS_CLIENT_AUTH` {#envvar.MINIO_NOTIFY_KAFKA_TLS_CLIENT_AUTH}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka tls_client_auth` {#mc-conf.notify_kafka.tls_client_auth}
 
 *mc-conf*
@@ -260,11 +280,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_TLS` {#envvar.MINIO_NOTIFY_KAFKA_TLS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka tls` {#mc-conf.notify_kafka.tls}
 
 *mc-conf*
@@ -279,11 +301,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_TLS_SKIP_VERIFY` {#envvar.MINIO_NOTIFY_KAFKA_TLS_SKIP_VERIFY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka tls_skip_verify` {#mc-conf.notify_kafka.tls_skip_verify}
 
 *mc-conf*
@@ -301,11 +325,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_CLIENT_TLS_CERT` {#envvar.MINIO_NOTIFY_KAFKA_CLIENT_TLS_CERT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka client_tls_cert` {#mc-conf.notify_kafka.client_tls_cert}
 
 *mc-conf*
@@ -320,11 +346,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_CLIENT_TLS_KEY` {#envvar.MINIO_NOTIFY_KAFKA_CLIENT_TLS_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka client_tls_key` {#mc-conf.notify_kafka.client_tls_key}
 
 *mc-conf*
@@ -339,11 +367,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_VERSION` {#envvar.MINIO_NOTIFY_KAFKA_VERSION}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka version` {#mc-conf.notify_kafka.version}
 
 *mc-conf*
@@ -358,11 +388,13 @@ mc admin config set notify_kafka \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_BATCH_SIZE` {#envvar.MINIO_NOTIFY_KAFKA_BATCH_SIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka batch_size` {#mc-conf.notify_kafka.batch_size}
 
 *mc-conf*
@@ -383,11 +415,13 @@ MinIO 先前将此值限制为 `100`。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_QUEUE_DIR` {#envvar.MINIO_NOTIFY_KAFKA_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka queue_dir` {#mc-conf.notify_kafka.queue_dir}
 
 *mc-conf*
@@ -404,11 +438,13 @@ MinIO 先前将此值限制为 `100`。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_KAFKA_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka queue_limit` {#mc-conf.notify_kafka.queue_limit}
 
 *mc-conf*
@@ -423,11 +459,13 @@ MinIO 先前将此值限制为 `100`。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_COMMENT` {#envvar.MINIO_NOTIFY_KAFKA_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka comment` {#mc-conf.notify_kafka.comment}
 
 *mc-conf*
@@ -448,11 +486,13 @@ Server RELEASE.2023-12-09T18-17-51Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_PRODUCER_COMPRESSION_CODEC` {#envvar.MINIO_NOTIFY_KAFKA_PRODUCER_COMPRESSION_CODEC}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka compression_codec` {#mc-conf.notify_kafka.compression_codec}
 
 *mc-conf*
@@ -481,11 +521,13 @@ Server RELEASE.2023-12-09T18-17-51Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_KAFKA_PRODUCER_COMPRESSION_LEVEL` {#envvar.MINIO_NOTIFY_KAFKA_PRODUCER_COMPRESSION_LEVEL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_kafka compression_level` {#mc-conf.notify_kafka.compression_level}
 
 *mc-conf*

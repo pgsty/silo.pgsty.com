@@ -41,6 +41,7 @@ The following example code sets *all* environment variables related to configuri
    set MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
    set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -51,6 +52,7 @@ The following example code sets *all* environment variables related to configuri
    export MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
    export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
 ```
+
 {{% /alert %}}
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the HTTP webhook endpoint. Use the same `<IDENTIFIER>` for all environment variables related to the new log HTTP webhook.
@@ -69,6 +71,7 @@ The following example code sets *all* environment variables related to configuri
   ```shell
   set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   {{% alert color="info" %}}
@@ -77,6 +80,7 @@ The following example code sets *all* environment variables related to configuri
   ```shell
   export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
@@ -87,6 +91,7 @@ The following example code sets *all* environment variables related to configuri
   ```shell
   set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   {{% alert color="info" %}}
@@ -95,6 +100,7 @@ The following example code sets *all* environment variables related to configuri
   ```shell
   export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   Consult the documenation for the desired service for more details.
@@ -165,6 +171,7 @@ set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
 set MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
 set MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -177,6 +184,7 @@ export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
 export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
 export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
 ```
+
 {{% /alert %}}
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the HTTP webhook endpoint. Use the same `<IDENTIFIER>` for all environment variables related to the new audit log HTTP webhook.
@@ -195,6 +203,7 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
   ```shell
   set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   {{% alert color="info" %}}
@@ -203,6 +212,7 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
   ```shell
   export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
@@ -213,6 +223,7 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
   ```shell
   set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   {{% alert color="info" %}}
@@ -221,6 +232,7 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
   ```shell
   export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
   ```
+
   {{% /alert %}}
 
   Consult the documenation for the desired service for more details.

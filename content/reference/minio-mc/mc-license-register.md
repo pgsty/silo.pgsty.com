@@ -31,6 +31,7 @@ After registration, you can upload deployment health reports directly to SUBNET 
 ```shell
 mc license register minio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -42,6 +43,7 @@ mc [GLOBALFLAGS] license register ALIAS                      \
                          [--license <path to license file>]  \
                          [--name <value>]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

@@ -44,11 +44,13 @@ For tiering from one type of storage to another, such as for cost management pur
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_STORAGE_CLASS_STANDARD` {#envvar.MINIO_STORAGE_CLASS_STANDARD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `storage_class standard` {#mc-conf.storage_class.standard}
 
 *mc-conf*
@@ -91,11 +93,13 @@ For tiering from one type of storage to another, such as for cost management pur
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_STORAGE_CLASS_RRS` {#envvar.MINIO_STORAGE_CLASS_RRS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `storage_class rrs` {#mc-conf.storage_class.rrs}
 
 *mc-conf*
@@ -116,11 +120,13 @@ You cannot set this value for deployments with an erasure set size less than 2. 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_STORAGE_CLASS_OPTIMIZE` {#envvar.MINIO_STORAGE_CLASS_OPTIMIZE}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `storage_class optimize` {#mc-conf.storage_class.optimize}
 
 *mc-conf*
@@ -135,6 +141,7 @@ Specify `capacity` to this setting to direct MinIO to not create any additional 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_STORAGE_CLASS_COMMENT` {#envvar.MINIO_STORAGE_CLASS_COMMENT}
 
 *envvar*

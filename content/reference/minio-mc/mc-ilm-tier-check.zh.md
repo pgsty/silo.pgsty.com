@@ -26,6 +26,7 @@ silo_modified: false
 ```shell
  mc ilm tier check myminio WARM-TIER
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令具有以下语法：
@@ -62,7 +63,7 @@ mc ilm tier add TARGET TIER_NAME
 
 要显示的现有远程层名称。
 
-**必须**使用全大写指定该层，例如 `WARM_TIER`。
+**必须** 使用全大写指定该层，例如 `WARM_TIER`。
 
 ### 全局标志 {#id7}
 

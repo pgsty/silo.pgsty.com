@@ -36,6 +36,7 @@ mc [GLOBALFLAGS] replicate rm FLAGS [FLAGS] ALIAS
 ```shell
 mc replicate rm --id "c76um9h4b0t1ijr36mug" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

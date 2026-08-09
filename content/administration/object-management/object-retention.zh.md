@@ -56,7 +56,7 @@ $ mc ls --versions play/locking-guide
   [DATETIME]    23B c6b581ca-2883-41e2-9905-0a1867b535b8 v1 PUT data.csv
 ```
 
-由于对象锁定设置，对 `data.csv` 的*特定版本*执行删除会失败：
+由于对象锁定设置，对 `data.csv` 的 *特定版本* 执行删除会失败：
 
 ```shell
 $ mc rm --version-id 62429eb1-9cb7-4dc5-b507-9cc23d0cc691 play/data.csv
@@ -82,8 +82,8 @@ $ mc rm play/locking-guide/data.csv
 
 对于受过期规则覆盖的对象，MinIO [对象过期](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 会遵循所有生效中的对象锁定和保留设置。
 
-- 对于仅作用于*当前*对象版本的过期规则， MinIO 会为受锁定对象创建一个 Delete Marker。
-- 对于作用于*非当前对象版本*的过期规则， MinIO 只能在保留期结束*之后*，或保留已被显式解除时（例如 legal hold）对非当前版本执行过期。
+- 对于仅作用于 *当前* 对象版本的过期规则， MinIO 会为受锁定对象创建一个 Delete Marker。
+- 对于作用于 *非当前对象版本* 的过期规则， MinIO 只能在保留期结束 *之后*，或保留已被显式解除时（例如 legal hold）对非当前版本执行过期。
 
 例如，考虑以下默认启用了 [GOVERNANCE 模式](#minio-object-locking-governance) 且保留期为 45 天的存储桶：
 
@@ -95,7 +95,7 @@ $ mc ls --versions play/locking-guide
   [60D]    23B c6b581ca-2883-41e2-9905-0a1867b535b8 v1 PUT data.csv
 ```
 
-为超过 7 天的*当前*对象创建过期规则时，会为该对象生成一个 Delete Marker：
+为超过 7 天的 *当前* 对象创建过期规则时，会为该对象生成一个 Delete Marker：
 
 ```shell
 $ mc ls --versions play/locking-guide
@@ -106,7 +106,7 @@ $ mc ls --versions play/locking-guide
   [60D]    23B c6b581ca-2883-41e2-9905-0a1867b535b8 v1 PUT data.csv
 ```
 
-不过，对于超过 7 天的*非当前*对象，过期规则只有在已配置的 WORM 锁过期*之后*才会生效。由于该存储桶设置了 45 天的 `GOVERNANCE` 保留，因此只有 `data.csv` 的 `v1` 版本已解锁，因而可被删除。
+不过，对于超过 7 天的 *非当前* 对象，过期规则只有在已配置的 WORM 锁过期 *之后* 才会生效。由于该存储桶设置了 45 天的 `GOVERNANCE` 保留，因此只有 `data.csv` 的 `v1` 版本已解锁，因而可被删除。
 
 ## 教程 {#id5}
 
@@ -194,7 +194,7 @@ MinIO 的 `GOVERNANCE` 锁在功能上与 [S3 GOVERNANCE 模式](https://docs.aw
 
 ### COMPLIANCE 模式 {#compliance}
 
-处于 `COMPLIANCE` 锁定下的对象可防止*所有*用户执行写操作，包括 [MinIO root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户。
+处于 `COMPLIANCE` 锁定下的对象可防止 *所有* 用户执行写操作，包括 [MinIO root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户。
 
 `COMPLIANCE` 锁定对象提供完全不可变性。 在配置的保留时长结束之前，无法更改或移除该锁。
 
@@ -204,12 +204,12 @@ MinIO 的 `COMPLIANCE` 锁在功能上与 [S3 COMPLIANCE 模式](https://docs.aw
 
 ## Legal Hold {#minio-object-locking-legalhold}
 
-处于 legal hold 状态下的对象可防止*所有*用户执行写操作，包括 [MinIO root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户。
+处于 legal hold 状态下的对象可防止 *所有* 用户执行写操作，包括 [MinIO root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户。
 
 legal hold 为无限期，并对锁定对象强制执行完全不可变性。 只有拥有 [`s3:PutObjectLegalHold`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.s3-PutObjectLegalHold) 权限的特权用户才能设置或解除 legal hold。
 
 legal hold 在对象级别生效。 如果你为一组对象启用 legal hold，例如某个存储桶中的现有内容，则该存储桶后续新创建的对象不会受到影响。
 
-legal hold 与 [GOVERNANCE 模式](#minio-object-locking-governance) 和 [COMPLIANCE 模式](#minio-object-locking-compliance) 保留设置是互补关系。 同时受 legal hold 和 `GOVERNANCE/COMPLIANCE` 保留规则保护的对象，会持续保持 WORM 锁定，直到 legal hold 被解除*且*规则到期。
+legal hold 与 [GOVERNANCE 模式](#minio-object-locking-governance) 和 [COMPLIANCE 模式](#minio-object-locking-compliance) 保留设置是互补关系。 同时受 legal hold 和 `GOVERNANCE/COMPLIANCE` 保留规则保护的对象，会持续保持 WORM 锁定，直到 legal hold 被解除 *且* 规则到期。
 
 对于 `GOVERNANCE` 锁定对象，即使用户拥有绕过保留的必要权限，legal hold 仍会阻止其修改该对象。

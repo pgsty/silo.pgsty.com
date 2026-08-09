@@ -16,7 +16,7 @@ AWS CLI 是一个用于管理 AWS 服务的统一工具。它也常用于在 AWS
 
 ## 1. 前提条件 {#id1}
 
-从[这里](https://silo.pgsty.com/zh/operations/deployments/installation/)安装 MinIO Server。
+按照 [SILO 安装指南](https://silo.pgsty.com/zh/operations/deployments/installation/) 安装 MinIO Server。
 
 ## 2. 安装 {#id2}
 

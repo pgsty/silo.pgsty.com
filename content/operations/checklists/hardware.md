@@ -206,7 +206,7 @@ You can calculate the maximum number of concurrent requests per node with this f
 
 To calculate the amount of RAM used for each request, use this formula:
 
-> \(((2MiB + 128KiB) * driveCount) + (2 * 10MiB) + (2 * 1 MiB)\)
+> \(((2MiB + 128KiB) \times driveCount) + (2 \times 10MiB) + (2 \times 1MiB)\)
 >
 > 10MiB is the default erasure block size v1. 1 MiB is the default erasure block size v2.
 
@@ -376,6 +376,7 @@ You must run this script on all MinIO nodes and configure the script to re-run o
 ```shell
 @reboot /opt/minio/xfs-retry-settings.sh
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -397,7 +398,7 @@ Test each drive independently on all servers to ensure they are identical in per
 
    This tests checks a drive’s ability to write new data (uncached) to the drive by creating a specified number of blocks at up to a certain number of bytes at a time to mimic how a drive would function with writing uncached data. This allows you to see the actual drive performance with consistent file I/O.
 
-   ```
+   ```text
    dd if=/dev/zero of=/mnt/driveN/testfile bs=128k count=80000 oflag=direct conv=fdatasync > dd-write-drive1.txt
    ```
 
@@ -443,7 +444,7 @@ Test each drive independently on all servers to ensure they are identical in per
    The operation returns the number of files written, total size written in bytes, the total length of time for the operation (in seconds), and the speed of the writing in some order of bytes per second.
 2. Test the drive’s performance during read operations
 
-   ```
+   ```text
    dd if=/mnt/driveN/testfile of=/dev/null bs=128k iflag=direct > dd-read-drive1.txt
    ```
 
@@ -561,6 +562,7 @@ The tools noted in this section **require** a MinIO subscription. MinIO strongly
    ```shell
    mc support perf net minio1
    ```
+
 3. Drive test
 
    Run drive read/write performance measurements on all drive on all nodes for a cluster with alias `minio1`. The command uses the default blocksize of 4MiB.
@@ -568,6 +570,7 @@ The tools noted in this section **require** a MinIO subscription. MinIO strongly
    ```shell
    mc support perf drive minio1
    ```
+
 4. Object test
 
    Measure the performance of S3 read/write of an object on the alias `minio1`. MinIO autotunes concurrency to obtain maximum throughput and IOPS (Input/Output Per Second).

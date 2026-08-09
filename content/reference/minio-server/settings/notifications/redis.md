@@ -33,6 +33,7 @@ You can specify multiple Redis service endpoints by appending a unique identifie
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 export MINIO_NOTIFY_REDIS_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_REDIS_ADDRESS_PRIMARY="redis-endpoint.example.net:9200"
@@ -45,8 +46,10 @@ export MINIO_NOTIFY_REDIS_REDIS_ADDRESS_SECONDARY="redis-endpoint2.example.net:9
 export MINIO_NOTIFY_REDIS_KEY_SECONDARY="bucketevents"
 export MINIO_NOTIFY_REDIS_FORMAT_SECONDARY="namespace"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
+
 ```shell
 mc admin config set notify_redis:primary              \
    address="redis-endpoint.example.net:9200"  \
@@ -60,6 +63,7 @@ mc admin config set notify_redis:secondary            \
    format="namespace"                                 \
    [ARGUMENT="VALUE"] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -71,6 +75,7 @@ mc admin config set notify_redis:secondary            \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_ENABLE` {#envvar.MINIO_NOTIFY_REDIS_ENABLE}
 
 *envvar*
@@ -86,6 +91,7 @@ Requires specifying the following additional environment variables if set to `on
 - [`MINIO_NOTIFY_REDIS_FORMAT`](#envvar.MINIO_NOTIFY_REDIS_FORMAT)
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis` {#mc-conf.notify_redis}
 
 *mc-conf*
@@ -107,6 +113,7 @@ mc admin config set notify_redis \
    format="<string>" \
    [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -116,11 +123,13 @@ mc admin config set notify_redis \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_ADDRESS` {#envvar.MINIO_NOTIFY_REDIS_ADDRESS}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis address` {#mc-conf.notify_redis.address}
 
 *mc-conf*
@@ -141,11 +150,13 @@ MinIO checks the health of the specified URL (if it is resolvable and reachable)
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_KEY` {#envvar.MINIO_NOTIFY_REDIS_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis key` {#mc-conf.notify_redis.key}
 
 *mc-conf*
@@ -160,11 +171,13 @@ Specify the Redis key to use for storing and updating events. Redis auto-creates
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_FORMAT` {#envvar.MINIO_NOTIFY_REDIS_FORMAT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis format` {#mc-conf.notify_redis.format}
 
 *mc-conf*
@@ -187,11 +200,13 @@ Specify the format of event data written to the Redis service endpoint. MinIO su
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_PASSWORD` {#envvar.MINIO_NOTIFY_REDIS_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis password` {#mc-conf.notify_redis.password}
 
 *mc-conf*
@@ -217,11 +232,13 @@ MinIO redacts this value when returned as part of [`mc admin config get`](/refer
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_USER` {#envvar.MINIO_NOTIFY_REDIS_USER}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis user` {#mc-conf.notify_redis.user}
 
 *mc-conf*
@@ -236,11 +253,13 @@ Specify the user for the Redis server.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_QUEUE_DIR` {#envvar.MINIO_NOTIFY_REDIS_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis queue_dir` {#mc-conf.notify_redis.queue_dir}
 
 *mc-conf*
@@ -257,11 +276,13 @@ MinIO stores undelivered events in the specified store while the Redis server/br
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_REDIS_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis queue_limit` {#mc-conf.notify_redis.queue_limit}
 
 *mc-conf*
@@ -276,11 +297,13 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_NOTIFY_REDIS_COMMENT` {#envvar.MINIO_NOTIFY_REDIS_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `notify_redis comment` {#mc-conf.notify_redis.comment}
 
 *mc-conf*

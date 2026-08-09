@@ -24,6 +24,7 @@ The following command returns details of user `myuser` on the `myminio` MinIO de
 ```shell
 mc admin user info myminio myuser
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

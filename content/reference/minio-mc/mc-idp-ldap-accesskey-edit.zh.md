@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc idp ldap accesskey edit myminio/ mykey --secret-key 'xxxxxxx'
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

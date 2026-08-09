@@ -172,6 +172,7 @@ silo_modified: true
    ```shell
    watch kubectl get all -n minio-tenant
    ```
+
 8. 暴露 Tenant 的 S3 API 端口
 
    若要在本地机器上测试 Silo 客户端 [`mc`](/zh/reference/minio-mc/#command-mc)，请转发 S3 API 端口并创建别名。

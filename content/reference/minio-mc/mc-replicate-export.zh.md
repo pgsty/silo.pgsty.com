@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc replicate export myminio/mydata > mydata-replication.json
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

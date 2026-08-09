@@ -34,6 +34,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY="https://webhook1.example.net"
@@ -41,8 +42,10 @@ export MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY="https://webhook1.example.net"
 export MINIO_NOTIFY_WEBHOOK_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_WEBHOOK_ENDPOINT_SECONDARY="https://webhook1.example.net"
 ```
+
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ```shell
 mc admin config set notify_webhook:primary \
    endpoint="https://webhook1.example.net"
@@ -52,6 +55,7 @@ mc admin config set notify_webhook:secondary \
    endpoint="https://webhook2.example.net
    [ARGUMENT=VALUE ...]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -63,6 +67,7 @@ mc admin config set notify_webhook:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_ENABLE` {#envvar.MINIO_NOTIFY_WEBHOOK_ENABLE}
 
 *envvar*
@@ -72,6 +77,7 @@ mc admin config set notify_webhook:secondary \
 默认为 `off`。
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_webhook` {#mc-conf.notify_webhook}
 
 *mc-conf*
@@ -85,6 +91,7 @@ mc admin config set notify_webhook \
   endpoint="https://webhook.example.net"
   [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -94,11 +101,13 @@ mc admin config set notify_webhook \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_ENDPOINT` {#envvar.MINIO_NOTIFY_WEBHOOK_ENDPOINT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_webhook endpoint` {#mc-conf.notify_webhook.endpoint}
 
 *mc-conf*
@@ -119,13 +128,14 @@ mc admin config set notify_webhook \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
 
 适用于该端点类型的认证令牌。 对于不需要认证的端点可省略。
 
-为支持多种令牌类型，MinIO 会使用*完全按所给内容*的值来构造请求认证头。 根据端点要求，你可能需要包含额外信息。
+为支持多种令牌类型，MinIO 会使用 *完全按所给内容* 的值来构造请求认证头。 根据端点要求，你可能需要包含额外信息。
 
 例如，对于 Bearer 令牌，请在前面加上 `Bearer`：
 
@@ -142,13 +152,14 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 更多详情请查阅目标服务的文档。
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_webhook auth_token` {#mc-conf.notify_webhook.auth_token}
 
 *mc-conf*
 
 适用于该端点类型的认证令牌。 对于不需要认证的端点可省略。
 
-为支持多种令牌类型，MinIO 会使用*完全按所给内容*的值来构造请求认证头。 根据端点要求，你可能需要包含额外信息。
+为支持多种令牌类型，MinIO 会使用 *完全按所给内容* 的值来构造请求认证头。 根据端点要求，你可能需要包含额外信息。
 
 例如，对于 Bearer 令牌，请在前面加上 `Bearer`：
 
@@ -183,11 +194,13 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_NOTIFY_WEBHOOK_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_webhook queue_dir` {#mc-conf.notify_webhook.queue_dir}
 
 *mc-conf*
@@ -204,11 +217,13 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_webhook queue_limit` {#mc-conf.notify_webhook.queue_limit}
 
 *mc-conf*
@@ -223,11 +238,13 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_NOTIFY_WEBHOOK_CLIENT_CERT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_webhook client_cert` {#mc-conf.notify_webhook.client_cert}
 
 *mc-conf*
@@ -242,11 +259,13 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_NOTIFY_WEBHOOK_CLIENT_KEY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ##### `notify_webhook client_key` {#mc-conf.notify_webhook.client_key}
 
 *mc-conf*

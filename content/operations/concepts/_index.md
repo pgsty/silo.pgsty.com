@@ -98,7 +98,7 @@ For deployments which have multiple server pools, you can [decommission](/operat
 
 If you decommission one pool in a multiple pool deployment, you cannot use the same node sequence for a new pool. For example, consider a deployment with the following pools:
 
-```
+```text
 https://minio-{1...4}.example.net/mnt/drive-{1...4}
 https://minio-{5...8}.example.net/mnt/drive-{1...4}
 https://minio-{9...12}.example.net/mnt/drive-{1...4}
@@ -106,11 +106,12 @@ https://minio-{9...12}.example.net/mnt/drive-{1...4}
 
 If you decommission the `minio-{5...8}` pool, you cannot add a new pool with the same node numbering. You must add the new pool *after* `minio-{9...12}`:
 
-```
+```text
 https://minio-{1...4}.example.net/mnt/drive-{1...4}
 https://minio-{9...12}.example.net/mnt/drive-{1...4}
 https://minio-{13...16}.example.net/mnt/drive-{1...4}
 ```
+
 {{% /alert %}}
 
 ### How do I manage one or more MinIO instances or clusters? {#how-do-i-manage-one-or-more-minio-instances-or-clusters}

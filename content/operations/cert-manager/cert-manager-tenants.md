@@ -92,6 +92,7 @@ The `Issuer` issues the certificates within the tenant namespace.
      ca:
        secretName: tenant-1-ca-tls
    ```
+
 2. Apply the `Issuer` resource definition:
 
    ```shell
@@ -161,6 +162,7 @@ Replace the the placeholder text (marked with the `<` and `>` characters) with v
    ```shell
    kubectl apply -f tenant-1-minio-certificate.yaml
    ```
+
 3. Validate the changes took effect:
 
    ```shell
@@ -219,6 +221,7 @@ Copy the tenant’s cert-manager generated CA public key (`ca.crt`) into the *mi
    ```shell
    kubectl get secrets -n tenant-1 tenant-1-ca-tls -o=jsonpath='{.data.ca\.crt}' | base64 -d > ca.crt
    ```
+
 2. Create the secret:
 
    ```shell

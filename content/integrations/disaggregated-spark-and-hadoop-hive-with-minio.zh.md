@@ -45,7 +45,7 @@ MinIO 还支持类似 AWS 区域与层级的多集群、多站点联邦。通过
 
 ![s3a-config](/images/integrations/spark/image5.png)
 
-```
+```text
 sudo pip install yq
 alias kv-pairify='yq ".configuration[]" | jq ".[]" | jq -r ".name + \"=\" + .value"'
 
@@ -53,7 +53,7 @@ alias kv-pairify='yq ".configuration[]" | jq ".[]" | jq -r ".name + \"=\" + .val
 
 以 12 个计算节点、总内存 *1.2TiB* 的集群为例，为获得最佳结果，需要进行以下设置。向 *core-site.xml* 添加以下优化项，以便为 **MinIO** 配置 *s3a*。其中最重要的选项如下：
 
-```
+```text
 cat ${HADOOP_CONF_DIR}/core-site.xml | kv-pairify | grep "mapred"
 
 mapred.maxthreads.generate.mapoutput=2 # Num threads to write map outputs
@@ -72,7 +72,7 @@ S3A 是用于访问 S3 及其他兼容 S3 的对象存储（如 MinIO）的连�
 
 测试结果显示，Directory staging committer 在三者中速度最快。为获得最佳结果，S3A 连接器应配置以下参数：
 
-```
+```text
 cat ${HADOOP_CONF_DIR}/core-site.xml | kv-pairify | grep "s3a"
 
 fs.s3a.access.key=minio
@@ -127,7 +127,7 @@ fs.s3a.threads.max=2048 # Maximum number of threads for S3A
 
 向 *spark-defaults.conf* 添加以下优化项，以便将 Spark 配置为使用 **MinIO**。
 
-```
+```text
 spark.hadoop.fs.s3a.access.key minio
 spark.hadoop.fs.s3a.secret.key minio123
 spark.hadoop.fs.s3a.path.style.access true
@@ -174,7 +174,7 @@ spark.hadoop.fs.s3a.threads.max 2048 # maximum number of threads for S3A
 
 向 `hive-site.xml` 添加以下优化项，以便将 Hive 配置为使用 **MinIO**。
 
-```
+```text
 hive.blobstore.use.blobstore.as.scratchdir=true
 hive.exec.input.listing.max.threads=50
 hive.load.dynamic.partitions.thread=25
@@ -206,7 +206,7 @@ mapreduce.input.fileinputformat.list-status.num-threads=50
 - 作业运行时，相关库可在中间处理阶段使用 **MinIO**。
 - 进入安装了 Spark client 的节点，并切换到 spark2-client 目录：
 
-```
+```text
 cd /usr/hdp/current/spark2-client
 su spark
 
@@ -214,7 +214,7 @@ su spark
 
 - 以 yarn-client 模式运行 Apache Spark Pi 作业，使用 **org.apache.spark** 中的代码：
 
-```
+```text
 ./bin/spark-submit --class org.apache.spark.examples.SparkPi \
     --master yarn-client \
     --num-executors 1 \
@@ -227,7 +227,7 @@ su spark
 
 作业应产生如下输出。请关注输出中的 pi 值。
 
-```
+```text
 17/03/22 23:21:10 INFO DAGScheduler: Job 0 finished: reduce at SparkPi.scala:38, took 1.302805 s
 Pi is roughly 3.1445191445191445
 
@@ -245,7 +245,7 @@ WordCount 是一个简单程序，用于统计文本文件中各单词的出现�
 - 作业运行时，相关库可在中间处理阶段使用 **MinIO**。
 - 进入安装了 Spark client 的节点，并切换到 spark2-client 目录：
 
-```
+```text
 cd /usr/hdp/current/spark2-client
 su spark
 
@@ -255,7 +255,7 @@ su spark
 
 #### **4.2.1 将输入文件上传到 HDFS：** {#hdfs}
 
-```
+```text
 hadoop fs -copyFromLocal /etc/hadoop/conf/log4j.properties
           s3a://testbucket/testdata
 
@@ -263,14 +263,14 @@ hadoop fs -copyFromLocal /etc/hadoop/conf/log4j.properties
 
 #### **4.2.2 运行 Spark shell：** {#spark-shell}
 
-```
+```text
 ./bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m
 
 ```
 
 该命令应产生如下输出（包含额外状态信息）：
 
-```
+```text
 Spark context Web UI available at http://172.26.236.247:4041
 Spark context available as 'sc' (master = yarn, app id = application_1490217230866_0002).
 Spark session available as 'spark'.
@@ -293,7 +293,7 @@ scala>
 
 - 在 *scala&gt;* 提示符下，输入以下命令提交作业。请将节点名、文件名和文件位置替换为实际值：
 
-```
+```text
 scala> val file = sc.textFile("s3a://testbucket/testdata")
 file: org.apache.spark.rdd.RDD[String] = s3a://testbucket/testdata MapPartitionsRDD[1] at textFile at <console>:24
 
@@ -308,7 +308,7 @@ scala> counts.saveAsTextFile("s3a://testbucket/wordcount")
 
 在 Scala shell 中查看输出：
 
-```
+```text
 scala> counts.count()
 364
 
@@ -316,14 +316,14 @@ scala> counts.count()
 
 若要在 MinIO 中查看输出，请退出 Scala shell。查看 WordCount 作业状态：
 
-```
+```text
 hadoop fs -ls s3a://testbucket/wordcount
 
 ```
 
 输出应类似如下：
 
-```
+```text
 Found 3 items
 -rw-rw-rw-   1 spark spark          0 2019-05-04 01:36 s3a://testbucket/wordcount/_SUCCESS
 -rw-rw-rw-   1 spark spark       4956 2019-05-04 01:36 s3a://testbucket/wordcount/part-00000

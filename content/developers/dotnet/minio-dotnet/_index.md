@@ -244,14 +244,14 @@ namespace FileUploader
 
 - 安装 [.NET SDK](https://docs.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#2204)。
 
-```
+```text
 wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 sudo dpkg -i packages-microsoft-prod.deb
 rm packages-microsoft-prod.deb
 
 ```
 
-```
+```text
 sudo apt-get update; \
   sudo apt-get install -y apt-transport-https && \
   sudo apt-get update && \
@@ -263,7 +263,7 @@ sudo apt-get update; \
 
 - 克隆此项目。
 
-```
+```text
 $ git clone https://github.com/minio/minio-dotnet && cd minio-dotnet
 
 ```
@@ -275,7 +275,7 @@ $ git clone https://github.com/minio/minio-dotnet && cd minio-dotnet
 
 ```
 
-```
+```text
 dotnet build --configuration Release --no-restore
 dotnet pack ./Minio/Minio.csproj --no-build --configuration Release --output ./artifacts
 dotnet test ./Minio.Tests/Minio.Tests.csproj

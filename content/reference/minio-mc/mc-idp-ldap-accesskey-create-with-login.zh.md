@@ -28,6 +28,7 @@ RELEASE.2024-04-18T16-45-29Z
 ```shell
 mc idp ldap accesskey create-with-login https://minio.example.net/
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -78,7 +79,7 @@ mc idp ldap accesskey create-with-login https://minio.example.net
 
 成功完成身份验证后要使用的访问密钥。 省略此项则由 MinIO 随机生成一个值。
 
-访问密钥不能包含 ``` =``（等号）或  ```,``（逗号）字符。
+访问密钥不能包含 `=`（等号）或 `,`（逗号）字符。
 
 需要同时指定 [`--secret-key`](#mc.idp.ldap.accesskey.create-with-login.-secret-key)
 

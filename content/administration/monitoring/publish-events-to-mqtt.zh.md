@@ -21,7 +21,7 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 
 此过程假定已存在一个 MQTT 3.1 或 3.1.1 server/broker，且 MinIO 部署能够连接到它。有关兼容 MQTT 的 server/broker 列表，请参见 [mqtt.org software listing](https://mqtt.org/software/)。
 
-如果 MQTT 服务需要身份验证，则在配置过程中*必须*提供适当的用户名和密码， 以授予 MinIO 访问该服务的权限。
+如果 MQTT 服务需要身份验证，则在配置过程中 *必须* 提供适当的用户名和密码， 以授予 MinIO 访问该服务的权限。
 
 #### MinIO `mc` 命令行工具 {#minio-mc}
 
@@ -29,7 +29,7 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 
 ### 1) 将 MQTT 端点添加到 MinIO {#mqtt-minio}
 
-你可以通过环境变量*或*运行时配置设置来配置新的 MQTT 服务端点。
+你可以通过环境变量 *或* 运行时配置设置来配置新的 MQTT 服务端点。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
@@ -59,6 +59,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
    set MINIO_NOTIFY_MQTT_QUEUE_LIMIT_<IDENTIFIER>="<string>"
    set MINIO_NOTIFY_MQTT_COMMENT_<IDENTIFIER>="<string>"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -77,11 +78,12 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
    export MINIO_NOTIFY_MQTT_QUEUE_LIMIT_<IDENTIFIER>="<string>"
    export MINIO_NOTIFY_MQTT_COMMENT_<IDENTIFIER>="<string>"
 ```
+
 {{% /alert %}}
 
 - 将 `<IDENTIFIER>` 替换为 MQTT 服务端点的唯一描述性字符串。 对所有与新 MQTT 服务端点相关的环境变量都使用相同的 `<IDENTIFIER>` 值。以下示例假定标识符为 `PRIMARY`。
 
-  如果指定的 `<IDENTIFIER>` 与 MinIO 部署中现有的 MQTT 服务端点匹配， 新设置将*覆盖*该端点的任何现有设置。使用 [`mc admin config get notify_mqtt`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署上当前配置的 MQTT 端点。
+  如果指定的 `<IDENTIFIER>` 与 MinIO 部署中现有的 MQTT 服务端点匹配， 新设置将 *覆盖* 该端点的任何现有设置。使用 [`mc admin config get notify_mqtt`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署上当前配置的 MQTT 端点。
 - 将 `<ENDPOINT>` 替换为 MQTT 服务端点的 URL。例如：
 
   `tcp://hostname:port`
@@ -92,7 +94,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 {{% tab header="Configuration Settings" %}}
 MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_mqtt`](/zh/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt) 配置键添加或更新 MQTT 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置设置。
 
-以下示例代码设置了与配置 MQTT 服务端点相关的*全部*设置。 对于 MQTT server/broker 端点，以下配置设置是*最少*必需项：
+以下示例代码设置了与配置 MQTT 服务端点相关的 *全部* 设置。 对于 MQTT server/broker 端点，以下配置设置是 *最少* 必需项：
 
 - [`broker`](/zh/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt.broker)
 - [`topic`](/zh/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt.topic)
@@ -115,7 +117,7 @@ mc admin config set ALIAS/ notify_mqtt:IDENTIFIER \
 
 - 将 `IDENTIFIER` 替换为 MQTT 服务端点的唯一描述性字符串。 本过程后续示例假定标识符为 `PRIMARY`。
 
-  如果指定的 `IDENTIFIER` 与 MinIO 部署中现有的 MQTT 服务端点匹配， 新设置将*覆盖*该端点的任何现有设置。使用 [`mc admin config get notify_mqtt`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署上当前配置的 MQTT 端点。
+  如果指定的 `IDENTIFIER` 与 MinIO 部署中现有的 MQTT 服务端点匹配， 新设置将 *覆盖* 该端点的任何现有设置。使用 [`mc admin config get notify_mqtt`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 查看 MinIO 部署上当前配置的 MQTT 端点。
 - 将 `ENDPOINT` 替换为 MQTT 服务端点的 URL。例如：
 
   `tcp://hostname:port`
@@ -155,6 +157,7 @@ SQS ARNs: arn:minio:sqs::primary:mqtt
    ```shell
    mc admin info --json ALIAS
    ```
+
 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
 
    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
@@ -212,7 +215,7 @@ mc cp ~/data/new-object.txt ALIAS/BUCKET
 
 此过程假定已存在一个 MQTT 3.1 或 3.1.1 server/broker，且 MinIO 部署能够连接到它。有关兼容 MQTT 的 server/broker 列表，请参见 [mqtt.org software listing](https://mqtt.org/software/)。
 
-如果 MQTT 服务需要身份验证，则在配置过程中*必须*提供适当的用户名和密码， 以授予 MinIO 访问该服务的权限。
+如果 MQTT 服务需要身份验证，则在配置过程中 *必须* 提供适当的用户名和密码， 以授予 MinIO 访问该服务的权限。
 
 #### MinIO `mc` 命令行工具 {#id8}
 
@@ -260,14 +263,14 @@ mc admin config set ALIAS/ notify_mqtt:<IDENTIFIER> \
    comment="<string>"
 ```
 
-以下配置设置是 MQTT server/broker 端点的*最少*必需项：
+以下配置设置是 MQTT server/broker 端点的 *最少* 必需项：
 
 - [`broker`](/zh/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt.broker)
 - [`topic`](/zh/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt.topic)
 - [`username`](/zh/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt.username) *如果 MQTT server/broker 强制要求身份验证/授权，则必需*
 - [`password`](/zh/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt.password) *如果 MQTT server/broker 强制要求身份验证/授权，则必需*
 
-所有其他配置设置均为*可选*。有关 MQTT 配置设置的完整列表，请参见 [MQTT 通知设置](/zh/reference/minio-server/settings/notifications/mqtt/#minio-server-config-bucket-notification-mqtt)。
+所有其他配置设置均为 *可选*。有关 MQTT 配置设置的完整列表，请参见 [MQTT 通知设置](/zh/reference/minio-server/settings/notifications/mqtt/#minio-server-config-bucket-notification-mqtt)。
 
 ### 3) 重启 MinIO 部署 {#id11}
 

@@ -80,6 +80,7 @@ The following command creates a new site replication configuration with ILM expi
 ```shell
 mc admin replicate add minio1 minio2 minio3 --replicate-ilm-expiry
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -91,6 +92,7 @@ mc [GLOBALFLAGS] admin replicate add      \
                             [ALIAS3 ...]  \
                             [--replicate-ilm-expiry]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -134,12 +136,14 @@ Modifies the endpoint used for an existing peer site participating in site repli
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="EXAMPLE" %}}
+
 ```shell
 mc admin replicate update                                                   \
                    minio2                                                 \
                    --deployment-id c1758167-4426-454f-9aae-5c3dfdf6df64   \
                    --endpoint https://minio2:9000
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -153,6 +157,7 @@ mc [GLOBALFLAGS] admin replicate update                     \
                             --enable-ilm-expiry-replication \
                             --disable-ilm-expiry-replication
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -292,6 +297,7 @@ mc admin replicate rm      \
                    minio6  \
                    --force
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -304,6 +310,7 @@ mc [GLOBALFLAGS] admin rm          \
                        --all       \
                        --force
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -347,14 +354,18 @@ Returns information about the sites in the site replication configuration.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="EXAMPLE" %}}
+
 ```shell
 mc admin replicate info minio1
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
+
 ```shell
 mc [GLOBALFLAGS] admin replicate info ALIAS
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -444,8 +455,10 @@ The output resembles the following:
 ILMExpiryRule   | MINIO1          | MINIO2
 ILM Expiry Rule | ✔               | ✔
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
+
 ```shell
 mc [GLOBALFLAGS] admin replicate status          \
                    TARGET                        \
@@ -461,6 +474,7 @@ mc [GLOBALFLAGS] admin replicate status          \
                    [--users]                     \
                    [--user accessKey]
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -601,8 +615,10 @@ The following command stops a resynchronization that is in progress.
 ```shell
 mc admin replicate resync cancel minio1 minio2
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
+
 ```shell
 mc [GLOBALFLAGS] admin replicate resync start|status|cancel ALIAS1 ALIAS2
 ```

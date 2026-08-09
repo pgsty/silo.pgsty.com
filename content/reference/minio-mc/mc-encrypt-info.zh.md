@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc encrypt info myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：
@@ -60,11 +61,14 @@ mc encrypt info play/mybucket
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
+
 ```shell
  mc encrypt info myminio/data
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
+
 ```shell
 mc encrypt info ALIAS
 ```

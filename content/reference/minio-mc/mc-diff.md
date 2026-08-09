@@ -22,6 +22,7 @@ The following command computes the difference between an object on a local files
 ```shell
 mc diff ~/mydata/myobject.txt myminio/mydata/myobject.txt
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The [`mc diff`](#command-mc.diff) command has the following syntax:

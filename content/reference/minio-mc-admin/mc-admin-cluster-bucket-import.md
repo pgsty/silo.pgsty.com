@@ -30,6 +30,7 @@ The following command imports the specified metadata to the `myminio` deployment
 ```shell
 mc admin cluster bucket import myminio ~/minio-metadata-backup/myminio-cluster.zip
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

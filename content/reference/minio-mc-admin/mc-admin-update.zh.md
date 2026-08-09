@@ -16,7 +16,7 @@ silo_modified: true
 
 运行该命令后，会显示确认更新的提示。 输入 `y` 并按 `[ENTER]`，即可确认并继续更新。
 
-用户**必须**对二进制安装目标位置具有 `write` 权限。
+用户 **必须** 对二进制安装目标位置具有 `write` 权限。
 
 {{% alert color="danger" %}}
 **不要在 Silo 上使用默认更新路径**
@@ -42,7 +42,7 @@ silo_modified: true
 
 ### 权限 {#id5}
 
-执行该命令的用户**必须**对 MinIO 服务端二进制安装目标路径具有 `write` 权限。
+执行该命令的用户 **必须** 对 MinIO 服务端二进制安装目标路径具有 `write` 权限。
 
 ## 示例 {#id6}
 
@@ -74,7 +74,7 @@ mc admin update ALIAS         \
 
 要更新的 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
-如果指定的 `ALIAS` 对应的是分布式 MinIO 部署，[`mc admin update`](#command-mc.admin.update) 会同时更新该部署中的*所有* MinIO 服务器。
+如果指定的 `ALIAS` 对应的是分布式 MinIO 部署，[`mc admin update`](#command-mc.admin.update) 会同时更新该部署中的 *所有* MinIO 服务器。
 
 使用 [`mc alias list`](/zh/reference/minio-mc/mc-alias-list/#command-mc.alias.list) 查看已配置的别名及其对应的 MinIO 部署端点。
 

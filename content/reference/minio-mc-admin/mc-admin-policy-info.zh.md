@@ -21,6 +21,7 @@ silo_modified: false
 ```shell
  mc admin policy info myminio writeonly
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

@@ -59,6 +59,7 @@ MinIO Operator 支持通过添加额外 pool 来扩展 MinIO Tenant。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Kustomization" %}}
+
 1. 检查描述 Tenant 对象（`tenant.yaml`）的 Kustomization 对象。
 
    `spec.pools` 数组描述当前的 pool 拓扑。

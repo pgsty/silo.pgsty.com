@@ -28,6 +28,7 @@ silo_modified: false
 ```shell
 mc ilm rule rm --id "bgrt1ghju" myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

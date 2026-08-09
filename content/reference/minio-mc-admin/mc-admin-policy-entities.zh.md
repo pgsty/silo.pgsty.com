@@ -31,6 +31,7 @@ silo_modified: false
 ```shell
 mc admin policy entities myminio/ --user bob
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：

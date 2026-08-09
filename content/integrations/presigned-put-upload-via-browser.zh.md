@@ -16,7 +16,7 @@ silo_modified: true
 
 本文介绍如何使用 [MinIO JavaScript Library](https://github.com/minio/minio-js) 中的 [`presignedPutObject`](https://github.com/minio/minio-js/blob/master/docs/zh_CN/API.md#presignedputobjectbucketname-objectname-expiry-callback) API 生成 pre-signed URL。文中通过一个 JavaScript 示例进行演示：由 Express Node.js 服务器暴露一个用于生成 pre-signed URL 的端点，客户端 Web 应用再使用该 URL 将文件上传到 MinIO Server。
 
-- [使用 Pre-signed URL 上传文件 ](#upload-files-using-pre-signed-urls-)
+- [使用 Pre-signed URL 上传文件](#upload-files-using-pre-signed-urls-)
 
   - [1. 创建服务端](#createserver)
   - [2. 创建客户端 Web 应用](#createclient)

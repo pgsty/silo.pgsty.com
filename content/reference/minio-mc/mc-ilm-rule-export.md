@@ -30,6 +30,7 @@ The following command exports the lifecycle management configuration of the `myd
 ```shell
 mc ilm rule export myminio/mydata > mydata-lifecycle-config.json
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -75,8 +76,10 @@ The following command exports the bucket lifecycle management configuration to t
 ```shell
 mc ilm rule export myminio/mybucket > bucket-lifecycle.json
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc ilm rule export ALIAS > file.json
 ```

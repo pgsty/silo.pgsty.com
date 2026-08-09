@@ -41,7 +41,7 @@ Reading the actual `mc` implementation (`cmd/ready-main.go`) shows the current h
 Three tracks, deliberately decoupled:
 
 | # | Decision |
-|---|----------|
+| --- | ---------- |
 | **D1** | The `silo` binary gains a `healthcheck` subcommand — a thin, anonymous HTTP client for the server's existing `/minio/health/*` endpoints. It ships in every build, so every image and bare-metal install gains the capability. |
 | **D2** | The **existing image does not change**. It keeps `mcli`, `curl`, the shell entrypoint, and the `mc ready local` examples. Users of the current image who want the new probe can opt in by overriding their `healthcheck.test` — nothing is taken away and no default behavior moves. |
 | **D3** | A **new distroless variant** is published alongside it, as a pilot: single binary, no shell, native `HEALTHCHECK` baked in. If the pilot proves out, it becomes the recommended default later and the switch completes; the classic image remains for compatibility either way. |
@@ -96,7 +96,7 @@ And one number that looks arbitrary but is not: the 15-second default timeout fo
 The table below is verified against the handler source, not quoted from documentation — and it corrects a common misreading:
 
 | Endpoint | Returns 200 when… | Fails with… | Notes |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `/minio/health/live` | almost always — **even before the object layer is initialized** (that state is only signaled via the `x-minio-server-status: offline` header) | 503 when the request queue is saturated | touches no external system; the only endpoint quiet enough for high-frequency probing |
 | `/minio/health/ready` | as `live`, **plus** KMS can generate a key and etcd answers a read — each only if configured | KMS/etcd failure; queue saturation | **without KMS or etcd, `ready` and `live` are the same code path** |
 | `/minio/health/cluster` | object layer, bucket metadata and IAM are initialized, **and every erasure set** has write quorum | 503 with quorum diagnostic headers; with `?maintenance=true`, failure is **412** | each failed evaluation writes a server-side log line — do not poll it tightly |
@@ -162,7 +162,7 @@ The Silo Helm chart currently ships **no probes at all** (neither does upstream'
 ## Rollout {#rollout}
 
 | Phase | Scope | Repo |
-|---|---|---|
+| --- | --- | --- |
 | **P1** | `silo healthcheck` subcommand + tests; ships in the next release binary (all images inherit the capability, no image behavior changes) | `pgsty/silo` |
 | **P2** | `Dockerfile.distroless` + CI build/health gate + publish `-distroless` tags as a pilot | `pgsty/silo` |
 | **P3** | Helm chart: add the three probes; refresh the stale default image tag | `pgsty/silo` |

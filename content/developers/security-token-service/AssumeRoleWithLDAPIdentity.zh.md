@@ -62,7 +62,7 @@ POST https://minio.example.net?Action=AssumeRoleWithLDAPIdentity
     <tr>
       <td><p><code>DurationSeconds</code></p></td>
       <td><p>integer</p></td>
-      <td><p><em>可选</em></p><p>指定临时凭据在多少秒后过期。默认值为 <code>3600</code>。</p><ul><li><p>最小值为 ``900``（15 分钟）。</p></li><li><p>最大值为 ``604800``（7 天）。</p></li></ul><p>如果省略 <code>DurationSeconds</code>，MinIO 在使用默认时长前会先检查 JWT token
+      <td><p><em>可选</em></p><p>指定临时凭据在多少秒后过期。默认值为 <code>3600</code>。</p><ul><li><p>最小值为 <code>900</code>（15 分钟）。</p></li><li><p>最大值为 <code>604800</code>（7 天）。</p></li></ul><p>如果省略 <code>DurationSeconds</code>，MinIO 在使用默认时长前会先检查 JWT token
 中是否包含 <code>exp</code> claim。有关 JSON web token 过期时间的更多信息，请参见
 <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4">RFC 7519 4.1.4: Expiration Time Claim</a>。</p></td>
     </tr>

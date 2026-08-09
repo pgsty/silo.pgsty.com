@@ -72,6 +72,7 @@ The following example creates the configuration settings for the `myminio` deplo
     redirect_uri="http://127.0.0.1:10000/oauth_callback"                      \
     role_policy="consoleAdmin"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -107,6 +108,7 @@ mc idp openid update                      \
               scopes="openid,groups"      \
               role_policy="consoleAdmin"
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -138,6 +140,7 @@ The following example removes the `test-config` settings for the `myminio` deplo
 ```shell
 mc idp openid rm myminio test_config
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -166,6 +169,7 @@ The following example outputs a list of all OpenID configuration sets defined fo
 ```shell
 mc idp openid ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -191,6 +195,7 @@ The following example outputs the configuration settings defined for the `test_c
 ```shell
 mc idp openid info myminio test_config
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -221,6 +226,7 @@ mc idp openid enable       \
               myminio      \
               test_config
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -251,6 +257,7 @@ mc idp openid disable      \
               myminio      \
               test_config
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

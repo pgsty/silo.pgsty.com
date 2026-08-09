@@ -28,7 +28,7 @@ silo_modified: false
 
 ### 计量单位 {#id3}
 
-[`mc quota set --size`](#mc.quota.set.-size) 标志接受以下**不区分大小写**的后缀，用于表示指定大小值的单位：
+[`mc quota set --size`](#mc.quota.set.-size) 标志接受以下 **不区分大小写** 的后缀，用于表示指定大小值的单位：
 
 | 后缀 | 单位大小 |
 | --- | --- |

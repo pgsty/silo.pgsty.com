@@ -22,6 +22,7 @@ The following command displays the current replication status of the `mydata` bu
 ```shell
 mc replicate status myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -72,7 +73,7 @@ Limit download rates to no more than a specified rate in KiB/s, MiB/s, or GiB/s.
 
 For example, to limit download rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-download 1G
 ```
 
@@ -96,7 +97,7 @@ Limit upload rates to no more than the specified rate in KiB/s, MiB/s, or GiB/s.
 
 For example, to limit upload rates to no more than 1 GiB/s, use the following:
 
-```
+```text
 --limit-upload 1G
 ```
 

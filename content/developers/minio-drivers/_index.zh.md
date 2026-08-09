@@ -58,6 +58,7 @@ GitHub: [minio/minio-py](https://github.com/minio/minio-py)
 >   ```shell
 >   pip3 install minio
 >   ```
+>
 > - 源码
 >
 >   ```shell
@@ -89,6 +90,7 @@ GitHub: [minio/minio-java](https://github.com/minio/minio-java)
 >       <version>JAVAVERSION</version>
 >   </dependency>
 >   ```
+>
 > - Gradle
 >
 >   ```java
@@ -96,6 +98,7 @@ GitHub: [minio/minio-java](https://github.com/minio/minio-java)
 >       implementation("io.minio:minio:JAVAVERSION")
 >   }
 >   ```
+>
 > - JAR
 >
 >   从 Sonatype Maven Central Repository 下载与 SDK 版本 JAVAVERSION 对应的最新 JAR 文件。
@@ -139,6 +142,7 @@ GitHub: [minio/minio-js](https://github.com/minio/minio-js)
 >   ```shell
 >   npm install --save minio
 >   ```
+>
 > - 源码
 >
 >   ```shell
@@ -181,6 +185,7 @@ GitHub: [minio/minio-cpp](https://github.com/minio/minio-cpp)
 >   ```shell
 >   vcpkg install minio-cpp
 >   ```
+>
 > - 源码
 >
 >   ```shell

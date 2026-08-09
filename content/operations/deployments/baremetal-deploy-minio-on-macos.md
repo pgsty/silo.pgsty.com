@@ -123,6 +123,7 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
+
 {{% /tab %}}
 {{% tab header="Single-Node Single-Drive" %}}
 Use Single-Node Single-Drive (“Standalone”) deployments in early development and evaluation environments. MinIO does not recommend Standalone deployments in production, as the loss of the node or its storage medium results in data loss.
@@ -157,6 +158,7 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

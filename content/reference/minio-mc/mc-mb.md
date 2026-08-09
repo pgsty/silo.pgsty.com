@@ -23,6 +23,7 @@ The following command creates a new bucket `mydata` on the `myminio` MinIO deplo
 ```shell
 mc mb --with-locks myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

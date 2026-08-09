@@ -35,6 +35,7 @@ mc admin user svcacct edit                                             \
                       --policy "/path/to/new/policy.json"              \
                       myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

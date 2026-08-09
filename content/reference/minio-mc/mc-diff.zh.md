@@ -13,7 +13,7 @@ silo_modified: false
 
 ## 语法 {#id2}
 
-[`mc diff`](#command-mc.diff) 命令用于计算两个文件系统目录或 MinIO 存储桶之间的差异。 [`mc diff`](#command-mc.diff) 仅列出缺失的对象或大小不同的对象。[`mc diff`](#command-mc.diff) **不会**比较对象内容。
+[`mc diff`](#command-mc.diff) 命令用于计算两个文件系统目录或 MinIO 存储桶之间的差异。 [`mc diff`](#command-mc.diff) 仅列出缺失的对象或大小不同的对象。[`mc diff`](#command-mc.diff) **不会** 比较对象内容。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc diff ~/mydata/myobject.txt myminio/mydata/myobject.txt
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 [`mc diff`](#command-mc.diff) 命令语法如下：

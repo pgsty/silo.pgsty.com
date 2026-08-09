@@ -35,6 +35,7 @@ Once the request succeeds in connecting to the `myminio` deployment, the output 
 ```text
 The cluster `myminio` is ready
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

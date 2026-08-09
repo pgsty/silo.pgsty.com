@@ -24,7 +24,7 @@ RELEASE.2024-05-03T11-21-07Z
 
 命令输出如下所示：
 
-```
+```text
 ●  play.min.io
    Uptime: 2 hours
    Version: 2024-05-10T08:24:14Z

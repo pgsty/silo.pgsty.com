@@ -35,6 +35,7 @@ silo_modified: false
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 export MINIO_NOTIFY_ELASTICSEARCH_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_ELASTICSEARCH_URL_PRIMARY="https://user:password@elasticsearch-endpoint.example.net:9200"
@@ -46,8 +47,10 @@ export MINIO_NOTIFY_ELASTICSEARCH_URL_SECONDARY="https://user:password@elasticse
 export MINIO_NOTIFY_ELASTICSEARCH_INDEX_SECONDARY="bucketevents"
 export MINIO_NOTIFY_ELASTICSEARCH_FORMAT_SECONDARY="namespace"
 ```
+
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 ```shell
 mc admin config set notify_elasticsearch:primary \
    url="user:password@https://elasticsearch-endpoint.example.net:9200" \
@@ -74,6 +77,7 @@ mc admin config set notify_elasticsearch:secondary \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" selected=true %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_ENABLE` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_ENABLE}
 
 *envvar*
@@ -89,13 +93,14 @@ mc admin config set notify_elasticsearch:secondary \
 - [`MINIO_NOTIFY_ELASTICSEARCH_FORMAT`](#envvar.MINIO_NOTIFY_ELASTICSEARCH_FORMAT)
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch` {#mc-conf.notify_elasticsearch}
 
 *mc-conf*
 
 用于定义 Elasticsearch 服务端点以配合 [MinIO bucket notifications](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 使用的顶级配置键。
 
-使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 Elasticsearch 服务端点。 对于每个目标，以下参数为*必需*：
+使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置或更新 Elasticsearch 服务端点。 对于每个目标，以下参数为 *必需*：
 
 - [`url`](#mc-conf.notify_elasticsearch.url)
 - [`index`](#mc-conf.notify_elasticsearch.index)
@@ -108,6 +113,7 @@ mc admin config set notify_elasticsearch \
   url="https://user:password@elasticsearch.example.com:9200" \
   [ARGUMENT="VALUE"] ... \
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -117,11 +123,13 @@ mc admin config set notify_elasticsearch \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_URL` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch url` {#mc-conf.notify_elasticsearch.url}
 
 *mc-conf*
@@ -144,11 +152,13 @@ MinIO 支持通过 URL 参数传递认证信息，格式为 `PROTOCOL://USERNAME
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_INDEX` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_INDEX}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch index` {#mc-conf.notify_elasticsearch.index}
 
 *mc-conf*
@@ -163,11 +173,13 @@ MinIO 支持通过 URL 参数传递认证信息，格式为 `PROTOCOL://USERNAME
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_FORMAT` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_FORMAT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch format` {#mc-conf.notify_elasticsearch.format}
 
 *mc-conf*
@@ -190,11 +202,13 @@ MinIO 支持通过 URL 参数传递认证信息，格式为 `PROTOCOL://USERNAME
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_USERNAME` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_USERNAME}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch username` {#mc-conf.notify_elasticsearch.username}
 
 *mc-conf*
@@ -209,11 +223,13 @@ MinIO 支持通过 URL 参数传递认证信息，格式为 `PROTOCOL://USERNAME
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_PASSWORD` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_PASSWORD}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch password` {#mc-conf.notify_elasticsearch.password}
 
 *mc-conf*
@@ -234,11 +250,13 @@ MinIO 支持通过 URL 参数传递认证信息，格式为 `PROTOCOL://USERNAME
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch queue_dir` {#mc-conf.notify_elasticsearch.queue_dir}
 
 *mc-conf*
@@ -255,11 +273,13 @@ MinIO 支持通过 URL 参数传递认证信息，格式为 `PROTOCOL://USERNAME
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch queue_limit` {#mc-conf.notify_elasticsearch.queue_limit}
 
 *mc-conf*
@@ -274,11 +294,13 @@ MinIO 支持通过 URL 参数传递认证信息，格式为 `PROTOCOL://USERNAME
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_NOTIFY_ELASTICSEARCH_COMMENT` {#envvar.MINIO_NOTIFY_ELASTICSEARCH_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `notify_elasticsearch comment` {#mc-conf.notify_elasticsearch.comment}
 
 *mc-conf*

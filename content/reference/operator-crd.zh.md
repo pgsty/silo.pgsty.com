@@ -1417,28 +1417,17 @@ array</em></p></td>
 <p>支持将额外客户端证书挂载到 MinIO 租户 Pod 中。
 多个客户端证书将按以下目录结构挂载：<br />
 </p>
-<ul>
-<li><p>certs<br />
-</p></li>
-<li><p>* client-0<br />
-</p></li>
-<li><p>* * client.crt<br />
-</p></li>
-<li><p>* * client.key<br />
-</p></li>
-<li><p>* client-1<br />
-</p></li>
-<li><p>* * client.crt<br />
-</p></li>
-<li><p>* * client.key<br />
-</p></li>
-<li><p>* * client-2<br />
-</p></li>
-<li><p>* client.crt<br />
-</p></li>
-<li><p>* * client.key<br />
-</p></li>
-</ul>
+<pre><code>certs/
+├── client-0/
+│   ├── client.crt
+│   └── client.key
+├── client-1/
+│   ├── client.crt
+│   └── client.key
+└── client-2/
+    ├── client.crt
+    └── client.key
+</code></pre>
 <p>指定一个 <a
 href="https://kubernetes.io/docs/concepts/configuration/secret/">Kubernetes
 TLS secret</a>。MinIO Operator 会将指定证书复制到租户中的每个 MinIO

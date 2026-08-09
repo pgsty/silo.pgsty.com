@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc anonymous links --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：

@@ -19,7 +19,7 @@ RELEASE.2022-10-08T20-11-00Z
 
 MinIO 批处理框架允许您使用 YAML 格式的作业定义文件（“批处理文件”）来创建、管理、监控和执行作业。 批处理作业直接在 MinIO 部署上运行，可利用服务端处理能力，而不受运行 [MinIO Client](/zh/reference/minio-mc/#minio-client) 的本地机器限制。
 
-`replicate` 批处理作业会将对象从一个 MinIO 部署（`source` 部署）复制到另一个 MinIO 部署（`target` 部署）。 `source` 或 `target` 中**必须**有一方是 [local](/zh/administration/batch-framework/#minio-batch-local) 部署。
+`replicate` 批处理作业会将对象从一个 MinIO 部署（`source` 部署）复制到另一个 MinIO 部署（`target` 部署）。 `source` 或 `target` 中 **必须** 有一方是 [local](/zh/administration/batch-framework/#minio-batch-local) 部署。
 
 与使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 相比，MinIO 部署之间的批量复制具有以下优势：
 
@@ -170,7 +170,7 @@ RELEASE.2024-08-03T04-33-23Z
 
 此版本引入了 Batch Job Replicate API 的新版本 `v2`。 更新后的 API 允许您在源端列出多个要复制的前缀。 若要从一个源端复制多个前缀，请将 `replicate.apiVersion` 指定为 `v2`。
 
-```
+```text
 replicate:
   apiVersion: v1
   source:
@@ -181,9 +181,10 @@ replicate:
       - prefix2
 ...
 ```
+
 {{% /alert %}}
 
-对于**源部署**
+对于 **源部署**
 
 - 必需信息
 
@@ -209,7 +210,7 @@ replicate:
       </tr>
       <tr>
         <td><p><code>endpoint:</code></p></td>
-        <td>用于复制批处理作业源端或目标端的部署位置。<br />例如，<code>https://minio.example.net</code>。<br /><br />如果该部署就是命令中指定的 <a href="/zh/reference/minio-mc/mc-alias-set/#alias">mc alias set</a>，可省略此字段，让 MinIO 使用该别名对应的 endpoint 和 credentials 值。<br />源部署或远程部署中*必须*有一方是 <a href="/zh/administration/batch-framework/#minio-batch-local">“local”</a> 别名。<br />非 “local” 部署必须指定 <code>endpoint</code> 和 <code>credentials</code>。<br /></td>
+        <td>用于复制批处理作业源端或目标端的部署位置。<br />例如，<code>https://minio.example.net</code>。<br /><br />如果该部署就是命令中指定的 <a href="/zh/reference/minio-mc/mc-alias-set/#alias">mc alias set</a>，可省略此字段，让 MinIO 使用该别名对应的 endpoint 和 credentials 值。<br />源部署或远程部署中<em>必须</em>有一方是 <a href="/zh/administration/batch-framework/#minio-batch-local">“local”</a> 别名。<br />非 “local” 部署必须指定 <code>endpoint</code> 和 <code>credentials</code>。<br /></td>
       </tr>
       <tr>
         <td><p><code>path:</code></p></td>
@@ -250,7 +251,7 @@ replicate:
     </tbody>
   </table>
 
-对于**目标部署**
+对于 **目标部署**
 
 - 必需信息
 
@@ -276,7 +277,7 @@ replicate:
       </tr>
       <tr>
         <td><p><code>endpoint:</code></p></td>
-        <td>目标部署的位置。<br /><br />如果目标是命令中指定的 <a href="/zh/reference/minio-mc/mc-alias-set/#alias">alias</a>，则可以省略此项以及 <code>credentials</code> 字段。<br />如果目标是 “local”，则源端*必须*通过 <code>endpoint</code> 和 <code>credentials</code> 指定远程部署。<br /></td>
+        <td>目标部署的位置。<br /><br />如果目标是命令中指定的 <a href="/zh/reference/minio-mc/mc-alias-set/#alias">alias</a>，则可以省略此项以及 <code>credentials</code> 字段。<br />如果目标是 “local”，则源端<em>必须</em>通过 <code>endpoint</code> 和 <code>credentials</code> 指定远程部署。<br /></td>
       </tr>
       <tr>
         <td><p><code>credentials:</code></p></td>
@@ -285,7 +286,7 @@ replicate:
     </tbody>
   </table>
 
-对于**筛选条件**
+对于 **筛选条件**
 
 <table>
   <tbody>
@@ -309,7 +310,7 @@ replicate:
   </tbody>
 </table>
 
-对于**通知**
+对于 **通知**
 
 <table>
   <tbody>
@@ -324,7 +325,7 @@ replicate:
   </tbody>
 </table>
 
-对于**重试次数**
+对于 **重试次数**
 
 如果有任何因素中断作业，您可以定义该批处理作业的重试次数。 对于每次重试，您还可以定义两次尝试之间的等待时长。
 

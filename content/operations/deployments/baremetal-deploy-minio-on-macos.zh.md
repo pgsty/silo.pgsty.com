@@ -123,6 +123,7 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
+
 {{% /tab %}}
 {{% tab header="单机单盘" %}}
 在早期开发和评估环境中使用 单机单盘（“Standalone”）部署。 MinIO 不建议在生产环境中使用 单机部署，因为节点或其存储介质丢失会导致数据丢失。
@@ -157,6 +158,7 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

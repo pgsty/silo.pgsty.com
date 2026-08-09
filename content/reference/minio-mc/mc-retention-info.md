@@ -25,6 +25,7 @@ The following command returns the default object lock configuration for the `myd
 ```shell
 mc retention info --default myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
@@ -141,6 +142,7 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Specific Object" %}}
+
 ```shell
 mc retention info ALIAS/PATH
 ```

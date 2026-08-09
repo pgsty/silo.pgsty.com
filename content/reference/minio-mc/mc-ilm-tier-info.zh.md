@@ -67,6 +67,7 @@ MinIO 要求具备以下权限，且权限范围限定为你要创建生命周�
 ```shell
  mc ilm tier info myminio WARM-TIER
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -74,6 +75,7 @@ MinIO 要求具备以下权限，且权限范围限定为你要创建生命周�
 ```shell
 mc ilm tier info TARGET TIER_NAME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -97,7 +99,7 @@ mc ilm tier info TARGET TIER_NAME
 
 要显示的现有远程层级名称。
 
-你**必须**使用全大写指定层级，例如 `WARM_TIER`。
+你 **必须** 使用全大写指定层级，例如 `WARM_TIER`。
 
 如果未指定，MinIO 会列出该部署上所有现有层级的统计信息。
 

@@ -58,6 +58,7 @@ The following example code sets *all* environment variables related to configuri
    set MINIO_NOTIFY_AMQP_QUEUE_LIMIT_<IDENTIFIER>="<string>"
    set MINIO_NOTIFY_AMQP_COMMENT_<IDENTIFIER>="<string>"
 ```
+
 {{% /alert %}}
 
 {{% alert color="info" %}}
@@ -79,6 +80,7 @@ The following example code sets *all* environment variables related to configuri
    export MINIO_NOTIFY_AMQP_QUEUE_LIMIT_<IDENTIFIER>="<string>"
    export MINIO_NOTIFY_AMQP_COMMENT_<IDENTIFIER>="<string>"
 ```
+
 {{% /alert %}}
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the AMQP service endpoint. Use the same `<IDENTIFIER>` value for all environment variables related to the new AMQP service endpoint. The following examples assume an identifier of `PRIMARY`.
@@ -153,6 +155,7 @@ You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notif
    ```shell
    mc admin info --json ALIAS
    ```
+
 2. In the JSON output, look for the key `info.sqsARN`.
 
    The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.

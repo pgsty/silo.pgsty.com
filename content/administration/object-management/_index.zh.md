@@ -199,7 +199,7 @@ MinIO *不* 要求目标存储桶在对象管理或版本控制配置上与源�
 
 ## 对远程数据的独占访问 {#id9}
 
-MinIO **必须** 对目标存储桶拥有*独占*访问权。 任何其他用户、进程、应用或资源都不应访问目标存储桶，也不应对其执行任何操作。
+MinIO **必须** 对目标存储桶拥有 *独占* 访问权。 任何其他用户、进程、应用或资源都不应访问目标存储桶，也不应对其执行任何操作。
 
 对已过渡对象的所有访问都 *必须* 仅通过 MinIO 的 S3 API 操作进行。 手动修改已过渡对象，无论是热 MinIO 层上的元数据，还是远程温/冷层上的对象数据，都可能导致该对象数据丢失。
 
@@ -216,12 +216,12 @@ MinIO 会忽略远程存储桶或存储桶前缀中任何不由该 MinIO 部署�
 
 例如，以下操作会创建命名空间冲突
 
-```
+```text
 PUT data/invoices/2024/january/vendors.csv
 PUT data/invoices/2024/january <- collides with existing object prefix
 ```
 
-```
+```text
 PUT data/invoices/2024/january
 PUT data/invoices/2024/january/vendors.csv <- collides with existing object
 ```

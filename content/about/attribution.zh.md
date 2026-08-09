@@ -49,13 +49,13 @@ PGSTY SILO 软件本身另行授权，参见[许可协议](/zh/about/license/)�
 
 如果你复用本站内容，按下面这样署名即可满足 CC BY 4.0 的要求：
 
-```
+```text
 [PGSTY SILO 文档](https://silo.pgsty.com/zh)，作者 PGSTY 与 MinIO. Inc，依据 CC BY 4.0 授权。
 ```
 
 英文场景可使用：
 
-```
+```text
 [PGSTY SILO Documentation](https://silo.pgsty.com) by PGSTY and MinIO. Inc, licensed under CC BY 4.0.
 ```
 

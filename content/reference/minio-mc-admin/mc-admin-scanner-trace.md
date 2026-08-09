@@ -27,6 +27,7 @@ The following example returns a list of API operations related to the scanner on
 ```shell
 mc admin scanner trace myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

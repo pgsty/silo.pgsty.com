@@ -92,6 +92,7 @@ silo_modified: false
      ca:
        secretName: tenant-1-ca-tls
    ```
+
 2. 应用该 `Issuer` 资源定义：
 
    ```shell
@@ -161,6 +162,7 @@ silo_modified: false
    ```shell
    kubectl apply -f tenant-1-minio-certificate.yaml
    ```
+
 3. 验证变更是否已生效：
 
    ```shell
@@ -219,6 +221,7 @@ MinIO Operator 会挂载并信任由所提供的 Certificate Authority 签发的
    ```shell
    kubectl get secrets -n tenant-1 tenant-1-ca-tls -o=jsonpath='{.data.ca\.crt}' | base64 -d > ca.crt
    ```
+
 2. 创建 secret：
 
    ```shell

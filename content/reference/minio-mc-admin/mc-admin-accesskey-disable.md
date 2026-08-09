@@ -22,6 +22,7 @@ The following command disables the specified access key:
 ```shell
 mc admin accesskey disable myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

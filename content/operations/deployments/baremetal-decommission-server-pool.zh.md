@@ -259,7 +259,7 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 
 ### 6) 重启 MinIO 部署 {#id17}
 
-在部署中的每个节点上**同时**执行以下命令，以重启 MinIO 服务：
+在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 
 ```shell
 sudo systemctl restart minio.service
@@ -302,7 +302,7 @@ MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 
 执行多 server 退役时，其他所有关于退役的注意事项同样适用。
 
 - 退役是永久性的。
-- 一旦将这些 pool 标记为退役，你就**无法**恢复它们。
+- 一旦将这些 pool 标记为退役，你就 **无法** 恢复它们。
 - 请确认你选择的是预期的 pool。
 
 ### 1) 查看 MinIO 部署拓扑 {#id19}
@@ -363,7 +363,7 @@ mc admin decommission start myminio/ https://minio-{01...04}.example.net:9000/mn
 
 在退役过程中，对于尚未迁移的对象，MinIO 会继续将读取操作（`GET`、`LIST`、`HEAD`）路由到这些 pool。 所有新的写入操作（`PUT`）都会被路由到部署中那些未计划退役的其余 pool。
 
-已退役 pool 的排空一次只处理一个 pool，并按顺序依次完成每个 pool 的退役。 排空过程 _不会_ 对所有待退役 pool 并发执行。
+已退役 pool 的排空一次只处理一个 pool，并按顺序依次完成每个 pool 的退役。 排空过程 *不会* 对所有待退役 pool 并发执行。
 
 此时，负责管理部署连接的负载均衡器、反向代理或其他网络控制组件无需修改其配置。
 
@@ -432,7 +432,7 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 
 ### 6) 重启 MinIO 部署 {#id24}
 
-在部署中的每个节点上**同时**执行以下命令，以重启 MinIO 服务：
+在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 
 ```shell
 sudo systemctl restart minio.service

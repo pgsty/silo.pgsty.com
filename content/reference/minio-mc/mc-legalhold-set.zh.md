@@ -15,7 +15,7 @@ silo_modified: false
 
 [`mc legalhold set`](#command-mc.legalhold.set) 命令可在单个或多个对象上启用 [legal hold](/zh/administration/object-management/object-retention/#minio-object-locking-legalhold) 的一次写入多次读取（WORM）对象锁定。
 
-[`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold) *要求* 指定的存储桶已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking)。你**只能**在创建存储桶时启用对象锁定。 有关创建已启用对象锁定的存储桶，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
+[`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold) *要求* 指定的存储桶已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking)。你 **只能** 在创建存储桶时启用对象锁定。 有关创建已启用对象锁定的存储桶，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}
@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc legalhold set --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令语法如下：
@@ -120,7 +121,7 @@ Legal hold 没有期限，并会对被锁定对象强制执行完全不可变。
 
 Legal hold 与 [GOVERNANCE 模式](/zh/administration/object-management/object-retention/#minio-object-locking-governance) 和 [COMPLIANCE 模式](/zh/administration/object-management/object-retention/#minio-object-locking-compliance) 保留设置互补。若对象同时受 legal hold 和 `GOVERNANCE/COMPLIANCE` 保留规则约束，则在 legal hold 被解除且规则到期之前， 该对象会一直保持 WORM 锁定。
 
-对于 `GOVERNANCE` 锁定对象，legal hold 会阻止对象被修改， *即使*用户具备绕过保留策略所需的权限也是如此。
+对于 `GOVERNANCE` 锁定对象，legal hold 会阻止对象被修改， *即使* 用户具备绕过保留策略所需的权限也是如此。
 
 ### S3 兼容性 {#s3}
 

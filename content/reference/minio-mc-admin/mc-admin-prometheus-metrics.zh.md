@@ -35,6 +35,7 @@ MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 
 ```shell
 mc admin prometheus metrics myminio cluster
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

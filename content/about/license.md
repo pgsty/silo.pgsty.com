@@ -20,7 +20,7 @@ Silo carries two separate licenses. The software and the documentation are distr
 
 ## Software: AGPLv3 {#software}
 
-PGSTY SILO is a fork of MinIO, which has been distributed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html) since 2021. 
+PGSTY SILO is a fork of MinIO, which has been distributed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html) since 2021.
 That license is irrevocable for code already released under it — the legal basis on which this fork exists. PGSTY SILO keeps the same license: no relicensing, no added restrictions, no open-core carve-outs.
 
 In practice, AGPLv3 lets you run, study, modify, and redistribute PGSTY SILO; if you offer a modified PGSTY SILO to users over a network, you must offer those users the corresponding source of your modified version.

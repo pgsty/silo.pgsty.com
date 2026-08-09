@@ -22,6 +22,7 @@ silo_modified: false
 ```shell
 mc idp ldap accesskey disable minio mykey
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

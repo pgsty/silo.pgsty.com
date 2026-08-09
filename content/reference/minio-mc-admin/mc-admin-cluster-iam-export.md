@@ -28,6 +28,7 @@ The following command exports all IAM metadata for the `myminio` deployment.
 ```shell
 mc admin cluster iam export myminio
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

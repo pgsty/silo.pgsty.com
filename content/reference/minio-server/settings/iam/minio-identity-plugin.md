@@ -32,12 +32,15 @@ When setting up the MinIO Identity Management Plugin, you must define at a minim
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variables" %}}
+
 ```shell
 MINIO_IDENTITY_PLUGIN_URL="https://authservice.example.net:8080/auth"
 MINIO_IDENTITY_PLUGIN_ROLE_POLICY="ConsoleUser"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Settings" %}}
+
 #### `identity_plugin` {#mc-conf.identity_plugin}
 
 *mc-conf*
@@ -50,6 +53,7 @@ mc admin config set identity_plugin                  \
    role_policy="consoleAdmin"                        \
    [ARGUMENT=VALUE] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -61,11 +65,13 @@ mc admin config set identity_plugin                  \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_URL` {#envvar.MINIO_IDENTITY_PLUGIN_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_plugin url` {#mc-conf.identity_plugin.url}
 
 *mc-conf*
@@ -80,11 +86,13 @@ The webhook endpoint for the external identity management service (`https://auth
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_ROLE_POLICY` {#envvar.MINIO_IDENTITY_PLUGIN_ROLE_POLICY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_plugin role_policy` {#mc-conf.identity_plugin.role_policy}
 
 *mc-conf*
@@ -102,6 +110,7 @@ Specify a comma-separated list of MinIO [policies](/administration/identity-acce
 This setting does not have an environment variable option.
 {{% /tab %}}
 {{% tab header="Configuration Setting" selected=true %}}
+
 ##### `identity_plugin enabled` {#mc-conf.identity_plugin.enabled}
 
 *mc-conf*
@@ -120,11 +129,13 @@ Defaults to `true` or “enabled”.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_TOKEN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_plugin token` {#mc-conf.identity_plugin.token}
 
 *mc-conf*
@@ -141,11 +152,13 @@ Specify a supported HTTP [Authentication scheme](https://developer.mozilla.org/e
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_ROLE_ID` {#envvar.MINIO_IDENTITY_PLUGIN_ROLE_ID}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_plugin role_id` {#mc-conf.identity_plugin.role_id}
 
 *mc-conf*
@@ -162,11 +175,13 @@ If omitted, MinIO automatically generates the ID and prints the full ARN to the 
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_COMMENT` {#envvar.MINIO_IDENTITY_PLUGIN_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 ##### `identity_plugin comment` {#mc-conf.identity_plugin.comment}
 
 *mc-conf*

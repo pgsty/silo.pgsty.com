@@ -30,6 +30,7 @@ silo_modified: false
 ```shell
 mc admin user ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令具有以下语法：

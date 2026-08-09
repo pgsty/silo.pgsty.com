@@ -25,6 +25,7 @@ The following command removes the policy names `writeonly` from the `myminio` Mi
 ```shell
 mc admin policy rm myminio writeonly
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

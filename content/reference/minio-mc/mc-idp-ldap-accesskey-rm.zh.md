@@ -32,6 +32,7 @@ MinIO 支持使用 [AssumeRoleWithLDAPIdentity](/zh/developers/security-token-se
 ```shell
 mc idp ldap accesskey rm minio/ mykey
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令使用以下语法：

@@ -36,6 +36,7 @@ mc od if=file.zip of=myminio/mybucket/file.zip size=40MiB parts=5
   "elapsed": "314ms"
 }
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 命令语法如下：

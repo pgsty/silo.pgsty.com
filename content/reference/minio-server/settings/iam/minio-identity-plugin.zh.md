@@ -28,16 +28,19 @@ silo_modified: true
 
 ## 示例 {#id2}
 
-配置 MinIO Identity Management Plugin 时，至少必须定义所有*必需*设置。 以下示例展示了最小必需配置。
+配置 MinIO Identity Management Plugin 时，至少必须定义所有 *必需* 设置。 以下示例展示了最小必需配置。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ```shell
 MINIO_IDENTITY_PLUGIN_URL="https://authservice.example.net:8080/auth"
 MINIO_IDENTITY_PLUGIN_ROLE_POLICY="ConsoleUser"
 ```
+
 {{% /tab %}}
 {{% tab header="配置设置" %}}
+
 #### `identity_plugin` {#mc-conf.identity_plugin}
 
 *mc-conf*
@@ -50,6 +53,7 @@ mc admin config set identity_plugin                  \
    role_policy="consoleAdmin"                        \
    [ARGUMENT=VALUE] ...
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -61,11 +65,13 @@ mc admin config set identity_plugin                  \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_URL` {#envvar.MINIO_IDENTITY_PLUGIN_URL}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_plugin url` {#mc-conf.identity_plugin.url}
 
 *mc-conf*
@@ -80,11 +86,13 @@ mc admin config set identity_plugin                  \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_ROLE_POLICY` {#envvar.MINIO_IDENTITY_PLUGIN_ROLE_POLICY}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_plugin role_policy` {#mc-conf.identity_plugin.role_policy}
 
 *mc-conf*
@@ -102,6 +110,7 @@ mc admin config set identity_plugin                  \
 此设置不提供环境变量选项。
 {{% /tab %}}
 {{% tab header="配置项" selected=true %}}
+
 ##### `identity_plugin enabled` {#mc-conf.identity_plugin.enabled}
 
 *mc-conf*
@@ -120,11 +129,13 @@ mc admin config set identity_plugin                  \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_TOKEN}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_plugin token` {#mc-conf.identity_plugin.token}
 
 *mc-conf*
@@ -141,11 +152,13 @@ mc admin config set identity_plugin                  \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_ROLE_ID` {#envvar.MINIO_IDENTITY_PLUGIN_ROLE_ID}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_plugin role_id` {#mc-conf.identity_plugin.role_id}
 
 *mc-conf*
@@ -162,11 +175,13 @@ mc admin config set identity_plugin                  \
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="环境变量" %}}
+
 ##### `MINIO_IDENTITY_PLUGIN_COMMENT` {#envvar.MINIO_IDENTITY_PLUGIN_COMMENT}
 
 *envvar*
 {{% /tab %}}
 {{% tab header="配置项" %}}
+
 ##### `identity_plugin comment` {#mc-conf.identity_plugin.comment}
 
 *mc-conf*

@@ -50,7 +50,7 @@ In PowerShell or the Command Prompt, navigate to the location of the executable 
 {{% tab header="Multi-Drive" %}}
 For Windows hosts with multiple drives, you can specify a sequential set of drives to use for configuring MinIO in the Single-Node Multi-Drive (SNMD) topology:
 
-```
+```text
 .\minio.exe server {D...G}:\minio --console-address :9001
 ```
 
@@ -78,7 +78,7 @@ The process is tied to the current PowerShell or Command Prompt window. Closing 
 {{% tab header="Single-Drive" %}}
 Use this command to start a local MinIO instance in the `C:\minio` folder. You can replace `C:\minio` with another drive or folder path on the local
 
-```
+```text
 .\minio.exe server C:\minio --console-address :9001
 ```
 
@@ -129,7 +129,7 @@ Download the Windows client archive from [Download & Install](/download/#client)
 
 Run it from the Command Prompt or PowerShell:
 
-```
+```text
 \path\to\mcli.exe --help
 ```
 

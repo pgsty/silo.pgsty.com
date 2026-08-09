@@ -97,6 +97,7 @@ STS for the MinIO Operator requires the following:
    ```shell
    kubectl apply -k path/to/yaml/file.yaml
    ```
+
 5. Use an SDK that supports the `AssumeRoleWithWebIdentity` like behavior to send a call from your application to the deployment
 
    The STS API expects a JWT for the service account to exist in the Kubernetes environment. When linked to a pod, such as through a deployment’s `.spec.spec.serviceAccountName` field, Kubernetes mounts a <abbr title="JSON Web Token">JWT</abbr> for the service account from a well-known location, such as `/var/run/secrets/kubernetes.io/serviceaccount/token`.

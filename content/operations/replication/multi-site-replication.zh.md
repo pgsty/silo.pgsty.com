@@ -68,6 +68,7 @@ RELEASE.2023-12-02T02-03-28Z
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="MinIO IDP" %}}
+
 1. 策略
 2. 用户账户（针对本地用户）
 3. 组
@@ -142,7 +143,7 @@ MinIO 对等站点可以将对象的 `GET/HEAD` 请求代理到其他对等站�
 4. `Site2` 返回请求对象的最新版本
 5. `Site1` 将代理返回的对象响应给客户端
 
-对于*不*包含唯一版本 ID 的 `GET/HEAD` 请求，代理请求会返回该对象在对等站点上的*最新*版本。 这可能导致取回对象的非当前版本，例如响应请求的对等站点本身也存在复制滞后时。
+对于 *不* 包含唯一版本 ID 的 `GET/HEAD` 请求，代理请求会返回该对象在对等站点上的 *最新* 版本。 这可能导致取回对象的非当前版本，例如响应请求的对等站点本身也存在复制滞后时。
 
 MinIO 不会代理 `LIST`、`DELETE` 和 `PUT` 操作。
 
@@ -154,7 +155,7 @@ MinIO 不会代理 `LIST`、`DELETE` 和 `PUT` 操作。
 
 ### 初始化时仅允许一个站点包含数据 {#id12}
 
-在初始化时，只允许*一个*站点包含数据。 其他站点必须不包含任何存储桶和对象。
+在初始化时，只允许 *一个* 站点包含数据。 其他站点必须不包含任何存储桶和对象。
 
 配置站点复制后，第一个部署上的所有数据都会复制到其他站点。
 
@@ -176,7 +177,7 @@ MinIO 不会代理 `LIST`、`DELETE` 和 `PUT` 操作。
 
 ### 复制要求启用版本控制 {#id14}
 
-站点复制*要求*启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)，并会自动为所有新建存储桶启用该功能。 在站点复制部署中，不能禁用版本控制。
+站点复制 *要求* 启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)，并会自动为所有新建存储桶启用该功能。 在站点复制部署中，不能禁用版本控制。
 
 对于存储桶中被排除在版本控制之外的前缀，MinIO 无法复制其中的对象。
 
@@ -230,6 +231,7 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
    export MC_HOST_minio2=https://adminuser:adminpassword@minio2.example.com
    export MC_HOST_minio3=https://adminuser:adminpassword@minio3.example.com
    ```
+
 3. 添加站点复制配置
 
    ```shell
@@ -305,9 +307,10 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
    ```shell
    export MC_HOST_minio4=https://adminuser:adminpassword@minio4.example.com
    ```
+
 3. 添加站点复制配置
 
-   使用 [`mc admin replicate add`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add) 命令，将新的对等站点加入站点复制配置中。 先指定*所有*现有对等站点的别名，再指定要添加的新站点别名。
+   使用 [`mc admin replicate add`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add) 命令，将新的对等站点加入站点复制配置中。 先指定 *所有* 现有对等站点的别名，再指定要添加的新站点别名。
 
    例如，以下命令将新的对等站点 `minio4` 添加到现有站点复制配置中，该配置已包含 `minio1`、`minio2` 和 `minio3` 三个站点。
 
@@ -335,6 +338,7 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
    ```shell
    mc admin replicate info <ALIAS>
    ```
+
 2. 使用 [`mc admin replicate update`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update) 更新站点的端点
 
    ```shell
@@ -388,7 +392,7 @@ mc admin replicate status <ALIAS> --<flag> <value>
 
   输出类似如下：
 
-  ```
+  ```text
   ●  Bucket config replication summary for: images
 
   Bucket          | MINIO2          | MINIO3          | MINIO4
@@ -399,13 +403,14 @@ mc admin replicate status <ALIAS> --<flag> <value>
   Encryption      |                 |                 |
   Replication     | ✔               | ✔               | ✔
   ```
+
 - `mc admin replicate status minio3 --all`
 
   显示 `minio3` 所属全部复制站点的复制状态摘要。
 
   输出类似如下：
 
-  ```
+  ```text
   Bucket replication status:
   ●  1/1 Buckets in sync
 

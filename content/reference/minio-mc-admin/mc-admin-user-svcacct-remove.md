@@ -38,6 +38,7 @@ The following command removes the specified access key:
 ```shell
 mc admin user svcacct rm myminio myuserserviceaccount
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

@@ -36,6 +36,7 @@ silo_modified: false
 ```shell
  mc ilm tier ls myminio
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -43,6 +44,7 @@ silo_modified: false
 ```shell
 mc ilm tier ls TARGET TIER_NAME
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 

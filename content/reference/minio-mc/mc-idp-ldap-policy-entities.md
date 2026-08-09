@@ -31,6 +31,7 @@ mc idp ldap policy entities myminio                                             
                             --user 'uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'  \
                             --group 'cn=projectb,ou=groups,ou=swengg,dc=min,dc=io'
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

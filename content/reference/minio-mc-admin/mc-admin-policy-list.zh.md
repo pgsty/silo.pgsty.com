@@ -25,6 +25,7 @@ silo_modified: false
 ```shell
 mc admin policy ls play
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：

@@ -31,6 +31,7 @@ The following command returns a list of the policies associated with the user `b
 ```shell
 mc admin policy entities myminio/ --user bob
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:

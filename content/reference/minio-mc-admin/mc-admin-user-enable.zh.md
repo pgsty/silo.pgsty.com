@@ -26,6 +26,7 @@ silo_modified: false
 ```shell
 mc admin user enable myminio myuser
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令具有以下语法：

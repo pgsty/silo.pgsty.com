@@ -48,6 +48,7 @@ mc stat play/mynewbucket/prefix/filename.extension
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="Baremetal" %}}
+
 1. Download the Silo server for your operating system
 
    Use [Download & Install](/download/#server) to select a published Silo package or archive, then verify its checksum. The executable intentionally retains the [`minio server`](/reference/minio-server/#command-minio.server) command contract.

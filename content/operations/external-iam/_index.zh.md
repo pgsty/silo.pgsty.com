@@ -61,6 +61,7 @@ MinIO 会查询已配置的 Active Directory / LDAP 服务器，以验证应用�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 - [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN)
 - [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD)
 - [`MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN)
@@ -69,6 +70,7 @@ MinIO 会查询已配置的 Active Directory / LDAP 服务器，以验证应用�
 关于这些变量的更多信息，请参见 [Active Directory / LDAP 设置](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 参考文档。[配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) 教程中包含这些值的完整配置说明。
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 - [`identity_ldap lookup_bind_dn`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.lookup_bind_dn)
 - [`identity_ldap lookup_bind_password`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.lookup_bind_password)
 - [`identity_ldap user_dn_search_base_dn`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.user_dn_search_base_dn)
@@ -102,12 +104,14 @@ MinIO 支持向 Active Directory / LDAP 服务器查询认证用户所属组列�
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 - [`MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN)
 - [`MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER)
 
 关于这些变量的更多信息，请参见 [Active Directory / LDAP 设置](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 参考文档。[配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) 教程中包含这些值的完整配置说明。
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 - [`identity_ldap group_search_base_dn`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.group_search_base_dn)
 - [`identity_ldap group_search_filter`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.group_search_filter)
 

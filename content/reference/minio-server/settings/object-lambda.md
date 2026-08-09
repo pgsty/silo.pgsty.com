@@ -30,6 +30,7 @@ Each configuration setting controls fundamental MinIO behavior and functionality
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_ENABLE` {#envvar.MINIO_LAMBDA_WEBHOOK_ENABLE}
 
 *envvar*
@@ -44,8 +45,10 @@ You can specify multiple webhooks as Lambda targets by appending a unique identi
 export MINIO_LAMBDA_WEBHOOK_ENABLE_myfunction="on"
 export MINIO_LAMBDA_WEBHOOK_ENABLE_yourfunction="on"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `lambda_webhook enable` {#mc-conf.lambda_webhook.enable}
 
 *mc-conf*
@@ -59,6 +62,7 @@ Example:
 ```shell
 mc admin config set myminio lambda_webhook:myfunction endpoint="https://example.com/" enable=on
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -66,6 +70,7 @@ mc admin config set myminio lambda_webhook:myfunction endpoint="https://example.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_ENDPOINT` {#envvar.MINIO_LAMBDA_WEBHOOK_ENDPOINT}
 
 *envvar*
@@ -78,8 +83,10 @@ You can specify multiple webhook endpoints as Lambda targets by appending a uniq
 export MINIO_LAMBDA_WEBHOOK_ENDPOINT_myfunction="http://webhook-1.example.com"
 export MINIO_LAMBDA_WEBHOOK_ENDPOINT_yourfunction="http://webhook-2.example.com"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `lambda_webhook endpoint` {#mc-conf.lambda_webhook.endpoint}
 
 *mc-conf*
@@ -94,6 +101,7 @@ The HTTP endpoint of the lambda webhook for the handler function.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_LAMBDA_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
@@ -114,6 +122,7 @@ MinIO redacts this value when returned as part of [`mc admin config get`](/refer
 {{% /alert %}}
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `lambda_webhook auth_token` {#mc-conf.lambda_webhook.auth_token}
 
 *mc-conf*
@@ -134,6 +143,7 @@ MinIO redacts this value when returned as part of [`mc admin config get`](/refer
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_LAMBDA_WEBHOOK_CLIENT_CERT}
 
 *envvar*
@@ -146,8 +156,10 @@ You can specify the client cert for multiple Lambda targets by appending a uniqu
 export MINIO_LAMBDA_WEBHOOK_CLIENT_CERT_myfunction="/path/to/cert1"
 export MINIO_LAMBDA_WEBHOOK_CLIENT_CERT_yourfunction="/path/to/cert2"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `lambda_webhook client_cert` {#mc-conf.lambda_webhook.client_cert}
 
 *mc-conf*
@@ -162,6 +174,7 @@ Specify the path to the client certificate to use for performing mTLS authentica
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="Environment Variable" %}}
+
 #### `MINIO_LAMBDA_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_LAMBDA_WEBHOOK_CLIENT_KEY}
 
 *envvar*
@@ -174,8 +187,10 @@ You can specify the client key for multiple Lambda targets by appending a unique
 export MINIO_LAMBDA_WEBHOOK_CLIENT_KEY_myfunction="/path/to/key1"
 export MINIO_LAMBDA_WEBHOOK_CLIENT_KEY_yourfunction="/path/to/key2"
 ```
+
 {{% /tab %}}
 {{% tab header="Configuration Setting" %}}
+
 #### `lambda_webhook client_key` {#mc-conf.lambda_webhook.client_key}
 
 *mc-conf*

@@ -93,6 +93,7 @@ Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移�
    service/sts unchanged
    deployment.apps/minio-operator configured
    ```
+
 4. 验证 Operator 升级结果
 
    你可以使用前面相同的 `kubectl` 命令检查新的 Operator 版本：
@@ -100,6 +101,7 @@ Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移�
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
+
 {{% /tab %}}
 {{% tab header="使用 Helm 升级" %}}
 以下步骤使用 Helm 升级现有的 MinIO Operator 安装。
@@ -127,6 +129,7 @@ Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移�
    NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
    operator        minio-operator  1               2023-11-01 15:49:54.539724775 -0400 EDT deployed        operator-5.0.x v5.0.x
    ```
+
 3. 更新 Operator 仓库
 
    使用 `helm repo update minio-operator` 更新 MinIO Operator 仓库。 如果你为 MinIO Operator 仓库设置了不同别名，请在命令中使用该别名替代 `minio-operator`。 你可以使用 `helm repo list` 查看当前已安装的仓库。
@@ -146,7 +149,7 @@ Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移�
    minio-operator/tenant           7.1.1          v7.1.1         A Helm chart for MinIO Operator
    ```
 
-   `minio-operator/minio-operator` 是旧版 chart，正常情况下**不应**安装。
+   `minio-operator/minio-operator` 是旧版 chart，正常情况下 **不应** 安装。
 4. 运行 `helm upgrade`
 
    Helm 会使用最新 chart 升级 MinIO Operator：
@@ -168,5 +171,6 @@ Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移�
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
+
 {{% /tab %}}
 {{< /tabpane >}}

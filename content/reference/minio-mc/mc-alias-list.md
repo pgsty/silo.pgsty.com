@@ -24,6 +24,7 @@ The following command lists all [aliases](/reference/minio-mc/mc-alias-set/#alia
 ```shell
 mc alias list
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The [`mc alias list`](#command-mc.alias.list) command has the following syntax:
@@ -63,11 +64,14 @@ The following [`mc alias list`](#command-mc.alias.list) command lists all config
 ```shell
 mc alias list
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc alias list
 ```
+
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -80,8 +84,10 @@ The following [`mc alias list`](#command-mc.alias.list) command lists the detail
 ```shell
 mc alias list myminio
 ```
+
 {{% /tab %}}
 {{% tab header="Syntax" %}}
+
 ```shell
 mc alias list ALIAS
 ```

@@ -25,6 +25,7 @@ silo_modified: false
 ```shell
 mc share upload --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="语法" %}}
 该命令的语法如下：
@@ -63,7 +64,7 @@ mc share upload play/mybucket/object.txt
 mc share upload play/mybucket/object.txt play/mybucket/otherobject.txt
 ```
 
-如果指定的是存储桶路径或存储桶前缀路径，则你**必须**同时指定 [`--recursive`](#mc.share.upload.-recursive) 参数。例如：
+如果指定的是存储桶路径或存储桶前缀路径，则你 **必须** 同时指定 [`--recursive`](#mc.share.upload.-recursive) 参数。例如：
 
 ```shell
 mc share upload --recursive play/mybucket/

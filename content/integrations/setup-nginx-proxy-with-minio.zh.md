@@ -106,7 +106,7 @@ server {
 }
 ```
 
-S3 API 签名计算算法*不*支持将 MinIO Server API 托管在 `example.net/s3/` 这类路径上的代理方案。
+S3 API 签名计算算法 *不* 支持将 MinIO Server API 托管在 `example.net/s3/` 这类路径上的代理方案。
 
 你还必须为 MinIO 部署设置以下环境变量：
 
@@ -208,7 +208,7 @@ server {
 }
 ```
 
-S3 API 签名计算算法*不*支持将 MinIO Server API 托管在子路径上的代理方案，例如 `minio.example.net/s3/`。
+S3 API 签名计算算法 *不* 支持将 MinIO Server API 托管在子路径上的代理方案，例如 `minio.example.net/s3/`。
 
 你还必须为 MinIO 部署设置以下环境变量：
 

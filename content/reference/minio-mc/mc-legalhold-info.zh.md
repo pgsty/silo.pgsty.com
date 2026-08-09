@@ -15,7 +15,7 @@ silo_modified: false
 
 [`mc legalhold info`](#command-mc.legalhold.info) 命令返回一个或多个对象的当前 [legal hold](/zh/administration/object-management/object-retention/#minio-object-locking-legalhold) 设置。
 
-[`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold) *要求* 指定的存储桶已启用对象锁定。 你**只能**在创建存储桶时启用对象锁定。有关创建启用对象锁定的存储桶，请参阅 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
+[`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold) *要求* 指定的存储桶已启用对象锁定。 你 **只能** 在创建存储桶时启用对象锁定。有关创建启用对象锁定的存储桶，请参阅 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="EXAMPLE" %}}
@@ -24,6 +24,7 @@ silo_modified: false
 ```shell
 mc legalhold info --recursive myminio/mydata
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 该命令语法如下：

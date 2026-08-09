@@ -15,7 +15,7 @@ Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [Git
 ## File layout {#layout}
 
 | MinIO installation | Silo package |
-|:--|:--|
+| :-- | :-- |
 | `/usr/bin/minio` | `/usr/bin/silo` (also provides `silo healthcheck`) |
 | `minio.service` | `/usr/lib/systemd/system/silo.service` |
 | `/etc/default/minio` | Still read, first; `/etc/default/silo` overrides per variable (`noreplace`/conffile — upgrades never overwrite edits) |

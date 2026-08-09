@@ -41,6 +41,7 @@ handler 函数应执行以下步骤：
    | `inputS3Url` | 原始对象的 [presigned URL](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject)。 调用应用程序会生成该 URL，并在原始请求中发送它。 这使 handler 无需通常所需的 MinIO 凭证即可访问原始对象。 该 URL 的有效期为一小时。 |
    | `outputRoute` | 允许 MinIO 验证转换后对象目标位置的令牌。 在响应中的 `x-amz-request-route` header 返回该值。 |
    | `outputToken` | 允许 MinIO 验证响应的令牌。 在响应中的 `x-amz-request-token` header 返回该值。 |
+
 2. 从 MinIO 获取原始对象。
 
    使用 presigned URL 从 MinIO 部署中获取对象。 对象内容位于响应体中。
@@ -230,6 +231,7 @@ Object Lambda ARNs: arn:minio:s3-object-lambda::myfunction:webhook
    EOF
    mc cp testobject myminio/myfunctionbucket/
    ```
+
 2. 调用 Handler
 
    以下 Go 代码使用 [The MinIO Go SDK](/zh/developers/go/minio-go/) 生成 presigned URL 并打印到 `stdout`。

@@ -31,7 +31,7 @@ silo_modified: false
 
 ### 1. 名字 —— 你敲的是什么，配置就在哪 {#naming}
 
-对许多用户来说这里其实什么都没变：容器镜像的入口仍然是 `mc`，以 `mc` 名安装的二进制与上游行为完全一致。变的是我们**交付**的东西 —— 归档包与 Linux 软件包把二进制装为 **`/usr/local/bin/mcli`**（软件包名 `mcli`）。
+对许多用户来说这里其实什么都没变：容器镜像的入口仍然是 `mc`，以 `mc` 名安装的二进制与上游行为完全一致。变的是我们 **交付** 的东西 —— 归档包与 Linux 软件包把二进制装为 **`/usr/local/bin/mcli`**（软件包名 `mcli`）。
 
 两个名字都没有被硬编码在任何地方。上游客户端自 2016 年起就根据被调用的名字派生运行时身份，而 `mcli` 正是上游自己的 `CONFLICT.md` 为解决与 Midnight Commander 的冲突所推荐的改名方案（[issue #873](https://github.com/minio/mc/issues/873#issuecomment-267583013)）—— 本分支只是把这个建议扶正为官方发行名，**代码零改动**。这套机制的实际含义如下：
 
@@ -48,9 +48,9 @@ silo_modified: false
 
 ### 2. `mcli update` 恒定失败 —— 这是有意的 {#self-update}
 
-自更新已移除。`mcli update` 不联网、不替换自身二进制，打印明确提示并**恒定以退出码 `1` 结束**。上游 `mc update` 在已是最新版时返回 `0`，因此**任何调用它并把非零退出码视为失败的 cron 任务或脚本都会开始报错** —— 请删除该调用，改用软件包管理器或 GitHub Releases 升级。每次执行时向上游发布源的版本探测也已移除，`MC_UPDATE` / `MINIO_UPDATE` 不再被读取。
+自更新已移除。`mcli update` 不联网、不替换自身二进制，打印明确提示并 **恒定以退出码 `1` 结束**。上游 `mc update` 在已是最新版时返回 `0`，因此 **任何调用它并把非零退出码视为失败的 cron 任务或脚本都会开始报错** —— 请删除该调用，改用软件包管理器或 GitHub Releases 升级。每次执行时向上游发布源的版本探测也已移除，`MC_UPDATE` / `MINIO_UPDATE` 不再被读取。
 
-（`mcli admin update ALIAS` —— 升级*服务端* —— 命令仍在，但 Silo 服务端会在服务侧拒绝就地升级。）
+（`mcli admin update ALIAS` —— 升级 *服务端* —— 命令仍在，但 Silo 服务端会在服务侧拒绝就地升级。）
 
 ### 3. SUBNET、许可与遥测命令 {#subnet}
 
@@ -76,7 +76,7 @@ silo_modified: false
 
 ### 6. 面向开发者 {#source}
 
-模块路径保持 `github.com/minio/mc`，现有 import 无需修改即可编译 —— 但 `go install github.com/minio/mc@latest` 安装的是**已归档的上游版本**，不是本分支。请从源码构建（`git clone https://github.com/pgsty/mc && cd mc && make`）或通过 `replace` 指令引用。贡献无需 CLA，但每个提交必须携带 DCO 签署（`git commit -s`）。上游已归档也意味着继承的缺陷只会在本分支修复 —— 最需要注意的是 [minio/mc#5139](https://github.com/minio/mc/issues/5139)（版本化桶上的 `mirror --remove --watch`）。
+模块路径保持 `github.com/minio/mc`，现有 import 无需修改即可编译 —— 但 `go install github.com/minio/mc@latest` 安装的是 **已归档的上游版本**，不是本分支。请从源码构建（`git clone https://github.com/pgsty/mc && cd mc && make`）或通过 `replace` 指令引用。贡献无需 CLA，但每个提交必须携带 DCO 签署（`git commit -s`）。上游已归档也意味着继承的缺陷只会在本分支修复 —— 最需要注意的是 [minio/mc#5139](https://github.com/minio/mc/issues/5139)（版本化桶上的 `mirror --remove --watch`）。
 
 ## 迁移指南 {#migration}
 
@@ -93,7 +93,7 @@ silo_modified: false
    - 检查所有解析 `--version` 首行之外内容的逻辑。
 4. **复查 `play` 依赖**（见 [§4](#aliases)）。
 5. **验证**：`mcli --version`、`mcli alias ls`，然后对你的服务器执行 `mcli ls <alias>` 与 `mcli ping <alias>`。
-6. **回退**始终是平凡操作：配置格式双向一致，保留旧的 `mc` 二进制即可随时切回。
+6. **回退** 始终是平凡操作：配置格式双向一致，保留旧的 `mc` 二进制即可随时切回。
 
 ## 参考阅读 {#see-also}
 

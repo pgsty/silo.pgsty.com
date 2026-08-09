@@ -22,6 +22,7 @@ The following command disables versioning for the `mybucket` bucket on the `mymi
 ```shell
 mc version suspend myminio/mybucket
 ```
+
 {{% /tab %}}
 {{% tab header="SYNTAX" %}}
 The command has the following syntax:
