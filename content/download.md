@@ -4,5 +4,6 @@ description: "Download the SILO server and MCLI Client for Linux, macOS, and Win
 url: "/download/"
 type: download
 layout: single
+toc_hide: true
 translationKey: download
 ---

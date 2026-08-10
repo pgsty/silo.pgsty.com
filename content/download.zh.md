@@ -4,5 +4,6 @@ description: "下载适用于 Linux、macOS 与 Windows 的 SILO server 与 MCLI
 url: "/zh/download/"
 type: download
 layout: single
+toc_hide: true
 translationKey: download
 ---
