@@ -6,7 +6,7 @@
  * 再没有才用硬编码值。两边各自的深浅色切换（data-bs-theme / data-theme）
  * 都作用在这些底层令牌上，页脚跟着变，不需要各写一套。
  *
- * 标记见 layouts/_partials/footer.html，全站三类模板共用。
+ * 标记见 layouts/_partials/silo-footer.html，仅供产品首页与下载页使用。
  */
 
 .silo-footer {

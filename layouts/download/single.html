@@ -2,7 +2,7 @@
 {{- $description := .Description | default .Site.Params.description -}}
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
 {{- $metrics := hugo.Data.home.metrics -}}
-{{- $socialImage := "images/silo-social-card.png" | absURL -}}
+{{- $socialImage := "images/silo-social-card.webp" | absURL -}}
 {{- $serverTag := "RELEASE.2026-08-06T00-00-00Z" -}}
 {{- $serverBuild := "20260806000000.0.0" -}}
 {{- $serverBase := printf "https://github.com/pgsty/silo/releases/download/%s" $serverTag -}}
@@ -44,6 +44,9 @@
   <meta property="og:site_name" content="SILO">
   <meta property="og:locale" content="{{ replace $locale "-" "_" }}">
   <meta property="og:image" content="{{ $socialImage }}">
+  <meta property="og:image:type" content="image/webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="631">
   <meta property="og:image:alt" content="{{ if $zh }}SILO 下载与安装{{ else }}Download and install SILO{{ end }}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ .Title }}">
@@ -335,13 +338,13 @@
               <div class="asset-family-grid">
                 <article class="asset-family">
                   <div class="asset-family-head"><span>RPM</span><p>RHEL · Rocky · Alma · Fedora</p></div>
-                  <a href="{{ printf "%s/silo-%s-1.x86_64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo-%s-1.x86_64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo-%s-1.aarch64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo-%s-1.aarch64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo-%s-1PGSTY.x86_64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo-%s-1PGSTY.x86_64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo-%s-1PGSTY.aarch64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo-%s-1PGSTY.aarch64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>DEB</span><p>Debian · Ubuntu</p></div>
-                  <a href="{{ printf "%s/silo_%s_amd64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>{{ printf "silo_%s_amd64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_arm64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_arm64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s-1PGSTY_amd64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>{{ printf "silo_%s-1PGSTY_amd64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/silo_%s-1PGSTY_arm64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s-1PGSTY_arm64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>APK</span><p>Alpine Linux</p></div>
@@ -671,7 +674,7 @@ make build
     </section>
   </main>
 
-  {{ partial "footer.html" . }}
+  {{ partial "silo-footer.html" . }}
 
   <script src="{{ "js/landing-v3.js" | relURL }}"></script>
   <script src="{{ "js/download.js" | relURL }}"></script>

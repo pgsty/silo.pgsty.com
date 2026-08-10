@@ -5,7 +5,7 @@
 {{- $evidenceProjects := hugo.Data.home.projects -}}
 {{- $voices := hugo.Data.home.voices -}}
 {{- $contributors := hugo.Data.home.contributors -}}
-{{- $socialImage := "images/silo-social-card.png" | absURL -}}
+{{- $socialImage := "images/silo-social-card.webp" | absURL -}}
 {{- $socialAlt := cond $zh "PGSTY SILO : MinIO/S3 兼容的对象存储" "SILO — S3/MinIO-Compatible Object Storage" -}}
 <!DOCTYPE html>
 <html lang="{{ $locale }}" class="no-js">
@@ -48,9 +48,9 @@
   <meta property="og:locale:alternate" content="{{ replace (.Language.Locale | default .Language.Lang) "-" "_" }}">
   {{ end -}}
   <meta property="og:image" content="{{ $socialImage }}">
-  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:type" content="image/webp">
   <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image:height" content="631">
   <meta property="og:image:alt" content="{{ $socialAlt }}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ .Title }}">
@@ -236,7 +236,7 @@
             <span class="stat-value" data-count="{{ $metrics.docker_pulls }}">{{ lang.FormatNumber 0 $metrics.docker_pulls }}</span>
             <span class="stat-label">Docker Pulls</span>
           </a>
-          <a href="https://github.com/pgsty/silo/stargazers" target="_blank" rel="noopener" class="stat-item">
+          <a href="https://github.com/pgsty/silo" target="_blank" rel="noopener" class="stat-item">
             <span class="stat-value" data-count="{{ $metrics.github_stars }}">{{ lang.FormatNumber 0 $metrics.github_stars }}</span>
             <span class="stat-label">GitHub Stars</span>
           </a>
@@ -623,7 +623,7 @@
 
   </main>
 
-  {{ partial "footer.html" . }}
+  {{ partial "silo-footer.html" . }}
 
   <script src="{{ "js/landing-v3.js" | relURL }}?v={{ substr (md5 (readFile "static/js/landing-v3.js")) 0 8 }}"></script>
 </body>

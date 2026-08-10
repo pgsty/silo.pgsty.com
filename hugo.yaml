@@ -168,8 +168,8 @@ params:
   description: S3-compatible object storage maintained by Pigsty, with security updates, a restored console, and supply-chain continuity.
   logo: img/silo.svg
   images:
-    - images/silo-social-card.png
-  version: 0.1.0
+    - images/silo-social-card.webp
+  version: 0.2.0
   copyright:
     authors: PIGSTY & SILO Contributors
     from_year: 2020

@@ -1,7 +1,6 @@
 {{- $outputFormat := partial "outputformat.html" . -}}
 {{- if ne $outputFormat "print" }}
 <link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
-<link rel="stylesheet" href="{{ "css/silo-footer.css" | relURL }}">
 {{- $author := "Pigsty and SILO contributors" -}}
 {{- with .Params.author }}{{ $author = . | markdownify | plainify }}{{ end }}
 <meta name="author" content="{{ $author }}">

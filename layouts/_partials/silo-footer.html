@@ -2,7 +2,7 @@
 <footer class="silo-footer d-print-none">
   <div class="silo-footer__container">
     <div class="silo-footer__grid">
-      {{/* Brand block mirrors the landing footer (see layouts/index.html). */ -}}
+      {{/* Product footer shared by the bespoke landing and download pages. */ -}}
       <div class="silo-footer__brand">
         <a href="{{ relLangURL "" }}" class="silo-footer__logo">
           <img src="{{ "img/silo.svg" | relURL }}" alt="" width="28" height="28">
@@ -55,7 +55,7 @@
     </div>
 
     <div class="silo-footer__bottom">
-      {{/* 底行与文档站单行页脚（silo/footer-line.html）保持同一格式。 */ -}}
+      {{/* 产品页底行保留维护者归属，文档壳使用 OINK 的紧凑页脚。 */ -}}
       <span>&copy; {{ .Site.Params.copyright.from_year }}-{{ now.Year }} <a href="https://vonng.com" target="_blank" rel="noopener">{{ T "silo_footer_author" }}</a> (<a href="https://github.com/Vonng" target="_blank" rel="noopener">Vonng</a>) @ <a href="https://pgsty.com" target="_blank" rel="noopener">PGSTY</a></span>
       {{ with .Site.Params.footer_icp -}}
       <span class="silo-footer__icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ . }}</a></span>

@@ -1,6 +1,6 @@
 # Silo Documentation
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and the [OINK](https://github.com/pgsty/oink) engineering-documentation theme, with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 0.2.0](https://github.com/pgsty/oink/releases/tag/v0.2.0), with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Local development
 
@@ -22,7 +22,7 @@ Run the module verification and warning-strict production build with:
 make check
 ```
 
-OINK is pinned as a Hugo Module. The project keeps only Silo-specific layouts and styles; documentation chrome, search, content components, and blocks come from the theme.
+OINK is pinned as a Hugo Module in `go.mod`. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, provenance notice, and imported-document ordering. Documentation chrome, search, footer, content components, blog feeds, and blocks come from the theme.
 
 ## Content convention
 
