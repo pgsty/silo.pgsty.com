@@ -1,81 +1,107 @@
 ---
 title: "Rust 快速入门指南"
+description: "使用 MinIO Rust SDK 从 Rust 应用连接 SILO。"
 url: "/zh/developers/rust/minio-rust/"
+aliases:
+  - "/developers/rust/quickstart/"
+  - "/developers/rust/API/"
 weight: 70
 icon: fa-brands fa-rust
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
-<a id="rust"></a>
-<a id="minio-rust-quickstart"></a>
+## MinIO Rust SDK {#rust-sdk}
 
-## 用于 Amazon S3 兼容云存储的 MinIO Rust SDK {#amazon-s3-minio-rust-sdk}
+SILO 实现兼容 S3 的服务端契约，因此 Rust 应用可以直接使用上游 [MinIO Rust SDK](https://github.com/minio/minio-rs)。该 crate 提供异步、强类型的请求构建器 API。
 
-[![CI](https://github.com/minio/minio-rs/actions/workflows/rust.yml/badge.svg?branch=master)](https://github.com/minio/minio-rs/actions/workflows/rust.yml) [![docs.rs](https://docs.rs/minio/badge.svg)](https://docs.rs/minio/latest/minio/) [![Slack](https://slack.min.io/slack?type=svg)](https://slack.min.io) [![Sourcegraph](https://sourcegraph.com/github.com/minio/minio-rs/-/badge.svg)](https://sourcegraph.com/github.com/minio/minio-rs?badge) [![crates.io](https://img.shields.io/crates/v/minio)](https://crates.io/crates/minio) [![Apache V2 License](https://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/minio/minio-rs/blob/master/LICENSE)
+{{% alert color="info" %}}
+本页按 `minio` crate `0.4.0` 校验。该 crate 目前没有声明最低支持的 Rust 版本，请核对[当前软件包元数据](https://crates.io/crates/minio)与 [API 文档](https://docs.rs/minio/latest/minio/)，并用项目固定的工具链完成验证。
+{{% /alert %}}
 
-MinIO Rust SDK 是一个 Simple Storage Service（即 S3）客户端，可用于在任意 Amazon S3 兼容对象存储服务上执行存储桶和对象操作。 它为 MinIO 和 Amazon S3 兼容对象存储 API 提供了强类型、异步优先的接口。
+## 安装软件包 {#install}
 
-每个受支持的 S3 操作都对应一个请求构建器（例如：\[`BucketExists`\]、\[`PutObject`\]、\[`UploadPartCopy`\]），用户可通过 fluent builder 模式配置请求参数。
+在 `Cargo.toml` 中加入 SDK 与 Tokio 运行时：
 
-所有请求构建器都实现了 \[`S3Api`\] trait，该 trait 提供异步 [`send`](https://docs.rs/minio/latest/minio/) 方法，用于执行请求并返回强类型响应。
-
-### 基本用法 {#id1}
-
-```no_run
-use minio::s3::Client;
-use minio::s3::types::S3Api;
-use minio::s3::response::BucketExistsResponse;
-
-#[tokio::main]
-async fn main() {
-    let client: Client = Default::default(); // configure your client
-
-    let exists: BucketExistsResponse = client
-        .bucket_exists("my-bucket")
-        .send()
-        .await
-        .expect("request failed");
-
-    println!("Bucket exists: {}", exists.exists);
-}
-
+```toml
+[dependencies]
+minio = "0.4.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 ```
 
-### 功能特性 {#id2}
+## 配置连接 {#configure}
 
-- 采用请求构建器模式，提升 API 使用体验
-- 通过 \[`tokio`\] 完整支持 async/await
-- 强类型响应
-- 通过 `Result<T, Error>` 提供透明的错误处理
+```shell
+export S3_ENDPOINT=http://127.0.0.1:9000
+export S3_ACCESS_KEY=silo-admin
+export S3_SECRET_KEY=replace-with-a-strong-secret
+```
 
-### 设计 {#id3}
+`S3_ENDPOINT` 是包含 `http://` 或 `https://` 协议的完整 URL。请把凭据保存在源码仓库之外。
 
-- \[`Client`\] 上的每个 API 方法都会返回一个 builder 结构体
-- builder 实现 \[`ToS3Request`\] 用于请求转换，并实现 \[`S3Api`\] 用于执行请求
-- 响应实现 \[`FromS3Response`\]，以实现一致的反序列化
+## 创建存储桶并上传对象 {#upload}
 
-### 示例 {#id4}
+```rust
+use minio::s3::builders::ObjectContent;
+use minio::s3::creds::StaticProvider;
+use minio::s3::http::BaseUrl;
+use minio::s3::response::BucketExistsResponse;
+use minio::s3::types::{BucketName, ObjectKey, S3Api};
+use minio::s3::{MinioClient, MinioClientBuilder};
+use std::env;
 
-你可以通过以下命令在命令行运行示例：
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let endpoint = env::var("S3_ENDPOINT")?;
+    let access_key = env::var("S3_ACCESS_KEY")?;
+    let secret_key = env::var("S3_SECRET_KEY")?;
 
-`cargo run --example <example_name>`
+    let base_url = endpoint.parse::<BaseUrl>()?;
+    let provider = StaticProvider::new(&access_key, &secret_key, None);
+    let client: MinioClient = MinioClientBuilder::new(base_url)
+        .provider(Some(provider))
+        .build()?;
 
-下面的示例覆盖了几个常见操作。 你可以在 `examples` 目录中找到完整示例列表。
+    let bucket = BucketName::new("rust-quickstart")?;
+    let object = ObjectKey::new("hello.txt")?;
 
-#### file_uploader.rs {#file-uploader-rs}
+    let exists: BucketExistsResponse = client
+        .bucket_exists(bucket.clone())?
+        .build()
+        .send()
+        .await?;
 
-- [上传文件到 MinIO](#file-uploader-rs)
-- [使用 CLI 上传文件到 MinIO](#file-uploader-rs)
+    if !exists.exists() {
+        client
+            .create_bucket(bucket.clone())?
+            .build()
+            .send()
+            .await?;
+    }
 
-#### file_downloader.rs {#file-downloader-rs}
+    client
+        .put_object_content(
+            bucket,
+            object,
+            ObjectContent::from("hello from SILO\n"),
+        )?
+        .build()
+        .send()
+        .await?;
 
-- [从 MinIO 下载文件](#file-downloader-rs)
+    println!("Uploaded hello.txt");
+    Ok(())
+}
+```
 
-#### object_prompt.rs {#object-prompt-rs}
+使用 `cargo run` 运行示例。仓库的[维护中示例](https://github.com/minio/minio-rs/tree/master/examples)与 [API 文档](https://docs.rs/minio/latest/minio/)涵盖文件上传、流处理、加密、通知、对象锁定等操作。
 
-- [在 MinIO 上提示一个文件](#object-prompt-rs)
+## 生产检查清单 {#production}
 
-### 许可证 {#id5}
+- 启用 TLS，并验证服务端证书。
+- 从密钥管理系统或受保护的环境中加载凭据。
+- 只授予应用实际需要的存储桶与对象权限。
+- 同时固定并验证 Rust 工具链、SDK、Tokio、HTTP、TLS 与密码学特性。
+- 定义超时，并显式处理错误、重试、任务取消与未完成的分段上传。
 
-该 SDK 基于 [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) 发布，更多信息请参见 [LICENSE](https://github.com/minio/minio-rs/blob/master/LICENSE)。
+服务端策略配置见[身份与访问管理](/zh/administration/identity-access-management/)。

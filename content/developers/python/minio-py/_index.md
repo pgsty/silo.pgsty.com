@@ -1,5 +1,6 @@
 ---
 title: "Python Quickstart Guide"
+description: "Connect a Python application to SILO with the MinIO Python SDK."
 url: "/developers/python/minio-py/"
 weight: 20
 icon: fa-brands fa-python
@@ -7,164 +8,93 @@ minio_origin: true
 silo_modified: true
 ---
 
-<a id="python-quickstart-guide"></a>
-<a id="minio-python-quickstart"></a>
+## MinIO Python SDK {#python-sdk}
 
-## MinIO Python Client SDK for Amazon S3 Compatible Cloud Storage [![Slack](https://slack.min.io/slack?type=svg)](https://slack.min.io) [![Apache V2 License](https://img.shields.io/badge/license-Apache%20V2-blue.svg)](https://github.com/minio/minio-py/blob/master/LICENSE) {#minio-python-client-sdk-for-amazon-s3-compatible-cloud-storage}
+SILO implements the S3-compatible server contract, so Python applications can use the upstream [MinIO Python SDK](https://github.com/minio/minio-py) directly.
 
-MinIO Python Client SDK 提供高级 API，可用于访问任意 MinIO 对象存储或其他兼容 Amazon S3 的服务。
+{{% alert color="info" %}}
+Supported Python versions and SDK APIs can change independently of SILO. Check the [current package metadata](https://pypi.org/project/minio/) and [SDK releases](https://github.com/minio/minio-py/releases) before pinning a version.
+{{% /alert %}}
 
-本快速入门指南介绍如何安装 MinIO Python Client SDK、连接对象存储服务并创建一个示例文件上传器。
+## Install the package {#install}
 
-以下示例使用：
+Install `minio` in a virtual environment:
 
-- [Python version 3.7+](https://www.python.org/downloads/)
-- [Silo `mc`/`mcli` 命令行工具](/reference/minio-mc/#command-mc)
-- MinIO `play` 测试服务器
-
-`play` 服务器是位于 [https://play.min.io](https://play.min.io) 的公开 MinIO 集群。 该集群运行 MinIO 的最新稳定版本，可用于测试与开发。 示例中的访问凭证对公众开放，上传到 `play` 的所有数据都应视为公开且全网可读。
-
-如需查看完整的 API 与示例列表，请参阅 [Python Client API Reference](https://github.com/minio/minio-py/blob/master/docs/API.md)
-
-### 安装 MinIO Python SDK {#minio-python-sdk}
-
-Python SDK 要求 Python 版本 3.7+。 你可以使用 `pip` 安装 SDK，或从 [`minio/minio-py` GitHub 仓库](https://github.com/minio/minio-py) 安装：
-
-#### 使用 `pip` {#pip}
-
-```sh
-pip3 install minio
-
+```shell
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install minio
 ```
 
-#### 使用 GitHub 源码安装 {#github}
+## Configure the connection {#configure}
 
-```sh
-git clone https://github.com/minio/minio-py
-cd minio-py
-python setup.py install
-
+```shell
+export S3_ENDPOINT=127.0.0.1:9000
+export S3_ACCESS_KEY=silo-admin
+export S3_SECRET_KEY=replace-with-a-strong-secret
+export S3_USE_SSL=false
 ```
 
-### 创建 MinIO Client {#minio-client}
+`S3_ENDPOINT` is a host and optional port, without an `http://` or `https://` prefix. Keep credentials outside source control and set `S3_USE_SSL=true` when the endpoint serves TLS.
 
-要连接目标服务，请使用 `Minio()` 方法并传入以下必需参数来创建 MinIO Client：
+## Create a bucket and upload an object {#upload}
 
-| Parameter | Description |
-| --- | --- |
-| `endpoint` | 目标服务的 URL。 |
-| `access_key` | 服务中某个用户账户的 Access key（用户 ID）。 |
-| `secret_key` | 用户账户的 Secret key（密码）。 |
+Save the following as `quickstart.py`:
 
-例如：
+```python
+import io
+import os
 
-```py
 from minio import Minio
 
-client = Minio("play.min.io",
-    access_key="Q3AM3UQ867SPQQA43P2F",
-    secret_key="zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG",
+
+def required(name: str) -> str:
+    value = os.environ.get(name)
+    if not value:
+        raise RuntimeError(f"{name} is required")
+    return value
+
+
+client = Minio(
+    required("S3_ENDPOINT"),
+    access_key=required("S3_ACCESS_KEY"),
+    secret_key=required("S3_SECRET_KEY"),
+    secure=os.environ.get("S3_USE_SSL", "false").lower() == "true",
 )
 
+bucket = "python-quickstart"
+object_name = "hello.txt"
+payload = b"hello from SILO\n"
+
+if not client.bucket_exists(bucket):
+    client.make_bucket(bucket)
+
+client.put_object(
+    bucket,
+    object_name,
+    io.BytesIO(payload),
+    length=len(payload),
+    content_type="text/plain",
+)
+
+stat = client.stat_object(bucket, object_name)
+print(f"Uploaded {object_name}: {stat.size} bytes")
 ```
 
-### 示例：文件上传器 {#id1}
+Run it with:
 
-此示例执行以下操作：
-
-- 使用提供的凭证连接到 MinIO `play` 服务器。
-- 如果不存在名为 `python-test-bucket` 的存储桶，则创建该存储桶。
-- 从 `/tmp` 上传名为 `test-file.txt` 的文件，并将其重命名为 `my-test-file.txt`。
-- 使用 [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) 验证文件已创建。
-
-#### `file_uploader.py` {#file-uploader-py}
-
-```py
-# file_uploader.py MinIO Python SDK example
-from minio import Minio
-from minio.error import S3Error
-
-def main():
-    # Create a client with the MinIO server playground, its access key
-    # and secret key.
-    client = Minio("play.min.io",
-        access_key="Q3AM3UQ867SPQQA43P2F",
-        secret_key="zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG",
-    )
-
-    # The file to upload, change this path if needed
-    source_file = "/tmp/test-file.txt"
-
-    # The destination bucket and filename on the MinIO server
-    bucket_name = "python-test-bucket"
-    destination_file = "my-test-file.txt"
-
-    # Make the bucket if it doesn't exist.
-    found = client.bucket_exists(bucket_name)
-    if not found:
-        client.make_bucket(bucket_name)
-        print("Created bucket", bucket_name)
-    else:
-        print("Bucket", bucket_name, "already exists")
-
-    # Upload the file, renaming it in the process
-    client.fput_object(
-        bucket_name, destination_file, source_file,
-    )
-    print(
-        source_file, "successfully uploaded as object",
-        destination_file, "to bucket", bucket_name,
-    )
-
-if __name__ == "__main__":
-    try:
-        main()
-    except S3Error as exc:
-        print("error occurred.", exc)
-
+```shell
+python quickstart.py
 ```
 
-运行此示例：
+Use the repository's [API reference](https://github.com/minio/minio-py/blob/master/docs/API.md) and [maintained examples](https://github.com/minio/minio-py/tree/master/examples) for presigned URLs, server-side encryption, notifications, object locking, multipart operations, and other APIs.
 
-1. 在 `/tmp` 中创建一个名为 `test-file.txt` 的文件。 如果要使用不同路径或文件名，请修改 `source_file` 的值。
-2. 使用以下命令运行 `file_uploader.py`：
+## Production checklist {#production}
 
-```sh
-python file_uploader.py
+- Use TLS and verify the server certificate.
+- Load credentials from a secret manager or protected environment.
+- Grant the application only the bucket and object permissions it needs.
+- Pin and test the Python runtime, SDK, and HTTP dependencies together.
+- Define timeouts and handle SDK exceptions, retries, streaming resources, and incomplete multipart uploads explicitly.
 
-```
-
-如果服务器上不存在该存储桶，输出类似如下内容：
-
-```sh
-Created bucket python-test-bucket
-/tmp/test-file.txt successfully uploaded as object my-test-file.txt to bucket python-test-bucket
-
-```
-
-3. 使用 `mc ls` 验证已上传文件：
-
-```sh
-mc ls play/python-test-bucket
-[2023-11-03 22:18:54 UTC]  20KiB STANDARD my-test-file.txt
-
-```
-
-### 更多参考 {#id2}
-
-- [Python Client API Reference](https://github.com/minio/minio-py/blob/master/docs/API.md)
-- [Examples](https://github.com/minio/minio-py/tree/master/examples)
-
-### 进一步了解 {#id3}
-
-- [Python SDK source and current documentation](https://github.com/minio/minio-py)
-
-### 参与贡献 {#id4}
-
-[Contributors Guide](https://github.com/minio/minio-py/blob/master/CONTRIBUTING.md)
-
-### 许可证 {#id5}
-
-此 SDK 按 [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) 分发，更多信息请参阅 [LICENSE](https://github.com/minio/minio-py/blob/master/LICENSE) 和 [NOTICE](https://github.com/minio/minio-go/blob/master/NOTICE)。
-
-[![PYPI](https://img.shields.io/pypi/v/minio.svg)](https://pypi.python.org/pypi/minio)
+See [Identity and Access Management](/administration/identity-access-management/) for server-side policy configuration.
