@@ -11,62 +11,64 @@ silo_modified: true
 ---
 
 {{% alert color="warning" %}}
-**Important**: SILO is a MinIO fork maintained by the PIGSTY community.
-This project is **not** affiliated with, endorsed by, or sponsored by MinIO, Inc. “MinIO” is a trademark of MinIO, Inc., used here solely to identify the upstream project.
-This documentation repository lives at [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com),
-and its content is forked from the upstream MinIO documentation project [`minio/docs`](https://github.com/minio/docs).
-
+**SILO is a MinIO fork maintained by the Pigsty community.** It is not affiliated with, endorsed by, or sponsored by MinIO, Inc. “MinIO” is a trademark of MinIO, Inc., used here only to identify the upstream project. See [Attribution](/about/attribution/) for source and licensing details.
 {{% /alert %}}
 
-- [Installing and Running MinIO on Docker: Overview](https://youtu.be/mg9NRR6Js1s?ref=docs)
-- [Installing and Running MinIO on Docker: Installation Lab](https://youtu.be/Z0FtabDUPtU?ref=docs)
-- [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
-- [How to Connect to MinIO with JavaScript](https://www.youtube.com/watch?v=yUR4Fvx0D3E&list=PLFOIsHSSYIK3Dd3Y_x7itJT1NUKT5SxDh&index=5)
-
-Silo is S3-compatible object storage maintained by the Pigsty community for existing deployments that need an open release and security-maintenance path. This site documents Silo operations, administration, development, downloads, release boundaries, and compatibility contracts.
+SILO gives existing MinIO deployments an open release and security-maintenance path while preserving the S3 API, configuration, and operational contracts that make migration practical. This site covers installation, migration, administration, development, releases, and compatibility boundaries.
 
 ## Quickstart {#quickstart}
 
 {{< tabpane text=true persist=header >}}
-{{% tab header="Sandbox" %}}
-MinIO maintains a sandbox instance of the community server at [https://play.min.io](https://play.min.io). You can use this instance for experimenting or evaluating the MinIO product on your local system.
+{{% tab header="Docker" %}}
 
-Follow the [`mc`](/reference/minio-mc/#command-mc) CLI [installation guide](/reference/minio-mc/#mc-install) to install the utility on your local host.
+The commands below pin the current SILO server release. Example credentials are suitable only for a local evaluation.
 
-[`mc`](/reference/minio-mc/#command-mc) includes a pre-configured `play` alias for connecting to the sandbox. For example, you can use the following commands to create a bucket and copy objects to `play`:
+{{% steps %}}
+
+### Start SILO {#quickstart-start}
 
 ```shell
-mc mb play/mynewbucket
-
-mc cp /path/to/file play/mynewbucket/prefix/filename.extension
-
-mc stat play/mynewbucket/prefix/filename.extension
+docker run -d --name silo \
+  -p 9000:9000 -p 9001:9001 \
+  -e MINIO_ROOT_USER=silo-admin \
+  -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
+  -v silo-data:/data \
+  pgsty/silo:RELEASE.2026-08-06T00-00-00Z \
+  server /data --console-address :9001
 ```
 
-{{% alert color="warning" %}}
-**Important**: MinIO’s Play sandbox is an ephemeral public-facing deployment with well-known access credentials. Any private, confidential, internal, secured, or other important data uploaded to Play is effectively made public. Exercise caution and discretion in any data you upload to Play.
-{{% /alert %}}
+### Check readiness {#quickstart-check}
+
+```shell
+docker exec silo silo healthcheck ready
+```
+
+Exit code `0` means the local server is ready. The probe is built into every SILO binary and does not require a second client inside the container.
+
+### Open the Console {#quickstart-console}
+
+Visit [http://127.0.0.1:9001](http://127.0.0.1:9001) and sign in with the credentials supplied above. Before production use, enable TLS, choose unique credentials, pin a tested image tag or digest, and test backup restoration.
+
+{{% /steps %}}
+
+See the [container deployment guide](/operations/deployments/baremetal-deploy-minio-as-a-container/) for persistent host paths, service management, and production considerations.
+
 {{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{% tab header="Linux packages" %}}
 
-1. Download the Silo server for your operating system
+Use [Download & Install](/download/#server) to select the RPM, DEB, APK, or standalone archive for your architecture. Published release assets include SHA-256 checksums and build-provenance attestations.
 
-   Use [Download & Install](/download/#server) to select a published Silo package or archive, then verify its checksum. The executable intentionally retains the [`minio server`](/reference/minio-server/#command-minio.server) command contract.
-2. Create a folder for object data
+Native packages install the server as `/usr/bin/silo`; the service keeps the established `MINIO_*` environment-variable contract. Review the [binary and package compatibility notes](/compatibility/binary/) before replacing an existing `minio` package.
 
-   For example, create a folder `~/minio` in Linux/MacOS or `C:\minio` in Windows.
-3. Start the MinIO Server
+{{% /tab %}}
+{{% tab header="Existing MinIO" %}}
 
-   Run the [`minio server`](/reference/minio-server/#command-minio.server) specifying the path to the directory and the [`--console-address`](/reference/minio-server/#minio.server.-console-address) parameter to set a static console listen path:
+Read the [migration guide](/compatibility/migration/) before changing images or binaries. Preserve the data volumes and configuration, stop every node running the old binary, and then start every node on the same pinned SILO release. Do not perform a mixed-binary rolling migration, and never use `docker compose down -v` on data you intend to keep.
 
-   ```shell
-   minio server ~/minio --console-address :9001
-   # For Windows, use minio.exe server ~/minio --console-address :9001
-   ```
-
-   The output includes connection instructions for both [`mc`](/reference/minio-mc/#command-mc) and connecting to the Console using your browser.
 {{% /tab %}}
 {{% tab header="Kubernetes" %}}
-Use the [`pgsty/minio`](https://hub.docker.com/r/pgsty/minio) image and follow the [Silo tenant deployment guide](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/). Pin a tested release tag or digest; do not treat `latest` as a production version contract.
+
+The archived MinIO Operator `v7.1.1` can run a SILO Tenant when its image is overridden to `pgsty/silo` with a tested tag or digest. Follow the [Tenant Helm guide](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and treat that Operator version as a frozen compatibility baseline, not an actively maintained dependency.
+
 {{% /tab %}}
 {{< /tabpane >}}
