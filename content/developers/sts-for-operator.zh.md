@@ -43,7 +43,7 @@ MinIO Operator 的 STS 具有以下优势：
 
 Operator 会检查请求有效性，检索该应用的策略，从租户获取凭证，然后将凭证返回给应用程序。 应用程序使用签发的凭证在该租户上执行对象存储操作。
 
-<img src="/images/k8s/sts-diagram.png" alt="展示 Kubernetes MinIO 部署中 STS token 流程的示意图，涉及请求应用、MinIO Operator、Kubernetes API、PolicyBinding custom resource definition 以及 MinIO tenant。" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/k8s/sts-diagram.png" alt="展示 Kubernetes MinIO 部署中 STS token 流程的示意图，涉及请求应用、MinIO Operator、Kubernetes API、PolicyBinding custom resource definition 以及 MinIO tenant。" style="max-width: 600px; height: auto;" />
 
 完整流程包括以下步骤：
 
@@ -116,7 +116,7 @@ MinIO Operator 的 STS 需要满足以下条件：
    - [.NET](/zh/developers/minio-drivers/#dotnet-sdk)
    - [Python](/zh/developers/minio-drivers/#python-sdk)
 
-   关于使用 SDK Assume role 的示例，请参见 [GitHub](https://github.com/minio/operator/tree/master/examples/kustomization/sts-example/sample-clients)。
+   关于使用 SDK Assume role 的示例，请参见 [Operator v7.1.1 示例](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/sts-example/sample-clients)。
 
 ## 示例资源 {#id5}
 
@@ -165,6 +165,6 @@ spec:
 
 ## 参考 {#id6}
 
-- [按 SDK 分类的 STS 示例](https://github.com/minio/operator/tree/master/examples/kustomization/sts-example/sample-clients)
+- [按 SDK 分类的 STS 示例](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/sts-example/sample-clients)
 - [Kubernetes Service Account 文档](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/)
-- [MinIO STS API](https://github.com/minio/operator/blob/master/docs/policybinding_crd.adoc)
+- [MinIO STS API](https://github.com/minio/operator/blob/v7.1.1/docs/policybinding_crd.adoc)

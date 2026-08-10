@@ -135,7 +135,7 @@ silo_modified: false
 
 > A method of encryption that stores an object in an encrypted state. The object remains encrypted while not moving from one location to another.
 >
-> Objects can be encrypted by the the server using one of key management methods: [SSE-KMS](#term-SSE-KMS), [SSE-S3](#term-SSE-S3), or [SSE-C](#term-SSE-C).
+> Objects can be encrypted by the server using one of the following key-management methods: [SSE-KMS](#term-SSE-KMS), [SSE-S3](#term-SSE-S3), or [SSE-C](#term-SSE-C).
 
 <a id="term-encryption-in-transit"></a>
 

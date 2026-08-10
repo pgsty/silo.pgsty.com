@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-book
 sidebar_expanded: true
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 {{< home-docs >}}

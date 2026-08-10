@@ -43,7 +43,7 @@ An application can use an `AssumeRoleWithWebIdentity` call including a [Kubernet
 
 The Operator checks the validity of the request, retrieves policies for the application, obtains credentials from the tenant, and then passes the credentials back the application. The application uses the issued credentials to work with the object storage on the tenant.
 
-<img src="/images/k8s/sts-diagram.png" alt="A diagram showing STS token process flow on a Kubernetes MinIO deployment between the requesting application, MinIO Operator, Kubernetes API, PolicyBinding custom resource definition, and the MinIO tenant." style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/k8s/sts-diagram.png" alt="A diagram showing STS token process flow on a Kubernetes MinIO deployment between the requesting application, MinIO Operator, Kubernetes API, PolicyBinding custom resource definition, and the MinIO tenant." style="max-width: 600px; height: auto;" />
 
 The complete process includes the following steps:
 
@@ -116,7 +116,7 @@ STS for the MinIO Operator requires the following:
    - [.NET](/developers/minio-drivers/#dotnet-sdk)
    - [Python](/developers/minio-drivers/#python-sdk)
 
-   For examples of using the SDKs to assume a role, see [GitHub](https://github.com/minio/operator/tree/master/examples/kustomization/sts-example/sample-clients).
+   For examples of using the SDKs to assume a role, see the [Operator v7.1.1 examples](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/sts-example/sample-clients).
 
 ## Example Resources {#example-resources}
 
@@ -165,6 +165,6 @@ spec:
 
 ## Reference {#reference}
 
-- [STS Examples by SDK](https://github.com/minio/operator/tree/master/examples/kustomization/sts-example/sample-clients)
+- [STS Examples by SDK](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/sts-example/sample-clients)
 - [Kubernetes documentation on Service Accounts](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/)
-- [MinIO STS API](https://github.com/minio/operator/blob/master/docs/policybinding_crd.adoc)
+- [MinIO STS API](https://github.com/minio/operator/blob/v7.1.1/docs/policybinding_crd.adoc)

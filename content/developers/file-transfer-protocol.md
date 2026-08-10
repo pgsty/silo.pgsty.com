@@ -363,7 +363,7 @@ MinIO requires specifying the Certificate Authority used to sign the certificate
 minio server {path-to-server} --sftp="trusted-user-ca-key=/path/to/.ssh/ca_user_key.pub" {...other flags}
 ```
 
-When connecting to the MinIO Server with SFTP, the client verifies the MinIO Server’s certificate. The client then passes its own certificate to the MinIO Server. The MinIO Server verifies the key created above by comparing its value to the the known public key from the certificate authority provided at server startup.
+When connecting to the MinIO Server with SFTP, the client verifies the MinIO Server’s certificate. The client then passes its own certificate to the MinIO Server. The MinIO Server verifies the key created above by comparing its value to the known public key from the certificate authority provided at server startup.
 
 Once the MinIO Server verifies the client’s certificate, the user can connect to the MinIO server over SFTP:
 
