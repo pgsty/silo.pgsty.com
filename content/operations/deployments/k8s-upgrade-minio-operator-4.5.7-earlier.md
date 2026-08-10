@@ -353,7 +353,7 @@ This procedure upgrades MinIO Operator release 4.2.3 through 4.5.7 to release 4.
    ```
 
    {{% /tab %}}
-   {{% tab header="Manual (Linux, MacOS)" %}}
+   {{% tab header="Manual (Linux, macOS)" %}}
    You can download the MinIO `kubectl` plugin to your local system path. The `kubectl` CLI automatically discovers and runs compatible plugins.
 
    The following code downloads the most recent version of the MinIO Kubernetes plugin and installs it to the system path:

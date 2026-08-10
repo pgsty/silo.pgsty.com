@@ -37,7 +37,7 @@ cert-manager 从 `Issuer` 或 `ClusterIssuer` 获取有效证书，并能在证�
 - 每个租户命名空间也拥有其本地 `Issuer`。
 - 各租户命名空间签发的证书必须被 MinIO Operator 感知并信任。
 
-<img src="/images/k8s/cert-manager-graph.png" alt="Kubernetes 集群命名空间关系图，展示根级 ClusterIssuer 与三个拥有各自 Issuer 的命名空间之间的关系。" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/k8s/cert-manager-graph.png" alt="Kubernetes 集群命名空间关系图，展示根级 ClusterIssuer 与三个拥有各自 Issuer 的命名空间之间的关系。" style="max-width: 600px; height: auto;" />
 
 ## 前提条件 {#id2}
 

@@ -12,7 +12,7 @@ silo_modified: true
 
 The MinIO Console is a rich graphical user interface that provides similar functionality to the [`mc`](/reference/minio-mc/#command-mc) command line tool.
 
-<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console Landing Page provides a view of the Object Browser for the authenticated user" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console Landing Page provides a view of the Object Browser for the authenticated user" style="max-width: 600px; height: auto;" />
 
 This page provides an overview of the MinIO Console and describes configuration options and instructions for logging in.
 
@@ -20,7 +20,7 @@ This page provides an overview of the MinIO Console and describes configuration 
 
 You can use the MinIO Console for administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration.
 
-The MinIO Console is embedded as part of the MinIO Server. You can also deploy a standalone MinIO Console using the instructions in the [github repository](https://github.com/minio/console).
+SILO embeds the maintained Silo Console in the server. The [Silo Console repository](https://github.com/pgsty/silo-console) documents the downstream source, releases, and compatibility changes; standalone deployment is an advanced integration path and must use a Console version compatible with the target server release.
 
 ### Supported Browsers {#supported-browsers}
 
@@ -79,7 +79,7 @@ to the MinIO Console.</p></td>
 
 ### Static vs Dynamic Port Assignment {#static-vs-dynamic-port-assignment}
 
-MinIO by default selects a random port for the MinIO Console on each server startup. Browser clients accessing the MinIO Server are automatically redirected to the MinIO Console on its dynamically selected port. This behavior emulates the legacy web browser behavior while reducing the the risk of a port collision on systems which were running MinIO *before* the embedded Console update.
+MinIO by default selects a random port for the MinIO Console on each server startup. Browser clients accessing the MinIO Server are automatically redirected to the MinIO Console on its dynamically selected port. This behavior emulates the legacy web browser behavior while reducing the risk of a port collision on systems which were running MinIO *before* the embedded Console update.
 
 You can select an explicit static port by passing the [`minio server --console-address`](/reference/minio-server/#minio.server.-console-address) commandline option when starting each MinIO Server in the deployment.
 
@@ -90,7 +90,7 @@ minio server https://minio-{1...4}.example.net/mnt/drive-{1...4} \
       --console-address ":9001"
 ```
 
-Deployments behind network routing components which require static ports for routing rules may require setting a static MinIO Console port. For example, load balancers, reverse proxies, or Kubernetes ingress may by default block or exhibit unexpected behavior with the the dynamic redirection behavior.
+Deployments behind network routing components which require static ports for routing rules may require setting a static MinIO Console port. For example, load balancers, reverse proxies, or Kubernetes ingress may by default block or exhibit unexpected behavior with the dynamic redirection behavior.
 
 You must also ensure that the host system firewall grants access to the configured Console port.
 

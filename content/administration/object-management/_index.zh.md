@@ -106,7 +106,7 @@ MinIO 对于给定部署中的存储桶、对象或前缀数量没有硬性的 [
 
 ## 对象版本控制 {#id4}
 
-<img src="/images/retention/minio-versioning-multiple-versions.svg" alt="Object with Multiple Versions" style="max-width: (&#x27;100%&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/retention/minio-versioning-multiple-versions.svg" alt="Object with Multiple Versions" style="max-width: 100%; height: auto;" />
 
 在存储桶上执行写入、列出、获取或 [删除](/zh/administration/object-management/object-delete/#minio-object-delete) 操作时，具体的客户端行为取决于该存储桶的版本控制状态：
 
@@ -159,7 +159,7 @@ MinIO 支持为单个对象最多添加 10 个自定义标签。
 
 MinIO 对象锁定（“对象保留”）通过强制执行一次写入、多次读取（WORM）不可变性，防止 [已启用版本控制的对象](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 被删除。 MinIO 同时支持 [基于时长的对象保留](/zh/administration/object-management/object-retention/#minio-object-locking-retention-modes) 和 [无限期 legal hold 保留](/zh/administration/object-management/object-retention/#minio-object-locking-legalhold)。
 
-<img src="/images/retention/minio-object-locking.svg" alt="30 Day Locked Objects" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/retention/minio-object-locking.svg" alt="30 Day Locked Objects" style="max-width: 600px; height: auto;" />
 
 针对受 WORM 锁定对象的删除操作，结果取决于具体操作类型：
 

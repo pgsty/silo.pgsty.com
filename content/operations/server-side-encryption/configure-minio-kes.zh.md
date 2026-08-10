@@ -121,7 +121,7 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    在继续之前，你必须先准备好所选外部 Key Management Service 所需的全部配置。
 2. 创建或修改 Tenant YAML，按需设置 `KesConfig` 的值：
 
-   你必须修改 Tenant YAML 或 `Kustomize` 模板，以反映所需的 KES 配置。 以下示例摘自 [MinIO Operator Kustomize 示例](https://github.com/minio//operator/blob/master/examples/kustomization/tenant-kes-encryption/tenant.yaml)
+   你必须修改 Tenant YAML 或 `Kustomize` 模板，以反映所需的 KES 配置。以下示例摘自固定版本的 [MinIO Operator v7.1.1 Kustomize 示例](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/tenant-kes-encryption/tenant.yaml)。
 
    ```yaml
    kes:
@@ -138,7 +138,28 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    更多说明请参阅 [固定到 `v7.1.1` 的 Kustomize 示例](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/tenant-kes-encryption/kes-configuration-secret.yaml)。
 3. 创建或修改 Tenant YAML，按需设置 `TenantSpec.configuration` 的值。
 
-   TODO
+   创建一个 Opaque Secret，在 `config.env` 键中写入 Tenant 所需的环境变量，再让 Tenant 按名称引用该 Secret。不要把真实的 root 凭据提交到源码仓库。
+
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: storage-configuration
+     namespace: minio-tenant
+   type: Opaque
+   stringData:
+     config.env: |-
+       export MINIO_ROOT_USER="replace-with-root-user"
+       export MINIO_ROOT_PASSWORD="replace-with-a-strong-secret"
+   ---
+   apiVersion: minio.min.io/v2
+   kind: Tenant
+   spec:
+     configuration:
+       name: storage-configuration
+   ```
+
+   Secret 与 Tenant 必须位于同一个命名空间。上游对象结构见固定到 [`v7.1.1` 的 Tenant 配置示例](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/base/tenant-config.yaml)。
 4. 生成新的加密密钥
 
    {{% alert color="info" %}}

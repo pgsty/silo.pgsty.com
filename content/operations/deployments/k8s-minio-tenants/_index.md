@@ -73,14 +73,14 @@ MinIO recommends the following [GKE CSI Driver](https://cloud.google.com/kuberne
 MinIO strongly recommends SSD-backed disk types for best performance. For more information on GKE disk types, see [Persistent Disks](https://cloud.google.com/compute/docs/disks).
 {{% /tab %}}
 {{% tab header="Azure AKS" %}}
-MinIO Tenants on AKS should use the [Azure Disks CSI driver](https://learn.microsoft.com/en-us/azure/azure-disk-csi) to provision the necessary underlying persistent volumes.
+MinIO Tenants on AKS should use the [Azure Disks CSI driver](https://learn.microsoft.com/en-us/azure/aks/csi-storage-drivers) to provision the necessary underlying persistent volumes.
 
 MinIO recommends the following [AKS CSI Driver](https://learn.microsoft.com/en-us/azure/aks/azure-disk-csi) storage classes:
 
 - `managed-csi` (Standard SSD)
 - `managed-csi-premium` (Premium SSD)
 
-MinIO strongly recommends SSD-backed disk types for best performance. For more information on AKS disk types, see [Azure disk types](https://learn.microsoft.com/en-us/azure/virtual-machines/disk-types).
+MinIO strongly recommends SSD-backed disk types for best performance. For more information on AKS disk types, see [Azure disk types](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types).
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -98,4 +98,4 @@ Starting with v5.0.6, the MinIO Operator supports custom [init containers](https
 
 The tenant utilizes Persistent Volume Claims to talk to the Persistent Volumes that store the objects.
 
-<img src="/images/k8s/OperatorsComponent-Diagram.png" alt="A diagram of the namespaces and pods used by or maintained by the MinIO Operator." style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/k8s/OperatorsComponent-Diagram.png" alt="A diagram of the namespaces and pods used by or maintained by the MinIO Operator." style="max-width: 600px; height: auto;" />

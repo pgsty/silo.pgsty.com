@@ -11,7 +11,7 @@ silo_modified: false
 
 本页面中的过程会创建一条新的存储桶复制规则，用于将对象从一个 MinIO 存储桶单向复制到另一个 MinIO 存储桶。 这些存储桶既可以位于同一个 MinIO 部署中，也可以位于不同的 MinIO 部署中。
 
-<img src="/images/replication/active-passive-oneway-replication.svg" alt="主动-被动复制会将数据从源 MinIO 部署同步到远程 MinIO 部署。" style="max-width: (&#x27;800px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/replication/active-passive-oneway-replication.svg" alt="主动-被动复制会将数据从源 MinIO 部署同步到远程 MinIO 部署。" style="max-width: 800px; height: auto;" />
 
 - 如需在 MinIO 存储桶之间配置双向“active-active”复制，请参见 [启用双向服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway)。
 - 如需在 MinIO 部署之间配置多站点“active-active”复制，请参见 [启用多站点服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/#minio-bucket-replication-serverside-multi)

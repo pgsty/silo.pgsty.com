@@ -12,7 +12,7 @@ silo_modified: true
 
 MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具类似的功能。
 
-<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console 登录页为已认证用户提供 Object Browser 视图" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console 登录页为已认证用户提供 Object Browser 视图" style="max-width: 600px; height: auto;" />
 
 本页面概述了 MinIO Console，并说明其配置选项和登录方法。
 
@@ -20,7 +20,7 @@ MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/
 
 您可以使用 MinIO Console 执行多种管理任务，例如身份与访问管理、指标与日志监控或服务器配置。
 
-MinIO Console 作为 MinIO Server 的一部分内嵌提供。 您也可以按照 [github repository](https://github.com/minio/console) 中的说明部署独立的 MinIO Console。
+SILO 在服务端内嵌持续维护的 Silo Console。[Silo Console 仓库](https://github.com/pgsty/silo-console)记录下游源码、版本发布与兼容性变化；独立部署属于高级集成路径，必须选择与目标服务端版本兼容的 Console 版本。
 
 ### 支持的浏览器 {#id3}
 

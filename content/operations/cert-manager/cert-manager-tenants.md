@@ -113,7 +113,7 @@ Request that cert-manager issue a new TLS server certificate for MinIO. The cert
 {{% alert color="warning" %}}
 **Important**
 
-Replace the the placeholder text (marked with the `<` and `>` characters) with values for your tenant:
+Replace the placeholder text (marked with the `<` and `>` characters) with values for your tenant:
 
 - `<cluster domain>` is the internal root DNS domain assigned in your Kubernetes cluster. Typically, this is `cluster.local`, but confirm the value by checking your CoreDNS configuration for the correct value for your Kubernetes cluster.
 
@@ -125,7 +125,7 @@ Replace the the placeholder text (marked with the `<` and `>` characters) with v
 
   Different Kubernetes providers manage the root domain differently. Check with your Kubernetes provider for more information.
 - `tenant-name` is the name provided to your tenant in the `metadata.name` of the Tenant YAML. For this example it is `myminio`.
-- `namespace` is the value created earlier where the tenant will be installed. In the tenant YAML, it is defined in the the `metadata.namespace` field. For this example it is `tenant-1`.
+- `namespace` is the value created earlier where the tenant will be installed. In the tenant YAML, it is defined in the `metadata.namespace` field. For this example it is `tenant-1`.
 {{% /alert %}}
 
 1. Request a `Certificate` for the specified domains

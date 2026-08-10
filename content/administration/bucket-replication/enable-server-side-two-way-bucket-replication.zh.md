@@ -11,7 +11,7 @@ silo_modified: false
 
 本页中的过程会创建新的存储桶复制规则，用于在 MinIO 存储桶之间对对象执行双向“主动-主动”同步。
 
-<img src="/images/replication/active-active-twoway-replication.svg" alt="主动-主动复制在两个远程集群之间同步数据。" style="max-width: (&#x27;800px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/replication/active-active-twoway-replication.svg" alt="主动-主动复制在两个远程集群之间同步数据。" style="max-width: 800px; height: auto;" />
 
 - 如需在任意兼容 S3 的服务之间配置复制，请使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror)。
 - 如需在 MinIO 集群之间配置单向“主动-被动”复制，请参见 [启用服务端单向存储桶复制](/zh/administration/bucket-replication/enable-server-side-one-way-bucket-replication/#minio-bucket-replication-serverside-oneway)。

@@ -91,7 +91,7 @@ MinIO 支持配置 [对象生命周期管理规则](/zh/administration/object-ma
 
 MinIO 会在写入操作中为每个对象版本生成唯一且不可变的标识符。 每个对象版本 ID 都由一个 128 位固定长度的 <a id="index-0"></a>[**UUIDv4**](https://datatracker.ietf.org/doc/html/rfc4122.html#section-4.4) 组成。 UUID 的生成具有足够随机性，可在任何环境中以极高概率保证唯一性，计算上也难以猜测，并且无需依赖中心化注册流程或机构来保证唯一性。
 
-<img src="/images/retention/minio-versioning-multiple-versions.svg" alt="多版本对象" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/retention/minio-versioning-multiple-versions.svg" alt="多版本对象" style="max-width: 600px; height: auto;" />
 
 MinIO 不支持由客户端管理版本 ID 的分配。 所有版本 ID 的生成都由 MinIO 服务端进程处理。
 

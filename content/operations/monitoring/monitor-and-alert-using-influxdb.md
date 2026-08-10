@@ -21,7 +21,7 @@ The procedure on this page documents the following:
 
 This procedure requires the following:
 
-- An existing InfluxDB deployment configured with one or more [notification endpoints](https://docs.influxdata.com/influxdb/v2.4/notification-endpoints/)
+- An existing InfluxDB deployment configured with one or more [notification endpoints](https://docs.influxdata.com/influxdb/v2/monitor-alert/notification-endpoints/)
 - An existing MinIO deployment with network access to the InfluxDB deployment
 - An [`mc`](/reference/minio-mc/#command-mc) installation on your local host configured to [access](/reference/minio-mc/mc-alias-set/#alias) the MinIO deployment
 
@@ -83,7 +83,7 @@ Configuring Telegraf is out of scope for this procedure. You can use this proced
    For example, you can set a filter on `minio_cluster_capacity_usable_total_bytes` and `minio_cluster_capacity_usable_free_bytes` to compare the total usable against total free space on the MinIO deployment.
 5. Configure a Check
 
-   Create a [new Check](https://docs.influxdata.com/influxdb/v2.4/https://docs.influxdata.com/influxdb/v2.4/monitor-alert/checks/create/) on a MinIO metric.
+   Create a [new Check](https://docs.influxdata.com/influxdb/v2/monitor-alert/checks/create/) on a MinIO metric.
 
    The following example check rules provide a baseline of alerts for a MinIO deployment. You can modify or otherwise use these examples for guidance in building your own checks.
 

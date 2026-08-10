@@ -91,7 +91,7 @@ MinIO emits a warning if the cumulative size of versions for any single object e
 
 MinIO generates a unique and immutable identifier for each versioned object as part of write operations. Each object version ID consists of a 128-bit fixed-size <a id="index-0"></a>[**UUIDv4**](https://datatracker.ietf.org/doc/html/rfc4122.html#section-4.4). UUID generation is sufficiently random to ensure high likelihood of uniqueness for any environment, are computationally difficult to guess, and do not require centralized registration process and authority to guarantee uniqueness.
 
-<img src="/images/retention/minio-versioning-multiple-versions.svg" alt="Object with Multiple Versions" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/retention/minio-versioning-multiple-versions.svg" alt="Object with Multiple Versions" style="max-width: 600px; height: auto;" />
 
 MinIO does not support client-managed version ID allocation. All version ID generation is handled by the MinIO server process.
 

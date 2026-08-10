@@ -202,7 +202,7 @@ Status:         1 Online, 0 Offline.
 
 `API` 区块列出了客户端可访问 MinIO S3 API 的网络接口和端口。 `Console` 区块列出了客户端可访问 MinIO Web Console 的网络接口和端口。
 
-若要在后台运行 MinIO server 进程或以守护进程方式运行，请参阅 MacOS 操作系统文档中的最佳实践和操作步骤。
+若要在后台运行 MinIO server 进程或以守护进程方式运行，请参阅 macOS 文档中的最佳实践和操作步骤。
 
 ### 5. 连接到部署 {#id6}
 
@@ -212,7 +212,7 @@ Status:         1 Online, 0 Offline.
 
 使用上一步中的 **MINIO_ROOT_USER** 和 **MINIO_ROOT_PASSWORD** 登录。
 
-<img src="/images/silo-console/console-login.webp" alt="MinIO Console 登录页" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-login.webp" alt="MinIO Console 登录页" style="max-width: 600px; height: auto;" />
 
 你可以使用 MinIO Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。 每个 MinIO server 都包含自身内嵌的 MinIO Console。
 {{% /tab %}}
@@ -233,4 +233,6 @@ mc alias set myminio https://minio-1.example.net:9000 USERNAME PASSWORD
 
 ### 6. 后续步骤 {#id7}
 
-待补充
+- 在可信开发网络之外暴露服务前，先[启用 TLS](/zh/operations/network-encryption/enable-minio-tls/)。
+- 通过[身份与访问管理](/zh/administration/identity-access-management/)创建最小权限用户和策略。
+- 在依赖该部署保存持久数据前，配置[监控与告警](/zh/operations/monitoring/)。

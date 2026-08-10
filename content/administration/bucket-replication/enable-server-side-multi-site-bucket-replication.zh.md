@@ -11,7 +11,7 @@ silo_modified: false
 
 本页中的过程用于在多个 MinIO 部署之间配置自动化的服务端存储桶复制。多站点 Active-Active 复制基于 [启用双向服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 过程，并增加了额外注意事项，以确保所有站点上的复制行为可预测。
 
-<img src="/images/replication/active-active-multi-replication.svg" alt="Active-Active 复制可在多个远程部署之间同步数据。" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/replication/active-active-multi-replication.svg" alt="Active-Active 复制可在多个远程部署之间同步数据。" style="max-width: 600px; height: auto;" />
 
 - 如需在任意 S3 兼容服务之间配置复制，请使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror)。
 - 如需在两个 MinIO 部署之间配置单向 “active-active” 复制，请参阅 [启用双向服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway)。

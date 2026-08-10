@@ -353,7 +353,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```
 
    {{% /tab %}}
-   {{% tab header="Manual (Linux, MacOS)" %}}
+   {{% tab header="Manual (Linux, macOS)" %}}
    你可以将 MinIO `kubectl` 插件下载到本地系统路径中。 `kubectl` CLI 会自动发现并运行兼容插件。
 
    以下代码会下载最新版本的 MinIO Kubernetes 插件， 并将其安装到系统路径中：

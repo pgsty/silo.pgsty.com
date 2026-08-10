@@ -336,7 +336,7 @@ Open your browser and access any of the MinIO hostnames at port `:9001` to open 
 
 Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previous step.
 
-<img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: 600px; height: auto;" />
 
 You can use the MinIO Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration. Each MinIO server includes its own embedded MinIO Console.
 {{% /tab %}}
@@ -357,4 +357,6 @@ Change the hostname, username, and password to reflect your deployment. The host
 
 ### 8. Next Steps {#next-steps}
 
-TODO
+- [Enable TLS](/operations/network-encryption/enable-minio-tls/) before exposing the service beyond a trusted network.
+- Create least-privilege users and policies through [Identity and Access Management](/administration/identity-access-management/).
+- Configure [monitoring and alerting](/operations/monitoring/), then test drive, node, and site recovery procedures before production use.

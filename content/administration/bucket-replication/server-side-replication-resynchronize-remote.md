@@ -13,7 +13,7 @@ The procedure on this page resynchronizes the contents of a MinIO bucket using a
 
 For example, consider a MinIO active-active replication configuration similar to the following:
 
-<img src="/images/replication/active-active-twoway-replication.svg" alt="Active-Active Replication synchronizes data between two remote deployments." style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/replication/active-active-twoway-replication.svg" alt="Active-Active Replication synchronizes data between two remote deployments." style="max-width: 600px; height: auto;" />
 
 Resynchronization allows using the healthy data on one of the participating MinIO deployments as the source for rebuilding the other deployment.
 

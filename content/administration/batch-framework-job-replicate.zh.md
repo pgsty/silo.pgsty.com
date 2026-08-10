@@ -3,7 +3,7 @@ title: "批量复制"
 url: "/zh/administration/batch-framework-job-replicate/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="minio-batch-framework-replicate-job"></a>
@@ -12,9 +12,9 @@ silo_modified: false
 {{% alert color="info" %}}
 **新增: MinIO**
 
-RELEASE.2022-10-08T20-11-00Z
+RELEASE.2022-10-09T21-10-59Z
 
-批处理框架在 [`mc`](/zh/reference/minio-mc/#command-mc) [RELEASE.2022-10-08T20-11-00Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-08T20-11-00Z) 中随 `replicate` 作业类型一同引入。
+批处理框架在 [`mc`](/zh/reference/minio-mc/#command-mc) [RELEASE.2022-10-09T21-10-59Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-09T21-10-59Z) 中随 `replicate` 作业类型一同引入。
 {{% /alert %}}
 
 MinIO 批处理框架允许您使用 YAML 格式的作业定义文件（“批处理文件”）来创建、管理、监控和执行作业。 批处理作业直接在 MinIO 部署上运行，可利用服务端处理能力，而不受运行 [MinIO Client](/zh/reference/minio-mc/#minio-client) 的本地机器限制。

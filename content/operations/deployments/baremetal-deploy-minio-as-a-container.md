@@ -150,7 +150,7 @@ Open your browser to [http://localhost:9001](http://localhost:9001) to open the 
 
 Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previous step.
 
-<img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: 600px; height: auto;" />
 
 You can use the embedded Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration.
 {{% /tab %}}

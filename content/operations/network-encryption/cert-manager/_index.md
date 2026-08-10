@@ -37,7 +37,7 @@ The following graphic depicts how cert-manager provides certificates in namespac
 - Each tenant’s namespace receives its own, local `Issuer`.
 - The certificates issued by each tenant namespace must be made known to and trusted by the MinIO Operator.
 
-<img src="/images/k8s/cert-manager-graph.png" alt="A graph of the namespaces in a Kubernetes cluster showing the relationship between the root level ClusterIssuer and three other namespaces with their own Issuer." style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/k8s/cert-manager-graph.png" alt="A graph of the namespaces in a Kubernetes cluster showing the relationship between the root level ClusterIssuer and three other namespaces with their own Issuer." style="max-width: 600px; height: auto;" />
 
 ## Prerequisites {#prerequisites}
 

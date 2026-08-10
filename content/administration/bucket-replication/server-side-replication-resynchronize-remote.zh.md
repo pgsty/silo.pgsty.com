@@ -13,7 +13,7 @@ silo_modified: false
 
 例如，考虑如下所示的 MinIO 主动-主动复制配置：
 
-<img src="/images/replication/active-active-twoway-replication.svg" alt="主动-主动复制在两个远程部署之间同步数据。" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/replication/active-active-twoway-replication.svg" alt="主动-主动复制在两个远程部署之间同步数据。" style="max-width: 600px; height: auto;" />
 
 重新同步允许使用其中一个参与复制的 MinIO 部署上的健康数据，作为重建另一个部署的源。
 

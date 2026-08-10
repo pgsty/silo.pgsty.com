@@ -21,7 +21,7 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 此过程要求满足以下条件：
 
-- 已有 InfluxDB 部署，并配置一个或多个 [notification endpoints](https://docs.influxdata.com/influxdb/v2.4/notification-endpoints/)
+- 已有 InfluxDB 部署，并配置一个或多个[通知端点](https://docs.influxdata.com/influxdb/v2/monitor-alert/notification-endpoints/)
 - 已有可通过网络访问 InfluxDB 部署的 MinIO 部署
 - 本地主机已安装 [`mc`](/zh/reference/minio-mc/#command-mc)，并已配置为可 [访问](/zh/reference/minio-mc/mc-alias-set/#alias) MinIO 部署
 
@@ -83,7 +83,7 @@ Telegraf Prometheus plugin 还支持 Kubernetes 特有能力，例如抓取特�
    例如，可针对 `minio_cluster_capacity_usable_total_bytes` 和 `minio_cluster_capacity_usable_free_bytes` 设置过滤条件，以比较 MinIO 部署中的总可用空间和剩余可用空间。
 5. 配置 Check
 
-   基于某个 MinIO 指标创建一个 [新的 Check](https://docs.influxdata.com/influxdb/v2.4/https://docs.influxdata.com/influxdb/v2.4/monitor-alert/checks/create/)。
+   基于某个 MinIO 指标创建一个[新的 Check](https://docs.influxdata.com/influxdb/v2/monitor-alert/checks/create/)。
 
    以下示例 Check 规则为 MinIO 部署提供了一组基础告警。 可按需修改这些示例，或将其作为构建自定义 Check 的参考。
 

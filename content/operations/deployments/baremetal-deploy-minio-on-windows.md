@@ -113,11 +113,11 @@ While port `9000` is used for connecting to the API, MinIO automatically redirec
 
 Log in to the Console with the `RootUser` and `RootPass` user credentials displayed in the output. These default to `minioadmin | minioadmin`.
 
-<img src="/images/silo-console/console-login.webp" alt="MinIO Console displaying login screen" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-login.webp" alt="MinIO Console displaying login screen" style="max-width: 600px; height: auto;" />
 
 You can use the MinIO Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration. Each MinIO server includes its own embedded MinIO Console.
 
-<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console displaying bucket start screen" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console displaying bucket start screen" style="max-width: 600px; height: auto;" />
 
 For more information, see the [MinIO Console](/administration/minio-console/#minio-console) documentation.
 
@@ -151,4 +151,6 @@ For additional details about this command, see [mc alias set](/reference/minio-m
 
 ### 5. Next Steps {#next-steps}
 
-ToDo
+- [Enable TLS](/operations/network-encryption/enable-minio-tls/) before exposing the service beyond a trusted development network.
+- Replace the example credentials and create least-privilege users through [Identity and Access Management](/administration/identity-access-management/).
+- Configure [monitoring and alerting](/operations/monitoring/) before relying on the deployment for persistent data.

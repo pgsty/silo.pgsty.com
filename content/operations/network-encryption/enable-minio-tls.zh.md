@@ -23,7 +23,7 @@ MinIO 会自动检测配置目录或默认目录中的 TLS 证书，并以启用
 {{% /tab %}}
 {{< /tabpane >}}
 
-本文说明如何为 MinIO 的单个域名启用 TLS。 关于多域 TLS，请参见 TODO。
+本文说明如何为 MinIO 的单个域名启用 TLS。需要通过 SNI 服务多个主机名时，请参阅[多域 TLS 指南](/zh/operations/network-encryption/enable-multiple-domain-minio-tls/)。
 
 ## 前提条件 {#id2}
 

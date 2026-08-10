@@ -106,7 +106,7 @@ MinIO does not support the `\` or `:` characters in object names, regardless of 
 
 ## Object Versioning {#object-versioning}
 
-<img src="/images/retention/minio-versioning-multiple-versions.svg" alt="Object with Multiple Versions" style="max-width: (&#x27;100%&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/retention/minio-versioning-multiple-versions.svg" alt="Object with Multiple Versions" style="max-width: 100%; height: auto;" />
 
 The specific client behavior on write, list, get, or [delete](/administration/object-management/object-delete/#minio-object-delete) operations on a bucket depends on the versioning state of that bucket:
 
@@ -159,7 +159,7 @@ For more on setting tags, refer to [`mc tag set`](/reference/minio-mc/mc-tag-set
 
 MinIO Object Locking (“Object Retention”) enforces Write-Once Read-Many (WORM) immutability to protect [versioned objects](/administration/object-management/object-versioning/#minio-bucket-versioning) from deletion. MinIO supports both [duration based object retention](/administration/object-management/object-retention/#minio-object-locking-retention-modes) and [indefinite legal hold retention](/administration/object-management/object-retention/#minio-object-locking-legalhold).
 
-<img src="/images/retention/minio-object-locking.svg" alt="30 Day Locked Objects" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/retention/minio-object-locking.svg" alt="30 Day Locked Objects" style="max-width: 600px; height: auto;" />
 
 Delete operations against a WORM-locked object depend on the specific operation:
 

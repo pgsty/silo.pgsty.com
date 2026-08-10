@@ -23,7 +23,7 @@ MinIO automatically detects TLS certificates in the configured or default direct
 {{% /tab %}}
 {{< /tabpane >}}
 
-This procedure documents enabling TLS for a single domain in MinIO. For instructions on TLS for multiple domains, see TODO
+This procedure documents enabling TLS for a single domain in MinIO. To serve more than one hostname with SNI, use the [multiple-domain TLS guide](/operations/network-encryption/enable-multiple-domain-minio-tls/).
 
 ## Prerequisites {#prerequisites}
 
@@ -53,7 +53,7 @@ Provision the necessary TLS certificates with a [supported cipher suite](/operat
 See [MinIO TLS on Kubernetes](/operations/network-encryption/#minio-tls-kubernetes) for more complete guidance on the supported Tenant TLS configurations.
 {{% /tab %}}
 {{% tab header="Baremetal" %}}
-Provision certificate susing your preferred path, such as through your organizations internal Certificate Authority or by using a well-known global provider such as Digicert or Verisign.
+Provision certificates using your preferred path, such as your organization's internal Certificate Authority or a well-known public provider.
 
 You can create self-signed certificates using `openssl` or the MinIO [certgen](https://github.com/minio/certgen) tool.
 

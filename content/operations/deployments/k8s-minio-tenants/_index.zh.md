@@ -73,14 +73,14 @@ MinIO 推荐以下 [GKE CSI Driver](https://cloud.google.com/kubernetes-engine/d
 MinIO 强烈建议使用基于 SSD 的磁盘类型以获得最佳性能。 有关 GKE 磁盘类型的更多信息，请参阅 [Persistent Disks](https://cloud.google.com/compute/docs/disks)。
 {{% /tab %}}
 {{% tab header="Azure AKS" %}}
-AKS 上的 MinIO 租户应使用 [Azure Disks CSI driver](https://learn.microsoft.com/en-us/azure/azure-disk-csi) 来配置所需的底层持久卷。
+AKS 上的 MinIO 租户应使用 [Azure Disks CSI 驱动](https://learn.microsoft.com/en-us/azure/aks/csi-storage-drivers)配置所需的底层持久卷。
 
 MinIO 推荐以下 [AKS CSI Driver](https://learn.microsoft.com/en-us/azure/aks/azure-disk-csi) 存储类：
 
 - `managed-csi` (Standard SSD)
 - `managed-csi-premium` (Premium SSD)
 
-MinIO 强烈建议使用基于 SSD 的磁盘类型以获得最佳性能。 有关 AKS 磁盘类型的更多信息，请参阅 [Azure disk types](https://learn.microsoft.com/en-us/azure/virtual-machines/disk-types)。
+MinIO 强烈建议使用 SSD 磁盘以获得最佳性能。有关 AKS 磁盘类型的更多信息，请参阅 [Azure 磁盘类型](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types)。
 {{% /tab %}}
 {{< /tabpane >}}
 
@@ -98,4 +98,4 @@ MinIO 强烈建议使用基于 SSD 的磁盘类型以获得最佳性能。 有�
 
 租户通过 Persistent Volume Claim 与实际存储对象的 Persistent Volume 交互。
 
-<img src="/images/k8s/OperatorsComponent-Diagram.png" alt="展示 MinIO Operator 使用或维护的命名空间和 pod 的示意图。" style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/k8s/OperatorsComponent-Diagram.png" alt="展示 MinIO Operator 使用或维护的命名空间和 pod 的示意图。" style="max-width: 600px; height: auto;" />

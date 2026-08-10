@@ -29,7 +29,7 @@ MinIO server 支持多张 TLS 证书，server 会使用 [Server Name Indication 
 {{% /tab %}}
 {{< /tabpane >}}
 
-本文说明如何为 MinIO 启用多域 TLS。 关于单域 TLS，请参见 TODO。
+本文说明如何为 MinIO 启用多域 TLS。部署只服务一个主机名时，请参阅[单域 TLS 指南](/zh/operations/network-encryption/enable-minio-tls/)。
 
 ## 前提条件 {#id2}
 

@@ -11,7 +11,7 @@ silo_modified: false
 
 The procedure on this page creates a new bucket replication rule for one-way synchronization of objects from one MinIO bucket to another MinIO bucket. The buckets can be on the same MinIO deployment or on separate MinIO deployments.
 
-<img src="/images/replication/active-passive-oneway-replication.svg" alt="Active-Passive Replication synchronizes data from a source MinIO deployment to a remote MinIO deployment." style="max-width: (&#x27;800px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/replication/active-passive-oneway-replication.svg" alt="Active-Passive Replication synchronizes data from a source MinIO deployment to a remote MinIO deployment." style="max-width: 800px; height: auto;" />
 
 - To configure two-way “active-active” replication between MinIO buckets, see [Enable Two-Way Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway).
 - To configure multi-site “active-active” replication between MinIO deployments, see [Enable Multi-Site Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/#minio-bucket-replication-serverside-multi)

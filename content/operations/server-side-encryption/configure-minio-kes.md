@@ -121,7 +121,7 @@ This procedure provides instructions for configuring and enabling Server-Side En
    You must prepare all necessary configurations associated to your external Key Management Service of choice before proceeding.
 2. Create or Modify your Tenant YAML to set the values of `KesConfig` as necessary:
 
-   You must modify your Tenant YAML or `Kustomize` templates to reflect the necessary KES configuration. The following example is taken from the [MinIO Operator Kustomize examples](https://github.com/minio//operator/blob/master/examples/kustomization/tenant-kes-encryption/tenant.yaml)
+   You must modify your Tenant YAML or `Kustomize` templates to reflect the necessary KES configuration. The following example is taken from the pinned [MinIO Operator v7.1.1 Kustomize examples](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/tenant-kes-encryption/tenant.yaml).
 
    ```yaml
    kes:
@@ -138,7 +138,28 @@ This procedure provides instructions for configuring and enabling Server-Side En
    Reference [the pinned `v7.1.1` Kustomize example](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/tenant-kes-encryption/kes-configuration-secret.yaml) for additional guidance.
 3. Create or Modify your Tenant YAML to set the values of `TenantSpec.configuration` as necessary.
 
-   TODO
+   Create an Opaque Secret whose `config.env` key contains the environment variables required by the Tenant, then reference that Secret by name. Do not commit real root credentials to source control.
+
+   ```yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: storage-configuration
+     namespace: minio-tenant
+   type: Opaque
+   stringData:
+     config.env: |-
+       export MINIO_ROOT_USER="replace-with-root-user"
+       export MINIO_ROOT_PASSWORD="replace-with-a-strong-secret"
+   ---
+   apiVersion: minio.min.io/v2
+   kind: Tenant
+   spec:
+     configuration:
+       name: storage-configuration
+   ```
+
+   Keep the Secret and Tenant in the same namespace. See the pinned [`v7.1.1` Tenant configuration example](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/base/tenant-config.yaml) for the upstream object shape.
 4. Generate a New Encryption Key
 
    {{% alert color="info" %}}

@@ -3,7 +3,7 @@ title: "Batch Replication"
 url: "/administration/batch-framework-job-replicate/"
 weight: 10
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="batch-replication"></a>
@@ -12,9 +12,9 @@ silo_modified: false
 {{% alert color="info" %}}
 **Added: MinIO**
 
-RELEASE.2022-10-08T20-11-00Z
+RELEASE.2022-10-09T21-10-59Z
 
-The Batch Framework was introduced with the `replicate` job type in the [`mc`](/reference/minio-mc/#command-mc) [RELEASE.2022-10-08T20-11-00Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-08T20-11-00Z).
+The Batch Framework was introduced with the `replicate` job type in the [`mc`](/reference/minio-mc/#command-mc) [RELEASE.2022-10-09T21-10-59Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-09T21-10-59Z).
 {{% /alert %}}
 
 The MinIO Batch Framework allows you to create, manage, monitor, and execute jobs using a YAML-formatted job definition file (a “batch file”). The batch jobs run directly on the MinIO deployment to take advantage of the server-side processing power without constraints of the local machine where you run the [MinIO Client](/reference/minio-mc/#minio-client).

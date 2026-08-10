@@ -188,7 +188,7 @@ mc ilm tier add azure TARGET TIER_NAME \
     <tr>
       <td><p><a href="/zh/reference/minio-mc/mc-ilm-tier-add/#mc.ilm.tier.add.-storage-class"><code>STORAGE_CLASS</code></a></p></td>
       <td><p>MinIO 应用于迁移到 Azure 容器中对象的 Azure 访问层。</p><p>MinIO 的分层行为依赖远程存储在收到请求后立即返回对象（毫秒到秒级）。
-因此，MinIO <em>不能</em> 支持需要 rehydration、等待周期或人工干预的远程存储。</p><p>以下 Azure 访问层满足 MinIO 对远程层的要求：</p><ul><li><p><code>Hot</code></p></li><li><p><code>Cool</code></p></li></ul><p>更多信息请参见 <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview.html">Hot, cool, and archive access tiers for blob data</a>。</p></td>
+因此，MinIO <em>不能</em> 支持需要 rehydration、等待周期或人工干预的远程存储。</p><p>以下 Azure 访问层满足 MinIO 对远程层的要求：</p><ul><li><p><code>Hot</code></p></li><li><p><code>Cool</code></p></li></ul><p>更多信息请参见 <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview">Hot, cool, and archive access tiers for blob data</a>。</p></td>
     </tr>
   </tbody>
 </table>

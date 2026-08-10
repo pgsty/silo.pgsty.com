@@ -194,7 +194,7 @@ diagnostics, maintenance, or disaster recovery.</p></td>
     <tr>
       <td><p><a href="/reference/minio-mc/mc-ilm-tier-add/#mc.ilm.tier.add.-storage-class"><code>STORAGE_CLASS</code></a></p></td>
       <td><p>The Azure access tier MinIO applies to objects transitioned to the Azure container.</p><p>MinIO tiering behavior depends on the remote storage returning objects immediately (milliseconds to seconds) upon request.
-MinIO therefore <em>cannot</em> support remote storage which requires rehydration, wait periods, or manual intervention.</p><p>The following Azure access tiers meet MinIO’s requirements as a remote tier:</p><ul><li><p><code>Hot</code></p></li><li><p><code>Cool</code></p></li></ul><p>For more information, see <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview.html">Hot, cool, and archive access tiers for blob data</a>.</p></td>
+MinIO therefore <em>cannot</em> support remote storage which requires rehydration, wait periods, or manual intervention.</p><p>The following Azure access tiers meet MinIO’s requirements as a remote tier:</p><ul><li><p><code>Hot</code></p></li><li><p><code>Cool</code></p></li></ul><p>For more information, see <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview">Hot, cool, and archive access tiers for blob data</a>.</p></td>
     </tr>
   </tbody>
 </table>

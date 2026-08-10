@@ -11,7 +11,7 @@ silo_modified: false
 
 The procedure on this page configures automatic server-side bucket replication between multiple MinIO deployments. Multi-Site Active-Active replication builds on the [Enable Two-Way Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) procedure with additional considerations required to ensure predictable replication behavior across all sites.
 
-<img src="/images/replication/active-active-multi-replication.svg" alt="Active-Active Replication synchronizes data between multiple remote deployments." style="max-width: (&#x27;600px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/replication/active-active-multi-replication.svg" alt="Active-Active Replication synchronizes data between multiple remote deployments." style="max-width: 600px; height: auto;" />
 
 - To configure replication between arbitrary S3-compatible services, use [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror).
 - To configure one-way “active-active” replication between two MinIO deployments, see [Enable Two-Way Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway).

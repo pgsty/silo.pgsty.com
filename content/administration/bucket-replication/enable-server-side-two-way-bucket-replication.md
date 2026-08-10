@@ -11,7 +11,7 @@ silo_modified: false
 
 The procedure on this page creates a new bucket replication rule for two-way “active-active” synchronization of objects between MinIO buckets.
 
-<img src="/images/replication/active-active-twoway-replication.svg" alt="Active-Active Replication synchronizes data between two remote clusters." style="max-width: (&#x27;800px&#x27;, &#x27;auto&#x27;);" />
+<img src="/images/replication/active-active-twoway-replication.svg" alt="Active-Active Replication synchronizes data between two remote clusters." style="max-width: 800px; height: auto;" />
 
 - To configure replication between arbitrary S3-compatible services, use [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror).
 - To configure one-way “active-passive” replication between MinIO clusters, see [Enable One-Way Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-one-way-bucket-replication/#minio-bucket-replication-serverside-oneway).
