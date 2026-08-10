@@ -27,7 +27,7 @@ If this information is required to diagnose a [MinIO SUBNET](https://min.io/pric
 {{% alert color="info" %}}
 **Changed: RELEASE.2023-01-11T03-14-16Z**
 
-The file uploads to MinIO for use by the engineering team in support efforts. The file saves the the current working directory in the event the file does not successfully upload (such as in an airgapped environment).
+The file uploads to MinIO for use by the engineering team in support efforts. If the upload fails, such as in an air-gapped environment, the command saves the file to the current working directory.
 {{% /alert %}}
 
 {{% alert color="info" %}}

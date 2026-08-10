@@ -51,7 +51,7 @@ silo_modified: false
     </tr>
     <tr>
       <td><p><a href="/zh/reference/minio-mc/mc-anonymous-set-json/#command-mc.anonymous.set-json"><code>set-json</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-anonymous-set-json/#command-mc.anonymous.set-json"><code>mc anonymous set-json</code></a> 命令使用 IAM <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies">JSON policy document</a>
+      <td><p><a href="/zh/reference/minio-mc/mc-anonymous-set-json/#command-mc.anonymous.set-json"><code>mc anonymous set-json</code></a> 命令使用 IAM <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html">JSON policy document</a>
 为存储桶设置匿名（即未认证或公开）访问 <a href="/zh/administration/identity-access-management/policy-based-access-control/#minio-policy">policies</a>。</p></td>
     </tr>
   </tbody>

@@ -425,8 +425,8 @@ href="https://kubernetes.io/docs/concepts/configuration/secret/">Kubernetes
 opaque secret</a>，用于设置 MinIO KES 服务。<br />
 </p>
 <p>示例请参阅 <a
-href="https://github.com/minio/operator/blob/master/examples/kes-secret.yaml">MinIO
-Operator <code>console-secret.yaml</code></a>。</p></td>
+href="https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/tenant-kes-encryption/kes-configuration-secret.yaml">Operator
+v7.1.1 KES 配置 Secret</a>。</p></td>
 </tr>
 <tr class="even">
 <td

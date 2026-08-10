@@ -13,7 +13,7 @@ silo_modified: false
 
 ## Syntax {#syntax}
 
-The [`mc anonymous set-json`](#command-mc.anonymous.set-json) command sets anonymous (i.e. unauthenticated or public) access [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) for a bucket using using an IAM [JSON policy document](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies).
+The [`mc anonymous set-json`](#command-mc.anonymous.set-json) command sets anonymous (that is, unauthenticated or public) access [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) for a bucket using an IAM [JSON policy document](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html).
 
 Buckets with anonymous policies allow clients to access the bucket contents and perform actions consistent with the specified policy without [authentication](/administration/identity-access-management/#minio-authentication-and-identity-management).
 

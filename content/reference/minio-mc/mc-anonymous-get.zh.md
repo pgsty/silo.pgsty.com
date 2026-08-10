@@ -17,7 +17,7 @@ silo_modified: false
 
 配置了匿名策略的存储桶允许客户端在无需 [身份验证](/zh/administration/identity-access-management/#minio-authentication-and-identity-management) 的情况下访问存储桶内容， 并执行与指定策略一致的操作。
 
-要获取分配给存储桶的 [JSON 策略](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies)， 请使用 [`mc anonymous get-json`](/zh/reference/minio-mc/mc-anonymous-get-json/#command-mc.anonymous.get-json) 命令。
+要获取分配给存储桶的 [JSON 策略](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html)，请使用 [`mc anonymous get-json`](/zh/reference/minio-mc/mc-anonymous-get-json/#command-mc.anonymous.get-json) 命令。
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="示例" %}}

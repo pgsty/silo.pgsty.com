@@ -13,7 +13,7 @@ silo_modified: false
 
 ## 语法 {#id2}
 
-[`mc anonymous set-json`](#command-mc.anonymous.set-json) 命令使用 IAM [JSON policy document](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies) 为存储桶设置匿名（即未认证或公开）访问 [policies](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
+[`mc anonymous set-json`](#command-mc.anonymous.set-json) 命令使用 IAM [JSON 策略文档](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html)，为存储桶设置匿名（即未认证或公开）访问[策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
 
 配置了匿名策略的存储桶允许客户端在无需 [authentication](/zh/administration/identity-access-management/#minio-authentication-and-identity-management) 的情况下访问存储桶内容， 并执行与指定策略一致的操作。
 

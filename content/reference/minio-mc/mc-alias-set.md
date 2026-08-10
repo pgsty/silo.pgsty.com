@@ -54,7 +54,7 @@ Copy the example to a text editor and modify as-needed before running the comman
 
 *mc-cmd*
 
-*Required* The name to associate to the S3-compatible service. Aliases are case-sensitive and must meet the following requirements:
+*Required* The name to associate with the S3-compatible service. Aliases are case-sensitive and must meet the following requirements:
 
 - Contain only [ASCII](https://en.wikipedia.org/wiki/ASCII) lower case letters (`a-z`), upper case letters (`A-Z`), numbers (`[0-9]`), hyphen (`-`), or underscore (`_`).
 - 2 or more characters in length.
@@ -154,7 +154,7 @@ If the `myminio` alias already exists, the [`mc alias set`](#command-mc.alias.se
 mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 ```
 
-- Replace `ALIAS` with the the name to associate to the MinIO service.
+- Replace `ALIAS` with the name to associate with the MinIO service.
 - Replace `HOSTNAME` with the URL for any node in the MinIO deployment. You can alternatively specify the URL for a load balancer or reverse proxy managing connections to the MinIO deployment.
 - Replace `ACCESSKEY` and `SECRETKEY` with credentials for a user on the MinIO deployment.
 {{% /tab %}}

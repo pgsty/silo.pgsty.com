@@ -38,7 +38,7 @@ MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.
 
 ### Required Permissions {#required-permissions}
 
-MinIO requires the following permissions scoped to to the bucket or buckets for which you are creating lifecycle management rules.
+MinIO requires the following permissions scoped to the bucket or buckets for which you are creating lifecycle management rules.
 
 - [`s3:PutLifecycleConfiguration`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-PutLifecycleConfiguration)
 - [`s3:GetLifecycleConfiguration`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-GetLifecycleConfiguration)

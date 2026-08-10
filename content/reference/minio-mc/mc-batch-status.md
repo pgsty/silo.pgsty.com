@@ -3,7 +3,7 @@ title: "mc batch status"
 url: "/reference/minio-mc/mc-batch-status/"
 weight: 60
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="mc-batch-status"></a>
@@ -14,7 +14,7 @@ silo_modified: false
 {{% alert color="info" %}}
 **Changed: MinIO**
 
-RELEASE.2022-10-08T20-11-00Z or later
+RELEASE.2022-10-09T21-10-59Z or later
 {{% /alert %}}
 
 ## Syntax {#syntax}

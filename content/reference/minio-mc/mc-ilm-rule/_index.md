@@ -77,7 +77,7 @@ configuration and applies it to a MinIO bucket.</p></td>
 
 ## Permissions {#permissions}
 
-MinIO requires the following permissions scoped to to the bucket or buckets for which you create lifecycle management rules.
+MinIO requires the following permissions scoped to the bucket or buckets for which you create lifecycle management rules.
 
 - [`s3:PutLifecycleConfiguration`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-PutLifecycleConfiguration)
 - [`s3:GetLifecycleConfiguration`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-GetLifecycleConfiguration)

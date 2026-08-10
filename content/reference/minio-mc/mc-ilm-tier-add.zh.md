@@ -296,7 +296,7 @@ MinIO 应用于转换到远程存储桶对象的 storage class（在 Microsoft A
 - `Hot`
 - `Cool`
 
-更多信息请参见 [Blob 数据的 Hot、Cool 和 Archive 访问层](https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview.html)。
+更多信息请参见 [Blob 数据的 Hot、Cool 和 Archive 访问层](https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview)。
 {{% /tab %}}
 {{< /tabpane >}}
 

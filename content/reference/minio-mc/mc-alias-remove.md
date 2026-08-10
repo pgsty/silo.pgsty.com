@@ -72,7 +72,7 @@ mc alias remove myminio
 mc alias remove ALIAS
 ```
 
-Replace `ALIAS` with the the name of the alias to remove.
+Replace `ALIAS` with the name of the alias to remove.
 {{% /tab %}}
 {{< /tabpane >}}
 

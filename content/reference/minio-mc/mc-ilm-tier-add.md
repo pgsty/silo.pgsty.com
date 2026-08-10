@@ -296,7 +296,7 @@ For more information, see [GCS storage class](https://cloud.google.com/storage/d
 - `Hot`
 - `Cool`
 
-For more information, see [Hot, cool, and archive access tiers for blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview.html).
+For more information, see [Hot, cool, and archive access tiers for blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview).
 {{% /tab %}}
 {{< /tabpane >}}
 

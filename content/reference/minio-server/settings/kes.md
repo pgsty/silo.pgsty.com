@@ -65,7 +65,7 @@ This environment variable is mutually exclusive with the [`MINIO_KMS_KES_KEY_FIL
 
 *envvar*
 
-The private key associated to the the [`MINIO_KMS_KES_CERT_FILE`](#envvar.MINIO_KMS_KES_CERT_FILE) x.509 certificate to use when authenticating to the KES server. The KES server requires clients to present their certificate for performing mutual TLS (mTLS).
+The private key associated with the [`MINIO_KMS_KES_CERT_FILE`](#envvar.MINIO_KMS_KES_CERT_FILE) X.509 certificate used when authenticating to the KES server. The KES server requires clients to present their certificate for mutual TLS (mTLS).
 
 See the [KES wiki](https://github.com/minio/kes/wiki/Configuration#policy-configuration) for more complete documentation on KES access control.
 

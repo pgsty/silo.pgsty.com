@@ -55,8 +55,8 @@ access <a href="/administration/identity-access-management/policy-based-access-c
     <tr>
       <td><p><a href="/reference/minio-mc/mc-anonymous-set-json/#command-mc.anonymous.set-json"><code>set-json</code></a></p></td>
       <td><p>The <a href="/reference/minio-mc/mc-anonymous-set-json/#command-mc.anonymous.set-json"><code>mc anonymous set-json</code></a> command sets anonymous (i.e. unauthenticated or
-public) access <a href="/administration/identity-access-management/policy-based-access-control/#minio-policy">policies</a> for a bucket using using an IAM
-<a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies">JSON policy document</a>.</p></td>
+public) access <a href="/administration/identity-access-management/policy-based-access-control/#minio-policy">policies</a> for a bucket using an IAM
+<a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html">JSON policy document</a>.</p></td>
     </tr>
   </tbody>
 </table>

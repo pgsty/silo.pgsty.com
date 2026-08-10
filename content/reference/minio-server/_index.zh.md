@@ -3,7 +3,7 @@ title: "Silo 服务端（minio）"
 url: "/zh/reference/minio-server/"
 weight: 30
 aliases:
-  - "/zh/reference/minio-server/minio-server/"
+  - "/reference/minio-server/minio-server/"
 icon: fa-solid fa-database
 minio_origin: true
 silo_modified: true

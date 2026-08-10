@@ -3,7 +3,7 @@ title: "mc batch describe"
 url: "/zh/reference/minio-mc/mc-batch-describe/"
 weight: 20
 minio_origin: true
-silo_modified: false
+silo_modified: true
 ---
 
 <a id="mc-batch-describe"></a>
@@ -14,7 +14,7 @@ silo_modified: false
 {{% alert color="info" %}}
 **变更: MinIO**
 
-RELEASE.2022-10-08T20-11-00Z or later
+RELEASE.2022-10-09T21-10-59Z or later
 {{% /alert %}}
 
 ## 语法 {#id1}

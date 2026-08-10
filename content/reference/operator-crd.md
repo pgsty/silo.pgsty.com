@@ -432,8 +432,8 @@ opaque secret</a> which contains environment variables to use for
 setting up the MinIO KES service.<br />
 </p>
 <p>See the <a
-href="https://github.com/minio/operator/blob/master/examples/kes-secret.yaml">MinIO
-Operator <code>console-secret.yaml</code></a> for an example.</p></td>
+href="https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/tenant-kes-encryption/kes-configuration-secret.yaml">Operator
+v7.1.1 KES configuration secret</a> for an example.</p></td>
 </tr>
 <tr class="even">
 <td
@@ -476,7 +476,7 @@ style="text-align: left;"><p><strong><code>clientCertSecret</code></strong>
 href="#localcertificatereference">LocalCertificateReference</a></em></p></td>
 <td style="text-align: left;"><p><strong>Optional</strong><br />
 </p>
-<p>Specify a a <a
+<p>Specify a <a
 href="https://kubernetes.io/docs/concepts/configuration/secret/">Kubernetes
 TLS secret</a> containing a custom root Certificate Authority and x.509
 certificate to use for performing mTLS authentication with an external

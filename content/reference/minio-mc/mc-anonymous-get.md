@@ -17,7 +17,7 @@ The [`mc anonymous get`](#command-mc.anonymous.get) command gets the anonymous (
 
 Buckets with anonymous policies allow clients to access the bucket contents and perform actions consistent with the specified policy without [authentication](/administration/identity-access-management/#minio-authentication-and-identity-management).
 
-To get the [JSON policy](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-iam-policies) assigned to the bucket, use the [`mc anonymous get-json`](/reference/minio-mc/mc-anonymous-get-json/#command-mc.anonymous.get-json) command.
+To get the [JSON policy](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html) assigned to the bucket, use the [`mc anonymous get-json`](/reference/minio-mc/mc-anonymous-get-json/#command-mc.anonymous.get-json) command.
 
 {{< tabpane text=true persist=header >}}
 {{% tab header="EXAMPLE" %}}
