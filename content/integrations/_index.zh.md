@@ -3,7 +3,7 @@ title: "集成"
 url: "/zh/integrations/"
 weight: 270
 aliases:
-  - "/zh/integrations/integrations/"
+  - "/integrations/integrations/"
 icon: fa-solid fa-plug
 minio_origin: true
 silo_modified: false

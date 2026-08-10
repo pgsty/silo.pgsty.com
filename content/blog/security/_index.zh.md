@@ -6,7 +6,7 @@ weight: 30
 icon: fa-solid fa-shield-halved
 sidebar_expanded: true
 module: [BLOG]
-default_featured_image: /images/blog/security.webp
+default_featured: /images/blog/security.webp
 aliases:
   - /security/
 ---

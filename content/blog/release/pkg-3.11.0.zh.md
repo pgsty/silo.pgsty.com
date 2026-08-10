@@ -8,7 +8,7 @@ tags: [发布, pkg]
 weight: 5
 url: "/zh/blog/release/pkg-3.11.0/"
 aliases:
-  - /zh/releases/pkg-3.11.0/
+  - /releases/pkg-3.11.0/
 ---
 
 **发布日期：** 2026-08-04 · **版本：** [v3.11.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.11.0) · **提交：** [`d8b1fa7`](https://github.com/pgsty/silo-pkg/commit/d8b1fa7) · **仓库：** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)

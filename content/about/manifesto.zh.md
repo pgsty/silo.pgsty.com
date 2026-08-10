@@ -4,8 +4,8 @@ linkTitle: "宣言"
 description: "PGSTY SILO 承诺什么、刻意拒绝承诺什么，以及两者的公开证据——项目的十一条公开承诺。"
 url: "/zh/about/manifesto/"
 aliases:
-  - /zh/about/manifest/
-  - /zh/manifesto/
+  - /about/manifest/
+  - /manifesto/
 weight: 5
 type: docs
 icon: fa-solid fa-scroll

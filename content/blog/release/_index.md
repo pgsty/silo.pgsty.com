@@ -6,7 +6,7 @@ weight: 20
 icon: fa-solid fa-tag
 sidebar_expanded: true
 module: [BLOG]
-default_featured_image: /images/blog/release.webp
+default_featured: /images/blog/release.webp
 aliases:
   - /releases/
 ---
