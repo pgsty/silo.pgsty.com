@@ -37,7 +37,7 @@
     {{ if eq .Language.Lang "en" }}{{ $en = .RelPermalink }}{{ end -}}
   {{ end -}}
   <div class="td-page-meta__item td-page-meta__translation">
-    <span class="td-page-meta__icon">{{ partialCached "shell/icon.html" "languages" "languages" }}</span>
+    <span class="td-page-meta__icon"><i class="fa-solid fa-language" aria-hidden="true"></i></span>
     <span>本页由英文文档翻译而来，权威版本请参考{{ with $en }}<a href="{{ . }}">英文原文</a>{{ else }}英文原文{{ end }}。</span>
   </div>
   {{ end -}}

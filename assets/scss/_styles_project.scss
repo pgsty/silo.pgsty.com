@@ -115,3 +115,14 @@ a {
     width: auto;
   }
 }
+
+// Imported MinIO docs cap screenshots with inline pixel max-width values.
+// Inline styles beat OINK's .img-fluid rule, so combine those authored caps
+// with the available content width instead of letting narrow layouts overflow.
+.td-content img[style*='max-width: 600px'] {
+  max-width: unquote('min(100%, 600px)') !important;
+}
+
+.td-content img[style*='max-width: 800px'] {
+  max-width: unquote('min(100%, 800px)') !important;
+}
