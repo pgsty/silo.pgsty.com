@@ -342,28 +342,7 @@ main { display: block; }
   gap: 10px;
   color: var(--ink) !important;
 }
-.nav-logo { width: 22px; height: 22px; }
-.nav-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.14em;
-  /* 抵消末位字距，让渐变正好收在 O 上 */
-  margin-right: -0.14em;
-  line-height: 1;
-  background: var(--wordmark-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-@media (forced-colors: active) {
-  .nav-title { color: CanvasText; -webkit-text-fill-color: CanvasText; }
-}
-/* 打印时背景图形常被丢弃，回落成实色，避免商标整个消失 */
-@media print {
-  .nav-title { color: #1d588c; -webkit-text-fill-color: #1d588c; }
-}
+.landing-page .nav-wordmark { display: block; width: auto; height: 30px; }
 .nav-links { display: flex; align-items: center; gap: 4px; }
 
 .nav-link {
@@ -1697,7 +1676,7 @@ a.stat-item:hover { transform: translateY(-3px); border-color: var(--card-hover-
 }
 .footer-logo img { width: 28px; height: 28px; }
 .footer-logo span {
-  /* 与标题栏 .nav-title 相同的渐变字标；抵消末位字距，让渐变正好收在 O 上 */
+  /* 与标题栏字标相同的渐变；抵消末位字距，让渐变正好收在 O 上 */
   margin-right: -0.2em;
   background: var(--wordmark-gradient);
   -webkit-background-clip: text;

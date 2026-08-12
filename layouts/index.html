@@ -115,8 +115,7 @@
     <div class="landing-container">
       <nav class="landing-nav" aria-label="{{ if $zh }}主导航{{ else }}Main navigation{{ end }}">
         <a href="{{ relLangURL "" }}" class="nav-brand" aria-label="{{ if $zh }}SILO 首页{{ else }}SILO home{{ end }}">
-          <img src="{{ "img/silo.svg" | relURL }}" alt="" class="nav-logo">
-          <span class="nav-title">SILO</span>
+          <img src="{{ .Site.Params.wordmark | relURL }}" alt="" class="nav-wordmark" width="100" height="40">
         </a>
 
         <div class="nav-links">
@@ -403,14 +402,14 @@
           </div>
         </div>
 
-        <div class="kernel-grid interface-grid" data-reveal>
+        <nav class="kernel-grid interface-grid" data-reveal aria-label="{{ if $zh }}SILO 兼容接口与运维契约{{ else }}SILO compatibility interfaces and operational contracts{{ end }}">
           <a href="{{ relLangURL "developers/minio-drivers/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">S3</span><span class="kernel-name">S3 API</span><span class="kernel-desc">Application interface</span></a>
           <a href="{{ relLangURL "reference/minio-server/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">$</span><span class="kernel-name">silo</span><span class="kernel-desc">Server executable</span></a>
           <a href="{{ relLangURL "reference/minio-server/settings/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">ENV</span><span class="kernel-name">MINIO_*</span><span class="kernel-desc">Environment Vars</span></a>
           <a href="{{ relLangURL "blog/release/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">REL</span><span class="kernel-name">RELEASE.*</span><span class="kernel-desc">Version tags</span></a>
           <a href="{{ relLangURL "reference/minio-mc/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">MC</span><span class="kernel-name">mcli / mc</span><span class="kernel-desc">Command-line client</span></a>
           <a href="{{ relLangURL "administration/identity-access-management/" }}" class="kernel-card"><span class="kernel-icon interface-glyph">IAM</span><span class="kernel-name">IAM + TLS</span><span class="kernel-desc">Security controls</span></a>
-        </div>
+        </nav>
 
         <div class="extbus-head" data-reveal><span class="silkscreen">OBJECT STORAGE CAPABILITIES</span></div>
         <div class="extensions-marquee" data-reveal aria-label="Object storage capabilities">

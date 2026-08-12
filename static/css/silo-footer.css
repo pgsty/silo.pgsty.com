@@ -18,9 +18,6 @@
   --sf-hover: var(--bs-link-hover-color, var(--pg-strong, #1d588c));
   --sf-silk: var(--silo-silk, var(--silk, #5d7189));
   --sf-mono: var(--bs-font-monospace, var(--font-mono, ui-monospace, monospace));
-  --sf-sans: var(--bs-font-sans-serif, var(--font-body, sans-serif));
-  --sf-mark: var(--silo-mark-gradient, var(--wordmark-gradient, none));
-
   margin-top: 3rem;
   border-top: 1px solid var(--sf-line);
   background: var(--sf-bg);
@@ -57,40 +54,10 @@
   gap: 0.625rem;
 }
 
-.silo-footer__logo img,
-.silo-footer__logo svg {
+.silo-footer__logo img {
   display: block;
-  width: 28px;
-  height: 28px;
-  border-radius: 0.35rem;
-}
-
-.silo-footer__logo span {
-  font-family: 'Chakra Petch', var(--sf-sans);
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: 0.2em;
-  margin-right: -0.2em; /* 抵消末位字距，让渐变正好收在 O 上 */
-  background: var(--sf-mark);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-
-@media (forced-colors: active) {
-  .silo-footer__logo span {
-    color: CanvasText;
-    -webkit-text-fill-color: CanvasText;
-  }
-}
-
-/* 打印时背景图形常被丢弃，回落成实色，避免商标整个消失 */
-@media print {
-  .silo-footer__logo span {
-    color: #1d588c;
-    -webkit-text-fill-color: #1d588c;
-  }
+  width: auto;
+  height: 34px;
 }
 
 /* 品牌块的三段小字：字号压到丝印级，让左栏高度与右侧链接列齐平 */

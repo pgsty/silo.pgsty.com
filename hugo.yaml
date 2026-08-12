@@ -167,9 +167,11 @@ outputs:
 params:
   description: S3-compatible object storage maintained by Pigsty, with security updates, a restored console, and supply-chain continuity.
   logo: img/silo.svg
+  # OINK 0.2 uses one wordmark across the docs sidebar and mobile shell.
+  wordmark: img/silo-word.svg
   images:
     - images/silo-social-card.webp
-  version: 0.2.0
+  version: 0.2.1
   copyright:
     authors: PIGSTY & SILO Contributors
     from_year: 2020

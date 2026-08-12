@@ -22,7 +22,7 @@ Run the module verification and warning-strict production build with:
 make check
 ```
 
-OINK is pinned as a Hugo Module in `go.mod`. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, provenance notice, and imported-document ordering. Documentation chrome, search, footer, content components, blog feeds, and blocks come from the theme.
+OINK is pinned as a Hugo Module in `go.mod`. OINK 0.2's wordmark, featured-image cascade, and Markdown-first steps are configured or used directly by this site. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, provenance notice, and imported-document ordering. Documentation chrome, search, footer, content components, blog feeds, and blocks come from the theme.
 
 ## Content convention
 

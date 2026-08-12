@@ -102,8 +102,7 @@
     <div class="landing-container">
       <nav class="landing-nav" aria-label="{{ if $zh }}主导航{{ else }}Main navigation{{ end }}">
         <a href="{{ relLangURL "" }}" class="nav-brand" aria-label="{{ if $zh }}SILO 首页{{ else }}SILO home{{ end }}">
-          <img src="{{ "img/silo.svg" | relURL }}" alt="" class="nav-logo">
-          <span class="nav-title">SILO</span>
+          <img src="{{ .Site.Params.wordmark | relURL }}" alt="" class="nav-wordmark" width="100" height="40">
         </a>
 
         <div class="nav-links">
