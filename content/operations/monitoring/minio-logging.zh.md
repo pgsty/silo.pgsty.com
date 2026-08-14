@@ -61,49 +61,49 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
 - 将 `https://webhook-1.example.net` 替换为 HTTP Webhook 端点的 URL。
 - 将 `TOKEN` 替换为适用于该端点的认证令牌类型。 对于无需认证的端点，可省略该项。
 
-  为支持多种令牌类型，MinIO 会按 *原样* 使用该值创建请求认证头。 根据端点不同，你可能需要包含额外信息。
+为支持多种令牌类型，MinIO 会按 *原样* 使用该值创建请求认证头。 根据端点不同，你可能需要包含额外信息。
 
-  例如，对于 Bearer token，请在前面加上 `Bearer`：
+例如，对于 Bearer token，请在前面加上 `Bearer`：
 
-  {{% alert color="info" %}}
-  **Windows**
+{{% alert color="info" %}}
+**Windows**
 
-  ```shell
-  set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-  ```
+```shell
+set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  {{% alert color="info" %}}
-  **Linux 与 macOS**
+{{% alert color="info" %}}
+**Linux 与 macOS**
 
-  ```shell
-  export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-  ```
+```shell
+export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  请根据端点要求调整该值。 自定义认证格式可能类似如下：
+请根据端点要求调整该值。 自定义认证格式可能类似如下：
 
-  {{% alert color="info" %}}
-  **Windows**
+{{% alert color="info" %}}
+**Windows**
 
-  ```shell
-  set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-  ```
+```shell
+set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  {{% alert color="info" %}}
-  **Linux 与 macOS**
+{{% alert color="info" %}}
+**Linux 与 macOS**
 
-  ```shell
-  export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-  ```
+```shell
+export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  详情请参阅目标服务的文档。
+详情请参阅目标服务的文档。
 
 重启 MinIO server 以应用新的配置项。 你必须在部署中的 *所有* MinIO server 上指定相同的环境变量和设置。
 {{% /tab %}}
@@ -193,49 +193,49 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
 - 将 `https://webhook-1.example.net` 替换为 HTTP Webhook 端点的 URL。
 - 将 `TOKEN` 替换为适用于该端点的认证令牌类型。 对于无需认证的端点，可省略该项。
 
-  为支持多种令牌类型，MinIO 会按 *原样* 使用该值创建请求认证头。 根据端点不同，你可能需要包含额外信息。
+为支持多种令牌类型，MinIO 会按 *原样* 使用该值创建请求认证头。 根据端点不同，你可能需要包含额外信息。
 
-  例如，对于 Bearer token，请在前面加上 `Bearer`：
+例如，对于 Bearer token，请在前面加上 `Bearer`：
 
-  {{% alert color="info" %}}
-  **Windows**
+{{% alert color="info" %}}
+**Windows**
 
-  ```shell
-  set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-  ```
+```shell
+set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  {{% alert color="info" %}}
-  **Linux 与 macOS**
+{{% alert color="info" %}}
+**Linux 与 macOS**
 
-  ```shell
-  export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-  ```
+```shell
+export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  请根据端点要求调整该值。 自定义认证格式可能类似如下：
+请根据端点要求调整该值。 自定义认证格式可能类似如下：
 
-  {{% alert color="info" %}}
-  **Windows**
+{{% alert color="info" %}}
+**Windows**
 
-  ```shell
-  set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-  ```
+```shell
+set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  {{% alert color="info" %}}
-  **Linux 与 macOS**
+{{% alert color="info" %}}
+**Linux 与 macOS**
 
-  ```shell
-  export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-  ```
+```shell
+export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  详情请参阅目标服务的文档。
+详情请参阅目标服务的文档。
 - 将 `cert.pem` 和 `cert.key` 替换为要向 HTTP Webhook server 提交的 x.509 TLS 证书公钥与私钥。 对于不要求客户端出示 TLS 证书的端点，可省略该项。
 
 重启 MinIO server 以应用新的配置项。 你必须在部署中的 *所有* MinIO server 上指定相同的环境变量和设置。

@@ -61,49 +61,49 @@ The following example code sets *all* environment variables related to configuri
 - Replace `https://webhook-1.example.net` with the URL of the HTTP webhook endpoint.
 - Replace `TOKEN` with an authentication token of the appropriate type for the endpoint. Omit for endpoints which do not require authentication.
 
-  To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
+To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
 
-  For example: for a Bearer token, prepend `Bearer`:
+For example: for a Bearer token, prepend `Bearer`:
 
-  {{% alert color="info" %}}
-  **Windows**
+{{% alert color="info" %}}
+**Windows**
 
-  ```shell
-  set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-  ```
+```shell
+set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  {{% alert color="info" %}}
-  **Linux and macOS**
+{{% alert color="info" %}}
+**Linux and macOS**
 
-  ```shell
-  export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-  ```
+```shell
+export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
+Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
 
-  {{% alert color="info" %}}
-  **Windows**
+{{% alert color="info" %}}
+**Windows**
 
-  ```shell
-  set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-  ```
+```shell
+set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  {{% alert color="info" %}}
-  **Linux and macOS**
+{{% alert color="info" %}}
+**Linux and macOS**
 
-  ```shell
-  export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-  ```
+```shell
+export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  Consult the documenation for the desired service for more details.
+Consult the documenation for the desired service for more details.
 
 Restart the MinIO server to apply the new configuration settings. You must specify the same environment variables and settings on *all* MinIO servers in the deployment.
 {{% /tab %}}
@@ -193,49 +193,49 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
 - Replace `https://webhook-1.example.net` with the URL of the HTTP webhook endpoint.
 - Replace `TOKEN` with an authentication token of the appropriate type for the endpoint. Omit for endpoints which do not require authentication.
 
-  To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
+To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
 
-  For example: for a Bearer token, prepend `Bearer`:
+For example: for a Bearer token, prepend `Bearer`:
 
-  {{% alert color="info" %}}
-  **Windows**
+{{% alert color="info" %}}
+**Windows**
 
-  ```shell
-  set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-  ```
+```shell
+set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  {{% alert color="info" %}}
-  **Linux and macOS**
+{{% alert color="info" %}}
+**Linux and macOS**
 
-  ```shell
-  export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-  ```
+```shell
+export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
+Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
 
-  {{% alert color="info" %}}
-  **Windows**
+{{% alert color="info" %}}
+**Windows**
 
-  ```shell
-  set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-  ```
+```shell
+set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  {{% alert color="info" %}}
-  **Linux and macOS**
+{{% alert color="info" %}}
+**Linux and macOS**
 
-  ```shell
-  export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-  ```
+```shell
+export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-  {{% /alert %}}
+{{% /alert %}}
 
-  Consult the documenation for the desired service for more details.
+Consult the documenation for the desired service for more details.
 - Replace `cert.pem` and `cert.key` with the public and private key of the x.509 TLS certificates to present to the HTTP webhook server. Omit for endpoints which do not require clients to present TLS certificates.
 
 Restart the MinIO server to apply the new configuration settings. You must specify the same environment variables and settings on *all* MinIO servers in the deployment.
