@@ -101,20 +101,20 @@
   <header class="landing-header" data-header>
     <div class="landing-container">
       <nav class="landing-nav" aria-label="{{ if $zh }}主导航{{ else }}Main navigation{{ end }}">
-        <a href="{{ relLangURL "" }}" class="nav-brand" aria-label="{{ if $zh }}SILO 首页{{ else }}SILO home{{ end }}">
+        <a href="{{ relLangURL "" }}" class="nav-brand" data-td-navbar-route aria-label="{{ if $zh }}SILO 首页{{ else }}SILO home{{ end }}">
           <img src="{{ .Site.Params.wordmark | relURL }}" alt="" class="nav-wordmark" width="100" height="40">
         </a>
 
         <div class="nav-links">
-          <a href="{{ relLangURL "docs/" }}" class="nav-link">{{ if $zh }}文档{{ else }}Docs{{ end }}</a>
-          <a href="{{ relLangURL "blog/" }}" class="nav-link">{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
-          <a href="{{ relLangURL "download/" }}" class="nav-link active" aria-current="page">{{ if $zh }}下载{{ else }}Download{{ end }}</a>
-          <button type="button" class="nav-util" data-theme-toggle title="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}" aria-label="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}">
+          <a href="{{ relLangURL "docs/" }}" class="nav-link" data-td-navbar-route data-td-keyboard-search-route>{{ if $zh }}文档{{ else }}Docs{{ end }}</a>
+          <a href="{{ relLangURL "blog/" }}" class="nav-link" data-td-navbar-route>{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
+          <a href="{{ relLangURL "download/" }}" class="nav-link active" data-td-navbar-route aria-current="page">{{ if $zh }}下载{{ else }}Download{{ end }}</a>
+          <button type="button" class="nav-util" data-theme-toggle data-td-theme-toggle title="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}" aria-label="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}">
             {{- partialCached "shell/icon.html" "sun" "sun" -}}
             {{- partialCached "shell/icon.html" "moon" "moon" -}}
           </button>
           {{ range .Translations }}
-          <a href="{{ .RelPermalink }}" class="nav-util" title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}">{{ partialCached "shell/icon.html" "languages" "languages" }}</a>
+          <a href="{{ .RelPermalink }}" class="nav-util" data-td-language-route title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}">{{ partialCached "shell/icon.html" "languages" "languages" }}</a>
           {{ end }}
           <a href="https://github.com/pgsty/silo" class="nav-github" target="_blank" rel="noopener" title="GitHub">
             {{ partialCached "shell/icon.html" "github" "github" }}
@@ -677,5 +677,9 @@ make build
 
   <script src="{{ "js/landing-v3.js" | relURL }}"></script>
   <script src="{{ "js/download.js" | relURL }}"></script>
+  {{- $keyboardNav := resources.Get "js/keyboard-nav.js" -}}
+  {{- if hugo.IsProduction }}{{ $keyboardNav = $keyboardNav | minify | fingerprint }}{{ end -}}
+  <script src="{{ $keyboardNav.RelPermalink }}"
+    {{- with $keyboardNav.Data.Integrity }} integrity="{{ . }}" crossorigin="anonymous"{{ end }}></script>
 </body>
 </html>
