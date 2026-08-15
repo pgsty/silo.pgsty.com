@@ -620,6 +620,7 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 
 @media (max-width: 768px) {
   .silo-hero-title { font-size: clamp(2.3rem, 11.5vw, 3.5rem); }
+  .operator-voices { overflow-x: clip; }
   .silo-board-stage { padding: 0; }
   .silo-board { grid-template-rows: auto minmax(232px, 1fr) auto; min-height: 318px; }
   .silo-port { min-width: 100px; padding: 8px 9px; }
