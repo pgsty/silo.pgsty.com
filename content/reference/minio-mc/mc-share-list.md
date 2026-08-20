@@ -2,8 +2,8 @@
 title: "mc share ls"
 url: "/reference/minio-mc/mc-share-list/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-share-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-share-ls"></a>
@@ -22,17 +22,16 @@ Applications can perform a `PUT` to retrieve the object from the URL.
 
 For more information on shareable object URLs, see the Amazon S3 documentation on [Pre-Signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command lists all upload and download presigned URLs respectively for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc share ls upload myminio/mydata
 mc share ls download myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -46,8 +45,8 @@ mc [GLOBALFLAGS] share list           \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -81,8 +80,8 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### List Generated Download and Upload URLs {#list-generated-download-and-upload-urls}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="List Active Download Presigned URLs" %}}
+{{< tabs group="tabs-fc3182c9" >}}
+{{< tab label="List Active Download Presigned URLs" value="list-active-download-presigned-urls" >}}
 Use [`mc share ls download`](#mc.share.ls.download) to generate a URL that supports `POST` requests for uploading a file to a specific object location on an S3-compatible host:
 
 ```shell
@@ -90,8 +89,8 @@ mc share ls download ALIAS
 ```
 
 - Replace [`ALIAS`](#mc.share.ls.ALIAS) with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment.
-{{% /tab %}}
-{{% tab header="List Active Upload Presigned URLs" %}}
+{{< /tab >}}
+{{< tab label="List Active Upload Presigned URLs" value="list-active-upload-presigned-urls" >}}
 Use [`mc share ls upload`](#mc.share.ls.upload) to generate a URL that supports `POST` requests for uploading a file to a specific object location on an S3-compatible host:
 
 ```shell
@@ -99,8 +98,8 @@ mc share ls upload ALIAS
 ```
 
 - Replace [`ALIAS`](/reference/minio-mc/mc-share-upload/#mc.share.upload.ALIAS) with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Behavior {#behavior}
 

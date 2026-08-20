@@ -2,19 +2,18 @@
 title: "mc support profile"
 url: "/reference/minio-mc/mc-support-profile/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-profile.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-profile"></a>
 
 <a id="command-mc.support.profile"></a>
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Description {#description}
 
@@ -22,11 +21,10 @@ The `mc support` commands are designed for MinIO deployments registered with [Mi
 
 The resulting report is intended for use by MinIO Engineering. You can upload the report to [MinIO SUBNET](https://min.io/pricing?jmp=docs). Independent or third-party use of these profiles for diagnostics and remediation is done at your own risk.
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Examples {#examples}
 
@@ -104,11 +102,10 @@ Valid types are:
 
 If not specified, the command collects data for CPU, memory, block, mutex, threads, and goroutines.
 
-{{% alert color="warning" %}}
-**Important**
-
-Do not use the `cpuio` or `trace` data types unless directed to by MinIO Support. These profiles require significant resources and may degrade cluster performance if used without guidance.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Do not use the `cpuio` or `trace` data types unless directed to by MinIO Support. These profiles require significant resources and may degrade cluster performance if used without guidance.
 
 ##### `--airgap` {#mc.support.profile.-airgap}
 

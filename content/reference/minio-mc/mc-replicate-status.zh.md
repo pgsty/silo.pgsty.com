@@ -2,8 +2,8 @@
 title: "mc replicate status"
 url: "/zh/reference/minio-mc/mc-replicate-status/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-status.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-status"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc replicate status`](#command-mc.replicate.status) 命令显示 MinIO 存储桶的 [复制状态](/zh/administration/bucket-replication/#minio-bucket-replication-serverside)。 该状态还会列出远程目标路径或位置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令显示 `myminio` MinIO 部署上 `mydata` 存储桶的当前复制状态：
 
 ```shell
 mc replicate status myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令具有以下语法：
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] replicate status TARGET
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 
@@ -124,11 +123,10 @@ mc replicate status ALIAS/PATH
 
 ### 移除并重新添加的 ARN {#arn}
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
 
 该命令的标准输出不会显示此前已从复制配置中移除的 ARN。
 

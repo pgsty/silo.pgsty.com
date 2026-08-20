@@ -3,30 +3,29 @@ title: "mc admin policy"
 url: "/reference/minio-mc-admin/mc-admin-policy/"
 weight: 110
 icon: fa-solid fa-file-shield
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy"></a>
 
 <a id="command-mc.admin.policy"></a>
 
-{{% alert color="info" %}}
-**Changed: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-
-The following commands are deprecated:
-
-- `mc admin policy add` use [`mc admin policy create`](/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) instead
-- `mc admin policy set` use [`mc admin policy attach`](/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) instead
-- `mc admin policy unset` use [`mc admin policy detach`](/reference/minio-mc-admin/mc-admin-policy-detach/#command-mc.admin.policy.detach) instead
-- `mc admin policy update` use [`attach`](/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) or [`detach`](/reference/minio-mc-admin/mc-admin-policy-detach/#command-mc.admin.policy.detach) instead
-
-The following command is added:
-
-- [`mc admin policy entities`](/reference/minio-mc-admin/mc-admin-policy-entities/#command-mc.admin.policy.entities)
-{{% /alert %}}
+> [!NOTE]
+> **Changed: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
+>
+> The following commands are deprecated:
+>
+> - `mc admin policy add` use [`mc admin policy create`](/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) instead
+> - `mc admin policy set` use [`mc admin policy attach`](/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) instead
+> - `mc admin policy unset` use [`mc admin policy detach`](/reference/minio-mc-admin/mc-admin-policy-detach/#command-mc.admin.policy.detach) instead
+> - `mc admin policy update` use [`attach`](/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) or [`detach`](/reference/minio-mc-admin/mc-admin-policy-detach/#command-mc.admin.policy.detach) instead
+>
+> The following command is added:
+>
+> - [`mc admin policy entities`](/reference/minio-mc-admin/mc-admin-policy-entities/#command-mc.admin.policy.entities)
 
 ## Description {#description}
 

@@ -2,8 +2,8 @@
 title: "mc idp ldap disable"
 url: "/zh/reference/minio-mc/mc-idp-ldap-disable/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-disable.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-disable"></a>
@@ -15,17 +15,16 @@ silo_modified: false
 
 [`mc idp ldap disable`](#command-mc.idp.ldap.disable) 命令用于禁用当前已配置的 AD/LDAP 提供程序。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例会在 `myminio` 部署上禁用 AD/LDAP 配置。
 
 ```shell
 mc idp ldap disable  \
             myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令具有以下语法：
 
 ```shell
@@ -40,8 +39,8 @@ mc [GLOBALFLAGS] idp ldap disable  \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

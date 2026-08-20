@@ -2,8 +2,8 @@
 title: "mc admin policy detach"
 url: "/zh/reference/minio-mc-admin/mc-admin-policy-detach/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-detach.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-detach"></a>
@@ -16,16 +16,15 @@ silo_modified: false
 
 必须且只能指定 [`--user`](#mc.admin.policy.detach.-user) 或 [`--group`](#mc.admin.policy.detach.-group) 其中之一。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令从别名为 `myminio` 的部署中为用户 `james` 解绑 `readonly` 策略。
 
 ```shell
 mc admin policy detach myminio readonly --user james
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -40,18 +39,17 @@ mc admin policy detach TARGET                         \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**重要**
-
-此命令仅用于管理 [MinIO 管理](/zh/administration/identity-access-management/minio-user-management/#minio-users) 用户的策略关联。
-
-如需管理 OpenID 管理的用户策略，请参见 [OpenID Connect 访问管理](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)。
-
-如需从 Active Directory/LDAP 用户或组解绑策略，请使用 [`mc idp ldap policy detach`](/zh/reference/minio-mc/mc-idp-ldap-policy-detach/#command-mc.idp.ldap.policy.detach)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 此命令仅用于管理 [MinIO 管理](/zh/administration/identity-access-management/minio-user-management/#minio-users) 用户的策略关联。
+>
+> 如需管理 OpenID 管理的用户策略，请参见 [OpenID Connect 访问管理](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)。
+>
+> 如需从 Active Directory/LDAP 用户或组解绑策略，请使用 [`mc idp ldap policy detach`](/zh/reference/minio-mc/mc-idp-ldap-policy-detach/#command-mc.idp.ldap.policy.detach)。
 
 ### 参数 {#id3}
 

@@ -2,8 +2,8 @@
 title: "Server-Side Encryption with Per-Bucket Keys (SSE-KMS)"
 url: "/administration/server-side-encryption/server-side-encryption-sse-kms/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/server-side-encryption/server-side-encryption-sse-kms.rst
+upstream_modified: true
 ---
 
 <a id="server-side-encryption-with-per-bucket-keys-sse-kms"></a>
@@ -38,13 +38,12 @@ MinIO SSE-KMS is functionally compatible with AWS S3 [Server-Side Encryption wit
 
 ## Quickstart {#quickstart}
 
-{{% alert color="warning" %}}
-**Important**
-
-Enabling <abbr title="Server-Side Encryption">SSE</abbr> on a MinIO deployment automatically encrypts the backend data for that deployment using the default encryption key.
-
-MinIO *requires* access to KES and the external KMS to decrypt the backend and start normally. The KMS **must** maintain and provide access to the [`MINIO_KMS_KES_KEY_NAME`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME). You cannot disable KES later or “undo” the <abbr title="Server-Side Encryption">SSE</abbr> configuration at a later point.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Enabling <abbr title="Server-Side Encryption">SSE</abbr> on a MinIO deployment automatically encrypts the backend data for that deployment using the default encryption key.
+>
+> MinIO *requires* access to KES and the external KMS to decrypt the backend and start normally. The KMS **must** maintain and provide access to the [`MINIO_KMS_KES_KEY_NAME`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME). You cannot disable KES later or “undo” the <abbr title="Server-Side Encryption">SSE</abbr> configuration at a later point.
 
 The following procedure uses the `play` MinIO <abbr title="Key Encryption Service">KES</abbr> sandbox for supporting <abbr title="Server-Side Encryption">SSE</abbr> with SSE-KMS in evaluation and early development environments.
 
@@ -58,15 +57,14 @@ For extended development or production environments, use one of the following su
 - [HashiCorp Vault Keystore](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
-{{% alert color="warning" %}}
-**Important**
-
-The MinIO KES `Play` sandbox is public and grants root access to all created External Keys (EK). Any <abbr title="External Key">EK</abbr> stored on the `Play` sandbox may be accessed or destroyed at any time, rendering protected data vulnerable or permanently unreadable.
-
-- **Never** use the `Play` sandbox to protect data you cannot afford to lose or reveal.
-- **Never** generate <abbr title="External Key">EK</abbr> using names that reveal private, confidential, or internal naming conventions for your organization.
-- **Never** use the `Play` sandbox for production environments.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The MinIO KES `Play` sandbox is public and grants root access to all created External Keys (EK). Any <abbr title="External Key">EK</abbr> stored on the `Play` sandbox may be accessed or destroyed at any time, rendering protected data vulnerable or permanently unreadable.
+>
+> - **Never** use the `Play` sandbox to protect data you cannot afford to lose or reveal.
+> - **Never** generate <abbr title="External Key">EK</abbr> using names that reveal private, confidential, or internal naming conventions for your organization.
+> - **Never** use the `Play` sandbox for production environments.
 
 This procedure requires the following components:
 
@@ -126,15 +124,14 @@ export MINIO_KMS_KES_API_KEY=<API-key-identity-string-from-KES> # Replace with t
 export MINIO_KMS_KES_KEY_NAME=my-minio-sse-s3-key
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-- An API key is the preferred way to authenticate with the KES server, as it provides a streamlined and secure authentication process to the KES server.
-- Alternatively, specify the [`MINIO_KMS_KES_KEY_FILE`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_FILE) and [`MINIO_KMS_KES_CERT_FILE`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_CERT_FILE) instead of [`MINIO_KMS_KES_API_KEY`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_API_KEY).
-
-  API keys are mutually exclusive with certificate-based authentication. Specify *either* the API key variable *or* the Key File and Cert File variables.
-- The documentation on this site uses API keys.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> - An API key is the preferred way to authenticate with the KES server, as it provides a streamlined and secure authentication process to the KES server.
+> - Alternatively, specify the [`MINIO_KMS_KES_KEY_FILE`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_FILE) and [`MINIO_KMS_KES_CERT_FILE`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_CERT_FILE) instead of [`MINIO_KMS_KES_API_KEY`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_API_KEY).
+>
+>   API keys are mutually exclusive with certificate-based authentication. Specify *either* the API key variable *or* the Key File and Cert File variables.
+> - The documentation on this site uses API keys.
 
 <table>
   <tbody>
@@ -204,11 +201,10 @@ For example, consider a MinIO deployment using one <abbr title="External Key">EK
 
 ## Encryption Process {#encryption-process}
 
-{{% alert color="info" %}}
-**Note**
-
-This section describes MinIO internal logic and functionality. This information is purely educational and is not a prerequisite for configuring or implementing any MinIO feature.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> This section describes MinIO internal logic and functionality. This information is purely educational and is not a prerequisite for configuring or implementing any MinIO feature.
 
 SSE-KMS uses an External Key (EK) managed by the configured Key Management System (KMS) for performing cryptographic operations and protecting objects. The table below describes each stage of the encryption process:
 

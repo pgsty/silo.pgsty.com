@@ -5,7 +5,8 @@
       {{/* Product footer shared by the bespoke landing and download pages. */ -}}
       <div class="silo-footer__brand">
         <a href="{{ relLangURL "" }}" class="silo-footer__logo" aria-label="{{ if $zh }}SILO 首页{{ else }}SILO home{{ end }}">
-          <img src="{{ .Site.Params.wordmark | relURL }}" alt="" width="100" height="40">
+          <img class="silo-footer__mark" src="{{ .Site.Params.logo | relURL }}" alt="" width="28" height="28">
+          <img class="silo-footer__wordmark" src="{{ .Site.Params.wordmark | relURL }}" alt="" width="100" height="40">
         </a>
         <p class="silo-footer__tagline"><b class="ini ini-t">S</b>3 <b class="ini ini-i">I</b>nterface, <b class="ini ini-y">L</b>ibre <b class="ini ini-g">O</b>bject Store<br>{{ if $zh }}<span class="silo-footer__tagline-zh">接口照旧，对象归你</span>{{ else }}Keep the interface. Own the objects.{{ end }}</p>
         <p class="silo-footer__origin">{{ if $zh }}一个由 <a href="https://pigsty.cc/" target="_blank" rel="noopener">PIGSTY</a> 社区维护的 <a href="https://github.com/minio/minio" target="_blank" rel="noopener">MinIO</a> 分支{{ else }}A <a href="https://github.com/minio/minio" target="_blank" rel="noopener">MinIO</a> fork maintained by the <a href="https://pigsty.io/" target="_blank" rel="noopener">Pigsty</a> community.{{ end }}</p>
@@ -56,6 +57,9 @@
     <div class="silo-footer__bottom">
       {{/* 产品页底行保留维护者归属，文档壳使用 OINK 的紧凑页脚。 */ -}}
       <span>&copy; {{ .Site.Params.copyright.from_year }}-{{ now.Year }} <a href="https://vonng.com" target="_blank" rel="noopener">{{ T "silo_footer_author" }}</a> (<a href="https://github.com/Vonng" target="_blank" rel="noopener">Vonng</a>) @ <a href="https://pgsty.com" target="_blank" rel="noopener">PGSTY</a></span>
+      {{/* 与 OINK 单行页脚同一条署名，居中；中文指向主题站的中文版。 */ -}}
+      {{ $powered := cond $zh "由 [Oink](https://oink.pgsty.com/zh) 主题强力驱动" "Powered by [Oink](https://oink.pgsty.com)" -}}
+      <span class="silo-footer__powered">{{ .RenderString (dict "display" "inline") $powered }}</span>
       {{ with .Site.Params.footer_icp -}}
       <span class="silo-footer__icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ . }}</a></span>
       {{- end }}

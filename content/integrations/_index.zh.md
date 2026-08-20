@@ -5,8 +5,9 @@ weight: 270
 aliases:
   - "/integrations/integrations/"
 icon: fa-solid fa-plug
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/integrations/integrations.rst
+upstream_modified: false
+sidebar_expanded: true
 ---
 
 <a id="id1"></a>

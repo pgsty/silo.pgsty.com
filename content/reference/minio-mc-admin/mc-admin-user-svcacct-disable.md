@@ -2,8 +2,8 @@
 title: "mc admin user svcacct disable"
 url: "/reference/minio-mc-admin/mc-admin-user-svcacct-disable/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct-disable.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct-disable"></a>
@@ -11,30 +11,28 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct.disable"></a>
 
-{{% alert color="warning" %}}
-**Important**
-
-This command has been replaced and will be deprecated in a future MinIO Client release.
-
-As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey disable`](/reference/minio-mc-admin/mc-admin-accesskey-disable/#command-mc.admin.accesskey.disable) command to disable an access key for a built-in MinIO IDP user.
-
-To disable access keys for AD/LDAP users, use the [`mc idp ldap accesskey disable`](/reference/minio-mc/mc-idp-ldap-accesskey-disable/#command-mc.idp.ldap.accesskey.disable) command.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This command has been replaced and will be deprecated in a future MinIO Client release.
+>
+> As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey disable`](/reference/minio-mc-admin/mc-admin-accesskey-disable/#command-mc.admin.accesskey.disable) command to disable an access key for a built-in MinIO IDP user.
+>
+> To disable access keys for AD/LDAP users, use the [`mc idp ldap accesskey disable`](/reference/minio-mc/mc-idp-ldap-accesskey-disable/#command-mc.idp.ldap.accesskey.disable) command.
 
 ## Syntax {#syntax}
 
 The [`mc admin user svcacct disable`](#command-mc.admin.user.svcacct.disable) command disables an existing access key.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command disables the specified access key:
 
 ```shell
 mc admin user svcacct disable myminio myuserserviceaccount
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -48,8 +46,8 @@ mc [GLOBALFLAGS] admin user svcacct disable         \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

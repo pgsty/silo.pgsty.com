@@ -2,8 +2,8 @@
 title: "Resynchronize Bucket from Remote Replica"
 url: "/administration/bucket-replication/server-side-replication-resynchronize-remote/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/server-side-replication-resynchronize-remote.rst
+upstream_modified: false
 ---
 
 <a id="resynchronize-bucket-from-remote-replica"></a>
@@ -19,13 +19,12 @@ Resynchronization allows using the healthy data on one of the participating MinI
 
 Resynchronization is a per-bucket process. You must repeat resynchronization for each bucket on the remote which suffered partial or total data loss.
 
-{{% alert color="info" %}}
-**Professional Support during BC/DR Operations**
-
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to resynchronization. Coordination with MinIO Engineering via SUBNET can ensure successful resynchronization and restoration of normal operations, including performance testing and health diagnostics.
-
-Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
-{{% /alert %}}
+> [!NOTE]
+> **Professional Support during BC/DR Operations**
+>
+> [MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to resynchronization. Coordination with MinIO Engineering via SUBNET can ensure successful resynchronization and restoration of normal operations, including performance testing and health diagnostics.
+>
+> Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
 
 <a id="minio-bucket-replication-serverside-resynchronize-requirements"></a>
 

@@ -2,8 +2,8 @@
 title: "mc ilm tier rm"
 url: "/reference/minio-mc/mc-ilm-tier-rm/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-rm.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-rm"></a>
@@ -19,11 +19,10 @@ The [`mc ilm tier rm`](#command-mc.ilm.tier.rm) command removes an remote tier t
 
 The [`mc ilm tier remove`](#command-mc.ilm.tier.remove) command has equivalent functionality to [`mc ilm tier rm`](#command-mc.ilm.tier.rm)
 
-{{% alert color="info" %}}
-**Note**
-
-Once a tier has transitioned objects, it cannot be removed.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Once a tier has transitioned objects, it cannot be removed.
 
 ### Required Permissions {#required-permissions}
 
@@ -70,24 +69,22 @@ For example, the following policy provides permission for configuring object tra
 
 The command has the following syntax:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example removes an existing remote tier called `WARM-TIER` on the `myminio` deployment. No objects have transitioned to the `WARM-TIER` tier.
 
 ```shell
  mc ilm tier rm myminio WARM-TIER
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
 mc ilm tier info TARGET TIER_NAME
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

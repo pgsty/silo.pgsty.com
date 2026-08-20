@@ -2,8 +2,8 @@
 title: "从远程副本重新同步存储桶"
 url: "/zh/administration/bucket-replication/server-side-replication-resynchronize-remote/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/server-side-replication-resynchronize-remote.rst
+upstream_modified: false
 ---
 
 <a id="minio-bucket-replication-resynchronize"></a>
@@ -19,13 +19,12 @@ silo_modified: false
 
 重新同步是按存储桶执行的过程。对于远端中每个遭受部分或全部数据丢失的存储桶，都必须重复执行重新同步。
 
-{{% alert color="info" %}}
-**BC/DR 操作期间的专业支持**
-
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) 用户可以 [登录](https://subnet.min.io/) 并创建与重新同步相关的新 issue。通过 SUBNET 与 MinIO Engineering 协调，可以确保重新同步成功并恢复正常运行，包括性能测试和健康诊断。
-
-社区用户可以通过 [MinIO Community Slack](https://slack.min.io) 寻求支持。社区支持仅按尽力而为原则提供，不对响应速度提供 SLA。
-{{% /alert %}}
+> [!NOTE]
+> **BC/DR 操作期间的专业支持**
+>
+> [MinIO SUBNET](https://min.io/pricing?jmp=docs) 用户可以 [登录](https://subnet.min.io/) 并创建与重新同步相关的新 issue。通过 SUBNET 与 MinIO Engineering 协调，可以确保重新同步成功并恢复正常运行，包括性能测试和健康诊断。
+>
+> 社区用户可以通过 [MinIO Community Slack](https://slack.min.io) 寻求支持。社区支持仅按尽力而为原则提供，不对响应速度提供 SLA。
 
 <a id="id3"></a>
 

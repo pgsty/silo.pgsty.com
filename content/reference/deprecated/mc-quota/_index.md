@@ -3,19 +3,18 @@ title: "mc quota"
 url: "/reference/deprecated/mc-quota/"
 weight: 70
 icon: fa-solid fa-box-archive
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-quota.rst
+upstream_modified: false
 ---
 
 <a id="mc-quota"></a>
 
 <a id="command-mc.quota"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2024-07-31T15-58-33Z**
-
-`mc quota` and its subcommands are deprecated.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2024-07-31T15-58-33Z**
+>
+> `mc quota` and its subcommands are deprecated.
 
 ## Description {#description}
 
@@ -25,11 +24,10 @@ When a bucket with a quota configured reaches the specified limit, as determined
 
 Each time the MinIO [object scanner](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-scanner) scans a bucket for pending [object lifecycle transitions](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management), it also checks if the bucket has exceeded a configured quota.
 
-{{% alert color="info" %}}
-**Quota enforcement is not immediate**
-
-Bucket quotas are not intended to enforce a strict hard limit on a bucket’s size. If a bucket exceeds its quota between scanner passes, MinIO continues to accept `PUT` requests for that bucket until _after_ the next scanner pass identifies the quota violation.
-{{% /alert %}}
+> [!NOTE]
+> **Quota enforcement is not immediate**
+>
+> Bucket quotas are not intended to enforce a strict hard limit on a bucket’s size. If a bucket exceeds its quota between scanner passes, MinIO continues to accept `PUT` requests for that bucket until _after_ the next scanner pass identifies the quota violation.
 
 ## Subcommands {#subcommands}
 

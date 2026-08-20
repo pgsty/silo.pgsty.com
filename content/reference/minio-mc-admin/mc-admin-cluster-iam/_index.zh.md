@@ -3,8 +3,8 @@ title: "mc admin cluster iam"
 url: "/zh/reference/minio-mc-admin/mc-admin-cluster-iam/"
 weight: 30
 icon: fa-solid fa-users-gear
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-iam.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-cluster-iam"></a>
@@ -14,10 +14,8 @@ silo_modified: false
 
 ## 描述 {#id2}
 
-{{% alert color="info" %}}
-**新增: RELEASE.2022-06-26T18-51-48Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2022-06-26T18-51-48Z**
 
 [`mc admin cluster iam`](#command-mc.admin.cluster.iam) 命令及其子命令提供了用于手动导入和导出 MinIO [身份与访问管理（IAM）](/zh/administration/identity-access-management/#minio-authentication-and-identity-management) 元数据的工具。
 

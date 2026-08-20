@@ -2,8 +2,8 @@
 title: "mc ilm rule rm"
 url: "/reference/minio-mc/mc-ilm-rule-rm/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-rm.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-rm"></a>
@@ -11,26 +11,24 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.rm"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm rule rm` replaces `mc ilm rm`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule rm` replaces `mc ilm rm`.
 
 ## Syntax {#syntax}
 
 The [`mc ilm rule rm`](#command-mc.ilm.rule.rm) command removes an object lifecycle management rule from a MinIO Bucket.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes a single lifecycle management rule from the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc ilm rule rm --id "bgrt1ghju" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -44,8 +42,8 @@ mc [GLOBALFLAGS] ilm rule rm                         \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

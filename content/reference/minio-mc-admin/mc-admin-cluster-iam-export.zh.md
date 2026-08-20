@@ -2,8 +2,8 @@
 title: "mc admin cluster iam export"
 url: "/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-iam-export.rst
+upstream_modified: false
 ---
 
 <a id="command-mc.admin.cluster.iam.export"></a>
@@ -12,25 +12,22 @@ silo_modified: false
 
 ## 描述 {#id1}
 
-{{% alert color="info" %}}
-**新增: RELEASE.2022-06-26T18-51-48Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2022-06-26T18-51-48Z**
 
 [`mc admin cluster iam export`](#command-mc.admin.cluster.iam.export) 命令导出 [IAM](/zh/administration/identity-access-management/#minio-authentication-and-identity-management) 元数据，以供 [`mc admin cluster iam import`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-import/#command-mc.admin.cluster.iam.import) 命令使用。
 
 该命令将输出保存为 `ALIAS-iam-metadata.zip`，其中 `ALIAS` 是 MinIO 部署的 [`alias`](#mc.admin.cluster.iam.export.ALIAS)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令导出 `myminio` 部署的全部 IAM 元数据。
 
 ```shell
 mc admin cluster iam export myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 命令语法如下：
 
 ```shell
@@ -43,8 +40,8 @@ mc [GLOBALFLAGS] admin cluster iam export ALIAS  \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 从 [RELEASE.2023-05-04T18-10-16Z](https://github.com/minio/mc/releases/tag/RELEASE.2023-05-04T18-10-16Z) 开始，[`mc admin cluster iam export`](#command-mc.admin.cluster.iam.export) 支持以尾随正斜杠结尾的别名 `ALIAS/`。 在此版本之前，提供尾随正斜杠会导致命令执行失败。
 

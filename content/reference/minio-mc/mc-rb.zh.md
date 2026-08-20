@@ -2,8 +2,8 @@
 title: "mc rb"
 url: "/zh/reference/minio-mc/mc-rb/"
 weight: 300
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-rb.rst
+upstream_modified: false
 ---
 
 <a id="mc-rb"></a>
@@ -16,24 +16,22 @@ silo_modified: false
 
 如仅需删除存储桶内容，请改用 [`mc rm`](/zh/reference/minio-mc/mc-rm/#command-mc.rm)。
 
-{{% alert color="warning" %}}
-**重要**
-
-[`mc rb`](#command-mc.rb) 会在目标部署上 *永久删除存储桶*， 包括所有 [对象版本](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 以及存储桶配置，例如 [生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 或 [复制](/zh/administration/bucket-replication/#minio-bucket-replication-serverside)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> [`mc rb`](#command-mc.rb) 会在目标部署上 *永久删除存储桶*， 包括所有 [对象版本](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 以及存储桶配置，例如 [生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 或 [复制](/zh/administration/bucket-replication/#minio-bucket-replication-serverside)。
 
 你也可以对本地文件系统使用 [`mc rb`](#command-mc.rb)，其效果与 `rm --rf` 命令行工具类似。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令删除 `myminio` MinIO 部署上的 `mydata` 存储桶：
 
 ```shell
 mc rb --force myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 命令语法如下：
 
 ```shell
@@ -48,8 +46,8 @@ mc [GLOBALFLAGS] rb             \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -95,11 +93,10 @@ mc rb --force myminio/mydata ~/data/myolddata
 
 如果任一 `ALIAS` 指定的是文件系统目录，此选项会删除该目录路径下的所有子目录和文件，效果类似 `rm --rf`。
 
-{{% alert color="danger" %}}
-**警告**
-
-执行 [`mc rb --dangerous`](#mc.rb.-dangerous) 不可逆。 在执行前请尽可能审慎核对，确保命令仅作用于预期的 `ALIAS` 目标。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> 执行 [`mc rb --dangerous`](#mc.rb.-dangerous) 不可逆。 在执行前请尽可能审慎核对，确保命令仅作用于预期的 `ALIAS` 目标。
 
 ### 全局标志 {#id4}
 

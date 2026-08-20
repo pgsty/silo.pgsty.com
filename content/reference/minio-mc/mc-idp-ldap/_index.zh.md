@@ -3,8 +3,8 @@ title: "mc idp ldap"
 url: "/zh/reference/minio-mc/mc-idp-ldap/"
 weight: 140
 icon: fa-solid fa-address-book
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap"></a>
@@ -12,11 +12,10 @@ silo_modified: false
 
 <a id="command-mc.idp.ldap"></a>
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-26T23-31-54Z**
-
-[`mc idp ldap`](#command-mc.idp.ldap) and its subcommands replace `mc admin idp ldap`.
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-26T23-31-54Z**
+>
+> [`mc idp ldap`](#command-mc.idp.ldap) and its subcommands replace `mc admin idp ldap`.
 
 ## 描述 {#id2}
 
@@ -26,11 +25,10 @@ silo_modified: false
 
 有关如何使用这些命令的教程，请参阅 [Active Directory / LDAP 访问管理](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap)。
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO [AD/LDAP 环境变量](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 会覆盖通过此命令修改或设置的对应配置项。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO [AD/LDAP 环境变量](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 会覆盖通过此命令修改或设置的对应配置项。
 
 [`mc idp ldap`](#command-mc.idp.ldap) 命令包含以下子命令：
 

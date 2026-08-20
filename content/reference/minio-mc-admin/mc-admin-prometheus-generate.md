@@ -2,8 +2,8 @@
 title: "mc admin prometheus generate"
 url: "/reference/minio-mc-admin/mc-admin-prometheus-generate/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-prometheus-generate.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-prometheus-generate"></a>
@@ -20,22 +20,20 @@ Starting with MinIO Server [RELEASE.2024-07-15T19-02-30Z](https://github.com/min
 
 MinIO recommends new deployments use [version 3 (v3)](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts). Existing deployments can continue to use [metrics version 2](/operations/monitoring/metrics-v2/#minio-metrics-v2)
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command generates a Prometheus scrape configuration that collects version 2 bucket metrics from the deployment at [alias](/glossary/#term-alias) `myminio`:
 
 ```shell
 mc admin prometheus generate myminio bucket
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -51,8 +49,8 @@ mc [GLOBALFLAGS] admin prometheus generate                                      
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

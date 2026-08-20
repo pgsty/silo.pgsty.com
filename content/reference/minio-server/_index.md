@@ -5,8 +5,8 @@ weight: 30
 aliases:
   - "/reference/minio-server/minio-server/"
 icon: fa-solid fa-database
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/minio-server.rst
+upstream_modified: true
 ---
 
 <a id="minio-server"></a>
@@ -82,15 +82,14 @@ The [`DIRECTORIES`](#minio.server.DIRECTORIES) path(s) *must* be empty when firs
 
 The [`minio server`](#command-minio.server) process requires *at least* 4 drives or directories to enable [erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding).
 
-{{% alert color="warning" %}}
-**Important**
-
-Silo recommends locally attached drives, where the [`DIRECTORIES`](#minio.server.DIRECTORIES) path points to each drive on the host machine. Avoid network-attached storage for primary object data unless the complete stack has been validated, because network latency and failure semantics differ from locally attached storage.
-
-For development or evaluation, you can specify multiple logical directories or partitions on a single physical volume to enable erasure coding on the deployment.
-
-For production environments, do **not** treat multiple logical directories or partitions on one physical disk as independent failure domains. The apparent drive count does not provide physical-disk redundancy.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Silo recommends locally attached drives, where the [`DIRECTORIES`](#minio.server.DIRECTORIES) path points to each drive on the host machine. Avoid network-attached storage for primary object data unless the complete stack has been validated, because network latency and failure semantics differ from locally attached storage.
+>
+> For development or evaluation, you can specify multiple logical directories or partitions on a single physical volume to enable erasure coding on the deployment.
+>
+> For production environments, do **not** treat multiple logical directories or partitions on one physical disk as independent failure domains. The apparent drive count does not provide physical-disk redundancy.
 
 ##### `--address` {#minio.server.-address}
 
@@ -102,23 +101,21 @@ Binds the [`minio`](#command-minio.server) server process to a specific network 
 
 To change the port number for all IP addresses or hostnames configured on the host machine, specify only `:PORT` where `PORT` is a valid and open port on the host.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-01-02T09-40-09Z**
-
-You can configure your hosts file to have MinIO only listen on specific IPs. For example, if the machine’s */etc/hosts* file contains the following:
-
-```shell
-127.0.1.1       minioip
-127.0.1.2       minioip
-```
-
-A command like the following would listen for API calls on port `9000` on both configured IP addresses.
-
-```shell
-minio server --address "minioip:9000" ~/miniodirectory
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-01-02T09-40-09Z**
+>
+> You can configure your hosts file to have MinIO only listen on specific IPs. For example, if the machine’s */etc/hosts* file contains the following:
+>
+> ```shell
+> 127.0.1.1       minioip
+> 127.0.1.2       minioip
+> ```
+>
+> A command like the following would listen for API calls on port `9000` on both configured IP addresses.
+>
+> ```shell
+> minio server --address "minioip:9000" ~/miniodirectory
+> ```
 
 If omitted, [`minio`](#command-minio.server) binds to port `9000` on all configured IPv4 addresses, IPv6 addresses, and hostnames on the host machine.
 
@@ -297,11 +294,10 @@ Omit to use the default directory paths:
 
 See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more information on TLS/SSL connectivity.
 
-{{% alert color="warning" %}}
-**Important**
-
-[MinIO Server RELEASE.2023-12-09T18-17-51Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-12-09T18-17-51Z) removes the deprecated `--config-dir | -C` parameter. Deployments using this flag may start without TLS enabled. Replace those parameters with `--certs-dir | -S` and restart to re-enable TLS.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> [MinIO Server RELEASE.2023-12-09T18-17-51Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-12-09T18-17-51Z) removes the deprecated `--config-dir | -C` parameter. Deployments using this flag may start without TLS enabled. Replace those parameters with `--certs-dir | -S` and restart to re-enable TLS.
 
 ##### `--quiet` {#minio.server.-quiet}
 
@@ -327,11 +323,10 @@ Hides sensitive information from logging.
 
 Outputs server logs and startup information in `JSON` format.
 
-{{% alert color="info" %}}
-**Note**
-
-You can define any of the `minio` parameters above by setting them in the [`MINIO_OPTS`](/reference/minio-server/settings/core/#envvar.MINIO_OPTS) environment variable. This variable takes as its value a single string that contains any of the above parameters and their values that you want to set when starting the MinIO Server.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> You can define any of the `minio` parameters above by setting them in the [`MINIO_OPTS`](/reference/minio-server/settings/core/#envvar.MINIO_OPTS) environment variable. This variable takes as its value a single string that contains any of the above parameters and their values that you want to set when starting the MinIO Server.
 
 ## Settings {#settings}
 

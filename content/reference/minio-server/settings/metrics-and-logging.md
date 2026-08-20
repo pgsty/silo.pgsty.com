@@ -2,8 +2,8 @@
 title: "Metrics and Logging Settings"
 url: "/reference/minio-server/settings/metrics-and-logging/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/metrics-and-logging.rst
+upstream_modified: false
 ---
 
 <a id="metrics-and-logging-settings"></a>
@@ -22,11 +22,10 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 - [Server Logs](#minio-server-envvar-logging-regular)
 - [Webhook Audit Logs](#minio-server-envvar-logging-audit)
@@ -36,17 +35,16 @@ Each configuration setting controls fundamental MinIO behavior and functionality
 
 This setting controls how MinIO authenticates to Prometheus.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" selected=true %}}
-
+{{< tabs group="environment-variable-configuration-setting" default="environment-variable" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_PROMETHEUS_AUTH_TYPE` {#envvar.MINIO_PROMETHEUS_AUTH_TYPE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specifies the authentication mode for the Prometheus [scraping endpoints](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts).
 
@@ -66,10 +64,7 @@ The following section documents settings for configuring MinIO to publish [`mini
 
 You can specify multiple webhook endpoints as log targets by appending a unique identifier `_ID` for each set of related logging environment variables. For example, the following settings define two distinct server logs webhook endpoints:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
-
-```shell
+```shell {tab="Environment Variables" group="environment-variables-configuration-setting" value="environment-variables"}
 export MINIO_LOGGER_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_PRIMARY="TOKEN"
 export MINIO_LOGGER_WEBHOOK_ENDPOINT_PRIMARY="http://webhook-1.example.net"
@@ -79,10 +74,7 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_SECONDARY="TOKEN"
 export MINIO_LOGGER_WEBHOOK_ENDPOINT_SECONDARY="http://webhook-2.example.net"
 ```
 
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
-```shell
+```shell {tab="Configuration Setting" value="configuration-setting"}
 mc admin config set logger_webhook:primary \
    endpoint="http://webhook-01.example.net" [ARGUMENTS=VALUE ...]
 
@@ -90,16 +82,12 @@ mc admin config set logger_webhook:secondary \
    endpoint="http://webhook-02.example.net" [ARGUMENTS=VALUE ...]
 ```
 
-{{% /tab %}}
-{{< /tabpane >}}
-
 ### Settings {#settings}
 
 #### Enable {#enable}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" selected=true %}}
-
+{{< tabs group="environment-variable-configuration-setting" default="environment-variable" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_ENABLE` {#envvar.MINIO_LOGGER_WEBHOOK_ENABLE}
 
 *envvar*
@@ -107,35 +95,32 @@ mc admin config set logger_webhook:secondary \
 Specify `"on"` to enable publishing [`minio server`](/reference/minio-server/#command-minio.server) logs to the HTTP webhook endpoint.
 
 Requires specifying [`MINIO_LOGGER_WEBHOOK_ENDPOINT`](#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT).
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook` {#mc-conf.logger_webhook}
 
 *mc-conf*
 
 The top level key for the configuration settings to configure logging to an HTTP webhook endpoint.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### Endpoint {#endpoint}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_ENDPOINT` {#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook endpoint` {#mc-conf.logger_webhook.endpoint}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The HTTP endpoint of the webhook.
 
@@ -143,9 +128,8 @@ The HTTP endpoint of the webhook.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_LOGGER_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
@@ -169,9 +153,8 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 Consult the documentation for the desired service for more details.
 
 This environment variable corresponds with the [`logger_webhook auth_token`](#mc-conf.logger_webhook.auth_token) configuration setting.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook auth_token` {#mc-conf.logger_webhook.auth_token}
 
 *mc-conf*
@@ -197,33 +180,30 @@ Modify the value according to the endpoint requirements. A custom authentication
 ```
 
 Consult the documentation for the desired service for more details.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### Batch Size {#batch-size}
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-Server RELEASE.2024-03-10T02-53-48Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> Server RELEASE.2024-03-10T02-53-48Z
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_BATCH_SIZE` {#envvar.MINIO_LOGGER_WEBHOOK_BATCH_SIZE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook batch_size` {#mc-conf.logger_webhook.batch_size}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Collect and send the specified number of events to the webhook as a batch. If not set, MinIO sends one event per request.
 
@@ -233,20 +213,18 @@ Collect and send the specified number of events to the webhook as a batch. If no
 
 Requires also setting the *Client Key*.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_LOGGER_WEBHOOK_CLIENT_CERT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook client_cert` {#mc-conf.logger_webhook.client_cert}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The path to the mTLS certificate to use for authenticating to the webhook logger.
 
@@ -256,20 +234,18 @@ The path to the mTLS certificate to use for authenticating to the webhook logger
 
 Required if you define the *Client Certificate*.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_LOGGER_WEBHOOK_CLIENT_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook client_key` {#mc-conf.logger_webhook.client_key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The path to the mTLS certificate key to use to authenticate with the webhook logger service.
 
@@ -277,26 +253,23 @@ The path to the mTLS certificate key to use to authenticate with the webhook log
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_PROXY` {#envvar.MINIO_LOGGER_WEBHOOK_PROXY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook proxy` {#mc-conf.logger_webhook.proxy}
 
 *mc-conf*
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-RELEASE.2023-02-22T18-23-45Z
-{{% /alert %}}
-{{% /tab %}}
-{{< /tabpane >}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> RELEASE.2023-02-22T18-23-45Z
+{{< /tab >}}
+{{< /tabs >}}
 
 Define a proxy to use for the webhook logger when communicating from MinIO to external webhooks.
 
@@ -304,25 +277,21 @@ Define a proxy to use for the webhook logger when communicating from MinIO to ex
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-18T00-05-36Z**
+> [!NOTE]
+> **Added: RELEASE.2023-05-18T00-05-36Z**
 
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_LOGGER_WEBHOOK_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook queue_dir` {#mc-conf.logger_webhook.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the directory path, such as `/opt/minio/events`, to enable MinIO’s persistent event store for undelivered messages. The MinIO process must have read, write, and list access on the specified directory.
 
@@ -332,20 +301,18 @@ MinIO stores undelivered events in the specified store while the webhook service
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_LOGGER_WEBHOOK_QUEUE_SIZE` {#envvar.MINIO_LOGGER_WEBHOOK_QUEUE_SIZE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `logger_webhook queue_size` {#mc-conf.logger_webhook.queue_size}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 An integer value to use for the queue size for logger webhook targets.
 
@@ -362,9 +329,8 @@ You can specify multiple webhook endpoints as audit log targets by appending a u
 
 For example, the following commands set two distinct audit log webhook endpoints:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
-
+{{< tabs group="environment-variables-configuration-setting" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 ```shell
 export MINIO_AUDIT_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_PRIMARY="TOKEN"
@@ -378,10 +344,8 @@ export MINIO_AUDIT_WEBHOOK_ENDPOINT_SECONDARY="http://webhook-1.example.net"
 export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_SECONDARY="/tmp/cert.pem"
 export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_SECONDARY="/tmp/key.pem"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `audit_webhook` {#mc-conf.audit_webhook}
 
 *mc-conf*
@@ -405,17 +369,15 @@ mc admin config set audit_webhook:primary \
 mc admin config set audit_webhook:secondary \
    endpoint="http://webhook-02.example.net" [ARGUMENTS=VALUE ...]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Settings {#id1}
 
 #### Enable {#id2}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" selected=true %}}
-
+{{< tabs group="environment-variable-configuration-setting" default="environment-variable" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_WEBHOOK_ENABLE` {#envvar.MINIO_AUDIT_WEBHOOK_ENABLE}
 
 *envvar*
@@ -423,30 +385,28 @@ mc admin config set audit_webhook:secondary \
 Specify `"on"` to enable publishing audit logs to the HTTP webhook endpoint.
 
 Requires specifying [`MINIO_AUDIT_WEBHOOK_ENDPOINT`](#envvar.MINIO_AUDIT_WEBHOOK_ENDPOINT).
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 Configure an audit webhook to enable it. There is *not* a separate `enable` configuration setting.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### Endpoint {#id3}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_WEBHOOK_ENDPOINT` {#envvar.MINIO_AUDIT_WEBHOOK_ENDPOINT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_webhook endpoint` {#mc-conf.audit_webhook.endpoint}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The HTTP endpoint of the webhook.
 
@@ -454,27 +414,25 @@ The HTTP endpoint of the webhook.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_AUDIT_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_webhook auth_token` {#mc-conf.audit_webhook.auth_token}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 An authentication token of the appropriate type for the endpoint. Omit for endpoints which do not require authentication.
 
 To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 For example, for a Bearer token, prepend `Bearer`:
 
 ```shell
@@ -488,10 +446,8 @@ A custom authentication format could resemble the following:
 ```shell
 export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ```shell
 mc admin config set myminio audit_webhook       \
          endpoint="http://webhook.example.net"  \
@@ -507,36 +463,32 @@ mc admin config set myminio audit_webhook       \
          endpoint="http://webhook.example.net"  \
          auth_token="ServiceXYZ 1a2b3c4f5e"
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Consult the documentation for the desired service for more details.
 
 #### Batch Size {#id5}
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-Server RELEASE.2024-03-10T02-53-48Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> Server RELEASE.2024-03-10T02-53-48Z
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_WEBHOOK_BATCH_SIZE` {#envvar.MINIO_AUDIT_WEBHOOK_BATCH_SIZE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_webhook batch_size` {#mc-conf.audit_webhook.batch_size}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Collect and send the specified number of events to the webhook as a batch. If not set, MinIO sends one event per request.
 
@@ -544,24 +496,22 @@ Collect and send the specified number of events to the webhook as a batch. If no
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_CERT}
 
 *envvar*
 
 Requires also specifying [`MINIO_AUDIT_WEBHOOK_CLIENT_KEY`](#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_KEY).
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_webhook client_cert` {#mc-conf.audit_webhook.client_cert}
 
 *mc-conf*
 
 Requires also specifying [`client_key`](#mc-conf.audit_webhook.client_key).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The x.509 client certificate to present to the HTTP webhook. Omit for webhooks which do not require clients to present a known TLS certificate.
 
@@ -569,24 +519,22 @@ The x.509 client certificate to present to the HTTP webhook. Omit for webhooks w
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_KEY}
 
 *envvar*
 
 Requires also specifying [`MINIO_AUDIT_WEBHOOK_CLIENT_CERT`](#envvar.MINIO_AUDIT_WEBHOOK_CLIENT_CERT).
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_webhook client_key` {#mc-conf.audit_webhook.client_key}
 
 *mc-conf*
 
 Requires specifying [`client_cert`](#mc-conf.audit_webhook.client_cert).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The x.509 private key to present to the HTTP webhook. Omit for webhooks which do not require clients to present a known TLS certificate.
 
@@ -594,25 +542,21 @@ The x.509 private key to present to the HTTP webhook. Omit for webhooks which do
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_AUDIT_WEBHOOK_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_webhook queue_dir` {#mc-conf.audit_webhook.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-18T00-05-36Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-18T00-05-36Z**
 
 Specify the directory path, such as `/opt/minio/events`, to enable MinIO’s persistent event store for undelivered messages. The MinIO process must have read, write, and list access on the specified directory.
 
@@ -622,20 +566,18 @@ MinIO stores undelivered events in the specified store while the webhook service
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_WEBHOOK_QUEUE_SIZE` {#envvar.MINIO_AUDIT_WEBHOOK_QUEUE_SIZE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_webhook queue_size` {#mc-conf.audit_webhook.queue_size}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 An integer value to use for the queue size for audit webhook targets. The default is `100000` events.
 
@@ -665,9 +607,8 @@ mc admin config set audit_kafka \
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" selected=true %}}
-
+{{< tabs group="environment-variable-configuration-setting" default="environment-variable" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_ENABLE` {#envvar.MINIO_AUDIT_KAFKA_ENABLE}
 
 *envvar*
@@ -675,30 +616,28 @@ mc admin config set audit_kafka \
 Set to `"on"` to enable the target.
 
 Set to `"off"` to disable the target.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 There is not a configuration setting for this value. Use the environment variable to disable a configured audit webhook target.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### Brokers {#brokers}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_BROKERS` {#envvar.MINIO_AUDIT_KAFKA_BROKERS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka brokers` {#mc-conf.audit_kafka.brokers}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 A comma-separated list of Kafka broker addresses:
 
@@ -712,20 +651,18 @@ At least one broker must be online and reachable by the MinIO server to initiali
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_TOPIC` {#envvar.MINIO_AUDIT_KAFKA_TOPIC}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka topic` {#mc-conf.audit_kafka.topic}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The name of the Kafka topic to associate to MinIO audit log events.
 
@@ -733,20 +670,18 @@ The name of the Kafka topic to associate to MinIO audit log events.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_TLS` {#envvar.MINIO_AUDIT_KAFKA_TLS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka tls` {#mc-conf.audit_kafka.tls}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Set to `"on"` to enable TLS connectivity to the specified Kafka brokers.
 
@@ -756,20 +691,18 @@ Defaults to `"off"`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY` {#envvar.MINIO_AUDIT_KAFKA_TLS_SKIP_VERIFY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka tls_skip_verify` {#mc-conf.audit_kafka.tls_skip_verify}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Set to `"on"` to direct MinIO to skip verification of the Kafka broker TLS certificates.
 
@@ -783,24 +716,22 @@ Defaults to `"off"` for strict verification of TLS certificates.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_SASL` {#envvar.MINIO_AUDIT_KAFKA_SASL}
 
 *envvar*
 
 Requires specifying [`MINIO_AUDIT_KAFKA_SASL_USERNAME`](#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME) and [`MINIO_AUDIT_KAFKA_SASL_PASSWORD`](#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD).
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka sasl` {#mc-conf.audit_kafka.sasl}
 
 *mc-conf*
 
 Requires specifying [`sasl_username`](#mc-conf.audit_kafka.sasl_username) and [`sasl_password`](#mc-conf.audit_kafka.sasl_password).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Set to `"on"` to direct MinIO to use SASL to authenticate against the Kafka brokers.
 
@@ -808,24 +739,22 @@ Set to `"on"` to direct MinIO to use SASL to authenticate against the Kafka brok
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_SASL_USERNAME` {#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME}
 
 *envvar*
 
 Requires specifying [`MINIO_AUDIT_KAFKA_SASL`](#envvar.MINIO_AUDIT_KAFKA_SASL) and [`MINIO_AUDIT_KAFKA_SASL_PASSWORD`](#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD).
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka sasl_username` {#mc-conf.audit_kafka.sasl_username}
 
 *mc-conf*
 
 Requires specifying [`sasl`](#mc-conf.audit_kafka.sasl) and [`sasl_password`](#mc-conf.audit_kafka.sasl_password).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The SASL username MinIO uses for authentication against the Kafka brokers.
 
@@ -833,24 +762,22 @@ The SASL username MinIO uses for authentication against the Kafka brokers.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_SASL_PASSWORD` {#envvar.MINIO_AUDIT_KAFKA_SASL_PASSWORD}
 
 *envvar*
 
 Requires specifying [`MINIO_AUDIT_KAFKA_SASL`](#envvar.MINIO_AUDIT_KAFKA_SASL) and [`MINIO_AUDIT_KAFKA_SASL_USERNAME`](#envvar.MINIO_AUDIT_KAFKA_SASL_USERNAME).
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka sasl_password` {#mc-conf.audit_kafka.sasl_password}
 
 *mc-conf*
 
 Requires specifying [`sasl`](#mc-conf.audit_kafka.sasl) and [`sasl_username`](#mc-conf.audit_kafka.sasl_username).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The SASL password MinIO uses for authentication against the Kafka brokers.
 
@@ -858,32 +785,28 @@ The SASL password MinIO uses for authentication against the Kafka brokers.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_SASL_MECHANISM` {#envvar.MINIO_AUDIT_KAFKA_SASL_MECHANISM}
 
 *envvar*
 
-{{% alert color="warning" %}}
-**Important**
-
-The `PLAIN` authentication mechanism sends credentials in plain text over the network. Use [`MINIO_AUDIT_KAFKA_TLS`](#envvar.MINIO_AUDIT_KAFKA_TLS) or to enable TLS connectivity to the Kafka brokers and ensure secure transmission of SASL credentials.
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+> [!WARNING]
+> **Important**
+>
+> The `PLAIN` authentication mechanism sends credentials in plain text over the network. Use [`MINIO_AUDIT_KAFKA_TLS`](#envvar.MINIO_AUDIT_KAFKA_TLS) or to enable TLS connectivity to the Kafka brokers and ensure secure transmission of SASL credentials.
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka sasl_mechanism` {#mc-conf.audit_kafka.sasl_mechanism}
 
 *mc-conf*
 
-{{% alert color="warning" %}}
-**Important**
-
-The `PLAIN` authentication mechanism sends credentials in plain text over the network. Use [`tls`](#mc-conf.audit_kafka.tls) to enable TLS connectivity to the Kafka brokers and ensure secure transmission of SASL credentials.
-{{% /alert %}}
-{{% /tab %}}
-{{< /tabpane >}}
+> [!WARNING]
+> **Important**
+>
+> The `PLAIN` authentication mechanism sends credentials in plain text over the network. Use [`tls`](#mc-conf.audit_kafka.tls) to enable TLS connectivity to the Kafka brokers and ensure secure transmission of SASL credentials.
+{{< /tab >}}
+{{< /tabs >}}
 
 The SASL mechanism MinIO uses for authentication against the Kafka brokers.
 
@@ -893,24 +816,22 @@ Defaults to `plain`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH` {#envvar.MINIO_AUDIT_KAFKA_TLS_CLIENT_AUTH}
 
 *envvar*
 
 Requires specifying [`MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT`](#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT) and [`MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY`](#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY).
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka tls_client_auth` {#mc-conf.audit_kafka.tls_client_auth}
 
 *mc-conf*
 
 Requires specifying [`client_tls_cert`](#mc-conf.audit_kafka.client_tls_cert) and [`client_tls_key`](#mc-conf.audit_kafka.client_tls_key).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Set to `"on"` to direct MinIO to use mTLS to authenticate against the Kafka brokers.
 
@@ -918,20 +839,18 @@ Set to `"on"` to direct MinIO to use mTLS to authenticate against the Kafka brok
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT` {#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_CERT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka client_tls_cert` {#mc-conf.audit_kafka.client_tls_cert}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The path to the TLS client certificate to use for mTLS authentication.
 
@@ -939,20 +858,18 @@ The path to the TLS client certificate to use for mTLS authentication.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY` {#envvar.MINIO_AUDIT_KAFKA_CLIENT_TLS_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka client_tls_key` {#mc-conf.audit_kafka.client_tls_key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The path to the TLS client private key to use for mTLS authentication.
 
@@ -960,20 +877,18 @@ The path to the TLS client private key to use for mTLS authentication.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_VERSION` {#envvar.MINIO_AUDIT_KAFKA_VERSION}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka version` {#mc-conf.audit_kafka.version}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The version of the Kafka broker MinIO expects at the specified endpoints.
 
@@ -983,20 +898,18 @@ MinIO returns an error if the Kakfa broker version does not match those specifie
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_COMMENT` {#envvar.MINIO_AUDIT_KAFKA_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka comment` {#mc-conf.audit_kafka.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 A comment to associate with the configuration.
 
@@ -1004,20 +917,18 @@ A comment to associate with the configuration.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_QUEUE_DIR` {#envvar.MINIO_AUDIT_KAFKA_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka queue_dir` {#mc-conf.audit_kafka.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the directory path to enable MinIO’s persistent event store for undelivered messages, such as `/opt/minio/events`.
 
@@ -1027,19 +938,17 @@ MinIO stores undelivered events in the specified store while the Kafka service i
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ###### `MINIO_AUDIT_KAFKA_QUEUE_SIZE` {#envvar.MINIO_AUDIT_KAFKA_QUEUE_SIZE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ###### `audit_kafka queue_size` {#mc-conf.audit_kafka.queue_size}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the maximum limit for undelivered messages. Defaults to `100000`.

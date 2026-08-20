@@ -2,8 +2,8 @@
 title: "AssumeRoleWithCustomToken"
 url: "/developers/security-token-service/AssumeRoleWithCustomToken/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/security-token-service/AssumeRoleWithCustomToken.rst
+upstream_modified: false
 ---
 
 <a id="assumerolewithcustomtoken"></a>

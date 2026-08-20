@@ -2,8 +2,8 @@
 title: "站点故障恢复"
 url: "/zh/operations/data-recovery/recover-after-site-failure/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery/recover-after-site-failure.rst
+upstream_modified: false
 ---
 
 <a id="minio-restore-hardware-failure-site"></a>
@@ -36,13 +36,12 @@ silo_modified: false
 
 ## 将不健康对等站点恢复到 Site Replication {#site-replication}
 
-{{% alert color="warning" %}}
-**重要**
-
-[RELEASE.2023-01-02T09-40-09Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-01-02T09-40-09Z) 版 MinIO server 包含重要修复，用于在包含三个或更多对等站点的复制配置中移除已下线站点。
-
-对于已配置站点复制的部署，请规划将所有对等站点 [测试并升级](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade) 到该版本。 一旦发生站点故障，你可以先将剩余健康站点更新到该指定版本，再执行本流程。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> [RELEASE.2023-01-02T09-40-09Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-01-02T09-40-09Z) 版 MinIO server 包含重要修复，用于在包含三个或更多对等站点的复制配置中移除已下线站点。
+>
+> 对于已配置站点复制的部署，请规划将所有对等站点 [测试并升级](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade) 到该版本。 一旦发生站点故障，你可以先将剩余健康站点更新到该指定版本，再执行本流程。
 
 [站点复制](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 可让两个或更多 MinIO 部署在 IAM 策略、存储桶、存储桶配置、对象及对象元数据方面保持同步。 如果某个对等站点由于重大灾害或长期停电等原因失效，你可以使用剩余健康站点来恢复 [可复制数据](/zh/operations/replication/multi-site-replication/#minio-site-replication-what-replicates)。
 
@@ -66,13 +65,12 @@ silo_modified: false
    - 验证新的 MinIO 部署运行正常，并且与其他对等站点具备双向连通性。
    - 确保新站点与现有对等站点使用相同的 server 版本
 
-   {{% alert color="danger" %}}
-   **警告**
-
-   [`mc admin replicate rm --force`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.rm.-force) 命令只会作用于站点复制配置中在线或健康的节点。 被移除的离线 MinIO 部署仍会保留其原始复制配置，因此如果该部署恢复正常运行，它仍会继续向已配置的对等站点执行复制操作。
-
-   如果你计划复用这些硬件重新加入站点复制配置，那么在重新初始化 MinIO 并将该站点重新加入复制配置之前，必须彻底清空该部署的驱动器。
-   {{% /alert %}}
+   > [!CAUTION]
+   > **警告**
+   >
+   > [`mc admin replicate rm --force`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.rm.-force) 命令只会作用于站点复制配置中在线或健康的节点。 被移除的离线 MinIO 部署仍会保留其原始复制配置，因此如果该部署恢复正常运行，它仍会继续向已配置的对等站点执行复制操作。
+   >
+   > 如果你计划复用这些硬件重新加入站点复制配置，那么在重新初始化 MinIO 并将该站点重新加入复制配置之前，必须彻底清空该部署的驱动器。
 3. 将 [替换后的对等站点加入](/zh/operations/replication/multi-site-replication/#minio-expand-site-replication) 复制配置。
 
    使用 [`mc admin replicate add`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add) 命令，将新站点加入复制配置：

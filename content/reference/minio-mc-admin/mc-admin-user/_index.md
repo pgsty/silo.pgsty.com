@@ -3,8 +3,8 @@ title: "mc admin user"
 url: "/reference/minio-mc-admin/mc-admin-user/"
 weight: 190
 icon: fa-solid fa-users
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user"></a>
@@ -22,11 +22,10 @@ To manage users who authenticate using a 3rd party IDP, use the command for the 
 - For AD/LDAP, use [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap)
 - For OpenID Connect (OIDC) compatible providers, use [`mc idp openid`](/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid)
 
-{{% alert color="info" %}}
-**Use `mc idp` commands on MinIO Deployments Only**
-
-[`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) and [`mc idp openid`](/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) and their subcommands are only supported against MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc idp` commands on MinIO Deployments Only**
+>
+> [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) and [`mc idp openid`](/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) and their subcommands are only supported against MinIO deployments.
 
 ## Subcommands {#subcommands}
 

@@ -7,8 +7,7 @@ weight: 1
 type: docs
 icon: fa-solid fa-book
 sidebar_expanded: true
-minio_origin: true
-silo_modified: true
+upstream_link: ""
 ---
 
 {{< home-docs >}}

@@ -2,8 +2,8 @@
 title: "mc encrypt set"
 url: "/zh/reference/minio-mc/mc-encrypt-set/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-encrypt-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-encrypt-set"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 [`mc encrypt set`](#command-mc.encrypt.set) 仅支持 [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) 和 [SSE-S3](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令为 `myminio` MinIO 部署上的 `mydata` 存储桶设置默认的 [SSE-KMS 加密密钥](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms)：
 
 ```shell
 mc encrypt set sse-kms "minio-encryption-key" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] encrypt set  ENCRYPTION [KMSKEY] ALIAS
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -78,8 +77,8 @@ mc encrypt set ENCRYPTION [KMSKEY] play/mybucket
 
 ### 启用自动服务端存储桶加密 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令假设：
 
 - MinIO 服务端配置支持 [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms)
@@ -88,10 +87,8 @@ mc encrypt set ENCRYPTION [KMSKEY] play/mybucket
 ```shell
  mc encrypt set sse-kms minio-encryption-key myminio/data
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc encrypt set ENCRYPTION KMSKEY TARGET
 ```
@@ -99,8 +96,8 @@ mc encrypt set ENCRYPTION KMSKEY TARGET
 - 将 `ENCRYPTION` 替换为 `sse-kms` 或 `sse-s3`，具体取决于 所需的加密模式。
 - 将 `KMSKEY` 替换为已配置 root KMS 中的加密密钥名称。 该参数对 `sse-s3` 无效。
 - 将 `TARGET` 替换为要配置自动服务端存储桶加密的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id7}
 

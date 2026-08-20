@@ -2,8 +2,8 @@
 title: "mc ilm tier update"
 url: "/reference/minio-mc/mc-ilm-tier-update/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-update.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-update"></a>
@@ -11,21 +11,19 @@ silo_modified: false
 
 <a id="command-mc.ilm.tier.update"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc ilm tier update`](#command-mc.ilm.tier.update) replaces `mc admin tier edit`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc ilm tier update`](#command-mc.ilm.tier.update) replaces `mc admin tier edit`.
 
 ## Description {#description}
 
 The [`mc ilm tier update`](#command-mc.ilm.tier.update) command modifies an existing configured remote tier.
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 ### Supported S3 Services {#supported-s3-services}
 
@@ -124,8 +122,8 @@ Defer to the documentation for the supported tiering targets for more complete i
 
 ## Syntax {#syntax}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example updates the credentials for an existing remote tier called `S3TIER` on the `myminio` deployment.
 
 ```shell
@@ -133,8 +131,8 @@ The following example updates the credentials for an existing remote tier called
 ```
 
 After running this command, lifecycle management rules on the `myminio` deployment use the tier’s new credentials to transition objects into the remote location. Options not modified in the command maintain their existing configurations.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -155,8 +153,8 @@ mc ilm tier update TARGET                         \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -228,11 +226,10 @@ This option only applies to remote storage tiers with [`TIER_TYPE`](/reference/m
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-07-03T20-17-25Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-07-03T20-17-25Z
 
 Directory ID for the Azure service principal account.
 
@@ -244,11 +241,10 @@ This option only applies to remote storage tiers with [`TIER_TYPE`](/reference/m
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-07-03T20-17-25Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-07-03T20-17-25Z
 
 Client ID of the Azure service principal account.
 
@@ -262,11 +258,10 @@ This option only applies to remote storage tiers with [`TIER_TYPE`](/reference/m
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-07-03T20-17-25Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-07-03T20-17-25Z
 
 The secret for the Azure service principal account.
 

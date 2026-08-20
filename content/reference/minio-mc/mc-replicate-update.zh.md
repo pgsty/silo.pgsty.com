@@ -2,8 +2,8 @@
 title: "mc replicate update"
 url: "/zh/reference/minio-mc/mc-replicate-update/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-update.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-update"></a>
@@ -14,17 +14,15 @@ silo_modified: false
 
 <a id="command-mc.replicate.update"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc replicate update` 替代了 `mc admin bucket remote update` 命令。
 
-`mc replicate update` 替代了 `mc admin bucket remote update` 命令。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2022-11-07T23-47-39Z**
-
-`mc replicate update` 替代了 `mc replicate edit` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-11-07T23-47-39Z**
+>
+> `mc replicate update` 替代了 `mc replicate edit` 命令。
 
 ## 语法 {#id2}
 
@@ -34,8 +32,8 @@ silo_modified: false
 mc [GLOBALFLAGS] replicate update FLAGS [FLAGS] ARGUMENTS [ARGUMENTS]
 ```
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会修改 `myminio` MinIO 部署中 `mydata` 存储桶的一条现有复制规则：
 
 ```shell
@@ -45,8 +43,8 @@ mc replicate update --id "c76um9h4b0t1ijr36mug"           \
 ```
 
 新的复制配置会将所有版本化删除操作、删除标记创建以及现有对象 同步到远端 MinIO 部署。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -73,8 +71,8 @@ mc [GLOBALFLAGS] replicate update              \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -323,11 +321,10 @@ mc replicate update ALIAS/PATH \
 - 将 [`PATH`](#mc.replicate.update.ALIAS) 替换为该规则所在存储桶或存储桶前缀的路径。
 - 将 [`ID`](#mc.replicate.update.-id) 替换为要修改规则的唯一标识符。 使用 [`mc replicate ls`](/zh/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls) 获取该存储桶上的复制规则列表及其对应标识符。
 
-{{% alert color="info" %}}
-**说明**
-
-修改复制配置规则不会影响已经复制的对象。 例如，修改 [`--tags`](#mc.replicate.update.-tags) 过滤器不会删除不满足过滤条件的已复制对象。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 修改复制配置规则不会影响已经复制的对象。 例如，修改 [`--tags`](#mc.replicate.update.-tags) 过滤器不会删除不满足过滤条件的已复制对象。
 
 ### 更新现有复制规则的凭据 {#id7}
 
@@ -358,13 +355,12 @@ mc replicate update ALIAS/PATH \
 - 将 [`ID`](#mc.replicate.update.-id) 替换为要修改规则的唯一标识符。 使用 [`mc replicate ls`](/zh/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls) 获取该存储桶上的复制规则列表及其对应标识符。
 - 在 [`--state`](#mc.replicate.update.-state) 标志中指定 `"disable"` 或 `"enable"`，以禁用或启用复制规则。
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 需要启用 [现有对象复制](/zh/administration/bucket-replication/#minio-replication-behavior-existing-objects)，才能同步在禁用复制规则后写入或删除的对象。
-
-对于 *未* 启用现有对象复制的规则，MinIO 仅同步复制规则处于 *启用* 状态期间发生的写入或删除操作。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 需要启用 [现有对象复制](/zh/administration/bucket-replication/#minio-replication-behavior-existing-objects)，才能同步在禁用复制规则后写入或删除的对象。
+>
+> 对于 *未* 启用现有对象复制的规则，MinIO 仅同步复制规则处于 *启用* 状态期间发生的写入或删除操作。
 
 ## 行为 {#id9}
 
@@ -372,8 +368,8 @@ MinIO 需要启用 [现有对象复制](/zh/administration/bucket-replication/#m
 
 MinIO 强烈建议创建专门用于支持存储桶复制操作的用户。 有关向 MinIO 部署添加用户和策略的更完整文档，请参见 [`mc admin user`](/zh/reference/minio-mc-admin/mc-admin-user/#command-mc.admin.user) 和 [`mc admin policy`](/zh/reference/minio-mc-admin/mc-admin-policy/#command-mc.admin.policy)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="复制管理员" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="复制管理员" value="tab1" >}}
 以下策略提供在部署上配置并启用复制所需的权限。
 
 ```json
@@ -418,8 +414,8 @@ MinIO 强烈建议创建专门用于支持存储桶复制操作的用户。 有�
 - `"EnableReplicationRuleConfiguration"` 语句授予在存储桶上创建复制规则的权限。`"arn:aws:s3:::*` 资源将复制权限应用到源部署上的 *任意* 存储桶。你可以按需将用户策略限制到特定存储桶。
 
 使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 将该策略添加到每个作为复制源的部署。使用 [`mc admin user add`](/zh/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) 在部署上创建用户，并使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将该策略关联到该新用户。
-{{% /tab %}}
-{{% tab header="复制远端用户" %}}
+{{< /tab >}}
+{{< tab label="复制远端用户" value="tab2" >}}
 以下策略提供将复制数据同步 *到* 该部署所需的权限。
 
 ```json
@@ -472,8 +468,8 @@ MinIO 强烈建议创建专门用于支持存储桶复制操作的用户。 有�
 - `"EnableReplicatingDataIntoBucket"` 语句授予远端目标将数据同步到 MinIO 部署中 *任意* 存储桶的权限。 若要将策略限制到特定存储桶，可在 `Resource` 数组中以 `"arn:aws:s3:::bucketName/*"` 形式指定这些存储桶。
 
 使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 将该策略添加到每个作为复制目标的部署。使用 [`mc admin user add`](/zh/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) 在部署上创建用户，并使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将该策略关联到该新用户。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### S3 兼容性 {#s3}
 

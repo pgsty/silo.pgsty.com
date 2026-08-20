@@ -2,8 +2,8 @@
 title: "将事件发布到 PostgreSQL"
 url: "/zh/administration/monitoring/publish-events-to-postgresql/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-postgresql.rst
+upstream_modified: false
 ---
 
 <a id="postgresql"></a>
@@ -29,8 +29,8 @@ MinIO 依赖 PostgreSQL 9.5 引入的特性。
 
 你可以使用环境变量 *或* 运行时配置设置来配置新的 PostgreSQL 服务端点。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/postgresql/#minio-server-envvar-bucket-notification-postgresql) 指定 PostgreSQL 服务端点及其相关 配置设置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用这些设置。
 
 下面的示例代码设置了与配置 PostgreSQL 服务端点相关的 *全部* 环境变量。 最低 *必需* 的变量如下：
@@ -39,37 +39,33 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 - [`MINIO_NOTIFY_POSTGRES_TABLE`](/zh/reference/minio-server/settings/notifications/postgresql/#envvar.MINIO_NOTIFY_POSTGRES_TABLE)
 - [`MINIO_NOTIFY_POSTGRES_FORMAT`](/zh/reference/minio-server/settings/notifications/postgresql/#envvar.MINIO_NOTIFY_POSTGRES_FORMAT)
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_POSTGRES_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_<IDENTIFIER>="host=postgresql-endpoint.example.net port=4222"
+>    set MINIO_NOTIFY_POSTGRES_TABLE_<IDENTIFIER>="minioevents"
+>    set MINIO_NOTIFY_POSTGRES_FORMAT_<IDENTIFIER>="namespace|access"
+>    set MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
+>    set MINIO_NOTIFY_POSTGRES_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
+>    set MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
+>    set MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
+> ```
 
-```shell
-   set MINIO_NOTIFY_POSTGRES_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_<IDENTIFIER>="host=postgresql-endpoint.example.net port=4222"
-   set MINIO_NOTIFY_POSTGRES_TABLE_<IDENTIFIER>="minioevents"
-   set MINIO_NOTIFY_POSTGRES_FORMAT_<IDENTIFIER>="namespace|access"
-   set MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
-   set MINIO_NOTIFY_POSTGRES_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
-   set MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
-   set MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-   export MINIO_NOTIFY_POSTGRES_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_<IDENTIFIER>="host=postgresql-endpoint.example.net port=4222"
-   export MINIO_NOTIFY_POSTGRES_TABLE_<IDENTIFIER>="minioevents"
-   export MINIO_NOTIFY_POSTGRES_FORMAT_<IDENTIFIER>="namespace|access"
-   export MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
-   export MINIO_NOTIFY_POSTGRES_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
-   export MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
-   export MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_POSTGRES_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_<IDENTIFIER>="host=postgresql-endpoint.example.net port=4222"
+>    export MINIO_NOTIFY_POSTGRES_TABLE_<IDENTIFIER>="minioevents"
+>    export MINIO_NOTIFY_POSTGRES_FORMAT_<IDENTIFIER>="namespace|access"
+>    export MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
+>    export MINIO_NOTIFY_POSTGRES_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
+>    export MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
+>    export MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
+> ```
 
 - 将 `<IDENTIFIER>` 替换为 PostgreSQL 服务端点的唯一描述性字符串。 对于与新目标服务端点相关的所有环境变量，请使用相同的 `<IDENTIFIER>` 值。 以下示例假定标识符为 `PRIMARY`。
 
@@ -81,8 +77,8 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
   有关受支持的 PostgreSQL 连接字符串参数的完整文档，请参见 [PostgreSQL 连接字符串](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)。
 
 各环境变量的完整文档请参见 [用于存储桶通知的 PostgreSQL 服务](/zh/reference/minio-server/settings/notifications/postgresql/#minio-server-envvar-bucket-notification-postgresql)。
-{{% /tab %}}
-{{% tab header="配置设置" %}}
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 MinIO 支持在正在运行的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_postgres`](/zh/reference/minio-server/settings/notifications/postgresql/#mc-conf.notify_postgres) 配置键 来新增或更新 PostgreSQL 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程， 才能应用任何新增或更新的配置设置。
 
 下面的示例代码设置了与配置 PostgreSQL 服务端点相关的 *全部* 设置。 最低 *必需* 的设置如下：
@@ -112,8 +108,8 @@ mc admin config set ALIAS/ notify_postgres:IDENTIFIER \
   有关受支持的 PostgreSQL 连接字符串参数的完整文档，请参见 [PostgreSQL 连接字符串](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)。
 
 各设置的完整文档请参见 [PostgreSQL 存储桶通知配置设置](/zh/reference/minio-server/settings/notifications/postgresql/#minio-server-config-bucket-notification-postgresql)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) 重启 MinIO 部署 {#minio}
 
@@ -133,36 +129,35 @@ SQS ARNs: arn:minio:sqs::primary:postgresql
 
 当将关联的 PostgreSQL 部署作为目标配置存储桶通知时，你必须指定该 ARN 资源。
 
-{{% alert color="info" %}}
-**识别存储桶通知的 ARN**
-
-此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
-
-**查看 JSON 输出**
-
-1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. 在 JSON 输出中，查找 `info.sqsARN` 键。
-
-   你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
-
-   例如，`arn:minio:sqs::primary:postgresql`。
-
-**使用 jq 从 JSON 中解析该值**
-
-1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
-2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:postgresql`。
-{{% /alert %}}
+> [!NOTE]
+> **识别存储桶通知的 ARN**
+>
+> 此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
+>
+> **查看 JSON 输出**
+>
+> 1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
+>
+>    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
+>
+>    例如，`arn:minio:sqs::primary:postgresql`。
+>
+> **使用 jq 从 JSON 中解析该值**
+>
+> 1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
+> 2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:postgresql`。
 
 ### 3) 将 PostgreSQL 端点作为目标配置存储桶通知 {#id4}
 

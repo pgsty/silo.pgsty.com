@@ -2,8 +2,8 @@
 title: "密钥加密服务设置"
 url: "/zh/reference/minio-server/settings/kes/"
 weight: 100
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/kes.rst
+upstream_modified: true
 ---
 
 <a id="minio-server-envvar-kes"></a>
@@ -11,19 +11,17 @@ silo_modified: true
 
 MinIO Server 提供三组环境变量，用于管理 MinIO Server 与 Key Encryption Service (KES)、Key Management Service (KMS) 或静态密钥文件的交互方式。 这三组中只能定义一组。 如果定义了多种类型的环境变量组，MinIO 会返回错误。
 
-{{% alert color="info" %}}
-**说明**
-
-这些设置不支持通过 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 进行配置。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 这些设置不支持通过 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 进行配置。
 
 在启动或重启 MinIO 进程之前，请在宿主系统中定义其中任意一组环境变量。 有关如何定义环境变量，请参考操作系统文档。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## Key Encryption Service {#key-encryption-service}
 
@@ -45,13 +43,12 @@ KES 服务器上配置的 Key Management system (KMS) 中外部密钥名称，�
 - [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) 的默认服务端加密密钥。
 - [SSE-S3](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3) 的服务端加密密钥。
 
-{{% alert color="warning" %}}
-**重要**
-
-在 MinIO 部署上启用 <abbr title="服务端加密">SSE</abbr> 后， 会自动使用默认加密密钥对该部署的后端数据进行加密。
-
-MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动。 KMS 必须维护并提供对 [`MINIO_KMS_KES_KEY_NAME`](#envvar.MINIO_KMS_KES_KEY_NAME) 的访问。 之后你不能再禁用 KES， 也不能在后续“撤销”该 <abbr title="服务端加密">SSE</abbr> 配置。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 在 MinIO 部署上启用 <abbr title="服务端加密">SSE</abbr> 后， 会自动使用默认加密密钥对该部署的后端数据进行加密。
+>
+> MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动。 KMS 必须维护并提供对 [`MINIO_KMS_KES_KEY_NAME`](#envvar.MINIO_KMS_KES_KEY_NAME) 的访问。 之后你不能再禁用 KES， 也不能在后续“撤销”该 <abbr title="服务端加密">SSE</abbr> 配置。
 
 #### `MINIO_KMS_KES_API_KEY` {#envvar.MINIO_KMS_KES_API_KEY}
 
@@ -131,11 +128,10 @@ MinIO Key Management Service (KMS) 进程用于支持 SSE-S3 和 MinIO 后端加
 
 ## 静态密钥文件 {#id3}
 
-{{% alert color="danger" %}}
-**警告**
-
-这些设置用于在不依赖外部 KMS 的情况下，对对象服务端加密进行早期开发和评估。 不要在长期开发、QA 或生产环境中使用这些设置。 关于如何使用 MinIO Key Encryption Service (KES) 和外部 KMS 部署 SSE，请参见 [使用 KES 进行服务端对象加密](/zh/operations/server-side-encryption/configure-minio-kes/#minio-sse-vault)。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> 这些设置用于在不依赖外部 KMS 的情况下，对对象服务端加密进行早期开发和评估。 不要在长期开发、QA 或生产环境中使用这些设置。 关于如何使用 MinIO Key Encryption Service (KES) 和外部 KMS 部署 SSE，请参见 [使用 KES 进行服务端对象加密](/zh/operations/server-side-encryption/configure-minio-kes/#minio-sse-vault)。
 
 提供静态 KMS 密钥或密钥文件用于加密。
 

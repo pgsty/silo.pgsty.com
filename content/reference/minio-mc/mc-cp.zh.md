@@ -2,8 +2,8 @@
 title: "mc cp"
 url: "/zh/reference/minio-mc/mc-cp/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-cp.rst
+upstream_modified: false
 ---
 
 <a id="mc-cp"></a>
@@ -17,22 +17,20 @@ silo_modified: false
 
 你也可以将 [`mc cp`](#command-mc.cp) 用于本地文件系统，达到与 `cp` 命令行工具 类似的效果。
 
-{{% alert color="info" %}}
-**说明**
+> [!NOTE]
+> **说明**
+>
+> [`mc cp`](#command-mc.cp) 仅复制对象的最新版本或指定版本，不包含任何版本信息或修改日期。 要复制所有版本、版本信息及相关元数据，请使用 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 或 [`mc admin replicate`](/zh/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate)。
 
-[`mc cp`](#command-mc.cp) 仅复制对象的最新版本或指定版本，不包含任何版本信息或修改日期。 要复制所有版本、版本信息及相关元数据，请使用 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 或 [`mc admin replicate`](/zh/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate)。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将文件从本地文件系统目录复制到 `myminio` MinIO 部署中的 `mydata` 存储桶：
 
 ```shell
 mc cp --recursive ~/mydata/ myminio/mydata/
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 [`mc cp`](#command-mc.cp) 命令的语法如下：
 
 ```shell
@@ -65,8 +63,8 @@ mc [GLOBALFLAGS] cp                                                        \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -132,10 +130,8 @@ mc cp play/mybucket/object.txt ~/mydata/object.txt
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-10-02T08-27-28Z**
 
 为上传对象添加校验和。
 
@@ -255,11 +251,10 @@ mc cp play/mybucket/object.txt ~/mydata/object.txt
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--legal-hold` {#mc.cp.-legal-hold}
 
@@ -329,11 +324,10 @@ MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-k
 
 *Optional*
 
-{{% alert color="info" %}}
-**变更: RELEASE.2024-10-02T08-27-28Z**
-
-已由 [`--checksum`](#mc.cp.-checksum) 标志替代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2024-10-02T08-27-28Z**
+>
+> 已由 [`--checksum`](#mc.cp.-checksum) 标志替代。
 
 强制所有上传计算 MD5 校验和。
 
@@ -459,9 +453,8 @@ MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-k
 
 使用 [`mc cp`](#command-mc.cp) 将对象复制到 S3 兼容主机：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="文件系统到 S3" %}}
-
+{{< tabs group="s3-s3-s3" >}}
+{{< tab label="文件系统到 S3" value="s3" >}}
 ```shell
 mc cp SOURCE ALIAS/PATH
 ```
@@ -469,9 +462,8 @@ mc cp SOURCE ALIAS/PATH
 - 将 [`SOURCE`](#mc.cp.SOURCE) 替换为对象的文件系统路径。
 - 将 [`ALIAS`](#mc.cp.TARGET) 替换为已配置的 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.cp.TARGET) 替换为 S3 兼容主机上的对象路径。 你可以指定不同的对象名称，以便在复制时“重命名”对象。
-{{% /tab %}}
-{{% tab header="S3 到 S3" %}}
-
+{{< /tab >}}
+{{< tab label="S3 到 S3" value="s3-s3" >}}
 ```shell
 mc cp SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
@@ -480,16 +472,15 @@ mc cp SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - 将 [`SRCPATH`](#mc.cp.SOURCE) 替换为 S3 兼容主机上对象的路径。
 - 将 [`TGTALIAS`](#mc.cp.TARGET) 替换为目标 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`TGTPATH`](#mc.cp.TARGET) 替换为目标 S3 兼容主机上对象的路径。 省略对象名称可使用 `SRCPATH` 的对象名称。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 递归复制对象到 S3 {#id10}
 
 使用 [`mc cp --recursive`](#mc.cp.-recursive) 将对象递归复制到 S3 兼容主机：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="文件系统到 S3" %}}
-
+{{< tabs group="s3-s3-s3" >}}
+{{< tab label="文件系统到 S3" value="s3" >}}
 ```shell
 mc cp --recursive SOURCE ALIAS/PATH
 ```
@@ -497,9 +488,8 @@ mc cp --recursive SOURCE ALIAS/PATH
 - 将 [`SOURCE`](#mc.cp.SOURCE) 替换为包含文件的目录路径。
 - 将 [`ALIAS`](#mc.cp.TARGET) 替换为已配置的 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.cp.TARGET) 替换为 S3 兼容主机上的对象路径。 [`mc cp`](#command-mc.cp) 在目标主机创建对象时会使用 `SOURCE` 的文件名。
-{{% /tab %}}
-{{% tab header="S3 到 S3" %}}
-
+{{< /tab >}}
+{{< tab label="S3 到 S3" value="s3-s3" >}}
 ```shell
 mc cp --recursive SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
@@ -508,8 +498,8 @@ mc cp --recursive SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - 将 [`SRCPATH`](#mc.cp.SOURCE) 替换为源 S3 兼容主机上的 存储桶或存储桶前缀路径。
 - 将 [`TGTALIAS`](#mc.cp.TARGET) 替换为目标 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`TGTPATH`](#mc.cp.TARGET) 替换为目标 S3 兼容主机上的对象路径。 [`mc cp`](#command-mc.cp) 在目标主机创建对象时会使用 `SRCPATH` 的对象名称。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 复制对象的时间点版本 {#id11}
 
@@ -525,11 +515,10 @@ mc cp --rewind DURATION SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - 将 [`TGTALIAS`](#mc.cp.TARGET) 替换为目标 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`TGTPATH`](#mc.cp.TARGET) 替换为目标 S3 兼容主机上对象的路径。 省略对象名称可使用 `SRCPATH` 的对象名称。
 
-{{% alert color="info" %}}
-**需要版本控制**
-
-要使用此功能，[`mc cp`](#command-mc.cp) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
-{{% /alert %}}
+> [!NOTE]
+> **需要版本控制**
+>
+> 要使用此功能，[`mc cp`](#command-mc.cp) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
 
 ### 复制对象的特定版本 {#id12}
 
@@ -545,11 +534,10 @@ mc cp --version-id VERSION SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - 将 [`TGTALIAS`](#mc.cp.TARGET) 替换为目标 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`TGTPATH`](#mc.cp.TARGET) 替换为目标 S3 兼容主机上对象的路径。 省略对象名称可使用 `SRCPATH` 的对象名称。
 
-{{% alert color="info" %}}
-**需要版本控制**
-
-要使用此功能，[`mc cp`](#command-mc.cp) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
-{{% /alert %}}
+> [!NOTE]
+> **需要版本控制**
+>
+> 要使用此功能，[`mc cp`](#command-mc.cp) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
 
 ### 添加 `content-type` 值 {#content-type}
 

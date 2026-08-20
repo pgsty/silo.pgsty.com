@@ -2,8 +2,8 @@
 title: "Requirements to Set Up Bucket Replication"
 url: "/administration/bucket-replication/bucket-replication-requirements/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/bucket-replication-requirements.rst
+upstream_modified: true
 ---
 
 <a id="requirements-to-set-up-bucket-replication"></a>
@@ -25,8 +25,8 @@ Ensure you meet the following prerequisites before you set up any of these repli
 
 Bucket replication requires specific permissions on the source and destination deployments to configure and enable replication rules.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Replication Admin" %}}
+{{< tabs group="replication-admin-replication-remote-user" >}}
+{{< tab label="Replication Admin" value="replication-admin" >}}
 The following policy provides permissions for configuring and enabling replication on a deployment.
 
 ```json
@@ -80,8 +80,8 @@ mc admin policy attach TARGET ReplicationAdminPolicy --user=ReplicationAdmin
 ```
 
 MinIO deployments configured for [Active Directory/LDAP](/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) or [OpenID Connect](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) user management should instead create a dedicated [access keys](/administration/identity-access-management/minio-user-management/#minio-idp-service-account) for bucket replication.
-{{% /tab %}}
-{{% tab header="Replication Remote User" %}}
+{{< /tab >}}
+{{< tab label="Replication Remote User" value="replication-remote-user" >}}
 The following policy provides permissions for enabling synchronization of replicated data *into* the deployment.
 
 ```json
@@ -143,8 +143,8 @@ mc admin policy attach TARGET ReplicationRemoteUserPolicy --user=ReplicationRemo
 ```
 
 MinIO deployments configured for [Active Directory/LDAP](/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) or [OpenID Connect](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) user management should instead create a dedicated [access keys](/administration/identity-access-management/minio-user-management/#minio-idp-service-account) for bucket replication.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 See [`mc admin user`](/reference/minio-mc-admin/mc-admin-user/#command-mc.admin.user), [`mc admin user svcacct`](/reference/minio-mc-admin/mc-admin-user-svcacct/#command-mc.admin.user.svcacct), and [`mc admin policy`](/reference/minio-mc-admin/mc-admin-policy/#command-mc.admin.policy) for more complete documentation on adding users, access keys, and policies to a MinIO deployment.
 

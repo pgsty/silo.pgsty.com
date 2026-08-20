@@ -2,8 +2,8 @@
 title: "Publish Events to MySQL"
 url: "/administration/monitoring/publish-events-to-mysql/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-mysql.rst
+upstream_modified: false
 ---
 
 <a id="publish-events-to-mysql"></a>
@@ -29,8 +29,8 @@ This procedure uses the [`mc`](/reference/minio-mc/#command-mc) command line too
 
 You can configure a new MySQL service endpoint using either environment variables *or* by setting runtime configuration settings.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 MinIO supports specifying the MySQL service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/mysql/#minio-server-envvar-bucket-notification-mysql). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring a MySQL service endpoint. The minimum *required* variables are:
@@ -40,37 +40,33 @@ The following example code sets *all* environment variables related to configuri
 - [`MINIO_NOTIFY_MYSQL_TABLE`](/reference/minio-server/settings/notifications/mysql/#envvar.MINIO_NOTIFY_MYSQL_TABLE)
 - [`MINIO_NOTIFY_MYSQL_FORMAT`](/reference/minio-server/settings/notifications/mysql/#envvar.MINIO_NOTIFY_MYSQL_FORMAT)
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_MYSQL_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_MYSQL_DSN_STRING_<IDENTIFIER>="user:password@tcp(hostname:port)/database"
+>    set MINIO_NOTIFY_MYSQL_TABLE_<IDENTIFIER>="minio-events"
+>    set MINIO_NOTIFY_MYSQL_FORMAT_<IDENTIFIER>="namespace|access"
+>    set MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
+>    set MINIO_NOTIFY_MYSQL_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
+>    set MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
+>    set MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
+> ```
 
-```shell
-   set MINIO_NOTIFY_MYSQL_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_MYSQL_DSN_STRING_<IDENTIFIER>="user:password@tcp(hostname:port)/database"
-   set MINIO_NOTIFY_MYSQL_TABLE_<IDENTIFIER>="minio-events"
-   set MINIO_NOTIFY_MYSQL_FORMAT_<IDENTIFIER>="namespace|access"
-   set MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
-   set MINIO_NOTIFY_MYSQL_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
-   set MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
-   set MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux and macOS**
-
-```shell
-   export MINIO_NOTIFY_MYSQL_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_MYSQL_DSN_STRING_<IDENTIFIER>="user:password@tcp(hostname:port)/database"
-   export MINIO_NOTIFY_MYSQL_TABLE_<IDENTIFIER>="minio-events"
-   export MINIO_NOTIFY_MYSQL_FORMAT_<IDENTIFIER>="namespace|access"
-   export MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
-   export MINIO_NOTIFY_MYSQL_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
-   export MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
-   export MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux and macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_MYSQL_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_MYSQL_DSN_STRING_<IDENTIFIER>="user:password@tcp(hostname:port)/database"
+>    export MINIO_NOTIFY_MYSQL_TABLE_<IDENTIFIER>="minio-events"
+>    export MINIO_NOTIFY_MYSQL_FORMAT_<IDENTIFIER>="namespace|access"
+>    export MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
+>    export MINIO_NOTIFY_MYSQL_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
+>    export MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
+>    export MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
+> ```
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the MySQL service endpoint. Use the same `<IDENTIFIER>` value for all environment variables related to the new target service endpoint. The following examples assume an identifier of `PRIMARY`.
 
@@ -84,8 +80,8 @@ The following example code sets *all* environment variables related to configuri
   `"username:password@tcp(mysql.example.com:3306)/miniodb"`
 
 See [MySQL Service for Bucket Notifications](/reference/minio-server/settings/notifications/mysql/#minio-server-envvar-bucket-notification-mysql) for complete documentation on each environment variable.
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 MinIO supports adding or updating MySQL endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_mysql`](/reference/minio-server/settings/notifications/mysql/#mc-conf.notify_mysql) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an MySQL service endpoint. The minimum *required* settings are:
@@ -117,8 +113,8 @@ mc admin config set ALIAS/ notify_mysql:IDENTIFIER \
   `"username:password@tcp(mysql.example.com:3306)/miniodb"`
 
 See [MySQL Bucket Notification Configuration Settings](/reference/minio-server/settings/notifications/mysql/#minio-server-config-bucket-notification-mysql) for complete documentation on each setting.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) Restart the MinIO Deployment {#restart-the-minio-deployment}
 
@@ -138,36 +134,35 @@ SQS ARNs: arn:minio:sqs::primary:mysql
 
 You must specify the ARN resource when configuring bucket notifications with the associated MySQL deployment as a target.
 
-{{% alert color="info" %}}
-**Identifying the ARN for your bucket notifications**
-
-You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
-
-**Review the JSON output**
-
-1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. In the JSON output, look for the key `info.sqsARN`.
-
-   The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
-
-   For example, `arn:minio:sqs::primary:mysql`.
-
-**Use jq to parse the JSON for the value**
-
-1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
-2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:mysql`
-{{% /alert %}}
+> [!NOTE]
+> **Identifying the ARN for your bucket notifications**
+>
+> You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
+>
+> **Review the JSON output**
+>
+> 1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. In the JSON output, look for the key `info.sqsARN`.
+>
+>    The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
+>
+>    For example, `arn:minio:sqs::primary:mysql`.
+>
+> **Use jq to parse the JSON for the value**
+>
+> 1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
+> 2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:mysql`
 
 ### 3) Configure Bucket Notifications using the MySQL Endpoint as a Target {#configure-bucket-notifications-using-the-mysql-endpoint-as-a-target}
 

@@ -2,8 +2,8 @@
 title: "mc admin accesskey ls"
 url: "/zh/reference/minio-mc-admin/mc-admin-accesskey-list/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-accesskey-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-accesskey-ls"></a>
@@ -19,8 +19,8 @@ silo_modified: false
 
 [`mc admin accesskey list`](#command-mc.admin.accesskey.list) 别名与 [`mc admin accesskey ls`](#command-mc.admin.accesskey.ls) 功能等效。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令列出别名为 `myminio` 的部署中，用户名为 `admin1` 的用户关联的所有访问密钥：
 
 ```shell
@@ -36,9 +36,8 @@ F4V2BBUZSWY7UG96ED70 | 2023-12-24 18:00:00 +0000 UTC
 FZVSEZ8NM9JRBEQZ7B8Q | no-expiry
 HOXGL8ON3RG0IKYCHCUD | no-expiry
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令使用以下语法：
 
 ```shell
@@ -56,8 +55,8 @@ mc [GLOBALFLAGS] admin accesskey ls             \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

@@ -2,8 +2,8 @@
 title: "Deploy Silo as a Container"
 url: "/operations/deployments/baremetal-deploy-minio-as-a-container/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-deploy-minio-as-a-container.rst
+upstream_modified: true
 ---
 
 <a id="deploy-minio-as-a-container"></a>
@@ -17,15 +17,14 @@ Functionality and performance of the Silo container may be constrained by the ba
 
 The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and Single-Node Single-Drive (SNSD) topologies in support of early development and evaluation environments.
 
-{{% alert color="warning" %}}
-**Important**
-
-These examples cover Single-Node Single-Drive and Single-Node Multi-Drive development or evaluation deployments. They do not define a production Multi-Node Multi-Drive topology or an upgrade contract for Docker Compose, Docker Swarm, or another container orchestrator. For a production distributed deployment, use a tested [Kubernetes tenant workflow](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and validate persistence, networking, failure domains, and upgrades for your environment.
-
-The examples use `pgsty/minio:latest` for readability. Pin a tested Silo release tag or image digest in production; `latest` is not a version contract.
-
-The `MINIO_UPDATE=off` setting intentionally disables the server's in-place updater. The current updater retains the upstream MinIO release feed and signing key, so container upgrades must replace the image with a verified Silo tag or digest instead of running `mc admin update`.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> These examples cover Single-Node Single-Drive and Single-Node Multi-Drive development or evaluation deployments. They do not define a production Multi-Node Multi-Drive topology or an upgrade contract for Docker Compose, Docker Swarm, or another container orchestrator. For a production distributed deployment, use a tested [Kubernetes tenant workflow](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and validate persistence, networking, failure domains, and upgrades for your environment.
+>
+> The examples use `pgsty/minio:latest` for readability. Pin a tested Silo release tag or image digest in production; `latest` is not a version contract.
+>
+> The `MINIO_UPDATE=off` setting intentionally disables the server's in-place updater. The current updater retains the upstream MinIO release feed and signing key, so container upgrades must replace the image with a verified Silo tag or digest instead of running `mc admin update`.
 
 ## Considerations {#considerations}
 
@@ -55,8 +54,8 @@ This procedure provides instructions for Podman and Docker in rootfull mode. For
 
 For all other container runtimes, follow the documentation for that runtime and specify the equivalent options, parameters, or configurations.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Podman" %}}
+{{< tabs group="podman-docker" >}}
+{{< tab label="Podman" value="podman" >}}
 The following command creates a folder in your home directory, then starts the Silo container using Podman:
 
 ```shell
@@ -97,8 +96,8 @@ podman run \
 ```
 
 For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.
-{{% /tab %}}
-{{% tab header="Docker" %}}
+{{< /tab >}}
+{{< tab label="Docker" value="docker" >}}
 The following command creates a folder in your home directory, then starts the Silo container using Docker:
 
 ```shell
@@ -139,13 +138,13 @@ docker run \
 ```
 
 For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 2. Connect to the Deployment {#connect-to-the-deployment}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Console" %}}
+{{< tabs group="console-cli" >}}
+{{< tab label="Console" value="console" >}}
 Open your browser to [http://localhost:9001](http://localhost:9001) to open the [Silo Console](/administration/minio-console/#minio-console) login page.
 
 Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previous step.
@@ -153,8 +152,8 @@ Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previou
 <img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: 600px; height: auto;" />
 
 You can use the embedded Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration.
-{{% /tab %}}
-{{% tab header="CLI" %}}
+{{< /tab >}}
+{{< tab label="CLI" value="cli" >}}
 Follow the [Silo client installation instructions](/reference/minio-mc/#mc-install) for `mcli` on your local host. Run `mcli --version` to verify the installation. Published standalone archives and Linux packages install `mcli`; source builds and the client container retain the `mc` executable name.
 
 Once installed, create an alias for the Silo deployment:
@@ -164,5 +163,5 @@ mcli alias set silo http://localhost:9000 USERNAME PASSWORD
 ```
 
 Change the hostname, username, and password to reflect your deployment.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

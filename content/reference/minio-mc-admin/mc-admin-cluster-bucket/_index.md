@@ -3,8 +3,8 @@ title: "mc admin cluster bucket"
 url: "/reference/minio-mc-admin/mc-admin-cluster-bucket/"
 weight: 20
 icon: fa-solid fa-boxes-stacked
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-bucket.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-cluster-bucket"></a>
@@ -14,10 +14,8 @@ silo_modified: false
 
 ## Description {#description}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2022-06-17T02-52-50Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2022-06-17T02-52-50Z**
 
 The [`mc admin cluster bucket`](#command-mc.admin.cluster.bucket) command and its subcommands provide tools for manually importing and exporting MinIO bucket metadata.
 

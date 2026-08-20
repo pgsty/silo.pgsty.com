@@ -3,19 +3,18 @@ title: "S3 API Compatibility"
 url: "/reference/s3-api-compatibility/"
 weight: 250
 icon: fa-solid fa-cloud
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/s3-api-compatibility.rst
+upstream_modified: false
 ---
 
 <a id="s3-api-compatibility"></a>
 
 This page documents S3 APIs supported by MinIO Object Storage. For reference documentation on any given API, see the corresponding documentation for Amazon S3.
 
-{{% alert color="warning" %}}
-**Important**
-
-MinIO strongly recommends using an [S3-Compatible SDK](/developers/minio-drivers/#minio-drivers) for performing object storage operations.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> MinIO strongly recommends using an [S3-Compatible SDK](/developers/minio-drivers/#minio-drivers) for performing object storage operations.
 
 ## Object APIs {#object-apis}
 

@@ -9,8 +9,6 @@ aliases:
 weight: 5
 type: docs
 icon: fa-solid fa-scroll
-minio_origin: false
-silo_modified: false
 ---
 
 PGSTY SILO keeps an open-source, feature-complete, S3-compatible object store maintained and installable, with a build and release chain anyone can inspect. That is the whole scope.

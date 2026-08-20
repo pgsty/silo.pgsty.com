@@ -3,8 +3,8 @@ title: "对象生命周期管理"
 url: "/zh/administration/object-management/object-lifecycle-management/"
 weight: 40
 icon: fa-solid fa-clock-rotate-left
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-lifecycle-management.rst
+upstream_modified: false
 ---
 
 <a id="minio-lifecycle-management"></a>
@@ -33,10 +33,8 @@ MinIO 对象迁移适用于这类场景：将私有云或公有云基础设施�
 
 使用 [`mc ilm tier add`](/zh/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add) 命令为分层数据创建远程目标。 然后，您可以使用 [`mc ilm rule add --transition-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-transition-days) 命令，在指定的日历天数后将对象迁移到该层。
 
-{{% alert color="info" %}}
-**新增: RELEASE.2022-11-10T18-20-21Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2022-11-10T18-20-21Z**
 
 您可以对存储桶或存储桶前缀使用 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls)，验证对象的分层状态。 输出中会包含每个对象的存储层：
 
@@ -49,15 +47,14 @@ $ mc ls play/mybucket
 - `STANDARD` 表示对象存储在 MinIO 部署上。
 - `WARM` 表示对象存储在同名远程层上。
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO 对象迁移支持这类成本优化策略：将较旧或陈旧的数据移动到成本优化的远程存储层，例如云存储或高密度 HDD 存储。
-
-MinIO 对象迁移 **不** 提供备份与恢复功能。 在 MinIO 发生数据丢失时，您不能将远程层用作恢复源。
-
-如需支持备份/恢复或 <abbr title="Business Continuity / Disaster Recovery">BC/DR</abbr> 需求，请使用 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 或 [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO 对象迁移支持这类成本优化策略：将较旧或陈旧的数据移动到成本优化的远程存储层，例如云存储或高密度 HDD 存储。
+>
+> MinIO 对象迁移 **不** 提供备份与恢复功能。 在 MinIO 发生数据丢失时，您不能将远程层用作恢复源。
+>
+> 如需支持备份/恢复或 <abbr title="Business Continuity / Disaster Recovery">BC/DR</abbr> 需求，请使用 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 或 [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication)。
 
 ### 对远程数据的独占访问 {#id3}
 
@@ -110,13 +107,12 @@ MinIO 生命周期管理支持对存储桶中的对象执行过期操作。 对�
   如需在该对象已无剩余版本时让删除标记过期，请在创建过期规则时指定 [`--expire-delete-marker`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-delete-marker) 选项。
 - 如需让一个没有删除标记的对象在指定天数后其所有版本都过期，请将 [`--expire-all-object-versions`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-all-object-versions) 标志与 [`--expire-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-days) 标志一同使用。 这允许该对象在指定天数过去后被永久删除。
 
-  {{% alert color="info" %}}
-  **变更: MinIO**
-
-  RELEASE.2024-05-01T01-11-10Z
-
-  此标志仅适用于没有删除标记的对象。
-  {{% /alert %}}
+  > [!NOTE]
+  > **变更: MinIO**
+  >
+  > RELEASE.2024-05-01T01-11-10Z
+  >
+  > 此标志仅适用于没有删除标记的对象。
 
 <a id="id8"></a>
 

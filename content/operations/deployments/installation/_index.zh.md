@@ -4,8 +4,8 @@ url: "/zh/operations/deployments/installation/"
 description: "Silo 部署拓扑与安装说明"
 weight: 10
 icon: fa-solid fa-download
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/installation.rst
+upstream_modified: true
 ---
 
 <a id="minio-snsd"></a>
@@ -65,8 +65,7 @@ Silo 可以运行在物理机、虚拟化主机或容器中。请查阅当前下
 - [在 macOS 上部署 Silo](/zh/operations/deployments/baremetal-deploy-minio-on-macos/#deploy-minio-macos)
 - [在 Windows 上部署 Silo](/zh/operations/deployments/baremetal-deploy-minio-on-windows/#deploy-minio-windows)
 
-{{% alert color="warning" %}}
-**重要**
-
-发布制品的存在不代表所有平台都有同等的生产验证范围。长期工作负载应优先使用经过测试的 Linux 或 Kubernetes 部署，固定确切的软件包/镜像版本，并根据所选拓扑验证存储、故障域、升级与恢复行为。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 发布制品的存在不代表所有平台都有同等的生产验证范围。长期工作负载应优先使用经过测试的 Linux 或 Kubernetes 部署，固定确切的软件包/镜像版本，并根据所选拓扑验证存储、故障域、升级与恢复行为。

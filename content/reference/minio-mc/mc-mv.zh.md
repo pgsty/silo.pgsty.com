@@ -2,8 +2,8 @@
 title: "mc mv"
 url: "/zh/reference/minio-mc/mc-mv/"
 weight: 250
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mv.rst
+upstream_modified: false
 ---
 
 <a id="mc-mv"></a>
@@ -16,16 +16,15 @@ silo_modified: false
 
 你也可以对本地文件系统使用 [`mc mv`](#command-mc.mv)，以获得与 `mv` 命令行工具类似的结果。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将对象从 `mydata` 存储桶移动到 `myminio` MinIO 部署上的 `archive` 存储桶：
 
 ```shell
 mc mv --recursive myminio/mydata myminio/archive
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -51,8 +50,8 @@ TARGET
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -234,11 +233,10 @@ MinIO 建议对大于 100 MB 的对象使用 multipart upload。 有关 multipar
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--limit-download` {#mc.mv.-limit-download}
 

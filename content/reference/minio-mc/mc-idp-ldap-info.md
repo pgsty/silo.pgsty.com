@@ -2,8 +2,8 @@
 title: "mc idp ldap info"
 url: "/reference/minio-mc/mc-idp-ldap-info/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-info"></a>
@@ -15,17 +15,16 @@ silo_modified: false
 
 The [`mc idp ldap info`](#command-mc.idp.ldap.info) command outputs the current configuration for an AD/LDAP provider on a specified MinIO deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example outputs the AD/LDAP configuration settings on the `myminio` deployment.
 
 ```shell
 mc idp ldap info     \
             myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -40,8 +39,8 @@ mc [GLOBALFLAGS] idp ldap info   \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

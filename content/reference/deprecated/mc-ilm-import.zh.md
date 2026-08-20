@@ -2,8 +2,8 @@
 title: "mc ilm import"
 url: "/zh/reference/deprecated/mc-ilm-import/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-import.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-import"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.import"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm import` 已被 [`mc ilm rule import`](/zh/reference/minio-mc/mc-ilm-rule-import/#command-mc.ilm.rule.import) 替代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm import` 已被 [`mc ilm rule import`](/zh/reference/minio-mc/mc-ilm-rule-import/#command-mc.ilm.rule.import) 替代。
 
 ## 语法 {#id2}
 
@@ -23,16 +22,15 @@ silo_modified: false
 
 [`mc ilm import`](#command-mc.ilm.import) 命令默认从 `STDIN` 导入。你可以从 `.json` 文件输入内容， 例如由 [`mc ilm export`](/zh/reference/deprecated/mc-ilm-export/#command-mc.ilm.export) 生成的文件。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令从 `mydata-lifecycle-config.json` 导入生命周期管理配置，并将其 应用到 `myminio` 部署上的 `mydata` 存储桶：
 
 ```shell
 mc ilm import myminio/mydata < mydata-lifecycle-config.json
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -44,8 +42,8 @@ mc [GLOBALFLAGS] ilm import ALIAS < STDIN
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -67,17 +65,15 @@ mc ilm import myminio/mydata < bucket-lifecycle.json
 
 ### 导入存储桶生命周期管理配置 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令从 `bucket-lifecycle.json` 文件导入存储桶生命周期管理配置：
 
 ```shell
 mc ilm import myminio/mybucket < bucket-lifecycle.json
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc ilm import ALIAS < file.json
 ```
@@ -86,8 +82,8 @@ mc ilm import ALIAS < file.json
 
   `myminio/mydata`
 - 将 `file.json` 替换为要从中导入生命周期管理规则的文件名。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id7}
 

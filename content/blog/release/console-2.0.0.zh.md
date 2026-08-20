@@ -20,11 +20,10 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 
 发布前，本版本经过了两轮独立审查：一轮完整的代码审查与提交历史重组，以及一轮对抗性复核（穷举资产校验、HTTP 语义探测、全站路由回归与发布产物冒烟测试）。
 
-{{% alert color="warning" %}}
-**升级前先看兼容边界**
-
-2.0.0 的主版本变化发生在 **公共身份和交付契约** 上，而不是对象数据格式或 S3 协议上。使用旧仓库、旧发布二进制名或旧容器镜像名的安装脚本必须更新；使用 `CONSOLE_MINIO_SERVER`、`CONSOLE_MINIO_REGION`、`github.com/minio/console` 或 MinIO-compatible Admin API 的现有集成则不应做全局替换。
-{{% /alert %}}
+> [!WARNING]
+> **升级前先看兼容边界**
+>
+> 2.0.0 的主版本变化发生在 **公共身份和交付契约** 上，而不是对象数据格式或 S3 协议上。使用旧仓库、旧发布二进制名或旧容器镜像名的安装脚本必须更新；使用 `CONSOLE_MINIO_SERVER`、`CONSOLE_MINIO_REGION`、`github.com/minio/console` 或 MinIO-compatible Admin API 的现有集成则不应做全局替换。
 
 ## 为什么是 2.0.0 {#why-2-0-0}
 

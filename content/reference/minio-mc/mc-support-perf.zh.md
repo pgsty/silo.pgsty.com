@@ -2,25 +2,23 @@
 title: "mc support perf"
 url: "/zh/reference/minio-mc/mc-support-perf/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-perf.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-perf"></a>
 
 <a id="command-mc.support.perf"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-07-24T02-25-13Z**
+> [!NOTE]
+> **变更: RELEASE.2022-07-24T02-25-13Z**
+>
+> `mc support perf` 替代 `mc admin speedtest` 命令。
 
-`mc support perf` 替代 `mc admin speedtest` 命令。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 描述 {#id2}
 
@@ -50,11 +48,10 @@ silo_modified: false
 
    测量站点复制操作的速度。
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 示例 {#id3}
 

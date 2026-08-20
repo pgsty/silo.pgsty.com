@@ -2,8 +2,8 @@
 title: "存储桶版本控制"
 url: "/zh/administration/object-management/object-versioning/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-versioning.rst
+upstream_modified: false
 ---
 
 <a id="minio-bucket-versioning"></a>
@@ -26,28 +26,27 @@ MinIO 支持在单个存储桶中保留对象的多个“版本”。
 
 查看本组中的四张图片，了解 MinIO 如何在启用版本控制的存储桶中获取对象。 使用图片两侧的箭头可在各张图片之间切换。
 
-{{< doc-carousel >}}
-{{< doc-card title="单一版本对象" image="/images/retention/minio-versioning-single-version.svg" alt="单一版本对象" >}}
+{{< cards >}}
+{{< card title="单一版本对象" image="/images/retention/minio-versioning-single-version.svg" image_alt="单一版本对象" >}}
 MinIO 会在写入操作中为每个对象添加唯一的版本 ID。
-{{< /doc-card >}}
-{{< doc-card title="多版本对象" image="/images/retention/minio-versioning-multiple-versions.svg" alt="多版本对象" >}}
+{{< /card >}}
+{{< card title="多版本对象" image="/images/retention/minio-versioning-multiple-versions.svg" image_alt="多版本对象" >}}
 MinIO 会保留对象的所有版本，并将最近的版本标记为“最新”版本。
-{{< /doc-card >}}
-{{< doc-card title="获取对象最新版本" image="/images/retention/minio-versioning-retrieve-latest-version.svg" alt="多版本对象" >}}
+{{< /card >}}
+{{< card title="获取对象最新版本" image="/images/retention/minio-versioning-retrieve-latest-version.svg" image_alt="多版本对象" >}}
 未指定版本 ID 的读取请求会返回该对象的最新版本。
-{{< /doc-card >}}
-{{< doc-card title="获取特定对象版本" image="/images/retention/minio-versioning-retrieve-single-version.svg" alt="多版本对象" >}}
+{{< /card >}}
+{{< card title="获取特定对象版本" image="/images/retention/minio-versioning-retrieve-single-version.svg" image_alt="多版本对象" >}}
 在读取操作中指定版本 ID，即可获取对象的特定版本。
-{{< /doc-card >}}
-{{< /doc-carousel >}}
+{{< /card >}}
+{{< /cards >}}
 
-{{% alert color="info" %}}
-**变更: MinIO**
-
-Server RELEASE.2023-05-04T21-44-30Z
-
-对于显式目录对象（“prefixes”）的创建、变更或删除，MinIO 不会创建版本。 在该显式目录对象内创建的对象，仍保留正常的版本控制行为。
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> Server RELEASE.2023-05-04T21-44-30Z
+>
+> 对于显式目录对象（“prefixes”）的创建、变更或删除，MinIO 不会创建版本。 在该显式目录对象内创建的对象，仍保留正常的版本控制行为。
 
 MinIO 会根据对象路径隐式推断前缀。 显式创建前缀通常只会出现在 Spark 及类似工作负载中，这类工作负载会在 S3 场景下采用传统 POSIX/HDFS 的目录创建行为。
 
@@ -79,11 +78,10 @@ MinIO 支持配置 [对象生命周期管理规则](/zh/administration/object-ma
 
   > 删除对象中早于指定日历日期的所有版本。
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-04-18T19-09-19Z**
-
-如果任一单个对象的版本累计大小超过 1TiB，MinIO 会发出警告。
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-04-18T19-09-19Z**
+>
+> 如果任一单个对象的版本累计大小超过 1TiB，MinIO 会发出警告。
 
 <a id="id"></a>
 
@@ -105,35 +103,32 @@ MinIO 不支持由客户端管理版本 ID 的分配。 所有版本 ID 的生�
 
 MinIO 可以利用 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 自动永久移除对象的旧版本。 否则，可使用手动 `DELETE` 操作永久删除非当前版本对象或 `DeleteMarker` 对象。
 
-{{% alert color="info" %}}
-**MinIO 实现幂等 Delete Marker**
-
-{{% alert color="info" %}}
-**变更: RELEASE.2022-08-22T23-53-06Z**
-
-{{% /alert %}}
-
-标准 S3 实现处理未指定版本标识符的简单 `DeleteObject` 请求时，可能会为同一对象连续创建多个删除标记。 关于更多细节，请参见 S3 文档中的 [管理删除标记](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManagingDelMarkers.html#RemDelMarker)。
-
-MinIO 与标准 S3 实现不同，会避免这种潜在的删除标记重复。 处理未指定版本标识符的 `Delete` 请求时，MinIO 最多只会为指定对象创建一个 Delete Marker。 MinIO **不会** 像 S3 那样创建多个连续的删除标记。
-{{% /alert %}}
+> [!NOTE]
+> **MinIO 实现幂等 Delete Marker**
+>
+> > [!NOTE]
+> > **变更: RELEASE.2022-08-22T23-53-06Z**
+>
+> 标准 S3 实现处理未指定版本标识符的简单 `DeleteObject` 请求时，可能会为同一对象连续创建多个删除标记。 关于更多细节，请参见 S3 文档中的 [管理删除标记](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManagingDelMarkers.html#RemDelMarker)。
+>
+> MinIO 与标准 S3 实现不同，会避免这种潜在的删除标记重复。 处理未指定版本标识符的 `Delete` 请求时，MinIO 最多只会为指定对象创建一个 Delete Marker。 MinIO **不会** 像 S3 那样创建多个连续的删除标记。
 
 若要永久删除某个对象版本，请执行 `DELETE` 操作并指定待删除对象的版本 ID。 这种删除操作 **不可逆**。
 
-{{< doc-carousel >}}
-{{< doc-card title="删除对象" image="/images/retention/minio-versioning-delete-object.svg" alt="删除对象" >}}
+{{< cards >}}
+{{< card title="删除对象" image="/images/retention/minio-versioning-delete-object.svg" image_alt="删除对象" >}}
 对带版本的对象执行 `DELETE` 操作时，会为该对象生成一个 `DeleteMarker`。
-{{< /doc-card >}}
-{{< doc-card title="读取已删除对象" image="/images/retention/minio-versioning-retrieve-deleted-object.svg" alt="多版本对象" >}}
+{{< /card >}}
+{{< card title="读取已删除对象" image="/images/retention/minio-versioning-retrieve-deleted-object.svg" image_alt="多版本对象" >}}
 客户端默认获取对象的“最新”版本。 如果最新版本是 `DeleteMarker`，MinIO 会返回类似 `404` 的响应。
-{{< /doc-card >}}
-{{< doc-card title="获取已删除对象的先前版本" image="/images/retention/minio-versioning-retrieve-version-before-delete.svg" alt="获取已删除对象的版本" >}}
+{{< /card >}}
+{{< card title="获取已删除对象的先前版本" image="/images/retention/minio-versioning-retrieve-version-before-delete.svg" image_alt="获取已删除对象的版本" >}}
 即使“最新”版本是 `DeleteMarker`，客户端仍可通过指定版本 ID 获取该对象的任意先前版本。
-{{< /doc-card >}}
-{{< doc-card title="删除特定对象版本" image="/images/retention/minio-versioning-delete-specific-version.svg" alt="获取已删除对象的版本" >}}
+{{< /card >}}
+{{< card title="删除特定对象版本" image="/images/retention/minio-versioning-delete-specific-version.svg" image_alt="获取已删除对象的版本" >}}
 客户端可在 `DELETE` 操作中指定版本 ID，以删除某个特定对象版本。 删除特定版本属于 **永久** 删除，不会创建 `DeleteMarker`。
-{{< /doc-card >}}
-{{< /doc-carousel >}}
+{{< /card >}}
+{{< /cards >}}
 
 以下 [`mc`](/zh/reference/minio-mc/#command-mc) 命令可用于处理 `DeleteMarkers` 或带版本的对象：
 
@@ -163,13 +158,12 @@ mc version enable ALIAS/BUCKET
 
 你可以使用 [MinIO Client](/zh/reference/minio-mc/#minio-client) 将某些 [前缀](/zh/administration/concepts/#minio-admin-concepts-organize-objects) 排除在版本控制之外。 这对于 Spark/Hadoop 等起初会使用临时前缀创建对象的工作负载尤其有用。
 
-{{% alert color="info" %}}
-**复制和对象锁定都要求启用版本控制**
-
-MinIO 依赖版本控制来支持 [复制](/zh/glossary/#term-replication)。 位于排除前缀中的对象不会复制到任何对等站点或远程站点。
-
-对于已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 的存储桶，MinIO 不支持从版本控制中排除前缀。
-{{% /alert %}}
+> [!NOTE]
+> **复制和对象锁定都要求启用版本控制**
+>
+> MinIO 依赖版本控制来支持 [复制](/zh/glossary/#term-replication)。 位于排除前缀中的对象不会复制到任何对等站点或远程站点。
+>
+> 对于已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 的存储桶，MinIO 不支持从版本控制中排除前缀。
 
 - 使用带 [`--excluded-prefixes`](/zh/reference/minio-mc/mc-version-enable/#mc.version.enable.-excluded-prefixes) 选项的 [`mc version enable`](/zh/reference/minio-mc/mc-version-enable/#command-mc.version.enable)：
 
@@ -224,19 +218,17 @@ $ mc version info local/my-bucket --json
 
 你可以使用 [MinIO Client](/zh/reference/minio-mc/#minio-client) 将文件夹排除在版本控制之外。
 
-{{% alert color="info" %}}
-**复制和对象锁定都要求启用版本控制**
+> [!NOTE]
+> **复制和对象锁定都要求启用版本控制**
+>
+> MinIO 依赖版本控制来支持 [复制](/zh/glossary/#term-replication)。 位于排除文件夹中的对象不会复制到任何对等站点或远程站点。
+>
+> 对于已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 的存储桶，MinIO 不支持从版本控制中排除文件夹。
 
-MinIO 依赖版本控制来支持 [复制](/zh/glossary/#term-replication)。 位于排除文件夹中的对象不会复制到任何对等站点或远程站点。
-
-对于已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 的存储桶，MinIO 不支持从版本控制中排除文件夹。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**对象锁定**
-
-已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 的存储桶要求启用版本控制，且不支持排除文件夹。
-{{% /alert %}}
+> [!NOTE]
+> **对象锁定**
+>
+> 已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 的存储桶要求启用版本控制，且不支持排除文件夹。
 
 - 使用带 [`--exclude-folders`](/zh/reference/minio-mc/mc-version-enable/#mc.version.enable.-exclude-folders) 选项的 [`mc version enable`](/zh/reference/minio-mc/mc-version-enable/#command-mc.version.enable)，将名称以 `/` 结尾的对象排除在版本控制之外：
 

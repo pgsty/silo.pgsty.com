@@ -2,8 +2,8 @@
 title: "mc admin accesskey rm"
 url: "/reference/minio-mc-admin/mc-admin-accesskey-remove/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-accesskey-remove.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-accesskey-rm"></a>
@@ -19,22 +19,20 @@ The [`mc admin accesskey rm`](#command-mc.admin.accesskey.rm) command removes an
 
 The [`mc admin accesskey remove`](#command-mc.admin.accesskey.remove) command has equivalent functionality to [`mc admin accesskey rm`](#command-mc.admin.accesskey.rm).
 
-{{% alert color="danger" %}}
-**Warning**
+> [!CAUTION]
+> **Warning**
+>
+> Applications can no longer authenticate using the access key after its removal.
 
-Applications can no longer authenticate using the access key after its removal.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes the specified access key:
 
 ```shell
 mc admin accesskey rm myminio myuserserviceaccount
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -48,8 +46,8 @@ mc [GLOBALFLAGS] admin accesskey rm                \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

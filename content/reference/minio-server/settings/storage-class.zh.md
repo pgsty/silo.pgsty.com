@@ -2,8 +2,8 @@
 title: "纠删码设置"
 url: "/zh/reference/minio-server/settings/storage-class/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/storage-class.rst
+upstream_modified: false
 math: true
 ---
 
@@ -22,40 +22,36 @@ math: true
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 <a id="id3"></a>
 
 ## 标准存储类 {#minio-ec-storage-class-standard}
 
-{{% alert color="info" %}}
-**说明**
+> [!NOTE]
+> **说明**
+>
+> *MinIO Storage Classes* 与 *AWS Storage Classes* 不同。
+>
+> AWS Storage Classes 指将给定对象存储到的特定存储层级，例如 `hot` 或 `glacier` 存储。 MinIO Storage Classes 会影响所使用的纠删码校验设置，并与对象的 [可用性与韧性](/zh/operations/concepts/availability-and-resiliency/#minio-availability-resiliency) 相关。
+>
+> 如需在不同类型存储之间分层（例如用于成本管理），请参见 [对象迁移（”Tiering”）](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering)。
 
-*MinIO Storage Classes* 与 *AWS Storage Classes* 不同。
-
-AWS Storage Classes 指将给定对象存储到的特定存储层级，例如 `hot` 或 `glacier` 存储。 MinIO Storage Classes 会影响所使用的纠删码校验设置，并与对象的 [可用性与韧性](/zh/operations/concepts/availability-and-resiliency/#minio-availability-resiliency) 相关。
-
-如需在不同类型存储之间分层（例如用于成本管理），请参见 [对象迁移（”Tiering”）](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering)。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_STORAGE_CLASS_STANDARD` {#envvar.MINIO_STORAGE_CLASS_STANDARD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 #### `storage_class standard` {#mc-conf.storage_class.standard}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 该部署的 [parity level](/zh/operations/concepts/erasure-coding/#minio-ec-parity)。 MinIO 会使用该校验值对采用默认 `STANDARD` 存储类写入的对象进行分片。
 
@@ -81,30 +77,27 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 ## 降低冗余存储类 {#id4}
 
-{{% alert color="info" %}}
-**说明**
+> [!NOTE]
+> **说明**
+>
+> *MinIO Storage Classes* 与 *AWS Storage Classes* 不同。
+>
+> AWS Storage Classes 指将给定对象存储到的特定存储层级，例如 `hot` 或 `glacier` 存储。 MinIO Storage Classes 会影响所使用的纠删码校验设置，并与对象的 [可用性与韧性](/zh/operations/concepts/availability-and-resiliency/#minio-availability-resiliency) 相关。
+>
+> 如需在不同类型存储之间分层（例如用于成本管理），请参见 [对象迁移（”Tiering”）](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering)。
 
-*MinIO Storage Classes* 与 *AWS Storage Classes* 不同。
-
-AWS Storage Classes 指将给定对象存储到的特定存储层级，例如 `hot` 或 `glacier` 存储。 MinIO Storage Classes 会影响所使用的纠删码校验设置，并与对象的 [可用性与韧性](/zh/operations/concepts/availability-and-resiliency/#minio-availability-resiliency) 相关。
-
-如需在不同类型存储之间分层（例如用于成本管理），请参见 [对象迁移（”Tiering”）](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering)。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_STORAGE_CLASS_RRS` {#envvar.MINIO_STORAGE_CLASS_RRS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 #### `storage_class rrs` {#mc-conf.storage_class.rrs}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 用于以 `REDUCED` 存储类写入对象的 [parity level](/zh/operations/concepts/erasure-coding/#minio-ec-parity)。
 
@@ -118,20 +111,18 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 ## 校验保留优化 {#id5}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_STORAGE_CLASS_OPTIMIZE` {#envvar.MINIO_STORAGE_CLASS_OPTIMIZE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 #### `storage_class optimize` {#mc-conf.storage_class.optimize}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 默认情况下，如果目标纠删集合维持写入法定人数（write quorum）*但* 有一个或多个驱动器离线，MinIO 会自动“升级”对象的校验。 该行为有助于确保给定对象与写入健康纠删集合的对象保持相同可用性。
 
@@ -139,16 +130,15 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 ## 注释 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_STORAGE_CLASS_COMMENT` {#envvar.MINIO_STORAGE_CLASS_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 为存储类设置添加注释。

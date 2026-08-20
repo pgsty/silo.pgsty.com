@@ -3,8 +3,8 @@ title: "Silo Identity Management"
 url: "/administration/identity-access-management/minio-identity-management/"
 weight: 10
 icon: fa-solid fa-user-shield
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/minio-identity-management.rst
+upstream_modified: true
 ---
 
 <a id="minio-identity-management"></a>
@@ -20,13 +20,12 @@ MinIO also supports creating [access keys](/administration/identity-access-manag
 
 MinIO by default denies access to all actions or resources not explicitly allowed by a user’s assigned or inherited [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy). You must either explicitly assign a [policy](/administration/identity-access-management/policy-based-access-control/#minio-policy) describing the user’s authorized actions and resources *or* assign the user to [groups](/administration/identity-access-management/minio-group-management/#minio-groups) which have associated policies. See [Access Management](/administration/identity-access-management/#minio-access-management) for more information.
 
-{{% alert color="info" %}}
-**External Identity Management**
-
-MinIO supports external management of identities using either an OpenID Connect (OIDC) or Active Directory/LDAP IDentity Provider (IDP). For more information, see:
-
-- [OpenID Connect Access Management](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)
-- [Active Directory / LDAP Access Management](/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap)
-
-AD/LDAP and OIDC configurations are mutually exclusive. Furthermore, enabling AD/LDAP external identity management disables the MinIO internal IDP, with the exception of creating [access keys](/administration/identity-access-management/minio-user-management/#minio-idp-service-account). You can configure multiple OIDC providers while maintaining MinIO-managed users.
-{{% /alert %}}
+> [!NOTE]
+> **External Identity Management**
+>
+> MinIO supports external management of identities using either an OpenID Connect (OIDC) or Active Directory/LDAP IDentity Provider (IDP). For more information, see:
+>
+> - [OpenID Connect Access Management](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)
+> - [Active Directory / LDAP Access Management](/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap)
+>
+> AD/LDAP and OIDC configurations are mutually exclusive. Furthermore, enabling AD/LDAP external identity management disables the MinIO internal IDP, with the exception of creating [access keys](/administration/identity-access-management/minio-user-management/#minio-idp-service-account). You can configure multiple OIDC providers while maintaining MinIO-managed users.

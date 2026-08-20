@@ -2,8 +2,8 @@
 title: "mc du"
 url: "/zh/reference/minio-mc/mc-du/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-du.rst
+upstream_modified: false
 ---
 
 <a id="mc-du"></a>
@@ -15,8 +15,8 @@ silo_modified: false
 
 [`mc du`](#command-mc.du) 命令用于汇总存储桶和文件夹的磁盘使用量。 你也可以对本地文件系统使用 [`du`](#command-mc.du)，以生成与 `du` 命令类似的结果。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令打印 `myminio` MinIO 部署中 `mybucket` 存储桶的磁盘使用量：
 
 ```shell
@@ -28,9 +28,8 @@ mc du play/mybucket
 ```shell
 825KiB 3 objects        mybucket
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 [`mc du`](#command-mc.du) 命令语法如下：
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] du                    \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -150,11 +149,10 @@ mc du --rewind DURATION ALIAS/PATH
 - 将 `ALIAS` 替换为 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 `PATH` 替换为 S3 兼容主机上存储桶或文件夹的路径。
 
-{{% alert color="info" %}}
-**需要版本控制**
-
-要使用此功能，[`mc du`](#command-mc.du) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
-{{% /alert %}}
+> [!NOTE]
+> **需要版本控制**
+>
+> 要使用此功能，[`mc du`](#command-mc.du) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
 
 ### 递归查看磁盘使用量 {#id8}
 

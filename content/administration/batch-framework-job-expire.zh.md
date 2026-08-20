@@ -2,18 +2,17 @@
 title: "批量过期"
 url: "/zh/administration/batch-framework-job-expire/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-expire.rst
+upstream_modified: false
 ---
 
 <a id="minio-batch-framework-expire-job"></a>
 <a id="id1"></a>
 
-{{% alert color="info" %}}
-**新增: MinIO**
-
-RELEASE.2023-12-02T10-51-33Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: MinIO**
+>
+> RELEASE.2023-12-02T10-51-33Z
 
 MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch file”）创建、管理、监控和执行作业。 批处理作业直接在 MinIO 部署上运行，从而利用服务端处理能力，而不受运行 [MinIO Client](/zh/reference/minio-mc/#minio-client) 的本地机器限制。
 

@@ -2,8 +2,8 @@
 title: "mc anonymous list"
 url: "/reference/minio-mc/mc-anonymous-list/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-anonymous-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-anonymous-list"></a>
@@ -17,16 +17,15 @@ The [`mc anonymous list`](#command-mc.anonymous.list) retrieves all anonymous (i
 
 Buckets with anonymous policies allow clients to access the bucket contents and perform actions consistent with the specified policy without [authentication](/administration/identity-access-management/#minio-authentication-and-identity-management).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command lists all anonymous access policies for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc anonymous list myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

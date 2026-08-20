@@ -2,8 +2,8 @@
 title: "mc watch"
 url: "/zh/reference/minio-mc/mc-watch/"
 weight: 440
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-watch.rst
+upstream_modified: false
 ---
 
 <a id="mc-watch"></a>
@@ -16,16 +16,15 @@ silo_modified: false
 
 你也可以将 [`mc watch`](#command-mc.watch) 用于本地文件系统目录， 以获得与运行 `inotify -e modify,create,delete,move` 命令类似的结果。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会监视 `myminio` MinIO 部署中 `mydata` 存储桶内任意对象或前缀上的 [事件](/zh/reference/minio-mc/mc-event-add/#mc-event-supported-events)：
 
 ```shell
 mc watch --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] watch                \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

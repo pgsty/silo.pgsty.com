@@ -2,8 +2,8 @@
 title: "使用 Helm 部署 Operator"
 url: "/zh/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-deploy-operator-helm-on-kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="helm-operator"></a>
@@ -13,9 +13,8 @@ silo_modified: true
 
 Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm chart](https://helm.sh/docs/topics/charts/) 是一组定义部署细节的 YAML 文件、模板和其他文件。 以下步骤使用 Helm Chart 将 [MinIO Kubernetes Operator](/zh/operations/deployments/kubernetes/#minio-operator-installation) 安装到 Kubernetes 集群中。
 
-{{% alert color="warning" %}}
-上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。本流程固定到其最终版本 `v7.1.1`，仅作为冻结的兼容基线；这不代表上游仍在维护或提供支持。用于生产环境前，请针对你的 Kubernetes 平台完成验证。
-{{% /alert %}}
+> [!WARNING]
+> 上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。本流程固定到其最终版本 `v7.1.1`，仅作为冻结的兼容基线；这不代表上游仍在维护或提供支持。用于生产环境前，请针对你的 Kubernetes 平台完成验证。
 
 ## 前提条件 {#id3}
 
@@ -34,11 +33,10 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 
 以下步骤使用 MinIO Operator Chart Repository 安装 Operator。 与 [本地 chart 安装](#minio-k8s-deploy-operator-helm-local) 相比，这种方式的安装路径更简单。 安装完成后，你仍可继续修改 Operator 部署。
 
-{{% alert color="warning" %}}
-**重要**
-
-如果你使用 Helm charts 安装 Operator，就必须使用 Helm 来管理该安装。 不要使用 `kubectl krew`、Kustomize 或类似方式更新或管理 MinIO Operator 安装。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 如果你使用 Helm charts 安装 Operator，就必须使用 Helm 来管理该安装。 不要使用 `kubectl krew`、Kustomize 或类似方式更新或管理 MinIO Operator 安装。
 
 1. 将 MinIO Operator Repo 添加到 Helm
 

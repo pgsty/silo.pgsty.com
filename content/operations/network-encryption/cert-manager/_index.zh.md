@@ -3,8 +3,8 @@ title: "cert-manager"
 url: "/zh/operations/network-encryption/cert-manager/"
 weight: 30
 icon: fa-solid fa-certificate
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/network-encryption/cert-manager.rst
+upstream_modified: false
 ---
 
 <a id="cert-manager"></a>
@@ -14,13 +14,12 @@ silo_modified: false
 
 本指南介绍如何安装 cert-manager 以管理 TLS 证书。 本文假设你使用的是全新或刚初始化的 MinIO Operator 安装环境。
 
-{{% alert color="info" %}}
-**说明**
-
-本指南使用自签名 `ClusterIssuer`。 你也可以使用 [cert-manager 支持的其他 Issuer](https://cert-manager.io/docs/configuration/issuers/)。
-
-主要区别在于，你必须向 MinIO 提供该 `Issuer` 的 CA 证书，而不是本文中提到的这些 CA。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 本指南使用自签名 `ClusterIssuer`。 你也可以使用 [cert-manager 支持的其他 Issuer](https://cert-manager.io/docs/configuration/issuers/)。
+>
+> 主要区别在于，你必须向 MinIO 提供该 `Issuer` 的 CA 证书，而不是本文中提到的这些 CA。
 
 如需更高级的配置，请参考 [cert-manager 文档](https://cert-manager.io) 以及你所在组织的证书规范。
 

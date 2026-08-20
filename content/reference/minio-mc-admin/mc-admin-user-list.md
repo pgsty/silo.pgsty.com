@@ -2,8 +2,8 @@
 title: "mc admin user ls"
 url: "/reference/minio-mc-admin/mc-admin-user-list/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-ls"></a>
@@ -23,16 +23,15 @@ The [`mc admin user list`](#command-mc.admin.user.list) command has equivalent f
 
 To manage external Identity Provider users, see [`OIDC`](/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) or [`AD/LDAP`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command lists all users on the `myminio` MinIO deployment:
 
 ```shell
 mc admin user ls myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -45,8 +44,8 @@ mc [GLOBALFLAGS] admin user list   \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

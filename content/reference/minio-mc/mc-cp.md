@@ -2,8 +2,8 @@
 title: "mc cp"
 url: "/reference/minio-mc/mc-cp/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-cp.rst
+upstream_modified: false
 ---
 
 <a id="mc-cp"></a>
@@ -17,22 +17,20 @@ The [`mc cp`](#command-mc.cp) command copies objects to or from a MinIO deployme
 
 You can also use [`mc cp`](#command-mc.cp) against the local filesystem to produce similar results to the `cp` commandline tool.
 
-{{% alert color="info" %}}
-**Note**
+> [!NOTE]
+> **Note**
+>
+> [`mc cp`](#command-mc.cp) only copies the latest version or the specified version of an object without any version information or modification date. To copy all versions, version information, and related metadata, use [`mc replicate add`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) or [`mc admin replicate`](/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate).
 
-[`mc cp`](#command-mc.cp) only copies the latest version or the specified version of an object without any version information or modification date. To copy all versions, version information, and related metadata, use [`mc replicate add`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) or [`mc admin replicate`](/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate).
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command copies files from a local filesystem directory to the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc cp --recursive ~/mydata/ myminio/mydata/
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc cp`](#command-mc.cp) command has the following syntax:
 
 ```shell
@@ -65,8 +63,8 @@ mc [GLOBALFLAGS] cp                                                        \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -132,10 +130,8 @@ Add custom metadata for the object. Specify key-value pairs as `KEY=VALUE\;`. Fo
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-10-02T08-27-28Z**
 
 Add a checksum to an uploaded object.
 
@@ -254,11 +250,10 @@ Specify the path to a prefix to apply encryption to all matching objects at that
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
 
 ##### `--legal-hold` {#mc.cp.-legal-hold}
 
@@ -328,11 +323,10 @@ If not specified, MinIO uses an unlimited upload rate.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2024-10-02T08-27-28Z**
-
-Replaced by the [`--checksum`](#mc.cp.-checksum) flag.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2024-10-02T08-27-28Z**
+>
+> Replaced by the [`--checksum`](#mc.cp.-checksum) flag.
 
 Forces all uploads to calculate MD5 checksums.
 
@@ -458,9 +452,8 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 Use [`mc cp`](#command-mc.cp) to copy an object to an S3-compatible host:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Filesystem to S3" %}}
-
+{{< tabs group="filesystem-to-s3-s3-to-s3" >}}
+{{< tab label="Filesystem to S3" value="filesystem-to-s3" >}}
 ```shell
 mc cp SOURCE ALIAS/PATH
 ```
@@ -468,9 +461,8 @@ mc cp SOURCE ALIAS/PATH
 - Replace [`SOURCE`](#mc.cp.SOURCE) with the filesystem path to the object.
 - Replace [`ALIAS`](#mc.cp.TARGET) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured S3-compatible host.
 - Replace [`PATH`](#mc.cp.TARGET) with the path to the object on the S3-compatible host. You can specify a different object name to “rename” the object on copy.
-{{% /tab %}}
-{{% tab header="S3 to S3" %}}
-
+{{< /tab >}}
+{{< tab label="S3 to S3" value="s3-to-s3" >}}
 ```shell
 mc cp SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
@@ -479,16 +471,15 @@ mc cp SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - Replace [`SRCPATH`](#mc.cp.SOURCE) with the path to the object on the S3-compatible host.
 - Replace [`TGTALIAS`](#mc.cp.TARGET) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a target S3-compatible host.
 - Replace [`TGTPATH`](#mc.cp.TARGET) with the path to the object on a target S3-compatible host. Omit the object name to use the `SRCPATH` object name.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Recursively Copy Objects to S3 {#recursively-copy-objects-to-s3}
 
 Use [`mc cp --recursive`](#mc.cp.-recursive) to recursively copy objects to an S3-compatible host:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Filesystem to S3" %}}
-
+{{< tabs group="filesystem-to-s3-s3-to-s3" >}}
+{{< tab label="Filesystem to S3" value="filesystem-to-s3" >}}
 ```shell
 mc cp --recursive SOURCE ALIAS/PATH
 ```
@@ -496,9 +487,8 @@ mc cp --recursive SOURCE ALIAS/PATH
 - Replace [`SOURCE`](#mc.cp.SOURCE) with the filesystem path to the directory containing the file(s).
 - Replace [`ALIAS`](#mc.cp.TARGET) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured S3-compatible host.
 - Replace [`PATH`](#mc.cp.TARGET) with the path to the object on the S3-compatible host. [`mc cp`](#command-mc.cp) uses the `SOURCE` filenames when creating the objects on the target host.
-{{% /tab %}}
-{{% tab header="S3 to S3" %}}
-
+{{< /tab >}}
+{{< tab label="S3 to S3" value="s3-to-s3" >}}
 ```shell
 mc cp --recursive SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 ```
@@ -507,8 +497,8 @@ mc cp --recursive SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - Replace [`SRCPATH`](#mc.cp.SOURCE) with the path to the bucket or bucket prefix on the source S3-compatible host.
 - Replace [`TGTALIAS`](#mc.cp.TARGET) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a target S3-compatible host.
 - Replace [`TGTPATH`](#mc.cp.TARGET) with the path to the object on the target S3-compatible host. [`mc cp`](#command-mc.cp) uses the `SRCPATH` object names when creating objects on the target host.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Copy Point-In-Time Version of Object {#copy-point-in-time-version-of-object}
 
@@ -524,11 +514,10 @@ mc cp --rewind DURATION SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - Replace [`TGTALIAS`](#mc.cp.TARGET) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a target S3-compatible host.
 - Replace [`TGTPATH`](#mc.cp.TARGET) with the path to the object on the target S3-compatible host. Omit the object name to use the `SRCPATH` object name.
 
-{{% alert color="info" %}}
-**Requires Versioning**
-
-[`mc cp`](#command-mc.cp) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
-{{% /alert %}}
+> [!NOTE]
+> **Requires Versioning**
+>
+> [`mc cp`](#command-mc.cp) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
 
 ### Copy Specific Version of Object {#copy-specific-version-of-object}
 
@@ -544,11 +533,10 @@ mc cp --version-id VERSION SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - Replace [`TGTALIAS`](#mc.cp.TARGET) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a target S3-compatible host.
 - Replace [`TGTPATH`](#mc.cp.TARGET) with the path to the object on the target S3-compatible host. Omit the object name to use the `SRCPATH` object name.
 
-{{% alert color="info" %}}
-**Requires Versioning**
-
-[`mc cp`](#command-mc.cp) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
-{{% /alert %}}
+> [!NOTE]
+> **Requires Versioning**
+>
+> [`mc cp`](#command-mc.cp) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
 
 ### Add a `content-type` Value {#add-a-content-type-value}
 

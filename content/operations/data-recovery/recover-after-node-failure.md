@@ -2,8 +2,8 @@
 title: "Node Failure Recovery"
 url: "/operations/data-recovery/recover-after-node-failure/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery/recover-after-node-failure.rst
+upstream_modified: false
 ---
 
 <a id="node-failure-recovery"></a>
@@ -13,13 +13,12 @@ If a MinIO node suffers complete hardware failure (e.g. loss of all drives, data
 
 MinIO healing ensures consistency and correctness of all data restored onto the drive.
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 The replacement node hardware should be substantially similar to the failed node. There are no negative performance implications to using improved hardware.
 

@@ -2,8 +2,8 @@
 title: "mc batch status"
 url: "/reference/minio-mc/mc-batch-status/"
 weight: 60
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-status.rst
+upstream_modified: true
 ---
 
 <a id="mc-batch-status"></a>
@@ -11,34 +11,31 @@ silo_modified: true
 
 <a id="command-mc.batch.status"></a>
 
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z or later
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z or later
 
 ## Syntax {#syntax}
 
 The [`mc batch status`](#command-mc.batch.status) command outputs summaries of job events on a MinIO server.
 
-{{% alert color="info" %}}
-**Changed: mc**
+> [!NOTE]
+> **Changed: mc**
+>
+> RELEASE.2024-07-03T20-17-25Z
+>
+> Batch status displays summaries for active, in-progress jobs or any batch job completed in the previous three (3) days.
 
-RELEASE.2024-07-03T20-17-25Z
-
-Batch status displays summaries for active, in-progress jobs or any batch job completed in the previous three (3) days.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command outputs the status of the specified job with JobID `KwSysDpxcBU9FNhGkn2dCf` currently in progress on the `myminio` alias.
 
 ```shell
 mc batch status myminio "KwSysDpxcBU9FNhGkn2dCf"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -51,8 +48,8 @@ mc [GLOBALFLAGS] batch list TARGET           \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

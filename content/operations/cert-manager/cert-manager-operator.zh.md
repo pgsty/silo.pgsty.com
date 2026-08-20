@@ -2,8 +2,8 @@
 title: "使用 cert-manager 管理 Operator 证书"
 url: "/zh/operations/cert-manager/cert-manager-operator/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/cert-manager/cert-manager-operator.rst
+upstream_modified: false
 ---
 
 <a id="cert-manager-operator"></a>
@@ -27,11 +27,10 @@ MinIO Operator 负责管理 `minio-operator` 命名空间中各服务的 TLS 证
 
 `minio-operator` 命名空间必须拥有自己的证书颁发机构（CA），该 CA 派生自你在 [配置 cert-manager](/zh/operations/network-encryption/cert-manager/#minio-certmanager) 时创建的集群 `ClusterIssuer` 证书。 请使用 cert-manager 创建此 CA 证书。
 
-{{% alert color="warning" %}}
-**重要**
-
-该 CA 证书 **必须** 在安装 MinIO Operator *之前* 已存在。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 该 CA 证书 **必须** 在安装 MinIO Operator *之前* 已存在。
 
 1. 如果 `minio-operator` 命名空间尚不存在，请先创建：
 
@@ -66,11 +65,10 @@ MinIO Operator 负责管理 `minio-operator` 命名空间中各服务的 TLS 证
        group: cert-manager.io
    ```
 
-   {{% alert color="warning" %}}
-   **重要**
-
-   `spec.issueRef.name` 必须与 [配置 cert-manager](/zh/operations/network-encryption/cert-manager/#minio-cert-manager-create-cluster-issuer) 时创建的 `ClusterIssuer` 名称一致。 如果你使用了不同的 `ClusterIssuer` 名称，或者使用了与本指南不同的 `Issuer`，请根据你的环境调整 `issuerRef`。
-   {{% /alert %}}
+   > [!WARNING]
+   > **重要**
+   >
+   > `spec.issueRef.name` 必须与 [配置 cert-manager](/zh/operations/network-encryption/cert-manager/#minio-cert-manager-create-cluster-issuer) 时创建的 `ClusterIssuer` 名称一致。 如果你使用了不同的 `ClusterIssuer` 名称，或者使用了与本指南不同的 `Issuer`，请根据你的环境调整 `issuerRef`。
 3. 应用该资源：
 
    ```shell
@@ -79,11 +77,10 @@ MinIO Operator 负责管理 `minio-operator` 命名空间中各服务的 TLS 证
 
 Kubernetes 会在 `minio-operator` 命名空间中创建一个名为 `operator-ca-tls` 的新 Secret。
 
-{{% alert color="warning" %}}
-**重要**
-
-任何需要与 MinIO Operator 交互的应用都必须信任此证书。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 任何需要与 MinIO Operator 交互的应用都必须信任此证书。
 
 ## 2) 使用该 Secret 创建 `Issuer` {#secret-issuer}
 
@@ -119,19 +116,18 @@ cert-manager 签发的证书必须对以下 DNS 名称有效：
 - `sts.minio-operator.svc.`
 - `sts.minio-operator.svc.<cluster domain>`
 
-  {{% alert color="warning" %}}
-  **重要**
-
-  将 `<cluster domain>` 替换为你的环境实际使用的值。 `cluster domain` 是 Kubernetes 集群内部的根 DNS 域。 该值通常为 `cluster.local`，但你仍应检查 CoreDNS 配置，以确认 Kubernetes 集群实际使用的值。
-
-  例如：
-
-  ```shell
-  kubectl get configmap coredns -n kube-system -o jsonpath="{.data}"
-  ```
-
-  不同 Kubernetes 发行版或托管平台对根域名的管理方式可能不同。 更多信息请参阅你的 Kubernetes 提供方文档。
-  {{% /alert %}}
+  > [!WARNING]
+  > **重要**
+  >
+  > 将 `<cluster domain>` 替换为你的环境实际使用的值。 `cluster domain` 是 Kubernetes 集群内部的根 DNS 域。 该值通常为 `cluster.local`，但你仍应检查 CoreDNS 配置，以确认 Kubernetes 集群实际使用的值。
+  >
+  > 例如：
+  >
+  > ```shell
+  > kubectl get configmap coredns -n kube-system -o jsonpath="{.data}"
+  > ```
+  >
+  > 不同 Kubernetes 发行版或托管平台对根域名的管理方式可能不同。 更多信息请参阅你的 Kubernetes 提供方文档。
 
 1. 为上述 DNS 名称创建一个 `Certificate`：
 
@@ -154,13 +150,12 @@ cert-manager 签发的证书必须对以下 DNS 名称有效：
        name: minio-operator-ca-issuer
    ```
 
-   {{% alert color="warning" %}}
-   **重要**
-
-   `spec.secretName` 不是可选项。
-
-   Secret 名称 **必须** 为 `sts-tls`。 请确认在证书 YAML 中按照高亮所示设置 `spec.secretName: sts-tls`。
-   {{% /alert %}}
+   > [!WARNING]
+   > **重要**
+   >
+   > `spec.secretName` 不是可选项。
+   >
+   > Secret 名称 **必须** 为 `sts-tls`。 请确认在证书 YAML 中按照高亮所示设置 `spec.secretName: sts-tls`。
 2. 应用该资源：
 
    ```shell
@@ -169,11 +164,10 @@ cert-manager 签发的证书必须对以下 DNS 名称有效：
 
 这会在 `minio-operator` 命名空间中创建一个名为 `sts-tls` 的 Secret。
 
-{{% alert color="danger" %}}
-**警告**
-
-如果包含 TLS 证书的 `sts-tls` Secret 缺失，或者其中包含无效的 `key-value` 对，则 STS service 无法启动。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> 如果包含 TLS 证书的 `sts-tls` Secret 缺失，或者其中包含无效的 `key-value` 对，则 STS service 无法启动。
 
 ## 4) 在禁用 Auto TLS 的情况下安装 Operator {#auto-tls-operator}
 

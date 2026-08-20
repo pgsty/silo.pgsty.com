@@ -3,8 +3,8 @@ title: "Upgrade Legacy MinIO Operators"
 url: "/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier/"
 weight: 9118
 toc_hide: true
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier.rst
+upstream_modified: true
 ---
 
 <a id="upgrade-legacy-minio-operators"></a>
@@ -27,15 +27,14 @@ After upgrading to 5.0.15, see [Upgrade MinIO Operator](/operations/deployments/
 
 ## Upgrade MinIO Operator 4.5.8 and Later to 5.0.15 {#upgrade-minio-operator-4-5-8-and-later-to-5-0-15}
 
-{{% alert color="info" %}}
-**Prerequisites**
-
-This procedure requires the following:
-
-- You have an existing MinIO Operator deployment running 4.5.8 or later
-- Your Kubernetes cluster runs 1.21.0 or later
-- Your local host has `kubectl` installed and configured with access to the Kubernetes cluster
-{{% /alert %}}
+> [!NOTE]
+> **Prerequisites**
+>
+> This procedure requires the following:
+>
+> - You have an existing MinIO Operator deployment running 4.5.8 or later
+> - Your Kubernetes cluster runs 1.21.0 or later
+> - Your local host has `kubectl` installed and configured with access to the Kubernetes cluster
 
 This procedure upgrades the MinIO Operator from any 4.5.8 or later release to 5.0.15
 
@@ -49,11 +48,10 @@ The following changes apply for Operator v5.0.0 or later:
   The `.spec.credsSecret` should hold all the environment variables for the MinIO deployment that contain sensitive information and should not show in `.spec.env`. This change impacts the Tenant <abbr title="CustomResourceDefinition">CRD</abbr> and only impacts users editing a tenant YAML directly, such as through Helm or Kustomize.
 - Both the **Log Search API** (`.spec.log`) and **Prometheus** (`.spec.prometheus`) deployments have been removed. However, existing deployments are left running as standalone deployments / statefulsets with no connection to the Tenant CR. Deleting the Tenant <abbr title="Custom Resource Definition">CRD</abbr> does **not** cascade to the log or Prometheus deployments.
 
-  {{% alert color="warning" %}}
-  **Important**
-
-  MinIO recommends that you create a yaml file to manage these deployments going forward.
-  {{% /alert %}}
+  > [!WARNING]
+  > **Important**
+  >
+  > MinIO recommends that you create a yaml file to manage these deployments going forward.
 
 ### Log Search and Prometheus {#log-search-and-prometheus}
 
@@ -110,8 +108,8 @@ The latest releases of Operator remove Log Search and Prometheus from included O
 
 ### Procedure {#procedure}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Upgrade using Kustomize" %}}
+{{< tabs group="upgrade-using-kustomize-upgrade-using-helm" >}}
+{{< tab label="Upgrade using Kustomize" value="upgrade-using-kustomize" >}}
 The following procedure upgrades the MinIO Operator using Kustomize.
 
 For Operator versions 5.0.1 to 5.0.14 installed with the MinIO Kubernetes Plugin, follow the Kustomize instructions below to upgrade to 5.0.15 or later. If you installed the Operator using [Helm](/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/#minio-k8s-deploy-operator-helm), use the **Upgrade using Helm** instructions instead.
@@ -183,9 +181,8 @@ For Operator versions 5.0.1 to 5.0.14 installed with the MinIO Kubernetes Plugin
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
-
-{{% /tab %}}
-{{% tab header="Upgrade using Helm" %}}
+{{< /tab >}}
+{{< tab label="Upgrade using Helm" value="upgrade-using-helm" >}}
 The following procedure upgrades an existing MinIO Operator Installation using Helm.
 
 If you installed the Operator using Kustomize, use the **Upgrade using Kustomize** instructions instead.
@@ -276,9 +273,8 @@ If you installed the Operator using Kustomize, use the **Upgrade using Kustomize
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-k8s-upgrade-minio-operator-to-4-5-8"></a>
 
@@ -335,8 +331,8 @@ This procedure upgrades MinIO Operator release 4.2.3 through 4.5.7 to release 4.
 
    You can install the MinIO plugin using either the Kubernetes Krew plugin manager or manually by downloading and installing the plugin binary to your local host:
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="Krew Plugin Manager" %}}
+   {{< tabs group="tabs-1c97e29a" >}}
+   {{< tab label="Krew Plugin Manager" value="krew-plugin-manager" >}}
    Krew is a `kubectl` plugin manager developed by the [Kubernetes SIG CLI group](https://github.com/kubernetes-sigs). See the `krew` [installation documentation](https://krew.sigs.k8s.io/docs/user-guide/setup/install/) for specific instructions. You can use the Krew plugin for Linux, macOS, and Windows operating systems.
 
    You can use Krew to install the MinIO `kubectl` plugin using the following commands:
@@ -351,9 +347,8 @@ This procedure upgrades MinIO Operator release 4.2.3 through 4.5.7 to release 4.
    ```shell
    kubectl krew upgrade minio
    ```
-
-   {{% /tab %}}
-   {{% tab header="Manual (Linux, macOS)" %}}
+   {{< /tab >}}
+   {{< tab label="Manual (Linux, macOS)" value="manual-linux-macos" >}}
    You can download the MinIO `kubectl` plugin to your local system path. The `kubectl` CLI automatically discovers and runs compatible plugins.
 
    The following code downloads the most recent version of the MinIO Kubernetes plugin and installs it to the system path:
@@ -373,8 +368,8 @@ This procedure upgrades MinIO Operator release 4.2.3 through 4.5.7 to release 4.
    ```
 
    The output should display the Operator version as 5.0.14.
-   {{% /tab %}}
-   {{% tab header="Manual (Windows)" %}}
+   {{< /tab >}}
+   {{< tab label="Manual (Windows)" value="manual-windows" >}}
    You can download the MinIO `kubectl` plugin to your local system path. The `kubectl` CLI automatically discovers and runs compatible plugins.
 
    The following PowerShell command downloads the most recent version of the MinIO Kubernetes plugin and installs it to the system path:
@@ -392,8 +387,8 @@ This procedure upgrades MinIO Operator release 4.2.3 through 4.5.7 to release 4.
    ```
 
    The output should display the Operator version as 5.0.14.
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 4. Run the initialization command to upgrade the Operator
 
    Use the `kubectl minio init` command to upgrade the existing MinIO Operator installation

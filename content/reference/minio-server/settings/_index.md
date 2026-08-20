@@ -3,8 +3,8 @@ title: "Settings Overview"
 url: "/reference/minio-server/settings/"
 weight: 10
 icon: fa-solid fa-gears
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings.rst
+upstream_modified: false
 ---
 
 <a id="settings-overview"></a>
@@ -29,11 +29,10 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 Additional settings include those to customize:
 

@@ -2,8 +2,8 @@
 title: "已弃用设置"
 url: "/zh/reference/minio-server/settings/deprecated/"
 weight: 120
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/deprecated.rst
+upstream_modified: false
 ---
 
 <a id="minio-server-envvar-deprecated"></a>
@@ -22,11 +22,10 @@ silo_modified: false
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 环境变量 {#id3}
 
@@ -36,52 +35,44 @@ silo_modified: false
 
 *envvar*
 
-{{% alert color="danger" %}}
-**已弃用: RELEASE.2021-04-22T15-44-28Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **已弃用: RELEASE.2021-04-22T15-44-28Z**
 
 [root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户的 secret key。
 
 该环境变量已 *弃用*，请改用 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 环境变量。
 
-{{% alert color="danger" %}}
-**警告**
-
-如果未设置 [`MINIO_SECRET_KEY`](#envvar.MINIO_SECRET_KEY)，[`minio`](/zh/reference/minio-server/#command-minio) 默认使用 `minioadmin`。
-
-在生产环境中 **绝不要** 使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) 指定唯一、足够长且随机的值。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> 如果未设置 [`MINIO_SECRET_KEY`](#envvar.MINIO_SECRET_KEY)，[`minio`](/zh/reference/minio-server/#command-minio) 默认使用 `minioadmin`。
+>
+> 在生产环境中 **绝不要** 使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) 指定唯一、足够长且随机的值。
 
 #### `MINIO_ACCESS_KEY` {#envvar.MINIO_ACCESS_KEY}
 
 *envvar*
 
-{{% alert color="danger" %}}
-**已弃用: RELEASE.2021-04-22T15-44-28Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **已弃用: RELEASE.2021-04-22T15-44-28Z**
 
 [root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户的 access key。
 
 > 该环境变量已 *弃用*，请改用 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 环境变量。
 
-{{% alert color="danger" %}}
-**警告**
-
-如果未设置 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY)，[`minio`](/zh/reference/minio-server/#command-minio) 默认使用 `minioadmin`。
-
-在生产环境中 **绝不要** 使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) 指定唯一、足够长且随机的值。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> 如果未设置 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY)，[`minio`](/zh/reference/minio-server/#command-minio) 默认使用 `minioadmin`。
+>
+> 在生产环境中 **绝不要** 使用默认凭证。 MinIO 强烈建议在所有环境中为 [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) 指定唯一、足够长且随机的值。
 
 #### `MINIO_ACCESS_KEY_OLD` {#envvar.MINIO_ACCESS_KEY_OLD}
 
 *envvar*
 
-{{% alert color="danger" %}}
-**已弃用: RELEASE.2021-04-22T15-44-28Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **已弃用: RELEASE.2021-04-22T15-44-28Z**
 
 要轮换 root 凭证，请修改 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 和 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 环境变量。
 
@@ -89,11 +80,10 @@ silo_modified: false
 
 *envvar*
 
-{{% alert color="danger" %}}
-**已弃用: Operator**
-
-6.0.4
-{{% /alert %}}
+> [!CAUTION]
+> **已弃用: Operator**
+>
+> 6.0.4
 
 指定为 Operator 创建并使用的命名空间。
 
@@ -103,10 +93,8 @@ silo_modified: false
 
 *envvar*
 
-{{% alert color="danger" %}}
-**已弃用: RELEASE.2021-04-22T15-44-28Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **已弃用: RELEASE.2021-04-22T15-44-28Z**
 
 要轮换 root 凭证，请修改 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 和 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 环境变量。
 
@@ -114,10 +102,8 @@ silo_modified: false
 
 *envvar*
 
-{{% alert color="danger" %}}
-**已弃用: RELEASE.2024-05-10T01-41-38Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **已弃用: RELEASE.2024-05-10T01-41-38Z**
 
 MinIO Console 用于连接 MinIO Server 的 [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) (FQDN)。
 

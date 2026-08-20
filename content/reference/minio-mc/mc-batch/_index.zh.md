@@ -3,21 +3,20 @@ title: "mc batch"
 url: "/zh/reference/minio-mc/mc-batch/"
 weight: 40
 icon: fa-solid fa-layer-group
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch.rst
+upstream_modified: false
 ---
 
 <a id="mc-batch"></a>
 
 <a id="command-mc.batch"></a>
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-
-新增了通过 [`mc batch cancel`](/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel) 命令取消作业的能力。
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
+>
+> 新增了通过 [`mc batch cancel`](/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel) 命令取消作业的能力。
 
 ## 描述 {#id2}
 

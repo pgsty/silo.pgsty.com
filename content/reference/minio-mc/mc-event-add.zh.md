@@ -2,8 +2,8 @@
 title: "mc event add"
 url: "/zh/reference/minio-mc/mc-event-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-event-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-event-add"></a>
@@ -17,8 +17,8 @@ silo_modified: false
 
 MinIO 会将已触发的事件自动发送到已配置的 [notification target](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令为 `myminio` MinIO 部署中的 `mydata` 存储桶上的 所有 `PUT` 和 `DELETE` 操作创建新的事件通知触发器：
 
 ```shell
@@ -26,8 +26,8 @@ mc event add --event "put,delete" myminio/mydata arn:aws:sqs::primary:target
 ```
 
 指定的 ARN 对应 `myminio` 部署上已配置的 [bucket notification target](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 命令语法如下：
 
 ```shell
@@ -45,8 +45,8 @@ mc [GLOBALFLAGS] event add \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -132,17 +132,15 @@ MinIO 生成存储桶通知所依据的事件。
 
 ### 为存储桶添加事件通知 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 以下命令为某个存储桶上的所有 S3 `PUT`、`GET` 和 `DELETE` 操作添加新的事件通知触发器。该命令假设 MinIO 部署中至少已配置一个 [bucket notification target](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)：
 
 ```shell
 mc event add myminio/mydata arn:minio:sqs::primary:webhook
 ```
-
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc event add ALIAS ARN
 ```
@@ -151,8 +149,8 @@ mc event add ALIAS ARN
 
   `myminio/mydata`
 - 将 `ARN` 替换为通知目标 [`ARN`](#mc.event.add.ARN)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id7}
 

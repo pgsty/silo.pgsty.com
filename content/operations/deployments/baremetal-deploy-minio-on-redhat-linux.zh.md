@@ -2,8 +2,8 @@
 title: "在 RHEL 兼容 Linux 上部署 Silo"
 url: "/zh/operations/deployments/baremetal-deploy-minio-on-redhat-linux/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-deploy-minio-on-redhat-linux.rst
+upstream_modified: true
 ---
 
 <a id="redhat-linux-minio"></a>
@@ -154,8 +154,8 @@ certgen -host "localhost,minio-*.example.net"
 
 请根据你的部署拓扑修改示例。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="多机多盘" %}}
+{{< tabs group="tab1-tab2-tab3" >}}
+{{< tab label="多机多盘" value="tab1" >}}
 在生产环境中使用 多机多盘（“Distributed”）部署拓扑。
 
 ```shell
@@ -195,9 +195,8 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
-
-{{% /tab %}}
-{{% tab header="单机多盘" %}}
+{{< /tab >}}
+{{< tab label="单机多盘" value="tab2" >}}
 在开发和评估环境中使用 单机多盘 部署。 对于能够容忍节点停机带来数据丢失或不可用的小型存储工作负载，也可以使用该拓扑。
 
 ```shell
@@ -236,16 +235,14 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
-
-{{% /tab %}}
-{{% tab header="单机单盘" %}}
+{{< /tab >}}
+{{< tab label="单机单盘" value="tab3" >}}
 在早期开发和评估环境中使用 单机单盘（“Standalone”）部署。 MinIO 不建议在生产环境中使用 单机部署，因为节点或其存储介质丢失会导致数据丢失。
 
-{{% alert color="warning" %}}
-**重要**
-
-SNSD 部署不支持通过添加新的 服务器池 来扩展存储。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> SNSD 部署不支持通过添加新的 服务器池 来扩展存储。
 
 ```shell
 # Set the volume MinIO uses at startup
@@ -277,9 +274,8 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 请根据部署需要，指定其他 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 或 server 命令行选项。
 
@@ -327,8 +323,8 @@ Status:         16 Online, 0 Offline.
 
 ### 7. 连接到部署 {#id9}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Console" %}}
+{{< tabs group="console-cli" >}}
+{{< tab label="Console" value="console" >}}
 打开浏览器，并通过任一 MinIO 主机名的 `:9001` 端口访问 [MinIO Console](/zh/administration/minio-console/#minio-console) 登录页。 例如：`https://minio1.example.com:9001`。
 
 使用上一步中的 **MINIO_ROOT_USER** 和 **MINIO_ROOT_PASSWORD** 登录。
@@ -336,8 +332,8 @@ Status:         16 Online, 0 Offline.
 <img src="/images/silo-console/console-login.webp" alt="MinIO Console 登录页" style="max-width: 600px; height: auto;" />
 
 你可以使用 MinIO Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。 每个 MinIO server 都包含自身内嵌的 MinIO Console。
-{{% /tab %}}
-{{% tab header="CLI" %}}
+{{< /tab >}}
+{{< tab label="CLI" value="cli" >}}
 请按照本地主机上的 `mc` [安装说明](/zh/reference/minio-mc/#mc-install) 完成安装。 运行 `mc --version` 验证安装结果。
 
 如果你的 MinIO 部署使用第三方或自签名 TLS 证书，请将 <abbr title="Certificate Authority">CA</abbr> 文件复制到 `~/.mc/certs/CAs`，以便 `mc` 信任该证书链。
@@ -349,8 +345,8 @@ mc alias set myminio https://minio-1.example.net:9000 USERNAME PASSWORD
 ```
 
 请根据你的部署修改主机名、用户名和密码。 主机名可以是部署中的任意一个 MinIO 节点。 你也可以指定负责处理部署连接的负载均衡器、反向代理或类似网络控制平面的主机名。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 8. 后续步骤 {#id10}
 

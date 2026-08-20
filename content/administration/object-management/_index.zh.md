@@ -3,8 +3,8 @@ title: "对象管理"
 url: "/zh/administration/object-management/"
 weight: 120
 icon: fa-solid fa-box-archive
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management.rst
+upstream_modified: true
 ---
 
 <a id="id1"></a>
@@ -18,13 +18,12 @@ silo_modified: true
 
 [对象](#objects) 是二进制数据，例如图像、音频文件、电子表格，甚至二进制可执行代码。 “Binary Large Object” 或 “blob” 这一术语有时会与对象存储关联使用，不过 blob 的大小可以从几个字节到数 TB 不等。 像 MinIO 这样的对象存储平台提供专用工具和能力，用于通过标准的 S3 兼容 API 存储、列出和获取对象。
 
-{{% alert color="info" %}}
-**磁盘独占访问**
-
-MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
-
-除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
-{{% /alert %}}
+> [!NOTE]
+> **磁盘独占访问**
+>
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+>
+> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
 <a id="buckets"></a>
 
@@ -73,15 +72,14 @@ MinIO 同时支持 [path-style](https://docs.aws.amazon.com/AmazonS3/latest/user
 
 例如，如果设置 `MINIO_DOMAIN=minio.example.net`，则 **不能** 将 `minio.example.net` 的任何子域名（即 `*.minio.example.net` 形式）分配给任何 MinIO 服务或目标。 这包括用于 [bucket](/zh/administration/bucket-replication/#minio-bucket-replication)、[batch](/zh/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job) 或 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 的主机名。
 
-{{% alert color="warning" %}}
-**重要**
-
-对于 [启用 TLS](/zh/operations/network-encryption/#minio-tls) 的部署，**必须** 确保 TLS 证书的 SAN 覆盖 [`MINIO_DOMAIN`](/zh/reference/minio-server/settings/core/#envvar.MINIO_DOMAIN) 中最左侧域名下的所有子域名。
-
-例如，`MINIO_DOMAIN=minio.example.net` 的情况要求 TLS SAN 覆盖 `minio.example.net` 的所有子域名。 可以额外设置一个 `*.minio.example.net` 的 TLS SAN，以正确覆盖该子域命名空间。
-
-TLS 通配符规则不允许继续匹配更深层级的子域名，因此，带有 `*.example.net` 通配符 SAN 的 TLS 证书 **不能** 覆盖 `*.minio.example.net` 这样的 virtual host 查找。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 对于 [启用 TLS](/zh/operations/network-encryption/#minio-tls) 的部署，**必须** 确保 TLS 证书的 SAN 覆盖 [`MINIO_DOMAIN`](/zh/reference/minio-server/settings/core/#envvar.MINIO_DOMAIN) 中最左侧域名下的所有子域名。
+>
+> 例如，`MINIO_DOMAIN=minio.example.net` 的情况要求 TLS SAN 覆盖 `minio.example.net` 的所有子域名。 可以额外设置一个 `*.minio.example.net` 的 TLS SAN，以正确覆盖该子域命名空间。
+>
+> TLS 通配符规则不允许继续匹配更深层级的子域名，因此，带有 `*.example.net` 通配符 SAN 的 TLS 证书 **不能** 覆盖 `*.minio.example.net` 这样的 virtual host 查找。
 
 ## 对象组织与规划 {#id3}
 
@@ -98,11 +96,10 @@ MinIO 对于给定部署中的存储桶、对象或前缀数量没有硬性的 [
 
 若要更深入了解限制前缀内容数量的收益，请参阅 [优化 S3 性能](https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html) 一文。
 
-{{% alert color="info" %}}
-**说明**
-
-无论 Windows 文件系统是否支持，MinIO 都不支持在对象名称中使用 `\` 或 `:` 字符。 请在对象名称中使用 `/` 作为分隔符，以便 MinIO 使用 [前缀](/zh/glossary/#term-prefix) 自动创建文件夹结构。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 无论 Windows 文件系统是否支持，MinIO 都不支持在对象名称中使用 `\` 或 `:` 字符。 请在对象名称中使用 `/` 作为分隔符，以便 MinIO 使用 [前缀](/zh/glossary/#term-prefix) 自动创建文件夹结构。
 
 ## 对象版本控制 {#id4}
 

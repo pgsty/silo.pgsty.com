@@ -2,8 +2,8 @@
 title: "mc admin update"
 url: "/zh/reference/minio-mc-admin/mc-admin-update/"
 weight: 180
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-update.rst
+upstream_modified: true
 ---
 
 <a id="mc-admin-update"></a>
@@ -18,19 +18,17 @@ silo_modified: true
 
 用户 **必须** 对二进制安装目标位置具有 `write` 权限。
 
-{{% alert color="danger" %}}
-**不要在 Silo 上使用默认更新路径**
+> [!CAUTION]
+> **不要在 Silo 上使用默认更新路径**
+>
+> 截至 2026-08-05，最新公开 Silo 服务端 `RELEASE.2026-08-04T00-00-00Z` 在省略 `MIRROR_URL` 时仍会解析到上游 `dl.min.io` 发布源，并保留上游 MinIO 签名密钥。对已启用更新的 Silo 服务端运行 `mc admin update ALIAS`，因此可能会把 Silo 替换成上游 MinIO 二进制。
+>
+> 请在 Silo 服务端设置 `MINIO_UPDATE=off`，并通过[下载与安装](/zh/download/#server)、可信软件仓库或手工校验的 Silo 制品升级。本页保留命令契约是为了兼容，并不表示这是推荐的 Silo 升级流程。
 
-截至 2026-08-05，最新公开 Silo 服务端 `RELEASE.2026-08-04T00-00-00Z` 在省略 `MIRROR_URL` 时仍会解析到上游 `dl.min.io` 发布源，并保留上游 MinIO 签名密钥。对已启用更新的 Silo 服务端运行 `mc admin update ALIAS`，因此可能会把 Silo 替换成上游 MinIO 二进制。
-
-请在 Silo 服务端设置 `MINIO_UPDATE=off`，并通过[下载与安装](/zh/download/#server)、可信软件仓库或手工校验的 Silo 制品升级。本页保留命令契约是为了兼容，并不表示这是推荐的 Silo 升级流程。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**仅在 Silo 或兼容的 MinIO 部署上使用 `mc admin`**
-
-[`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 使用 MinIO 专用管理 API。仅仅兼容通用 S3 API，并不意味着其他对象存储支持这些命令。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 Silo 或兼容的 MinIO 部署上使用 `mc admin`**
+>
+> [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 使用 MinIO 专用管理 API。仅仅兼容通用 S3 API，并不意味着其他对象存储支持这些命令。
 
 ## 注意事项 {#id3}
 
@@ -96,10 +94,9 @@ mc admin update ALIAS         \
 
 ### 二进制压缩 {#id9}
 
-{{% alert color="info" %}}
-**变更: RELEASE.2024-01-28T22-35-53Z**
-
-[`mc admin update`](#command-mc.admin.update) 会先压缩二进制，再发送到部署中的所有节点。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2024-01-28T22-35-53Z**
+>
+> [`mc admin update`](#command-mc.admin.update) 会先压缩二进制，再发送到部署中的所有节点。
 
 此功能不适用于 [systemctl managed deployments](/zh/operations/deployments/baremetal/#minio-baremetal)。

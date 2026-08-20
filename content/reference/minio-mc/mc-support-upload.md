@@ -2,8 +2,8 @@
 title: "mc support upload"
 url: "/reference/minio-mc/mc-support-upload/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-upload.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-upload"></a>
@@ -14,11 +14,10 @@ silo_modified: false
 
 [`mc support upload`](#command-mc.support.upload) copies a file from the local file system to a SUBNET ticket.
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Syntax {#syntax}
 

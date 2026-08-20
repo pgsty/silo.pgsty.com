@@ -3,8 +3,8 @@ title: "Availability and Resiliency"
 url: "/operations/concepts/availability-and-resiliency/"
 description: "Silo availability and resiliency in production environments"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts/availability-and-resiliency.rst
+upstream_modified: true
 ---
 
 <a id="availability-and-resiliency"></a>
@@ -12,13 +12,12 @@ silo_modified: true
 
 This page provides an overview of MinIO’s availability and resiliency design and features from a production perspective.
 
-{{% alert color="info" %}}
-**Note**
-
-The contents of this page are intended as a best-effort guide to understanding MinIO’s intended design and philosophy behind availability and resiliency. It cannot replace the functionality of [MinIO SUBNET](https://min.io/pricing?jmp=docs), which allows for coordinating with MinIO Engineering when planning your MinIO deployments.
-
-Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> The contents of this page are intended as a best-effort guide to understanding MinIO’s intended design and philosophy behind availability and resiliency. It cannot replace the functionality of [MinIO SUBNET](https://min.io/pricing?jmp=docs), which allows for coordinating with MinIO Engineering when planning your MinIO deployments.
+>
+> Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
 
 ## Distributed MinIO Deployments {#distributed-minio-deployments}
 
@@ -132,13 +131,12 @@ Community users can seek support on the [MinIO Community Slack](https://slack.mi
 >
 > Use replicated remotes to restore the lost data to the deployment. All data stored on the healthy pools remain safe on disk.
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 ## Replicated MinIO Deployments {#replicated-minio-deployments}
 

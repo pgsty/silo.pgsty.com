@@ -2,19 +2,18 @@
 title: "mc get"
 url: "/reference/minio-mc/mc-get/"
 weight: 120
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-get.rst
+upstream_modified: false
 ---
 
 <a id="mc-get"></a>
 
 <a id="command-mc.get"></a>
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-02-24T01-33-20Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-02-24T01-33-20Z
 
 ## Syntax {#syntax}
 
@@ -22,16 +21,15 @@ The [`mc get`](#command-mc.get) command downloads an object from a target S3 dep
 
 `mc get` provides a simplified interface for downloading files compared to [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) or [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror). `mc get` uses a one-way download function that trades efficiency for the power and complexity of the other commands.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following downloads the file `logo.png` from an s3 source to the local file system at path `~/images/collateral/`.
 
 ```shell
 mc get minio/marketing/logo.png ~/images/collateral
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -47,8 +45,8 @@ mc [GLOBALFLAGS] get                      \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -110,11 +108,10 @@ Specify the path to a prefix to apply encryption to all matching objects at that
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
 
 ##### `--version-id, --vid` {#mc.get.-version-id}
 

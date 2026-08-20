@@ -2,8 +2,8 @@
 title: "mc sql"
 url: "/zh/reference/minio-mc/mc-sql/"
 weight: 360
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-sql.rst
+upstream_modified: false
 ---
 
 <a id="mc-sql"></a>
@@ -16,16 +16,15 @@ silo_modified: false
 
 有关 S3 Select 的行为和限制，请参阅 [Selecting content from objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/selecting-content-from-objects)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会查询 `myminio` MinIO 部署中 `mydata` 存储桶内的所有对象：
 
 ```shell
 mc sql --recursive --query "select * from S3Object" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] mc sql                          \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -164,11 +163,10 @@ mc sql [FLAGS] play/mybucket
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--json-input` {#mc.sql.-json-input}
 

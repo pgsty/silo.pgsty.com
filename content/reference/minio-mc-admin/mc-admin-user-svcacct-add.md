@@ -2,8 +2,8 @@
 title: "mc admin user svcacct add"
 url: "/reference/minio-mc-admin/mc-admin-user-svcacct-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct-add"></a>
@@ -11,28 +11,26 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct.add"></a>
 
-{{% alert color="warning" %}}
-**Important**
-
-This command has been replaced and will be deprecated in a future MinIO Client release.
-
-As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey create`](/reference/minio-mc-admin/mc-admin-accesskey-create/#command-mc.admin.accesskey.create) command to add access keys for built-in MinIO IDP users.
-
-To add access keys for AD/LDAP users, use the [`mc idp ldap accesskey create`](/reference/minio-mc/mc-idp-ldap-accesskey-create/#command-mc.idp.ldap.accesskey.create) command.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This command has been replaced and will be deprecated in a future MinIO Client release.
+>
+> As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey create`](/reference/minio-mc-admin/mc-admin-accesskey-create/#command-mc.admin.accesskey.create) command to add access keys for built-in MinIO IDP users.
+>
+> To add access keys for AD/LDAP users, use the [`mc idp ldap accesskey create`](/reference/minio-mc/mc-idp-ldap-accesskey-create/#command-mc.idp.ldap.accesskey.create) command.
 
 ## Syntax {#syntax}
 
 The [`mc admin user svcacct add`](#command-mc.admin.user.svcacct.add) command adds a new access key to an existing MinIO or AD/LDAP user.
 
-{{% alert color="info" %}}
-**Access keys for OpenID Connect users**
+> [!NOTE]
+> **Access keys for OpenID Connect users**
+>
+> To generate service account access keys for [OpenID Connect users](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid), use the [MinIO Console](/administration/minio-console/#minio-console).
 
-To generate service account access keys for [OpenID Connect users](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid), use the [MinIO Console](/administration/minio-console/#minio-console).
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command creates a new access key associated to an existing MinIO user:
 
 ```shell
@@ -44,8 +42,8 @@ mc admin user svcacct add                       \
 ```
 
 The command returns the access key and secret key for the new account.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -63,8 +61,8 @@ mc [GLOBALFLAGS] admin user svcacct add             \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -104,13 +102,12 @@ Access Key names *must* be unique across all users.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-18T16-59-00Z**
-
-Replaced by [`--description`](#mc.admin.user.svcacct.add.-description) and [`--name`](#mc.admin.user.svcacct.add.-name).
-
-Originally added in version RELEASE.2023-01-28T20-29-38Z.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-18T16-59-00Z**
+>
+> Replaced by [`--description`](#mc.admin.user.svcacct.add.-description) and [`--name`](#mc.admin.user.svcacct.add.-name).
+>
+> Originally added in version RELEASE.2023-01-28T20-29-38Z.
 
 This option has been removed. Use `--description` or `--name` instead.
 
@@ -120,10 +117,8 @@ This option has been removed. Use `--description` or `--name` instead.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-18T16-59-00Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-18T16-59-00Z**
 
 Add a description for the service account. For example, you might specify the reason the service account exists.
 
@@ -133,10 +128,8 @@ Add a description for the service account. For example, you might specify the re
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-30T22-41-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-30T22-41-38Z**
 
 Set an expiration date for the service account. The date must be in the future, you may not set an expiration date that has already passed.
 
@@ -154,10 +147,8 @@ Allowed date and time formats:
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-18T16-59-00Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-18T16-59-00Z**
 
 Add a human-readable name for the service account.
 

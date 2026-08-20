@@ -3,8 +3,8 @@ title: "mc replicate"
 url: "/zh/reference/minio-mc/mc-replicate/"
 weight: 320
 icon: fa-solid fa-copy
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate"></a>
@@ -15,11 +15,10 @@ silo_modified: false
 
 [`mc replicate`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 命令用于为 MinIO 部署配置和管理 [服务端存储桶复制](/zh/administration/bucket-replication/#minio-bucket-replication-serverside)，包括 [双活复制配置](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 和 [重新同步](/zh/administration/bucket-replication/#minio-replication-behavior-resync)。
 
-{{% alert color="info" %}}
-**说明**
-
-对于多站点复制，请参见 [`mc admin replicate`](/zh/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate)。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 对于多站点复制，请参见 [`mc admin replicate`](/zh/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate)。
 
 ## 子命令 {#id3}
 

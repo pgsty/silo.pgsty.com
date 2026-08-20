@@ -2,8 +2,8 @@
 title: "mc ilm tier update"
 url: "/zh/reference/minio-mc/mc-ilm-tier-update/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-update.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-update"></a>
@@ -11,21 +11,19 @@ silo_modified: false
 
 <a id="command-mc.ilm.tier.update"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc ilm tier update`](#command-mc.ilm.tier.update) 替代 `mc admin tier edit`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc ilm tier update`](#command-mc.ilm.tier.update) 替代 `mc admin tier edit`。
 
 ## 描述 {#id2}
 
 [`mc ilm tier update`](#command-mc.ilm.tier.update) 命令用于修改已配置的远程层。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ### 支持的 S3 服务 {#s3}
 
@@ -124,8 +122,8 @@ MinIO 还要求在集群上具备以下管理权限，以便为对象过渡生�
 
 ## 语法 {#id5}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例会更新 `myminio` 部署上名为 `S3TIER` 的现有远程层凭证。
 
 ```shell
@@ -133,8 +131,8 @@ MinIO 还要求在集群上具备以下管理权限，以便为对象过渡生�
 ```
 
 运行此命令后，`myminio` 部署上的生命周期管理规则会使用该层的新凭证将对象过渡到远程位置。 命令中未修改的选项会保留其现有配置。
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令的语法如下：
 
 ```shell
@@ -155,8 +153,8 @@ mc ilm tier update TARGET                         \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id6}
 
@@ -228,11 +226,10 @@ mc ilm tier update TARGET                         \
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-07-03T20-17-25Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-07-03T20-17-25Z
 
 Azure service principal account 的 Directory ID。
 
@@ -244,11 +241,10 @@ Azure service principal account 的 Directory ID。
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-07-03T20-17-25Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-07-03T20-17-25Z
 
 Azure service principal account 的 Client ID。
 
@@ -262,11 +258,10 @@ Azure service principal account 的 Client ID。
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-07-03T20-17-25Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-07-03T20-17-25Z
 
 Azure service principal account 的 secret。
 

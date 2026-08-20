@@ -2,8 +2,8 @@
 title: "mc admin user svcacct disable"
 url: "/zh/reference/minio-mc-admin/mc-admin-user-svcacct-disable/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct-disable.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct-disable"></a>
@@ -11,30 +11,28 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct.disable"></a>
 
-{{% alert color="warning" %}}
-**重要**
-
-此命令已被替代，并将在未来的 MinIO 客户端版本中弃用。
-
-从 MinIO客户端版本RELEASE.2024-10-08T09-37-26Z 起，请使用 [`mc admin accesskey disable`](/zh/reference/minio-mc-admin/mc-admin-accesskey-disable/#command-mc.admin.accesskey.disable) 命令禁用内置 MinIO IDP 用户的访问密钥。
-
-如需禁用 AD/LDAP 用户的访问密钥，请使用 [`mc idp ldap accesskey disable`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-disable/#command-mc.idp.ldap.accesskey.disable) 命令。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 此命令已被替代，并将在未来的 MinIO 客户端版本中弃用。
+>
+> 从 MinIO客户端版本RELEASE.2024-10-08T09-37-26Z 起，请使用 [`mc admin accesskey disable`](/zh/reference/minio-mc-admin/mc-admin-accesskey-disable/#command-mc.admin.accesskey.disable) 命令禁用内置 MinIO IDP 用户的访问密钥。
+>
+> 如需禁用 AD/LDAP 用户的访问密钥，请使用 [`mc idp ldap accesskey disable`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-disable/#command-mc.idp.ldap.accesskey.disable) 命令。
 
 ## 语法 {#id2}
 
 [`mc admin user svcacct disable`](#command-mc.admin.user.svcacct.disable) 命令用于禁用现有访问密钥。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令会禁用指定的访问密钥：
 
 ```shell
 mc admin user svcacct disable myminio myuserserviceaccount
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 命令语法如下：
 
 ```shell
@@ -48,8 +46,8 @@ mc [GLOBALFLAGS] admin user svcacct disable         \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

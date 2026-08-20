@@ -6,15 +6,12 @@ url: "/compatibility/server/"
 weight: 10
 type: docs
 icon: fa-solid fa-server
-minio_origin: false
-silo_modified: false
 ---
 
 Silo is a maintained fork of the MinIO server. It preserves MinIO's S3-facing and on-disk compatibility, but it is **not a byte-for-byte, operationally invisible rename**. This page is the compatibility contract for moving from the upstream baseline to the Silo source prepared on 2026-08-06.
 
-{{% alert color="warning" %}}
-**Read this before replacing a MinIO deployment.** The binary, package, service account, systemd unit, default local configuration directory, container path, Helm resource names, embedded Console, update behavior, several authorization decisions, and some error responses changed. Data disks and the `MINIO_*` configuration namespace did not receive a matching rename.
-{{% /alert %}}
+> [!WARNING]
+> **Read this before replacing a MinIO deployment.** The binary, package, service account, systemd unit, default local configuration directory, container path, Helm resource names, embedded Console, update behavior, several authorization decisions, and some error responses changed. Data disks and the `MINIO_*` configuration namespace did not receive a matching rename.
 
 ## Audit scope and method {#scope}
 

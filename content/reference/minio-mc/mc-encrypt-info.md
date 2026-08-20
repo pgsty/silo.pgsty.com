@@ -2,8 +2,8 @@
 title: "mc encrypt info"
 url: "/reference/minio-mc/mc-encrypt-info/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-encrypt-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-encrypt-info"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc encrypt info`](#command-mc.encrypt.info) command returns the current default encryption settings for a bucket.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command returns the default encryption setting for the `mydata` bucket on the `myminio` MinIO deployment.
 
 ```shell
 mc encrypt info myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] encrypt info ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -59,23 +58,20 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Retrieve the Automatic Server-Side Encryption Settings for a Bucket {#retrieve-the-automatic-server-side-encryption-settings-for-a-bucket}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
-
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 ```shell
  mc encrypt info myminio/data
 ```
-
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc encrypt info ALIAS
 ```
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment on which to configure automatic server-side bucket encryption.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Behavior {#behavior}
 

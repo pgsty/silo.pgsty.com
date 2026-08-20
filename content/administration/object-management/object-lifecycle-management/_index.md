@@ -3,8 +3,8 @@ title: "Object Lifecycle Management"
 url: "/administration/object-management/object-lifecycle-management/"
 weight: 40
 icon: fa-solid fa-clock-rotate-left
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-lifecycle-management.rst
+upstream_modified: false
 ---
 
 <a id="object-lifecycle-management"></a>
@@ -33,10 +33,8 @@ MinIO object transition supports use cases like moving aged data from MinIO clus
 
 Use the [`mc ilm tier add`](/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add) command to create a remote target for tiering data to that target. You can then use the [`mc ilm rule add --transition-days`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-transition-days) command to transition objects to that tier after a specified number of calendar days.
 
-{{% alert color="info" %}}
-**Added: RELEASE.2022-11-10T18-20-21Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2022-11-10T18-20-21Z**
 
 You can verify the tiering status of an object using [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) against the bucket or bucket prefix. The output includes the storage tier of each object:
 
@@ -49,15 +47,14 @@ $ mc ls play/mybucket
 - `STANDARD` marks objects stored on the MinIO deployment.
 - `WARM` marks objects stored on the remote tier with matching name.
 
-{{% alert color="warning" %}}
-**Important**
-
-MinIO Object Transition supports cost-saving strategies around moving older or aged data to cost-optimized remote storage tiers, such as cloud storage or high-density HDD storage.
-
-MinIO Object Transition does **not** provide backup and recovery functionality. You cannot use the remote tier as a recovery source in the event of data loss in MinIO.
-
-Use either [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview) or [bucket replication](/administration/bucket-replication/#minio-bucket-replication) to support backup/recovery or <abbr title="Business Continuity / Disaster Recovery">BC/DR</abbr> requirements.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> MinIO Object Transition supports cost-saving strategies around moving older or aged data to cost-optimized remote storage tiers, such as cloud storage or high-density HDD storage.
+>
+> MinIO Object Transition does **not** provide backup and recovery functionality. You cannot use the remote tier as a recovery source in the event of data loss in MinIO.
+>
+> Use either [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview) or [bucket replication](/administration/bucket-replication/#minio-bucket-replication) to support backup/recovery or <abbr title="Business Continuity / Disaster Recovery">BC/DR</abbr> requirements.
 
 ### Exclusive Access to Remote Data {#exclusive-access-to-remote-data}
 
@@ -110,13 +107,12 @@ MinIO adopts [S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide
   To expire delete markers when there are no remaining versions for that object, specify the [`--expire-delete-marker`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-delete-marker) option when creating the expiration rule.
 - To expire *all* versions of an object that does *not* have a delete marker after a specified period of days, use the [`--expire-all-object-versions`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-all-object-versions) flag with the [`--expire-days`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-days) flag. This permits the permanent deletion of the object after the specified number of days pass.
 
-  {{% alert color="info" %}}
-  **Changed: MinIO**
-
-  RELEASE.2024-05-01T01-11-10Z
-
-  This flag applies only to objects that do **not** have a delete marker.
-  {{% /alert %}}
+  > [!NOTE]
+  > **Changed: MinIO**
+  >
+  > RELEASE.2024-05-01T01-11-10Z
+  >
+  > This flag applies only to objects that do **not** have a delete marker.
 
 <a id="minio-lifecycle-management-scanner"></a>
 

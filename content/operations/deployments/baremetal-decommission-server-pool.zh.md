@@ -2,8 +2,8 @@
 title: "退役 服务器池"
 url: "/zh/operations/deployments/baremetal-decommission-server-pool/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-decommission-server-pool.rst
+upstream_modified: false
 ---
 
 <a id="minio-decommissioning"></a>
@@ -19,17 +19,16 @@ MinIO 支持从包含两个或更多 pool 的部署中退役并移除 [服务器
 
 本页步骤用于从至少包含两个 服务器池 的 [分布式](/zh/operations/deployments/installation/#deploy-minio-distributed) MinIO 部署中退役并移除一个或多个 服务器池。
 
-{{% alert color="info" %}}
-**退役是永久性的**
-
-一旦 MinIO 开始退役某个 pool，就会将其标记为 *永久* 非活跃（“draining”）状态。 取消或以其他方式中断退役流程，**不会** 将该 pool 恢复为 active 状态。 退役多个 pool 时必须格外谨慎。
-
-退役是一项重大的管理操作，规划与执行都需要谨慎对待，并不是轻量或“日常型”的任务。
-
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) 用户可以 [登录](https://subnet.min.io/) 并创建与退役相关的新工单。 通过 SUBNET 与 MinIO Engineering 协作，可提高退役成功率，包括性能测试和健康诊断。
-
-社区用户可以在 [MinIO Community Slack](https://slack.min.io) 寻求支持。 社区支持仅为 best-effort，不对响应速度提供任何 SLA。
-{{% /alert %}}
+> [!NOTE]
+> **退役是永久性的**
+>
+> 一旦 MinIO 开始退役某个 pool，就会将其标记为 *永久* 非活跃（“draining”）状态。 取消或以其他方式中断退役流程，**不会** 将该 pool 恢复为 active 状态。 退役多个 pool 时必须格外谨慎。
+>
+> 退役是一项重大的管理操作，规划与执行都需要谨慎对待，并不是轻量或“日常型”的任务。
+>
+> [MinIO SUBNET](https://min.io/pricing?jmp=docs) 用户可以 [登录](https://subnet.min.io/) 并创建与退役相关的新工单。 通过 SUBNET 与 MinIO Engineering 协作，可提高退役成功率，包括性能测试和健康诊断。
+>
+> 社区用户可以在 [MinIO Community Slack](https://slack.min.io) 寻求支持。 社区支持仅为 best-effort，不对响应速度提供任何 SLA。
 
 <a id="id3"></a>
 
@@ -135,10 +134,8 @@ MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 
 
 ### 对已启用 Tiering 的 Server 执行退役 {#tiering-server}
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-03-20T20-16-18Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-03-20T20-16-18Z**
 
 对于已启用并处于活动状态的 tiering 部署，退役会将对象引用迁移到新的 active pool。 应用程序仍可继续对这些对象发出 GET 请求，MinIO 会透明地从远端 tier 中检索对象。
 
@@ -175,13 +172,12 @@ mc admin decommission status myminio
 
 ### 2) 启动退役过程 {#id14}
 
-{{% alert color="info" %}}
-**退役是永久性的**
-
-一旦 MinIO 开始退役某个 pool，就会将其标记为 *永久* 非活跃（“draining”）状态。 取消或以其他方式中断退役流程，**不会** 将该 pool 恢复为 active 状态。
-
-在运行以下命令前，请先确认并验证你要退役的是正确的 pool。
-{{% /alert %}}
+> [!NOTE]
+> **退役是永久性的**
+>
+> 一旦 MinIO 开始退役某个 pool，就会将其标记为 *永久* 非活跃（“draining”）状态。 取消或以其他方式中断退役流程，**不会** 将该 pool 恢复为 active 状态。
+>
+> 在运行以下命令前，请先确认并验证你要退役的是正确的 pool。
 
 使用 [`mc admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 命令开始退役目标 pool。 指定部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，以及待退役 pool 的完整描述，包括所有主机、磁盘和文件路径。
 
@@ -284,10 +280,8 @@ MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 
 
 ## 退役多个 服务器池 {#minio-decommission-multiple-pools}
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-01-18T04-36-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-01-18T04-36-38Z**
 
 在执行退役命令时，你可以一次性启动多个 服务器池 的退役过程。
 
@@ -337,21 +331,19 @@ mc admin decommission status myminio
 
 第三个和第四个 pool 可以吸收第一个 pool 上的全部对象，而不会显著影响总可用存储。
 
-{{% alert color="warning" %}}
-**重要**
-
-在开始退役前，请先完成所有新增存储资源所需的 server 扩容。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 在开始退役前，请先完成所有新增存储资源所需的 server 扩容。
 
 ### 2) 启动退役过程 {#id20}
 
-{{% alert color="info" %}}
-**退役是永久性的**
-
-一旦 MinIO 开始退役这些 pool，就会将它们标记为 *永久* 非活跃（“draining”）状态。 取消或以其他方式中断退役流程，**不会** 将这些 pool 恢复为 active 状态。
-
-在运行以下命令前，请先确认并验证你要退役的是正确的 pool。
-{{% /alert %}}
+> [!NOTE]
+> **退役是永久性的**
+>
+> 一旦 MinIO 开始退役这些 pool，就会将它们标记为 *永久* 非活跃（“draining”）状态。 取消或以其他方式中断退役流程，**不会** 将这些 pool 恢复为 active 状态。
+>
+> 在运行以下命令前，请先确认并验证你要退役的是正确的 pool。
 
 使用 [`mc admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 命令开始退役目标 pool。 指定部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，以及以逗号分隔的每个待退役 pool 的完整描述，包括所有主机、磁盘和文件路径。
 

@@ -2,8 +2,8 @@
 title: "mc alias import"
 url: "/reference/minio-mc/mc-alias-import/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias-import.rst
+upstream_modified: false
 ---
 
 <a id="mc-alias-import"></a>
@@ -17,8 +17,8 @@ The [`mc alias import`](#command-mc.alias.import) command imports an alias confi
 
 You can use [`mc alias export`](/reference/minio-mc/mc-alias-export/#command-mc.alias.export) to create the necessary JSON for import.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command imports an alias configuration from a JSON document:
 
 ```shell
@@ -26,8 +26,8 @@ mc alias import newalias ./credentials.json
 ```
 
 Use [`mc alias list newalias`](/reference/minio-mc/mc-alias-list/#command-mc.alias.list) to confirm the import succeeded.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc alias import`](#command-mc.alias.import) command has the following syntax:
 
 ```shell
@@ -39,8 +39,8 @@ mc [GLOBALFLAGS] alias import ALIAS PATH|STDIN
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

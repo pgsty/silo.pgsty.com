@@ -2,8 +2,8 @@
 title: "使用 Grafana 监控 Silo 服务端"
 url: "/zh/operations/monitoring/grafana/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/grafana.rst
+upstream_modified: true
 ---
 
 <a id="grafana-minio-server"></a>
@@ -17,13 +17,12 @@ silo_modified: true
 - 已有可通过网络访问 Prometheus 部署的 MinIO 部署
 - [已安装 Grafana](https://grafana.com/grafana/download)
 
-{{% alert color="info" %}}
-**Grafana 仪表板使用 metrics version 2**
-
-MinIO 的 Grafana 仪表板使用 [metrics version 2](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2)。 关于指标 API 版本的更多信息，请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
-
-对于 version 3 指标，你需要自行创建仪表板。 关于仪表板的更多信息，请参见 [Grafana 文档](https://grafana.com/docs/grafana/latest/dashboards/)。
-{{% /alert %}}
+> [!NOTE]
+> **Grafana 仪表板使用 metrics version 2**
+>
+> MinIO 的 Grafana 仪表板使用 [metrics version 2](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2)。 关于指标 API 版本的更多信息，请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
+>
+> 对于 version 3 指标，你需要自行创建仪表板。 关于仪表板的更多信息，请参见 [Grafana 文档](https://grafana.com/docs/grafana/latest/dashboards/)。
 
 ## MinIO Grafana 仪表板 {#id3}
 

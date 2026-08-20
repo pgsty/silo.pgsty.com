@@ -2,8 +2,8 @@
 title: "mc od"
 url: "/reference/minio-mc/mc-od/"
 weight: 260
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-od.rst
+upstream_modified: false
 ---
 
 <a id="mc-od"></a>
@@ -16,8 +16,8 @@ The [`mc od`](#command-mc.od) command copies a local file to a remote location i
 
 Use the [`mc od`](#command-mc.od) to mimic the functionality of the Linux `dd` command.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command Upload 200MiB of a file to a bucket in 5 parts of size 40MiB. The output shows the results of the upload, including the length of time it took for the upload to complete.
 
 ```shell
@@ -36,9 +36,8 @@ If passing the `--json` [global flag](/reference/minio-mc/#minio-mc-global-optio
   "elapsed": "314ms"
 }
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -55,8 +54,8 @@ mc [GLOBALFLAGS] od                                            \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -137,11 +136,10 @@ mc od if=file.zip of=myminio/mybucket/file.zip size=40MiB parts=5
 
 In this command example, if the source object stream is larger than 200MiB (40MiB × 5 parts), only the first 200MiB of the file upload.
 
-{{% alert color="warning" %}}
-**Important**
-
-Using the command this way may not upload the entirety of an object.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Using the command this way may not upload the entirety of an object.
 
 ### Upload a Full File in 5 Parts {#upload-a-full-file-in-5-parts}
 

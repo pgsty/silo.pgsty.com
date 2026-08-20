@@ -2,8 +2,8 @@
 title: "mc license register"
 url: "/reference/minio-mc/mc-license-register/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-license-register.rst
+upstream_modified: false
 ---
 
 <a id="mc-license-register"></a>
@@ -12,11 +12,10 @@ silo_modified: false
 
 <a id="command-mc.license.register"></a>
 
-{{% alert color="warning" %}}
-**Important**
-
-`mc license register` requires [MinIO Client](/reference/minio-mc/#minio-client) version `RELEASE.2023-11-20T16-30-59Z` or later. While not strictly required, best practice keeps the [MinIO Client version](/reference/minio-mc/#mc-client-versioning) in alignment with the MinIO Server version.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> `mc license register` requires [MinIO Client](/reference/minio-mc/#minio-client) version `RELEASE.2023-11-20T16-30-59Z` or later. While not strictly required, best practice keeps the [MinIO Client version](/reference/minio-mc/#mc-client-versioning) in alignment with the MinIO Server version.
 
 ## Description {#description}
 
@@ -24,16 +23,15 @@ The [`mc license register`](#command-mc.license.register) command connects your 
 
 After registration, you can upload deployment health reports directly to SUBNET using the [`mc support diag`](/reference/minio-mc/mc-support-diag/#command-mc.support.diag) command.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 > The following example registers the `minio` [alias](/reference/minio-mc/mc-alias-set/#alias) with [MinIO SUBNET](https://min.io/pricing?jmp=docs):
 
 ```shell
 mc license register minio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -43,9 +41,8 @@ mc [GLOBALFLAGS] license register ALIAS                      \
                          [--license <path to license file>]  \
                          [--name <value>]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -150,13 +147,12 @@ mc license register minio2 --name second-deployment
 
 Register a MinIO deployment at alias `minio3` on SUBNET that does not have direct Internet access due to a firewall, airgap, or the like.
 
-{{% alert color="info" %}}
-**Changed: mc**
-
-RELEASE.2022-07-29T19-17-16Z
-
-The airgap registration process works with MinIO Client version `RELEASE.2022-07-29T19-17-16Z` or later. Earlier versions of the MinIO Client cannot register an airgapped deployment.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: mc**
+>
+> RELEASE.2022-07-29T19-17-16Z
+>
+> The airgap registration process works with MinIO Client version `RELEASE.2022-07-29T19-17-16Z` or later. Earlier versions of the MinIO Client cannot register an airgapped deployment.
 
 ```shell
 mc license register minio3 --airgap
@@ -193,10 +189,8 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Automatic License Updates {#automatic-license-updates}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-01-18T04-36-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-01-18T04-36-38Z**
 
 Once registered for [MinIO SUBNET](https://min.io/pricing?jmp=docs), MinIO automatically checks for and updates the license every month.
 

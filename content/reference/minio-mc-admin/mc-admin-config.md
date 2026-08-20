@@ -2,8 +2,8 @@
 title: "mc admin config"
 url: "/reference/minio-mc-admin/mc-admin-config/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-config.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-config"></a>
@@ -15,11 +15,10 @@ silo_modified: false
 
 The [`mc admin config`](#command-mc.admin.config) command manages configuration settings for the [`minio`](/reference/minio-server/#command-minio) server.
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 ## Examples {#examples}
 

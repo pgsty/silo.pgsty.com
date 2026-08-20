@@ -2,8 +2,8 @@
 title: "mc admin idp ldap"
 url: "/zh/reference/deprecated/mc-admin-idp-ldap/"
 weight: 140
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-idp-ldap.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-idp-ldap"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.admin.idp.ldap"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-26T23-31-54Z**
-
-`mc admin idp ldap` 及其子命令已由 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 替代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-26T23-31-54Z**
+>
+> `mc admin idp ldap` 及其子命令已由 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 替代。
 
 ## 说明 {#id2}
 
@@ -23,11 +22,10 @@ silo_modified: false
 
 在 [配置 AD/LDAP 连接](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) 时，可将配置设置作为使用环境变量的替代方案。
 
-{{% alert color="info" %}}
-**说明**
-
-配置设置 **不会** 覆盖通过环境变量配置的设置。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 配置设置 **不会** 覆盖通过环境变量配置的设置。
 
 [`mc admin idp ldap`](#command-mc.admin.idp.ldap) 命令包含以下子命令：
 
@@ -56,8 +54,8 @@ silo_modified: false
 
 为 AD/LDAP 提供方创建新配置。 每个部署中，MinIO 最多仅支持 *一个* (1) AD/LDAP 提供方。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例为 `myminio` 部署设置 AD/LDAP 配置参数。
 
 ```shell
@@ -71,9 +69,8 @@ silo_modified: false
       group_search_base_dn=ou=swengg,dc=min,dc=io                    \
       group_search_filter="(&(objectclass=groupofnames)(member=%d))"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -85,8 +82,8 @@ mc [GLOBALFLAGS] admin idp ldap add          \
 
 - 将 `ALIAS` 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，用于创建 AD/LDAP 集成配置。
 - 将 `[CFG_PARAM#]` 替换为各个 [配置设置](/zh/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings) 键值对，格式为 `PARAMETER="value"`。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `update` {#mc.admin.idp.ldap.update}
 
@@ -94,8 +91,8 @@ mc [GLOBALFLAGS] admin idp ldap add          \
 
 修改 AD/LDAP 提供方现有的一组配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例修改 `myminio` 部署中的两个 AD/LDAP 配置参数。
 
 ```shell
@@ -104,9 +101,8 @@ mc admin idp ldap update                                \
                   lookup_bind_dn=cn=admin,dc=min,dc=io  \
                   lookup_bind_password=somesecret
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -118,8 +114,8 @@ mc [GLOBALFLAGS] admin idp ldap update           \
 
 - 将 `ALIAS` 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，用于更新 AD/LDAP 集成配置。
 - 将 `[CFG_PARAM#]` 替换为要更新的各个 [配置设置](/zh/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings) 键值对，格式为 `PARAMETER="value"`。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `ls, list` {#mc.admin.idp.ldap.ls}
 
@@ -127,16 +123,15 @@ mc [GLOBALFLAGS] admin idp ldap update           \
 
 列出 AD/LDAP 提供方现有的一组配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例列出 `myminio` 部署中的 AD/LDAP 配置参数。
 
 ```shell
 mc admin idp ldap ls myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -144,8 +139,8 @@ mc [GLOBALFLAGS] admin idp ldap ls ALIAS
 ```
 
 - 将 `ALIAS` 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，用于列出 AD/LDAP 集成配置。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `rm, remove` {#mc.admin.idp.ldap.rm}
 
@@ -153,16 +148,15 @@ mc [GLOBALFLAGS] admin idp ldap ls ALIAS
 
 移除 AD/LDAP 提供方现有配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例移除 `myminio` 部署中的 AD/LDAP 提供方设置。
 
 ```shell
 mc admin idp ldap rm myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -171,8 +165,8 @@ mc [GLOBALFLAGS] admin idp ldap rm     \
 ```
 
 - 将 `ALIAS` 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，用于移除 AD/LDAP 集成配置。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `info` {#mc.admin.idp.ldap.info}
 
@@ -180,16 +174,15 @@ mc [GLOBALFLAGS] admin idp ldap rm     \
 
 输出指定 MinIO 部署上 AD/LDAP 提供方的当前配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例输出 `myminio` 部署上的 AD/LDAP 配置参数。
 
 ```shell
 mc admin idp ldap info myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -198,8 +191,8 @@ mc [GLOBALFLAGS] admin idp ldap info     \
 ```
 
 - 将 `ALIAS` 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，用于获取 AD/LDAP 集成信息。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `enable` {#mc.admin.idp.ldap.enable}
 
@@ -207,17 +200,16 @@ mc [GLOBALFLAGS] admin idp ldap info     \
 
 启用当前已配置的 AD/LDAP 提供方。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例在 `myminio` 部署上启用 AD/LDAP 配置。
 
 ```shell
 mc admin idp ldap enable       \
                   myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -226,8 +218,8 @@ mc [GLOBALFLAGS] admin idp ldap enable     \
 ```
 
 - 将 `ALIAS` 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，用于启用 AD/LDAP 集成配置。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `disable` {#mc.admin.idp.ldap.disable}
 
@@ -235,17 +227,16 @@ mc [GLOBALFLAGS] admin idp ldap enable     \
 
 禁用当前已配置的 AD/LDAP 提供方。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例在 `myminio` 部署上禁用 AD/LDAP 配置。
 
 ```shell
 mc admin idp ldap disable      \
                   myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -254,8 +245,8 @@ mc [GLOBALFLAGS] admin idp ldap disable       \
 ```
 
 - 将 `ALIAS` 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)，用于禁用 AD/LDAP 集成配置。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 全局标志 {#id5}
 

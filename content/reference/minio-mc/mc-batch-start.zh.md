@@ -2,8 +2,8 @@
 title: "mc batch start"
 url: "/zh/reference/minio-mc/mc-batch-start/"
 weight: 50
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-start.rst
+upstream_modified: true
 ---
 
 <a id="mc-batch-start"></a>
@@ -11,11 +11,10 @@ silo_modified: true
 
 <a id="command-mc.batch.start"></a>
 
-{{% alert color="info" %}}
-**变更: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z or later
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z or later
 
 ## 语法 {#id2}
 
@@ -23,8 +22,8 @@ RELEASE.2022-10-09T21-10-59Z or later
 
 批处理作业会运行一次直到完成（或达到文件中指定的最大重试次数）。 若要在完成后再次运行该批处理作业，必须重新启动它。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会在 `myminio` 别名的 `mybucket` 存储桶上，为 replicate 作业创建一个基础 YAML 文件。
 
 ```shell
@@ -36,9 +35,8 @@ mc batch start myminio jobfile.yaml
 ```shell
 Successfully start 'replicate' job `B34HHqnNMcg1taynaPfxu` on '2022-10-24 17:19:06.296974771 -0700 PDT'
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令具有以下语法：
 
 ```shell
@@ -52,8 +50,8 @@ mc [GLOBALFLAGS] batch start    \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

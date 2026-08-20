@@ -3,8 +3,8 @@ title: "Core Operational Concepts"
 url: "/operations/concepts/"
 weight: 30
 icon: fa-solid fa-diagram-project
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts.rst
+upstream_modified: false
 math: true
 ---
 
@@ -93,26 +93,24 @@ See [Baremetal: Expand a MinIO deployment](/operations/deployments/baremetal-exp
 
 For deployments which have multiple server pools, you can [decommission](/operations/deployments/baremetal-decommission-server-pool/#minio-decommissioning) the older pools and migrate that data to the newer pools in the deployment. Once started, decommissioning cannot be stopped. MinIO intends decommissioning for use with removing older pools with aged hardware, and not as an operation performed regularly within any deployment.
 
-{{% alert color="info" %}}
-**Maintain pool order when decommissioning and then adding**
-
-If you decommission one pool in a multiple pool deployment, you cannot use the same node sequence for a new pool. For example, consider a deployment with the following pools:
-
-```text
-https://minio-{1...4}.example.net/mnt/drive-{1...4}
-https://minio-{5...8}.example.net/mnt/drive-{1...4}
-https://minio-{9...12}.example.net/mnt/drive-{1...4}
-```
-
-If you decommission the `minio-{5...8}` pool, you cannot add a new pool with the same node numbering. You must add the new pool *after* `minio-{9...12}`:
-
-```text
-https://minio-{1...4}.example.net/mnt/drive-{1...4}
-https://minio-{9...12}.example.net/mnt/drive-{1...4}
-https://minio-{13...16}.example.net/mnt/drive-{1...4}
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Maintain pool order when decommissioning and then adding**
+>
+> If you decommission one pool in a multiple pool deployment, you cannot use the same node sequence for a new pool. For example, consider a deployment with the following pools:
+>
+> ```text
+> https://minio-{1...4}.example.net/mnt/drive-{1...4}
+> https://minio-{5...8}.example.net/mnt/drive-{1...4}
+> https://minio-{9...12}.example.net/mnt/drive-{1...4}
+> ```
+>
+> If you decommission the `minio-{5...8}` pool, you cannot add a new pool with the same node numbering. You must add the new pool *after* `minio-{9...12}`:
+>
+> ```text
+> https://minio-{1...4}.example.net/mnt/drive-{1...4}
+> https://minio-{9...12}.example.net/mnt/drive-{1...4}
+> https://minio-{13...16}.example.net/mnt/drive-{1...4}
+> ```
 
 ### How do I manage one or more MinIO instances or clusters? {#how-do-i-manage-one-or-more-minio-instances-or-clusters}
 
@@ -177,13 +175,12 @@ MinIO calculates the size and number of Erasure Sets in a Server Pool based on t
 
 [Erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding) provides continued read and write access if an object has been partially lost.
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 ### MinIO Writes Data Protection at the Object Level with Parity {#minio-writes-data-protection-at-the-object-level-with-parity}
 

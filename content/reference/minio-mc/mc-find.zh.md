@@ -2,8 +2,8 @@
 title: "mc find"
 url: "/zh/reference/minio-mc/mc-find/"
 weight: 110
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-find.rst
+upstream_modified: false
 ---
 
 <a id="mc-find"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc find`](#command-mc.find) 命令支持在 MinIO 部署上搜索对象。 你也可以使用该命令在文件系统上搜索文件。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令会在 `myminio` MinIO 部署的 `mydata` 存储桶中， 搜索所有匹配指定模式的对象：
 
 ```shell
 mc find myminio/mydata --name "*.jpg"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令的语法如下：
 
 ```shell
@@ -52,8 +51,8 @@ mc [GLOBALFLAGS] find                    \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -115,11 +114,10 @@ mc find ~/mydata/
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-04-12T02-21-51Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-04-12T02-21-51Z
 
 **仅用于 MinIO 部署。**
 
@@ -145,11 +143,10 @@ RELEASE.2023-04-12T02-21-51Z
 
 匹配晚于指定天数的对象。 指定 `#d#hh#mm#ss` 格式的字符串。 例如：`--older-than 1d2hh3mm4ss`
 
-{{% alert color="info" %}}
-**变更: RELEASE.2025-02-04T04-57-50Z**
-
-日期时间也可以使用 `YYYY-MM-DD HH:MM:SS TMZ` 格式的绝对时间指定。 例如，`mc find --newer-than="2025-01-22 09:57:00 CET" minioalias/mybucket`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2025-02-04T04-57-50Z**
+>
+> 日期时间也可以使用 `YYYY-MM-DD HH:MM:SS TMZ` 格式的绝对时间指定。 例如，`mc find --newer-than="2025-01-22 09:57:00 CET" minioalias/mybucket`。
 
 ##### `--older-than` {#mc.find.-older-than}
 
@@ -159,11 +156,10 @@ RELEASE.2023-04-12T02-21-51Z
 
 匹配早于指定时间限制的对象。指定 `#d#hh#mm#ss` 格式的字符串。 例如：`--older-than 1d2hh3mm4ss`
 
-{{% alert color="info" %}}
-**变更: RELEASE.2025-02-04T04-57-50Z**
-
-日期时间也可以使用 `YYYY-MM-DD HH:MM:SS TMZ` 格式的绝对时间指定。 例如，`mc find --newer-than="2025-01-22 09:57:00 CET" minioalias/mybucket`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2025-02-04T04-57-50Z**
+>
+> 日期时间也可以使用 `YYYY-MM-DD HH:MM:SS TMZ` 格式的绝对时间指定。 例如，`mc find --newer-than="2025-01-22 09:57:00 CET" minioalias/mybucket`。
 
 默认为 `0`（所有对象）。
 
@@ -197,11 +193,10 @@ RELEASE.2023-04-12T02-21-51Z
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-04-12T02-21-51Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-04-12T02-21-51Z
 
 **仅用于 MinIO 部署。**
 
@@ -282,11 +277,10 @@ mc find --watch FILEPATH --name "*.EXTENSION" --exec "mc cp {} ALIAS/PATH"
 
 ### 查找具有匹配标签的对象 {#id10}
 
-{{% alert color="info" %}}
-**说明**
-
-标签匹配仅适用于 MinIO 部署。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 标签匹配仅适用于 MinIO 部署。
 
 ```shell
 mc find --tags="key=v*" ALIAS/BUCKET/
@@ -301,11 +295,10 @@ mc find --tags="key=v*" ALIAS/BUCKET/
 
 ### 查找具有匹配元数据的对象 {#id11}
 
-{{% alert color="info" %}}
-**说明**
-
-元数据匹配仅适用于 MinIO 部署。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 元数据匹配仅适用于 MinIO 部署。
 
 ```shell
 mc find --json --metadata="content-type=text/csv" ALIAS/BUCKET/

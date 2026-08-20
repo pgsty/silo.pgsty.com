@@ -4,8 +4,8 @@ url: "/operations/deployments/installation/"
 description: "Silo deployment topologies and installation instructions"
 weight: 10
 icon: fa-solid fa-download
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/installation.rst
+upstream_modified: true
 ---
 
 <a id="installation-and-management"></a>
@@ -65,8 +65,7 @@ Silo can run on physical machines, virtualized hosts, or in a container. Consult
 - [Deploy Silo on macOS](/operations/deployments/baremetal-deploy-minio-on-macos/#deploy-minio-macos)
 - [Deploy Silo on Windows](/operations/deployments/baremetal-deploy-minio-on-windows/#deploy-minio-windows)
 
-{{% alert color="warning" %}}
-**Important**
-
-Published artifacts do not establish equal production validation across platforms. Prefer a tested Linux or Kubernetes deployment for long-running workloads, pin exact package/image versions, and validate storage, failure domains, upgrade, and recovery behavior for the chosen topology.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Published artifacts do not establish equal production validation across platforms. Prefer a tested Linux or Kubernetes deployment for long-running workloads, pin exact package/image versions, and validate storage, failure domains, upgrade, and recovery behavior for the chosen topology.

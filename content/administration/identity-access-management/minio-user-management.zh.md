@@ -2,8 +2,8 @@
 title: "用户管理"
 url: "/zh/administration/identity-access-management/minio-user-management/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/minio-user-management.rst
+upstream_modified: false
 ---
 
 <a id="minio-users"></a>
@@ -37,9 +37,8 @@ MinIO 用户可以生成任意数量的访问密钥。 这使应用所有者可�
 
 你还可以通过 `AssumeRole` STS API 端点，以编程方式创建 [security token service](/zh/developers/security-token-service/#minio-security-token-service) 账户。 STS token 默认在 1 小时后过期，但你可以将过期时间设置为自创建起最长 7 天。
 
-{{% details title="访问密钥用于编程访问" closed="true" %}}
-访问密钥支持应用程序进行编程访问。 你不能使用访问密钥登录 MinIO Console。
-{{% /details %}}
+> [!DETAILS]- 访问密钥用于编程访问
+> 访问密钥支持应用程序进行编程访问。 你不能使用访问密钥登录 MinIO Console。
 
 <a id="minio-users-root"></a>
 
@@ -57,14 +56,13 @@ MinIO 用户可以生成任意数量的访问密钥。 这使应用所有者可�
 
 如果这些变量未设置，[`minio`](/zh/reference/minio-server/#command-minio) 默认分别使用 `minioadmin` 和 `minioadmin` 作为访问密钥和密钥。无论部署环境如何，MinIO 都 *强烈不建议* 使用默认凭证。
 
-{{% details title="旧版 Root 用户环境变量已弃用" closed="true" %}}
-MinIO [RELEASE.2021-04-22T15-44-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2021-04-22T15-44-28Z) 及后续版本已弃用以下用于设置或更新 root 用户凭证的变量：
-
-- [`MINIO_ACCESS_KEY`](/zh/reference/minio-server/settings/deprecated/#envvar.MINIO_ACCESS_KEY) 表示新的访问密钥。
-- [`MINIO_SECRET_KEY`](/zh/reference/minio-server/settings/deprecated/#envvar.MINIO_SECRET_KEY) 表示新的密钥。
-- [`MINIO_ACCESS_KEY_OLD`](/zh/reference/minio-server/settings/deprecated/#envvar.MINIO_ACCESS_KEY_OLD) 表示旧的访问密钥。
-- [`MINIO_SECRET_KEY_OLD`](/zh/reference/minio-server/settings/deprecated/#envvar.MINIO_SECRET_KEY_OLD) 表示旧的密钥。
-{{% /details %}}
+> [!DETAILS]- 旧版 Root 用户环境变量已弃用
+> MinIO [RELEASE.2021-04-22T15-44-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2021-04-22T15-44-28Z) 及后续版本已弃用以下用于设置或更新 root 用户凭证的变量：
+>
+> - [`MINIO_ACCESS_KEY`](/zh/reference/minio-server/settings/deprecated/#envvar.MINIO_ACCESS_KEY) 表示新的访问密钥。
+> - [`MINIO_SECRET_KEY`](/zh/reference/minio-server/settings/deprecated/#envvar.MINIO_SECRET_KEY) 表示新的密钥。
+> - [`MINIO_ACCESS_KEY_OLD`](/zh/reference/minio-server/settings/deprecated/#envvar.MINIO_ACCESS_KEY_OLD) 表示旧的访问密钥。
+> - [`MINIO_SECRET_KEY_OLD`](/zh/reference/minio-server/settings/deprecated/#envvar.MINIO_SECRET_KEY_OLD) 表示旧的密钥。
 
 ## 用户管理 {#id5}
 

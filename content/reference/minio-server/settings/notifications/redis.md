@@ -2,8 +2,8 @@
 title: "Redis Notification Settings"
 url: "/reference/minio-server/settings/notifications/redis/"
 weight: 90
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/redis.rst
+upstream_modified: false
 ---
 
 <a id="redis-notification-settings"></a>
@@ -21,20 +21,16 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Multiple Redis Targets {#multiple-redis-targets}
 
 You can specify multiple Redis service endpoints by appending a unique identifier `_ID` to the end of the top level key for each set of related Redis settings. For example, the following commands set two distinct Redis service endpoints as `PRIMARY` and `SECONDARY` respectively:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
-
-```shell
+```shell {tab="Environment Variables" group="environment-variables-configuration-settings" value="environment-variables"}
 export MINIO_NOTIFY_REDIS_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_REDIS_ADDRESS_PRIMARY="redis-endpoint.example.net:9200"
 export MINIO_NOTIFY_REDIS_KEY_PRIMARY="bucketevents"
@@ -47,10 +43,7 @@ export MINIO_NOTIFY_REDIS_KEY_SECONDARY="bucketevents"
 export MINIO_NOTIFY_REDIS_FORMAT_SECONDARY="namespace"
 ```
 
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
-
-```shell
+```shell {tab="Configuration Settings" value="configuration-settings"}
 mc admin config set notify_redis:primary              \
    address="redis-endpoint.example.net:9200"  \
    key="bucketevents"                                 \
@@ -64,18 +57,14 @@ mc admin config set notify_redis:secondary            \
    [ARGUMENT="VALUE"] ...
 ```
 
-{{% /tab %}}
-{{< /tabpane >}}
-
 ## Settings {#settings}
 
 ### Enable {#enable}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_ENABLE` {#envvar.MINIO_NOTIFY_REDIS_ENABLE}
 
 *envvar*
@@ -89,9 +78,8 @@ Requires specifying the following additional environment variables if set to `on
 - [`MINIO_NOTIFY_REDIS_ADDRESS`](#envvar.MINIO_NOTIFY_REDIS_ADDRESS)
 - [`MINIO_NOTIFY_REDIS_KEY`](#envvar.MINIO_NOTIFY_REDIS_KEY)
 - [`MINIO_NOTIFY_REDIS_FORMAT`](#envvar.MINIO_NOTIFY_REDIS_FORMAT)
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis` {#mc-conf.notify_redis}
 
 *mc-conf*
@@ -113,55 +101,49 @@ mc admin config set notify_redis \
    format="<string>" \
    [ARGUMENT="VALUE"] ... \
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Address {#address}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_ADDRESS` {#envvar.MINIO_NOTIFY_REDIS_ADDRESS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis address` {#mc-conf.notify_redis.address}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the Redis service endpoint to which MinIO publishes bucket events. For example, `redis.example.com:6369`.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-27T05-56-19Z**
-
-MinIO checks the health of the specified URL (if it is resolvable and reachable) prior to adding the target. MinIO no longer blocks adding new notification targets if existing targets are offline.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-27T05-56-19Z**
+>
+> MinIO checks the health of the specified URL (if it is resolvable and reachable) prior to adding the target. MinIO no longer blocks adding new notification targets if existing targets are offline.
 
 ### Key {#key}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_KEY` {#envvar.MINIO_NOTIFY_REDIS_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis key` {#mc-conf.notify_redis.key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the Redis key to use for storing and updating events. Redis auto-creates the key if it does not exist.
 
@@ -169,20 +151,18 @@ Specify the Redis key to use for storing and updating events. Redis auto-creates
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_FORMAT` {#envvar.MINIO_NOTIFY_REDIS_FORMAT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis format` {#mc-conf.notify_redis.format}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the format of event data written to the Redis service endpoint. MinIO supports the following values:
 
@@ -198,52 +178,45 @@ Specify the format of event data written to the Redis service endpoint. MinIO su
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_PASSWORD` {#envvar.MINIO_NOTIFY_REDIS_PASSWORD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis password` {#mc-conf.notify_redis.password}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the password for the Redis server.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-06-23T20-26-00Z**
-
-MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-06-23T20-26-00Z**
+>
+> MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
 
 ### User {#user}
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-03-21T23-13-43Z**
+> [!NOTE]
+> **Added: RELEASE.2024-03-21T23-13-43Z**
 
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_USER` {#envvar.MINIO_NOTIFY_REDIS_USER}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis user` {#mc-conf.notify_redis.user}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the user for the Redis server.
 
@@ -251,20 +224,18 @@ Specify the user for the Redis server.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_QUEUE_DIR` {#envvar.MINIO_NOTIFY_REDIS_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis queue_dir` {#mc-conf.notify_redis.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the directory path to enable MinIO’s persistent event store for undelivered messages, such as `/opt/minio/events`.
 
@@ -274,20 +245,18 @@ MinIO stores undelivered events in the specified store while the Redis server/br
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_REDIS_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis queue_limit` {#mc-conf.notify_redis.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
@@ -295,19 +264,17 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_REDIS_COMMENT` {#envvar.MINIO_NOTIFY_REDIS_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_redis comment` {#mc-conf.notify_redis.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comment to associate with the Redis configuration.

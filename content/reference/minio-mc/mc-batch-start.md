@@ -2,8 +2,8 @@
 title: "mc batch start"
 url: "/reference/minio-mc/mc-batch-start/"
 weight: 50
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-start.rst
+upstream_modified: true
 ---
 
 <a id="mc-batch-start"></a>
@@ -11,11 +11,10 @@ silo_modified: true
 
 <a id="command-mc.batch.start"></a>
 
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z or later
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z or later
 
 ## Syntax {#syntax}
 
@@ -23,8 +22,8 @@ The [`mc batch start`](#command-mc.batch.start) command launches a batch job fro
 
 The batch job runs to completion (or up to the number of retries specified in the file) one time. To run the batch job again after completion, you must start it again.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command creates a basic YAML file for a replicate job on the `mybucket` bucket of the `myminio` alias.
 
 ```shell
@@ -36,9 +35,8 @@ The output of the above command is something similar to:
 ```shell
 Successfully start 'replicate' job `B34HHqnNMcg1taynaPfxu` on '2022-10-24 17:19:06.296974771 -0700 PDT'
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -52,8 +50,8 @@ mc [GLOBALFLAGS] batch start    \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

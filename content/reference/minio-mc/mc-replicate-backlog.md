@@ -2,8 +2,8 @@
 title: "mc replicate backlog"
 url: "/reference/minio-mc/mc-replicate-backlog/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-backlog.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-backlog"></a>
@@ -14,11 +14,10 @@ silo_modified: false
 
 <a id="command-mc.replicate.backlog"></a>
 
-{{% alert color="info" %}}
-**Changed: mc.RELEASE.2023-07-18T21-05-38Z**
-
-`mc replicate diff` has been renamed `mc replicate backlog`. No functionality has changed.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: mc.RELEASE.2023-07-18T21-05-38Z**
+>
+> `mc replicate diff` has been renamed `mc replicate backlog`. No functionality has changed.
 
 ## Description {#description}
 
@@ -28,8 +27,8 @@ You can list the replication status of objects for a particular remote target. T
 
 ## Syntax {#syntax}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command shows new or deleted objects in the `notes` bucket of the `teamorange/projects` prefix on the `myminio` alias that have not yet replicated to a specific remote target bucket. The remote target’s ARN is `arn:minio:replication::3bb8c736-4014-42c5-b3cb-d64e3ebaa75e:notes`.
 
 ```shell
@@ -44,8 +43,8 @@ If any new or deleted objects have not yet replicated, the command outputs somet
 ```
 
 In the output, `PUT` corresponds to a new object. Deleted objects or versions would show `DEL`.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -59,8 +58,8 @@ mc [GLOBALFLAGS] replicate backlog   \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

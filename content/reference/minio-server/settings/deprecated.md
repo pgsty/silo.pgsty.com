@@ -2,8 +2,8 @@
 title: "Deprecated Settings"
 url: "/reference/minio-server/settings/deprecated/"
 weight: 120
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/deprecated.rst
+upstream_modified: false
 ---
 
 <a id="deprecated-settings"></a>
@@ -22,11 +22,10 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Environment Variables {#environment-variables}
 
@@ -36,52 +35,44 @@ The following *environment variables* are deprecated. They are listed here for h
 
 *envvar*
 
-{{% alert color="danger" %}}
-**Deprecated: RELEASE.2021-04-22T15-44-28Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **Deprecated: RELEASE.2021-04-22T15-44-28Z**
 
 The secret key for the [root](/administration/identity-access-management/minio-user-management/#minio-users-root) user.
 
 This environment variable is *deprecated* in favor of the [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) environment variable.
 
-{{% alert color="danger" %}}
-**Warning**
-
-If [`MINIO_SECRET_KEY`](#envvar.MINIO_SECRET_KEY) is unset, [`minio`](/reference/minio-server/#command-minio) defaults to `minioadmin`.
-
-**NEVER** use the default credentials in production environments. MinIO strongly recommends specifying a unique, long, and random [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) value for all environments.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> If [`MINIO_SECRET_KEY`](#envvar.MINIO_SECRET_KEY) is unset, [`minio`](/reference/minio-server/#command-minio) defaults to `minioadmin`.
+>
+> **NEVER** use the default credentials in production environments. MinIO strongly recommends specifying a unique, long, and random [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) value for all environments.
 
 #### `MINIO_ACCESS_KEY` {#envvar.MINIO_ACCESS_KEY}
 
 *envvar*
 
-{{% alert color="danger" %}}
-**Deprecated: RELEASE.2021-04-22T15-44-28Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **Deprecated: RELEASE.2021-04-22T15-44-28Z**
 
 The access key for the [root](/administration/identity-access-management/minio-user-management/#minio-users-root) user.
 
 > This environment variable is *deprecated* in favor of the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) environment variable.
 
-{{% alert color="danger" %}}
-**Warning**
-
-If [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) is unset, [`minio`](/reference/minio-server/#command-minio) defaults to `minioadmin`.
-
-**NEVER** use the default credentials in production environments. MinIO strongly recommends specifying a unique, long, and random [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) value for all environments.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> If [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) is unset, [`minio`](/reference/minio-server/#command-minio) defaults to `minioadmin`.
+>
+> **NEVER** use the default credentials in production environments. MinIO strongly recommends specifying a unique, long, and random [`MINIO_ACCESS_KEY`](#envvar.MINIO_ACCESS_KEY) value for all environments.
 
 #### `MINIO_ACCESS_KEY_OLD` {#envvar.MINIO_ACCESS_KEY_OLD}
 
 *envvar*
 
-{{% alert color="danger" %}}
-**Deprecated: RELEASE.2021-04-22T15-44-28Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **Deprecated: RELEASE.2021-04-22T15-44-28Z**
 
 To perform root credential rotation, modify the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) environment variables.
 
@@ -89,11 +80,10 @@ To perform root credential rotation, modify the [`MINIO_ROOT_USER`](/reference/m
 
 *envvar*
 
-{{% alert color="danger" %}}
-**Deprecated: Operator**
-
-6.0.4
-{{% /alert %}}
+> [!CAUTION]
+> **Deprecated: Operator**
+>
+> 6.0.4
 
 Specifies the namespace to create and use for Operator.
 
@@ -103,10 +93,8 @@ When not specified, the default value is `minio-operator`.
 
 *envvar*
 
-{{% alert color="danger" %}}
-**Deprecated: RELEASE.2021-04-22T15-44-28Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **Deprecated: RELEASE.2021-04-22T15-44-28Z**
 
 To perform root credential rotation, modify the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) environment variables.
 
@@ -114,10 +102,8 @@ To perform root credential rotation, modify the [`MINIO_ROOT_USER`](/reference/m
 
 *envvar*
 
-{{% alert color="danger" %}}
-**Deprecated: RELEASE.2024-05-10T01-41-38Z**
-
-{{% /alert %}}
+> [!CAUTION]
+> **Deprecated: RELEASE.2024-05-10T01-41-38Z**
 
 The [fully qualified domain name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) (FQDN) the MinIO Console uses for connecting to the MinIO Server.
 

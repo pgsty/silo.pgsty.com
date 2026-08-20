@@ -2,8 +2,8 @@
 title: "mc rb"
 url: "/reference/minio-mc/mc-rb/"
 weight: 300
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-rb.rst
+upstream_modified: false
 ---
 
 <a id="mc-rb"></a>
@@ -16,24 +16,22 @@ The [`mc rb`](#command-mc.rb) command removes one or more buckets on MinIO *or* 
 
 To remove only the contents of a bucket, use [`mc rm`](/reference/minio-mc/mc-rm/#command-mc.rm) instead.
 
-{{% alert color="warning" %}}
-**Important**
-
-[`mc rb`](#command-mc.rb) *permanently deletes bucket(s)* on the target deployment, including any and all [object versions](/administration/object-management/object-versioning/#minio-bucket-versioning) and bucket configurations such as [lifecycle management](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) or [replication](/administration/bucket-replication/#minio-bucket-replication-serverside).
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> [`mc rb`](#command-mc.rb) *permanently deletes bucket(s)* on the target deployment, including any and all [object versions](/administration/object-management/object-versioning/#minio-bucket-versioning) and bucket configurations such as [lifecycle management](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) or [replication](/administration/bucket-replication/#minio-bucket-replication-serverside).
 
 You can also use [`mc rb`](#command-mc.rb) against the local filesystem to produce similar results to the `rm --rf` commandline tool.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc rb --force myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -48,8 +46,8 @@ mc [GLOBALFLAGS] rb             \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -95,11 +93,10 @@ mc rb --force myminio/mydata ~/data/myolddata
 
 If any `ALIAS` specifies a filesystem directory, this option results in the removal of all subdirectories and files at that directory path similar to `rm --rf`.
 
-{{% alert color="danger" %}}
-**Warning**
-
-Running [`mc rb --dangerous`](#mc.rb.-dangerous) is irreversible. Exercise all possible due diligence in ensuring the command applies to only the desired `ALIAS` targets prior to execution.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> Running [`mc rb --dangerous`](#mc.rb.-dangerous) is irreversible. Exercise all possible due diligence in ensuring the command applies to only the desired `ALIAS` targets prior to execution.
 
 ### Global Flags {#global-flags}
 

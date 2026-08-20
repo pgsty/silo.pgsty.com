@@ -2,8 +2,8 @@
 title: "AMQP Notification Settings"
 url: "/reference/minio-server/settings/notifications/amqp/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/amqp.rst
+upstream_modified: false
 ---
 
 <a id="amqp-notification-settings"></a>
@@ -21,11 +21,10 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Multiple AMQP Targets {#multiple-amqp-targets}
 
@@ -35,9 +34,8 @@ You can specify multiple AMQP service endpoints by appending a unique identifier
 
 For example, the following commands set two distinct AMQP service endpoints as `PRIMARY` and `SECONDARY` respectively:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
-
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 ```shell
 export MINIO_NOTIFY_AMQP_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_AMQP_URL_PRIMARY="amqp://user:password@amqp-endpoint.example.net:5672"
@@ -47,9 +45,8 @@ export MINIO_NOTIFY_AMQP_URL_SECONDARY="amqp://user:password@amqp-endpoint.examp
 ```
 
 For example, [`MINIO_NOTIFY_AMQP_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_AMQP_ENABLE) indicates the environment variable is associated to an AMQP service endpoint with ID of `PRIMARY`.
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 ```shell
 mc admin config set notify_amqp:primary \
    url="user:password@amqp://amqp-endpoint.example.net:5672" [ARGUMENT=VALUE ...]
@@ -59,16 +56,15 @@ mc admin config set notify_amqp:secondary \
 ```
 
 Notice that for configuration settings, the unique identifier appends to `amqp` only, not to each individual argument.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Settings {#settings}
 
 ### Enable {#enable}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" selected=true %}}
-
+{{< tabs group="environment-variable-configuration-setting" default="environment-variable" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_ENABLE` {#envvar.MINIO_NOTIFY_AMQP_ENABLE}
 
 *envvar*
@@ -78,9 +74,8 @@ Requires specifying [`MINIO_NOTIFY_AMQP_URL`](#envvar.MINIO_NOTIFY_AMQP_URL) if 
 Specify `on` to enable publishing bucket notifications to an AMQP endpoint.
 
 Defaults to `off`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp` {#mc-conf.notify_amqp}
 
 *mc-conf*
@@ -94,55 +89,49 @@ mc admin config set notify_amqp \
   url="amqp://user:password@endpoint:port" \
   [ARGUMENT="VALUE"] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### URL {#url}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_URL` {#envvar.MINIO_NOTIFY_AMQP_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp url` {#mc-conf.notify_amqp.url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the AMQP server endpoint to which MinIO publishes bucket events. For example, `amqp://myuser:mypassword@localhost:5672`.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-27T05-56-19Z**
-
-MinIO checks the health of the specified URL (if it is resolvable and reachable) prior to adding the target. MinIO no longer blocks adding new notification targets if existing targets are offline.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-27T05-56-19Z**
+>
+> MinIO checks the health of the specified URL (if it is resolvable and reachable) prior to adding the target. MinIO no longer blocks adding new notification targets if existing targets are offline.
 
 ### Exchange {#exchange}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_EXCHANGE` {#envvar.MINIO_NOTIFY_AMQP_EXCHANGE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp exchange` {#mc-conf.notify_amqp.exchange}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the name of the AMQP exchange to use.
 
@@ -150,20 +139,18 @@ Specify the name of the AMQP exchange to use.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_EXCHANGE_TYPE` {#envvar.MINIO_NOTIFY_AMQP_EXCHANGE_TYPE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp exchange_type` {#mc-conf.notify_amqp.exchange_type}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the type of the AMQP exchange.
 
@@ -171,20 +158,18 @@ Specify the type of the AMQP exchange.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_ROUTING_KEY` {#envvar.MINIO_NOTIFY_AMQP_ROUTING_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp routing_key` {#mc-conf.notify_amqp.routing_key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the routing key for publishing events.
 
@@ -192,20 +177,18 @@ Specify the routing key for publishing events.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_MANDATORY` {#envvar.MINIO_NOTIFY_AMQP_MANDATORY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp mandatory` {#mc-conf.notify_amqp.mandatory}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `off` to ignore undelivered messages errors. Defaults to `on`.
 
@@ -213,20 +196,18 @@ Specify `off` to ignore undelivered messages errors. Defaults to `on`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_DURABLE` {#envvar.MINIO_NOTIFY_AMQP_DURABLE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp durable` {#mc-conf.notify_amqp.durable}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to persist the message queue across broker restarts. Defaults to `off`.
 
@@ -234,20 +215,18 @@ Specify `on` to persist the message queue across broker restarts. Defaults to `o
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_NO_WAIT` {#envvar.MINIO_NOTIFY_AMQP_NO_WAIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp no_wait` {#mc-conf.notify_amqp.no_wait}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to enable non-blocking message delivery. Defaults to `off`.
 
@@ -255,20 +234,18 @@ Specify `on` to enable non-blocking message delivery. Defaults to `off`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_INTERNAL` {#envvar.MINIO_NOTIFY_AMQP_INTERNAL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp internal` {#mc-conf.notify_amqp.internal}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to use the exchange only if it is bound to other exchanges. See the RabbitMQ documentation on [Exchange to Exchange Bindings](https://www.rabbitmq.com/e2e.html) for more information on AMQP exchange binding.
 
@@ -276,20 +253,18 @@ Specify `on` to use the exchange only if it is bound to other exchanges. See the
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_AUTO_DELETED` {#envvar.MINIO_NOTIFY_AMQP_AUTO_DELETED}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp auto_deleted` {#mc-conf.notify_amqp.auto_deleted}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to automatically delete the message queue if there are no consumers. Defaults to `off`.
 
@@ -297,20 +272,18 @@ Specify `on` to automatically delete the message queue if there are no consumers
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_DELIVERY_MODE` {#envvar.MINIO_NOTIFY_AMQP_DELIVERY_MODE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp delivery_mode` {#mc-conf.notify_amqp.delivery_mode}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `1` for set the delivery mode to non-persistent queue.
 
@@ -320,20 +293,18 @@ Specify `2` to set the delivery mode to persistent queue.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_QUEUE_DIR` {#envvar.MINIO_NOTIFY_AMQP_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp queue_dir` {#mc-conf.notify_amqp.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the directory path to enable MinIO’s persistent event store for undelivered messages, such as `/opt/minio/events`.
 
@@ -343,20 +314,18 @@ MinIO stores undelivered events in the specified store while the AMQP service is
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_AMQP_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp queue_limit` {#mc-conf.notify_amqp.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
@@ -364,19 +333,17 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_AMQP_COMMENT` {#envvar.MINIO_NOTIFY_AMQP_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_amqp comment` {#mc-conf.notify_amqp.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comment for the AMQP configuration.

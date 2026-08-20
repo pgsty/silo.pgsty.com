@@ -2,8 +2,8 @@
 title: "mc idp ldap accesskey create-with-login"
 url: "/zh/reference/minio-mc/mc-idp-ldap-accesskey-create-with-login/"
 weight: 160
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey-create-with-login.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-accesskey-create-with-login"></a>
@@ -11,26 +11,24 @@ silo_modified: false
 
 <a id="command-mc.idp.ldap.accesskey.create-with-login"></a>
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-04-18T16-45-29Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-04-18T16-45-29Z
 
 ## 描述 {#id2}
 
 [`mc idp ldap accesskey create-with-login`](#command-mc.idp.ldap.accesskey.create-with-login) 使用基于终端的交互式提示与外部 AD/LDAP 服务器进行身份验证，并生成可供 MinIO 使用的访问密钥。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 > 以下示例会提示用户提供其 AD/LDAP 凭证。 然后使用与该 AD/LDAP 用户关联的一个或多个策略生成新的访问密钥对。
 
 ```shell
 mc idp ldap accesskey create-with-login https://minio.example.net/
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -52,8 +50,8 @@ mc [GLOBALFLAGS] idp ldap accesskey create-with-login        \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

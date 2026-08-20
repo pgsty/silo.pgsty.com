@@ -56,8 +56,8 @@ project — the blog, release and download pages, and Silo-specific content — 
 original works of the Silo project. Provenance is tracked per page in the front
 matter, and rendered at the bottom of each page:
 
-    minio_origin: true      # page is derived from the MinIO documentation
-    silo_modified: true     # page has been changed by Silo beyond conversion
+    upstream_link: https://github.com/minio/docs  # derived from this material
+    upstream_modified: true                       # changed by Silo beyond conversion
 
 ## Translation
 

@@ -2,8 +2,8 @@
 title: "mc idp openid"
 url: "/reference/minio-mc/mc-idp-openid/"
 weight: 180
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-openid.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-openid"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.idp.openid"></a>
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-26T23-31-54Z**
-
-[`mc idp openid`](#command-mc.idp.openid) and its subcommands replace `mc admin idp openid`.
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-26T23-31-54Z**
+>
+> [`mc idp openid`](#command-mc.idp.openid) and its subcommands replace `mc admin idp openid`.
 
 ## Description {#description}
 
@@ -23,11 +22,10 @@ The [`mc idp openid`](#command-mc.idp.openid) commands allow you to manage confi
 
 Define configuration settings as an alternative to using environment variables when [setting up an OpenID connection](/operations/external-iam/configure-openid-external-identity-management/#minio-external-identity-management-openid-configure). The [`mc idp openid`](#command-mc.idp.openid) commands are only supported against MinIO deployments.
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO [OpenID environment variables](/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid) override their corresponding configuration settings as modified or set by this command.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO [OpenID environment variables](/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid) override their corresponding configuration settings as modified or set by this command.
 
 The [`mc idp openid`](#command-mc.idp.openid) command has the following subcommands:
 
@@ -59,8 +57,8 @@ You can run the command multiple times to set up multiple OpenID providers.
 
 When adding multiple OpenID providers, only one can be a JWT Claim-based provider. All others must be role-based providers.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example creates the configuration settings for the `myminio` deployment as defined in a new `test-config` setup for Dex integration.
 
 ```shell
@@ -72,9 +70,8 @@ The following example creates the configuration settings for the `myminio` deplo
     redirect_uri="http://127.0.0.1:10000/oauth_callback"                      \
     role_policy="consoleAdmin"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -88,8 +85,8 @@ mc [GLOBALFLAGS] idp openid add               \
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to configure for OpenID integration.
 - Replace `CFG_NAME` with a unique string for this configuration. If not specified, the command creates default configuration values.
 - Replace the `[CFG_PARAM#]` with each of the [configuration setting](/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings) key-value pairs in the format of `PARAMETER="value"`.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `update` {#mc.idp.openid.update}
 
@@ -97,8 +94,8 @@ mc [GLOBALFLAGS] idp openid add               \
 
 Modify an existing set of configurations for an OpenID provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example changes two of the configuration settings for the `myminio` deployment as defined in the `test-config` setup for Dex integration.
 
 ```shell
@@ -108,9 +105,8 @@ mc idp openid update                      \
               scopes="openid,groups"      \
               role_policy="consoleAdmin"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -124,8 +120,8 @@ mc [GLOBALFLAGS] idp openid update           \
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to configure for OpenID integration.
 - Replace `CFG_NAME` with a unique string for this configuration. If not specified, the command updates the default configuration.
 - Replace the `[CFG_PARAM#]` with each of the [configuration setting](/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings) key-value pairs to update in the format of `PARAMETER="value"`.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `rm, remove` {#mc.idp.openid.rm}
 
@@ -133,16 +129,15 @@ mc [GLOBALFLAGS] idp openid update           \
 
 Remove an existing set of configurations for an OpenID provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example removes the `test-config` settings for the `myminio` deployment.
 
 ```shell
 mc idp openid rm myminio test_config
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -153,8 +148,8 @@ mc [GLOBALFLAGS] idp openid rm          \
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to configure for OpenID integration.
 - Replace `CFG_NAME` with a unique string for this configuration. If not specified, the command removes the default configurations.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `ls, list` {#mc.idp.openid.ls}
 
@@ -162,16 +157,15 @@ mc [GLOBALFLAGS] idp openid rm          \
 
 Outputs a list of existing configuration sets for OpenID providers.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example outputs a list of all OpenID configuration sets defined for the `myminio` deployment.
 
 ```shell
 mc idp openid ls myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -179,8 +173,8 @@ mc [GLOBALFLAGS] idp openid ls ALIAS
 ```
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to list OpenID integrations for.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `info` {#mc.idp.openid.info}
 
@@ -188,16 +182,15 @@ mc [GLOBALFLAGS] idp openid ls ALIAS
 
 Outputs the set of values defined for an existing set of server configurations for an OpenID provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example outputs the configuration settings defined for the `test_config` set of OpenID settings on the `myminio` deployment.
 
 ```shell
 mc idp openid info myminio test_config
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -208,8 +201,8 @@ mc [GLOBALFLAGS] idp openid info        \
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to configure for OpenID integration.
 - Replace `CFG_NAME` with a unique string for this configuration. If not specified, the information displays for the default server configuration.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `enable` {#mc.idp.openid.enable}
 
@@ -217,8 +210,8 @@ mc [GLOBALFLAGS] idp openid info        \
 
 Begin using an existing set of configurations for an OpenID provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example enables the server configurations defined as `test_config` on the `myminio` deployment.
 
 ```shell
@@ -226,9 +219,8 @@ mc idp openid enable       \
               myminio      \
               test_config
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -239,8 +231,8 @@ mc [GLOBALFLAGS] idp openid enable     \
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to configure for OpenID integration.
 - Replace `CFG_NAME` with a unique string for this configuration. If not specified, the command enables the default configuration values.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `disable` {#mc.idp.openid.disable}
 
@@ -248,8 +240,8 @@ mc [GLOBALFLAGS] idp openid enable     \
 
 Stop using a set of configurations for an OpenID provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example disables the server configurations defined as `test_config` on the `myminio` deployment.
 
 ```shell
@@ -257,9 +249,8 @@ mc idp openid disable      \
               myminio      \
               test_config
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -270,8 +261,8 @@ mc [GLOBALFLAGS] idp openid disable       \
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to configure for OpenID integration.
 - Replace `CFG_NAME` with a unique string for this configuration. If not specified, the command disables the default configuration values.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Global Flags {#global-flags}
 

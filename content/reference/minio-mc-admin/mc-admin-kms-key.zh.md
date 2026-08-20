@@ -2,8 +2,8 @@
 title: "mc admin kms key"
 url: "/zh/reference/minio-mc-admin/mc-admin-kms-key/"
 weight: 90
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-kms-key.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-kms-key"></a>
@@ -14,11 +14,10 @@ silo_modified: false
 
 [`mc admin kms key`](#command-mc.admin.kms.key) 命令通过 MinIO Key Encryption Service (KES) 执行加密密钥管理操作。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ## 语法 {#id3}
 

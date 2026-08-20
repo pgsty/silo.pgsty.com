@@ -2,8 +2,8 @@
 title: "mc admin scanner trace"
 url: "/reference/minio-mc-admin/mc-admin-scanner-trace/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-scanner-trace.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-scanner-trace"></a>
@@ -14,22 +14,20 @@ silo_modified: false
 
 The [`mc admin scanner trace`](#command-mc.admin.scanner.trace) command displays [scanner](/operations/concepts/scanner/#minio-concepts-scanner)-specific API operations occurring on the target MinIO deployment.
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example returns a list of API operations related to the scanner on the `myminio` deployment.
 
 ```shell
 mc admin scanner trace myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -49,8 +47,8 @@ mc admin scanner trace ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

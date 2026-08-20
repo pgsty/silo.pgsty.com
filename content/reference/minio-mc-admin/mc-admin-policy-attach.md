@@ -2,8 +2,8 @@
 title: "mc admin policy attach"
 url: "/reference/minio-mc-admin/mc-admin-policy-attach/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-attach.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-attach"></a>
@@ -14,24 +14,22 @@ silo_modified: false
 
 Attaches one or more IAM policies to either a [MinIO-managed user or a group](/administration/identity-access-management/minio-user-management/#minio-users).
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-27T05-56-19Z**
-
-To successfully attach a policy, the referenced user or group must exist.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-27T05-56-19Z**
+>
+> To successfully attach a policy, the referenced user or group must exist.
 
 Exactly one [`--user`](#mc.admin.policy.attach.-user) or one [`--group`](#mc.admin.policy.attach.-group) is required.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command attaches the `readonly` policy to the user `james` on the deployment at [alias](/glossary/#term-alias) `myminio`.
 
 ```shell
 mc admin policy attach myminio readonly --user james
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -47,18 +45,17 @@ mc admin policy attach                       \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**Important**
-
-This command is intended for managing policy associations for [MinIO-managed](/administration/identity-access-management/minio-user-management/#minio-users) users only.
-
-For attaching policies to OpenID-managed users, see [OpenID Connect Access Management](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid).
-
-For attaching policies to Active Directory/LDAP users or groups, use [`mc idp ldap policy attach`](/reference/minio-mc/mc-idp-ldap-policy-attach/#command-mc.idp.ldap.policy.attach).
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This command is intended for managing policy associations for [MinIO-managed](/administration/identity-access-management/minio-user-management/#minio-users) users only.
+>
+> For attaching policies to OpenID-managed users, see [OpenID Connect Access Management](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid).
+>
+> For attaching policies to Active Directory/LDAP users or groups, use [`mc idp ldap policy attach`](/reference/minio-mc/mc-idp-ldap-policy-attach/#command-mc.idp.ldap.policy.attach).
 
 ### Parameters {#parameters}
 

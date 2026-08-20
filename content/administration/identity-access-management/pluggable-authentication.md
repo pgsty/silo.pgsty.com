@@ -2,8 +2,8 @@
 title: "Silo External Identity Management Plugin"
 url: "/administration/identity-access-management/pluggable-authentication/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/pluggable-authentication.rst
+upstream_modified: true
 ---
 
 <a id="minio-external-identity-management-plugin"></a>
@@ -19,8 +19,8 @@ Once enabled, client applications use the `AssumeRoleWithCustomToken` STS API ex
 
 You can configure the MinIO Identity Management Plugin using the following environment variables or configuration settings:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 Specify the following [environment variables](/reference/minio-server/settings/iam/minio-identity-plugin/#minio-server-envvar-external-identity-management-plugin) to each MinIO server in the deployment:
 
 ```shell
@@ -32,9 +32,8 @@ MINIO_IDENTITY_PLUGIN_TOKEN="Bearer TOKEN"
 MINIO_IDENTITY_PLUGIN_ROLE_ID="external-auth-provider"
 MINIO_IDENTITY_PLUGIN_COMMENT="External Identity Management using PROVIDER"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 Set the following configuration settings using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command:
 
 ```shell
@@ -47,9 +46,8 @@ mc admin config set identity_plugin \
    role_id="external-auth-provider" \
    comment="External Identity Management using PROVIDER"
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Authentication and Authorization Flow {#authentication-and-authorization-flow}
 

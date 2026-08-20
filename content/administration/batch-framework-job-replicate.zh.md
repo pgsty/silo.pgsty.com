@@ -2,20 +2,19 @@
 title: "批量复制"
 url: "/zh/administration/batch-framework-job-replicate/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-replicate.rst
+upstream_modified: true
 ---
 
 <a id="minio-batch-framework-replicate-job"></a>
 <a id="id1"></a>
 
-{{% alert color="info" %}}
-**新增: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z
-
-批处理框架在 [`mc`](/zh/reference/minio-mc/#command-mc) [RELEASE.2022-10-09T21-10-59Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-09T21-10-59Z) 中随 `replicate` 作业类型一同引入。
-{{% /alert %}}
+> [!NOTE]
+> **新增: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z
+>
+> 批处理框架在 [`mc`](/zh/reference/minio-mc/#command-mc) [RELEASE.2022-10-09T21-10-59Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-09T21-10-59Z) 中随 `replicate` 作业类型一同引入。
 
 MinIO 批处理框架允许您使用 YAML 格式的作业定义文件（“批处理文件”）来创建、管理、监控和执行作业。 批处理作业直接在 MinIO 部署上运行，可利用服务端处理能力，而不受运行 [MinIO Client](/zh/reference/minio-mc/#minio-client) 的本地机器限制。
 
@@ -133,13 +132,12 @@ MinIO 批处理框架允许您使用 YAML 格式的作业定义文件（“批�
 
 批处理作业定义文件可按存储桶、前缀和/或筛选条件限制复制范围，从而只复制特定对象。 复制过程对对象和存储桶的访问，可能会受到您在 YAML 中为源端或目标端提供的凭据限制。
 
-{{% alert color="info" %}}
-**变更: MinIO**
-
-Server RELEASE.2023-04-07T05-28-58Z
-
-您可以从远程 MinIO 部署复制到运行该批处理作业的本地部署。
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> Server RELEASE.2023-04-07T05-28-58Z
+>
+> 您可以从远程 MinIO 部署复制到运行该批处理作业的本地部署。
 
 例如，您可以使用批处理作业执行一次性复制同步，将对象从本地部署 `minio-local/invoices/` 上的某个存储桶推送到远程部署 `minio-remote/invoices` 上的某个存储桶。 您也可以将对象从远程部署 `minio-remote/invoices` 拉取到本地部署 `minio-local/invoices`。
 
@@ -155,34 +153,31 @@ Server RELEASE.2023-04-07T05-28-58Z
 
 YAML **必须** 定义源部署和目标部署。 如果 *source* 部署是远程部署，则 *target* 部署 **必须** 为 `local`。 此外，YAML 还可以定义标志，用于筛选要复制的对象、为作业发送通知或定义作业的重试次数。
 
-{{% alert color="info" %}}
-**变更: MinIO**
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2023-04-07T05-28-58Z
+>
+> 您可以从远程 MinIO 部署复制到运行该批处理作业的本地部署。
 
-RELEASE.2023-04-07T05-28-58Z
-
-您可以从远程 MinIO 部署复制到运行该批处理作业的本地部署。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: MinIO**
-
-RELEASE.2024-08-03T04-33-23Z
-
-此版本引入了 Batch Job Replicate API 的新版本 `v2`。 更新后的 API 允许您在源端列出多个要复制的前缀。 若要从一个源端复制多个前缀，请将 `replicate.apiVersion` 指定为 `v2`。
-
-```text
-replicate:
-  apiVersion: v1
-  source:
-    type: minio
-    bucket: mybucket
-    prefix:
-      - prefix1
-      - prefix2
-...
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2024-08-03T04-33-23Z
+>
+> 此版本引入了 Batch Job Replicate API 的新版本 `v2`。 更新后的 API 允许您在源端列出多个要复制的前缀。 若要从一个源端复制多个前缀，请将 `replicate.apiVersion` 指定为 `v2`。
+>
+> ```text
+> replicate:
+>   apiVersion: v1
+>   source:
+>     type: minio
+>     bucket: mybucket
+>     prefix:
+>       - prefix1
+>       - prefix2
+> ...
+> ```
 
 对于 **源部署**
 

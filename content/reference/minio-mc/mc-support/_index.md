@@ -3,8 +3,8 @@ title: "mc support"
 url: "/reference/minio-mc/mc-support/"
 weight: 380
 icon: fa-solid fa-life-ring
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support.rst
+upstream_modified: false
 ---
 
 <a id="mc-support"></a>
@@ -15,13 +15,12 @@ silo_modified: false
 
 The MinIO Client [`mc support`](#command-mc.support) commands provides tools for analyzing deployment health or performance and for running diagnostics. You can also upload generated health reports for further analysis by MinIO engineering.
 
-{{% alert color="warning" %}}
-**Important**
-
-The `mc support` commands require an active [MinIO SUBNET](https://min.io/pricing?jmp=docs) registration.
-
-[`mc support proxy set`](/reference/minio-mc/mc-support-proxy/#mc.support.proxy.set) and [`mc support proxy remove`](/reference/minio-mc/mc-support-proxy/#mc.support.proxy.remove) are exceptions, as you may need to set up a proxy to complete the deployment registration.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The `mc support` commands require an active [MinIO SUBNET](https://min.io/pricing?jmp=docs) registration.
+>
+> [`mc support proxy set`](/reference/minio-mc/mc-support-proxy/#mc.support.proxy.set) and [`mc support proxy remove`](/reference/minio-mc/mc-support-proxy/#mc.support.proxy.remove) are exceptions, as you may need to set up a proxy to complete the deployment registration.
 
 ## Subcommands {#subcommands}
 

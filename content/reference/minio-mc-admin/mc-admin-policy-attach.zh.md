@@ -2,8 +2,8 @@
 title: "mc admin policy attach"
 url: "/zh/reference/minio-mc-admin/mc-admin-policy-attach/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-attach.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-attach"></a>
@@ -14,24 +14,22 @@ silo_modified: false
 
 将一个或多个 IAM 策略附加到 [MinIO 管理的用户或组](/zh/administration/identity-access-management/minio-user-management/#minio-users)。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-27T05-56-19Z**
-
-要成功附加策略，所引用的用户或组必须存在。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-27T05-56-19Z**
+>
+> 要成功附加策略，所引用的用户或组必须存在。
 
 必须且只能指定 [`--user`](#mc.admin.policy.attach.-user) 或 [`--group`](#mc.admin.policy.attach.-group) 二者之一。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将 `readonly` 策略附加到 [alias](/zh/glossary/#term-alias) 为 `myminio` 的部署中的用户 `james`。
 
 ```shell
 mc admin policy attach myminio readonly --user james
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令使用以下语法：
 
 ```shell
@@ -47,18 +45,17 @@ mc admin policy attach                       \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**重要**
-
-此命令仅用于管理 [MinIO 管理](/zh/administration/identity-access-management/minio-user-management/#minio-users) 用户的策略关联。
-
-如需为 OpenID 管理的用户附加策略，请参见 [OpenID Connect 访问管理](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)。
-
-如需为 Active Directory/LDAP 用户或组附加策略，请使用 [`mc idp ldap policy attach`](/zh/reference/minio-mc/mc-idp-ldap-policy-attach/#command-mc.idp.ldap.policy.attach)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 此命令仅用于管理 [MinIO 管理](/zh/administration/identity-access-management/minio-user-management/#minio-users) 用户的策略关联。
+>
+> 如需为 OpenID 管理的用户附加策略，请参见 [OpenID Connect 访问管理](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)。
+>
+> 如需为 Active Directory/LDAP 用户或组附加策略，请使用 [`mc idp ldap policy attach`](/zh/reference/minio-mc/mc-idp-ldap-policy-attach/#command-mc.idp.ldap.policy.attach)。
 
 ### 参数 {#id2}
 

@@ -3,8 +3,8 @@ title: "纠删码"
 url: "/zh/operations/concepts/erasure-coding/"
 description: "Silo 纠删码"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts/erasure-coding.rst
+upstream_modified: true
 ---
 
 <a id="minio-erasure-coding"></a>
@@ -22,11 +22,10 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 
 ## 纠删码基础 {#minio-read-quorum}
 
-{{% alert color="info" %}}
-**说明**
-
-本节中的图示和内容仅用于说明 MinIO 纠删码操作的简化视图，并不完整呈现 MinIO 纠删码实现的全部复杂性。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 本节中的图示和内容仅用于说明 MinIO 纠删码操作的简化视图，并不完整呈现 MinIO 纠删码实现的全部复杂性。
 
 **MinIO 会将每个 [服务器池](/zh/glossary/#term-43) 中的驱动器分组为一个或多个相同大小的纠删码集合。**
 
@@ -109,13 +108,12 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 
 你可以使用 MinIO [纠删码计算器](https://min.io/product/erasure-code-calculator)，为计划中的拓扑探索可能的纠删码集合大小和分布方式。 如无特殊原因，建议使用偶数个节点和每节点偶数块驱动器，以简化拓扑规划以及驱动器和纠删码集合分布的理解。
 
-{{% alert color="info" %}}
-**磁盘独占访问**
-
-MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
-
-除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
-{{% /alert %}}
+> [!NOTE]
+> **磁盘独占访问**
+>
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+>
+> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
 <a id="id4"></a>
 

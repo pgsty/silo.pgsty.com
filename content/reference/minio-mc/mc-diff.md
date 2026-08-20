@@ -2,8 +2,8 @@
 title: "mc diff"
 url: "/reference/minio-mc/mc-diff/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-diff.rst
+upstream_modified: false
 ---
 
 <a id="mc-diff"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc diff`](#command-mc.diff) mc computes the differences between two filesystem directories or MinIO buckets. [`mc diff`](#command-mc.diff) lists only those objects which are missing or which differ in size. [`mc diff`](#command-mc.diff) does **not** compare the contents of objects.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command computes the difference between an object on a local filesystem and an object in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc diff ~/mydata/myobject.txt myminio/mydata/myobject.txt
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc diff`](#command-mc.diff) command has the following syntax:
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] diff SOURCE TARGET
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

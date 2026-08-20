@@ -3,8 +3,8 @@ title: "Transforms with Object Lambda"
 url: "/developers/transforms-with-object-lambda/"
 weight: 210
 icon: fa-solid fa-wand-magic-sparkles
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/transforms-with-object-lambda.rst
+upstream_modified: true
 ---
 
 <a id="transforms-with-object-lambda"></a>
@@ -57,11 +57,10 @@ A handler function should perform the following steps:
 
    MinIO validates the response and sends the transformed data back to the original calling application.
 
-{{% alert color="info" %}}
-**Response headers**
-
-Handlers **must** include the `outputRoute` and `outputToken` values in the appropriate response headers. This allows MinIO to correctly validate the response from the handler.
-{{% /alert %}}
+> [!NOTE]
+> **Response headers**
+>
+> Handlers **must** include the `outputRoute` and `outputToken` values in the appropriate response headers. This allows MinIO to correctly validate the response from the handler.
 
 ### Register the Handler {#register-the-handler}
 

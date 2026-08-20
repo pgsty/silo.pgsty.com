@@ -2,8 +2,8 @@
 title: "mc admin user svcacct info"
 url: "/reference/minio-mc-admin/mc-admin-user-svcacct-info/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct-info"></a>
@@ -11,15 +11,14 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct.info"></a>
 
-{{% alert color="warning" %}}
-**Important**
-
-This command has been replaced and will be deprecated in a future MinIO Client release.
-
-As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey info`](/reference/minio-mc-admin/mc-admin-accesskey-info/#command-mc.admin.accesskey.info) command to display information about access keys for built-in MinIO IDP users.
-
-For access keys for AD/LDAP users, use the [`mc idp ldap accesskey info`](/reference/minio-mc/mc-idp-ldap-accesskey-info/#command-mc.idp.ldap.accesskey.info) command.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This command has been replaced and will be deprecated in a future MinIO Client release.
+>
+> As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey info`](/reference/minio-mc-admin/mc-admin-accesskey-info/#command-mc.admin.accesskey.info) command to display information about access keys for built-in MinIO IDP users.
+>
+> For access keys for AD/LDAP users, use the [`mc idp ldap accesskey info`](/reference/minio-mc/mc-idp-ldap-accesskey-info/#command-mc.idp.ldap.accesskey.info) command.
 
 ## Syntax {#syntax}
 
@@ -38,16 +37,15 @@ The description output includes the following details, as available:
 
 Use [`--policy`](#mc.admin.user.svcacct.info.-policy) to view the attached policies.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command returns information on the specified access key:
 
 ```shell
 mc admin user svcacct info myminio myuseraccesskey
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -62,8 +60,8 @@ mc [GLOBALFLAGS] admin user svcacct info           \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

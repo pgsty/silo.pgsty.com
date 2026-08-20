@@ -2,8 +2,8 @@
 title: "MinIO Operator Environment Variables"
 url: "/reference/operator-environment-variables/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/operator-environment-variables.rst
+upstream_modified: false
 ---
 
 <a id="minio-operator-environment-variables"></a>
@@ -72,11 +72,10 @@ The password Operator should use to decrypt the private key in the TLS certifica
 
 Toggle STS Service `on` or `off`.
 
-{{% alert color="info" %}}
-**Changed: v5.0.11**
-
-When not specified, the default value is `on`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: v5.0.11**
+>
+> When not specified, the default value is `on`.
 
 For versions prior to Operator 5.0.11, the default value was `off`.
 
@@ -100,10 +99,8 @@ When not specified, the default value is `off`.
 
 *envvar*
 
-{{% alert color="info" %}}
-**Added: v5.0.11**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: v5.0.11**
 
 Specify the image of the MinIO instance sidecar container loaded by the Operator.
 

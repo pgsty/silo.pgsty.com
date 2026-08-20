@@ -2,8 +2,8 @@
 title: "mc support callhome"
 url: "/reference/minio-mc/mc-support-callhome/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-callhome.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-callhome"></a>
@@ -26,11 +26,10 @@ When enabled, MinIO sends diagnostic information to SUBNET.
 
 MinIO disables this functionality by default, regardless of registration status. You must explicitly enable the `callhome` function to begin information upload.
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Syntax {#syntax}
 
@@ -47,11 +46,10 @@ mc support callhome enable    \
                     [--diag]
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-The `--logs` and `--diag` flags are no longer supported in SUBNET and will be removed in a future release.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> The `--logs` and `--diag` flags are no longer supported in SUBNET and will be removed in a future release.
 
 #### `mc support callhome disable` {#mc.support.callhome.disable}
 
@@ -66,11 +64,10 @@ mc support callhome disable  \
                     [--diag]
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-The `--logs` and `--diag` flags are no longer supported in SUBNET and will be removed in a future release.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> The `--logs` and `--diag` flags are no longer supported in SUBNET and will be removed in a future release.
 
 #### `mc support callhome status` {#mc.support.callhome.status}
 
@@ -84,11 +81,10 @@ mc support callhome status   \
                     [--diag]
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-The `--diag` flag is no longer supported in SUBNET and will be removed in a future release.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> The `--diag` flag is no longer supported in SUBNET and will be removed in a future release.
 
 ### Parameters {#parameters}
 
@@ -106,11 +102,10 @@ The [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Note**
-
-This option is no longer supported in SUBNET and will be removed in a future release.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> This option is no longer supported in SUBNET and will be removed in a future release.
 
 Send or stop sending deployment diagnostic information to SUBNET every 24 hours.
 

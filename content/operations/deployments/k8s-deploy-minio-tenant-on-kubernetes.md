@@ -2,8 +2,8 @@
 title: "Deploy a Silo Tenant"
 url: "/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="deploy-a-minio-tenant"></a>
@@ -24,11 +24,10 @@ The following procedure uses the `base` Kustomization template from the [MinIO O
 
 You can select a different v7.1.1 [example](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/) as your starting point, or build your own resources using the [MinIO Custom Resource Documentation](/reference/operator-crd/#minio-operator-crd). No later supported upstream release exists; review any fork, replacement, or CRD change independently before departing from this pinned snapshot.
 
-{{% alert color="warning" %}}
-**Important**
-
-If you use Kustomize to deploy a MinIO Tenant, you must use Kustomize to manage or upgrade that deployment. Do not use `kubectl krew`, a Helm Chart, or similar methods to manage or upgrade the MinIO Tenant.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> If you use Kustomize to deploy a MinIO Tenant, you must use Kustomize to manage or upgrade that deployment. Do not use `kubectl krew`, a Helm Chart, or similar methods to manage or upgrade the MinIO Tenant.
 
 This procedure is not exhaustive of all possible configuration options available in the [Tenant CRD](/reference/operator-crd/#minio-operator-crd). It provides a baseline from which you can modify and tailor the Tenant to your requirements.
 

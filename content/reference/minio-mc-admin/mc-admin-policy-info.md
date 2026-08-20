@@ -2,8 +2,8 @@
 title: "mc admin policy info"
 url: "/reference/minio-mc-admin/mc-admin-policy-info/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-info"></a>
@@ -14,16 +14,15 @@ silo_modified: false
 
 Returns the specified policy in JSON format if it exists on the target MinIO deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command displays the contents of the `writeonly` policy on the [alias](/glossary/#term-alias) `myminio`.
 
 ```shell
  mc admin policy info myminio writeonly
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -36,8 +35,8 @@ mc admin policy info TARGET POLICYNAME
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

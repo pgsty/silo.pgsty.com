@@ -3,8 +3,8 @@ title: "在 Kubernetes 上部署 Silo"
 url: "/zh/operations/deployments/kubernetes/"
 weight: 10
 icon: fa-solid fa-dharmachakra
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="kubernetes-minio"></a>
@@ -29,10 +29,9 @@ MinIO Operator、Helm Chart、CRD 与 `Tenant` Kind 都是独立于 Silo 发布�
 
 CRD 为 Kustomize、Helm 和 `kubectl` 等工具部署与管理使用 Silo 镜像的 Tenant 提供可定制入口。
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO Operator Console UI 已被弃用，并在 MinIO Operator 6.0.0 中移除。
-
-你仍可继续使用标准 Kubernetes 方式管理 MinIO 租户，例如 Kustomize 模板、Helm Charts，以及用于查看租户命名空间和资源的 `kubectl` 命令。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO Operator Console UI 已被弃用，并在 MinIO Operator 6.0.0 中移除。
+>
+> 你仍可继续使用标准 Kubernetes 方式管理 MinIO 租户，例如 Kustomize 模板、Helm Charts，以及用于查看租户命名空间和资源的 `kubectl` 命令。

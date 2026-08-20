@@ -2,8 +2,8 @@
 title: "mc undo"
 url: "/zh/reference/minio-mc/mc-undo/"
 weight: 410
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-undo.rst
+upstream_modified: false
 ---
 
 <a id="mc-undo"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc undo`](#command-mc.undo) 命令用于撤销指定路径上由 `PUT` 或 `DELETE` 操作引起的更改。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会回滚 `myminio` 部署中 `data` 存储桶内 `file.zip` 对象最近三次上传和/或删除操作：
 
 ```shell
 mc undo myminio/data/file.zip --last 3
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] undo                \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

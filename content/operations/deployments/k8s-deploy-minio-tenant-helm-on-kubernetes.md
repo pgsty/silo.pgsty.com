@@ -2,8 +2,8 @@
 title: "Deploy a Silo Tenant with Helm Charts"
 url: "/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="deploy-a-minio-tenant-with-helm-charts"></a>
@@ -15,11 +15,10 @@ Helm is a tool for automating the deployment of applications to Kubernetes clust
 
 This procedure requires the Kubernetes cluster have a valid [Operator](/operations/deployments/kubernetes/#deploy-operator-kubernetes) deployment. You cannot use the MinIO Operator Tenant chart to deploy a Tenant independent of the Operator.
 
-{{% alert color="warning" %}}
-**Important**
-
-The MinIO Operator Tenant Chart is distinct from the server repository's legacy community [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio). This guide uses the Operator Tenant Chart because it exposes an explicit Tenant image override. The upstream Operator repository was archived on March 20, 2026, so this guide pins its final `v7.1.1` chart as a frozen compatibility baseline. Silo does not inherit upstream vendor support commitments.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The MinIO Operator Tenant Chart is distinct from the server repository's legacy community [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio). This guide uses the Operator Tenant Chart because it exposes an explicit Tenant image override. The upstream Operator repository was archived on March 20, 2026, so this guide pins its final `v7.1.1` chart as a frozen compatibility baseline. Silo does not inherit upstream vendor support commitments.
 
 ## Prerequisites {#prerequisites}
 
@@ -49,11 +48,10 @@ The following procedure deploys a MinIO Tenant using the MinIO Operator Chart Re
 
 The following procedure uses Helm to deploy a MinIO Tenant with the archived upstream Tenant Chart at `v7.1.1`.
 
-{{% alert color="warning" %}}
-**Important**
-
-If you use Helm to deploy a MinIO Tenant, you must use Helm to manage or upgrade that deployment. Do not use `kubectl krew`, Kustomize, or similar methods to manage or upgrade the MinIO Tenant.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> If you use Helm to deploy a MinIO Tenant, you must use Helm to manage or upgrade that deployment. Do not use `kubectl krew`, Kustomize, or similar methods to manage or upgrade the MinIO Tenant.
 
 This procedure is not exhaustive of all possible configuration options available in the [Tenant Chart](/reference/tenant-chart-values/#minio-tenant-chart-values). It provides a baseline from which you can modify and tailor the Tenant to your requirements.
 

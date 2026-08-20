@@ -2,8 +2,8 @@
 title: "mc admin logs"
 url: "/reference/minio-mc-admin/mc-admin-logs/"
 weight: 100
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-logs.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-logs"></a>
@@ -12,19 +12,17 @@ silo_modified: false
 
 <a id="command-mc.admin.logs"></a>
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-02T23-48-47Z**
-
-`mc support logs` moved to `mc admin logs` and provide a simpler command interface for displaying server logs for the MinIO deployment.
-
-The output is similar to what is available via `journalctl -uf minio` for systemd-controlled deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-02T23-48-47Z**
+>
+> `mc support logs` moved to `mc admin logs` and provide a simpler command interface for displaying server logs for the MinIO deployment.
+>
+> The output is similar to what is available via `journalctl -uf minio` for systemd-controlled deployments.
 
 ## Description {#description}
 

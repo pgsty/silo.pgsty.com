@@ -2,8 +2,8 @@
 title: "mc alias list"
 url: "/reference/minio-mc/mc-alias-list/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-alias-list"></a>
@@ -17,16 +17,15 @@ The [`mc alias list`](#command-mc.alias.list) command lists all aliases in the l
 
 The command output includes the configured access key and secret key associated to each alias.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command lists all [aliases](/reference/minio-mc/mc-alias-set/#alias) configured on the local host machine:
 
 ```shell
 mc alias list
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc alias list`](#command-mc.alias.list) command has the following syntax:
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] alias list [ALIAS]
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -57,44 +56,39 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### List All Configured Aliases {#list-all-configured-aliases}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 The following [`mc alias list`](#command-mc.alias.list) command lists all configured aliases in the local **`mc`** configuration.
 
 ```shell
 mc alias list
 ```
-
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc alias list
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### List a Specific Alias {#list-a-specific-alias}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 The following [`mc alias list`](#command-mc.alias.list) command lists the details of a specific alias in the local **`mc`** configuration.
 
 ```shell
 mc alias list myminio
 ```
-
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc alias list ALIAS
 ```
 
 - Replace `ALIAS` with the name of the alias to return.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Behavior {#behavior}
 

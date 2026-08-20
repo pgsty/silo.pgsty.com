@@ -3,19 +3,18 @@ title: "mc ilm tier"
 url: "/reference/minio-mc/mc-ilm-tier/"
 weight: 30
 icon: fa-solid fa-layer-group
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier"></a>
 
 <a id="command-mc.ilm.tier"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc ilm tier`](#command-mc.ilm.tier) replaces `mc admin tier`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc ilm tier`](#command-mc.ilm.tier) replaces `mc admin tier`.
 
 ## Description {#description}
 
@@ -141,13 +140,12 @@ For example, if the remote storage tier implements AWS IAM policy-based access c
 
 Modify the `Resource` for the bucket into which MinIO tiers objects.
 
-{{% alert color="info" %}}
-**Avoid enabling versioning in the remote tier**
-
-MinIO strongly recommends against enabling bucket versioning for remote tiers. If the remote tier bucket is versioned, each source object version is transitioned to a *unique object* in the remote tier.
-
-If your environment requires versioning for the remote tier, you must also allow the `s3:DeleteObjectVersion` permission.
-{{% /alert %}}
+> [!NOTE]
+> **Avoid enabling versioning in the remote tier**
+>
+> MinIO strongly recommends against enabling bucket versioning for remote tiers. If the remote tier bucket is versioned, each source object version is transitioned to a *unique object* in the remote tier.
+>
+> If your environment requires versioning for the remote tier, you must also allow the `s3:DeleteObjectVersion` permission.
 
 Defer to the documentation for the supported tiering targets for more complete information on configuring users and permissions to support MinIO tiering:
 

@@ -2,8 +2,8 @@
 title: "SUBNET"
 url: "/zh/administration/console/subnet-registration/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/53e14984e3cacacd5a0206822693f15442186bb8/source/administration/console/subnet-registration.rst
+upstream_modified: false
 ---
 
 <a id="subnet"></a>
@@ -59,20 +59,18 @@ MinIO 提供三种许可证选项：
 
 ## Call Home {#call-home}
 
-{{% alert color="info" %}}
-**新增: Console**
-
-v0.24.0
-{{% /alert %}}
+> [!NOTE]
+> **新增: Console**
+>
+> v0.24.0
 
 Call Home 是一个可选功能，已注册到 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 的部署可以自动将每日健康诊断报告或实时错误日志发送到 SUBNET。 这些报告可为工程支持团队在响应支持请求时提供诊断记录、日志记录，或同时提供两者。
 
 MinIO 安装后默认禁用 Call Home 选项。
 
-{{% alert color="warning" %}}
-**重要**
-
-Call Home 需要有效的 Enterprise 许可证。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> Call Home 需要有效的 Enterprise 许可证。
 
 使用 **Call Home** 部分可启用或禁用将每日一次的健康诊断报告或实时错误日志上传到 SUBNET。 健康报告和实时日志是彼此独立的功能，您可以分别启用或禁用。 如有需要，您也可以同时启用诊断报告和日志。

@@ -2,8 +2,8 @@
 title: "mc retention info"
 url: "/reference/minio-mc/mc-retention-info/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-retention-info"></a>
@@ -18,16 +18,15 @@ To lock an object under [legal hold](/administration/object-management/object-re
 
 [`mc retention info`](#command-mc.retention.info) *requires* that the specified bucket has object locking enabled. You can **only** enable object locking at bucket creation. See [`mc mb --with-lock`](/reference/minio-mc/mc-mb/#mc.mb.-with-lock) for documentation on creating buckets with object locking enabled.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command returns the default object lock configuration for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc retention info --default myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] retention info            \
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 
 [`mc retention info --version-id`](#mc.retention.info.-version-id) is mutually exclusive with multiple other parameters. See the reference documentation for more information.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -140,17 +139,16 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Retrieve Object Lock Settings for an Object or Object(s) {#retrieve-object-lock-settings-for-an-object-or-object-s}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Specific Object" %}}
-
+{{< tabs group="specific-object-multiple-objects" >}}
+{{< tab label="Specific Object" value="specific-object" >}}
 ```shell
 mc retention info ALIAS/PATH
 ```
 
 - Replace [`ALIAS`](#mc.retention.info.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured S3-compatible host.
 - Replace [`PATH`](#mc.retention.info.ALIAS) with the path to the object.
-{{% /tab %}}
-{{% tab header="Multiple Objects" %}}
+{{< /tab >}}
+{{< tab label="Multiple Objects" value="multiple-objects" >}}
 Use [`mc retention info`](#command-mc.retention.info) with [`--recursive`](#mc.retention.info.-recursive) to retrieve the retention settings for all objects in a bucket:
 
 ```shell
@@ -159,8 +157,8 @@ mc retention info --recursive ALIAS/PATH
 
 - Replace [`ALIAS`](#mc.retention.info.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured S3-compatible host.
 - Replace [`PATH`](#mc.retention.info.ALIAS) with the path to the bucket.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 > The bucket *must* have object locking enabled to use this command. You can only enable object locking when creating a bucket. See [`mc mb --with-lock`](/reference/minio-mc/mc-mb/#mc.mb.-with-lock) for more information on creating buckets with object locking enabled.
 

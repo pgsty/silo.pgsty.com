@@ -2,8 +2,8 @@
 title: "mc idp ldap ls"
 url: "/reference/minio-mc/mc-idp-ldap-ls/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-ls"></a>
@@ -19,17 +19,16 @@ The [`mc idp ldap ls`](#command-mc.idp.ldap.ls) command lists the existing set o
 
 [`mc idp ldap ls`](#command-mc.idp.ldap.ls) is also known as [`mc idp ldap list`](#command-mc.idp.ldap.list).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example lists the AD/LDAP configuration settings for the `myminio` deployment.
 
 ```shell
 mc idp ldap ls       \
             myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -44,8 +43,8 @@ mc [GLOBALFLAGS] idp ldap ls     \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

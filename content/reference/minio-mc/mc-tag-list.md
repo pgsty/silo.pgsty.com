@@ -2,8 +2,8 @@
 title: "mc tag list"
 url: "/reference/minio-mc/mc-tag-list/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-tag-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-tag-list"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc tag list`](#command-mc.tag.list) command lists all tags from a bucket or object.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command lists tags for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc tag list myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] tag set                   \
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 
 [`mc tag list --version-id`](#mc.tag.list.-version-id) is mutually exclusive with multiple parameters. See the reference documentation for more information.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -65,10 +64,8 @@ mc tag list myminio/mybucket/object.txt
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-04T18-10-16Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-04T18-10-16Z**
 
 Recursively lists the tags for all objects at the path specified to [`ALIAS`](#mc.tag.list.ALIAS).
 

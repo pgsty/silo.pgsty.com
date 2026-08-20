@@ -3,8 +3,8 @@ title: "Silo 控制台"
 url: "/zh/administration/minio-console/"
 weight: 110
 icon: fa-solid fa-display
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/minio-console.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -38,11 +38,10 @@ MinIO Console 可运行于多种当前稳定版本的浏览器。
 
 如需查看运行 MinIO Console 所支持的完整浏览器及版本列表，请参见 [Browserslist](https://browsersl.ist/#q=%3E0.2%25%2Cnot+dead+and+not+op_mini+all) 网站。
 
-{{% alert color="secondary" %}}
-**提示**
-
-MinIO Console *不支持* Opera Mini。
-{{% /alert %}}
+> [!NOTE]
+> **提示**
+>
+> MinIO Console *不支持* Opera Mini。
 
 ## 配置 {#id4}
 
@@ -95,25 +94,22 @@ minio server https://minio-{1...4}.example.net/mnt/drive-{1...4} \
 
 ## 登录 {#minio-console-play-login}
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-03-09T23-16-13Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-03-09T23-16-13Z**
 
 MinIO Console 会向未认证用户显示登录页面。 默认情况下，Console 为 [MinIO-managed user](/zh/administration/identity-access-management/minio-identity-management/#minio-internal-idp) 提供用户名和密码登录提示。
 
 对于配置了多个 [identity managers](/zh/administration/identity-access-management/#minio-authentication-and-identity-management) 的部署， 请选择 **Other Authentication Methods** 下拉菜单，以选择其他已配置的身份提供商之一。 您也可以使用通过 [Security Token Service (STS)](/zh/developers/security-token-service/#minio-security-token-service) API 生成的凭证登录。
 
-{{% alert color="info" %}}
-**使用 MinIO 的 Play 测试环境体验 Console**
-
-您可以通过 [https://play.min.io:9443](https://play.min.io:9443) 体验 Console。 请使用以下凭证登录：
-
-- 用户名：`Q3AM3UQ867SPQQA43P2F`
-- 密码：`zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG`
-
-Play Console 连接到位于 [https://play.min.io](https://play.min.io) 的 MinIO Play 部署。 您也可以通过 [`mc`](/zh/reference/minio-mc/#command-mc) 使用 `play` 别名访问该部署。
-{{% /alert %}}
+> [!NOTE]
+> **使用 MinIO 的 Play 测试环境体验 Console**
+>
+> 您可以通过 [https://play.min.io:9443](https://play.min.io:9443) 体验 Console。 请使用以下凭证登录：
+>
+> - 用户名：`Q3AM3UQ867SPQQA43P2F`
+> - 密码：`zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG`
+>
+> Play Console 连接到位于 [https://play.min.io](https://play.min.io) 的 MinIO Play 部署。 您也可以通过 [`mc`](/zh/reference/minio-mc/#command-mc) 使用 `play` 别名访问该部署。
 
 ## 文档 {#id7}
 

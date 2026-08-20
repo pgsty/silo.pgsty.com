@@ -2,40 +2,37 @@
 title: "mc admin bucket remote"
 url: "/reference/deprecated/mc-admin-bucket-remote/"
 weight: 120
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-bucket-remote.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-bucket-remote"></a>
 
 <a id="command-mc.admin.bucket.remote"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> - `mc admin bucket remote add` replaced by [`mc replicate add`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add)
+> - `mc admin bucket remote update` replaced by [`mc replicate update`](/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update)
+> - `mc admin bucket remote rm` replaced by [`mc replicate rm`](/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm)
+> - `mc admin bucket remote ls` replaced by [`mc replicate ls`](/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls)
 
-- `mc admin bucket remote add` replaced by [`mc replicate add`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add)
-- `mc admin bucket remote update` replaced by [`mc replicate update`](/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update)
-- `mc admin bucket remote rm` replaced by [`mc replicate rm`](/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm)
-- `mc admin bucket remote ls` replaced by [`mc replicate ls`](/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls)
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-02-16T19-20-11Z**
-
-- `mc admin bucket remote bandwidth` replaced by [`mc replicate status`](/reference/minio-mc/mc-replicate-status/#command-mc.replicate.status)
-
-  Replication related statistics are moving to the `mc replicate status` command.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-02-16T19-20-11Z**
+>
+> - `mc admin bucket remote bandwidth` replaced by [`mc replicate status`](/reference/minio-mc/mc-replicate-status/#command-mc.replicate.status)
+>
+>   Replication related statistics are moving to the `mc replicate status` command.
 
 ## Description {#description}
 
 The [`mc admin bucket remote`](#command-mc.admin.bucket.remote) command manages the `ARN` resources for use with [`bucket replication`](/reference/minio-mc/mc-replicate/#command-mc.replicate).
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 ## Examples {#examples}
 
@@ -81,11 +78,10 @@ mc replicate ls ALIAS/PATH
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-- `mc admin bucket remote add` replaced by [`mc replicate add`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add)
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> - `mc admin bucket remote add` replaced by [`mc replicate add`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add)
 
 Adds a remote target to a bucket on a MinIO deployment. The command has the following syntax:
 
@@ -174,11 +170,10 @@ By default, [`mc admin bucket remote add`](#mc.admin.bucket.remote.add) operates
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-- `mc admin bucket remote ls` replaced by [`mc replicate ls`](/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls)
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> - `mc admin bucket remote ls` replaced by [`mc replicate ls`](/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls)
 
 Lists all remote targets associated to a bucket on the MinIO deployment. Use `mc admin bucket remote ls --help` for usage syntax.
 
@@ -186,11 +181,10 @@ Lists all remote targets associated to a bucket on the MinIO deployment. Use `mc
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-- `mc admin bucket remote rm` replaced by [`mc replicate rm`](/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm)
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> - `mc admin bucket remote rm` replaced by [`mc replicate rm`](/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm)
 
 Removes a remote target for a bucket on the MinIO deployment. The command has the following syntax:
 

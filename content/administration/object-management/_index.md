@@ -3,8 +3,8 @@ title: "Object Management"
 url: "/administration/object-management/"
 weight: 120
 icon: fa-solid fa-box-archive
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management.rst
+upstream_modified: true
 ---
 
 <a id="object-management"></a>
@@ -18,13 +18,12 @@ silo_modified: true
 
 An [object](#objects) is binary data, such as images, audio files, spreadsheets, or even binary executable code. The term “Binary Large Object” or “blob” is sometimes associated to object storage, although blobs can be anywhere from a few bytes to several terabytes in size. Object Storage platforms like MinIO provide dedicated tools and capabilities for storing, listing, and retrieving objects using a standard S3-compatible API.
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 <a id="buckets"></a>
 
@@ -73,15 +72,14 @@ If you configure `MINIO_DOMAIN`, you **must** consider all subdomains of the spe
 
 For example, if setting `MINIO_DOMAIN=minio.example.net`, you **cannot** assign any subdomains of `minio.example.net` (in the form of `*.minio.example.net`) to any MinIO service or target. This includes hostnames for use with [bucket](/administration/bucket-replication/#minio-bucket-replication), [batch](/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job), or [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview).
 
-{{% alert color="warning" %}}
-**Important**
-
-For deployments with [TLS enabled](/operations/network-encryption/#minio-tls), you **must** ensure your TLS certificate SANs cover all subdomains of the leftmost domain specified to [`MINIO_DOMAIN`](/reference/minio-server/settings/core/#envvar.MINIO_DOMAIN).
-
-For example, the example of `MINIO_DOMAIN=minio.example.net` requires a TLS SAN that covers the subdomains of `minio.example.net`. You can set an additional TLS SAN of `*.minio.example.net` to appropriately cover the subdomain namespace.
-
-TLS Wildcard rules prevent chaining to additional subdomain levels, such that a TLS certificate with a wildcard SAN of `*.example.net` would **not** cover the virtual host lookups at `*.minio.example.net`.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> For deployments with [TLS enabled](/operations/network-encryption/#minio-tls), you **must** ensure your TLS certificate SANs cover all subdomains of the leftmost domain specified to [`MINIO_DOMAIN`](/reference/minio-server/settings/core/#envvar.MINIO_DOMAIN).
+>
+> For example, the example of `MINIO_DOMAIN=minio.example.net` requires a TLS SAN that covers the subdomains of `minio.example.net`. You can set an additional TLS SAN of `*.minio.example.net` to appropriately cover the subdomain namespace.
+>
+> TLS Wildcard rules prevent chaining to additional subdomain levels, such that a TLS certificate with a wildcard SAN of `*.example.net` would **not** cover the virtual host lookups at `*.minio.example.net`.
 
 ## Object Organization and Planning {#object-organization-and-planning}
 
@@ -98,11 +96,10 @@ Consider the following points as general guidance for client applications worklo
 
 For a deeper discussion on the benefits of limiting prefix contents, see the article on [optimizing S3 performance](https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html).
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO does not support the `\` or `:` characters in object names, regardless of support for those characters in Windows filesystems. Use `/` as a delimiter in object names to have MinIO automatically create a folder structure using [prefixes](/glossary/#term-prefix).
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO does not support the `\` or `:` characters in object names, regardless of support for those characters in Windows filesystems. Use `/` as a delimiter in object names to have MinIO automatically create a folder structure using [prefixes](/glossary/#term-prefix).
 
 ## Object Versioning {#object-versioning}
 

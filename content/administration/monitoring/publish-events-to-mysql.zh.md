@@ -2,8 +2,8 @@
 title: "将事件发布到 MySQL"
 url: "/zh/administration/monitoring/publish-events-to-mysql/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-mysql.rst
+upstream_modified: false
 ---
 
 <a id="mysql"></a>
@@ -29,8 +29,8 @@ MinIO 依赖于 MySQL 5.7.8 中引入的功能。
 
 你可以使用环境变量 *或* 设置运行时配置设置来配置新的 MySQL 服务端点。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/mysql/#minio-server-envvar-bucket-notification-mysql) 指定 MySQL 服务端点及其相关 配置设置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用指定的设置。
 
 以下示例代码设置了与配置 MySQL 服务端点相关的 *所有* 环境变量。最少的 *必需* 变量为：
@@ -40,37 +40,33 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 - [`MINIO_NOTIFY_MYSQL_TABLE`](/zh/reference/minio-server/settings/notifications/mysql/#envvar.MINIO_NOTIFY_MYSQL_TABLE)
 - [`MINIO_NOTIFY_MYSQL_FORMAT`](/zh/reference/minio-server/settings/notifications/mysql/#envvar.MINIO_NOTIFY_MYSQL_FORMAT)
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_MYSQL_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_MYSQL_DSN_STRING_<IDENTIFIER>="user:password@tcp(hostname:port)/database"
+>    set MINIO_NOTIFY_MYSQL_TABLE_<IDENTIFIER>="minio-events"
+>    set MINIO_NOTIFY_MYSQL_FORMAT_<IDENTIFIER>="namespace|access"
+>    set MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
+>    set MINIO_NOTIFY_MYSQL_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
+>    set MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
+>    set MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
+> ```
 
-```shell
-   set MINIO_NOTIFY_MYSQL_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_MYSQL_DSN_STRING_<IDENTIFIER>="user:password@tcp(hostname:port)/database"
-   set MINIO_NOTIFY_MYSQL_TABLE_<IDENTIFIER>="minio-events"
-   set MINIO_NOTIFY_MYSQL_FORMAT_<IDENTIFIER>="namespace|access"
-   set MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
-   set MINIO_NOTIFY_MYSQL_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
-   set MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
-   set MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-   export MINIO_NOTIFY_MYSQL_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_MYSQL_DSN_STRING_<IDENTIFIER>="user:password@tcp(hostname:port)/database"
-   export MINIO_NOTIFY_MYSQL_TABLE_<IDENTIFIER>="minio-events"
-   export MINIO_NOTIFY_MYSQL_FORMAT_<IDENTIFIER>="namespace|access"
-   export MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
-   export MINIO_NOTIFY_MYSQL_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
-   export MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
-   export MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_MYSQL_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_MYSQL_DSN_STRING_<IDENTIFIER>="user:password@tcp(hostname:port)/database"
+>    export MINIO_NOTIFY_MYSQL_TABLE_<IDENTIFIER>="minio-events"
+>    export MINIO_NOTIFY_MYSQL_FORMAT_<IDENTIFIER>="namespace|access"
+>    export MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
+>    export MINIO_NOTIFY_MYSQL_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
+>    export MINIO_NOTIFY_MYSQL_QUEUE_LIMIT_<IDENTIFIER>="100000"
+>    export MINIO_NOTIFY_MYSQL_COMMENT_<IDENTIFIER>="MySQL Event Notification Logging for MinIO"
+> ```
 
 - 将 `<IDENTIFIER>` 替换为该 MySQL 服务端点的唯一描述性字符串。对于与新目标服务端点相关的所有环境变量，请使用相同的 `<IDENTIFIER>` 值。 以下示例假定标识符为 `PRIMARY`。
 
@@ -84,8 +80,8 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
   `"username:password@tcp(mysql.example.com:3306)/miniodb"`
 
 有关每个环境变量的完整文档，请参阅 [用于存储桶通知的 MySQL 服务](/zh/reference/minio-server/settings/notifications/mysql/#minio-server-envvar-bucket-notification-mysql)。
-{{% /tab %}}
-{{% tab header="配置设置" %}}
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令 和 [`notify_mysql`](/zh/reference/minio-server/settings/notifications/mysql/#mc-conf.notify_mysql) 配置键添加或更新 MySQL 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置设置。
 
 以下示例代码设置了与配置 MySQL 服务端点相关的 *所有* 设置。最少的 *必需* 设置为：
@@ -117,8 +113,8 @@ mc admin config set ALIAS/ notify_mysql:IDENTIFIER \
   `"username:password@tcp(mysql.example.com:3306)/miniodb"`
 
 有关每项设置的完整文档，请参阅 [MySQL 存储桶通知配置设置](/zh/reference/minio-server/settings/notifications/mysql/#minio-server-config-bucket-notification-mysql)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) 重启 MinIO 部署 {#minio}
 
@@ -138,36 +134,35 @@ SQS ARNs: arn:minio:sqs::primary:mysql
 
 当将关联的 MySQL 部署配置为目标时，你必须在配置存储桶通知时指定该 ARN 资源。
 
-{{% alert color="info" %}}
-**识别存储桶通知的 ARN**
-
-此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
-
-**查看 JSON 输出**
-
-1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. 在 JSON 输出中，查找 `info.sqsARN` 键。
-
-   你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
-
-   例如，`arn:minio:sqs::primary:mysql`。
-
-**使用 jq 从 JSON 中解析该值**
-
-1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
-2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:mysql`。
-{{% /alert %}}
+> [!NOTE]
+> **识别存储桶通知的 ARN**
+>
+> 此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
+>
+> **查看 JSON 输出**
+>
+> 1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
+>
+>    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
+>
+>    例如，`arn:minio:sqs::primary:mysql`。
+>
+> **使用 jq 从 JSON 中解析该值**
+>
+> 1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
+> 2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:mysql`。
 
 ### 3) 使用 MySQL 端点作为目标配置存储桶通知 {#id3}
 

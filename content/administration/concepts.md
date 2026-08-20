@@ -3,8 +3,8 @@ title: "Core Administration Concepts"
 url: "/administration/concepts/"
 weight: 180
 icon: fa-solid fa-diagram-project
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/concepts.rst
+upstream_modified: false
 ---
 
 <a id="core-administration-concepts"></a>
@@ -93,13 +93,12 @@ MinIO provides two types of replication to copy an object, its versions, and its
 
 Besides replication, MinIO provides a mirroring service. [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) copies only the actual object to any other S3 compatible data store, including other MinIO stores. However, versions and metadata do not back up with the [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) command.
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 ## What tools does MinIO provide to manage objects based on speed and frequency of access? {#what-tools-does-minio-provide-to-manage-objects-based-on-speed-and-frequency-of-access}
 

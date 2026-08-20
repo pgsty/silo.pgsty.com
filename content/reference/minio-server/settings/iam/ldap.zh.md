@@ -2,8 +2,8 @@
 title: "Active Directory / LDAP 设置"
 url: "/zh/reference/minio-server/settings/iam/ldap/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/iam/ldap.rst
+upstream_modified: false
 ---
 
 <a id="active-directory-ldap"></a>
@@ -12,15 +12,14 @@ silo_modified: false
 
 本页面说明通过 Active Directory 或 LDAP 服务启用外部身份管理所需的设置。 有关使用这些设置的教程，请参见 [配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic)。
 
-{{% alert color="warning" %}}
-**重要**
-
-在 `RELEASE.2023-05-26T23-31-54Z` 版本中新增：
-
-相比使用配置设置，优先使用 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 命令将 MinIO 配置为使用 Active Directory 或 LDAP 进行身份管理。
-
-MinIO 建议使用 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 命令执行 LDAP 管理操作。 这些命令提供了更好的校验能力和附加功能，同时提供与 `identity_ldap` 配置键相同的设置。 有关 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 的使用教程，请参见 [配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 在 `RELEASE.2023-05-26T23-31-54Z` 版本中新增：
+>
+> 相比使用配置设置，优先使用 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 命令将 MinIO 配置为使用 Active Directory 或 LDAP 进行身份管理。
+>
+> MinIO 建议使用 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 命令执行 LDAP 管理操作。 这些命令提供了更好的校验能力和附加功能，同时提供与 `identity_ldap` 配置键相同的设置。 有关 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 的使用教程，请参见 [配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic)。
 
 `identity_ldap` 配置设置仍可用于现有脚本和其他工具。
 
@@ -33,31 +32,27 @@ MinIO 建议使用 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-m
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 示例 {#id2}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ```shell
 MINIO_IDENTITY_LDAP_SERVER_ADDR="ldapserver.com:636"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-`srv_record_name` 会自动识别端口。
-
-如果你的 AD/LDAP 服务器使用 `DNS SRV Records`，请 *不要* 在 `server_addr` 值后附加端口号。 SRV 请求在返回可用服务器列表时会自动包含端口号。
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+> [!NOTE]
+> **说明**
+>
+> `srv_record_name` 会自动识别端口。
+>
+> 如果你的 AD/LDAP 服务器使用 `DNS SRV Records`，请 *不要* 在 `server_addr` 值后附加端口号。 SRV 请求在返回可用服务器列表时会自动包含端口号。
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 #### `identity_ldap` {#mc-conf.identity_ldap}
 
 *mc-conf*
@@ -80,9 +75,8 @@ mc admin config set identity_ldap                        \
    user_dn_search_base_dn="dc=example,dc=net"            \
    user_dn_search_filter="(&(objectCategory=user)(sAMAccountName=%s))"
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 设置 {#id3}
 
@@ -90,9 +84,8 @@ mc admin config set identity_ldap                        \
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_SERVER_ADDR` {#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR}
 
 *envvar*
@@ -103,19 +96,17 @@ mc admin config set identity_ldap                        \
 ldapserver.com:636
 ```
 
-{{% alert color="info" %}}
-**[`srv_record_name`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name) 会自动识别端口**
-
-如果你的 AD/LDAP server 使用 [`DNS SRV Records`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name)，则 *不要* 在 [`server_addr`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.server_addr) 的值后追加端口号。 SRV 请求在返回可用服务器列表时会自动包含端口号。
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+> [!NOTE]
+> **[`srv_record_name`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name) 会自动识别端口**
+>
+> 如果你的 AD/LDAP server 使用 [`DNS SRV Records`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name)，则 *不要* 在 [`server_addr`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.server_addr) 的值后追加端口号。 SRV 请求在返回可用服务器列表时会自动包含端口号。
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap server_addr` {#mc-conf.identity_ldap.server_addr}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 Active Directory / LDAP server 的主机名。例如：
 
@@ -123,30 +114,27 @@ ldapserver.com:636
 ldapserver.com:636
 ```
 
-{{% alert color="info" %}}
-**[`srv_record_name`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name) 会自动识别端口**
-
-如果你的 AD/LDAP server 使用 [`DNS SRV Records`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name)，则 *不要* 在 [`server_addr`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.server_addr) 的值后追加端口号。 SRV 请求在返回可用服务器列表时会自动包含端口号。
-{{% /alert %}}
+> [!NOTE]
+> **[`srv_record_name`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name) 会自动识别端口**
+>
+> 如果你的 AD/LDAP server 使用 [`DNS SRV Records`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name)，则 *不要* 在 [`server_addr`](/zh/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.server_addr) 的值后追加端口号。 SRV 请求在返回可用服务器列表时会自动包含端口号。
 
 ### Lookup Bind DN {#lookup-bind-dn}
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN` {#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap lookup_bind_dn` {#mc-conf.identity_ldap.lookup_bind_dn}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 在查询 AD/LDAP server 时所使用的 AD/LDAP 账户 Distinguished Name (DN)。 这会启用对 AD/LDAP server 的 [Lookup-Bind](/zh/operations/external-iam/#minio-external-identity-management-ad-ldap-lookup-bind) 认证。
 
@@ -156,47 +144,42 @@ ldapserver.com:636
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD` {#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap lookup_bind_password` {#mc-conf.identity_ldap.lookup_bind_password}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 [Lookup-Bind](/zh/operations/external-iam/#minio-external-identity-management-ad-ldap-lookup-bind) 用户账户的密码。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-06-23T20-26-00Z**
-
-当通过 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回此值时，MinIO 会将其脱敏。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-06-23T20-26-00Z**
+>
+> 当通过 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回此值时，MinIO 会将其脱敏。
 
 ### 用户 DN 搜索基准 DN {#dn-dn}
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap user_dn_search_base_dn` {#mc-conf.identity_ldap.user_dn_search_base_dn}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 在查询与认证客户端所提供凭证相匹配的用户凭证时所使用的基础 Distinguished Name (DN)。
 
@@ -214,20 +197,18 @@ cn=miniousers,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap user_dn_search_filter` {#mc-conf.identity_ldap.user_dn_search_filter}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 在查询与认证客户端所提供凭证相匹配的用户凭证时所使用的 AD/LDAP 搜索过滤器。
 
@@ -241,25 +222,21 @@ cn=miniousers,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_USER_DN_ATTRIBUTES` {#envvar.MINIO_IDENTITY_LDAP_USER_DN_ATTRIBUTES}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap user_dn_attributes` {#mc-conf.identity_ldap.user_dn_attributes}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-06-06T09-36-42Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-06-06T09-36-42Z**
 
 用户 DN 属性的逗号分隔列表。
 
@@ -275,17 +252,16 @@ mc idp ldap update ALIAS user_dn_attributes=sshPublicKey
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" default="tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 此设置没有环境变量选项。 请改用配置设置。
-{{% /tab %}}
-{{% tab header="配置设置" selected=true %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap enabled` {#mc-conf.identity_ldap.enabled}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 将其设置为 `false` 可禁用 AD/LDAP 配置。
 
@@ -297,20 +273,18 @@ mc idp ldap update ALIAS user_dn_attributes=sshPublicKey
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER` {#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap group_search_filter` {#mc-conf.identity_ldap.group_search_filter}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于为已认证用户执行组查询的 AD/LDAP 搜索过滤器。
 
@@ -330,20 +304,18 @@ mc idp ldap update ALIAS user_dn_attributes=sshPublicKey
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN` {#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap group_search_base_dn` {#mc-conf.identity_ldap.group_search_base_dn}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 在执行组查询时所使用的组搜索基础 [Distinguished Names](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ldap/distinguished-names) 列表，多个值之间使用分号（`;`）分隔。
 
@@ -357,20 +329,18 @@ cn=miniogroups,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` {#envvar.MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap tls_skip_verify` {#mc-conf.identity_ldap.tls_skip_verify}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 可在不验证的情况下信任 AD/LDAP server 的 TLS 证书。 如果 AD/LDAP server 的 TLS 证书由不受信任的证书颁发机构签名 （例如自签名），则可能需要此选项。
 
@@ -380,20 +350,18 @@ cn=miniogroups,dc=myldapserver,dc=net;ou=swengg,dc=min,dc=io
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_SERVER_INSECURE` {#envvar.MINIO_IDENTITY_LDAP_SERVER_INSECURE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap server_insecure` {#mc-conf.identity_ldap.server_insecure}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 可允许与 AD/LDAP server 建立未加密的连接（非 TLS）。
 
@@ -405,20 +373,18 @@ MinIO 会以明文形式将 AD/LDAP 用户凭证发送到 AD/LDAP server，因�
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_SERVER_STARTTLS` {#envvar.MINIO_IDENTITY_LDAP_SERVER_STARTTLS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap server_starttls` {#mc-conf.identity_ldap.server_starttls}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 可启用到 AD/LDAP server 的 `StartTLS` 连接。
 
@@ -430,25 +396,21 @@ MinIO 会以明文形式将 AD/LDAP 用户凭证发送到 AD/LDAP server，因�
 
 *可选*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2022-12-12T19-27-27Z**
+> [!NOTE]
+> **新增: RELEASE.2022-12-12T19-27-27Z**
 
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_SRV_RECORD_NAME` {#envvar.MINIO_IDENTITY_LDAP_SRV_RECORD_NAME}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap srv_record_name` {#mc-conf.identity_ldap.srv_record_name}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定适当的值，以允许 MinIO 通过 [DNS SRV record](https://ldap.com/dns-srv-records-for-ldap) 请求选择 AD/LDAP server。
 
@@ -476,31 +438,28 @@ _ldaps._tcp.example.com
 
 有关 DNS SRV 记录的更多信息，请参见 [DNS SRV Records for LDAP](https://ldap.com/dns-srv-records-for-ldap)。
 
-{{% alert color="info" %}}
-**DNS SRV 记录配置中的 server 地址**
-
-指定的 server 名称 **不得** 包含端口号。 这与标准 AD/LDAP 配置不同，后者要求提供端口号。
-
-关于如何配置 AD/LDAP server 地址，请参见 [`server_addr`](#mc-conf.identity_ldap.server_addr) 或 [`MINIO_IDENTITY_LDAP_SERVER_ADDR`](#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR)。
-{{% /alert %}}
+> [!NOTE]
+> **DNS SRV 记录配置中的 server 地址**
+>
+> 指定的 server 名称 **不得** 包含端口号。 这与标准 AD/LDAP 配置不同，后者要求提供端口号。
+>
+> 关于如何配置 AD/LDAP server 地址，请参见 [`server_addr`](#mc-conf.identity_ldap.server_addr) 或 [`MINIO_IDENTITY_LDAP_SERVER_ADDR`](#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR)。
 
 ### 备注 {#id12}
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_LDAP_COMMENT` {#envvar.MINIO_IDENTITY_LDAP_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `identity_ldap identity_ldap comment` {#mc-conf.identity_ldap.identity_ldap.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定要附加到 AD/LDAP 配置上的注释。

@@ -2,8 +2,8 @@
 title: "mc retention set"
 url: "/reference/minio-mc/mc-retention-set/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-retention-set"></a>
@@ -19,16 +19,15 @@ To lock an object under [legal hold](/administration/object-management/object-re
 
 [`mc retention set`](#command-mc.retention.set) *requires* that the specified bucket has object locking enabled. You can **only** enable object locking at bucket creation. See [`mc mb --with-lock`](/reference/minio-mc/mc-mb/#mc.mb.-with-lock) for documentation on creating buckets with object locking enabled.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command sets a default 30 day [GOVERNANCE](/administration/object-management/object-retention/#minio-object-locking-governance) object lock on the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc retention set --default GOVERNANCE "30d" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -51,8 +50,8 @@ mc [GLOBALFLAGS] retention set                         \
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 
 [`mc retention set --version-id`](#mc.retention.set.-version-id) is mutually exclusive with multiple other parameters. See the reference documentation for more information.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -193,8 +192,8 @@ mc retention set  --recursive --default MODE DURATION ALIAS/PATH
 
 ### Set Object Lock Configuration for Versioned Object {#set-object-lock-configuration-for-versioned-object}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Specific Version" %}}
+{{< tabs group="specific-version-all-versions" >}}
+{{< tab label="Specific Version" value="specific-version" >}}
 Use [`mc retention set`](#command-mc.retention.set) with [`--version-id`](#mc.retention.set.-version-id) to apply the retention settings to a specific object version:
 
 ```shell
@@ -206,8 +205,8 @@ mc retention set --version-id VERSION MODE DURATION ALIAS/PATH
 - Replace [`DURATION`](#mc.retention.set.VALIDITY) with the duration which the object lock should remain in effect. For example, to set a retention period of 30 days, specify `30d`.
 - Replace [`ALIAS`](#mc.retention.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured S3-compatible host.
 - Replace [`PATH`](#mc.retention.set.ALIAS) with the path to the object.
-{{% /tab %}}
-{{% tab header="All Versions" %}}
+{{< /tab >}}
+{{< tab label="All Versions" value="all-versions" >}}
 Use [`mc retention set`](#command-mc.retention.set) with [`--versions`](#mc.retention.set.-versions) to apply the retention settings to a specific object version:
 
 ```shell
@@ -218,8 +217,8 @@ mc retention set --versions  MODE DURATION ALIAS/PATH
 - Replace [`DURATION`](#mc.retention.set.VALIDITY) with the duration which the object lock should remain in effect. For example, to set a retention period of 30 days, specify `30d`.
 - Replace [`ALIAS`](#mc.retention.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured S3-compatible host.
 - Replace [`PATH`](#mc.retention.set.ALIAS) with the path to the object.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 > The bucket *must* have object locking enabled to use this command. You can only enable object locking when creating a bucket. See [`mc mb --with-lock`](/reference/minio-mc/mc-mb/#mc.mb.-with-lock) for more information on creating buckets with object locking enabled.
 
@@ -229,22 +228,22 @@ mc retention set --versions  MODE DURATION ALIAS/PATH
 
 For buckets with [`versioning enabled`](/reference/minio-mc/mc-version/#command-mc.version), [`mc retention set`](#command-mc.retention.set) by default operates on the *latest* version of the target object or object(s). [`mc retention set`](#command-mc.retention.set) includes specific options that when *explicitly* specified direct the command to operate on either a specific object version *or* all versions of an object:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Specific Object Version" %}}
+{{< tabs group="specific-object-version-all-object-versions" >}}
+{{< tab label="Specific Object Version" value="specific-object-version" >}}
 To direct [`mc retention set`](#command-mc.retention.set) to operate on a specific version of an object, include the `--version-id` argument:
 
 - [`mc retention set --version-id`](#mc.retention.set.-version-id)
 - [`mc retention set --version-id`](#mc.retention.set.-version-id)
 - [`mc retention set --version-id`](#mc.retention.set.-version-id)
-{{% /tab %}}
-{{% tab header="All Object Versions" %}}
+{{< /tab >}}
+{{< tab label="All Object Versions" value="all-object-versions" >}}
 To direct [`mc retention set`](#command-mc.retention.set) to operate on *all* versions of an object, include the `--versions` argument:
 
 - [`mc retention set --versions`](#mc.retention.set.-versions)
 - [`mc retention set --versions`](#mc.retention.set.-versions)
 - [`mc retention set --versions`](#mc.retention.set.-versions)
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Interaction with Legal Holds {#interaction-with-legal-holds}
 

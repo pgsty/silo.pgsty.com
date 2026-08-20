@@ -2,8 +2,8 @@
 title: "mc replicate rm"
 url: "/zh/reference/minio-mc/mc-replicate-rm/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-rm.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-rm"></a>
@@ -13,11 +13,10 @@ silo_modified: false
 
 <a id="command-mc.replicate.rm"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc replicate rm` 替代 `mc admin bucket remote rm` 命令。 删除复制配置时会自动删除其底层远程目标。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc replicate rm` 替代 `mc admin bucket remote rm` 命令。 删除复制配置时会自动删除其底层远程目标。
 
 ## 语法 {#id2}
 
@@ -29,16 +28,15 @@ silo_modified: false
 mc [GLOBALFLAGS] replicate rm FLAGS [FLAGS] ALIAS
 ```
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令从 `myminio` MinIO 部署中的 `mydata` 存储桶删除指定 id 的复制规则：
 
 ```shell
 mc replicate rm --id "c76um9h4b0t1ijr36mug" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -53,8 +51,8 @@ mc [GLOBALFLAGS] replicate rm     \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

@@ -2,8 +2,8 @@
 title: "Tenant Helm Charts"
 url: "/reference/tenant-chart-values/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/tenant-chart-values.rst
+upstream_modified: true
 ---
 
 <a id="tenant-helm-charts"></a>
@@ -13,16 +13,15 @@ The archived MinIO Operator project published an [Operator Chart](https://github
 
 The following page documents the `values.yaml` chart for a MinIO Tenant. For documentation on the chart for a MinIO Operator, see [Operator Helm Charts](/reference/operator-chart-values/#minio-operator-chart-values)
 
-{{% alert color="warning" %}}
-The upstream MinIO Operator repository was archived on March 20, 2026. This is a retained reference snapshot for its final chart at `v7.1.1`, not evidence of ongoing upstream maintenance or support. Its defaults were checked against that tag; internal documentation links are routed to this site, and the stale upstream `existingSecret` comment is corrected to the chart's actual `tenant.configSecret.name` input. The `quay.io/minio/minio` values below are upstream chart defaults, not Silo branding or a recommended Silo image. To run Silo, override `tenant.image.repository` with `pgsty/minio` and pin a tested [published release tag or digest](/download/#server).
-{{% /alert %}}
+> [!WARNING]
+> The upstream MinIO Operator repository was archived on March 20, 2026. This is a retained reference snapshot for its final chart at `v7.1.1`, not evidence of ongoing upstream maintenance or support. Its defaults were checked against that tag; internal documentation links are routed to this site, and the stale upstream `existingSecret` comment is corrected to the chart's actual `tenant.configSecret.name` input. The `quay.io/minio/minio` values below are upstream chart defaults, not Silo branding or a recommended Silo image. To run Silo, override `tenant.image.repository` with `pgsty/minio` and pin a tested [published release tag or digest](/download/#server).
 
 <a id="minio-tenant-chart-operator-values"></a>
 
 ## MinIO Tenant Chart {#minio-tenant-chart}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Reference" %}}
+{{< tabs group="reference-yaml" >}}
+{{< tab label="Reference" value="reference" >}}
 **tenant**
 
 > **name**
@@ -89,11 +88,10 @@ The upstream MinIO Operator repository was archived on March 20, 2026. This is a
 > > Root key for dynamically creating a secret for use with configuring root MinIO User Specify the `name` and then a list of environment variables.
 > > To reuse an existing Secret containing `config.env`, set `tenant.configSecret.name` to that Secret and set `tenant.configSecret.existingSecret` to `true`.
 > >
-> > {{% alert color="warning" %}}
-> > **Important**
-> >
-> > Do not use this in production environments. This field is intended for use with rapid development or testing only.
-> > {{% /alert %}}
+> > > [!WARNING]
+> > > **Important**
+> > >
+> > > Do not use this in production environments. This field is intended for use with rapid development or testing only.
 > >
 > > For example:
 > >
@@ -205,11 +203,11 @@ The upstream MinIO Operator repository was archived on March 20, 2026. This is a
 >
 > > The Sub path inside Mount path where MinIO stores data.
 > >
-> > {{% alert color="danger" %}}
-> > **Warning**
+> > > [!CAUTION]
+> > > **Warning**
+> > >
+> > > Treat the `mountPath` and `subPath` values as immutable once you deploy the Tenant. If you change these values post-deployment, then you may have different paths for new and pre-existing data. This can vastly increase operational complexity and may result in unpredictable data states.
 > >
-> > Treat the `mountPath` and `subPath` values as immutable once you deploy the Tenant. If you change these values post-deployment, then you may have different paths for new and pre-existing data. This can vastly increase operational complexity and may result in unpredictable data states.
-> > {{% /alert %}}
 >
 > **metrics**
 >
@@ -235,13 +233,13 @@ The upstream MinIO Operator repository was archived on March 20, 2026. This is a
 > > >
 > > > See [Operator CRD: TenantSpec](https://silo.pgsty.com/reference/operator-crd/#tenantspec).
 > > >
-> > > {{% alert color="warning" %}}
-> > > **Important**
+> > > > [!WARNING]
+> > > > **Important**
+> > > >
+> > > > The MinIO Operator may output TLS connectivity errors if it cannot trust the Certificate Authority (CA) which minted the custom certificates.
+> > > >
+> > > > You can pass the CA to the Operator to allow it to trust that cert. See [Self-Signed, Internal, and Private Certificates](https://silo.pgsty.com/operations/network-encryption/#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates) for more information. This step may also be necessary for globally trusted CAs where you must provide intermediate certificates to the Operator to help build the full chain of trust.
 > > >
-> > > The MinIO Operator may output TLS connectivity errors if it cannot trust the Certificate Authority (CA) which minted the custom certificates.
-> > >
-> > > You can pass the CA to the Operator to allow it to trust that cert. See [Self-Signed, Internal, and Private Certificates](https://silo.pgsty.com/operations/network-encryption/#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates) for more information. This step may also be necessary for globally trusted CAs where you must provide intermediate certificates to the Operator to help build the full chain of trust.
-> > > {{% /alert %}}
 > >
 > > **requestAutoCert**
 > >
@@ -360,9 +358,8 @@ The upstream MinIO Operator repository was archived on March 20, 2026. This is a
 > Configures [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) for the Tenant S3 API and Console.
 >
 > Set the keys to conform to the Ingress controller and configuration of your choice.
-{{% /tab %}}
-{{% tab header="YAML" %}}
-
+{{< /tab >}}
+{{< tab label="YAML" value="yaml" >}}
 ```text
 # Root key for MinIO Tenant Chart
 tenant:
@@ -876,6 +873,5 @@ ingress:
 #        export MINIO_ROOT_PASSWORD='minio123'
 
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

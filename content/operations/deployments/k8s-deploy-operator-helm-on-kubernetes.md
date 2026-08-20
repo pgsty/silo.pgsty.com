@@ -2,8 +2,8 @@
 title: "Deploy Operator With Helm"
 url: "/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-deploy-operator-helm-on-kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="deploy-operator-with-helm"></a>
@@ -13,9 +13,8 @@ silo_modified: true
 
 Helm is a tool for automating the deployment of applications to Kubernetes clusters. A [Helm chart](https://helm.sh/docs/topics/charts/) is a set of YAML files, templates, and other files that define the deployment details. The following procedure uses a Helm Chart to install the [MinIO Kubernetes Operator](/operations/deployments/kubernetes/#minio-operator-installation) to a Kubernetes cluster.
 
-{{% alert color="warning" %}}
-The upstream MinIO Operator repository was archived on March 20, 2026. This procedure is pinned to its final release, `v7.1.1`, as a frozen compatibility baseline. It does not imply ongoing upstream maintenance or support; validate it against your Kubernetes platform before production use.
-{{% /alert %}}
+> [!WARNING]
+> The upstream MinIO Operator repository was archived on March 20, 2026. This procedure is pinned to its final release, `v7.1.1`, as a frozen compatibility baseline. It does not imply ongoing upstream maintenance or support; validate it against your Kubernetes platform before production use.
 
 ## Prerequisites {#prerequisites}
 
@@ -34,11 +33,10 @@ This procedure assumes familiarity with the referenced Kubernetes concepts and u
 
 The following procedure installs the Operator using the MinIO Operator Chart Repository. This method supports a simplified installation path compared to the [local chart installation](#minio-k8s-deploy-operator-helm-local). You can modify the Operator deployment after installation.
 
-{{% alert color="warning" %}}
-**Important**
-
-If you use Helm charts to install the Operator, you must use Helm to manage that installation. Do not use `kubectl krew`, Kustomize, or similar methods to update or manage the MinIO Operator installation.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> If you use Helm charts to install the Operator, you must use Helm to manage that installation. Do not use `kubectl krew`, Kustomize, or similar methods to update or manage the MinIO Operator installation.
 
 1. Add the MinIO Operator Repo to Helm
 

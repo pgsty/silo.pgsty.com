@@ -2,8 +2,8 @@
 title: "Metrics version 2"
 url: "/operations/monitoring/metrics-v2/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/metrics-v2.rst
+upstream_modified: true
 ---
 
 <a id="metrics-version-2"></a>
@@ -39,8 +39,8 @@ MinIO publishes two [Grafana Dashboards](/operations/monitoring/grafana/#minio-g
 
 The following sections describe the version 2 endpoints and metrics.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Cluster Metrics" %}}
+{{< tabs group="cluster-metrics-bucket-metrics-resource-metrics" >}}
+{{< tab label="Cluster Metrics" value="cluster-metrics" >}}
 You can scrape [cluster-level metrics](#minio-available-cluster-metrics) using the following URL endpoint:
 
 ```shell
@@ -48,39 +48,34 @@ http://HOSTNAME:PORT/minio/v2/metrics/cluster
 ```
 
 Replace `HOSTNAME:PORT` with the <abbr title="Fully Qualified Domain Name">FQDN</abbr> and port of the MinIO deployment. For deployments with a load balancer managing connections between MinIO nodes, specify the address of the load balancer.
-{{% /tab %}}
-{{% tab header="Bucket Metrics" %}}
-{{% alert color="info" %}}
-**Changed: MinIO**
+{{< /tab >}}
+{{< tab label="Bucket Metrics" value="bucket-metrics" >}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2023-07-21T21-12-44Z
+>
+> Bucket metrics have moved to use their own, separate endpoint.
 
-RELEASE.2023-07-21T21-12-44Z
+> [!NOTE]
+> **Changed: RELEASE.2023-08-31T15-31-16Z**
+>
+> You can scrape [bucket-level metrics](#minio-available-bucket-metrics) using the following URL endpoint:
 
-Bucket metrics have moved to use their own, separate endpoint.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-08-31T15-31-16Z**
-
-You can scrape [bucket-level metrics](#minio-available-bucket-metrics) using the following URL endpoint:
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2025-03-12T17-29-24Z**
-
-v2 metrics have a limit of 100 buckets for performance reasons. For metrics across a higher number of buckets, use [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics) instead.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2025-03-12T17-29-24Z**
+>
+> v2 metrics have a limit of 100 buckets for performance reasons. For metrics across a higher number of buckets, use [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics) instead.
 
 ```shell
 http://HOSTNAME:PORT/minio/v2/metrics/bucket
 ```
 
 Replace `HOSTNAME:PORT` with the <abbr title="Fully Qualified Domain Name">FQDN</abbr> and port of the MinIO deployment. For deployments with a load balancer managing connections between MinIO nodes, specify the address of the load balancer.
-{{% /tab %}}
-{{% tab header="Resource Metrics" %}}
-{{% alert color="info" %}}
-**Added: RELEASE.2023-10-07T15-07-38Z**
-
-{{% /alert %}}
+{{< /tab >}}
+{{< tab label="Resource Metrics" value="resource-metrics" >}}
+> [!NOTE]
+> **Added: RELEASE.2023-10-07T15-07-38Z**
 
 You can scrape [resource metrics](#minio-available-resource-metrics) using the following URL endpoint:
 
@@ -89,8 +84,8 @@ http://HOSTNAME:PORT/minio/v2/metrics/resource
 ```
 
 Replace `HOSTNAME:PORT` with the <abbr title="Fully Qualified Domain Name">FQDN</abbr> and port of the MinIO deployment. For deployments with a load balancer managing connections between MinIO nodes, specify the address of the load balancer.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 - [Cluster Metrics](#minio-available-cluster-metrics)
 - [Bucket Metrics](#minio-available-bucket-metrics)
@@ -368,11 +363,10 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_node_syscall_write_total` | Total write SysCalls to the kernel. /proc/\[pid\]/io syscw. |
 | `minio_usage_last_activity_nano_seconds` | Time elapsed (in nano seconds) since last scan activity. |
 
-> {{% alert color="info" %}}
-> **Changed: RELEASE.2025-03-12T17-29-24Z**
->
-> v2 metrics have a limit of 100 buckets for performance reasons. For metrics across a higher number of buckets, use [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics) instead.
-> {{% /alert %}}
+> > [!NOTE]
+> > **Changed: RELEASE.2025-03-12T17-29-24Z**
+> >
+> > v2 metrics have a limit of 100 buckets for performance reasons. For metrics across a higher number of buckets, use [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics) instead.
 
 <a id="minio-available-bucket-metrics"></a>
 

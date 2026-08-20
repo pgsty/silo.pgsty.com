@@ -2,8 +2,8 @@
 title: "mc tag remove"
 url: "/zh/reference/minio-mc/mc-tag-remove/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-tag-remove.rst
+upstream_modified: false
 ---
 
 <a id="mc-tag-remove"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc tag remove`](#command-mc.tag.remove) 命令用于移除存储桶或对象上的所有标签。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会移除 `myminio` MinIO 部署中 `mydata` 存储桶的标签：
 
 ```shell
 mc tag remove myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -41,8 +40,8 @@ mc [GLOBALFLAGS] tag remove                \
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 
 [`mc tag remove --version-id`](#mc.tag.remove.-version-id) 与多个参数互斥。有关更多信息，请参阅参考文档。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 
@@ -64,10 +63,8 @@ mc tag remove myminio/mybucket/object.txt
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-04T18-10-16Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-04T18-10-16Z**
 
 递归移除指定 [`ALIAS`](#mc.tag.remove.ALIAS) 下所有对象的全部标签。
 

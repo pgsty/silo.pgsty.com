@@ -6,8 +6,6 @@ url: "/zh/compatibility/binary/"
 weight: 20
 type: docs
 icon: fa-solid fa-box
-minio_origin: false
-silo_modified: false
 ---
 
 Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub Releases](https://github.com/pgsty/silo/releases)，附 SHA-256 校验和与构建溯源 attestation。本页记录相对 `minio` 软件包安装的变化：文件布局、服务账号与注意事项。迁移的总体范围见[迁移指南](/zh/compatibility/migration/)。

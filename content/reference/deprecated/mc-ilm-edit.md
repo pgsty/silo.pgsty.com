@@ -2,8 +2,8 @@
 title: "mc ilm edit"
 url: "/reference/deprecated/mc-ilm-edit/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-edit.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-edit"></a>
@@ -11,18 +11,17 @@ silo_modified: false
 
 <a id="command-mc.ilm.edit"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm edit` replaced by [`mc ilm rule edit`](/reference/minio-mc/mc-ilm-rule-edit/#command-mc.ilm.rule.edit).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm edit` replaced by [`mc ilm rule edit`](/reference/minio-mc/mc-ilm-rule-edit/#command-mc.ilm.rule.edit).
 
 ## Syntax {#syntax}
 
 The [`mc ilm edit`](#command-mc.ilm.edit) command modifies an existing object lifecycle management rule on a MinIO bucket.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command modifies existing lifecycle management rules for the `mydata` bucket on the `myminio` deployment:
 
 ```shell
@@ -38,8 +37,8 @@ The command modifies the specified rules as follows:
 - Delete objects more than 90 days old.
 - Delete `DeleteMarker` tombstones if that object has no other versions remaining.
 - Transition objects more than 30 days old to the `COLDTIER` remote tier.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -61,8 +60,8 @@ mc [GLOBALFLAGS] ilm edit \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

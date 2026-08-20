@@ -2,8 +2,8 @@
 title: "mc idp ldap accesskey ls"
 url: "/zh/reference/minio-mc/mc-idp-ldap-accesskey-ls/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-accesskey-ls"></a>
@@ -25,8 +25,8 @@ silo_modified: false
 
 MinIO 支持使用 [AssumeRoleWithLDAPIdentity](/zh/developers/security-token-service/AssumeRoleWithLDAPIdentity/#minio-sts-assumerolewithldapidentity) 通过 [Security Token Service](/zh/developers/security-token-service/#minio-security-token-service) 生成临时访问密钥。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 > 以下示例返回 `minio` [alias](/zh/reference/minio-mc/mc-alias-set/#alias) 上与已认证用户关联的访问密钥列表：
 
 ```shell
@@ -34,8 +34,8 @@ mc idp ldap accesskey ls minio/
 ```
 
 如果已认证用户具有 `admin:ListUsers` 权限，则该示例命令会返回所有用户及其关联访问密钥的列表。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -57,8 +57,8 @@ mc [GLOBALFLAGS] idp ldap accesskey ls           \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -82,11 +82,10 @@ mc idp ldap accesskey ls minio
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-07-31T15-58-33Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-07-31T15-58-33Z
 
 列出所有 LDAP 用户的全部访问密钥。
 
@@ -96,11 +95,10 @@ RELEASE.2024-07-31T15-58-33Z
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-07-31T15-58-33Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-07-31T15-58-33Z
 
 列出当前已认证用户的访问密钥。
 
@@ -142,11 +140,10 @@ RELEASE.2024-07-31T15-58-33Z
 mc idp ldap accesskey ls minio
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-如果用户没有 `admin:ListUsers` 权限，该命令仅返回已认证用户的访问密钥列表。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 如果用户没有 `admin:ListUsers` 权限，该命令仅返回已认证用户的访问密钥列表。
 
 #### 列出用户 Distinguished Name {#distinguished-name}
 
@@ -188,11 +185,10 @@ mc idp ldap accesskey list minio/ uid=bobfisher,dc=min,dc=io uid=cody3,dc=min,dc
 mc idp ldap accesskey list minio/
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-如果已认证用户具有 `admin:ListUsers` 权限，则该命令会返回部署上所有用户及其访问密钥列表。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 如果已认证用户具有 `admin:ListUsers` 权限，则该命令会返回部署上所有用户及其访问密钥列表。
 
 ### 全局参数 {#id10}
 

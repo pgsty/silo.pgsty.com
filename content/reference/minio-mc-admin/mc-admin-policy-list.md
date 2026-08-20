@@ -2,8 +2,8 @@
 title: "mc admin policy ls"
 url: "/reference/minio-mc-admin/mc-admin-policy-list/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-ls"></a>
@@ -18,16 +18,15 @@ Lists all policies on the target MinIO deployment.
 
 The [`mc admin policy list`](#command-mc.admin.policy.list) command has equivalent functionality to [`mc admin policy ls`](#command-mc.admin.policy.ls).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command displays a list of the policies currently current on the [alias](/glossary/#term-alias) `play`.
 
 ```shell
 mc admin policy ls play
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -39,8 +38,8 @@ mc admin policy ls TARGET
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

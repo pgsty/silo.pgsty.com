@@ -2,19 +2,18 @@
 title: "mc support profile"
 url: "/zh/reference/minio-mc/mc-support-profile/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-profile.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-profile"></a>
 
 <a id="command-mc.support.profile"></a>
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 描述 {#id2}
 
@@ -22,11 +21,10 @@ silo_modified: false
 
 生成的报告供 MinIO Engineering 使用。 你可以将报告上传到 [MinIO SUBNET](https://min.io/pricing?jmp=docs)。 若由你自己或第三方独立使用这些剖析结果进行诊断和修复，风险自担。
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 示例 {#id3}
 
@@ -104,11 +102,10 @@ mc [GLOBALFLAGS] support profile       \
 
 如果未指定，命令将收集 CPU、memory、block、mutex、threads 和 goroutines 的数据。
 
-{{% alert color="warning" %}}
-**重要**
-
-除非 MinIO Support 明确要求，否则不要使用 `cpuio` 或 `trace` 数据类型。 这些剖析会消耗大量资源，在缺乏指导时使用可能导致集群性能下降。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 除非 MinIO Support 明确要求，否则不要使用 `cpuio` 或 `trace` 数据类型。 这些剖析会消耗大量资源，在缺乏指导时使用可能导致集群性能下降。
 
 ##### `--airgap` {#mc.support.profile.-airgap}
 

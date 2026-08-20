@@ -2,8 +2,8 @@
 title: "Silo External Access Management Plugin"
 url: "/administration/identity-access-management/pluggable-authorization/"
 weight: 60
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/pluggable-authorization.rst
+upstream_modified: true
 ---
 
 <a id="minio-external-access-management-plugin"></a>
@@ -19,8 +19,8 @@ Once enabled, MinIO sends the request and credential details for every API call 
 
 You can configure the MinIO External Access Management Plugin using the following environment variables or configuration settings.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 Specify the following [environmental variables](/reference/minio-server/settings/iam/minio-access-plugin/#minio-server-envvar-external-access-management-plugin) to each MinIO server in the deployment:
 
 ```shell
@@ -31,9 +31,8 @@ MINIO_POLICY_PLUGIN_AUTH_TOKEN="Bearer TOKEN"
 MINIO_POLICY_PLUGIN_ENABLE_HTTP2="OFF"
 MINIO_POLICY_PLUGIN_COMMENT="External Access Management using PROVIDER"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 Set the following configuration settings using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command:
 
 ```shell
@@ -45,9 +44,8 @@ mc admin config set policy_plugin \
    enable_http2="off" \
    comment="External Access Management using PROVIDER"
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Authentication and Authorization Flow {#authentication-and-authorization-flow}
 

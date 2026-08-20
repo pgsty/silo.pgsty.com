@@ -4,17 +4,16 @@ description: "使用 MinIO Python SDK 从 Python 应用连接 SILO。"
 url: "/zh/developers/python/minio-py/"
 weight: 20
 icon: fa-brands fa-python
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/python/minio-py.rst
+upstream_modified: true
 ---
 
 ## MinIO Python SDK {#python-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此 Python 应用可以直接使用上游 [MinIO Python SDK](https://github.com/minio/minio-py)。
 
-{{% alert color="info" %}}
-支持的 Python 版本与 SDK API 会独立于 SILO 演进。固定依赖前，请核对[当前软件包元数据](https://pypi.org/project/minio/)与 [SDK 发布记录](https://github.com/minio/minio-py/releases)。
-{{% /alert %}}
+> [!NOTE]
+> 支持的 Python 版本与 SDK API 会独立于 SILO 演进。固定依赖前，请核对[当前软件包元数据](https://pypi.org/project/minio/)与 [SDK 发布记录](https://github.com/minio/minio-py/releases)。
 
 ## 安装软件包 {#install}
 

@@ -2,8 +2,8 @@
 title: "为 Silo 服务端配置 NGINX 代理"
 url: "/zh/integrations/setup-nginx-proxy-with-minio/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/integrations/setup-nginx-proxy-with-minio.rst
+upstream_modified: true
 ---
 
 <a id="minio-server-nginx"></a>
@@ -19,8 +19,8 @@ silo_modified: true
 
 将请求代理到 MinIO 服务端 API 和 MinIO Console 有两种模式：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="专用 DNS" %}}
+{{< tabs group="dns-tab2" >}}
+{{< tab label="专用 DNS" value="dns" >}}
 为 MinIO 服务创建或配置一个专用 DNS 名称。
 
 对于 MinIO Server S3 API，将请求代理到该域名的根路径。 对于 MinIO Console Web GUI，将请求代理到 `/minio` 子路径。
@@ -111,8 +111,8 @@ S3 API 签名计算算法 *不* 支持将 MinIO Server API 托管在 `example.ne
 你还必须为 MinIO 部署设置以下环境变量：
 
 - 将 [`MINIO_BROWSER_REDIRECT_URL`](/zh/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) 设置为 MinIO Console 代理主机的 FQDN（`https://example.net/minio/ui`）
-{{% /tab %}}
-{{% tab header="子域名" %}}
+{{< /tab >}}
+{{< tab label="子域名" value="tab2" >}}
 为 MinIO Server S3 API 和 MinIO Console Web GUI 分别创建或配置独立且唯一的子域名。
 
 例如，给定根域 `example.net`：
@@ -213,5 +213,5 @@ S3 API 签名计算算法 *不* 支持将 MinIO Server API 托管在子路径上
 你还必须为 MinIO 部署设置以下环境变量：
 
 - 将 [`MINIO_BROWSER_REDIRECT_URL`](/zh/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) 设置为 MinIO Console 代理主机的 FQDN（`https://console.example.net/`）
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

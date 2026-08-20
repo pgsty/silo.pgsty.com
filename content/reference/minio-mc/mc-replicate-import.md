@@ -2,8 +2,8 @@
 title: "mc replicate import"
 url: "/reference/minio-mc/mc-replicate-import/"
 weight: 90
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-import.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-import"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc replicate import`](#command-mc.replicate.import) command imports JSON-formatted [replication rules](/administration/bucket-replication/#minio-bucket-replication-serverside) for a MinIO bucket from `STDIN`.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command imports the replication configuration for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc replicate import myminio/mydata < mydata-replication.json
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] import ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

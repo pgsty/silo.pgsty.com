@@ -3,8 +3,8 @@ title: "对象的服务器端加密"
 url: "/zh/administration/server-side-encryption/"
 weight: 150
 icon: fa-solid fa-key
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/server-side-encryption.rst
+upstream_modified: true
 ---
 
 <a id="minio-encryption-overview"></a>
@@ -17,8 +17,8 @@ MinIO SSE 使用 [MinIO Key Encryption Service (KES)](https://github.com/minio/k
 
 MinIO SSE 在功能和 API 上与 [AWS Server-Side Encryption](https://docs.aws.amazon.com/AmazonS3/latest/userguide/server-side-encryption.html) 兼容，并支持以下加密策略：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="SSE-KMS 推荐" %}}
+{{< tabs group="sse-kms-sse-s3-sse-c" >}}
+{{< tab label="SSE-KMS 推荐" value="sse-kms" >}}
 MinIO 支持使用存储在外部 <abbr title="密钥管理系统">KMS</abbr> 上的特定外部密钥（EK），为写入某个存储桶的所有对象启用自动 SSE-KMS 加密。 客户端可以在写入操作中指定显式密钥，以覆盖存储桶默认的 <abbr title="外部密钥">EK</abbr>。
 
 对于未启用自动 SSE-KMS 加密的存储桶，客户端也可以在写入操作时指定一个 <abbr title="外部密钥">EK</abbr>。
@@ -36,8 +36,8 @@ MinIO 会在启用服务器端加密时对后端数据进行加密。 SSE-KMS �
 - [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
 - [HashiCorp Vault Keystore](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
-{{% /tab %}}
-{{% tab header="SSE-S3" %}}
+{{< /tab >}}
+{{< tab label="SSE-S3" value="sse-s3" >}}
 MinIO 支持使用存储在外部 <abbr title="密钥管理系统">KMS</abbr> 上的一个 <abbr title="外部密钥">EK</abbr>，为写入某个存储桶的所有对象 启用自动 SSE-S3 加密。MinIO SSE-S3 在整个部署范围内仅支持 *一个* <abbr title="外部密钥">EK</abbr>。
 
 对于未启用自动 SSE-S3 加密的存储桶，客户端也可以在写入操作中请求 SSE 加密。
@@ -53,13 +53,13 @@ MinIO 会在启用服务器端加密时对后端数据进行加密。 SSE-KMS �
 - [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
 - [HashiCorp Vault Keystore](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
-{{% /tab %}}
-{{% tab header="SSE-C" %}}
+{{< /tab >}}
+{{< tab label="SSE-C" value="sse-c" >}}
 客户端在对象写入操作中指定一个 <abbr title="外部密钥">EK</abbr>。 MinIO 使用指定的 <abbr title="外部密钥">EK</abbr> 执行 SSE-S3。
 
 SSE-C 不支持存储桶默认加密设置，并要求客户端执行所有密钥管理操作。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 MinIO SSE 需要启用 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
 

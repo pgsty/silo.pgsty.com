@@ -2,8 +2,8 @@
 title: "mc ilm ls"
 url: "/zh/reference/deprecated/mc-ilm-ls/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-ls"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.ls"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm ls` 已由 [`mc ilm rule ls`](/zh/reference/minio-mc/mc-ilm-rule-ls/#command-mc.ilm.rule.ls) 替代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm ls` 已由 [`mc ilm rule ls`](/zh/reference/minio-mc/mc-ilm-rule-ls/#command-mc.ilm.rule.ls) 替代。
 
 ## 语法 {#id2}
 
@@ -55,16 +54,15 @@ silo_modified: false
 └────────┴─────────┴────────┴─────────────────────┴────────────────┴───────────────┘
 ```
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令列出 `myminio` MinIO 部署中 `mydata` 存储桶的所有生命周期管理规则：
 
 ```shell
 mc ilm ls myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 [`mc ilm ls`](#command-mc.ilm.ls) 命令的语法如下：
 
 ```shell
@@ -77,8 +75,8 @@ mc [GLOBALFLAGS] ilm ls                        \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

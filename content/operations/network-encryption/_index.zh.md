@@ -3,8 +3,8 @@ title: "网络加密（TLS）"
 url: "/zh/operations/network-encryption/"
 weight: 70
 icon: fa-solid fa-shield-halved
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/network-encryption.rst
+upstream_modified: true
 ---
 
 <a id="tls"></a>
@@ -12,11 +12,10 @@ silo_modified: true
 <a id="minio-tls-third-party-ca"></a>
 <a id="minio-tls"></a>
 
-{{% alert color="info" %}}
-**SSL 已弃用**
-
-TLS 是 Secure Socket Layer（SSL）加密的后继方案。 自 2018 年 6 月 30 日起，SSL 已被完全 [弃用](https://tools.ietf.org/html/rfc7568)。
-{{% /alert %}}
+> [!NOTE]
+> **SSL 已弃用**
+>
+> TLS 是 Secure Socket Layer（SSL）加密的后继方案。 自 2018 年 6 月 30 日起，SSL 已被完全 [弃用](https://tools.ietf.org/html/rfc7568)。
 
 ## 概览 {#id2}
 
@@ -44,11 +43,10 @@ MinIO Kubernetes Operator 为 MinIO 租户提供三种 TLS 配置方式：
 >
 > 默认情况下，Kubernetes 会在每个 pod 的 `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` 放置一份证书 bundle。 该 CA bundle 应包含用于签发 MinIO 租户 TLS 证书的集群 CA 或根 CA。 部署在同一 Kubernetes 集群中的其他应用，可以信任这份集群证书，并通过 [MinIO service DNS 名称](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) 连接到 MinIO 租户（例如 `https://minio.minio-tenant-1.svc.cluster-domain.example:443`）。
 >
-> {{% alert color="info" %}}
-> **Subject Alternative Name 证书**
->
-> 如果你使用的是自定义 Subject Alternative Name (SAN) 证书，并且它 *不是* 通配符证书，那么 TLS 证书的 SAN **必须** 覆盖其父节点主机名。 在没有通配符的情况下，SAN 必须精确匹配，才能成功连接到该租户。
-> {{% /alert %}}
+> > [!NOTE]
+> > **Subject Alternative Name 证书**
+> >
+> > 如果你使用的是自定义 Subject Alternative Name (SAN) 证书，并且它 *不是* 通配符证书，那么 TLS 证书的 SAN **必须** 覆盖其父节点主机名。 在没有通配符的情况下，SAN 必须精确匹配，才能成功连接到该租户。
 
 **cert-manager 证书管理**
 
@@ -104,8 +102,8 @@ Operator 会将指定的 CA 放置到每个 MinIO Server pod 上，从而确保�
 
 MinIO Server 会为每个节点搜索 TLS 私钥和证书，并使用这些凭据启用 TLS。 MinIO 会在发现并验证证书后自动启用 TLS。 搜索位置取决于你的 MinIO 配置：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="默认路径" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="默认路径" value="tab1" >}}
 默认情况下，MinIO server 会在以下目录中查找每个节点的 TLS 私钥和证书：
 
 ```shell
@@ -115,8 +113,8 @@ ${HOME}/.minio/certs
 其中 `${HOME}` 是运行 MinIO 服务端进程的用户主目录。 如果 `${HOME}/.minio/certs` 目录不存在，你可能需要手动创建它。
 
 对于由 `systemd` 管理的部署，该路径必须对应运行 MinIO 进程的 `USER`。 如果该用户没有主目录，请改用 **自定义路径** 选项。
-{{% /tab %}}
-{{% tab header="自定义路径" %}}
+{{< /tab >}}
+{{< tab label="自定义路径" value="tab2" >}}
 你可以通过 [`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S` 参数指定 MinIO server 搜索证书的路径。
 
 例如，以下命令片段指示 MinIO 进程使用 `/opt/minio/certs` 目录存放 TLS 证书。
@@ -126,8 +124,8 @@ minio server --certs-dir /opt/minio/certs ...
 ```
 
 运行 MinIO service 的用户 *必须* 对该目录拥有读写权限。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 请将默认域名（例如 `minio.example.net`）对应的 TLS 证书放入 `/certs` 目录，其中私钥命名为 `private.key`，公钥证书命名为 `public.crt`。
 
@@ -139,23 +137,20 @@ minio server --certs-dir /opt/minio/certs ...
 
 请将 CA 证书放入 `/certs/CAs` 目录。 该目录的根路径取决于你使用的是默认证书路径，还是自定义证书路径（[`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S`）。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="默认证书路径" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="默认证书路径" value="tab1" >}}
 ```shell
 mv myCA.crt ${HOME}/.minio/certs/CAs
 ```
-
-{{% /tab %}}
-{{% tab header="自定义证书路径" %}}
+{{< /tab >}}
+{{< tab label="自定义证书路径" value="tab2" >}}
 以下示例假设 MinIO Server 以 `--certs dir /opt/minio/certs` 启动：
 
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 对于自签名证书，Certificate Authority 通常就是用于签署该证书的私钥。
 
@@ -169,23 +164,20 @@ MinIO Server 会使用主机系统中的受信任根证书存储来校验每个�
 
 请将 CA 证书放入 `/certs/CAs` 目录。 该目录的根路径取决于你使用的是默认证书路径，还是自定义证书路径（[`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S`）。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="默认证书路径" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="默认证书路径" value="tab1" >}}
 ```shell
 mv myCA.crt ${HOME}/certs/CAs
 ```
-
-{{% /tab %}}
-{{% tab header="自定义证书路径" %}}
+{{< /tab >}}
+{{< tab label="自定义证书路径" value="tab2" >}}
 以下示例假设 MinIO Server 以 `--certs dir /opt/minio/certs` 启动：
 
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 请将每个 CA 的证书文件放入 `/CAs` 子目录。 确保 MinIO 部署中的所有主机在该目录下拥有一致的受信任 CA 集合。 如果 MinIO Server 无法将传入客户端的 TLS 证书签发者与任一可用 CA 匹配，则会将该连接视为无效并拒绝。
 
@@ -197,19 +189,18 @@ mv myCA.crt /opt/minio/certs/CAs/
 
 MinIO 支持以下由 [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17.1:src/crypto/tls/cipher_suites.go;l=52) 支持的 TLS 1.2 和 TLS 1.3 cipher suite。列表中使用 <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 标记推荐算法：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="TLS 1.3" %}}
-
+{{< tabs group="tls-13-tls-12" >}}
+{{< tab label="TLS 1.3" value="tls-13" >}}
 - `TLS_CHACHA20_POLY1305_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_AES_128_GCM_SHA256`
 - `TLS_AES_256_GCM_SHA384`
-{{% /tab %}}
-{{% tab header="TLS 1.2" %}}
+{{< /tab >}}
+{{< tab label="TLS 1.2" value="tls-12" >}}
 - `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305`
 - `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`
 - `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

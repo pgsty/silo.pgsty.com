@@ -3,8 +3,8 @@ title: "Monitoring and Alerts"
 url: "/operations/monitoring/"
 weight: 40
 icon: fa-solid fa-chart-line
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring.rst
+upstream_modified: false
 ---
 
 <a id="monitoring-and-alerts"></a>

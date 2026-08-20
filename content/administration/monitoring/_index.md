@@ -3,8 +3,8 @@ title: "Monitoring Bucket and Object Events"
 url: "/administration/monitoring/"
 weight: 130
 icon: fa-solid fa-bell
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring.rst
+upstream_modified: false
 ---
 
 <a id="monitoring-bucket-and-object-events"></a>

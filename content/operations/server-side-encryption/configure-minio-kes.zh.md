@@ -3,8 +3,8 @@ title: "使用 KES 进行服务端对象加密"
 url: "/zh/operations/server-side-encryption/configure-minio-kes/"
 description: "为 Silo 部署服务端对象加密"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/server-side-encryption/configure-minio-kes.rst
+upstream_modified: true
 ---
 
 <a id="kes"></a>
@@ -13,12 +13,11 @@ silo_modified: true
 <a id="minio-sse-gcp"></a>
 <a id="minio-sse-vault"></a>
 
-{{% alert color="warning" %}}
-社区版 KES 及其文档均已弃用并归档。下方 Kubernetes 页签还引用了在 MinIO Operator 6.0.0 中移除的 Operator Console；该内容仅作为历史迁移参考保留，并不是适用于当前 `v7.1.1` 的部署流程。新部署在启用不可逆的服务端加密前，应选择仍受维护的 KMS 集成，并验证迁移或替代方案。
-{{% /alert %}}
+> [!WARNING]
+> 社区版 KES 及其文档均已弃用并归档。下方 Kubernetes 页签还引用了在 MinIO Operator 6.0.0 中移除的 Operator Console；该内容仅作为历史迁移参考保留，并不是适用于当前 `v7.1.1` 的部署流程。新部署在启用不可逆的服务端加密前，应选择仍受维护的 KMS 集成，并验证迁移或替代方案。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 本流程假定你可以访问一个已经安装并启用了 MinIO Operator 的 Kubernetes 集群。 关于如何运行 KES，请参见 [KES 文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md)。
 
 在本流程中，你将完成：
@@ -28,8 +27,8 @@ silo_modified: true
 3. 进入该租户的 **Encryption** 设置，并通过 [受支持的 Key Management System](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) 配置 <abbr title="Server-Side Encryption">SSE</abbr>。
 4. 创建一个新的 <abbr title="External Key">EK</abbr> 供 <abbr title="Server-Side Encryption">SSE</abbr> 使用。
 5. 配置自动化的存储桶默认 [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms)。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 本流程说明如何部署已配置 KES 并启用 [服务端加密](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 的 MinIO。 关于如何运行 KES，请参见 [KES 文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md)。
 
 在本流程中，你将完成：
@@ -37,61 +36,59 @@ silo_modified: true
 1. 创建一个新的 <abbr title="External Key">EK</abbr> 供 <abbr title="Server-Side Encryption">SSE</abbr> 使用。
 2. 创建或修改一个通过 <abbr title="Key Encryption Service">KES</abbr> 支持 <abbr title="Server-Side Encryption">SSE</abbr> 的 MinIO 部署。 关于生产可用 MinIO 部署的指导，请参见 [部署分布式 MinIO](/zh/operations/deployments/installation/#minio-mnmd) 教程。
 3. 配置自动化的存储桶默认 [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms)
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**重要**
-
-在 MinIO 部署上启用 <abbr title="Server-Side Encryption">SSE</abbr> 后， 会自动使用默认加密密钥对该部署的后端数据进行加密。
-
-MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动。 KMS 必须维护并提供对 [`MINIO_KMS_KES_KEY_NAME`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) 的访问。 之后你不能再禁用 KES， 也不能在后续“撤销”该 <abbr title="Server-Side Encryption">SSE</abbr> 配置。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 在 MinIO 部署上启用 <abbr title="Server-Side Encryption">SSE</abbr> 后， 会自动使用默认加密密钥对该部署的后端数据进行加密。
+>
+> MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动。 KMS 必须维护并提供对 [`MINIO_KMS_KES_KEY_NAME`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) 的访问。 之后你不能再禁用 KES， 也不能在后续“撤销”该 <abbr title="Server-Side Encryption">SSE</abbr> 配置。
 
 ## 前提条件 {#id2}
 
 ### 访问 MinIO 集群 {#minio}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 你必须能够访问 Kubernetes 集群，并且 `kubectl` 上下文配置的权限至少具备管理员级别。
 
 本流程假定你的权限集足以支持在 Kubernetes 集群中部署或修改与 MinIO 相关的资源，包括但不限于 pods、statefulsets、replicasets、deployments 和 secrets。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 本流程使用 [`mc`](/zh/reference/minio-mc/#command-mc) 对 MinIO 集群执行操作。 请在一台能够访问该集群网络的机器上安装 `mc`。 关于如何下载和安装 `mc`，请参见 `mc` [安装快速开始](/zh/reference/minio-mc/#mc-install)。
 
 本流程假定已为 MinIO 集群配置 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-sse-vault-prereq-vault"></a>
 
 ### 确保 KES 可访问受支持的 KMS 目标 {#kes-kms}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 本流程假定已经存在一个可从 Kubernetes 集群访问的 [受支持 KMS 安装](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets)。
 
 - 对于与 MinIO 租户位于同一 Kubernetes 集群的部署，你可以使用 Kubernetes service 名称，让 MinIO 租户连接到目标 KMS 服务。
 - 对于位于 Kubernetes 集群外部的部署，你必须确保该集群支持 Kubernetes services、pods 与外部网络之间的通信路由。 这可能需要配置或部署额外的 Kubernetes 网络组件，和/或启用访问公网的能力。
 
 关于部署和配置的指导，请以你所选 KMS 方案的文档为准。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 本流程假定已经存在一个 KES 安装，并已连接到受支持的 <abbr title="Key Management System">KMS</abbr> 安装，且二者都可从本地主机访问。 请参照你所选 [受支持 KMS 目标](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets) 的安装说明，部署 KES 并将其连接到对应 KMS 方案。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="info" %}}
-**KES 操作要求目标处于 Unsealed 状态**
-
-某些受支持的 <abbr title="Key Management System">KMS</abbr> 目标允许你对 Vault 实例执行 seal 或 unseal。 如果已配置的 <abbr title="Key Management System">KMS</abbr> 服务处于 sealed 状态，KES 会返回错误。
-
-如果你重启或以其他方式 seal 了 Vault 实例，KES 将无法针对该 Vault 执行任何密码学操作。 你必须对 Vault 执行 unseal，才能确保其正常运行。
-
-关于是否需要执行 unseal 的更多信息，请参见你所选 <abbr title="Key Management System">KMS</abbr> 方案的文档。
-{{% /alert %}}
+> [!NOTE]
+> **KES 操作要求目标处于 Unsealed 状态**
+>
+> 某些受支持的 <abbr title="Key Management System">KMS</abbr> 目标允许你对 Vault 实例执行 seal 或 unseal。 如果已配置的 <abbr title="Key Management System">KMS</abbr> 服务处于 sealed 状态，KES 会返回错误。
+>
+> 如果你重启或以其他方式 seal 了 Vault 实例，KES 将无法针对该 Vault 执行任何密码学操作。 你必须对 Vault 执行 unseal，才能确保其正常运行。
+>
+> 关于是否需要执行 unseal 的更多信息，请参见你所选 <abbr title="Key Management System">KMS</abbr> 方案的文档。
 
 对于你所选的受支持 <abbr title="Key Management System">KMS</abbr>，请参照 [KES 文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) 中的配置说明：
 
@@ -111,9 +108,8 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 - 一个或多个已连接到该 KMS 目标的 KES 服务器
 - 一个或多个用于新建或现有 MinIO 部署的主机
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
-
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 1. 查看 Tenant CRD
 
    查看 [Tenant CRD](/zh/reference/operator-crd/#minio-operator-crd) 中的 `TenantSpec.kes` 对象、 `TenantSpec.configuration` 对象，以及 [KES Configuration 参考](https://github.com/minio/kes/wiki/Configuration)。
@@ -162,11 +158,10 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    Secret 与 Tenant 必须位于同一个命名空间。上游对象结构见固定到 [`v7.1.1` 的 Tenant 配置示例](https://github.com/minio/operator/blob/v7.1.1/examples/kustomization/base/tenant-config.yaml)。
 4. 生成新的加密密钥
 
-   {{% alert color="info" %}}
-   **创建密钥前先解封 Vault**
-
-   如果你所选的提供方有此要求， 则必须先解封底层 Vault 实例， 然后才能创建新的加密密钥。 更多信息请参考你所选 KMS 方案的文档。
-   {{% /alert %}}
+   > [!NOTE]
+   > **创建密钥前先解封 Vault**
+   >
+   > 如果你所选的提供方有此要求， 则必须先解封底层 Vault 实例， 然后才能创建新的加密密钥。 更多信息请参考你所选 KMS 方案的文档。
 
    MinIO 要求某个存储桶或对象使用的 <abbr title="External Key">EK</abbr> 在执行 <abbr title="Server-Side Encryption">SSE</abbr> 操作之前， 必须已经存在于根 KMS 中。 你可以针对 MinIO Tenant 使用 [`mc admin kms key create`](/zh/reference/minio-mc-admin/mc-admin-kms-key/#mc.admin.kms.key.create) 命令。
 
@@ -205,8 +200,8 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 
    你可以使用 MinIO Tenant Console 或 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) CLI， 通过生成的密钥启用存储桶默认 SSE-KMS：
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="MinIO Tenant Console" %}}
+   {{< tabs group="minio-tenant-console-minio-cli" >}}
+   {{< tab label="MinIO Tenant Console" value="minio-tenant-console" >}}
    连接到 [MinIO Tenant Console service](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#create-tenant-connect-tenant) 并登录。 对于 Kubernetes 集群内部客户端， 你可以指定 [service DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#a-aaaa-records)。 对于 Kubernetes 集群外部客户端， 请指定通过 Ingress、Load Balancer 或类似 Kubernetes 网络控制组件暴露的服务主机名。
 
    登录后，新建一个 Bucket，并按你的偏好命名。 选择齿轮 <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-gear" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M7.429 1.525a6.593 6.593 0 011.142 0c.036.003.108.036.137.146l.289 1.105c.147.56.55.967.997 1.189.174.086.341.183.501.29.417.278.97.423 1.53.27l1.102-.303c.11-.03.175.016.195.046.219.31.41.641.573.989.014.031.022.11-.059.19l-.815.806c-.411.406-.562.957-.53 1.456a4.588 4.588 0 010 .582c-.032.499.119 1.05.53 1.456l.815.806c.08.08.073.159.059.19a6.494 6.494 0 01-.573.99c-.02.029-.086.074-.195.045l-1.103-.303c-.559-.153-1.112-.008-1.529.27-.16.107-.327.204-.5.29-.449.222-.851.628-.998 1.189l-.289 1.105c-.029.11-.101.143-.137.146a6.613 6.613 0 01-1.142 0c-.036-.003-.108-.037-.137-.146l-.289-1.105c-.147-.56-.55-.967-.997-1.189a4.502 4.502 0 01-.501-.29c-.417-.278-.97-.423-1.53-.27l-1.102.303c-.11.03-.175-.016-.195-.046a6.492 6.492 0 01-.573-.989c-.014-.031-.022-.11.059-.19l.815-.806c.411-.406.562-.957.53-1.456a4.587 4.587 0 010-.582c.032-.499-.119-1.05-.53-1.456l-.815-.806c-.08-.08-.073-.159-.059-.19a6.44 6.44 0 01.573-.99c.02-.029.086-.075.195-.045l1.103.303c.559.153 1.112.008 1.529-.27.16-.107.327-.204.5-.29.449-.222.851-.628.998-1.189l.289-1.105c.029-.11.101-.143.137-.146zM8 0c-.236 0-.47.01-.701.03-.743.065-1.29.615-1.458 1.261l-.29 1.106c-.017.066-.078.158-.211.224a5.994 5.994 0 00-.668.386c-.123.082-.233.09-.3.071L3.27 2.776c-.644-.177-1.392.02-1.82.63a7.977 7.977 0 00-.704 1.217c-.315.675-.111 1.422.363 1.891l.815.806c.05.048.098.147.088.294a6.084 6.084 0 000 .772c.01.147-.038.246-.088.294l-.815.806c-.474.469-.678 1.216-.363 1.891.2.428.436.835.704 1.218.428.609 1.176.806 1.82.63l1.103-.303c.066-.019.176-.011.299.071.213.143.436.272.668.386.133.066.194.158.212.224l.289 1.106c.169.646.715 1.196 1.458 1.26a8.094 8.094 0 001.402 0c.743-.064 1.29-.614 1.458-1.26l.29-1.106c.017-.066.078-.158.211-.224a5.98 5.98 0 00.668-.386c.123-.082.233-.09.3-.071l1.102.302c.644.177 1.392-.02 1.82-.63.268-.382.505-.789.704-1.217.315-.675.111-1.422-.364-1.891l-.814-.806c-.05-.048-.098-.147-.088-.294a6.1 6.1 0 000-.772c-.01-.147.039-.246.088-.294l.814-.806c.475-.469.679-1.216.364-1.891a7.992 7.992 0 00-.704-1.218c-.428-.609-1.176-.806-1.82-.63l-1.103.303c-.066.019-.176.011-.299-.071a5.991 5.991 0 00-.668-.386c-.133-.066-.194-.158-.212-.224L10.16 1.29C9.99.645 9.444.095 8.701.031A8.094 8.094 0 008 0zm1.5 8a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM11 8a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 图标打开管理视图。
@@ -216,8 +211,8 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    选择 **SSE-KMS**，然后输入上一步创建的密钥名称。
 
    保存更改后，尝试向该存储桶上传一个文件。 在对象浏览器中查看该文件时， 请注意侧边栏中的元数据包含了 SSE 加密方案 以及用于加密该对象的密钥信息。 这表明该对象已成功加密。
-   {{% /tab %}}
-   {{% tab header="MinIO CLI" %}}
+   {{< /tab >}}
+   {{< tab label="MinIO CLI" value="minio-cli" >}}
    使用 [MinIO API Service](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#create-tenant-connect-tenant) 为 MinIO 部署创建新的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。 之后即可使用 [`mc encrypt set`](/zh/reference/minio-mc/mc-encrypt-set/#command-mc.encrypt.set) 为存储桶启用 SSE-KMS 加密：
 
    ```shell
@@ -230,10 +225,10 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    对于 Kubernetes 集群外部客户端， 请指定通过 Ingress、Load Balancer 或类似 Kubernetes 网络控制组件暴露的服务主机名。
 
    使用 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp) 或任何带有 `PutObject` 函数的 S3 兼容 SDK 将文件写入该存储桶。 然后你可以对该文件执行 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)， 以确认其关联的加密元数据。
-   {{% /tab %}}
-   {{< /tabpane >}}
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+   {{< /tab >}}
+   {{< /tabs >}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 1. 生成供 MinIO 使用的 KES API Key
 
    使用 [kes identity new](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/kes-identity/new.md) 命令， 为 MinIO Server 生成新的 API key：
@@ -277,15 +272,14 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    MinIO 默认在 `/etc/default/minio` 查找此文件。 如果你的部署将环境文件放在其他位置，请修改对应位置的文件。
 3. 启动 MinIO
 
-   {{% alert color="info" %}}
-   **KES 操作要求 Vault 已解封**
-
-   根据你选择的 KMS 方案， 你可能需要先将密钥实例解封，才能执行正常的加密操作，包括密钥创建或读取。 KES 需要已解封的密钥目标才能执行这些操作。
-
-   关于该实例在运行时是否需要 sealed/unsealed， 请参阅你所选 [KMS 方案文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets)。
-
-   你必须先启动 KES，再启动 MinIO。 MinIO 部署在启动过程中需要访问 KES。
-   {{% /alert %}}
+   > [!NOTE]
+   > **KES 操作要求 Vault 已解封**
+   >
+   > 根据你选择的 KMS 方案， 你可能需要先将密钥实例解封，才能执行正常的加密操作，包括密钥创建或读取。 KES 需要已解封的密钥目标才能执行这些操作。
+   >
+   > 关于该实例在运行时是否需要 sealed/unsealed， 请参阅你所选 [KMS 方案文档](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets)。
+   >
+   > 你必须先启动 KES，再启动 MinIO。 MinIO 部署在启动过程中需要访问 KES。
 
    你可以使用 [`mc admin service restart`](/zh/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) 命令重启 MinIO：
 
@@ -321,5 +315,5 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
    ```
 
    使用 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp) 或任何带有 `PutObject` 函数的 S3 兼容 SDK 将文件写入该存储桶。 然后你可以对该文件执行 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)， 以确认其关联的加密元数据。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

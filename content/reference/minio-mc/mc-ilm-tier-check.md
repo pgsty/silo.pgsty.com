@@ -2,8 +2,8 @@
 title: "mc ilm tier check"
 url: "/reference/minio-mc/mc-ilm-tier-check/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-check.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-check"></a>
@@ -19,16 +19,15 @@ The [`mc ilm tier check`](#command-mc.ilm.tier.check) command displays the confi
 
 The command has the following syntax:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example displays the configuration for an existing remote tier called `WARM-TIER` on the `myminio` deployment.
 
 ```shell
  mc ilm tier check myminio WARM-TIER
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -40,8 +39,8 @@ mc ilm tier add TARGET TIER_NAME
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

@@ -3,8 +3,8 @@ title: "Silo 客户端（mcli / mc）"
 url: "/zh/reference/minio-mc/"
 weight: 10
 icon: fa-solid fa-terminal
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -57,21 +57,18 @@ make build
 ./mc --version
 ```
 
-{{% alert color="warning" %}}
-Pigsty 分支刻意禁用了 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update)。请通过 [Silo 下载页](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
-{{% /alert %}}
+> [!WARNING]
+> Pigsty 分支刻意禁用了 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update)。请通过 [Silo 下载页](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
 
-{{% alert color="info" %}}
-当前 `pgsty/mc` 源码仍注册 `mc license` 与 `mc support` 命令树。这些命令集成的是上游 MinIO SUBNET 及其商业许可/支持服务，而不是 Silo 服务。它们的命令名、协议字段、SUBNET 措辞以及 MinIO 价格/许可证链接属于上游契约，不应更名。
-{{% /alert %}}
+> [!NOTE]
+> 当前 `pgsty/mc` 源码仍注册 `mc license` 与 `mc support` 命令树。这些命令集成的是上游 MinIO SUBNET 及其商业许可/支持服务，而不是 Silo 服务。它们的命令名、协议字段、SUBNET 措辞以及 MinIO 价格/许可证链接属于上游契约，不应更名。
 
 ### 2) 为兼容 S3 的服务创建别名 {#s3}
 
-{{% alert color="warning" %}}
-**重要**
-
-以下示例会临时禁用 bash history，以降低身份认证凭据明文泄露的风险。 这是一项基础安全措施，无法覆盖所有可能的攻击向量。 对于在命令行输入敏感信息，请遵循你所用操作系统的安全最佳实践。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 以下示例会临时禁用 bash history，以降低身份认证凭据明文泄露的风险。 这是一项基础安全措施，无法覆盖所有可能的攻击向量。 对于在命令行输入敏感信息，请遵循你所用操作系统的安全最佳实践。
 
 使用 [`mc alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 命令将 Amazon S3 兼容服务添加到 [`mc`](#command-mc) [配置](#mc-configuration) 中。
 
@@ -89,29 +86,17 @@ bash -o history
 
 以下每个标签页都包含一个特定提供商示例：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Silo 服务端" %}}
-
-```shell
+```shell {tab="Silo 服务端" group="silo-aws-s3-storage-google-cloud-storage" value="silo"}
 mc alias set silo https://silo.example.net ACCESS_KEY SECRET_KEY
 ```
 
-{{% /tab %}}
-{{% tab header="AWS S3 Storage" %}}
-
-```shell
+```shell {tab="AWS S3 Storage" value="aws-s3-storage"}
 mc alias set myS3 https://s3.{your-region-code}.amazonaws.com/endpoint ACCESS_KEY SECRET_KEY
 ```
 
-{{% /tab %}}
-{{% tab header="Google Cloud Storage" %}}
-
-```shell
+```shell {tab="Google Cloud Storage" value="google-cloud-storage"}
 mc alias set myGCS https://storage.googleapis.com/endpoint ACCESS_KEY SECRET_KEY
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
 
 ### 3) 测试连接 {#id4}
 
@@ -134,13 +119,12 @@ mc admin info silo
 
 下表列出了 [`mc`](#command-mc) 命令：
 
-{{% alert color="info" %}}
-**说明**
-
-客户端还包含用于管理 Silo 与兼容 MinIO 部署的管理扩展。更完整文档参见 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin)。
-
-下表不包含这些命令。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 客户端还包含用于管理 Silo 与兼容 MinIO 部署的管理扩展。更完整文档参见 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin)。
+>
+> 下表不包含这些命令。
 
 <table>
   <thead>
@@ -375,11 +359,10 @@ C:\Users\[username]\mc\certs\CAs\ # Certificate Authorities
 
 创建新的 [alias](/zh/reference/minio-mc/mc-alias-set/#minio-mc-alias) 时，MinIO Client 会拉取对端证书、计算公钥指纹，并询问用户是否接受该部署的证书。 如果你决定信任该证书，MinIO Client 会将其添加到上述证书颁发机构路径。
 
-{{% alert color="info" %}}
-**说明**
-
-在测试环境中，你可以通过传入 `--insecure` flag，跳过部分 MinIO Client 命令的证书检查。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 在测试环境中，你可以通过传入 `--insecure` flag，跳过部分 MinIO Client 命令的证书检查。
 
 <a id="id10"></a>
 
@@ -437,11 +420,10 @@ mc --debug ls play
 
 *option*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-04-29T09-56-05Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-04-29T09-56-05Z
 
 在 CLI 中禁用 MinIO Client 的分页功能。 使用后，输出会直接打印到原始 `STDOUT`。
 
@@ -487,11 +469,10 @@ mc --json ls play
 
 *option*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-08-13T05-33-17Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-08-13T05-33-17Z
 
 创建自定义 DNS 映射，将 HOST 解析到指定 IP 地址。
 

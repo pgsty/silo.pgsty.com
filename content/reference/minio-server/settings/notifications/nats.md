@@ -2,21 +2,20 @@
 title: "NATS Notification Settings"
 url: "/reference/minio-server/settings/notifications/nats/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/nats.rst
+upstream_modified: false
 ---
 
 <a id="nats-notification-settings"></a>
 <a id="minio-server-config-bucket-notification-nats"></a>
 <a id="minio-server-envvar-bucket-notification-nats"></a>
 
-{{% alert color="info" %}}
-**NATS Streaming Deprecated**
-
-NATS Streaming is deprecated. Migrate to [JetStream](https://docs.nats.io/nats-concepts/jetstream) instead.
-
-The related MinIO configuration options and environment variables are deprecated.
-{{% /alert %}}
+> [!NOTE]
+> **NATS Streaming Deprecated**
+>
+> NATS Streaming is deprecated. Migrate to [JetStream](https://docs.nats.io/nats-concepts/jetstream) instead.
+>
+> The related MinIO configuration options and environment variables are deprecated.
 
 This page documents settings for configuring an NATS service as a target for [Bucket Notifications](/administration/monitoring/bucket-notifications/#minio-bucket-notifications). See [Publish Events to NATS](/administration/monitoring/publish-events-to-nats/#minio-bucket-notifications-publish-nats) for a tutorial on using these settings.
 
@@ -29,11 +28,10 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Multiple NATS Targets {#multiple-nats-targets}
 
@@ -43,9 +41,8 @@ You can specify multiple NATS service endpoints by appending a unique identifier
 
 For example, the following commands set two distinct NATS service endpoints as `PRIMARY` and `SECONDARY` respectively:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
-
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 ```shell
 export MINIO_NOTIFY_NATS_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_NATS_ADDRESS_PRIMARY="nats-endpoint.example.net:4222"
@@ -55,9 +52,8 @@ export MINIO_NOTIFY_NATS_ADDRESS_SECONDARY="nats-endpoint.example.net:4222"
 ```
 
 With these settings, [`MINIO_NOTIFY_NATS_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_NATS_ENABLE) indicates the environment variable is associated to an NATS service endpoint with ID of `PRIMARY`.
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 ```shell
 mc admin config set notify_nats:primary \
    address="nats-endpoint.example.com:4222" \
@@ -69,9 +65,8 @@ mc admin config set notify_nats:secondary \
    subject="minioevents" \
    [ARGUMENT=VALUE ...]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Settings {#settings}
 
@@ -79,9 +74,8 @@ mc admin config set notify_nats:secondary \
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_ENABLE` {#envvar.MINIO_NOTIFY_NATS_ENABLE}
 
 *envvar*
@@ -89,9 +83,8 @@ mc admin config set notify_nats:secondary \
 Specify `on` to enable publishing bucket notifications to an NATS service endpoint.
 
 Defaults to `off`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats` {#mc-conf.notify_nats}
 
 *mc-conf*
@@ -106,55 +99,49 @@ mc admin config set notify_nats \
   subject="minioevents" \
   [ARGUMENT="VALUE"] ... \
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Address {#address}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_ADDRESS` {#envvar.MINIO_NOTIFY_NATS_ADDRESS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats address` {#mc-conf.notify_nats.address}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the NATS service endpoint to which MinIO publishes bucket events. For example, `nats-endpoint.example.com:4222`.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-27T05-56-19Z**
-
-MinIO checks the health of the specified URL (if it is resolvable and reachable) prior to adding the target. MinIO no longer blocks adding new notification targets if existing targets are offline.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-27T05-56-19Z**
+>
+> MinIO checks the health of the specified URL (if it is resolvable and reachable) prior to adding the target. MinIO no longer blocks adding new notification targets if existing targets are offline.
 
 ### Subject {#subject}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_SUBJECT` {#envvar.MINIO_NOTIFY_NATS_SUBJECT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats subject` {#mc-conf.notify_nats.subject}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the subscription to which MinIO associates events published to the NATS endpoint.
 
@@ -162,20 +149,18 @@ Specify the subscription to which MinIO associates events published to the NATS 
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_USERNAME` {#envvar.MINIO_NOTIFY_NATS_USERNAME}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats username` {#mc-conf.notify_nats.username}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the username for connecting to the NATS service endpoint.
 
@@ -183,74 +168,66 @@ Specify the username for connecting to the NATS service endpoint.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_PASSWORD` {#envvar.MINIO_NOTIFY_NATS_PASSWORD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats password` {#mc-conf.notify_nats.password}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the passport for connecting to the NATS service endpoint.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-06-23T20-26-00Z**
-
-MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-06-23T20-26-00Z**
+>
+> MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
 
 ### Token {#token}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_TOKEN` {#envvar.MINIO_NOTIFY_NATS_TOKEN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats token` {#mc-conf.notify_nats.token}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the token for connecting to the NATS service endpoint.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-06-23T20-26-00Z**
-
-MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-06-23T20-26-00Z**
+>
+> MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
 
 ### User Credentials File {#user-credentials-file}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_USER_CREDENTIALS` {#envvar.MINIO_NOTIFY_NATS_USER_CREDENTIALS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats user_credentials` {#mc-conf.notify_nats.user_credentials}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the [user credentials file](https://docs.nats.io/using-nats/developer/connecting/creds) to use to connect to the NATS service endpoint.
 
@@ -258,20 +235,18 @@ Specify the [user credentials file](https://docs.nats.io/using-nats/developer/co
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_TLS` {#envvar.MINIO_NOTIFY_NATS_TLS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats tls` {#mc-conf.notify_nats.tls}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to enable TLS connectivity to the NATS service endpoint.
 
@@ -279,20 +254,18 @@ Specify `on` to enable TLS connectivity to the NATS service endpoint.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY` {#envvar.MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats tls_skip_verify` {#mc-conf.notify_nats.tls_skip_verify}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Enables or disables TLS verification of the NATS service endpoint TLS certificates.
 
@@ -303,20 +276,18 @@ Enables or disables TLS verification of the NATS service endpoint TLS certificat
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_PING_INTERVAL` {#envvar.MINIO_NOTIFY_NATS_PING_INTERVAL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats ping_interval` {#mc-conf.notify_nats.ping_interval}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the duration interval for client pings to the NATS server. MinIO supports the following time units:
 
@@ -329,20 +300,18 @@ Specify the duration interval for client pings to the NATS server. MinIO support
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_JETSTREAM` {#envvar.MINIO_NOTIFY_NATS_JETSTREAM}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats jetstream` {#mc-conf.notify_nats.jetstream}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to enable JetStream support for streaming events to a NATS JetStream service endpoint.
 
@@ -352,20 +321,18 @@ Specify `on` to enable JetStream support for streaming events to a NATS JetStrea
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_STREAMING` {#envvar.MINIO_NOTIFY_NATS_STREAMING}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats streaming` {#mc-conf.notify_nats.streaming}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to enable asynchronous publishing of events to the NATS service endpoint.
 
@@ -375,20 +342,18 @@ Specify `on` to enable asynchronous publishing of events to the NATS service end
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_STREAMING_ASYNC` {#envvar.MINIO_NOTIFY_NATS_STREAMING_ASYNC}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats streaming_async` {#mc-conf.notify_nats.streaming_async}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to enable asynchronous publishing of events to the NATS service endpoint.
 
@@ -398,20 +363,18 @@ Specify `on` to enable asynchronous publishing of events to the NATS service end
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_STREAMING_MAX_PUB_ACKS_IN_FLIGHT` {#envvar.MINIO_NOTIFY_NATS_STREAMING_MAX_PUB_ACKS_IN_FLIGHT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats streaming_max_pub_acks_in_flight` {#mc-conf.notify_nats.streaming_max_pub_acks_in_flight}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the number of messages to publish without waiting for an ACK response from the NATS service endpoint.
 
@@ -421,20 +384,18 @@ Specify the number of messages to publish without waiting for an ACK response fr
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_STREAMING_CLUSTER_ID` {#envvar.MINIO_NOTIFY_NATS_STREAMING_CLUSTER_ID}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats streaming_cluster_id` {#mc-conf.notify_nats.streaming_cluster_id}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the unique ID for the NATS streaming cluster.
 
@@ -442,20 +403,18 @@ Specify the unique ID for the NATS streaming cluster.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_CERT_AUTHORITY` {#envvar.MINIO_NOTIFY_NATS_CERT_AUTHORITY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats cert_authority` {#mc-conf.notify_nats.cert_authority}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the path to the Certificate Authority chain used to sign the NATS service endpoint TLS certificates.
 
@@ -463,20 +422,18 @@ Specify the path to the Certificate Authority chain used to sign the NATS servic
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_CLIENT_CERT` {#envvar.MINIO_NOTIFY_NATS_CLIENT_CERT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats client_cert` {#mc-conf.notify_nats.client_cert}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the path to the client certificate to use for performing mTLS authentication to the NATS service endpoint.
 
@@ -484,20 +441,18 @@ Specify the path to the client certificate to use for performing mTLS authentica
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_CLIENT_KEY` {#envvar.MINIO_NOTIFY_NATS_CLIENT_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats client_key` {#mc-conf.notify_nats.client_key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the path to the client private key to use for performing mTLS authentication to the NATS service endpoint.
 
@@ -505,20 +460,18 @@ Specify the path to the client private key to use for performing mTLS authentica
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_QUEUE_DIR` {#envvar.MINIO_NOTIFY_NATS_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats queue_dir` {#mc-conf.notify_nats.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the directory path to enable MinIO’s persistent event store for undelivered messages, such as `/opt/minio/events`.
 
@@ -528,20 +481,18 @@ MinIO stores undelivered events in the specified store while the NATS server/bro
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_NATS_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats queue_limit` {#mc-conf.notify_nats.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
@@ -549,19 +500,17 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_NATS_COMMENT` {#envvar.MINIO_NOTIFY_NATS_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_nats comment` {#mc-conf.notify_nats.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comment to associate with the NATS configuration.

@@ -2,8 +2,8 @@
 title: "启用双向服务端存储桶复制"
 url: "/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/enable-server-side-two-way-bucket-replication.rst
+upstream_modified: false
 ---
 
 <a id="minio-bucket-replication-serverside-twoway"></a>
@@ -48,41 +48,37 @@ silo_modified: false
 
 ## 注意事项 {#id5}
 
-{{% details title="使用一致的复制设置" closed="true" %}}
-MinIO 支持自定义复制配置，以启用或禁用以下复制行为：
+> [!DETAILS]- 使用一致的复制设置
+> MinIO 支持自定义复制配置，以启用或禁用以下复制行为：
+>
+> - [删除操作](/zh/administration/object-management/object-delete/#minio-object-delete) 的复制
+> - 删除标记的复制
+> - 现有对象的复制
+> - 仅元数据变更的复制
+>
+> 为存储桶配置复制规则时，请确保参与主动-主动复制的两个 MinIO 部署使用 *相同* 的复制行为，以确保对象同步一致且可预测。
 
-- [删除操作](/zh/administration/object-management/object-delete/#minio-object-delete) 的复制
-- 删除标记的复制
-- 现有对象的复制
-- 仅元数据变更的复制
+> [!DETAILS]- 现有对象的复制
+> MinIO 支持自动复制存储桶中的现有对象。
+>
+> MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用现有对象复制，并包含 `existing-objects` 复制功能标志。 此过程包含启用现有对象复制所需的标志。
 
-为存储桶配置复制规则时，请确保参与主动-主动复制的两个 MinIO 部署使用 *相同* 的复制行为，以确保对象同步一致且可预测。
-{{% /details %}}
+> [!DETAILS]- 删除操作的复制
+> MinIO 支持将删除操作复制到目标存储桶。 具体而言，MinIO 可以复制版本控制中的 [Delete Markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html) 以及特定已版本化对象的删除：
+>
+> - 对于对象上的删除操作，MinIO 复制也会在目标存储桶上创建删除标记。
+> - 对于对象某个版本的删除操作，MinIO 复制也会删除目标存储桶上的这些版本。
+>
+> MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用删除操作复制。 此过程包含启用删除操作和删除标记复制所需的标志。
+>
+> MinIO *不会* 复制因应用 [lifecycle management expiration rules](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 而产生的删除操作。 请在源存储桶和目标存储桶上配置匹配的过期规则，以确保对象过期行为一致。
+>
+> 有关更完整的文档，请参见 [删除操作的复制](/zh/administration/bucket-replication/#minio-replication-behavior-delete) 和 [对象删除](/zh/administration/object-management/object-delete/#minio-object-delete)。
 
-{{% details title="现有对象的复制" closed="true" %}}
-MinIO 支持自动复制存储桶中的现有对象。
-
-MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用现有对象复制，并包含 `existing-objects` 复制功能标志。 此过程包含启用现有对象复制所需的标志。
-{{% /details %}}
-
-{{% details title="删除操作的复制" closed="true" %}}
-MinIO 支持将删除操作复制到目标存储桶。 具体而言，MinIO 可以复制版本控制中的 [Delete Markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html) 以及特定已版本化对象的删除：
-
-- 对于对象上的删除操作，MinIO 复制也会在目标存储桶上创建删除标记。
-- 对于对象某个版本的删除操作，MinIO 复制也会删除目标存储桶上的这些版本。
-
-MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用删除操作复制。 此过程包含启用删除操作和删除标记复制所需的标志。
-
-MinIO *不会* 复制因应用 [lifecycle management expiration rules](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 而产生的删除操作。 请在源存储桶和目标存储桶上配置匹配的过期规则，以确保对象过期行为一致。
-
-有关更完整的文档，请参见 [删除操作的复制](/zh/administration/bucket-replication/#minio-replication-behavior-delete) 和 [对象删除](/zh/administration/object-management/object-delete/#minio-object-delete)。
-{{% /details %}}
-
-{{% details title="多站点复制" closed="true" %}}
-MinIO 支持为每个存储桶或存储桶前缀配置多个远程目标。 这使得可以在 MinIO 部署之间配置多站点主动-主动复制。
-
-本过程介绍 *两个* MinIO 站点之间的主动-主动复制。 您可以针对复制网格中的每一“对”MinIO 部署重复此过程。有关专门教程，请参见 [启用多站点服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/#minio-bucket-replication-serverside-multi)。
-{{% /details %}}
+> [!DETAILS]- 多站点复制
+> MinIO 支持为每个存储桶或存储桶前缀配置多个远程目标。 这使得可以在 MinIO 部署之间配置多站点主动-主动复制。
+>
+> 本过程介绍 *两个* MinIO 站点之间的主动-主动复制。 您可以针对复制网格中的每一“对”MinIO 部署重复此过程。有关专门教程，请参见 [启用多站点服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/#minio-bucket-replication-serverside-multi)。
 
 ## 操作步骤 {#id6}
 
@@ -100,11 +96,10 @@ MinIO 支持为每个存储桶或存储桶前缀配置多个远程目标。 这�
 
 此过程假定您已使用具有 [所需复制权限](#minio-bucket-replication-serverside-twoway-permissions) 的用户为每个部署定义了别名。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本文档仅说明自该版本起的过程。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本文档仅说明自该版本起的过程。
 
 <a id="minio-bucket-replication-two-way-minio-cli-create-remote-targets"></a>
 <a id="id7"></a>
@@ -159,10 +154,9 @@ mc ls ALIAS/BUCKET
 
 当两个对象都存在于两个部署上时，您就已成功在 MinIO 存储桶之间设置了双向、主动-主动复制。
 
-{{% alert color="info" %}}
-**另请参阅**
-
-- 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令修改现有复制规则。
-- 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令并配合 [`--state "disable"`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) 标志禁用现有复制规则。
-- 使用 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) 命令移除现有复制规则。
-{{% /alert %}}
+> [!NOTE]
+> **另请参阅**
+>
+> - 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令修改现有复制规则。
+> - 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令并配合 [`--state "disable"`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) 标志禁用现有复制规则。
+> - 使用 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) 命令移除现有复制规则。

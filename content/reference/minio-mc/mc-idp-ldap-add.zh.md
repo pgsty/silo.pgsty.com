@@ -2,8 +2,8 @@
 title: "mc idp ldap add"
 url: "/zh/reference/minio-mc/mc-idp-ldap-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-add"></a>
@@ -17,8 +17,8 @@ silo_modified: false
 
 每个 MinIO 部署最多仅支持 *一个* (1) AD/LDAP 提供商。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例为 `myminio` 部署设置 AD/LDAP 配置项。
 
 ```shell
@@ -32,9 +32,8 @@ mc idp ldap add                                                            \
             group_search_base_dn=ou=swengg,dc=min,dc=io                    \
             group_search_filter="(&(objectclass=groupofnames)(member=%d))"
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -52,8 +51,8 @@ mc [GLOBALFLAGS] idp ldap add               \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -88,11 +87,10 @@ mc idp ldap add myminio                               \
 ldapserver.com:636
 ```
 
-{{% alert color="info" %}}
-**[`srv_record_name`](#mc.idp.ldap.add.srv_record_name) 会自动识别端口**
-
-如果你的 AD/LDAP server 使用 [`DNS SRV Records`](#mc.idp.ldap.add.srv_record_name)，则 *不要* 在 [`server_addr`](#mc.idp.ldap.add.server_addr) 的值后追加端口号。 SRV 请求在返回可用服务器列表时会自动包含端口号。
-{{% /alert %}}
+> [!NOTE]
+> **[`srv_record_name`](#mc.idp.ldap.add.srv_record_name) 会自动识别端口**
+>
+> 如果你的 AD/LDAP server 使用 [`DNS SRV Records`](#mc.idp.ldap.add.srv_record_name)，则 *不要* 在 [`server_addr`](#mc.idp.ldap.add.server_addr) 的值后追加端口号。 SRV 请求在返回可用服务器列表时会自动包含端口号。
 
 该参数对应环境变量 [`MINIO_IDENTITY_LDAP_SERVER_ADDR`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR)。
 
@@ -116,11 +114,10 @@ ldapserver.com:636
 
 指定 [Lookup-Bind](/zh/operations/external-iam/#minio-external-identity-management-ad-ldap-lookup-bind) 用户账户的密码。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-06-23T20-26-00Z**
-
-当通过 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回此值时，MinIO 会将其脱敏。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-06-23T20-26-00Z**
+>
+> 当通过 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回此值时，MinIO 会将其脱敏。
 
 该参数对应环境变量 [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD)。
 
@@ -130,10 +127,8 @@ ldapserver.com:636
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-06-06T09-36-42Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-06-06T09-36-42Z**
 
 用户 DN 属性的逗号分隔列表。
 
@@ -273,10 +268,8 @@ MinIO 会以明文形式将 AD/LDAP 用户凭证发送到 AD/LDAP server，因�
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2022-12-12T19-27-27Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2022-12-12T19-27-27Z**
 
 指定适当的值，以允许 MinIO 通过 [DNS SRV record](https://ldap.com/dns-srv-records-for-ldap) 请求选择 AD/LDAP server。
 
@@ -304,13 +297,12 @@ _ldaps._tcp.example.com
 
 有关 DNS SRV 记录的更多信息，请参见 [DNS SRV Records for LDAP](https://ldap.com/dns-srv-records-for-ldap)。
 
-{{% alert color="info" %}}
-**DNS SRV 记录配置中的 server 地址**
-
-指定的 server 名称 **不得** 包含端口号。 这与标准 AD/LDAP 配置不同，后者要求提供端口号。
-
-关于如何配置 AD/LDAP server 地址，请参见 [`server_addr`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.server_addr) 或 [`MINIO_IDENTITY_LDAP_SERVER_ADDR`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR)。
-{{% /alert %}}
+> [!NOTE]
+> **DNS SRV 记录配置中的 server 地址**
+>
+> 指定的 server 名称 **不得** 包含端口号。 这与标准 AD/LDAP 配置不同，后者要求提供端口号。
+>
+> 关于如何配置 AD/LDAP server 地址，请参见 [`server_addr`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.server_addr) 或 [`MINIO_IDENTITY_LDAP_SERVER_ADDR`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR)。
 
 该参数对应环境变量 [`MINIO_IDENTITY_LDAP_SRV_RECORD_NAME`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_SRV_RECORD_NAME)。
 

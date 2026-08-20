@@ -4,17 +4,16 @@ description: "使用 MinIO .NET SDK 从 .NET 应用连接 SILO。"
 url: "/zh/developers/dotnet/minio-dotnet/"
 weight: 30
 icon: fa-brands fa-microsoft
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/dotnet/minio-dotnet.rst
+upstream_modified: true
 ---
 
 ## MinIO .NET SDK {#dotnet-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此应用可以直接使用上游 [MinIO .NET SDK](https://github.com/minio/minio-dotnet)，无需 SILO 专用客户端分支。本指南使用稳定的 NuGet 软件包，并通过环境变量传入凭据。
 
-{{% alert color="info" %}}
-SDK 的运行时要求与 API 会独立于 SILO 演进。为应用选择版本前，请核对[当前 NuGet 软件包](https://www.nuget.org/packages/Minio/)与 [SDK 发布记录](https://github.com/minio/minio-dotnet/releases)。
-{{% /alert %}}
+> [!NOTE]
+> SDK 的运行时要求与 API 会独立于 SILO 演进。为应用选择版本前，请核对[当前 NuGet 软件包](https://www.nuget.org/packages/Minio/)与 [SDK 发布记录](https://github.com/minio/minio-dotnet/releases)。
 
 ## 安装软件包 {#install}
 

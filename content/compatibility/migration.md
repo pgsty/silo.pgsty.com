@@ -6,8 +6,6 @@ url: "/compatibility/migration/"
 weight: 10
 type: docs
 icon: fa-solid fa-arrow-right-arrow-left
-minio_origin: false
-silo_modified: false
 ---
 
 Migrating from MinIO to Silo is an in-place binary replacement, not a data migration. Nothing is exported or re-imported. In a container deployment the only required change is the image name. For RPM/DEB installations, see [Native Package Migration](/compatibility/binary/).

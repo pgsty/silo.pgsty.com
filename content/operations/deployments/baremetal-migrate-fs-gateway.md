@@ -2,8 +2,8 @@
 title: "Migrate from Gateway or Filesystem Mode"
 url: "/operations/deployments/baremetal-migrate-fs-gateway/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-migrate-fs-gateway.rst
+upstream_modified: false
 ---
 
 <a id="migrate-from-gateway-or-filesystem-mode"></a>
@@ -21,23 +21,21 @@ To upgrade to the [RELEASE.2022-10-29T06-21-33Z](https://github.com/minio/minio/
 
 This document outlines the steps required to successfully launch and migrate to a new deployment.
 
-{{% alert color="warning" %}}
-**Important**
-
-Standalone/file system mode continues to work on any release up to and including MinIO Server [RELEASE.2022-10-24T18-35-07Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-10-24T18-35-07Z). To continue using a standalone deployment, install that MinIO Server release with MinIO Client [RELEASE.2022-10-29T10-09-23Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-29T10-09-23Z) or any [earlier release](https://github.com/minio/minio/releases) with its corresponding MinIO Client. Note that the version of the MinIO Client should be newer and as close as possible to the version of the MinIO server.
-
-Filesystem mode deployments must be on at least [RELEASE.2022-06-25T15-50-16Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-06-25T15-50-16Z) to use the MinIO Client import and export commands. Filesystem mode deployments up to and including [RELEASE.2022-06-20T23-13-45Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-06-20T23-13-45Z) can be migrated by manually recreating users, policies, buckets, and other resources on the new deployment.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Standalone/file system mode continues to work on any release up to and including MinIO Server [RELEASE.2022-10-24T18-35-07Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-10-24T18-35-07Z). To continue using a standalone deployment, install that MinIO Server release with MinIO Client [RELEASE.2022-10-29T10-09-23Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-29T10-09-23Z) or any [earlier release](https://github.com/minio/minio/releases) with its corresponding MinIO Client. Note that the version of the MinIO Client should be newer and as close as possible to the version of the MinIO server.
+>
+> Filesystem mode deployments must be on at least [RELEASE.2022-06-25T15-50-16Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-06-25T15-50-16Z) to use the MinIO Client import and export commands. Filesystem mode deployments up to and including [RELEASE.2022-06-20T23-13-45Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-06-20T23-13-45Z) can be migrated by manually recreating users, policies, buckets, and other resources on the new deployment.
 
 ## Procedure {#procedure}
 
-{{% alert color="info" %}}
-**Note**
-
-You can set MinIO configuration settings in environment variables and using [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set). Depending on your current deployment setup, you may need to retrieve the values for both.
-
-You can examine any runtime settings using `env | grep MINIO_` or, for deployments using MinIO’s systemd service, check the contents of `/etc/default/minio`.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> You can set MinIO configuration settings in environment variables and using [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set). Depending on your current deployment setup, you may need to retrieve the values for both.
+>
+> You can examine any runtime settings using `env | grep MINIO_` or, for deployments using MinIO’s systemd service, check the contents of `/etc/default/minio`.
 
 1. For filesystem mode deployments:
 
@@ -88,20 +86,19 @@ You can examine any runtime settings using `env | grep MINIO_` or, for deploymen
    - The MinIO Gateway is a stateless proxy service that provides S3 API compatibility for an array of backend storage systems.
    - Filesystem mode deployments provide an S3 access layer for a single MinIO server process and single storage volume.
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="Gateway" %}}
+   {{< tabs group="gateway-filesystem-mode" >}}
+   {{< tab label="Gateway" value="gateway" >}}
    Migrate configuration settings:
 
    If your deployment uses [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) for configuration settings, copy the environment variables from the existing deployment’s `/etc/default/minio` file to the same file in the new deployment. You may omit any `MINIO_CACHE_*` and `MINIO_GATEWAY_SSE` environment variables, as these are no longer used.
 
    If you use [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) for configuration settings, duplicate the existing settings for the new deployment using the new MinIO Client.
-   {{% /tab %}}
-   {{% tab header="Filesystem mode" %}}
-   {{% alert color="info" %}}
-   **Note**
-
-   The following Filesystem mode steps presume the existing MinIO Client supports the needed export commands. If it does not, recreate users, policies, lifecycle rules, and buckets manually on the new deployment using the new MinIO Client.
-   {{% /alert %}}
+   {{< /tab >}}
+   {{< tab label="Filesystem mode" value="filesystem-mode" >}}
+   > [!NOTE]
+   > **Note**
+   >
+   > The following Filesystem mode steps presume the existing MinIO Client supports the needed export commands. If it does not, recreate users, policies, lifecycle rules, and buckets manually on the new deployment using the new MinIO Client.
 
    1. Export the existing deployment’s **configurations**.
 
@@ -196,8 +193,8 @@ You can examine any runtime settings using `env | grep MINIO_` or, for deploymen
       - Use the new MinIO Client.
       - Replace `ALIAS` with the alias for the new deployment.
       - Replace the name of the zip file with the name for the existing deployment’s file.
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 5. Migrate bucket contents with [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror).
 
    Use [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) with the [`--preserve`](/reference/minio-mc/mc-mirror/#mc.mirror.-preserve) and [`--watch`](/reference/minio-mc/mc-mirror/#mc.mirror.-watch) flags on the standalone deployment to move objects to the new <abbr title="Single-Node Single-Drive">SNSD</abbr> deployment with the existing MinIO Client

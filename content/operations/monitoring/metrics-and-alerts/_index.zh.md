@@ -3,8 +3,8 @@ title: "指标与告警"
 url: "/zh/operations/monitoring/metrics-and-alerts/"
 weight: 10
 icon: fa-solid fa-gauge-high
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/metrics-and-alerts.rst
+upstream_modified: true
 ---
 
 <a id="minio-metrics-and-alerts"></a>
@@ -16,21 +16,19 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 从 MinIO 服务端 [RELEASE.2024-07-15T19-02-30Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-15T19-02-30Z) 与 MinIO 客户端 [RELEASE.2024-07-11T18-01-28Z](https://github.com/minio/mc/releases/tag/RELEASE.2024-07-11T18-01-28Z) 开始，metrics version 3 提供了更多端点。 对于新部署，MinIO 建议使用 version 3。
 
-{{% alert color="info" %}}
-**Metrics version 2**
-
-现有部署可以继续使用 version 2 [指标](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2) 和 [Grafana 仪表板](/zh/operations/monitoring/grafana/#minio-grafana)。
-{{% /alert %}}
+> [!NOTE]
+> **Metrics version 2**
+>
+> 现有部署可以继续使用 version 2 [指标](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2) 和 [Grafana 仪表板](/zh/operations/monitoring/grafana/#minio-grafana)。
 
 ## Version 3 端点 {#version-3}
 
 对于 metrics version 3，所有指标都位于基础端点 `/minio/metrics/v3` 之下。 你可以抓取该基础端点以一次性收集全部指标，也可以追加可选路径，仅返回特定类别的指标。
 
-{{% alert color="warning" %}}
-**重要**
-
-本页中的 V3 指标说明可能存在缺漏、不准确或错误信息。 如需最准确的指标定义，请参考 [minio/minio](https://github.com/minio/minio)<a id="minio-minio"></a> 仓库并审阅源代码。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 本页中的 V3 指标说明可能存在缺漏、不准确或错误信息。 如需最准确的指标定义，请参考 [minio/minio](https://github.com/minio/minio)<a id="minio-minio"></a> 仓库并审阅源代码。
 
 例如，以下端点会返回 audit 指标：
 

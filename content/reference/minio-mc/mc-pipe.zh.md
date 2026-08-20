@@ -2,8 +2,8 @@
 title: "mc pipe"
 url: "/zh/reference/minio-mc/mc-pipe/"
 weight: 280
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-pipe.rst
+upstream_modified: false
 ---
 
 <a id="mc-pipe"></a>
@@ -14,16 +14,15 @@ silo_modified: false
 
 [`mc pipe`](#command-mc.pipe) 命令将内容从 [STDIN](https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html) 流式传输到目标对象。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令将 `STDIN` 的内容写入 S3 兼容存储。
 
 ```shell
 echo "My Meeting Notes" | mc pipe s3/engineering/meeting-notes.txt
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -43,14 +42,13 @@ mc [GLOBALFLAGS] pipe                              \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-01-11T03-14-16Z**
-
-`mc pipe` 现已支持并发上传，以提升大流式数据的吞吐量。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-01-11T03-14-16Z**
+>
+> `mc pipe` 现已支持并发上传，以提升大流式数据的吞吐量。
 
 ### 参数 {#id3}
 
@@ -78,10 +76,8 @@ mc [GLOBALFLAGS] pipe                              \
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-10-02T08-27-28Z**
 
 为上传的对象添加校验和。
 
@@ -193,11 +189,10 @@ mc [GLOBALFLAGS] pipe                              \
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--storage-class, --sc` {#mc.pipe.-storage-class}
 

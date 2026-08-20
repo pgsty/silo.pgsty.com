@@ -4,17 +4,16 @@ description: "Connect a Go application to SILO with the MinIO Go SDK."
 url: "/developers/go/minio-go/"
 weight: 10
 icon: fa-brands fa-golang
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/go/minio-go.rst
+upstream_modified: true
 ---
 
 ## MinIO Go SDK {#go-sdk}
 
 SILO implements the S3-compatible server contract, so Go applications can use the upstream [MinIO Go SDK](https://github.com/minio/minio-go) directly. The current major module path is `github.com/minio/minio-go/v7`.
 
-{{% alert color="info" %}}
-SDK releases and Go requirements evolve independently of SILO. Check the [current releases](https://github.com/minio/minio-go/releases) and [package documentation](https://pkg.go.dev/github.com/minio/minio-go/v7) before pinning a version.
-{{% /alert %}}
+> [!NOTE]
+> SDK releases and Go requirements evolve independently of SILO. Check the [current releases](https://github.com/minio/minio-go/releases) and [package documentation](https://pkg.go.dev/github.com/minio/minio-go/v7) before pinning a version.
 
 ## Install the module {#install}
 

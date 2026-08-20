@@ -3,8 +3,8 @@ title: "外部身份管理"
 url: "/zh/operations/external-iam/"
 weight: 50
 icon: fa-solid fa-id-card
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/external-iam.rst
+upstream_modified: false
 ---
 
 <a id="minio-external-identity-management"></a>
@@ -59,26 +59,24 @@ MinIO 会查询已配置的 Active Directory / LDAP 服务器，以验证应用�
 
 以下标签页给出了启用 Lookup-Bind 模式所需环境变量和配置项的参考：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 - [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN)
 - [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD)
 - [`MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN)
 - [`MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER)
 
 关于这些变量的更多信息，请参见 [Active Directory / LDAP 设置](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 参考文档。[配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) 教程中包含这些值的完整配置说明。
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 - [`identity_ldap lookup_bind_dn`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.lookup_bind_dn)
 - [`identity_ldap lookup_bind_password`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.lookup_bind_password)
 - [`identity_ldap user_dn_search_base_dn`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.user_dn_search_base_dn)
 - [`identity_ldap user_dn_search_filter`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.user_dn_search_filter)
 
 关于这些设置的更多信息，请参见 [`identity_ldap`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) 参考文档。 [配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) 教程中包含这些变量的完整配置说明。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-external-identity-management-ad-ldap-access-control"></a>
 
@@ -102,19 +100,17 @@ MinIO 支持向 Active Directory / LDAP 服务器查询认证用户所属组列�
 
 以下标签页给出了启用组查询所需环境变量和配置项的参考：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 - [`MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN)
 - [`MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER`](/zh/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER)
 
 关于这些变量的更多信息，请参见 [Active Directory / LDAP 设置](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 参考文档。[配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) 教程中包含这些值的完整配置说明。
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 - [`identity_ldap group_search_base_dn`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.group_search_base_dn)
 - [`identity_ldap group_search_filter`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.group_search_filter)
 
 关于这些设置的更多信息，请参见 [`identity_ldap`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) 参考文档。 [配置 MinIO 使用 Active Directory / LDAP 进行认证](/zh/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) 教程中包含这些变量的完整配置说明。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

@@ -2,8 +2,8 @@
 title: "mc replicate update"
 url: "/reference/minio-mc/mc-replicate-update/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-update.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-update"></a>
@@ -14,17 +14,15 @@ silo_modified: false
 
 <a id="command-mc.replicate.update"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc replicate update` replaces the `mc admin bucket remote update` command.
 
-`mc replicate update` replaces the `mc admin bucket remote update` command.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-11-07T23-47-39Z**
-
-`mc replicate update` replaces the `mc replicate edit` command.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-11-07T23-47-39Z**
+>
+> `mc replicate update` replaces the `mc replicate edit` command.
 
 ## Syntax {#syntax}
 
@@ -34,8 +32,8 @@ The [`mc replicate update`](#command-mc.replicate.update) command modifies an ex
 mc [GLOBALFLAGS] replicate update FLAGS [FLAGS] ARGUMENTS [ARGUMENTS]
 ```
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command modifies an existing replication rule for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
@@ -45,8 +43,8 @@ mc replicate update --id "c76um9h4b0t1ijr36mug"           \
 ```
 
 The new replication configuration synchronizes all versioned delete operations, delete marker creation, and existing objects to the remote MinIO deployment.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -73,8 +71,8 @@ mc [GLOBALFLAGS] replicate update              \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -323,11 +321,10 @@ mc replicate update ALIAS/PATH \
 - Replace [`PATH`](#mc.replicate.update.ALIAS) with the path to the bucket or bucket prefix on which the rule exists.
 - Replace [`ID`](#mc.replicate.update.-id) with the unique identifier for the rule to modify. Use [`mc replicate ls`](/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls) to retrieve the list of replication rules on the bucket and their corresponding identifiers.
 
-{{% alert color="info" %}}
-**Note**
-
-Modifying a replication configuration rule does not affect already replicated objects. For example, modifying the [`--tags`](#mc.replicate.update.-tags) filter does not result in the removal of replicated objects which do not meet the filter.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Modifying a replication configuration rule does not affect already replicated objects. For example, modifying the [`--tags`](#mc.replicate.update.-tags) filter does not result in the removal of replicated objects which do not meet the filter.
 
 ### Update the Credentials for an Existing Replication Rule {#update-the-credentials-for-an-existing-replication-rule}
 
@@ -358,13 +355,12 @@ mc replicate update ALIAS/PATH \
 - Replace [`ID`](#mc.replicate.update.-id) with the unique identifier for the rule to modify. Use [`mc replicate ls`](/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls) to retrieve the list of replication rules on the bucket and their corresponding identifiers.
 - Specify either `"disable"` or `"enable"` to the [`--state`](#mc.replicate.update.-state) flag to disable or enable the replication rule.
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO requires enabling [existing object replication](/administration/bucket-replication/#minio-replication-behavior-existing-objects) to synchronize objects written or removed after disabling a replication rule.
-
-For rules *without* existing object replication, MinIO synchronizes only those write or delete operations issued while the replication rule is *enabled*.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO requires enabling [existing object replication](/administration/bucket-replication/#minio-replication-behavior-existing-objects) to synchronize objects written or removed after disabling a replication rule.
+>
+> For rules *without* existing object replication, MinIO synchronizes only those write or delete operations issued while the replication rule is *enabled*.
 
 ## Behavior {#behavior}
 
@@ -372,8 +368,8 @@ For rules *without* existing object replication, MinIO synchronizes only those w
 
 MinIO strongly recommends creating users specifically for supporting bucket replication operations. See [`mc admin user`](/reference/minio-mc-admin/mc-admin-user/#command-mc.admin.user) and [`mc admin policy`](/reference/minio-mc-admin/mc-admin-policy/#command-mc.admin.policy) for more complete documentation on adding users and policies to a MinIO deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Replication Admin" %}}
+{{< tabs group="replication-admin-replication-remote-user" >}}
+{{< tab label="Replication Admin" value="replication-admin" >}}
 The following policy provides permissions for configuring and enabling replication on a deployment.
 
 ```json
@@ -418,8 +414,8 @@ The following policy provides permissions for configuring and enabling replicati
 - The `"EnableReplicationRuleConfiguration"` statement grants permission for creating replication rules on a bucket. The `"arn:aws:s3:::*` resource applies the replication permissions to *any* bucket on the source deployment. You can restrict the user policy to specific buckets as-needed.
 
 Use the [`mc admin policy create`](/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) to add this policy to each deployment acting as a replication source. Use [`mc admin user add`](/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) to create a user on the deployment and [`mc admin policy attach`](/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) to associate the policy to that new user.
-{{% /tab %}}
-{{% tab header="Replication Remote User" %}}
+{{< /tab >}}
+{{< tab label="Replication Remote User" value="replication-remote-user" >}}
 The following policy provides permissions for enabling synchronization of replicated data *into* the deployment.
 
 ```json
@@ -472,8 +468,8 @@ The following policy provides permissions for enabling synchronization of replic
 - The `"EnableReplicatingDataIntoBucket"` statement grants permission for a remote target to synchronize data into *any* bucket in the MinIO deployment. To restrict the policy to specific buckets, specify those buckets as an element in the `Resource` array similar to `"arn:aws:s3:::bucketName/*"`.
 
 Use the [`mc admin policy create`](/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) to add this policy to each deployment acting as a replication target. Use [`mc admin user add`](/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) to create a user on the deployment and [`mc admin policy attach`](/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) to associate the policy to that new user.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### S3 Compatibility {#s3-compatibility}
 

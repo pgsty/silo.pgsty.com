@@ -2,8 +2,8 @@
 title: "Expand a Distributed Silo Deployment"
 url: "/operations/deployments/baremetal-expand-minio-deployment/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-expand-minio-deployment.rst
+upstream_modified: true
 math: true
 ---
 
@@ -20,11 +20,10 @@ To provide BC-DR grade failover and recovery support for your single or multi-po
 
 The procedure on this page expands an existing [distributed](/operations/deployments/installation/#deploy-minio-distributed) MinIO deployment with an additional server pool.
 
-{{% alert color="warning" %}}
-**Important**
-
-MinIO does not support expanding Single-Node Single-Drive topologies.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> MinIO does not support expanding Single-Node Single-Drive topologies.
 
 <a id="expand-minio-distributed-prereqs"></a>
 
@@ -103,13 +102,12 @@ The following requirements summarize the [Storage](/operations/checklists/hardwa
 >
 > Non-Linux Operating Systems should use the equivalent drive mount management tool.
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 ### Minimum Drives for Erasure Code Parity {#minimum-drives-for-erasure-code-parity}
 
@@ -195,32 +193,27 @@ Complete any planned hardware expansion prior to [decommissioning older hardware
 
 Install the **same published Silo release** used by the existing pool. Download the x86-64 or ARM64 RPM, DEB, or standalone archive from [Download & Install](/download/#server), and verify its checksum before installation. The Silo release currently publishes those two Linux architectures; inherited references to unsupported `ppc64le` and `s390x` downloads have been removed.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="RPM (RHEL family)" %}}
-
+{{< tabs group="tabs-0082ddfa" >}}
+{{< tab label="RPM (RHEL family)" value="rpm-rhel-family" >}}
 ```shell
 sudo dnf install ./minio-*.rpm
 ```
-
-{{% /tab %}}
-{{% tab header="DEB (Debian/Ubuntu)" %}}
-
+{{< /tab >}}
+{{< tab label="DEB (Debian/Ubuntu)" value="deb-debianubuntu" >}}
 ```shell
 sudo dpkg -i ./minio_*_amd64.deb
 ```
 
 Use the `arm64` package name on ARM64 hosts.
-{{% /tab %}}
-{{% tab header="Standalone archive" %}}
-
+{{< /tab >}}
+{{< tab label="Standalone archive" value="standalone-archive" >}}
 ```shell
 tar -xzf minio_*_linux_*.tar.gz
 sudo install -m 0755 ./minio /usr/local/bin/minio
 minio --version
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Run `minio --version` on every new node and compare it with the existing pool. Do not join a node running a different release. For upgrades, follow the [`systemctl`-managed Silo procedure](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl).
 
@@ -241,13 +234,12 @@ For more specific guidance on configuring MinIO for TLS, including multi-domain 
 
 The `.deb` or `.rpm` packages install the following [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/usr/lib/systemd/system/minio.service`. For binary installations, create this file manually on all MinIO hosts.
 
-{{% alert color="info" %}}
-**Note**
-
-`systemd` checks the `/etc/systemd/...` path before checking the `/usr/lib/systemd/...` path and uses the first file it finds. To avoid conflicting or unexpected configuration options, check that the file only exists at the `/usr/lib/systemd/system/minio.service` path.
-
-Refer to the [man page for systemd.unit](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html) for details on the file path search order.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> `systemd` checks the `/etc/systemd/...` path before checking the `/usr/lib/systemd/...` path and uses the first file it finds. To avoid conflicting or unexpected configuration options, check that the file only exists at the `/usr/lib/systemd/system/minio.service` path.
+>
+> Refer to the [man page for systemd.unit](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html) for details on the file path search order.
 
 ```shell
 [Unit]

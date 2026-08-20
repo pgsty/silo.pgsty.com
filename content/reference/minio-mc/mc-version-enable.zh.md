@@ -2,8 +2,8 @@
 title: "mc version enable"
 url: "/zh/reference/minio-mc/mc-version-enable/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-version-enable.rst
+upstream_modified: false
 ---
 
 <a id="mc-version-enable"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc version enable`](#command-mc.version.enable) 命令用于为指定存储桶启用版本控制。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令为 `myminio` MinIO 部署中的 `mybucket` 存储桶启用版本控制：
 
 ```shell
  mc version enable myminio/mybucket
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] version enable ALIAS                \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

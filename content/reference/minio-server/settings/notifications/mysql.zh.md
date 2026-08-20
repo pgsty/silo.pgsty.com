@@ -2,8 +2,8 @@
 title: "MySQL 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/mysql/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/mysql.rst
+upstream_modified: false
 ---
 
 <a id="mysql"></a>
@@ -21,11 +21,10 @@ silo_modified: false
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 多个 MySQL 目标 {#id2}
 
@@ -35,9 +34,8 @@ silo_modified: false
 
 以下命令分别将两个不同的 MySQL 服务端点设置为 `PRIMARY` 和 `SECONDARY`：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ```shell
 export MINIO_NOTIFY_MYSQL_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_MYSQL_DSN_STRING_PRIMARY="username:password@tcp(mysql.example.com:3306)/miniodb"
@@ -51,9 +49,8 @@ export MINIO_NOTIFY_MYSQL_FORMAT_SECONDARY="namespace"
 ```
 
 在这些设置中，[`MINIO_NOTIFY_MYSQL_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_MYSQL_ENABLE) 表示该环境变量关联到 ID 为 `PRIMARY` 的 MySQL 服务端点。
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ```shell
 mc admin config set notify_mysql:primary \
    dsn_string="username:password@tcp(mysql.example.com:3306)/miniodb"
@@ -67,9 +64,8 @@ mc admin config set notify_mysql:secondary \
    format="namespace" \
    [ARGUMENT=VALUE ...]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 设置 {#id4}
 
@@ -77,9 +73,8 @@ mc admin config set notify_mysql:secondary \
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_MYSQL_ENABLE` {#envvar.MINIO_NOTIFY_MYSQL_ENABLE}
 
 *envvar*
@@ -93,9 +88,8 @@ mc admin config set notify_mysql:secondary \
 - [`MINIO_NOTIFY_MYSQL_DSN_STRING`](#envvar.MINIO_NOTIFY_MYSQL_DSN_STRING)
 - [`MINIO_NOTIFY_MYSQL_TABLE`](#envvar.MINIO_NOTIFY_MYSQL_TABLE)
 - [`MINIO_NOTIFY_MYSQL_FORMAT`](#envvar.MINIO_NOTIFY_MYSQL_FORMAT)
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_mysql` {#mc-conf.notify_mysql}
 
 *mc-conf*
@@ -117,28 +111,25 @@ mc admin config set notify_mysql \
   format="namespace" \
   [ARGUMENT="VALUE"] ... \
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 数据源名称（DSN）字符串 {#dsn}
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_MYSQL_DSN_STRING` {#envvar.MINIO_NOTIFY_MYSQL_DSN_STRING}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_mysql dsn_string` {#mc-conf.notify_mysql.dsn_string}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MySQL 服务端点的数据源名称（DSN）。MinIO 期望使用以下格式：
 
@@ -148,30 +139,27 @@ mc admin config set notify_mysql \
 
 `"username:password@tcp(mysql.example.com:3306)/miniodb"`
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-27T05-56-19Z**
-
-在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-27T05-56-19Z**
+>
+> 在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
 
 ### 表 {#id6}
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_MYSQL_TABLE` {#envvar.MINIO_NOTIFY_MYSQL_TABLE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_mysql table` {#mc-conf.notify_mysql.table}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 发布事件通知到的 MySQL 表名。
 
@@ -179,20 +167,18 @@ mc admin config set notify_mysql \
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_MYSQL_FORMAT` {#envvar.MINIO_NOTIFY_MYSQL_FORMAT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_mysql format` {#mc-conf.notify_mysql.format}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定写入 MySQL 服务端点的事件数据格式。 MinIO 支持以下取值：
 
@@ -208,20 +194,18 @@ mc admin config set notify_mysql \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS` {#envvar.MINIO_NOTIFY_MYSQL_MAX_OPEN_CONNECTIONS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_mysql max_open_connections` {#mc-conf.notify_mysql.max_open_connections}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定与 MySQL 数据库建立的最大打开连接数。
 
@@ -231,20 +215,18 @@ mc admin config set notify_mysql \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_MYSQL_QUEUE_DIR` {#envvar.MINIO_NOTIFY_MYSQL_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_mysql queue_dir` {#mc-conf.notify_mysql.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定目录路径，以启用 MinIO 对未投递消息的持久化事件存储，例如 `/opt/minio/events`。
 
@@ -254,20 +236,18 @@ mc admin config set notify_mysql \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_MYSQL_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_MYSQL_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_mysql queue_limit` {#mc-conf.notify_mysql.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定未投递消息的最大上限。默认为 `100000`。
 
@@ -275,19 +255,17 @@ mc admin config set notify_mysql \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_MYSQL_COMMENT` {#envvar.MINIO_NOTIFY_MYSQL_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_mysql comment` {#mc-conf.notify_mysql.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定与 MySQL 配置关联的注释。

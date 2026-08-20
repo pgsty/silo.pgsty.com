@@ -2,8 +2,8 @@
 title: "mc mirror"
 url: "/reference/minio-mc/mc-mirror/"
 weight: 240
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mirror.rst
+upstream_modified: false
 ---
 
 <a id="mc-mirror"></a>
@@ -14,14 +14,13 @@ silo_modified: false
 
 The [`mc mirror`](#command-mc.mirror) command synchronizes content to MinIO deployment, similar to the `rsync` utility. [`mc mirror`](#command-mc.mirror) supports filesystems, MinIO deployments, and other S3-compatible hosts as the synchronization source.
 
-{{% alert color="info" %}}
-**Note**
+> [!NOTE]
+> **Note**
+>
+> [`mc mirror`](#command-mc.mirror) only synchronizes the current object without any version information or metadata. To synchronize an object’s version history and metadata, consider using [`mc replicate`](/reference/minio-mc/mc-replicate/#command-mc.replicate) for [bucket replication](/administration/bucket-replication/#minio-bucket-replication-serverside) or [`mc admin replicate`](/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate) for [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview).
 
-[`mc mirror`](#command-mc.mirror) only synchronizes the current object without any version information or metadata. To synchronize an object’s version history and metadata, consider using [`mc replicate`](/reference/minio-mc/mc-replicate/#command-mc.replicate) for [bucket replication](/administration/bucket-replication/#minio-bucket-replication-serverside) or [`mc admin replicate`](/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate) for [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview).
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command synchronizes content from a local filesystem directory to the `mydata` bucket on the `myminio` MinIO deployment.
 
 ```shell
@@ -31,8 +30,8 @@ mc mirror --watch ~/mydata myminio/mydata
 The command “watches” for files added or removed on the local filesystem and synchronizes those operations to MinIO until explicitly terminated.
 
 [`mc mirror --watch`](#mc.mirror.-watch) updates files changed on the local filesystem to MinIO (see [`--overwrite`](#mc.mirror.-overwrite)). `--watch` does not remove other files from MinIO not present on the local filesystem (see [`--remove`](#mc.mirror.-remove)).
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -72,8 +71,8 @@ mc [GLOBALFLAGS] mirror                            \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -155,10 +154,8 @@ Add custom metadata for mirrored objects. Specify key-value pairs as `KEY=VALUE\
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-10-02T08-27-28Z**
 
 Add a checksum to an uploaded object.
 
@@ -285,11 +282,10 @@ Specify the path to a prefix to apply encryption to all matching objects at that
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
 
 ##### `--exclude` {#mc.mirror.-exclude}
 
@@ -305,11 +301,10 @@ Exclude object(s) in the [`SOURCE`](#mc.mirror.SOURCE) path that match the speci
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-03-03T00-13-08Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-03-03T00-13-08Z
 
 Exclude bucket(s) in the [`SOURCE`](#mc.mirror.SOURCE) path that match the specified bucket [name pattern](/reference/minio-mc/#minio-wildcard-matching).
 
@@ -459,13 +454,12 @@ After the action, only objects A, B, and C exist on both the Source and the Targ
 
 `mc mirror --remove` does not verify that the contents of object C are the same on both Source and Target, only that an object called *C* exists on both. To ensure objects on the Source and Target match both names *and* content, use [`--overwrite`](#mc.mirror.-overwrite) or [`--watch`](#mc.mirror.-watch).
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-04T18-10-16Z**
-
-`mc mirror --remove` returns an error if the target path is a local filesystem directory that does not exist.
-
-In prior versions, specifying `/path/to/directory` would result in the removal of the `/path/to` folder if `directory` did not exist.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-04T18-10-16Z**
+>
+> `mc mirror --remove` returns an error if the target path is a local filesystem directory that does not exist.
+>
+> In prior versions, specifying `/path/to/directory` would result in the removal of the `/path/to` folder if `directory` did not exist.
 
 ##### `--retry` {#mc.mirror.-retry}
 
@@ -491,11 +485,10 @@ See the Amazon documentation on [Storage Classes](https://docs.aws.amazon.com/Am
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-01-28T16-23-14Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-01-28T16-23-14Z
 
 Skip any objects that produce errors while mirroring.
 

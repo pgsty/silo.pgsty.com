@@ -2,19 +2,18 @@
 title: "mc support inspect"
 url: "/zh/reference/minio-mc/mc-support-inspect/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-inspect.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-inspect"></a>
 
 <a id="command-mc.support.inspect"></a>
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 描述 {#id2}
 
@@ -24,29 +23,25 @@ silo_modified: false
 
 如果诊断 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 问题需要这些信息，MinIO Engineering 会提供相应命令。 生成的报告用于 MinIO Engineering 通过 SUBNET 进行分析，且可能包含与对象相关的内部或私有数据点。 将报告发送给第三方或发布到公共论坛前请谨慎评估。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-01-11T03-14-16Z**
+> [!NOTE]
+> **变更: RELEASE.2023-01-11T03-14-16Z**
+>
+> 该文件会上传到 MinIO，供工程团队用于支持工作。 如果文件上传失败（例如在 airgapped 环境中），则会保存到当前工作目录。
 
-该文件会上传到 MinIO，供工程团队用于支持工作。 如果文件上传失败（例如在 airgapped 环境中），则会保存到当前工作目录。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-12T19-27-27Z**
+>
+> 在写入 zip 归档时，MinIO 还会对归档内文件名的 zip 索引进行加密。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-12T19-27-27Z**
+> [!NOTE]
+> **变更: RELEASE.2024-10-29T15-34-59Z**
+>
+> Inspect 现在会生成唯一文件名，以区分不同的 inspect 文件。 文件名会体现被检查的路径。
 
-在写入 zip 归档时，MinIO 还会对归档内文件名的 zip 索引进行加密。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2024-10-29T15-34-59Z**
-
-Inspect 现在会生成唯一文件名，以区分不同的 inspect 文件。 文件名会体现被检查的路径。
-{{% /alert %}}
-
-{{% alert color="warning" %}}
-**重要**
-
-[`mc support inspect`](#command-mc.support.inspect) 要求 MinIO 部署端服务版本为 2021 年 10 月或之后。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> [`mc support inspect`](#command-mc.support.inspect) 要求 MinIO 部署端服务版本为 2021 年 10 月或之后。
 
 ## 通配符 {#id3}
 
@@ -78,11 +73,10 @@ mc support inspect minio1/mybucket/myobject/xl.meta
 
 以下命令会递归下载某个前缀下找到的所有对象。
 
-{{% alert color="danger" %}}
-**注意**
-
-该操作的开销可能较高。 请谨慎执行。
-{{% /alert %}}
+> [!CAUTION]
+> **注意**
+>
+> 该操作的开销可能较高。 请谨慎执行。
 
 ```shell
 mc support inspect minio1/mybucket/myobject/**

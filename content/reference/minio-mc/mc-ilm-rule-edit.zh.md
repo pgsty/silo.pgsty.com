@@ -2,8 +2,8 @@
 title: "mc ilm rule edit"
 url: "/zh/reference/minio-mc/mc-ilm-rule-edit/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-edit.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-edit"></a>
@@ -11,18 +11,17 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.edit"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm rule edit` 替代 `mc ilm edit`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule edit` 替代 `mc ilm edit`。
 
 ## 语法 {#id2}
 
 [`mc ilm rule edit`](#command-mc.ilm.rule.edit) 命令用于修改 MinIO 存储桶上现有的对象生命周期管理规则。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令用于修改 `myminio` 部署上 `mydata` 存储桶的现有生命周期管理规则：
 
 ```shell
@@ -38,8 +37,8 @@ mc ilm rule edit --id "c79n19dn10dnab109fg1" --transition-days 30 --tier "COLDTI
 - 删除超过 90 天的对象。
 - 如果对象没有其他剩余版本，则删除 `DeleteMarker` 墓碑标记。
 - 将超过 30 天的对象迁移到 `COLDTIER` 远程层。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -66,8 +65,8 @@ mc [GLOBALFLAGS] ilm rule edit                                       \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -129,21 +128,19 @@ mc ilm rule edit --prefix "meetingnotes/" myminio/mydata --expire-days "90"
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-02-24T01-33-20Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-02-24T01-33-20Z
 
 使对象的所有当前版本和非当前版本都过期。 与 [`--expire-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-days) 选项结合使用，可指定扫描器进程在多少天后删除对象的所有版本。
 
 在 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 处理该命令后，部署中不会保留该对象的任何版本。
 
-{{% alert color="info" %}}
-**新增: MinIO**
-
-RELEASE.2024-05-01T01-11-10Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: MinIO**
+>
+> RELEASE.2024-05-01T01-11-10Z
 
 该标志 *仅* 适用于最新版本 **不** 是 delete marker 的对象。
 

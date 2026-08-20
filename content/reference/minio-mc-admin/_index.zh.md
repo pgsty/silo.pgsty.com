@@ -3,8 +3,8 @@ title: "Silo 客户端管理"
 url: "/zh/reference/minio-mc-admin/"
 weight: 20
 icon: fa-solid fa-user-gear
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -128,11 +128,10 @@ MinIO PBAC 使用与 IAM 兼容的策略 JSON 文档来定义访问 MinIO 服务
 
 开始此流程前，请确保主机已 [安装](#mc-admin-install) [`mc`](/zh/reference/minio-mc/#command-mc)。
 
-{{% alert color="warning" %}}
-**重要**
-
-以下示例会临时禁用 bash 历史记录，以降低认证凭据明文泄露的风险。 这是一项基础安全措施，无法缓解所有可能的攻击向量。请遵循你所用操作系统的 安全最佳实践，在命令行中输入敏感信息。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 以下示例会临时禁用 bash 历史记录，以降低认证凭据明文泄露的风险。 这是一项基础安全措施，无法缓解所有可能的攻击向量。请遵循你所用操作系统的 安全最佳实践，在命令行中输入敏感信息。
 
 使用 [`mc alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 命令将该部署添加到 **`mc`** 配置中。
 

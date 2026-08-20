@@ -2,8 +2,8 @@
 title: "mc head"
 url: "/reference/minio-mc/mc-head/"
 weight: 130
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-head.rst
+upstream_modified: false
 ---
 
 <a id="mc-head"></a>
@@ -17,16 +17,15 @@ The [`mc head`](#command-mc.head) command displays the first `n` lines of an obj
 
 [`mc head`](#command-mc.head) does not perform any transformation or formatting of object contents to facilitate readability. You can also use [`mc head`](#command-mc.head) against the local filesystem to produce similar results to the `head` commandline tool.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command returns the first 10 lines of an object in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc head myminio/mydata/myobject.txt
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -43,8 +42,8 @@ mc [GLOBALFLAGS] head                     \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -126,11 +125,10 @@ Specify the path to a prefix to apply encryption to all matching objects at that
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
 
 ##### `--rewind` {#mc.head.-rewind}
 
@@ -184,11 +182,10 @@ mc head ALIAS/PATH --rewind DURATION
 - Replace [`PATH`](#mc.head.ALIAS) with the path to the object on the S3-compatible host.
 - Replace [`DURATION`](#mc.head.-rewind) with the point-in-time in the past at which the command returns the object. For example, specify `30d` to return the version of the object 30 days prior to the current date.
 
-{{% alert color="info" %}}
-**Requires Versioning**
-
-[`mc head`](#command-mc.head) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
-{{% /alert %}}
+> [!NOTE]
+> **Requires Versioning**
+>
+> [`mc head`](#command-mc.head) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
 
 ### View Partial Contents of an Object with Specific Version {#view-partial-contents-of-an-object-with-specific-version}
 
@@ -202,11 +199,10 @@ mc head ALIAS/PATH --version-id VERSION
 - Replace [`PATH`](#mc.head.ALIAS) with the path to the object on the S3-compatible host.
 - Replace [`VERSION`](#mc.head.-version-id) with the version of the object. For example, specify `30d` to return the version of the object 30 days prior to the current date.
 
-{{% alert color="info" %}}
-**Requires Versioning**
-
-[`mc head`](#command-mc.head) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
-{{% /alert %}}
+> [!NOTE]
+> **Requires Versioning**
+>
+> [`mc head`](#command-mc.head) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
 
 ## Behavior {#behavior}
 

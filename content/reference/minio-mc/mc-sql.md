@@ -2,8 +2,8 @@
 title: "mc sql"
 url: "/reference/minio-mc/mc-sql/"
 weight: 360
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-sql.rst
+upstream_modified: false
 ---
 
 <a id="mc-sql"></a>
@@ -16,16 +16,15 @@ The [`mc sql`](#command-mc.sql) command provides an S3 Select interface for perf
 
 See [Selecting content from objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/selecting-content-from-objects) for more information on S3 Select behavior and limitations.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command queries all objects in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc sql --recursive --query "select * from S3Object" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] mc sql                          \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -163,11 +162,10 @@ Specify the path to a prefix to apply encryption to all matching objects at that
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
 
 ##### `--json-input` {#mc.sql.-json-input}
 

@@ -2,8 +2,8 @@
 title: "mc admin heal"
 url: "/reference/minio-mc-admin/mc-admin-heal/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-heal.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-heal"></a>
@@ -24,11 +24,10 @@ As a part of normal operations, MinIO:
 
 Refer to [Object Healing](/operations/concepts/healing/#minio-concepts-healing) for more details on how MinIO heals objects.
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 ## Syntax {#syntax}
 
@@ -87,11 +86,10 @@ Show information about offline and faulty healing drives.
 
 Some versions of MinIO used a color key as a way to differentiate objects with different healing statuses.
 
-{{% alert color="info" %}}
-**Changed: mc**
-
-RELEASE.2024-11-17T19-35-25Z
-{{% /alert %}}
+> [!NOTE]
+> **Changed: mc**
+>
+> RELEASE.2024-11-17T19-35-25Z
 
 The color meaning has been updated.
 

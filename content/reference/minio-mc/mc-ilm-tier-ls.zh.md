@@ -2,8 +2,8 @@
 title: "mc ilm tier ls"
 url: "/zh/reference/minio-mc/mc-ilm-tier-ls/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-ls"></a>
@@ -13,11 +13,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.tier.ls"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc ilm tier ls`](#command-mc.ilm.tier.ls) replaces `mc admin tier ls`.
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc ilm tier ls`](#command-mc.ilm.tier.ls) replaces `mc admin tier ls`.
 
 ## 描述 {#id2}
 
@@ -29,24 +28,22 @@ silo_modified: false
 
 该命令的语法如下：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例输出 `myminio` 部署上现有远程层级的列表。
 
 ```shell
  mc ilm tier ls myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
 mc ilm tier ls TARGET TIER_NAME
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id4}
 

@@ -20,17 +20,15 @@ SILO Console 2.1.0 is the first feature release after the independent 2.0.0. It 
 
 This is a **minor release**. No environment variable, module path, API contract, binary name, or data layout changes. Upgrading is a binary or image swap.
 
-{{% alert color="info" %}}
-**A 2.1.1 patch follows this release**
+> [!NOTE]
+> **A 2.1.1 patch follows this release**
+>
+> [v2.1.1](https://github.com/pgsty/silo-console/releases/tag/v2.1.1), published the same day, completes the legend hardening described below: a label placeholder the legend builder cannot resolve is now removed instead of leaking literal braces into the Traffic chart legends, the one remaining substitution branch is escape-proofed against label values containing `$&` or `$1`, and the License page reports the actual release version instead of 2.0.0. Nothing else changes — upgrade straight to 2.1.1, and everything in this note applies unchanged.
 
-[v2.1.1](https://github.com/pgsty/silo-console/releases/tag/v2.1.1), published the same day, completes the legend hardening described below: a label placeholder the legend builder cannot resolve is now removed instead of leaking literal braces into the Traffic chart legends, the one remaining substitution branch is escape-proofed against label values containing `$&` or `$1`, and the License page reports the actual release version instead of 2.0.0. Nothing else changes — upgrade straight to 2.1.1, and everything in this note applies unchanged.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Rebuild your embedded assets if you vendor this console**
-
-2.1.0 fixes a packaging defect present on the `main` branch after 2.0.0: the `go:embed` payload still carried the 2.0.0 frontend build, so a binary built from an intermediate commit would serve the old UI. The released 2.1.0 artifacts are built from the regenerated payload and are unaffected.
-{{% /alert %}}
+> [!NOTE]
+> **Rebuild your embedded assets if you vendor this console**
+>
+> 2.1.0 fixes a packaging defect present on the `main` branch after 2.0.0: the `go:embed` payload still carried the 2.0.0 frontend build, so a binary built from an intermediate commit would serve the old UI. The released 2.1.0 artifacts are built from the regenerated payload and are unaffected.
 
 ## A Bilingual Console {#bilingual-console}
 

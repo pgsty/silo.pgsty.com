@@ -2,8 +2,8 @@
 title: "mc legalhold clear"
 url: "/reference/minio-mc/mc-legalhold-clear/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold-clear.rst
+upstream_modified: false
 ---
 
 <a id="mc-legalhold-clear"></a>
@@ -17,16 +17,15 @@ The [`mc legalhold clear`](#command-mc.legalhold.clear) command removes the curr
 
 Removing the legal hold on object(s) does *not* remove any other [GOVERNANCE Mode](/administration/object-management/object-retention/#minio-object-locking-governance) and [COMPLIANCE Mode](/administration/object-management/object-retention/#minio-object-locking-compliance) retention settings in place for the object(s)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes the legal hold on all objects in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc legalhold clear --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] legalhold clear \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

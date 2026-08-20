@@ -3,8 +3,8 @@ title: "Install the Silo Server"
 url: "/operations/deployments/baremetal-deploy-minio-server/"
 weight: 10
 icon: fa-solid fa-hard-drive
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-deploy-minio-server.rst
+upstream_modified: true
 ---
 
 <a id="install-the-minio-server"></a>

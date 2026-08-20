@@ -3,8 +3,8 @@ title: "核心管理概念"
 url: "/zh/administration/concepts/"
 weight: 180
 icon: fa-solid fa-diagram-project
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/concepts.rst
+upstream_modified: false
 ---
 
 <a id="id1"></a>
@@ -93,13 +93,12 @@ MinIO 提供两种复制类型，用于将对象、其版本及其元数据从�
 
 除复制外，MinIO 还提供镜像服务。 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 仅将实际对象复制到任何其他兼容 S3 的数据存储中，包括其他 MinIO 存储。 但是，版本和元数据不会随 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 命令一起备份。
 
-{{% alert color="info" %}}
-**磁盘独占访问**
-
-MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
-
-除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
-{{% /alert %}}
+> [!NOTE]
+> **磁盘独占访问**
+>
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+>
+> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
 ## MinIO 提供哪些工具可根据访问速度和频率管理对象？ {#id7}
 

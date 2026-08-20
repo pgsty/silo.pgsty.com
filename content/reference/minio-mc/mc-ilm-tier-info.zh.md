@@ -2,8 +2,8 @@
 title: "mc ilm tier info"
 url: "/zh/reference/minio-mc/mc-ilm-tier-info/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-info"></a>
@@ -60,24 +60,22 @@ MinIO 要求具备以下权限，且权限范围限定为你要创建生命周�
 
 该命令的语法如下：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例输出 `myminio` 部署上名为 `WARM-TIER` 的现有远程层级的配置信息。
 
 ```shell
  mc ilm tier info myminio WARM-TIER
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
 mc ilm tier info TARGET TIER_NAME
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id5}
 

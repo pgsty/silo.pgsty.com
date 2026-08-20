@@ -2,18 +2,17 @@
 title: "批量密钥轮换"
 url: "/zh/administration/batch-framework-job-keyrotate/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-keyrotate.rst
+upstream_modified: false
 ---
 
 <a id="minio-batch-framework-keyrotate-job"></a>
 <a id="id1"></a>
 
-{{% alert color="info" %}}
-**新增: MinIO**
-
-RELEASE.2023-04-07T05-28-58Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: MinIO**
+>
+> RELEASE.2023-04-07T05-28-58Z
 
 MinIO Batch Framework 允许你使用 YAML 格式的作业定义文件（“批处理文件”）来创建、管理、监控和执行作业。 批处理作业直接在 MinIO 部署上运行，以利用服务端处理能力，而不受运行 [MinIO Client](/zh/reference/minio-mc/#minio-client) 的本地机器限制。
 
@@ -25,11 +24,10 @@ YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，
 
 ## 密钥轮换批处理作业参考 {#minio-batch-framework-keyrotate-job-ref}
 
-{{% alert color="info" %}}
-**新增: MinIO**
-
-RELEASE.2023-04-07T05-28-58Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: MinIO**
+>
+> RELEASE.2023-04-07T05-28-58Z
 
 使用 `keyrotate` 作业类型创建批处理作业，以轮换加密对象的 [sse-s3 or sse-kms keys](/zh/operations/server-side-encryption/#minio-sse-data-encryption)。
 

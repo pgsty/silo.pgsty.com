@@ -2,8 +2,8 @@
 title: "部署 Silo Tenant"
 url: "/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="minio-tenant"></a>
@@ -24,11 +24,10 @@ silo_modified: true
 
 你也可以从 v7.1.1 的其他 [示例](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/) 中选择起点，或者依据 [MinIO Custom Resource Documentation](/zh/reference/operator-crd/#minio-operator-crd) 自行构建资源。上游没有更晚的受支持版本；离开此固定快照前，应独立审查任何分支、替代实现或 CRD 变化。
 
-{{% alert color="warning" %}}
-**重要**
-
-如果你使用 Kustomize 部署 MinIO Tenant，就必须使用 Kustomize 来管理或升级该部署。 不要使用 `kubectl krew`、Helm Chart 或类似方式来管理或升级该 MinIO Tenant。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 如果你使用 Kustomize 部署 MinIO Tenant，就必须使用 Kustomize 来管理或升级该部署。 不要使用 `kubectl krew`、Helm Chart 或类似方式来管理或升级该 MinIO Tenant。
 
 本步骤并未穷尽 [Tenant CRD](/zh/reference/operator-crd/#minio-operator-crd) 中的所有可配置项。 它只提供一个基线，你可以在此基础上按需修改和定制 Tenant。
 

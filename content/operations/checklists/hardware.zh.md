@@ -2,8 +2,8 @@
 title: "硬件检查清单"
 url: "/zh/operations/checklists/hardware/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/checklists/hardware.rst
+upstream_modified: true
 math: true
 ---
 
@@ -33,14 +33,13 @@ math: true
 
 如果节点的硬件或软件配置不一致，部署可能表现出不可预测的性能。 对于适合将陈旧数据放在低成本硬件上的工作负载，应改为部署专用的“温”或“冷”MinIO 部署，并将数据 [转移](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) 到该层级。
 
-{{% alert color="info" %}}
-**MinIO 不提供托管服务或硬件销售**
+> [!NOTE]
+> **MinIO 不提供托管服务或硬件销售**
+>
+> 如需查看硬件合作伙伴提供的服务器与存储组件精选清单，请参见我们的 [Reference Hardware](https://min.io/product/reference-hardware#hardware?ref-docs) 页面。
 
-如需查看硬件合作伙伴提供的服务器与存储组件精选清单，请参见我们的 [Reference Hardware](https://min.io/product/reference-hardware#hardware?ref-docs) 页面。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 <table>
   <thead>
     <tr>
@@ -83,8 +82,8 @@ math: true
     </tr>
   </tbody>
 </table>
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 <table>
   <thead>
     <tr>
@@ -127,33 +126,32 @@ math: true
     </tr>
   </tbody>
 </table>
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**重要**
-
-以下领域对 MinIO 性能影响最大，重要性从高到低依次如下：
-
-<table>
-  <tbody>
-    <tr>
-      <td><p>网络基础设施</p></td>
-      <td><p>吞吐量不足或受限会约束性能</p></td>
-    </tr>
-    <tr>
-      <td><p>存储控制器</p></td>
-      <td><p>固件过旧、吞吐量有限或硬件故障会约束性能并影响可靠性</p></td>
-    </tr>
-    <tr>
-      <td><p>存储（驱动器）</p></td>
-      <td><p>固件过旧，或硬件过慢、老化、故障，会约束性能并影响可靠性</p></td>
-    </tr>
-  </tbody>
-</table>
-
-在关注计算类约束等其他硬件资源之前，请优先确保这些领域的关键组件到位。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 以下领域对 MinIO 性能影响最大，重要性从高到低依次如下：
+>
+> <table>
+>   <tbody>
+>     <tr>
+>       <td><p>网络基础设施</p></td>
+>       <td><p>吞吐量不足或受限会约束性能</p></td>
+>     </tr>
+>     <tr>
+>       <td><p>存储控制器</p></td>
+>       <td><p>固件过旧、吞吐量有限或硬件故障会约束性能并影响可靠性</p></td>
+>     </tr>
+>     <tr>
+>       <td><p>存储（驱动器）</p></td>
+>       <td><p>固件过旧，或硬件过慢、老化、故障，会约束性能并影响可靠性</p></td>
+>     </tr>
+>   </tbody>
+> </table>
+>
+> 在关注计算类约束等其他硬件资源之前，请优先确保这些领域的关键组件到位。
 
 上述最低建议体现了 MinIO 在协助企业客户部署到多种 IT 基础设施、同时保持目标 SLA/SLO 方面的实践经验。 虽然 MinIO 可能在低于最低建议的拓扑上运行，但任何潜在的成本节省都要以可靠性、性能或整体功能下降为代价。
 
@@ -228,28 +226,26 @@ MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、�
 | 不超过 1 Pebibyte (Pi) | 64GiB |
 | 超过 1 Pebibyte (Pi) | 128GiB |
 
-{{% alert color="warning" %}}
-**重要**
-
-从 [RELEASE.2024-01-28T22-35-53Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-01-28T22-35-53Z) 开始，MinIO 在分布式部署中会为每个节点预分配 2GiB 内存，在单节点部署中会预分配 1GiB 内存。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 从 [RELEASE.2024-01-28T22-35-53Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-01-28T22-35-53Z) 开始，MinIO 在分布式部署中会为每个节点预分配 2GiB 内存，在单节点部署中会预分配 1GiB 内存。
 
 <a id="id7"></a>
 
 ### 存储 {#minio-hardware-checklist-storage}
 
-{{% alert color="info" %}}
-**磁盘独占访问**
-
-MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
-
-除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
-{{% /alert %}}
+> [!NOTE]
+> **磁盘独占访问**
+>
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+>
+> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
 #### 推荐的存储介质 {#id8}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 MinIO 建议为每个 MinIO Tenant 配置满足其性能目标的 storage class。
 
 在可能的情况下，请将 PV 底层的 Storage Class、CSI 或其他 provisioner 配置为将卷格式化为 XFS，以获得最佳性能。
@@ -257,48 +253,47 @@ MinIO 建议为每个 MinIO Tenant 配置满足其性能目标的 storage class�
 请确保 Tenant 中所有已配置 PV 的底层存储类型（NVMe、SSD、HDD）保持一致。
 
 请确保每个 Tenant [服务器池](/zh/operations/concepts/#minio-intro-server-pool) 内所有节点呈现给各 PV 的容量一致。 MinIO 会将每个 PV 的最大可用容量限制为该 pool 中最小的 PV。 例如，如果某个 pool 具有 15 个 10TB PV 和 1 个 1TB PV，MinIO 会将每个 PV 的可用容量限制为 1TB。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 MinIO 建议在所有工作负载类型和规模下都使用闪存介质（NVMe 或 SSD）。 对性能要求较高的工作负载应优先选择 NVMe 而不是 SSD。
 
 MinIO 不建议在生产环境中使用 HDD 存储。 HDD 存储通常无法提供现代工作负载所需的性能，而其规模化成本优势也会被介质本身的性能约束所抵消。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### 优先使用直连“本地”存储（DAS） {#das}
 
 <abbr title="Direct-Attached Storage">DAS</abbr>，例如本地直连的 <abbr title="Just a Bunch of Disks">JBOD</abbr> 阵列，相比网络存储（NAS、SAN、NFS）在性能和一致性方面具有显著优势。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 虽然 MinIO Tenant 可以使用远程 Persistent Volume (PV) 资源，但通过网络执行 I/O 的成本通常会限制整体性能。
 
 MinIO 强烈建议使用能够将存储配置到 Kubernetes 调度 MinIO pods 所在 worker 节点上的 CSI，例如 [MinIO DirectPV](https://github.com/minio/directpv)。
 
 在其他场景中，也应尽可能选择能让 MinIO 像访问本地挂载文件系统一样访问存储的 CSI。 在 MinIO 与操作系统级存储访问 API 之间增加软件层或转换层的 CSI，必然会增加系统复杂度，并可能带来意料之外或不期望的行为。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 请将 JBOD 阵列配置为无 RAID、无 pooling 或其他类似的软件层，使存储可以直接呈现给 MinIO。
 
 对于虚拟机或需要以虚拟卷形式提供存储的系统，MinIO 只建议使用 thick LUN。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% details title="网络文件系统卷会破坏一致性保证" closed="true" %}}
-MinIO 严格的 **read-after-write** 和 **list-after-write** 一致性模型要求使用本地驱动器文件系统。 如果底层存储卷是 NFS 或类似的网络挂载存储卷，MinIO 无法提供一致性保证。
-{{% /details %}}
+> [!DETAILS]- 网络文件系统卷会破坏一致性保证
+> MinIO 严格的 **read-after-write** 和 **list-after-write** 一致性模型要求使用本地驱动器文件系统。 如果底层存储卷是 NFS 或类似的网络挂载存储卷，MinIO 无法提供一致性保证。
 
 #### 使用 XFS 格式化驱动器并保持一致挂载 {#xfs}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 MinIO 建议将 MinIO Persistent Volumes 底层驱动器格式化为 `xfs`。
 
 如果使用 CSI，请查阅对应 CSI 的文档，并确保其支持指定 `xfs` 文件系统。 MinIO 强烈建议避免使用会将驱动器格式化为 `ext4`、`btrfs` 或其他文件系统的 CSI。
 
 MinIO 预期所有已配置的 Persistent Volumes (PV) 都专供自身使用，且底层存储介质能够在指定挂载路径上保证对已存储数据的访问。 对底层存储介质的修改，包括但不限于外部或第三方应用干预，或对本地直连存储进行任意重新挂载，都可能导致异常行为或数据丢失。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 请将驱动器格式化为 XFS，并以无 RAID 或其他 pooling 配置的 <abbr title="Just a Bunch of Disks">JBOD</abbr> 阵列形式提供给 MinIO。 使用其他类型的后端存储（SAN/NAS、ext4、RAID、LVM）通常会降低性能、可靠性、可预测性和一致性。
 
 格式化 XFS 驱动器时，请为每块驱动器设置唯一标签。 例如，以下命令会将四块驱动器格式化为 XFS，并为其设置对应标签。
@@ -328,17 +323,16 @@ LABEL=MINIODRIVE4      /mnt/drive-4     xfs     defaults,noatime  0       2
 
 MinIO **强烈建议** 使用基于标签的挂载规则，而不是基于 UUID 的规则。 基于标签的规则允许你用格式和标签相同的替换盘，替换不健康或损坏的驱动器。 基于 UUID 的规则则要求编辑 `/etc/fstab` 文件，用新驱动器的 UUID 替换原有映射。
 
-{{% alert color="info" %}}
-**说明**
-
-依赖挂载外部存储的云环境实例，如果一个或多个远程文件挂载返回错误或失败，可能在启动时直接失败。 例如，挂载持久化 EBS 卷的 AWS ECS 实例，如果一个或多个 EBS 卷挂载失败，可能无法按照标准 `/etc/fstab` 配置正常启动。
-
-你可以设置 `nofail` 选项，在启动时静默这些错误并允许实例在存在一个或多个挂载问题时继续启动。
-
-但对于使用本地直连磁盘的系统，不应使用该选项，因为静默驱动器错误会阻止 MinIO 和操作系统以正常方式响应这些错误。
-{{% /alert %}}
-{{% /tab %}}
-{{< /tabpane >}}
+> [!NOTE]
+> **说明**
+>
+> 依赖挂载外部存储的云环境实例，如果一个或多个远程文件挂载返回错误或失败，可能在启动时直接失败。 例如，挂载持久化 EBS 卷的 AWS ECS 实例，如果一个或多个 EBS 卷挂载失败，可能无法按照标准 `/etc/fstab` 配置正常启动。
+>
+> 你可以设置 `nofail` 选项，在启动时静默这些错误并允许实例在存在一个或多个挂载问题时继续启动。
+>
+> 但对于使用本地直连磁盘的系统，不应使用该选项，因为静默驱动器错误会阻止 MinIO 和操作系统以正常方式响应这些错误。
+{{< /tab >}}
+{{< /tabs >}}
 
 #### 禁用 XFS 的出错重试 {#id9}
 
@@ -350,11 +344,11 @@ MinIO **强烈建议** 通过 `max_retries` 配置禁用 [retry-on-error](https:
 
 默认的 `max_retries` 设置通常会让文件系统在出错后无限重试，而不是将错误向上传递。 MinIO 可以正确处理 XFS 错误，因此 retry-on-error 行为最多只会引入不必要的延迟或性能下降。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 关于如何配置文件系统级设置，请以所选 CSI 或 StorageClass 的文档为准。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 以下脚本会遍历指定挂载路径下的所有驱动器，并将推荐错误类别对应的 XFS `max_retries` 设置为 `0`，即“出错立即失败”。 该脚本会忽略所有未挂载的驱动器，无论它们是手动未挂载，还是未通过 `/etc/fstab` 挂载。 请将 `/mnt/drive` 这一行修改为符合你 MinIO 驱动器路径模式的值。
 
 ```bash
@@ -376,9 +370,8 @@ exit 0
 ```shell
 @reboot /opt/minio/xfs-retry-settings.sh
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### 统一驱动器类型与容量 {#id10}
 
@@ -540,11 +533,10 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
 
 ## 适用于 MinIO 订阅的推荐工具 {#minio}
 
-{{% alert color="warning" %}}
-**重要**
-
-本节提到的工具 **需要** MinIO 订阅。MinIO 强烈建议所有生产部署结合其 SUBNET 许可证使用 [AIStor Object Store](https://www.min.io/product/aistor/object-data-store)。更多信息请参见 [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 本节提到的工具 **需要** MinIO 订阅。MinIO 强烈建议所有生产部署结合其 SUBNET 许可证使用 [AIStor Object Store](https://www.min.io/product/aistor/object-data-store)。更多信息请参见 [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs)。
 
 1. 健康诊断工具
 

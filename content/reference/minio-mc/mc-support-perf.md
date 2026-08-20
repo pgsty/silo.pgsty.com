@@ -2,25 +2,23 @@
 title: "mc support perf"
 url: "/reference/minio-mc/mc-support-perf/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-perf.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-perf"></a>
 
 <a id="command-mc.support.perf"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-07-24T02-25-13Z**
+> [!NOTE]
+> **Changed: RELEASE.2022-07-24T02-25-13Z**
+>
+> `mc support perf` replaces the `mc admin speedtest` command.
 
-`mc support perf` replaces the `mc admin speedtest` command.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Description {#description}
 
@@ -50,11 +48,10 @@ The resulting tests can provide general guidance of deployment performance under
 
    Measure the speed of site replication operations.
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Examples {#examples}
 

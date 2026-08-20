@@ -2,31 +2,29 @@
 title: "mc admin console"
 url: "/zh/reference/deprecated/mc-admin-console/"
 weight: 130
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-console.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-console"></a>
 
 <a id="command-mc.admin.console"></a>
 
-{{% alert color="warning" %}}
-**重要**
-
-此命令已在 [mc RELEASE.2022-12-02T23-48-47Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-12-02T23-48-47Z) 中被 [`mc admin logs`](/zh/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) 替代。
-
-该命令此前已在 [mc RELEASE.2022-06-26T18-51-48Z](https://github.com/minio/mc/tree/RELEASE.2022-06-26T18-51-48Z) 中被 `mc support logs show` 替代。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 此命令已在 [mc RELEASE.2022-12-02T23-48-47Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-12-02T23-48-47Z) 中被 [`mc admin logs`](/zh/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) 替代。
+>
+> 该命令此前已在 [mc RELEASE.2022-06-26T18-51-48Z](https://github.com/minio/mc/tree/RELEASE.2022-06-26T18-51-48Z) 中被 `mc support logs show` 替代。
 
 ## 描述 {#id2}
 
 [`mc admin console`](#command-mc.admin.console) 命令返回部署中每个 MinIO 服务器的服务端日志条目。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ## 语法 {#id3}
 

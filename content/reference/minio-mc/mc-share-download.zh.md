@@ -2,8 +2,8 @@
 title: "mc share download"
 url: "/zh/reference/minio-mc/mc-share-download/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-share-download.rst
+upstream_modified: false
 ---
 
 <a id="mc-share-download"></a>
@@ -19,16 +19,15 @@ silo_modified: false
 
 有关可共享对象 URL 的更多信息，请参阅 Amazon S3 关于 [Pre-Signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会为 `myminio` MinIO 部署中的 `mydata` 存储桶生成一个新的预签名下载 URL：
 
 ```shell
 mc share download --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -44,8 +43,8 @@ mc [GLOBALFLAGS] share download           \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -115,8 +114,8 @@ mc share download --recursive play/mybucket/myprefix/
 
 ### 生成用于下载对象的 URL {#url}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="获取特定对象" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="获取特定对象" value="tab1" >}}
 使用 [`mc share download`](#command-mc.share.download) 为对象生成支持 `GET` 请求的 URL：
 
 ```shell
@@ -126,8 +125,8 @@ mc share download --expire DURATION ALIAS/PATH
 - 将 [`ALIAS`](#mc.share.download.ALIAS) 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 [`PATH`](#mc.share.download.ALIAS) 替换为 MinIO 部署上对象的路径。
 - 将 [`DURATION`](#mc.share.download.-expire) 替换为 URL 的过期时长。 例如，要设置为 30 天过期，请指定 `30d`。
-{{% /tab %}}
-{{% tab header="获取存储桶中的对象" %}}
+{{< /tab >}}
+{{< tab label="获取存储桶中的对象" value="tab2" >}}
 使用 [`mc share download`](#command-mc.share.download) 并结合 [`--recursive`](#mc.share.download.-recursive) 选项，可为存储桶中的每个对象生成一个 URL。 每个 URL 都支持对其关联对象执行 `GET` 请求：
 
 ```shell
@@ -137,8 +136,8 @@ mc share download --recursive --expire DURATION ALIAS/PATH
 - 将 [`ALIAS`](#mc.share.download.ALIAS) 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 [`PATH`](#mc.share.download.ALIAS) 替换为 MinIO 部署上的存储桶路径或存储桶前缀路径。
 - 将 [`DURATION`](#mc.share.download.-expire) 替换为 URL 的过期时长。 例如，要设置为 30 天过期，请指定 `30d`。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id6}
 

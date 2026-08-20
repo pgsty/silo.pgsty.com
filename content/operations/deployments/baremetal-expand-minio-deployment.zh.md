@@ -2,8 +2,8 @@
 title: "扩展分布式 Silo 部署"
 url: "/zh/operations/deployments/baremetal-expand-minio-deployment/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-expand-minio-deployment.rst
+upstream_modified: true
 math: true
 ---
 
@@ -20,11 +20,10 @@ Silo 支持通过添加新的[服务器池](/zh/operations/concepts/#minio-intro
 
 本页步骤用于为现有 [分布式](/zh/operations/deployments/installation/#deploy-minio-distributed) MinIO 部署增加一个额外的 服务器池。
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO 不支持扩展 单机单盘 拓扑。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO 不支持扩展 单机单盘 拓扑。
 
 <a id="id2"></a>
 
@@ -103,13 +102,12 @@ MinIO 在创建 服务器池 时，*要求* 使用扩展表示法 `{x...y}` 来�
 >
 > 非 Linux 操作系统应使用等效的磁盘挂载管理工具。
 
-{{% alert color="info" %}}
-**磁盘独占访问**
-
-MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
-
-除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
-{{% /alert %}}
+> [!NOTE]
+> **磁盘独占访问**
+>
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+>
+> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
 ### 满足纠删码校验的最小驱动器数量 {#id6}
 
@@ -195,32 +193,27 @@ MinIO 建议预先规划足以存放 **至少** 2 年数据的存储容量，并
 
 安装与现有 pool **完全相同的公开 Silo 版本**。从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 的 RPM、DEB 或独立归档，并在安装前校验摘要。当前 Silo 发布只提供这两种 Linux 架构，因此已删除继承文档中指向未发布 `ppc64le` 与 `s390x` 制品的说明。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="RPM（RHEL 系）" %}}
-
+{{< tabs group="rpmrhel-debdebianubuntu-tab3" >}}
+{{< tab label="RPM（RHEL 系）" value="rpmrhel" >}}
 ```shell
 sudo dnf install ./minio-*.rpm
 ```
-
-{{% /tab %}}
-{{% tab header="DEB（Debian/Ubuntu）" %}}
-
+{{< /tab >}}
+{{< tab label="DEB（Debian/Ubuntu）" value="debdebianubuntu" >}}
 ```shell
 sudo dpkg -i ./minio_*_amd64.deb
 ```
 
 ARM64 主机请使用名称中带 `arm64` 的软件包。
-{{% /tab %}}
-{{% tab header="独立归档" %}}
-
+{{< /tab >}}
+{{< tab label="独立归档" value="tab3" >}}
 ```shell
 tar -xzf minio_*_linux_*.tar.gz
 sudo install -m 0755 ./minio /usr/local/bin/minio
 minio --version
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 在每个新节点运行 `minio --version` 并与现有 pool 比对；不要把版本不同的节点加入集群。需要升级时，请遵循[`systemctl` 管理的 Silo 升级流程](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl)。
 
@@ -241,13 +234,12 @@ minio --version
 
 `.deb` 或 `.rpm` 软件包会将以下 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件 安装到 `/usr/lib/systemd/system/minio.service`。 对于二进制安装方式，请在所有 MinIO 主机上手动创建该文件。
 
-{{% alert color="info" %}}
-**说明**
-
-`systemd` 会先检查 `/etc/systemd/...` 路径，再检查 `/usr/lib/systemd/...` 路径， 并使用它找到的第一个文件。 为避免配置冲突或意外选项，请确认该文件仅存在于 `/usr/lib/systemd/system/minio.service` 路径下。
-
-关于文件路径搜索顺序的详细信息，请参阅 [systemd.unit 的 man page](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html)。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> `systemd` 会先检查 `/etc/systemd/...` 路径，再检查 `/usr/lib/systemd/...` 路径， 并使用它找到的第一个文件。 为避免配置冲突或意外选项，请确认该文件仅存在于 `/usr/lib/systemd/system/minio.service` 路径下。
+>
+> 关于文件路径搜索顺序的详细信息，请参阅 [systemd.unit 的 man page](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html)。
 
 ```shell
 [Unit]

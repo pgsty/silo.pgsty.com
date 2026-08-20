@@ -2,8 +2,8 @@
 title: "mc ilm rule add"
 url: "/reference/minio-mc/mc-ilm-rule-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-add"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.add"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm rule rm` replaces `mc ilm add`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule rm` replaces `mc ilm add`.
 
 ## Syntax {#syntax}
 
@@ -23,8 +22,8 @@ The [`mc ilm rule add`](#command-mc.ilm.rule.add) command adds an object lifecyc
 
 The command supports adding both [Transition (Tiering)](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) and [Expiration](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) lifecycle management rules.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command adds new lifecycle management rules to the `mydata` bucket on the `myminio` deployment:
 
 ```shell
@@ -44,8 +43,8 @@ The configured rules have the following effect:
 - Delete `DeleteMarker` tombstones if that object has no other versions remaining.
 - Transition objects more than 30 days old to the `COLDTIER` remote tier.
 - Transition objects 7 days after they become non-current to the `COLDTIER` remote tier.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -71,8 +70,8 @@ mc [GLOBALFLAGS] ilm rule add                               \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -124,21 +123,19 @@ This option is mutually exclusive with the following option:
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-02-24T01-33-20Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-02-24T01-33-20Z
 
 Expire all current **and** noncurrent versions of an object. Use with the [`--expire-days`](#mc.ilm.rule.add.-expire-days) option to specify the number of days after which all versions of an object should be deleted by the scanner process.
 
 After the [scanner](/operations/concepts/scanner/#minio-concepts-scanner) processes this command, no versions of the object remain on the deployment.
 
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-RELEASE.2024-05-01T01-11-10Z
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2024-05-01T01-11-10Z
 
 This flag *only* applies to objects that do **not** have a delete marker as the latest version.
 
@@ -288,11 +285,10 @@ MinIO uses a [scanner process](/operations/concepts/scanner/#minio-concepts-scan
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 Select objects larger than the specified value. Enter the value as a number and a unit, such as `5GiB` for 5 gibibytes.
 
@@ -315,11 +311,10 @@ Valid units include:
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 Select objects smaller than the specified value. Enter the value as a number and a unit, such as `1M` for 1 megabyte.
 
@@ -413,11 +408,10 @@ mc ilm rule add ALIAS/PATH --expire-delete-marker
 - Replace [`ALIAS`](#mc.ilm.rule.add.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the S3-compatible host.
 - Replace [`PATH`](#mc.ilm.rule.add.ALIAS) with the path to the bucket on the S3-compatible host.
 
-{{% alert color="info" %}}
-**Note**
-
-To delete all versions of an object with a delete marker as its latest version, *including the delete marker*, consider using [batch expiration](/reference/minio-mc/mc-batch-generate/#minio-mc-batch-generate-expire-job).
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> To delete all versions of an object with a delete marker as its latest version, *including the delete marker*, consider using [batch expiration](/reference/minio-mc/mc-batch-generate/#minio-mc-batch-generate-expire-job).
 
 ## Required Permissions {#required-permissions}
 

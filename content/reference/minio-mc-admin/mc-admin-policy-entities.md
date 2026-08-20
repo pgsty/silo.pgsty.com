@@ -2,8 +2,8 @@
 title: "mc admin policy entities"
 url: "/reference/minio-mc-admin/mc-admin-policy-entities/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-entities.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-entities"></a>
@@ -14,26 +14,24 @@ silo_modified: false
 
 List the entities associated with a policy, user, or group on a target MinIO deployment.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-27T05-56-19Z**
-
-This command only returns [minio-managed users and groups](/administration/identity-access-management/minio-user-management/#minio-users).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-27T05-56-19Z**
+>
+> This command only returns [minio-managed users and groups](/administration/identity-access-management/minio-user-management/#minio-users).
 
 To list entities associated with an Active Directory or LDAP (AD/LDAP) configuration, use [`mc idp ldap policy entities`](/reference/minio-mc/mc-idp-ldap-policy-entities/#command-mc.idp.ldap.policy.entities).
 
 For example, you can list all of the users and groups attached to a policy or list all of the policies attached to a specific user or group.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command returns a list of the policies associated with the user `bob` on the deployment at alias `myminio`.
 
 ```shell
 mc admin policy entities myminio/ --user bob
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -49,18 +47,17 @@ mc admin policy entities         \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**Important**
-
-This command is intended for managing policy associations for [MinIO-managed](/administration/identity-access-management/minio-user-management/#minio-users) users only.
-
-For managing policies to OpenID-managed users, see [OpenID Connect Access Management](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid).
-
-For viewing policies for Active Directory/LDAP users or groups, use [`mc idp ldap policy entities`](/reference/minio-mc/mc-idp-ldap-policy-entities/#command-mc.idp.ldap.policy.entities).
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This command is intended for managing policy associations for [MinIO-managed](/administration/identity-access-management/minio-user-management/#minio-users) users only.
+>
+> For managing policies to OpenID-managed users, see [OpenID Connect Access Management](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid).
+>
+> For viewing policies for Active Directory/LDAP users or groups, use [`mc idp ldap policy entities`](/reference/minio-mc/mc-idp-ldap-policy-entities/#command-mc.idp.ldap.policy.entities).
 
 ### Parameters {#parameters}
 

@@ -2,8 +2,8 @@
 title: "mc admin cluster bucket export"
 url: "/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-export/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-bucket-export.rst
+upstream_modified: false
 ---
 
 <a id="command-mc.admin.cluster.bucket.export"></a>
@@ -12,10 +12,8 @@ silo_modified: false
 
 ## 描述 {#id1}
 
-{{% alert color="info" %}}
-**新增: RELEASE.2022-06-17T02-52-50Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2022-06-17T02-52-50Z**
 
 [`mc admin cluster bucket export`](#command-mc.admin.cluster.bucket.export) 命令会导出存储桶元数据，以供 [`mc admin cluster bucket import`](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-import/#command-mc.admin.cluster.bucket.import) 命令使用。
 
@@ -23,16 +21,15 @@ silo_modified: false
 
 如果你仅将部署指定为目标，此命令会备份目标部署上所有存储桶的元数据。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会导出 `myminio` 部署的所有存储桶元数据。
 
 ```shell
 mc admin cluster bucket export myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令使用以下语法：
 
 ```shell
@@ -45,8 +42,8 @@ mc [GLOBALFLAGS] admin cluster bucket export  \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 

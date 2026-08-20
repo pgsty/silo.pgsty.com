@@ -2,8 +2,8 @@
 title: "mc ilm edit"
 url: "/zh/reference/deprecated/mc-ilm-edit/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-edit.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-edit"></a>
@@ -11,18 +11,17 @@ silo_modified: false
 
 <a id="command-mc.ilm.edit"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm edit` 已被 [`mc ilm rule edit`](/zh/reference/minio-mc/mc-ilm-rule-edit/#command-mc.ilm.rule.edit) 取代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm edit` 已被 [`mc ilm rule edit`](/zh/reference/minio-mc/mc-ilm-rule-edit/#command-mc.ilm.rule.edit) 取代。
 
 ## 语法 {#id2}
 
 [`mc ilm edit`](#command-mc.ilm.edit) 命令用于修改 MinIO 存储桶上现有的对象生命周期管理规则。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令用于修改 `myminio` 部署上 `mydata` 存储桶的现有生命周期管理规则：
 
 ```shell
@@ -38,8 +37,8 @@ mc ilm edit --id "c79n19dn10dnab109fg1" --transition-days 30 --tier "COLDTIER"
 - 删除对象创建时间超过 90 天的对象。
 - 如果对象没有其他剩余版本，则删除 `DeleteMarker` 墓碑标记。
 - 将对象创建时间超过 30 天的对象转移到 `COLDTIER` 远程层。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -61,8 +60,8 @@ mc [GLOBALFLAGS] ilm edit \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

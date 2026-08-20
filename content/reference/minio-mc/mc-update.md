@@ -2,8 +2,8 @@
 title: "mc update"
 url: "/reference/minio-mc/mc-update/"
 weight: 420
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-update.rst
+upstream_modified: true
 ---
 
 <a id="mc-update"></a>
@@ -16,16 +16,15 @@ The Pigsty-maintained client keeps [`mc update`](#command-mc.update) for command
 
 Upgrade through [Download & Install](/download/#client), the [Pigsty package repository](https://pigsty.io/docs/repo/infra/list/#object-storage), or [GitHub Releases](https://github.com/pgsty/mc/releases).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command reports that self-update is disabled and exits with status `1`:
 
 ```shell
 mc update
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] update [--json] [RELEASE-URL]
 - `RELEASE-URL` is accepted only for compatibility and is not contacted.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The non-JSON error text is:
 

@@ -20,11 +20,10 @@ SILO Console 2.0.0 is the first major release of this object-storage administrat
 
 Before publication this release went through two independent review passes: a full code review with commit-history restructuring, followed by an adversarial re-verification (exhaustive asset validation, HTTP semantics probing, full routing regression, and smoke tests against the published artifacts themselves).
 
-{{% alert color="warning" %}}
-**Read the compatibility boundary before upgrading**
-
-The major-version change in 2.0.0 is about **public identity and delivery contracts**, not the object data format or the S3 protocol. Installation scripts that reference the old repository, binary name, or container image must be updated; existing integrations that use `CONSOLE_MINIO_SERVER`, `CONSOLE_MINIO_REGION`, `github.com/minio/console`, or the MinIO-compatible Admin API must **not** be search-and-replaced.
-{{% /alert %}}
+> [!WARNING]
+> **Read the compatibility boundary before upgrading**
+>
+> The major-version change in 2.0.0 is about **public identity and delivery contracts**, not the object data format or the S3 protocol. Installation scripts that reference the old repository, binary name, or container image must be updated; existing integrations that use `CONSOLE_MINIO_SERVER`, `CONSOLE_MINIO_REGION`, `github.com/minio/console`, or the MinIO-compatible Admin API must **not** be search-and-replaced.
 
 ## Why 2.0.0 {#why-2-0-0}
 

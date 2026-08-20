@@ -2,8 +2,8 @@
 title: "mc ilm tier check"
 url: "/zh/reference/minio-mc/mc-ilm-tier-check/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-check.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-check"></a>
@@ -19,16 +19,15 @@ silo_modified: false
 
 该命令具有以下语法：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例显示 `myminio` 部署上名为 `WARM-TIER` 的现有远程层配置。
 
 ```shell
  mc ilm tier check myminio WARM-TIER
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令具有以下语法：
 
 ```shell
@@ -40,8 +39,8 @@ mc ilm tier add TARGET TIER_NAME
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id4}
 

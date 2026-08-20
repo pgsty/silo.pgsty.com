@@ -2,8 +2,8 @@
 title: "mc idp ldap accesskey create-with-login"
 url: "/reference/minio-mc/mc-idp-ldap-accesskey-create-with-login/"
 weight: 160
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey-create-with-login.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-accesskey-create-with-login"></a>
@@ -11,26 +11,24 @@ silo_modified: false
 
 <a id="command-mc.idp.ldap.accesskey.create-with-login"></a>
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-04-18T16-45-29Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-04-18T16-45-29Z
 
 ## Description {#description}
 
 The [`mc idp ldap accesskey create-with-login`](#command-mc.idp.ldap.accesskey.create-with-login) uses interactive terminal-based prompt to authenticate with the external AD/LDAP server and generate access keys for use with MinIO.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 > The following example prompts the user to provide their AD/LDAP credentials. It then generates a new access key pair using the policy or policies associated with that AD/LDAP user.
 
 ```shell
 mc idp ldap accesskey create-with-login https://minio.example.net/
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -52,8 +50,8 @@ mc [GLOBALFLAGS] idp ldap accesskey create-with-login        \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

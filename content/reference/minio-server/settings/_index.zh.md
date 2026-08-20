@@ -3,8 +3,8 @@ title: "设置概览"
 url: "/zh/reference/minio-server/settings/"
 weight: 10
 icon: fa-solid fa-gears
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings.rst
+upstream_modified: false
 ---
 
 <a id="minio-server-configuration-settings"></a>
@@ -29,11 +29,10 @@ MinIO 设置定义 MinIO [`server`](/zh/reference/minio-server/#command-minio.se
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 其他可用于自定义的设置包括：
 

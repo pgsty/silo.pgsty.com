@@ -2,8 +2,8 @@
 title: "mc ilm rule ls"
 url: "/zh/reference/minio-mc/mc-ilm-rule-ls/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-ls"></a>
@@ -13,17 +13,15 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.ls"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule ls` 替代了 `mc ilm ls`。
 
-`mc ilm rule ls` 替代了 `mc ilm ls`。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-26T23-31-54Z**
-
-`mc ilm rule ls --json` 的输出在 `updateAt` 中包含策略修改时间。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-26T23-31-54Z**
+>
+> `mc ilm rule ls --json` 的输出在 `updateAt` 中包含策略修改时间。
 
 ## 语法 {#id2}
 
@@ -31,8 +29,8 @@ silo_modified: false
 
 [`mc ilm rule list`](#command-mc.ilm.rule.list) 命令与 [`mc ilm rule ls`](#command-mc.ilm.rule.ls) 的功能等效。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令列出 `myminio` MinIO 部署中 `mydata` 存储桶的所有生命周期管理规则：
 
 ```shell
@@ -72,9 +70,8 @@ mc ilm rule ls myminio/mydata
 │ rule-2 │ Enabled │ logs/  │ -                   │              1 │             3 │
 └────────┴─────────┴────────┴─────────────────────┴────────────────┴───────────────┘
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 [`mc ilm rule ls`](#command-mc.ilm.rule.ls) 命令语法如下：
 
 ```shell
@@ -88,8 +85,8 @@ mc [GLOBALFLAGS] ilm rule ls     \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

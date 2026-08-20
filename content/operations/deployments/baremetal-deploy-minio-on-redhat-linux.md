@@ -2,8 +2,8 @@
 title: "Deploy Silo on RHEL-Compatible Linux"
 url: "/operations/deployments/baremetal-deploy-minio-on-redhat-linux/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-deploy-minio-on-redhat-linux.rst
+upstream_modified: true
 ---
 
 <a id="deploy-minio-on-redhat-linux"></a>
@@ -152,8 +152,8 @@ Create an environment file at `/etc/default/minio`. The MinIO service uses this 
 
 Modify the example to reflect your deployment topology.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Multi-Node Multi-Drive" %}}
+{{< tabs group="tabs-64e16a1a" >}}
+{{< tab label="Multi-Node Multi-Drive" value="multi-node-multi-drive" >}}
 Use Multi-Node Multi-Drive (“Distributed”) deployment topologies in production environments.
 
 ```shell
@@ -193,9 +193,8 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
-
-{{% /tab %}}
-{{% tab header="Single-Node Multi-Drive" %}}
+{{< /tab >}}
+{{< tab label="Single-Node Multi-Drive" value="single-node-multi-drive" >}}
 Use Single-Node Multi-Drive deployments in development and evaluation environments. You can also use them for smaller storage workloads which can tolerate data loss or unavailability due to node downtime.
 
 ```shell
@@ -234,16 +233,14 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
-
-{{% /tab %}}
-{{% tab header="Single-Node Single-Drive" %}}
+{{< /tab >}}
+{{< tab label="Single-Node Single-Drive" value="single-node-single-drive" >}}
 Use Single-Node Single-Drive (“Standalone”) deployments in early development and evaluation environments. MinIO does not recommend Standalone deployments in production, as the loss of the node or its storage medium results in data loss.
 
-{{% alert color="warning" %}}
-**Important**
-
-SNSD deployments do not support storage expansion through adding new server pools.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> SNSD deployments do not support storage expansion through adding new server pools.
 
 ```shell
 # Set the volume MinIO uses at startup
@@ -275,9 +272,8 @@ MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify any other [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) or server command-line options as required by your deployment.
 
@@ -325,8 +321,8 @@ Following our checklists typically mitigates the risk of encountering those or s
 
 ### 7. Connect to the Deployment {#connect-to-the-deployment}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Console" %}}
+{{< tabs group="console-cli" >}}
+{{< tab label="Console" value="console" >}}
 Open your browser and access any of the MinIO hostnames at port `:9001` to open the [MinIO Console](/administration/minio-console/#minio-console) login page. For example, `https://minio1.example.com:9001`.
 
 Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previous step.
@@ -334,8 +330,8 @@ Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previou
 <img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: 600px; height: auto;" />
 
 You can use the MinIO Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration. Each MinIO server includes its own embedded MinIO Console.
-{{% /tab %}}
-{{% tab header="CLI" %}}
+{{< /tab >}}
+{{< tab label="CLI" value="cli" >}}
 Follow the [installation instructions](/reference/minio-mc/#mc-install) for `mc` on your local host. Run `mc --version` to verify the installation.
 
 If your MinIO deployment uses third-party or self-signed TLS certificates, copy the <abbr title="Certificate Authority">CA</abbr> files to `~/.mc/certs/CAs` to allow `mc`
@@ -347,8 +343,8 @@ mc alias set myminio https://minio-1.example.net:9000 USERNAME PASSWORD
 ```
 
 Change the hostname, username, and password to reflect your deployment. The hostname can be any MinIO node in the deployment. You can also specify the hostname load balancer, reverse proxy, or similar network control plane that handles connections to the deployment.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 8. Next Steps {#next-steps}
 

@@ -3,8 +3,8 @@ title: "升级旧版 MinIO Operator"
 url: "/zh/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier/"
 weight: 9118
 toc_hide: true
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier.rst
+upstream_modified: true
 ---
 
 <a id="minio-operator"></a>
@@ -27,15 +27,14 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
 ## 将 MinIO Operator 4.5.8 及更高版本升级到 5.0.15 {#minio-operator-4-5-8-5-0-15}
 
-{{% alert color="info" %}}
-**前提条件**
-
-本流程需要满足以下条件：
-
-- 你已有一个运行 4.5.8 或更高版本的 MinIO Operator 部署
-- 你的 Kubernetes 集群版本为 1.21.0 或更高
-- 你的本地主机已安装 `kubectl`，并已配置好对 Kubernetes 集群的访问
-{{% /alert %}}
+> [!NOTE]
+> **前提条件**
+>
+> 本流程需要满足以下条件：
+>
+> - 你已有一个运行 4.5.8 或更高版本的 MinIO Operator 部署
+> - 你的 Kubernetes 集群版本为 1.21.0 或更高
+> - 你的本地主机已安装 `kubectl`，并已配置好对 Kubernetes 集群的访问
 
 本流程将 MinIO Operator 从任意 4.5.8 及以上版本升级到 5.0.15
 
@@ -49,11 +48,10 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
   `.spec.credsSecret` 应保存 MinIO 部署中所有包含敏感信息的环境变量，这些变量不应出现在 `.spec.env` 中。 该变更会影响 Tenant <abbr title="CustomResourceDefinition">CRD</abbr>，且只影响直接编辑 tenant YAML 的用户，例如通过 Helm 或 Kustomize 管理的用户。
 - **Log Search API** （`.spec.log`）和 **Prometheus** （`.spec.prometheus`）部署都已移除。 不过，现有部署会保留为独立的 deployment 或 statefulset 继续运行，不再与 Tenant CR 关联。 删除 Tenant <abbr title="Custom Resource Definition">CRD</abbr> **不会** 级联删除日志或 Prometheus 部署。
 
-  {{% alert color="warning" %}}
-  **重要**
-
-  MinIO 建议你后续创建单独的 YAML 文件来管理这些部署。
-  {{% /alert %}}
+  > [!WARNING]
+  > **重要**
+  >
+  > MinIO 建议你后续创建单独的 YAML 文件来管理这些部署。
 
 ### Log Search 和 Prometheus {#log-search-prometheus}
 
@@ -110,8 +108,8 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
 ### 操作步骤 {#id2}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="使用 Kustomize 升级" %}}
+{{< tabs group="kustomize-helm" >}}
+{{< tab label="使用 Kustomize 升级" value="kustomize" >}}
 以下步骤使用 Kustomize 升级 MinIO Operator。
 
 对于通过 MinIO Kubernetes Plugin 安装的 Operator 5.0.1 到 5.0.14 版本，请按照下方 Kustomize 步骤先升级到 5.0.15 或更高版本。 如果你是通过 [Helm](/zh/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/#minio-k8s-deploy-operator-helm) 安装 Operator，请改用 **使用 Helm 升级** 步骤。
@@ -183,9 +181,8 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
-
-{{% /tab %}}
-{{% tab header="使用 Helm 升级" %}}
+{{< /tab >}}
+{{< tab label="使用 Helm 升级" value="helm" >}}
 以下步骤使用 Helm 升级现有的 MinIO Operator 安装。
 
 如果你是使用 Kustomize 安装 Operator，请改用 **使用 Kustomize 升级** 步骤。
@@ -276,9 +273,8 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-k8s-upgrade-minio-operator-to-4-5-8"></a>
 
@@ -335,8 +331,8 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
    你可以通过 Kubernetes Krew 插件管理器安装 MinIO 插件， 也可以手动下载插件二进制并安装到本地主机：
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="Krew Plugin Manager" %}}
+   {{< tabs group="tabs-1c97e29a" >}}
+   {{< tab label="Krew Plugin Manager" value="krew-plugin-manager" >}}
    Krew 是由 [Kubernetes SIG CLI group](https://github.com/kubernetes-sigs) 开发的 `kubectl` 插件管理器。 具体安装方法请参阅 `krew` [installation documentation](https://krew.sigs.k8s.io/docs/user-guide/setup/install/)。 Krew 适用于 Linux、macOS 和 Windows 操作系统。
 
    你可以使用以下命令，通过 Krew 安装 MinIO `kubectl` 插件：
@@ -351,9 +347,8 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```shell
    kubectl krew upgrade minio
    ```
-
-   {{% /tab %}}
-   {{% tab header="Manual (Linux, macOS)" %}}
+   {{< /tab >}}
+   {{< tab label="Manual (Linux, macOS)" value="manual-linux-macos" >}}
    你可以将 MinIO `kubectl` 插件下载到本地系统路径中。 `kubectl` CLI 会自动发现并运行兼容插件。
 
    以下代码会下载最新版本的 MinIO Kubernetes 插件， 并将其安装到系统路径中：
@@ -373,8 +368,8 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```
 
    输出应显示 Operator 版本为 5.0.14。
-   {{% /tab %}}
-   {{% tab header="Manual (Windows)" %}}
+   {{< /tab >}}
+   {{< tab label="Manual (Windows)" value="manual-windows" >}}
    你可以将 MinIO `kubectl` 插件下载到本地系统路径中。 `kubectl` CLI 会自动发现并运行兼容插件。
 
    以下 PowerShell 命令会下载最新版本的 MinIO Kubernetes 插件， 并将其安装到系统路径中：
@@ -392,8 +387,8 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
    ```
 
    输出应显示 Operator 版本为 5.0.14。
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 4. 运行初始化命令以升级 Operator
 
    使用 `kubectl minio init` 命令升级现有 MinIO Operator 安装：

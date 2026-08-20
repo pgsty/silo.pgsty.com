@@ -2,8 +2,8 @@
 title: "mc mb"
 url: "/zh/reference/minio-mc/mc-mb/"
 weight: 230
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mb.rst
+upstream_modified: false
 ---
 
 <a id="mc-mb"></a>
@@ -16,16 +16,15 @@ silo_modified: false
 
 你也可将 [`mc mb`](#command-mc.mb) 用于本地文件系统，实现与 `mkdir -p` 命令行工具类似的效果。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会在 `myminio` MinIO 部署上创建一个新的存储桶 `mydata`。 该命令创建的存储桶将 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking)。
 
 ```shell
 mc mb --with-locks myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] mb                   \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -93,11 +92,10 @@ mc mb ~/mydata/mydir
 
 在指定存储桶上启用 [对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking)。 对象锁定要求并因此隐含启用对象版本控制。
 
-{{% alert color="warning" %}}
-**重要**
-
-你 *只能* 在创建存储桶时启用对象锁定。 未启用对象锁定创建的存储桶无法使用 [存储桶生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 或 [存储桶对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 功能。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 你 *只能* 在创建存储桶时启用对象锁定。 未启用对象锁定创建的存储桶无法使用 [存储桶生命周期管理](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 或 [存储桶对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking) 功能。
 
 ##### `--with-versioning` {#mc.mb.-with-versioning}
 

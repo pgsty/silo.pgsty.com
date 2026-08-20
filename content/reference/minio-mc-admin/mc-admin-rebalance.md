@@ -2,8 +2,8 @@
 title: "mc admin rebalance"
 url: "/reference/minio-mc-admin/mc-admin-rebalance/"
 weight: 130
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-rebalance.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-rebalance"></a>
@@ -31,11 +31,10 @@ Follow the progress of an ongoing rebalance operation using the following comman
 mc admin trace --call rebalance ALIAS
 ```
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 The [`mc admin rebalance`](#command-mc.admin.rebalance) command has the following subcommands:
 
@@ -53,8 +52,8 @@ The [`mc admin rebalance`](#command-mc.admin.rebalance) command has the followin
 
 Start a rebalance operation for a MinIO deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLES" %}}
+{{< tabs group="examples-syntax" >}}
+{{< tab label="EXAMPLES" value="examples" >}}
 Consider a MinIO deployment with two pools with an assigned alias of `minio1`. One pool has 250 GB of free space while the other pool has 3 TB of free space.
 
 The [`mc admin rebalance`](#command-mc.admin.rebalance) command shifts objects from the pool with less free space to the pool with more free space so that there is roughly equal free space on both pools.
@@ -62,9 +61,8 @@ The [`mc admin rebalance`](#command-mc.admin.rebalance) command shifts objects f
 ```shell
 mc admin rebalance start minio1
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -72,8 +70,8 @@ mc [GLOBALFLAGS] admin rebalance start ALIAS
 ```
 
 - Replace ALIAS with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to rebalance.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `mc admin rebalance status` {#mc.admin.rebalance.status}
 
@@ -83,15 +81,13 @@ Queries the deployment with an active rebalance process and returns information 
 
 The status returns the ID of the rebalance operation, the time of the operation, and details for each pool on the deployment. For each pool, the status shows the pool ID, the pool’s rebalance status, the percentage of used space, and rebalance progress for the pool.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
-
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 ```shell
 mc admin rebalance status minio1
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -99,8 +95,8 @@ mc [GLOBALFLAGS] admin rebalance ALIAS
 ```
 
 - Replace ALIAS with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `mc admin rebalance stop` {#mc.admin.rebalance.stop}
 
@@ -108,15 +104,13 @@ mc [GLOBALFLAGS] admin rebalance ALIAS
 
 Ends an in-progress rebalance job on the specified deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLES" %}}
-
+{{< tabs group="examples-syntax" >}}
+{{< tab label="EXAMPLES" value="examples" >}}
 ```shell
 mc admin rebalance stop minio1
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -124,8 +118,8 @@ mc [GLOBALFLAGS] admin rebalance stop ALIAS
 ```
 
 - Replace ALIAS with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Global Flags {#global-flags}
 

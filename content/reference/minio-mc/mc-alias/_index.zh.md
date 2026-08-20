@@ -3,8 +3,8 @@ title: "mc alias"
 url: "/zh/reference/minio-mc/mc-alias/"
 weight: 20
 icon: fa-solid fa-link
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias.rst
+upstream_modified: false
 ---
 
 <a id="mc-alias"></a>
@@ -15,11 +15,10 @@ silo_modified: false
 
 [`mc alias`](#command-mc.alias) 命令提供了一个便捷接口，用于管理 [`mc`](/zh/reference/minio-mc/#command-mc) 可连接并执行操作的 S3 兼容主机列表。
 
-{{% alert color="warning" %}}
-**重要**
-
-对 S3 兼容服务执行操作的 [`mc`](/zh/reference/minio-mc/#command-mc) 命令 *必须* 为该服务指定一个别名。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 对 S3 兼容服务执行操作的 [`mc`](/zh/reference/minio-mc/#command-mc) 命令 *必须* 为该服务指定一个别名。
 
 ## 子命令 {#id3}
 

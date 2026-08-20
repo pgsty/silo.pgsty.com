@@ -2,8 +2,8 @@
 title: "mc admin scanner status"
 url: "/zh/reference/minio-mc-admin/mc-admin-scanner-status/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-scanner-status.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-scanner-status"></a>
@@ -18,14 +18,13 @@ silo_modified: false
 
 该命令的别名为 `mc admin scanner info`。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例返回扫描器进程当前状态的信息。
 
 ```shell
@@ -52,9 +51,8 @@ Check Replication:     3 versions; Avg: 892ns
 Verify Deleted:        0 folders; Avg: 0ms
 Yield:                 18ms total; Avg: 6ms/obj
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -71,8 +69,8 @@ mc admin scanner status ALIAS
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

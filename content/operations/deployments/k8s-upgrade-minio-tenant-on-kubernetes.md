@@ -2,8 +2,8 @@
 title: "Upgrade a Silo Tenant"
 url: "/operations/deployments/k8s-upgrade-minio-tenant-on-kubernetes/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-upgrade-minio-tenant-on-kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="upgrade-a-minio-tenant"></a>
@@ -11,15 +11,13 @@ silo_modified: true
 
 The following procedures upgrade a single Silo Tenant using either Kustomize or Helm. Test the exact server image, Operator/chart version, and rollback procedure in a non-production Tenant first.
 
-{{% alert color="danger" %}}
-Keep the server image on `pgsty/minio` and use only a tag or digest published on the [Silo download page](/download/#server). The upstream Tenant defaults use a MinIO image. Also keep `MINIO_UPDATE=off`; the inherited in-place updater still targets the upstream MinIO feed and is not a Silo upgrade path.
-{{% /alert %}}
+> [!CAUTION]
+> Keep the server image on `pgsty/minio` and use only a tag or digest published on the [Silo download page](/download/#server). The upstream Tenant defaults use a MinIO image. Also keep `MINIO_UPDATE=off`; the inherited in-place updater still targets the upstream MinIO feed and is not a Silo upgrade path.
 
-{{% alert color="warning" %}}
-**Important**
-
-For Tenants using a MinIO Image older than [RELEASE.2024-03-30T09-41-56Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-03-30T09-41-56Z) running with [AD/LDAP](/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings) enabled, you **must** read through the release notes for [RELEASE.2024-04-18T19-09-19Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-04-18T19-09-19Z) before starting this procedure. You must take the extra steps documented in the linked release as part of the upgrade procedure.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> For Tenants using a MinIO Image older than [RELEASE.2024-03-30T09-41-56Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-03-30T09-41-56Z) running with [AD/LDAP](/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings) enabled, you **must** read through the release notes for [RELEASE.2024-04-18T19-09-19Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-04-18T19-09-19Z) before starting this procedure. You must take the extra steps documented in the linked release as part of the upgrade procedure.
 
 <a id="minio-upgrade-tenant-kustomize"></a>
 <a id="minio-upgrade-tenant-plugin"></a>
@@ -36,9 +34,8 @@ If the tenant was deployed with Kustomize, the base configuration is your existi
 
 Choose a tab below depending on how the tenant was deployed:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Operator Console-Deployed Tenant" selected=true %}}
-
+{{< tabs group="tabs-35d63cca" default="operator-console-deployed-tenant" >}}
+{{< tab label="Operator Console-Deployed Tenant" value="operator-console-deployed-tenant" >}}
 1. Create the base configuration file:
 
    1. In a convenient directory, save the current Tenant configuration to a file using `kubectl get`:
@@ -82,11 +79,11 @@ Choose a tab below depending on how the tenant was deployed:
       ```
 
       If you used a different filename for the `kubectl get` output in the previous step, replace `my-tenant-base.yaml` with the name of that file.
-{{% /tab %}}
-{{% tab header="Existing Kustomized-deployed Tenant" %}}
+{{< /tab >}}
+{{< tab label="Existing Kustomized-deployed Tenant" value="existing-kustomized-deployed-tenant" >}}
 1. You can upgrade the tenant using the `kustomization` files from the original deployment as the base configuration. If you no longer have these files, follow the instructions in the Operator Console-Deployed Tenant tab.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 2. Create a `upgrade-minio-tenant.yaml` file with contents resembling the following:
 

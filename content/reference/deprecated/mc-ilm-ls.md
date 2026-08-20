@@ -2,8 +2,8 @@
 title: "mc ilm ls"
 url: "/reference/deprecated/mc-ilm-ls/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-ls"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.ls"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm ls` replaced by [`mc ilm rule ls`](/reference/minio-mc/mc-ilm-rule-ls/#command-mc.ilm.rule.ls).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm ls` replaced by [`mc ilm rule ls`](/reference/minio-mc/mc-ilm-rule-ls/#command-mc.ilm.rule.ls).
 
 ## Syntax {#syntax}
 
@@ -55,16 +54,15 @@ The output of the command might resemble the following:
 └────────┴─────────┴────────┴─────────────────────┴────────────────┴───────────────┘
 ```
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command lists all lifecycle management rules for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc ilm ls myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc ilm ls`](#command-mc.ilm.ls) command has the following syntax:
 
 ```shell
@@ -77,8 +75,8 @@ mc [GLOBALFLAGS] ilm ls                        \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

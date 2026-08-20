@@ -2,34 +2,32 @@
 title: "mc support top disk"
 url: "/zh/reference/minio-mc/mc-support-top-disk/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top-disk.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-top-disk"></a>
 
 <a id="command-mc.support.top.disk"></a>
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 语法 {#id2}
 
 [`mc support top disk`](#command-mc.support.top.disk) 命令显示当前驱动器统计信息。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令显示 [alias](/zh/glossary/#term-alias) `myminio` 上当前正在进行的 S3 API 调用。
 
 ```shell
 mc support top disk myminio/
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令具有以下语法：
 
 ```shell
@@ -43,8 +41,8 @@ mc [GLOBALFLAGS] support top disk                     \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

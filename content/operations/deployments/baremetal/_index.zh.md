@@ -3,8 +3,8 @@ title: "在裸机上部署 Silo"
 url: "/zh/operations/deployments/baremetal/"
 weight: 20
 icon: fa-solid fa-server
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>

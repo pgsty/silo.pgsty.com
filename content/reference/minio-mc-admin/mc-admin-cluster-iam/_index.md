@@ -3,8 +3,8 @@ title: "mc admin cluster iam"
 url: "/reference/minio-mc-admin/mc-admin-cluster-iam/"
 weight: 30
 icon: fa-solid fa-users-gear
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-iam.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-cluster-iam"></a>
@@ -14,10 +14,8 @@ silo_modified: false
 
 ## Description {#description}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2022-06-26T18-51-48Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2022-06-26T18-51-48Z**
 
 The [`mc admin cluster iam`](#command-mc.admin.cluster.iam) command and its subcommands provide tools for manually importing and exporting MinIO [identity and access management (IAM)](/administration/identity-access-management/#minio-authentication-and-identity-management) metadata.
 

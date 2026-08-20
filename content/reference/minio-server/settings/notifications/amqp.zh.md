@@ -2,8 +2,8 @@
 title: "AMQP 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/amqp/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/amqp.rst
+upstream_modified: false
 ---
 
 <a id="amqp"></a>
@@ -21,11 +21,10 @@ silo_modified: false
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 多个 AMQP 目标 {#id2}
 
@@ -35,9 +34,8 @@ silo_modified: false
 
 例如，以下命令分别将两个不同的 AMQP 服务端点设置为 `PRIMARY` 和 `SECONDARY`：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ```shell
 export MINIO_NOTIFY_AMQP_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_AMQP_URL_PRIMARY="amqp://user:password@amqp-endpoint.example.net:5672"
@@ -47,9 +45,8 @@ export MINIO_NOTIFY_AMQP_URL_SECONDARY="amqp://user:password@amqp-endpoint.examp
 ```
 
 例如，[`MINIO_NOTIFY_AMQP_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_AMQP_ENABLE) 表示该环境变量关联到 ID 为 `PRIMARY` 的 AMQP 服务端点。
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ```shell
 mc admin config set notify_amqp:primary \
    url="user:password@amqp://amqp-endpoint.example.net:5672" [ARGUMENT=VALUE ...]
@@ -59,16 +56,15 @@ mc admin config set notify_amqp:secondary \
 ```
 
 请注意，对于配置设置，唯一标识符仅追加到 `amqp`，而不是每个单独参数。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 设置 {#id4}
 
 ### 启用 {#id5}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_ENABLE` {#envvar.MINIO_NOTIFY_AMQP_ENABLE}
 
 *envvar*
@@ -78,9 +74,8 @@ mc admin config set notify_amqp:secondary \
 指定 `on` 以启用向 AMQP 端点发布存储桶通知。
 
 默认值为 `off`。
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp` {#mc-conf.notify_amqp}
 
 *mc-conf*
@@ -94,55 +89,49 @@ mc admin config set notify_amqp \
   url="amqp://user:password@endpoint:port" \
   [ARGUMENT="VALUE"] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### URL {#url}
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_URL` {#envvar.MINIO_NOTIFY_AMQP_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp url` {#mc-conf.notify_amqp.url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 发布存储桶事件的 AMQP 服务器端点。 例如，`amqp://myuser:mypassword@localhost:5672`。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-27T05-56-19Z**
-
-在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-27T05-56-19Z**
+>
+> 在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
 
 ### Exchange（交换机） {#exchange}
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_EXCHANGE` {#envvar.MINIO_NOTIFY_AMQP_EXCHANGE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp exchange` {#mc-conf.notify_amqp.exchange}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定要使用的 AMQP exchange 名称。
 
@@ -150,20 +139,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_EXCHANGE_TYPE` {#envvar.MINIO_NOTIFY_AMQP_EXCHANGE_TYPE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp exchange_type` {#mc-conf.notify_amqp.exchange_type}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 AMQP exchange 的类型。
 
@@ -171,20 +158,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_ROUTING_KEY` {#envvar.MINIO_NOTIFY_AMQP_ROUTING_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp routing_key` {#mc-conf.notify_amqp.routing_key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于发布事件的 routing key。
 
@@ -192,20 +177,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_MANDATORY` {#envvar.MINIO_NOTIFY_AMQP_MANDATORY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp mandatory` {#mc-conf.notify_amqp.mandatory}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `off` 以忽略消息未送达错误。 默认值为 `on`。
 
@@ -213,20 +196,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_DURABLE` {#envvar.MINIO_NOTIFY_AMQP_DURABLE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp durable` {#mc-conf.notify_amqp.durable}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以在 broker 重启后保留消息队列。 默认值为 `off`。
 
@@ -234,20 +215,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_NO_WAIT` {#envvar.MINIO_NOTIFY_AMQP_NO_WAIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp no_wait` {#mc-conf.notify_amqp.no_wait}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以启用非阻塞消息投递。 默认值为 `off`。
 
@@ -255,20 +234,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_INTERNAL` {#envvar.MINIO_NOTIFY_AMQP_INTERNAL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp internal` {#mc-conf.notify_amqp.internal}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以仅在 exchange 绑定到其他 exchanges 时使用该 exchange。 有关 AMQP exchange 绑定的更多信息，请参阅 RabbitMQ 文档中的 [Exchange to Exchange Bindings](https://www.rabbitmq.com/e2e.html)。
 
@@ -276,20 +253,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_AUTO_DELETED` {#envvar.MINIO_NOTIFY_AMQP_AUTO_DELETED}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp auto_deleted` {#mc-conf.notify_amqp.auto_deleted}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以在没有消费者时自动删除消息队列。 默认值为 `off`。
 
@@ -297,20 +272,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_DELIVERY_MODE` {#envvar.MINIO_NOTIFY_AMQP_DELIVERY_MODE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp delivery_mode` {#mc-conf.notify_amqp.delivery_mode}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `1` 以将投递模式设置为非持久化队列。
 
@@ -320,20 +293,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_QUEUE_DIR` {#envvar.MINIO_NOTIFY_AMQP_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp queue_dir` {#mc-conf.notify_amqp.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定目录路径以启用 MinIO 对未送达消息的持久化事件存储，例如 `/opt/minio/events`。
 
@@ -343,20 +314,18 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_AMQP_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp queue_limit` {#mc-conf.notify_amqp.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定未送达消息的最大数量限制。 默认值为 `100000`。
 
@@ -364,19 +333,17 @@ mc admin config set notify_amqp \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_AMQP_COMMENT` {#envvar.MINIO_NOTIFY_AMQP_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_amqp comment` {#mc-conf.notify_amqp.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 为 AMQP 配置指定注释。

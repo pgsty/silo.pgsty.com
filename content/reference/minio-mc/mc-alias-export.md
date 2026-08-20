@@ -2,8 +2,8 @@
 title: "mc alias export"
 url: "/reference/minio-mc/mc-alias-export/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias-export.rst
+upstream_modified: false
 ---
 
 <a id="mc-alias-export"></a>
@@ -11,10 +11,8 @@ silo_modified: false
 
 <a id="command-mc.alias.export"></a>
 
-{{% alert color="info" %}}
-**Added: mc.RELEASE.2023-11-15T22-45-58Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc.RELEASE.2023-11-15T22-45-58Z**
 
 ## Syntax {#syntax}
 
@@ -24,8 +22,8 @@ The command outputs the result to `STDOUT` where you can either capture the outp
 
 Use the [`mc alias import`](/reference/minio-mc/mc-alias-import/#command-mc.alias.import) command to import the resulting JSON configuration.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command exports an alias configuration from the existing host and outputs it to a file:
 
 ```shell
@@ -33,8 +31,8 @@ mc alias export play > play.json
 ```
 
 The command outputs the file to Standard Out (`STDOUT`). You can alternatively pipe the output to a utility of your choice for further operations.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc alias export`](#command-mc.alias.export) command has the following syntax:
 
 ```shell
@@ -46,8 +44,8 @@ mc [GLOBALFLAGS] alias export ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

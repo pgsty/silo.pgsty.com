@@ -2,20 +2,19 @@
 title: "Batch Replication"
 url: "/administration/batch-framework-job-replicate/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-replicate.rst
+upstream_modified: true
 ---
 
 <a id="batch-replication"></a>
 <a id="minio-batch-framework-replicate-job"></a>
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z
-
-The Batch Framework was introduced with the `replicate` job type in the [`mc`](/reference/minio-mc/#command-mc) [RELEASE.2022-10-09T21-10-59Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-09T21-10-59Z).
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z
+>
+> The Batch Framework was introduced with the `replicate` job type in the [`mc`](/reference/minio-mc/#command-mc) [RELEASE.2022-10-09T21-10-59Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-09T21-10-59Z).
 
 The MinIO Batch Framework allows you to create, manage, monitor, and execute jobs using a YAML-formatted job definition file (a “batch file”). The batch jobs run directly on the MinIO deployment to take advantage of the server-side processing power without constraints of the local machine where you run the [MinIO Client](/reference/minio-mc/#minio-client).
 
@@ -133,13 +132,12 @@ MinIO deployments configured for [Active Directory/LDAP](/administration/identit
 
 The batch job definition file can limit the replication by bucket, prefix, and/or filters to only replicate certain objects. The access to objects and buckets for the replication process may be restricted by the credentials you provide in the YAML for either the source or target destinations.
 
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-Server RELEASE.2023-04-07T05-28-58Z
-
-You can replicate from a remote MinIO deployment to the local deployment that runs the batch job.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> Server RELEASE.2023-04-07T05-28-58Z
+>
+> You can replicate from a remote MinIO deployment to the local deployment that runs the batch job.
 
 For example, you can use a batch job to perform a one-time replication sync to push objects from a bucket on a local deployment at `minio-local/invoices/` to a bucket on a remote deployment at `minio-remote/invoices`. You can also pull objects from the remote deployment at `minio-remote/invoices` to the local deployment at `minio-local/invoices`.
 
@@ -155,34 +153,31 @@ You can modify the compression settings in the [replicate](/reference/minio-mc/m
 
 The YAML **must** define the source and target deployments. If the *source* deployment is remote, then the *target* deployment **must** be `local`. Optionally, the YAML can also define flags to filter which objects replicate, send notifications for the job, or define retry attempts for the job.
 
-{{% alert color="info" %}}
-**Changed: MinIO**
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2023-04-07T05-28-58Z
+>
+> You can replicate from a remote MinIO deployment to the local deployment that runs the batch job.
 
-RELEASE.2023-04-07T05-28-58Z
-
-You can replicate from a remote MinIO deployment to the local deployment that runs the batch job.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-RELEASE.2024-08-03T04-33-23Z
-
-This release introduces a new version of the Batch Job Replicate API, `v2`. The updated API allows you to list multiple prefixes on the source to replicate from. To replicate multiple prefixes from a source, specify `replicate.apiVersion` as `v2`.
-
-```text
-replicate:
-  apiVersion: v1
-  source:
-    type: minio
-    bucket: mybucket
-    prefix:
-      - prefix1
-      - prefix2
-...
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2024-08-03T04-33-23Z
+>
+> This release introduces a new version of the Batch Job Replicate API, `v2`. The updated API allows you to list multiple prefixes on the source to replicate from. To replicate multiple prefixes from a source, specify `replicate.apiVersion` as `v2`.
+>
+> ```text
+> replicate:
+>   apiVersion: v1
+>   source:
+>     type: minio
+>     bucket: mybucket
+>     prefix:
+>       - prefix1
+>       - prefix2
+> ...
+> ```
 
 For the **source deployment**
 

@@ -2,8 +2,8 @@
 title: "mc ilm rule export"
 url: "/zh/reference/minio-mc/mc-ilm-rule-export/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-export.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-export"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.export"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm rule export` 替代 `mc ilm export`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule export` 替代 `mc ilm export`。
 
 ## 语法 {#id2}
 
@@ -23,16 +22,15 @@ silo_modified: false
 
 [`mc ilm rule export`](#command-mc.ilm.rule.export) 命令默认输出到 `STDOUT`。 你可以将内容输出到 `.json` 文件中进行归档，或使用 [`mc ilm rule import`](/zh/reference/minio-mc/mc-ilm-rule-import/#command-mc.ilm.rule.import) 导入。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将 `myminio` 部署上 `mydata` 存储桶的生命周期管理配置 导出到 `mydata-lifecycle-config.json` 文件：
 
 ```shell
 mc ilm rule export myminio/mydata > mydata-lifecycle-config.json
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -44,8 +42,8 @@ mc [GLOBALFLAGS] ilm rule export ALIAS
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -69,17 +67,15 @@ mc ilm rule export myminio/mydata > bucket-lifecycle.json
 
 ### 导出存储桶生命周期管理配置 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将存储桶生命周期管理配置导出到 `bucket-lifecycle.json` 文件：
 
 ```shell
 mc ilm rule export myminio/mybucket > bucket-lifecycle.json
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc ilm rule export ALIAS > file.json
 ```
@@ -88,8 +84,8 @@ mc ilm rule export ALIAS > file.json
 
   `myminio/mydata`
 - 将 `file.json` 替换为用于导出生命周期管理规则的文件名。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 所需权限 {#id7}
 

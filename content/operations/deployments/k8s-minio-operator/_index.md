@@ -3,8 +3,8 @@ title: "MinIO Kubernetes Operator"
 url: "/operations/deployments/k8s-minio-operator/"
 weight: 10
 icon: fa-solid fa-dharmachakra
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-minio-operator.rst
+upstream_modified: true
 ---
 
 <a id="minio-kubernetes-operator"></a>
@@ -88,12 +88,11 @@ Confirm that the output contains the highlighted lines. The output of the exampl
  ...
 ```
 
-{{% alert color="warning" %}}
-**Important**
-
-MinIO Operator can generate TLS certificates for Tenant pods using the specified Certificate Authority (CA). Clients external to the Kubernetes cluster must trust that CA to connect to the Silo Tenant endpoints.
-
-Disabling TLS validation is suitable only for controlled testing. Production clients should trust the issuing CA or use certificates issued by a CA they already trust.
-
-Alternatively, generate x.509 TLS certificates signed by a known and trusted CA and pass those certificates through the Tenant CRD. See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more complete documentation.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> MinIO Operator can generate TLS certificates for Tenant pods using the specified Certificate Authority (CA). Clients external to the Kubernetes cluster must trust that CA to connect to the Silo Tenant endpoints.
+>
+> Disabling TLS validation is suitable only for controlled testing. Production clients should trust the issuing CA or use certificates issued by a CA they already trust.
+>
+> Alternatively, generate x.509 TLS certificates signed by a known and trusted CA and pass those certificates through the Tenant CRD. See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more complete documentation.

@@ -2,8 +2,8 @@
 title: "mc replicate ls"
 url: "/zh/reference/minio-mc/mc-replicate-ls/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-ls"></a>
@@ -13,11 +13,10 @@ silo_modified: false
 
 <a id="command-mc.replicate.ls"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc replicate ls` 替代 `mc admin bucket remote ls` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc replicate ls` 替代 `mc admin bucket remote ls` 命令。
 
 ## 语法 {#id2}
 
@@ -25,16 +24,15 @@ silo_modified: false
 
 [`mc replicate list`](#command-mc.replicate.list) 命令与 [`mc replicate ls`](#command-mc.replicate.ls) 功能等价。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令列出 `myminio` MinIO 部署中 `mydata` 存储桶的所有已启用复制规则：
 
 ```shell
 mc replicate ls --status "enabled" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -48,8 +46,8 @@ mc [GLOBALFLAGS] replicate ls         \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

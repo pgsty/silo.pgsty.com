@@ -2,8 +2,8 @@
 title: "Silo Object Locking"
 url: "/administration/object-management/object-retention/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-retention.rst
+upstream_modified: true
 ---
 
 <a id="minio-object-retention"></a>
@@ -19,20 +19,20 @@ MinIO Object Locking (“Object Retention”) enforces Write-Once Read-Many (WOR
 
 MinIO Object Locking provides key data retention compliance and meets SEC17a-4(f), FINRA 4511(C), and CFTC 1.31(c)-(d) requirements as per [Cohasset Associates](https://min.io/cohasset?ref-docs).
 
-{{< doc-carousel >}}
-{{< doc-card title="Bucket Without Locking" image="/images/retention/minio-versioning-delete-object.svg" alt="Deleting an Object" >}}
+{{< cards >}}
+{{< card title="Bucket Without Locking" image="/images/retention/minio-versioning-delete-object.svg" image_alt="Deleting an Object" >}}
 MinIO versioning preserves the full history of object mutations. However, applications can explicitly delete specific object versions.
-{{< /doc-card >}}
-{{< doc-card title="Bucket With Locking" image="/images/retention/minio-object-locking.svg" alt="30 Day Locked Objects" >}}
+{{< /card >}}
+{{< card title="Bucket With Locking" image="/images/retention/minio-object-locking.svg" image_alt="30 Day Locked Objects" >}}
 Applying a default 30 Day WORM lock to objects in the bucket ensures a minimum period of retention and protection for all object versions.
-{{< /doc-card >}}
-{{< doc-card title="Delete Operations in Locked Bucket" image="/images/retention/minio-object-locking-delete.svg" alt="Delete Operation in Locked Bucket" >}}
+{{< /card >}}
+{{< card title="Delete Operations in Locked Bucket" image="/images/retention/minio-object-locking-delete.svg" image_alt="Delete Operation in Locked Bucket" >}}
 [Delete operations](/administration/object-management/object-delete/#minio-object-delete) follow normal behavior in [versioned buckets](/administration/object-management/object-versioning/#minio-bucket-versioning-delete), where MinIO creates a `DeleteMarker` for the object. However, non-Delete Marker versions of the object remain under the retention rules and are protected from any specific deletion or overwrite attempts.
-{{< /doc-card >}}
-{{< doc-card title="Versioned Delete Operations in Locked Bucket" image="/images/retention/minio-object-locking-delete-version.svg" alt="Versioned Delete Operation in a Locked Bucket" >}}
+{{< /card >}}
+{{< card title="Versioned Delete Operations in Locked Bucket" image="/images/retention/minio-object-locking-delete-version.svg" image_alt="Versioned Delete Operation in a Locked Bucket" >}}
 MinIO blocks any attempt to [delete](/administration/object-management/object-delete/#minio-object-delete) a specific object version held under WORM lock. The earliest possible time after which a client may delete the version is when the lock expires.
-{{< /doc-card >}}
-{{< /doc-carousel >}}
+{{< /card >}}
+{{< /cards >}}
 
 MinIO object locking is [feature and API compatible with AWS S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html). This page summarizes Object Locking / Retention concepts as implemented by MinIO. See the AWS S3 documentation on [How S3 Object Lock works](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html) for additional resources.
 

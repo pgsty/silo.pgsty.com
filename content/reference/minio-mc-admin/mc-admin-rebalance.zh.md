@@ -2,8 +2,8 @@
 title: "mc admin rebalance"
 url: "/zh/reference/minio-mc-admin/mc-admin-rebalance/"
 weight: 130
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-rebalance.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-rebalance"></a>
@@ -31,11 +31,10 @@ silo_modified: false
 mc admin trace --call rebalance ALIAS
 ```
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 [`mc admin rebalance`](#command-mc.admin.rebalance) 命令具有以下子命令：
 
@@ -53,8 +52,8 @@ MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 
 
 为 MinIO 部署启动再平衡操作。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLES" %}}
+{{< tabs group="examples-syntax" >}}
+{{< tab label="EXAMPLES" value="examples" >}}
 假设一个 MinIO 部署有两个池，并分配了别名 `minio1`。 其中一个池有 250 GB 可用空间，另一个池有 3 TB 可用空间。
 
 [`mc admin rebalance`](#command-mc.admin.rebalance) 命令会将对象从可用空间较少的池迁移到可用空间较多的池，使两个池的可用空间大致相等。
@@ -62,9 +61,8 @@ MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 
 ```shell
 mc admin rebalance start minio1
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令的语法如下：
 
 ```shell
@@ -72,8 +70,8 @@ mc [GLOBALFLAGS] admin rebalance start ALIAS
 ```
 
 - 将 ALIAS 替换为要执行再平衡的 MinIO 部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `mc admin rebalance status` {#mc.admin.rebalance.status}
 
@@ -83,15 +81,13 @@ mc [GLOBALFLAGS] admin rebalance start ALIAS
 
 状态输出包括再平衡操作 ID、操作时间，以及部署中每个池的详细信息。 对每个池，状态会显示池 ID、该池的再平衡状态、已用空间百分比以及该池的再平衡进度。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
-
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 ```shell
 mc admin rebalance status minio1
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令的语法如下：
 
 ```shell
@@ -99,8 +95,8 @@ mc [GLOBALFLAGS] admin rebalance ALIAS
 ```
 
 - 将 ALIAS 替换为 MinIO 部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `mc admin rebalance stop` {#mc.admin.rebalance.stop}
 
@@ -108,15 +104,13 @@ mc [GLOBALFLAGS] admin rebalance ALIAS
 
 结束指定部署上正在进行中的再平衡任务。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLES" %}}
-
+{{< tabs group="examples-syntax" >}}
+{{< tab label="EXAMPLES" value="examples" >}}
 ```shell
 mc admin rebalance stop minio1
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令的语法如下：
 
 ```shell
@@ -124,8 +118,8 @@ mc [GLOBALFLAGS] admin rebalance stop ALIAS
 ```
 
 - 将 ALIAS 替换为 MinIO 部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 全局标志 {#id5}
 

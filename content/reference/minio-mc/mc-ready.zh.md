@@ -2,8 +2,8 @@
 title: "mc ready"
 url: "/zh/reference/minio-mc/mc-ready/"
 weight: 310
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ready.rst
+upstream_modified: false
 ---
 
 <a id="mc-ready"></a>
@@ -14,8 +14,8 @@ silo_modified: false
 
 [`mc ready`](#command-mc.ready) 命令用于检查集群状态，以及集群是否具有 `read` 和 `write` quorum。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令向别名为 `myminio` 的集群发送 `GET` 请求，并返回其状态。
 
 ```shell
@@ -35,9 +35,8 @@ The cluster `myminio` is unreachable: Get "http://myminio.example.com:9000/minio
 ```text
 The cluster `myminio` is ready
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -52,8 +51,8 @@ mc [GLOBALFLAGS] ready            \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

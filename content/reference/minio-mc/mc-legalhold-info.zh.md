@@ -2,8 +2,8 @@
 title: "mc legalhold info"
 url: "/zh/reference/minio-mc/mc-legalhold-info/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-legalhold-info"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 [`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold) *要求* 指定的存储桶已启用对象锁定。 你 **只能** 在创建存储桶时启用对象锁定。有关创建启用对象锁定的存储桶，请参阅 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令检索 `myminio` MinIO 部署中 `mydata` 存储桶内对象的当前 legal hold 状态：
 
 ```shell
 mc legalhold info --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] legalhold info  \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 

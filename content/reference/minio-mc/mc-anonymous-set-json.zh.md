@@ -2,8 +2,8 @@
 title: "mc anonymous set-json"
 url: "/zh/reference/minio-mc/mc-anonymous-set-json/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-anonymous-set-json.rst
+upstream_modified: false
 ---
 
 <a id="mc-anonymous-set-json"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 配置了匿名策略的存储桶允许客户端在无需 [authentication](/zh/administration/identity-access-management/#minio-authentication-and-identity-management) 的情况下访问存储桶内容， 并执行与指定策略一致的操作。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将 JSON 格式的匿名策略应用到 `myminio` MinIO 部署上的 `mydata` 存储桶：
 
 ```shell
 mc anonymous set-json ~/mydata-anonymous.json myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] set-json POLICY ALIAS
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

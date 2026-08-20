@@ -2,8 +2,8 @@
 title: "mc watch"
 url: "/reference/minio-mc/mc-watch/"
 weight: 440
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-watch.rst
+upstream_modified: false
 ---
 
 <a id="mc-watch"></a>
@@ -16,16 +16,15 @@ The [`mc watch`](#command-mc.watch) command watches for events on the specified 
 
 You can also use [`mc watch`](#command-mc.watch) against a local filesystem directory to produce similar results to running the `inotify -e modify,create,delete,move` command.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command watches for [events](/reference/minio-mc/mc-event-add/#mc-event-supported-events) on any object or prefix in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc watch --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] watch                \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

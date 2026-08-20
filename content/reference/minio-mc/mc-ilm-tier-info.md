@@ -2,8 +2,8 @@
 title: "mc ilm tier info"
 url: "/reference/minio-mc/mc-ilm-tier-info/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-info"></a>
@@ -60,24 +60,22 @@ For example, the following policy provides permission for configuring object tra
 
 The command has the following syntax:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example outputs the configuration for an existing remote tier called `WARM-TIER` on the `myminio` deployment.
 
 ```shell
  mc ilm tier info myminio WARM-TIER
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
 mc ilm tier info TARGET TIER_NAME
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

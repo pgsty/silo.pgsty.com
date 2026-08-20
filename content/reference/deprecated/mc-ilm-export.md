@@ -2,8 +2,8 @@
 title: "mc ilm export"
 url: "/reference/deprecated/mc-ilm-export/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-export.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-export"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.export"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm export` replaced by [`mc ilm rule export`](/reference/minio-mc/mc-ilm-rule-export/#command-mc.ilm.rule.export).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm export` replaced by [`mc ilm rule export`](/reference/minio-mc/mc-ilm-rule-export/#command-mc.ilm.rule.export).
 
 ## Syntax {#syntax}
 
@@ -23,16 +22,15 @@ The [`mc ilm export`](#command-mc.ilm.export) command exports the object lifecyc
 
 The [`mc ilm export`](#command-mc.ilm.export) command outputs to `STDOUT` by default. You can output the contents to a `.json` file for archival or ingestion using [`mc ilm import`](/reference/deprecated/mc-ilm-import/#command-mc.ilm.import).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command exports the lifecycle management configuration of the `mydata` bucket on the `myminio` deployment to the `mydata-lifecycle-config.json` file:
 
 ```shell
 mc ilm export myminio/mydata > mydata-lifecycle-config.json
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -44,8 +42,8 @@ mc [GLOBALFLAGS] ilm export ALIAS > STDOUT
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -67,17 +65,15 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Export the Bucket Lifecycle Management Configuration {#export-the-bucket-lifecycle-management-configuration}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 The following command exports the bucket lifecycle management configuration to the `bucket-lifecycle.json` file:
 
 ```shell
 mc ilm export myminio/mybucket > bucket-lifecycle.json
 ```
-
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc ilm export ALIAS > file.json
 ```
@@ -86,8 +82,8 @@ mc ilm export ALIAS > file.json
 
   `myminio/mydata`
 - Replace `file.json` with the name of the file to which to export the lifecycle management rules.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Behavior {#behavior}
 

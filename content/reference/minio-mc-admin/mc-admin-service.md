@@ -2,8 +2,8 @@
 title: "mc admin service"
 url: "/reference/minio-mc-admin/mc-admin-service/"
 weight: 160
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-service.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-service"></a>
@@ -16,11 +16,10 @@ The [`mc admin service`](#command-mc.admin.service) command can restart or unfre
 
 [`mc admin service`](#command-mc.admin.service) affects *all* MinIO servers in the target deployment at the same time. The command interrupts in-progress API operations on the MinIO deployment. Use caution when issuing this command to a deployment.
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 ## Examples {#examples}
 

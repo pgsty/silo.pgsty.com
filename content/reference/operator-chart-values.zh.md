@@ -2,8 +2,8 @@
 title: "Operator Helm 图表"
 url: "/zh/reference/operator-chart-values/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/operator-chart-values.rst
+upstream_modified: true
 ---
 
 <a id="operator-helm"></a>
@@ -13,16 +13,15 @@ silo_modified: true
 
 本页说明 MinIO Operator 的 `values.yaml` 图表。 有关 MinIO 租户图表的文档，请参见 [租户 Helm Charts](/zh/reference/tenant-chart-values/#minio-tenant-chart-values)
 
-{{% alert color="warning" %}}
-上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。请将这些配置视为冻结的 `v7.1.1` 参考快照，而不是上游仍在维护或提供支持的依据。
-{{% /alert %}}
+> [!WARNING]
+> 上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。请将这些配置视为冻结的 `v7.1.1` 参考快照，而不是上游仍在维护或提供支持的依据。
 
 <a id="minio-operator-chart-operator-values"></a>
 
 ## MinIO Operator 图表 {#minio-operator}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="参考" %}}
+{{< tabs group="tab1-yaml" >}}
+{{< tab label="参考" value="tab1" >}}
 **operator**
 
 > Root key for Operator Helm Chart
@@ -168,9 +167,8 @@ silo_modified: true
 > > The [Requests or Limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for resources to associate to Operator pods.
 > >
 > > These settings can control the minimum and maximum resources requested for each pod. If no worker nodes can meet the specified requests, the Operator may fail to deploy.
-{{% /tab %}}
-{{% tab header="YAML" %}}
-
+{{< /tab >}}
+{{< tab label="YAML" value="yaml" >}}
 ```text
 ###
 # Root key for Operator Helm Chart
@@ -361,6 +359,5 @@ operator:
       ephemeral-storage: 500Mi
 
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

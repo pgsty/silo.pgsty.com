@@ -3,8 +3,8 @@ title: "使用 Object Lambda 进行转换"
 url: "/zh/developers/transforms-with-object-lambda/"
 weight: 210
 icon: fa-solid fa-wand-magic-sparkles
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/transforms-with-object-lambda.rst
+upstream_modified: true
 ---
 
 <a id="object-lambda"></a>
@@ -57,11 +57,10 @@ handler 函数应执行以下步骤：
 
    MinIO 会验证响应，并将转换后的数据发送回原始调用应用程序。
 
-{{% alert color="info" %}}
-**响应头**
-
-handler **必须** 在对应的响应头中包含 `outputRoute` 和 `outputToken` 值。 这使 MinIO 能够正确验证来自 handler 的响应。
-{{% /alert %}}
+> [!NOTE]
+> **响应头**
+>
+> handler **必须** 在对应的响应头中包含 `outputRoute` 和 `outputToken` 值。 这使 MinIO 能够正确验证来自 handler 的响应。
 
 ### 注册 Handler {#handler}
 

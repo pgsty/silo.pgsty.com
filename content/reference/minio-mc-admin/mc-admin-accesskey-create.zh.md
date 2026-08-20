@@ -2,8 +2,8 @@
 title: "mc admin accesskey create"
 url: "/zh/reference/minio-mc-admin/mc-admin-accesskey-create/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-accesskey-create.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-accesskey-create"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc admin accesskey create`](#command-mc.admin.accesskey.create) 命令为现有 MinIO 用户添加新的 access key 和 secret key 对。
 
-{{% alert color="info" %}}
-**OpenID Connect 或 AD/LDAP 用户的访问密钥**
+> [!NOTE]
+> **OpenID Connect 或 AD/LDAP 用户的访问密钥**
+>
+> 此命令用于为直接在 MinIO 部署上创建、且不由第三方方案管理的用户创建访问密钥。
+>
+> 要为 [Active Directory/LDAP users](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) 生成访问密钥，请使用 [`mc idp ldap accesskey create`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-create/#command-mc.idp.ldap.accesskey.create)。
 
-此命令用于为直接在 MinIO 部署上创建、且不由第三方方案管理的用户创建访问密钥。
-
-要为 [Active Directory/LDAP users](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) 生成访问密钥，请使用 [`mc idp ldap accesskey create`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-create/#command-mc.idp.ldap.accesskey.create)。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会创建一个与现有 MinIO 用户关联的新访问密钥：
 
 ```shell
@@ -36,8 +35,8 @@ mc admin accesskey create        \
 ```
 
 该命令会返回新账户的 access key 和 secret key。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -58,8 +57,8 @@ mc [GLOBALFLAGS] admin accesskey create                    \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

@@ -2,8 +2,8 @@
 title: "Configure Silo Authentication with Keycloak"
 url: "/operations/external-iam/configure-keycloak-identity-management/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/external-iam/configure-keycloak-identity-management.rst
+upstream_modified: true
 ---
 
 <a id="configure-minio-for-authentication-using-keycloak"></a>
@@ -17,8 +17,8 @@ This page has procedures for configuring OIDC for MinIO deployments in Kubernete
 
 Select the tab corresponding to your infrastructure to switch between instruction sets.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 For MinIO Tenants deployed using the [MinIO Kubernetes Operator](/operations/deployments/kubernetes/#minio-kubernetes), this procedure covers:
 
 - Configure Keycloak for use with MinIO authentication and authorization
@@ -26,8 +26,8 @@ For MinIO Tenants deployed using the [MinIO Kubernetes Operator](/operations/dep
 - Create policies to control access of Keycloak-authenticated users
 - Log into the MinIO Tenant Console using SSO and a Keycloak-managed identity
 - Generate temporary S3 access credentials using the `AssumeRoleWithWebIdentity` Security Token Service (STS) API
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 For MinIO deployments on baremetal infrastructure, this procedure covers:
 
 - Configure Keycloak for use with MinIO authentication and authorization
@@ -35,8 +35,8 @@ For MinIO deployments on baremetal infrastructure, this procedure covers:
 - Create policies to control access of Keycloak-authenticated users
 - Log into the MinIO Console using SSO and a Keycloak-managed identity
 - Generate temporary S3 access credentials using the `AssumeRoleWithWebIdentity` Security Token Service (STS) API
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 This procedure was written and tested against Keycloak `21.0.0`. The provided instructions may work against other Keycloak versions. This procedure assumes you have prior experience with Keycloak and have reviewed [their documentation](https://www.keycloak.org/documentation) for guidance and best practices in deploying, configuring, and managing the service.
 
@@ -46,37 +46,36 @@ This procedure was written and tested against Keycloak `21.0.0`. The provided in
 
 This procedure assumes an existing Keycloak deployment to which you have administrative access. Specifically, you must have permission to create and configure Realms, Clients, Client Scopes, Realm Roles, Users, and Groups on the Keycloak deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 For Keycloak deployments within the same Kubernetes cluster as the MinIO Tenant, this procedure assumes bidirectional access between the Keycloak and MinIO pods/services. For Keycloak deployments external to the Kubernetes cluster, this procedure assumes an existing Ingress, Load Balancer, or similar Kubernetes network control component that manages network access to and from the MinIO Tenant.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 The MinIO deployment must have bidirectional access to the target OIDC service.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Ensure each user identity intended for use with MinIO has the appropriate [claim](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid-access-control) configured such that MinIO can associate a [policy](/administration/identity-access-management/policy-based-access-control/#minio-policy) to the authenticated user. An OpenID user with no assigned policy has no permission to access any action or resource on the MinIO cluster.
 
 ### Access to MinIO Cluster {#access-to-minio-cluster}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 You must have access to the MinIO Operator Console web UI. You can either expose the MinIO Operator Console service using your preferred Kubernetes routing component, or use temporary port forwarding to expose the Console service port on your local machine.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 This procedure uses [`mc`](/reference/minio-mc/#command-mc) for performing operations on the MinIO cluster. Install `mc` on a machine with network access to the cluster. See the `mc` [Installation Quickstart](/reference/minio-mc/#mc-install) for instructions on downloading and installing `mc`.
 
 This procedure assumes a configured [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) for the MinIO cluster.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-external-identity-management-keycloak-configure"></a>
 
 ## Configure MinIO for Keycloak Identity Management {#configure-minio-for-keycloak-identity-management}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
-
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 1. Configure or Create a Client for Accessing Keycloak
 
    Authenticate to the Keycloak **Administrative Console** and navigate to **Clients**.
@@ -363,9 +362,8 @@ Check the MinIO logs and verify that startup succeeded with no errors related to
 Applications should implement the [STS AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) flow using their [SDK](/developers/minio-drivers/#minio-drivers) of choice. When STS credentials expire, applications should have logic in place to regenerate the JWT token, STS token, and MinIO credentials before retrying and continuing operations.
 
 Alternatively, users can generate [access keys](/administration/identity-access-management/minio-user-management/#minio-id-access-keys) through the MinIO Console for the purpose of creating long-lived API-key like access using their Keycloak credentials.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
-
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 1. Configure or Create a Client for Accessing Keycloak
 
    Authenticate to the Keycloak **Administrative Console** and navigate to **Clients**.
@@ -545,8 +543,8 @@ Alternatively, users can generate [access keys](/administration/identity-access-
    - Using a terminal/shell and the [`mc idp openid`](/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) command
    - Using environment variables set prior to starting MinIO
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="CLI" %}}
+   {{< tabs group="cli-environment-variables" >}}
+   {{< tab label="CLI" value="cli" >}}
    You can use the [`mc idp openid add`](/reference/minio-mc/mc-idp-openid/#mc.idp.openid.add) command to create a new configuration for the Keycloak service. The command takes all supported [OpenID Configuration Settings](/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings):
 
    ```shell
@@ -588,8 +586,8 @@ Alternatively, users can generate [access keys](/administration/identity-access-
        </tr>
      </tbody>
    </table>
-   {{% /tab %}}
-   {{% tab header="Environment Variables" %}}
+   {{< /tab >}}
+   {{< tab label="Environment Variables" value="environment-variables" >}}
    Set the following [environment variables](/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid) prior to starting the container using the `-e ENVVAR=VALUE` flag.
 
    The following example code sets the minimum required environment variables related to configuring Keycloak as an external identity management provider.
@@ -635,8 +633,8 @@ Alternatively, users can generate [access keys](/administration/identity-access-
    </table>
 
    For complete documentation on these variables, see [OpenID Identity Management Settings](/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid)
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 
    Restart the MinIO deployment for the changes to apply.
 
@@ -711,8 +709,8 @@ Alternatively, users can generate [access keys](/administration/identity-access-
    Applications should implement the [STS AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) flow using their [SDK](/developers/minio-drivers/#minio-drivers) of choice. When STS credentials expire, applications should have logic in place to regenerate the JWT token, STS token, and MinIO credentials before retrying and continuing operations.
 
    Alternatively, users can generate [access keys](/administration/identity-access-management/minio-user-management/#minio-id-access-keys) through the MinIO Console for the purpose of creating long-lived API-key like access using their Keycloak credentials.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Enable the Keycloak Admin REST API {#enable-the-keycloak-admin-rest-api}
 
@@ -811,8 +809,8 @@ MinIO supports multiple methods for configuring Keycloak Admin API Support:
 - Using a terminal/shell and the [`mc idp openid`](/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) command
 - Using environment variables set prior to starting MinIO
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="CLI" %}}
+{{< tabs group="cli-environment-variables" >}}
+{{< tab label="CLI" value="cli" >}}
 You can use the [`mc idp openid update`](/reference/minio-mc/mc-idp-openid/#mc.idp.openid.update) command to modify the configuration settings for an existing Keycloak service. You can alternatively include the following configuration settings when setting up Keycloak for the first time. The command takes all supported [OpenID Configuration Settings](/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings):
 
 ```shell
@@ -825,8 +823,8 @@ mc idp openid update ALIAS KEYCLOAK_IDENTIFIER \
 - Replace `KEYCLOAK_IDENTIFIER` with the name of the configured Keycloak IDP. You can use [`mc idp openid ls`](/reference/minio-mc/mc-idp-openid/#mc.idp.openid.ls) to view all configured IDP configurations on the MinIO deployment
 - Specify the Keycloak admin URL in the [`keycloak_admin_url`](/reference/minio-server/settings/iam/openid/#mc-conf.identity_openid.keycloak_admin_url) configuration setting
 - Specify the Keycloak Realm name in the [`keycloak_realm`](/reference/minio-server/settings/iam/openid/#mc-conf.identity_openid.keycloak_realm)
-{{% /tab %}}
-{{% tab header="Environment Variables" %}}
+{{< /tab >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 Set the following [environment variables](/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid) in the appropriate configuration location, such as `/etc/default/minio`.
 
 The following example code sets the minimum required environment variables related to enabling the Keycloak Admin API for an existing Keycloak configuration. Replace the suffix `_PRIMARY_IAM` with the unique identifier for the target Keycloak configuration.
@@ -839,5 +837,5 @@ MINIO_IDENTITY_OPENID_KEYCLOAK_REALM_PRIMARY_IAM="REALM"
 
 - Specify the Keycloak admin URL in the [`MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL`](/reference/minio-server/settings/iam/openid/#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL)
 - Specify the Keycloak Realm name in the [`MINIO_IDENTITY_OPENID_KEYCLOAK_REALM`](/reference/minio-server/settings/iam/openid/#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_REALM)
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

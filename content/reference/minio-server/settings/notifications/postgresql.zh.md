@@ -2,8 +2,8 @@
 title: "PostgreSQL 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/postgresql/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/postgresql.rst
+upstream_modified: false
 ---
 
 <a id="postgresql"></a>
@@ -21,20 +21,16 @@ silo_modified: false
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 多个 PostgreSQL 目标 {#id2}
 
 你可以通过在顶层键后追加唯一标识符 `_ID`，为每组相关 PostgreSQL 设置指定多个 PostgreSQL 服务端点。 例如，以下命令分别将两个不同的 PostgreSQL 服务端点设置为 `PRIMARY` 和 `SECONDARY`：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
-```shell
+```shell {tab="环境变量" group="tab1-tab2" value="tab1"}
 export MINIO_NOTIFY_POSTGRES_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_PRIMARY="host=postgresql-endpoint.example.net port=4222..."
 export MINIO_NOTIFY_POSTGRES_TABLE_PRIMARY="minioevents"
@@ -46,10 +42,7 @@ export MINIO_NOTIFY_POSTGRES_TABLE_SECONDARY="minioevents"
 export MINIO_NOTIFY_POSTGRES_FORMAT_SECONDARY="namespace"
 ```
 
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
-```shell
+```shell {tab="配置设置" value="tab2"}
 mc admin config set notify_postgres:primary \
    connection_string="host=postgresql.example.com port=5432..."
    table="minioevents" \
@@ -63,9 +56,6 @@ mc admin config set notify_postgres:secondary \
    [ARGUMENT=VALUE ...]
 ```
 
-{{% /tab %}}
-{{< /tabpane >}}
-
 在这些设置中，[`MINIO_NOTIFY_POSTGRES_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_POSTGRES_ENABLE) 表示该环境变量关联到 ID 为 `PRIMARY` 的 PostgreSQL 服务端点。
 
 ## 设置 {#id3}
@@ -74,9 +64,8 @@ mc admin config set notify_postgres:secondary \
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_POSTGRES_ENABLE` {#envvar.MINIO_NOTIFY_POSTGRES_ENABLE}
 
 *envvar*
@@ -90,9 +79,8 @@ mc admin config set notify_postgres:secondary \
 - [`MINIO_NOTIFY_POSTGRES_CONNECTION_STRING`](#envvar.MINIO_NOTIFY_POSTGRES_CONNECTION_STRING)
 - [`MINIO_NOTIFY_POSTGRES_TABLE`](#envvar.MINIO_NOTIFY_POSTGRES_TABLE)
 - [`MINIO_NOTIFY_POSTGRES_FORMAT`](#envvar.MINIO_NOTIFY_POSTGRES_FORMAT)
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_postgres` {#mc-conf.notify_postgres}
 
 *mc-conf*
@@ -114,28 +102,25 @@ mc admin config set notify_postgres                            \
   format="namespace"                                           \
   [ARGUMENT="VALUE"] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 连接字符串 {#id5}
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_POSTGRES_CONNECTION_STRING` {#envvar.MINIO_NOTIFY_POSTGRES_CONNECTION_STRING}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_postgres connection_string` {#mc-conf.notify_postgres.connection_string}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 PostgreSQL 服务端点的 [URI connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)。 MinIO 支持 `key=value` 格式的 PostgreSQL 连接字符串。 例如：
 
@@ -143,30 +128,27 @@ mc admin config set notify_postgres                            \
 
 有关受支持 PostgreSQL 连接字符串参数的完整文档，请参阅 [PostgreSQL Connection Strings documentation](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-27T05-56-19Z**
-
-在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-27T05-56-19Z**
+>
+> 在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
 
 ### 表 {#id6}
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_POSTGRES_TABLE` {#envvar.MINIO_NOTIFY_POSTGRES_TABLE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_postgres table` {#mc-conf.notify_postgres.table}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 发布事件通知的 PostgreSQL 表名称。
 
@@ -174,20 +156,18 @@ mc admin config set notify_postgres                            \
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_POSTGRES_FORMAT` {#envvar.MINIO_NOTIFY_POSTGRES_FORMAT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_postgres format` {#mc-conf.notify_postgres.format}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定写入 PostgreSQL 服务端点的事件数据格式。 MinIO 支持以下取值：
 
@@ -203,20 +183,18 @@ mc admin config set notify_postgres                            \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS` {#envvar.MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_postgres max_open_connections` {#mc-conf.notify_postgres.max_open_connections}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定与 PostgreSQL 数据库建立的最大打开连接数。
 
@@ -226,20 +204,18 @@ mc admin config set notify_postgres                            \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_POSTGRES_QUEUE_DIR` {#envvar.MINIO_NOTIFY_POSTGRES_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_postgres queue_dir` {#mc-conf.notify_postgres.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定目录路径以启用 MinIO 的持久化事件存储，用于保存未投递消息，例如 `/opt/minio/events`。
 
@@ -249,20 +225,18 @@ mc admin config set notify_postgres                            \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_postgres queue_limit` {#mc-conf.notify_postgres.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定未投递消息的数量上限。 默认为 `100000`。
 
@@ -270,19 +244,17 @@ mc admin config set notify_postgres                            \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_POSTGRES_COMMENT` {#envvar.MINIO_NOTIFY_POSTGRES_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_postgres comment` {#mc-conf.notify_postgres.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定与 PostgreSQL 配置关联的注释。

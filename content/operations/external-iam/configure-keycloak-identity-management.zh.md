@@ -2,8 +2,8 @@
 title: "配置 Silo 使用 Keycloak 进行认证"
 url: "/zh/operations/external-iam/configure-keycloak-identity-management/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/external-iam/configure-keycloak-identity-management.rst
+upstream_modified: true
 ---
 
 <a id="minio-keycloak"></a>
@@ -17,8 +17,8 @@ silo_modified: true
 
 请选择与你基础设施对应的标签页，在不同说明集之间切换。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 对于使用 [MinIO Kubernetes Operator](/zh/operations/deployments/kubernetes/#minio-kubernetes) 部署的 MinIO Tenant，本流程包括：
 
 - 配置 Keycloak 以配合 MinIO 认证与授权
@@ -26,8 +26,8 @@ silo_modified: true
 - 创建用于控制 Keycloak 认证用户访问权限的策略
 - 使用 SSO 和 Keycloak 托管身份登录 MinIO Tenant Console
 - 使用 `AssumeRoleWithWebIdentity` Security Token Service (STS) API 生成临时 S3 访问凭证
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 对于部署在裸金属基础设施上的 MinIO，本流程包括：
 
 - 配置 Keycloak 以配合 MinIO 认证与授权
@@ -35,8 +35,8 @@ silo_modified: true
 - 创建用于控制 Keycloak 认证用户访问权限的策略
 - 使用 SSO 和 Keycloak 托管身份登录 MinIO Console
 - 使用 `AssumeRoleWithWebIdentity` Security Token Service (STS) API 生成临时 S3 访问凭证
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 本流程基于 Keycloak `21.0.0` 编写并完成测试。 这些说明也可能适用于其他 Keycloak 版本。 本流程假定你已经具备 Keycloak 的使用经验，并已阅读 [其文档](https://www.keycloak.org/documentation)，以获取部署、配置和管理该服务的指导和最佳实践。
 
@@ -46,37 +46,36 @@ silo_modified: true
 
 本流程假定你已经拥有一个现成的 Keycloak 部署，并且具备其管理访问权限。 具体来说，你必须拥有在该 Keycloak 部署上创建和配置 Realms、Clients、Client Scopes、Realm Roles、Users 和 Groups 的权限。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 对于与 MinIO Tenant 位于同一 Kubernetes 集群内的 Keycloak 部署，本流程假定 Keycloak 与 MinIO 的 pods/services 之间具备双向访问能力。 对于位于 Kubernetes 集群外部的 Keycloak 部署，本流程假定已经存在用于管理 MinIO Tenant 入站和出站访问的 Ingress、Load Balancer 或类似 Kubernetes 网络控制组件。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 MinIO 部署必须与目标 OIDC 服务保持双向访问。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 请确保每个打算与 MinIO 配合使用的用户身份，都配置了合适的 [claim](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid-access-control)，以便 MinIO 能将认证用户关联到某个 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。 未分配任何策略的 OpenID 用户，无权访问 MinIO 集群中的任何操作或资源。
 
 ### 访问 MinIO 集群 {#minio}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 你必须能够访问 MinIO Operator Console Web UI。 你可以使用自己偏好的 Kubernetes 路由组件暴露 MinIO Operator Console Service，也可以通过临时端口转发，在本地机器上暴露 Console Service 端口。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 本流程使用 [`mc`](/zh/reference/minio-mc/#command-mc) 对 MinIO 集群执行操作。 请在一台能够访问该集群网络的机器上安装 `mc`。 关于如何下载和安装 `mc`，请参见 `mc` [安装快速开始](/zh/reference/minio-mc/#mc-install)。
 
 本流程假定已为 MinIO 集群配置 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="id4"></a>
 
 ## 为 MinIO 配置 Keycloak 身份管理 {#minio-external-identity-management-keycloak-configure}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
-
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 1. 配置或创建用于访问 Keycloak 的 Client
 
    认证到 Keycloak **Administrative Console**，然后进入 **Clients**。
@@ -364,9 +363,8 @@ Keycloak 会使用提供的 URI 将已认证用户返回到 Console。</p><p>对
 应用程序应使用其选择的 [SDK](/zh/developers/minio-drivers/#minio-drivers) 实现 [STS AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) 流程。 当 STS 凭证过期时，应用程序应具备在重试并继续操作之前重新生成 JWT token、 STS token 和 MinIO 凭证的逻辑。
 
 或者，用户也可以通过 MinIO Console 使用其 Keycloak 凭证生成 [access keys](/zh/administration/identity-access-management/minio-user-management/#minio-id-access-keys)， 以创建类似长期 API key 的访问方式。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
-
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 1. 配置或创建用于访问 Keycloak 的 Client
 
    认证到 Keycloak **Administrative Console**，然后进入 **Clients**。
@@ -546,8 +544,8 @@ Keycloak 会使用提供的 URI 将已认证用户返回到 Console。</p><p>对
    - 使用终端/shell 以及 [`mc idp openid`](/zh/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) 命令
    - 使用在启动 MinIO 之前设置的环境变量
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="CLI" %}}
+   {{< tabs group="cli-tab2" >}}
+   {{< tab label="CLI" value="cli" >}}
    你可以使用 [`mc idp openid add`](/zh/reference/minio-mc/mc-idp-openid/#mc.idp.openid.add) 命令为 Keycloak 服务创建新配置。 该命令接受所有受支持的 [OpenID Configuration Settings](/zh/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings)：
 
    ```shell
@@ -590,8 +588,8 @@ Keycloak 会使用提供的 URI 将已认证用户返回到 Console。</p><p>对
        </tr>
      </tbody>
    </table>
-   {{% /tab %}}
-   {{% tab header="环境变量" %}}
+   {{< /tab >}}
+   {{< tab label="环境变量" value="tab2" >}}
    在使用 `-e ENVVAR=VALUE` 标志启动容器之前， 设置以下 [环境变量](/zh/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid)。
 
    下面的示例代码设置了将 Keycloak 配置为外部身份管理提供者所需的最小环境变量集合。
@@ -638,8 +636,8 @@ Keycloak 会使用提供的 URI 将已认证用户返回到 Console。</p><p>对
    </table>
 
    有关这些变量的完整文档，请参见 [OpenID 身份管理设置](/zh/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid)
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 
    重启 MinIO 部署以应用这些更改。
 
@@ -714,8 +712,8 @@ Keycloak 会使用提供的 URI 将已认证用户返回到 Console。</p><p>对
    应用程序应使用所选 [SDK](/zh/developers/minio-drivers/#minio-drivers) 实现 [STS AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) 流程。 当 STS 凭证过期时，应用程序应具备在重试并继续操作之前重新生成 JWT token、 STS token 和 MinIO 凭证的逻辑。
 
    或者，用户也可以通过 MinIO Console 使用其 Keycloak 凭证生成 [access keys](/zh/administration/identity-access-management/minio-user-management/#minio-id-access-keys)， 以创建类似长期 API key 的访问方式。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 启用 Keycloak Admin REST API {#keycloak-admin-rest-api}
 
@@ -814,8 +812,8 @@ MinIO 支持多种方式来配置 Keycloak Admin API 支持：
 - 使用终端 / shell 以及 [`mc idp openid`](/zh/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) 命令
 - 使用在启动 MinIO 之前设置的环境变量
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="CLI" %}}
+{{< tabs group="cli-environment-variables" >}}
+{{< tab label="CLI" value="cli" >}}
 你可以使用 [`mc idp openid update`](/zh/reference/minio-mc/mc-idp-openid/#mc.idp.openid.update) 命令修改现有 Keycloak 服务的配置项。 如果是首次配置 Keycloak，也可以直接在初始设置时包含以下配置项。 该命令接受所有受支持的 [OpenID 配置项](/zh/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings)：
 
 ```shell
@@ -828,8 +826,8 @@ mc idp openid update ALIAS KEYCLOAK_IDENTIFIER \
 - 将 `KEYCLOAK_IDENTIFIER` 替换为已配置 Keycloak IDP 的名称。 你可以使用 [`mc idp openid ls`](/zh/reference/minio-mc/mc-idp-openid/#mc.idp.openid.ls) 查看 MinIO 部署上所有已配置的 IDP 项
 - 在 [`keycloak_admin_url`](/zh/reference/minio-server/settings/iam/openid/#mc-conf.identity_openid.keycloak_admin_url) 配置项中指定 Keycloak admin URL
 - 在 [`keycloak_realm`](/zh/reference/minio-server/settings/iam/openid/#mc-conf.identity_openid.keycloak_realm) 中指定 Keycloak Realm 名称
-{{% /tab %}}
-{{% tab header="Environment Variables" %}}
+{{< /tab >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 在合适的配置位置（例如 `/etc/default/minio`）设置以下 [环境变量](/zh/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid)。
 
 以下示例代码设置了在现有 Keycloak 配置上启用 Keycloak Admin API 所需的最小环境变量集合。 请将后缀 `_PRIMARY_IAM` 替换为目标 Keycloak 配置的唯一标识符。
@@ -842,5 +840,5 @@ MINIO_IDENTITY_OPENID_KEYCLOAK_REALM_PRIMARY_IAM="REALM"
 
 - 在 [`MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL`](/zh/reference/minio-server/settings/iam/openid/#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL) 中指定 Keycloak admin URL
 - 在 [`MINIO_IDENTITY_OPENID_KEYCLOAK_REALM`](/zh/reference/minio-server/settings/iam/openid/#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_REALM) 中指定 Keycloak Realm 名称
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

@@ -2,8 +2,8 @@
 title: "mc ls"
 url: "/reference/minio-mc/mc-ls/"
 weight: 220
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-ls"></a>
@@ -16,8 +16,8 @@ The [`mc ls`](#command-mc.ls) command lists buckets and objects on MinIO or anot
 
 You can also use [`mc ls`](#command-mc.ls) against the local filesystem to produce similar results as the `ls` command.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command lists all objects *and* object versions in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
@@ -34,8 +34,8 @@ The output resembles the following:
 - `STANDARD` marks objects stored on the MinIO deployment
 - `WARM` marks objects stored on the remote tier with matching name
 - `videos/` indicates the prefix for the object
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -53,8 +53,8 @@ mc [GLOBALFLAGS] ls              \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -153,11 +153,10 @@ mc ls --versions ALIAS/PATH
 - Replace [`ALIAS`](#mc.ls.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the S3-compatible host.
 - Replace [`PATH`](#mc.ls.ALIAS) with the path to the bucket or object on the S3-compatible host.
 
-{{% alert color="info" %}}
-**Requires Versioning**
-
-[`mc ls`](#command-mc.ls) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
-{{% /alert %}}
+> [!NOTE]
+> **Requires Versioning**
+>
+> [`mc ls`](#command-mc.ls) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
 
 ### List Bucket Contents at Point in Time {#list-bucket-contents-at-point-in-time}
 
@@ -171,11 +170,10 @@ mc ls --rewind DURATION ALIAS/PATH
 - Replace [`PATH`](#mc.ls.ALIAS) with the path to the bucket or object on the S3-compatible host.
 - Replace [`DURATION`](#mc.ls.-rewind) with the point-in-time in the past at which the command returns the object. For example, specify `30d` to return the version of the object 30 days prior to the current date.
 
-{{% alert color="info" %}}
-**Requires Versioning**
-
-[`mc ls`](#command-mc.ls) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
-{{% /alert %}}
+> [!NOTE]
+> **Requires Versioning**
+>
+> [`mc ls`](#command-mc.ls) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
 
 ## Behavior {#behavior}
 

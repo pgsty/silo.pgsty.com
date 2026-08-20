@@ -2,8 +2,8 @@
 title: "cert-manager for Operator"
 url: "/operations/cert-manager/cert-manager-operator/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/cert-manager/cert-manager-operator.rst
+upstream_modified: false
 ---
 
 <a id="cert-manager-for-operator"></a>
@@ -27,11 +27,10 @@ This guide **disables** the automatic generation of certificates in MinIO Operat
 
 The `minio-operator` namespace must have its own certificate authority (CA), derived from the cluster’s `ClusterIssuer` certificate created during [cert-manager setup](/operations/network-encryption/cert-manager/#minio-certmanager). Create this CA certificate using cert-manager.
 
-{{% alert color="warning" %}}
-**Important**
-
-This CA certificate **must** exist *before* installing MinIO Operator.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This CA certificate **must** exist *before* installing MinIO Operator.
 
 1. If it does not exist, create the `minio-operator` namespace
 
@@ -66,11 +65,10 @@ This CA certificate **must** exist *before* installing MinIO Operator.
        group: cert-manager.io
    ```
 
-   {{% alert color="warning" %}}
-   **Important**
-
-   The `spec.issueRef.name` must match the name of the `ClusterIssuer` created when [setting up cert-manager](/operations/network-encryption/cert-manager/#minio-cert-manager-create-cluster-issuer). If you specified a different `ClusterIssuer` name or are using a different `Issuer` from the guide, modify the `issuerRef` to match your environment.
-   {{% /alert %}}
+   > [!WARNING]
+   > **Important**
+   >
+   > The `spec.issueRef.name` must match the name of the `ClusterIssuer` created when [setting up cert-manager](/operations/network-encryption/cert-manager/#minio-cert-manager-create-cluster-issuer). If you specified a different `ClusterIssuer` name or are using a different `Issuer` from the guide, modify the `issuerRef` to match your environment.
 3. Apply the resource:
 
    ```shell
@@ -79,11 +77,10 @@ This CA certificate **must** exist *before* installing MinIO Operator.
 
 Kubernetes creates a new secret with the name `operator-ca-tls` in the `minio-operator` namespace.
 
-{{% alert color="warning" %}}
-**Important**
-
-Make sure to trust this certificate in any applications that need to interact with the MinIO Operator.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Make sure to trust this certificate in any applications that need to interact with the MinIO Operator.
 
 ## 2) Use the secret to create the `Issuer` {#use-the-secret-to-create-the-issuer}
 
@@ -119,19 +116,18 @@ The certificate from cert-manager must be valid for the following DNS domains:
 - `sts.minio-operator.svc.`
 - `sts.minio-operator.svc.<cluster domain>`
 
-  {{% alert color="warning" %}}
-  **Important**
-
-  Replace `<cluster domain>` with the actual value for your MinIO tenant. `cluster domain` is the internal root DNS domain assigned in your Kubernetes cluster. Typically, this is `cluster.local`, but confirm the value by checking your CoreDNS configuration for the correct value for your Kubernetes cluster.
-
-  For example:
-
-  ```shell
-  kubectl get configmap coredns -n kube-system -o jsonpath="{.data}"
-  ```
-
-  Different Kubernetes providers manage the root domain differently. Check with your Kubernetes provider for more information.
-  {{% /alert %}}
+  > [!WARNING]
+  > **Important**
+  >
+  > Replace `<cluster domain>` with the actual value for your MinIO tenant. `cluster domain` is the internal root DNS domain assigned in your Kubernetes cluster. Typically, this is `cluster.local`, but confirm the value by checking your CoreDNS configuration for the correct value for your Kubernetes cluster.
+  >
+  > For example:
+  >
+  > ```shell
+  > kubectl get configmap coredns -n kube-system -o jsonpath="{.data}"
+  > ```
+  >
+  > Different Kubernetes providers manage the root domain differently. Check with your Kubernetes provider for more information.
 
 1. Create a `Certificate` for the specified domains:
 
@@ -154,13 +150,12 @@ The certificate from cert-manager must be valid for the following DNS domains:
        name: minio-operator-ca-issuer
    ```
 
-   {{% alert color="warning" %}}
-   **Important**
-
-   The `spec.secretName` is not optional.
-
-   The secret name **must** be `sts-tls`. Confirm this by setting `spec.secretName: sts-tls` as highlighted in the certificate YAML.
-   {{% /alert %}}
+   > [!WARNING]
+   > **Important**
+   >
+   > The `spec.secretName` is not optional.
+   >
+   > The secret name **must** be `sts-tls`. Confirm this by setting `spec.secretName: sts-tls` as highlighted in the certificate YAML.
 2. Apply the resource:
 
    ```shell
@@ -169,11 +164,10 @@ The certificate from cert-manager must be valid for the following DNS domains:
 
 This creates a secret called `sts-tls` in the `minio-operator` namespace.
 
-{{% alert color="danger" %}}
-**Warning**
-
-The STS service will not start if the `sts-tls` secret, containing the TLS certificate, is missing or contains an invalid `key-value` pair.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> The STS service will not start if the `sts-tls` secret, containing the TLS certificate, is missing or contains an invalid `key-value` pair.
 
 ## 4) Install Operator with Auto TLS disabled {#install-operator-with-auto-tls-disabled}
 

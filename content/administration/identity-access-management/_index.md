@@ -3,8 +3,8 @@ title: "Identity and Access Management"
 url: "/administration/identity-access-management/"
 weight: 140
 icon: fa-solid fa-users-gear
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management.rst
+upstream_modified: false
 ---
 
 <a id="minio-authentication-and-identity-management"></a>
@@ -74,10 +74,9 @@ information.</p></td>
 
 MinIO PBAC is built for compatibility with AWS IAM policy syntax, structure, and behavior. The MinIO documentation makes a best-effort to cover IAM-specific behavior and functionality. Consider deferring to the [IAM documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/) for more complete documentation on IAM, IAM policies, or IAM JSON syntax.
 
-{{% alert color="info" %}}
-**`Deny` overrides `Allow`**
-
-MinIO follows AWS IAM policy evaluation rules where a `Deny` rule overrides `Allow` rule on the same action/resource. For example, if a user has an explicitly assigned policy with an `Allow` rule for an action/resource while one of its groups has an assigned policy with a `Deny` rule for that action/resource, MinIO would apply only the `Deny` rule.
-
-For more information on IAM policy evaluation logic, see the IAM documentation on [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow).
-{{% /alert %}}
+> [!NOTE]
+> **`Deny` overrides `Allow`**
+>
+> MinIO follows AWS IAM policy evaluation rules where a `Deny` rule overrides `Allow` rule on the same action/resource. For example, if a user has an explicitly assigned policy with an `Allow` rule for an action/resource while one of its groups has an assigned policy with a `Deny` rule for that action/resource, MinIO would apply only the `Deny` rule.
+>
+> For more information on IAM policy evaluation logic, see the IAM documentation on [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow).

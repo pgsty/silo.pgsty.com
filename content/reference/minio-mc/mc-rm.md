@@ -2,8 +2,8 @@
 title: "mc rm"
 url: "/reference/minio-mc/mc-rm/"
 weight: 340
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-rm.rst
+upstream_modified: false
 ---
 
 <a id="mc-rm"></a>
@@ -18,22 +18,20 @@ You can also use [`mc rm`](#command-mc.rm) against the local filesystem to produ
 
 For more information on how MinIO performs `DELETE` actions on objects, see [Object Deletion](/administration/object-management/object-delete/#minio-object-delete).
 
-{{% alert color="warning" %}}
-**Important**
+> [!WARNING]
+> **Important**
+>
+> [`mc rm`](#command-mc.rm) supports removing multiple objects *or* files in a single command. Consider using the [`--dry-run`](#mc.rm.-dry-run) option to validate that the operation targets only the desired objects/files.
 
-[`mc rm`](#command-mc.rm) supports removing multiple objects *or* files in a single command. Consider using the [`--dry-run`](#mc.rm.-dry-run) option to validate that the operation targets only the desired objects/files.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes multiple objects from the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc rm --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -61,8 +59,8 @@ mc [GLOBALFLAGS] rm  \
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 
 [`mc rm --force`](#mc.rm.-force) is required by multiple parameters. [`mc rm --version-id`](#mc.rm.-version-id) is mutually exclusive with multiple parameters. See the reference documentation for more information.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -120,11 +118,10 @@ When combined with [`--versions`](#mc.rm.-versions), this flag directs [`mc rm`]
 
 Consider first running the command with the [`--dry-run`](#mc.rm.-dry-run) to validate the scope of the site-wide delete operation.
 
-{{% alert color="danger" %}}
-**Warning**
-
-Running [`mc rm --dangerous`](#mc.rm.-dangerous) with the [`--versions`](#mc.rm.-versions) flag is irreversible. Exercise all possible due diligence in ensuring the command applies to only the desired `ALIAS` targets prior to execution.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> Running [`mc rm --dangerous`](#mc.rm.-dangerous) with the [`--versions`](#mc.rm.-versions) flag is irreversible. Exercise all possible due diligence in ensuring the command applies to only the desired `ALIAS` targets prior to execution.
 
 ##### `--dry-run` {#mc.rm.-dry-run}
 
@@ -294,11 +291,10 @@ mc rm --incomplete --recursive --force ALIAS/PATH
 
 Use [`mc rm`](#command-mc.rm) with [`--versions`](#mc.rm.-versions) and [`--newer-than`](#mc.rm.-newer-than) to remove all object versions newer than the specified duration of time. This effectively “rolls back” the object to its state at that time.
 
-{{% alert color="warning" %}}
-**Important**
-
-Removing specific versions of an object is a *destructive* action. You cannot restore the deleted object versions.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Removing specific versions of an object is a *destructive* action. You cannot restore the deleted object versions.
 
 ```shell
 mc rm ALIAS/PATH --versions --newer-than DURATION
@@ -340,13 +336,12 @@ MinIO supports keeping multiple [versions](/administration/object-management/obj
 - To remove all versions of an object from a bucket, use [`mc rm --versions`](#mc.rm.-versions)
 - To remove all non-current versions of an object from a bucket, use [`mc rm --non-current`](#mc.rm.-non-current)
 
-{{% alert color="info" %}}
-**Changed: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-
-The output shows the modification time of versioned files. When used with `--dry-run`, this can help confirm that you selected the correct object(s) for removal.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
+>
+> The output shows the modification time of versioned files. When used with `--dry-run`, this can help confirm that you selected the correct object(s) for removal.
 
 ### S3 Compatibility {#s3-compatibility}
 

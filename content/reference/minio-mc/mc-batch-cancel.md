@@ -2,8 +2,8 @@
 title: "mc batch cancel"
 url: "/reference/minio-mc/mc-batch-cancel/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-cancel.rst
+upstream_modified: false
 ---
 
 <a id="mc-batch-cancel"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.batch.cancel"></a>
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
 
 ## Syntax {#syntax}
 
@@ -23,16 +22,15 @@ The [`mc batch cancel`](#command-mc.batch.cancel) stops an ongoing batch job.
 
 You must specify the job ID. To find the job ID, use [`mc batch list`](/reference/minio-mc/mc-batch-list/#command-mc.batch.list).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command outputs the job definition for the job identified as `KwSysDpxcBU9FNhGkn2dCf`.
 
 ```shell
 mc batch cancel myminio KwSysDpxcBU9FNhGkn2dCf
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -44,8 +42,8 @@ mc [GLOBALFLAGS] batch cancel ALIAS JOBID
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

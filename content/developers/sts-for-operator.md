@@ -2,8 +2,8 @@
 title: "Security Token Service (STS) for MinIO Operator"
 url: "/developers/sts-for-operator/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/sts-for-operator.rst
+upstream_modified: false
 ---
 
 <a id="security-token-service-sts-for-minio-operator"></a>
@@ -11,13 +11,12 @@ silo_modified: false
 
 ## Overview {#overview}
 
-{{% alert color="info" %}}
-**Added: Operator**
-
-v5.0.0
-
-The MinIO Operator supports a set of API calls that allows an application to obtain STS credentials for a MinIO Tenant.
-{{% /alert %}}
+> [!NOTE]
+> **Added: Operator**
+>
+> v5.0.0
+>
+> The MinIO Operator supports a set of API calls that allows an application to obtain STS credentials for a MinIO Tenant.
 
 Benefits of STS for MinIO Operator include:
 
@@ -27,15 +26,14 @@ Benefits of STS for MinIO Operator include:
   Service Accounts or Service Account Tokens are a core concept of [Role-Based Access Control (RBAC)](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) [authentication](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#service-account-tokens) in Kubernetes.
 - Implementing STS for MinIO Operator allows you to utilize infrastructure as code principles and configuration by using the tenant custom resource definition (CRD) and a MinIO PolicyBinding CRD.
 
-{{% alert color="warning" %}}
-**Important**
-
-Starting with Operator v5.0.11, STS is *enabled* by default.
-
-Previous versions of the Operator start with STS *disabled* by default. To use STS with v5.0.10 or older versions of the Operator, you must first explicitly enable it.
-
-The procedure on this page includes instructions to enable the STS API in the MinIO Operator.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Starting with Operator v5.0.11, STS is *enabled* by default.
+>
+> Previous versions of the Operator start with STS *disabled* by default. To use STS with v5.0.10 or older versions of the Operator, you must first explicitly enable it.
+>
+> The procedure on this page includes instructions to enable the STS API in the MinIO Operator.
 
 ## How STS Authorization Works in Kubernetes {#how-sts-authorization-works-in-kubernetes}
 
@@ -69,11 +67,10 @@ STS for the MinIO Operator requires the following:
 
 1. Enable STS functionality for the deployment
 
-   {{% alert color="info" %}}
-   **Note**
-
-   This step is optional for Operator version 5.0.11 or later.
-   {{% /alert %}}
+   > [!NOTE]
+   > **Note**
+   >
+   > This step is optional for Operator version 5.0.11 or later.
 
    ```shell
    kubectl -n minio-operator set env deployment/minio-operator OPERATOR_STS_ENABLED=on

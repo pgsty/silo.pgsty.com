@@ -3,19 +3,18 @@ title: "mc ilm tier"
 url: "/zh/reference/minio-mc/mc-ilm-tier/"
 weight: 30
 icon: fa-solid fa-layer-group
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier"></a>
 
 <a id="command-mc.ilm.tier"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc ilm tier`](#command-mc.ilm.tier) replaces `mc admin tier`.
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc ilm tier`](#command-mc.ilm.tier) replaces `mc admin tier`.
 
 ## 说明 {#id2}
 
@@ -141,13 +140,12 @@ silo_modified: false
 
 请将 `Resource` 修改为 MinIO 用于对象分层的目标存储桶。
 
-{{% alert color="info" %}}
-**避免在远程层启用版本控制**
-
-MinIO 强烈建议不要为远程层启用存储桶版本控制。 如果远程层存储桶启用了版本控制，则每个源对象版本都会过渡为远程层中的一个 *唯一对象*。
-
-如果你的环境要求远程层启用版本控制，则还必须允许 `s3:DeleteObjectVersion` 权限。
-{{% /alert %}}
+> [!NOTE]
+> **避免在远程层启用版本控制**
+>
+> MinIO 强烈建议不要为远程层启用存储桶版本控制。 如果远程层存储桶启用了版本控制，则每个源对象版本都会过渡为远程层中的一个 *唯一对象*。
+>
+> 如果你的环境要求远程层启用版本控制，则还必须允许 `s3:DeleteObjectVersion` 权限。
 
 有关如何配置用户和权限以支持 MinIO 分层的更完整信息，请参阅受支持分层目标的相关文档：
 

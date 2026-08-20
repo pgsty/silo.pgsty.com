@@ -2,8 +2,8 @@
 title: "Silo Access Management Plugin Settings"
 url: "/reference/minio-server/settings/iam/minio-access-plugin/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/iam/minio-access-plugin.rst
+upstream_modified: true
 ---
 
 <a id="minio-access-management-plugin-settings"></a>
@@ -20,26 +20,22 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Examples {#examples}
 
 When setting up the MinIO Access Management plugin, you must define at minimum all *required* settings. The examples here represent the minimum required setting.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
-
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 ```shell
 MINIO_POLICY_PLUGIN_URL="https://authzservice.example.net:8080/authz"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 #### `policy_plugin` {#mc-conf.policy_plugin}
 
 *mc-conf*
@@ -51,9 +47,8 @@ mc admin config set policy_plugin                     \
    url="https://authzservice.example.net:8080/authz"  \
    [ARGUMENT=VALUE] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Settings {#settings}
 
@@ -61,20 +56,18 @@ mc admin config set policy_plugin                     \
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_POLICY_PLUGIN_URL` {#envvar.MINIO_POLICY_PLUGIN_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `policy_plugin url` {#mc-conf.policy_plugin.url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The webhook endpoint for the external access management service (`https://authzservice.example.net:8080/authz`).
 
@@ -82,20 +75,18 @@ The webhook endpoint for the external access management service (`https://authzs
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_POLICY_PLUGIN_AUTH_TOKEN` {#envvar.MINIO_POLICY_PLUGIN_AUTH_TOKEN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `policy_plugin auth_token` {#mc-conf.policy_plugin.auth_token}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 An authentication token to present to the configured webhook endpoint.
 
@@ -105,20 +96,18 @@ Specify a supported HTTP [Authentication scheme](https://developer.mozilla.org/e
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_POLICY_PLUGIN_ENABLE_HTTP2` {#envvar.MINIO_POLICY_PLUGIN_ENABLE_HTTP2}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `policy_plugin enable_http2` {#mc-conf.policy_plugin.enable_http2}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Enable experimental HTTP2 support for connecting to the configure webhook service.
 
@@ -128,19 +117,17 @@ Defaults to off
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_POLICY_PLUGIN_COMMENT` {#envvar.MINIO_POLICY_PLUGIN_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `policy_plugin comment` {#mc-conf.policy_plugin.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comment to associate to the external access management configuration.

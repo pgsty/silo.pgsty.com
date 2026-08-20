@@ -2,8 +2,8 @@
 title: "mc legalhold clear"
 url: "/zh/reference/minio-mc/mc-legalhold-clear/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold-clear.rst
+upstream_modified: false
 ---
 
 <a id="mc-legalhold-clear"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 移除对象的 legal hold *不会* 移除对象上已有的其他 [GOVERNANCE 模式](/zh/administration/object-management/object-retention/#minio-object-locking-governance) 和 [COMPLIANCE 模式](/zh/administration/object-management/object-retention/#minio-object-locking-compliance) 保留设置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令会移除 `myminio` MinIO 部署中 `mydata` 存储桶内 所有对象的 legal hold：
 
 ```shell
 mc legalhold clear --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令的语法如下：
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] legalhold clear \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 

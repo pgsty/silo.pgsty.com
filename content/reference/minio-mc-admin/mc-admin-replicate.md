@@ -2,8 +2,8 @@
 title: "mc admin replicate"
 url: "/reference/minio-mc-admin/mc-admin-replicate/"
 weight: 140
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-replicate.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-replicate"></a>
@@ -11,12 +11,11 @@ silo_modified: false
 
 <a id="command-mc.admin.replicate"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-01-11T03-14-16Z**
-
-- `mc admin replicate edit` renamed to [`mc admin replicate update`](#mc.admin.replicate.update)
-- `mc admin replicate remove` renamed to [`mc admin replicate rm`](#mc.admin.replicate.rm)
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-01-11T03-14-16Z**
+>
+> - `mc admin replicate edit` renamed to [`mc admin replicate update`](#mc.admin.replicate.update)
+> - `mc admin replicate remove` renamed to [`mc admin replicate rm`](#mc.admin.replicate.rm)
 
 ## Description {#description}
 
@@ -32,11 +31,10 @@ Only one deployment can have any data when initiating a new site replication con
 
 Site replication enforces [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) on all buckets, including existing buckets and any buckets added after initiating site replication. Site replication fully synchronizes versioned objects, compared to [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) which operates only on the latest version of an object
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 The [`mc admin replicate`](#command-mc.admin.replicate) command has the following subcommands:
 
@@ -59,8 +57,8 @@ Create or expand a site replication configuration. The configuration uses asynch
 
 To enable synchronous site replication, create the replication using this command *first*. Then use [`mc admin replicate update --mode sync`](#mc.admin.replicate.update.-mode) to update the configuration.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLES" %}}
+{{< tabs group="examples-syntax" >}}
+{{< tab label="EXAMPLES" value="examples" >}}
 Consider a multi-site MinIO topology with three separate MinIO deployments using the following [aliases](/reference/minio-mc/mc-alias-set/#alias): `minio1`, `minio2`, and `minio3`. All three sites have complete bidirectional network access and low latency between sites.
 
 ```shell
@@ -80,9 +78,8 @@ The following command creates a new site replication configuration with ILM expi
 ```shell
 mc admin replicate add minio1 minio2 minio3 --replicate-ilm-expiry
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -92,9 +89,8 @@ mc [GLOBALFLAGS] admin replicate add      \
                             [ALIAS3 ...]  \
                             [--replicate-ilm-expiry]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `ALIAS` {#mc.admin.replicate.add.ALIAS}
 
@@ -114,11 +110,10 @@ To expand an existing site replication to one more new replication sites, list a
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 Replicate [ILM expiration](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) rules across peers.
 
@@ -128,24 +123,21 @@ Replicate [ILM expiration](/administration/object-management/object-lifecycle-ma
 
 Modifies the endpoint used for an existing peer site participating in site replication.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-01-11T03-14-16Z**
+> [!NOTE]
+> **Changed: RELEASE.2023-01-11T03-14-16Z**
+>
+> `mc admin replicate edit` renamed to `mc admin replicate update`.
 
-`mc admin replicate edit` renamed to `mc admin replicate update`.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
-
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 ```shell
 mc admin replicate update                                                   \
                    minio2                                                 \
                    --deployment-id c1758167-4426-454f-9aae-5c3dfdf6df64   \
                    --endpoint https://minio2:9000
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -157,9 +149,8 @@ mc [GLOBALFLAGS] admin replicate update                     \
                             --enable-ilm-expiry-replication \
                             --disable-ilm-expiry-replication
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `ALIAS` {#mc.admin.replicate.update.ALIAS}
 
@@ -209,11 +200,10 @@ The deployment ID can be found by running [`mc admin replicate info ALIAS`](#mc.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 Stops the replication of ILM expiration rules between peer sites. Existing rules already synchronized across peers are not removed from any peer site.
 
@@ -223,11 +213,10 @@ Stops the replication of ILM expiration rules between peer sites. Existing rules
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 Start replication of ILM expiration rules between peer sites.
 
@@ -255,11 +244,10 @@ Defaults to `async`.
 
 *Optional*
 
-{{% alert color="warning" %}}
-**Important**
-
-The `--sync` flag has been deprecated as of `RELEASE.2023-07-07T05-25-51Z`. Use [`--mode`](#mc.admin.replicate.update.-mode) instead.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The `--sync` flag has been deprecated as of `RELEASE.2023-07-07T05-25-51Z`. Use [`--mode`](#mc.admin.replicate.update.-mode) instead.
 
 Enable or disable synchronous site replication. Available values are `enable` and `disable`. If not defined, MInIO uses asynchronous site replication.
 
@@ -267,18 +255,17 @@ Enable or disable synchronous site replication. Available values are `enable` an
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-01-11T03-14-16Z**
-
-The `mc admin replicate remove` subcommand renamed to `mc admin replicate rm`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-01-11T03-14-16Z**
+>
+> The `mc admin replicate remove` subcommand renamed to `mc admin replicate rm`.
 
 Removes one or more sites from a site replication configuration.
 
 Remember, if you intend to re-add the site to a site replication configuration in the future, it must be empty of [replicable data](/operations/replication/multi-site-replication/#minio-site-replication-what-replicates).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLES" %}}
+{{< tabs group="examples-syntax" >}}
+{{< tab label="EXAMPLES" value="examples" >}}
 Remove site replication for all connected sites for an existing site replication configuration that includes *minio2*. This deletes the site replication configuration for all participating sites.
 
 ```shell
@@ -297,9 +284,8 @@ mc admin replicate rm      \
                    minio6  \
                    --force
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -310,9 +296,8 @@ mc [GLOBALFLAGS] admin rm          \
                        --all       \
                        --force
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `TARGET` {#mc.admin.replicate.rm.TARGET}
 
@@ -352,22 +337,13 @@ This flag forces the removal of the specified peer site(s) from the site replica
 
 Returns information about the sites in the site replication configuration.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
-
-```shell
+```shell {tab="EXAMPLE" group="example-syntax" value="example"}
 mc admin replicate info minio1
 ```
 
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
-
-```shell
+```shell {tab="SYNTAX" value="syntax"}
 mc [GLOBALFLAGS] admin replicate info ALIAS
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
 
 #### `ALIAS` {#mc.admin.replicate.info.ALIAS}
 
@@ -383,8 +359,8 @@ The [alias](/reference/minio-mc/mc-alias-set/#alias) of an active MinIO deployme
 
 Displays the status of the sites, buckets, users, groups, or policies for a site replication configuration.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLES" %}}
+{{< tabs group="examples-syntax" >}}
+{{< tab label="EXAMPLES" value="examples" >}}
 Display the overall replication status for a site replication configuration that includes the site `minio1`.
 
 ```shell
@@ -455,10 +431,8 @@ The output resembles the following:
 ILMExpiryRule   | MINIO1          | MINIO2
 ILM Expiry Rule | ✔               | ✔
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
-
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 ```shell
 mc [GLOBALFLAGS] admin replicate status          \
                    TARGET                        \
@@ -474,9 +448,8 @@ mc [GLOBALFLAGS] admin replicate status          \
                    [--users]                     \
                    [--user accessKey]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `TARGET` {#mc.admin.replicate.status.TARGET}
 
@@ -532,11 +505,10 @@ Display the replication status of a specific group by including the group name a
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 Display sync information about ILM expiration rules.
 
@@ -548,11 +520,10 @@ Mutually exclusive with [`--ilm-expiry-rule`](#mc.admin.replicate.status.-ilm-ex
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 Display replication status information about the specified ILM expiration rule.
 
@@ -596,8 +567,8 @@ Display the replication status of a specific user by including the user name aft
 
 Resynchronizes data from one site in the replication configuration to a second site in the replication configuration in the event of lost data.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLES" %}}
+{{< tabs group="examples-syntax" >}}
+{{< tab label="EXAMPLES" value="examples" >}}
 The following command starts a resynchronization process to restore `minio2` from `minio1`
 
 ```shell
@@ -615,18 +586,16 @@ The following command stops a resynchronization that is in progress.
 ```shell
 mc admin replicate resync cancel minio1 minio2
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
-
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 ```shell
 mc [GLOBALFLAGS] admin replicate resync start|status|cancel ALIAS1 ALIAS2
 ```
 
 - Replace `ALIAS1` with the alias for the site that has the data to restore.
 - Replace `ALIAS2` with the alias for the site that needs resynched data.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `start` {#mc.admin.replicate.resync.start}
 

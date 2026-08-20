@@ -8,8 +8,6 @@ aliases:
 weight: 30
 type: docs
 icon: fa-solid fa-copyright
-minio_origin: false
-silo_modified: false
 ---
 
 ## 版权 {#copyright}

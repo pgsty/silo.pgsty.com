@@ -2,8 +2,8 @@
 title: "升级 MinIO Operator"
 url: "/zh/operations/deployments/k8s-upgrade-minio-operator-kubernetes/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-upgrade-minio-operator-kubernetes.rst
+upstream_modified: false
 ---
 
 <a id="minio-operator"></a>
@@ -15,28 +15,26 @@ silo_modified: false
 
 本页说明如何将 Operator 从 5.0.15 升级到 7.1.1。 如果在开始本流程前需要先升级到 Operator 5.0.15，请参阅 [将 MinIO Operator 4.5.8 及更高版本升级到 5.0.15](/zh/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier/#minio-k8s-upgrade-minio-operator-to-5-0-15)。
 
-{{% alert color="info" %}}
-**Operator 6.0.0 弃用 Operator Console**
-
-从 Operator 6.0.0 开始，MinIO Operator Console 已被弃用并移除。
-
-你可以继续使用 Kustomize 或 Helm 等标准 Kubernetes 方式来管理和部署 MinIO Tenant。
-{{% /alert %}}
+> [!NOTE]
+> **Operator 6.0.0 弃用 Operator Console**
+>
+> 从 Operator 6.0.0 开始，MinIO Operator Console 已被弃用并移除。
+>
+> 你可以继续使用 Kustomize 或 Helm 等标准 Kubernetes 方式来管理和部署 MinIO Tenant。
 
 <a id="minio-k8s-upgrade-minio-operator-procedure"></a>
 
 ## 将 MinIO Operator 从 5.0.15 升级到 7.1.1 {#minio-operator-5-0-15-operator-version-stable}
 
-{{% alert color="warning" %}}
-**重要**
+> [!WARNING]
+> **重要**
+>
+> Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移除相关资源。 其中包括 Operator Console 的 service、pod 等资源。
+>
+> 后续请改用 Kustomize 或 Helm 来管理 Tenant。
 
-Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移除相关资源。 其中包括 Operator Console 的 service、pod 等资源。
-
-后续请改用 Kustomize 或 Helm 来管理 Tenant。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="使用 Kustomize 升级" %}}
+{{< tabs group="kustomize-helm" >}}
+{{< tab label="使用 Kustomize 升级" value="kustomize" >}}
 以下步骤使用 Kustomize 升级 MinIO Operator。 对于使用 Operator 5.0.0 到 5.0.14 的部署，请先按照 [将 MinIO Operator 4.5.8 及更高版本升级到 5.0.15](/zh/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier/#minio-k8s-upgrade-minio-operator-to-5-0-15) 完成升级，再执行本流程。
 
 如果你是通过 [Helm](/zh/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/#minio-k8s-deploy-operator-helm) 安装 Operator，请改用 **使用 Helm 升级** 步骤。
@@ -101,9 +99,8 @@ Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移�
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
-
-{{% /tab %}}
-{{% tab header="使用 Helm 升级" %}}
+{{< /tab >}}
+{{< tab label="使用 Helm 升级" value="helm" >}}
 以下步骤使用 Helm 升级现有的 MinIO Operator 安装。
 
 如果你是使用 Kustomize 安装 Operator，请改用 **使用 Kustomize 升级** 步骤。
@@ -171,6 +168,5 @@ Operator 6.0.0 弃用 MinIO Operator Console，并从 MinIO Operator CRD 中移�
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

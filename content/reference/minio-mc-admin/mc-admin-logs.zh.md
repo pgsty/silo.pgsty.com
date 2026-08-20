@@ -2,8 +2,8 @@
 title: "mc admin logs"
 url: "/zh/reference/minio-mc-admin/mc-admin-logs/"
 weight: 100
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-logs.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-logs"></a>
@@ -12,19 +12,17 @@ silo_modified: false
 
 <a id="command-mc.admin.logs"></a>
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-02T23-48-47Z**
-
-`mc support logs` 已迁移至 `mc admin logs`，并提供了更简化的命令接口，用于显示 MinIO 部署的服务器日志。
-
-对于由 systemd 管理的部署，其输出与 `journalctl -uf minio` 提供的内容类似。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-02T23-48-47Z**
+>
+> `mc support logs` 已迁移至 `mc admin logs`，并提供了更简化的命令接口，用于显示 MinIO 部署的服务器日志。
+>
+> 对于由 systemd 管理的部署，其输出与 `journalctl -uf minio` 提供的内容类似。
 
 ## 描述 {#id2}
 

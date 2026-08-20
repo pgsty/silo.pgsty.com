@@ -2,18 +2,17 @@
 title: "Batch Key Rotation"
 url: "/administration/batch-framework-job-keyrotate/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-keyrotate.rst
+upstream_modified: false
 ---
 
 <a id="batch-key-rotation"></a>
 <a id="minio-batch-framework-keyrotate-job"></a>
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-RELEASE.2023-04-07T05-28-58Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> RELEASE.2023-04-07T05-28-58Z
 
 The MinIO Batch Framework allows you to create, manage, monitor, and execute jobs using a YAML-formatted job definition file (a “batch file”). The batch jobs run directly on the MinIO deployment to take advantage of the server-side processing power without constraints of the local machine where you run the [MinIO Client](/reference/minio-mc/#minio-client).
 
@@ -25,11 +24,10 @@ The YAML configuration supports filters to restrict key rotation to a specific s
 
 ## Key Rotate Batch Job Reference {#key-rotate-batch-job-reference}
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-RELEASE.2023-04-07T05-28-58Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> RELEASE.2023-04-07T05-28-58Z
 
 Use the `keyrotate` job type to create a batch job that cycles the [sse-s3 or sse-kms keys](/operations/server-side-encryption/#minio-sse-data-encryption) for encrypted objects.
 

@@ -2,29 +2,27 @@
 title: "mc admin tier"
 url: "/zh/reference/deprecated/mc-admin-tier/"
 weight: 190
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-tier.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-tier"></a>
 
 <a id="command-mc.admin.tier"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc admin tier` 已由 [`mc ilm tier`](/zh/reference/minio-mc/mc-ilm-tier/#command-mc.ilm.tier) 替代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc admin tier` 已由 [`mc ilm tier`](/zh/reference/minio-mc/mc-ilm-tier/#command-mc.ilm.tier) 替代。
 
 ## 描述 {#id2}
 
 [`mc admin tier`](#command-mc.admin.tier) 命令用于配置受支持的远程 S3 兼容服务，以支持 MinIO [Lifecycle Management: Object Transition (“Tiering”)](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ### 支持的 S3 服务 {#s3}
 
@@ -128,11 +126,10 @@ MinIO 还需要在集群上具备以下管理权限，用于为对象过渡生�
 
 创建一个新的远程存储层，用于通过 MinIO 生命周期管理规则过渡对象。
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO 不支持移除远程存储层。在将其添加为远程层目标 *之前*，请先确保该存储后端能够满足预期工作负载。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO 不支持移除远程存储层。在将其添加为远程层目标 *之前*，请先确保该存储后端能够满足预期工作负载。
 
 命令语法如下：
 

@@ -2,8 +2,8 @@
 title: "User Management"
 url: "/administration/identity-access-management/minio-user-management/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/minio-user-management.rst
+upstream_modified: false
 ---
 
 <a id="user-management"></a>
@@ -37,9 +37,8 @@ You can create access keys by using the [`mc admin user svcacct add`](/reference
 
 You can also create [security token service](/developers/security-token-service/#minio-security-token-service) accounts programmatically with the `AssumeRole` STS API endpoint. STS tokens default to expire in 1 hour, but you set expiration for up to 7 days from creation.
 
-{{% details title="Access Keys are for Programmatic Access" closed="true" %}}
-Access Keys support programmatic access by applications. You cannot use an access key to log into the MinIO Console.
-{{% /details %}}
+> [!DETAILS]- Access Keys are for Programmatic Access
+> Access Keys support programmatic access by applications. You cannot use an access key to log into the MinIO Console.
 
 <a id="minio-users-root"></a>
 
@@ -57,14 +56,13 @@ Rotating the root user credentials requires updating either or both variables fo
 
 If these variables are unset, [`minio`](/reference/minio-server/#command-minio) defaults to `minioadmin` and `minioadmin` as the access key and secret key respectively. MinIO *strongly discourages* use of the default credentials regardless of deployment environment.
 
-{{% details title="Deprecation of Legacy Root User Environment Variables" closed="true" %}}
-MinIO [RELEASE.2021-04-22T15-44-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2021-04-22T15-44-28Z) and later deprecates the following variables used for setting or updating root user credentials:
-
-- [`MINIO_ACCESS_KEY`](/reference/minio-server/settings/deprecated/#envvar.MINIO_ACCESS_KEY) to the new access key.
-- [`MINIO_SECRET_KEY`](/reference/minio-server/settings/deprecated/#envvar.MINIO_SECRET_KEY) to the new secret key.
-- [`MINIO_ACCESS_KEY_OLD`](/reference/minio-server/settings/deprecated/#envvar.MINIO_ACCESS_KEY_OLD) to the old access key.
-- [`MINIO_SECRET_KEY_OLD`](/reference/minio-server/settings/deprecated/#envvar.MINIO_SECRET_KEY_OLD) to the old secret key.
-{{% /details %}}
+> [!DETAILS]- Deprecation of Legacy Root User Environment Variables
+> MinIO [RELEASE.2021-04-22T15-44-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2021-04-22T15-44-28Z) and later deprecates the following variables used for setting or updating root user credentials:
+>
+> - [`MINIO_ACCESS_KEY`](/reference/minio-server/settings/deprecated/#envvar.MINIO_ACCESS_KEY) to the new access key.
+> - [`MINIO_SECRET_KEY`](/reference/minio-server/settings/deprecated/#envvar.MINIO_SECRET_KEY) to the new secret key.
+> - [`MINIO_ACCESS_KEY_OLD`](/reference/minio-server/settings/deprecated/#envvar.MINIO_ACCESS_KEY_OLD) to the old access key.
+> - [`MINIO_SECRET_KEY_OLD`](/reference/minio-server/settings/deprecated/#envvar.MINIO_SECRET_KEY_OLD) to the old secret key.
 
 ## User Management {#id1}
 

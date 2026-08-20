@@ -2,8 +2,8 @@
 title: "从 Gateway 或 Filesystem 模式迁移"
 url: "/zh/operations/deployments/baremetal-migrate-fs-gateway/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-migrate-fs-gateway.rst
+upstream_modified: false
 ---
 
 <a id="gateway-filesystem"></a>
@@ -21,23 +21,21 @@ MinIO Gateway 及相关 filesystem 模式自 2020 年 7 月起进入功能冻结
 
 本文概述成功启动并迁移到新部署所需的步骤。
 
-{{% alert color="warning" %}}
-**重要**
-
-单机/文件系统 模式在截至 MinIO Server [RELEASE.2022-10-24T18-35-07Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-10-24T18-35-07Z) 的所有版本中仍可使用。 若要继续使用 standalone 部署，请安装该 MinIO 服务端版本以及 MinIO Client [RELEASE.2022-10-29T10-09-23Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-29T10-09-23Z)，或安装任意 [更早版本](https://github.com/minio/minio/releases) 及其对应的 MinIO 客户端。请注意，MinIO Client 的版本应更新，且尽可能接近 MinIO 服务端的版本。
-
-Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-06-25T15-50-16Z)，才能使用 MinIO 客户端 的导入和导出命令。 对于截至 [RELEASE.2022-06-20T23-13-45Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-06-20T23-13-45Z) 的 filesystem 模式部署，可以通过在新部署上手动重建用户、策略、存储桶和其他资源完成迁移。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 单机/文件系统 模式在截至 MinIO Server [RELEASE.2022-10-24T18-35-07Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-10-24T18-35-07Z) 的所有版本中仍可使用。 若要继续使用 standalone 部署，请安装该 MinIO 服务端版本以及 MinIO Client [RELEASE.2022-10-29T10-09-23Z](https://github.com/minio/mc/releases/tag/RELEASE.2022-10-29T10-09-23Z)，或安装任意 [更早版本](https://github.com/minio/minio/releases) 及其对应的 MinIO 客户端。请注意，MinIO Client 的版本应更新，且尽可能接近 MinIO 服务端的版本。
+>
+> Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-06-25T15-50-16Z)，才能使用 MinIO 客户端 的导入和导出命令。 对于截至 [RELEASE.2022-06-20T23-13-45Z](https://github.com/minio/minio/releases/tag/RELEASE.2022-06-20T23-13-45Z) 的 filesystem 模式部署，可以通过在新部署上手动重建用户、策略、存储桶和其他资源完成迁移。
 
 ## 步骤 {#id4}
 
-{{% alert color="info" %}}
-**说明**
-
-你可以通过环境变量和 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置 MinIO 配置项。 根据你当前的部署方式，可能需要同时获取这两类配置值。
-
-你可以使用 `env | grep MINIO_` 查看运行时设置；对于使用 MinIO systemd 服务的部署，也可以直接检查 `/etc/default/minio` 的内容。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 你可以通过环境变量和 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 设置 MinIO 配置项。 根据你当前的部署方式，可能需要同时获取这两类配置值。
+>
+> 你可以使用 `env | grep MINIO_` 查看运行时设置；对于使用 MinIO systemd 服务的部署，也可以直接检查 `/etc/default/minio` 的内容。
 
 1. 对于 filesystem 模式部署：
 
@@ -88,20 +86,19 @@ Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](http
    - MinIO Gateway 是一个无状态代理服务，为多种后端存储系统提供 S3 API 兼容层。
    - Filesystem 模式部署为单个 MinIO server 进程和单个存储卷提供 S3 访问层。
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="Gateway" %}}
+   {{< tabs group="gateway-filesystem-mode" >}}
+   {{< tab label="Gateway" value="gateway" >}}
    迁移配置设置：
 
    如果你的部署使用 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 作为配置方式，请将现有部署 `/etc/default/minio` 文件中的环境变量复制到新部署的同名文件中。 你可以省略所有 `MINIO_CACHE_*` 和 `MINIO_GATEWAY_SSE` 环境变量，因为这些变量已不再使用。
 
    如果你使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 管理配置，请使用新的 MinIO 客户端将现有设置复制到新部署中。
-   {{% /tab %}}
-   {{% tab header="Filesystem mode" %}}
-   {{% alert color="info" %}}
-   **说明**
-
-   以下 filesystem 模式步骤默认现有 MinIO Client 支持所需的导出命令。 如果不支持，请在新部署上使用新的 MinIO 客户端 手动重建用户、策略、生命周期规则和存储桶。
-   {{% /alert %}}
+   {{< /tab >}}
+   {{< tab label="Filesystem mode" value="filesystem-mode" >}}
+   > [!NOTE]
+   > **说明**
+   >
+   > 以下 filesystem 模式步骤默认现有 MinIO Client 支持所需的导出命令。 如果不支持，请在新部署上使用新的 MinIO 客户端 手动重建用户、策略、生命周期规则和存储桶。
 
    1. 导出现有部署的 **配置**。
 
@@ -196,8 +193,8 @@ Filesystem 模式部署至少需要升级到 [RELEASE.2022-06-25T15-50-16Z](http
       - 使用新的 MinIO 客户端。
       - 将 `ALIAS` 替换为新部署的别名。
       - 将 zip 文件名替换为现有部署导出的文件名。
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 5. 使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 迁移存储桶内容。
 
    在 standalone 部署上，使用现有 MinIO Client 运行带有 [`--preserve`](/zh/reference/minio-mc/mc-mirror/#mc.mirror.-preserve) 和 [`--watch`](/zh/reference/minio-mc/mc-mirror/#mc.mirror.-watch) 参数的 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror)，将对象迁移到新的 <abbr title="单机单盘">SNSD</abbr> 部署中。

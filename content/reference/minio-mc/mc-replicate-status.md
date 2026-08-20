@@ -2,8 +2,8 @@
 title: "mc replicate status"
 url: "/reference/minio-mc/mc-replicate-status/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-status.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-status"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc replicate status`](#command-mc.replicate.status) command displays the [replication status](/administration/bucket-replication/#minio-bucket-replication-serverside) of a MinIO bucket. The status also lists the remote target path or location.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command displays the current replication status of the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc replicate status myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] replicate status TARGET
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -124,11 +123,10 @@ mc replicate status ALIAS/PATH
 
 ### Removed and Re-added ARNs {#removed-and-re-added-arns}
 
-{{% alert color="info" %}}
-**Changed: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-{{% /alert %}}
+> [!NOTE]
+> **Changed: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
 
 The standard output of this command does not display ARNs previously removed from a replication configuration.
 

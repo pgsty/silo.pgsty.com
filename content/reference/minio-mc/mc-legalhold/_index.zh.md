@@ -3,8 +3,8 @@ title: "mc legalhold"
 url: "/zh/reference/minio-mc/mc-legalhold/"
 weight: 200
 icon: fa-solid fa-gavel
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold.rst
+upstream_modified: false
 ---
 
 <a id="mc-legalhold"></a>

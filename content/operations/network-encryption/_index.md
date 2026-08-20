@@ -3,8 +3,8 @@ title: "Network Encryption (TLS)"
 url: "/operations/network-encryption/"
 weight: 70
 icon: fa-solid fa-shield-halved
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/network-encryption.rst
+upstream_modified: false
 ---
 
 <a id="network-encryption-tls"></a>
@@ -12,11 +12,10 @@ silo_modified: false
 <a id="minio-tls-third-party-ca"></a>
 <a id="minio-tls"></a>
 
-{{% alert color="info" %}}
-**SSL is Deprecated**
-
-TLS is the successor to Secure Socket Layer (SSL) encryption. SSL is fully [deprecated](https://tools.ietf.org/html/rfc7568) as of June 30th, 2018.
-{{% /alert %}}
+> [!NOTE]
+> **SSL is Deprecated**
+>
+> TLS is the successor to Secure Socket Layer (SSL) encryption. SSL is fully [deprecated](https://tools.ietf.org/html/rfc7568) as of June 30th, 2018.
 
 ## Overview {#overview}
 
@@ -44,11 +43,10 @@ The MinIO Kubernetes Operator provides three approaches for configuring TLS on M
 >
 > By default, Kubernetes places a certificate bundle on each pod at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`. This CA bundle should include the cluster or root CA used to sign the MinIO Tenant TLS certificates. Other applications deployed within the Kubernetes cluster can trust this cluster certificate to connect to a MinIO Tenant using the [MinIO service DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) (e.g. `https://minio.minio-tenant-1.svc.cluster-domain.example:443`).
 >
-> {{% alert color="info" %}}
-> **Subject Alternative Name Certificates**
->
-> If you have a custom Subject Alternative Name (SAN) certificate that is *not* also a wildcard cert, the TLS certificate SAN **must** apply to the hostname for its parent node. Without a wildcard, the SAN must match exactly to be able to connect to the tenant.
-> {{% /alert %}}
+> > [!NOTE]
+> > **Subject Alternative Name Certificates**
+> >
+> > If you have a custom Subject Alternative Name (SAN) certificate that is *not* also a wildcard cert, the TLS certificate SAN **must** apply to the hostname for its parent node. Without a wildcard, the SAN must match exactly to be able to connect to the tenant.
 
 **cert-manager Certificate Management**
 
@@ -106,8 +104,8 @@ If the MinIO Server cannot match an incoming client’s TLS certificate issuer a
 
 The MinIO Server searches for TLS keys and certificates for each node and uses those credentials for enabling TLS. MinIO automatically enables TLS upon discovery and validation of certificates. The search location depends on your MinIO configuration:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Default Path" %}}
+{{< tabs group="default-path-custom-path" >}}
+{{< tab label="Default Path" value="default-path" >}}
 By default, the MinIO server looks for the TLS keys and certificates for each node in the following directory:
 
 ```shell
@@ -117,8 +115,8 @@ ${HOME}/.minio/certs
 Where `${HOME}` is the home directory of the user running the MinIO Server process. You may need to create the `${HOME}/.minio/certs` directory if it does not exist.
 
 For `systemd` managed deployments this must correspond to the `USER` running the MinIO process. If that user has no home directory, use the **Custom Path** option instead.
-{{% /tab %}}
-{{% tab header="Custom Path" %}}
+{{< /tab >}}
+{{< tab label="Custom Path" value="custom-path" >}}
 You can specify a path for the MinIO server to search for certificates using the [`minio server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S` parameter.
 
 For example, the following command fragment directs the MinIO process to use the `/opt/minio/certs` directory for TLS certificates.
@@ -128,8 +126,8 @@ minio server --certs-dir /opt/minio/certs ...
 ```
 
 The user running the MinIO service *must* have read and write permissions to this directory.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Place the TLS certificates for the default domain (e.g. `minio.example.net`) in the `/certs` directory, with the private key as `private.key` and public certificate as `public.crt`.
 
@@ -141,23 +139,20 @@ If using Certificates signed by a non-global or non-public Certificate Authority
 
 Place the CA certificates in the `/certs/CAs` folder. The root path for this folder depends on whether you use the default certificate path *or* a custom certificate path ([`minio server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S`)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Default Certificate Path" %}}
-
+{{< tabs group="default-certificate-path-custom-certificate-path" >}}
+{{< tab label="Default Certificate Path" value="default-certificate-path" >}}
 ```shell
 mv myCA.crt ${HOME}/.minio/certs/CAs
 ```
-
-{{% /tab %}}
-{{% tab header="Custom Certificate Path" %}}
+{{< /tab >}}
+{{< tab label="Custom Certificate Path" value="custom-certificate-path" >}}
 The following example assumes the MinIO Server was started with `--certs dir /opt/minio/certs`:
 
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 For a self-signed certificate, the Certificate Authority is typically the private key used to sign the cert.
 
@@ -171,23 +166,20 @@ The MinIO Server validates the TLS certificate presented by each connecting clie
 
 Place the CA certificates in the `/certs/CAs` folder. The root path for this folder depends on whether you use the default certificate path *or* a custom certificate path ([`minio server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S`)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Default Certificate Path" %}}
-
+{{< tabs group="default-certificate-path-custom-certificate-path" >}}
+{{< tab label="Default Certificate Path" value="default-certificate-path" >}}
 ```shell
 mv myCA.crt ${HOME}/certs/CAs
 ```
-
-{{% /tab %}}
-{{% tab header="Custom Certificate Path" %}}
+{{< /tab >}}
+{{< tab label="Custom Certificate Path" value="custom-certificate-path" >}}
 The following example assumes the MinIO Server was started with `--certs dir /opt/minio/certs`:
 
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Place the certificate file for each CA into the `/CAs` subdirectory. Ensure all hosts in the MinIO deployment have a consistent set of trusted CAs in that directory. If the MinIO Server cannot match an incoming client’s TLS certificate issuer against any of the available CAs, the server rejects the connection as invalid.
 
@@ -199,19 +191,18 @@ MinIO recommends generating ECDSA (e.g. [NIST P-256 curve](https://nvlpubs.nist.
 
 MinIO supports the following TLS 1.2 and 1.3 cipher suites as supported by [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17.1:src/crypto/tls/cipher_suites.go;l=52). The lists mark recommended algorithms with a <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> icon:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="TLS 1.3" %}}
-
+{{< tabs group="tls-13-tls-12" >}}
+{{< tab label="TLS 1.3" value="tls-13" >}}
 - `TLS_CHACHA20_POLY1305_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_AES_128_GCM_SHA256`
 - `TLS_AES_256_GCM_SHA384`
-{{% /tab %}}
-{{% tab header="TLS 1.2" %}}
+{{< /tab >}}
+{{< tab label="TLS 1.2" value="tls-12" >}}
 - `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
 - `TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305`
 - `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`
 - `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

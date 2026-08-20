@@ -3,8 +3,8 @@ title: "MinIO Kubernetes Operator"
 url: "/zh/operations/deployments/k8s-minio-operator/"
 weight: 10
 icon: fa-solid fa-dharmachakra
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-minio-operator.rst
+upstream_modified: true
 ---
 
 <a id="minio-kubernetes-operator"></a>
@@ -88,12 +88,11 @@ kubectl get pod kube-controller-manager-$CLUSTERNAME-control-plane \
  ...
 ```
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO Operator 可以使用指定的 Certificate Authority (CA) 为 Tenant pod 生成 TLS 证书。Kubernetes 集群外部的客户端必须信任该 CA，才能连接到 Silo Tenant 端点。
-
-禁用 TLS 校验仅适用于受控测试。生产客户端应信任签发 CA，或使用其本来就信任的 CA 所签发的证书。
-
-另一种方式是生成由已知且受信任 CA 签发的 x.509 TLS 证书，并通过 Tenant CRD 提供这些证书。更完整的文档请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO Operator 可以使用指定的 Certificate Authority (CA) 为 Tenant pod 生成 TLS 证书。Kubernetes 集群外部的客户端必须信任该 CA，才能连接到 Silo Tenant 端点。
+>
+> 禁用 TLS 校验仅适用于受控测试。生产客户端应信任签发 CA，或使用其本来就信任的 CA 所签发的证书。
+>
+> 另一种方式是生成由已知且受信任 CA 签发的 x.509 TLS 证书，并通过 Tenant CRD 提供这些证书。更完整的文档请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。

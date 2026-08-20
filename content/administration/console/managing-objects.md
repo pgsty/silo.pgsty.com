@@ -2,8 +2,8 @@
 title: "Managing Objects"
 url: "/administration/console/managing-objects/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/console/managing-objects.rst
+upstream_modified: false
 ---
 
 <a id="managing-objects"></a>
@@ -41,21 +41,19 @@ The user can perform actions on the bucket’s objects, depending on the policie
 - Display versions
 - [Delete](/administration/object-management/object-delete/#minio-object-delete)
 
-{{% alert color="info" %}}
-**Added: Console**
+> [!NOTE]
+> **Added: Console**
+>
+> v0.24.0
+>
+> View the status of uploading or downloading objects with the object manager button available on the top right corner of the Console. If you have not uploaded or downloaded any objects during the current session, the button does not appear.
 
-v0.24.0
-
-View the status of uploading or downloading objects with the object manager button available on the top right corner of the Console. If you have not uploaded or downloaded any objects during the current session, the button does not appear.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: Console**
-
-v0.35.0
-
-If you select multiple objects to download, MinIO creates a ZIP archive of those objects for downloading. You must unzip or uncompress this archive after downloading to access the files.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: Console**
+>
+> v0.35.0
+>
+> If you select multiple objects to download, MinIO creates a ZIP archive of those objects for downloading. You must unzip or uncompress this archive after downloading to access the files.
 
 <a id="minio-console-admin-buckets"></a>
 <a id="minio-console-buckets"></a>
@@ -72,13 +70,12 @@ MinIO does not limit the total number of buckets allowed on a deployment. Howeve
 
 While creating a bucket, you can enable [versioning](/administration/object-management/object-versioning/#minio-bucket-versioning), [object locking](/administration/object-management/object-retention/#minio-object-locking), bucket size (quota) limits, and [retention rules](/administration/object-management/object-retention/#minio-object-locking-retention-modes) (which require versioning).
 
-{{% alert color="info" %}}
-**Changed: Console**
-
-v0.35.0
-
-If you enable versioning, you can specify prefixes to exclude from versioning.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: Console**
+>
+> v0.35.0
+>
+> If you enable versioning, you can specify prefixes to exclude from versioning.
 
 You **must** configure replication, locking, and versioning options at the time of bucket creation. You cannot change these settings for the bucket later.
 
@@ -88,11 +85,10 @@ Use the **Search** bar to filter for specific buckets. Select the row for the bu
 
 Form the summary screen, select any of the available tabs to further manage the bucket.
 
-{{% alert color="info" %}}
-**Note**
-
-Some management features may not be available if the authenticated user does not have the [required administrative permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions).
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Some management features may not be available if the authenticated user does not have the [required administrative permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions).
 
 When managing a bucket, your access settings may allow you to view or change any of the following:
 

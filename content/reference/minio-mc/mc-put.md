@@ -2,19 +2,18 @@
 title: "mc put"
 url: "/reference/minio-mc/mc-put/"
 weight: 290
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-put.rst
+upstream_modified: false
 ---
 
 <a id="mc-put"></a>
 
 <a id="command-mc.put"></a>
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-02-24T01-33-20Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-02-24T01-33-20Z
 
 ## Syntax {#syntax}
 
@@ -22,16 +21,15 @@ The [`mc put`](#command-mc.put) uploads an object from the local file system to 
 
 `mc put` provides a simplified interface for uploading files compared to [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) or [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror). `mc put` uses a one-way upload function that trades efficiency for the power and complexity of the other commands.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following uploads the file `logo.png` from the local file system at path `~/images/collateral/` to a bucket called `marketing` on the MinIO deployment with the alias of `minio`.
 
 ```shell
 mc put ~/images/collateral/logo.png minio/marketing
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -53,8 +51,8 @@ mc [GLOBALFLAGS] put                            \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -76,10 +74,8 @@ Valid TARGETs could take any of the following forms: - `ALIAS/BUCKET` - `ALIAS/B
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-10-02T08-27-28Z**
 
 Add a checksum to an uploaded object.
 
@@ -93,10 +89,8 @@ The flag requires server trailing headers and works with AWS or MinIO targets.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-10-02T08-27-28Z**
 
 Disables multipart uploads and directs `mc` to send the object in a single `PUT` operation.
 
@@ -203,11 +197,10 @@ Specify the path to a prefix to apply encryption to all matching objects at that
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
 
 ##### `--parallel, --P` {#mc.put.-parallel}
 

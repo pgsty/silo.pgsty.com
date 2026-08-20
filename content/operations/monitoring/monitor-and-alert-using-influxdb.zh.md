@@ -2,8 +2,8 @@
 title: "使用 InfluxDB 进行监控与告警"
 url: "/zh/operations/monitoring/monitor-and-alert-using-influxdb/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/monitor-and-alert-using-influxdb.rst
+upstream_modified: false
 ---
 
 <a id="influxdb"></a>
@@ -16,36 +16,34 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 - 配置 InfluxDB 服务，抓取并展示 MinIO 部署的指标
 - 基于 MinIO 指标配置告警
 
-{{% alert color="info" %}}
-**前提条件**
-
-此过程要求满足以下条件：
-
-- 已有 InfluxDB 部署，并配置一个或多个[通知端点](https://docs.influxdata.com/influxdb/v2/monitor-alert/notification-endpoints/)
-- 已有可通过网络访问 InfluxDB 部署的 MinIO 部署
-- 本地主机已安装 [`mc`](/zh/reference/minio-mc/#command-mc)，并已配置为可 [访问](/zh/reference/minio-mc/mc-alias-set/#alias) MinIO 部署
-
-本文说明使用 [version 2 指标](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2)。 关于指标 API 版本的更多信息，请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
-{{% /alert %}}
+> [!NOTE]
+> **前提条件**
+>
+> 此过程要求满足以下条件：
+>
+> - 已有 InfluxDB 部署，并配置一个或多个[通知端点](https://docs.influxdata.com/influxdb/v2/monitor-alert/notification-endpoints/)
+> - 已有可通过网络访问 InfluxDB 部署的 MinIO 部署
+> - 本地主机已安装 [`mc`](/zh/reference/minio-mc/#command-mc)，并已配置为可 [访问](/zh/reference/minio-mc/mc-alias-set/#alias) MinIO 部署
+>
+> 本文说明使用 [version 2 指标](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2)。 关于指标 API 版本的更多信息，请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
 
 对于 Kubernetes 上的 MinIO 部署，本文默认已具备 Ingress、负载均衡器等必要的网络控制组件，以便 MinIO 租户与 InfluxDB 服务之间能够互相访问。
 
 ## 配置 InfluxDB 收集 MinIO 指标并触发告警 {#influxdb-minio}
 
-{{% alert color="warning" %}}
-**重要**
-
-本过程专门使用 InfluxDB UI 来创建抓取端点。
-
-InfluxDB UI 提供的配置能力不如 [Telegraf](https://docs.influxdata.com/telegraf/v1.24/) 及其对应的 [Prometheus plugin](https://github.com/influxdata/telegraf/blob/release-1.24/plugins/inputs/prometheus/README.md) 完整。 具体来说：
-
-- 无法通过 InfluxDB UI 为 MinIO 指标端点启用认证访问
-- 无法为已采集指标设置标签（例如 `url_tag`），以唯一标识特定 MinIO 部署的指标
-
-Telegraf Prometheus plugin 还支持 Kubernetes 特有能力，例如抓取特定 MinIO 租户的 `minio` service。
-
-配置 Telegraf 不在本文范围内。 可将本文作为配置 Telegraf 抓取 MinIO 指标的一般指导。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 本过程专门使用 InfluxDB UI 来创建抓取端点。
+>
+> InfluxDB UI 提供的配置能力不如 [Telegraf](https://docs.influxdata.com/telegraf/v1.24/) 及其对应的 [Prometheus plugin](https://github.com/influxdata/telegraf/blob/release-1.24/plugins/inputs/prometheus/README.md) 完整。 具体来说：
+>
+> - 无法通过 InfluxDB UI 为 MinIO 指标端点启用认证访问
+> - 无法为已采集指标设置标签（例如 `url_tag`），以唯一标识特定 MinIO 部署的指标
+>
+> Telegraf Prometheus plugin 还支持 Kubernetes 特有能力，例如抓取特定 MinIO 租户的 `minio` service。
+>
+> 配置 Telegraf 不在本文范围内。 可将本文作为配置 Telegraf 抓取 MinIO 指标的一般指导。
 
 1. 配置对 MinIO 指标的公开访问
 

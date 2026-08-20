@@ -7,17 +7,16 @@ aliases:
   - "/developers/rust/API/"
 weight: 70
 icon: fa-brands fa-rust
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/rust/minio-rust.rst
+upstream_modified: true
 ---
 
 ## MinIO Rust SDK {#rust-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此 Rust 应用可以直接使用上游 [MinIO Rust SDK](https://github.com/minio/minio-rs)。该 crate 提供异步、强类型的请求构建器 API。
 
-{{% alert color="info" %}}
-本页按 `minio` crate `0.4.0` 校验。该 crate 目前没有声明最低支持的 Rust 版本，请核对[当前软件包元数据](https://crates.io/crates/minio)与 [API 文档](https://docs.rs/minio/latest/minio/)，并用项目固定的工具链完成验证。
-{{% /alert %}}
+> [!NOTE]
+> 本页按 `minio` crate `0.4.0` 校验。该 crate 目前没有声明最低支持的 Rust 版本，请核对[当前软件包元数据](https://crates.io/crates/minio)与 [API 文档](https://docs.rs/minio/latest/minio/)，并用项目固定的工具链完成验证。
 
 ## 安装软件包 {#install}
 

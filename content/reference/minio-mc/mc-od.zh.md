@@ -2,8 +2,8 @@
 title: "mc od"
 url: "/zh/reference/minio-mc/mc-od/"
 weight: 260
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-od.rst
+upstream_modified: false
 ---
 
 <a id="mc-od"></a>
@@ -16,8 +16,8 @@ silo_modified: false
 
 使用 [`mc od`](#command-mc.od) 可模拟 Linux `dd` 命令的功能。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将文件的 200MiB 上传到存储桶中，分为 5 个 40MiB 的分片。 输出会显示上传结果，包括完成上传所用的时长。
 
 ```shell
@@ -36,9 +36,8 @@ mc od if=file.zip of=myminio/mybucket/file.zip size=40MiB parts=5
   "elapsed": "314ms"
 }
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -55,8 +54,8 @@ mc [GLOBALFLAGS] od                                            \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -137,11 +136,10 @@ mc od if=file.zip of=myminio/mybucket/file.zip size=40MiB parts=5
 
 在该命令示例中，如果源对象流大于 200MiB（40MiB × 5 个分片），则仅上传文件的前 200MiB。
 
-{{% alert color="warning" %}}
-**重要**
-
-以这种方式使用该命令可能无法上传对象的全部内容。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 以这种方式使用该命令可能无法上传对象的全部内容。
 
 ### 将完整文件分 5 个分片上传 {#id7}
 

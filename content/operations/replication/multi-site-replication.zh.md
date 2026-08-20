@@ -3,8 +3,8 @@ title: "站点复制概览"
 url: "/zh/operations/replication/multi-site-replication/"
 weight: 20
 icon: fa-solid fa-arrows-rotate
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/replication/multi-site-replication.rst
+upstream_modified: true
 ---
 
 <a id="minio-site-replication-overview"></a>
@@ -46,11 +46,10 @@ silo_modified: true
 
 站点复制会在所有复制站点上，为所有新建和现有存储桶启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 你可以选择在对等站点之间复制 ILM 过期规则。 对于新的站点复制配置，可使用带有 [`--replicate-ilm-expiry`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add.-replicate-ilm-expiry) 标志的 [`mc admin replicate add`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add)。 对于现有站点复制配置，则可根据需要使用 [`mc admin replicate update`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update) 配合 [`--enable-ilm-expiry-replication`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-enable-ilm-expiry-replication) 或 [`--disable-ilm-expiry-replication`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-disable-ilm-expiry-replication) 标志启用或禁用该行为。
 
@@ -66,9 +65,8 @@ RELEASE.2023-12-02T02-03-28Z
 
 启用站点复制后，身份与访问管理（IAM）设置会按以下顺序同步：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="MinIO IDP" %}}
-
+{{< tabs group="minio-idp-oidc-ldap" >}}
+{{< tab label="MinIO IDP" value="minio-idp" >}}
 1. 策略
 2. 用户账户（针对本地用户）
 3. 组
@@ -77,21 +75,21 @@ RELEASE.2023-12-02T02-03-28Z
    `root` 的 Access Keys 不会同步。
 5. 已同步用户账户的策略映射
 6. [Security Token Service (STS) users](/zh/developers/security-token-service/#minio-security-token-service) 的策略映射
-{{% /tab %}}
-{{% tab header="OIDC" %}}
+{{< /tab >}}
+{{< tab label="OIDC" value="oidc" >}}
 1. 策略
 2. 与具有有效 [MinIO Policy](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 的 OIDC 账户关联的 Access Keys。`root` 的 Access Keys 不会同步。
 3. 已同步用户账户的策略映射
 4. [Security Token Service (STS) users](/zh/developers/security-token-service/#minio-security-token-service) 的策略映射
-{{% /tab %}}
-{{% tab header="LDAP" %}}
+{{< /tab >}}
+{{< tab label="LDAP" value="ldap" >}}
 1. 策略
 2. 组
 3. 与具有有效 [MinIO Policy](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 的 LDAP 账户关联的 Access Keys。`root` 的 Access Keys 不会同步。
 4. 已同步用户账户的策略映射
 5. [Security Token Service (STS) users](/zh/developers/security-token-service/#minio-security-token-service) 的策略映射
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 在对等站点之间完成初始数据同步后，MinIO 会持续在所有站点之间复制并同步任何站点上新发生的 [可复制数据](#minio-site-replication-what-replicates)。
 
@@ -99,25 +97,22 @@ RELEASE.2023-12-02T02-03-28Z
 
 站点复制配置中的任意 MinIO 部署，都可以从拥有该数据最新版本的对等站点重新同步受损的 [可复制数据](#minio-site-replication-what-replicates)。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-07-18T17-49-40Z**
+> [!NOTE]
+> **变更: RELEASE.2023-07-18T17-49-40Z**
+>
+> 站点复制操作最多重试三（3）次。
+>
+> 对于重试三次后仍复制失败的操作，MinIO 会将其移出队列。 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 会在稍后重新扫描这些受影响对象，并将其重新加入复制队列。
 
-站点复制操作最多重试三（3）次。
+> [!NOTE]
+> **变更: RELEASE.2022-08-11T04-37-28Z**
+>
+> 执行任意 `GET` 或 `HEAD` API 方法时，失败或待处理的复制会自动重新入队。 例如，某个站点恢复在线后，使用 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)、[`mc cat`](/zh/reference/minio-mc/mc-cat/#command-mc.cat) 或 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls) 命令会触发自愈重新入队。
 
-对于重试三次后仍复制失败的操作，MinIO 会将其移出队列。 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 会在稍后重新扫描这些受影响对象，并将其重新加入复制队列。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2022-08-11T04-37-28Z**
-
-执行任意 `GET` 或 `HEAD` API 方法时，失败或待处理的复制会自动重新入队。 例如，某个站点恢复在线后，使用 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)、[`mc cat`](/zh/reference/minio-mc/mc-cat/#command-mc.cat) 或 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls) 命令会触发自愈重新入队。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-02T23-48-47Z**
-
-如果某个站点因任何原因丢失数据，可使用 [`mc admin replicate resync`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.resync) 从另一个健康站点重新同步数据。 这会启动一个主动进程来重新同步数据，而无需等待被动的 [MinIO scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 识别缺失数据。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-02T23-48-47Z**
+>
+> 如果某个站点因任何原因丢失数据，可使用 [`mc admin replicate resync`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.resync) 从另一个健康站点重新同步数据。 这会启动一个主动进程来重新同步数据，而无需等待被动的 [MinIO scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 识别缺失数据。
 
 你可以使用 [`MINIO_SCANNER_SPEED`](/zh/reference/minio-server/settings/core/#envvar.MINIO_SCANNER_SPEED) 环境变量或 [`scanner speed`](/zh/reference/minio-server/settings/core/#mc-conf.scanner.speed) 配置项， 调整 MinIO 在扫描器性能与读写操作之间的平衡方式。
 
@@ -318,11 +313,10 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
    mc admin replicate add minio1 minio2 minio3 minio4
    ```
 
-   {{% alert color="info" %}}
-   **说明**
-
-   如果任一站点不可达或已永久丢失，则在使用新站点进行扩展前，必须先使用 [`mc admin replicate rm`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.rm) 移除不可达站点。
-   {{% /alert %}}
+   > [!NOTE]
+   > **说明**
+   >
+   > 如果任一站点不可达或已永久丢失，则在使用新站点进行扩展前，必须先使用 [`mc admin replicate rm`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.rm) 移除不可达站点。
 4. 查询站点复制配置进行验证
 
    ```shell

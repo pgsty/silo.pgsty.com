@@ -2,8 +2,8 @@
 title: "将事件发布到 MQTT"
 url: "/zh/administration/monitoring/publish-events-to-mqtt/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-mqtt.rst
+upstream_modified: false
 ---
 
 <a id="mqtt"></a>
@@ -31,8 +31,8 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 
 你可以通过环境变量 *或* 运行时配置设置来配置新的 MQTT 服务端点。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/mqtt/#minio-server-envvar-bucket-notification-mqtt) 指定 MQTT 服务端点及其相关 配置设置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用这些设置。
 
 以下示例代码设置了与配置 MQTT 服务端点相关的 *全部* 环境变量。 *最少* 需要以下变量：
@@ -43,43 +43,39 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 - [`MINIO_NOTIFY_MQTT_USERNAME`](/zh/reference/minio-server/settings/notifications/mqtt/#envvar.MINIO_NOTIFY_MQTT_USERNAME) *如果 MQTT server/broker 强制要求身份验证/授权，则必需*
 - [`MINIO_NOTIFY_MQTT_PASSWORD`](/zh/reference/minio-server/settings/notifications/mqtt/#envvar.MINIO_NOTIFY_MQTT_PASSWORD) *如果 MQTT server/broker 强制要求身份验证/授权，则必需*
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_MQTT_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_MQTT_BROKER_<IDENTIFIER>="ENDPOINT"
+>    set MINIO_NOTIFY_MQTT_TOPIC_<IDENTIFIER>="TOPIC"
+>    set MINIO_NOTIFY_MQTT_USERNAME_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_MQTT_PASSWORD_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_MQTT_QOS_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_MQTT_KEEP_ALIVE_INTERVAL_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_MQTT_RECONNECT_INTERVAL_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_MQTT_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_MQTT_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_MQTT_COMMENT_<IDENTIFIER>="<string>"
+> ```
 
-```shell
-   set MINIO_NOTIFY_MQTT_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_MQTT_BROKER_<IDENTIFIER>="ENDPOINT"
-   set MINIO_NOTIFY_MQTT_TOPIC_<IDENTIFIER>="TOPIC"
-   set MINIO_NOTIFY_MQTT_USERNAME_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_MQTT_PASSWORD_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_MQTT_QOS_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_MQTT_KEEP_ALIVE_INTERVAL_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_MQTT_RECONNECT_INTERVAL_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_MQTT_QUEUE_DIR_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_MQTT_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_MQTT_COMMENT_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-   export MINIO_NOTIFY_MQTT_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_MQTT_BROKER_<IDENTIFIER>="ENDPOINT"
-   export MINIO_NOTIFY_MQTT_TOPIC_<IDENTIFIER>="TOPIC"
-   export MINIO_NOTIFY_MQTT_USERNAME_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_MQTT_PASSWORD_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_MQTT_QOS_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_MQTT_KEEP_ALIVE_INTERVAL_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_MQTT_RECONNECT_INTERVAL_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_MQTT_QUEUE_DIR_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_MQTT_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_MQTT_COMMENT_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_MQTT_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_MQTT_BROKER_<IDENTIFIER>="ENDPOINT"
+>    export MINIO_NOTIFY_MQTT_TOPIC_<IDENTIFIER>="TOPIC"
+>    export MINIO_NOTIFY_MQTT_USERNAME_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_MQTT_PASSWORD_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_MQTT_QOS_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_MQTT_KEEP_ALIVE_INTERVAL_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_MQTT_RECONNECT_INTERVAL_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_MQTT_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_MQTT_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_MQTT_COMMENT_<IDENTIFIER>="<string>"
+> ```
 
 - 将 `<IDENTIFIER>` 替换为 MQTT 服务端点的唯一描述性字符串。 对所有与新 MQTT 服务端点相关的环境变量都使用相同的 `<IDENTIFIER>` 值。以下示例假定标识符为 `PRIMARY`。
 
@@ -90,8 +86,8 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 - 将 `TOPIC` 替换为 MQTT topic，MinIO 会将发布到 server/broker 的 事件关联到该 topic。
 
 有关每个环境变量的完整文档，请参见 [用于存储桶通知的 MQTT 服务](/zh/reference/minio-server/settings/notifications/mqtt/#minio-server-envvar-bucket-notification-mqtt)。
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_mqtt`](/zh/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt) 配置键添加或更新 MQTT 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置设置。
 
 以下示例代码设置了与配置 MQTT 服务端点相关的 *全部* 设置。 对于 MQTT server/broker 端点，以下配置设置是 *最少* 必需项：
@@ -124,8 +120,8 @@ mc admin config set ALIAS/ notify_mqtt:IDENTIFIER \
 - 将 `TOPIC` 替换为 MQTT topic，MinIO 会将发布到 server/broker 的 事件关联到该 topic。
 
 有关每个设置的完整文档，请参见 [MQTT 存储桶通知配置设置](/zh/reference/minio-server/settings/notifications/mqtt/#minio-server-config-bucket-notification-mqtt)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) 重启 MinIO 部署 {#minio}
 
@@ -145,36 +141,35 @@ SQS ARNs: arn:minio:sqs::primary:mqtt
 
 将关联的 MQTT 部署配置为目标时，你必须在配置存储桶通知时指定 ARN 资源。
 
-{{% alert color="info" %}}
-**识别存储桶通知的 ARN**
-
-此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
-
-**查看 JSON 输出**
-
-1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. 在 JSON 输出中，查找 `info.sqsARN` 键。
-
-   你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
-
-   例如，`arn:minio:sqs::primary:mqtt`。
-
-**使用 jq 从 JSON 中解析该值**
-
-1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
-2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:mqtt`。
-{{% /alert %}}
+> [!NOTE]
+> **识别存储桶通知的 ARN**
+>
+> 此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
+>
+> **查看 JSON 输出**
+>
+> 1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
+>
+>    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
+>
+>    例如，`arn:minio:sqs::primary:mqtt`。
+>
+> **使用 jq 从 JSON 中解析该值**
+>
+> 1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
+> 2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:mqtt`。
 
 ### 1) 将 MQTT 端点配置为存储桶通知目标 {#id3}
 

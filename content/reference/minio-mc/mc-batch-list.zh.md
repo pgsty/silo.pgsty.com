@@ -2,8 +2,8 @@
 title: "mc batch list"
 url: "/zh/reference/minio-mc/mc-batch-list/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-list.rst
+upstream_modified: true
 ---
 
 <a id="mc-batch-list"></a>
@@ -11,26 +11,24 @@ silo_modified: true
 
 <a id="command-mc.batch.list"></a>
 
-{{% alert color="info" %}}
-**变更: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z or later
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z or later
 
 ## 语法 {#id2}
 
 [`mc batch list`](#command-mc.batch.list) 命令会输出部署中当前正在进行的批处理作业列表。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会输出 `myminio` alias 上当前正在进行的所有作业列表。
 
 ```shell
 mc batch list myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -43,8 +41,8 @@ mc [GLOBALFLAGS] batch list TARGET           \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

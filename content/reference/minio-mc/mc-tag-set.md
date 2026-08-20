@@ -2,8 +2,8 @@
 title: "mc tag set"
 url: "/reference/minio-mc/mc-tag-set/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-tag-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-tag-set"></a>
@@ -17,16 +17,15 @@ The [`mc tag set`](#command-mc.tag.set) command sets one or more tags to a bucke
 
 MinIO supports adding up to 10 custom tags to an object.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command sets tags for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc tag set myminio/mydata "tag1=value1&tag2=value2"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -45,8 +44,8 @@ mc [GLOBALFLAGS] tag set                   \
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 
 [`mc tag set --version-id`](#mc.tag.set.-version-id) is mutually exclusive with multiple parameters. See the reference documentation for more information.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -80,10 +79,8 @@ mc tag set myminio/mybucket/object.txt "key1=value1&key2=value2"
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-01-11T05-49-32Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-01-11T05-49-32Z**
 
 When used with [`--recursive`](#mc.tag.set.-recursive), causes [`mc tag set`](#command-mc.tag.set) to **not** traverse child prefixes. Tags are only applied to objects at the specified path. Requires [`--recursive`](#mc.tag.set.-recursive).
 
@@ -101,10 +98,8 @@ mc tag set myminio/vacation-photos/cancun "destination=international" --exclude-
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-04T18-10-16Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-04T18-10-16Z**
 
 Recursively applies the tag to all objects at the path specified to [`ALIAS`](#mc.tag.set.ALIAS).
 

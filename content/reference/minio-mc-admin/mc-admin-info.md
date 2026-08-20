@@ -2,8 +2,8 @@
 title: "mc admin info"
 url: "/reference/minio-mc-admin/mc-admin-info/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-info"></a>
@@ -14,13 +14,12 @@ silo_modified: false
 
 The [`mc admin info`](#command-mc.admin.info) command displays information on a MinIO server. For distributed MinIO deployments, [`mc admin info`](#command-mc.admin.info) displays information for each MinIO server in the deployment.
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-05-03T11-21-07Z
-
-The command output includes information about the [erasure code](/operations/concepts/erasure-coding/#minio-ec-erasure-set) setting for the cluster. This displays in the output in the format `EC:#`.
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-05-03T11-21-07Z
+>
+> The command output includes information about the [erasure code](/operations/concepts/erasure-coding/#minio-ec-erasure-set) setting for the cluster. This displays in the output in the format `EC:#`.
 
 The output of the command resembles the following:
 

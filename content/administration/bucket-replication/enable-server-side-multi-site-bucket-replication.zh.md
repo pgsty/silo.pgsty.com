@@ -2,8 +2,8 @@
 title: "启用多站点服务端存储桶复制"
 url: "/zh/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/enable-server-side-multi-site-bucket-replication.rst
+upstream_modified: false
 ---
 
 <a id="minio-bucket-replication-serverside-multi"></a>
@@ -19,13 +19,12 @@ silo_modified: false
 
 多站点 Active-Active 复制配置可以跨越多个机架、数据中心或地理位置。多站点配置的部署与维护复杂度通常会随着站点数量和每个站点规模的增加而提高。计划实施多站点复制的企业应考虑借助 [MinIO SUBNET](https://min.io/pricing?ref=docs) 支持，以获取应对此类用例所需的专业知识、规划能力和工程资源。
 
-{{% alert color="info" %}}
-**另请参阅**
-
-- 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令修改现有复制规则。
-- 使用带有 [`--state "disable"`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) 标志的 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令禁用现有复制规则。
-- 使用 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) 命令删除现有复制规则。
-{{% /alert %}}
+> [!NOTE]
+> **另请参阅**
+>
+> - 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令修改现有复制规则。
+> - 使用带有 [`--state "disable"`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) 标志的 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令禁用现有复制规则。
+> - 使用 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) 命令删除现有复制规则。
 
 <a id="id3"></a>
 
@@ -56,33 +55,30 @@ silo_modified: false
 
 点击展开以下任意条目：
 
-{{% details title="使用一致的复制设置" closed="true" %}}
-MinIO 支持自定义复制配置，以启用或禁用以下复制行为：
+> [!DETAILS]- 使用一致的复制设置
+> MinIO 支持自定义复制配置，以启用或禁用以下复制行为：
+>
+> - 复制 [delete operations](/zh/administration/object-management/object-delete/#minio-object-delete)
+> - 复制删除标记
+> - 复制现有对象
+> - 复制仅元数据变更
+>
+> 为存储桶配置复制规则时，请确保参与多站点复制的所有 MinIO 部署使用 *相同* 的复制行为，以保证对象同步的一致性和可预测性。
 
-- 复制 [delete operations](/zh/administration/object-management/object-delete/#minio-object-delete)
-- 复制删除标记
-- 复制现有对象
-- 复制仅元数据变更
+> [!DETAILS]- 现有对象复制
+> MinIO 支持自动复制存储桶中的现有对象。
+>
+> MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用现有对象复制，并包含 `existing-objects` 复制功能标志。 本过程包含用于启用现有对象复制的必需标志。
 
-为存储桶配置复制规则时，请确保参与多站点复制的所有 MinIO 部署使用 *相同* 的复制行为，以保证对象同步的一致性和可预测性。
-{{% /details %}}
-
-{{% details title="现有对象复制" closed="true" %}}
-MinIO 支持自动复制存储桶中的现有对象。
-
-MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用现有对象复制，并包含 `existing-objects` 复制功能标志。 本过程包含用于启用现有对象复制的必需标志。
-{{% /details %}}
-
-{{% details title="删除操作复制" closed="true" %}}
-MinIO 支持将 [delete operations](/zh/administration/object-management/object-delete/#minio-object-delete) 复制到目标存储桶。 具体来说，MinIO 可以复制版本控制中的 [Delete Markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html)，以及删除指定版本对象的操作：
-
-- 对对象执行删除操作时，MinIO 复制也会在目标存储桶上创建删除标记。
-- 对对象的某个版本执行删除操作时，MinIO 复制也会在目标存储桶上删除这些版本。
-
-MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用删除操作复制。 本过程包含用于启用删除操作和删除标记复制的必需标志。
-
-MinIO *不会* 复制因应用 [lifecycle management expiration rules](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 而产生的删除操作。 请在所有复制站点上为该存储桶配置一致的过期规则，以确保对象过期策略得到一致应用。
-{{% /details %}}
+> [!DETAILS]- 删除操作复制
+> MinIO 支持将 [delete operations](/zh/administration/object-management/object-delete/#minio-object-delete) 复制到目标存储桶。 具体来说，MinIO 可以复制版本控制中的 [Delete Markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html)，以及删除指定版本对象的操作：
+>
+> - 对对象执行删除操作时，MinIO 复制也会在目标存储桶上创建删除标记。
+> - 对对象的某个版本执行删除操作时，MinIO 复制也会在目标存储桶上删除这些版本。
+>
+> MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用删除操作复制。 本过程包含用于启用删除操作和删除标记复制的必需标志。
+>
+> MinIO *不会* 复制因应用 [lifecycle management expiration rules](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 而产生的删除操作。 请在所有复制站点上为该存储桶配置一致的过期规则，以确保对象过期策略得到一致应用。
 
 ## 过程 {#id6}
 
@@ -99,11 +95,10 @@ MinIO *不会* 复制因应用 [lifecycle management expiration rules](/zh/admin
 
 本过程假设每个别名都对应一个具备 [necessary replication permissions](/zh/administration/bucket-replication/bucket-replication-requirements/#minio-bucket-replication-requirements) 的用户。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本过程仅记录该版本及之后的操作方式。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本过程仅记录该版本及之后的操作方式。
 
 <a id="id7"></a>
 

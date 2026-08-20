@@ -3,8 +3,8 @@ title: "Silo Console"
 url: "/administration/minio-console/"
 weight: 110
 icon: fa-solid fa-display
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/minio-console.rst
+upstream_modified: true
 ---
 
 <a id="minio-console"></a>
@@ -38,11 +38,10 @@ This list is *not* exhaustive and is subject to change.
 
 For a full list of browsers and versions for running MinIO Console, see the [Browserslist](https://browsersl.ist/#q=%3E0.2%25%2Cnot+dead+and+not+op_mini+all) website.
 
-{{% alert color="secondary" %}}
-**Tip**
-
-MinIO Console does *not* support Opera Mini.
-{{% /alert %}}
+> [!NOTE]
+> **Tip**
+>
+> MinIO Console does *not* support Opera Mini.
 
 ## Configuration {#configuration}
 
@@ -98,25 +97,22 @@ You must also ensure that the host system firewall grants access to the configur
 
 ## Logging In {#logging-in}
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-03-09T23-16-13Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-03-09T23-16-13Z**
 
 The MinIO Console displays a login screen for unauthenticated users. The Console defaults to providing a username and password prompt for a [MinIO-managed user](/administration/identity-access-management/minio-identity-management/#minio-internal-idp).
 
 For deployments configured with multiple [identity managers](/administration/identity-access-management/#minio-authentication-and-identity-management), select the **Other Authentication Methods** dropdown to select one of the other configured identity providers. You can also log in using credentials generated using a [Security Token Service (STS)](/developers/security-token-service/#minio-security-token-service) API.
 
-{{% alert color="info" %}}
-**Try out the Console using MinIO’s Play testing environment**
-
-You can explore the Console using [https://play.min.io:9443](https://play.min.io:9443). Log in with the following credentials:
-
-- Username: `Q3AM3UQ867SPQQA43P2F`
-- Password: `zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG`
-
-The Play Console connects to the MinIO Play deployment at [https://play.min.io](https://play.min.io). You can also access this deployment using [`mc`](/reference/minio-mc/#command-mc) and using the `play` alias.
-{{% /alert %}}
+> [!NOTE]
+> **Try out the Console using MinIO’s Play testing environment**
+>
+> You can explore the Console using [https://play.min.io:9443](https://play.min.io:9443). Log in with the following credentials:
+>
+> - Username: `Q3AM3UQ867SPQQA43P2F`
+> - Password: `zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG`
+>
+> The Play Console connects to the MinIO Play deployment at [https://play.min.io](https://play.min.io). You can also access this deployment using [`mc`](/reference/minio-mc/#command-mc) and using the `play` alias.
 
 ## Documentation {#documentation}
 

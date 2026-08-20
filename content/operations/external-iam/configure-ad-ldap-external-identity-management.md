@@ -2,8 +2,8 @@
 title: "Configure Silo Authentication with Active Directory / LDAP"
 url: "/operations/external-iam/configure-ad-ldap-external-identity-management/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/external-iam/configure-ad-ldap-external-identity-management.rst
+upstream_modified: true
 ---
 
 <a id="configure-minio-for-authentication-using-active-directory-ldap"></a>
@@ -15,22 +15,22 @@ MinIO supports configuring a single Active Directory / LDAP Connect for external
 
 The procedure on this page provides instructions for:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 For MinIO Tenants deployed using the [MinIO Kubernetes Operator](/operations/deployments/kubernetes/#minio-kubernetes), this procedure covers:
 
 - Configuring a MinIO Tenant to use an external AD/LDAP provider
 - Accessing the Tenant Console using AD/LDAP Credentials.
 - Using the MinIO `AssumeRoleWithLDAPIdentity` Security Token Service (STS) API to generate temporary credentials for use by applications.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 For MinIO deployments on baremetal infrastructure, this procedure covers:
 
 - Configuring a MinIO cluster for an external AD/LDAP provider.
 - Accessing the MinIO Console using AD/LDAP credentials.
 - Using the MinIO `AssumeRoleWithLDAPIdentity` Security Token Service (STS) API to generate temporary credentials for use by applications.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 This procedure is generic for AD/LDAP services. See the documentation for the AD/LDAP provider of your choice for specific instructions or procedures on configuration of user identities.
 
@@ -38,31 +38,30 @@ This procedure is generic for AD/LDAP services. See the documentation for the AD
 
 ### Access to MinIO Cluster {#access-to-minio-cluster}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 You must have access to the MinIO Operator Console web UI. You can either expose the MinIO Operator Console service using your preferred Kubernetes routing component, or use temporary port forwarding to expose the Console service port on your local machine.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 This procedure uses [`mc`](/reference/minio-mc/#command-mc) for performing operations on the MinIO cluster. Install `mc` on a machine with network access to the cluster. See the `mc` [Installation Quickstart](/reference/minio-mc/#mc-install) for instructions on downloading and installing `mc`.
 
 This procedure assumes a configured [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) for the MinIO cluster.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Active Directory / LDAP Compatible IDentity Provider {#active-directory-ldap-compatible-identity-provider}
 
 This procedure assumes an existing Active Directory or LDAP service. Instructions on configuring AD/LDAP are out of scope for this procedure.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
-
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 - For AD/LDAP deployments within the same Kubernetes cluster as the MinIO Tenant, you can use Kubernetes service names to allow the MinIO Tenant to establish connectivity to the AD/LDAP service.
 - For AD/LDAP deployments external to the Kubernetes cluster, you must ensure the cluster supports routing communications between Kubernetes services and pods and the external network. This may require configuration or deployment of additional Kubernetes network components and/or enabling access to the public internet.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 The MinIO deployment must have bidirectional network connectivity to the target AD / LDAP service.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 MinIO requires a read-only access keys with which it [binds](/operations/external-iam/#minio-external-identity-management-ad-ldap-lookup-bind) to perform authenticated user and group queries. Ensure each AD/LDAP user and group intended for use with MinIO has a corresponding [policy](/operations/external-iam/#minio-external-identity-management-ad-ldap-access-control) on the MinIO deployment. An AD/LDAP user with no assigned policy *and* with membership in groups with no assigned policy has no permission to access any action or resource on the MinIO cluster.
 
@@ -81,8 +80,8 @@ MinIO requires a read-only access keys with which it [binds](/operations/externa
 
    The following tabs provide a quick reference for the available configuration methods:
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="MinIO Client" %}}
+   {{< tabs group="minio-client-environment-variables" >}}
+   {{< tab label="MinIO Client" value="minio-client" >}}
    > MinIO supports specifying the AD/LDAP provider settings using [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) commands.
    >
    > For distributed deployments, the [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) command applies the configuration to all nodes in the deployment.
@@ -117,15 +116,14 @@ MinIO requires a read-only access keys with which it [binds](/operations/externa
 
    For more complete documentation on these settings, see [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap).
 
-   {{% alert color="info" %}}
-   **[`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) recommended**
-
-   [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) offers additional features and improved validation over [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) runtime configuration settings. [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) supports the same settings as [`mc admin config`](/reference/minio-mc-admin/mc-admin-config/#command-mc.admin.config) and the [`identity_ldap`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) configuration key.
-
-   The [`identity_ldap`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) configuration key remains available for existing scripts and tools.
-   {{% /alert %}}
-   {{% /tab %}}
-   {{% tab header="Environment Variables" %}}
+   > [!NOTE]
+   > **[`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) recommended**
+   >
+   > [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) offers additional features and improved validation over [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) runtime configuration settings. [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) supports the same settings as [`mc admin config`](/reference/minio-mc-admin/mc-admin-config/#command-mc.admin.config) and the [`identity_ldap`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) configuration key.
+   >
+   > The [`identity_ldap`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) configuration key remains available for existing scripts and tools.
+   {{< /tab >}}
+   {{< tab label="Environment Variables" value="environment-variables" >}}
    **MinIO supports specifying the AD/LDAP provider settings using [environment variables](/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap).**
 
    > The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup. For distributed deployments, specify these settings across all nodes in the deployment using the *same* values. Any differences in server configurations between nodes will result in startup or configuration failures.
@@ -154,8 +152,8 @@ MinIO requires a read-only access keys with which it [binds](/operations/externa
    ```
 
    For complete documentation on these variables, see [Active Directory / LDAP Settings](/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap).
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 2. Restart the MinIO Deployment
 
    You must restart the MinIO deployment to apply the configuration changes.
@@ -204,10 +202,8 @@ MinIO requires a read-only access keys with which it [binds](/operations/externa
 
 ## Disable a Configured Active Directory / LDAP Connection {#disable-a-configured-active-directory-ldap-connection}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-03-20T20-16-18Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-03-20T20-16-18Z**
 
 You can enable and disable the configured AD/LDAP connection as needed.
 

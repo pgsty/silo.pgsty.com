@@ -3,8 +3,8 @@ title: "Software Development Kits (SDK)"
 url: "/developers/minio-drivers/"
 weight: 190
 icon: fa-solid fa-cubes
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/minio-drivers.rst
+upstream_modified: true
 ---
 
 <a id="software-development-kits-sdk"></a>

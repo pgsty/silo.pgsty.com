@@ -2,8 +2,8 @@
 title: "mc mb"
 url: "/reference/minio-mc/mc-mb/"
 weight: 230
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mb.rst
+upstream_modified: false
 ---
 
 <a id="mc-mb"></a>
@@ -16,16 +16,15 @@ The [`mc mb`](#command-mc.mb) command creates a new bucket or directory at the s
 
 You can also use [`mc mb`](#command-mc.mb) against the local filesystem to produce similar results to the `mkdir -p` commandline tool.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command creates a new bucket `mydata` on the `myminio` MinIO deployment. The command creates the bucket with [object locking enabled](/administration/object-management/object-retention/#minio-object-locking).
 
 ```shell
 mc mb --with-locks myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] mb                   \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -93,11 +92,10 @@ If not specified, default value is `us-east-1`.
 
 Enables [object locking](/administration/object-management/object-retention/#minio-object-locking) on the specified bucket. Object locking requires, and therefore implies, enabling object versioning.
 
-{{% alert color="warning" %}}
-**Important**
-
-You can *only* enable object locking when creating the bucket. Buckets created without object locking cannot use [Bucket Lifecycle Management](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) or [Bucket Object Locking](/administration/object-management/object-retention/#minio-object-locking) functionality.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> You can *only* enable object locking when creating the bucket. Buckets created without object locking cannot use [Bucket Lifecycle Management](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) or [Bucket Object Locking](/administration/object-management/object-retention/#minio-object-locking) functionality.
 
 ##### `--with-versioning` {#mc.mb.-with-versioning}
 

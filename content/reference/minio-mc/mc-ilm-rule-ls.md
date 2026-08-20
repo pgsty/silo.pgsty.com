@@ -2,8 +2,8 @@
 title: "mc ilm rule ls"
 url: "/reference/minio-mc/mc-ilm-rule-ls/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-ls"></a>
@@ -13,17 +13,15 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.ls"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule ls` replaces `mc ilm ls`.
 
-`mc ilm rule ls` replaces `mc ilm ls`.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-26T23-31-54Z**
-
-`mc ilm rule ls --json` output includes the policy modification time in `updateAt`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-26T23-31-54Z**
+>
+> `mc ilm rule ls --json` output includes the policy modification time in `updateAt`.
 
 ## Syntax {#syntax}
 
@@ -31,8 +29,8 @@ The [`mc ilm rule ls`](#command-mc.ilm.rule.ls) command summarizes all configure
 
 The [`mc ilm rule list`](#command-mc.ilm.rule.list) command has equivalent functionality to [`mc ilm rule ls`](#command-mc.ilm.rule.ls).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command lists all lifecycle management rules for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
@@ -72,9 +70,8 @@ The output of the command might resemble the following:
 │ rule-2 │ Enabled │ logs/  │ -                   │              1 │             3 │
 └────────┴─────────┴────────┴─────────────────────┴────────────────┴───────────────┘
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc ilm rule ls`](#command-mc.ilm.rule.ls) command has the following syntax:
 
 ```shell
@@ -88,8 +85,8 @@ mc [GLOBALFLAGS] ilm rule ls     \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

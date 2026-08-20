@@ -2,8 +2,8 @@
 title: "Data Compression"
 url: "/administration/object-management/data-compression/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/data-compression.rst
+upstream_modified: false
 ---
 
 <a id="data-compression"></a>
@@ -40,11 +40,10 @@ Data compression is a global option, the configured settings apply to all bucket
 
 You can control which objects are compressed by specifying the desired file extensions and [media (MIME) types](https://en.wikipedia.org/wiki/Media_type).
 
-{{% alert color="info" %}}
-**Existing objects are not modified**
-
-Enabling, disabling, or updating a deployment’s compression settings does not modify existing objects. New objects are compressed according to the settings in effect at the time they are created.
-{{% /alert %}}
+> [!NOTE]
+> **Existing objects are not modified**
+>
+> Enabling, disabling, or updating a deployment’s compression settings does not modify existing objects. New objects are compressed according to the settings in effect at the time they are created.
 
 <a id="minio-data-compression-excluded-types"></a>
 
@@ -181,11 +180,10 @@ The default data compression configuration compresses the following types of dat
   </tbody>
 </table>
 
-{{% alert color="info" %}}
-**Default excluded extensions and types are never compressed**
-
-Some objects cannot be efficiently compressed. MinIO will not attempt to compress these objects, even if they are specified in [`extensions`](/reference/minio-server/settings/core/#mc-conf.compression.extensions) or [`mime_types`](/reference/minio-server/settings/core/#mc-conf.compression.mime_types) arguments. See [Excluded File Types](#minio-data-compression-excluded-types) for a list of excluded types.
-{{% /alert %}}
+> [!NOTE]
+> **Default excluded extensions and types are never compressed**
+>
+> Some objects cannot be efficiently compressed. MinIO will not attempt to compress these objects, even if they are specified in [`extensions`](/reference/minio-server/settings/core/#mc-conf.compression.extensions) or [`mime_types`](/reference/minio-server/settings/core/#mc-conf.compression.mime_types) arguments. See [Excluded File Types](#minio-data-compression-excluded-types) for a list of excluded types.
 
 The sections below describe how to configure compression for the desired file extensions and media types.
 

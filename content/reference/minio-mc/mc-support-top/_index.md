@@ -3,40 +3,35 @@ title: "mc support top"
 url: "/reference/minio-mc/mc-support-top/"
 weight: 70
 icon: fa-solid fa-ranking-star
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-top"></a>
 
 <a id="command-mc.support.top"></a>
 
-{{% alert color="info" %}}
-**Note**
+> [!NOTE]
+> **Note**
+>
+> > [!NOTE]
+> > **Changed: RELEASE.2022-08-11T00-30-48Z**
+>
+> `mc support top` replaces the `mc admin top` command.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-08-11T00-30-48Z**
-
-{{% /alert %}}
-
-`mc support top` replaces the `mc admin top` command.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Description {#description}
 
 The [`mc support top`](#command-mc.support.top) command returns statistics for distributed MinIO deployments, similar to the output of the `top` command in a shell.
 
-{{% alert color="info" %}}
-**Note**
-
-[`mc support top`](#command-mc.support.top) is not supported on single-node single-drive MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> [`mc support top`](#command-mc.support.top) is not supported on single-node single-drive MinIO deployments.
 
 [`mc support top`](#command-mc.support.top) has the following subcommands:
 

@@ -2,8 +2,8 @@
 title: "mc ping"
 url: "/reference/minio-mc/mc-ping/"
 weight: 270
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ping.rst
+upstream_modified: false
 ---
 
 <a id="mc-ping"></a>
@@ -14,8 +14,8 @@ silo_modified: false
 
 The [`mc ping`](#command-mc.ping) command performs a liveness check on a specified target.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following sends a response request to the target(s) and outputs the minimum, maximum, average, and roundtrip times of the response, as well as the number of errors encountered when processing the request.
 
 ```shell
@@ -31,9 +31,8 @@ The command pings the deployment at the [`alias`](/reference/minio-mc/mc-alias/#
 4: https://play.min.io   min=61.26ms    max=213.00ms   average=102.20ms   errors=0   roundtrip=61.26ms
 5: https://play.min.io   min=61.26ms    max=213.00ms   average=95.03ms    errors=0   roundtrip=66.36ms
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -50,8 +49,8 @@ mc [GLOBALFLAGS] ping                       \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -93,10 +92,8 @@ mc ping TARGET -e 5
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-30T22-41-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-30T22-41-38Z**
 
 Exit after the first successful check.
 
@@ -118,11 +115,10 @@ By default, the command waits 1 second between requests.
 
 Send requests to all servers in the MinIO cluster.
 
-{{% alert color="info" %}}
-**Note**
-
-Use this option for distributed deployments where you have direct access to each node or pod. This flag does not work when nodes are placed behind a service, such as a load balancer.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Use this option for distributed deployments where you have direct access to each node or pod. This flag does not work when nodes are placed behind a service, such as a load balancer.
 
 ### Global Flags {#global-flags}
 

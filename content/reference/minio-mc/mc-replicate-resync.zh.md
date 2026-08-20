@@ -2,8 +2,8 @@
 title: "mc replicate resync"
 url: "/zh/reference/minio-mc/mc-replicate-resync/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-resync.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-resync"></a>
@@ -24,8 +24,8 @@ silo_modified: false
 - [启用双向服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway)
 - [启用多站点服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/#minio-bucket-replication-serverside-multi)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将 `myminio` MinIO 部署中 `mydata` 存储桶的内容， 重新同步到与指定 `--remote-bucket` 关联的远端 MinIO 部署：
 
 ```shell
@@ -33,9 +33,8 @@ mc replicate resync start \
    --remote-bucket "arn:minio:replication::d3c086c7-1d64-40c2-954b-fe8222907033:mydata" \
    myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -50,8 +49,8 @@ mc [GLOBALFLAGS] replicate resync start|status  \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

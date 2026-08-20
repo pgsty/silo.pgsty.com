@@ -3,8 +3,8 @@ title: "存储桶通知设置"
 url: "/zh/reference/minio-server/settings/notifications/"
 weight: 70
 icon: fa-solid fa-bell
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications.rst
+upstream_modified: false
 ---
 
 <a id="minio-server-config-logging-logs"></a>
@@ -22,30 +22,27 @@ silo_modified: false
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 同步事件 {#id3}
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 #### `MINIO_API_SYNC_EVENTS` {#envvar.MINIO_API_SYNC_EVENTS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 #### `api sync_events` {#mc-conf.api.sync_events}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 启用同步 [存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
 

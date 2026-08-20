@@ -2,8 +2,8 @@
 title: "使用 Helm Charts 部署 Silo Tenant"
 url: "/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="helm-charts-minio-tenant"></a>
@@ -15,11 +15,10 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 
 本步骤要求 Kubernetes 集群中已存在一个有效的 [Operator](/zh/operations/deployments/kubernetes/#deploy-operator-kubernetes) 部署。 你不能使用 MinIO Operator Tenant chart 在脱离 Operator 的情况下独立部署 Tenant。
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio) *不同*。本指南使用 Operator Tenant Chart，因为它提供明确的 Tenant 镜像覆盖。上游 Operator 仓库已于 2026 年 3 月 20 日归档，因此本文固定其最终 `v7.1.1` Chart，仅作为冻结的兼容基线；Silo 不继承上游厂商的支持承诺。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio) *不同*。本指南使用 Operator Tenant Chart，因为它提供明确的 Tenant 镜像覆盖。上游 Operator 仓库已于 2026 年 3 月 20 日归档，因此本文固定其最终 `v7.1.1` Chart，仅作为冻结的兼容基线；Silo 不继承上游厂商的支持承诺。
 
 ## 前提条件 {#id3}
 
@@ -49,11 +48,10 @@ MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](http
 
 以下步骤使用 Helm 通过已归档上游项目的 `v7.1.1` Tenant Chart 部署 MinIO Tenant。
 
-{{% alert color="warning" %}}
-**重要**
-
-如果你使用 Helm 部署 MinIO Tenant，就必须使用 Helm 来管理或升级该部署。 不要使用 `kubectl krew`、Kustomize 或类似方式来管理或升级 MinIO Tenant。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 如果你使用 Helm 部署 MinIO Tenant，就必须使用 Helm 来管理或升级该部署。 不要使用 `kubectl krew`、Kustomize 或类似方式来管理或升级 MinIO Tenant。
 
 本步骤并未穷尽 [Tenant Chart](/zh/reference/tenant-chart-values/#minio-tenant-chart-values) 中所有可能的配置项。 它只提供一个基线，你可以在此基础上按需修改和定制 Tenant。
 

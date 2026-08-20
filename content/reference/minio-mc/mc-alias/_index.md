@@ -3,8 +3,8 @@ title: "mc alias"
 url: "/reference/minio-mc/mc-alias/"
 weight: 20
 icon: fa-solid fa-link
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias.rst
+upstream_modified: false
 ---
 
 <a id="mc-alias"></a>
@@ -15,11 +15,10 @@ silo_modified: false
 
 The [`mc alias`](#command-mc.alias) commands provide a convenient interface for managing the list of S3-compatible hosts that [`mc`](/reference/minio-mc/#command-mc) can connect to and run operations against.
 
-{{% alert color="warning" %}}
-**Important**
-
-[`mc`](/reference/minio-mc/#command-mc) commands that operate on S3-compatible services *require* specifying an alias for that service.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> [`mc`](/reference/minio-mc/#command-mc) commands that operate on S3-compatible services *require* specifying an alias for that service.
 
 ## Subcommands {#subcommands}
 

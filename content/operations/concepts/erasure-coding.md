@@ -3,8 +3,8 @@ title: "Erasure Coding"
 url: "/operations/concepts/erasure-coding/"
 description: "Silo erasure coding"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts/erasure-coding.rst
+upstream_modified: true
 ---
 
 <a id="erasure-coding"></a>
@@ -22,11 +22,10 @@ See [Availability and Resiliency](/operations/concepts/availability-and-resilien
 
 ## Erasure Coding Basics {#erasure-coding-basics}
 
-{{% alert color="info" %}}
-**Note**
-
-The diagrams and content in this section present a simplified view of MinIO erasure coding operations and are not intended to represent the complexities of MinIO’s full erasure coding implementation.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> The diagrams and content in this section present a simplified view of MinIO erasure coding operations and are not intended to represent the complexities of MinIO’s full erasure coding implementation.
 
 **MinIO groups drives in each [server pool](/glossary/#term-server-pool) into one or more Erasure Sets of the same size.**
 
@@ -109,13 +108,12 @@ The diagrams and content in this section present a simplified view of MinIO eras
 
 Use the MinIO [Erasure Coding Calculator](https://min.io/product/erasure-code-calculator) to explore the possible erasure set size and distributions for your planned topology. Where possible, use an even number of nodes and drives per node to simplify topology planning and conceptualization of drive/erasure-set distribution.
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 <a id="minio-ec-parity"></a>
 

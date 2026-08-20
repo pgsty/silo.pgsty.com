@@ -2,8 +2,8 @@
 title: "将事件发布到 Elasticsearch"
 url: "/zh/administration/monitoring/publish-events-to-elasticsearch/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-elasticsearch.rst
+upstream_modified: false
 ---
 
 <a id="elasticsearch"></a>
@@ -31,8 +31,8 @@ MinIO 依赖 [https://github.com/olivere/elastic](https://github.com/olivere/ela
 
 你可以使用环境变量，*或* 通过设置运行时配置项来配置新的 Elasticsearch 服务端点。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/notifications/elasticsearch/#minio-server-envvar-bucket-notification-elasticsearch) 指定 Elasticsearch 服务端点及其相关配置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次 启动时应用这些设置。
 
 以下示例代码设置了配置 Elasticsearch 服务端点所需的 *全部* 环境变量。 最少 *必须* 设置的变量包括：
@@ -42,39 +42,35 @@ MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/n
 - [`MINIO_NOTIFY_ELASTICSEARCH_INDEX`](/zh/reference/minio-server/settings/notifications/elasticsearch/#envvar.MINIO_NOTIFY_ELASTICSEARCH_INDEX)
 - [`MINIO_NOTIFY_ELASTICSEARCH_FORMAT`](/zh/reference/minio-server/settings/notifications/elasticsearch/#envvar.MINIO_NOTIFY_ELASTICSEARCH_FORMAT)
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_ELASTICSEARCH_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_ELASTICSEARCH_URL_<IDENTIFIER>="<ENDPOINT>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_INDEX_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_FORMAT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_USERNAME_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_PASSWORD_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_COMMENT_<IDENTIFIER>="<string>"
+> ```
 
-```shell
-   set MINIO_NOTIFY_ELASTICSEARCH_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_ELASTICSEARCH_URL_<IDENTIFIER>="<ENDPOINT>"
-   set MINIO_NOTIFY_ELASTICSEARCH_INDEX_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_FORMAT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_USERNAME_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_PASSWORD_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_COMMENT_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-   export MINIO_NOTIFY_ELASTICSEARCH_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_ELASTICSEARCH_URL_<IDENTIFIER>="<ENDPOINT>"
-   export MINIO_NOTIFY_ELASTICSEARCH_INDEX_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_FORMAT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_USERNAME_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_PASSWORD_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_COMMENT_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_ELASTICSEARCH_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_ELASTICSEARCH_URL_<IDENTIFIER>="<ENDPOINT>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_INDEX_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_FORMAT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_USERNAME_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_PASSWORD_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_COMMENT_<IDENTIFIER>="<string>"
+> ```
 
 - 将 `<IDENTIFIER>` 替换为目标服务端点的唯一描述性字符串。 与新目标服务端点相关的所有环境变量都应使用相同的 `<IDENTIFIER>` 值。 以下示例假定该标识符为 `PRIMARY`。
 
@@ -82,8 +78,8 @@ MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/n
 - 将 `<ENDPOINT>` 替换为 Elasticsearch 服务端点的 URL。 例如：
 
 有关各环境变量的完整说明，请参见 [Elasticsearch Service for 存储桶通知](/zh/reference/minio-server/settings/notifications/elasticsearch/#minio-server-envvar-bucket-notification-elasticsearch)。
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_elasticsearch`](/zh/reference/minio-server/settings/notifications/elasticsearch/#mc-conf.notify_elasticsearch) 配置键来添加或更新 Elasticsearch 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用新增或更新后的配置项。
 
 以下示例代码设置了配置 Elasticsearch 服务端点相关的 *全部* 配置项。 最少 *必须* 设置的配置项包括：
@@ -112,8 +108,8 @@ mc admin config set ALIAS/ notify_elasticsearch:IDENTIFIER \
   `https://user:password@hostname:port`
 
 有关各配置项的完整说明，请参见 [Elasticsearch Bucket Notification Configuration Settings](/zh/reference/minio-server/settings/notifications/elasticsearch/#minio-server-config-bucket-notification-elasticsearch)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) 重启 MinIO 部署 {#minio}
 
@@ -133,36 +129,35 @@ SQS ARNs: arn:minio:sqs::primary:elasticsearch
 
 在将关联的 Elasticsearch 部署配置为存储桶通知目标时，你必须指定该 ARN 资源。
 
-{{% alert color="info" %}}
-**识别存储桶通知的 ARN**
-
-此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
-
-**查看 JSON 输出**
-
-1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. 在 JSON 输出中，查找 `info.sqsARN` 键。
-
-   你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
-
-   例如，`arn:minio:sqs::primary:elasticsearch`。
-
-**使用 jq 从 JSON 中解析该值**
-
-1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
-2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:elasticsearch`。
-{{% /alert %}}
+> [!NOTE]
+> **识别存储桶通知的 ARN**
+>
+> 此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
+>
+> **查看 JSON 输出**
+>
+> 1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
+>
+>    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
+>
+>    例如，`arn:minio:sqs::primary:elasticsearch`。
+>
+> **使用 jq 从 JSON 中解析该值**
+>
+> 1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
+> 2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:elasticsearch`。
 
 ### 3) 将 Elasticsearch 端点配置为存储桶通知目标 {#id3}
 

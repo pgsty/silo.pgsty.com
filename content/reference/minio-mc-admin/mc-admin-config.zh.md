@@ -2,8 +2,8 @@
 title: "mc admin config"
 url: "/zh/reference/minio-mc-admin/mc-admin-config/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-config.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-config"></a>
@@ -15,11 +15,10 @@ silo_modified: false
 
 [`mc admin config`](#command-mc.admin.config) 命令用于管理 [`minio`](/zh/reference/minio-server/#command-minio) 服务器的配置设置。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ## 示例 {#id3}
 

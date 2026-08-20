@@ -2,8 +2,8 @@
 title: "将事件发布到 Webhook"
 url: "/zh/administration/monitoring/publish-events-to-webhook/"
 weight: 100
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-webhook.rst
+upstream_modified: false
 ---
 
 <a id="webhook"></a>
@@ -25,41 +25,37 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 
 你可以使用环境变量，或通过设置运行时配置项来配置新的 Webhook 服务端点。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/webhook-service/#minio-server-envvar-bucket-notification-webhook) 指定 Webhook 服务端点及其相关配置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时 应用这些设置。
 
 以下示例代码设置了配置 Webhook 服务端点所需的 *全部* 环境变量。 最低 *必需* 变量为 [`MINIO_NOTIFY_WEBHOOK_ENABLE`](/zh/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENABLE) 和 [`MINIO_NOTIFY_WEBHOOK_ENDPOINT`](/zh/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENDPOINT)：
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_WEBHOOK_ENDPOINT_<IDENTIFIER>="ENDPOINT"
+>    set MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
+> ```
 
-```shell
-   set MINIO_NOTIFY_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_WEBHOOK_ENDPOINT_<IDENTIFIER>="ENDPOINT"
-   set MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-   export MINIO_NOTIFY_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_WEBHOOK_ENDPOINT_<IDENTIFIER>="ENDPOINT"
-   export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_WEBHOOK_ENDPOINT_<IDENTIFIER>="ENDPOINT"
+>    export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
+> ```
 
 - 将 `<IDENTIFIER>` 替换为该 Webhook 服务端点的唯一描述性字符串。 对于与新目标服务端点相关的所有环境变量，请使用相同的 `<IDENTIFIER>` 值。以下示例假设该标识符为 `PRIMARY`。
 
@@ -69,8 +65,8 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
   `https://webhook.example.com`
 
 有关每个环境变量的完整文档，请参见 [用于存储桶通知的 Webhook 服务](/zh/reference/minio-server/settings/notifications/webhook-service/#minio-server-envvar-bucket-notification-webhook)。
-{{% /tab %}}
-{{% tab header="配置设置" %}}
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_webhook`](/zh/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook) 配置键来添加或更新 Webhook 端点。 你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的 配置设置。
 
 以下示例代码设置了配置 Webhook 服务端点所需的 *全部* 设置。 最低 *必需* 设置为 [`notify_webhook endpoint`](/zh/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook.endpoint)：
@@ -93,8 +89,8 @@ mc admin config set ALIAS/ notify_webhook:IDENTIFIER \
   `https://webhook.example.com`
 
 有关每个设置的完整文档，请参见 [Webhook 存储桶通知配置设置](/zh/reference/minio-server/settings/notifications/webhook-service/#minio-server-config-bucket-notification-webhook)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) 重启 MinIO 部署 {#minio}
 
@@ -114,36 +110,35 @@ SQS ARNs: arn:minio:sqs::primary:webhook
 
 在将关联的 Webhook 部署配置为目标时，你必须在配置存储桶通知时指定该 ARN 资源。
 
-{{% alert color="info" %}}
-**识别存储桶通知的 ARN**
-
-此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
-
-**查看 JSON 输出**
-
-1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. 在 JSON 输出中，查找 `info.sqsARN` 键。
-
-   你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
-
-   例如，`arn:minio:sqs::primary:webhook`。
-
-**使用 jq 从 JSON 中解析该值**
-
-1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
-2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:webhook`。
-{{% /alert %}}
+> [!NOTE]
+> **识别存储桶通知的 ARN**
+>
+> 此前创建端点时，你已定义 `<IDENTIFIER>`，用于分配给存储桶通知目标 ARN。 以下步骤会返回该部署上已配置的 ARN。 请通过查找你指定的 `<IDENTIFIER>` 来识别此前创建的 ARN。
+>
+> **查看 JSON 输出**
+>
+> 1. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. 在 JSON 输出中，查找 `info.sqsARN` 键。
+>
+>    你需要的 ARN 就是该键中与所指定 `<IDENTIFIER>` 匹配的那个值。
+>
+>    例如，`arn:minio:sqs::primary:webhook`。
+>
+> **使用 jq 从 JSON 中解析该值**
+>
+> 1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
+> 2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:webhook`。
 
 ### 3) 使用 Webhook 端点作为目标来配置存储桶通知 {#id4}
 

@@ -2,8 +2,8 @@
 title: "mc replicate resync"
 url: "/reference/minio-mc/mc-replicate-resync/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-resync.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-resync"></a>
@@ -24,8 +24,8 @@ This command supports rebuilding a MinIO deployment using an active-active repli
 - [Enable Two-Way Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway)
 - [Enable Multi-Site Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/#minio-bucket-replication-serverside-multi)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command resynchronizes the content of the `mydata` bucket on the `myminio` MinIO deployment to the remote MinIO deployment associated to the specified `--remote-bucket`:
 
 ```shell
@@ -33,9 +33,8 @@ mc replicate resync start \
    --remote-bucket "arn:minio:replication::d3c086c7-1d64-40c2-954b-fe8222907033:mydata" \
    myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -50,8 +49,8 @@ mc [GLOBALFLAGS] replicate resync start|status  \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

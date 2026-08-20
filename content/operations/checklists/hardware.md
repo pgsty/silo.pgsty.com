@@ -2,8 +2,8 @@
 title: "Hardware Checklist"
 url: "/operations/checklists/hardware/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/checklists/hardware.rst
+upstream_modified: true
 math: true
 ---
 
@@ -33,14 +33,13 @@ MinIO, like any distributed system, benefits from selecting identical configurat
 
 Deployments may exhibit unpredictable performance if nodes have varying hardware or software configurations. Workloads that benefit from storing aged data on lower-cost hardware should instead deploy a dedicated “warm” or “cold” MinIO deployment and [transition](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) data to that tier.
 
-{{% alert color="info" %}}
-**MinIO does not provide hosted services or hardware sales**
+> [!NOTE]
+> **MinIO does not provide hosted services or hardware sales**
+>
+> See our [Reference Hardware](https://min.io/product/reference-hardware#hardware?ref-docs) page for a curated selection of servers and storage components from our hardware partners.
 
-See our [Reference Hardware](https://min.io/product/reference-hardware#hardware?ref-docs) page for a curated selection of servers and storage components from our hardware partners.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 <table>
   <thead>
     <tr>
@@ -83,8 +82,8 @@ See our [Reference Hardware](https://min.io/product/reference-hardware#hardware?
     </tr>
   </tbody>
 </table>
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 <table>
   <thead>
     <tr>
@@ -127,33 +126,32 @@ See our [Reference Hardware](https://min.io/product/reference-hardware#hardware?
     </tr>
   </tbody>
 </table>
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**Important**
-
-The following areas have the greatest impact on MinIO performance, listed in order of importance:
-
-<table>
-  <tbody>
-    <tr>
-      <td><p>Network Infrastructure</p></td>
-      <td><p>Insufficient or limited throughput constrains performance</p></td>
-    </tr>
-    <tr>
-      <td><p>Storage Controller</p></td>
-      <td><p>Old firmware, limited throughput, or failing hardware constrains performance and affects reliability</p></td>
-    </tr>
-    <tr>
-      <td><p>Storage (Drive)</p></td>
-      <td><p>Old firmware, or slow/aging/failing hardware constrains performance and affects reliability</p></td>
-    </tr>
-  </tbody>
-</table>
-
-Prioritize securing the necessary components for each of these areas before focusing on other hardware resources, such as compute-related constraints.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The following areas have the greatest impact on MinIO performance, listed in order of importance:
+>
+> <table>
+>   <tbody>
+>     <tr>
+>       <td><p>Network Infrastructure</p></td>
+>       <td><p>Insufficient or limited throughput constrains performance</p></td>
+>     </tr>
+>     <tr>
+>       <td><p>Storage Controller</p></td>
+>       <td><p>Old firmware, limited throughput, or failing hardware constrains performance and affects reliability</p></td>
+>     </tr>
+>     <tr>
+>       <td><p>Storage (Drive)</p></td>
+>       <td><p>Old firmware, or slow/aging/failing hardware constrains performance and affects reliability</p></td>
+>     </tr>
+>   </tbody>
+> </table>
+>
+> Prioritize securing the necessary components for each of these areas before focusing on other hardware resources, such as compute-related constraints.
 
 The minimum recommendations above reflect MinIO’s experience with assisting enterprise customers in deploying on a variety of IT infrastructures while maintaining the desired SLA/SLO. While MinIO may run on less than the minimum recommended topology, any potential cost savings come at the risk of decreased reliability, performance, or overall functionality.
 
@@ -228,28 +226,26 @@ The following table provides general guidelines for allocating memory for use by
 | Up to 1 Pebibyte (Pi) | 64GiB |
 | More than 1 Pebibyte (Pi) | 128GiB |
 
-{{% alert color="warning" %}}
-**Important**
-
-Starting with [RELEASE.2024-01-28T22-35-53Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-01-28T22-35-53Z), MinIO preallocates 2GiB of memory per node in distributed setups and 1GiB of memory for a single-node setup.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Starting with [RELEASE.2024-01-28T22-35-53Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-01-28T22-35-53Z), MinIO preallocates 2GiB of memory per node in distributed setups and 1GiB of memory for a single-node setup.
 
 <a id="minio-hardware-checklist-storage"></a>
 
 ### Storage {#storage}
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 #### Recommended Storage Mediums {#recommended-storage-mediums}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 MinIO recommends provisioning a storage class for each MinIO Tenant that meets the performance objectives for that tenant.
 
 Where possible, configure the Storage Class, CSI, or other provisioner underlying the PV to format volumes as XFS to ensure best performance.
@@ -257,48 +253,47 @@ Where possible, configure the Storage Class, CSI, or other provisioner underlyin
 Ensure a consistent underlying storage type (NVMe, SSD, HDD) for all PVs provisioned in a Tenant.
 
 Ensure the same presented capacity of each PV across all nodes in each Tenant [server pool](/operations/concepts/#minio-intro-server-pool). MinIO limits the maximum usable size per PV to the smallest PV in the pool. For example, if a pool has 15 10TB PVs and 1 1TB PV, MinIO limits the per-PV capacity to 1TB.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 MinIO recommends using flash-based storage (NVMe or SSD) for all workload types and scales. Workloads that require high performance should prefer NVMe over SSD.
 
 MinIO does not recommends HDD storage for production environments. HDD storage typically does not provide the necessary performance to meet the expectations of modern workloads, and any cost efficiencies at scale are offset by the performance constraints of the medium.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### Prefer Direct-Attached “Local” Storage (DAS) {#prefer-direct-attached-local-storage-das}
 
 <abbr title="Direct-Attached Storage">DAS</abbr>, such as locally-attached JBOD (Just a Bunch of Disks) arrays, provide significant performance and consistency advantages over networked (NAS, SAN, NFS) storage.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 While MinIO Tenants can make use of remote Persistent Volume (PV) resources, the cost of performing I/O over the network typically constrains overall performance.
 
 MinIO strongly recommends using CSIs which can provision storage attached to the worker node on which Kubernetes schedules your MinIO pods, such as [MinIO DirectPV](https://github.com/minio/directpv).
 
 For all other cases, make every effort possible to select a CSI which presents the storage to MinIO as if it were a locally-attached filesystem. CSIs which add layers of software or translations between MinIO and the OS-level storage access APIs necessarily increase the complexity of the syste and can contribute to unexpected or undesired behavior.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 Configure the JBOD arrays without any RAID, pooling, or similar software-level layers, such that the storage is presented directly to MinIO.
 
 For virtual machines or systems that require provising storage as a virtual volume, MinIO recommends using thick LUNs only.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% details title="Network File System Volumes Break Consistency Guarantees" closed="true" %}}
-MinIO’s strict **read-after-write** and **list-after-write** consistency model requires local drive filesystems. MinIO cannot provide consistency guarantees if the underlying storage volumes are NFS or a similar network-attached storage volume.
-{{% /details %}}
+> [!DETAILS]- Network File System Volumes Break Consistency Guarantees
+> MinIO’s strict **read-after-write** and **list-after-write** consistency model requires local drive filesystems. MinIO cannot provide consistency guarantees if the underlying storage volumes are NFS or a similar network-attached storage volume.
 
 #### Use XFS-Formatted Drives with Consistent Mounting {#use-xfs-formatted-drives-with-consistent-mounting}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 MinIO recommends formatting the drives underlying MinIO Persistent Volumes as `xfs`.
 
 If using a CSI, review the documentation for that CSI and ensure it supports specifying the `xfs` filesystem. MinIO strongly recommends avoiding any CSI which formats drives as `ext4`, `btrfs` or other filesystems.
 
 MinIO expects all provisioned Persistent Volumes (PV) to be intended for its exclusive use, where the underlying storage medium guarantees access to the stored data at the assigned mount path. Modifications to the underlying storage medium, including but not limited to external or third-party applications or the arbitrary re-mounting of locally-attached storage, may result in unexpected behavior or data loss.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 Format drives as XFS and present them to MinIO as a <abbr title="Just a Bunch of Disks">JBOD</abbr> array with no RAID or other pooling configurations. Using any other type of backing storage (SAN/NAS, ext4, RAID, LVM) typically results in a reduction in performance, reliability, predictability, and consistency.
 
 When formatting XFS drives, apply a unique label per drive. For example, the following command formats four drives as XFS and applies a corresponding drive label.
@@ -328,17 +323,16 @@ You can use `mount -a` to mount those drives at those paths during initial setup
 
 MinIO **strongly recommends** using label-based mounting rules over UUID-based rules. Label-based rules allow swapping an unhealthy or non-working drive with a replacement that has matching format and label. UUID-based rules require editing the `/etc/fstab` file to replace mappings with the new drive UUID.
 
-{{% alert color="info" %}}
-**Note**
-
-Cloud environment instances which depend on mounted external storage may encounter boot failure if one or more of the remote file mounts return errors or failure. For example, an AWS ECS instance with mounted persistent EBS volumes may not boot with the standard `/etc/fstab` configuration if one or more EBS volumes fail to mount.
-
-You can set the `nofail` option to silence error reporting at boot and allow the instance to boot with one or more mount issues.
-
-You should not use this option on systems with locally attached disks, as silencing drive errors prevents both MinIO and the OS from responding to those errors in a normal fashion.
-{{% /alert %}}
-{{% /tab %}}
-{{< /tabpane >}}
+> [!NOTE]
+> **Note**
+>
+> Cloud environment instances which depend on mounted external storage may encounter boot failure if one or more of the remote file mounts return errors or failure. For example, an AWS ECS instance with mounted persistent EBS volumes may not boot with the standard `/etc/fstab` configuration if one or more EBS volumes fail to mount.
+>
+> You can set the `nofail` option to silence error reporting at boot and allow the instance to boot with one or more mount issues.
+>
+> You should not use this option on systems with locally attached disks, as silencing drive errors prevents both MinIO and the OS from responding to those errors in a normal fashion.
+{{< /tab >}}
+{{< /tabs >}}
 
 #### Disable XFS Retry On Error {#disable-xfs-retry-on-error}
 
@@ -350,11 +344,11 @@ MinIO **strongly recommends** disabling [retry-on-error](https://docs.kernel.org
 
 The default `max_retries` setting typically directs the filesystem to retry-on-error indefinitely instead of propagating the error. MinIO can handle XFS errors appropriately, such that the retry-on-error behavior introduces at most unnecessary latency or performance degradation.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 Defer to the documentation for your preferred CSI or StorageClass on options for configuring filesystem-level settings.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 The following script iterates through all drives at the specified mount path and sets the XFS `max_retries` setting to `0` or “fail immediately on error” for the recommended error classes. The script ignores any drives not mounted, either manually or through `/etc/fstab`. Modify the `/mnt/drive` line to match the pattern used for your MinIO drives.
 
 ```bash
@@ -376,9 +370,8 @@ You must run this script on all MinIO nodes and configure the script to re-run o
 ```shell
 @reboot /opt/minio/xfs-retry-settings.sh
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### Use Consistent Drive Type and Capacity {#use-consistent-drive-type-and-capacity}
 
@@ -540,11 +533,10 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
 
 ## Recommended tools for MinIO subscriptions {#recommended-tools-for-minio-subscriptions}
 
-{{% alert color="warning" %}}
-**Important**
-
-The tools noted in this section **require** a MinIO subscription. MinIO strongly recommends all production deployments use [AIStor Object Store](https://www.min.io/product/aistor/object-data-store) with their SUBNET license. For more information, see the [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs).
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The tools noted in this section **require** a MinIO subscription. MinIO strongly recommends all production deployments use [AIStor Object Store](https://www.min.io/product/aistor/object-data-store) with their SUBNET license. For more information, see the [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs).
 
 1. Health diagnostic tool
 

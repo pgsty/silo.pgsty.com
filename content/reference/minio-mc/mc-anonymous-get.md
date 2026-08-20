@@ -2,8 +2,8 @@
 title: "mc anonymous get"
 url: "/reference/minio-mc/mc-anonymous-get/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-anonymous-get.rst
+upstream_modified: false
 ---
 
 <a id="mc-anonymous-get"></a>
@@ -19,16 +19,15 @@ Buckets with anonymous policies allow clients to access the bucket contents and 
 
 To get the [JSON policy](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html) assigned to the bucket, use the [`mc anonymous get-json`](/reference/minio-mc/mc-anonymous-get-json/#command-mc.anonymous.get-json) command.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command retrieves the anonymous access policy for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc anonymous get myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -40,8 +39,8 @@ mc [GLOBALFLAGS] policy get ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

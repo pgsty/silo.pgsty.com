@@ -2,8 +2,8 @@
 title: "将对象从 MinIO 迁移到 Azure"
 url: "/zh/administration/object-management/transition-objects-to-azure/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/transition-objects-to-azure.rst
+upstream_modified: true
 ---
 
 <a id="minio-azure"></a>
@@ -95,13 +95,12 @@ MinIO 会将所有已转移对象存储在远程存储桶或资源下、 每个�
 
 对于包含其他数据的远程存储层， 包括来自其他 MinIO 部署的已转移对象， MinIO 建议指定此可选前缀。 本教程包含设置此前缀所需的语法。
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO *不* 支持更改与 Azure 远程层关联的账户名称。 Azure 存储后端与该账户绑定，因此更改账户会改变存储后端，并导致无法访问已迁移到原始账户/后端的任何对象。
-
-如果您需要与 Azure 远程层配置相关的场景化指导，请联系 [MinIO Support](https://min.io/pricing?ref=docs)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO *不* 支持更改与 Azure 远程层关联的账户名称。 Azure 存储后端与该账户绑定，因此更改账户会改变存储后端，并导致无法访问已迁移到原始账户/后端的任何对象。
+>
+> 如果您需要与 Azure 远程层配置相关的场景化指导，请联系 [MinIO Support](https://min.io/pricing?ref=docs)。
 
 ### 远程数据的可用性 {#id6}
 

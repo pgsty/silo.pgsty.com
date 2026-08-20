@@ -2,8 +2,8 @@
 title: "mc admin idp ldap"
 url: "/reference/deprecated/mc-admin-idp-ldap/"
 weight: 140
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-idp-ldap.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-idp-ldap"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.admin.idp.ldap"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-26T23-31-54Z**
-
-`mc admin idp ldap` and its subcommands replaced by [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-26T23-31-54Z**
+>
+> `mc admin idp ldap` and its subcommands replaced by [`mc idp ldap`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap).
 
 ## Description {#description}
 
@@ -23,11 +22,10 @@ The [`mc admin idp ldap`](#command-mc.admin.idp.ldap) commands allow you to add,
 
 Define configuration settings as an alternative to using environment variables when [setting up an AD/LDAP connection](/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic).
 
-{{% alert color="info" %}}
-**Note**
-
-Configuration settings do **not** override settings configured as environment variables.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Configuration settings do **not** override settings configured as environment variables.
 
 The [`mc admin idp ldap`](#command-mc.admin.idp.ldap) command has the following subcommands:
 
@@ -56,8 +54,8 @@ For a more detailed explanation of the configuration parameters, refer to the [c
 
 Create a new configuration for an AD/LDAP provider. MinIO supports no more than *one* (1) AD/LDAP provider per deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example sets the AD/LDAP configuration settings for the `myminio` deployment.
 
 ```shell
@@ -71,9 +69,8 @@ The following example sets the AD/LDAP configuration settings for the `myminio` 
       group_search_base_dn=ou=swengg,dc=min,dc=io                    \
       group_search_filter="(&(objectclass=groupofnames)(member=%d))"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -85,8 +82,8 @@ mc [GLOBALFLAGS] admin idp ldap add          \
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to create for AD/LDAP integration.
 - Replace the `[CFG_PARAM#]` with each of the [configuration setting](/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings) key-value pairs in the format of `PARAMETER="value"`.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `update` {#mc.admin.idp.ldap.update}
 
@@ -94,8 +91,8 @@ mc [GLOBALFLAGS] admin idp ldap add          \
 
 Modify an existing set of configurations for an AD/LDAP provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example changes two of the AD/LDAP configuration settings for the `myminio` deployment.
 
 ```shell
@@ -104,9 +101,8 @@ mc admin idp ldap update                                \
                   lookup_bind_dn=cn=admin,dc=min,dc=io  \
                   lookup_bind_password=somesecret
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -118,8 +114,8 @@ mc [GLOBALFLAGS] admin idp ldap update           \
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to update for AD/LDAP integration.
 - Replace the `[CFG_PARAM#]` with each of the [configuration setting](/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings) key-value pairs to update in the format of `PARAMETER="value"`.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `ls, list` {#mc.admin.idp.ldap.ls}
 
@@ -127,16 +123,15 @@ mc [GLOBALFLAGS] admin idp ldap update           \
 
 Lists the existing set of configurations for an AD/LDAP provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example lists the AD/LDAP configuration settings for the `myminio` deployment.
 
 ```shell
 mc admin idp ldap ls myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -144,8 +139,8 @@ mc [GLOBALFLAGS] admin idp ldap ls ALIAS
 ```
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to list the AD/LDAP integration.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `rm, remove` {#mc.admin.idp.ldap.rm}
 
@@ -153,16 +148,15 @@ mc [GLOBALFLAGS] admin idp ldap ls ALIAS
 
 Remove the existing configuration for an AD/LDAP provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example removes the AD/LDAP provider settings for the `myminio` deployment.
 
 ```shell
 mc admin idp ldap rm myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -171,8 +165,8 @@ mc [GLOBALFLAGS] admin idp ldap rm     \
 ```
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to remove the AD/LDAP integration.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `info` {#mc.admin.idp.ldap.info}
 
@@ -180,16 +174,15 @@ mc [GLOBALFLAGS] admin idp ldap rm     \
 
 Outputs the current configuration for an AD/LDAP provider on a specified MinIO deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example outputs the AD/LDAP configuration settings on the `myminio` deployment.
 
 ```shell
 mc admin idp ldap info myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -198,8 +191,8 @@ mc [GLOBALFLAGS] admin idp ldap info     \
 ```
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to retrieve info on the AD/LDAP integration.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `enable` {#mc.admin.idp.ldap.enable}
 
@@ -207,17 +200,16 @@ mc [GLOBALFLAGS] admin idp ldap info     \
 
 Enables the currently configured AD/LDAP provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example enables the AD/LDAP configuration on the `myminio` deployment.
 
 ```shell
 mc admin idp ldap enable       \
                   myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -226,8 +218,8 @@ mc [GLOBALFLAGS] admin idp ldap enable     \
 ```
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to enable the AD/LDAP integration.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `disable` {#mc.admin.idp.ldap.disable}
 
@@ -235,17 +227,16 @@ mc [GLOBALFLAGS] admin idp ldap enable     \
 
 Disables the currently configured AD/LDAP provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example disables the AD/LDAP configurations on the `myminio` deployment.
 
 ```shell
 mc admin idp ldap disable      \
                   myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -254,8 +245,8 @@ mc [GLOBALFLAGS] admin idp ldap disable       \
 ```
 
 - Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of a MinIO deployment to disable the AD/LDAP integration.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Global Flags {#global-flags}
 

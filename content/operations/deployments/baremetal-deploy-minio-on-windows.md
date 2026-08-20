@@ -2,8 +2,8 @@
 title: "Deploy Silo on Windows"
 url: "/operations/deployments/baremetal-deploy-minio-on-windows/"
 weight: 50
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-deploy-minio-on-windows.rst
+upstream_modified: true
 ---
 
 <a id="deploy-minio-on-windows"></a>
@@ -46,8 +46,8 @@ The next step includes instructions for running the executable. Launch the serve
 
 In PowerShell or the Command Prompt, navigate to the location of the executable or add the path of the `minio.exe` file to the system `$PATH`. computer.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Multi-Drive" %}}
+{{< tabs group="multi-drive-single-drive" >}}
+{{< tab label="Multi-Drive" value="multi-drive" >}}
 For Windows hosts with multiple drives, you can specify a sequential set of drives to use for configuring MinIO in the Single-Node Multi-Drive (SNMD) topology:
 
 ```text
@@ -74,8 +74,8 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 ```
 
 The process is tied to the current PowerShell or Command Prompt window. Closing the window stops the server and ends the process.
-{{% /tab %}}
-{{% tab header="Single-Drive" %}}
+{{< /tab >}}
+{{< tab label="Single-Drive" value="single-drive" >}}
 Use this command to start a local MinIO instance in the `C:\minio` folder. You can replace `C:\minio` with another drive or folder path on the local
 
 ```text
@@ -102,8 +102,8 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 ```
 
 The process is tied to the current PowerShell or Command Prompt window. Closing the window stops the server and ends the process.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 3. Connect your Browser to the MinIO Server {#connect-your-browser-to-the-minio-server}
 

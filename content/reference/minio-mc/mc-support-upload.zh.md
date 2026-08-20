@@ -2,8 +2,8 @@
 title: "mc support upload"
 url: "/zh/reference/minio-mc/mc-support-upload/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-upload.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-upload"></a>
@@ -14,11 +14,10 @@ silo_modified: false
 
 [`mc support upload`](#command-mc.support.upload) 将文件从本地文件系统复制到 SUBNET 工单。
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## Syntax {#syntax}
 

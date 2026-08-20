@@ -2,8 +2,8 @@
 title: "mc admin user info"
 url: "/reference/minio-mc-admin/mc-admin-user-info/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-info"></a>
@@ -17,16 +17,15 @@ The [`mc admin user info`](#command-mc.admin.user.info) command returns detailed
 
 To manage external Identity Provider users, see [`OIDC`](/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) or [`AD/LDAP`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command returns details of user `myuser` on the `myminio` MinIO deployment:
 
 ```shell
 mc admin user info myminio myuser
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -40,8 +39,8 @@ mc [GLOBALFLAGS] admin user info      \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -63,11 +62,10 @@ The username to retrieve information for.
 
 This command supports any of the [global flags](/reference/minio-mc/#minio-mc-global-options).
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-26T23-31-54Z**
-
-`mc admin user info --json` output includes policies inherited from a user’s group memberships in `memberOf`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-26T23-31-54Z**
+>
+> `mc admin user info --json` output includes policies inherited from a user’s group memberships in `memberOf`.
 
 ## Examples {#examples}
 

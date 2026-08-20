@@ -2,8 +2,8 @@
 title: "mc admin user svcacct rm"
 url: "/zh/reference/minio-mc-admin/mc-admin-user-svcacct-remove/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct-remove.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct-rm"></a>
@@ -13,15 +13,14 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct.rm"></a>
 
-{{% alert color="warning" %}}
-**重要**
-
-此命令已被替代，并将在未来的 MinIO 客户端版本中弃用。
-
-从 MinIO客户端版本RELEASE.2024-10-08T09-37-26Z 起，请使用 [`mc admin accesskey rm`](/zh/reference/minio-mc-admin/mc-admin-accesskey-remove/#command-mc.admin.accesskey.rm) 命令删除内置 MinIO IDP 用户的访问密钥。
-
-对于 AD/LDAP 用户的访问密钥，请使用 [`mc idp ldap accesskey rm`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-rm/#command-mc.idp.ldap.accesskey.rm) 命令。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 此命令已被替代，并将在未来的 MinIO 客户端版本中弃用。
+>
+> 从 MinIO客户端版本RELEASE.2024-10-08T09-37-26Z 起，请使用 [`mc admin accesskey rm`](/zh/reference/minio-mc-admin/mc-admin-accesskey-remove/#command-mc.admin.accesskey.rm) 命令删除内置 MinIO IDP 用户的访问密钥。
+>
+> 对于 AD/LDAP 用户的访问密钥，请使用 [`mc idp ldap accesskey rm`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-rm/#command-mc.idp.ldap.accesskey.rm) 命令。
 
 ## 语法 {#id2}
 
@@ -31,16 +30,15 @@ silo_modified: false
 
 删除后，应用程序将无法再使用该访问密钥进行身份验证。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会删除指定的访问密钥：
 
 ```shell
 mc admin user svcacct rm myminio myuserserviceaccount
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -54,8 +52,8 @@ mc [GLOBALFLAGS] admin user svcacct remove          \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

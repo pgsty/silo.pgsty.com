@@ -6,4 +6,6 @@ type: download
 layout: single
 toc_hide: true
 translationKey: download
+body_class: landing-page download-page
+footer_style: none
 ---

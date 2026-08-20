@@ -2,21 +2,20 @@
 title: "NATS 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/nats/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/nats.rst
+upstream_modified: false
 ---
 
 <a id="nats"></a>
 <a id="minio-server-config-bucket-notification-nats"></a>
 <a id="minio-server-envvar-bucket-notification-nats"></a>
 
-{{% alert color="info" %}}
-**NATS Streaming 已弃用**
-
-NATS Streaming 已弃用。 请迁移到 [JetStream](https://docs.nats.io/nats-concepts/jetstream)。
-
-相关的 MinIO 配置选项和环境变量也已弃用。
-{{% /alert %}}
+> [!NOTE]
+> **NATS Streaming 已弃用**
+>
+> NATS Streaming 已弃用。 请迁移到 [JetStream](https://docs.nats.io/nats-concepts/jetstream)。
+>
+> 相关的 MinIO 配置选项和环境变量也已弃用。
 
 本页面说明了将 NATS 服务配置为 [存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 目标的设置。 有关如何使用这些设置的教程，请参见 [将事件发布到 NATS](/zh/administration/monitoring/publish-events-to-nats/#minio-bucket-notifications-publish-nats)。
 
@@ -29,11 +28,10 @@ NATS Streaming 已弃用。 请迁移到 [JetStream](https://docs.nats.io/nats-c
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 多个 NATS 目标 {#id2}
 
@@ -43,9 +41,8 @@ NATS Streaming 已弃用。 请迁移到 [JetStream](https://docs.nats.io/nats-c
 
 例如，以下命令分别将两个不同的 NATS 服务端点设置为 `PRIMARY` 和 `SECONDARY`：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ```shell
 export MINIO_NOTIFY_NATS_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_NATS_ADDRESS_PRIMARY="nats-endpoint.example.net:4222"
@@ -55,9 +52,8 @@ export MINIO_NOTIFY_NATS_ADDRESS_SECONDARY="nats-endpoint.example.net:4222"
 ```
 
 在这些设置中，[`MINIO_NOTIFY_NATS_ENABLE_PRIMARY`](#envvar.MINIO_NOTIFY_NATS_ENABLE) 表示该环境变量关联到 ID 为 `PRIMARY` 的 NATS 服务端点。
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ```shell
 mc admin config set notify_nats:primary \
    address="nats-endpoint.example.com:4222" \
@@ -69,9 +65,8 @@ mc admin config set notify_nats:secondary \
    subject="minioevents" \
    [ARGUMENT=VALUE ...]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 设置 {#id4}
 
@@ -79,9 +74,8 @@ mc admin config set notify_nats:secondary \
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_ENABLE` {#envvar.MINIO_NOTIFY_NATS_ENABLE}
 
 *envvar*
@@ -89,9 +83,8 @@ mc admin config set notify_nats:secondary \
 指定 `on` 以启用向 NATS 服务端点发布存储桶通知。
 
 默认为 `off`。
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats` {#mc-conf.notify_nats}
 
 *mc-conf*
@@ -106,55 +99,49 @@ mc admin config set notify_nats \
   subject="minioevents" \
   [ARGUMENT="VALUE"] ... \
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 地址 {#id6}
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_ADDRESS` {#envvar.MINIO_NOTIFY_NATS_ADDRESS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats address` {#mc-conf.notify_nats.address}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 发布存储桶事件到的 NATS 服务端点。 例如：`nats-endpoint.example.com:4222`。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-27T05-56-19Z**
-
-在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-27T05-56-19Z**
+>
+> 在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
 
 ### Subject {#subject}
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_SUBJECT` {#envvar.MINIO_NOTIFY_NATS_SUBJECT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats subject` {#mc-conf.notify_nats.subject}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 在 NATS 端点上关联已发布事件的订阅。
 
@@ -162,20 +149,18 @@ mc admin config set notify_nats \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_USERNAME` {#envvar.MINIO_NOTIFY_NATS_USERNAME}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats username` {#mc-conf.notify_nats.username}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定连接到 NATS 服务端点时使用的用户名。
 
@@ -183,74 +168,66 @@ mc admin config set notify_nats \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_PASSWORD` {#envvar.MINIO_NOTIFY_NATS_PASSWORD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats password` {#mc-conf.notify_nats.password}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定连接到 NATS 服务端点时使用的密码。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-06-23T20-26-00Z**
-
-MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回结果的一部分时会对该值进行脱敏。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-06-23T20-26-00Z**
+>
+> MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回结果的一部分时会对该值进行脱敏。
 
 ### Token {#token}
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_TOKEN` {#envvar.MINIO_NOTIFY_NATS_TOKEN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats token` {#mc-conf.notify_nats.token}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定连接到 NATS 服务端点时使用的 token。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-06-23T20-26-00Z**
-
-MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回结果的一部分时会对该值进行脱敏。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-06-23T20-26-00Z**
+>
+> MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回结果的一部分时会对该值进行脱敏。
 
 ### 用户凭证文件 {#id9}
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_USER_CREDENTIALS` {#envvar.MINIO_NOTIFY_NATS_USER_CREDENTIALS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats user_credentials` {#mc-conf.notify_nats.user_credentials}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于连接 NATS 服务端点的 [user credentials file](https://docs.nats.io/using-nats/developer/connecting/creds)。
 
@@ -258,20 +235,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_TLS` {#envvar.MINIO_NOTIFY_NATS_TLS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats tls` {#mc-conf.notify_nats.tls}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以启用到 NATS 服务端点的 TLS 连接。
 
@@ -279,20 +254,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY` {#envvar.MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats tls_skip_verify` {#mc-conf.notify_nats.tls_skip_verify}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 启用或禁用对 NATS 服务端点 TLS 证书的 TLS 校验。
 
@@ -303,20 +276,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_PING_INTERVAL` {#envvar.MINIO_NOTIFY_NATS_PING_INTERVAL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats ping_interval` {#mc-conf.notify_nats.ping_interval}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定客户端向 NATS 服务器发送 ping 的时间间隔。 MinIO 支持以下时间单位：
 
@@ -329,20 +300,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_JETSTREAM` {#envvar.MINIO_NOTIFY_NATS_JETSTREAM}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats jetstream` {#mc-conf.notify_nats.jetstream}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以启用 JetStream 支持，将事件流式传输到 NATS JetStream 服务端点。
 
@@ -352,20 +321,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_STREAMING` {#envvar.MINIO_NOTIFY_NATS_STREAMING}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats streaming` {#mc-conf.notify_nats.streaming}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以启用向 NATS 服务端点异步发布事件。
 
@@ -375,20 +342,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_STREAMING_ASYNC` {#envvar.MINIO_NOTIFY_NATS_STREAMING_ASYNC}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats streaming_async` {#mc-conf.notify_nats.streaming_async}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以启用向 NATS 服务端点异步发布事件。
 
@@ -398,20 +363,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_STREAMING_MAX_PUB_ACKS_IN_FLIGHT` {#envvar.MINIO_NOTIFY_NATS_STREAMING_MAX_PUB_ACKS_IN_FLIGHT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats streaming_max_pub_acks_in_flight` {#mc-conf.notify_nats.streaming_max_pub_acks_in_flight}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定在等待 NATS 服务端点 ACK 响应之前可发布的消息数量。
 
@@ -421,20 +384,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_STREAMING_CLUSTER_ID` {#envvar.MINIO_NOTIFY_NATS_STREAMING_CLUSTER_ID}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats streaming_cluster_id` {#mc-conf.notify_nats.streaming_cluster_id}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 NATS Streaming 集群的唯一 ID。
 
@@ -442,20 +403,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_CERT_AUTHORITY` {#envvar.MINIO_NOTIFY_NATS_CERT_AUTHORITY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats cert_authority` {#mc-conf.notify_nats.cert_authority}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于签署 NATS 服务端点 TLS 证书的 Certificate Authority 证书链路径。
 
@@ -463,20 +422,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_CLIENT_CERT` {#envvar.MINIO_NOTIFY_NATS_CLIENT_CERT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats client_cert` {#mc-conf.notify_nats.client_cert}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于执行到 NATS 服务端点 mTLS 认证的客户端证书路径。
 
@@ -484,20 +441,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_CLIENT_KEY` {#envvar.MINIO_NOTIFY_NATS_CLIENT_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats client_key` {#mc-conf.notify_nats.client_key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于执行到 NATS 服务端点 mTLS 认证的客户端私钥路径。
 
@@ -505,20 +460,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_QUEUE_DIR` {#envvar.MINIO_NOTIFY_NATS_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats queue_dir` {#mc-conf.notify_nats.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定目录路径以启用 MinIO 对未投递消息的持久化事件存储，例如 `/opt/minio/events`。
 
@@ -528,20 +481,18 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_NATS_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats queue_limit` {#mc-conf.notify_nats.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定未投递消息的最大上限。 默认为 `100000`。
 
@@ -549,19 +500,17 @@ MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-co
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NATS_COMMENT` {#envvar.MINIO_NOTIFY_NATS_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nats comment` {#mc-conf.notify_nats.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定与 NATS 配置关联的注释。

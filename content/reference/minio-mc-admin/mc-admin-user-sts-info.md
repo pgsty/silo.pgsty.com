@@ -2,8 +2,8 @@
 title: "mc admin user sts info"
 url: "/reference/minio-mc-admin/mc-admin-user-sts-info/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-sts-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-sts-info"></a>
@@ -17,16 +17,15 @@ The [`mc admin user sts info`](#command-mc.admin.user.sts.info) command retrieve
 
 <abbr title="Security Token Service">STS</abbr> credentials provide temporary access to the MinIO deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command retrieves information on the STS credentials with specified access key:
 
 ```shell
 mc admin user sts info myminio/ "J123C4ZXEQN8RK6ND35I"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -41,8 +40,8 @@ mc [GLOBALFLAGS] admin user sts info          \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

@@ -2,8 +2,8 @@
 title: "mc ilm rule edit"
 url: "/reference/minio-mc/mc-ilm-rule-edit/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-edit.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-edit"></a>
@@ -11,18 +11,17 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.edit"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm rule edit` replaces `mc ilm edit`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule edit` replaces `mc ilm edit`.
 
 ## Syntax {#syntax}
 
 The [`mc ilm rule edit`](#command-mc.ilm.rule.edit) command modifies an existing object lifecycle management rule on a MinIO bucket.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command modifies existing lifecycle management rules for the `mydata` bucket on the `myminio` deployment:
 
 ```shell
@@ -38,8 +37,8 @@ The command modifies the specified rules as follows:
 - Delete objects more than 90 days old.
 - Delete `DeleteMarker` tombstones if that object has no other versions remaining.
 - Transition objects more than 30 days old to the `COLDTIER` remote tier.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -66,8 +65,8 @@ mc [GLOBALFLAGS] ilm rule edit                                       \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -129,21 +128,19 @@ The command modifies a rule that expires objects in the `mydata` bucket of the `
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-02-24T01-33-20Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-02-24T01-33-20Z
 
 Expire all current **and** noncurrent versions of an object. Use with the [`--expire-days`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-days) option to specify the number of days after which all versions of an object should be deleted by the scanner process.
 
 After the [scanner](/operations/concepts/scanner/#minio-concepts-scanner) processes this command, no versions of the object remain on the deployment.
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-RELEASE.2024-05-01T01-11-10Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> RELEASE.2024-05-01T01-11-10Z
 
 This flag *only* applies to objects that do **not** have a delete marker as the latest version.
 

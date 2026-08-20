@@ -2,31 +2,28 @@
 title: "mc support diag"
 url: "/zh/reference/minio-mc/mc-support-diag/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-diag.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-diag"></a>
 
 <a id="command-mc.support.diag"></a>
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
-
-{{% details title="命令历史" closed="true" %}}
-用于创建诊断报告的命令会随版本演进而变化。
-
-| MinIO Client Release | 命令 | 说明 |
-| --- | --- | --- |
-| RELEASE.2022-02-13T23-26-13Z | `mc support diag` | 命令移动到 `mc support` |
-| RELEASE.2020-11-17T00-39-14Z | `mc admin subnet health` | 命令改为 SUBNET 子命令 |
-| RELEASE.2020-10-03T02-54-56Z | `mc admin health` | 命令重命名为 health |
-| Original Command | `mc admin obd` | 命令重命名为 `mc admin health` |
-
-{{% /details %}}
+> [!DETAILS]- 命令历史
+> 用于创建诊断报告的命令会随版本演进而变化。
+>
+> | MinIO Client Release | 命令 | 说明 |
+> | --- | --- | --- |
+> | RELEASE.2022-02-13T23-26-13Z | `mc support diag` | 命令移动到 `mc support` |
+> | RELEASE.2020-11-17T00-39-14Z | `mc admin subnet health` | 命令改为 SUBNET 子命令 |
+> | RELEASE.2020-10-03T02-54-56Z | `mc admin health` | 命令重命名为 health |
+> | Original Command | `mc admin obd` | 命令重命名为 `mc admin health` |
 
 ## 描述 {#id2}
 
@@ -142,11 +139,10 @@ MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-11-10T21-37-17Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-11-10T21-37-17Z
 
 MinIO 会对上传到 SUBNET 的数据做匿名化处理。 从 mc `RELEASE.2023-11-10T21-37-17Z` 开始，MinIO *不会* 匿名化主机名。 这是默认的 `standard` 匿名化模式。
 

@@ -41,6 +41,8 @@ languages:
     params:
       description: S3-compatible object storage maintained by Pigsty
       time_format_blog: 'January 02, 2006'
+      time_format_default: 'January 02, 2006'
+      upstream_copyright: "© 2020–Present MinIO, Inc."
     menu:
       main:
         - identifier: docs
@@ -76,6 +78,8 @@ languages:
     params:
       description: 由 Pigsty 持续维护的 S3 兼容对象存储
       time_format_blog: '2006年01月02日'
+      time_format_default: '2006年01月02日'
+      upstream_copyright: "© 2020–至今 MinIO, Inc."
     menu:
       main:
         - identifier: docs
@@ -121,6 +125,7 @@ permalinks:
 markup:
   goldmark:
     parser:
+      wrapStandAloneImageWithinParagraph: false
       attribute:
         block: true
       autoHeadingID: true
@@ -184,6 +189,13 @@ params:
   # 示例：footer_icp: 浙ICP备15016890号-2
   footer_icp: ""
 
+  # ---- 上游归属与署名 ----
+  # 每页 front matter 只写 upstream_link（本页所改编的上游材料），其余常量在
+  # 这里声明一次；upstream_copyright 分语言写在下面的 languages 块里。
+  upstream_name: minio/docs
+  upstream_license: CC-BY-4.0
+  upstream_notice: /about/attribution/
+
   archived_version: false
   url_latest_version: https://silo.pgsty.com
   github_repo: https://github.com/pgsty/silo.pgsty.com
@@ -191,31 +203,28 @@ params:
   github_branch: main
 
   # OINK 提供自托管的 Lunr、按语言生成的索引与 ⌘K 搜索弹窗。
-  offlineSearch: true
-  offlineSearchIndex: content
-  offlineSearchSummaryLength: 90
-  offlineSearchMaxResults: 10
-  prism_syntax_highlighting: false
+  offline_search: true
+  offline_search_index: content
+  offline_search_summary_length: 90
+  offline_search_max_results: 10
+  highlight_classes: true
 
   ui:
+    blog_index_size: 20
     quick_links: [docs, blog]
     page_context_menu:
       enable: true
       links: []
-    breadcrumb_disable: false
-    navbar_logo: true
-    navbar_translucent_over_cover_disable: false
-    navbar_theme: dark
+    breadcrumb: true
     sidebar_menu_compact: true
     sidebar_menu_foldable: true
     sidebar_menu_truncate: 2000
     sidebar_cache_limit: 1000
     sidebar_root_enabled: true
-    ul_show: 2
-    showLightDarkModeMenu: true
+    sidebar_expand_levels: 2
+    dark_mode: true
     # OINK 的文档壳自行维护 TOC 高亮，不需要 Bootstrap ScrollSpy。
-    scrollSpy:
-      disable: true
+    scroll_spy: false
     # ---- OINK 文档壳 ----
     # 搜索框下方的根节点下拉：列出 docs 根 + 所有 sidebar_root_for: self
     # 的 section；若无 self 根 section 则自动隐藏。
@@ -230,25 +239,6 @@ params:
     sidebar_item_overflow: ellipsis
     feedback:
       enable: false
-    readingtime:
-      enable: false
-
-  links:
-    user:
-      - name: Silo source
-        url: https://github.com/pgsty/silo
-        icon: fab fa-github
-        desc: Silo source repository
-      - name: Pigsty
-        url: https://pigsty.io
-        icon: fa fa-database
-        desc: Pigsty project
-    developer:
-      - name: Releases
-        url: https://github.com/pgsty/silo/releases
-        icon: fa fa-box-archive
-        desc: Silo release artifacts
-      - name: Documentation source
-        url: https://github.com/pgsty/silo.pgsty.com
-        icon: fab fa-github
-        desc: Silo documentation repository
+    reading_time: false
+    # 译文页脚提示：权威版本是英文版；原生中文页可用 translation_notice: false 关闭。
+    translation_notice: en

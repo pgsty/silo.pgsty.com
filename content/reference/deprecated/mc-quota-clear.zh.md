@@ -2,25 +2,23 @@
 title: "mc quota clear"
 url: "/zh/reference/deprecated/mc-quota-clear/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-quota-clear.rst
+upstream_modified: false
 ---
 
 <a id="mc-quota-clear"></a>
 
 <a id="command-mc.quota.clear"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-13T00-23-28Z**
+> [!NOTE]
+> **变更: RELEASE.2022-12-13T00-23-28Z**
+>
+> `mc quota clear` 替代了 `mc admin bucket quota --clear`。
 
-`mc quota clear` 替代了 `mc admin bucket quota --clear`。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2024-07-31T15-58-33Z**
-
-`mc quota clear` 已弃用。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2024-07-31T15-58-33Z**
+>
+> `mc quota clear` 已弃用。
 
 ## 说明 {#id2}
 

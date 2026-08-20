@@ -2,8 +2,8 @@
 title: "mc admin scanner status"
 url: "/reference/minio-mc-admin/mc-admin-scanner-status/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-scanner-status.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-scanner-status"></a>
@@ -18,14 +18,13 @@ The [`mc admin scanner status`](#command-mc.admin.scanner.status) command displa
 
 This command has an alias of `mc admin scanner info`.
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example returns information about the current state of the scanner process.
 
 ```shell
@@ -52,9 +51,8 @@ Check Replication:     3 versions; Avg: 892ns
 Verify Deleted:        0 folders; Avg: 0ms
 Yield:                 18ms total; Avg: 6ms/obj
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -71,8 +69,8 @@ mc admin scanner status ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

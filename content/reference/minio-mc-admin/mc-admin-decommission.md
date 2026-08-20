@@ -2,8 +2,8 @@
 title: "mc admin decommission"
 url: "/reference/minio-mc-admin/mc-admin-decommission/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-decommission.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-decommission"></a>
@@ -17,17 +17,16 @@ The [`mc admin decommission`](#command-mc.admin.decommission) command starts the
 
 See [Decommission Server Pools](/operations/deployments/baremetal-decommission-server-pool/#minio-decommissioning) for a complete procedure on decommissioning a server pool.
 
-{{% alert color="info" %}}
-**Decommissioning is Permanent**
-
-Once MinIO begins decommissioning a pool, it marks that pool as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pool to an active state.
-
-Decommissioning is a major administrative operation that requires care in planning and execution, and is not a trivial or ‘daily’ task.
-
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to decommissioning. Coordination with MinIO Engineering via SUBNET can ensure successful decommissioning, including performance testing and health diagnostics.
-
-Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
-{{% /alert %}}
+> [!NOTE]
+> **Decommissioning is Permanent**
+>
+> Once MinIO begins decommissioning a pool, it marks that pool as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pool to an active state.
+>
+> Decommissioning is a major administrative operation that requires care in planning and execution, and is not a trivial or ‘daily’ task.
+>
+> [MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to decommissioning. Coordination with MinIO Engineering via SUBNET can ensure successful decommissioning, including performance testing and health diagnostics.
+>
+> Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
 
 ```shell
 mc admin [GLOBALFLAGS] decommission start|status|cancel ALIAS TARGET

@@ -2,8 +2,8 @@
 title: "mc ilm add"
 url: "/zh/reference/deprecated/mc-ilm-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-add"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.add"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm add` 已由 [`mc ilm rule add`](/zh/reference/minio-mc/mc-ilm-rule-add/#command-mc.ilm.rule.add) 取代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm add` 已由 [`mc ilm rule add`](/zh/reference/minio-mc/mc-ilm-rule-add/#command-mc.ilm.rule.add) 取代。
 
 ## 语法 {#id2}
 
@@ -23,8 +22,8 @@ silo_modified: false
 
 该命令支持同时添加 [Transition (Tiering)](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) 和 [Expiration](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 生命周期管理规则。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会向 `myminio` 部署上的 `mydata` 存储桶添加新的生命周期管理规则：
 
 ```shell
@@ -44,8 +43,8 @@ mc ilm add --noncurrent-transition-days 7 --noncurrent-transition-tier "COLDTIER
 - 如果对象没有其他剩余版本，则删除其 `DeleteMarker` 墓碑。
 - 将超过 30 天的对象过渡到 `COLDTIER` 远程层。
 - 在对象变为非当前版本 7 天后，将其过渡到 `COLDTIER` 远程层。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -68,8 +67,8 @@ mc [GLOBALFLAGS] ilm add                                    \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

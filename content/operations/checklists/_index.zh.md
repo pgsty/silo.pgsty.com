@@ -3,8 +3,8 @@ title: "部署检查清单"
 url: "/zh/operations/checklists/"
 weight: 80
 icon: fa-solid fa-list-check
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/checklists.rst
+upstream_modified: false
 ---
 
 <a id="id1"></a>

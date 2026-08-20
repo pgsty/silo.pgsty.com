@@ -2,8 +2,8 @@
 title: "Publish Events to PostgreSQL"
 url: "/administration/monitoring/publish-events-to-postgresql/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-postgresql.rst
+upstream_modified: false
 ---
 
 <a id="publish-events-to-postgresql"></a>
@@ -29,8 +29,8 @@ This procedure uses the [`mc`](/reference/minio-mc/#command-mc) command line too
 
 You can configure a new PostgreSQL service endpoint using either environment variables *or* by setting runtime configuration settings.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 MinIO supports specifying the PostgreSQL service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/postgresql/#minio-server-envvar-bucket-notification-postgresql). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring a PostgreSQL service endpoint. The minimum *required* variables are:
@@ -39,37 +39,33 @@ The following example code sets *all* environment variables related to configuri
 - [`MINIO_NOTIFY_POSTGRES_TABLE`](/reference/minio-server/settings/notifications/postgresql/#envvar.MINIO_NOTIFY_POSTGRES_TABLE)
 - [`MINIO_NOTIFY_POSTGRES_FORMAT`](/reference/minio-server/settings/notifications/postgresql/#envvar.MINIO_NOTIFY_POSTGRES_FORMAT)
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_POSTGRES_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_<IDENTIFIER>="host=postgresql-endpoint.example.net port=4222"
+>    set MINIO_NOTIFY_POSTGRES_TABLE_<IDENTIFIER>="minioevents"
+>    set MINIO_NOTIFY_POSTGRES_FORMAT_<IDENTIFIER>="namespace|access"
+>    set MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
+>    set MINIO_NOTIFY_POSTGRES_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
+>    set MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
+>    set MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
+> ```
 
-```shell
-   set MINIO_NOTIFY_POSTGRES_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_<IDENTIFIER>="host=postgresql-endpoint.example.net port=4222"
-   set MINIO_NOTIFY_POSTGRES_TABLE_<IDENTIFIER>="minioevents"
-   set MINIO_NOTIFY_POSTGRES_FORMAT_<IDENTIFIER>="namespace|access"
-   set MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
-   set MINIO_NOTIFY_POSTGRES_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
-   set MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
-   set MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux and macOS**
-
-```shell
-   export MINIO_NOTIFY_POSTGRES_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_<IDENTIFIER>="host=postgresql-endpoint.example.net port=4222"
-   export MINIO_NOTIFY_POSTGRES_TABLE_<IDENTIFIER>="minioevents"
-   export MINIO_NOTIFY_POSTGRES_FORMAT_<IDENTIFIER>="namespace|access"
-   export MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
-   export MINIO_NOTIFY_POSTGRES_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
-   export MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
-   export MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux and macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_POSTGRES_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_POSTGRES_CONNECTION_STRING_<IDENTIFIER>="host=postgresql-endpoint.example.net port=4222"
+>    export MINIO_NOTIFY_POSTGRES_TABLE_<IDENTIFIER>="minioevents"
+>    export MINIO_NOTIFY_POSTGRES_FORMAT_<IDENTIFIER>="namespace|access"
+>    export MINIO_NOTIFY_POSTGRES_MAX_OPEN_CONNECTIONS_<IDENTIFIER>="2"
+>    export MINIO_NOTIFY_POSTGRES_QUEUE_DIR_<IDENTIFIER>="/opt/minio/events"
+>    export MINIO_NOTIFY_POSTGRES_QUEUE_LIMIT_<IDENTIFIER>="100000"
+>    export MINIO_NOTIFY_POSTGRES_COMMENT_<IDENTIFIER>="PostgreSQL Notification Event Logging for MinIO"
+> ```
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the PostgreSQL service endpoint. Use the same `<IDENTIFIER>` value for all environment variables related to the new target service endpoint. The following examples assume an identifier of `PRIMARY`.
 
@@ -81,8 +77,8 @@ The following example code sets *all* environment variables related to configuri
   For more complete documentation on supported PostgreSQL connection string parameters, see [PostgreSQL Connection String](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING).
 
 See [PostgreSQL Service for Bucket Notifications](/reference/minio-server/settings/notifications/postgresql/#minio-server-envvar-bucket-notification-postgresql) for complete documentation on each environment variable.
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 MinIO supports adding or updating PostgreSQL endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_postgres`](/reference/minio-server/settings/notifications/postgresql/#mc-conf.notify_postgres) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an PostgreSQL service endpoint. The minimum *required* setting are:
@@ -112,8 +108,8 @@ mc admin config set ALIAS/ notify_postgres:IDENTIFIER \
   For more complete documentation on supported PostgreSQL connection string parameters, see [PostgreSQL Connection String](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING).
 
 See [PostgreSQL Bucket Notification Configuration Settings](/reference/minio-server/settings/notifications/postgresql/#minio-server-config-bucket-notification-postgresql) for complete documentation on each setting.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) Restart the MinIO Deployment {#restart-the-minio-deployment}
 
@@ -133,36 +129,35 @@ SQS ARNs: arn:minio:sqs::primary:postgresql
 
 You must specify the ARN resource when configuring bucket notifications with the associated PostgreSQL deployment as a target.
 
-{{% alert color="info" %}}
-**Identifying the ARN for your bucket notifications**
-
-You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
-
-**Review the JSON output**
-
-1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. In the JSON output, look for the key `info.sqsARN`.
-
-   The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
-
-   For example, `arn:minio:sqs::primary:postgresql`.
-
-**Use jq to parse the JSON for the value**
-
-1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
-2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:postgresql`
-{{% /alert %}}
+> [!NOTE]
+> **Identifying the ARN for your bucket notifications**
+>
+> You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
+>
+> **Review the JSON output**
+>
+> 1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. In the JSON output, look for the key `info.sqsARN`.
+>
+>    The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
+>
+>    For example, `arn:minio:sqs::primary:postgresql`.
+>
+> **Use jq to parse the JSON for the value**
+>
+> 1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
+> 2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:postgresql`
 
 ### 3) Configure Bucket Notifications using the PostgreSQL Endpoint as a Target {#configure-bucket-notifications-using-the-postgresql-endpoint-as-a-target}
 

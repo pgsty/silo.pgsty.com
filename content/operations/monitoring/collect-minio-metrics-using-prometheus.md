@@ -2,8 +2,8 @@
 title: "Monitoring and Alerting using Prometheus"
 url: "/operations/monitoring/collect-minio-metrics-using-prometheus/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/collect-minio-metrics-using-prometheus.rst
+upstream_modified: false
 ---
 
 <a id="monitoring-and-alerting-using-prometheus"></a>
@@ -19,15 +19,14 @@ MinIO publishes cluster, node, bucket, and resource metrics using the [Prometheu
 
 These instructions use [version 2 metrics.](/operations/monitoring/metrics-v2/#minio-metrics-v2) For more about metrics API versions, see [Metrics and alerts.](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)
 
-{{% alert color="info" %}}
-**Prerequisites**
-
-This procedure requires the following:
-
-- An existing [Prometheus deployment](https://prometheus.io/docs/prometheus/latest/installation/) with backing [Alert Manager](https://prometheus.io/docs/alerting/latest/overview/)
-- An existing MinIO deployment with network access to the Prometheus deployment
-- An [`mc`](/reference/minio-mc/#command-mc) installation on your local host configured to [access](/reference/minio-mc/mc-alias-set/#alias) the MinIO deployment
-{{% /alert %}}
+> [!NOTE]
+> **Prerequisites**
+>
+> This procedure requires the following:
+>
+> - An existing [Prometheus deployment](https://prometheus.io/docs/prometheus/latest/installation/) with backing [Alert Manager](https://prometheus.io/docs/alerting/latest/overview/)
+> - An existing MinIO deployment with network access to the Prometheus deployment
+> - An [`mc`](/reference/minio-mc/#command-mc) installation on your local host configured to [access](/reference/minio-mc/mc-alias-set/#alias) the MinIO deployment
 
 ## Configure Prometheus to Collect and Alert using MinIO Metrics {#configure-prometheus-to-collect-and-alert-using-minio-metrics}
 
@@ -35,8 +34,8 @@ This procedure requires the following:
 
 Use the [`mc admin prometheus generate`](/reference/minio-mc-admin/mc-admin-prometheus-generate/#command-mc.admin.prometheus.generate) command to generate the scrape configuration for use by Prometheus in making scraping requests:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="MinIO Server" %}}
+{{< tabs group="minio-server-nodes-buckets-resources" >}}
+{{< tab label="MinIO Server" value="minio-server" >}}
 The following command scrapes metrics for the MinIO cluster.
 
 ```shell
@@ -59,9 +58,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="Nodes" %}}
+{{< /tab >}}
+{{< tab label="Nodes" value="nodes" >}}
 The following command scrapes metrics for a node on the MinIO Server.
 
 ```shell
@@ -82,9 +80,8 @@ scrape_configs:
      static_configs:
      - targets: [minio-1.example.net, minio-2.example.net, minio-N.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="Buckets" %}}
+{{< /tab >}}
+{{< tab label="Buckets" value="buckets" >}}
 The following command scrapes metrics for buckets on the MinIO Server.
 
 ```shell
@@ -105,13 +102,10 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="Resources" %}}
-{{% alert color="info" %}}
-**Added: RELEASE.2023-10-07T15-07-38Z**
-
-{{% /alert %}}
+{{< /tab >}}
+{{< tab label="Resources" value="resources" >}}
+> [!NOTE]
+> **Added: RELEASE.2023-10-07T15-07-38Z**
 
 The following command scrapes metrics for resources on the MinIO Server.
 
@@ -133,9 +127,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 - Set an appropriate `scrape_interval` value to ensure each scraping operation completes before the next one begins. The recommended value is 60 seconds.
 
@@ -155,8 +148,8 @@ scrape_configs:
 
 Append the desired `scrape_configs` job generated in the previous step to the configuration file:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Cluster" %}}
+{{< tabs group="cluster-nodes-bucket-resource" >}}
+{{< tab label="Cluster" value="cluster" >}}
 Cluster metrics aggregate node-level metrics and, where appropriate, attach labels to metrics for the originating node.
 
 ```yaml
@@ -171,9 +164,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="Nodes" %}}
+{{< /tab >}}
+{{< tab label="Nodes" value="nodes" >}}
 Node metrics are specific for node-level monitoring. You need to list all MinIO nodes for this configuration.
 
 ```yaml
@@ -188,10 +180,8 @@ scrape_configs:
      static_configs:
      - targets: [minio-1.example.net, minio-2.example.net, minio-N.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="Bucket" %}}
-
+{{< /tab >}}
+{{< tab label="Bucket" value="bucket" >}}
 ```yaml
 global:
    scrape_interval: 60s
@@ -204,10 +194,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="Resource" %}}
-
+{{< /tab >}}
+{{< tab label="Resource" value="resource" >}}
 ```yaml
 global:
    scrape_interval: 60s
@@ -220,9 +208,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Start the Prometheus cluster using the configuration file:
 
@@ -234,8 +221,8 @@ prometheus --config.file=prometheus.yaml
 
 Prometheus includes an [expression browser](https://prometheus.io/docs/prometheus/latest/getting_started/#using-the-expression-browser). You can execute queries here to analyze the collected metrics.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Examples" %}}
+{{< tabs group="examples-recommended-metrics" >}}
+{{< tab label="Examples" value="examples" >}}
 The following query examples return metrics collected by Prometheus every five minutes for a scrape job named `minio-job`:
 
 ```shell
@@ -257,9 +244,8 @@ minio_node_drive_errors_availability{job="minio-job"}[5m]
 
 minio_node_drive_io_waiting{job="minio-job"}[5m]
 ```
-
-{{% /tab %}}
-{{% tab header="Recommended Metrics" %}}
+{{< /tab >}}
+{{< tab label="Recommended Metrics" value="recommended-metrics" >}}
 MinIO recommends the following as a basic set of metrics to monitor.
 
 See [Metrics and alerts](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) for information about all available metrics.
@@ -277,9 +263,8 @@ See [Metrics and alerts](/operations/monitoring/metrics-and-alerts/#minio-metric
 | `minio_node_drive_errors_timeout` | Total number of drive timeout errors since server start. |
 | `minio_node_drive_errors_availability` | Total number of drive I/O errors, permission denied and timeouts since server start. |
 | `minio_node_drive_io_waiting` | Total number of I/O operations waiting on drive. |
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 4) Configure an Alert Rule using MinIO Metrics {#configure-an-alert-rule-using-minio-metrics}
 

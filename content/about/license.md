@@ -6,8 +6,6 @@ url: "/about/license/"
 weight: 10
 type: docs
 icon: fa-solid fa-scale-balanced
-minio_origin: false
-silo_modified: false
 ---
 
 Silo carries two separate licenses. The software and the documentation are distributed under different terms, and each inherits the license its upstream work already used.

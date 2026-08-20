@@ -6,8 +6,6 @@ url: "/about/security/"
 weight: 40
 type: docs
 icon: fa-solid fa-shield-halved
-minio_origin: false
-silo_modified: false
 ---
 
 Security maintenance is the reason this fork exists. Upstream `minio/minio` is archived; Silo tracks CVEs against the codebase, backports or writes the fixes, and publishes what it found.

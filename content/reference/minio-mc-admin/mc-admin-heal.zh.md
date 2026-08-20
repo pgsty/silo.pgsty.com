@@ -2,8 +2,8 @@
 title: "mc admin heal"
 url: "/zh/reference/minio-mc-admin/mc-admin-heal/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-heal.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-heal"></a>
@@ -24,11 +24,10 @@ silo_modified: false
 
 有关 MinIO 如何执行对象自愈的更多详细信息，请参阅 [对象自愈](/zh/operations/concepts/healing/#minio-concepts-healing)。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ## 语法 {#id3}
 
@@ -87,11 +86,10 @@ mc admin heal play/mybucket/myprefix
 
 某些版本的 MinIO 使用颜色标识来区分不同自愈状态的对象。
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2024-11-17T19-35-25Z
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2024-11-17T19-35-25Z
 
 颜色含义已更新。
 

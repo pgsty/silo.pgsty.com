@@ -2,8 +2,8 @@
 title: "mc replicate add"
 url: "/zh/reference/minio-mc/mc-replicate-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-add"></a>
@@ -11,13 +11,12 @@ silo_modified: false
 
 <a id="command-mc.replicate.add"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc replicate add` 替代了 `mc admin bucket remote add` 命令。
-
-MinIO 会根据给定的文件路径或资源位置（例如 IP 或 DNS 地址）自动创建远程目标。 定义远程目标的用户不再需要为远程存储桶确定 ARN。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc replicate add` 替代了 `mc admin bucket remote add` 命令。
+>
+> MinIO 会根据给定的文件路径或资源位置（例如 IP 或 DNS 地址）自动创建远程目标。 定义远程目标的用户不再需要为远程存储桶确定 ARN。
 
 ## 语法 {#id2}
 
@@ -25,16 +24,15 @@ MinIO 会根据给定的文件路径或资源位置（例如 IP 或 DNS 地址�
 
 远程存储桶 **必须** 位于与本地部署运行相同 MinIO 版本的 MinIO 部署上。
 
-{{% alert color="info" %}}
-**说明**
-
-[`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 仅同步对象的当前版本，而 `mc replicate` 会同步对象的所有版本、版本信息和元数据。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 仅同步对象的当前版本，而 `mc replicate` 会同步对象的所有版本、版本信息和元数据。
 
 创建规则后，MinIO 部署会自动开始将新对象同步到远程 MinIO 部署。 你也可以选择配置对现有对象、删除操作和已完全删除对象的同步。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令为 `myminio` MinIO 部署上的 `mydata` 存储桶添加一条新的复制规则：
 
 ```shell
@@ -46,15 +44,14 @@ mc replicate add                                                     \
 
 该复制规则会将带版本的删除操作、删除标记和现有对象同步到远程 MinIO 部署。
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2024-03-03T00-13-08Z
-
-你可以在 `--remote-bucket` 参数中使用已配置的 ALIAS。
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="语法" %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2024-03-03T00-13-08Z
+>
+> 你可以在 `--remote-bucket` 参数中使用已配置的 ALIAS。
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -82,8 +79,8 @@ mc [GLOBALFLAGS] replicate add                     \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -105,13 +102,12 @@ mc replicate add --remote-bucket https://user:secret@myminio.cloudprovider.tld:9
 
 *Required*
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2024-03-03T00-13-08Z
-
-`--remote-bucket` 支持指定已有的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2024-03-03T00-13-08Z
+>
+> `--remote-bucket` 支持指定已有的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
 指定远程位置的凭证、目标部署和存储桶。 该值可以是 IP 地址、URL 或 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)/bucket。
 
@@ -381,8 +377,8 @@ mc version enable ALIAS/PATH
 
 MinIO 强烈建议专门创建用于支持存储桶复制操作的用户。 关于向 MinIO 部署添加用户和策略的更完整文档，请参见 [`mc admin user`](/zh/reference/minio-mc-admin/mc-admin-user/#command-mc.admin.user) 和 [`mc admin policy`](/zh/reference/minio-mc-admin/mc-admin-policy/#command-mc.admin.policy)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="复制管理员" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="复制管理员" value="tab1" >}}
 以下策略提供在部署上配置并启用复制所需的权限。
 
 ```json
@@ -427,8 +423,8 @@ MinIO 强烈建议专门创建用于支持存储桶复制操作的用户。 关�
 - `"EnableReplicationRuleConfiguration"` 语句授予在存储桶上创建复制规则的权限。 `"arn:aws:s3:::*` 资源将复制权限应用到源部署上的 *任意* 存储桶。 你可以按需将用户策略限制到特定存储桶。
 
 使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 将该策略添加到每个作为复制源的部署。 使用 [`mc admin user add`](/zh/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) 在部署上创建用户，并使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将策略关联到该新用户。
-{{% /tab %}}
-{{% tab header="复制远程用户" %}}
+{{< /tab >}}
+{{< tab label="复制远程用户" value="tab2" >}}
 以下策略提供将复制数据同步 *到* 该部署所需的权限。
 
 ```json
@@ -481,8 +477,8 @@ MinIO 强烈建议专门创建用于支持存储桶复制操作的用户。 关�
 - `"EnableReplicatingDataIntoBucket"` 语句授予远程目标将数据同步到 MinIO 部署中 *任意* 存储桶的权限。 若要将策略限制到特定存储桶，请在 `Resource` 数组中按 `"arn:aws:s3:::bucketName/*"` 形式指定这些存储桶。
 
 使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 将该策略添加到每个作为复制目标的部署。 使用 [`mc admin user add`](/zh/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) 在部署上创建用户，并使用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 将策略关联到该新用户。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 现有对象复制 {#id11}
 

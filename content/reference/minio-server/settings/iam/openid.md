@@ -2,8 +2,8 @@
 title: "OpenID Identity Management Settings"
 url: "/reference/minio-server/settings/iam/openid/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/iam/openid.rst
+upstream_modified: false
 ---
 
 <a id="openid-identity-management-settings"></a>
@@ -21,24 +21,20 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Examples {#examples}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
-
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 ```shell
 MINIO_IDENTITY_OPENID_CONFIG_URL="https://openid-provider.example.net/.well-known/openid-configuration"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 #### `identity_openid` {#mc-conf.identity_openid}
 
 *mc-conf*
@@ -50,9 +46,8 @@ mc admin config set identity_openid                                             
   config_url="https://openid-provider.example.net/.well-known/openid-configuration" \
   [ARGUMENT="VALUE"] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Settings {#settings}
 
@@ -60,20 +55,18 @@ mc admin config set identity_openid                                             
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_CONFIG_URL` {#envvar.MINIO_IDENTITY_OPENID_CONFIG_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid config_url` {#mc-conf.identity_openid.config_url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the URL for the <abbr title="OpenID Connect">OIDC</abbr> compatible provider [discovery document](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig).
 
@@ -85,17 +78,16 @@ The <abbr title="OpenID Connect">OIDC</abbr> Discovery URL typically resembles t
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
+{{< tabs group="environment-variable-configuration-setting" default="configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 This setting does not have an environment variable option. Use the Configuration Setting instead.
-{{% /tab %}}
-{{% tab header="Configuration Setting" selected=true %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid enabled` {#mc-conf.identity_openid.enabled}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Set to `false` to disable the OpenID configuration.
 
@@ -107,20 +99,18 @@ Defaults to `true` or “enabled”.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_CLIENT_ID` {#envvar.MINIO_IDENTITY_OPENID_CLIENT_ID}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid client_id` {#mc-conf.identity_openid.client_id}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the unique public identifier MinIO uses when authenticating user credentials against the <abbr title="OpenID Connect">OIDC</abbr> compatible provider.
 
@@ -128,28 +118,25 @@ Specify the unique public identifier MinIO uses when authenticating user credent
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_CLIENT_SECRET` {#envvar.MINIO_IDENTITY_OPENID_CLIENT_SECRET}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid client_secret` {#mc-conf.identity_openid.client_secret}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the client secret MinIO uses when authenticating user credentials against the <abbr title="OpenID Connect">OIDC</abbr> compatible provider. This field may be optional depending on the provider.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-06-23T20-26-00Z**
-
-MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-06-23T20-26-00Z**
+>
+> MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
 
 ### Role Policy {#role-policy}
 
@@ -157,20 +144,18 @@ MinIO redacts this value when returned as part of [`mc admin config get`](/refer
 
 This setting is mutually exclusive with the `Claim Name` setting.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_ROLE_POLICY` {#envvar.MINIO_IDENTITY_OPENID_ROLE_POLICY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid role_policy` {#mc-conf.identity_openid.role_policy}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comma-separated list of [policy names](/administration/identity-access-management/policy-based-access-control/#minio-policy) to use for the request’s `RoleArn` for all authentication requests for the provider. The specified policy or policies must already exist on the MinIO Server.
 
@@ -182,20 +167,18 @@ To use this OIDC configuration, you must specify the corresponding [RoleArn](/de
 
 This setting is mutually exclusive with the `Role Policy` setting.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_CLAIM_NAME` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_NAME}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid claim_name` {#mc-conf.identity_openid.claim_name}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the name of the [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4) MinIO uses to identify the [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) to attach to the authenticated user.
 
@@ -209,20 +192,18 @@ Defaults to `policy`.
 
 This setting is deprecated and has been removed as of [RELEASE.2024-07-13T01-46-15Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-13T01-46-15Z). Use [`MINIO_IDENTITY_OPENID_CLAIM_NAME`](#envvar.MINIO_IDENTITY_OPENID_CLAIM_NAME) instead.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_CLAIM_PREFIX` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_PREFIX}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid claim_prefix` {#mc-conf.identity_openid.claim_prefix}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4) namespace prefix to apply to the specified claim name.
 
@@ -230,20 +211,18 @@ Specify the [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4)
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_DISPLAY_NAME` {#envvar.MINIO_IDENTITY_OPENID_DISPLAY_NAME}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid display_name` {#mc-conf.identity_openid.display_name}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the user-facing name the MinIO Console displays on the login screen.
 
@@ -251,20 +230,18 @@ Specify the user-facing name the MinIO Console displays on the login screen.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_SCOPES` {#envvar.MINIO_IDENTITY_OPENID_SCOPES}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid scopes` {#mc-conf.identity_openid.scopes}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comma-separated list of [scopes](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3). Defaults to those scopes advertised in the discovery document.
 
@@ -274,26 +251,23 @@ Specify a comma-separated list of [scopes](https://datatracker.ietf.org/doc/html
 
 This setting is deprecated and has been removed as of [RELEASE.2024-07-13T01-46-15Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-13T01-46-15Z). Use [`MINIO_BROWSER_REDIRECT_URL`](/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) instead.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_REDIRECT_URI` {#envvar.MINIO_IDENTITY_OPENID_REDIRECT_URI}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid redirect_uri` {#mc-conf.identity_openid.redirect_uri}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**Important**
-
-This parameter was removed in [RELEASE.2023-02-27T18-10-45Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-02-27T18-10-45Z). Use the [`MINIO_BROWSER_REDIRECT_URL`](/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) [environment variable](/reference/minio-server/settings/#minio-server-environment-variables) instead.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This parameter was removed in [RELEASE.2023-02-27T18-10-45Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-02-27T18-10-45Z). Use the [`MINIO_BROWSER_REDIRECT_URL`](/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) [environment variable](/reference/minio-server/settings/#minio-server-environment-variables) instead.
 
 The MinIO Console defaults to using the hostname of the node making the authentication request. For MinIO deployments behind a load balancer or reverse proxy, specify this field to ensure the OIDC provider returns the authentication response to the correct MinIO Console URL. Include the Console hostname, port, and `/oauth_callback`:
 
@@ -309,20 +283,18 @@ The specified URI *must* match one of the approved redirect / callback URIs on t
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC` {#envvar.MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid redirect_uri_dynamic` {#mc-conf.identity_openid.redirect_uri_dynamic}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The MinIO Console defaults to using the hostname of the node making the authentication request as part of the redirect URI provided to the OIDC provider. For MinIO deployments behind a load balancer using a round-robin protocol, this may result in the load balancer returning the response to a different MinIO Node than the originating client.
 
@@ -332,20 +304,18 @@ Specify this option as `on` to direct the MinIO Console to use the `Host` header
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_CLAIM_USERINFO` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_USERINFO}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid claim_userinfo` {#mc-conf.identity_openid.claim_userinfo}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Allow MinIO to fetch claims from the [UserInfo Endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) for the authenticated user.
 
@@ -355,20 +325,18 @@ Valid values are `on` or `off`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_VENDOR` {#envvar.MINIO_IDENTITY_OPENID_VENDOR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid vendor` {#mc-conf.identity_openid.vendor}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the OIDC Vendor to enable specific supported behaviors for that vendor.
 
@@ -382,20 +350,18 @@ Supports the following value:
 
 This setting requires that the `OpenID Vendor` setting be defined as `keycloak`.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_KEYCLOAK_REALM` {#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_REALM}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid keycloak_realm` {#mc-conf.identity_openid.keycloak_realm}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the Keycloak Realm to use as part of Keycloak Admin API Operations, such as `main`.
 
@@ -405,20 +371,18 @@ Specify the Keycloak Realm to use as part of Keycloak Admin API Operations, such
 
 This setting requires that the `OpenID Vendor` setting be defined as `keycloak`.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL` {#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid keycloak_admin_url` {#mc-conf.identity_openid.keycloak_admin_url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the Keycloak Admin API URL. MinIO can use this URL if configured to periodically validate authenticated Keycloak users as active/existing. For example, `https://keycloak-endpoint:port/admin/`.
 
@@ -426,19 +390,17 @@ Specify the Keycloak Admin API URL. MinIO can use this URL if configured to peri
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_IDENTITY_OPENID_COMMENT` {#envvar.MINIO_IDENTITY_OPENID_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `identity_openid comment` {#mc-conf.identity_openid.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comment to associate with the <abbr title="OpenID Connect">OIDC</abbr> compatible provider configuration.

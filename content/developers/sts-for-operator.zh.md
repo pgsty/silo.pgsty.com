@@ -2,8 +2,8 @@
 title: "MinIO Operator 的 Security Token Service (STS)"
 url: "/zh/developers/sts-for-operator/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/sts-for-operator.rst
+upstream_modified: false
 ---
 
 <a id="minio-operator-security-token-service-sts"></a>
@@ -11,13 +11,12 @@ silo_modified: false
 
 ## 概述 {#id2}
 
-{{% alert color="info" %}}
-**新增: Operator**
-
-v5.0.0
-
-MinIO Operator 支持一组 API 调用，使应用程序能够为 MinIO Tenant 获取 STS 凭证。
-{{% /alert %}}
+> [!NOTE]
+> **新增: Operator**
+>
+> v5.0.0
+>
+> MinIO Operator 支持一组 API 调用，使应用程序能够为 MinIO Tenant 获取 STS 凭证。
 
 MinIO Operator 的 STS 具有以下优势：
 
@@ -27,15 +26,14 @@ MinIO Operator 的 STS 具有以下优势：
   Service Account 或 Service Account Token 是 Kubernetes 中 [Role-Based Access Control (RBAC)](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) [authentication](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#service-account-tokens) 的核心概念。
 - 为 MinIO Operator 实现 STS 后，你可以通过租户 custom resource definition (CRD) 和 MinIO PolicyBinding CRD，利用基础设施即代码的原则与配置方式。
 
-{{% alert color="warning" %}}
-**重要**
-
-从 Operator v5.0.11 开始，STS 默认 *启用*。
-
-较早版本的 Operator 默认 *禁用* STS。 若要在 v5.0.10 或更早版本的 Operator 中使用 STS，必须先显式启用。
-
-本页流程包含在 MinIO Operator 中启用 STS API 的说明。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 从 Operator v5.0.11 开始，STS 默认 *启用*。
+>
+> 较早版本的 Operator 默认 *禁用* STS。 若要在 v5.0.10 或更早版本的 Operator 中使用 STS，必须先显式启用。
+>
+> 本页流程包含在 MinIO Operator 中启用 STS API 的说明。
 
 ## Kubernetes 中 STS 授权的工作方式 {#kubernetes-sts}
 
@@ -69,11 +67,10 @@ MinIO Operator 的 STS 需要满足以下条件：
 
 1. 为部署启用 STS 功能
 
-   {{% alert color="info" %}}
-   **说明**
-
-   对于 Operator 5.0.11 及更高版本，此步骤是可选的。
-   {{% /alert %}}
+   > [!NOTE]
+   > **说明**
+   >
+   > 对于 Operator 5.0.11 及更高版本，此步骤是可选的。
 
    ```shell
    kubectl -n minio-operator set env deployment/minio-operator OPERATOR_STS_ENABLED=on

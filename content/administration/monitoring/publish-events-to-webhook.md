@@ -2,8 +2,8 @@
 title: "Publish Events to Webhook"
 url: "/administration/monitoring/publish-events-to-webhook/"
 weight: 100
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-webhook.rst
+upstream_modified: false
 ---
 
 <a id="publish-events-to-webhook"></a>
@@ -25,41 +25,37 @@ This procedure uses the [`mc`](/reference/minio-mc/#command-mc) command line too
 
 You can configure a new Webhook service endpoint using either environment variables *or* by setting runtime configuration settings.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 MinIO supports specifying the Webhook service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/webhook-service/#minio-server-envvar-bucket-notification-webhook). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring an Webhook service endpoint. The minimum *required* variables are [`MINIO_NOTIFY_WEBHOOK_ENABLE`](/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENABLE) and [`MINIO_NOTIFY_WEBHOOK_ENDPOINT`](/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENDPOINT):
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_WEBHOOK_ENDPOINT_<IDENTIFIER>="ENDPOINT"
+>    set MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
+> ```
 
-```shell
-   set MINIO_NOTIFY_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_WEBHOOK_ENDPOINT_<IDENTIFIER>="ENDPOINT"
-   set MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux and macOS**
-
-```shell
-   export MINIO_NOTIFY_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_WEBHOOK_ENDPOINT_<IDENTIFIER>="ENDPOINT"
-   export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux and macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_WEBHOOK_ENDPOINT_<IDENTIFIER>="ENDPOINT"
+>    export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_WEBHOOK_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="<string>"
+> ```
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the Webhook service endpoint. Use the same `<IDENTIFIER>` value for all environment variables related to the new target service endpoint. The following examples assume an identifier of `PRIMARY`.
 
@@ -69,8 +65,8 @@ The following example code sets *all* environment variables related to configuri
   `https://webhook.example.com`
 
 See [Webhook Service for Bucket Notifications](/reference/minio-server/settings/notifications/webhook-service/#minio-server-envvar-bucket-notification-webhook) for complete documentation on each environment variable.
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 MinIO supports adding or updating Webhook endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_webhook`](/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an Webhook service endpoint. The minimum *required* setting is [`notify_webhook endpoint`](/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook.endpoint):
@@ -93,8 +89,8 @@ mc admin config set ALIAS/ notify_webhook:IDENTIFIER \
   `https://webhook.example.com`
 
 See [Webhook Bucket Notification Configuration Settings](/reference/minio-server/settings/notifications/webhook-service/#minio-server-config-bucket-notification-webhook) for complete documentation on each setting.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) Restart the MinIO Deployment {#restart-the-minio-deployment}
 
@@ -114,36 +110,35 @@ SQS ARNs: arn:minio:sqs::primary:webhook
 
 You must specify the ARN resource when configuring bucket notifications with the associated Webhook deployment as a target.
 
-{{% alert color="info" %}}
-**Identifying the ARN for your bucket notifications**
-
-You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
-
-**Review the JSON output**
-
-1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. In the JSON output, look for the key `info.sqsARN`.
-
-   The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
-
-   For example, `arn:minio:sqs::primary:webhook`.
-
-**Use jq to parse the JSON for the value**
-
-1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
-2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:webhook`
-{{% /alert %}}
+> [!NOTE]
+> **Identifying the ARN for your bucket notifications**
+>
+> You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
+>
+> **Review the JSON output**
+>
+> 1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. In the JSON output, look for the key `info.sqsARN`.
+>
+>    The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
+>
+>    For example, `arn:minio:sqs::primary:webhook`.
+>
+> **Use jq to parse the JSON for the value**
+>
+> 1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
+> 2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:webhook`
 
 ### 3) Configure Bucket Notifications using the Webhook Endpoint as a Target {#configure-bucket-notifications-using-the-webhook-endpoint-as-a-target}
 

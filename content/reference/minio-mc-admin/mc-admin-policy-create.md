@@ -2,8 +2,8 @@
 title: "mc admin policy create"
 url: "/reference/minio-mc-admin/mc-admin-policy-create/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-create.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-create"></a>
@@ -21,8 +21,8 @@ MinIO deployments include the following [built-in policies](/administration/iden
 - [`diagnostics`](/administration/identity-access-management/policy-based-access-control/#userpolicy.diagnostics)
 - [`writeonly`](/administration/identity-access-management/policy-based-access-control/#userpolicy.writeonly)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 Consider the following JSON policy document saved at a file called `/tmp/listmybuckets.json`:
 
 ```javascript
@@ -47,9 +47,8 @@ The following command creates a new policy called `listmybuckets` on the [alias]
 ```shell
 mc admin policy create myminio listmybuckets /tmp/listmybuckets.json
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -64,8 +63,8 @@ mc admin policy create     \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

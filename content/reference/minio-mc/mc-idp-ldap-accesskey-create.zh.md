@@ -3,8 +3,8 @@ title: "mc idp ldap accesskey create"
 url: "/zh/reference/minio-mc/mc-idp-ldap-accesskey-create/"
 weight: 9262
 toc_hide: true
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey-create.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-accesskey-create"></a>
@@ -12,26 +12,24 @@ silo_modified: false
 
 <a id="command-mc.idp.ldap.accesskey.create"></a>
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-23T08-47-21Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-23T08-47-21Z
 
 ## 描述 {#id1}
 
 [`mc idp ldap accesskey create`](#command-mc.idp.ldap.accesskey.create) 允许添加 LDAP 访问密钥对。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 > 以下示例在 `minio` [alias](/zh/reference/minio-mc/mc-alias-set/#alias) 上创建一个新的访问密钥对，并使用与已认证用户相同的策略：
 
 ```shell
 mc idp ldap accesskey create minio/
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令具有以下语法：
 
 ```shell
@@ -53,8 +51,8 @@ mc [GLOBALFLAGS] idp ldap accesskey create                   \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 
@@ -148,11 +146,10 @@ mc idp ldap accesskey create minio
 
 *Optional*
 
-{{% alert color="danger" %}}
-**已弃用: RELEASE.2024-04-18T16-45-29Z**
-
-使用 [`mc idp ldap accesskey create-with-login`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-create-with-login/#command-mc.idp.ldap.accesskey.create-with-login) 获取此前由该参数提供的功能。
-{{% /alert %}}
+> [!CAUTION]
+> **已弃用: RELEASE.2024-04-18T16-45-29Z**
+>
+> 使用 [`mc idp ldap accesskey create-with-login`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-create-with-login/#command-mc.idp.ldap.accesskey.create-with-login) 获取此前由该参数提供的功能。
 
 提示用户使用 LDAP 凭证登录以生成访问密钥。 指定用于登录提示的、已配置 LDAP 的 MinIO Server URL。
 

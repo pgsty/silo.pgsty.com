@@ -2,8 +2,8 @@
 title: "mc share upload"
 url: "/zh/reference/minio-mc/mc-share-upload/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-share-upload.rst
+upstream_modified: false
 ---
 
 <a id="mc-share-upload"></a>
@@ -18,16 +18,15 @@ silo_modified: false
 
 有关可共享对象 URL 的更多信息，请参阅 Amazon S3 文档中的 [Pre-Signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会为 `myminio` MinIO 部署上的 `mydata` 存储桶生成一个新的预签名上传 URL：
 
 ```shell
 mc share upload --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -43,8 +42,8 @@ mc [GLOBALFLAGS] share upload               \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -116,8 +115,8 @@ curl ... -F key=<NAME> -F file=@<FILE>
 
 ### 生成用于上传对象的 URL {#url}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="上传单个对象" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="上传单个对象" value="tab1" >}}
 使用 [`mc share upload`](#command-mc.share.upload) 生成一个支持 `POST` 请求的 URL， 用于将文件上传到 MinIO 部署上的特定对象位置：
 
 ```shell
@@ -127,8 +126,8 @@ mc share upload --expire DURATION ALIAS/PATH
 - 将 [`ALIAS`](#mc.share.upload.ALIAS) 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 [`PATH`](#mc.share.upload.ALIAS) 替换为 MinIO 部署中对象的路径。
 - 将 [`DURATION`](#mc.share.upload.-expire) 替换为 URL 过期前的时长。 例如，要设置 30 天过期时间，指定 `30d`。
-{{% /tab %}}
-{{% tab header="上传多个对象" %}}
+{{< /tab >}}
+{{< tab label="上传多个对象" value="tab2" >}}
 使用 [`mc share upload`](#command-mc.share.upload) 并结合 [`--recursive`](#mc.share.upload.-recursive) 与 [`--expire`](#mc.share.upload.-expire) 选项，生成一个临时 URL， 该 URL 支持 `POST` 请求，用于将文件上传到 MinIO 部署上的存储桶：
 
 ```shell
@@ -162,8 +161,8 @@ done
 ```
 
 此示例会将 `~/Documents/photos/` 目录中的每个文件上传到 `mybucket` 存储桶下的 `photos` 前缀。 对于如何遍历目录中的文件，请遵循你所选脚本语言文档中的最佳实践。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id6}
 

@@ -2,29 +2,27 @@
 title: "mc admin tier"
 url: "/reference/deprecated/mc-admin-tier/"
 weight: 190
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-tier.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-tier"></a>
 
 <a id="command-mc.admin.tier"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc admin tier` replaced by [`mc ilm tier`](/reference/minio-mc/mc-ilm-tier/#command-mc.ilm.tier).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc admin tier` replaced by [`mc ilm tier`](/reference/minio-mc/mc-ilm-tier/#command-mc.ilm.tier).
 
 ## Description {#description}
 
 The [`mc admin tier`](#command-mc.admin.tier) command configures a remote supported S3-compatible service for supporting MinIO [Lifecycle Management: Object Transition (“Tiering”)](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration).
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 ### Supported S3 Services {#supported-s3-services}
 
@@ -128,11 +126,10 @@ Defer to the documentation for the supported tiering targets for more complete i
 
 Creates a new remote storage tier for transitioning objects using MinIO lifecycle management rules.
 
-{{% alert color="warning" %}}
-**Important**
-
-MinIO does not support removing remote storage tiers. Ensure the storage backend supports the intended workload *prior* to adding it as a remote tier target.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> MinIO does not support removing remote storage tiers. Ensure the storage backend supports the intended workload *prior* to adding it as a remote tier target.
 
 The command has the following syntax:
 

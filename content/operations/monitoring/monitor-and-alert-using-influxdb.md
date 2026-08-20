@@ -2,8 +2,8 @@
 title: "Monitoring and Alerting using InfluxDB"
 url: "/operations/monitoring/monitor-and-alert-using-influxdb/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/monitor-and-alert-using-influxdb.rst
+upstream_modified: false
 ---
 
 <a id="monitoring-and-alerting-using-influxdb"></a>
@@ -16,36 +16,34 @@ The procedure on this page documents the following:
 - Configuring an InfluxDB service to scrape and display metrics from a MinIO deployment
 - Configuring an Alert on a MinIO metric
 
-{{% alert color="info" %}}
-**Prerequisites**
-
-This procedure requires the following:
-
-- An existing InfluxDB deployment configured with one or more [notification endpoints](https://docs.influxdata.com/influxdb/v2/monitor-alert/notification-endpoints/)
-- An existing MinIO deployment with network access to the InfluxDB deployment
-- An [`mc`](/reference/minio-mc/#command-mc) installation on your local host configured to [access](/reference/minio-mc/mc-alias-set/#alias) the MinIO deployment
-
-These instructions use [version 2 metrics.](/operations/monitoring/metrics-v2/#minio-metrics-v2) For more about metrics API versions, see [Metrics and alerts.](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)
-{{% /alert %}}
+> [!NOTE]
+> **Prerequisites**
+>
+> This procedure requires the following:
+>
+> - An existing InfluxDB deployment configured with one or more [notification endpoints](https://docs.influxdata.com/influxdb/v2/monitor-alert/notification-endpoints/)
+> - An existing MinIO deployment with network access to the InfluxDB deployment
+> - An [`mc`](/reference/minio-mc/#command-mc) installation on your local host configured to [access](/reference/minio-mc/mc-alias-set/#alias) the MinIO deployment
+>
+> These instructions use [version 2 metrics.](/operations/monitoring/metrics-v2/#minio-metrics-v2) For more about metrics API versions, see [Metrics and alerts.](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)
 
 For MinIO Deployments on Kubernetes, this procedure assumes all necessary network control components, such as Ingress or Load Balancers, to facilitate access between the MinIO Tenant and the InfluxDB service.
 
 ## Configure InfluxDB to Collect and Alert using MinIO Metrics {#configure-influxdb-to-collect-and-alert-using-minio-metrics}
 
-{{% alert color="warning" %}}
-**Important**
-
-This procedure specifically uses the InfluxDB UI to create a scraping endpoint.
-
-The InfluxDB UI does not provide the same level of configuration as using [Telegraf](https://docs.influxdata.com/telegraf/v1.24/) and the corresponding [Prometheus plugin](https://github.com/influxdata/telegraf/blob/release-1.24/plugins/inputs/prometheus/README.md). Specifically:
-
-- You cannot enable authenticated access to the MinIO metrics endpoint via the InfluxDB UI
-- You cannot set a tag for collected metrics (e.g. `url_tag`) for uniquely identifying the metrics for a given MinIO deployment
-
-The Telegraf Prometheus plugin also supports Kubernetes-specific features, such as scraping the `minio` service for a given MinIO Tenant.
-
-Configuring Telegraf is out of scope for this procedure. You can use this procedure as general guidance for configuring Telegraf to scrape MinIO metrics.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This procedure specifically uses the InfluxDB UI to create a scraping endpoint.
+>
+> The InfluxDB UI does not provide the same level of configuration as using [Telegraf](https://docs.influxdata.com/telegraf/v1.24/) and the corresponding [Prometheus plugin](https://github.com/influxdata/telegraf/blob/release-1.24/plugins/inputs/prometheus/README.md). Specifically:
+>
+> - You cannot enable authenticated access to the MinIO metrics endpoint via the InfluxDB UI
+> - You cannot set a tag for collected metrics (e.g. `url_tag`) for uniquely identifying the metrics for a given MinIO deployment
+>
+> The Telegraf Prometheus plugin also supports Kubernetes-specific features, such as scraping the `minio` service for a given MinIO Tenant.
+>
+> Configuring Telegraf is out of scope for this procedure. You can use this procedure as general guidance for configuring Telegraf to scrape MinIO metrics.
 
 1. Configure Public Access to MinIO Metrics
 

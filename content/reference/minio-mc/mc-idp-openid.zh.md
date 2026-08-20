@@ -2,8 +2,8 @@
 title: "mc idp openid"
 url: "/zh/reference/minio-mc/mc-idp-openid/"
 weight: 180
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-openid.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-openid"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.idp.openid"></a>
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-26T23-31-54Z**
-
-[`mc idp openid`](#command-mc.idp.openid) 及其子命令取代 `mc admin idp openid`。
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-26T23-31-54Z**
+>
+> [`mc idp openid`](#command-mc.idp.openid) 及其子命令取代 `mc admin idp openid`。
 
 ## 描述 {#id2}
 
@@ -23,11 +22,10 @@ silo_modified: false
 
 在 [设置 OpenID 连接](/zh/operations/external-iam/configure-openid-external-identity-management/#minio-external-identity-management-openid-configure) 时，可通过定义配置项作为使用环境变量的替代方式。[`mc idp openid`](#command-mc.idp.openid) 命令仅支持 MinIO 部署。
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO [OpenID 环境变量](/zh/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid) 会覆盖通过此命令修改或设置的对应配置项。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO [OpenID 环境变量](/zh/reference/minio-server/settings/iam/openid/#minio-server-envvar-external-identity-management-openid) 会覆盖通过此命令修改或设置的对应配置项。
 
 [`mc idp openid`](#command-mc.idp.openid) 命令包含以下子命令：
 
@@ -59,8 +57,8 @@ MinIO [OpenID 环境变量](/zh/reference/minio-server/settings/iam/openid/#mini
 
 添加多个 OpenID 提供方时，只能有一个是基于 JWT Claim 的提供方。 其余都必须是基于角色的提供方。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例为 `myminio` 部署创建配置项，定义一个新的 `test-config` 用于 Dex 集成。
 
 ```shell
@@ -72,9 +70,8 @@ MinIO [OpenID 环境变量](/zh/reference/minio-server/settings/iam/openid/#mini
     redirect_uri="http://127.0.0.1:10000/oauth_callback"                      \
     role_policy="consoleAdmin"
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -88,8 +85,8 @@ mc [GLOBALFLAGS] idp openid add               \
 - 将 `ALIAS` 替换为要配置 OpenID 集成的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 `CFG_NAME` 替换为此配置的唯一字符串。 如果未指定，命令将创建默认配置值。
 - 将 `[CFG_PARAM#]` 替换为各个 [配置项](/zh/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings) 键值对，格式为 `PARAMETER="value"`。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `update` {#mc.idp.openid.update}
 
@@ -97,8 +94,8 @@ mc [GLOBALFLAGS] idp openid add               \
 
 修改 OpenID 提供方现有的一组配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例修改 `myminio` 部署中 `test-config` 的两个配置项，该配置用于 Dex 集成。
 
 ```shell
@@ -108,9 +105,8 @@ mc idp openid update                      \
               scopes="openid,groups"      \
               role_policy="consoleAdmin"
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -124,8 +120,8 @@ mc [GLOBALFLAGS] idp openid update           \
 - 将 `ALIAS` 替换为要配置 OpenID 集成的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 `CFG_NAME` 替换为此配置的唯一字符串。 如果未指定，命令将更新默认配置。
 - 将 `[CFG_PARAM#]` 替换为要更新的各个 [配置项](/zh/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings) 键值对，格式为 `PARAMETER="value"`。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `rm, remove` {#mc.idp.openid.rm}
 
@@ -133,16 +129,15 @@ mc [GLOBALFLAGS] idp openid update           \
 
 移除 OpenID 提供方现有的一组配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例移除 `myminio` 部署中的 `test-config` 配置。
 
 ```shell
 mc idp openid rm myminio test_config
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -153,8 +148,8 @@ mc [GLOBALFLAGS] idp openid rm          \
 
 - 将 `ALIAS` 替换为要配置 OpenID 集成的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 `CFG_NAME` 替换为此配置的唯一字符串。 如果未指定，命令将移除默认配置。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `ls, list` {#mc.idp.openid.ls}
 
@@ -162,16 +157,15 @@ mc [GLOBALFLAGS] idp openid rm          \
 
 输出 OpenID 提供方现有配置集列表。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例输出为 `myminio` 部署定义的全部 OpenID 配置集列表。
 
 ```shell
 mc idp openid ls myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -179,8 +173,8 @@ mc [GLOBALFLAGS] idp openid ls ALIAS
 ```
 
 - 将 `ALIAS` 替换为要列出 OpenID 集成的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `info` {#mc.idp.openid.info}
 
@@ -188,16 +182,15 @@ mc [GLOBALFLAGS] idp openid ls ALIAS
 
 输出 OpenID 提供方现有服务器配置集中定义的一组值。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例输出 `myminio` 部署中 `test_config` 这组 OpenID 设置定义的配置项。
 
 ```shell
 mc idp openid info myminio test_config
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -208,8 +201,8 @@ mc [GLOBALFLAGS] idp openid info        \
 
 - 将 `ALIAS` 替换为要配置 OpenID 集成的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 `CFG_NAME` 替换为此配置的唯一字符串。 如果未指定，则显示默认服务器配置的信息。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `enable` {#mc.idp.openid.enable}
 
@@ -217,8 +210,8 @@ mc [GLOBALFLAGS] idp openid info        \
 
 开始使用 OpenID 提供方现有的一组配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例启用 `myminio` 部署中定义为 `test_config` 的服务器配置。
 
 ```shell
@@ -226,9 +219,8 @@ mc idp openid enable       \
               myminio      \
               test_config
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -239,8 +231,8 @@ mc [GLOBALFLAGS] idp openid enable     \
 
 - 将 `ALIAS` 替换为要配置 OpenID 集成的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 `CFG_NAME` 替换为此配置的唯一字符串。 如果未指定，命令将启用默认配置值。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `disable` {#mc.idp.openid.disable}
 
@@ -248,8 +240,8 @@ mc [GLOBALFLAGS] idp openid enable     \
 
 停止使用 OpenID 提供方的一组配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例禁用 `myminio` 部署中定义为 `test_config` 的服务器配置。
 
 ```shell
@@ -257,9 +249,8 @@ mc idp openid disable      \
               myminio      \
               test_config
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -270,8 +261,8 @@ mc [GLOBALFLAGS] idp openid disable       \
 
 - 将 `ALIAS` 替换为要配置 OpenID 集成的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 `CFG_NAME` 替换为此配置的唯一字符串。 如果未指定，命令将禁用默认配置值。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 全局标志 {#id5}
 

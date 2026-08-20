@@ -2,8 +2,8 @@
 title: "mc admin cluster bucket export"
 url: "/reference/minio-mc-admin/mc-admin-cluster-bucket-export/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-bucket-export.rst
+upstream_modified: false
 ---
 
 <a id="command-mc.admin.cluster.bucket.export"></a>
@@ -12,10 +12,8 @@ silo_modified: false
 
 ## Description {#description}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2022-06-17T02-52-50Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2022-06-17T02-52-50Z**
 
 The [`mc admin cluster bucket export`](#command-mc.admin.cluster.bucket.export) command exports bucket metadata for use with the [`mc admin cluster bucket import`](/reference/minio-mc-admin/mc-admin-cluster-bucket-import/#command-mc.admin.cluster.bucket.import) command.
 
@@ -23,16 +21,15 @@ You can use this command to manually back up the metadata for the specified MinI
 
 If you specify only the deployment as the target, this command backs up all bucket metadata on the target deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command exports all bucket metadata for the `myminio` deployment.
 
 ```shell
 mc admin cluster bucket export myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -45,8 +42,8 @@ mc [GLOBALFLAGS] admin cluster bucket export  \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

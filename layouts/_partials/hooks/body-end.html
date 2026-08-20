@@ -1,0 +1,9 @@
+{{- /* Runtime for the bespoke landing and download sections: reveal,
+      count-up, the marquee pause, and the download page's tab controller.
+      The theme owns the navbar, theme toggle, and menus. */ -}}
+{{- if or .IsHome (eq .Type "download") }}
+<script src="{{ "js/landing-v3.js" | relURL }}?v={{ substr (md5 (readFile "static/js/landing-v3.js")) 0 8 }}"></script>
+{{- if eq .Type "download" }}
+<script src="{{ "js/download.js" | relURL }}?v={{ substr (md5 (readFile "static/js/download.js")) 0 8 }}"></script>
+{{- end }}
+{{- end }}

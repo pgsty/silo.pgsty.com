@@ -4,8 +4,8 @@ description: "使用 MinIO JavaScript SDK 从 Node.js 应用连接 SILO。"
 url: "/zh/developers/javascript/minio-javascript/"
 weight: 50
 icon: fa-brands fa-js
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/javascript/minio-javascript.rst
+upstream_modified: true
 ---
 
 ## MinIO JavaScript SDK {#javascript-sdk}

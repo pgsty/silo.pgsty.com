@@ -6,8 +6,8 @@ url: "/zh/docs/"
 weight: 1
 type: docs
 icon: fa-solid fa-book
-minio_origin: true
-silo_modified: true
+upstream_link: ""
+sidebar_expanded: true
 ---
 
 {{< home-docs >}}

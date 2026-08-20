@@ -2,8 +2,8 @@
 title: "NSQ 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/nsq/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/nsq.rst
+upstream_modified: false
 ---
 
 <a id="nsq"></a>
@@ -21,20 +21,16 @@ silo_modified: false
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 多个 NSQ 目标 {#id2}
 
 你可以通过在每组相关 NSQ 设置的顶层键末尾附加唯一标识符 `_ID`，指定多个 NSQ 服务端点。 例如，以下命令分别将两个不同的 NSQ 服务端点设置为 `PRIMARY` 和 `SECONDARY`：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
-```shell
+```shell {tab="环境变量" group="tab1-tab2" value="tab1"}
 export MINIO_NOTIFY_NSQ_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_NSQ_NSQD_ADDRESS_PRIMARY="https://user:password@nsq-endpoint.example.net:9200"
 export MINIO_NOTIFY_NSQ_TOPIC_PRIMARY="bucketevents"
@@ -44,10 +40,7 @@ export MINIO_NOTIFY_NSQ_NSQD_ADDRESS_SECONDARY="https://user:password@nsq-endpoi
 export MINIO_NOTIFY_NSQ_TOPIC_SECONDARY="bucketevents"
 ```
 
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
-```shell
+```shell {tab="配置项" value="tab2"}
 mc admin config set notify_nsq:primary \
    nsqd_address="ENDPOINT" \
    topic="<string>" \
@@ -59,26 +52,21 @@ mc admin config set notify_nsq:secondary \
    [ARGUMENT="VALUE"] ... \
 ```
 
-{{% /tab %}}
-{{< /tabpane >}}
-
 ## 设置 {#id3}
 
 ### 启用 {#id4}
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NSQ_ENABLE` {#envvar.MINIO_NOTIFY_NSQ_ENABLE}
 
 *envvar*
 
 指定 `on` 以启用将存储桶通知发布到 NSQ 端点。
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nsq` {#mc-conf.notify_nsq}
 
 *mc-conf*
@@ -98,57 +86,51 @@ mc admin config set notify_nsq                          \
    topic="<string>"                                     \
    [ARGUMENT="VALUE"] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### NSQ Daemon 服务器地址 {#nsq-daemon}
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NSQ_NSQD_ADDRESS` {#envvar.MINIO_NOTIFY_NSQ_NSQD_ADDRESS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nsq nsqd_address` {#mc-conf.notify_nsq.nsqd_address}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 NSQ Daemon 运行所在的 NSQ 服务器地址。 例如：
 
 `https://nsq-endpoint.example.net:4150`
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-27T05-56-19Z**
-
-在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-27T05-56-19Z**
+>
+> 在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
 
 ### 主题 {#id5}
 
 *必填*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NSQ_TOPIC` {#envvar.MINIO_NOTIFY_NSQ_TOPIC}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nsq topic` {#mc-conf.notify_nsq.topic}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 向 broker 发布事件时使用的 NSQ topic 名称。
 
@@ -156,20 +138,18 @@ mc admin config set notify_nsq                          \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NSQ_TLS` {#envvar.MINIO_NOTIFY_NSQ_TLS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nsq tls` {#mc-conf.notify_nsq.tls}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 `on` 以启用到 NSQ service broker 的 TLS 连接。
 
@@ -177,20 +157,18 @@ mc admin config set notify_nsq                          \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NSQ_TLS_SKIP_VERIFY` {#envvar.MINIO_NOTIFY_NSQ_TLS_SKIP_VERIFY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nsq tls_skip_verify` {#mc-conf.notify_nsq.tls_skip_verify}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 启用或禁用对 NSQ service broker TLS 证书的 TLS 校验。
 
@@ -201,20 +179,18 @@ mc admin config set notify_nsq                          \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NSQ_QUEUE_DIR` {#envvar.MINIO_NOTIFY_NSQ_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nsq queue_dir` {#mc-conf.notify_nsq.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定目录路径以启用 MinIO 对未投递消息的持久化事件存储，例如 `/opt/minio/events`。
 
@@ -224,20 +200,18 @@ mc admin config set notify_nsq                          \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NSQ_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_NSQ_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nsq queue_limit` {#mc-conf.notify_nsq.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定未投递消息的最大上限。 默认值为 `100000`。
 
@@ -245,19 +219,17 @@ mc admin config set notify_nsq                          \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_NSQ_COMMENT` {#envvar.MINIO_NOTIFY_NSQ_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `notify_nsq comment` {#mc-conf.notify_nsq.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定与 NSQ 配置关联的备注。

@@ -2,8 +2,8 @@
 title: "mc event rm"
 url: "/zh/reference/minio-mc/mc-event-remove/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-event-remove.rst
+upstream_modified: false
 ---
 
 <a id="mc-event-rm"></a>
@@ -19,16 +19,15 @@ silo_modified: false
 
 [`mc event remove`](#command-mc.event.remove) 命令与 [`mc event rm`](#command-mc.event.rm) 功能等效。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令会在 `myminio` MinIO 部署的 `mydata` 存储桶上， 移除指定 [bucket notification target](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 的已配置事件通知：
 
 ```shell
 mc event rm myminio/mydata arn:aws:sqs::primary:target
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 命令语法如下：
 
 ```shell
@@ -46,8 +45,8 @@ mc [GLOBALFLAGS] event remove        \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ```shell
 mc [GLOBALFLAGS] event remove [FLAGS] ALIAS ARN
@@ -149,17 +148,15 @@ mc event rm alias/bucket arn:minio:sqs::mytest:webhook --event get,put
 
 ### 从存储桶中移除事件通知 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会移除某个存储桶上的所有事件通知触发器。 该命令假设 MinIO 部署中至少配置了一个 [bucket notification target](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications):
 
 ```shell
 mc event rm myminio/mydata arn:minio:sqs::primary:webhook
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc event rm ALIAS ARN
 ```
@@ -168,8 +165,8 @@ mc event rm ALIAS ARN
 
   `myminio/mydata`
 - 将 `ARN` 替换为通知目标 [`ARN`](/zh/reference/minio-mc/mc-event-add/#mc.event.add.ARN).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id7}
 

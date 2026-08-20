@@ -2,8 +2,8 @@
 title: "mc admin group"
 url: "/zh/reference/minio-mc-admin/mc-admin-group/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-group.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-group"></a>
@@ -16,11 +16,10 @@ silo_modified: false
 
 [组](/zh/administration/identity-access-management/minio-group-management/#minio-groups) 是 [用户](/zh/administration/identity-access-management/minio-user-management/#minio-users) 的集合。每个组都可以分配一个或多个 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)，用于明确列出允许或拒绝组成员访问的 操作和资源。对于具有相同访问模式和工作负载的用户，组提供了一种 简化的共享权限管理方式。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ### 组与基于策略的访问控制 {#id3}
 
@@ -30,13 +29,12 @@ MinIO 使用 基于策略的访问控制 (PBAC) 对已成功在部署上 *认证
 
 有关 MinIO 用户和组的更多信息，请参见 [用户管理](/zh/administration/identity-access-management/minio-user-management/#minio-users) 和 [组管理](/zh/administration/identity-access-management/minio-group-management/#minio-groups)。有关 MinIO 策略的更多信息， 请参见 [MinIO Policy Based Access Control](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
 
-{{% alert color="info" %}}
-**`Deny` 会覆盖 `Allow`**
-
-MinIO 遵循 IAM 标准：在同一操作或资源上，`Deny` 规则会覆盖 `Allow` 规则。 例如，如果某个用户显式分配的策略对某个操作/资源包含 `Allow` 规则， 而该用户所属的某个组所分配策略对同一操作/资源包含 `Deny` 规则， 则 MinIO 只会应用 `Deny` 规则。
-
-有关 IAM 策略评估逻辑的更多信息，请参见 IAM 文档中的 [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow)。
-{{% /alert %}}
+> [!NOTE]
+> **`Deny` 会覆盖 `Allow`**
+>
+> MinIO 遵循 IAM 标准：在同一操作或资源上，`Deny` 规则会覆盖 `Allow` 规则。 例如，如果某个用户显式分配的策略对某个操作/资源包含 `Allow` 规则， 而该用户所属的某个组所分配策略对同一操作/资源包含 `Deny` 规则， 则 MinIO 只会应用 `Deny` 规则。
+>
+> 有关 IAM 策略评估逻辑的更多信息，请参见 IAM 文档中的 [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow)。
 
 ## 示例 {#id4}
 

@@ -3,8 +3,8 @@ title: "Deploy Silo on Kubernetes"
 url: "/operations/deployments/kubernetes/"
 weight: 10
 icon: fa-solid fa-dharmachakra
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="deploy-minio-on-kubernetes"></a>
@@ -29,10 +29,9 @@ You can interact with the Operator through its [Custom Resource Definition (CRD)
 
 The CRD provides a customizable entry point for tools such as Kustomize, Helm, and `kubectl` to deploy and manage Silo-backed Tenants.
 
-{{% alert color="warning" %}}
-**Important**
-
-The MinIO Operator Console UI is deprecated and removed in MinIO Operator 6.0.0.
-
-You can continue to use standard Kubernetes approaches for MinIO Tenant management, such as Kustomize templates, Helm Charts, and `kubectl` commands for introspecting Tenant namespaces and resources.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The MinIO Operator Console UI is deprecated and removed in MinIO Operator 6.0.0.
+>
+> You can continue to use standard Kubernetes approaches for MinIO Tenant management, such as Kustomize templates, Helm Charts, and `kubectl` commands for introspecting Tenant namespaces and resources.

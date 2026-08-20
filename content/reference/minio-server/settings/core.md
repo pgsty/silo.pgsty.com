@@ -2,8 +2,8 @@
 title: "Core Settings"
 url: "/reference/minio-server/settings/core/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/core.rst
+upstream_modified: false
 ---
 
 <a id="core-settings"></a>
@@ -20,25 +20,23 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## MinIO Server CLI Options {#minio-server-cli-options}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_OPTS` {#envvar.MINIO_OPTS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 There is no configuration setting for this variable, as these settings apply at server startup.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 *Optional*
 
@@ -65,17 +63,15 @@ minio server $MINIO_OPTS ...
 #              --ftp="passive-port-range=30000-40000"
 ```
 
-{{% alert color="warning" %}}
-**Important**
-
-The `minio server` command does not read `$MINIO_OPTS` directly. The variable only functions if used as described above.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The `minio server` command does not read `$MINIO_OPTS` directly. The variable only functions if used as described above.
 
 ## Storage Volumes {#storage-volumes}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_VOLUMES` {#envvar.MINIO_VOLUMES}
 
 *envvar*
@@ -83,17 +79,16 @@ The `minio server` command does not read `$MINIO_OPTS` directly. The variable on
 The directories or drives the [`minio server`](/reference/minio-server/#command-minio.server) process uses as the storage backend.
 
 Functionally equivalent to setting [`minio server DIRECTORIES`](/reference/minio-server/#minio.server.DIRECTORIES). Use this value when configuring MinIO to run using an environment file.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Environment Variable File Path {#environment-variable-file-path}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_CONFIG_ENV_FILE` {#envvar.MINIO_CONFIG_ENV_FILE}
 
 *envvar*
@@ -101,33 +96,31 @@ This setting does not have a configuration setting option.
 Specifies the full path to the file the MinIO server process uses for loading environment variables.
 
 For `systemd`-managed files, set this value to the path of the environment file (`/etc/default/minio`) to direct MinIO to reload changes to that file when using [`mc admin service restart`](/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) to restart the deployment.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Workers for Expiration {#workers-for-expiration}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_ILM_EXPIRY_WORKERS` {#envvar.MINIO_ILM_EXPIRY_WORKERS}
 
 *envvar*
 
 Specifies the number of workers to make available to expire objects configured with ILM rules for expiration. When not set, MinIO defaults to using up to half of the available processing cores available.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Domain {#domain}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_DOMAIN` {#envvar.MINIO_DOMAIN}
 
 *envvar*
@@ -141,37 +134,34 @@ For example, consider a MinIO deployment with an assigned FQDN of `minio.example
 - With path-style lookups, applications can access the bucket using its full path as `minio.example.net/mybucket`.
 - With virtual-host lookups, application can access the bucket as a virtual host as `mybucket.minio.example.net/`.
 
-{{% alert color="warning" %}}
-**Important**
-
-If you configure `MINIO_DOMAIN`, you **must** consider all subdomains of the specified FQDN as exclusively assigned for use as bucket names. Any MinIO services which conflict with those domains, such as replication targets, may exhibit unexpected or undesired behavior as a result of the collision.
-
-For example, if setting `MINIO_DOMAIN=minio.example.net`, you **cannot** assign any subdomains of `minio.example.net` (in the form of `*.minio.example.net`) to any MinIO service or target. This includes hostnames for use with [bucket](/administration/bucket-replication/#minio-bucket-replication), [batch](/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job), or [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview).
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+> [!WARNING]
+> **Important**
+>
+> If you configure `MINIO_DOMAIN`, you **must** consider all subdomains of the specified FQDN as exclusively assigned for use as bucket names. Any MinIO services which conflict with those domains, such as replication targets, may exhibit unexpected or undesired behavior as a result of the collision.
+>
+> For example, if setting `MINIO_DOMAIN=minio.example.net`, you **cannot** assign any subdomains of `minio.example.net` (in the form of `*.minio.example.net`) to any MinIO service or target. This includes hostnames for use with [bucket](/administration/bucket-replication/#minio-bucket-replication), [batch](/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job), or [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview).
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-scanner-speed-options"></a>
 
 ## Scanner Speed {#scanner-speed}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_SCANNER_SPEED` {#envvar.MINIO_SCANNER_SPEED}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 #### `scanner speed` {#mc-conf.scanner.speed}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Manage the maximum wait period for the [scanner](/operations/concepts/scanner/#minio-concepts-scanner) when balancing MinIO read/write performance to scanner processes.
 
@@ -211,11 +201,11 @@ This setting prioritizes read and write operations at the potential cost of scan
 
 ## Batch Replication {#batch-replication}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Configuration Setting" %}}
+{{< tabs group="configuration-setting" >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Data Compression {#data-compression}
 
@@ -229,20 +219,18 @@ All of the settings in this section fall under the following top-level key:
 
 ### Enable Compression {#enable-compression}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_COMPRESSION_ENABLE` {#envvar.MINIO_COMPRESSION_ENABLE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `compression enable` {#mc-conf.compression.enable}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 *Optional*
 
@@ -252,100 +240,90 @@ Enabling or disabling data compression does not change existing objects.
 
 ### Allow Encryption {#allow-encryption}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_COMPRESSION_ALLOW_ENCRYPTION` {#envvar.MINIO_COMPRESSION_ALLOW_ENCRYPTION}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `compression allow_encryption` {#mc-conf.compression.allow_encryption}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 *Optional*
 
 Set to `on` to encrypt objects after compressing them. Defaults to `off`.
 
-{{% alert color="info" %}}
-**Encrypting compressed objects may compromise security**
-
-MinIO strongly recommends against encrypting compressed objects. If you require encryption, carefully evaluate the risk of potentially leaking information about the contents of encrypted objects.
-{{% /alert %}}
+> [!NOTE]
+> **Encrypting compressed objects may compromise security**
+>
+> MinIO strongly recommends against encrypting compressed objects. If you require encryption, carefully evaluate the risk of potentially leaking information about the contents of encrypted objects.
 
 ### Compression Extensions {#compression-extensions}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_COMPRESSION_EXTENSIONS` {#envvar.MINIO_COMPRESSION_EXTENSIONS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `compression extensions` {#mc-conf.compression.extensions}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 *Optional*
 
 Comma-separated list of the file extensions to compress. Setting a new list of file extensions replaces the previously configured list. Defaults to `".txt, .log, .csv, .json, .tar, .xml, .bin"`.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2024-03-15T01-07-19Z**
-
-Specify `"*"` to direct MinIO to compress all supported file types.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2024-03-15T01-07-19Z**
+>
+> Specify `"*"` to direct MinIO to compress all supported file types.
 
 MinIO does not support compressing file types on the [Excluded File Types](/administration/object-management/data-compression/#minio-data-compression-excluded-types) list, even if explicitly specified in this argument.
 
 ### Compression MIME Types {#compression-mime-types}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-variable" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_COMPRESSION_MIME_TYPES` {#envvar.MINIO_COMPRESSION_MIME_TYPES}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Variable" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Variable" value="configuration-variable" >}}
 ##### `compression mime_types` {#mc-conf.compression.mime_types}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 *Optional*
 
 Comma-separated list of the MIME types to compress. Setting a new list of types replaces the previously configured list. Defaults to `"text/*, application/json, application/xml, binary/octet-stream"`.
 
-{{% alert color="info" %}}
-**Default excluded files**
-
-Some types of files cannot be significantly reduced in size. MinIO will *not* compress these, even if specified in an [`mime_types`](#mc-conf.compression.mime_types) argument. See [Excluded types](/administration/object-management/data-compression/#minio-data-compression-excluded-types) for details.
-{{% /alert %}}
+> [!NOTE]
+> **Default excluded files**
+>
+> Some types of files cannot be significantly reduced in size. MinIO will *not* compress these, even if specified in an [`mime_types`](#mc-conf.compression.mime_types) argument. See [Excluded types](/administration/object-management/data-compression/#minio-data-compression-excluded-types) for details.
 
 ### Comments {#comments}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
+{{< tabs group="environment-variable-configuration-setting" default="configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 This setting does not have an environment variable option. Use the configuration setting instead.
-{{% /tab %}}
-{{% tab header="Configuration Setting" selected=true %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `compression comment` {#envvar.compression.comment}
 
 *envvar*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 *Optional*
 
@@ -353,17 +331,16 @@ Specify a comment to associate with the data compression configuration.
 
 ## Erasure Stripe Size {#erasure-stripe-size}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-variable" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_ERASURE_SET_DRIVE_COUNT` {#envvar.MINIO_ERASURE_SET_DRIVE_COUNT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Variable" %}}
+{{< /tab >}}
+{{< tab label="Configuration Variable" value="configuration-variable" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 *Optional*
 
@@ -373,30 +350,27 @@ If you set this value, you **must** do so *before* you initialize the cluster Th
 
 [MinIO SUBNET](https://min.io/pricing?jmp=docs) users should log in and open an issue to discuss stripe size settings prior to implementing them in any environment.
 
-{{% alert color="danger" %}}
-**Warning**
-
-**Do not** change the stripe size setting unless directed to by MinIO engineering.
-
-Changes to stripe size have significant impact to deployment functionality, availability, performance, and behavior. MinIO’s stripe selection algorithms set appropriate defaults for the majority of workloads. Changing the stripe size from this default is unusual and generally not necessary or advised.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> **Do not** change the stripe size setting unless directed to by MinIO engineering.
+>
+> Changes to stripe size have significant impact to deployment functionality, availability, performance, and behavior. MinIO’s stripe selection algorithms set appropriate defaults for the majority of workloads. Changing the stripe size from this default is unusual and generally not necessary or advised.
 
 ## Maximum Object Versions {#maximum-object-versions}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_API_OBJECT_MAX_VERSIONS` {#envvar.MINIO_API_OBJECT_MAX_VERSIONS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 #### `api object_max_versions` {#mc-conf.api.object_max_versions}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 *Optional*
 
@@ -404,11 +378,10 @@ Defines the default maximum versions to allow per object.
 
 By default, MinIO allows up to the maximum value of an Int64 versions per object, or over 9.2 quintillion.
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO versions from `RELEASE.2023-08-04T17-40-21Z` to `RELEASE.2024-03-26T22-10-45Z` had a default limit of 10,000 object versions. This setting can be used to override that limit to another value.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO versions from `RELEASE.2023-08-04T17-40-21Z` to `RELEASE.2024-03-26T22-10-45Z` had a default limit of 10,000 object versions. This setting can be used to override that limit to another value.
 
 Arbitrarily high versions per objects may cause performance degradation on some operations, such as `LIST`. This is especially true on systems running budget hardware or spinning drives (HDD). Applications or workloads which produce thousands or more versions per object may require design or architecture review to mitigate potential performance degradations.
 
@@ -416,9 +389,8 @@ Setting a limit of no more than `100` should provide enough versions for most ty
 
 ## Client Source Address Trust {#client-source-address-trust}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_API_TRUSTED_PROXIES` {#envvar.MINIO_API_TRUSTED_PROXIES}
 
 *envvar*
@@ -431,26 +403,24 @@ Set this to a comma-separated list of addresses or CIDR blocks to believe forwar
 
 Set this to `none` to believe no forwarding header at all and always use the peer address.
 
-{{% alert color="info" %}}
-**Note**
-
-Unset is the default and preserves the historical behaviour, so this setting is inert until you configure it.
-
-List **the proxies themselves, not the subnet they sit in.** Listed entries are skipped while walking the chain, so a range that also covers clients lets those clients forge. Multi-node deployments must include their own node addresses, because MinIO forwards some requests between nodes. Loopback is always trusted as a peer so FTP and SFTP keep attributing their sessions. A malformed value, or one that names no proxy at all, stops startup.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Unset is the default and preserves the historical behaviour, so this setting is inert until you configure it.
+>
+> List **the proxies themselves, not the subnet they sit in.** Listed entries are skipped while walking the chain, so a range that also covers clients lets those clients forge. Multi-node deployments must include their own node addresses, because MinIO forwards some requests between nodes. Loopback is always trusted as a peer so FTP and SFTP keep attributing their sessions. A malformed value, or one that names no proxy at all, stops startup.
 
 If you use `IpAddress` or `NotIpAddress` policy conditions, they are not enforceable until this setting names your proxies, or the deployment is otherwise unreachable except through them.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Legacy Bucket Resource Matching {#legacy-bucket-resource-matching}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH` {#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH}
 
 *envvar*
@@ -461,13 +431,12 @@ By default, twelve bucket-level write actions are not authorized through an obje
 
 Setting this to `on` returns to matching bucket-level requests against the string `mybucket/`, which an object pattern also matches. It is read once at startup and is intended as a temporary measure while stored policies are updated.
 
-{{% alert color="warning" %}}
-**This restores an over-grant**
-
-The historical matching is what allowed a principal holding only `s3:*` on `arn:aws:s3:::mybucket/*` to rewrite the bucket policy — including making the bucket public — or to delete the bucket. The switch is all-or-nothing: enabling it for one action reopens all twelve.
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+> [!WARNING]
+> **This restores an over-grant**
+>
+> The historical matching is what allowed a principal holding only `s3:*` on `arn:aws:s3:::mybucket/*` to rewrite the bucket policy — including making the bucket public — or to delete the bucket. The switch is all-or-nothing: enabling it for one action reopens all twelve.
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

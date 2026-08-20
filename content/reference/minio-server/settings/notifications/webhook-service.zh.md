@@ -2,8 +2,8 @@
 title: "Webhook 服务通知设置"
 url: "/zh/reference/minio-server/settings/notifications/webhook-service/"
 weight: 100
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/webhook-service.rst
+upstream_modified: false
 ---
 
 <a id="webhook"></a>
@@ -22,20 +22,16 @@ silo_modified: false
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 多个 Webhook 服务目标 {#id2}
 
 可通过在顶层键后为每组相关 Webhook 设置追加唯一标识符 `_ID` 来指定多个 Webhook 服务端点。 例如，以下命令分别将两个不同的 Webhook 服务端点设置为 `PRIMARY` 和 `SECONDARY`：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
-```shell
+```shell {tab="环境变量" group="tab1-tab2" value="tab1"}
 export MINIO_NOTIFY_WEBHOOK_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_WEBHOOK_ENDPOINT_PRIMARY="https://webhook1.example.net"
 
@@ -43,10 +39,7 @@ export MINIO_NOTIFY_WEBHOOK_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_WEBHOOK_ENDPOINT_SECONDARY="https://webhook1.example.net"
 ```
 
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
-```shell
+```shell {tab="配置设置" value="tab2"}
 mc admin config set notify_webhook:primary \
    endpoint="https://webhook1.example.net"
    [ARGUMENT=VALUE ...]
@@ -56,18 +49,14 @@ mc admin config set notify_webhook:secondary \
    [ARGUMENT=VALUE ...]
 ```
 
-{{% /tab %}}
-{{< /tabpane >}}
-
 ## 设置 {#id3}
 
 ### 启用 {#id4}
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_WEBHOOK_ENABLE` {#envvar.MINIO_NOTIFY_WEBHOOK_ENABLE}
 
 *envvar*
@@ -75,9 +64,8 @@ mc admin config set notify_webhook:secondary \
 指定 `on` 以启用将存储桶通知发布到 Webhook 服务端点。
 
 默认为 `off`。
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_webhook` {#mc-conf.notify_webhook}
 
 *mc-conf*
@@ -91,44 +79,39 @@ mc admin config set notify_webhook \
   endpoint="https://webhook.example.net"
   [ARGUMENT="VALUE"] ... \
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 端点 {#id5}
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_WEBHOOK_ENDPOINT` {#envvar.MINIO_NOTIFY_WEBHOOK_ENDPOINT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_webhook endpoint` {#mc-conf.notify_webhook.endpoint}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 Webhook 服务的 URL。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-27T05-56-19Z**
-
-在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-27T05-56-19Z**
+>
+> 在添加目标之前，如果指定的 URL 可解析且可达， MinIO 会先检查其健康状态。 如果现有目标处于离线状态，MinIO 也不再阻止添加新的通知目标。
 
 ### 认证令牌 {#id6}
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN` {#envvar.MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN}
 
 *envvar*
@@ -150,9 +133,8 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 ```
 
 更多详情请查阅目标服务的文档。
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_webhook auth_token` {#mc-conf.notify_webhook.auth_token}
 
 *mc-conf*
@@ -179,33 +161,29 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 更多详情请查阅目标服务的文档。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-06-23T20-26-00Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-06-23T20-26-00Z**
 
 当该值作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 的返回内容的一部分时，MinIO 会将其打码。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 队列目录 {#id7}
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_WEBHOOK_QUEUE_DIR` {#envvar.MINIO_NOTIFY_WEBHOOK_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_webhook queue_dir` {#mc-conf.notify_webhook.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定目录路径以启用 MinIO 针对未投递消息的持久化事件存储，例如 `/opt/minio/events`。
 
@@ -215,20 +193,18 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_webhook queue_limit` {#mc-conf.notify_webhook.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定未投递消息的最大上限。 默认为 `100000`。
 
@@ -236,20 +212,18 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_WEBHOOK_CLIENT_CERT` {#envvar.MINIO_NOTIFY_WEBHOOK_CLIENT_CERT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_webhook client_cert` {#mc-conf.notify_webhook.client_cert}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于向 Webhook 服务执行 mTLS 认证的客户端证书路径。
 
@@ -257,19 +231,17 @@ export MINIO_NOTIFY_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_NOTIFY_WEBHOOK_CLIENT_KEY` {#envvar.MINIO_NOTIFY_WEBHOOK_CLIENT_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 ##### `notify_webhook client_key` {#mc-conf.notify_webhook.client_key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于向 Webhook 服务执行 mTLS 认证的客户端私钥路径。

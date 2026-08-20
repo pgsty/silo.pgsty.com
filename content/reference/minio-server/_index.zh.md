@@ -5,8 +5,8 @@ weight: 30
 aliases:
   - "/reference/minio-server/minio-server/"
 icon: fa-solid fa-database
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/minio-server.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -82,15 +82,14 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 
 [`minio server`](#command-minio.server) 进程至少需要 4 个驱动器或目录才能启用 [erasure coding](/zh/operations/concepts/erasure-coding/#minio-erasure-coding)。
 
-{{% alert color="warning" %}}
-**重要**
-
-Silo 建议使用本地直连驱动器，即 [`DIRECTORIES`](#minio.server.DIRECTORIES) 路径指向主机上的各个驱动器。除非已验证完整技术栈，应避免把网络附加存储用作主对象数据存储，因为其网络延迟和故障语义与本地直连存储不同。
-
-在开发或评估场景中，你可以在单个物理卷上指定多个逻辑目录或分区，以便在部署中启用纠删码。
-
-对于生产环境，**不要** 把同一物理磁盘上的多个逻辑目录或分区当作独立故障域。表面上的驱动器数量不能提供物理磁盘冗余。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> Silo 建议使用本地直连驱动器，即 [`DIRECTORIES`](#minio.server.DIRECTORIES) 路径指向主机上的各个驱动器。除非已验证完整技术栈，应避免把网络附加存储用作主对象数据存储，因为其网络延迟和故障语义与本地直连存储不同。
+>
+> 在开发或评估场景中，你可以在单个物理卷上指定多个逻辑目录或分区，以便在部署中启用纠删码。
+>
+> 对于生产环境，**不要** 把同一物理磁盘上的多个逻辑目录或分区当作独立故障域。表面上的驱动器数量不能提供物理磁盘冗余。
 
 ##### `--address` {#minio.server.-address}
 
@@ -102,23 +101,21 @@ Silo 建议使用本地直连驱动器，即 [`DIRECTORIES`](#minio.server.DIREC
 
 若要为主机上配置的所有 IP 地址或主机名修改端口号，仅指定 `:PORT` 即可，其中 `PORT` 是主机上有效且开放的端口。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-01-02T09-40-09Z**
-
-你可以通过配置 hosts 文件，让 MinIO 仅监听特定 IP。 例如，如果机器的 */etc/hosts* 文件包含以下内容：
-
-```shell
-127.0.1.1       minioip
-127.0.1.2       minioip
-```
-
-类似下面的命令会在两个已配置 IP 地址的 `9000` 端口上监听 API 调用。
-
-```shell
-minio server --address "minioip:9000" ~/miniodirectory
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-01-02T09-40-09Z**
+>
+> 你可以通过配置 hosts 文件，让 MinIO 仅监听特定 IP。 例如，如果机器的 */etc/hosts* 文件包含以下内容：
+>
+> ```shell
+> 127.0.1.1       minioip
+> 127.0.1.2       minioip
+> ```
+>
+> 类似下面的命令会在两个已配置 IP 地址的 `9000` 端口上监听 API 调用。
+>
+> ```shell
+> minio server --address "minioip:9000" ~/miniodirectory
+> ```
 
 若省略该参数，[`minio`](#command-minio.server) 会绑定到主机上所有已配置 IPv4 地址、IPv6 地址和主机名的 `9000` 端口。
 
@@ -297,11 +294,10 @@ minio server http://server{1...4}/disk{1...4}                                 \
 
 有关 TLS/SSL 连接的更多信息，请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
 
-{{% alert color="warning" %}}
-**重要**
-
-[MinIO Server RELEASE.2023-12-09T18-17-51Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-12-09T18-17-51Z) 移除了已弃用参数 `--config-dir | -C`。 使用该 flag 的部署可能会在未启用 TLS 的情况下启动。 请将这些参数替换为 `--certs-dir | -S` 并重启，以重新启用 TLS。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> [MinIO Server RELEASE.2023-12-09T18-17-51Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-12-09T18-17-51Z) 移除了已弃用参数 `--config-dir | -C`。 使用该 flag 的部署可能会在未启用 TLS 的情况下启动。 请将这些参数替换为 `--certs-dir | -S` 并重启，以重新启用 TLS。
 
 ##### `--quiet` {#minio.server.-quiet}
 
@@ -327,11 +323,10 @@ minio server http://server{1...4}/disk{1...4}                                 \
 
 以 `JSON` 格式输出 server 日志和启动信息。
 
-{{% alert color="info" %}}
-**说明**
-
-你可以通过在 [`MINIO_OPTS`](/zh/reference/minio-server/settings/core/#envvar.MINIO_OPTS) 环境变量中设置上述任意 `minio` 参数来定义它们。 该变量的值是一个字符串，包含你希望在启动 MinIO Server 时设置的上述参数及其对应取值。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 你可以通过在 [`MINIO_OPTS`](/zh/reference/minio-server/settings/core/#envvar.MINIO_OPTS) 环境变量中设置上述任意 `minio` 参数来定义它们。 该变量的值是一个字符串，包含你希望在启动 MinIO Server 时设置的上述参数及其对应取值。
 
 ## 设置 {#id3}
 

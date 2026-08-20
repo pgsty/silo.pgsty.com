@@ -2,8 +2,8 @@
 title: "Generate a Let’s Encrypt Certificate for Silo with Certbot"
 url: "/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/"
 weight: 60
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio.md
+upstream_modified: true
 ---
 
 <a id="generate-let-s-encrypt-certificate-using-certbot-for-minio"></a>

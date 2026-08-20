@@ -2,8 +2,8 @@
 title: "mc tag set"
 url: "/zh/reference/minio-mc/mc-tag-set/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-tag-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-tag-set"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 MinIO 支持为对象最多添加 10 个自定义标签。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令为 `myminio` MinIO 部署中的 `mydata` 存储桶设置标签：
 
 ```shell
 mc tag set myminio/mydata "tag1=value1&tag2=value2"
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -45,8 +44,8 @@ mc [GLOBALFLAGS] tag set                   \
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 
 [`mc tag set --version-id`](#mc.tag.set.-version-id) 与多个参数互斥。更多信息请参阅参考文档。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -80,10 +79,8 @@ mc tag set myminio/mybucket/object.txt "key1=value1&key2=value2"
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-01-11T05-49-32Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-01-11T05-49-32Z**
 
 与 [`--recursive`](#mc.tag.set.-recursive) 一起使用时，[`mc tag set`](#command-mc.tag.set) 将 **不会** 遍历子前缀。 标签仅应用于指定路径下的对象。 需要 [`--recursive`](#mc.tag.set.-recursive)。
 
@@ -101,10 +98,8 @@ mc tag set myminio/vacation-photos/cancun "destination=international" --exclude-
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-04T18-10-16Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-04T18-10-16Z**
 
 递归地将标签应用到 [`ALIAS`](#mc.tag.set.ALIAS) 指定路径下的所有对象。
 

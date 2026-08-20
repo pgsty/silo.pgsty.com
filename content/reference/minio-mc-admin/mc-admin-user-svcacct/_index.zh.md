@@ -3,8 +3,8 @@ title: "mc admin user svcacct"
 url: "/zh/reference/minio-mc-admin/mc-admin-user-svcacct/"
 weight: 80
 icon: fa-solid fa-user-tag
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct"></a>
@@ -12,15 +12,14 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct"></a>
 
-{{% alert color="warning" %}}
-**重要**
-
-这些命令已被替代，并将在未来的 MinIO 客户端版本中弃用。
-
-自 MinIO客户端版本RELEASE.2024-10-08T09-37-26Z 起，与内置 MinIO IDP 用户及其访问密钥或 STS 令牌相关的功能，请使用 [`mc admin accesskey`](/zh/reference/minio-mc-admin/mc-admin-accesskey/#command-mc.admin.accesskey) 命令及其子命令。
-
-对于 AD/LDAP 用户的访问密钥，请使用 [`mc idp ldap accesskey`](/zh/reference/minio-mc/mc-idp-ldap-accesskey/#command-mc.idp.ldap.accesskey) 命令及其子命令。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 这些命令已被替代，并将在未来的 MinIO 客户端版本中弃用。
+>
+> 自 MinIO客户端版本RELEASE.2024-10-08T09-37-26Z 起，与内置 MinIO IDP 用户及其访问密钥或 STS 令牌相关的功能，请使用 [`mc admin accesskey`](/zh/reference/minio-mc-admin/mc-admin-accesskey/#command-mc.admin.accesskey) 命令及其子命令。
+>
+> 对于 AD/LDAP 用户的访问密钥，请使用 [`mc idp ldap accesskey`](/zh/reference/minio-mc/mc-idp-ldap-accesskey/#command-mc.idp.ldap.accesskey) 命令及其子命令。
 
 ## 描述 {#id2}
 

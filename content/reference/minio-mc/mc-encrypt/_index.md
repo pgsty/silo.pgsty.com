@@ -3,8 +3,8 @@ title: "mc encrypt"
 url: "/reference/minio-mc/mc-encrypt/"
 weight: 90
 icon: fa-solid fa-lock
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-encrypt.rst
+upstream_modified: false
 ---
 
 <a id="mc-encrypt"></a>

@@ -2,8 +2,8 @@
 title: "mc stat"
 url: "/zh/reference/minio-mc/mc-stat/"
 weight: 370
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-stat.rst
+upstream_modified: false
 ---
 
 <a id="mc-stat"></a>
@@ -16,16 +16,15 @@ silo_modified: false
 
 你可以对本地文件系统使用 [`mc stat`](#command-mc.stat)，以获得与 `stat` 命令行工具类似的结果。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令显示 `myminio` MinIO 部署中 `mydata` 存储桶内所有对象的信息：
 
 ```shell
 mc stat --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令具有以下语法：
 
 ```shell
@@ -46,8 +45,8 @@ mc [GLOBALFLAGS] stat                      \
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 
 [`mc stat --version-id`](#mc.stat.-version-id) 与多个参数互斥。更多信息请参阅参考文档。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -124,11 +123,10 @@ mc stat ~/data/myobject.txt
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--no-list` {#mc.stat.-no-list}
 

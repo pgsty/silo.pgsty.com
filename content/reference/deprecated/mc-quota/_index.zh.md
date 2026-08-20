@@ -3,19 +3,18 @@ title: "mc quota"
 url: "/zh/reference/deprecated/mc-quota/"
 weight: 70
 icon: fa-solid fa-box-archive
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-quota.rst
+upstream_modified: false
 ---
 
 <a id="mc-quota"></a>
 
 <a id="command-mc.quota"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2024-07-31T15-58-33Z**
-
-`mc quota` 及其子命令已弃用。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2024-07-31T15-58-33Z**
+>
+> `mc quota` 及其子命令已弃用。
 
 ## 说明 {#id2}
 
@@ -25,11 +24,10 @@ silo_modified: false
 
 每当 MinIO [object scanner](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-scanner) 扫描存储桶中待处理的 [object lifecycle transitions](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) 时，也会检查该存储桶是否超出已配置的配额。
 
-{{% alert color="info" %}}
-**配额执行并非即时生效**
-
-存储桶配额的设计目的不是对存储桶大小施加严格的硬限制。 如果存储桶在两次扫描之间超出配额，MinIO 仍会继续接受该存储桶的 `PUT` 请求，直到下一次扫描识别出配额违规 _之后_ 才会拒绝。
-{{% /alert %}}
+> [!NOTE]
+> **配额执行并非即时生效**
+>
+> 存储桶配额的设计目的不是对存储桶大小施加严格的硬限制。 如果存储桶在两次扫描之间超出配额，MinIO 仍会继续接受该存储桶的 `PUT` 请求，直到下一次扫描识别出配额违规 _之后_ 才会拒绝。
 
 ## 子命令 {#id3}
 

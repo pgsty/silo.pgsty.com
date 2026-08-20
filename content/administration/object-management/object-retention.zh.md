@@ -2,8 +2,8 @@
 title: "Silo 对象锁定"
 url: "/zh/administration/object-management/object-retention/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-retention.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -19,20 +19,20 @@ MinIO 对象锁定（“对象保留”）通过强制执行一次写入、多�
 
 根据 [Cohasset Associates](https://min.io/cohasset?ref-docs) 的说明，MinIO 对象锁定 提供关键的数据保留合规能力，并满足 SEC17a-4(f)、FINRA 4511(C) 和 CFTC 1.31(c)-(d) 的要求。
 
-{{< doc-carousel >}}
-{{< doc-card title="未启用锁定的存储桶" image="/images/retention/minio-versioning-delete-object.svg" alt="删除对象" >}}
+{{< cards >}}
+{{< card title="未启用锁定的存储桶" image="/images/retention/minio-versioning-delete-object.svg" image_alt="删除对象" >}}
 MinIO 版本控制会保留对象变更的完整历史。 但应用仍可显式删除特定对象版本。
-{{< /doc-card >}}
-{{< doc-card title="启用锁定的存储桶" image="/images/retention/minio-object-locking.svg" alt="锁定 30 天的对象" >}}
+{{< /card >}}
+{{< card title="启用锁定的存储桶" image="/images/retention/minio-object-locking.svg" image_alt="锁定 30 天的对象" >}}
 对存储桶中的对象应用默认 30 天的 WORM 锁，可确保所有对象版本在最短保留期内受到保护。
-{{< /doc-card >}}
-{{< doc-card title="锁定存储桶中的删除操作" image="/images/retention/minio-object-locking-delete.svg" alt="锁定存储桶中的删除操作" >}}
+{{< /card >}}
+{{< card title="锁定存储桶中的删除操作" image="/images/retention/minio-object-locking-delete.svg" image_alt="锁定存储桶中的删除操作" >}}
 [删除操作](/zh/administration/object-management/object-delete/#minio-object-delete) 在 [已启用版本控制的存储桶](/zh/administration/object-management/object-versioning/#minio-bucket-versioning-delete) 中遵循常规行为，即 MinIO 会为对象创建 `DeleteMarker`。不过，对象中非 Delete Marker 的版本仍受保留规则约束，可防止任何针对特定版本的删除或覆盖尝试。
-{{< /doc-card >}}
-{{< doc-card title="锁定存储桶中的版本删除操作" image="/images/retention/minio-object-locking-delete-version.svg" alt="锁定存储桶中的版本删除操作" >}}
+{{< /card >}}
+{{< card title="锁定存储桶中的版本删除操作" image="/images/retention/minio-object-locking-delete-version.svg" image_alt="锁定存储桶中的版本删除操作" >}}
 对于受 WORM 锁定保护的特定对象版本，MinIO 会阻止任何 [删除](/zh/administration/object-management/object-delete/#minio-object-delete) 尝试。客户端最早只能在锁过期后删除该版本。
-{{< /doc-card >}}
-{{< /doc-carousel >}}
+{{< /card >}}
+{{< /cards >}}
 
 MinIO 对象锁定在功能和 API 层面与 AWS S3 [兼容](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html)。 本页概述了 MinIO 中对象锁定/保留的实现概念。更多信息请参见 AWS S3 文档 [How S3 Object Lock works](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html)。
 

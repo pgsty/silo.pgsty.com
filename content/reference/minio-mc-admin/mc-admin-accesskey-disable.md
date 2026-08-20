@@ -2,8 +2,8 @@
 title: "mc admin accesskey disable"
 url: "/reference/minio-mc-admin/mc-admin-accesskey-disable/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-accesskey-disable.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-accesskey-disable"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc admin accesskey disable`](#command-mc.admin.accesskey.disable) command disables an existing access key for a MinIO IDP user.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command disables the specified access key:
 
 ```shell
 mc admin accesskey disable myminio myuserserviceaccount
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] admin accesskey disable         \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

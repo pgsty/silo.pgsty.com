@@ -2,8 +2,8 @@
 title: "mc license info"
 url: "/zh/reference/minio-mc/mc-license-info/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-license-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-license-info"></a>

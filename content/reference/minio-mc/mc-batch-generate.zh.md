@@ -2,8 +2,8 @@
 title: "mc batch generate"
 url: "/zh/reference/minio-mc/mc-batch-generate/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-generate.rst
+upstream_modified: true
 ---
 
 <a id="mc-batch-generate"></a>
@@ -11,11 +11,10 @@ silo_modified: true
 
 <a id="command-mc.batch.generate"></a>
 
-{{% alert color="info" %}}
-**变更: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z or later
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z or later
 
 ## 语法 {#id1}
 
@@ -25,16 +24,15 @@ MinIO 创建该文件后，请在你偏好的文本编辑器中打开并进一�
 
 请参阅 [job types](#minio-batch-job-types) 了解可生成的受支持作业。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令会为 `myminio` 别名下 `mybucket` 存储桶上的 replicate 作业创建一个基础 YAML 文件。
 
 ```shell
 mc batch generate myminio replicate
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -48,8 +46,8 @@ mc [GLOBALFLAGS] batch generate \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 
@@ -117,20 +115,18 @@ mc batch generate alias replicate > replicate.yaml
   在两个 MinIO 部署之间复制对象。 以批处理作业形式提供与 [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication) 类似的功能，而不是持续扫描功能。
 - [keyrotate](#minio-mc-batch-generate-keyrotate-job)
 
-  {{% alert color="info" %}}
-  **新增: MinIO**
-
-  RELEASE.2023-04-07T05-28-58Z
-  {{% /alert %}}
+  > [!NOTE]
+  > **新增: MinIO**
+  >
+  > RELEASE.2023-04-07T05-28-58Z
 
   为 MinIO 部署中静态对象的 sse-s3 或 sse-kms 密钥执行轮换。
 - [expire](#minio-mc-batch-generate-expire-job)
 
-  {{% alert color="info" %}}
-  **新增: MinIO**
-
-  RELEASE.2023-12-02T10-51-33Z
-  {{% /alert %}}
+  > [!NOTE]
+  > **新增: MinIO**
+  >
+  > RELEASE.2023-12-02T10-51-33Z
 
   依据与 [对象自动过期](/zh/administration/object-management/create-lifecycle-management-expiration-rule/#minio-lifecycle-management-create-expiry-rule) 类似的语义使对象过期。
 

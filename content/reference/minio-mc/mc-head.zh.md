@@ -2,8 +2,8 @@
 title: "mc head"
 url: "/zh/reference/minio-mc/mc-head/"
 weight: 130
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-head.rst
+upstream_modified: false
 ---
 
 <a id="mc-head"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 [`mc head`](#command-mc.head) 不会对对象内容执行任何转换或格式化来提升可读性。 你也可以将 [`mc head`](#command-mc.head) 用于本地文件系统，以获得与 `head` 命令行工具类似的结果。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令返回 `myminio` MinIO 部署中 `mydata` 存储桶内某个对象的前 10 行：
 
 ```shell
 mc head myminio/mydata/myobject.txt
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -43,8 +42,8 @@ mc [GLOBALFLAGS] head                     \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -127,11 +126,10 @@ mc head ~/mydata/object.txt
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--rewind` {#mc.head.-rewind}
 
@@ -185,11 +183,10 @@ mc head ALIAS/PATH --rewind DURATION
 - 将 [`PATH`](#mc.head.ALIAS) 替换为该对象在 S3 兼容主机上的路径。
 - 将 [`DURATION`](#mc.head.-rewind) 替换为过去的某个时间点， 命令会返回该时间点对应的对象。例如，指定 `30d` 可返回当前日期前 30 天的对象版本。
 
-{{% alert color="info" %}}
-**需要版本控制**
-
-要使用此功能，[`mc head`](#command-mc.head) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
-{{% /alert %}}
+> [!NOTE]
+> **需要版本控制**
+>
+> 要使用此功能，[`mc head`](#command-mc.head) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
 
 ### 查看对象指定版本的部分内容 {#id8}
 
@@ -203,11 +200,10 @@ mc head ALIAS/PATH --version-id VERSION
 - 将 [`PATH`](#mc.head.ALIAS) 替换为该对象在 S3 兼容主机上的路径。
 - 将 [`VERSION`](#mc.head.-version-id) 替换为对象版本。 例如，指定 `30d` 可返回当前日期前 30 天的对象版本。
 
-{{% alert color="info" %}}
-**需要版本控制**
-
-要使用此功能，[`mc head`](#command-mc.head) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
-{{% /alert %}}
+> [!NOTE]
+> **需要版本控制**
+>
+> 要使用此功能，[`mc head`](#command-mc.head) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
 
 ## 行为 {#id9}
 

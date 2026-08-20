@@ -3,8 +3,8 @@ title: "mc admin accesskey"
 url: "/reference/minio-mc-admin/mc-admin-accesskey/"
 weight: 10
 icon: fa-solid fa-key
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-accesskey.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-accesskey"></a>
@@ -12,11 +12,10 @@ silo_modified: false
 
 <a id="command-mc.admin.accesskey"></a>
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-Client RELEASE.2024-10-08T09-37-26Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> Client RELEASE.2024-10-08T09-37-26Z
 
 These commands replace the MinIO IDP functionality of the [`mc admin user svcacct`](/reference/minio-mc-admin/mc-admin-user-svcacct/#command-mc.admin.user.svcacct) command and its subcommands.
 

@@ -3,8 +3,8 @@ title: "存储桶通知"
 url: "/zh/administration/monitoring/bucket-notifications/"
 weight: 10
 icon: fa-solid fa-bell
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/bucket-notifications.rst
+upstream_modified: true
 ---
 
 <a id="minio-bucket-notifications"></a>
@@ -70,11 +70,10 @@ MinIO 支持将事件通知发布到以下目标：
 
 ## 异步与同步存储桶通知 {#id4}
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-06-23T20-26-00Z**
-
-对于 *所有* 远程目标，MinIO 支持异步（默认）或同步存储桶通知。
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-06-23T20-26-00Z**
+>
+> 对于 *所有* 远程目标，MinIO 支持异步（默认）或同步存储桶通知。
 
 使用异步传递时，MinIO 会将事件发送到已配置的远程目标，并且在继续处理下一个事件之前 *不会* 等待响应。 异步存储桶通知优先保证发送速率，但如果远程目标在传输或处理期间出现瞬时问题，则存在部分事件丢失的风险。
 
@@ -85,17 +84,16 @@ MinIO 支持将事件通知发布到以下目标：
 - 将 [`MINIO_API_SYNC_EVENTS`](/zh/reference/minio-server/settings/notifications/#envvar.MINIO_API_SYNC_EVENTS) 环境变量设置为 `on`，然后重启 MinIO 部署。
 - 将 [`api.sync_events`](/zh/reference/minio-server/settings/notifications/#mc-conf.api.sync_events) 配置项设置为 `on`，然后重启 MinIO 部署。
 
-{{% alert color="info" %}}
-**说明**
-
-对于同步和异步事件，MinIO 都会为每个远程目标维护一个队列，用于存储尚未发送和待处理的事件。 队列上限默认为 `100000`。
-
-队列已满时，MinIO 会丢弃新事件。
-
-可按需增大队列大小，以更好地适配 MinIO 部署与远程目标的事件发送和处理速率。 使用对应通知方法的 `QUEUE_LIMIT` 环境变量或配置项来修改该限制。
-
-对于异步事件，MinIO 最多允许 `50000` 个并发 `send` 调用。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 对于同步和异步事件，MinIO 都会为每个远程目标维护一个队列，用于存储尚未发送和待处理的事件。 队列上限默认为 `100000`。
+>
+> 队列已满时，MinIO 会丢弃新事件。
+>
+> 可按需增大队列大小，以更好地适配 MinIO 部署与远程目标的事件发送和处理速率。 使用对应通知方法的 `QUEUE_LIMIT` 环境变量或配置项来修改该限制。
+>
+> 对于异步事件，MinIO 最多允许 `50000` 个并发 `send` 调用。
 
 <a id="minio-bucket-notifications-event-types"></a>
 

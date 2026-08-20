@@ -4,17 +4,16 @@ description: "使用 MinIO Haskell SDK 从 Haskell 应用连接 SILO。"
 url: "/zh/developers/haskell/minio-haskell/"
 weight: 60
 icon: fa-solid fa-code
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/haskell/minio-haskell.rst
+upstream_modified: true
 ---
 
 ## MinIO Haskell SDK {#haskell-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此 Haskell 应用可以直接使用上游 [`minio-hs`](https://github.com/minio/minio-hs) 软件包。
 
-{{% alert color="warning" %}}
-上游最新标签版本仍为 2023 年发布的 `1.7.0`，其软件包元数据列出的测试编译器为 GHC 8.10.7。采用前，请针对当前 GHC、resolver、TLS 栈与实际负载验证 `minio-hs`。更新的兼容信息见 [Hackage](https://hackage.haskell.org/package/minio-hs) 与[上游发布记录](https://github.com/minio/minio-hs/releases)。
-{{% /alert %}}
+> [!WARNING]
+> 上游最新标签版本仍为 2023 年发布的 `1.7.0`，其软件包元数据列出的测试编译器为 GHC 8.10.7。采用前，请针对当前 GHC、resolver、TLS 栈与实际负载验证 `minio-hs`。更新的兼容信息见 [Hackage](https://hackage.haskell.org/package/minio-hs) 与[上游发布记录](https://github.com/minio/minio-hs/releases)。
 
 ## 安装软件包 {#install}
 

@@ -2,8 +2,8 @@
 title: "设置存储桶复制的要求"
 url: "/zh/administration/bucket-replication/bucket-replication-requirements/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/bucket-replication-requirements.rst
+upstream_modified: true
 ---
 
 <a id="minio-bucket-replication-requirements"></a>
@@ -25,8 +25,8 @@ silo_modified: true
 
 要配置和启用复制规则，存储桶复制要求源端和目标端部署具备特定权限。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="复制管理员" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="复制管理员" value="tab1" >}}
 下列策略提供了在部署上配置和启用复制所需的权限。
 
 ```json
@@ -80,8 +80,8 @@ mc admin policy attach TARGET ReplicationAdminPolicy --user=ReplicationAdmin
 ```
 
 对于配置了 [Active Directory/LDAP](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) 或 [OpenID Connect](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) 用户管理的 MinIO 部署，则应改为为存储桶复制创建专用 [访问密钥](/zh/administration/identity-access-management/minio-user-management/#minio-idp-service-account)。
-{{% /tab %}}
-{{% tab header="复制远端用户" %}}
+{{< /tab >}}
+{{< tab label="复制远端用户" value="tab2" >}}
 下列策略提供了将复制数据同步 *到* 该部署所需的权限。
 
 ```json
@@ -143,8 +143,8 @@ mc admin policy attach TARGET ReplicationRemoteUserPolicy --user=ReplicationRemo
 ```
 
 对于配置了 [Active Directory/LDAP](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) 或 [OpenID Connect](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) 用户管理的 MinIO 部署，则应改为为存储桶复制创建专用 [访问密钥](/zh/administration/identity-access-management/minio-user-management/#minio-idp-service-account)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 关于在 MinIO 部署中添加用户、访问密钥和策略的更完整文档，请参见 [`mc admin user`](/zh/reference/minio-mc-admin/mc-admin-user/#command-mc.admin.user)、[`mc admin user svcacct`](/zh/reference/minio-mc-admin/mc-admin-user-svcacct/#command-mc.admin.user.svcacct) 和 [`mc admin policy`](/zh/reference/minio-mc-admin/mc-admin-policy/#command-mc.admin.policy)。
 

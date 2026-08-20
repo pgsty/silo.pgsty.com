@@ -2,8 +2,8 @@
 title: "mc admin replicate"
 url: "/zh/reference/minio-mc-admin/mc-admin-replicate/"
 weight: 140
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-replicate.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-replicate"></a>
@@ -11,12 +11,11 @@ silo_modified: false
 
 <a id="command-mc.admin.replicate"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-01-11T03-14-16Z**
-
-- `mc admin replicate edit` renamed to [`mc admin replicate update`](#mc.admin.replicate.update)
-- `mc admin replicate remove` renamed to [`mc admin replicate rm`](#mc.admin.replicate.rm)
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-01-11T03-14-16Z**
+>
+> - `mc admin replicate edit` renamed to [`mc admin replicate update`](#mc.admin.replicate.update)
+> - `mc admin replicate remove` renamed to [`mc admin replicate rm`](#mc.admin.replicate.rm)
 
 ## 描述 {#id2}
 
@@ -32,11 +31,10 @@ silo_modified: false
 
 站点复制会对所有存储桶强制启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)，包括现有存储桶以及启动站点复制后新增的任何存储桶。 与仅处理对象最新版本的 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 相比，站点复制会完整同步版本化对象。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 [`mc admin replicate`](#command-mc.admin.replicate) 命令包含以下子命令：
 
@@ -59,8 +57,8 @@ MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 
 
 若要启用同步站点复制，请先使用此命令创建复制配置。 然后使用 [`mc admin replicate update --mode sync`](#mc.admin.replicate.update.-mode) 更新配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 假设一个多站点 MinIO 拓扑包含三个独立的 MinIO 部署，使用以下 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)：`minio1`、`minio2` 和 `minio3`。 三个站点之间都具备完整的双向网络访问，并且站点间延迟较低。
 
 ```shell
@@ -80,9 +78,8 @@ mc admin replicate add minio1 minio2 minio3 minio4 minio5
 ```shell
 mc admin replicate add minio1 minio2 minio3 --replicate-ilm-expiry
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -92,9 +89,8 @@ mc [GLOBALFLAGS] admin replicate add      \
                             [ALIAS3 ...]  \
                             [--replicate-ilm-expiry]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `ALIAS` {#mc.admin.replicate.add.ALIAS}
 
@@ -114,11 +110,10 @@ mc [GLOBALFLAGS] admin replicate add      \
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 在对等站点间复制 [ILM expiration](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 规则。
 
@@ -128,24 +123,21 @@ RELEASE.2023-12-02T02-03-28Z
 
 修改参与站点复制的现有对等站点所使用的 endpoint。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-01-11T03-14-16Z**
+> [!NOTE]
+> **变更: RELEASE.2023-01-11T03-14-16Z**
+>
+> `mc admin replicate edit` renamed to `mc admin replicate update`.
 
-`mc admin replicate edit` renamed to `mc admin replicate update`.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 ```shell
 mc admin replicate update                                                   \
                    minio2                                                 \
                    --deployment-id c1758167-4426-454f-9aae-5c3dfdf6df64   \
                    --endpoint https://minio2:9000
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -157,9 +149,8 @@ mc [GLOBALFLAGS] admin replicate update                     \
                             --enable-ilm-expiry-replication \
                             --disable-ilm-expiry-replication
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `ALIAS` {#mc.admin.replicate.update.ALIAS}
 
@@ -209,11 +200,10 @@ mc admin replicate update myminio --deployment-id c1758167-4426-454f-9aae-5c3dfd
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 停止在对等站点之间复制 ILM 过期规则。 对等站点之间已经同步的现有规则不会从任何对等站点移除。
 
@@ -223,11 +213,10 @@ RELEASE.2023-12-02T02-03-28Z
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 开始在对等站点之间复制 ILM 过期规则。
 
@@ -255,11 +244,10 @@ RELEASE.2023-12-02T02-03-28Z
 
 *Optional*
 
-{{% alert color="warning" %}}
-**重要**
-
-`--sync` 标志自 `RELEASE.2023-07-07T05-25-51Z` 起已弃用。 请改用 [`--mode`](#mc.admin.replicate.update.-mode)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> `--sync` 标志自 `RELEASE.2023-07-07T05-25-51Z` 起已弃用。 请改用 [`--mode`](#mc.admin.replicate.update.-mode)。
 
 启用或禁用同步站点复制。 可用值为 `enable` 和 `disable`。 若未定义，MinIO 使用异步站点复制。
 
@@ -267,18 +255,17 @@ RELEASE.2023-12-02T02-03-28Z
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-01-11T03-14-16Z**
-
-`mc admin replicate remove` 子命令重命名为 `mc admin replicate rm`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-01-11T03-14-16Z**
+>
+> `mc admin replicate remove` 子命令重命名为 `mc admin replicate rm`。
 
 从站点复制配置中移除一个或多个站点。
 
 请注意，如果你打算未来将该站点重新加入站点复制配置，则其必须不包含任何 [可复制数据](/zh/operations/replication/multi-site-replication/#minio-site-replication-what-replicates)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 从包含 *minio2* 的现有站点复制配置中，移除所有已连接站点的站点复制。 这会删除所有参与站点的站点复制配置。
 
 ```shell
@@ -297,9 +284,8 @@ mc admin replicate rm      \
                    minio6  \
                    --force
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -310,9 +296,8 @@ mc [GLOBALFLAGS] admin rm          \
                        --all       \
                        --force
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `TARGET` {#mc.admin.replicate.rm.TARGET}
 
@@ -352,22 +337,13 @@ mc [GLOBALFLAGS] admin rm          \
 
 返回站点复制配置中各站点的信息。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
-
-```shell
+```shell {tab="示例" group="tab1-tab2" value="tab1"}
 mc admin replicate info minio1
 ```
 
-{{% /tab %}}
-{{% tab header="语法" %}}
-
-```shell
+```shell {tab="语法" value="tab2"}
 mc [GLOBALFLAGS] admin replicate info ALIAS
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
 
 #### `ALIAS` {#mc.admin.replicate.info.ALIAS}
 
@@ -383,8 +359,8 @@ mc [GLOBALFLAGS] admin replicate info ALIAS
 
 显示站点复制配置中站点、存储桶、用户、组或策略的状态。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 显示包含站点 `minio1` 的站点复制配置的整体复制状态。
 
 ```shell
@@ -455,10 +431,8 @@ mc admin replicate status minio1 --ilm-expiry-rule ckok9v5b4dtgofkbi6tg
 ILMExpiryRule   | MINIO1          | MINIO2
 ILM Expiry Rule | ✔               | ✔
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc [GLOBALFLAGS] admin replicate status          \
                    TARGET                        \
@@ -474,9 +448,8 @@ mc [GLOBALFLAGS] admin replicate status          \
                    [--users]                     \
                    [--user accessKey]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `TARGET` {#mc.admin.replicate.status.TARGET}
 
@@ -532,11 +505,10 @@ mc [GLOBALFLAGS] admin replicate status          \
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 显示 ILM 过期规则的同步信息。
 
@@ -548,11 +520,10 @@ RELEASE.2023-12-02T02-03-28Z
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 显示指定 ILM 过期规则的复制状态信息。
 
@@ -596,8 +567,8 @@ RELEASE.2023-12-02T02-03-28Z
 
 在数据丢失场景下，将复制配置中一个站点的数据重新同步到复制配置中的第二个站点。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令启动重新同步过程，将 `minio1` 的数据恢复到 `minio2`
 
 ```shell
@@ -615,18 +586,16 @@ mc admin replicate resync status minio1 minio2
 ```shell
 mc admin replicate resync cancel minio1 minio2
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc [GLOBALFLAGS] admin replicate resync start|status|cancel ALIAS1 ALIAS2
 ```
 
 - 将 `ALIAS1` 替换为拥有待恢复数据的站点别名。
 - 将 `ALIAS2` 替换为需要重新同步数据的站点别名。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### `start` {#mc.admin.replicate.resync.start}
 

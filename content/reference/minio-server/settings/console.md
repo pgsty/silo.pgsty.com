@@ -2,20 +2,19 @@
 title: "Silo Console Settings"
 url: "/reference/minio-server/settings/console/"
 weight: 50
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/console.rst
+upstream_modified: true
 ---
 
 <a id="minio-console-settings"></a>
 <a id="minio-server-envvar-console"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2025-05-24T17-08-30Z**
-
-The Console now presents only object browser capabilities similar to those available through the [`mc`](/reference/minio-mc/#command-mc) tool. For administrative interactions, such as user management, use the [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) command.
-
-Some of the settings on this page may no longer be relevant for newer deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2025-05-24T17-08-30Z**
+>
+> The Console now presents only object browser capabilities similar to those available through the [`mc`](/reference/minio-mc/#command-mc) tool. For administrative interactions, such as user management, use the [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) command.
+>
+> Some of the settings on this page may no longer be relevant for newer deployments.
 
 This page covers settings that manage access and behavior for the MinIO Console.
 
@@ -28,11 +27,10 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Browser Settings {#browser-settings}
 
@@ -42,75 +40,69 @@ The following settings control behavior for the embedded MinIO Console.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_BROWSER` {#envvar.MINIO_BROWSER}
 
 *envvar*
 
 Specify `off` to disable the embedded MinIO Console.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Animation {#animation}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_BROWSER_LOGIN_ANIMATION` {#envvar.MINIO_BROWSER_LOGIN_ANIMATION}
 
 *envvar*
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-Server RELEASE.2023-05-04T21-44-30Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> Server RELEASE.2023-05-04T21-44-30Z
 
 Specify `off` to disable the animated login screen for the MinIO Console. Defaults to `on`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Browser Redirect {#browser-redirect}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_BROWSER_REDIRECT` {#envvar.MINIO_BROWSER_REDIRECT}
 
 *envvar*
 
-> {{% alert color="info" %}}
-> **Added: MinIO**
->
-> Server RELEASE.2023-09-16T01-01-47Z
-> {{% /alert %}}
+> > [!NOTE]
+> > **Added: MinIO**
+> >
+> > Server RELEASE.2023-09-16T01-01-47Z
 
 Specify whether requests from a web browser automatically redirect to the Console address. Defaults to `true`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Browser Redirect URL {#browser-redirect-url}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_BROWSER_REDIRECT_URL` {#envvar.MINIO_BROWSER_REDIRECT_URL}
 
 *envvar*
@@ -122,28 +114,26 @@ If you want to host the MinIO Console exclusively from a reverse-proxy service, 
 For example, consider a reverse proxy configured to route `https://example.net/minio/` to the MinIO Console. You must set this environment variable to match that hostname for the Console to both listen and respond to requests using that hostname.
 
 If you omit this variable, the Console listens and responds to all IP addresses or hostnames associated to the host machine on which the MinIO Server runs.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Session Duration {#session-duration}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_BROWSER_SESSION_DURATION` {#envvar.MINIO_BROWSER_SESSION_DURATION}
 
 *envvar*
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-Server RELEASE.2023-08-23T10-07-06Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> Server RELEASE.2023-08-23T10-07-06Z
 
 Specify the duration of a browser session for working with the MinIO Console.
 
@@ -155,29 +145,28 @@ MinIO supports the following units of time measurement:
 - `d` - days, “7d”
 
 Defaults to `12h`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Log Query URL {#log-query-url}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_LOG_QUERY_URL` {#envvar.MINIO_LOG_QUERY_URL}
 
 *envvar*
 
 Specify the URL of a PostgreSQL service to which MinIO writes [Audit logs](/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs). The embedded MinIO Console provides a Log Search tool that allows querying the PostgreSQL service for collected logs.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Content Security Policy {#content-security-policy}
 
@@ -185,9 +174,8 @@ This setting does not have a configuration variable setting. Use the Environment
 
 Configure MinIO Console to generate a [Content-Security-Policy](https://en.wikipedia.org/wiki/Content_Security_Policy) header in HTTP responses. Defaults to `default-src 'self' 'unsafe-eval' 'unsafe-inline';`
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_BROWSER_CONTENT_SECURITY_POLICY` {#envvar.MINIO_BROWSER_CONTENT_SECURITY_POLICY}
 
 *envvar*
@@ -195,10 +183,8 @@ Configure MinIO Console to generate a [Content-Security-Policy](https://en.wikip
 ```shell
 export MINIO_BROWSER_CONTENT_SECURITY_POLICY="default-src 'self' 'unsafe-eval' 'unsafe-inline';"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `browser csp_policy` {#mc-conf.browser.csp_policy}
 
 *mc-conf*
@@ -208,9 +194,8 @@ mc admin config set browser \
    csp_policy="default-src 'self' 'unsafe-eval' 'unsafe-inline';" \
    [ARGUMENT=VALUE ...]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Strict Transport Security {#strict-transport-security}
 
@@ -220,9 +205,8 @@ Configure MinIO console to generate a [Strict-Transport-Security](https://en.wik
 
 To generate the header, you **must** set a duration using either [`MINIO_BROWSER_HSTS_SECONDS`](#envvar.MINIO_BROWSER_HSTS_SECONDS) or [`hsts_seconds`](#mc-conf.browser.hsts_seconds). Other HSTS settings are optional.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
-
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 ##### `MINIO_BROWSER_HSTS_SECONDS` {#envvar.MINIO_BROWSER_HSTS_SECONDS}
 
 *envvar*
@@ -252,9 +236,8 @@ Set to `on` to direct the client browser to add the MinIO Console domain to its 
 ```shell
 export MINIO_BROWSER_HSTS_PRELOAD="on"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 The following configuration settings require a service restart to take effect. To restart the service, use [`mc admin service restart`](/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart).
 
 ##### `browser hsts_seconds` {#mc-conf.browser.hsts_seconds}
@@ -294,9 +277,8 @@ mc admin config set browser \
    hsts_seconds="31536000" \
    [ARGUMENT=VALUE ...]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### Examples {#examples}
 
@@ -338,9 +320,8 @@ The following examples show the rendered header for the given configuration sett
 
 Configure MinIO Console to generate a [Referrer-Policy](https://www.w3.org/TR/referrer-policy/) header in HTTP responses. Defaults to `strict-origin-when-cross-origin`.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_BROWSER_REFERRER_POLICY` {#envvar.MINIO_BROWSER_REFERRER_POLICY}
 
 *envvar*
@@ -348,10 +329,8 @@ Configure MinIO Console to generate a [Referrer-Policy](https://www.w3.org/TR/re
 ```shell
 export MINIO_BROWSER_REFERRER_POLICY="strict-origin-when-cross-origin"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `browser referrer_policy` {#mc-conf.browser.referrer_policy}
 
 *mc-conf*
@@ -361,9 +340,8 @@ mc admin config set browser \
    referrer_policy="strict-origin-when-cross-origin" \
    [ARGUMENT=VALUE ...]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Prometheus Settings {#prometheus-settings}
 
@@ -373,9 +351,8 @@ The following settings manage how MinIO interacts with your Prometheus service.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_PROMETHEUS_URL` {#envvar.MINIO_PROMETHEUS_URL}
 
 *envvar*
@@ -385,19 +362,18 @@ Specify the URL for a Prometheus service configured to [scrape MinIO metrics](/o
 The MinIO Console populates the **Dashboard** with cluster metrics using the `minio-job` Prometheus scraping job.
 
 If you are using a standalone MinIO Console process, this variable corresponds with `CONSOLE_PROMETHEUS_URL`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Prometheus Job ID {#prometheus-job-id}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_PROMETHEUS_JOB_ID` {#envvar.MINIO_PROMETHEUS_JOB_ID}
 
 *envvar*
@@ -407,19 +383,18 @@ Specify the custom Prometheus job ID used for [scraping MinIO metrics](/operatio
 MinIO defaults to `minio-job`.
 
 If you are using a standalone MinIO Console process, this variable corresponds with `CONSOLE_PROMETHEUS_JOB_ID`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Prometheus Auth Token {#prometheus-auth-token}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_PROMETHEUS_AUTH_TOKEN` {#envvar.MINIO_PROMETHEUS_AUTH_TOKEN}
 
 *envvar*
@@ -433,8 +408,8 @@ eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJwcm9tZXRoZXVzIiwic3ViIjoibWluaW8
 ```
 
 If you are using a standalone MinIO Console process, this variable corresponds with `CONSOLE_PROMETHEUS_AUTH_TOKEN`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration variable setting. Use the Environment Variable instead.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

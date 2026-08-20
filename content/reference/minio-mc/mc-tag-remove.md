@@ -2,8 +2,8 @@
 title: "mc tag remove"
 url: "/reference/minio-mc/mc-tag-remove/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-tag-remove.rst
+upstream_modified: false
 ---
 
 <a id="mc-tag-remove"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc tag remove`](#command-mc.tag.remove) command removes all tags from a bucket or object.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes tags for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc tag remove myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -41,8 +40,8 @@ mc [GLOBALFLAGS] tag remove                \
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 
 [`mc tag remove --version-id`](#mc.tag.remove.-version-id) is mutually exclusive with multiple parameters. See the reference documentation for more information.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -64,10 +63,8 @@ mc tag remove myminio/mybucket/object.txt
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-04T18-10-16Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-04T18-10-16Z**
 
 Recursively removes all tags from all objects at the specified [`ALIAS`](#mc.tag.remove.ALIAS).
 

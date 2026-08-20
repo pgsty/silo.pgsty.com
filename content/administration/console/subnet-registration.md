@@ -2,8 +2,8 @@
 title: "SUBNET"
 url: "/administration/console/subnet-registration/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/53e14984e3cacacd5a0206822693f15442186bb8/source/administration/console/subnet-registration.rst
+upstream_modified: false
 ---
 
 <a id="subnet"></a>
@@ -59,20 +59,18 @@ The resulting object may be read using MinIO’s [debugging tool](https://github
 
 ## Call Home {#call-home}
 
-{{% alert color="info" %}}
-**Added: Console**
-
-v0.24.0
-{{% /alert %}}
+> [!NOTE]
+> **Added: Console**
+>
+> v0.24.0
 
 Call Home is an optional feature where a deployment registered for [MinIO SUBNET](https://min.io/pricing?jmp=docs) can automatically send daily health diagnostic reports or real-time error logs to SUBNET. Having these reports equips engineering support with a record of diagnostics, logs, or both when responding to support requests.
 
 MinIO installs with Call Home options disabled by default.
 
-{{% alert color="warning" %}}
-**Important**
-
-Call Home requires an active Enterprise license.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Call Home requires an active Enterprise license.
 
 Use the **Call Home** section to enable or disable uploading either once-per-day health diagnostic reports or real-time error logs to SUBNET. The health reports and real-time logs are separate functions you can enable or disable separately. You can enable both diagnostics and logs at the same time, if desired.

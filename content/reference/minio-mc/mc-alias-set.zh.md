@@ -2,8 +2,8 @@
 title: "mc alias set"
 url: "/zh/reference/minio-mc/mc-alias-set/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-alias-set"></a>
@@ -17,8 +17,8 @@ silo_modified: false
 
 [`mc alias set`](#command-mc.alias.set) 命令用于在本地 **`mc`** 配置中添加或更新别名。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令为运行在 URL `https://myminio.example.net` 的 MinIO 部署 `myminio` 添加一个 [alias](#alias)。**`mc`** 使用指定的用户名和密码对该 MinIO 部署进行身份验证：
 
 ```shell
@@ -26,8 +26,8 @@ mc alias set myminio https://myminio.example.net minioadminuser minioadminpasswo
 ```
 
 如果 `myminio` 别名已存在，该命令会使用新的 URL、access key 和 secret key 覆盖该别名。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 [`mc alias set`](#command-mc.alias.set) 命令语法如下：
 
 ```shell
@@ -45,8 +45,8 @@ mc [GLOBALFLAGS] alias set \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 
@@ -60,11 +60,10 @@ mc [GLOBALFLAGS] alias set \
 - 长度为 2 个或更多字符。
 - 首字符必须是字母。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2024-01-11T05-49-32Z**
-
-别名也可以是单个字母（`a-z` 或 `A-Z`）。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2024-01-11T05-49-32Z**
+>
+> 别名也可以是单个字母（`a-z` 或 `A-Z`）。
 
 部分有效别名示例如下：
 
@@ -108,13 +107,12 @@ mc [GLOBALFLAGS] alias set \
 - `S3v4`（默认）
 - `S3v2`
 
-{{% alert color="info" %}}
-**说明**
-
-AWS 将 AWS Signature V2 视为 [deprecated](https://aws.amazon.com/blogs/aws/amazon-s3-update-sigv2-deprecation-period-extended-modified/)。 [`mc alias set`](#command-mc.alias.set) 保留该选项，仅用于仍依赖 Signature V2 的 S3 存储桶或服务。
-
-除非 S3 兼容服务明确要求，否则请使用 `S3v4`。 MinIO server 不依赖也不要求 `S3v2`，且并非所有 API 操作都可在 `S3v2` 上使用。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> AWS 将 AWS Signature V2 视为 [deprecated](https://aws.amazon.com/blogs/aws/amazon-s3-update-sigv2-deprecation-period-extended-modified/)。 [`mc alias set`](#command-mc.alias.set) 保留该选项，仅用于仍依赖 Signature V2 的 S3 存储桶或服务。
+>
+> 除非 S3 兼容服务明确要求，否则请使用 `S3v4`。 MinIO server 不依赖也不要求 `S3v2`，且并非所有 API 操作都可在 `S3v2` 上使用。
 
 ##### `--path` {#mc.alias.set.-path}
 
@@ -138,8 +136,8 @@ AWS 将 AWS Signature V2 视为 [deprecated](https://aws.amazon.com/blogs/aws/am
 
 使用 [`mc alias set`](#command-mc.alias.set) 添加一个供 **`mc`** 使用的 S3 兼容服务：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令创建一个新的别名 `myminio`，指向位于 `https://minio.example.net` 的 MinIO 部署。该别名使用 `miniouser` 和 `miniopassword` 凭据对该部署执行操作。
 
 ```shell
@@ -147,9 +145,8 @@ mc alias set myminio https://minio.example.net miniouser miniopassword
 ```
 
 如果 `myminio` 别名已存在， [`mc alias set`](#command-mc.alias.set) 命令会使用指定参数覆盖该别名。
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 ```
@@ -157,8 +154,8 @@ mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 - 将 `ALIAS` 替换为与 MinIO 服务关联的名称。
 - 将 `HOSTNAME` 替换为 MinIO 部署中任意节点的 URL。你也可以指定 用于管理 MinIO 部署连接的负载均衡器或反向代理 URL。
 - 将 `ACCESSKEY` 和 `SECRETKEY` 替换为 MinIO 部署中某个用户的凭据。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id11}
 

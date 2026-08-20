@@ -2,8 +2,8 @@
 title: "Drive Failure Recovery"
 url: "/operations/data-recovery/recover-after-drive-failure/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery/recover-after-drive-failure.rst
+upstream_modified: false
 ---
 
 <a id="drive-failure-recovery"></a>
@@ -13,13 +13,12 @@ MinIO supports hot-swapping failed drives with new healthy drives. MinIO detects
 
 MinIO healing ensures consistency and correctness of all data restored onto the drive.
 
-{{% alert color="info" %}}
-**Exclusive access to drives**
-
-MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-
-Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
-{{% /alert %}}
+> [!NOTE]
+> **Exclusive access to drives**
+>
+> MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
+>
+> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 The following steps provide a more detailed walkthrough of drive replacement. These steps assume a MinIO deployment where each node manages drives using `/etc/fstab` with per-drive labels as per the [documented prerequisites](/operations/deployments/installation/#minio-installation).
 
@@ -69,15 +68,14 @@ $ cat /etc/fstab
   LABEL=DRIVE4     /mnt/drive4    xfs     defaults,noatime  0       2
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-Cloud environment instances which depend on mounted external storage may encounter boot failure if one or more of the remote file mounts return errors or failure. For example, an AWS ECS instances with mounted persistent EBS volumes may fail to boot with the standard `/etc/fstab` configuration if one or more EBS volumes fail to mount.
-
-You can set the `nofail` option to silence error reporting at boot and allow the instance to boot with one or more mount issues.
-
-You should not use this option on systems which have locally attached disks, as silencing drive errors prevents both MinIO and the OS from responding to those errors in a normal fashion.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Cloud environment instances which depend on mounted external storage may encounter boot failure if one or more of the remote file mounts return errors or failure. For example, an AWS ECS instances with mounted persistent EBS volumes may fail to boot with the standard `/etc/fstab` configuration if one or more EBS volumes fail to mount.
+>
+> You can set the `nofail` option to silence error reporting at boot and allow the instance to boot with one or more mount issues.
+>
+> You should not use this option on systems which have locally attached disks, as silencing drive errors prevents both MinIO and the OS from responding to those errors in a normal fashion.
 
 Given the previous example command, no changes are required to `fstab` since the replacement drive at `/mnt/drive1` uses the same label `DRIVE1` as the failed drive.
 

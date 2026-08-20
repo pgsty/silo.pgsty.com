@@ -2,8 +2,8 @@
 title: "mc legalhold set"
 url: "/zh/reference/minio-mc/mc-legalhold-set/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-legalhold-set"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 [`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold) *要求* 指定的存储桶已 [启用对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking)。你 **只能** 在创建存储桶时启用对象锁定。 有关创建已启用对象锁定的存储桶，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会在 `myminio` MinIO 部署中，对 `mydata` 存储桶内所有现有对象启用 legalhold WORM 锁定：
 
 ```shell
 mc legalhold set --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] legalhold set  \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -67,11 +66,10 @@ mc legalhold set play/mybucket/myobjects/objects.txt
 
 将 legal hold 应用于 [`ALIAS`](#mc.legalhold.set.ALIAS) 指定存储桶或存储桶前缀下的 所有现有对象。
 
-{{% alert color="info" %}}
-**`--recursive` 仅作用于现有对象**
-
-若要为后续新建对象启用 legal hold，请在有新对象创建后周期性重复执行 [`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold) 命令。
-{{% /alert %}}
+> [!NOTE]
+> **`--recursive` 仅作用于现有对象**
+>
+> 若要为后续新建对象启用 legal hold，请在有新对象创建后周期性重复执行 [`mc legalhold`](/zh/reference/minio-mc/mc-legalhold/#command-mc.legalhold) 命令。
 
 ##### `--rewind` {#mc.legalhold.set.-rewind}
 

@@ -3,21 +3,20 @@ title: "mc batch"
 url: "/reference/minio-mc/mc-batch/"
 weight: 40
 icon: fa-solid fa-layer-group
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch.rst
+upstream_modified: false
 ---
 
 <a id="mc-batch"></a>
 
 <a id="command-mc.batch"></a>
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-
-Added the ability to cancel jobs with the [`mc batch cancel`](/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel) command.
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
+>
+> Added the ability to cancel jobs with the [`mc batch cancel`](/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel) command.
 
 ## Description {#description}
 

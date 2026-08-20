@@ -4,17 +4,16 @@ description: "Connect a .NET application to SILO with the MinIO .NET SDK."
 url: "/developers/dotnet/minio-dotnet/"
 weight: 30
 icon: fa-brands fa-microsoft
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/dotnet/minio-dotnet.rst
+upstream_modified: true
 ---
 
 ## MinIO SDK for .NET {#dotnet-sdk}
 
 SILO implements the S3-compatible server contract, so applications can use the upstream [MinIO .NET SDK](https://github.com/minio/minio-dotnet) without a SILO-specific client fork. This guide uses the stable NuGet package and environment variables for credentials.
 
-{{% alert color="info" %}}
-SDK release requirements and APIs can change independently of SILO. Check the [current NuGet package](https://www.nuget.org/packages/Minio/) and [SDK releases](https://github.com/minio/minio-dotnet/releases) before choosing a version for your application.
-{{% /alert %}}
+> [!NOTE]
+> SDK release requirements and APIs can change independently of SILO. Check the [current NuGet package](https://www.nuget.org/packages/Minio/) and [SDK releases](https://github.com/minio/minio-dotnet/releases) before choosing a version for your application.
 
 ## Install the package {#install}
 

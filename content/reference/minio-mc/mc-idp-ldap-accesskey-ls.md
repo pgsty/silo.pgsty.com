@@ -2,8 +2,8 @@
 title: "mc idp ldap accesskey ls"
 url: "/reference/minio-mc/mc-idp-ldap-accesskey-ls/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-accesskey-ls"></a>
@@ -25,8 +25,8 @@ Create AD/LDAP service accounts with the [`mc idp ldap accesskey create`](/refer
 
 MinIO supports using [AssumeRoleWithLDAPIdentity](/developers/security-token-service/AssumeRoleWithLDAPIdentity/#minio-sts-assumerolewithldapidentity) to generate temporary access keys using the [Security Token Service](/developers/security-token-service/#minio-security-token-service).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 > The following example returns a list of access keys associated with the authenticated user on the `minio` [alias](/reference/minio-mc/mc-alias-set/#alias):
 
 ```shell
@@ -34,8 +34,8 @@ mc idp ldap accesskey ls minio/
 ```
 
 If the authenticated user has the `admin:ListUsers` permission, the example command returns a list of all users and their associated access keys.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -57,8 +57,8 @@ mc [GLOBALFLAGS] idp ldap accesskey ls           \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -82,11 +82,10 @@ mc idp ldap accesskey ls minio
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-07-31T15-58-33Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-07-31T15-58-33Z
 
 List all access keys for all LDAP users.
 
@@ -96,11 +95,10 @@ List all access keys for all LDAP users.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-07-31T15-58-33Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-07-31T15-58-33Z
 
 List access keys for the currently authenticated user.
 
@@ -142,11 +140,10 @@ To return a list of all access keys, you must first authenticate as the `admin` 
 mc idp ldap accesskey ls minio
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-If the user does not have the `admin:ListUsers` permission, the command returns a list of access keys for the authenticated user only.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> If the user does not have the `admin:ListUsers` permission, the command returns a list of access keys for the authenticated user only.
 
 #### List User Distinguished Names {#list-user-distinguished-names}
 
@@ -188,11 +185,10 @@ The following command returns the AD/LDAP access keys for the currently authenti
 mc idp ldap accesskey list minio/
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-If the authenticated user has the `admin:ListUsers` permission, the command returns a list of all users and access keys on the deployment.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> If the authenticated user has the `admin:ListUsers` permission, the command returns a list of all users and access keys on the deployment.
 
 ### Global Flags {#global-flags}
 

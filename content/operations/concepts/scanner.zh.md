@@ -2,8 +2,8 @@
 title: "对象扫描器"
 url: "/zh/operations/concepts/scanner/"
 weight: 50
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts/scanner.rst
+upstream_modified: true
 ---
 
 <a id="minio-concepts-scanner"></a>

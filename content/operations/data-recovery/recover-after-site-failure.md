@@ -2,8 +2,8 @@
 title: "Site Failure Recovery"
 url: "/operations/data-recovery/recover-after-site-failure/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery/recover-after-site-failure.rst
+upstream_modified: false
 ---
 
 <a id="site-failure-recovery"></a>
@@ -36,13 +36,12 @@ If you are switching from using bucket replication to using site replication, yo
 
 ## Restore an Unhealthy Peer to Site Replication {#restore-an-unhealthy-peer-to-site-replication}
 
-{{% alert color="warning" %}}
-**Important**
-
-The [RELEASE.2023-01-02T09-40-09Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-01-02T09-40-09Z) MinIO server release includes important fixes for removing a downed site in replication configurations containing three or more peer sites.
-
-For deployments configured for site replication, plan to [test and upgrade](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade) all peer sites to the specified release. In the event of a site failure, you can update the remaining healthy sites to the specified version and use this procedure.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The [RELEASE.2023-01-02T09-40-09Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-01-02T09-40-09Z) MinIO server release includes important fixes for removing a downed site in replication configurations containing three or more peer sites.
+>
+> For deployments configured for site replication, plan to [test and upgrade](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade) all peer sites to the specified release. In the event of a site failure, you can update the remaining healthy sites to the specified version and use this procedure.
 
 [Site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview) keeps two or more MinIO deployments in sync with IAM policies, buckets, bucket configurations, objects, and object metadata. If a peer site fails, such as due to a major disaster or long power outage, you can use the remaining healthy site(s) to restore the [replicable data](/operations/replication/multi-site-replication/#minio-site-replication-what-replicates).
 
@@ -66,13 +65,12 @@ The following procedure can restore data in scenarios where [site replication](/
    - Validate that the new MinIO deployment functions normally and has bidirectional connectivity to the other peer sites.
    - Ensure the new site matches the server version on the existing peer sites
 
-   {{% alert color="danger" %}}
-   **Warning**
-
-   The [`mc admin replicate rm --force`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.rm.-force) command only operates on the online or healthy nodes in the site replication configuration. The removed offline MinIO deployment retains its original replication configuration, such that if the deployment resumes normal operations it would continue replication operations to its configured peer sites.
-
-   If you plan to re-use the hardware for the site replication configuration, you **must** completely wipe the drives for the deployment before re-initializing MinIO and adding the site back to the replication configuration.
-   {{% /alert %}}
+   > [!CAUTION]
+   > **Warning**
+   >
+   > The [`mc admin replicate rm --force`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.rm.-force) command only operates on the online or healthy nodes in the site replication configuration. The removed offline MinIO deployment retains its original replication configuration, such that if the deployment resumes normal operations it would continue replication operations to its configured peer sites.
+   >
+   > If you plan to re-use the hardware for the site replication configuration, you **must** completely wipe the drives for the deployment before re-initializing MinIO and adding the site back to the replication configuration.
 3. [Add the replacement peer site](/operations/replication/multi-site-replication/#minio-expand-site-replication) to the replication configuration.
 
    Use the [`mc admin replicate add`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add) command to update the replication configuration with the new site:

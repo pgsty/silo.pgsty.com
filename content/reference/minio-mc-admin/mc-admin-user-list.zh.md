@@ -2,8 +2,8 @@
 title: "mc admin user ls"
 url: "/zh/reference/minio-mc-admin/mc-admin-user-list/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-ls"></a>
@@ -23,16 +23,15 @@ silo_modified: false
 
 要管理外部 Identity Provider 用户，请参阅 [`OIDC`](/zh/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) 或 [`AD/LDAP`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会列出 `myminio` MinIO 部署上的所有用户：
 
 ```shell
 mc admin user ls myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令具有以下语法：
 
 ```shell
@@ -45,8 +44,8 @@ mc [GLOBALFLAGS] admin user list   \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 

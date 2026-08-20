@@ -3,26 +3,25 @@ title: "mc ilm rule"
 url: "/reference/minio-mc/mc-ilm-rule/"
 weight: 20
 icon: fa-solid fa-list-check
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule"></a>
 
 <a id="command-mc.ilm.rule"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-The following commands have moved to subcommands under [`mc ilm rule`](#command-mc.ilm.rule):
-
-- [`mc ilm add`](/reference/deprecated/mc-ilm-add/#command-mc.ilm.add)
-- [`mc ilm edit`](/reference/deprecated/mc-ilm-edit/#command-mc.ilm.edit)
-- [`mc ilm export`](/reference/deprecated/mc-ilm-export/#command-mc.ilm.export)
-- [`mc ilm import`](/reference/deprecated/mc-ilm-import/#command-mc.ilm.import)
-- [`mc ilm ls`](/reference/deprecated/mc-ilm-ls/#command-mc.ilm.ls)
-- [`mc ilm rm`](/reference/deprecated/mc-ilm-rm/#command-mc.ilm.rm)
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> The following commands have moved to subcommands under [`mc ilm rule`](#command-mc.ilm.rule):
+>
+> - [`mc ilm add`](/reference/deprecated/mc-ilm-add/#command-mc.ilm.add)
+> - [`mc ilm edit`](/reference/deprecated/mc-ilm-edit/#command-mc.ilm.edit)
+> - [`mc ilm export`](/reference/deprecated/mc-ilm-export/#command-mc.ilm.export)
+> - [`mc ilm import`](/reference/deprecated/mc-ilm-import/#command-mc.ilm.import)
+> - [`mc ilm ls`](/reference/deprecated/mc-ilm-ls/#command-mc.ilm.ls)
+> - [`mc ilm rm`](/reference/deprecated/mc-ilm-rm/#command-mc.ilm.rm)
 
 ## Description {#description}
 

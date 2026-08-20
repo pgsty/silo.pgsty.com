@@ -54,10 +54,22 @@
   gap: 0.625rem;
 }
 
+/* 与顶栏同一套锁标关系：圆形徽标恒定，字标取徽标高度的 ~70%。
+   两条规则都带上父选择器：页面现在跑在主题外壳里，主题的 img { max-width:
+   100% } 会把 width:auto 的图片撑到容器宽度，所以尺寸必须比 `.silo-footer__logo
+   img` 更具体才压得住。 */
 .silo-footer__logo img {
   display: block;
+}
+
+.silo-footer__logo .silo-footer__mark {
+  width: 28px;
+  height: 28px;
+}
+
+.silo-footer__logo .silo-footer__wordmark {
   width: auto;
-  height: 34px;
+  height: 20px;
 }
 
 /* 品牌块的三段小字：字号压到丝印级，让左栏高度与右侧链接列齐平 */
@@ -147,6 +159,19 @@
   gap: 0.9rem;
 }
 
+/* 居中的署名行。左右两块宽度不等，space-between 放不到真正的中点，
+   所以这一条脱离流居中；窄屏底栏改为纵向排列时再退回文档流。 */
+.silo-footer__bottom {
+  position: relative;
+}
+
+.silo-footer__powered {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
 /* Bootstrap 断点：lg / sm */
 @media (max-width: 991.98px) {
   .silo-footer__grid {
@@ -162,6 +187,11 @@
   .silo-footer__bottom {
     flex-direction: column;
     text-align: center;
+  }
+
+  .silo-footer__powered {
+    position: static;
+    transform: none;
   }
 }
 

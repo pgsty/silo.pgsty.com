@@ -1,3 +1,9 @@
+{{- /* SILO's download page, rendered inside OINK's landing shell.
+     baseof.landing.html supplies <head> and the site navbar; the page keeps
+     its own sections and footer. Front matter carries `layout: landing` so
+     the landing base template applies, `body_class` so the bespoke CSS keeps
+     its scope, and `footer_style: none` so only one footer renders. */ -}}
+{{ define "main" }}
 {{- $zh := eq .Site.Language.Lang "zh" -}}
 {{- $description := .Description | default .Site.Params.description -}}
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
@@ -9,136 +15,6 @@
 {{- $clientTag := "RELEASE.2026-08-06T00-00-00Z" -}}
 {{- $clientBuild := "20260806000000.0.0" -}}
 {{- $clientBase := printf "https://github.com/pgsty/mc/releases/download/%s" $clientTag -}}
-<!DOCTYPE html>
-<html lang="{{ $locale }}" class="no-js">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>{{ .Title }} · SILO</title>
-  <meta name="description" content="{{ $description }}">
-  {{ if hugo.IsProduction -}}
-  <meta name="robots" content="index, follow">
-  {{ else -}}
-  <meta name="robots" content="noindex, nofollow">
-  {{ end -}}
-  <meta name="author" content="Pigsty and SILO contributors">
-  <meta name="application-name" content="SILO">
-  <meta name="theme-color" content="#0b1119">
-  <meta name="color-scheme" content="dark light">
-
-  <link rel="icon" type="image/svg+xml" href="{{ "img/silo.svg" | relURL }}">
-  <link rel="canonical" href="{{ .Permalink }}">
-  {{ range .AllTranslations -}}
-  <link rel="alternate" hreflang="{{ .Language.Locale | default .Language.Lang }}" href="{{ .Permalink }}">
-  {{ end -}}
-  {{ range where .AllTranslations "Language.Lang" "en" -}}
-  <link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
-  {{ end -}}
-
-  <meta property="og:title" content="{{ .Title }}">
-  <meta property="og:description" content="{{ $description }}">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="{{ .Permalink }}">
-  <meta property="og:site_name" content="SILO">
-  <meta property="og:locale" content="{{ replace $locale "-" "_" }}">
-  <meta property="og:image" content="{{ $socialImage }}">
-  <meta property="og:image:type" content="image/webp">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="631">
-  <meta property="og:image:alt" content="{{ if $zh }}SILO 下载与安装{{ else }}Download and install SILO{{ end }}">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{{ .Title }}">
-  <meta name="twitter:description" content="{{ $description }}">
-  <meta name="twitter:image" content="{{ $socialImage }}">
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "SILO",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "Linux, macOS, Windows",
-    "softwareVersion": {{ $serverTag | jsonify | safeJS }},
-    "downloadUrl": "https://github.com/pgsty/silo/releases/latest",
-    "codeRepository": "https://github.com/pgsty/silo",
-    "license": "https://www.gnu.org/licenses/agpl-3.0.html",
-    "isAccessibleForFree": true,
-    "maintainer": {
-      "@type": "Organization",
-      "name": "Pigsty",
-      "url": "https://pigsty.io/"
-    },
-    "description": {{ $description | jsonify | safeJS }}
-  }
-  </script>
-
-  <script>
-    (function () {
-      var theme = null;
-      try { theme = window.localStorage.getItem('silo-landing-theme'); } catch (error) {}
-      if (theme !== 'light' && theme !== 'dark') {
-        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-      }
-      document.documentElement.setAttribute('data-theme', theme);
-      document.documentElement.classList.remove('no-js');
-      document.documentElement.classList.add('js');
-    })();
-  </script>
-
-  <link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
-  <link rel="stylesheet" href="{{ "vendor/fontawesome/css/all.min.css" | relURL }}">
-  {{/* 内容哈希防缓存（与 index.html 同款）：static 资产长缓存，改样式必须换 URL。 */}}
-  {{- range slice "css/landing-v3.css" "css/silo-v3.css" "css/download.css" "css/silo-footer.css" }}
-  <link rel="stylesheet" href="{{ . | relURL }}?v={{ substr (md5 (readFile (path.Join "static" .))) 0 8 }}">
-  {{- end }}
-  {{ if hugo.IsProduction }}{{ partial "google_analytics.html" . }}{{ end }}
-</head>
-<body class="landing-page download-page">
-  <a class="skip-link" href="#main">{{ if $zh }}跳到正文{{ else }}Skip to content{{ end }}</a>
-
-  <header class="landing-header" data-header>
-    <div class="landing-container">
-      <nav class="landing-nav" aria-label="{{ if $zh }}主导航{{ else }}Main navigation{{ end }}">
-        <a href="{{ relLangURL "" }}" class="nav-brand" data-td-navbar-route aria-label="{{ if $zh }}SILO 首页{{ else }}SILO home{{ end }}">
-          <img src="{{ .Site.Params.wordmark | relURL }}" alt="" class="nav-wordmark" width="100" height="40">
-        </a>
-
-        <div class="nav-links">
-          <a href="{{ relLangURL "docs/" }}" class="nav-link" data-td-navbar-route data-td-keyboard-search-route>{{ if $zh }}文档{{ else }}Docs{{ end }}</a>
-          <a href="{{ relLangURL "blog/" }}" class="nav-link" data-td-navbar-route>{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
-          <a href="{{ relLangURL "download/" }}" class="nav-link active" data-td-navbar-route aria-current="page">{{ if $zh }}下载{{ else }}Download{{ end }}</a>
-          <button type="button" class="nav-util" data-theme-toggle data-td-theme-toggle title="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}" aria-label="{{ if $zh }}切换深浅主题{{ else }}Switch light / dark mode{{ end }}">
-            {{- partialCached "shell/icon.html" "sun" "sun" -}}
-            {{- partialCached "shell/icon.html" "moon" "moon" -}}
-          </button>
-          {{ range .Translations }}
-          <a href="{{ .RelPermalink }}" class="nav-util" data-td-language-route title="{{ .Language.Label }}" aria-label="{{ .Language.Label }}">{{ partialCached "shell/icon.html" "languages" "languages" }}</a>
-          {{ end }}
-          <a href="https://github.com/pgsty/silo" class="nav-github" target="_blank" rel="noopener" title="GitHub">
-            {{ partialCached "shell/icon.html" "github" "github" }}
-            <span class="nav-count">{{ partial "compact-number.html" $metrics.github_stars }}</span>
-          </a>
-        </div>
-
-        <button class="mobile-menu-toggle" type="button" aria-label="{{ if $zh }}打开菜单{{ else }}Open menu{{ end }}" aria-expanded="false" data-menu-toggle>
-          <span></span><span></span><span></span>
-        </button>
-      </nav>
-    </div>
-  </header>
-
-  <div class="mobile-menu" data-mobile-menu>
-    <a href="{{ relLangURL "docs/" }}" class="mobile-menu-link">{{ if $zh }}文档{{ else }}Docs{{ end }}</a>
-    <a href="{{ relLangURL "blog/" }}" class="mobile-menu-link">{{ if $zh }}博客{{ else }}Blog{{ end }}</a>
-    <a href="{{ relLangURL "download/" }}" class="mobile-menu-link active"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Download &amp; Install{{ end }}</a>
-    {{ range .Translations }}<a href="{{ .RelPermalink }}" class="mobile-menu-link"><i class="fas fa-language" aria-hidden="true"></i> {{ .Language.Label }}</a>{{ end }}
-    <button type="button" class="mobile-menu-link mobile-menu-link--btn" data-theme-toggle><i class="fas fa-moon" aria-hidden="true"></i> {{ if $zh }}浅色 / 深色{{ else }}Light / Dark{{ end }}</button>
-    <a href="https://github.com/pgsty/silo" class="mobile-menu-link" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> GitHub · {{ partial "compact-number.html" $metrics.github_stars }}</a>
-  </div>
-
-  <main id="main">
     <section class="download-hero" aria-labelledby="download-title">
       <div class="download-grid-bg" aria-hidden="true"></div>
       <div class="landing-container">
@@ -671,15 +547,6 @@ make build
         </div>
       </div>
     </section>
-  </main>
 
   {{ partial "silo-footer.html" . }}
-
-  <script src="{{ "js/landing-v3.js" | relURL }}"></script>
-  <script src="{{ "js/download.js" | relURL }}"></script>
-  {{- $keyboardNav := resources.Get "js/keyboard-nav.js" -}}
-  {{- if hugo.IsProduction }}{{ $keyboardNav = $keyboardNav | minify | fingerprint }}{{ end -}}
-  <script src="{{ $keyboardNav.RelPermalink }}"
-    {{- with $keyboardNav.Data.Integrity }} integrity="{{ . }}" crossorigin="anonymous"{{ end }}></script>
-</body>
-</html>
+{{ end }}

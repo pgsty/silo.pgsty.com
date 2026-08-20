@@ -2,8 +2,8 @@
 title: "mc idp ldap rm"
 url: "/zh/reference/minio-mc/mc-idp-ldap-rm/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-rm.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-rm"></a>
@@ -19,17 +19,16 @@ silo_modified: false
 
 [`mc idp ldap rm`](#command-mc.idp.ldap.rm) 也称为 [`mc idp ldap remove`](#command-mc.idp.ldap.remove)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例移除 `myminio` 部署的 AD/LDAP 提供方设置。
 
 ```shell
 mc idp ldap rm       \
             myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -44,8 +43,8 @@ mc [GLOBALFLAGS] idp ldap rm     \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

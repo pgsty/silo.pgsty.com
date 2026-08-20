@@ -1,6 +1,6 @@
 # Silo Documentation
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 0.4.1](https://github.com/pgsty/oink/tree/v0.4.1), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 0.6.0](https://github.com/pgsty/oink/tree/v0.6.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Local development
 
@@ -55,14 +55,16 @@ Do not rewrite primary external sources as Silo URLs. AWS specifications, SDK AP
 
 ## Page provenance
 
-Pages carried over from the MinIO documentation declare it in their front matter, which drives the attribution notice rendered at the bottom of the page:
+Pages carried over from the MinIO documentation declare their source in front matter, which drives the attribution notice rendered at the bottom of the page:
 
 ```yaml
-minio_origin: true # page is derived from the MinIO documentation
-silo_modified: false # page has been changed by Silo beyond the format conversion
+upstream_link: https://github.com/minio/docs # material this page is derived from
+upstream_modified: false # page has been changed by Silo beyond the format conversion
 ```
 
-Set `silo_modified: true` when you change the substance of a MinIO-derived page. The notice then links to that file's change history. Pages written from scratch by Silo — the blog, download and release pages, Silo-specific content — carry neither field.
+`upstream_link` is the only per-page field. The constants it needs — the work's name, the copyright notice, the license, and the attribution page — are declared once in `hugo.yaml` (`upstream_name`, `upstream_copyright`, `upstream_license`, `upstream_notice`); the theme fails the build if a page names a source without them, so an incomplete notice can never ship.
+
+Set `upstream_modified: true` when you change the substance of a MinIO-derived page. The notice then links to that file's change history. Pages written from scratch by Silo — the blog, download and release pages, Silo-specific content — carry neither field. A page under a section that cascades the upstream keys opts out with `upstream_link: ""`.
 
 ## Attribution and license
 

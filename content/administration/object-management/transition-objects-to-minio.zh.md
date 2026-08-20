@@ -2,8 +2,8 @@
 title: "将对象迁移到远程 MinIO 部署"
 url: "/zh/administration/object-management/transition-objects-to-minio/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/transition-objects-to-minio.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>

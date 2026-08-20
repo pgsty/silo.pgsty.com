@@ -2,8 +2,8 @@
 title: "Bucket Versioning"
 url: "/administration/object-management/object-versioning/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-versioning.rst
+upstream_modified: false
 ---
 
 <a id="bucket-versioning"></a>
@@ -26,28 +26,27 @@ Define [object expiration](/administration/object-management/create-lifecycle-ma
 
 Review each of the four images in this series to see how MinIO retrieves objects in a versioned bucket. Use the arrows on either side of the images to navigate from one to the next.
 
-{{< doc-carousel >}}
-{{< doc-card title="Object with Single Version" image="/images/retention/minio-versioning-single-version.svg" alt="Object with single version" >}}
+{{< cards >}}
+{{< card title="Object with Single Version" image="/images/retention/minio-versioning-single-version.svg" image_alt="Object with single version" >}}
 MinIO adds a unique version ID to each object as part of write operations.
-{{< /doc-card >}}
-{{< doc-card title="Object with Multiple Versions" image="/images/retention/minio-versioning-multiple-versions.svg" alt="Object with Multiple Versions" >}}
+{{< /card >}}
+{{< card title="Object with Multiple Versions" image="/images/retention/minio-versioning-multiple-versions.svg" image_alt="Object with Multiple Versions" >}}
 MinIO retains all versions of an object and marks the most recent version as the “latest”.
-{{< /doc-card >}}
-{{< doc-card title="Retrieving the Latest Object Version" image="/images/retention/minio-versioning-retrieve-latest-version.svg" alt="Object with Multiple Versions" >}}
+{{< /card >}}
+{{< card title="Retrieving the Latest Object Version" image="/images/retention/minio-versioning-retrieve-latest-version.svg" image_alt="Object with Multiple Versions" >}}
 A read operation request without a version ID returns the latest version of the object.
-{{< /doc-card >}}
-{{< doc-card title="Retrieving a Specific Object Version" image="/images/retention/minio-versioning-retrieve-single-version.svg" alt="Object with Multiple Versions" >}}
+{{< /card >}}
+{{< card title="Retrieving a Specific Object Version" image="/images/retention/minio-versioning-retrieve-single-version.svg" image_alt="Object with Multiple Versions" >}}
 Include the version ID to retrieve a specific version of an object during a read operation.
-{{< /doc-card >}}
-{{< /doc-carousel >}}
+{{< /card >}}
+{{< /cards >}}
 
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-Server RELEASE.2023-05-04T21-44-30Z
-
-MinIO does not create versions for creation, mutation, or deletion of explicit directory objects (“prefixes”). Objects created within that explicit directory object retain normal versioning behavior.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> Server RELEASE.2023-05-04T21-44-30Z
+>
+> MinIO does not create versions for creation, mutation, or deletion of explicit directory objects (“prefixes”). Objects created within that explicit directory object retain normal versioning behavior.
 
 MinIO implicitly determines prefixes from object paths. Explicit prefix creation typically only occurs with Spark and similar workloads which apply legacy POSIX/HDFS directory creation behavior within the S3 context.
 
@@ -79,11 +78,10 @@ You can alternatively perform manual removal of object versions using the follow
 
   > Removes all versions of an object older than the specified calendar date.
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-04-18T19-09-19Z**
-
-MinIO emits a warning if the cumulative size of versions for any single object exceeds 1TiB.
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-04-18T19-09-19Z**
+>
+> MinIO emits a warning if the cumulative size of versions for any single object exceeds 1TiB.
 
 <a id="minio-bucket-versioning-id"></a>
 
@@ -105,35 +103,32 @@ Performing a `DELETE` operation on a versioned object creates a 0-byte `DeleteMa
 
 MinIO can utilize [Lifecycle Management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) to automatically remove versioned objects permanently. Otherwise, use manual `DELETE` operations to permanently remove non-current versioned objects or `DeleteMarker` objects.
 
-{{% alert color="info" %}}
-**MinIO Implements Idempotent Delete Markers**
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-08-22T23-53-06Z**
-
-{{% /alert %}}
-
-Standard S3 implementations can create multiple sequential delete markers for the same object when processing simple `DeleteObject` requests with no version identifier. See the S3 docs for details on [managing delete markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManagingDelMarkers.html#RemDelMarker).
-
-MinIO diverges from standard S3 implementation by avoiding this potential duplication of delete markers. When processing a `Delete` request with no version identifier, MinIO creates at most one Delete Marker for the specified object. MinIO **does not** share S3’s behavior in creating multiple sequential delete markers.
-{{% /alert %}}
+> [!NOTE]
+> **MinIO Implements Idempotent Delete Markers**
+>
+> > [!NOTE]
+> > **Changed: RELEASE.2022-08-22T23-53-06Z**
+>
+> Standard S3 implementations can create multiple sequential delete markers for the same object when processing simple `DeleteObject` requests with no version identifier. See the S3 docs for details on [managing delete markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManagingDelMarkers.html#RemDelMarker).
+>
+> MinIO diverges from standard S3 implementation by avoiding this potential duplication of delete markers. When processing a `Delete` request with no version identifier, MinIO creates at most one Delete Marker for the specified object. MinIO **does not** share S3’s behavior in creating multiple sequential delete markers.
 
 To permanently delete an object version, perform the `DELETE` operation and specify the version ID of the object to delete. Versioned delete operations are **irreversible**.
 
-{{< doc-carousel >}}
-{{< doc-card title="Deleting an Object" image="/images/retention/minio-versioning-delete-object.svg" alt="Deleting an Object" >}}
+{{< cards >}}
+{{< card title="Deleting an Object" image="/images/retention/minio-versioning-delete-object.svg" image_alt="Deleting an Object" >}}
 Performing a `DELETE` operation on a versioned object produces a `DeleteMarker` for that object.
-{{< /doc-card >}}
-{{< doc-card title="Reading a Deleted Object" image="/images/retention/minio-versioning-retrieve-deleted-object.svg" alt="Object with Multiple Versions" >}}
+{{< /card >}}
+{{< card title="Reading a Deleted Object" image="/images/retention/minio-versioning-retrieve-deleted-object.svg" image_alt="Object with Multiple Versions" >}}
 Clients by default retrieve the “latest” object version. MinIO returns a `404`-like response if the latest version is a `DeleteMarker`.
-{{< /doc-card >}}
-{{< doc-card title="Retrieve Previous Version of Deleted Object" image="/images/retention/minio-versioning-retrieve-version-before-delete.svg" alt="Retrieve Version of Deleted Object" >}}
+{{< /card >}}
+{{< card title="Retrieve Previous Version of Deleted Object" image="/images/retention/minio-versioning-retrieve-version-before-delete.svg" image_alt="Retrieve Version of Deleted Object" >}}
 Clients can retrieve any previous version of the object by specifying the version ID, even if the “Latest” version is a `DeleteMarker`.
-{{< /doc-card >}}
-{{< doc-card title="Delete a Specific Object Version" image="/images/retention/minio-versioning-delete-specific-version.svg" alt="Retrieve Version of Deleted Object" >}}
+{{< /card >}}
+{{< card title="Delete a Specific Object Version" image="/images/retention/minio-versioning-delete-specific-version.svg" image_alt="Retrieve Version of Deleted Object" >}}
 Clients can delete a specific object version by specifying the version ID as part of the `DELETE` operation. Deleting a specific version is **permanent** and does not result in the creation of a `DeleteMarker`.
-{{< /doc-card >}}
-{{< /doc-carousel >}}
+{{< /card >}}
+{{< /cards >}}
 
 The following [`mc`](/reference/minio-mc/#command-mc) commands operate on `DeleteMarkers` or versioned objects:
 
@@ -163,13 +158,12 @@ Objects created prior to enabling versioning have a `null` [version ID](#minio-b
 
 You can exclude certain [prefixes](/administration/concepts/#minio-admin-concepts-organize-objects) from versioning using the [MinIO Client](/reference/minio-mc/#minio-client). This is useful for Spark/Hadoop workloads or others that initially create objects with temporary prefixes.
 
-{{% alert color="info" %}}
-**Replication and Object Locking Require Versioning**
-
-MinIO requires versioning to support [replication](/glossary/#term-replication). Objects in excluded prefixes do not replicate to any peer site or remote site.
-
-MinIO does not support excluding prefixes from versioning on buckets with [object locking enabled](/administration/object-management/object-retention/#minio-object-locking).
-{{% /alert %}}
+> [!NOTE]
+> **Replication and Object Locking Require Versioning**
+>
+> MinIO requires versioning to support [replication](/glossary/#term-replication). Objects in excluded prefixes do not replicate to any peer site or remote site.
+>
+> MinIO does not support excluding prefixes from versioning on buckets with [object locking enabled](/administration/object-management/object-retention/#minio-object-locking).
 
 - Use [`mc version enable`](/reference/minio-mc/mc-version-enable/#command-mc.version.enable) with the [`--excluded-prefixes`](/reference/minio-mc/mc-version-enable/#mc.version.enable.-excluded-prefixes) option:
 
@@ -224,19 +218,17 @@ To disable prefix exclusion and resume versioning all prefixes, repeat the [`mc 
 
 You can exclude folders from versioning using the [MinIO Client](/reference/minio-mc/#minio-client).
 
-{{% alert color="info" %}}
-**Replication and Object Locking Require Versioning**
+> [!NOTE]
+> **Replication and Object Locking Require Versioning**
+>
+> MinIO requires versioning to support [replication](/glossary/#term-replication). Objects in excluded folders do not replicate to any peer site or remote site.
+>
+> MinIO does not support excluding folders from versioning on buckets with [object locking enabled](/administration/object-management/object-retention/#minio-object-locking).
 
-MinIO requires versioning to support [replication](/glossary/#term-replication). Objects in excluded folders do not replicate to any peer site or remote site.
-
-MinIO does not support excluding folders from versioning on buckets with [object locking enabled](/administration/object-management/object-retention/#minio-object-locking).
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Object locking**
-
-Buckets with [object locking enabled](/administration/object-management/object-retention/#minio-object-locking) require versioning and do not support excluding folders.
-{{% /alert %}}
+> [!NOTE]
+> **Object locking**
+>
+> Buckets with [object locking enabled](/administration/object-management/object-retention/#minio-object-locking) require versioning and do not support excluding folders.
 
 - Use [`mc version enable`](/reference/minio-mc/mc-version-enable/#command-mc.version.enable) with the [`--exclude-folders`](/reference/minio-mc/mc-version-enable/#mc.version.enable.-exclude-folders) option to exclude objects with names ending in `/` from versioning:
 

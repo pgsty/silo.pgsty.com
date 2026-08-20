@@ -2,8 +2,8 @@
 title: "mc pipe"
 url: "/reference/minio-mc/mc-pipe/"
 weight: 280
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-pipe.rst
+upstream_modified: false
 ---
 
 <a id="mc-pipe"></a>
@@ -14,16 +14,15 @@ silo_modified: false
 
 The [`mc pipe`](#command-mc.pipe) command streams content from [STDIN](https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html) to a target object.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command writes contents of `STDIN` to an S3 compatible storage.
 
 ```shell
 echo "My Meeting Notes" | mc pipe s3/engineering/meeting-notes.txt
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -43,14 +42,13 @@ mc [GLOBALFLAGS] pipe                              \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-01-11T03-14-16Z**
-
-`mc pipe` now supports concurrent uploads for better throughput of large streams.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-01-11T03-14-16Z**
+>
+> `mc pipe` now supports concurrent uploads for better throughput of large streams.
 
 ### Parameters {#parameters}
 
@@ -78,10 +76,8 @@ Specify key-value pairs as `KEY=VALUE\;`, separating each pair with a back slash
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-10-02T08-27-28Z**
 
 Add a checksum to an uploaded object.
 
@@ -192,11 +188,10 @@ Specify the path to a prefix to apply encryption to all matching objects at that
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
 
 ##### `--storage-class, --sc` {#mc.pipe.-storage-class}
 

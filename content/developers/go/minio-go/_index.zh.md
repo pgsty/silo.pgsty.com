@@ -4,17 +4,16 @@ description: "使用 MinIO Go SDK 从 Go 应用连接 SILO。"
 url: "/zh/developers/go/minio-go/"
 weight: 10
 icon: fa-brands fa-golang
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/go/minio-go.rst
+upstream_modified: true
 ---
 
 ## MinIO Go SDK {#go-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此 Go 应用可以直接使用上游 [MinIO Go SDK](https://github.com/minio/minio-go)。当前主版本的模块路径为 `github.com/minio/minio-go/v7`。
 
-{{% alert color="info" %}}
-SDK 版本与 Go 版本要求会独立于 SILO 演进。固定依赖前，请核对[当前发布记录](https://github.com/minio/minio-go/releases)与[软件包文档](https://pkg.go.dev/github.com/minio/minio-go/v7)。
-{{% /alert %}}
+> [!NOTE]
+> SDK 版本与 Go 版本要求会独立于 SILO 演进。固定依赖前，请核对[当前发布记录](https://github.com/minio/minio-go/releases)与[软件包文档](https://pkg.go.dev/github.com/minio/minio-go/v7)。
 
 ## 安装模块 {#install}
 

@@ -2,8 +2,8 @@
 title: "mc version info"
 url: "/reference/minio-mc/mc-version-info/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-version-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-version-info"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc version info`](#command-mc.version.info) command returns the versioning status for the specified bucket.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command returns the versioning status for the `mybucket` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc version info myminio/mybucket
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] version info ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

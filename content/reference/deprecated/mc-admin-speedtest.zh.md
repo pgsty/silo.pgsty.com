@@ -2,19 +2,18 @@
 title: "mc admin speedtest"
 url: "/zh/reference/deprecated/mc-admin-speedtest/"
 weight: 180
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-speedtest.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-speedtest"></a>
 
 <a id="command-mc.admin.speedtest"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-07-24T02-25-13Z**
-
-`mc admin speedtest` 已由 [`mc support perf`](/zh/reference/minio-mc/mc-support-perf/#command-mc.support.perf) 替代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-07-24T02-25-13Z**
+>
+> `mc admin speedtest` 已由 [`mc support perf`](/zh/reference/minio-mc/mc-support-perf/#command-mc.support.perf) 替代。
 
 ## 描述 {#id1}
 
@@ -24,11 +23,10 @@ silo_modified: false
 
 [`speedtest`](#command-mc.admin.speedtest) 不支持独立部署或 MinIO Gateway 部署。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ## 语法 {#id2}
 

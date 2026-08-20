@@ -2,8 +2,8 @@
 title: "AWS CLI 与 Silo 服务端"
 url: "/zh/integrations/aws-cli-with-minio/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/integrations/aws-cli-with-minio.md
+upstream_modified: true
 ---
 
 <a id="aws-cli-minio-server"></a>

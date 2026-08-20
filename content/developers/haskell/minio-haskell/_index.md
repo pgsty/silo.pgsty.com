@@ -4,17 +4,16 @@ description: "Connect a Haskell application to SILO with the MinIO Haskell SDK."
 url: "/developers/haskell/minio-haskell/"
 weight: 60
 icon: fa-solid fa-code
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/haskell/minio-haskell.rst
+upstream_modified: true
 ---
 
 ## MinIO Haskell SDK {#haskell-sdk}
 
 SILO implements the S3-compatible server contract, so Haskell applications can use the upstream [`minio-hs`](https://github.com/minio/minio-hs) package directly.
 
-{{% alert color="warning" %}}
-The latest tagged upstream release is `1.7.0`, published in 2023, and its package metadata lists GHC 8.10.7 as the tested compiler. Validate `minio-hs` against your current GHC, resolver, TLS stack, and workload before adopting it. Check [Hackage](https://hackage.haskell.org/package/minio-hs) and [upstream releases](https://github.com/minio/minio-hs/releases) for newer compatibility information.
-{{% /alert %}}
+> [!WARNING]
+> The latest tagged upstream release is `1.7.0`, published in 2023, and its package metadata lists GHC 8.10.7 as the tested compiler. Validate `minio-hs` against your current GHC, resolver, TLS stack, and workload before adopting it. Check [Hackage](https://hackage.haskell.org/package/minio-hs) and [upstream releases](https://github.com/minio/minio-hs/releases) for newer compatibility information.
 
 ## Install the package {#install}
 

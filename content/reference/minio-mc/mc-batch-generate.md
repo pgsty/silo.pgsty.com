@@ -2,8 +2,8 @@
 title: "mc batch generate"
 url: "/reference/minio-mc/mc-batch-generate/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-generate.rst
+upstream_modified: true
 ---
 
 <a id="mc-batch-generate"></a>
@@ -11,11 +11,10 @@ silo_modified: true
 
 <a id="command-mc.batch.generate"></a>
 
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z or later
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z or later
 
 ## Syntax {#syntax}
 
@@ -25,16 +24,15 @@ After MinIO creates the file, open it in your preferred text editor tool to furt
 
 See [job types](#minio-batch-job-types) for the supported jobs you can generate.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command creates a basic YAML file for a replicate job on the `mybucket` bucket of the `myminio` alias.
 
 ```shell
 mc batch generate myminio replicate
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -48,8 +46,8 @@ mc [GLOBALFLAGS] batch generate \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -117,20 +115,18 @@ MinIO provides no guarantees for other S3-compatible services, as their S3 API i
   Replicate objects between two MinIO deployments. Provides similar functionality to [bucket replication](/administration/bucket-replication/#minio-bucket-replication) as a batch job rather than continual scanning function.
 - [keyrotate](#minio-mc-batch-generate-keyrotate-job)
 
-  {{% alert color="info" %}}
-  **Added: MinIO**
-
-  RELEASE.2023-04-07T05-28-58Z
-  {{% /alert %}}
+  > [!NOTE]
+  > **Added: MinIO**
+  >
+  > RELEASE.2023-04-07T05-28-58Z
 
   Rotate the sse-s3 or sse-kms keys for objects at rest on a MinIO deployment.
 - [expire](#minio-mc-batch-generate-expire-job)
 
-  {{% alert color="info" %}}
-  **Added: MinIO**
-
-  RELEASE.2023-12-02T10-51-33Z
-  {{% /alert %}}
+  > [!NOTE]
+  > **Added: MinIO**
+  >
+  > RELEASE.2023-12-02T10-51-33Z
 
   Expire objects based using similar semantics as [Automatic Object Expiration](/administration/object-management/create-lifecycle-management-expiration-rule/#minio-lifecycle-management-create-expiry-rule).
 

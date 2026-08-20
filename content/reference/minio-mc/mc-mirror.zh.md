@@ -2,8 +2,8 @@
 title: "mc mirror"
 url: "/zh/reference/minio-mc/mc-mirror/"
 weight: 240
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mirror.rst
+upstream_modified: false
 ---
 
 <a id="mc-mirror"></a>
@@ -14,14 +14,13 @@ silo_modified: false
 
 [`mc mirror`](#command-mc.mirror) 命令用于将内容同步到 MinIO 部署，类似于 `rsync` 工具。 [`mc mirror`](#command-mc.mirror) 支持以文件系统、MinIO 部署和其他 S3 兼容主机作为同步源。
 
-{{% alert color="info" %}}
-**说明**
+> [!NOTE]
+> **说明**
+>
+> [`mc mirror`](#command-mc.mirror) 仅同步当前对象，不包含任何版本信息或元数据。 若要同步对象的版本历史和元数据，可考虑对 [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication-serverside) 使用 [`mc replicate`](/zh/reference/minio-mc/mc-replicate/#command-mc.replicate)，或对 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 使用 [`mc admin replicate`](/zh/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate)。
 
-[`mc mirror`](#command-mc.mirror) 仅同步当前对象，不包含任何版本信息或元数据。 若要同步对象的版本历史和元数据，可考虑对 [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication-serverside) 使用 [`mc replicate`](/zh/reference/minio-mc/mc-replicate/#command-mc.replicate)，或对 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 使用 [`mc admin replicate`](/zh/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate)。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令将本地文件系统目录中的内容同步到 `myminio` MinIO 部署上的 `mydata` 存储桶。
 
 ```shell
@@ -31,8 +30,8 @@ mc mirror --watch ~/mydata myminio/mydata
 该命令会“监视”本地文件系统中新增或删除的文件，并将这些操作同步到 MinIO，直到显式终止。
 
 [`mc mirror --watch`](#mc.mirror.-watch) 会把本地文件系统中发生变更的文件更新到 MinIO（参见 [`--overwrite`](#mc.mirror.-overwrite)）。 `--watch` 不会删除 MinIO 中本地文件系统不存在的其他文件（参见 [`--remove`](#mc.mirror.-remove)）。
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 命令语法如下：
 
 ```shell
@@ -72,8 +71,8 @@ mc [GLOBALFLAGS] mirror                            \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -155,10 +154,8 @@ mc mirror --active-active siteB siteA
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-10-02T08-27-28Z**
 
 为上传对象添加校验和。
 
@@ -286,11 +283,10 @@ mc mirror --active-active siteB siteA
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--exclude` {#mc.mirror.-exclude}
 
@@ -306,11 +302,10 @@ MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-k
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-03-03T00-13-08Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-03-03T00-13-08Z
 
 排除 [`SOURCE`](#mc.mirror.SOURCE) 路径中与指定存储桶 [name pattern](/zh/reference/minio-mc/#minio-wildcard-matching) 匹配的存储桶。
 
@@ -460,13 +455,12 @@ RELEASE.2024-03-03T00-13-08Z
 
 `mc mirror --remove` 不会校验对象 C 在 Source 和 Target 上的内容是否一致，只检查两端是否都存在名为 *C* 的对象。 若要确保 Source 与 Target 上对象的名称和内容都一致，请使用 [`--overwrite`](#mc.mirror.-overwrite) 或 [`--watch`](#mc.mirror.-watch)。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-04T18-10-16Z**
-
-如果目标路径是不存在的本地文件系统目录，`mc mirror --remove` 会返回错误。
-
-在早期版本中，如果 `directory` 不存在，指定 `/path/to/directory` 会导致删除 `/path/to` 文件夹。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-04T18-10-16Z**
+>
+> 如果目标路径是不存在的本地文件系统目录，`mc mirror --remove` 会返回错误。
+>
+> 在早期版本中，如果 `directory` 不存在，指定 `/path/to/directory` 会导致删除 `/path/to` 文件夹。
 
 ##### `--retry` {#mc.mirror.-retry}
 
@@ -492,11 +486,10 @@ RELEASE.2024-03-03T00-13-08Z
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-01-28T16-23-14Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-01-28T16-23-14Z
 
 跳过镜像过程中产生错误的对象。
 

@@ -2,8 +2,8 @@
 title: "OpenID 身份管理设置"
 url: "/zh/reference/minio-server/settings/iam/openid/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/iam/openid.rst
+upstream_modified: false
 ---
 
 <a id="openid"></a>
@@ -21,24 +21,20 @@ silo_modified: false
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 示例 {#id2}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ```shell
 MINIO_IDENTITY_OPENID_CONFIG_URL="https://openid-provider.example.net/.well-known/openid-configuration"
 ```
-
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 #### `identity_openid` {#mc-conf.identity_openid}
 
 *mc-conf*
@@ -50,9 +46,8 @@ mc admin config set identity_openid                                             
   config_url="https://openid-provider.example.net/.well-known/openid-configuration" \
   [ARGUMENT="VALUE"] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 设置 {#id3}
 
@@ -60,20 +55,18 @@ mc admin config set identity_openid                                             
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_CONFIG_URL` {#envvar.MINIO_IDENTITY_OPENID_CONFIG_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid config_url` {#mc-conf.identity_openid.config_url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定与 <abbr title="OpenID Connect">OIDC</abbr> 兼容的 provider 的 [discovery document](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig) URL。
 
@@ -85,17 +78,16 @@ mc admin config set identity_openid                                             
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" default="tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 此设置没有环境变量选项。 请改用配置项。
-{{% /tab %}}
-{{% tab header="配置项" selected=true %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid enabled` {#mc-conf.identity_openid.enabled}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 设置为 `false` 可禁用 OpenID 配置。
 
@@ -107,20 +99,18 @@ mc admin config set identity_openid                                             
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_CLIENT_ID` {#envvar.MINIO_IDENTITY_OPENID_CLIENT_ID}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid client_id` {#mc-conf.identity_openid.client_id}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 在使用与 <abbr title="OpenID Connect">OIDC</abbr> 兼容的 provider 验证用户凭证时 所使用的唯一公开标识符。
 
@@ -128,28 +118,25 @@ mc admin config set identity_openid                                             
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_CLIENT_SECRET` {#envvar.MINIO_IDENTITY_OPENID_CLIENT_SECRET}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid client_secret` {#mc-conf.identity_openid.client_secret}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 在使用与 <abbr title="OpenID Connect">OIDC</abbr> 兼容的 provider 验证用户凭证时 所使用的 client secret。根据 provider 的不同，此字段可能是可选的。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-06-23T20-26-00Z**
-
-当通过 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回此值时，MinIO 会将其脱敏。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-06-23T20-26-00Z**
+>
+> 当通过 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回此值时，MinIO 会将其脱敏。
 
 ### 角色策略 {#id8}
 
@@ -157,20 +144,18 @@ mc admin config set identity_openid                                             
 
 此设置与 `Claim Name` 设置互斥。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_ROLE_POLICY` {#envvar.MINIO_IDENTITY_OPENID_ROLE_POLICY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid role_policy` {#mc-conf.identity_openid.role_policy}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定逗号分隔的 [策略名称](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 列表，用于该 provider 的所有认证请求 中的 `RoleArn`。指定的一个或多个策略必须已经存在于 MinIO Server 上。
 
@@ -182,20 +167,18 @@ mc admin config set identity_openid                                             
 
 此设置与 `Role Policy` 设置互斥。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_CLAIM_NAME` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_NAME}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid claim_name` {#mc-conf.identity_openid.claim_name}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4) 的名称，MinIO 使用该 Claim 来识别应附加到已认证用户上的 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
 
@@ -209,20 +192,18 @@ mc admin config set identity_openid                                             
 
 此设置已弃用，并已在 [RELEASE.2024-07-13T01-46-15Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-13T01-46-15Z) 起移除。 请改用 [`MINIO_IDENTITY_OPENID_CLAIM_NAME`](#envvar.MINIO_IDENTITY_OPENID_CLAIM_NAME)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_CLAIM_PREFIX` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_PREFIX}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid claim_prefix` {#mc-conf.identity_openid.claim_prefix}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定应用到所给 Claim 名称上的 [JWT Claim](https://datatracker.ietf.org/doc/html/rfc7519#section-4) 命名空间前缀。
 
@@ -230,20 +211,18 @@ mc admin config set identity_openid                                             
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_DISPLAY_NAME` {#envvar.MINIO_IDENTITY_OPENID_DISPLAY_NAME}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid display_name` {#mc-conf.identity_openid.display_name}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO Console 在登录页面上显示给用户的名称。
 
@@ -251,20 +230,18 @@ mc admin config set identity_openid                                             
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_SCOPES` {#envvar.MINIO_IDENTITY_OPENID_SCOPES}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid scopes` {#mc-conf.identity_openid.scopes}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定逗号分隔的 [scopes](https://datatracker.ietf.org/doc/html/rfc6749#section-3.3) 列表。 默认使用 discovery document 中公布的 scopes。
 
@@ -274,26 +251,23 @@ mc admin config set identity_openid                                             
 
 此设置已弃用，并已在 [RELEASE.2024-07-13T01-46-15Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-13T01-46-15Z) 起移除。 请改用 [`MINIO_BROWSER_REDIRECT_URL`](/zh/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_REDIRECT_URI` {#envvar.MINIO_IDENTITY_OPENID_REDIRECT_URI}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid redirect_uri` {#mc-conf.identity_openid.redirect_uri}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**重要**
-
-该参数已在 [RELEASE.2023-02-27T18-10-45Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-02-27T18-10-45Z) 中移除。 请改用 [`MINIO_BROWSER_REDIRECT_URL`](/zh/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 该参数已在 [RELEASE.2023-02-27T18-10-45Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-02-27T18-10-45Z) 中移除。 请改用 [`MINIO_BROWSER_REDIRECT_URL`](/zh/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables)。
 
 MinIO Console 默认使用发起认证请求的节点主机名。 对于位于负载均衡器或反向代理之后的 MinIO 部署，请指定该字段，以确保 OIDC provider 将认证响应返回到正确的 MinIO Console URL。 其中应包含 Console 主机名、端口以及 `/oauth_callback`：
 
@@ -309,20 +283,18 @@ http://minio.example.net:consoleport/oauth_callback
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC` {#envvar.MINIO_IDENTITY_OPENID_REDIRECT_URI_DYNAMIC}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid redirect_uri_dynamic` {#mc-conf.identity_openid.redirect_uri_dynamic}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 MinIO Console 默认会将发起认证请求的节点主机名作为重定向 URI 的一部分， 并将其提供给 OIDC provider。 对于位于使用轮询协议的负载均衡器之后的 MinIO 部署，这可能导致负载均衡器将响应 返回给与原始客户端不同的 MinIO 节点。
 
@@ -332,20 +304,18 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_CLAIM_USERINFO` {#envvar.MINIO_IDENTITY_OPENID_CLAIM_USERINFO}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid claim_userinfo` {#mc-conf.identity_openid.claim_userinfo}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 允许 MinIO 从已认证用户的 [UserInfo Endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo) 获取 claims。
 
@@ -355,20 +325,18 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_VENDOR` {#envvar.MINIO_IDENTITY_OPENID_VENDOR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid vendor` {#mc-conf.identity_openid.vendor}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 OIDC Vendor，以启用该 vendor 的特定受支持行为。
 
@@ -382,20 +350,18 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 此设置要求将 `OpenID Vendor` 设置定义为 `keycloak`。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_KEYCLOAK_REALM` {#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_REALM}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid keycloak_realm` {#mc-conf.identity_openid.keycloak_realm}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定用于 Keycloak Admin API 操作的 Keycloak Realm，例如 `main`。
 
@@ -405,20 +371,18 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 此设置要求将 `OpenID Vendor` 设置定义为 `keycloak`。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL` {#envvar.MINIO_IDENTITY_OPENID_KEYCLOAK_ADMIN_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid keycloak_admin_url` {#mc-conf.identity_openid.keycloak_admin_url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 Keycloak Admin API URL。 如果配置为定期校验已认证的 Keycloak 用户是否处于激活 / 存在状态，MinIO 可以 使用该 URL。 例如，`https://keycloak-endpoint:port/admin/`。
 
@@ -426,19 +390,17 @@ MinIO Console 默认会将发起认证请求的节点主机名作为重定向 UR
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_OPENID_COMMENT` {#envvar.MINIO_IDENTITY_OPENID_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_openid comment` {#mc-conf.identity_openid.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定要附加到与 <abbr title="OpenID Connect">OIDC</abbr> 兼容 provider 配置上的注释。

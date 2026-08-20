@@ -2,8 +2,8 @@
 title: "mc replicate backlog"
 url: "/zh/reference/minio-mc/mc-replicate-backlog/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-backlog.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-backlog"></a>
@@ -14,11 +14,10 @@ silo_modified: false
 
 <a id="command-mc.replicate.backlog"></a>
 
-{{% alert color="info" %}}
-**变更: mc.RELEASE.2023-07-18T21-05-38Z**
-
-`mc replicate diff` 已重命名为 `mc replicate backlog`。 功能未发生变化。
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc.RELEASE.2023-07-18T21-05-38Z**
+>
+> `mc replicate diff` 已重命名为 `mc replicate backlog`。 功能未发生变化。
 
 ## 描述 {#id2}
 
@@ -28,8 +27,8 @@ silo_modified: false
 
 ## 语法 {#id3}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令显示 `myminio` 别名下 `notes` 存储桶中 `teamorange/projects` 前缀里尚未复制到特定远程目标存储桶的新建或已删除对象。 该远程目标的 ARN 为 `arn:minio:replication::3bb8c736-4014-42c5-b3cb-d64e3ebaa75e:notes`。
 
 ```shell
@@ -44,8 +43,8 @@ mc replicate backlog myminio/notes/teamorange/projects --arn arn:minio:replicati
 ```
 
 在输出中，`PUT` 对应新建对象。 已删除对象或版本会显示为 `DEL`。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -59,8 +58,8 @@ mc [GLOBALFLAGS] replicate backlog   \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id4}
 

@@ -6,15 +6,12 @@ url: "/zh/compatibility/server/"
 weight: 10
 type: docs
 icon: fa-solid fa-server
-minio_origin: false
-silo_modified: false
 ---
 
 Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端和磁盘数据的兼容性，但 **绝不是一次在运维层面完全无感的二进制改名**。本页是从上游基线迁移到 2026-08-06 所准备 Silo 源码时的兼容性契约。
 
-{{% alert color="warning" %}}
-**替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
-{{% /alert %}}
+> [!WARNING]
+> **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
 
 ## 审计范围与方法 {#scope}
 

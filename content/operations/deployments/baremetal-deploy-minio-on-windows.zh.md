@@ -2,8 +2,8 @@
 title: "在 Windows 上部署 Silo"
 url: "/zh/operations/deployments/baremetal-deploy-minio-on-windows/"
 weight: 50
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-deploy-minio-on-windows.rst
+upstream_modified: true
 ---
 
 <a id="windows-minio"></a>
@@ -46,8 +46,8 @@ MinIO 会根据拓扑中的节点和驱动器总数，自动为集群确定默�
 
 在 PowerShell 或命令提示符中，切换到可执行文件所在目录，或将 `minio.exe` 文件路径加入系统 `$PATH`。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Multi-Drive" %}}
+{{< tabs group="multi-drive-single-drive" >}}
+{{< tab label="Multi-Drive" value="multi-drive" >}}
 对于带有多个驱动器的 Windows 主机，你可以指定一组顺序驱动器，以便在 单机多盘 (SNMD) 拓扑中配置 MinIO：
 
 ```text
@@ -74,8 +74,8 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 ```
 
 该进程绑定到当前 PowerShell 或命令提示符窗口。 关闭窗口会停止 server 并结束该进程。
-{{% /tab %}}
-{{% tab header="Single-Drive" %}}
+{{< /tab >}}
+{{< tab label="Single-Drive" value="single-drive" >}}
 使用此命令在 `C:\minio` 文件夹中启动本地 MinIO 实例。 你可以将 `C:\minio` 替换为本地主机上的其他驱动器或文件夹路径。
 
 ```text
@@ -102,8 +102,8 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 ```
 
 该进程绑定到当前 PowerShell 或命令提示符窗口。 关闭窗口会停止 server 并结束该进程。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 3. 使用浏览器连接到 MinIO 服务端 {#id6}
 

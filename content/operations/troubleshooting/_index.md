@@ -3,8 +3,8 @@ title: "Troubleshooting"
 url: "/operations/troubleshooting/"
 weight: 100
 icon: fa-solid fa-screwdriver-wrench
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/troubleshooting.rst
+upstream_modified: false
 ---
 
 <a id="troubleshooting"></a>

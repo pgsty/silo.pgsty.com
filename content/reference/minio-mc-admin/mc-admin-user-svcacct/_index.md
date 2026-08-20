@@ -3,8 +3,8 @@ title: "mc admin user svcacct"
 url: "/reference/minio-mc-admin/mc-admin-user-svcacct/"
 weight: 80
 icon: fa-solid fa-user-tag
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct"></a>
@@ -12,15 +12,14 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct"></a>
 
-{{% alert color="warning" %}}
-**Important**
-
-These commands have been replaced and will be deprecated in a future MinIO Client release.
-
-As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey`](/reference/minio-mc-admin/mc-admin-accesskey/#command-mc.admin.accesskey) command and its subcommands for functions related to built-in MinIO IDP users and their access keys or STS tokens.
-
-For access keys for AD/LDAP users, use the [`mc idp ldap accesskey`](/reference/minio-mc/mc-idp-ldap-accesskey/#command-mc.idp.ldap.accesskey) command and its subcommands.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> These commands have been replaced and will be deprecated in a future MinIO Client release.
+>
+> As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey`](/reference/minio-mc-admin/mc-admin-accesskey/#command-mc.admin.accesskey) command and its subcommands for functions related to built-in MinIO IDP users and their access keys or STS tokens.
+>
+> For access keys for AD/LDAP users, use the [`mc idp ldap accesskey`](/reference/minio-mc/mc-idp-ldap-accesskey/#command-mc.idp.ldap.accesskey) command and its subcommands.
 
 ## Description {#description}
 

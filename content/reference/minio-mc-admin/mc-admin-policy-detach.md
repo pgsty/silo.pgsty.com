@@ -2,8 +2,8 @@
 title: "mc admin policy detach"
 url: "/reference/minio-mc-admin/mc-admin-policy-detach/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-detach.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-detach"></a>
@@ -16,16 +16,15 @@ Remove one or more IAM policies from either a [MinIO-managed user or a group](/a
 
 Exactly one [`--user`](#mc.admin.policy.detach.-user) or one [`--group`](#mc.admin.policy.detach.-group) is required.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command detaches the policy `readonly` from the user `james` on the deployment at alias `myminio`.
 
 ```shell
 mc admin policy detach myminio readonly --user james
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -40,18 +39,17 @@ mc admin policy detach TARGET                         \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**Important**
-
-This command is intended for managing policy associations for [MinIO-managed](/administration/identity-access-management/minio-user-management/#minio-users) users only.
-
-For managing policies to OpenID-managed users, see [OpenID Connect Access Management](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid).
-
-For detaching policies from Active Directory/LDAP users or groups, use [`mc idp ldap policy detach`](/reference/minio-mc/mc-idp-ldap-policy-detach/#command-mc.idp.ldap.policy.detach).
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This command is intended for managing policy associations for [MinIO-managed](/administration/identity-access-management/minio-user-management/#minio-users) users only.
+>
+> For managing policies to OpenID-managed users, see [OpenID Connect Access Management](/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid).
+>
+> For detaching policies from Active Directory/LDAP users or groups, use [`mc idp ldap policy detach`](/reference/minio-mc/mc-idp-ldap-policy-detach/#command-mc.idp.ldap.policy.detach).
 
 ### Parameters {#parameters}
 

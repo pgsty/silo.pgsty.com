@@ -2,8 +2,8 @@
 title: "mc rm"
 url: "/zh/reference/minio-mc/mc-rm/"
 weight: 340
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-rm.rst
+upstream_modified: false
 ---
 
 <a id="mc-rm"></a>
@@ -18,22 +18,20 @@ silo_modified: false
 
 有关 MinIO 如何对对象执行 `DELETE` 操作的更多信息，请参见 [对象删除](/zh/administration/object-management/object-delete/#minio-object-delete)。
 
-{{% alert color="warning" %}}
-**重要**
+> [!WARNING]
+> **重要**
+>
+> [`mc rm`](#command-mc.rm) 支持在一条命令中删除多个对象 *或* 文件。 建议使用 [`--dry-run`](#mc.rm.-dry-run) 选项验证操作仅作用于预期的对象/文件。
 
-[`mc rm`](#command-mc.rm) 支持在一条命令中删除多个对象 *或* 文件。 建议使用 [`--dry-run`](#mc.rm.-dry-run) 选项验证操作仅作用于预期的对象/文件。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令从 `myminio` MinIO 部署的 `mydata` 存储桶中删除多个对象：
 
 ```shell
 mc rm --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -61,8 +59,8 @@ mc [GLOBALFLAGS] rm  \
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 
 [`mc rm --force`](#mc.rm.-force) 是多个参数的必需项。 [`mc rm --version-id`](#mc.rm.-version-id) 与多个 参数互斥。更多信息请参见参考文档。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -120,11 +118,10 @@ mc rm ~/data/myoldobject.txt
 
 建议先使用 [`--dry-run`](#mc.rm.-dry-run) 运行命令， 验证站点范围删除操作的范围。
 
-{{% alert color="danger" %}}
-**警告**
-
-搭配 [`--versions`](#mc.rm.-versions) 标志运行 [`mc rm --dangerous`](#mc.rm.-dangerous) 是不可逆操作。执行前请尽可能 审慎核查，确保命令只应用于预期的 `ALIAS` 目标。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> 搭配 [`--versions`](#mc.rm.-versions) 标志运行 [`mc rm --dangerous`](#mc.rm.-dangerous) 是不可逆操作。执行前请尽可能 审慎核查，确保命令只应用于预期的 `ALIAS` 目标。
 
 ##### `--dry-run` {#mc.rm.-dry-run}
 
@@ -294,11 +291,10 @@ mc rm --incomplete --recursive --force ALIAS/PATH
 
 将 [`mc rm`](#command-mc.rm) 与 [`--versions`](#mc.rm.-versions) 和 [`--newer-than`](#mc.rm.-newer-than) 结合使用，可删除新于指定时长的 所有对象版本。这会有效地将对象“回滚”到该时间点的状态。
 
-{{% alert color="warning" %}}
-**重要**
-
-删除对象的特定版本属于 *破坏性* 操作。你无法恢复 已删除的对象版本。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 删除对象的特定版本属于 *破坏性* 操作。你无法恢复 已删除的对象版本。
 
 ```shell
 mc rm ALIAS/PATH --versions --newer-than DURATION
@@ -340,13 +336,12 @@ MinIO 支持在单个存储桶中保留对象的多个 [版本](/zh/administrati
 - 要从存储桶中删除对象的所有版本，请使用 [`mc rm --versions`](#mc.rm.-versions)
 - 要从存储桶中删除对象的所有非当前版本，请使用 [`mc rm --non-current`](#mc.rm.-non-current)
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-
-输出会显示版本化文件的修改时间。 与 `--dry-run` 搭配使用时，这有助于确认你选择了正确的删除对象。
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
+>
+> 输出会显示版本化文件的修改时间。 与 `--dry-run` 搭配使用时，这有助于确认你选择了正确的删除对象。
 
 ### S3 兼容性 {#s3}
 

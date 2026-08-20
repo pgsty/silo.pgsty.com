@@ -2,8 +2,8 @@
 title: "mc idp ldap policy detach"
 url: "/zh/reference/minio-mc/mc-idp-ldap-policy-detach/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-policy-detach.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-policy-detach"></a>
@@ -15,8 +15,8 @@ silo_modified: false
 
 [`mc idp ldap policy detach`](#command-mc.idp.ldap.policy.detach) 命令可从实体分离一个或多个策略。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例从 `myminio` 部署中的用户 `bobfisher` 分离策略 `userpolicy`。
 
 ```shell
@@ -24,9 +24,8 @@ mc idp ldap policy detach myminio                                               
                           userpolicy                                               \
                           --user='uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令具有以下语法：
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] idp ldap policy detach             \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

@@ -3,8 +3,8 @@ title: "mc admin user"
 url: "/zh/reference/minio-mc-admin/mc-admin-user/"
 weight: 190
 icon: fa-solid fa-users
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user"></a>
@@ -22,11 +22,10 @@ silo_modified: false
 - 对于 AD/LDAP，请使用 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap)
 - 对于兼容 OpenID Connect (OIDC) 的提供方，请使用 [`mc idp openid`](/zh/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid)
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc idp` 命令**
-
-[`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 和 [`mc idp openid`](/zh/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) 及其子命令仅支持对 MinIO 部署使用。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc idp` 命令**
+>
+> [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 和 [`mc idp openid`](/zh/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) 及其子命令仅支持对 MinIO 部署使用。
 
 ## 子命令 {#id3}
 

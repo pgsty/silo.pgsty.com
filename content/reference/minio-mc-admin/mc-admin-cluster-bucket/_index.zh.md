@@ -3,8 +3,8 @@ title: "mc admin cluster bucket"
 url: "/zh/reference/minio-mc-admin/mc-admin-cluster-bucket/"
 weight: 20
 icon: fa-solid fa-boxes-stacked
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-bucket.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-cluster-bucket"></a>
@@ -14,10 +14,8 @@ silo_modified: false
 
 ## 说明 {#id2}
 
-{{% alert color="info" %}}
-**新增: RELEASE.2022-06-17T02-52-50Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2022-06-17T02-52-50Z**
 
 [`mc admin cluster bucket`](#command-mc.admin.cluster.bucket) 命令及其子命令提供了用于手动导入和导出 MinIO 存储桶元数据的工具。
 

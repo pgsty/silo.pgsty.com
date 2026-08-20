@@ -2,8 +2,8 @@
 title: "租户 Helm Charts"
 url: "/zh/reference/tenant-chart-values/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/tenant-chart-values.rst
+upstream_modified: true
 ---
 
 <a id="helm-charts"></a>
@@ -13,16 +13,15 @@ silo_modified: true
 
 以下页面说明 MinIO 租户的 `values.yaml` Chart。 有关 MinIO Operator Chart 的文档，请参阅 [Operator Helm 图表](/zh/reference/operator-chart-values/#minio-operator-chart-values)
 
-{{% alert color="warning" %}}
-上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。本页是其最终 `v7.1.1` Chart 的保留参考快照，不代表上游仍在维护或提供支持。默认值已对照该标签核验；内部文档链接改为本站路由，并把上游陈旧的 `existingSecret` 注释校正为 Chart 实际使用的 `tenant.configSecret.name` 输入。下文的 `quay.io/minio/minio` 是上游 Chart 默认值，不是 Silo 品牌名称，也不是推荐的 Silo 镜像。要运行 Silo，请将 `tenant.image.repository` 覆盖为 `pgsty/minio`，并固定经过测试的 [已发布标签或镜像摘要](/zh/download/#server)。
-{{% /alert %}}
+> [!WARNING]
+> 上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。本页是其最终 `v7.1.1` Chart 的保留参考快照，不代表上游仍在维护或提供支持。默认值已对照该标签核验；内部文档链接改为本站路由，并把上游陈旧的 `existingSecret` 注释校正为 Chart 实际使用的 `tenant.configSecret.name` 输入。下文的 `quay.io/minio/minio` 是上游 Chart 默认值，不是 Silo 品牌名称，也不是推荐的 Silo 镜像。要运行 Silo，请将 `tenant.image.repository` 覆盖为 `pgsty/minio`，并固定经过测试的 [已发布标签或镜像摘要](/zh/download/#server)。
 
 <a id="minio-tenant-chart-operator-values"></a>
 
 ## MinIO 租户 Chart {#minio-chart}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="参考" %}}
+{{< tabs group="tab1-yaml" >}}
+{{< tab label="参考" value="tab1" >}}
 **tenant**
 
 > **name**
@@ -89,11 +88,10 @@ silo_modified: true
 > > Root key for dynamically creating a secret for use with configuring root MinIO User Specify the `name` and then a list of environment variables.
 > > 若要复用包含 `config.env` 的现有 Secret，请将 `tenant.configSecret.name` 设为该 Secret，并把 `tenant.configSecret.existingSecret` 设为 `true`。
 > >
-> > {{% alert color="warning" %}}
-> > **重要**
-> >
-> > Do not use this in production environments. This field is intended for use with rapid development or testing only.
-> > {{% /alert %}}
+> > > [!WARNING]
+> > > **重要**
+> > >
+> > > Do not use this in production environments. This field is intended for use with rapid development or testing only.
 > >
 > > For example:
 > >
@@ -205,11 +203,11 @@ silo_modified: true
 >
 > > The Sub path inside Mount path where MinIO stores data.
 > >
-> > {{% alert color="danger" %}}
-> > **警告**
+> > > [!CAUTION]
+> > > **警告**
+> > >
+> > > Treat the `mountPath` and `subPath` values as immutable once you deploy the Tenant. If you change these values post-deployment, then you may have different paths for new and pre-existing data. This can vastly increase operational complexity and may result in unpredictable data states.
 > >
-> > Treat the `mountPath` and `subPath` values as immutable once you deploy the Tenant. If you change these values post-deployment, then you may have different paths for new and pre-existing data. This can vastly increase operational complexity and may result in unpredictable data states.
-> > {{% /alert %}}
 >
 > **metrics**
 >
@@ -235,13 +233,13 @@ silo_modified: true
 > > >
 > > > See [Operator CRD: TenantSpec](https://silo.pgsty.com/zh/reference/operator-crd/#tenantspec).
 > > >
-> > > {{% alert color="warning" %}}
-> > > **重要**
+> > > > [!WARNING]
+> > > > **重要**
+> > > >
+> > > > The MinIO Operator may output TLS connectivity errors if it cannot trust the Certificate Authority (CA) which minted the custom certificates.
+> > > >
+> > > > You can pass the CA to the Operator to allow it to trust that cert. See [Self-Signed, Internal, and Private Certificates](https://silo.pgsty.com/zh/operations/network-encryption/#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates) for more information. This step may also be necessary for globally trusted CAs where you must provide intermediate certificates to the Operator to help build the full chain of trust.
 > > >
-> > > The MinIO Operator may output TLS connectivity errors if it cannot trust the Certificate Authority (CA) which minted the custom certificates.
-> > >
-> > > You can pass the CA to the Operator to allow it to trust that cert. See [Self-Signed, Internal, and Private Certificates](https://silo.pgsty.com/zh/operations/network-encryption/#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates) for more information. This step may also be necessary for globally trusted CAs where you must provide intermediate certificates to the Operator to help build the full chain of trust.
-> > > {{% /alert %}}
 > >
 > > **requestAutoCert**
 > >
@@ -360,9 +358,8 @@ silo_modified: true
 > Configures [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) for the Tenant S3 API and Console.
 >
 > Set the keys to conform to the Ingress controller and configuration of your choice.
-{{% /tab %}}
-{{% tab header="YAML" %}}
-
+{{< /tab >}}
+{{< tab label="YAML" value="yaml" >}}
 ```text
 # Root key for MinIO Tenant Chart
 tenant:
@@ -876,6 +873,5 @@ ingress:
 #        export MINIO_ROOT_PASSWORD='minio123'
 
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

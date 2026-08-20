@@ -2,8 +2,8 @@
 title: "mc batch list"
 url: "/reference/minio-mc/mc-batch-list/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-list.rst
+upstream_modified: true
 ---
 
 <a id="mc-batch-list"></a>
@@ -11,26 +11,24 @@ silo_modified: true
 
 <a id="command-mc.batch.list"></a>
 
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z or later
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z or later
 
 ## Syntax {#syntax}
 
 The [`mc batch list`](#command-mc.batch.list) command outputs a list of the batch jobs currently in progress on a deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command outputs a list of all jobs currently in progress on the `myminio` alias.
 
 ```shell
 mc batch list myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -43,8 +41,8 @@ mc [GLOBALFLAGS] batch list TARGET           \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

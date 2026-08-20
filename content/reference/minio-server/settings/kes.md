@@ -2,8 +2,8 @@
 title: "Key Encryption Service Settings"
 url: "/reference/minio-server/settings/kes/"
 weight: 100
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/kes.rst
+upstream_modified: true
 ---
 
 <a id="key-encryption-service-settings"></a>
@@ -11,19 +11,17 @@ silo_modified: true
 
 MinIO Server includes three groups of environment variables to manage how the MinIO Server interacts with the Key Encryption Service (KES), Key Management Service (KMS), or static key files. You may only define one of the three sets. If more than one type of environment variable sets is defined, MinIO returns an error.
 
-{{% alert color="info" %}}
-**Note**
-
-These settings do not have configuration setting options for use with [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set).
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> These settings do not have configuration setting options for use with [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set).
 
 Define any one set of these environment variables in the host system prior to starting or restarting the MinIO process. Refer to your operating system’s documentation for how to define an environment variable.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Key Encryption Service {#key-encryption-service}
 
@@ -45,13 +43,12 @@ The name of an external key on the Key Management system (KMS) configured on the
 - The default encryption key for Server-Side Encryption with [SSE-KMS](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms).
 - The encryption key for Server-Side Encryption with [SSE-S3](/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3).
 
-{{% alert color="warning" %}}
-**Important**
-
-Enabling <abbr title="Server-Side Encryption">SSE</abbr> on a MinIO deployment automatically encrypts the backend data for that deployment using the default encryption key.
-
-MinIO *requires* access to KES and the external KMS to decrypt the backend and start normally. The KMS **must** maintain and provide access to the [`MINIO_KMS_KES_KEY_NAME`](#envvar.MINIO_KMS_KES_KEY_NAME). You cannot disable KES later or “undo” the <abbr title="Server-Side Encryption">SSE</abbr> configuration at a later point.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Enabling <abbr title="Server-Side Encryption">SSE</abbr> on a MinIO deployment automatically encrypts the backend data for that deployment using the default encryption key.
+>
+> MinIO *requires* access to KES and the external KMS to decrypt the backend and start normally. The KMS **must** maintain and provide access to the [`MINIO_KMS_KES_KEY_NAME`](#envvar.MINIO_KMS_KES_KEY_NAME). You cannot disable KES later or “undo” the <abbr title="Server-Side Encryption">SSE</abbr> configuration at a later point.
 
 #### `MINIO_KMS_KES_API_KEY` {#envvar.MINIO_KMS_KES_API_KEY}
 
@@ -131,11 +128,10 @@ The credential used to authenticate with the MinIO KMS service.
 
 ## Static Key Files {#static-key-files}
 
-{{% alert color="danger" %}}
-**Warning**
-
-These settings support early development and evaluation of Server-Side Encryption of Objects without depending on an external KMS. Do not use these settings in any extended development, QA, or production environments. See [Server-Side Object Encryption with KES](/operations/server-side-encryption/configure-minio-kes/#minio-sse-vault) for guidance on deploying SSE using MinIO Key Encryption Service (KES) and an external KMS.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> These settings support early development and evaluation of Server-Side Encryption of Objects without depending on an external KMS. Do not use these settings in any extended development, QA, or production environments. See [Server-Side Object Encryption with KES](/operations/server-side-encryption/configure-minio-kes/#minio-sse-vault) for guidance on deploying SSE using MinIO Key Encryption Service (KES) and an external KMS.
 
 Provide a static KMS key or key file to use for encryption.
 

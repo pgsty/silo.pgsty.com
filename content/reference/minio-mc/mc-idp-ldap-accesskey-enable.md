@@ -2,8 +2,8 @@
 title: "mc idp ldap accesskey enable"
 url: "/reference/minio-mc/mc-idp-ldap-accesskey-enable/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey-enable.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-accesskey-enable"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc idp ldap accesskey enable`](#command-mc.idp.ldap.accesskey.enable) enables the specified [access key](/administration/identity-access-management/minio-user-management/#minio-id-access-keys) on the local server.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 > The following example enables the access key `mykey` from the `minio` deployment:
 
 ```shell
 mc idp ldap accesskey enable minio/ mykey
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -41,8 +40,8 @@ mc [GLOBALFLAGS] idp ldap accesskey enable  \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

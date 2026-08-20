@@ -2,8 +2,8 @@
 title: "mc retention clear"
 url: "/zh/reference/minio-mc/mc-retention-clear/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-clear.rst
+upstream_modified: false
 ---
 
 <a id="mc-retention-clear"></a>
@@ -16,16 +16,15 @@ silo_modified: false
 
 要更改处于 [legal hold](/zh/administration/object-management/object-retention/#minio-object-locking-legalhold) 状态的对象的 保留状态，请使用 [`mc legalhold clear`](/zh/reference/minio-mc/mc-legalhold-clear/#command-mc.legalhold.clear)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会移除 `myminio` MinIO 部署中 `mydata` 存储桶的默认对象锁定配置：
 
 ```shell
 mc retention clear --default myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -45,8 +44,8 @@ mc [GLOBALFLAGS] retention clear           \
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 
 [`mc retention clear --version-id`](#mc.retention.clear.-version-id) 与多个其他参数互斥。更多信息请参阅 参考文档。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 
@@ -138,17 +137,16 @@ mc retention clear play/mybucket/object.txt
 
 ### 清除单个或多个对象的对象锁定设置 {#id5}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="单个对象" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="单个对象" value="tab1" >}}
 ```shell
 mc retention clear ALIAS/PATH
 ```
 
 - 将 [`ALIAS`](#mc.retention.clear.ALIAS) 替换为已配置的 S3 兼容主机 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.retention.clear.ALIAS) 替换为对象路径。
-{{% /tab %}}
-{{% tab header="多个对象" %}}
+{{< /tab >}}
+{{< tab label="多个对象" value="tab2" >}}
 将 [`mc retention clear`](#command-mc.retention.clear) 与 [`--recursive`](#mc.retention.clear.-recursive) 配合使用，可清除存储桶中所有对象的 保留设置：
 
 ```shell
@@ -157,8 +155,8 @@ mc retention clear --recursive ALIAS/PATH
 
 - 将 [`ALIAS`](#mc.retention.clear.ALIAS) 替换为已配置的 S3 兼容主机 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.retention.clear.ALIAS) 替换为存储桶路径。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 > 要使用此命令，存储桶 *必须* 启用对象锁定。 只能在创建存储桶时启用对象锁定。有关创建已启用对象锁定的存储桶的更多信息， 请参阅 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock)。
 

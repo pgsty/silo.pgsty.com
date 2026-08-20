@@ -6,8 +6,7 @@ url: "/zh/compatibility/"
 weight: 7
 type: docs
 icon: fa-solid fa-code-compare
-minio_origin: false
-silo_modified: false
+sidebar_expanded: true
 ---
 
 Silo 是 MinIO 的社区分支。本节记录 Silo 从 MinIO 继承了什么、在哪些地方有意做出不同选择，以及这对双向迁移意味着什么。

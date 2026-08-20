@@ -2,8 +2,8 @@
 title: "mc admin policy info"
 url: "/zh/reference/minio-mc-admin/mc-admin-policy-info/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-info"></a>
@@ -14,16 +14,15 @@ silo_modified: false
 
 如果目标 MinIO 部署上存在指定策略，则以 JSON 格式返回该策略。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令显示 [alias](/zh/glossary/#term-alias) `myminio` 上 `writeonly` 策略的内容。
 
 ```shell
  mc admin policy info myminio writeonly
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -36,8 +35,8 @@ mc admin policy info TARGET POLICYNAME
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

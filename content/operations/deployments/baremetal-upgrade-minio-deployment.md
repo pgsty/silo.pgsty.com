@@ -2,18 +2,17 @@
 title: "Upgrade a Silo Deployment"
 url: "/operations/deployments/baremetal-upgrade-minio-deployment/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-upgrade-minio-deployment.rst
+upstream_modified: true
 ---
 
 <a id="upgrade-a-minio-deployment"></a>
 <a id="minio-upgrade"></a>
 
-{{% alert color="warning" %}}
-**Legacy upstream upgrades**
-
-If the deployment still runs an upstream MinIO release older than [`RELEASE.2024-03-30T09-41-56Z`](https://github.com/minio/minio/releases/tag/RELEASE.2024-03-30T09-41-56Z) with AD/LDAP enabled, read the upstream notes for [`RELEASE.2024-04-18T19-09-19Z`](https://github.com/minio/minio/releases/tag/RELEASE.2024-04-18T19-09-19Z) and complete its migration steps before moving to Silo. These names and links identify upstream release contracts and are intentionally retained.
-{{% /alert %}}
+> [!WARNING]
+> **Legacy upstream upgrades**
+>
+> If the deployment still runs an upstream MinIO release older than [`RELEASE.2024-03-30T09-41-56Z`](https://github.com/minio/minio/releases/tag/RELEASE.2024-03-30T09-41-56Z) with AD/LDAP enabled, read the upstream notes for [`RELEASE.2024-04-18T19-09-19Z`](https://github.com/minio/minio/releases/tag/RELEASE.2024-04-18T19-09-19Z) and complete its migration steps before moving to Silo. These names and links identify upstream release contracts and are intentionally retained.
 
 Upgrade Silo by installing a verified server artifact on every node and then restarting the deployment as one coordinated operation. A full-cluster restart creates a brief availability interruption. Applications should retry failed or interrupted requests; operation atomicity does not remove the need for retry handling.
 
@@ -29,11 +28,10 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 6. **Disable the inherited in-place updater.** Set `MINIO_UPDATE=off` in the server environment and restart the service so the setting takes effect.
 7. **Check bucket-scoped policies for object-only resources.** In the exported IAM configuration, look for statements that grant one of twelve bucket-level write actions — or `s3:*` — on a resource pattern containing `/`, with no bare bucket ARN for the same bucket. Those statements no longer authorize those actions. Add the bare ARN alongside the object pattern; see [Bucket and Object Resources](/administration/identity-access-management/policy-based-access-control/#bucket-and-object-resources). Built-in policies and any statement using `arn:aws:s3:::*` are unaffected.
 
-{{% alert color="danger" %}}
-**Do not use `mc admin update ALIAS` for Silo**
-
-As of 2026-08-05, an omitted update URL still selects the upstream `dl.min.io` feed and upstream MinIO signing key in the latest published Silo server. The command can therefore replace Silo with an upstream binary. Use the verified package or binary procedure below. The separate client command [`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is disabled and cannot perform an upgrade.
-{{% /alert %}}
+> [!CAUTION]
+> **Do not use `mc admin update ALIAS` for Silo**
+>
+> As of 2026-08-05, an omitted update URL still selects the upstream `dl.min.io` feed and upstream MinIO signing key in the latest published Silo server. The command can therefore replace Silo with an upstream binary. Use the verified package or binary procedure below. The separate client command [`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is disabled and cannot perform an upgrade.
 
 <a id="minio-upgrade-systemctl"></a>
 
@@ -42,31 +40,26 @@ As of 2026-08-05, an omitted update URL still selects the upstream `dl.min.io` f
 1. Download the same published server release for every node from [Download & Install](/download/#server), then verify its checksum.
 2. Install the package or replace the binary on every node **without restarting only part of the cluster**:
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="RPM (RHEL family)" %}}
-
+   {{< tabs group="rpm-rhel-family-deb-debianubuntu-binary" >}}
+   {{< tab label="RPM (RHEL family)" value="rpm-rhel-family" >}}
    ```shell
    sudo dnf install /path/to/minio.rpm
    ```
-
-   {{% /tab %}}
-   {{% tab header="DEB (Debian/Ubuntu)" %}}
-
+   {{< /tab >}}
+   {{< tab label="DEB (Debian/Ubuntu)" value="deb-debianubuntu" >}}
    ```shell
    sudo dpkg -i /path/to/minio.deb
    ```
-
-   {{% /tab %}}
-   {{% tab header="Binary" %}}
-
+   {{< /tab >}}
+   {{< tab label="Binary" value="binary" >}}
    ```shell
    sha256sum ./minio
    sudo install -m 0755 ./minio /usr/local/bin/minio
    ```
 
    Replace `/usr/local/bin/minio` with the path returned by `command -v minio` when your installation uses a different location.
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 
 3. Run `minio --version` on every node. Do not proceed until every node reports the same intended release.
 4. Restart all server processes as one coordinated operation. Where the admin API is available, use:

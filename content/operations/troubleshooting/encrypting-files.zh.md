@@ -2,8 +2,8 @@
 title: "加密文件"
 url: "/zh/operations/troubleshooting/encrypting-files/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/troubleshooting/encrypting-files.rst
+upstream_modified: false
 ---
 
 <a id="minio-support-encryption"></a>

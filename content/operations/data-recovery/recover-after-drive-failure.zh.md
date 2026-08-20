@@ -2,8 +2,8 @@
 title: "驱动器故障恢复"
 url: "/zh/operations/data-recovery/recover-after-drive-failure/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery/recover-after-drive-failure.rst
+upstream_modified: false
 ---
 
 <a id="minio-restore-hardware-failure-drive"></a>
@@ -13,13 +13,12 @@ MinIO 支持将故障驱动器热替换为新的健康驱动器。 MinIO 会检�
 
 MinIO 自愈会确保恢复到驱动器上的所有数据保持一致且正确。
 
-{{% alert color="info" %}}
-**磁盘独占访问**
-
-MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
-
-除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
-{{% /alert %}}
+> [!NOTE]
+> **磁盘独占访问**
+>
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+>
+> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
 以下步骤提供了更详细的驱动器替换流程。 这些步骤假定你使用的是一个 MinIO 部署，其中每个节点都按照 [文档中的前置条件](/zh/operations/deployments/installation/#minio-installation)，通过 `/etc/fstab` 配合逐盘标签来管理驱动器。
 
@@ -69,15 +68,14 @@ $ cat /etc/fstab
   LABEL=DRIVE4     /mnt/drive4    xfs     defaults,noatime  0       2
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-依赖挂载外部存储的云环境实例，如果一个或多个远程文件挂载返回错误或失败，可能会遇到启动失败。 例如，挂载持久化 EBS 卷的 AWS ECS 实例，如果一个或多个 EBS 卷挂载失败，可能无法按标准 `/etc/fstab` 配置正常启动。
-
-你可以设置 `nofail` 选项，在启动时静默这些错误，并允许实例在存在一个或多个挂载问题时继续启动。
-
-但在使用本地直连磁盘的系统上，不应使用该选项，因为静默驱动器错误会阻止 MinIO 和操作系统以正常方式响应这些错误。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 依赖挂载外部存储的云环境实例，如果一个或多个远程文件挂载返回错误或失败，可能会遇到启动失败。 例如，挂载持久化 EBS 卷的 AWS ECS 实例，如果一个或多个 EBS 卷挂载失败，可能无法按标准 `/etc/fstab` 配置正常启动。
+>
+> 你可以设置 `nofail` 选项，在启动时静默这些错误，并允许实例在存在一个或多个挂载问题时继续启动。
+>
+> 但在使用本地直连磁盘的系统上，不应使用该选项，因为静默驱动器错误会阻止 MinIO 和操作系统以正常方式响应这些错误。
 
 基于前述示例命令，由于 `/mnt/drive1` 处的替换驱动器与故障驱动器使用相同的 `DRIVE1` 标签，因此 `fstab` 无需修改。
 

@@ -2,8 +2,8 @@
 title: "mc replicate add"
 url: "/reference/minio-mc/mc-replicate-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate-add"></a>
@@ -11,13 +11,12 @@ silo_modified: false
 
 <a id="command-mc.replicate.add"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc replicate add` replaces the `mc admin bucket remote add` command.
-
-MinIO automatically creates remote targets based on a given file path or resource location (such as an IP or DNS address). Users defining a remote target no longer need to determine an ARN for the remote bucket.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc replicate add` replaces the `mc admin bucket remote add` command.
+>
+> MinIO automatically creates remote targets based on a given file path or resource location (such as an IP or DNS address). Users defining a remote target no longer need to determine an ARN for the remote bucket.
 
 ## Syntax {#syntax}
 
@@ -25,16 +24,15 @@ The [`mc replicate add`](#command-mc.replicate.add) command creates a new [serve
 
 The remote bucket **must** be on a MinIO deployment running the same version of MinIO as the local deployment.
 
-{{% alert color="info" %}}
-**Note**
-
-Where [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) only synchronizes the current version of an object, `mc replicate` synchronizes all versions, version information, and metadata for the objects.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Where [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) only synchronizes the current version of an object, `mc replicate` synchronizes all versions, version information, and metadata for the objects.
 
 The MinIO deployment automatically begins synchronizing new objects to the remote MinIO deployment after creating the rule. You can optionally configure synchronization of existing objects, delete operations, and fully-deleted objects.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command adds a new replication rule for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
@@ -46,15 +44,14 @@ mc replicate add                                                     \
 
 The replication rule synchronizes versioned delete operations, delete markers, and existing objects to the remote MinIO deployment.
 
-{{% alert color="info" %}}
-**Changed: mc**
-
-RELEASE.2024-03-03T00-13-08Z
-
-You can use a configured ALIAS to the `--remote-bucket` flag.
-{{% /alert %}}
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+> [!NOTE]
+> **Changed: mc**
+>
+> RELEASE.2024-03-03T00-13-08Z
+>
+> You can use a configured ALIAS to the `--remote-bucket` flag.
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -82,8 +79,8 @@ mc [GLOBALFLAGS] replicate add                     \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -105,13 +102,12 @@ mc replicate add --remote-bucket https://user:secret@myminio.cloudprovider.tld:9
 
 *Required*
 
-{{% alert color="info" %}}
-**Changed: mc**
-
-RELEASE.2024-03-03T00-13-08Z
-
-The `--remote-bucket` supports specifying an existing [alias](/reference/minio-mc/mc-alias-set/#alias).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: mc**
+>
+> RELEASE.2024-03-03T00-13-08Z
+>
+> The `--remote-bucket` supports specifying an existing [alias](/reference/minio-mc/mc-alias-set/#alias).
 
 Specify the credentials, destination deployment, and bucket of the remote location. Value may be an IP address, URL, or [alias](/reference/minio-mc/mc-alias-set/#alias)/bucket.
 
@@ -381,8 +377,8 @@ mc version enable ALIAS/PATH
 
 MinIO strongly recommends creating users specifically for supporting bucket replication operations. See [`mc admin user`](/reference/minio-mc-admin/mc-admin-user/#command-mc.admin.user) and [`mc admin policy`](/reference/minio-mc-admin/mc-admin-policy/#command-mc.admin.policy) for more complete documentation on adding users and policies to a MinIO deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Replication Admin" %}}
+{{< tabs group="replication-admin-replication-remote-user" >}}
+{{< tab label="Replication Admin" value="replication-admin" >}}
 The following policy provides permissions for configuring and enabling replication on a deployment.
 
 ```json
@@ -427,8 +423,8 @@ The following policy provides permissions for configuring and enabling replicati
 - The `"EnableReplicationRuleConfiguration"` statement grants permission for creating replication rules on a bucket. The `"arn:aws:s3:::*` resource applies the replication permissions to *any* bucket on the source deployment. You can restrict the user policy to specific buckets as-needed.
 
 Use the [`mc admin policy create`](/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) to add this policy to each deployment acting as a replication source. Use [`mc admin user add`](/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) to create a user on the deployment and [`mc admin policy attach`](/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) to associate the policy to that new user.
-{{% /tab %}}
-{{% tab header="Replication Remote User" %}}
+{{< /tab >}}
+{{< tab label="Replication Remote User" value="replication-remote-user" >}}
 The following policy provides permissions for enabling synchronization of replicated data *into* the deployment.
 
 ```json
@@ -481,8 +477,8 @@ The following policy provides permissions for enabling synchronization of replic
 - The `"EnableReplicatingDataIntoBucket"` statement grants permission for a remote target to synchronize data into *any* bucket in the MinIO deployment. To restrict the policy to specific buckets, specify those buckets as an element in the `Resource` array similar to `"arn:aws:s3:::bucketName/*"`.
 
 Use the [`mc admin policy create`](/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) to add this policy to each deployment acting as a replication target. Use [`mc admin user add`](/reference/minio-mc-admin/mc-admin-user-add/#command-mc.admin.user.add) to create a user on the deployment and [`mc admin policy attach`](/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) to associate the policy to that new user.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Replication of Existing Objects {#replication-of-existing-objects}
 

@@ -3,8 +3,8 @@ title: "mc admin accesskey"
 url: "/zh/reference/minio-mc-admin/mc-admin-accesskey/"
 weight: 10
 icon: fa-solid fa-key
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-accesskey.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-accesskey"></a>
@@ -12,10 +12,8 @@ silo_modified: false
 
 <a id="command-mc.admin.accesskey"></a>
 
-{{% alert color="info" %}}
-**新增: MinIO客户端版本RELEASE.2024-10-08T09-37-26Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: MinIO客户端版本RELEASE.2024-10-08T09-37-26Z**
 
 这些命令用于替代 [`mc admin user svcacct`](/zh/reference/minio-mc-admin/mc-admin-user-svcacct/#command-mc.admin.user.svcacct) 命令及其子命令中的 MinIO IDP 功能。
 

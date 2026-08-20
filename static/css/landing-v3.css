@@ -342,7 +342,8 @@ main { display: block; }
   gap: 10px;
   color: var(--ink) !important;
 }
-.landing-page .nav-wordmark { display: block; width: auto; height: 30px; }
+.landing-page .nav-logo { display: block; width: 24px; height: 24px; }
+.landing-page .nav-wordmark { display: block; width: auto; height: 17px; }
 .nav-links { display: flex; align-items: center; gap: 4px; }
 
 .nav-link {

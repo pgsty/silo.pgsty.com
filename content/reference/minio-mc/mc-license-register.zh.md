@@ -2,8 +2,8 @@
 title: "mc license register"
 url: "/zh/reference/minio-mc/mc-license-register/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-license-register.rst
+upstream_modified: false
 ---
 
 <a id="mc-license-register"></a>
@@ -12,11 +12,10 @@ silo_modified: false
 
 <a id="command-mc.license.register"></a>
 
-{{% alert color="warning" %}}
-**重要**
-
-`mc license register` 需要 [MinIO Client](/zh/reference/minio-mc/#minio-client) `RELEASE.2023-11-20T16-30-59Z` 或更高版本。 虽非强制要求，但最佳实践是保持 [MinIO 客户端版本](/zh/reference/minio-mc/#mc-client-versioning) 与 MinIO 服务端版本一致。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> `mc license register` 需要 [MinIO Client](/zh/reference/minio-mc/#minio-client) `RELEASE.2023-11-20T16-30-59Z` 或更高版本。 虽非强制要求，但最佳实践是保持 [MinIO 客户端版本](/zh/reference/minio-mc/#mc-client-versioning) 与 MinIO 服务端版本一致。
 
 ## 描述 {#id2}
 
@@ -24,16 +23,15 @@ silo_modified: false
 
 注册后，你可以使用 [`mc support diag`](/zh/reference/minio-mc/mc-support-diag/#command-mc.support.diag) 命令将部署健康报告直接上传到 SUBNET。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 > 以下示例将 `minio` [alias](/zh/reference/minio-mc/mc-alias-set/#alias) 注册到 [MinIO SUBNET](https://min.io/pricing?jmp=docs)：
 
 ```shell
 mc license register minio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -43,9 +41,8 @@ mc [GLOBALFLAGS] license register ALIAS                      \
                          [--license <path to license file>]  \
                          [--name <value>]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -150,13 +147,12 @@ mc license register minio2 --name second-deployment
 
 将 alias 为 `minio3` 的 MinIO 部署注册到 SUBNET；该部署由于防火墙、airgap 或类似原因无法直接访问互联网。
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2022-07-29T19-17-16Z
-
-airgap 注册流程适用于 `RELEASE.2022-07-29T19-17-16Z` 或更高版本的 MinIO 客户端。 早期版本的 MinIO 客户端 无法注册 airgapped 部署。
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2022-07-29T19-17-16Z
+>
+> airgap 注册流程适用于 `RELEASE.2022-07-29T19-17-16Z` 或更高版本的 MinIO 客户端。 早期版本的 MinIO 客户端 无法注册 airgapped 部署。
 
 ```shell
 mc license register minio3 --airgap
@@ -193,10 +189,8 @@ mc [GLOBALFLAGS] license register       \
 
 ### 自动更新 License {#id11}
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-01-18T04-36-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-01-18T04-36-38Z**
 
 注册到 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 后，MinIO 会每月自动检查并更新 license。
 

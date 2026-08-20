@@ -2,8 +2,8 @@
 title: "mc ping"
 url: "/zh/reference/minio-mc/mc-ping/"
 weight: 270
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ping.rst
+upstream_modified: false
 ---
 
 <a id="mc-ping"></a>
@@ -14,8 +14,8 @@ silo_modified: false
 
 [`mc ping`](#command-mc.ping) 命令对指定目标执行存活性检查。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令向目标发送请求，并输出响应的最小、最大、平均与往返时间，以及处理请求时遇到的错误数量。
 
 ```shell
@@ -31,9 +31,8 @@ mc ping play --count 5
 4: https://play.min.io   min=61.26ms    max=213.00ms   average=102.20ms   errors=0   roundtrip=61.26ms
 5: https://play.min.io   min=61.26ms    max=213.00ms   average=95.03ms    errors=0   roundtrip=66.36ms
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -50,8 +49,8 @@ mc [GLOBALFLAGS] ping                       \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -93,10 +92,8 @@ mc ping TARGET -e 5
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-30T22-41-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-30T22-41-38Z**
 
 在首次检查成功后退出。
 
@@ -118,11 +115,10 @@ mc ping TARGET -e 5
 
 向 MinIO 集群中的所有服务器发送请求。
 
-{{% alert color="info" %}}
-**说明**
-
-在可直接访问每个节点或 Pod 的分布式部署中使用此选项。 当节点位于服务（例如负载均衡器）之后时，此标志不起作用。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 在可直接访问每个节点或 Pod 的分布式部署中使用此选项。 当节点位于服务（例如负载均衡器）之后时，此标志不起作用。
 
 ### 全局标志 {#id4}
 

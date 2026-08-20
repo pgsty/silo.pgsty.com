@@ -6,8 +6,6 @@ url: "/compatibility/mcli/"
 weight: 20
 type: docs
 icon: fa-solid fa-terminal
-minio_origin: false
-silo_modified: false
 ---
 
 `mcli` is Silo's build of the MinIO Client (`mc`). This page records where the two are interchangeable and where they differ.

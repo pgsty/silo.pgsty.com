@@ -2,8 +2,8 @@
 title: "租户的 cert-manager"
 url: "/zh/operations/cert-manager/cert-manager-tenants/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/cert-manager/cert-manager-tenants.rst
+upstream_modified: false
 ---
 
 <a id="cert-manager"></a>
@@ -11,13 +11,12 @@ silo_modified: false
 
 以下过程用于创建并应用在租户内使用 cert-manager 管理 TLS 证书所需的资源。
 
-{{% alert color="info" %}}
-**说明**
-
-本过程使用 `tenant-1` 作为租户名称。
-
-请在整个过程中将 `tenant-1` 替换为你的租户名称。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 本过程使用 `tenant-1` 作为租户名称。
+>
+> 请在整个过程中将 `tenant-1` 替换为你的租户名称。
 
 ## 前提条件 {#id2}
 
@@ -62,11 +61,10 @@ silo_modified: false
        group: cert-manager.io
    ```
 
-   {{% alert color="warning" %}}
-   **重要**
-
-   `spec.issueRef.name` 必须与 [设置 cert-manager](/zh/operations/network-encryption/cert-manager/#minio-cert-manager-create-cluster-issuer) 时创建的 `ClusterIssuer` 名称一致。 如果你使用了不同的 `ClusterIssuer` 名称，或者采用了与本指南不同的 `Issuer`，请按你的环境修改 `issuerRef`。
-   {{% /alert %}}
+   > [!WARNING]
+   > **重要**
+   >
+   > `spec.issueRef.name` 必须与 [设置 cert-manager](/zh/operations/network-encryption/cert-manager/#minio-cert-manager-create-cluster-issuer) 时创建的 `ClusterIssuer` 名称一致。 如果你使用了不同的 `ClusterIssuer` 名称，或者采用了与本指南不同的 `Issuer`，请按你的环境修改 `issuerRef`。
 3. 应用该资源：
 
    ```shell
@@ -110,23 +108,22 @@ silo_modified: false
 - `*.<namespace>.svc.<cluster domain>`
 - `*.<tenant-name>.minio.<namespace>.svc.<cluster domain>'`
 
-{{% alert color="warning" %}}
-**重要**
-
-请将占位符文本（由 `<` 和 `>` 标识）替换为你的租户实际值：
-
-- `<cluster domain>` 是 Kubernetes 集群内部的根 DNS 域。 通常为 `cluster.local`，但你仍应检查 CoreDNS 配置，以确认 Kubernetes 集群实际使用的值。
-
-  例如：
-
-  ```shell
-  kubectl get configmap coredns -n kube-system -o jsonpath="{.data}"
-  ```
-
-  不同 Kubernetes 提供方对根域名的管理方式各不相同。 更多信息请参考你的 Kubernetes 提供方文档。
-- `tenant-name` 是 Tenant YAML 中 `metadata.name` 字段指定的名称。 在本例中该值为 `myminio`。
-- `namespace` 是前面创建、将用于安装租户的命名空间值。 在 Tenant YAML 中，它定义在 `metadata.namespace` 字段。 在本例中该值为 `tenant-1`。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 请将占位符文本（由 `<` 和 `>` 标识）替换为你的租户实际值：
+>
+> - `<cluster domain>` 是 Kubernetes 集群内部的根 DNS 域。 通常为 `cluster.local`，但你仍应检查 CoreDNS 配置，以确认 Kubernetes 集群实际使用的值。
+>
+>   例如：
+>
+>   ```shell
+>   kubectl get configmap coredns -n kube-system -o jsonpath="{.data}"
+>   ```
+>
+>   不同 Kubernetes 提供方对根域名的管理方式各不相同。 更多信息请参考你的 Kubernetes 提供方文档。
+> - `tenant-name` 是 Tenant YAML 中 `metadata.name` 字段指定的名称。 在本例中该值为 `myminio`。
+> - `namespace` 是前面创建、将用于安装租户的命名空间值。 在 Tenant YAML 中，它定义在 `metadata.namespace` 字段。 在本例中该值为 `tenant-1`。
 
 1. 为指定域名申请一个 `Certificate`
 
@@ -152,11 +149,10 @@ silo_modified: false
        name: tenant-1-ca-issuer
    ```
 
-   {{% alert color="secondary" %}}
-   **提示**
-
-   在本例中，Tenant 名称为 `myminio`。 作为命名约定，建议将 `spec.secretName` 字段中的 secret 命名为 `<tenant-name>-tls`。
-   {{% /alert %}}
+   > [!NOTE]
+   > **提示**
+   >
+   > 在本例中，Tenant 名称为 `myminio`。 作为命名约定，建议将 `spec.secretName` 字段中的 secret 命名为 `<tenant-name>-tls`。
 2. 应用该证书资源：
 
    ```shell
@@ -169,12 +165,11 @@ silo_modified: false
    kubectl describe secret/myminio-tls -n tenant-1
    ```
 
-   {{% alert color="info" %}}
-   **说明**
-
-   - 将 `tenant-1` 替换为你的租户命名空间。
-   - 如果 secret 名称不同，请将 `myminio-tls` 替换为实际值。
-   {{% /alert %}}
+   > [!NOTE]
+   > **说明**
+   >
+   > - 将 `tenant-1` 替换为你的租户命名空间。
+   > - 如果 secret 名称不同，请将 `myminio-tls` 替换为实际值。
 
 ## 4) 使用 cert-manager 部署租户并管理 TLS 证书 {#cert-manager-tls}
 
@@ -228,11 +223,10 @@ MinIO Operator 会挂载并信任由所提供的 Certificate Authority 签发的
    kubectl create secret generic operator-ca-tls-tenant-1 --from-file=ca.crt -n minio-operator
    ```
 
-{{% alert color="secondary" %}}
-**提示**
-
-在本例中，我们选择将 secret 命名为 `operator-ca-tls-tenant-1`。 我们使用租户命名空间 `tenant-1` 作为后缀，以便更容易识别该 CA 来自哪个命名空间。 建议使用你的租户命名空间名称作为后缀，以便将 secret 与相关资源更容易关联起来。
-{{% /alert %}}
+> [!NOTE]
+> **提示**
+>
+> 在本例中，我们选择将 secret 命名为 `operator-ca-tls-tenant-1`。 我们使用租户命名空间 `tenant-1` 作为后缀，以便更容易识别该 CA 来自哪个命名空间。 建议使用你的租户命名空间名称作为后缀，以便将 secret 与相关资源更容易关联起来。
 
 ## 6) 部署租户 {#id4}
 

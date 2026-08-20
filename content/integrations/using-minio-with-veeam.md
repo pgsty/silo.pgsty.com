@@ -2,8 +2,8 @@
 title: "Using Silo with Veeam"
 url: "/integrations/using-minio-with-veeam/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/integrations/using-minio-with-veeam.md
+upstream_modified: true
 ---
 
 <a id="using-minio-with-veeam"></a>

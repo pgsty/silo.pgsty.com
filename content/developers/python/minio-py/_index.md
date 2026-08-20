@@ -4,17 +4,16 @@ description: "Connect a Python application to SILO with the MinIO Python SDK."
 url: "/developers/python/minio-py/"
 weight: 20
 icon: fa-brands fa-python
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/python/minio-py.rst
+upstream_modified: true
 ---
 
 ## MinIO Python SDK {#python-sdk}
 
 SILO implements the S3-compatible server contract, so Python applications can use the upstream [MinIO Python SDK](https://github.com/minio/minio-py) directly.
 
-{{% alert color="info" %}}
-Supported Python versions and SDK APIs can change independently of SILO. Check the [current package metadata](https://pypi.org/project/minio/) and [SDK releases](https://github.com/minio/minio-py/releases) before pinning a version.
-{{% /alert %}}
+> [!NOTE]
+> Supported Python versions and SDK APIs can change independently of SILO. Check the [current package metadata](https://pypi.org/project/minio/) and [SDK releases](https://github.com/minio/minio-py/releases) before pinning a version.
 
 ## Install the package {#install}
 

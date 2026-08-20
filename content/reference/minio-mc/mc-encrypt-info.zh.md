@@ -2,8 +2,8 @@
 title: "mc encrypt info"
 url: "/zh/reference/minio-mc/mc-encrypt-info/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-encrypt-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-encrypt-info"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc encrypt info`](#command-mc.encrypt.info) 命令返回存储桶当前的默认加密设置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令返回 `myminio` MinIO 部署上 `mydata` 存储桶的默认加密设置。
 
 ```shell
 mc encrypt info myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] encrypt info ALIAS
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -59,23 +58,20 @@ mc encrypt info play/mybucket
 
 ### 获取存储桶的自动服务端加密设置 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 ```shell
  mc encrypt info myminio/data
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc encrypt info ALIAS
 ```
 
 - 将 `ALIAS` 替换为要为其配置存储桶自动服务端加密的 MinIO 部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id7}
 

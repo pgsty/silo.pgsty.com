@@ -2,8 +2,8 @@
 title: "mc ilm restore"
 url: "/zh/reference/minio-mc/mc-ilm-restore/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-restore.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-restore"></a>
@@ -17,24 +17,22 @@ silo_modified: false
 
 使用此命令可让应用程序通过 MinIO 部署访问分层对象（例如“热层”）。 归档对象会保留在远程层，而临时副本会成为该对象的 `HEAD`。
 
-{{% alert color="info" %}}
-**新增: mc**
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-04-12T02-21-51Z
+>
+> 使用 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat) 可显示已恢复对象是从本地临时副本读取还是从远程层读取。 当前正在从远程层恢复的对象会显示状态 `Ongoing : true`。
 
-RELEASE.2023-04-12T02-21-51Z
-
-使用 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat) 可显示已恢复对象是从本地临时副本读取还是从远程层读取。 当前正在从远程层恢复的对象会显示状态 `Ongoing : true`。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将远程层上一个已转储对象的副本恢复到 `myminio` MinIO 部署：
 
 ```shell
 mc ilm restore myminio/mybucket/object.txt
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -52,8 +50,8 @@ mc [GLOBALFLAGS] ilm restore         \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id2}
 
@@ -120,11 +118,10 @@ MinIO 使已恢复归档对象副本过期前的天数。
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--recursive, r` {#mc.ilm.restore.-recursive}
 

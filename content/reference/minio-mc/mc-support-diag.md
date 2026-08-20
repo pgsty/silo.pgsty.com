@@ -2,31 +2,28 @@
 title: "mc support diag"
 url: "/reference/minio-mc/mc-support-diag/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-diag.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-diag"></a>
 
 <a id="command-mc.support.diag"></a>
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
-
-{{% details title="Command History" closed="true" %}}
-The command used to create the diagnostic report has changed over time.
-
-| MinIO Client Release | Command | Notes |
-| --- | --- | --- |
-| RELEASE.2022-02-13T23-26-13Z | `mc support diag` | Command moved to `mc support` |
-| RELEASE.2020-11-17T00-39-14Z | `mc admin subnet health` | Command made a SUBNET subcommand |
-| RELEASE.2020-10-03T02-54-56Z | `mc admin health` | Command renamed to health |
-| Original Command | `mc admin obd` | Command renamed `mc admin health` |
-
-{{% /details %}}
+> [!DETAILS]- Command History
+> The command used to create the diagnostic report has changed over time.
+>
+> | MinIO Client Release | Command | Notes |
+> | --- | --- | --- |
+> | RELEASE.2022-02-13T23-26-13Z | `mc support diag` | Command moved to `mc support` |
+> | RELEASE.2020-11-17T00-39-14Z | `mc admin subnet health` | Command made a SUBNET subcommand |
+> | RELEASE.2020-10-03T02-54-56Z | `mc admin health` | Command renamed to health |
+> | Original Command | `mc admin obd` | Command renamed `mc admin health` |
 
 ## Description {#description}
 
@@ -142,11 +139,10 @@ If the deployment is airgapped, but the local device where you are using the [mi
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-11-10T21-37-17Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-11-10T21-37-17Z
 
 MinIO anonymizes data loaded to SUBNET. Beginning with mc `RELEASE.2023-11-10T21-37-17Z`, MinIO does *not* anonymize host names. This is the default `standard` anonymization mode.
 

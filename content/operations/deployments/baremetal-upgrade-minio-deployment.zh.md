@@ -2,18 +2,17 @@
 title: "升级 Silo 部署"
 url: "/zh/operations/deployments/baremetal-upgrade-minio-deployment/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-upgrade-minio-deployment.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
 <a id="minio-upgrade"></a>
 
-{{% alert color="warning" %}}
-**从上游旧版本迁移**
-
-如果部署仍运行早于 [`RELEASE.2024-03-30T09-41-56Z`](https://github.com/minio/minio/releases/tag/RELEASE.2024-03-30T09-41-56Z) 的上游 MinIO，且启用了 AD/LDAP，请先阅读上游 [`RELEASE.2024-04-18T19-09-19Z`](https://github.com/minio/minio/releases/tag/RELEASE.2024-04-18T19-09-19Z) 的发布说明，并完成其中的迁移步骤，再切换到 Silo。这里的名称与链接用于标识上游发布契约，刻意保留不改。
-{{% /alert %}}
+> [!WARNING]
+> **从上游旧版本迁移**
+>
+> 如果部署仍运行早于 [`RELEASE.2024-03-30T09-41-56Z`](https://github.com/minio/minio/releases/tag/RELEASE.2024-03-30T09-41-56Z) 的上游 MinIO，且启用了 AD/LDAP，请先阅读上游 [`RELEASE.2024-04-18T19-09-19Z`](https://github.com/minio/minio/releases/tag/RELEASE.2024-04-18T19-09-19Z) 的发布说明，并完成其中的迁移步骤，再切换到 Silo。这里的名称与链接用于标识上游发布契约，刻意保留不改。
 
 升级 Silo 时，应先在每个节点安装经过校验的服务端制品，再把整个部署作为一次协调操作重启。全量集群重启会造成短暂不可用；应用应重试失败或中断的请求，对象操作的原子性并不能替代重试处理。
 
@@ -29,11 +28,10 @@ silo_modified: true
 6. **禁用继承的原地更新器。** 在服务端环境中设置 `MINIO_UPDATE=off`，并重启服务让配置生效。
 7. **检查桶级策略中的对象级资源。** 在导出的 IAM 配置里，查找那些把十二个桶级写动作之一（或 `s3:*`）授在含 `/` 的资源模式上、且同一个桶没有裸桶 ARN 的语句。这些语句不再授权那些动作。请在对象模式旁边补上裸桶 ARN，参见[存储桶资源与对象资源](/zh/administration/identity-access-management/policy-based-access-control/#bucket-and-object-resources)。内置策略以及任何使用 `arn:aws:s3:::*` 的语句都不受影响。
 
-{{% alert color="danger" %}}
-**不要对 Silo 使用 `mc admin update ALIAS`**
-
-截至 2026-08-05，最新公开 Silo 服务端在省略更新 URL 时，仍会选择上游 `dl.min.io` 发布源和上游 MinIO 签名密钥。因此该命令可能把 Silo 替换成上游二进制。请使用下面经过校验的软件包或二进制流程。另一个客户端命令 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update) 已被禁用，不能执行升级。
-{{% /alert %}}
+> [!CAUTION]
+> **不要对 Silo 使用 `mc admin update ALIAS`**
+>
+> 截至 2026-08-05，最新公开 Silo 服务端在省略更新 URL 时，仍会选择上游 `dl.min.io` 发布源和上游 MinIO 签名密钥。因此该命令可能把 Silo 替换成上游二进制。请使用下面经过校验的软件包或二进制流程。另一个客户端命令 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update) 已被禁用，不能执行升级。
 
 <a id="minio-upgrade-systemctl"></a>
 
@@ -42,31 +40,26 @@ silo_modified: true
 1. 从[下载与安装](/zh/download/#server)为每个节点下载同一个公开服务端版本，并校验其摘要。
 2. 在 **不单独重启部分集群** 的前提下，在每个节点安装软件包或替换二进制：
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="RPM（RHEL 系）" %}}
-
+   {{< tabs group="rpmrhel-debdebianubuntu-tab3" >}}
+   {{< tab label="RPM（RHEL 系）" value="rpmrhel" >}}
    ```shell
    sudo dnf install /path/to/minio.rpm
    ```
-
-   {{% /tab %}}
-   {{% tab header="DEB（Debian/Ubuntu）" %}}
-
+   {{< /tab >}}
+   {{< tab label="DEB（Debian/Ubuntu）" value="debdebianubuntu" >}}
    ```shell
    sudo dpkg -i /path/to/minio.deb
    ```
-
-   {{% /tab %}}
-   {{% tab header="二进制" %}}
-
+   {{< /tab >}}
+   {{< tab label="二进制" value="tab3" >}}
    ```shell
    sha256sum ./minio
    sudo install -m 0755 ./minio /usr/local/bin/minio
    ```
 
    如果安装位置不同，请把 `/usr/local/bin/minio` 替换成 `command -v minio` 返回的路径。
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 
 3. 在每个节点运行 `minio --version`。只有所有节点都报告同一个预期版本时才能继续。
 4. 把所有服务端进程作为一次协调操作重启。管理 API 可用时执行：

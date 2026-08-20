@@ -2,8 +2,8 @@
 title: "mc anonymous set"
 url: "/reference/minio-mc/mc-anonymous-set/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-anonymous-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-anonymous-set"></a>
@@ -20,8 +20,8 @@ Buckets with anonymous policies allow clients to access the bucket contents and 
 
 To set anonymous bucket policies using an IAM [JSON policy](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html), use the [`mc anonymous set-json`](/reference/minio-mc/mc-anonymous-set-json/#command-mc.anonymous.set-json) command.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command sets anonymous access policies for several buckets on the `myminio` MinIO deployment:
 
 ```shell
@@ -34,8 +34,8 @@ Applications can perform the following operations without authentication:
 
 - `PUT` objects to `myminio/uploads` and `myminio/public`.
 - `GET` objects from `myminio/downloads` and `myminio/public`.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -47,8 +47,8 @@ mc [GLOBALFLAGS] policy set PERMISSION ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

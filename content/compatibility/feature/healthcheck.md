@@ -6,8 +6,6 @@ url: "/compatibility/feature/healthcheck/"
 weight: 10
 type: docs
 icon: fa-solid fa-heart-pulse
-minio_origin: false
-silo_modified: false
 ---
 
 > **Status**: P1 (subcommand, `2ff594f4b`) and P2 (distroless image + CI gate, `4c34d2309`) implemented in `pgsty/silo`; P3 (Helm probes) and P4 (docs) pending · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)

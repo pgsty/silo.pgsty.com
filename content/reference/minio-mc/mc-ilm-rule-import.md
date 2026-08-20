@@ -2,8 +2,8 @@
 title: "mc ilm rule import"
 url: "/reference/minio-mc/mc-ilm-rule-import/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-import.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-import"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.import"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm rule import` replaces `mc ilm import`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule import` replaces `mc ilm import`.
 
 ## Syntax {#syntax}
 
@@ -23,16 +22,15 @@ The [`mc ilm rule import`](#command-mc.ilm.rule.import) command imports an objec
 
 The [`mc ilm rule import`](#command-mc.ilm.rule.import) command imports from `STDIN` by default. You can input the contents from a `.json` file, such as one produced by [`mc ilm rule export`](/reference/minio-mc/mc-ilm-rule-export/#command-mc.ilm.rule.export).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command imports the lifecycle management configuration from `mydata-lifecycle-config.json` and applies it to the `mydata` bucket on the `myminio` deployment:
 
 ```shell
 mc ilm rule import myminio/mydata < mydata-lifecycle-config.json
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -44,8 +42,8 @@ mc [GLOBALFLAGS] ilm rule import ALIAS < STDIN
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -69,17 +67,15 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Import the Bucket Lifecycle Management Configuration {#import-the-bucket-lifecycle-management-configuration}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 The following command imports the bucket lifecycle management configuration from the `bucket-lifecycle.json` file:
 
 ```shell
 mc ilm rule import myminio/mybucket < bucket-lifecycle.json
 ```
-
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc ilm rule import ALIAS < file.json
 ```
@@ -88,8 +84,8 @@ mc ilm rule import ALIAS < file.json
 
   `myminio/mydata`
 - Replace `file.json` with the name of the file from which to import the lifecycle management rules.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Required Permissions {#required-permissions}
 

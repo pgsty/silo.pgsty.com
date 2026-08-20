@@ -3,8 +3,8 @@ title: "文件传输协议 (FTP/SFTP)"
 url: "/zh/developers/file-transfer-protocol/"
 weight: 220
 icon: fa-solid fa-file-arrow-up
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/file-transfer-protocol.rst
+upstream_modified: false
 ---
 
 <a id="ftp-sftp"></a>
@@ -12,30 +12,30 @@ silo_modified: false
 
 - [使用 FTP 和 SFTP 与 MinIO 进行文件传输](https://www.youtube.com/watch?v=lNZyL8wD-lI)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 从 MinIO Operator 5.0.7 和 [MinIO Server RELEASE.2023-04-20T17-56-55Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-04-20T17-56-55Z) 起，你可以使用 SSH 文件传输协议 (SFTP) 与 MinIO Operator 租户部署中的对象交互。
 
 互联网工程任务组 (IETF) 将 SFTP 定义为 SSH 2.0 的扩展。 它允许通过 SSH 进行文件传输，可用于 [传输层安全 (TLS)](/zh/operations/network-encryption/#minio-tls) 和虚拟专用网络 (VPN) 场景。
 
 启用 SFTP 不会影响其他 MinIO 功能。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 从 [MinIO Server RELEASE.2023-04-20T17-56-55Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-04-20T17-56-55Z) 起，你可以使用文件传输协议 (FTP) 与 MinIO 部署中的对象交互。
 
 启动服务器时，你必须显式启用 FTP 或 SFTP。 启用任一服务器类型都不会影响其他 MinIO 功能。
 
 本页下文统一使用缩写 FTP，但你可以使用下文描述的任意受支持 FTP 协议。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 支持的协议 {#id2}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 MinIO Operator 仅支持配置 SSH 文件传输协议 (SFTP)。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 启用后，MinIO 支持通过以下协议进行 FTP 访问：
 
 - SSH 文件传输协议 (SFTP)
@@ -53,8 +53,8 @@ MinIO Operator 仅支持配置 SSH 文件传输协议 (SFTP)。
   不加密的文件传输。
 
   MinIO **不** 建议使用未加密的 FTP 进行文件传输。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 支持的命令 {#id5}
 
@@ -94,25 +94,23 @@ SFTP 协议不需要任何 `admin:*` [权限](/zh/administration/identity-access
 
 ## 前提条件 {#id9}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
-
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 - MinIO Operator v5.0.7 或更高版本。
 - 为服务器启用一个 SFTP 端口 (8022)。
 - 一个用于 SFTP 命令的端口，以及一个端口范围，用于允许 SFTP 服务器在数据传输期间按需请求使用。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 - MinIO RELEASE.2023-04-20T17-56-55Z 或更高版本。
 - 为服务器启用一个 FTP 或 SFTP 端口。
 - 一个用于 FTP 命令的端口，以及一个端口范围，用于允许 FTP 服务器在数据传输期间按需请求使用。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 操作步骤 {#id10}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
-
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 1. 为目标 Tenant 启用 SFTP：
 
    使用以下 Kubectl 命令编辑 Tenant YAML 配置：
@@ -185,14 +183,12 @@ kubectl get tenants/my-tenant -n my-tenant-ns -o yaml | yq '.spec.features'
 ```console
 enableSFTP: true
 ```
-
-{{% /tab %}}
-{{% tab header="裸金属" %}}
-
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 1. 启动 MinIO 并启用 FTP 和/或 SFTP 端口。
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="FTPS" %}}
+   {{< tabs group="ftps-sftpftp" >}}
+   {{< tab label="FTPS" value="ftps" >}}
    以下示例以启用 FTPS 的方式启动 MinIO。
 
    ```shell
@@ -204,14 +200,12 @@ enableSFTP: true
    ...
    ```
 
-   {{% alert color="info" %}}
-   **说明**
-
-   省略 `tls-private-key` 和 `tls-public-cert` 可使用 MinIO 默认 TLS 密钥进行 FTPS 连接。 更多信息请参阅 [MinIO TLS 文档](/zh/operations/network-encryption/#minio-tls)。
-   {{% /alert %}}
-   {{% /tab %}}
-   {{% tab header="SFTP/FTP" %}}
-
+   > [!NOTE]
+   > **说明**
+   >
+   > 省略 `tls-private-key` 和 `tls-public-cert` 可使用 MinIO 默认 TLS 密钥进行 FTPS 连接。 更多信息请参阅 [MinIO TLS 文档](/zh/operations/network-encryption/#minio-tls)。
+   {{< /tab >}}
+   {{< tab label="SFTP/FTP" value="sftpftp" >}}
    ```shell
    minio server http://server{1...4}/disk{1...4}        \
    --ftp="address=:8021"                                \
@@ -229,9 +223,8 @@ enableSFTP: true
    MinIO FTP Server listening on :8021
    MinIO SFTP Server listening on :8022
    ```
-
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 2. 使用你偏好的 FTP 客户端连接到 MinIO 部署。 你必须使用其 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 允许访问目标存储桶和对象的用户身份进行连接。
 
    连接到 MinIO 部署的具体方式取决于所使用的 FTP 客户端。 请参阅该客户端的文档。
@@ -239,8 +232,8 @@ enableSFTP: true
    若要通过 TLS 或 SSH 连接，必须使用支持相应协议的客户端。
 3. 连接到 MinIO
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="SFTP/FTP" %}}
+   {{< tabs group="sftpftp-ftps" >}}
+   {{< tab label="SFTP/FTP" value="sftpftp" >}}
    以下示例连接到 SFTP 服务器，并列出名为 `runner` 的存储桶内容。
 
    ```console
@@ -250,9 +243,8 @@ enableSFTP: true
    sftp> ls runner/
    chunkdocs  testdir
    ```
-
-   {{% /tab %}}
-   {{% tab header="FTPS" %}}
+   {{< /tab >}}
+   {{< tab label="FTPS" value="ftps" >}}
    以下示例使用 Linux 的 [FTP CLI client](https://linux.die.net/man/1/ftp)，通过 `minio` 凭证连接到 MinIO 服务器，并列出名为 `runner` 的存储桶内容。
 
    ```shell
@@ -272,13 +264,12 @@ enableSFTP: true
    drwxrwxrwx 1 nobody nobody            0 Jan  1 00:00 testdir/
    ...
    ```
-
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 4. 下载对象
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="SFTP/FTP" %}}
+   {{< tabs group="sftpftp-ftps" >}}
+   {{< tab label="SFTP/FTP" value="sftpftp" >}}
    本示例先列出存储桶中的条目，然后下载该存储桶中的内容。
 
    ```console
@@ -292,9 +283,8 @@ enableSFTP: true
    metadata                               100%  226    16.6KB/s   00:00
    sftp>
    ```
-
-   {{% /tab %}}
-   {{% tab header="FTPS" %}}
+   {{< /tab >}}
+   {{< tab label="FTPS" value="ftps" >}}
    本示例先列出存储桶中的条目，然后下载该存储桶中的内容。
 
    ```console
@@ -322,20 +312,17 @@ enableSFTP: true
    45 bytes received in 00:00 (3.55 KiB/s)
    ...
    ```
-
-   {{% /tab %}}
-   {{< /tabpane >}}
-{{% /tab %}}
-{{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-certificate-key-file-sftp-k8s"></a>
 
 ## 使用证书密钥文件通过 SFTP 连接到 MinIO {#sftp-minio}
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-05-07T06-41-25Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-05-07T06-41-25Z**
 
 MinIO 支持在 SFTP 上使用基于证书的双向 TLS (mTLS) 身份验证，服务器与客户端会相互验证对方的真实性。
 

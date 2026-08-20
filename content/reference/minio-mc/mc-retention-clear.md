@@ -2,8 +2,8 @@
 title: "mc retention clear"
 url: "/reference/minio-mc/mc-retention-clear/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-clear.rst
+upstream_modified: false
 ---
 
 <a id="mc-retention-clear"></a>
@@ -16,16 +16,15 @@ The [`mc retention clear`](#command-mc.retention.clear) command removes the [Wri
 
 To change the retention status of an object under [legal hold](/administration/object-management/object-retention/#minio-object-locking-legalhold), use [`mc legalhold clear`](/reference/minio-mc/mc-legalhold-clear/#command-mc.legalhold.clear).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes the default object lock configuration for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc retention clear --default myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -45,8 +44,8 @@ mc [GLOBALFLAGS] retention clear           \
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 
 [`mc retention clear --version-id`](#mc.retention.clear.-version-id) is mutually exclusive with multiple other parameters. See the reference documentation for more information.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -138,17 +137,16 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Clear Object Lock Settings for an Object or Object(s) {#clear-object-lock-settings-for-an-object-or-object-s}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Specific Object" %}}
-
+{{< tabs group="specific-object-multiple-objects" >}}
+{{< tab label="Specific Object" value="specific-object" >}}
 ```shell
 mc retention clear ALIAS/PATH
 ```
 
 - Replace [`ALIAS`](#mc.retention.clear.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured S3-compatible host.
 - Replace [`PATH`](#mc.retention.clear.ALIAS) with the path to the object.
-{{% /tab %}}
-{{% tab header="Multiple Objects" %}}
+{{< /tab >}}
+{{< tab label="Multiple Objects" value="multiple-objects" >}}
 Use [`mc retention clear`](#command-mc.retention.clear) with [`--recursive`](#mc.retention.clear.-recursive) to clear the retention settings from all objects in a bucket:
 
 ```shell
@@ -157,8 +155,8 @@ mc retention clear --recursive ALIAS/PATH
 
 - Replace [`ALIAS`](#mc.retention.clear.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured S3-compatible host.
 - Replace [`PATH`](#mc.retention.clear.ALIAS) with the path to the bucket.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 > The bucket *must* have object locking enabled to use this command. You can only enable object locking when creating a bucket. See [`mc mb --with-lock`](/reference/minio-mc/mc-mb/#mc.mb.-with-lock) for more information on creating buckets with object locking enabled.
 

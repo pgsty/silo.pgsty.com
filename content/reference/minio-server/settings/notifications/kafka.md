@@ -2,8 +2,8 @@
 title: "Kafka Notification Settings"
 url: "/reference/minio-server/settings/notifications/kafka/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/kafka.rst
+upstream_modified: false
 ---
 
 <a id="kafka-notification-settings"></a>
@@ -21,11 +21,10 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 ## Multiple Kafka Targets {#multiple-kafka-targets}
 
@@ -35,9 +34,8 @@ You can specify multiple Kafka service endpoints by appending a unique identifie
 
 For example, the following commands set two distinct Kafka service endpoints as `PRIMARY` and `SECONDARY` respectively:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ```shell
 export MINIO_NOTIFY_KAFKA_ENABLE_PRIMARY="on"
 export MINIO_NOTIFY_KAFKA_BROKERS_PRIMARY="https://kafka1.example.net:9200, https://kafka2.example.net:9200"
@@ -45,10 +43,8 @@ export MINIO_NOTIFY_KAFKA_BROKERS_PRIMARY="https://kafka1.example.net:9200, http
 export MINIO_NOTIFY_KAFKA_ENABLE_SECONDARY="on"
 export MINIO_NOTIFY_KAFKA_BROKERS_SECONDARY="https://kafka1.example.net:9200, https://kafka2.example.net:9200"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ```shell
 mc admin config set notify_kafka:primary \
    brokers="https://kafka1.example.net:9200, https://kafka2.example.net:9200"
@@ -60,8 +56,8 @@ mc admin config set notify_kafka:secondary \
 ```
 
 Notice that for configuration settings, the unique identifier appends to `notify_kafka` only, not to each individual argument.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Settings {#settings}
 
@@ -69,9 +65,8 @@ Notice that for configuration settings, the unique identifier appends to `notify
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_ENABLE` {#envvar.MINIO_NOTIFY_KAFKA_ENABLE}
 
 *envvar*
@@ -79,9 +74,8 @@ Notice that for configuration settings, the unique identifier appends to `notify
 Specify `on` to enable publishing bucket notifications to a Kafka service endpoint.
 
 Defaults to `off`.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka` {#mc-conf.notify_kafka}
 
 *mc-conf*
@@ -95,57 +89,51 @@ mc admin config set notify_kafka \
   brokers="https://kafka1.example.net:9200, https://kafka2.example.net:9200"
   [ARGUMENT="VALUE"] ... \
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Brokers {#brokers}
 
 *Required*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_BROKERS` {#envvar.MINIO_NOTIFY_KAFKA_BROKERS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka brokers` {#mc-conf.notify_kafka.brokers}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comma-separated list of Kafka broker addresses. For example:
 
 `"kafka1.example.com:2021,kafka2.example.com:2021"`
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-05-27T05-56-19Z**
-
-MinIO checks the health of the specified URL (if it is resolvable and reachable) prior to adding the target. MinIO no longer blocks adding new notification targets if existing targets are offline.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-05-27T05-56-19Z**
+>
+> MinIO checks the health of the specified URL (if it is resolvable and reachable) prior to adding the target. MinIO no longer blocks adding new notification targets if existing targets are offline.
 
 ### Topic {#topic}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_TOPIC` {#envvar.MINIO_NOTIFY_KAFKA_TOPIC}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka topic` {#mc-conf.notify_kafka.topic}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the name of the Kafka topic to which MinIO publishes bucket events.
 
@@ -153,20 +141,18 @@ Specify the name of the Kafka topic to which MinIO publishes bucket events.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_SASL` {#envvar.MINIO_NOTIFY_KAFKA_SASL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka sasl` {#mc-conf.notify_kafka.sasl}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to enable SASL authentication.
 
@@ -174,20 +160,18 @@ Specify `on` to enable SASL authentication.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_SASL_USERNAME` {#envvar.MINIO_NOTIFY_KAFKA_SASL_USERNAME}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka sasl_username` {#mc-conf.notify_kafka.sasl_username}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the username for performing SASL/PLAIN or SASL/SCRAM authentication to the Kafka broker(s).
 
@@ -195,47 +179,42 @@ Specify the username for performing SASL/PLAIN or SASL/SCRAM authentication to t
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_SASL_PASSWORD` {#envvar.MINIO_NOTIFY_KAFKA_SASL_PASSWORD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka sasl_password` {#mc-conf.notify_kafka.sasl_password}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the password for performing SASL/PLAIN or SASL/SCRAM authentication to the Kafka broker(s).
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-06-23T20-26-00Z**
-
-MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-06-23T20-26-00Z**
+>
+> MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
 
 ### SASL Mechanism {#sasl-mechanism}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_SASL_MECHANISM` {#envvar.MINIO_NOTIFY_KAFKA_SASL_MECHANISM}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka sasl_mechanism` {#mc-conf.notify_kafka.sasl_mechanism}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the SASL mechanism to use for authenticating to the Kafka broker(s). MinIO supports the following mechanisms:
 
@@ -247,20 +226,18 @@ Specify the SASL mechanism to use for authenticating to the Kafka broker(s). Min
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_TLS_CLIENT_AUTH` {#envvar.MINIO_NOTIFY_KAFKA_TLS_CLIENT_AUTH}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka tls_client_auth` {#mc-conf.notify_kafka.tls_client_auth}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the client authentication type of the Kafka broker(s). The following table lists the supported values and their mappings
 
@@ -278,20 +255,18 @@ See [ClientAuthType](https://golang.org/pkg/crypto/tls/#ClientAuthType) for more
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_TLS` {#envvar.MINIO_NOTIFY_KAFKA_TLS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka tls` {#mc-conf.notify_kafka.tls}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify `on` to enable TLS connectivity to the Kafka broker(s).
 
@@ -299,20 +274,18 @@ Specify `on` to enable TLS connectivity to the Kafka broker(s).
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_TLS_SKIP_VERIFY` {#envvar.MINIO_NOTIFY_KAFKA_TLS_SKIP_VERIFY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka tls_skip_verify` {#mc-conf.notify_kafka.tls_skip_verify}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Enables or disables TLS verification of the NATS service endpoint TLS certificates.
 
@@ -323,20 +296,18 @@ Enables or disables TLS verification of the NATS service endpoint TLS certificat
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_CLIENT_TLS_CERT` {#envvar.MINIO_NOTIFY_KAFKA_CLIENT_TLS_CERT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka client_tls_cert` {#mc-conf.notify_kafka.client_tls_cert}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the path to the client certificate to use for performing mTLS authentication to the Kafka broker(s).
 
@@ -344,20 +315,18 @@ Specify the path to the client certificate to use for performing mTLS authentica
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_CLIENT_TLS_KEY` {#envvar.MINIO_NOTIFY_KAFKA_CLIENT_TLS_KEY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka client_tls_key` {#mc-conf.notify_kafka.client_tls_key}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the path to the client private key to use for performing mTLS authentication to the Kafka broker(s).
 
@@ -365,20 +334,18 @@ Specify the path to the client private key to use for performing mTLS authentica
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_VERSION` {#envvar.MINIO_NOTIFY_KAFKA_VERSION}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka version` {#mc-conf.notify_kafka.version}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the version of the Kafka cluster to assume when performing operations against that cluster. See the [sarama reference documentation](https://github.com/shopify/sarama/blob/v1.20.1/config.go#L327) for more information on this field’s behavior.
 
@@ -386,47 +353,42 @@ Specify the version of the Kafka cluster to assume when performing operations ag
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_BATCH_SIZE` {#envvar.MINIO_NOTIFY_KAFKA_BATCH_SIZE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka batch_size` {#mc-conf.notify_kafka.batch_size}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the integer value to use as the [batch size](https://kafka.apache.org/documentation/#producerconfigs_batch.size) for sending records to Kafka.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-12-02T10-51-33Z**
-
-MinIO previously limited this value to `100`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-12-02T10-51-33Z**
+>
+> MinIO previously limited this value to `100`.
 
 ### Queue Directory {#queue-directory}
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_QUEUE_DIR` {#envvar.MINIO_NOTIFY_KAFKA_QUEUE_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka queue_dir` {#mc-conf.notify_kafka.queue_dir}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the directory path to enable MinIO’s persistent event store for undelivered messages, such as `/opt/minio/events`.
 
@@ -436,20 +398,18 @@ MinIO stores undelivered events in the specified store while the Kafka server/br
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_QUEUE_LIMIT` {#envvar.MINIO_NOTIFY_KAFKA_QUEUE_LIMIT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka queue_limit` {#mc-conf.notify_kafka.queue_limit}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
@@ -457,47 +417,42 @@ Specify the maximum limit for undelivered messages. Defaults to `100000`.
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_COMMENT` {#envvar.MINIO_NOTIFY_KAFKA_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka comment` {#mc-conf.notify_kafka.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify a comment to associate with the Kafka configuration.
 
 ### Compression Codec {#compression-codec}
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-Server RELEASE.2023-12-09T18-17-51Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> Server RELEASE.2023-12-09T18-17-51Z
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_PRODUCER_COMPRESSION_CODEC` {#envvar.MINIO_NOTIFY_KAFKA_PRODUCER_COMPRESSION_CODEC}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka compression_codec` {#mc-conf.notify_kafka.compression_codec}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Specify the compression codec to use when sending records to Kafka.
 
@@ -511,28 +466,25 @@ Supports the following values:
 
 ### Compression Level {#compression-level}
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-Server RELEASE.2023-12-09T18-17-51Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> Server RELEASE.2023-12-09T18-17-51Z
 
 *Optional*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 ##### `MINIO_NOTIFY_KAFKA_PRODUCER_COMPRESSION_LEVEL` {#envvar.MINIO_NOTIFY_KAFKA_PRODUCER_COMPRESSION_LEVEL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 ##### `notify_kafka compression_level` {#mc-conf.notify_kafka.compression_level}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Controls the level of compression applied based on the configured compression codec.
 

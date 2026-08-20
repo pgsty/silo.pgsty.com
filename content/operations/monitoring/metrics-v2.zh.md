@@ -2,8 +2,8 @@
 title: "Metrics version 2"
 url: "/zh/operations/monitoring/metrics-v2/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/metrics-v2.rst
+upstream_modified: true
 ---
 
 <a id="metrics-version-2"></a>
@@ -37,8 +37,8 @@ MinIO 提供两个 [Grafana 仪表板](/zh/operations/monitoring/grafana/#minio-
 
 以下各节描述 version 2 的端点与指标。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="集群指标" %}}
+{{< tabs group="tab1-tab2-tab3" >}}
+{{< tab label="集群指标" value="tab1" >}}
 你可以使用以下 URL 端点抓取[集群级指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics)：
 
 ```shell
@@ -46,39 +46,34 @@ http://HOSTNAME:PORT/minio/v2/metrics/cluster
 ```
 
 将 `HOSTNAME:PORT` 替换为 MinIO 部署的 <abbr title="Fully Qualified Domain Name">FQDN</abbr> 与端口。 对于使用负载均衡器管理 MinIO 节点间连接的部署，请指定负载均衡器地址。
-{{% /tab %}}
-{{% tab header="存储桶指标" %}}
-{{% alert color="info" %}}
-**变更: MinIO**
+{{< /tab >}}
+{{< tab label="存储桶指标" value="tab2" >}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2023-07-21T21-12-44Z
+>
+> 存储桶指标已迁移到独立端点。
 
-RELEASE.2023-07-21T21-12-44Z
+> [!NOTE]
+> **变更: RELEASE.2023-08-31T15-31-16Z**
+>
+> 你可以使用以下 URL 端点抓取[存储桶级指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)：
 
-存储桶指标已迁移到独立端点。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2023-08-31T15-31-16Z**
-
-你可以使用以下 URL 端点抓取[存储桶级指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)：
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2025-03-12T17-29-24Z**
-
-出于性能原因，v2 指标最多支持 100 个存储桶。 如果需要覆盖更多存储桶的指标，请改用 [v3 指标](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics)。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2025-03-12T17-29-24Z**
+>
+> 出于性能原因，v2 指标最多支持 100 个存储桶。 如果需要覆盖更多存储桶的指标，请改用 [v3 指标](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics)。
 
 ```shell
 http://HOSTNAME:PORT/minio/v2/metrics/bucket
 ```
 
 将 `HOSTNAME:PORT` 替换为 MinIO 部署的 <abbr title="Fully Qualified Domain Name">FQDN</abbr> 与端口。 对于使用负载均衡器管理 MinIO 节点间连接的部署，请指定负载均衡器地址。
-{{% /tab %}}
-{{% tab header="资源指标" %}}
-{{% alert color="info" %}}
-**新增: RELEASE.2023-10-07T15-07-38Z**
-
-{{% /alert %}}
+{{< /tab >}}
+{{< tab label="资源指标" value="tab3" >}}
+> [!NOTE]
+> **新增: RELEASE.2023-10-07T15-07-38Z**
 
 你可以使用以下 URL 端点抓取[资源指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-resource-metrics)：
 
@@ -87,17 +82,16 @@ http://HOSTNAME:PORT/minio/v2/metrics/resource
 ```
 
 将 `HOSTNAME:PORT` 替换为 MinIO 部署的 <abbr title="Fully Qualified Domain Name">FQDN</abbr> 与端口。 对于使用负载均衡器管理 MinIO 节点间连接的部署，请指定负载均衡器地址。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 - [集群指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics)
 - [存储桶指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)
 - [资源指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-resource-metrics)
 
-> {{% alert color="info" %}}
-> **变更: RELEASE.2025-03-12T17-29-24Z**
->
-> 出于性能原因，v2 指标最多支持 100 个存储桶。 如果需要覆盖更多存储桶的指标，请改用 [v3 指标](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics)。
-> {{% /alert %}}
+> > [!NOTE]
+> > **变更: RELEASE.2025-03-12T17-29-24Z**
+> >
+> > 出于性能原因，v2 指标最多支持 100 个存储桶。 如果需要覆盖更多存储桶的指标，请改用 [v3 指标](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics)。
 
 <a id="minio-available-resource-metrics"></a>

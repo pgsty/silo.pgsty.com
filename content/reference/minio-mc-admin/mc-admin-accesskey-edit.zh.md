@@ -2,8 +2,8 @@
 title: "mc admin user accesskey edit"
 url: "/zh/reference/minio-mc-admin/mc-admin-accesskey-edit/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-accesskey-edit.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-accesskey-edit"></a>
@@ -17,8 +17,8 @@ silo_modified: false
 
 该命令要求访问密钥至少有一个属性发生变更。 否则，命令会报错退出。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令为 `myminio` 部署上的 `myuserserviceaccount` 访问密钥应用新的策略和 secret key：
 
 ```shell
@@ -27,9 +27,8 @@ mc admin accesskey edit                                             \
                    --secret-key "myuserserviceaccountnewsecretkey"  \
                    --policy "/path/to/new/policy.json"
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -49,8 +48,8 @@ mc [GLOBALFLAGS] admin accesskey edit                      \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

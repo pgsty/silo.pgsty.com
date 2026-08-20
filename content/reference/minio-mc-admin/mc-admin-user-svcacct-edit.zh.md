@@ -2,8 +2,8 @@
 title: "mc admin user svcacct edit"
 url: "/zh/reference/minio-mc-admin/mc-admin-user-svcacct-edit/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct-edit.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct-edit"></a>
@@ -11,22 +11,21 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct.edit"></a>
 
-{{% alert color="warning" %}}
-**重要**
-
-此命令已被替代，并将在未来的 MinIO 客户端 发布版本中弃用。
-
-从 MinIO客户端版本RELEASE.2024-10-08T09-37-26Z 起，请使用 [`mc admin accesskey edit`](/zh/reference/minio-mc-admin/mc-admin-accesskey-edit/#command-mc.admin.accesskey.edit) 命令修改内置 MinIO IDP 用户的访问密钥。
-
-如需修改 AD/LDAP 用户的访问密钥，请使用 [`mc idp ldap accesskey edit`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-edit/#command-mc.idp.ldap.accesskey.edit) 命令。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 此命令已被替代，并将在未来的 MinIO 客户端 发布版本中弃用。
+>
+> 从 MinIO客户端版本RELEASE.2024-10-08T09-37-26Z 起，请使用 [`mc admin accesskey edit`](/zh/reference/minio-mc-admin/mc-admin-accesskey-edit/#command-mc.admin.accesskey.edit) 命令修改内置 MinIO IDP 用户的访问密钥。
+>
+> 如需修改 AD/LDAP 用户的访问密钥，请使用 [`mc idp ldap accesskey edit`](/zh/reference/minio-mc/mc-idp-ldap-accesskey-edit/#command-mc.idp.ldap.accesskey.edit) 命令。
 
 ## 语法 {#id2}
 
 [`mc admin user svcacct edit`](#command-mc.admin.user.svcacct.edit) 命令用于修改与指定用户关联的访问密钥配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令为 `myminio` 部署上的 `myuserserviceaccount` 访问密钥应用新的策略和密钥：
 
 ```shell
@@ -35,9 +34,8 @@ mc admin user svcacct edit                                             \
                       --policy "/path/to/new/policy.json"              \
                       myminio myuserserviceaccount
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -53,8 +51,8 @@ mc [GLOBALFLAGS] admin user svcacct edit            \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -80,10 +78,8 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-18T16-59-00Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-18T16-59-00Z**
 
 为服务账户添加描述。 例如，可以说明该服务账户存在的原因。
 
@@ -93,10 +89,8 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-30T22-41-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-30T22-41-38Z**
 
 为服务账户设置过期日期。 日期必须在未来，不能设置已经过去的过期日期。
 
@@ -114,10 +108,8 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-18T16-59-00Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-18T16-59-00Z**
 
 为服务账户添加一个便于识别的名称。
 

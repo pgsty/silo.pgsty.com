@@ -2,8 +2,8 @@
 title: "管理部署"
 url: "/zh/administration/console/managing-deployment/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/console/managing-deployment.rst
+upstream_modified: true
 ---
 
 <a id="minio-console-managing-deployment"></a>
@@ -16,13 +16,12 @@ silo_modified: true
 - 设置 [站点复制](#minio-console-site-replication)，以同步数据中心，满足地理分散团队的及时访问需求，或用于灾难准备。
 - 配置部署 [设置](#minio-console-settings)。
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO Console 是 MinIO Server 的 Web 界面。
-
-它与 MinIO Kubernetes Operator Console 相互独立，二者并不相同；后者已在 Operator 6.0.0 起废弃并移除。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO Console 是 MinIO Server 的 Web 界面。
+>
+> 它与 MinIO Kubernetes Operator Console 相互独立，二者并不相同；后者已在 Operator 6.0.0 起废弃并移除。
 
 <a id="id3"></a>
 
@@ -50,11 +49,10 @@ Console 的 **Logs** 部分显示 MinIO 部署生成的 [服务器日志](/zh/op
 
 ### 审计 {#id6}
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO 计划废弃 Tenant Console Audit Log 功能，并在后续版本中将其移除。 作为替代方案，可使用任何支持 Webhook 的数据库或日志服务，从 Tenant 捕获 [审计日志](/zh/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO 计划废弃 Tenant Console Audit Log 功能，并在后续版本中将其移除。 作为替代方案，可使用任何支持 Webhook 的数据库或日志服务，从 Tenant 捕获 [审计日志](/zh/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs)。
 
 Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审计日志](/zh/operations/monitoring/minio-logging/#minio-logging) 的界面。
 
@@ -78,13 +76,12 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 
 ## 事件 {#minio-console-notifications}
 
-{{% alert color="info" %}}
-**变更: Console**
-
-0.23.1
-
-Notifications 部分重命名为 Events。
-{{% /alert %}}
+> [!NOTE]
+> **变更: Console**
+>
+> 0.23.1
+>
+> Notifications 部分重命名为 Events。
 
 **Events** 部分提供用于查看、添加或删除 [事件通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 目标的界面。
 
@@ -110,11 +107,10 @@ Notifications 部分重命名为 Events。
 
 你可以将此视图中创建或列出的密钥用于对象加密操作，包括设置 [存储桶级默认密钥](/zh/administration/console/managing-objects/#minio-console-buckets)。
 
-{{% alert color="warning" %}}
-**重要**
-
-删除密钥会导致 MinIO 无法解密任何受该密钥保护的对象。 如果该密钥不存在备份，删除密钥将使对象永久不可读。 更多信息请参见 [安全擦除与锁定](/zh/administration/server-side-encryption/#minio-encryption-sse-secure-erasure-locking)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 删除密钥会导致 MinIO 无法解密任何受该密钥保护的对象。 如果该密钥不存在备份，删除密钥将使对象永久不可读。 更多信息请参见 [安全擦除与锁定](/zh/administration/server-side-encryption/#minio-encryption-sse-secure-erasure-locking)。
 
 <a id="id13"></a>
 
@@ -134,13 +130,12 @@ Notifications 部分重命名为 Events。
 - Audit [Webhook](/zh/administration/monitoring/publish-events-to-webhook/#minio-bucket-notifications-publish-webhook)
 - Audit [Kafka](/zh/administration/monitoring/publish-events-to-kafka/#minio-bucket-notifications-publish-kafka)
 
-{{% alert color="info" %}}
-**新增: Console**
-
-v0.24.0
-
-环境变量中的配置设置会覆盖在 MinIO Console 中添加的任何自定义内容。 将鼠标悬停在配置字段上方，可显示工具提示，说明该设置是否由环境变量控制。
-{{% /alert %}}
+> [!NOTE]
+> **新增: Console**
+>
+> v0.24.0
+>
+> 环境变量中的配置设置会覆盖在 MinIO Console 中添加的任何自定义内容。 将鼠标悬停在配置字段上方，可显示工具提示，说明该设置是否由环境变量控制。
 
 如果已认证用户不具备 [所需的管理权限](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions)，则某些子部分可能不可见。
 

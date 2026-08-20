@@ -2,8 +2,8 @@
 title: "MinIO Operator 环境变量"
 url: "/zh/reference/operator-environment-variables/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/operator-environment-variables.rst
+upstream_modified: false
 ---
 
 <a id="minio-operator"></a>
@@ -72,11 +72,10 @@ Operator 用于解密其 TLS 证书中私钥的密码。
 
 将 STS Service 切换为 `on` 或 `off`。
 
-{{% alert color="info" %}}
-**变更: v5.0.11**
-
-未指定时，默认值为 `on`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: v5.0.11**
+>
+> 未指定时，默认值为 `on`。
 
 在 Operator 5.0.11 之前的版本中，默认值为 `off`。
 
@@ -100,10 +99,8 @@ Operator 用于解密其 TLS 证书中私钥的密码。
 
 *envvar*
 
-{{% alert color="info" %}}
-**新增: v5.0.11**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: v5.0.11**
 
 指定由 Operator 加载的 MinIO 实例 sidecar 容器镜像。
 

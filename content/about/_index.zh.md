@@ -6,8 +6,7 @@ url: "/zh/about/"
 weight: 5
 type: docs
 icon: fa-solid fa-circle-info
-minio_origin: false
-silo_modified: false
+sidebar_expanded: true
 ---
 
 Silo 是由 [Pigsty](https://pgsty.com) 发布并维护的 MinIO 社区分支。本节收录项目对外公布的各项条款：

@@ -2,19 +2,18 @@
 title: "mc get"
 url: "/zh/reference/minio-mc/mc-get/"
 weight: 120
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-get.rst
+upstream_modified: false
 ---
 
 <a id="mc-get"></a>
 
 <a id="command-mc.get"></a>
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-02-24T01-33-20Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-02-24T01-33-20Z
 
 ## 语法 {#id2}
 
@@ -22,16 +21,15 @@ RELEASE.2024-02-24T01-33-20Z
 
 与 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp) 或 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 相比，`mc get` 为下载文件提供了更简化的接口。 `mc get` 使用单向下载功能，以牺牲效率为代价，换取相较其他命令更低的功能复杂度。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将文件 `logo.png` 从 s3 源下载到本地文件系统路径 `~/images/collateral/`。
 
 ```shell
 mc get minio/marketing/logo.png ~/images/collateral
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -47,8 +45,8 @@ mc [GLOBALFLAGS] get                      \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -111,11 +109,10 @@ mc [GLOBALFLAGS] get                      \
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--version-id, --vid` {#mc.get.-version-id}
 

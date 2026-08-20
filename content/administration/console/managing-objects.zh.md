@@ -2,8 +2,8 @@
 title: "管理对象"
 url: "/zh/administration/console/managing-objects/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/console/managing-objects.rst
+upstream_modified: false
 ---
 
 <a id="minio-console-managing-objects"></a>
@@ -41,21 +41,19 @@ silo_modified: false
 - 显示版本
 - [删除](/zh/administration/object-management/object-delete/#minio-object-delete)
 
-{{% alert color="info" %}}
-**新增: Console**
+> [!NOTE]
+> **新增: Console**
+>
+> v0.24.0
+>
+> 可通过 Console 右上角的对象管理器按钮查看对象上传或下载状态。 如果你在当前会话期间未上传或下载任何对象，则不会显示该按钮。
 
-v0.24.0
-
-可通过 Console 右上角的对象管理器按钮查看对象上传或下载状态。 如果你在当前会话期间未上传或下载任何对象，则不会显示该按钮。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: Console**
-
-v0.35.0
-
-如果你选择下载多个对象，MinIO 会将这些对象打包为一个 ZIP 归档供下载。 下载后你必须解压该归档，才能访问其中的文件。
-{{% /alert %}}
+> [!NOTE]
+> **变更: Console**
+>
+> v0.35.0
+>
+> 如果你选择下载多个对象，MinIO 会将这些对象打包为一个 ZIP 归档供下载。 下载后你必须解压该归档，才能访问其中的文件。
 
 <a id="minio-console-buckets"></a>
 <a id="id4"></a>
@@ -72,13 +70,12 @@ MinIO 不限制单个部署允许创建的存储桶总数。 不过，作为通�
 
 创建存储桶时，你可以启用以下功能：[版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning), [对象锁定](/zh/administration/object-management/object-retention/#minio-object-locking), 存储桶大小（配额）限制，以及 [保留规则](/zh/administration/object-management/object-retention/#minio-object-locking-retention-modes)。 保留规则要求启用版本控制。
 
-{{% alert color="info" %}}
-**变更: Console**
-
-v0.35.0
-
-如果启用版本控制，你可以指定要排除在版本控制之外的前缀。
-{{% /alert %}}
+> [!NOTE]
+> **变更: Console**
+>
+> v0.35.0
+>
+> 如果启用版本控制，你可以指定要排除在版本控制之外的前缀。
 
 你 **必须** 在创建存储桶时配置复制、锁定和版本控制选项。 之后无法再更改该存储桶的这些设置。
 
@@ -88,11 +85,10 @@ v0.35.0
 
 在摘要页面中，选择任一可用标签页以进一步管理该存储桶。
 
-{{% alert color="info" %}}
-**说明**
-
-如果已认证用户没有 [所需的管理权限](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions)，某些管理功能可能不可用。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 如果已认证用户没有 [所需的管理权限](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions)，某些管理功能可能不可用。
 
 管理存储桶时，你的访问设置可能允许你查看或更改以下内容：
 

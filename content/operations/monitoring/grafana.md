@@ -2,8 +2,8 @@
 title: "Monitor a Silo Server with Grafana"
 url: "/operations/monitoring/grafana/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/grafana.rst
+upstream_modified: true
 ---
 
 <a id="monitor-a-minio-server-with-grafana"></a>
@@ -17,13 +17,12 @@ silo_modified: true
 - An existing MinIO deployment with network access to the Prometheus deployment
 - [Grafana installed](https://grafana.com/grafana/download)
 
-{{% alert color="info" %}}
-**Grafana dashboards use metrics version 2**
-
-The MinIO Grafana dashboards use [metrics version 2](/operations/monitoring/metrics-v2/#minio-metrics-v2). For more about metrics API versions, see [Metrics and alerts.](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)
-
-Version 3 metrics require creating your own dashboard. For more information about dashboards, see [the Grafana documentation.](https://grafana.com/docs/grafana/latest/dashboards/)
-{{% /alert %}}
+> [!NOTE]
+> **Grafana dashboards use metrics version 2**
+>
+> The MinIO Grafana dashboards use [metrics version 2](/operations/monitoring/metrics-v2/#minio-metrics-v2). For more about metrics API versions, see [Metrics and alerts.](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)
+>
+> Version 3 metrics require creating your own dashboard. For more information about dashboards, see [the Grafana documentation.](https://grafana.com/docs/grafana/latest/dashboards/)
 
 ## MinIO Grafana Dashboard {#minio-grafana-dashboard}
 

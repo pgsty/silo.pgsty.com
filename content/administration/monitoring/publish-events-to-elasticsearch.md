@@ -2,8 +2,8 @@
 title: "Publish Events to Elasticsearch"
 url: "/administration/monitoring/publish-events-to-elasticsearch/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-elasticsearch.rst
+upstream_modified: false
 ---
 
 <a id="publish-events-to-elasticsearch"></a>
@@ -31,8 +31,8 @@ This procedure uses the [`mc`](/reference/minio-mc/#command-mc) command line too
 
 You can configure a new Elasticsearch service endpoint using either environment variables *or* by setting runtime configuration settings.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 MinIO supports specifying the Elasticsearch service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/elasticsearch/#minio-server-envvar-bucket-notification-elasticsearch). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring an Elasticsearch service endpoint. The minimum *required* variables are:
@@ -42,39 +42,35 @@ The following example code sets *all* environment variables related to configuri
 - [`MINIO_NOTIFY_ELASTICSEARCH_INDEX`](/reference/minio-server/settings/notifications/elasticsearch/#envvar.MINIO_NOTIFY_ELASTICSEARCH_INDEX)
 - [`MINIO_NOTIFY_ELASTICSEARCH_FORMAT`](/reference/minio-server/settings/notifications/elasticsearch/#envvar.MINIO_NOTIFY_ELASTICSEARCH_FORMAT)
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_ELASTICSEARCH_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_ELASTICSEARCH_URL_<IDENTIFIER>="<ENDPOINT>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_INDEX_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_FORMAT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_USERNAME_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_PASSWORD_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_ELASTICSEARCH_COMMENT_<IDENTIFIER>="<string>"
+> ```
 
-```shell
-   set MINIO_NOTIFY_ELASTICSEARCH_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_ELASTICSEARCH_URL_<IDENTIFIER>="<ENDPOINT>"
-   set MINIO_NOTIFY_ELASTICSEARCH_INDEX_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_FORMAT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_USERNAME_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_PASSWORD_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_ELASTICSEARCH_COMMENT_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux and macOS**
-
-```shell
-   export MINIO_NOTIFY_ELASTICSEARCH_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_ELASTICSEARCH_URL_<IDENTIFIER>="<ENDPOINT>"
-   export MINIO_NOTIFY_ELASTICSEARCH_INDEX_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_FORMAT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_USERNAME_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_PASSWORD_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_ELASTICSEARCH_COMMENT_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux and macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_ELASTICSEARCH_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_ELASTICSEARCH_URL_<IDENTIFIER>="<ENDPOINT>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_INDEX_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_FORMAT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_USERNAME_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_PASSWORD_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_ELASTICSEARCH_COMMENT_<IDENTIFIER>="<string>"
+> ```
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the TARGET service endpoint. Use the same `<IDENTIFIER>` value for all environment variables related to the new target service endpoint. The following examples assume an identifier of `PRIMARY`.
 
@@ -82,8 +78,8 @@ The following example code sets *all* environment variables related to configuri
 - Replace `<ENDPOINT>` with the URL of the Elasticsearch service endpoint. For example:
 
 See [Elasticsearch Service for Bucket Notifications](/reference/minio-server/settings/notifications/elasticsearch/#minio-server-envvar-bucket-notification-elasticsearch) for complete documentation on each environment variable.
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 MinIO supports adding or updating Elasticsearch endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_elasticsearch`](/reference/minio-server/settings/notifications/elasticsearch/#mc-conf.notify_elasticsearch) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an Elasticsearch service endpoint. The minimum *required* settings are:
@@ -112,8 +108,8 @@ mc admin config set ALIAS/ notify_elasticsearch:IDENTIFIER \
   `https://user:password@hostname:port`
 
 See [Elasticsearch Bucket Notification Configuration Settings](/reference/minio-server/settings/notifications/elasticsearch/#minio-server-config-bucket-notification-elasticsearch) for complete documentation on each setting.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) Restart the MinIO Deployment {#restart-the-minio-deployment}
 
@@ -133,36 +129,35 @@ SQS ARNs: arn:minio:sqs::primary:elasticsearch
 
 You must specify the ARN resource when configuring bucket notifications with the associated Elasticsearch deployment as a target.
 
-{{% alert color="info" %}}
-**Identifying the ARN for your bucket notifications**
-
-You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
-
-**Review the JSON output**
-
-1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. In the JSON output, look for the key `info.sqsARN`.
-
-   The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
-
-   For example, `arn:minio:sqs::primary:elasticsearch`.
-
-**Use jq to parse the JSON for the value**
-
-1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
-2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:elasticsearch`
-{{% /alert %}}
+> [!NOTE]
+> **Identifying the ARN for your bucket notifications**
+>
+> You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
+>
+> **Review the JSON output**
+>
+> 1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. In the JSON output, look for the key `info.sqsARN`.
+>
+>    The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
+>
+>    For example, `arn:minio:sqs::primary:elasticsearch`.
+>
+> **Use jq to parse the JSON for the value**
+>
+> 1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
+> 2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:elasticsearch`
 
 ### 3) Configure Bucket Notifications using the Elasticsearch Endpoint as a Target {#configure-bucket-notifications-using-the-elasticsearch-endpoint-as-a-target}
 

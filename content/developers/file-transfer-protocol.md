@@ -3,8 +3,8 @@ title: "File Transfer Protocol (FTP/SFTP)"
 url: "/developers/file-transfer-protocol/"
 weight: 220
 icon: fa-solid fa-file-arrow-up
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/file-transfer-protocol.rst
+upstream_modified: false
 ---
 
 <a id="file-transfer-protocol-ftp-sftp"></a>
@@ -12,30 +12,30 @@ silo_modified: false
 
 - [File Transport Using FTP and SFTP with MinIO](https://www.youtube.com/watch?v=lNZyL8wD-lI)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 Starting with Operator 5.0.7 and [MinIO Server RELEASE.2023-04-20T17-56-55Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-04-20T17-56-55Z), you can use the SSH File Transfer Protocol (SFTP) to interact with the objects on a MinIO Operator Tenant deployment.
 
 SFTP is defined by the Internet Engineering Task Force (IETF) as an extension of SSH 2.0. It allows file transfer over SSH for use with [Transport Layer Security (TLS)](/operations/network-encryption/#minio-tls) and virtual private network (VPN) applications.
 
 Enabling SFTP does not affect other MinIO features.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 Starting with [MinIO Server RELEASE.2023-04-20T17-56-55Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-04-20T17-56-55Z), you can use the File Transfer Protocol (FTP) to interact with the objects on a MinIO deployment.
 
 You must specifically enable FTP or SFTP when starting the server. Enabling either server type does not affect other MinIO features.
 
 This page uses the abbreviation FTP throughout, but you can use any of the supported FTP protocols described below.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Supported Protocols {#supported-protocols}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 The MinIO Operator only supports configuring SSH File Transfer Protocol (SFTP).
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 When enabled, MinIO supports FTP access over the following protocols:
 
 - SSH File Transfer Protocol (SFTP)
@@ -53,8 +53,8 @@ When enabled, MinIO supports FTP access over the following protocols:
   Unencrypted file transfer.
 
   MinIO does **not** recommend using unencrypted FTP for file transfer.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Supported Commands {#supported-commands}
 
@@ -94,25 +94,23 @@ The SFTP protocol does not require any of the `admin:*` [permissions](/administr
 
 ## Prerequisites {#prerequisites}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
-
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 - MinIO Operator v5.0.7 or later.
 - Enable an SFTP port (8022) for the server.
 - A port to use for the SFTP commands and a range of ports to allow the SFTP server to request to use for the data transfer.
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 - MinIO RELEASE.2023-04-20T17-56-55Z or later.
 - Enable an FTP or SFTP port for the server.
 - A port to use for the FTP commands and a range of ports to allow the FTP server to request to use for the data transfer.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Procedure {#procedure}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
-
+{{< tabs group="kubernetes-baremetal" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 1. Enable SFTP for the desired Tenant:
 
    Use the following Kubectl command to edit the Tenant YAML configuration:
@@ -185,14 +183,12 @@ If SFTP is enabled, the output resembles the following:
 ```console
 enableSFTP: true
 ```
-
-{{% /tab %}}
-{{% tab header="Baremetal" %}}
-
+{{< /tab >}}
+{{< tab label="Baremetal" value="baremetal" >}}
 1. Start MinIO with an FTP and/or SFTP port enabled.
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="FTPS" %}}
+   {{< tabs group="ftps-sftpftp" >}}
+   {{< tab label="FTPS" value="ftps" >}}
    The following example starts MinIO with FTPS enabled.
 
    ```shell
@@ -204,14 +200,12 @@ enableSFTP: true
    ...
    ```
 
-   {{% alert color="info" %}}
-   **Note**
-
-   Omit `tls-private-key` and `tls-public-cert` to use the MinIO default TLS keys for FTPS. For more information, see the [TLS on MinIO documentation](/operations/network-encryption/#minio-tls).
-   {{% /alert %}}
-   {{% /tab %}}
-   {{% tab header="SFTP/FTP" %}}
-
+   > [!NOTE]
+   > **Note**
+   >
+   > Omit `tls-private-key` and `tls-public-cert` to use the MinIO default TLS keys for FTPS. For more information, see the [TLS on MinIO documentation](/operations/network-encryption/#minio-tls).
+   {{< /tab >}}
+   {{< tab label="SFTP/FTP" value="sftpftp" >}}
    ```shell
    minio server http://server{1...4}/disk{1...4}        \
    --ftp="address=:8021"                                \
@@ -229,9 +223,8 @@ enableSFTP: true
    MinIO FTP Server listening on :8021
    MinIO SFTP Server listening on :8022
    ```
-
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 2. Use your preferred FTP client to connect to the MinIO deployment. You must connect as a user whose [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) allow access to the desired buckets and objects.
 
    The specifics of connecting to the MinIO deployment depend on your FTP client. Refer to the documentation for your client.
@@ -239,8 +232,8 @@ enableSFTP: true
    To connect over TLS or through SSH, you must use a client that supports the desired protocol.
 3. Connect to MinIO
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="SFTP/FTP" %}}
+   {{< tabs group="sftpftp-ftps" >}}
+   {{< tab label="SFTP/FTP" value="sftpftp" >}}
    The following example connects to an SFTP server, and lists the contents of a bucket named `runner`.
 
    ```console
@@ -250,9 +243,8 @@ enableSFTP: true
    sftp> ls runner/
    chunkdocs  testdir
    ```
-
-   {{% /tab %}}
-   {{% tab header="FTPS" %}}
+   {{< /tab >}}
+   {{< tab label="FTPS" value="ftps" >}}
    The following uses the Linux uses the [FTP CLI client](https://linux.die.net/man/1/ftp) to connect to the MinIO server using `minio` credentials to list contents in a bucket named `runner`
 
    ```shell
@@ -272,13 +264,12 @@ enableSFTP: true
    drwxrwxrwx 1 nobody nobody            0 Jan  1 00:00 testdir/
    ...
    ```
-
-   {{% /tab %}}
-   {{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
 4. Download an Object
 
-   {{< tabpane text=true persist=header >}}
-   {{% tab header="SFTP/FTP" %}}
+   {{< tabs group="sftpftp-ftps" >}}
+   {{< tab label="SFTP/FTP" value="sftpftp" >}}
    This example lists items in a bucket, then downloads the contents of the bucket.
 
    ```console
@@ -292,9 +283,8 @@ enableSFTP: true
    metadata                               100%  226    16.6KB/s   00:00
    sftp>
    ```
-
-   {{% /tab %}}
-   {{% tab header="FTPS" %}}
+   {{< /tab >}}
+   {{< tab label="FTPS" value="ftps" >}}
    This example lists items in a bucket, then downloads the contents of the bucket.
 
    ```console
@@ -322,20 +312,17 @@ enableSFTP: true
    45 bytes received in 00:00 (3.55 KiB/s)
    ...
    ```
-
-   {{% /tab %}}
-   {{< /tabpane >}}
-{{% /tab %}}
-{{< /tabpane >}}
+   {{< /tab >}}
+   {{< /tabs >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-certificate-key-file-sftp-k8s"></a>
 
 ## Connect to MinIO Using SFTP with a Certificate Key File {#connect-to-minio-using-sftp-with-a-certificate-key-file}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-05-07T06-41-25Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-05-07T06-41-25Z**
 
 MinIO supports mutual TLS (mTLS) certificate-based authentication on SFTP, where both the server and the client verify the authenticity of each other.
 

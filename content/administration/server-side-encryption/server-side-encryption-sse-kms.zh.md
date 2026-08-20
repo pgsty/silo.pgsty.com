@@ -2,8 +2,8 @@
 title: "使用按存储桶划分密钥的服务端加密（SSE-KMS）"
 url: "/zh/administration/server-side-encryption/server-side-encryption-sse-kms/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/server-side-encryption/server-side-encryption-sse-kms.rst
+upstream_modified: true
 ---
 
 <a id="sse-kms"></a>
@@ -38,13 +38,12 @@ MinIO SSE-KMS 在功能上与 AWS S3 [使用存储在 AWS 中的 KMS 密钥进�
 
 ## 快速开始 {#minio-encryption-sse-kms-quickstart}
 
-{{% alert color="warning" %}}
-**重要**
-
-在 MinIO 部署上启用 <abbr title="服务端加密">SSE</abbr> 后， 会自动使用默认加密密钥对该部署的后端数据进行加密。
-
-MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动。 KMS 必须维护并提供对 [`MINIO_KMS_KES_KEY_NAME`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) 的访问。 之后你不能再禁用 KES， 也不能在后续“撤销”该 <abbr title="服务端加密">SSE</abbr> 配置。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 在 MinIO 部署上启用 <abbr title="服务端加密">SSE</abbr> 后， 会自动使用默认加密密钥对该部署的后端数据进行加密。
+>
+> MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动。 KMS 必须维护并提供对 [`MINIO_KMS_KES_KEY_NAME`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) 的访问。 之后你不能再禁用 KES， 也不能在后续“撤销”该 <abbr title="服务端加密">SSE</abbr> 配置。
 
 以下过程使用 `play` MinIO <abbr title="Key Encryption Service">KES</abbr> 沙箱，在评估和早期开发环境中为 <abbr title="服务端加密">SSE</abbr> 提供 SSE-KMS 支持。
 
@@ -58,15 +57,14 @@ MinIO 必须能够访问 KES 和外部 KMS， 才能解密后端并正常启动�
 - [HashiCorp Vault Keystore](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO KES `Play` sandbox 是公开环境， 并会为所有创建的 External Keys（EK）授予 root 级访问权限。 任何存储在 `Play` sandbox 上的 <abbr title="外部密钥">EK</abbr> 都可能随时被访问或销毁， 从而使受保护数据暴露风险或永久不可读。
-
-- **切勿** 使用 `Play` sandbox 保护你无法承受丢失或泄露的数据。
-- **切勿** 使用会暴露组织私有、机密或内部命名约定的名称来生成 <abbr title="外部密钥">EK</abbr>。
-- **切勿** 在生产环境中使用 `Play` sandbox。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO KES `Play` sandbox 是公开环境， 并会为所有创建的 External Keys（EK）授予 root 级访问权限。 任何存储在 `Play` sandbox 上的 <abbr title="外部密钥">EK</abbr> 都可能随时被访问或销毁， 从而使受保护数据暴露风险或永久不可读。
+>
+> - **切勿** 使用 `Play` sandbox 保护你无法承受丢失或泄露的数据。
+> - **切勿** 使用会暴露组织私有、机密或内部命名约定的名称来生成 <abbr title="外部密钥">EK</abbr>。
+> - **切勿** 在生产环境中使用 `Play` sandbox。
 
 此过程需要以下组件：
 
@@ -126,15 +124,14 @@ export MINIO_KMS_KES_API_KEY=<API-key-identity-string-from-KES> # Replace with t
 export MINIO_KMS_KES_KEY_NAME=my-minio-sse-s3-key
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-- API 密钥是与 KES 服务器进行身份验证的首选方式，因为它提供了更简洁且更安全的认证流程。
-- 或者，也可以指定 [`MINIO_KMS_KES_KEY_FILE`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_FILE) 和 [`MINIO_KMS_KES_CERT_FILE`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_CERT_FILE)，而不是 [`MINIO_KMS_KES_API_KEY`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_API_KEY)。
-
-  API 密钥与基于证书的身份验证互斥。 请指定 API 密钥变量，*或* 指定密钥文件和证书文件变量。
-- 本站文档使用 API 密钥。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> - API 密钥是与 KES 服务器进行身份验证的首选方式，因为它提供了更简洁且更安全的认证流程。
+> - 或者，也可以指定 [`MINIO_KMS_KES_KEY_FILE`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_FILE) 和 [`MINIO_KMS_KES_CERT_FILE`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_CERT_FILE)，而不是 [`MINIO_KMS_KES_API_KEY`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_API_KEY)。
+>
+>   API 密钥与基于证书的身份验证互斥。 请指定 API 密钥变量，*或* 指定密钥文件和证书文件变量。
+> - 本站文档使用 API 密钥。
 
 <table>
   <tbody>
@@ -204,11 +201,10 @@ SSE-KMS 使用在存储桶自动加密设置中指定的 <abbr title="外部密�
 
 ## 加密过程 {#minio-encryption-sse-kms-encryption-process}
 
-{{% alert color="info" %}}
-**说明**
-
-本节介绍 MinIO 的内部逻辑和功能。 这些信息仅用于帮助理解，并不是配置或实现任何 MinIO 功能的前提条件。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 本节介绍 MinIO 的内部逻辑和功能。 这些信息仅用于帮助理解，并不是配置或实现任何 MinIO 功能的前提条件。
 
 SSE-KMS 使用由已配置密钥管理系统（KMS）管理的外部密钥（EK） 来执行加密操作并保护对象。下表描述了加密过程的各个阶段：
 

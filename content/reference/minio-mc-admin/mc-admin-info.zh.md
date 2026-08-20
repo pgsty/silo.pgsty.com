@@ -2,8 +2,8 @@
 title: "mc admin info"
 url: "/zh/reference/minio-mc-admin/mc-admin-info/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-info"></a>
@@ -14,13 +14,12 @@ silo_modified: false
 
 [`mc admin info`](#command-mc.admin.info) 命令显示 MinIO 服务器的信息。 对于分布式 MinIO 部署，[`mc admin info`](#command-mc.admin.info) 会显示部署中每个 MinIO 服务器的信息。
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-05-03T11-21-07Z
-
-命令输出包含集群的 [erasure code](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set) 设置信息。 该信息在输出中以 `EC:#` 格式显示。
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-05-03T11-21-07Z
+>
+> 命令输出包含集群的 [erasure code](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set) 设置信息。 该信息在输出中以 `EC:#` 格式显示。
 
 命令输出如下所示：
 

@@ -3,8 +3,8 @@ title: "可用性与韧性"
 url: "/zh/operations/concepts/availability-and-resiliency/"
 description: "Silo 生产环境的可用性与韧性"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts/availability-and-resiliency.rst
+upstream_modified: true
 ---
 
 <a id="minio-availability-resiliency"></a>
@@ -12,13 +12,12 @@ silo_modified: true
 
 本页从生产视角概述 MinIO 在可用性与韧性方面的设计和特性。
 
-{{% alert color="info" %}}
-**说明**
-
-本页内容旨在尽力帮助你理解 MinIO 在可用性与韧性方面的预期设计和理念。 它不能替代 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 的能力。使用 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 可以在规划 MinIO 部署时与 MinIO Engineering 协同。
-
-社区用户可以通过 [MinIO Community Slack](https://slack.min.io) 寻求支持。 社区支持仅为 best-effort，不提供关于响应时间的 SLA。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 本页内容旨在尽力帮助你理解 MinIO 在可用性与韧性方面的预期设计和理念。 它不能替代 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 的能力。使用 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 可以在规划 MinIO 部署时与 MinIO Engineering 协同。
+>
+> 社区用户可以通过 [MinIO Community Slack](https://slack.min.io) 寻求支持。 社区支持仅为 best-effort，不提供关于响应时间的 SLA。
 
 ## 分布式 MinIO 部署 {#minio}
 
@@ -132,13 +131,12 @@ silo_modified: true
 >
 > 你可以使用复制远端将丢失数据恢复回该部署。 存储在健康 pool 中的所有数据仍会安全保留在磁盘上。
 
-{{% alert color="info" %}}
-**磁盘独占访问**
-
-MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
-
-除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
-{{% /alert %}}
+> [!NOTE]
+> **磁盘独占访问**
+>
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+>
+> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
 ## 复制型 MinIO 部署 {#id3}
 

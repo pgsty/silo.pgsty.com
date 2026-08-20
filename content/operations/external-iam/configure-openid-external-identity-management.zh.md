@@ -2,8 +2,8 @@
 title: "配置 Silo 使用 OpenID 进行认证"
 url: "/zh/operations/external-iam/configure-openid-external-identity-management/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/external-iam/configure-openid-external-identity-management.rst
+upstream_modified: true
 ---
 
 <a id="minio-openid"></a>

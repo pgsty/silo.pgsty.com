@@ -2,8 +2,8 @@
 title: "Silo 身份管理插件设置"
 url: "/zh/reference/minio-server/settings/iam/minio-identity-plugin/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/iam/minio-identity-plugin.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -20,27 +20,23 @@ silo_modified: true
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 示例 {#id2}
 
 配置 MinIO Identity Management Plugin 时，至少必须定义所有 *必需* 设置。 以下示例展示了最小必需配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ```shell
 MINIO_IDENTITY_PLUGIN_URL="https://authservice.example.net:8080/auth"
 MINIO_IDENTITY_PLUGIN_ROLE_POLICY="ConsoleUser"
 ```
-
-{{% /tab %}}
-{{% tab header="配置设置" %}}
-
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 #### `identity_plugin` {#mc-conf.identity_plugin}
 
 *mc-conf*
@@ -53,9 +49,8 @@ mc admin config set identity_plugin                  \
    role_policy="consoleAdmin"                        \
    [ARGUMENT=VALUE] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 设置 {#id3}
 
@@ -63,20 +58,18 @@ mc admin config set identity_plugin                  \
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_PLUGIN_URL` {#envvar.MINIO_IDENTITY_PLUGIN_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_plugin url` {#mc-conf.identity_plugin.url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 外部身份管理服务的 webhook endpoint （`https://authservice.example.net:8080/auth`）。
 
@@ -84,20 +77,18 @@ mc admin config set identity_plugin                  \
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_PLUGIN_ROLE_POLICY` {#envvar.MINIO_IDENTITY_PLUGIN_ROLE_POLICY}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_plugin role_policy` {#mc-conf.identity_plugin.role_policy}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定要分配给已认证用户的 MinIO [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 列表，多个策略之间 使用逗号分隔。
 
@@ -105,17 +96,16 @@ mc admin config set identity_plugin                  \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" default="tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 此设置不提供环境变量选项。
-{{% /tab %}}
-{{% tab header="配置项" selected=true %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_plugin enabled` {#mc-conf.identity_plugin.enabled}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 设置为 `false` 以禁用身份提供方配置。
 
@@ -127,20 +117,18 @@ mc admin config set identity_plugin                  \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_PLUGIN_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_TOKEN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_plugin token` {#mc-conf.identity_plugin.token}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 提供给已配置 webhook endpoint 的认证令牌。
 
@@ -150,20 +138,18 @@ mc admin config set identity_plugin                  \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_PLUGIN_ROLE_ID` {#envvar.MINIO_IDENTITY_PLUGIN_ROLE_ID}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_plugin role_id` {#mc-conf.identity_plugin.role_id}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定 MinIO 用于为该 identity manager 生成 ARN 的唯一 ID。 在生成 ARN 时，MinIO 会自动在指定 ID 前添加 `idmp-` 前缀。
 
@@ -173,19 +159,17 @@ mc admin config set identity_plugin                  \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_IDENTITY_PLUGIN_COMMENT` {#envvar.MINIO_IDENTITY_PLUGIN_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `identity_plugin comment` {#mc-conf.identity_plugin.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定要附加到身份配置上的注释。

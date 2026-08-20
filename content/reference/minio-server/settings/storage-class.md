@@ -2,8 +2,8 @@
 title: "Erasure Code Settings"
 url: "/reference/minio-server/settings/storage-class/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/storage-class.rst
+upstream_modified: false
 math: true
 ---
 
@@ -22,40 +22,36 @@ If you define both an environment variable and the similar configuration setting
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
-{{% alert color="warning" %}}
-**Important**
-
-Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
 <a id="minio-ec-storage-class-standard"></a>
 
 ## Standard Storage Class {#standard-storage-class}
 
-{{% alert color="info" %}}
-**Note**
+> [!NOTE]
+> **Note**
+>
+> *MinIO Storage Classes* are distinct from *AWS Storage Classes*.
+>
+> AWS Storage Classes refer to the specific storage tier on which to store a given object, such as `hot` or `glacier` storage. MinIO Storage Classes affect the erasure code parity setting used and relate to [Availability and Resiliency](/operations/concepts/availability-and-resiliency/#minio-availability-resiliency) of objects.
+>
+> For tiering from one type of storage to another, such as for cost management purposes, see [Object Transition (“Tiering”)](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering).
 
-*MinIO Storage Classes* are distinct from *AWS Storage Classes*.
-
-AWS Storage Classes refer to the specific storage tier on which to store a given object, such as `hot` or `glacier` storage. MinIO Storage Classes affect the erasure code parity setting used and relate to [Availability and Resiliency](/operations/concepts/availability-and-resiliency/#minio-availability-resiliency) of objects.
-
-For tiering from one type of storage to another, such as for cost management purposes, see [Object Transition (“Tiering”)](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering).
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_STORAGE_CLASS_STANDARD` {#envvar.MINIO_STORAGE_CLASS_STANDARD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 #### `storage_class standard` {#mc-conf.storage_class.standard}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The [parity level](/operations/concepts/erasure-coding/#minio-ec-parity) for the deployment. MinIO shards objects written with the default `STANDARD` storage class using this parity value.
 
@@ -81,30 +77,27 @@ You can change this value after startup to any value between `0` and the upper b
 
 ## Reduced Redundancy Storage Class {#reduced-redundancy-storage-class}
 
-{{% alert color="info" %}}
-**Note**
+> [!NOTE]
+> **Note**
+>
+> *MinIO Storage Classes* are distinct from *AWS Storage Classes*.
+>
+> AWS Storage Classes refer to the specific storage tier on which to store a given object, such as `hot` or `glacier` storage. MinIO Storage Classes affect the erasure code parity setting used and relate to [Availability and Resiliency](/operations/concepts/availability-and-resiliency/#minio-availability-resiliency) of objects.
+>
+> For tiering from one type of storage to another, such as for cost management purposes, see [Object Transition (“Tiering”)](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering).
 
-*MinIO Storage Classes* are distinct from *AWS Storage Classes*.
-
-AWS Storage Classes refer to the specific storage tier on which to store a given object, such as `hot` or `glacier` storage. MinIO Storage Classes affect the erasure code parity setting used and relate to [Availability and Resiliency](/operations/concepts/availability-and-resiliency/#minio-availability-resiliency) of objects.
-
-For tiering from one type of storage to another, such as for cost management purposes, see [Object Transition (“Tiering”)](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering).
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_STORAGE_CLASS_RRS` {#envvar.MINIO_STORAGE_CLASS_RRS}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 #### `storage_class rrs` {#mc-conf.storage_class.rrs}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 The [parity level](/operations/concepts/erasure-coding/#minio-ec-parity) for objects written with the `REDUCED` storage class.
 
@@ -118,20 +111,18 @@ You cannot set this value for deployments with an erasure set size less than 2. 
 
 ## Parity Retention Optimization {#parity-retention-optimization}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_STORAGE_CLASS_OPTIMIZE` {#envvar.MINIO_STORAGE_CLASS_OPTIMIZE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 #### `storage_class optimize` {#mc-conf.storage_class.optimize}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 MinIO by default automatically “upgrades” parity for an object if the destination erasure set maintains write quorum *but* has one or more drives offline. This behavior helps ensure that the given object maintains the same availability as objects written to the healthy erasure set.
 
@@ -139,16 +130,15 @@ Specify `capacity` to this setting to direct MinIO to not create any additional 
 
 ## Comment {#comment}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 #### `MINIO_STORAGE_CLASS_COMMENT` {#envvar.MINIO_STORAGE_CLASS_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Adds a comment to the storage class settings.

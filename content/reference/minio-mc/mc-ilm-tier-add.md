@@ -2,8 +2,8 @@
 title: "mc ilm tier add"
 url: "/reference/minio-mc/mc-ilm-tier-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-add"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.tier.add"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc ilm tier add`](#command-mc.ilm.tier.add) replaces `mc admin tier add`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc ilm tier add`](#command-mc.ilm.tier.add) replaces `mc admin tier add`.
 
 ## Description {#description}
 
@@ -70,8 +69,8 @@ For example, the following policy provides permission for configuring object tra
 
 ## Syntax {#syntax}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example creates a new remote tier called `WARM-MINIO-TIER` on the `myminio` deployment. The command creates a tier for a remote MinIO deployment located at the hostname `https://warm-minio.com`.
 
 ```shell
@@ -84,8 +83,8 @@ The following example creates a new remote tier called `WARM-MINIO-TIER` on the 
 ```
 
 Lifecycle management rules on the `myminio` deployment can use the new tier to transition objects into the remote location’s `myprefix/` prefix in the `mybucket` bucket.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -117,8 +116,8 @@ mc ilm tier add TIER_TYPE                    \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -267,38 +266,34 @@ The storage class to apply to objects transitioned by MinIO to the remote bucket
 
 Select the tab corresponding to the `TIER_TYPE` for a list of supported values for each tier:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="minio" %}}
-
+{{< tabs group="minio-s3-gcs-azure" >}}
+{{< tab label="minio" value="minio" >}}
 - `STANDARD` *Recommended*
 - `REDUCED`
 
 For more information, see [Erasure Coding storage class](/reference/minio-server/settings/storage-class/#minio-ec-storage-class).
-{{% /tab %}}
-{{% tab header="s3" %}}
-
+{{< /tab >}}
+{{< tab label="s3" value="s3" >}}
 - `STANDARD`
 - `STANDARD-IA`
 - `ONEZONE-IA`
 
 For more information, see [Using Amazon S3 storage classes](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html).
-{{% /tab %}}
-{{% tab header="gcs" %}}
-
+{{< /tab >}}
+{{< tab label="gcs" value="gcs" >}}
 - `STANDARD`
 - `NEARLINE`
 - `COLDLINE`
 
 For more information, see [GCS storage class](https://cloud.google.com/storage/docs/storage-classes).
-{{% /tab %}}
-{{% tab header="azure" %}}
-
+{{< /tab >}}
+{{< tab label="azure" value="azure" >}}
 - `Hot`
 - `Cool`
 
 For more information, see [Hot, cool, and archive access tiers for blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 If omitted, objects use the default storage class defined for the remote bucket.
 

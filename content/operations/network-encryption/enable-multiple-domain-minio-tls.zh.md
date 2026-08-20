@@ -2,16 +2,16 @@
 title: "为 Silo 启用多域 TLS"
 url: "/zh/operations/network-encryption/enable-multiple-domain-minio-tls/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/network-encryption/enable-multiple-domain-minio-tls.rst
+upstream_modified: true
 ---
 
 <a id="minio-tls"></a>
 
 MinIO 支持使用 Transport Layer Security (TLS) 1.2+ 对入站和出站流量进行加密。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 MinIO Operator 支持通过以下方式为 MinIO 租户启用 TLS：
 
 - 使用 Kubernetes Cluster Signing Certificates 自动下发 TLS
@@ -21,13 +21,13 @@ MinIO Operator 支持通过以下方式为 MinIO 租户启用 TLS：
 MinIO Operator 支持在 [部署](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant-security) 或 [修改](/zh/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/#minio-k8s-modify-minio-tenant-security) MinIO 租户时挂载用户指定的 TLS 证书。
 
 这些自定义证书支持 [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication)，即 MinIO server 会根据客户端指定的主机名决定使用哪张证书。 例如，你可以生成由组织内首选 Certificate Authority (CA) 签发的证书，并将其挂载到 MinIO 租户上。 信任该 <abbr title="Certificate Authority">CA</abbr> 的应用可以连接到 MinIO 租户，并完整校验其 TLS 证书。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 MinIO 会自动检测配置目录或默认目录中的 TLS 证书，并在启用 TLS 的情况下启动。
 
 MinIO server 支持多张 TLS 证书，server 会使用 [Server Name Indication (SNI)](https://en.wikipedia.org/wiki/Server_Name_Indication) 来识别在响应客户端请求时应当使用哪张证书。 当客户端使用特定主机名连接时，MinIO 会通过 <abbr title="Server Name Indication">SNI</abbr> 选择与该主机名匹配的 TLS 证书。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 本文说明如何为 MinIO 启用多域 TLS。部署只服务一个主机名时，请参阅[单域 TLS 指南](/zh/operations/network-encryption/enable-minio-tls/)。
 
@@ -35,30 +35,30 @@ MinIO server 支持多张 TLS 证书，server 会使用 [Server Name Indication 
 
 ### 访问 MinIO 集群 {#minio}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 你必须能够访问 Kubernetes 集群，并且 `kubectl` 配置中具备对应的管理权限。
 
 本过程假设你的权限足以在 Kubernetes 集群中部署或修改 MinIO 相关资源，包括但不限于 pod、statefulset、replicaset、deployment 和 secret。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 本过程使用 [`mc`](/zh/reference/minio-mc/#command-mc) 对 MinIO 集群执行操作。 请在一台可通过网络访问该集群的机器上安装 `mc`。 关于下载和安装 `mc`，请参见 `mc` [Installation Quickstart](/zh/reference/minio-mc/#mc-install)。
 
 本过程还假设你已经为 MinIO 集群配置了 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 同时假设你拥有对每台 MinIO 主机 server 的 SSH 或类似 shell 级别的管理访问权限。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### TLS 证书 {#tls}
 
 请准备 MinIO 所需的 TLS 证书，并确保其使用 [受支持的密码套件](/zh/operations/network-encryption/#minio-tls-supported-cipher-suites)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 关于支持的租户 TLS 配置，请参见 [Kubernetes 上的 MinIO TLS](/zh/operations/network-encryption/#minio-tls-kubernetes)。
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 请按你偏好的方式准备证书，例如通过组织内部 Certificate Authority，或使用 Digicert、Verisign 等知名公共提供商。
 
 你也可以使用 `openssl` 或 MinIO 的 [certgen](https://github.com/minio/certgen) 工具创建自签名证书。
@@ -70,13 +70,13 @@ certgen -host "localhost,minio-*.example.net"
 ```
 
 关于证书生成和放置方式的更完整说明，请参见 [裸金属上的 MinIO TLS](/zh/operations/network-encryption/#minio-tls-baremetal)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 步骤 {#id3}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Kubernetes" %}}
+{{< tabs group="kubernetes-tab2" >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 MinIO Operator 支持通过三种方式管理 MinIO 租户上的 TLS 证书：
 
 - MinIO 自动生成 TLS 证书
@@ -85,8 +85,8 @@ MinIO Operator 支持通过三种方式管理 MinIO 租户上的 TLS 证书：
 
 你也可以部署未启用 TLS 的 MinIO 租户。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="MinIO Auto-TLS" %}}
+{{< tabs group="minio-auto-tls-certmanager-tab3" >}}
+{{< tab label="MinIO Auto-TLS" value="minio-auto-tls" >}}
 以下步骤同时适用于使用 `Kustomize` 的新建和现有 MinIO 部署：
 
 1. 检查 [Tenant CRD](/zh/reference/operator-crd/#minio-operator-crd) 中的 `TenantSpec.requestAutoCert` 和 `TenantSpec.certConfig` 字段。
@@ -111,8 +111,8 @@ MinIO Operator 支持通过三种方式管理 MinIO 租户上的 TLS 证书：
 3. 应用新的 Kustomization 模板
 
    一旦应用这些更改，MinIO Operator 会使用更新后的配置自动重新部署该租户。
-{{% /tab %}}
-{{% tab header="CertManager" %}}
+{{< /tab >}}
+{{< tab label="CertManager" value="certmanager" >}}
 以下步骤同时适用于使用 `Kustomize` 的新建和现有 MinIO 部署：
 
 1. 检查 [Tenant CRD](/zh/reference/operator-crd/#minio-operator-crd) 中的 `TenantSpec.externalCertsCecret` 字段
@@ -144,8 +144,8 @@ MinIO Operator 支持通过三种方式管理 MinIO 租户上的 TLS 证书：
 3. 应用新的 Kustomization 模板
 
    一旦应用这些更改，MinIO Operator 会使用更新后的配置自动重新部署该租户。
-{{% /tab %}}
-{{% tab header="用户指定" %}}
+{{< /tab >}}
+{{< tab label="用户指定" value="tab3" >}}
 以下步骤同时适用于使用 `Kustomize` 的新建和现有 MinIO 部署：
 
 1. 检查 [Tenant CRD](/zh/reference/operator-crd/#minio-operator-crd) 中的 `TenantSpec.externalCertSecret` 字段。
@@ -175,14 +175,14 @@ MinIO Operator 支持通过三种方式管理 MinIO 租户上的 TLS 证书：
 3. 应用新的 Kustomization 模板
 
    一旦应用这些更改，MinIO Operator 会使用更新后的配置自动重新部署该租户。
-{{% /tab %}}
-{{< /tabpane >}}
-{{% /tab %}}
-{{% tab header="裸金属" %}}
+{{< /tab >}}
+{{< /tabs >}}
+{{< /tab >}}
+{{< tab label="裸金属" value="tab2" >}}
 MinIO Server 会为每个节点搜索 TLS 私钥和证书，并使用这些凭据启用 TLS。 MinIO 会在发现并验证证书后自动启用 TLS。 搜索位置取决于你的 MinIO 配置：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Default Path" %}}
+{{< tabs group="default-path-custom-path" >}}
+{{< tab label="Default Path" value="default-path" >}}
 默认情况下，MinIO server 会在以下目录中查找每个节点的 TLS 私钥和证书：
 
 ```shell
@@ -192,8 +192,8 @@ ${HOME}/.minio/certs
 其中 `${HOME}` 是运行 MinIO 服务端进程的用户主目录。 如果 `${HOME}/.minio/certs` 目录不存在，你可能需要手动创建它。
 
 对于由 `systemd` 管理的部署，该路径必须对应运行 MinIO 进程的 `USER`。 如果该用户没有主目录，请改用 **Custom Path** 选项。
-{{% /tab %}}
-{{% tab header="Custom Path" %}}
+{{< /tab >}}
+{{< tab label="Custom Path" value="custom-path" >}}
 你可以通过 [`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S` 参数指定 MinIO server 搜索证书的路径。
 
 例如，以下命令片段指示 MinIO 进程使用 `/opt/minio/certs` 目录存放 TLS 证书。
@@ -203,8 +203,8 @@ minio server --certs-dir /opt/minio/certs ...
 ```
 
 运行 MinIO service 的用户 *必须* 对该目录拥有读写权限。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 请将证书放入 `/certs` 目录，并为 MinIO 需要呈现 TLS 证书的每个附加域名在 `/certs` 下创建一个子目录。 虽然 MinIO 对目录名称没有强制要求，但建议将子目录命名为对应域名，以便人工识别。 请将该域名的 TLS 私钥和公钥证书放入对应子目录中。
 
@@ -219,6 +219,5 @@ minio server --certs-dir /opt/minio/certs ...
       private.key
       public.crt
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

@@ -3,8 +3,8 @@ title: "mc replicate"
 url: "/reference/minio-mc/mc-replicate/"
 weight: 320
 icon: fa-solid fa-copy
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-replicate.rst
+upstream_modified: false
 ---
 
 <a id="mc-replicate"></a>
@@ -15,11 +15,10 @@ silo_modified: false
 
 The [`mc replicate`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) command configures and manages the [Server-Side Bucket Replication](/administration/bucket-replication/#minio-bucket-replication-serverside) for a MinIO deployment, including [active-active replication configurations](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) and [resynchronization](/administration/bucket-replication/#minio-replication-behavior-resync).
 
-{{% alert color="info" %}}
-**Note**
-
-For multi-site replication, see [`mc admin replicate`](/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate).
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> For multi-site replication, see [`mc admin replicate`](/reference/minio-mc-admin/mc-admin-replicate/#command-mc.admin.replicate).
 
 ## Subcommands {#subcommands}
 

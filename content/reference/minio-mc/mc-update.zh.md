@@ -2,8 +2,8 @@
 title: "mc update"
 url: "/zh/reference/minio-mc/mc-update/"
 weight: 420
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-update.rst
+upstream_modified: true
 ---
 
 <a id="mc-update"></a>
@@ -16,16 +16,15 @@ Pigsty 维护版客户端为保持命令行兼容而保留 [`mc update`](#comman
 
 请通过[下载与安装](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会报告自更新已禁用，并以状态码 `1` 退出：
 
 ```shell
 mc update
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] update [--json] [RELEASE-URL]
 - `RELEASE-URL` 仅为兼容性而接受，不会被访问。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 非 JSON 模式的错误文本为：
 

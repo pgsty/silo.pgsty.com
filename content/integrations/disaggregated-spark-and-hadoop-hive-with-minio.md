@@ -2,8 +2,8 @@
 title: "Disaggregated HDP Spark and Hive with Silo"
 url: "/integrations/disaggregated-spark-and-hadoop-hive-with-minio/"
 weight: 20
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/integrations/disaggregated-spark-and-hadoop-hive-with-minio.md
+upstream_modified: true
 ---
 
 <a id="disaggregated-hdp-spark-and-hive-with-minio"></a>

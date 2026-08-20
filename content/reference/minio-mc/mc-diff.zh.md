@@ -2,8 +2,8 @@
 title: "mc diff"
 url: "/zh/reference/minio-mc/mc-diff/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-diff.rst
+upstream_modified: false
 ---
 
 <a id="mc-diff"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc diff`](#command-mc.diff) 命令用于计算两个文件系统目录或 MinIO 存储桶之间的差异。 [`mc diff`](#command-mc.diff) 仅列出缺失的对象或大小不同的对象。[`mc diff`](#command-mc.diff) **不会** 比较对象内容。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令用于比较本地文件系统中的一个对象与 `myminio` MinIO 部署中 `mydata` 存储桶内一个对象之间的差异：
 
 ```shell
 mc diff ~/mydata/myobject.txt myminio/mydata/myobject.txt
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 [`mc diff`](#command-mc.diff) 命令语法如下：
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] diff SOURCE TARGET
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id5}
 

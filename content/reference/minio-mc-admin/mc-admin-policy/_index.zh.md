@@ -3,30 +3,29 @@ title: "mc admin policy"
 url: "/zh/reference/minio-mc-admin/mc-admin-policy/"
 weight: 110
 icon: fa-solid fa-file-shield
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy"></a>
 
 <a id="command-mc.admin.policy"></a>
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2023-03-20T17-17-53Z
-
-以下命令已弃用：
-
-- `mc admin policy add` 请改用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create)
-- `mc admin policy set` 请改用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach)
-- `mc admin policy unset` 请改用 [`mc admin policy detach`](/zh/reference/minio-mc-admin/mc-admin-policy-detach/#command-mc.admin.policy.detach)
-- `mc admin policy update` 请改用 [`attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 或 [`detach`](/zh/reference/minio-mc-admin/mc-admin-policy-detach/#command-mc.admin.policy.detach)
-
-新增以下命令：
-
-- [`mc admin policy entities`](/zh/reference/minio-mc-admin/mc-admin-policy-entities/#command-mc.admin.policy.entities)
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2023-03-20T17-17-53Z
+>
+> 以下命令已弃用：
+>
+> - `mc admin policy add` 请改用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create)
+> - `mc admin policy set` 请改用 [`mc admin policy attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach)
+> - `mc admin policy unset` 请改用 [`mc admin policy detach`](/zh/reference/minio-mc-admin/mc-admin-policy-detach/#command-mc.admin.policy.detach)
+> - `mc admin policy update` 请改用 [`attach`](/zh/reference/minio-mc-admin/mc-admin-policy-attach/#command-mc.admin.policy.attach) 或 [`detach`](/zh/reference/minio-mc-admin/mc-admin-policy-detach/#command-mc.admin.policy.detach)
+>
+> 新增以下命令：
+>
+> - [`mc admin policy entities`](/zh/reference/minio-mc-admin/mc-admin-policy-entities/#command-mc.admin.policy.entities)
 
 ## 说明 {#id2}
 

@@ -2,8 +2,8 @@
 title: "使用 Prometheus 进行监控与告警"
 url: "/zh/operations/monitoring/collect-minio-metrics-using-prometheus/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/collect-minio-metrics-using-prometheus.rst
+upstream_modified: false
 ---
 
 <a id="prometheus"></a>
@@ -19,15 +19,14 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 本文说明使用 [version 2 指标](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2)。 关于指标 API 版本的更多信息，请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
 
-{{% alert color="info" %}}
-**前提条件**
-
-此过程要求满足以下条件：
-
-- 已有 [Prometheus 部署](https://prometheus.io/docs/prometheus/latest/installation/)，并配置 [Alert Manager](https://prometheus.io/docs/alerting/latest/overview/)
-- 已有可通过网络访问 Prometheus 部署的 MinIO 部署
-- 本地主机已安装 [`mc`](/zh/reference/minio-mc/#command-mc)，并已配置为可 [访问](/zh/reference/minio-mc/mc-alias-set/#alias) MinIO 部署
-{{% /alert %}}
+> [!NOTE]
+> **前提条件**
+>
+> 此过程要求满足以下条件：
+>
+> - 已有 [Prometheus 部署](https://prometheus.io/docs/prometheus/latest/installation/)，并配置 [Alert Manager](https://prometheus.io/docs/alerting/latest/overview/)
+> - 已有可通过网络访问 Prometheus 部署的 MinIO 部署
+> - 本地主机已安装 [`mc`](/zh/reference/minio-mc/#command-mc)，并已配置为可 [访问](/zh/reference/minio-mc/mc-alias-set/#alias) MinIO 部署
 
 ## 配置 Prometheus 收集 MinIO 指标并触发告警 {#prometheus-minio}
 
@@ -35,8 +34,8 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 使用 [`mc admin prometheus generate`](/zh/reference/minio-mc-admin/mc-admin-prometheus-generate/#command-mc.admin.prometheus.generate) 命令生成 Prometheus 执行抓取请求所需的 scrape 配置：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="MinIO Server" %}}
+{{< tabs group="minio-server-tab2-tab3-tab4" >}}
+{{< tab label="MinIO Server" value="minio-server" >}}
 以下命令用于抓取 MinIO 集群的指标。
 
 ```shell
@@ -59,9 +58,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="节点" %}}
+{{< /tab >}}
+{{< tab label="节点" value="tab2" >}}
 以下命令用于抓取 MinIO Server 上某个节点的指标。
 
 ```shell
@@ -82,9 +80,8 @@ scrape_configs:
      static_configs:
      - targets: [minio-1.example.net, minio-2.example.net, minio-N.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="存储桶" %}}
+{{< /tab >}}
+{{< tab label="存储桶" value="tab3" >}}
 以下命令用于抓取 MinIO Server 上存储桶的指标。
 
 ```shell
@@ -105,13 +102,10 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="资源" %}}
-{{% alert color="info" %}}
-**新增: RELEASE.2023-10-07T15-07-38Z**
-
-{{% /alert %}}
+{{< /tab >}}
+{{< tab label="资源" value="tab4" >}}
+> [!NOTE]
+> **新增: RELEASE.2023-10-07T15-07-38Z**
 
 以下命令用于抓取 MinIO Server 上资源的指标。
 
@@ -133,9 +127,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 - 设置合适的 `scrape_interval`，确保每次抓取操作都能在下一次开始前完成。 推荐值为 60 秒。
 
@@ -155,8 +148,8 @@ scrape_configs:
 
 将上一步生成的目标 `scrape_configs` job 追加到配置文件中：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="集群" %}}
+{{< tabs group="tab1-tab2-tab3-tab4" >}}
+{{< tab label="集群" value="tab1" >}}
 集群指标会聚合节点级指标，并在适用时为指标附加来源节点的标签。
 
 ```yaml
@@ -171,9 +164,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="节点" %}}
+{{< /tab >}}
+{{< tab label="节点" value="tab2" >}}
 节点指标专用于节点级监控。该配置需要列出所有 MinIO 节点。
 
 ```yaml
@@ -188,10 +180,8 @@ scrape_configs:
      static_configs:
      - targets: [minio-1.example.net, minio-2.example.net, minio-N.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="存储桶" %}}
-
+{{< /tab >}}
+{{< tab label="存储桶" value="tab3" >}}
 ```yaml
 global:
    scrape_interval: 60s
@@ -204,10 +194,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{% tab header="资源" %}}
-
+{{< /tab >}}
+{{< tab label="资源" value="tab4" >}}
 ```yaml
 global:
    scrape_interval: 60s
@@ -220,9 +208,8 @@ scrape_configs:
      static_configs:
      - targets: [minio.example.net]
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 使用该配置文件启动 Prometheus 集群：
 
@@ -234,8 +221,8 @@ prometheus --config.file=prometheus.yaml
 
 Prometheus 内置 [expression browser](https://prometheus.io/docs/prometheus/latest/getting_started/#using-the-expression-browser)。 你可以在其中执行查询，以分析已采集的指标。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下查询示例会返回抓取任务名为 `minio-job` 的 Prometheus 每五分钟采集一次的指标：
 
 ```shell
@@ -257,9 +244,8 @@ minio_node_drive_errors_availability{job="minio-job"}[5m]
 
 minio_node_drive_io_waiting{job="minio-job"}[5m]
 ```
-
-{{% /tab %}}
-{{% tab header="推荐指标" %}}
+{{< /tab >}}
+{{< tab label="推荐指标" value="tab2" >}}
 MinIO 建议将以下指标作为基础监控项。
 
 所有可用指标的信息请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
@@ -277,9 +263,8 @@ MinIO 建议将以下指标作为基础监控项。
 | `minio_node_drive_errors_timeout` | 自 server 启动以来驱动器超时错误的总数。 |
 | `minio_node_drive_errors_availability` | 自 server 启动以来驱动器 I/O 错误、权限拒绝和超时的总数。 |
 | `minio_node_drive_io_waiting` | 驱动器上等待中的 I/O 操作总数。 |
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 4) 使用 MinIO 指标配置告警规则 {#minio}
 

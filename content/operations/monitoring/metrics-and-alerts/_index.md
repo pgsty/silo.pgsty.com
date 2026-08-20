@@ -3,8 +3,8 @@ title: "Metrics and alerts"
 url: "/operations/monitoring/metrics-and-alerts/"
 weight: 10
 icon: fa-solid fa-gauge-high
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/metrics-and-alerts.rst
+upstream_modified: false
 ---
 
 <a id="metrics-and-alerts"></a>
@@ -16,21 +16,19 @@ MinIO publishes metrics using the [Prometheus Data Model](https://prometheus.io/
 
 Starting with MinIO Server [RELEASE.2024-07-15T19-02-30Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-15T19-02-30Z) and MinIO Client [RELEASE.2024-07-11T18-01-28Z](https://github.com/minio/mc/releases/tag/RELEASE.2024-07-11T18-01-28Z), metrics version 3 provides additional endpoints. MinIO recommends version 3 for new deployments.
 
-{{% alert color="info" %}}
-**Metrics version 2**
-
-Existing deployments can continue to use version 2 [metrics](/operations/monitoring/metrics-v2/#minio-metrics-v2) and [Grafana dashboards](/operations/monitoring/grafana/#minio-grafana).
-{{% /alert %}}
+> [!NOTE]
+> **Metrics version 2**
+>
+> Existing deployments can continue to use version 2 [metrics](/operations/monitoring/metrics-v2/#minio-metrics-v2) and [Grafana dashboards](/operations/monitoring/grafana/#minio-grafana).
 
 ## Version 3 Endpoints {#version-3-endpoints}
 
 For metrics version 3, all metrics are available under the base `/minio/metrics/v3` endpoint. You can scrape the base endpoint to collect all metrics in a single operation, or append an optional path to return a specific category.
 
-{{% alert color="warning" %}}
-**Important**
-
-The V3 metrics on this page may have gaps, inaccuracies, or incorrect information. Reference the [minio/minio](https://github.com/minio/minio)<a id="minio-minio"></a> repository and review the source code for the most accurate representation of metrics as available.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The V3 metrics on this page may have gaps, inaccuracies, or incorrect information. Reference the [minio/minio](https://github.com/minio/minio)<a id="minio-minio"></a> repository and review the source code for the most accurate representation of metrics as available.
 
 For example, the following endpoint returns audit metrics:
 

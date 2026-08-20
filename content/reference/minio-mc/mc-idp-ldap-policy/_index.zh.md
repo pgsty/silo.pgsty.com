@@ -3,8 +3,8 @@ title: "mc idp ldap policy"
 url: "/zh/reference/minio-mc/mc-idp-ldap-policy/"
 weight: 170
 icon: fa-solid fa-file-shield
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-policy.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-policy"></a>
@@ -12,11 +12,10 @@ silo_modified: false
 
 <a id="command-mc.idp.ldap.policy"></a>
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-05-26T23-31-54Z**
-
-[`mc idp ldap policy`](#command-mc.idp.ldap.policy) 及其子命令替代 `mc admin idp ldap policy`。
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-05-26T23-31-54Z**
+>
+> [`mc idp ldap policy`](#command-mc.idp.ldap.policy) 及其子命令替代 `mc admin idp ldap policy`。
 
 ## 说明 {#id2}
 

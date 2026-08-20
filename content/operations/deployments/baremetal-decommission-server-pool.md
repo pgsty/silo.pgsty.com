@@ -2,8 +2,8 @@
 title: "Decommission Server Pools"
 url: "/operations/deployments/baremetal-decommission-server-pool/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-decommission-server-pool.rst
+upstream_modified: false
 ---
 
 <a id="decommission-server-pools"></a>
@@ -19,17 +19,16 @@ During the decommissioning process, MinIO routes read operations (e.g. `GET`, `L
 
 The procedures on this page decommission and remove one or more server pools from a [distributed](/operations/deployments/installation/#deploy-minio-distributed) MinIO deployment with *at least* two server pools.
 
-{{% alert color="info" %}}
-**Decommissioning is Permanent**
-
-Once MinIO begins decommissioning a pool, it marks that pool as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pool to an active state. Use extra caution when decommissioning multiple pools.
-
-Decommissioning is a major administrative operation that requires care in planning and execution, and is not a trivial or ‘daily’ task.
-
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to decommissioning. Coordination with MinIO Engineering via SUBNET can ensure successful decommissioning, including performance testing and health diagnostics.
-
-Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
-{{% /alert %}}
+> [!NOTE]
+> **Decommissioning is Permanent**
+>
+> Once MinIO begins decommissioning a pool, it marks that pool as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pool to an active state. Use extra caution when decommissioning multiple pools.
+>
+> Decommissioning is a major administrative operation that requires care in planning and execution, and is not a trivial or ‘daily’ task.
+>
+> [MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to decommissioning. Coordination with MinIO Engineering via SUBNET can ensure successful decommissioning, including performance testing and health diagnostics.
+>
+> Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
 
 <a id="minio-decommissioning-prereqs"></a>
 
@@ -135,10 +134,8 @@ If the decommission fails, customers should open a [MinIO SUBNET](https://min.io
 
 ### Decommissioning a Server with Tiering Enabled {#decommissioning-a-server-with-tiering-enabled}
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-03-20T20-16-18Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-03-20T20-16-18Z**
 
 For deployments with tiering enabled and active, decommissioning moves the object references to a new active pool. Applications can continue issuing GET requests against those objects where MinIO handles transparently retrieving them from the remote tier.
 
@@ -175,13 +172,12 @@ In the example above, the deployment has 210TiB total storage with 110TiB used. 
 
 ### 2) Start the Decommissioning Process {#start-the-decommissioning-process}
 
-{{% alert color="info" %}}
-**Decommissioning is Permanent**
-
-Once MinIO begins decommissioning a pool, it marks that pool as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pool to an active state.
-
-Review and validate that you are decommissioning the correct pool *before* running the following command.
-{{% /alert %}}
+> [!NOTE]
+> **Decommissioning is Permanent**
+>
+> Once MinIO begins decommissioning a pool, it marks that pool as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pool to an active state.
+>
+> Review and validate that you are decommissioning the correct pool *before* running the following command.
 
 Use the [`mc admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) command to begin decommissioning the target pool. Specify the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment and the full description of the pool to decommission, including all hosts, disks, and file paths.
 
@@ -284,10 +280,8 @@ Once the deployment is online, use [`mc admin info`](/reference/minio-mc-admin/m
 
 ## Decommission Multiple Server Pools {#decommission-multiple-server-pools}
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-01-18T04-36-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-01-18T04-36-38Z**
 
 You can start the decommission process for multiple server pools when issuing a decommission command.
 
@@ -337,21 +331,19 @@ In the example above, the deployment has 1110TiB total storage with 145TiB used.
 
 The third and fourth pools can absorb all objects stored on the first pool without significantly impacting total available storage.
 
-{{% alert color="warning" %}}
-**Important**
-
-Complete any server expansion to add new storage resources *before* beginning a decommission process.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Complete any server expansion to add new storage resources *before* beginning a decommission process.
 
 ### 2) Start the Decommissioning Process {#id2}
 
-{{% alert color="info" %}}
-**Decommissioning is Permanent**
-
-Once MinIO begins decommissioning the pools, it marks those pools as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pools to an active state.
-
-Review and validate that you are decommissioning the correct pools *before* running the following command.
-{{% /alert %}}
+> [!NOTE]
+> **Decommissioning is Permanent**
+>
+> Once MinIO begins decommissioning the pools, it marks those pools as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pools to an active state.
+>
+> Review and validate that you are decommissioning the correct pools *before* running the following command.
 
 Use the [`mc admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) command to begin decommissioning the target pool. Specify the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment and a comma-separated list of the full description of each pool to decommission, including all hosts, disks, and file paths.
 

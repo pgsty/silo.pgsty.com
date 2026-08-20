@@ -6,8 +6,6 @@ url: "/zh/about/security/"
 weight: 40
 type: docs
 icon: fa-solid fa-shield-halved
-minio_origin: false
-silo_modified: false
 ---
 
 安全维护正是这个分支存在的理由。上游 `minio/minio` 已经归档，Silo 持续跟踪针对该代码库的 CVE，

@@ -2,26 +2,25 @@
 title: "mc support top rpc"
 url: "/reference/minio-mc/mc-support-top-rpc/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top-rpc.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-top-rpc"></a>
 
 <a id="command-mc.support.top.rpc"></a>
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Syntax {#syntax}
 
 The [`mc support top rpc`](#command-mc.support.top.rpc) command displays metrics for remote procedure calls (RPC).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command displays the current remote procedure call metrics for the [alias](/glossary/#term-alias) `myminio` deployment.
 
 ```shell
@@ -46,9 +45,8 @@ From 127.0.0.1:9005       5     0.3ms   1s ago    0        0     ->0      0->   
  To  127.0.0.1:9006       5     0.3ms   1s ago    0        0     ->0      0->    3185    3221
 From 127.0.0.1:9006       5     0.6ms   1s ago    0        0     ->0      0->    3222    3185
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -66,8 +64,8 @@ mc [GLOBALFLAGS] support top rpc                 \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

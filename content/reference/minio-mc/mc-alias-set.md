@@ -2,8 +2,8 @@
 title: "mc alias set"
 url: "/reference/minio-mc/mc-alias-set/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-alias-set"></a>
@@ -17,8 +17,8 @@ silo_modified: false
 
 The [`mc alias set`](#command-mc.alias.set) command adds or updates an alias to the local **`mc`** configuration.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command adds an [alias](#alias) for a MinIO deployment `myminio` running at the URL `https://myminio.example.net`. **`mc`** uses the specified username and password for authenticating to the MinIO deployment:
 
 ```shell
@@ -26,8 +26,8 @@ mc alias set myminio https://myminio.example.net minioadminuser minioadminpasswo
 ```
 
 If the `myminio` alias already exists, the command overwrites that alias with the new URL, access key, and secret key.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc alias set`](#command-mc.alias.set) command has the following syntax:
 
 ```shell
@@ -45,8 +45,8 @@ mc [GLOBALFLAGS] alias set \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -60,11 +60,10 @@ Copy the example to a text editor and modify as-needed before running the comman
 - 2 or more characters in length.
 - The first character must be a letter.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2024-01-11T05-49-32Z**
-
-An alias may also be a single letter (`a-z` or `A-Z`).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2024-01-11T05-49-32Z**
+>
+> An alias may also be a single letter (`a-z` or `A-Z`).
 
 Examples of some valid alias values include:
 
@@ -108,13 +107,12 @@ Specifies the signature calculation method to use when connecting to the S3-comp
 - `S3v4` (Default)
 - `S3v2`
 
-{{% alert color="info" %}}
-**Note**
-
-AWS Signature V2 is considered [deprecated](https://aws.amazon.com/blogs/aws/amazon-s3-update-sigv2-deprecation-period-extended-modified/) by AWS. [`mc alias set`](#command-mc.alias.set) includes this option only for S3 buckets or services still reliant on the Signature V2.
-
-Use `S3v4` unless explicitly required by the S3-compatible service. MinIO server does not rely on nor require `S3v2`, nor are all API operations available on `S3v2`.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> AWS Signature V2 is considered [deprecated](https://aws.amazon.com/blogs/aws/amazon-s3-update-sigv2-deprecation-period-extended-modified/) by AWS. [`mc alias set`](#command-mc.alias.set) includes this option only for S3 buckets or services still reliant on the Signature V2.
+>
+> Use `S3v4` unless explicitly required by the S3-compatible service. MinIO server does not rely on nor require `S3v2`, nor are all API operations available on `S3v2`.
 
 ##### `--path` {#mc.alias.set.-path}
 
@@ -138,8 +136,8 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 Use [`mc alias set`](#command-mc.alias.set) to add an S3-compatible service for use with **`mc`**:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 The following command creates a new alias `myminio` pointing at a MinIO deployment at `https://minio.example.net`. The alias uses the `miniouser` and `miniopassword` credentials for performing operations against the deployment.
 
 ```shell
@@ -147,9 +145,8 @@ mc alias set myminio https://minio.example.net miniouser miniopassword
 ```
 
 If the `myminio` alias already exists, the [`mc alias set`](#command-mc.alias.set) command overwrites that alias with the specified arguments.
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 ```
@@ -157,8 +154,8 @@ mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 - Replace `ALIAS` with the name to associate with the MinIO service.
 - Replace `HOSTNAME` with the URL for any node in the MinIO deployment. You can alternatively specify the URL for a load balancer or reverse proxy managing connections to the MinIO deployment.
 - Replace `ACCESSKEY` and `SECRETKEY` with credentials for a user on the MinIO deployment.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Behavior {#behavior}
 

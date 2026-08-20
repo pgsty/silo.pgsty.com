@@ -2,8 +2,8 @@
 title: "数据压缩"
 url: "/zh/administration/object-management/data-compression/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/data-compression.rst
+upstream_modified: false
 ---
 
 <a id="minio-data-compression"></a>
@@ -40,11 +40,10 @@ MinIO Server 支持对对象进行压缩，以减少磁盘使用量。 对象在
 
 你可以通过指定所需的文件扩展名和 [media (MIME) types](https://en.wikipedia.org/wiki/Media_type) 来控制哪些对象会被压缩。
 
-{{% alert color="info" %}}
-**现有对象不会被修改**
-
-启用、禁用或更新某个部署的压缩设置时，不会修改现有对象。 新对象会根据其创建时生效的设置进行压缩。
-{{% /alert %}}
+> [!NOTE]
+> **现有对象不会被修改**
+>
+> 启用、禁用或更新某个部署的压缩设置时，不会修改现有对象。 新对象会根据其创建时生效的设置进行压缩。
 
 <a id="id5"></a>
 
@@ -181,11 +180,10 @@ mc admin config set ALIAS compression enable=off
   </tbody>
 </table>
 
-{{% alert color="info" %}}
-**默认排除的扩展名和类型永远不会被压缩**
-
-某些对象无法被高效压缩。 即使这些对象已在 [`extensions`](/zh/reference/minio-server/settings/core/#mc-conf.compression.extensions) 或 [`mime_types`](/zh/reference/minio-server/settings/core/#mc-conf.compression.mime_types) 参数中指定，MinIO 也不会尝试压缩它们。 排除类型列表请参阅 [排除的文件类型](#minio-data-compression-excluded-types)。
-{{% /alert %}}
+> [!NOTE]
+> **默认排除的扩展名和类型永远不会被压缩**
+>
+> 某些对象无法被高效压缩。 即使这些对象已在 [`extensions`](/zh/reference/minio-server/settings/core/#mc-conf.compression.extensions) 或 [`mime_types`](/zh/reference/minio-server/settings/core/#mc-conf.compression.mime_types) 参数中指定，MinIO 也不会尝试压缩它们。 排除类型列表请参阅 [排除的文件类型](#minio-data-compression-excluded-types)。
 
 以下各节介绍如何为所需的文件扩展名和媒体类型配置压缩。
 

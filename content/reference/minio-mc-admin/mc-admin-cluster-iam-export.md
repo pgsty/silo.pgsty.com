@@ -2,8 +2,8 @@
 title: "mc admin cluster iam export"
 url: "/reference/minio-mc-admin/mc-admin-cluster-iam-export/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-iam-export.rst
+upstream_modified: false
 ---
 
 <a id="command-mc.admin.cluster.iam.export"></a>
@@ -12,25 +12,22 @@ silo_modified: false
 
 ## Description {#description}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2022-06-26T18-51-48Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2022-06-26T18-51-48Z**
 
 The [`mc admin cluster iam export`](#command-mc.admin.cluster.iam.export) command exports [IAM](/administration/identity-access-management/#minio-authentication-and-identity-management) metadata for use with the [`mc admin cluster iam import`](/reference/minio-mc-admin/mc-admin-cluster-iam-import/#command-mc.admin.cluster.iam.import) command.
 
 The command saves the output as `ALIAS-iam-metadata.zip`, where `ALIAS` is the [`alias`](#mc.admin.cluster.iam.export.ALIAS) of the MinIO deployment.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command exports all IAM metadata for the `myminio` deployment.
 
 ```shell
 mc admin cluster iam export myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -43,8 +40,8 @@ mc [GLOBALFLAGS] admin cluster iam export ALIAS  \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 Starting with [RELEASE.2023-05-04T18-10-16Z](https://github.com/minio/mc/releases/tag/RELEASE.2023-05-04T18-10-16Z), [`mc admin cluster iam export`](#command-mc.admin.cluster.iam.export) adds support for aliases ending with a trailing forward slash `ALIAS/`. Prior to this release, the command would fail when provided a trailing forward slash.
 

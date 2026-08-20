@@ -2,8 +2,8 @@
 title: "使用客户端管理密钥的服务端加密（SSE-C）"
 url: "/zh/administration/server-side-encryption/server-side-encryption-sse-c/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/server-side-encryption/server-side-encryption-sse-c.rst
+upstream_modified: false
 ---
 
 <a id="sse-c"></a>
@@ -34,13 +34,12 @@ SSE-C 在写入操作期间使用客户端指定的 <abbr title="外部密钥">E
 
 ### 复制场景中的 SSE-C {#id4}
 
-{{% alert color="info" %}}
-**变更: Server**
-
-RELEASE.2024-03-30T09-41-56Z
-
-使用 SSE-C 加密的对象现在可以通过站点复制或存储桶复制进行复制。 早期版本的 MinIO Object Store 不会复制经过 SSE-C 加密的对象。
-{{% /alert %}}
+> [!NOTE]
+> **变更: Server**
+>
+> RELEASE.2024-03-30T09-41-56Z
+>
+> 使用 SSE-C 加密的对象现在可以通过站点复制或存储桶复制进行复制。 早期版本的 MinIO Object Store 不会复制经过 SSE-C 加密的对象。
 
 经过压缩的 SSE-C 加密对象与 MinIO [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication) 或 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 不兼容。 请使用 [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) 或 [SSE-S3](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3)，以确保加密对象与复制兼容。
 
@@ -56,11 +55,10 @@ MinIO SSE-C 要求客户端执行所有密钥创建和存储操作。
 
 SSE-C 密钥 *必须* 是一个 256 位原始编码字符串或十六进制编码字符串。 客户端应用负责生成并存储该加密密钥。 MinIO *不会* 存储 SSE-C 加密密钥，并且在没有客户端管理密钥的情况下无法解密 SSE-C 加密对象。
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO Client 从 `RELEASE.2024-06-20T14-50-54Z` 开始支持十六进制编码密钥。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO Client 从 `RELEASE.2024-06-20T14-50-54Z` 开始支持十六进制编码密钥。
 
 ### 1) 生成加密密钥 {#id6}
 

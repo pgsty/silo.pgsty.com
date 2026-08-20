@@ -2,8 +2,8 @@
 title: "mc admin group"
 url: "/reference/minio-mc-admin/mc-admin-group/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-group.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-group"></a>
@@ -16,11 +16,10 @@ The [`mc admin group`](#command-mc.admin.group) command manages groups on a MinI
 
 A [group](/administration/identity-access-management/minio-group-management/#minio-groups) is a collection of [users](/administration/identity-access-management/minio-user-management/#minio-users). Each group can have one or more assigned [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) that explicitly list the actions and resources to which group members are allowed or denied access. Groups provide a simplified method for managing shared permissions among users with common access patterns and workloads.
 
-{{% alert color="info" %}}
-**Use `mc admin` on MinIO Deployments Only**
-
-MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on MinIO Deployments Only**
+>
+> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
 
 ### Groups and Policy-Based Access Control {#groups-and-policy-based-access-control}
 
@@ -30,13 +29,12 @@ Newly created groups have *no* policies by default. To configure a group’s ass
 
 For more information on MinIO users and groups, see [User Management](/administration/identity-access-management/minio-user-management/#minio-users) and [Group Management](/administration/identity-access-management/minio-group-management/#minio-groups). For more information on MinIO policies, see [MinIO Policy Based Access Control](/administration/identity-access-management/policy-based-access-control/#minio-policy).
 
-{{% alert color="info" %}}
-**`Deny` overrides `Allow`**
-
-MinIO follows the IAM standard where a `Deny` rule overrides `Allow` rule on the same action or resource. For example, if a user has an explicitly assigned policy with an `Allow` rule for an action/resource while one of its groups has an assigned policy with a `Deny` rule for that action/resource, MinIO would apply only the `Deny` rule.
-
-For more information on IAM policy evaluation logic, see the IAM documentation on [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow).
-{{% /alert %}}
+> [!NOTE]
+> **`Deny` overrides `Allow`**
+>
+> MinIO follows the IAM standard where a `Deny` rule overrides `Allow` rule on the same action or resource. For example, if a user has an explicitly assigned policy with an `Allow` rule for an action/resource while one of its groups has an assigned policy with a `Deny` rule for that action/resource, MinIO would apply only the `Deny` rule.
+>
+> For more information on IAM policy evaluation logic, see the IAM documentation on [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow).
 
 ## Examples {#examples}
 

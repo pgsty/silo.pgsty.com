@@ -2,8 +2,8 @@
 title: "将服务日志或审计日志发布到外部服务"
 url: "/zh/operations/monitoring/minio-logging/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/minio-logging.rst
+upstream_modified: false
 ---
 
 <a id="minio-logging"></a>
@@ -24,8 +24,8 @@ MinIO 会将日志作为 JSON 文档，通过 `PUT` 请求发送到每个已配�
 
 你可以通过环境变量 *或* 运行时配置项，配置一个新的 HTTP Webhook 端点， 让 MinIO 将 [`minio server`](/zh/reference/minio-server/#command-minio.server) 日志发布到该端点。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-regular) 指定 [`minio server`](/zh/reference/minio-server/#command-minio.server) 日志 HTTP Webhook 端点及其相关配置项。
 
 下面的示例代码设置了配置日志 HTTP Webhook 端点所需的 *全部* 环境变量。 其中最少 *必须* 配置的变量为：
@@ -33,27 +33,23 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
 - [`MINIO_LOGGER_WEBHOOK_ENABLE`](/zh/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_LOGGER_WEBHOOK_ENABLE)
 - [`MINIO_LOGGER_WEBHOOK_ENDPOINT`](/zh/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT)
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_LOGGER_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
+>    set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
+> ```
 
-```shell
-   set MINIO_LOGGER_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-   set MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
-   set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-   export MINIO_LOGGER_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-   export MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
-   export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+>    export MINIO_LOGGER_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
+>    export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
+> ```
 
 - 将 `<IDENTIFIER>` 替换为该 HTTP Webhook 端点的唯一描述字符串。 与新日志 HTTP Webhook 相关的所有环境变量都应使用同一个 `<IDENTIFIER>`。
 
@@ -65,49 +61,41 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
 
 例如，对于 Bearer token，请在前面加上 `Bearer`：
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+> set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+> ```
 
-```shell
-set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+> export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+> ```
 
 请根据端点要求调整该值。 自定义认证格式可能类似如下：
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+> set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+> ```
 
-```shell
-set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+> export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+> ```
 
 详情请参阅目标服务的文档。
 
 重启 MinIO server 以应用新的配置项。 你必须在部署中的 *所有* MinIO server 上指定相同的环境变量和设置。
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 MinIO 支持在 MinIO 部署上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`logger_webhook`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook) 配置键新增或更新日志 HTTP Webhook 端点。 应用任何新增或更新后的配置项都需要重启 MinIO 部署。
 
 下面的示例代码设置了配置日志 HTTP Webhook 端点相关的 *全部* 配置项。 其中最少 *必须* 配置的项为 [`logger_webhook endpoint`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook.endpoint)：
@@ -143,8 +131,8 @@ mc admin config set ALIAS/ logger_webhook:IDENTIFIER  \
   ```
 
   详情请参阅目标服务的文档。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="id3"></a>
 
@@ -152,8 +140,8 @@ mc admin config set ALIAS/ logger_webhook:IDENTIFIER  \
 
 你可以通过环境变量 *或* 运行时配置项，配置一个新的 HTTP Webhook 端点， 让 MinIO 将审计日志发布到该端点：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-audit) 指定审计日志 HTTP Webhook 端点及其相关配置项。
 
 下面的示例代码设置了配置审计日志 HTTP Webhook 端点所需的 *全部* 环境变量。 其中最少 *必须* 配置的变量为：
@@ -161,31 +149,27 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-an
 - [`MINIO_AUDIT_WEBHOOK_ENABLE`](/zh/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_AUDIT_WEBHOOK_ENABLE)
 - [`MINIO_AUDIT_WEBHOOK_ENDPOINT`](/zh/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_AUDIT_WEBHOOK_ENDPOINT)
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+> set MINIO_AUDIT_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+> set MINIO_AUDIT_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
+> set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
+> set MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
+> set MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
+> ```
 
-```shell
-set MINIO_AUDIT_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-set MINIO_AUDIT_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
-set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
-set MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
-set MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-export MINIO_AUDIT_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-export MINIO_AUDIT_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
-export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
-export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
-export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+> export MINIO_AUDIT_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+> export MINIO_AUDIT_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
+> export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
+> export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
+> export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
+> ```
 
 - 将 `<IDENTIFIER>` 替换为该 HTTP Webhook 端点的唯一描述字符串。 与新审计日志 HTTP Webhook 相关的所有环境变量都应使用同一个 `<IDENTIFIER>`。
 
@@ -197,50 +181,42 @@ export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
 
 例如，对于 Bearer token，请在前面加上 `Bearer`：
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+> set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+> ```
 
-```shell
-set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+> export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+> ```
 
 请根据端点要求调整该值。 自定义认证格式可能类似如下：
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+> set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+> ```
 
-```shell
-set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux 与 macOS**
-
-```shell
-export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux 与 macOS**
+>
+> ```shell
+> export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+> ```
 
 详情请参阅目标服务的文档。
 - 将 `cert.pem` 和 `cert.key` 替换为要向 HTTP Webhook server 提交的 x.509 TLS 证书公钥与私钥。 对于不要求客户端出示 TLS 证书的端点，可省略该项。
 
 重启 MinIO server 以应用新的配置项。 你必须在部署中的 *所有* MinIO server 上指定相同的环境变量和设置。
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 MinIO 支持在 MinIO 部署上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`audit_webhook`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook) 配置键新增或更新审计日志 HTTP Webhook 端点。 应用任何新增或更新后的配置项都需要重启 MinIO 部署。
 
 下面的示例代码设置了配置审计日志 HTTP Webhook 端点相关的 *全部* 配置项。 其中最少 *必须* 配置的项为 [`audit_webhook endpoint`](/zh/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook.endpoint)：
@@ -279,8 +255,8 @@ mc admin config set ALIAS/ audit_webhook:IDENTIFIER  \
 
   详情请参阅目标服务的文档。
 - 将 `cert.pem` 和 `cert.key` 替换为要向 HTTP Webhook server 提交的 x.509 TLS 证书公钥与私钥。 对于不要求客户端出示 TLS 证书的端点，可省略该项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 审计日志结构 {#id4}
 

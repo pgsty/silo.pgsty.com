@@ -2,8 +2,8 @@
 title: "cert-manager for Tenants"
 url: "/operations/cert-manager/cert-manager-tenants/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/cert-manager/cert-manager-tenants.rst
+upstream_modified: false
 ---
 
 <a id="cert-manager-for-tenants"></a>
@@ -11,13 +11,12 @@ silo_modified: false
 
 The following procedures create and apply the resources necessary to use cert-manager for the TLS certificates within a tenant.
 
-{{% alert color="info" %}}
-**Note**
-
-The procedures use `tenant-1` as the name of the tenant.
-
-Replace the string `tenant-1` throughout the procedures to reflect the name of your tenant.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> The procedures use `tenant-1` as the name of the tenant.
+>
+> Replace the string `tenant-1` throughout the procedures to reflect the name of your tenant.
 
 ## Prerequisites {#prerequisites}
 
@@ -62,11 +61,10 @@ Before deploying a new tenant, create a Certificate Authority and Issuer for the
        group: cert-manager.io
    ```
 
-   {{% alert color="warning" %}}
-   **Important**
-
-   The `spec.issueRef.name` must match the name of the `ClusterIssuer` created when [setting up cert-manager](/operations/network-encryption/cert-manager/#minio-cert-manager-create-cluster-issuer). If you specified a different `ClusterIssuer` name or are using a different `Issuer` from the guide, modify the `issuerRef` to match your environment.
-   {{% /alert %}}
+   > [!WARNING]
+   > **Important**
+   >
+   > The `spec.issueRef.name` must match the name of the `ClusterIssuer` created when [setting up cert-manager](/operations/network-encryption/cert-manager/#minio-cert-manager-create-cluster-issuer). If you specified a different `ClusterIssuer` name or are using a different `Issuer` from the guide, modify the `issuerRef` to match your environment.
 3. Apply the resource:
 
    ```shell
@@ -110,23 +108,22 @@ Request that cert-manager issue a new TLS server certificate for MinIO. The cert
 - `*.<namespace>.svc.<cluster domain>`
 - `*.<tenant-name>.minio.<namespace>.svc.<cluster domain>'`
 
-{{% alert color="warning" %}}
-**Important**
-
-Replace the placeholder text (marked with the `<` and `>` characters) with values for your tenant:
-
-- `<cluster domain>` is the internal root DNS domain assigned in your Kubernetes cluster. Typically, this is `cluster.local`, but confirm the value by checking your CoreDNS configuration for the correct value for your Kubernetes cluster.
-
-  For example:
-
-  ```shell
-  kubectl get configmap coredns -n kube-system -o jsonpath="{.data}"
-  ```
-
-  Different Kubernetes providers manage the root domain differently. Check with your Kubernetes provider for more information.
-- `tenant-name` is the name provided to your tenant in the `metadata.name` of the Tenant YAML. For this example it is `myminio`.
-- `namespace` is the value created earlier where the tenant will be installed. In the tenant YAML, it is defined in the `metadata.namespace` field. For this example it is `tenant-1`.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Replace the placeholder text (marked with the `<` and `>` characters) with values for your tenant:
+>
+> - `<cluster domain>` is the internal root DNS domain assigned in your Kubernetes cluster. Typically, this is `cluster.local`, but confirm the value by checking your CoreDNS configuration for the correct value for your Kubernetes cluster.
+>
+>   For example:
+>
+>   ```shell
+>   kubectl get configmap coredns -n kube-system -o jsonpath="{.data}"
+>   ```
+>
+>   Different Kubernetes providers manage the root domain differently. Check with your Kubernetes provider for more information.
+> - `tenant-name` is the name provided to your tenant in the `metadata.name` of the Tenant YAML. For this example it is `myminio`.
+> - `namespace` is the value created earlier where the tenant will be installed. In the tenant YAML, it is defined in the `metadata.namespace` field. For this example it is `tenant-1`.
 
 1. Request a `Certificate` for the specified domains
 
@@ -152,11 +149,10 @@ Replace the placeholder text (marked with the `<` and `>` characters) with value
        name: tenant-1-ca-issuer
    ```
 
-   {{% alert color="secondary" %}}
-   **Tip**
-
-   For this example, the Tenant name is `myminio`. We recommend naming the secret in the field `spec.secretName` as `<tenant-name>-tls` as a naming convention.
-   {{% /alert %}}
+   > [!NOTE]
+   > **Tip**
+   >
+   > For this example, the Tenant name is `myminio`. We recommend naming the secret in the field `spec.secretName` as `<tenant-name>-tls` as a naming convention.
 2. Apply the certificate resource:
 
    ```shell
@@ -169,12 +165,11 @@ Replace the placeholder text (marked with the `<` and `>` characters) with value
    kubectl describe secret/myminio-tls -n tenant-1
    ```
 
-   {{% alert color="info" %}}
-   **Note**
-
-   - Replace `tenant-1` with the namespace for your tenant.
-   - Replace `myminio-tls` with the name of your secret, if different.
-   {{% /alert %}}
+   > [!NOTE]
+   > **Note**
+   >
+   > - Replace `tenant-1` with the namespace for your tenant.
+   > - Replace `myminio-tls` with the name of your secret, if different.
 
 ## 4) Deploy the tenant using cert-manager for TLS certificate management {#deploy-the-tenant-using-cert-manager-for-tls-certificate-management}
 
@@ -228,11 +223,10 @@ Copy the tenant’s cert-manager generated CA public key (`ca.crt`) into the *mi
    kubectl create secret generic operator-ca-tls-tenant-1 --from-file=ca.crt -n minio-operator
    ```
 
-{{% alert color="secondary" %}}
-**Tip**
-
-In this example we chose a secret name of `operator-ca-tls-tenant-1`. We used the tenant namespace `tenant-1` as a suffix for easy identification of which namespace the CA comes from. Use the name of your tenant namespace for easier linking secrets to the related resources.
-{{% /alert %}}
+> [!NOTE]
+> **Tip**
+>
+> In this example we chose a secret name of `operator-ca-tls-tenant-1`. We used the tenant namespace `tenant-1` as a suffix for easy identification of which namespace the CA comes from. Use the name of your tenant namespace for easier linking secrets to the related resources.
 
 ## 6) Deploy the tenant {#deploy-the-tenant}
 

@@ -2,8 +2,8 @@
 title: "mc idp ldap policy entities"
 url: "/reference/minio-mc/mc-idp-ldap-policy-entities/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-policy-entities.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-policy-entities"></a>
@@ -15,8 +15,8 @@ silo_modified: false
 
 The [`mc idp ldap policy entities`](#command-mc.idp.ldap.policy.entities) command displays a list of mappings for a user, group, and/or policy.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example lists all mappings for a specific policy, a set of groups, and a selection of users on the `myminio` deployment.
 
 Specifically, it lists:
@@ -31,9 +31,8 @@ mc idp ldap policy entities myminio                                             
                             --user 'uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'  \
                             --group 'cn=projectb,ou=groups,ou=swengg,dc=min,dc=io'
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -54,8 +53,8 @@ mc [GLOBALFLAGS] idp ldap policy entities                       \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

@@ -2,8 +2,8 @@
 title: "Managing Your Deployment"
 url: "/administration/console/managing-deployment/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/console/managing-deployment.rst
+upstream_modified: true
 ---
 
 <a id="managing-your-deployment"></a>
@@ -16,13 +16,12 @@ You can use the MinIO Console to perform many of the deployment monitoring and m
 - Set up [site replication](#minio-console-site-replication) to synchronize datacenters for timely access across geographically dispersed workforces or for disaster preparedness.
 - Configure deployment [settings](#minio-console-settings).
 
-{{% alert color="warning" %}}
-**Important**
-
-The MinIO Console is a web-based interface for the MinIO Server.
-
-It is distinct and independent from the MinIO Kubernetes Operator Console which was deprecated and removed as of Operator 6.0.0.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The MinIO Console is a web-based interface for the MinIO Server.
+>
+> It is distinct and independent from the MinIO Kubernetes Operator Console which was deprecated and removed as of Operator 6.0.0.
 
 <a id="minio-console-monitoring"></a>
 
@@ -50,11 +49,10 @@ Select the **Start Logs** button to begin collecting logs using the selected fil
 
 ### Audit {#audit}
 
-{{% alert color="warning" %}}
-**Important**
-
-MinIO plans to deprecate the Tenant Console Audit Log feature and remove it in an upcoming release. As an alternative, use any webhook-capable database or logging service to capture [audit logs](/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs) from the Tenant.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> MinIO plans to deprecate the Tenant Console Audit Log feature and remove it in an upcoming release. As an alternative, use any webhook-capable database or logging service to capture [audit logs](/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs) from the Tenant.
 
 The Audit Log section provides an interface for viewing [audit logs](/operations/monitoring/minio-logging/#minio-logging) collected by a configured PostgreSQL service.
 
@@ -78,13 +76,12 @@ The **Encryption** section allows you to view the status and metrics for configu
 
 ## Events {#events}
 
-{{% alert color="info" %}}
-**Changed: Console**
-
-0.23.1
-
-Notifications section renamed to Events.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: Console**
+>
+> 0.23.1
+>
+> Notifications section renamed to Events.
 
 The **Events** section provides an interface to view, add, or remove [Event Notification](/administration/monitoring/bucket-notifications/#minio-bucket-notifications) targets.
 
@@ -110,11 +107,10 @@ The **Encryption** setting provides an interface for listing, creating, and dele
 
 You can use keys created or listed in this view for object encryption operations, including setting a [bucket-level default key](/administration/console/managing-objects/#minio-console-buckets).
 
-{{% alert color="warning" %}}
-**Important**
-
-Deleting a key prevents MinIO from decrypting any objects protected with that key. If no backups of that key exist, deleting a key renders objects permanently unreadable. See [Secure Erasure and Locking](/administration/server-side-encryption/#minio-encryption-sse-secure-erasure-locking) for more information.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> Deleting a key prevents MinIO from decrypting any objects protected with that key. If no backups of that key exist, deleting a key renders objects permanently unreadable. See [Secure Erasure and Locking](/administration/server-side-encryption/#minio-encryption-sse-secure-erasure-locking) for more information.
 
 <a id="minio-console-settings"></a>
 
@@ -134,13 +130,12 @@ This section contains the following subsections.
 - Audit [Webhook](/administration/monitoring/publish-events-to-webhook/#minio-bucket-notifications-publish-webhook)
 - Audit [Kafka](/administration/monitoring/publish-events-to-kafka/#minio-bucket-notifications-publish-kafka)
 
-{{% alert color="info" %}}
-**Added: Console**
-
-v0.24.0
-
-Environment variable configuration settings override any customizations added in the MinIO Console. Hover your mouse cover over a configuration field to display a tooltip that indicates whether an environment variable controls the setting.
-{{% /alert %}}
+> [!NOTE]
+> **Added: Console**
+>
+> v0.24.0
+>
+> Environment variable configuration settings override any customizations added in the MinIO Console. Hover your mouse cover over a configuration field to display a tooltip that indicates whether an environment variable controls the setting.
 
 Some subsections may not be visible if the authenticated user does not have the [required administrative permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions).
 

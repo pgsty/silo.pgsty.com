@@ -2,8 +2,8 @@
 title: "mc idp ldap policy attach"
 url: "/zh/reference/minio-mc/mc-idp-ldap-policy-attach/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-policy-attach.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-policy-attach"></a>
@@ -15,8 +15,8 @@ silo_modified: false
 
 [`mc idp ldap policy attach`](#command-mc.idp.ldap.policy.attach) 命令将一个或多个策略附加到实体。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 > 以下示例将策略 `userpolicy` 附加到 `myminio` 部署中的用户 `bobfisher`：
 
 ```shell
@@ -24,9 +24,8 @@ mc idp ldap policy attach myminio                                               
                           userpolicy                                               \
                           --user='uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令的语法如下：
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] idp ldap policy attach             \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

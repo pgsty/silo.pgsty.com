@@ -2,8 +2,8 @@
 title: "mc ilm rule add"
 url: "/zh/reference/minio-mc/mc-ilm-rule-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-rule-add"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.rule.add"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm rule rm` 替代 `mc ilm add`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm rule rm` 替代 `mc ilm add`。
 
 ## 语法 {#id2}
 
@@ -23,8 +22,8 @@ silo_modified: false
 
 该命令支持添加 [迁移（分层）](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) 和 [过期](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 两类生命周期管理规则。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令将新的生命周期管理规则添加到 `myminio` 部署上的 `mydata` 存储桶：
 
 ```shell
@@ -44,8 +43,8 @@ mc ilm rule add --noncurrent-transition-days 7 --noncurrent-transition-tier "COL
 - 如果对象没有其他剩余版本，则删除 `DeleteMarker` 墓碑。
 - 将超过 30 天的对象迁移到 `COLDTIER` 远程层。
 - 对象变为非当前版本后 7 天迁移到 `COLDTIER` 远程层。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -71,8 +70,8 @@ mc [GLOBALFLAGS] ilm rule add                               \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -124,21 +123,19 @@ mc ilm rule add --prefix "meetingnotes/" myminio/mydata --expire-days "90"
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-02-24T01-33-20Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-02-24T01-33-20Z
 
 使对象的当前版本和非当前版本全部过期。 与 [`--expire-days`](#mc.ilm.rule.add.-expire-days) 选项结合使用，以指定扫描器进程在多少天后删除对象的所有版本。
 
 在 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 处理该命令后，部署中将不再保留该对象的任何版本。
 
-{{% alert color="info" %}}
-**变更: MinIO**
-
-RELEASE.2024-05-01T01-11-10Z
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2024-05-01T01-11-10Z
 
 此标志 *仅* 适用于最新版本 **不是** 删除标记的对象。
 
@@ -288,11 +285,10 @@ MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-s
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 选择大于指定值的对象。 以数字加单位输入该值，例如 `5GiB` 表示 5 gibibytes。
 
@@ -315,11 +311,10 @@ RELEASE.2023-12-02T02-03-28Z
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 选择小于指定值的对象。 以数字加单位输入该值，例如 `1M` 表示 1 megabyte。
 
@@ -413,11 +408,10 @@ mc ilm rule add ALIAS/PATH --expire-delete-marker
 - 将 [`ALIAS`](#mc.ilm.rule.add.ALIAS) 替换为 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.ilm.rule.add.ALIAS) 替换为 S3 兼容主机上存储桶的路径。
 
-{{% alert color="info" %}}
-**说明**
-
-若要删除最新版本为删除标记的对象的所有版本，*包括删除标记本身*，可考虑使用 [batch expiration](/zh/reference/minio-mc/mc-batch-generate/#minio-mc-batch-generate-expire-job)。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 若要删除最新版本为删除标记的对象的所有版本，*包括删除标记本身*，可考虑使用 [batch expiration](/zh/reference/minio-mc/mc-batch-generate/#minio-mc-batch-generate-expire-job)。
 
 ## 所需权限 {#id10}
 

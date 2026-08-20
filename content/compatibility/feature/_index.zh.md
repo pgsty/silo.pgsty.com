@@ -6,8 +6,6 @@ url: "/zh/compatibility/feature/"
 weight: 40
 type: docs
 icon: fa-solid fa-flask
-minio_origin: false
-silo_modified: false
 ---
 
 本节的组件页面记录 Silo 与 MinIO 的一致之处；这个子节则记录 Silo 有意超越上游的地方：每一页都是一份设计笔记，在实现落地之前写就，落地之后继续作为"当时决定了什么、为什么这么决定"的权威记录保留。

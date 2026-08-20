@@ -2,8 +2,8 @@
 title: "mc ilm tier rm"
 url: "/zh/reference/minio-mc/mc-ilm-tier-rm/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-rm.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-rm"></a>
@@ -19,11 +19,10 @@ silo_modified: false
 
 [`mc ilm tier remove`](#command-mc.ilm.tier.remove) 命令与 [`mc ilm tier rm`](#command-mc.ilm.tier.rm) 具有等效功能。
 
-{{% alert color="info" %}}
-**说明**
-
-一旦某个层已经转换过对象，则无法将其移除。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 一旦某个层已经转换过对象，则无法将其移除。
 
 ### 所需权限 {#id3}
 
@@ -70,24 +69,22 @@ MinIO 还要求在集群上具备以下管理权限，该集群用于为对象�
 
 该命令具有以下语法：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例在 `myminio` 部署上移除名为 `WARM-TIER` 的现有远程层。 没有对象被转换到 `WARM-TIER` 层。
 
 ```shell
  mc ilm tier rm myminio WARM-TIER
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令具有以下语法：
 
 ```shell
 mc ilm tier info TARGET TIER_NAME
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id5}
 

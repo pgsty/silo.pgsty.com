@@ -1,16 +1,12 @@
 HUGO ?= hugo
 
-# An ignored sibling-theme workspace is opt-in for local development. Normal
-# checkouts without go.work continue to use the OINK version pinned in go.mod.
-ifneq ($(wildcard go.work),)
-HUGO_MODULE_WORKSPACE ?= go.work
-export HUGO_MODULE_WORKSPACE
-endif
-
-.PHONY: dev build check
+.PHONY: dev serve build check
 
 dev:
-	$(HUGO) server
+	HUGO_MODULE_REPLACEMENTS='github.com/pgsty/oink -> $(abspath ../oink)' $(HUGO) server --renderToMemory
+
+serve:
+	$(HUGO) server --environment production --minify --disableFastRender --disableLiveReload
 
 build:
 	$(HUGO) build --minify --cleanDestinationDir

@@ -2,8 +2,8 @@
 title: "Enable Multi-Site Server-Side Bucket Replication"
 url: "/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/enable-server-side-multi-site-bucket-replication.rst
+upstream_modified: false
 ---
 
 <a id="enable-multi-site-server-side-bucket-replication"></a>
@@ -19,13 +19,12 @@ The procedure on this page configures automatic server-side bucket replication b
 
 Multi-Site Active-Active replication configurations can span multiple racks, datacenters, or geographic locations. Complexity of configuring and maintaining multi-site configurations generally increase with the number of sites and size of each site. Enterprises looking to implement multi-site replication should consider leveraging [MinIO SUBNET](https://min.io/pricing?ref=docs) support to access the expertise, planning, and engineering resources required for addressing that use case.
 
-{{% alert color="info" %}}
-**See also**
-
-- Use the [`mc replicate update`](/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) command to modify an existing replication rule.
-- Use the [`mc replicate update`](/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) command with the [`--state "disable"`](/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) flag to disable an existing replication rule.
-- Use the [`mc replicate rm`](/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) command to remove an existing replication rule.
-{{% /alert %}}
+> [!NOTE]
+> **See also**
+>
+> - Use the [`mc replicate update`](/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) command to modify an existing replication rule.
+> - Use the [`mc replicate update`](/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) command with the [`--state "disable"`](/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) flag to disable an existing replication rule.
+> - Use the [`mc replicate rm`](/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) command to remove an existing replication rule.
 
 <a id="minio-bucket-replication-serverside-multi-requirements"></a>
 
@@ -56,33 +55,30 @@ Specifically, ensure the user has *at minimum*:
 
 Click to expand any of the following:
 
-{{% details title="Use Consistent Replication Settings" closed="true" %}}
-MinIO supports customizing the replication configuration to enable or disable the following replication behaviors:
+> [!DETAILS]- Use Consistent Replication Settings
+> MinIO supports customizing the replication configuration to enable or disable the following replication behaviors:
+>
+> - Replication of [delete operations](/administration/object-management/object-delete/#minio-object-delete)
+> - Replication of delete markers
+> - Replication of existing objects
+> - Replication of metadata-only changes
+>
+> When configuring replication rules for a bucket, ensure that all MinIO deployments participating in multi-site replication use the *same* replication behaviors to ensure consistent and predictable synchronization of objects.
 
-- Replication of [delete operations](/administration/object-management/object-delete/#minio-object-delete)
-- Replication of delete markers
-- Replication of existing objects
-- Replication of metadata-only changes
+> [!DETAILS]- Replication of Existing Objects
+> MinIO supports automatically replicating existing objects in a bucket.
+>
+> MinIO requires explicitly enabling replication of existing objects using the [`mc replicate add --replicate`](/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) or [`mc replicate update --replicate`](/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) and including the `existing-objects` replication feature flag. This procedure includes the required flags for enabling replication of existing objects.
 
-When configuring replication rules for a bucket, ensure that all MinIO deployments participating in multi-site replication use the *same* replication behaviors to ensure consistent and predictable synchronization of objects.
-{{% /details %}}
-
-{{% details title="Replication of Existing Objects" closed="true" %}}
-MinIO supports automatically replicating existing objects in a bucket.
-
-MinIO requires explicitly enabling replication of existing objects using the [`mc replicate add --replicate`](/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) or [`mc replicate update --replicate`](/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) and including the `existing-objects` replication feature flag. This procedure includes the required flags for enabling replication of existing objects.
-{{% /details %}}
-
-{{% details title="Replication of Delete Operations" closed="true" %}}
-MinIO supports replicating [delete operations](/administration/object-management/object-delete/#minio-object-delete) onto the target bucket. Specifically, MinIO can replicate versioning [Delete Markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html) and the deletion of specific versioned objects:
-
-- For delete operations on an object, MinIO replication also creates the delete marker on the target bucket.
-- For delete operations on versions of an object, MinIO replication also deletes those versions on the target bucket.
-
-MinIO requires explicitly enabling replication of delete operations using the [`mc replicate add --replicate`](/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) or [`mc replicate update --replicate`](/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate). This procedure includes the required flags for enabling replication of delete operations and delete markers.
-
-MinIO does *not* replicate delete operations resulting from the application of [lifecycle management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration). Configure matching expiration rules for the bucket on all replication sites to ensure consistent application of object expiration.
-{{% /details %}}
+> [!DETAILS]- Replication of Delete Operations
+> MinIO supports replicating [delete operations](/administration/object-management/object-delete/#minio-object-delete) onto the target bucket. Specifically, MinIO can replicate versioning [Delete Markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html) and the deletion of specific versioned objects:
+>
+> - For delete operations on an object, MinIO replication also creates the delete marker on the target bucket.
+> - For delete operations on versions of an object, MinIO replication also deletes those versions on the target bucket.
+>
+> MinIO requires explicitly enabling replication of delete operations using the [`mc replicate add --replicate`](/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) or [`mc replicate update --replicate`](/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate). This procedure includes the required flags for enabling replication of delete operations and delete markers.
+>
+> MinIO does *not* replicate delete operations resulting from the application of [lifecycle management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration). Configure matching expiration rules for the bucket on all replication sites to ensure consistent application of object expiration.
 
 ## Procedure {#procedure}
 
@@ -99,11 +95,10 @@ This procedure uses the placeholder `ALIAS` to reference the [alias](/reference/
 
 This procedure assumes each alias corresponds to a user with the [necessary replication permissions](/administration/bucket-replication/bucket-replication-requirements/#minio-bucket-replication-requirements).
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc replicate add`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) automatically creates the necessary replication targets, removing the need for using the deprecated `mc admin remote bucket add` command. This procedure only documents the procedure as of that release.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc replicate add`](/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) automatically creates the necessary replication targets, removing the need for using the deprecated `mc admin remote bucket add` command. This procedure only documents the procedure as of that release.
 
 <a id="minio-bucket-replication-multi-site-minio-cli-create-replication-rules"></a>
 

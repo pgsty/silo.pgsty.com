@@ -2,29 +2,27 @@
 title: "mc admin top"
 url: "/zh/reference/deprecated/mc-admin-top/"
 weight: 200
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-top.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-top"></a>
 
 <a id="command-mc.admin.top"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-08-11T00-30-48Z**
-
-`mc admin top` 已由 [`mc support top`](/zh/reference/minio-mc/mc-support-top/#command-mc.support.top) 替代。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-08-11T00-30-48Z**
+>
+> `mc admin top` 已由 [`mc support top`](/zh/reference/minio-mc/mc-support-top/#command-mc.support.top) 替代。
 
 ## 描述 {#id2}
 
 [`mc admin top`](#command-mc.admin.top) 命令返回分布式 MinIO 部署的统计信息， 类似于 `top` 命令的输出。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ## 语法 {#id3}
 

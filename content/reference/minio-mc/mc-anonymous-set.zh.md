@@ -2,8 +2,8 @@
 title: "mc anonymous set"
 url: "/zh/reference/minio-mc/mc-anonymous-set/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-anonymous-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-anonymous-set"></a>
@@ -20,8 +20,8 @@ silo_modified: false
 
 要使用 IAM [JSON 策略](https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html)设置存储桶匿名策略，请使用 [`mc anonymous set-json`](/zh/reference/minio-mc/mc-anonymous-set-json/#command-mc.anonymous.set-json) 命令。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令为 `myminio` MinIO 部署上的多个存储桶设置匿名访问策略：
 
 ```shell
@@ -34,8 +34,8 @@ mc anonymous set public myminio/public
 
 - 向 `myminio/uploads` 和 `myminio/public` 执行 `PUT` 对象操作。
 - 从 `myminio/downloads` 和 `myminio/public` 执行 `GET` 对象操作。
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -47,8 +47,8 @@ mc [GLOBALFLAGS] policy set PERMISSION ALIAS
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

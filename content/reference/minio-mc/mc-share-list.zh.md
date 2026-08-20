@@ -2,8 +2,8 @@
 title: "mc share ls"
 url: "/zh/reference/minio-mc/mc-share-list/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-share-list.rst
+upstream_modified: false
 ---
 
 <a id="mc-share-ls"></a>
@@ -22,17 +22,16 @@ silo_modified: false
 
 有关可共享对象 URL 的更多信息，请参阅 Amazon S3 文档中的 [Pre-Signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令分别列出 `myminio` MinIO 部署中 `mydata` 存储桶的 所有上传和下载预签名 URL：
 
 ```shell
 mc share ls upload myminio/mydata
 mc share ls download myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -46,8 +45,8 @@ mc [GLOBALFLAGS] share list           \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -81,8 +80,8 @@ mc [GLOBALFLAGS] share list           \
 
 ### 列出已生成的下载和上传 URL {#url}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="列出活动下载预签名 URL" %}}
+{{< tabs group="url-url-2" >}}
+{{< tab label="列出活动下载预签名 URL" value="url" >}}
 使用 [`mc share ls download`](#mc.share.ls.download) 生成一个 URL， 该 URL 支持 `POST` 请求，用于将文件上传到 S3 兼容主机上的 特定对象位置：
 
 ```shell
@@ -90,8 +89,8 @@ mc share ls download ALIAS
 ```
 
 - 将 [`ALIAS`](#mc.share.ls.ALIAS) 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{% tab header="列出活动上传预签名 URL" %}}
+{{< /tab >}}
+{{< tab label="列出活动上传预签名 URL" value="url-2" >}}
 使用 [`mc share ls upload`](#mc.share.ls.upload) 生成一个 URL， 该 URL 支持 `POST` 请求，用于将文件上传到 S3 兼容主机上的 特定对象位置：
 
 ```shell
@@ -99,8 +98,8 @@ mc share ls upload ALIAS
 ```
 
 - 将 [`ALIAS`](/zh/reference/minio-mc/mc-share-upload/#mc.share.upload.ALIAS) 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id6}
 

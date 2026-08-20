@@ -3,8 +3,8 @@ title: "身份与访问管理"
 url: "/zh/administration/identity-access-management/"
 weight: 140
 icon: fa-solid fa-users-gear
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management.rst
+upstream_modified: false
 ---
 
 <a id="minio-authentication-and-identity-management"></a>
@@ -63,10 +63,9 @@ MinIO 负责策略的创建与存储。将策略分配给用户或组的具体�
 
 MinIO PBAC 在设计上兼容 AWS IAM 策略语法、结构和行为。MinIO 文档会尽力覆盖 IAM 特定行为和功能。若需要更完整的 IAM、IAM 策略或 IAM JSON 语法文档，请参考 [IAM documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/)。
 
-{{% alert color="info" %}}
-**`Deny` overrides `Allow`**
-
-MinIO 遵循 AWS IAM 策略求值规则，即在同一操作/资源上，`Deny` 规则会覆盖 `Allow` 规则。例如，如果某个用户被显式分配的策略对某个操作/资源包含 `Allow` 规则，而其所属某个组被分配的策略对同一操作/资源包含 `Deny` 规则，则 MinIO 只会应用 `Deny` 规则。
-
-有关 IAM 策略求值逻辑的更多信息，请参见 IAM 文档中的 [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow)。
-{{% /alert %}}
+> [!NOTE]
+> **`Deny` overrides `Allow`**
+>
+> MinIO 遵循 AWS IAM 策略求值规则，即在同一操作/资源上，`Deny` 规则会覆盖 `Allow` 规则。例如，如果某个用户被显式分配的策略对某个操作/资源包含 `Allow` 规则，而其所属某个组被分配的策略对同一操作/资源包含 `Deny` 规则，则 MinIO 只会应用 `Deny` 规则。
+>
+> 有关 IAM 策略求值逻辑的更多信息，请参见 IAM 文档中的 [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow)。

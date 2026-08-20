@@ -2,19 +2,18 @@
 title: "mc support inspect"
 url: "/reference/minio-mc/mc-support-inspect/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-inspect.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-inspect"></a>
 
 <a id="command-mc.support.inspect"></a>
 
-{{% alert color="info" %}}
-**SUBNET Registration Required**
-
-The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-{{% /alert %}}
+> [!NOTE]
+> **SUBNET Registration Required**
+>
+> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Description {#description}
 
@@ -24,29 +23,25 @@ MinIO assembles this data from each backend drive storing an [erasure shard](/op
 
 If this information is required to diagnose a [MinIO SUBNET](https://min.io/pricing?jmp=docs) issue, MinIO Engineering will provide the appropriate command. The resulting report is intended for use by MinIO Engineering via SUBNET and may contain internal or private data points associated to the object. Exercise caution before sending a report to a third party or posting the report in a public forum.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-01-11T03-14-16Z**
+> [!NOTE]
+> **Changed: RELEASE.2023-01-11T03-14-16Z**
+>
+> The file uploads to MinIO for use by the engineering team in support efforts. If the upload fails, such as in an air-gapped environment, the command saves the file to the current working directory.
 
-The file uploads to MinIO for use by the engineering team in support efforts. If the upload fails, such as in an air-gapped environment, the command saves the file to the current working directory.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-12T19-27-27Z**
+>
+> When writing the zip archive, MinIO also encrypts the zip index of file names included in the archive.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-12T19-27-27Z**
+> [!NOTE]
+> **Changed: RELEASE.2024-10-29T15-34-59Z**
+>
+> Inspect now generates unique file names to help distinguish one inspect file from another. The file name reflects the inspected path.
 
-When writing the zip archive, MinIO also encrypts the zip index of file names included in the archive.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2024-10-29T15-34-59Z**
-
-Inspect now generates unique file names to help distinguish one inspect file from another. The file name reflects the inspected path.
-{{% /alert %}}
-
-{{% alert color="warning" %}}
-**Important**
-
-[`mc support inspect`](#command-mc.support.inspect) requires a MinIO deployment server from October 2021 or later.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> [`mc support inspect`](#command-mc.support.inspect) requires a MinIO deployment server from October 2021 or later.
 
 ## Wildcards {#wildcards}
 
@@ -78,11 +73,10 @@ The contents of the `xl.meta` file are not human readable. You can convert the c
 
 The following command downloads all objects recursively found at a prefix.
 
-{{% alert color="danger" %}}
-**Caution**
-
-This can be an expensive operation. Proceed with caution.
-{{% /alert %}}
+> [!CAUTION]
+> **Caution**
+>
+> This can be an expensive operation. Proceed with caution.
 
 ```shell
 mc support inspect minio1/mybucket/myobject/**

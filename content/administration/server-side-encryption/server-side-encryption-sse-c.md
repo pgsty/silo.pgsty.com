@@ -2,8 +2,8 @@
 title: "Server-Side Encryption with Client-Managed Keys (SSE-C)"
 url: "/administration/server-side-encryption/server-side-encryption-sse-c/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/server-side-encryption/server-side-encryption-sse-c.rst
+upstream_modified: false
 ---
 
 <a id="server-side-encryption-with-client-managed-keys-sse-c"></a>
@@ -34,13 +34,12 @@ The scope of a single <abbr title="External Key">EK</abbr> depends on the number
 
 ### SSE-C with Replication {#sse-c-with-replication}
 
-{{% alert color="info" %}}
-**Changed: Server**
-
-RELEASE.2024-03-30T09-41-56Z
-
-Objects encrypted with SSE-C can replicate through both site replication or bucket replication. Previous versions of MinIO Object Store did not replicate SSE-C encrypted objects.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: Server**
+>
+> RELEASE.2024-03-30T09-41-56Z
+>
+> Objects encrypted with SSE-C can replicate through both site replication or bucket replication. Previous versions of MinIO Object Store did not replicate SSE-C encrypted objects.
 
 SSE-C encrypted objects that are compressed are not compatible with MinIO [bucket replication](/administration/bucket-replication/#minio-bucket-replication) or [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview). Use [SSE-KMS](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) or [SSE-S3](/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3) to ensure encrypted objects are compatible with replication.
 
@@ -56,11 +55,10 @@ This procedure uses [`mc`](/reference/minio-mc/#command-mc) for performing opera
 
 The SSE-C key *must* be a 256-bit raw encoded string or a hex encoded string. The client application is responsible for generation and storage of the encryption key. MinIO does *not* store SSE-C encryption keys and cannot decrypt SSE-C encrypted objects without the client-managed key.
 
-{{% alert color="info" %}}
-**Note**
-
-Support for hex encoded keys was added in MinIO Client `RELEASE.2024-06-20T14-50-54Z`.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Support for hex encoded keys was added in MinIO Client `RELEASE.2024-06-20T14-50-54Z`.
 
 ### 1) Generate the Encryption Key {#generate-the-encryption-key}
 

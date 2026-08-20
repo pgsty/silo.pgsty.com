@@ -2,8 +2,8 @@
 title: "mc retention set"
 url: "/zh/reference/minio-mc/mc-retention-set/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-retention-set"></a>
@@ -19,16 +19,15 @@ silo_modified: false
 
 [`mc retention set`](#command-mc.retention.set) *要求* 指定存储桶已启用对象锁定。 你 **只能** 在创建存储桶时启用对象锁定。有关启用对象锁定创建存储桶的文档，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会在 `myminio` MinIO 部署中的 `mydata` 存储桶上， 设置默认 30 天的 [GOVERNANCE](/zh/administration/object-management/object-retention/#minio-object-locking-governance) 对象锁：
 
 ```shell
 mc retention set --default GOVERNANCE "30d" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -51,8 +50,8 @@ mc [GLOBALFLAGS] retention set                         \
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 
 [`mc retention set --version-id`](#mc.retention.set.-version-id) 与多个其他参数互斥。 更多信息请参见参考文档。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -193,8 +192,8 @@ mc retention set  --recursive --default MODE DURATION ALIAS/PATH
 
 ### 为已版本化对象设置对象锁定配置 {#id7}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="特定版本" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="特定版本" value="tab1" >}}
 将 [`mc retention set`](#command-mc.retention.set) 与 [`--version-id`](#mc.retention.set.-version-id) 结合使用， 可将保留设置应用到特定对象版本：
 
 ```shell
@@ -206,8 +205,8 @@ mc retention set --version-id VERSION MODE DURATION ALIAS/PATH
 - 将 [`DURATION`](#mc.retention.set.VALIDITY) 替换为对象锁定应持续生效的时长。 例如，要将保留期设置为 30 天，请指定 `30d`。
 - 将 [`ALIAS`](#mc.retention.set.ALIAS) 替换为已配置的兼容 S3 主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.retention.set.ALIAS) 替换为对象路径。
-{{% /tab %}}
-{{% tab header="所有版本" %}}
+{{< /tab >}}
+{{< tab label="所有版本" value="tab2" >}}
 将 [`mc retention set`](#command-mc.retention.set) 与 [`--versions`](#mc.retention.set.-versions) 结合使用， 可将保留设置应用到特定对象版本：
 
 ```shell
@@ -218,8 +217,8 @@ mc retention set --versions  MODE DURATION ALIAS/PATH
 - 将 [`DURATION`](#mc.retention.set.VALIDITY) 替换为对象锁定应持续生效的时长。 例如，要将保留期设置为 30 天，请指定 `30d`。
 - 将 [`ALIAS`](#mc.retention.set.ALIAS) 替换为已配置的兼容 S3 主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.retention.set.ALIAS) 替换为对象路径。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 > 要使用此命令，存储桶 *必须* 启用对象锁定。 只能在创建存储桶时启用对象锁定。有关创建已启用对象锁定的存储桶的更多信息， 请参阅 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock)。
 
@@ -229,22 +228,22 @@ mc retention set --versions  MODE DURATION ALIAS/PATH
 
 对于启用了 [`versioning`](/zh/reference/minio-mc/mc-version/#command-mc.version) 的存储桶，[`mc retention set`](#command-mc.retention.set) 默认对目标对象（一个或多个）的 *最新* 版本执行操作。 [`mc retention set`](#command-mc.retention.set) 包含若干特定选项，在 *显式* 指定时， 可指示命令对特定对象版本 *或* 对象的所有版本执行操作：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="特定对象版本" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="特定对象版本" value="tab1" >}}
 要让 [`mc retention set`](#command-mc.retention.set) 对对象的特定版本执行操作， 请包含 `--version-id` 参数：
 
 - [`mc retention set --version-id`](#mc.retention.set.-version-id)
 - [`mc retention set --version-id`](#mc.retention.set.-version-id)
 - [`mc retention set --version-id`](#mc.retention.set.-version-id)
-{{% /tab %}}
-{{% tab header="所有对象版本" %}}
+{{< /tab >}}
+{{< tab label="所有对象版本" value="tab2" >}}
 要让 [`mc retention set`](#command-mc.retention.set) 对对象的 *所有* 版本执行操作， 请包含 `--versions` 参数：
 
 - [`mc retention set --versions`](#mc.retention.set.-versions)
 - [`mc retention set --versions`](#mc.retention.set.-versions)
 - [`mc retention set --versions`](#mc.retention.set.-versions)
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 与 legal hold 的交互 {#legal-hold}
 

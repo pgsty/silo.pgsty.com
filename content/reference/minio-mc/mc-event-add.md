@@ -2,8 +2,8 @@
 title: "mc event add"
 url: "/reference/minio-mc/mc-event-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-event-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-event-add"></a>
@@ -17,8 +17,8 @@ The [`mc event add`](#command-mc.event.add) command adds event notification trig
 
 MinIO automatically sends triggered events to the configured [notification target](/administration/monitoring/bucket-notifications/#minio-bucket-notifications).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command creates a new event notification trigger for all `PUT` and `DELETE` operations for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
@@ -26,8 +26,8 @@ mc event add --event "put,delete" myminio/mydata arn:aws:sqs::primary:target
 ```
 
 The specified ARN corresponds to a configured [bucket notification target](/administration/monitoring/bucket-notifications/#minio-bucket-notifications) on the `myminio` deployment.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -45,8 +45,8 @@ mc [GLOBALFLAGS] event add \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -132,17 +132,15 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Add an Event Notification to a Bucket {#add-an-event-notification-to-a-bucket}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 The following command adds a new event notification trigger for all S3 `PUT`, `GET`, and `DELETE` operations on a bucket. The command assumes the MinIO deployment has at least one configured [bucket notification target](/administration/monitoring/bucket-notifications/#minio-bucket-notifications):
 
 ```shell
 mc event add myminio/mydata arn:minio:sqs::primary:webhook
 ```
-
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc event add ALIAS ARN
 ```
@@ -151,8 +149,8 @@ mc event add ALIAS ARN
 
   `myminio/mydata`
 - Replace `ARN` with the notification target [`ARN`](#mc.event.add.ARN).
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Behavior {#behavior}
 

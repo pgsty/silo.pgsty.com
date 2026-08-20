@@ -2,8 +2,8 @@
 title: "mc idp ldap update"
 url: "/reference/minio-mc/mc-idp-ldap-update/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-update.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-update"></a>
@@ -15,8 +15,8 @@ silo_modified: false
 
 The [`mc idp ldap update`](#command-mc.idp.ldap.update) command modifies an existing set of configurations for an AD/LDAP provider.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example changes two of the AD/LDAP configuration settings for the `myminio` deployment.
 
 ```shell
@@ -25,9 +25,8 @@ mc idp ldap update                                \
             lookup_bind_dn=cn=admin,dc=min,dc=io  \
             lookup_bind_password=somesecret
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -45,8 +44,8 @@ mc [GLOBALFLAGS] idp ldap update           \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -77,11 +76,10 @@ Specify the hostname for the Active Directory / LDAP server. For example:
 ldapserver.com:636
 ```
 
-{{% alert color="info" %}}
-**[`srv_record_name`](/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name) automatically identifies the port**
-
-If your AD/LDAP server uses [`DNS SRV Records`](/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name), do *not* append the port number to your [`server_addr`](/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.server_addr) value. SRV requests automatically include port numbers when returning the list of available servers.
-{{% /alert %}}
+> [!NOTE]
+> **[`srv_record_name`](/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name) automatically identifies the port**
+>
+> If your AD/LDAP server uses [`DNS SRV Records`](/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.srv_record_name), do *not* append the port number to your [`server_addr`](/reference/minio-mc/mc-idp-ldap-add/#mc.idp.ldap.add.server_addr) value. SRV requests automatically include port numbers when returning the list of available servers.
 
 This parameter corresponds with the [`MINIO_IDENTITY_LDAP_SERVER_ADDR`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR) environment variable.
 
@@ -105,11 +103,10 @@ This parameter corresponds with the [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN`](/refe
 
 Specify the password for the [Lookup-Bind](/operations/external-iam/#minio-external-identity-management-ad-ldap-lookup-bind) user account.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-06-23T20-26-00Z**
-
-MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2023-06-23T20-26-00Z**
+>
+> MinIO redacts this value when returned as part of [`mc admin config get`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get).
 
 This parameter corresponds with the [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD) environment variable.
 
@@ -119,10 +116,8 @@ This parameter corresponds with the [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD`]
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2024-06-06T09-36-42Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2024-06-06T09-36-42Z**
 
 Comma-separated list of user DN attributes.
 
@@ -262,10 +257,8 @@ This parameter corresponds with the [`MINIO_IDENTITY_LDAP_SERVER_STARTTLS`](/ref
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2022-12-12T19-27-27Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2022-12-12T19-27-27Z**
 
 Specify the appropriate value to enable MinIO to select an AD/LDAP server using a [DNS SRV record](https://ldap.com/dns-srv-records-for-ldap) request.
 
@@ -293,13 +286,12 @@ If your DNS SRV record name uses alternate service or protocol names, specify `o
 
 For more about DNS SRV records, see [DNS SRV Records for LDAP](https://ldap.com/dns-srv-records-for-ldap).
 
-{{% alert color="info" %}}
-**Server address for DNS SRV record configurations**
-
-The specified server name **must not** include a port number. This is different from a standard AD/LDAP configuration, where the port number is required.
-
-See [`server_addr`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.server_addr) or [`MINIO_IDENTITY_LDAP_SERVER_ADDR`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR) for more about configuring an AD/LDAP server address.
-{{% /alert %}}
+> [!NOTE]
+> **Server address for DNS SRV record configurations**
+>
+> The specified server name **must not** include a port number. This is different from a standard AD/LDAP configuration, where the port number is required.
+>
+> See [`server_addr`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.server_addr) or [`MINIO_IDENTITY_LDAP_SERVER_ADDR`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_SERVER_ADDR) for more about configuring an AD/LDAP server address.
 
 This parameter corresponds with the [`MINIO_IDENTITY_LDAP_SRV_RECORD_NAME`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_SRV_RECORD_NAME) environment variable.
 

@@ -3,8 +3,8 @@ title: "mc idp ldap accesskey"
 url: "/zh/reference/minio-mc/mc-idp-ldap-accesskey/"
 weight: 150
 icon: fa-solid fa-key
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-accesskey"></a>
@@ -12,10 +12,8 @@ silo_modified: false
 
 <a id="command-mc.idp.ldap.accesskey"></a>
 
-{{% alert color="info" %}}
-**新增: RELEASE.2023-10-30T18-43-32Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2023-10-30T18-43-32Z**
 
 ## 说明 {#id2}
 

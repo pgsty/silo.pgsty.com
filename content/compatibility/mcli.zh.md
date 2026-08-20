@@ -6,8 +6,6 @@ url: "/zh/compatibility/mcli/"
 weight: 20
 type: docs
 icon: fa-solid fa-terminal
-minio_origin: false
-silo_modified: false
 ---
 
 `mcli` 是 Silo 构建的 MinIO 客户端（`mc`）。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。

@@ -2,8 +2,8 @@
 title: "mc retention info"
 url: "/zh/reference/minio-mc/mc-retention-info/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-retention-info"></a>
@@ -18,16 +18,15 @@ silo_modified: false
 
 [`mc retention info`](#command-mc.retention.info) *要求* 指定存储桶已启用对象锁定。 你 **只能** 在创建存储桶时启用对象锁定。有关创建启用对象锁定的存储桶，请参见 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock) 文档。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令返回 `myminio` MinIO 部署中 `mydata` 存储桶的默认对象锁定配置：
 
 ```shell
 mc retention info --default myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 命令语法如下：
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] retention info            \
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 
 [`mc retention info --version-id`](#mc.retention.info.-version-id) 与多个其他参数互斥。 更多信息请参见参考文档。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -140,17 +139,16 @@ mc retention info play/mybucket/object.txt
 
 ### 检索单个或多个对象的对象锁定设置 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="指定对象" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="指定对象" value="tab1" >}}
 ```shell
 mc retention info ALIAS/PATH
 ```
 
 - 将 [`ALIAS`](#mc.retention.info.ALIAS) 替换为已配置 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.retention.info.ALIAS) 替换为对象路径。
-{{% /tab %}}
-{{% tab header="多个对象" %}}
+{{< /tab >}}
+{{< tab label="多个对象" value="tab2" >}}
 将 [`mc retention info`](#command-mc.retention.info) 与 [`--recursive`](#mc.retention.info.-recursive) 一起使用，以检索存储桶中所有对象的保留设置：
 
 ```shell
@@ -159,8 +157,8 @@ mc retention info --recursive ALIAS/PATH
 
 - 将 [`ALIAS`](#mc.retention.info.ALIAS) 替换为已配置 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.retention.info.ALIAS) 替换为存储桶路径。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 > 要使用此命令，存储桶 *必须* 启用对象锁定。 只能在创建存储桶时启用对象锁定。有关创建已启用对象锁定的存储桶的更多信息， 请参阅 [`mc mb --with-lock`](/zh/reference/minio-mc/mc-mb/#mc.mb.-with-lock)。
 

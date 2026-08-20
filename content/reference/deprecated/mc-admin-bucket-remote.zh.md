@@ -2,40 +2,37 @@
 title: "mc admin bucket remote"
 url: "/zh/reference/deprecated/mc-admin-bucket-remote/"
 weight: 120
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-bucket-remote.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-bucket-remote"></a>
 
 <a id="command-mc.admin.bucket.remote"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> - `mc admin bucket remote add` 已替换为 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add)
+> - `mc admin bucket remote update` 已替换为 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update)
+> - `mc admin bucket remote rm` 已替换为 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm)
+> - `mc admin bucket remote ls` 已替换为 [`mc replicate ls`](/zh/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls)
 
-- `mc admin bucket remote add` 已替换为 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add)
-- `mc admin bucket remote update` 已替换为 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update)
-- `mc admin bucket remote rm` 已替换为 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm)
-- `mc admin bucket remote ls` 已替换为 [`mc replicate ls`](/zh/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls)
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2023-02-16T19-20-11Z**
-
-- `mc admin bucket remote bandwidth` 已替换为 [`mc replicate status`](/zh/reference/minio-mc/mc-replicate-status/#command-mc.replicate.status)
-
-  与复制相关的统计信息已迁移到 `mc replicate status` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-02-16T19-20-11Z**
+>
+> - `mc admin bucket remote bandwidth` 已替换为 [`mc replicate status`](/zh/reference/minio-mc/mc-replicate-status/#command-mc.replicate.status)
+>
+>   与复制相关的统计信息已迁移到 `mc replicate status` 命令。
 
 ## 描述 {#id1}
 
 [`mc admin bucket remote`](#command-mc.admin.bucket.remote) 命令用于管理 `ARN` 资源， 供 [`bucket replication`](/zh/reference/minio-mc/mc-replicate/#command-mc.replicate) 使用。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ## 示例 {#id2}
 
@@ -81,11 +78,10 @@ mc replicate ls ALIAS/PATH
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-- `mc admin bucket remote add` 已替换为 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add)
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> - `mc admin bucket remote add` 已替换为 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add)
 
 在 MinIO 部署上的存储桶中添加远程目标。该命令语法如下：
 
@@ -168,11 +164,10 @@ http(s)://ACCESSKEY:SECRETKEY@DESTHOSTNAME/DESTBUCKET
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-- `mc admin bucket remote ls` 已替换为 [`mc replicate ls`](/zh/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls)
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> - `mc admin bucket remote ls` 已替换为 [`mc replicate ls`](/zh/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls)
 
 列出 MinIO 部署上与某个存储桶关联的所有远程目标。 使用 `mc admin bucket remote ls --help` 查看用法语法。
 
@@ -180,11 +175,10 @@ http(s)://ACCESSKEY:SECRETKEY@DESTHOSTNAME/DESTBUCKET
 
 *mc-cmd*
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-- `mc admin bucket remote rm` 已替换为 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm)
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> - `mc admin bucket remote rm` 已替换为 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm)
 
 删除 MinIO 部署上某个存储桶的远程目标。该命令语法如下：
 

@@ -2,8 +2,8 @@
 title: "Access Management"
 url: "/administration/identity-access-management/policy-based-access-control/"
 weight: 50
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/policy-based-access-control.rst
+upstream_modified: true
 ---
 
 <a id="access-management"></a>
@@ -19,15 +19,14 @@ The [`mc admin policy`](/reference/minio-mc-admin/mc-admin-policy/#command-mc.ad
 
 ## Tag-Based Policy Conditions {#tag-based-policy-conditions}
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-10-02T19-29-29Z**
-
-Policies can use conditions to limit a user’s access only to objects with a [specific tag](/administration/object-management/#minio-object-tagging).
-
-MinIO supports [tag-based conditions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html) for [selected actions](#minio-selected-conditional-actions). `s3:ExistingObjectTag/<key>` evaluates tags stored on the target object when that API path loads the object metadata before authorization. `s3:RequestObjectTag/<key>` and `s3:RequestObjectTagKeys` are client-supplied request values, not evidence of stored object state. `PutObject`, `CreateMultipartUpload`, and `PutObjectTagging` explicitly bind them to the tag input those handlers consume; other action paths retain the historical `X-Amz-Tagging` Header mapping for compatibility, so use request-tag conditions only where the API actually consumes tags.
-
-Bucket tags are separate from object tags. `PutBucketTagging` does not populate the `s3:RequestObjectTag*` condition keys from its XML body.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-10-02T19-29-29Z**
+>
+> Policies can use conditions to limit a user’s access only to objects with a [specific tag](/administration/object-management/#minio-object-tagging).
+>
+> MinIO supports [tag-based conditions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html) for [selected actions](#minio-selected-conditional-actions). `s3:ExistingObjectTag/<key>` evaluates tags stored on the target object when that API path loads the object metadata before authorization. `s3:RequestObjectTag/<key>` and `s3:RequestObjectTagKeys` are client-supplied request values, not evidence of stored object state. `PutObject`, `CreateMultipartUpload`, and `PutObjectTagging` explicitly bind them to the tag input those handlers consume; other action paths retain the historical `X-Amz-Tagging` Header mapping for compatibility, so use request-tag conditions only where the API actually consumes tags.
+>
+> Bucket tags are separate from object tags. `PutBucketTagging` does not populate the `s3:RequestObjectTag*` condition keys from its XML body.
 
 <a id="minio-policy-built-in"></a>
 
@@ -122,13 +121,12 @@ For example, consider the following table of users. Each user is assigned a [bui
 
 Each user can access only those resources and operations which are *explicitly* granted by the built-in role. MinIO denies access to any other resource or action by default.
 
-{{% alert color="info" %}}
-**`Deny` overrides `Allow`**
-
-MinIO follows the IAM policy evaluation rules where a `Deny` rule overrides `Allow` rule on the same action/resource. For example, if a user has an explicitly assigned policy with an `Allow` rule for an action/resource while one of its groups has an assigned policy with a `Deny` rule for that action/resource, MinIO would apply only the `Deny` rule.
-
-For more information on IAM policy evaluation logic, see the IAM documentation on [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow).
-{{% /alert %}}
+> [!NOTE]
+> **`Deny` overrides `Allow`**
+>
+> MinIO follows the IAM policy evaluation rules where a `Deny` rule overrides `Allow` rule on the same action/resource. For example, if a user has an explicitly assigned policy with an `Allow` rule for an action/resource while one of its groups has an assigned policy with a `Deny` rule for that action/resource, MinIO would apply only the `Deny` rule.
+>
+> For more information on IAM policy evaluation logic, see the IAM documentation on [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow).
 
 <a id="minio-policy-document"></a>
 
@@ -181,17 +179,16 @@ Grant both when a principal needs both, which is the conventional form for a pol
 "Resource": ["arn:aws:s3:::mybucket", "arn:aws:s3:::mybucket/*"]
 ```
 
-{{% alert color="warning" %}}
-**Twelve bucket-level writes require the bucket ARN**
-
-An object-only pattern such as `arn:aws:s3:::mybucket/*` does **not** authorize the following actions, even when the statement grants `s3:*`:
-
-`PutBucketPolicy`, `DeleteBucketPolicy`, `PutBucketObjectLockConfiguration`, `PutBucketVersioning`, `PutReplicationConfiguration`, `PutLifecycleConfiguration`, `DeleteBucket`, `ForceDeleteBucket`, `PutBucketCors`, `DeleteBucketCors`, `PutBucketQOS`, `PutInventoryConfiguration`
-
-Each of these hands the caller something an object-scoped grant does not otherwise provide — access for other principals, defeat of a protection aimed at write-holders, activity that outlives the grant, or destruction of the bucket entity. Add the bare bucket ARN alongside the object pattern to grant them.
-
-Earlier releases authorized these through the object pattern as well, because a bucket-level request was matched against the string `mybucket/`, which `mybucket/*` also matches. That was an over-grant; see upstream [minio/minio#20449](https://github.com/minio/minio/issues/20449). Set [`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`](/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH) to `on` to restore the previous behaviour while you adjust policies.
-{{% /alert %}}
+> [!WARNING]
+> **Twelve bucket-level writes require the bucket ARN**
+>
+> An object-only pattern such as `arn:aws:s3:::mybucket/*` does **not** authorize the following actions, even when the statement grants `s3:*`:
+>
+> `PutBucketPolicy`, `DeleteBucketPolicy`, `PutBucketObjectLockConfiguration`, `PutBucketVersioning`, `PutReplicationConfiguration`, `PutLifecycleConfiguration`, `DeleteBucket`, `ForceDeleteBucket`, `PutBucketCors`, `DeleteBucketCors`, `PutBucketQOS`, `PutInventoryConfiguration`
+>
+> Each of these hands the caller something an object-scoped grant does not otherwise provide — access for other principals, defeat of a protection aimed at write-holders, activity that outlives the grant, or destruction of the bucket entity. Add the bare bucket ARN alongside the object pattern to grant them.
+>
+> Earlier releases authorized these through the object pattern as well, because a bucket-level request was matched against the string `mybucket/`, which `mybucket/*` also matches. That was an over-grant; see upstream [minio/minio#20449](https://github.com/minio/minio/issues/20449). Set [`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`](/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH) to `on` to restore the previous behaviour while you adjust policies.
 
 Everything else is unchanged. `ListBucket`, `GetBucketLocation`, the bucket configuration *reads*, and `CreateBucket` are still authorized through an object pattern, so listing and provisioning flows written that way keep working. `Deny` statements and `NotResource` exclusions match as they always did, so no restriction written against `mybucket/*` is weakened. The built-in `readwrite`, `readonly`, `writeonly` and `diagnostics` policies use `arn:aws:s3:::*` and are unaffected.
 
@@ -903,21 +900,19 @@ MinIO supports the following condition keys for all supported [actions](#minio-p
 - `s3:x-amz-content-sha256`
 - `s3:signatureAge`
 
-{{% alert color="danger" %}}
-**Warning**
-
-The `aws:Referer`, `aws:SourceIp`, and `aws:UserAgent` keys may be spoofed and therefore pose a potential security risk. `aws:SourceIp` is only as trustworthy as the proxy boundary that supplies or overwrites forwarding headers. MinIO recommends only using these condition keys to *deny* access as a secondary security measure.
-
-**Never** use these three keys to grant access by themselves.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> The `aws:Referer`, `aws:SourceIp`, and `aws:UserAgent` keys may be spoofed and therefore pose a potential security risk. `aws:SourceIp` is only as trustworthy as the proxy boundary that supplies or overwrites forwarding headers. MinIO recommends only using these condition keys to *deny* access as a secondary security measure.
+>
+> **Never** use these three keys to grant access by themselves.
 
 ### Condition Value Sources and Precedence {#condition-value-sources}
 
-{{% alert color="warning" %}}
-**Unreleased server behavior (as of 2026-08-03)**
-
-The table below describes behavior after companion server change `1a6d5b415`. That change is present only on the local `pgsty/minio` branch: it is not on public `origin/master`, and the latest published server release (`RELEASE.2026-08-04T00-00-00Z`) does not contain it. Published builds retain the previous behavior. Verify the server release notes before relying on these precedence guarantees.
-{{% /alert %}}
+> [!WARNING]
+> **Unreleased server behavior (as of 2026-08-03)**
+>
+> The table below describes behavior after companion server change `1a6d5b415`. That change is present only on the local `pgsty/minio` branch: it is not on public `origin/master`, and the latest published server release (`RELEASE.2026-08-04T00-00-00Z`) does not contain it. Published builds retain the previous behavior. Verify the server release notes before relying on these precedence guarantees.
 
 Silo constructs the condition-value map from semantic request sources instead of treating every header and query parameter as interchangeable. A raw header or query parameter whose name resembles an internal condition key cannot replace a value calculated by the server or create one that the server did not provide.
 
@@ -942,11 +937,10 @@ MinIO extends the S3 standard condition keys with the following extended key:
 
 `sts:DurationSeconds`
 
-> {{% alert color="info" %}}
-> **Added: MinIO**
->
-> SERVER RELEASE.2024-02-06T21-36-22Z
-> {{% /alert %}}
+> > [!NOTE]
+> > **Added: MinIO**
+> >
+> > SERVER RELEASE.2024-02-06T21-36-22Z
 >
 > Specify a time in seconds to limit the duration of *all* Security Token Service credentials generated by [AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity).
 >
@@ -1447,34 +1441,32 @@ Retrieve the status of a specified KMS key.
 
 To select all of the available kms policy actions, use `kms:*`.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2024-07-16T23-46-41Z**
-
-KMS actions can be restricted by resource or a resource prefix. The wildcard character `*` can be used to apply the KMS action policy to all resources that match the prefix.
-
-For example, the following policy document allows a user to list keys, create new keys, and check the status of keys for any resource that begins with `keys-abc-` or `myuser-`.
-
-```shell
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "kms:CreateKey",
-                "kms:KeyStatus",
-                "kms:ListKeys"
-            ],
-            "Resource": [
-                "arn:minio:kms:::keys-abc-*",
-                "arn:minio:kms:::myuser-*"
-            ]
-        }
-    ]
-}
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2024-07-16T23-46-41Z**
+>
+> KMS actions can be restricted by resource or a resource prefix. The wildcard character `*` can be used to apply the KMS action policy to all resources that match the prefix.
+>
+> For example, the following policy document allows a user to list keys, create new keys, and check the status of keys for any resource that begins with `keys-abc-` or `myuser-`.
+>
+> ```shell
+> {
+>     "Version": "2012-10-17",
+>     "Statement": [
+>         {
+>             "Effect": "Allow",
+>             "Action": [
+>                 "kms:CreateKey",
+>                 "kms:KeyStatus",
+>                 "kms:ListKeys"
+>             ],
+>             "Resource": [
+>                 "arn:minio:kms:::keys-abc-*",
+>                 "arn:minio:kms:::myuser-*"
+>             ]
+>         }
+>     ]
+> }
+> ```
 
 ## `mc admin` Policy Condition Keys {#mc-admin-policy-condition-keys}
 

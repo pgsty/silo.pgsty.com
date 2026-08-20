@@ -6,8 +6,6 @@ url: "/compatibility/binary/"
 weight: 20
 type: docs
 icon: fa-solid fa-box
-minio_origin: false
-silo_modified: false
 ---
 
 Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [GitHub Releases](https://github.com/pgsty/silo/releases), with SHA-256 sums and build-provenance attestations. This page records what changes relative to a `minio` package installation: the file layout, the service account, and the caveats. General migration scope is in the [migration guide](/compatibility/migration/).

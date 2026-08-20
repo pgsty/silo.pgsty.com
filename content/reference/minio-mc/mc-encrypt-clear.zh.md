@@ -2,8 +2,8 @@
 title: "mc encrypt clear"
 url: "/zh/reference/minio-mc/mc-encrypt-clear/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-encrypt-clear.rst
+upstream_modified: false
 ---
 
 <a id="mc-encrypt-clear"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc encrypt clear`](#command-mc.encrypt.clear) 命令用于移除存储桶当前的默认加密设置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会移除 `myminio` [alias](/zh/reference/minio-mc/mc-alias-set/#alias) 关联的 MinIO 部署中 `mydata` 存储桶的默认加密设置：
 
 ```shell
 mc encrypt clear myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] encrypt clear ALIAS
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -59,23 +58,20 @@ mc encrypt clear play/mybucket
 
 ### 移除存储桶的自动服务端加密设置 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 ```shell
  mc encrypt clear myminio/data
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc encrypt clear ALIAS
 ```
 
 - 将 `ALIAS` 替换为目标 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)， 即要移除存储桶自动服务端加密配置的部署别名。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 行为 {#id7}
 

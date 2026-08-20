@@ -2,19 +2,18 @@
 title: "mc put"
 url: "/zh/reference/minio-mc/mc-put/"
 weight: 290
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-put.rst
+upstream_modified: false
 ---
 
 <a id="mc-put"></a>
 
 <a id="command-mc.put"></a>
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-02-24T01-33-20Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-02-24T01-33-20Z
 
 ## 语法 {#id2}
 
@@ -22,16 +21,15 @@ RELEASE.2024-02-24T01-33-20Z
 
 与 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp) 或 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 相比，`mc put` 为文件上传提供了更简化的接口。 `mc put` 使用单向上传机制，以牺牲效率为代价换取相较其他命令更低的复杂度。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下示例将本地文件系统路径 `~/images/collateral/` 下的文件 `logo.png` 上传到别名为 `minio` 的 MinIO 部署中名为 `marketing` 的存储桶。
 
 ```shell
 mc put ~/images/collateral/logo.png minio/marketing
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -53,8 +51,8 @@ mc [GLOBALFLAGS] put                            \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -76,10 +74,8 @@ TARGET 还可以包含以下可选组成部分： - 对象应上传到的 PREFIX
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-10-02T08-27-28Z**
 
 为上传对象添加校验和。
 
@@ -93,10 +89,8 @@ TARGET 还可以包含以下可选组成部分： - 对象应上传到的 PREFIX
 
 *Optional*
 
-{{% alert color="info" %}}
-**新增: RELEASE.2024-10-02T08-27-28Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **新增: RELEASE.2024-10-02T08-27-28Z**
 
 禁用分段上传，并指示 `mc` 通过单次 `PUT` 操作发送对象。
 
@@ -204,11 +198,10 @@ TARGET 还可以包含以下可选组成部分： - 对象应上传到的 PREFIX
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**说明**
-
-MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> MinIO 强烈不建议在生产负载中使用 SSE-C 加密。 请改用 `--enc-kms` 参数启用 SSE-KMS，或使用 `--enc-s3` 参数启用 SSE-S3。
 
 ##### `--parallel, --P` {#mc.put.-parallel}
 

@@ -3,8 +3,8 @@ title: "External Identity Management"
 url: "/operations/external-iam/"
 weight: 50
 icon: fa-solid fa-id-card
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/external-iam.rst
+upstream_modified: false
 ---
 
 <a id="external-identity-management"></a>
@@ -59,26 +59,24 @@ MinIO queries the configured Active Directory / LDAP server to verify the creden
 
 The following tabs provide a reference of the environment variables and configuration settings required for enabling Lookup-Bind mode.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 - [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_DN)
 - [`MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_LOOKUP_BIND_PASSWORD)
 - [`MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_BASE_DN)
 - [`MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_USER_DN_SEARCH_FILTER)
 
 See the [Active Directory / LDAP Settings](/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) reference documentation for more information on these variables. The [Configure MinIO for Authentication using Active Directory / LDAP](/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) tutorial includes complete instructions on setting these values.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 - [`identity_ldap lookup_bind_dn`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.lookup_bind_dn)
 - [`identity_ldap lookup_bind_password`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.lookup_bind_password)
 - [`identity_ldap user_dn_search_base_dn`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.user_dn_search_base_dn)
 - [`identity_ldap user_dn_search_filter`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.user_dn_search_filter)
 
 See the [`identity_ldap`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) reference documentation for more information on these settings. The [Configure MinIO for Authentication using Active Directory / LDAP](/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) tutorial includes complete instructions on setting these variables.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 <a id="minio-external-identity-management-ad-ldap-access-control"></a>
 
@@ -102,19 +100,17 @@ MinIO supports querying the Active Directory / LDAP server for a list of groups 
 
 The following tabs provide a reference of the environment variables and configuration settings required for enabling group lookups:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variable" %}}
-
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
 - [`MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_BASE_DN)
 - [`MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER`](/reference/minio-server/settings/iam/ldap/#envvar.MINIO_IDENTITY_LDAP_GROUP_SEARCH_FILTER)
 
 See the [Active Directory / LDAP Settings](/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) reference documentation for more information on these variables. The [Configure MinIO for Authentication using Active Directory / LDAP](/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) tutorial includes complete instructions on setting these values.
-{{% /tab %}}
-{{% tab header="Configuration Setting" %}}
-
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
 - [`identity_ldap group_search_base_dn`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.group_search_base_dn)
 - [`identity_ldap group_search_filter`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap.group_search_filter)
 
 See the [`identity_ldap`](/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) reference documentation for more information on these settings. The [Configure MinIO for Authentication using Active Directory / LDAP](/operations/external-iam/configure-ad-ldap-external-identity-management/#minio-authenticate-using-ad-ldap-generic) tutorial includes complete instructions on setting these variables.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

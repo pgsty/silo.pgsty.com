@@ -2,8 +2,8 @@
 title: "mc idp ldap policy detach"
 url: "/reference/minio-mc/mc-idp-ldap-policy-detach/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-policy-detach.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-policy-detach"></a>
@@ -15,8 +15,8 @@ silo_modified: false
 
 The [`mc idp ldap policy detach`](#command-mc.idp.ldap.policy.detach) command detaches one or more polices from an entity.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example detaches the policy `userpolicy` from the user `bobfisher` on the `myminio` deployment.
 
 ```shell
@@ -24,9 +24,8 @@ mc idp ldap policy detach myminio                                               
                           userpolicy                                               \
                           --user='uid=bobfisher,ou=people,ou=hwengg,dc=min,dc=io'
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] idp ldap policy detach             \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

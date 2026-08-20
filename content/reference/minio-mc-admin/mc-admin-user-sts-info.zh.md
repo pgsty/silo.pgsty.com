@@ -2,8 +2,8 @@
 title: "mc admin user sts info"
 url: "/zh/reference/minio-mc-admin/mc-admin-user-sts-info/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-sts-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-sts-info"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 <abbr title="Security Token Service">STS</abbr> 凭证为 MinIO 部署提供临时访问权限。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令检索具有指定访问密钥的 STS 凭证信息：
 
 ```shell
 mc admin user sts info myminio/ "J123C4ZXEQN8RK6ND35I"
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -41,8 +40,8 @@ mc [GLOBALFLAGS] admin user sts info          \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

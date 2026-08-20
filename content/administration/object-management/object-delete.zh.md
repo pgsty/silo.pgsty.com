@@ -2,8 +2,8 @@
 title: "对象删除"
 url: "/zh/administration/object-management/object-delete/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-delete.rst
+upstream_modified: false
 ---
 
 <a id="minio-object-delete"></a>
@@ -48,21 +48,19 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 
 如需从驱动器中删除对象的当前版本，请先找到该版本的 UUID，然后使用 [`mc rm --version-id=UUID ...`](/zh/reference/minio-mc/mc-rm/#mc.rm.-version-id) 删除当前版本。 在这种情况下，该对象紧邻的前一个版本将成为当前版本，并用于响应未指定 UUID 的该对象 `GET` 请求。
 
-{{% alert color="danger" %}}
-**警告**
-
-在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且 **无法** 恢复。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> 在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且 **无法** 恢复。
 
 ### 删除先前版本 {#id8}
 
 如需删除对象的先前版本，请指定该版本的 UUID。 可以使用 [`mc ls --versions`](/zh/reference/minio-mc/mc-ls/#mc.ls.-versions) 获取版本 UUID。 当 `DELETE` 请求指定 `version-id`，且用户具有删除该对象版本的正确权限时，MinIO 会从驱动器中永久删除指定版本。
 
-{{% alert color="danger" %}}
-**警告**
-
-在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且 **无法** 恢复。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> 在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且 **无法** 恢复。
 
 ### 删除所有版本 {#id9}
 
@@ -78,11 +76,10 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 
 `DeleteMarkers` 本身也是对象。 生命周期规则可以删除作为对象唯一剩余版本的 `DeleteMarkers`。
 
-{{% alert color="info" %}}
-**变更: MinIO**
-
-RELEASE.2024-05-01T01-11-10Z
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2024-05-01T01-11-10Z
 
 使用 `JSON` 时，生命周期规则可以在指定天数后删除已删除对象的所有版本。
 
@@ -118,20 +115,19 @@ MinIO 要求 *显式启用* 带版本删除和 delete marker 复制。 使用 [`
 
 MinIO 只复制由客户端显式触发的删除操作。 MinIO *不会* 复制由 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 删除的对象。 对于 [active-active](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 配置，应在 *所有* 复制存储桶上设置相同的过期规则，以确保对象过期行为一致。
 
-{{% details title="MinIO 会清理源存储桶和远程存储桶中的空对象前缀" closed="true" %}}
-如果某次删除操作移除了某个存储桶前缀中的最后一个对象，MinIO 会递归删除该前缀中直到存储桶根为止的每一个空层级。 MinIO 仅对作为对象写入操作一部分而 *隐式* 创建的前缀执行这种递归删除。 对于使用显式目录创建命令（例如 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb)）创建的前缀，MinIO 不会递归删除。
-
-如果复制规则启用了删除操作复制，则复制过程在目标 MinIO 集群上 *同样* 会应用这种隐式前缀清理行为。
-
-例如，考虑一个名为 `photos` 的存储桶，其中包含以下对象前缀：
-
-- `photos/2021/january/myphoto.jpg` // `2021/january/` 根据对象名隐式创建
-- `photos/2021/february/myotherphoto.jpg` // `2021/february/` 根据对象名隐式创建
-- `photos/NYE21/NewYears.jpg` // `NYE21/` 在存储桶中显式创建
-
-`photos/NYE21` 是 *唯一* 使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 显式创建的前缀。 其他所有前缀都是在写入位于该前缀下的对象时 *隐式* 创建的。
-
-- 某个命令删除了 `myphoto.jpg`。 MinIO 会自动清理空的 `/january/` 前缀。
-- 某个命令随后删除了 `myotherphoto.jpg`。 MinIO 会自动清理 `/february/` 前缀，以及此时已为空的 `/2021` 前缀。
-- 某个命令删除了 `NewYears.jpg` 对象。 由于 `/NYE21/` 是 *显式* 创建的，MinIO 会保留该前缀。
-{{% /details %}}
+> [!DETAILS]- MinIO 会清理源存储桶和远程存储桶中的空对象前缀
+> 如果某次删除操作移除了某个存储桶前缀中的最后一个对象，MinIO 会递归删除该前缀中直到存储桶根为止的每一个空层级。 MinIO 仅对作为对象写入操作一部分而 *隐式* 创建的前缀执行这种递归删除。 对于使用显式目录创建命令（例如 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb)）创建的前缀，MinIO 不会递归删除。
+>
+> 如果复制规则启用了删除操作复制，则复制过程在目标 MinIO 集群上 *同样* 会应用这种隐式前缀清理行为。
+>
+> 例如，考虑一个名为 `photos` 的存储桶，其中包含以下对象前缀：
+>
+> - `photos/2021/january/myphoto.jpg` // `2021/january/` 根据对象名隐式创建
+> - `photos/2021/february/myotherphoto.jpg` // `2021/february/` 根据对象名隐式创建
+> - `photos/NYE21/NewYears.jpg` // `NYE21/` 在存储桶中显式创建
+>
+> `photos/NYE21` 是 *唯一* 使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 显式创建的前缀。 其他所有前缀都是在写入位于该前缀下的对象时 *隐式* 创建的。
+>
+> - 某个命令删除了 `myphoto.jpg`。 MinIO 会自动清理空的 `/january/` 前缀。
+> - 某个命令随后删除了 `myotherphoto.jpg`。 MinIO 会自动清理 `/february/` 前缀，以及此时已为空的 `/2021` 前缀。
+> - 某个命令删除了 `NewYears.jpg` 对象。 由于 `/NYE21/` 是 *显式* 创建的，MinIO 会保留该前缀。

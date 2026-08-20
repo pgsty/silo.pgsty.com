@@ -1,8 +1,16 @@
-{{- $outputFormat := partial "outputformat.html" . -}}
+{{- $outputFormat := lower (.Store.Get "tdOutputFormat" | default "html") -}}
 {{- if ne $outputFormat "print" }}
 <link rel="stylesheet" href="{{ "fonts/fonts.css" | relURL }}">
 {{- $author := "Pigsty and SILO contributors" -}}
 {{- with .Params.author }}{{ $author = . | markdownify | plainify }}{{ end }}
 <meta name="author" content="{{ $author }}">
 <meta name="application-name" content="SILO">
+{{- end }}
+{{- /* The homepage and the download page keep their own section stylesheets.
+      Both render inside the theme shell now, so the links load here rather
+      than from a hand-written <head>. */ -}}
+{{- if and (ne $outputFormat "print") (or .IsHome (eq .Type "download")) }}
+{{- range slice "css/landing-v3.css" "css/silo-v3.css" "css/download.css" "css/silo-footer.css" }}
+<link rel="stylesheet" href="{{ . | relURL }}?v={{ substr (md5 (readFile (printf "static/%s" .))) 0 8 }}">
+{{- end }}
 {{- end }}

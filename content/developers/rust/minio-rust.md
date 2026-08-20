@@ -7,17 +7,16 @@ aliases:
   - "/developers/rust/API/"
 weight: 70
 icon: fa-brands fa-rust
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/rust/minio-rust.rst
+upstream_modified: true
 ---
 
 ## MinIO Rust SDK {#rust-sdk}
 
 SILO implements the S3-compatible server contract, so Rust applications can use the upstream [MinIO Rust SDK](https://github.com/minio/minio-rs) directly. The crate provides an asynchronous, strongly typed request-builder API.
 
-{{% alert color="info" %}}
-This page was verified with the `minio` crate `0.4.0`. The crate does not currently declare a minimum supported Rust version, so check the [current package metadata](https://crates.io/crates/minio) and [API documentation](https://docs.rs/minio/latest/minio/) and test it with your pinned toolchain.
-{{% /alert %}}
+> [!NOTE]
+> This page was verified with the `minio` crate `0.4.0`. The crate does not currently declare a minimum supported Rust version, so check the [current package metadata](https://crates.io/crates/minio) and [API documentation](https://docs.rs/minio/latest/minio/) and test it with your pinned toolchain.
 
 ## Install the package {#install}
 

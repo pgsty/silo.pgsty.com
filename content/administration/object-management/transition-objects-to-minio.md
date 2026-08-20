@@ -2,8 +2,8 @@
 title: "Transition Objects to Remote MinIO Deployment"
 url: "/administration/object-management/transition-objects-to-minio/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/transition-objects-to-minio.rst
+upstream_modified: true
 ---
 
 <a id="transition-objects-to-remote-minio-deployment"></a>

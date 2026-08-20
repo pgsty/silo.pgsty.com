@@ -6,8 +6,6 @@ url: "/zh/compatibility/migration/"
 weight: 10
 type: docs
 icon: fa-solid fa-arrow-right-arrow-left
-minio_origin: false
-silo_modified: false
 ---
 
 从 MinIO 迁移到 Silo 是一次原地二进制替换，不是数据迁移。不导出、不重新导入任何东西。容器部署中，唯一必须修改的是镜像名。RPM/DEB 安装见[原生软件包迁移](/zh/compatibility/binary/)。

@@ -2,8 +2,8 @@
 title: "mc admin cluster bucket import"
 url: "/reference/minio-mc-admin/mc-admin-cluster-bucket-import/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-bucket-import.rst
+upstream_modified: false
 ---
 
 <a id="command-mc.admin.cluster.bucket.import"></a>
@@ -12,10 +12,8 @@ silo_modified: false
 
 ## Description {#description}
 
-{{% alert color="info" %}}
-**Added: RELEASE.2022-06-17T02-52-50Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2022-06-17T02-52-50Z**
 
 The [`mc admin cluster bucket import`](#command-mc.admin.cluster.bucket.import) command imports bucket metadata as created by the [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) command.
 
@@ -23,16 +21,15 @@ You can use this command to manually restore the metadata to the specified bucke
 
 If you specify only the deployment as the target, this command applies the metadata objects to all matching buckets on the target.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command imports the specified metadata to the `myminio` deployment.
 
 ```shell
 mc admin cluster bucket import myminio ~/minio-metadata-backup/myminio-cluster.zip
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -46,8 +43,8 @@ mc [GLOBALFLAGS] admin cluster bucket import  \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

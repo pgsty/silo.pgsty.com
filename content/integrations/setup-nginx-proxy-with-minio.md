@@ -2,8 +2,8 @@
 title: "Configure NGINX Proxy for Silo Server"
 url: "/integrations/setup-nginx-proxy-with-minio/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/integrations/setup-nginx-proxy-with-minio.rst
+upstream_modified: true
 ---
 
 <a id="configure-nginx-proxy-for-minio-server"></a>
@@ -19,8 +19,8 @@ This documentation assumes the following:
 
 There are two models for proxying requests to the MinIO Server API and the MinIO Console:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Dedicated DNS" %}}
+{{< tabs group="dedicated-dns-subdomain" >}}
+{{< tab label="Dedicated DNS" value="dedicated-dns" >}}
 Create or configure a dedicated DNS name for the MinIO service.
 
 For the MinIO Server S3 API, proxy requests to the root of that domain. For the MinIO Console Web GUI, proxy requests to the `/minio` subpath.
@@ -111,8 +111,8 @@ The S3 API signature calculation algorithm does *not* support proxy schemes wher
 You must also set the following environment variables for the MinIO deployment:
 
 - Set the [`MINIO_BROWSER_REDIRECT_URL`](/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) to the proxy host FQDN of the MinIO Console (`https://example.net/minio/ui`)
-{{% /tab %}}
-{{% tab header="Subdomain" %}}
+{{< /tab >}}
+{{< tab label="Subdomain" value="subdomain" >}}
 Create or configure separate, unique subdomains for the MinIO Server S3 API and for the MinIO Console Web GUI.
 
 For example, given the root domain of `example.net`:
@@ -213,5 +213,5 @@ The S3 API signature calculation algorithm does *not* support proxy schemes wher
 You must also set the following environment variables for the MinIO deployment:
 
 - Set the [`MINIO_BROWSER_REDIRECT_URL`](/reference/minio-server/settings/console/#envvar.MINIO_BROWSER_REDIRECT_URL) to the proxy host FQDN of the MinIO Console (`https://console.example.net/`)
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

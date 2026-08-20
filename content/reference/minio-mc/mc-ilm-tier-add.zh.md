@@ -2,8 +2,8 @@
 title: "mc ilm tier add"
 url: "/zh/reference/minio-mc/mc-ilm-tier-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-add"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.tier.add"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc ilm tier add`](#command-mc.ilm.tier.add) 替代了 `mc admin tier add`。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc ilm tier add`](#command-mc.ilm.tier.add) 替代了 `mc admin tier add`。
 
 ## 描述 {#id2}
 
@@ -70,8 +69,8 @@ silo_modified: false
 
 ## 语法 {#id6}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下示例在 `myminio` 部署上创建一个名为 `WARM-MINIO-TIER` 的新远程层。 该命令为位于主机名 `https://warm-minio.com` 的远程 MinIO 部署创建一个层。
 
 ```shell
@@ -84,8 +83,8 @@ silo_modified: false
 ```
 
 `myminio` 部署上的生命周期管理规则可以使用该新层，将对象转换到远程位置 `mybucket` 存储桶中的 `myprefix/` 前缀下。
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 命令语法如下：
 
 ```shell
@@ -117,8 +116,8 @@ mc ilm tier add TIER_TYPE                    \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id11}
 
@@ -267,38 +266,34 @@ MinIO 应用于转换到远程存储桶对象的 storage class（在 Microsoft A
 
 选择与 `TIER_TYPE` 对应的选项卡，查看各层支持的值：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="minio" %}}
-
+{{< tabs group="minio-s3-gcs-azure" >}}
+{{< tab label="minio" value="minio" >}}
 - `STANDARD` *推荐*
 - `REDUCED`
 
 更多信息请参见 [纠删码存储类](/zh/reference/minio-server/settings/storage-class/#minio-ec-storage-class)。
-{{% /tab %}}
-{{% tab header="s3" %}}
-
+{{< /tab >}}
+{{< tab label="s3" value="s3" >}}
 - `STANDARD`
 - `STANDARD-IA`
 - `ONEZONE-IA`
 
 更多信息请参见 [使用 Amazon S3 存储类](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html)。
-{{% /tab %}}
-{{% tab header="gcs" %}}
-
+{{< /tab >}}
+{{< tab label="gcs" value="gcs" >}}
 - `STANDARD`
 - `NEARLINE`
 - `COLDLINE`
 
 更多信息请参见 [GCS 存储类](https://cloud.google.com/storage/docs/storage-classes)。
-{{% /tab %}}
-{{% tab header="azure" %}}
-
+{{< /tab >}}
+{{< tab label="azure" value="azure" >}}
 - `Hot`
 - `Cool`
 
 更多信息请参见 [Blob 数据的 Hot、Cool 和 Archive 访问层](https://learn.microsoft.com/en-us/azure/storage/blobs/access-tiers-overview)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 若省略，对象将使用远程存储桶定义的默认存储类。
 

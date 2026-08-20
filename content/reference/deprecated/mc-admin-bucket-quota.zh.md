@@ -2,33 +2,31 @@
 title: "mc admin bucket quota"
 url: "/zh/reference/deprecated/mc-admin-bucket-quota/"
 weight: 110
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-bucket-quota.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-bucket-quota"></a>
 
 <a id="command-mc.admin.bucket.quota"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-13T00-23-28Z**
-
-`mc admin bucket quota` 已被以下命令替代：
-
-- [`mc quota set`](/zh/reference/deprecated/mc-quota-set/#command-mc.quota.set)
-- [`mc quota info`](/zh/reference/deprecated/mc-quota-info/#command-mc.quota.info)
-- [`mc quota clear`](/zh/reference/deprecated/mc-quota-clear/#command-mc.quota.clear)
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-13T00-23-28Z**
+>
+> `mc admin bucket quota` 已被以下命令替代：
+>
+> - [`mc quota set`](/zh/reference/deprecated/mc-quota-set/#command-mc.quota.set)
+> - [`mc quota info`](/zh/reference/deprecated/mc-quota-info/#command-mc.quota.info)
+> - [`mc quota clear`](/zh/reference/deprecated/mc-quota-clear/#command-mc.quota.clear)
 
 ## 说明 {#id2}
 
 [`mc admin bucket quota`](#command-mc.admin.bucket.quota) 命令用于管理按存储桶设置的存储配额。
 
-{{% alert color="info" %}}
-**仅在 MinIO 部署上使用 `mc admin`**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **仅在 MinIO 部署上使用 `mc admin`**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 <a id="id3"></a>
 

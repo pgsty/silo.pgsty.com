@@ -2,8 +2,8 @@
 title: "mc admin user svcacct edit"
 url: "/reference/minio-mc-admin/mc-admin-user-svcacct-edit/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct-edit.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct-edit"></a>
@@ -11,22 +11,21 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct.edit"></a>
 
-{{% alert color="warning" %}}
-**Important**
-
-This command has been replaced and will be deprecated in a future MinIO Client release.
-
-As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey edit`](/reference/minio-mc-admin/mc-admin-accesskey-edit/#command-mc.admin.accesskey.edit) command to modify access keys for built-in MinIO IDP users.
-
-To modify access keys for AD/LDAP users, use the [`mc idp ldap accesskey edit`](/reference/minio-mc/mc-idp-ldap-accesskey-edit/#command-mc.idp.ldap.accesskey.edit) command.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This command has been replaced and will be deprecated in a future MinIO Client release.
+>
+> As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey edit`](/reference/minio-mc-admin/mc-admin-accesskey-edit/#command-mc.admin.accesskey.edit) command to modify access keys for built-in MinIO IDP users.
+>
+> To modify access keys for AD/LDAP users, use the [`mc idp ldap accesskey edit`](/reference/minio-mc/mc-idp-ldap-accesskey-edit/#command-mc.idp.ldap.accesskey.edit) command.
 
 ## Syntax {#syntax}
 
 The [`mc admin user svcacct edit`](#command-mc.admin.user.svcacct.edit) command modifies the configuration of an access key associated to the specified user.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command applies a new policy and secret key to the `myuserserviceaccount` access key on the `myminio` deployment:
 
 ```shell
@@ -35,9 +34,8 @@ mc admin user svcacct edit                                             \
                       --policy "/path/to/new/policy.json"              \
                       myminio myuserserviceaccount
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -53,8 +51,8 @@ mc [GLOBALFLAGS] admin user svcacct edit            \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -80,10 +78,8 @@ The service account to modify.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-18T16-59-00Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-18T16-59-00Z**
 
 Add a description for the service account. For example, you might specify the reason the service account exists.
 
@@ -93,10 +89,8 @@ Add a description for the service account. For example, you might specify the re
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-30T22-41-38Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-30T22-41-38Z**
 
 Set an expiration date for the service account. The date must be in the future, you may not set an expiration date that has already passed.
 
@@ -114,10 +108,8 @@ Allowed date and time formats:
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-18T16-59-00Z**
-
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-18T16-59-00Z**
 
 Add a human-readable name for the service account.
 

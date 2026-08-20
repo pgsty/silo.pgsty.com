@@ -2,8 +2,8 @@
 title: "对象自动过期"
 url: "/zh/administration/object-management/create-lifecycle-management-expiration-rule/"
 weight: 50
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/create-lifecycle-management-expiration-rule.rst
+upstream_modified: false
 ---
 
 <a id="minio-lifecycle-management-create-expiry-rule"></a>

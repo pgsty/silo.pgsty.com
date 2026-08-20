@@ -2,8 +2,8 @@
 title: "mc share download"
 url: "/reference/minio-mc/mc-share-download/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-share-download.rst
+upstream_modified: false
 ---
 
 <a id="mc-share-download"></a>
@@ -19,16 +19,15 @@ The [`mc share download`](#command-mc.share.download) command generates a tempor
 
 For more information on shareable object URLs, see the Amazon S3 documentation on [Pre-Signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command generates a new presigned download URL for the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc share download --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -44,8 +43,8 @@ mc [GLOBALFLAGS] share download           \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -115,8 +114,8 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Generate a URL to Download Object(s) {#generate-a-url-to-download-object-s}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Get Specific Object" %}}
+{{< tabs group="get-specific-object-get-objects-in-a-bucket" >}}
+{{< tab label="Get Specific Object" value="get-specific-object" >}}
 Use [`mc share download`](#command-mc.share.download) to generate a URL that supports `GET` requests for an object:
 
 ```shell
@@ -126,8 +125,8 @@ mc share download --expire DURATION ALIAS/PATH
 - Replace [`ALIAS`](#mc.share.download.ALIAS) with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment.
 - Replace [`PATH`](#mc.share.download.ALIAS) with the path to the object on the MinIO deployment.
 - Replace [`DURATION`](#mc.share.download.-expire) with the duration after which the URL expires. For example, to set a 30 day expiry, specify `30d`.
-{{% /tab %}}
-{{% tab header="Get Object(s) in a Bucket" %}}
+{{< /tab >}}
+{{< tab label="Get Object(s) in a Bucket" value="get-objects-in-a-bucket" >}}
 Use [`mc share download`](#command-mc.share.download) with the [`--recursive`](#mc.share.download.-recursive) option to generate a URL for each object in a bucket. Each URL supports `GET` requests for its associated object:
 
 ```shell
@@ -137,8 +136,8 @@ mc share download --recursive --expire DURATION ALIAS/PATH
 - Replace [`ALIAS`](#mc.share.download.ALIAS) with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment.
 - Replace [`PATH`](#mc.share.download.ALIAS) with the path to the bucket or bucket prefix on the MinIO deployment.
 - Replace [`DURATION`](#mc.share.download.-expire) with the duration after which the URL expires. For example, to set a 30 day expiry, specify `30d`.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Behavior {#behavior}
 

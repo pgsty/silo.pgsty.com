@@ -3,8 +3,8 @@ title: "Site Replication Overview"
 url: "/operations/replication/multi-site-replication/"
 weight: 20
 icon: fa-solid fa-arrows-rotate
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/replication/multi-site-replication.rst
+upstream_modified: true
 ---
 
 <a id="site-replication-overview"></a>
@@ -46,11 +46,10 @@ Each MinIO deployment (“peer site”) synchronizes the following changes acros
 
 Site replication enables [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) for all new and existing buckets on all replicated sites.
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 You can choose to replicate ILM expiration rules across peer sites. For new site replication configurations, use the [`mc admin replicate add`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add) with the [`--replicate-ilm-expiry`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add.-replicate-ilm-expiry) flag. For existing site replication configurations, you can enable or disable the behavior using [`mc admin replicate update`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update) with either the [`--enable-ilm-expiry-replication`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-enable-ilm-expiry-replication) or [`--disable-ilm-expiry-replication`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-disable-ilm-expiry-replication) flag, as appropriate.
 
@@ -66,9 +65,8 @@ MinIO deployments in a site replication configuration do *not* replicate the cre
 
 After enabling site replication, identity and access management (IAM) settings sync in the following order:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="MinIO IDP" %}}
-
+{{< tabs group="minio-idp-oidc-ldap" >}}
+{{< tab label="MinIO IDP" value="minio-idp" >}}
 1. Policies
 2. User accounts (for local users)
 3. Groups
@@ -77,21 +75,21 @@ After enabling site replication, identity and access management (IAM) settings s
    Access Keys for `root` do not sync.
 5. Policy mapping for synced user accounts
 6. Policy mapping for [Security Token Service (STS) users](/developers/security-token-service/#minio-security-token-service)
-{{% /tab %}}
-{{% tab header="OIDC" %}}
+{{< /tab >}}
+{{< tab label="OIDC" value="oidc" >}}
 1. Policies
 2. Access Keys associated to OIDC accounts with a valid [MinIO Policy](/administration/identity-access-management/policy-based-access-control/#minio-policy). `root` access keys do not sync.
 3. Policy mapping for synced user accounts
 4. Policy mapping for [Security Token Service (STS) users](/developers/security-token-service/#minio-security-token-service)
-{{% /tab %}}
-{{% tab header="LDAP" %}}
+{{< /tab >}}
+{{< tab label="LDAP" value="ldap" >}}
 1. Policies
 2. Groups
 3. Access Keys associated to LDAP accounts with a valid [MinIO Policy](/administration/identity-access-management/policy-based-access-control/#minio-policy). `root` access keys do not sync.
 4. Policy mapping for synced user accounts
 5. Policy mapping for [Security Token Service (STS) users](/developers/security-token-service/#minio-security-token-service)
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 After the initial synchronization of data across peer sites, MinIO continually replicates and synchronizes [replicable data](#minio-site-replication-what-replicates) among all sites as they occur on any site.
 
@@ -99,25 +97,22 @@ After the initial synchronization of data across peer sites, MinIO continually r
 
 Any MinIO deployment in the site replication configuration can resynchronize damaged [replica-eligible data](#minio-site-replication-what-replicates) from the peer with the most updated (“latest”) version of that data.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2023-07-18T17-49-40Z**
+> [!NOTE]
+> **Changed: RELEASE.2023-07-18T17-49-40Z**
+>
+> Site replication operations retry up to three (3) times.
+>
+> MinIO dequeues replication operations that fail to replicate after three attempts. The [scanner](/operations/concepts/scanner/#minio-concepts-scanner) picks up those affected objects at a later time and requeues them for replication.
 
-Site replication operations retry up to three (3) times.
+> [!NOTE]
+> **Changed: RELEASE.2022-08-11T04-37-28Z**
+>
+> Failed or pending replications requeue automatically when performing any `GET` or `HEAD` API method. For example, using [`mc stat`](/reference/minio-mc/mc-stat/#command-mc.stat), [`mc cat`](/reference/minio-mc/mc-cat/#command-mc.cat), or [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) commands after a site comes back online prompts healing to requeue.
 
-MinIO dequeues replication operations that fail to replicate after three attempts. The [scanner](/operations/concepts/scanner/#minio-concepts-scanner) picks up those affected objects at a later time and requeues them for replication.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-08-11T04-37-28Z**
-
-Failed or pending replications requeue automatically when performing any `GET` or `HEAD` API method. For example, using [`mc stat`](/reference/minio-mc/mc-stat/#command-mc.stat), [`mc cat`](/reference/minio-mc/mc-cat/#command-mc.cat), or [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) commands after a site comes back online prompts healing to requeue.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-02T23-48-47Z**
-
-If one site loses data for any reason, resynchronize the data from another healthy site with [`mc admin replicate resync`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.resync). This launches an active process that resynchronizes the data without waiting for the passive [MinIO scanner](/operations/concepts/scanner/#minio-concepts-scanner) to recognize the missing data.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-02T23-48-47Z**
+>
+> If one site loses data for any reason, resynchronize the data from another healthy site with [`mc admin replicate resync`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.resync). This launches an active process that resynchronizes the data without waiting for the passive [MinIO scanner](/operations/concepts/scanner/#minio-concepts-scanner) to recognize the missing data.
 
 You can adjust how MinIO balances the scanner performance with read/write operations using either the [`MINIO_SCANNER_SPEED`](/reference/minio-server/settings/core/#envvar.MINIO_SCANNER_SPEED) environment variable or the [`scanner speed`](/reference/minio-server/settings/core/#mc-conf.scanner.speed) configuration setting.
 
@@ -318,11 +313,10 @@ The new site must meet the following requirements:
    mc admin replicate add minio1 minio2 minio3 minio4
    ```
 
-   {{% alert color="info" %}}
-   **Note**
-
-   If any of the sites are unreachable or permanently lost, you **must** first remove the unreachable site(s) with [`mc admin replicate rm`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.rm) before expanding with the new site.
-   {{% /alert %}}
+   > [!NOTE]
+   > **Note**
+   >
+   > If any of the sites are unreachable or permanently lost, you **must** first remove the unreachable site(s) with [`mc admin replicate rm`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.rm) before expanding with the new site.
 4. Query the site replication configuration to verify
 
    ```shell

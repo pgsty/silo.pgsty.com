@@ -2,8 +2,8 @@
 title: "访问管理"
 url: "/zh/administration/identity-access-management/policy-based-access-control/"
 weight: 50
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/policy-based-access-control.rst
+upstream_modified: true
 ---
 
 <a id="minio-policy"></a>
@@ -19,15 +19,14 @@ MinIO PBAC 在设计上兼容 AWS IAM 策略语法、结构和行为。 MinIO �
 
 ## 基于标签的策略条件 {#id4}
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-10-02T19-29-29Z**
-
-策略可以使用条件，将用户访问限制为仅能访问带有 [特定标签](/zh/administration/object-management/#minio-object-tagging) 的对象。
-
-对于[选定操作](#minio-selected-conditional-actions)，MinIO 支持[基于标签的条件](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html)。当 API 路径在授权前加载目标对象元数据时，`s3:ExistingObjectTag/<key>` 读取对象上已经存储的标签。`s3:RequestObjectTag/<key>` 与 `s3:RequestObjectTagKeys` 是客户端提供的请求值，不能证明对象已经具有这些标签。`PutObject`、`CreateMultipartUpload` 与 `PutObjectTagging` 会把它们显式绑定到处理器实际消费的标签输入；其他 action 路径为了兼容仍保留历史 `X-Amz-Tagging` Header 映射，因此请求标签条件只应在 API 确实消费标签时使用。
-
-存储桶标签与对象标签不是同一类数据。`PutBucketTagging` 不会从 XML 正文填充 `s3:RequestObjectTag*` 条件键。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-10-02T19-29-29Z**
+>
+> 策略可以使用条件，将用户访问限制为仅能访问带有 [特定标签](/zh/administration/object-management/#minio-object-tagging) 的对象。
+>
+> 对于[选定操作](#minio-selected-conditional-actions)，MinIO 支持[基于标签的条件](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html)。当 API 路径在授权前加载目标对象元数据时，`s3:ExistingObjectTag/<key>` 读取对象上已经存储的标签。`s3:RequestObjectTag/<key>` 与 `s3:RequestObjectTagKeys` 是客户端提供的请求值，不能证明对象已经具有这些标签。`PutObject`、`CreateMultipartUpload` 与 `PutObjectTagging` 会把它们显式绑定到处理器实际消费的标签输入；其他 action 路径为了兼容仍保留历史 `X-Amz-Tagging` Header 映射，因此请求标签条件只应在 API 确实消费标签时使用。
+>
+> 存储桶标签与对象标签不是同一类数据。`PutBucketTagging` 不会从 XML 正文填充 `s3:RequestObjectTag*` 条件键。
 
 <a id="id5"></a>
 
@@ -122,13 +121,12 @@ MinIO 提供以下内置策略，可分配给 [users](/zh/administration/identit
 
 每个用户只能访问内置角色 *显式* 授予的那些资源和操作。 默认情况下，MinIO 会拒绝访问任何其他资源或 action。
 
-{{% alert color="info" %}}
-**`Deny` overrides `Allow`**
-
-MinIO 遵循 IAM 策略求值规则，即在同一操作/资源上，`Deny` 规则会覆盖 `Allow` 规则。例如，如果某个用户被显式分配的策略对某个操作/资源包含 `Allow` 规则，而其所属某个组被分配的策略对同一操作/资源包含 `Deny` 规则， 则 MinIO 只会应用 `Deny` 规则。
-
-有关 IAM 策略求值逻辑的更多信息，请参见 IAM 文档中的 [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow)。
-{{% /alert %}}
+> [!NOTE]
+> **`Deny` overrides `Allow`**
+>
+> MinIO 遵循 IAM 策略求值规则，即在同一操作/资源上，`Deny` 规则会覆盖 `Allow` 规则。例如，如果某个用户被显式分配的策略对某个操作/资源包含 `Allow` 规则，而其所属某个组被分配的策略对同一操作/资源包含 `Deny` 规则， 则 MinIO 只会应用 `Deny` 规则。
+>
+> 有关 IAM 策略求值逻辑的更多信息，请参见 IAM 文档中的 [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow)。
 
 <a id="id6"></a>
 
@@ -181,17 +179,16 @@ MinIO 策略文档使用与 [AWS IAM Policy](https://docs.aws.amazon.com/IAM/lat
 "Resource": ["arn:aws:s3:::mybucket", "arn:aws:s3:::mybucket/*"]
 ```
 
-{{% alert color="warning" %}}
-**十二个桶级写操作需要存储桶 ARN**
-
-`arn:aws:s3:::mybucket/*` 这样的对象级模式 **不会** 授权以下动作，即使语句授予的是 `s3:*`：
-
-`PutBucketPolicy`、`DeleteBucketPolicy`、`PutBucketObjectLockConfiguration`、`PutBucketVersioning`、`PutReplicationConfiguration`、`PutLifecycleConfiguration`、`DeleteBucket`、`ForceDeleteBucket`、`PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration`
-
-这些动作中的每一个，都能让调用者拿到对象级授权本来给不了的东西——把访问权发给别的主体、击穿专门针对写权限持有者的保护、在授权被吊销后仍持续生效，或者销毁存储桶实体本身。要授予它们，请在对象模式旁边补上裸的存储桶 ARN。
-
-早期版本也会通过对象模式授权这些动作，因为桶级请求被拿去与字符串 `mybucket/` 匹配，而 `mybucket/*` 同样命中它。那是一种过度授予，参见上游 [minio/minio#20449](https://github.com/minio/minio/issues/20449)。在调整策略期间，可将 [`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`](/zh/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH) 设为 `on` 恢复此前的行为。
-{{% /alert %}}
+> [!WARNING]
+> **十二个桶级写操作需要存储桶 ARN**
+>
+> `arn:aws:s3:::mybucket/*` 这样的对象级模式 **不会** 授权以下动作，即使语句授予的是 `s3:*`：
+>
+> `PutBucketPolicy`、`DeleteBucketPolicy`、`PutBucketObjectLockConfiguration`、`PutBucketVersioning`、`PutReplicationConfiguration`、`PutLifecycleConfiguration`、`DeleteBucket`、`ForceDeleteBucket`、`PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration`
+>
+> 这些动作中的每一个，都能让调用者拿到对象级授权本来给不了的东西——把访问权发给别的主体、击穿专门针对写权限持有者的保护、在授权被吊销后仍持续生效，或者销毁存储桶实体本身。要授予它们，请在对象模式旁边补上裸的存储桶 ARN。
+>
+> 早期版本也会通过对象模式授权这些动作，因为桶级请求被拿去与字符串 `mybucket/` 匹配，而 `mybucket/*` 同样命中它。那是一种过度授予，参见上游 [minio/minio#20449](https://github.com/minio/minio/issues/20449)。在调整策略期间，可将 [`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`](/zh/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH) 设为 `on` 恢复此前的行为。
 
 其余行为一律不变。`ListBucket`、`GetBucketLocation`、各类存储桶配置 **读取** 以及 `CreateBucket` 仍然可以通过对象模式获得授权，因此按这种写法配置的列举与供应流程照常工作。`Deny` 语句与 `NotResource` 排除的匹配方式一如既往，所以任何写在 `mybucket/*` 上的限制都不会被削弱。内置的 `readwrite`、`readonly`、`writeonly`、`diagnostics` 策略使用 `arn:aws:s3:::*`，不受影响。
 
@@ -903,21 +900,19 @@ MinIO 策略文档支持 IAM [条件语句](https://docs.aws.amazon.com/IAM/late
 - `s3:x-amz-content-sha256`
 - `s3:signatureAge`
 
-{{% alert color="danger" %}}
-**警告**
-
-`aws:Referer`、`aws:SourceIp` 和 `aws:UserAgent` 键可能被伪造，因此存在潜在安全风险。`aws:SourceIp` 的可信程度取决于负责提供或覆写转发请求头的代理边界。MinIO 建议仅将这些条件键作为辅助安全措施用于 *拒绝* 访问。
-
-**绝不要** 仅凭这三个键授予访问权限。
-{{% /alert %}}
+> [!CAUTION]
+> **警告**
+>
+> `aws:Referer`、`aws:SourceIp` 和 `aws:UserAgent` 键可能被伪造，因此存在潜在安全风险。`aws:SourceIp` 的可信程度取决于负责提供或覆写转发请求头的代理边界。MinIO 建议仅将这些条件键作为辅助安全措施用于 *拒绝* 访问。
+>
+> **绝不要** 仅凭这三个键授予访问权限。
 
 ### 条件值来源与优先级 {#condition-value-sources}
 
-{{% alert color="warning" %}}
-**尚未发布的服务端行为（截至 2026-08-03）**
-
-下表描述配套服务端改动 `1a6d5b415` 之后的行为。该改动目前仅存在于本地 `pgsty/minio` 分支：尚未进入公开 `origin/master`，最新公开服务端版本 `RELEASE.2026-08-04T00-00-00Z` 也不包含它。已发布构建仍保留此前行为。在依赖这些优先级保证前，请先核对服务端发布说明。
-{{% /alert %}}
+> [!WARNING]
+> **尚未发布的服务端行为（截至 2026-08-03）**
+>
+> 下表描述配套服务端改动 `1a6d5b415` 之后的行为。该改动目前仅存在于本地 `pgsty/minio` 分支：尚未进入公开 `origin/master`，最新公开服务端版本 `RELEASE.2026-08-04T00-00-00Z` 也不包含它。已发布构建仍保留此前行为。在依赖这些优先级保证前，请先核对服务端发布说明。
 
 Silo 按请求字段的实际语义来源构造条件值映射，而不是把所有请求头与查询参数混为一谈。原始请求头或查询参数即使与内部条件键同名，也不能覆盖服务端计算出的值，或伪造服务端没有提供的值。
 
@@ -942,11 +937,10 @@ MinIO 在 S3 标准条件键基础上扩展了以下键：
 
 `sts:DurationSeconds`
 
-> {{% alert color="info" %}}
-> **新增: MinIO**
->
-> SERVER RELEASE.2024-02-06T21-36-22Z
-> {{% /alert %}}
+> > [!NOTE]
+> > **新增: MinIO**
+> >
+> > SERVER RELEASE.2024-02-06T21-36-22Z
 >
 > 指定一个以秒为单位的时间，用于限制由 [AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) 生成的 *所有* Security Token Service 凭证的有效期。
 >
@@ -1447,34 +1441,32 @@ MinIO 支持通过策略限制密钥管理服务 (KMS) action。
 
 若要选择所有可用的 kms 策略 action，可使用 `kms:*`。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2024-07-16T23-46-41Z**
-
-KMS action 可以按资源或资源前缀进行限制。 可以使用通配符 `*` 将 KMS action 策略应用到所有匹配该前缀的资源。
-
-例如，以下策略文档允许用户列出密钥、创建新密钥，并检查任何以 `keys-abc-` 或 `myuser-` 开头资源上的密钥状态。
-
-```shell
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "kms:CreateKey",
-                "kms:KeyStatus",
-                "kms:ListKeys"
-            ],
-            "Resource": [
-                "arn:minio:kms:::keys-abc-*",
-                "arn:minio:kms:::myuser-*"
-            ]
-        }
-    ]
-}
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2024-07-16T23-46-41Z**
+>
+> KMS action 可以按资源或资源前缀进行限制。 可以使用通配符 `*` 将 KMS action 策略应用到所有匹配该前缀的资源。
+>
+> 例如，以下策略文档允许用户列出密钥、创建新密钥，并检查任何以 `keys-abc-` 或 `myuser-` 开头资源上的密钥状态。
+>
+> ```shell
+> {
+>     "Version": "2012-10-17",
+>     "Statement": [
+>         {
+>             "Effect": "Allow",
+>             "Action": [
+>                 "kms:CreateKey",
+>                 "kms:KeyStatus",
+>                 "kms:ListKeys"
+>             ],
+>             "Resource": [
+>                 "arn:minio:kms:::keys-abc-*",
+>                 "arn:minio:kms:::myuser-*"
+>             ]
+>         }
+>     ]
+> }
+> ```
 
 ## `mc admin` 策略条件键 {#mc-admin}
 

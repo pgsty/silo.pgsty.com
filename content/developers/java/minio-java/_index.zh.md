@@ -4,17 +4,16 @@ description: "使用 MinIO Java SDK 从 Java 应用连接 SILO。"
 url: "/zh/developers/java/minio-java/"
 weight: 40
 icon: fa-brands fa-java
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/java/minio-java.rst
+upstream_modified: true
 ---
 
 ## MinIO Java SDK {#java-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此 Java 应用可以直接使用上游 [MinIO Java SDK](https://github.com/minio/minio-java)。SDK 支持 Java 8 及更高版本；请同时考虑应用框架对运行时的支持范围。
 
-{{% alert color="info" %}}
-本页按 SDK `9.0.3` 校验。固定依赖前，请核对[当前发布记录](https://github.com/minio/minio-java/releases)与 [Maven Central 元数据](https://central.sonatype.com/artifact/io.minio/minio)。
-{{% /alert %}}
+> [!NOTE]
+> 本页按 SDK `9.0.3` 校验。固定依赖前，请核对[当前发布记录](https://github.com/minio/minio-java/releases)与 [Maven Central 元数据](https://central.sonatype.com/artifact/io.minio/minio)。
 
 ## 安装软件包 {#install}
 

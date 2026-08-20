@@ -2,8 +2,8 @@
 title: "mc batch status"
 url: "/zh/reference/minio-mc/mc-batch-status/"
 weight: 60
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-status.rst
+upstream_modified: true
 ---
 
 <a id="mc-batch-status"></a>
@@ -11,34 +11,31 @@ silo_modified: true
 
 <a id="command-mc.batch.status"></a>
 
-{{% alert color="info" %}}
-**变更: MinIO**
-
-RELEASE.2022-10-09T21-10-59Z or later
-{{% /alert %}}
+> [!NOTE]
+> **变更: MinIO**
+>
+> RELEASE.2022-10-09T21-10-59Z or later
 
 ## 语法 {#id2}
 
 [`mc batch status`](#command-mc.batch.status) 命令会输出 MinIO 服务器上作业事件的汇总信息。
 
-{{% alert color="info" %}}
-**变更: mc**
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2024-07-03T20-17-25Z
+>
+> Batch status 会显示活动且正在进行的作业，或前 3（三）天内已完成的任意批处理作业的汇总信息。
 
-RELEASE.2024-07-03T20-17-25Z
-
-Batch status 会显示活动且正在进行的作业，或前 3（三）天内已完成的任意批处理作业的汇总信息。
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会输出 `myminio` alias 上当前正在运行、JobID 为 `KwSysDpxcBU9FNhGkn2dCf` 的指定作业状态。
 
 ```shell
 mc batch status myminio "KwSysDpxcBU9FNhGkn2dCf"
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
@@ -51,8 +48,8 @@ mc [GLOBALFLAGS] batch list TARGET           \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

@@ -2,8 +2,8 @@
 title: "Operator Helm Charts"
 url: "/reference/operator-chart-values/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/operator-chart-values.rst
+upstream_modified: true
 ---
 
 <a id="operator-helm-charts"></a>
@@ -13,16 +13,15 @@ The archived MinIO Operator project published an [Operator Chart](https://github
 
 The following page documents the `values.yaml` chart for the MinIO Operator. For documentation on the chart for a MinIO Tenant, see [Tenant Helm Charts](/reference/tenant-chart-values/#minio-tenant-chart-values)
 
-{{% alert color="warning" %}}
-The upstream MinIO Operator repository was archived on March 20, 2026. Treat these values as a frozen `v7.1.1` reference snapshot, not as evidence of ongoing upstream maintenance or support.
-{{% /alert %}}
+> [!WARNING]
+> The upstream MinIO Operator repository was archived on March 20, 2026. Treat these values as a frozen `v7.1.1` reference snapshot, not as evidence of ongoing upstream maintenance or support.
 
 <a id="minio-operator-chart-operator-values"></a>
 
 ## MinIO Operator Chart {#minio-operator-chart}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Reference" %}}
+{{< tabs group="reference-yaml" >}}
+{{< tab label="Reference" value="reference" >}}
 **operator**
 
 > Root key for Operator Helm Chart
@@ -168,9 +167,8 @@ The upstream MinIO Operator repository was archived on March 20, 2026. Treat the
 > > The [Requests or Limits](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/) for resources to associate to Operator pods.
 > >
 > > These settings can control the minimum and maximum resources requested for each pod. If no worker nodes can meet the specified requests, the Operator may fail to deploy.
-{{% /tab %}}
-{{% tab header="YAML" %}}
-
+{{< /tab >}}
+{{< tab label="YAML" value="yaml" >}}
 ```text
 ###
 # Root key for Operator Helm Chart
@@ -361,6 +359,5 @@ operator:
       ephemeral-storage: 500Mi
 
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

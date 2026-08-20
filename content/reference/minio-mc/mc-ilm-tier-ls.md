@@ -2,8 +2,8 @@
 title: "mc ilm tier ls"
 url: "/reference/minio-mc/mc-ilm-tier-ls/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-ls.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-tier-ls"></a>
@@ -13,11 +13,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.tier.ls"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc ilm tier ls`](#command-mc.ilm.tier.ls) replaces `mc admin tier ls`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc ilm tier ls`](#command-mc.ilm.tier.ls) replaces `mc admin tier ls`.
 
 ## Description {#description}
 
@@ -29,24 +28,22 @@ The [`mc ilm tier list`](#command-mc.ilm.tier.list) command has equivalent funct
 
 The command has the following syntax:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following example outputs a list of the existing remote tiers on the `myminio` deployment.
 
 ```shell
  mc ilm tier ls myminio
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
 mc ilm tier ls TARGET TIER_NAME
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

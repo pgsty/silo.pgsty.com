@@ -2,18 +2,17 @@
 title: "Batch Expiration"
 url: "/administration/batch-framework-job-expire/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-expire.rst
+upstream_modified: false
 ---
 
 <a id="batch-expiration"></a>
 <a id="minio-batch-framework-expire-job"></a>
 
-{{% alert color="info" %}}
-**Added: MinIO**
-
-RELEASE.2023-12-02T10-51-33Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: MinIO**
+>
+> RELEASE.2023-12-02T10-51-33Z
 
 The MinIO Batch Framework allows you to create, manage, monitor, and execute jobs using a YAML-formatted job definition file (a “batch file”). The batch jobs run directly on the MinIO deployment to take advantage of the server-side processing power without constraints of the local machine where you run the [MinIO Client](/reference/minio-mc/#minio-client).
 

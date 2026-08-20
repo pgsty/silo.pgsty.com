@@ -6,8 +6,6 @@ url: "/compatibility/feature/"
 weight: 40
 type: docs
 icon: fa-solid fa-flask
-minio_origin: false
-silo_modified: false
 ---
 
 The component pages in this section record where Silo matches MinIO. This subsection records the places where Silo deliberately goes beyond it: each page is a design note, written before the implementation lands, and kept afterwards as the authoritative record of what was decided and why.

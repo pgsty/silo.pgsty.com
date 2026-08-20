@@ -6,8 +6,7 @@ url: "/about/"
 weight: 5
 type: docs
 icon: fa-solid fa-circle-info
-minio_origin: false
-silo_modified: false
+sidebar_expanded: true
 ---
 
 Silo is a community fork of MinIO, published and maintained by [Pigsty](https://pgsty.com). This section collects the terms the project publishes about itself: the [**Manifesto**](/about/manifesto/) with the project's public commitments, what license the code and the documentation are under, how the MinIO name is used, whom this documentation is attributed to, and how to report a security issue.

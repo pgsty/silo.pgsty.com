@@ -3,8 +3,8 @@ title: "Bucket Replication"
 url: "/administration/bucket-replication/"
 weight: 160
 icon: fa-solid fa-arrows-rotate
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication.rst
+upstream_modified: false
 ---
 
 <a id="bucket-replication"></a>
@@ -22,18 +22,17 @@ MinIO supports server-side and client-side replication of objects between source
 
 > Use the command process to synchronize objects between buckets within the same S3-compatible cluster *or* between two independent S3-compatible clusters. Client-side replication using [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) supports MinIO-to-S3 and similar replication configurations.
 
-{{% alert color="info" %}}
-**Bucket vs Site Replication**
-
-Bucket Replication is distinct from and mutually exclusive with [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview).
-
-- Bucket Replication synchronizes data at the bucket level, such as bucket prefix paths and objects.
-
-  You can configure bucket replication at any time, and the remote MinIO deployments may have pre-existing data on the replication target buckets.
-- Site Replication extends bucket replication to include [IAM](/administration/identity-access-management/#minio-authentication-and-identity-management), security tokens, access keys, and bucket-level configurations.
-
-  Site replication is typically configured when initially deploying the MinIO peer sites. Only one site can hold any bucket or objects at the time of initial configuration.
-{{% /alert %}}
+> [!NOTE]
+> **Bucket vs Site Replication**
+>
+> Bucket Replication is distinct from and mutually exclusive with [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview).
+>
+> - Bucket Replication synchronizes data at the bucket level, such as bucket prefix paths and objects.
+>
+>   You can configure bucket replication at any time, and the remote MinIO deployments may have pre-existing data on the replication target buckets.
+> - Site Replication extends bucket replication to include [IAM](/administration/identity-access-management/#minio-authentication-and-identity-management), security tokens, access keys, and bucket-level configurations.
+>
+>   Site replication is typically configured when initially deploying the MinIO peer sites. Only one site can hold any bucket or objects at the time of initial configuration.
 
 <a id="minio-bucket-replication-serverside"></a>
 
@@ -78,23 +77,22 @@ For replicating the deletion of a specific object version, MinIO marks the objec
 
 MinIO only replicates explicit client-driven delete operations. MinIO does *not* replicate objects deleted from the application of [lifecycle management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration). For [active-active](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) configurations, set the same expiration rules on *all* of the replication buckets to ensure consistent application of object expiration.
 
-{{% details title="MinIO Trims Empty Object Prefixes on Source and Remote Bucket" closed="true" %}}
-If a delete operation removes the last object in a bucket prefix, MinIO recursively removes each empty part of the prefix up to the bucket root. MinIO only applies the recursive removal to prefixes created *implicitly* as part of object write operations - that is, the prefix was not created using an explicit directory creation command such as [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb).
-
-If a replication rule enables replication delete operations, the replication process *also* applies the implicit prefix trimming behavior on the destination MinIO cluster.
-
-For example, consider a bucket `photos` with the following object prefixes:
-
-- `photos/2021/january/myphoto.jpg`
-- `photos/2021/february/myotherphoto.jpg`
-- `photos/NYE21/NewYears.jpg`
-
-`photos/NYE21` is the *only* prefix explicitly created using [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb). All other prefixes were *implicitly* created as part of writing the object located at that prefix.
-
-- A command removes `myphoto.jpg`. MinIO automatically trims the empty `/janaury` prefix.
-- A command then removes the `myotherphoto.jpg`. MinIO automatically trims the `/february` prefix *and* the now-empty `/2021` prefix.
-- A command removes the `NewYears.jpg` object. MinIO leaves the `/NYE21` prefix remains in place since it was *explicitly* created.
-{{% /details %}}
+> [!DETAILS]- MinIO Trims Empty Object Prefixes on Source and Remote Bucket
+> If a delete operation removes the last object in a bucket prefix, MinIO recursively removes each empty part of the prefix up to the bucket root. MinIO only applies the recursive removal to prefixes created *implicitly* as part of object write operations - that is, the prefix was not created using an explicit directory creation command such as [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb).
+>
+> If a replication rule enables replication delete operations, the replication process *also* applies the implicit prefix trimming behavior on the destination MinIO cluster.
+>
+> For example, consider a bucket `photos` with the following object prefixes:
+>
+> - `photos/2021/january/myphoto.jpg`
+> - `photos/2021/february/myotherphoto.jpg`
+> - `photos/NYE21/NewYears.jpg`
+>
+> `photos/NYE21` is the *only* prefix explicitly created using [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb). All other prefixes were *implicitly* created as part of writing the object located at that prefix.
+>
+> - A command removes `myphoto.jpg`. MinIO automatically trims the empty `/janaury` prefix.
+> - A command then removes the `myotherphoto.jpg`. MinIO automatically trims the `/february` prefix *and* the now-empty `/2021` prefix.
+> - A command removes the `NewYears.jpg` object. MinIO leaves the `/NYE21` prefix remains in place since it was *explicitly* created.
 
 <a id="minio-replication-behavior-existing-objects"></a>
 
@@ -131,19 +129,17 @@ This section documents internal replication behavior and is not critical to usin
 
 MinIO uses a replication queuing system with multiple concurrent replication workers operating on that queue. MinIO continuously works to replicate and remove objects from the queue while scanning for new unreplicated objects to add to the queue.
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-07-18T17-49-40Z**
+> [!NOTE]
+> **Changed: RELEASE.2022-07-18T17-49-40Z**
+>
+> MinIO queues failed replication operations and retries those operations up to three (3) times.
+>
+> MinIO dequeues replication operations that fail to replicate after three attempts. The scanner can pick up those affected objects at a later time and requeue them for replication.
 
-MinIO queues failed replication operations and retries those operations up to three (3) times.
-
-MinIO dequeues replication operations that fail to replicate after three attempts. The scanner can pick up those affected objects at a later time and requeue them for replication.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-08-11T04-37-28Z**
-
-Failed or pending replications requeue automatically when performing a list or any `GET` or `HEAD` API method. For example, using [`mc stat`](/reference/minio-mc/mc-stat/#command-mc.stat), [`mc cat`](/reference/minio-mc/mc-cat/#command-mc.cat), or [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) after a remote location comes back online requeues replication.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-08-11T04-37-28Z**
+>
+> Failed or pending replications requeue automatically when performing a list or any `GET` or `HEAD` API method. For example, using [`mc stat`](/reference/minio-mc/mc-stat/#command-mc.stat), [`mc cat`](/reference/minio-mc/mc-cat/#command-mc.cat), or [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) after a remote location comes back online requeues replication.
 
 MinIO sets the `X-Amz-Replication-Status` metadata field according to the replication state of the object:
 

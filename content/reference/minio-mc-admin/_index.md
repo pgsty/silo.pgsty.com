@@ -3,8 +3,8 @@ title: "Silo Client Administration"
 url: "/reference/minio-mc-admin/"
 weight: 20
 icon: fa-solid fa-user-gear
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin.rst
+upstream_modified: true
 ---
 
 <a id="minio-admin-client"></a>
@@ -130,11 +130,10 @@ Install the maintained client from [Download & Install](/download/#client), or f
 
 Ensure that the host machine has [`mc`](/reference/minio-mc/#command-mc) [installed](#mc-admin-install) prior to starting this procedure.
 
-{{% alert color="warning" %}}
-**Important**
-
-The following example temporarily disables the bash history to mitigate the risk of authentication credentials leaking in plain text. This is a basic security measure and does not mitigate all possible attack vectors. Defer to security best practices for your operating system for inputting sensitive information on the command line.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The following example temporarily disables the bash history to mitigate the risk of authentication credentials leaking in plain text. This is a basic security measure and does not mitigate all possible attack vectors. Defer to security best practices for your operating system for inputting sensitive information on the command line.
 
 Use the [`mc alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) command to add the deployment to the **`mc`** configuration.
 

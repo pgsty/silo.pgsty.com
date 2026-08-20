@@ -2,8 +2,8 @@
 title: "mc find"
 url: "/reference/minio-mc/mc-find/"
 weight: 110
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-find.rst
+upstream_modified: false
 ---
 
 <a id="mc-find"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 The [`mc find`](#command-mc.find) command supports searching for objects on a MinIO deployment. You can also use the command to search for files on a filesystem.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command searches for all objects matching the specified pattern in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc find myminio/mydata --name "*.jpg"
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -52,8 +51,8 @@ mc [GLOBALFLAGS] find                    \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -115,11 +114,10 @@ Limits directory navigation to the specified depth.
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-04-12T02-21-51Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-04-12T02-21-51Z
 
 **For use with MinIO deployments only.**
 
@@ -145,11 +143,10 @@ Return objects whose names match the specified [wildcard pattern](/reference/min
 
 Mirror object(s) newer than the specified number of days. Specify a string in `#d#hh#mm#ss` format. For example: `--older-than 1d2hh3mm4ss`
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2025-02-04T04-57-50Z**
-
-The datetime may also be specified in absolute time of `YYYY-MM-DD HH:MM:SS TMZ` format. For example, `mc find --newer-than="2025-01-22 09:57:00 CET" minioalias/mybucket`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2025-02-04T04-57-50Z**
+>
+> The datetime may also be specified in absolute time of `YYYY-MM-DD HH:MM:SS TMZ` format. For example, `mc find --newer-than="2025-01-22 09:57:00 CET" minioalias/mybucket`.
 
 ##### `--older-than` {#mc.find.-older-than}
 
@@ -159,11 +156,10 @@ The datetime may also be specified in absolute time of `YYYY-MM-DD HH:MM:SS TMZ`
 
 Mirror object(s) older than the specified time limit. Specify a string in `#d#hh#mm#ss` format. For example: `--older-than 1d2hh3mm4ss`
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2025-02-04T04-57-50Z**
-
-The datetime may also be specified in absolute time of `YYYY-MM-DD HH:MM:SS TMZ` format. For example, `mc find --newer-than="2025-01-22 09:57:00 CET" minioalias/mybucket`.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2025-02-04T04-57-50Z**
+>
+> The datetime may also be specified in absolute time of `YYYY-MM-DD HH:MM:SS TMZ` format. For example, `mc find --newer-than="2025-01-22 09:57:00 CET" minioalias/mybucket`.
 
 Defaults to `0` (all objects).
 
@@ -197,11 +193,10 @@ Returns objects or the contents of directories whose names match the specified P
 
 *Optional*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2023-04-12T02-21-51Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2023-04-12T02-21-51Z
 
 **For use with MinIO deployments only.**
 
@@ -282,11 +277,10 @@ mc find --watch FILEPATH --name "*.EXTENSION" --exec "mc cp {} ALIAS/PATH"
 
 ### Find Objects with a Matching Tag {#find-objects-with-a-matching-tag}
 
-{{% alert color="info" %}}
-**Note**
-
-Tag matching is only available for use on MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Tag matching is only available for use on MinIO deployments.
 
 ```shell
 mc find --tags="key=v*" ALIAS/BUCKET/
@@ -301,11 +295,10 @@ You can add additional `--tags="key=RegExpression"` flags to match. Matching obj
 
 ### Find Objects with Matching Metadata {#find-objects-with-matching-metadata}
 
-{{% alert color="info" %}}
-**Note**
-
-Metadata matching is only available for use on MinIO deployments.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> Metadata matching is only available for use on MinIO deployments.
 
 ```shell
 mc find --json --metadata="content-type=text/csv" ALIAS/BUCKET/

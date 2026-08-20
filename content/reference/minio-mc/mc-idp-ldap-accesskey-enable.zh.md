@@ -2,8 +2,8 @@
 title: "mc idp ldap accesskey enable"
 url: "/zh/reference/minio-mc/mc-idp-ldap-accesskey-enable/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap-accesskey-enable.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap-accesskey-enable"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc idp ldap accesskey enable`](#command-mc.idp.ldap.accesskey.enable) 在本地服务器上启用指定的 [access key](/zh/administration/identity-access-management/minio-user-management/#minio-id-access-keys)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 > 以下示例启用 `minio` 部署中的 access key `mykey`：
 
 ```shell
 mc idp ldap accesskey enable minio/ mykey
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令具有以下语法：
 
 ```shell
@@ -41,8 +40,8 @@ mc [GLOBALFLAGS] idp ldap accesskey enable  \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

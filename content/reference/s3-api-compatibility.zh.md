@@ -3,19 +3,18 @@ title: "S3 API 兼容性"
 url: "/zh/reference/s3-api-compatibility/"
 weight: 250
 icon: fa-solid fa-cloud
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/s3-api-compatibility.rst
+upstream_modified: false
 ---
 
 <a id="s3-api"></a>
 
 本页面记录 MinIO 对象存储支持的 S3 API。 如需查看任意 API 的参考文档，请参阅 Amazon S3 的对应文档。
 
-{{% alert color="warning" %}}
-**重要**
-
-MinIO 强烈建议使用 [S3 兼容 SDK](/zh/developers/minio-drivers/#minio-drivers) 执行对象存储操作。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> MinIO 强烈建议使用 [S3 兼容 SDK](/zh/developers/minio-drivers/#minio-drivers) 执行对象存储操作。
 
 ## 对象 API {#api}
 

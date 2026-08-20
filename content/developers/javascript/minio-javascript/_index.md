@@ -4,8 +4,8 @@ description: "Connect a Node.js application to SILO with the MinIO JavaScript SD
 url: "/developers/javascript/minio-javascript/"
 weight: 50
 icon: fa-brands fa-js
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/javascript/minio-javascript.rst
+upstream_modified: true
 ---
 
 ## MinIO JavaScript SDK {#javascript-sdk}

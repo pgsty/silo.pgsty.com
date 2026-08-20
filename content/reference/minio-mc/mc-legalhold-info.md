@@ -2,8 +2,8 @@
 title: "mc legalhold info"
 url: "/reference/minio-mc/mc-legalhold-info/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-legalhold-info"></a>
@@ -17,16 +17,15 @@ The [`mc legalhold info`](#command-mc.legalhold.info) command returns the curren
 
 [`mc legalhold`](/reference/minio-mc/mc-legalhold/#command-mc.legalhold) *requires* that the specified bucket has object locking enabled. You can **only** enable object locking at bucket creation. See [`mc mb --with-lock`](/reference/minio-mc/mc-mb/#mc.mb.-with-lock) for documentation on creating buckets with object locking enabled.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command retrieves the current legalhold status for objects in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc legalhold info --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] legalhold info  \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

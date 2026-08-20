@@ -2,8 +2,8 @@
 title: "mc admin update"
 url: "/reference/minio-mc-admin/mc-admin-update/"
 weight: 180
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-update.rst
+upstream_modified: true
 ---
 
 <a id="mc-admin-update"></a>
@@ -18,19 +18,17 @@ After running the command, a prompt displays to confirm the update. Type `y` and
 
 The user **must** have `write` permissions for the target location where the binary installs.
 
-{{% alert color="danger" %}}
-**Do not use the default update path on Silo**
+> [!CAUTION]
+> **Do not use the default update path on Silo**
+>
+> As of 2026-08-05, the latest published Silo server (`RELEASE.2026-08-04T00-00-00Z`) still resolves an omitted `MIRROR_URL` through the upstream `dl.min.io` release feed and retains the upstream MinIO signing key. Running `mc admin update ALIAS` against an update-enabled Silo server can therefore replace Silo with an upstream MinIO binary.
+>
+> Set `MINIO_UPDATE=off` on Silo servers and upgrade through [Download & Install](/download/#server), a trusted package repository, or a manually verified Silo artifact. This page retains the command contract for compatibility; it is not the recommended Silo upgrade procedure.
 
-As of 2026-08-05, the latest published Silo server (`RELEASE.2026-08-04T00-00-00Z`) still resolves an omitted `MIRROR_URL` through the upstream `dl.min.io` release feed and retains the upstream MinIO signing key. Running `mc admin update ALIAS` against an update-enabled Silo server can therefore replace Silo with an upstream MinIO binary.
-
-Set `MINIO_UPDATE=off` on Silo servers and upgrade through [Download & Install](/download/#server), a trusted package repository, or a manually verified Silo artifact. This page retains the command contract for compatibility; it is not the recommended Silo upgrade procedure.
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Use `mc admin` on Silo or compatible MinIO deployments only**
-
-[`mc admin`](/reference/minio-mc-admin/#command-mc.admin) uses MinIO-specific administration APIs. General S3 API compatibility alone does not imply that another object store supports these commands.
-{{% /alert %}}
+> [!NOTE]
+> **Use `mc admin` on Silo or compatible MinIO deployments only**
+>
+> [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) uses MinIO-specific administration APIs. General S3 API compatibility alone does not imply that another object store supports these commands.
 
 ## Considerations {#considerations}
 
@@ -96,10 +94,9 @@ Pass this flag to confirm the update and bypass the confirmation prompt.
 
 ### Binary Compression {#binary-compression}
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2024-01-28T22-35-53Z**
-
-[`mc admin update`](#command-mc.admin.update) compresses the binary before sending to all nodes in the deployment.
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2024-01-28T22-35-53Z**
+>
+> [`mc admin update`](#command-mc.admin.update) compresses the binary before sending to all nodes in the deployment.
 
 This feature does not apply to [systemctl managed deployments](/operations/deployments/baremetal/#minio-baremetal).

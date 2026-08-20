@@ -2,8 +2,8 @@
 title: "mc du"
 url: "/reference/minio-mc/mc-du/"
 weight: 80
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-du.rst
+upstream_modified: false
 ---
 
 <a id="mc-du"></a>
@@ -15,8 +15,8 @@ silo_modified: false
 
 The [`mc du`](#command-mc.du) command summarizes the disk usage of buckets and folders. You can also use [`du`](#command-mc.du) against the local filesystem to produce similar results as the `du` command.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command prints the disk usage of the `mybucket` bucket on the `myminio` MinIO deployment:
 
 ```shell
@@ -28,9 +28,8 @@ The output resembles the following:
 ```shell
 825KiB 3 objects        mybucket
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The [`mc du`](#command-mc.du) command has the following syntax:
 
 ```shell
@@ -47,8 +46,8 @@ mc [GLOBALFLAGS] du                    \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -150,11 +149,10 @@ mc du --rewind DURATION ALIAS/PATH
 - Replace `ALIAS` with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the S3-compatible host.
 - Replace `PATH` with the path to the bucket or folder on the S3-compatible host.
 
-{{% alert color="info" %}}
-**Requires Versioning**
-
-[`mc du`](#command-mc.du) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
-{{% /alert %}}
+> [!NOTE]
+> **Requires Versioning**
+>
+> [`mc du`](#command-mc.du) requires [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) to use this feature. Use [`mc version`](/reference/minio-mc/mc-version/#command-mc.version) to enable versioning on a bucket.
 
 ### View the Disk Usage Recursively {#view-the-disk-usage-recursively}
 

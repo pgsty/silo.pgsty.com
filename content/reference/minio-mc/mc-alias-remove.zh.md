@@ -2,8 +2,8 @@
 title: "mc alias remove"
 url: "/zh/reference/minio-mc/mc-alias-remove/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias-remove.rst
+upstream_modified: false
 ---
 
 <a id="mc-alias-remove"></a>
@@ -15,16 +15,15 @@ silo_modified: false
 
 [`mc alias remove`](#command-mc.alias.remove) 从本地 **`mc`** 配置中移除一个已存在的别名。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会从主机上移除 MinIO 部署的 `myminio` [alias](/zh/reference/minio-mc/mc-alias-set/#alias)：
 
 ```shell
 mc alias remove myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 [`mc alias remove`](#command-mc.alias.remove) 命令的语法如下：
 
 ```shell
@@ -36,8 +35,8 @@ mc [GLOBALFLAGS] alias remove ALIAS
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -57,24 +56,22 @@ mc [GLOBALFLAGS] alias remove ALIAS
 
 使用 [`mc alias remove`](#command-mc.alias.remove) 从 **`mc`** 配置中移除一个已存在的别名：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令会移除 `myminio` 别名。
 
 ```shell
 mc alias remove myminio
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
-
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 ```shell
 mc alias remove ALIAS
 ```
 
 将 `ALIAS` 替换为要移除的别名名称。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 行为 {#id6}
 

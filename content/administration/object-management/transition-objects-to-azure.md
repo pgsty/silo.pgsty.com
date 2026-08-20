@@ -2,8 +2,8 @@
 title: "Transition Objects from MinIO to Azure"
 url: "/administration/object-management/transition-objects-to-azure/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/transition-objects-to-azure.rst
+upstream_modified: true
 ---
 
 <a id="transition-objects-from-minio-to-azure"></a>
@@ -95,13 +95,12 @@ MinIO stores all transitioned objects in the remote storage bucket or resource u
 
 MinIO recommends specifying this optional prefix for remote storage tiers which contain other data, including transitioned objects from other MinIO deployments. This tutorial includes the necessary syntax for setting this prefix.
 
-{{% alert color="warning" %}}
-**Important**
-
-MinIO does *not* support changing the account name associated to an Azure remote tier. Azure storage backends are tied to the account, such that changing the account would change the storage backend and prevent access to any objects transitioned to the original account/backend.
-
-Please contact [MinIO Support](https://min.io/pricing?ref=docs) if you need situation-specific guidance around configuring Azure remote tiers.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> MinIO does *not* support changing the account name associated to an Azure remote tier. Azure storage backends are tied to the account, such that changing the account would change the storage backend and prevent access to any objects transitioned to the original account/backend.
+>
+> Please contact [MinIO Support](https://min.io/pricing?ref=docs) if you need situation-specific guidance around configuring Azure remote tiers.
 
 ### Availability of Remote Data {#availability-of-remote-data}
 

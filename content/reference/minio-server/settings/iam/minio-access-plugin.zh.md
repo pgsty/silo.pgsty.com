@@ -2,8 +2,8 @@
 title: "Silo 访问管理插件设置"
 url: "/zh/reference/minio-server/settings/iam/minio-access-plugin/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/iam/minio-access-plugin.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -20,26 +20,22 @@ silo_modified: true
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-{{% alert color="warning" %}}
-**重要**
-
-每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
 ## 示例 {#id2}
 
 在设置 MinIO Access Management 插件时，至少必须定义所有 *Required* 设置。 此处示例展示了最小必需配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ```shell
 MINIO_POLICY_PLUGIN_URL="https://authzservice.example.net:8080/authz"
 ```
-
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 #### `policy_plugin` {#mc-conf.policy_plugin}
 
 *mc-conf*
@@ -51,9 +47,8 @@ mc admin config set policy_plugin                     \
    url="https://authzservice.example.net:8080/authz"  \
    [ARGUMENT=VALUE] ...
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 设置 {#id3}
 
@@ -61,20 +56,18 @@ mc admin config set policy_plugin                     \
 
 *必需*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_POLICY_PLUGIN_URL` {#envvar.MINIO_POLICY_PLUGIN_URL}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `policy_plugin url` {#mc-conf.policy_plugin.url}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 外部访问管理服务的 webhook endpoint （`https://authzservice.example.net:8080/authz`）。
 
@@ -82,20 +75,18 @@ mc admin config set policy_plugin                     \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_POLICY_PLUGIN_AUTH_TOKEN` {#envvar.MINIO_POLICY_PLUGIN_AUTH_TOKEN}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `policy_plugin auth_token` {#mc-conf.policy_plugin.auth_token}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 提供给已配置 webhook endpoint 的认证令牌。
 
@@ -105,20 +96,18 @@ mc admin config set policy_plugin                     \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_POLICY_PLUGIN_ENABLE_HTTP2` {#envvar.MINIO_POLICY_PLUGIN_ENABLE_HTTP2}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `policy_plugin enable_http2` {#mc-conf.policy_plugin.enable_http2}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 为连接已配置的 webhook 服务启用实验性的 HTTP2 支持。
 
@@ -128,19 +117,17 @@ mc admin config set policy_plugin                     \
 
 *可选*
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
-
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MINIO_POLICY_PLUGIN_COMMENT` {#envvar.MINIO_POLICY_PLUGIN_COMMENT}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
-
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 ##### `policy_plugin comment` {#mc-conf.policy_plugin.comment}
 
 *mc-conf*
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 指定要附加到外部访问管理配置上的注释。

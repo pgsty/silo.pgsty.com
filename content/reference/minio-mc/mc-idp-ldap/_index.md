@@ -3,8 +3,8 @@ title: "mc idp ldap"
 url: "/reference/minio-mc/mc-idp-ldap/"
 weight: 140
 icon: fa-solid fa-address-book
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-ldap.rst
+upstream_modified: false
 ---
 
 <a id="mc-idp-ldap"></a>
@@ -12,11 +12,10 @@ silo_modified: false
 
 <a id="command-mc.idp.ldap"></a>
 
-{{% alert color="info" %}}
-**Added: RELEASE.2023-05-26T23-31-54Z**
-
-[`mc idp ldap`](#command-mc.idp.ldap) and its subcommands replace `mc admin idp ldap`.
-{{% /alert %}}
+> [!NOTE]
+> **Added: RELEASE.2023-05-26T23-31-54Z**
+>
+> [`mc idp ldap`](#command-mc.idp.ldap) and its subcommands replace `mc admin idp ldap`.
 
 ## Description {#description}
 
@@ -26,11 +25,10 @@ The [`mc idp ldap`](#command-mc.idp.ldap) commands are an alternative to using e
 
 See [Active Directory / LDAP Access Management](/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) for a tutorial on using these commands.
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO [AD/LDAP environment variables](/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) override their corresponding configuration settings as modified or set by this command.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO [AD/LDAP environment variables](/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) override their corresponding configuration settings as modified or set by this command.
 
 The [`mc idp ldap`](#command-mc.idp.ldap) command has the following subcommands:
 

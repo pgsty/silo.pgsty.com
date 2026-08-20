@@ -2,8 +2,8 @@
 title: "mc admin policy create"
 url: "/zh/reference/minio-mc-admin/mc-admin-policy-create/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-create.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-create"></a>
@@ -21,8 +21,8 @@ MinIO 部署默认包含以下 [内置策略](/zh/administration/identity-access
 - [`diagnostics`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.diagnostics)
 - [`writeonly`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.writeonly)
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 假设以下 JSON 策略文档保存在名为 `/tmp/listmybuckets.json` 的文件中：
 
 ```javascript
@@ -47,9 +47,8 @@ MinIO 部署默认包含以下 [内置策略](/zh/administration/identity-access
 ```shell
 mc admin policy create myminio listmybuckets /tmp/listmybuckets.json
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令的语法如下：
 
 ```shell
@@ -64,8 +63,8 @@ mc admin policy create     \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

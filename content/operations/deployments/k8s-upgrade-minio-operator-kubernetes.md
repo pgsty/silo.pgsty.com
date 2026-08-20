@@ -2,8 +2,8 @@
 title: "Upgrade MinIO Operator"
 url: "/operations/deployments/k8s-upgrade-minio-operator-kubernetes/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-upgrade-minio-operator-kubernetes.rst
+upstream_modified: false
 ---
 
 <a id="upgrade-minio-operator"></a>
@@ -15,28 +15,26 @@ As part of the upgrade process, the Operator may update and restart Tenants to s
 
 This page describes how to upgrade from Operator 5.0.15 to 7.1.1. See [Upgrade MinIO Operator 4.5.8 and Later to 5.0.15](/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier/#minio-k8s-upgrade-minio-operator-to-5-0-15) for instructions on upgrading to Operator 5.0.15 before starting this procedure.
 
-{{% alert color="info" %}}
-**Operator 6.0.0 Deprecates the Operator Console**
-
-Starting with Operator 6.0.0, the MinIO Operator Console is deprecated and removed.
-
-You can continue to manage and deploy MinIO Tenants using standard Kubernetes approaches such as Kustomize or Helm.
-{{% /alert %}}
+> [!NOTE]
+> **Operator 6.0.0 Deprecates the Operator Console**
+>
+> Starting with Operator 6.0.0, the MinIO Operator Console is deprecated and removed.
+>
+> You can continue to manage and deploy MinIO Tenants using standard Kubernetes approaches such as Kustomize or Helm.
 
 <a id="minio-k8s-upgrade-minio-operator-procedure"></a>
 
 ## Upgrade MinIO Operator 5.0.15 to 7.1.1 {#upgrade-minio-operator-5-0-15-to-operator-version-stable}
 
-{{% alert color="warning" %}}
-**Important**
+> [!WARNING]
+> **Important**
+>
+> Operator 6.0.0 deprecates the MinIO Operator Console and removes the related resources from the MinIO Operator CRD. This includes removal of Operator Console resources such as services and pods.
+>
+> Use either Kustomization or Helm for managing Tenants moving forward.
 
-Operator 6.0.0 deprecates the MinIO Operator Console and removes the related resources from the MinIO Operator CRD. This includes removal of Operator Console resources such as services and pods.
-
-Use either Kustomization or Helm for managing Tenants moving forward.
-{{% /alert %}}
-
-{{< tabpane text=true persist=header >}}
-{{% tab header="Upgrade using Kustomize" %}}
+{{< tabs group="upgrade-using-kustomize-upgrade-using-helm" >}}
+{{< tab label="Upgrade using Kustomize" value="upgrade-using-kustomize" >}}
 The following procedure upgrades the MinIO Operator using Kustomize. For deployments using Operator 5.0.0 through 5.0.14, follow the [Upgrade MinIO Operator 4.5.8 and Later to 5.0.15](/operations/deployments/k8s-upgrade-minio-operator-4.5.7-earlier/#minio-k8s-upgrade-minio-operator-to-5-0-15) procedure before performing this upgrade.
 
 If you installed the Operator using [Helm](/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/#minio-k8s-deploy-operator-helm), use the **Upgrade using Helm** instructions instead.
@@ -101,9 +99,8 @@ If you installed the Operator using [Helm](/operations/deployments/k8s-deploy-op
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
-
-{{% /tab %}}
-{{% tab header="Upgrade using Helm" %}}
+{{< /tab >}}
+{{< tab label="Upgrade using Helm" value="upgrade-using-helm" >}}
 The following procedure upgrades an existing MinIO Operator Installation using Helm.
 
 If you installed the Operator using Kustomize, use the **Upgrade using Kustomize** instructions instead.
@@ -171,6 +168,5 @@ If you installed the Operator using Kustomize, use the **Upgrade using Kustomize
    ```shell
    kubectl get pod -l 'name=minio-operator' -n minio-operator -o json | jq '.items[0].spec.containers'
    ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

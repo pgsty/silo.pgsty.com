@@ -9,8 +9,6 @@ aliases:
 weight: 5
 type: docs
 icon: fa-solid fa-scroll
-minio_origin: false
-silo_modified: false
 ---
 
 PGSTY SILO 的存在目的：让一个可信、可维护、功能完整的 S3 兼容社区版对象存储继续存在，确保其软件供应链的持续性。

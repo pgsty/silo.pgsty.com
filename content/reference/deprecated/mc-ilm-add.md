@@ -2,8 +2,8 @@
 title: "mc ilm add"
 url: "/reference/deprecated/mc-ilm-add/"
 weight: 10
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-add.rst
+upstream_modified: false
 ---
 
 <a id="mc-ilm-add"></a>
@@ -11,11 +11,10 @@ silo_modified: false
 
 <a id="command-mc.ilm.add"></a>
 
-{{% alert color="info" %}}
-**Changed: RELEASE.2022-12-24T15-21-38Z**
-
-`mc ilm add` replaced by [`mc ilm rule add`](/reference/minio-mc/mc-ilm-rule-add/#command-mc.ilm.rule.add).
-{{% /alert %}}
+> [!NOTE]
+> **Changed: RELEASE.2022-12-24T15-21-38Z**
+>
+> `mc ilm add` replaced by [`mc ilm rule add`](/reference/minio-mc/mc-ilm-rule-add/#command-mc.ilm.rule.add).
 
 ## Syntax {#syntax}
 
@@ -23,8 +22,8 @@ The [`mc ilm add`](#command-mc.ilm.add) command adds an object lifecycle managem
 
 The command supports adding both [Transition (Tiering)](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) and [Expiration](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) lifecycle management rules.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command adds new lifecycle management rules to the `mydata` bucket on the `myminio` deployment:
 
 ```shell
@@ -44,8 +43,8 @@ The configured rules have the following effect:
 - Delete `DeleteMarker` tombstones if that object has no other versions remaining.
 - Transition objects more than 30 days old to the `COLDTIER` remote tier.
 - Transition objects 7 days after they become non-current to the `COLDTIER` remote tier.
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -68,8 +67,8 @@ mc [GLOBALFLAGS] ilm add                                    \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

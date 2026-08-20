@@ -2,8 +2,8 @@
 title: "Object Deletion"
 url: "/administration/object-management/object-delete/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-delete.rst
+upstream_modified: false
 ---
 
 <a id="object-deletion"></a>
@@ -48,21 +48,19 @@ You can find the UUID of object versions with [`mc ls --versions`](/reference/mi
 
 To remove the current version of the object from the drive, find the UUID of the version, and then use [`mc rm --version-id=UUID ...`](/reference/minio-mc/mc-rm/#mc.rm.-version-id) to delete the current version. In this scenario, the immediately preceding version of the object then becomes the current version of the object served for `GET` requests of the object with no UUID specified.
 
-{{% alert color="danger" %}}
-**Warning**
-
-Specifying a `version-id` in a DELETE operation is irreversible. MinIO removes the specified version from the drive and **cannot** retrieve it.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> Specifying a `version-id` in a DELETE operation is irreversible. MinIO removes the specified version from the drive and **cannot** retrieve it.
 
 ### Delete operations on a prior version {#delete-operations-on-a-prior-version}
 
 To delete prior versions of an object, specify the version’s UUID. You can retrieve the version UUID with [`mc ls --versions`](/reference/minio-mc/mc-ls/#mc.ls.-versions). When the `DELETE` request specifies a `version-id` and the user has the correct permissions to delete the object version, MinIO permanently removes the specified version from the drive.
 
-{{% alert color="danger" %}}
-**Warning**
-
-Specifying a `version-id` in a DELETE operation is irreversible. MinIO removes the specified version from the drive and **cannot** retrieve it.
-{{% /alert %}}
+> [!CAUTION]
+> **Warning**
+>
+> Specifying a `version-id` in a DELETE operation is irreversible. MinIO removes the specified version from the drive and **cannot** retrieve it.
 
 ### Delete all versions {#delete-all-versions}
 
@@ -78,11 +76,10 @@ See the [scanner](/operations/concepts/scanner/#minio-concepts-scanner) page for
 
 `DeleteMarkers` are their own objects. Lifecycle rules can remove `DeleteMarkers` that are the only remaining versions of their objects.
 
-{{% alert color="info" %}}
-**Changed: MinIO**
-
-RELEASE.2024-05-01T01-11-10Z
-{{% /alert %}}
+> [!NOTE]
+> **Changed: MinIO**
+>
+> RELEASE.2024-05-01T01-11-10Z
 
 With `JSON`, lifecycle rules can remove all versions of a deleted object after a specified number of days.
 
@@ -118,20 +115,19 @@ For replicating the deletion of a specific object version, MinIO marks the objec
 
 MinIO only replicates explicit client-driven delete operations. MinIO does *not* replicate objects deleted by [lifecycle management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration). For [active-active](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) configurations, set the same expiration rules on *all* of the replication buckets to ensure consistent application of object expiration.
 
-{{% details title="MinIO Trims Empty Object Prefixes on Source and Remote Bucket" closed="true" %}}
-If a delete operation removes the last object in a bucket prefix, MinIO recursively removes each empty part of the prefix up to the bucket root. MinIO only applies the recursive removal to prefixes created *implicitly* as part of object write operations. MinIO does not recursively remove prefixes created using an explicit directory creation command, such as [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb).
-
-If a replication rule enables replication delete operations, the replication process *also* applies the implicit prefix trimming behavior on the destination MinIO cluster.
-
-For example, consider a bucket `photos` with the following object prefixes:
-
-- `photos/2021/january/myphoto.jpg` // `2021/january/` created implicitly based on the object name
-- `photos/2021/february/myotherphoto.jpg` // `2021/february/` created implicitly based on the object name
-- `photos/NYE21/NewYears.jpg` // `NYE21/` explicitly created in the bucket
-
-`photos/NYE21` is the *only* prefix explicitly created using [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb). All other prefixes were *implicitly* created as part of writing the object located at that prefix.
-
-- A command removes `myphoto.jpg`. MinIO automatically trims the empty `/january/` prefix.
-- A command then removes the `myotherphoto.jpg`. MinIO automatically trims the `/february/` prefix *and* the now-empty `/2021` prefix.
-- A command removes the `NewYears.jpg` object. MinIO leaves the `/NYE21/` prefix remains in place since it was *explicitly* created.
-{{% /details %}}
+> [!DETAILS]- MinIO Trims Empty Object Prefixes on Source and Remote Bucket
+> If a delete operation removes the last object in a bucket prefix, MinIO recursively removes each empty part of the prefix up to the bucket root. MinIO only applies the recursive removal to prefixes created *implicitly* as part of object write operations. MinIO does not recursively remove prefixes created using an explicit directory creation command, such as [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb).
+>
+> If a replication rule enables replication delete operations, the replication process *also* applies the implicit prefix trimming behavior on the destination MinIO cluster.
+>
+> For example, consider a bucket `photos` with the following object prefixes:
+>
+> - `photos/2021/january/myphoto.jpg` // `2021/january/` created implicitly based on the object name
+> - `photos/2021/february/myotherphoto.jpg` // `2021/february/` created implicitly based on the object name
+> - `photos/NYE21/NewYears.jpg` // `NYE21/` explicitly created in the bucket
+>
+> `photos/NYE21` is the *only* prefix explicitly created using [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb). All other prefixes were *implicitly* created as part of writing the object located at that prefix.
+>
+> - A command removes `myphoto.jpg`. MinIO automatically trims the empty `/january/` prefix.
+> - A command then removes the `myotherphoto.jpg`. MinIO automatically trims the `/february/` prefix *and* the now-empty `/2021` prefix.
+> - A command removes the `NewYears.jpg` object. MinIO leaves the `/NYE21/` prefix remains in place since it was *explicitly* created.

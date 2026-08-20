@@ -2,8 +2,8 @@
 title: "mc encrypt set"
 url: "/reference/minio-mc/mc-encrypt-set/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-encrypt-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-encrypt-set"></a>
@@ -17,16 +17,15 @@ The [`mc encrypt set`](#command-mc.encrypt.set) encrypt command sets or updates 
 
 [`mc encrypt set`](#command-mc.encrypt.set) only supports [SSE-KMS](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) and [SSE-S3](/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command sets the default [SSE-KMS encryption key](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) for the bucket `mydata` on the `myminio` MinIO deployment:
 
 ```shell
 mc encrypt set sse-kms "minio-encryption-key" myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -38,8 +37,8 @@ mc [GLOBALFLAGS] encrypt set  ENCRYPTION [KMSKEY] ALIAS
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -78,8 +77,8 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Enable Automatic Server-Side Bucket Encryption {#enable-automatic-server-side-bucket-encryption}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Example" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="Example" value="example" >}}
 The following commands assumes that:
 
 - The MinIO server configuration supports [SSE-KMS](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms)
@@ -88,10 +87,8 @@ The following commands assumes that:
 ```shell
  mc encrypt set sse-kms minio-encryption-key myminio/data
 ```
-
-{{% /tab %}}
-{{% tab header="Syntax" %}}
-
+{{< /tab >}}
+{{< tab label="Syntax" value="syntax" >}}
 ```shell
 mc encrypt set ENCRYPTION KMSKEY TARGET
 ```
@@ -99,8 +96,8 @@ mc encrypt set ENCRYPTION KMSKEY TARGET
 - Replace `ENCRYPTION` with `sse-kms` or `sse-s3` depending on the preferred encryption mode.
 - Replace `KMSKEY` with the name of the encryption key on the configured root KMS. This argument has no effect with `sse-s3`.
 - Replace `TARGET` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment on which to configure automatic server-side bucket encryption.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## Behavior {#behavior}
 

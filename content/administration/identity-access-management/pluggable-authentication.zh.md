@@ -2,8 +2,8 @@
 title: "Silo 外部身份管理插件"
 url: "/zh/administration/identity-access-management/pluggable-authentication/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/pluggable-authentication.rst
+upstream_modified: true
 ---
 
 <a id="minio-external-identity-management-plugin"></a>
@@ -19,8 +19,8 @@ MinIO Identity Management Plugin 提供了一个 REST 接口，用于通过 Webh
 
 你可以使用以下环境变量或配置设置来配置 MinIO Identity Management Plugin：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 为部署中的每个 MinIO 服务器指定以下 [environment variables](/zh/reference/minio-server/settings/iam/minio-identity-plugin/#minio-server-envvar-external-identity-management-plugin)：
 
 ```shell
@@ -32,9 +32,8 @@ MINIO_IDENTITY_PLUGIN_TOKEN="Bearer TOKEN"
 MINIO_IDENTITY_PLUGIN_ROLE_ID="external-auth-provider"
 MINIO_IDENTITY_PLUGIN_COMMENT="External Identity Management using PROVIDER"
 ```
-
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令设置以下配置项：
 
 ```shell
@@ -47,9 +46,8 @@ mc admin config set identity_plugin \
    role_id="external-auth-provider" \
    comment="External Identity Management using PROVIDER"
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 认证与授权流程 {#id5}
 

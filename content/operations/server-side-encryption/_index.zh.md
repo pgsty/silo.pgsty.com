@@ -3,8 +3,8 @@ title: "数据加密（SSE）"
 url: "/zh/operations/server-side-encryption/"
 weight: 60
 icon: fa-solid fa-lock
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/server-side-encryption.rst
+upstream_modified: false
 ---
 
 <a id="sse"></a>
@@ -29,8 +29,8 @@ MinIO SSE 需要启用 [网络加密（TLS）](/zh/operations/network-encryption
 
 MinIO SSE 在功能和 API 上兼容 [AWS Server-Side Encryption](https://docs.aws.amazon.com/AmazonS3/latest/userguide/server-side-encryption.html)， 并支持以下加密策略：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="SSE-KMS Recommended" %}}
+{{< tabs group="sse-kms-recommended-sse-s3-sse-c" >}}
+{{< tab label="SSE-KMS Recommended" value="sse-kms-recommended" >}}
 MinIO 支持使用存储在外部 <abbr title="Key Management System">KMS</abbr> 中的特定 External Key (EK)， 对写入某个存储桶的所有对象自动启用 SSE-KMS 加密。 客户端可以在写入操作中显式指定密钥， 以覆盖存储桶默认使用的 <abbr title="External Key">EK</abbr>。
 
 对于未启用自动 SSE-KMS 加密的存储桶， 客户端也可以在写入操作中指定 <abbr title="External Key">EK</abbr>。
@@ -40,8 +40,8 @@ MinIO 支持使用存储在外部 <abbr title="Key Management System">KMS</abbr>
 相比 SSE-S3 和 SSE-C， SSE-KMS 提供更细粒度、可定制性更强的加密能力， 因此推荐优先使用。
 
 关于如何在本地（非生产）MinIO 部署中启用 SSE-KMS， 请参见 [快速开始](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms-quickstart)。
-{{% /tab %}}
-{{% tab header="SSE-S3" %}}
+{{< /tab >}}
+{{< tab label="SSE-S3" value="sse-s3" >}}
 MinIO 支持使用存储在外部 <abbr title="Key Management System">KMS</abbr> 中的 <abbr title="External Key">EK</abbr>， 对写入某个存储桶的所有对象自动启用 SSE-S3 加密。 MinIO SSE-S3 在整个部署范围内仅支持 *一个* <abbr title="External Key">EK</abbr>。
 
 对于未启用自动 SSE-S3 加密的存储桶， 客户端也可以在写入操作中请求使用 SSE 加密。
@@ -49,10 +49,10 @@ MinIO 支持使用存储在外部 <abbr title="Key Management System">KMS</abbr>
 启用服务端加密时，MinIO 也会加密后端数据。 SSE-KMS 一旦启用便无法禁用。
 
 关于如何在本地（非生产）MinIO 部署中启用 SSE-S3， 请参见 [快速开始](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3-quickstart)。
-{{% /tab %}}
-{{% tab header="SSE-C" %}}
+{{< /tab >}}
+{{< tab label="SSE-C" value="sse-c" >}}
 客户端在对象写入操作中指定 <abbr title="External Key">EK</abbr>。 MinIO 使用指定的 <abbr title="External Key">EK</abbr> 执行 SSE-S3。
 
 SSE-C 不支持存储桶默认加密设置， 并要求客户端自行执行全部密钥管理操作。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

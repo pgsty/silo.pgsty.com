@@ -2,25 +2,23 @@
 title: "mc quota info"
 url: "/zh/reference/deprecated/mc-quota-info/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-quota-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-quota-info"></a>
 
 <a id="command-mc.quota.info"></a>
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-13T00-23-28Z**
+> [!NOTE]
+> **变更: RELEASE.2022-12-13T00-23-28Z**
+>
+> `mc quota info` 替代了 `mc admin bucket quota`。
 
-`mc quota info` 替代了 `mc admin bucket quota`。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2024-07-31T15-58-33Z**
-
-`mc quota info` 已弃用。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2024-07-31T15-58-33Z**
+>
+> `mc quota info` 已弃用。
 
 ## 说明 {#id2}
 

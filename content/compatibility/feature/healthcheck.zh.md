@@ -6,8 +6,6 @@ url: "/zh/compatibility/feature/healthcheck/"
 weight: 10
 type: docs
 icon: fa-solid fa-heart-pulse
-minio_origin: false
-silo_modified: false
 ---
 
 > **状态**：P1（子命令，`2ff594f4b`）与 P2（distroless 镜像 + CI 门禁，`4c34d2309`）已在 `pgsty/silo` 落地；P3（Helm 探针）与 P4（文档）待办 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）

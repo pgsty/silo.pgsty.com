@@ -2,8 +2,8 @@
 title: "mc admin user svcacct rm"
 url: "/reference/minio-mc-admin/mc-admin-user-svcacct-remove/"
 weight: 70
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct-remove.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-svcacct-rm"></a>
@@ -13,15 +13,14 @@ silo_modified: false
 
 <a id="command-mc.admin.user.svcacct.rm"></a>
 
-{{% alert color="warning" %}}
-**Important**
-
-This command has been replaced and will be deprecated in a future MinIO Client release.
-
-As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey rm`](/reference/minio-mc-admin/mc-admin-accesskey-remove/#command-mc.admin.accesskey.rm) command to delete access keys for built-in MinIO IDP users.
-
-For access keys for AD/LDAP users, use the [`mc idp ldap accesskey rm`](/reference/minio-mc/mc-idp-ldap-accesskey-rm/#command-mc.idp.ldap.accesskey.rm) command.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> This command has been replaced and will be deprecated in a future MinIO Client release.
+>
+> As of MinIO Client RELEASE.2024-10-08T09-37-26Z, use the [`mc admin accesskey rm`](/reference/minio-mc-admin/mc-admin-accesskey-remove/#command-mc.admin.accesskey.rm) command to delete access keys for built-in MinIO IDP users.
+>
+> For access keys for AD/LDAP users, use the [`mc idp ldap accesskey rm`](/reference/minio-mc/mc-idp-ldap-accesskey-rm/#command-mc.idp.ldap.accesskey.rm) command.
 
 ## Syntax {#syntax}
 
@@ -31,16 +30,15 @@ The [`mc admin user svcacct remove`](#command-mc.admin.user.svcacct.remove) comm
 
 Applications can no longer authenticate using that access key after removal.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes the specified access key:
 
 ```shell
 mc admin user svcacct rm myminio myuserserviceaccount
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -54,8 +52,8 @@ mc [GLOBALFLAGS] admin user svcacct remove          \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

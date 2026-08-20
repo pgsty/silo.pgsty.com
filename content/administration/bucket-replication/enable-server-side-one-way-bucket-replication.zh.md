@@ -2,8 +2,8 @@
 title: "启用服务端单向存储桶复制"
 url: "/zh/administration/bucket-replication/enable-server-side-one-way-bucket-replication/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/enable-server-side-one-way-bucket-replication.rst
+upstream_modified: false
 ---
 
 <a id="minio-bucket-replication-serverside-oneway"></a>
@@ -16,11 +16,10 @@ silo_modified: false
 - 如需在 MinIO 存储桶之间配置双向“active-active”复制，请参见 [启用双向服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway)。
 - 如需在 MinIO 部署之间配置多站点“active-active”复制，请参见 [启用多站点服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/#minio-bucket-replication-serverside-multi)
 
-{{% alert color="info" %}}
-**说明**
-
-如需在任意兼容 S3 的服务之间配置复制（不一定是 MinIO），请使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror)。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> 如需在任意兼容 S3 的服务之间配置复制（不一定是 MinIO），请使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror)。
 
 ## 要求 {#id3}
 
@@ -32,30 +31,27 @@ silo_modified: false
 
 点击展开以下任一项：
 
-{{% details title="现有对象的复制" closed="true" %}}
-MinIO 支持自动复制存储桶中的现有对象。
+> [!DETAILS]- 现有对象的复制
+> MinIO 支持自动复制存储桶中的现有对象。
+>
+> MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用现有对象复制，并包含 `existing-objects` 复制功能标志。 本过程包含启用现有对象复制所需的标志。
 
-MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用现有对象复制，并包含 `existing-objects` 复制功能标志。 本过程包含启用现有对象复制所需的标志。
-{{% /details %}}
+> [!DETAILS]- 删除操作的复制
+> MinIO 支持将 S3 `DELETE` 操作复制到目标存储桶。 具体来说，MinIO 可以复制版本控制的 [Delete Markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html)，以及删除特定版本对象的操作：
+>
+> - 对于对象的删除操作，MinIO 复制也会在目标存储桶上创建删除标记。
+> - 对于对象某个版本的删除操作，MinIO 复制也会在目标存储桶上删除这些版本。
+>
+> MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用删除操作复制。 本过程包含启用删除操作和删除标记复制所需的标志。
+>
+> MinIO *不会* 复制因应用 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 而产生的删除操作。
+>
+> 更完整的文档请参见 [删除操作的复制](/zh/administration/bucket-replication/#minio-replication-behavior-delete) 和 [对象删除](/zh/administration/object-management/object-delete/#minio-object-delete)。
 
-{{% details title="删除操作的复制" closed="true" %}}
-MinIO 支持将 S3 `DELETE` 操作复制到目标存储桶。 具体来说，MinIO 可以复制版本控制的 [Delete Markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html)，以及删除特定版本对象的操作：
-
-- 对于对象的删除操作，MinIO 复制也会在目标存储桶上创建删除标记。
-- 对于对象某个版本的删除操作，MinIO 复制也会在目标存储桶上删除这些版本。
-
-MinIO 要求使用 [`mc replicate add --replicate`](/zh/reference/minio-mc/mc-replicate-add/#mc.replicate.add.-replicate) 或 [`mc replicate update --replicate`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-replicate) 显式启用删除操作复制。 本过程包含启用删除操作和删除标记复制所需的标志。
-
-MinIO *不会* 复制因应用 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 而产生的删除操作。
-
-更完整的文档请参见 [删除操作的复制](/zh/administration/bucket-replication/#minio-replication-behavior-delete) 和 [对象删除](/zh/administration/object-management/object-delete/#minio-object-delete)。
-{{% /details %}}
-
-{{% details title="多站点复制" closed="true" %}}
-MinIO 支持为每个存储桶或存储桶前缀配置多个远程目标。 例如，你可以将一个存储桶配置为把数据复制到两个或更多远程 MinIO 部署，其中一个部署是 1:1 副本（复制包括删除在内的所有操作），另一个部署则是完整的历史记录（仅复制非破坏性的写入操作）。
-
-本过程说明了到单个远程 MinIO 部署的单向复制。 你可以重复本教程，将单个存储桶复制到多个远程目标。
-{{% /details %}}
+> [!DETAILS]- 多站点复制
+> MinIO 支持为每个存储桶或存储桶前缀配置多个远程目标。 例如，你可以将一个存储桶配置为把数据复制到两个或更多远程 MinIO 部署，其中一个部署是 1:1 副本（复制包括删除在内的所有操作），另一个部署则是完整的历史记录（仅复制非破坏性的写入操作）。
+>
+> 本过程说明了到单个远程 MinIO 部署的单向复制。 你可以重复本教程，将单个存储桶复制到多个远程目标。
 
 ## 过程 {#id5}
 
@@ -73,11 +69,10 @@ MinIO 支持为每个存储桶或存储桶前缀配置多个远程目标。 例�
 
 本过程假定每个别名都对应一个具有 [必要复制权限](/zh/administration/bucket-replication/bucket-replication-requirements/#minio-bucket-replication-serverside-oneway-permissions) 的用户。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-12-24T15-21-38Z**
-
-[`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本过程仅说明该版本起的操作流程。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-12-24T15-21-38Z**
+>
+> [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本过程仅说明该版本起的操作流程。
 
 <a id="minio-bucket-replication-one-way-minio-cli-create-remote-targets"></a>
 <a id="id6"></a>
@@ -124,10 +119,9 @@ mc cp ~/foo.txt ALIAS/BUCKET
 mc ls ALIAS/BUCKET
 ```
 
-{{% alert color="info" %}}
-**另请参阅**
-
-- 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令修改现有复制规则。
-- 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令并配合 [`--state "disable"`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) 标志禁用现有复制规则。
-- 使用 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) 命令删除现有复制规则。
-{{% /alert %}}
+> [!NOTE]
+> **另请参阅**
+>
+> - 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令修改现有复制规则。
+> - 使用 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令并配合 [`--state "disable"`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) 标志禁用现有复制规则。
+> - 使用 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) 命令删除现有复制规则。

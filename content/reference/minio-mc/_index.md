@@ -3,8 +3,8 @@ title: "Silo Client (mcli / mc)"
 url: "/reference/minio-mc/"
 weight: 10
 icon: fa-solid fa-terminal
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc.rst
+upstream_modified: true
 ---
 
 <a id="minio-client"></a>
@@ -55,21 +55,18 @@ make build
 ./mc --version
 ```
 
-{{% alert color="warning" %}}
-[`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is intentionally disabled in the Pigsty fork. Upgrade through the [Silo download page](/download/#client), the [Pigsty package repository](https://pigsty.io/docs/repo/infra/list/#object-storage), or [GitHub Releases](https://github.com/pgsty/mc/releases).
-{{% /alert %}}
+> [!WARNING]
+> [`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is intentionally disabled in the Pigsty fork. Upgrade through the [Silo download page](/download/#client), the [Pigsty package repository](https://pigsty.io/docs/repo/infra/list/#object-storage), or [GitHub Releases](https://github.com/pgsty/mc/releases).
 
-{{% alert color="info" %}}
-The current `pgsty/mc` source still registers the `mc license` and `mc support` command trees. Those commands integrate with upstream MinIO SUBNET and its commercial licensing/support service; they are not Silo services. Their command names, protocol fields, SUBNET wording, and MinIO pricing/license links are retained as upstream contracts and must not be rebranded.
-{{% /alert %}}
+> [!NOTE]
+> The current `pgsty/mc` source still registers the `mc license` and `mc support` command trees. Those commands integrate with upstream MinIO SUBNET and its commercial licensing/support service; they are not Silo services. Their command names, protocol fields, SUBNET wording, and MinIO pricing/license links are retained as upstream contracts and must not be rebranded.
 
 ### 2) Create an Alias for the S3-Compatible Service {#create-an-alias-for-the-s3-compatible-service}
 
-{{% alert color="warning" %}}
-**Important**
-
-The following example temporarily disables the bash history to mitigate the risk of authentication credentials leaking in plain text. This is a basic security measure and does not mitigate all possible attack vectors. Defer to security best practices for your operating system for inputting sensitive information on the command line.
-{{% /alert %}}
+> [!WARNING]
+> **Important**
+>
+> The following example temporarily disables the bash history to mitigate the risk of authentication credentials leaking in plain text. This is a basic security measure and does not mitigate all possible attack vectors. Defer to security best practices for your operating system for inputting sensitive information on the command line.
 
 Use the [`mc alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) command to add an Amazon S3-compatible service to the [`mc`](#command-mc) [configuration](#mc-configuration).
 
@@ -87,29 +84,17 @@ Replace each argument with the required values. If you omit the `ACCESS_KEY` and
 
 Each of the following tabs contains a provider-specific example:
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Silo Server" %}}
-
-```shell
+```shell {tab="Silo Server" group="silo-server-aws-s3-storage-google-cloud-storage" value="silo-server"}
 mc alias set silo https://silo.example.net ACCESS_KEY SECRET_KEY
 ```
 
-{{% /tab %}}
-{{% tab header="AWS S3 Storage" %}}
-
-```shell
+```shell {tab="AWS S3 Storage" value="aws-s3-storage"}
 mc alias set myS3 https://s3.{your-region-code}.amazonaws.com/endpoint ACCESS_KEY SECRET_KEY
 ```
 
-{{% /tab %}}
-{{% tab header="Google Cloud Storage" %}}
-
-```shell
+```shell {tab="Google Cloud Storage" value="google-cloud-storage"}
 mc alias set myGCS https://storage.googleapis.com/endpoint ACCESS_KEY SECRET_KEY
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
 
 ### 3) Test the Connection {#test-the-connection}
 
@@ -132,13 +117,12 @@ The command returns information on the S3 service if successful. If unsuccessful
 
 The following table lists [`mc`](#command-mc) commands:
 
-{{% alert color="info" %}}
-**Note**
-
-The client also includes an administration extension for managing Silo and compatible MinIO deployments. See [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) for more complete documentation.
-
-The below table does not include those commands.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> The client also includes an administration extension for managing Silo and compatible MinIO deployments. See [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) for more complete documentation.
+>
+> The below table does not include those commands.
 
 <table>
   <thead>
@@ -381,11 +365,10 @@ C:\Users\[username]\mc\certs\CAs\ # Certificate Authorities
 
 When creating a new [alias](/reference/minio-mc/mc-alias-set/#minio-mc-alias), the MinIO Client fetches the peer certificate, computes the public key fingerprint, and asks the user whether to accept the deployment’s certificate. If you decide to trust the certificate, the MinIO Client adds the certificate to the certificate authority path listed above.
 
-{{% alert color="info" %}}
-**Note**
-
-In testing environments, you can bypass the certificate check for selected MinIO Client commands by passing the `--insecure` flag.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> In testing environments, you can bypass the certificate check for selected MinIO Client commands by passing the `--insecure` flag.
 
 <a id="minio-wildcard-matching"></a>
 
@@ -443,11 +426,10 @@ Alternatively, set the environment variable [`MC_DEBUG`](/reference/minio-mc/min
 
 *option*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-04-29T09-56-05Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-04-29T09-56-05Z
 
 Disable the pager functionality of the MinIO Client in the CLI. When used, output prints to raw `STDOUT` instead.
 
@@ -493,11 +475,10 @@ Alternatively, set the environment variable [`MC_QUIET`](/reference/minio-mc/min
 
 *option*
 
-{{% alert color="info" %}}
-**Added: mc**
-
-RELEASE.2024-08-13T05-33-17Z
-{{% /alert %}}
+> [!NOTE]
+> **Added: mc**
+>
+> RELEASE.2024-08-13T05-33-17Z
 
 Creates a custom DNS mapping to resolve a HOST to a specified IP address.
 

@@ -2,8 +2,8 @@
 title: "Silo 外部访问管理插件"
 url: "/zh/administration/identity-access-management/pluggable-authorization/"
 weight: 60
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/pluggable-authorization.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -19,8 +19,8 @@ MinIO Access Management Plugin 提供了一个 `REST` 接口，可通过 Webhook
 
 你可以使用以下环境变量或配置设置来配置 MinIO 外部访问管理插件。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
 为部署中的每个 MinIO 服务器指定以下 [环境变量](/zh/reference/minio-server/settings/iam/minio-access-plugin/#minio-server-envvar-external-access-management-plugin)：
 
 ```shell
@@ -31,9 +31,8 @@ MINIO_POLICY_PLUGIN_AUTH_TOKEN="Bearer TOKEN"
 MINIO_POLICY_PLUGIN_ENABLE_HTTP2="OFF"
 MINIO_POLICY_PLUGIN_COMMENT="External Access Management using PROVIDER"
 ```
-
-{{% /tab %}}
-{{% tab header="配置设置" %}}
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令设置以下配置项：
 
 ```shell
@@ -45,9 +44,8 @@ mc admin config set policy_plugin \
    enable_http2="off" \
    comment="External Access Management using PROVIDER"
 ```
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ## 认证与授权流程 {#id4}
 

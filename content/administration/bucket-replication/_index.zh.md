@@ -3,8 +3,8 @@ title: "存储桶复制"
 url: "/zh/administration/bucket-replication/"
 weight: 160
 icon: fa-solid fa-arrows-rotate
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication.rst
+upstream_modified: false
 ---
 
 <a id="minio-bucket-replication"></a>
@@ -22,18 +22,17 @@ MinIO 支持在源存储桶与目标存储桶之间进行服务端和客户端�
 
 > 使用命令流程在同一 S3 兼容集群内的存储桶之间，或在两个相互独立的 S3 兼容集群之间同步对象。 使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 的客户端复制支持 MinIO 到 S3 以及类似的复制配置。
 
-{{% alert color="info" %}}
-**存储桶复制与站点复制**
-
-存储桶复制与 [站点复制](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 不同，且二者互斥。
-
-- 存储桶复制在存储桶级别同步数据，例如存储桶前缀路径和对象。
-
-  你可以在任何时候配置存储桶复制，并且远端 MinIO 部署上的复制目标存储桶中可以预先存在数据。
-- 站点复制在存储桶复制的基础上扩展到包含 [IAM](/zh/administration/identity-access-management/#minio-authentication-and-identity-management)、安全令牌、访问密钥以及存储桶级配置。
-
-  站点复制通常在最初部署 MinIO 对等站点时配置。 在初始配置时，任意存储桶或对象只能由一个站点持有。
-{{% /alert %}}
+> [!NOTE]
+> **存储桶复制与站点复制**
+>
+> 存储桶复制与 [站点复制](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 不同，且二者互斥。
+>
+> - 存储桶复制在存储桶级别同步数据，例如存储桶前缀路径和对象。
+>
+>   你可以在任何时候配置存储桶复制，并且远端 MinIO 部署上的复制目标存储桶中可以预先存在数据。
+> - 站点复制在存储桶复制的基础上扩展到包含 [IAM](/zh/administration/identity-access-management/#minio-authentication-and-identity-management)、安全令牌、访问密钥以及存储桶级配置。
+>
+>   站点复制通常在最初部署 MinIO 对等站点时配置。 在初始配置时，任意存储桶或对象只能由一个站点持有。
 
 <a id="id3"></a>
 
@@ -78,23 +77,22 @@ MinIO 要求显式启用带版本的删除和删除标记复制。 使用 [`mc r
 
 MinIO 仅复制由客户端显式发起的删除操作。 MinIO *不会* 复制因应用 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 而删除的对象。 对于 [active-active](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 配置，请在 *所有* 复制存储桶上设置相同的过期规则，以确保对象过期行为一致。
 
-{{% details title="MinIO 会在源存储桶和远端存储桶上裁剪空对象前缀" closed="true" %}}
-如果删除操作移除了某个存储桶前缀中的最后一个对象，MinIO 会递归删除该前缀中所有为空的部分，直到存储桶根目录。 MinIO 仅对在对象写入过程中 *隐式* 创建的前缀应用这种递归删除行为，也就是说，该前缀不是通过 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 之类的显式目录创建命令创建的。
-
-如果复制规则启用了删除操作复制，那么复制过程在目标 MinIO 集群上 *也会* 应用这种隐式前缀裁剪行为。
-
-例如，考虑一个名为 `photos` 的存储桶，其中包含以下对象前缀：
-
-- `photos/2021/january/myphoto.jpg`
-- `photos/2021/february/myotherphoto.jpg`
-- `photos/NYE21/NewYears.jpg`
-
-`photos/NYE21` 是 *唯一一个* 使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 显式创建的前缀。 其他所有前缀都是在写入位于该前缀下的对象时 *隐式* 创建的。
-
-- 某个命令删除了 `myphoto.jpg`。MinIO 会自动裁剪空的 `/janaury` 前缀。
-- 随后某个命令删除了 `myotherphoto.jpg`。MinIO 会自动裁剪 `/february` 前缀以及此时已为空的 `/2021` 前缀。
-- 某个命令删除了 `NewYears.jpg` 对象。MinIO 会保留 `/NYE21` 前缀，因为它是 *显式* 创建的。
-{{% /details %}}
+> [!DETAILS]- MinIO 会在源存储桶和远端存储桶上裁剪空对象前缀
+> 如果删除操作移除了某个存储桶前缀中的最后一个对象，MinIO 会递归删除该前缀中所有为空的部分，直到存储桶根目录。 MinIO 仅对在对象写入过程中 *隐式* 创建的前缀应用这种递归删除行为，也就是说，该前缀不是通过 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 之类的显式目录创建命令创建的。
+>
+> 如果复制规则启用了删除操作复制，那么复制过程在目标 MinIO 集群上 *也会* 应用这种隐式前缀裁剪行为。
+>
+> 例如，考虑一个名为 `photos` 的存储桶，其中包含以下对象前缀：
+>
+> - `photos/2021/january/myphoto.jpg`
+> - `photos/2021/february/myotherphoto.jpg`
+> - `photos/NYE21/NewYears.jpg`
+>
+> `photos/NYE21` 是 *唯一一个* 使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 显式创建的前缀。 其他所有前缀都是在写入位于该前缀下的对象时 *隐式* 创建的。
+>
+> - 某个命令删除了 `myphoto.jpg`。MinIO 会自动裁剪空的 `/janaury` 前缀。
+> - 随后某个命令删除了 `myotherphoto.jpg`。MinIO 会自动裁剪 `/february` 前缀以及此时已为空的 `/2021` 前缀。
+> - 某个命令删除了 `NewYears.jpg` 对象。MinIO 会保留 `/NYE21` 前缀，因为它是 *显式* 创建的。
 
 <a id="id6"></a>
 
@@ -131,19 +129,17 @@ MinIO 会将所有满足复制规则的对象或对象前缀标记为可同步�
 
 MinIO 使用一个复制排队系统，并由多个并发复制工作线程处理该队列。 MinIO 会持续执行复制并从队列中移除对象，同时扫描新的未复制对象并将其加入队列。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-07-18T17-49-40Z**
+> [!NOTE]
+> **变更: RELEASE.2022-07-18T17-49-40Z**
+>
+> MinIO 会将失败的复制操作加入队列，并最多重试三（3）次。
+>
+> 对于在三次尝试后仍复制失败的操作，MinIO 会将其移出队列。 扫描器稍后可以再次发现这些受影响对象，并将其重新加入复制队列。
 
-MinIO 会将失败的复制操作加入队列，并最多重试三（3）次。
-
-对于在三次尝试后仍复制失败的操作，MinIO 会将其移出队列。 扫描器稍后可以再次发现这些受影响对象，并将其重新加入复制队列。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**变更: RELEASE.2022-08-11T04-37-28Z**
-
-在执行列表操作或任何 `GET`、`HEAD` API 方法时，失败或待处理的复制会自动重新入队。 例如，在远端位置恢复在线后，使用 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)、[`mc cat`](/zh/reference/minio-mc/mc-cat/#command-mc.cat) 或 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls) 会使复制重新入队。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2022-08-11T04-37-28Z**
+>
+> 在执行列表操作或任何 `GET`、`HEAD` API 方法时，失败或待处理的复制会自动重新入队。 例如，在远端位置恢复在线后，使用 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)、[`mc cat`](/zh/reference/minio-mc/mc-cat/#command-mc.cat) 或 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls) 会使复制重新入队。
 
 MinIO 会根据对象的复制状态设置 `X-Amz-Replication-Status` 元数据字段：
 

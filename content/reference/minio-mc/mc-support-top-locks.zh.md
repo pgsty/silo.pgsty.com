@@ -2,19 +2,18 @@
 title: "mc support top locks"
 url: "/zh/reference/minio-mc/mc-support-top-locks/"
 weight: 20
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top-locks.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-top-locks"></a>
 
 <a id="command-mc.support.top.locks"></a>
 
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 语法 {#id2}
 
@@ -29,16 +28,15 @@ Since                 Type    Owner                 Resource
 13 hours ago          WRITE   10.68.100.23:9000     .minio.sys/new-drive-healing/0/0
 ```
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令显示 [alias](/zh/glossary/#term-alias) `myminio` 上当前进行中的 S3 API 调用。
 
 ```shell
 mc support top locks myminio/
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令使用以下语法：
 
 ```shell
@@ -52,8 +50,8 @@ mc [GLOBALFLAGS] support top locks  \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 

@@ -2,8 +2,8 @@
 title: "mc admin user info"
 url: "/zh/reference/minio-mc-admin/mc-admin-user-info/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-info.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-info"></a>
@@ -17,16 +17,15 @@ silo_modified: false
 
 如需管理外部身份提供商用户，请参见 [`OIDC`](/zh/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) 或 [`AD/LDAP`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 以下命令返回 `myminio` MinIO 部署中用户 `myuser` 的详细信息：
 
 ```shell
 mc admin user info myminio myuser
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 该命令语法如下：
 
 ```shell
@@ -40,8 +39,8 @@ mc [GLOBALFLAGS] admin user info      \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 参数 {#id3}
 
@@ -63,11 +62,10 @@ mc [GLOBALFLAGS] admin user info      \
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-26T23-31-54Z**
-
-`mc admin user info --json` 输出包含用户通过组成员关系继承的策略，位于 `memberOf` 中。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-26T23-31-54Z**
+>
+> `mc admin user info --json` 输出包含用户通过组成员关系继承的策略，位于 `memberOf` 中。
 
 ## 示例 {#id5}
 

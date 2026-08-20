@@ -2,8 +2,8 @@
 title: "以容器方式部署 Silo"
 url: "/zh/operations/deployments/baremetal-deploy-minio-as-a-container/"
 weight: 30
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-deploy-minio-as-a-container.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -17,15 +17,14 @@ Silo 容器的功能和性能可能会受到基础操作系统的限制。
 
 本步骤包含对 单机多盘 (SNMD) 和 单机单盘 (SNSD) 拓扑的指导，适用于早期开发和评估环境。
 
-{{% alert color="warning" %}}
-**重要**
-
-下面的示例仅覆盖用于开发或评估的单机单盘和单机多盘部署；它们不构成 Docker Compose、Docker Swarm 或其他容器编排器上的生产级多机多盘拓扑或升级契约。生产环境的分布式部署应使用经过验证的 [Kubernetes Tenant 流程](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)，并针对实际环境验证持久化、网络、故障域与升级。
-
-为便于阅读，示例使用 `pgsty/minio:latest`。生产环境必须固定经过测试的 Silo 发行标签或镜像摘要；`latest` 不是版本契约。
-
-`MINIO_UPDATE=off` 用于刻意禁用服务端原地更新。当前更新器仍保留上游 MinIO 发布源与签名密钥，因此容器应通过替换为经验证的 Silo 标签或摘要升级，不要运行 `mc admin update`。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 下面的示例仅覆盖用于开发或评估的单机单盘和单机多盘部署；它们不构成 Docker Compose、Docker Swarm 或其他容器编排器上的生产级多机多盘拓扑或升级契约。生产环境的分布式部署应使用经过验证的 [Kubernetes Tenant 流程](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)，并针对实际环境验证持久化、网络、故障域与升级。
+>
+> 为便于阅读，示例使用 `pgsty/minio:latest`。生产环境必须固定经过测试的 Silo 发行标签或镜像摘要；`latest` 不是版本契约。
+>
+> `MINIO_UPDATE=off` 用于刻意禁用服务端原地更新。当前更新器仍保留上游 MinIO 发布源与签名密钥，因此容器应通过替换为经验证的 Silo 标签或摘要升级，不要运行 `mc admin update`。
 
 ## 注意事项 {#id2}
 
@@ -55,8 +54,8 @@ Silo 会根据拓扑中的节点和驱动器总数，自动为集群确定默认
 
 对于其他容器 runtime，请参阅对应文档，并使用等效的选项、参数或配置。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Podman" %}}
+{{< tabs group="podman-docker" >}}
+{{< tab label="Podman" value="podman" >}}
 以下命令会先在你的主目录中创建一个文件夹，然后使用 Podman 启动 Silo 容器：
 
 ```shell
@@ -97,8 +96,8 @@ podman run \
 ```
 
 对于 Windows 主机，请使用 Windows 文件系统语义指定本地文件夹路径，例如 `C:\minio\:/data`。
-{{% /tab %}}
-{{% tab header="Docker" %}}
+{{< /tab >}}
+{{< tab label="Docker" value="docker" >}}
 以下命令会先在你的主目录中创建一个文件夹，然后使用 Docker 启动 Silo 容器：
 
 ```shell
@@ -139,13 +138,13 @@ docker run \
 ```
 
 对于 Windows 主机，请使用 Windows 文件系统语义指定本地文件夹路径，例如 `C:\minio\:/data`。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 2. 连接到部署 {#id7}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="控制台" %}}
+{{< tabs group="tab1-cli" >}}
+{{< tab label="控制台" value="tab1" >}}
 在浏览器中打开 [http://localhost:9001](http://localhost:9001) 以访问 [Silo Console](/zh/administration/minio-console/#minio-console) 登录页。
 
 使用上一步中的 **MINIO_ROOT_USER** 和 **MINIO_ROOT_PASSWORD** 进行登录。
@@ -153,8 +152,8 @@ docker run \
 <img src="/images/silo-console/console-login.webp" alt="MinIO Console 登录页" style="max-width: 600px; height: auto;" />
 
 你可以使用内嵌 Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。
-{{% /tab %}}
-{{% tab header="CLI" %}}
+{{< /tab >}}
+{{< tab label="CLI" value="cli" >}}
 请按照 [Silo 客户端安装说明](/zh/reference/minio-mc/#mc-install) 安装 `mcli`，并运行 `mcli --version` 验证。已发布的独立归档与 Linux 软件包安装 `mcli`；源码构建和客户端容器则保留 `mc` 可执行文件名。
 
 安装完成后，为该 Silo 部署创建一个别名：
@@ -164,5 +163,5 @@ mcli alias set silo http://localhost:9000 USERNAME PASSWORD
 ```
 
 请根据你的部署修改主机名、用户名和密码。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

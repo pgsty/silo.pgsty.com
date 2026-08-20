@@ -2,8 +2,8 @@
 title: "Publish Events to NATS"
 url: "/administration/monitoring/publish-events-to-nats/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-nats.rst
+upstream_modified: false
 ---
 
 <a id="publish-events-to-nats"></a>
@@ -11,13 +11,12 @@ silo_modified: false
 
 MinIO supports publishing [bucket notification](/administration/monitoring/bucket-notifications/#minio-bucket-notifications) events to a [NATS](https://nats.io/) service endpoint.
 
-{{% alert color="info" %}}
-**NATS Streaming Deprecated**
-
-NATS Streaming is deprecated. Migrate to [JetStream](https://docs.nats.io/nats-concepts/jetstream) instead.
-
-The related MinIO configuration options and environment variables are deprecated.
-{{% /alert %}}
+> [!NOTE]
+> **NATS Streaming Deprecated**
+>
+> NATS Streaming is deprecated. Migrate to [JetStream](https://docs.nats.io/nats-concepts/jetstream) instead.
+>
+> The related MinIO configuration options and environment variables are deprecated.
 
 ## Add a NATS Endpoint to a MinIO Deployment {#add-a-nats-endpoint-to-a-minio-deployment}
 
@@ -33,59 +32,55 @@ This procedure uses the [`mc`](/reference/minio-mc/#command-mc) command line too
 
 You can configure a new NATS service endpoint using either environment variables *or* by setting runtime configuration settings.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Environment Variables" %}}
+{{< tabs group="environment-variables-configuration-settings" >}}
+{{< tab label="Environment Variables" value="environment-variables" >}}
 MinIO supports specifying the NATS service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/nats/#minio-server-envvar-bucket-notification-nats). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring an NATS service endpoint. The minimum *required* variables are [`MINIO_NOTIFY_NATS_ADDRESS`](/reference/minio-server/settings/notifications/nats/#envvar.MINIO_NOTIFY_NATS_ADDRESS) and [`MINIO_NOTIFY_NATS_SUBJECT`](/reference/minio-server/settings/notifications/nats/#envvar.MINIO_NOTIFY_NATS_SUBJECT):
 
-{{% alert color="info" %}}
-**Windows**
+> [!NOTE]
+> **Windows**
+>
+> ```shell
+>    set MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
+>    set MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
+>    set MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
+> ```
 
-```shell
-   set MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
-   set MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
-   set MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**Linux and macOS**
-
-```shell
-   export MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
-   export MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
-   export MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
-```
-
-{{% /alert %}}
+> [!NOTE]
+> **Linux and macOS**
+>
+> ```shell
+>    export MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
+>    export MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
+>    export MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
+> ```
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the NATS service endpoint. Use the same `<IDENTIFIER>` value for all environment variables related to the new target service endpoint. The following examples assume an identifier of `PRIMARY`.
 
@@ -93,8 +88,8 @@ The following example code sets *all* environment variables related to configuri
 - Replace `<ENDPOINT>` with the hostname and port of the NATS service endpoint. For example: `nats-endpoint.example.com:4222`
 
 See [NATS Service for Bucket Notifications](/reference/minio-server/settings/notifications/nats/#minio-server-envvar-bucket-notification-nats) for complete documentation on each environment variable.
-{{% /tab %}}
-{{% tab header="Configuration Settings" %}}
+{{< /tab >}}
+{{< tab label="Configuration Settings" value="configuration-settings" >}}
 MinIO supports adding or updating NATS endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_nats`](/reference/minio-server/settings/notifications/nats/#mc-conf.notify_nats) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an NATS service endpoint. The minimum *required* setting are [`notify_nats address`](/reference/minio-server/settings/notifications/nats/#mc-conf.notify_nats.address) and [`notify_nats subject`](/reference/minio-server/settings/notifications/nats/#mc-conf.notify_nats.subject):
@@ -124,8 +119,8 @@ mc admin config set ALIAS/ notify_nats:IDENTIFIER \
 - Replace `ENDPOINT` with the hostname and port of the NATS service endpoint. For example: `nats-endpoint.example.com:4222`.
 
 See [NATS Bucket Notification Configuration Settings](/reference/minio-server/settings/notifications/nats/#minio-server-config-bucket-notification-nats) for complete documentation on each setting.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 1) Restart the MinIO Deployment {#restart-the-minio-deployment}
 
@@ -145,36 +140,35 @@ SQS ARNs: arn:minio:sqs::primary:nats
 
 You must specify the ARN resource when configuring bucket notifications with the associated NATS deployment as a target.
 
-{{% alert color="info" %}}
-**Identifying the ARN for your bucket notifications**
-
-You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
-
-**Review the JSON output**
-
-1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS
-   ```
-
-2. In the JSON output, look for the key `info.sqsARN`.
-
-   The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
-
-   For example, `arn:minio:sqs::primary:nats`.
-
-**Use jq to parse the JSON for the value**
-
-1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
-2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
-
-   ```shell
-   mc admin info --json ALIAS | jq  .info.sqsARN
-   ```
-
-   This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:nats`
-{{% /alert %}}
+> [!NOTE]
+> **Identifying the ARN for your bucket notifications**
+>
+> You defined the `<IDENTIFIER>` to assign to the target ARN for your bucket notifications when creating the endpoint previously. The steps below return the ARNs configured on the deployment. Identify the ARN created previously by looking for the `<IDENTIFIER>` you specified.
+>
+> **Review the JSON output**
+>
+> 1. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS
+>    ```
+>
+> 2. In the JSON output, look for the key `info.sqsARN`.
+>
+>    The ARN you need is the value of that key that matches the `<IDENTIFIER>` you specified.
+>
+>    For example, `arn:minio:sqs::primary:nats`.
+>
+> **Use jq to parse the JSON for the value**
+>
+> 1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
+> 2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
+>
+>    ```shell
+>    mc admin info --json ALIAS | jq  .info.sqsARN
+>    ```
+>
+>    This returns the ARN to use for notifications, such as `arn:minio:sqs::primary:nats`
 
 ### 3) Configure Bucket Notifications using the NATS Endpoint as a Target {#configure-bucket-notifications-using-the-nats-endpoint-as-a-target}
 

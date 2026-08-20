@@ -6,8 +6,7 @@ url: "/compatibility/"
 weight: 7
 type: docs
 icon: fa-solid fa-code-compare
-minio_origin: false
-silo_modified: false
+sidebar_expanded: true
 ---
 
 Silo is a community fork of MinIO. This section records what Silo keeps from MinIO, where it deliberately differs, and what either means when moving between them.

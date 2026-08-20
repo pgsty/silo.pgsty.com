@@ -2,8 +2,8 @@
 title: "mc legalhold set"
 url: "/reference/minio-mc/mc-legalhold-set/"
 weight: 30
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold-set.rst
+upstream_modified: false
 ---
 
 <a id="mc-legalhold-set"></a>
@@ -17,16 +17,15 @@ The [`mc legalhold set`](#command-mc.legalhold.set) command enables [legal hold]
 
 [`mc legalhold`](/reference/minio-mc/mc-legalhold/#command-mc.legalhold) *requires* that the specified bucket has [object locking enabled](/administration/object-management/object-retention/#minio-object-locking). You can **only** enable object locking at bucket creation. See [`mc mb --with-lock`](/reference/minio-mc/mc-mb/#mc.mb.-with-lock) for documentation on creating buckets with object locking enabled.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command enables legalhold WORM locking on all existing objects in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc legalhold set --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -42,8 +41,8 @@ mc [GLOBALFLAGS] legalhold set  \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -67,11 +66,10 @@ mc legalhold set play/mybucket/myobjects/objects.txt
 
 Applies the legal hold to all existing objects in the [`ALIAS`](#mc.legalhold.set.ALIAS) bucket or bucket prefix.
 
-{{% alert color="info" %}}
-**`--recursive` only applies to existing objects**
-
-To enable legal hold for future objects, periodically repeat the [`mc legalhold`](/reference/minio-mc/mc-legalhold/#command-mc.legalhold) command as new objects are created.
-{{% /alert %}}
+> [!NOTE]
+> **`--recursive` only applies to existing objects**
+>
+> To enable legal hold for future objects, periodically repeat the [`mc legalhold`](/reference/minio-mc/mc-legalhold/#command-mc.legalhold) command as new objects are created.
 
 ##### `--rewind` {#mc.legalhold.set.-rewind}
 

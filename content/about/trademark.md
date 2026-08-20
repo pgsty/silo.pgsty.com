@@ -6,8 +6,6 @@ url: "/about/trademark/"
 weight: 20
 type: docs
 icon: fa-solid fa-registered
-minio_origin: false
-silo_modified: false
 ---
 
 > [!WARNING]

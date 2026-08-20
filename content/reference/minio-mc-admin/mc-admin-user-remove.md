@@ -2,8 +2,8 @@
 title: "mc admin user rm"
 url: "/reference/minio-mc-admin/mc-admin-user-remove/"
 weight: 60
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-remove.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-user-rm"></a>
@@ -21,16 +21,15 @@ The [`mc admin user remove`](#command-mc.admin.user.remove) command has equivale
 
 To manage external Identity Provider users, see [`OIDC`](/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) or [`AD/LDAP`](/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap).
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command removes user `myuser` on the `myminio` MinIO deployment:
 
 ```shell
 mc admin user rm myminio myuser
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 Removes a user on the target MinIO deployment.
 
 The command has the following syntax:
@@ -46,8 +45,8 @@ mc [GLOBALFLAGS] admin user remove    \
 - Parameters separated using the pipe `|` operator are mutually exclusive.
 
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 

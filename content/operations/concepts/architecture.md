@@ -3,8 +3,8 @@ title: "Deployment Architecture"
 url: "/operations/concepts/architecture/"
 description: "Silo production deployment architecture and topology"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts/architecture.rst
+upstream_modified: true
 ---
 
 <a id="deployment-architecture"></a>

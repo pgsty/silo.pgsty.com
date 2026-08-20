@@ -2,8 +2,8 @@
 title: "mc stat"
 url: "/reference/minio-mc/mc-stat/"
 weight: 370
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-stat.rst
+upstream_modified: false
 ---
 
 <a id="mc-stat"></a>
@@ -16,16 +16,15 @@ The [`mc stat`](#command-mc.stat) command displays information on objects in a M
 
 You can use [`mc stat`](#command-mc.stat) against the local filesystem to produce similar results to the `stat` commandline tool.
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="EXAMPLE" %}}
+{{< tabs group="example-syntax" >}}
+{{< tab label="EXAMPLE" value="example" >}}
 The following command displays information on all objects in the `mydata` bucket on the `myminio` MinIO deployment:
 
 ```shell
 mc stat --recursive myminio/mydata
 ```
-
-{{% /tab %}}
-{{% tab header="SYNTAX" %}}
+{{< /tab >}}
+{{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
@@ -46,8 +45,8 @@ mc [GLOBALFLAGS] stat                      \
 Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 
 [`mc stat --version-id`](#mc.stat.-version-id) is mutually exclusive with multiple parameters. See the reference documentation for more information.
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Parameters {#parameters}
 
@@ -123,11 +122,10 @@ Specify the path to a prefix to apply encryption to all matching objects at that
 --enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
-{{% alert color="info" %}}
-**Note**
-
-MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
-{{% /alert %}}
+> [!NOTE]
+> **Note**
+>
+> MinIO strongly recommends against using SSE-C encryption in production workloads. Use SSE-KMS via the `--enc-kms` or SSE-S3 via `--enc-s3` parameters instead.
 
 ##### `--no-list` {#mc.stat.-no-list}
 

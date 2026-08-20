@@ -3,8 +3,8 @@ title: "mc support"
 url: "/zh/reference/minio-mc/mc-support/"
 weight: 380
 icon: fa-solid fa-life-ring
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support.rst
+upstream_modified: false
 ---
 
 <a id="mc-support"></a>
@@ -15,13 +15,12 @@ silo_modified: false
 
 MinIO Client [`mc support`](#command-mc.support) 命令提供用于分析部署健康状况或性能、并运行诊断的工具。 你还可以上传生成的健康报告，供 MinIO 工程团队进一步分析。
 
-{{% alert color="warning" %}}
-**重要**
-
-`mc support` 命令需要有效的 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册。
-
-[`mc support proxy set`](/zh/reference/minio-mc/mc-support-proxy/#mc.support.proxy.set) 和 [`mc support proxy remove`](/zh/reference/minio-mc/mc-support-proxy/#mc.support.proxy.remove) 是例外，因为你可能需要先配置代理才能完成部署注册。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> `mc support` 命令需要有效的 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册。
+>
+> [`mc support proxy set`](/zh/reference/minio-mc/mc-support-proxy/#mc.support.proxy.set) 和 [`mc support proxy remove`](/zh/reference/minio-mc/mc-support-proxy/#mc.support.proxy.remove) 是例外，因为你可能需要先配置代理才能完成部署注册。
 
 ## 子命令 {#id3}
 

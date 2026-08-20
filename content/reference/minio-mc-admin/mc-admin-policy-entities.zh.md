@@ -2,8 +2,8 @@
 title: "mc admin policy entities"
 url: "/zh/reference/minio-mc-admin/mc-admin-policy-entities/"
 weight: 40
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-entities.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-policy-entities"></a>
@@ -14,26 +14,24 @@ silo_modified: false
 
 列出目标 MinIO 部署中与策略、用户或组关联的实体。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2023-05-27T05-56-19Z**
-
-此命令仅返回 [MinIO 管理的用户和组](/zh/administration/identity-access-management/minio-user-management/#minio-users)。
-{{% /alert %}}
+> [!NOTE]
+> **变更: RELEASE.2023-05-27T05-56-19Z**
+>
+> 此命令仅返回 [MinIO 管理的用户和组](/zh/administration/identity-access-management/minio-user-management/#minio-users)。
 
 如需列出与 Active Directory 或 LDAP（AD/LDAP）配置关联的实体，请使用 [`mc idp ldap policy entities`](/zh/reference/minio-mc/mc-idp-ldap-policy-entities/#command-mc.idp.ldap.policy.entities)。
 
 例如，你可以列出附加到某个策略的所有用户和组，或者列出附加到特定用户或组的所有策略。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="示例" %}}
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="示例" value="tab1" >}}
 以下命令返回别名为 `myminio` 的部署中与用户 `bob` 关联的策略列表。
 
 ```shell
 mc admin policy entities myminio/ --user bob
 ```
-
-{{% /tab %}}
-{{% tab header="语法" %}}
+{{< /tab >}}
+{{< tab label="语法" value="tab2" >}}
 该命令语法如下：
 
 ```shell
@@ -49,18 +47,17 @@ mc admin policy entities         \
 - 使用管道符 `|` 分隔的参数彼此互斥。
 
 请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
-{{% alert color="warning" %}}
-**重要**
-
-此命令仅用于管理 [MinIO 管理的](/zh/administration/identity-access-management/minio-user-management/#minio-users) 用户的策略关联。
-
-如需管理 OpenID 管理用户的策略，请参阅 [OpenID Connect 访问管理](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)。
-
-如需查看 Active Directory/LDAP 用户或组的策略，请使用 [`mc idp ldap policy entities`](/zh/reference/minio-mc/mc-idp-ldap-policy-entities/#command-mc.idp.ldap.policy.entities)。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 此命令仅用于管理 [MinIO 管理的](/zh/administration/identity-access-management/minio-user-management/#minio-users) 用户的策略关联。
+>
+> 如需管理 OpenID 管理用户的策略，请参阅 [OpenID Connect 访问管理](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)。
+>
+> 如需查看 Active Directory/LDAP 用户或组的策略，请使用 [`mc idp ldap policy entities`](/zh/reference/minio-mc/mc-idp-ldap-policy-entities/#command-mc.idp.ldap.policy.entities)。
 
 ### 参数 {#id3}
 

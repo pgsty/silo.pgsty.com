@@ -2,8 +2,8 @@
 title: "mc admin service"
 url: "/zh/reference/minio-mc-admin/mc-admin-service/"
 weight: 160
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-service.rst
+upstream_modified: false
 ---
 
 <a id="mc-admin-service"></a>
@@ -16,11 +16,10 @@ silo_modified: false
 
 [`mc admin service`](#command-mc.admin.service) 会同时影响目标部署中的 *所有* MinIO 服务器。 该命令会中断 MinIO 部署上正在进行的 API 操作。对某个部署执行此命令时请谨慎。
 
-{{% alert color="info" %}}
-**`mc admin` 仅用于 MinIO 部署**
-
-MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
-{{% /alert %}}
+> [!NOTE]
+> **`mc admin` 仅用于 MinIO 部署**
+>
+> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
 ## 示例 {#id3}
 

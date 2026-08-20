@@ -2,8 +2,8 @@
 title: "Silo 客户端设置"
 url: "/zh/reference/minio-mc/minio-client-settings/"
 weight: 10
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/minio-client-settings.rst
+upstream_modified: true
 ---
 
 <a id="minio"></a>
@@ -28,8 +28,8 @@ silo_modified: true
 
 该临时别名使用 [AWS s3v4 signature](https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html)。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 <a id="envvar.MC_HOST_&lt;ALIAS&gt;"></a>
 
 ##### `MC_HOST_<ALIAS>` {#envvar.MC_HOST_-ALIAS}
@@ -37,74 +37,54 @@ silo_modified: true
 *envvar*
 
 将环境变量末尾的 `<ALIAS>` 替换为要设置主机的 `alias`。
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
 
 使用 [`mc alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 配置 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 #### 示例 {#id4}
 
 **静态凭证**
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="语法" %}}
-
-```shell
+```shell {tab="语法" group="tab1-tab2" value="tab1"}
 export MC_HOST_<alias>=https://<Access Key>:<Secret Key>@<YOUR-S3-ENDPOINT>
 ```
 
-{{% /tab %}}
-{{% tab header="示例" %}}
-
-```shell
+```shell {tab="示例" value="tab2"}
 export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG@play.min.io
 ```
 
-{{% /tab %}}
-{{< /tabpane >}}
-
 **Security Token Service (STS) 凭证**
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="语法" %}}
-
-```shell
+```shell {tab="语法" group="tab1-tab2" value="tab1"}
 export MC_HOST_<alias>=https://<Access Key>:<Secret Key>:<Session Token>@<YOUR-S3-ENDPOINT>
 ```
 
-{{% /tab %}}
-{{% tab header="示例" %}}
-
-```shell
+```shell {tab="示例" value="tab2"}
 export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG:eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJOVUlCT1JaWVRWMkhHMkJNUlNYUiIsImF1ZCI6IlBvRWdYUDZ1Vk80NUlzRU5SbmdEWGo1QXU1WWEiLCJhenAiOiJQb0VnWFA2dVZPNDVJc0VOUm5nRFhqNUF1NVlhIiwiZXhwIjoxNTM0ODk2NjI5LCJpYXQiOjE1MzQ4OTMwMjksImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0Ojk0NDMvb2F1dGgyL3Rva2VuIiwianRpIjoiNjY2OTZjZTctN2U1Ny00ZjU5LWI0MWQtM2E1YTMzZGZiNjA4In0.eJONnVaSVHypiXKEARSMnSKgr-2mlC2Sr4fEGJitLcJF_at3LeNdTHv0_oHsv6ZZA3zueVGgFlVXMlREgr9LXA@play.min.io
 ```
 
-{{% /tab %}}
-{{< /tabpane >}}
-
 ### STS 服务 {#sts}
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-11-06T04-19-23Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-11-06T04-19-23Z
 
 使用此设置可添加一个用于 *mc* 命令的 STS endpoint。
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 支持按 alias 添加多个环境变量。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 <a id="envvar.MC_STS_ENDPOINT_&lt;alias&gt;"></a>
 
 ##### `MC_STS_ENDPOINT_<alias>` {#envvar.MC_STS_ENDPOINT_-alias}
@@ -114,33 +94,30 @@ RELEASE.2023-12-02T02-03-28Z
 ```shell
 export MC_STS_ENDPOINT_myalias=https://sts.minio-operator.svc.cluster.local:4223/sts/ns-1
 ```
-
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Web Token Identity {#web-token-identity}
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2023-11-06T04-19-23Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2023-11-06T04-19-23Z
 
 使用此设置可添加一个用于 *mc* 命令的 Web Token Identity。
 
-{{% alert color="info" %}}
-**变更: mc**
-
-RELEASE.2023-12-02T02-03-28Z
-{{% /alert %}}
+> [!NOTE]
+> **变更: mc**
+>
+> RELEASE.2023-12-02T02-03-28Z
 
 支持按 alias 添加多个环境变量。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 <a id="envvar.MC_WEB_IDENTITY_TOKEN_&lt;alias&gt;"></a>
 
 ##### `MC_WEB_IDENTITY_TOKEN_<alias>` {#envvar.MC_WEB_IDENTITY_TOKEN_-alias}
@@ -150,146 +127,136 @@ RELEASE.2023-12-02T02-03-28Z
 ```shell
 export MC_WEB_IDENTITY_TOKEN_FILE_myalias=/var/run/secrets/kubernetes.io/serviceaccount/token
 ```
-
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 配置目录 {#id5}
 
 指定 MinIO Client 应使用的配置目录路径。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_CONFIG_DIR` {#envvar.MC_CONFIG_DIR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 进度条 {#id6}
 
 禁用 MinIO Client 进度条。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_QUIET` {#envvar.MC_QUIET}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### Pager {#pager}
 
-{{% alert color="info" %}}
-**新增: mc**
-
-RELEASE.2024-04-29T09-56-05Z
-{{% /alert %}}
+> [!NOTE]
+> **新增: mc**
+>
+> RELEASE.2024-04-29T09-56-05Z
 
 在 CLI 中禁用 MinIO Client 的分页器功能。 使用该设置后，输出将改为直接打印到原始 `STDOUT`。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_DISABLE_PAGER` {#envvar.MC_DISABLE_PAGER}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 颜色主题 {#id7}
 
 禁用 MinIO Client 输出使用的颜色主题。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_NO_COLOR` {#envvar.MC_NO_COLOR}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### JSON {#json}
 
 启用将输出格式化为 JSON lines。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_JSON` {#envvar.MC_JSON}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 调试 {#id8}
 
 启用调试输出。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_DEBUG` {#envvar.MC_DEBUG}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 禁用 SSL {#ssl}
 
 禁用 SSL 证书校验。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_INSECURE` {#envvar.MC_INSECURE}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### 限制下载带宽 {#id9}
 
 限制 MinIO Client 在某些命令中使用的下载带宽。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_LIMIT_DOWNLOAD` {#envvar.MC_LIMIT_DOWNLOAD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 若未指定，MinIO Client 使用全部可用带宽。
 
@@ -315,17 +282,16 @@ export MC_LIMIT_DOWNLOAD=1G
 
 限制 MinIO Client 在某些命令中使用的上传带宽。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_LIMIT_UPLOAD` {#envvar.MC_LIMIT_UPLOAD}
 
 *envvar*
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 若未指定，MinIO Client 使用全部可用带宽。
 
@@ -351,34 +317,32 @@ export MC_LIMIT_UPLOAD=1G
 
 使用服务端管理密钥通过 [SSE-KMS](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 对选项进行加密和解密。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_ENC_KMS` {#envvar.MC_ENC_KMS}
 
 *envvar*
 
 使用 [`MC_ENC_KMS`](#envvar.MC_ENC_KMS) 环境变量指定密钥。
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 ### SSE-S3 加密 {#sse-s3}
 
 使用服务端管理密钥通过 [SSE-KMS](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 对选项进行加密和解密。
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="环境变量" selected=true %}}
-
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
 ##### `MC_ENC_S3` {#envvar.MC_ENC_S3}
 
 *envvar*
 
 指定执行 SSE-S3 加密时使用的密钥。 指定值必须与 [`MINIO_KMS_KES_KEY_NAME`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) 中设置的加密密钥匹配。
-{{% /tab %}}
-{{% tab header="配置项" %}}
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

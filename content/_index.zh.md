@@ -6,21 +6,21 @@ weight: 1
 type: home
 cascade:
   type: docs
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs
+upstream_modified: true
+body_class: landing-page
+footer_style: none
 ---
 
-{{% alert color="warning" %}}
-**SILO 是由 Pigsty 社区维护的 MinIO 分支。** 本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。“MinIO” 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。源码与许可信息详见[归属与署名](/zh/about/attribution/)。
-{{% /alert %}}
+> [!WARNING]
+> **SILO 是由 Pigsty 社区维护的 MinIO 分支。** 本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。“MinIO” 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。源码与许可信息详见[归属与署名](/zh/about/attribution/)。
 
 SILO 在保留 S3 API、配置与运维契约的同时，为现有 MinIO 部署提供开放的发行与安全维护路径。本站覆盖安装、迁移、管理、开发、版本发布与兼容边界。
 
 ## 快速开始 {#quickstart}
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Docker" %}}
-
+{{< tabs group="docker-linux-minio-kubernetes" >}}
+{{< tab label="Docker" value="docker" >}}
 下面的命令固定到当前 SILO 服务端发行版。示例凭据仅适用于本地评估。
 
 {{% steps %}}
@@ -52,23 +52,16 @@ docker exec silo silo healthcheck ready
 {{% /steps %}}
 
 持久化宿主机路径、服务管理与生产注意事项见[容器部署指南](/zh/operations/deployments/baremetal-deploy-minio-as-a-container/)。
-
-{{% /tab %}}
-{{% tab header="Linux 软件包" %}}
-
+{{< /tab >}}
+{{< tab label="Linux 软件包" value="linux" >}}
 在[下载与安装](/zh/download/#server)页面选择对应架构的 RPM、DEB、APK 或独立归档。正式发布制品同时提供 SHA-256 校验和与构建溯源证明。
 
 原生软件包将服务端安装为 `/usr/bin/silo`，并继续使用既有的 `MINIO_*` 环境变量契约。替换现有 `minio` 软件包前，请阅读[二进制与软件包兼容说明](/zh/compatibility/binary/)。
-
-{{% /tab %}}
-{{% tab header="现有 MinIO" %}}
-
+{{< /tab >}}
+{{< tab label="现有 MinIO" value="minio" >}}
 替换镜像或二进制前，请先阅读[迁移指南](/zh/compatibility/migration/)。保留数据卷与配置，停止所有运行旧二进制的节点，再让所有节点统一启动同一个固定版本的 SILO。不要在两种二进制之间滚动迁移，也不要对需要保留的数据执行 `docker compose down -v`。
-
-{{% /tab %}}
-{{% tab header="Kubernetes" %}}
-
+{{< /tab >}}
+{{< tab label="Kubernetes" value="kubernetes" >}}
 已归档的 MinIO Operator `v7.1.1` 可以运行使用 SILO 镜像的 Tenant：将镜像覆盖为 `pgsty/silo`，并固定经过测试的标签或摘要。请遵循 [Tenant Helm 指南](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)，并把该 Operator 版本视为冻结的兼容基线，而不是仍在维护的依赖。
-
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}

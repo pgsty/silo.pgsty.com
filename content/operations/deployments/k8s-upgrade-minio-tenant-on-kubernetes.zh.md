@@ -2,8 +2,8 @@
 title: "升级 Silo Tenant"
 url: "/zh/operations/deployments/k8s-upgrade-minio-tenant-on-kubernetes/"
 weight: 40
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/k8s-upgrade-minio-tenant-on-kubernetes.rst
+upstream_modified: true
 ---
 
 <a id="minio-tenant"></a>
@@ -11,15 +11,13 @@ silo_modified: true
 
 以下步骤用于使用 Kustomize 或 Helm 升级单个 Silo Tenant。请先在非生产 Tenant 中测试确切的服务端镜像、Operator/Chart 版本与回滚流程。
 
-{{% alert color="danger" %}}
-服务端镜像必须保持为 `pgsty/minio`，并仅使用 [Silo 下载页](/zh/download/#server) 已发布的标签或摘要。上游 Tenant 默认值使用 MinIO 镜像。同时保留 `MINIO_UPDATE=off`；继承的原地更新器仍指向上游 MinIO 发布源，不是 Silo 升级路径。
-{{% /alert %}}
+> [!CAUTION]
+> 服务端镜像必须保持为 `pgsty/minio`，并仅使用 [Silo 下载页](/zh/download/#server) 已发布的标签或摘要。上游 Tenant 默认值使用 MinIO 镜像。同时保留 `MINIO_UPDATE=off`；继承的原地更新器仍指向上游 MinIO 发布源，不是 Silo 升级路径。
 
-{{% alert color="warning" %}}
-**重要**
-
-对于使用早于 [RELEASE.2024-03-30T09-41-56Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-03-30T09-41-56Z) 的 MinIO Image 且启用了 [AD/LDAP](/zh/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings) 的 Tenant，在开始本步骤前，你 **必须** 先完整阅读 [RELEASE.2024-04-18T19-09-19Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-04-18T19-09-19Z) 的发布说明。 你必须将该发布说明中记录的额外步骤纳入升级过程。
-{{% /alert %}}
+> [!WARNING]
+> **重要**
+>
+> 对于使用早于 [RELEASE.2024-03-30T09-41-56Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-03-30T09-41-56Z) 的 MinIO Image 且启用了 [AD/LDAP](/zh/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings) 的 Tenant，在开始本步骤前，你 **必须** 先完整阅读 [RELEASE.2024-04-18T19-09-19Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-04-18T19-09-19Z) 的发布说明。 你必须将该发布说明中记录的额外步骤纳入升级过程。
 
 <a id="minio-upgrade-tenant-kustomize"></a>
 <a id="minio-upgrade-tenant-plugin"></a>
@@ -36,9 +34,8 @@ silo_modified: true
 
 请根据 Tenant 的部署方式选择下方标签页：
 
-{{< tabpane text=true persist=header >}}
-{{% tab header="Operator Console-Deployed Tenant" selected=true %}}
-
+{{< tabs group="tabs-ff01f39e" default="operator-console-deployed-tenant" >}}
+{{< tab label="Operator Console-Deployed Tenant" value="operator-console-deployed-tenant" >}}
 1. 创建基础配置文件：
 
    1. 在一个合适的目录中，使用 `kubectl get` 将当前 Tenant 配置保存到文件：
@@ -82,11 +79,11 @@ silo_modified: true
       ```
 
       如果你在上一步为 `kubectl get` 输出使用了不同的文件名，请将 `my-tenant-base.yaml` 替换为对应文件名。
-{{% /tab %}}
-{{% tab header="现有 Kustomize 部署 Tenant" %}}
+{{< /tab >}}
+{{< tab label="现有 Kustomize 部署 Tenant" value="kustomize-tenant" >}}
 1. 你可以使用原始部署中的 `kustomization` 文件作为基础配置来升级 Tenant。 如果你已经没有这些文件，请按照 Operator Console-Deployed Tenant 标签页中的说明操作。
-{{% /tab %}}
-{{< /tabpane >}}
+{{< /tab >}}
+{{< /tabs >}}
 
 2. 创建一个 `upgrade-minio-tenant.yaml` 文件，其内容类似如下：
 

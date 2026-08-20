@@ -4,17 +4,16 @@ description: "Connect a Java application to SILO with the MinIO Java SDK."
 url: "/developers/java/minio-java/"
 weight: 40
 icon: fa-brands fa-java
-minio_origin: true
-silo_modified: true
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/java/minio-java.rst
+upstream_modified: true
 ---
 
 ## MinIO Java SDK {#java-sdk}
 
 SILO implements the S3-compatible server contract, so Java applications can use the upstream [MinIO Java SDK](https://github.com/minio/minio-java) directly. The SDK supports Java 8 and later; select a runtime that is also supported by your application framework.
 
-{{% alert color="info" %}}
-This page was verified with SDK `9.0.3`. Check the [current releases](https://github.com/minio/minio-java/releases) and [Maven Central metadata](https://central.sonatype.com/artifact/io.minio/minio) before pinning a version.
-{{% /alert %}}
+> [!NOTE]
+> This page was verified with SDK `9.0.3`. Check the [current releases](https://github.com/minio/minio-java/releases) and [Maven Central metadata](https://central.sonatype.com/artifact/io.minio/minio) before pinning a version.
 
 ## Install the package {#install}
 

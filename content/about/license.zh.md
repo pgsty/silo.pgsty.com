@@ -6,8 +6,6 @@ url: "/zh/about/license/"
 weight: 10
 type: docs
 icon: fa-solid fa-scale-balanced
-minio_origin: false
-silo_modified: false
 ---
 
 Silo 涉及两套彼此独立的许可协议：软件与文档的分发条款不同，各自沿用其上游作品原有的许可。

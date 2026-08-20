@@ -3,40 +3,35 @@ title: "mc support top"
 url: "/zh/reference/minio-mc/mc-support-top/"
 weight: 70
 icon: fa-solid fa-ranking-star
-minio_origin: true
-silo_modified: false
+upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top.rst
+upstream_modified: false
 ---
 
 <a id="mc-support-top"></a>
 
 <a id="command-mc.support.top"></a>
 
-{{% alert color="info" %}}
-**说明**
+> [!NOTE]
+> **说明**
+>
+> > [!NOTE]
+> > **变更: RELEASE.2022-08-11T00-30-48Z**
+>
+> `mc support top` 替代 `mc admin top` 命令。
 
-{{% alert color="info" %}}
-**变更: RELEASE.2022-08-11T00-30-48Z**
-
-{{% /alert %}}
-
-`mc support top` 替代 `mc admin top` 命令。
-{{% /alert %}}
-
-{{% alert color="info" %}}
-**需要完成 SUBNET 注册**
-
-`mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-{{% /alert %}}
+> [!NOTE]
+> **需要完成 SUBNET 注册**
+>
+> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 描述 {#id2}
 
 [`mc support top`](#command-mc.support.top) 命令返回分布式 MinIO 部署的统计信息， 类似于 shell 中 `top` 命令的输出。
 
-{{% alert color="info" %}}
-**说明**
-
-[`mc support top`](#command-mc.support.top) 不支持单节点单驱动 MinIO 部署。
-{{% /alert %}}
+> [!NOTE]
+> **说明**
+>
+> [`mc support top`](#command-mc.support.top) 不支持单节点单驱动 MinIO 部署。
 
 [`mc support top`](#command-mc.support.top) 具有以下子命令：
 

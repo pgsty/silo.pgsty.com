@@ -15,12 +15,11 @@ aliases:
 
 This is the fork's **first pinned release**. It restores the IAM bucket/object resource boundary reported as upstream [minio/minio#20449](https://github.com/minio/minio/issues/20449): a policy condition-key bypass fix, three LDAP connection defects, a certificate watcher leak, a seeded-RNG defect, and the module's real minimum Go version.
 
-{{% alert color="warning" %}}
-**Two things to check before upgrading**
-
-1. **This release tightens authorization.** Twelve bucket-level write actions are no longer reachable through an object-only resource pattern such as `arn:aws:s3:::bucket/*`. If you write your own bucket-scoped policies, read [The IAM bucket/object boundary](#bucket-boundary) — the fix is one line of policy for anyone affected, and `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` restores the previous behaviour in full.
-2. **The condition-key fix still needs its server half.** The policy lookup change and the server changes that reserve internal condition-key names each cover one half of that problem. The companion server work exists in `pgsty/minio` commit `2f55347f7` but is not yet on public `origin/master`, and no published Silo server release contains it. Verify that a later server release explicitly includes it.
-{{% /alert %}}
+> [!WARNING]
+> **Two things to check before upgrading**
+>
+> 1. **This release tightens authorization.** Twelve bucket-level write actions are no longer reachable through an object-only resource pattern such as `arn:aws:s3:::bucket/*`. If you write your own bucket-scoped policies, read [The IAM bucket/object boundary](#bucket-boundary) — the fix is one line of policy for anyone affected, and `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` restores the previous behaviour in full.
+> 2. **The condition-key fix still needs its server half.** The policy lookup change and the server changes that reserve internal condition-key names each cover one half of that problem. The companion server work exists in `pgsty/minio` commit `2f55347f7` but is not yet on public `origin/master`, and no published Silo server release contains it. Verify that a later server release explicitly includes it.
 
 ## What This Repository Is {#what-is-this}
 
