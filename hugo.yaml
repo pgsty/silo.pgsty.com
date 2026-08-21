@@ -80,6 +80,11 @@ languages:
       time_format_blog: '2006年01月02日'
       time_format_default: '2006年01月02日'
       upstream_copyright: "© 2020–至今 MinIO, Inc."
+      # giscus 的 aria-label 与加载失败提示没有走 i18n，只能按语言覆盖。
+      comments:
+        giscus:
+          arialabel: 评论
+          errormessage: 评论加载失败。
     menu:
       main:
         - identifier: docs
@@ -208,6 +213,27 @@ params:
   offline_search_summary_length: 90
   offline_search_max_results: 10
   highlight_classes: true
+
+  # Giscus 评论，后端是本站仓库 pgsty/silo.pgsty.com 的 GitHub Discussions。
+  # pathname 映射让每个页面拥有独立线程 —— 中英文版本各自成帖，读者用正在
+  # 阅读的语言留言。分类用 Announcements：只有维护者能开新帖，页面的线程位不
+  # 会被路人讨论占掉。strict 用 pathname 的哈希精确匹配线程，而不是模糊标题搜索。
+  # 首页与下载页是自定义布局，不走 page-end，因此不渲染评论。
+  comments:
+    enable: true
+    type: giscus
+    giscus:
+      repo: pgsty/silo.pgsty.com
+      repoId: R_kgDOTqwfbg
+      category: Announcements
+      categoryId: DIC_kwDOTqwfbs4DDrsY
+      mapping: pathname
+      strict: 1
+      reactionsEnabled: 1
+      emitMetadata: 0
+      inputPosition: top
+      theme: auto
+      loading: lazy
 
   ui:
     blog_index_size: 20
