@@ -40,8 +40,6 @@ languages:
     title: SILO
     params:
       description: S3-compatible object storage maintained by Pigsty
-      time_format_blog: 'January 02, 2006'
-      time_format_default: 'January 02, 2006'
       upstream_copyright: "© 2020–Present MinIO, Inc."
     menu:
       main:
@@ -77,8 +75,6 @@ languages:
     title: SILO
     params:
       description: 由 Pigsty 持续维护的 S3 兼容对象存储
-      time_format_blog: '2006年01月02日'
-      time_format_default: '2006年01月02日'
       upstream_copyright: "© 2020–至今 MinIO, Inc."
       # giscus 的 aria-label 与加载失败提示没有走 i18n，只能按语言覆盖。
       comments:
@@ -190,6 +186,13 @@ params:
   # 正文列宽模式：normal（1050px，默认）| wide（1300px）| full（占满可用宽）。
   # 页面 front matter 可单页覆盖（page_width: wide），栏目可经 cascade 继承。
   page_width: normal
+
+  # 日期一律 ISO：博客列表/表格/文章信息行走 time_format_blog，页脚"最后修改"
+  # 走 time_format_default。两个键都是全站的，不按语言分——YYYY-MM-DD 中英通用，
+  # 而且短，release 表格的日期列不会挤到标题上。
+  # 这也正是 OINK 0.6.0 起的默认值，这里写出来是把要求钉死。
+  time_format_blog: 2006-01-02
+  time_format_default: 2006-01-02
   # ICP 备案号（单行页脚居中显示，链接到 beian.miit.gov.cn；留空则不渲染）。
   # 示例：footer_icp: 浙ICP备15016890号-2
   footer_icp: ""
@@ -200,6 +203,9 @@ params:
   upstream_name: minio/docs
   upstream_license: CC-BY-4.0
   upstream_notice: /about/attribution/
+  # upstream_modified 不在这里设默认值：790 个引用页里 788 个在自己的 front
+  # matter 写明了改没改（177 true / 611 false），另外两个是 upstream_link: ""
+  # 的显式豁免。站点级默认值只会盖住那份逐页记录。
 
   archived_version: false
   url_latest_version: https://silo.pgsty.com
