@@ -272,10 +272,10 @@ This containment is lexical. It does not resolve filesystem symlinks, and native
 - NATS now registers parser-consumed `user_credentials`, `nkey_seed`, and `tls_handshake_first`; AMQP registers `immediate`. Existing environment variable names stay unchanged.
 - The old literal `MINIO_NOTIFY_NATS_USER_CREDENTIALS` remains accepted for NATS only. Precedence is environment, new key, then old migration key.
 - AMQP legacy migration maps `immediate` correctly. Invalid notification errors identify names but no longer echo credential values.
-- Generated PostgreSQL notification DSNs now quote/escape every libpq value and use the correct `user` keyword. An explicit `connection_string` is passed through unchanged.
+- PostgreSQL and MySQL notification configuration uses the canonical `connection_string` or `dsn_string`; explicit strings pass through unchanged. The retained internal PostgreSQL fallback builder quotes values and uses the correct `user` keyword, but discrete fields are not a supported KV input.
 - Dangling-object deletion audit events once again include per-drive errors under `merrs`.
 
-One inherited migration risk is intentionally documented, not disguised as fixed: PostgreSQL/MySQL legacy notification migration can write host/port/user/password/database keys that are not registered by the current target schema, potentially disabling all targets on the next load; historical passwords may be stored in plaintext. Review legacy notification KV state before restarting into Silo.
+The inherited database-notification migration risk is closed by `f1ba68358`: migration no longer writes unregistered discrete connection keys. An enabled pre-KV target without `connection_string` or `dsn_string` now stops startup with a credential-free error. Convert, disable, or remove such targets before upgrading; diagnostic bundles exported before this fix may contain a historical plaintext database password and should be treated accordingly.
 
 ## Toolchain, dependencies, and embedded components {#dependencies}
 

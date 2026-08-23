@@ -272,10 +272,10 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 - NATS 现在注册解析器实际读取的 `user_credentials`、`nkey_seed`、`tls_handshake_first`；AMQP 注册 `immediate`；既有环境变量名不变。
 - 旧字面量 `MINIO_NOTIFY_NATS_USER_CREDENTIALS` 仍只对 NATS 接受；优先级为环境变量、新 key、旧迁移 key。
 - AMQP 旧配置迁移会正确映射 `immediate`。非法通知配置错误只标识名称，不再回显凭据值。
-- 自动生成的 PostgreSQL 通知 DSN 会正确引用/转义每个 libpq 值并使用正确 `user` 关键字；显式 `connection_string` 原样透传。
+- PostgreSQL 与 MySQL 通知配置使用规范 `connection_string` 或 `dsn_string`，显式连接串原样透传。保留的 PostgreSQL 内部 fallback builder 会正确引用参数并使用 `user` 关键字，但离散字段不是受支持的 KV 输入。
 - dangling object 删除审计重新在 `merrs` 中包含每块盘的错误。
 
-有一个继承的迁移风险被明确记录，而没有伪装成已经修复：PostgreSQL/MySQL 旧通知迁移可能写入当前 target schema 未注册的 host/port/user/password/database key，导致下次加载时禁用全部 target；历史密码还可能以明文存储。重启到 Silo 前必须审核旧通知 KV 状态。
+提交 `f1ba68358` 已关闭继承的数据库通知迁移风险：迁移不再写入未注册的离散连接 key。缺少 `connection_string` 或 `dsn_string` 的已启用 pre-KV target 现在会以不含凭据的错误中止启动。升级前必须转换、禁用或删除这类 target；修复前导出的诊断包可能含有历史明文数据库密码，应据此处置。
 
 ## 工具链、依赖与内嵌组件 {#dependencies}
 

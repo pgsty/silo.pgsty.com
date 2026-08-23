@@ -3,7 +3,7 @@ title: "PostgreSQL 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/postgresql/"
 weight: 80
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/postgresql.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="postgresql"></a>
@@ -18,6 +18,13 @@ upstream_modified: false
 - 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 定义 *配置项*。
 
 如果同时定义了环境变量和对应的配置项，MinIO 使用环境变量的值。
+
+> [!IMPORTANT]
+> **SILO 要求完整连接串**
+>
+> PostgreSQL 通知必须使用 `connection_string` 或 `MINIO_NOTIFY_POSTGRES_CONNECTION_STRING`。2020 年前的离散 `HOST`、`PORT`、`USERNAME`、`PASSWORD`、`DATABASE` 形式没有接入当前配置解析，也不会被自动迁移。
+>
+> 已启用但缺少 `connection_string` 的旧 target 会让 SILO 以可操作错误中止启动。升级前请将其转换为完整 libpq 连接串，或禁用/删除该 target。兼容性决策与实现证据见 [DSN-only 设计归档](/zh/blog/design/notify-url/)。
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
@@ -124,7 +131,7 @@ mc admin config set notify_postgres                            \
 
 指定 PostgreSQL 服务端点的 [URI connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)。 MinIO 支持 `key=value` 格式的 PostgreSQL 连接字符串。 例如：
 
-`"host=https://postgresql.example.com port=5432 ..."`
+`"host=postgresql.example.com port=5432 dbname=minioevents user=postgres password=secret sslmode=disable"`
 
 有关受支持 PostgreSQL 连接字符串参数的完整文档，请参阅 [PostgreSQL Connection Strings documentation](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING)。
 

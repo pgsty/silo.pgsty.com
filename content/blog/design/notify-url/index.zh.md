@@ -1,6 +1,7 @@
 ---
 title: "数据库通知统一连接串：#53 的兼容性边界"
 date: 2026-08-23
+lastmod: 2026-08-24
 author: "冯若航"
 summary: >
   SILO 保留 PostgreSQL 与 MySQL 通知目标，但将配置统一收敛到完整连接串。KV 配置体系之前（pre-KV）的数据库离散字段属于不受支持的迁移输入，必须让服务器启动明确失败，而不是被接受后静默拖垮全部桶通知。
@@ -10,7 +11,7 @@ draft: false
 url: "/zh/blog/design/notify-url/"
 ---
 
-本文是 [SILO #53](https://github.com/pgsty/silo/issues/53) 的产品需求文档与设计决策归档，用来在实现开始前固定 PostgreSQL/MySQL 桶通知目标的最终兼容性边界。
+本文是 [SILO #53](https://github.com/pgsty/silo/issues/53) 的产品需求文档与最终设计归档，记录 PostgreSQL/MySQL 桶通知目标的兼容性边界、实现结果与验证证据。
 
 ## 最终决策 {#decision}
 
@@ -31,7 +32,7 @@ SILO 保留 PostgreSQL 与 MySQL notification target，但每种数据库只支�
 
 这是配置边界决策，不是删除数据库通知功能。
 
-**状态：** 设计已接受，实现待完成。  
+**状态：** 已由服务端提交 `f1ba68358` 实现，发布待完成。<br>
 **归属：** SILO 服务端仓库。  
 **跟踪：** [pgsty/silo#53](https://github.com/pgsty/silo/issues/53)。  
 **目标：** 实现并验证后进入下一个 SILO 补丁版本。
@@ -63,7 +64,7 @@ SILO 是一个迁移步骤显式的新社区分支。它优先保证 S3/Admin AP
 
 ## 问题本质 {#defect}
 
-当前旧配置迁移器 `SetNotifyPostgres` 与 `SetNotifyMySQL` 会把两种形式一起写入新 KV 配置。即使旧 target 已经有完整连接串，迁移器仍会附带五个离散 key，通常只是写入空值。
+修复之前，旧配置迁移器 `SetNotifyPostgres` 与 `SetNotifyMySQL` 会把两种形式一起写入新 KV 配置。即使旧 target 已经有完整连接串，迁移器仍会附带五个离散 key，通常只是写入空值。
 
 新解析器会拒绝这些 key，因为 `DefaultPostgresKVS` 与 `DefaultMySQLKVS` 都没有注册它们。合法性检查只看 key 是否存在，不看值是不是空。因此两种旧来源都会失败：
 
@@ -247,6 +248,21 @@ set connection_string before migrating to SILO
 
     `cmd` 的详细输出必须显示两个前缀的测试确实执行；零匹配警告视为验收失败。服务端常规 CI 测试也必须通过；文档仓库执行 `make check`。
 
+## 实现结果 {#implementation-result}
+
+服务端提交 [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) 在不扩大公共配置面的前提下实现了最终设计：
+
+- 两个旧数据库 setter 只输出 `connection_string` 或 `dsn_string` 及已注册 target 设置；
+- 未启用 target 继续忽略；已启用但缺少规范连接串的 target 返回不携带配置值的 `LegacyDatabaseTargetError`；
+- 仅新增传播两个数据库迁移错误；
+- 类型化错误不可重试，会穿过 `initConfigSubsystem`，并由 `serverMain` 判定为致命错误，最终通过 `logger.FatalIf` 退出进程；
+- `knownUnregisteredWrites` 中 Postgres/MySQL 的十条例外已经删除；
+- 聚焦测试覆盖完整连接串往返、规范值优先级、离散值丢弃、凭据保密、迁移失败原子性、启动分类和真实 tokenizer key 集。
+
+最终本地 Claude Code 审阅使用 Claude Fable 5 `max` effort，结论为 **GO**，置信度 high，没有 blocking finding。验证范围包括聚焦包、race 测试、`go vet ./cmd` 与完整 `go test ./cmd -count=1`。该审阅仅授权六文件服务端提交；发布仍是独立门槛。
+
+跨仓库复核确认 `pgsty/mc`、`pgsty/silo-pkg` 与 `pgsty/silo-console` 都不需要实现修改：客户端只转发配置文本，package 仓库不拥有通知 schema，Console 已经把表单序列化为规范 `connection_string` 或 `dsn_string`。公共参考与兼容性文档随本文同步更新。
+
 ## 发布与兼容性声明 {#release}
 
 发布注记必须把它描述为一个被正式执行的兼容性边界：
@@ -262,3 +278,5 @@ set connection_string before migrating to SILO
 Claude Fable 5 于 2026-08-23 使用 `xhigh` effort 审阅初稿，结论为 **approve with required changes**。必需校准已经吸收：启动致命错误传播扩展到 `initConfigSubsystem`；覆盖已经运行 SILO 的部署；明确可用性代价；补充规范连接串优先级、无效旧环境变量、其他 helper 错误范围和可执行测试。
 
 同一模型随后完成了基于当前源码的最终复核。最终结论：**approve**，没有 blocking finding。复核确认中英文记录语义对齐，需求可以在当前服务端代码树上实现，验收标准覆盖启动、迁移、解析器回归和凭据保密边界。
+
+实现完成后，又使用本地 Claude Code 的 Claude Fable 5 `max` effort 进行独立审阅，追踪到 `ExitFunc(1)`，检查 driver 错误行为，并运行聚焦、race、vet 和完整 `cmd` 测试；最终结论为 **GO**，置信度 high，没有 blocking finding。

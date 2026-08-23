@@ -1,6 +1,7 @@
 ---
 title: "DSN-Only Database Notifications: A Compatibility Boundary for #53"
 date: 2026-08-23
+lastmod: 2026-08-24
 author: "Ruohang Feng"
 summary: >
   SILO will keep PostgreSQL and MySQL notification targets, but standardize their configuration on complete connection strings. Pre-KV discrete database fields are an unsupported migration input and must abort server startup with an explicit error instead of being accepted and silently disabling every bucket notification.
@@ -10,7 +11,7 @@ draft: false
 url: "/blog/design/notify-url/"
 ---
 
-This document is the product requirements and design record for [SILO issue #53](https://github.com/pgsty/silo/issues/53). It records the accepted compatibility boundary for PostgreSQL and MySQL bucket-notification targets before implementation begins.
+This document is the product requirements and final design record for [SILO issue #53](https://github.com/pgsty/silo/issues/53). It records the accepted compatibility boundary, implementation, and verification for PostgreSQL and MySQL bucket-notification targets.
 
 ## Decision {#decision}
 
@@ -31,7 +32,7 @@ The legacy migration contract is deliberately narrow:
 
 This is a configuration-boundary decision, not removal of the database-notification feature.
 
-**Status:** accepted design; implementation pending.  
+**Status:** implemented in server commit `f1ba68358`; release pending.<br>
 **Owner:** SILO server repository.  
 **Tracking:** [pgsty/silo#53](https://github.com/pgsty/silo/issues/53).  
 **Target:** the next SILO patch release after implementation and verification.
@@ -63,7 +64,7 @@ SILO is a new community fork with an explicit migration step. Its compatibility 
 
 ## The defect {#defect}
 
-The current legacy migration helpers, `SetNotifyPostgres` and `SetNotifyMySQL`, write both forms into the new KV configuration. Even when the old target already has a complete connection string, the helpers also emit all five discrete keys, usually with empty values.
+Before the fix, the legacy migration helpers, `SetNotifyPostgres` and `SetNotifyMySQL`, wrote both forms into the new KV configuration. Even when the old target already had a complete connection string, the helpers also emitted all five discrete keys, usually with empty values.
 
 The new parser rejects those keys because neither `DefaultPostgresKVS` nor `DefaultMySQLKVS` registers them. Key validation checks key presence, not whether the corresponding value is empty. Both legacy source forms therefore fail:
 
@@ -247,6 +248,21 @@ The implementation is complete only when all of the following are demonstrated:
 
     The verbose `cmd` output must show that tests with both prefixes actually ran; a zero-match warning is a failed acceptance check. The normal server CI suite must also pass. In the documentation checkout, run `make check`.
 
+## Implementation result {#implementation-result}
+
+Server commit [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) implements the accepted design without expanding the public configuration surface:
+
+- the two legacy database setters emit only `connection_string` or `dsn_string` plus registered target settings;
+- disabled targets remain ignored, while enabled targets without a canonical string return a value-free `LegacyDatabaseTargetError`;
+- only the two database migration errors are newly propagated;
+- the typed error is non-retriable, escapes `initConfigSubsystem`, and is classified as fatal by `serverMain` before `logger.FatalIf` exits the process;
+- the ten Postgres/MySQL exceptions were removed from `knownUnregisteredWrites`;
+- focused tests cover complete-string round trips, canonical precedence, discarded discrete values, secrecy, failed-migration atomicity, startup classification, and the real tokenizer key sets.
+
+The final local Claude Code review used Claude Fable 5 at `max` effort and returned **GO** with high confidence and no blocking findings. Verification included the focused package set, race tests, `go vet ./cmd`, and the complete `go test ./cmd -count=1` suite. The review authorized only the six-file server commit; publication remains a separate gate.
+
+Cross-repository review found no implementation changes are required in `pgsty/mc`, `pgsty/silo-pkg`, or `pgsty/silo-console`: the client forwards configuration text, the package repository owns no notification schema, and Console already serializes its form into the canonical `connection_string` or `dsn_string`. The public reference and compatibility documentation is updated with this record.
+
 ## Release and compatibility statement {#release}
 
 The release note must describe this as an enforced compatibility boundary:
@@ -262,3 +278,5 @@ The issue should close only after the repair is present in a published server ta
 Claude Fable 5 reviewed the first draft at `xhigh` effort on 2026-08-23 and returned **approve with required changes**. The required calibration was incorporated: startup-fatal propagation now extends through `initConfigSubsystem`; already-running SILO deployments are covered; the availability trade-off is explicit; canonical-string precedence, dead legacy environment variables, other ignored helper errors, and executable tests are specified.
 
 The same model then completed a final source-backed verification pass. Final verdict: **approve**, with no blocking findings. It confirmed that the English and Chinese records are aligned, the requirements are implementable against the current server tree, and the acceptance criteria cover the startup, migration, parser-regression, and secrecy boundaries.
+
+After implementation, a separate local Claude Code review using Claude Fable 5 at `max` effort traced the path through `ExitFunc(1)`, inspected driver error behavior, ran the focused, race, vet, and full `cmd` suites, and returned **GO** with high confidence and no blocking findings.

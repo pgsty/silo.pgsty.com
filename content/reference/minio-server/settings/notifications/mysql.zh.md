@@ -3,7 +3,7 @@ title: "MySQL 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/mysql/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/mysql.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mysql"></a>
@@ -18,6 +18,13 @@ upstream_modified: false
 - 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 定义 *配置项*。
 
 如果同时定义了环境变量和对应的配置项，MinIO 使用环境变量的值。
+
+> [!IMPORTANT]
+> **SILO 要求完整 DSN**
+>
+> MySQL 通知必须使用 `dsn_string` 或 `MINIO_NOTIFY_MYSQL_DSN_STRING`。2020 年前的离散 `HOST`、`PORT`、`USERNAME`、`PASSWORD`、`DATABASE` 形式没有接入当前配置解析，也不会被自动迁移。
+>
+> 已启用但缺少 `dsn_string` 的旧 target 会让 SILO 以可操作错误中止启动。升级前请将其转换为完整 MySQL DSN，或禁用/删除该 target。兼容性决策与实现证据见 [DSN-only 设计归档](/zh/blog/design/notify-url/)。
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 

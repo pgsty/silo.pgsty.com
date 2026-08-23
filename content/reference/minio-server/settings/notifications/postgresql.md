@@ -3,7 +3,7 @@ title: "PostgreSQL Notification Settings"
 url: "/reference/minio-server/settings/notifications/postgresql/"
 weight: 80
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/postgresql.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="postgresql-notification-settings"></a>
@@ -18,6 +18,13 @@ You can establish or modify settings by defining:
 - a *configuration setting* using [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set).
 
 If you define both an environment variable and the similar configuration setting, MinIO uses the environment variable value.
+
+> [!IMPORTANT]
+> **SILO requires a complete connection string**
+>
+> Configure PostgreSQL notifications with `connection_string` or `MINIO_NOTIFY_POSTGRES_CONNECTION_STRING`. The pre-2020 discrete `HOST`, `PORT`, `USERNAME`, `PASSWORD`, and `DATABASE` forms are not parsed by the current configuration system and are not migrated automatically.
+>
+> An enabled legacy target without `connection_string` stops SILO startup with an actionable error. Convert the target to a complete libpq connection string, or disable/remove it, before upgrading. See the [DSN-only design record](/blog/design/notify-url/) for the compatibility decision and implementation evidence.
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
@@ -124,7 +131,7 @@ mc admin config set notify_postgres                            \
 
 Specify the [URI connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING) of the PostgreSQL service endpoint. MinIO supports `key=value` format for the PostgreSQL connection string. For example:
 
-`"host=https://postgresql.example.com port=5432 ..."`
+`"host=postgresql.example.com port=5432 dbname=minioevents user=postgres password=secret sslmode=disable"`
 
 For more complete documentation on supported PostgreSQL connection string parameters, see the [PostgreSQL Connection Strings documentation](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING).
 

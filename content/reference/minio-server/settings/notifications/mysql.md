@@ -3,7 +3,7 @@ title: "MySQL Notification Settings"
 url: "/reference/minio-server/settings/notifications/mysql/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/mysql.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mysql-notification-settings"></a>
@@ -18,6 +18,13 @@ You can establish or modify settings by defining:
 - a *configuration setting* using [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set).
 
 If you define both an environment variable and the similar configuration setting, MinIO uses the environment variable value.
+
+> [!IMPORTANT]
+> **SILO requires a complete DSN**
+>
+> Configure MySQL notifications with `dsn_string` or `MINIO_NOTIFY_MYSQL_DSN_STRING`. The pre-2020 discrete `HOST`, `PORT`, `USERNAME`, `PASSWORD`, and `DATABASE` forms are not parsed by the current configuration system and are not migrated automatically.
+>
+> An enabled legacy target without `dsn_string` stops SILO startup with an actionable error. Convert the target to a complete MySQL DSN, or disable/remove it, before upgrading. See the [DSN-only design record](/blog/design/notify-url/) for the compatibility decision and implementation evidence.
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
