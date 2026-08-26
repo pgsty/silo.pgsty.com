@@ -1135,7 +1135,7 @@ Allows list users permission
 
 *policy-action*
 
-Allows enable user permission
+Allows changing a user's target status to `enabled`. This action does **not** authorize changing the target status to `disabled`.
 
 <a id="policy-action.admin:DisableUser"></a>
 
@@ -1143,7 +1143,10 @@ Allows enable user permission
 
 *policy-action*
 
-Allows disable user permission
+Allows changing a user's target status to `disabled`. This action does **not** authorize changing the target status to `enabled`.
+
+> [!IMPORTANT]
+> SILO authorizes user-status changes by the requested target state: `enabled` requires `admin:EnableUser`, while `disabled` requires `admin:DisableUser`. Roles responsible for both transitions must explicitly receive both actions; the built-in `consoleAdmin` policy already does through `admin:*`. See [One Endpoint, Two Privileges](/blog/design/user-status-permissions/) for the permission matrix, least-privilege policy examples, compatibility guidance, and the design decision behind this strict separation.
 
 <a id="policy-action.admin:GetUser"></a>
 

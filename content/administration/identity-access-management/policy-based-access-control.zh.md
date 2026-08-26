@@ -1135,7 +1135,7 @@ MinIO 支持以下 action，用于为 [`mc admin`](/zh/reference/minio-mc-admin/
 
 *policy-action*
 
-允许启用用户
+允许把用户的目标状态改为 `enabled`。该 action **不能**授权把目标状态改为 `disabled`。
 
 <a id="policy-action.admin:DisableUser"></a>
 
@@ -1143,7 +1143,10 @@ MinIO 支持以下 action，用于为 [`mc admin`](/zh/reference/minio-mc-admin/
 
 *policy-action*
 
-允许禁用用户
+允许把用户的目标状态改为 `disabled`。该 action **不能**授权把目标状态改为 `enabled`。
+
+> [!IMPORTANT]
+> SILO 根据请求的目标状态鉴权用户状态变更：`enabled` 必须具备 `admin:EnableUser`，`disabled` 必须具备 `admin:DisableUser`。负责两个方向的角色必须显式获得两个 action；内置 `consoleAdmin` 已通过 `admin:*` 同时具备它们。权限矩阵、最小权限策略示例、兼容性迁移和严格分离的设计决策详见[一个端点，两种权限](/zh/blog/design/user-status-permissions/)。
 
 <a id="policy-action.admin:GetUser"></a>
 
