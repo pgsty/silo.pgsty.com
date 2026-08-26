@@ -1,27 +1,28 @@
 ---
-title: "Silo Console 2.2.0 发布说明（草案）"
+title: "Silo Console 2.2.0 发布说明"
 linkTitle: "silo/console 2.2.0"
-date: 2026-08-25
+date: 2026-08-26
+lastmod: 2026-08-26
 author: "冯若航"
-description: "SILO Console 2.2.0 草案：日志与结构化文本的安全预览、不会说谎的下载路径、真正生效的权限门控、拆分后的用户 API、加固的通知表单，以及迁移到 Go 1.27 与 SILO 维护分支的依赖栈。"
+description: "SILO Console 2.2.0 发布说明：安全文本预览、不会说谎的下载路径、真正生效的权限门控、拆分后的用户 API、加固的通知与 IAM 策略写入，以及基于 Go 1.27 和 SILO 维护分支的依赖栈。"
 tags: [发布, console]
 weight: 1
-draft: true
+draft: false
 url: "/zh/blog/release/console-2.2.0/"
 aliases:
   - /releases/console-2.2.0/
 ---
 
-> [!CAUTION]
-> **草案 —— 尚未发布。** 2.2.0 候选版本已在提交 [`19047161f`](https://github.com/pgsty/silo-console/commit/19047161fa0e6ad6436057e5cc996ac6eb0751e4) 上代码冻结，验证矩阵全绿；但目前尚无发布标签、二进制、软件包、容器镜像、校验和或签名。正式发布前，范围与日期仍可能调整。
+> [!NOTE]
+> **已于 2026-08-26 正式发布。** [`v2.2.0`](https://github.com/pgsty/silo-console/releases/tag/v2.2.0) 指向最终提交 [`7dc4258a6`](https://github.com/pgsty/silo-console/commit/7dc4258a6a33b6e01b5b3bae8a0fd63f02b3bad8)。这棵精确标签树通过了完整 CI 矩阵、漏洞检查与发布流水线。公开 Release 包含六个独立二进制、九个 Linux 软件包和一份 SHA-256 校验和清单。
 
-**候选版本：** `v2.2.0` · **候选提交：** `19047161f` · **状态：** 草案，待发布决定 · **仓库：** [pgsty/silo-console](https://github.com/pgsty/silo-console)
+**版本：** [`v2.2.0`](https://github.com/pgsty/silo-console/releases/tag/v2.2.0) · **发布提交：** `7dc4258a6` · **状态：** 已发布 · **仓库：** [pgsty/silo-console](https://github.com/pgsty/silo-console)
 
 SILO Console 2.2.0 是一个以正确性与加固为主题的版本。它新增一项功能——对日志与结构化文本的严格受限预览——其余精力全部用于让既有界面「说真话」：下载不再可能静默交付缺文件的压缩包，进度条不再可能编造百分比，权限门控真正禁用它声称禁用的按钮，用户 API 不再把状态变更与用户组变更捆绑在一起，数据库通知表单发出的连接串与服务器实际存储的完全一致。
 
-在底层，依赖栈迁移到 Go 1.27.0，并切换到 SILO 维护的分支：[`pgsty/silo-pkg` 3.12.0](/zh/blog/release/pkg-3.12.0/)（2026-08-24 已正式发布）取代上游 `minio/pkg`，`pgsty/mc` 分支取代上游 `mc` 库依赖，etcd client 系列升级到 3.7.1，关闭 [CVE-2026-73500](https://pkg.go.dev/vuln/GO-2026-6107)。
+在底层，依赖栈迁移到 Go 1.27.0，并切换到 SILO 维护的分支：[`pgsty/silo-pkg` 3.12.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.1) 取代上游 `minio/pkg`，`pgsty/mc` 分支取代上游 `mc` 库依赖，`minio-go` 升级到 7.3.0，etcd client 系列升级到 3.7.1，关闭 [CVE-2026-73500](https://pkg.go.dev/vuln/GO-2026-6107)。
 
-自 [v2.1.1](https://github.com/pgsty/silo-console/releases/tag/v2.1.1) 以来的变更集共 24 个提交，涉及 161 个源文件（+7,649/−1,930 行，不含重新生成的嵌入式前端资产）。
+自 [v2.1.1](https://github.com/pgsty/silo-console/releases/tag/v2.1.1) 以来的最终变更集共 33 个提交，涉及 176 个源文件（+8,794/−2,057 行，不含重新生成的嵌入式前端资产）。
 
 **为什么是 2.2.0 而不是 2.1.2：** 单看用户可见的修复，补丁版本号就够了；但这个周期更换了共享策略/证书实现的提供方、跨越了 etcd client 的 minor 边界、拆分了一条 REST 路由、并刻意改变了下载失败语义。这几件事中的每一件都值得在 minor 版本线上配一份明确的兼容性说明，而不是藏在一个补丁号里。
 
@@ -83,6 +84,10 @@ S3 合法的 `null` 版本 ID 保持可见而不被丢弃，版本计数把前�
 - 会话通告的 *Create Access Key* 能力对请求作用域策略的计算修正为：以 `svc:DurationSeconds` 为条件的 `Deny`（一种只有在具体请求存在后才能求值的有效期限制）保持该能力可见——包括通配符管理动作——而无条件或登录期即可判定的 deny 现在会正确隐藏它。最终授权仍由 SILO 在请求时裁决。旧代码对*任意*条件 deny 都保持能力可见，属于过度通告。
 - 新增一条 OIDC 创建/列举/查看/删除的集成回归，走 UI 的显式凭据端点，并断言预期中的自我更新拒绝。
 
+### 写入前校验 IAM 策略 {#policy-validation}
+
+命名策略与服务账号策略写入现在会在调用 Admin API 之前拒绝畸形文档和裸 S3 资源 ARN，并返回客户端错误。为兼容历史数据，旧策略读取仍保持宽容；但不兼容的已存策略必须先修正，才能再次保存。严格解析与资源检查位于控制台自身写入路径，而不是导入分支专有的策略 API，因此仍能维持对上游 `minio/pkg v3.6.1` 的源码构建下限。
+
 ### 匿名页面回归匿名 {#anonymous}
 
 匿名对象浏览页不再发出只会产生 `Access Denied` 噪音的受保护 Object Lock/保留策略请求，并补上了语言（文/A）与暗色模式切换控件。
@@ -139,13 +144,13 @@ PostgreSQL 与 MySQL 事件目标表单围绕一个共享的 DSN 解析器/序�
 ```go
 require github.com/minio/pkg/v3 v3.6.1
 
-replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.0
+replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.1
 replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd01ccb
 ```
 
-- **`silo-pkg` 3.12.0 已成真。** 本文早先的草稿描述的还是过渡安排；[`pgsty/silo-pkg` v3.12.0](/zh/blog/release/pkg-3.12.0/) 已于 2026-08-24 正式发布，控制台直接固定它。它承载了 [3.11.0](/zh/blog/release/pkg-3.11.0/) 审阅过的策略资源边界加固、条件键查找修复、LDAP 与证书监视器修复，再叠加 Go 1.27 / etcd 3.7 依赖基线。
-- **`mc` 库依赖切换到 `pgsty/mc` 分支**（日期式伪版本）——早先草稿中被推迟的事项，这次完成了。导入路径不变。
-- **`require` 行刻意停留在上游 `v3.6.1`。** Go 会忽略依赖模块中的 `replace` 指令：下游模块 require 本控制台时，解析到的是*上游* `minio/pkg`——而 `v3.12.0` 在上游并不存在。要求一个真实的上游标签保证控制台对下游可解析；replace 只在控制台自身构建时应用分支。这一点经过实测：**删除全部 replace** 后，`go mod tidy` 选中上游 v3.6.1/mc/go-systemd，`go build ./...` 依然成功。注意这只是编译层兼容——没有自带 replace 的下游构建得到的是上游*行为*，不含分支的 SILO 专有 IAM 语义。
+- **`silo-pkg` 3.12.1 是正式发布依赖。** [`pgsty/silo-pkg` v3.12.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.1) 已于 2026-08-25 发布，控制台直接固定它。它建立在 [3.12.0](/zh/blog/release/pkg-3.12.0/) 之上，继承策略资源边界加固、条件键查找、LDAP 与证书监视器修复，以及 Go 1.27 / etcd 3.7 依赖基线。
+- **`mc` 库依赖切换到 `pgsty/mc` 分支**，使用日期式伪版本；导入路径不变。
+- **`require` 行刻意停留在上游 `v3.6.1`。** Go 会忽略依赖模块中的 `replace` 指令：下游模块 require 本控制台时，解析到的是*上游* `minio/pkg`，而 SILO 的 `v3.12.1` 标签在上游并不存在。要求真实上游标签保证控制台对下游可解析；replace 只在控制台自身构建时应用分支。最终 CI 针对上游 v3.6.1 验证了公共源码构建表面。注意这只是编译层兼容——没有自带顶层 replace 的下游构建得到的是上游*行为*，不含分支的 SILO 专有 IAM 语义。
 - **`go-systemd` 回钉到 v22.6.0**：v22.7.0 在 NetBSD 上使用了那里不存在的 `CLOCK_MONOTONIC`，无法编译；钉住直到上游修复发布。
 
 ### etcd 3.7.1——仅客户端库 {#etcd-3-7}
@@ -154,13 +159,13 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd
 
 ### 第三方维护保持克制 {#third-party}
 
-由已接受的第一方迁移连带引入的变更：`jwx` v2→v3 与 `httprc` v3（受维护的 JWT 版本线，silo-pkg 的要求）、`go-openapi/swag/conv`+`typeutils` 0.28.0、`grpc-gateway` 2.29.0（etcd 3.7.1 声明）、`cheggaaa/pb` 1.0.30、`go.yaml.in/yaml/v3` 3.0.5。经过源码 diff 审查（而不是相信版本号）后刻意**不**采纳的：`minio-go` 7.0.100（19 个文件横跨签名/端点/缓存路径）、go-openapi 各新补丁线（每模块 17–52 个文件，`spec` 触及 SSRF 敏感的展开器/加载器路径）、`pb/v3` 3.2、`klauspost/compress` 1.19、`testify` 1.12。没有任何 CVE 能触达它们。
+最终版本在独立兼容性审查后把 `minio-go` 升级到 v7.3.0，迁移其 INI 导入路径，并增加 lifecycle-filter XML 兼容覆盖。控制台侧的兼容解码器可以接受旧服务器返回的 legacy AccountInfo tag payload。其他已接受的维护变更包括 `jwx` v2→v3 与 `httprc` v3、`go-openapi/swag/conv`+`typeutils` 0.28.0、`grpc-gateway` 2.29.0、`cheggaaa/pb` 1.0.30 和 `go.yaml.in/yaml/v3` 3.0.5；无关的更大规模 go-openapi、`pb/v3`、压缩库与测试库升级仍然推迟。
 
 前端方面，漏洞检查工作流扩展到 push、手动触发与开发依赖，使用不可变安装；刷新了有漏洞的传递依赖解析（`fast-xml-parser` 5.11、`nanoid` 3.3.18、`@babel/core` 7.29.7），移除了死导出与未使用的 `http-status-codes` 依赖。`fast-xml-parser` 5.x 新的传递依赖树（`@nodable/entities`、`is-unsafe`、`anynum`、`fast-xml-builder`、`path-expression-matcher`、`xml-naming`）在本次评审中做过供应链核查：六个包全部由 fast-xml-parser 作者本人的账号与组织发布，安装代码不含执行/网络/外传模式，且整棵树仅用于开发——不进入浏览器产物。
 
 ## 安全评审 {#security}
 
-- 候选树上的 `govulncheck`：**零个可达的漏洞符号，零个受影响的导入包**（本次评审重新验证，非沿用早先草稿的结论）。Swagger 构建工具单独扫描，同样干净。
+- 发布树上的 `govulncheck`：**零个可达的漏洞符号，零个受影响的导入包**。Swagger 构建工具单独扫描，同样干净。
 - 依赖迁移关闭的漏洞：[CVE-2026-73500](https://pkg.go.dev/vuln/GO-2026-6107)（etcd TLS 监听器 DoS）、[CVE-2026-56864 / CVE-2026-56865](https://pkg.go.dev/vuln/GO-2026-6180)（x/mod 校验）。
 - 仍会报告、但依旧不可达：模块级 [GO-2026-5932](https://pkg.go.dev/vuln/GO-2026-5932) openpgp 公告——控制台不导入 `x/crypto/openpgp`，且该公告没有修复版本。
 - 文本预览按 XSS 攻击面评审（见[上文](#text-preview)）；其回归套件包含活动载荷测试。
@@ -204,30 +209,33 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd
 - 「不能删除 Default IDP 配置」的行守卫拿行对象与字符串 `"Default"` 比较，因此永远不生效（`IDPConfigurations.tsx`）；
 - 「不能删除环境变量覆盖的 Webhook 端点」的行守卫存在同样的对象-字符串错配，同样失效（`WebhookSettings.tsx`）。
 
-两者都不是 2.2.0 的回归——这两个谓词在 2.1.1 里整体就是死代码——且两处服务端仍然执行真实规则；建议在打标签前或随后尽快修复。另有两处锋利边缘记为已知限制而非缺陷：新的 PostgreSQL DSN 解析器在填充结构化字段时只接受规范的 `key=value` 语法（不常见但 libpq 合法的 DSN 会显示为空结构化字段，此时编辑结构化字段会用这些字段重建 DSN）；TestCafe/Playwright 覆盖断言的是 UI 门控，真实服务器的拒绝路径覆盖仍由集成套件承担。
+两者都不是 2.2.0 的回归——这两个谓词在 2.1.1 里整体就是死代码——且两处服务端仍然执行真实规则。它们作为发布后的后续项继续记录。另有两处锋利边缘记为已知限制而非缺陷：新的 PostgreSQL DSN 解析器在填充结构化字段时只接受规范的 `key=value` 语法（不常见但 libpq 合法的 DSN 会显示为空结构化字段，此时编辑结构化字段会用这些字段重建 DSN）；TestCafe/Playwright 覆盖断言的是 UI 门控，真实服务器的拒绝路径覆盖仍由集成套件承担。
 
 ## 验证 {#verification}
 
-以下全部在最终候选树（`19047161f`）上执行：
+发布决策综合了本地候选阶段证据，以及在精确标签树 [`7dc4258a6`](https://github.com/pgsty/silo-console/commit/7dc4258a6a33b6e01b5b3bae8a0fd63f02b3bad8) 上执行的远端门禁：
 
-**本机门禁** —— `go build ./...`、`go vet ./...`（含 `-tags testrunmain`）、`gofmt`、`golangci-lint`（0 发现）、`go test -race ./...`（api、api/policy、cmd、pkg 套件）、`go tool swagger validate`、`govulncheck`（0 可达）、TypeScript `tsc`、Playwright unit 项目（**77/77 通过**）、Prettier、knip、linux/amd64 与 linux/arm64 生产标签交叉编译、`go mod verify`。
+**本地发布准备门禁** —— `go build ./...`、`go vet ./...`（含 `-tags testrunmain`）、`gofmt`、`golangci-lint`、`go test -race ./...`、`go tool swagger validate`、`govulncheck`、TypeScript `tsc`、Playwright、Prettier、knip、linux/amd64 与 linux/arm64 发布标签交叉编译、`go mod verify`。
 
-**嵌入资产确定性** —— 前端经完整流水线（`yarn build` + 嵌入优化）从源码重建，与提交的 `web-app/build` 对比：**逐字节一致，零脏文件**。发布构建嵌入的就是源码产出的。
+**嵌入资产确定性** —— 前端经完整流水线（`yarn build` + 嵌入优化）从源码重建，与提交的 `web-app/build` 对比：**逐字节一致，零脏文件**。早期候选 `19047161f` 之后的九个提交修改 Go 兼容性、workflow 与浏览器测试时序，没有修改产品前端源码或嵌入资产。
 
-**CI 完整矩阵** —— GitHub Actions 运行 [32824984359](https://github.com/pgsty/silo-console/actions/runs/32824984359)（手动触发，2026-08-25，恰在本提交上）：约 30 个 job 全绿——lint、semgrep、单元测试、五个交叉编译目标、Swagger 漂移检查、Docker 承载的**集成**套件（分布式 MinIO）、**站点复制**、针对固定镜像 `pgsty/silo:RELEASE.2026-08-06T00-00-00Z` 的封闭 **SSO** 套件、完整的 **TestCafe 权限矩阵**（套件 1–8、A、B）、subpath-nginx、Playwright（89 通过）、覆盖率门禁。Vulnerability Check 工作流同日通过。这是该分叉的第一条 CI 基线——注意它**只经手动 `workflow_dispatch` 运行**；push 触发器在此分叉上不生效。
+**最终树 CI 完整矩阵** —— [Workflow 32888892876](https://github.com/pgsty/silo-console/actions/runs/32888892876) 报告 32 个成功 job，另有一个明确禁用的 React 测试占位项。覆盖 lint、semgrep、Go 与 API 测试、五个交叉编译目标、Swagger 漂移、最新 MinIO 源码构建、分布式集成、站点复制、封闭 SSO、完整 TestCafe 权限矩阵、subpath-nginx、Playwright 与覆盖率门禁。[Vulnerability Check 32888899120](https://github.com/pgsty/silo-console/actions/runs/32888899120) 在同一提交上两个 job 全部通过。
+
+**发布流水线** —— [goreleaser 32916237254](https://github.com/pgsty/silo-console/actions/runs/32916237254) 针对 `v2.2.0` 的两个 job 全部通过，并发布公开 GitHub Release。
 
 **下游契约** —— 在删除全部 `replace` 的临时树中，`go mod tidy` + `go build ./...` 针对上游 `minio/pkg v3.6.1` 成功，证明分支替换不会把分支独有符号泄漏进公共模块表面。
 
 **本周期一并交付的测试基础设施修复**（让上述门禁真正起门禁作用）：Docker 承载的集成/复制/SSO 套件回到 `testrunmain` 构建标签之后（裸 `go test ./...` 不再试图启动容器）；SSO 门禁封闭化——不再 `sudo` 修改 `/etc/hosts`、不再临时 pip 安装、固定 SILO 镜像、自选端口、真实清理；集成门禁断言新的 416 range 语义并停止把 PostgreSQL fixture 绑定到主机端口；浏览器门禁通过发布 fixture 端口实现脱离 Linux 运行；修复了残存的品牌重塑前「MinIO administrator」选择器；有状态的 TestCafe 套件改为串行；Playwright CI 以不可变方式安装提交的锁文件。
 
-## 剩余发布门禁 {#remaining-gates}
+## 发布制品 {#release-artifacts}
 
-本草案不构成 v2.2.0 已存在的证据。在把 `draft: false` 之前：
+[v2.2.0 GitHub Release](https://github.com/pgsty/silo-console/releases/tag/v2.2.0) 公开发布：
 
-1. 决定是否修复两处失效的行守卫（[见上](#regression-review)）——若修复，则重跑前端门禁、刷新嵌入资产、重新触发 CI；
-2. 做出发布决定，为已验证的树打标签，运行 goreleaser 流水线（与以往发布一样通过 `workflow_dispatch`）；
-3. 对照打标签的树核验所有公开制品——二进制、软件包、容器镜像、校验和、签名；
-4. 用最终标签、日期与制品链接更新本页。
+1. 六个独立二进制：Linux amd64/arm64/armv6、macOS amd64/arm64、Windows amd64；
+2. 九个 Linux 软件包：amd64、arm64、armv6 各自的 DEB、RPM 与 APK；
+3. `silo-console_2.2.0_checksums.txt`，以及 GitHub 为每个制品记录的 SHA-256 digest。
+
+本文核实的是这些制品、标签与 Release 页面；不声称另有独立分发的容器镜像或 detached signature。
 
 ## 相关提交 {#related-commits}
 
@@ -254,9 +262,18 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd
 - [`7e57771a4`](https://github.com/pgsty/silo-console/commit/7e57771a44495e7c23e21dcff8f19b171d60c672) — build: refresh SILO Console assets
 - [`57cfe7aa0`](https://github.com/pgsty/silo-console/commit/57cfe7aa078361e0e1d41897e460adef1cd1e5a3) — fix: restore downstream and browser release gates
 - [`19047161f`](https://github.com/pgsty/silo-console/commit/19047161fa0e6ad6436057e5cc996ac6eb0751e4) — test: stabilize permissions browser gates
+- [`e37dec873`](https://github.com/pgsty/silo-console/commit/e37dec873bf1a2f8e15b6937aa391da2b9626ba4) — fix: validate IAM policies before writes
+- [`28505ed23`](https://github.com/pgsty/silo-console/commit/28505ed238084b0df4f2026b35adbb2145969cb4) — chore: update minio-go to v7.3.0
+- [`16abb971e`](https://github.com/pgsty/silo-console/commit/16abb971e12610a333f3f38a3cb9f52d815f18c9) — ci: harden validation and release gates
+- [`2ddfcd036`](https://github.com/pgsty/silo-console/commit/2ddfcd0361b537a5a6ab531600bd3d37f408cf59) — fix: accept legacy AccountInfo tag payloads
+- [`31332bca9`](https://github.com/pgsty/silo-console/commit/31332bca9456a1b3340b98fa9108650216578eaf) — fix: preserve policy source compatibility
+- [`3a8251086`](https://github.com/pgsty/silo-console/commit/3a82510863366abc2ed7c865f12f4e0bb1562a2a) — ci: allow permission tests to finish
+- [`c159fff78`](https://github.com/pgsty/silo-console/commit/c159fff78af92ec5ee237f3c4f289a11461cb401) — ci: serialize shared-role permission tests
+- [`2e91cdf9a`](https://github.com/pgsty/silo-console/commit/2e91cdf9afa71f588d467a785e922fb9b54e0a40) — test: wait for watch controls to become ready
+- [`7dc4258a6`](https://github.com/pgsty/silo-console/commit/7dc4258a6a33b6e01b5b3bae8a0fd63f02b3bad8) — test: allow asynchronous UI controls to settle
 
 链接：
 
-- [SILO Console 源码](https://github.com/pgsty/silo-console) · [发布页](https://github.com/pgsty/silo-console/releases)
-- [silo-pkg 3.12.0 发布说明](/zh/blog/release/pkg-3.12.0/) · [silo-pkg 3.11.0 发布说明](/zh/blog/release/pkg-3.11.0/)
+- [SILO Console 源码](https://github.com/pgsty/silo-console) · [v2.2.0 Release](https://github.com/pgsty/silo-console/releases/tag/v2.2.0)
+- [silo-pkg 3.12.1 Release](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.1) · [silo-pkg 3.12.0 发布说明](/zh/blog/release/pkg-3.12.0/)
 - [SILO 官网](https://silo.pgsty.com/zh/) · [文档](https://silo.pgsty.com/zh/docs/)
