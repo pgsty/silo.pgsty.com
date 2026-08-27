@@ -5,7 +5,7 @@ date: 2026-08-25
 lastmod: 2026-08-26
 author: "Ruohang Feng"
 summary: >
-  SILO persisted the right multipart checksum and could report its type through HEAD and other APIs, but CompleteMultipartUpload dropped ChecksumType from its XML result. This record explains the defect, why PR #57 fixes it with two production lines, the review findings, compatibility impact, and the remaining merge and release gates.
+  SILO persisted the right multipart checksum and could report its type through HEAD and other APIs, but CompleteMultipartUpload dropped ChecksumType from its XML result. This record explains the defect, why PR #57 fixes it with two production lines, the review findings, the CI and merge decision, compatibility impact, and the remaining release boundary.
 tags: [Design, S3, Compatibility, Checksum]
 weight: 20
 draft: false
@@ -14,7 +14,7 @@ url: "/blog/design/complete-multipart-checksum-type/"
 
 This is the design, review, and decision record for [SILO #47](https://github.com/pgsty/silo/issues/47) and [PR #57](https://github.com/pgsty/silo/pull/57).
 
-> **Status on 2026-08-26:** PR #57 is open and mergeable. Its code review verdict is **GO WITH NON-BLOCKING NOTES**, with high confidence. The four fork workflows still await maintainer approval, so the PR is not merged and no release artifact contains it.<br>
+> **Status on 2026-08-26:** [PR #57](https://github.com/pgsty/silo/pull/57) was approved and merged as [`a96116b1`](https://github.com/pgsty/silo/commit/a96116b128bbf2aa42f85eafbf75eb6636cd36ee); [#47](https://github.com/pgsty/silo/issues/47) closed automatically. All nine checks on the tested PR head passed, followed by green Go CI and VulnCheck runs on `main`. No tagged release, package, container image, deployment, or production endpoint has yet been verified to contain the fix.<br>
 > **Scope:** return the already-known checksum type from `CompleteMultipartUploadResult`; do not add new checksum algorithms.<br>
 > **Owner:** [`pgsty/silo`](https://github.com/pgsty/silo), the SILO server repository.<br>
 > **Release boundary:** code review, merge, a green `main`, a tagged release, packages, container images, deployment, and production verification are separate gates.
@@ -25,11 +25,11 @@ SILO already computed and persisted the correct checksum type for a completed mu
 
 PR #57 adds that field, copies the existing value from the checksum map, registers the new exported symbol in the compatibility baseline, and tests `FULL_OBJECT`, `COMPOSITE`, and the no-checksum case. It does not recalculate data, change metadata, migrate objects, or weaken integrity checks.
 
-The repair is correct and intentionally narrow. Before merge, maintainers must approve and run all pending GitHub Actions, require every workflow to pass, and preserve the contributor's DCO trailer in the final squash commit.
+The repair is correct and intentionally narrow. Maintainers approved the fork workflows, refreshed the stale PR branch onto current `main`, required every new check to pass, submitted an approving review, and merged while preserving the contributor's signed-off commit. Repository integration is complete; release delivery remains a separate gate.
 
 ## Where the defect came from {#origin}
 
-The defect was found while investigating [#31](https://github.com/pgsty/silo/issues/31), where a real boto3 client exposed several adjacent multipart-checksum incompatibilities. #31 was the data-path failure: a `FULL_OBJECT` CRC32 multipart upload could fail at completion. That problem was fixed independently.
+The defect was found while investigating [#31](https://github.com/pgsty/silo/issues/31), where a real boto3 client exposed several adjacent multipart-checksum incompatibilities. #31 was the data-path failure: a `FULL_OBJECT` CRC32 multipart upload could fail at completion. It was fixed independently by `0cff48f6c` and `75859690b`, then closed on 2026-08-04. That review deliberately split four adjacent findings into [#46](https://github.com/pgsty/silo/issues/46), #47, #48, and #50 instead of treating them as one checksum bug.
 
 After the object completed successfully, another inconsistency remained:
 
@@ -40,7 +40,7 @@ head_object()               -> ChecksumType: FULL_OBJECT
 
 AWS S3 returned `FULL_OBJECT` in both places. SILO returned the checksum value in the completion XML, and the committed object retained the correct type, but the completion SDK result exposed a null type.
 
-That observation became #47. It is a presentation defect, not a checksum-calculation or storage defect. It does not explain the earlier `InvalidPart` failure from #31, and repairing it does not replace the [server-side part-checksum work tracked in #46](/blog/design/uploadpart-checksum/).
+That observation became #47. It is a presentation defect, not a checksum-calculation or storage defect. It does not explain the earlier `InvalidPart` failure from #31, and repairing it does not replace the [server-side part-checksum work tracked in #46](/blog/design/uploadpart-checksum/), which later landed independently as `7fea6d5a5`.
 
 ## The S3 response contract {#contract}
 
@@ -86,7 +86,7 @@ Other surfaces used the same state correctly. `ListParts` and `GetObjectAttribut
 
 ## What PR #57 changes {#implementation}
 
-The PR contains one signed-off commit, three files, 60 added lines, and no deletions. Only two production lines change.
+The contributed diff contains one signed-off commit, three files, 60 added lines, and no deletions. Only two production lines change. A maintainer later merged current `main` into the contributor branch to refresh its CI context; that merge changed history, not the three-file product diff.
 
 ### Add the response field {#field}
 
@@ -141,7 +141,7 @@ The change is therefore a missing projection from established state to the wire 
 
 ## Review and verification {#review}
 
-The PR was reviewed against GitHub's current synthetic merge commit, whose parents were the latest `main` and the PR head. Although the contributor branch was 12 commits behind its original base, the current merge result was clean and compiled with the intervening checksum work on `main`.
+The PR was reviewed after the contributor branch was refreshed onto current `main`. The update produced head `c4b9d38d`; the resulting tree hash, `39ec44c6b390c441413e490370f70fbacc4e6a91`, exactly matched the isolated local no-commit merge. The result was clean and included the intervening checksum work on `main`.
 
 Local verification on that exact merge result included:
 
@@ -154,9 +154,24 @@ rebrand compatibility guard
 local DCO rule
 ```
 
-The full `cmd` test completed successfully in 137.598 seconds. The commit author email matches its `Signed-off-by` trailer. Cryptographic Git commit signing is independent of DCO and is not required by this repository.
+The targeted regression completed in 2.174 seconds and the full `cmd` package test completed in 168.956 seconds. The commit author email matches its `Signed-off-by` trailer. Cryptographic Git commit signing is independent of DCO and is not required by this repository.
 
-A separate read-only local Claude Code adversarial review inspected the merged diff, checksum serialization, XML path, current `main`, tests, DCO, and compatibility guard. Its verdict was **GO WITH NON-BLOCKING NOTES**, with high confidence on correctness, compatibility, security, and mergeability.
+A separate read-only local Claude Code adversarial review inspected the merged diff, checksum serialization, XML path, current `main`, tests, DCO, and compatibility guard. Its verdict was **COMMENT**: the production change was correct and safe, but it preferred an additional HTTP-level completion test before merge. The maintainer agreed that such a test would improve fidelity, but disagreed that it was blocking: the handler delegates directly to the tested generator, while existing real MPU tests already cover persisted `FULL_OBJECT` and `COMPOSITE` states. The formal GitHub review therefore recorded **APPROVED** with the HTTP-level test as a follow-up.
+
+### Actions, branch refresh, and merge {#merge-sequence}
+
+The first four `action_required` runs had been created on 2026-08-09 against the PR's old base. After approval, DCO passed but the old [VulnCheck run](https://github.com/pgsty/silo/actions/runs/31306998949) used Go 1.26.5 and failed on newly published standard-library vulnerabilities fixed in Go 1.26.6. Current `main` had already moved to Go 1.27.0, and its latest VulnCheck was green. Treating the stale failure as either a product regression or an ignorable red check would both have been wrong.
+
+The decision was to refresh the test context, not rerun or waive the stale result:
+
+1. GitHub's update-branch API merged current `main` (`8d76a255c`) into contributor head `d014a12cf`, producing `c4b9d38d` without conflicts.
+2. GitHub created four new fork workflow runs for the refreshed head; all four were explicitly approved again.
+3. All nine reported checks passed: [DCO](https://github.com/pgsty/silo/actions/runs/32922040560), [VulnCheck](https://github.com/pgsty/silo/actions/runs/32922040457), six jobs in [Go CI](https://github.com/pgsty/silo/actions/runs/32922040467), and the [Test Release Pipeline](https://github.com/pgsty/silo/actions/runs/32922040567). The release validation job completed in 11 minutes 26 seconds.
+4. A formal approving review was submitted against `c4b9d38d`.
+5. Merge used an expected-head guard and the repository's normal merge strategy, producing `a96116b1`. This preserved the contributor's signed-off commit rather than rewriting it through a squash. The PR's `Resolves #47` relationship closed the issue one second later.
+6. The post-merge `main` [VulnCheck](https://github.com/pgsty/silo/actions/runs/32922815310) and all six [Go CI](https://github.com/pgsty/silo/actions/runs/32922815278) jobs also passed; cross-compilation, the slowest job, completed in 9 minutes 54 seconds.
+
+This sequence matters because “the patch passed once” was not the acceptance criterion. The exact tree merged into current `main` had to be the tree reviewed and tested, and a stale CI environment could not substitute for that proof.
 
 ## Evaluation of the PR {#evaluation}
 
@@ -180,7 +195,7 @@ Existing API-level tests already exercise genuine `FULL_OBJECT` and `COMPOSITE` 
 
 The PR places `ChecksumType` before the algorithm-specific fields, while AWS's example response and SILO's newer `CopyObjectResponse` place it after them. Mainstream S3 SDKs parse XML by element name, so this is a parity and style detail rather than a compatibility blocker. Moving the field is optional.
 
-Finally, the commit title says `feat:` even though the PR correctly marks itself as a bug fix. The squash subject should use `fix:`; the contributor does not need to amend the code for that cleanup.
+Finally, the contributor commit title says `feat:` even though the PR correctly marks itself as a bug fix. The final merge preserved that signed-off commit instead of rewriting it. This is a history/style imperfection, not a protocol or release blocker.
 
 ## Why new algorithms do not belong in this PR {#algorithm-scope}
 
@@ -214,22 +229,21 @@ This is an additive compatibility repair, not a release feature that requires op
 
 ## Merge and release decision {#decision}
 
-The final code-review decision is **accept PR #57 after remote CI is green**.
+The final decision had six parts:
 
-Before merge:
+1. accept the narrow projection fix without recalculating checksums or changing storage;
+2. keep SHA512, MD5, and XXHASH families out of #57 until they have end-to-end server support;
+3. record an HTTP-level completion test as useful follow-up work, not a blocker for the directly tested generator repair;
+4. reject stale CI as merge evidence, update the branch to current `main`, and approve the newly created workflows;
+5. merge only after the refreshed head was formally approved and every check was green, using an expected-head guard and a normal merge that preserved the DCO-signed contribution;
+6. let `Resolves #47` close the issue, then verify the resulting `main` workflows independently.
 
-1. inspect the fork diff and approve the pending GitHub Actions;
-2. require DCO, Go CI, Test Release Pipeline, and VulnCheck to pass;
-3. confirm the tested merge ref still includes the current `main` if `main` moves again;
-4. squash with a bug-fix subject such as `fix: return ChecksumType from CompleteMultipartUpload`;
-5. preserve `Signed-off-by: Shooks <justanormalme@gmail.com>` in the final squash commit body.
+No dependency update, storage migration, or cross-repository implementation was required. That decision is now complete at the repository-integration gate.
 
-No code expansion, rebase, dependency update, storage migration, or cross-repository implementation is required to merge this PR. The PR's `Resolves #47` relationship should close the issue after merge.
-
-After merge, a green `main` proves repository integration. It still does not prove that a SILO release, package, container image, deployment, or production endpoint contains the repair. Those gates must be recorded separately.
+A green `main` still does not prove that a SILO tag, release package, container image, deployment, or production endpoint contains the repair. Those delivery gates remain unverified and must be recorded separately when the next release ships.
 
 ## Conclusion {#conclusion}
 
 PR #57 is a good example of a small compatibility fix whose correctness comes from respecting an existing source of truth. The checksum type was already calculated, validated, persisted, decryptable, and visible through other APIs. The completion response simply failed to project it into XML.
 
-The accepted repair does exactly that projection and nothing more. It makes the wire response honest without touching user data, checksum mathematics, storage layout, or algorithm scope. The remaining work is operational discipline: run the untrusted fork workflows, keep DCO provenance through squash, merge only on green, and distinguish that merge from a shipped release.
+The accepted repair does exactly that projection and nothing more. It makes the wire response honest without touching user data, checksum mathematics, storage layout, or algorithm scope. The fork workflows, refreshed-head review, merge, automatic issue closure, and post-merge `main` verification are complete. What remains is delivery discipline: distinguish this merged fix from a tagged, packaged, imaged, deployed, and production-verified release.
