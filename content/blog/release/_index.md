@@ -10,7 +10,7 @@ module: [BLOG]
 # 不分页。参见 params.ui.blog_index。
 blog_index: table
 cascade:
-  images: [/images/blog/release.webp]
+  images: [/images/blog/silo-release.webp]
 aliases:
   - /releases/
 ---

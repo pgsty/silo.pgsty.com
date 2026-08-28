@@ -13,6 +13,7 @@ outputs:
   - print
 cascade:
   type: blog
+  images: [/images/blog/silo.webp]
   outputs:
     - HTML
     - print

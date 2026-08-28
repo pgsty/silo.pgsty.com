@@ -10,7 +10,7 @@ module: [BLOG]
 # 这就是主题默认值，写出来是为了三个栏目的形态在同一处能一眼看全。
 blog_index: list
 cascade:
-  images: [/images/blog/security.webp]
+  images: [/images/blog/silo-security.webp]
 aliases:
   - /security/
 ---
