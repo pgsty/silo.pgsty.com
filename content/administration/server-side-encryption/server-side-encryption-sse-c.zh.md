@@ -100,6 +100,8 @@ MinIO 支持使用以下 AWS S3 请求头，将 SSE-C 加密对象复制到另�
 - `X-Amz-Copy-Source-Server-Side-Encryption-Key` 设置为加密密钥值。 如果指定的密钥与用于对该对象执行 SSE-C 加密的密钥不匹配， 复制操作将失败。
 - `X-Amz-Copy-Source-Server-Side-Encryption-Key-MD5` 设置为加密密钥的 128 位 MD5 摘要。
 
+源对象与目标对象使用不同 SSE-C key 时，需要同时提供两组 header：`Copy-Source-*` 表示源 key，普通 `Server-Side-Encryption-Customer-*` 表示目标 key。SILO 会在提交后严格分开两个上下文，因此 CopyObject XML 与 HTTP header 中的 checksum 字段使用目标 key 解密。详见[两把 SSE-C 密钥，一份 CopyObject 响应](/zh/blog/design/copyobject-ssec-checksum-response/)。
+
 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具及兼容 S3 的 SDK 提供了设置这些请求头的特定语法。 某些 [`mc`](/zh/reference/minio-mc/#command-mc) 命令（例如 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）包含用于启用 SSE-S3 加密的 专用参数：
 
 ```shell

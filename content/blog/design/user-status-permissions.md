@@ -1,11 +1,11 @@
 ---
-title: "One Endpoint, Two Privileges: Separating User Enable and Disable"
-linkTitle: "User Status Permissions"
+title: "One Endpoint, Two Privileges: Separating User and Group Status"
+linkTitle: "User and Group Status Permissions"
 date: 2026-08-26
-lastmod: 2026-08-26
+lastmod: 2026-08-28
 author: "Ruohang Feng"
 summary: >
-  A single user-status endpoint always checked admin:EnableUser, making admin:DisableUser unusable by itself. This record explains the least-privilege defect reported in minio/minio#21478, SILO's strict target-state authorization design, the rejected compatibility fallbacks, the implementation and four-way IAM tests, and the boundary between a merged repair and a delivered release.
+  Shared user and group status endpoints historically checked their Enable action even for disable requests. This record explains the least-privilege defect, SILO's strict target-state authorization design, the user repair merged through PR #73, the group follow-up, four-way IAM tests, and the boundary between committed code and a delivered release.
 tags: [Design, IAM, Security, Compatibility]
 weight: 15
 draft: false
@@ -15,6 +15,7 @@ url: "/blog/design/user-status-permissions/"
 This document records the discussion, repair, and final authorization design for [upstream issue minio/minio#21478](https://github.com/minio/minio/issues/21478) and [SILO PR #73](https://github.com/pgsty/silo/pull/73).
 
 > **Status on 2026-08-26:** SILO PR #73 was merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5), preserving the signed-off repair commit [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1). All eight reported checks passed. Upstream issue #21478 and PR #21482 remain open, but `minio/minio` is archived and read-only, so no further issue comment or merge can be made there.<br>
+> **Group follow-up on 2026-08-28:** final release review found the same fixed-action defect in `set-group-status`. Signed-off server commit `d98250110` now selects `admin:EnableGroup` or `admin:DisableGroup` from the requested target state and adds a real four-way IAM authorization test. Local verification and independent review are complete; push, remote CI, merge, tag, and delivery remain pending.<br>
 > **Scope:** authorize enabling and disabling a user with their respective existing Admin Actions. Do not change the route, status values, account storage, replication record, or client API.<br>
 > **Security property:** possessing `admin:DisableUser` must not grant the ability to enable an account, and possessing `admin:EnableUser` must not grant the ability to disable one.<br>
 > **Release boundary:** merge, tag, release package, container image, deployment, and production verification remain separate gates.
@@ -32,6 +33,16 @@ The selected repair derives exactly one required action from the requested targe
 | invalid or unknown | `admin:EnableUser`, preserving the previous authorization-before-validation default |
 
 The handler then calls `validateAdminReq` once. A four-way IAM test proves both positive operations and both denied cross-action operations. This is intentionally stricter than preserving the accidental historical behavior in which an Enable-only policy could also disable users.
+
+The same rule now applies to group status:
+
+| Requested group status | Required action |
+| --- | --- |
+| `enabled` | `admin:EnableGroup` |
+| `disabled` | `admin:DisableGroup` |
+| invalid or unknown | `admin:EnableGroup`, preserving the previous authorization-before-validation default |
+
+Before the follow-up, an EnableGroup-only principal could disable a group, while a DisableGroup-only principal received `AccessDenied` for that exact operation. The group repair uses the same one-selector, one-authorization design rather than treating the two actions as aliases.
 
 ## The reported defect {#defect}
 
@@ -263,6 +274,40 @@ This principal can inspect and disable another user, but cannot enable it.
 
 This principal can inspect and enable another user, but cannot disable it. Grant both actions explicitly to roles responsible for the complete account lifecycle.
 
+## Group-status follow-up {#group-follow-up}
+
+The group endpoint has the same shape as the user endpoint:
+
+```text
+PUT /minio/admin/v3/set-group-status
+    ?group=<target>
+    &status=enabled|disabled
+```
+
+It also publishes two existing actions, `admin:EnableGroup` and `admin:DisableGroup`. The inherited handler nevertheless authorized every request with `EnableGroup` before reading `status`. This was not merely a dead permission: it reversed least privilege in both directions. The wrong principal could disable a group, and the intended disable-only principal could not.
+
+The follow-up adds `setGroupStatusAdminAction`, deliberately matching `setUserStatusAdminAction`:
+
+```go
+func setGroupStatusAdminAction(status string) policy.AdminAction {
+    if madmin.GroupStatus(status) == madmin.GroupDisabled {
+        return policy.DisableGroupAdminAction
+    }
+    return policy.EnableGroupAdminAction
+}
+```
+
+The integration test creates separate EnableGroup-only and DisableGroup-only administrators and a real target group. It proves:
+
+1. DisableGroup-only can disable;
+2. DisableGroup-only cannot enable;
+3. EnableGroup-only can enable;
+4. EnableGroup-only cannot disable.
+
+The suite exercises signed Admin requests, policy attachment, handler authorization, IAM mutation, response decoding, and cleanup. Invalid status still selects the legacy Enable action before the existing validation error, so the change does not expose a new pre-authentication oracle. The successful site-replication hook remains after mutation and is not called for denied requests.
+
+This follow-up changes no user behavior and introduces no new policy action. It makes the two already documented group actions enforce the same state-specific contract as their user counterparts.
+
 ## Compatibility and migration {#compatibility}
 
 No client or API migration is required. The endpoint, query parameters, status strings, success response, and Admin-client method are unchanged.
@@ -275,6 +320,13 @@ Policy review is required for restricted administrative roles:
 - `consoleAdmin` and other `admin:*` policies are unaffected;
 - a legacy custom policy containing only `admin:EnableUser` can no longer use that permission to disable users and must add `admin:DisableUser` if both operations are intended.
 
+The equivalent rules now apply to group-management roles:
+
+- a role that should only disable groups needs `admin:DisableGroup`;
+- a role that should only enable groups needs `admin:EnableGroup`;
+- a role that must do both needs both actions;
+- a legacy EnableGroup-only role can no longer disable groups.
+
 This is a source-level compatibility change in authorization behavior, not a wire-protocol break.
 
 ## Upstream disposition {#upstream}
@@ -285,20 +337,21 @@ The upstream artifacts remain useful provenance but are no longer an actionable 
 
 ## Delivery state {#delivery}
 
-| Gate | State on 2026-08-26 |
-| --- | --- |
-| Design decision | complete |
-| Implementation and local tests | complete |
-| Signed-off commit and push | complete |
-| PR CI and merge into SILO `main` | complete |
-| Tagged SILO release | not established |
-| Release package or container image | not established |
-| Deployment | not established |
-| Production behavior | not established |
-| Upstream merge | unavailable; repository archived |
+| Gate | User repair | Group follow-up on 2026-08-28 |
+| --- | --- | --- |
+| Design decision | complete | complete |
+| Implementation and local tests | complete | complete |
+| Independent adversarial review | complete | complete, GO |
+| Signed-off commit | complete | local `d98250110` |
+| Push, PR CI, and merge | complete | not established |
+| Tagged SILO release | not established | not established |
+| Release package or container image | not established | not established |
+| Deployment | not established | not established |
+| Production behavior | not established | not established |
+| Upstream merge | unavailable; repository archived | not applicable |
 
 ## Conclusion {#conclusion}
 
-The repair makes the authorization model tell the truth. Enabling and disabling are opposite state transitions with different operational risk, and SILO already exposes different policy actions for them. The handler must therefore select the action from the requested target state and authorize once before mutation.
+The repairs make the authorization model tell the truth. Enabling and disabling users or groups are opposite state transitions with different operational risk, and SILO already exposes different policy actions for each direction. Each handler must therefore select the action from the requested target state and authorize once before mutation.
 
 The code change is small because the design boundary is clear. The durable result is larger: an explicit permission matrix, rejected compatibility alternatives, an invalid-input rule, a four-way integration test, a clean merge record, migration guidance, and an honest release boundary.

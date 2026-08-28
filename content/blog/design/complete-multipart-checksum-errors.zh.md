@@ -2,9 +2,10 @@
 title: "BadDigest、InvalidRequest 与 CompleteMultipartUpload 校验和契约"
 linkTitle: "分片完成校验和错误"
 date: 2026-08-27
+lastmod: 2026-08-28
 author: "Ruohang Feng"
 summary: >
-  SILO 能拒绝三类非法 CompleteMultipartUpload 请求，却返回了错误的 S3 错误码，并漏掉了一个校验和类型不匹配方向。本文完整记录 AWS 证据、上游历史、根因、操作域修复、回归矩阵，以及 CRC64NVME + COMPOSITE 的独立证据门槛。
+  SILO 能拒绝三类非法 CompleteMultipartUpload 请求，却返回了错误的 S3 错误码，并漏掉了若干校验和类型验证路径。本文记录 AWS 证据、上游历史、操作域修复、type-only 善后、回归矩阵，以及 CRC64NVME + COMPOSITE 的独立证据门槛。
 tags: [设计, S3, 兼容性, 校验和]
 weight: 31
 draft: false
@@ -13,7 +14,8 @@ url: "/zh/blog/design/complete-multipart-checksum-errors/"
 
 本文是 [SILO #48](https://github.com/pgsty/silo/issues/48) 的完整设计、调查与验证记录，同时划清它与相关问题 [SILO #50](https://github.com/pgsty/silo/issues/50) 的决策边界。
 
-> **状态：** 实现与文档已分别提交为 [`pgsty/silo#74`](https://github.com/pgsty/silo/pull/74) 和 [`pgsty/silo.pgsty.com#6`](https://github.com/pgsty/silo.pgsty.com/pull/6)；对应提交已完成完整本地验证、远端 CI 与独立 Opus 5 Max 验收。合并、发布与部署仍是彼此独立、尚未完成的门槛。<br>
+> **状态：** [`pgsty/silo#74`](https://github.com/pgsty/silo/pull/74) 已合并为 `590aeaa7d`，[`pgsty/silo.pgsty.com#6`](https://github.com/pgsty/silo.pgsty.com/pull/6) 已合并为 `9805dd7`；对应变更完成完整本地验证、远端 CI 与独立 Opus 5 Max 验收。tag、release、package、image、deployment 与 production verification 仍是彼此独立、尚未完成的门槛。<br>
+> **2026-08-28 善后：** 带 sign-off 的服务器提交 `f7bc725d8` 关闭剩余 type-only 与非法 token 绕过，同时保持 CRC64NVME canonicalization 不变。完整本地、tagged、race、静态、构建与 Fable Max 验收均通过；push、远端 CI、merge、tag 与交付仍待后续。<br>
 > **归属：** [`pgsty/silo`](https://github.com/pgsty/silo)，即 SILO 服务端仓库。<br>
 > **实现范围：** 仅调整 `CompleteMultipartUpload` 的错误语义；不改变存储格式、校验和数学、依赖、Console、软件包或客户端。<br>
 > **独立决策：** #50 仍需 AWS 探针证明，不纳入本次修复。
@@ -32,6 +34,8 @@ url: "/zh/blog/design/complete-multipart-checksum-errors/"
 | --- | --- | --- |
 | 客户端提供的对象校验和与组装结果不一致 | `XAmzContentChecksumMismatch` | `BadDigest` |
 | 完成时的校验和类型与创建时不同，无论哪个方向 | 一个方向为 `InvalidArgument`；反方向可能放行 | `BadDigest` |
+| 完成时声明不同 type，但不发送 whole-object checksum | type assertion 被忽略 | `BadDigest` |
+| 完成时发送未知非空 type，无论是否同时带 checksum value | 可能被忽略或按 checksum 默认规则解释 | `InvalidArgument` |
 | 组合式上传的某个分片缺少校验和 | `InvalidPart` | `InvalidRequest`，并点名算法与分片号 |
 
 修复采用“完成操作专用错误类型”。它明确不修改 `hash.ChecksumMismatch` 的全局映射，因此 `PutObject`、`UploadPart`、流式 Trailer 等操作仍保持现有的 `XAmzContentChecksumMismatch` 契约。
@@ -113,6 +117,29 @@ The CRC32 checksum you specified did not match the calculated checksum.
 2. 对象类型是否相同（`COMPOSITE` 与 `FULL_OBJECT`）。
 
 对于两种对象类型在语法上都成立的算法——目前是 CRC32 与 CRC32C——两个不匹配方向现在都返回 `400 BadDigest`。SHA1/SHA256 与 `FULL_OBJECT` 的组合会更早被现有解析器以 `InvalidArgument` 拒绝；CRC64NVME 则是下文 #50 所述的规范化特例。基础算法不匹配仍保留独立的 `InvalidArgument` 路径，因为 #48 与引用的 AWS 类型契约不足以授权扩大修改范围。
+
+### Type-only assertion 与非法 token {#type-only-follow-up}
+
+第一轮 #48 修复记住了请求是否出现 `x-amz-checksum-type`，但对象层比较仍然嵌套在 `WantChecksum != nil` 下面。只有 completion 同时携带 checksum value 时，`WantChecksum` 才非空。因此客户端可以只发送 type assertion：
+
+```text
+CreateMultipartUpload:   CRC32 + COMPOSITE
+CompleteMultipartUpload: x-amz-checksum-type: FULL_OBJECT
+                         没有 x-amz-checksum-crc32 value
+```
+
+服务器会返回成功，并继续持久化创建阶段的 composite 状态。对象没有损坏，但服务器接受了与上传契约矛盾的显式完整性声明。
+
+解析器还有第二处不对称。在 completion 常见的“只有 checksum header、没有 algorithm header”路径中，`NOT_A_TYPE` 这样的未知值可能在同时携带 checksum 时被忽略。不能先构造 invalid bitmask，再依赖 `ChecksumType.ObjType()`：非法的 non-multipart 值可能落入默认 full-object 分支。原始枚举值必须先独立校验。
+
+善后修复把显式 raw type string 保存在 `ObjectOptions` 中，只接受 `COMPOSITE` 与 `FULL_OBJECT`，并让对象类型比较完全独立于 `WantChecksum`。顺序是刻意设计的：
+
+1. 所有未知非空 token 先以 `InvalidArgument` 拒绝；
+2. 提供 checksum value 时，再比较基础算法；
+3. 只要上传记录了 checksum algorithm，就比较显式 object type；
+4. 即使没有 object checksum value，显式 type mismatch 仍返回 `BadDigest`。
+
+CRC64NVME 继续作为刻意例外：raw `COMPOSITE` 会先规范化为 `FULL_OBJECT`，保持继承行为，等待 #50 AWS 探针。对于创建时没有记录 checksum algorithm 的上传，合法 type-only header 仍不参与比较，因为不存在可供 assertion 的创建阶段 checksum type；它的精确 AWS 错误语义尚无证据，本次没有扩大修改范围。
 
 ### 组合式分片缺少校验和 {#missing-part}
 
@@ -205,6 +232,9 @@ API 级测试通过签名 HTTP 请求运行，并覆盖单盘与纠删码两个�
 | 组合式对象摘要错误 | CRC32 分片值正确、组合对象值错误 | HTTP 400、`BadDigest`，覆盖独立的“校验和之校验和”路径 |
 | 类型错误：完整到组合 | 创建 CRC32 `FULL_OBJECT`，完成 `COMPOSITE` | HTTP 400、`BadDigest`，消息点名请求/期望类型 |
 | 类型错误：组合到完整 | 创建 CRC32 `COMPOSITE`，完成 `FULL_OBJECT` | HTTP 400、`BadDigest`，关闭旧包含关系绕过 |
+| 两个方向的 type-only mismatch | CRC32 创建为一种类型；完成时只声明另一种 type，不提供对象 checksum value | HTTP 400、`BadDigest`；不能通过省略 digest 绕过显式 assertion 校验 |
+| 非法显式 type | 完成时发送 `NOT_A_TYPE` 或小写 `full_object`，分别覆盖有/无 checksum value | HTTP 400、`InvalidArgument`，对象不提交 |
+| 匹配的 type-only assertion | 创建与完成均为 CRC32 `COMPOSITE`，省略对象 checksum value | 成功；执行合法 assertion，但不凭空要求 digest |
 | 省略可选类型头 | 创建 `FULL_OBJECT`，完成时只有摘要值、没有类型头 | 成功；省略不被视为显式 `COMPOSITE` |
 | 算法不匹配护栏 | 创建 CRC32，完成时使用 CRC32C | 仍为 `InvalidArgument` |
 | CRC64NVME #50 护栏 | CRC64NVME 创建时显式写 `COMPOSITE`，完成时再次显式写 `COMPOSITE` | 仍通过现有完整对象规范化成功；记录完成侧残留，而不是声称 #48 已验证原始类型字段 |
@@ -212,7 +242,7 @@ API 级测试通过签名 HTTP 请求运行，并覆盖单盘与纠删码两个�
 | 全局映射护栏 | 直接映射 `hash.ChecksumMismatch` | 仍为 `XAmzContentChecksumMismatch` |
 | UploadPart 护栏 | 客户端分片校验和值错误 | 仍为 `XAmzContentChecksumMismatch` |
 
-提交的类型不匹配回归测试使用 CRC32，独立验收探针还覆盖了 CRC32C。该探针同时确认：SHA1/SHA256 的 `FULL_OBJECT` 请求会更早停在现有的非法组合检查，而 CRC64NVME 仍会把显式 `COMPOSITE` 规范化。这些差异是协议边界，不应被误写成“所有算法都进入同一个错误映射器”。
+提交的类型不匹配回归测试使用 CRC32，独立验收探针还覆盖了 CRC32C。善后矩阵另外覆盖 type-only、unknown、lowercase、matching 与“非法 token 同时带 checksum”的场景。整套测试同时确认：SHA1/SHA256 的 `FULL_OBJECT` 请求会更早停在现有非法组合检查，而 CRC64NVME 仍会把显式 `COMPOSITE` 规范化。这些差异是协议边界，不应被误写成“所有算法都进入同一个错误映射器”。
 
 聚焦验证命令：
 
@@ -254,18 +284,19 @@ ok  github.com/minio/minio/internal/hash   0.566s
 
 第一轮最终复审结论为 **FINAL GO、无阻断项**。Claude 明确撤回了先前的错误码疑问，同意接受 #48、推迟 #50，确认新增护栏保持了所有有意不变的行为，并确认中英文不存在漂移。
 
-随后又使用 Claude Code `claude-opus-5`、最高推理强度进行了独立验收，结论为 **ACCEPT、无阻断项**。它对修复前代码端到端复现了“组合式上传冒充 `FULL_OBJECT`”的绕过，验证新增 API 断言会在旧代码上失败，并双向探测了全部五种校验和算法。其发现的残留边界在此明确披露，而不是悄悄并入“验收通过”的结论。
+随后又使用 Claude Code `claude-opus-5`、最高推理强度进行了独立验收，结论为 **ACCEPT、无阻断项**。它对修复前代码端到端复现了“组合式上传冒充 `FULL_OBJECT`”的绕过，验证新增 API 断言会在旧代码上失败，并双向探测了全部五种校验和算法。
 
-仍有六个修复前就存在或有意推迟、且不阻断本次工作的观察：
+2026-08-28 的善后 diff 又接受了一次本机 Fable Max 镜像审查，结论为 **GO**，没有 P0–P2。主审独立核查七条 P3：五条是非阻断边界，另外两条因果推断被真实 config 与 key-rotation 调用链否定。审查确认 raw 非法 type 会在规范化前拒绝、type-only mismatch 会执行、源 checksum 解密仍收到完整请求、CRC64NVME canonicalization 完全未动。
+
+仍有五个修复前就存在或有意推迟、且不阻断本次工作的观察：
 
 - SHA1/SHA256 的 `FULL_OBJECT` 组合会被现有解析器提前以 `InvalidArgument` 拒绝；只有 CRC32/CRC32C 能进入两个类型不匹配方向；
 - CRC64NVME 会把任意类型值视为完整对象状态，因此完成时显式写 `COMPOSITE` 仍会在 #50 AWS 探针结论出来前经规范化后被接受；
 - 如果创建阶段没有记录校验和算法、完成阶段却提供对象校验和，SILO 会返回 `BadDigest`；AWS 文档说明该值应被接受并忽略，应另立兼容性问题处理；
 - 组合式分片数不匹配与摘要值不匹配都会成为 `BadDigest`，并使用同一描述；
-- 完整对象校验和值如果带 `-N` 后缀，后缀会被忽略，但摘要本身仍会验证；
-- 未知且非空的 `x-amz-checksum-type` 会被解析成组合式，而不是直接拒绝。
+- 完整对象校验和值如果带 `-N` 后缀，后缀会被忽略，但摘要本身仍会验证。
 
-它们都不是本补丁引入的，也不改变 #48 结论。如果未来要追求更严格的消息或非法请求头兼容性，应分别立项处理。
+它们都不是这些补丁引入的，也不改变 #48 结论。如果未来要追求更严格的消息或非法请求头兼容性，应分别立项处理。
 
 ## 为什么不顺便修 #50 {#issue-50}
 
@@ -298,7 +329,7 @@ ok  github.com/minio/minio/internal/hash   0.566s
 ## 兼容性与运维影响 {#impact}
 
 - **成功请求：** 校验语义不变，但省略可选的 `x-amz-checksum-type` 头不再被误判为显式 `COMPOSITE` 声明。这项有意的互操作性放宽会把旧实现错误返回的 400 改为成功。
-- **失败请求：** 除上述省略请求头的情况外，HTTP 状态仍为 400；受影响的 S3 错误码与消息改为 AWS 兼容语义。
+- **失败请求：** 除上述省略请求头的情况外，HTTP 状态仍为 400；受影响的 S3 错误码与消息改为 AWS 兼容语义。显式 type-only mismatch 现在会执行，未知非空 type 会在 bitmask 规范化之前以 `InvalidArgument` 拒绝。
 - **完整性：** 不减弱，并关闭反向类型绕过；任何失败完成都不会提交对象。
 - **存储数据：** 不改变格式、编码、元数据、纠删码布局；无需迁移或回填。
 - **性能：** 只有常数时间比较与错误构造；不增加数据读取或哈希遍历。
@@ -309,15 +340,18 @@ ok  github.com/minio/minio/internal/hash   0.566s
 
 ## 合并与发布门禁 {#gates}
 
-合并之前：
+| 门槛 | #48 基础修复 | 2026-08-28 善后 |
+| --- | --- | --- |
+| 设计与本地验证 | 完成 | 完成 |
+| 独立对抗评审 | 完成，ACCEPT | 完成，GO |
+| 带 sign-off 的服务器提交 | 完成 | 本地 `f7bc725d8` |
+| Push、远端 CI 与 merge | 已合并为 `590aeaa7d` | 尚未确认 |
+| 公共设计记录 | 已合并为 `9805dd7` | 本次文档更新仍在本地 |
+| Tag 与 release artifact | 尚未确认 | 尚未确认 |
+| Container image 与 package | 尚未确认 | 尚未确认 |
+| Deployment 与 production probe | 尚未确认 | 尚未确认 |
 
-1. 完成包级测试矩阵与格式检查；
-2. 对真实服务端 diff 和本文证据记录进行独立审查；
-3. 除非 AWS 原始响应改变结论，否则不得把 #50 混入补丁；
-4. 对最终提交运行远端 DCO、Go CI、漏洞与发布流水线检查；
-5. 合并前确认分支仍基于最新 SILO `main`。
-
-合并之后，仓库集成、发布制品、容器镜像、部署与生产探针必须分别记录。任何一项都不能由本地测试或文档构建结果推导出来。
+善后提交必须继续把 #50 排除在外，除非 AWS 原始响应改变决策；最终提交还需运行远端 DCO、Go CI、漏洞与 release pipeline，并基于当前 SILO `main` 合并。仓库集成、release artifact、image、deployment 与 production probe 仍是独立门槛，不能由本地测试或文档构建结果推导。
 
 ## 结论 {#conclusion}
 

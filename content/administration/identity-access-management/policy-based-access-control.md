@@ -1194,7 +1194,7 @@ Allows list groups permission
 
 *policy-action*
 
-Allows enable group permission
+Allows changing a group's target status to `enabled`. It does not authorize disabling a group. See [User and Group Status Permissions](/blog/design/user-status-permissions/).
 
 <a id="policy-action.admin:DisableGroup"></a>
 
@@ -1202,7 +1202,7 @@ Allows enable group permission
 
 *policy-action*
 
-Allows disable group permission
+Allows changing a group's target status to `disabled`. It does not authorize enabling a group. Grant both actions when a role manages the complete group lifecycle.
 
 <a id="policy-action.admin:CreatePolicy"></a>
 

@@ -100,6 +100,8 @@ MinIO supports the following AWS S3 headers for copying an SSE-C encrypted objec
 - `X-Amz-Copy-Source-Server-Side-Encryption-Key` set to the encryption key value. The copy operation will fail if the specified key does not match the key used to SSE-C encrypt the object.
 - `X-Amz-Copy-Source-Server-Side-Encryption-Key-MD5` set to the 128-bit MD5 digest of the encryption key.
 
+When source and destination use different SSE-C keys, provide both header sets: the `Copy-Source-*` headers identify the source key, while the ordinary `Server-Side-Encryption-Customer-*` headers identify the destination key. SILO keeps these contexts separate after commit, so CopyObject checksum fields in XML and HTTP headers are decrypted with the destination key. See [Two SSE-C Keys, One CopyObject Response](/blog/design/copyobject-ssec-checksum-response/).
+
 The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible SDKs include specific syntax for setting headers. Certain [`mc`](/reference/minio-mc/#command-mc) commands like [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) include specific arguments for enabling SSE-S3 encryption:
 
 ```shell

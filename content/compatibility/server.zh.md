@@ -248,7 +248,8 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 | Snowball               | 先授权后解包 tar；流式 trailer 绕过无法在后续失败前写入对象                                                                                                                     |
 | S3 Select 记录限制         | CSV 输入、JSON Lines 输入和输出记录超过 1 MiB 时返回 `OverMaxRecordSize` 事件。JSON Lines 始终使用有界 reader（在支持 SIMD 的 CPU 上可能变慢），JSON 解析错误为 `JSONParsingError`，已完成记录可先于终止错误送达 |
 | 流式响应                   | tracking writer 实现 `Flush`；Write/Flush 会记录隐式 HTTP 200。ListenBucketNotification/watch 流及 S3 Select keepalive 能及时送达，审计/状态指标也能记录已提交状态                       |
-| Multipart 整对象 checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME 完成时可完全省略每 part checksum；只要提供任意一个仍会校验；COMPOSITE 仍要求每个 part。零字节 multipart 对象 checksum 会正确保存                             |
+| Multipart 整对象 checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME 完成时可完全省略每 part checksum；只要提供任意一个仍会校验；COMPOSITE 仍要求每个 part。即使不提供对象 checksum value，显式 completion type 仍会校验：不匹配返回 `BadDigest`，未知 type 返回 `InvalidArgument`。CRC64NVME canonicalization 保持不变。零字节 multipart 对象 checksum 会正确保存 |
+| CopyObject checksum 响应 | CopyObject XML 与 HTTP header 使用目标加密上下文报告已提交 checksum。SSE-C 源 key A 与目标 key B 严格分开；同对象换钥会用新 key 返回 checksum 字段。存储数据与 checksum format 均不改变 |
 | Multipart part 顺序      | 重复或非递增 part number 在组装前以 `InvalidPartOrder` 失败；允许空洞及不从 1 开始；upload 保留供重试                                                                                 |
 | 纠删码读缓冲池                | 恢复正确 shard buffer 所有权，避免池失效以及可能造成卡死、损坏或严重性能下降的错误缓冲关联                                                                                                     |
 | 更新缓冲                   | 返回的下载 buffer 具有正确所有权；公开更新器随后已禁用，所以当前受支持升级路径不会运行该代码                                                                                                       |

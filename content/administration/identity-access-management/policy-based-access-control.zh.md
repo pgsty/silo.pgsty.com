@@ -1194,7 +1194,7 @@ MinIO 支持以下 action，用于为 [`mc admin`](/zh/reference/minio-mc-admin/
 
 *policy-action*
 
-允许启用组
+允许把组的目标状态改为 `enabled`，但不能据此禁用组。详见[用户与组状态权限](/zh/blog/design/user-status-permissions/)。
 
 <a id="policy-action.admin:DisableGroup"></a>
 
@@ -1202,7 +1202,7 @@ MinIO 支持以下 action，用于为 [`mc admin`](/zh/reference/minio-mc-admin/
 
 *policy-action*
 
-允许禁用组
+允许把组的目标状态改为 `disabled`，但不能据此启用组。负责完整组生命周期的角色需要同时授予两个 action。
 
 <a id="policy-action.admin:CreatePolicy"></a>
 

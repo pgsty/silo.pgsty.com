@@ -2,9 +2,10 @@
 title: "BadDigest, InvalidRequest, and the CompleteMultipartUpload Checksum Contract"
 linkTitle: "Multipart Checksum Errors"
 date: 2026-08-27
+lastmod: 2026-08-28
 author: "Ruohang Feng"
 summary: >
-  SILO rejected three invalid CompleteMultipartUpload requests, but returned the wrong S3 error codes and missed one checksum-type mismatch direction. This record establishes the AWS evidence, upstream history, root cause, operation-scoped repair, regression matrix, and the separate evidence gate for CRC64NVME plus COMPOSITE.
+  SILO rejected three invalid CompleteMultipartUpload requests, but returned the wrong S3 error codes and missed checksum-type validation paths. This record establishes the AWS evidence, upstream history, operation-scoped repair, type-only follow-up, regression matrix, and the separate evidence gate for CRC64NVME plus COMPOSITE.
 tags: [Design, S3, Compatibility, Checksum]
 weight: 31
 draft: false
@@ -13,7 +14,8 @@ url: "/blog/design/complete-multipart-checksum-errors/"
 
 This is the design, investigation, and verification record for [SILO #48](https://github.com/pgsty/silo/issues/48), with the decision boundary for the related [SILO #50](https://github.com/pgsty/silo/issues/50).
 
-> **Status:** implementation and documentation committed in [`pgsty/silo#74`](https://github.com/pgsty/silo/pull/74) and [`pgsty/silo.pgsty.com#6`](https://github.com/pgsty/silo.pgsty.com/pull/6); full local verification, remote CI, and independent Opus 5 Max acceptance review complete at the linked commits. Merge, release, and deployment remain separate pending gates.<br>
+> **Status:** [`pgsty/silo#74`](https://github.com/pgsty/silo/pull/74) merged as `590aeaa7d`, and [`pgsty/silo.pgsty.com#6`](https://github.com/pgsty/silo.pgsty.com/pull/6) merged as `9805dd7`; full local verification, remote CI, and independent Opus 5 Max acceptance review completed on the linked changes. Tag, release, package, image, deployment, and production verification remain separate pending gates.<br>
+> **2026-08-28 follow-up:** signed-off server commit `f7bc725d8` closes the remaining type-only and invalid-token bypass without changing CRC64NVME canonicalization. Complete local, tagged, race, static, build, and Fable Max verification passed; push, remote CI, merge, tag, and delivery remain pending.<br>
 > **Owner:** [`pgsty/silo`](https://github.com/pgsty/silo), the SILO server repository.<br>
 > **Implementation scope:** `CompleteMultipartUpload` error semantics only; no storage-format, checksum-math, dependency, Console, package, or client change.<br>
 > **Independent decision:** #50 remains probe-gated and is not part of this repair.
@@ -32,6 +34,8 @@ The accepted behavior is:
 | --- | --- | --- |
 | Supplied object checksum does not match the assembled object | `XAmzContentChecksumMismatch` | `BadDigest` |
 | Completion checksum type differs from initiation, in either direction | one direction `InvalidArgument`; reverse direction could pass | `BadDigest` |
+| Completion declares a different type but sends no whole-object checksum | type assertion ignored | `BadDigest` |
+| Completion sends an unknown non-empty type, with or without a checksum value | could be ignored or interpreted through checksum defaults | `InvalidArgument` |
 | A composite completion omits a checksum for a part | `InvalidPart` | `InvalidRequest`, naming the algorithm and part |
 
 The repair uses completion-specific error types. It deliberately does **not** change the global mapping of `hash.ChecksumMismatch`, so `PutObject`, `UploadPart`, streaming trailers, and other operations retain their existing `XAmzContentChecksumMismatch` contract.
@@ -113,6 +117,29 @@ The repair normalizes both values into multipart checksum types, then compares:
 2. object type equality (`COMPOSITE` versus `FULL_OBJECT`).
 
 For algorithms whose two object-type forms are both syntactically accepted—currently CRC32 and CRC32C—both mismatch directions now return `400 BadDigest`. SHA1 and SHA256 with `FULL_OBJECT` are rejected earlier as `InvalidArgument`; CRC64NVME is the canonicalized special case discussed under #50 below. Base-algorithm mismatch remains a separate `InvalidArgument` path because #48 and the cited AWS type contract do not authorize broadening that behavior.
+
+### Type-only assertions and invalid tokens {#type-only-follow-up}
+
+The first #48 repair remembered whether `x-amz-checksum-type` was present, but its object-layer comparison was still nested under `WantChecksum != nil`. `WantChecksum` is populated only when completion carries a checksum value. A caller could therefore send a type assertion without a whole-object checksum:
+
+```text
+CreateMultipartUpload:   CRC32 + COMPOSITE
+CompleteMultipartUpload: x-amz-checksum-type: FULL_OBJECT
+                         no x-amz-checksum-crc32 value
+```
+
+The server returned success and persisted the initiated composite state. It did not corrupt the object, but it accepted an explicit integrity assertion that contradicted the upload contract.
+
+There was a second parser asymmetry. In the header-without-algorithm path used by completion, an unknown value such as `NOT_A_TYPE` could be ignored when a checksum header was also present. Relying on `ChecksumType.ObjType()` after creating an invalid bitmask would not be safe: an invalid non-multipart value can fall through to the full-object default. Raw enum validation must happen first.
+
+The follow-up stores the explicit raw type string in `ObjectOptions`, accepts only `COMPOSITE` or `FULL_OBJECT`, and compares it with the initiated multipart type independently of `WantChecksum`. The order is deliberate:
+
+1. reject every unknown non-empty token as `InvalidArgument`;
+2. compare the base algorithm when a checksum value is supplied;
+3. compare the explicit object type whenever the upload recorded a checksum algorithm;
+4. report an explicit type mismatch as `BadDigest` even when no object checksum value was supplied.
+
+CRC64NVME remains a deliberate exception. A raw `COMPOSITE` token is normalized to `FULL_OBJECT` before comparison, preserving the inherited behavior pending the #50 AWS probe. A legal type-only header on an upload that recorded no checksum algorithm remains outside the comparison because there is no initiated checksum type to assert against; its exact AWS error semantics remain unproven and were not expanded into this repair.
 
 ### Missing composite part checksum {#missing-part}
 
@@ -205,6 +232,9 @@ The API-level tests exercise signed HTTP requests through both the single-drive 
 | Composite object digest mismatch | Correct CRC32 part values, wrong composite object value | HTTP 400, `BadDigest`; covers the separate checksum-of-checksums path |
 | Type mismatch: full to composite | Initiate CRC32 `FULL_OBJECT`, complete `COMPOSITE` | HTTP 400, `BadDigest`, provided/expected types named |
 | Type mismatch: composite to full | Initiate CRC32 `COMPOSITE`, complete `FULL_OBJECT` | HTTP 400, `BadDigest`; closes old containment bypass |
+| Type-only mismatch in both directions | Initiate one CRC32 type; complete with the opposite type and no object checksum value | HTTP 400, `BadDigest`; the explicit assertion cannot bypass validation by omitting the digest |
+| Invalid explicit type | Complete with `NOT_A_TYPE` or lowercase `full_object`, with and without a checksum value | HTTP 400, `InvalidArgument`, no object committed |
+| Matching type-only assertion | Initiate and complete CRC32 `COMPOSITE`, omit object checksum value | Success; the valid assertion is enforced without inventing a required digest |
 | Omitted optional type | Initiate `FULL_OBJECT`, complete with checksum value but no type header | Success; omission is not treated as explicit `COMPOSITE` |
 | Algorithm mismatch guard | Initiate CRC32, complete with CRC32C | Still `InvalidArgument` |
 | CRC64NVME #50 guard | Initiate CRC64NVME with explicit `COMPOSITE`, then complete with explicit `COMPOSITE` | Still succeeds through existing full-object canonicalization; records the completion-side residue rather than claiming #48 validates the raw type token |
@@ -212,7 +242,7 @@ The API-level tests exercise signed HTTP requests through both the single-drive 
 | Global-mapping guard | Direct `hash.ChecksumMismatch` mapping | Still `XAmzContentChecksumMismatch` |
 | UploadPart guard | Wrong client part checksum | Still `XAmzContentChecksumMismatch` |
 
-The committed type-mismatch regression uses CRC32, while an independent acceptance probe covered CRC32C as well. The same probe confirmed that SHA1/SHA256 `FULL_OBJECT` requests stop earlier at the existing invalid-combination check and that CRC64NVME still canonicalizes an explicit `COMPOSITE` token. Those distinctions are protocol boundaries, not untested claims that every algorithm reaches the same error mapper.
+The committed type-mismatch regression uses CRC32, while an independent acceptance probe covered CRC32C as well. The follow-up additionally covers type-only, unknown, lowercase, matching, and checksum-bearing invalid-token cases. The same matrix confirms that SHA1/SHA256 `FULL_OBJECT` requests stop earlier at the existing invalid-combination check and that CRC64NVME still canonicalizes an explicit `COMPOSITE` token. Those distinctions are protocol boundaries, not untested claims that every algorithm reaches the same error mapper.
 
 Focused verification command:
 
@@ -254,18 +284,19 @@ One first-review concern was rejected by primary evidence: it questioned whether
 
 The final first-round re-review verdict was **FINAL GO, no blockers**. It explicitly withdrew the earlier error-code concern, agreed with accepting #48 and deferring #50, verified that the new guards preserve the intended non-changes, and found no English/Chinese drift.
 
-A subsequent independent acceptance run used Claude Code `claude-opus-5` with maximum effort. It returned **ACCEPT, no blocking findings**, reproduced the old composite-as-`FULL_OBJECT` bypass end to end against the pre-fix code, verified that the new API assertions fail against that code, and probed all five checksum algorithms in both type directions. Its residual findings are disclosed here instead of being silently folded into the acceptance verdict.
+A subsequent independent acceptance run used Claude Code `claude-opus-5` with maximum effort. It returned **ACCEPT, no blocking findings**, reproduced the old composite-as-`FULL_OBJECT` bypass end to end against the pre-fix code, verified that the new API assertions fail against that code, and probed all five checksum algorithms in both type directions.
 
-Six pre-existing or deliberately deferred, non-blocking observations remain outside this repair:
+The 2026-08-28 follow-up received a separate local Fable Max mirror review over the complete uncommitted release-review diff. It returned **GO**, with no P0–P2 findings. The primary review independently checked its seven P3 observations: five were non-blocking boundaries, while two proposed causes were disproved by the actual config and key-rotation call paths. The review confirmed that raw invalid types are rejected before normalization, type-only mismatch is enforced, source-side checksum decryption still receives the full request, and CRC64NVME canonicalization remains untouched.
+
+Five pre-existing or deliberately deferred, non-blocking observations remain outside these repairs:
 
 - SHA1/SHA256 `FULL_OBJECT` combinations are rejected by the existing parser as `InvalidArgument` before the new type-mismatch mapper; only CRC32/CRC32C reach both mismatch directions;
 - CRC64NVME treats any type value as full-object state, so completion with an explicit `COMPOSITE` token is still accepted through canonicalization pending the #50 AWS probe;
 - when initiation recorded no checksum algorithm but completion supplies an object checksum, SILO returns `BadDigest`; AWS documentation says such a value is accepted and ignored, so this should be triaged as a separate compatibility issue;
 - composite part-count and value mismatches both become `BadDigest` with the same description;
-- a full-object checksum carrying a `-N` suffix has that suffix ignored while its digest is still validated;
-- an unrecognized non-empty `x-amz-checksum-type` is parsed as composite rather than rejected.
+- a full-object checksum carrying a `-N` suffix has that suffix ignored while its digest is still validated.
 
-None is introduced by this patch, and none changes the #48 decision. They should be triaged separately if strict message or invalid-header parity becomes a maintenance priority.
+None is introduced by these patches, and none changes the #48 decision. They should be triaged separately if strict message or invalid-header parity becomes a maintenance priority.
 
 ## Why #50 is not included {#issue-50}
 
@@ -298,7 +329,7 @@ Only a captured rejection authorizes replacing canonicalization with validation.
 ## Compatibility and operational impact {#impact}
 
 - **Successful requests:** checksum semantics are unchanged, except that omitting the optional `x-amz-checksum-type` header is no longer misclassified as an explicit `COMPOSITE` assertion. That intentional interoperability relaxation changes the old erroneous 400 into success.
-- **Rejected requests:** apart from that omitted-header case, HTTP status remains 400; the affected S3 error code and message become AWS-compatible.
+- **Rejected requests:** apart from that omitted-header case, HTTP status remains 400; the affected S3 error code and message become AWS-compatible. Explicit type-only mismatch is now enforced, and an unknown non-empty type is rejected as `InvalidArgument` before bitmask normalization.
 - **Integrity:** unchanged or stronger. The reverse type-bypass is closed; no failed completion commits an object.
 - **Stored data:** no format, checksum encoding, metadata, erasure layout, migration, or backfill change.
 - **Performance:** constant-time comparisons and error construction only; no additional data reads or hashing passes.
@@ -309,15 +340,18 @@ Only a captured rejection authorizes replacing canonicalization with validation.
 
 ## Merge and release gates {#gates}
 
-Before merge:
+| Gate | Base #48 repair | 2026-08-28 follow-up |
+| --- | --- | --- |
+| Design and local verification | complete | complete |
+| Independent adversarial review | complete, ACCEPT | complete, GO |
+| Signed-off server commit | complete | local `f7bc725d8` |
+| Push, remote CI, and merge | merged as `590aeaa7d` | not established |
+| Public design record | merged as `9805dd7` | this documentation update is local |
+| Tag and release artifacts | not established | not established |
+| Container image and package | not established | not established |
+| Deployment and production probe | not established | not established |
 
-1. complete the package-level test matrix and formatting checks;
-2. obtain an independent review of the actual server diff and this evidence record;
-3. keep #50 out of the patch unless a raw AWS transcript changes the decision;
-4. run remote DCO, Go CI, vulnerability, and release-pipeline checks on the final commit;
-5. confirm the branch is based on the current SILO `main` before merge.
-
-After merge, record repository integration, release artifact, container image, deployment, and production probe as separate gates. None can be inferred from a local test or a documentation build.
+The follow-up must keep #50 out unless a raw AWS transcript changes the decision, run remote DCO/Go CI/vulnerability/release-pipeline checks on its final commit, and merge from the current SILO `main`. Repository integration, release artifact, image, deployment, and production probe remain independent gates; none can be inferred from a local test or documentation build.
 
 ## Conclusion {#conclusion}
 

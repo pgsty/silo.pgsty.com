@@ -161,6 +161,8 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 
 Specify any other [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) or server command-line options as required by your deployment.
 
+`MINIO_CONFIG_ENV_FILE` is parsed by the server; it is not sourced as a shell script. Quote values when leading or trailing spaces are significant. Named configuration targets may contain visible punctuation such as `my-hook`; malformed keys, NUL, and invisible characters stop startup with a value-redacted file-and-line error. See [Config Environment Files Are Not Shell Scripts](/blog/design/config-env-file/).
+
 ### 4. Start the MinIO Server {#start-the-minio-server}
 
 The following command starts the MinIO Server attached to the current terminal/shell window:

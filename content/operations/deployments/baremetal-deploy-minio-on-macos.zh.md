@@ -161,6 +161,8 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 
 请根据部署需要，指定其他 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 或 server 命令行选项。
 
+`MINIO_CONFIG_ENV_FILE` 由服务器自行解析，并不会作为 shell 脚本 source。需要保留 value 首尾空格时必须加引号；命名配置 target 可以包含 `my-hook` 这样的可见标点。畸形键、NUL 与不可见字符会阻止启动，并返回不含 value 的文件/行号错误。详见[配置环境文件不是 Shell 脚本](/zh/blog/design/config-env-file/)。
+
 ### 4. 启动 MinIO Server {#minio-server}
 
 以下命令会启动附着在当前终端/shell 窗口上的 MinIO Server：
