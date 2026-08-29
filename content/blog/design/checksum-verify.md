@@ -57,6 +57,30 @@ bounded workers, download limits, JSON output, and an optional JSON Lines report
 It does not verify `COMPOSITE` checksums, infer type from an ETag, inspect
 `xl.meta`, identify the historical writer with certainty, or repair metadata.
 
+## Server checksum compatibility boundary {#server-boundary}
+
+Amazon S3 currently defines ten additional-checksum algorithms. This SILO
+release implements CRC32, CRC32C, CRC64NVME, SHA1, and SHA256. MD5, SHA512,
+XXHASH64, XXHASH3, and XXHASH128 are not persisted or verified yet.
+
+An unsupported `x-amz-checksum-*` value or trailer is rejected with HTTP 400
+`InvalidArgument`; SILO no longer accepts the object while silently discarding
+the caller's integrity assertion. This also means cross-vendor replication of
+an object carrying one of the five unsupported algorithms fails visibly and
+must be retried with a supported algorithm. Supported SDK control headers such
+as `x-amz-sdk-checksum-algorithm` remain accepted when paired with a supported
+value or trailer.
+
+CRC64NVME is a full-object checksum only. Requests combining CRC64NVME with
+`COMPOSITE` are rejected instead of being silently converted to `FULL_OBJECT`.
+Comma-separated checksum trailer names are parsed individually; declaring more
+than one checksum trailer remains invalid.
+
+The release deliberately rejects rather than adding five new persisted
+checksum type identifiers. Older nodes cannot interpret such identifiers
+safely during a rolling upgrade. Adding those algorithms requires a separate
+storage and mixed-version compatibility design.
+
 ## Read-only data path {#data-path}
 
 For every selected object, MCLI:

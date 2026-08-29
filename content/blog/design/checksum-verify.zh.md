@@ -50,6 +50,26 @@ manifest 给出的精确条目。它还支持 SSE-C key 映射、时间与大小
 V1 不验证 `COMPOSITE` checksum，不从 ETag 推断类型，不读取 `xl.meta`，不能确定
 历史 writer，也不会修复 metadata。
 
+## Server checksum 兼容边界 {#server-boundary}
+
+Amazon S3 当前定义了十种附加 checksum 算法。本次 SILO 实现 CRC32、
+CRC32C、CRC64NVME、SHA1 与 SHA256；MD5、SHA512、XXHASH64、XXHASH3、
+XXHASH128 尚未持久化或校验。
+
+不支持的 `x-amz-checksum-*` 值或 trailer 现在会明确返回 HTTP 400
+`InvalidArgument`，SILO 不再一边返回成功、一边静默丢弃调用方的完整性断言。
+这也意味着：从其他厂商复制携带上述五种未支持算法的对象时，复制会显式失败，
+必须改用已支持算法后重试。`x-amz-sdk-checksum-algorithm` 等 SDK 控制头本身
+仍可使用，但必须配合已支持的 checksum 值或 trailer。
+
+CRC64NVME 只支持整对象 checksum。CRC64NVME 与 `COMPOSITE` 的组合会被拒绝，
+不再静默改写为 `FULL_OBJECT`。逗号分隔的 checksum trailer 会逐项解析；
+同时声明多个 checksum trailer 仍属于非法请求。
+
+本次选择“明确拒绝”，而不是直接增加五种持久化 checksum 类型标识。
+旧节点无法在滚动升级期间安全解释新标识；完整支持这些算法需要单独设计
+存储格式与混合版本兼容方案。
+
 ## 只读数据路径 {#data-path}
 
 对每个候选对象，MCLI：
