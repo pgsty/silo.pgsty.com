@@ -14,7 +14,7 @@ url: "/zh/blog/design/bucket-cors-replication/"
 
 本文完整记录 [SILO PR #71](https://github.com/pgsty/silo/pull/71) 与发布善后任务 [SILO #75](https://github.com/pgsty/silo/issues/75) 的问题、评审、合并决策、对抗辩论和最终实现契约。
 
-> **状态：** PR #71 已合并为 [`e4e3007da`](https://github.com/pgsty/silo/commit/e4e3007da6d7d1198a6a050e34f84566d40a9654)。B2 收敛修复是 [PR #80](https://github.com/pgsty/silo/pull/80) 中的 [`724f8703d`](https://github.com/pgsty/silo/commit/724f8703d83f4c51859c7650b7f1da2c2a55548c)，其 DCO、CI、race、cross-compile 与漏洞检查共八项全部通过。B2+B3 组合方案是本地 signed commit `0eebc928f`；Opus 5 Max 组合终审 finding 已解决，parser、middleware、replication、namespace 与 legacy-repair 定向测试通过。完整组合验收刻意等方案与文档冻结后再安排。Issue #75 仍是发布阻断：尚未 merge、tag、打包、发布镜像、部署或完成生产验证。<br>
+> **状态：** PR #71 已合并为 [`e4e3007da`](https://github.com/pgsty/silo/commit/e4e3007da6d7d1198a6a050e34f84566d40a9654)。B2 收敛修复是 [PR #80](https://github.com/pgsty/silo/pull/80) 中的 [`724f8703d`](https://github.com/pgsty/silo/commit/724f8703d83f4c51859c7650b7f1da2c2a55548c)，其首轮 DCO、CI、race、cross-compile 与漏洞检查共八项全部通过。最终 B2+B3 代码是 signed commit `0eebc928f`；组合 Opus finding 已修复，全量 tagged/race/build/vet/lint/compatibility 门禁、真实本地双站点离线 DELETE/heal/restart 与 raw SigV4 B3 探针均通过。EN/ZH 记录通过 warning-fatal Hugo 构建、渲染链接检查和本地浏览器 QA。Issue #75 仍是发布阻断：尚未 merge、tag、打包、发布镜像、部署或完成生产验证。<br>
 > **归属：** [`pgsty/silo`](https://github.com/pgsty/silo) 负责服务端修改；这份公共设计记录归 [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com) 所有；Console UI 仍是独立交付。<br>
 > **决策：** 接受有价值的功能并保留贡献者成果，但在站点复制删除、恢复、通配符响应和窄幅协议善后正确收敛前，不允许发布。
 

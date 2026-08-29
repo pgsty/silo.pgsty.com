@@ -14,7 +14,7 @@ url: "/zh/blog/design/bucket-cors-wire-contract/"
 
 本文记录 [SILO PR #71](https://github.com/pgsty/silo/pull/71) 以 [`e4e3007da`](https://github.com/pgsty/silo/commit/e4e3007da6d7d1198a6a050e34f84566d40a9654) 合并后，桶级 CORS 的 B3 协议加固决策。范围只包括 S3 请求体、校验、checksum、匹配和浏览器响应契约。站点复制顺序、tombstone、heal、状态计数与通用 metadata 重构仍是 [SILO #75](https://github.com/pgsty/silo/issues/75) 下的独立工作。
 
-> **状态：** 独立 B3 实现是本地 commit `ae879f6cc`，最终 B2+B3 整合是 issue-75 分支上的 signed commit `0eebc928f`。组合 Opus 5 Max 评审保留了 strict parser、Validate、checksum、MaxAge、wildcard、`Origin: null` 与 fail-closed replication 契约，并发现、修正了一处冲突 helper 拼接错误和 legacy-invalid metadata 恢复风险。组合定向测试已经通过；完整组合验收刻意等代码与文档方案冻结后再安排。组合修改仍未 merge、tag、发布、部署或完成生产验证。<br>
+> **状态：** 独立 B3 实现是本地 commit `ae879f6cc`，最终 B2+B3 整合是 issue-75 分支上的 signed commit `0eebc928f`。组合 Opus 5 Max 评审保留了 strict parser、Validate、checksum、MaxAge、wildcard、`Origin: null` 与 fail-closed replication 契约，并发现、修正了一处冲突 helper 拼接错误和 legacy-invalid metadata 恢复风险。组合全量本地门禁、raw SigV4 B3 探针与真实双站点 CORS 复制/恢复均通过；EN/ZH 记录通过 warning-fatal 构建、渲染链接检查和本地浏览器 QA。组合修改仍未 merge、tag、发布、部署或完成生产验证。<br>
 > **决策：** 在第一个包含桶级 CORS 的 SILO 正式版本之前完成严格 B3 wire 契约。不能把无效输入规范化成有效配置，不能把补丁扩大成 site replication 重构，也不能用本地 B3 证据宣称整体发布 GO。
 
 ## 为什么这是发布阻断 {#problem}
