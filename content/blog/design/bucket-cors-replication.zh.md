@@ -14,7 +14,7 @@ url: "/zh/blog/design/bucket-cors-replication/"
 
 本文完整记录 [SILO PR #71](https://github.com/pgsty/silo/pull/71) 与发布善后任务 [SILO #75](https://github.com/pgsty/silo/issues/75) 的问题、评审、合并决策、对抗辩论和最终实现契约。
 
-> **状态：** PR #71 已合并为 [`e4e3007da`](https://github.com/pgsty/silo/commit/e4e3007da6d7d1198a6a050e34f84566d40a9654)。B2 收敛修复是 [PR #80](https://github.com/pgsty/silo/pull/80) 中的 [`724f8703d`](https://github.com/pgsty/silo/commit/724f8703d83f4c51859c7650b7f1da2c2a55548c)，其首轮 DCO、CI、race、cross-compile 与漏洞检查共八项全部通过。最终 B2+B3 代码是 signed commit `0eebc928f`；组合 Opus finding 已修复，全量 tagged/race/build/vet/lint/compatibility 门禁、真实本地双站点离线 DELETE/heal/restart 与 raw SigV4 B3 探针均通过。EN/ZH 记录通过 warning-fatal Hugo 构建、渲染链接检查和本地浏览器 QA。Issue #75 仍是发布阻断：尚未 merge、tag、打包、发布镜像、部署或完成生产验证。<br>
+> **状态：** 完整 B2+B3 服务端方案通过 [PR #80](https://github.com/pgsty/silo/pull/80) 合并为 [`b6ef7e430`](https://github.com/pgsty/silo/commit/b6ef7e430c336afe619a12a1072414e817e060fd)；最后的非对称状态计数回归通过 [PR #81](https://github.com/pgsty/silo/pull/81) 合并为 [`04d3d316d`](https://github.com/pgsty/silo/commit/04d3d316d2c657999ae78c2c20cae4c8ee421a80)。最终 `main` Go CI 与 VulnCheck 均通过。公开文档通过 [silo.pgsty.com PR #7](https://github.com/pgsty/silo.pgsty.com/pull/7) 合并，GitHub Pages 与 Cloudflare Pages 生产部署均成功，公开 EN/ZH 路由已验证 HTTP 200。[Issue #75](https://github.com/pgsty/silo/issues/75) 已按 completed 关闭。本轮善后没有创建 release tag、软件包或容器镜像。<br>
 > **归属：** [`pgsty/silo`](https://github.com/pgsty/silo) 负责服务端修改；这份公共设计记录归 [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com) 所有；Console UI 仍是独立交付。<br>
 > **决策：** 接受有价值的功能并保留贡献者成果，但在站点复制删除、恢复、通配符响应和窄幅协议善后正确收敛前，不允许发布。
 
