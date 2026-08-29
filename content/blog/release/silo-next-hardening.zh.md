@@ -60,6 +60,7 @@ CRC64NVME 只允许整对象 checksum；CRC64NVME + `COMPOSITE` 会被拒绝，
 - 每站点 totals 按该站点自己的有效 payload 统计，不再使用累计计数。Bucket policy
   与 quota 统计得到补齐；非法字段输出有界诊断，且不会吞掉同站点的其他桶统计。
   升级后，统计数可能下降或移动到真正持有配置的站点，这是修正后的结果。
+  Status 中的 `Has*` 现在表示“存在且有效”；空 quota 按未配置处理，而不是已复制配置。
 
 Policy、Tags、SSE、Quota、Versioning、Object Lock 的完整 source-time/tombstone
 收敛仍需 peer capability 设计后分阶段交付。本版本不得宣称所有继承 metadata

@@ -72,7 +72,8 @@ supported algorithm. See the [checksum verification design](/blog/design/checksu
   cumulative counters. Bucket policy and quota totals are now accurate;
   malformed fields emit bounded diagnostics without suppressing unrelated
   bucket statistics. Reported totals may therefore decrease or move to the
-  correct site after upgrade.
+  correct site after upgrade. Status `Has*` fields now mean present and valid;
+  an empty quota is treated as absent rather than replicated configuration.
 
 The wider source-timestamp/tombstone repair for policy, tags, SSE, quota,
 versioning, and Object Lock remains staged behind a peer-capability design.
