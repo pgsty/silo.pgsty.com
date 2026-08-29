@@ -146,7 +146,8 @@ No other command's progress or output behavior changes.
 
 ## Report, secrets, and operational cost {#operations}
 
-Report files are created with mode `0600`, must not already exist, and contain
+On POSIX systems report files are created with mode `0600`; Windows relies on
+the account's filesystem ACLs. Reports must not already exist and contain
 metadata/results rather than object bodies or SSE-C keys. The manifest likewise
 contains only bucket, key, and optional VersionID.
 

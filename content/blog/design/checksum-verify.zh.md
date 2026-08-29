@@ -126,7 +126,8 @@ quiet 参数，以及拿不到终端尺寸时自动启用、用于关闭进度 U
 
 ## Report、秘密与运行成本 {#operations}
 
-Report 文件以 `0600` 新建，目标必须不存在；它只包含 metadata 与结果，不包含对象体
+POSIX 系统上的 Report 文件以 `0600` 新建；Windows 使用账户的文件系统 ACL。
+目标必须不存在；它只包含 metadata 与结果，不包含对象体
 或 SSE-C key。Manifest 同样只保存 bucket、key 与可选 VersionID。
 
 校验会下载每个受支持对象的完整逻辑内容。运维人员应使用 `--dry-run`、`--max-size`、
