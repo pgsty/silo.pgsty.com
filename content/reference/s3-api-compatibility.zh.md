@@ -4,7 +4,7 @@ url: "/zh/reference/s3-api-compatibility/"
 weight: 250
 icon: fa-solid fa-cloud
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/s3-api-compatibility.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="s3-api"></a>
@@ -62,7 +62,8 @@ PutObjectAcl
 
 #### 与 S3 API 在多部分上传方面的差异 {#id5}
 
-- `ListMultipartUploads` 需要使用精确的对象名称作为前缀。
+- `ListMultipartUploads` 当前把非空 `prefix` 当成精确对象名，而不是词法对象键前缀。
+- prefix 为空时，结果来自节点本地的易失状态，并不具备 AWS 兼容的分页、marker 或 delimiter 行为。已验证的影响与修复方案参见 [Issue #79 设计与决策记录](/zh/blog/design/list-multipart-uploads/)。
 - `PutBucketLifecycle` 不支持 `AbortIncompleteMultipartUpload` 生命周期动作。
 
 ## 存储桶 API {#id6}

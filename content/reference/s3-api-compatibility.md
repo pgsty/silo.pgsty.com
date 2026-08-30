@@ -4,7 +4,7 @@ url: "/reference/s3-api-compatibility/"
 weight: 250
 icon: fa-solid fa-cloud
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/s3-api-compatibility.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="s3-api-compatibility"></a>
@@ -62,7 +62,8 @@ PutObjectAcl
 
 #### Differences from S3 APIs for Multipart Uploads {#differences-from-s3-apis-for-multipart-uploads}
 
-- `ListMultipartUploads` requires the exact object name as a prefix.
+- `ListMultipartUploads` currently treats a non-empty `prefix` as an exact object name instead of a lexical key prefix.
+- With an empty prefix, its result comes from node-local volatile state and does not provide AWS-compatible pagination, marker, or delimiter behavior. See the [issue #79 design and decision record](/blog/design/list-multipart-uploads/) for the verified impact and proposed repair.
 - The `AbortIncompleteMultipartUpload` lifecycle action is not supported with `PutBucketLifecycle`.
 
 ## Bucket APIs {#bucket-apis}
