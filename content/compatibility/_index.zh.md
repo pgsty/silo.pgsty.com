@@ -11,4 +11,4 @@ sidebar_expanded: true
 
 Silo 是 MinIO 的社区分支。本节记录 Silo 从 MinIO 继承了什么、在哪些地方有意做出不同选择，以及这对双向迁移意味着什么。
 
-内容按阅读顺序：[迁移指南](/zh/compatibility/migration/)（范围与 Docker）、[原生软件包迁移](/zh/compatibility/binary/)（RPM/DEB）、[服务器兼容性审计](/zh/compatibility/server/)、[mcli 客户端说明](/zh/compatibility/mcli/)。[特性设计](/zh/compatibility/feature/)子节记录相反的方向：Silo 在上游之外新增能力的设计文档。
+内容按阅读顺序：[迁移指南](/zh/compatibility/migration/)（范围与 Docker）、[原生软件包迁移](/zh/compatibility/binary/)（RPM/DEB）、[服务器兼容性审计](/zh/compatibility/server/)、[mcli 客户端说明](/zh/compatibility/mcli/)、[Console 说明](/zh/compatibility/console/)。[特性设计](/zh/compatibility/feature/)子节记录相反的方向：Silo 在上游之外新增能力的设计文档。
