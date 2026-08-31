@@ -2,7 +2,7 @@
 title: "Read-Only Checksum Audit and Reliable CLI Output"
 linkTitle: "Checksum Verify"
 date: 2026-08-29
-lastmod: 2026-08-29
+lastmod: 2026-09-01
 author: "Ruohang Feng"
 summary: >
   MCLI can audit stored S3 checksums against logical object bytes without mutating data. This record defines selection, classification, report and exit semantics, and the non-TTY output contract required by pipelines and CI.
@@ -16,10 +16,11 @@ This is the design and implementation record for MCLI's read-only checksum
 verification workflow and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5),
 the non-TTY output defect found during release review.
 
-> **Status:** implementation, local commits, real-S3 probes, subprocess tests,
-> full unit/race, lint, vet, branding, credits, cross-builds, and clean local
-> provenance are complete. Push, pull request, hosted CI, release, Server image
-> integration, and public documentation deployment remain separate gates.<br>
+> **Status:** shipped in [mcli 20260901](/blog/release/mcli-20260901/). The
+> command merged to `main` through pull requests [#8](https://github.com/pgsty/mc/pull/8)
+> and [#13](https://github.com/pgsty/mc/pull/13), is exercised against a real
+> SILO server in hosted CI, and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)
+> is closed. Bundling the client into the Server image remains a separate gate.<br>
 > **Owner:** [`pgsty/mc`](https://github.com/pgsty/mc).<br>
 > **Tracking:** [pgsty/mc#5](https://github.com/pgsty/mc/issues/5).<br>
 > **Safety boundary:** verification is read-only; repair is not part of this
@@ -31,7 +32,8 @@ Historical CopyObject implementations could calculate a stored additional
 checksum over transformed storage bytes instead of the logical bytes returned
 by S3. `mcli checksum verify` inventories objects and independently streams the
 logical body through the recorded algorithm. Each candidate becomes `MATCH`,
-`MISMATCH`, `NO_CHECKSUM`, `UNKNOWN_*`, or `SKIPPED_*`.
+`MISMATCH`, `NO_CHECKSUM`, `WOULD_VERIFY` (dry run), one of ten `UNKNOWN_*`
+classifications, or one of three `SKIPPED_*` results.
 
 The first implementation worked in a terminal but printed nothing when stdout
 was redirected. MCLI automatically marked non-TTY execution as quiet to disable
@@ -56,6 +58,9 @@ bounded workers, download limits, JSON output, and an optional JSON Lines report
 
 It does not verify `COMPOSITE` checksums, infer type from an ETag, inspect
 `xl.meta`, identify the historical writer with certainty, or repair metadata.
+The endpoint must report the checksum type (`x-amz-checksum-type`) alongside
+the checksum; on one that does not, every checksummed object is classified
+`UNKNOWN_CHECKSUM_TYPE` rather than guessed at.
 
 ## Read-only data path {#data-path}
 
@@ -86,10 +91,18 @@ Every candidate produces one stable result:
 | `UNKNOWN_*` | MCLI cannot make a reliable statement |
 | `SKIPPED_*` | A filter intentionally excluded the object |
 
-`--fail-on` accepts `mismatch`, `unknown`, `any`, or `none`. The default `any`
-returns exit 1 for mismatches and incomplete verification. Dry-run does not
-apply `--fail-on`. Argument, authentication, enumeration, and report-write
-failures remain command failures rather than object classifications.
+The summary carries `objects`, a `verified` count, the count of every result
+status, and `incomplete`. `verified` is `MATCH` plus `MISMATCH`: the only results
+that actually streamed a body through a hasher. A run that enumerated many
+objects and verified none is visible as such.
+
+`--fail-on` accepts `mismatch`, `unknown`, `no-checksum`, `any`, or `none`. The
+default `any` returns exit 1 for mismatches and incomplete verification.
+`no-checksum` returns exit 1 when any object carries no checksum **or when
+nothing was verified at all**, so an empty prefix or a stale manifest cannot
+pass as a clean audit. Dry-run does not apply `--fail-on`. Argument,
+authentication, enumeration, and report-write failures remain command failures
+rather than object classifications.
 
 In particular, `SKIPPED_TOO_LARGE` makes the default `any` return exit 1 because
 the size cap leaves the audit incomplete. Time-filter and delete-marker skips do
@@ -151,7 +164,9 @@ quiet, report-write failure, and MISMATCH/UNKNOWN exit status. It also includes
 real historical `MATCH`, `MISMATCH`, and unsupported-composite objects on a local
 S3 server.
 
-Local commits are not a release. Close [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)
-only after the code and this decision record are merged and hosted `main` CI is
-green. A signed tag, packages, container image, bundled Server client, public
-deployment, and production audit remain later, separately evidenced gates.
+The command shipped in [mcli 20260901](/blog/release/mcli-20260901/) from a
+signed tag at the tip of `main`, with the functional suite - including a
+checksum verification run against a real SILO server - green for that commit,
+and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) is closed. Bundling the
+client into the Server image and a production audit remain later, separately
+evidenced gates.

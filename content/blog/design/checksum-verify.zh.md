@@ -2,7 +2,7 @@
 title: "只读 Checksum 审计与可靠的 CLI 输出契约"
 linkTitle: "Checksum Verify"
 date: 2026-08-29
-lastmod: 2026-08-29
+lastmod: 2026-09-01
 author: "冯若航"
 summary: >
   MCLI 可以在不修改数据的前提下，将 S3 已存 checksum 与对象逻辑字节重新比对。本文定义候选选择、结果分类、report、退出码，以及管道和 CI 所依赖的 non-TTY 输出契约。
@@ -15,9 +15,11 @@ url: "/zh/blog/design/checksum-verify/"
 本文是 MCLI 只读 checksum 校验流程，以及发布审查中发现的 non-TTY 输出缺陷
 [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 的设计与实现记录。
 
-> **状态：** 实现、本地提交、真实 S3 探针、subprocess 测试、完整 unit/race、
-> lint、vet、品牌、CREDITS、跨平台构建及本地干净溯源已经完成。push、PR、
-> 托管 CI、发布、Server 镜像集成与公共文档部署仍是相互独立的后续门禁。<br>
+> **状态：** 已随 [mcli 20260901](/zh/blog/release/mcli-20260901/) 发布。命令经
+> pull request [#8](https://github.com/pgsty/mc/pull/8) 与 [#13](https://github.com/pgsty/mc/pull/13)
+> 合入 `main`，在托管 CI 中针对真实 SILO 服务器验证，
+> [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。把客户端打包进
+> Server 镜像仍是独立的后续门禁。<br>
 > **归属：** [`pgsty/mc`](https://github.com/pgsty/mc)。<br>
 > **跟踪：** [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)。<br>
 > **安全边界：** 本命令只读校验，不负责修复。
@@ -27,7 +29,7 @@ url: "/zh/blog/design/checksum-verify/"
 历史 CopyObject 实现可能在转换后的存储字节上计算 additional checksum，而不是在
 S3 返回给客户端的逻辑对象字节上计算。`mcli checksum verify` 会筛选对象，独立地
 把逻辑对象流送入已记录的算法，并把每个候选分类为 `MATCH`、`MISMATCH`、
-`NO_CHECKSUM`、`UNKNOWN_*` 或 `SKIPPED_*`。
+`NO_CHECKSUM`、`WOULD_VERIFY`（dry run）、十种 `UNKNOWN_*` 分类之一，或三种 `SKIPPED_*` 之一。
 
 首版实现在终端中工作正常，但 stdout 被重定向时完全不输出。MCLI 为了在非终端
 环境中禁用进度 UI，会自动把执行状态标记为 quiet；新命令错误地把这项内部状态
@@ -48,7 +50,9 @@ manifest 给出的精确条目。它还支持 SSE-C key 映射、时间与大小
 估计、有界 worker、下载限速、JSON 输出和可选的 JSON Lines report。
 
 V1 不验证 `COMPOSITE` checksum，不从 ETag 推断类型，不读取 `xl.meta`，不能确定
-历史 writer，也不会修复 metadata。
+历史 writer，也不会修复 metadata。端点必须随 checksum 一并报告其类型
+（`x-amz-checksum-type`）；对不报告类型的端点，每个带 checksum 的对象都会被归为
+`UNKNOWN_CHECKSUM_TYPE`，而不是靠猜。
 
 ## 只读数据路径 {#data-path}
 
@@ -76,8 +80,14 @@ S3 边界只允许 LIST、HEAD 与 GET；如果 mock endpoint 收到写方法，
 | `UNKNOWN_*` | MCLI 无法给出可靠判断 |
 | `SKIPPED_*` | 过滤器主动排除了对象 |
 
-`--fail-on` 支持 `mismatch`、`unknown`、`any` 与 `none`。默认 `any` 会在 mismatch
-或校验不完整时返回 exit 1。dry-run 不应用 `--fail-on`。参数、认证、枚举与 report
+summary 携带 `objects`、`verified` 计数、每种结果状态的计数以及 `incomplete`。
+`verified` 等于 `MATCH` 加 `MISMATCH`：只有这两种结果真正把对象体流过了哈希器。
+枚举了很多对象却一个都没核验的运行，会如实地显示出来。
+
+`--fail-on` 支持 `mismatch`、`unknown`、`no-checksum`、`any` 与 `none`。默认 `any`
+会在 mismatch 或校验不完整时返回 exit 1。`no-checksum` 在任一对象没有 checksum
+**或根本没有核验任何对象**时返回 exit 1，因此空前缀或过期的 manifest 不可能冒充
+一次干净的审计。dry-run 不应用 `--fail-on`。参数、认证、枚举与 report
 写入失败属于命令失败，而不是对象分类。
 
 其中，`SKIPPED_TOO_LARGE` 会让默认 `any` 返回 exit 1，因为大小上限使审计不完整；
@@ -130,6 +140,7 @@ mismatch，优先写入新 key 或新 version，验证替代对象后再显式�
 MISMATCH/UNKNOWN 退出码。真实本地 S3 还覆盖了历史 `MATCH`、`MISMATCH` 与不支持
 的 composite 对象。
 
-本地 commit 不是正式发布。只有代码与本文决策记录合并、托管 `main` CI green 后，
-才能关闭 [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)。签名 tag、软件包、容器
-镜像、Server 内置客户端、公共部署与生产审计仍是之后需要独立证明的门禁。
+该命令已随 [mcli 20260901](/zh/blog/release/mcli-20260901/) 从 `main` 顶端的签名
+tag 发布，功能套件 —— 包括针对真实 SILO 服务器的一次 checksum 校验 —— 对该提交
+全部通过，[pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。Server 内置
+客户端与生产审计仍是之后需要独立证明的门禁。
