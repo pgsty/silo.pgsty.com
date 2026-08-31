@@ -8,7 +8,7 @@ summary: >
   MCLI can audit stored S3 checksums against logical object bytes without mutating data. This record defines selection, classification, report and exit semantics, and the non-TTY output contract required by pipelines and CI.
 tags: [Design, S3, Compatibility, Checksum, mcli]
 weight: 28
-draft: true
+draft: false
 url: "/blog/design/checksum-verify/"
 ---
 

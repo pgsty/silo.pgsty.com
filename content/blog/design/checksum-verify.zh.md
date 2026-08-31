@@ -8,7 +8,7 @@ summary: >
   MCLI 可以在不修改数据的前提下，将 S3 已存 checksum 与对象逻辑字节重新比对。本文定义候选选择、结果分类、report、退出码，以及管道和 CI 所依赖的 non-TTY 输出契约。
 tags: [设计, S3, 兼容性, Checksum, mcli]
 weight: 28
-draft: true
+draft: false
 url: "/zh/blog/design/checksum-verify/"
 ---
 
