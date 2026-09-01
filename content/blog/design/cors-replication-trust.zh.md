@@ -159,6 +159,11 @@ Object-lock parser 过去只要看到原始 marker header，就会接受已经�
 | Batch replication PUT/Complete | 是 | 否 | `trusted`；目标凭据必须拥有 `s3:ReplicateObject` |
 | Proxy/readiness/validity probe | 独立 probe header | marker 不授予权限 | 保持 probe 行为；本修复不会剥离这些 header |
 
+`s3:ReplicateDelete` 是信任闸门，但不是 receiver 的唯一权限。为了兼容已经部署的
+目标端策略，可信复制删除仍要求 `s3:DeleteObject`；显式 Deny
+`s3:DeleteObjectVersion` 仍会阻止指定版本的清理。普通客户端不走这条兼容路径：
+显式 UUID 或 `versionId=null` 必须获得 `s3:DeleteObjectVersion` 的 Allow。
+
 如果要求所有可信请求都带 `REPLICA`，PutPart、multipart completion 与 batch replication 会立即回归；如果相信所有 marker，则漏洞会原样重现。已保存的 multipart provenance 在加密 raw part 上连接了这两个要求。
 
 ## CORS resident-only 状态机 {#cors-state-machine}
