@@ -256,6 +256,10 @@ MinIO 策略文档支持 IAM [S3 Action keys](https://docs.aws.amazon.com/IAM/la
 
 控制对 [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html) S3 API 操作的访问。
 
+此操作授权未显式指定版本的删除请求。在启用版本控制的存储桶上，该请求会创建
+delete marker。它不授权 `DELETE ?versionId=...`，也不授权 `DeleteObjects` 中
+携带 `VersionId` 的条目。
+
 支持以下额外[条件键](#minio-policy-conditions)：
 
 ```shell
@@ -519,6 +523,9 @@ s3:RequestObjectTag/<key>
 *policy-action*
 
 控制对 [DeleteObjectVersion](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectVersion.html) S3 API 操作的访问。
+
+此操作授权删除明确指定的 UUID 或显式 `null` 版本。在 `DeleteObjects` 中，SILO
+会对每个携带 `VersionId` 的条目独立检查该权限。
 
 支持以下附加 [condition keys](#minio-policy-conditions)：
 

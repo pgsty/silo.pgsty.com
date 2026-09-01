@@ -26,6 +26,18 @@ upstream_modified: false
 
 MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 系统进行访问管理。 用户或服务账户必须提供正确的策略操作和条件，才能对该存储桶和对象执行 `DELETE`。
 
+所需权限由请求是否显式指定版本决定，而不是仅由存储桶是否启用版本控制决定：
+
+| 请求 | 所需权限 |
+| --- | --- |
+| 未携带 `versionId` 的 `DELETE` | `s3:DeleteObject` |
+| 携带版本 UUID 的 `DELETE` | `s3:DeleteObjectVersion` |
+| 携带 `versionId=null` 的 `DELETE` | `s3:DeleteObjectVersion` |
+| `DeleteObjects` | 对 XML 中的每个条目独立判定 |
+
+显式 `Deny` 始终优先。`s3:versionid` 条件读取当前条目实际删除的版本 ID；外层
+`DeleteObjects` 请求上的查询参数不能覆盖条目自己的 `VersionId`。
+
 ## 未启用版本控制的对象 {#id5}
 
 如果对未启用版本控制的存储桶中的对象执行 `DELETE` 操作，其行为比较直接。 在确认用户或服务账户具有执行 `DELETE` 操作的权限后，MinIO 会永久删除该对象。
@@ -36,7 +48,10 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 
 启用版本控制后，`DELETE` 操作的行为会有所不同。
 
-用户或服务账户必须对该存储桶和对象具有 [`s3:DeleteObjectVersion`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.s3-DeleteObjectVersion) 操作权限。
+删除一个明确指定的版本需要
+[`s3:DeleteObjectVersion`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.s3-DeleteObjectVersion)
+权限。未指定版本 ID 的删除仍需要 `s3:DeleteObject`，它会创建 delete marker，
+而不会移除现有版本。
 
 ### 删除当前版本 {#id7}
 

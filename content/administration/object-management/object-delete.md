@@ -26,6 +26,20 @@ Any combination of the following factors may impact how `DELETE` operations func
 
 MinIO uses a [policy based access control](/administration/identity-access-management/policy-based-access-control/#minio-policy) system for access management. The user or service account must provide the correct policy action and conditions to allow a `DELETE` for the bucket and object.
 
+The required action is selected from the request, not merely from whether the
+bucket has versioning enabled:
+
+| Request | Required action |
+| --- | --- |
+| `DELETE` without `versionId` | `s3:DeleteObject` |
+| `DELETE` with a version UUID | `s3:DeleteObjectVersion` |
+| `DELETE` with `versionId=null` | `s3:DeleteObjectVersion` |
+| `DeleteObjects` | Evaluated independently for each XML entry |
+
+An explicit deny always takes precedence. Conditions using `s3:versionid` see
+the effective version ID of the object being deleted; a query parameter on the
+outer `DeleteObjects` request does not replace an entry's `VersionId`.
+
 ## Unversioned Objects {#unversioned-objects}
 
 When performing a `DELETE` operation on an object in a bucket that does not have versioning enabled, the operation is straightforward. After verifying the user or service account has permission to perform the `DELETE` operation, MinIO permanently removes the object.
@@ -36,7 +50,10 @@ The user or service account requesting the delete action the action must have th
 
 `DELETE` operations work differently when an object is versioned.
 
-The user or service account must have the [`s3:DeleteObjectVersion`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-DeleteObjectVersion) action permission for the bucket and object.
+Deleting a specifically named version requires
+[`s3:DeleteObjectVersion`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-DeleteObjectVersion).
+Deleting without a version ID still requires `s3:DeleteObject` and creates a
+delete marker instead of removing an existing version.
 
 ### Delete operations on the current version {#delete-operations-on-the-current-version}
 

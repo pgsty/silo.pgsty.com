@@ -133,6 +133,13 @@ The following policy provides permissions for enabling synchronization of replic
 - The `"EnableReplicationOnBucket"` statement grants permission for a remote target to retrieve bucket-level configuration for supporting replication operations on *all* buckets in the MinIO deployment. To restrict the policy to specific buckets, specify those buckets as an element in the `Resource` array similar to `"arn:aws:s3:::bucketName"`.
 - The `"EnableReplicatingDataIntoBucket"` statement grants permission for a remote target to synchronize data into *any* bucket in the MinIO deployment. To restrict the policy to specific buckets, specify those buckets as an element in the `Resource` array similar to `"arn:aws:s3:::bucketName/*"`.
 
+Replicated deletes on a SILO target use the established receiver contract
+`s3:DeleteObject` plus `s3:ReplicateDelete`. The replication credential does
+not also need an allow for `s3:DeleteObjectVersion`; however, an explicit deny
+on `s3:DeleteObjectVersion` still blocks the corresponding version purge. This
+internal contract does not change the permission for an ordinary S3 client,
+which needs `s3:DeleteObjectVersion` whenever it explicitly names a version.
+
 The following code creates a [MinIO-managed user](/administration/identity-access-management/minio-user-management/#minio-users) with the necessary policy. Replace `TARGET` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment on which you are configuring replication:
 
 ```shell

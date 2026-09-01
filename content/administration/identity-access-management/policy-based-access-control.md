@@ -256,6 +256,11 @@ Controls access to the [ListBuckets](https://docs.aws.amazon.com/AmazonS3/latest
 
 Controls access to the [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html) S3 API operation.
 
+This action authorizes a delete request that does not explicitly name a
+version. On a versioned bucket, that request creates a delete marker. It does
+not authorize `DELETE ?versionId=...` or a `DeleteObjects` entry containing
+`VersionId`.
+
 Supports the following additional [condition key](#minio-policy-conditions):
 
 ```shell
@@ -519,6 +524,10 @@ Controls access to the [GetBucketVersioning](https://docs.aws.amazon.com/AmazonS
 *policy-action*
 
 Controls access to the [DeleteObjectVersion](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectVersion.html) S3 API operation.
+
+This action authorizes deletion of an explicitly named UUID or the explicit
+`null` version. In `DeleteObjects`, SILO evaluates this action independently for
+each entry that contains `VersionId`.
 
 Supports the following additional [condition keys](#minio-policy-conditions):
 
