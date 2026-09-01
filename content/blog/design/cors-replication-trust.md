@@ -14,7 +14,7 @@ url: "/blog/design/cors-replication-trust/"
 
 This record describes the CORS hot-path and replication-request trust repair committed locally in SILO as `938603458`.
 
-> **Status on 2026-09-01:** implementation, focused and race tests, the complete server package suite, object-lock tests, vet, build, two rounds of Fable 5 design review, an Opus 5 adversarial implementation review, and a real local TLS two-site replication run are complete. The server commit exists only on a local branch; push, pull request, remote CI, merge, tag, package, image, deployment, and production verification remain separate gates.<br>
+> **Status on 2026-09-02:** implementation, focused and race tests, the complete server package suite, object-lock tests, vet, build, two rounds of Fable 5 design review, repeated Opus 5 adversarial acceptance, and a real local TLS two-site replication run are complete. The candidate is pushed as [pgsty/silo#101](https://github.com/pgsty/silo/pull/101); remote CI, merge, tag, package, image, deployment, and production verification remain separate gates.<br>
 > **Scope:** HTTP request interpretation before and inside the S3 handlers. No S3 wire field, object format, bucket metadata format, replication protocol, encryption format, or client command changes.<br>
 > **Security properties:** pre-authentication CORS processing performs no object-layer I/O; a header never grants replication semantics by itself; SSE-C ciphertext paths and replica-only metadata require both authentication and the corresponding replication permission.
 

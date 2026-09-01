@@ -10,8 +10,9 @@ draft: false
 url: "/zh/blog/release/delete-object-version-authorization/"
 ---
 
-> **发布状态：** 此变更已实现，正在
-> [pgsty/silo#58](https://github.com/pgsty/silo/issues/58) 中评审。本文发布本身不代表
+> **发布状态：** 此变更已在
+> [pgsty/silo#104](https://github.com/pgsty/silo/pull/104) 中实现，对应
+> [Issue #58](https://github.com/pgsty/silo/issues/58)。本文发布本身不代表
 > 某个服务器版本、软件包、镜像或部署已经包含该变更。
 
 SILO 现在按照请求实际执行的删除类型选择权限：

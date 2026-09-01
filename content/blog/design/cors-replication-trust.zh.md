@@ -14,7 +14,7 @@ url: "/zh/blog/design/cors-replication-trust/"
 
 本文记录 SILO 本地提交 `938603458` 中的 CORS 热路径与复制请求信任边界修复。
 
-> **截至 2026-09-01 的状态：** 实现、定向与 race 测试、完整服务端 package 套件、对象锁测试、vet、build、两轮 Fable 5 设计评审、Opus 5 实现对抗验收，以及真实本地 TLS 双站复制均已完成。服务端提交仅存在于本地分支；push、PR、远端 CI、merge、tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
+> **截至 2026-09-02 的状态：** 实现、定向与 race 测试、完整服务端 package 套件、对象锁测试、vet、build、两轮 Fable 5 设计评审、多轮 Opus 5 对抗验收，以及真实本地 TLS 双站复制均已完成。候选实现已推送为 [pgsty/silo#101](https://github.com/pgsty/silo/pull/101)；远端 CI、merge、tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
 > **范围：** S3 handler 之前与内部的 HTTP 请求解释。不修改 S3 wire field、对象格式、bucket metadata 格式、复制协议、加密格式或客户端命令。<br>
 > **安全属性：** CORS 预鉴权处理不执行对象层 I/O；header 本身永远不授予复制语义；SSE-C 密文路径与 replica-only metadata 必须同时通过身份认证与对应复制权限检查。
 

@@ -10,8 +10,9 @@ draft: false
 url: "/blog/release/delete-object-version-authorization/"
 ---
 
-> **Release status:** this change is implemented and under review in
-> [pgsty/silo#58](https://github.com/pgsty/silo/issues/58). Publishing this note
+> **Release status:** this change is implemented in
+> [pgsty/silo#104](https://github.com/pgsty/silo/pull/104), tracking
+> [issue #58](https://github.com/pgsty/silo/issues/58). Publishing this note
 > does not by itself mean that a server release, package, image, or deployment
 > contains the change.
 
