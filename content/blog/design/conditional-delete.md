@@ -259,7 +259,7 @@ The single-object repair becomes mergeable only after:
 5. DCO, Go CI, VulnCheck, and other required remote workflows are green;
 6. the PR description distinguishes complete `DeleteObject` support from the batch fail-closed guard and links the full batch/policy follow-ups.
 
-A merge is still not a release. Users can rely on the behavior only after a corresponding SILO release, package, `docker.io/pgsty/minio` image, deployment, and real-client verification have independently completed.
+A merge is still not a release. Users can rely on the behavior only after a corresponding SILO release, package, `docker.io/pgsty/silo` image, deployment, and real-client verification have independently completed.
 
 ## Conclusion {#conclusion}
 

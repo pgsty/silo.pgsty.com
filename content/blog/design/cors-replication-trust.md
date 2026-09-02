@@ -14,7 +14,7 @@ url: "/blog/design/cors-replication-trust/"
 
 This record describes the CORS hot-path and replication-request trust repair merged into SILO as [PR #101](https://github.com/pgsty/silo/pull/101) (`938603458` through `04b097fd9`).
 
-> **Status on 2026-09-02:** PR #101 merged into `main` on 2026-09-01 with four follow-up commits: per-entry Snowball trust isolation (`ff44527a3`), request defaults preserved across Snowball workers (`ab3ae99ca`), and replication validity probes that verify the replication permissions (`c9ad74673`) under the rule prefix (`5db7be4ee`). The pre-release cleanup then simplified the CORS lookup: non-resident buckets always use the global policy (the fail-closed startup and load-failure states below were dropped), and the header-stripped request clone shares the original request trailer so streaming-checksum uploads keep working for untrusted requests. Tag, package, image, deployment, and production verification remain separate gates.<br>
+> **Status on 2026-09-02:** PR #101 merged into `main` on 2026-09-01 with four follow-up commits: per-entry Snowball trust isolation (`ff44527a3`), request defaults preserved across Snowball workers (`ab3ae99ca`), and replication validity probes that verify the replication permissions (`c9ad74673`) under the rule prefix (`5db7be4ee`). The pre-release cleanup then simplified the CORS lookup: startup stays fail-closed, but the separate load-failure bookkeeping was dropped in favor of the global policy, and the header-stripped request clone shares the original request trailer so streaming-checksum uploads keep working for untrusted requests. Tag, package, image, deployment, and production verification remain separate gates.<br>
 > **Scope:** HTTP request interpretation before and inside the S3 handlers. No S3 wire field, object format, bucket metadata format, replication protocol, encryption format, or client command changes.<br>
 > **Security properties:** pre-authentication CORS processing performs no object-layer I/O; a header never grants replication semantics by itself; SSE-C ciphertext paths and replica-only metadata require both authentication and the corresponding replication permission.
 
@@ -170,9 +170,10 @@ The outer CORS middleware must remain cheaper than the request it is about to ro
 | resident, valid per-bucket CORS | apply per-bucket rule | none |
 | resident, no CORS document | use global CORS fallback | none |
 | resident, invalid stored CORS | fail closed; continue without CORS headers and log once | none |
-| not resident: startup still loading, metadata load failure, reserved, invalid, internal, or unknown name | global fallback | none |
+| not resident while startup loading is still running | fail closed | none |
+| not resident after startup: metadata load failure, reserved, invalid, internal, or unknown name | global fallback | none |
 
-Nothing outside the resident map is consulted. A real bucket that is not yet resident, because startup loading is still running or its metadata failed to load, is served with the global policy until the next refresh loads it. The first version of this repair failed closed in those states; the pre-release cleanup removed that: CORS is a browser response policy, not an authorization boundary, normal S3 authentication and bucket policy still apply, and failing closed only broke browser clients during startup.
+Nothing outside the resident map is consulted. While startup loading is still running the lookup fails closed, because a non-resident name may still be a bucket with a restrictive document. After startup, a real bucket whose metadata failed to load is served with the global policy until the next refresh loads it: the first version of this repair tracked such buckets in a separate set and failed closed for them, and the pre-release cleanup removed that bookkeeping. CORS is a browser response policy rather than an authorization boundary, and a bucket in that degraded state has also lost its bucket policy, so nothing anonymous is readable through it.
 
 ## Alternatives rejected {#alternatives}
 

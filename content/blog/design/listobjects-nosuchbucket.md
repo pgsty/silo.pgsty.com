@@ -291,7 +291,7 @@ The accepted sequence was:
 
 No cache, feature flag, additional abstraction, or continuation-token redesign was required. High-frequency shortcut traffic and large-cluster tail latency remain observability follow-ups, not reasons for speculative code expansion.
 
-Repository integration is complete. A tag, package, `docker.io/pgsty/minio` image, deployment, and real S3-client verification must still complete before the repair can be described as delivered to users.
+Repository integration is complete. A tag, package, `docker.io/pgsty/silo` image, deployment, and real S3-client verification must still complete before the repair can be described as delivered to users.
 
 ## Conclusion {#conclusion}
 

@@ -17,7 +17,7 @@ upstream_modified: true
 <a id="deploy-operator-kubernetes"></a>
 <a id="minio-kubernetes"></a>
 
-Silo 是可在 Kubernetes 中运行的 S3 兼容对象存储服务端。MinIO Kubernetes Operator 的最后一个上游版本 `v7.1.1` 可以部署使用 Silo 镜像的 `Tenant`：将 `tenant.image.repository` 覆盖为 `pgsty/minio`，并固定经过测试的标签或摘要。
+Silo 是可在 Kubernetes 中运行的 S3 兼容对象存储服务端。MinIO Kubernetes Operator 的最后一个上游版本 `v7.1.1` 可以部署使用 Silo 镜像的 `Tenant`：将 `tenant.image.repository` 覆盖为 `pgsty/silo`，并固定经过测试的标签或摘要。
 
 这些指南默认你熟悉所引用的 Kubernetes 概念、工具和操作流程。它们不能替代官方 [Kubernetes Documentation](https://kubernetes.io/docs/)；Silo 项目也不继承原 MinIO 厂商针对各 Kubernetes 发行版的支持矩阵。
 

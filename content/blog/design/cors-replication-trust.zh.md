@@ -14,7 +14,7 @@ url: "/zh/blog/design/cors-replication-trust/"
 
 本文记录以 [PR #101](https://github.com/pgsty/silo/pull/101)（`938603458` 至 `04b097fd9`）合并进 SILO 的 CORS 热路径与复制请求信任边界修复。
 
-> **截至 2026-09-02 的状态：** PR #101 已于 2026-09-01 合并进 `main`，并带四个后续提交：Snowball 逐条目信任隔离（`ff44527a3`）、Snowball worker 间保留请求默认值（`ab3ae99ca`）、复制有效性探针校验复制权限（`c9ad74673`）且合成 key 置于规则前缀下（`5db7be4ee`）。随后的发布前清理简化了 CORS 查找：不驻留的桶一律使用全局策略（下文原有的启动期与加载失败 fail-closed 状态已移除），剥头后的请求克隆与原请求共享 trailer，使不可信请求的流式校验和上传照常工作。tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
+> **截至 2026-09-02 的状态：** PR #101 已于 2026-09-01 合并进 `main`，并带四个后续提交：Snowball 逐条目信任隔离（`ff44527a3`）、Snowball worker 间保留请求默认值（`ab3ae99ca`）、复制有效性探针校验复制权限（`c9ad74673`）且合成 key 置于规则前缀下（`5db7be4ee`）。随后的发布前清理简化了 CORS 查找：启动期保持 fail closed，但取消了独立的加载失败记账、改用全局策略；剥头后的请求克隆与原请求共享 trailer，使不可信请求的流式校验和上传照常工作。tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
 > **范围：** S3 handler 之前与内部的 HTTP 请求解释。不修改 S3 wire field、对象格式、bucket metadata 格式、复制协议、加密格式或客户端命令。<br>
 > **安全属性：** CORS 预鉴权处理不执行对象层 I/O；header 本身永远不授予复制语义；SSE-C 密文路径与 replica-only metadata 必须同时通过身份认证与对应复制权限检查。
 
@@ -170,9 +170,10 @@ Object-lock parser 过去只要看到原始 marker header，就会接受已经�
 | resident，per-bucket CORS 合法 | 应用桶级规则 | 无 |
 | resident，没有 CORS 文档 | 使用 global CORS fallback | 无 |
 | resident，持久化 CORS 非法 | fail closed；继续处理请求但不加 CORS header，并只记一次日志 | 无 |
-| 不驻留：启动加载中、metadata 加载失败、reserved、非法、内部或未知名字 | global fallback | 无 |
+| 启动加载仍在进行时的不驻留名字 | fail closed | 无 |
+| 启动完成后的不驻留名字：metadata 加载失败、reserved、非法、内部或未知 | global fallback | 无 |
 
-除驻留 map 之外不查任何状态。一个尚未驻留的真实桶——启动加载仍在进行，或其 metadata 加载失败——在下一轮 refresh 加载它之前使用全局策略。本修复的第一版在这些状态下 fail closed；发布前清理移除了它：CORS 是浏览器响应策略而非授权边界，普通 S3 认证与 bucket policy 仍然生效，fail closed 只会在启动期弄坏浏览器客户端。
+除驻留 map 之外不查任何状态。启动加载仍在进行时查找 fail closed，因为不驻留的名字仍可能是带限制性文档的桶。启动完成后，metadata 加载失败的真实桶在下一轮 refresh 加载它之前使用全局策略：本修复的第一版用一个独立集合记录这类桶并对其 fail closed，发布前清理移除了该记账。CORS 是浏览器响应策略而非授权边界，而处于这种退化状态的桶同时也失去了 bucket policy，匿名请求读不到任何东西。
 
 ## 被否决的方案 {#alternatives}
 

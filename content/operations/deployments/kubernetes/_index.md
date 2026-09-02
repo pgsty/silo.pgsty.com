@@ -17,7 +17,7 @@ upstream_modified: true
 <a id="deploy-operator-kubernetes"></a>
 <a id="minio-kubernetes"></a>
 
-Silo is an S3-compatible object storage server that can run in Kubernetes. The final upstream MinIO Kubernetes Operator release, `v7.1.1`, can deploy a `Tenant` with the Silo image when `tenant.image.repository` is overridden to `pgsty/minio` and a tested tag or digest is pinned.
+Silo is an S3-compatible object storage server that can run in Kubernetes. The final upstream MinIO Kubernetes Operator release, `v7.1.1`, can deploy a `Tenant` with the Silo image when `tenant.image.repository` is overridden to `pgsty/silo` and a tested tag or digest is pinned.
 
 These guides assume familiarity with the referenced Kubernetes concepts, utilities, and procedures. They are not a replacement for the official [Kubernetes Documentation](https://kubernetes.io/docs/), and the Silo project does not inherit the former MinIO vendor support matrix for Kubernetes distributions.
 

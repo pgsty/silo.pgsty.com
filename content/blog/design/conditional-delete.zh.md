@@ -259,7 +259,7 @@ AWS 规定 conditional delete 评估当前版本。SILO 的外层 pool 选择本
 5. DCO、Go CI、VulnCheck 等远端 workflow 全绿；
 6. PR 描述明确区分完整的 `DeleteObject` 支持与 batch fail-closed 护栏，并链接完整 batch/policy 后续项。
 
-即使代码合并，仍不能把功能写成已发布。只有对应 release、软件包、`docker.io/pgsty/minio` 镜像、部署和真实 S3 客户端验证分别完成后，生产用户才能依赖它。
+即使代码合并，仍不能把功能写成已发布。只有对应 release、软件包、`docker.io/pgsty/silo` 镜像、部署和真实 S3 客户端验证分别完成后，生产用户才能依赖它。
 
 ## 结论 {#conclusion}
 

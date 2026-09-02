@@ -12,7 +12,7 @@ upstream_modified: true
 The following procedures upgrade a single Silo Tenant using either Kustomize or Helm. Test the exact server image, Operator/chart version, and rollback procedure in a non-production Tenant first.
 
 > [!CAUTION]
-> Keep the server image on `pgsty/minio` and use only a tag or digest published on the [Silo download page](/download/#server). The upstream Tenant defaults use a MinIO image. Also keep `MINIO_UPDATE=off`; the inherited in-place updater still targets the upstream MinIO feed and is not a Silo upgrade path.
+> Keep the server image on `pgsty/silo` and use only a tag or digest published on the [Silo download page](/download/#server). The upstream Tenant defaults use a MinIO image. Also keep `MINIO_UPDATE=off`; the inherited in-place updater still targets the upstream MinIO feed and is not a Silo upgrade path.
 
 > [!WARNING]
 > **Important**
@@ -96,7 +96,7 @@ metadata:
   namespace: my-tenant-ns
 
 spec:
-  image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+  image: pgsty/silo:RELEASE.2026-08-06T00-00-00Z
   env:
     - name: MINIO_UPDATE
       value: "off"
@@ -173,7 +173,7 @@ If you deployed the Tenant using Kustomize, use the [Upgrade a Tenant using Kust
    helm get values CHART_NAME -n TENANT_NAMESPACE -o yaml > values.yaml
    ```
 
-   Set `tenant.image.repository` to `pgsty/minio`, pin `tenant.image.tag` to a tested published Silo release, and ensure `tenant.env` includes `MINIO_UPDATE=off`. Never allow a chart upgrade to silently restore the upstream image default.
+   Set `tenant.image.repository` to `pgsty/silo`, pin `tenant.image.tag` to a tested published Silo release, and ensure `tenant.env` includes `MINIO_UPDATE=off`. Never allow a chart upgrade to silently restore the upstream image default.
 
 4. Run the pinned `helm upgrade`
 

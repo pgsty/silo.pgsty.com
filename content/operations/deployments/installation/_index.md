@@ -49,7 +49,7 @@ Silo uses [Erasure Coding](/operations/concepts/erasure-coding/#minio-erasure-co
 
 The archived MinIO Kubernetes Operator `v7.1.1` can manage Tenant resources that run a Silo server image. The Operator, its charts, CRDs, and `Tenant` kind retain their upstream names; its upstream release lifecycle is now frozen.
 
-These retained Operator guides describe a compatibility snapshot. The upstream repository was archived on 2026-03-20, so verify `v7.1.1` against your Kubernetes distribution and override the Tenant image to `pgsty/minio`; the Silo project does not claim the former upstream vendor's platform support matrix.
+These retained Operator guides describe a compatibility snapshot. The upstream repository was archived on 2026-03-20, so verify `v7.1.1` against your Kubernetes distribution and override the Tenant image to `pgsty/silo`; the Silo project does not claim the former upstream vendor's platform support matrix.
 
 - [Deploy a Silo Tenant with Helm](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)
 - [Deploy the MinIO Operator](/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/)

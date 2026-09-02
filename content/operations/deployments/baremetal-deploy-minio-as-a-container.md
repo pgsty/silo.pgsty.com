@@ -11,7 +11,7 @@ upstream_modified: true
 
 This page documents deploying Silo as a container on an operating system that supports containerized processes.
 
-This documentation assumes installation of Docker, Podman, or a similar runtime which supports the standard container image format. Published `pgsty/minio` release images use [Red Hat Universal Base Image 9 Micro](https://catalog.redhat.com/software/container-stacks/detail/609560d9e2b160d361d24f98).
+This documentation assumes installation of Docker, Podman, or a similar runtime which supports the standard container image format. Published `pgsty/silo` release images use [Red Hat Universal Base Image 9 Micro](https://catalog.redhat.com/software/container-stacks/detail/609560d9e2b160d361d24f98).
 
 Functionality and performance of the Silo container may be constrained by the base OS.
 
@@ -22,7 +22,7 @@ The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and
 >
 > These examples cover Single-Node Single-Drive and Single-Node Multi-Drive development or evaluation deployments. They do not define a production Multi-Node Multi-Drive topology or an upgrade contract for Docker Compose, Docker Swarm, or another container orchestrator. For a production distributed deployment, use a tested [Kubernetes tenant workflow](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and validate persistence, networking, failure domains, and upgrades for your environment.
 >
-> The examples use `pgsty/minio:latest` for readability. Pin a tested Silo release tag or image digest in production; `latest` is not a version contract.
+> The examples use `pgsty/silo:latest` for readability. Pin a tested Silo release tag or image digest in production; `latest` is not a version contract.
 >
 > The `MINIO_UPDATE=off` setting intentionally disables the server's in-place updater. The current updater retains the upstream MinIO release feed and signing key, so container upgrades must replace the image with a verified Silo tag or digest instead of running `mc admin update`.
 
@@ -69,7 +69,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   pgsty/minio:latest server /data --console-address ":9001"
+   pgsty/silo:latest server /data --console-address ":9001"
 ```
 
 The command binds ports `9000` and `9001` to the S3 API and Web Console respectively.
@@ -92,7 +92,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   pgsty/minio:latest server /mnt/drive-{1...4} --console-address ":9001"
+   pgsty/silo:latest server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.
@@ -111,7 +111,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   pgsty/minio:latest server /data --console-address ":9001"
+   pgsty/silo:latest server /data --console-address ":9001"
 ```
 
 The command binds ports `9000` and `9001` to the S3 API and Web Console respectively.
@@ -134,7 +134,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   pgsty/minio:latest server /mnt/drive-{1...4} --console-address ":9001"
+   pgsty/silo:latest server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.

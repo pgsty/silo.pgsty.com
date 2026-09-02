@@ -89,7 +89,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
    ```yaml
    tenant:
      image:
-       repository: pgsty/minio
+       repository: pgsty/silo
        tag: RELEASE.2026-08-04T00-00-00Z
        pullPolicy: IfNotPresent
      env:
@@ -254,7 +254,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 
    每个 chart 都包含一个可按需定制的 `values.yaml` 文件。 有关 MinIO Tenant `values.yaml` 可用选项的详细信息，请参阅 [租户 Helm Charts](/zh/reference/tenant-chart-values/#minio-tenant-chart-values)。
 
-   请使用文本编辑器打开 `values.yaml`：将 `tenant.image.repository` 设为 `pgsty/minio`，将 `tenant.image.tag` 固定为已发布 Silo 版本，并在 `tenant.env` 中加入 `MINIO_UPDATE=off`，与 [基于仓库的流程](#deploy-tenant-helm-repo) 中的示例一致。
+   请使用文本编辑器打开 `values.yaml`：将 `tenant.image.repository` 设为 `pgsty/silo`，将 `tenant.image.tag` 固定为已发布 Silo 版本，并在 `tenant.env` 中加入 `MINIO_UPDATE=off`，与 [基于仓库的流程](#deploy-tenant-helm-repo) 中的示例一致。
 2. 配置 Tenant 拓扑
 
    以下字段都带有 `tenant.pools[0]` 前缀，用于控制 Tenant 中所有 pod 的 server 数量、每个 server 的卷数量以及存储类：
