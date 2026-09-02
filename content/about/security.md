@@ -14,7 +14,7 @@ Security maintenance is the reason this fork exists. Upstream `minio/minio` is a
 
 Report undisclosed high-severity vulnerabilities through a private channel, not in a public issue.
 
-- **Silo server and `mcli` client** — preferably as a private report through [GitHub Security Advisories on `pgsty/minio`](https://github.com/pgsty/minio/security/advisories/new).
+- **Silo server and `mcli` client** — preferably as a private report through [GitHub Security Advisories on `pgsty/silo`](https://github.com/pgsty/silo/security/advisories/new).
 - **This documentation** — open an issue on [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/issues); if the content itself discloses a weakness, use a private channel instead.
 
 Include the affected release, a description of the impact, and reproduction steps if you have them — this helps us confirm the issue faster.

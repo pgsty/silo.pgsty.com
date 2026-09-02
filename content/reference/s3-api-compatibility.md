@@ -21,6 +21,7 @@ This page documents S3 APIs supported by MinIO Object Storage. For reference doc
 - [CopyObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html)
 - [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
 - [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
+  - Conditional delete is not supported: `DeleteObject` ignores the HTTP `If-Match` header and `DeleteObjects` ignores each `<Object><ETag>` element; both delete unconditionally ([#10](https://github.com/pgsty/silo/issues/10)).
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)

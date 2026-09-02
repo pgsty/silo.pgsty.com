@@ -34,7 +34,7 @@ url: "/zh/blog/release/silo-next/"
 
 ## 已知问题 {#known-issues}
 
-- **条件删除。** `DeleteObject` 与 `DeleteObjects` 仍忽略 `If-Match`（[#10](https://github.com/pgsty/silo/issues/10)），compare-and-delete 请求会执行无条件删除。修复存在于本地分支，不在本版本内。
+- **条件删除。** `DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object>` 条目的 `<ETag>` 元素（[#10](https://github.com/pgsty/silo/issues/10)），两者都执行无条件删除。修复存在于本地分支，不在本版本内。
 - **多站点配置删除。** 在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；只有 CORS 使用带 tombstone 的寄存器。继承自上游。
 - **混合版本复制组。** 仍在 20260806 的对端会接受但忽略桶级 CORS，并持续报告 CORS 不一致。请先升级全部站点。
 - **回滚。** 20260806 忽略桶级 CORS，并会在重写该桶元数据时把它丢掉。

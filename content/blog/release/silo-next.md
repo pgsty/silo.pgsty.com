@@ -34,7 +34,7 @@ Read [Upgrading from RELEASE.2026-08-06](/compatibility/migration/#since-2026080
 
 ## Known issues {#known-issues}
 
-- **Conditional delete.** `DeleteObject` and `DeleteObjects` still ignore `If-Match` ([#10](https://github.com/pgsty/silo/issues/10)); a compare-and-delete request performs an unconditional delete. A repair exists on a local branch and is not part of this release.
+- **Conditional delete.** `DeleteObject` ignores the HTTP `If-Match` header and `DeleteObjects` ignores the `<ETag>` element of each `<Object>` entry ([#10](https://github.com/pgsty/silo/issues/10)); both perform an unconditional delete. A repair exists on a local branch and is not part of this release.
 - **Multi-site configuration deletion.** Deleting a bucket policy, SSE, tag, or quota configuration on one site can be restored by a peer that still holds it ([#77](https://github.com/pgsty/silo/issues/77)); only CORS uses the tombstone-aware register. Inherited from upstream.
 - **Mixed-version replication groups.** A peer still on 20260806 accepts but ignores bucket CORS and keeps reporting a CORS mismatch. Upgrade every site first.
 - **Rollback.** 20260806 ignores bucket CORS and drops it when it rewrites that bucket's metadata.

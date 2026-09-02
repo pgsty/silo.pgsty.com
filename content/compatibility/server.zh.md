@@ -163,12 +163,12 @@ Linux amd64/arm64 软件包名为 `silo`，关键载荷如下：
 - 显式指定的 shell 或其他工具保持原样。
 - 所有降权路径最终都使用 `exec`，服务端成为 PID 1 并收到 `SIGTERM` 完成优雅退出，不会再隔着 entrypoint 超时。
 - 镜像默认 `HOME=/tmp`；任意 UID 或旧 `MINIO_USERNAME` 降权流程也会把 HOME 归一到可写目录。
-- 端口 `9000`、`/data` 与 `MINIO_*` 接口不变。amd64/arm64 镜像 manifest 还包含经过校验的 MCLI `RELEASE.2026-08-04T00-00-00Z` 和只面向客户端的 `mc` 符号链接。
+- 端口 `9000`、`/data` 与 `MINIO_*` 接口不变。amd64/arm64 镜像 manifest 还包含经过校验的 MCLI `RELEASE.2026-08-06T00-00-00Z`（在本审计头之后的发布提交中提升）和只面向客户端的 `mc` 符号链接。
 - OCI 法律材料位于 `/licenses/{LICENSE,NOTICE,CREDITS}`。
 
 ### Helm Chart {#helm}
 
-继承的 `helm/minio` Chart、`helm-releases`、根 Chart 索引与重建脚本已删除。维护中的 Chart 为 `helm/silo`，版本 `7.0.0`。
+继承的 `helm/minio` Chart、`helm-releases`、根 Chart 索引与重建脚本已删除。维护中的 Chart 为 `helm/silo`；20260806 发布的 Chart 版本为 `7.0.1`（审计头当时仍是 `7.0.0`）。
 
 大多数 values 刻意保留原名，包括 `minioAPIPort`、`minioConsolePort` 及所有 `MINIO_*` 环境设置。迁移时需要关注：
 
@@ -332,6 +332,8 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 6. **私有 API 不是稳定兼容承诺。** `ReadMultiple` 表明即便 storage REST 协议号不变，操作仍可能消失。不要跨越该边界滚动运行混合构建。
 7. **源码结果不等于已发布制品。** 在逐渠道验证前，本页不声称 GitHub 标签、软件包、OCI manifest、签名或线上站点已经包含仅存在于审计 HEAD 的最后三个提交。
 8. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
+9. **未实现条件删除。** `DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object><ETag>` 元素，两者都执行无条件删除（[#10](https://github.com/pgsty/silo/issues/10)）。
+10. **多站点删除桶配置不会收敛。** 在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；只有桶级 CORS 使用带 tombstone 的寄存器。依赖多站点同步删除这些配置的部署，删除后必须逐站核对。
 
 ## 迁移检查清单 {#migration}
 

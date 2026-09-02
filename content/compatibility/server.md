@@ -163,12 +163,12 @@ The source repository is `github.com/pgsty/silo`; the intended image name is `do
 - An explicitly requested shell or utility is left alone.
 - Every privilege path uses `exec`, so the server becomes PID 1 and receives `SIGTERM` for graceful shutdown instead of timing out behind the entrypoint.
 - `HOME=/tmp` is the image default and is normalized to a writable directory for arbitrary-UID and legacy `MINIO_USERNAME` drop-user execution.
-- Port `9000`, `/data`, and the `MINIO_*` interface remain. The amd64/arm64 image manifest also contains checksummed MCLI `RELEASE.2026-08-04T00-00-00Z` and the client-only `mc` symlink.
+- Port `9000`, `/data`, and the `MINIO_*` interface remain. The amd64/arm64 image manifest also contains checksummed MCLI `RELEASE.2026-08-06T00-00-00Z` (bumped in the release commit after this audit head) and the client-only `mc` symlink.
 - OCI license material is under `/licenses/{LICENSE,NOTICE,CREDITS}`.
 
 ### Helm chart {#helm}
 
-The inherited `helm/minio` chart, `helm-releases`, root chart index, and reindex helper were removed. The maintained chart is `helm/silo`, chart version `7.0.0`.
+The inherited `helm/minio` chart, `helm-releases`, root chart index, and reindex helper were removed. The maintained chart is `helm/silo`; the 20260806 release ships chart version `7.0.1` (the audit head still carried `7.0.0`).
 
 Most values deliberately keep their established names, including `minioAPIPort`, `minioConsolePort`, and all `MINIO_*` environment settings. The changes that matter during migration are:
 
@@ -332,6 +332,8 @@ This audit does not turn inherited limitations into claims of compatibility:
 6. **Private APIs are not a stable compatibility promise.** `ReadMultiple` proves that a same-numbered storage REST protocol can still lose an operation. Do not run a rolling mixed build across this boundary.
 7. **A source result is not a released artifact.** This page does not assert that GitHub tags, packages, OCI manifests, signatures, or the public site contain the three audit-head-only commits until each channel is verified separately.
 8. **Informational HTTP responses remain imperfectly tracked.** The response-tracking layer treats a 1xx response as final. The Flush/implicit-200 change did not introduce this behavior and does not claim to fix it.
+9. **Conditional delete is not implemented.** `DeleteObject` ignores the HTTP `If-Match` header and `DeleteObjects` ignores each `<Object><ETag>` element; both delete unconditionally ([#10](https://github.com/pgsty/silo/issues/10)).
+10. **Multi-site deletion of bucket configuration does not converge.** Deleting a bucket policy, SSE, tag, or quota configuration on one site can be restored by a peer that still holds it ([#77](https://github.com/pgsty/silo/issues/77)); only per-bucket CORS uses a tombstone-aware register. Deployments that rely on multi-site deletion of these configurations must verify every site after a delete.
 
 ## Migration checklist {#migration}
 
