@@ -167,14 +167,14 @@ The outer CORS middleware must remain cheaper than the request it is about to ro
 
 | Bucket metadata state | CORS result | Object-layer work |
 | --- | --- | --- |
-| resident, valid per-bucket CORS | apply per-bucket rule | none |
+| resident, valid per-bucket CORS | apply per-bucket rule; a failed refresh keeps the last loaded document, as for every other bucket configuration | none |
 | resident, no CORS document | use global CORS fallback | none |
 | resident, invalid stored CORS | fail closed; continue without CORS headers and log once | none |
 | not resident while startup loading is still running | fail closed | none |
 | not resident after startup: real bucket whose metadata failed to load | fail closed | none |
 | not resident after startup: reserved, invalid, internal, or unknown name | global fallback | none |
 
-The lookup consults the resident map and a bounded set of real buckets whose metadata failed to load at startup or during a refresh. That set is filled only from disk-derived bucket lists, never from a client path, and a successful load, `Set`, bucket removal, stale-bucket reconciliation, and subsystem reset clear it. Both non-resident states fail closed: a presigned URL is authenticated by its own signature, so the bucket's CORS document is the only origin boundary a browser enforces for it, and answering with the global policy would let a leaked URL be used from any origin. The internal `.minio.sys` namespace no longer has a special case; like any reserved or invalid name it is not a bucket, gets the global fallback, and is rejected downstream.
+The lookup consults the resident map and a bounded set of real buckets whose metadata failed to load at startup or during a refresh. That set is filled only from disk-derived bucket lists, never from a client path, never records a bucket that is already resident, and a successful load, `Set`, bucket removal, stale-bucket reconciliation, and subsystem reset clear it. Both non-resident states fail closed: a presigned URL is authenticated by its own signature, so the bucket's CORS document is the only origin boundary a browser enforces for it, and answering with the global policy would let a leaked URL be used from any origin. The internal `.minio.sys` namespace no longer has a special case; like any reserved or invalid name it is not a bucket, gets the global fallback, and is rejected downstream.
 
 ## Alternatives rejected {#alternatives}
 

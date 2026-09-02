@@ -167,14 +167,14 @@ Object-lock parser 过去只要看到原始 marker header，就会接受已经�
 
 | Bucket metadata 状态 | CORS 结果 | 对象层工作 |
 | --- | --- | --- |
-| resident，per-bucket CORS 合法 | 应用桶级规则 | 无 |
+| resident，per-bucket CORS 合法 | 应用桶级规则；refresh 失败时沿用最近一次加载的文档，与其它所有桶配置一致 | 无 |
 | resident，没有 CORS 文档 | 使用 global CORS fallback | 无 |
 | resident，持久化 CORS 非法 | fail closed；继续处理请求但不加 CORS header，并只记一次日志 | 无 |
 | 启动加载仍在进行时的不驻留名字 | fail closed | 无 |
 | 启动完成后的不驻留名字：metadata 加载失败的真实桶 | fail closed | 无 |
 | 启动完成后的不驻留名字：reserved、非法、内部或未知 | global fallback | 无 |
 
-查找只看驻留 map 和一个有界集合——启动或 refresh 时 metadata 加载失败的真实桶。该集合只从磁盘得到的桶列表写入，客户端路径无法增长它；加载成功、`Set`、桶删除、stale 桶清理与 subsystem reset 都会清除相应条目。两种不驻留状态都 fail closed：预签名 URL 以自身签名完成认证，桶级 CORS 文档是浏览器对它施加的唯一 origin 边界，若回落到全局策略，泄露的 URL 就能从任意 origin 使用。内部 `.minio.sys` namespace 不再特殊处理：它与任何 reserved 或非法名字一样不是桶，使用 global fallback，请求随后会在下游被拒绝。
+查找只看驻留 map 和一个有界集合——启动或 refresh 时 metadata 加载失败的真实桶。该集合只从磁盘得到的桶列表写入，客户端路径无法增长它，也从不记录已经驻留的桶；加载成功、`Set`、桶删除、stale 桶清理与 subsystem reset 都会清除相应条目。两种不驻留状态都 fail closed：预签名 URL 以自身签名完成认证，桶级 CORS 文档是浏览器对它施加的唯一 origin 边界，若回落到全局策略，泄露的 URL 就能从任意 origin 使用。内部 `.minio.sys` namespace 不再特殊处理：它与任何 reserved 或非法名字一样不是桶，使用 global fallback，请求随后会在下游被拒绝。
 
 ## 被否决的方案 {#alternatives}
 
