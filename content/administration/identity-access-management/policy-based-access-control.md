@@ -912,7 +912,7 @@ MinIO supports the following condition keys for all supported [actions](#minio-p
 > [!WARNING]
 > **Unreleased server behavior (as of 2026-08-03)**
 >
-> The table below describes behavior after companion server change `1a6d5b415`. That change is present only on the local `pgsty/minio` branch: it is not on public `origin/master`, and the latest published server release (`RELEASE.2026-08-04T00-00-00Z`) does not contain it. Published builds retain the previous behavior. Verify the server release notes before relying on these precedence guarantees.
+> The table below describes behavior after companion server change `2f55347f7` (recorded as SN-2026-003), which ships in `RELEASE.2026-08-04T00-00-00Z` and every later Silo release. Verify the server release notes before relying on these precedence guarantees.
 
 Silo constructs the condition-value map from semantic request sources instead of treating every header and query parameter as interchangeable. A raw header or query parameter whose name resembles an internal condition key cannot replace a value calculated by the server or create one that the server did not provide.
 

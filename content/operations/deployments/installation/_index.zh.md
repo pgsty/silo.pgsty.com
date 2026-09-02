@@ -49,7 +49,7 @@ Silo 使用 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-co
 
 已经归档的 MinIO Kubernetes Operator `v7.1.1` 可以管理运行 Silo 服务端镜像的 Tenant 资源。Operator、Chart、CRD 与 `Tenant` Kind 保留上游名称；其上游发布周期现已冻结。
 
-这些保留的 Operator 指南描述一份兼容快照。上游仓库已于 2026-03-20 归档，因此请根据 Kubernetes 发行版验证 `v7.1.1`，并将 Tenant 镜像覆盖为 `pgsty/minio`；Silo 项目不继承上游原厂商曾经的平台支持矩阵声明。
+这些保留的 Operator 指南描述一份兼容快照。上游仓库已于 2026-03-20 归档，因此请根据 Kubernetes 发行版验证 `v7.1.1`，并将 Tenant 镜像覆盖为 `pgsty/silo`；Silo 项目不继承上游原厂商曾经的平台支持矩阵声明。
 
 - [使用 Helm 部署 Silo Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)
 - [部署 MinIO Operator](/zh/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/)

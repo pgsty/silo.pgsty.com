@@ -63,6 +63,9 @@ Two consequences follow, and both bite in practice:
 
 Console's own source avoids fork-only APIs — it applies its strict policy-write checks locally rather than importing them — and a CI job proves it by dropping all three replacements and building, vetting, testing, and cross-compiling against the pure upstream graph. That is a build-compatibility guarantee, not a claim that the upstream and Silo packages behave identically at runtime.
 
+> [!NOTE]
+> Since Console [v2.3.0] (2026-09-01) the module requires `github.com/pgsty/silo-pkg/v3` directly, because `silo-pkg` v3.13.0 moved to that module path, and the replacement graph shown above is retired. A server that still selects `silo-pkg` through `replace github.com/minio/pkg/v3 => …` cannot embed v2.3.0 or later until it imports the new path itself. The Silo server embeds Console commit `43f8447fd`: the last commit of the v2.3.0 line before the module-path migration, which carries the v2.3.0 security fixes.
+
 ## Migration {#migration}
 
 An existing MinIO Console deployment upgrades in place. The service unit, service account, and configuration file keep their names, and every `CONSOLE_*` variable is read unchanged, so the usual path is to install the `silo-console` package over the old one and restart.
@@ -80,3 +83,4 @@ Two behaviors change on first start and are worth expecting:
 
 [v2.1.1]: https://github.com/pgsty/silo-console/releases/tag/v2.1.1
 [v2.2.1]: https://github.com/pgsty/silo-console/releases/tag/v2.2.1
+[v2.3.0]: https://github.com/pgsty/silo-console/releases/tag/v2.3.0

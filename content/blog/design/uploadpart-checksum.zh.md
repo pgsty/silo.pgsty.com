@@ -2,6 +2,7 @@
 title: "可选校验和，强制失败：修复 UploadPart 与 UploadPartCopy 兼容性"
 linkTitle: "Multipart Checksum 兼容性"
 date: 2026-08-24
+lastmod: 2026-09-02
 author: "冯若航"
 summary: >
   SILO 曾要求 checksum-enabled multipart upload 的每个 UploadPart 都携带逐 part checksum，导致省略可选 header 的普通上传失败，并让 UploadPartCopy 完全不可用。本文记录问题发现、AWS 与 AIStor 调研、被否决的方案、明文单遍计算设计、兼容基线 blocker、对抗审查，以及后续修复必须遵守的一致性边界。
@@ -13,7 +14,7 @@ url: "/zh/blog/design/uploadpart-checksum/"
 
 本文是 [SILO #46](https://github.com/pgsty/silo/issues/46) 的完整设计与实现归档。它记录的并不只是一个 `if` 条件如何修改，而是一个看似简单的 S3 可选 header，如何一路牵动 multipart 完成语义、复制响应、压缩与加密数据流、兼容基线和发布验证。
 
-> **状态：** 服务端实现与本地验证完成；commit、PR、远端 CI、发布与线上验证待完成。<br>
+> **状态：** 已于 2026-08-24 以 `7fea6d5a5` 合并进 `main`（[pgsty/silo#46](https://github.com/pgsty/silo/issues/46) 已关闭）；发布与线上验证待完成。<br>
 > **归属：** [`pgsty/silo`](https://github.com/pgsty/silo) 服务端仓库。<br>
 > **跟踪：** [#46](https://github.com/pgsty/silo/issues/46)。<br>
 > **独立后续：** [#63 CopyObject + compression checksum](https://github.com/pgsty/silo/issues/63)、[#64 federated UploadPartCopy checksum](https://github.com/pgsty/silo/issues/64)。<br>

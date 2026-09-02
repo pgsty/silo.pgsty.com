@@ -2,7 +2,7 @@
 title: "BadDigest, InvalidRequest, and the CompleteMultipartUpload Checksum Contract"
 linkTitle: "Multipart Checksum Errors"
 date: 2026-08-27
-lastmod: 2026-08-28
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   SILO rejected three invalid CompleteMultipartUpload requests, but returned the wrong S3 error codes and missed checksum-type validation paths. This record establishes the AWS evidence, upstream history, operation-scoped repair, type-only follow-up, regression matrix, and the separate evidence gate for CRC64NVME plus COMPOSITE.
@@ -15,7 +15,8 @@ url: "/blog/design/complete-multipart-checksum-errors/"
 This is the design, investigation, and verification record for [SILO #48](https://github.com/pgsty/silo/issues/48), with the decision boundary for the related [SILO #50](https://github.com/pgsty/silo/issues/50).
 
 > **Status:** [`pgsty/silo#74`](https://github.com/pgsty/silo/pull/74) merged as `590aeaa7d`, and [`pgsty/silo.pgsty.com#6`](https://github.com/pgsty/silo.pgsty.com/pull/6) merged as `9805dd7`; full local verification, remote CI, and independent Opus 5 Max acceptance review completed on the linked changes. Tag, release, package, image, deployment, and production verification remain separate pending gates.<br>
-> **2026-08-28 follow-up:** signed-off server commit `f7bc725d8` closes the remaining type-only and invalid-token bypass without changing CRC64NVME canonicalization. Complete local, tagged, race, static, build, and Fable Max verification passed; push, remote CI, merge, tag, and delivery remain pending.<br>
+> **2026-08-28 follow-up:** signed-off server commit `7e079ff05` closes the remaining type-only and invalid-token bypass without changing CRC64NVME canonicalization. Complete local, tagged, race, static, build, and Fable Max verification passed; it was merged into `main` on 2026-08-29, and tag and delivery remain pending.<br>
+> **2026-09-02 update:** the CRC64NVME exception described below no longer holds. `main` now rejects `CRC64NVME` combined with `COMPOSITE` at multipart initiation, in trailers, and at completion with `InvalidArgument` (`d28885d0e`, `d4c8da162`, `32b2aa49f`), resolving [pgsty/silo#50](https://github.com/pgsty/silo/issues/50) by rejection rather than canonicalization. The reasoning below is kept as the record of the earlier decision.<br>
 > **Owner:** [`pgsty/silo`](https://github.com/pgsty/silo), the SILO server repository.<br>
 > **Implementation scope:** `CompleteMultipartUpload` error semantics only; no storage-format, checksum-math, dependency, Console, package, or client change.<br>
 > **Independent decision:** #50 remains probe-gated and is not part of this repair.
@@ -344,7 +345,7 @@ Only a captured rejection authorizes replacing canonicalization with validation.
 | --- | --- | --- |
 | Design and local verification | complete | complete |
 | Independent adversarial review | complete, ACCEPT | complete, GO |
-| Signed-off server commit | complete | local `f7bc725d8` |
+| Signed-off server commit | complete | `7e079ff05` on `main` |
 | Push, remote CI, and merge | merged as `590aeaa7d` | not established |
 | Public design record | merged as `9805dd7` | this documentation update is local |
 | Tag and release artifacts | not established | not established |

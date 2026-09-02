@@ -21,6 +21,7 @@ This page documents S3 APIs supported by MinIO Object Storage. For reference doc
 - [CopyObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html)
 - [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
 - [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
+  - Conditional delete is not supported: `DeleteObject` ignores the HTTP `If-Match` header and `DeleteObjects` ignores each `<Object><ETag>` element; both delete unconditionally ([#10](https://github.com/pgsty/silo/issues/10)).
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)
@@ -110,6 +111,9 @@ PutObjectAcl
 - [GetBucketPolicyStatus](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketPolicyStatus.html)
 - [PutBucketPolicy](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketPolicy.html)
 - [DeleteBucketPolicy](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketPolicy.html)
+- [GetBucketCors](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketCors.html)
+- [PutBucketCors](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketCors.html)
+- [DeleteBucketCors](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketCors.html)
 
 ### Unsupported API Bucket Operations {#unsupported-api-bucket-operations}
 
@@ -117,8 +121,6 @@ PutObjectAcl
 GetBucketInventoryConfiguration
 PutBucketInventoryConfiguration
 DeleteBucketInventoryConfiguration
-PutBucketCors
-DeleteBucketCors
 GetBucketMetricsConfiguration
 PutBucketMetricsConfiguration
 DeleteBucketMetricsConfiguration
@@ -151,6 +153,6 @@ CreateSession
 ### MinIO alternatives for unsupported Bucket resources {#minio-alternatives-for-unsupported-bucket-resources}
 
 - For calls to `BucketACL` or `ObjectACL` operations, use [Policies](/administration/identity-access-management/policy-based-access-control/#minio-policy).
-- Calls to `BucketCORS` operations are not needed because CORS is enabled by default on all buckets for all HTTP verbs.
+- `BucketCORS` operations are supported since the release after `RELEASE.2026-08-06T00-00-00Z`. A bucket with its own CORS configuration is served only by that configuration; buckets without one use the server-wide `MINIO_API_CORS_ALLOW_ORIGIN` policy, which allows every origin by default.
 - For calls to `BucketWebsite` operations, use `caddy` or `nginx`.
 - For calls to `BucketAnalytics`, `BucketMetrics`, or `BucketLogging` operations, use [Bucket Notifications](/administration/monitoring/bucket-notifications/#minio-bucket-notifications).

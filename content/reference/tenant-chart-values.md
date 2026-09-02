@@ -14,7 +14,7 @@ The archived MinIO Operator project published an [Operator Chart](https://github
 The following page documents the `values.yaml` chart for a MinIO Tenant. For documentation on the chart for a MinIO Operator, see [Operator Helm Charts](/reference/operator-chart-values/#minio-operator-chart-values)
 
 > [!WARNING]
-> The upstream MinIO Operator repository was archived on March 20, 2026. This is a retained reference snapshot for its final chart at `v7.1.1`, not evidence of ongoing upstream maintenance or support. Its defaults were checked against that tag; internal documentation links are routed to this site, and the stale upstream `existingSecret` comment is corrected to the chart's actual `tenant.configSecret.name` input. The `quay.io/minio/minio` values below are upstream chart defaults, not Silo branding or a recommended Silo image. To run Silo, override `tenant.image.repository` with `pgsty/minio` and pin a tested [published release tag or digest](/download/#server).
+> The upstream MinIO Operator repository was archived on March 20, 2026. This is a retained reference snapshot for its final chart at `v7.1.1`, not evidence of ongoing upstream maintenance or support. Its defaults were checked against that tag; internal documentation links are routed to this site, and the stale upstream `existingSecret` comment is corrected to the chart's actual `tenant.configSecret.name` input. The `quay.io/minio/minio` values below are upstream chart defaults, not Silo branding or a recommended Silo image. To run Silo, override `tenant.image.repository` with `pgsty/silo` and pin a tested [published release tag or digest](/download/#server).
 
 <a id="minio-tenant-chart-operator-values"></a>
 

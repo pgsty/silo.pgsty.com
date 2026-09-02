@@ -89,8 +89,8 @@ This procedure is not exhaustive of all possible configuration options available
    ```yaml
    tenant:
      image:
-       repository: pgsty/minio
-       tag: RELEASE.2026-08-04T00-00-00Z
+       repository: pgsty/silo
+       tag: RELEASE.2026-08-06T00-00-00Z
        pullPolicy: IfNotPresent
      env:
        - name: MINIO_UPDATE
@@ -254,7 +254,7 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
 
    Each chart contains a `values.yaml` file you can customize to suit your needs. For details on the options available in the MinIO Tenant `values.yaml`, see [Tenant Helm Charts](/reference/tenant-chart-values/#minio-tenant-chart-values).
 
-   Open `values.yaml` in your preferred text editor. Set `tenant.image.repository` to `pgsty/minio`, pin `tenant.image.tag` to a published Silo release, and add `MINIO_UPDATE=off` to `tenant.env`, exactly as shown in the [repository-based procedure](#deploy-tenant-helm-repo).
+   Open `values.yaml` in your preferred text editor. Set `tenant.image.repository` to `pgsty/silo`, pin `tenant.image.tag` to a published Silo release, and add `MINIO_UPDATE=off` to `tenant.env`, exactly as shown in the [repository-based procedure](#deploy-tenant-helm-repo).
 2. Configure the Tenant topology
 
    The following fields share the `tenant.pools[0]` prefix and control the number of servers, volumes per server, and storage class of all pods deployed in the Tenant:

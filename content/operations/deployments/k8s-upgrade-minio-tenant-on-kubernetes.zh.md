@@ -12,7 +12,7 @@ upstream_modified: true
 以下步骤用于使用 Kustomize 或 Helm 升级单个 Silo Tenant。请先在非生产 Tenant 中测试确切的服务端镜像、Operator/Chart 版本与回滚流程。
 
 > [!CAUTION]
-> 服务端镜像必须保持为 `pgsty/minio`，并仅使用 [Silo 下载页](/zh/download/#server) 已发布的标签或摘要。上游 Tenant 默认值使用 MinIO 镜像。同时保留 `MINIO_UPDATE=off`；继承的原地更新器仍指向上游 MinIO 发布源，不是 Silo 升级路径。
+> 服务端镜像必须保持为 `pgsty/silo`，并仅使用 [Silo 下载页](/zh/download/#server) 已发布的标签或摘要。上游 Tenant 默认值使用 MinIO 镜像。同时保留 `MINIO_UPDATE=off`；继承的原地更新器仍指向上游 MinIO 发布源，不是 Silo 升级路径。
 
 > [!WARNING]
 > **重要**
@@ -96,7 +96,7 @@ metadata:
   namespace: my-tenant-ns
 
 spec:
-  image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+  image: pgsty/silo:RELEASE.2026-08-06T00-00-00Z
   env:
     - name: MINIO_UPDATE
       value: "off"
@@ -173,7 +173,7 @@ spec:
    helm get values CHART_NAME -n TENANT_NAMESPACE -o yaml > values.yaml
    ```
 
-   将 `tenant.image.repository` 设为 `pgsty/minio`，将 `tenant.image.tag` 固定为经测试的已发布 Silo 版本，并确保 `tenant.env` 包含 `MINIO_UPDATE=off`。不得让 Chart 升级默默恢复上游镜像默认值。
+   将 `tenant.image.repository` 设为 `pgsty/silo`，将 `tenant.image.tag` 固定为经测试的已发布 Silo 版本，并确保 `tenant.env` 包含 `MINIO_UPDATE=off`。不得让 Chart 升级默默恢复上游镜像默认值。
 
 4. 运行已固定的 `helm upgrade`
 

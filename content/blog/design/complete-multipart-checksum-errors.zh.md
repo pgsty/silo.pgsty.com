@@ -2,7 +2,7 @@
 title: "BadDigest、InvalidRequest 与 CompleteMultipartUpload 校验和契约"
 linkTitle: "分片完成校验和错误"
 date: 2026-08-27
-lastmod: 2026-08-28
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   SILO 能拒绝三类非法 CompleteMultipartUpload 请求，却返回了错误的 S3 错误码，并漏掉了若干校验和类型验证路径。本文记录 AWS 证据、上游历史、操作域修复、type-only 善后、回归矩阵，以及 CRC64NVME + COMPOSITE 的独立证据门槛。
@@ -15,7 +15,8 @@ url: "/zh/blog/design/complete-multipart-checksum-errors/"
 本文是 [SILO #48](https://github.com/pgsty/silo/issues/48) 的完整设计、调查与验证记录，同时划清它与相关问题 [SILO #50](https://github.com/pgsty/silo/issues/50) 的决策边界。
 
 > **状态：** [`pgsty/silo#74`](https://github.com/pgsty/silo/pull/74) 已合并为 `590aeaa7d`，[`pgsty/silo.pgsty.com#6`](https://github.com/pgsty/silo.pgsty.com/pull/6) 已合并为 `9805dd7`；对应变更完成完整本地验证、远端 CI 与独立 Opus 5 Max 验收。tag、release、package、image、deployment 与 production verification 仍是彼此独立、尚未完成的门槛。<br>
-> **2026-08-28 善后：** 带 sign-off 的服务器提交 `f7bc725d8` 关闭剩余 type-only 与非法 token 绕过，同时保持 CRC64NVME canonicalization 不变。完整本地、tagged、race、静态、构建与 Fable Max 验收均通过；push、远端 CI、merge、tag 与交付仍待后续。<br>
+> **2026-08-28 善后：** 带 sign-off 的服务器提交 `7e079ff05` 关闭剩余 type-only 与非法 token 绕过，同时保持 CRC64NVME canonicalization 不变。完整本地、tagged、race、静态、构建与 Fable Max 验收均通过；已于 2026-08-29 合并进 `main`，tag 与交付仍待后续。<br>
+> **2026-09-02 更新：** 下文描述的 CRC64NVME 例外已不再成立。`main` 现在在 multipart 初始化、trailer 与 completion 三处以 `InvalidArgument` 拒绝 `CRC64NVME` 与 `COMPOSITE` 的组合（`d28885d0e`、`d4c8da162`、`32b2aa49f`），[pgsty/silo#50](https://github.com/pgsty/silo/issues/50) 以拒绝而非 canonicalization 收口。下文的推理保留为当时决策的记录。<br>
 > **归属：** [`pgsty/silo`](https://github.com/pgsty/silo)，即 SILO 服务端仓库。<br>
 > **实现范围：** 仅调整 `CompleteMultipartUpload` 的错误语义；不改变存储格式、校验和数学、依赖、Console、软件包或客户端。<br>
 > **独立决策：** #50 仍需 AWS 探针证明，不纳入本次修复。
@@ -344,7 +345,7 @@ ok  github.com/minio/minio/internal/hash   0.566s
 | --- | --- | --- |
 | 设计与本地验证 | 完成 | 完成 |
 | 独立对抗评审 | 完成，ACCEPT | 完成，GO |
-| 带 sign-off 的服务器提交 | 完成 | 本地 `f7bc725d8` |
+| 带 sign-off 的服务器提交 | 完成 | `7e079ff05`（已在 `main`） |
 | Push、远端 CI 与 merge | 已合并为 `590aeaa7d` | 尚未确认 |
 | 公共设计记录 | 已合并为 `9805dd7` | 本次文档更新仍在本地 |
 | Tag 与 release artifact | 尚未确认 | 尚未确认 |

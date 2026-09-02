@@ -60,7 +60,7 @@ Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端�
 - 默认 S3 端口 `9000`、既有 `--address` / `--console-address` 参数，以及 `RELEASE.YYYY-MM-DDTHH-MM-SSZ` 标签格式；
 - 配置 KV 格式、IAM 数据、KMS/KES 配置、加密元数据、桶元数据、复制状态与修复状态。
 
-自动化 rebrand 基线记录了 137 个兼容 import、436 个环境变量名、19 个指标命名空间、84 个头、330 条路由、1 个内部根目录、3 个 Grid 命名空间、15 个 storage-REST 标识、58 个策略标识和 9,014 个导出符号。Guard 会把任何未评审的基线漂移视为兼容性失败。
+自动化 rebrand 基线记录了 137 个兼容 import、437 个环境变量名、19 个指标命名空间、84 个头、334 条路由、1 个内部根目录、3 个 Grid 命名空间、15 个 storage-REST 标识、58 个策略标识和 9,014 个导出符号。Guard 会把任何未评审的基线漂移视为兼容性失败。
 
 同一组数据盘从 MinIO 切到 Silo 时不需要复制数据或重写元数据。但这并不意味着一切畸形历史对象都会继续被接受：下文的存储加固会拒绝不安全路径、非法纠删码几何、负 part size 以及过去可能继续向下传播的污染元数据。
 
@@ -163,12 +163,12 @@ Linux amd64/arm64 软件包名为 `silo`，关键载荷如下：
 - 显式指定的 shell 或其他工具保持原样。
 - 所有降权路径最终都使用 `exec`，服务端成为 PID 1 并收到 `SIGTERM` 完成优雅退出，不会再隔着 entrypoint 超时。
 - 镜像默认 `HOME=/tmp`；任意 UID 或旧 `MINIO_USERNAME` 降权流程也会把 HOME 归一到可写目录。
-- 端口 `9000`、`/data` 与 `MINIO_*` 接口不变。amd64/arm64 镜像 manifest 还包含经过校验的 MCLI `RELEASE.2026-08-04T00-00-00Z` 和只面向客户端的 `mc` 符号链接。
+- 端口 `9000`、`/data` 与 `MINIO_*` 接口不变。amd64/arm64 镜像 manifest 还包含经过校验的 MCLI `RELEASE.2026-08-06T00-00-00Z`（在本审计头之后的发布提交中提升）和只面向客户端的 `mc` 符号链接。
 - OCI 法律材料位于 `/licenses/{LICENSE,NOTICE,CREDITS}`。
 
 ### Helm Chart {#helm}
 
-继承的 `helm/minio` Chart、`helm-releases`、根 Chart 索引与重建脚本已删除。维护中的 Chart 为 `helm/silo`，版本 `7.0.0`。
+继承的 `helm/minio` Chart、`helm-releases`、根 Chart 索引与重建脚本已删除。维护中的 Chart 为 `helm/silo`；20260806 发布的 Chart 版本为 `7.0.1`（审计头当时仍是 `7.0.0`）。
 
 大多数 values 刻意保留原名，包括 `minioAPIPort`、`minioConsolePort` 及所有 `MINIO_*` 环境设置。迁移时需要关注：
 
@@ -303,6 +303,23 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 
 新工具链重新生成了 `String()` 文件。合法枚举输出不变；差异来自生成器来源与非法值格式化机制，不单独宣称为 S3 行为变化。
 
+## 2026-08-06 审计之后的变更 {#since-20260806}
+
+上文各节描述的是 `219670d3` 快照。下表记录此后合并进 `main`、截至 `6586fbfd0` 及随后发布前清理的行为变更；下一次发布审计会把它们并入上文各节。
+
+| 领域 | 变更 | 出处 |
+|:-----|:-----|:-----|
+| 授权 | 显式删除版本按 `s3:DeleteObjectVersion` 授权，`DeleteObjects` 逐条目授权；用户与组状态变更要求与目标状态匹配的动作；策略写入拒绝裸 ARN 前缀 | [#104](https://github.com/pgsty/silo/pull/104)、`58735ee38`、`229fe2b3c`、`eee05a17c`（SN-2026-005、-009、-010） |
+| 复制信任 | 仅当精确标记与 `s3:ReplicateObject` / `s3:ReplicateDelete` 同时成立，复制专用 header 才获得复制语义；否则在签名验证后被移除 | [#101](https://github.com/pgsty/silo/pull/101)（SN-2026-008） |
+| SSE-C | 零字节对象与 `GetObjectAttributes` 校验客户密钥；null 版本与原地换钥复制不再把对象重写成不可读密文；CopyObject 以目标密钥报告校验和 | `b73581b05`、`474cd5801`、`05df6e70d`、`ffb70eb37`、`e73436c99`（SN-2026-006、-007） |
+| 校验和 | 服务端计算分片校验和、联邦 `UploadPartCopy`、`CompleteMultipartUpload` 返回 `ChecksumType`、与 AWS 对齐的完成错误码、拒绝未知算法与 `CRC64NVME` + `COMPOSITE` | `7fea6d5a5`、`8d76a255c`、`d014a12cf`、`5d152416d`、`7c103389f`、`d28885d0e` |
+| 列表 | 对不存在的桶，`ListObjects` 在原先返回空列表的捷径路径上改为返回 `NoSuchBucket` | `e9c5340be` |
+| 桶级 CORS | 真实的 `?cors` API；桶配置覆盖全局策略；预鉴权查找只读驻留元数据，否则应用全局策略；站点复制以 last-writer-wins 寄存器收敛 CORS | [#71](https://github.com/pgsty/silo/pull/71)、[#80](https://github.com/pgsty/silo/pull/80)、[#101](https://github.com/pgsty/silo/pull/101) |
+| 桶元数据 | `metadata.lock` 串行化所有桶配置写入；`ForceCreate` 与站点 adoption 保留既有配置；启用 lock 的桶始终使用纯 Enabled 版本控制 | [#103](https://github.com/pgsty/silo/pull/103)、`dd3bdb808` |
+| 站点复制 | Object Lock 配置以独立字段复制（仍接受旧的 `Tags` 载体）；按站点统计状态；有效性探针在规则前缀下校验权限 | `3861f33cb`、`fb406fdc9`、`c9ad74673`、`5db7be4ee` |
+| 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
+| 工具链与组件 | Go 1.27.0；上游 `minio-go` `v7.3.1-0.20260828`（与 Console、`mcli` 所要求的预发布版本一致；`silo-go` 分叉已退役）；`silo-pkg` v3.12.3 预发布 pin 与 Console `43f8447fd`（见 [Console 页](/compatibility/console/)）；捆绑 `mcli` 20260901 | `43f4bb7ed`、`4d6e1ea8e`、发布前清理 |
+
 ## 已知残余风险与未修复项 {#limits}
 
 本次审计不会把继承的限制包装成兼容性承诺：
@@ -315,6 +332,8 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 6. **私有 API 不是稳定兼容承诺。** `ReadMultiple` 表明即便 storage REST 协议号不变，操作仍可能消失。不要跨越该边界滚动运行混合构建。
 7. **源码结果不等于已发布制品。** 在逐渠道验证前，本页不声称 GitHub 标签、软件包、OCI manifest、签名或线上站点已经包含仅存在于审计 HEAD 的最后三个提交。
 8. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
+9. **未实现条件删除。** `DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object><ETag>` 元素，两者都执行无条件删除（[#10](https://github.com/pgsty/silo/issues/10)）。
+10. **多站点删除桶配置不会收敛。** 在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；只有桶级 CORS 使用带 tombstone 的寄存器。依赖多站点同步删除这些配置的部署，删除后必须逐站核对。
 
 ## 迁移检查清单 {#migration}
 

@@ -291,7 +291,7 @@ CI 范围 gofmt 与 git diff --check
 
 本轮不需要新增缓存、feature flag、更多抽象或修改 continuation-token 语义。高频 shortcut 流量与大型集群尾延迟仍是后续可观测项，不是继续凭假设扩代码的理由。
 
-仓库集成已经完成。只有 tag、软件包、`docker.io/pgsty/minio` 镜像、部署与真实 S3 客户端验证分别完成后，才能宣称用户已经获得修复。
+仓库集成已经完成。只有 tag、软件包、`docker.io/pgsty/silo` 镜像、部署与真实 S3 客户端验证分别完成后，才能宣称用户已经获得修复。
 
 ## 结论 {#conclusion}
 

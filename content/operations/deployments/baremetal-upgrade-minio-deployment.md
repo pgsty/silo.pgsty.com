@@ -21,7 +21,7 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 ## Before You Upgrade {#prerequisites}
 
 1. **Back up cluster settings.** Export bucket metadata and IAM configuration with [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) and [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export).
-2. **Choose a published Silo release.** Use [Download & Install](/download/#server), [Silo release notes](/blog/release/), and [GitHub Releases](https://github.com/pgsty/minio/releases). A local tag, branch commit, draft release, or uploaded draft asset is not a published release.
+2. **Choose a published Silo release.** Use [Download & Install](/download/#server), [Silo release notes](/blog/release/), and [GitHub Releases](https://github.com/pgsty/silo/releases). A local tag, branch commit, draft release, or uploaded draft asset is not a published release.
 3. **Verify the artifact.** Check its SHA-256 digest against the checksum published with that exact release. Pin one release across all nodes.
 4. **Read every intervening release note.** Pay particular attention to format, identity, configuration, and downgrade warnings.
 5. **Test the exact upgrade in a lower environment.** Exercise representative reads, writes, policies, lifecycle rules, replication, notifications, and recovery procedures before production.

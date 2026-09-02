@@ -2,7 +2,7 @@
 title: "One Endpoint, Two Privileges: Separating User and Group Status"
 linkTitle: "User and Group Status Permissions"
 date: 2026-08-26
-lastmod: 2026-08-28
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   Shared user and group status endpoints historically checked their Enable action even for disable requests. This record explains the least-privilege defect, SILO's strict target-state authorization design, the user repair merged through PR #73, the group follow-up, four-way IAM tests, and the boundary between committed code and a delivered release.
@@ -15,7 +15,7 @@ url: "/blog/design/user-status-permissions/"
 This document records the discussion, repair, and final authorization design for [upstream issue minio/minio#21478](https://github.com/minio/minio/issues/21478) and [SILO PR #73](https://github.com/pgsty/silo/pull/73).
 
 > **Status on 2026-08-26:** SILO PR #73 was merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5), preserving the signed-off repair commit [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1). All eight reported checks passed. Upstream issue #21478 and PR #21482 remain open, but `minio/minio` is archived and read-only, so no further issue comment or merge can be made there.<br>
-> **Group follow-up on 2026-08-28:** final release review found the same fixed-action defect in `set-group-status`. Signed-off server commit `d98250110` now selects `admin:EnableGroup` or `admin:DisableGroup` from the requested target state and adds a real four-way IAM authorization test. Local verification and independent review are complete; push, remote CI, merge, tag, and delivery remain pending.<br>
+> **Group follow-up on 2026-08-28:** final release review found the same fixed-action defect in `set-group-status`. Signed-off server commit `229fe2b3c` now selects `admin:EnableGroup` or `admin:DisableGroup` from the requested target state and adds a real four-way IAM authorization test. Local verification and independent review are complete; it was merged into `main` on 2026-08-29, and tag and delivery remain pending.<br>
 > **Scope:** authorize enabling and disabling a user with their respective existing Admin Actions. Do not change the route, status values, account storage, replication record, or client API.<br>
 > **Security property:** possessing `admin:DisableUser` must not grant the ability to enable an account, and possessing `admin:EnableUser` must not grant the ability to disable one.<br>
 > **Release boundary:** merge, tag, release package, container image, deployment, and production verification remain separate gates.
@@ -342,8 +342,8 @@ The upstream artifacts remain useful provenance but are no longer an actionable 
 | Design decision | complete | complete |
 | Implementation and local tests | complete | complete |
 | Independent adversarial review | complete | complete, GO |
-| Signed-off commit | complete | local `d98250110` |
-| Push, PR CI, and merge | complete | not established |
+| Signed-off commit | complete | `229fe2b3c` on `main` |
+| Push, PR CI, and merge | complete | merged 2026-08-29 |
 | Tagged SILO release | not established | not established |
 | Release package or container image | not established | not established |
 | Deployment | not established | not established |

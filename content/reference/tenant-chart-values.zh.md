@@ -14,7 +14,7 @@ upstream_modified: true
 以下页面说明 MinIO 租户的 `values.yaml` Chart。 有关 MinIO Operator Chart 的文档，请参阅 [Operator Helm 图表](/zh/reference/operator-chart-values/#minio-operator-chart-values)
 
 > [!WARNING]
-> 上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。本页是其最终 `v7.1.1` Chart 的保留参考快照，不代表上游仍在维护或提供支持。默认值已对照该标签核验；内部文档链接改为本站路由，并把上游陈旧的 `existingSecret` 注释校正为 Chart 实际使用的 `tenant.configSecret.name` 输入。下文的 `quay.io/minio/minio` 是上游 Chart 默认值，不是 Silo 品牌名称，也不是推荐的 Silo 镜像。要运行 Silo，请将 `tenant.image.repository` 覆盖为 `pgsty/minio`，并固定经过测试的 [已发布标签或镜像摘要](/zh/download/#server)。
+> 上游 MinIO Operator 仓库已于 2026 年 3 月 20 日归档。本页是其最终 `v7.1.1` Chart 的保留参考快照，不代表上游仍在维护或提供支持。默认值已对照该标签核验；内部文档链接改为本站路由，并把上游陈旧的 `existingSecret` 注释校正为 Chart 实际使用的 `tenant.configSecret.name` 输入。下文的 `quay.io/minio/minio` 是上游 Chart 默认值，不是 Silo 品牌名称，也不是推荐的 Silo 镜像。要运行 Silo，请将 `tenant.image.repository` 覆盖为 `pgsty/silo`，并固定经过测试的 [已发布标签或镜像摘要](/zh/download/#server)。
 
 <a id="minio-tenant-chart-operator-values"></a>
 

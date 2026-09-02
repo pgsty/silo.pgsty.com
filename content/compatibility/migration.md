@@ -105,6 +105,18 @@ Kubelet probes are `httpGet` requests in the pod spec; Docker `HEALTHCHECK` is i
 
 The disk format is unchanged and works with both servers: set `image:` back to the recorded MinIO tag and `docker compose up -d`. The same volume stays attached, and data written by Silo remains readable by MinIO.
 
+## Upgrading from RELEASE.2026-08-06 {#since-20260806}
+
+The release after `RELEASE.2026-08-06T00-00-00Z` tightens several behaviors that 20260806 accepted. Check these before upgrading:
+
+1. **Explicit version deletes need `s3:DeleteObjectVersion`.** `DeleteObject` and `DeleteObjects` entries that carry a `versionId` are authorized as `s3:DeleteObjectVersion`, as on AWS. Grant it to principals that delete specific versions, and add `Deny s3:DeleteObjectVersion` next to any `Deny s3:DeleteObject` that is meant to block permanent deletes.
+2. **Enable and disable are separate admin actions.** `admin:EnableUser` / `admin:DisableUser` and the group equivalents are checked against the requested status; a policy that grants only one of them loses the other operation.
+3. **New and updated policies reject bare ARN prefixes** such as `arn:aws:s3:::`, and statements that combine `Resource` with `NotResource`. Stored policies keep loading; automation that re-applies such policies fails.
+4. **Legacy database notification targets need a connection string.** An enabled pre-KV PostgreSQL or MySQL target without `connection_string` / `dsn_string` stops startup with a credential-free error; 20260806 silently dropped every notification target in that situation.
+5. **Checksum requests are validated.** Unknown `x-amz-checksum-*` algorithms, `CRC64NVME` combined with `COMPOSITE`, and checksum-type assertions that contradict the upload are rejected with `400`. The default behavior of the AWS SDKs, `minio-go`, and `mcli` is unaffected.
+6. **Per-bucket CORS is real.** A bucket with its own CORS configuration is served by that configuration only; `MINIO_API_CORS_ALLOW_ORIGIN` applies to buckets without one. In a site-replication group, configure bucket CORS only after every site runs the new release: older peers accept but ignore the configuration and keep reporting a CORS mismatch.
+7. **Rollback keeps the data readable.** 20260806 ignores bucket CORS configuration and drops it when it rewrites that bucket's metadata; recreate the configuration after upgrading again.
+
 ## One cluster, one binary {#one-binary}
 
 Distributed nodes verify each other's binary at bootstrap. A node started among peers running a different binary does not fail — it waits indefinitely in `activating`, logging:

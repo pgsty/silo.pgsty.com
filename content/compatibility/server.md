@@ -60,7 +60,7 @@ The following MinIO identifiers are compatibility identifiers, not unfinished br
 - the default S3 port `9000`, existing `--address` / `--console-address` flags, and release tags of the form `RELEASE.YYYY-MM-DDTHH-MM-SSZ`;
 - configuration KV formats, IAM data, KMS/KES configuration, encryption metadata, bucket metadata, replication state, and healing state.
 
-The automated rebrand baseline records 137 compatible imports, 436 environment names, 19 metric namespaces, 84 headers, 330 routes, one internal root, three Grid namespaces, 15 storage-REST identifiers, 58 policy identifiers, and 9,014 exported symbols. The guard treats an unreviewed change to that manifest as a compatibility failure.
+The automated rebrand baseline records 137 compatible imports, 437 environment names, 19 metric namespaces, 84 headers, 334 routes, one internal root, three Grid namespaces, 15 storage-REST identifiers, 58 policy identifiers, and 9,014 exported symbols. The guard treats an unreviewed change to that manifest as a compatibility failure.
 
 No data copy or metadata rewrite is required when the same disks move from MinIO to Silo. This does not mean every malformed historical object is accepted: the storage hardening described below rejects unsafe paths, invalid erasure geometry, negative part sizes, and poisoned metadata that older code could carry farther into the stack.
 
@@ -163,12 +163,12 @@ The source repository is `github.com/pgsty/silo`; the intended image name is `do
 - An explicitly requested shell or utility is left alone.
 - Every privilege path uses `exec`, so the server becomes PID 1 and receives `SIGTERM` for graceful shutdown instead of timing out behind the entrypoint.
 - `HOME=/tmp` is the image default and is normalized to a writable directory for arbitrary-UID and legacy `MINIO_USERNAME` drop-user execution.
-- Port `9000`, `/data`, and the `MINIO_*` interface remain. The amd64/arm64 image manifest also contains checksummed MCLI `RELEASE.2026-08-04T00-00-00Z` and the client-only `mc` symlink.
+- Port `9000`, `/data`, and the `MINIO_*` interface remain. The amd64/arm64 image manifest also contains checksummed MCLI `RELEASE.2026-08-06T00-00-00Z` (bumped in the release commit after this audit head) and the client-only `mc` symlink.
 - OCI license material is under `/licenses/{LICENSE,NOTICE,CREDITS}`.
 
 ### Helm chart {#helm}
 
-The inherited `helm/minio` chart, `helm-releases`, root chart index, and reindex helper were removed. The maintained chart is `helm/silo`, chart version `7.0.0`.
+The inherited `helm/minio` chart, `helm-releases`, root chart index, and reindex helper were removed. The maintained chart is `helm/silo`; the 20260806 release ships chart version `7.0.1` (the audit head still carried `7.0.0`).
 
 Most values deliberately keep their established names, including `minioAPIPort`, `minioConsolePort`, and all `MINIO_*` environment settings. The changes that matter during migration are:
 
@@ -303,6 +303,23 @@ For external Go consumers of `silo-pkg`, two changes are broader than this serve
 
 Generated `String()` files were regenerated under the new toolchain. Valid enum output remains the same; the diff is generator provenance and invalid-value formatting machinery, not a separately claimed S3 behavior change.
 
+## Changes since the 2026-08-06 audit {#since-20260806}
+
+The sections above describe the `219670d3` snapshot. The table below records the behavior changes merged to `main` after it, up to `6586fbfd0` and the pre-release cleanup that followed; the next release audit folds them into the sections above.
+
+| Area | Change | Where |
+|:-----|:-------|:------|
+| Authorization | Explicit version deletes are authorized as `s3:DeleteObjectVersion` and `DeleteObjects` authorizes each entry; user and group status changes require the action matching the target status; policy writes reject bare ARN prefixes | [#104](https://github.com/pgsty/silo/pull/104), `58735ee38`, `229fe2b3c`, `eee05a17c` (SN-2026-005, -009, -010) |
+| Replication trust | Replication-only headers grant replication semantics only with the exact marker and `s3:ReplicateObject` / `s3:ReplicateDelete`; otherwise they are removed after signature verification | [#101](https://github.com/pgsty/silo/pull/101) (SN-2026-008) |
+| SSE-C | Zero-byte objects and `GetObjectAttributes` authenticate the customer key; null-version and in-place key-rotation copies no longer rewrite objects into unreadable ciphertext; CopyObject reports checksums under the destination key | `b73581b05`, `474cd5801`, `05df6e70d`, `ffb70eb37`, `e73436c99` (SN-2026-006, -007) |
+| Checksums | Server-side part checksums, federated `UploadPartCopy`, `ChecksumType` in `CompleteMultipartUpload`, AWS-aligned completion errors, rejection of unknown algorithms and of `CRC64NVME` with `COMPOSITE` | `7fea6d5a5`, `8d76a255c`, `d014a12cf`, `5d152416d`, `7c103389f`, `d28885d0e` |
+| Listing | `ListObjects` on a missing bucket returns `NoSuchBucket` on the shortcut paths that previously returned an empty listing | `e9c5340be` |
+| Per-bucket CORS | Real `?cors` API; a bucket configuration overrides the global policy; the pre-authentication lookup reads resident metadata only and otherwise applies the global policy; site replication converges CORS with a last-writer-wins register | [#71](https://github.com/pgsty/silo/pull/71), [#80](https://github.com/pgsty/silo/pull/80), [#101](https://github.com/pgsty/silo/pull/101) |
+| Bucket metadata | `metadata.lock` serializes every bucket-configuration writer; `ForceCreate` and site adoption keep existing configuration; a locked bucket always carries plain Enabled versioning | [#103](https://github.com/pgsty/silo/pull/103), `dd3bdb808` |
+| Site replication | Object Lock configuration replicates in its own field (the legacy `Tags` carrier is still accepted); status is accounted per site; validity probes verify permissions under the rule prefix | `3861f33cb`, `fb406fdc9`, `c9ad74673`, `5db7be4ee` |
+| Configuration | Legacy database notification targets require a DSN; `MINIO_CONFIG_ENV_FILE` uses a dedicated parser that keeps named targets | `f1ba68358`, `6b0998157`, `2aea7fe9c` |
+| Toolchain and components | Go 1.27.0; upstream `minio-go` `v7.3.1-0.20260828` (the same pre-release the Console and `mcli` stacks require; the `silo-go` fork is retired); `silo-pkg` v3.12.3 pre-release pin and Console `43f8447fd` (see the [Console page](/compatibility/console/)); bundled `mcli` 20260901 | `43f4bb7ed`, `4d6e1ea8e`, pre-release cleanup |
+
 ## Known residual risks and non-fixes {#limits}
 
 This audit does not turn inherited limitations into claims of compatibility:
@@ -315,6 +332,8 @@ This audit does not turn inherited limitations into claims of compatibility:
 6. **Private APIs are not a stable compatibility promise.** `ReadMultiple` proves that a same-numbered storage REST protocol can still lose an operation. Do not run a rolling mixed build across this boundary.
 7. **A source result is not a released artifact.** This page does not assert that GitHub tags, packages, OCI manifests, signatures, or the public site contain the three audit-head-only commits until each channel is verified separately.
 8. **Informational HTTP responses remain imperfectly tracked.** The response-tracking layer treats a 1xx response as final. The Flush/implicit-200 change did not introduce this behavior and does not claim to fix it.
+9. **Conditional delete is not implemented.** `DeleteObject` ignores the HTTP `If-Match` header and `DeleteObjects` ignores each `<Object><ETag>` element; both delete unconditionally ([#10](https://github.com/pgsty/silo/issues/10)).
+10. **Multi-site deletion of bucket configuration does not converge.** Deleting a bucket policy, SSE, tag, or quota configuration on one site can be restored by a peer that still holds it ([#77](https://github.com/pgsty/silo/issues/77)); only per-bucket CORS uses a tombstone-aware register. Deployments that rely on multi-site deletion of these configurations must verify every site after a delete.
 
 ## Migration checklist {#migration}
 

@@ -2,7 +2,7 @@
 title: "Conditional DELETE: Why the Condition Must Be Evaluated Once"
 linkTitle: "Conditional DELETE"
 date: 2026-08-26
-lastmod: 2026-08-26
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   SILO PR #12 attempted to add If-Match to DeleteObject, but evaluated the condition independently in every storage pool, allowing a 412 response after a partial deletion or a stale copy to reappear after success. This record documents the defect, AWS contract, counterexamples, minimal repair, test requirements, and follow-up boundary for batch conditions and policy enforcement.
@@ -14,7 +14,7 @@ url: "/blog/design/conditional-delete/"
 
 This document records the analysis, design discussion, and repair decision for [SILO PR #12](https://github.com/pgsty/silo/pull/12).
 
-> **Status on 2026-08-26:** PR #12 remains open at head `5b71a75e`, 118 commits behind the latest `main`. Its commit has no DCO sign-off and GitHub reports no check runs. The improved design described here has been implemented, tested, and reviewed twice in an isolated local worktree, but it has not been committed, pushed, merged, or released.<br>
+> **Status on 2026-08-26:** PR #12 remains open at head `5b71a75e`, 118 commits behind the latest `main`. Its commit has no DCO sign-off and GitHub reports no check runs. The improved design described here has been implemented, tested, and reviewed twice in an isolated local worktree, and committed on the local branch `codex/pr12-conditional-delete`; it has not been pushed, merged, or released.<br>
 > **Scope:** correctly support `If-Match` for the single-object `DeleteObject` API, and fail closed instead of silently deleting when an unsupported per-object `DeleteObjects` ETag is received. Full batch-condition execution and bucket-policy enforcement remain separate deliverables.<br>
 > **Release boundary:** local implementation, tests, review, commit, push, remote CI, merge, tag, image publication, and production deployment are independent gates.
 
@@ -259,7 +259,7 @@ The single-object repair becomes mergeable only after:
 5. DCO, Go CI, VulnCheck, and other required remote workflows are green;
 6. the PR description distinguishes complete `DeleteObject` support from the batch fail-closed guard and links the full batch/policy follow-ups.
 
-A merge is still not a release. Users can rely on the behavior only after a corresponding SILO release, package, `docker.io/pgsty/minio` image, deployment, and real-client verification have independently completed.
+A merge is still not a release. Users can rely on the behavior only after a corresponding SILO release, package, `docker.io/pgsty/silo` image, deployment, and real-client verification have independently completed.
 
 ## Conclusion {#conclusion}
 

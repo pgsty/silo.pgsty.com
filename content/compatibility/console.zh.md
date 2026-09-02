@@ -63,6 +63,9 @@ replace (
 
 Console 自身的源码不使用只有分支才有的 API —— 严格策略写入校验是本地实现而非引入的 —— 并且有一个 CI 任务通过丢弃全部三个 replace、在纯上游模块图上完成构建、vet、测试与交叉编译来证明这一点。这是构建兼容性的保证，不等于声称上游包与 Silo 包在运行时行为一致。
 
+> [!NOTE]
+> 自 Console [v2.3.0]（2026-09-01）起，模块直接 require `github.com/pgsty/silo-pkg/v3`：`silo-pkg` v3.13.0 已迁到该模块路径，上文所示的 replace 图谱随之退役。仍通过 `replace github.com/minio/pkg/v3 => …` 选择 `silo-pkg` 的服务端，在自身改用新路径之前无法内嵌 v2.3.0 及之后的版本。Silo 服务端内嵌的是 Console 提交 `43f8447fd`：v2.3.0 线上模块路径迁移之前的最后一个提交，含 v2.3.0 的全部安全修复。
+
 ## 迁移 {#migration}
 
 已有的 MinIO Console 部署可以原地升级。服务单元、服务账号与配置文件名称都不变，全部 `CONSOLE_*` 变量按原样读取，因此通常的做法是用 `silo-console` 软件包覆盖安装后重启。
@@ -80,3 +83,4 @@ Console 自身的源码不使用只有分支才有的 API —— 严格策略写
 
 [v2.1.1]: https://github.com/pgsty/silo-console/releases/tag/v2.1.1
 [v2.2.1]: https://github.com/pgsty/silo-console/releases/tag/v2.2.1
+[v2.3.0]: https://github.com/pgsty/silo-console/releases/tag/v2.3.0

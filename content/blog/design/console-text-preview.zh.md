@@ -2,6 +2,7 @@
 title: "只预览文本，绝不执行：SILO Console 文本预览 PRD"
 linkTitle: "安全文本预览"
 date: 2026-08-23
+lastmod: 2026-09-02
 author: "冯若航"
 summary: >
   SILO Console 安全文本预览的最终 PRD：用严格 UTF-8 与 1 MiB 硬上限查看日志、纯文本、JSON 和 XML；任何对象内容都不得成为同源可执行文档。
@@ -11,7 +12,7 @@ draft: false
 url: "/zh/blog/design/console-text-preview/"
 ---
 
-> **状态：** 设计已接受，实现待完成 · **归属：** [pgsty/silo-console](https://github.com/pgsty/silo-console) · **跟踪：** [pgsty/silo#17](https://github.com/pgsty/silo/issues/17) · **审阅：** 产品、安全与前端架构三方共识
+> **状态：** 已随 SILO Console 2.2.0 发布 · **归属：** [pgsty/silo-console](https://github.com/pgsty/silo-console) · **跟踪：** [pgsty/silo#17](https://github.com/pgsty/silo/issues/17) · **审阅：** 产品、安全与前端架构三方共识
 
 SILO Console 可以预览图片、PDF、音频和视频，却不能直接查看运维中最常见的小型日志、纯文本、JSON 与 XML。即使对象保存了完全正确的 <code>Content-Type</code>，前端也会在选择渲染器之前把它判为不支持。
 

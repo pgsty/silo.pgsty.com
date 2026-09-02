@@ -2,7 +2,7 @@
 title: "一个端点，两种权限：彻底分离用户与组状态"
 linkTitle: "用户与组状态权限"
 date: 2026-08-26
-lastmod: 2026-08-28
+lastmod: 2026-09-02
 author: "冯若航"
 summary: >
   用户与组状态端点过去即使处理禁用请求，也固定检查各自的 Enable action。本文记录最小权限缺陷、SILO 基于目标状态严格选权的设计、通过 PR #73 合并的用户修复、后续组修复、四向 IAM 测试，以及代码提交与版本交付之间的边界。
@@ -15,7 +15,7 @@ url: "/zh/blog/design/user-status-permissions/"
 本文完整记录 [上游 issue minio/minio#21478](https://github.com/minio/minio/issues/21478) 与 [SILO PR #73](https://github.com/pgsty/silo/pull/73) 的讨论、修复过程和最终鉴权设计。
 
 > **截至 2026-08-26 的状态：** SILO PR #73 已合并为 [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)，并保留带 DCO sign-off 的修复提交 [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1)；八项远端检查全部通过。上游 #21478 与 PR #21482 仍显示 open，但 `minio/minio` 已归档为只读仓库，无法继续评论或合并。<br>
-> **2026-08-28 组权限善后：** 最终发布审查发现 `set-group-status` 存在同样的固定 action 问题。带 sign-off 的服务器提交 `d98250110` 现已根据目标状态选择 `admin:EnableGroup` 或 `admin:DisableGroup`，并加入真实四向 IAM 鉴权测试。本地验证与独立评审完成；push、远端 CI、merge、tag 与交付仍待后续。<br>
+> **2026-08-28 组权限善后：** 最终发布审查发现 `set-group-status` 存在同样的固定 action 问题。带 sign-off 的服务器提交 `229fe2b3c` 现已根据目标状态选择 `admin:EnableGroup` 或 `admin:DisableGroup`，并加入真实四向 IAM 鉴权测试。本地验证与独立评审完成；已于 2026-08-29 合并进 `main`，tag 与交付仍待后续。<br>
 > **本轮范围：** 分别使用已有的两个 Admin Action 鉴权用户启用与禁用；不修改路由、状态值、账户存储、复制记录或客户端 API。<br>
 > **安全属性：** 持有 `admin:DisableUser` 不能因此获得启用账户的能力，持有 `admin:EnableUser` 也不能因此获得禁用账户的能力。<br>
 > **发布边界：** merge、tag、release package、container image、deployment 与 production verification 仍是相互独立的门槛。
@@ -342,8 +342,8 @@ func setGroupStatusAdminAction(status string) policy.AdminAction {
 | 设计决策 | 完成 | 完成 |
 | 实现与本地测试 | 完成 | 完成 |
 | 独立对抗评审 | 完成 | 完成，GO |
-| 带 sign-off 的提交 | 完成 | 本地 `d98250110` |
-| Push、PR CI 与 merge | 完成 | 尚未确认 |
+| 带 sign-off 的提交 | 完成 | `229fe2b3c`（已在 `main`）|
+| Push、PR CI 与 merge | 完成 | 已于 2026-08-29 合并 |
 | SILO tag | 尚未确认 | 尚未确认 |
 | Release package 或 container image | 尚未确认 | 尚未确认 |
 | 部署 | 尚未确认 | 尚未确认 |

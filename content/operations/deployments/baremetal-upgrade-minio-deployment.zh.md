@@ -21,7 +21,7 @@ upstream_modified: true
 ## 升级前准备 {#id2}
 
 1. **备份集群设置。** 使用 [`mc admin cluster bucket export`](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) 与 [`mc admin cluster iam export`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) 导出存储桶元数据和 IAM 配置。
-2. **选择已经公开发布的 Silo 版本。** 以[下载与安装](/zh/download/#server)、[Silo 发布说明](/zh/blog/release/)和 [GitHub Releases](https://github.com/pgsty/minio/releases)为准。本地标签、分支提交、草稿 Release 或上传到草稿中的制品都不等于公开发布。
+2. **选择已经公开发布的 Silo 版本。** 以[下载与安装](/zh/download/#server)、[Silo 发布说明](/zh/blog/release/)和 [GitHub Releases](https://github.com/pgsty/silo/releases)为准。本地标签、分支提交、草稿 Release 或上传到草稿中的制品都不等于公开发布。
 3. **校验制品。** 将 SHA-256 摘要与该精确版本随附的校验和核对；所有节点固定到同一个版本。
 4. **阅读跨越的全部发布说明。** 特别关注格式、身份认证、配置和降级限制。
 5. **在低环境验证完全相同的升级。** 上生产前覆盖代表性的读写、策略、生命周期、复制、通知与恢复流程。

@@ -21,6 +21,7 @@ upstream_modified: true
 - [CopyObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html)
 - [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
 - [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
+  - 不支持条件删除：`DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object><ETag>` 元素，两者都执行无条件删除（[#10](https://github.com/pgsty/silo/issues/10)）。
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)
@@ -110,6 +111,9 @@ PutObjectAcl
 - [GetBucketPolicyStatus](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketPolicyStatus.html)
 - [PutBucketPolicy](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketPolicy.html)
 - [DeleteBucketPolicy](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketPolicy.html)
+- [GetBucketCors](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketCors.html)
+- [PutBucketCors](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketCors.html)
+- [DeleteBucketCors](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketCors.html)
 
 ### 不支持的 API 存储桶操作 {#id11}
 
@@ -117,8 +121,6 @@ PutObjectAcl
 GetBucketInventoryConfiguration
 PutBucketInventoryConfiguration
 DeleteBucketInventoryConfiguration
-PutBucketCors
-DeleteBucketCors
 GetBucketMetricsConfiguration
 PutBucketMetricsConfiguration
 DeleteBucketMetricsConfiguration
@@ -151,6 +153,6 @@ CreateSession
 ### MinIO 针对不支持的存储桶资源的替代方案 {#minio}
 
 - 对于 `BucketACL` 或 `ObjectACL` 操作调用，请使用 [Policies](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
-- 不需要 `BucketCORS` 操作调用，因为默认情况下所有存储桶都已为所有 HTTP 动词启用 CORS。
+- 自 `RELEASE.2026-08-06T00-00-00Z` 之后的版本起支持 `BucketCORS` 操作。设置了自身 CORS 配置的存储桶只按该配置响应；未设置的存储桶使用服务端全局的 `MINIO_API_CORS_ALLOW_ORIGIN` 策略，默认允许所有来源。
 - 对于 `BucketWebsite` 操作调用，请使用 `caddy` 或 `nginx`。
 - 对于 `BucketAnalytics`、`BucketMetrics` 或 `BucketLogging` 操作调用，请使用 [存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
