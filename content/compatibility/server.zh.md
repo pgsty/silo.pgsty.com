@@ -60,7 +60,7 @@ Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端�
 - 默认 S3 端口 `9000`、既有 `--address` / `--console-address` 参数，以及 `RELEASE.YYYY-MM-DDTHH-MM-SSZ` 标签格式；
 - 配置 KV 格式、IAM 数据、KMS/KES 配置、加密元数据、桶元数据、复制状态与修复状态。
 
-自动化 rebrand 基线记录了 137 个兼容 import、436 个环境变量名、19 个指标命名空间、84 个头、330 条路由、1 个内部根目录、3 个 Grid 命名空间、15 个 storage-REST 标识、58 个策略标识和 9,014 个导出符号。Guard 会把任何未评审的基线漂移视为兼容性失败。
+自动化 rebrand 基线记录了 137 个兼容 import、437 个环境变量名、19 个指标命名空间、84 个头、334 条路由、1 个内部根目录、3 个 Grid 命名空间、15 个 storage-REST 标识、58 个策略标识和 9,014 个导出符号。Guard 会把任何未评审的基线漂移视为兼容性失败。
 
 同一组数据盘从 MinIO 切到 Silo 时不需要复制数据或重写元数据。但这并不意味着一切畸形历史对象都会继续被接受：下文的存储加固会拒绝不安全路径、非法纠删码几何、负 part size 以及过去可能继续向下传播的污染元数据。
 
@@ -302,6 +302,23 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 对外部 `silo-pkg` Go 使用者，有两项变化比服务端自身调用路径更宽：`xtime.Duration` JSON 从整数纳秒变为 duration 字符串；部分 AIStor action 词汇/受保护 action helper 与上游不同。特别是 `Policy.IsAllowedActions` 可能在受保护 action 上产生不同结论，但服务端并不调用它。服务端通过 YAML/msgp 保存相关状态，也没有调用这些有差异的 AIStor/action helper 路径，因此没有发现由这些库变化引起的服务端数据迁移或授权变化。
 
 新工具链重新生成了 `String()` 文件。合法枚举输出不变；差异来自生成器来源与非法值格式化机制，不单独宣称为 S3 行为变化。
+
+## 2026-08-06 审计之后的变更 {#since-20260806}
+
+上文各节描述的是 `219670d3` 快照。下表记录此后合并进 `main`、截至 `6586fbfd0` 及随后发布前清理的行为变更；下一次发布审计会把它们并入上文各节。
+
+| 领域 | 变更 | 出处 |
+|:-----|:-----|:-----|
+| 授权 | 显式删除版本按 `s3:DeleteObjectVersion` 授权，`DeleteObjects` 逐条目授权；用户与组状态变更要求与目标状态匹配的动作；策略写入拒绝裸 ARN 前缀 | [#104](https://github.com/pgsty/silo/pull/104)、`58735ee38`、`229fe2b3c`、`eee05a17c`（SN-2026-005、-009、-010） |
+| 复制信任 | 仅当精确标记与 `s3:ReplicateObject` / `s3:ReplicateDelete` 同时成立，复制专用 header 才获得复制语义；否则在签名验证后被移除 | [#101](https://github.com/pgsty/silo/pull/101)（SN-2026-008） |
+| SSE-C | 零字节对象与 `GetObjectAttributes` 校验客户密钥；null 版本与原地换钥复制不再把对象重写成不可读密文；CopyObject 以目标密钥报告校验和 | `b73581b05`、`474cd5801`、`05df6e70d`、`ffb70eb37`、`e73436c99`（SN-2026-006、-007） |
+| 校验和 | 服务端计算分片校验和、联邦 `UploadPartCopy`、`CompleteMultipartUpload` 返回 `ChecksumType`、与 AWS 对齐的完成错误码、拒绝未知算法与 `CRC64NVME` + `COMPOSITE` | `7fea6d5a5`、`8d76a255c`、`d014a12cf`、`5d152416d`、`7c103389f`、`d28885d0e` |
+| 列表 | 对不存在的桶，`ListObjects` 在原先返回空列表的捷径路径上改为返回 `NoSuchBucket` | `e9c5340be` |
+| 桶级 CORS | 真实的 `?cors` API；桶配置覆盖全局策略；预鉴权查找只读驻留元数据，否则应用全局策略；站点复制以 last-writer-wins 寄存器收敛 CORS | [#71](https://github.com/pgsty/silo/pull/71)、[#80](https://github.com/pgsty/silo/pull/80)、[#101](https://github.com/pgsty/silo/pull/101) |
+| 桶元数据 | `metadata.lock` 串行化所有桶配置写入；`ForceCreate` 与站点 adoption 保留既有配置；启用 lock 的桶始终使用纯 Enabled 版本控制 | [#103](https://github.com/pgsty/silo/pull/103)、`dd3bdb808` |
+| 站点复制 | Object Lock 配置以独立字段复制（仍接受旧的 `Tags` 载体）；按站点统计状态；有效性探针在规则前缀下校验权限 | `3861f33cb`、`fb406fdc9`、`c9ad74673`、`5db7be4ee` |
+| 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
+| 工具链与组件 | Go 1.27.0；上游 `minio-go` `v7.3.1-0.20260828`（与 Console、`mcli` 所要求的预发布版本一致；`silo-go` 分叉已退役）；`silo-pkg` v3.12.3 预发布 pin 与 Console `43f8447fd`（见 [Console 页](/compatibility/console/)）；捆绑 `mcli` 20260901 | `43f4bb7ed`、`4d6e1ea8e`、发布前清理 |
 
 ## 已知残余风险与未修复项 {#limits}
 

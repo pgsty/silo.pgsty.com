@@ -2,6 +2,7 @@
 title: "Optional Checksums, Mandatory Failure: Repairing UploadPart and UploadPartCopy Compatibility"
 linkTitle: "Multipart Checksum Compatibility"
 date: 2026-08-24
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   SILO required every part in a checksum-enabled multipart upload to carry a per-part checksum. That rejected ordinary UploadPart requests that omitted an optional header and made UploadPartCopy unusable. This record covers discovery, AWS and AIStor research, rejected designs, the one-pass plaintext solution, the compatibility-baseline blocker, adversarial review, and the consistency contract for follow-up repairs.
@@ -13,7 +14,7 @@ url: "/blog/design/uploadpart-checksum/"
 
 This is the complete design and implementation record for [SILO #46](https://github.com/pgsty/silo/issues/46). The repair was not merely a changed `if` statement. One apparently optional S3 header reached into multipart completion semantics, copy responses, compression and encryption pipelines, compatibility baselines, and release verification.
 
-> **Status:** server implementation and local verification complete; commit, PR, remote CI, release, and production verification pending.<br>
+> **Status:** merged into `main` as `7fea6d5a5` on 2026-08-24 ([pgsty/silo#46](https://github.com/pgsty/silo/issues/46) closed); release and production verification pending.<br>
 > **Owner:** [`pgsty/silo`](https://github.com/pgsty/silo), the SILO server repository.<br>
 > **Tracking:** [#46](https://github.com/pgsty/silo/issues/46).<br>
 > **Independent follow-ups:** [#63 CopyObject + compression checksum](https://github.com/pgsty/silo/issues/63), [#64 federated UploadPartCopy checksum](https://github.com/pgsty/silo/issues/64).<br>

@@ -2,6 +2,7 @@
 title: "When the Total Is Unknown: Folder Download Progress"
 linkTitle: "Folder Download Progress"
 date: 2026-08-23
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 description: "PRD for replacing NaN% with truthful indeterminate progress when SILO Console downloads a streamed folder ZIP, without changing the server API or ordinary file downloads."
 tags: [Design, Console, Download]
@@ -9,7 +10,7 @@ weight: 20
 url: "/blog/design/dir-percentage/"
 ---
 
-> **Status**: Implemented and verified locally; commit, Console release, and Silo dependency update pending · **Priority**: P1 · **Owner**: [`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **Related issue**: [`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD review**: Claude Fable 5 (`xhigh`) — **APPROVE** · **Implementation review**: Claude Fable 5 (`xhigh`), 2026-08-23 — **APPROVE**, no P0/P1/P2 findings
+> **Status**: Shipped in SILO Console 2.2.0 (`16960f7ab`); the server embeds it since its Console pin was updated (`4d6e1ea8e`) · **Priority**: P1 · **Owner**: [`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **Related issue**: [`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD review**: Claude Fable 5 (`xhigh`) — **APPROVE** · **Implementation review**: Claude Fable 5 (`xhigh`), 2026-08-23 — **APPROVE**, no P0/P1/P2 findings
 
 SILO Console shows `NaN%` in Downloads / Uploads while downloading a folder. The ZIP normally keeps streaming and the stored objects are intact, but the progress bar has crossed from "unknown" into an invalid determinate state. Users see a full-looking bar, assume the transfer failed or finished, and retry it.
 

@@ -105,6 +105,18 @@ kubelet 探针是 pod spec 中的 `httpGet` 请求；Docker `HEALTHCHECK` 被忽
 
 磁盘格式未变、两侧通用：把 `image:` 改回记录的 MinIO tag，`docker compose up -d`。同一卷保持挂载，Silo 运行期间写入的数据 MinIO 仍可读取。
 
+## 从 RELEASE.2026-08-06 升级 {#since-20260806}
+
+`RELEASE.2026-08-06T00-00-00Z` 之后的版本收紧了若干 20260806 曾接受的行为。升级前请逐项核对：
+
+1. **显式删除版本需要 `s3:DeleteObjectVersion`。** 带 `versionId` 的 `DeleteObject` 与 `DeleteObjects` 条目按 `s3:DeleteObjectVersion` 授权，与 AWS 一致。给需要删除特定版本的主体授予该权限；凡是用 `Deny s3:DeleteObject` 来阻止永久删除的策略，都要同时加上 `Deny s3:DeleteObjectVersion`。
+2. **启用与禁用是两个独立的管理动作。** `admin:EnableUser` / `admin:DisableUser` 及组的对应动作按请求的目标状态检查；只授予其中一个的策略会失去另一个操作。
+3. **新建与更新的策略拒绝裸 ARN 前缀**（如 `arn:aws:s3:::`）以及同时含 `Resource` 与 `NotResource` 的语句。已存储的策略照常加载；重复下发此类策略的自动化会失败。
+4. **旧版数据库通知目标必须有连接串。** 已启用的 pre-KV PostgreSQL 或 MySQL 目标若缺少 `connection_string` / `dsn_string`，启动会以不含凭据的错误停止；20260806 在同样情况下会静默丢掉全部通知目标。
+5. **校验和请求会被校验。** 未知的 `x-amz-checksum-*` 算法、`CRC64NVME` 与 `COMPOSITE` 的组合、与上传矛盾的校验和类型断言都返回 `400`。AWS SDK、`minio-go` 与 `mcli` 的默认行为不受影响。
+6. **桶级 CORS 真正生效。** 设置了自身 CORS 配置的桶只按该配置响应；`MINIO_API_CORS_ALLOW_ORIGIN` 只作用于没有配置的桶。在站点复制组里，等所有站点都运行新版本后再配置桶级 CORS：旧对端会接受但忽略该配置，并持续报告 CORS 不一致。
+7. **回滚后数据仍可读。** 20260806 忽略桶级 CORS 配置，并会在重写该桶元数据时把它丢掉；再次升级后请重新创建。
+
 ## 一个集群只运行一种二进制 {#one-binary}
 
 分布式节点在 bootstrap 时相互校验二进制。起进不同二进制对端之间的节点不会报错退出，而是无限停在 `activating`，日志记录：

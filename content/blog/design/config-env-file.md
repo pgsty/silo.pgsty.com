@@ -2,7 +2,7 @@
 title: "Config Environment Files Are Not Shell Scripts"
 linkTitle: "Config Env File Contract"
 date: 2026-08-28
-lastmod: 2026-08-28
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   MINIO_CONFIG_ENV_FILE is parsed directly by SILO, not sourced by a shell. A shell-identifier check therefore rejected valid named configuration targets such as my-hook. This record defines the compatible key grammar, whitespace and quoting rules, failure behavior, security boundary, and regression tests.
@@ -12,9 +12,9 @@ draft: false
 url: "/blog/design/config-env-file/"
 ---
 
-This record defines the startup contract for `MINIO_CONFIG_ENV_FILE` and explains the compatibility repair committed in SILO as `ce456dba0`.
+This record defines the startup contract for `MINIO_CONFIG_ENV_FILE` and explains the compatibility repair committed in SILO as `2aea7fe9c`.
 
-> **Status on 2026-08-28:** implementation, focused tests, the complete `cmd` and `internal` suites, tagged tests, race tests, vet, lint, generated-file checks, rebrand guards, build, and an independent local Fable Max review are complete. The server commit exists locally; push, remote CI, merge, tag, package, image, deployment, and production verification remain separate gates.<br>
+> **Status on 2026-08-28:** implementation, focused tests, the complete `cmd` and `internal` suites, tagged tests, race tests, vet, lint, generated-file checks, rebrand guards, build, and an independent local Fable Max review are complete. The commit was merged into `main` on 2026-08-29 as `2aea7fe9c`; tag, package, image, deployment, and production verification remain separate gates.<br>
 > **Scope:** environment-file parsing and named-target discovery only. No configuration key, subsystem, value, precedence, storage format, or client API changes.<br>
 > **Compatibility rule:** the file is a SILO input format. Supporting an optional `export` prefix does not make it a POSIX shell program.
 

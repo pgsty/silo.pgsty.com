@@ -2,6 +2,7 @@
 title: "Preview Text, Never Execute It: SILO Console Text Preview PRD"
 linkTitle: "Safe Text Preview"
 date: 2026-08-23
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   The accepted PRD for previewing small log, text, JSON, and XML objects in SILO Console as bounded, strict UTF-8 text—never as a same-origin executable document.
@@ -11,7 +12,7 @@ draft: false
 url: "/blog/design/console-text-preview/"
 ---
 
-> **Status:** accepted design; implementation pending · **Owner:** [pgsty/silo-console](https://github.com/pgsty/silo-console) · **Tracking:** [pgsty/silo#17](https://github.com/pgsty/silo/issues/17) · **Review:** consensus of product, security, and frontend architecture reviews
+> **Status:** shipped in SILO Console 2.2.0 · **Owner:** [pgsty/silo-console](https://github.com/pgsty/silo-console) · **Tracking:** [pgsty/silo#17](https://github.com/pgsty/silo/issues/17) · **Review:** consensus of product, security, and frontend architecture reviews
 
 SILO Console can preview images, PDFs, audio, and video, but not the small logs, text files, JSON documents, and XML documents that operators inspect every day. A correctly stored <code>Content-Type</code> does not help: these objects are classified as unsupported before the preview renderer is selected.
 

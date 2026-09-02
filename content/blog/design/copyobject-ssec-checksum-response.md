@@ -2,7 +2,7 @@
 title: "Two SSE-C Keys, One CopyObject Response"
 linkTitle: "CopyObject SSE-C Checksums"
 date: 2026-08-28
-lastmod: 2026-08-28
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   CopyObject can carry one SSE-C key for the source and another for the destination. SILO stored the destination checksum correctly but tried to decrypt it for the response with the source key, silently omitting checksum fields. This record explains the key-context boundary, response-only repair, single-decryption design, and regression matrix.
@@ -12,9 +12,9 @@ draft: false
 url: "/blog/design/copyobject-ssec-checksum-response/"
 ---
 
-This record explains the CopyObject SSE-C checksum response repair committed in SILO as `e37b0134a`.
+This record explains the CopyObject SSE-C checksum response repair committed in SILO as `e73436c99`.
 
-> **Status on 2026-08-28:** implementation, encryption and key-rotation tests, complete server suites, race tests, static checks, build, and independent Fable Max acceptance review are complete. The commit exists locally; push, remote CI, merge, tag, package, image, deployment, and production verification remain separate gates.<br>
+> **Status on 2026-08-28:** implementation, encryption and key-rotation tests, complete server suites, race tests, static checks, build, and independent Fable Max acceptance review are complete. The commit was merged into `main` on 2026-08-29 as `e73436c99`; tag, package, image, deployment, and production verification remain separate gates.<br>
 > **Scope:** the successful CopyObject XML and HTTP response after the destination object has committed. Stored object bytes, checksum metadata, encryption format, source decryption, federation, replication, and historical objects are unchanged.<br>
 > **Security property:** source SSE-C headers may decrypt only source state; destination SSE-C headers may decrypt only committed destination state.
 

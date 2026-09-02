@@ -2,7 +2,7 @@
 title: "Conditional DELETE：为什么删除条件只能针对当前对象判断一次"
 linkTitle: "Conditional DELETE"
 date: 2026-08-26
-lastmod: 2026-08-26
+lastmod: 2026-09-02
 author: "冯若航"
 summary: >
   SILO PR #12 尝试为 DeleteObject 增加 If-Match，却把条件交给每个存储池分别判断，可能造成 412 后部分删除或成功后旧副本重新可见。本文记录问题真实性、AWS 契约、评审反例、最小修复设计、测试要求，以及批量条件删除和策略条件键的后续边界。
@@ -14,7 +14,7 @@ url: "/zh/blog/design/conditional-delete/"
 
 本文是 [SILO PR #12](https://github.com/pgsty/silo/pull/12) 的问题分析、设计讨论与修复决策归档。
 
-> **截至 2026-08-26 的状态：** PR #12 仍然 open，原 head 为 `5b71a75e`，落后最新 `main` 118 个提交。原提交没有 DCO sign-off，GitHub 上没有 check run。本文记录的改进方案已在独立本地 worktree 中实现、测试并完成两轮 review，但尚未提交、推送、合并或发布。<br>
+> **截至 2026-08-26 的状态：** PR #12 仍然 open，原 head 为 `5b71a75e`，落后最新 `main` 118 个提交。原提交没有 DCO sign-off，GitHub 上没有 check run。本文记录的改进方案已在独立本地 worktree 中实现、测试并完成两轮 review，并已提交到本地分支 `codex/pr12-conditional-delete`；尚未推送、合并或发布。<br>
 > **本轮范围：** 正确实现单对象 `DeleteObject` 的 `If-Match`；同时在收到尚未支持的 `DeleteObjects` 逐对象 ETag 时 fail closed，避免静默无条件删除。完整批量条件执行与 bucket policy 仍是独立交付。<br>
 > **发布边界：** 本地实现、测试、review、commit、push、远端 CI、merge、tag、镜像与生产部署是相互独立的门槛。
 

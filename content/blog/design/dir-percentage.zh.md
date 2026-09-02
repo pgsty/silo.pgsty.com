@@ -2,6 +2,7 @@
 title: "总量未知时，进度条应该说什么"
 linkTitle: "文件夹下载进度"
 date: 2026-08-23
+lastmod: 2026-09-02
 author: "冯若航"
 description: "文件夹流式 ZIP 下载显示 NaN% 的修复 PRD：不改变服务端 API 与普通文件下载，用诚实的不确定进度替代非法百分比。"
 tags: [设计, Console, 下载]
@@ -9,7 +10,7 @@ weight: 20
 url: "/zh/blog/design/dir-percentage/"
 ---
 
-> **状态**：已在本地实现并验证；提交、Console 发布与 Silo 依赖更新待办 · **优先级**：P1 · **归属**：[`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **关联问题**：[`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD 复核**：Claude Fable 5（`xhigh`）— **APPROVE** · **实现复核**：Claude Fable 5（`xhigh`），2026-08-23 — **APPROVE**，无 P0/P1/P2 发现
+> **状态**：已随 SILO Console 2.2.0 发布（`16960f7ab`）；服务端自更新 Console pin（`4d6e1ea8e`）起内嵌该修复 · **优先级**：P1 · **归属**：[`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **关联问题**：[`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD 复核**：Claude Fable 5（`xhigh`）— **APPROVE** · **实现复核**：Claude Fable 5（`xhigh`），2026-08-23 — **APPROVE**，无 P0/P1/P2 发现
 
 SILO Console 下载文件夹时，Downloads / Uploads 面板会显示 `NaN%`。ZIP 通常仍在正常传输，存储对象也完好无损，但进度条已经从“总量未知”错误地跨进了一个非法的确定进度状态。用户看到一条近乎满格的进度条，以为下载失败或已经完成，于是重复点击。
 

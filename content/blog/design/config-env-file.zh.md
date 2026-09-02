@@ -2,7 +2,7 @@
 title: "配置环境文件不是 Shell 脚本"
 linkTitle: "配置环境文件契约"
 date: 2026-08-28
-lastmod: 2026-08-28
+lastmod: 2026-09-02
 author: "冯若航"
 summary: >
   MINIO_CONFIG_ENV_FILE 由 SILO 自己解析，并不会交给 shell source。用 shell identifier 规则校验键名，会误伤 my-hook 这样的合法命名配置目标。本文定义兼容的键名语法、空白与引号规则、失败行为、安全边界和回归测试。
@@ -12,9 +12,9 @@ draft: false
 url: "/zh/blog/design/config-env-file/"
 ---
 
-本文定义 `MINIO_CONFIG_ENV_FILE` 的启动契约，并记录 SILO 提交 `ce456dba0` 中的兼容性修复。
+本文定义 `MINIO_CONFIG_ENV_FILE` 的启动契约，并记录 SILO 提交 `2aea7fe9c` 中的兼容性修复。
 
-> **截至 2026-08-28 的状态：** 实现、定向测试、完整 `cmd` 与 `internal` 套件、tagged tests、race、vet、lint、生成物检查、rebrand 守卫、构建与本机 Fable Max 独立评审均已完成。服务器提交已在本地创建；push、远端 CI、merge、tag、软件包、镜像、部署和生产验证仍是独立门槛。<br>
+> **截至 2026-08-28 的状态：** 实现、定向测试、完整 `cmd` 与 `internal` 套件、tagged tests、race、vet、lint、生成物检查、rebrand 守卫、构建与本机 Fable Max 独立评审均已完成。该提交已于 2026-08-29 以 `2aea7fe9c` 合并进 `main`；tag、软件包、镜像、部署和生产验证仍是独立门槛。<br>
 > **范围：** 只修改环境文件解析与命名 target 发现；不改配置键、子系统、取值优先级、存储格式或客户端 API。<br>
 > **兼容性原则：** 这是 SILO 的输入格式。支持可选的 `export` 前缀，并不意味着它是一段 POSIX shell 程序。
 

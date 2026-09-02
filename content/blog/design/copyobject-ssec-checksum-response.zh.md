@@ -2,7 +2,7 @@
 title: "两把 SSE-C 密钥，一份 CopyObject 响应"
 linkTitle: "CopyObject SSE-C Checksum"
 date: 2026-08-28
-lastmod: 2026-08-28
+lastmod: 2026-09-02
 author: "冯若航"
 summary: >
   CopyObject 可以用一把 SSE-C 密钥读取源对象，再用另一把密钥写入目标对象。SILO 会正确保存目标 checksum，却在生成响应时误用源密钥解密，导致 checksum 字段静默缺失。本文记录密钥上下文边界、纯响应修复、单次解密设计和回归矩阵。
@@ -12,9 +12,9 @@ draft: false
 url: "/zh/blog/design/copyobject-ssec-checksum-response/"
 ---
 
-本文记录 SILO 提交 `e37b0134a` 中的 CopyObject SSE-C checksum 响应修复。
+本文记录 SILO 提交 `e73436c99` 中的 CopyObject SSE-C checksum 响应修复。
 
-> **截至 2026-08-28 的状态：** 实现、加密与换钥测试、完整服务器套件、race、静态检查、构建和 Fable Max 独立验收均已完成。提交已在本地创建；push、远端 CI、merge、tag、软件包、镜像、部署和生产验证仍是独立门槛。<br>
+> **截至 2026-08-28 的状态：** 实现、加密与换钥测试、完整服务器套件、race、静态检查、构建和 Fable Max 独立验收均已完成。该提交已于 2026-08-29 以 `e73436c99` 合并进 `main`；tag、软件包、镜像、部署和生产验证仍是独立门槛。<br>
 > **范围：** 只处理目标对象提交成功后的 CopyObject XML 与 HTTP 响应。存储对象字节、checksum metadata、加密格式、源对象解密、federation、replication 与历史对象均不改变。<br>
 > **安全属性：** source SSE-C header 只能解密源状态；destination SSE-C header 只能解释已提交的目标状态。
 

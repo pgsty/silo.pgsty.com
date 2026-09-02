@@ -2,7 +2,7 @@
 title: "No I/O Before Auth, No Privilege From Headers"
 linkTitle: "CORS & Replication Trust"
 date: 2026-09-01
-lastmod: 2026-09-01
+lastmod: 2026-09-02
 author: "Ruohang Feng"
 summary: >
   A pre-authentication CORS lookup turned arbitrary path segments into metadata I/O and cache entries, while a client-controlled replication marker acquired privileges across SSE-C reads, source timestamps, checksums, object lock, events, and deletes. This record defines SILO's resident-only CORS hot path, two-level replication trust model, post-signature sanitization boundary, wire-compatibility matrix, and release evidence.
@@ -12,9 +12,9 @@ draft: false
 url: "/blog/design/cors-replication-trust/"
 ---
 
-This record describes the CORS hot-path and replication-request trust repair committed locally in SILO as `938603458`.
+This record describes the CORS hot-path and replication-request trust repair merged into SILO as [PR #101](https://github.com/pgsty/silo/pull/101) (`938603458` through `04b097fd9`).
 
-> **Status on 2026-09-01:** implementation, focused and race tests, the complete server package suite, object-lock tests, vet, build, two rounds of Fable 5 design review, an Opus 5 adversarial implementation review, and a real local TLS two-site replication run are complete. The server commit exists only on a local branch; push, pull request, remote CI, merge, tag, package, image, deployment, and production verification remain separate gates.<br>
+> **Status on 2026-09-02:** PR #101 merged into `main` on 2026-09-01 with four follow-up commits: per-entry Snowball trust isolation (`ff44527a3`), request defaults preserved across Snowball workers (`ab3ae99ca`), and replication validity probes that verify the replication permissions (`c9ad74673`) under the rule prefix (`5db7be4ee`). The pre-release cleanup then simplified the CORS lookup: non-resident buckets always use the global policy (the fail-closed startup and load-failure states below were dropped), and the header-stripped request clone shares the original request trailer so streaming-checksum uploads keep working for untrusted requests. Tag, package, image, deployment, and production verification remain separate gates.<br>
 > **Scope:** HTTP request interpretation before and inside the S3 handlers. No S3 wire field, object format, bucket metadata format, replication protocol, encryption format, or client command changes.<br>
 > **Security properties:** pre-authentication CORS processing performs no object-layer I/O; a header never grants replication semantics by itself; SSE-C ciphertext paths and replica-only metadata require both authentication and the corresponding replication permission.
 
@@ -170,19 +170,9 @@ The outer CORS middleware must remain cheaper than the request it is about to ro
 | resident, valid per-bucket CORS | apply per-bucket rule | none |
 | resident, no CORS document | use global CORS fallback | none |
 | resident, invalid stored CORS | fail closed; continue without CORS headers and log once | none |
-| subsystem not initialized | fail closed | none |
-| known metadata load failure | fail closed | none |
-| internal `.minio.sys` namespace | fail closed | none |
-| reserved or invalid bucket-shaped path | global fallback | none |
-| initialized, otherwise unknown name | global fallback | none |
+| not resident: startup still loading, metadata load failure, reserved, invalid, internal, or unknown name | global fallback | none |
 
-`loadFailed` is populated only from disk-derived bucket lists during startup or refresh. It cannot grow from a client path. Successful metadata load, `Set`, bucket removal, stale-bucket reconciliation, and subsystem reset clear the corresponding state.
-
-### Cold-cache residual boundary {#cold-cache}
-
-There is one accepted edge: a real bucket can be absent from both `metadataMap` and `loadFailed` if a node misses the peer metadata-load notification. Until the next bucket refresh discovers and loads it, that node treats the name as unknown and uses global CORS.
-
-CORS remains a browser response policy, not an authorization mechanism—normal S3 authentication and bucket policy still apply—but an operator relying on a restrictive per-bucket CORS document should understand the temporary relaxation. A follow-up can mark every disk-listed-but-nonresident bucket as load-failed before attempting its refresh, preserving fail-closed behavior without adding synchronous request I/O.
+Nothing outside the resident map is consulted. A real bucket that is not yet resident, because startup loading is still running or its metadata failed to load, is served with the global policy until the next refresh loads it. The first version of this repair failed closed in those states; the pre-release cleanup removed that: CORS is a browser response policy, not an authorization boundary, normal S3 authentication and bucket policy still apply, and failing closed only broke browser clients during startup.
 
 ## Alternatives rejected {#alternatives}
 
@@ -216,7 +206,7 @@ No object-layer API needs to infer HTTP trust. Programmatic internal callers tha
 Regression coverage includes:
 
 - hundreds of distinct valid missing bucket names, both actual and preflight CORS requests, with zero metadata reads and no map growth;
-- Console, reserved, invalid, startup, internal namespace, invalid stored CORS, and known load-failure paths;
+- Console, reserved, invalid, startup, internal namespace, and invalid stored CORS paths;
 - least-privilege SSE-C GET, HEAD, and GetObjectAttributes callers with correct, missing, wrong-case, and unauthorized markers;
 - marker-only batch-style PUT preserving source ETag/MTime only with `s3:ReplicateObject`;
 - unauthorized `REPLICA` PUT and DELETE returning `403`;
@@ -253,9 +243,8 @@ Two Fable 5 review rounds first corrected the trust model for marker-only batch 
 
 ## Residual risks and follow-ups {#residual-risks}
 
-- Mark disk-listed but nonresident buckets fail-closed before refresh to narrow the cold-cache CORS window described above.
 - Emit a rate-limited diagnostic when a marker-bearing request lacks replication permission; the safe ordinary fallback is otherwise easy to misdiagnose as an ETag/MTime mismatch.
-- Replication validity probes retain their inherited permission-reporting behavior and should be audited separately rather than silently changed in this repair.
+- Replication validity probes now verify the replication permissions the target credentials need and place the synthetic validation key under the rule prefix (`c9ad74673`, `5db7be4ee`).
 - This review covers the named source/replication headers. Other future internal controls must still answer the same question: which authenticated decision allowed this client value to acquire internal meaning?
 
 ## Conclusion {#conclusion}

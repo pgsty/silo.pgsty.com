@@ -2,7 +2,7 @@
 title: "鉴权前不做 I/O，Header 不授予权限"
 linkTitle: "CORS 与复制信任边界"
 date: 2026-09-01
-lastmod: 2026-09-01
+lastmod: 2026-09-02
 author: "冯若航"
 summary: >
   CORS 预鉴权查询曾把任意 URL 路径段变成 metadata I/O 与缓存条目；客户端可控的 replication marker 又会影响 SSE-C 读取、源时间戳、checksum、对象锁、事件与删除语义。本文记录 SILO 的 resident-only CORS 热路径、两级复制信任模型、验签后清洗边界、真实 wire 兼容矩阵与发布前证据。
@@ -12,9 +12,9 @@ draft: false
 url: "/zh/blog/design/cors-replication-trust/"
 ---
 
-本文记录 SILO 本地提交 `938603458` 中的 CORS 热路径与复制请求信任边界修复。
+本文记录以 [PR #101](https://github.com/pgsty/silo/pull/101)（`938603458` 至 `04b097fd9`）合并进 SILO 的 CORS 热路径与复制请求信任边界修复。
 
-> **截至 2026-09-01 的状态：** 实现、定向与 race 测试、完整服务端 package 套件、对象锁测试、vet、build、两轮 Fable 5 设计评审、Opus 5 实现对抗验收，以及真实本地 TLS 双站复制均已完成。服务端提交仅存在于本地分支；push、PR、远端 CI、merge、tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
+> **截至 2026-09-02 的状态：** PR #101 已于 2026-09-01 合并进 `main`，并带四个后续提交：Snowball 逐条目信任隔离（`ff44527a3`）、Snowball worker 间保留请求默认值（`ab3ae99ca`）、复制有效性探针校验复制权限（`c9ad74673`）且合成 key 置于规则前缀下（`5db7be4ee`）。随后的发布前清理简化了 CORS 查找：不驻留的桶一律使用全局策略（下文原有的启动期与加载失败 fail-closed 状态已移除），剥头后的请求克隆与原请求共享 trailer，使不可信请求的流式校验和上传照常工作。tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
 > **范围：** S3 handler 之前与内部的 HTTP 请求解释。不修改 S3 wire field、对象格式、bucket metadata 格式、复制协议、加密格式或客户端命令。<br>
 > **安全属性：** CORS 预鉴权处理不执行对象层 I/O；header 本身永远不授予复制语义；SSE-C 密文路径与 replica-only metadata 必须同时通过身份认证与对应复制权限检查。
 
@@ -170,19 +170,9 @@ Object-lock parser 过去只要看到原始 marker header，就会接受已经�
 | resident，per-bucket CORS 合法 | 应用桶级规则 | 无 |
 | resident，没有 CORS 文档 | 使用 global CORS fallback | 无 |
 | resident，持久化 CORS 非法 | fail closed；继续处理请求但不加 CORS header，并只记一次日志 | 无 |
-| subsystem 尚未初始化 | fail closed | 无 |
-| 已知 metadata load failure | fail closed | 无 |
-| 内部 `.minio.sys` namespace | fail closed | 无 |
-| reserved 或非法桶形路径 | global fallback | 无 |
-| 已初始化，除此之外的未知名字 | global fallback | 无 |
+| 不驻留：启动加载中、metadata 加载失败、reserved、非法、内部或未知名字 | global fallback | 无 |
 
-`loadFailed` 只会从启动或 refresh 得到的 disk-derived bucket list 中写入，客户端路径无法增长它。Metadata 成功加载、`Set`、bucket removal、stale reconciliation 与 subsystem reset 都会清理相应状态。
-
-### 冷缓存残余边界 {#cold-cache}
-
-仍有一个已接受的边缘：如果某节点漏掉 peer metadata-load 通知，一个真实桶可能同时不在 `metadataMap` 与 `loadFailed`。在下一轮 bucket refresh 发现并加载它之前，该节点会把这个名字当作 unknown，使用 global CORS。
-
-CORS 是浏览器响应策略，不是授权机制；普通 S3 authentication 与 bucket policy 仍然生效。但如果运维明确依赖 restrictive per-bucket CORS document，就应该知道这段短暂放宽。后续可以在 refresh 尝试加载之前，把 disk list 中存在但不 resident 的桶标记为 load-failed；这样不增加请求同步 I/O，也能继续 fail closed。
+除驻留 map 之外不查任何状态。一个尚未驻留的真实桶——启动加载仍在进行，或其 metadata 加载失败——在下一轮 refresh 加载它之前使用全局策略。本修复的第一版在这些状态下 fail closed；发布前清理移除了它：CORS 是浏览器响应策略而非授权边界，普通 S3 认证与 bucket policy 仍然生效，fail closed 只会在启动期弄坏浏览器客户端。
 
 ## 被否决的方案 {#alternatives}
 
@@ -216,7 +206,7 @@ CORS 是浏览器响应策略，不是授权机制；普通 S3 authentication �
 回归覆盖包括：
 
 - 数百个不同的合法缺失桶名，actual/preflight 两类 CORS 请求，metadata read 为零且 map 不增长；
-- Console、reserved、invalid、startup、内部 namespace、非法持久化 CORS 与已知 load failure；
+- Console、reserved、invalid、startup、内部 namespace 与非法持久化 CORS；
 - 最小权限 SSE-C GET、HEAD、GetObjectAttributes，对正确、缺失、大小写错误与未授权 marker 的处理；
 - marker-only batch 风格 PUT 只有在具备 `s3:ReplicateObject` 时才保留 source ETag/MTime；
 - 未授权 `REPLICA` PUT/DELETE 返回 `403`；
@@ -253,9 +243,8 @@ CORS 是浏览器响应策略，不是授权机制；普通 S3 authentication �
 
 ## 残余风险与后续 {#residual-risks}
 
-- Refresh 加载之前，把 disk list 中存在但不 resident 的桶标记为 fail-closed，进一步缩小上述 CORS 冷缓存窗口。
 - 当 marker-bearing request 缺少复制权限时记录限频诊断；安全的 ordinary fallback 否则容易被误诊为 ETag/MTime 不一致。
-- Replication validity probe 保留上游继承的权限报告语义，应作为独立议题审计，而不是在本修复中静默改变。
+- Replication validity probe 现在会校验目标凭据所需的复制权限，并把合成的校验 key 放在规则前缀之下（`c9ad74673`、`5db7be4ee`）。
 - 本次覆盖已命名的 source/replication header。未来任何内部控制都仍需回答同一个问题：哪一个认证后的决定允许这个客户端值获得内部含义？
 
 ## 结论 {#conclusion}
