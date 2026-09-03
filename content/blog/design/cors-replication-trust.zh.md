@@ -14,7 +14,7 @@ url: "/zh/blog/design/cors-replication-trust/"
 
 本文记录以 [PR #101](https://github.com/pgsty/silo/pull/101)（`938603458` 至 `04b097fd9`）合并进 SILO 的 CORS 热路径与复制请求信任边界修复。
 
-> **截至 2026-09-02 的状态：** PR #101 已于 2026-09-01 合并进 `main`，并带四个后续提交：Snowball 逐条目信任隔离（`ff44527a3`）、Snowball worker 间保留请求默认值（`ab3ae99ca`）、复制有效性探针校验复制权限（`c9ad74673`）且合成 key 置于规则前缀下（`5db7be4ee`）。随后的发布前清理保留了 resident-only 查找及其启动期与加载失败的 fail closed 状态，只去掉了内部 namespace 的特殊分支；剥头后的请求克隆与原请求共享 trailer，使不可信请求的流式校验和上传照常工作。tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
+> **截至 2026-09-03 的状态：** [PR #101](https://github.com/pgsty/silo/pull/101) 已于 2026-09-01 合并进 `main`，并带四个后续提交：Snowball 逐条目信任隔离（`ff44527a3`）、Snowball worker 间保留请求默认值（`ab3ae99ca`）、复制有效性探针校验复制权限（`c9ad74673`）且合成 key 置于规则前缀下（`5db7be4ee`）。实现、定向与 race 测试、完整服务端 package 套件、对象锁测试、vet、build、两轮 Fable 5 设计评审、多轮 Opus 5 对抗验收，以及真实本地 TLS 双站复制均已完成。随后的发布前清理保留了 resident-only 查找及其启动期与加载失败的 fail closed 状态，只去掉了内部 namespace 的特殊分支；剥头后的请求克隆与原请求共享 trailer，使不可信请求的流式校验和上传照常工作。tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
 > **范围：** S3 handler 之前与内部的 HTTP 请求解释。不修改 S3 wire field、对象格式、bucket metadata 格式、复制协议、加密格式或客户端命令。<br>
 > **安全属性：** CORS 预鉴权处理不执行对象层 I/O；header 本身永远不授予复制语义；SSE-C 密文路径与 replica-only metadata 必须同时通过身份认证与对应复制权限检查。
 
@@ -158,6 +158,11 @@ Object-lock parser 过去只要看到原始 marker header，就会接受已经�
 | 复制 `RemoveObject` | 是 | 是 | 具有 `s3:ReplicateDelete` 的 `replicaTrusted` |
 | Batch replication PUT/Complete | 是 | 否 | `trusted`；目标凭据必须拥有 `s3:ReplicateObject` |
 | Proxy/readiness/validity probe | 独立 probe header | marker 不授予权限 | 保持 probe 行为；本修复不会剥离这些 header |
+
+`s3:ReplicateDelete` 是信任闸门，但不是 receiver 的唯一权限。为了兼容已经部署的
+目标端策略，可信复制删除仍要求 `s3:DeleteObject`；显式 Deny
+`s3:DeleteObjectVersion` 仍会阻止指定版本的清理。普通客户端不走这条兼容路径：
+显式 UUID 或 `versionId=null` 必须获得 `s3:DeleteObjectVersion` 的 Allow。
 
 如果要求所有可信请求都带 `REPLICA`，PutPart、multipart completion 与 batch replication 会立即回归；如果相信所有 marker，则漏洞会原样重现。已保存的 multipart provenance 在加密 raw part 上连接了这两个要求。
 

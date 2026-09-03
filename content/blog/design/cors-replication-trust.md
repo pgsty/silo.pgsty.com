@@ -14,7 +14,7 @@ url: "/blog/design/cors-replication-trust/"
 
 This record describes the CORS hot-path and replication-request trust repair merged into SILO as [PR #101](https://github.com/pgsty/silo/pull/101) (`938603458` through `04b097fd9`).
 
-> **Status on 2026-09-02:** PR #101 merged into `main` on 2026-09-01 with four follow-up commits: per-entry Snowball trust isolation (`ff44527a3`), request defaults preserved across Snowball workers (`ab3ae99ca`), and replication validity probes that verify the replication permissions (`c9ad74673`) under the rule prefix (`5db7be4ee`). The pre-release cleanup kept the resident-only lookup with its fail-closed startup and load-failure states, dropped only the internal-namespace special case, and made the header-stripped request clone share the original request trailer so streaming-checksum uploads keep working for untrusted requests. Tag, package, image, deployment, and production verification remain separate gates.<br>
+> **Status on 2026-09-03:** [PR #101](https://github.com/pgsty/silo/pull/101) merged into `main` on 2026-09-01 with four follow-up commits: per-entry Snowball trust isolation (`ff44527a3`), request defaults preserved across Snowball workers (`ab3ae99ca`), and replication validity probes that verify the replication permissions (`c9ad74673`) under the rule prefix (`5db7be4ee`). Implementation, focused and race tests, the complete server package suite, object-lock tests, vet, build, two rounds of Fable 5 design review, repeated Opus 5 adversarial acceptance, and a real local TLS two-site replication run are complete. The pre-release cleanup kept the resident-only lookup with its fail-closed startup and load-failure states, dropped only the internal-namespace special case, and made the header-stripped request clone share the original request trailer so streaming-checksum uploads keep working for untrusted requests. Tag, package, image, deployment, and production verification remain separate gates.<br>
 > **Scope:** HTTP request interpretation before and inside the S3 handlers. No S3 wire field, object format, bucket metadata format, replication protocol, encryption format, or client command changes.<br>
 > **Security properties:** pre-authentication CORS processing performs no object-layer I/O; a header never grants replication semantics by itself; SSE-C ciphertext paths and replica-only metadata require both authentication and the corresponding replication permission.
 
@@ -158,6 +158,13 @@ The design was checked against the silo-go v7.3.1 emitter selected by the server
 | replicated `RemoveObject` | yes | yes | `replicaTrusted` with `s3:ReplicateDelete` |
 | batch replication PUT/Complete | yes | no | `trusted`; target credentials must hold `s3:ReplicateObject` |
 | proxy/readiness/validity probes | separate probe headers | no marker authority | probe behavior retained; those headers are never stripped by this repair |
+
+`s3:ReplicateDelete` is the trust gate, not the receiver's only permission.
+For compatibility with deployed target policies, a trusted replication delete
+also requires `s3:DeleteObject`; an explicit deny on
+`s3:DeleteObjectVersion` still blocks a named-version purge. Ordinary clients
+do not use this compatibility path: an explicit UUID or `versionId=null`
+requires an allow for `s3:DeleteObjectVersion`.
 
 Requiring `REPLICA` for every trusted operation would break PutPart, multipart completion, and batch replication. Trusting every marker would recreate the vulnerability. Stored multipart provenance bridges the two requirements for encrypted raw parts.
 

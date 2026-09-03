@@ -133,6 +133,11 @@ mc admin policy attach TARGET ReplicationAdminPolicy --user=ReplicationAdmin
 - `"EnableReplicationOnBucket"` 语句授予远端目标获取存储桶级配置的权限， 从而支持在 MinIO 部署中 *所有* 存储桶上执行复制操作。 如果要将策略限制到特定存储桶，请像 `"arn:aws:s3:::bucketName"` 一样， 在 `Resource` 数组中指定这些存储桶。
 - `"EnableReplicatingDataIntoBucket"` 语句授予远端目标将数据同步到 MinIO 部署中 *任意* 存储桶的权限。 如果要将策略限制到特定存储桶，请像 `"arn:aws:s3:::bucketName/*"` 一样， 在 `Resource` 数组中指定这些存储桶。
 
+SILO 目标端的复制删除沿用 `s3:DeleteObject` 加 `s3:ReplicateDelete` 的 receiver
+契约。复制凭据不需要额外获得 `s3:DeleteObjectVersion` 的 Allow；但显式 Deny
+`s3:DeleteObjectVersion` 仍会阻止对应的版本清理。这个内部契约不改变普通 S3
+客户端的要求：只要请求明确指定版本，就必须具备 `s3:DeleteObjectVersion`。
+
 下列代码使用所需策略创建一个 [MinIO 管理用户](/zh/administration/identity-access-management/minio-user-management/#minio-users)。 将 `TARGET` 替换为你要配置复制的 MinIO 部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)：
 
 ```shell
