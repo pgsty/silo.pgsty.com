@@ -18,6 +18,8 @@ The **`mc`** command-line tool is built for compatibility with the AWS S3 API. I
 
 The Silo project cannot guarantee behavior against every other S3-compatible service because implementations differ. Test the operations your workload relies on before treating another service as compatible.
 
+The current release is [`RELEASE.2026-09-03T07-13-05Z`](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-03T07-13-05Z), built with Go 1.27.1. It adds the read-only [`mc checksum verify`](/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify) audit command and hardens credential-bearing output, policy writes, support artifacts, and release provenance. See the [client compatibility notes](/compatibility/mcli/#current-release) for the exact behavior and dependency changes since 20260806.
+
 [`mc`](#command-mc) has the following syntax:
 
 ```shell
@@ -59,7 +61,7 @@ make build
 > [`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is intentionally disabled in the Pigsty fork. Upgrade through the [Silo download page](/download/#client), the [Pigsty package repository](https://pigsty.io/docs/repo/infra/list/#object-storage), or [GitHub Releases](https://github.com/pgsty/mc/releases).
 
 > [!NOTE]
-> The current `pgsty/mc` source still registers the `mc license` and `mc support` command trees. Those commands integrate with upstream MinIO SUBNET and its commercial licensing/support service; they are not Silo services. Their command names, protocol fields, SUBNET wording, and MinIO pricing/license links are retained as upstream contracts and must not be rebranded.
+> The current `pgsty/mc` source keeps the `mc license` and `mc support` command trees for script compatibility, but every online MinIO SUBNET, licensing, upload, call-home, and telemetry path is disabled. Commands that would contact those services fail with a stable message and exit `1`; local diagnostics such as `support diag`, `perf`, `profile`, and `inspect` still work without registration and write private local files. See [MCLI Client Compatibility Notes](/compatibility/mcli/#subnet).
 
 ### 2) Create an Alias for the S3-Compatible Service {#create-an-alias-for-the-s3-compatible-service}
 
@@ -151,6 +153,10 @@ Buckets with anonymous policies allow public access where clients can perform an
 object to another file or object. You can also use the command to
 display the contents of the specified file or object to <code>STDOUT</code>.
 <a href="/reference/minio-mc/mc-cat/#command-mc.cat"><code>cat</code></a> has similar functionality to <code>cat</code>.</p></td>
+    </tr>
+    <tr>
+      <td><p><a href="/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify"><code>mc checksum verify</code></a></p></td>
+      <td><p>The Silo client extension independently recomputes and compares stored S3 full-object checksums. It is read-only and supports individual objects, recursive prefixes, versions, candidate manifests, dry runs, JSON Lines reports, and explicit failure policies.</p></td>
     </tr>
     <tr>
       <td><p><a href="/reference/minio-mc/mc-cp/#command-mc.cp"><code>mc cp</code></a></p></td>

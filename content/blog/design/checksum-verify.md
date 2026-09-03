@@ -16,7 +16,7 @@ This is the design and implementation record for MCLI's read-only checksum
 verification workflow and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5),
 the non-TTY output defect found during release review.
 
-> **Status:** shipped in [mcli 20260901](/blog/release/mcli-20260901/). The
+> **Status:** shipped in the final [mcli 20260903](/blog/release/mcli-20260903/) release. The
 > command merged to `main` through pull requests [#8](https://github.com/pgsty/mc/pull/8)
 > and [#13](https://github.com/pgsty/mc/pull/13), is exercised against a real
 > SILO server in hosted CI, and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)
@@ -164,7 +164,7 @@ quiet, report-write failure, and MISMATCH/UNKNOWN exit status. It also includes
 real historical `MATCH`, `MISMATCH`, and unsupported-composite objects on a local
 S3 server.
 
-The command shipped in [mcli 20260901](/blog/release/mcli-20260901/) from a
+The command shipped in the final [mcli 20260903](/blog/release/mcli-20260903/) release from a
 signed tag at the tip of `main`, with the functional suite - including a
 checksum verification run against a real SILO server - green for that commit,
 and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) is closed. Bundling the

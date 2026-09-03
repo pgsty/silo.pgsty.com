@@ -305,7 +305,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 
 ## 2026-08-06 审计之后的变更 {#since-20260806}
 
-上文各节描述的是 `219670d3` 快照。下表记录此后合并进 `main`、截至 `6586fbfd0` 及随后发布前清理的行为变更；下一次发布审计会把它们并入上文各节。
+上文各节描述的是 `219670d3` 快照。下表记录此后合并进 `main`、并在 20260903 版本中统一交付的行为变更。
 
 | 领域 | 变更 | 出处 |
 |:-----|:-----|:-----|
@@ -318,7 +318,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 桶元数据 | `metadata.lock` 串行化所有桶配置写入；`ForceCreate` 与站点 adoption 保留既有配置；启用 lock 的桶始终使用纯 Enabled 版本控制 | [#103](https://github.com/pgsty/silo/pull/103)、`dd3bdb808` |
 | 站点复制 | Object Lock 配置以独立字段复制（仍接受旧的 `Tags` 载体）；按站点统计状态；有效性探针在规则前缀下校验权限 | `3861f33cb`、`fb406fdc9`、`c9ad74673`、`5db7be4ee` |
 | 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
-| 工具链与组件 | Go 1.27.0；上游 `minio-go` `v7.3.1-0.20260828`（与 Console、`mcli` 所要求的预发布版本一致；`silo-go` 分叉已退役）；`silo-pkg` v3.12.3 预发布 pin 与 Console `43f8447fd`（见 [Console 页](/compatibility/console/)）；捆绑 `mcli` 20260901 | `43f4bb7ed`、`4d6e1ea8e`、发布前清理 |
+| 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
 
 ## 已知残余风险与未修复项 {#limits}
 

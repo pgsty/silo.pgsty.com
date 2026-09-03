@@ -1,7 +1,7 @@
 ---
 title: "MCLI 客户端兼容性注记"
 linkTitle: "客户端 MC"
-description: "pgsty/mc 与上游 minio/mc 的差异"
+description: "pgsty/mc 的兼容性、行为变化、安装方式与当前版本"
 url: "/zh/compatibility/mcli/"
 weight: 20
 type: docs
@@ -10,7 +10,23 @@ icon: fa-solid fa-terminal
 
 `mcli` 是 Silo 构建的 MinIO 客户端（`mc`）。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
-[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。分支至今的发布版本：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260901](/zh/blog/release/mcli-20260901/)。
+[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/) 与 [20260903](/zh/blog/release/mcli-20260903/)。中间的 20260901 制品仍保留在 GitHub，但本站文档直接以 20260806 与当前版本比较。
+
+> [!TIP]
+> **当前版本：** [`RELEASE.2026-09-03T07-13-05Z`](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-03T07-13-05Z)，软件包版本 `20260903071305.0.0`，构建自 [`a2ef95c0`](https://github.com/pgsty/mc/commit/a2ef95c035d9ae7cc01469a63926900f1786f9e2)。它提供 Linux RPM/DEB/APK 软件包、六份 OS/架构归档包，以及多架构 `docker.io/pgsty/mc` 镜像。完整内容见 [20260903 发布说明](/zh/blog/release/mcli-20260903/)。
+
+## 当前版本变化 {#current-release}
+
+20260903 客户端保留上游命令、配置、协议与 JSON 契约；相对 20260806 有以下明确新增与收紧：
+
+- **只读校验和审计：** [`mc checksum verify`](/zh/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify) 流式读取对象，并比对存储的 `FULL_OBJECT` CRC32、CRC32C、CRC64NVME、SHA1 或 SHA256。它支持单对象、递归前缀、精确或全部版本、JSON Lines 清单、dry run、受限 worker、大小/时间过滤、SSE-C、机器可读输出、私有权限报告文件与显式失败策略；绝不修复或改写对象。
+- **凭据输出 fail-closed：** `--debug`、`admin trace`、错误、跳转、trailer、JSON 文档、SSE-C 路径、自定义 header 与运行时登记密钥都会在显示前清洗。支持包与集群导出产物（包括轮转副本）在 POSIX 系统上以 `0600` 创建。
+- **正确性修复：** JSON Prometheus metrics 不再 panic；`pipe` 空输入使用普通零字节 PUT；S3 Select 在打印有效结果后不再重复关闭响应；app 层格式错误的全局参数不再被忽略；服务账号策略可再次被清除。
+- **严格写入、宽松读取：** 命名策略与服务账号写入路径拒绝空或畸形策略、裸 ARN 命名空间，以及混合 S3/admin action 的 statement。既有存储策略仍可读取；服务账号空策略仍表示“清除内联策略”。
+- **依赖与工具链下限：** 源码构建要求 Go 1.27.1，并直接使用 `github.com/pgsty/silo-pkg/v3` v3.13.2。`minio-go` 钉在上游 master 提交 `0e78d3f18efe`，gRPC 为 1.83.2，`x/crypto` 为 0.56.0。Darwin 二进制要求 macOS 13 或更高版本。
+- **可验证交付：** 公开 Release 不可变，包含 19 个通过校验和核验的资产；归档与 DEB/APK 通过 Sigstore 证明绑定到签名标签和精确源码，RPM 携带 PGSTY GPG 签名。版本标签与 `latest` 容器均发布相同的 linux/amd64、linux/arm64 manifest。
+
+专门场景需要留意两项底层兼容变化：JWX 3.2 会更严格地拒绝不符合标准的 JWT `crit` 处理；Unicode 宽度实现更新可能轻微改变 Indic 或大量 ZWJ 字符在表格/进度条中的对齐。
 
 ## 兼容原则 {#principles}
 

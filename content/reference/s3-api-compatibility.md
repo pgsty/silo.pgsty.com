@@ -153,6 +153,6 @@ CreateSession
 ### MinIO alternatives for unsupported Bucket resources {#minio-alternatives-for-unsupported-bucket-resources}
 
 - For calls to `BucketACL` or `ObjectACL` operations, use [Policies](/administration/identity-access-management/policy-based-access-control/#minio-policy).
-- `BucketCORS` operations are supported since the release after `RELEASE.2026-08-06T00-00-00Z`. A bucket with its own CORS configuration is served only by that configuration; buckets without one use the server-wide `MINIO_API_CORS_ALLOW_ORIGIN` policy, which allows every origin by default.
+- `BucketCORS` operations are supported since `RELEASE.2026-09-03T00-00-00Z`. A bucket with its own CORS configuration is served only by that configuration; buckets without one use the server-wide `MINIO_API_CORS_ALLOW_ORIGIN` policy, which allows every origin by default.
 - For calls to `BucketWebsite` operations, use `caddy` or `nginx`.
 - For calls to `BucketAnalytics`, `BucketMetrics`, or `BucketLogging` operations, use [Bucket Notifications](/administration/monitoring/bucket-notifications/#minio-bucket-notifications).

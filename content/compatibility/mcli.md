@@ -1,7 +1,7 @@
 ---
 title: "MCLI Client Compatibility Notes"
 linkTitle: "MC Client"
-description: "Differences between the pgsty/mc and upstream minio/mc"
+description: "Compatibility, behavior changes, installation, and the current pgsty/mc release"
 url: "/compatibility/mcli/"
 weight: 20
 type: docs
@@ -10,7 +10,23 @@ icon: fa-solid fa-terminal
 
 `mcli` is Silo's build of the MinIO Client (`mc`). This page records where the two are interchangeable and where they differ.
 
-[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Fork releases to date: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), and [20260901](/blog/release/mcli-20260901/).
+[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), and [20260903](/blog/release/mcli-20260903/). The intermediate 20260901 artifact remains on GitHub, but the documentation compares the current release directly with 20260806.
+
+> [!TIP]
+> **Current release:** [`RELEASE.2026-09-03T07-13-05Z`](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-03T07-13-05Z), package version `20260903071305.0.0`, built from [`a2ef95c0`](https://github.com/pgsty/mc/commit/a2ef95c035d9ae7cc01469a63926900f1786f9e2). It is available as Linux RPM/DEB/APK packages, six OS/architecture archives, and the multi-architecture `docker.io/pgsty/mc` image. See the [complete release notes](/blog/release/mcli-20260903/).
+
+## Current release changes {#current-release}
+
+The 20260903 client keeps the upstream command, configuration, protocol, and JSON contracts, with these deliberate additions and tightenings since 20260806:
+
+- **Read-only checksum audit:** [`mc checksum verify`](/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify) streams object data and compares stored `FULL_OBJECT` CRC32, CRC32C, CRC64NVME, SHA1, or SHA256 values. It supports one object, recursive prefixes, exact or all versions, JSON Lines manifests, dry runs, bounded workers, size/time filters, SSE-C, machine-readable output, private report files, and explicit failure policies. It never repairs or mutates an object.
+- **Credential output is fail-closed:** `--debug`, `admin trace`, errors, redirects, trailers, JSON documents, SSE-C paths, custom headers, and registered runtime secrets are scrubbed before display. Support and cluster-export artifacts, including rotated copies, are created with mode `0600` on POSIX systems.
+- **Correctness repairs:** JSON Prometheus metrics no longer panic; empty `pipe` input uses a regular zero-byte PUT; S3 Select responses are no longer closed twice after valid rows are printed; malformed app-level global flags fail instead of being ignored; and service-account policy clearing works again.
+- **Strict writes, permissive reads:** named policy and service-account write paths reject empty or malformed policies, bare ARN namespaces, and mixed S3/admin action statements. Existing stored policies remain readable; an empty service-account policy still means “clear the inline policy.”
+- **Dependency and toolchain floor:** builds require Go 1.27.1 and directly consume `github.com/pgsty/silo-pkg/v3` v3.13.2. `minio-go` is pinned to upstream master commit `0e78d3f18efe`; gRPC is 1.83.2 and `x/crypto` is 0.56.0. Darwin binaries require macOS 13 or newer.
+- **Verifiable delivery:** the public release is immutable, contains 19 checksum-checked assets, and binds archives plus DEB/APK packages to the signed tag and exact source with Sigstore attestations. RPMs carry the PGSTY GPG signature. The release and `latest` container tags publish matching linux/amd64 and linux/arm64 manifests.
+
+Two low-level compatibility changes are worth testing in specialized deployments: JWX 3.2 rejects non-compliant JWT `crit` processing more strictly, and updated Unicode width handling can slightly change table/progress alignment for Indic or ZWJ-heavy strings.
 
 ## Principles {#principles}
 

@@ -305,7 +305,7 @@ Generated `String()` files were regenerated under the new toolchain. Valid enum 
 
 ## Changes since the 2026-08-06 audit {#since-20260806}
 
-The sections above describe the `219670d3` snapshot. The table below records the behavior changes merged to `main` after it, up to `6586fbfd0` and the pre-release cleanup that followed; the next release audit folds them into the sections above.
+The sections above describe the `219670d3` snapshot. The table below records the behavior changes merged to `main` after it and consolidated in the 20260903 release.
 
 | Area | Change | Where |
 |:-----|:-------|:------|
@@ -318,7 +318,7 @@ The sections above describe the `219670d3` snapshot. The table below records the
 | Bucket metadata | `metadata.lock` serializes every bucket-configuration writer; `ForceCreate` and site adoption keep existing configuration; a locked bucket always carries plain Enabled versioning | [#103](https://github.com/pgsty/silo/pull/103), `dd3bdb808` |
 | Site replication | Object Lock configuration replicates in its own field (the legacy `Tags` carrier is still accepted); status is accounted per site; validity probes verify permissions under the rule prefix | `3861f33cb`, `fb406fdc9`, `c9ad74673`, `5db7be4ee` |
 | Configuration | Legacy database notification targets require a DSN; `MINIO_CONFIG_ENV_FILE` uses a dedicated parser that keeps named targets | `f1ba68358`, `6b0998157`, `2aea7fe9c` |
-| Toolchain and components | Go 1.27.0; upstream `minio-go` `v7.3.1-0.20260828` (the same pre-release the Console and `mcli` stacks require; the `silo-go` fork is retired); `silo-pkg` v3.12.3 pre-release pin and Console `43f8447fd` (see the [Console page](/compatibility/console/)); bundled `mcli` 20260901 | `43f4bb7ed`, `4d6e1ea8e`, pre-release cleanup |
+| Toolchain and components | Go 1.27.1; upstream `minio-go` at `0e78d3f18efe` (`silo-go` retired); `silo-pkg` v3.13.2; Console v2.3.0 (see the [Console page](/compatibility/console/)); bundled [mcli 20260903](/blog/release/mcli-20260903/) | `43f4bb7ed`, `4d6e1ea8e`, final dependency refresh |
 
 ## Known residual risks and non-fixes {#limits}
 

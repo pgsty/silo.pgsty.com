@@ -15,7 +15,7 @@ url: "/zh/blog/design/checksum-verify/"
 本文是 MCLI 只读 checksum 校验流程，以及发布审查中发现的 non-TTY 输出缺陷
 [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 的设计与实现记录。
 
-> **状态：** 已随 [mcli 20260901](/zh/blog/release/mcli-20260901/) 发布。命令经
+> **状态：** 已随最终的 [mcli 20260903](/zh/blog/release/mcli-20260903/) 正式发布。命令经
 > pull request [#8](https://github.com/pgsty/mc/pull/8) 与 [#13](https://github.com/pgsty/mc/pull/13)
 > 合入 `main`，在托管 CI 中针对真实 SILO 服务器验证，
 > [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。把客户端打包进
@@ -140,7 +140,7 @@ mismatch，优先写入新 key 或新 version，验证替代对象后再显式�
 MISMATCH/UNKNOWN 退出码。真实本地 S3 还覆盖了历史 `MATCH`、`MISMATCH` 与不支持
 的 composite 对象。
 
-该命令已随 [mcli 20260901](/zh/blog/release/mcli-20260901/) 从 `main` 顶端的签名
+该命令已随最终的 [mcli 20260903](/zh/blog/release/mcli-20260903/) 从 `main` 顶端的签名
 tag 发布，功能套件 —— 包括针对真实 SILO 服务器的一次 checksum 校验 —— 对该提交
 全部通过，[pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。Server 内置
 客户端与生产审计仍是之后需要独立证明的门禁。

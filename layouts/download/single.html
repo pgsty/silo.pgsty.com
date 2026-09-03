@@ -9,11 +9,11 @@
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
 {{- $metrics := hugo.Data.home.metrics -}}
 {{- $socialImage := "images/silo-social-card.webp" | absURL -}}
-{{- $serverTag := "RELEASE.2026-08-06T00-00-00Z" -}}
-{{- $serverBuild := "20260806000000.0.0" -}}
+{{- $serverTag := "RELEASE.2026-09-03T00-00-00Z" -}}
+{{- $serverBuild := "20260903000000.0.0" -}}
 {{- $serverBase := printf "https://github.com/pgsty/silo/releases/download/%s" $serverTag -}}
-{{- $clientTag := "RELEASE.2026-09-01T00-00-00Z" -}}
-{{- $clientBuild := "20260901000000.0.0" -}}
+{{- $clientTag := "RELEASE.2026-09-03T07-13-05Z" -}}
+{{- $clientBuild := "20260903071305.0.0" -}}
 {{- $clientBase := printf "https://github.com/pgsty/mc/releases/download/%s" $clientTag -}}
     <section class="download-hero" aria-labelledby="download-title">
       <div class="download-grid-bg" aria-hidden="true"></div>
@@ -25,7 +25,7 @@
           <div class="download-release-line">
             <span class="release-live"><i aria-hidden="true"></i>{{ if $zh }}当前服务端发行版{{ else }}CURRENT SERVER RELEASE{{ end }}</span>
             <a href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
-            <span>2026-08-06 · amd64 / arm64</span>
+            <span>2026-09-03 · amd64 / arm64</span>
           </div>
         </div>
 
@@ -69,7 +69,7 @@
           </div>
           <a class="version-card" href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">
             <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
-            <strong>2026-08-06</strong>
+            <strong>2026-09-03</strong>
             <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
           </a>
         </div>
@@ -361,7 +361,7 @@ make build
           </div>
           <a class="version-card version-card--client" href="https://github.com/pgsty/mc/releases/tag/{{ $clientTag }}" target="_blank" rel="noopener">
             <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
-            <strong>2026-08-06</strong>
+            <strong>2026-09-03</strong>
             <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
           </a>
         </div>
@@ -443,7 +443,7 @@ make build
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fab fa-docker" aria-hidden="true"></i> Docker</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制容器客户端命令{{ else }}Copy container client command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
                     <pre><code><span class="k">docker</span> run <span class="v">--rm</span> <span class="s">pgsty/mc:{{ $clientTag }}</span> <span class="v">--version</span>
-<span class="k">docker</span> run <span class="v">--rm</span> <span class="s">pgsty/mc:{{ $clientTag }}</span> ls play</code></pre>
+<span class="k">docker</span> run <span class="v">--rm</span> <span class="s">pgsty/mc:{{ $clientTag }}</span> checksum verify <span class="v">--help</span></code></pre>
                   </div>
                   <div class="method-actions"><a class="btn btn-primary" href="https://hub.docker.com/r/pgsty/mc" target="_blank" rel="noopener"><i class="fab fa-docker" aria-hidden="true"></i> Docker Hub</a></div>
                 </div>

@@ -18,6 +18,8 @@ Pigsty 维护的客户端在独立归档与 Linux 软件包中以 **`mcli`** 发
 
 Silo 项目无法保证它与每一种其他 S3 兼容服务的行为，因为各家实现存在差异。在将其他服务视为兼容对象前，请先测试工作负载依赖的操作。
 
+当前版本为 [`RELEASE.2026-09-03T07-13-05Z`](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-03T07-13-05Z)，使用 Go 1.27.1 构建。它新增只读审计命令 [`mc checksum verify`](/zh/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify)，并加固包含凭据的输出、策略写入、支持产物与发布溯源。20260806 以来的精确行为与依赖变化参见 [MCLI 客户端兼容性注记](/zh/compatibility/mcli/#current-release)。
+
 [`mc`](#command-mc) 的语法如下：
 
 ```shell
@@ -61,7 +63,7 @@ make build
 > Pigsty 分支刻意禁用了 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update)。请通过 [Silo 下载页](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
 
 > [!NOTE]
-> 当前 `pgsty/mc` 源码仍注册 `mc license` 与 `mc support` 命令树。这些命令集成的是上游 MinIO SUBNET 及其商业许可/支持服务，而不是 Silo 服务。它们的命令名、协议字段、SUBNET 措辞以及 MinIO 价格/许可证链接属于上游契约，不应更名。
+> 当前 `pgsty/mc` 为脚本兼容保留 `mc license` 与 `mc support` 命令树，但所有在线 MinIO SUBNET、许可、上传、call-home 与遥测路径都已禁用。会联系这些服务的命令以稳定消息失败并返回 `1`；`support diag`、`perf`、`profile`、`inspect` 等本地诊断无需注册即可使用，并写入私有权限的本地文件。参见 [MCLI 客户端兼容性注记](/zh/compatibility/mcli/#subnet)。
 
 ### 2) 为兼容 S3 的服务创建别名 {#s3}
 
@@ -152,6 +154,10 @@ mc admin info silo
       <td><p><a href="/zh/reference/minio-mc/mc-cat/#command-mc.cat"><code>mc cat</code></a> 命令将文件或对象的内容连接到另一个文件或对象。
 你也可以使用该命令将指定文件或对象的内容输出到 <code>STDOUT</code>。
 <a href="/zh/reference/minio-mc/mc-cat/#command-mc.cat"><code>cat</code></a> 的功能与 <code>cat</code> 类似。</p></td>
+    </tr>
+    <tr>
+      <td><p><a href="/zh/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify"><code>mc checksum verify</code></a></p></td>
+      <td><p>Silo 客户端扩展会独立重算并比对存储的 S3 full-object 校验和。它是只读命令，支持单对象、递归前缀、版本、候选清单、dry run、JSON Lines 报告与显式失败策略。</p></td>
     </tr>
     <tr>
       <td><p><a href="/zh/reference/minio-mc/mc-cp/#command-mc.cp"><code>mc cp</code></a></p></td>

@@ -153,6 +153,6 @@ CreateSession
 ### MinIO 针对不支持的存储桶资源的替代方案 {#minio}
 
 - 对于 `BucketACL` 或 `ObjectACL` 操作调用，请使用 [Policies](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
-- 自 `RELEASE.2026-08-06T00-00-00Z` 之后的版本起支持 `BucketCORS` 操作。设置了自身 CORS 配置的存储桶只按该配置响应；未设置的存储桶使用服务端全局的 `MINIO_API_CORS_ALLOW_ORIGIN` 策略，默认允许所有来源。
+- 自 `RELEASE.2026-09-03T00-00-00Z` 起支持 `BucketCORS` 操作。设置了自身 CORS 配置的存储桶只按该配置响应；未设置的存储桶使用服务端全局的 `MINIO_API_CORS_ALLOW_ORIGIN` 策略，默认允许所有来源。
 - 对于 `BucketWebsite` 操作调用，请使用 `caddy` 或 `nginx`。
 - 对于 `BucketAnalytics`、`BucketMetrics` 或 `BucketLogging` 操作调用，请使用 [存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
