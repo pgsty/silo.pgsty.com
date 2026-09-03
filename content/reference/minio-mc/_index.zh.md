@@ -14,7 +14,7 @@ upstream_modified: true
 
 Pigsty 维护的客户端在独立归档与 Linux 软件包中以 **`mcli`** 发布；源码构建、容器入口点、配置目录、模块路径和命令语法则为兼容性保留 **`mc`**。它为文件系统和兼容 Amazon S3 的对象存储提供 `ls`、`cat`、`cp`、`mirror`、`diff` 等熟悉的命令。
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建。当前源码保留与 Silo、上游 MinIO 和 AWS S3 的兼容性。
+**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建。发布版本以 Silo 为正式验收对象，并尽最大努力兼容上游 MinIO 与其他 S3 兼容端点。
 
 Silo 项目无法保证它与每一种其他 S3 兼容服务的行为，因为各家实现存在差异。在将其他服务视为兼容对象前，请先测试工作负载依赖的操作。
 
@@ -34,7 +34,7 @@ mc [GLOBALFLAGS] COMMAND --help
 
 客户端与 Silo 服务端独立发布。
 
-为获得最佳功能与兼容性，建议使用与 Silo 或 MinIO 服务端发布时间接近的客户端版本。通常，选择与服务端同日或更晚发布的客户端更稳妥。
+为获得最佳功能与兼容性，建议使用与 Silo 服务端发布时间接近的客户端版本。对上游 MinIO 的兼容属于尽最大努力；使用时请联测确切的客户端与服务端版本。
 
 可以安装比服务端更新的客户端。但如果版本偏差过大，即使 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp) 等核心 S3 操作仍兼容，管理功能或 flag 也可能存在差异。
 
@@ -124,7 +124,7 @@ mc admin info silo
 > [!NOTE]
 > **说明**
 >
-> 客户端还包含用于管理 Silo 与兼容 MinIO 部署的管理扩展。更完整文档参见 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin)。
+> 客户端还包含以 Silo 为正式验收对象的管理扩展，并尽最大努力兼容 MinIO 部署。更完整文档参见 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin)。
 >
 > 下表不包含这些命令。
 

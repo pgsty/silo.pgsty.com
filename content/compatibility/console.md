@@ -44,27 +44,35 @@ The interface, help content, and documentation links are available in English an
 
 ### 5. For developers: the module graph {#source}
 
-The Go module path stays `github.com/minio/console`, and Console's own `require` directives stay on **resolvable upstream versions** — notably `github.com/minio/pkg/v3 v3.6.1`. Those requirements are part of Console's public module graph, and Go selects the maximum requirement across the whole graph, so raising them would push every embedding server's module graph up with them.
+The Go module path stays `github.com/minio/console` as a compatibility
+interface, but maintained Console source directly imports and requires
+`github.com/pgsty/silo-pkg/v3` v3.13.2. The package is not selected through an
+upstream-path replacement. `minio-go` is the explicit exception and resolves to
+the verified upstream version.
 
-The maintained Silo implementations are selected by `replace` directives instead:
+The maintained graph has one replacement, selecting the released `pgsty/mc`
+source while retaining its historical module path:
 
 ```go
 replace (
-	github.com/minio/mc          => github.com/pgsty/mc ...
-	github.com/minio/minio-go/v7 => github.com/pgsty/silo-go/v7 ...
-	github.com/minio/pkg/v3      => github.com/pgsty/silo-pkg/v3 ...
+	github.com/minio/mc => github.com/pgsty/mc ...
 )
 ```
 
-Two consequences follow, and both bite in practice:
+Go does not inherit replacements from dependency modules, so a SILO server that
+embeds Console must copy that one `mc` selection. The release-gating graph is the
+coordinated PGSTY stack: SILO, SILO Console, `pgsty/mc`, and `silo-pkg`.
 
-1. **Replacements are not inherited.** Go ignores `replace` directives declared by a dependency module. A server that embeds Console source has to repeat these selections in its own `go.mod`, or it will silently build Console against the upstream packages.
-2. **Adopt them as one set.** The CLI and the shared package are coupled: `pgsty/mc` compiles against the Silo package's strict policy API. A build that keeps the CLI replacement must keep the shared-package replacement too. Go will resolve a partial override that pairs one project's CLI with the other's shared package, but Console neither supports nor tests it.
-
-Console's own source avoids fork-only APIs — it applies its strict policy-write checks locally rather than importing them — and a CI job proves it by dropping all three replacements and building, vetting, testing, and cross-compiling against the pure upstream graph. That is a build-compatibility guarantee, not a claim that the upstream and Silo packages behave identically at runtime.
+The project also probes builds with upstream MinIO and upstream `mc` on a
+best-effort basis. Those jobs are compatibility signals, not dependency floors
+or release gates: an upstream-only failure is investigated and documented, but
+does not require downgrading `silo-pkg` or duplicating its APIs. A small
+`github.com/minio/pkg/v3` residue may still appear transitively through legacy
+dependencies such as `minio/colorjson`; maintained Console behavior comes from
+`silo-pkg`.
 
 > [!NOTE]
-> Since Console [v2.3.0] (2026-09-01) the module requires `github.com/pgsty/silo-pkg/v3` directly, because `silo-pkg` v3.13.0 moved to that module path, and the replacement graph shown above is retired. A server that still selects `silo-pkg` through `replace github.com/minio/pkg/v3 => …` cannot embed v2.3.0 or later until it imports the new path itself. The Silo server embeds Console commit `43f8447fd`: the last commit of the v2.3.0 line before the module-path migration, which carries the v2.3.0 security fixes.
+> Since Console [v2.3.0] (2026-09-01) the module requires `github.com/pgsty/silo-pkg/v3` directly, because `silo-pkg` v3.13.0 moved to that module path. A server that still selects `silo-pkg` through `replace github.com/minio/pkg/v3 => …` must migrate its imports before adopting this Console line. The Silo server embeds Console commit `43f8447fd`: the last commit of the v2.3.0 line before the module-path migration, which carries the v2.3.0 security fixes.
 
 ## Migration {#migration}
 

@@ -44,27 +44,32 @@ SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地�
 
 ### 5. 面向开发者：模块图 {#source}
 
-Go 模块路径保持 `github.com/minio/console`，Console 自身的 `require` 指令保持在**可解析的上游版本**上 —— 尤其是 `github.com/minio/pkg/v3 v3.6.1`。这些 require 是 Console 公开模块图的一部分，而 Go 取整个模块图中各要求的最大值，因此抬高它们会把每一个内嵌 Console 的服务器的模块图一起顶上去。
+Go 模块路径继续保留为 `github.com/minio/console`，作为兼容接口；但
+Console 的维护源码已经直接 import 并 require
+`github.com/pgsty/silo-pkg/v3` v3.13.2，不再通过上游路径的 replace 选择
+共享包。`minio-go` 是明确例外，直接使用经过验证的上游版本。
 
-Silo 维护的实现改由 `replace` 指令选择：
+维护图只剩一条 replace：在保留历史模块路径的同时选择已发布的
+`pgsty/mc` 源码：
 
 ```go
 replace (
-	github.com/minio/mc          => github.com/pgsty/mc ...
-	github.com/minio/minio-go/v7 => github.com/pgsty/silo-go/v7 ...
-	github.com/minio/pkg/v3      => github.com/pgsty/silo-pkg/v3 ...
+	github.com/minio/mc => github.com/pgsty/mc ...
 )
 ```
 
-由此得出两条结论，并且在实践中都会咬人：
+Go 不会继承依赖模块里的 replace，因此内嵌 Console 的 SILO 服务端必须
+复制这条 `mc` 选择。发布硬门禁对应的是由 SILO、SILO Console、
+`pgsty/mc` 与 `silo-pkg` 组成的 PGSTY 协调栈。
 
-1. **replace 不会被继承。** Go 会忽略依赖模块声明的 `replace`。内嵌 Console 源码的服务器必须在自己的 `go.mod` 里重复这些选择，否则会在无声无息中用上游包构建 Console。
-2. **这些选择要成套采用。** 客户端与共享包是耦合的：`pgsty/mc` 需要基于 Silo 共享包的严格策略 API 编译。保留客户端 replace 的构建必须同时保留共享包 replace。Go 能够解析"一个项目的客户端 + 另一个项目的共享包"这种部分覆盖，但 Console 既不支持也不测试它。
-
-Console 自身的源码不使用只有分支才有的 API —— 严格策略写入校验是本地实现而非引入的 —— 并且有一个 CI 任务通过丢弃全部三个 replace、在纯上游模块图上完成构建、vet、测试与交叉编译来证明这一点。这是构建兼容性的保证，不等于声称上游包与 Silo 包在运行时行为一致。
+项目仍会尽最大努力探测上游 MinIO 与上游 `mc` 的构建兼容性，但这些
+任务只是兼容信号，不是依赖下限或发布门禁：只在上游图中出现的失败会被
+调查和记录，但不能以降级 `silo-pkg` 或复制其 API 为代价。少量
+`github.com/minio/pkg/v3` 仍可能由 `minio/colorjson` 等历史依赖间接带入；
+Console 的维护行为来自 `silo-pkg`。
 
 > [!NOTE]
-> 自 Console [v2.3.0]（2026-09-01）起，模块直接 require `github.com/pgsty/silo-pkg/v3`：`silo-pkg` v3.13.0 已迁到该模块路径，上文所示的 replace 图谱随之退役。仍通过 `replace github.com/minio/pkg/v3 => …` 选择 `silo-pkg` 的服务端，在自身改用新路径之前无法内嵌 v2.3.0 及之后的版本。Silo 服务端内嵌的是 Console 提交 `43f8447fd`：v2.3.0 线上模块路径迁移之前的最后一个提交，含 v2.3.0 的全部安全修复。
+> 自 Console [v2.3.0]（2026-09-01）起，模块直接 require `github.com/pgsty/silo-pkg/v3`：`silo-pkg` v3.13.0 已迁到该模块路径。仍通过 `replace github.com/minio/pkg/v3 => …` 选择 `silo-pkg` 的服务端，必须先迁移自身 import 才能采用这一 Console 版本线。Silo 服务端内嵌的是 Console 提交 `43f8447fd`：v2.3.0 线上模块路径迁移之前的最后一个提交，含 v2.3.0 的全部安全修复。
 
 ## 迁移 {#migration}
 

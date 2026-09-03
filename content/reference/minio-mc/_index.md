@@ -14,7 +14,7 @@ upstream_modified: true
 
 The Pigsty-maintained client is distributed as **`mcli`** in standalone archives and Linux packages. Its source build, container entrypoint, configuration directory, module path, and command syntax retain **`mc`** for compatibility. It provides familiar commands such as `ls`, `cat`, `cp`, `mirror`, and `diff` for filesystems and Amazon S3-compatible object storage.
 
-The **`mc`** command-line tool is built for compatibility with the AWS S3 API. Its current source retains compatibility with Silo, upstream MinIO, and AWS S3.
+The **`mc`** command-line tool is built for compatibility with the AWS S3 API. It is release-tested with Silo and retains best-effort compatibility with upstream MinIO and other S3-compatible endpoints.
 
 The Silo project cannot guarantee behavior against every other S3-compatible service because implementations differ. Test the operations your workload relies on before treating another service as compatible.
 
@@ -34,7 +34,7 @@ See [Command Quick Reference](#minio-mc-commands) for a list of supported comman
 
 The client releases separately from the Silo server.
 
-For best functionality and compatibility, use a client version released close to your Silo or MinIO server version. A client released on the same day or later than the server is generally the safer choice.
+For best functionality and compatibility, use a client version released close to your Silo server version. Operation against upstream MinIO is best effort; when using it, test the exact client and server versions together.
 
 You can install a client newer than the server. If the versions skew too far apart, however, administrative features or flags may differ even when core S3 operations such as [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) remain compatible.
 
@@ -122,7 +122,7 @@ The following table lists [`mc`](#command-mc) commands:
 > [!NOTE]
 > **Note**
 >
-> The client also includes an administration extension for managing Silo and compatible MinIO deployments. See [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) for more complete documentation.
+> The client also includes an administration extension release-tested for Silo. It retains best-effort compatibility with MinIO deployments; see [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) for more complete documentation.
 >
 > The below table does not include those commands.
 

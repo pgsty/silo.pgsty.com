@@ -37,7 +37,7 @@ The fork follows one rule: **the shipped artifact and its channels are renamed; 
 - **Severed** — every connection to MinIO-operated services: the release/update feed, the SUBNET support and licensing portal, telemetry, and the pre-seeded `play` demo alias. Affected commands remain in the CLI for script compatibility and fail with a stable error rather than disappearing.
 - **Preserved** — upstream copyright and the AGPL-3.0 license. Runtime output credits both MinIO, Inc. and PGSTY.
 
-A configuration written by upstream `mc` is readable by `mcli` unchanged, and vice versa; both clients can talk to MinIO servers, Silo servers, and any other S3-compatible endpoint.
+A configuration written by upstream `mc` is readable by `mcli` unchanged, and vice versa. SILO releases test mcli against Silo; operation against upstream MinIO and other S3-compatible endpoints is retained on a best-effort basis and should be verified with the exact versions in use.
 
 ## What changed {#changed}
 
