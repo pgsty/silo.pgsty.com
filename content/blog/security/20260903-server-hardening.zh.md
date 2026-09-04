@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/20260903-server-hardening/"
 ---
 
-> **已随 SILO 20260903 发布。** 这些修复属于 [`RELEASE.2026-09-03T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T00-00-00Z)。从 20260806 到 20260903 的完整升级边界、组件、验证证据与已知延期见[完整发布说明](/zh/blog/release/silo-20260903/)。
+> **已随 SILO 20260903 发布。** 这些修复属于 [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z)。从 20260806 到 20260903 的完整升级边界、组件、验证证据与已知延期见[完整发布说明](/zh/blog/release/silo-20260903/)。
 
 本公告汇总 SILO Server 最终复审发现的五个相关安全问题，覆盖客户提供的加密密钥、客户端可控复制 header、管理状态变更与显式对象版本删除。
 
@@ -145,7 +145,7 @@ context decision 才是 authority。stripping 保护旧 consumer，却不能自�
 
 修复包含 focused unit、handler、authorization、streaming-trailer、Snowball 与 site-replication 测试。`ebac0ca73` 的完整本地验收包括完整 `cmd` race，以及六种部署形态 174 PASS / 0 FAIL。最终发布线在完整验收后又增加一处 CORS state-clear 修复，并通过定向 race、compatibility、generation、diff 与 lint 门禁。
 
-本公告**不声称** `RELEASE.2026-09-03T00-00-00Z` 或任何 image/package 已发布。远端 CI、Test Release、tag 校验、构件签名、checksum、attestation 与真实公开 image pull 仍然是发布 blocker，详见[发布前复审](/zh/blog/design/server-release-readiness/#decision)。
+最终 [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) 已完成[发布前复审](/zh/blog/design/server-release-readiness/#decision)记录的门禁：精确 SHA 的 CI 与 Test Release、签名软件包、checksum、SBOM、provenance，以及公开的 classic/distroless 容器镜像。本公告的结论仍只覆盖上面五项修复与下面列出的残余风险。
 
 ## 本公告之外的残余风险 {#residual-risks}
 

@@ -90,7 +90,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
    tenant:
      image:
        repository: pgsty/silo
-       tag: RELEASE.2026-09-03T00-00-00Z
+       tag: RELEASE.2026-09-03T13-18-01Z
        pullPolicy: IfNotPresent
      env:
        - name: MINIO_UPDATE

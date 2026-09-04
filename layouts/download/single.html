@@ -9,8 +9,8 @@
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
 {{- $metrics := hugo.Data.home.metrics -}}
 {{- $socialImage := "images/silo-social-card.webp" | absURL -}}
-{{- $serverTag := "RELEASE.2026-09-03T00-00-00Z" -}}
-{{- $serverBuild := "20260903000000.0.0" -}}
+{{- $serverTag := "RELEASE.2026-09-03T13-18-01Z" -}}
+{{- $serverBuild := "20260903131801.0.0" -}}
 {{- $serverBase := printf "https://github.com/pgsty/silo/releases/download/%s" $serverTag -}}
 {{- $clientTag := "RELEASE.2026-09-03T07-13-05Z" -}}
 {{- $clientBuild := "20260903071305.0.0" -}}
@@ -318,7 +318,7 @@ mcli ls sss/</code></pre>
             <section class="download-panel" id="server-source" role="tabpanel" aria-labelledby="tab-server-source" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}从维护分支构建{{ else }}Build from the maintained branch{{ end }}</h3></div>
-                <div class="method-tags"><span>Go 1.26+</span><span>AGPLv3</span><span>make</span></div>
+                <div class="method-tags"><span>Go 1.27.1+</span><span>AGPLv3</span><span>make</span></div>
               </div>
               <div class="method-grid">
                 <div class="method-main">
@@ -461,7 +461,7 @@ make build
             <section class="download-panel" id="client-source" role="tabpanel" aria-labelledby="tab-client-source" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}构建维护版客户端{{ else }}Build the maintained client{{ end }}</h3></div>
-                <div class="method-tags"><span>Go 1.26+</span><span>AGPLv3</span><span>make</span></div>
+                <div class="method-tags"><span>Go 1.27.1+</span><span>AGPLv3</span><span>make</span></div>
               </div>
               <div class="method-grid">
                 <div class="method-main">

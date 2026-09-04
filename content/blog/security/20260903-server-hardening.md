@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/20260903-server-hardening/"
 ---
 
-> **Released in SILO 20260903.** These fixes are part of [`RELEASE.2026-09-03T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T00-00-00Z). See the [complete release notes](/blog/release/silo-20260903/) for the 20260806-to-20260903 upgrade boundary, components, verification evidence, and known deferrals.
+> **Released in SILO 20260903.** These fixes are part of [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z). See the [complete release notes](/blog/release/silo-20260903/) for the 20260806-to-20260903 upgrade boundary, components, verification evidence, and known deferrals.
 
 This bulletin collects five related security findings from the final SILO Server review. They cover customer-provided encryption keys, client-controlled replication headers, administrative status changes, and explicit object-version deletion.
 
@@ -145,7 +145,7 @@ After upgrading:
 
 The fixes have focused unit, handler, authorization, streaming-trailer, Snowball, and site-replication tests. Full local acceptance on `ebac0ca73` included the complete `cmd` race suite and six deployment shapes with 174 PASS / 0 FAIL. The final line adds one CORS state-clear fix after that run and passes targeted race, compatibility, generation, diff, and lint gates.
 
-This bulletin does **not** claim that `RELEASE.2026-09-03T00-00-00Z` or any image/package has been published. Remote CI, Test Release, tag verification, artifact signing, checksums, attestations, and real public image pulls remain release blockers, as recorded in the [pre-release review](/blog/design/server-release-readiness/#decision).
+The final [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) publication completed the gates recorded in the [pre-release review](/blog/design/server-release-readiness/#decision): exact-SHA CI and Test Release, signed packages, checksums, SBOMs, provenance, and public classic/distroless container images. This bulletin still scopes its claims to the five fixes above and the residual risks below.
 
 ## Residual risks outside this bulletin {#residual-risks}
 

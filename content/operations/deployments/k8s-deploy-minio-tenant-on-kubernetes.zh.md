@@ -46,7 +46,7 @@ upstream_modified: true
 
    ```yaml
    spec:
-     image: pgsty/silo:RELEASE.2026-09-03T00-00-00Z
+     image: pgsty/silo:RELEASE.2026-09-03T13-18-01Z
      env:
        - name: MINIO_UPDATE
          value: "off"

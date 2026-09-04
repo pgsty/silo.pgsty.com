@@ -90,7 +90,7 @@ This procedure is not exhaustive of all possible configuration options available
    tenant:
      image:
        repository: pgsty/silo
-       tag: RELEASE.2026-09-03T00-00-00Z
+       tag: RELEASE.2026-09-03T13-18-01Z
        pullPolicy: IfNotPresent
      env:
        - name: MINIO_UPDATE

@@ -33,7 +33,7 @@ docker run -d --name silo \
   -e MINIO_ROOT_USER=silo-admin \
   -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
   -v silo-data:/data \
-  pgsty/silo:RELEASE.2026-09-03T00-00-00Z \
+  pgsty/silo:RELEASE.2026-09-03T13-18-01Z \
   server /data --console-address :9001
 ```
 

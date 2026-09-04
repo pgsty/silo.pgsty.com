@@ -15,7 +15,8 @@ This is the durable pre-release engineering record behind [SILO 20260903](/blog/
 
 > **Decision:** the source candidate at `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3` is a **code-level GO for remote review**. Production release remains a **conditional GO** until remote CI, Test Release, tag and artifact verification, signing, container publication, and public pull checks complete.<br>
 > **Baseline:** `RELEASE.2026-08-06T00-00-00Z` at `3be10fcc1a44f6620ded0bd303461f9d688cca23`.<br>
-> **Scope:** SILO Server behavior and its embedded/pinned runtime components. Documentation, the standalone Console, mcli, package repositories, images, and the deployed site are separate deliverables.
+> **Scope:** SILO Server behavior and its embedded/pinned runtime components. Documentation, the standalone Console, mcli, package repositories, images, and the deployed site are separate deliverables.<br>
+> **Publication closure:** the later final tree `9b11dc9469e650815b775cb47b039610644f5da4` was published as [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) on 2026-09-04 after the remote, package, provenance, container, and public-download gates below completed. The conditional decision in this page remains the historical review criterion, not the current release state.
 
 ## Why the second review was necessary {#why-review}
 
@@ -210,4 +211,4 @@ Operators should delay even a successfully published release when they cannot ye
 - revise IAM policies for `s3:DeleteObjectVersion` and status-action separation;
 - avoid or explicitly accept the known #10, #77, #79, #99, or #100 path their workload depends on.
 
-The final conclusion is intentionally narrower than “everything is fixed”: **the reviewed candidate is ready to enter the release machinery, the remaining limitations are explicit, and production publication is gated by verifiable artifacts rather than confidence.**
+The final conclusion at the review point was intentionally narrower than “everything is fixed”: **the reviewed candidate was ready to enter the release machinery, the remaining limitations were explicit, and production publication was gated by verifiable artifacts rather than confidence.** Those gates later completed for the release linked above; the deployment-specific conditions remain applicable.
