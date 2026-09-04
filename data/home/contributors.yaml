@@ -1,6 +1,7 @@
-# People who have contributed to the pgsty/silo fork since it was established in 2026.
+# Community members who have contributed to the pgsty/silo fork since it was established in 2026.
 # Mirrors CONTRIBUTORS.md in the server repository; update both together at each release.
 # GitHub generates no contributor graph for forks, so this list is maintained by hand.
+# Project maintainers and automated accounts are intentionally excluded from this community roll.
 #
 # `name` is the account's GitHub display name, shown on hover; it falls back to the handle
 # when the account has not set one. Avatars live in static/images/contributors/<handle>.webp
@@ -8,6 +9,28 @@
 
 # Merged into main. Rendered first and ringed on the landing page; `what` shows on hover.
 code:
+  - handle: "h5vx"
+    pr: 71
+    commit: "e4e3007da"
+    what: "Implemented per-bucket CORS configuration and enforcement"
+    whatZh: "实现单桶 CORS 配置与请求执行"
+  - handle: "ycjlin"
+    pr: 37
+    commit: "e9c5340be"
+    what: "Fixed missing-bucket ListObjects semantics"
+    whatZh: "修复缺失桶的 ListObjects 语义"
+  - handle: "Dansyuqri"
+    name: "Shooks"
+    pr: 57
+    commit: "d014a12cf"
+    what: "Added ChecksumType to multipart completion responses"
+    whatZh: "为分片上传完成响应补充 ChecksumType"
+  - handle: "pinginfo"
+    name: "ping"
+    pr: 34
+    commit: "65795ee1f"
+    what: "Repaired bucket notification streaming"
+    whatZh: "修复桶通知的流式输出"
   - handle: "ZouhairCharef"
     pr: 18
     commit: "68e0ba997"
@@ -19,12 +42,6 @@ code:
     commit: "1869bd30b"
     what: "Patched CVE-2026-39883 in OpenTelemetry"
     whatZh: "修复 OpenTelemetry 中的 CVE-2026-39883"
-  - handle: "pinginfo"
-    name: "ping"
-    pr: 34
-    commit: "65795ee1f"
-    what: "Repaired bucket notification streaming"
-    whatZh: "修复桶通知的流式输出"
   - handle: "waterkip"
     name: "Wesley Schwengle"
     pr: 41
@@ -36,16 +53,32 @@ code:
 proposed:
   - handle: "magicxor"
     name: "Ilia Burakov"
-  - handle: "ycjlin"
+    what: "Proposed conditional DELETE support for If-Match"
+    whatZh: "提交 DELETE If-Match 条件请求支持方案"
   - handle: "davinkevin"
     name: "Davin Kevin"
+    what: "Proposed a distroless container image"
+    whatZh: "提交 distroless 容器镜像方案"
   - handle: "lem21h"
+    what: "Proposed robustness and goroutine improvements"
+    whatZh: "提交健壮性与 goroutine 改进"
   - handle: "sulin37392"
+    what: "Proposed dependency updates"
+    whatZh: "提交依赖更新"
+  - handle: "metaneutrons"
+    name: "Fabian Schmieder"
+    what: "Proposed explicit-version delete authorization"
+    whatZh: "提交显式版本删除鉴权方案"
+  - handle: "mrjavadseydi"
+    name: "mohammadjavad seydi"
+    what: "Proposed access-frequency ILM across server pools"
+    whatZh: "提交跨服务器池的访问频率 ILM 方案"
 
 # Bug reports, compatibility findings, and proposals filed against this fork.
-# Deduplicated against `proposed`: @magicxor (#10) and @davinkevin (#20) also filed issues but are
-# listed above, so the rendered wall shows each person once. CONTRIBUTORS.md carries the full
-# non-deduplicated breakdown — 5 pull requests and 22 reports across 25 distinct people.
+# Deduplicated against `proposed`: @magicxor (#10), @davinkevin (#20), and @metaneutrons (#58)
+# also filed issues but are listed above, so the rendered wall shows each person once.
+# CONTRIBUTORS.md carries the full non-deduplicated breakdown — 7 merged-code contributors,
+# 6 other pull-request authors, and 27 issue reporters across 37 distinct community contributors.
 reports:
   - handle: "mosesdd"
   - handle: "Xavier-777"
@@ -77,3 +110,10 @@ reports:
     name: "Pavel Mezhuev"
   - handle: "kh0mka"
     name: "khomenokk"
+  - handle: "bagutzu"
+    name: "Bag Raul Cristian"
+  - handle: "liuhaodongliu990-cmyk"
+  - handle: "sargarass"
+    name: "Anton Bornev"
+  - handle: "mumu-lab"
+    name: "木木"

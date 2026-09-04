@@ -11,6 +11,7 @@ new avatar.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import re
 import subprocess
@@ -24,9 +25,10 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = REPO_ROOT / "data" / "home" / "contributors.yaml"
 OUTPUT_DIR = REPO_ROOT / "static" / "images" / "contributors"
 
-# github.com/<handle>.png redirects to the account's current avatar. Requesting a
-# size larger than the rendered one keeps the image sharp on HiDPI displays.
-AVATAR_URL = "https://github.com/{handle}.png?size={size}"
+# Resolve the account's current avatar through GitHub's API. The old
+# github.com/<handle>.png redirect is convenient but intermittently stalls;
+# avatars.githubusercontent.com is reliable once the canonical URL is known.
+PROFILE_URL = "https://api.github.com/users/{handle}"
 SOURCE_SIZE = 200
 RENDER_SIZE = 96
 WEBP_QUALITY = 82
@@ -48,8 +50,25 @@ def read_handles() -> list[str]:
 
 
 def fetch(handle: str) -> bytes:
-    url = AVATAR_URL.format(handle=handle, size=SOURCE_SIZE)
-    request = urllib.request.Request(url, headers={"User-Agent": "silo-site-avatars"})
+    profile_request = urllib.request.Request(
+        PROFILE_URL.format(handle=handle),
+        headers={
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "silo-site-avatars",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    with urllib.request.urlopen(profile_request, timeout=TIMEOUT_SECONDS) as response:
+        profile = json.load(response)
+
+    avatar_url = profile.get("avatar_url")
+    if not avatar_url:
+        raise OSError(f"GitHub profile for {handle} has no avatar_url")
+    separator = "&" if "?" in avatar_url else "?"
+    request = urllib.request.Request(
+        f"{avatar_url}{separator}s={SOURCE_SIZE}",
+        headers={"User-Agent": "silo-site-avatars"},
+    )
     with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
         return response.read()
 
