@@ -4,11 +4,11 @@
 # Order: merged PR authors, other PR authors, then issue-only authors; impact within each tier.
 # featured marks significant contributions, including adopted proposals and actionable reports.
 # Refresh WebP and GitHub SVG avatars with: python3 bin/contributor_avatars.py
-updated: "2026-09-07"
+updated: "2026-09-07T03:00:14.855250+00:00"
 repositories:
   - repo: "pgsty/silo"
     issues: 82
-    pullRequests: 60
+    pullRequests: 61
   - repo: "pgsty/silo-console"
     issues: 34
     pullRequests: 10
