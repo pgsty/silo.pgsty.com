@@ -117,6 +117,14 @@ kubelet 探针是 pod spec 中的 `httpGet` 请求；Docker `HEALTHCHECK` 被忽
 6. **桶级 CORS 真正生效。** 设置了自身 CORS 配置的桶只按该配置响应；`MINIO_API_CORS_ALLOW_ORIGIN` 只作用于没有配置的桶。在站点复制组里，等所有站点都运行新版本后再配置桶级 CORS：旧对端会接受但忽略该配置，并持续报告 CORS 不一致。
 7. **回滚后数据仍可读。** 20260806 忽略桶级 CORS 配置，并会在重写该桶元数据时把它丢掉；再次升级后请重新创建。
 
+### 9 月 3 日版本的 Console 回归 {#console-0903}
+
+`RELEASE.2026-09-03T13-18-01Z` 不再识别未配置的本机代理转发的客户端地址，同时清除了四个 `CONSOLE_WS_MAX_*` 连接配置。这会改变 IP Allow/Deny 策略的判断，并使管理员无法提高每个地址默认八条匿名连接的限额。
+
+包含修复的构建会恢复内嵌 Console 对环回 TCP 对端的信任，除非设置了 `MINIO_API_TRUSTED_PROXIES=none`/`off`；同时保留环境变量或 `MINIO_CONFIG_ENV_FILE` 中的四个限额配置。远程代理仍需显式配置 IP/CIDR 列表。独立 Console 的默认行为、转发链信任规则和连接预算保持不变，非法配置会在启动时报错。策略表与配置约束见 [Console 设置](/zh/reference/minio-server/settings/console/#embedded-compatibility)。发布进展见 [#147](https://github.com/pgsty/silo/issues/147) 和 [#148](https://github.com/pgsty/silo/issues/148)；0903 镜像尚不包含这些修复。
+
+在 0903 上，显式将本机代理对端加入 `MINIO_API_TRUSTED_PROXIES` 可恢复客户端地址识别，但也会将 9000 端口的 S3 监听器切换到列表模式，需要同时列出它所需的其他代理。自定义 WebSocket 限额则需要包含修复的 Server 构建或独立 Console。
+
 ## 一个集群只运行一种二进制 {#one-binary}
 
 分布式节点在 bootstrap 时相互校验二进制。起进不同二进制对端之间的节点不会报错退出，而是无限停在 `activating`，日志记录：

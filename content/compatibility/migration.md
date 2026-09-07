@@ -117,6 +117,14 @@ The release after `RELEASE.2026-08-06T00-00-00Z` tightens several behaviors that
 6. **Per-bucket CORS is real.** A bucket with its own CORS configuration is served by that configuration only; `MINIO_API_CORS_ALLOW_ORIGIN` applies to buckets without one. In a site-replication group, configure bucket CORS only after every site runs the new release: older peers accept but ignore the configuration and keep reporting a CORS mismatch.
 7. **Rollback keeps the data readable.** 20260806 ignores bucket CORS configuration and drops it when it rewrites that bucket's metadata; recreate the configuration after upgrading again.
 
+### Console regressions in the September 3 release {#console-0903}
+
+`RELEASE.2026-09-03T13-18-01Z` stopped recognizing forwarded client addresses from unconfigured local proxies and discarded the four `CONSOLE_WS_MAX_*` connection settings. This can change IP Allow/Deny decisions and prevent operators from raising the eight-connection anonymous per-address limit.
+
+Builds containing the fixes restore loopback TCP-peer trust for embedded Console unless `MINIO_API_TRUSTED_PROXIES=none`/`off`, and preserves all four limits from the environment or `MINIO_CONFIG_ENV_FILE`. Remote proxies still need an explicit IP/CIDR list. Standalone defaults, forwarded-chain trust rules and connection budgets remain unchanged; invalid configuration becomes a startup error. See [Console settings](/reference/minio-server/settings/console/#embedded-compatibility) for the policy table and configuration constraints. Track availability in [#147](https://github.com/pgsty/silo/issues/147) and [#148](https://github.com/pgsty/silo/issues/148); the 0903 image does not include these fixes.
+
+On 0903, explicitly listing the local proxy peer in `MINIO_API_TRUSTED_PROXIES` restores client attribution, but also switches the S3 listener on port 9000 to listed mode; include its other required proxies too. Custom WebSocket limits require a fixed Server build or standalone Console.
+
 ## One cluster, one binary {#one-binary}
 
 Distributed nodes verify each other's binary at bootstrap. A node started among peers running a different binary does not fail — it waits indefinitely in `activating`, logging:
