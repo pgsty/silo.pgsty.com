@@ -6,11 +6,15 @@ WebP per contributor to static/images/contributors/<handle>.webp, matching how
 static/images/voices/ already stores its faces. Existing files are left alone
 unless --force is given, so a rerun after adding a contributor only fetches the
 new avatar.
+
+Also writes self-contained SVG avatars for the GitHub README and contributor
+record. Significant contributions get the same gold ring as the website.
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 from pathlib import Path
 import re
@@ -37,16 +41,43 @@ TIMEOUT_SECONDS = 20
 HANDLE_RE = re.compile(r"^\s*-\s*handle:\s*\"([^\"]+)\"", re.MULTILINE)
 
 
-def read_handles() -> list[str]:
-    """Collect handles in file order, dropping duplicates."""
+def read_contributors() -> list[tuple[str, bool]]:
+    """Collect handles and featured flags from the contributor entry blocks."""
     text = DATA_FILE.read_text(encoding="utf-8")
-    handles: list[str] = []
-    for handle in HANDLE_RE.findall(text):
-        if handle not in handles:
-            handles.append(handle)
-    if not handles:
+    matches = list(HANDLE_RE.finditer(text))
+    contributors: list[tuple[str, bool]] = []
+    seen: set[str] = set()
+    for index, match in enumerate(matches):
+        handle = match.group(1)
+        if handle.lower() in seen:
+            sys.exit(f"duplicate contributor: {handle}")
+        seen.add(handle.lower())
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        featured = bool(re.search(r"^    featured: true$", text[match.end():end], re.MULTILINE))
+        contributors.append((handle, featured))
+    if not contributors:
         sys.exit(f"no handles found in {DATA_FILE}")
-    return handles
+    return contributors
+
+
+def write_svg(source: Path, featured: bool) -> None:
+    """Wrap the local avatar in a circular, portable GitHub image."""
+    encoded = base64.b64encode(source.read_bytes()).decode("ascii")
+    ring = (
+        '<circle cx="54" cy="54" r="51" fill="none" stroke="#e0a35c" stroke-opacity=".16" stroke-width="6"/>\n'
+        '<circle cx="54" cy="54" r="47" fill="none" stroke="#e0a35c" stroke-width="4"/>'
+        if featured else
+        '<circle cx="54" cy="54" r="47.5" fill="none" stroke="#94b0d2" stroke-opacity=".32"/>'
+    )
+    muted = '' if featured else ' filter="url(#muted)" opacity=".86"'
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">\n'
+        '<defs><clipPath id="face"><circle cx="54" cy="54" r="48"/></clipPath>'
+        '<filter id="muted"><feColorMatrix type="saturate" values=".55"/></filter></defs>\n'
+        f'<image x="6" y="6" width="96" height="96" clip-path="url(#face)"{muted} href="data:image/webp;base64,{encoded}"/>\n'
+        f'{ring}\n</svg>\n'
+    )
+    source.with_suffix(".svg").write_text(svg, encoding="utf-8")
 
 
 def fetch(handle: str) -> bytes:
@@ -96,17 +127,19 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    handles = read_handles()
+    contributors = read_contributors()
     fetched = skipped = 0
     failures: list[str] = []
 
-    for handle in handles:
+    for handle, featured in contributors:
         destination = OUTPUT_DIR / f"{handle}.webp"
         if destination.exists() and not args.force:
+            write_svg(destination, featured)
             skipped += 1
             continue
         try:
             convert(fetch(handle), destination)
+            write_svg(destination, featured)
         except (urllib.error.URLError, subprocess.CalledProcessError, OSError) as error:
             failures.append(f"{handle}: {error}")
             continue

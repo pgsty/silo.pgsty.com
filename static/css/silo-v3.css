@@ -580,7 +580,7 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 /* Contributors：用户之声下方的头像墙。合入代码的四位加铜环并排在最前，
    其余压暗去饱和作陪衬；悬停浮出姓名，合入代码的那几位再带上具体改动。 */
 .contrib-strip { margin-top: clamp(34px, 4vw, 52px); padding-top: clamp(26px, 3vw, 38px); border-top: 1px solid var(--line); }
-.contrib-lead { max-width: 640px; margin: 0 auto 28px; text-align: center; color: var(--ink-mute); font-size: 0.92rem; line-height: 1.6; }
+.contrib-lead { margin: 0 auto 28px; text-align: center; color: var(--ink-mute); font-size: 0.92rem; line-height: 1.6; white-space: nowrap; }
 .landing-page .contrib-lead a { color: var(--copper); border-bottom: 1px solid var(--copper-dim); transition: border-color 160ms ease; }
 .landing-page .contrib-lead a:hover { border-bottom-color: var(--copper); }
 /* 宽度收在 880px：29 个头像排成 15+14 的两行，比撑满 1280 的 22+7 匀称 */
@@ -592,10 +592,10 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 .contrib-avatar:hover, .contrib-avatar:focus-visible { z-index: 3; transform: translateY(-3px) scale(1.1); }
 .contrib-avatar:hover img, .contrib-avatar:focus-visible img { filter: none; opacity: 1; }
 
-/* 合入代码的一档：更大、满色、铜环 */
-.contrib-avatar--code { width: 54px; height: 54px; }
-.contrib-avatar--code img { filter: none; opacity: 1; }
-.contrib-avatar--code::after { border: 2px solid var(--copper); box-shadow: 0 0 0 3px color-mix(in srgb, var(--copper) 16%, transparent); }
+/* 显著贡献：更大、满色、铜环，不以原 PR 是否合并为限 */
+.contrib-avatar--featured { width: 54px; height: 54px; }
+.contrib-avatar--featured img { filter: none; opacity: 1; }
+.contrib-avatar--featured::after { border: 2px solid var(--copper); box-shadow: 0 0 0 3px color-mix(in srgb, var(--copper) 16%, transparent); }
 
 /* 悬停铭牌 */
 .contrib-tip { position: absolute; bottom: calc(100% + 10px); left: 50%; z-index: 4; display: flex; flex-direction: column; gap: 2px; width: max-content; max-width: 210px; padding: 7px 11px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--bg-elev-2); box-shadow: var(--shadow-sm); opacity: 0; text-align: center; transform: translate(-50%, 4px); transition: opacity 160ms ease, transform 160ms ease; pointer-events: none; }
@@ -646,10 +646,11 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 @media (max-width: 480px) {
   .silo-hero-title { font-size: clamp(2.1rem, 11vw, 2.9rem); }
   .eyebrow-zh { display: none; }
-  /* 窄屏收紧头像墙，避免 29 张头像撑成过多行 */
+  /* 窄屏保持贡献文案一行，并收紧头像墙 */
+  .contrib-lead { font-size: 0.74rem; }
   .contrib-wall { gap: 7px; }
   .contrib-avatar { width: 38px; height: 38px; }
-  .contrib-avatar--code { width: 46px; height: 46px; }
+  .contrib-avatar--featured { width: 46px; height: 46px; }
   .contrib-tip { max-width: 170px; }
   .silo-board { grid-template-rows: auto minmax(212px, 1fr) auto; min-height: 296px; }
   .silo-board-top,

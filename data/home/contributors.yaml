@@ -1,119 +1,195 @@
-# Community members who have contributed to the pgsty/silo fork since it was established in 2026.
-# Mirrors CONTRIBUTORS.md in the server repository; update both together at each release.
-# GitHub generates no contributor graph for forks, so this list is maintained by hand.
-# Project maintainers and automated accounts are intentionally excluded from this community roll.
-#
-# `name` is the account's GitHub display name, shown on hover; it falls back to the handle
-# when the account has not set one. Avatars live in static/images/contributors/<handle>.webp
-# and are refreshed with `python3 bin/contributor_avatars.py`.
+# All human Issue / PR authors across the SILO repositories, including maintainers.
+# Audited with paginated GitHub API results; open, closed, and unmerged submissions count.
+# Mirrors pgsty/silo CONTRIBUTORS.md and both READMEs. Each handle appears exactly once.
+# Order: merged PR authors, other PR authors, then issue-only authors; impact within each tier.
+# featured marks significant contributions, including adopted proposals and actionable reports.
+# Refresh WebP and GitHub SVG avatars with: python3 bin/contributor_avatars.py
+updated: "2026-09-07"
+repositories:
+  - repo: "pgsty/silo"
+    issues: 82
+    pullRequests: 60
+  - repo: "pgsty/silo-console"
+    issues: 34
+    pullRequests: 10
+  - repo: "pgsty/mc"
+    issues: 18
+    pullRequests: 17
+  - repo: "pgsty/silo-pkg"
+    issues: 0
+    pullRequests: 3
+  - repo: "pgsty/silo-go"
+    issues: 0
+    pullRequests: 0
+  - repo: "pgsty/kes"
+    issues: 0
+    pullRequests: 0
+  - repo: "pgsty/silo.pgsty.com"
+    issues: 1
+    pullRequests: 11
+  - repo: "pgsty/minio-docs"
+    issues: 0
+    pullRequests: 0
 
-# Merged into main. Rendered first and ringed on the landing page; `what` shows on hover.
 code:
+  - handle: "Vonng"
+    name: "Feng Ruohang"
+    featured: true
+    what: "Maintains SILO, Console, mcli, shared packages, releases, and documentation"
+    whatZh: "维护 SILO、Console、mcli、公共包、发行与文档"
   - handle: "h5vx"
-    pr: 71
-    commit: "e4e3007da"
+    featured: true
     what: "Implemented per-bucket CORS configuration and enforcement"
     whatZh: "实现单桶 CORS 配置与请求执行"
-  - handle: "ycjlin"
-    pr: 37
-    commit: "e9c5340be"
-    what: "Fixed missing-bucket ListObjects semantics"
-    whatZh: "修复缺失桶的 ListObjects 语义"
+  - handle: "mrjavadseydi"
+    name: "mohammadjavad seydi"
+    featured: true
+    what: "Fixed effective bucket quota metrics; proposed access-frequency ILM"
+    whatZh: "修复有效桶配额指标，并提交按访问频率分层的 ILM 方案"
   - handle: "Dansyuqri"
     name: "Shooks"
-    pr: 57
-    commit: "d014a12cf"
+    featured: true
     what: "Added ChecksumType to multipart completion responses"
     whatZh: "为分片上传完成响应补充 ChecksumType"
+  - handle: "ycjlin"
+    featured: true
+    what: "Fixed missing-bucket ListObjects semantics"
+    whatZh: "修复缺失桶的 ListObjects 语义"
   - handle: "pinginfo"
     name: "ping"
-    pr: 34
-    commit: "65795ee1f"
+    featured: true
     what: "Repaired bucket notification streaming"
     whatZh: "修复桶通知的流式输出"
   - handle: "ZouhairCharef"
-    pr: 18
-    commit: "68e0ba997"
+    featured: true
     what: "Patched CVE-2026-34986 in go-jose"
     whatZh: "修复 go-jose 中的 CVE-2026-34986"
   - handle: "mfredenhagen"
     name: "Mario Fredenhagen"
-    pr: 19
-    commit: "1869bd30b"
+    featured: true
     what: "Patched CVE-2026-39883 in OpenTelemetry"
     whatZh: "修复 OpenTelemetry 中的 CVE-2026-39883"
   - handle: "waterkip"
     name: "Wesley Schwengle"
-    pr: 41
-    commit: "d495d30d5"
-    what: "Repointed the documentation links"
-    whatZh: "将文档链接指向 Silo 门户"
+    featured: true
+    what: "Repointed documentation links to the SILO portal"
+    whatZh: "将文档链接指向 SILO 门户"
 
-# Pull requests open for review, or closed after informing work that shipped differently.
 proposed:
+  - handle: "mikemikimike"
+    featured: true
+    what: "Contributed the replicated SSE-C plaintext part-size fix"
+    whatZh: "提交 SSE-C 复制分片明文尺寸修复"
+  - handle: "metaneutrons"
+    name: "Fabian Schmieder"
+    featured: true
+    what: "Reported and proposed explicit-version delete authorization"
+    whatZh: "报告并提交显式版本删除鉴权方案"
   - handle: "magicxor"
     name: "Ilia Burakov"
-    what: "Proposed conditional DELETE support for If-Match"
-    whatZh: "提交 DELETE If-Match 条件请求支持方案"
+    featured: true
+    what: "Reported and proposed conditional DELETE support for If-Match"
+    whatZh: "报告并提交 DELETE If-Match 条件请求支持方案"
   - handle: "davinkevin"
     name: "Davin Kevin"
-    what: "Proposed a distroless container image"
-    whatZh: "提交 distroless 容器镜像方案"
+    featured: true
+    what: "Proposed the distroless container image and dependency automation"
+    whatZh: "提交 distroless 容器镜像与依赖自动更新方案"
   - handle: "lem21h"
     what: "Proposed robustness and goroutine improvements"
     whatZh: "提交健壮性与 goroutine 改进"
   - handle: "sulin37392"
     what: "Proposed dependency updates"
     whatZh: "提交依赖更新"
-  - handle: "metaneutrons"
-    name: "Fabian Schmieder"
-    what: "Proposed explicit-version delete authorization"
-    whatZh: "提交显式版本删除鉴权方案"
-  - handle: "mrjavadseydi"
-    name: "mohammadjavad seydi"
-    what: "Proposed access-frequency ILM across server pools"
-    whatZh: "提交跨服务器池的访问频率 ILM 方案"
 
-# Bug reports, compatibility findings, and proposals filed against this fork.
-# Deduplicated against `proposed`: @magicxor (#10), @davinkevin (#20), and @metaneutrons (#58)
-# also filed issues but are listed above, so the rendered wall shows each person once.
-# CONTRIBUTORS.md carries the full non-deduplicated breakdown — 7 merged-code contributors,
-# 6 other pull-request authors, and 27 issue reporters across 37 distinct community contributors.
 reports:
-  - handle: "mosesdd"
-  - handle: "Xavier-777"
-  - handle: "jiadzh"
-  - handle: "TLINDEN"
-    name: "T.v.Dein"
-  - handle: "AntonOfTheWoods"
-    name: "Anton Melser"
-  - handle: "zylpsrs"
-  - handle: "nsanitate"
-    name: "Nicola Sanitate"
-  - handle: "makinikm"
-  - handle: "spaceg00se-r"
-  - handle: "heroes1412"
-  - handle: "vampywiz17"
-    name: "Vamp"
-  - handle: "chalukyaj"
   - handle: "cbornet"
     name: "Christophe Bornet"
-  - handle: "jvasile"
-    name: "James Vasile"
-  - handle: "Kesavaambati"
-  - handle: "redfoxfox"
-    name: "yingzhou Wang"
-  - handle: "kuldeep-link11"
-  - handle: "meesudzu"
-    name: "Du"
-  - handle: "pmezhuev"
-    name: "Pavel Mezhuev"
-  - handle: "kh0mka"
-    name: "khomenokk"
-  - handle: "bagutzu"
-    name: "Bag Raul Cristian"
-  - handle: "liuhaodongliu990-cmyk"
-  - handle: "sargarass"
-    name: "Anton Bornev"
+    featured: true
+    what: "Reported multipart and streaming checksum defects and missing-bucket semantics"
+    whatZh: "报告分片与流式校验和缺陷及缺失桶语义问题"
+  - handle: "vampywiz17"
+    name: "Vamp"
+    featured: true
+    what: "Reported LDAP TLS and Console login regressions"
+    whatZh: "报告 LDAP TLS 与 Console 登录回归"
   - handle: "mumu-lab"
     name: "木木"
+    what: "Reported bucket quota metrics reading a deprecated field"
+    whatZh: "报告桶配额指标读取已弃用字段的问题"
+  - handle: "jvasile"
+    name: "James Vasile"
+    what: "Reported missing user, group, and defaults in Debian packages"
+    whatZh: "报告 Debian 包缺少用户、用户组与默认配置"
+  - handle: "pmezhuev"
+    name: "Pavel Mezhuev"
+    what: "Reported missing RPM package signatures"
+    whatZh: "报告 RPM 包缺少 GPG 签名"
+  - handle: "TLINDEN"
+    name: "T.v.Dein"
+    what: "Reported the missing client in release tarballs"
+    whatZh: "报告发布压缩包缺少客户端"
+  - handle: "makinikm"
+    what: "Reported the missing client in the container image"
+    whatZh: "报告容器镜像缺少客户端"
+  - handle: "meesudzu"
+    name: "Du"
+    what: "Requested the migration guide from upstream MinIO"
+    whatZh: "提出从上游 MinIO 迁移的指南需求"
+  - handle: "kuldeep-link11"
+    what: "Reported NATS JWT credentials and target reload issues"
+    whatZh: "报告 NATS JWT 凭据与通知目标重载问题"
+  - handle: "sargarass"
+    name: "Anton Bornev"
+    what: "Reported ListMultipartUploads prefix and pagination semantics"
+    whatZh: "报告 ListMultipartUploads 前缀与分页语义问题"
+  - handle: "liuhaodongliu990-cmyk"
+    what: "Reported indeterminate progress for prefix downloads"
+    whatZh: "报告前缀下载进度显示异常"
+  - handle: "Xavier-777"
+    what: "Reported Console lifecycle management and file preview gaps"
+    whatZh: "报告 Console 生命周期管理与文件预览缺失"
+  - handle: "spaceg00se-r"
+    what: "Requested cpuv1 support and reported a workflow token failure"
+    whatZh: "提出 cpuv1 支持需求并报告工作流令牌错误"
+  - handle: "kh0mka"
+    name: "khomenokk"
+    what: "Reported inter-node I/O timeouts in ReadFileStreamHandler"
+    whatZh: "报告 ReadFileStreamHandler 节点间 I/O 超时"
+  - handle: "bagutzu"
+    name: "Bag Raul Cristian"
+    what: "Requested KES-compatible external KMS and OpenBao support"
+    whatZh: "提出兼容 KES 的外部 KMS 与 OpenBao 支持需求"
+  - handle: "DestroyLee"
+    what: "Reported the missing documentation navigation"
+    whatZh: "报告文档目录导航缺失"
+  - handle: "mosesdd"
+    what: "Requested a maintained Helm chart"
+    whatZh: "提出维护 Helm Chart 的需求"
+  - handle: "zylpsrs"
+    what: "Reported missing Console tiering and site replication"
+    whatZh: "报告 Console 缺少分层与站点复制"
+  - handle: "heroes1412"
+    what: "Reported the unusable profiling option"
+    whatZh: "报告性能分析选项不可用"
+  - handle: "redfoxfox"
+    name: "yingzhou Wang"
+    what: "Reported Chinese documentation availability"
+    whatZh: "报告中文文档站点不可用"
+  - handle: "jiadzh"
+    what: "Requested Windows build guidance"
+    whatZh: "提出 Windows 构建指导需求"
+  - handle: "AntonOfTheWoods"
+    name: "Anton Melser"
+    what: "Asked for clarity on Helm chart and operator options"
+    whatZh: "提出明确 Helm Chart 与 Operator 选项的需求"
+  - handle: "chalukyaj"
+    what: "Proposed making the SILO Operator easier to discover"
+    whatZh: "提出改善 SILO Operator 可发现性的建议"
+  - handle: "nsanitate"
+    name: "Nicola Sanitate"
+    what: "Proposed CNCF Sandbox governance"
+    whatZh: "提出加入 CNCF Sandbox 的治理建议"
+  - handle: "Kesavaambati"
+    what: "Asked about community support and image maintenance"
+    whatZh: "提出社区支持与容器镜像维护问题"
