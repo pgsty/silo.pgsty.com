@@ -10,11 +10,13 @@ icon: fa-solid fa-scale-balanced
 
 Silo carries two separate licenses. The software and the documentation are distributed under different terms, and each inherits the license its upstream work already used.
 
-| What               | License    | Where                                                                               |
-|:-------------------|:-----------|:------------------------------------------------------------------------------------|
-| `silo` server      | GNU AGPLv3 | [`pgsty/silo`](https://github.com/pgsty/silo/blob/main/LICENSE)                     |
-| `mcli` client      | GNU AGPLv3 | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE)                         |
-| This documentation | CC BY 4.0  | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
+| What | License | Where |
+|:-----|:--------|:------|
+| `silo` server | AGPL-3.0-or-later | [`pgsty/silo`](https://github.com/pgsty/silo/blob/main/LICENSE) |
+| SILO Console | AGPL-3.0-or-later | [`pgsty/silo-console`](https://github.com/pgsty/silo-console/blob/main/LICENSE) |
+| `mcli` client | AGPL-3.0-or-later | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE) |
+| SILO Shared Packages | AGPL-3.0-or-later | [`pgsty/silo-pkg`](https://github.com/pgsty/silo-pkg/blob/main/LICENSE) |
+| This documentation | CC BY 4.0 | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
 
 ## Software: AGPLv3 {#software}
 
@@ -24,6 +26,24 @@ That license is irrevocable for code already released under it — the legal bas
 In practice, AGPLv3 lets you run, study, modify, and redistribute PGSTY SILO; if you offer a modified PGSTY SILO to users over a network, you must offer those users the corresponding source of your modified version.
 
 Read the [full license text](https://www.gnu.org/licenses/agpl-3.0.html) before acting on any summary, including this one.
+
+## Contributions to PGSTY SILO {#contributions}
+
+Code contributions to all four maintained software repositories use
+**AGPL-3.0-or-later**, the same license as each repository. Contributors retain
+copyright in their original work. SILO requires no CLA, copyright assignment,
+or separate Apache-2.0 license grant to its maintainers or to upstream MinIO.
+
+Submit changes to the PGSTY repository that owns them and sign commits with
+`git commit -s` to certify the [Developer Certificate of Origin 1.1](https://developercertificate.org/).
+See the contribution guides for the [server](https://github.com/pgsty/silo/blob/main/CONTRIBUTING.md),
+[Console](https://github.com/pgsty/silo-console/blob/main/CONTRIBUTING.md),
+[mcli](https://github.com/pgsty/mc/blob/main/CONTRIBUTING.md), and
+[shared packages](https://github.com/pgsty/silo-pkg/blob/main/CONTRIBUTING.md).
+
+Contributions to this documentation follow **CC BY 4.0**. Existing copyright,
+license, and attribution notices remain in place, including the original terms
+of separately licensed third-party material.
 
 ## Documentation: CC BY 4.0 {#documentation}
 
