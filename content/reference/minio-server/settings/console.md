@@ -9,6 +9,40 @@ upstream_modified: true
 <a id="minio-console-settings"></a>
 <a id="minio-server-envvar-console"></a>
 
+## Embedded Console fixes after 0903 {#embedded-compatibility}
+
+Fixes are tracked for [local-proxy source attribution (#147)](https://github.com/pgsty/silo/issues/147) and [ignored WebSocket limits (#148)](https://github.com/pgsty/silo/issues/148). The behavior below requires a build containing both fixes; the 0903 image does not include them.
+
+### Proxy source addresses {#trusted-proxies}
+
+Embedded Console uses `MINIO_API_TRUSTED_PROXIES`; `CONSOLE_TRUSTED_PROXIES` remains standalone-only. Client attribution affects `aws:SourceIp` policies and WebSocket limits.
+
+| Setting | Trusted Console TCP peers | Forwarded-chain entries skipped |
+| --- | --- | --- |
+| Unset or blank | Loopback (`127.0.0.0/8`, `::1`, including IPv4-mapped addresses) | None |
+| IP/CIDR list | Loopback plus listed peers | Explicit list entries only |
+| `none` / `off` | None | None |
+| Invalid or unreadable | Startup error | None |
+
+Separate list entries with commas, semicolons or whitespace. Specify the actual peer addresses of proxies on other hosts or containers. Local proxies need no setting, but must sanitize forwarded source headers: this behavior trusts local processes. A loopback address inside a header does not automatically become a trusted hop. Standalone Console still requires explicit proxy trust.
+
+The Server's S3 policy is unchanged. With `none`/`off`, S3 also ignores the browser address forwarded by embedded Console, so IP policies through Console see the internal peer. WebSocket Origin checks still require a matching authority; loopback trust alone does not allow arbitrary origins.
+
+### WebSocket connection limits {#websocket-limits}
+
+Set these variables in the Server environment or `MINIO_CONFIG_ENV_FILE`:
+
+| Variable | Default |
+| --- | --- |
+| `CONSOLE_WS_MAX_CONNECTIONS` | 1024 |
+| `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT` | 256 |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64 |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8 |
+
+Public browsing uses one WebSocket per tab. NAT clients share an address; IPv6 clients share a budget per /64. For example, set `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT=16` to allow more anonymous tabs from one address. Defaults and authenticated capacity reservations remain unchanged.
+
+Values must be integers from 1 to 1048576. Each anonymous cap must be strictly below its corresponding shared cap, and the anonymous per-client cap must not exceed the anonymous total. Unset uses the default; explicitly blank values, literal `env://` references and invalid relationships are errors. Configuration errors exit Server before Console serves requests, although the S3 listener may already have started. Other `CONSOLE_*` operator overrides are still cleared and derived from Server configuration.
+
 > [!NOTE]
 > **Changed: RELEASE.2025-05-24T17-08-30Z**
 >

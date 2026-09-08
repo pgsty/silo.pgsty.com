@@ -9,6 +9,40 @@ upstream_modified: true
 <a id="minio-console"></a>
 <a id="minio-server-envvar-console"></a>
 
+## 0903 之后的内嵌 Console 修复 {#embedded-compatibility}
+
+正在修复的问题包括[本机代理来源地址识别（#147）](https://github.com/pgsty/silo/issues/147)与 [WebSocket 限额配置被忽略（#148）](https://github.com/pgsty/silo/issues/148)。以下行为要求所用构建包含这两项修复；0903 镜像尚不包含它们。
+
+### 代理来源地址 {#trusted-proxies}
+
+内嵌 Console 使用 `MINIO_API_TRUSTED_PROXIES`；`CONSOLE_TRUSTED_PROXIES` 仍仅供独立 Console 使用。客户端地址会影响 `aws:SourceIp` 策略和 WebSocket 限额。
+
+| 配置 | 信任的 Console TCP 对端 | 转发链中跳过的地址 |
+| --- | --- | --- |
+| 未设置或空白 | 环回地址（`127.0.0.0/8`、`::1`，包括 IPv4 映射地址） | 无 |
+| IP/CIDR 列表 | 环回地址及列表中的对端 | 仅显式列出的地址 |
+| `none` / `off` | 无 | 无 |
+| 非法或无法读取 | 启动报错 | 无 |
+
+列表用逗号、分号或空白分隔。其他主机或容器中的代理需要配置其实际对端地址。本机代理无需额外配置，但必须清理转发来源头：这一行为基于对本机进程的信任。头部中的环回地址不会自动成为可信转发节点。独立 Console 仍要求显式配置代理信任。
+
+Server 的 S3 策略保持不变。设置 `none`/`off` 时，S3 也会忽略内嵌 Console 转发的浏览器地址，因此经 Console 执行的 IP 策略看到的是内部对端。WebSocket Origin 检查仍要求匹配主机与端口；信任环回对端不代表允许任意来源。
+
+### WebSocket 连接限额 {#websocket-limits}
+
+在 Server 环境变量或 `MINIO_CONFIG_ENV_FILE` 中设置：
+
+| 变量 | 默认值 |
+| --- | --- |
+| `CONSOLE_WS_MAX_CONNECTIONS` | 1024 |
+| `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT` | 256 |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64 |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8 |
+
+公开浏览每个标签页使用一个 WebSocket。NAT 后的客户端共享一个地址；IPv6 客户端按 /64 共享限额。例如，设置 `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT=16` 可增加同一地址的匿名标签页容量。默认值和登录用户的预留容量保持不变。
+
+数值必须为 1 到 1048576 的整数。匿名总量与匿名单客户端限额必须分别低于对应的共享限额，匿名单客户端限额不得超过匿名总量。未设置时使用默认值；显式空值、字面量 `env://` 引用与不符合上述关系的配置均会报错。配置错误会在 Console 开始服务前退出 Server 进程，此时 S3 监听器可能已经启动。其他 `CONSOLE_*` 用户覆盖值仍会清除，并由 Server 配置生成。
+
 > [!NOTE]
 > **变更: RELEASE.2025-05-24T17-08-30Z**
 >
