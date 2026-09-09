@@ -2,6 +2,7 @@
 title: "SILO Server 20260903 Pre-release Review"
 linkTitle: "Server 20260903 Review"
 date: 2026-09-03
+lastmod: 2026-09-09
 author: "Ruohang Feng"
 summary: >
   The final adversarial review of every server change after 20260806: confirmed defects, fixes, rejected simplifications, necessary complexity, validation evidence, explicit deferrals, and the distinction between code-level GO and production release.
@@ -17,6 +18,8 @@ This is the durable pre-release engineering record behind [SILO 20260903](/blog/
 > **Baseline:** `RELEASE.2026-08-06T00-00-00Z` at `3be10fcc1a44f6620ded0bd303461f9d688cca23`.<br>
 > **Scope:** SILO Server behavior and its embedded/pinned runtime components. Documentation, the standalone Console, mcli, package repositories, images, and the deployed site are separate deliverables.<br>
 > **Publication closure:** the later final tree `9b11dc9469e650815b775cb47b039610644f5da4` was published as [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) on 2026-09-04 after the remote, package, provenance, container, and public-download gates below completed. The conditional decision in this page remains the historical review criterion, not the current release state.
+
+**2026-09-09 follow-up:** the repairs and main validation for #153, #152, and #137 are recorded separately in [Replication Reliability](/blog/design/replication-reliability/). That record preserves #136's accounting contract, explains cancellation lifecycle decisions, and keeps #133 separately tracked. It does not change the historical assessment of the 0903 release candidate below.
 
 ## Why the second review was necessary {#why-review}
 

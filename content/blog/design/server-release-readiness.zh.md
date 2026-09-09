@@ -2,6 +2,7 @@
 title: "SILO Server 20260903 发布前复审"
 linkTitle: "Server 20260903 复审"
 date: 2026-09-03
+lastmod: 2026-09-09
 author: "冯若航"
 summary: >
   对 20260806 之后全部服务端变更的最终对抗性复审：已确认缺陷、修复、否决的简化、必要复杂度、验证证据、明确延期，以及代码 GO 与生产发布之间的区别。
@@ -17,6 +18,8 @@ url: "/zh/blog/design/server-release-readiness/"
 > **基线：** `RELEASE.2026-08-06T00-00-00Z`，提交 `3be10fcc1a44f6620ded0bd303461f9d688cca23`。<br>
 > **范围：** SILO Server 行为及其内嵌/锁定的运行时组件。文档、独立 Console、mcli、软件仓库、镜像与线上站点是彼此独立的交付物。<br>
 > **发布闭环：** 后续最终源码树 `9b11dc9469e650815b775cb47b039610644f5da4` 在完成下列远端、软件包、provenance、容器与公开下载门禁后，于 2026-09-04 以 [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) 正式发布。本页的有条件结论保留为当时的复审标准，不代表当前仍未发布。
+
+**2026-09-09 后续：** #153、#152、#137 的修复与主干验收另见 [复制可靠性设计归档](/zh/blog/design/replication-reliability/)。新文保留 #136 的计数契约、记录取消生命周期决策，并明确 #133 仍单独跟踪；它不改变下文对 0903 发布候选的历史判断。
 
 ## 为什么需要第二轮审查 {#why-review}
 

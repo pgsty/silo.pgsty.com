@@ -2,7 +2,7 @@
 title: "No I/O Before Auth, No Privilege From Headers"
 linkTitle: "CORS & Replication Trust"
 date: 2026-09-01
-lastmod: 2026-09-02
+lastmod: 2026-09-09
 author: "Ruohang Feng"
 summary: >
   A pre-authentication CORS lookup turned arbitrary path segments into metadata I/O and cache entries, while a client-controlled replication marker acquired privileges across SSE-C reads, source timestamps, checksums, object lock, events, and deletes. This record defines SILO's resident-only CORS hot path, two-level replication trust model, post-signature sanitization boundary, wire-compatibility matrix, and release evidence.
@@ -251,6 +251,8 @@ Two Fable 5 review rounds first corrected the trust model for marker-only batch 
 - **Rollback:** data written by the repaired version remains readable by the previous version, but rollback reopens both trust defects and restores pre-authentication metadata loads.
 
 ## Residual risks and follow-ups {#residual-risks}
+
+- **2026-09-09 replication reliability follow-up:** [Delete completion, MRF visibility, and resync cancellation](/blog/design/replication-reliability/) records the reproductions, minimal fixes, Fable review, and PR #162 validation for #153, #152, and #137. It addresses reliability after trusted requests enter the replication pipeline, preserving this page's authorization boundary.
 
 - Emit a rate-limited diagnostic when a marker-bearing request lacks replication permission; the safe ordinary fallback is otherwise easy to misdiagnose as an ETag/MTime mismatch.
 - Replication validity probes now verify the replication permissions the target credentials need and place the synthetic validation key under the rule prefix (`c9ad74673`, `5db7be4ee`).
