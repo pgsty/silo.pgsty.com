@@ -2,7 +2,7 @@
 title: "鉴权前不做 I/O，Header 不授予权限"
 linkTitle: "CORS 与复制信任边界"
 date: 2026-09-01
-lastmod: 2026-09-02
+lastmod: 2026-09-09
 author: "冯若航"
 summary: >
   CORS 预鉴权查询曾把任意 URL 路径段变成 metadata I/O 与缓存条目；客户端可控的 replication marker 又会影响 SSE-C 读取、源时间戳、checksum、对象锁、事件与删除语义。本文记录 SILO 的 resident-only CORS 热路径、两级复制信任模型、验签后清洗边界、真实 wire 兼容矩阵与发布前证据。
@@ -249,6 +249,8 @@ Object-lock parser 过去只要看到原始 marker header，就会接受已经�
 - **回滚：** 修复版本写入的数据仍可被旧版本读取，但 rollback 会重新打开两个信任缺陷并恢复预鉴权 metadata load。
 
 ## 残余风险与后续 {#residual-risks}
+
+- **2026-09-09 复制可靠性后续：** [删除完成、MRF 可见性与 resync 取消](/zh/blog/design/replication-reliability/) 记录 #153、#152、#137 的复现、最小修复、Fable 评审与 PR #162 验收。它处理可信复制请求进入执行路径后的可靠性，沿用本文的权限边界。
 
 - 当 marker-bearing request 缺少复制权限时记录限频诊断；安全的 ordinary fallback 否则容易被误诊为 ETag/MTime 不一致。
 - Replication validity probe 现在会校验目标凭据所需的复制权限，并把合成的校验 key 放在规则前缀之下（`c9ad74673`、`5db7be4ee`）。
