@@ -4,7 +4,7 @@
 # Order: merged PR authors, other PR authors, then issue-only authors; impact within each tier.
 # featured marks significant contributions, including adopted proposals and actionable reports.
 # Refresh WebP and GitHub SVG avatars with: python3 bin/contributor_avatars.py
-updated: "2026-09-07T03:00:14.855250+00:00"
+updated: "2026-09-10T02:15:00+00:00"
 repositories:
   - repo: "pgsty/silo"
     issues: 82
@@ -113,6 +113,11 @@ reports:
     featured: true
     what: "Reported LDAP TLS and Console login regressions"
     whatZh: "报告 LDAP TLS 与 Console 登录回归"
+  - handle: "orenyomtov"
+    name: "Oren Yomtov"
+    featured: true
+    what: "Reported the unsigned-header CopyObject cross-object read (SN-2026-011)"
+    whatZh: "报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011）"
   - handle: "mumu-lab"
     name: "木木"
     what: "Reported bucket quota metrics reading a deprecated field"
