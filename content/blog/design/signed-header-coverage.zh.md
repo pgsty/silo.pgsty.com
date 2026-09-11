@@ -87,7 +87,7 @@ AWS 对未签名头返回 `403 Forbidden`；SILO 返回 `400 AccessDenied`（`Er
 
 ## 测试 {#tests}
 
-有几个既有测试先构造一个签名请求，然后*在签名之后*才设置 `x-amz-copy-source`、`x-amz-copy-source-range` 或 `x-amz-metadata-directive`——也就是说，它们依赖的正是本修复所移除的行为。它们现在改为在设置这些头之后用 `signRequestV4` 重新签名，这正是每个真实 S3 客户端的做法。`signRequestV4` 会把 `Authorization` 头排除在自己的签名集合之外，因此重签是安全的。新增覆盖包括 `checkUnsignedHeaders` 的单元用例（含空首值与两处豁免用例）以及 `TestPresignedVerifyIdempotent`——对同一个 presigned 请求验签两次。
+有几个既有测试先构造一个签名请求，然后*在签名之后*才设置 `x-amz-copy-source`、`x-amz-copy-source-range` 或 `x-amz-metadata-directive`——也就是说，它们依赖的正是本修复所移除的行为。它们现在改为在设置这些头之后用 `signRequestV4` 重新签名，这正是每个真实 S3 客户端的做法。`signRequestV4` 会把 `Authorization` 头排除在自己的签名集合之外，因此重签是安全的。当前覆盖包括 `checkUnsignedHeaders` 的单元用例（空首值、载荷哈希豁免，以及旧签名年龄头未签名时的拒绝行为）以及 `TestPresignedVerifyIdempotent`——对同一个 presigned 请求验签两次。
 
 ## 证据 {#evidence}
 
