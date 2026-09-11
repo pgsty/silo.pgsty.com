@@ -87,7 +87,7 @@ AWS returns `403 Forbidden` for an unsigned header; SILO returns `400 AccessDeni
 
 ## Tests {#tests}
 
-Several existing tests built a signed request and then set `x-amz-copy-source`, `x-amz-copy-source-range`, or `x-amz-metadata-directive` *after* signing — that is, they depended on the very behavior this fix removes. They now re-sign with `signRequestV4` after setting those headers, which is what every real S3 client does. `signRequestV4` excludes the `Authorization` header from its own signed set, so re-signing is safe. New coverage adds `checkUnsignedHeaders` unit cases (including the empty-first-value and both exemption cases) and `TestPresignedVerifyIdempotent`, which verifies the same presigned request twice.
+Several existing tests built a signed request and then set `x-amz-copy-source`, `x-amz-copy-source-range`, or `x-amz-metadata-directive` *after* signing — that is, they depended on the very behavior this fix removes. They now re-sign with `signRequestV4` after setting those headers, which is what every real S3 client does. `signRequestV4` excludes the `Authorization` header from its own signed set, so re-signing is safe. Current coverage includes `checkUnsignedHeaders` unit cases for empty first values, the payload-hash exception and rejection of the obsolete unsigned signature-age header and `TestPresignedVerifyIdempotent`, which verifies the same presigned request twice.
 
 ## Evidence {#evidence}
 
