@@ -15,13 +15,15 @@ translation_notice: false
 
 [#77](https://github.com/pgsty/silo/issues/77) 是已复现的站点复制正确性问题。接收端把来源时间改成到达时间，可能拒绝真正较新的删除；部分配置删除后不再导出时间，断线期间遗漏的删除也无法被 heal 找回。单独补一个 DELETE 分支不能解决这两个问题。
 
-> **截至 2026-09-12：** 问题仍为 **OPEN**。本地修复分支为 `codex/issue-77-metadata-convergence`，基线为 main `5c5765816`。审查对象是 `4089113e3`，分支现停在 `461e9a721`，其中包含评审修正；最后一提交仅调整测试写法，产品代码与 `fcbb93e89` 相同，全部提交已补签 DCO。尚未推送、创建 PR、合并、发布或部署。<br>
-> **评审边界：** 计划已通过四轮 Claude Code Opus 5 Max 审查；实现完整审查、修正复审和最终定向验收共三轮，均为 `GO_WITH_NONBLOCKING_NOTES`。最终阻断为零，要求等待的完整 cmd 与最终 lint 已通过。<br>
+> **截至 2026-09-12：** 修复与研究归档已提交为 [PR #180](https://github.com/pgsty/silo/pull/180)，正在等待检查通过后合并。基线为 main `5c5765816`，验收源码为 `461e9a721`，生产代码与 `fcbb93e89` 相同；`114dc1052` 只补充研究归档。全部提交包含 DCO，尚未发布或部署。<br>
+> **评审边界：** 计划经过四轮 Claude Code Opus 5 Max 审查，最后两轮通过；实现完整审查、修正复审和最终定向验收共三轮，均为 `GO_WITH_NONBLOCKING_NOTES`。最终阻断为零，要求等待的完整 cmd 与最终 lint 已通过。<br>
 > **适用范围：** 下文描述修复候选的行为，不能用来证明现有下载包或线上实例已经具备这些能力。
 
 ## 既有工作与本轮范围 {#scope}
 
 此前的[发布说明](/zh/blog/release/silo-20260903/)、[安全加固记录](/zh/blog/security/20260903-server-hardening/)和 [Server 兼容性说明](/zh/compatibility/server/#limits) 已记载 #77 的删除收敛限制，但没有完整记录状态模型、替代方案和验证边界。本文补齐这部分设计依据。
+
+[源码仓库正式归档](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77.md)保存实施前复现、各版计划、七轮审查的最终报告与调用身份、逐项处置、验收日志、源码/二进制哈希及可重跑的双站点驱动。原始模型推理流、二进制和临时实验卷不纳入仓库；整理后的工作站路径及文档链接与原始产物分别记录哈希。
 
 相关修复各有自己的责任边界：
 
@@ -150,7 +152,7 @@ off 期间隐藏的 Tags/SSE/Quota 删除记录可能导致 heal 重复发送旧
 
 ## 验证及其证据边界 {#validation}
 
-环境为本机 `go1.27.1 darwin/arm64`。三项原始复现在未修复基线上失败，修复后的回归套件在两种 ObjectLayer 上通过；核心测试入口位于 `cmd/site-replication-metadata{,-heal,-gate}_test.go`。
+环境为本机 `go1.27.1 darwin/arm64`。四组实施前审计用例在未修复基线上失败，修复后的回归套件在两种 ObjectLayer 上通过；核心测试入口位于 `cmd/site-replication-metadata{,-heal,-gate}_test.go`。原始失败与现有用例通过的完整输出见[基线审计日志](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77/current-tests.log)。
 
 | 验证 | 观察结果 |
 | :-- | :-- |
@@ -192,7 +194,7 @@ off 期间隐藏的 Tags/SSE/Quota 删除记录可能导致 heal 重复发送旧
 
 其中的 stub 值得单独一提：原 recovery 测试注入的对象层在创建时间探测中直接返回期望值，于是它对一段生产中永远不会这样表现的代码判定通过。替换后的测试在每块本地盘上标记桶目录时间并驱动真实对象层，在未修复的代码上会失败。
 
-第二轮复审固定 `62cf066ff`，再次由实际 `claude-opus-5 --effort max` 执行，结论仍为 `GO_WITH_NONBLOCKING_NOTES`，条件性与无条件阻断都为零。它逐项重查生产路径，并用最终测试配合旧生产代码的 overlay 验证 F1/F2，修正了首轮对 Policy 编码器必要性的判断。
+第二轮复审固定 `62cf066ff`，再次由实际 `claude-opus-5 --effort max` 执行，结论仍为 `GO_WITH_NONBLOCKING_NOTES`，条件性与无条件阻断都为零。它逐项重查生产路径，并核对作者用正式测试配合旧生产代码 overlay 得到的 F1/F2 复现结果，修正了首轮对 Policy 编码器必要性的判断。审查者没有代为运行测试。
 
 | 后续发现 | 收尾处置 |
 | :-- | :-- |

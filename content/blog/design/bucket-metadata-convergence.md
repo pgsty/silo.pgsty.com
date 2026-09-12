@@ -14,13 +14,15 @@ url: "/blog/design/bucket-metadata-convergence/"
 
 [#77](https://github.com/pgsty/silo/issues/77) is a reproduced site-replication correctness defect. A receiver replaces source time with arrival time and may then reject a genuinely newer deletion. Some configuration types stop exporting their timestamp after deletion, preventing heal from recovering a delete missed during an outage. Adding a DELETE branch alone cannot solve both problems.
 
-> **As of 2026-09-12:** the issue remains **OPEN**. The local repair branch is `codex/issue-77-metadata-convergence`, based on main `5c5765816`. The reviewed implementation was `4089113e3`; the branch now ends at `461e9a721`, which carries the review repairs; its final commit only adjusts test style, with production code identical to `fcbb93e89`, and every commit was re-signed for DCO. It has not been pushed, submitted as a PR, merged, released, or deployed.<br>
-> **Review boundary:** the plan passed four Claude Code Opus 5 Max review rounds. Full implementation review, remediation review, and focused final acceptance returned `GO_WITH_NONBLOCKING_NOTES` in all three rounds. Final blockers are zero; the requested full cmd and final lint checks have now passed.<br>
+> **As of 2026-09-12:** the repair and research archive are in [PR #180](https://github.com/pgsty/silo/pull/180), awaiting successful checks before merge. The baseline is main `5c5765816`; acceptance source `461e9a721` has production code identical to `fcbb93e89`, and `114dc1052` only adds the research archive. All commits carry DCO sign-off. No release or deployment has been performed.<br>
+> **Review boundary:** the plan went through four Claude Code Opus 5 Max review rounds, passing the final two. Full implementation review, remediation review, and focused final acceptance returned `GO_WITH_NONBLOCKING_NOTES` in all three rounds. Final blockers are zero; the requested full cmd and final lint checks have now passed.<br>
 > **Applicability:** this page describes a repair candidate. It does not establish that existing downloads or running installations provide these behaviors.
 
 ## Existing work and scope {#scope}
 
 The earlier [release notes](/blog/release/silo-20260903/), [security hardening record](/blog/security/20260903-server-hardening/), and [Server compatibility page](/compatibility/server/#limits) already document the #77 deletion limitation. They do not provide a complete record of its state model, alternatives, or verification boundaries. This page supplies that reasoning.
+
+The [source repository archive](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77.md) retains the original reproduction, plan versions, final reports and invocation identities for all seven review rounds, finding dispositions, executed test logs, source/binary hashes, and a rerunnable two-site driver. Raw model reasoning streams, binaries, and temporary lab volumes are excluded. Original artifacts and copies with normalized workstation paths and document links have separate hashes.
 
 | Existing work | What it repaired | What it does not establish |
 | :-- | :-- | :-- |
@@ -147,7 +149,7 @@ The initial implementation adds 729 and removes 692 production Go lines, a net i
 
 ## Validation and its limits {#validation}
 
-The environment is local `go1.27.1 darwin/arm64`. The three original reproductions failed on the unfixed baseline. The resulting regression suite passes on both ObjectLayers; its main entry points are in `cmd/site-replication-metadata{,-heal,-gate}_test.go`.
+The environment is local `go1.27.1 darwin/arm64`. Four groups of pre-implementation audit tests failed on the unfixed baseline. The resulting regression suite passes on both ObjectLayers; its main entry points are in `cmd/site-replication-metadata{,-heal,-gate}_test.go`. The [baseline audit log](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77/current-tests.log) retains the original failures alongside the passing existing tests.
 
 | Validation | Observation |
 | :-- | :-- |
@@ -189,7 +191,7 @@ The separate implementation review pinned `4089113e3` and used the same model an
 
 A stub is worth calling out separately. The original recovery test injected an object layer whose creation probe returned the expected time, so it passed against code that could never behave that way in production. The replacement stamps the bucket directory on every local drive and drives the real object layer, and it fails on the unrepaired code.
 
-The second review pinned `62cf066ff`, again using actual `claude-opus-5 --effort max`. It returned `GO_WITH_NONBLOCKING_NOTES` with zero conditional or unconditional blockers. It retraced production paths, checked the final tests with old production code overlaid for F1/F2, and revised the first review's assessment of the Policy encoder.
+The second review pinned `62cf066ff`, again using actual `claude-opus-5 --effort max`. It returned `GO_WITH_NONBLOCKING_NOTES` with zero conditional or unconditional blockers. It retraced production paths, checked the author's F1/F2 reproduction results from formal tests with old production code overlaid, and revised the first review's assessment of the Policy encoder. The reviewer did not execute the tests.
 
 | Follow-up finding | Final disposition |
 | :-- | :-- |
