@@ -333,7 +333,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 7. **源码结果不等于已发布制品。** 在逐渠道验证前，本页不声称 GitHub 标签、软件包、OCI manifest、签名或线上站点已经包含仅存在于审计 HEAD 的最后三个提交。
 8. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
 9. **未实现条件删除。** `DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object><ETag>` 元素，两者都执行无条件删除（[#10](https://github.com/pgsty/silo/issues/10)）。
-10. **多站点删除桶配置不会收敛。** 在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；只有桶级 CORS 使用带 tombstone 的寄存器。依赖多站点同步删除这些配置的部署，删除后必须逐站核对。2026-09-12 的本地修复候选、评审与升级边界见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)；该记录不表示已发布版本包含修复。
+10. **多站点删除桶配置的历史收敛限制。** 本页所述已发布版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。依赖多站点同步删除这些配置的部署，删除后必须逐站核对。2026-09-12，[PR #180](https://github.com/pgsty/silo/pull/180) 已将修复合入主干；完整删除自愈要求全部节点升级并统一开启删除导出，详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。发行制品是否包含修复仍需按版本核对。
 
 ## 迁移检查清单 {#migration}
 
