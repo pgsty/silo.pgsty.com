@@ -4,41 +4,30 @@ url: "/zh/reference/minio-mc/mc-license/"
 weight: 210
 icon: fa-solid fa-certificate
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-license.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-license"></a>
-
 <a id="command-mc.license"></a>
+<a id="id2"></a>
+<a id="id3"></a>
 
-## 说明 {#id2}
+## 许可命令 {#description}
 
-[`mc license`](#command-mc.license) 命令用于管理 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 的集群注册。 可使用这些命令注册部署、显示集群当前许可证信息，或更新集群的许可证密钥。
+SILO 使用 AGPLv3。许可命令保留旧命令语法，不能购买或激活 MinIO 商业订阅。
 
-## 子命令 {#id3}
+| 命令 | 行为 |
+| --- | --- |
+| `mcli license info ALIAS` | 显示本地保存的许可信息，不访问 SUBNET |
+| `mcli license unregister ALIAS` | 清除本地许可注册状态 |
+| `mcli license update ALIAS license.key` | 保留显式本地文件更新路径，是否接受由目标服务端决定 |
+| `mcli license update ALIAS` | 在线续订禁用，退出码 1 |
+| `mcli license register ALIAS` | 注册禁用，退出码 1 |
 
-[`mc license`](#command-mc.license) 包含以下子命令：
+## 用法 {#syntax}
 
-<table>
-  <thead>
-    <tr>
-      <th><p>子命令</p></th>
-      <th><p>说明</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-license-info/#command-mc.license.info"><code>info</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-license-info/#command-mc.license.info"><code>mc license info</code></a> 命令用于显示 MinIO 部署的许可证状态信息。
-具体来说，用于确认该部署使用的是 AGPLv3 开源许可证，还是 <a href="https://min.io/product/subnet?ref=docs">MinIO Commercial License</a>。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-license-register/#command-mc.license.register"><code>register</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-license-register/#command-mc.license.register"><code>mc license register</code></a> 命令会将你的部署与 <a href="https://min.io/pricing?jmp=docs">MinIO SUBNET</a> 账户关联。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-license-update/#command-mc.license.update"><code>update</code></a></p></td>
-      <td><p>使用 <a href="/zh/reference/minio-mc/mc-license-update/#command-mc.license.update"><code>mc license update</code></a> 命令为部署替换许可证密钥。</p></td>
-    </tr>
-  </tbody>
-</table>
+使用 `mcli license COMMAND --help` 查看安装版本接受的参数。
+旧 `--airgap`、API-key 等兼容参数不能重新启用在线注册/续订。
+日常对象存储与诊断不要求 SUBNET 注册。
+
+见 [SILO 许可说明](/zh/about/license/)与 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。

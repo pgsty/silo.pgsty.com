@@ -12,6 +12,9 @@ draft: false
 url: "/blog/design/conditional-delete/"
 ---
 
+> **Follow-up, 2026-09-13:** single-object If-Match DELETE later landed as `40bee4b7b`, followed by main-branch multi-pool serialization and cleanup fixes. Latest published Server 20260903 does not contain these later changes. The August 26 design status below is historical; see the [component matrix](/compatibility/versions/) and [Server changelog](https://github.com/pgsty/silo/blob/main/CHANGELOG.md).
+
+
 This document records the analysis, design discussion, and repair decision for [SILO PR #12](https://github.com/pgsty/silo/pull/12).
 
 > **Status on 2026-08-26:** PR #12 remains open at head `5b71a75e`, 118 commits behind the latest `main`. Its commit has no DCO sign-off and GitHub reports no check runs. The improved design described here has been implemented, tested, and reviewed twice in an isolated local worktree, and committed on the local branch `codex/pr12-conditional-delete`; it has not been pushed, merged, or released.<br>

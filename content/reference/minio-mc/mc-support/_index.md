@@ -4,65 +4,34 @@ url: "/reference/minio-mc/mc-support/"
 weight: 380
 icon: fa-solid fa-life-ring
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support"></a>
-
 <a id="command-mc.support"></a>
 
-## Description {#description}
+## Local diagnostics {#description}
 
-The MinIO Client [`mc support`](#command-mc.support) commands provides tools for analyzing deployment health or performance and for running diagnostics. You can also upload generated health reports for further analysis by MinIO engineering.
-
-> [!WARNING]
-> **Important**
->
-> The `mc support` commands require an active [MinIO SUBNET](https://min.io/pricing?jmp=docs) registration.
->
-> [`mc support proxy set`](/reference/minio-mc/mc-support-proxy/#mc.support.proxy.set) and [`mc support proxy remove`](/reference/minio-mc/mc-support-proxy/#mc.support.proxy.remove) are exceptions, as you may need to set up a proxy to complete the deployment registration.
+`mcli support` retains SILO diagnostics without a MinIO SUBNET subscription.
+Administrators control generated files and deliberate sharing.
 
 ## Subcommands {#subcommands}
 
-[`mc support`](#command-mc.support) includes the following subcommands:
+| Command | SILO behavior |
+| --- | --- |
+| `diag` | Generate a local health report |
+| `perf` | Run performance tests with local results |
+| `profile` | Server profiling and local output |
+| `inspect` | Inspect object metadata |
+| `top` | Observe live server activity |
+| `callhome enable` | Disabled, exit 1; disable/status remain |
+| `proxy set` | Disabled, exit 1; remove remains |
+| `upload` | Disabled, exit 1 |
 
-<table>
-  <thead>
-    <tr>
-      <th><p>Subcommand</p></th>
-      <th><p>Description</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-support-callhome/#command-mc.support.callhome"><code>callhome</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-support-callhome/#command-mc.support.callhome"><code>mc support callhome</code></a> command allows the enabling or disabling of diagnostic information from a deployment to <a href="https://min.io/pricing?jmp=docs">MinIO SUBNET</a>.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-support-diag/#command-mc.support.diag"><code>diag</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-support-diag/#command-mc.support.diag"><code>mc support diag</code></a> command generates a health report for a MinIO deployment.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-support-inspect/#command-mc.support.inspect"><code>inspect</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-support-inspect/#command-mc.support.inspect"><code>mc support inspect</code></a> command collects the data and metadata associated to objects at the specified path.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-support-perf/#command-mc.support.perf"><code>perf</code></a></p></td>
-      <td><p>Use the <a href="/reference/minio-mc/mc-support-perf/#command-mc.support.perf"><code>mc support perf</code></a> command to review the performance of the S3 API (read/write), network IO, and storage (drive read/write).</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-support-profile/#command-mc.support.profile"><code>profile</code></a></p></td>
-      <td><p><a href="/reference/minio-mc/mc-support-profile/#command-mc.support.profile"><code>mc support profile</code></a> runs a system profile for your deployment.
-The results of the profile can provide insight into the MinIO server process running on a given node.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-support-proxy/#command-mc.support.proxy"><code>proxy</code></a></p></td>
-      <td><p>Use the <a href="/reference/minio-mc/mc-support-proxy/#command-mc.support.proxy"><code>mc support proxy</code></a> command to configure a proxy to use to communicate with <a href="https://min.io/pricing?jmp=docs">MinIO SUBNET</a>.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-support-top/#command-mc.support.top"><code>top</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-support-top/#command-mc.support.top"><code>mc support top</code></a> command returns statistics for distributed
-MinIO deployments, similar to the output of the <code>top</code> command in a shell.</p></td>
-    </tr>
-  </tbody>
-</table>
+Use `mcli support COMMAND --help` for flags. Diagnostics still require the
+corresponding administrative permissions on the target SILO server.
+See [diag](/reference/minio-mc/mc-support-diag/),
+[perf](/reference/minio-mc/mc-support-perf/),
+[profile](/reference/minio-mc/mc-support-profile/),
+[inspect](/reference/minio-mc/mc-support-inspect/) and
+[mcli compatibility](/compatibility/mcli/#subnet).

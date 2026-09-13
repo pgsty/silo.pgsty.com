@@ -3,72 +3,36 @@ title: "mc license info"
 url: "/zh/reference/minio-mc/mc-license-info/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-license-info.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-license-info"></a>
-
 <a id="command-mc.license.info"></a>
+<a id="id2"></a>
+<a id="id3"></a>
+<a id="minio1"></a>
+<a id="id4"></a>
+<a id="id5"></a>
+<a id="mc.license.info.ALIAS"></a>
+<a id="mc.license.info.-airgap"></a>
+<a id="id6"></a>
 
-## 描述 {#id2}
+## 许可命令 {#description}
 
-[`mc license info`](#command-mc.license.info) 命令用于显示 MinIO 部署的许可证状态信息。 具体来说，用于确认该部署使用的是 AGPLv3 开源许可证，还是 [MinIO Commercial License](https://min.io/product/subnet?ref=docs)。
+SILO 使用 AGPLv3。许可命令保留旧命令语法，不能购买或激活 MinIO 商业订阅。
 
-你必须在 MinIO [MinIO SUBNET](https://min.io/pricing?jmp=docs) 中注册部署，才能激活商业许可证。
+| 命令 | 行为 |
+| --- | --- |
+| `mcli license info ALIAS` | 显示本地保存的许可信息，不访问 SUBNET |
+| `mcli license unregister ALIAS` | 清除本地许可注册状态 |
+| `mcli license update ALIAS license.key` | 保留显式本地文件更新路径，是否接受由目标服务端决定 |
+| `mcli license update ALIAS` | 在线续订禁用，退出码 1 |
+| `mcli license register ALIAS` | 注册禁用，退出码 1 |
 
-例如，对于未注册的部署，该命令会返回以下信息：
+## 用法 {#syntax}
 
-```shell
-You are using GNU AFFERO GENERAL PUBLIC LICENSE Version 3 (https://www.gnu.org/licenses/agpl-3.0.txt)
+使用 `mcli license COMMAND --help` 查看安装版本接受的参数。
+旧 `--airgap`、API-key 等兼容参数不能重新启用在线注册/续订。
+日常对象存储与诊断不要求 SUBNET 注册。
 
-If you are building proprietary applications, you may want to choose the commercial license
-included as part of the Standard and Enterprise subscription plans. (https://min.io/signup?ref=mc)
-
-Applications must otherwise comply with all the GNU AGPLv3 License & Trademark obligations.
-```
-
-使用 [`mc license register`](/zh/reference/minio-mc/mc-license-register/#command-mc.license.register) 将你的部署关联到 SUBNET 账户。 如果你尚未注册 SUBNET，请参阅 [Registration](https://min.io/pricing?ref=docs) 页面。
-
-## 示例 {#id3}
-
-### 显示别名为 `minio1` 的部署当前许可证 {#minio1}
-
-```shell
-mc license info minio1
-```
-
-如果部署使用的是已过期的 MinIO Commercial License，该命令会输出错误信息。
-
-## 语法 {#id4}
-
-该命令的语法如下：
-
-```shell
-mc [GLOBALFLAGS] license info       \
-                         ALIAS      \
-                         [--airgap]
-```
-
-### 参数 {#id5}
-
-##### `ALIAS` {#mc.license.info.ALIAS}
-
-*mc-cmd*
-
-*Required*
-
-MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-##### `--airgap` {#mc.license.info.-airgap}
-
-*mc-cmd*
-
-*Optional*
-
-在运行 [minio client](/zh/reference/minio-mc/#minio-client) 的客户端机器无法通过网络访问 SUBNET 的环境中使用（例如 airgapped、受防火墙限制或类似配置），以显示如何将部署注册到 SUBNET 的说明。
-
-如果部署处于 airgapped 环境，但本地设备具备网络访问能力，则无需使用 `--airgap` 标志。
-
-### 全局选项 {#id6}
-
-此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
+见 [SILO 许可说明](/zh/about/license/)与 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。

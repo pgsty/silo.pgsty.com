@@ -1,6 +1,18 @@
 # Silo Documentation
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 0.6.0](https://github.com/pgsty/oink/tree/v0.6.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.0.0](https://github.com/pgsty/oink/tree/v1.0.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
+
+## Release state and publication
+
+The [component matrix](https://silo.pgsty.com/compatibility/versions/) separates
+published artifacts from accepted main-branch source. Update both languages,
+component changelogs and GitHub release notes together. Download artifact inputs
+live in `data/releases.yaml`; historical articles retain their original version
+numbers and receive a dated follow-up when status changes.
+
+Before publishing, run `python3 bin/metrics.py`, review its generated metrics
+diff, then run `make check`. Cloudflare Pages deploys the `main` branch; verify
+its commit check and the live English/Chinese pages after publication.
 
 ## Local development
 

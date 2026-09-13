@@ -3,28 +3,21 @@ title: "mc support profile"
 url: "/reference/minio-mc/mc-support-profile/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-profile.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> **SILO behavior:** diagnostics run locally without SUBNET registration or automatic uploads. License info/unregister operate on local state; license update retains the explicit-file path. Online registration/renewal and uploads are disabled. Retained upstream syntax below does not enable those services. See [mcli compatibility](/compatibility/mcli/#subnet).
+
 
 <a id="mc-support-profile"></a>
 
 <a id="command-mc.support.profile"></a>
 
-> [!NOTE]
-> **SUBNET Registration Required**
->
-> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
-
 ## Description {#description}
 
 [`mc support profile`](#command-mc.support.profile) runs a system profile for your deployment. The results of the profile can provide insight into the MinIO server process running on a given node.
 
-The resulting report is intended for use by MinIO Engineering. You can upload the report to [MinIO SUBNET](https://min.io/pricing?jmp=docs). Independent or third-party use of these profiles for diagnostics and remediation is done at your own risk.
-
-> [!NOTE]
-> **SUBNET Registration Required**
->
-> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
+Diagnostic output stays local; SUBNET online services are disabled. Compatibility flags do not enable uploads.
 
 ## Examples {#examples}
 
@@ -113,7 +106,7 @@ If not specified, the command collects data for CPU, memory, block, mutex, threa
 
 *Optional*
 
-Use in environments without network access to SUBNET (for example, airgapped, firewalled, or similar configuration).
+Diagnostic output stays local; SUBNET online services are disabled. Compatibility flags do not enable uploads.
 
 If the deployment is airgapped, but the local device where you are using the [minio client](/reference/minio-mc/#minio-client) has network access, you do not need to use the `--airgap` flag.
 

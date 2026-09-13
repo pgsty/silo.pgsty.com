@@ -3,73 +3,37 @@ title: "mc license update"
 url: "/zh/reference/minio-mc/mc-license-update/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-license-update.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-license-update"></a>
-
 <a id="command-mc.license.update"></a>
+<a id="id2"></a>
+<a id="id3"></a>
+<a id="minio1"></a>
+<a id="id4"></a>
+<a id="id5"></a>
+<a id="mc.license.update.ALIAS"></a>
+<a id="mc.license.update.LICENSE-FILE-WITH-PATH"></a>
+<a id="mc.license.update.-airgap"></a>
+<a id="id6"></a>
 
-## 描述 {#id2}
+## 许可命令 {#description}
 
-使用 [`mc license update`](#command-mc.license.update) 命令为部署替换许可证密钥。
+SILO 使用 AGPLv3。许可命令保留旧命令语法，不能购买或激活 MinIO 商业订阅。
 
-对于已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的部署，MinIO 每月会自动检查并更新许可证。
+| 命令 | 行为 |
+| --- | --- |
+| `mcli license info ALIAS` | 显示本地保存的许可信息，不访问 SUBNET |
+| `mcli license unregister ALIAS` | 清除本地许可注册状态 |
+| `mcli license update ALIAS license.key` | 保留显式本地文件更新路径，是否接受由目标服务端决定 |
+| `mcli license update ALIAS` | 在线续订禁用，退出码 1 |
+| `mcli license register ALIAS` | 注册禁用，退出码 1 |
 
-## 示例 {#id3}
+## 用法 {#syntax}
 
-### 更新别名为 `minio1` 的部署许可证密钥 {#minio1}
+使用 `mcli license COMMAND --help` 查看安装版本接受的参数。
+旧 `--airgap`、API-key 等兼容参数不能重新启用在线注册/续订。
+日常对象存储与诊断不要求 SUBNET 注册。
 
-```shell
-mc license update minio1 license.key
-```
-
-## 语法 {#id4}
-
-该命令具有以下语法：
-
-```shell
-mc [GLOBALFLAGS] license update                   \
-                         ALIAS                    \
-                         [LICENSE-FILE-WITH-PATH] \
-                         [--airgap]
-```
-
-### 参数 {#id5}
-
-##### `ALIAS` {#mc.license.update.ALIAS}
-
-*mc-cmd*
-
-*Required*
-
-MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-##### `LICENSE-FILE-WITH-PATH` {#mc.license.update.LICENSE-FILE-WITH-PATH}
-
-*mc-cmd*
-
-*Optional*
-
-用于更新部署许可证的密钥文件路径（相对于当前工作目录）和文件名。
-
-从 SUBNET 下载 API key：
-
-1. 登录 [MinIO SUBNET](https://min.io/pricing?jmp=docs)
-2. 转到 **Deployments** 选项卡
-3. 在页面顶部、账户统计信息框右侧，选择 **API Key** 按钮
-4. 选择 key 字段右侧的复制按钮，将 key 值复制到剪贴板
-
-##### `--airgap` {#mc.license.update.-airgap}
-
-*mc-cmd*
-
-*Optional*
-
-在无法通过网络访问 SUBNET 的环境中使用（例如 airgapped、firewalled 或类似配置）。
-
-如果部署是 airgapped，但你使用 [minio client](/zh/reference/minio-mc/#minio-client) 的本地设备有网络访问能力，则无需使用 `--airgap` 标志。
-
-### 全局标志 {#id6}
-
-此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
+见 [SILO 许可说明](/zh/about/license/)与 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。

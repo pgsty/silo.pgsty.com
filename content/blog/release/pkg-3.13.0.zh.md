@@ -11,6 +11,8 @@ aliases:
   - /releases/pkg-3.13.0/
 ---
 
+> **2026-09-13 后续状态：** 本文保留 3.13.0 发布时的迁移记录。四个维护组件现已完成独立模块路径迁移；当前 pkg 为 [v3.14.0](/zh/blog/release/pkg-3.14.0/)。文中的“尚未迁移”描述仅适用于当时，见[现有组件矩阵](/zh/compatibility/versions/)。
+
 **发布日期：** 2026-08-30 · **版本：** [v3.13.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.13.0) · **提交：** [`215f116`](https://github.com/pgsty/silo-pkg/commit/215f116ec25120ce365c79bce4096cd7665b2c1e) · **仓库：** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
 3.13.0 是一个破坏性版本，只有一条主线：本模块不再冒用上游的导入路径，改用自己的。同时废弃 `pgsty/silo-go` 分支——它已经不再包含任何上游没有的东西。

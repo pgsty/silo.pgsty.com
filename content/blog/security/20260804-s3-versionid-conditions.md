@@ -10,12 +10,12 @@ draft: false
 url: "/blog/security/s3-versionid-conditions/"
 ---
 
-**Status:** Fixed on the local `pgsty/minio` branch as `744a9dcd7`, **unreleased**
+**Release status (verified 2026-09-13):** the primary fix in this article is included in [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) and later releases. The investigation below retains its original test boundaries; see the [component matrix](/compatibility/versions/) for current unreleased work.
 **Classification:** Policy-enforcement correctness — a fail-**closed** report, a fail-**open** trap avoided, and one narrow trim bypass closed. **Not a headline CVE** — see [How we classify this](#not-a-cve)
 **Affected scope:** Any deployment with a bucket/IAM policy using `Null` or `StringEquals` on `s3:versionid`; the reported break is on `DeleteObject`/`DeleteObjects`
 **Tracking:** upstream `minio/minio` issue #21735 (reporter iTrooz, 2026-01-10); upstream repository archived read-only since 2026-04-25
 
-> This article documents an unreleased fix and two unfixed same-class residuals in neighbouring paths ([governance-bypass and Snowball](#boundary)). Hold publication until the fix ships and the residuals are triaged.
+> This article is now public. The primary fix shipped as recorded above; residual findings below are the investigation-time record, not a claim that publishing one fix closed the entire defect class.
 
 ## Conclusions first {#summary}
 

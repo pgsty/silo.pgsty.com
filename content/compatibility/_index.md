@@ -9,6 +9,8 @@ icon: fa-solid fa-code-compare
 sidebar_expanded: true
 ---
 
+> **Current components:** Server 20260903, Console v2.4.0, mcli 20260913 and pkg v3.14.0. Later Server/Console changes remain unreleased. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
+
 Silo is a community fork of MinIO. This section records what Silo keeps from MinIO, where it deliberately differs, and what either means when moving between them.
 
 Contents, in reading order: the [migration guide](/compatibility/migration/) (scope and Docker), [native package migration](/compatibility/binary/) (RPM/DEB), the [server compatibility audit](/compatibility/server/), the [mcli client notes](/compatibility/mcli/), and the [console notes](/compatibility/console/). The [Feature Notes](/compatibility/feature/) subsection covers the opposite direction: design records for capabilities Silo adds beyond upstream.

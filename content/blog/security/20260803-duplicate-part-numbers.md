@@ -10,12 +10,12 @@ draft: false
 url: "/blog/security/duplicate-part-numbers/"
 ---
 
-**Status:** Fixed on the local `pgsty/minio` branch as `22c1e41fd`, **unreleased**
+**Release status (verified 2026-09-13):** the primary fix in this article is included in [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) and later releases. The investigation below retains its original test boundaries; see the [component matrix](/compatibility/versions/) for current unreleased work.
 **Classification:** Data correctness, **not a vulnerability** — see [Why this is not a CVE](#not-a-cve)
 **Affected scope:** All backends, any authenticated S3 client, on its own upload
 **Tracking:** `pgsty/minio` issue #49
 
-> One section of this article describes an unfixed process-level panic in a neighbouring code path. Hold publication until that is fixed and released.
+> This article is now public. The primary fix shipped as recorded above; residual findings below are the investigation-time record, not a claim that publishing one fix closed the entire defect class.
 
 ## Conclusions first {#summary}
 

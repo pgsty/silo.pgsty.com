@@ -12,6 +12,8 @@ body_class: landing-page
 footer_style: none
 ---
 
+Components release independently; see the [component matrix](/compatibility/versions/) for published versions and development source.
+
 > [!WARNING]
 > **SILO is a MinIO fork maintained by the Pigsty community.** It is not affiliated with, endorsed by, or sponsored by MinIO, Inc. “MinIO” is a trademark of MinIO, Inc., used here only to identify the upstream project. See [Attribution](/about/attribution/) for source and licensing details.
 

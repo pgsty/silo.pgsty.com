@@ -3,95 +3,35 @@ title: "mc support upload"
 url: "/zh/reference/minio-mc/mc-support-upload/"
 weight: 80
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-upload.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support-upload"></a>
-
 <a id="command-mc.support.upload"></a>
+<a id="parameters"></a>
+<a id="mc.support.upload.ALIAS"></a>
+<a id="mc.support.upload.FILE"></a>
+<a id="mc.support.upload.-comment"></a>
+<a id="mc.support.upload.-enc"></a>
+<a id="mc.support.upload.-issue"></a>
+<a id="global-flags"></a>
+<a id="examples"></a>
+<a id="upload-a-file-to-an-issue"></a>
+<a id="upload-a-file-to-an-issue-with-a-comment-for-minio-engineers"></a>
 
-## Description {#description}
+## 当前行为 {#description}
 
-[`mc support upload`](#command-mc.support.upload) 将文件从本地文件系统复制到 SUBNET 工单。
+在 PGSTY mcli 中，`support upload` 保留旧语法兼容入口，但 MinIO SUBNET 服务已在构建时禁用。
+命令返回明确的禁用提示与退出码 **1**，不会注册订阅或上传文件。旧上游的订阅/API-key 操作步骤不适用。
 
-> [!NOTE]
-> **需要完成 SUBNET 注册**
->
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
-## Syntax {#syntax}
+## 用法 {#syntax}
 
-[`mc support profile`](/zh/reference/minio-mc/mc-support-profile/#command-mc.support.profile) 命令具有以下语法：
-
-```shell
-mc [GLOBALFLAGS] support profile              \
-                         ALIAS                \
-                         FILE                 \
-                         [--comment "string"] \
-                         [--enc]              \
-                         [--issue integer]
-```
-
-### Parameters {#parameters}
-
-##### `ALIAS` {#mc.support.upload.ALIAS}
-
-*mc-cmd*
-
-*Required*
-
-MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-##### `FILE` {#mc.support.upload.FILE}
-
-*mc-cmd*
-
-*Required*
-
-要上传到 SUBNET 的文件路径。
-
-##### `--comment` {#mc.support.upload.-comment}
-
-*mc-cmd*
-
-*Optional*
-
-上传文件时，向 issue 附加一条消息。
-
-##### `--enc` {#mc.support.upload.-enc}
-
-*mc-cmd*
-
-*Optional*
-
-对上传内容进行加密。 用于加密的密钥仅 MinIO 可访问。
-
-##### `--issue` {#mc.support.upload.-issue}
-
-*mc-cmd*
-
-*Optional*
-
-指定要添加该文件的 issue 编号。 如果未指定，则文件会上传到通用 issue 编号 `0`。
-
-### Global Flags {#global-flags}
-
-此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
-
-## Examples {#examples}
-
-### Upload a file to an issue {#upload-a-file-to-an-issue}
-
-此命令将本地文件系统中的文件 `./trace.log` 上传到别名为 `minio1` 的部署对应的 SUBNET issue `10001`。
+查看所安装版本接受的兼容参数：
 
 ```shell
-mc support upload --issue 10001 minio1 ./trace.log
+mcli support upload --help
 ```
 
-### Upload a file to an issue with a comment for MinIO Engineers {#upload-a-file-to-an-issue-with-a-comment-for-minio-engineers}
-
-此命令将本地文件系统中的文件 `./trace.log` 上传到别名为 `minio1` 的部署对应的 SUBNET issue `10001`。 该命令还会附加一条关于该文件的注释，供 MinIO Engineers 查看。
-
-```shell
-mc support upload --issue 10001 --comment "here is the requested trace log" minio1 ./trace.log
-```
+诊断工具 `mcli support diag`、`perf`、`profile`、`inspect` 仍在本地运行，无需 SUBNET 注册。
+结果由管理员自行保存和分享。完整边界见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。

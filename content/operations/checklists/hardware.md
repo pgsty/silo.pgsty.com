@@ -531,12 +531,9 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
   </tbody>
 </table>
 
-## Recommended tools for MinIO subscriptions {#recommended-tools-for-minio-subscriptions}
+## Local SILO diagnostic tools {#recommended-tools-for-minio-subscriptions}
 
-> [!WARNING]
-> **Important**
->
-> The tools noted in this section **require** a MinIO subscription. MinIO strongly recommends all production deployments use [AIStor Object Store](https://www.min.io/product/aistor/object-data-store) with their SUBNET license. For more information, see the [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs).
+> SILO local diagnostics do not require a MinIO subscription or upload automatically. Administrators inspect and share their results deliberately.
 
 1. Health diagnostic tool
 

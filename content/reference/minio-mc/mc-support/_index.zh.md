@@ -4,65 +4,31 @@ url: "/zh/reference/minio-mc/mc-support/"
 weight: 380
 icon: fa-solid fa-life-ring
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support"></a>
-
 <a id="command-mc.support"></a>
+<a id="id2"></a>
+<a id="id3"></a>
 
-## 描述 {#id2}
+## 本地诊断工具 {#description}
 
-MinIO Client [`mc support`](#command-mc.support) 命令提供用于分析部署健康状况或性能、并运行诊断的工具。 你还可以上传生成的健康报告，供 MinIO 工程团队进一步分析。
+`mcli support` 保留 SILO 诊断能力，不要求 MinIO SUBNET 订阅。管理员控制生成的文件与主动分享。
 
-> [!WARNING]
-> **重要**
->
-> `mc support` 命令需要有效的 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册。
->
-> [`mc support proxy set`](/zh/reference/minio-mc/mc-support-proxy/#mc.support.proxy.set) 和 [`mc support proxy remove`](/zh/reference/minio-mc/mc-support-proxy/#mc.support.proxy.remove) 是例外，因为你可能需要先配置代理才能完成部署注册。
+## 子命令 {#subcommands}
 
-## 子命令 {#id3}
+| 命令 | SILO 行为 |
+| --- | --- |
+| `diag` | 生成本地健康报告 |
+| `perf` | 性能测试，结果在本地处理 |
+| `profile` | 服务端性能剖析与本地输出 |
+| `inspect` | 对象元数据诊断 |
+| `top` | 实时观察服务端活动 |
+| `callhome enable` | 禁用并返回退出码 1；disable/status 保留 |
+| `proxy set` | 禁用并返回退出码 1；remove 保留 |
+| `upload` | 禁用并返回退出码 1 |
 
-[`mc support`](#command-mc.support) 包含以下子命令：
-
-<table>
-  <thead>
-    <tr>
-      <th><p>子命令</p></th>
-      <th><p>描述</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-callhome/#command-mc.support.callhome"><code>callhome</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-callhome/#command-mc.support.callhome"><code>mc support callhome</code></a> 命令用于启用或禁用将部署诊断信息发送到 <a href="https://min.io/pricing?jmp=docs">MinIO SUBNET</a>。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-diag/#command-mc.support.diag"><code>diag</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-diag/#command-mc.support.diag"><code>mc support diag</code></a> 命令用于为 MinIO 部署生成健康报告。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-inspect/#command-mc.support.inspect"><code>inspect</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-inspect/#command-mc.support.inspect"><code>mc support inspect</code></a> 命令会收集指定路径下与对象相关的数据和元数据。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-perf/#command-mc.support.perf"><code>perf</code></a></p></td>
-      <td><p>使用 <a href="/zh/reference/minio-mc/mc-support-perf/#command-mc.support.perf"><code>mc support perf</code></a> 命令可检查 S3 API（读/写）、网络 IO 和存储（磁盘读/写）的性能。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-profile/#command-mc.support.profile"><code>profile</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-profile/#command-mc.support.profile"><code>mc support profile</code></a> 为你的部署运行系统性能剖析。
-剖析结果可帮助了解给定节点上运行的 MinIO 服务端进程状态。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-proxy/#command-mc.support.proxy"><code>proxy</code></a></p></td>
-      <td><p>使用 <a href="/zh/reference/minio-mc/mc-support-proxy/#command-mc.support.proxy"><code>mc support proxy</code></a> 命令配置与 <a href="https://min.io/pricing?jmp=docs">MinIO SUBNET</a> 通信时使用的代理。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-top/#command-mc.support.top"><code>top</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-support-top/#command-mc.support.top"><code>mc support top</code></a> 命令返回分布式 MinIO 部署的统计信息，
-类似于 shell 中 <code>top</code> 命令的输出。</p></td>
-    </tr>
-  </tbody>
-</table>
+用 `mcli support COMMAND --help` 查看参数。各诊断命令需要目标 SILO 的相应管理授权。
+参考 [diag](/zh/reference/minio-mc/mc-support-diag/)、[perf](/zh/reference/minio-mc/mc-support-perf/)、
+[profile](/zh/reference/minio-mc/mc-support-profile/)、[inspect](/zh/reference/minio-mc/mc-support-inspect/)与[mcli 兼容性](/zh/compatibility/mcli/#subnet)。

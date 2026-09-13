@@ -3,75 +3,35 @@ title: "mc support proxy"
 url: "/zh/reference/minio-mc/mc-support-proxy/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-proxy.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support-proxy"></a>
-
 <a id="command-mc.support.proxy"></a>
+<a id="id2"></a>
+<a id="id3"></a>
+<a id="url"></a>
+<a id="id4"></a>
+<a id="callhome"></a>
+<a id="id5"></a>
+<a id="mc.support.proxy.set"></a>
+<a id="mc.support.proxy.show"></a>
+<a id="mc.support.proxy.remove"></a>
+<a id="id6"></a>
 
-## 说明 {#id2}
+## 当前行为 {#description}
 
-使用 [`mc support proxy`](#command-mc.support.proxy) 命令配置与 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 通信时使用的代理。
+在 PGSTY mcli 中，`support proxy set` 保留旧语法兼容入口，但 MinIO SUBNET 服务已在构建时禁用。
+命令返回明确的禁用提示与退出码 **1**，不会注册订阅或上传文件。旧上游的订阅/API-key 操作步骤不适用。
+`mcli support proxy remove ALIAS` 仍可清除旧代理设置。
 
-## 示例 {#id3}
+## 用法 {#syntax}
 
-### 设置代理 URL {#url}
-
-定义部署 `minio1` 与 SUBNET 通信时使用的代理 URL。 此示例中的代理 URL 为 `http://my.proxy`。
-
-```shell
-mc support proxy set minio1 http://my.proxy
-```
-
-### 删除为部署配置的代理 URL {#id4}
-
-以下命令会删除为别名 `minio1` 配置的代理 URL。
-
-```shell
-mc support proxy remove minio1
-```
-
-### 禁用 `callhome` 日志 {#callhome}
-
-以下命令显示为别名 `minio1` 配置的代理 URL。
+查看所安装版本接受的兼容参数：
 
 ```shell
-mc support proxy show minio1
+mcli support proxy --help
 ```
 
-## 语法 {#id5}
-
-#### `mc support proxy set` {#mc.support.proxy.set}
-
-*mc-cmd*
-
-为 MinIO 部署创建与 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 通信时使用的代理 URL。
-
-```shell
-mc support proxy set ALIAS PROXY_URL
-```
-
-#### `mc support proxy show` {#mc.support.proxy.show}
-
-*mc-cmd*
-
-显示当前为与 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 通信配置的代理 URL。
-
-```shell
-mc support proxy show ALIAS
-```
-
-#### `mc support proxy remove` {#mc.support.proxy.remove}
-
-*mc-cmd*
-
-删除为与 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 通信配置的代理 URL。
-
-```shell
-mc support proxy remove ALIAS
-```
-
-### 全局标志 {#id6}
-
-此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
+诊断工具 `mcli support diag`、`perf`、`profile`、`inspect` 仍在本地运行，无需 SUBNET 注册。
+结果由管理员自行保存和分享。完整边界见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。

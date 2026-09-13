@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/notify-keyspace-registration/"
 ---
 
-**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `162ded343`，**尚未发布**
+**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
 **定级：** 配置 Schema 一致性与可用性问题，**不是漏洞**；附带一项防御性加固（验证报错不再回显凭据值）
 **影响范围：** `notify_nats` 的 JWT/NKey/TLS-handshake-first 选项、`notify_amqp` 的 `immediate`，以及任何带着启用状态 NATS 目标从 2020 年前配置迁移上来的部署——它的失败会连带压掉 **所有** 通知后端
 **跟踪：** `pgsty/minio` issue #39

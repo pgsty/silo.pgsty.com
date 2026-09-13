@@ -10,7 +10,7 @@ draft: false
 url: "/blog/security/notify-keyspace-registration/"
 ---
 
-**Status:** Fixed on the local `pgsty/minio` branch as `162ded343`, **unreleased**
+**Release status (verified 2026-09-13):** the primary fix in this article is included in [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) and later releases. The investigation below retains its original test boundaries; see the [component matrix](/compatibility/versions/) for current unreleased work.
 **Classification:** Configuration-schema consistency and availability, **not a vulnerability**; includes one defensive hardening (credential values no longer echoed in validation errors)
 **Affected scope:** `notify_nats` JWT/NKey/TLS-handshake-first options, `notify_amqp` `immediate`, and any pre-2020 config migrated with an enabled NATS target — whose failure then silences **every** notification backend
 **Tracking:** `pgsty/minio` issue #39

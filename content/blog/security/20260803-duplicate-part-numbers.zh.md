@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/duplicate-part-numbers/"
 ---
 
-**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `22c1e41fd`，**尚未发布**
+**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
 **定级：** 数据正确性问题，**不是漏洞**——见[为什么这不是 CVE](#not-a-cve)
 **影响范围：** 所有后端；任何已认证的 S3 客户端，作用于它自己的上传
 **跟踪：** `pgsty/minio` issue #49

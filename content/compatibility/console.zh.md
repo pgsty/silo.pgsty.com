@@ -8,9 +8,11 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
+> **最新已发布：** [Console v2.4.0](/zh/blog/release/console-2.4.0/)（2026-09-08）。对象分页已发布；流式 ZIP、密码权限拆分与新版发布流程尚在 main。Server 内嵌版本与独立发行版不同，见[组件矩阵](/zh/compatibility/versions/)。
+
 SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
-[`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。分支至今的发布版本：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]。
+[`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。较早版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]。
 
 ## 原则 {#principles}
 
@@ -44,32 +46,25 @@ SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地�
 
 ### 5. 面向开发者：模块图 {#source}
 
-Go 模块路径继续保留为 `github.com/minio/console`，作为兼容接口；但
-Console 的维护源码已经直接 import 并 require
-`github.com/pgsty/silo-pkg/v3` v3.13.2，不再通过上游路径的 replace 选择
-共享包。`minio-go` 是明确例外，直接使用经过验证的上游版本。
-
-维护图只剩一条 replace：在保留历史模块路径的同时选择已发布的
-`pgsty/mc` 源码：
+截至 2026-09-13，Console main 直接 require `github.com/pgsty/silo-pkg/v3` v3.14.0，
+使用上游 SDK `v7.3.1-0.20260910142817-60bd07042d49`，并保留历史模块路径 `github.com/minio/console`。
+维护组件 replacement 为：
 
 ```go
-replace (
-	github.com/minio/mc => github.com/pgsty/mc ...
-)
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260913012246-4f609a4da3bb
 ```
 
-Go 不会继承依赖模块里的 replace，因此内嵌 Console 的 SILO 服务端必须
-复制这条 `mc` 选择。发布硬门禁对应的是由 SILO、SILO Console、
-`pgsty/mc` 与 `silo-pkg` 组成的 PGSTY 协调栈。
+Go 不继承依赖的 replacement。Server 必须同时显式选择 PGSTY Console 与 MC。
+兼容性固定版本另有 go-systemd v22.6.0（NetBSD）与 tablewriter v0.0.5（MC API）。
+旧 `minio/pkg/v3` 可由 colorjson 等间接引入；受维护的策略实现直接来自 silo-pkg。
+`minio/pkg => silo-pkg`、`minio-go => silo-go` 的旧 replacement 不再受支持。
 
-项目仍会尽最大努力探测上游 MinIO 与上游 `mc` 的构建兼容性，但这些
-任务只是兼容信号，不是依赖下限或发布门禁：只在上游图中出现的失败会被
-调查和记录，但不能以降级 `silo-pkg` 或复制其 API 为代价。少量
-`github.com/minio/pkg/v3` 仍可能由 `minio/colorjson` 等历史依赖间接带入；
-Console 的维护行为来自 `silo-pkg`。
+**上述是源码图，不是 v2.4.0 发布依赖。** v2.4.0 使用 pkg v3.13.3、MC `c8aa5d25a63a`、SDK `0e78d3f18efe`。
+Server 20260903 内嵌的 Console 是 `464a59d73ada`（v2.3.0 版本标识）；Server main 选择 `417559bb2c97`。
+精确矩阵见[组件版本](/zh/compatibility/versions/)，嵌入步骤见[源码指南](https://github.com/pgsty/silo-console/blob/main/docs/Embedding.md)。
 
-> [!NOTE]
-> 自 Console [v2.3.0]（2026-09-01）起，模块直接 require `github.com/pgsty/silo-pkg/v3`：`silo-pkg` v3.13.0 已迁到该模块路径。仍通过 `replace github.com/minio/pkg/v3 => …` 选择 `silo-pkg` 的服务端，必须先迁移自身 import 才能采用这一 Console 版本线。Silo 服务端内嵌的是 Console 提交 `43f8447fd`：v2.3.0 线上模块路径迁移之前的最后一个提交，含 v2.3.0 的全部安全修复。
+正式发布门槛针对 SILO、Console、mcli、pkg 的协调栈。上游原版 MinIO/MC 只做非阻塞兼容性探测，
+不能据此降级 pkg 或重复实现其 API。
 
 ## 迁移 {#migration}
 

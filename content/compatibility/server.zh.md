@@ -8,6 +8,8 @@ type: docs
 icon: fa-solid fa-server
 ---
 
+> **当前组件：** Server 20260903、Console v2.4.0、mcli 20260913、pkg v3.14.0。Server/Console 后续改动尚未发布。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
+
 Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端和磁盘数据的兼容性，但 **绝不是一次在运维层面完全无感的二进制改名**。本页是从上游基线迁移到 2026-08-06 所准备 Silo 源码时的兼容性契约。
 
 > [!WARNING]

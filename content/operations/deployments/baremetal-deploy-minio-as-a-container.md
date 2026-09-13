@@ -24,7 +24,7 @@ The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and
 >
 > The examples use `pgsty/silo:latest` for readability. Pin a tested Silo release tag or image digest in production; `latest` is not a version contract.
 >
-> The `MINIO_UPDATE=off` setting intentionally disables the server's in-place updater. The current updater retains the upstream MinIO release feed and signing key, so container upgrades must replace the image with a verified Silo tag or digest instead of running `mc admin update`.
+> SILO disables in-place self-update; `MINIO_UPDATE=off` does not re-enable it. Upgrade containers by replacing the image with a verified SILO tag or digest, not with `mc admin update`.
 
 ## Considerations {#considerations}
 

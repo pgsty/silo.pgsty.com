@@ -3,17 +3,15 @@ title: "mc support inspect"
 url: "/reference/minio-mc/mc-support-inspect/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-inspect.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> **SILO behavior:** diagnostics run locally without SUBNET registration or automatic uploads. License info/unregister operate on local state; license update retains the explicit-file path. Online registration/renewal and uploads are disabled. Retained upstream syntax below does not enable those services. See [mcli compatibility](/compatibility/mcli/#subnet).
+
 
 <a id="mc-support-inspect"></a>
 
 <a id="command-mc.support.inspect"></a>
-
-> [!NOTE]
-> **SUBNET Registration Required**
->
-> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Description {#description}
 
@@ -21,7 +19,7 @@ The [`mc support inspect`](#command-mc.support.inspect) command collects the dat
 
 MinIO assembles this data from each backend drive storing an [erasure shard](/operations/concepts/erasure-coding/#minio-erasure-coding) for each specified object. The command produces an encrypted zip file that includes all matching files with their respective *host+drive+path*.
 
-If this information is required to diagnose a [MinIO SUBNET](https://min.io/pricing?jmp=docs) issue, MinIO Engineering will provide the appropriate command. The resulting report is intended for use by MinIO Engineering via SUBNET and may contain internal or private data points associated to the object. Exercise caution before sending a report to a third party or posting the report in a public forum.
+Diagnostic output stays local; SUBNET online services are disabled. Compatibility flags do not enable uploads.
 
 > [!NOTE]
 > **Changed: RELEASE.2023-01-11T03-14-16Z**

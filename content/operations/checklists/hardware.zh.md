@@ -531,12 +531,9 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
   </tbody>
 </table>
 
-## 适用于 MinIO 订阅的推荐工具 {#minio}
+## SILO 本地诊断工具 {#minio}
 
-> [!WARNING]
-> **重要**
->
-> 本节提到的工具 **需要** MinIO 订阅。MinIO 强烈建议所有生产部署结合其 SUBNET 许可证使用 [AIStor Object Store](https://www.min.io/product/aistor/object-data-store)。更多信息请参见 [MinIO AIStor pricing page](https://min.io/pricing?jmp=docs)。
+> SILO 的本地诊断工具不要求 MinIO 订阅，也不会自动上传。管理员自行检查和分享结果。
 
 1. 健康诊断工具
 

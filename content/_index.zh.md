@@ -12,6 +12,8 @@ body_class: landing-page
 footer_style: none
 ---
 
+组件独立发布，已发布版本与开发分支的区别见[组件版本矩阵](/zh/compatibility/versions/)。
+
 > [!WARNING]
 > **SILO 是由 Pigsty 社区维护的 MinIO 分支。** 本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。“MinIO” 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。源码与许可信息详见[归属与署名](/zh/about/attribution/)。
 

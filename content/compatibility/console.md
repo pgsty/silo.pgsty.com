@@ -8,9 +8,11 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
+> **Latest published:** [Console v2.4.0](/blog/release/console-2.4.0/) (2026-09-08). Object pagination is released; streaming ZIPs, the password split and revised publication flow remain on main. Embedded and standalone versions differ; see the [component matrix](/compatibility/versions/).
+
 SILO Console is Silo's build of the MinIO Console. This page records where the two are interchangeable and where they differ.
 
-[`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Fork releases to date: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), and [v2.2.1].
+[`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Earlier release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), and [v2.2.1].
 
 ## Principles {#principles}
 
@@ -44,35 +46,30 @@ The interface, help content, and documentation links are available in English an
 
 ### 5. For developers: the module graph {#source}
 
-The Go module path stays `github.com/minio/console` as a compatibility
-interface, but maintained Console source directly imports and requires
-`github.com/pgsty/silo-pkg/v3` v3.13.2. The package is not selected through an
-upstream-path replacement. `minio-go` is the explicit exception and resolves to
-the verified upstream version.
-
-The maintained graph has one replacement, selecting the released `pgsty/mc`
-source while retaining its historical module path:
+As of 2026-09-13, Console main directly requires `github.com/pgsty/silo-pkg/v3`
+v3.14.0 and upstream SDK `v7.3.1-0.20260910142817-60bd07042d49`, while retaining
+the historical `github.com/minio/console` module path. Its maintained-component
+replacement is:
 
 ```go
-replace (
-	github.com/minio/mc => github.com/pgsty/mc ...
-)
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260913012246-4f609a4da3bb
 ```
 
-Go does not inherit replacements from dependency modules, so a SILO server that
-embeds Console must copy that one `mc` selection. The release-gating graph is the
-coordinated PGSTY stack: SILO, SILO Console, `pgsty/mc`, and `silo-pkg`.
+Go does not inherit dependency replacements. Server must explicitly select both
+PGSTY Console and MC. Separate compatibility pins retain go-systemd v22.6.0
+for NetBSD and tablewriter v0.0.5 for the MC API. Legacy transitive minio/pkg
+from colorjson is separate from the maintained silo-pkg policy implementation.
+The old `minio/pkg => silo-pkg` and `minio-go => silo-go` replacements are unsupported.
 
-The project also probes builds with upstream MinIO and upstream `mc` on a
-best-effort basis. Those jobs are compatibility signals, not dependency floors
-or release gates: an upstream-only failure is investigated and documented, but
-does not require downgrading `silo-pkg` or duplicating its APIs. A small
-`github.com/minio/pkg/v3` residue may still appear transitively through legacy
-dependencies such as `minio/colorjson`; maintained Console behavior comes from
-`silo-pkg`.
+**This is the source graph, not the v2.4.0 release graph.** v2.4.0 uses pkg
+v3.13.3, MC `c8aa5d25a63a` and SDK `0e78d3f18efe`. Server 20260903 embeds Console
+`464a59d73ada` (v2.3.0 version identity); Server main selects `417559bb2c97`.
+See the [component matrix](/compatibility/versions/) and
+[embedding guide](https://github.com/pgsty/silo-console/blob/main/docs/Embedding.md).
 
-> [!NOTE]
-> Since Console [v2.3.0] (2026-09-01) the module requires `github.com/pgsty/silo-pkg/v3` directly, because `silo-pkg` v3.13.0 moved to that module path. A server that still selects `silo-pkg` through `replace github.com/minio/pkg/v3 => …` must migrate its imports before adopting this Console line. The Silo server embeds Console commit `43f8447fd`: the last commit of the v2.3.0 line before the module-path migration, which carries the v2.3.0 security fixes.
+The release-gating target is the coordinated SILO, Console, mcli and pkg stack.
+Unmodified upstream MinIO/MC probes are non-blocking compatibility signals;
+they do not require pkg downgrades or duplicate APIs.
 
 ## Migration {#migration}
 

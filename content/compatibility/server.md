@@ -8,6 +8,8 @@ type: docs
 icon: fa-solid fa-server
 ---
 
+> **Current components:** Server 20260903, Console v2.4.0, mcli 20260913 and pkg v3.14.0. Later Server/Console changes remain unreleased. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
+
 Silo is a maintained fork of the MinIO server. It preserves MinIO's S3-facing and on-disk compatibility, but it is **not a byte-for-byte, operationally invisible rename**. This page is the compatibility contract for moving from the upstream baseline to the Silo source prepared on 2026-08-06.
 
 > [!WARNING]
