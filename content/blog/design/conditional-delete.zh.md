@@ -12,6 +12,9 @@ draft: false
 url: "/zh/blog/design/conditional-delete/"
 ---
 
+> **2026-09-13 后续状态：** 单对象 If-Match DELETE 后来经 `40bee4b7b` 合入，主分支又修复了多池串行化与回收。最新公开 Server 20260903 不含这些后续改动；下文保留 8 月 26 日的方案状态。见[组件矩阵](/zh/compatibility/versions/)与 [Server changelog](https://github.com/pgsty/silo/blob/main/CHANGELOG.md)。
+
+
 本文是 [SILO PR #12](https://github.com/pgsty/silo/pull/12) 的问题分析、设计讨论与修复决策归档。
 
 > **截至 2026-08-26 的状态：** PR #12 仍然 open，原 head 为 `5b71a75e`，落后最新 `main` 118 个提交。原提交没有 DCO sign-off，GitHub 上没有 check run。本文记录的改进方案已在独立本地 worktree 中实现、测试并完成两轮 review，并已提交到本地分支 `codex/pr12-conditional-delete`；尚未推送、合并或发布。<br>

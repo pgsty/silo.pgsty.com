@@ -4,41 +4,30 @@ url: "/reference/minio-mc/mc-license/"
 weight: 210
 icon: fa-solid fa-certificate
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-license.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-license"></a>
-
 <a id="command-mc.license"></a>
+<a id="subcommands"></a>
 
-## Description {#description}
+## License commands {#description}
 
-The [`mc license`](#command-mc.license) commands work with cluster registration for [MinIO SUBNET](https://min.io/pricing?jmp=docs). Use the commands to register a deployment, display information about the cluster’s current license, or update the license key for a cluster.
+SILO uses AGPLv3. License commands preserve legacy command syntax and cannot
+purchase or activate a MinIO commercial subscription.
 
-## Subcommands {#subcommands}
+| Command | Behavior |
+| --- | --- |
+| `mcli license info ALIAS` | Display locally stored license information without SUBNET access |
+| `mcli license unregister ALIAS` | Clear local license registration state |
+| `mcli license update ALIAS license.key` | Retain the explicit local-file path; acceptance depends on the target server |
+| `mcli license update ALIAS` | Online renewal disabled, exit 1 |
+| `mcli license register ALIAS` | Registration disabled, exit 1 |
 
-[`mc license`](#command-mc.license) includes the following subcommands:
+## Syntax {#syntax}
 
-<table>
-  <thead>
-    <tr>
-      <th><p>Subcommand</p></th>
-      <th><p>Description</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-license-info/#command-mc.license.info"><code>info</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-license-info/#command-mc.license.info"><code>mc license info</code></a> command displays information about the MinIO deployment’s license status.
-Specifically, whether the deployment uses the AGPLv3 Open Source license of the <a href="https://min.io/product/subnet?ref=docs">MinIO Commercial License</a>.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-license-register/#command-mc.license.register"><code>register</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-license-register/#command-mc.license.register"><code>mc license register</code></a> command connects your deployment with your <a href="https://min.io/pricing?jmp=docs">MinIO SUBNET</a> account.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-license-update/#command-mc.license.update"><code>update</code></a></p></td>
-      <td><p>Use the <a href="/reference/minio-mc/mc-license-update/#command-mc.license.update"><code>mc license update</code></a> command to replace a license key for a deployment.</p></td>
-    </tr>
-  </tbody>
-</table>
+Use `mcli license COMMAND --help` for flags accepted by the installed version.
+Legacy `--airgap` and API-key flags cannot re-enable online registration/renewal.
+Ordinary object storage and diagnostics do not require SUBNET registration.
+
+See [SILO licensing](/about/license/) and [mcli compatibility](/compatibility/mcli/#subnet).

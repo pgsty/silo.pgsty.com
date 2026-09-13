@@ -9,11 +9,11 @@
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
 {{- $metrics := hugo.Data.home.metrics -}}
 {{- $socialImage := "images/silo-social-card.webp" | absURL -}}
-{{- $serverTag := "RELEASE.2026-09-03T13-18-01Z" -}}
-{{- $serverBuild := "20260903131801.0.0" -}}
+{{- $serverTag := hugo.Data.releases.server.tag -}}
+{{- $serverBuild := hugo.Data.releases.server.build -}}
 {{- $serverBase := printf "https://github.com/pgsty/silo/releases/download/%s" $serverTag -}}
-{{- $clientTag := "RELEASE.2026-09-03T07-13-05Z" -}}
-{{- $clientBuild := "20260903071305.0.0" -}}
+{{- $clientTag := hugo.Data.releases.client.tag -}}
+{{- $clientBuild := hugo.Data.releases.client.build -}}
 {{- $clientBase := printf "https://github.com/pgsty/mc/releases/download/%s" $clientTag -}}
     <section class="download-hero" aria-labelledby="download-title">
       <div class="download-grid-bg" aria-hidden="true"></div>
@@ -22,10 +22,11 @@
           <p class="section-eyebrow download-eyebrow"><span class="silkscreen">DOWNLOAD MATRIX</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h1 id="download-title">{{ if $zh }}下载与安装 <span>SILO</span>{{ else }}Download &amp; Install <span>SILO</span>{{ end }}</h1>
           <p>{{ if $zh }}选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Choose the server or admin client first, then use the install path that matches your operating system, architecture, and deployment model.{{ end }}</p>
+          <p>{{ if $zh }}组件独立发布：Server 20260903、Console v2.4.0、mcli 20260913、pkg v3.14.0。新 Server/Console 依赖目前在主分支，见 <a href="/zh/compatibility/versions/">组件版本与升级顺序</a>。{{ else }}Components release independently: Server 20260903, Console v2.4.0, mcli 20260913 and pkg v3.14.0. Newer Server/Console dependencies are on main; see <a href="/compatibility/versions/">component versions and upgrade order</a>.{{ end }}</p>
           <div class="download-release-line">
             <span class="release-live"><i aria-hidden="true"></i>{{ if $zh }}当前服务端发行版{{ else }}CURRENT SERVER RELEASE{{ end }}</span>
             <a href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
-            <span>2026-09-03 · amd64 / arm64</span>
+            <span>{{ hugo.Data.releases.server.date }} · amd64 / arm64</span>
           </div>
         </div>
 
@@ -69,7 +70,7 @@
           </div>
           <a class="version-card" href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">
             <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
-            <strong>2026-09-03</strong>
+            <strong>{{ hugo.Data.releases.server.date }}</strong>
             <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
           </a>
         </div>
@@ -361,7 +362,7 @@ make build
           </div>
           <a class="version-card version-card--client" href="https://github.com/pgsty/mc/releases/tag/{{ $clientTag }}" target="_blank" rel="noopener">
             <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
-            <strong>2026-09-03</strong>
+            <strong>{{ hugo.Data.releases.client.date }}</strong>
             <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
           </a>
         </div>

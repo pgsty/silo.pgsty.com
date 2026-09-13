@@ -3,75 +3,36 @@ title: "mc support proxy"
 url: "/reference/minio-mc/mc-support-proxy/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-proxy.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support-proxy"></a>
-
 <a id="command-mc.support.proxy"></a>
+<a id="examples"></a>
+<a id="set-a-proxy-url"></a>
+<a id="remove-the-proxy-url-configured-for-a-deployment"></a>
+<a id="disable-callhome-logs"></a>
+<a id="mc.support.proxy.set"></a>
+<a id="mc.support.proxy.show"></a>
+<a id="mc.support.proxy.remove"></a>
+<a id="global-flags"></a>
 
-## Description {#description}
+## Current behavior {#description}
 
-Use the [`mc support proxy`](#command-mc.support.proxy) command to configure a proxy to use to communicate with [MinIO SUBNET](https://min.io/pricing?jmp=docs).
-
-## Examples {#examples}
-
-### Set a Proxy URL {#set-a-proxy-url}
-
-Define the proxy URL to use when the deployment `minio1` communicates to SUBNET. The proxy URL in the example is `http://my.proxy`.
-
-```shell
-mc support proxy set minio1 http://my.proxy
-```
-
-### Remove the Proxy URL Configured for a Deployment {#remove-the-proxy-url-configured-for-a-deployment}
-
-The following command removes the URL configured as the proxy for the alias `minio1`.
-
-```shell
-mc support proxy remove minio1
-```
-
-### Disable `callhome` Logs {#disable-callhome-logs}
-
-The following command shows the URL configured as the proxy for the alias `minio1`.
-
-```shell
-mc support proxy show minio1
-```
+PGSTY mcli retains the legacy syntax of `support proxy set` for compatibility, but
+MinIO SUBNET services are disabled at build time. The command reports the
+explicit disabled-service error and exits **1**, without registration or uploads.
+Upstream subscription/API-key instructions do not apply.
+`mcli support proxy remove ALIAS` still clears legacy proxy settings.
 
 ## Syntax {#syntax}
 
-#### `mc support proxy set` {#mc.support.proxy.set}
-
-*mc-cmd*
-
-Create a proxy URL for the MinIO deployment to use when communicating with [MinIO SUBNET](https://min.io/pricing?jmp=docs).
+Inspect the compatibility flags accepted by your installed version:
 
 ```shell
-mc support proxy set ALIAS PROXY_URL
+mcli support proxy --help
 ```
 
-#### `mc support proxy show` {#mc.support.proxy.show}
-
-*mc-cmd*
-
-Display the current proxy URL configured for communicating with [MinIO SUBNET](https://min.io/pricing?jmp=docs).
-
-```shell
-mc support proxy show ALIAS
-```
-
-#### `mc support proxy remove` {#mc.support.proxy.remove}
-
-*mc-cmd*
-
-Remove the proxy URL configured for communicating with [MinIO SUBNET](https://min.io/pricing?jmp=docs).
-
-```shell
-mc support proxy remove ALIAS
-```
-
-### Global Flags {#global-flags}
-
-This command supports any of the [global flags](/reference/minio-mc/#minio-mc-global-options).
+`mcli support diag`, `perf`, `profile` and `inspect` still run locally without
+SUBNET registration. Administrators control storage and any deliberate sharing
+of the results. See [mcli compatibility](/compatibility/mcli/#subnet).

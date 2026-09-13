@@ -10,12 +10,19 @@ icon: fa-solid fa-terminal
 
 `mcli` 是 Silo 构建的 MinIO 客户端（`mc`）。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
-[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/) 与 [20260903](/zh/blog/release/mcli-20260903/)。中间的 20260901 制品仍保留在 GitHub，但本站文档直接以 20260806 与当前版本比较。
+[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/) 与 [20260903](/zh/blog/release/mcli-20260903/)。最新版本为 [20260913](/zh/blog/release/mcli-20260913/)；历史说明保留各自比较基线。
 
 > [!TIP]
-> **当前版本：** [`RELEASE.2026-09-03T07-13-05Z`](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-03T07-13-05Z)，软件包版本 `20260903071305.0.0`，构建自 [`a2ef95c0`](https://github.com/pgsty/mc/commit/a2ef95c035d9ae7cc01469a63926900f1786f9e2)。它提供 Linux RPM/DEB/APK 软件包、六份 OS/架构归档包，以及多架构 `docker.io/pgsty/mc` 镜像。完整内容见 [20260903 发布说明](/zh/blog/release/mcli-20260903/)。
+> **当前版本：** [RELEASE.2026-09-13T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-13T00-00-00Z)，软件包 `20260913000000.0.0`，源码 `4f609a4da3bb`。已提供六个系统/架构归档、RPM/DEB/APK 与多架构镜像。见[发布说明](/zh/blog/release/mcli-20260913/)和[组件矩阵](/zh/compatibility/versions/)。
 
 ## 当前版本变化 {#current-release}
+
+20260913 使用 pkg v3.14.0、上游 SDK `60bd07042d49` 和 Go 1.27.1，刷新 Go x/* 依赖。
+它保留 mirror 目标历史版本，修复重启 dry run、非交互行为、传输/SQL 错误退出、空上传显式校验和及 quiet JSON 输出，布尔环境变量支持 on/off。
+策略 Deny/NotResource 与有界通配匹配修复会保留原先可能丢失的拒绝语句；已丢失语句需从原始策略恢复。
+[密码权限拆分](/zh/compatibility/password-permissions/)需要配套 Server/Console，最新公开 Server/Console 尚未包含，单独升级客户端不会修改服务端授权。
+
+## 继承自 20260903 的变化 {#previous-release}
 
 20260903 客户端保留上游命令、配置、协议与 JSON 契约；相对 20260806 有以下明确新增与收紧：
 
@@ -33,7 +40,7 @@ icon: fa-solid fa-terminal
 本分支只遵循一条规则：**改名的是交付物与渠道，不是你手里的工具。**
 
 - **改名 / 更换** —— 磁盘上的制品名（`mcli`）、`--version` 与 `--help` 中的产品身份、分发渠道（GitHub `pgsty/mc`、Pigsty 软件仓库、`docker.io/pgsty/mc`），以及制品签名密钥。命令语法没有改 —— 而且取决于你怎么安装，连你敲的名字都可以不变。
-- **保持不变** —— 全部命令、子命令与参数；S3 与 admin API 行为、请求签名与协议头（`x-minio-*`）；JSON 输出结构；正常操作的退出码；配置文件格式与别名语义；`MC_*` 环境变量（含 `MC_HOST_<alias>`）；`.part.minio` 断点续传后缀；以及 Go 模块路径 `github.com/minio/mc`。
+- **保留的接口** —— 熟悉的命令语法、S3/admin 协议与 `x-minio-*` 标识；输出、授权与错误处理的具体变化以上述版本说明为准；配置文件格式与别名语义；`MC_*` 环境变量（含 `MC_HOST_<alias>`）；`.part.minio` 断点续传后缀；以及 Go 模块路径 `github.com/minio/mc`。
 - **切断** —— 所有连向 MinIO 运营服务的通道：发布/更新源、SUBNET 支持与许可门户、遥测，以及预置的 `play` 演示别名。受影响的命令为保持脚本兼容而保留，以稳定错误快速失败，而不是直接消失。
 - **保留** —— 上游版权与 AGPL-3.0 许可证。运行时输出同时致谢 MinIO, Inc. 与 PGSTY。
 

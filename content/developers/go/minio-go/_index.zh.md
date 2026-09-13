@@ -8,6 +8,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+> **SILO 验证过的版本，2026-09-13：** 当前 pkg/mcli 发布及 Server/Console 主分支使用 `v7.3.1-0.20260910142817-60bd07042d49`。如需复现该依赖图，可执行 `go get github.com/minio/minio-go/v7@v7.3.1-0.20260910142817-60bd07042d49`。最新公开 Server/Console 仍使用较早 SDK；见[组件矩阵](/zh/compatibility/versions/)。
+
 ## MinIO Go SDK {#go-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此 Go 应用可以直接使用上游 [MinIO Go SDK](https://github.com/minio/minio-go)。当前主版本的模块路径为 `github.com/minio/minio-go/v7`。

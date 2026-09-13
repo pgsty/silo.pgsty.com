@@ -403,7 +403,10 @@
     "/integrations/aws-cli-with-minio/": "integrations/aws-cli-with-minio",
     "/integrations/setup-nginx-proxy-with-minio/": "integrations/setup-nginx-proxy-with-minio",
     "/integrations/presigned-put-upload-via-browser/": "integrations/presigned-put-upload-via-browser",
-    "/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/": "integrations/generate-lets-encrypt-certificate-using-certbot-for-minio"
+    "/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/": "integrations/generate-lets-encrypt-certificate-using-certbot-for-minio",
+    "/compatibility/versions/": "compatibility/versions",
+    "/compatibility/password-permissions/": "compatibility/password-permissions",
+    "/compatibility/console/": "compatibility/console"
   },
   "children_by_url": {
     "/operations/": [
@@ -1255,7 +1258,10 @@
     "/integrations/aws-cli-with-minio/": [],
     "/integrations/setup-nginx-proxy-with-minio/": [],
     "/integrations/presigned-put-upload-via-browser/": [],
-    "/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/": []
+    "/integrations/generate-lets-encrypt-certificate-using-certbot-for-minio/": [],
+    "/compatibility/versions/": [],
+    "/compatibility/password-permissions/": [],
+    "/compatibility/console/": []
   },
   "active_path_by_url": {
     "/operations/": [
@@ -3691,6 +3697,18 @@
     "/about/manifesto/": [
       "/about/",
       "/about/manifesto/"
+    ],
+    "/compatibility/versions/": [
+      "/compatibility/",
+      "/compatibility/versions/"
+    ],
+    "/compatibility/password-permissions/": [
+      "/compatibility/",
+      "/compatibility/password-permissions/"
+    ],
+    "/compatibility/console/": [
+      "/compatibility/",
+      "/compatibility/console/"
     ]
   },
   "sections": [
@@ -3741,6 +3759,16 @@
       "title_zh": "\u517c\u5bb9\u6027",
       "children": [
         {
+          "page": "compatibility/versions",
+          "url": "/compatibility/versions/",
+          "children": []
+        },
+        {
+          "page": "compatibility/password-permissions",
+          "url": "/compatibility/password-permissions/",
+          "children": []
+        },
+        {
           "page": "compatibility/migration",
           "url": "/compatibility/migration/",
           "children": []
@@ -3758,6 +3786,11 @@
         {
           "page": "compatibility/mcli",
           "url": "/compatibility/mcli/",
+          "children": []
+        },
+        {
+          "page": "compatibility/console",
+          "url": "/compatibility/console/",
           "children": []
         },
         {

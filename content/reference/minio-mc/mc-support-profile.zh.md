@@ -3,28 +3,21 @@ title: "mc support profile"
 url: "/zh/reference/minio-mc/mc-support-profile/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-profile.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> **SILO 行为：** 诊断在本地运行，不要求 SUBNET 订阅，也不会自动上传。license info/unregister 只操作本地状态，license update 保留显式文件方式；在线注册/续订与上传禁用。下文保留的上游语法不启用这些在线服务。见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。
+
 
 <a id="mc-support-profile"></a>
 
 <a id="command-mc.support.profile"></a>
 
-> [!NOTE]
-> **需要完成 SUBNET 注册**
->
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-
 ## 描述 {#id2}
 
 [`mc support profile`](#command-mc.support.profile) 为你的部署运行系统性能剖析。 剖析结果可帮助了解给定节点上运行的 MinIO 服务端进程状态。
 
-生成的报告供 MinIO Engineering 使用。 你可以将报告上传到 [MinIO SUBNET](https://min.io/pricing?jmp=docs)。 若由你自己或第三方独立使用这些剖析结果进行诊断和修复，风险自担。
-
-> [!NOTE]
-> **需要完成 SUBNET 注册**
->
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
+诊断产物保存在本地；SUBNET 在线服务已禁用。兼容参数不会启用上传。
 
 ## 示例 {#id3}
 
@@ -113,7 +106,7 @@ mc [GLOBALFLAGS] support profile       \
 
 *Optional*
 
-在无法网络访问 SUBNET 的环境中使用（例如 airgapped、firewalled 或类似配置）。
+诊断产物保存在本地；SUBNET 在线服务已禁用。兼容参数不会启用上传。
 
 如果部署是 airgapped，但你运行 [minio client](/zh/reference/minio-mc/#minio-client) 的本地设备具有网络访问能力，则无需使用 `--airgap` 标志。
 

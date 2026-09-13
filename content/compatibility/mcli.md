@@ -10,12 +10,24 @@ icon: fa-solid fa-terminal
 
 `mcli` is Silo's build of the MinIO Client (`mc`). This page records where the two are interchangeable and where they differ.
 
-[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), and [20260903](/blog/release/mcli-20260903/). The intermediate 20260901 artifact remains on GitHub, but the documentation compares the current release directly with 20260806.
+[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), and [20260903](/blog/release/mcli-20260903/). The latest is [20260913](/blog/release/mcli-20260913/); historical notes retain their own comparison baselines.
 
 > [!TIP]
-> **Current release:** [`RELEASE.2026-09-03T07-13-05Z`](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-03T07-13-05Z), package version `20260903071305.0.0`, built from [`a2ef95c0`](https://github.com/pgsty/mc/commit/a2ef95c035d9ae7cc01469a63926900f1786f9e2). It is available as Linux RPM/DEB/APK packages, six OS/architecture archives, and the multi-architecture `docker.io/pgsty/mc` image. See the [complete release notes](/blog/release/mcli-20260903/).
+> **Current release:** [RELEASE.2026-09-13T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-13T00-00-00Z), package `20260913000000.0.0`, source `4f609a4da3bb`. Six OS/architecture archives, RPM/DEB/APK and multi-architecture images are published. See the [release notes](/blog/release/mcli-20260913/) and [component matrix](/compatibility/versions/).
 
 ## Current release changes {#current-release}
+
+20260913 uses pkg v3.14.0, upstream SDK `60bd07042d49` and Go 1.27.1, with
+refreshed Go x/* modules. It preserves mirror destination history and fixes
+restart dry runs, noninteractive behavior, transfer/SQL failure exits, explicit
+checksums for empty uploads and quiet JSON output. Boolean environment values
+accept on/off. Deny/NotResource and bounded wildcard fixes preserve clauses that
+could previously be lost; recover already-lost clauses from the original policy.
+The [password-permission split](/compatibility/password-permissions/) requires
+matching Server/Console source; the latest public Server/Console do not contain
+it. Updating the client alone does not change Server authorization.
+
+## Changes inherited from 20260903 {#previous-release}
 
 The 20260903 client keeps the upstream command, configuration, protocol, and JSON contracts, with these deliberate additions and tightenings since 20260806:
 
@@ -33,7 +45,7 @@ Two low-level compatibility changes are worth testing in specialized deployments
 The fork follows one rule: **the shipped artifact and its channels are renamed; the tool you use is not.**
 
 - **Renamed / replaced** — the artifact name on disk (`mcli`), the product identity in `--version` and `--help`, the distribution channels (GitHub `pgsty/mc`, the Pigsty repository, `docker.io/pgsty/mc`), and the signing keys. Not the command syntax, and — depending on how you install it — not even the name you type.
-- **Unchanged** — every command, subcommand, and flag; S3 and admin API behavior, request signing, and protocol headers (`x-minio-*`); JSON output schemas; exit codes of normal operations; the configuration file format and alias semantics; `MC_*` environment variables (including `MC_HOST_<alias>`); the `.part.minio` resume suffix; and the Go module path `github.com/minio/mc`.
+- **Preserved interfaces** — familiar command syntax, S3/admin protocols and `x-minio-*` identifiers; versioned output, authorization and error-handling changes are documented above; the configuration file format and alias semantics; `MC_*` environment variables (including `MC_HOST_<alias>`); the `.part.minio` resume suffix; and the Go module path `github.com/minio/mc`.
 - **Severed** — every connection to MinIO-operated services: the release/update feed, the SUBNET support and licensing portal, telemetry, and the pre-seeded `play` demo alias. Affected commands remain in the CLI for script compatibility and fail with a stable error rather than disappearing.
 - **Preserved** — upstream copyright and the AGPL-3.0 license. Runtime output credits both MinIO, Inc. and PGSTY.
 

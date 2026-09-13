@@ -10,7 +10,7 @@ draft: false
 url: "/zh/blog/security/source-address-trust/"
 ---
 
-**状态：** 已合入 `pgsty/minio` `master`，提交 `fe6dc4780`，**尚未发布**
+**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
 **定级：** 可选加固 + 文档缺陷，**不是漏洞，也不是回归**；未申请 CVE。底层弱点继承自上游，本次未改变其默认行为
 **影响范围：** `aws:SourceIp` 策略条件、审计日志 `remotehost` 字段、S3 事件通知的 `Host`、`mc admin trace` 显示的客户端——凡是 S3 API 端口无需经过清洗请求头的代理即可抵达的部署
 **上游：** 无处可报——`minio/minio` 已归档。上游既有记录：[PR #4736](https://github.com/minio/minio/pull/4736)（2017，疑虑被提出并被半途解决）、[discussion #17878](https://github.com/minio/minio/discussions/17878)（2023，维护者标记为符合预期）、[PR #20977](https://github.com/minio/minio/pull/20977)（2025，那个只管一半的开关）

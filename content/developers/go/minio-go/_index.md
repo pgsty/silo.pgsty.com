@@ -8,6 +8,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+> **SILO-verified pin, 2026-09-13:** current pkg/mcli releases and Server/Console main use `v7.3.1-0.20260910142817-60bd07042d49`. To reproduce that graph, run `go get github.com/minio/minio-go/v7@v7.3.1-0.20260910142817-60bd07042d49`. Published Server/Console still use the earlier SDK; see the [component matrix](/compatibility/versions/).
+
 ## MinIO Go SDK {#go-sdk}
 
 SILO implements the S3-compatible server contract, so Go applications can use the upstream [MinIO Go SDK](https://github.com/minio/minio-go) directly. The current major module path is `github.com/minio/minio-go/v7`.

@@ -44,6 +44,8 @@
               <a href="{{ relLangURL "download/" }}" class="btn btn-ghost"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Install{{ end }}</a>
             </div>
 
+            <p class="hero-manifesto anim" style="--d:4"><a href="{{ relLangURL "compatibility/versions/" }}">{{ if $zh }}组件版本：Server 20260903 · Console 2.4.0 · mcli 20260913 · pkg 3.14.0{{ else }}Component versions: Server 20260903 · Console 2.4.0 · mcli 20260913 · pkg 3.14.0{{ end }} →</a></p>
+
             <p class="hero-manifesto anim" style="--d:4">
               <a href="{{ relLangURL "about/manifesto/" }}"><i class="fas fa-scroll" aria-hidden="true"></i> {{ if $zh }}我们承诺什么，不承诺什么：PGSTY SILO 宣言{{ else }}The PGSTY SILO Manifesto: our commitments, and limits{{ end }} →</a>
             </p>
@@ -102,12 +104,12 @@
             <span class="stat-label">GitHub Stars</span>
           </a>
           <a href="{{ relLangURL "blog/security/" }}" class="stat-item">
-            <span class="stat-value" data-count="{{ $metrics.security_fixes }}">{{ lang.FormatNumber 0 $metrics.security_fixes }}</span>
-            <span class="stat-label">Security Fixes</span>
+            <span class="stat-value" data-count="{{ (len (.Site.GetPage "blog/security").RegularPages) }}">{{ lang.FormatNumber 0 (len (.Site.GetPage "blog/security").RegularPages) }}</span>
+            <span class="stat-label">Security Notes</span>
           </a>
           <a href="{{ relLangURL "blog/release/" }}" class="stat-item">
-            <span class="stat-value" data-count="{{ $metrics.releases }}">{{ lang.FormatNumber 0 $metrics.releases }}</span>
-            <span class="stat-label">Releases</span>
+            <span class="stat-value" data-count="{{ (len (.Site.GetPage "blog/release").RegularPages) }}">{{ lang.FormatNumber 0 (len (.Site.GetPage "blog/release").RegularPages) }}</span>
+            <span class="stat-label">Release Notes</span>
           </a>
         </div>
 
@@ -418,7 +420,7 @@
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q6</span><span class="faq-q">{{ if $zh }}磁盘格式会变化吗？{{ else }}Will the on-disk format change?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}不会。<code>.minio.sys</code> 元数据目录与对象布局保持上游原样，由 CI 兼容性门禁冻结，与 MinIO 双向互通。新增能力默认不触碰磁盘格式；任何例外都将是显式可选、启用前明确标注的。参见<a href="{{ relLangURL "compatibility/server/" }}">兼容性审计</a>。{{ else }}No. The <code>.minio.sys</code> metadata directory and the object layout are unchanged from upstream, held in place by a CI compatibility check, and tested for interoperability with MinIO. New features do not touch the on-disk format; if one ever has to, it will be opt-in and marked non-reversible before you can turn it on. The <a href="{{ relLangURL "compatibility/server/" }}">compatibility audit</a> has the details.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}<code>.minio.sys</code> 与对象布局保留历史标识，迁移不要求改名。元数据行为、复制格式门槛和回滚限制按版本记录；升级前核对<a href="{{ relLangURL "compatibility/versions/" }}">组件版本</a>与<a href="{{ relLangURL "compatibility/server/" }}">兼容性说明</a>。上游互操作为尽力保留，不能据此推断任意版本混用都安全。{{ else }}The <code>.minio.sys</code> and object-layout identifiers are retained; migration does not require renaming data. Metadata behavior, replication format gates and rollback limits are recorded per version. Check <a href="{{ relLangURL "compatibility/versions/" }}">component versions</a> and <a href="{{ relLangURL "compatibility/server/" }}">compatibility notes</a> before upgrading. Upstream interoperability is best effort, not a guarantee that arbitrary versions can be mixed.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">
@@ -428,7 +430,7 @@
 
           <details class="faq-item" name="silo-faq">
             <summary><span class="faq-num silkscreen">Q8</span><span class="faq-q">{{ if $zh }}可以用于生产环境吗？{{ else }}Can I run it in production?{{ end }}</span><span class="faq-toggle" aria-hidden="true"></span></summary>
-            <div class="faq-a"><p>{{ if $zh }}可以——这就是我们自己在生产环境中使用的版本：Pigsty 的生产 PostgreSQL 备份就跑在 Silo 上，你下载的制品与我们线上运行的是同一批。本页还列出了<a href="#voices">带公开出处的第三方采用记录</a>；照例建议锁定版本、先用自己的负载验证，并保留<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>中演练过的回滚路径。{{ else }}Yes, with the usual caveats. Pigsty's production PostgreSQL backups run on Silo, and this page links <a href="#voices">third-party reports</a> from people running it elsewhere. That is evidence, not a warranty. Pin a release, test it against your own workload, and rehearse the rollback in the <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a> before you need it.{{ end }}</p></div>
+            <div class="faq-a"><p>{{ if $zh }}SILO 提供版本化制品与 Pigsty 部署集成，本页列出<a href="#voices">带公开出处的第三方采用记录</a>。生产使用应核对<a href="{{ relLangURL "compatibility/versions/" }}">当前发布和安全状态</a>，锁定版本，用实际负载验收并演练回滚。仓库合并、公开发布与具体生产环境部署是独立事项。{{ else }}SILO provides versioned artifacts and Pigsty deployment integration, with <a href="#voices">public third-party adoption records</a> on this page. Review <a href="{{ relLangURL "compatibility/versions/" }}">current release and security status</a>, pin a version, validate your workload and rehearse rollback. A repository merge, public release and deployment to a particular production environment are separate events.{{ end }}</p></div>
           </details>
 
           <details class="faq-item" name="silo-faq">

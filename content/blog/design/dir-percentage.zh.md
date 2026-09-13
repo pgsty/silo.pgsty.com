@@ -22,7 +22,7 @@ SILO Console 下载文件夹时，Downloads / Uploads 面板会显示 `NaN%`。Z
 
 ## 已观察到的故障 {#failure}
 
-这个缺陷存在于当前 `silo-console v2.1.1`，Silo `RELEASE.2026-08-06T00-00-00Z` 内嵌的正是这一版本。
+这个缺陷在当时的 `silo-console v2.1.1` 中被观察到，Silo `RELEASE.2026-08-06T00-00-00Z` 内嵌的正是这一版本。
 
 复现步骤：
 

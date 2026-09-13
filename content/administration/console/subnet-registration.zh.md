@@ -3,74 +3,38 @@ title: "SUBNET"
 url: "/zh/administration/console/subnet-registration/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/53e14984e3cacacd5a0206822693f15442186bb8/source/administration/console/subnet-registration.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="subnet"></a>
 <a id="minio-console-subscription"></a>
+<a id="id2"></a>
+<a id="id3"></a>
+<a id="id4"></a>
 
-您可以使用 MinIO Console 执行 MinIO 中若干与许可证和订阅相关的功能，例如：
+## SILO 的许可与支持 {#license}
 
-- 查看 MinIO 部署当前使用的许可证。
-- 订阅商业许可证，其中包含对 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 的访问权限。
-- 管理部署的 Enterprise 许可证。
-- 使用可与 MinIO Engineering 共享的支持工具。
-- 查看不同许可证选项之间的差异。
+SILO Console 保留开源 AGPL 许可信息、对应源码与第三方署名页面。它不提供 MinIO 商业订阅注册、购买或在线续订，也不会把诊断自动上传到 SUBNET。
+此 URL 保留用于旧文档兼容；旧上游的商业订阅说明不适用于 SILO。
 
-## 许可证 {#id2}
+## 健康诊断 {#health}
 
-MinIO 提供三种许可证选项：
+Health 页面生成部署健康报告，可下载用于自己的诊断流程。文件可能包含主机名等环境信息，应在主动分享前检查。SILO 不自动将其上传。
 
-1. 基于 [GNU AGPLv3 license](https://github.com/minio/mc/blob/master/LICENSE) 的开源版本
-2. Enterprise Lite，一种 [commercial license](https://min.io/pricing?ref=docs)，包含由 MinIO Engineers 直接提供的支持
-3. Enterprise Plus，一种 [commercial license](https://min.io/pricing?ref=docs)，包含由 MinIO Engineers 直接提供的支持、较长的发布周期、更短的 SLA 以及其他优势
+## 性能 {#performance}
 
-**License** 页面显示部署当前的许可证状态。 您还可以开始注册流程，以开通付费订阅或将该部署添加到现有订阅中。
+性能工具测试 S3 GET/PUT 等路径。应在适合的测试环境中运行，并结合实际负载解释结果。
 
-采用 AGPLv3 许可的部署必须遵守该许可证条款。 MinIO 无法判定您的应用程序对 MinIO 的使用是否符合 AGPLv3 的许可证要求。 您应当依赖自己的法律顾问或许可证专家，对应用程序进行审计，并确保其符合 MinIO 以及所有与您的应用程序集成或交互的其他开源项目的许可证要求。
+## 性能剖析 {#profile}
 
-对于会触发 AGPLv3 义务的应用程序（例如需要将应用开源），MinIO Commercial Licensing 是最佳选择。 在未验证其使用方式的情况下使用 MinIO 或任何其他采用 OSS 许可证代码的应用程序，风险由使用者自行承担。
+Profile 页面保留服务端剖析与本地下载功能，不依赖 SUBNET 订阅。
 
-## 健康 {#id3}
+## 对象检查 {#inspect}
 
-**Health** 部分提供了一个界面，用于对 MinIO 部署运行健康诊断。 对于连接到 Internet 的集群，报告会自动上传到 SUBNET。
-
-生成的健康报告供 MinIO Engineering 通过 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 使用，其中可能包含诸如主机名等内部或私有数据点。 在将健康报告发送给第三方或发布到公开论坛之前，请务必谨慎评估。
-
-如有需要，您可以从该页面下载最新报告。
-
-## 性能 {#id4}
-
-**Performance** 部分提供了一个界面，用于对部署执行性能测试。 测试结果可作为部署在 S3 `GET` 和 `PUT` 请求下性能表现的一般性参考。
-
-如需更完整的性能测试，可考虑结合使用预发布应用环境中的负载测试以及 MinIO [WARP](https://github.com/minio/warp) 工具。
-
-## Profile {#profile}
-
-**Profile** 部分提供了一个界面，用于对部署执行系统分析。 结果可以帮助了解给定节点上运行的 MinIO 服务进程。
-
-生成的报告供 MinIO Engineering 通过 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 使用。 独立使用或由第三方使用这些分析结果进行诊断和修复，风险由您自行承担。
-
-## Inspect {#inspect}
-
-**Inspect** 部分提供了一个界面，用于捕获与一个或多个对象相关的纠删码元数据。 MinIO Engineering 可能会要求提供此输出，作为 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 中诊断的一部分。
-
-生成的对象可使用 MinIO 的 [debugging tool](https://github.com/minio/minio/tree/master/docs/debugging#decoding-metadata) 读取。 独立使用或由第三方使用该输出进行诊断或修复，风险由您自行承担。 您还可以选择对该对象进行加密，使其仅在调试工具链中包含所生成的加密密钥时才能被读取。
+Inspect 工具收集对象的纠删码元数据；由管理员自行保管并使用自己的诊断工具分析。
 
 ## Call Home {#call-home}
 
-> [!NOTE]
-> **新增: Console**
->
-> v0.24.0
+SILO 不发送周期性健康报告或日志到 MinIO。旧命令保留兼容入口，但 `mcli support callhome enable` 返回禁用错误；disable/status 用于检查或清理旧设置。
 
-Call Home 是一个可选功能，已注册到 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 的部署可以自动将每日健康诊断报告或实时错误日志发送到 SUBNET。 这些报告可为工程支持团队在响应支持请求时提供诊断记录、日志记录，或同时提供两者。
-
-MinIO 安装后默认禁用 Call Home 选项。
-
-> [!WARNING]
-> **重要**
->
-> Call Home 需要有效的 Enterprise 许可证。
-
-使用 **Call Home** 部分可启用或禁用将每日一次的健康诊断报告或实时错误日志上传到 SUBNET。 健康报告和实时日志是彼此独立的功能，您可以分别启用或禁用。 如有需要，您也可以同时启用诊断报告和日志。
+参见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)、[许可说明](/zh/about/license/)与[组件版本](/zh/compatibility/versions/)。

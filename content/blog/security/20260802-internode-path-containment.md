@@ -10,11 +10,11 @@ draft: false
 url: "/blog/security/internode-path-containment/"
 ---
 
-**Status:** Fixed on the local `pgsty/minio` branch, **unreleased and not disclosed** (no CVE/GHSA requested; the upstream repository is archived)
+**Release status (verified 2026-09-13):** the primary fix in this article is included in [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) and later releases. The investigation below retains its original test boundaries; see the [component matrix](/compatibility/versions/) for current unreleased work.
 **Affected scope:** Distributed erasure only; cluster-root / internode JWT required
 **Prerequisite reading:** [CVE-2026-42600 · ReadMultiple](/blog/security/cve-2026-42600/)
 
-> This article contains complete exploitation vectors and measurements. Publishing it constitutes disclosure. Hold it until the fixed release ships.
+> This article is now public. The primary fix shipped as recorded above; residual findings below are the investigation-time record, not a claim that publishing one fix closed the entire defect class.
 
 [The previous entry](/blog/security/cve-2026-42600/) closed with this sentence:
 
@@ -174,6 +174,6 @@ Two limitations remain and should not be folded into a stronger claim:
 
 ## Closing {#closing}
 
-The previous entry said that closing an endpoint and closing a defect class are two different conclusions. This time the known sinks are closed on the local branch, at the cost of four self-inflicted regressions and three overturned declarations that it was ready to ship. Publication remains a separate gate: the fixes above are not in a released server build yet.
+The previous entry said that closing an endpoint and closing a defect class are two different conclusions. This time the known sinks are closed on the local branch, at the cost of four self-inflicted regressions and three overturned declarations that it was ready to ship. At the investigation date publication remained a separate gate; these fixes subsequently shipped in 20260804.
 
 If only one sentence survives: **the vulnerability was upstream's; our mistake was treating a point fix as a closure.** And what prevents a third occurrence is not a more careful person — it is a test that fails.

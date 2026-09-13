@@ -24,7 +24,7 @@ Silo 容器的功能和性能可能会受到基础操作系统的限制。
 >
 > 为便于阅读，示例使用 `pgsty/silo:latest`。生产环境必须固定经过测试的 Silo 发行标签或镜像摘要；`latest` 不是版本契约。
 >
-> `MINIO_UPDATE=off` 用于刻意禁用服务端原地更新。当前更新器仍保留上游 MinIO 发布源与签名密钥，因此容器应通过替换为经验证的 Silo 标签或摘要升级，不要运行 `mc admin update`。
+> SILO 禁止原地自更新，`MINIO_UPDATE=off` 不会重新启用它。容器升级应替换为经过验证的 SILO 标签或摘要，不应调用 `mc admin update`。
 
 ## 注意事项 {#id2}
 

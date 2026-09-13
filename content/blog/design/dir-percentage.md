@@ -22,7 +22,7 @@ The server keeps streaming ZIPs. Ordinary files keep their percentages. The fron
 
 ## The observed failure {#failure}
 
-The defect is present in the current `silo-console v2.1.1`, which is embedded by Silo `RELEASE.2026-08-06T00-00-00Z`.
+The defect was observed in the then-current `silo-console v2.1.1`, which is embedded by Silo `RELEASE.2026-08-06T00-00-00Z`.
 
 Reproduction:
 

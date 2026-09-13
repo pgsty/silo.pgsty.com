@@ -3,8 +3,11 @@ title: "mc support perf"
 url: "/zh/reference/minio-mc/mc-support-perf/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-perf.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> **SILO 行为：** 诊断在本地运行，不要求 SUBNET 订阅，也不会自动上传。license info/unregister 只操作本地状态，license update 保留显式文件方式；在线注册/续订与上传禁用。下文保留的上游语法不启用这些在线服务。见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。
+
 
 <a id="mc-support-perf"></a>
 
@@ -14,11 +17,6 @@ upstream_modified: false
 > **变更: RELEASE.2022-07-24T02-25-13Z**
 >
 > `mc support perf` 替代 `mc admin speedtest` 命令。
-
-> [!NOTE]
-> **需要完成 SUBNET 注册**
->
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 描述 {#id2}
 
@@ -47,11 +45,6 @@ upstream_modified: false
 5. [`site-replication`](#mc.support.perf.site-replication)
 
    测量站点复制操作的速度。
-
-> [!NOTE]
-> **需要完成 SUBNET 注册**
->
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 示例 {#id3}
 
@@ -187,7 +180,7 @@ mc [GLOBAL FLAGS] support perf site-replication \
 
 *Optional*
 
-用于无法通过网络访问 SUBNET 的环境（例如 airgapped、受防火墙限制或类似配置）。
+诊断产物保存在本地；SUBNET 在线服务已禁用。兼容参数不会启用上传。
 
 如果部署本身是 airgapped，但你使用 [minio client](/zh/reference/minio-mc/#minio-client) 的本地设备可以访问网络，则无需使用 `--airgap` 标志。
 

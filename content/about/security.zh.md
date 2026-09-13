@@ -8,6 +8,8 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
+> **当前发布边界：** 最新 Server 20260903 仍受 [SN-2026-011](/zh/blog/security/20260913-signed-header-status/) 影响，修复已在 main。客户端/pkg 发布与 Server 修复发布是独立事项，见[组件矩阵](/zh/compatibility/versions/)。
+
 安全维护正是这个分支存在的理由。上游 `minio/minio` 已经归档，Silo 持续跟踪针对该代码库的 CVE，
 回合并或自行编写修复，并把调查过程公之于众。
 

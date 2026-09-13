@@ -3,8 +3,11 @@ title: "mc support perf"
 url: "/reference/minio-mc/mc-support-perf/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-perf.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> **SILO behavior:** diagnostics run locally without SUBNET registration or automatic uploads. License info/unregister operate on local state; license update retains the explicit-file path. Online registration/renewal and uploads are disabled. Retained upstream syntax below does not enable those services. See [mcli compatibility](/compatibility/mcli/#subnet).
+
 
 <a id="mc-support-perf"></a>
 
@@ -14,11 +17,6 @@ upstream_modified: false
 > **Changed: RELEASE.2022-07-24T02-25-13Z**
 >
 > `mc support perf` replaces the `mc admin speedtest` command.
-
-> [!NOTE]
-> **SUBNET Registration Required**
->
-> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Description {#description}
 
@@ -47,11 +45,6 @@ The resulting tests can provide general guidance of deployment performance under
 5. [`site-replication`](#mc.support.perf.site-replication)
 
    Measure the speed of site replication operations.
-
-> [!NOTE]
-> **SUBNET Registration Required**
->
-> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
 
 ## Examples {#examples}
 
@@ -187,7 +180,7 @@ mc [GLOBAL FLAGS] support perf site-replication \
 
 *Optional*
 
-Use in environments without network access to SUBNET (for example, airgapped, firewalled, or similar configuration).
+Diagnostic output stays local; SUBNET online services are disabled. Compatibility flags do not enable uploads.
 
 If the deployment is airgapped, but the local device where you are using the [minio client](/reference/minio-mc/#minio-client) has network access, you do not need to use the `--airgap` flag.
 

@@ -3,17 +3,15 @@ title: "mc support inspect"
 url: "/zh/reference/minio-mc/mc-support-inspect/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-inspect.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> **SILO 行为：** 诊断在本地运行，不要求 SUBNET 订阅，也不会自动上传。license info/unregister 只操作本地状态，license update 保留显式文件方式；在线注册/续订与上传禁用。下文保留的上游语法不启用这些在线服务。见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。
+
 
 <a id="mc-support-inspect"></a>
 
 <a id="command-mc.support.inspect"></a>
-
-> [!NOTE]
-> **需要完成 SUBNET 注册**
->
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
 ## 描述 {#id2}
 
@@ -21,7 +19,7 @@ upstream_modified: false
 
 对于每个指定对象，MinIO 会从存储其 [纠删码分片](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) 的各个后端驱动器汇总这些数据。 该命令会生成一个加密 zip 文件，其中包含所有匹配文件及其对应的 *host+drive+path*。
 
-如果诊断 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 问题需要这些信息，MinIO Engineering 会提供相应命令。 生成的报告用于 MinIO Engineering 通过 SUBNET 进行分析，且可能包含与对象相关的内部或私有数据点。 将报告发送给第三方或发布到公共论坛前请谨慎评估。
+诊断产物保存在本地；SUBNET 在线服务已禁用。兼容参数不会启用上传。
 
 > [!NOTE]
 > **变更: RELEASE.2023-01-11T03-14-16Z**

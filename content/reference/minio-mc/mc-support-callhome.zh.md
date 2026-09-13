@@ -3,138 +3,41 @@ title: "mc support callhome"
 url: "/zh/reference/minio-mc/mc-support-callhome/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-callhome.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support-callhome"></a>
-
 <a id="command-mc.support.logs.disable"></a>
-
 <a id="command-mc.support.logs.enable"></a>
-
 <a id="command-mc.support.logs.status"></a>
-
 <a id="command-mc.support.callhome"></a>
+<a id="id2"></a>
+<a id="id3"></a>
+<a id="mc.support.callhome.enable"></a>
+<a id="mc.support.callhome.disable"></a>
+<a id="mc.support.callhome.status"></a>
+<a id="id4"></a>
+<a id="mc.support.callhome.ALIAS"></a>
+<a id="mc.support.callhome.-diag"></a>
+<a id="id5"></a>
+<a id="callhome"></a>
+<a id="id6"></a>
+<a id="id7"></a>
+<a id="id8"></a>
 
-## 描述 {#id2}
+## 当前行为 {#description}
 
-[`mc support callhome`](#command-mc.support.callhome) 命令用于启用或禁用将部署诊断信息发送到 [MinIO SUBNET](https://min.io/pricing?jmp=docs)。
+在 PGSTY mcli 中，`support callhome enable` 保留旧语法兼容入口，但 MinIO SUBNET 服务已在构建时禁用。
+命令返回明确的禁用提示与退出码 **1**，不会注册订阅或上传文件。旧上游的订阅/API-key 操作步骤不适用。
+`mcli support callhome disable ALIAS` 与 `status ALIAS` 仍保留。
 
-所有 `mc support` 命令都需要有效的 SUBNET 订阅。
+## 用法 {#syntax}
 
-启用后，MinIO 会将诊断信息发送到 SUBNET。
-
-无论注册状态如何，MinIO 默认禁用此功能。 你必须显式启用 `callhome` 功能，信息上传才会开始。
-
-> [!NOTE]
-> **需要完成 SUBNET 注册**
->
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
-
-## 语法 {#id3}
-
-#### `mc support callhome enable` {#mc.support.callhome.enable}
-
-*mc-cmd*
-
-开始将部署的诊断信息、日志或两者同时发送到 SUBNET。
-
-```shell
-mc support callhome enable    \
-                    ALIAS     \
-                    [--logs]  \
-                    [--diag]
-```
-
-> [!NOTE]
-> **说明**
->
-> SUBNET 不再支持 `--logs` 和 `--diag` 标志，并将在未来版本中移除。
-
-#### `mc support callhome disable` {#mc.support.callhome.disable}
-
-*mc-cmd*
-
-停止将部署的诊断信息、日志或两者同时发送到 SUBNET。
+查看所安装版本接受的兼容参数：
 
 ```shell
-mc support callhome disable  \
-                    ALIAS    \
-                    [--logs] \
-                    [--diag]
+mcli support callhome --help
 ```
 
-> [!NOTE]
-> **说明**
->
-> SUBNET 不再支持 `--logs` 和 `--diag` 标志，并将在未来版本中移除。
-
-#### `mc support callhome status` {#mc.support.callhome.status}
-
-*mc-cmd*
-
-输出某个部署当前是否将诊断信息、日志或两者同时发送到 SUBNET。
-
-```shell
-mc support callhome status   \
-                    ALIAS    \
-                    [--diag]
-```
-
-> [!NOTE]
-> **说明**
->
-> SUBNET 不再支持 `--diag` 标志，并将在未来版本中移除。
-
-### 参数 {#id4}
-
-##### `ALIAS` {#mc.support.callhome.ALIAS}
-
-*mc-cmd*
-
-*Required*
-
-MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
-
-##### `--diag` {#mc.support.callhome.-diag}
-
-*mc-cmd*
-
-*Optional*
-
-> [!NOTE]
-> **说明**
->
-> SUBNET 不再支持此选项，并将在未来版本中移除。
-
-每 24 小时向 SUBNET 发送部署诊断信息，或停止发送。
-
-## 示例 {#id5}
-
-### 启用 `callhome` 上报 {#callhome}
-
-为已注册到 SUBNET 且 [alias](/zh/reference/minio-mc/mc-alias-set/#alias) 为 `minio1` 的部署启用向 SUBNET 发送诊断信息。
-
-```shell
-mc support callhome enable minio1
-```
-
-### 禁用 `callhome` 上报 {#id6}
-
-为已注册到 SUBNET 且 [alias](/zh/reference/minio-mc/mc-alias-set/#alias) 为 `minio1` 的部署禁用向 SUBNET 发送诊断信息。
-
-```shell
-mc support callhome disable minio1
-```
-
-### 显示当前 `callhome` 设置 {#id7}
-
-显示别名为 `minio1` 的部署是否向 SUBNET 发送信息。
-
-```shell
-mc support callhome status minio1
-```
-
-### 全局标志 {#id8}
-
-此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
+诊断工具 `mcli support diag`、`perf`、`profile`、`inspect` 仍在本地运行，无需 SUBNET 注册。
+结果由管理员自行保存和分享。完整边界见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。

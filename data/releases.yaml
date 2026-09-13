@@ -1,0 +1,10 @@
+# Verified published artifacts on 2026-09-13. Main-branch pins are documented
+# separately in content/compatibility/versions*.md.
+server:
+  tag: RELEASE.2026-09-03T13-18-01Z
+  build: 20260903131801.0.0
+  date: "2026-09-03"
+client:
+  tag: RELEASE.2026-09-13T00-00-00Z
+  build: 20260913000000.0.0
+  date: "2026-09-13"

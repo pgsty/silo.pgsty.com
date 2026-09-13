@@ -10,12 +10,12 @@ draft: false
 url: "/zh/blog/security/s3-versionid-conditions/"
 ---
 
-**状态：** 已在本地 `pgsty/minio` 分支修复，提交 `744a9dcd7`，**尚未发布**
+**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
 **定级：** 策略执行正确性——一个 fail-**closed** 的报告、一个被避免的 fail-**open** 陷阱、以及顺手关掉的一处窄绕过。**不是重点 CVE**——见[我们如何定级](#not-a-cve)
 **影响范围：** 任何在 `s3:versionid` 上使用 `Null` 或 `StringEquals` 的桶/IAM 策略；报告中的失效发生在 `DeleteObject`/`DeleteObjects`
 **跟踪：** 上游 `minio/minio` issue #21735（报告者 iTrooz，2026-01-10）；上游仓库自 2026-04-25 起归档只读
 
-> 本文记录了一个尚未发布的修复，以及相邻路径上两个尚未修复的同类残留（[治理绕过与 Snowball](#boundary)）。请在修复发布、残留完成分诊之后再上线。
+> 本文现已公开。主修复的发布状态如上；文中残留问题属于当时的调查记录，不能从主修复的发布推断整个问题类别已关闭。
 
 ## 结论先行 {#summary}
 

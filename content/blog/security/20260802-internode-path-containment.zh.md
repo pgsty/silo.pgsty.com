@@ -10,11 +10,11 @@ draft: false
 url: "/zh/blog/security/internode-path-containment/"
 ---
 
-**状态：** 已在本地 `pgsty/minio` 分支修复，**尚未发布、尚未披露**（未申请 CVE/GHSA，上游仓库已归档）
+**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
 **影响范围：** 仅 distributed erasure；需要 cluster-root / internode JWT
 **前置阅读：** [CVE-2026-42600 · ReadMultiple](/zh/blog/security/cve-2026-42600/)
 
-> 本文包含完整利用向量与实测数据。发布即构成披露，请在修复版本发出后再上线。
+> 本文现已公开。主修复的发布状态如上；文中残留问题属于当时的调查记录，不能从主修复的发布推断整个问题类别已关闭。
 
 [上一篇](/zh/blog/security/cve-2026-42600/)的结尾写着一句话：
 
@@ -174,6 +174,6 @@ url: "/zh/blog/security/internode-path-containment/"
 
 ## 尾声 {#closing}
 
-上一篇说"关闭一个 endpoint，与关闭一个缺陷类别，是两种不同结论"。这次已知 sink 已在本地分支关闭，代价是四次自制回归和三次被推翻的"可以发版"。发布仍是独立的一道门：以上修复尚未进入公开服务端构建。
+上一篇说"关闭一个 endpoint，与关闭一个缺陷类别，是两种不同结论"。这次已知 sink 已在本地分支关闭，代价是四次自制回归和三次被推翻的"可以发版"。在当时的调查节点，发布仍是独立的一道门；以上修复后来已进入 20260804 公开构建。
 
 如果只留一句：**漏洞是上游的，我们的错在于把点修复当成了闭合。** 而防止它第三次发生的，不是更仔细的人，是会失败的测试。

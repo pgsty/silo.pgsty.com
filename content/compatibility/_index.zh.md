@@ -9,6 +9,8 @@ icon: fa-solid fa-code-compare
 sidebar_expanded: true
 ---
 
+> **当前组件：** Server 20260903、Console v2.4.0、mcli 20260913、pkg v3.14.0。Server/Console 后续改动尚未发布。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
+
 Silo 是 MinIO 的社区分支。本节记录 Silo 从 MinIO 继承了什么、在哪些地方有意做出不同选择，以及这对双向迁移意味着什么。
 
 内容按阅读顺序：[迁移指南](/zh/compatibility/migration/)（范围与 Docker）、[原生软件包迁移](/zh/compatibility/binary/)（RPM/DEB）、[服务器兼容性审计](/zh/compatibility/server/)、[mcli 客户端说明](/zh/compatibility/mcli/)、[Console 说明](/zh/compatibility/console/)。[特性设计](/zh/compatibility/feature/)子节记录相反的方向：Silo 在上游之外新增能力的设计文档。

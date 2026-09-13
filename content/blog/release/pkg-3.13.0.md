@@ -11,6 +11,8 @@ aliases:
   - /releases/pkg-3.13.0/
 ---
 
+> **Follow-up, 2026-09-13:** this article preserves the v3.13.0 release-time migration record. All four maintained components have since adopted the own-module path; current pkg is [v3.14.0](/blog/release/pkg-3.14.0/). The “not yet migrated” statements below describe that earlier date; see the [current component matrix](/compatibility/versions/).
+
 **Release date:** 2026-08-30 · **Version:** [v3.13.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.13.0) · **Commit:** [`215f116`](https://github.com/pgsty/silo-pkg/commit/215f116ec25120ce365c79bce4096cd7665b2c1e) · **Repository:** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
 Version 3.13.0 is a breaking release with one theme: the module stops claiming upstream's import path and takes its own. It also retires the `pgsty/silo-go` fork, which no longer carried anything upstream lacks.
