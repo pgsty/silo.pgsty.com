@@ -43,12 +43,30 @@ Public browsing uses one WebSocket per tab. NAT clients share an address; IPv6 c
 
 Values must be integers from 1 to 1048576. Each anonymous cap must be strictly below its corresponding shared cap, and the anonymous per-client cap must not exceed the anonymous total. Unset uses the default; explicitly blank values, literal `env://` references and invalid relationships are errors. Configuration errors exit Server before Console serves requests, although the S3 listener may already have started. Other `CONSOLE_*` operator overrides are still cleared and derived from Server configuration.
 
+## Object sharing {#object-sharing}
+
 > [!NOTE]
-> **Changed: RELEASE.2025-05-24T17-08-30Z**
+> **Pending, verified on 2026-09-16:** [Console #52](https://github.com/pgsty/silo-console/issues/52) remains open and its local fix has not merged. This section describes that proposed behavior. It is not present in the published Console v2.4.0, Server 20260903, or Server's currently selected Console source. Embedded SILO must select a Console commit containing the fix before these restrictions apply. See [component status](/compatibility/versions/#pending).
+
+The proposed fix requires no new setting. Its request restrictions always apply, and normal sharing remains available. `CONSOLE_SHARE_MINIO_URL` continues to select only the generated link format. The anonymous proxy is limited to object-content GET requests:
+
+| Allowed | Rejected |
+| --- | --- |
+| Configured S3 scheme, host and effective port | Other origins, URL user information and fragments |
+| `/valid-bucket/nonempty-object-key` | Root/bucket-only requests, `minio` and `.minio.sys*` system paths, dot path components |
+| Signatures, session tokens, versions, object parts and download response options | Query-selected operations: `acl`, `tagging`, `retention`, `legal-hold`, `attributes`, `uploadId`, `lambdaArn`, `torrent`; malformed query encoding |
+| Direct backend responses | All 3xx return 502 without following the redirect or forwarding `Location` |
+
+S3 continues to enforce authorization: unsigned public objects are allowed by their policies; private objects require valid authorization. Original URL encoding and signature parameters are preserved. Manual proxying of bucket listings, object subresources or downloads that depend on redirects no longer works through this endpoint.
+
+## Console settings reference {#settings-reference}
+
+> [!NOTE]
+> **Upstream MinIO change: RELEASE.2025-05-24T17-08-30Z**
 >
-> The Console now presents only object browser capabilities similar to those available through the [`mc`](/reference/minio-mc/#command-mc) tool. For administrative interactions, such as user management, use the [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) command.
+> Upstream MinIO reduced its Console to object browsing. SILO Console retains the administrative interface, including user management; see [Console compatibility](/compatibility/console/).
 >
-> Some of the settings on this page may no longer be relevant for newer deployments.
+> The inherited settings below must be interpreted for the deployed Server and Console versions.
 
 This page covers settings that manage access and behavior for the MinIO Console.
 

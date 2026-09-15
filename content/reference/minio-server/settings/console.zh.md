@@ -43,12 +43,30 @@ Server 的 S3 策略保持不变。设置 `none`/`off` 时，S3 也会忽略内�
 
 数值必须为 1 到 1048576 的整数。匿名总量与匿名单客户端限额必须分别低于对应的共享限额，匿名单客户端限额不得超过匿名总量。未设置时使用默认值；显式空值、字面量 `env://` 引用与不符合上述关系的配置均会报错。配置错误会在 Console 开始服务前退出 Server 进程，此时 S3 监听器可能已经启动。其他 `CONSOLE_*` 用户覆盖值仍会清除，并由 Server 配置生成。
 
+## 对象分享 {#object-sharing}
+
 > [!NOTE]
-> **变更: RELEASE.2025-05-24T17-08-30Z**
+> **待合入，核对于 2026-09-16：** [Console #52](https://github.com/pgsty/silo-console/issues/52) 仍然开放，本地修复尚未合入。本节描述该修复的拟议行为，已发布的 Console v2.4.0、Server 20260903 以及 Server 当前选择的 Console 源码均不包含这些限制。内嵌 SILO 必须先选择包含修复的 Console 提交，限制才会生效。详见[组件状态](/zh/compatibility/versions/#pending)。
+
+该修复无需新增配置，请求限制始终执行，正常分享继续可用。`CONSOLE_SHARE_MINIO_URL` 仍只选择生成的链接格式。匿名代理仅允许下载对象内容的 GET 请求：
+
+| 允许 | 拒绝 |
+| --- | --- |
+| 已配置 S3 的协议、主机和有效端口 | 其他源地址，以及带用户信息、片段的 URL |
+| `/合法桶名/非空对象键` | 根路径、仅桶路径、`minio` 与 `.minio.sys*` 系统路径、点路径分量 |
+| 签名、会话令牌、版本、对象分片和下载响应选项 | 通过查询参数选择的 `acl`、`tagging`、`retention`、`legal-hold`、`attributes`、`uploadId`、`lambdaArn`、`torrent` 操作，以及非法查询编码 |
+| 后端直接响应 | 所有 3xx 返回 502，不跟随跳转，也不转发 `Location` |
+
+S3 继续执行授权检查：公共对象按策略允许匿名读取，私有对象需要有效授权。URL 的原始编码和签名参数保持不变。手工利用此接口代理桶列表、对象子资源或依赖重定向的下载将不再可用。
+
+## Console 设置参考 {#settings-reference}
+
+> [!NOTE]
+> **上游 MinIO 变更：RELEASE.2025-05-24T17-08-30Z**
 >
-> Console 现在仅提供对象浏览能力，类似于通过 [`mc`](/zh/reference/minio-mc/#command-mc) 工具可用的能力。 对于用户管理等管理类交互，请使用 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令。
+> 上游 MinIO 将其 Console 裁剪为对象浏览器。SILO Console 保留包括用户管理在内的管理界面，详见 [Console 兼容性](/zh/compatibility/console/)。
 >
-> 本页中的部分设置可能已不再适用于较新的部署。
+> 以下继承的设置说明应结合实际部署的 Server 与 Console 版本阅读。
 
 本页介绍用于管理 MinIO Console 访问与行为的设置。
 

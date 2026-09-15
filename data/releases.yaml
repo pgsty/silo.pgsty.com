@@ -1,4 +1,4 @@
-# Verified published artifacts on 2026-09-13. Main-branch pins are documented
+# Published release tags rechecked on 2026-09-16. Main-branch pins are documented
 # separately in content/compatibility/versions*.md.
 server:
   tag: RELEASE.2026-09-03T13-18-01Z
