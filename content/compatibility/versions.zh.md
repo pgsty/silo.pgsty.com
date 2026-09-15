@@ -65,7 +65,7 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 
 **升级与兼容性要求：**
 
-- **IAM 要求所有参与服务器协调升级。** 不支持共享 IAM 后端的新旧节点混用，也不支持滚动降级。备份完整 IAM 存储及所需加密材料，普通管理导出不包含删除历史。同名父身份重建前签发的旧凭据可能需要重新签发；升级前已经丢失的删除历史无法自动重建。具体操作见 [IAM 升级与回滚说明](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/site-replication/iam-revocations.md#protocol-and-supported-upgrade)。
+- **IAM 要求所有参与服务器协调升级。** 不支持共享 IAM 后端的新旧节点混用，也不支持滚动降级。备份完整 IAM 存储及所需加密材料，普通管理导出不包含删除历史。同名父身份重建前签发的旧凭据可能需要重新签发；升级前已经丢失的删除历史无法自动重建。具体操作见 [IAM 升级与回滚说明](/zh/operations/replication/iam-upgrade/)。
 - **不可读池会更一致地使写入、删除失败。** 即使另一个池还能处理 GET/HEAD，只要任一池元数据不可读，条件式分片上传完成就会失败。普通版本 DELETE 在池不可读或清理失败时也返回错误；读取仲裁不足返回 `503 SlowDownRead`，应在恢复后重试。出站删除复制尚未完成时，请求成功不代表每块磁盘都已立即物理删除。
 - **Server 20260903 从未包含访问频率池间分层。** 只有使用过该实验功能的构建需要按[迁移说明](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/bucket/lifecycle/access-tiering-removal.md)清理配置和 XML。普通生命周期过期、远程层迁移、再平衡与池退役仍可使用。
 - 清除操作的审计状态由 `COMPLETE` 规范为 `COMPLETED`。历史异常标签修订可能失败并重试，本次修复不会重建其历史。较短的请求头超时也会限制 TLS 握手读取窗口；它不会给 HTTP/1 上传、下载新增总时长限制。
@@ -74,6 +74,9 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 
 ### 仍待完成的工作 {#pending}
 
+- **普通条件 PUT：** [#199](https://github.com/pgsty/silo/issues/199) 跟踪跨 pool 前置条件盲区，修复仍在独立研究与评审。#190 修复的是分片完成，不能据此认定普通 PUT 已修复。
+- **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。源码修复不会自动修复旧状态。
+- **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 单独验收最终制品与多进程栈，当前尚未据此发布新 Server。
 - **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 仍然开放。[设计记录](/zh/blog/design/list-multipart-uploads/)中的前缀、分页与原始对象键发现限制，不属于上面的分片上传完成修复。
 - **Console 对象分享：** [Console #52](https://github.com/pgsty/silo-console/issues/52) 仍然开放，本地修复尚未合入。[拟议的请求限制](/zh/reference/minio-server/settings/console/#object-sharing)尚未进入当前选择的 Console 源码或已发布的 Server、Console。
 

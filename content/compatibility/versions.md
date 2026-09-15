@@ -79,7 +79,7 @@ a build containing them.
   Back up complete IAM storage and required encryption material; a live admin
   export omits deletion history. Older credentials for a recreated parent may
   need reissuance. Pre-upgrade deletions whose history is already lost cannot be
-  reconstructed automatically. Follow the [IAM upgrade and rollback guide](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/site-replication/iam-revocations.md#protocol-and-supported-upgrade).
+  reconstructed automatically. Follow the [IAM upgrade and rollback guide](/operations/replication/iam-upgrade/).
 - **Unavailable pools can now fail writes and deletes more consistently.**
   Conditional multipart completion fails if any pool's metadata is unreadable,
   even when GET/HEAD can use another pool. Ordinary version DELETE also fails
@@ -102,6 +102,17 @@ a new release or production cluster rollout.
 
 ### Work still pending {#pending}
 
+- **Ordinary conditional PUT:** [#199](https://github.com/pgsty/silo/issues/199)
+  tracks a separate cross-pool precondition gap under investigation and review.
+  The multipart-completion repair in #190 does not resolve ordinary PUT.
+- **Upgrade and historical-state readiness:** [#200](https://github.com/pgsty/silo/issues/200)
+  tracks the [IAM upgrade/restore rehearsal](/operations/replication/iam-upgrade/);
+  [#201](https://github.com/pgsty/silo/issues/201) tracks [historical replica inventory and repair validation](/operations/replication/replica-metadata-audit/).
+  Source repairs do not automatically repair old state.
+- **Release delivery:** [#202](https://github.com/pgsty/silo/issues/202)
+  collects release notes and component identities; [#203](https://github.com/pgsty/silo/issues/203)
+  separately validates final artifacts and multi-process behavior. No new Server
+  release is established by these tracking issues.
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
   open. The prefix, pagination and original-key discovery limitations described
   in the [design record](/blog/design/list-multipart-uploads/) are not fixed by
