@@ -17,6 +17,9 @@ draft: false
 url: "/blog/design/request-header-timeouts/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+
 This page records the repair of Server's HTTP read deadlines, merged into
 main as part of [PR #196](https://github.com/pgsty/silo/pull/196) (fix
 [`055030ea5`](https://github.com/pgsty/silo/commit/055030ea5)).

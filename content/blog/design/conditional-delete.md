@@ -12,6 +12,9 @@ draft: false
 url: "/blog/design/conditional-delete/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+
 **Status, 2026-09-16:** [PR #145](https://github.com/pgsty/silo/pull/145) added single-object conditional deletion; [PR #178](https://github.com/pgsty/silo/pull/178) subsequently repaired multi-pool serialization and reconciliation. Neither change is in published Server 20260903. Check the [component matrix](/compatibility/versions/) before relying on this behavior.
 
 The August proposal around [PR #12](https://github.com/pgsty/silo/pull/12) was broader than the code that merged. In particular, its proposed batch rejection, extra read authorization and current-version-only rule are **not implemented guarantees**. This page describes the maintained source at [`f99ed829b`](https://github.com/pgsty/silo/tree/f99ed829b5eba549160725f035156c9e020b6a07).

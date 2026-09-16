@@ -9,6 +9,9 @@ weight: 1
 url: "/zh/blog/security/20260916-release-hardening/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
 本文记录截至 9 月 16 日的三项修复及交付边界。编号属于 SILO 本地安全台账，不是 CVE，也不代表已分配 CVSS 分数。
 持续维护的索引见[安全公告台账](/zh/about/security-advisories/)。
 

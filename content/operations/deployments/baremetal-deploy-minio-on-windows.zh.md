@@ -38,23 +38,23 @@ MinIO 会根据拓扑中的节点和驱动器总数，自动为集群确定默�
 
 ### 1. 下载 Silo 二进制文件 {#minio}
 
-从[下载与安装](/zh/download/#server)获取与架构对应的 Windows 归档，使用同一发布随附的校验和核验后，解压得到 `minio.exe`。
+从[下载与安装](/zh/download/#server)获取与架构对应的 Windows 归档，使用同一发布随附的校验和核验后，解压得到 `silo.exe`。
 
 下一步说明如何运行该文件。请从 PowerShell 或命令提示符启动服务端，不要在资源管理器中双击运行。
 
 ### 2. 启动 MinIO Server {#minio-server}
 
-在 PowerShell 或命令提示符中，切换到可执行文件所在目录，或将 `minio.exe` 文件路径加入系统 `$PATH`。
+在 PowerShell 或命令提示符中，切换到可执行文件所在目录，或将 `silo.exe` 文件路径加入系统 `$PATH`。
 
 {{< tabs group="multi-drive-single-drive" >}}
 {{< tab label="Multi-Drive" value="multi-drive" >}}
 对于带有多个驱动器的 Windows 主机，你可以指定一组顺序驱动器，以便在 单机多盘 (SNMD) 拓扑中配置 MinIO：
 
 ```text
-.\minio.exe server {D...G}:\minio --console-address :9001
+.\silo.exe server {D...G}:\minio --console-address :9001
 ```
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会将输出打印到系统控制台，类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会将输出打印到系统控制台，类似如下：
 
 ```shell
 API: http://192.0.2.10:9000  http://127.0.0.1:9000
@@ -79,10 +79,10 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 使用此命令在 `C:\minio` 文件夹中启动本地 MinIO 实例。 你可以将 `C:\minio` 替换为本地主机上的其他驱动器或文件夹路径。
 
 ```text
-.\minio.exe server C:\minio --console-address :9001
+.\silo.exe server C:\minio --console-address :9001
 ```
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会将输出打印到系统控制台，类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会将输出打印到系统控制台，类似如下：
 
 ```shell
 API: http://192.0.2.10:9000  http://127.0.0.1:9000
@@ -107,7 +107,7 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 
 ### 3. 使用浏览器连接到 MinIO 服务端 {#id6}
 
-使用浏览器（例如 Microsoft Edge）访问 `http://127.0.0.1:9001`，或访问 [`minio server`](/zh/reference/minio-server/#command-minio.server) 命令输出中列出的任意 Console 地址，以打开 [MinIO 控制台](/zh/administration/minio-console/#minio-console)。 例如，示例输出中的 `Console: http://192.0.2.10:9001 http://127.0.0.1:9001` 表示有两个可用于连接 Console 的地址。
+使用浏览器（例如 Microsoft Edge）访问 `http://127.0.0.1:9001`，或访问 [`silo server`](/zh/reference/minio-server/#command-minio.server) 命令输出中列出的任意 Console 地址，以打开 [MinIO 控制台](/zh/administration/minio-console/#minio-console)。 例如，示例输出中的 `Console: http://192.0.2.10:9001 http://127.0.0.1:9001` 表示有两个可用于连接 Console 的地址。
 
 尽管端口 `9000` 用于连接 API，MinIO 仍会自动将浏览器访问重定向到 MinIO Console。
 

@@ -13,9 +13,9 @@ revoked identities and older grants. They require a coordinated upgrade of all
 participating servers, including nodes without site replication that share an
 IAM backend. Mixed old/new nodes on that backend and rolling downgrade are unsupported.
 
-**Release status:** these repairs are in the [September source baseline](/compatibility/versions/#september-reliability),
-not Server 20260903. This procedure is preparation for a build containing those
-repairs. Isolated upgrade/restore observations and remaining recovery checks are
+**Release status:** these repairs shipped in [Server 20260916](/blog/release/silo-20260916/)
+and are absent from Server 20260903. This procedure covers coordinated upgrades
+and recovery for the repaired version. Isolated upgrade/restore observations and remaining recovery checks are
 tracked in [#200](https://github.com/pgsty/silo/issues/200); see the
 [validation scope](#validation). Publication of this page does not establish
 production upgrade acceptance.
@@ -62,7 +62,7 @@ live replication group merely to inspect its contents.
 Before upgrading, follow the [password-policy migration](/compatibility/password-permissions/).
 Where an existing `Deny admin:CreateUser` also meant to prohibit changing one's own
 password, add `admin:ChangeMyPassword` to the same Deny with its existing scope and
-conditions; retain both through rollback. Current main keeps multipart listing in
+conditions; retain both through rollback. Server 20260916 keeps multipart listing in
 `legacy` by default. An ordinary upgrade does not require strict mode; only an
 explicit opt-in needs the [multipart preflight and drain procedure](/blog/design/list-multipart-uploads/#implementation).
 

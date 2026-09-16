@@ -21,7 +21,7 @@ upstream_modified: true
 - [CopyObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html)
 - [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
 - [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
-  - **条件 DELETE：**已发布的 Server 20260903 忽略 `If-Match`。当前 main 通过 #145/#178 支持单个 `DeleteObject` 的非空 `If-Match`，显式版本比较指定版本。批量 `DeleteObjects` 仍忽略 `<Object><ETag>`，没有逐项条件保护。详见[范围与限制](/blog/design/conditional-delete/)。
+  - **条件 DELETE：**已发布的 Server 20260903 忽略 `If-Match`。Server 20260916 通过 #145/#178 支持单个 `DeleteObject` 的非空 `If-Match`，显式版本比较指定版本。批量 `DeleteObjects` 仍忽略 `<Object><ETag>`，没有逐项条件保护。详见[范围与限制](/blog/design/conditional-delete/)。
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)
@@ -64,7 +64,7 @@ PutObjectAcl
 #### 与 S3 API 在多部分上传方面的差异 {#id5}
 
 - 已发布的 Server 20260903：`ListMultipartUploads` 将非空 `prefix` 当成精确对象名；空 prefix 使用节点本地易失缓存，不具备完整分页、marker 和 delimiter 语义。
-- [PR #198](https://github.com/pgsty/silo/pull/198) 增加持久扫描与全局分页，并在原生 marker 对应上传被删除后继续翻页。发布前兼容性修复默认使用保留旧限制的 `legacy` 模式；严格模式仅通过 `MINIO_API_MULTIPART_LISTING=strict` 显式启用。启用严格模式前需要所有 writer 升级、旧上传排空、只读预检及容量验收；严格模式在覆盖不足、旧格式或资源超限时返回 503。普通升级不要求切换模式或强制排空上传。排序、扫描容量与迟到创建写入的取消边界见[实现与升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。这不表示发布产物或生产验收完成。
+- Server 20260916 通过 [PR #198](https://github.com/pgsty/silo/pull/198) 增加持久扫描与全局分页，并在原生 marker 对应上传被删除后继续翻页。经 #213 的兼容性修复，默认使用保留旧限制的 `legacy` 模式；严格模式仅通过 `MINIO_API_MULTIPART_LISTING=strict` 显式启用。启用严格模式前需要所有 writer 升级、旧上传排空、只读预检及容量验收；严格模式在覆盖不足、旧格式或资源超限时返回 503。普通升级不要求切换模式或强制排空上传。排序、扫描容量与迟到创建写入的取消边界见[实现与升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。发布不代表严格模式已通过各部署的容量验收。
 - `PutBucketLifecycle` 不支持 `AbortIncompleteMultipartUpload` 生命周期动作。
 
 ## 存储桶 API {#id6}

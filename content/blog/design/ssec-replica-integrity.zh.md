@@ -11,6 +11,9 @@ draft: false
 url: "/zh/blog/design/ssec-replica-integrity/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
 **2026-09-16 源码状态：**[#122](https://github.com/pgsty/silo/pull/122)、[#123](https://github.com/pgsty/silo/pull/123)、[#124](https://github.com/pgsty/silo/pull/124)、[#126](https://github.com/pgsty/silo/pull/126) 和 [#134](https://github.com/pgsty/silo/pull/134) 已在 main，但不在已发布的 Server 20260903 中。此前零字节/属性读取认证与目标密钥 checksum 响应修复已随 20260903 发布；不能把所有 SSE-C 修复当作同一次发布。
 
 ## 密文与信任 {#ciphertext}

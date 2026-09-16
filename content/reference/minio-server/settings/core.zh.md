@@ -458,7 +458,7 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 
 ## 多段上传列举模式 {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**仅当前 main 提供，Server 20260903 尚未包含。**`MINIO_API_MULTIPART_LISTING` 接受 `legacy` 或 `strict`，默认 **`legacy`**。在每个服务进程的环境中设置并重启；不支持共享的 `api multipart_listing` 配置键，不能用 `mcli admin config set` 选择模式。无效值会记录诊断并使用 `legacy`，不会丢弃其它 API 设置。
+**自 Server 20260916 起提供，Server 20260903 不包含。** `MINIO_API_MULTIPART_LISTING` 接受 `legacy` 或 `strict`，默认 **`legacy`**。在每个服务进程的环境中设置并重启；不支持共享的 `api multipart_listing` 配置键，不能用 `mcli admin config set` 选择模式。无效值会记录诊断并使用 `legacy`，不会丢弃其它 API 设置。
 
 Legacy 保留精确键/cache 列举限制。Strict 扫描持久上传元数据，启用前必须升级所有写入方并排空旧上传。缺少身份字段时无法证明旧上传属于哪个桶，因此**另一个桶的上传仍可能导致本桶 strict 列举返回 503**。有效身份可以提前过滤，所以并不是所有旧原生 ID 记录都会无条件导致跨桶失败。
 
@@ -466,7 +466,7 @@ Legacy 保留精确键/cache 列举限制。Strict 扫描持久上传元数据�
 
 ## HTTP 请求头与空闲超时 {#envvar.MINIO_READ_HEADER_TIMEOUT}
 
-`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` 默认 `30s`；参数可用，但在普通 CLI 帮助中隐藏。当前 main 将其接入 HTTP/1 请求头绝对截止时间，Server 20260903 尚未正确执行这个可配置限制。零值回退到读取超时；负值禁用请求头上限，可能重新放开慢请求头资源耗尽路径。该限制也影响 TLS 握手读取。超时可能直接关闭连接，并不保证返回 HTTP 错误状态。
+`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` 默认 `30s`；参数可用，但在普通 CLI 帮助中隐藏。Server 20260916 将其接入 HTTP/1 请求头绝对截止时间，Server 20260903 尚未正确执行这个可配置限制。零值回退到读取超时；负值禁用请求头上限，可能重新放开慢请求头资源耗尽路径。该限制也影响 TLS 握手读取。超时可能直接关闭连接，并不保证返回 HTTP 错误状态。
 
 <a id="envvar.MINIO_IDLE_TIMEOUT"></a>
 

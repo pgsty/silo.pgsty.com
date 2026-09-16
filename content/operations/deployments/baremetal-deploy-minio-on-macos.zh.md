@@ -38,12 +38,12 @@ MinIO 会根据拓扑中的节点和驱动器总数，自动为集群确定默�
 
 ### 1. 下载 Silo 二进制文件 {#minio}
 
-从[下载与安装](/zh/download/#server)选择 Intel（`darwin_amd64`）或 Apple Silicon（`darwin_arm64`）归档。使用同一发布随附的校验和核验后，解压并安装 `minio` 兼容二进制：
+从[下载与安装](/zh/download/#server)选择 Intel（`darwin_amd64`）或 Apple Silicon（`darwin_arm64`）归档。使用同一发布随附的校验和核验后，解压并安装 `silo` 二进制：
 
 ```shell
-tar -xzf minio_*_darwin_*.tar.gz
-sudo install -m 0755 ./minio /usr/local/bin/minio
-minio --version
+tar -xzf silo_*_darwin_*.tar.gz
+sudo install -m 0755 ./silo /usr/local/bin/silo
+silo --version
 ```
 
 本页原有 Homebrew 命令安装的是上游 MinIO formula，而不是 Silo，因此已经删除。
@@ -63,7 +63,7 @@ cp private.key /opt/minio/certs
 cp public.crt /opt/minio/certs
 ```
 
-MinIO 会根据操作系统/系统默认的受信任证书颁发机构列表来验证客户端证书。 若要启用对第三方证书或内部签发证书的验证，请将 CA 文件放入 `/opt/minio/certs/CAs` 目录。 CA 文件应包含从叶子证书到根证书的完整信任链，以确保验证成功。
+SILO 连接其他节点、复制目标等服务时，使用操作系统信任库和配置的 `CAs` 目录验证对端 TLS 证书。使用私有 CA 时，将其 CA 证书放入 `/opt/minio/certs/CAs`，并确保服务账户可读。仅启用服务端 TLS 并不会自动启用客户端证书认证。
 
 有关为 MinIO 配置 TLS 的更具体指导，包括通过 Server Name Indication (SNI) 支持多域名，请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
 
@@ -78,7 +78,7 @@ MinIO 会根据操作系统/系统默认的受信任证书颁发机构列表来�
 
 ### 3. 创建 MinIO 环境文件 {#id5}
 
-在 `/etc/default/minio` 创建环境文件。 MinIO 服务将该文件作为 MinIO *以及* `minio.service` 文件所用全部 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 的来源。
+在 `/etc/default/silo` 创建环境文件。下面的启动命令通过 `MINIO_CONFIG_ENV_FILE` 读取它；macOS 不使用 Linux 的 systemd 服务。
 
 请根据你的部署拓扑修改示例。
 
@@ -168,8 +168,8 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 以下命令会启动附着在当前终端/shell 窗口上的 MinIO Server：
 
 ```shell
-export MINIO_CONFIG_ENV_FILE=/etc/default/minio
-minio server --console-address :9001
+export MINIO_CONFIG_ENV_FILE=/etc/default/silo
+silo server --console-address :9001
 ```
 
 命令输出类似如下：
@@ -183,7 +183,7 @@ Silo 对象存储服务端
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-09-03T13-18-01Z (go1.27.1 darwin/arm64)
+Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 darwin/arm64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin
@@ -217,7 +217,7 @@ Status:         1 Online, 0 Offline.
 你可以使用 MinIO Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。 每个 MinIO server 都包含自身内嵌的 MinIO Console。
 {{< /tab >}}
 {{< tab label="CLI" value="cli" >}}
-请按照本地主机上的 `mc` [安装说明](/zh/reference/minio-mc/#mc-install) 完成安装。 运行 `mc --version` 验证安装结果。
+请按照本地主机上的 `mcli` [安装说明](/zh/reference/minio-mc/#mc-install) 完成安装。 运行 `mcli --version` 验证安装结果。下文引用的 `mc` 命令可替换为发行包安装的 `mcli`，参数保持不变。
 
 如果你的 MinIO 部署使用第三方或自签名 TLS 证书，请将 <abbr title="Certificate Authority">CA</abbr> 文件复制到 `~/.mc/certs/CAs`，以便 `mc` 信任该证书链。
 

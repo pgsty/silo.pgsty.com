@@ -38,12 +38,12 @@ While you can change erasure parity settings at any time, objects written with a
 
 ### 1. Download the Silo Binary {#download-the-minio-binary}
 
-Choose the Intel (`darwin_amd64`) or Apple Silicon (`darwin_arm64`) archive from [Download & Install](/download/#server). Verify the archive against the checksum published with the same release, extract it, and install the `minio` compatibility binary:
+Choose the Intel (`darwin_amd64`) or Apple Silicon (`darwin_arm64`) archive from [Download & Install](/download/#server). Verify the archive against the checksum published with the same release, extract it, and install the `silo` binary:
 
 ```shell
-tar -xzf minio_*_darwin_*.tar.gz
-sudo install -m 0755 ./minio /usr/local/bin/minio
-minio --version
+tar -xzf silo_*_darwin_*.tar.gz
+sudo install -m 0755 ./silo /usr/local/bin/silo
+silo --version
 ```
 
 The old Homebrew commands on this page installed the upstream MinIO formula, not Silo, and have therefore been removed.
@@ -63,7 +63,7 @@ cp private.key /opt/minio/certs
 cp public.crt /opt/minio/certs
 ```
 
-MinIO verifies client certificates against the OS/System’s default list of trusted Certificate Authorities. To enable verification of third-party or internally-signed certificates, place the CA file in the `/opt/minio/certs/CAs` folder. The CA file should include the full chain of trust from leaf to root to ensure successful verification.
+SILO uses the operating system trust store and the configured `CAs` directory to verify TLS peers when connecting to other services, such as nodes and replication targets. For a private CA, place its CA certificate in `/opt/minio/certs/CAs` and make it readable by the service account. Enabling server TLS alone does not enable client-certificate authentication.
 
 For more specific guidance on configuring MinIO for TLS, including multi-domain support via Server Name Indication (SNI), see [Network Encryption (TLS)](/operations/network-encryption/#minio-tls).
 
@@ -78,7 +78,7 @@ For more specific guidance on configuring MinIO for TLS, including multi-domain 
 
 ### 3. Create the MinIO Environment File {#create-the-minio-environment-file}
 
-Create an environment file at `/etc/default/minio`. The MinIO service uses this file as the source of all [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) used by MinIO *and* the `minio.service` file.
+Create an environment file at `/etc/default/silo`. The launch command below reads it through `MINIO_CONFIG_ENV_FILE`; macOS does not use the Linux systemd unit.
 
 Modify the example to reflect your deployment topology.
 
@@ -168,8 +168,8 @@ Specify any other [environment variables](/reference/minio-server/settings/#mini
 The following command starts the MinIO Server attached to the current terminal/shell window:
 
 ```shell
-export MINIO_CONFIG_ENV_FILE=/etc/default/minio
-minio server --console-address :9001
+export MINIO_CONFIG_ENV_FILE=/etc/default/silo
+silo server --console-address :9001
 ```
 
 The command output resembles the following:
@@ -183,7 +183,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-09-03T13-18-01Z (go1.27.1 darwin/arm64)
+Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 darwin/arm64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin
@@ -217,7 +217,7 @@ Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previou
 You can use the MinIO Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration. Each MinIO server includes its own embedded MinIO Console.
 {{< /tab >}}
 {{< tab label="CLI" value="cli" >}}
-Follow the [installation instructions](/reference/minio-mc/#mc-install) for `mc` on your local host. Run `mc --version` to verify the installation.
+Follow the [installation instructions](/reference/minio-mc/#mc-install) for `mcli` on your local host. Run `mcli --version` to verify the installation. Substitute the installed `mcli` for the `mc` examples below; the arguments are unchanged.
 
 If your MinIO deployment uses third-party or self-signed TLS certificates, copy the <abbr title="Certificate Authority">CA</abbr> files to `~/.mc/certs/CAs` to allow `mc`
 

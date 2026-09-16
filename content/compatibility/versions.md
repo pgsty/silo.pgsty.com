@@ -9,24 +9,26 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-**Verified on 2026-09-16.** SILO releases its four components independently.
+**Verified on 2026-09-17.** SILO releases its four components independently.
 A merged dependency update does not change an existing binary or image.
 
 ## Published components {#published}
 
 | Component | Latest published version | What it contains |
 | --- | --- | --- |
-| Server | <a href="https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z" style="white-space:nowrap">20260903</a> | pkg v3.13.2; upstream SDK `0e78d3f18efe`; mcli 20260903; embedded Console source `464a59d73ada` with v2.3.0 version identity |
+| Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | pkg v3.14.1; upstream SDK `32e1f32cb176`; mcli 20260916; embedded Console v2.4.1, source `1360e26d976d` |
 | <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) | pkg v3.14.1; mcli 20260916; upstream SDK `32e1f32cb176`; restricted shared downloads, streaming ZIPs and signed artifacts |
 | mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1; upstream SDK `32e1f32cb176`; package version `20260916000000.0.0` |
 | Shared pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | Own module path `github.com/pgsty/silo-pkg/v3`; CopyObject embedded-error handling; JWX v3.3.0 field-name escaping; upstream SDK `32e1f32cb176` |
 
-Release notes: [Server 20260903](/blog/release/silo-20260903/),
+Release notes: [Server 20260916](/blog/release/silo-20260916/),
 [Console v2.4.1](/blog/release/console-2.4.1/),
 [mcli 20260916](/blog/release/mcli-20260916/), [pkg v3.14.1](/blog/release/pkg-3.14.1/).
 For embedded deployments, select Console and MC explicitly in the Server build.
 Package-repository mirrors may lag GitHub; the [download page](/download/)
 links directly to the published artifacts.
+
+**Standalone Console image:** anonymous token requests for `docker.io/pgsty/silo-console` returned HTTP 401 on 2026-09-17; public pulls are not confirmed. v2.4.1 GitHub binaries, packages and source are published. This limitation does not affect Server embedding.
 
 ## September 16 dependency graph {#source}
 
@@ -55,9 +57,8 @@ coordinated Server upgrades.
 
 ### Storage, IAM and HTTP repairs {#september-reliability}
 
-The following changes have merged into Server main. They remain absent from
-the published Server 20260903; use the linked PRs and source records to identify
-a build containing them.
+The following changes shipped in Server 20260916 and are absent from Server
+20260903. Use the linked PRs and source records to check each repair's scope.
 
 | <span style="display:inline-block;min-width:10rem">Area</span> | <span style="white-space:nowrap">Merged PRs</span> | Operator-visible behavior |
 | --- | --- | --- |
@@ -130,7 +131,7 @@ The separate cross-pool conditional PUT defect in
 Server 20260903. [PR #207](https://github.com/pgsty/silo/pull/207) was merged as
 [`9b4ae82a29cc`](https://github.com/pgsty/silo/commit/9b4ae82a29cc2290fb5be7b551ec3d8cf7acdd99)
 after its head `4620be394b52` passed all eight CI checks on 2026-09-16.
-**The repair is on main and remains unreleased.** Its behavior is:
+**The repair shipped in Server 20260916.** Its behavior is:
 
 - Ordinary multi-pool `If-Match` / `If-None-Match` conditions use the logical
   current object across all pools. Unreadable metadata can prevent acceptance
@@ -157,8 +158,7 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
   Source repairs do not automatically repair old state.
 - **Release delivery:** [#202](https://github.com/pgsty/silo/issues/202)
   collects release notes and component identities; [#203](https://github.com/pgsty/silo/issues/203)
-  separately validates final artifacts and multi-process behavior. No new Server
-  release is established by these tracking issues.
+  separately validates final artifacts and multi-process behavior. Release-artifact acceptance and production rollout remain separate.
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
   open for capacity/release acceptance and the known delayed-creation-write
   boundary. PR #198 repairs durable discovery, global pagination and static
@@ -204,7 +204,7 @@ with unmodified upstream MinIO/MC and other S3 implementations is best effort.
 
 ## September 16 Server source review {#source-review}
 
-Pinned baseline `f99ed829b5eb` selects pkg v3.14.0, upstream minio-go `60bd07042d49`, Console source `56dfe455ac2f` and bundled mcli 20260913. This differs from standalone Console 2.4.1. Recheck the final Server tag before release; publishing another component does not update an existing Server.
+Server 20260916 source [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4d51406b7ed87af5fe6fe0f801f3290f96eb3c) selects pkg v3.14.1, upstream minio-go `32e1f32cb176`, Console v2.4.1 source `1360e26d976d`, and MC `e952aa78f10a` (mcli 20260916). The published Server tag is `RELEASE.2026-09-16T00-00-00Z`, package version `20260916000000.0.0`.
 
 - #213 retains **legacy as the multipart default**. Strict requires `MINIO_API_MULTIPART_LISTING` in the process environment and restart, with no shared dynamic key. Majority cancellation confirmation is strict-only. See [settings](/reference/minio-server/settings/core/#multipart-listing) and the [upgrade contract](/blog/design/list-multipart-uploads/#implementation).
 - [Multi-pool consistency](/blog/design/multi-pool-object-consistency/), [conditional DELETE](/blog/design/conditional-delete/) and [Object Lock replication ordering](/blog/design/object-lock-replication-ordering/) distinguish logical current objects, addressed versions and persistence locks.
@@ -214,3 +214,5 @@ Pinned baseline `f99ed829b5eb` selects pkg v3.14.0, upstream minio-go `60bd07042
 - The [September security chronicle](/blog/security/20260916-release-hardening/) records SN-2026-012/013/014 and their distinct component delivery boundaries.
 
 These later Server repairs are not in 20260903; original Object Lock fixes and other released prerequisites retain their explicitly identified earlier release boundaries.
+
+Final storage repairs also include migration tag preservation in [`fced86303`](https://github.com/pgsty/silo/commit/fced8630365fd57d6116c595b65252bcd12e13be), null-version quorum in [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b126b4ac640cd076a4585b66f2ec753a6), and exact-version purge, marker metadata and queued-creation fixes in `eb4f5e5b3` / `254b19ac0` / `358ab38fb`. Late creation/crash residue in [#217](https://github.com/pgsty/silo/issues/217) and restart-time listing omissions in [#218](https://github.com/pgsty/silo/issues/218) remain known limitations.

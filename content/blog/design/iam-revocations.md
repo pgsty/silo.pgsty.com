@@ -11,6 +11,9 @@ draft: false
 url: "/blog/design/iam-revocations/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+
 **Source status, 2026-09-16:** [#191](https://github.com/pgsty/silo/pull/191) and [#192](https://github.com/pgsty/silo/pull/192) are merged into main, but are absent from published Server 20260903. They change persistent IAM state and require a coordinated upgrade. Follow the [upgrade and recovery runbook](/operations/replication/iam-upgrade/) and [SN-2026-013](/about/security-advisories/#sn-2026-013).
 
 SILO retains the version of a deleted IAM record so an offline site cannot

@@ -35,7 +35,7 @@ docker run -d --name silo \
   -e MINIO_ROOT_USER=silo-admin \
   -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
   -v silo-data:/data \
-  pgsty/silo:RELEASE.2026-09-03T13-18-01Z \
+  docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z \
   server /data --console-address :9001
 ```
 
@@ -64,6 +64,6 @@ Native packages install the server as `/usr/bin/silo`; the service keeps the est
 Read the [migration guide](/compatibility/migration/) before changing images or binaries. Preserve the data volumes and configuration, stop every node running the old binary, and then start every node on the same pinned SILO release. Do not perform a mixed-binary rolling migration, and never use `docker compose down -v` on data you intend to keep.
 {{< /tab >}}
 {{< tab label="Kubernetes" value="kubernetes" >}}
-The archived MinIO Operator `v7.1.1` can run a SILO Tenant when its image is overridden to `pgsty/silo` with a tested tag or digest. Follow the [Tenant Helm guide](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and treat that Operator version as a frozen compatibility baseline, not an actively maintained dependency.
+The archived MinIO Operator `v7.1.1` can run a SILO Tenant when its image is overridden to `docker.io/pgsty/silo` with a tested tag or digest. Follow the [Tenant Helm guide](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and treat that Operator version as a frozen compatibility baseline, not an actively maintained dependency.
 {{< /tab >}}
 {{< /tabs >}}

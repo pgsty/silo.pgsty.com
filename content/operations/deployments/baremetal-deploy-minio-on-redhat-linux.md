@@ -46,34 +46,34 @@ Consider using the MinIO [Erasure Code Calculator](https://min.io/product/erasur
 Download the x86-64 or ARM64 RPM from [Download & Install](/download/#server), verify its published checksum, and install it:
 
 ```shell
-sudo dnf install ./minio-*.rpm
+sudo dnf install ./silo-*.rpm
 ```
 
 Current Silo releases do not publish the inherited `ppc64le` or `s390x` package variants.
 
 ### 2. Review the `systemd` Service File {#review-the-systemd-service-file}
 
-The `.rpm` package install the following [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/usr/lib/systemd/system/minio.service`:
+The `.rpm` package installs the following [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/usr/lib/systemd/system/silo.service`:
 
-```shell
+```ini
 [Unit]
-Description=MinIO
+Description=Silo Object Storage Server
 Documentation=https://silo.pgsty.com/docs/
 Wants=network-online.target
-After=network-online.target
-AssertFileIsExecutable=/usr/local/bin/minio
+After=network-online.target minio.service
+Conflicts=minio.service
+AssertFileIsExecutable=/usr/bin/silo
 
 [Service]
 Type=notify
 
-WorkingDirectory=/usr/local
-
-User=minio-user
-Group=minio-user
+User=silo
+Group=silo
 ProtectProc=invisible
 
 EnvironmentFile=-/etc/default/minio
-ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
+EnvironmentFile=-/etc/default/silo
+ExecStart=/usr/bin/silo server $MINIO_OPTS $MINIO_VOLUMES
 
 # Let systemd restart this service always
 Restart=always
@@ -90,48 +90,31 @@ TasksMax=infinity
 # Disable timeout logic and wait until process is stopped
 TimeoutSec=infinity
 
-# Disable killing of MinIO by the kernel's OOM killer
+# Disable killing of Silo by the kernel's OOM killer
 OOMScoreAdjust=-1000
 
 SendSIGKILL=no
 
 [Install]
 WantedBy=multi-user.target
-
-# Built for ${project.name}-${project.version} (${project.name})
 ```
 
-### 3. Create a User and Group for MinIO {#create-a-user-and-group-for-minio}
+### 3. Check the Service Account and Permissions {#create-a-user-and-group-for-minio}
 
-The `minio.service` file runs as the `minio-user` User and Group by default. You can create the user and group using the `groupadd` and `useradd` commands. The following example creates the user, group, and sets permissions to access the folder paths intended for use by MinIO. These commands typically require root (`sudo`) permissions.
+The package installer creates `silo:silo` but does not start or enable the service. For a new deployment, give that account access to the intended data and certificate directories.
 
-```shell
-groupadd -r minio-user
-useradd -M -r -g minio-user minio-user
-```
-
-The command above creates the user **without** a home directory, as is typical for system service accounts.
-
-You **must** `chown` the drive paths you intend to use with MinIO. If the `minio-user` user or group cannot read, write, or list contents of any drive, the MinIO process returns errors on startup.
-
-For example, the following command sets `minio-user:minio-user` as the user-group owner of all drives at `/mnt/drives-n` where `n` is between 1 and 16 inclusive:
-
-```shell
-chown -R minio-user:minio-user /mnt/drives-{1...16}
-```
+When migrating MinIO, preserve the existing data owner and configure a `silo.service` user/group drop-in using the [package migration guide](/compatibility/binary/#user). Do not recursively change existing data ownership just to rename the service. The following `silo:silo` examples apply to new deployments; use the selected existing account for a migration.
 
 ### 4. Enable TLS Connectivity {#enable-tls-connectivity}
 
 Create or provide [Transport Layer Security (TLS)](/operations/network-encryption/#minio-tls) certificates to MinIO to automatically enable HTTPS-secured connections between the server and clients.
 
-Place the certificates in a directory accessible by the `minio-user` user/group:
+Place the certificates in a directory accessible by the `silo` user/group:
 
 ```shell
-mkdir -p /opt/minio/certs
-chown -R minio-user:minio-user /opt/minio/certs
-
-cp private.key /opt/minio/certs
-cp public.crt /opt/minio/certs
+sudo install -d -o silo -g silo -m 0750 /opt/minio/certs
+sudo install -o silo -g silo -m 0600 private.key /opt/minio/certs/private.key
+sudo install -o silo -g silo -m 0644 public.crt /opt/minio/certs/public.crt
 ```
 
 For local testing or development environments, you can use the MinIO [certgen](https://github.com/minio/certgen) to mint self-signed certificates. For example, the following command generates a self-signed certificate with a set of IP and DNS Subject Alternate Names (SANs) associated to the MinIO Server hosts:
@@ -142,13 +125,13 @@ certgen -host "localhost,minio-*.example.net"
 
 Place the generated `public.crt` and `private.key` into the `/path/to/certs` directory to enable TLS for the MinIO deployment. Applications can use the `public.crt` as a trusted Certificate Authority to allow connections to the MinIO deployment without disabling certificate validation.
 
-When MinIO runs with TLS enabled, it also verifies connecting client certificates against the OS list of trusted Certificate Authorities. To enable verification of third-party or internally-signed certificates, place the CA file in the `/opt/minio/certs/CAs` folder. The CA file should include the full chain of trust from leaf to root to ensure successful verification.
+SILO uses the operating system trust store and the configured `CAs` directory to verify TLS peers when connecting to other services, such as nodes and replication targets. For a private CA, place its CA certificate in `/opt/minio/certs/CAs` and make it readable by the service account. Enabling server TLS alone does not enable client-certificate authentication.
 
 For more specific guidance on configuring MinIO for TLS, including multi-domain support via Server Name Indication (SNI), see [Network Encryption (TLS)](/operations/network-encryption/#minio-tls). You can optionally skip this step to deploy without TLS enabled. MinIO strongly recommends *against* non-TLS deployments outside of early development.
 
 ### 5. Create the MinIO Environment File {#create-the-minio-environment-file}
 
-Create an environment file at `/etc/default/minio`. The MinIO service uses this file as the source of all [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) used by MinIO *and* the `minio.service` file.
+Create an environment file at `/etc/default/silo`. The MinIO service uses this file as the source of all [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) used by MinIO *and* the `silo.service` file.
 
 Modify the example to reflect your deployment topology.
 
@@ -277,13 +260,13 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 
 Specify any other [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) or server command-line options as required by your deployment.
 
-For distributed deployments, all nodes **must** have matching `/etc/default/minio` environment files. Use a utility such as `shasum -a 256 /etc/default/minio` on each node to verify an exact match across all nodes.
+For distributed deployments, all nodes **must** have matching `/etc/default/silo` environment files. Use a utility such as `shasum -a 256 /etc/default/silo` on each node to verify an exact match across all nodes.
 
 ### 6. Start the MinIO Deployment {#start-the-minio-deployment}
 
-Use `systemctl start minio` to start each node in the deployment.
+Use `systemctl start silo` to start each node in the deployment.
 
-You can track the status of the startup using `journalctl -u minio` on each node.
+You can track the status of the startup using `journalctl -u silo` on each node.
 
 On successful startup, the MinIO process emits a summary of the deployment that resembles the following output:
 
@@ -292,7 +275,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-09-03T13-18-01Z (go1.27.1 linux/amd64)
+Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 linux/amd64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin
@@ -333,7 +316,7 @@ Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previou
 You can use the MinIO Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration. Each MinIO server includes its own embedded MinIO Console.
 {{< /tab >}}
 {{< tab label="CLI" value="cli" >}}
-Follow the [installation instructions](/reference/minio-mc/#mc-install) for `mc` on your local host. Run `mc --version` to verify the installation.
+Follow the [installation instructions](/reference/minio-mc/#mc-install) for `mcli` on your local host. Run `mcli --version` to verify the installation. Substitute the installed `mcli` for the `mc` examples below; the arguments are unchanged.
 
 If your MinIO deployment uses third-party or self-signed TLS certificates, copy the <abbr title="Certificate Authority">CA</abbr> files to `~/.mc/certs/CAs` to allow `mc`
 
