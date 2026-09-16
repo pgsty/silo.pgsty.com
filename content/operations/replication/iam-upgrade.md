@@ -171,7 +171,14 @@ The isolated object-store and etcd rehearsals passed this policy with the
 credential checks below. Apply the same checks to the actual recovery group
 before approving access.
 
-The following shows the operations against a protected recovery alias. Replace
+Check and apply reconciliation at **every restored site**. A successful command
+at one site does not prove that the others applied it. After restoring an old
+object-store snapshot with its old binaries, do not rely on site replication
+alone to propagate revocations. Confirm already-removed service keys are absent,
+keep replacement identities and credentials consistent across the recovery
+group, and require the per-process credential checks below before opening access.
+
+The following shows the operations against one protected recovery alias. Replace
 the uppercase names with reviewed entries. User creation prompts for a secret;
 service-account creation prints credentials, which belong in the approved
 secret store rather than the rehearsal log.
