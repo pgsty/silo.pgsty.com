@@ -32,7 +32,7 @@ This console originated as MinIO Console and was carried forward by the [Alevsk/
 The version jumps from v1.9.1 to v2.0.0 because these public contracts change together:
 
 - the product is now uniformly **SILO Console**, with the primary repository at [`pgsty/silo-console`](https://github.com/pgsty/silo-console);
-- the release binary changes from `console` to `silo-console`, and the container image moves to `ghcr.io/pgsty/silo-console`;
+- the release binary changes from `console` to `silo-console`;
 - release assets, checksums, package metadata, CLI descriptions, and project links all switch to SILO;
 - in-product identity, help entry points, copyright attribution, source offers, and trademark notices are re-established.
 
@@ -45,10 +45,11 @@ The migration strategy is "clear external identity, restrained internal compatib
 | Product          | Console / legacy MinIO Console    | **SILO Console**                            |
 | Repository       | `georgmangold/console`            | `pgsty/silo-console`                        |
 | Release binary   | `console`                         | `silo-console`                              |
-| Container image  | `ghcr.io/georgmangold/console`    | `ghcr.io/pgsty/silo-console`                |
 | Binary assets    | `console-<os>-<arch>`             | `silo-console-<os>-<arch>`                  |
 | Checksums        | `console_<version>_checksums.txt` | `silo-console_<version>_checksums.txt`      |
 | Website and docs | upstream / previous maintainer    | `silo.pgsty.com` and `silo.pgsty.com/docs/` |
+
+For container deployments, use [`pgsty/silo-console` on Docker Hub](https://hub.docker.com/r/pgsty/silo-console). See the [Console v2.4.1 release notes](/blog/release/console-2.4.1/#delivery) for the current version and pull command.
 
 CLI authorship, usage text, and project descriptions now identify Pigsty and SILO Console. DEB/RPM/APK vendor, maintainer, homepage, description, and license metadata are updated accordingly; the executable installs to `/usr/local/bin/silo-console`.
 

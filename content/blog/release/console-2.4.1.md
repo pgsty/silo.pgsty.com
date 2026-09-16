@@ -83,13 +83,19 @@ MinIO/MC compatibility is best effort.
 
 ## Packages and verification {#delivery}
 
+The official container image is on [Docker Hub](https://hub.docker.com/r/pgsty/silo-console), with Linux amd64 and arm64 support:
+
+```sh
+docker pull docker.io/pgsty/silo-console:v2.4.1
+```
+
 The release contains **44 assets**: binaries and bundles, DEB/RPM/APK packages,
 source, legal notices, SPDX SBOMs, a checksum manifest and its Sigstore bundle.
 Checksums and the OCI image use keyless Cosign signatures; GitHub provenance
-binds artifacts to the tagged source and release workflow. The image's `latest`
+records the build workflow and tagged release inputs. The image's `latest`
 tag advances only after the published release passes signature, provenance,
 SBOM and anonymous-access checks. See the
-[release contract](https://github.com/pgsty/silo-console/blob/v2.4.1/docs/release-contract.md)
+[release contract](https://github.com/pgsty/silo-console/blob/8ba8a266a503f13037931747256c5a349af09124/docs/release-contract.md)
 for online and offline verification.
 
 Linux packages retain `minio-console.service`, `console-user` and
@@ -98,7 +104,7 @@ Linux packages retain `minio-console.service`, `console-user` and
 **Before restarting an existing installation**, migrate certificates with the
 documented ownership or retain the old path through `CONSOLE_OPTS`. The installer
 preserves old certificates and keys and does not restart the service for you.
-See the [package upgrade instructions](https://github.com/pgsty/silo-console/blob/v2.4.1/systemd/README.md#upgrading-an-installation-with-existing-certificates).
+See the [package upgrade instructions](https://github.com/pgsty/silo-console/blob/6a1802261c6a6f6972b42f347d8d4420ad5d1248/systemd/README.md#upgrading-an-installation-with-existing-certificates).
 
 The exact release source passed the [complete CI matrix](https://github.com/pgsty/silo-console/actions/runs/35071257392),
 [vulnerability checks](https://github.com/pgsty/silo-console/actions/runs/35071257306)
