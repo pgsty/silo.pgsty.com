@@ -63,8 +63,8 @@ PutObjectAcl
 
 #### Differences from S3 APIs for Multipart Uploads {#differences-from-s3-apis-for-multipart-uploads}
 
-- `ListMultipartUploads` currently treats a non-empty `prefix` as an exact object name instead of a lexical key prefix.
-- With an empty prefix, its result comes from node-local volatile state and does not provide AWS-compatible pagination, marker, or delimiter behavior. See the [issue #79 design and decision record](/blog/design/list-multipart-uploads/) for the verified impact and proposed repair.
+- Published Server 20260903 treats a non-empty `ListMultipartUploads` prefix as an exact object name. An empty prefix uses node-local volatile state without complete pagination, marker or delimiter semantics.
+- [PR #198](https://github.com/pgsty/silo/pull/198) adds durable discovery, global pagination and continuation after a native marker upload is deleted. This source change requires all writers to be upgraded, legacy uploads to drain and a read-only preflight. Strict mode returns 503 for insufficient coverage, legacy records or resource limits; explicit `legacy` mode retains the old limitations. See the [implementation and upgrade contract](/blog/design/list-multipart-uploads/#implementation) for ordering, scan capacity and the cancellation boundary for delayed creation writes. This is not a release or production-acceptance claim.
 - The `AbortIncompleteMultipartUpload` lifecycle action is not supported with `PutBucketLifecycle`.
 
 ## Bucket APIs {#bucket-apis}
