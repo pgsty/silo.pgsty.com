@@ -18,12 +18,12 @@ A merged dependency update does not change an existing binary or image.
 | --- | --- | --- |
 | Server | <a href="https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z" style="white-space:nowrap">20260903</a> | pkg v3.13.2; upstream SDK `0e78d3f18efe`; mcli 20260903; embedded Console source `464a59d73ada` with v2.3.0 version identity |
 | <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0) | pkg v3.13.3; MC source `c8aa5d25a63a`; upstream SDK `0e78d3f18efe`; bounded object-browser pages |
-| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-13T00-00-00Z" style="white-space:nowrap">20260913</a> | pkg v3.14.0; upstream SDK `60bd07042d49`; package version `20260913000000.0.0` |
-| Shared pkg | [v3.14.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.0) | Own module path `github.com/pgsty/silo-pkg/v3`; password-capability split; upstream SDK `60bd07042d49` |
+| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1; upstream SDK `32e1f32cb176`; package version `20260916000000.0.0` |
+| Shared pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | Own module path `github.com/pgsty/silo-pkg/v3`; CopyObject embedded-error handling; JWX v3.3.0 field-name escaping; upstream SDK `32e1f32cb176` |
 
 Release notes: [Server 20260903](/blog/release/silo-20260903/),
 [Console v2.4.0](/blog/release/console-2.4.0/),
-[mcli 20260913](/blog/release/mcli-20260913/), [pkg v3.14.0](/blog/release/pkg-3.14.0/).
+[mcli 20260916](/blog/release/mcli-20260916/), [pkg v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1).
 The published Server image still bundles its original client and Console.
 Installing a standalone update does not replace those embedded components.
 Package-repository mirrors may lag GitHub; the [download page](/download/)
@@ -31,13 +31,15 @@ links directly to the published artifacts.
 
 ## Coordinated source on main {#source}
 
+**September 16 client/library release:** mcli 20260916 is [`e952aa78f10a`](https://github.com/pgsty/mc/commit/e952aa78f10a2b77dd525a2b7e3143bcda0cd377), Go pseudo-version `v0.0.0-20260916070421-e952aa78f10a`; pkg v3.14.1 is `fa657ef431ae22e720df37e5144cf00f67102945`. Both select SDK `v7.3.1-0.20260915093545-32e1f32cb176` and JWX v3.3.0. The verified Server/Console integration sources below still select their earlier dependency graph; publishing the client does not advance those pins.
+
 The September 13 refresh landed as [pkg #7](https://github.com/pgsty/silo-pkg/pull/7),
 [MC #42](https://github.com/pgsty/mc/pull/42),
 [Console #53](https://github.com/pgsty/silo-console/pull/53) and [#54](https://github.com/pgsty/silo-console/pull/54),
 and [Server #181](https://github.com/pgsty/silo/pull/181).
 
-- **pkg:** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`.
-- **MC:** `v0.0.0-20260913012246-4f609a4da3bb` → the published 20260913 tag.
+- **pkg selected by Server/Console:** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`.
+- **MC selected by Server/Console:** `v0.0.0-20260913012246-4f609a4da3bb` → the published 20260913 tag.
 - **Console selected by Server:** `v0.0.0-20260916034812-56dfe455ac2f`; accepted on main by merge [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) with the same tree.
 - **Server Console integration:** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c), merged through [#209](https://github.com/pgsty/silo/pull/209). The other September 13 component pins remain unchanged.
 - **Verified Server main:** [`3c26a8b0b5bd`](https://github.com/pgsty/silo/commit/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca), including the repairs below.

@@ -18,7 +18,7 @@ The **`mc`** command-line tool is built for compatibility with the AWS S3 API. I
 
 The Silo project cannot guarantee behavior against every other S3-compatible service because implementations differ. Test the operations your workload relies on before treating another service as compatible.
 
-The current release is [mcli 20260913](/blog/release/mcli-20260913/), using Go 1.27.1, pkg v3.14.0 and upstream SDK `60bd07042d49`. See the [compatibility notes](/compatibility/mcli/#current-release) for behavior changes and the [component matrix](/compatibility/versions/) for Server/Console release boundaries.
+The current release is [mcli 20260916](/blog/release/mcli-20260916/), using Go 1.27.1, pkg v3.14.1 and upstream SDK `32e1f32cb176`. See the [compatibility notes](/compatibility/mcli/#current-release) for behavior changes and the [component matrix](/compatibility/versions/) for Server/Console release boundaries.
 
 [`mc`](#command-mc) has the following syntax:
 

@@ -3,8 +3,12 @@ title: "mc mv"
 url: "/reference/minio-mc/mc-mv/"
 weight: 250
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mv.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** A failed copy never authorizes source deletion. A successful copy followed by a failed source deletion exits 1 after waiting for deletion results; successfully copied objects are not rolled back. The selected SDK also reports S3 errors embedded in CopyObject HTTP 200 responses. [Release behavior](/compatibility/mcli/#current-release).
+
 
 <a id="mc-mv"></a>
 

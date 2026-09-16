@@ -3,8 +3,12 @@ title: "mc find"
 url: "/reference/minio-mc/mc-find/"
 weight: 110
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-find.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** Invalid `--regex` expressions produce a normal CLI error instead of a panic. Target validation still runs first, so an invalid target retains its original error. [Release behavior](/compatibility/mcli/#current-release).
+
 
 <a id="mc-find"></a>
 <a id="minio-mc-find"></a>

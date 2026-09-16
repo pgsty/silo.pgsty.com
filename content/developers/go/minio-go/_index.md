@@ -8,7 +8,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO-verified pin, 2026-09-13:** current pkg/mcli releases and Server/Console main use `v7.3.1-0.20260910142817-60bd07042d49`. To reproduce that graph, run `go get github.com/minio/minio-go/v7@v7.3.1-0.20260910142817-60bd07042d49`. Published Server/Console still use the earlier SDK; see the [component matrix](/compatibility/versions/).
+> **SILO-verified pin, 2026-09-16:** pkg v3.14.1 and mcli 20260916 use `v7.3.1-0.20260915093545-32e1f32cb176`. Select it with `go get github.com/minio/minio-go/v7@v7.3.1-0.20260915093545-32e1f32cb176`. It retries and propagates S3 errors embedded in CopyObject HTTP 200 responses. Server/Console select their versions independently; see the [component matrix](/compatibility/versions/).
 
 ## MinIO Go SDK {#go-sdk}
 

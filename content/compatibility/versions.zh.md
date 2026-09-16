@@ -17,24 +17,26 @@ icon: fa-solid fa-code-branch
 | --- | --- | --- |
 | Server | <a href="https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z" style="white-space:nowrap">20260903</a> | pkg v3.13.2；上游 SDK `0e78d3f18efe`；mcli 20260903；内嵌 Console 源码 `464a59d73ada`，版本标识为 v2.3.0 |
 | <span style="white-space:nowrap">独立<br>Console</span> | [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0) | pkg v3.13.3；MC 源码 `c8aa5d25a63a`；上游 SDK `0e78d3f18efe`；对象浏览器分页 |
-| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-13T00-00-00Z" style="white-space:nowrap">20260913</a> | pkg v3.14.0；上游 SDK `60bd07042d49`；软件包版本 `20260913000000.0.0` |
-| 共享 pkg | [v3.14.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.0) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；密码能力拆分；上游 SDK `60bd07042d49` |
+| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1；上游 SDK `32e1f32cb176`；软件包版本 `20260916000000.0.0` |
+| 共享 pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；CopyObject 内嵌错误处理；JWX v3.3.0 字段名转义；上游 SDK `32e1f32cb176` |
 
 发布说明：[Server 20260903](/zh/blog/release/silo-20260903/)、
 [Console v2.4.0](/zh/blog/release/console-2.4.0/)、
-[mcli 20260913](/zh/blog/release/mcli-20260913/)、[pkg v3.14.0](/zh/blog/release/pkg-3.14.0/)。
+[mcli 20260916](/zh/blog/release/mcli-20260916/)、[pkg v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1)。
 已发布的 Server 镜像仍捆绑原来的客户端与 Console。安装独立组件的新版本不会替换 Server 内嵌的组件。
 软件包仓库镜像可能晚于 GitHub 更新；[下载页](/zh/download/)直接链接已发布的制品。
 
 ## 主分支协调后的源码 {#source}
+
+**9 月 16 日客户端/库发布：** mcli 20260916 对应 [`e952aa78f10a`](https://github.com/pgsty/mc/commit/e952aa78f10a2b77dd525a2b7e3143bcda0cd377)，Go 模块伪版本为 `v0.0.0-20260916070421-e952aa78f10a`；pkg v3.14.1 对应 `fa657ef431ae22e720df37e5144cf00f67102945`。两者使用 SDK `v7.3.1-0.20260915093545-32e1f32cb176` 与 JWX v3.3.0。下面列出的是已核对的 Server/Console 集成源码所选择的较早依赖；发布客户端不会自动推进它们。
 
 9 月 13 日更新通过 [pkg #7](https://github.com/pgsty/silo-pkg/pull/7)、
 [MC #42](https://github.com/pgsty/mc/pull/42)、
 [Console #53](https://github.com/pgsty/silo-console/pull/53) 与 [#54](https://github.com/pgsty/silo-console/pull/54)、
 [Server #181](https://github.com/pgsty/silo/pull/181) 合入。
 
-- **pkg：** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`。
-- **MC：** `v0.0.0-20260913012246-4f609a4da3bb` → 已发布的 20260913 标签。
+- **Server/Console 选择的 pkg：** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`。
+- **Server/Console 选择的 MC：** `v0.0.0-20260913012246-4f609a4da3bb` → 已发布的 20260913 标签。
 - **Server 选择的 Console：** `v0.0.0-20260916034812-56dfe455ac2f`；经 [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) 合入 main，源码树相同。
 - **Server 的 Console 集成提交：** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c)，通过 [#209](https://github.com/pgsty/silo/pull/209) 合入。9 月 13 日选择的其他组件版本保持不变。
 - **已核对的 Server main：** [`3c26a8b0b5bd`](https://github.com/pgsty/silo/commit/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca)，包含下述修复。

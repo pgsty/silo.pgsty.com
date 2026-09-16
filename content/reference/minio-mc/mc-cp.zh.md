@@ -3,8 +3,12 @@ title: "mc cp"
 url: "/zh/reference/minio-mc/mc-cp/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-cp.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** 选定 SDK 会重试并报告 CopyObject HTTP 200 响应内嵌的 S3 错误。HTTP 200 或复制开始消息本身不能证明成功，请检查命令退出码和错误记录。 [版本说明](/zh/compatibility/mcli/#current-release).
+
 
 <a id="mc-cp"></a>
 <a id="minio-mc-cp"></a>

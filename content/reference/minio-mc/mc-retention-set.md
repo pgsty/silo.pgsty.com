@@ -3,8 +3,12 @@ title: "mc retention set"
 url: "/reference/minio-mc/mc-retention-set/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-set.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** A partial recursive retention failure returns exit status 1 and reports each failed object once; successful objects are not rolled back. Empty duration arguments produce a normal CLI error instead of a panic. [Release behavior](/compatibility/mcli/#current-release).
+
 
 <a id="mc-retention-set"></a>
 <a id="minio-bucket-locking"></a>

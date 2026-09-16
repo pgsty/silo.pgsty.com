@@ -3,8 +3,12 @@ title: "mc mv"
 url: "/zh/reference/minio-mc/mc-mv/"
 weight: 250
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mv.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** 复制失败不会授权删除源对象。复制成功但源删除失败时，命令等待删除结果后返回 1，已成功复制的对象不会回滚。选定 SDK 也会报告 CopyObject HTTP 200 响应内嵌的 S3 错误。 [版本说明](/zh/compatibility/mcli/#current-release).
+
 
 <a id="mc-mv"></a>
 

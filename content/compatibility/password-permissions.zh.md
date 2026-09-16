@@ -12,6 +12,8 @@ icon: fa-solid fa-code-branch
 > 最新已发布的 Server 20260903 与 Console v2.4.0 **尚未包含此拆分**。
 > 单独升级 pkg 或 mcli 不会改变旧 Server 的权限判断。见[组件版本矩阵](/zh/compatibility/versions/)。
 
+> **2026-09-16 更新：** pkg v3.14.1 与 mcli 20260916 保留本页的密码权限语义；它们不会升级已安装的 Server，也不会重写已保存策略。
+
 **这是授权语义的破坏性变化。** 同一份已保存策略，在升级前后可能作出不同的允许/拒绝决定。
 这来自采用 [minio/pkg #262](https://github.com/minio/pkg/pull/262)，与 SDK 更新独立；不是透明的依赖刷新。
 

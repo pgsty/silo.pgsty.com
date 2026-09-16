@@ -3,8 +3,12 @@ title: "mc retention clear"
 url: "/reference/minio-mc/mc-retention-clear/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-clear.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** A partial recursive retention failure returns exit status 1 and reports each failed object once; successful objects are not rolled back. [Release behavior](/compatibility/mcli/#current-release).
+
 
 <a id="mc-retention-clear"></a>
 
