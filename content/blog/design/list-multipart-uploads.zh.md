@@ -2,7 +2,7 @@
 title: "SILO 应该修复 ListMultipartUploads 吗？Issue #79 兼容性设计评审"
 linkTitle: "ListMultipartUploads 兼容性"
 date: 2026-08-30
-lastmod: 2026-08-30
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   SILO 把 ListMultipartUploads 的 prefix 当成精确对象键，并用节点本地的易失内存缓存回答存储桶级查询。本文解释问题及其来源，评估兼容性与运维影响，比较四种响应和存储方案，并建议分阶段采用“上传元数据加全局扫描”，而不是只修缓存或立刻引入持久化二级索引。
@@ -14,11 +14,53 @@ url: "/zh/blog/design/list-multipart-uploads/"
 
 这是 [SILO Issue #79](https://github.com/pgsty/silo/issues/79) 的问题说明、设计分析与决策记录。
 
-> **截至 2026-08-30 的状态：** 已确认的兼容性缺陷，目前只有设计提案。本文不代表服务端实现、发布产物、部署或生产验证已经完成。<br>
-> **建议：** 把它作为有计划的 P1 兼容性项目修复，而不是给缓存打一个小补丁。如果项目决定不实现完整兼容，也应该明确拒绝无法正确处理的请求，不能返回一个看似成功、实际上没有遵守参数的响应。<br>
-> **范围：** 通用 S3 存储桶的 `ListMultipartUploads`。本文不增加目录存储桶语义，也不处理 `AbortIncompleteMultipartUpload` 生命周期动作。<br>
-> **责任仓库：** [`pgsty/silo`](https://github.com/pgsty/silo)，即 SILO 服务端仓库。<br>
-> **发布边界：** 设计、规范取证、原型、实现、源码 QA、提交、发布产物、文档、部署与线上验证是彼此独立的关卡。
+## 9 月 16 日实现与升级契约 {#implementation}
+
+[PR #198](https://github.com/pgsty/silo/pull/198) 保留 mr javad seydi 的原始元数据与扫描实现，并追加维护者对 marker 消失、发现覆盖不足、取消确认和升级诊断的修复。本节说明这项源码变更。**Server 20260903 不包含此修复；源码实现也不代表生产性能与部署验收完成。** 下方 8 月 30 日的分析保留为历史设计记录。
+
+### 列表与取消语义
+
+新上传将 bucket 与原始对象键写入既有 `xl.meta`，完成时删除这些上传专用字段。严格列表跨 pool/set 发现持久上传，以既有读取 quorum 验证元数据，再全局处理 prefix、delimiter、`CommonPrefixes` 和最多 1,000 项的分页。节点重启或切换入口无需等待上传缓存重建。
+
+排序为 `(key, 原生上传 ID 中的发起时间, 编码后的 upload ID)`。即使 marker 对应的上传已完成或取消，返回的 marker 仍然表示这个边界。该契约支持客户端回传服务端 marker，不承诺对随机上传 ID 做任意字典序比较。并发变更下，跨页遍历不是快照。没有 `key-marker` 时忽略 `upload-id-marker`；有 key marker 时，非法 base64 保留既有 404 行为，可解码但不支持的原生 ID 返回 400。不能解析的持久 ID 属于旧格式，不会用当前时间伪造发起时间。
+
+每个 set 的目录枚举需要 `floor(N/2)+1` 块盘成功。例如四盘只有两盘可扫描时返回 503，即使两份元数据仍可读取。只有验证 bucket/key 与目录哈希一致后，单来源盘身份读取才能排除其他 bucket；不确定时升级为 quorum 读取。严格模式遇到旧格式返回 `MultipartListingNotReady`（503），身份不合法返回 `MultipartListingMetadataInvalid`（503），不会让整个请求悄悄退回缓存列表。
+
+Abort 检查每个相关 pool，每 set 需要 `floor(N/2)+1` 份确定的不存在确认。部分删除导致元数据低于读取 quorum 后仍可重试。任一 pool 状态未知返回 503；全部确定不存在且本轮未找到上传则返回 `NoSuchUpload`（404）。逻辑取消成功后，离线盘上的分片数据仍可能等待后续清理。
+
+**尚未解决的创建写入边界：** 如果创建上传的物理写入在调用方收到存储超时后继续执行，以上确认不能阻止它迟到提交。故障注入已复现 16 盘/EC:8 场景：取消成功后，七份迟到写入加上七份离线旧副本，可以恢复出可继续写入的上传。测试保留了这个已知限制；测试通过不表示此问题已修复。持久创建屏障需要独立的存储一致性设计。
+
+### 协调升级
+
+新增配置为 `api multipart_listing=strict|legacy`，默认 `strict`；环境变量 `MINIO_API_MULTIPART_LISTING` 优先。在迁移期间若需要旧行为，明确在所有服务端启用临时兼容模式：
+
+```bash
+mcli admin config set ALIAS api multipart_listing=legacy
+```
+
+Legacy 模式保留原有精确键与缓存限制。先升级**所有 writer**，停止产生旧格式上传，再使用已知 key/ID 完成或取消旧上传。切换模式后，应从头开始分页遍历。检查每台服务器的生效配置；环境变量覆盖存储的配置值。
+
+只读预检接口为 `GET /minio/admin/v3/multipart-preflight`，使用 SigV4 签名，要求 `admin:StorageInfo` 权限。例如，由操作者提供凭据与地址：
+
+```bash
+curl --aws-sigv4 'aws:amz:us-east-1:s3' \
+  --user "$SILO_ACCESS_KEY:$SILO_SECRET_KEY" \
+  "$SILO_ENDPOINT/minio/admin/v3/multipart-preflight"
+```
+
+报告包含 `mode`、`ready`、`complete`、`scannedEntries`、`legacyUploads`，以及各 pool/set 的盘覆盖、未覆盖盘序号与最老旧上传的发起时间。它绕过上传缓存，检查包括暂停 pool 在内的持久状态，并识别只剩少数副本的旧上传。`ready=true` 要求全部盘可检查、候选元数据没有不可读状态、且未发现旧格式副本。它无法证明所有 writer 都已升级，也不能阻止并发旧 writer 再引入旧格式。离线盘、扫描错误、超时和预算耗尽均不能报告就绪；不完整计数不能当作零。磁盘恢复后以及切换严格模式前应重新预检：
+
+```bash
+mcli admin config set ALIAS api multipart_listing=strict
+```
+
+丢失原始 key/ID 的旧上传由既有 stale-upload 清理器处理，各服务器扫描自己的本地盘。年龄按创建时间计算，**不会被最近上传分片的活动刷新**。默认 24 小时过期、6 小时清理间隔不等于保证已经排空。临时降低 `api stale_uploads_expiry` 或 `api stale_uploads_cleanup_interval`，也会删除仍在进行的长上传和新格式上传。只能在维护窗口暂停或排空相关负载、记录原值并接受取消范围后操作；验证实际排空，恢复配置后再恢复业务。本次不新增按任意路径删除的管理接口。
+
+### 扫描容量与证据边界
+
+每个进程最多同时接受两个扫描，每扫描使用 16 个身份读取 worker 和四个全盘元数据读取 worker。目录读取传递有限 count 并检测溢出。请求合计预算为 100,000 个返回的目录条目，包含不同盘上的重复条目和哈希目录，**不代表支持列出 100,000 个唯一上传**。合计超限时，其他并发目录请求可能已经发出；超限返回 `SlowDown`（503），不能返回成功的局部页面。30 秒 context 预算停止后续调度，扫描 worker 退出前仍占用并发名额。这不是精确内存上限，也不保证已进入系统调用的物理 I/O 立即停止。
+
+每一页仍需重扫持久状态，遍历成本随存储候选数与页数共同增长。测试覆盖 marker 消失、多 pool 覆盖、部分删除重试、身份读取回退、RPC 目录边界、取消后并发名额，以及已知迟到写入反例。临时多节点与维护客户端测试只证明记录环境中的功能行为；生产规模延迟和前台负载影响仍需按部署验收，源码合并不等于性能认证。
 
 ## 先用最简单的话说明问题 {#plain-language}
 
@@ -108,11 +150,11 @@ erasureServerPools.ListMultipartUploads
 
 关键位置包括：
 
-- [`cmd/erasure-server-pool.go`](https://github.com/pgsty/silo/blob/main/cmd/erasure-server-pool.go)：无 prefix 的 `mpCache`、逐 pool 拼接，以及 `NewMultipartUpload` 内部使用的精确对象查询；
-- [`cmd/erasure-multipart.go`](https://github.com/pgsty/silo/blob/main/cmd/erasure-multipart.go)：精确对象 listing、上传目录构造、stale-upload 清理，以及新上传 `xl.meta` 的 quorum 写入；
-- [`cmd/erasure-sets.go`](https://github.com/pgsty/silo/blob/main/cmd/erasure-sets.go)：把传入的对象名哈希到单个 erasure set；
-- [`cmd/bucket-handlers.go`](https://github.com/pgsty/silo/blob/main/cmd/bucket-handlers.go)：公开请求校验，其中包括 `key-marker` 不属于 prefix 时返回 `501 NotImplemented` 的保护；
-- [`cmd/object-api-multipart_test.go`](https://github.com/pgsty/silo/blob/main/cmd/object-api-multipart_test.go)：虽然有大型期望结果表，但最后的断言只检查回显的标量，没有验证 uploads、prefixes、markers 或截断状态。
+- [`cmd/erasure-server-pool.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/erasure-server-pool.go)：无 prefix 的 `mpCache`、逐 pool 拼接，以及 `NewMultipartUpload` 内部使用的精确对象查询；
+- [`cmd/erasure-multipart.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/erasure-multipart.go)：精确对象 listing、上传目录构造、stale-upload 清理，以及新上传 `xl.meta` 的 quorum 写入；
+- [`cmd/erasure-sets.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/erasure-sets.go)：把传入的对象名哈希到单个 erasure set；
+- [`cmd/bucket-handlers.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/bucket-handlers.go)：公开请求校验，其中包括 `key-marker` 不属于 prefix 时返回 `501 NotImplemented` 的保护；
+- [`cmd/object-api-multipart_test.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/object-api-multipart_test.go)：虽然有大型期望结果表，但最后的断言只检查回显的标量，没有验证 uploads、prefixes、markers 或截断状态。
 
 ### 独立复现与对抗性审查 {#source-review}
 
