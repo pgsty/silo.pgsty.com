@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-arrow-right-arrow-left
 ---
 
-从 MinIO 迁移到 Silo 是一次原地二进制替换，不是数据迁移。不导出、不重新导入任何东西。容器部署中，唯一必须修改的是镜像名。RPM/DEB 安装见[原生软件包迁移](/zh/compatibility/binary/)。
+从 MinIO 迁移到 Silo 通常可以复用已有对象数据和卷，无需逐对象导出再导入。管理员仍需核对部署、权限与持久状态变化；容器迁移应检查入口命令、运行用户、目录权限和探针。RPM/DEB 安装见[原生软件包迁移](/zh/compatibility/binary/)，各版本要求见[组件矩阵](/zh/compatibility/versions/)。
 
 ## 哪些改变 {#scope}
 
@@ -23,15 +23,15 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 ## 哪些不变 {#unchanged}
 
-- **对象数据与 `.minio.sys` 元数据目录——磁盘格式未变，同一份数据与 MinIO 双向通用。**
-- Bucket、版本、用户、Access Key、策略、生命周期规则、复制状态、加密元数据。
-- S3 API、SigV4 签名、SDK、`mc`/`mcli`、预签名 URL 行为。
+- **保留既有对象布局、纠删码格式与 `.minio.sys` 目录，可复用兼容基线的数据盘。** 这不保证任意版本均可降级，见[回滚边界](#rollback)。
+- 既有桶、对象版本、身份和配置可继续使用；权限判断、复制状态与新元数据变化按目标版本的[发布说明](/zh/blog/release/silo-20260916/)核对。
+- 沿用常见 S3 API、SigV4、SDK、`mc`/`mcli` 与预签名 URL 接口；请求校验、条件操作和错误行为可能随修复而变化。
 - 端点主机名、API 端口 `9000`、Console 端口、卷挂载。
 - `MINIO_*` 环境变量与既有服务端参数。
 - `/minio/*` 路由、`x-minio-*` 头、`minio_*` 指标。
 - 策略命名空间标识：IAM 策略、通知与审计事件中的 `arn:minio:*` ARN、`minio:s3` 等服务命名空间保持原拼写。**不存在 `SILO_*` 别名命名空间**——引用上述标识的脚本与策略无需任何修改。
 
-没有数据转换步骤。若你的 MinIO 版本已很陈旧，需要在预发环境验证的是版本跨度本身——那是一次大版本软件升级，不是格式变化。
+这些结论适用于兼容的纠删码部署。较老版本及历史 filesystem/gateway 模式应先确认对应迁移路径，再在隔离环境验证。
 
 ## Docker 迁移 {#docker}
 
@@ -43,7 +43,7 @@ docker.io/pgsty/silo:<RELEASE-tag>
 
 tag：不可变的 `RELEASE.YYYY-MM-DDTHH-MM-SSZ`（建议钉住）、滚动 `latest`，以及下述 `-distroless` 变体。旧的 `pgsty/minio` 仓库保持已发布状态，冻结在最后一个 tag。
 
-Compose 中只改镜像一行：
+以下 Compose 示例保留原端口、卷与 `MINIO_*` 配置；完成上述检查后再替换镜像：
 
 ```yaml
 services:
@@ -105,7 +105,7 @@ kubelet 探针是 pod spec 中的 `httpGet` 请求；Docker `HEALTHCHECK` 被忽
 
 ### 回滚 {#rollback}
 
-磁盘格式未变、两侧通用：把 `image:` 改回记录的 MinIO tag，`docker compose up -d`。同一卷保持挂载，Silo 运行期间写入的数据 MinIO 仍可读取。
+回滚取决于源版本、目标版本及已经写入的持久状态。保留原镜像摘要、配置和一致的备份；按目标版本的恢复步骤停止相关节点后恢复。对象数据可读取并不证明 IAM、桶配置或复制状态可以安全降级。包含持久 IAM 撤销的版本不支持滚动降级，详见 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)。
 
 ## 从 RELEASE.2026-08-06 升级 {#since-20260806}
 

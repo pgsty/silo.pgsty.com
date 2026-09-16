@@ -11,7 +11,10 @@ draft: false
 url: "/zh/blog/design/iam-revocations/"
 ---
 
-**2026-09-16 源码状态：**[#191](https://github.com/pgsty/silo/pull/191) 与 [#192](https://github.com/pgsty/silo/pull/192) 已合入 main，但不在已发布的 Server 20260903 中。它们改变 IAM 持久状态，要求协调升级。执行时使用[升级恢复手册](/operations/replication/iam-upgrade/)，安全边界见 [SN-2026-013](/about/security-advisories/#sn-2026-013)。
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
+**2026-09-16 源码状态：**[#191](https://github.com/pgsty/silo/pull/191) 与 [#192](https://github.com/pgsty/silo/pull/192) 已合入 main，但不在已发布的 Server 20260903 中。它们改变 IAM 持久状态，要求协调升级。执行时使用[升级恢复手册](/zh/operations/replication/iam-upgrade/)，安全边界见 [SN-2026-013](/zh/about/security-advisories/#sn-2026-013)。
 
 SILO 保留已删除 IAM 记录的版本，使离线站点重新连接后不能恢复旧身份或旧授权。覆盖内置用户、服务账号、组、策略文档，以及用户、STS 父身份和组各自命名空间中的策略映射。内置用户删除后，即使有意重建同名用户，旧服务账号、STS 凭证与组授权也不能因此复活。
 

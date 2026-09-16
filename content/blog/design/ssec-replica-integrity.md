@@ -11,6 +11,9 @@ draft: false
 url: "/blog/design/ssec-replica-integrity/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+
 **Source status, 2026-09-16:** the repairs in [#122](https://github.com/pgsty/silo/pull/122), [#123](https://github.com/pgsty/silo/pull/123), [#124](https://github.com/pgsty/silo/pull/124), [#126](https://github.com/pgsty/silo/pull/126) and [#134](https://github.com/pgsty/silo/pull/134) are on main, not published Server 20260903. Earlier zero-byte/read-attribute authentication and destination-key checksum repairs did ship in 20260903. Do not treat all SSE-C fixes as one release.
 
 ## Ciphertext and trust {#ciphertext}

@@ -83,20 +83,9 @@ MinIO/MC compatibility is best effort.
 
 ## Packages and verification {#delivery}
 
-The official container image is on [Docker Hub](https://hub.docker.com/r/pgsty/silo-console), with Linux amd64 and arm64 support:
+The [GitHub Release](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) contains **44 assets**: binaries and bundles, DEB/RPM/APK packages, source, legal notices, SPDX SBOMs, a checksum manifest and its Sigstore bundle. Checksums use Cosign signatures, and provenance records the tagged workflow inputs.
 
-```sh
-docker pull docker.io/pgsty/silo-console:v2.4.1
-```
-
-The release contains **44 assets**: binaries and bundles, DEB/RPM/APK packages,
-source, legal notices, SPDX SBOMs, a checksum manifest and its Sigstore bundle.
-Checksums and the OCI image use keyless Cosign signatures; GitHub provenance
-records the build workflow and tagged release inputs. The image's `latest`
-tag advances only after the published release passes signature, provenance,
-SBOM and anonymous-access checks. See the
-[release contract](https://github.com/pgsty/silo-console/blob/8ba8a266a503f13037931747256c5a349af09124/docs/release-contract.md)
-for online and offline verification.
+**Container delivery correction, 2026-09-17:** the official image name is [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console), but anonymous token requests returned HTTP 401. Public pulls of v2.4.1 or `latest` are not confirmed. Use the GitHub binaries/packages; source and binary publication do not establish image delivery. This standalone image limitation does not affect Server embedding.
 
 Linux packages retain `minio-console.service`, `console-user` and
 `/etc/default/console`. The service now uses `/var/lib/silo-console` for state,

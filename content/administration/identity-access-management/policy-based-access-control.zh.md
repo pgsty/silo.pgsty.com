@@ -916,19 +916,20 @@ MinIO 策略文档支持 IAM [条件语句](https://docs.aws.amazon.com/IAM/late
 
 ### 条件值来源与优先级 {#condition-value-sources}
 
-> [!WARNING]
-> **尚未发布的服务端行为（截至 2026-08-03）**
+> [!NOTE]
+> **发布版本与优先级**
 >
-> 下表描述配套服务端改动 `2f55347f7`（台账编号 SN-2026-003）之后的行为，该改动已随 `RELEASE.2026-08-04T00-00-00Z` 及之后的每个 Silo 版本发布。在依赖这些优先级保证之前，请核对服务端发布说明。
+> 条件来源隔离 `2f55347f7`（SN-2026-003）自 `RELEASE.2026-08-04T00-00-00Z` 起发布。下表按 Server 20260916 更新，包含 #177 对预签名年龄与有效载荷哈希的后续修复；旧版不具备全部优先级保证。
 
 Silo 按请求字段的实际语义来源构造条件值映射，而不是把所有请求头与查询参数混为一谈。原始请求头或查询参数即使与内部条件键同名，也不能覆盖服务端计算出的值，或伪造服务端没有提供的值。
 
 | 条件键类别 | 策略求值使用的来源 | 优先级与兼容性 |
 | :-- | :-- | :-- |
 | 身份、时间、传输、认证、`s3:versionid`、`s3:LocationConstraint`、LDAP 与 JWT 值 | 已认证的凭据与声明、服务端时钟与传输状态，或该操作解析出的 API 字段 | 同名原始请求头与查询参数不能增加或覆盖这些值。`aws:Referer` 与 `aws:UserAgent` 按定义仍由客户端控制；`aws:SourceIp` 的限制见上方警告。 |
-| `s3:signatureAge` | SigV4 预签名请求校验器计算出的已过去时间 | 只有通过校验的 SigV4 预签名请求才有该值；其他请求类型中客户端提供的 `x-amz-signature-age` Header 会被忽略。 |
+| `s3:signatureAge` | 自 SigV4 预签名请求的 `X-Amz-Date` 起经过的毫秒数 | 仅对日期可解析的 SigV4 预签名请求提供；接受请求前仍须通过签名校验。客户端传入的 `x-amz-signature-age` 头不参与求值。 |
 | `s3:prefix`、`s3:delimiter`、`s3:max-keys` | 仅查询字符串 | 同名请求头不会参与这些列表条件的求值。 |
-| `s3:x-amz-content-sha256`、`s3:x-amz-copy-source`、`s3:x-amz-metadata-directive` 与服务端加密条件键 | 仅对应的 HTTP 请求头 | 查询字符串中的替代值不能满足这些条件。尤其是预签名请求校验所使用的 `X-Amz-Content-Sha256` 查询值，不会作为策略条件值暴露。 |
+| `s3:x-amz-content-sha256` | 与验签和正文校验相同的单一有效哈希 | 仅当 `X-Amz-Content-Sha256` 请求头存在时提供此条件键。预签名查询值优先于请求头；否则使用请求头的第一个值。只有查询参数而没有该请求头时，此条件键缺失。 |
+| `s3:x-amz-copy-source`、`s3:x-amz-metadata-directive` 与服务端加密条件键 | 仅对应的 HTTP 请求头 | 查询字符串中的同名字段不能代替这些条件值。 |
 | `s3:x-amz-storage-class` | `X-Amz-Storage-Class` 请求头，兼容回退到查询字符串 | 只要请求头存在就优先，即使它是空值。查询形式继续保留，以兼容现有上传路径。 |
 | `s3:RequestObjectTag/<key>` 与 `s3:RequestObjectTagKeys` | 默认来自 `X-Amz-Tagging` Header；标签感知处理器可显式传入实际标签集 | `PutObject` 与 `CreateMultipartUpload` 从 Header 或兼容查询形式取值，Header 存在时优先；`PutObjectTagging` 使用解析后的 XML 请求正文。无关操作会忽略 query 标签。对于策略映射允许这些键的 action，历史 Header 回退仍为兼容性保留，因此在上述三个处理器之外，请求标签条件本身不能证明该操作会消费或持久化这些标签。 |
 | `s3:ExistingObjectTag/<key>` | 从目标对象存储状态加载的标签 | 请求头与查询参数永远不能提供已有对象标签。只有在授权前加载这些标签的 API 路径上才有该值，包括对象 GET/HEAD 与对象标签处理器。 |

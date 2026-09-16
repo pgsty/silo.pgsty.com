@@ -108,14 +108,14 @@ silo server $MINIO_OPTS ...
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-#### `MINIO_ILM_EXPIRY_WORKERS` {#envvar.MINIO_ILM_EXPIRY_WORKERS}
+#### `MINIO_ILM_EXPIRATION_WORKERS` {#envvar.MINIO_ILM_EXPIRATION_WORKERS}
 
 *envvar*
 
-指定用于处理按 ILM 过期规则配置对象过期任务的工作线程数。 未设置时，MinIO 默认最多使用可用处理器核心数的一半。
+指定用于处理按 ILM 过期规则进行对象过期的工作线程数。有效取值为 `1` 到 `500`，默认值为 `100`。详见 [ILM 设置](/zh/reference/minio-server/settings/ilm/#worker)。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
-此设置没有对应的配置项。
+此设置对应 [`ilm expiration_workers`](/zh/reference/minio-server/settings/ilm/#worker) 配置键。
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -458,7 +458,7 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 
 ## 多段上传列举模式 {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**仅当前 main 提供，Server 20260903 尚未包含。**`MINIO_API_MULTIPART_LISTING` 接受 `legacy` 或 `strict`，默认 **`legacy`**。在每个服务进程的环境中设置并重启；不支持共享的 `api multipart_listing` 配置键，不能用 `mcli admin config set` 选择模式。无效值会记录诊断并使用 `legacy`，不会丢弃其它 API 设置。
+**自 Server 20260916 起提供，Server 20260903 不包含。** `MINIO_API_MULTIPART_LISTING` 接受 `legacy` 或 `strict`，默认 **`legacy`**。在每个服务进程的环境中设置并重启；不支持共享的 `api multipart_listing` 配置键，不能用 `mcli admin config set` 选择模式。无效值会记录诊断并使用 `legacy`，不会丢弃其它 API 设置。
 
 Legacy 保留精确键/cache 列举限制。Strict 扫描持久上传元数据，启用前必须升级所有写入方并排空旧上传。缺少身份字段时无法证明旧上传属于哪个桶，因此**另一个桶的上传仍可能导致本桶 strict 列举返回 503**。有效身份可以提前过滤，所以并不是所有旧原生 ID 记录都会无条件导致跨桶失败。
 
@@ -466,7 +466,7 @@ Legacy 保留精确键/cache 列举限制。Strict 扫描持久上传元数据�
 
 ## HTTP 请求头与空闲超时 {#envvar.MINIO_READ_HEADER_TIMEOUT}
 
-`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` 默认 `30s`；参数可用，但在普通 CLI 帮助中隐藏。当前 main 将其接入 HTTP/1 请求头绝对截止时间，Server 20260903 尚未正确执行这个可配置限制。零值回退到读取超时；负值禁用请求头上限，可能重新放开慢请求头资源耗尽路径。该限制也影响 TLS 握手读取。超时可能直接关闭连接，并不保证返回 HTTP 错误状态。
+`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` 默认 `30s`；参数可用，但在普通 CLI 帮助中隐藏。Server 20260916 将其接入 HTTP/1 请求头绝对截止时间，Server 20260903 尚未正确执行这个可配置限制。零值回退到读取超时；负值禁用请求头上限，可能重新放开慢请求头资源耗尽路径。该限制也影响 TLS 握手读取。超时可能直接关闭连接，并不保证返回 HTTP 错误状态。
 
 <a id="envvar.MINIO_IDLE_TIMEOUT"></a>
 
@@ -477,3 +477,9 @@ Legacy 保留精确键/cache 列举限制。Strict 扫描持久上传元数据�
 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` 是恢复桶级策略动作旧对象资源匹配行为的兼容开关，值区分大小写。策略包在进程初始化时读取它，早于 SILO 加载 `MINIO_CONFIG_ENV_FILE`；只在后者文件中设置不会生效。必须在启动前通过真实进程环境传入，例如 systemd 的 `EnvironmentFile`。应优先修正策略，避免恢复较弱的匹配规则。详见 [SN-2026-004](/about/security-advisories/#sn-2026-004)。
 
 SILO 自身的环境文件解析器与 systemd 不同，详见[环境文件设计](/blog/design/config-env-file/)。与工具链相关的身份提供方启动故障，见 [TLS 与 OIDC 发现诊断](/blog/design/go127-tls-oidc-discovery/)。
+
+## 站点复制元数据墓碑 {#envvar.MINIO_SITE_REPLICATION_METADATA_TOMBSTONES}
+
+`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES` 接受 `on` 或 `off`，默认 **`off`**。它控制站点复制元数据导出是否暴露可删除桶元数据类型的真实删除时间（墓碑）信息。为 `off` 时，普通删除事件仍会复制，既有的策略删除时间导出保持不变，但新暴露的删除时间保持隐藏。为 `on` 时，缺失的标签、SSE 配置与配额的删除时间也会导出，初始同步将包含全部四种可删除类型。
+
+该开关不探测远端站点的消费能力：只有当 mesh 中每个站点都运行能理解墓碑的构建之后才应启用，并将其视为协调升级的一部分。详见[桶元数据收敛设计的发布小节](/zh/blog/design/bucket-metadata-convergence/#rollout)。

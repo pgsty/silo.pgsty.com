@@ -11,6 +11,9 @@ draft: false
 url: "/zh/blog/design/multi-pool-object-consistency/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
 **2026-09-16 源码状态：**[#178](https://github.com/pgsty/silo/pull/178) 修复多池修改顺序，随后 [#207](https://github.com/pgsty/silo/pull/207) 把当前对象选择扩展到条件 PUT。它们已合入 main，但不在 Server 20260903 中，关闭了 [#133](https://github.com/pgsty/silo/issues/133) 与 [#144](https://github.com/pgsty/silo/issues/144) 跟踪的源码缺陷；这不构成新发布产物的验收。
 
 ## 一个键可以有多份物理副本 {#problem}

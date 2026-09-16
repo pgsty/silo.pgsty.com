@@ -1,9 +1,9 @@
-# Published release tags rechecked on 2026-09-16. Main-branch pins are documented
+# Published release tags rechecked on 2026-09-17. Main-branch pins are documented
 # separately in content/compatibility/versions*.md.
 server:
-  tag: RELEASE.2026-09-03T13-18-01Z
-  build: 20260903131801.0.0
-  date: "2026-09-03"
+  tag: RELEASE.2026-09-16T00-00-00Z
+  build: 20260916000000.0.0
+  date: "2026-09-16"
 client:
   tag: RELEASE.2026-09-16T00-00-00Z
   build: 20260916000000.0.0

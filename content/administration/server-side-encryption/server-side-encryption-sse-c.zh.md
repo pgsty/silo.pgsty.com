@@ -41,7 +41,7 @@ SSE-C 在写入操作期间使用客户端指定的 <abbr title="外部密钥">E
 >
 > 使用 SSE-C 加密的对象现在可以通过站点复制或存储桶复制进行复制。 早期版本的 MinIO Object Store 不会复制经过 SSE-C 加密的对象。
 
-已发布的 Server 20260903 仍存在压缩 SSE-C 副本的继承限制。当前 main 在 [#126](https://github.com/pgsty/silo/pull/126) 后，对 PUT、多段上传、COPY 和 Snowball 等**所有新 SSE-C 写入禁用压缩**，不受 SSE-S3/SSE-KMS 加密压缩选项影响。这会避免生成新的压缩 SSE-C 对象，但不会重写历史对象。应清点旧压缩 SSE-C 数据，保留原密钥并验证其恢复或复制，详见 [SSE-C 副本完整性](/blog/design/ssec-replica-integrity/)及[发布矩阵](/compatibility/versions/)。
+已发布的 Server 20260903 仍存在压缩 SSE-C 副本的继承限制。Server 20260916 在 [#126](https://github.com/pgsty/silo/pull/126) 后，对 PUT、多段上传、COPY 和 Snowball 等**所有新 SSE-C 写入禁用压缩**，不受 SSE-S3/SSE-KMS 加密压缩选项影响。这会避免生成新的压缩 SSE-C 对象，但不会重写历史对象。应清点旧压缩 SSE-C 数据，保留原密钥并验证其恢复或复制，详见 [SSE-C 副本完整性](/zh/blog/design/ssec-replica-integrity/)及[发布矩阵](/zh/compatibility/versions/)。
 
 ### SSE-C 会覆盖 SSE-S3 和 SSE-KMS {#sse-c-sse-s3-sse-kms}
 
@@ -123,4 +123,4 @@ S3 客户端可以在不重新上传对象的情况下更换其客户端密钥�
 
 这种自 COPY 称为 SSE-C 密钥轮换。满足仅更新元数据的条件时，服务器用旧客户端密钥解封对象加密密钥，再用新密钥重新封装，对象数据不重写。需要写入新对象数据的复制（例如某些版本化或 checksum 变更）则走普通解密、重新加密路径。客户端提供的密钥不会持久化到对象元数据中。普通 COPY 权限与版本化规则仍适用，它不是通用的原位版本编辑接口。
 
-当前 main 的 [#123](https://github.com/pgsty/silo/pull/123) 会让普通客户端自 COPY 在**请求了任何 checksum 算法**时走完整解密、重新加密路径，即使请求的算法与原值相同。这类重写可能改变 ETag，把多段源变为单段对象，并按完整对象数据复制，而非仅复制元数据。不带该头且满足原位条件时，密钥轮换保留既有 checksum 状态，包括原本没有 checksum 的情况。版本化与旧格式限制也可能独立触发重写。
+Server 20260916 的 [#123](https://github.com/pgsty/silo/pull/123) 会让普通客户端自 COPY 在**请求了任何 checksum 算法**时走完整解密、重新加密路径，即使请求的算法与原值相同。这类重写可能改变 ETag，把多段源变为单段对象，并按完整对象数据复制，而非仅复制元数据。不带该头且满足原位条件时，密钥轮换保留既有 checksum 状态，包括原本没有 checksum 的情况。版本化与旧格式限制也可能独立触发重写。

@@ -65,7 +65,7 @@ colorjson 带入的历史 minio/pkg 传递依赖与维护中的 silo-pkg 策略�
 
 ## 迁移 {#migration}
 
-官方容器镜像为 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)。固定版本使用 `:v2.4.1`；`latest` 通过正式发布与镜像验证后更新。
+官方镜像名称为 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)。**2026-09-17 分发复核：匿名 token 请求返回 HTTP 401，尚不能确认公开拉取 v2.4.1。** 请使用已发布的 [GitHub 二进制或软件包](https://github.com/pgsty/silo-console/releases/tag/v2.4.1)；不要由源码或二进制发布推断镜像可用。该限制不影响 Server 内嵌 Console。
 
 已有的 MinIO Console 部署可以原地升级。服务单元、服务账号与配置文件名称都不变，全部 `CONSOLE_*` 变量按原样读取，因此通常的做法是用 `silo-console` 软件包覆盖安装后重启。
 

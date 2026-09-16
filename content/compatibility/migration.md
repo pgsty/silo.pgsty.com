@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-arrow-right-arrow-left
 ---
 
-Migrating from MinIO to Silo is an in-place binary replacement, not a data migration. Nothing is exported or re-imported. In a container deployment the only required change is the image name. For RPM/DEB installations, see [Native Package Migration](/compatibility/binary/).
+Migrating from MinIO to Silo normally reuses existing object data and volumes without an object-by-object export and import. Review deployment, authorization and persistent-state changes; container migrations must account for entrypoints, runtime users, permissions and probes. For RPM/DEB installations, see [Native Package Migration](/compatibility/binary/); check the [component matrix](/compatibility/versions/) for version-specific requirements.
 
 ## What changes {#scope}
 
@@ -23,15 +23,15 @@ In order of importance:
 
 ## What stays {#unchanged}
 
-- **Object data and the `.minio.sys` metadata directory — the on-disk format is unchanged and remains interoperable with MinIO in both directions.**
-- Buckets, versions, users, access keys, policies, lifecycle rules, replication state, encryption metadata.
-- S3 API, SigV4 signing, SDKs, `mc`/`mcli`, presigned URL behavior.
+- **Object layouts, erasure formats and the `.minio.sys` directory remain, allowing disks from compatible baselines to be reused.** This does not guarantee arbitrary downgrades; see [rollback scope](#rollback).
+- Existing buckets, object versions, identities and configuration remain usable; check authorization, replication-state and new-metadata changes in the target [release notes](/blog/release/silo-20260916/).
+- Common S3 APIs, SigV4, SDK, `mc`/`mcli` and presigned-URL interfaces carry over; validation, conditional operations and error behavior can change with repairs.
 - Endpoint hostname, API port `9000`, Console port, volume mounts.
 - `MINIO_*` environment variables and existing server options.
 - `/minio/*` routes, `x-minio-*` headers, `minio_*` metrics.
 - Policy-namespace identifiers: `arn:minio:*` ARNs, `minio:s3` and the other service namespaces in IAM policies, notifications, and audit events keep their exact spelling. There is **no `SILO_*` alias namespace** — scripts and policies addressing the identifiers above need no change.
 
-There is no data-conversion step. If your MinIO build is years old, validate the version distance itself in staging; it is a large software upgrade, not a format change.
+These conclusions apply to compatible erasure deployments. Establish a version-specific migration path for older builds and historical filesystem/gateway modes, then validate it in isolation.
 
 ## Docker migration {#docker}
 
@@ -43,7 +43,7 @@ docker.io/pgsty/silo:<RELEASE-tag>
 
 Tags: immutable `RELEASE.YYYY-MM-DDTHH-MM-SSZ` (pin these), rolling `latest`, and the `-distroless` variants below. The old `pgsty/minio` repository stays published, frozen at its final tag.
 
-In Compose, change only the image line:
+The Compose example retains the original ports, volumes and `MINIO_*` configuration; replace the image after the checks above:
 
 ```yaml
 services:
@@ -105,7 +105,7 @@ Kubelet probes are `httpGet` requests in the pod spec; Docker `HEALTHCHECK` is i
 
 ### Rollback {#rollback}
 
-The disk format is unchanged and works with both servers: set `image:` back to the recorded MinIO tag and `docker compose up -d`. The same volume stays attached, and data written by Silo remains readable by MinIO.
+Rollback depends on the source version, target version and persistent state already written. Retain the original image digest, configuration and a consistent backup, and follow the target release's recovery procedure with the relevant processes stopped. Readable object data does not establish safe IAM, bucket-configuration or replication downgrade. Versions with durable IAM revocation do not support rolling downgrade; follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/).
 
 ## Upgrading from RELEASE.2026-08-06 {#since-20260806}
 

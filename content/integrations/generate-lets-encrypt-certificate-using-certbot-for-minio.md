@@ -92,7 +92,7 @@ $ ./minio server --address ":443" /mnt/data
 If you are using dockerized version of MinIO then you would need to
 
 ```sh
-$ sudo docker run -p 443:443 -v /home/user/.minio:/root/.minio/ -v /home/user/data:/data minio/minio server --address ":443" /data
+$ sudo docker run -p 443:443 -v /home/user/.minio:/root/.minio/ -v /home/user/data:/data docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server --address ":443" /data
 
 ```
 

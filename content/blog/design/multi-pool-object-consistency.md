@@ -11,6 +11,9 @@ draft: false
 url: "/blog/design/multi-pool-object-consistency/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+
 **Source status, 2026-09-16:** [#178](https://github.com/pgsty/silo/pull/178) repairs multi-pool mutation ordering; [#207](https://github.com/pgsty/silo/pull/207) extends current-object selection to conditional PUT. These changes are merged into main and absent from Server 20260903. They close the source defects tracked by [#133](https://github.com/pgsty/silo/issues/133) and [#144](https://github.com/pgsty/silo/issues/144); this does not establish acceptance of a new release artifact.
 
 ## One key can have several physical copies {#problem}

@@ -108,14 +108,14 @@ This setting does not have a configuration setting option.
 
 {{< tabs group="environment-variable-configuration-setting" >}}
 {{< tab label="Environment Variable" value="environment-variable" >}}
-#### `MINIO_ILM_EXPIRY_WORKERS` {#envvar.MINIO_ILM_EXPIRY_WORKERS}
+#### `MINIO_ILM_EXPIRATION_WORKERS` {#envvar.MINIO_ILM_EXPIRATION_WORKERS}
 
 *envvar*
 
-Specifies the number of workers to make available to expire objects configured with ILM rules for expiration. When not set, MinIO defaults to using up to half of the available processing cores available.
+Specifies the number of workers to use for expiring objects configured with ILM rules for expiration. Valid values are `1` to `500`. The default value is `100`. See [ILM settings](/reference/minio-server/settings/ilm/#expiration-workers) for details.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
-This setting does not have a configuration setting option.
+This setting corresponds to the [`ilm expiration_workers`](/reference/minio-server/settings/ilm/#expiration-workers) configuration key.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -454,7 +454,7 @@ This setting does not have a configuration setting option.
 
 ## Multipart listing mode {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**Current main only; absent from Server 20260903.** `MINIO_API_MULTIPART_LISTING` accepts `legacy` or `strict`. The default is **`legacy`**. Set it in each server process environment and restart; there is no supported shared `api multipart_listing` key and `mcli admin config set` must not be used to select the mode. Invalid values log a diagnostic and use `legacy` without discarding other API settings.
+**Available since Server 20260916; absent from Server 20260903.** `MINIO_API_MULTIPART_LISTING` accepts `legacy` or `strict`. The default is **`legacy`**. Set it in each server process environment and restart; there is no supported shared `api multipart_listing` key and `mcli admin config set` must not be used to select the mode. Invalid values log a diagnostic and use `legacy` without discarding other API settings.
 
 Legacy keeps exact-key/cache listing limitations. Strict mode scans durable upload metadata and requires all writers to be upgraded and old uploads to be drained first. Missing identity can prevent proving which bucket owns a legacy upload, so **an upload in another bucket can still make this bucket's strict listing return 503**. A valid identity can be filtered early; this is not an unconditional cross-bucket failure for every old native-ID record.
 
@@ -462,7 +462,7 @@ Use the read-only, SigV4-authenticated `GET /minio/admin/v3/multipart-preflight`
 
 ## HTTP header and idle timeouts {#envvar.MINIO_READ_HEADER_TIMEOUT}
 
-`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` defaults to `30s`. The flag is accepted but hidden from ordinary CLI help. Current main wires it to an absolute HTTP/1 header deadline; Server 20260903 did not correctly enforce this configured limit. Zero falls back to the read timeout; a negative value disables the header cap and permits a slow-header resource-exhaustion path. The header limit also affects TLS handshake reads. A cutoff can close the connection without an HTTP error status.
+`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` defaults to `30s`. The flag is accepted but hidden from ordinary CLI help. Server 20260916 wires it to an absolute HTTP/1 header deadline; Server 20260903 did not correctly enforce this configured limit. Zero falls back to the read timeout; a negative value disables the header cap and permits a slow-header resource-exhaustion path. The header limit also affects TLS handshake reads. A cutoff can close the connection without an HTTP error status.
 
 <a id="envvar.MINIO_IDLE_TIMEOUT"></a>
 
@@ -473,3 +473,9 @@ Use the read-only, SigV4-authenticated `GET /minio/admin/v3/multipart-preflight`
 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` is a compatibility escape hatch that restores the old object-resource matching behavior for bucket-level policy actions. The value is case-sensitive. The policy package reads it during process initialization, before SILO loads `MINIO_CONFIG_ENV_FILE`: setting it only in that file has no effect. Supply it in the actual process environment, such as systemd's `EnvironmentFile`, before startup. Prefer correcting the policy rather than restoring the weaker matching rule. See [SN-2026-004](/about/security-advisories/#sn-2026-004).
 
 SILO's own environment-file parser differs from systemd's parser; see the [environment-file design](/blog/design/config-env-file/). For toolchain-sensitive identity-provider startup failures, see [TLS and OIDC discovery](/blog/design/go127-tls-oidc-discovery/).
+
+## Site-replication metadata tombstones {#envvar.MINIO_SITE_REPLICATION_METADATA_TOMBSTONES}
+
+`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES` accepts `on` or `off` and defaults to **`off`**. It gates whether site-replication metadata export exposes real deletion-time (tombstone) information for the deletable bucket metadata types. With `off`, ordinary deletion events still replicate and the pre-existing policy deletion-time export is preserved, but the newly exposed deletion times stay hidden. With `on`, deletion times for absent tags, SSE configuration and quota are also exported, and initial synchronization includes all four deletable types.
+
+The flag does not detect what the remote sites can consume: enable it only after every site in the mesh runs a build that understands tombstones, and treat it as part of a coordinated upgrade. See the [rollout section of the bucket metadata convergence design](/blog/design/bucket-metadata-convergence/#rollout).

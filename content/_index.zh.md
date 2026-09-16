@@ -35,7 +35,7 @@ docker run -d --name silo \
   -e MINIO_ROOT_USER=silo-admin \
   -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
   -v silo-data:/data \
-  pgsty/silo:RELEASE.2026-09-03T13-18-01Z \
+  docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z \
   server /data --console-address :9001
 ```
 
@@ -64,6 +64,6 @@ docker exec silo silo healthcheck ready
 替换镜像或二进制前，请先阅读[迁移指南](/zh/compatibility/migration/)。保留数据卷与配置，停止所有运行旧二进制的节点，再让所有节点统一启动同一个固定版本的 SILO。不要在两种二进制之间滚动迁移，也不要对需要保留的数据执行 `docker compose down -v`。
 {{< /tab >}}
 {{< tab label="Kubernetes" value="kubernetes" >}}
-已归档的 MinIO Operator `v7.1.1` 可以运行使用 SILO 镜像的 Tenant：将镜像覆盖为 `pgsty/silo`，并固定经过测试的标签或摘要。请遵循 [Tenant Helm 指南](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)，并把该 Operator 版本视为冻结的兼容基线，而不是仍在维护的依赖。
+已归档的 MinIO Operator `v7.1.1` 可以运行使用 SILO 镜像的 Tenant：将镜像覆盖为 `docker.io/pgsty/silo`，并固定经过测试的标签或摘要。请遵循 [Tenant Helm 指南](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)，并把该 Operator 版本视为冻结的兼容基线，而不是仍在维护的依赖。
 {{< /tab >}}
 {{< /tabs >}}

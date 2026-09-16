@@ -78,7 +78,7 @@ replace github.com/minio/mc      => github.com/pgsty/mc ...
 公共包是刻意的例外。[pkg v3.13.0](/zh/blog/release/pkg-3.13.0/) 起它使用自己的模块路径构建，所有维护中的组件——包括服务端——都**直接**消费它：
 
 ```go
-require github.com/pgsty/silo-pkg/v3 v3.14.0   // 不再使用 replace 安排
+require github.com/pgsty/silo-pkg/v3 v3.14.1   // 不再使用 replace 安排
 ```
 
 历史的 `replace github.com/minio/pkg/v3 => ...` 安排已退役；`github.com/minio/pkg/v3` 现在仅作为遗留的*间接*依赖出现（经 `colorjson`/`dperf`），与维护中的策略实现相互独立。上游 SDK `github.com/minio/minio-go/v7` 是另一个明确例外：以经过验证的 commit 直接消费上游，退役的 `silo-go` 分叉不属于维护依赖图。
@@ -299,7 +299,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 |:-----------|:-------------------------------------------------------------|:-------------------------------------------------------------------------|
 | Console    | `pgsty/silo-console` v2.1.1，保持 `github.com/minio/console` 路径 | 恢复内嵌 UI，应用 Silo 品牌和双语文本，加入 Metrics V3，移除 SUBNET 流程并修复指标图例未翻译问题           |
 | 客户端库       | `pgsty/mc`，保持 `github.com/minio/mc` 路径                       | Console import path 不变，同时使用维护中的 MCLI 分叉                                  |
-| 公共包        | `pgsty/silo-pkg/v3`，以自有模块路径直接消费（v3.14.0；v3.12.x 及之前经 `minio/pkg/v3` replace） | [v3.13.0](/zh/blog/release/pkg-3.13.0/) 的破坏性模块路径迁移；提供 IAM 精确匹配的一半、LDAP TLS/StartTLS/deadline/close 修复、证书 watcher 清理和 RNG 修复 |
+| 公共包        | `pgsty/silo-pkg/v3`，以自有模块路径直接消费（v3.14.1；v3.12.x 及之前经 `minio/pkg/v3` replace） | [v3.13.0](/zh/blog/release/pkg-3.13.0/) 的破坏性模块路径迁移；提供 IAM 精确匹配的一半、LDAP TLS/StartTLS/deadline/close 修复、证书 watcher 清理和 RNG 修复 |
 | Kafka      | Sarama 1.45.1                                                | 固定以避免破坏性的 broker 协商漂移                                                    |
 | PostgreSQL | lib/pq 1.10.9                                                | 固定以避免 nil `[]byte` / PostgreSQL 14 以前版本的行为回归；自动 DSN 引用在服务端代码中修复          |
 | 压缩         | klauspost/compress 1.18.7                                    | 显式安全/正确性升级                                                               |
@@ -343,7 +343,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 6. **私有 API 不是稳定兼容承诺。** `ReadMultiple` 表明即便 storage REST 协议号不变，操作仍可能消失。不要跨越该边界滚动运行混合构建。
 7. **源码结果不等于已发布制品。** 在逐渠道验证前，本页不声称 GitHub 标签、软件包、OCI manifest、签名或线上站点已经包含仅存在于审计 HEAD 的最后三个提交。
 8. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
-9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；当前 main 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
+9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
 10. **多站点删除桶配置的历史收敛限制。** 本页所述已发布版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。依赖多站点同步删除这些配置的部署，删除后必须逐站核对。2026-09-12，[PR #180](https://github.com/pgsty/silo/pull/180) 已将修复合入主干；完整删除自愈要求全部节点升级并统一开启删除导出，详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。发行制品是否包含修复仍需按版本核对。
 
 ## 迁移检查清单 {#migration}
@@ -358,7 +358,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 6. 使用 Helm 时，以完整旧 values 分别渲染新旧 Chart；需要时用 `nameOverride` / `fullnameOverride` / `serviceAccount.name` 保留名称；Chart 与镜像原子切换。
 7. 删除 updater、callhome、SUBNET 注册和支持上传自动化，改用软件包/镜像/编排器滚动及自己的诊断传输渠道。
 8. 把 HMAC OIDC token 改为非对称 JWKS。分别测试 LDAP 成功、错密码、未知用户、后端故障和限流路径。
-9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；当前 main 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
+9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
 10. 设置 `MINIO_API_TRUSTED_PROXIES=none` 或精确列表，清洗三种来源地址头，并加入会转发认证请求的集群 peer。
 11. 测试超大 S3 Select 记录、流式通知、unsigned trailer 拒绝、multipart 整对象 checksum、重复 part、复制、修复、KMS、每个通知 target、审计摄取及容器优雅关停。
 12. 把分布式集群所有节点作为同一构建升级。回滚时旧 Chart 与旧镜像成对使用，绝不能只回滚一个。

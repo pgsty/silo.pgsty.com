@@ -53,7 +53,7 @@ mc [GLOBALFLAGS] COMMAND --help
 从源码构建维护分支：
 
 ```shell
-git clone https://github.com/pgsty/mc.git
+git clone --branch RELEASE.2026-09-16T00-00-00Z --depth 1 https://github.com/pgsty/mc.git
 cd mc
 make build
 ./mc --version

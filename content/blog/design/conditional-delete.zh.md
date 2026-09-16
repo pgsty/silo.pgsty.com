@@ -12,6 +12,9 @@ draft: false
 url: "/zh/blog/design/conditional-delete/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
 **2026-09-16 状态：**[#145](https://github.com/pgsty/silo/pull/145) 引入单对象条件删除，随后 [#178](https://github.com/pgsty/silo/pull/178) 修复多池串行化与清理。这两批修改均不在已发布的 Server 20260903 中。依赖该行为前请核对[组件矩阵](/compatibility/versions/)。
 
 围绕 [PR #12](https://github.com/pgsty/silo/pull/12) 的八月方案比实际合并代码范围更大。其中批量拒绝、额外读取授权和只比较当前版本等规则，**并不是已实现的保证**。本文以维护主线 [`f99ed829b`](https://github.com/pgsty/silo/tree/f99ed829b5eba549160725f035156c9e020b6a07) 为依据。
