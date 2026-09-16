@@ -37,7 +37,7 @@ url: "/zh/blog/design/request-header-timeouts/"
 
 ## 配置 {#config}
 
-- **旗标：** `--read-header-timeout`
+- **旗标：** `--read-header-timeout`（`Hidden: true`，普通 CLI help 不显示）
 - **环境变量：** `MINIO_READ_HEADER_TIMEOUT`
 - **默认值：** 30 s（与 idle timeout 默认值相等）
 - 两个超时都**没有 YAML 配置字段**；值在启动时按 flag > 环境变量 > 默认 一次性绑定。
@@ -48,6 +48,8 @@ url: "/zh/blog/design/request-header-timeouts/"
 | header = 0（显式设置） | 回退 Go 规则：读超时（= idle timeout）生效；CLI 默认值是 30 s |
 | header < 0 | 关闭头部专用上限；正值的读/写超时仍限制 TLS 握手读取，正值 `IdleTimeout` 仍限制 keep-alive 等待，并非取消所有连接超时 |
 | 缩短 idle、未设 header | 头部阶段独立使用 30 s 默认值——唯一比朴素预期"更松"的组合，但仍严格紧于修复前的无限续期 |
+
+负值关闭绝对读头上限，重新允许持续滴入请求头的慢速占用，不能当作推荐的兼容开关。被截断的未完成请求头通常导致连接关闭，不保证返回 HTTP 错误状态。来源为 @AEGEGE 的 [#183](https://github.com/pgsty/silo/issues/183) 扫描器报告，修复经 [PR #195](https://github.com/pgsty/silo/pull/195) 集成进 #196；这不把实验结果升级为该部署的复现。
 
 ## 各协议得到什么 {#protocols}
 
@@ -69,3 +71,5 @@ url: "/zh/blog/design/request-header-timeouts/"
 测试固定了连接包装器跨三个连续更新周期（绝对上限不外推）、HTTP/1 keep-alive / TLS / 仅 HTTP/2 协商的相位切换，以及真实 CLI 上下文的 flag/env 绑定；进程探针让一个 100 ms 头部上限的活服务器拒绝了 400 ms 才完成的头部。已知限制：TLS 握手写入侧仍为滚动；handler 的 CPU/存储等待没有截止时间；绝对头部上限无松弛而滚动 idle 保留约 250 ms 的更新松弛；多节点、跨区域长传输验收是后续工作——集成记录明确不把脚本化的 S3 长传输计为本修复的通过项。
 
 升级注意（更短的头部超时同时收窄 TLS 握手窗口；它不是上传/下载的总时长限制）见[组件版本矩阵](/zh/compatibility/versions/#september-reliability)。
+
+相关记录：[tags](/zh/blog/design/replicated-tag-ordering/) · [metadata](/zh/blog/design/replica-metadata-normalization/) · [HTTP](/zh/blog/design/request-header-timeouts/) · [audit](/zh/operations/replication/replica-metadata-audit/)

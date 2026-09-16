@@ -1,11 +1,11 @@
 ---
-title: "Should SILO Fix ListMultipartUploads? Design Review of Issue #79"
+title: "ListMultipartUploads: Implementation, Upgrade Contract and Design History"
 linkTitle: "ListMultipartUploads Compatibility"
 date: 2026-08-30
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  SILO treats ListMultipartUploads prefix as an exact object key and uses a node-local volatile cache for bucket-wide listing. This record explains the defect and its sources, evaluates the compatibility and operational impact, compares four response and storage options, and recommends a staged metadata-plus-scan repair rather than either a cosmetic cache patch or an immediate durable index.
+  Main implements durable scanning and preflight, with legacy as the default and strict as a process-environment opt-in. Pagination, quorum, capacity, migration and remaining limits; not included in Server 20260903.
 tags: [Design, S3, Compatibility, Multipart]
 weight: 35
 draft: false
@@ -59,13 +59,21 @@ The report contains `mode`, `ready`, `complete`, `scannedEntries`, `legacyUpload
 
 For uploads whose original key/ID has been lost, the existing stale-upload cleanup scans each server's local drives. Age is measured from creation, **not recent part activity**. Retain the existing cleanup policy, wait and verify actual drain; the default 24-hour expiry and 6-hour interval do not guarantee drain completion. Do not shorten expiry to accelerate an ordinary upgrade, since this can also remove active long-running uploads. Continue using default `legacy` mode if drain cannot be established. This batch changes neither cleanup policy nor the available deletion APIs.
 
+The shared `maxUploadsList` cap changes from 10,000 to 1,000 in both modes; clients that assumed one response contained everything must paginate.
+
+A legacy upload lacks bucket/key identity and cannot safely be excluded as belonging to another bucket, so it can block strict listing for any bucket. A valid new-format identity belonging to another bucket can be filtered earlier. This does not impose deployment-wide 503 responses on default legacy listing.
+
 ### Scan capacity and evidence limits
 
 Each process admits two scans, with 16 identity workers and four full-metadata workers per scan. Directory reads pass a finite count with overflow detection. The aggregate budget is 100,000 returned directory entries, including repeated entries on different drives and hash directories; it is **not** a promise to list 100,000 unique uploads. Concurrent directory calls may already be in flight when the aggregate budget is exceeded. Overflow returns `SlowDown` (503), never a successful partial page. A 30-second context budget stops further scheduling; admission stays held until scan workers exit. This is neither a precise memory ceiling nor a guarantee that a canceled physical system call stops immediately.
 
+As a budget illustration only, one upload per unique key on every drive of an N-drive set costs about `2 × N` entries across the two directory levels: `100000 / (2 × N)` uploads, or about 3,125 at N=16. Multiple uploads under one key share the hash-directory cost; other sets/pools, stale directories and timeouts also matter. This is not a universal upload-count limit.
+
 Every page still rescans durable state: total enumeration cost grows with both stored candidates and page count. The tests cover missing markers, multi-pool coverage, partial-deletion retries, identity fallback, RPC directory bounds, cancellation admission and the known late-write counterexample. Temporary multi-node and maintained-client checks establish functional behavior for their recorded environment. Production-scale latency and foreground-load impact remain deployment-specific acceptance work; merging the source does not certify them.
 
 A September 16 temporary Docker Desktop arm64 run used two nodes, four APFS-backed bind volumes and 11,000 uploads across two buckets, while other local validation was running. One 1,000-entry page for the 10,000-upload target bucket took 18.7 seconds; two concurrent requests returned retryable `SlowDownRead` responses after about 25–27 seconds. These observations do not meet the provisional five-second page target and are not an isolated SSD benchmark. Capacity and foreground-load acceptance remain open; the bounded scanner must not be advertised as a large-scale performance fix.
+
+> **Historical analysis (2026-08-30):** “current”, “recommended” and gate language below describes that review and proposal. The September 16 section above defines the implementation and remaining limits. Capability advertisement and the old one-day drain estimate are not current guarantees.
 
 ## The problem in plain language {#plain-language}
 

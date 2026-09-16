@@ -21,7 +21,7 @@ upstream_modified: true
 - [CopyObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html)
 - [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
 - [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
-  - 不支持条件删除：`DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object><ETag>` 元素，两者都执行无条件删除（[#10](https://github.com/pgsty/silo/issues/10)）。
+  - **条件 DELETE：**已发布的 Server 20260903 忽略 `If-Match`。当前 main 通过 #145/#178 支持单个 `DeleteObject` 的非空 `If-Match`，显式版本比较指定版本。批量 `DeleteObjects` 仍忽略 `<Object><ETag>`，没有逐项条件保护。详见[范围与限制](/blog/design/conditional-delete/)。
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)

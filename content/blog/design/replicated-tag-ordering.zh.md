@@ -22,11 +22,11 @@ url: "/zh/blog/design/replicated-tag-ordering/"
 > [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a)
 > 上；**不在**已发布的 Server 20260903 中，请用链接的 PR 识别包含它们的构建。<br>
 > **交付边界：** 仅源码级验收（回归测试 + R4–R8 集成运行，PR #196 的 11 项检查全部通过）。本记录不确立任何 tag、包、镜像或生产 rollout。<br>
-> **证据类别：** 以下每个机制都用针对真实单盘与 16 盘纠删后端的合成实验验证。没有客户事故被归因于这些路径。
+> **证据类别：** 合成签名 HTTP 测试使用真实单盘、16 盘与多池纠删后端；发送端、wire 形态与前置条件还包含函数级测试。没有客户事故被归因于这些路径。
 
 ## 共同模型：标签值与其修订构成一个状态 {#model}
 
-标签复制携带内部修订时间戳（`x-minio-internal-tagging-timestamp`）。接收端的排序规则很简单：复制的标签状态只有在其修订新于存量时才胜出。本族两个缺陷都以"丢失修订而非丢失值"的方式破坏该规则：
+标签复制通过 wire 头 `X-Minio-Source-Tagging-Timestamp` 携带修订，存储键为 `x-minio-internal-tagging-timestamp`。接收端的排序规则很简单：复制的标签状态只有在其修订新于存量时才胜出。本族两个缺陷都以"丢失修订而非丢失值"的方式破坏该规则：
 
 - **R4** 在写入 SSE-KMS 目的端的过程中丢失时间戳，新的标签更新因此在存储层对账中输给旧的存量状态。
 - **R5** 使*空*值（删除）完全不携带修订，协议无法表达"在时刻 T 已删除"——迟到的事件可以复活客户端已经删除的内容。
@@ -37,22 +37,22 @@ url: "/zh/blog/design/replicated-tag-ordering/"
 
 **触发面。** 不止显式 SSE-KMS 头。桶默认 KMS 与全局自动加密走同一代码路径，因此即使请求中没有任何 KMS 头也可能触发。
 
-**根因。** PUT 类请求的选项构建器先解析出可信来源标签时间戳，随后 SSE-KMS 分支构造并返回另一个 `ObjectOptions`，携带 mtime、ETag、复制信任与两个 Object Lock 时间戳——唯独没有 `ReplicationSourceTaggingTimestamp`。该遗漏可追溯到上游 `c4373ef290`（2021）；2026 年的一次 Object Lock 修复给该字面量补了两个时间戳，仍漏掉这一个。该字段唯一的消费点就是 COPY 标签排序比较，这也是 PUT 与 multipart 不受影响的原因——这一分工也使 R4 与 R5 相互独立。
+**根因。** PUT 类请求的选项构建器先解析出可信来源标签时间戳，随后 SSE-KMS 分支构造并返回另一个 `ObjectOptions`，携带 mtime、ETag、复制信任与两个 Object Lock 时间戳——唯独没有 `ReplicationSourceTaggingTimestamp`。该遗漏可追溯到上游 `c4373ef290`（2021）；2026 年的一次 Object Lock 修复给该字面量补了两个时间戳，仍漏掉这一个。R5 之前，消费点为 COPY 排序；R5 新增副本 PUT 与分段初始化的时间戳持久化及重复前置条件消费者。这些 SSE-KMS 路径也依赖 R4 保留选项，因此回移植需共同考虑两项修复。
 
 **修复。** 在既有 SSE-KMS `ObjectOptions` 字面量中补一个字段（[`03027727d`](https://github.com/pgsty/silo/commit/03027727d)），别无其他改动。回归测试覆盖全部目的端加密（无、SSE-S3、带与不带 key context 的 SSE-KMS、SSE-C）× 可信/不可信来源 × 缺失/有效/畸形时间戳，外加在两个单池后端（单盘、16 盘纠删）上合计 50 次签名 COPY+GET 有序序列（事件间隔 1–3 ns）。KMS 场景使用测试桩。
 
 **不回填。** 丢失的来源标签时间戳无法在目的端重建。升级后，*新的*标签事件按序复制；旧事件重放仍按时间戳比较：传入事件必须严格更新，平局或传入事件更旧时保留存量值。
 
-**遗留观察。** 同一 SSE-KMS 字面量还缺少 proxy 与 speedtest 选项字段；speedtest 标志在存储路径被读取，全局自动加密下 speedtest PUT 会丢失该标志。已登记为独立后续项，刻意不并入本次修复。
+**遗留观察。** 同一 SSE-KMS 字面量还缺少 proxy 与 speedtest 选项字段；speedtest 标志在存储路径被读取，全局自动加密下 speedtest PUT 会丢失该标志。在此记录为独立后续项，不声称已经建立公开 issue，刻意不并入本次修复。
 
 ## R5：空标签值没有修订，删除可被复活 {#r5}
 
-**故障形态。** 九项基线回归，全部针对真实存储：
+**故障形态。** 九项基线回归，包含真实存储与函数级测试：
 
 - 成功的 `DeleteObjectTagging` 从不生成新修订，因此*迟到*的可信元数据 COPY 携带旧标签视图即可将其复位。
 - 携带*空*标签状态的较新 COPY 被忽略——空的含义是"无事可说"而不是"已删除"。
 - 首个副本 PUT 解析了来源标签时间戳却从不持久化。
-- 可见值相等且时间戳相等时塌缩为"无需复制"，删除 → 重加序列无法重建顺序。
+- 可见标签值相等时塌缩为“无需复制”；HEAD 不暴露标签修订，更新的删除或重加因而不可见，无法重建顺序。
 - 队列中复制事件的完成回调把快照里的旧标签写回、覆盖已提交的删除——且不带时间戳，复活的集合继承了删除的较新修订，比最初报告的症状更糟。
 
 **根因。** 标签值与其时间戳（含空值的时间戳）构成一个状态。旧协议只能表达非空状态：DELETE tagging 从不打修订、发送端只在非空分支附带时间戳、接收端只在非空分支做决策。
@@ -61,7 +61,7 @@ url: "/zh/blog/design/replicated-tag-ordering/"
 
 1. **每次标签变更生成一个修订。** PUT/DELETE tagging handler 无条件打上单一 UTC RFC3339Nano 修订，与复制是否选中该对象无关。存储层在写锁内强制单调：不严格更新的本地修订被推进到 stored+1 ns；多池后端计算一个严格超过所有池副本的统一值。
 2. **发送端传输墓碑。** 空值携带其已记录修订；空且无修订不伪造；畸形的已记录时间戳 fail-closed，不做静默修复。
-3. **接收端接受墓碑。** 复制 COPY 在重建前捕获存量标签对，使带时间戳的空值作为可胜出的状态进入既有对账。重复抑制只对严格更新的来源修订放宽。Multipart 完成从已持久化的 upload 元数据排序标签。删除确认路径不再写回快照标签。
+3. **接收端接受墓碑。** 复制 COPY 在重建前捕获存量标签对，使带时间戳的空值作为可胜出的状态进入既有对账。重复抑制只对严格更新的来源修订放宽。Multipart 完成从已持久化的 upload 元数据排序标签。删除确认路径不再写回快照标签。普通 SSE-C 轮换会从复制的加密元数据中删除旧标签时间戳，防止其覆盖新的本地修订。
 
 **运维可见变化：**
 
@@ -70,6 +70,10 @@ url: "/zh/blog/design/replicated-tag-ordering/"
 - 每次普通 COPY（包括不改变内容的密钥轮换）都会记录一个新的本地修订。
 - **复制双方必须一起升级。** 旧对端仍会丢弃空值修订，新发送端的墓碑对它不可见。
 - 有已记录修订的对象在显式 resync/heal 期间**每对象多一次元数据 COPY**。当目的端有桶默认或自动 KMS 加密时，该"元数据"COPY 实际重写对象数据——批量 resync 请据此预算。
+
+历史非空标签没有修订时，发送端以对象 ModTime 为后备；空且无修订的集合不会伪造墓碑。严格更新的可信标签修订只绕过内部 ETag/version 重复保护（否则返回 412 `PreconditionFailed`）；客户端 `If-Match` 与 `If-None-Match` 仍然执行。
+
+标签修复没有增加 wire 字段或存储格式，也没有能力协商。双端升级才能保证删除排序，旧跳仍保留旧行为；这不授权整个九月候选滚动升级或降级，因为它同时包含独立的 [IAM 迁移](/zh/operations/replication/iam-upgrade/)。已经受损的标签需从权威来源核实后显式重新写入，无法重建丢失的历史顺序。
 
 **限制按限制陈述：**
 
@@ -91,3 +95,5 @@ url: "/zh/blog/design/replicated-tag-ordering/"
 R4 回归覆盖加密 × 信任 × 时间戳矩阵，以及两个单池后端（单盘、16 盘纠删）上的有序序列，KMS 使用测试桩。R5 另有多池标签删除回归。R4–R8 集成运行在合并树上复跑了定向测试，包括隔离运行的 R5 多池测试；PR #196 的 11 项检查全部通过。这些确立了受测场景的排序行为，不确立真实时钟偏差下的多站点调度、跨区域故障切换，或只升级一对复制端中一端的部署行为。
 
 升级摘要与发布边界见[组件版本矩阵](/zh/compatibility/versions/#september-reliability)；阻止归一化副本元数据被重新注入的姊妹修复另见[副本元数据归一化](/zh/blog/design/replica-metadata-normalization/)。
+
+相关记录：[tags](/zh/blog/design/replicated-tag-ordering/) · [metadata](/zh/blog/design/replica-metadata-normalization/) · [HTTP](/zh/blog/design/request-header-timeouts/) · [audit](/zh/operations/replication/replica-metadata-audit/)

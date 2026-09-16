@@ -9,23 +9,25 @@ upstream_modified: true
 <a id="minio-server-envvar-core"></a>
 <a id="id1"></a>
 
-本页介绍用于控制 MinIO 进程核心行为的设置。
+本页介绍用于控制 SILO 进程核心行为的设置。
 
 你可以通过以下方式建立或修改设置：
 
-- 在启动或重启 MinIO Server 之前，在宿主机系统上定义 *环境变量*。 如何定义环境变量，请参考所用操作系统的文档。
+- 在启动或重启 SILO Server 之前，在宿主机系统上定义 *环境变量*。 如何定义环境变量，请参考所用操作系统的文档。
 - 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 定义 *配置项*。
 
-如果同时定义了环境变量和对应的配置项，MinIO 使用环境变量的值。
+如果同时定义了环境变量和对应的配置项，SILO 使用环境变量的值。
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
 > [!WARNING]
 > **重要**
 >
-> 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
+> 每个配置项都会控制 SILO 的基础行为和功能。 SILO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
-## MinIO Server CLI 选项 {#minio-server-cli}
+SILO 软件包安装的是 `silo.service`。服务单元为迁移兼容先读取 `/etc/default/minio`，再读取 `/etc/default/silo`，后者的同名变量覆盖前者。SILO 配置应写入后者；`MINIO_*` 变量名与既有参考锚点继续保留。
+
+## SILO Server CLI 选项 {#minio-server-cli}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -40,25 +42,25 @@ upstream_modified: true
 
 *可选*
 
-设置一个 [参数](/zh/reference/minio-server/#minio-server-parameters) 字符串，在启动 MinIO Server 时使用。
+设置一个 [参数](/zh/reference/minio-server/#minio-server-parameters) 字符串，在启动 SILO Server 时使用。
 
-对于采用推荐 MinIO `systemd` 服务的类 Unix 系统，请使用 `/etc/default/minio` 文件并创建环境变量 `MINIO_OPTS`，用于指定要附加到 `minio` systemd 进程的参数：
+对于采用推荐 SILO `systemd` 服务的类 Unix 系统，请使用 `/etc/default/silo` 文件并创建环境变量 `MINIO_OPTS`，用于指定要附加到 `silo` systemd 进程的参数：
 
 ```shell
-# Editing /etc/default/minio
+# Editing /etc/default/silo
 
-MINIO_OPTS=' --console-address=":9001" --ftp="address=:8021" --ftp="passive-port-range=30000-40000" '
+MINIO_OPTS='--console-address=:9001 --ftp=address=:8021 --ftp=passive-port-range=30000-40000'
 ```
 
-对于在命令行运行 `minio` 的系统，`MINIO_OPTS` 是可选项。 如需使用，请按标准 shell 语义声明该环境变量，然后在启动 MinIO Server 时引用该环境变量：
+对于在命令行运行 `silo` 的系统，`MINIO_OPTS` 是可选项。 如需使用，请按标准 shell 语义声明该环境变量，然后在启动 SILO Server 时引用该环境变量：
 
 ```shell
-export MINIO_OPTS=' --console-address=":9001" --ftp="address=:8021" --ftp="passive-port-range=30000-40000" '
+export MINIO_OPTS='--console-address=:9001 --ftp=address=:8021 --ftp=passive-port-range=30000-40000'
 
-minio server $MINIO_OPTS ...
+silo server $MINIO_OPTS ...
 
 # The above is equivalent to running the following:
-# minio server --console-address=":9001" \
+# silo server --console-address=":9001" \
 #              --ftp="address=:8021"     \
 #              --ftp="passive-port-range=30000-40000"
 ```
@@ -66,7 +68,7 @@ minio server $MINIO_OPTS ...
 > [!WARNING]
 > **重要**
 >
-> `minio server` 命令不会直接读取 `$MINIO_OPTS`。 该变量仅在按上述方式使用时才会生效。
+> `silo server` 命令不会直接读取 `$MINIO_OPTS`。 该变量仅在按上述方式使用时才会生效。
 
 ## 存储卷 {#id3}
 
@@ -76,9 +78,9 @@ minio server $MINIO_OPTS ...
 
 *envvar*
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程用作存储后端的目录或磁盘。
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程用作存储后端的目录或磁盘。
 
-在功能上等价于设置 [`minio server DIRECTORIES`](/zh/reference/minio-server/#minio.server.DIRECTORIES)。 在通过环境文件配置 MinIO 运行时使用此值。
+在功能上等价于设置 [`silo server DIRECTORIES`](/zh/reference/minio-server/#minio.server.DIRECTORIES)。 在通过环境文件配置 SILO 运行时使用此值。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
@@ -93,9 +95,9 @@ minio server $MINIO_OPTS ...
 
 *envvar*
 
-指定 MinIO server 进程用于加载环境变量的文件完整路径。
+指定 SILO server 进程用于加载环境变量的文件完整路径。
 
-对于由 `systemd` 管理的文件，将该值设置为环境文件路径（`/etc/default/minio`），以便在使用 [`mc admin service restart`](/zh/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) 重启部署时，指示 MinIO 重新加载该文件中的变更。
+对于由 `systemd` 管理的文件，将该值设置为环境文件路径（`/etc/default/silo`），以便在使用 [`mc admin service restart`](/zh/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) 重启部署时，指示 SILO 重新加载该文件中的变更。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
@@ -450,3 +452,28 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 此设置没有对应的配置项。
 {{< /tab >}}
 {{< /tabs >}}
+
+
+<a id="multipart-listing"></a>
+
+## 多段上传列举模式 {#envvar.MINIO_API_MULTIPART_LISTING}
+
+**仅当前 main 提供，Server 20260903 尚未包含。**`MINIO_API_MULTIPART_LISTING` 接受 `legacy` 或 `strict`，默认 **`legacy`**。在每个服务进程的环境中设置并重启；不支持共享的 `api multipart_listing` 配置键，不能用 `mcli admin config set` 选择模式。无效值会记录诊断并使用 `legacy`，不会丢弃其它 API 设置。
+
+Legacy 保留精确键/cache 列举限制。Strict 扫描持久上传元数据，启用前必须升级所有写入方并排空旧上传。缺少身份字段时无法证明旧上传属于哪个桶，因此**另一个桶的上传仍可能导致本桶 strict 列举返回 503**。有效身份可以提前过滤，所以并不是所有旧原生 ID 记录都会无条件导致跨桶失败。
+
+使用只读、SigV4 认证的 `GET /minio/admin/v3/multipart-preflight`，需要 `admin:StorageInfo`。检查 `mode`、`ready`、`complete`、`scannedEntries`、`legacyUploads` 以及各 set 的磁盘覆盖。扫描不完整不等于结果干净；就绪结果也不能证明旧写入方不会再产生旧格式上传。100,000 条预算统计每块盘返回的目录条目，包括哈希目录，而不是唯一上传数。两种模式的每页上限均从 10,000 降为 1,000。详见[升级、预检与回滚步骤](/blog/design/list-multipart-uploads/#implementation)。
+
+## HTTP 请求头与空闲超时 {#envvar.MINIO_READ_HEADER_TIMEOUT}
+
+`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` 默认 `30s`；参数可用，但在普通 CLI 帮助中隐藏。当前 main 将其接入 HTTP/1 请求头绝对截止时间，Server 20260903 尚未正确执行这个可配置限制。零值回退到读取超时；负值禁用请求头上限，可能重新放开慢请求头资源耗尽路径。该限制也影响 TLS 握手读取。超时可能直接关闭连接，并不保证返回 HTTP 错误状态。
+
+<a id="envvar.MINIO_IDLE_TIMEOUT"></a>
+
+`MINIO_IDLE_TIMEOUT` / `--idle-timeout` 同样默认 `30s`，控制请求体的滚动空闲超时。持续有进展的长 HTTP/1 上传不会因此被限制为总共 30 秒。两者都没有服务端 YAML 字段；启动时 CLI 参数优先于环境变量。HTTP/2 及 TLS 写侧限制见[超时设计](/blog/design/request-header-timeouts/)。
+
+## 旧式桶资源匹配 {#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH}
+
+`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` 是恢复桶级策略动作旧对象资源匹配行为的兼容开关，值区分大小写。策略包在进程初始化时读取它，早于 SILO 加载 `MINIO_CONFIG_ENV_FILE`；只在后者文件中设置不会生效。必须在启动前通过真实进程环境传入，例如 systemd 的 `EnvironmentFile`。应优先修正策略，避免恢复较弱的匹配规则。详见 [SN-2026-004](/about/security-advisories/#sn-2026-004)。
+
+SILO 自身的环境文件解析器与 systemd 不同，详见[环境文件设计](/blog/design/config-env-file/)。与工具链相关的身份提供方启动故障，见 [TLS 与 OIDC 发现诊断](/blog/design/go127-tls-oidc-discovery/)。

@@ -145,3 +145,5 @@ Moving from an official `mc` binary to `mcli`:
 [20260313]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-13T08-57-32Z
 [20260321]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-21T00-00-00Z
 [20260417]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-04-17T00-00-00Z
+
+The HTTP-200 CopyObject repair applies when mcli selects a single CopyObject: objects smaller than 64 MiB or explicit `--disable-multipart`. Larger copies normally use ComposeObject; this fix does not substitute for separate evidence for that path.

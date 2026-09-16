@@ -1,7 +1,7 @@
 ---
 title: SILO Security Chronicle
 linkTitle: Security
-description: An account of every application-level CVE investigated by the SILO fork, newest first, one incident per article.
+description: CVEs, SILO-local SN advisories and correctness audits, with impact, evidence and release scope.
 weight: 30
 icon: fa-solid fa-shield-halved
 sidebar_expanded: true
@@ -15,4 +15,6 @@ aliases:
   - /security/
 ---
 
-This is the security chronicle of the SILO community fork, listed from newest to oldest. Each CVE has its own article: the original threat model, the turns taken during review, the rejected alternatives, the final invariant, the evidence, and the compatibility cost all stay with that incident.
+This is the security chronicle of the SILO community fork, listed from newest to oldest. Records may cover a CVE, a SILO-local SN finding, several related repairs, or a non-vulnerability correctness audit: the original threat model, the turns taken during review, the rejected alternatives, the final invariant, the evidence, and the compatibility cost all stay with that incident.
+
+The [security ledger](/about/security-advisories/) indexes identifiers, fixed source and first containing releases. An investigation date is not a release date, and publishing an article does not deliver a fix.

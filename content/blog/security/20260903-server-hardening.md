@@ -90,7 +90,7 @@ The detailed protocol matrix, CORS interaction, black-box replication test, and 
 ## SN-2026-009: user and group status authorization {#sn-2026-009}
 
 **Affected operations:** admin `SetUserStatus` and `SetGroupStatus`.<br>
-**Tracking:** [PR #73](https://github.com/pgsty/silo/pull/73).<br>
+**Tracking:** [PR #73](https://github.com/pgsty/silo/pull/73) / [PR #85](https://github.com/pgsty/silo/pull/85).<br>
 **Fixes:** `58735ee38` and `229fe2b3c`.
 
 The inherited handlers checked `admin:EnableUser` or `admin:EnableGroup` regardless of the target state. A narrowly delegated administrator permitted to enable an identity could therefore disable it too; an identity intended to hold only the disable action could fail or be evaluated against the wrong grant.

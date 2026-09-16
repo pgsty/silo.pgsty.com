@@ -2,7 +2,7 @@
 title: "未签名的 Header 不属于请求"
 linkTitle: "签名头覆盖边界"
 date: 2026-09-09
-lastmod: 2026-09-11
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   一个只授权写单个对象的 presigned/签名 PUT，可被转化为读取签名密钥可及的任意对象的服务端复制——因为 SigV4 验签只遍历"签名头名单"，从不检查真正到达的 x-amz-* 头，而路由又仅凭一个未签名的 x-amz-copy-source 头就派发到 CopyObject。本文记录 SILO 的未签名头拒绝边界、载荷哈希豁免与可信签名年龄的计算、PutObjectTagging 注入时序调整、跨签名模式的适用范围与发布前证据。
@@ -16,20 +16,20 @@ url: "/zh/blog/design/signed-header-coverage/"
 
 > **2026-09-11 状态：** 原始修复已推送，并通过 [PR #173](https://github.com/pgsty/silo/pull/173) 合并。下文的后续签名与正文校验修复也已通过 [PR #177](https://github.com/pgsty/silo/pull/177) 合并，8 项 PR 检查全部通过。源码验证与正式发布分别计数：当前已发布的 9 月 3 日 Server 版本尚未包含这些修复。<br>
 > **范围：** SigV4 请求头覆盖、策略输入一致性与正文摘要校验。不改变 S3 字段名称、对象或桶元数据格式、复制协议、加密格式和客户端命令。<br>
-> **安全性质：** 客户端未签名的 `x-amz-*` 操作头不能改变已授权请求；策略求值与正文校验使用实际参与签名的有效输入。
+> **普通签名与预签名 SigV4 的安全性质：** 客户端未签名的 `x-amz-*` 操作头不能改变已授权请求；策略求值与正文校验使用实际参与签名的有效输入。
 
 ## 太长不看（TL;DR） {#tldr}
 
-一个 presigned `PUT` URL 只签一个头：`host`。SILO 会确认签名头名单里点名的每个头都已到达，却从不遍历*真正*到达的头，于是名单之外的 `x-amz-*` 头被照单接受并使用。`cmd/api-router.go` 仅凭 `x-amz-copy-source` 头就把任意 `PUT` 派发到 `CopyObjectHandler`。两者相加，把"只能写某个对象"的授权，变成了**以签名者身份读取签名密钥可及的任意对象的服务端复制**——一个混淆代理（confused deputy）。当该头被排除在 `SignedHeaders` 之外时，Authorization 头路径也是同样的行为。
+一个 presigned `PUT` URL 可以只签一个头：`host`。SILO 会确认签名头名单里点名的每个头都已到达，却从不遍历*真正*到达的头，于是名单之外的 `x-amz-*` 头被照单接受并使用。`cmd/api-router.go` 仅凭 `x-amz-copy-source` 头就把任意 `PUT` 派发到 `CopyObjectHandler`。两者相加，把"只能写某个对象"的授权，变成了**以签名者身份读取签名密钥可及的任意对象的服务端复制**——一个混淆代理（confused deputy）。当该头被排除在 `SignedHeaders` 之外时，Authorization 头路径也是同样的行为。
 
 修复只确立一条不变式：
 
 ```text
-就 x-amz-* 语义而言，签名头名单“就是”整个请求。
-任何不被它覆盖的 x-amz-* 头，都在 handler 运行前被拒绝。
+普通签名与预签名 SigV4 中，x-amz-* 操作头必须被签名覆盖。
+唯一豁免 X-Amz-Content-Sha256，其有效值另行绑定和校验；streaming seed 不在此覆盖内。
 ```
 
-这与 AWS S3 一致——AWS 对同一请求返回 `AccessDenied`（“There were headers present in the request which were not signed”）。签名代码是逐字节继承自上游 `minio/minio` 的，因此每个更早的 SILO 发布版本、以及上游本身，都带有这个缺口。
+这与 AWS S3 一致——AWS 对同一请求返回 `AccessDenied`（“There were headers present in the request which were not signed”）。受影响的签名代码继承自上游 `minio/minio`，已发布的 SILO 基线尚未包含本修复；源码谱系本身不能证明所有上游构建或其他分叉的状态。
 
 ## 缺陷：覆盖缺口 {#failure}
 
@@ -47,11 +47,11 @@ presigned PUT（SignedHeaders=host）  ->  加一个未签名的  x-amz-copy-sou
 
 ## 溯源 {#provenance}
 
-这个缺口继承自上游 MinIO，并非 SILO 引入。`cmd/signature-v4-utils.go` 里的 SigV4 验签器、以及 `cmd/signature-v4.go` 里的 Authorization 头路径 `doesSignatureMatch`，都是可追溯到 2016 年的原始 MinIO 代码；`cmd/api-router.go` 里由头驱动的 CopyObject 派发可追溯到 2019 年。唯一遍历到达头的例程 `checkMetaHeaders`，是上游在 2023-07-27 通过 [minio/minio#17737](https://github.com/minio/minio/pull/17737)（`535f97ba6`）加入的。也就是说，上游其实已经意识到了这一类问题——未签名的头必须与签名集合相符——却把检查限定在 `X-Amz-Meta-` 前缀和 presigned 路径上，把 `x-amz-copy-source` 和整条 Authorization 头路径都漏在外面。这个窗口在 MinIO 的 S3 层里一直开着。
+这个缺口继承自上游 MinIO，并非 SILO 引入。`cmd/signature-v4-utils.go` 里的 SigV4 验签器、以及 `cmd/signature-v4.go` 里的 Authorization 头路径 `doesSignatureMatch`，都是可追溯到 2016 年的原始 MinIO 代码；`cmd/api-router.go` 里由头驱动的 CopyObject 派发可追溯到 2019 年。唯一遍历到达头的例程 `checkMetaHeaders`，是上游在 2023-07-27 通过 [minio/minio#17737](https://github.com/minio/minio/pull/17737)（`535f97ba6`）加入的。也就是说，上游其实已经意识到了这一类问题——未签名的头必须与签名集合相符——却把检查限定在 `X-Amz-Meta-` 前缀和 presigned 路径上，把 `x-amz-copy-source` 和整条 Authorization 头路径都漏在外面。继承的验证器早于 SILO 分叉。
 
 在未签名头修复之前，SILO 对 `cmd/signature-v4-utils.go` 的改动是一行依赖路径迁移：`9b11dc946` 将 `policy` 导入改为 `pgsty/silo-pkg/v3`。存在缺陷的验签行为来自上游。原始修复（`123325430`）以及 [PR #177](https://github.com/pgsty/silo/pull/177) 的后续修复改变了这条边界。存在缺陷的代码早于 SILO 的分叉基线——即上游 2025-12-03 的 “maintenance mode” 提交，第一个 SILO 发布版本正是从那里切出的。
 
-上游 `minio/minio` 自那次交接起即处于归档状态，没有上游维护者能接收补丁。SILO 原样继承了这份代码，也是唯一修复它的地方——正如安全台账对其它继承性发现的记录方式。
+本文确认维护中的 SILO 源码已修复该边界，不声称 SILO 是唯一已有修复的实现，也不据此判断其他项目当前的维护状态。
 
 ## 修复 {#repair}
 
@@ -78,7 +78,7 @@ presigned PUT（SignedHeaders=host）  ->  加一个未签名的  x-amz-copy-sou
 ## 跨签名模式的适用范围 {#scope}
 
 - **Authorization 头（签名）与 presigned SigV4：** 两者现均已强制。这是可达的路径。
-- **Streaming SigV4：** 对复制不可达。`authenticateRequest` 对 streaming 鉴权类型返回 `ErrSignatureVersionNotSupported`，因此 `CopyObjectHandler` 的 `checkRequestAuthType` 会在任何复制发生前就拒绝一个 streaming 签名的复制。检查没有加到 streaming 验签器上，因为派发根本到不了那里；有回归测试钉住这一拒绝。
+- **Streaming SigV4：**种子验签没有调用 `checkUnsignedHeaders`。COPY 处理器通过普通认证分发拒绝 streaming auth，但不代表 streaming PUT/UploadPart 的所有头都已覆盖。这里不声称存在专门验证 streaming COPY 拒绝的回归测试；完整覆盖需要单独实现和证据。
 - **SigV2：** 不受影响。V2 的规范化本就把 `x-amz-*` 头折进 string-to-sign，因此新增一个 `x-amz-*` 头会改变算出的签名，被当作签名不匹配拒绝。
 
 ## 状态码：400 还是 403 {#status-code}
@@ -87,7 +87,7 @@ AWS 对未签名头返回 `403 Forbidden`；SILO 返回 `400 AccessDenied`（`Er
 
 ## 测试 {#tests}
 
-有几个既有测试先构造一个签名请求，然后*在签名之后*才设置 `x-amz-copy-source`、`x-amz-copy-source-range` 或 `x-amz-metadata-directive`——也就是说，它们依赖的正是本修复所移除的行为。它们现在改为在设置这些头之后用 `signRequestV4` 重新签名，这正是每个真实 S3 客户端的做法。`signRequestV4` 会把 `Authorization` 头排除在自己的签名集合之外，因此重签是安全的。当前覆盖包括 `checkUnsignedHeaders` 的单元用例（空首值、载荷哈希豁免，以及旧签名年龄头未签名时的拒绝行为）以及 `TestPresignedVerifyIdempotent`——对同一个 presigned 请求验签两次。
+有几个既有测试先构造一个签名请求，然后*在签名之后*才设置 `x-amz-copy-source`、`x-amz-copy-source-range` 或 `x-amz-metadata-directive`——也就是说，它们依赖的正是本修复所移除的行为。它们现在改为在设置这些头之后用 `signRequestV4` 重新签名，这符合修复后的验证器对操作头的签名要求。`signRequestV4` 会把 `Authorization` 头排除在自己的签名集合之外，因此重签是安全的。当前覆盖包括 `checkUnsignedHeaders` 的单元用例（空首值、载荷哈希豁免，以及旧签名年龄头未签名时的拒绝行为）以及 `TestPresignedVerifyIdempotent`——对同一个 presigned 请求验签两次。
 
 ## 证据 {#evidence}
 
@@ -98,7 +98,7 @@ AWS 对未签名头返回 `403 Forbidden`；SILO 返回 `400 AccessDenied`（`Er
 
 ## 兼容性与运维 {#impact}
 
-- **普通客户端：** 请求无变化。每个 AWS SDK、`minio-go`、`mc` 本就会对它发送的 `x-amz-*` 头签名。
+- **普通客户端：** 请求无变化。已验证的标准 SDK 路径会签入其操作头；这不是对所有 SDK 版本和自定义签名器的保证。
 - **未签名的 `x-amz-*` 头：** 现在以 `AccessDenied` 拒绝，与 AWS 一致。一个不签名就加上此类头的客户端，本就在 SigV4 契约之外。
 - **滚动升级：** wire 与存储格式不变。已升级节点强制该边界；仍跑旧版本的节点在升级前仍然暴露，因此滚动窗口内不同节点行为可能不同。
 - **回滚：** 修复版本写入的数据仍可被旧版本读取，但回滚会重新打开混淆代理。
@@ -115,4 +115,6 @@ AWS 对未签名头返回 `403 Forbidden`；SILO 返回 `400 AccessDenied`（`Er
 
 签名即请求。`x-amz-*` 头所声称的一切，在签名覆盖它之前都只是声称：
 
-> 确认"承诺过的头都到了"，不等于确认"到了的头都被承诺过"。在 handler 运行前，在 handler 可被到达的每一条签名路径上，拒绝任何未签名的 `x-amz-*` 头。
+> 确认"承诺过的头都到了"，不等于确认"到了的头都被承诺过"。应让参与普通签名与预签名操作的头受同一认证契约约束；载荷哈希豁免与 streaming seed 限制仍如上文。
+
+台账把[载荷验证修复单列为 SN-2026-012](/about/security-advisories/#sn-2026-012)。签名修改本身不改变存储格式，但同一 main 候选还包含[要求协调升级的 IAM 变化](/operations/replication/iam-upgrade/)，不能用本文授权整个候选版本滚动升级。

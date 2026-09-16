@@ -2,7 +2,7 @@
 title: "只预览文本，绝不执行：SILO Console 文本预览 PRD"
 linkTitle: "安全文本预览"
 date: 2026-08-23
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   SILO Console 安全文本预览的最终 PRD：用严格 UTF-8 与 1 MiB 硬上限查看日志、纯文本、JSON 和 XML；任何对象内容都不得成为同源可执行文档。
@@ -41,7 +41,7 @@ SILO Console 可以预览图片、PDF、音频和视频，却不能直接查看�
 9. 要么显示完整对象，要么完全不显示；不展示截断 JSON/XML。
 10. 文件超限、编码非法或加载失败时，始终保留 Download。
 
-不新增 Console API 或 S3 API，也不扩大后端 inline MIME 白名单。
+不新增 Console 或 S3 路由，也不扩大后端 inline MIME 白名单。但交付修改了 Console 响应语义：零字节对象的 Range 请求返回空 200；不可满足的范围返回 416 与 `Content-Range: bytes */N`；对象 JSON 总是输出 `size`。见 [Console 2.2.0](/zh/blog/release/console-2.2.0/#byte-ranges)。
 
 ## 当前状况 {#current-behavior}
 
@@ -215,8 +215,8 @@ MAX_TEXT_PREVIEW_BYTES = 1,048,576
 
 ### 已知大小 {#known-size}
 
-- 选中版本的已知大小超过上限时，不请求正文；
-- 已知大小为零时，显示空文件状态；
+- 选中版本的已知大小超过上限时，首次不请求正文；显式 Retry 可绕过可能过期的列表大小，但仍保持有界 Range 和字节上限；
+- 已知大小为零仍走有界请求，空响应显示空文件状态；
 - 已知大小不超过上限时，开始有界请求；
 - 缺失大小不等于零，必须进入有界未知大小路径。
 
@@ -333,7 +333,7 @@ AND 不是 prefix
 | Loading | 可访问 busy 状态，不显示旧文本。 |
 | Success | 可滚动原文和 Download。 |
 | Empty | 明确“文件为空”。 |
-| Too large | 对象大小、1 MiB 上限、Download；已知超限时正文请求数为零。 |
+| Too large | 对象大小、1 MiB 上限、Download；已知超限时首次正文请求数为零；Retry 仍为有界探测。 |
 | Invalid UTF-8 / binary | 独立解释和 Download。 |
 | Forbidden | 权限专属提示，不保留正文。 |
 | Not found / replaced | 对象变化提示，不保留正文。 |
@@ -445,7 +445,7 @@ HTTP 错误响应正文绝不能被解码后当作对象内容展示。
 - 1 字节；
 - 正好 1,048,576 字节；
 - 1,048,577 字节；
-- 已知超限且正文请求数为零；
+- 已知超限时首次正文请求数为零，以及有界 Retry；
 - 未知大小；
 - 206 且 <code>Content-Range</code> 已暴露总大小；
 - 服务端忽略 Range 并返回 200；
@@ -541,3 +541,5 @@ HTTP 错误响应正文绝不能被解码后当作对象内容展示。
 - 有损查看另立独立方案。
 
 当前没有待裁决设计项，可以依照本文进入实现。
+
+**当前 Retry 边界：** “过大”状态允许重新探测可能过期的列表大小，但不会无限下载；请求仍为有界 Range，响应头和最多 1 MiB + 1 字节的读取限制继续执行。空文件必须通过响应路径验证，不能将未知大小当成零。

@@ -161,13 +161,13 @@ url: "/zh/blog/security/internode-path-containment/"
 
 ## 后续状态 {#open}
 
-初稿列出的两个实现缺口现已在本地分支关闭；但截至 2026-08-03，下面这些后续提交都尚未进入公开服务端版本：
+以下五项后续在 8 月 3 日原评审时尚未发布，随后均进入 Server 20260804：
 
 - **`ReadFileHandler` 已有上界。** 提交 `b6f70ab08` 会拒绝超过 5 GiB 的声明读取长度；这是该旧式整文件 bitrot 路径所代表 S3 part 的最大尺寸。合法的 GiB 级读取仍可能按相同量级分配内存；这里消除的是超过格式真实上限、由调用方任意指定的分配，并没有假装大读取毫无成本。
 - **负数 part size 既不能写入，也不能被信任。** 提交 `80e8eaa42` 在 `AddVersion` 写入收口点拒绝该值，并在 `CheckParts` 与 `VerifyFile` 再次校验，因此既覆盖新写入的毒化元数据，也覆盖已经落盘的历史元数据。内部节点边界使用同一个谓词。
 - **非正数 erasure block size 在构造时即被拒绝。** 提交 `80e8eaa42` 在 `NewErasure` 校验 `blockSize`，覆盖单独给 `ShardFileSize` 加守卫无法覆盖的其他 offset 与 decode 除法；rebalance 中独立的除法在自身边界另行校验。
-- **`ReadParts` 的错误终于能传回调用方。** 顺带修好的既有 bug：原 handler 在存储调用结束前就宣告成功（`done(nil)`），因此 `ReadParts` 的任何失败——不只是新守卫，也包括 `errFileNotFound` 等——都从未被返回；客户端拿到保活流，把错误文本当 msgpack 解析，表现为 `msgp: attempted to decode type "int" with method for "map"`。修复后真实存储错误进入 quorum 归约；成功路径未变，multipart 相关日志里的这类 msgpack 解码噪声会被真实存储错误取代。
-- **被 recover 的 panic 不等于健康节点。** `WithDeadline` 的 recover 把原本的进程立即死亡变成一行 stderr（`panic in deadline-bounded work: ...` 带完整栈）加一次失败请求。栈转储在每个进程生命周期内最多 10 次，但错误每次都会返回。**若你的告警只盯进程存活，请为该字符串补一条日志告警**——否则一个过去以崩溃自我暴露的真 bug，现在只在日志里低语。
+- **`ReadParts` 的错误终于能传回调用方（`1af351a70`）。** 顺带修好的既有 bug：原 handler 在存储调用结束前就宣告成功（`done(nil)`），因此 `ReadParts` 的任何失败——不只是新守卫，也包括 `errFileNotFound` 等——都从未被返回；客户端拿到保活流，把错误文本当 msgpack 解析，表现为 `msgp: attempted to decode type "int" with method for "map"`。修复后真实存储错误进入 quorum 归约；成功路径未变，multipart 相关日志里的这类 msgpack 解码噪声会被真实存储错误取代。
+- **被 recover 的 panic 不等于健康节点（`a36fd8fff`）。** `WithDeadline` 的 recover 把原本的进程立即死亡变成一行 stderr（`panic in deadline-bounded work: ...` 带完整栈）加一次失败请求。栈转储在每个进程生命周期内最多 10 次，但错误每次都会返回。**若你的告警只盯进程存活，请为该字符串补一条日志告警**——否则一个过去以崩溃自我暴露的真 bug，现在只在日志里低语。
 
 仍有两项限制，不能被打包进更强的结论：
 

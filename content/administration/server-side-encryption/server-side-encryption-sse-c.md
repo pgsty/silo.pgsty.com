@@ -41,7 +41,7 @@ The scope of a single <abbr title="External Key">EK</abbr> depends on the number
 >
 > Objects encrypted with SSE-C can replicate through both site replication or bucket replication. Previous versions of MinIO Object Store did not replicate SSE-C encrypted objects.
 
-SSE-C encrypted objects that are compressed are not compatible with MinIO [bucket replication](/administration/bucket-replication/#minio-bucket-replication) or [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview). Use [SSE-KMS](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) or [SSE-S3](/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3) to ensure encrypted objects are compatible with replication.
+Published Server 20260903 retains the inherited limitation for compressed SSE-C replicas. Current main, after [#126](https://github.com/pgsty/silo/pull/126), excludes **all new SSE-C writes from compression**, including PUT, multipart, COPY and Snowball. This is independent of the encrypted-compression setting for SSE-S3/SSE-KMS. It prevents new compressed SSE-C objects; it does not rewrite historical objects. Inventory old compressed SSE-C data and verify recovery or replication with the original keys before depending on it. See [SSE-C replica integrity](/blog/design/ssec-replica-integrity/) and the [release matrix](/compatibility/versions/).
 
 ### SSE-C Overrides SSE-S3 and SSE-KMS {#sse-c-overrides-sse-s3-and-sse-kms}
 
@@ -82,7 +82,7 @@ MinIO supports the following AWS S3 headers for specifying SSE-C encryption:
 - `X-Amz-Server-Side-Encryption-Customer-Key` set to the encryption key value.
 - `X-Amz-Server-Side-Encryption-Customer-Key-MD5` to the 128-bit MD5 digest of the encryption key.
 
-The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible SDKs include specific syntax for setting headers. Certain [`mc`](/reference/minio-mc/#command-mc) commands like [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) include specific arguments for enabling SSE-S3 encryption:
+The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible SDKs include specific syntax for setting headers. Certain [`mc`](/reference/minio-mc/#command-mc) commands like [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) include specific arguments for enabling SSE-C encryption:
 
 ```shell
 mc cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
@@ -96,13 +96,13 @@ mc cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
 
 MinIO supports the following AWS S3 headers for copying an SSE-C encrypted object to another S3-compatible service:
 
-- `X-Amz-Copy-Source-Server-Side-Encryption-Algorithm` set to `AES256`
-- `X-Amz-Copy-Source-Server-Side-Encryption-Key` set to the encryption key value. The copy operation will fail if the specified key does not match the key used to SSE-C encrypt the object.
-- `X-Amz-Copy-Source-Server-Side-Encryption-Key-MD5` set to the 128-bit MD5 digest of the encryption key.
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Algorithm` set to `AES256`
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key` set to the encryption key value. The copy operation will fail if the specified key does not match the key used to SSE-C encrypt the object.
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key-MD5` set to the 128-bit MD5 digest of the encryption key.
 
 When source and destination use different SSE-C keys, provide both header sets: the `Copy-Source-*` headers identify the source key, while the ordinary `Server-Side-Encryption-Customer-*` headers identify the destination key. SILO keeps these contexts separate after commit, so CopyObject checksum fields in XML and HTTP headers are decrypted with the destination key. See [Two SSE-C Keys, One CopyObject Response](/blog/design/copyobject-ssec-checksum-response/).
 
-The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible SDKs include specific syntax for setting headers. Certain [`mc`](/reference/minio-mc/#command-mc) commands like [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) include specific arguments for enabling SSE-S3 encryption:
+The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible SDKs include specific syntax for setting headers. Certain [`mc`](/reference/minio-mc/#command-mc) commands like [`mc cp`](/reference/minio-mc/mc-cp/#command-mc.cp) include specific arguments for enabling SSE-C encryption:
 
 ```shell
 mc cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
@@ -133,3 +133,5 @@ Copies that require new object data (for example, some versioning or checksum
 changes) use the regular decrypt-and-re-encrypt path instead. Client-provided
 keys are not persisted in object metadata. Normal COPY permissions and
 versioning behavior still apply; this is not a general in-place version editor.
+
+On current main, [#123](https://github.com/pgsty/silo/pull/123) sends an ordinary client self-COPY with **any requested checksum algorithm** through the full decrypt-and-re-encrypt path, even when it names the stored algorithm. That rewrite can change the ETag, produces a single-part object from a multipart source, and replicates full object data rather than a metadata-only update. Without that header, an eligible in-place rotation preserves the existing checksum state, including the absence of a checksum. Versioning and legacy-format constraints can independently require a rewrite.

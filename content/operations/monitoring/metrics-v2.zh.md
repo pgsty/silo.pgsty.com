@@ -15,9 +15,9 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 Metrics version 2 将指标划分为以下三个类别：
 
-- [集群指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics)
-- [存储桶指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)
-- [资源指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-resource-metrics)
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-cluster-metrics">集群指标（英文详细表）</a>
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-bucket-metrics">存储桶指标（英文详细表）</a>
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-resource-metrics">资源指标（英文详细表）</a>
 
 每个 v2 端点都会返回其所属类别的全部指标。 例如，抓取以下端点会返回所有集群指标：
 
@@ -39,7 +39,7 @@ MinIO 提供两个 [Grafana 仪表板](/zh/operations/monitoring/grafana/#minio-
 
 {{< tabs group="tab1-tab2-tab3" >}}
 {{< tab label="集群指标" value="tab1" >}}
-你可以使用以下 URL 端点抓取[集群级指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics)：
+你可以使用以下 URL 端点抓取<a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-cluster-metrics">集群级指标（英文详细表）</a>：
 
 ```shell
 http://HOSTNAME:PORT/minio/v2/metrics/cluster
@@ -58,7 +58,7 @@ http://HOSTNAME:PORT/minio/v2/metrics/cluster
 > [!NOTE]
 > **变更: RELEASE.2023-08-31T15-31-16Z**
 >
-> 你可以使用以下 URL 端点抓取[存储桶级指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)：
+> 你可以使用以下 URL 端点抓取<a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-bucket-metrics">存储桶级指标（英文详细表）</a>：
 
 > [!NOTE]
 > **变更: RELEASE.2025-03-12T17-29-24Z**
@@ -75,7 +75,7 @@ http://HOSTNAME:PORT/minio/v2/metrics/bucket
 > [!NOTE]
 > **新增: RELEASE.2023-10-07T15-07-38Z**
 
-你可以使用以下 URL 端点抓取[资源指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-resource-metrics)：
+你可以使用以下 URL 端点抓取<a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-resource-metrics">资源指标（英文详细表）</a>：
 
 ```shell
 http://HOSTNAME:PORT/minio/v2/metrics/resource
@@ -85,9 +85,9 @@ http://HOSTNAME:PORT/minio/v2/metrics/resource
 {{< /tab >}}
 {{< /tabs >}}
 
-- [集群指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics)
-- [存储桶指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-bucket-metrics)
-- [资源指标（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-resource-metrics)
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-cluster-metrics">集群指标（英文详细表）</a>
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-bucket-metrics">存储桶指标（英文详细表）</a>
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-resource-metrics">资源指标（英文详细表）</a>
 
 > > [!NOTE]
 > > **变更: RELEASE.2025-03-12T17-29-24Z**
@@ -95,3 +95,15 @@ http://HOSTNAME:PORT/minio/v2/metrics/resource
 > > 出于性能原因，v2 指标最多支持 100 个存储桶。 如果需要覆盖更多存储桶的指标，请改用 [v3 指标](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics)。
 
 <a id="minio-available-resource-metrics"></a>
+
+<a id="minio-available-cluster-metrics"></a>
+
+### 集群指标明细
+
+<a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-cluster-metrics">查看英文集群指标表</a>。
+
+<a id="minio-available-bucket-metrics"></a>
+
+### 存储桶指标明细
+
+<a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-bucket-metrics">查看英文存储桶指标表</a>。

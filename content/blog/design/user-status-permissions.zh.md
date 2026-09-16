@@ -2,7 +2,7 @@
 title: "一个端点，两种权限：彻底分离用户与组状态"
 linkTitle: "用户与组状态权限"
 date: 2026-08-26
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   用户与组状态端点过去即使处理禁用请求，也固定检查各自的 Enable action。本文记录最小权限缺陷、SILO 基于目标状态严格选权的设计、通过 PR #73 合并的用户修复、后续组修复、四向 IAM 测试，以及代码提交与版本交付之间的边界。
@@ -11,6 +11,8 @@ weight: 15
 draft: false
 url: "/zh/blog/design/user-status-permissions/"
 ---
+
+> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
 
 本文完整记录 [上游 issue minio/minio#21478](https://github.com/minio/minio/issues/21478) 与 [SILO PR #73](https://github.com/pgsty/silo/pull/73) 的讨论、修复过程和最终鉴权设计。
 
@@ -344,8 +346,8 @@ func setGroupStatusAdminAction(status string) policy.AdminAction {
 | 独立对抗评审 | 完成 | 完成，GO |
 | 带 sign-off 的提交 | 完成 | `229fe2b3c`（已在 `main`）|
 | Push、PR CI 与 merge | 完成 | 已于 2026-08-29 合并 |
-| SILO tag | 尚未确认 | 尚未确认 |
-| Release package 或 container image | 尚未确认 | 尚未确认 |
+| SILO tag | Server 20260903 | Server 20260903 |
+| Release package 或 container image | 见 20260903 发布记录 | 见 20260903 发布记录 |
 | 部署 | 尚未确认 | 尚未确认 |
 | 生产行为 | 尚未确认 | 尚未确认 |
 | 上游合并 | 不可用；仓库已归档 | 不适用 |
@@ -355,3 +357,5 @@ func setGroupStatusAdminAction(status string) policy.AdminAction {
 这些修复让鉴权模型说真话。启用和禁用用户或组，都是风险方向相反的状态变化，SILO 也早已为每个方向提供不同 policy action；每个 handler 都应该从请求的目标状态选择 action，并在 mutation 前只鉴权一次。
 
 代码很小，是因为设计边界足够清晰。真正需要长期保留的是更完整的结果：明确的权限矩阵、被否决的兼容方案、非法输入规则、四向集成测试、干净的合并证据、迁移指引，以及不把“已合并”误报成“已发布”的交付边界。
+
+本页的 enable/disable 权限修复与后续 `admin:ChangeMyPassword` 拆分是不同改动。升级九月候选前须按[密码迁移指南](/zh/compatibility/password-permissions/)为原有自助改密限制保留配对 Deny。

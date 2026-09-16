@@ -18,8 +18,7 @@ url: "/zh/blog/design/checksum-verify/"
 > **状态：** 已随最终的 [mcli 20260903](/zh/blog/release/mcli-20260903/) 正式发布。命令经
 > pull request [#8](https://github.com/pgsty/mc/pull/8) 与 [#13](https://github.com/pgsty/mc/pull/13)
 > 合入 `main`，在托管 CI 中针对真实 SILO 服务器验证，
-> [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。把客户端打包进
-> Server 镜像仍是独立的后续门禁。<br>
+> [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。Server 20260903 镜像已捆绑包含本命令的 mcli 20260903。<br>
 > **归属：** [`pgsty/mc`](https://github.com/pgsty/mc)。<br>
 > **跟踪：** [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)。<br>
 > **安全边界：** 本命令只读校验，不负责修复。
@@ -142,5 +141,6 @@ MISMATCH/UNKNOWN 退出码。真实本地 S3 还覆盖了历史 `MATCH`、`MISMA
 
 该命令已随最终的 [mcli 20260903](/zh/blog/release/mcli-20260903/) 从 `main` 顶端的签名
 tag 发布，功能套件 —— 包括针对真实 SILO 服务器的一次 checksum 校验 —— 对该提交
-全部通过，[pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。Server 内置
-客户端与生产审计仍是之后需要独立证明的门禁。
+全部通过，[pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。Server 20260903 已内置该客户端；生产审计仍是需要独立执行并提供证据的工作。
+
+JSON 消费者应检查 `schemaVersion: 1`，以 `type: object` 与 `type: summary` 区分逐对象记录和最终汇总。`--max-workers` 默认 4，接受 1–64，限制并发对象处理数，不是总内存或服务端 I/O 上限。

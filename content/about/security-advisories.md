@@ -35,6 +35,8 @@ release and all earlier public Server releases. A newer mcli, pkg or standalone
 Console does not patch an installed Server. See the
 [component matrix](/compatibility/versions/) for source pins.
 
+Server 20260903 also lacks [SN-2026-012](#sn-2026-012) and [SN-2026-013](#sn-2026-013). The standalone Console boundary differs: [SN-2026-014](#sn-2026-014) is fixed in released Console v2.4.1, while an embedded Console requires a repaired Server build.
+
 ## Inherited upstream advisory baseline {#inherited}
 
 The first Silo community release was cut from upstream history that already
@@ -66,9 +68,12 @@ patch.
 | [`SN-2026-006`](#sn-2026-006) | [`b73581b05`](https://github.com/pgsty/silo/commit/b73581b05), [`c4fd97d0b`](https://github.com/pgsty/silo/commit/c4fd97d0b) ([#82](https://github.com/pgsty/silo/issues/82)) | SSE-C reads of zero-byte objects | [Chronicle](/blog/security/20260903-server-hardening/) |
 | [`SN-2026-007`](#sn-2026-007) | [`474cd5801`](https://github.com/pgsty/silo/commit/474cd5801), [`74c97d005`](https://github.com/pgsty/silo/commit/74c97d005), [`21870fa2e`](https://github.com/pgsty/silo/commit/21870fa2e) ([#84](https://github.com/pgsty/silo/issues/84)) | `GetObjectAttributes` on SSE-C objects | [Chronicle](/blog/security/20260903-server-hardening/) |
 | [`SN-2026-008`](#sn-2026-008) | [PR #101](https://github.com/pgsty/silo/pull/101) ([`938603458`](https://github.com/pgsty/silo/commit/938603458) through [`04b097fd9`](https://github.com/pgsty/silo/commit/04b097fd9)) | Internal replication request headers | [Chronicle](/blog/security/20260903-server-hardening/) |
-| [`SN-2026-009`](#sn-2026-009) | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee38), [`229fe2b3c`](https://github.com/pgsty/silo/commit/229fe2b3c) ([PR #73](https://github.com/pgsty/silo/pull/73)) | Admin `SetUserStatus` / `SetGroupStatus` | [Chronicle](/blog/security/20260903-server-hardening/) |
+| [`SN-2026-009`](#sn-2026-009) | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee38), [`229fe2b3c`](https://github.com/pgsty/silo/commit/229fe2b3c) ([PR #73](https://github.com/pgsty/silo/pull/73), [#85](https://github.com/pgsty/silo/pull/85)) | Admin `SetUserStatus` / `SetGroupStatus` | [Chronicle](/blog/security/20260903-server-hardening/) |
 | [`SN-2026-010`](#sn-2026-010) | [PR #104](https://github.com/pgsty/silo/pull/104) ([`75a6734e4`](https://github.com/pgsty/silo/commit/75a6734e4) through [`d2d47a41f`](https://github.com/pgsty/silo/commit/d2d47a41f), [#58](https://github.com/pgsty/silo/issues/58)) | `DeleteObject`/`DeleteObjects` with explicit `versionId` | [Chronicle](/blog/security/20260903-server-hardening/) |
 | [`SN-2026-011`](#sn-2026-011) | [`123325430`](https://github.com/pgsty/silo/commit/1233254309b15571f101b2b26d531951ceaeef1e) | SigV4 signed-header coverage; `x-amz-copy-source` dispatch | [Chronicle](/blog/security/20260913-signed-header-status/) |
+| [`SN-2026-012`](#sn-2026-012) | [`c4b5e1cb4`](https://github.com/pgsty/silo/commit/c4b5e1cb4), [#177](https://github.com/pgsty/silo/pull/177) | Header-only presigned payload hash verification | [Chronicle](/blog/security/20260916-release-hardening/#sn-2026-012) |
+| [`SN-2026-013`](#sn-2026-013) | [#191](https://github.com/pgsty/silo/pull/191), [#192](https://github.com/pgsty/silo/pull/192) | IAM revocation replay and recovery | [Design](/blog/design/iam-revocations/) · [Chronicle](/blog/security/20260916-release-hardening/#sn-2026-013) |
+| [`SN-2026-014`](#sn-2026-014) | [Console #56](https://github.com/pgsty/silo-console/pull/56), [Server #209](https://github.com/pgsty/silo/pull/209) | Anonymous shared-download proxy scope | [Chronicle](/blog/security/20260916-release-hardening/#sn-2026-014) · [Console v2.4.1](/blog/release/console-2.4.1/) |
 
 Upgrade and compatibility notes for each entry follow. Entries whose full
 investigation is told in a chronicle article are summarized here; follow the
@@ -190,8 +195,7 @@ upgrading if you write your own bucket-scoped policies.** Add the bare bucket
 ARN (`arn:aws:s3:::bucket`) alongside the wildcard form in any statement that
 legitimately grants one of the twelve. Built-in canned policies are unaffected;
 `Deny` statements and `NotResource` exclusions are untouched.
-`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` restores the historical behaviour
-in full; it is read once at startup.
+`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` restores the historical behaviour in full. It is read during package initialization from the process environment; setting it only in `MINIO_CONFIG_ENV_FILE` is too late. See the [setting](/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH).
 
 ### SN-2026-005 — bare ARN prefix rejection {#sn-2026-005}
 
@@ -263,26 +267,33 @@ that relied on `Deny s3:DeleteObject` to block permanent deletes must also deny
 deletes. Replication targets keep the `s3:ReplicateDelete` contract. Inherited
 from upstream.
 
-### SN-2026-011 — unsigned `x-amz-*` headers and `x-amz-copy-source` {#sn-2026-011}
+### SN-2026-011 — unsigned `x-amz-*` operation headers {#sn-2026-011}
 
-Remote exploitation: yes; a party holding only a presigned PUT URL, or any
-signed PUT, needs no credentials of its own. SigV4 verification only checked
-that each named signed header was present and never inspected the `x-amz-*`
-headers that actually arrived, while the router dispatches any PUT carrying
-`x-amz-copy-source` to `CopyObjectHandler`. An unsigned `x-amz-copy-source`
-therefore turned a one-object write grant into a server-side copy of any
-object the signing key can read, executed as the signer; both the presigned
-and Authorization-header paths were affected, and where the destination bucket
-allows anonymous `GetObject` the copied private bytes become readable
-unauthenticated. Any unsigned `x-amz-*` request header is now refused with
-`AccessDenied` on both paths, matching AWS S3 (AWS returns `403`; Silo returns
-`400 AccessDenied`, otherwise identical). Every AWS SDK, `minio-go`, and `mc`
-already signs its `x-amz-*` headers, so legitimate clients need no change.
-Inherited unchanged from upstream `minio/minio`; every earlier release,
-including the latest published Server 20260903, is affected. Reported by Oren
-Yomtov; a CVE has been requested. See the [chronicle
-article](/blog/security/20260913-signed-header-status/) and the [signed-header
-design record](/blog/design/signed-header-coverage/).
+A holder of a presigned or ordinary signed PUT can add an unsigned `x-amz-copy-source` without knowing the signing secret. On affected paths this changes a one-object write into `CopyObject` or `UploadPartCopy`, reading source data with the signer's authority. A readable destination can expose the copied bytes. Published Server 20260903 is affected; the original fix is `123325430`, followed by #177.
+
+Ordinary SigV4 and presigned verification now reject unsigned `x-amz-*` headers with `400 AccessDenied`. `X-Amz-Content-Sha256` is the sole explicit header exception: its effective value is separately bound by the canonical request. #177 removed the internal `X-Amz-Signature-Age` header, constant and exemption; signature age comes from the signed date. Conforming ordinary signers keep working; custom clients must sign nonexempt headers before sending them. AWS uses a different HTTP status for this rejection, so this is not byte-for-byte response parity.
+
+The streaming SigV4 seed verifier does not call this same coverage helper. Streaming auth is refused by the copy handler's ordinary authentication dispatch, but the change must not be described as universal header coverage for every streaming PUT path. See the [scope and residual boundary](/blog/design/signed-header-coverage/#scope). Reported by Oren Yomtov; a CVE was requested. Upgrade the Server, restrict signing grants to the required objects and review anonymously readable destinations. A client or standalone Console update does not repair it.
+
+### SN-2026-012 — header-only presigned payload hash {#sn-2026-012}
+
+A valid presigned request can bind a SHA-256 value supplied only through `X-Amz-Content-Sha256`, yet affected generic authenticated handlers did not verify the consumed body against it. A URL holder could change the body while retaining the valid signed request; `PutBucketPolicy` is a reproduced surface. This does not create permission the signer never had, but it defeats the intended signed-body restriction.
+
+`c4b5e1cb4` makes generic body verification use the same effective payload hash as signature verification: query value first, header fallback. Tampering with a checksum-bound body is rejected with `XAmzContentSHA256Mismatch`; explicit `UNSIGNED-PAYLOAD` keeps its protocol meaning. This is on main, not Server 20260903. Upgrade before depending on body-bound presigned administration; avoid distributing broad administrative presigned grants. See the [chronicle](/blog/security/20260916-release-hardening/#sn-2026-012).
+
+### SN-2026-013 — durable IAM revocation {#sn-2026-013}
+
+A revoked identity or grant could return when stale site state, delayed notifications or incomplete recovery reintroduced it. The attacker needs a previously valid credential and an affected replay/recovery scenario; this is not unauthenticated identity creation. #191/#192 preserve deletion revisions, parent revocation boundaries and original group-grant times, and reject old child credentials after same-name parent recreation.
+
+The repair is on main and absent from Server 20260903. **Coordinated upgrade is required for every site and every process sharing an IAM backend, including shared backends without site replication.** Back up complete persistent IAM state, not only a live-record export. Keep tombstones, reissue the required child credentials and reconcile revocations missing from older backups before reopening access. Ordinary group-member removal during an outage remains a separate limitation. See the [design](/blog/design/iam-revocations/) and [recovery runbook](/operations/replication/iam-upgrade/).
+
+### SN-2026-014 — anonymous share-download proxy {#sn-2026-014}
+
+The public Console download proxy could fetch non-object paths on its configured S3 origin, exposing endpoints such as public metrics that operators had isolated behind the Console network boundary. An anonymous caller could cross that boundary without a Console session. This is not a claim that the proxy bypassed S3 authentication or could read every private object.
+
+Console #56 limits forwarding to object-content GETs at the configured origin, rejects system paths and query-selected non-download APIs before sending a request, and refuses all redirects. Ordinary public, presigned and versioned downloads remain supported; the existing shared-link format setting is not a global sharing-disable switch. Reported by Jiri Pejchal (@jiri-pejchal).
+
+The standalone repair is published in **Console v2.4.1**. Server #209 selects the repaired Console on main, but published Server 20260903 still embeds an older Console. Upgrade the component that actually serves the UI; installing a standalone Console does not replace an embedded bundle. While awaiting a repaired Server build, restrict access to the exposed Console proxy and review the configured origin's public endpoints. See the [chronicle](/blog/security/20260916-release-hardening/#sn-2026-014).
 
 ## Dependency security updates {#dependencies}
 
@@ -293,18 +304,19 @@ Silo.
 
 | ID / date | Fixed by | Summary |
 | :-- | :-- | :-- |
-| 2026-03-25 release | [`RELEASE.2026-03-25`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-03-25) | OTel SDK, Paho MQTT and `x/crypto` updates absorb `CVE-2026-24051`, `CVE-2025-10543` and `CVE-2025-58181`; shipped together with the LDAP TLS regression fix below. Not every dependency upgrade in that release was a reachable vulnerability. |
+| 2026-03-25 release | [`RELEASE.2026-03-25`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-03-25T00-00-00Z) | OTel SDK, Paho MQTT and `x/crypto` updates absorb `CVE-2026-24051`, `CVE-2025-10543` and `CVE-2025-58181`; shipped together with the LDAP TLS regression fix below. Not every dependency upgrade in that release was a reachable vulnerability. |
 | `CVE-2026-34986` | [`68e0ba997`](https://github.com/pgsty/silo/commit/68e0ba997) | Upgrades `go-jose` to `v4.1.4`. |
 | `CVE-2026-39883` | `1869bd30b`, `e4fa06394` | Updates OpenTelemetry dependencies. |
-| Go 1.26.2 stdlib | [`db4c0fd5e`](https://github.com/pgsty/silo/commit/db4c0fd5e) (release lineage `9a4b3cd92`) | `CVE-2026-32280` and `CVE-2026-32281` (`crypto/x509`), `CVE-2026-32283` (`crypto/tls`); toolchain/stdlib only, no unrelated dependency rolling. |
+| Go 1.26.2 stdlib | [`db4c0fd5e`](https://github.com/pgsty/silo/commit/db4c0fd5e)  | `CVE-2026-32280` and `CVE-2026-32281` (`crypto/x509`), `CVE-2026-32283` (`crypto/tls`); toolchain/stdlib only, no unrelated dependency rolling. |
 | Go 1.26.4 refresh | `df627ff89`, `3e61b1d3a` | `CVE-2026-32952` (Azure NTLM), `CVE-2026-41602` (Thrift), plus further NATS/Prometheus security fixes as the dependency-maintenance layer of the 06-18 release. |
 | Upstream Go security fixes | [Go 1.26.5](https://go.dev/doc/devel/release#go1.26.5) | Bumps the required toolchain to Go 1.26.5, which includes security fixes to `crypto/tls` and `os`. |
 | [GO-2026-6061](https://pkg.go.dev/vuln/GO-2026-6061) / [GHSA-hrxh-6v49-42gf](https://github.com/advisories/GHSA-hrxh-6v49-42gf) | `4dfc27ce3`: gRPC `v1.82.1` with `x/text` `v0.39.0` | gRPC xDS RBAC engine and HTTP/2 transport fixes ([GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970) / `CVE-2026-56852`, an infinite loop on invalid input in `x/text`, landed in the same refresh). Existing MVS pins were kept; the security update was not used to roll unrelated dependencies. |
-| [GO-2026-5841](https://pkg.go.dev/vuln/GO-2026-5841) | `f1357853d`: `klauspost/compress` `v1.18.7` | `govulncheck` judged the affected dictionary symbols unreachable, but the known-affected direct dependency was still not carried; updated to the first fixed version. |
+| [GO-2026-5841](https://pkg.go.dev/vuln/GO-2026-5841) | `c1aec0518`: `klauspost/compress` `v1.18.7` | `govulncheck` judged the affected dictionary symbols unreachable, but the known-affected direct dependency was still not carried; updated to the first fixed version. |
 | Toolchain and dependency refresh | [Go 1.27.1](https://go.dev/doc/devel/release#go1.27.1) via [`43f4bb7ed`](https://github.com/pgsty/silo/commit/43f4bb7ed), [`edc8be6ed`](https://github.com/pgsty/silo/commit/edc8be6ed), [`4d6e1ea8e`](https://github.com/pgsty/silo/commit/4d6e1ea8e) | Moves the toolchain to Go 1.27 (1.27.1 as of the release) and refreshes the dependency stack (etcd client v3.7.1, `jwx` v3.0.13, `klauspost/compress` v1.19.2). The pre-release cleanup then returns to upstream `minio-go` (v7.3.1 pre-release) and retires the `silo-go` fork; `govulncheck` reports no reachable vulnerability on the release candidate. |
 | [GO-2026-6354](https://pkg.go.dev/vuln/GO-2026-6354) / [GO-2026-6355](https://pkg.go.dev/vuln/GO-2026-6355) | `golang.org/x/crypto` `v0.56.0` ([`edf36bcbf`](https://github.com/pgsty/silo/commit/edf36bcbf)) | Updates `x/crypto/ssh` to the first fixed version for denial of service on deadlocked undecided and established channels. Reachable through the SFTP server (`startSFTPServer` → `sftp.Server.Listen` → `ssh.NewServerConn`); every earlier release that enables SFTP is affected. |
 | [CVE-2026-84304](https://github.com/advisories/GHSA-vp52-pcj8-j9qc) | gRPC `v1.83.1` | Updates gRPC-Go to the first fixed version for unauthenticated heap exhaustion through highly fragmented HTTP/2 DATA frames. Silo pulls gRPC transitively rather than registering a gRPC server itself, but selects the fixed version for the complete module graph. |
 | [GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970) / `CVE-2026-56852` | `x/text` `v0.39.0` | Updates `x/text` to the first fixed version for an infinite loop on invalid input. |
+| [CVE-2026-79921 / GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) | `d63c92e39`: `amqp091-go` v1.14.0 (upstream first fixed v1.13.0) | A malicious AMQP broker can send oversized frames and exhaust client memory. Relevant when an AMQP notification target is configured; this is not an unauthenticated S3 request path. The update is on main, not Server 20260903. |
 
 ## Operationally significant security-related fixes {#operational}
 
@@ -312,11 +324,13 @@ Silo.
 | :-- | :-- | :-- |
 | Replicated Object Lock updates ignored their timestamps | [`f4c1286c9`](https://github.com/pgsty/silo/commit/f4c1286c9), included in [Server 20260903](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) | A replicated `CopyObject` rebuilt the metadata from the request before comparing replication timestamps, so the stored retention and legal-hold timestamps were never seen: any replica update was applied regardless of order, and the legal-hold timestamp was written under the retention key. A stale replica could therefore turn a newer legal hold off or shorten a newer retention. The stored state is now captured first, a replica update is applied only when its timestamp is newer, a stale one leaves the stored state in place, and each timestamp is kept under its own key. Inherited from upstream; builds preceding the fix are affected. |
 | LDAP TLS regression | [`ce1c537eb`](https://github.com/pgsty/silo/commit/ce1c537eb1dd6c4efa1cf75cf5df0e2c489c947a), released in `RELEASE.2026-03-25` | Restores TLS configuration propagation for `ldaps://` `DialURL()` connections so `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` and custom root CAs work again. |
+| Signed-field and policy-input alignment | [#177](https://github.com/pgsty/silo/pull/177), `87d8b5967` | Rejects ambiguous repeated copy-source values, derives signature age from signed input and aligns the effective payload-hash policy value. Distinct from the original header-coverage fix; on main, not Server 20260903. |
+| Cross-pool conditional PUT | [#207](https://github.com/pgsty/silo/pull/207), `5e7d60308` | Evaluates write conditions against the current logical object under the shared pool lock; a stale pool copy must not authorize an overwrite. On main, not Server 20260903; see [multi-pool consistency](/blog/design/multi-pool-object-consistency/). |
 
 ## Attribution of this ledger {#attribution}
 
 This page is maintained from the ledger previously carried in the repository at
-`docs/security/advisories.md`, updated through verified main `40220bd836cb`
+`docs/security/advisories.md`, updated through verified main `f99ed829b5eba`
 (2026-09-16). Release status statements are calibrated against the
 [component matrix](/compatibility/versions/); each fix's investigation, review,
 and verification detail lives in the linked chronicle article or release note.

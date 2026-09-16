@@ -8,6 +8,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="minio-java-quickstart"></a>
+
 ## MinIO Java SDK {#java-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此 Java 应用可以直接使用上游 [MinIO Java SDK](https://github.com/minio/minio-java)。SDK 支持 Java 8 及更高版本；请同时考虑应用框架对运行时的支持范围。

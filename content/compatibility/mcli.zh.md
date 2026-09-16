@@ -136,3 +136,5 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 [20260313]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-13T08-57-32Z
 [20260321]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-21T00-00-00Z
 [20260417]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-04-17T00-00-00Z
+
+这项 HTTP-200 CopyObject 修复适用于 mcli 选择单次 CopyObject 的路径：对象小于 64 MiB，或显式 `--disable-multipart`。更大复制默认走 ComposeObject，不能用该修复替代对此路径的单独验证。

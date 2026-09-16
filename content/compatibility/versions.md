@@ -23,7 +23,7 @@ A merged dependency update does not change an existing binary or image.
 
 Release notes: [Server 20260903](/blog/release/silo-20260903/),
 [Console v2.4.1](/blog/release/console-2.4.1/),
-[mcli 20260916](/blog/release/mcli-20260916/), [pkg v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1).
+[mcli 20260916](/blog/release/mcli-20260916/), [pkg v3.14.1](/blog/release/pkg-3.14.1/).
 For embedded deployments, select Console and MC explicitly in the Server build.
 Package-repository mirrors may lag GitHub; the [download page](/download/)
 links directly to the published artifacts.
@@ -201,3 +201,16 @@ reachability result is not a claim that every selected module is advisory-free.
 
 The supported integration target is the coordinated PGSTY stack. Compatibility
 with unmodified upstream MinIO/MC and other S3 implementations is best effort.
+
+## September 16 Server source review {#source-review}
+
+Pinned baseline `f99ed829b5eb` selects pkg v3.14.0, upstream minio-go `60bd07042d49`, Console source `56dfe455ac2f` and bundled mcli 20260913. This differs from standalone Console 2.4.1. Recheck the final Server tag before release; publishing another component does not update an existing Server.
+
+- #213 retains **legacy as the multipart default**. Strict requires `MINIO_API_MULTIPART_LISTING` in the process environment and restart, with no shared dynamic key. Majority cancellation confirmation is strict-only. See [settings](/reference/minio-server/settings/core/#multipart-listing) and the [upgrade contract](/blog/design/list-multipart-uploads/#implementation).
+- [Multi-pool consistency](/blog/design/multi-pool-object-consistency/), [conditional DELETE](/blog/design/conditional-delete/) and [Object Lock replication ordering](/blog/design/object-lock-replication-ordering/) distinguish logical current objects, addressed versions and persistence locks.
+- [Federated CopyObject](/blog/design/federated-copy-object/) and [SSE-C replica integrity](/blog/design/ssec-replica-integrity/) describe logical-byte checksums, encryption and historical-object limits.
+- [Durable IAM revocation](/blog/design/iam-revocations/) and [bucket configuration convergence](/blog/design/bucket-metadata-convergence/) document coordinated upgrades, deletion history and the default-off `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES` switch.
+- [Request-header timeouts](/blog/design/request-header-timeouts/) and [Go 1.27 TLS/OIDC](/blog/design/go127-tls-oidc-discovery/) explain their separate scopes.
+- The [September security chronicle](/blog/security/20260916-release-hardening/) records SN-2026-012/013/014 and their distinct component delivery boundaries.
+
+These later Server repairs are not in 20260903; original Object Lock fixes and other released prerequisites retain their explicitly identified earlier release boundaries.

@@ -2,7 +2,7 @@
 title: "Optional Checksums, Mandatory Failure: Repairing UploadPart and UploadPartCopy Compatibility"
 linkTitle: "Multipart Checksum Compatibility"
 date: 2026-08-24
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   SILO required every part in a checksum-enabled multipart upload to carry a per-part checksum. That rejected ordinary UploadPart requests that omitted an optional header and made UploadPartCopy unusable. This record covers discovery, AWS and AIStor research, rejected designs, the one-pass plaintext solution, the compatibility-baseline blocker, adversarial review, and the consistency contract for follow-up repairs.
@@ -12,9 +12,11 @@ draft: false
 url: "/blog/design/uploadpart-checksum/"
 ---
 
+> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
+
 This is the complete design and implementation record for [SILO #46](https://github.com/pgsty/silo/issues/46). The repair was not merely a changed `if` statement. One apparently optional S3 header reached into multipart completion semantics, copy responses, compression and encryption pipelines, compatibility baselines, and release verification.
 
-> **Status:** merged into `main` as `7fea6d5a5` on 2026-08-24 ([pgsty/silo#46](https://github.com/pgsty/silo/issues/46) closed); release and production verification pending.<br>
+> **Status:** merged into `main` as `7fea6d5a5` on 2026-08-24 ([pgsty/silo#46](https://github.com/pgsty/silo/issues/46) closed); included in Server 20260903; deployment verification is installation-specific.<br>
 > **Owner:** [`pgsty/silo`](https://github.com/pgsty/silo), the SILO server repository.<br>
 > **Tracking:** [#46](https://github.com/pgsty/silo/issues/46).<br>
 > **Independent follow-ups:** [#63 CopyObject + compression checksum](https://github.com/pgsty/silo/issues/63), [#64 federated UploadPartCopy checksum](https://github.com/pgsty/silo/issues/64).<br>
@@ -323,7 +325,7 @@ When a client omits its value, the server performs one additional hash over the 
 
 During a rolling upgrade, old and new nodes may answer the same checksum-less request differently: a new node accepts it while an old node returns 400. `ObjectPartInfo.Checksums` did not change format, so stored data remains downgrade-readable, but client-visible behavior stabilizes only after all serving nodes have upgraded. The release note must call that out.
 
-This record describes a local `main` worktree. The implementation has not been committed, pushed, run through remote CI, or packaged into a release. SILO documentation belongs to `silo.pgsty.com`; a successful local Hugo build does not mean that the product in the wider [pgsty.com](https://pgsty.com) ecosystem has shipped.
+The original local implementation later merged and shipped in Server 20260903. Its historical local verification record does not establish the state of any production deployment.
 
 ## Why two follow-ups remain separate {#follow-ups}
 

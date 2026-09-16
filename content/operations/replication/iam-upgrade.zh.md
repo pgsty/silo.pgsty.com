@@ -42,6 +42,11 @@ mcli ready site-a
 **停止条件：** 任何参与节点、后端、备份、必要密钥、未知离线节点或回滚流程尚未核实。
 不要为了查看旧快照内容，就把它接回正在运行的复制集群。
 
+升级前按[密码策略迁移指南](/zh/compatibility/password-permissions/)检查所有原有 `Deny admin:CreateUser`：
+若其意图包含禁止修改自身密码，在保留原 scope 与条件的同一 Deny 中加入 `admin:ChangeMyPassword`，并贯穿回滚窗口。
+当前 main 的分段上传默认仍为 `legacy`；普通升级不要求切换为严格模式。只有主动启用严格模式时才执行
+[分段上传预检与排空流程](/zh/blog/design/list-multipart-uploads/#implementation)。
+
 ## 保存完整恢复点 {#backup}
 
 最终备份前，停止共享各后端的所有 SILO 进程。systemd 部署使用实际服务单元，并逐节点确认已停止；
@@ -99,6 +104,30 @@ etcdutl snapshot status iam-upgrade-evidence/etcd.db --write-out=json
 
 只有版本身份、后端恢复、IAM 加载、复制和两类凭据检查都通过后，才恢复访问。
 如果陈旧凭据仍能成功，保持相关站点隔离并调查；反复重启直到健康检查变绿不能解决授权问题。
+
+## 错误与可观测性 {#observability}
+
+撤销记录持久化后，依赖清理仍可能失败，返回带 `IAM revocation committed; cleanup failed` 的 HTTP 500。
+这不意味着撤销已回滚。保持 IAM 写入暂停，检查对应身份与日志后重试清理；不要在同名身份已经重建后盲目重复删除。
+该路径会通知本地兄弟节点重载，但可能跳过即时跨站钩子，后续站点调和仍需验证。
+STS 在无法读取父身份撤销边界时 fail closed，可返回 `STSInternalError`，不是成功签发或已证实的凭据无效。
+
+从每个进程的 `/minio/metrics/v3/cluster/iam` 收集：
+
+| 指标 | 含义 |
+| --- | --- |
+| `minio_cluster_iam_revocation_records` | 当前进程看到的持久撤销记录数 |
+| `minio_cluster_iam_revocation_heal_failures` | IAM 调和失败计数 |
+| `minio_cluster_iam_revocation_heal_duration_millis` | 最近调和耗时 |
+| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | 最近成功调和的 Unix 时间 |
+
+这些是进程指标，不能直接求和当作唯一撤销数。三个 `heal_*` 指标只在启用站点复制并持有 leader lease 的节点推进；
+未启用站点复制、仅共享后端的部署不会运行该调和，不应把零值当作故障。撤销墓碑没有 TTL 或自动压缩，需计入持久容量与启动读取成本。
+初次调和还可能为缺少修订的记录补写时间戳，造成写入突增。间隔与指标均不提供收敛 SLA。
+
+已删除 access key 的验证请求通常应返回 `403 InvalidAccessKeyId`；其他撤销方式应按其预期授权错误判断，不能强制所有场景同一码。
+5xx、超时和对象不存在都不能证明撤销生效。live-record export/import 不保存删除历史；仅靠它恢复无法维持过去撤销的保证。
+完整排序与限制见 [IAM 设计](/zh/blog/design/iam-revocations/)。
 
 ## 回滚与恢复 {#rollback}
 

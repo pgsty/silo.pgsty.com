@@ -35,7 +35,7 @@ url: "/zh/blog/design/replication-reliability/"
 - [#139](https://github.com/pgsty/silo/issues/139) 修复的是**结果真实性**：目标对象存在，不代表这次更新成功；必须依据目标的实际复制结果统计成功和失败。
 - #137 修复的是**取消与资源生命周期**：任务能够停止，walker、worker 和结果消费者能够退出，旧任务不能污染新任务状态。本次延续前两项契约，没有另建一套计数机制。
 
-复制请求是否有权使用内部语义，属于此前的 [CORS 与复制信任边界](/zh/blog/design/cors-replication-trust/)；跨池 Object Lock 的权威状态选择仍由 [#133](https://github.com/pgsty/silo/issues/133) 单独跟踪，截至本文归档时仍未关闭。本次三个 issue 关闭不等于所有复制问题都已解决。
+复制请求是否有权使用内部语义，属于此前的 [CORS 与复制信任边界](/zh/blog/design/cors-replication-trust/)；跨池 Object Lock 的权威状态选择仍由 [#133](https://github.com/pgsty/silo/issues/133) 单独跟踪，在初始归档时尚未关闭，随后由 #178 在 main 修复；见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/)，Server 20260903 仍不包含该修复。本次三个 issue 关闭不等于所有复制问题都已解决。
 
 正式验收对象是维护中的 `pgsty/silo` 及配套的 Console、mcli、silo-pkg。上游 MinIO/MC 兼容性保持尽最大努力；不能直接把上游报告的机制或实验结果当成当前 SILO 的实测结论。
 
@@ -206,7 +206,7 @@ go test ./... -count=1 -timeout=30m
 
 后续改动必须继续分别证明：操作类型正确、失败可见、逐对象结果真实、终态计数完整、取消能够结束自己的资源。任何一项都不能由“接口返回 Completed”或“目标上对象存在”代替。
 
-本次代码结论是 GO，交付事实是主干合并及 CI 通过。正式发布仍需另行选定 tag，验证软件包与镜像，并确认实际部署包含修复。既有 MRF scanner 恢复时延、未关闭的跨池问题，以及外部 405 风暴尚未在当前 SILO 复现的边界，都应随这份决策一起保留。
+本次代码结论是 GO，交付事实是主干合并及 CI 通过。正式发布仍需另行选定 tag，验证软件包与镜像，并确认实际部署包含修复。既有 MRF scanner 恢复时延、仍未进入 20260903 的跨池修复，以及外部 405 风暴尚未在当前 SILO 复现的边界，都应随这份决策一起保留。
 
 ## 第二轮（2026-09-16）：worker 侧 purge 分类与持久 MRF 恢复 {#second-round}
 

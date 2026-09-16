@@ -2,7 +2,7 @@
 title: "A ListObjects Shortcut Must Not Turn a Missing Bucket into an Empty One"
 linkTitle: "ListObjects NoSuchBucket"
 date: 2026-08-26
-lastmod: 2026-08-26
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   Three ListObjects shortcuts return EOF before touching storage, causing a missing bucket to appear as an empty listing. This record explains the SILO #32 / PR #37 regression, S3 compatibility value, minimal shortcut-only existence check, cluster fan-out cost, derived risks, and acceptance decision.
@@ -11,6 +11,8 @@ weight: 25
 draft: false
 url: "/blog/design/listobjects-nosuchbucket/"
 ---
+
+> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
 
 This document records the problem analysis, design discussion, and repair decision for [SILO #32](https://github.com/pgsty/silo/issues/32) and [PR #37](https://github.com/pgsty/silo/pull/37).
 
@@ -299,4 +301,4 @@ The issue is not merely “a slash prefix reports the wrong error.” The listin
 
 The selected repair restores that premise by calling the existing `GetBucketInfo` only at three storage-bypassing exits. It makes those requests more expensive and exposes real errors on degraded clusters; both are explicit costs. In return, SILO restores S3's 404 semantics, upgrade compatibility, and test fidelity while preserving the upstream optimization on the normal listing hot path.
 
-This worthwhile, controlled compatibility fix is now merged and green on `main`; release delivery remains a separate gate.
+This worthwhile, controlled compatibility fix is now merged and green on `main`; the repair is included in Server 20260903; production deployment remains installation-specific.
