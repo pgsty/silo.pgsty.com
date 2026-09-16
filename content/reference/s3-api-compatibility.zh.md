@@ -63,8 +63,8 @@ PutObjectAcl
 
 #### 与 S3 API 在多部分上传方面的差异 {#id5}
 
-- `ListMultipartUploads` 当前把非空 `prefix` 当成精确对象名，而不是词法对象键前缀。
-- prefix 为空时，结果来自节点本地的易失状态，并不具备 AWS 兼容的分页、marker 或 delimiter 行为。已验证的影响与修复方案参见 [Issue #79 设计与决策记录](/zh/blog/design/list-multipart-uploads/)。
+- 已发布的 Server 20260903：`ListMultipartUploads` 将非空 `prefix` 当成精确对象名；空 prefix 使用节点本地易失缓存，不具备完整分页、marker 和 delimiter 语义。
+- [PR #198](https://github.com/pgsty/silo/pull/198) 增加持久扫描与全局分页，并在原生 marker 对应上传被删除后继续翻页。该源码变更需要所有 writer 升级、旧上传排空及只读预检；严格模式在覆盖不足、旧格式或资源超限时返回 503。显式 `legacy` 模式保留旧限制。排序、扫描容量与迟到创建写入的取消边界见[实现与升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。这不表示发布产物或生产验收完成。
 - `PutBucketLifecycle` 不支持 `AbortIncompleteMultipartUpload` 生命周期动作。
 
 ## 存储桶 API {#id6}

@@ -46,7 +46,7 @@ Server 的 S3 策略保持不变。设置 `none`/`off` 时，S3 也会忽略内�
 ## 对象分享 {#object-sharing}
 
 > [!NOTE]
-> **待合入，核对于 2026-09-16：** [Console #52](https://github.com/pgsty/silo-console/issues/52) 仍然开放，本地修复尚未合入。本节描述该修复的拟议行为，已发布的 Console v2.4.0、Server 20260903 以及 Server 当前选择的 Console 源码均不包含这些限制。内嵌 SILO 必须先选择包含修复的 Console 提交，限制才会生效。详见[组件状态](/zh/compatibility/versions/#pending)。
+> **源码已合入，核对于 2026-09-16：** [Console #56](https://github.com/pgsty/silo-console/pull/56) 实现了以下请求边界，[Server #209](https://github.com/pgsty/silo/pull/209) 为内嵌部署选择了修复后的 Console 源码。这些改动尚未进入已发布的 Console v2.4.0 或 Server 20260903，现有二进制与镜像不会随源码合并而改变。详见[组件状态](/zh/compatibility/versions/#console-sharing)。
 
 该修复无需新增配置，请求限制始终执行，正常分享继续可用。`CONSOLE_SHARE_MINIO_URL` 仍只选择生成的链接格式。匿名代理仅允许下载对象内容的 GET 请求：
 
@@ -58,6 +58,19 @@ Server 的 S3 策略保持不变。设置 `none`/`off` 时，S3 也会忽略内�
 | 后端直接响应 | 所有 3xx 返回 502，不跟随跳转，也不转发 `Location` |
 
 S3 继续执行授权检查：公共对象按策略允许匿名读取，私有对象需要有效授权。URL 的原始编码和签名参数保持不变。手工利用此接口代理桶列表、对象子资源或依赖重定向的下载将不再可用。
+
+分享可用时，请求边界始终生效。原型曾包含 `CONSOLE_SHARE_ENABLED=off`，
+最终撤掉了该开关及配套前端状态和内嵌 Server 配置传递：彻底关闭分享是独立的
+产品需求，代理自身应当无需额外配置就正确限制访问范围。
+`CONSOLE_SHARE_MINIO_URL` 因而继续只选择链接格式，不承担访问控制职责。
+只检查是否存在签名字段不能保护公开指标；针对限定为对象下载的代理，也没有
+必要另建 Console MAC 或分享链接注册表。编码后的 URL 本身不保证由 Console 签发。
+
+这些检查只增加本地解析和比较，不增加 S3／IAM 请求、令牌存储、签名密钥或
+整个对象的内存缓冲。后续增加通过查询参数选择的 S3 操作时，需要同步审查
+拒绝列表与回归测试。[Issue 设计记录](https://github.com/pgsty/silo-console/issues/52)
+说明了威胁范围、备选方案和兼容性权衡。感谢
+[Jiri Pejchal（@jiri-pejchal）](https://github.com/jiri-pejchal) 报告内部指标暴露问题。
 
 ## Console 设置参考 {#settings-reference}
 

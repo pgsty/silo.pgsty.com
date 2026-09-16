@@ -9,7 +9,7 @@ icon: fa-solid fa-code-compare
 sidebar_expanded: true
 ---
 
-> **Current components:** Server 20260903, Console v2.4.0, mcli 20260913 and pkg v3.14.0. Later Server/Console changes remain unreleased. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
+> **Current components:** Server 20260903, Console v2.4.0, mcli 20260916 and pkg v3.14.1. Later Server/Console changes remain unreleased. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
 
 Silo is a community fork of MinIO. This section records what Silo keeps from MinIO, where it deliberately differs, and what either means when moving between them.
 

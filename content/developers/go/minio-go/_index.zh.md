@@ -8,7 +8,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO 验证过的版本，2026-09-13：** 当前 pkg/mcli 发布及 Server/Console 主分支使用 `v7.3.1-0.20260910142817-60bd07042d49`。如需复现该依赖图，可执行 `go get github.com/minio/minio-go/v7@v7.3.1-0.20260910142817-60bd07042d49`。最新公开 Server/Console 仍使用较早 SDK；见[组件矩阵](/zh/compatibility/versions/)。
+> **SILO 验证过的版本，2026-09-16：** pkg v3.14.1 与 mcli 20260916 使用 `v7.3.1-0.20260915093545-32e1f32cb176`。可执行 `go get github.com/minio/minio-go/v7@v7.3.1-0.20260915093545-32e1f32cb176` 选择同一版本。该版本修复 CopyObject 在 HTTP 200 响应中包含 S3 错误时的重试与错误传播。Server/Console 的版本选择独立，见[组件矩阵](/zh/compatibility/versions/)。
 
 ## MinIO Go SDK {#go-sdk}
 

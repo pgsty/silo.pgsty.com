@@ -2,7 +2,7 @@
 title: "Should SILO Fix ListMultipartUploads? Design Review of Issue #79"
 linkTitle: "ListMultipartUploads Compatibility"
 date: 2026-08-30
-lastmod: 2026-08-30
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   SILO treats ListMultipartUploads prefix as an exact object key and uses a node-local volatile cache for bucket-wide listing. This record explains the defect and its sources, evaluates the compatibility and operational impact, compares four response and storage options, and recommends a staged metadata-plus-scan repair rather than either a cosmetic cache patch or an immediate durable index.
@@ -14,11 +14,55 @@ url: "/blog/design/list-multipart-uploads/"
 
 This is the problem, design, and decision record for [SILO issue #79](https://github.com/pgsty/silo/issues/79).
 
-> **Status on 2026-08-30:** confirmed compatibility defect; design proposal only. No server implementation, release artifact, deployment, or production verification is claimed by this record.<br>
-> **Recommendation:** fix it as a planned P1 compatibility project, not as a small cache patch. If the project declines full compatibility, reject unsupported requests explicitly instead of returning a successful response that did not honor them.<br>
-> **Scope:** `ListMultipartUploads` for S3 general-purpose buckets. This record does not add directory-bucket behavior or `AbortIncompleteMultipartUpload` lifecycle support.<br>
-> **Owner:** [`pgsty/silo`](https://github.com/pgsty/silo), the SILO server repository.<br>
-> **Release boundary:** design, specification capture, prototype, implementation, source QA, commit, release artifact, documentation, deployment, and live verification are separate gates.
+## September 16 implementation and upgrade contract {#implementation}
+
+[PR #198](https://github.com/pgsty/silo/pull/198) retains mr javad seydi's original metadata-and-scan contribution and adds maintainer fixes for disappearing markers, incomplete discovery, cancellation confirmation and upgrade diagnostics. This section describes that source change. **It is not included in Server 20260903, and does not establish production performance or deployment acceptance.** The August 30 analysis below remains a historical design record.
+
+### Listing and cancellation
+
+New uploads persist their bucket and object key in the existing `xl.meta`; completion removes these upload-only fields. Strict listing discovers durable uploads across pools and sets, verifies metadata with the existing read quorum, and applies prefix, delimiter, `CommonPrefixes` and a global page limit of at most 1,000. Restarting a node or choosing another endpoint does not depend on rebuilding its upload cache.
+
+Ordering is `(key, initiation time from the native upload ID, encoded upload ID)`. A returned marker defines this boundary even after the corresponding upload is completed or canceled. This supports clients that echo the server's markers; it does not promise arbitrary lexical comparison of random upload IDs. There is no snapshot across pages under concurrent mutations. Without `key-marker`, `upload-id-marker` is ignored. With a key marker, invalid base64 retains the existing 404 response; a decodable but unsupported native ID returns 400. Unsupported persistent IDs are legacy records, never assigned a fabricated current initiation time.
+
+Directory discovery requires `floor(N/2)+1` successful drive scans per set. For example, two available drives out of four are insufficient and return 503, even when metadata could still be read from two copies. A source-drive identity read may exclude another bucket only after validating its bucket/key hash; uncertain identities require a quorum read. Strict mode returns `MultipartListingNotReady` (503) for legacy records and `MultipartListingMetadataInvalid` (503) for invalid identities. It never silently switches the whole request to cache-based listing.
+
+Abort checks every relevant pool and requires confirmed absence on `floor(N/2)+1` drives per set. Partial deletion can be retried even after metadata has fallen below read quorum. An unknown pool state returns 503; confirmed absence everywhere with no upload found returns `NoSuchUpload` (404). Successful logical cancellation can leave offline part data for later cleanup.
+
+**Unresolved creation-write boundary:** these confirmations do not fence a physical creation write that continues after its caller receives a storage timeout. A fault-injection test reproduces a 16-drive/EC:8 case where seven delayed writes and seven offline old copies restore a writable upload after acknowledged cancellation. The test preserves this known limitation; its passing status is not a repair claim. A durable creation fence needs a separate storage-consistency design.
+
+### Coordinated upgrade
+
+The new setting is `api multipart_listing=strict|legacy`, with `strict` as the default; `MINIO_API_MULTIPART_LISTING` overrides it. During migration, explicitly set `legacy` on all servers if the old listing behavior is required:
+
+```bash
+mcli admin config set ALIAS api multipart_listing=legacy
+```
+
+Legacy mode retains the old exact-key/cache limitations. Upgrade **all writers**, stop introducing old-format uploads, then finish or abort legacy uploads using their known keys and IDs. Switching modes requires restarting any paginated traversal. Check every server's effective setting; an environment override takes precedence over stored configuration.
+
+The read-only, SigV4-authenticated endpoint `GET /minio/admin/v3/multipart-preflight` requires `admin:StorageInfo`. For example, with credentials and an endpoint supplied by the operator:
+
+```bash
+curl --aws-sigv4 'aws:amz:us-east-1:s3' \
+  --user "$SILO_ACCESS_KEY:$SILO_SECRET_KEY" \
+  "$SILO_ENDPOINT/minio/admin/v3/multipart-preflight"
+```
+
+The report contains `mode`, `ready`, `complete`, `scannedEntries`, `legacyUploads`, and per-pool/set drive coverage, uncovered drive indexes and oldest legacy initiation time. It bypasses upload caches, inspects even suspended pools and detects minority legacy copies. `ready=true` requires every drive to be inspected, no unreadable candidate metadata and no observed legacy copies. It cannot attest that every writer has been upgraded or that no concurrent writer will introduce a legacy record. Offline drives, scan errors, timeouts and budget exhaustion prevent readiness; an incomplete count is not a zero count. Rerun after drives return and before enabling strict mode:
+
+```bash
+mcli admin config set ALIAS api multipart_listing=strict
+```
+
+For uploads whose original key/ID has been lost, use the existing stale-upload cleanup, which scans each server's local drives. Its age is measured from creation, **not recent part activity**. Defaults of 24-hour expiry and a 6-hour cleanup interval do not prove drain completion. Temporarily lowering `api stale_uploads_expiry` or `api stale_uploads_cleanup_interval` can also remove active long-running uploads and new-format uploads. Only do so in a maintenance window after pausing/draining the affected workload, recording original values and accepting that cancellation scope; verify physical drain and restore the original settings before resuming. This change adds no arbitrary-path deletion API.
+
+### Scan capacity and evidence limits
+
+Each process admits two scans, with 16 identity workers and four full-metadata workers per scan. Directory reads pass a finite count with overflow detection. The aggregate budget is 100,000 returned directory entries, including repeated entries on different drives and hash directories; it is **not** a promise to list 100,000 unique uploads. Concurrent directory calls may already be in flight when the aggregate budget is exceeded. Overflow returns `SlowDown` (503), never a successful partial page. A 30-second context budget stops further scheduling; admission stays held until scan workers exit. This is neither a precise memory ceiling nor a guarantee that a canceled physical system call stops immediately.
+
+Every page still rescans durable state: total enumeration cost grows with both stored candidates and page count. The tests cover missing markers, multi-pool coverage, partial-deletion retries, identity fallback, RPC directory bounds, cancellation admission and the known late-write counterexample. Temporary multi-node and maintained-client checks establish functional behavior for their recorded environment. Production-scale latency and foreground-load impact remain deployment-specific acceptance work; merging the source does not certify them.
+
+A September 16 temporary Docker Desktop arm64 run used two nodes, four APFS-backed bind volumes and 11,000 uploads across two buckets, while other local validation was running. One 1,000-entry page for the 10,000-upload target bucket took 18.7 seconds; two concurrent requests returned retryable `SlowDownRead` responses after about 25–27 seconds. These observations do not meet the provisional five-second page target and are not an isolated SSD benchmark. Capacity and foreground-load acceptance remain open; the bounded scanner must not be advertised as a large-scale performance fix.
 
 ## The problem in plain language {#plain-language}
 
@@ -108,11 +152,11 @@ erasureServerPools.ListMultipartUploads
 
 The important locations are:
 
-- [`cmd/erasure-server-pool.go`](https://github.com/pgsty/silo/blob/main/cmd/erasure-server-pool.go): empty-prefix `mpCache`, per-pool concatenation, and the internal exact-object lookup used by `NewMultipartUpload`;
-- [`cmd/erasure-multipart.go`](https://github.com/pgsty/silo/blob/main/cmd/erasure-multipart.go): exact-object listing, upload directory construction, stale-upload cleanup, and the quorum write for a new upload's `xl.meta`;
-- [`cmd/erasure-sets.go`](https://github.com/pgsty/silo/blob/main/cmd/erasure-sets.go): hashing a supplied object name to one erasure set;
-- [`cmd/bucket-handlers.go`](https://github.com/pgsty/silo/blob/main/cmd/bucket-handlers.go): public request validation, including a `501 NotImplemented` guard when `key-marker` does not share the request prefix;
-- [`cmd/object-api-multipart_test.go`](https://github.com/pgsty/silo/blob/main/cmd/object-api-multipart_test.go): a large expected-results table whose final assertion block checks only echoed scalar fields, not the returned uploads, prefixes, markers, or truncation state.
+- [`cmd/erasure-server-pool.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/erasure-server-pool.go): empty-prefix `mpCache`, per-pool concatenation, and the internal exact-object lookup used by `NewMultipartUpload`;
+- [`cmd/erasure-multipart.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/erasure-multipart.go): exact-object listing, upload directory construction, stale-upload cleanup, and the quorum write for a new upload's `xl.meta`;
+- [`cmd/erasure-sets.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/erasure-sets.go): hashing a supplied object name to one erasure set;
+- [`cmd/bucket-handlers.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/bucket-handlers.go): public request validation, including a `501 NotImplemented` guard when `key-marker` does not share the request prefix;
+- [`cmd/object-api-multipart_test.go`](https://github.com/pgsty/silo/blob/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca/cmd/object-api-multipart_test.go): a large expected-results table whose final assertion block checks only echoed scalar fields, not the returned uploads, prefixes, markers, or truncation state.
 
 ### Independent reproduction and adversarial review {#source-review}
 

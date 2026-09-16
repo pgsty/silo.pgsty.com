@@ -3,8 +3,12 @@ title: "mc mirror"
 url: "/reference/minio-mc/mc-mirror/"
 weight: 240
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mirror.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** Per-object permission errors are reported while later objects continue; a finite mirror with failures exits 1. This includes unreadable sources, rejected destination writes and failed local destination removals. `--skip-errors` is not required for these permission errors. In watch mode, listing/watcher failures retain their existing retry behavior. Failed jobs suppress normal success statistics; explicit `--summary` JSON has `status: failure`. Text errors go to stderr; check the exit code, not progress counters. [Release behavior](/compatibility/mcli/#current-release).
+
 
 <a id="mc-mirror"></a>
 

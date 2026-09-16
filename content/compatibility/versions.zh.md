@@ -17,27 +17,29 @@ icon: fa-solid fa-code-branch
 | --- | --- | --- |
 | Server | <a href="https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z" style="white-space:nowrap">20260903</a> | pkg v3.13.2；上游 SDK `0e78d3f18efe`；mcli 20260903；内嵌 Console 源码 `464a59d73ada`，版本标识为 v2.3.0 |
 | <span style="white-space:nowrap">独立<br>Console</span> | [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0) | pkg v3.13.3；MC 源码 `c8aa5d25a63a`；上游 SDK `0e78d3f18efe`；对象浏览器分页 |
-| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-13T00-00-00Z" style="white-space:nowrap">20260913</a> | pkg v3.14.0；上游 SDK `60bd07042d49`；软件包版本 `20260913000000.0.0` |
-| 共享 pkg | [v3.14.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.0) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；密码能力拆分；上游 SDK `60bd07042d49` |
+| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1；上游 SDK `32e1f32cb176`；软件包版本 `20260916000000.0.0` |
+| 共享 pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；CopyObject 内嵌错误处理；JWX v3.3.0 字段名转义；上游 SDK `32e1f32cb176` |
 
 发布说明：[Server 20260903](/zh/blog/release/silo-20260903/)、
 [Console v2.4.0](/zh/blog/release/console-2.4.0/)、
-[mcli 20260913](/zh/blog/release/mcli-20260913/)、[pkg v3.14.0](/zh/blog/release/pkg-3.14.0/)。
+[mcli 20260916](/zh/blog/release/mcli-20260916/)、[pkg v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1)。
 已发布的 Server 镜像仍捆绑原来的客户端与 Console。安装独立组件的新版本不会替换 Server 内嵌的组件。
 软件包仓库镜像可能晚于 GitHub 更新；[下载页](/zh/download/)直接链接已发布的制品。
 
 ## 主分支协调后的源码 {#source}
+
+**9 月 16 日客户端/库发布：** mcli 20260916 对应 [`e952aa78f10a`](https://github.com/pgsty/mc/commit/e952aa78f10a2b77dd525a2b7e3143bcda0cd377)，Go 模块伪版本为 `v0.0.0-20260916070421-e952aa78f10a`；pkg v3.14.1 对应 `fa657ef431ae22e720df37e5144cf00f67102945`。两者使用 SDK `v7.3.1-0.20260915093545-32e1f32cb176` 与 JWX v3.3.0。下面列出的是已核对的 Server/Console 集成源码所选择的较早依赖；发布客户端不会自动推进它们。
 
 9 月 13 日更新通过 [pkg #7](https://github.com/pgsty/silo-pkg/pull/7)、
 [MC #42](https://github.com/pgsty/mc/pull/42)、
 [Console #53](https://github.com/pgsty/silo-console/pull/53) 与 [#54](https://github.com/pgsty/silo-console/pull/54)、
 [Server #181](https://github.com/pgsty/silo/pull/181) 合入。
 
-- **pkg：** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`。
-- **MC：** `v0.0.0-20260913012246-4f609a4da3bb` → 已发布的 20260913 标签。
-- **Server 选择的 Console：** `v0.0.0-20260913015128-417559bb2c97`；经 `449c185a8d14` 合入 main，源码树相同。
-- **Server 依赖集成提交：** `5d955b5b7444f8a3ab550ce92713607998f89c0d`。
-- **已核对的 Server main：** [`9b4ae82a29cc`](https://github.com/pgsty/silo/commit/9b4ae82a29cc2290fb5be7b551ec3d8cf7acdd99)，包含下述修复及集成测试夹具修正。
+- **Server/Console 选择的 pkg：** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`。
+- **Server/Console 选择的 MC：** `v0.0.0-20260913012246-4f609a4da3bb` → 已发布的 20260913 标签。
+- **Server 选择的 Console：** `v0.0.0-20260916034812-56dfe455ac2f`；经 [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) 合入 main，源码树相同。
+- **Server 的 Console 集成提交：** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c)，通过 [#209](https://github.com/pgsty/silo/pull/209) 合入。9 月 13 日选择的其他组件版本保持不变。
+- **Server 源码快照：** [`a168576adb23`](https://github.com/pgsty/silo/commit/a168576adb23c47fbf3ca7008cc06cec6c9cd7a2)，包含下述已合入修复。各项运行时验证仍以对应说明中实际测试的提交为准。
 - **上游 minio-go：** `v7.3.1-0.20260910142817-60bd07042d49`。
 
 **Server 与 Console 最新标签之后的改动尚未发布。** 其中包括[密码权限拆分](/zh/compatibility/password-permissions/)、
@@ -59,6 +61,7 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 | <span style="white-space:nowrap">多池存储</span> | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189) | 普通单对象版本 DELETE 协调各池副本，副本协调保留标签状态；移除可选的 GET 访问频率池间分层功能。 |
 | <span style="white-space:nowrap">分片完成条件</span> | [#190](https://github.com/pgsty/silo/pull/190) | 前置条件使用所有池中的逻辑最新对象，避免旧副本接受过期 ETag，或拒绝当前 ETag。 |
 | <span style="white-space:nowrap">普通条件 PUT</span> | [#207](https://github.com/pgsty/silo/pull/207) | 公开写入条件使用所有池中的逻辑当前对象，包括正在退役或再平衡的池；可读性及目标版本行为变化见[下文](#conditional-put)。 |
+| <span style="white-space:nowrap">分片发现与取消</span> | [#198](https://github.com/pgsty/silo/pull/198) | 跨 pool/set 发现持久上传，原生 marker 对应上传消失后仍能续页，取消需要多数盘确认。严格模式要求所有 writer 升级并排空旧上传，见[升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。 |
 | <span style="white-space:nowrap">IAM 撤销</span> | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | 节点间删除通知重新加载已提交状态；持久化删除版本与撤销边界，防止旧站点事件重放恢复已撤销身份或旧授权。 |
 | <span style="white-space:nowrap">标签与删除标记</span> | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS 复制保留标签修订时间；删除标签推进修订并抵御延迟事件；删除标记清除在 MRF 恢复时保留标记身份和重试状态。 |
 | <span style="white-space:nowrap">复制元数据</span> | [#194](https://github.com/pgsty/silo/pull/194) | 恢复复制元数据时，不再把传输用的 `aws-chunked` 编码重新写入对象元数据。 |
@@ -90,12 +93,25 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 #190 的分片完成修复既未引入、也未修复此 PUT 问题。
 最终打包候选及部署验收仍由 [#203](https://github.com/pgsty/silo/issues/203) 单独跟踪。
 
+### Console 分享下载 {#console-sharing}
+
+[Console #56](https://github.com/pgsty/silo-console/pull/56) 与
+[Server #209](https://github.com/pgsty/silo/pull/209) 修复了
+[Console #52](https://github.com/pgsty/silo-console/issues/52) 报告的匿名代理边界问题。
+代理只允许访问已配置 S3 源地址上的对象内容 GET，拒绝跳转、系统路径以及
+通过查询参数选择的非下载操作。没有新增关闭分享的环境变量，正常公共对象、
+预签名和版本下载继续可用，详见[行为与设计权衡](/zh/reference/minio-server/settings/console/#object-sharing)。
+
+Console 最终 CI 矩阵与漏洞检查在合并前通过。Server 的正式模块依赖通过了
+独立与内嵌两种部署下的真实 API、浏览器分享测试，以及自身 CI 检查。
+这些结果属于源码验收：Console v2.4.0 和 Server 20260903 均不包含此修复，
+合并上述 PR 不会发布新的二进制或镜像。
+
 ### 仍待完成的工作 {#pending}
 
 - **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。源码修复不会自动修复旧状态。
 - **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 单独验收最终制品与多进程栈，当前尚未据此发布新 Server。
-- **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 仍然开放。[设计记录](/zh/blog/design/list-multipart-uploads/)中的前缀、分页与原始对象键发现限制，不属于上面的分片上传完成修复。
-- **Console 对象分享：** [Console #52](https://github.com/pgsty/silo-console/issues/52) 仍然开放，本地修复尚未合入。[拟议的请求限制](/zh/reference/minio-server/settings/console/#object-sharing)尚未进入当前选择的 Console 源码或已发布的 Server、Console。
+- **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 保留开放，继续跟踪容量、发布验收和迟到创建写入边界。PR #198 已修复持久发现、全局分页与静态残留取消确认，但没有新增创建屏障，也没有完成大规模扫描验收。临时 10,000 上传试验未达到暂定的单页五秒目标，见[设计记录](/zh/blog/design/list-multipart-uploads/#implementation)。
 
 ## 依赖与发布顺序 {#order}
 

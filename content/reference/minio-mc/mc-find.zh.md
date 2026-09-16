@@ -3,8 +3,12 @@ title: "mc find"
 url: "/zh/reference/minio-mc/mc-find/"
 weight: 110
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-find.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** 非法 `--regex` 表达式正常报错，不再 panic；目标校验仍优先执行，因此无效目标保留原先的错误诊断。 [版本说明](/zh/compatibility/mcli/#current-release).
+
 
 <a id="mc-find"></a>
 <a id="minio-mc-find"></a>

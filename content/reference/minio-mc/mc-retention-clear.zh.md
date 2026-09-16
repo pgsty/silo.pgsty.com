@@ -3,8 +3,12 @@ title: "mc retention clear"
 url: "/zh/reference/minio-mc/mc-retention-clear/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-retention-clear.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** 递归清除 retention 部分失败时返回退出码 1，每个失败对象只输出一次诊断，成功对象不会回滚。 [版本说明](/zh/compatibility/mcli/#current-release).
+
 
 <a id="mc-retention-clear"></a>
 

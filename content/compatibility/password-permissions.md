@@ -15,6 +15,8 @@ icon: fa-solid fa-code-branch
 > split. The pkg v3.14.0 and mcli 20260913 releases alone do not change an old
 > Server's authorization. See [the component matrix](/compatibility/versions/).
 
+> **2026-09-16 update:** pkg v3.14.1 and mcli 20260916 preserve the password-policy semantics described here. They do not upgrade an installed Server or rewrite saved policies.
+
 **Breaking change: the password-permission split changes the meaning of
 existing IAM policies.** The same stored policy can authorize a request after
 this update that it denied before, or deny a request it previously authorized.

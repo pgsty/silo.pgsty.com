@@ -3,8 +3,12 @@ title: "mc cp"
 url: "/reference/minio-mc/mc-cp/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-cp.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** The selected SDK retries and reports S3 errors embedded in CopyObject HTTP 200 responses. An HTTP 200 status or a copy-start message alone does not establish success; inspect the command exit status and error records. [Release behavior](/compatibility/mcli/#current-release).
+
 
 <a id="mc-cp"></a>
 <a id="minio-mc-cp"></a>

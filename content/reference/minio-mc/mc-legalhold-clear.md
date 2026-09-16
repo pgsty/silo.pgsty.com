@@ -3,8 +3,12 @@ title: "mc legalhold clear"
 url: "/reference/minio-mc/mc-legalhold-clear/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold-clear.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** Single-object and recursive legal-hold failures return exit status 1. Successful objects are not rolled back. [Release behavior](/compatibility/mcli/#current-release).
+
 
 <a id="mc-legalhold-clear"></a>
 <a id="minio-mc-legalhold-clear"></a>
