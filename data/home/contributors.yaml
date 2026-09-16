@@ -20,6 +20,7 @@ repositories:
   - repo: "pgsty/silo-pkg"
     issues: 0
     pullRequests: 9
+  # Retired upstream-SDK fork; kept for the cross-repository audit history.
   - repo: "pgsty/silo-go"
     issues: 0
     pullRequests: 0

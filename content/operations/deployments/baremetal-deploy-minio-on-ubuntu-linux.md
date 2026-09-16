@@ -292,10 +292,11 @@ You can track the status of the startup using `journalctl -u minio` on each node
 On successful startup, the MinIO process emits a summary of the deployment that resembles the following output:
 
 ```shell
-MinIO Object Storage Server
-Copyright: 2015-2024 MinIO, Inc.
+Silo Object Storage Server
+Copyright: 2015-2025 MinIO, Inc.
+Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2024-06-07T16-42-07Z (go1.22.4 linux/amd64)
+Version: RELEASE.2026-09-03T13-18-01Z (go1.27.1 linux/amd64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin

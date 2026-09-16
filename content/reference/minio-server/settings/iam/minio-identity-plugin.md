@@ -119,12 +119,12 @@ Defaults to `true` or “enabled”.
 
 {{< tabs group="environment-variable-configuration-setting" >}}
 {{< tab label="Environment Variable" value="environment-variable" >}}
-##### `MINIO_IDENTITY_PLUGIN_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_TOKEN}
+##### `MINIO_IDENTITY_PLUGIN_AUTH_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_AUTH_TOKEN}
 
 *envvar*
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
-##### `identity_plugin token` {#mc-conf.identity_plugin.token}
+##### `identity_plugin auth_token` {#mc-conf.identity_plugin.auth_token}
 
 *mc-conf*
 {{< /tab >}}

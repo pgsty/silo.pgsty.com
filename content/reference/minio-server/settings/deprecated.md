@@ -3,7 +3,7 @@ title: "Deprecated Settings"
 url: "/reference/minio-server/settings/deprecated/"
 weight: 120
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/deprecated.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="deprecated-settings"></a>
@@ -76,6 +76,8 @@ The access key for the [root](/administration/identity-access-management/minio-u
 
 To perform root credential rotation, modify the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) environment variables.
 
+Current Silo releases do not read this variable; setting it has no effect.
+
 #### `MINIO_OPERATOR_DEPLOYMENT_NAME` {#envvar.MINIO_OPERATOR_DEPLOYMENT_NAME}
 
 *envvar*
@@ -89,6 +91,8 @@ Specifies the namespace to create and use for Operator.
 
 When not specified, the default value is `minio-operator`.
 
+Current Silo releases do not read this variable; setting it has no effect.
+
 #### `MINIO_SECRET_KEY_OLD` {#envvar.MINIO_SECRET_KEY_OLD}
 
 *envvar*
@@ -97,6 +101,8 @@ When not specified, the default value is `minio-operator`.
 > **Deprecated: RELEASE.2021-04-22T15-44-28Z**
 
 To perform root credential rotation, modify the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) environment variables.
+
+Current Silo releases do not read this variable; setting it has no effect.
 
 #### `MINIO_SERVER_URL` {#envvar.MINIO_SERVER_URL}
 

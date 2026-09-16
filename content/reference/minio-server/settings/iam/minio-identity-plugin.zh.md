@@ -119,12 +119,12 @@ mc admin config set identity_plugin                  \
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-##### `MINIO_IDENTITY_PLUGIN_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_TOKEN}
+##### `MINIO_IDENTITY_PLUGIN_AUTH_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_AUTH_TOKEN}
 
 *envvar*
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
-##### `identity_plugin token` {#mc-conf.identity_plugin.token}
+##### `identity_plugin auth_token` {#mc-conf.identity_plugin.auth_token}
 
 *mc-conf*
 {{< /tab >}}
