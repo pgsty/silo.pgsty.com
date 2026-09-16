@@ -102,6 +102,13 @@ restore separately.
 2. Repeat `mcli --json admin info site-a`, `mcli ready site-a` and
    `mcli --json admin replicate status site-a`. Verify the actual identity of
    every process, clean IAM loading and working cross-site communication.
+   Run the write-readiness check against each process endpoint, not just a load
+   balancer. On distributed nodes, confirm `IAM load(startup) finished.` in each process's
+   current startup log and, when site replication is configured, also
+   `Cluster replication initialized`. `/minio/health/ready` and successful root requests
+   can precede these background initializers. Wait for both before issuing STS
+   credentials; the startup messages still do not replace the credential checks
+   below.
 3. Check IAM metrics for revision counts, healing failures and last successful
    healing. A quiet error counter alone does not prove credential revocation.
    The background pass runs periodically; its interval is not a convergence SLA.
@@ -147,6 +154,50 @@ system. If that ledger is incomplete, keep access isolated until the affected
 scope is reconciled. Never remove tombstones, truncate revision history or
 import only live records to make an old binary start.
 
+After a restore, repeat the IAM/site-replication startup checks on every process
+before issuing credentials. Verify temporary sessions separately from ordinary
+users and service accounts. Reissue the required STS credentials after startup
+and check them against every intended site; an old session failing on one site
+does not prove that its parent identity is safely revoked everywhere.
+
+### Reconcile a known recovery group {#reconcile}
+
+One bounded recovery policy is to keep retired parent identities disabled,
+remove their recorded service-account keys, detach revoked grants, and issue
+replacement credentials under distinct identity names. Use the reviewed ledger
+to select the actual users, keys and policies; all known sites must be online
+inside the isolated recovery group, with stale or unknown peers excluded.
+The isolated object-store and etcd rehearsals passed this policy with the
+credential checks below. Apply the same checks to the actual recovery group
+before approving access.
+
+The following shows the operations against a protected recovery alias. Replace
+the uppercase names with reviewed entries. User creation prompts for a secret;
+service-account creation prints credentials, which belong in the approved
+secret store rather than the rehearsal log.
+
+```bash
+mcli admin user disable recovery-a RETIRED_USER
+mcli admin user svcacct rm recovery-a RETIRED_SERVICE_KEY
+mcli admin policy detach recovery-a RETIRED_POLICY --user RETIRED_MAPPING_USER
+mcli admin user add recovery-a RECOVERED_USER
+mcli admin policy attach recovery-a CURRENT_POLICY --user RECOVERED_USER
+mcli admin user svcacct add recovery-a RECOVERED_USER
+```
+
+Issue designated STS canaries through the application's usual authenticated
+flow after startup completes, and verify each new session on every intended
+process. If issuance or cross-site reads fail, keep the recovery group isolated,
+retain the failure evidence and investigate. A fresh canary may be issued again
+within the planned maintenance window; an elapsed timer alone cannot approve
+access. Check the retired user, recorded service keys, revoked
+mapping and both pre-restore and newly issued sessions of the retired parent.
+They must all be denied on every process that will serve clients. The replacement
+user, service account and freshly issued STS credentials must work. Repeat these
+checks after a complete restore of the reconciled backup. Keep access isolated
+if any check fails; this policy does not permit reconnecting a stale old peer or
+re-enabling a retired parent on old software.
+
 ## Required rehearsal record {#rehearsal}
 
 For **each** supported backend, use isolated old/new multi-process sites and
@@ -180,10 +231,26 @@ a known object with a successful root control, rather than treating any request
 failure as proof of revocation.
 
 Restoring a pre-upgrade backup with its old binary made a subsequently revoked
-credential work again, confirming the rollback hazard above. That run stopped
-before replaying the revocation ledger or rekeying; it **does not approve
-reopening the restored system**. The laboratory used one isolated Linux ARM64
-container with a shared clock and no external peers. It did not test production
-storage snapshots, an HA etcd cluster, external identity providers/KMS, clock
-skew or reopening after rollback reconciliation. These remaining checks and
-the exact artifact identities are tracked in [#200](https://github.com/pgsty/silo/issues/200).
+credential work again, confirming the rollback hazard above. A subsequent
+rehearsal applied the [bounded reconciliation policy](#reconcile), then restored
+the reconciled backup using the matching old binary:
+
+| Backend | Observed result after reconciliation and full restore |
+| --- | --- |
+| etcd 3.6.13 | All six processes rejected the retired user, service key, revoked mapping and retired parent's sessions; replacement users, service accounts and newly issued STS credentials worked. The isolated client-access checks passed. |
+| Object store | The completed continuation from the same pre-upgrade backup rejected retired users, service keys, revoked grants and the retired parent's STS. Replacement users, service accounts and fresh STS worked on all six processes after reconciliation and full restore. |
+
+The object-store laboratory also observed temporary STS write and cross-site
+authentication failures after startup checks passed. A control using only
+Server 20260903 also encountered an STS write failure after cold restart; this
+does not establish a regression in the new build. The exact cause was not
+isolated. Fresh STS probes later passed without changing the binaries or
+configuration, and the completed recovery run required those end-to-end checks
+before proceeding. Startup messages and a fixed waiting period are insufficient;
+preservation of pre-restore STS sessions is outside the accepted recovery scope.
+
+The laboratory used one isolated Linux ARM64 container with a shared clock and
+no external peers; the etcd instances were single-member backends. Production
+storage snapshots, HA etcd, external identity providers/KMS and clock skew were
+not tested. Those deployment-specific checks, the startup observations and
+exact artifact identities remain tracked in [#200](https://github.com/pgsty/silo/issues/200).
