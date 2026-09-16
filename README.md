@@ -38,6 +38,33 @@ OINK is pinned as a Hugo Module in `go.mod`. Its wordmark, featured-image cascad
 
 ## Content convention
 
+### Contributor records
+
+The reviewed roster in `data/home/contributors.yaml` drives the homepage and
+generates both contributor pages, all four software repositories' `CONTRIBUTORS.md`
+files, and their README sections. Include every human issue / PR author, in any
+state; retain acknowledged security disclosures and distinguish incorporated
+work from the original PR's merge status. Preserve historical release credits.
+
+Refresh the complete paginated GitHub records for every repository listed in
+the data file (`gh api --paginate --slurp 'repos/pgsty/REPO/issues?state=all&per_page=100'`).
+Review descriptions, adoption evidence, account deduplication, bot exclusions,
+status lists, repository totals, ordering, and the audit date together. Then,
+with sibling software checkouts present and Python's PyYAML package available:
+
+```bash
+python3 bin/contributors.py
+python3 bin/contributor_avatars.py
+python3 bin/contributors.py --check
+make check
+```
+
+Use `--workspace /path/to/checkouts` for a different sibling-checkout location.
+Publish new site pages and avatar assets before publishing source-repository
+updates that reference their public URLs.
+
+### Bilingual content
+
 English is the default language. Keep translations next to each other:
 
 ```text

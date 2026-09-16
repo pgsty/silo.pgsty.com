@@ -15,7 +15,7 @@ icon: fa-solid fa-copyright
 **Copyright © 2020–至今 MinIO, Inc.**
 MinIO 对象存储文档原作。
 
-**Copyright © 2026–至今 [PIGSTY SILO Contributors](https://pgsty.com)**
+**Copyright © 2026–至今 [PIGSTY SILO Contributors](/zh/about/contributors/)**
 分支维护、格式转换、内容修改、恢复与新增的文档，以及中文翻译。
 
 两层版权同时存在。经过翻译或修改的页面，底层表达的版权属于 MinIO，翻译与修改部分的版权属于 PGSTY SILO 项目，二者互不取代。

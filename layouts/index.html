@@ -346,10 +346,11 @@
       </div>
 
       {{- $totalCount := add (len $contributors.code) (add (len $contributors.proposed) (len $contributors.reports)) -}}
-      {{- $record := "https://github.com/pgsty/silo/blob/main/CONTRIBUTORS.md" -}}
+      {{- $record := (site.GetPage "/about/contributors").RelPermalink -}}
       <div class="landing-container">
         <div class="contrib-strip" data-reveal id="contributors">
-          <p class="contrib-lead">{{ if $zh }}{{ $totalCount }} 位社区贡献者 · <a href="{{ $record }}" target="_blank" rel="noopener">查看完整贡献记录</a>{{ else }}{{ $totalCount }} community contributors · <a href="{{ $record }}" target="_blank" rel="noopener">View full record</a>{{ end }}</p>
+          <p class="contrib-lead">{{ if $zh }}{{ $totalCount }} 位社区贡献者 · <a href="{{ $record }}">查看完整贡献记录</a>{{ else }}{{ $totalCount }} community contributors · <a href="{{ $record }}">View full record</a>{{ end }}</p>
+          <p class="contrib-note">{{ if $zh }}提交 issue、PR 或安全报告，都是贡献。{{ else }}Issues, pull requests, and security reports all count.{{ end }} · {{ time.Format "2006-01-02" $contributors.updated }}</p>
           <div class="contrib-wall">
             {{ range $contributors.code }}{{ partial "contributor-avatar.html" . }}{{ end }}
             {{ range $contributors.proposed }}{{ partial "contributor-avatar.html" . }}{{ end }}

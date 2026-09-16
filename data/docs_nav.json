@@ -3709,6 +3709,10 @@
     "/compatibility/console/": [
       "/compatibility/",
       "/compatibility/console/"
+    ],
+    "/about/contributors/": [
+      "/about/",
+      "/about/contributors/"
     ]
   },
   "sections": [
@@ -3743,6 +3747,11 @@
         {
           "page": "about/attribution",
           "url": "/about/attribution/",
+          "children": []
+        },
+        {
+          "page": "about/contributors",
+          "url": "/about/contributors/",
           "children": []
         },
         {
