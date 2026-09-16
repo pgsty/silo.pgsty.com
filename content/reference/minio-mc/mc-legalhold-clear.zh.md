@@ -3,8 +3,12 @@ title: "mc legalhold clear"
 url: "/zh/reference/minio-mc/mc-legalhold-clear/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-legalhold-clear.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** 单对象与递归清除 legal hold 失败都会返回退出码 1；成功对象不会回滚。 [版本说明](/zh/compatibility/mcli/#current-release).
+
 
 <a id="mc-legalhold-clear"></a>
 <a id="minio-mc-legalhold-clear"></a>

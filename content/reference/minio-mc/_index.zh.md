@@ -18,7 +18,7 @@ Pigsty 维护的客户端在独立归档与 Linux 软件包中以 **`mcli`** 发
 
 Silo 项目无法保证它与每一种其他 S3 兼容服务的行为，因为各家实现存在差异。在将其他服务视为兼容对象前，请先测试工作负载依赖的操作。
 
-当前版本为 [mcli 20260913](/zh/blog/release/mcli-20260913/)，使用 Go 1.27.1、pkg v3.14.0 与上游 SDK `60bd07042d49`。完整行为变化见[兼容性注记](/zh/compatibility/mcli/#current-release)，Server/Console 版本边界见[组件矩阵](/zh/compatibility/versions/)。
+当前版本为 [mcli 20260916](/zh/blog/release/mcli-20260916/)，使用 Go 1.27.1、pkg v3.14.1 与上游 SDK `32e1f32cb176`。完整行为变化见[兼容性注记](/zh/compatibility/mcli/#current-release)，Server/Console 版本边界见[组件矩阵](/zh/compatibility/versions/)。
 
 [`mc`](#command-mc) 的语法如下：
 

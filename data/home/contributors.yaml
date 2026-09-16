@@ -288,15 +288,15 @@ reports:
   - handle: "jiri-pejchal"
     name: "Jiri Pejchal"
     featured: true
-    what: "Reported the RabbitMQ client vulnerability and requested controls for Console object sharing"
-    whatZh: "报告 RabbitMQ 客户端漏洞，并提出 Console 对象分享管控需求"
+    what: "Reported the RabbitMQ client vulnerability and the Console share proxy's exposure of internal metrics"
+    whatZh: "报告 RabbitMQ 客户端漏洞，以及 Console 分享代理暴露内部指标的问题"
     firstContribution: "2026-09-10"
     activity:
       - repo: "pgsty/silo"
         issuesClosed: [176]
       - repo: "pgsty/silo-console"
-        what: "Requested controls for Console object sharing and its public proxy"
-        whatZh: "提出 Console 对象分享与公共代理管控需求"
+        what: "Reported the Console share proxy's exposure of internal metrics"
+        whatZh: "报告 Console 分享代理暴露内部指标的问题"
         issuesOpen: [52]
   - handle: "AEGEGE"
     featured: true

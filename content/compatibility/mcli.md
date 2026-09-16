@@ -10,12 +10,29 @@ icon: fa-solid fa-terminal
 
 `mcli` is Silo's build of the MinIO Client (`mc`). This page records where the two are interchangeable and where they differ.
 
-[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), and [20260903](/blog/release/mcli-20260903/). The latest is [20260913](/blog/release/mcli-20260913/); historical notes retain their own comparison baselines.
+[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/) and [20260913](/blog/release/mcli-20260913/). The latest is [20260916](/blog/release/mcli-20260916/); historical notes retain their own comparison baselines.
 
 > [!TIP]
-> **Current release:** [RELEASE.2026-09-13T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-13T00-00-00Z), package `20260913000000.0.0`, source `4f609a4da3bb`. Six OS/architecture archives, RPM/DEB/APK and multi-architecture images are published. See the [release notes](/blog/release/mcli-20260913/) and [component matrix](/compatibility/versions/).
+> **Current release:** [RELEASE.2026-09-16T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z), package `20260916000000.0.0`, source `e952aa78f10a`. Six OS/architecture archives, RPM/DEB/APK and multi-architecture images are published. See the [release notes](/blog/release/mcli-20260916/) and [component matrix](/compatibility/versions/).
 
 ## Current release changes {#current-release}
+
+20260916 uses pkg v3.14.1, upstream SDK `32e1f32cb176`, JWX v3.3.0 and Go 1.27.1.
+The SDK retries and reports S3 errors embedded in CopyObject HTTP 200 responses,
+so a failed copy cannot authorize `mv` to remove its source. JWX fixes JSON
+field-name escaping; pkg v3.14.0 password-policy semantics are unchanged.
+
+- Per-object `mirror` permission errors are reported and accumulated while later objects continue; finite jobs exit 1. Failed local destination removals are no longer swallowed. These permission failures do not require `--skip-errors` to continue; watch listing/watcher errors retain their existing cancellation/retry behavior.
+- Failed mirrors suppress normal final success statistics. Explicit `--summary` still reports statistics, with JSON `status: failure`; text errors go to stderr and statistics to stdout.
+- Failed legalhold set/clear, partial recursive retention failures, and `mv` source-deletion failures now return nonzero. Successful objects are not rolled back. Retention reports each failed object once.
+- Empty retention durations and invalid find regexes produce normal errors instead of panics. Very short transfers no longer produce infinite speeds in JSON statistics.
+
+**Automation migration:** affected failure paths that returned 0 now return 1.
+Check the final exit code and error records; per-object success start messages
+and progress bytes are not completion proof. Configuration, aliases and `MC_*`
+variables are unchanged. See the [release notes](/blog/release/mcli-20260916/).
+
+## Changes inherited from 20260913 {#release-20260913}
 
 20260913 uses pkg v3.14.0, upstream SDK `60bd07042d49` and Go 1.27.1, with
 refreshed Go x/* modules. It preserves mirror destination history and fixes

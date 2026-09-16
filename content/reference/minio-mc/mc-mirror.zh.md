@@ -3,8 +3,12 @@ title: "mc mirror"
 url: "/zh/reference/minio-mc/mc-mirror/"
 weight: 240
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-mirror.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+> [!NOTE]
+> **mcli 20260916:** 逐对象权限错误会报告并继续处理后续对象；有限 mirror 任务只要有失败就返回 1。包括源不可读、目标写入拒绝及本地目标删除失败；这些权限错误不要求 `--skip-errors`。watch 模式的列举/监听失败保留原有重试行为。失败任务不再输出普通成功结束统计，显式 `--summary` JSON 的 `status` 为 `failure`。文本错误位于 stderr；检查退出码，不要把进度计数当作完成证明。 [版本说明](/zh/compatibility/mcli/#current-release).
+
 
 <a id="mc-mirror"></a>
 
