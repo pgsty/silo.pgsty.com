@@ -69,6 +69,8 @@ require pkg downgrades or duplicate APIs.
 
 ## Migration {#migration}
 
+The official image is [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console). Pin `:v2.4.1` for a specific release; `latest` advances after publication and image verification.
+
 An existing MinIO Console deployment upgrades in place. The service unit, service account, and configuration file keep their names, and every `CONSOLE_*` variable is read unchanged, so the usual path is to install the `silo-console` package over the old one and restart.
 
 Two behaviors change on first start and are worth expecting:

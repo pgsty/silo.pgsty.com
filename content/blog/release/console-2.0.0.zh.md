@@ -32,7 +32,7 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 版本号从 v1.9.1 提升到 v2.0.0，主要是因为以下对外契约同时发生变化：
 
 - 产品名称统一为 **SILO Console**，主仓库迁移到 [`pgsty/silo-console`](https://github.com/pgsty/silo-console)；
-- 正式发布二进制从 `console` 改为 `silo-console`，容器镜像迁移到 `ghcr.io/pgsty/silo-console`；
+- 正式发布二进制从 `console` 改为 `silo-console`；
 - 发布资产、校验和、软件包元数据、命令行说明与项目链接全部切换到 SILO；
 - 界面中的项目身份、帮助入口、版权归属、源代码供应与商标说明重新建立。
 
@@ -45,10 +45,11 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 | 产品             | Console / MinIO Console 的遗留表述     | **SILO Console**                          |
 | 源码仓库           | `georgmangold/console`            | `pgsty/silo-console`                      |
 | 正式二进制          | `console`                         | `silo-console`                            |
-| 容器镜像           | `ghcr.io/georgmangold/console`    | `ghcr.io/pgsty/silo-console`              |
 | 二进制资产          | `console-<os>-<arch>`             | `silo-console-<os>-<arch>`                |
 | 校验和文件          | `console_<version>_checksums.txt` | `silo-console_<version>_checksums.txt`    |
 | 网站与文档          | 上游或前维护者入口                         | `silo.pgsty.com` 与 `silo.pgsty.com/docs/` |
+
+容器部署使用 [Docker Hub 的 `pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)，当前版本及拉取命令见 [Console v2.4.1 发布说明](/zh/blog/release/console-2.4.1/#delivery)。
 
 命令行程序的作者、用途、帮助文本和项目描述已切换为 Pigsty 与 SILO Console。DEB/RPM/APK 软件包的厂商、维护者、主页、描述与许可证元数据相应更新，可执行文件安装到 `/usr/local/bin/silo-console`。
 

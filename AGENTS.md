@@ -16,6 +16,12 @@ silo.pgsty.com —— SILO 官网（Hugo）。给 AI agent 的项目约定，改
 
 看到它指向 `pgsty/silo` 时，那是回归，改回 `pgsty/minio`。
 
+## 容器分发
+
+SILO 官方容器镜像统一使用 Docker Hub：`docker.io/pgsty/silo`、
+`docker.io/pgsty/mc`、`docker.io/pgsty/silo-console`。发布说明、安装命令与链接
+统一指向 Docker Hub。
+
 ## 兼容性与依赖口径
 
 保留 SILO、SILO Console、mcli 与上游 MinIO/MC 的兼容性说明，兼容目标是
