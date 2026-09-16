@@ -16,7 +16,7 @@ This is the problem, design, and decision record for [SILO issue #79](https://gi
 
 ## September 16 implementation and upgrade contract {#implementation}
 
-[PR #198](https://github.com/pgsty/silo/pull/198) retains mr javad seydi's original metadata-and-scan contribution and adds maintainer fixes for disappearing markers, incomplete discovery, cancellation confirmation and upgrade diagnostics. This section describes that source change. **It is not included in Server 20260903, and does not establish production performance or deployment acceptance.** The August 30 analysis below remains a historical design record.
+[PR #198](https://github.com/pgsty/silo/pull/198) retains mr javad seydi's original metadata-and-scan contribution and adds maintainer fixes for disappearing markers, incomplete discovery, cancellation confirmation and upgrade diagnostics. The pre-release compatibility follow-up restores `legacy` as the default and makes strict mode an explicit process-environment opt-in. This section describes those source changes. **It is not included in Server 20260903, and does not establish production performance or deployment acceptance.** The August 30 analysis below remains a historical design record.
 
 ### Listing and cancellation
 
@@ -26,19 +26,26 @@ Ordering is `(key, initiation time from the native upload ID, encoded upload ID)
 
 Directory discovery requires `floor(N/2)+1` successful drive scans per set. For example, two available drives out of four are insufficient and return 503, even when metadata could still be read from two copies. A source-drive identity read may exclude another bucket only after validating its bucket/key hash; uncertain identities require a quorum read. Strict mode returns `MultipartListingNotReady` (503) for legacy records and `MultipartListingMetadataInvalid` (503) for invalid identities. It never silently switches the whole request to cache-based listing.
 
-Abort checks every relevant pool and requires confirmed absence on `floor(N/2)+1` drives per set. Partial deletion can be retried even after metadata has fallen below read quorum. An unknown pool state returns 503; confirmed absence everywhere with no upload found returns `NoSuchUpload` (404). Successful logical cancellation can leave offline part data for later cleanup.
+In default `legacy` mode, Abort retains the released read quorum, best-effort cleanup and pool-order return behavior, avoiding new 503 responses for previously successful cancellations. In `strict` mode it checks every relevant pool and requires `floor(N/2)+1` deletion acknowledgements per set. Remnants below read quorum can still be retried. When a majority was already absent but remnants were observed, those observed copies must be cleaned successfully; successful responses from empty drives cannot mask their deletion failures. Unknown pools or insufficient confirmations still return 503.
+
+In both modes, an Abort with the wrong key or bucket cannot evict another valid upload's cache entry. The S3 HTTP layer retains its existing idempotent response: a nonexistent upload also returns 204; malformed input, authorization and quorum errors remain errors. **204 does not prove that every physical copy has been deleted.** Offline part data may still need later cleanup.
 
 **Unresolved creation-write boundary:** these confirmations do not fence a physical creation write that continues after its caller receives a storage timeout. A fault-injection test reproduces a 16-drive/EC:8 case where seven delayed writes and seven offline old copies restore a writable upload after acknowledged cancellation. The test preserves this known limitation; its passing status is not a repair claim. A durable creation fence needs a separate storage-consistency design.
 
 ### Coordinated upgrade
 
-The new setting is `api multipart_listing=strict|legacy`, with `strict` as the default; `MINIO_API_MULTIPART_LISTING` overrides it. During migration, explicitly set `legacy` on all servers if the old listing behavior is required:
+**The default is `legacy`**, retaining the old exact-key/cache listing limitations. An ordinary upgrade does not require pausing production or draining uploads to enable the new listing. The mode is read only from the server process environment, `MINIO_API_MULTIPART_LISTING=legacy|strict`; no shared configuration key is added. An unset value selects `legacy`. An invalid value logs a diagnostic and falls back to `legacy` while preserving other API settings. Do not set this mode with `mcli admin config set`.
+
+Only before opting into strict mode must operators upgrade **all writers**, stop introducing old-format uploads, finish or abort legacy uploads using known keys/IDs, run the read-only preflight below, and verify scan capacity against their workload. Once these checks pass, set `MINIO_API_MULTIPART_LISTING=strict` in every server's service environment and restart; check the effective mode at each endpoint. Restart paginated traversals after changing modes. Issue #79 remains open for the default listing limitations; this batch does not claim a complete repair.
+
+If a development build already persisted `api multipart_listing`, back up configuration and record API values, upgrade all configuration writers to the patched version, prevent concurrent configuration writes, then remove only that historical key:
 
 ```bash
-mcli admin config set ALIAS api multipart_listing=legacy
+mcli admin config reset ALIAS api multipart_listing
+mcli admin config get ALIAS api
 ```
 
-Legacy mode retains the old exact-key/cache limitations. Upgrade **all writers**, stop introducing old-format uploads, then finish or abort legacy uploads using their known keys and IDs. Switching modes requires restarting any paginated traversal. Check every server's effective setting; an environment override takes precedence over stored configuration.
+The patched server ignores the historical key's mode value without automatically rewriting shared configuration or deleting history. The config get/export views omit retired keys, so their absence from those views alone does not prove deletion. Require a successful targeted reset, then verify preserved values after restart and during a controlled rollback check; do not reset the whole `api` subsystem. A development build can reintroduce the key on its next configuration write, and history containing that key should not be replayed directly. Existing API values can temporarily be pinned through their corresponding environment variables where needed, but that does not replace persistent cleanup. This procedure covers this API configuration change only; other rollback constraints require separate checks.
 
 The read-only, SigV4-authenticated endpoint `GET /minio/admin/v3/multipart-preflight` requires `admin:StorageInfo`. For example, with credentials and an endpoint supplied by the operator:
 
@@ -48,13 +55,9 @@ curl --aws-sigv4 'aws:amz:us-east-1:s3' \
   "$SILO_ENDPOINT/minio/admin/v3/multipart-preflight"
 ```
 
-The report contains `mode`, `ready`, `complete`, `scannedEntries`, `legacyUploads`, and per-pool/set drive coverage, uncovered drive indexes and oldest legacy initiation time. It bypasses upload caches, inspects even suspended pools and detects minority legacy copies. `ready=true` requires every drive to be inspected, no unreadable candidate metadata and no observed legacy copies. It cannot attest that every writer has been upgraded or that no concurrent writer will introduce a legacy record. Offline drives, scan errors, timeouts and budget exhaustion prevent readiness; an incomplete count is not a zero count. Rerun after drives return and before enabling strict mode:
+The report contains `mode`, `ready`, `complete`, `scannedEntries`, `legacyUploads`, and per-pool/set drive coverage, uncovered drive indexes and oldest legacy initiation time. It bypasses upload caches, inspects even suspended pools and detects minority legacy copies. `ready=true` requires every drive to be inspected, no unreadable candidate metadata and no observed legacy copies. It cannot attest that every writer has been upgraded or that no concurrent writer will introduce a legacy record. Offline drives, scan errors, timeouts and budget exhaustion prevent readiness; an incomplete count is not a zero count. Rerun after drives return and before enabling strict mode.
 
-```bash
-mcli admin config set ALIAS api multipart_listing=strict
-```
-
-For uploads whose original key/ID has been lost, use the existing stale-upload cleanup, which scans each server's local drives. Its age is measured from creation, **not recent part activity**. Defaults of 24-hour expiry and a 6-hour cleanup interval do not prove drain completion. Temporarily lowering `api stale_uploads_expiry` or `api stale_uploads_cleanup_interval` can also remove active long-running uploads and new-format uploads. Only do so in a maintenance window after pausing/draining the affected workload, recording original values and accepting that cancellation scope; verify physical drain and restore the original settings before resuming. This change adds no arbitrary-path deletion API.
+For uploads whose original key/ID has been lost, the existing stale-upload cleanup scans each server's local drives. Age is measured from creation, **not recent part activity**. Retain the existing cleanup policy, wait and verify actual drain; the default 24-hour expiry and 6-hour interval do not guarantee drain completion. Do not shorten expiry to accelerate an ordinary upgrade, since this can also remove active long-running uploads. Continue using default `legacy` mode if drain cannot be established. This batch changes neither cleanup policy nor the available deletion APIs.
 
 ### Scan capacity and evidence limits
 

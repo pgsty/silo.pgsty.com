@@ -16,7 +16,7 @@ url: "/zh/blog/design/list-multipart-uploads/"
 
 ## 9 月 16 日实现与升级契约 {#implementation}
 
-[PR #198](https://github.com/pgsty/silo/pull/198) 保留 mr javad seydi 的原始元数据与扫描实现，并追加维护者对 marker 消失、发现覆盖不足、取消确认和升级诊断的修复。本节说明这项源码变更。**Server 20260903 不包含此修复；源码实现也不代表生产性能与部署验收完成。** 下方 8 月 30 日的分析保留为历史设计记录。
+[PR #198](https://github.com/pgsty/silo/pull/198) 保留 mr javad seydi 的原始元数据与扫描实现，并追加维护者对 marker 消失、发现覆盖不足、取消确认和升级诊断的修复。发布前的兼容性修复将默认模式恢复为 `legacy`，严格模式仅通过进程环境显式启用。本节说明这些源码变更。**Server 20260903 不包含此修复；源码实现也不代表生产性能与部署验收完成。** 下方 8 月 30 日的分析保留为历史设计记录。
 
 ### 列表与取消语义
 
@@ -26,19 +26,26 @@ url: "/zh/blog/design/list-multipart-uploads/"
 
 每个 set 的目录枚举需要 `floor(N/2)+1` 块盘成功。例如四盘只有两盘可扫描时返回 503，即使两份元数据仍可读取。只有验证 bucket/key 与目录哈希一致后，单来源盘身份读取才能排除其他 bucket；不确定时升级为 quorum 读取。严格模式遇到旧格式返回 `MultipartListingNotReady`（503），身份不合法返回 `MultipartListingMetadataInvalid`（503），不会让整个请求悄悄退回缓存列表。
 
-Abort 检查每个相关 pool，每 set 需要 `floor(N/2)+1` 份确定的不存在确认。部分删除导致元数据低于读取 quorum 后仍可重试。任一 pool 状态未知返回 503；全部确定不存在且本轮未找到上传则返回 `NoSuchUpload`（404）。逻辑取消成功后，离线盘上的分片数据仍可能等待后续清理。
+默认 `legacy` 模式下，Abort 保留已发布版本的读取 quorum、尽力清理和按 pool 顺序返回的行为，避免把原本可成功的取消变为 503。`strict` 模式检查每个相关 pool，删除需要 `floor(N/2)+1` 份确认，元数据已低于读取 quorum 的残片也可以重试清理。多数盘已不存在、但仍观察到残片时，必须成功清理这些已观察副本；空盘的成功不能掩盖残片盘的删除失败。未知 pool 或确认不足仍返回 503。
+
+两种模式都不会因错 key 或错 bucket 的 Abort 清除另一个有效上传的缓存。S3 HTTP 层保留既有幂等行为：上传不存在也返回 204；格式错误、权限不足或 quorum 错误仍返回错误。**204 不是所有物理副本已删除的证明**，离线分片仍可能等待后续清理。
 
 **尚未解决的创建写入边界：** 如果创建上传的物理写入在调用方收到存储超时后继续执行，以上确认不能阻止它迟到提交。故障注入已复现 16 盘/EC:8 场景：取消成功后，七份迟到写入加上七份离线旧副本，可以恢复出可继续写入的上传。测试保留了这个已知限制；测试通过不表示此问题已修复。持久创建屏障需要独立的存储一致性设计。
 
 ### 协调升级
 
-新增配置为 `api multipart_listing=strict|legacy`，默认 `strict`；环境变量 `MINIO_API_MULTIPART_LISTING` 优先。在迁移期间若需要旧行为，明确在所有服务端启用临时兼容模式：
+**默认使用 `legacy`**，保留原有精确键与缓存列表限制。普通升级无需为了启用新列表而暂停生产或强制排空上传。模式只读取服务器进程环境变量 `MINIO_API_MULTIPART_LISTING=legacy|strict`，不新增共享配置项。未设置时采用 `legacy`；非法值会记录诊断并回退 `legacy`，其他 API 配置继续生效。不要使用 `mcli admin config set` 设置此模式。
+
+只有准备启用严格模式时，才需要先升级**所有 writer**，停止产生旧格式上传，再使用已知 key/ID 完成或取消旧上传，执行以下只读预检，并验证扫描容量能够满足实际负载。通过后，在每台服务器的服务环境中设置 `MINIO_API_MULTIPART_LISTING=strict` 并重启；核对每个入口的生效模式。切换模式后应从头开始分页遍历。默认模式保留的列表缺陷仍由 issue #79 跟踪，本批不宣称完整修复。
+
+如果曾运行写入 `api multipart_listing` 的开发版本：先备份配置并记录 API 设置，让所有配置写入者升级到修复版，停止并发配置写入，再只删除这个历史键：
 
 ```bash
-mcli admin config set ALIAS api multipart_listing=legacy
+mcli admin config reset ALIAS api multipart_listing
+mcli admin config get ALIAS api
 ```
 
-Legacy 模式保留原有精确键与缓存限制。先升级**所有 writer**，停止产生旧格式上传，再使用已知 key/ID 完成或取消旧上传。切换模式后，应从头开始分页遍历。检查每台服务器的生效配置；环境变量覆盖存储的配置值。
+修复版会忽略历史键的模式值，但不会自动改写共享配置或删除历史记录。config get/export 会隐藏退役键，因此列表里看不到它不代表已经删除。应确认单项 reset 成功，重启后核对原有设置，并在受控回滚检查中验证旧版读取；不要重置整个 `api` 子系统。旧开发版本再次写入配置可能重新引入该键，带键的历史配置也不应直接回放。需要临时保护的 API 设置可按原值放入相应环境变量，但这不能替代持久配置清理。此步骤只处理本项 API 配置兼容性，其他变更的回滚条件仍需独立核对。
 
 只读预检接口为 `GET /minio/admin/v3/multipart-preflight`，使用 SigV4 签名，要求 `admin:StorageInfo` 权限。例如，由操作者提供凭据与地址：
 
@@ -48,13 +55,9 @@ curl --aws-sigv4 'aws:amz:us-east-1:s3' \
   "$SILO_ENDPOINT/minio/admin/v3/multipart-preflight"
 ```
 
-报告包含 `mode`、`ready`、`complete`、`scannedEntries`、`legacyUploads`，以及各 pool/set 的盘覆盖、未覆盖盘序号与最老旧上传的发起时间。它绕过上传缓存，检查包括暂停 pool 在内的持久状态，并识别只剩少数副本的旧上传。`ready=true` 要求全部盘可检查、候选元数据没有不可读状态、且未发现旧格式副本。它无法证明所有 writer 都已升级，也不能阻止并发旧 writer 再引入旧格式。离线盘、扫描错误、超时和预算耗尽均不能报告就绪；不完整计数不能当作零。磁盘恢复后以及切换严格模式前应重新预检：
+报告包含 `mode`、`ready`、`complete`、`scannedEntries`、`legacyUploads`，以及各 pool/set 的盘覆盖、未覆盖盘序号与最老旧上传的发起时间。它绕过上传缓存，检查包括暂停 pool 在内的持久状态，并识别只剩少数副本的旧上传。`ready=true` 要求全部盘可检查、候选元数据没有不可读状态、且未发现旧格式副本。它无法证明所有 writer 都已升级，也不能阻止并发旧 writer 再引入旧格式。离线盘、扫描错误、超时和预算耗尽均不能报告就绪；不完整计数不能当作零。磁盘恢复后以及切换严格模式前应重新预检。
 
-```bash
-mcli admin config set ALIAS api multipart_listing=strict
-```
-
-丢失原始 key/ID 的旧上传由既有 stale-upload 清理器处理，各服务器扫描自己的本地盘。年龄按创建时间计算，**不会被最近上传分片的活动刷新**。默认 24 小时过期、6 小时清理间隔不等于保证已经排空。临时降低 `api stale_uploads_expiry` 或 `api stale_uploads_cleanup_interval`，也会删除仍在进行的长上传和新格式上传。只能在维护窗口暂停或排空相关负载、记录原值并接受取消范围后操作；验证实际排空，恢复配置后再恢复业务。本次不新增按任意路径删除的管理接口。
+丢失原始 key/ID 的旧上传由既有 stale-upload 清理器处理，各服务器扫描自己的本地盘。年龄按创建时间计算，**不会被最近上传分片的活动刷新**。保留现有清理策略，等待并验证实际排空；默认 24 小时过期、6 小时清理间隔不等于排空保证。不能据此缩短过期时间催促普通升级，因为这也会删除仍在进行的长上传。无法排空时继续使用默认 `legacy` 模式。本批不改变清理规则，也不新增按任意路径删除的管理接口。
 
 ### 扫描容量与证据边界
 
