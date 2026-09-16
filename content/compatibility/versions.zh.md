@@ -35,9 +35,9 @@ icon: fa-solid fa-code-branch
 
 - **pkg：** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`。
 - **MC：** `v0.0.0-20260913012246-4f609a4da3bb` → 已发布的 20260913 标签。
-- **Server 选择的 Console：** `v0.0.0-20260913015128-417559bb2c97`；经 `449c185a8d14` 合入 main，源码树相同。
-- **Server 依赖集成提交：** `5d955b5b7444f8a3ab550ce92713607998f89c0d`。
-- **已核对的 Server main：** [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a)，包含下述修复。
+- **Server 选择的 Console：** `v0.0.0-20260916034812-56dfe455ac2f`；经 [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) 合入 main，源码树相同。
+- **Server 的 Console 集成提交：** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c)，通过 [#209](https://github.com/pgsty/silo/pull/209) 合入。9 月 13 日选择的其他组件版本保持不变。
+- **已核对的 Server main：** [`3c26a8b0b5bd`](https://github.com/pgsty/silo/commit/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca)，包含下述修复。
 - **上游 minio-go：** `v7.3.1-0.20260910142817-60bd07042d49`。
 
 **Server 与 Console 最新标签之后的改动尚未发布。** 其中包括[密码权限拆分](/zh/compatibility/password-permissions/)、
@@ -72,10 +72,23 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 
 [R4–R8 集成记录](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)保留了源码哈希、本地测试及验收边界。PR #196 合并前的 11 项检查全部通过；这些结果证明源码验收，不代表新版本发布或生产集群升级。
 
+### Console 分享下载 {#console-sharing}
+
+[Console #56](https://github.com/pgsty/silo-console/pull/56) 与
+[Server #209](https://github.com/pgsty/silo/pull/209) 修复了
+[Console #52](https://github.com/pgsty/silo-console/issues/52) 报告的匿名代理边界问题。
+代理只允许访问已配置 S3 源地址上的对象内容 GET，拒绝跳转、系统路径以及
+通过查询参数选择的非下载操作。没有新增关闭分享的环境变量，正常公共对象、
+预签名和版本下载继续可用，详见[行为与设计权衡](/zh/reference/minio-server/settings/console/#object-sharing)。
+
+Console 最终 CI 矩阵与漏洞检查在合并前通过。Server 的正式模块依赖通过了
+独立与内嵌两种部署下的真实 API、浏览器分享测试，以及自身 CI 检查。
+这些结果属于源码验收：Console v2.4.0 和 Server 20260903 均不包含此修复，
+合并上述 PR 不会发布新的二进制或镜像。
+
 ### 仍待完成的工作 {#pending}
 
 - **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 仍然开放。[设计记录](/zh/blog/design/list-multipart-uploads/)中的前缀、分页与原始对象键发现限制，不属于上面的分片上传完成修复。
-- **Console 对象分享：** [Console #52](https://github.com/pgsty/silo-console/issues/52) 仍然开放，本地修复尚未合入。[拟议的请求限制](/zh/reference/minio-server/settings/console/#object-sharing)尚未进入当前选择的 Console 源码或已发布的 Server、Console。
 
 ## 依赖与发布顺序 {#order}
 
