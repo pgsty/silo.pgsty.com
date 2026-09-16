@@ -60,15 +60,21 @@ Go 不继承依赖模块的 replacement，需同时复制[标签 README](https:/
 
 ## 软件包与验证 {#delivery}
 
+官方容器镜像发布在 [Docker Hub](https://hub.docker.com/r/pgsty/silo-console)，支持 Linux amd64 与 arm64：
+
+```sh
+docker pull docker.io/pgsty/silo-console:v2.4.1
+```
+
 本次发布有 **44 个附件**：二进制及归档、DEB/RPM/APK 软件包、源码、法律声明、SPDX SBOM、校验清单及 Sigstore 签名包。
-校验清单和 OCI 镜像使用无长期密钥的 Cosign 签名，GitHub 构建溯源将制品绑定到标签源码与发布工作流。
+校验清单和 OCI 镜像使用无长期密钥的 Cosign 签名，GitHub 构建溯源记录构建工作流与对应标签的发布输入。
 镜像的 `latest` 仅在正式 Release 通过签名、溯源、SBOM 和匿名访问检查后推进。
-在线与离线验证方法见[发布契约](https://github.com/pgsty/silo-console/blob/v2.4.1/docs/release-contract.md)。
+在线与离线验证方法见[发布契约](https://github.com/pgsty/silo-console/blob/8ba8a266a503f13037931747256c5a349af09124/docs/release-contract.md)。
 
 Linux 软件包保留 `minio-console.service`、`console-user` 和 `/etc/default/console`。
 服务状态目录为 `/var/lib/silo-console`，证书目录改为 `/etc/silo-console/certs`，停止服务最多等待 90 秒。
 **已有安装重启前**，请按要求迁移证书和权限，或通过 `CONSOLE_OPTS` 保留旧证书路径。
-安装过程保留旧证书与私钥，不会自动重启服务。具体见[软件包升级说明](https://github.com/pgsty/silo-console/blob/v2.4.1/systemd/README.md#upgrading-an-installation-with-existing-certificates)。
+安装过程保留旧证书与私钥，不会自动重启服务。具体见[软件包升级说明](https://github.com/pgsty/silo-console/blob/6a1802261c6a6f6972b42f347d8d4420ad5d1248/systemd/README.md#upgrading-an-installation-with-existing-certificates)。
 
 精确发布源码通过[完整 CI 矩阵](https://github.com/pgsty/silo-console/actions/runs/35071257392)、
 [漏洞检查](https://github.com/pgsty/silo-console/actions/runs/35071257306)和
