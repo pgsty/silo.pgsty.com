@@ -27,6 +27,14 @@ with `s3:ListBucketVersions` and `s3:GetObjectVersion` permissions on the chosen
 scope. This profile is separate from an `mcli` alias. Allow any additional
 read-only Object Lock permissions needed to inspect that deployment.
 
+Download the script and its [SHA-256 file](/tools/replica-metadata-audit.py.sha256), then verify it before execution. This revision is `ccc9d035809b2b41157b4a3f1d35a21108ae4b3af2836e99416a1d2eec1efef2`.
+
+```bash
+curl --fail --location --output replica-metadata-audit.py https://silo.pgsty.com/tools/replica-metadata-audit.py
+curl --fail --location --output replica-metadata-audit.py.sha256 https://silo.pgsty.com/tools/replica-metadata-audit.py.sha256
+shasum -a 256 --check replica-metadata-audit.py.sha256
+```
+
 ```bash
 umask 077
 python3 -m venv audit-venv
@@ -197,3 +205,5 @@ The inventory tool is preparation, not a repair engine. Configuration-specific
 Object Lock/SSE/replication checks remain tracked in
 [#201](https://github.com/pgsty/silo/issues/201). Record any production inventory
 and writes separately against a selected deployment and reviewed change list.
+
+For a `confirmed-header` row, `proposed_content_encoding: null` means remove the Content-Encoding field entirely, not set an empty string. A null value in other classifications is not a repair recommendation. See [replica metadata normalization](/blog/design/replica-metadata-normalization/) for the design.

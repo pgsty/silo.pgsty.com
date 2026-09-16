@@ -24,7 +24,7 @@ TLS 层的变化、[issue #154](https://github.com/pgsty/silo/issues/154)
 
 ## Go 1.27 改变了什么 {#go127}
 
-- **显式曲线偏好现在会压过 ML-KEM 兼容开关。** `GODEBUG=tlsmlkem=0`（及 `tlssecpmlkem=0`）只从*默认*曲线集合中移除后量子混合方案。显式配置 `CurvePreferences` 的应用会在它给出的列表里保留 ML-KEM——这是 Go 1.27 的有意变更。SILO Server 有 8 个 TLS 配置点显式设置了含 X25519MLKEM768 的列表；修复移除这 8 处赋值并退役该 helper，使这些配置点遵循 Go 默认值，兼容开关重新生效。栈评审确认 pkg、mcli 和 Console 客户端原本已使用默认值；Console HTTPS 监听器保留单独的 P-256 策略。
+- **显式曲线偏好现在会压过 ML-KEM 兼容开关。** `GODEBUG=tlsmlkem=0` 从默认集合移除全部 ML-KEM 混合方案；`tlssecpmlkem=0` 只移除 Go 1.26 新增的 P-256/P-384 混合，仍保留 X25519MLKEM768。显式配置 `CurvePreferences` 的应用会在它给出的列表里保留 ML-KEM——这是 Go 1.27 的有意变更。SILO Server 有 8 个 TLS 配置点显式设置了含 X25519MLKEM768 的列表；修复移除这 8 处赋值并退役该 helper，使这些配置点遵循 Go 默认值，兼容开关重新生效。栈评审确认 pkg、mcli 和 Console 客户端原本已使用默认值；Console HTTPS 监听器保留单独的 P-256 策略。
 - **ClientHello 新增 ML-DSA 签名算法编号**（`0x0904`–`0x0906`）。ML-DSA 是签名方案，与 ML-KEM 不同：禁用混合密钥交换不会禁用 ML-DSA offer，拒绝 ML-DSA 的入口不会被任何 ML-KEM 开关修复。
 - **ClientHello 变大。** 同源码同依赖实测：Go 1.26.5 默认 1497 字节；Go 1.27.1 默认 1509 字节；`tlsmlkem=0` 下的旧显式列表产生 275 字节、无 ML-KEM 的 hello，而 Go 1.27.1 加显式列表仍产生含 ML-KEM 的 1509 字节。仅更换编译器就改变了握手。
 - **macOS 根 CA 行为随模块 go 指令翻转。** 新鲜进程是遵循 `SSL_CERT_FILE`/`SSL_CERT_DIR` 还是 Keychain，由 `x509sslcertoverrideplatform` GODEBUG 默认值决定，而它跟随主模块的 `go` 指令：`go 1.26` 模块在 macOS 上忽略这两个变量（平台库优先），`go 1.27` 模块遵循——且以消费*应用*的指令为准，库模块更旧也不妨碍新行为。macOS 上的运维者应知道：设置任一变量都会用给定文件/目录整体替换 Keychain 信任；过期或不完整的路径会破坏 Keychain 本可接受的链，取消设置即可恢复。
@@ -53,8 +53,10 @@ IAM 离线期间，`/minio/health/live` 与 `/minio/health/ready` **都保持 20
 
 ## 值得知道的 transport 事实 {#transport}
 
-discovery/JWKS 客户端自建 transport：禁用 HTTP/2（无 ALPN、HTTP/1.1）、代理只取 `HTTPS_PROXY`/`NO_PROXY`（大写优先；不用 `ALL_PROXY`）、30 秒 DNS 缓存、拨号按序遍历地址不做 shuffle、超时为每次 TCP 拨号 5 秒、TLS 握手 10 秒、响应头 1 分钟。**discovery 或 JWKS 抓取本身没有总超时**——缓慢的 IdP 可以无限期拖住启动；收紧它是已评估过工作量的独立后续项。
+discovery/JWKS 客户端自建 transport：禁用 HTTP/2（无 ALPN、HTTP/1.1）、代理只取 `HTTPS_PROXY`/`NO_PROXY`（大写优先；不用 `ALL_PROXY`）、默认在 Kubernetes/Docker 中使用 30 秒 DNS 刷新、其它环境使用 10 分钟（可由 DNS cache TTL 设置覆盖）、拨号按序遍历地址不做 shuffle、超时为每次 TCP 拨号 5 秒、TLS 握手 10 秒、响应头 1 分钟。**discovery 或 JWKS 抓取本身没有总超时**——缓慢的 IdP 可以无限期拖住启动；收紧它是已评估过工作量的独立后续项。
 
 ## 归属 {#attribution}
 
 本文提炼自 issue #154 调查与九月的 Go 1.27 工具链栈评审；复现工件与完整证据链保留在文档树之外。可支持的表述是：合并后的修复在受影响的 8 个 Server 配置点恢复 Go 密钥交换默认值，并经合成负对照验证——它不声称诊断了任何特定隐藏部署，#154 在受影响环境复测前保持打开。
+
+Go 行为以[官方 1.27 发布说明](https://go.dev/doc/go1.27)及实际工具链为准。本文的 ClientHello 字节数属于所述夹具测量，不是所有连接的固定大小。

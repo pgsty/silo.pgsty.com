@@ -62,7 +62,7 @@ Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端�
 - 默认 S3 端口 `9000`、既有 `--address` / `--console-address` 参数，以及 `RELEASE.YYYY-MM-DDTHH-MM-SSZ` 标签格式；
 - 配置 KV 格式、IAM 数据、KMS/KES 配置、加密元数据、桶元数据、复制状态与修复状态。
 
-自动化 rebrand 基线记录了 137 个兼容 import、437 个环境变量名、19 个指标命名空间、84 个头、334 条路由、1 个内部根目录、3 个 Grid 命名空间、15 个 storage-REST 标识、58 个策略标识和 9,014 个导出符号。Guard 会把任何未评审的基线漂移视为兼容性失败。
+rebrand guard 检查显式标识清单，数量并不是运行时兼容性测试。归档的 `219670d3` 清单包含 137 个 import、436 个环境变量名、19 个指标命名空间、84 个头、330 条路由、1 个根目录、3 个 Grid 命名空间、15 个存储标识、58 个策略标识和 9,014 个导出符号。[当前源码清单](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/buildscripts/rebrand-guard/compat-baseline.json) 为版本 4，已不再跟踪导出符号。应在实际源码版本运行 `make rebrand-guard` 并评审有意的清单变化；检查通过不等于证明协议或升级兼容。
 
 同一组数据盘从 MinIO 切到 Silo 时不需要复制数据或重写元数据。但这并不意味着一切畸形历史对象都会继续被接受：下文的存储加固会拒绝不安全路径、非法纠删码几何、负 part size 以及过去可能继续向下传播的污染元数据。
 
@@ -257,7 +257,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 | Snowball               | 先授权后解包 tar；流式 trailer 绕过无法在后续失败前写入对象                                                                                                                     |
 | S3 Select 记录限制         | CSV 输入、JSON Lines 输入和输出记录超过 1 MiB 时返回 `OverMaxRecordSize` 事件。JSON Lines 始终使用有界 reader（在支持 SIMD 的 CPU 上可能变慢），JSON 解析错误为 `JSONParsingError`，已完成记录可先于终止错误送达 |
 | 流式响应                   | tracking writer 实现 `Flush`；Write/Flush 会记录隐式 HTTP 200。ListenBucketNotification/watch 流及 S3 Select keepalive 能及时送达，审计/状态指标也能记录已提交状态                       |
-| Multipart 整对象 checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME 完成时可完全省略每 part checksum；只要提供任意一个仍会校验；COMPOSITE 仍要求每个 part。即使不提供对象 checksum value，显式 completion type 仍会校验：不匹配返回 `BadDigest`，未知 type 返回 `InvalidArgument`。CRC64NVME canonicalization 保持不变。零字节 multipart 对象 checksum 会正确保存 |
+| Multipart 整对象 checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME 完成时可完全省略每 part checksum；只要提供任意一个仍会校验；COMPOSITE 仍要求每个 part。即使不提供对象 checksum value，显式 completion type 仍会校验：不匹配返回 `BadDigest`，未知 type 返回 `InvalidArgument`。后续 #93/#96 已拒绝 CRC64NVME + COMPOSITE，修复包含在 Server 20260903 中。零字节 multipart 对象 checksum 会正确保存 |
 | CopyObject checksum 响应 | CopyObject XML 与 HTTP header 使用目标加密上下文报告已提交 checksum。SSE-C 源 key A 与目标 key B 严格分开；同对象换钥会用新 key 返回 checksum 字段。存储数据与 checksum format 均不改变 |
 | Multipart part 顺序      | 重复或非递增 part number 在组装前以 `InvalidPartOrder` 失败；允许空洞及不从 1 开始；upload 保留供重试                                                                                 |
 | 纠删码读缓冲池                | 恢复正确 shard buffer 所有权，避免池失效以及可能造成卡死、损坏或严重性能下降的错误缓冲关联                                                                                                     |
@@ -336,14 +336,14 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 本次审计不会把继承的限制包装成兼容性承诺：
 
 1. **默认来源 IP 仍可伪造。** 未设置 `MINIO_API_TRUSTED_PROXIES` 时刻意保留上游 trust-any 行为。直连部署设为 `none`，代理部署使用精确 allowlist。
-2. **版本条件仍有缺口。** MultiDelete governance bypass 的二次授权仍读取 query/缺失 version，而非每个 XML entry；Snowball 在逐文件授权后才读 PAX `minio.versionId`。`username`、`userid`、`signatureversion`、`authType` 条件 key 仍无条件插入空值，因此对它们使用 `Null` 仍是“存在但为空”的语义。
+2. **版本条件的后续修复。** #104 已在 Server 20260903 中修复 governance bypass 的逐条目版本授权。Snowball PAX 版本的授权时序是另一条路径；部分身份条件仍保留“存在但为空”的语义。
 3. **Multipart parser 防御尚未完整。** Handler 已修复顺序，但 object layer 没有独立 uniqueness 防线；XML root 验证和继承的非数字 part 错误映射未修改。
 4. **旧通知迁移仍有风险。** 按上文说明审核。
 5. **存储路径校验为词法层面。** 不解析符号链接；未独立覆盖原生 Windows 执行。
 6. **私有 API 不是稳定兼容承诺。** `ReadMultiple` 表明即便 storage REST 协议号不变，操作仍可能消失。不要跨越该边界滚动运行混合构建。
 7. **源码结果不等于已发布制品。** 在逐渠道验证前，本页不声称 GitHub 标签、软件包、OCI manifest、签名或线上站点已经包含仅存在于审计 HEAD 的最后三个提交。
 8. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
-9. **未实现条件删除。** `DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object><ETag>` 元素，两者都执行无条件删除（[#10](https://github.com/pgsty/silo/issues/10)）。
+9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；当前 main 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
 10. **多站点删除桶配置的历史收敛限制。** 本页所述已发布版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。依赖多站点同步删除这些配置的部署，删除后必须逐站核对。2026-09-12，[PR #180](https://github.com/pgsty/silo/pull/180) 已将修复合入主干；完整删除自愈要求全部节点升级并统一开启删除导出，详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。发行制品是否包含修复仍需按版本核对。
 
 ## 迁移检查清单 {#migration}
@@ -358,7 +358,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 6. 使用 Helm 时，以完整旧 values 分别渲染新旧 Chart；需要时用 `nameOverride` / `fullnameOverride` / `serviceAccount.name` 保留名称；Chart 与镜像原子切换。
 7. 删除 updater、callhome、SUBNET 注册和支持上传自动化，改用软件包/镜像/编排器滚动及自己的诊断传输渠道。
 8. 把 HMAC OIDC token 改为非对称 JWKS。分别测试 LDAP 成功、错密码、未知用户、后端故障和限流路径。
-9. 为 12 个受保护 action 加裸桶 ARN；测试有效 tag、signature-age、source-IP 和逐版本删除条件。旧桶开关只作为临时回退杆。
+9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；当前 main 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
 10. 设置 `MINIO_API_TRUSTED_PROXIES=none` 或精确列表，清洗三种来源地址头，并加入会转发认证请求的集群 peer。
 11. 测试超大 S3 Select 记录、流式通知、unsigned trailer 拒绝、multipart 整对象 checksum、重复 part、复制、修复、KMS、每个通知 target、审计摄取及容器优雅关停。
 12. 把分布式集群所有节点作为同一构建升级。回滚时旧 Chart 与旧镜像成对使用，绝不能只回滚一个。

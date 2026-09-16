@@ -22,7 +22,7 @@ icon: fa-solid fa-code-branch
 
 发布说明：[Server 20260903](/zh/blog/release/silo-20260903/)、
 [Console v2.4.1](/zh/blog/release/console-2.4.1/)、
-[mcli 20260916](/zh/blog/release/mcli-20260916/)、[pkg v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1)。
+[mcli 20260916](/zh/blog/release/mcli-20260916/)、[pkg v3.14.1](/zh/blog/release/pkg-3.14.1/)。
 内嵌部署需要在 Server 构建中显式选择 Console 与 MC。
 软件包仓库镜像可能晚于 GitHub 更新；[下载页](/zh/download/)直接链接已发布的制品。
 
@@ -130,3 +130,16 @@ Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。这�
 可达性扫描通过，不等于整个依赖图没有任何漏洞通告。
 
 正式支持的集成对象是协调后的 PGSTY 栈；与原版上游 MinIO/MC 和其他 S3 实现的兼容属于尽力保留。
+
+## 9 月 16 日 Server 源码核对补充 {#source-review}
+
+固定基线 `f99ed829b5eb` 选择 pkg v3.14.0、上游 minio-go `60bd07042d49`、Console 源码 `56dfe455ac2f` 和镜像捆绑 mcli 20260913。这与独立 Console 2.4.1 的依赖图不同；后续 Server 发布须根据最终 tag 重新核对，不能由独立组件发布推断 Server 已更新。
+
+- 分段列表经 #213 保持 **legacy 默认**；strict 仅由 `MINIO_API_MULTIPART_LISTING` 进程环境显式启用并重启，不支持共享动态配置键。严格取消的多数确认也只用于 strict。见[设置参考](/zh/reference/minio-server/settings/core/#multipart-listing)与[升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。
+- [多池对象一致性](/zh/blog/design/multi-pool-object-consistency/)、[条件删除](/zh/blog/design/conditional-delete/)与 [Object Lock 复制排序](/zh/blog/design/object-lock-replication-ordering/)区分逻辑当前对象、指定版本与持久化锁。
+- [联邦 CopyObject](/zh/blog/design/federated-copy-object/)和 [SSE-C 副本完整性](/zh/blog/design/ssec-replica-integrity/)记录明文字节校验、复制加密与历史对象限制。
+- [IAM 持久撤销](/zh/blog/design/iam-revocations/)与[桶配置收敛](/zh/blog/design/bucket-metadata-convergence/)分别说明协调升级、删除历史及默认关闭的 `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`。
+- [请求头超时](/zh/blog/design/request-header-timeouts/)与 [Go 1.27 TLS/OIDC](/zh/blog/design/go127-tls-oidc-discovery/)说明各自范围。
+- [九月安全纪事](/zh/blog/security/20260916-release-hardening/)列出 SN-2026-012/013/014 及不同组件的发布边界。
+
+相关 Server 后续修复均未进入 20260903；文章中的原有 Object Lock 修复及其它已发布前置项按各自明确的版本记载。

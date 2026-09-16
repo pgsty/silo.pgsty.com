@@ -26,7 +26,7 @@ url: "/zh/blog/design/replica-metadata-normalization/"
 ## 哪里错了 {#problem}
 
 普通 PUT 路径会对元数据归一化：从 `Content-Encoding` 中剥掉仅传输用的
-`aws-chunked` token，并删除某项 GHSA 缓解刻意移除的
+`aws-chunked` token，并删除[GHSA-76wf-9vgp-pj7w](https://github.com/google/security-research/security/advisories/GHSA-76wf-9vgp-pj7w) 缓解刻意移除的
 `X-Amz-Meta-X-Amz-Unencrypted-Content-Length/-Md5` 用户元数据键。而可信复制
 接收端恢复副本元数据时，却以"允许复制"的开关重新运行*同一个宽松提取器*——把
 原始请求的全部受支持头与用户元数据重放一遍。具体表现为，可信副本写入时服务器可能存储、并在之后的 GET/HEAD 返回：
@@ -60,7 +60,7 @@ url: "/zh/blog/design/replica-metadata-normalization/"
 
 ## 运维可见变化 {#behavior}
 
-- 无 PAX 头的 Snowball 条目的可信副本**不再**继承外层归档的普通元数据。六个复制域字段仍作用于已授权条目。这与普通（非信任）Snowball 行为一致，且仓库内没有生产代码发送 auto-extract 标记，没有内部依赖旧继承行为。
+- 可信 Snowball 条目不再继承外层归档的普通元数据。没有 PAX 时，不再继承外层 content-type、cache-control、expires 与用户元数据；有 PAX 时，也不再继承条目自身未重新声明的字段。条目的 `minio.metadata.*` 仍生效，六个复制域字段仍作用于已授权条目，归档的 storage class 仍然继承。仓库内 batch 生产者调用 `PutObjectsSnowball`，SDK 会发送 auto-extract 标记，但外层请求不标记为可信副本，因此没有使用本次受影响的继承路径。
 - GHSA 脱敏键不再在副本恢复时被写回——与每次普通 PUT 的行为一致。
 - 认证、权限门控与复制信任语义不变；普通提取路径逐字节等价。
 - 回滚代码会重新打开注入路径，但**不会**修复已存储的元数据。
@@ -69,8 +69,12 @@ url: "/zh/blog/design/replica-metadata-normalization/"
 
 升级阻止新的污染；不扫描、不改写既有对象。两个后果值得注意：
 
-- *权威来源*仍被污染的对象在升级后会被判为不一致，并在 heal/resync 中被反复选中做元数据复制。先修复权威来源，再让副本收敛。
+- *权威来源*仍被污染时，与已归一化副本的比较可能检测到差异，从而在 heal/resync 中反复选择元数据复制。先修复权威来源，再让副本收敛。
 - 普通 S3 自 COPY 不是通用的修复 API：它会创建新版本或移动时间戳，而不是原位改写单个版本的元数据。
+
+[只读审计 runbook](/zh/operations/replication/replica-metadata-audit/)已提供可执行清单工具与分类规则，但不授权或执行修复。
+
+[只读审计 runbook](/zh/operations/replication/replica-metadata-audit/)已提供可执行清单工具与分类规则，但不授权或执行修复。
 
 ### 存量元数据修复提案——状态 {#remediation}
 
@@ -82,10 +86,12 @@ url: "/zh/blog/design/replica-metadata-normalization/"
 
 ## 已知限制 {#limits}
 
-- POST 表单上传路径（`bucket-handlers.go`）直接调用低层提取器，从不归一化编码；该行为不变，已另立 issue。
+- POST 表单上传路径（`bucket-handlers.go`）直接调用低层提取器，从不归一化编码；该行为不变，作为已知后续项记录；此处不声称已经建立公开 issue。
 - 本地验证在测试专用的容量适配（宿主盘满）下运行；R4–R8 集成记录中的合并树复跑覆盖了未改动树的情形。
 - 不声明双站点调度、重启或网络故障验收。
 
 ## 验证 {#verification}
 
-回归测试（`TestExtractReplicationMetadata*`、`TestAPIReplicaContentEncoding`、`TestAPISnowballReplicaContentEncoding`，外加含 race 的信任/SSE-C 回环）覆盖映射表、六个恢复字段与普通路径等价性；反事实运行（同一套测试对基线 helper）复现 20 个缺陷失败，证明测试确有咬合力。升级摘要见[组件版本矩阵](/zh/compatibility/versions/#september-reliability)；姊妹修复见[复制标签排序](/zh/blog/design/replicated-tag-ordering/)。
+回归测试（`TestExtractReplicationMetadata*`、`TestAPIReplicaContentEncoding`、`TestAPISnowballReplicaContentEncoding`，外加含 race 的信任/SSE-C 回环）覆盖映射表、六个恢复字段与普通路径等价性；原修复记录中的反事实运行对基线 helper 得到 36 个预期失败（20 个 HTTP 与 16 个 helper 用例），44 个对照通过；这不是本次文档修改重新运行的结果。升级摘要见[组件版本矩阵](/zh/compatibility/versions/#september-reliability)；姊妹修复见[复制标签排序](/zh/blog/design/replicated-tag-ordering/)。
+
+相关记录：[tags](/zh/blog/design/replicated-tag-ordering/) · [metadata](/zh/blog/design/replica-metadata-normalization/) · [HTTP](/zh/blog/design/request-header-timeouts/) · [audit](/zh/operations/replication/replica-metadata-audit/)

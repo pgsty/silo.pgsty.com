@@ -59,6 +59,13 @@ deletion history cannot be reconstructed from a missing user record.
 peer or rollback procedure is unaccounted for. Do not admit an old snapshot to a
 live replication group merely to inspect its contents.
 
+Before upgrading, follow the [password-policy migration](/compatibility/password-permissions/).
+Where an existing `Deny admin:CreateUser` also meant to prohibit changing one's own
+password, add `admin:ChangeMyPassword` to the same Deny with its existing scope and
+conditions; retain both through rollback. Current main keeps multipart listing in
+`legacy` by default. An ordinary upgrade does not require strict mode; only an
+explicit opt-in needs the [multipart preflight and drain procedure](/blog/design/list-multipart-uploads/#implementation).
+
 ## Preserve a complete recovery point {#backup}
 
 Stop all SILO processes sharing each backend before taking the final recovery
@@ -140,6 +147,41 @@ Reopen access only after version identity, backend recovery, IAM loading,
 replication and both credential checks pass. If a stale credential succeeds,
 keep affected sites isolated and investigate; restarting until health is green
 does not resolve the authorization failure.
+
+## Errors and observability {#observability}
+
+A revocation can persist and then return HTTP 500 with
+`IAM revocation committed; cleanup failed` when dependent cleanup fails. This does
+not roll back the revocation. Keep IAM writes paused, inspect the identity and
+logs, and retry cleanup; do not blindly repeat deletion after a same-name identity
+has been recreated. This path publishes to local sibling caches but may skip the
+immediate cross-site hook, so verify later site reconciliation. STS fails closed
+with `STSInternalError` if it cannot read the parent revocation boundary; that is
+neither successful issuance nor proof of a revoked credential.
+
+Collect these from every process at `/minio/metrics/v3/cluster/iam`:
+
+| Metric | Meaning |
+| --- | --- |
+| `minio_cluster_iam_revocation_records` | Persistent revocation records observed by this process |
+| `minio_cluster_iam_revocation_heal_failures` | IAM reconciliation failure count |
+| `minio_cluster_iam_revocation_heal_duration_millis` | Latest reconciliation duration |
+| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | Unix time of the last successful reconciliation |
+
+These are process metrics, not additive unique-record counts. The three `heal_*`
+metrics advance only with site replication enabled and on the node holding the
+leader lease. A shared-backend deployment without site replication performs no
+such pass; zero healing metrics are expected. Tombstones have no TTL or automatic
+compaction: budget for durable capacity and startup reads. Initial reconciliation
+may backfill missing revisions and produce a write burst. Neither its interval
+nor these metrics establish a convergence SLA.
+
+A deleted access-key canary normally returns `403 InvalidAccessKeyId`; other
+revocation mechanisms require their appropriate authorization failure, not a
+universal error-code assertion. A 5xx, timeout or missing object is inconclusive.
+Live-record export/import omits deletion history and cannot preserve the guarantee
+of earlier revocations by itself. See the [IAM design](/blog/design/iam-revocations/)
+for ordering and remaining limitations.
 
 ## Rollback and restore {#rollback}
 

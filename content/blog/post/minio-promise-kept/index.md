@@ -14,7 +14,7 @@ Two months ago in ["MinIO is Dead, Long Live MinIO,"](/blog/post/minio-resurrect
 The recurring objection on HN is fair: can one person actually maintain something like this?
 The real answer isn't clicking fork. It's what happens when CVEs start landing.
 
-Between April 15 and 17, `pgsty/minio` shipped [RELEASE.2026-04-17](https://github.com/pgsty/minio/releases/tag/RELEASE.2026-04-17T00-00-00Z),
+Between April 15 and 17, `pgsty/minio` shipped [RELEASE.2026-04-17](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-04-17T00-00-00Z),
 closing four CVEs and a handful of related vulnerabilities disclosed in the same window.
 
 [![gh-release.webp](gh-release.webp)](/blog/release/20260417/)
@@ -107,7 +107,7 @@ Not remarkable numbers, but enough to tell me I'm not the only one who needed th
 If you're already running OSS MinIO, migration is cheap:
 
 - **Docker**: swap `minio/minio` for `pgsty/minio`.
-- **RPM / DEB**: on [GitHub Releases](https://github.com/pgsty/minio/releases), or via `pig`.
+- **RPM / DEB**: on [GitHub Releases](https://github.com/pgsty/silo/releases), or via `pig`.
 - **Source**: [pgsty/minio](https://github.com/pgsty/minio)
 - **Docs**: [silo.pgsty.com](https://silo.pgsty.com/)
 

@@ -152,3 +152,5 @@ Recording the boundary rather than implying it: today twelve bucket-level writes
 ## Closing {#closing}
 
 A single appended slash turned *"only the objects"* into *"and the bucket too."* The tempting fix removes the slash everywhere and, in doing so, breaks a listing pattern half the world relies on and quietly weakens every `Deny` written against `bucket/*`. The fix we shipped removes it in exactly the place where an object-scoped grant should never have reached — the writes that can make a bucket public, and the ones that can delete it — and nowhere else. The rest is written down, waiting for a release where breaking it is something users are told to expect rather than something that happens to them.
+
+**Follow-up checked September 16:** the “CORS has no handler” zero-cost argument describes early August. #71/#80 implemented per-bucket CORS, included in Server 20260903; Put/DeleteBucketCors remain protected bucket-configuration actions and must not move to the unprotected list. `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` is read during process initialization: supply it in the actual startup environment, not a later-loaded `MINIO_CONFIG_ENV_FILE`.

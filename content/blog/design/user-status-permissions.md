@@ -2,7 +2,7 @@
 title: "One Endpoint, Two Privileges: Separating User and Group Status"
 linkTitle: "User and Group Status Permissions"
 date: 2026-08-26
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   Shared user and group status endpoints historically checked their Enable action even for disable requests. This record explains the least-privilege defect, SILO's strict target-state authorization design, the user repair merged through PR #73, the group follow-up, four-way IAM tests, and the boundary between committed code and a delivered release.
@@ -11,6 +11,8 @@ weight: 15
 draft: false
 url: "/blog/design/user-status-permissions/"
 ---
+
+> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
 
 This document records the discussion, repair, and final authorization design for [upstream issue minio/minio#21478](https://github.com/minio/minio/issues/21478) and [SILO PR #73](https://github.com/pgsty/silo/pull/73).
 
@@ -344,8 +346,8 @@ The upstream artifacts remain useful provenance but are no longer an actionable 
 | Independent adversarial review | complete | complete, GO |
 | Signed-off commit | complete | `229fe2b3c` on `main` |
 | Push, PR CI, and merge | complete | merged 2026-08-29 |
-| Tagged SILO release | not established | not established |
-| Release package or container image | not established | not established |
+| Tagged SILO release | Server 20260903 | Server 20260903 |
+| Release package or container image | See the 20260903 release record | See the 20260903 release record |
 | Deployment | not established | not established |
 | Production behavior | not established | not established |
 | Upstream merge | unavailable; repository archived | not applicable |
@@ -355,3 +357,5 @@ The upstream artifacts remain useful provenance but are no longer an actionable 
 The repairs make the authorization model tell the truth. Enabling and disabling users or groups are opposite state transitions with different operational risk, and SILO already exposes different policy actions for each direction. Each handler must therefore select the action from the requested target state and authorize once before mutation.
 
 The code change is small because the design boundary is clear. The durable result is larger: an explicit permission matrix, rejected compatibility alternatives, an invalid-input rule, a four-way integration test, a clean merge record, migration guidance, and an honest release boundary.
+
+The enable/disable repair is separate from the later `admin:ChangeMyPassword` split. Before upgrading the September candidate, preserve the paired Deny needed for an existing self-password restriction using the [password migration guide](/compatibility/password-permissions/).

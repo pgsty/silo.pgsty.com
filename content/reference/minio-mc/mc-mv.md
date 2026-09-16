@@ -438,3 +438,5 @@ If using [`mc mv`](#command-mc.mv) for operations on a filesystem, [`mc`](/refer
 The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
 
 MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+
+The HTTP-200 CopyObject repair applies when mcli selects a single CopyObject: objects smaller than 64 MiB or explicit `--disable-multipart`. Larger copies normally use ComposeObject; this fix does not substitute for separate evidence for that path.

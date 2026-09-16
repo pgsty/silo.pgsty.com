@@ -31,14 +31,12 @@ keep their ordering across replication, merged into Server main as
 > **Delivery boundary:** source acceptance (regression tests plus the R4–R8
 > integration run whose PR #196 checks passed) only. No tag, package, image,
 > or production rollout is established by this record.<br>
-> **Evidence class:** every mechanism below was demonstrated with synthetic
-> experiments against real single-drive and 16-drive erasure backends. No
-> customer incident is attributed to these paths.
+> **Evidence class:** synthetic signed HTTP tests use real single-drive, 16-drive and multi-pool erasure backends; sender, wire-shape and precondition checks also include function-level tests. No customer incident is attributed to these paths.
 
 ## The shared model: a tag value and its revision are one state {#model}
 
 Tags replicate with an internal revision timestamp
-(`x-minio-internal-tagging-timestamp`). The ordering rule on the receiving
+(wire header `X-Minio-Source-Tagging-Timestamp`, stored as `x-minio-internal-tagging-timestamp`). The ordering rule on the receiving
 side is simple: a replicated tagging state wins only when its revision is
 newer than the stored one. Both defects in this family break that rule by
 making the revision — not the value — the part that gets lost:
@@ -70,9 +68,7 @@ constructed and returned a *different* `ObjectOptions` carrying mtime, ETag,
 replication trust, and two Object Lock timestamps — but not
 `ReplicationSourceTaggingTimestamp`. The omission dated back to upstream
 `c4373ef290` (2021); a 2026 Object Lock repair added two more timestamps to
-that literal and still missed this one. The field's only consumer is the COPY
-tag-ordering comparison, which is why PUT and multipart were not affected —
-that split is also what keeps R4 separate from R5.
+that literal and still missed this one. Before R5, the consuming path was COPY ordering. R5 adds timestamp persistence for replica PUT and multipart initiation, as well as the duplicate-precondition consumer. Those SSE-KMS paths also depend on R4 preserving the option, so backports must consider the pair together.
 
 **Fix.** One field added to the existing SSE-KMS `ObjectOptions` literal
 ([`03027727d`](https://github.com/pgsty/silo/commit/03027727d)), nothing
@@ -89,12 +85,11 @@ be strictly newer; the stored value wins ties and rejects older events.
 
 **Deferred observation.** The same SSE-KMS literal also omits the proxy and
 speedtest option fields; the speedtest flag is read on the storage path, so
-global auto-encryption would drop it on a speedtest PUT. Registered as a
-separate follow-up; deliberately not bundled into this repair.
+global auto-encryption would drop it on a speedtest PUT. Recorded here as a separate follow-up, without asserting a public issue exists; deliberately not bundled into this repair.
 
 ## R5: empty tag values had no revision, so deletions could resurrect {#r5}
 
-**Failure form.** Nine baseline regressions, all against real storage:
+**Failure form.** Nine baseline regressions across real-storage and function-level tests:
 
 - A successful `DeleteObjectTagging` never minted a new revision, so a
   *later-arriving* trusted metadata COPY with an older view of the tags
@@ -103,8 +98,7 @@ separate follow-up; deliberately not bundled into this repair.
   "nothing to say" instead of "deleted".
 - The first replica PUT parsed the source tag timestamp and never persisted
   it.
-- Equal visible values with equal timestamps collapsed to "no replication
-  needed", so a delete → re-add sequence never re-established ordering.
+- Equal visible tag values collapsed to "no replication needed". HEAD does not expose a tag revision, so a newer deletion or re-addition was invisible and ordering was not restored.
 - A queued replication event's completion callback wrote the old tags from its
   snapshot back over an already-committed deletion — and without a timestamp,
   the resurrected set inherited the deletion's newer revision, which is worse
@@ -132,7 +126,7 @@ decisions in the non-empty branch.
    existing reconciliation as a state that can win. Duplicate suppression is
    relaxed only for a strictly newer source revision. Multipart completion
    orders tags from the persisted upload metadata. The delete-acknowledgement
-   path no longer writes snapshot tags back.
+   path no longer writes snapshot tags back. Ordinary SSE-C rotation drops the old tag timestamp from copied encryption metadata so it cannot overwrite the new local revision.
 
 **Operator-visible changes:**
 
@@ -152,6 +146,10 @@ decisions in the non-empty branch.
   during explicit resync/heal. When the destination has bucket-default or
   automatic KMS encryption, that "metadata" COPY rewrites the object data —
   budget accordingly for bulk resync.
+
+A nonempty legacy tag set without a revision uses object ModTime as its sender fallback; an empty set without a revision does not acquire a fabricated tombstone. A strictly newer trusted tag revision bypasses only the internal ETag/version duplicate guard (otherwise 412 `PreconditionFailed`); client `If-Match` and `If-None-Match` remain enforced.
+
+The tag repair adds no wire field or storage format and has no capability negotiation. Both endpoints are needed for ordered deletions; an old hop retains the old behavior. This statement does not authorize rolling upgrade or downgrade of the entire September candidate, which also contains the separate [IAM migration](/operations/replication/iam-upgrade/). Reconcile already-damaged tags from an authoritative source by a new explicit tag change; the lost historical order cannot be reconstructed.
 
 **Limits, stated as limits:**
 
@@ -204,3 +202,5 @@ The upgrade summary and release boundary live in the
 sibling repair that stops normalized replica metadata from being re-injected
 is recorded separately in [Replica Metadata
 Normalization](/blog/design/replica-metadata-normalization/).
+
+Related records: [tags](/blog/design/replicated-tag-ordering/) · [metadata](/blog/design/replica-metadata-normalization/) · [HTTP](/blog/design/request-header-timeouts/) · [audit](/operations/replication/replica-metadata-audit/)

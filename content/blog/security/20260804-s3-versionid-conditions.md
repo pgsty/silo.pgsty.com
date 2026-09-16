@@ -168,7 +168,7 @@ So: policy-enforcement correctness, filed here because that is where we keep sil
 
 Two same-class residuals remain, recorded rather than silently left:
 
-- **Governance-bypass in Multi-Delete.** When an entry carries object-lock, `enforceRetentionBypassForDelete` re-authorizes under `BypassGovernanceRetentionAction` (`cmd/bucket-object-lock.go:153`). That action is not `DeleteObjectAction`, so the effective-version override does not apply, and its `s3:versionid` is still the query value — absent in a normal Multi-Delete — rather than the per-entry version whose lock is being bypassed.
+- **Multi-Delete governance-bypass follow-up.** The adjacent gap was fixed by `75a6734e4` / #104 and shipped in Server 20260903, using each XML entry's effective version for reauthorization. The Snowball observation below is a separate scope.
 - **Snowball tar extraction.** `PutObjectExtract` takes each member's version from the tar PAX record `minio.versionId` **after** the per-file authorization, so a named version can be written that never appeared in any condition value.
 
 Both are narrow, both are pre-existing, and both would widen the change from "fix the reported key" into "re-plumb every action's version into `ReqInfo`." We scoped to the reported surface and wrote the IOUs down here, for the same reason the [previous article](/blog/security/duplicate-part-numbers/) recorded its object-layer omission: a deliberate omission that is not written down is indistinguishable from an oversight six months later.

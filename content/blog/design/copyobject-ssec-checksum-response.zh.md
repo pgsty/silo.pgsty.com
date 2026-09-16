@@ -2,7 +2,7 @@
 title: "两把 SSE-C 密钥，一份 CopyObject 响应"
 linkTitle: "CopyObject SSE-C Checksum"
 date: 2026-08-28
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   CopyObject 可以用一把 SSE-C 密钥读取源对象，再用另一把密钥写入目标对象。SILO 会正确保存目标 checksum，却在生成响应时误用源密钥解密，导致 checksum 字段静默缺失。本文记录密钥上下文边界、纯响应修复、单次解密设计和回归矩阵。
@@ -11,6 +11,8 @@ weight: 17
 draft: false
 url: "/zh/blog/design/copyobject-ssec-checksum-response/"
 ---
+
+> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
 
 本文记录 SILO 提交 `e73436c99` 中的 CopyObject SSE-C checksum 响应修复。
 

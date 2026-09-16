@@ -2,7 +2,7 @@
 title: "配置环境文件不是 Shell 脚本"
 linkTitle: "配置环境文件契约"
 date: 2026-08-28
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   MINIO_CONFIG_ENV_FILE 由 SILO 自己解析，并不会交给 shell source。用 shell identifier 规则校验键名，会误伤 my-hook 这样的合法命名配置目标。本文定义兼容的键名语法、空白与引号规则、失败行为、安全边界和回归测试。
@@ -11,6 +11,8 @@ weight: 16
 draft: false
 url: "/zh/blog/design/config-env-file/"
 ---
+
+> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
 
 本文定义 `MINIO_CONFIG_ENV_FILE` 的启动契约，并记录 SILO 提交 `2aea7fe9c` 中的兼容性修复。
 
@@ -139,8 +141,10 @@ EMPTY =
 - 畸形输入以带位置且脱敏的错误阻止启动；
 - 仅仅因为 shell 不能用 `NAME=value` 语法直接赋值，不再拒绝一个合法的标点 target。
 
-本文记录的是 source commit，不是已交付 release。在提交完成 push、远端测试、merge、tag、打包、制镜像和部署之前，不能假设公开 SILO 二进制已经具备此契约。
+解析契约已进入 Server 20260903，具体部署仍需核对实际运行制品。
 
 ## 结论 {#conclusion}
 
 配置兼容性的前提，是验证 SILO 真正消费的格式。`MINIO_CONFIG_ENV_FILE` 只借用了少量 dotenv 风格语法方便运维，并不会被 shell 执行。最终修复在恢复命名 target 兼容性的同时，保留了 NUL、不可见字符、脱敏与 fail-fast 保障。
+
+最初的 [#65](https://github.com/pgsty/silo/issues/65) 还包含重启陷阱：旧解析器将 `KEY = new` 保存为带尾随空格的键 `KEY `。systemd 冷启动可能正常，因为它自己解析 EnvironmentFile；管理 API 的 re-exec 继承 `KEY=old` 后，带空格的新键不能覆盖它，重启可成功却继续使用旧值。修复后空白赋值真正生效，升级前应核对 root、KMS、IdP 等敏感配置的预期值。

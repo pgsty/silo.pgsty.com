@@ -2,7 +2,7 @@
 title: "Preview Text, Never Execute It: SILO Console Text Preview PRD"
 linkTitle: "Safe Text Preview"
 date: 2026-08-23
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   The accepted PRD for previewing small log, text, JSON, and XML objects in SILO Console as bounded, strict UTF-8 text—never as a same-origin executable document.
@@ -41,7 +41,7 @@ The contract is:
 9. Show the complete object or no object; do not show a truncated JSON or XML document.
 10. Keep download available for files that are too large, invalidly encoded, or otherwise unavailable.
 
-No Console API or S3 API change is required. The backend inline MIME allowlist is not expanded.
+No new API route or S3 operation is added, and the backend inline MIME allowlist is unchanged. Delivery did change Console download responses: zero-byte Range requests return an empty 200, unsatisfiable ranges return 416 with `Content-Range: bytes */N`, and `size` is always emitted in object JSON. See [Console 2.2.0](/blog/release/console-2.2.0/#byte-ranges).
 
 ## Current behavior {#current-behavior}
 
@@ -215,8 +215,8 @@ Exactly 1 MiB is eligible. 1 MiB plus one byte is not.
 
 ### Known sizes {#known-size}
 
-- If the selected version has a known size greater than the limit, do not request its body.
-- If its known size is zero, show the empty-file state.
+- If the selected version has a known size greater than the limit, the initial attempt does not request its body. Explicit Retry bypasses that possibly stale listed size but retains the bounded Range and byte limit.
+- A known zero size still takes the bounded request path; an empty response produces the empty-file state.
 - If its known size is within the limit, begin a bounded request.
 - An absent size is not the same as zero; it enters the bounded unknown-size path.
 
@@ -333,7 +333,7 @@ The modal distinguishes:
 | Loading | Accessible busy state; no stale text. |
 | Success | Scrollable raw text plus Download. |
 | Empty | Explicit “File is empty” state. |
-| Too large | Object size, 1 MiB limit, Download; no body request when size is already known. |
+| Too large | Object size, 1 MiB limit, Download and Retry; no initial body request when size is known to exceed the limit. |
 | Invalid UTF-8 / binary | Dedicated explanation and Download. |
 | Forbidden | Permission-specific message; no retained text. |
 | Not found / replaced | Object-change message; no retained text. |
@@ -541,3 +541,5 @@ The reviewers initially differed on MIME-only eligibility and lossy UTF-8 fallba
 - lossy viewing is deferred to a separate proposal.
 
 No unresolved design question remains. Implementation may proceed against this record.
+
+**Current Retry boundary:** the too-large state permits reprobe of potentially stale listed size, never an unbounded download. The Range, response-header checks and at-most-1 MiB + 1-byte read limit still apply. Empty files are verified through the response path; unknown size must not be treated as zero.

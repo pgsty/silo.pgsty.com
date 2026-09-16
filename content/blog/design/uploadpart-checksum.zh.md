@@ -2,7 +2,7 @@
 title: "可选校验和，强制失败：修复 UploadPart 与 UploadPartCopy 兼容性"
 linkTitle: "Multipart Checksum 兼容性"
 date: 2026-08-24
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   SILO 曾要求 checksum-enabled multipart upload 的每个 UploadPart 都携带逐 part checksum，导致省略可选 header 的普通上传失败，并让 UploadPartCopy 完全不可用。本文记录问题发现、AWS 与 AIStor 调研、被否决的方案、明文单遍计算设计、兼容基线 blocker、对抗审查，以及后续修复必须遵守的一致性边界。
@@ -11,6 +11,8 @@ weight: 30
 draft: false
 url: "/zh/blog/design/uploadpart-checksum/"
 ---
+
+> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
 
 本文是 [SILO #46](https://github.com/pgsty/silo/issues/46) 的完整设计与实现归档。它记录的并不只是一个 `if` 条件如何修改，而是一个看似简单的 S3 可选 header，如何一路牵动 multipart 完成语义、复制响应、压缩与加密数据流、兼容基线和发布验证。
 
@@ -323,7 +325,7 @@ go run ./buildscripts/rebrand-guard
 
 滚动升级期间，新旧节点可能对同一个省略 checksum 的请求给出不同结果：新节点接受，旧节点返回 400。盘上 `ObjectPartInfo.Checksums` 格式没有变化，降级读取是兼容的；但客户端可见行为要到所有服务节点升级后才稳定。发布说明必须提示完成滚动升级。
 
-本记录描述的是本地 `main` 工作树。实现尚未 commit、push 或进入远端 CI，也没有形成发布包。SILO 文档属于 `silo.pgsty.com`，不能因为本地 Hugo 构建成功就宣称 [pgsty.com](https://pgsty.com) 生态中的产品版本已经发布。
+原先的本地实现后来已合并并随 Server 20260903 发布。历史本地验证记录不证明任何具体生产部署的状态。
 
 ## 为什么拆出两个独立后续 {#follow-ups}
 

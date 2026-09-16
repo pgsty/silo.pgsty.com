@@ -40,8 +40,7 @@ at startup.
 ## What Go 1.27 changed {#go127}
 
 - **Explicit curve preferences now override the ML-KEM compat switches.**
-  `GODEBUG=tlsmlkem=0` (and `tlssecpmlkem=0`) only remove post-quantum
-  hybrids from the *default* curve set. An application that configures
+  `GODEBUG=tlsmlkem=0` removes all ML-KEM hybrids from the default set; `tlssecpmlkem=0` removes only the P-256/P-384 hybrids introduced in Go 1.26 and retains X25519MLKEM768. An application that configures
   `CurvePreferences` explicitly keeps ML-KEM in whatever list it names — a
   deliberate Go 1.27 change. SILO had eight TLS configuration points setting
   an explicit list including X25519MLKEM768; the fix removes all eight
@@ -131,7 +130,7 @@ incompatibility — a hello the ingress rejects stays rejected.
 
 The discovery/JWKS client builds its own transport: HTTP/2 disabled (no ALPN,
 HTTP/1.1), proxies taken only from `HTTPS_PROXY`/`NO_PROXY` (uppercase
-preferred; `ALL_PROXY` unused), a 30 s DNS cache, dialing that walks
+preferred; `ALL_PROXY` unused), DNS refresh defaulting to 30 s in Kubernetes/Docker and 10 min otherwise (overridable by the DNS cache TTL setting), dialing that walks
 addresses in order without shuffling, and timeouts of 5 s per TCP dial,
 10 s for the TLS handshake, and 1 min to response headers. There is **no
 total timeout on the discovery or JWKS fetch itself** — a slow IdP can hold
@@ -147,3 +146,5 @@ defaults at the eight affected Server configuration points, verified with synthe
 controls — it does not claim to have diagnosed any specific hidden
 deployment, and #154 remains open pending a retest in the affected
 environment.
+
+Go behavior is grounded in the [official 1.27 release notes](https://go.dev/doc/go1.27) and the actual toolchain. ClientHello byte counts above describe the recorded fixtures, not a fixed size for every connection.

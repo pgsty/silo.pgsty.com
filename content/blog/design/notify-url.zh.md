@@ -1,7 +1,8 @@
 ---
+linkTitle: "数据库通知迁移"
 title: "数据库通知统一连接串：#53 的兼容性边界"
 date: 2026-08-23
-lastmod: 2026-08-24
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   SILO 保留 PostgreSQL 与 MySQL 通知目标，但将配置统一收敛到完整连接串。KV 配置体系之前（pre-KV）的数据库离散字段属于不受支持的迁移输入，必须让服务器启动明确失败，而不是被接受后静默拖垮全部桶通知。
@@ -10,6 +11,8 @@ weight: 10
 draft: false
 url: "/zh/blog/design/notify-url/"
 ---
+
+> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
 
 本文是 [SILO #53](https://github.com/pgsty/silo/issues/53) 的产品需求文档与最终设计归档，记录 PostgreSQL/MySQL 桶通知目标的兼容性边界、实现结果与验证证据。
 
@@ -32,9 +35,9 @@ SILO 保留 PostgreSQL 与 MySQL notification target，但每种数据库只支�
 
 这是配置边界决策，不是删除数据库通知功能。
 
-**状态：** 已由服务端提交 `f1ba68358` 实现，发布待完成。<br>
-**归属：** SILO 服务端仓库。  
-**跟踪：** [pgsty/silo#53](https://github.com/pgsty/silo/issues/53)。  
+**状态：** 已由 `f1ba68358` 实现，包含在 Server 20260903 中。<br>
+**归属：** SILO 服务端仓库。<br>
+**跟踪：** [pgsty/silo#53](https://github.com/pgsty/silo/issues/53)。<br>
 **目标：** 实现并验证后进入下一个 SILO 补丁版本。
 
 ## 背景 {#context}
@@ -186,27 +189,27 @@ set connection_string before migrating to SILO
 
 ### 注册并解析离散字段 {#alternative-register}
 
-**优点：** 保留旧来源形式，并复用现存参数字段。  
+**优点：** 保留旧来源形式，并复用现存参数字段。<br>
 **拒绝原因：** 注册会把常见字段名暴露给共享分词器，破坏引号内的完整连接串；而且这些字段早在 2020 年就已废弃，重新注册等于反向扩大公共配置面。
 
 ### 迁移时自动生成规范连接串 {#alternative-synthesize}
 
-**优点：** 兼容仅使用离散字段的旧安装。  
+**优点：** 兼容仅使用离散字段的旧安装。<br>
 **拒绝原因：** 这会为过时输入建立永久代码与测试责任，包括 PostgreSQL 引用、MySQL DSN 格式、socket/IPv6 行为、默认值与未来驱动漂移。对于迁移边界显式的新 fork，这个收益不足以覆盖长期维护面。
 
 ### 只跳过不支持的 target {#alternative-skip}
 
-**优点：** 对象存储服务与其他通知 target 可以继续运行。  
+**优点：** 对象存储服务与其他通知 target 可以继续运行。<br>
 **拒绝原因：** 静默丢弃已经配置的事件出口可能造成不可见、不可恢复的事件丢失。清晰的迁移失败，比一次通知覆盖缩水却看似成功的升级更安全。
 
 ### 修改全局通知 fail-fast 行为 {#alternative-fail-fast}
 
-**优点：** 限制未来非法 target 的故障半径。  
+**优点：** 限制未来非法 target 的故障半径。<br>
 **本次拒绝原因：** 它既不能修复数据库 target，也不能关闭凭据暴露路径，还会改变全系统错误语义。可另立独立设计和运维契约评估。
 
 ### 删除数据库通知 target {#alternative-remove-targets}
 
-**优点：** 删除全部数据库专用维护面。  
+**优点：** 删除全部数据库专用维护面。<br>
 **拒绝原因：** 这些 target 仍然有用且相对自洽。缺陷属于过时配置形式，不属于通知能力本身。
 
 ## 实现范围 {#implementation-scope}

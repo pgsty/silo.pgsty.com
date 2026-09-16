@@ -73,7 +73,7 @@ exactly that same 30 s — so every observable default behaved as if configured.
 
 ## Configuration {#config}
 
-- **Flag:** `--read-header-timeout`
+- **Flag:** `--read-header-timeout` (`Hidden: true`, absent from ordinary CLI help)
 - **Environment:** `MINIO_READ_HEADER_TIMEOUT`
 - **Default:** 30 s (equal to the idle timeout default)
 - There is **no YAML configuration field** for either timeout; the value binds
@@ -85,6 +85,8 @@ exactly that same 30 s — so every observable default behaved as if configured.
 | header = 0 (explicit) | Falls back to Go's rule: the read timeout (= idle timeout) applies; the CLI default is 30 s |
 | header < 0 | Disables the header-specific cap. Positive read/write timeouts still bound TLS handshake reads, and positive `IdleTimeout` still bounds the keep-alive wait. This does not disable every connection timeout. |
 | idle shortened, header unset | Header phase independently uses the 30 s default — the one combination looser than a naive expectation, though still strictly tighter than the pre-fix unbounded extension |
+
+A negative value reopens unbounded slow-header trickling; it is not a recommended compatibility setting. An incomplete header cut off by the deadline normally sees a closed connection, not a guaranteed HTTP error status. The trigger was @AEGEGE's scanner report [#183](https://github.com/pgsty/silo/issues/183); [PR #195](https://github.com/pgsty/silo/pull/195) was integrated through #196. The experiment does not establish reproduction in that deployment.
 
 ## What each protocol gets {#protocols}
 
@@ -140,3 +142,5 @@ does not count a scripted S3 long transfer as passed for this repair.
 The upgrade note (a shorter header timeout also narrows the TLS handshake
 window; it is not a total-duration limit for uploads or downloads) is in the
 [component matrix](/compatibility/versions/#september-reliability).
+
+Related records: [tags](/blog/design/replicated-tag-ordering/) · [metadata](/blog/design/replica-metadata-normalization/) · [HTTP](/blog/design/request-header-timeouts/) · [audit](/operations/replication/replica-metadata-audit/)

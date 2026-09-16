@@ -41,7 +41,7 @@ SSE-C 在写入操作期间使用客户端指定的 <abbr title="外部密钥">E
 >
 > 使用 SSE-C 加密的对象现在可以通过站点复制或存储桶复制进行复制。 早期版本的 MinIO Object Store 不会复制经过 SSE-C 加密的对象。
 
-经过压缩的 SSE-C 加密对象与 MinIO [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication) 或 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 不兼容。 请使用 [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) 或 [SSE-S3](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3)，以确保加密对象与复制兼容。
+已发布的 Server 20260903 仍存在压缩 SSE-C 副本的继承限制。当前 main 在 [#126](https://github.com/pgsty/silo/pull/126) 后，对 PUT、多段上传、COPY 和 Snowball 等**所有新 SSE-C 写入禁用压缩**，不受 SSE-S3/SSE-KMS 加密压缩选项影响。这会避免生成新的压缩 SSE-C 对象，但不会重写历史对象。应清点旧压缩 SSE-C 数据，保留原密钥并验证其恢复或复制，详见 [SSE-C 副本完整性](/blog/design/ssec-replica-integrity/)及[发布矩阵](/compatibility/versions/)。
 
 ### SSE-C 会覆盖 SSE-S3 和 SSE-KMS {#sse-c-sse-s3-sse-kms}
 
@@ -82,7 +82,7 @@ MinIO 支持使用以下 AWS S3 请求头指定 SSE-C 加密：
 - `X-Amz-Server-Side-Encryption-Customer-Key` 设置为加密密钥值。
 - `X-Amz-Server-Side-Encryption-Customer-Key-MD5` 设置为加密密钥的 128 位 MD5 摘要。
 
-MinIO [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具及兼容 S3 的 SDK 提供了设置这些请求头的特定语法。 某些 [`mc`](/zh/reference/minio-mc/#command-mc) 命令（例如 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）包含用于启用 SSE-S3 加密的 专用参数：
+MinIO [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具及兼容 S3 的 SDK 提供了设置这些请求头的特定语法。 某些 [`mc`](/zh/reference/minio-mc/#command-mc) 命令（例如 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）包含用于启用 SSE-C 加密的 专用参数：
 
 ```shell
 mc cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
@@ -96,13 +96,13 @@ mc cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
 
 MinIO 支持使用以下 AWS S3 请求头，将 SSE-C 加密对象复制到另一个兼容 S3 的服务：
 
-- `X-Amz-Copy-Source-Server-Side-Encryption-Algorithm` 设置为 `AES256`
-- `X-Amz-Copy-Source-Server-Side-Encryption-Key` 设置为加密密钥值。 如果指定的密钥与用于对该对象执行 SSE-C 加密的密钥不匹配， 复制操作将失败。
-- `X-Amz-Copy-Source-Server-Side-Encryption-Key-MD5` 设置为加密密钥的 128 位 MD5 摘要。
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Algorithm` 设置为 `AES256`
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key` 设置为加密密钥值。 如果指定的密钥与用于对该对象执行 SSE-C 加密的密钥不匹配， 复制操作将失败。
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key-MD5` 设置为加密密钥的 128 位 MD5 摘要。
 
 源对象与目标对象使用不同 SSE-C key 时，需要同时提供两组 header：`Copy-Source-*` 表示源 key，普通 `Server-Side-Encryption-Customer-*` 表示目标 key。SILO 会在提交后严格分开两个上下文，因此 CopyObject XML 与 HTTP header 中的 checksum 字段使用目标 key 解密。详见[两把 SSE-C 密钥，一份 CopyObject 响应](/zh/blog/design/copyobject-ssec-checksum-response/)。
 
-MinIO [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具及兼容 S3 的 SDK 提供了设置这些请求头的特定语法。 某些 [`mc`](/zh/reference/minio-mc/#command-mc) 命令（例如 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）包含用于启用 SSE-S3 加密的 专用参数：
+MinIO [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具及兼容 S3 的 SDK 提供了设置这些请求头的特定语法。 某些 [`mc`](/zh/reference/minio-mc/#command-mc) 命令（例如 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp)）包含用于启用 SSE-C 加密的 专用参数：
 
 ```shell
 mc cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
@@ -122,3 +122,5 @@ S3 客户端可以在不重新上传对象的情况下更换其客户端密钥�
 源与目标还各需配套的 `Customer-Algorithm: AES256` 和 `Customer-Key-MD5` 请求头，通常由 S3 SDK 设置。
 
 这种自 COPY 称为 SSE-C 密钥轮换。满足仅更新元数据的条件时，服务器用旧客户端密钥解封对象加密密钥，再用新密钥重新封装，对象数据不重写。需要写入新对象数据的复制（例如某些版本化或 checksum 变更）则走普通解密、重新加密路径。客户端提供的密钥不会持久化到对象元数据中。普通 COPY 权限与版本化规则仍适用，它不是通用的原位版本编辑接口。
+
+当前 main 的 [#123](https://github.com/pgsty/silo/pull/123) 会让普通客户端自 COPY 在**请求了任何 checksum 算法**时走完整解密、重新加密路径，即使请求的算法与原值相同。这类重写可能改变 ETag，把多段源变为单段对象，并按完整对象数据复制，而非仅复制元数据。不带该头且满足原位条件时，密钥轮换保留既有 checksum 状态，包括原本没有 checksum 的情况。版本化与旧格式限制也可能独立触发重写。

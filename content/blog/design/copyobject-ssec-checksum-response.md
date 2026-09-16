@@ -2,7 +2,7 @@
 title: "Two SSE-C Keys, One CopyObject Response"
 linkTitle: "CopyObject SSE-C Checksums"
 date: 2026-08-28
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   CopyObject can carry one SSE-C key for the source and another for the destination. SILO stored the destination checksum correctly but tried to decrypt it for the response with the source key, silently omitting checksum fields. This record explains the key-context boundary, response-only repair, single-decryption design, and regression matrix.
@@ -11,6 +11,8 @@ weight: 17
 draft: false
 url: "/blog/design/copyobject-ssec-checksum-response/"
 ---
+
+> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
 
 This record explains the CopyObject SSE-C checksum response repair committed in SILO as `e73436c99`.
 

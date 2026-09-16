@@ -19,7 +19,7 @@ aliases:
 
 现在，这件事可以交账了。
 
-4 月 15 日到 17 日，三天时间，`pgsty/minio` 发布了 [RELEASE.2026-04-17](https://github.com/pgsty/minio/releases/tag/RELEASE.2026-04-17T00-00-00Z)，连续修掉并关闭了 4 条 CVE 加几条同期披露的安全漏洞，OIDC JWT 算法混淆（CVSS 9.8）、LDAP 登录用户名枚举与暴力破解、复制头元数据注入导致对象不可读、S3 Select 超大记录打穿内存，以及两条 unsigned-trailer 写入路径上的签名绕过。
+4 月 15 日到 17 日，三天时间，`pgsty/minio` 发布了 [RELEASE.2026-04-17](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-04-17T00-00-00Z)，连续修掉并关闭了 4 条 CVE 加几条同期披露的安全漏洞，OIDC JWT 算法混淆（CVSS 9.8）、LDAP 登录用户名枚举与暴力破解、复制头元数据注入导致对象不可读、S3 Select 超大记录打穿内存，以及两条 unsigned-trailer 写入路径上的签名绕过。
 
 *A promise made, a promise kept.*
 
@@ -138,7 +138,7 @@ MinIO 是 Pigsty 的生产依赖。我需要可用的二进制、完整的控制
 对已经在用 MinIO 开源版的人来说，迁移到这个分支的成本其实很低：
 
 - **Docker 镜像**：把 `minio/minio` 换成 `pgsty/minio`，一行的事。
-- **RPM / DEB**：[GitHub Release](https://github.com/pgsty/minio/releases) 里都有，或者用 `pig` 一键装。
+- **RPM / DEB**：[GitHub Release](https://github.com/pgsty/silo/releases) 里都有，或者用 `pig` 一键装。
 - **源代码仓库**：[pgsty/minio](https://github.com/pgsty/minio)
 - **中文文档**：[silo.pgsty.com/zh/](https://silo.pgsty.com/zh/)
 - **英文文档**：[silo.pgsty.com](https://silo.pgsty.com/)

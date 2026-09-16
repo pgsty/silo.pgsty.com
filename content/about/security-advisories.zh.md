@@ -24,6 +24,8 @@ changelog 更窄，只关注影响发布的安全行为。每个经过完整调�
 [SN-2026-011](#sn-2026-011) 已在 main 修复，但该版本及之前所有公开 Server 版本仍受影响。升级
 mcli、pkg 或独立 Console 不会修补已安装的 Server。源码钉定见[组件版本矩阵](/zh/compatibility/versions/)。
 
+Server 20260903 也尚未包含 [SN-2026-012](#sn-2026-012) 与 [SN-2026-013](#sn-2026-013)。独立 Console 的边界不同：[SN-2026-014](#sn-2026-014) 已随 Console v2.4.1 发布，内嵌 Console 则需要修复后的 Server 构建。
+
 ## 继承自上游的公告基线 {#inherited}
 
 Silo 首个社区版本切自已包含以下安全修复的上游历史。上游与 Silo 链接同时记录——即使
@@ -55,6 +57,9 @@ fork 保留了同一提交对象与 SHA；该同一性是继承证据，不表�
 | [`SN-2026-009`](#sn-2026-009) | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee38)、[`229fe2b3c`](https://github.com/pgsty/silo/commit/229fe2b3c)（[PR #73](https://github.com/pgsty/silo/pull/73)） | Admin `SetUserStatus` / `SetGroupStatus` | [编年史](/zh/blog/security/20260903-server-hardening/) |
 | [`SN-2026-010`](#sn-2026-010) | [PR #104](https://github.com/pgsty/silo/pull/104)（[`75a6734e4`](https://github.com/pgsty/silo/commit/75a6734e4) 至 [`d2d47a41f`](https://github.com/pgsty/silo/commit/d2d47a41f)，[#58](https://github.com/pgsty/silo/issues/58)） | 显式 `versionId` 的 `DeleteObject`/`DeleteObjects` | [编年史](/zh/blog/security/20260903-server-hardening/) |
 | [`SN-2026-011`](#sn-2026-011) | [`123325430`](https://github.com/pgsty/silo/commit/1233254309b15571f101b2b26d531951ceaeef1e) | SigV4 签名头覆盖；`x-amz-copy-source` 分发 | [编年史](/zh/blog/security/20260913-signed-header-status/) |
+| [`SN-2026-012`](#sn-2026-012) | [`c4b5e1cb4`](https://github.com/pgsty/silo/commit/c4b5e1cb4)、[#177](https://github.com/pgsty/silo/pull/177) | 仅头部预签名载荷哈希验证 | [编年史](/blog/security/20260916-release-hardening/#sn-2026-012) |
+| [`SN-2026-013`](#sn-2026-013) | [#191](https://github.com/pgsty/silo/pull/191)、[#192](https://github.com/pgsty/silo/pull/192) | IAM 撤销重放与恢复 | [设计](/blog/design/iam-revocations/) · [编年史](/blog/security/20260916-release-hardening/#sn-2026-013) |
+| [`SN-2026-014`](#sn-2026-014) | [Console #56](https://github.com/pgsty/silo-console/pull/56)、[Server #209](https://github.com/pgsty/silo/pull/209) | 匿名分享下载代理范围 | [编年史](/blog/security/20260916-release-hardening/#sn-2026-014) · [Console v2.4.1](/blog/release/console-2.4.1/) |
 
 各条目的升级与兼容性说明如下。有编年史文章的条目在此只做摘要；威胁模型、被否决方案与验证细节请 follow 链接。
 
@@ -102,7 +107,7 @@ JWKS 支持的 RSA 或 ECDSA 签名。`PS256` 与 `EdDSA` 暂不支持。
 
 ### SN-2026-004 — 对象授权触达桶动作 {#sn-2026-004}
 
-可利用性取决于策略。把十二个敏感桶级写入从对象形式资源模式（`arn:aws:s3:::bucket/*`）中扣留：`PutBucketPolicy`、`DeleteBucketPolicy`、`PutBucketObjectLockConfiguration`、`PutBucketVersioning`、`PutReplicationConfiguration`、`PutBucketLifecycle`、`DeleteBucket`、`ForceDeleteBucket`、`PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration`。**这是授权收紧；自写桶域策略的用户升级前请读[编年史文章](/zh/blog/security/object-grant-bucket-reach/)。** 在合法授予上述动作之一的语句中，把裸桶 ARN（`arn:aws:s3:::bucket`）与通配形式并列添加。内置 canned 策略不受影响；`Deny` 语句与 `NotResource` 排除不动。`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` 可完整恢复历史行为，启动时读取一次。
+可利用性取决于策略。把十二个敏感桶级写入从对象形式资源模式（`arn:aws:s3:::bucket/*`）中扣留：`PutBucketPolicy`、`DeleteBucketPolicy`、`PutBucketObjectLockConfiguration`、`PutBucketVersioning`、`PutReplicationConfiguration`、`PutBucketLifecycle`、`DeleteBucket`、`ForceDeleteBucket`、`PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration`。**这是授权收紧；自写桶域策略的用户升级前请读[编年史文章](/zh/blog/security/object-grant-bucket-reach/)。** 在合法授予上述动作之一的语句中，把裸桶 ARN（`arn:aws:s3:::bucket`）与通配形式并列添加。内置 canned 策略不受影响；`Deny` 语句与 `NotResource` 排除不动。`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` 可恢复历史行为。包初始化时读取真实进程环境，只写入 `MINIO_CONFIG_ENV_FILE` 不生效，详见[设置参考](/reference/minio-server/settings/core/#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH)。
 
 ### SN-2026-005 — 裸 ARN 前缀拒绝 {#sn-2026-005}
 
@@ -128,9 +133,33 @@ JWKS 支持的 RSA 或 ECDSA 签名。`PS256` 与 `EdDSA` 暂不支持。
 
 可远程利用；已认证 S3 API。显式版本删除此前按 `s3:DeleteObject` 授权，仅对 `s3:DeleteObjectVersion` 做拒绝检查，与 AWS 不一致。现在显式版本删除要求 `s3:DeleteObjectVersion`。**两个策略影响：** 只被授予 `s3:DeleteObject` 的主体不能再删除特定版本；依赖 `Deny s3:DeleteObject` 阻止永久删除的策略必须同时 deny `s3:DeleteObjectVersion`，因为 `Allow s3:*` 现在允许显式版本删除。复制目标保持 `s3:ReplicateDelete` 契约。继承自上游。
 
-### SN-2026-011 — 未签名 `x-amz-*` 头与 `x-amz-copy-source` {#sn-2026-011}
+### SN-2026-011 — 未签名 `x-amz-*` 操作头 {#sn-2026-011}
 
-可远程利用；只持有一个预签名 PUT URL 或任意已签名 PUT 的方无需自有凭据。SigV4 验证只检查每个被命名签名头是否存在，从不检查实际到达的 `x-amz-*` 头，而路由把任何携带 `x-amz-copy-source` 的 PUT 分发给 `CopyObjectHandler`。未签名的 `x-amz-copy-source` 因此把单对象写授权变成以签名者身份执行的服务端复制，可复制签名密钥能读到的任意对象；预签名与 Authorization 头两条路径均受影响，且当目的桶允许匿名 `GetObject` 时，被复制的私有字节可被匿名读取。现在两条路径上任何未签名的 `x-amz-*` 请求头都会被以 `AccessDenied` 拒绝，与 AWS S3 对齐（AWS 返回 `403`；Silo 返回 `400 AccessDenied`，其余一致）。所有 AWS SDK、`minio-go` 与 `mc` 本就签名其 `x-amz-*` 头，合法客户端无需改动。原样继承自上游 `minio/minio`；包括最新已发布 Server 20260903 在内的更早版本均受影响。报告人 Oren Yomtov；CVE 已申请。见[编年史文章](/zh/blog/security/20260913-signed-header-status/)与[签名头设计记录](/zh/blog/design/signed-header-coverage/)。
+持有预签名或普通签名 PUT 的调用方无需知道签名密钥，即可添加未签名 `x-amz-copy-source`。受影响路径会把单对象写入变成 `CopyObject` 或 `UploadPartCopy`，以签名者权限读取源数据；可读取的目标可能暴露复制后的字节。已发布 Server 20260903 受影响；初始修复为 `123325430`，后续见 #177。
+
+普通 SigV4 与预签名验证现在以 `400 AccessDenied` 拒绝未签名 `x-amz-*` 头。`X-Amz-Content-Sha256` 是唯一显式头豁免，其有效值另由规范请求绑定。#177 删除内部 `X-Amz-Signature-Age` 头、常量及豁免，改由签名日期计算签名年龄。合规的普通签名客户端保持可用；自定义客户端必须在发送前签名非豁免头。AWS 对该拒绝采用不同 HTTP 状态，不能宣称逐字节响应一致。
+
+Streaming SigV4 的种子验签没有调用同一个覆盖检查 helper。COPY 处理器的普通认证分发会拒绝 streaming auth，但不能把这次变更写成所有流式 PUT 路径的完整头覆盖。详见[范围与剩余边界](/blog/design/signed-header-coverage/#scope)。报告者为 Oren Yomtov，已申请 CVE。应升级 Server，将签名授权限制到必要对象并检查可匿名读取的目标；升级客户端或独立 Console 不能修复它。
+
+### SN-2026-012 — 仅头部预签名载荷哈希 {#sn-2026-012}
+
+有效预签名请求可以通过 `X-Amz-Content-Sha256` 头绑定 SHA-256 值，但受影响的通用认证处理器没有按该值验证实际读取的正文。URL 持有者因此能保留有效签名并替换正文；`PutBucketPolicy` 是已复现的路径。这不会产生签名者原本没有的权限，但会破坏签名正文的限制。
+
+`c4b5e1cb4` 让通用正文验证与验签使用同一有效哈希：查询参数优先，缺失时回退头部。受 checksum 绑定的正文被篡改时返回 `XAmzContentSHA256Mismatch`，显式 `UNSIGNED-PAYLOAD` 保持协议含义。修复在 main，不在 Server 20260903。依赖正文绑定的预签名管理操作前应升级，避免分发宽泛的管理预签名授权，详见[编年史](/blog/security/20260916-release-hardening/#sn-2026-012)。
+
+### SN-2026-013 — 持久化 IAM 撤销 {#sn-2026-013}
+
+旧站点状态、延迟通知或不完整恢复可能重新引入已撤销身份或授权。攻击者需持有曾有效的凭证，并遇到受影响的重放/恢复场景；这不是匿名创建身份。#191/#192 保留删除版本、父撤销边界和原始组授权时间，并在同名父身份重建后拒绝旧子凭证。
+
+修复在 main，Server 20260903 尚未包含。**必须协调升级所有站点和共享 IAM 后端的所有进程，包括没有站点复制的共享后端。** 应备份完整持久 IAM 状态，不能只备份活记录导出；保留 tombstone，重发要求重新签发的子凭证，在恢复访问前协调旧备份缺失的撤销。断网期间的普通组成员移除仍是单独限制。详见[设计](/blog/design/iam-revocations/)与[恢复手册](/operations/replication/iam-upgrade/)。
+
+### SN-2026-014 — 匿名分享下载代理 {#sn-2026-014}
+
+Console 公共下载代理可以请求配置 S3 源站的非对象路径，暴露运维原本通过 Console 网络边界隔离的端点，例如公共 metrics。匿名调用方无需 Console 会话即可跨越该边界。这不表示代理绕过 S3 认证，也不表示能读取任意私有对象。
+
+Console #56 将转发限制为配置源站上的对象内容 GET，在发出请求前拒绝系统路径和通过查询参数选择的非下载 API，并拒绝所有重定向。普通公共、预签名和版本化下载仍支持；现有分享链接格式设置不是全局禁用分享开关。报告者为 Jiri Pejchal（@jiri-pejchal）。
+
+独立版本修复已随 **Console v2.4.1** 发布。Server #209 在 main 中选用修复后的 Console，但已发布 Server 20260903 仍内嵌旧版。应升级实际提供 UI 的组件；安装独立 Console 不会替换内嵌包。等待修复 Server 构建期间，应限制暴露的 Console 代理访问并检查配置源站的公共端点。详见[编年史](/blog/security/20260916-release-hardening/#sn-2026-014)。
 
 ## 依赖安全更新 {#dependencies}
 
@@ -138,18 +167,19 @@ JWKS 支持的 RSA 或 ECDSA 签名。`PS256` 与 `EdDSA` 暂不支持。
 
 | 编号 / 日期 | 修复方式 | 摘要 |
 | :-- | :-- | :-- |
-| 2026-03-25 发布 | [`RELEASE.2026-03-25`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-03-25) | OTel SDK、Paho MQTT 与 `x/crypto` 更新吸收 `CVE-2026-24051`、`CVE-2025-10543`、`CVE-2025-58181`；与下述 LDAP TLS 回归修复一同发布。该发布中的依赖升级并非全部为可达漏洞。 |
+| 2026-03-25 发布 | [`RELEASE.2026-03-25`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-03-25T00-00-00Z) | OTel SDK、Paho MQTT 与 `x/crypto` 更新吸收 `CVE-2026-24051`、`CVE-2025-10543`、`CVE-2025-58181`；与下述 LDAP TLS 回归修复一同发布。该发布中的依赖升级并非全部为可达漏洞。 |
 | `CVE-2026-34986` | [`68e0ba997`](https://github.com/pgsty/silo/commit/68e0ba997) | 升级 `go-jose` 至 `v4.1.4`。 |
 | `CVE-2026-39883` | `1869bd30b`、`e4fa06394` | 更新 OpenTelemetry 依赖。 |
-| Go 1.26.2 标准库 | [`db4c0fd5e`](https://github.com/pgsty/silo/commit/db4c0fd5e)（发布 lineage `9a4b3cd92`） | `CVE-2026-32280`、`CVE-2026-32281`（`crypto/x509`）、`CVE-2026-32283`（`crypto/tls`）；仅升级 toolchain/stdlib，不顺带滚动无关依赖。 |
+| Go 1.26.2 标准库 | [`db4c0fd5e`](https://github.com/pgsty/silo/commit/db4c0fd5e)（发布 lineage `db4c0fd5e`） | `CVE-2026-32280`、`CVE-2026-32281`（`crypto/x509`）、`CVE-2026-32283`（`crypto/tls`）；仅升级 toolchain/stdlib，不顺带滚动无关依赖。 |
 | Go 1.26.4 刷新 | `df627ff89`、`3e61b1d3a` | `CVE-2026-32952`（Azure NTLM）、`CVE-2026-41602`（Thrift）及 NATS/Prometheus 多项安全修复，作为 06-18 发布的依赖维护层。 |
 | 上游 Go 安全修复 | [Go 1.26.5](https://go.dev/doc/devel/release#go1.26.5) | 所需 toolchain 提升至 Go 1.26.5，包含 `crypto/tls` 与 `os` 的安全修复。 |
 | [GO-2026-6061](https://pkg.go.dev/vuln/GO-2026-6061) / [GHSA-hrxh-6v49-42gf](https://github.com/advisories/GHSA-hrxh-6v49-42gf) | `4dfc27ce3`：gRPC `v1.82.1` 与 `x/text` `v0.39.0` | gRPC xDS RBAC 引擎与 HTTP/2 传输修复（[GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970) / `CVE-2026-56852`，`x/text` 对非法输入的死循环，同一刷新落地）。保留既有 MVS 钉定；未借安全升级滚动无关依赖。 |
-| [GO-2026-5841](https://pkg.go.dev/vuln/GO-2026-5841) | `f1357853d`：`klauspost/compress` `v1.18.7` | `govulncheck` 判定受影响字典符号不可达，但已知受影响的直接依赖仍不应继续携带；升级到首个修复版本。 |
+| [GO-2026-5841](https://pkg.go.dev/vuln/GO-2026-5841) | `c1aec0518`：`klauspost/compress` `v1.18.7` | `govulncheck` 判定受影响字典符号不可达，但已知受影响的直接依赖仍不应继续携带；升级到首个修复版本。 |
 | 工具链与依赖刷新 | [Go 1.27.1](https://go.dev/doc/devel/release#go1.27.1) 经 [`43f4bb7ed`](https://github.com/pgsty/silo/commit/43f4bb7ed)、[`edc8be6ed`](https://github.com/pgsty/silo/commit/edc8be6ed)、[`4d6e1ea8e`](https://github.com/pgsty/silo/commit/4d6e1ea8e) | 工具链迁移到 Go 1.27（发布时为 1.27.1）并刷新依赖栈（etcd client v3.7.1、`jwx` v3.0.13、`klauspost/compress` v1.19.2）。发布前清理回归上游 `minio-go`（v7.3.1 预发布）并退役 `silo-go` fork；`govulncheck` 在候选版本上无可达漏洞。 |
 | [GO-2026-6354](https://pkg.go.dev/vuln/GO-2026-6354) / [GO-2026-6355](https://pkg.go.dev/vuln/GO-2026-6355) | `golang.org/x/crypto` `v0.56.0`（[`edf36bcbf`](https://github.com/pgsty/silo/commit/edf36bcbf)） | 更新 `x/crypto/ssh` 至首个修复版本，修复死锁 undecided/established channel 的拒绝服务。经 SFTP 服务器可达（`startSFTPServer` → `sftp.Server.Listen` → `ssh.NewServerConn`）；启用 SFTP 的更早版本均受影响。 |
 | [CVE-2026-84304](https://github.com/advisories/GHSA-vp52-pcj8-j9qc) | gRPC `v1.83.1` | 更新 gRPC-Go 至首个修复版本，修复高度碎片化 HTTP/2 DATA 帧导致的未认证堆耗尽。Silo 以传递方式引入 gRPC 而非自身注册 gRPC 服务器，但仍为完整模块图选择修复版本。 |
 | [GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970) / `CVE-2026-56852` | `x/text` `v0.39.0` | 更新 `x/text` 至首个修复版本，修复非法输入上的无限循环。 |
+| [CVE-2026-79921 / GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) | `d63c92e39`：`amqp091-go` v1.14.0（上游首个修复版为 v1.13.0） | 恶意 AMQP broker 可发送超大帧耗尽客户端内存；与配置了 AMQP 通知目标的部署相关，不是匿名 S3 请求路径。更新在 main，不在 Server 20260903。 |
 
 ## 运维相关的安全修复 {#operational}
 
@@ -157,6 +187,8 @@ JWKS 支持的 RSA 或 ECDSA 签名。`PS256` 与 `EdDSA` 暂不支持。
 | :-- | :-- | :-- |
 | 复制 Object Lock 更新忽略时间戳 | [`f4c1286c9`](https://github.com/pgsty/silo/commit/f4c1286c9)，已包含在 [Server 20260903](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) 中 | 复制 `CopyObject` 在比较复制时间戳之前先从请求重建元数据，导致存储的保留与 legal-hold 时间戳从未被看到：任何副本更新无论先后都被应用，legal-hold 时间戳被写在保留键下。过期副本因此可以关掉更新的 legal hold 或缩短更新的保留。现在先捕获存储状态，仅当副本时间戳更新时应用，过期更新不影响存储状态，且各时间戳保存在各自键下。继承自上游；修复前的构建受影响。 |
 | LDAP TLS 回归 | [`ce1c537eb`](https://github.com/pgsty/silo/commit/ce1c537eb1dd6c4efa1cf75cf5df0e2c489c947a)，随 `RELEASE.2026-03-25` 发布 | 恢复 `ldaps://` `DialURL()` 连接的 TLS 配置传递，使 `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` 与自定义根 CA 重新生效。 |
+| 签名字段与策略输入对齐 | [#177](https://github.com/pgsty/silo/pull/177)、`87d8b5967` | 拒绝有歧义的重复 copy-source 值，由签名输入推导年龄，并对齐有效载荷哈希的策略值。这与最初的头覆盖修复不同；在 main，不在 Server 20260903。 |
+| 跨池条件 PUT | [#207](https://github.com/pgsty/silo/pull/207)、`5e7d60308` | 在共享池锁下按逻辑当前对象判断写入条件，旧池副本不能授权覆盖。在 main，不在 Server 20260903，见[多池一致性](/blog/design/multi-pool-object-consistency/)。 |
 
 ## 台账归属 {#attribution}
 

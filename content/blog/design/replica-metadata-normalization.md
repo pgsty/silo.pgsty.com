@@ -39,7 +39,7 @@ metadata for a replica, merged into Server main as
 The ordinary PUT path normalizes metadata: it strips the transport-only
 `aws-chunked` token from `Content-Encoding`, and removes the
 `X-Amz-Meta-X-Amz-Unencrypted-Content-Length/-Md5` user-metadata keys that a
-GHSA mitigation deliberately deletes. The trusted replication receiver,
+[GHSA-76wf-9vgp-pj7w](https://github.com/google/security-research/security/advisories/GHSA-76wf-9vgp-pj7w) mitigation deliberately deletes. The trusted replication receiver,
 however, restored replica metadata by re-running the *same permissive
 extractor* with replication allowed — replaying every supported header and all
 user metadata from the original request. Concretely, on a trusted replica
@@ -85,11 +85,7 @@ space, and `gzip, aws-chunked` stores the whole string. These are
 
 ## Operator-visible changes {#behavior}
 
-- Trusted replicas of Snowball entries **without a PAX header** no longer
-  inherit the outer archive's ordinary metadata. The six replication-scoped
-  fields still apply to authorized entries. This matches ordinary (non-trust)
-  Snowball behavior, and no producer in the repository ships the
-  auto-extract marker, so nothing in-tree depends on the old inheritance.
+- Trusted Snowball entries no longer inherit the outer archive's ordinary metadata. Without PAX records, this removes outer content-type, cache-control, expires and user metadata; with PAX records it removes fields the entry did not restate. Per-entry `minio.metadata.*` still applies, the six replication-scoped fields still apply to authorized entries, and the archive's storage class remains inherited. The in-tree batch producer calls `PutObjectsSnowball`, whose SDK emits the auto-extract marker, but it does not mark the outer request as a trusted replica; it did not use the affected inheritance path.
 - The GHSA-redacted keys are no longer written back on replica restore —
   matching what every ordinary PUT already did.
 - Authentication, permission gating, and replication trust semantics are
@@ -102,13 +98,13 @@ space, and `gzip, aws-chunked` stores the whole string. These are
 An upgrade stops new pollution; it does not scan or rewrite existing objects.
 Two consequences matter:
 
-- Objects whose *authoritative source* is still polluted will be judged
-  inconsistent after the upgrade and re-selected for metadata replication on
-  heal/resync — repeatedly. Fix the authoritative source first, then let the
+- Objects whose *authoritative source* remains polluted can be selected repeatedly for metadata replication when comparison with a normalized replica detects a difference. Fix the authoritative source first, then let the
   copies converge.
 - Ordinary S3 self-COPY is not a general remediation API: it can create new
   versions or shift timestamps rather than rewriting one version's metadata
   in place.
+
+The [read-only audit runbook](/operations/replication/replica-metadata-audit/) now provides an executable inventory tool and classification rules. It does not authorize or perform repairs.
 
 ### The stored-metadata remediation proposal — status {#remediation}
 
@@ -148,9 +144,9 @@ chosen operation and rollback before this proposal becomes an executable runbook
 Regression tests (`TestExtractReplicationMetadata*`,
 `TestAPIReplicaContentEncoding`, `TestAPISnowballReplicaContentEncoding`,
 plus race-included trust/SSE-C round-trips) cover the mapping table, the six
-restored fields, and the ordinary path's equivalence; the counterfactual run
-(unchanged tests against the baseline helper) reproduces the 20 defect
-failures, demonstrating the tests bite. The upgrade summary lives in the
+restored fields, and the ordinary path's equivalence; the recorded counterfactual run against the baseline helper produced 36 expected failures (20 HTTP cases and 16 helper cases), with 44 controls passing. These are the original repair's observations, not a new execution by this documentation update. The upgrade summary lives in the
 [component matrix](/compatibility/versions/#september-reliability); the
 sibling tag-ordering repair is recorded in [Replicated Tag
 Ordering](/blog/design/replicated-tag-ordering/).
+
+Related records: [tags](/blog/design/replicated-tag-ordering/) · [metadata](/blog/design/replica-metadata-normalization/) · [HTTP](/blog/design/request-header-timeouts/) · [audit](/operations/replication/replica-metadata-audit/)

@@ -168,7 +168,7 @@ vid := strings.TrimSpace(r.Form.Get(xhttp.VersionID))
 
 两个同类残留仍在，记录下来而非静默留置：
 
-- **Multi-Delete 里的治理绕过。** 当某个条目带对象锁时，`enforceRetentionBypassForDelete` 会以 `BypassGovernanceRetentionAction` 重新授权（`cmd/bucket-object-lock.go:153`）。那个动作不是 `DeleteObjectAction`，所以有效版本覆盖不生效，它的 `s3:versionid` 仍是查询值——在正常 Multi-Delete 里为空——而不是被绕过锁的那个逐条目版本。
+- **Multi-Delete governance bypass 后续：** 原相邻缺口已由 `75a6734e4` / #104 修复并随 Server 20260903 发布，按每个 XML 条目的实际版本重新授权。下方 Snowball 观察是独立范围。
 - **Snowball tar 解包。** `PutObjectExtract` 在逐文件授权 **之后** 才从 tar PAX 记录 `minio.versionId` 取每个成员的版本，于是一个从未出现在任何条件值里的指定版本可能被写入。
 
 两者都窄、都是既有行为，且都会把改动从"修好报告里的那个键"扩大成"把每个动作的版本都重新接进 `ReqInfo`"。我们限定在报告的这个面上，把欠条写在这里，理由和[上一篇](/zh/blog/security/duplicate-part-numbers/)记录它对象层省略时一样：**一个没有记录的刻意省略，半年后与疏忽无法区分。**

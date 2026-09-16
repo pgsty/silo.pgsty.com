@@ -495,7 +495,7 @@ mc mirror --active-active siteB siteA
 >
 > RELEASE.2024-01-28T16-23-14Z
 
-跳过镜像过程中产生错误的对象。
+逐对象出错后继续，已记录的失败仍使有限任务退出码为 1。mcli 20260916 的逐对象权限错误不需要此参数也会继续；列举/监听错误保留取消重试路径。
 
 ##### `--summary` {#mc.mirror.-summary}
 
@@ -503,7 +503,7 @@ mc mirror --active-active siteB siteA
 
 *Optional*
 
-完成后输出已同步数据的摘要。
+输出结束统计，包括失败任务。mcli 20260916 的失败 JSON 摘要使用 `status: failure`；未指定时，失败的 quiet/JSON mirror 不输出尾部统计记录。
 
 ##### `--watch, w` {#mc.mirror.-watch}
 

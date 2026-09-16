@@ -16,3 +16,5 @@ Silo is not affiliated with, endorsed by, or sponsored by MinIO, Inc. MinIO® is
 Meet the [**community contributors**](/about/contributors/) behind SILO, Console,
 mcli, shared packages, and this documentation. Issue reports and unmerged pull
 requests are recognized alongside merged work and security disclosures.
+
+The [security advisory ledger](/about/security-advisories/) records confirmed findings, repair evidence and upgrade boundaries. The [component matrix](/compatibility/versions/) distinguishes each public component release from unreleased source changes.
