@@ -122,6 +122,8 @@ Starting with [RELEASE.2023-05-27T05-56-19Z](https://github.com/minio/minio/rele
 
 Starting with [RELEASE.2023-06-23T20-26-00Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-23T20-26-00Z), decommissioning also ignores object versions which have expired based on the configured [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) for the parent bucket. Starting with [RELEASE.2023-06-29T05-12-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-29T05-12-28Z), you can monitor ignored delete markers and expired objects during the decommission process with [`mc admin trace --call decommission`](/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call).
 
+Silo builds that include [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) (main after Server 20260903) carry object tags and their revision fields to the destination pool during decommission and rebalance. Earlier builds dropped the tags of migrated objects. If tag-dependent lifecycle or policy rules matter, audit the migrated objects instead of assuming the tags survived; see [multi-pool object consistency](/blog/design/multi-pool-object-consistency/#migration-tags).
+
 Once the decommissioning process completes, you can safely shut down that pool. Since the only remaining data was scheduled for deletion *or* was only a `DeleteMarker`, you can safely clear or destroy those drives as per your internal procedures.
 
 ## Behavior {#behavior}

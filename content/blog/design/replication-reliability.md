@@ -5,19 +5,20 @@ date: 2026-09-09
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  The decision record for SILO #153, #152, and #137: distinguish external reports from local evidence, classify delete-marker purges correctly, expose drops from the bounded MRF queue, and give resync cancellation a complete lifecycle. Includes review, rejected alternatives, final validation, and a 2026-09-16 second round covering worker-side purge classification and persisted MRF marker recovery (PR #196).
+  The decision record for SILO #153, #152, and #137: distinguish external reports from local evidence, classify delete-marker purges correctly, expose drops from the bounded MRF queue, and give resync cancellation a complete lifecycle. Includes review, rejected alternatives, final validation, and a 2026-09-16 second round covering worker-side purge classification and persisted MRF marker recovery (PR #196), and a third round on exact-version purges, marker healing and stale queued creations.
 tags: [Design, Replication, S3, Review]
 weight: 7
 draft: false
 url: "/blog/design/replication-reliability/"
 ---
 
-> **Publication update, 2026-09-17:** The repairs recorded here (PR #162 and the second-round PR #196) shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+> **Publication update, 2026-09-17:** The repairs recorded here (PR #162, the second-round PR #196 and the third-round purge repairs) shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
 
 This page records the analysis, design choices, review, and implementation of [#153](https://github.com/pgsty/silo/issues/153), [#152](https://github.com/pgsty/silo/issues/152), and [#137](https://github.com/pgsty/silo/issues/137). They belong to the same replication reliability series, but affect operation classification, recovery visibility, and task lifecycle respectively. One general retry patch cannot repair all three.
 
 > **As of 2026-09-09:** [PR #162](https://github.com/pgsty/silo/pull/162) is merged as [`d1105bbb`](https://github.com/pgsty/silo/commit/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e), and all three issues are closed. All eight checks on the tested PR head, followed by main Go CI and VulnCheck, passed.<br>
 > **Second round, 2026-09-16:** [PR #196](https://github.com/pgsty/silo/pull/196) (fix [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2), verification record `aea3882c9`) repaired the replication worker's own delete exits and the persisted MRF marker-recovery path — a different surface from the first round. It is on main and **not** in Server 20260903; see [the second-round section](#second-round).<br>
+> **Third round, 2026-09-16:** commits [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3), [`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0) and [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) repair what an exact-version purge does to drives and what a queued creation does after a purge. On main, **not** in Server 20260903; see [the third-round section](#third-round).<br>
 > **Review:** the plan was discussed with the installed Claude Code Fable 5.1 Max, followed by a review of the implementation. The final verdict was **GO**.<br>
 > **Delivery boundary:** this work completed code, tests, and main integration. It did not create a Server tag or formal release, and does not establish that existing packages, images, or production deployments contain the fixes.
 
@@ -242,3 +243,29 @@ For **creation** (replicating a delete marker), a HEAD 405 on the target marker 
 ### Boundaries that remain {#second-round-limits}
 
 The legacy in-memory task shape does not serialize across restart and has no current producer — its handling is robustness, not an active repair. Targets without a configured client still only log. Target-level resync replacing a purge subset is a pre-existing defect this round neither caused nor fixed. Persistence was driven directly in tests; timer-based flush and process-crash durability are not claimed. Multi-process site-replication meshes and cross-region acceptance are out of scope. For the tag-ordering and replica-metadata repairs in the same reliability series, see [Replicated Tag Ordering](/blog/design/replicated-tag-ordering/) and [Replica Metadata Normalization](/blog/design/replica-metadata-normalization/).
+
+## Third round (2026-09-16): exact-version purges, marker healing and stale creations {#third-round}
+
+The second round made the worker's purge exits truthful. The third round — commits [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3), [`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0) and [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) — repairs what a purge does to drives and what a queued creation does after a purge. It was driven by three-site container runs (three sites, four processes and sixteen drives each, EC 12+4) in which a purged delete marker came back on both target sites while the source still read the data version.
+
+> **Status:** on main after the published Server 20260903. Unit and race coverage on single-drive and 16-drive fixtures. The three-site rounds ran on a combined build (`6f27ee6`) containing the same purge repair, not on the final main. One adversarial review round (Codex, gpt-6-astra) returned REQUEST CHANGES with a single should-fix, corrected in `358ab38fb`.
+
+### What was still broken {#third-round-defects}
+
+- **A purge could create the marker it was removing.** The lookup marks a version under purge as deleted for visibility, and the purge write-back reused that flag as a disk instruction. On drives that lacked the marker, the write-back added it; a half-purged set flip-flopped instead of converging.
+- **A missing version was acknowledged too early.** The read path reports a version as absent once half of the drives say so, so a retried purge returned 204 while up to half of the drives still held the marker.
+- **Healing a marker discarded its metadata.** The heal path rebuilt delete markers with an empty metadata map. A healed marker lost its replication and purge state, looked pending again, and could be re-replicated as a fresh creation.
+- **A queued creation ran after the purge.** Every GET/HEAD/LIST of a pending marker, the scanner and MRF queue a creation task carrying a snapshot of the marker, and tasks from several frontends serialize on the per-object replication lock. In the reproduced sequence the user's purge was acknowledged by both targets, and about 85 ms later a queued creation for the same VersionID and original modification time reached both; the source ended with 0/16 marker copies and each target with 16/16. A target that no longer holds the marker creates it: nothing in the request distinguishes a first creation from a stale one.
+
+### The repair {#third-round-fix}
+
+- **Purge intent is classified once** (`isVersionPurge`): a valid explicit VersionID; no marker-creation, prefix, movement, free-version, expiry or transition options; and either a completed purge status or no replication state at all, or a trusted replica request. A purge never sets the marker-creation flags, and its result merges physically removed and reliably absent drive replies. The response still reports a delete marker when a stored marker was removed, and only then; a data version whose earlier purge is still pending is reported as a data version.
+- **Absence needs a write-quorum majority.** A retried purge whose lookup reports the version missing re-reads every drive. Fewer than `N/2+1` absent replies fail with insufficient write quorum, and a set with any remaining copy is scheduled for MRF healing. Offline, corrupt or unreadable drives never count as absent. The pools layer applies the same check to pools omitted by lookup, and replica receivers resolve purges by version across pools.
+- **Healed markers keep their stored metadata.** Healing copies the marker's persisted map and drops only operation-time healing, movement and tier keys. Typed state is used only for creation writers without stored metadata, and no timestamp is invented.
+- **Creations are re-checked under the lock.** Before sending, the delete replication worker re-reads the source version. A missing version, a non-marker version or a version under purge makes the task stale, and it is dropped without touching the source. A read that cannot confirm either way is retried through MRF instead of being treated as absence.
+
+### Evidence and boundaries {#third-round-limits}
+
+Two three-site batched-recovery rounds (source restarted and not restarted, one target site returned in two halves) converged within about 15 s and stayed stable for the rest of a 450 s window. The stale-creation sequence reproduced on the combined build; the new regression fails on unmodified main and passes with the repair on both fixtures.
+
+The re-check cannot intercept a creation already on the wire or one replayed by another site. Closing that needs a receiver-side persistent purge record or sequence, tracked in [#217](https://github.com/pgsty/silo/issues/217). After a majority-acknowledged purge followed by the loss of every process, the minority copies on the drives that had been offline remained through 450 s and seven scanner cycles per site. All frontends read the data version, but no persistent owner of that cleanup is proven. These two boundaries are inherited behavior and were not made a condition of the 2026-09-16 release.

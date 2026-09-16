@@ -61,6 +61,9 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 | <span style="white-space:nowrap">分片发现与取消</span> | [#198](https://github.com/pgsty/silo/pull/198) | 跨 pool/set 发现持久上传，原生 marker 对应上传消失后仍能续页，取消需要多数盘确认。严格模式要求所有 writer 升级并排空旧上传，见[升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。 |
 | <span style="white-space:nowrap">普通条件 PUT</span> | [#207](https://github.com/pgsty/silo/pull/207) | 公开写入条件使用所有池中的逻辑当前对象，包括正在退役或再平衡的池；可读性及目标版本行为变化见[下文](#conditional-put)。 |
 | <span style="white-space:nowrap">IAM 撤销</span> | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | 节点间删除通知重新加载已提交状态；持久化删除版本与撤销边界，防止旧站点事件重放恢复已撤销身份或旧授权。 |
+| <span style="white-space:nowrap">删除标记清除</span> | [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)<br>[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0)<br>[`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) | 指定版本的清除不再在缺少该标记的盘上创建标记；对已缺失版本的重试须有写仲裁多数的缺失票才确认；heal 后的标记保留复制与清除元数据；排队中的标记创建任务在发送前先在复制锁内复核源端。剩余边界见[下文](#pending)、[#217](https://github.com/pgsty/silo/issues/217) 与[复制可靠性记录第三轮](/zh/blog/design/replication-reliability/#third-round)。 |
+| <span style="white-space:nowrap">盘间分歧下的列举</span> | [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) | 当更新的少数盘排在前面时，仍保留达到列举仲裁的 null 对象版本。滚动重启叠加并发覆盖写时，成功的 LIST 仍可能漏掉可读的 key；见[下文](#pending)、[#218](https://github.com/pgsty/silo/issues/218) 与[设计记录](/zh/blog/design/list-null-version-quorum/)。 |
+| <span style="white-space:nowrap">跨池迁移标签</span> | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) | rebalance 与 decommission 对普通和分片写入都把对象标签及其修订字段带到目标池。此前迁移已丢失的标签不会恢复；见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/#migration-tags)。 |
 | <span style="white-space:nowrap">标签与删除标记</span> | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS 复制保留标签修订时间；删除标签推进修订并抵御延迟事件；删除标记清除在 MRF 恢复时保留标记身份和重试状态。 |
 | <span style="white-space:nowrap">复制元数据</span> | [#194](https://github.com/pgsty/silo/pull/194) | 恢复复制元数据时，不再把传输用的 `aws-chunked` 编码重新写入对象元数据。 |
 | <span style="white-space:nowrap">请求头超时</span> | [#196](https://github.com/pgsty/silo/pull/196) | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` 正确传入 HTTP 服务，对 HTTP/1 请求头设置绝对读取期限，持续少量发送字节也无法延长；正文保留既有滚动空闲超时。 |
@@ -109,6 +112,9 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 
 - **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。源码修复不会自动修复旧状态。
 - **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 单独验收最终制品与多进程栈，发布制品和实际生产升级分别验收。
+- **多站删除标记收敛：** `254b19ac0` 的源端复核覆盖不了已经在网络上在途、或由另一站点重放的创建；多数确认的清除之后崩溃留下的少数标记副本，也没有证明持久的清理责任人。[#217](https://github.com/pgsty/silo/issues/217) 跟踪接收端方案。清除修复的三站证据来自组合构建，不是最终 main；见[设计记录](/zh/blog/design/replication-reliability/#third-round-limits)。
+- **滚动重启期间的列举：** 在包含 `8d06424b1` 的构建上，四节点滚动重启叠加并发覆盖写时，27,966 次成功 LIST 中有 2,624 次少了一到四个可读的 key；稳态 20,000 次为零。内部原因尚未绑定，[#218](https://github.com/pgsty/silo/issues/218) 跟踪取证与契约裁决。滚动重启期间不要用会删除目标端对象的同步工具；见[设计记录](/zh/blog/design/list-null-version-quorum/#boundary)。
+- **跨池迁移标签：** `fced86303` 有单元与 race 覆盖，修复后的八节点 rebalance/decommission 验收尚未完成。此前迁移丢失的标签需要审计，不能默认仍在。
 - **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 保留开放，继续跟踪容量、发布验收和迟到创建写入边界。PR #198 已修复持久发现、全局分页与静态残留取消确认，但没有新增创建屏障，也没有完成大规模扫描验收。临时 10,000 上传试验未达到暂定的单页五秒目标，见[设计记录](/zh/blog/design/list-multipart-uploads/#implementation)。
 
 ## 依赖与发布顺序 {#order}
