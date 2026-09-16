@@ -6,20 +6,20 @@
 # firstContribution is the first public issue / PR date; omitted for private disclosures.
 # Sync repository records, README sections, and bilingual pages: python3 bin/contributors.py
 # Refresh avatars: python3 bin/contributor_avatars.py
-updated: "2026-09-16T03:59:24+00:00"
+updated: "2026-09-16T08:13:18+00:00"
 repositories:
   - repo: "pgsty/silo"
-    issues: 107
-    pullRequests: 97
+    issues: 108
+    pullRequests: 99
   - repo: "pgsty/silo-console"
     issues: 35
-    pullRequests: 21
+    pullRequests: 22
   - repo: "pgsty/mc"
     issues: 18
     pullRequests: 25
   - repo: "pgsty/silo-pkg"
     issues: 0
-    pullRequests: 8
+    pullRequests: 9
   - repo: "pgsty/silo-go"
     issues: 0
     pullRequests: 0
@@ -28,13 +28,11 @@ repositories:
     pullRequests: 0
   - repo: "pgsty/silo.pgsty.com"
     issues: 1
-    pullRequests: 23
+    pullRequests: 26
   - repo: "pgsty/minio-docs"
     issues: 0
     pullRequests: 0
-bots:
-  - "Copilot"
-  - "dependabot[bot]"
+bots: ["Copilot", "dependabot[bot]"]
 code:
   - handle: "Vonng"
     name: "Feng Ruohang"
@@ -44,24 +42,22 @@ code:
     firstContribution: "2026-04-14"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [22, 23, 24, 25, 26, 27, 28, 46, 47, 48, 49, 50, 52, 53, 55, 63, 64, 65, 67, 68, 75, 76, 77, 78, 82,
-          83, 84, 99, 100, 102, 105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 133, 136, 137, 139, 141,
-          144, 147, 148, 158, 165, 166, 167, 168, 169, 170, 171, 204]
-        merged: [44, 45, 56, 66, 69, 70, 72, 73, 74, 80, 81, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 101,
-          103, 104, 121, 122, 123, 124, 126, 127, 128, 129, 130, 131, 134, 135, 138, 140, 142, 143, 145, 146, 149, 156, 157,
-          159, 161, 162, 163, 164, 173, 174, 175, 177, 178, 179, 180, 181, 182, 188, 189, 190, 191, 192, 193, 194, 196, 205,
-          206, 207]
+        merged: [44, 45, 56, 66, 69, 70, 72, 73, 74, 80, 81, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97,
+          98, 101, 103, 104, 121, 122, 123, 124, 126, 127, 128, 129, 130, 131, 134, 135, 138, 140, 142, 143, 145,
+          146, 149, 156, 157, 159, 161, 162, 163, 164, 173, 174, 175, 177, 178, 179, 180, 181, 182, 188, 189, 190,
+          191, 192, 193, 194, 196, 205, 206, 207, 208, 209, 211]
         closed: [155, 195]
+        issuesClosed: [22, 23, 24, 25, 26, 27, 28, 46, 47, 48, 49, 50, 52, 53, 55, 63, 64, 65, 67, 68, 75, 76, 77,
+          78, 82, 83, 84, 99, 100, 102, 105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 133, 136,
+          137, 139, 141, 144, 147, 148, 158, 165, 166, 167, 168, 169, 170, 171, 204]
         issuesOpen: [199, 200, 201, 202, 203]
-        open: [208]
       - repo: "pgsty/silo-console"
         what: "Maintains SILO Console, including fixes, tests, releases, and documentation"
         whatZh: "维护 SILO Console 的修复、测试、发行与文档"
-        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-          31, 33, 35, 36, 37]
-        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55]
+        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57]
+        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+          29, 30, 31, 33, 35, 36, 37]
         issuesOpen: [32, 34]
-        open: [56]
       - repo: "pgsty/mc"
         what: "Maintains mcli, including fixes, tests, packaging, and releases"
         whatZh: "维护 mcli 的修复、测试、打包与发行"
@@ -70,9 +66,9 @@ code:
       - repo: "pgsty/silo-pkg"
         what: "Maintains shared packages, including policy fixes and component coordination"
         whatZh: "维护共享包、策略修复与组件协调"
-        merged: [1, 2, 3, 4, 5, 6, 7, 8]
+        merged: [1, 2, 3, 4, 5, 6, 7, 8, 9]
       - repo: "pgsty/silo.pgsty.com"
-        merged: [2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 26]
+        merged: [2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29]
         open: [25]
   - handle: "ZouhairCharef"
     featured: true
@@ -131,14 +127,15 @@ code:
     featured: true
     what: "Fixed bucket quota metrics; contributed access-frequency ILM and S3-compatible multipart listing proposals"
     whatZh: "修复桶配额指标，贡献按访问频率分层的 ILM 与 S3 兼容分片上传列表方案"
-    note: "The access-frequency feature in [#60](https://github.com/pgsty/silo/pull/60) was merged and later removed; [#198](https://github.com/pgsty/silo/pull/198)\
-      \ remains open."
-    noteZh: "[#60](https://github.com/pgsty/silo/pull/60) 的访问频率功能合并后被移除；[#198](https://github.com/pgsty/silo/pull/198) 仍未合并。"
+    note: "The access-frequency feature in [#60](https://github.com/pgsty/silo/pull/60) was merged and later removed.\
+      \ The multipart-listing contribution in [#198](https://github.com/pgsty/silo/pull/198) was merged after follow-up\
+      \ durability and cancellation repairs; it remains unreleased."
+    noteZh: "[#60](https://github.com/pgsty/silo/pull/60) 的访问频率功能合并后被移除；[#198](https://github.com/pgsty/silo/pull/198)\
+      \ 的分片列表贡献在补充持久发现与取消修复后已合并，尚未发布。"
     firstContribution: "2026-08-15"
     activity:
       - repo: "pgsty/silo"
-        merged: [60, 132]
-        open: [198]
+        merged: [60, 132, 198]
   - handle: "h5vx"
     featured: true
     what: "Implemented per-bucket CORS configuration and enforcement"
@@ -155,8 +152,8 @@ code:
     firstContribution: "2026-09-07"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [150]
         merged: [151]
+        issuesClosed: [150]
   - handle: "Aeirx"
     name: "Ayush Sharma"
     featured: true
@@ -177,8 +174,8 @@ proposed:
     firstContribution: "2026-03-21"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [10]
         closed: [12]
+        issuesClosed: [10]
   - handle: "davinkevin"
     name: "Davin Kevin"
     featured: true
@@ -190,8 +187,8 @@ proposed:
     firstContribution: "2026-04-10"
     activity:
       - repo: "pgsty/silo"
-        issuesOpen: [20]
         closed: [21]
+        issuesOpen: [20]
   - handle: "metaneutrons"
     name: "Fabian Schmieder"
     featured: true
@@ -202,8 +199,8 @@ proposed:
     firstContribution: "2026-08-15"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [58]
         closed: [59]
+        issuesClosed: [58]
   - handle: "mikemikimike"
     featured: true
     what: "Contributed the replicated SSE-C plaintext part-size fix"
@@ -220,27 +217,28 @@ proposed:
     featured: true
     what: "Reported MRF queue and delete-marker retry defects; contributed repair proposals, tests, and documentation"
     whatZh: "报告 MRF 队列与删除标记重试缺陷，贡献修复方案、测试与文档"
-    note: "The original PR was not merged directly. Its purge-state and recovery analysis, proposed fix, tests, and documentation\
-      \ helped shape [#196](https://github.com/pgsty/silo/pull/196); see the [maintainer acknowledgement](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)."
+    note: "The original PR was not merged directly. Its purge-state and recovery analysis, proposed fix, tests,\
+      \ and documentation helped shape [#196](https://github.com/pgsty/silo/pull/196); see the [maintainer acknowledgement](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)."
     noteZh: "原 PR 未直接合并；其中的清理状态与恢复分析、修复方案、测试和文档帮助完善了 [#196](https://github.com/pgsty/silo/pull/196)，见[维护者致谢](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)。"
     firstContribution: "2026-09-07"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [152, 153]
         closed: [184]
+        issuesClosed: [152, 153]
   - handle: "chodorenko"
     featured: true
     what: "Reported and contributed the fix for aws-chunked leaking into replica metadata"
     whatZh: "报告并贡献 aws-chunked 错写入副本元数据的修复"
-    note: "The implementation was incorporated in [#194](https://github.com/pgsty/silo/pull/194), with [co-author credit](https://github.com/pgsty/silo/commit/4fcdf37ce656152b32ad0f615d47f5e3f9748c3a);\
-      \ the original PR was closed as superseded."
+    note: "The implementation was incorporated in [#194](https://github.com/pgsty/silo/pull/194), with [co-author\
+      \ credit](https://github.com/pgsty/silo/commit/4fcdf37ce656152b32ad0f615d47f5e3f9748c3a); the original PR\
+      \ was closed as superseded."
     noteZh: "实现已纳入 [#194](https://github.com/pgsty/silo/pull/194)，并保留[共同作者署名](https://github.com/pgsty/silo/commit/4fcdf37ce656152b32ad0f615d47f5e3f9748c3a)；原\
       \ PR 因被替代而关闭。"
     firstContribution: "2026-09-14"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [185]
         closed: [187]
+        issuesClosed: [185]
   - handle: "sulin37392"
     what: "Proposed dependency updates"
     whatZh: "提交依赖更新"
@@ -280,8 +278,8 @@ reports:
     what: "Reported the unsigned-header CopyObject cross-object read (SN-2026-011)"
     whatZh: "报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011）"
     note: "Security disclosure credited in [SN-2026-011](https://silo.pgsty.com/about/security-advisories/#sn-2026-011),\
-      \ with the source fix in [#173](https://github.com/pgsty/silo/pull/173). This credit is retained separately from public\
-      \ issue/PR authorship."
+      \ with the source fix in [#173](https://github.com/pgsty/silo/pull/173). This credit is retained separately\
+      \ from public issue/PR authorship."
     noteZh: "安全披露署名见 [SN-2026-011](https://silo.pgsty.com/zh/about/security-advisories/#sn-2026-011)，源码修复见 [#173](https://github.com/pgsty/silo/pull/173)。此项署名单独保留，不计作公开\
       \ issue/PR 作者。"
     activity: []
@@ -297,7 +295,7 @@ reports:
       - repo: "pgsty/silo-console"
         what: "Reported the Console share proxy's exposure of internal metrics"
         whatZh: "报告 Console 分享代理暴露内部指标的问题"
-        issuesOpen: [52]
+        issuesClosed: [52]
   - handle: "AEGEGE"
     featured: true
     what: "Reported the slow-HTTP denial-of-service vulnerability"
@@ -497,3 +495,10 @@ reports:
     activity:
       - repo: "pgsty/silo"
         issuesOpen: [197]
+  - handle: "aschyolkin"
+    what: "Reported a data race in CPU metrics collection"
+    whatZh: "报告 CPU 指标采集中的数据竞争"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [210]
+    firstContribution: "2026-09-16"
