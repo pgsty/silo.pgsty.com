@@ -38,9 +38,9 @@ and [Server #181](https://github.com/pgsty/silo/pull/181).
 
 - **pkg:** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`.
 - **MC:** `v0.0.0-20260913012246-4f609a4da3bb` → the published 20260913 tag.
-- **Console selected by Server:** `v0.0.0-20260913015128-417559bb2c97`; accepted on main by merge `449c185a8d14` with the same tree.
-- **Server dependency integration:** `5d955b5b7444f8a3ab550ce92713607998f89c0d`.
-- **Verified Server main:** [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a), including the repairs below.
+- **Console selected by Server:** `v0.0.0-20260916034812-56dfe455ac2f`; accepted on main by merge [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) with the same tree.
+- **Server Console integration:** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c), merged through [#209](https://github.com/pgsty/silo/pull/209). The other September 13 component pins remain unchanged.
+- **Verified Server main:** [`3c26a8b0b5bd`](https://github.com/pgsty/silo/commit/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca), including the repairs below.
 - **Upstream minio-go:** `v7.3.1-0.20260910142817-60bd07042d49`.
 
 **Server and Console changes after their latest tags remain unreleased.** This
@@ -100,15 +100,28 @@ contains source hashes, local tests and remaining acceptance limits. PR #196's
 11 checks passed before merge. Those results establish source acceptance, not
 a new release or production cluster rollout.
 
+### Console shared downloads {#console-sharing}
+
+[Console #56](https://github.com/pgsty/silo-console/pull/56) and
+[Server #209](https://github.com/pgsty/silo/pull/209) resolve the anonymous proxy
+boundary reported in [Console #52](https://github.com/pgsty/silo-console/issues/52).
+The proxy only accepts object-content GETs at the configured S3 origin and
+rejects redirects, system paths and query-selected non-download operations.
+No sharing-disable environment variable was added. Normal public, presigned and
+versioned downloads remain supported; see the [behavior and design tradeoffs](/reference/minio-server/settings/console/#object-sharing).
+
+The final Console CI matrix and vulnerability checks passed before merge.
+Server's formal module selection passed real API and browser sharing tests in
+both standalone and embedded deployments, as well as its CI checks. These are
+source acceptance results: Console v2.4.0 and Server 20260903 do not contain this
+fix, and no new binary or image is published by merging either PR.
+
 ### Work still pending {#pending}
 
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
   open. The prefix, pagination and original-key discovery limitations described
   in the [design record](/blog/design/list-multipart-uploads/) are not fixed by
   the multipart-completion repair above.
-- **Console object sharing:** [Console #52](https://github.com/pgsty/silo-console/issues/52)
-  remains open and its local fix has not merged. The [proposed request restrictions](/reference/minio-server/settings/console/#object-sharing)
-  are not part of the selected Console source or published Server/Console releases.
 
 ## Dependency and release order {#order}
 

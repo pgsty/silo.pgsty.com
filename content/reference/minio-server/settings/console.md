@@ -46,9 +46,9 @@ Values must be integers from 1 to 1048576. Each anonymous cap must be strictly b
 ## Object sharing {#object-sharing}
 
 > [!NOTE]
-> **Pending, verified on 2026-09-16:** [Console #52](https://github.com/pgsty/silo-console/issues/52) remains open and its local fix has not merged. This section describes that proposed behavior. It is not present in the published Console v2.4.0, Server 20260903, or Server's currently selected Console source. Embedded SILO must select a Console commit containing the fix before these restrictions apply. See [component status](/compatibility/versions/#pending).
+> **Merged source fix, verified on 2026-09-16:** [Console #56](https://github.com/pgsty/silo-console/pull/56) enforces the boundary below. [Server #209](https://github.com/pgsty/silo/pull/209) selects the corrected Console source for embedded deployments. These changes are not in the published Console v2.4.0 or Server 20260903; existing binaries and images are unchanged. See [component status](/compatibility/versions/#console-sharing).
 
-The proposed fix requires no new setting. Its request restrictions always apply, and normal sharing remains available. `CONSOLE_SHARE_MINIO_URL` continues to select only the generated link format. The anonymous proxy is limited to object-content GET requests:
+The fix requires no new setting. Its request restrictions always apply, and normal sharing remains available. `CONSOLE_SHARE_MINIO_URL` continues to select only the generated link format. The anonymous proxy is limited to object-content GET requests:
 
 | Allowed | Rejected |
 | --- | --- |
@@ -58,6 +58,23 @@ The proposed fix requires no new setting. Its request restrictions always apply,
 | Direct backend responses | All 3xx return 502 without following the redirect or forwarding `Location` |
 
 S3 continues to enforce authorization: unsigned public objects are allowed by their policies; private objects require valid authorization. Original URL encoding and signature parameters are preserved. Manual proxying of bucket listings, object subresources or downloads that depend on redirects no longer works through this endpoint.
+
+The access boundary applies whenever sharing is available. A prototype included
+`CONSOLE_SHARE_ENABLED=off`, but that switch and its frontend and embedded-Server
+plumbing were removed: disabling an entire feature is a separate product
+requirement, while the proxy must enforce its scope without extra configuration.
+`CONSOLE_SHARE_MINIO_URL` therefore remains a link-format setting, not an access
+control. Requiring signature-shaped parameters would not protect public metrics,
+and a separate Console MAC or link registry is not needed for this bounded object
+download contract. The encoded URL is not authenticated as Console-issued.
+
+These checks add local parsing and comparisons, without extra S3/IAM requests,
+stored tokens, new signing keys or whole-object buffering. New query-selected S3
+operations must be reviewed against the deny list and regression tests. The
+[issue decision record](https://github.com/pgsty/silo-console/issues/52) documents
+the threat model, alternatives and compatibility tradeoffs. Thanks to
+[Jiri Pejchal (@jiri-pejchal)](https://github.com/jiri-pejchal) for reporting the
+internal-metrics exposure.
 
 ## Console settings reference {#settings-reference}
 
