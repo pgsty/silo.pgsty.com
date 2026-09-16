@@ -17,47 +17,41 @@ A merged dependency update does not change an existing binary or image.
 | Component | Latest published version | What it contains |
 | --- | --- | --- |
 | Server | <a href="https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z" style="white-space:nowrap">20260903</a> | pkg v3.13.2; upstream SDK `0e78d3f18efe`; mcli 20260903; embedded Console source `464a59d73ada` with v2.3.0 version identity |
-| <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0) | pkg v3.13.3; MC source `c8aa5d25a63a`; upstream SDK `0e78d3f18efe`; bounded object-browser pages |
+| <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) | pkg v3.14.1; mcli 20260916; upstream SDK `32e1f32cb176`; restricted shared downloads, streaming ZIPs and signed artifacts |
 | mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1; upstream SDK `32e1f32cb176`; package version `20260916000000.0.0` |
 | Shared pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | Own module path `github.com/pgsty/silo-pkg/v3`; CopyObject embedded-error handling; JWX v3.3.0 field-name escaping; upstream SDK `32e1f32cb176` |
 
 Release notes: [Server 20260903](/blog/release/silo-20260903/),
-[Console v2.4.0](/blog/release/console-2.4.0/),
+[Console v2.4.1](/blog/release/console-2.4.1/),
 [mcli 20260916](/blog/release/mcli-20260916/), [pkg v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1).
-The published Server image still bundles its original client and Console.
-Installing a standalone update does not replace those embedded components.
+For embedded deployments, select Console and MC explicitly in the Server build.
 Package-repository mirrors may lag GitHub; the [download page](/download/)
 links directly to the published artifacts.
 
-## Coordinated source on main {#source}
+## September 16 dependency graph {#source}
 
-**September 16 client/library release:** mcli 20260916 is [`e952aa78f10a`](https://github.com/pgsty/mc/commit/e952aa78f10a2b77dd525a2b7e3143bcda0cd377), Go pseudo-version `v0.0.0-20260916070421-e952aa78f10a`; pkg v3.14.1 is `fa657ef431ae22e720df37e5144cf00f67102945`. Both select SDK `v7.3.1-0.20260915093545-32e1f32cb176` and JWX v3.3.0. The verified Server/Console integration sources below still select their earlier dependency graph; publishing the client does not advance those pins.
+[Console v2.4.1](/blog/release/console-2.4.1/) selects the released pkg and MC
+sources below. These identities are verified through the public Go proxy and
+checksum database.
 
-The September 13 refresh landed as [pkg #7](https://github.com/pgsty/silo-pkg/pull/7),
-[MC #42](https://github.com/pgsty/mc/pull/42),
-[Console #53](https://github.com/pgsty/silo-console/pull/53) and [#54](https://github.com/pgsty/silo-console/pull/54),
-and [Server #181](https://github.com/pgsty/silo/pull/181).
+- **Console:** `v0.0.0-20260916075814-1360e26d976d` →
+  [`1360e26d976d`](https://github.com/pgsty/silo-console/commit/1360e26d976d82eda395b0b2e449df8c9d49f39c), tag `v2.4.1`.
+- **pkg:** `v3.14.1` → `fa657ef431ae22e720df37e5144cf00f67102945`.
+- **MC:** `v0.0.0-20260916070421-e952aa78f10a` →
+  [`e952aa78f10a`](https://github.com/pgsty/mc/commit/e952aa78f10a2b77dd525a2b7e3143bcda0cd377), tag `RELEASE.2026-09-16T00-00-00Z`.
+- **Upstream minio-go:** `v7.3.1-0.20260915093545-32e1f32cb176`.
+- **JWX / strfmt / React Router:** v3.3.0 / v0.27.2 / v7.18.4.
 
-- **pkg selected by Server/Console:** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`.
-- **MC selected by Server/Console:** `v0.0.0-20260913012246-4f609a4da3bb` → the published 20260913 tag.
-- **Console selected by Server:** `v0.0.0-20260916034812-56dfe455ac2f`; accepted on main by merge [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) with the same tree.
-- **Server Console integration:** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c), merged through [#209](https://github.com/pgsty/silo/pull/209). The other September 13 component pins remain unchanged.
-- **Verified Server main:** [`0e3c43778e55`](https://github.com/pgsty/silo/commit/0e3c43778e55dc6342937cb83f8905c160b965e1), including the repairs below.
-- **Upstream minio-go:** `v7.3.1-0.20260910142817-60bd07042d49`.
+Console's embedded frontend is rebuilt from this graph. Its Go dependency uses
+the canonical pseudo-version because the historical module path has no `/v2`
+suffix. Server embedders must copy both Console and MC replacements; see the
+[Console integration notes](/compatibility/console/#source).
 
-**Server and Console changes after their latest tags remain unreleased.** This
-includes the [password-permission split](/compatibility/password-permissions/),
-Console streaming ZIP downloads and its revised image-promotion gate, and
-Server's later storage, replication and signed-header fixes. Server main now
-builds curl 8.22.0 and bundles mcli 20260913; existing Server images retain their
-published contents. The [Server changelog](https://github.com/pgsty/silo/blob/main/CHANGELOG.md)
-and [Console changelog](https://github.com/pgsty/silo-console/blob/main/CHANGELOG.md)
-separate those changes from published releases.
-
-The latest published Server is affected by [SN-2026-011](/blog/security/20260913-signed-header-status/).
-Its fix is on main; upgrading only pkg, mcli or standalone Console does not patch
-an installed Server. Source validation and vulnerability scans do not establish
-that a fixed Server binary has been published.
+Review the [password-permission migration](/compatibility/password-permissions/)
+before upgrading: `admin:ChangeMyPassword` and `admin:CreateUser` now express
+separate operations. The [Server changelog](https://github.com/pgsty/silo/blob/main/CHANGELOG.md)
+and source links below describe the storage, IAM and HTTP changes needed for
+coordinated Server upgrades.
 
 ### Storage, IAM and HTTP repairs {#september-reliability}
 
@@ -123,11 +117,11 @@ rejects redirects, system paths and query-selected non-download operations.
 No sharing-disable environment variable was added. Normal public, presigned and
 versioned downloads remain supported; see the [behavior and design tradeoffs](/reference/minio-server/settings/console/#object-sharing).
 
-The final Console CI matrix and vulnerability checks passed before merge.
-Server's formal module selection passed real API and browser sharing tests in
-both standalone and embedded deployments, as well as its CI checks. These are
-source acceptance results: Console v2.4.0 and Server 20260903 do not contain this
-fix, and no new binary or image is published by merging either PR.
+The fix is released in [Console v2.4.1](/blog/release/console-2.4.1/).
+The exact release source passed the complete CI matrix, vulnerability checks
+and release workflow. Real API and browser sharing tests passed in standalone
+and embedded deployments; the downloaded standalone binary also passed the
+sharing regression against a SILO fixture.
 
 ### Ordinary conditional PUT {#conditional-put}
 

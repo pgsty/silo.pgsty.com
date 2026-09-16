@@ -16,41 +16,37 @@ icon: fa-solid fa-code-branch
 | 组件 | 发行版本 | 实际包含内容 |
 | --- | --- | --- |
 | Server | <a href="https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z" style="white-space:nowrap">20260903</a> | pkg v3.13.2；上游 SDK `0e78d3f18efe`；mcli 20260903；内嵌 Console 源码 `464a59d73ada`，版本标识为 v2.3.0 |
-| <span style="white-space:nowrap">独立<br>Console</span> | [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0) | pkg v3.13.3；MC 源码 `c8aa5d25a63a`；上游 SDK `0e78d3f18efe`；对象浏览器分页 |
+| <span style="white-space:nowrap">独立<br>Console</span> | [v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) | pkg v3.14.1；mcli 20260916；上游 SDK `32e1f32cb176`；共享下载限制、流式 ZIP 与签名制品 |
 | mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1；上游 SDK `32e1f32cb176`；软件包版本 `20260916000000.0.0` |
 | 共享 pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；CopyObject 内嵌错误处理；JWX v3.3.0 字段名转义；上游 SDK `32e1f32cb176` |
 
 发布说明：[Server 20260903](/zh/blog/release/silo-20260903/)、
-[Console v2.4.0](/zh/blog/release/console-2.4.0/)、
+[Console v2.4.1](/zh/blog/release/console-2.4.1/)、
 [mcli 20260916](/zh/blog/release/mcli-20260916/)、[pkg v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1)。
-已发布的 Server 镜像仍捆绑原来的客户端与 Console。安装独立组件的新版本不会替换 Server 内嵌的组件。
+内嵌部署需要在 Server 构建中显式选择 Console 与 MC。
 软件包仓库镜像可能晚于 GitHub 更新；[下载页](/zh/download/)直接链接已发布的制品。
 
-## 主分支协调后的源码 {#source}
+## 9 月 16 日依赖图 {#source}
 
-**9 月 16 日客户端/库发布：** mcli 20260916 对应 [`e952aa78f10a`](https://github.com/pgsty/mc/commit/e952aa78f10a2b77dd525a2b7e3143bcda0cd377)，Go 模块伪版本为 `v0.0.0-20260916070421-e952aa78f10a`；pkg v3.14.1 对应 `fa657ef431ae22e720df37e5144cf00f67102945`。两者使用 SDK `v7.3.1-0.20260915093545-32e1f32cb176` 与 JWX v3.3.0。下面列出的是已核对的 Server/Console 集成源码所选择的较早依赖；发布客户端不会自动推进它们。
+[Console v2.4.1](/zh/blog/release/console-2.4.1/) 选择以下已发布的 pkg 与 MC 源码，
+各模块身份已通过公共 Go proxy 与校验和数据库验证。
 
-9 月 13 日更新通过 [pkg #7](https://github.com/pgsty/silo-pkg/pull/7)、
-[MC #42](https://github.com/pgsty/mc/pull/42)、
-[Console #53](https://github.com/pgsty/silo-console/pull/53) 与 [#54](https://github.com/pgsty/silo-console/pull/54)、
-[Server #181](https://github.com/pgsty/silo/pull/181) 合入。
+- **Console：** `v0.0.0-20260916075814-1360e26d976d` →
+  [`1360e26d976d`](https://github.com/pgsty/silo-console/commit/1360e26d976d82eda395b0b2e449df8c9d49f39c)，标签 `v2.4.1`。
+- **pkg：** `v3.14.1` → `fa657ef431ae22e720df37e5144cf00f67102945`。
+- **MC：** `v0.0.0-20260916070421-e952aa78f10a` →
+  [`e952aa78f10a`](https://github.com/pgsty/mc/commit/e952aa78f10a2b77dd525a2b7e3143bcda0cd377)，标签 `RELEASE.2026-09-16T00-00-00Z`。
+- **上游 minio-go：** `v7.3.1-0.20260915093545-32e1f32cb176`。
+- **JWX / strfmt / React Router：** v3.3.0 / v0.27.2 / v7.18.4。
 
-- **Server/Console 选择的 pkg：** `v3.14.0` → `827f8109ff11bf6239a35d8d6d137cb5738539c3`。
-- **Server/Console 选择的 MC：** `v0.0.0-20260913012246-4f609a4da3bb` → 已发布的 20260913 标签。
-- **Server 选择的 Console：** `v0.0.0-20260916034812-56dfe455ac2f`；经 [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) 合入 main，源码树相同。
-- **Server 的 Console 集成提交：** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c)，通过 [#209](https://github.com/pgsty/silo/pull/209) 合入。9 月 13 日选择的其他组件版本保持不变。
-- **已核对的 Server main：** [`0e3c43778e55`](https://github.com/pgsty/silo/commit/0e3c43778e55dc6342937cb83f8905c160b965e1)，包含下述修复。
-- **上游 minio-go：** `v7.3.1-0.20260910142817-60bd07042d49`。
+Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没有 `/v2` 后缀，
+所以通过规范伪版本引用 Console。Server 嵌入方必须同时复制 Console 与 MC replacement，
+见[Console 集成说明](/zh/compatibility/console/#source)。
 
-**Server 与 Console 最新标签之后的改动尚未发布。** 其中包括[密码权限拆分](/zh/compatibility/password-permissions/)、
-Console 流式 ZIP 下载与新版镜像发布门槛，以及 Server 后续的存储、复制和签名头修复。
-Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 镜像保留发布时的内容。
-[Server changelog](https://github.com/pgsty/silo/blob/main/CHANGELOG.md) 与
-[Console changelog](https://github.com/pgsty/silo-console/blob/main/CHANGELOG.md) 将这些改动列为 Unreleased。
-
-最新已发布的 Server 受 [SN-2026-011](/zh/blog/security/20260913-signed-header-status/) 影响。
-修复已在 main；只升级 pkg、mcli 或独立 Console 无法修补已安装的 Server。
-源码验证和漏洞扫描通过，不代表修复版 Server 二进制已经发布。
+升级前请检查[密码权限迁移](/zh/compatibility/password-permissions/)：
+`admin:ChangeMyPassword` 与 `admin:CreateUser` 分别控制不同操作。
+[Server changelog](https://github.com/pgsty/silo/blob/main/CHANGELOG.md) 和下列源码链接
+说明协调升级 Server 时涉及的存储、IAM 与 HTTP 变化。
 
 ### 存储、IAM 与 HTTP 修复 {#september-reliability}
 
@@ -86,10 +82,9 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 通过查询参数选择的非下载操作。没有新增关闭分享的环境变量，正常公共对象、
 预签名和版本下载继续可用，详见[行为与设计权衡](/zh/reference/minio-server/settings/console/#object-sharing)。
 
-Console 最终 CI 矩阵与漏洞检查在合并前通过。Server 的正式模块依赖通过了
-独立与内嵌两种部署下的真实 API、浏览器分享测试，以及自身 CI 检查。
-这些结果属于源码验收：Console v2.4.0 和 Server 20260903 均不包含此修复，
-合并上述 PR 不会发布新的二进制或镜像。
+修复已随 [Console v2.4.1](/zh/blog/release/console-2.4.1/) 发布。
+精确发布源码通过完整 CI 矩阵、漏洞检查与发布工作流；真实 API 和浏览器分享测试
+覆盖独立与内嵌部署，实际下载的独立二进制也连接 SILO 测试服务通过了分享回归。
 
 ### 普通条件 PUT {#conditional-put}
 

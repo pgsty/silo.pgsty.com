@@ -1118,16 +1118,16 @@ Allows MinIO config management
 
 #### `admin:CreateUser` {#policy-action.admin-CreateUser}
 
-Allows creating other users or resetting their passwords. Published Server
-20260903 also uses this action for the caller's own password change.
+Allows creating other users or resetting their passwords. For self-service
+password changes, use `admin:ChangeMyPassword`.
 
 <a id="policy-action.admin:ChangeMyPassword"></a>
 
 #### `admin:ChangeMyPassword` {#policy-action.admin-ChangeMyPassword}
 
-Server main, paired with pkg v3.14.0 and matching Console, checks this action
-for self-service password changes: implicit Allow, with explicit Deny taking
-precedence. **This is not yet in a published Server/Console as of 2026-09-13.**
+The coordinated SILO stack with Console v2.4.1 and pkg v3.14.1 checks this
+action for self-service password changes: implicit Allow, with explicit Deny
+taking precedence.
 If CreateUser Deny was used to lock passwords, preserve both denies in the same
 statement before upgrading. See the [migration guide](/compatibility/password-permissions/)
 and [version matrix](/compatibility/versions/).

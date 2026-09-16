@@ -11,7 +11,8 @@ url: "/blog/release/console-2.4.0/"
 
 [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0) was published
 on 2026-09-08 from [`c103d08e`](https://github.com/pgsty/silo-console/commit/c103d08ec36aab8e08ba091d77b639158ce9f18f).
-It remains the latest standalone Console release as of 2026-09-13.
+**September 16 follow-up:** [Console v2.4.1](/blog/release/console-2.4.1/) is the
+current release. This article records the v2.4.0 behavior and dependencies.
 
 ## Released behavior {#changes}
 
@@ -25,8 +26,7 @@ It remains the latest standalone Console release as of 2026-09-13.
 - Transient network failures preserve sessions. Empty versioning state,
   malformed sidebar preferences and stale dropdown selections are handled.
 - Embedded Console restores loopback proxy behavior when Server explicitly
-  enables the policy; standalone trust defaults remain unchanged. The latest
-  Server 20260903 still needs its own post-release proxy/WebSocket fixes.
+  enables the policy; standalone trust defaults remain unchanged.
 - Dependencies include pkg **v3.13.3**, MC source
   **`v0.0.0-20260908140805-c8aa5d25a63a`**, and upstream SDK **`0e78d3f18efe`**.
   This release consumed MC as source and did not itself publish a new mcli tag.
@@ -36,18 +36,13 @@ old deduplication defects. Restore already-lost clauses from the original policy
 source. Embedders must copy the MC replacement from the
 [tagged README](https://github.com/pgsty/silo-console/blob/v2.4.0/README.md).
 
-## What is still unreleased {#unreleased}
+## Later release {#unreleased}
 
-Console main now selects pkg **v3.14.0**, mcli **20260913**, and SDK
-**`60bd07042d49`**, and contains the password-permission split, streaming ZIP
-transfers, browser recovery/text improvements and a stricter release-promotion
-contract. **These are not v2.4.0 features.** In particular, v2.4.0 still buffers
-multi-object ZIP downloads in browser memory; use mcli for large transfers.
-
-Server main selects the newer Console source; the published Server 20260903
-still embeds Console source `464a59d73ada` with v2.3.0 version identity.
-See the [component matrix](/compatibility/versions/) and
-[password migration](/compatibility/password-permissions/).
+[Console v2.4.1](/blog/release/console-2.4.1/) adds restricted shared downloads,
+the password-permission split, streaming multi-object ZIPs, browser recovery
+and verifiable release artifacts. It selects pkg v3.14.1 and mcli 20260916.
+v2.4.0 uses the earlier browser-memory ZIP path. Read the
+[password migration](/compatibility/password-permissions/) before upgrading.
 
 The exact v2.4.0 source passed the complete Console CI matrix. The authoritative
 historical record is its [tagged changelog](https://github.com/pgsty/silo-console/blob/v2.4.0/CHANGELOG.md),

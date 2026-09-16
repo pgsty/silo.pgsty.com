@@ -3,7 +3,7 @@ title: "Managing Objects"
 url: "/administration/console/managing-objects/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/console/managing-objects.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="managing-objects"></a>
@@ -54,6 +54,23 @@ The user can perform actions on the bucket’s objects, depending on the policie
 > v0.35.0
 >
 > If you select multiple objects to download, MinIO creates a ZIP archive of those objects for downloading. You must unzip or uncompress this archive after downloading to access the files.
+
+### Multi-object downloads and sharing {#silo-downloads}
+
+[Console v2.4.1](/blog/release/console-2.4.1/) streams multi-selection ZIPs to a
+file writer where supported; other browsers use their native download manager.
+Neither path buffers the complete archive in JavaScript. Console identifies
+the native handoff explicitly; use the browser download manager for subsequent
+progress, cancellation and network errors. Recursive ZIPs normally have no
+reliable total and therefore no completion percentage. Selections above 5 GiB
+or with unknown size recommend mcli.
+
+Directory listings are paged: sorting, filtering and select-all cover the
+current page. Duplicate ZIP tasks are prevented; dismissing a handed-off task
+in Console does not cancel the browser download. Public, presigned and
+version-specific sharing remains available. The anonymous proxy only accepts
+object-content GETs at the configured S3 origin and rejects redirects and system
+endpoints. See the [sharing boundary](/reference/minio-server/settings/console/#object-sharing).
 
 <a id="minio-console-admin-buckets"></a>
 <a id="minio-console-buckets"></a>

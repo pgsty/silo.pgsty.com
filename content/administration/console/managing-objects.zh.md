@@ -3,7 +3,7 @@ title: "管理对象"
 url: "/zh/administration/console/managing-objects/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/console/managing-objects.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-console-managing-objects"></a>
@@ -54,6 +54,18 @@ upstream_modified: false
 > v0.35.0
 >
 > 如果你选择下载多个对象，MinIO 会将这些对象打包为一个 ZIP 归档供下载。 下载后你必须解压该归档，才能访问其中的文件。
+
+### 多对象下载与分享 {#silo-downloads}
+
+[Console v2.4.1](/zh/blog/release/console-2.4.1/) 多选 ZIP 下载使用文件写入器流式保存；
+不支持该接口的浏览器由原生下载管理器接管，两者都不在 JavaScript 中缓冲完整归档。
+Console 会明确提示原生下载交接，此后请在浏览器下载管理器中查看进度、取消或处理网络错误。
+递归 ZIP 通常没有可靠总大小，未知大小不显示完成百分比；超过 5 GiB 或大小未知的选择推荐使用 mcli。
+
+对象目录按页加载，排序、筛选与全选仅作用于当前页。重复 ZIP 任务会被阻止，
+原生下载交接后关闭 Console 任务条目不会取消浏览器下载。公开对象、预签名链接与指定版本分享
+继续可用，匿名代理只接受配置 S3 源站上的对象内容 GET，拒绝重定向和系统端点。
+详见[分享边界](/zh/reference/minio-server/settings/console/#object-sharing)。
 
 <a id="minio-console-buckets"></a>
 <a id="id4"></a>
