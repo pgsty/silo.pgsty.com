@@ -16,7 +16,7 @@ its commit check and the live English/Chinese pages after publication.
 
 ## Local development
 
-Install Hugo Extended 0.160.1 or newer, Go, and Git. OINK vendors the browser and styling dependencies required by the site, so a Node.js toolchain is not needed.
+Install Hugo Extended 0.160.1 or newer, Go, Git, and Python 3.10 or newer with `venv` support. OINK vendors the browser and styling dependencies required by the site, so a Node.js toolchain is not needed.
 
 ```bash
 make dev
@@ -33,6 +33,11 @@ Run the module verification and warning-strict production build with:
 ```bash
 make check
 ```
+
+The first check creates `.venv-check` and installs the pinned test dependencies
+from `bin/requirements-test.txt`. Subsequent checks reuse that environment.
+`make test` runs the link-checker and replica-audit regression tests without
+rebuilding the site.
 
 OINK is pinned as a Hugo Module in `go.mod`. Its wordmark, featured-image cascade, and Markdown-first steps are configured or used directly by this site. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, provenance notice, and imported-document ordering. Documentation chrome, search, footer, content components, blog feeds, and blocks come from the theme.
 
