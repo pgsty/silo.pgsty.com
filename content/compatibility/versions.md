@@ -40,7 +40,7 @@ and [Server #181](https://github.com/pgsty/silo/pull/181).
 - **MC:** `v0.0.0-20260913012246-4f609a4da3bb` → the published 20260913 tag.
 - **Console selected by Server:** `v0.0.0-20260913015128-417559bb2c97`; accepted on main by merge `449c185a8d14` with the same tree.
 - **Server dependency integration:** `5d955b5b7444f8a3ab550ce92713607998f89c0d`.
-- **Verified Server main:** [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a), including the repairs below.
+- **Verified Server main:** [`fb7c406ddc0e`](https://github.com/pgsty/silo/commit/fb7c406ddc0e41faab847799685bc91396839fcc), including the repairs below, their release notes and integration-fixture corrections.
 - **Upstream minio-go:** `v7.3.1-0.20260910142817-60bd07042d49`.
 
 **Server and Console changes after their latest tags remain unreleased.** This
@@ -100,11 +100,37 @@ contains source hashes, local tests and remaining acceptance limits. PR #196's
 11 checks passed before merge. Those results establish source acceptance, not
 a new release or production cluster rollout.
 
+### Conditional PUT proposal {#conditional-put}
+
+The separate cross-pool conditional PUT defect in
+[#199](https://github.com/pgsty/silo/issues/199) was reproduced on published
+Server 20260903. [PR #207](https://github.com/pgsty/silo/pull/207), at
+`4620be394b52`, passed its eight CI checks on 2026-09-16 but remains
+**unmerged and unreleased**. The proposed behavior is:
+
+- Ordinary multi-pool `If-Match` / `If-None-Match` conditions use the logical
+  current object across all pools. Unreadable metadata can prevent acceptance
+  even when GET still works from another pool; read-quorum failures return 503.
+  Restore readability or heal before retrying.
+- When a destination `versionId` is supplied, the public condition still
+  compares the current object. The requested destination version is preserved;
+  internal replication keeps its addressed-version checks. Unconditional PUT
+  and single-pool conditions retain their existing behavior.
+- A successful conditional overwrite does not retire stale copies in other
+  pools, and upgrading cannot recover historical accepted overwrites. Existing
+  modification-time/pool ordering remains in use; this adds no global clock
+  ordering guarantee.
+
+The multipart-completion fix in #190 neither introduced nor repaired this PUT
+defect. Final release notes must identify the actual merged candidate before
+describing the proposed behavior as available on main or in a release.
+
 ### Work still pending {#pending}
 
 - **Ordinary conditional PUT:** [#199](https://github.com/pgsty/silo/issues/199)
-  tracks a separate cross-pool precondition gap under investigation and review.
-  The multipart-completion repair in #190 does not resolve ordinary PUT.
+  tracks integration of [PR #207](https://github.com/pgsty/silo/pull/207).
+  Its [proposed behavior and availability tradeoff](#conditional-put) remain
+  separate from the merged multipart-completion repair.
 - **Upgrade and historical-state readiness:** [#200](https://github.com/pgsty/silo/issues/200)
   tracks the [IAM upgrade/restore rehearsal](/operations/replication/iam-upgrade/);
   [#201](https://github.com/pgsty/silo/issues/201) tracks [historical replica inventory and repair validation](/operations/replication/replica-metadata-audit/).

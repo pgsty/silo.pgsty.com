@@ -37,7 +37,7 @@ icon: fa-solid fa-code-branch
 - **MC：** `v0.0.0-20260913012246-4f609a4da3bb` → 已发布的 20260913 标签。
 - **Server 选择的 Console：** `v0.0.0-20260913015128-417559bb2c97`；经 `449c185a8d14` 合入 main，源码树相同。
 - **Server 依赖集成提交：** `5d955b5b7444f8a3ab550ce92713607998f89c0d`。
-- **已核对的 Server main：** [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a)，包含下述修复。
+- **已核对的 Server main：** [`fb7c406ddc0e`](https://github.com/pgsty/silo/commit/fb7c406ddc0e41faab847799685bc91396839fcc)，包含下述修复、相关发布说明及集成测试夹具修正。
 - **上游 minio-go：** `v7.3.1-0.20260910142817-60bd07042d49`。
 
 **Server 与 Console 最新标签之后的改动尚未发布。** 其中包括[密码权限拆分](/zh/compatibility/password-permissions/)、
@@ -72,9 +72,25 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 
 [R4–R8 集成记录](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)保留了源码哈希、本地测试及验收边界。PR #196 合并前的 11 项检查全部通过；这些结果证明源码验收，不代表新版本发布或生产集群升级。
 
+### 条件 PUT 修复提案 {#conditional-put}
+
+[#199](https://github.com/pgsty/silo/issues/199) 的跨 pool 条件 PUT 问题已在发布版 Server 20260903 上复现。
+[PR #207](https://github.com/pgsty/silo/pull/207) 的提交 `4620be394b52` 于 2026-09-16 通过全部 8 项 CI，
+目前**尚未合并、尚未发布**。拟议行为如下：
+
+- 普通多 pool `If-Match` / `If-None-Match` 条件使用所有池中的逻辑当前对象。
+  即使另一个池仍可处理 GET，只要无法核实某池元数据，条件写入就可能失败；读取仲裁不足返回 503，应恢复可读性或完成 heal 后重试。
+- 请求指定目标 `versionId` 时，公开写入条件仍比较当前对象，写入的目标版本保持请求指定的值；
+  内部复制保留按指定版本检查的语义。无条件 PUT 与单 pool 条件写入保持既有行为。
+- 条件覆盖成功不会清理其他池中的旧副本，升级也不能恢复历史上已接受的覆盖。
+  仍沿用既有修改时间与 pool 排序，不新增全局时钟排序保证。
+
+#190 的分片完成修复既未引入、也未修复此 PUT 问题。
+最终发布说明须绑定实际合入的候选提交，才能将上述行为描述为主分支或发行版已提供的能力。
+
 ### 仍待完成的工作 {#pending}
 
-- **普通条件 PUT：** [#199](https://github.com/pgsty/silo/issues/199) 跟踪跨 pool 前置条件盲区，修复仍在独立研究与评审。#190 修复的是分片完成，不能据此认定普通 PUT 已修复。
+- **普通条件 PUT：** [#199](https://github.com/pgsty/silo/issues/199) 跟踪 [PR #207](https://github.com/pgsty/silo/pull/207) 的集成；[拟议行为与可用性取舍](#conditional-put)须与已合入的分片完成修复分开看待。
 - **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。源码修复不会自动修复旧状态。
 - **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 单独验收最终制品与多进程栈，当前尚未据此发布新 Server。
 - **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 仍然开放。[设计记录](/zh/blog/design/list-multipart-uploads/)中的前缀、分页与原始对象键发现限制，不属于上面的分片上传完成修复。
