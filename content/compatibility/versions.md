@@ -67,6 +67,9 @@ a build containing them.
 | Ordinary conditional PUT | [#207](https://github.com/pgsty/silo/pull/207) | Public write conditions use the logical current object across all pools, including draining pools. Readability and destination-version changes are detailed [below](#conditional-put). |
 | IAM revocations | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | Peer deletion notifications reload committed state. Durable deletion versions and retained revocation boundaries prevent stale site replay from restoring revoked identities or their older grants. |
 | Replicated tags and delete markers | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS copies preserve tag revision times; tag deletion advances its revision and resists delayed events. Delete-marker purges retain their identity and retry state through MRF recovery. |
+| Delete-marker purges | [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)<br>[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0)<br>[`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) | An exact-version purge never creates the marker on drives that lack it, a retried purge of a missing version needs a write-quorum majority of absent drives, healed markers keep their replication and purge metadata, and a queued marker creation is re-checked against the source under the replication lock before it is sent. Remaining gaps are listed [below](#pending) and in [#217](https://github.com/pgsty/silo/issues/217); see the [third round of the replication record](/blog/design/replication-reliability/#third-round). |
+| Listing under drive disagreement | [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) | A null object version that has listing quorum is kept when a newer minority of drives sorts first. Rolling restarts with concurrent overwrites can still omit readable keys from a successful LIST; see [below](#pending), [#218](https://github.com/pgsty/silo/issues/218) and the [design record](/blog/design/list-null-version-quorum/). |
+| Pool migration tags | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) | Rebalance and decommission carry object tags and their revision fields to the destination pool for ordinary and multipart writes. Tags lost by earlier migrations are not recovered; see [multi-pool object consistency](/blog/design/multi-pool-object-consistency/#migration-tags). |
 | Replica metadata | [#194](https://github.com/pgsty/silo/pull/194) | Restoring replication metadata no longer reintroduces the transport-only `aws-chunked` encoding into stored object metadata. |
 | Request-header timeout | [#196](https://github.com/pgsty/silo/pull/196) | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` reaches the HTTP server and imposes an absolute HTTP/1 header-reading deadline, even while bytes keep arriving. HTTP/1 bodies retain the existing rolling idle timeout. |
 
@@ -159,6 +162,25 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
   collects release notes and component identities; [#203](https://github.com/pgsty/silo/issues/203)
   separately validates final artifacts and multi-process behavior. No new Server
   release is established by these tracking issues.
+- **Multi-site delete-marker convergence:** the source-side re-check in
+  `254b19ac0` does not cover creations already in flight or replayed from
+  another site, and minority marker copies left by a crash after a
+  majority-acknowledged purge have no proven persistent cleanup owner.
+  [#217](https://github.com/pgsty/silo/issues/217) tracks the receiver-side
+  design. The three-site evidence for the purge repairs came from a combined
+  build, not from the final main; see the
+  [design record](/blog/design/replication-reliability/#third-round-limits).
+- **Listing during rolling restarts:** with `8d06424b1` included, a four-node
+  rolling restart under concurrent overwrites returned 2,624 of 27,966
+  successful LISTs with one to four readable keys missing; steady state
+  returned 0 of 20,000. The internal cause is not bound;
+  [#218](https://github.com/pgsty/silo/issues/218) tracks the diagnostic
+  capture and contract decision. Do not run destination-deleting sync tools
+  against listings taken during a rolling restart; see the
+  [design record](/blog/design/list-null-version-quorum/#boundary).
+- **Pool migration tags:** `fced86303` has unit and race coverage; the
+  post-repair eight-node rebalance/decommission acceptance was not completed.
+  Tags dropped by earlier migrations must be audited, not assumed.
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
   open for capacity/release acceptance and the known delayed-creation-write
   boundary. PR #198 repairs durable discovery, global pagination and static
