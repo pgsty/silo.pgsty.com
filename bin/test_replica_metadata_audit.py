@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Contract tests: run with the same Python/boto3 environment as the audit tool."""
 import datetime
+import hashlib
 import importlib.util
 import io
 import json
@@ -31,6 +32,10 @@ def head(vid="old", encoding="gzip, aws-chunked", **extra):
 
 
 class InventoryTests(unittest.TestCase):
+    def test_published_checksum_matches_script(self):
+        expected = tool.with_suffix('.py.sha256').read_text().split()[0]
+        self.assertEqual(hashlib.sha256(tool.read_bytes()).hexdigest(), expected)
+
     def setUp(self):
         self.client = boto3.client("s3", endpoint_url="http://127.0.0.1:1", region_name="us-east-1",
                                    aws_access_key_id="fixture", aws_secret_access_key="fixture-secret")

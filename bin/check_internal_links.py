@@ -114,7 +114,7 @@ def main() -> int:
             checked += 1
             route, fragment = target
             candidates = target_candidates(public, route)
-            existing = next((candidate.resolve() for candidate in candidates if candidate.exists()), None)
+            existing = next((candidate.resolve() for candidate in candidates if candidate.is_file()), None)
             if existing is None:
                 failures[f"missing target {route}"].append(source_route)
                 continue
