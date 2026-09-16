@@ -4,7 +4,7 @@
 # Order: merged PR authors, other PR authors, then issue-only authors; impact within each tier.
 # featured marks significant contributions, including adopted proposals and actionable reports.
 # Refresh WebP and GitHub SVG avatars with: python3 bin/contributor_avatars.py
-updated: "2026-09-10T02:15:00+00:00"
+updated: "2026-09-16T03:41:47+00:00"
 repositories:
   - repo: "pgsty/silo"
     issues: 82
@@ -118,6 +118,11 @@ reports:
     featured: true
     what: "Reported the unsigned-header CopyObject cross-object read (SN-2026-011)"
     whatZh: "报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011）"
+  - handle: "jiri-pejchal"
+    name: "Jiri Pejchal"
+    featured: true
+    what: "Reported the Console share proxy's exposure of internal metrics"
+    whatZh: "报告 Console 分享代理暴露内部指标的问题"
   - handle: "mumu-lab"
     name: "木木"
     what: "Reported bucket quota metrics reading a deprecated field"
