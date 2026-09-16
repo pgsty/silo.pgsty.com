@@ -105,6 +105,11 @@ is missing, polluted or otherwise untrustworthy, keep the object unresolved.
    required, explicitly document changed version identity and caller impact.
    If no supported safe operation exists, leave the record unresolved. Do not
    edit `xl.meta` or internal drive files.
+   Verify the encryption configuration and key availability at each destination;
+   an encrypted source alone does not establish encrypted replica storage.
+   After any restart, use a designated write/read canary on every serving
+   process, including replication targets, before COPY or rollback. Health
+   checks and successful reads can precede usable write quorum.
 4. Immediately before a write, recheck exact version, ETag, size, metadata
    fingerprint, timestamps, tags and lock state under the chosen write-coordination
    procedure. A read-then-write check alone does not eliminate races; metadata
@@ -113,12 +118,19 @@ is missing, polluted or otherwise untrustworthy, keep the object unresolved.
    retained metadata/locks and eventual replica convergence. Exercise restart,
    delayed old events and the specific rollback operation. A successful local
    COPY response alone is insufficient.
+   Check exact version listings at every site and the source replication status
+   as well as current-object reads. After rollback, the replacement version must
+   be absent from every intended replica; a correct current object can coexist
+   with a version still awaiting purge elsewhere.
 
 Keep the immutable manifest, full private metadata backup and a tested rollback
 for the selected operation. If it created a new version, rollback must account
 for that version and which version is current. Another COPY is not proof of
 rollback. Reverting the binary can reopen the original error path and does not
 undo prior metadata writes.
+If a write fails or its outcome is uncertain, stop and re-inventory the exact
+versions before retrying. An automatic COPY retry can create another version;
+repeating the request is not a substitute for reconciling its outcome.
 
 ## Tags and marker purge {#other-state}
 
@@ -148,12 +160,40 @@ through an explicit replacement COPY. Raw gzip bytes and tags were preserved,
 but COPY created a new version and left the original version's header unchanged.
 Deleting only that new, unlocked version restored the original current version.
 This demonstrates the version/rollback distinction, not a general in-place
-repair. The setup used one Linux ARM64 process/drive and a static test KMS key;
-it did not validate multi-site convergence, SSE-C, external KMS or rewriting
-locked versions. Detailed results and remaining checks are tracked in
+repair. That initial setup used one Linux ARM64 process/drive and a static test
+KMS key.
+
+An additional rehearsal used three sites, each with two Server processes and
+four drives. A stopped Server 20260903 backup was restored into the same
+candidate build above, with explicit SSE-S3 bucket defaults and a static lab
+KMS key. Two unlocked gzip objects received replacement versions while one
+site was offline. After it returned, all six processes served the same new
+version IDs, raw gzip bytes, metadata and tags; the source reported replication
+`COMPLETED`. Later tag updates to the historical versions remained separate
+from the replacement versions. An untouched control retained SSE-S3,
+GOVERNANCE retention and legal hold throughout.
+
+| Phase | Observed exact-version inventory at each site |
+| --- | --- |
+| Old storage and upgraded clone | Three affected original versions. |
+| Replacement, offline-site catch-up and cold restart | Two corrected current versions plus the three affected original versions. |
+| Delete only the two new unlocked versions, then cold restart | The three original versions remain; both replacement version IDs are absent. |
+
+The completed run checked signed write/read canaries on every process before
+both COPY and rollback. Earlier attempts are retained: health/read checks
+passed while writes returned `SlowDownWrite`, and a rollback begun immediately
+after restart still had replacement versions in peer listings after 180
+seconds. That observation does not establish a permanent replication failure;
+the longer recovery path for that attempt was not tested. The completed
+procedure requires actual write readiness and exact-version convergence.
+
+The multi-site lab ran in one isolated Linux ARM64 container with a shared
+clock. It did not validate SSE-C, external KMS, rewriting locked versions,
+every delayed-event ordering or a general in-place historical-version repair.
+Detailed results and remaining limits are tracked in
 [#201](https://github.com/pgsty/silo/issues/201).
 
-The inventory tool is preparation, not a repair engine. Clone remediation and
-configuration-specific Object Lock/SSE/replication checks remain tracked in
+The inventory tool is preparation, not a repair engine. Configuration-specific
+Object Lock/SSE/replication checks remain tracked in
 [#201](https://github.com/pgsty/silo/issues/201). Record any production inventory
 and writes separately against a selected deployment and reviewed change list.
