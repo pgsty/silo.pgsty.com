@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
-> **最新已发布：** [Console v2.4.0](/zh/blog/release/console-2.4.0/)（2026-09-08）。对象分页已发布；流式 ZIP、密码权限拆分与新版发布流程尚在 main。Server 内嵌版本与独立发行版不同，见[组件矩阵](/zh/compatibility/versions/)。
+> **最新版本：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)（2026-09-16），包含共享下载边界修复、密码权限拆分、流式 ZIP 与签名发布制品。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
 SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
@@ -46,25 +46,22 @@ SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地�
 
 ### 5. 面向开发者：模块图 {#source}
 
-截至 2026-09-13，Console main 直接 require `github.com/pgsty/silo-pkg/v3` v3.14.0，
-使用上游 SDK `v7.3.1-0.20260910142817-60bd07042d49`，并保留历史模块路径 `github.com/minio/console`。
-维护组件 replacement 为：
+Console v2.4.1 直接 require `github.com/pgsty/silo-pkg/v3` v3.14.1 与上游 SDK
+`v7.3.1-0.20260915093545-32e1f32cb176`，保留历史模块路径 `github.com/minio/console`。
+嵌入方显式选择以下已发布源码：
 
 ```go
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260913012246-4f609a4da3bb
+replace github.com/minio/console => github.com/pgsty/silo-console v0.0.0-20260916075814-1360e26d976d
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260916070421-e952aa78f10a
 ```
 
-Go 不继承依赖的 replacement。Server 必须同时显式选择 PGSTY Console 与 MC。
-兼容性固定版本另有 go-systemd v22.6.0（NetBSD）与 tablewriter v0.0.5（MC API）。
-旧 `minio/pkg/v3` 可由 colorjson 等间接引入；受维护的策略实现直接来自 silo-pkg。
-`minio/pkg => silo-pkg`、`minio-go => silo-go` 的旧 replacement 不再受支持。
+Go 不继承依赖模块的 replacement，Server 必须同时选择 PGSTY Console 与 MC。
+go-systemd v22.6.0 保留 NetBSD 兼容，tablewriter v0.0.5 保留 MC API 兼容。
+colorjson 带入的历史 minio/pkg 传递依赖与维护中的 silo-pkg 策略实现分开；不使用旧的
+`minio/pkg => silo-pkg` 或 `minio-go => silo-go` replacement。
+详见[组件矩阵](/zh/compatibility/versions/)和[嵌入指南](https://github.com/pgsty/silo-console/blob/v2.4.1/docs/Embedding.md)。
 
-**上述是源码图，不是 v2.4.0 发布依赖。** v2.4.0 使用 pkg v3.13.3、MC `c8aa5d25a63a`、SDK `0e78d3f18efe`。
-Server 20260903 内嵌的 Console 是 `464a59d73ada`（v2.3.0 版本标识）；Server main 选择 `417559bb2c97`。
-精确矩阵见[组件版本](/zh/compatibility/versions/)，嵌入步骤见[源码指南](https://github.com/pgsty/silo-console/blob/main/docs/Embedding.md)。
-
-正式发布门槛针对 SILO、Console、mcli、pkg 的协调栈。上游原版 MinIO/MC 只做非阻塞兼容性探测，
-不能据此降级 pkg 或重复实现其 API。
+发布门禁验证配套 SILO、Console、mcli 与 pkg；上游 MinIO/MC 探针属于非阻塞兼容信号，不要求降低 pkg 版本或复制 API。
 
 ## 迁移 {#migration}
 
@@ -74,6 +71,11 @@ Server 20260903 内嵌的 Console 是 `464a59d73ada`（v2.3.0 版本标识）；
 
 - `silo-console` 不会自我更新。请通过软件包、镜像或编排系统来推送新版本。
 - 任何依赖控制台访问 MinIO 运营服务的流程 —— 更新源、许可、遥测 —— 都不再有可访问的对端。
+
+v2.4.1 升级还需检查[密码权限迁移](/zh/compatibility/password-permissions/)。
+Linux 软件包使用 `/etc/silo-console/certs` 作为证书目录；重启前迁移旧证书，或在
+`/etc/default/console` 的 `CONSOLE_OPTS` 中保留旧路径。服务名和配置文件路径不变。
+共享代理仅接受对象下载，不需要新增环境变量。详见[本版发布说明](/zh/blog/release/console-2.4.1/)。
 
 ## 参见 {#see-also}
 

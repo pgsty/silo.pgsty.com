@@ -46,7 +46,7 @@ Values must be integers from 1 to 1048576. Each anonymous cap must be strictly b
 ## Object sharing {#object-sharing}
 
 > [!NOTE]
-> **Merged source fix, verified on 2026-09-16:** [Console #56](https://github.com/pgsty/silo-console/pull/56) enforces the boundary below. [Server #209](https://github.com/pgsty/silo/pull/209) selects the corrected Console source for embedded deployments. These changes are not in the published Console v2.4.0 or Server 20260903; existing binaries and images are unchanged. See [component status](/compatibility/versions/#console-sharing).
+> **Console v2.4.1:** [#56](https://github.com/pgsty/silo-console/pull/56) implements the boundary below, released in [v2.4.1](/blog/release/console-2.4.1/). [Server #209](https://github.com/pgsty/silo/pull/209) integrates the corresponding embedded behavior. See the [component notes](/compatibility/versions/#console-sharing).
 
 The fix requires no new setting. Its request restrictions always apply, and normal sharing remains available. `CONSOLE_SHARE_MINIO_URL` continues to select only the generated link format. The anonymous proxy is limited to object-content GET requests:
 

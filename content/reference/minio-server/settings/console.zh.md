@@ -46,7 +46,7 @@ Server 的 S3 策略保持不变。设置 `none`/`off` 时，S3 也会忽略内�
 ## 对象分享 {#object-sharing}
 
 > [!NOTE]
-> **源码已合入，核对于 2026-09-16：** [Console #56](https://github.com/pgsty/silo-console/pull/56) 实现了以下请求边界，[Server #209](https://github.com/pgsty/silo/pull/209) 为内嵌部署选择了修复后的 Console 源码。这些改动尚未进入已发布的 Console v2.4.0 或 Server 20260903，现有二进制与镜像不会随源码合并而改变。详见[组件状态](/zh/compatibility/versions/#console-sharing)。
+> **Console v2.4.1：** [#56](https://github.com/pgsty/silo-console/pull/56) 实现了以下请求边界，并随 [v2.4.1](/zh/blog/release/console-2.4.1/) 发布。[Server #209](https://github.com/pgsty/silo/pull/209) 接入了对应的内嵌行为。详见[组件说明](/zh/compatibility/versions/#console-sharing)。
 
 该修复无需新增配置，请求限制始终执行，正常分享继续可用。`CONSOLE_SHARE_MINIO_URL` 仍只选择生成的链接格式。匿名代理仅允许下载对象内容的 GET 请求：
 

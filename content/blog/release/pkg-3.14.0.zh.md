@@ -26,8 +26,8 @@ url: "/zh/blog/release/pkg-3.14.0/"
 要保留旧版同时禁止两类操作的限制，应在升级前把两个动作保留在**同一个 Deny 语句**中，保留原资源范围与条件，
 并持续到回滚窗口结束。旧 Server 不会执行此端点的密码专用 Deny。详见[完整迁移指南](/zh/compatibility/password-permissions/)。
 
-截至 2026-09-13，pkg 与 mcli 已发布，配套 Server 和 Console 仍是**主分支源码**。
-Server 20260903、Console v2.4.0 尚不包含拆分。见[组件版本矩阵](/zh/compatibility/versions/)。
+**9 月 16 日更新：** [Console v2.4.1](/zh/blog/release/console-2.4.1/) 发布配套密码界面，
+使用 pkg v3.14.1 与 mcli 20260916。协调升级见[组件版本矩阵](/zh/compatibility/versions/)。
 
 ## 依赖与验证 {#dependencies}
 

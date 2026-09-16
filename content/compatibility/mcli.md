@@ -41,8 +41,8 @@ checksums for empty uploads and quiet JSON output. Boolean environment values
 accept on/off. Deny/NotResource and bounded wildcard fixes preserve clauses that
 could previously be lost; recover already-lost clauses from the original policy.
 The [password-permission split](/compatibility/password-permissions/) requires
-matching Server/Console source; the latest public Server/Console do not contain
-it. Updating the client alone does not change Server authorization.
+Console v2.4.1 and a matching Server. Review the existing policy denies as
+part of the coordinated upgrade.
 
 ## Changes inherited from 20260903 {#previous-release}
 

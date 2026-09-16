@@ -31,9 +31,9 @@ Deny statement**, including its original scope and conditions, before upgrading
 and throughout rollback. Old Servers do not enforce a password-only deny for
 this endpoint. Read the [full migration guide](/compatibility/password-permissions/).
 
-As of 2026-09-13, pkg and mcli have been released, but the matching Server and
-Console changes are **main-branch source only**. Server 20260903 and Console
-v2.4.0 do not contain the split. See [the component matrix](/compatibility/versions/).
+**September 16 follow-up:** [Console v2.4.1](/blog/release/console-2.4.1/) ships
+the matching password UI with pkg v3.14.1 and mcli 20260916. Follow the
+[component matrix](/compatibility/versions/) for the coordinated upgrade.
 
 ## Dependencies and verification {#dependencies}
 

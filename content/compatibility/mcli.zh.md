@@ -33,7 +33,7 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 20260913 使用 pkg v3.14.0、上游 SDK `60bd07042d49` 和 Go 1.27.1，刷新 Go x/* 依赖。
 它保留 mirror 目标历史版本，修复重启 dry run、非交互行为、传输/SQL 错误退出、空上传显式校验和及 quiet JSON 输出，布尔环境变量支持 on/off。
 策略 Deny/NotResource 与有界通配匹配修复会保留原先可能丢失的拒绝语句；已丢失语句需从原始策略恢复。
-[密码权限拆分](/zh/compatibility/password-permissions/)需要配套 Server/Console，最新公开 Server/Console 尚未包含，单独升级客户端不会修改服务端授权。
+[密码权限拆分](/zh/compatibility/password-permissions/)配套 Console v2.4.1 与对应 Server；协调升级时需检查现有策略中的 Deny。
 
 ## 继承自 20260903 的变化 {#previous-release}
 

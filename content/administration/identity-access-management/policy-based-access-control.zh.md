@@ -1116,14 +1116,14 @@ MinIO 支持以下 action，用于为 [`mc admin`](/zh/reference/minio-mc-admin/
 
 #### `admin:CreateUser` {#policy-action.admin-CreateUser}
 
-允许创建其他用户或重置其密码。已发布 Server 20260903 也用这个动作判断修改自己的密码。
+允许创建其他用户或重置其密码。修改自己的密码使用 `admin:ChangeMyPassword`。
 
 <a id="policy-action.admin:ChangeMyPassword"></a>
 
 #### `admin:ChangeMyPassword` {#policy-action.admin-ChangeMyPassword}
 
-Server main 配合 pkg v3.14.0 与匹配的 Console 后，修改自己的密码改为检查此动作，隐式允许但显式 Deny 优先。
-**截至 2026-09-13 尚未随 Server/Console 发布。** 如果原 CreateUser Deny 用于锁定密码，需在升级前保留同语句双 Deny。
+SILO 配合 Console v2.4.1 与 pkg v3.14.1 后，修改自己的密码检查此动作，隐式允许但显式 Deny 优先。
+如果原 CreateUser Deny 用于锁定密码，需在升级前保留同语句双 Deny。
 见[完整迁移说明](/zh/compatibility/password-permissions/)与[版本矩阵](/zh/compatibility/versions/)。
 
 <a id="policy-action.admin:DeleteUser"></a>

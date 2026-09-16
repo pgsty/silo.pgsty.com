@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
-> **Latest published:** [Console v2.4.0](/blog/release/console-2.4.0/) (2026-09-08). Object pagination is released; streaming ZIPs, the password split and revised publication flow remain on main. Embedded and standalone versions differ; see the [component matrix](/compatibility/versions/).
+> **Latest release:** [Console v2.4.1](/blog/release/console-2.4.1/) (2026-09-16), with restricted shared downloads, password-permission separation, streaming ZIPs and signed release artifacts. See the [component matrix](/compatibility/versions/).
 
 SILO Console is Silo's build of the MinIO Console. This page records where the two are interchangeable and where they differ.
 
@@ -46,30 +46,26 @@ The interface, help content, and documentation links are available in English an
 
 ### 5. For developers: the module graph {#source}
 
-As of 2026-09-13, Console main directly requires `github.com/pgsty/silo-pkg/v3`
-v3.14.0 and upstream SDK `v7.3.1-0.20260910142817-60bd07042d49`, while retaining
-the historical `github.com/minio/console` module path. Its maintained-component
-replacement is:
+Console v2.4.1 directly requires `github.com/pgsty/silo-pkg/v3` v3.14.1 and
+upstream SDK `v7.3.1-0.20260915093545-32e1f32cb176`, retaining the historical
+`github.com/minio/console` module path. Embedders explicitly select these released sources:
 
 ```go
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260913012246-4f609a4da3bb
+replace github.com/minio/console => github.com/pgsty/silo-console v0.0.0-20260916075814-1360e26d976d
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260916070421-e952aa78f10a
 ```
 
-Go does not inherit dependency replacements. Server must explicitly select both
-PGSTY Console and MC. Separate compatibility pins retain go-systemd v22.6.0
-for NetBSD and tablewriter v0.0.5 for the MC API. Legacy transitive minio/pkg
-from colorjson is separate from the maintained silo-pkg policy implementation.
-The old `minio/pkg => silo-pkg` and `minio-go => silo-go` replacements are unsupported.
-
-**This is the source graph, not the v2.4.0 release graph.** v2.4.0 uses pkg
-v3.13.3, MC `c8aa5d25a63a` and SDK `0e78d3f18efe`. Server 20260903 embeds Console
-`464a59d73ada` (v2.3.0 version identity); Server main selects `417559bb2c97`.
+Go does not inherit dependency replacements. Server must select both PGSTY
+Console and MC. go-systemd v22.6.0 preserves NetBSD compatibility and tablewriter
+v0.0.5 preserves the MC API. Legacy transitive minio/pkg from colorjson remains
+separate from the maintained silo-pkg policy implementation. The old
+`minio/pkg => silo-pkg` and `minio-go => silo-go` replacements are unsupported.
 See the [component matrix](/compatibility/versions/) and
-[embedding guide](https://github.com/pgsty/silo-console/blob/main/docs/Embedding.md).
+[embedding guide](https://github.com/pgsty/silo-console/blob/v2.4.1/docs/Embedding.md).
 
 The release-gating target is the coordinated SILO, Console, mcli and pkg stack.
-Unmodified upstream MinIO/MC probes are non-blocking compatibility signals;
-they do not require pkg downgrades or duplicate APIs.
+Upstream MinIO/MC probes remain non-blocking compatibility signals and do not
+require pkg downgrades or duplicate APIs.
 
 ## Migration {#migration}
 
@@ -79,6 +75,12 @@ Two behaviors change on first start and are worth expecting:
 
 - `silo-console` will not update itself. Roll out new versions through packages, images, or your orchestrator.
 - Any workflow that relied on the console reaching MinIO-operated services — the update feed, licensing, or telemetry — no longer has anything to reach.
+
+For v2.4.1, also review the [password-policy migration](/compatibility/password-permissions/).
+Linux packages use `/etc/silo-console/certs`; migrate existing certificates or
+retain their old path in `CONSOLE_OPTS` in `/etc/default/console` before restarting.
+The service and configuration names are retained. Shared downloads require no new
+setting. See the [v2.4.1 release notes](/blog/release/console-2.4.1/).
 
 ## See also {#see-also}
 
