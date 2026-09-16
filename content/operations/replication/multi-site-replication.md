@@ -7,6 +7,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+> **SILO upgrade requirements:** the September IAM repairs require a coordinated upgrade of all participating nodes and a backup containing deletion history. Read [IAM Upgrade and Recovery](/operations/replication/iam-upgrade/) and [Audit Historical Replica State](/operations/replication/replica-metadata-audit/), and use the [component matrix](/compatibility/versions/) to distinguish main from published artifacts.
+
 <a id="site-replication-overview"></a>
 <a id="minio-site-replication-overview"></a>
 
