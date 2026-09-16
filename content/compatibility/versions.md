@@ -67,6 +67,7 @@ a build containing them.
 | --- | --- | --- |
 | Multi-pool storage | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189) | Ordinary single-object version DELETE reconciles copies across pools; reconciliation preserves tag state. The opt-in GET-frequency pool-tiering feature was removed. |
 | Conditional multipart completion | [#190](https://github.com/pgsty/silo/pull/190) | Preconditions use the logical current object across all pools, preventing an older pool copy from accepting a stale ETag or rejecting the current one. |
+| Multipart discovery and cancellation | [#198](https://github.com/pgsty/silo/pull/198) | Discover persistent uploads across pools and sets, continue after native marker uploads disappear, and require majority cancellation confirmations. Strict mode requires a coordinated writer upgrade and legacy drain; see the [upgrade contract](/blog/design/list-multipart-uploads/#implementation). |
 | IAM revocations | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | Peer deletion notifications reload committed state. Durable deletion versions and retained revocation boundaries prevent stale site replay from restoring revoked identities or their older grants. |
 | Replicated tags and delete markers | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS copies preserve tag revision times; tag deletion advances its revision and resists delayed events. Delete-marker purges retain their identity and retry state through MRF recovery. |
 | Replica metadata | [#194](https://github.com/pgsty/silo/pull/194) | Restoring replication metadata no longer reintroduces the transport-only `aws-chunked` encoding into stored object metadata. |
@@ -119,9 +120,11 @@ fix, and no new binary or image is published by merging either PR.
 ### Work still pending {#pending}
 
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
-  open. The prefix, pagination and original-key discovery limitations described
-  in the [design record](/blog/design/list-multipart-uploads/) are not fixed by
-  the multipart-completion repair above.
+  open for capacity/release acceptance and the known delayed-creation-write
+  boundary. PR #198 repairs durable discovery, global pagination and static
+  cancellation confirmation; it does not add a creation fence or certify
+  large-scale scanning. The temporary 10,000-upload trial missed the provisional
+  five-second page target; see the [design record](/blog/design/list-multipart-uploads/#implementation).
 
 ## Dependency and release order {#order}
 
