@@ -42,7 +42,7 @@ and [Server #181](https://github.com/pgsty/silo/pull/181).
 - **MC selected by Server/Console:** `v0.0.0-20260913012246-4f609a4da3bb` → the published 20260913 tag.
 - **Console selected by Server:** `v0.0.0-20260916034812-56dfe455ac2f`; accepted on main by merge [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) with the same tree.
 - **Server Console integration:** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c), merged through [#209](https://github.com/pgsty/silo/pull/209). The other September 13 component pins remain unchanged.
-- **Verified Server main:** [`3c26a8b0b5bd`](https://github.com/pgsty/silo/commit/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca), including the repairs below.
+- **Verified Server main:** [`0e3c43778e55`](https://github.com/pgsty/silo/commit/0e3c43778e55dc6342937cb83f8905c160b965e1), including the repairs below.
 - **Upstream minio-go:** `v7.3.1-0.20260910142817-60bd07042d49`.
 
 **Server and Console changes after their latest tags remain unreleased.** This
@@ -70,6 +70,7 @@ a build containing them.
 | Multi-pool storage | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189) | Ordinary single-object version DELETE reconciles copies across pools; reconciliation preserves tag state. The opt-in GET-frequency pool-tiering feature was removed. |
 | Conditional multipart completion | [#190](https://github.com/pgsty/silo/pull/190) | Preconditions use the logical current object across all pools, preventing an older pool copy from accepting a stale ETag or rejecting the current one. |
 | Multipart discovery and cancellation | [#198](https://github.com/pgsty/silo/pull/198) | Discover persistent uploads across pools and sets, continue after native marker uploads disappear, and require majority cancellation confirmations. Strict mode requires a coordinated writer upgrade and legacy drain; see the [upgrade contract](/blog/design/list-multipart-uploads/#implementation). |
+| Ordinary conditional PUT | [#207](https://github.com/pgsty/silo/pull/207) | Public write conditions use the logical current object across all pools, including draining pools. Readability and destination-version changes are detailed [below](#conditional-put). |
 | IAM revocations | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | Peer deletion notifications reload committed state. Durable deletion versions and retained revocation boundaries prevent stale site replay from restoring revoked identities or their older grants. |
 | Replicated tags and delete markers | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS copies preserve tag revision times; tag deletion advances its revision and resists delayed events. Delete-marker purges retain their identity and retry state through MRF recovery. |
 | Replica metadata | [#194](https://github.com/pgsty/silo/pull/194) | Restoring replication metadata no longer reintroduces the transport-only `aws-chunked` encoding into stored object metadata. |
@@ -82,7 +83,7 @@ a build containing them.
   Back up complete IAM storage and required encryption material; a live admin
   export omits deletion history. Older credentials for a recreated parent may
   need reissuance. Pre-upgrade deletions whose history is already lost cannot be
-  reconstructed automatically. Follow the [IAM upgrade and rollback guide](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/site-replication/iam-revocations.md#protocol-and-supported-upgrade).
+  reconstructed automatically. Follow the [IAM upgrade and rollback guide](/operations/replication/iam-upgrade/).
 - **Unavailable pools can now fail writes and deletes more consistently.**
   Conditional multipart completion fails if any pool's metadata is unreadable,
   even when GET/HEAD can use another pool. Ordinary version DELETE also fails
@@ -90,13 +91,22 @@ a build containing them.
   `503 SlowDownRead`. Retry after recovery. Successful deletion does not promise
   immediate removal from every drive while outbound delete replication is pending.
 - **Access-frequency pool tiering was never in Server 20260903.** Only builds
-  containing the experimental feature need its [configuration/XML migration](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/bucket/lifecycle/access-tiering-removal.md).
+  containing the experimental feature need its
+  [configuration/XML migration](/compatibility/access-tiering-removal/).
   Ordinary lifecycle expiration, remote-tier transitions, rebalance and
   decommission remain available.
 - Purge audit status is normalized from `COMPLETE` to `COMPLETED`. Malformed
   historical tag revisions can fail and retry; this repair does not reconstruct
   their history. A shorter header timeout also constrains TLS handshake reads;
   this is not a new total-duration limit for HTTP/1 uploads or downloads.
+- Objects with recorded tag revisions take **one extra metadata COPY per
+  object** during explicit resync or heal; when the destination is KMS-encrypted
+  by bucket default, that copy rewrites the object data. Replication rules with
+  tag filters still evaluate target eligibility against the post-deletion
+  (empty) tagging state, and arbitrary site clock skew remains outside the
+  repaired ordering guarantees. Both endpoints of a replication pair must run
+  the repaired build for tombstones to be honored; an old peer still drops
+  empty-value revisions. See [Replicated Tag Ordering](/blog/design/replicated-tag-ordering/).
 
 The [R4–R8 integration record](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)
 contains source hashes, local tests and remaining acceptance limits. PR #196's
@@ -119,8 +129,42 @@ both standalone and embedded deployments, as well as its CI checks. These are
 source acceptance results: Console v2.4.0 and Server 20260903 do not contain this
 fix, and no new binary or image is published by merging either PR.
 
+### Ordinary conditional PUT {#conditional-put}
+
+The separate cross-pool conditional PUT defect in
+[#199](https://github.com/pgsty/silo/issues/199) was reproduced on published
+Server 20260903. [PR #207](https://github.com/pgsty/silo/pull/207) was merged as
+[`9b4ae82a29cc`](https://github.com/pgsty/silo/commit/9b4ae82a29cc2290fb5be7b551ec3d8cf7acdd99)
+after its head `4620be394b52` passed all eight CI checks on 2026-09-16.
+**The repair is on main and remains unreleased.** Its behavior is:
+
+- Ordinary multi-pool `If-Match` / `If-None-Match` conditions use the logical
+  current object across all pools. Unreadable metadata can prevent acceptance
+  even when GET still works from another pool; read-quorum failures return 503.
+  Restore readability or heal before retrying.
+- When a destination `versionId` is supplied, the public condition still
+  compares the current object. The requested destination version is preserved;
+  internal replication keeps its addressed-version checks. Unconditional PUT
+  and single-pool conditions retain their existing behavior.
+- A successful conditional overwrite does not retire stale copies in other
+  pools, and upgrading cannot recover historical accepted overwrites. Existing
+  modification-time/pool ordering remains in use; this adds no global clock
+  ordering guarantee.
+
+The multipart-completion fix in #190 neither introduced nor repaired this PUT
+defect. Final packaged-candidate and rollout acceptance remain tracked in
+[#203](https://github.com/pgsty/silo/issues/203).
+
 ### Work still pending {#pending}
 
+- **Upgrade and historical-state readiness:** [#200](https://github.com/pgsty/silo/issues/200)
+  tracks the [IAM upgrade/restore rehearsal](/operations/replication/iam-upgrade/);
+  [#201](https://github.com/pgsty/silo/issues/201) tracks [historical replica inventory and repair validation](/operations/replication/replica-metadata-audit/).
+  Source repairs do not automatically repair old state.
+- **Release delivery:** [#202](https://github.com/pgsty/silo/issues/202)
+  collects release notes and component identities; [#203](https://github.com/pgsty/silo/issues/203)
+  separately validates final artifacts and multi-process behavior. No new Server
+  release is established by these tracking issues.
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
   open for capacity/release acceptance and the known delayed-creation-write
   boundary. PR #198 repairs durable discovery, global pagination and static

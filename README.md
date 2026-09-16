@@ -38,6 +38,33 @@ OINK is pinned as a Hugo Module in `go.mod`. Its wordmark, featured-image cascad
 
 ## Content convention
 
+### Contributor records
+
+The reviewed roster in `data/home/contributors.yaml` drives the homepage and
+generates both contributor pages, all four software repositories' `CONTRIBUTORS.md`
+files, and their README sections. Include every human issue / PR author, in any
+state; retain acknowledged security disclosures and distinguish incorporated
+work from the original PR's merge status. Preserve historical release credits.
+
+Refresh the complete paginated GitHub records for every repository listed in
+the data file (`gh api --paginate --slurp 'repos/pgsty/REPO/issues?state=all&per_page=100'`).
+Review descriptions, adoption evidence, account deduplication, bot exclusions,
+status lists, repository totals, ordering, and the audit date together. Then,
+with sibling software checkouts present and Python's PyYAML package available:
+
+```bash
+python3 bin/contributors.py
+python3 bin/contributor_avatars.py
+python3 bin/contributors.py --check
+make check
+```
+
+Use `--workspace /path/to/checkouts` for a different sibling-checkout location.
+Publish new site pages and avatar assets before publishing source-repository
+updates that reference their public URLs.
+
+### Bilingual content
+
 English is the default language. Keep translations next to each other:
 
 ```text
@@ -57,6 +84,16 @@ The product homepage lives at `/`; the documentation overview lives at `/docs/`.
 └── glossary/
 ```
 
+Silo-specific migration and compatibility guidance lives in `content/compatibility/`,
+the advisory ledger in `content/about/security-advisories.*`, and design,
+security investigations written for readers, and release articles in `content/blog/`.
+Raw investigation plans, prompts, session transcripts, execution logs, and private
+security evidence stay outside both this checkout and the server checkout.
+When retiring server-side documents, preserve useful knowledge here, repair
+incoming links, and publish new routes before publishing the source cleanup.
+Repository maintenance rules are in [AGENTS.md](AGENTS.md); `CLAUDE.md` imports
+that same guide.
+
 The English and Chinese corpus was converted deterministically from frozen Sphinx RST/MyST source. The upstream revisions it was frozen from are recorded in [NOTICE.md](NOTICE.md).
 
 ## URL policy
@@ -71,10 +108,10 @@ Pages carried over from the MinIO documentation declare their source in front ma
 
 ```yaml
 upstream_link: https://github.com/minio/docs # material this page is derived from
-upstream_modified: false # page has been changed by Silo beyond the format conversion
+upstream_modified: false # set true when Silo changes substance beyond the format conversion
 ```
 
-`upstream_link` is the only per-page field. The constants it needs — the work's name, the copyright notice, the license, and the attribution page — are declared once in `hugo.yaml` (`upstream_name`, `upstream_copyright`, `upstream_license`, `upstream_notice`); the theme fails the build if a page names a source without them, so an incomplete notice can never ship.
+`upstream_link` identifies the source and `upstream_modified` records whether its substance has changed. Shared attribution metadata — the work's name, the copyright notice, the license, and the attribution page — is declared once in `hugo.yaml` (`upstream_name`, `upstream_copyright`, `upstream_license`, `upstream_notice`); the theme fails the build if a page names a source without that metadata.
 
 Set `upstream_modified: true` when you change the substance of a MinIO-derived page. The notice then links to that file's change history. Pages written from scratch by Silo — the blog, download and release pages, Silo-specific content — carry neither field. A page under a section that cascades the upstream keys opts out with `upstream_link: ""`.
 

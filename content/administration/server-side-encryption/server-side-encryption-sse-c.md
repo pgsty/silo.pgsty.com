@@ -3,7 +3,7 @@ title: "Server-Side Encryption with Client-Managed Keys (SSE-C)"
 url: "/administration/server-side-encryption/server-side-encryption-sse-c/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/server-side-encryption/server-side-encryption-sse-c.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="server-side-encryption-with-client-managed-keys-sse-c"></a>
@@ -110,4 +110,26 @@ mc cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
 ```
 
 - Replace [`SOURCE/BUCKET`](/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment from which you are reading the encrypted object and the full path to the bucket or bucket prefix from which you want to read the SSE-C encrypted object.
-- Replace [`TARGET/BUCKET`](/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment from which you are writing the encrypted object and the full path to the bucket or bucket prefix to which you want to write the SSE-C encrypted object.
+- Replace [`TARGET/BUCKET`](/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment to which you are writing the encrypted object and the full path to the bucket or bucket prefix to which you want to write the SSE-C encrypted object.
+
+### 4) Rotate the SSE-C Key of an Object {#rotate-the-sse-c-key-of-an-object}
+
+An S3 client can change the client-provided key of an existing object without
+re-uploading it: issue an S3 COPY operation where the copy source and the copy
+destination are the same object, and provide both keys in the request headers:
+
+- `X-Amz-Server-Side-Encryption-Customer-Key`: Base64-encoded **new** key (the
+  key the object will have after the operation).
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key`: Base64-encoded
+  **current** key (the key the object is encrypted with now).
+
+Also supply the matching `Customer-Algorithm: AES256` and `Customer-Key-MD5`
+headers for both source and destination, normally through an S3 SDK.
+
+This self-COPY is known as SSE-C key rotation. When the metadata-only path is
+eligible, the server unwraps the object encryption key with the old customer
+key and rewraps it with the new one; stored object bytes are not rewritten.
+Copies that require new object data (for example, some versioning or checksum
+changes) use the regular decrypt-and-re-encrypt path instead. Client-provided
+keys are not persisted in object metadata. Normal COPY permissions and
+versioning behavior still apply; this is not a general in-place version editor.

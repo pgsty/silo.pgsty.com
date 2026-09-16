@@ -30,8 +30,13 @@ silo.pgsty.com —— SILO 官网（Hugo）。给 AI agent 的项目约定，改
 
 ## 其它
 
-- 文案改动同时维护中英两版（`$zh` 分支 / `content/_index.md` 与 `content/_index.zh.md`）。
-- 改完模板或 CSS 跑 `hugo --quiet` 验证构建；`static/css/*` 靠 md5 query string 破缓存，
+- 本仓库承载 SILO 的正式用户文档、迁移指南、安全公告、设计与发布说明；服务端源码仓库链接到本站。
+  调查计划、会话摘录、执行日志和私有安全材料保存在两个仓库之外，不能原样作为站点内容提交。
+- 文案改动在同一分支同时维护相邻的中英文件，例如 `content/_index.md` 与 `content/_index.zh.md`。
+- 更新继承页面的实质内容时设置 `upstream_modified: true`，并保留其 `upstream_link`。
+- 提交前跑 `make check`，验证严格构建与内部链接；跨仓库迁移还要检查源码仓库指向本站的路径和锚点。
+  新路由先随站点发布，再发布依赖它们的源码删除与链接改动。
+- `static/css/*` 靠 md5 query string 破缓存，
   不需要手动改版本号。
 - 指标数据别手写，跑 `bin/metrics.py`。
 - 通用文档壳、搜索、短代码和 blocks 来自 `github.com/pgsty/oink`；不要把 OINK

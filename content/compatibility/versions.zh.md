@@ -39,7 +39,7 @@ icon: fa-solid fa-code-branch
 - **Server/Console 选择的 MC：** `v0.0.0-20260913012246-4f609a4da3bb` → 已发布的 20260913 标签。
 - **Server 选择的 Console：** `v0.0.0-20260916034812-56dfe455ac2f`；经 [`60aa9492779a`](https://github.com/pgsty/silo-console/commit/60aa9492779a67d2f5131a892dea7aa0da5e133c) 合入 main，源码树相同。
 - **Server 的 Console 集成提交：** [`2fabd436c0b1`](https://github.com/pgsty/silo/commit/2fabd436c0b18b6f31536889af27a376e718483c)，通过 [#209](https://github.com/pgsty/silo/pull/209) 合入。9 月 13 日选择的其他组件版本保持不变。
-- **已核对的 Server main：** [`3c26a8b0b5bd`](https://github.com/pgsty/silo/commit/3c26a8b0b5bd404d594d7e1d77f73a53ffbb1fca)，包含下述修复。
+- **已核对的 Server main：** [`0e3c43778e55`](https://github.com/pgsty/silo/commit/0e3c43778e55dc6342937cb83f8905c160b965e1)，包含下述修复。
 - **上游 minio-go：** `v7.3.1-0.20260910142817-60bd07042d49`。
 
 **Server 与 Console 最新标签之后的改动尚未发布。** 其中包括[密码权限拆分](/zh/compatibility/password-permissions/)、
@@ -61,6 +61,7 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 | <span style="white-space:nowrap">多池存储</span> | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189) | 普通单对象版本 DELETE 协调各池副本，副本协调保留标签状态；移除可选的 GET 访问频率池间分层功能。 |
 | <span style="white-space:nowrap">分片完成条件</span> | [#190](https://github.com/pgsty/silo/pull/190) | 前置条件使用所有池中的逻辑最新对象，避免旧副本接受过期 ETag，或拒绝当前 ETag。 |
 | <span style="white-space:nowrap">分片发现与取消</span> | [#198](https://github.com/pgsty/silo/pull/198) | 跨 pool/set 发现持久上传，原生 marker 对应上传消失后仍能续页，取消需要多数盘确认。严格模式要求所有 writer 升级并排空旧上传，见[升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。 |
+| <span style="white-space:nowrap">普通条件 PUT</span> | [#207](https://github.com/pgsty/silo/pull/207) | 公开写入条件使用所有池中的逻辑当前对象，包括正在退役或再平衡的池；可读性及目标版本行为变化见[下文](#conditional-put)。 |
 | <span style="white-space:nowrap">IAM 撤销</span> | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | 节点间删除通知重新加载已提交状态；持久化删除版本与撤销边界，防止旧站点事件重放恢复已撤销身份或旧授权。 |
 | <span style="white-space:nowrap">标签与删除标记</span> | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS 复制保留标签修订时间；删除标签推进修订并抵御延迟事件；删除标记清除在 MRF 恢复时保留标记身份和重试状态。 |
 | <span style="white-space:nowrap">复制元数据</span> | [#194](https://github.com/pgsty/silo/pull/194) | 恢复复制元数据时，不再把传输用的 `aws-chunked` 编码重新写入对象元数据。 |
@@ -68,10 +69,11 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 
 **升级与兼容性要求：**
 
-- **IAM 要求所有参与服务器协调升级。** 不支持共享 IAM 后端的新旧节点混用，也不支持滚动降级。备份完整 IAM 存储及所需加密材料，普通管理导出不包含删除历史。同名父身份重建前签发的旧凭据可能需要重新签发；升级前已经丢失的删除历史无法自动重建。具体操作见 [IAM 升级与回滚说明](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/site-replication/iam-revocations.md#protocol-and-supported-upgrade)。
+- **IAM 要求所有参与服务器协调升级。** 不支持共享 IAM 后端的新旧节点混用，也不支持滚动降级。备份完整 IAM 存储及所需加密材料，普通管理导出不包含删除历史。同名父身份重建前签发的旧凭据可能需要重新签发；升级前已经丢失的删除历史无法自动重建。具体操作见 [IAM 升级与回滚说明](/zh/operations/replication/iam-upgrade/)。
 - **不可读池会更一致地使写入、删除失败。** 即使另一个池还能处理 GET/HEAD，只要任一池元数据不可读，条件式分片上传完成就会失败。普通版本 DELETE 在池不可读或清理失败时也返回错误；读取仲裁不足返回 `503 SlowDownRead`，应在恢复后重试。出站删除复制尚未完成时，请求成功不代表每块磁盘都已立即物理删除。
-- **Server 20260903 从未包含访问频率池间分层。** 只有使用过该实验功能的构建需要按[迁移说明](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/bucket/lifecycle/access-tiering-removal.md)清理配置和 XML。普通生命周期过期、远程层迁移、再平衡与池退役仍可使用。
+- **Server 20260903 从未包含访问频率池间分层。** 只有使用过该实验功能的构建需要按[迁移说明](/zh/compatibility/access-tiering-removal/)清理配置和 XML。普通生命周期过期、远程层迁移、再平衡与池退役仍可使用。
 - 清除操作的审计状态由 `COMPLETE` 规范为 `COMPLETED`。历史异常标签修订可能失败并重试，本次修复不会重建其历史。较短的请求头超时也会限制 TLS 握手读取窗口；它不会给 HTTP/1 上传、下载新增总时长限制。
+- 带已记录标签修订的对象在显式 resync 或 heal 时**每对象多一次元数据 COPY**；当目的端按桶默认做 KMS 加密时，该复制会重写对象数据。带标签过滤的复制规则仍按删除后的（空）标签状态评估目标资格；任意站点时钟偏差不在修复后的顺序保证之内。复制双方必须都运行修复后的构建，墓碑才会被尊重——旧对端仍会丢弃空值修订。见[复制标签排序](/zh/blog/design/replicated-tag-ordering/)。
 
 [R4–R8 集成记录](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)保留了源码哈希、本地测试及验收边界。PR #196 合并前的 11 项检查全部通过；这些结果证明源码验收，不代表新版本发布或生产集群升级。
 
@@ -89,8 +91,27 @@ Console 最终 CI 矩阵与漏洞检查在合并前通过。Server 的正式模�
 这些结果属于源码验收：Console v2.4.0 和 Server 20260903 均不包含此修复，
 合并上述 PR 不会发布新的二进制或镜像。
 
+### 普通条件 PUT {#conditional-put}
+
+[#199](https://github.com/pgsty/silo/issues/199) 的跨 pool 条件 PUT 问题已在发布版 Server 20260903 上复现。
+[PR #207](https://github.com/pgsty/silo/pull/207) 的提交 `4620be394b52` 于 2026-09-16 通过全部 8 项 CI，
+随后以 [`9b4ae82a29cc`](https://github.com/pgsty/silo/commit/9b4ae82a29cc2290fb5be7b551ec3d8cf7acdd99) 合入。
+**修复已在 main，尚未发布。** 具体行为如下：
+
+- 普通多 pool `If-Match` / `If-None-Match` 条件使用所有池中的逻辑当前对象。
+  即使另一个池仍可处理 GET，只要无法核实某池元数据，条件写入就可能失败；读取仲裁不足返回 503，应恢复可读性或完成 heal 后重试。
+- 请求指定目标 `versionId` 时，公开写入条件仍比较当前对象，写入的目标版本保持请求指定的值；
+  内部复制保留按指定版本检查的语义。无条件 PUT 与单 pool 条件写入保持既有行为。
+- 条件覆盖成功不会清理其他池中的旧副本，升级也不能恢复历史上已接受的覆盖。
+  仍沿用既有修改时间与 pool 排序，不新增全局时钟排序保证。
+
+#190 的分片完成修复既未引入、也未修复此 PUT 问题。
+最终打包候选及部署验收仍由 [#203](https://github.com/pgsty/silo/issues/203) 单独跟踪。
+
 ### 仍待完成的工作 {#pending}
 
+- **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。源码修复不会自动修复旧状态。
+- **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 单独验收最终制品与多进程栈，当前尚未据此发布新 Server。
 - **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 保留开放，继续跟踪容量、发布验收和迟到创建写入边界。PR #198 已修复持久发现、全局分页与静态残留取消确认，但没有新增创建屏障，也没有完成大规模扫描验收。临时 10,000 上传试验未达到暂定的单页五秒目标，见[设计记录](/zh/blog/design/list-multipart-uploads/#implementation)。
 
 ## 依赖与发布顺序 {#order}

@@ -253,3 +253,15 @@ MinIO 不会将 OEK 的明文形式存储到磁盘上。
     </tr>
   </tbody>
 </table>
+
+## 密钥轮换 {#key-rotation}
+
+SSE-S3 加密的对象可以在不重写对象数据的情况下换钥。服务器只假定 KMS 提供两个服务——`GenerateKey`（返回新 data key 的明文与主密钥加密形式）和 `DecryptKey`（解包已加密的 data key）——轮换即由它们构成：
+
+1. 服务器使用对象自身元数据中存储的加密 data key 与主密钥 ID，解密该对象的 OEK。
+2. 使用**当前** KMS 配置中的主密钥 ID 向 KMS 请求新的 data key。
+3. 从新 data key 派生新的 KEK，用它重新加密 OEK，并把新的加密 OEK、加密 data key 与主密钥 ID 写入对象元数据。
+
+对象内容本身不变：只是包裹 OEK 的密钥层级在当前配置的主密钥下重建。这就是把用旧主密钥加密的对象迁移到新主密钥之下的方式。所有需要保留的对象版本完成轮换并验证之前，旧密钥必须仍可用于解密；提前删除它会使第一步解封失败。
+
+使用 [batch `keyrotate` 作业](/zh/administration/batch-framework-job-keyrotate/) 轮换存量对象密钥。启动作业需要相应的批处理管理权限，服务器需要 KMS 的旧 data key 解密与新 data key 生成权限。普通 S3 自 COPY 是另一条路径，可能重写对象数据。[`mc admin kms key`](/zh/reference/minio-mc-admin/mc-admin-kms-key/) 命令管理 KMS 密钥，本身不会轮换所有存量对象的密钥。

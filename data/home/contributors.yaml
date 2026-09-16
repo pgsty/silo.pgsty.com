@@ -1,23 +1,25 @@
-# All human Issue / PR authors across the SILO repositories, including maintainers.
-# Audited with paginated GitHub API results; open, closed, and unmerged submissions count.
-# Mirrors pgsty/silo CONTRIBUTORS.md and both READMEs. Each handle appears exactly once.
-# Order: merged PR authors, other PR authors, then issue-only authors; impact within each tier.
-# featured marks significant contributions, including adopted proposals and actionable reports.
-# Refresh WebP and GitHub SVG avatars with: python3 bin/contributor_avatars.py
-updated: "2026-09-16T03:41:47+00:00"
+# Reviewed SILO contribution record; all human issue / PR authors count, in every state.
+# Public API scope and counts include bots; the community roll excludes them.
+# Existing security-disclosure credit is retained in addition to public issue / PR authors.
+# Order: merged PR authors, other PR authors, then reports; significant contributions
+# first within each group, followed by first recorded participation. Maintainer first.
+# firstContribution is the first public issue / PR date; omitted for private disclosures.
+# Sync repository records, README sections, and bilingual pages: python3 bin/contributors.py
+# Refresh avatars: python3 bin/contributor_avatars.py
+updated: "2026-09-16T08:13:18+00:00"
 repositories:
   - repo: "pgsty/silo"
-    issues: 82
-    pullRequests: 61
+    issues: 108
+    pullRequests: 99
   - repo: "pgsty/silo-console"
-    issues: 34
-    pullRequests: 10
+    issues: 35
+    pullRequests: 22
   - repo: "pgsty/mc"
     issues: 18
-    pullRequests: 17
+    pullRequests: 25
   - repo: "pgsty/silo-pkg"
     issues: 0
-    pullRequests: 3
+    pullRequests: 9
   - repo: "pgsty/silo-go"
     issues: 0
     pullRequests: 0
@@ -26,180 +28,477 @@ repositories:
     pullRequests: 0
   - repo: "pgsty/silo.pgsty.com"
     issues: 1
-    pullRequests: 11
+    pullRequests: 26
   - repo: "pgsty/minio-docs"
     issues: 0
     pullRequests: 0
-
+bots: ["Copilot", "dependabot[bot]"]
 code:
   - handle: "Vonng"
     name: "Feng Ruohang"
     featured: true
     what: "Maintains SILO, Console, mcli, shared packages, releases, and documentation"
     whatZh: "维护 SILO、Console、mcli、公共包、发行与文档"
-  - handle: "h5vx"
-    featured: true
-    what: "Implemented per-bucket CORS configuration and enforcement"
-    whatZh: "实现单桶 CORS 配置与请求执行"
-  - handle: "mrjavadseydi"
-    name: "mohammadjavad seydi"
-    featured: true
-    what: "Fixed effective bucket quota metrics; proposed access-frequency ILM"
-    whatZh: "修复有效桶配额指标，并提交按访问频率分层的 ILM 方案"
-  - handle: "Dansyuqri"
-    name: "Shooks"
-    featured: true
-    what: "Added ChecksumType to multipart completion responses"
-    whatZh: "为分片上传完成响应补充 ChecksumType"
-  - handle: "ycjlin"
-    featured: true
-    what: "Fixed missing-bucket ListObjects semantics"
-    whatZh: "修复缺失桶的 ListObjects 语义"
-  - handle: "pinginfo"
-    name: "ping"
-    featured: true
-    what: "Repaired bucket notification streaming"
-    whatZh: "修复桶通知的流式输出"
+    firstContribution: "2026-04-14"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [44, 45, 56, 66, 69, 70, 72, 73, 74, 80, 81, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97,
+          98, 101, 103, 104, 121, 122, 123, 124, 126, 127, 128, 129, 130, 131, 134, 135, 138, 140, 142, 143, 145,
+          146, 149, 156, 157, 159, 161, 162, 163, 164, 173, 174, 175, 177, 178, 179, 180, 181, 182, 188, 189, 190,
+          191, 192, 193, 194, 196, 205, 206, 207, 208, 209, 211]
+        closed: [155, 195]
+        issuesClosed: [22, 23, 24, 25, 26, 27, 28, 46, 47, 48, 49, 50, 52, 53, 55, 63, 64, 65, 67, 68, 75, 76, 77,
+          78, 82, 83, 84, 99, 100, 102, 105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 133, 136,
+          137, 139, 141, 144, 147, 148, 158, 165, 166, 167, 168, 169, 170, 171, 204]
+        issuesOpen: [199, 200, 201, 202, 203]
+      - repo: "pgsty/silo-console"
+        what: "Maintains SILO Console, including fixes, tests, releases, and documentation"
+        whatZh: "维护 SILO Console 的修复、测试、发行与文档"
+        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57]
+        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+          29, 30, 31, 33, 35, 36, 37]
+        issuesOpen: [32, 34]
+      - repo: "pgsty/mc"
+        what: "Maintains mcli, including fixes, tests, packaging, and releases"
+        whatZh: "维护 mcli 的修复、测试、打包与发行"
+        merged: [1, 2, 3, 4, 8, 9, 10, 11, 13, 22, 24, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43]
+        issuesClosed: [5, 6, 7, 12, 14, 15, 16, 17, 18, 19, 20, 21, 23, 25, 28, 29, 30, 31]
+      - repo: "pgsty/silo-pkg"
+        what: "Maintains shared packages, including policy fixes and component coordination"
+        whatZh: "维护共享包、策略修复与组件协调"
+        merged: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+      - repo: "pgsty/silo.pgsty.com"
+        merged: [2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29]
+        open: [25]
   - handle: "ZouhairCharef"
     featured: true
     what: "Patched CVE-2026-34986 in go-jose"
     whatZh: "修复 go-jose 中的 CVE-2026-34986"
+    firstContribution: "2026-04-06"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [18]
   - handle: "mfredenhagen"
     name: "Mario Fredenhagen"
     featured: true
     what: "Patched CVE-2026-39883 in OpenTelemetry"
     whatZh: "修复 OpenTelemetry 中的 CVE-2026-39883"
+    firstContribution: "2026-04-10"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [19]
+  - handle: "pinginfo"
+    name: "ping"
+    featured: true
+    what: "Repaired bucket notification streaming"
+    whatZh: "修复桶通知的流式输出"
+    firstContribution: "2026-05-02"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [34]
+  - handle: "ycjlin"
+    featured: true
+    what: "Fixed missing-bucket ListObjects semantics"
+    whatZh: "修复缺失桶的 ListObjects 语义"
+    firstContribution: "2026-06-28"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [37]
   - handle: "waterkip"
     name: "Wesley Schwengle"
     featured: true
     what: "Repointed documentation links to the SILO portal"
     whatZh: "将文档链接指向 SILO 门户"
-
+    firstContribution: "2026-07-16"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [41]
+  - handle: "Dansyuqri"
+    name: "Shooks"
+    featured: true
+    what: "Added ChecksumType to multipart completion responses"
+    whatZh: "为分片上传完成响应补充 ChecksumType"
+    firstContribution: "2026-08-09"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [57]
+  - handle: "mrjavadseydi"
+    name: "mohammadjavad seydi"
+    featured: true
+    what: "Fixed bucket quota metrics; contributed access-frequency ILM and S3-compatible multipart listing proposals"
+    whatZh: "修复桶配额指标，贡献按访问频率分层的 ILM 与 S3 兼容分片上传列表方案"
+    note: "The access-frequency feature in [#60](https://github.com/pgsty/silo/pull/60) was merged and later removed.\
+      \ The multipart-listing contribution in [#198](https://github.com/pgsty/silo/pull/198) was merged after follow-up\
+      \ durability and cancellation repairs; it remains unreleased."
+    noteZh: "[#60](https://github.com/pgsty/silo/pull/60) 的访问频率功能合并后被移除；[#198](https://github.com/pgsty/silo/pull/198)\
+      \ 的分片列表贡献在补充持久发现与取消修复后已合并，尚未发布。"
+    firstContribution: "2026-08-15"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [60, 132, 198]
+  - handle: "h5vx"
+    featured: true
+    what: "Implemented per-bucket CORS configuration and enforcement"
+    whatZh: "实现单桶 CORS 配置与请求执行"
+    firstContribution: "2026-08-25"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [71]
+  - handle: "nikitapogromsky"
+    name: "Pogromskiy Nikita"
+    featured: true
+    what: "Fixed duplicate logger targets that broke Metrics V3 collection"
+    whatZh: "修复重复日志目标导致 Metrics V3 采集失败的问题"
+    firstContribution: "2026-09-07"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [151]
+        issuesClosed: [150]
+  - handle: "Aeirx"
+    name: "Ayush Sharma"
+    featured: true
+    what: "Preserved Object Lock legal-hold headers in federated CopyObject"
+    whatZh: "修复联邦 CopyObject 丢失 Object Lock 合法保留请求头的问题"
+    firstContribution: "2026-09-09"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [172]
 proposed:
-  - handle: "mikemikimike"
-    featured: true
-    what: "Contributed the replicated SSE-C plaintext part-size fix"
-    whatZh: "提交 SSE-C 复制分片明文尺寸修复"
-  - handle: "metaneutrons"
-    name: "Fabian Schmieder"
-    featured: true
-    what: "Reported and proposed explicit-version delete authorization"
-    whatZh: "报告并提交显式版本删除鉴权方案"
   - handle: "magicxor"
     name: "Ilia Burakov"
     featured: true
     what: "Reported and proposed conditional DELETE support for If-Match"
     whatZh: "报告并提交 DELETE If-Match 条件请求支持方案"
+    note: "The original PR closed after conditional DELETE support landed in [#145](https://github.com/pgsty/silo/pull/145)."
+    noteZh: "条件 DELETE 支持经 [#145](https://github.com/pgsty/silo/pull/145) 纳入后，原 PR 关闭。"
+    firstContribution: "2026-03-21"
+    activity:
+      - repo: "pgsty/silo"
+        closed: [12]
+        issuesClosed: [10]
   - handle: "davinkevin"
     name: "Davin Kevin"
     featured: true
     what: "Proposed the distroless container image and dependency automation"
     whatZh: "提交 distroless 容器镜像与依赖自动更新方案"
-  - handle: "lem21h"
-    what: "Proposed robustness and goroutine improvements"
-    whatZh: "提交健壮性与 goroutine 改进"
+    note: "The distroless proposal was superseded by the image shipped in [RELEASE.2026-08-06](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-06T00-00-00Z)."
+    noteZh: "distroless 方案由 [RELEASE.2026-08-06](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-06T00-00-00Z)\
+      \ 交付的镜像替代。"
+    firstContribution: "2026-04-10"
+    activity:
+      - repo: "pgsty/silo"
+        closed: [21]
+        issuesOpen: [20]
+  - handle: "metaneutrons"
+    name: "Fabian Schmieder"
+    featured: true
+    what: "Reported and proposed explicit-version delete authorization"
+    whatZh: "报告并提交显式版本删除鉴权方案"
+    note: "The original PR was superseded; its authorization action split informed [#104](https://github.com/pgsty/silo/pull/104)."
+    noteZh: "原 PR 被后续工作替代；其鉴权动作拆分方案为 [#104](https://github.com/pgsty/silo/pull/104) 提供了依据。"
+    firstContribution: "2026-08-15"
+    activity:
+      - repo: "pgsty/silo"
+        closed: [59]
+        issuesClosed: [58]
+  - handle: "mikemikimike"
+    featured: true
+    what: "Contributed the replicated SSE-C plaintext part-size fix"
+    whatZh: "提交 SSE-C 复制分片明文尺寸修复"
+    note: "The original PR was superseded; its plaintext-size fix was incorporated through [#124](https://github.com/pgsty/silo/pull/124),\
+      \ with attribute handling in [#128](https://github.com/pgsty/silo/pull/128)."
+    noteZh: "原 PR 被后续工作替代；明文尺寸修复经 [#124](https://github.com/pgsty/silo/pull/124) 纳入，属性处理见 [#128](https://github.com/pgsty/silo/pull/128)。"
+    firstContribution: "2026-09-05"
+    activity:
+      - repo: "pgsty/silo"
+        closed: [125]
+  - handle: "julienlau"
+    name: "Julien Laurenceau"
+    featured: true
+    what: "Reported MRF queue and delete-marker retry defects; contributed repair proposals, tests, and documentation"
+    whatZh: "报告 MRF 队列与删除标记重试缺陷，贡献修复方案、测试与文档"
+    note: "The original PR was not merged directly. Its purge-state and recovery analysis, proposed fix, tests,\
+      \ and documentation helped shape [#196](https://github.com/pgsty/silo/pull/196); see the [maintainer acknowledgement](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)."
+    noteZh: "原 PR 未直接合并；其中的清理状态与恢复分析、修复方案、测试和文档帮助完善了 [#196](https://github.com/pgsty/silo/pull/196)，见[维护者致谢](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)。"
+    firstContribution: "2026-09-07"
+    activity:
+      - repo: "pgsty/silo"
+        closed: [184]
+        issuesClosed: [152, 153]
+  - handle: "chodorenko"
+    featured: true
+    what: "Reported and contributed the fix for aws-chunked leaking into replica metadata"
+    whatZh: "报告并贡献 aws-chunked 错写入副本元数据的修复"
+    note: "The implementation was incorporated in [#194](https://github.com/pgsty/silo/pull/194), with [co-author\
+      \ credit](https://github.com/pgsty/silo/commit/4fcdf37ce656152b32ad0f615d47f5e3f9748c3a); the original PR\
+      \ was closed as superseded."
+    noteZh: "实现已纳入 [#194](https://github.com/pgsty/silo/pull/194)，并保留[共同作者署名](https://github.com/pgsty/silo/commit/4fcdf37ce656152b32ad0f615d47f5e3f9748c3a)；原\
+      \ PR 因被替代而关闭。"
+    firstContribution: "2026-09-14"
+    activity:
+      - repo: "pgsty/silo"
+        closed: [187]
+        issuesClosed: [185]
   - handle: "sulin37392"
     what: "Proposed dependency updates"
     whatZh: "提交依赖更新"
-
+    firstContribution: "2026-03-17"
+    activity:
+      - repo: "pgsty/silo"
+        closed: [8]
+  - handle: "lem21h"
+    what: "Proposed robustness and goroutine improvements"
+    whatZh: "提交健壮性与 goroutine 改进"
+    firstContribution: "2026-06-24"
+    activity:
+      - repo: "pgsty/silo"
+        closed: [36]
 reports:
-  - handle: "cbornet"
-    name: "Christophe Bornet"
-    featured: true
-    what: "Reported multipart and streaming checksum defects and missing-bucket semantics"
-    whatZh: "报告分片与流式校验和缺陷及缺失桶语义问题"
   - handle: "vampywiz17"
     name: "Vamp"
     featured: true
     what: "Reported LDAP TLS and Console login regressions"
     whatZh: "报告 LDAP TLS 与 Console 登录回归"
+    firstContribution: "2026-03-23"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [15, 108]
+  - handle: "cbornet"
+    name: "Christophe Bornet"
+    featured: true
+    what: "Reported multipart and streaming checksum defects and missing-bucket semantics"
+    whatZh: "报告分片与流式校验和缺陷及缺失桶语义问题"
+    firstContribution: "2026-04-24"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [31, 32, 107]
   - handle: "orenyomtov"
     name: "Oren Yomtov"
     featured: true
     what: "Reported the unsigned-header CopyObject cross-object read (SN-2026-011)"
     whatZh: "报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011）"
+    note: "Security disclosure credited in [SN-2026-011](https://silo.pgsty.com/about/security-advisories/#sn-2026-011),\
+      \ with the source fix in [#173](https://github.com/pgsty/silo/pull/173). This credit is retained separately\
+      \ from public issue/PR authorship."
+    noteZh: "安全披露署名见 [SN-2026-011](https://silo.pgsty.com/zh/about/security-advisories/#sn-2026-011)，源码修复见 [#173](https://github.com/pgsty/silo/pull/173)。此项署名单独保留，不计作公开\
+      \ issue/PR 作者。"
+    activity: []
   - handle: "jiri-pejchal"
     name: "Jiri Pejchal"
     featured: true
-    what: "Reported the Console share proxy's exposure of internal metrics"
-    whatZh: "报告 Console 分享代理暴露内部指标的问题"
-  - handle: "mumu-lab"
-    name: "木木"
-    what: "Reported bucket quota metrics reading a deprecated field"
-    whatZh: "报告桶配额指标读取已弃用字段的问题"
-  - handle: "jvasile"
-    name: "James Vasile"
-    what: "Reported missing user, group, and defaults in Debian packages"
-    whatZh: "报告 Debian 包缺少用户、用户组与默认配置"
-  - handle: "pmezhuev"
-    name: "Pavel Mezhuev"
-    what: "Reported missing RPM package signatures"
-    whatZh: "报告 RPM 包缺少 GPG 签名"
-  - handle: "TLINDEN"
-    name: "T.v.Dein"
-    what: "Reported the missing client in release tarballs"
-    whatZh: "报告发布压缩包缺少客户端"
-  - handle: "makinikm"
-    what: "Reported the missing client in the container image"
-    whatZh: "报告容器镜像缺少客户端"
-  - handle: "meesudzu"
-    name: "Du"
-    what: "Requested the migration guide from upstream MinIO"
-    whatZh: "提出从上游 MinIO 迁移的指南需求"
-  - handle: "kuldeep-link11"
-    what: "Reported NATS JWT credentials and target reload issues"
-    whatZh: "报告 NATS JWT 凭据与通知目标重载问题"
-  - handle: "sargarass"
-    name: "Anton Bornev"
-    what: "Reported ListMultipartUploads prefix and pagination semantics"
-    whatZh: "报告 ListMultipartUploads 前缀与分页语义问题"
-  - handle: "liuhaodongliu990-cmyk"
-    what: "Reported indeterminate progress for prefix downloads"
-    whatZh: "报告前缀下载进度显示异常"
-  - handle: "Xavier-777"
-    what: "Reported Console lifecycle management and file preview gaps"
-    whatZh: "报告 Console 生命周期管理与文件预览缺失"
-  - handle: "spaceg00se-r"
-    what: "Requested cpuv1 support and reported a workflow token failure"
-    whatZh: "提出 cpuv1 支持需求并报告工作流令牌错误"
-  - handle: "kh0mka"
-    name: "khomenokk"
-    what: "Reported inter-node I/O timeouts in ReadFileStreamHandler"
-    whatZh: "报告 ReadFileStreamHandler 节点间 I/O 超时"
-  - handle: "bagutzu"
-    name: "Bag Raul Cristian"
-    what: "Requested KES-compatible external KMS and OpenBao support"
-    whatZh: "提出兼容 KES 的外部 KMS 与 OpenBao 支持需求"
-  - handle: "DestroyLee"
-    what: "Reported the missing documentation navigation"
-    whatZh: "报告文档目录导航缺失"
+    what: "Reported the RabbitMQ client vulnerability and the Console share proxy's exposure of internal metrics"
+    whatZh: "报告 RabbitMQ 客户端漏洞，以及 Console 分享代理暴露内部指标的问题"
+    firstContribution: "2026-09-10"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [176]
+      - repo: "pgsty/silo-console"
+        what: "Reported the Console share proxy's exposure of internal metrics"
+        whatZh: "报告 Console 分享代理暴露内部指标的问题"
+        issuesClosed: [52]
+  - handle: "AEGEGE"
+    featured: true
+    what: "Reported the slow-HTTP denial-of-service vulnerability"
+    whatZh: "报告慢速 HTTP 拒绝服务漏洞"
+    note: "The reproduced slow-header defect was fixed on main through [#196](https://github.com/pgsty/silo/pull/196)."
+    noteZh: "已复现的慢速请求头缺陷通过 [#196](https://github.com/pgsty/silo/pull/196) 在 main 修复。"
+    firstContribution: "2026-09-14"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [183]
   - handle: "mosesdd"
     what: "Requested a maintained Helm chart"
     whatZh: "提出维护 Helm Chart 的需求"
-  - handle: "zylpsrs"
-    what: "Reported missing Console tiering and site replication"
-    whatZh: "报告 Console 缺少分层与站点复制"
-  - handle: "heroes1412"
-    what: "Reported the unusable profiling option"
-    whatZh: "报告性能分析选项不可用"
-  - handle: "redfoxfox"
-    name: "yingzhou Wang"
-    what: "Reported Chinese documentation availability"
-    whatZh: "报告中文文档站点不可用"
+    firstContribution: "2026-03-03"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [1]
+  - handle: "Xavier-777"
+    what: "Reported Console lifecycle management and file preview gaps"
+    whatZh: "报告 Console 生命周期管理与文件预览缺失"
+    firstContribution: "2026-03-04"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [2, 17]
   - handle: "jiadzh"
     what: "Requested Windows build guidance"
     whatZh: "提出 Windows 构建指导需求"
+    firstContribution: "2026-03-05"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [3]
   - handle: "AntonOfTheWoods"
     name: "Anton Melser"
     what: "Asked for clarity on Helm chart and operator options"
     whatZh: "提出明确 Helm Chart 与 Operator 选项的需求"
-  - handle: "chalukyaj"
-    what: "Proposed making the SILO Operator easier to discover"
-    whatZh: "提出改善 SILO Operator 可发现性的建议"
+    firstContribution: "2026-03-10"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [5]
+  - handle: "TLINDEN"
+    name: "T.v.Dein"
+    what: "Reported the missing client in release tarballs"
+    whatZh: "报告发布压缩包缺少客户端"
+    firstContribution: "2026-03-10"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [4]
+  - handle: "zylpsrs"
+    what: "Reported missing Console tiering and site replication"
+    whatZh: "报告 Console 缺少分层与站点复制"
+    firstContribution: "2026-03-12"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [6]
   - handle: "nsanitate"
     name: "Nicola Sanitate"
     what: "Proposed CNCF Sandbox governance"
     whatZh: "提出加入 CNCF Sandbox 的治理建议"
+    firstContribution: "2026-03-13"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [7]
+  - handle: "makinikm"
+    what: "Reported the missing client in the container image"
+    whatZh: "报告容器镜像缺少客户端"
+    firstContribution: "2026-03-20"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [9]
+  - handle: "spaceg00se-r"
+    what: "Requested cpuv1 support and reported a workflow token failure"
+    whatZh: "提出 cpuv1 支持需求并报告工作流令牌错误"
+    firstContribution: "2026-03-21"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [11, 14]
+  - handle: "heroes1412"
+    what: "Reported the unusable profiling option"
+    whatZh: "报告性能分析选项不可用"
+    firstContribution: "2026-03-22"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [13]
+  - handle: "chalukyaj"
+    what: "Proposed making the SILO Operator easier to discover"
+    whatZh: "提出改善 SILO Operator 可发现性的建议"
+    firstContribution: "2026-04-19"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [30]
+  - handle: "jvasile"
+    name: "James Vasile"
+    what: "Reported missing user, group, and defaults in Debian packages"
+    whatZh: "报告 Debian 包缺少用户、用户组与默认配置"
+    firstContribution: "2026-04-27"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [33]
   - handle: "Kesavaambati"
     what: "Asked about community support and image maintenance"
     whatZh: "提出社区支持与容器镜像维护问题"
+    firstContribution: "2026-05-21"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [35]
+  - handle: "redfoxfox"
+    name: "yingzhou Wang"
+    what: "Reported Chinese documentation availability"
+    whatZh: "报告中文文档站点不可用"
+    firstContribution: "2026-07-06"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [38]
+  - handle: "kuldeep-link11"
+    what: "Reported NATS JWT credentials and target reload issues"
+    whatZh: "报告 NATS JWT 凭据与通知目标重载问题"
+    firstContribution: "2026-07-08"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [39]
+        issuesOpen: [40]
+  - handle: "meesudzu"
+    name: "Du"
+    what: "Requested the migration guide from upstream MinIO"
+    whatZh: "提出从上游 MinIO 迁移的指南需求"
+    firstContribution: "2026-07-21"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [42]
+  - handle: "pmezhuev"
+    name: "Pavel Mezhuev"
+    what: "Reported missing RPM package signatures"
+    whatZh: "报告 RPM 包缺少 GPG 签名"
+    firstContribution: "2026-07-21"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [43]
+  - handle: "kh0mka"
+    name: "khomenokk"
+    what: "Reported inter-node I/O timeouts and OIDC configuration-fetch failures"
+    whatZh: "报告节点间 I/O 超时与 OIDC 配置拉取失败"
+    firstContribution: "2026-08-03"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [51, 154]
+  - handle: "bagutzu"
+    name: "Bag Raul Cristian"
+    what: "Requested KES-compatible external KMS and OpenBao support"
+    whatZh: "提出兼容 KES 的外部 KMS 与 OpenBao 支持需求"
+    firstContribution: "2026-08-17"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [61]
+  - handle: "liuhaodongliu990-cmyk"
+    what: "Reported indeterminate progress for prefix downloads"
+    whatZh: "报告前缀下载进度显示异常"
+    firstContribution: "2026-08-21"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [62]
+  - handle: "DestroyLee"
+    what: "Reported the missing documentation navigation"
+    whatZh: "报告文档目录导航缺失"
+    firstContribution: "2026-08-26"
+    activity:
+      - repo: "pgsty/silo.pgsty.com"
+        issuesClosed: [4]
+  - handle: "sargarass"
+    name: "Anton Bornev"
+    what: "Reported ListMultipartUploads prefix and pagination semantics"
+    whatZh: "报告 ListMultipartUploads 前缀与分页语义问题"
+    firstContribution: "2026-08-28"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [79]
+  - handle: "mumu-lab"
+    name: "木木"
+    what: "Reported bucket quota metrics reading a deprecated field"
+    whatZh: "报告桶配额指标读取已弃用字段的问题"
+    firstContribution: "2026-09-03"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [106]
+  - handle: "haiming236"
+    name: "Yu Yanan"
+    what: "Proposed a built-in image processing pipeline"
+    whatZh: "提出内置图像处理流水线的建议"
+    firstContribution: "2026-09-08"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [160]
+  - handle: "tiredenzo"
+    name: "TiredEnzo"
+    what: "Reported inconsistent documentation for two-drive EC:1 support"
+    whatZh: "报告双盘 EC:1 支持的文档不一致问题"
+    firstContribution: "2026-09-15"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [197]
+  - handle: "aschyolkin"
+    what: "Reported a data race in CPU metrics collection"
+    whatZh: "报告 CPU 指标采集中的数据竞争"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [210]
+    firstContribution: "2026-09-16"

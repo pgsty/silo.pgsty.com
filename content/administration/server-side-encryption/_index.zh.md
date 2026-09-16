@@ -82,3 +82,14 @@ MinIO 需要访问用于 SSE 操作的加密密钥（EK）*以及* 外部密钥�
 - [SSE-KMS 安全擦除与锁定](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms-erasure-locking)
 - [SSE-S3 安全擦除与锁定](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3-erasure-locking)
 - [SSE-C 安全擦除与锁定](/zh/administration/server-side-encryption/server-side-encryption-sse-c/#minio-encryption-sse-c-erasure-locking)
+
+## 密码学构造 {#cryptographic-construction}
+
+以下事实描述各 SSE 方案共享的构造。它们属于审计级参考材料：配置和使用 SSE 并不需要，但在审视"实际存储了什么、以什么形式存储"时有用。该描述源自从上游 MinIO 继承并由 Silo 保留的加密设计说明。
+
+- 对象内容以认证加密方案（AEAD）加解密，组织为 *Secure Channel*：明文被切分为固定大小的分块，每个分块以唯一的 key-nonce 组合单独封装。最后一个分块可以更小，并被特殊处理以防止截断攻击。
+- 对多部分对象，每个 part 使用由对象加密密钥（OEK）与 part 编号经 PRF 派生的独立密钥封装——OEK 本身从不直接作为 part 密钥使用。
+- PRF 为 HMAC-SHA-256。固定版本的 `sio` 在硬件加速可用时优先选择 AES-256-GCM（包括符合条件的 x86 和 ARM64 CPU），否则优先选择 ChaCha20-Poly1305。
+- 对象加密密钥为 256 位。内容加密格式使用 96 位 nonce，另有用于封装密钥的 256 位 IV；二者是不同字段，不能混淆。
+- 分块大小为 65536 字节，因此密码学格式层面的单个对象或 part 明文上限为 `65536 * 2^32 = 256 TiB`；这不是 S3 API 支持的对象或 multipart part 大小上限。
+- 对象密钥派生和密钥封装 IV 生成使用 `crypto/rand`，`sio` 默认也使用该密码学安全随机源。不要以仅保证唯一的计数器替换密钥或随机 nonce。

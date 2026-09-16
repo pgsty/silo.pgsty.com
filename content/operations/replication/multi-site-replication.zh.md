@@ -7,6 +7,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+> **SILO 升级说明：** 九月 IAM 修复要求所有参与节点协调升级，并备份完整删除历史。请先阅读 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)及[历史复制状态检查](/zh/operations/replication/replica-metadata-audit/)，并按[组件版本表](/zh/compatibility/versions/)区分主分支修复与已发布制品。
+
 <a id="minio-site-replication-overview"></a>
 <a id="id1"></a>
 

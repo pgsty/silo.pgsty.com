@@ -24,7 +24,7 @@ pkg v3.14.0、mcli 20260913 发布不代表已经发布修复版 Server。
 安排更新期间，应把写入签名凭据限制到必要对象，避免不必要的读取授权与可匿名读取的上传目标。
 只升级客户端或 Console 不会消除 Server 缺陷。
 
-问题由 Oren Yomtov 报告。[权威安全台账](https://github.com/pgsty/silo/blob/main/docs/security/advisories.md)
+问题由 Oren Yomtov 报告。[安全公告台账](/zh/about/security-advisories/#sn-2026-011)
 记录 SN-2026-011 与修复提交，并记载已申请 CVE。不能用依赖扫描的可达性通过结果替代此应用层漏洞状态。
 [组件版本矩阵](/zh/compatibility/versions/)区分已发布与 main 源码，
 [Server changelog](https://github.com/pgsty/silo/blob/main/CHANGELOG.md)列出待发布内容。

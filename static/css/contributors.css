@@ -1,0 +1,10 @@
+.community-avatars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 1.5rem 0;
+}
+.community-avatars a { display: block; flex: none; line-height: 0; }
+.community-avatars img { display: block; margin: 0; }

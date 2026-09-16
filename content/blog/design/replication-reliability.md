@@ -2,10 +2,10 @@
 title: "Replication Reliability: Delete Completion, MRF Visibility, and Resync Cancellation"
 linkTitle: "Replication Reliability"
 date: 2026-09-09
-lastmod: 2026-09-09
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  The decision record for SILO #153, #152, and #137: distinguish external reports from local evidence, classify delete-marker purges correctly, expose drops from the bounded MRF queue, and give resync cancellation a complete lifecycle. Includes Fable 5.1 Max review, rejected alternatives, and final validation.
+  The decision record for SILO #153, #152, and #137: distinguish external reports from local evidence, classify delete-marker purges correctly, expose drops from the bounded MRF queue, and give resync cancellation a complete lifecycle. Includes review, rejected alternatives, final validation, and a 2026-09-16 second round covering worker-side purge classification and persisted MRF marker recovery (PR #196).
 tags: [Design, Replication, S3, Review]
 weight: 7
 draft: false
@@ -15,6 +15,7 @@ url: "/blog/design/replication-reliability/"
 This page records the analysis, design choices, review, and implementation of [#153](https://github.com/pgsty/silo/issues/153), [#152](https://github.com/pgsty/silo/issues/152), and [#137](https://github.com/pgsty/silo/issues/137). They belong to the same replication reliability series, but affect operation classification, recovery visibility, and task lifecycle respectively. One general retry patch cannot repair all three.
 
 > **As of 2026-09-09:** [PR #162](https://github.com/pgsty/silo/pull/162) is merged as [`d1105bbb`](https://github.com/pgsty/silo/commit/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e), and all three issues are closed. All eight checks on the tested PR head, followed by main Go CI and VulnCheck, passed.<br>
+> **Second round, 2026-09-16:** [PR #196](https://github.com/pgsty/silo/pull/196) (fix [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2), verification record `aea3882c9`) repaired the replication worker's own delete exits and the persisted MRF marker-recovery path — a different surface from the first round. It is on main and **not** in Server 20260903; see [the second-round section](#second-round).<br>
 > **Review:** the plan was discussed with the installed Claude Code Fable 5.1 Max, followed by a review of the implementation. The final verdict was **GO**.<br>
 > **Delivery boundary:** this work completed code, tests, and main integration. It did not create a Server tag or formal release, and does not establish that existing packages, images, or production deployments contain the fixes.
 
@@ -206,3 +207,36 @@ After complete local validation, only new-test formatting and fixtures changed: 
 Future changes must continue to establish operation identity, visible failure, truthful per-object outcomes, complete terminal counters, and cancellation that releases its own resources. Neither an API returning Completed nor an object existing at the destination can replace those checks.
 
 The code verdict is GO, and the delivery facts are main integration and passing CI. A formal release still requires selecting a tag, verifying packages and images, and establishing that deployments contain the repair. The scanner-dependent MRF recovery delay, the open cross-pool issue, and the externally reported 405 storm not reproduced on current SILO remain part of this decision record.
+
+## Second round (2026-09-16): worker-side purge classification and persisted MRF recovery {#second-round}
+
+The first round classified deletes at the **handler entry** (#153), exposed MRF queue drops (#152), and completed resync cancellation (#137). The second round — [PR #196](https://github.com/pgsty/silo/pull/196), fix [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2), integration verification `aea3882c9` — repairs a different surface: the replication **worker's own exits**, the outer aggregation, and the **persisted MRF recovery path** for delete markers. The two rounds are complementary; neither subsumes the other.
+
+> **Status:** on verified main [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a), **not** in Server 20260903. All evidence is synthetic (real single-drive and 16-drive storage, signed DELETEs, controlled HTTP targets, real persisted-MRF disk files replayed through a fresh worker pool). The externally reported 405 storm is **not** reproduced and **not** attributed to these paths.
+
+### What was still broken {#second-round-defects}
+
+- **Legacy-shape tasks were skipped entirely.** A task with an empty `VersionID`, a non-empty `DeleteMarkerVersionID`, a COMPLETED creation target, and a PENDING purge target never issued its DELETE — the per-target creation early-return suppressed it.
+- **Fixing only the target function made aggregation lie.** The outer status selection keys on `VersionID` and creation state, so a failed legacy-shape purge aggregated as COMPLETED, emitted `ObjectReplicationComplete`, and **skipped queueing to persisted MRF** — worse than the baseline.
+- **Persisted MRF dropped every marker 405.** Replaying a disk MRF entry for a delete-marker version fetched real marker metadata plus `MethodNotAllowed`, and the error path discarded it — the marker MRF recovery route was a dead end.
+- **Failed purges overwrote successful resync markers**, completed purges were re-sent, and a not-yet-ready HEAD unconditionally overwrote creation state.
+- **A multi-target empty-state regex misparse could corrupt creation state once.** A disk marker carrying only creation metadata, replayed against a task with purge state, let two empty target states parse as a bogus `Pending`; the deleted-flag guard then rewrote the whole creation block as empty entries with fresh timestamps — a one-shot corruption that requires disk/task divergence to reach.
+
+Root causes: the worker had no **task-level** purge classification (the per-target predicate in the community's [#184](https://github.com/pgsty/silo/pull/184) was itself wrong — a composite purge status can never reach COMPLETE through it; its investigation and proposed fix nevertheless shaped this follow-up, with thanks to Julien Laurenceau); MRF recovery had no **valid-405 identity gate**; and the delete task carried no retry count, so the existing `mrfRetryLimit` drop was unreachable on the delete path.
+
+### The repair {#second-round-fix}
+
+- **One classification, every exit.** `isVersionPurge()` (non-empty `VersionID`, or a non-empty `DeleteMarkerVersionID` with a composite purge status) drives both the inner target function and the outer aggregation. Purge exits write only `VersionPurgeStatus` and leave `ReplicationStatus` empty — the storage layer's "do not update" signal.
+- **A three-field clear guard** empties the composite status on the purge path, making the multi-target misparse unreachable at disk writes.
+- **Purges send the canonical permanent-delete request** — explicit `versionId`, `ReplicationDeleteMarker=false`, no HEAD/readiness probe (authorization is the DELETE's own). This also prevents a lost-response retry from **re-creating a marker** at an unversioned fallback.
+- **A valid-405 gate for MRF recovery.** A `MethodNotAllowed` schedules recovery only when the returned object is a delete marker, the bucket/object/version identity matches, and the modification time is non-zero.
+- **A bounded retry budget.** Delete tasks carry a retry counter, incremented at all three persisted-MRF entry points (aggregation failure, lock failure, queue-full fallback), respecting the existing limit; after exhaustion, the scanner can still re-raise healing.
+- **Audit and event status map `COMPLETE` to `COMPLETED`** at the statistics/event boundary only, reusing the existing legacy constant.
+
+### What 405 means, precisely {#second-round-405}
+
+For **creation** (replicating a delete marker), a HEAD 405 on the target marker version means *already created* — idempotent completion. For **purge** (permanently deleting a version), a 405 from MRF identity probing with full marker identity means *work remains*; the purge's own success is decided by the DELETE alone, and a DELETE 403/405/503 is always a real failure. Empty or null version markers return `ObjectNotFound`, not 405, and sit outside the gate.
+
+### Boundaries that remain {#second-round-limits}
+
+The legacy in-memory task shape does not serialize across restart and has no current producer — its handling is robustness, not an active repair. Targets without a configured client still only log. Target-level resync replacing a purge subset is a pre-existing defect this round neither caused nor fixed. Persistence was driven directly in tests; timer-based flush and process-crash durability are not claimed. Multi-process site-replication meshes and cross-region acceptance are out of scope. For the tag-ordering and replica-metadata repairs in the same reliability series, see [Replicated Tag Ordering](/blog/design/replicated-tag-ordering/) and [Replica Metadata Normalization](/blog/design/replica-metadata-normalization/).

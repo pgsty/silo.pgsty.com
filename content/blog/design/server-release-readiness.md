@@ -2,10 +2,10 @@
 title: "SILO Server 20260903 Pre-release Review"
 linkTitle: "Server 20260903 Review"
 date: 2026-09-03
-lastmod: 2026-09-09
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  The final adversarial review of every server change after 20260806: confirmed defects, fixes, rejected simplifications, necessary complexity, validation evidence, explicit deferrals, and the distinction between code-level GO and production release.
+  The final adversarial review of every server change after 20260806: confirmed defects, fixes, rejected simplifications, necessary complexity, validation evidence, explicit deferrals, and the distinction between code-level GO and production release. Updated 2026-09-16 with the #116 restart-and-readback verification method.
 tags: [Design, Review, Security, Compatibility, Release]
 weight: 8
 draft: false
@@ -215,3 +215,16 @@ Operators should delay even a successfully published release when they cannot ye
 - avoid or explicitly accept the known #10, #77, #79, #99, or #100 path their workload depends on.
 
 The final conclusion at the review point was intentionally narrower than “everything is fixed”: **the reviewed candidate was ready to enter the release machinery, the remaining limitations were explicit, and production publication was gated by verifiable artifacts rather than confidence.** Those gates later completed for the release linked above; the deployment-specific conditions remain applicable.
+
+## Restart and readback verification (2026-09-11, #116) {#restart-readback}
+
+A later acceptance ([#116](https://github.com/pgsty/silo/issues/116), run on 2026-09-11) established the restart-persistence half of readiness. The durable part is the *method*, which any operator can reuse when validating a restart or upgrade window:
+
+- **Acknowledgement ledger.** Every acknowledged PUT writes to a unique versioned key, and the acknowledgement records the VersionId, byte count, and SHA-256 immediately. Readback fetches by exact VersionId and asserts all three — an early confirmation cannot be silently replaced by a later write.
+- **Readback timing.** Periodic re-reads happen at 15/30/60 s after the data canary succeeds, through every peer, and the final check includes writes made during a single-node outage and after its rejoin.
+- **No retry masking.** Each canary carries a hard 60 s deadline covering setup, request, response-body read, and sleep, and SDK retries are disabled so a recovery window cannot be papered over by client-side retries.
+- **Driver topology.** Four Linux/arm64 containers on one host with independent network identities, one drive each (EC 2+2), and tmpfs volumes kept mounted by a holder container through the full shutdown; nodes stop in parallel with a 10 s grace period, then start in parallel.
+
+The operational finding worth remembering: **admin-endpoint readiness is not data readiness.** In the recorded run the candidate's admin endpoint was online at roughly 2.5 s while the first full data canary completed only near 14 s. A readiness probe against admin/health says nothing about the data plane during that window, and no fixed sleep substitutes for an actual data-plane check.
+
+Boundaries, stated as boundaries: this acceptance covers process/container restart and TCP peer reconnection on a single Linux host. It does not prove persistence across independent hosts, host reboots, or physical media failure, and the timings are individual observations, not latency guarantees. The run artifacts are retained outside the documentation tree; the method above is the part that generalizes.

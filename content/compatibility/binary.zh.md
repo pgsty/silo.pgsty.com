@@ -10,6 +10,18 @@ icon: fa-solid fa-box
 
 Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub Releases](https://github.com/pgsty/silo/releases)，附 SHA-256 校验和与构建溯源 attestation。本页记录相对 `minio` 软件包安装的变化：文件布局、服务账号与注意事项。迁移的总体范围见[迁移指南](/zh/compatibility/migration/)。
 
+## 安装 {#install}
+
+从 release 资产中选取与平台匹配的软件包，安装前先校验：
+
+```bash
+curl -fLO https://github.com/pgsty/silo/releases/download/<RELEASE-tag>/silo-<version>.<arch>.rpm
+sha256sum --check silo-<version>.<arch>.rpm.sha256sum   # 或手动比对
+sudo rpm -i silo-<version>.<arch>.rpm                    # Debian/Ubuntu：sudo dpkg -i silo_<version>_<arch>.deb
+```
+
+使用 Pigsty 软件仓库时，`dnf install silo` / `apt install silo` 解析同样的工件（仓库可能落后于 GitHub Releases）。该软件包刻意**不**提供任何 `minio` 别名或 `Provides:` 关系——`minio` 与 `silo` 是并存的独立软件包，接管发生在 systemd 层而不是软件包替换层（见[接管](#takeover)）。
+
 ## 文件布局 {#layout}
 
 | MinIO 安装             | Silo 软件包                                                     |
@@ -70,6 +82,7 @@ Restart=always
 切换：
 
 ```bash
+sudo cp -a /etc/default/minio /etc/default/minio.migration-backup   # 廉价的保险
 sudo systemctl disable --now minio.service
 sudo systemctl enable  --now silo.service
 silo healthcheck --url https://127.0.0.1:9000 ready    # 未启用 TLS 用 http://
@@ -83,10 +96,18 @@ sudo systemctl disable --now silo.service
 sudo systemctl enable  --now minio.service
 ```
 
+验证完成、回滚窗口关闭后，可选择 mask 旧 unit，使任何操作都无法再直接启动它：
+
+```bash
+sudo systemctl mask minio.service
+```
+
 ## 注意事项 {#caveats}
 
 - **集群所有节点一起切换。** 任意两个不同的二进制都无法组成集群——MinIO 与 Silo 之间如此，两个不同版本的 Silo 之间亦然；混跑节点无限停在 `activating`（[细节](/zh/compatibility/migration/#one-binary)）。先在所有节点完成准备（装包、建 drop-in），再快速连续翻转所有节点：`systemctl disable --now minio && systemctl enable --now --no-block silo`。回滚与将来的升级同理，所有节点一起。
 - **非软件包安装同样适用。**`/usr/local/bin/minio` 加自定义 unit 的部署以相同方式被接管，只要其配置位于 `/etc/default/minio`。
 - **崩溃循环有频率限制。** 配置错误（如缺证书）时 `Restart=always` 反复重启，直至触发 systemd 启动限制（`Start request repeated too quickly`）。修复根因后执行 `systemctl reset-failed silo && systemctl start silo`。
+- **旧 `minio.service` 停止时可能卡住。** 旧 unit 常见 `TimeoutSec=infinity`。排空流量、等候约定的优雅退出时间后仍卡住时，可由运维者执行 `sudo systemctl kill --signal=SIGKILL minio.service` 强制结束，确认旧进程退出后再启动 Silo。这会中断残余请求；不带信号参数的 `systemctl kill` 默认只是再发一次 `SIGTERM`，不能解决忽略该信号的进程。
+- **桥接期的环境链可能反咬一口。** `/etc/default/silo` 存在时 `/etc/default/minio` 仍会被读取：从 `/etc/default/silo` 删除一个变量并不等于禁用它——`/etc/default/minio` 里的旧值会重新生效。要禁用请同时从两个文件移除，或在仍携带它的文件里注释掉。
 - **保留回滚窗口。** 验证完成前保留 `minio` 软件包、unit 与二进制；已禁用的 unit 没有开销，之后可按需移除旧包。
 - **迁移后的滚动重启**：每次重启前用 `silo healthcheck --maintenance cluster` 把关；退出码 `0` 表示停掉本节点仍保有写 quorum，HTTP `412` 表示不能停。

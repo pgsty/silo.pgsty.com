@@ -29,6 +29,11 @@ Silo is a fork, so the vast majority of findings apply to `minio/minio` as well.
 
 ## Where fixes are published {#published}
 
+- [Advisory Ledger](/about/security-advisories/) —
+  the stable index of every CVE and fork-local `SN-` identifier: the fix
+  commit, affected area, exploitability, release boundary, and dependency
+  security updates.
+
 - [Security Chronicle](/blog/security/) —
   one article per investigated CVE: the original threat model, the back-and-forth of the review, the rejected alternatives, the invariant finally settled on, the verifying evidence, and the compatibility cost.
 

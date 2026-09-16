@@ -15,7 +15,7 @@ icon: fa-solid fa-copyright
 **Copyright © 2020–Present MinIO, Inc.**
 Original MinIO Object Storage Documentation.
 
-**Copyright © 2026–Present [PIGSTY & SILO Contributors](https://pgsty.com)**
+**Copyright © 2026–Present [PIGSTY & SILO Contributors](/about/contributors/)**
 Fork maintenance, format conversion, modifications, restored and newly written
 content, and Simplified Chinese translation.
 

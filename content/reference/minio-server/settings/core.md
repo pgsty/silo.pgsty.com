@@ -3,7 +3,7 @@ title: "Core Settings"
 url: "/reference/minio-server/settings/core/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/core.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="core-settings"></a>
@@ -401,7 +401,11 @@ By default MinIO believes the `X-Forwarded-For`, `X-Real-IP` and RFC 7239 `Forwa
 
 Set this to a comma-separated list of addresses or CIDR blocks to believe forwarded headers **only** from those peers. The forwarding chain is then read right to left past listed hops, which also discards the client-supplied left-most entry that an appending proxy leaves in place — the stock nginx `$proxy_add_x_forwarded_for` recipe and HAProxy's added second header line both produce one.
 
-Set this to `none` to believe no forwarding header at all and always use the peer address.
+Set this to `none` (or the synonym `off`) to believe no forwarding header at all and always use the peer address. The value is case-insensitive; entries may be separated by commas, semicolons, or whitespace.
+
+Headers are consulted in a fixed order — `X-Forwarded-For`, then `X-Real-IP`, then RFC 7239 `Forwarded` — and the first that yields an address wins. In allow-list mode, `X-Forwarded-For` only yields an address via a trusted chain; `X-Real-IP` is a single value with no chain to verify, so it is taken verbatim only when the `X-Forwarded-For` walk produced nothing. A proxy that sets `X-Real-IP` to the real client address (nginx: `proxy_set_header X-Real-IP $remote_addr;`) keeps it accurate; a proxy that forwards a client-supplied `X-Real-IP` unchanged makes it forgeable. Stripping untrusted headers at the proxy remains the reliable policy.
+
+Write entries in their plain form. IPv4-mapped notation such as `::ffff:10.0.0.7` is accepted but does not match an IPv4 peer, so an entry written that way never takes effect.
 
 > [!NOTE]
 > **Note**
@@ -411,6 +415,8 @@ Set this to `none` to believe no forwarding header at all and always use the pee
 > List **the proxies themselves, not the subnet they sit in.** Listed entries are skipped while walking the chain, so a range that also covers clients lets those clients forge. Multi-node deployments must include their own node addresses, because MinIO forwards some requests between nodes. Loopback is always trusted as a peer so FTP and SFTP keep attributing their sessions. A malformed value, or one that names no proxy at all, stops startup.
 
 If you use `IpAddress` or `NotIpAddress` policy conditions, they are not enforceable until this setting names your proxies, or the deployment is otherwise unreachable except through them.
+
+The LDAP STS login throttle has its own independent allowlist, `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES` ([LDAP settings](/reference/minio-server/settings/iam/ldap/)); it only affects how logins are bucketed for rate limiting and never feeds `aws:SourceIp`. Unless you deliberately want different trust for those two purposes, set both lists to the same value.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.

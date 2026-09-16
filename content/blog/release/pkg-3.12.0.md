@@ -96,7 +96,7 @@ Compatibility-sensitive paths stay permissive in this rollout:
 - STS inline session policies; and
 - bucket policies, whose existing bucket/action validation already rejects these forms.
 
-Enabling `ParseConfigStrict` also activates two pre-existing admin-policy checks: one admin statement may not contain both `Resource` and `NotResource`, and a bucket-scoped admin action may not use a non-S3 resource. These are intentional authorization tightenings and are documented in [`SN-2026-005`](https://github.com/pgsty/silo/blob/main/docs/security/advisories.md).
+Enabling `ParseConfigStrict` also activates two pre-existing admin-policy checks: one admin statement may not contain both `Resource` and `NotResource`, and a bucket-scoped admin action may not use a non-S3 resource. These are intentional authorization tightenings and are documented in the [advisory ledger under `SN-2026-005`](/about/security-advisories/#sn-2026-005).
 
 > [!IMPORTANT]
 > In this article, **bare ARN prefix** means an ARN namespace with no resource after it, such as `arn:aws:s3:::`. It is different from the valid **bare bucket ARN** used in the 3.11 bucket/object-boundary fix, such as `arn:aws:s3:::my-bucket`.

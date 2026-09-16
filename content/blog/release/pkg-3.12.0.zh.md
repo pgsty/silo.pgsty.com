@@ -96,7 +96,7 @@ SILO 提交 [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07ceb
 - STS 内联 Session Policy；
 - Bucket Policy——它现有的 bucket/action 校验已经会拒绝这些形式。
 
-启用 `ParseConfigStrict` 还会激活两条早已存在的 Admin Policy 规则：同一条 Admin Statement 不能同时携带 `Resource` 与 `NotResource`；作用于 bucket 的 Admin Action 不能使用非 S3 资源。这些都是刻意的鉴权收紧，已经记录在 [`SN-2026-005`](https://github.com/pgsty/silo/blob/main/docs/security/advisories.md) 中。
+启用 `ParseConfigStrict` 还会激活两条早已存在的 Admin Policy 规则：同一条 Admin Statement 不能同时携带 `Resource` 与 `NotResource`；作用于 bucket 的 Admin Action 不能使用非 S3 资源。这些都是刻意的鉴权收紧，已经记录在[安全公告台账 `SN-2026-005`](/zh/about/security-advisories/#sn-2026-005) 中。
 
 > [!IMPORTANT]
 > 本文所说的 **裸 ARN 前缀**，是 `arn:aws:s3:::` 这种命名空间后没有任何资源的形式；它不同于 3.11 桶/对象边界修复中的合法 **裸 bucket ARN**，例如 `arn:aws:s3:::my-bucket`。
