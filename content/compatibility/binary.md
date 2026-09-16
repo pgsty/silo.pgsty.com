@@ -10,6 +10,18 @@ icon: fa-solid fa-box
 
 Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [GitHub Releases](https://github.com/pgsty/silo/releases), with SHA-256 sums and build-provenance attestations. This page records what changes relative to a `minio` package installation: the file layout, the service account, and the caveats. General migration scope is in the [migration guide](/compatibility/migration/).
 
+## Installing {#install}
+
+Install the package that matches your platform from the release assets, then verify the checksum before installing:
+
+```bash
+curl -fLO https://github.com/pgsty/silo/releases/download/<RELEASE-tag>/silo-<version>.<arch>.rpm
+sha256sum --check silo-<version>.<arch>.rpm.sha256sum   # or compare manually
+sudo rpm -i silo-<version>.<arch>.rpm                    # Debian/Ubuntu: sudo dpkg -i silo_<version>_<arch>.deb
+```
+
+If you use the Pigsty package repository, `dnf install silo` / `apt install silo` resolves the same artifacts (the repository may lag GitHub Releases). The package intentionally provides **no** `minio` alias or `Provides:` relationship — `minio` and `silo` are separate packages that coexist, and the takeover happens at the systemd level, not through package replacement (see [Takeover](#takeover)).
+
 ## File layout {#layout}
 
 | MinIO installation | Silo package |
@@ -73,6 +85,7 @@ Restart=always
 Switch over:
 
 ```bash
+sudo cp -a /etc/default/minio /etc/default/minio.migration-backup   # cheap insurance
 sudo systemctl disable --now minio.service
 sudo systemctl enable  --now silo.service
 silo healthcheck --url https://127.0.0.1:9000 ready    # http:// without TLS
@@ -86,10 +99,18 @@ sudo systemctl disable --now silo.service
 sudo systemctl enable  --now minio.service
 ```
 
+After validation completes and the rollback window closes, optionally mask the old unit so nothing but an explicit `systemctl unmask` can bring it back:
+
+```bash
+sudo systemctl mask minio.service
+```
+
 ## Caveats {#caveats}
 
 - **Clusters switch all nodes together.** Two different binaries do not form a cluster — MinIO next to Silo, or one Silo version next to another; a mixed node waits indefinitely in `activating` ([details](/compatibility/migration/#one-binary)). Prepare every node first (install package, create drop-in), then flip all nodes in quick succession: `systemctl disable --now minio && systemctl enable --now --no-block silo`. Rollback and later upgrades likewise: all nodes together.
 - **Non-packaged installations work the same way.** A `/usr/local/bin/minio` with a custom unit is taken over identically, as long as its configuration lives in `/etc/default/minio`.
 - **Crash loops rate-limit.** A misconfigured start (for example, missing certificates) repeats under `Restart=always` until systemd's start limit trips (`Start request repeated too quickly`). Fix the cause, then `systemctl reset-failed silo && systemctl start silo`.
+- **An old `minio.service` stop can hang.** Legacy units commonly set `TimeoutSec=infinity`. If graceful shutdown remains stuck after traffic is drained and the shutdown allowance expires, an operator can force it with `sudo systemctl kill --signal=SIGKILL minio.service`, then confirm the old process has exited before starting Silo. This interrupts any remaining requests; plain `systemctl kill` defaults to another `SIGTERM` and does not resolve a process that ignores it.
+- **The environment chain can surprise you during the bridge period.** `/etc/default/minio` is still read while `/etc/default/silo` exists: deleting a variable from `/etc/default/silo` does not disable it — the old value from `/etc/default/minio` applies again. Remove the variable from both files, or comment it out in the file that still carries it.
 - **Keep the rollback window.** Leave the `minio` package, unit, and binary installed until validation completes; a disabled unit costs nothing. Remove the old package afterwards if desired.
 - **Rolling restarts after migration**: gate each with `silo healthcheck --maintenance cluster`; exit `0` means stopping this node keeps write quorum, HTTP `412` means it does not.

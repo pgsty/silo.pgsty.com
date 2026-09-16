@@ -67,14 +67,16 @@ Server 主分支现在构建 curl 8.22.0、捆绑 mcli 20260913；现有 Server 
 
 - **IAM 要求所有参与服务器协调升级。** 不支持共享 IAM 后端的新旧节点混用，也不支持滚动降级。备份完整 IAM 存储及所需加密材料，普通管理导出不包含删除历史。同名父身份重建前签发的旧凭据可能需要重新签发；升级前已经丢失的删除历史无法自动重建。具体操作见 [IAM 升级与回滚说明](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/site-replication/iam-revocations.md#protocol-and-supported-upgrade)。
 - **不可读池会更一致地使写入、删除失败。** 即使另一个池还能处理 GET/HEAD，只要任一池元数据不可读，条件式分片上传完成就会失败。普通版本 DELETE 在池不可读或清理失败时也返回错误；读取仲裁不足返回 `503 SlowDownRead`，应在恢复后重试。出站删除复制尚未完成时，请求成功不代表每块磁盘都已立即物理删除。
-- **Server 20260903 从未包含访问频率池间分层。** 只有使用过该实验功能的构建需要按[迁移说明](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/bucket/lifecycle/access-tiering-removal.md)清理配置和 XML。普通生命周期过期、远程层迁移、再平衡与池退役仍可使用。
+- **Server 20260903 从未包含访问频率池间分层。** 只有使用过该实验功能的构建需要按[迁移说明](/zh/compatibility/access-tiering-removal/)清理配置和 XML。普通生命周期过期、远程层迁移、再平衡与池退役仍可使用。
 - 清除操作的审计状态由 `COMPLETE` 规范为 `COMPLETED`。历史异常标签修订可能失败并重试，本次修复不会重建其历史。较短的请求头超时也会限制 TLS 握手读取窗口；它不会给 HTTP/1 上传、下载新增总时长限制。
+- 带已记录标签修订的对象在显式 resync 或 heal 时**每对象多一次元数据 COPY**；当目的端按桶默认做 KMS 加密时，该复制会重写对象数据。带标签过滤的复制规则仍按删除后的（空）标签状态评估目标资格；任意站点时钟偏差不在修复后的顺序保证之内。复制双方必须都运行修复后的构建，墓碑才会被尊重——旧对端仍会丢弃空值修订。见[复制标签排序](/zh/blog/design/replicated-tag-ordering/)。
 
 [R4–R8 集成记录](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)保留了源码哈希、本地测试及验收边界。PR #196 合并前的 11 项检查全部通过；这些结果证明源码验收，不代表新版本发布或生产集群升级。
 
 ### 仍待完成的工作 {#pending}
 
 - **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 仍然开放。[设计记录](/zh/blog/design/list-multipart-uploads/)中的前缀、分页与原始对象键发现限制，不属于上面的分片上传完成修复。
+- **条件完成的范围：** #190 的修复只覆盖 CompleteMultipartUpload 的前置条件。普通条件 PUT 存在独立的跨池前置条件缺口，由 [#199](https://github.com/pgsty/silo/issues/199) 跟踪；分片修复不解决它，`NewMultipartUpload` 的池放置同样是独立后续工作。
 - **Console 对象分享：** [Console #52](https://github.com/pgsty/silo-console/issues/52) 仍然开放，本地修复尚未合入。[拟议的请求限制](/zh/reference/minio-server/settings/console/#object-sharing)尚未进入当前选择的 Console 源码或已发布的 Server、Console。
 
 ## 依赖与发布顺序 {#order}

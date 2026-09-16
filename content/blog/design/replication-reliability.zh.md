@@ -2,10 +2,10 @@
 title: "复制可靠性：删除完成、MRF 可见性与 resync 取消"
 linkTitle: "复制可靠性"
 date: 2026-09-09
-lastmod: 2026-09-09
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
-  SILO #153、#152、#137 的设计与决策归档：区分外部报告与本地复现，修正删除标记 purge 分类，公开有界 MRF 队列的丢弃信息，以任务自有 context 完成可靠取消，并记录 Fable 5.1 Max 评审、被否决的方案和最终验收证据。
+  SILO #153、#152、#137 的设计与决策归档：区分外部报告与本地复现，修正删除标记 purge 分类，公开有界 MRF 队列的丢弃信息，以任务自有 context 完成可靠取消，并记录评审、被否决的方案和最终验收证据。含 2026-09-16 第二轮：worker 侧 purge 分类与持久 MRF 标记恢复（PR #196）。
 tags: [设计, 复制, S3, 评审]
 weight: 7
 draft: false
@@ -15,6 +15,7 @@ url: "/zh/blog/design/replication-reliability/"
 本文记录 [#153](https://github.com/pgsty/silo/issues/153)、[#152](https://github.com/pgsty/silo/issues/152)、[#137](https://github.com/pgsty/silo/issues/137) 的分析、方案取舍、评审与实施结论。三者属于同一组复制可靠性问题，但分别发生在操作分类、后台恢复可见性和任务生命周期上，不能靠一个统一的重试补丁解决。
 
 > **截至 2026-09-09：** [PR #162](https://github.com/pgsty/silo/pull/162) 已合并为 [`d1105bbb`](https://github.com/pgsty/silo/commit/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e)，三个 issue 均已关闭。被测 PR head 的八项检查与合并后主干的 Go CI、VulnCheck 全部通过。<br>
+> **第二轮，2026-09-16：** [PR #196](https://github.com/pgsty/silo/pull/196)（修复 [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2)，验证记录 `aea3882c9`）修复了复制 worker 自身的删除出口与持久 MRF 标记恢复路径——与第一轮不同的层面。已在 main、**不在** Server 20260903 中；见[第二轮小节](#second-round)。<br>
 > **评审：** 与环境中的 Claude Code Fable 5.1 Max 商榷方案，并在实施后复核；最终结论为 **GO**。<br>
 > **交付边界：** 本轮完成代码、测试和主干合并，没有创建 Server tag 或正式 release。本文不据此宣称现有软件包、镜像或生产部署已包含修复。
 
@@ -206,3 +207,36 @@ go test ./... -count=1 -timeout=30m
 后续改动必须继续分别证明：操作类型正确、失败可见、逐对象结果真实、终态计数完整、取消能够结束自己的资源。任何一项都不能由“接口返回 Completed”或“目标上对象存在”代替。
 
 本次代码结论是 GO，交付事实是主干合并及 CI 通过。正式发布仍需另行选定 tag，验证软件包与镜像，并确认实际部署包含修复。既有 MRF scanner 恢复时延、未关闭的跨池问题，以及外部 405 风暴尚未在当前 SILO 复现的边界，都应随这份决策一起保留。
+
+## 第二轮（2026-09-16）：worker 侧 purge 分类与持久 MRF 恢复 {#second-round}
+
+第一轮在 **handler 入口** 做删除分类（#153）、公开 MRF 队列丢弃（#152）、补全 resync 取消生命周期（#137）。第二轮——[PR #196](https://github.com/pgsty/silo/pull/196)，修复 [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2)，集成验证记录 `aea3882c9`——修复另一个层面：复制 **worker 自身的出口**、外层聚合，以及删除标记的**持久 MRF 恢复路径**。两轮互补，互不包含。
+
+> **状态：** 在核验过的 main [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a) 上，**不在** Server 20260903。全部证据为合成实验（真实单盘与 16 盘存储、签名 DELETE、受控 HTTP 目标、真实落盘的 MRF 条目经全新 worker 池重放）。外部报告的 405 风暴**未复现**，也**未**被归因于这些路径。
+
+### 仍然坏着的部分 {#second-round-defects}
+
+- **旧形态任务被整体跳过。** `VersionID` 为空、`DeleteMarkerVersionID` 非空、创建目标 COMPLETED、purge 目标 PENDING 的任务从不发出 DELETE——按目标的创建早退把它挡掉了。
+- **只修目标函数会让聚合说谎。** 外层状态选择以 `VersionID` 与创建状态为键，失败的旧形态 purge 聚合为 COMPLETED、发出 `ObjectReplicationComplete`，并**跳过持久 MRF 入队**——比基线更糟。
+- **持久 MRF 丢弃所有标记 405。** 重放磁盘上删除标记版本的 MRF 条目时，取回的是真实标记元数据加 `MethodNotAllowed`，错误路径将其丢弃——标记 MRF 恢复路线是死路。
+- **失败的 purge 覆盖成功的 resync 标记**，已完成的 purge 被重发，未就绪的 HEAD 无条件覆盖创建状态。
+- **多目标空状态正则误读可一次性损坏创建块。** 磁盘标记只带创建元数据、任务带 purge 状态时，两个空目标状态被解析为伪 `Pending`；deleted 标志守卫随即把整个创建块改写为带新时间戳的空条目——需要磁盘/任务分歧才可达的一次性损坏。
+
+根因：worker 缺少**任务级** purge 分类（社区的 [#184](https://github.com/pgsty/silo/pull/184) 中按目标判定的谓词本身是错的——复合 purge 状态经它永远到不了 COMPLETE；其调查与修复提案仍为本轮奠定了方向，感谢 Julien Laurenceau）；MRF 恢复缺少**有效 405 身份门**；删除任务不带重试计数，既有 `mrfRetryLimit` 的丢弃在删除路径上不可达。
+
+### 修复 {#second-round-fix}
+
+- **一个分类管所有出口。** `isVersionPurge()`（`VersionID` 非空，或 `DeleteMarkerVersionID` 非空且复合 purge 状态非空）同时驱动内层目标函数与外层聚合。purge 出口只写 `VersionPurgeStatus`，`ReplicationStatus` 恒留空——这是存储层的"不更新"信号。
+- **三字段清空守卫**把 purge 路径的复合状态真正清空，使多目标误读在磁盘写入处不可达。
+- **purge 发送规范的永久删除请求**——显式 `versionId`、`ReplicationDeleteMarker=false`、不做 HEAD/就绪探测（授权由 DELETE 本身决定）。这同时防止丢响应重试在无版本回退处**重建标记**。
+- **MRF 恢复的有效 405 门。** `MethodNotAllowed` 只有在返回对象是删除标记、桶/对象/版本身份匹配、修改时间非零时才调度恢复。
+- **有界重试预算。** 删除任务携带重试计数，在全部三个持久 MRF 入口（聚合失败、锁失败、队列满回退）递增，尊重既有上限；耗尽后 scanner 仍可重新发起 heal。
+- **审计与事件状态只在统计/事件边界**把 `COMPLETE` 映射为 `COMPLETED`，复用既有 legacy 常量。
+
+### 405 的准确含义 {#second-round-405}
+
+对**创建**（复制删除标记），对目标标记版本的 HEAD 405 意味着*已存在*——幂等完成。对 **purge**（永久删除版本），MRF 身份探测的 405 且带完整标记身份意味着*还有活要干*；purge 自身的成败只由 DELETE 决定，DELETE 403/405/503 一律是真实失败。空或 null 版本标记返回 `ObjectNotFound` 而非 405，在门外。
+
+### 仍然保留的边界 {#second-round-limits}
+
+旧内存形态任务不跨重启序列化、当前没有生产者——对它的处理是健壮性而非活跃修复。未配置 client 的目标仍只记日志。目标级 resync 替换 purge 子集是本轮既未造成也未修复的既有缺陷。测试直接驱动持久化；不声明定时器 flush 与进程崩溃耐久性。多进程站点复制 mesh 与跨区域验收不在范围内。同轮可靠性修复中的标签排序与副本元数据修复另见[复制标签排序](/zh/blog/design/replicated-tag-ordering/)与[副本元数据归一化](/zh/blog/design/replica-metadata-normalization/)。

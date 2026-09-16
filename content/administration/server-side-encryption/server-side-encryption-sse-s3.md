@@ -255,3 +255,32 @@ of the metadata.</p></td>
     </tr>
   </tbody>
 </table>
+
+## Key Rotation {#key-rotation}
+
+SSE-S3 encrypted objects can be re-keyed without rewriting object data. The
+server assumes only two services from the KMS — `GenerateKey` (return a new
+data key in plain and master-key-encrypted form) and `DecryptKey` (unwrap an
+encrypted data key) — and rotation is built from them:
+
+1. The server decrypts the object's OEK using the encrypted data key and
+   master key ID stored in the object's own metadata.
+2. It requests a new data key from the KMS using the master key ID of the
+   **current** KMS configuration.
+3. It derives a new KEK from the new data key, re-encrypts the OEK with it,
+   and stores the new encrypted OEK, encrypted data key, and master key ID in
+   the object metadata.
+
+The object content itself does not change: only the key hierarchy wrapping the
+OEK is re-created under the currently configured master key. This is how
+objects encrypted under an old master key are brought under a new one. The
+old key must remain decryptable until all required object versions have been
+rotated and verified; deleting it first prevents the initial unwrap.
+
+Use a [batch `keyrotate` job](/administration/batch-framework-job-keyrotate/)
+to rotate stored object keys. Starting the job requires the corresponding
+batch administration permission, and the server needs KMS permission to
+decrypt the old data key and generate a new one. Ordinary S3 self-COPY is a
+different path and can rewrite object data. The
+[`mc admin kms key`](/reference/minio-mc-admin/mc-admin-kms-key/) commands
+manage KMS keys; they do not themselves rotate every stored object's key.

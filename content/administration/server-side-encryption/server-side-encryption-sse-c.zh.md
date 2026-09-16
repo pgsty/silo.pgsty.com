@@ -3,7 +3,7 @@ title: "使用客户端管理密钥的服务端加密（SSE-C）"
 url: "/zh/administration/server-side-encryption/server-side-encryption-sse-c/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/server-side-encryption/server-side-encryption-sse-c.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="sse-c"></a>
@@ -111,3 +111,14 @@ mc cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
 
 - 将 [`SOURCE/BUCKET`](/zh/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) 替换为您要读取 加密对象所在的 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)， 以及您要读取 SSE-C 加密对象的存储桶或存储桶前缀的完整路径。
 - 将 [`TARGET/BUCKET`](/zh/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) 替换为您要写入 加密对象的 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)， 以及您要写入 SSE-C 加密对象的存储桶或存储桶前缀的完整路径。
+
+### 4) 轮换对象的 SSE-C 密钥 {#rotate-the-sse-c-key-of-an-object}
+
+S3 客户端可以在不重新上传对象的情况下更换其客户端密钥：发起一次复制源与复制目标为同一对象的 S3 COPY 操作，并在请求头中同时提供两把密钥：
+
+- `X-Amz-Server-Side-Encryption-Customer-Key`：Base64 编码的**新**密钥（操作完成后对象所用的密钥）。
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key`：Base64 编码的**当前**密钥（对象现在加密所用的密钥）。
+
+源与目标还各需配套的 `Customer-Algorithm: AES256` 和 `Customer-Key-MD5` 请求头，通常由 S3 SDK 设置。
+
+这种自 COPY 称为 SSE-C 密钥轮换。满足仅更新元数据的条件时，服务器用旧客户端密钥解封对象加密密钥，再用新密钥重新封装，对象数据不重写。需要写入新对象数据的复制（例如某些版本化或 checksum 变更）则走普通解密、重新加密路径。客户端提供的密钥不会持久化到对象元数据中。普通 COPY 权限与版本化规则仍适用，它不是通用的原位版本编辑接口。

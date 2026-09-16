@@ -3,7 +3,7 @@ title: "核心设置"
 url: "/zh/reference/minio-server/settings/core/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/core.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-server-envvar-core"></a>
@@ -405,7 +405,11 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 
 将其设为以逗号分隔的地址或 CIDR 列表，则 **只** 采信名单内对端送来的转发头。此时转发链会从右向左、跳过名单内的跳数来解析，这也会丢弃"追加型代理"在链首留下的、由客户端自己提供的那一项——nginx 默认的 `$proxy_add_x_forwarded_for` 写法与 HAProxy 追加的第二行头都会产生这一项。
 
-将其设为 `none`，则完全不采信任何转发头，始终使用对端地址。
+将其设为 `none`（同义词 `off`），则完全不采信任何转发头，始终使用对端地址。取值大小写不敏感；条目之间可用逗号、分号或空白分隔。
+
+三个头按固定顺序查阅——先 `X-Forwarded-For`，再 `X-Real-IP`，最后 RFC 7239 `Forwarded`——第一个产出地址者生效。在允许列表模式下，`X-Forwarded-For` 只有经过可信链解析才会产出地址；`X-Real-IP` 是单值、没有链可校验，因此仅当 `X-Forwarded-For` 的遍历没有产出时才逐字采信。代理若把 `X-Real-IP` 设为真实客户端地址（nginx：`proxy_set_header X-Real-IP $remote_addr;`），该头保持准确；代理若原样转发客户端提供的 `X-Real-IP`，该头即可被伪造。在代理侧剥离不可信头仍是最可靠的做法。
+
+条目请用普通形式书写。`::ffff:10.0.0.7` 这类 IPv4 映射写法会被接受，但不会匹配 IPv4 对端，因此这样写的条目永远不会生效。
 
 > [!NOTE]
 > **说明**
@@ -415,6 +419,8 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 > 要列出 **代理本身，而不是它们所在的网段**。名单内的条目在遍历转发链时会被跳过，因此一个同时覆盖了客户端的网段，等于让那些客户端可以伪造。多节点部署必须把自己各节点的地址也列进去，因为 MinIO 会在节点之间转发部分请求。回环地址始终被视为可信对端，以便 FTP 与 SFTP 能正确归属其会话。取值格式错误、或没有指向任何代理，都会阻止启动。
 
 如果你使用 `IpAddress` 或 `NotIpAddress` 策略条件，那么在此设置指明你的代理之前（或部署本身除代理外不可达之前），这些条件是无法强制执行的。
+
+LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES`（见 [LDAP 设置](/zh/reference/minio-server/settings/iam/ldap/)）；它只影响登录限流的分桶，从不影响 `aws:SourceIp`。除非刻意想让两者信任不同的对端，否则两个列表应设为相同的值。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。

@@ -87,13 +87,22 @@ a build containing them.
   `503 SlowDownRead`. Retry after recovery. Successful deletion does not promise
   immediate removal from every drive while outbound delete replication is pending.
 - **Access-frequency pool tiering was never in Server 20260903.** Only builds
-  containing the experimental feature need its [configuration/XML migration](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/bucket/lifecycle/access-tiering-removal.md).
+  containing the experimental feature need its
+  [configuration/XML migration](/compatibility/access-tiering-removal/).
   Ordinary lifecycle expiration, remote-tier transitions, rebalance and
   decommission remain available.
 - Purge audit status is normalized from `COMPLETE` to `COMPLETED`. Malformed
   historical tag revisions can fail and retry; this repair does not reconstruct
   their history. A shorter header timeout also constrains TLS handshake reads;
   this is not a new total-duration limit for HTTP/1 uploads or downloads.
+- Objects with recorded tag revisions take **one extra metadata COPY per
+  object** during explicit resync or heal; when the destination is KMS-encrypted
+  by bucket default, that copy rewrites the object data. Replication rules with
+  tag filters still evaluate target eligibility against the post-deletion
+  (empty) tagging state, and arbitrary site clock skew remains outside the
+  repaired ordering guarantees. Both endpoints of a replication pair must run
+  the repaired build for tombstones to be honored; an old peer still drops
+  empty-value revisions. See [Replicated Tag Ordering](/blog/design/replicated-tag-ordering/).
 
 The [R4–R8 integration record](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)
 contains source hashes, local tests and remaining acceptance limits. PR #196's
@@ -106,6 +115,12 @@ a new release or production cluster rollout.
   open. The prefix, pagination and original-key discovery limitations described
   in the [design record](/blog/design/list-multipart-uploads/) are not fixed by
   the multipart-completion repair above.
+- **Conditional-completion scope:** the #190 repair covers
+  `CompleteMultipartUpload` preconditions only. Ordinary conditional PUT has a
+  separate cross-pool precondition gap tracked in
+  [#199](https://github.com/pgsty/silo/issues/199); the multipart repair does
+  not resolve it, and `NewMultipartUpload` pool placement likewise remains
+  separate follow-up work.
 - **Console object sharing:** [Console #52](https://github.com/pgsty/silo-console/issues/52)
   remains open and its local fix has not merged. The [proposed request restrictions](/reference/minio-server/settings/console/#object-sharing)
   are not part of the selected Console source or published Server/Console releases.

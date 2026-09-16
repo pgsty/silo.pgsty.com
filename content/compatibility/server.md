@@ -45,7 +45,7 @@ The tagged [`RELEASE.2026-08-04T00-00-00Z`](https://github.com/pgsty/silo/releas
 | Runtime identity                | Changed                               | CLI text, banners, HTTP `Server`, User-Agent application names, FTP banner, log names, support links, and some human-readable errors say Silo                                                                                |
 | Upstream network services       | Disabled                              | In-place update, update polling, callhome, SUBNET registration, and diagnostic uploads do not contact MinIO services                                                                                                         |
 | Authorization/security          | Intentionally stricter                | OIDC HMAC tokens, unsafe LDAP failures, forged replication metadata, object-only grants for protected bucket writes, shadowed policy inputs, ambiguous version IDs, and several malformed internode requests change behavior |
-| Embedded UI and Go dependencies | Forked behind compatible import paths | Silo Console, MCLI, and Silo Pkg are selected with `replace` directives while `github.com/minio/...` module/import paths remain                                                                                              |
+| Embedded UI and Go dependencies | Console and MCLI forked behind compatible import paths; pkg on its own path | Silo Console and MCLI are selected with `replace` directives while `github.com/minio/console` / `github.com/minio/mc` paths remain; Silo Pkg is consumed directly under `github.com/pgsty/silo-pkg/v3` |
 | Mixed-version cluster           | Not supported for this transition     | The private `ReadMultiple` storage-REST operation was removed without bumping storage REST v63. Upgrade all nodes as one build                                                                                               |
 
 ## What deliberately stays compatible {#same}
@@ -68,13 +68,20 @@ No data copy or metadata rewrite is required when the same disks move from MinIO
 
 ### Source compatibility {#source-compatibility}
 
-The server module remains `github.com/minio/minio`. Silo selects maintained forks without forcing callers to rewrite imports:
+The server module remains `github.com/minio/minio`, and Console and the client library are selected through replacements without forcing callers to rewrite imports:
 
 ```go
 replace github.com/minio/console => github.com/pgsty/silo-console ...
 replace github.com/minio/mc      => github.com/pgsty/mc ...
-replace github.com/minio/pkg/v3  => github.com/pgsty/silo-pkg/v3 v3.11.0
 ```
+
+The shared package is the deliberate exception. Since [pkg v3.13.0](/blog/release/pkg-3.13.0/) it builds under its own module path, and every maintained component — including the server — consumes it **directly**:
+
+```go
+require github.com/pgsty/silo-pkg/v3 v3.14.0   // no replace arrangement
+```
+
+The historical `replace github.com/minio/pkg/v3 => ...` arrangement is retired; `github.com/minio/pkg/v3` now appears only as a legacy *indirect* dependency (via `colorjson`/`dperf`), separate from the maintained policy implementation. The upstream SDK `github.com/minio/minio-go/v7` is the other explicit exception: it is consumed directly from upstream at a verified commit, and the retired `silo-go` fork is not part of the maintained graph.
 
 This preserves most source compatibility, but it is not an assertion that every private or exported Go symbol is frozen. The internal `ReadMultiple` storage interface was removed, and the selected `silo-pkg` release has several developer-visible fixes described in [Dependencies](#dependencies).
 
@@ -292,7 +299,7 @@ Important deliberate dependency decisions are:
 |:----------------|:--------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------|
 | Console         | `pgsty/silo-console` v2.1.1 behind `github.com/minio/console` | Restores the embedded UI, applies Silo branding and bilingual text, adds Metrics V3, removes SUBNET flows, and fixes untranslated metric legends |
 | Client library  | `pgsty/mc` behind `github.com/minio/mc`                       | Keeps Console's import path while consuming the maintained MCLI fork                                                                             |
-| Shared package  | `pgsty/silo-pkg/v3` v3.11.0 behind `github.com/minio/pkg/v3`  | Supplies the IAM exact-match half, LDAP TLS/StartTLS/deadline/close fixes, certificate-watcher cleanup, and RNG fixes                            |
+| Shared package  | `pgsty/silo-pkg/v3`, consumed directly at its own module path (v3.14.0; behind `minio/pkg/v3` via `replace` up to v3.12.x) | Breaking module-path move in [v3.13.0](/blog/release/pkg-3.13.0/); supplies the IAM exact-match half, LDAP TLS/StartTLS/deadline/close fixes, certificate-watcher cleanup, and RNG fixes |
 | Kafka           | Sarama 1.45.1                                                 | Pinned to avoid a breaking broker-negotiation drift                                                                                              |
 | PostgreSQL      | lib/pq 1.10.9                                                 | Pinned to avoid a nil-`[]byte` / PostgreSQL-before-14 behavior regression; generated DSN quoting is fixed in server code                         |
 | Compression     | klauspost/compress 1.18.7                                     | Explicit security/correctness upgrade                                                                                                            |
@@ -321,6 +328,8 @@ The sections above describe the `219670d3` snapshot. The table below records the
 | Site replication | Object Lock configuration replicates in its own field (the legacy `Tags` carrier is still accepted); status is accounted per site; validity probes verify permissions under the rule prefix | `3861f33cb`, `fb406fdc9`, `c9ad74673`, `5db7be4ee` |
 | Configuration | Legacy database notification targets require a DSN; `MINIO_CONFIG_ENV_FILE` uses a dedicated parser that keeps named targets | `f1ba68358`, `6b0998157`, `2aea7fe9c` |
 | Toolchain and components | Go 1.27.1; upstream `minio-go` at `0e78d3f18efe` (`silo-go` retired); `silo-pkg` v3.13.2; Console v2.3.0 (see the [Console page](/compatibility/console/)); bundled [mcli 20260903](/blog/release/mcli-20260903/) | `43f4bb7ed`, `4d6e1ea8e`, final dependency refresh |
+
+The shared package's own-module move ([v3.13.0](/blog/release/pkg-3.13.0/), a **breaking** change for Go consumers) was already adopted by published Server 20260903: that tag directly requires `github.com/pgsty/silo-pkg/v3 v3.13.2`. The September 13 refresh moves the maintained stack to v3.14.0; it is not the first Server adoption of the new path. See the [component matrix](/compatibility/versions/) for each build.
 
 ## Known residual risks and non-fixes {#limits}
 

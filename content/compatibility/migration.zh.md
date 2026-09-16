@@ -18,7 +18,8 @@ icon: fa-solid fa-arrow-right-arrow-left
 2. **软件包、systemd 服务与服务端二进制**：`minio` → `silo`。
 3. **上游服务**：原地更新器与 MinIO 官方 callhome/SUBNET 被禁用；升级通过软件包、镜像或编排系统进行。
 4. **默认操作系统服务账号**：`silo`——仅影响全新安装；迁移场景继续以数据现属主运行。
-5. **品牌呈现**：启动横幅、Console 外观、日志措辞与产品链接显示 Silo。
+5. **默认本地配置目录**：`~/.minio` → `~/.silo`（仅影响全新进程；证书回退顺序见[服务端兼容性](/zh/compatibility/server/#config-dir)——既有的 `~/.minio/certs` 仍会被识别）。
+6. **品牌呈现**：启动横幅、Console 外观、日志措辞与产品链接显示 Silo。
 
 ## 哪些不变 {#unchanged}
 
@@ -28,6 +29,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 - 端点主机名、API 端口 `9000`、Console 端口、卷挂载。
 - `MINIO_*` 环境变量与既有服务端参数。
 - `/minio/*` 路由、`x-minio-*` 头、`minio_*` 指标。
+- 策略命名空间标识：IAM 策略、通知与审计事件中的 `arn:minio:*` ARN、`minio:s3` 等服务命名空间保持原拼写。**不存在 `SILO_*` 别名命名空间**——引用上述标识的脚本与策略无需任何修改。
 
 没有数据转换步骤。若你的 MinIO 版本已很陈旧，需要在预发环境验证的是版本跨度本身——那是一次大版本软件升级，不是格式变化。
 
@@ -138,10 +140,12 @@ Waiting for at least 1 remote servers with valid configuration to be online
 
 ## 验证 {#verification}
 
+动手之前，先记录你要离开的制品：正在运行的镜像 digest（或软件包版本与二进制校验和）、unit 状态与启用状态、数据目录属主的 UID/GID。回滚的精度取决于这份记录。
+
 ```bash
 silo healthcheck ready                   # 本节点在服务；退出码 0/1
 silo healthcheck cluster                 # 集群级写 quorum
 mc admin info <现有别名>                  # 所有节点在线、新版本、旧别名直连
 ```
 
-随后下载一个已知对象比对校验和，用现有 SDK 跑通一个应用，重启服务一次并复查。
+随后下载一个已知对象比对校验和，用现有 SDK 跑通一个应用，重启服务一次并复查。回滚还有一条前提：迁移窗口内不要启用旧版本无法理解的新功能——回滚意味着回到旧二进制能解析的状态。

@@ -82,3 +82,32 @@ For more information, see:
 - [SSE-KMS Secure Erasure and Locking](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms-erasure-locking)
 - [SSE-S3 Secure Erasure and Locking](/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3-erasure-locking)
 - [SSE-C Secure Erasure and Locking](/administration/server-side-encryption/server-side-encryption-sse-c/#minio-encryption-sse-c-erasure-locking)
+
+## Cryptographic Construction {#cryptographic-construction}
+
+The following facts describe the construction shared by the SSE schemes. They
+are audit-level reference material: not necessary for configuring or using
+SSE, but useful when reviewing what is actually stored and in what form. The
+description originates from the encryption design notes inherited from
+upstream MinIO and retained by Silo.
+
+- Object content is en/decrypted with an authenticated encryption scheme
+  (AEAD) organized as a *Secure Channel*: the plaintext is split into
+  fixed-size chunks, and each chunk is sealed separately with a unique
+  key-nonce combination. The last chunk may be smaller and is treated
+  specially to prevent truncation attacks.
+- For multi-part objects, each part is sealed with its own key derived from
+  the Object Encryption Key (OEK) and the part number through a PRF — so the
+  OEK itself is never used directly as a part key.
+- The PRF is HMAC-SHA-256. The pinned `sio` implementation prefers
+  AES-256-GCM when hardware acceleration is available (including supported
+  x86 and ARM64 CPUs), and ChaCha20-Poly1305 otherwise.
+- Object encryption keys are 256 bits. The content-encryption format uses
+  96-bit nonces; the separate key-sealing metadata carries a 256-bit IV.
+  These are different fields and must not be confused.
+- The chunk size is 65536 bytes, which bounds a single encrypted object or
+  part at `65536 * 2^32 = 256 TiB` of plaintext at the cryptographic-format
+  level. This is not the supported S3 object or multipart-part size limit.
+- Object-key derivation and key-sealing IV generation use `crypto/rand`;
+  `sio` also defaults to that cryptographically secure random source.
+  Neither keys nor nonces should be replaced with merely unique counters.

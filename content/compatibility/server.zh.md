@@ -45,7 +45,7 @@ Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端�
 | 运行时身份         | 已改变                   | CLI 文本、启动横幅、HTTP `Server`、User-Agent 应用名、FTP 横幅、日志名、支持链接以及部分人类可读错误改为 Silo              |
 | 上游网络服务        | 已禁用                   | 原地更新、更新轮询、callhome、SUBNET 注册与诊断上传不会联系 MinIO 服务                                         |
 | 授权与安全         | 有意收紧                  | OIDC HMAC token、不安全 LDAP 失败、伪造复制元数据、对象资源对受保护桶写操作的越权、策略输入遮蔽、歧义版本 ID 以及若干畸形节点间请求均改变行为    |
-| 内嵌 UI 与 Go 依赖 | 通过兼容 import path 使用分叉 | Silo Console、MCLI 与 Silo Pkg 由 `replace` 选中，同时保留 `github.com/minio/...` 模块/import path |
+| 内嵌 UI 与 Go 依赖 | Console 与 MCLI 走兼容 import path，pkg 走自有路径 | Silo Console 与 MCLI 由 `replace` 选中，同时保留 `github.com/minio/console` / `github.com/minio/mc` 路径；Silo Pkg 以 `github.com/pgsty/silo-pkg/v3` 直接消费 |
 | 混合版本集群        | 此迁移边界不支持              | 私有 `ReadMultiple` storage-REST 操作已删除，却没有提升 storage REST v63；所有节点应作为同一构建整体升级            |
 
 ## 明确保留的兼容契约 {#same}
@@ -68,13 +68,20 @@ Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端�
 
 ### 源码兼容性 {#source-compatibility}
 
-服务端模块仍为 `github.com/minio/minio`。Silo 在不强迫调用方改写 import 的情况下选择维护中的分叉：
+服务端模块仍为 `github.com/minio/minio`；Console 与客户端库通过 replace 选择维护中的分叉，不强迫调用方改写 import：
 
 ```go
 replace github.com/minio/console => github.com/pgsty/silo-console ...
 replace github.com/minio/mc      => github.com/pgsty/mc ...
-replace github.com/minio/pkg/v3  => github.com/pgsty/silo-pkg/v3 v3.11.0
 ```
+
+公共包是刻意的例外。[pkg v3.13.0](/zh/blog/release/pkg-3.13.0/) 起它使用自己的模块路径构建，所有维护中的组件——包括服务端——都**直接**消费它：
+
+```go
+require github.com/pgsty/silo-pkg/v3 v3.14.0   // 不再使用 replace 安排
+```
+
+历史的 `replace github.com/minio/pkg/v3 => ...` 安排已退役；`github.com/minio/pkg/v3` 现在仅作为遗留的*间接*依赖出现（经 `colorjson`/`dperf`），与维护中的策略实现相互独立。上游 SDK `github.com/minio/minio-go/v7` 是另一个明确例外：以经过验证的 commit 直接消费上游，退役的 `silo-go` 分叉不属于维护依赖图。
 
 这保留了大部分源码兼容性，但不表示所有私有或导出 Go 符号永久冻结。内部 `ReadMultiple` 存储接口已删除，所选 `silo-pkg` 版本也包含[依赖章节](#dependencies)所述的开发者可见变化。
 
@@ -292,7 +299,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 |:-----------|:-------------------------------------------------------------|:-------------------------------------------------------------------------|
 | Console    | `pgsty/silo-console` v2.1.1，保持 `github.com/minio/console` 路径 | 恢复内嵌 UI，应用 Silo 品牌和双语文本，加入 Metrics V3，移除 SUBNET 流程并修复指标图例未翻译问题           |
 | 客户端库       | `pgsty/mc`，保持 `github.com/minio/mc` 路径                       | Console import path 不变，同时使用维护中的 MCLI 分叉                                  |
-| 公共包        | `pgsty/silo-pkg/v3` v3.11.0，保持 `github.com/minio/pkg/v3` 路径  | 提供 IAM 精确匹配的一半、LDAP TLS/StartTLS/deadline/close 修复、证书 watcher 清理和 RNG 修复 |
+| 公共包        | `pgsty/silo-pkg/v3`，以自有模块路径直接消费（v3.14.0；v3.12.x 及之前经 `minio/pkg/v3` replace） | [v3.13.0](/zh/blog/release/pkg-3.13.0/) 的破坏性模块路径迁移；提供 IAM 精确匹配的一半、LDAP TLS/StartTLS/deadline/close 修复、证书 watcher 清理和 RNG 修复 |
 | Kafka      | Sarama 1.45.1                                                | 固定以避免破坏性的 broker 协商漂移                                                    |
 | PostgreSQL | lib/pq 1.10.9                                                | 固定以避免 nil `[]byte` / PostgreSQL 14 以前版本的行为回归；自动 DSN 引用在服务端代码中修复          |
 | 压缩         | klauspost/compress 1.18.7                                    | 显式安全/正确性升级                                                               |
@@ -321,6 +328,8 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 站点复制 | Object Lock 配置以独立字段复制（仍接受旧的 `Tags` 载体）；按站点统计状态；有效性探针在规则前缀下校验权限 | `3861f33cb`、`fb406fdc9`、`c9ad74673`、`5db7be4ee` |
 | 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
 | 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
+
+公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，并非 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
 
 ## 已知残余风险与未修复项 {#limits}
 

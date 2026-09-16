@@ -18,7 +18,8 @@ In order of importance:
 2. **Package, systemd service, and server executable**: `minio` → `silo`.
 3. **Upstream services**: the in-place updater and MinIO-operated callhome/SUBNET are disabled; upgrades go through packages, images, or your orchestrator.
 4. **Default OS service account**: `silo` — fresh installations only; migrations keep running as the existing data owner.
-5. **Branding**: banners, Console appearance, log wording, and product links say Silo.
+5. **Default local configuration directory**: `~/.minio` → `~/.silo` (fresh processes only; see [server compatibility](/compatibility/server/#config-dir) for the certificate fallback order — an existing `~/.minio/certs` keeps being honored).
+6. **Branding**: banners, Console appearance, log wording, and product links say Silo.
 
 ## What stays {#unchanged}
 
@@ -28,6 +29,7 @@ In order of importance:
 - Endpoint hostname, API port `9000`, Console port, volume mounts.
 - `MINIO_*` environment variables and existing server options.
 - `/minio/*` routes, `x-minio-*` headers, `minio_*` metrics.
+- Policy-namespace identifiers: `arn:minio:*` ARNs, `minio:s3` and the other service namespaces in IAM policies, notifications, and audit events keep their exact spelling. There is **no `SILO_*` alias namespace** — scripts and policies addressing the identifiers above need no change.
 
 There is no data-conversion step. If your MinIO build is years old, validate the version distance itself in staging; it is a large software upgrade, not a format change.
 
@@ -138,10 +140,12 @@ This applies to any pair of different binaries: MinIO next to Silo, and one Silo
 
 ## Verification {#verification}
 
+Before touching anything, record the artifacts you are leaving behind: the running image digest (or package version and binary checksum), the unit status and enabled state, and the UID/GID that owns the data directory. Rollback is only as precise as that record.
+
 ```bash
 silo healthcheck ready                   # this node serves; exit 0/1
 silo healthcheck cluster                 # cluster-wide write quorum
 mc admin info <existing-alias>           # all nodes online, new version, old alias
 ```
 
-Then download a known object and compare its checksum, exercise one application through its existing SDK, restart the service once, and re-check.
+Then download a known object and compare its checksum, exercise one application through its existing SDK, restart the service once, and re-check. One more rollback precondition: do not enable features in the migration window that the old version cannot understand — rolling back means rolling back to what the old binary can parse.

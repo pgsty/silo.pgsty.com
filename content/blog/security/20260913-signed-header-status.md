@@ -32,7 +32,7 @@ required objects and avoid exposing unnecessary read grants or anonymous
 readable upload destinations while planning that update. Updating a client or
 Console alone does not remove the Server defect.
 
-Reported by Oren Yomtov. The [canonical advisory ledger](https://github.com/pgsty/silo/blob/main/docs/security/advisories.md)
+Reported by Oren Yomtov. The [advisory ledger](/about/security-advisories/#sn-2026-011)
 records SN-2026-011 and its source fix; a CVE was requested. Do not substitute
 a dependency scan's clean reachability result for this application-level status.
 See the [component matrix](/compatibility/versions/) for released versus main
