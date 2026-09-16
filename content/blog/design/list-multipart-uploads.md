@@ -62,6 +62,8 @@ Each process admits two scans, with 16 identity workers and four full-metadata w
 
 Every page still rescans durable state: total enumeration cost grows with both stored candidates and page count. The tests cover missing markers, multi-pool coverage, partial-deletion retries, identity fallback, RPC directory bounds, cancellation admission and the known late-write counterexample. Temporary multi-node and maintained-client checks establish functional behavior for their recorded environment. Production-scale latency and foreground-load impact remain deployment-specific acceptance work; merging the source does not certify them.
 
+A September 16 temporary Docker Desktop arm64 run used two nodes, four APFS-backed bind volumes and 11,000 uploads across two buckets, while other local validation was running. One 1,000-entry page for the 10,000-upload target bucket took 18.7 seconds; two concurrent requests returned retryable `SlowDownRead` responses after about 25–27 seconds. These observations do not meet the provisional five-second page target and are not an isolated SSD benchmark. Capacity and foreground-load acceptance remain open; the bounded scanner must not be advertised as a large-scale performance fix.
+
 ## The problem in plain language {#plain-language}
 
 Imagine that four large files are still being uploaded:
