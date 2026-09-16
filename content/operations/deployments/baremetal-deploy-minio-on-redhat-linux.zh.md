@@ -290,10 +290,11 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 启动成功后，MinIO 进程会输出一段部署摘要，类似如下：
 
 ```shell
-MinIO 对象存储服务端
-Copyright: 2015-2024 MinIO, Inc.
+Silo 对象存储服务端
+Copyright: 2015-2025 MinIO, Inc.
+Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2024-06-07T16-42-07Z (go1.22.4 linux/amd64)
+Version: RELEASE.2026-09-03T13-18-01Z (go1.27.1 linux/amd64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin

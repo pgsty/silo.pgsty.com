@@ -28,7 +28,7 @@ MINIO_IDENTITY_PLUGIN_URL="https://external-auth.example.net:8080/auth"
 MINIO_IDENTITY_PLUGIN_ROLE_POLICY="consoleAdmin"
 
 # All other envvars are optional
-MINIO_IDENTITY_PLUGIN_TOKEN="Bearer TOKEN"
+MINIO_IDENTITY_PLUGIN_AUTH_TOKEN="Bearer TOKEN"
 MINIO_IDENTITY_PLUGIN_ROLE_ID="external-auth-provider"
 MINIO_IDENTITY_PLUGIN_COMMENT="External Identity Management using PROVIDER"
 ```
@@ -42,7 +42,7 @@ mc admin config set identity_plugin \
    role_policy="consoleAdmin" \
 
    # All other config settings are optional
-   token="Bearer TOKEN" \
+   auth_token="Bearer TOKEN" \
    role_id="external-auth-provider" \
    comment="External Identity Management using PROVIDER"
 ```

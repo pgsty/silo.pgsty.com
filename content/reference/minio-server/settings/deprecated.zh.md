@@ -3,7 +3,7 @@ title: "已弃用设置"
 url: "/zh/reference/minio-server/settings/deprecated/"
 weight: 120
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/deprecated.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-server-envvar-deprecated"></a>
@@ -76,6 +76,8 @@ upstream_modified: false
 
 要轮换 root 凭证，请修改 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 和 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 环境变量。
 
+当前的 Silo 版本已不再读取该变量，设置它没有任何效果。
+
 #### `MINIO_OPERATOR_DEPLOYMENT_NAME` {#envvar.MINIO_OPERATOR_DEPLOYMENT_NAME}
 
 *envvar*
@@ -89,6 +91,8 @@ upstream_modified: false
 
 未指定时，默认值为 `minio-operator`。
 
+当前的 Silo 版本已不再读取该变量，设置它没有任何效果。
+
 #### `MINIO_SECRET_KEY_OLD` {#envvar.MINIO_SECRET_KEY_OLD}
 
 *envvar*
@@ -97,6 +101,8 @@ upstream_modified: false
 > **已弃用: RELEASE.2021-04-22T15-44-28Z**
 
 要轮换 root 凭证，请修改 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 和 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 环境变量。
+
+当前的 Silo 版本已不再读取该变量，设置它没有任何效果。
 
 #### `MINIO_SERVER_URL` {#envvar.MINIO_SERVER_URL}
 
