@@ -37,6 +37,12 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 副本写入从跨池同版本的权威副本中协调目标保留期和 legal hold。较旧入站副本不能缩短较新的保留期或关闭较新的 hold。标签同样与其时间戳共同传递，包括表示删除的空值。详见 [Object Lock 排序](/blog/design/object-lock-replication-ordering/)及[复制标签](/blog/design/replicated-tag-ordering/)。
 
+## 跨池迁移中的标签 {#migration-tags}
+
+rebalance 与 decommission 把每个版本读成 `FileInfo`，转换成 `ObjectInfo`——这一步把标签头从普通元数据表移到 `UserTags` 字段——再把对象写到目标池。迁移写入方自 2022 年引入以来只复制普通元数据表，于是普通和分片对象在两个入口都会丢标签；2020 年的字段拆分本身没有问题。提交 [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) 让四个迁移写入方共用一个元数据组装：克隆元数据表、恢复 `UserTags`、按存储原样保留标签修订字段，不伪造时间戳，并沿用既有的协调锁。回归覆盖普通与分片对象、初始标签、更新与清空的标签、版本化与旧格式读取。
+
+修复只能防止今后的丢失。此前迁移已经丢掉的标签不会恢复，要恢复必须有可信的旧值来源。修复后的八节点 rebalance 与 decommission 验收在本文写作时尚未完成。
+
 ## 证据与运维影响 {#verification}
 
 [协调层实现](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/erasure-server-pool-consistency.go)、[池入口](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/erasure-server-pool.go)和两份已合并 PR 界定源码契约。覆盖包含多池、旧副本、删除标记、显式版本、并发写入及失败路径，不代表原子回滚或任意故障容错。

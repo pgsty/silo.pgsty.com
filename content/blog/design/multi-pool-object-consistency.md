@@ -37,6 +37,12 @@ Cleanup and metadata propagation can still partially modify physical copies befo
 
 Replica writes reconcile destination retention and legal-hold state against authoritative same-version copies across pools. A stale incoming replica must not shorten a newer retention or turn off a newer hold. Tags similarly travel with their timestamp, including an empty deletion value. See [Object Lock ordering](/blog/design/object-lock-replication-ordering/) and [replicated tags](/blog/design/replicated-tag-ordering/).
 
+## Tags across pool migration {#migration-tags}
+
+Rebalance and decommission read each version as a `FileInfo`, convert it to an `ObjectInfo` — which moves the tag header out of the ordinary metadata map into `UserTags` — and rewrite the object in the destination pool. Since their introduction in 2022 the migration writers copied only the ordinary metadata map, so tags were dropped for ordinary and multipart objects on both entry points; the 2020 field split itself is correct. Commit [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) gives the four migration writers one metadata assembly that clones the map, restores `UserTags` and keeps the tag revision fields exactly as stored, without inventing timestamps, under the existing coordination locks. Regressions cover ordinary and multipart objects, initial tags, updated and cleared tags, and versioned and legacy readers.
+
+The repair only prevents future loss. Tags already dropped by an earlier migration are not recovered; restoring them needs a trusted source of the old values. The post-repair eight-node rebalance and decommission acceptance was not completed at the time of writing.
+
 ## Evidence and operator impact {#verification}
 
 The [coordinator implementation](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/erasure-server-pool-consistency.go), [pool entry points](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/erasure-server-pool.go), and the two merged PRs identify the source contract. Coverage includes multiple pools, stale copies, delete markers, explicit versions, concurrent writes and failure paths. It is not a claim of atomic rollback or arbitrary fault tolerance.

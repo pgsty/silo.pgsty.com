@@ -122,6 +122,8 @@ MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 
 
 从 [RELEASE.2023-06-23T20-26-00Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-23T20-26-00Z) 起，退役还会忽略那些已根据父存储桶配置的 [生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 过期的对象版本。 从 [RELEASE.2023-06-29T05-12-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-29T05-12-28Z) 起，你可以使用 [`mc admin trace --call decommission`](/zh/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) 在退役过程中监控被忽略的 delete marker 和已过期对象。
 
+包含 [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) 的 Silo 构建（main，晚于 Server 20260903）会在退役与 rebalance 期间把对象标签及其修订字段带到目标池。更早的构建会丢掉被迁移对象的标签。如果依赖标签的生命周期或策略规则有影响，请审计已迁移的对象，不要默认标签仍在；见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/#migration-tags)。
+
 退役过程完成后，你就可以安全关闭该 pool。 由于剩余数据要么已计划删除，要么仅为 `DeleteMarker`，因此你可以按照内部流程安全清空或销毁这些驱动器。
 
 ## 行为说明 {#id11}
