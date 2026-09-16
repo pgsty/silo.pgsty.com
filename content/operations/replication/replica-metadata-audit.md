@@ -132,6 +132,27 @@ undo prior metadata writes.
   response alone does not prove that the expected marker was found or purged.
 - **Historical IAM revocations:** use the separate [IAM recovery procedure](/operations/replication/iam-upgrade/).
 
+## Validation scope {#validation}
+
+On 2026-09-16 the tool was exercised with a read-only account against actual
+Server 20260903 storage, a stopped-storage clone upgraded to build `70c7ec4a9fbf`
+(runtime source baseline `40220bd836cb`), and that clone after restart. All three inventories agreed on
+21 version/marker records: six confirmed headers, two ambiguous encodings,
+twelve unaffected headers and one marker. Fixtures included a non-current
+version, null version, unusual object keys, gzip bytes, and SSE-S3 with retention
+and legal hold. Original bytes, tags and the verified lock state survived the
+upgrade; the old encoding headers also remained, as expected.
+
+A separate clone rehearsal corrected one unlocked current object's encoding
+through an explicit replacement COPY. Raw gzip bytes and tags were preserved,
+but COPY created a new version and left the original version's header unchanged.
+Deleting only that new, unlocked version restored the original current version.
+This demonstrates the version/rollback distinction, not a general in-place
+repair. The setup used one Linux ARM64 process/drive and a static test KMS key;
+it did not validate multi-site convergence, SSE-C, external KMS or rewriting
+locked versions. Detailed results and remaining checks are tracked in
+[#201](https://github.com/pgsty/silo/issues/201).
+
 The inventory tool is preparation, not a repair engine. Clone remediation and
 configuration-specific Object Lock/SSE/replication checks remain tracked in
 [#201](https://github.com/pgsty/silo/issues/201). Record any production inventory

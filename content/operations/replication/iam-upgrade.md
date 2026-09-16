@@ -15,9 +15,10 @@ IAM backend. Mixed old/new nodes on that backend and rolling downgrade are unsup
 
 **Release status:** these repairs are in the [September source baseline](/compatibility/versions/#september-reliability),
 not Server 20260903. This procedure is preparation for a build containing those
-repairs. The old/new, object-store/etcd recovery rehearsals remain tracked in
-[#200](https://github.com/pgsty/silo/issues/200); publication of this page does
-not establish that a production upgrade has passed them.
+repairs. Isolated upgrade/restore observations and remaining recovery checks are
+tracked in [#200](https://github.com/pgsty/silo/issues/200); see the
+[validation scope](#validation). Publication of this page does not establish
+production upgrade acceptance.
 
 ## Prepare the maintenance window {#prepare}
 
@@ -160,3 +161,29 @@ supports the protocol implementation. The rehearsal adds deployment topology,
 backup completeness, restart and operator recovery evidence. Link the resulting
 redacted observations in [#200](https://github.com/pgsty/silo/issues/200); keep
 release-artifact validation and a real production rollout separate.
+
+## Validation scope {#validation}
+
+On 2026-09-16, isolated rehearsals upgraded Server 20260903 (`9b11dc9469e6`)
+to build `70c7ec4a9fbf`, whose runtime source matches baseline `40220bd836cb`
+(only the changelog differs). Both the object-store and etcd 3.6.13 backends
+passed. Each run used three sites with two Server processes and four drives per
+site; the etcd run used one independent etcd process per site.
+
+Existing, non-revoked user, service-account and STS credentials survived the
+coordinated upgrade. Revocations made while one site was stopped converged after
+it returned. Cold restart and full restore from a post-revocation backup kept
+old credentials and detached grants denied, while explicitly recreated and
+reissued credentials worked. Same-key service-account replacement also retained
+the new secret and rejected the old secret. Denial checks used signed reads of
+a known object with a successful root control, rather than treating any request
+failure as proof of revocation.
+
+Restoring a pre-upgrade backup with its old binary made a subsequently revoked
+credential work again, confirming the rollback hazard above. That run stopped
+before replaying the revocation ledger or rekeying; it **does not approve
+reopening the restored system**. The laboratory used one isolated Linux ARM64
+container with a shared clock and no external peers. It did not test production
+storage snapshots, an HA etcd cluster, external identity providers/KMS, clock
+skew or reopening after rollback reconciliation. These remaining checks and
+the exact artifact identities are tracked in [#200](https://github.com/pgsty/silo/issues/200).
