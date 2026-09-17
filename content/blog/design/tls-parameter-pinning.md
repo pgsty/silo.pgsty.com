@@ -25,6 +25,12 @@ url: "/blog/design/tls-parameter-pinning/"
 > the strength of the merge rather than a retest; that was wrong, and this record
 > states what the repair covers, what it cannot cover, and what has to change.
 
+> **Update, 2026-09-17.** An upstream Go issue reports the same symptoms from a
+> different product, and a second one carries a full diagnosis of the mechanism.
+> Both are summarized in [The known upstream instance](#upstream). The practical
+> consequence: the first question to ask an affected operator is what inspects
+> that traffic, not what to set in SILO.
+
 > **Evidence class.** Go behavior below is read from the Go 1.27.1 standard
 > library source and the [official release notes](https://go.dev/doc/go1.27).
 > Handshake byte counts and branch reproductions come from the synthetic
@@ -217,6 +223,20 @@ Only the identity path blocks startup, which is why it was reported first. The
 others degrade quietly, so a deployment can be affected without anyone filing an
 issue.
 
+Which deployments are exposed at all:
+
+| Situation | Why |
+| --- | --- |
+| An SSL-inspection NGFW, SASE, SWG or IDS/IPS sits on the outbound path | The reported case, and the one with a confirmed vendor defect |
+| Egress through an enterprise VPN that inspects TLS | Same mechanism, applied to the whole egress |
+| The environment allow-lists **JA3/JA4 client fingerprints** | The fingerprint changes whenever the handshake changes, so **every toolchain upgrade can trip it**, with the same silent reset |
+| An old TLS terminator or load balancer in front of the endpoint | Intolerant of unknown extensions, or mishandles a hello split across segments |
+| **Migrating from an upstream MinIO release built with Go ≤ 1.22** | That handshake carried neither post-quantum key exchange nor ML-DSA — roughly 275 bytes against roughly 1509. This cohort makes the largest single jump and is the most exposed |
+| Regulated environments that disallow post-quantum algorithms | They need the classical profile for policy reasons, not interoperability ones |
+
+Deployments whose outbound paths carry no inspection device are unaffected, and
+should not set any of the compatibility options below.
+
 Four properties combine to make the symptom nearly undiagnosable in the field:
 identity initialization retries at randomized 0–3 second intervals; the discovery
 and JWKS fetches have **no total timeout**, so startup can hang indefinitely;
@@ -269,6 +289,48 @@ ingress's own reject reason for the same second, settles it. That evidence was
 never requested from the reporter — which is the process failure this record
 exists to fix.
 
+## The known upstream instance {#upstream}
+
+Branch B is not hypothetical. Two upstream Go issues describe it:
+
+- [golang/go#81199](https://github.com/golang/go/issues/81199), *"add a GODEBUG
+  to disable advertising ML-DSA signature algorithms in the ClientHello (Go 1.27
+  regression against TLS-inspecting middleboxes)"*, open since 2026-08-28.
+  The reported symptoms are identical to #154: `read: connection reset by peer`
+  on every TLS 1.3 connection through a TLS-inspecting firewall, while curl,
+  OpenSSL 3.6 and Node.js 24 succeed from the same host, a Go 1.26 build of the
+  same program succeeds, and `MaxVersion: tls.VersionTLS12` works. The product
+  named there is Palo Alto Prisma Access with PAN-OS 10.2.10-h37, and the Go
+  team's reply notes that a patched version is available.
+- [golang/go#79626](https://github.com/golang/go/issues/79626), closed, carries
+  the diagnosis. A network administrator traced it with their own firewall team:
+  a Palo Alto IDS/IPS threat signature for OpenSSL **CVE-2020-1967** — reported
+  there as PA threat ID 58033, last updated 2022-07-12 — inspects the
+  `signature_algorithms_cert` extension and resets connections whose algorithm
+  list it does not expect. Palo Alto shipped a content update disabling that
+  signature on 2026-06-23.
+
+CVE-2020-1967 was a null-pointer dereference reachable through a malformed
+`signature_algorithms_cert`; the vendor's detector for it has now been firing on
+legitimate modern handshakes for years. This also explains the 12-byte delta
+precisely: Go 1.27 adds three ML-DSA identifiers to **both**
+`signature_algorithms` and `signature_algorithms_cert`, which is 3 × 2 bytes in
+each of two extensions.
+
+**Go will not provide a switch.** The security lead's position on #81199 is that
+they cannot GODEBUG every low-level ClientHello change, that GODEBUGs have been
+reserved for changes that alter negotiated parameters, and that advertising a
+signature algorithm is not supposed to change anything. The proposed `tlsmldsa`
+setting ([golang/go#81307](https://github.com/golang/go/issues/81307)) has not
+landed. Chrome is also expected to start GREASEing `signature_algorithms_cert`,
+which will break the remaining affected devices harder and faster.
+
+Two consequences for SILO. First, **no plan may depend on an upstream knob
+appearing**: the explicit compatibility setting in the requirements below is
+mandatory, not a fallback. Second, the fastest diagnostic question for any
+affected operator is *what inspects this traffic* — a vendor content update may
+close the case in one step, and that is a real fix rather than a workaround.
+
 ## The option space {#options}
 
 Grouped by who has to act. Each row solves specific branches; before the
@@ -278,7 +340,7 @@ discriminating evidence exists, any of them is a guess.
 
 | Action | Branches | Cost |
 | --- | --- | --- |
-| Update or reconfigure the middlebox to tolerate unknown algorithm identifiers | A, B, C | Requires the device's owner; timeline outside our control |
+| Update the middlebox — threat-signature content as well as firmware — so it tolerates unknown algorithm identifiers | A, B, C | Requires the device's owner. For the identified product a content update already exists, so this can be the shortest path, not the longest |
 | Route around it: point `MINIO_IDENTITY_OPENID_CONFIG_URL` at an endpoint that does not traverse the device, or use split-horizon DNS. The discovery document's `issuer` must not change | A, B, C | Certificate hostname and issuer consistency must hold |
 | Terminate TLS in a sidecar (stunnel, Envoy) that connects to the IdP itself | A, B, C | An extra component and its own trust chain |
 | Send the request through `HTTPS_PROXY` | none | A CONNECT tunnel forwards the same ClientHello; only a proxy that terminates TLS changes anything |
@@ -300,6 +362,38 @@ signature algorithms — the crypto/tls entries in `internal/godebugs/table.go` 
 gate: the identifiers are TLS 1.3-only, so capping `MaxVersion` at TLS 1.2
 suppresses them. SILO does not expose that anywhere. That is the gap.
 
+## Why the toolchain is not rolled back {#rollback}
+
+Rebuilding on Go 1.26 would restore the exact handshake of the working release,
+and upstream reports confirm that downgrading works. It is still the wrong
+instrument, for five reasons.
+
+1. **It pays for someone else's defect with everyone's toolchain.** The device
+   at fault has a vendor fix available.
+2. **It expires.** Go supports the two most recent releases. Once Go 1.28 ships,
+   a 1.26 build runs on a standard library that no longer receives security
+   fixes, and the same decision returns with worse options.
+3. **Upstream is not going back.** Go has declined to add a switch, and Chrome
+   intends to GREASE the same extension. A rollback defers the problem rather
+   than solving it.
+4. **It is not a compiler swap.** Server, Console, mcli and silo-pkg all declare
+   `go 1.27.1`; building the current source with Go 1.26.7 is rejected by the
+   module requirement, so a downgrade is a coordinated change across four
+   repositories plus whatever transitive modules already require 1.27.
+5. **It only covers one branch.** If the reset is the HTTP-layer rule of branch
+   C, the toolchain is irrelevant.
+
+One adjacent idea does not work either: lowering the `go` directive in `go.mod`
+while still compiling with 1.27. That mechanism only governs behaviors that have
+a GODEBUG, and ML-DSA advertisement has none — it would change unrelated
+defaults such as the macOS root-certificate behavior and leave the handshake
+exactly as it is.
+
+**Rolling back the release image is a different decision and a legitimate one.**
+An affected operator staying on 20260804 while their appliance is patched is
+sound emergency practice; the product freezing its compiler for the same reason
+is not.
+
 ## Requirements taken from this {#requirements}
 
 1. **Phase-labeled diagnostics on the discovery and JWKS fetches.** Record, via
@@ -312,7 +406,8 @@ suppresses them. SILO does not expose that anywhere. That is the gap.
    identity provider: classical curves, and optionally a TLS 1.2 cap. It must be
    opt-in, warn loudly at startup, and be visible in `mc admin config` and
    support bundles. `MINIO_API_SECURE_CIPHERS` is the existing precedent. This is
-   the only in-process remedy for branch B.
+   the only in-process remedy for branch B, and since Go has declined to add a
+   signature-algorithm switch, it is mandatory rather than a fallback.
 3. **Startup robustness**: a total deadline and context cancellation for the
    discovery and JWKS fetches, and a decision on whether readiness should reflect
    identity state, which currently it does not.
