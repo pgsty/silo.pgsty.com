@@ -4,7 +4,7 @@ url: "/zh/glossary/"
 weight: 260
 icon: fa-solid fa-book-open
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/glossary.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="id1"></a>
@@ -235,7 +235,7 @@ upstream_modified: false
 
 **纠删码集合**
 
-> MinIO 中支持 [erasure coding](#term-erasure-coding) 的一组磁盘。 MinIO 会将部署中服务器池的磁盘划分为若干组，每组包含 4 到 16 个磁盘，每组构成一个纠删码集合。 写入对象时，[data](#term-data) 和 [parity](#term-parity) 块会随机写入该纠删码集合中的各个磁盘。
+> 用于 [纠删码](#term-erasure-coding) 的一组磁盘。SILO 的每个多盘纠删集合包含 2 到 16 块磁盘。每个对象归属于一个纠删集合，其 [数据](#term-data) 与 [校验](#term-parity) 分片分布在该集合的磁盘上。单盘部署使用 `EC:0`，不提供纠删码冗余。
 
 <a id="term-hashing"></a>
 

@@ -51,7 +51,7 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 > 这意味着它支持从 <code>EC:0</code> 到纠删码集合驱动器数量 1/2 的校验值，也就是最高 <code>EC:8</code>。</figcaption>
 > </figure>
 
-**你可以将校验值设置在 0 到纠删码集合大小的 1/2 之间。**
+**校验值为 0 到 `floor(N/2)` 之间的整数，其中 `N` 是纠删集合的磁盘数。**
 
 > <figure>
 >   <img src="/images/erasure/erasure-coding-erasure-set-shard-distribution.svg" alt="Diagram of an object being sharded using MinIO&#x27;s Reed-Solomon Erasure Coding algorithm." />
@@ -61,9 +61,9 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 >
 > 对象一旦按某个校验设置写入，即使之后修改校验值，也不会自动更新。
 
-**MinIO 至少需要 `K` 个任意类型的分片才能读取对象。**
+**重建对象数据至少需要 `K` 个健康的数据分片或校验分片。**
 
-> 这里的 `K` 构成部署的读仲裁。 因此，纠删码集合中至少要有 `K` 块健康驱动器，才能支持读操作。
+> 对于保存在本地的普通非空对象，`K` 是其通常的 **读仲裁**，按对象实际记录的分片布局计算。读取还须满足相应的 [元数据仲裁](/zh/operations/concepts/availability-and-resiliency/#minio-availability-resiliency)；`K` 不是所有操作或整个部署的统一仲裁值。
 >
 > <figure>
 >   <img src="/images/erasure/erasure-coding-shard-read-quorum.svg" alt="Diagram of a 4-node 16-drive deployment with one node offline." />
@@ -74,9 +74,9 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 >
 > 对于已经失去读仲裁的对象，MinIO 无法进行重建。 这类对象可能需要通过其他方式恢复，例如 [复制重同步](/zh/administration/bucket-replication/server-side-replication-resynchronize-remote/#minio-bucket-replication-resynchronize)。
 
-**MinIO 至少需要 `K` 块纠删码集合驱动器才能写入对象。**
+**当 `K>M` 时，对象写入需要 `K` 块可用磁盘；当 `K=M` 时，需要 `K+1` 块。**
 
-> 这里的 `K` 构成部署的写仲裁。 因此，纠删码集合中至少要有 `K` 块可用驱动器在线，才能支持写操作。
+> 写仲裁由对象采用的数据分片数和校验分片数决定，纠删集合必须有至少相应数量的可用磁盘才能完成写入。写入降级集合的新对象可能采用更高的校验值，但仍受校验上限和写仲裁约束。
 >
 > <figure>
 >   <img src="/images/erasure/erasure-coding-shard-write-quorum.svg" alt="Diagram of a 4-node 16-drive deployment where one node is offline." />
@@ -92,11 +92,16 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 > <figure>
 >   <img src="/images/erasure/erasure-coding-shard-split-brain.svg" alt="Diagram of an erasure set where parity EC:M is 1/2 the set size" />
 >   <figcaption>该部署中有两个节点因临时网络故障而离线。
-> 客户端按 <code>EC:8</code> 校验设置写入对象，此时该纠删码集合的写仲裁为 <code>K=9</code>。
+> 客户端在这个 16 盘集合中按 <code>EC:8</code> 写入对象，此时 <code>K=8</code>，写仲裁为 <code>K+1=9</code>。
 > 该纠删码集合已经失去写仲裁，因此 MinIO 无法将其用于写操作。</figcaption>
 > </figure>
 >
 > `K+1` 逻辑可确保客户端不会把同一个对象分别写入纠删码集合的两个“半边”，从而避免潜在的不一致。
+
+> [!NOTE]
+> **双盘 EC:1**
+>
+> SILO 支持双盘纠删集合，默认使用 `EC:1`。此时 `K=M=1`，读仲裁为 1，写仲裁为 2，容量开销相当于两份副本。运行中失去一盘后，如果另一盘上的对象数据和元数据完好，仍可读取既有对象，但无法继续写入。要获得物理磁盘冗余，需要使用独立物理盘；单节点不提供主机故障下的服务可用性。
 
 **对于仍满足读仲裁的对象，MinIO 可以使用任意数据分片或校验分片来 [自愈](/zh/operations/concepts/healing/#minio-concepts-healing) 受损分片。**
 

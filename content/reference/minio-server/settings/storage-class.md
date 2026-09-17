@@ -3,7 +3,7 @@ title: "Erasure Code Settings"
 url: "/reference/minio-server/settings/storage-class/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/storage-class.rst
-upstream_modified: false
+upstream_modified: true
 math: true
 ---
 
@@ -61,7 +61,7 @@ Specify the value using `EC:M` notation, where `M` refers to the number of parit
 
 The following table lists the default values based on the [erasure set size](/operations/concepts/erasure-coding/#minio-ec-erasure-set) of the initial server pool in the deployment:
 
-| Erasure Set Size | Default Parity (EC:N) |
+| Erasure Set Size | Default Parity (EC:M) |
 | --- | --- |
 | 1 | EC:0 |
 | 2-3 | EC:1 |
@@ -69,9 +69,11 @@ The following table lists the default values based on the [erasure set size](/op
 | 6 - 7 | EC:3 |
 | 8 - 16 | EC:4 |
 
+The `2–3` row describes the same default parity, not the same write availability. With `EC:1`, a two-drive set has a read quorum of 1 and a write quorum of 2, while a three-drive set has both quorums equal to 2. Losing one drive therefore prevents writes to the two-drive set. A single-drive `EC:0` deployment has no erasure-code redundancy. See [Erasure Coding](/operations/concepts/erasure-coding/#minio-ec-basics).
+
 The minimum supported value is `0`, which indicates no erasure coding protections. These deployments rely entirely on the storage controller or resource for availability / resiliency.
 
-The maximum value depends on the erasure set size of the initial server pool in the deployment, where the upper bound is \(\frac{\text{ERASURE\_SET\_SIZE}}{2}\). For example, a deployment with erasure set stripe size of 16 has a maximum standard parity of 8.
+The maximum value depends on the erasure set size `N` of the initial server pool in the deployment, with an upper bound of `floor(N/2)`. For example, a deployment with erasure set stripe size of 16 has a maximum standard parity of 8.
 
 You can change this value after startup to any value between `0` and the upper bound for the erasure set size. MinIO only applies the changed parity to newly written objects. Existing objects retain the parity value in place at the time of their creation.
 
@@ -105,7 +107,7 @@ MinIO references the `x-amz-storage-class` header in request metadata for determ
 
 Specify the value using `EC:M` notation, where `M` refers to the number of parity blocks to create for the object.
 
-This value **must be** less than or equal to [`MINIO_STORAGE_CLASS_STANDARD`](#envvar.MINIO_STORAGE_CLASS_STANDARD).
+When this value and [`MINIO_STORAGE_CLASS_STANDARD`](#envvar.MINIO_STORAGE_CLASS_STANDARD) are both nonzero, this value **must be** less than or equal to `STANDARD` parity. Equal parity is allowed.
 
 You cannot set this value for deployments with an erasure set size less than 2. Defaults to `EC:1` for deployments with erasure set size greater than 1. Defaults to `EC:0` for deployments of erasure set size of 1.
 
@@ -124,7 +126,7 @@ You cannot set this value for deployments with an erasure set size less than 2. 
 {{< /tab >}}
 {{< /tabs >}}
 
-MinIO by default automatically “upgrades” parity for an object if the destination erasure set maintains write quorum *but* has one or more drives offline. This behavior helps ensure that the given object maintains the same availability as objects written to the healthy erasure set.
+The default `availability` setting allows SILO to increase parity for new objects when drives in the destination erasure set are offline, up to `floor(N/2)` parity shards for a set of `N` drives. The write must still satisfy the quorum for its resulting shard layout. This can improve redundancy for new objects, but does not guarantee unchanged availability. In particular, it cannot keep a two-drive `EC:1` set writable after one drive becomes unavailable.
 
 Specify `capacity` to this setting to direct MinIO to not create any additional parity for the object. This prioritizes the overall capacity of the cluster at the cost of potentially reduced object availability in the event more drives in that erasure set fail.
 

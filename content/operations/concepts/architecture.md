@@ -19,7 +19,9 @@ This page provides an overview of MinIO deployment architectures from a producti
 
 ## Distributed MinIO Deployments {#distributed-minio-deployments}
 
-**A production MinIO deployment consists of at least 4 MinIO hosts with homogeneous storage and compute resources.**
+**For production deployments that need availability during node failures, SILO recommends planning around at least 4 hosts with homogeneous storage and compute resources. This is a topology recommendation, not the minimum required to run SILO or enable erasure coding.**
+
+> Validate the planned node failures against read and write quorum in every erasure set. A single-node, two-drive `EC:1` deployment is supported, but it loses write availability when either drive is unavailable and loses service availability when its host is down.
 
 > MinIO aggregates these resources together as a [pool](/operations/concepts/#minio-intro-server-pool) and presents itself as a single object storage service.
 >

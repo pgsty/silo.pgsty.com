@@ -4,7 +4,7 @@ url: "/glossary/"
 weight: 260
 icon: fa-solid fa-book-open
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/glossary.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="glossary"></a>
@@ -155,7 +155,7 @@ upstream_modified: false
 
 **erasure set**
 
-> A group of drives within MinIO that support [erasure coding](#term-erasure-coding). MinIO divides the number of drives in a deployment’s server pool into groups of 4 to 16 drives that make up each *erasure set*. When writing objects, [data](#term-data) and [parity](#term-parity) blocks write randomly to the drives in the erasure set.
+> A group of drives used for [erasure coding](#term-erasure-coding). A multi-drive erasure set in SILO contains 2 to 16 drives. Each object is assigned to one erasure set, and its [data](#term-data) and [parity](#term-parity) shards are distributed across the drives in that set. Single-drive deployments use `EC:0` without erasure-code redundancy.
 
 <a id="term-hashing"></a>
 

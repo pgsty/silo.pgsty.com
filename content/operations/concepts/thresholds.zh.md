@@ -3,7 +3,7 @@ title: "阈值与限制"
 url: "/zh/operations/concepts/thresholds/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts/thresholds.rst
-upstream_modified: false
+upstream_modified: true
 math: true
 ---
 
@@ -84,8 +84,12 @@ math: true
 | 当服务器数为 1 时，每台服务器的最少驱动器数 | 1（适用于 <abbr title="单机单盘">SNSD</abbr> 部署，此类部署不提供额外可靠性或可用性） |
 | 当服务器数为 2 或更多时，每台服务器的最少驱动器数 | 1 |
 | 每台服务器的最大驱动器数 | 无限制 |
-| 读仲裁 | \(N/2\) |
-| 写仲裁 | \((N/2)+1\) |
+| 每个多盘纠删集合的最少磁盘数 | 2 |
+| 每个纠删集合的最多磁盘数 | 16 |
+| 对象读仲裁 | `K=N-M` |
+| 对象写仲裁 | `K>M` 时为 `K`；`K=M` 时为 `K+1` |
+
+其中，`N` 是单个纠删集合的磁盘数，`M` 是对象的校验分片数，`K` 是数据分片数。上述公式用于保存在本地的普通非空对象；读取还要求分片完好并满足相应的 [元数据仲裁](/zh/operations/concepts/availability-and-resiliency/#minio-availability-resiliency)。降级集合中的新写入可能采用更高的校验值。只有在 `K=M=N/2` 时，读写仲裁才分别为 `N/2` 和 `N/2+1`。单盘 `EC:0` 不提供纠删码冗余；双盘 `EC:1` 读取需要 1 盘，写入需要 2 盘。
 
 ## 对象名称限制 {#id4}
 

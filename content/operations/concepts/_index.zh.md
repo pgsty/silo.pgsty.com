@@ -4,7 +4,7 @@ url: "/zh/operations/concepts/"
 weight: 30
 icon: fa-solid fa-diagram-project
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts.rst
-upstream_modified: false
+upstream_modified: true
 math: true
 ---
 
@@ -165,7 +165,7 @@ MinIO 还可以使用 [MinIO 扫描器](/zh/operations/concepts/scanner/#minio-c
 
 纠删码集合是一组支持 MinIO [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) 的驱动器。 纠删码为存储在 MinIO 部署上的数据提供高可用性、可靠性和冗余性。
 
-MinIO 会将对象拆分为称作 `shards` 的块，并将其均匀分布到纠删码集合中的各块驱动器上。 即使任意单块驱动器丢失，MinIO 也可以继续无缝响应读写请求。 在最高冗余级别下，即使部署中最多有一半 (\(N / 2\)) 驱动器丢失，MinIO 仍能以很小的性能影响继续提供读取请求。
+SILO 将对象拆分为分片，并将它们分布到纠删集合中的磁盘上。发生故障后能否继续读写，取决于对象的校验配置，以及该集合中的可用磁盘是否满足相应仲裁。双盘 `EC:1` 的读仲裁为 1，写仲裁为 2：失去一盘后仍可能读取既有完整对象，但无法继续写入。在最高校验配置下，可以使用对象所在 `N` 盘纠删集合中的 `ceil(N/2)` 个健康分片重建数据；集合磁盘数为偶数时，这恰好是一半磁盘。访问对象还须满足相应的元数据仲裁。上述限制适用于每个纠删集合，不能按整个部署的磁盘总数累计。
 
 MinIO 会根据集合中的驱动器总数以及集合中的 [`minio`](/zh/reference/minio-server/#command-minio) server 数量，计算 服务器池 中纠删码集合的大小和数量。 更多信息请参阅 [纠删码基础](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set)。
 

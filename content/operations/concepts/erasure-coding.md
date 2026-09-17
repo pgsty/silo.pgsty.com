@@ -51,7 +51,7 @@ See [Availability and Resiliency](/operations/concepts/availability-and-resilien
 > This can support parity between <code>EC:0</code> and 1/2 the erasure set drives, or <code>EC:8</code>.</figcaption>
 > </figure>
 
-**You can set the parity value between 0 and 1/2 the Erasure Set size.**
+**Parity is an integer from 0 to `floor(N/2)`, where `N` is the erasure set size.**
 
 > <figure>
 >   <img src="/images/erasure/erasure-coding-erasure-set-shard-distribution.svg" alt="Diagram of an object being sharded using MinIO&#x27;s Reed-Solomon Erasure Coding algorithm." />
@@ -61,9 +61,9 @@ See [Availability and Resiliency](/operations/concepts/availability-and-resilien
 >
 > Objects written with a given parity settings do not automatically update if you change the parity values later.
 
-**MinIO requires a minimum of `K` shards of any type to read an object.**
+**Reconstructing an object's data requires at least `K` healthy data or parity shards.**
 
-> The value `K` here constitutes the **read quorum** for the deployment. The erasure set must therefore have at least `K` healthy drives in the erasure set to support read operations.
+> For an ordinary, non-empty object stored locally, `K` is its normal **read quorum**, calculated from its recorded shard layout. Reads also require the applicable [metadata quorum](/operations/concepts/availability-and-resiliency/#minio-availability-resiliency); `K` is not a universal quorum for all operations or the entire deployment.
 >
 > <figure>
 >   <img src="/images/erasure/erasure-coding-shard-read-quorum.svg" alt="Diagram of a 4-node 16-drive deployment with one node offline." />
@@ -74,9 +74,9 @@ See [Availability and Resiliency](/operations/concepts/availability-and-resilien
 >
 > MinIO cannot reconstruct an object that has lost read quorum. Such objects may be recovered through other means such as [replication resynchronization](/administration/bucket-replication/server-side-replication-resynchronize-remote/#minio-bucket-replication-resynchronize).
 
-**MinIO requires a minimum of `K` erasure set drives to write an object.**
+**Object writes require `K` available drives when `K>M`, or `K+1` when `K=M`.**
 
-> The value `K` here constitutes the **write quorum** for the deployment. The erasure set must therefore have at least `K` available drives online to support write operations.
+> Write quorum is calculated from the data and parity shard counts selected for the object. The erasure set must have at least that many available drives for the write. New objects written to a degraded set may use increased parity, subject to the parity limit and write quorum.
 >
 > <figure>
 >   <img src="/images/erasure/erasure-coding-shard-write-quorum.svg" alt="Diagram of a 4-node 16-drive deployment where one node is offline." />
@@ -92,11 +92,16 @@ See [Availability and Resiliency](/operations/concepts/availability-and-resilien
 > <figure>
 >   <img src="/images/erasure/erasure-coding-shard-split-brain.svg" alt="Diagram of an erasure set where parity EC:M is 1/2 the set size" />
 >   <figcaption>This deployment has two nodes offline due to a transient network failure.
-> A client writes an object with <code>EC:8</code> parity settings where the erasure set has a write quorum of <code>K=9</code>.
+> A client writes an object with <code>EC:8</code> in this 16-drive set: <code>K=8</code>, so write quorum is <code>K+1=9</code>.
 > This erasure set has lost write quorum and MinIO cannot use it for write operations.</figcaption>
 > </figure>
 >
 > The `K+1` logic ensures that a client could not potentially write the same object twice - once to each “half” of the erasure set.
+
+> [!NOTE]
+> **Two-drive EC:1**
+>
+> SILO supports a two-drive erasure set, which defaults to `EC:1`. Here `K=M=1`, so read quorum is 1 and write quorum is 2. This layout has the capacity cost of two copies. If one drive becomes unavailable while the service is running, existing objects can remain readable from intact data and metadata on the other drive, but writes cannot continue. Separate physical drives are needed for physical-drive redundancy, and a single node does not provide availability during a host failure.
 
 **For an object maintaining read quorum, MinIO can use any data or parity shard to [heal](/operations/concepts/healing/#minio-concepts-healing) damaged shards.**
 

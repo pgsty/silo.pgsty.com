@@ -80,7 +80,7 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 
 首次启动 [`minio`](#command-minio.server) 进程时，[`DIRECTORIES`](#minio.server.DIRECTORIES) 路径 *必须* 为空。
 
-[`minio server`](#command-minio.server) 进程至少需要 4 个驱动器或目录才能启用 [erasure coding](/zh/operations/concepts/erasure-coding/#minio-erasure-coding)。
+SILO 至少使用 2 个驱动器或目录端点即可启用 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding)。双盘集合默认采用 `EC:1`，即 1 个数据分片和 1 个校验分片，读仲裁为 1，写仲裁为 2。运行中失去一盘后，只要剩余盘上的对象数据和元数据完好，仍可读取既有对象，但无法继续写入。单盘部署使用 `EC:0`，不提供纠删码冗余。
 
 > [!WARNING]
 > **重要**
