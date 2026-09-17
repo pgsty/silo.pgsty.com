@@ -17,6 +17,8 @@ draft: false
 url: "/blog/design/replicated-tag-ordering/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
 This page records the analysis and repair of two defects in how object tags
 keep their ordering across replication, merged into Server main as
 [PR #193](https://github.com/pgsty/silo/pull/193) (fix

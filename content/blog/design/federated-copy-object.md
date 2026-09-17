@@ -11,6 +11,8 @@ draft: false
 url: "/blog/design/federated-copy-object/"
 ---
 
+> **Publication update, 2026-09-17:** The federated CopyObject repairs recorded here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
 **Source status, 2026-09-16:** this records the main-branch CopyObject fixes in [#157](https://github.com/pgsty/silo/pull/157), [#159](https://github.com/pgsty/silo/pull/159), [#163](https://github.com/pgsty/silo/pull/163), [#177](https://github.com/pgsty/silo/pull/177) and [#179](https://github.com/pgsty/silo/pull/179). They are absent from Server 20260903. The subject is the **legacy etcd bucket-federation** path that forwards a copy to another deployment as `PutObject`, not the bucket/site replication scheduler.
 
 ## Forward bytes once, encrypt at the destination {#bytes}

@@ -329,11 +329,11 @@ The sections above describe the `219670d3` snapshot. The table below records the
 | Configuration | Legacy database notification targets require a DSN; `MINIO_CONFIG_ENV_FILE` uses a dedicated parser that keeps named targets | `f1ba68358`, `6b0998157`, `2aea7fe9c` |
 | Toolchain and components | Go 1.27.1; upstream `minio-go` at `0e78d3f18efe` (`silo-go` retired); `silo-pkg` v3.13.2; Console v2.3.0 (see the [Console page](/compatibility/console/)); bundled [mcli 20260903](/blog/release/mcli-20260903/) | `43f4bb7ed`, `4d6e1ea8e`, final dependency refresh |
 
-The shared package's own-module move ([v3.13.0](/blog/release/pkg-3.13.0/), a **breaking** change for Go consumers) was already adopted by published Server 20260903: that tag directly requires `github.com/pgsty/silo-pkg/v3 v3.13.2`. The September 13 refresh moves the maintained stack to v3.14.0; it is not the first Server adoption of the new path. See the [component matrix](/compatibility/versions/) for each build.
+The shared package's own-module move ([v3.13.0](/blog/release/pkg-3.13.0/), a **breaking** change for Go consumers) was already adopted by published Server 20260903: that tag directly requires `github.com/pgsty/silo-pkg/v3 v3.13.2`. The September 13 refresh moved the maintained stack to v3.14.0 and Server 20260916 requires v3.14.1; neither is the first Server adoption of the new path. See the [component matrix](/compatibility/versions/) for each build.
 
-## September 16, 2026 source changes {#september-2026}
+## Changes released in Server 20260916 {#september-2026}
 
-These changes are **not included in published Server 20260903**. See the [version matrix](/compatibility/versions/#source-review) for build and companion-component status, and the overview IDs for user impact.
+These changes shipped in [Server 20260916](/blog/release/silo-20260916/) and are **not included in Server 20260903**. See the [version matrix](/compatibility/versions/#source-review) for per-repair scope and companion-component status, and the overview IDs for user impact.
 
 | Area | Observable change | Classification and details |
 | --- | --- | --- |

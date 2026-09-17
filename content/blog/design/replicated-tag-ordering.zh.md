@@ -12,6 +12,8 @@ draft: false
 url: "/zh/blog/design/replicated-tag-ordering/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
 本文记录对象标签在复制中如何保序的两个缺陷的分析与修复，分别合入 Server main 为
 [PR #193](https://github.com/pgsty/silo/pull/193)（修复
 [`03027727d`](https://github.com/pgsty/silo/commit/03027727d)）与

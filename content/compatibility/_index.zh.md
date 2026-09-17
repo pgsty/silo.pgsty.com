@@ -23,7 +23,7 @@ sidebar_expanded: true
 {{< /card >}}
 {{< /cards >}}
 
-**核对日期：2026-09-16。** 下表汇总分叉以来的源码与配套组件变化；当日已发布的 Server 仍为 **20260903**，后续源码修复不等于已经进入该发行版，具体以[组件版本矩阵](/zh/compatibility/versions/)为准。24 项是用户场景分类，**不是 API 数量、兼容率或故障概率**。
+**核对日期：2026-09-16，发布状态更新于 2026-09-17。** 下表汇总分叉以来的源码与配套组件变化；其中的服务端变化已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，哪些修复不在更早的 Server 20260903 中，以[组件版本矩阵](/zh/compatibility/versions/)为准。24 项是用户场景分类，**不是 API 数量、兼容率或故障概率**。
 
 ## 🟢 兼容或改进：12 类 {#compatible}
 
@@ -79,6 +79,6 @@ sidebar_expanded: true
 
 SILO 对上游 MinIO/MC 保持**尽最大努力兼容**；正式支持和发布验收的组合为 **SILO + SILO Console + mcli + silo-pkg**。保留协议、环境变量和磁盘布局，不构成任意上游版本混跑或双向降级的承诺。[服务端详细审计](/zh/compatibility/server/)保留历史基线和逐项说明，[组件版本矩阵](/zh/compatibility/versions/)区分已发布组件与待发布源码。
 
-曾加入后撤回的[访问频率池间分层](/zh/compatibility/access-tiering-removal/)不属于上述 24 类：它不在分叉时的上游功能中，也从未进入公开 Server 20260903。普通生命周期过期、远程分层、再平衡和池退役仍然保留。
+曾加入后撤回的[访问频率池间分层](/zh/compatibility/access-tiering-removal/)不属于上述 24 类：它不在分叉时的上游功能中，也从未进入任何公开 Server 版本：20260903 早于该特性，20260916 发布前已将其移除。普通生命周期过期、远程分层、再平衡和池退役仍然保留。
 
 准备迁移时，从 [O01–O08](#conditional) 筛选与你有关的条件，再按[迁移指南](/zh/compatibility/migration/)执行。

@@ -23,7 +23,7 @@ When a condition applies, verify or adjust deployment, policies, tools or upgrad
 {{< /card >}}
 {{< /cards >}}
 
-**Reviewed: 2026-09-16.** This index covers source and companion-component changes since the fork. The published Server on that date is still **20260903**; later source fixes are not part of that release. Check the [component matrix](/compatibility/versions/) for delivery status. The 24 entries group user scenarios; they are **not API counts, compatibility percentages or failure probabilities**.
+**Reviewed: 2026-09-16; release status updated 2026-09-17.** This index covers source and companion-component changes since the fork. The server-side changes described here shipped in [Server 20260916](/blog/release/silo-20260916/); the [component matrix](/compatibility/versions/) records which repairs are absent from the earlier Server 20260903. The 24 entries group user scenarios; they are **not API counts, compatibility percentages or failure probabilities**.
 
 ## 🟢 Compatible improvements: 12 categories {#compatible}
 
@@ -79,6 +79,6 @@ The server comparison starts at upstream source [`27742d469462`](https://github.
 
 Upstream MinIO/MC compatibility is **best effort**. The supported, release-tested combination is **SILO + SILO Console + mcli + silo-pkg**. Retained protocols, environment variables and storage layouts do not guarantee arbitrary upstream mixed-version operation or downgrades. The [detailed server audit](/compatibility/server/) retains historical baselines and individual findings; the [component matrix](/compatibility/versions/) separates published components from unreleased source.
 
-The experimental [access-frequency pool tiering](/compatibility/access-tiering-removal/) that was added and later withdrawn is outside these 24 categories: it was not an upstream feature at the fork and never shipped in public Server 20260903. Ordinary lifecycle expiration, remote tiering, rebalance and pool decommission remain available.
+The experimental [access-frequency pool tiering](/compatibility/access-tiering-removal/) that was added and later withdrawn is outside these 24 categories: it was not an upstream feature at the fork and never shipped in a public Server release: 20260903 predates it, and it was removed before 20260916. Ordinary lifecycle expiration, remote tiering, rebalance and pool decommission remain available.
 
 For migration, select the relevant [O01–O08 conditions](#conditional), then follow the [migration guide](/compatibility/migration/).

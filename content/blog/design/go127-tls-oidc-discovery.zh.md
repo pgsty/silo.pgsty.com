@@ -12,6 +12,8 @@ draft: false
 url: "/zh/blog/design/go127-tls-oidc-discovery/"
 ---
 
+> **2026-09-17 发布更新：** Go TLS 默认值修复（`48e184652`）已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
 SILO 工具链迁移到 Go 1.27 后，Server TLS 修复
 [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31)
 （"fix(tls): honor Go key exchange defaults across transports"）移除了显式曲线覆盖。本文记录

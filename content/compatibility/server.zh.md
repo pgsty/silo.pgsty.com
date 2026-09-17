@@ -329,11 +329,11 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
 | 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
 
-公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，并非 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
+公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，Server 20260916 则要求 v3.14.1；两者都不是 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
 
-## 2026-09-16 源码变化索引 {#september-2026}
+## Server 20260916 发布的变化 {#september-2026}
 
-以下变化**尚未进入已发布的 Server 20260903**。具体构建及配套组件见[版本矩阵](/zh/compatibility/versions/#source-review)，用户影响按总览编号查阅。
+以下变化已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，**不在 Server 20260903 中**。逐项修复范围及配套组件见[版本矩阵](/zh/compatibility/versions/#source-review)，用户影响按总览编号查阅。
 
 | 范围 | 用户可见变化 | 对应分类与详情 |
 | --- | --- | --- |

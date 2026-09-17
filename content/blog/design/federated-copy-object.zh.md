@@ -11,6 +11,8 @@ draft: false
 url: "/zh/blog/design/federated-copy-object/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的联邦 CopyObject 修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
 **2026-09-16 源码状态：**本文记录 main 中 [#157](https://github.com/pgsty/silo/pull/157)、[#159](https://github.com/pgsty/silo/pull/159)、[#163](https://github.com/pgsty/silo/pull/163)、[#177](https://github.com/pgsty/silo/pull/177) 和 [#179](https://github.com/pgsty/silo/pull/179) 的 CopyObject 修复，Server 20260903 尚未包含。讨论对象是把复制作为 `PutObject` 转发到另一部署的**旧 etcd 存储桶联邦**路径，不是桶/站点复制调度器。
 
 ## 转发一次逻辑字节，由目标端加密 {#bytes}

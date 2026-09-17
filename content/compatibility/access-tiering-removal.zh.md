@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-code-compare
 ---
 
-> **发布边界：** 可选的 GET 频率池分层特性（社区 [PR #60](https://github.com/pgsty/silo/pull/60)）只存在于 main/快照构建中。已发布的 Server 20260903 早于该特性，从已发布版本升级**无需**任何访问分层配置清理。移除经 [PR #188](https://github.com/pgsty/silo/pull/188) 合入；只有运行过包含该特性的构建的部署需要本页。
+> **发布边界：** 可选的 GET 频率池分层特性（社区 [PR #60](https://github.com/pgsty/silo/pull/60)）只存在于 main/快照构建中。Server 20260903 早于该特性，Server 20260916 则在移除之后打标签，因此从任一已发布版本升级都**无需**访问分层配置清理。移除经 [PR #188](https://github.com/pgsty/silo/pull/188) 合入；只有运行过包含该特性的构建的部署需要本页。
 
 ## 为何移除 {#why}
 

@@ -11,6 +11,8 @@ draft: false
 url: "/blog/design/object-lock-replication-ordering/"
 ---
 
+> **Publication update, 2026-09-17:** The later repairs in #129, #134 and #178 shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
 **Release boundary, 2026-09-16:** [`f4c1286c9`](https://github.com/pgsty/silo/commit/f4c1286c9) shipped in Server 20260903. The later timestamp-only removal, SSE-C retransmission and cross-pool repairs in [#129](https://github.com/pgsty/silo/pull/129), [#134](https://github.com/pgsty/silo/pull/134) and [#178](https://github.com/pgsty/silo/pull/178) are on main and not in that release. The [advisory ledger](/about/security-advisories/#operational) records the original ordering defect.
 
 ## Preserve the old state before rebuilding metadata {#problem}

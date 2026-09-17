@@ -11,6 +11,8 @@ draft: false
 url: "/zh/blog/design/object-lock-replication-ordering/"
 ---
 
+> **2026-09-17 发布更新：** 后续的 #129、#134 与 #178 修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
 **2026-09-16 发布边界：**[`f4c1286c9`](https://github.com/pgsty/silo/commit/f4c1286c9) 已随 Server 20260903 发布。后续仅时间戳删除、SSE-C 重传和跨池修复见 [#129](https://github.com/pgsty/silo/pull/129)、[#134](https://github.com/pgsty/silo/pull/134)、[#178](https://github.com/pgsty/silo/pull/178)，它们在 main 中，但不在该发布中。[公告台账](/about/security-advisories/#operational) 记录原始排序缺陷。
 
 ## 重建元数据前保留旧状态 {#problem}

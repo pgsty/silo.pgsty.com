@@ -17,6 +17,8 @@ draft: false
 url: "/blog/design/replica-metadata-normalization/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
 This page records the repair of how a trusted replication receiver restores
 metadata for a replica, merged into Server main as
 [PR #194](https://github.com/pgsty/silo/pull/194) (fix

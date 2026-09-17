@@ -12,6 +12,8 @@ draft: false
 url: "/blog/design/complete-multipart-checksum-errors/"
 ---
 
+> **Publication update, 2026-09-17:** The streaming-checksum follow-up (PR #143) shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
 The repairs for [#48](https://github.com/pgsty/silo/issues/48) and
 [#50](https://github.com/pgsty/silo/issues/50) are included in
 [Server 20260903](/blog/release/silo-20260903/). This record supersedes the

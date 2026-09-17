@@ -12,6 +12,8 @@ draft: false
 url: "/blog/design/bucket-metadata-convergence/"
 ---
 
+> **Publication update, 2026-09-17:** The #77 repair recorded here shipped in [Server 20260916](/blog/release/silo-20260916/); deletion-record export stays off by default. Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
 [#77](https://github.com/pgsty/silo/issues/77) is a reproduced site-replication correctness defect. A receiver replaces source time with arrival time and may then reject a genuinely newer deletion. Some configuration types stop exporting their timestamp after deletion, preventing heal from recovering a delete missed during an outage. Adding a DELETE branch alone cannot solve both problems.
 
 > **Merge status (2026-09-12):** the repair and research archive were merged into `main` through [PR #180](https://github.com/pgsty/silo/pull/180), commit [48ec10312](https://github.com/pgsty/silo/commit/48ec10312f98b494f75989615a5d24eae3207e44). [#77](https://github.com/pgsty/silo/issues/77) is closed. All nine pre-merge CI checks passed.<br>

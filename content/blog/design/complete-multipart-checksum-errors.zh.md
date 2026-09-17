@@ -12,6 +12,8 @@ draft: false
 url: "/zh/blog/design/complete-multipart-checksum-errors/"
 ---
 
+> **2026-09-17 发布更新：** 流式校验和后续修复（PR #143）已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
 [#48](https://github.com/pgsty/silo/issues/48) 与 [#50](https://github.com/pgsty/silo/issues/50) 的修复
 已包含在 [Server 20260903](/zh/blog/release/silo-20260903/) 中。
 本文取代八月提案中“暂时保持 CRC64NVME 规范化”的结论。

@@ -12,6 +12,8 @@ draft: false
 url: "/zh/blog/design/replica-metadata-normalization/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
 本文记录可信复制接收端如何为副本恢复元数据的修复，合入 Server main 为
 [PR #194](https://github.com/pgsty/silo/pull/194)（修复
 [`4fcdf37ce`](https://github.com/pgsty/silo/commit/4fcdf37ce)，合并为

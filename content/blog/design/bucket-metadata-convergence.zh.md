@@ -13,6 +13,8 @@ url: "/zh/blog/design/bucket-metadata-convergence/"
 translation_notice: false
 ---
 
+> **2026-09-17 发布更新：** 本文记录的 #77 修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，删除记录导出默认仍关闭；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
 [#77](https://github.com/pgsty/silo/issues/77) 是已复现的站点复制正确性问题。接收端把来源时间改成到达时间，可能拒绝真正较新的删除；部分配置删除后不再导出时间，断线期间遗漏的删除也无法被 heal 找回。单独补一个 DELETE 分支不能解决这两个问题。
 
 > **合并状态（2026-09-12）：** 修复与研究归档已通过 [PR #180](https://github.com/pgsty/silo/pull/180) 合入 `main`（[48ec10312](https://github.com/pgsty/silo/commit/48ec10312f98b494f75989615a5d24eae3207e44)），[#77](https://github.com/pgsty/silo/issues/77) 已关闭。合并前 9 项 CI 检查全部通过。<br>

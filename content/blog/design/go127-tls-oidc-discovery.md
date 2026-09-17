@@ -16,6 +16,8 @@ draft: false
 url: "/blog/design/go127-tls-oidc-discovery/"
 ---
 
+> **Publication update, 2026-09-17:** The Go TLS default repair (`48e184652`) shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
 After SILO's toolchain moved to Go 1.27, the Server TLS repair
 [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31)
 ("fix(tls): honor Go key exchange defaults across transports") removed its

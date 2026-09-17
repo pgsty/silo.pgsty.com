@@ -12,6 +12,8 @@ draft: false
 url: "/zh/blog/design/replication-reliability/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的修复（PR #162 与第二轮 PR #196）已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
 本文记录 [#153](https://github.com/pgsty/silo/issues/153)、[#152](https://github.com/pgsty/silo/issues/152)、[#137](https://github.com/pgsty/silo/issues/137) 的分析、方案取舍、评审与实施结论。三者属于同一组复制可靠性问题，但分别发生在操作分类、后台恢复可见性和任务生命周期上，不能靠一个统一的重试补丁解决。
 
 > **截至 2026-09-09：** [PR #162](https://github.com/pgsty/silo/pull/162) 已合并为 [`d1105bbb`](https://github.com/pgsty/silo/commit/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e)，三个 issue 均已关闭。被测 PR head 的八项检查与合并后主干的 Go CI、VulnCheck 全部通过。<br>

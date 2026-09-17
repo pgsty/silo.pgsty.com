@@ -12,6 +12,8 @@ draft: false
 url: "/blog/design/replication-reliability/"
 ---
 
+> **Publication update, 2026-09-17:** The repairs recorded here (PR #162 and the second-round PR #196) shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
 This page records the analysis, design choices, review, and implementation of [#153](https://github.com/pgsty/silo/issues/153), [#152](https://github.com/pgsty/silo/issues/152), and [#137](https://github.com/pgsty/silo/issues/137). They belong to the same replication reliability series, but affect operation classification, recovery visibility, and task lifecycle respectively. One general retry patch cannot repair all three.
 
 > **As of 2026-09-09:** [PR #162](https://github.com/pgsty/silo/pull/162) is merged as [`d1105bbb`](https://github.com/pgsty/silo/commit/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e), and all three issues are closed. All eight checks on the tested PR head, followed by main Go CI and VulnCheck, passed.<br>
