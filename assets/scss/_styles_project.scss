@@ -116,6 +116,20 @@ a {
   }
 }
 
+// Keep the compatibility index readable inside OINK's scrollable table wrapper.
+.td-content .td-table-scroll > table.silo-compatibility-table {
+  width: 100%;
+  min-width: 44rem;
+  table-layout: fixed;
+
+  th:nth-child(1) { width: 36%; }
+  th:nth-child(2) { width: 20%; }
+  th:nth-child(3) { width: 28%; }
+  th:nth-child(4) { width: 16%; }
+
+  @media print { min-width: 0; }
+}
+
 // Imported MinIO docs cap screenshots with inline pixel max-width values.
 // Inline styles beat OINK's .img-fluid rule, so combine those authored caps
 // with the available content width instead of letting narrow layouts overflow.
