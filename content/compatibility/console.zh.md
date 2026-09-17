@@ -10,16 +10,16 @@ icon: fa-solid fa-window-maximize
 
 > **最新版本：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)（2026-09-16），包含共享下载边界修复、密码权限拆分、流式 ZIP 与签名发布制品。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
-SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
+SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
 
 [`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。较早版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]。
 
 ## 原则 {#principles}
 
-本分支遵循与 Silo 其余部分相同的规则：**交付物及其分发渠道改名，其它软件所依赖的接口不改。**
+本分支优先保留既有集成契约，同时明确记录授权、响应与界面变化。
 
 - **改名** —— 磁盘上的产物（`silo-console`）、界面与 `--version` 中的产品标识、分发渠道、签名密钥。
-- **不变** —— Go 模块路径 `github.com/minio/console`、全部 `CONSOLE_*` 环境变量（含 `CONSOLE_MINIO_SERVER` 与 `CONSOLE_MINIO_REGION`）、Web 应用调用的 REST API 结构，以及打包标识 `minio-console.service`、`console-user`、`/etc/default/console` —— 因此原地升级软件包依然可用。
+- **保留的基础契约** —— Go 模块路径 `github.com/minio/console`、既有 `CONSOLE_*` 环境变量（含 `CONSOLE_MINIO_SERVER` 与 `CONSOLE_MINIO_REGION`），以及打包标识 `minio-console.service`、`console-user`、`/etc/default/console`。REST API 沿用既有体系，具体响应与操作变化见[下文](#api-output)。
 - **切断** —— 自动自更新、遥测、分析、信标、外部脚本与字体、以及 call-home。只有在显式配置时才会访问版本目录，入口是 `SILO_RELEASE_SERVICE_HOST`，并保留 `RELEASE_SERVICE_HOST` 作为兼容回退。
 - **保留** —— 上游版权与 AGPL-3.0 许可证。运行时输出同时致谢 MinIO, Inc. 与 PGSTY。
 
@@ -44,7 +44,21 @@ SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地�
 
 界面、帮助内容与文档链接提供英文与中文，通过页面级切换使用，且未引入额外的运行时依赖。
 
-### 5. 面向开发者：模块图 {#source}
+### 5. 对象列表按页操作 {#pagination}
+
+对应 [B02](/zh/compatibility/#b02)，自 Console v2.4.0 起使用游标分页，v2.4.1 保留该行为。默认每页 100 项，可选 50、100、250、500、1,000；提供首页、上一页与下一页，不提供“加载全部”或任意跳页。
+
+**排序、名称筛选和全选只作用于当前页。** 只有首页已包含整个目录时，它们才覆盖整个目录。翻页保留筛选文本、清空选择；更换页大小回到首页，更换目录清空筛选。失败的页面保留上一页供重试。
+
+Rewind 与“显示已删除对象”没有游标，最多返回 1,000 个版本，并有时间预算；触及限制会提示结果不完整。它们限制浏览器收到的结果，不保证服务端只扫描这么多版本。详见[对象浏览器契约](https://github.com/pgsty/silo-console/blob/v2.4.1/docs/ObjectBrowser.md#paging)。
+
+### 6. API 返回与自动化 {#api-output}
+
+对应 [B04](/zh/compatibility/#b04)、[O05](/zh/compatibility/#o05)。会话响应增加 `accountAccessKey`，对象列表显式返回零字节对象的 `size: 0`；会话能力字段还会随有效权限变化，按钮可见不替代服务端授权。自制解析器应容忍新增字段，Console 自动化应处理分页、会话失效和 WebSocket 错误。
+
+用户启用/禁用新增独立的 `PUT /api/v1/user/{name}/status`，旧 `PUT /api/v1/user/{name}` 保留但已弃用；批量下载沿用原入口，同时接受受限表单以支持原生流式 ZIP。改密权限另见[密码权限迁移](/zh/compatibility/password-permissions/)，分享下载边界见 [v2.4.1 说明](/zh/blog/release/console-2.4.1/)；定制调用以[该版 API 定义](https://github.com/pgsty/silo-console/blob/v2.4.1/swagger.yml)为准。
+
+### 7. 面向开发者：模块图 {#source}
 
 Console v2.4.1 直接 require `github.com/pgsty/silo-pkg/v3` v3.14.1 与上游 SDK
 `v7.3.1-0.20260915093545-32e1f32cb176`，保留历史模块路径 `github.com/minio/console`。

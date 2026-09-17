@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-arrow-right-arrow-left
 ---
 
-Migrating from MinIO to Silo is an in-place binary replacement, not a data migration. Nothing is exported or re-imported. In a container deployment the only required change is the image name. For RPM/DEB installations, see [Native Package Migration](/compatibility/binary/).
+Migrating from MinIO to Silo normally reuses existing object data and volumes without an object-by-object export and import. **Ordinary S3 applications usually need no code changes; administrators still need to check deployment, authorization and state compatibility.** Select the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level overview](/compatibility/) before following this guide. RPM/DEB installs are covered in [Native Package Migration](/compatibility/binary/).
 
 ## What changes {#scope}
 
@@ -23,15 +23,15 @@ In order of importance:
 
 ## What stays {#unchanged}
 
-- **Object data and the `.minio.sys` metadata directory — the on-disk format is unchanged and remains interoperable with MinIO in both directions.**
-- Buckets, versions, users, access keys, policies, lifecycle rules, replication state, encryption metadata.
-- S3 API, SigV4 signing, SDKs, `mc`/`mcli`, presigned URL behavior.
+- **Object layouts, erasure formats and the `.minio.sys` directory remain, allowing data disks from compatible baselines to be reused.** This does not guarantee arbitrary downgrades; see [rollback scope](#rollback).
+- Existing buckets, object versions, users, access keys, policies, lifecycle and encryption configuration remain usable. Authorization decisions, replication state and new metadata have exceptions in [O02](/compatibility/#o02) and [O07](/compatibility/#o07).
+- Common S3 APIs, SigV4, SDK and presigned URL integration carry over. Validation, conditional requests and error behavior have changes in [O04](/compatibility/#o04).
 - Endpoint hostname, API port `9000`, Console port, volume mounts.
 - `MINIO_*` environment variables and existing server options.
 - `/minio/*` routes, `x-minio-*` headers, `minio_*` metrics.
-- Policy-namespace identifiers: `arn:minio:*` ARNs, `minio:s3` and the other service namespaces in IAM policies, notifications, and audit events keep their exact spelling. There is **no `SILO_*` alias namespace** — scripts and policies addressing the identifiers above need no change.
+- Policy-namespace identifiers: `arn:minio:*` ARNs, `minio:s3` and other service namespaces in IAM policies, notifications and audit events keep their spelling. Do not rename these strings with the product; still check authorization semantics under [O02](/compatibility/#o02).
 
-There is no data-conversion step. If your MinIO build is years old, validate the version distance itself in staging; it is a large software upgrade, not a format change.
+These conclusions apply to the [comparison baseline](/compatibility/#scope) and compatible erasure deployments. For older MinIO versions or historical filesystem/gateway deployments, establish the migration path for that version and deployment mode, then validate it in staging.
 
 ## Docker migration {#docker}
 
@@ -43,7 +43,7 @@ docker.io/pgsty/silo:<RELEASE-tag>
 
 Tags: immutable `RELEASE.YYYY-MM-DDTHH-MM-SSZ` (pin these), rolling `latest`, and the `-distroless` variants below. The old `pgsty/minio` repository stays published, frozen at its final tag.
 
-In Compose, change only the image line:
+The Compose example below retains the original ports, data volume and `MINIO_*` configuration. Before switching, check custom entrypoints, executable paths, runtime users, directory permissions and probes; changing the image name alone does not establish a successful migration.
 
 ```yaml
 services:
@@ -105,7 +105,11 @@ Kubelet probes are `httpGet` requests in the pod spec; Docker `HEALTHCHECK` is i
 
 ### Rollback {#rollback}
 
-The disk format is unchanged and works with both servers: set `image:` back to the recorded MinIO tag and `docker compose up -d`. The same volume stays attached, and data written by Silo remains readable by MinIO.
+**Establish that state can be recovered before switching back.** Compatible object layouts do not guarantee that old software understands new bucket configuration, IAM revisions or deletion history, or that permissions and replication state remain equivalent after rollback.
+
+Before upgrading, retain the original image digest, deployment configuration and a matching recovery point, and test the exact version combination in isolation. For the new IAM revocation mechanism, follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/) to preserve complete IAM storage and key material; ordinary administration exports omit deletion history. Also check [bucket-configuration deletion state](/blog/design/bucket-metadata-convergence/#rollout) and [password permissions](/compatibility/password-permissions/#coordinated-upgrade-and-rollback).
+
+Use the planned image or binary rollback only when the relevant upgrade instructions permit it and recovery validation passes. Do not let old and new nodes access the same data simultaneously. Restoring an older snapshot also requires handling data and authorization changes made after that snapshot.
 
 ## Upgrading from RELEASE.2026-08-06 {#since-20260806}
 
@@ -117,7 +121,7 @@ The release after `RELEASE.2026-08-06T00-00-00Z` tightens several behaviors that
 4. **Legacy database notification targets need a connection string.** An enabled pre-KV PostgreSQL or MySQL target without `connection_string` / `dsn_string` stops startup with a credential-free error; 20260806 silently dropped every notification target in that situation.
 5. **Checksum requests are validated.** Unknown `x-amz-checksum-*` algorithms, `CRC64NVME` combined with `COMPOSITE`, and checksum-type assertions that contradict the upload are rejected with `400`. The default behavior of the AWS SDKs, `minio-go`, and `mcli` is unaffected.
 6. **Per-bucket CORS is real.** A bucket with its own CORS configuration is served by that configuration only; `MINIO_API_CORS_ALLOW_ORIGIN` applies to buckets without one. In a site-replication group, configure bucket CORS only after every site runs the new release: older peers accept but ignore the configuration and keep reporting a CORS mismatch.
-7. **Rollback keeps the data readable.** 20260806 ignores bucket CORS configuration and drops it when it rewrites that bucket's metadata; recreate the configuration after upgrading again.
+7. **Rollback loses new CORS configuration.** 20260806 ignores bucket CORS and drops it when rewriting bucket metadata. Export it before rollback and restore it after upgrading again; check other state separately under [rollback scope](#rollback).
 
 ### Console regressions in the September 3 release {#console-0903}
 

@@ -10,7 +10,7 @@ icon: fa-solid fa-server
 
 > **当前控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
 
-Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端和磁盘数据的兼容性，但 **绝不是一次在运维层面完全无感的二进制改名**。本页是从上游基线迁移到 2026-08-06 所准备 Silo 源码时的兼容性契约。
+**先看[三档兼容性总览](/zh/compatibility/)：12 类兼容或改进、4 类轻微差异、8 类按条件检查。** 本页提供服务端细节，保留 2026-08-06 审计的固定基线，并分别记录[后续已发布变化](#since-20260806)与[9 月 16 日源码变化](#september-2026)。历史审计基线不等于[最初分叉基线](/zh/compatibility/#scope)，也不代表最新制品已经包含全部源码修复。
 
 > [!WARNING]
 > **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
@@ -330,6 +330,30 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
 
 公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，并非 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
+
+## 2026-09-16 源码变化索引 {#september-2026}
+
+以下变化**尚未进入已发布的 Server 20260903**。具体构建及配套组件见[版本矩阵](/zh/compatibility/versions/#source-review)，用户影响按总览编号查阅。
+
+| 范围 | 用户可见变化 | 对应分类与详情 |
+| --- | --- | --- |
+| 新增管理 API | `GET /minio/admin/v3/multipart-preflight` 只读检查分片迁移准备；站点间新增 `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` 同步修订与撤销状态。 | [O06](/zh/compatibility/#o06) / [分片预检](/zh/blog/design/list-multipart-uploads/#implementation)；[O07](/zh/compatibility/#o07) / [IAM 协议](/zh/blog/design/iam-revocations/#upgrade) |
+| S3 条件与分片列表 | 多池条件写入、分片完成及版本删除更严格地核实元数据；分片列表上限为 1,000，默认仍为 legacy，strict 必须显式启用并完成准备。 | [O04](/zh/compatibility/#o04)、[O06](/zh/compatibility/#o06) / [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[分片模式](/zh/blog/design/list-multipart-uploads/#implementation) |
+| 权限与持久状态 | 自助改密与创建用户使用独立权限；IAM 持久撤销和桶配置删除状态影响协调升级与恢复，通用桶配置墓碑导出默认关闭。 | [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) / [密码迁移](/zh/compatibility/password-permissions/)、[IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout) |
+| 数据与复制 | 继续修复多池副本、标签与 Object Lock 排序、删除标记恢复、SSE-C 与联邦复制；不自动重建已丢失的历史状态。 | [G07–G10](/zh/compatibility/#g07) / [复制状态检查](/zh/operations/replication/replica-metadata-audit/)、[版本说明](/zh/compatibility/versions/#source-review) |
+| HTTP 与 TLS | 请求头使用绝对读取期限；TLS 默认选择与旧代理、IdP 的互操作需要核对，正文仍使用既有滚动空闲超时。 | [O03](/zh/compatibility/#o03) / [请求头超时](/zh/blog/design/request-header-timeouts/)、[TLS/OIDC](/zh/blog/design/go127-tls-oidc-discovery/) |
+
+API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占位接口的实质启用](#since-20260806)，`ReadMultiple` 是[私有存储接口删除](#storage-rest)，在线更新是[保留入口但停用功能](#offline-services)。`silo healthcheck` 与 `mcli checksum verify` 是新增命令，分别调用既有健康端点、读取对象做本地审计。
+
+### 运行与观测变化 {#observability}
+
+对应 [G12](/zh/compatibility/#g12)、[B03](/zh/compatibility/#b03)。`minio_*` 命名空间与既有指标路径保留，但指标集合和数值含义并未冻结：
+
+- [MRF 丢弃计数](/zh/blog/design/replication-reliability/#mrf)进入管理统计及 Prometheus v2/v3。它统计队列条目，同一对象可对应多个条目，不能当成丢失对象数。
+- [IAM 撤销指标](/zh/blog/design/iam-revocations/#errors)反映删除记录、协调失败、耗时与最近成功时间，需按各节点的采集语义解释。
+- 桶配额指标改为报告实际有效配额；CPU 指标采集增加并发保护。它们分别影响监控数值与运行稳定性，不代表统一性能提升。
+
+核对受影响的仪表盘和告警，并独立验证对象及复制状态；监控正常不代表所有历史问题已经修复。
 
 ## 已知残余风险与未修复项 {#limits}
 

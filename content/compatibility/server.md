@@ -10,7 +10,7 @@ icon: fa-solid fa-server
 
 > **Current Console:** [v2.4.1](/blog/release/console-2.4.1/), with mcli 20260916 and pkg v3.14.1. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
 
-Silo is a maintained fork of the MinIO server. It preserves MinIO's S3-facing and on-disk compatibility, but it is **not a byte-for-byte, operationally invisible rename**. This page is the compatibility contract for moving from the upstream baseline to the Silo source prepared on 2026-08-06.
+**Start with the [three-level overview](/compatibility/): 12 compatible improvements, 4 minor differences and 8 conditional checks.** This page provides server details, preserving the fixed 2026-08-06 audit baseline and separating [subsequently released changes](#since-20260806) from [September 16 source changes](#september-2026). The historical audit baseline differs from the [original fork baseline](/compatibility/#scope), and does not imply that current artifacts include every source fix.
 
 > [!WARNING]
 > **Read this before replacing a MinIO deployment.** The binary, package, service account, systemd unit, default local configuration directory, container path, Helm resource names, embedded Console, update behavior, several authorization decisions, and some error responses changed. Data disks and the `MINIO_*` configuration namespace did not receive a matching rename.
@@ -330,6 +330,30 @@ The sections above describe the `219670d3` snapshot. The table below records the
 | Toolchain and components | Go 1.27.1; upstream `minio-go` at `0e78d3f18efe` (`silo-go` retired); `silo-pkg` v3.13.2; Console v2.3.0 (see the [Console page](/compatibility/console/)); bundled [mcli 20260903](/blog/release/mcli-20260903/) | `43f4bb7ed`, `4d6e1ea8e`, final dependency refresh |
 
 The shared package's own-module move ([v3.13.0](/blog/release/pkg-3.13.0/), a **breaking** change for Go consumers) was already adopted by published Server 20260903: that tag directly requires `github.com/pgsty/silo-pkg/v3 v3.13.2`. The September 13 refresh moves the maintained stack to v3.14.0; it is not the first Server adoption of the new path. See the [component matrix](/compatibility/versions/) for each build.
+
+## September 16, 2026 source changes {#september-2026}
+
+These changes are **not included in published Server 20260903**. See the [version matrix](/compatibility/versions/#source-review) for build and companion-component status, and the overview IDs for user impact.
+
+| Area | Observable change | Classification and details |
+| --- | --- | --- |
+| New administration APIs | `GET /minio/admin/v3/multipart-preflight` checks multipart migration readiness without modifying state. New peer `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` operations synchronize revisions and revocations. | [O06](/compatibility/#o06) / [multipart preflight](/blog/design/list-multipart-uploads/#implementation); [O07](/compatibility/#o07) / [IAM protocol](/blog/design/iam-revocations/#upgrade) |
+| S3 conditions and multipart listing | Multi-pool conditional writes, multipart completion and version deletion verify metadata more strictly. Multipart listings are capped at 1,000; legacy remains the default, while strict requires explicit opt-in and preparation. | [O04](/compatibility/#o04), [O06](/compatibility/#o06) / [multi-pool consistency](/blog/design/multi-pool-object-consistency/), [listing modes](/blog/design/list-multipart-uploads/#implementation) |
+| Authorization and persistent state | Self-service password changes and user creation use separate permissions. Persistent IAM revocations and bucket-configuration deletion state affect coordinated upgrades and recovery; general bucket-configuration tombstone export is off by default. | [O02](/compatibility/#o02), [O07](/compatibility/#o07) / [password migration](/compatibility/password-permissions/), [IAM upgrades](/operations/replication/iam-upgrade/), [configuration convergence](/blog/design/bucket-metadata-convergence/#rollout) |
+| Data and replication | Further fixes cover multi-pool replicas, tag and Object Lock ordering, delete-marker recovery, SSE-C and federated copies; they do not reconstruct lost historical state automatically. | [G07–G10](/compatibility/#g07) / [replica audit](/operations/replication/replica-metadata-audit/), [version notes](/compatibility/versions/#source-review) |
+| HTTP and TLS | Request headers use an absolute read deadline. TLS defaults need checking with older proxies and identity providers; bodies retain the existing rolling idle timeout. | [O03](/compatibility/#o03) / [header timeouts](/blog/design/request-header-timeouts/), [TLS/OIDC](/blog/design/go127-tls-oidc-discovery/) |
+
+Distinguish API additions, removals and behavioral changes: per-bucket CORS [implements existing placeholder APIs](#since-20260806); `ReadMultiple` is a [removed private storage operation](#storage-rest); online updates [retain an entry point with the function disabled](#offline-services). `silo healthcheck` and `mcli checksum verify` are new commands that call existing health endpoints and read objects for local auditing, respectively.
+
+### Runtime and observability {#observability}
+
+See [G12](/compatibility/#g12) and [B03](/compatibility/#b03). The `minio_*` namespace and existing metric paths remain, but the metric set and value meanings are not frozen:
+
+- [MRF drop counters](/blog/design/replication-reliability/#mrf) are exposed through administration statistics and Prometheus v2/v3. They count queue entries; several may refer to one object, so they are not counts of lost objects.
+- [IAM revocation metrics](/blog/design/iam-revocations/#errors) report retained deletion records, reconciliation failures, duration and last success. Interpret them using each node's collection semantics.
+- Bucket-quota metrics report effective quotas, and CPU metric collection gains concurrency protection. These affect monitoring values and runtime stability respectively; no universal speedup is implied.
+
+Review affected dashboards and alerts, and verify object and replication state independently. Healthy monitoring does not establish that all historical problems have been repaired.
 
 ## Known residual risks and non-fixes {#limits}
 

@@ -78,7 +78,7 @@ ExecStart=/usr/bin/silo server $MINIO_OPTS $MINIO_VOLUMES
 Restart=always
 ```
 
-- `Conflicts=minio.service`: systemd never runs both; starting one stops the other. This implements takeover and rollback in both directions.
+- `Conflicts=minio.service`: systemd never runs both units; starting one stops the other. This switches processes, but does not establish that state can safely be rolled back between versions.
 - The `EnvironmentFile` chain means `MINIO_VOLUMES`, `MINIO_OPTS`, credentials, and KMS settings from `/etc/default/minio` apply unchanged.
 - `Type=notify`: `systemctl start` returns success only after the server is actually ready.
 
@@ -92,7 +92,7 @@ silo healthcheck --url https://127.0.0.1:9000 ready    # http:// without TLS
 mc admin info <existing-alias>
 ```
 
-Roll back (nothing to restore — data ownership, certificates, and the old unit were never touched):
+Before rollback, validate the target version, complete recovery point and IAM/bucket-configuration state under [rollback scope](/compatibility/migration/#rollback). Retaining ownership, certificates and the old unit does not mean state needs no restoration; the following commands only illustrate service switching on one node:
 
 ```bash
 sudo systemctl disable --now silo.service
@@ -107,7 +107,7 @@ sudo systemctl mask minio.service
 
 ## Caveats {#caveats}
 
-- **Clusters switch all nodes together.** Two different binaries do not form a cluster — MinIO next to Silo, or one Silo version next to another; a mixed node waits indefinitely in `activating` ([details](/compatibility/migration/#one-binary)). Prepare every node first (install package, create drop-in), then flip all nodes in quick succession: `systemctl disable --now minio && systemctl enable --now --no-block silo`. Rollback and later upgrades likewise: all nodes together.
+- **Coordinate the switch across all cluster nodes.** Prepare every node first (install packages and create drop-ins), stop all old processes, confirm they have exited, then start all new processes. Avoid old and new versions accessing storage together. See [migration notes](/compatibility/migration/#one-binary) for mixed versions and binary consistency; for shared IAM or site replication, coordinate every participant under the [IAM upgrade procedure](/operations/replication/iam-upgrade/). Rollback must also meet the applicable state-recovery requirements.
 - **Non-packaged installations work the same way.** A `/usr/local/bin/minio` with a custom unit is taken over identically, as long as its configuration lives in `/etc/default/minio`.
 - **Crash loops rate-limit.** A misconfigured start (for example, missing certificates) repeats under `Restart=always` until systemd's start limit trips (`Start request repeated too quickly`). Fix the cause, then `systemctl reset-failed silo && systemctl start silo`.
 - **An old `minio.service` stop can hang.** Legacy units commonly set `TimeoutSec=infinity`. If graceful shutdown remains stuck after traffic is drained and the shutdown allowance expires, an operator can force it with `sudo systemctl kill --signal=SIGKILL minio.service`, then confirm the old process has exited before starting Silo. This interrupts any remaining requests; plain `systemctl kill` defaults to another `SIGTERM` and does not resolve a process that ignores it.

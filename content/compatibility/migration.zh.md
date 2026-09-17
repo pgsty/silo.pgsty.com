@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-arrow-right-arrow-left
 ---
 
-从 MinIO 迁移到 Silo 是一次原地二进制替换，不是数据迁移。不导出、不重新导入任何东西。容器部署中，唯一必须修改的是镜像名。RPM/DEB 安装见[原生软件包迁移](/zh/compatibility/binary/)。
+从 MinIO 迁移到 Silo，通常可以复用现有对象数据和卷，无需逐对象导出、重新导入。**普通 S3 应用通常不改代码，管理员仍需检查部署、权限与状态兼容性。** 先用[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 安装见[原生软件包迁移](/zh/compatibility/binary/)。
 
 ## 哪些改变 {#scope}
 
@@ -23,15 +23,15 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 ## 哪些不变 {#unchanged}
 
-- **对象数据与 `.minio.sys` 元数据目录——磁盘格式未变，同一份数据与 MinIO 双向通用。**
-- Bucket、版本、用户、Access Key、策略、生命周期规则、复制状态、加密元数据。
-- S3 API、SigV4 签名、SDK、`mc`/`mcli`、预签名 URL 行为。
+- **对象布局、纠删码格式和 `.minio.sys` 目录保留，可以复用兼容基线的数据盘。** 这不等于任意版本都能双向降级，见[回滚边界](#rollback)。
+- 既有桶、对象版本、用户、Access Key、策略、生命周期与加密配置继续使用；授权判定、复制状态和新增元数据的例外见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07)。
+- 常用 S3 API、SigV4、SDK 与预签名 URL 接入方式延续上游；校验、条件请求和错误行为变化见 [O04](/zh/compatibility/#o04)。
 - 端点主机名、API 端口 `9000`、Console 端口、卷挂载。
 - `MINIO_*` 环境变量与既有服务端参数。
 - `/minio/*` 路由、`x-minio-*` 头、`minio_*` 指标。
-- 策略命名空间标识：IAM 策略、通知与审计事件中的 `arn:minio:*` ARN、`minio:s3` 等服务命名空间保持原拼写。**不存在 `SILO_*` 别名命名空间**——引用上述标识的脚本与策略无需任何修改。
+- 策略命名空间标识：IAM 策略、通知与审计事件中的 `arn:minio:*` ARN、`minio:s3` 等服务命名空间保持原拼写，无需因产品改名而替换这些字符串；权限语义仍按 [O02](/zh/compatibility/#o02) 检查。
 
-没有数据转换步骤。若你的 MinIO 版本已很陈旧，需要在预发环境验证的是版本跨度本身——那是一次大版本软件升级，不是格式变化。
+上述结论面向[比较基线](/zh/compatibility/#scope)与兼容的纠删码部署。若 MinIO 版本较旧，或仍使用历史 filesystem/gateway 模式，应先确认对应版本和部署模式的迁移路径，再在预发环境验证。
 
 ## Docker 迁移 {#docker}
 
@@ -43,7 +43,7 @@ docker.io/pgsty/silo:<RELEASE-tag>
 
 tag：不可变的 `RELEASE.YYYY-MM-DDTHH-MM-SSZ`（建议钉住）、滚动 `latest`，以及下述 `-distroless` 变体。旧的 `pgsty/minio` 仓库保持已发布状态，冻结在最后一个 tag。
 
-Compose 中只改镜像一行：
+下面的 Compose 示例保留原端口、数据卷与 `MINIO_*` 配置。切换前核对自定义 entrypoint、二进制路径、运行用户、目录权限和探针；不能仅凭镜像名替换就认定迁移完成。
 
 ```yaml
 services:
@@ -105,7 +105,11 @@ kubelet 探针是 pod spec 中的 `httpGet` 请求；Docker `HEALTHCHECK` 被忽
 
 ### 回滚 {#rollback}
 
-磁盘格式未变、两侧通用：把 `image:` 改回记录的 MinIO tag，`docker compose up -d`。同一卷保持挂载，Silo 运行期间写入的数据 MinIO 仍可读取。
+**先确认状态可恢复，再切回旧版本。** 对象布局兼容不保证旧程序理解新增的桶配置、IAM 修订或删除历史，也不保证回滚后权限和复制状态相同。
+
+升级前保存原镜像摘要、部署配置及匹配的恢复点，并在隔离环境验证确切版本组合。涉及新的 IAM 撤销机制时，必须按 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)保留完整 IAM 存储及密钥材料；普通管理导出不包含删除历史。还需检查[桶配置删除状态](/zh/blog/design/bucket-metadata-convergence/#rollout)与[密码权限](/zh/compatibility/password-permissions/#rollback)。
+
+只有对应升级说明明确允许、且恢复验证通过时，才执行既定的镜像或二进制回退。不要让新旧节点同时操作同一份数据；恢复旧快照还需处理备份之后的数据和授权变更。
 
 ## 从 RELEASE.2026-08-06 升级 {#since-20260806}
 
@@ -117,7 +121,7 @@ kubelet 探针是 pod spec 中的 `httpGet` 请求；Docker `HEALTHCHECK` 被忽
 4. **旧版数据库通知目标必须有连接串。** 已启用的 pre-KV PostgreSQL 或 MySQL 目标若缺少 `connection_string` / `dsn_string`，启动会以不含凭据的错误停止；20260806 在同样情况下会静默丢掉全部通知目标。
 5. **校验和请求会被校验。** 未知的 `x-amz-checksum-*` 算法、`CRC64NVME` 与 `COMPOSITE` 的组合、与上传矛盾的校验和类型断言都返回 `400`。AWS SDK、`minio-go` 与 `mcli` 的默认行为不受影响。
 6. **桶级 CORS 真正生效。** 设置了自身 CORS 配置的桶只按该配置响应；`MINIO_API_CORS_ALLOW_ORIGIN` 只作用于没有配置的桶。在站点复制组里，等所有站点都运行新版本后再配置桶级 CORS：旧对端会接受但忽略该配置，并持续报告 CORS 不一致。
-7. **回滚后数据仍可读。** 20260806 忽略桶级 CORS 配置，并会在重写该桶元数据时把它丢掉；再次升级后请重新创建。
+7. **回滚会丢失新 CORS 配置。** 20260806 忽略桶级 CORS，并会在重写桶元数据时丢弃它；回滚前导出，重新升级后再恢复。其他状态按[回滚边界](#rollback)单独检查。
 
 ### 9 月 3 日版本的 Console 回归 {#console-0903}
 
