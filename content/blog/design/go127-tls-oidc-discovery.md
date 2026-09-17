@@ -18,6 +18,8 @@ url: "/blog/design/go127-tls-oidc-discovery/"
 
 > **Publication update, 2026-09-17:** The Go TLS default repair (`48e184652`) shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
 
+> **Follow-up, 2026-09-17:** the #154 reporter retested on 20260916 and reports the same failure. The repair restores the effect of `GODEBUG=tlsmlkem=0`; it does not change the default handshake, and it cannot address an ingress that rejects the new ML-DSA signature identifiers. The mechanism analysis, the full option space and the release-communication gates that follow from this are recorded in [Pinned TLS Parameters and Handshake Compatibility](/blog/design/tls-parameter-pinning/).
+
 After SILO's toolchain moved to Go 1.27, the Server TLS repair
 [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31)
 ("fix(tls): honor Go key exchange defaults across transports") removed its
@@ -36,8 +38,10 @@ at startup.
 > configuration were never obtained, so **no root cause is claimed for that
 > deployment** — two locally verified mechanisms could each produce the
 > reported symptom, and either the ingress rejecting the new handshake, or a
-> proxy rejecting the changed User-Agent, remains plausible. #154 stays open
-> for an affected-environment retest.
+> proxy rejecting the changed User-Agent, remains plausible. #154 was closed on
+> 2026-09-11 on the strength of the merge; the 2026-09-17 retest on 20260916
+> still fails, so an affected-environment retest with phase-level evidence is
+> still owed.
 
 ## What Go 1.27 changed {#go127}
 
@@ -146,7 +150,7 @@ artifacts and the full evidence chain are retained outside the documentation
 tree. The supported statement is: the merged fix restores Go key-exchange
 defaults at the eight affected Server configuration points, verified with synthetic negative
 controls — it does not claim to have diagnosed any specific hidden
-deployment, and #154 remains open pending a retest in the affected
-environment.
+deployment, and no root cause is established for #154 until a retest in the
+affected environment supplies phase-level evidence.
 
 Go behavior is grounded in the [official 1.27 release notes](https://go.dev/doc/go1.27) and the actual toolchain. ClientHello byte counts above describe the recorded fixtures, not a fixed size for every connection.
