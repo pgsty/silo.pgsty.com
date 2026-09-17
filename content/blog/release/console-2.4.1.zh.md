@@ -60,16 +60,9 @@ Go 不继承依赖模块的 replacement，需同时复制[标签 README](https:/
 
 ## 软件包与验证 {#delivery}
 
-官方容器镜像发布在 [Docker Hub](https://hub.docker.com/r/pgsty/silo-console)，支持 Linux amd64 与 arm64：
+本次 [GitHub Release](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) 有 **44 个附件**：二进制及归档、DEB/RPM/APK 软件包、源码、法律声明、SPDX SBOM、校验清单及 Sigstore 签名包。校验清单使用 Cosign 签名，构建溯源记录对应标签和工作流。
 
-```sh
-docker pull docker.io/pgsty/silo-console:v2.4.1
-```
-
-本次发布有 **44 个附件**：二进制及归档、DEB/RPM/APK 软件包、源码、法律声明、SPDX SBOM、校验清单及 Sigstore 签名包。
-校验清单和 OCI 镜像使用无长期密钥的 Cosign 签名，GitHub 构建溯源记录构建工作流与对应标签的发布输入。
-镜像的 `latest` 仅在正式 Release 通过签名、溯源、SBOM 和匿名访问检查后推进。
-在线与离线验证方法见[发布契约](https://github.com/pgsty/silo-console/blob/8ba8a266a503f13037931747256c5a349af09124/docs/release-contract.md)。
+**2026-09-17 镜像分发更正：** 官方镜像名称是 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)，但匿名 token 请求返回 HTTP 401，尚不能确认公开拉取 v2.4.1 或 `latest`。请使用 GitHub 二进制/软件包，不把源码和二进制的发布视为镜像交付证明。Server 内嵌 Console 不受此独立镜像分发状态影响。
 
 Linux 软件包保留 `minio-console.service`、`console-user` 和 `/etc/default/console`。
 服务状态目录为 `/var/lib/silo-console`，证书目录改为 `/etc/silo-console/certs`，停止服务最多等待 90 秒。

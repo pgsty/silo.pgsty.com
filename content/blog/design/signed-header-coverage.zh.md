@@ -12,6 +12,9 @@ draft: false
 url: "/zh/blog/design/signed-header-coverage/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
 本文记录 SILO 的未签名头覆盖修复，核心提交为 [`123325430`](https://github.com/pgsty/silo/commit/123325430)，已通过 [PR #173](https://github.com/pgsty/silo/pull/173) 合并，台账编号 `SN-2026-011`。该问题由 Oren Yomtov 针对已发布版本报告，并在本地两条签名路径上均已复现。
 
 > **2026-09-11 状态：** 原始修复已推送，并通过 [PR #173](https://github.com/pgsty/silo/pull/173) 合并。下文的后续签名与正文校验修复也已通过 [PR #177](https://github.com/pgsty/silo/pull/177) 合并，8 项 PR 检查全部通过。源码验证与正式发布分别计数：当前已发布的 9 月 3 日 Server 版本尚未包含这些修复。<br>

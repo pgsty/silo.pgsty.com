@@ -12,13 +12,19 @@ Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [Git
 
 ## Installing {#install}
 
-Install the package that matches your platform from the release assets, then verify the checksum before installing:
+Download the package that matches your platform from the release assets, then verify its checksum before installing:
 
 ```bash
-curl -fLO https://github.com/pgsty/silo/releases/download/<RELEASE-tag>/silo-<version>.<arch>.rpm
-sha256sum --check silo-<version>.<arch>.rpm.sha256sum   # or compare manually
-sudo rpm -i silo-<version>.<arch>.rpm                    # Debian/Ubuntu: sudo dpkg -i silo_<version>_<arch>.deb
+SILO_TAG=RELEASE.2026-09-16T00-00-00Z
+SILO_RPM=silo-20260916000000.0.0-1PGSTY.x86_64.rpm
+SILO_URL="https://github.com/pgsty/silo/releases/download/$SILO_TAG"
+curl -fLO "$SILO_URL/$SILO_RPM"
+curl -fLO "$SILO_URL/$SILO_RPM.sha256sum"
+sha256sum --check "$SILO_RPM.sha256sum" && \
+  sudo dnf install "./$SILO_RPM"
 ```
+This example selects the x86_64 RPM. For ARM64 use `.aarch64.rpm`; on Debian/Ubuntu select the `.deb` file and matching checksum from the download page.
+
 
 If you use the Pigsty package repository, `dnf install silo` / `apt install silo` resolves the same artifacts (the repository may lag GitHub Releases). The package intentionally provides **no** `minio` alias or `Provides:` relationship — `minio` and `silo` are separate packages that coexist, and the takeover happens at the systemd level, not through package replacement (see [Takeover](#takeover)).
 

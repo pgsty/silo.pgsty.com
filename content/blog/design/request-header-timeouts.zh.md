@@ -12,6 +12,9 @@ draft: false
 url: "/zh/blog/design/request-header-timeouts/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
 本文记录 Server HTTP 读取截止时间的修复，作为
 [PR #196](https://github.com/pgsty/silo/pull/196) 的一部分合入 main（修复
 [`055030ea5`](https://github.com/pgsty/silo/commit/055030ea5)）。

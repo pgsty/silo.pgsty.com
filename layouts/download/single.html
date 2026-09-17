@@ -105,25 +105,25 @@
                     <section role="tabpanel" id="server-docker-standard" aria-labelledby="tab-server-docker-standard">
                       <div class="download-code">
                         <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> shell</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Docker 命令{{ else }}Copy Docker command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                        <pre><code><span class="k">docker</span> pull <span class="s">pgsty/silo:{{ $serverTag }}</span>
+                        <pre><code><span class="k">docker</span> pull <span class="s">docker.io/pgsty/silo:{{ $serverTag }}</span>
 <span class="k">docker</span> run <span class="v">-d</span> <span class="v">--name</span> silo <span class="v">--restart</span> unless-stopped \
   <span class="v">-p</span> 9000:9000 <span class="v">-p</span> 9001:9001 \
   <span class="v">-v</span> /data/silo:/data \
   <span class="v">-e</span> MINIO_ROOT_USER=<span class="s">silo-admin</span> \
   <span class="v">-e</span> MINIO_ROOT_PASSWORD=<span class="s">replace-with-a-strong-secret</span> \
-  <span class="s">pgsty/silo:{{ $serverTag }}</span> server /data <span class="v">--console-address</span> :9001</code></pre>
+  <span class="s">docker.io/pgsty/silo:{{ $serverTag }}</span> server /data <span class="v">--console-address</span> :9001</code></pre>
                       </div>
                     </section>
                     <section role="tabpanel" id="server-docker-distroless" aria-labelledby="tab-server-docker-distroless" hidden>
                       <div class="download-code">
                         <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> shell</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Distroless Docker 命令{{ else }}Copy distroless Docker command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                        <pre><code><span class="k">docker</span> pull <span class="s">pgsty/silo:{{ $serverTag }}-distroless</span>
+                        <pre><code><span class="k">docker</span> pull <span class="s">docker.io/pgsty/silo:{{ $serverTag }}-distroless</span>
 <span class="k">docker</span> run <span class="v">-d</span> <span class="v">--name</span> silo <span class="v">--restart</span> unless-stopped \
   <span class="v">-p</span> 9000:9000 <span class="v">-p</span> 9001:9001 \
   <span class="v">-v</span> /data/silo:/data \
   <span class="v">-e</span> MINIO_ROOT_USER=<span class="s">silo-admin</span> \
   <span class="v">-e</span> MINIO_ROOT_PASSWORD=<span class="s">replace-with-a-strong-secret</span> \
-  <span class="s">pgsty/silo:{{ $serverTag }}-distroless</span> server /data <span class="v">--console-address</span> :9001</code></pre>
+  <span class="s">docker.io/pgsty/silo:{{ $serverTag }}-distroless</span> server /data <span class="v">--console-address</span> :9001</code></pre>
                       </div>
                     </section>
                     <section role="tabpanel" id="server-docker-standard-compose" aria-labelledby="tab-server-docker-standard-compose" hidden>
@@ -132,7 +132,7 @@
                         <pre><code><span class="c"># {{ if $zh }}docker compose up -d 启动{{ else }}start with: docker compose up -d{{ end }}</span>
 <span class="k">services</span>:
   <span class="k">silo</span>:
-    <span class="k">image</span>: <span class="s">pgsty/silo:{{ $serverTag }}</span>
+    <span class="k">image</span>: <span class="s">docker.io/pgsty/silo:{{ $serverTag }}</span>
     <span class="k">container_name</span>: <span class="s">silo</span>
     <span class="k">restart</span>: <span class="s">unless-stopped</span>
     <span class="k">command</span>: <span class="s">server /data --console-address ":9001"</span>
@@ -155,7 +155,7 @@
                         <pre><code><span class="c"># {{ if $zh }}镜像自带 HEALTHCHECK，无需 healthcheck 配置块{{ else }}the image carries its own HEALTHCHECK; no healthcheck: block needed{{ end }}</span>
 <span class="k">services</span>:
   <span class="k">silo</span>:
-    <span class="k">image</span>: <span class="s">pgsty/silo:{{ $serverTag }}-distroless</span>
+    <span class="k">image</span>: <span class="s">docker.io/pgsty/silo:{{ $serverTag }}-distroless</span>
     <span class="k">container_name</span>: <span class="s">silo</span>
     <span class="k">restart</span>: <span class="s">unless-stopped</span>
     <span class="k">command</span>: <span class="s">server /data --console-address ":9001"</span>
@@ -187,12 +187,12 @@
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}当前 MinIO Operator Tenant Chart 支持覆盖租户镜像仓库、标签或摘要。下载官方 <code>values.yaml</code> 后，将 <code>tenant.image</code> 指向 <code>pgsty/silo</code>，再按故障域配置存储池与 PVC。{{ else }}The current MinIO Operator Tenant Chart supports overriding the tenant image repository, tag, or digest. Download the official <code>values.yaml</code>, point <code>tenant.image</code> at <code>pgsty/silo</code>, then configure pools and PVCs for your failure domains.{{ end }}</p>
+                  <p>{{ if $zh }}当前 MinIO Operator Tenant Chart 支持覆盖租户镜像仓库、标签或摘要。下载官方 <code>values.yaml</code> 后，将 <code>tenant.image</code> 指向 <code>docker.io/pgsty/silo</code>，再按故障域配置存储池与 PVC。{{ else }}The current MinIO Operator Tenant Chart supports overriding the tenant image repository, tag, or digest. Download the official <code>values.yaml</code>, point <code>tenant.image</code> at <code>docker.io/pgsty/silo</code>, then configure pools and PVCs for your failure domains.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fas fa-file-code" aria-hidden="true"></i> values.yaml</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Kubernetes 镜像配置{{ else }}Copy Kubernetes image configuration{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
                     <pre><code>tenant:
   image:
-    repository: pgsty/silo
+    repository: docker.io/pgsty/silo
     tag: {{ $serverTag }}
     pullPolicy: IfNotPresent</code></pre>
                   </div>
@@ -229,7 +229,7 @@
                 </article>
               </div>
               <div class="package-footer">
-                <a href="{{ printf "%s/silo_%s_checksums.txt" $serverBase $serverBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}校验和{{ else }}checksums{{ end }}</a>
+                <a href="{{ printf "%s/silo_%s_packages_checksums.txt" $serverBase $serverBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}软件包校验和{{ else }}package checksums{{ end }}</a>
                 <a href="https://github.com/pgsty/silo/releases" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}全部发行制品{{ else }}All release artifacts{{ end }}</a>
               </div>
             </section>
@@ -263,6 +263,9 @@
 tar -xzf {{ printf "silo_%s_linux_amd64.tar.gz" $serverBuild }}
 sudo install -m 0755 silo /usr/local/bin/silo
 silo --version</code></pre>
+              </div>
+              <div class="package-footer">
+                <a href="{{ printf "%s/silo_%s_checksums.txt" $serverBase $serverBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}归档校验和{{ else }}archive checksums{{ end }}</a>
               </div>
             </section>
 
@@ -318,7 +321,7 @@ mcli ls sss/</code></pre>
 
             <section class="download-panel" id="server-source" role="tabpanel" aria-labelledby="tab-server-source" hidden>
               <div class="method-heading">
-                <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}从维护分支构建{{ else }}Build from the maintained branch{{ end }}</h3></div>
+                <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}从发行标签构建{{ else }}Build from the release tag{{ end }}</h3></div>
                 <div class="method-tags"><span>Go 1.27.1+</span><span>AGPLv3</span><span>make</span></div>
               </div>
               <div class="method-grid">
@@ -326,7 +329,7 @@ mcli ls sss/</code></pre>
                   <p>{{ if $zh }}适合审计、二次开发或需要自定义构建参数的场景。构建结果是当前平台的 <code>silo</code> 可执行文件。{{ else }}Use this path for auditing, development, or custom build flags. The result is a native <code>silo</code> executable for the current platform.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fab fa-git-alt" aria-hidden="true"></i> git + make</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制源码构建命令{{ else }}Copy source build command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                    <pre><code>git clone https://github.com/pgsty/silo.git
+                    <pre><code>git clone --branch {{ $serverTag }} --depth 1 https://github.com/pgsty/silo.git
 cd silo
 make build
 ./silo --version</code></pre>
@@ -399,7 +402,13 @@ make build
                 </article>
               </div>
               <div class="package-footer">
-                <a href="{{ printf "%s/mcli_%s_checksums.txt" $clientBase $clientBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}校验和{{ else }}checksums{{ end }}</a>
+                <span>SHA-256:</span>
+                <a href="{{ printf "%s/mcli-%s-1.x86_64.rpm.sha256sum" $clientBase $clientBuild }}" target="_blank" rel="noopener">RPM x86_64</a>
+                <a href="{{ printf "%s/mcli-%s-1.aarch64.rpm.sha256sum" $clientBase $clientBuild }}" target="_blank" rel="noopener">RPM ARM64</a>
+                <a href="{{ printf "%s/mcli_%s_amd64.deb.sha256sum" $clientBase $clientBuild }}" target="_blank" rel="noopener">DEB amd64</a>
+                <a href="{{ printf "%s/mcli_%s_arm64.deb.sha256sum" $clientBase $clientBuild }}" target="_blank" rel="noopener">DEB ARM64</a>
+                <a href="{{ printf "%s/mcli_%s_x86_64.apk.sha256sum" $clientBase $clientBuild }}" target="_blank" rel="noopener">APK x86_64</a>
+                <a href="{{ printf "%s/mcli_%s_aarch64.apk.sha256sum" $clientBase $clientBuild }}" target="_blank" rel="noopener">APK ARM64</a>
                 <a href="https://github.com/pgsty/mc/releases" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}全部客户端制品{{ else }}All client artifacts{{ end }}</a>
               </div>
             </section>
@@ -431,6 +440,9 @@ make build
                 <code>mcli alias set local http://127.0.0.1:9000 ACCESS_KEY SECRET_KEY</code>
                 <button type="button" data-copy-inline aria-label="{{ if $zh }}复制连接命令{{ else }}Copy connection command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i></button>
               </div>
+              <div class="package-footer">
+                <a href="{{ printf "%s/mcli_%s_checksums.txt" $clientBase $clientBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}归档校验和{{ else }}archive checksums{{ end }}</a>
+              </div>
             </section>
 
             <section class="download-panel" id="client-container" role="tabpanel" aria-labelledby="tab-client-container">
@@ -443,8 +455,8 @@ make build
                   <p>{{ if $zh }}容器镜像保留熟悉的 <code>mc</code> 入口点；独立归档与 Linux 软件包则使用 <code>mcli</code>。{{ else }}The container retains the familiar <code>mc</code> entrypoint, while standalone archives and Linux packages use <code>mcli</code>.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fab fa-docker" aria-hidden="true"></i> Docker</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制容器客户端命令{{ else }}Copy container client command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                    <pre><code><span class="k">docker</span> run <span class="v">--rm</span> <span class="s">pgsty/mc:{{ $clientTag }}</span> <span class="v">--version</span>
-<span class="k">docker</span> run <span class="v">--rm</span> <span class="s">pgsty/mc:{{ $clientTag }}</span> checksum verify <span class="v">--help</span></code></pre>
+                    <pre><code><span class="k">docker</span> run <span class="v">--rm</span> <span class="s">docker.io/pgsty/mc:{{ $clientTag }}</span> <span class="v">--version</span>
+<span class="k">docker</span> run <span class="v">--rm</span> <span class="s">docker.io/pgsty/mc:{{ $clientTag }}</span> checksum verify <span class="v">--help</span></code></pre>
                   </div>
                   <div class="method-actions"><a class="btn btn-primary" href="https://hub.docker.com/r/pgsty/mc" target="_blank" rel="noopener"><i class="fab fa-docker" aria-hidden="true"></i> Docker Hub</a></div>
                 </div>
@@ -469,7 +481,7 @@ make build
                   <p>{{ if $zh }}源码仍保留 <code>github.com/minio/mc</code> 模块路径与 <code>mc</code> 构建产物，以维护兼容性；发行归档和软件包使用 <code>mcli</code>。{{ else }}The source keeps the <code>github.com/minio/mc</code> module path and <code>mc</code> build output for compatibility; release archives and packages use <code>mcli</code>.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fab fa-git-alt" aria-hidden="true"></i> git + make</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制客户端构建命令{{ else }}Copy client build command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                    <pre><code>git clone https://github.com/pgsty/mc.git
+                    <pre><code>git clone --branch {{ $clientTag }} --depth 1 https://github.com/pgsty/mc.git
 cd mc
 make build
 ./mc --version</code></pre>

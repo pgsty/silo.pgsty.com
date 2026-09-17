@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-arrow-right-arrow-left
 ---
 
-从 MinIO 迁移到 Silo，通常可以复用现有对象数据和卷，无需逐对象导出、重新导入。**普通 S3 应用通常不改代码，管理员仍需检查部署、权限与状态兼容性。** 先用[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 安装见[原生软件包迁移](/zh/compatibility/binary/)。
+从 MinIO 迁移到 Silo，通常可以复用现有对象数据和卷，无需逐对象导出、重新导入。**普通 S3 应用通常不改代码，管理员仍需检查部署、权限与状态兼容性。** 先用[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 安装见[原生软件包迁移](/zh/compatibility/binary/)，各版本要求见[组件矩阵](/zh/compatibility/versions/)。
 
 ## 哪些改变 {#scope}
 
@@ -24,8 +24,8 @@ icon: fa-solid fa-arrow-right-arrow-left
 ## 哪些不变 {#unchanged}
 
 - **对象布局、纠删码格式和 `.minio.sys` 目录保留，可以复用兼容基线的数据盘。** 这不等于任意版本都能双向降级，见[回滚边界](#rollback)。
-- 既有桶、对象版本、用户、Access Key、策略、生命周期与加密配置继续使用；授权判定、复制状态和新增元数据的例外见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07)。
-- 常用 S3 API、SigV4、SDK 与预签名 URL 接入方式延续上游；校验、条件请求和错误行为变化见 [O04](/zh/compatibility/#o04)。
+- 既有桶、对象版本、用户、Access Key、策略、生命周期与加密配置继续使用；授权判定、复制状态和新增元数据的例外见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07)，具体以目标版本的[发布说明](/zh/blog/release/silo-20260916/)为准。
+- 常用 S3 API、SigV4、SDK、`mc`/`mcli` 与预签名 URL 接入方式延续上游；校验、条件请求和错误行为变化见 [O04](/zh/compatibility/#o04)。
 - 端点主机名、API 端口 `9000`、Console 端口、卷挂载。
 - `MINIO_*` 环境变量与既有服务端参数。
 - `/minio/*` 路由、`x-minio-*` 头、`minio_*` 指标。
@@ -109,7 +109,7 @@ kubelet 探针是 pod spec 中的 `httpGet` 请求；Docker `HEALTHCHECK` 被忽
 
 升级前保存原镜像摘要、部署配置及匹配的恢复点，并在隔离环境验证确切版本组合。涉及新的 IAM 撤销机制时，必须按 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)保留完整 IAM 存储及密钥材料；普通管理导出不包含删除历史。还需检查[桶配置删除状态](/zh/blog/design/bucket-metadata-convergence/#rollout)与[密码权限](/zh/compatibility/password-permissions/#rollback)。
 
-只有对应升级说明明确允许、且恢复验证通过时，才执行既定的镜像或二进制回退。不要让新旧节点同时操作同一份数据；恢复旧快照还需处理备份之后的数据和授权变更。
+只有对应升级说明明确允许、且恢复验证通过时，才执行既定的镜像或二进制回退。包含持久 IAM 撤销的版本不支持滚动降级。不要让新旧节点同时操作同一份数据；恢复旧快照还需处理备份之后的数据和授权变更。
 
 ## 从 RELEASE.2026-08-06 升级 {#since-20260806}
 

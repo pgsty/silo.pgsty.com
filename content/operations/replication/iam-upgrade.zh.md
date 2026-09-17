@@ -10,8 +10,8 @@ icon: fa-solid fa-user-shield
 [#192](https://github.com/pgsty/silo/pull/192) 持久化删除修订及父身份撤销边界，防止延迟的站点事件恢复已撤销身份和旧授权。
 所有参与服务器必须协调升级，包括没有配置站点复制、但共享 IAM 后端的节点。不支持共享后端的新旧节点混用，也不支持滚动降级。
 
-**发布状态：** 修复已进入[九月源码基线](/zh/compatibility/versions/#september-reliability)，尚未进入 Server 20260903。
-本页为包含这些修复的构建准备操作流程。隔离升级与恢复的观察结果、剩余恢复检查由
+**发布状态：** 修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；Server 20260903 不包含。
+本页说明该版本的协调升级与恢复流程。隔离升级与恢复的观察结果、剩余恢复检查由
 [#200](https://github.com/pgsty/silo/issues/200) 跟踪，参阅[验证范围](#validation)；文档发布不代表生产升级验收通过。
 
 ## 准备维护窗口 {#prepare}
@@ -44,7 +44,7 @@ mcli ready site-a
 
 升级前按[密码策略迁移指南](/zh/compatibility/password-permissions/)检查所有原有 `Deny admin:CreateUser`：
 若其意图包含禁止修改自身密码，在保留原 scope 与条件的同一 Deny 中加入 `admin:ChangeMyPassword`，并贯穿回滚窗口。
-当前 main 的分段上传默认仍为 `legacy`；普通升级不要求切换为严格模式。只有主动启用严格模式时才执行
+Server 20260916 的分段上传默认仍为 `legacy`；普通升级不要求切换为严格模式。只有主动启用严格模式时才执行
 [分段上传预检与排空流程](/zh/blog/design/list-multipart-uploads/#implementation)。
 
 ## 保存完整恢复点 {#backup}

@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-arrow-right-arrow-left
 ---
 
-Migrating from MinIO to Silo normally reuses existing object data and volumes without an object-by-object export and import. **Ordinary S3 applications usually need no code changes; administrators still need to check deployment, authorization and state compatibility.** Select the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level overview](/compatibility/) before following this guide. RPM/DEB installs are covered in [Native Package Migration](/compatibility/binary/).
+Migrating from MinIO to Silo normally reuses existing object data and volumes without an object-by-object export and import. **Ordinary S3 applications usually need no code changes; administrators still need to check deployment, authorization and state compatibility.** Select the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level overview](/compatibility/) before following this guide. RPM/DEB installs are covered in [Native Package Migration](/compatibility/binary/); check the [component matrix](/compatibility/versions/) for version-specific requirements.
 
 ## What changes {#scope}
 
@@ -24,8 +24,8 @@ In order of importance:
 ## What stays {#unchanged}
 
 - **Object layouts, erasure formats and the `.minio.sys` directory remain, allowing data disks from compatible baselines to be reused.** This does not guarantee arbitrary downgrades; see [rollback scope](#rollback).
-- Existing buckets, object versions, users, access keys, policies, lifecycle and encryption configuration remain usable. Authorization decisions, replication state and new metadata have exceptions in [O02](/compatibility/#o02) and [O07](/compatibility/#o07).
-- Common S3 APIs, SigV4, SDK and presigned URL integration carry over. Validation, conditional requests and error behavior have changes in [O04](/compatibility/#o04).
+- Existing buckets, object versions, users, access keys, policies, lifecycle and encryption configuration remain usable. Authorization decisions, replication state and new metadata have exceptions in [O02](/compatibility/#o02) and [O07](/compatibility/#o07); the target [release notes](/blog/release/silo-20260916/) list the specifics.
+- Common S3 APIs, SigV4, SDK, `mc`/`mcli` and presigned URL integration carry over. Validation, conditional requests and error behavior have changes in [O04](/compatibility/#o04).
 - Endpoint hostname, API port `9000`, Console port, volume mounts.
 - `MINIO_*` environment variables and existing server options.
 - `/minio/*` routes, `x-minio-*` headers, `minio_*` metrics.
@@ -109,7 +109,7 @@ Kubelet probes are `httpGet` requests in the pod spec; Docker `HEALTHCHECK` is i
 
 Before upgrading, retain the original image digest, deployment configuration and a matching recovery point, and test the exact version combination in isolation. For the new IAM revocation mechanism, follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/) to preserve complete IAM storage and key material; ordinary administration exports omit deletion history. Also check [bucket-configuration deletion state](/blog/design/bucket-metadata-convergence/#rollout) and [password permissions](/compatibility/password-permissions/#coordinated-upgrade-and-rollback).
 
-Use the planned image or binary rollback only when the relevant upgrade instructions permit it and recovery validation passes. Do not let old and new nodes access the same data simultaneously. Restoring an older snapshot also requires handling data and authorization changes made after that snapshot.
+Use the planned image or binary rollback only when the relevant upgrade instructions permit it and recovery validation passes. Versions with durable IAM revocation do not support rolling downgrade. Do not let old and new nodes access the same data simultaneously. Restoring an older snapshot also requires handling data and authorization changes made after that snapshot.
 
 ## Upgrading from RELEASE.2026-08-06 {#since-20260806}
 

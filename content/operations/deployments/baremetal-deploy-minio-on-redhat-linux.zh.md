@@ -48,34 +48,34 @@ MinIO 建议在存储使用率达到 70% 之前，预先规划足以存放 **至
 从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 RPM，校验发布摘要后安装：
 
 ```shell
-sudo dnf install ./minio-*.rpm
+sudo dnf install ./silo-*.rpm
 ```
 
 当前 Silo 发布不提供继承文档中提到的 `ppc64le` 或 `s390x` 软件包变体。
 
 ### 2. 查看 `systemd` 服务文件 {#systemd}
 
-`.rpm` 软件包会将以下 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件安装到 `/usr/lib/systemd/system/minio.service`：
+`.rpm` 软件包会将以下 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件安装到 `/usr/lib/systemd/system/silo.service`：
 
-```shell
+```ini
 [Unit]
-Description=MinIO
-Documentation=https://silo.pgsty.com/zh/docs/
+Description=Silo Object Storage Server
+Documentation=https://silo.pgsty.com/docs/
 Wants=network-online.target
-After=network-online.target
-AssertFileIsExecutable=/usr/local/bin/minio
+After=network-online.target minio.service
+Conflicts=minio.service
+AssertFileIsExecutable=/usr/bin/silo
 
 [Service]
 Type=notify
 
-WorkingDirectory=/usr/local
-
-User=minio-user
-Group=minio-user
+User=silo
+Group=silo
 ProtectProc=invisible
 
 EnvironmentFile=-/etc/default/minio
-ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
+EnvironmentFile=-/etc/default/silo
+ExecStart=/usr/bin/silo server $MINIO_OPTS $MINIO_VOLUMES
 
 # Let systemd restart this service always
 Restart=always
@@ -92,48 +92,31 @@ TasksMax=infinity
 # Disable timeout logic and wait until process is stopped
 TimeoutSec=infinity
 
-# Disable killing of MinIO by the kernel's OOM killer
+# Disable killing of Silo by the kernel's OOM killer
 OOMScoreAdjust=-1000
 
 SendSIGKILL=no
 
 [Install]
 WantedBy=multi-user.target
-
-# Built for ${project.name}-${project.version} (${project.name})
 ```
 
-### 3. 为 MinIO 创建用户和组 {#minio}
+### 3. 核对服务账户与目录权限 {#create-a-user-and-group-for-minio}
 
-`minio.service` 文件默认以 `minio-user` 用户和组身份运行。 你可以使用 `groupadd` 和 `useradd` 命令创建该用户和组。 以下示例创建用户、组，并为计划供 MinIO 使用的文件夹路径设置访问权限。 这些命令通常需要 root（`sudo`）权限。
+软件包安装脚本创建 `silo:silo`，但不会启动或启用服务。新部署应让该账户可访问计划使用的数据目录和证书目录。
 
-```shell
-groupadd -r minio-user
-useradd -M -r -g minio-user minio-user
-```
-
-以上命令创建的用户 **不包含** 主目录，这对系统服务账户来说是典型做法。
-
-你 **必须** 对计划供 MinIO 使用的驱动器路径执行 `chown`。 如果 `minio-user` 用户或组无法读取、写入或列出任一驱动器的内容，MinIO 进程会在启动时返回错误。
-
-例如，以下命令将 `/mnt/drives-n` 下所有驱动器的属主和属组设置为 `minio-user:minio-user`，其中 `n` 的范围为 1 到 16：
-
-```shell
-chown -R minio-user:minio-user /mnt/drives-{1...16}
-```
+从 MinIO 迁移时，保留现有数据所有者；按[软件包迁移说明](/zh/compatibility/binary/#user)为 `silo.service` 设置现有用户/组的 drop-in，不要为了改名递归修改已有数据。下列步骤的 `silo:silo` 适用于新部署；迁移部署应使用选定的实际服务账户。
 
 ### 4. 启用 TLS 连接 {#tls}
 
 为 MinIO 创建或提供 [传输层安全 (TLS)](/zh/operations/network-encryption/#minio-tls) 证书，以自动启用 server 与客户端之间的 HTTPS 安全连接。
 
-请将证书放置在 `minio-user` 用户/组可访问的目录中：
+请将证书放置在 `silo` 用户/组可访问的目录中：
 
 ```shell
-mkdir -p /opt/minio/certs
-chown -R minio-user:minio-user /opt/minio/certs
-
-cp private.key /opt/minio/certs
-cp public.crt /opt/minio/certs
+sudo install -d -o silo -g silo -m 0750 /opt/minio/certs
+sudo install -o silo -g silo -m 0600 private.key /opt/minio/certs/private.key
+sudo install -o silo -g silo -m 0644 public.crt /opt/minio/certs/public.crt
 ```
 
 对于本地测试或开发环境，你可以使用 MinIO [certgen](https://github.com/minio/certgen) 生成自签名证书。 例如，以下命令会生成一组带有 IP 和 DNS Subject Alternate Names (SANs) 的自签名证书，这些 SAN 与 MinIO 服务端 主机关联：
@@ -144,13 +127,13 @@ certgen -host "localhost,minio-*.example.net"
 
 将生成的 `public.crt` 和 `private.key` 放入 `/path/to/certs` 目录，以为 MinIO 部署启用 TLS。 应用程序可以将 `public.crt` 作为受信任的证书颁发机构，从而在不禁用证书校验的情况下连接到 MinIO 部署。
 
-当 MinIO 启用 TLS 运行时，它还会根据操作系统中的受信任证书颁发机构列表来验证连接客户端的证书。 若要启用对第三方证书或内部签发证书的验证，请将 CA 文件放入 `/opt/minio/certs/CAs` 目录。 CA 文件应包含从叶子证书到根证书的完整信任链，以确保验证成功。
+SILO 连接其他节点、复制目标等服务时，使用操作系统信任库和配置的 `CAs` 目录验证对端 TLS 证书。使用私有 CA 时，将其 CA 证书放入 `/opt/minio/certs/CAs`，并确保服务账户可读。仅启用服务端 TLS 并不会自动启用客户端证书认证。
 
 有关为 MinIO 配置 TLS 的更具体指导，包括通过 Server Name Indication (SNI) 支持多域名，请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。 你也可以跳过此步骤，以在未启用 TLS 的情况下部署。MinIO 强烈 *不建议* 在早期开发之外的场景中进行非 TLS 部署。
 
 ### 5. 创建 MinIO 环境文件 {#id7}
 
-在 `/etc/default/minio` 创建环境文件。 MinIO 服务将该文件作为 MinIO *以及* `minio.service` 文件所用全部 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 的来源。
+在 `/etc/default/silo` 创建环境文件。 MinIO 服务将该文件作为 MinIO *以及* `silo.service` 文件所用全部 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 的来源。
 
 请根据你的部署拓扑修改示例。
 
@@ -279,13 +262,13 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 
 请根据部署需要，指定其他 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 或 server 命令行选项。
 
-对于分布式部署，所有节点的 `/etc/default/minio` 环境文件 **必须** 完全一致。 可在每个节点上使用 `shasum -a 256 /etc/default/minio` 等工具验证其是否完全匹配。
+对于分布式部署，所有节点的 `/etc/default/silo` 环境文件 **必须** 完全一致。 可在每个节点上使用 `shasum -a 256 /etc/default/silo` 等工具验证其是否完全匹配。
 
 ### 6. 启动 MinIO 部署 {#id8}
 
-使用 `systemctl start minio` 启动部署中的每个节点。
+使用 `systemctl start silo` 启动部署中的每个节点。
 
-你可以在每个节点上使用 `journalctl -u minio` 跟踪启动状态。
+你可以在每个节点上使用 `journalctl -u silo` 跟踪启动状态。
 
 启动成功后，MinIO 进程会输出一段部署摘要，类似如下：
 
@@ -294,7 +277,7 @@ Silo 对象存储服务端
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-09-03T13-18-01Z (go1.27.1 linux/amd64)
+Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 linux/amd64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin
@@ -335,7 +318,7 @@ Status:         16 Online, 0 Offline.
 你可以使用 MinIO Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。 每个 MinIO server 都包含自身内嵌的 MinIO Console。
 {{< /tab >}}
 {{< tab label="CLI" value="cli" >}}
-请按照本地主机上的 `mc` [安装说明](/zh/reference/minio-mc/#mc-install) 完成安装。 运行 `mc --version` 验证安装结果。
+请按照本地主机上的 `mcli` [安装说明](/zh/reference/minio-mc/#mc-install) 完成安装。 运行 `mcli --version` 验证安装结果。下文引用的 `mc` 命令可替换为发行包安装的 `mcli`，参数保持不变。
 
 如果你的 MinIO 部署使用第三方或自签名 TLS 证书，请将 <abbr title="Certificate Authority">CA</abbr> 文件复制到 `~/.mc/certs/CAs`，以便 `mc` 信任该证书链。
 

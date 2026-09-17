@@ -19,12 +19,13 @@ changelog 更窄，只关注影响发布的安全行为。每个经过完整调�
 
 ## 当前发布边界 {#boundary}
 
-**核验于 2026-09-16。** 最新已发布 Server 为
-[`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z)。
-[SN-2026-011](#sn-2026-011) 已在 main 修复，但该版本及之前所有公开 Server 版本仍受影响。升级
-mcli、pkg 或独立 Console 不会修补已安装的 Server。源码钉定见[组件版本矩阵](/zh/compatibility/versions/)。
-
-Server 20260903 也尚未包含 [SN-2026-012](#sn-2026-012) 与 [SN-2026-013](#sn-2026-013)。独立 Console 的边界不同：[SN-2026-014](#sn-2026-014) 已随 Console v2.4.1 发布，内嵌 Console 则需要修复后的 Server 构建。
+**核验于 2026-09-17。** 最新已发布 Server 为
+[`RELEASE.2026-09-16T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z)，
+已包含 [SN-2026-011](#sn-2026-011)、[SN-2026-012](#sn-2026-012)、[SN-2026-013](#sn-2026-013)
+及内嵌 Console 的 [SN-2026-014](#sn-2026-014) 修复；Server 20260903 不包含这些修复。
+独立 Console 的修复版为 v2.4.1。应升级实际提供相应服务的组件，
+升级 mcli、pkg 或独立 Console 不会修补已安装的 Server。
+组件身份与升级要求见[版本矩阵](/zh/compatibility/versions/)和[完整发布说明](/zh/blog/release/silo-20260916/)。
 
 ## 继承自上游的公告基线 {#inherited}
 
@@ -145,13 +146,13 @@ Streaming SigV4 的种子验签没有调用同一个覆盖检查 helper。COPY �
 
 有效预签名请求可以通过 `X-Amz-Content-Sha256` 头绑定 SHA-256 值，但受影响的通用认证处理器没有按该值验证实际读取的正文。URL 持有者因此能保留有效签名并替换正文；`PutBucketPolicy` 是已复现的路径。这不会产生签名者原本没有的权限，但会破坏签名正文的限制。
 
-`c4b5e1cb4` 让通用正文验证与验签使用同一有效哈希：查询参数优先，缺失时回退头部。受 checksum 绑定的正文被篡改时返回 `XAmzContentSHA256Mismatch`，显式 `UNSIGNED-PAYLOAD` 保持协议含义。修复在 main，不在 Server 20260903。依赖正文绑定的预签名管理操作前应升级，避免分发宽泛的管理预签名授权，详见[编年史](/blog/security/20260916-release-hardening/#sn-2026-012)。
+`c4b5e1cb4` 让通用正文验证与验签使用同一有效哈希：查询参数优先，缺失时回退头部。受 checksum 绑定的正文被篡改时返回 `XAmzContentSHA256Mismatch`，显式 `UNSIGNED-PAYLOAD` 保持协议含义。修复已随 Server 20260916 发布，Server 20260903 不包含。依赖正文绑定的预签名管理操作前应升级，避免分发宽泛的管理预签名授权，详见[编年史](/blog/security/20260916-release-hardening/#sn-2026-012)。
 
 ### SN-2026-013 — 持久化 IAM 撤销 {#sn-2026-013}
 
 旧站点状态、延迟通知或不完整恢复可能重新引入已撤销身份或授权。攻击者需持有曾有效的凭证，并遇到受影响的重放/恢复场景；这不是匿名创建身份。#191/#192 保留删除版本、父撤销边界和原始组授权时间，并在同名父身份重建后拒绝旧子凭证。
 
-修复在 main，Server 20260903 尚未包含。**必须协调升级所有站点和共享 IAM 后端的所有进程，包括没有站点复制的共享后端。** 应备份完整持久 IAM 状态，不能只备份活记录导出；保留 tombstone，重发要求重新签发的子凭证，在恢复访问前协调旧备份缺失的撤销。断网期间的普通组成员移除仍是单独限制。详见[设计](/blog/design/iam-revocations/)与[恢复手册](/operations/replication/iam-upgrade/)。
+修复已随 Server 20260916 发布，Server 20260903 不包含。**必须协调升级所有站点和共享 IAM 后端的所有进程，包括没有站点复制的共享后端。** 应备份完整持久 IAM 状态，不能只备份活记录导出；保留 tombstone，重发要求重新签发的子凭证，在恢复访问前协调旧备份缺失的撤销。断网期间的普通组成员移除仍是单独限制。详见[设计](/blog/design/iam-revocations/)与[恢复手册](/operations/replication/iam-upgrade/)。
 
 ### SN-2026-014 — 匿名分享下载代理 {#sn-2026-014}
 
@@ -159,7 +160,7 @@ Console 公共下载代理可以请求配置 S3 源站的非对象路径，暴�
 
 Console #56 将转发限制为配置源站上的对象内容 GET，在发出请求前拒绝系统路径和通过查询参数选择的非下载 API，并拒绝所有重定向。普通公共、预签名和版本化下载仍支持；现有分享链接格式设置不是全局禁用分享开关。报告者为 Jiri Pejchal（@jiri-pejchal）。
 
-独立版本修复已随 **Console v2.4.1** 发布。Server #209 在 main 中选用修复后的 Console，但已发布 Server 20260903 仍内嵌旧版。应升级实际提供 UI 的组件；安装独立 Console 不会替换内嵌包。等待修复 Server 构建期间，应限制暴露的 Console 代理访问并检查配置源站的公共端点。详见[编年史](/blog/security/20260916-release-hardening/#sn-2026-014)。
+独立版本修复已随 **Console v2.4.1** 发布。Server 20260916 通过 #209 内嵌修复后的 Console，Server 20260903 仍内嵌旧版。应升级实际提供 UI 的组件；安装独立 Console 不会替换内嵌包。升级实际提供服务的旧 Server 前，应限制暴露的 Console 代理访问并检查配置源站的公共端点。详见[编年史](/blog/security/20260916-release-hardening/#sn-2026-014)。
 
 ## 依赖安全更新 {#dependencies}
 
@@ -179,7 +180,7 @@ Console #56 将转发限制为配置源站上的对象内容 GET，在发出请�
 | [GO-2026-6354](https://pkg.go.dev/vuln/GO-2026-6354) / [GO-2026-6355](https://pkg.go.dev/vuln/GO-2026-6355) | `golang.org/x/crypto` `v0.56.0`（[`edf36bcbf`](https://github.com/pgsty/silo/commit/edf36bcbf)） | 更新 `x/crypto/ssh` 至首个修复版本，修复死锁 undecided/established channel 的拒绝服务。经 SFTP 服务器可达（`startSFTPServer` → `sftp.Server.Listen` → `ssh.NewServerConn`）；启用 SFTP 的更早版本均受影响。 |
 | [CVE-2026-84304](https://github.com/advisories/GHSA-vp52-pcj8-j9qc) | gRPC `v1.83.1` | 更新 gRPC-Go 至首个修复版本，修复高度碎片化 HTTP/2 DATA 帧导致的未认证堆耗尽。Silo 以传递方式引入 gRPC 而非自身注册 gRPC 服务器，但仍为完整模块图选择修复版本。 |
 | [GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970) / `CVE-2026-56852` | `x/text` `v0.39.0` | 更新 `x/text` 至首个修复版本，修复非法输入上的无限循环。 |
-| [CVE-2026-79921 / GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) | `d63c92e39`：`amqp091-go` v1.14.0（上游首个修复版为 v1.13.0） | 恶意 AMQP broker 可发送超大帧耗尽客户端内存；与配置了 AMQP 通知目标的部署相关，不是匿名 S3 请求路径。更新在 main，不在 Server 20260903。 |
+| [CVE-2026-79921 / GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) | `d63c92e39`：`amqp091-go` v1.14.0（上游首个修复版为 v1.13.0） | 恶意 AMQP broker 可发送超大帧耗尽客户端内存；与配置了 AMQP 通知目标的部署相关，不是匿名 S3 请求路径。更新已随 Server 20260916 发布，Server 20260903 不包含。 |
 
 ## 运维相关的安全修复 {#operational}
 
@@ -187,8 +188,8 @@ Console #56 将转发限制为配置源站上的对象内容 GET，在发出请�
 | :-- | :-- | :-- |
 | 复制 Object Lock 更新忽略时间戳 | [`f4c1286c9`](https://github.com/pgsty/silo/commit/f4c1286c9)，已包含在 [Server 20260903](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) 中 | 复制 `CopyObject` 在比较复制时间戳之前先从请求重建元数据，导致存储的保留与 legal-hold 时间戳从未被看到：任何副本更新无论先后都被应用，legal-hold 时间戳被写在保留键下。过期副本因此可以关掉更新的 legal hold 或缩短更新的保留。现在先捕获存储状态，仅当副本时间戳更新时应用，过期更新不影响存储状态，且各时间戳保存在各自键下。继承自上游；修复前的构建受影响。 |
 | LDAP TLS 回归 | [`ce1c537eb`](https://github.com/pgsty/silo/commit/ce1c537eb1dd6c4efa1cf75cf5df0e2c489c947a)，随 `RELEASE.2026-03-25` 发布 | 恢复 `ldaps://` `DialURL()` 连接的 TLS 配置传递，使 `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` 与自定义根 CA 重新生效。 |
-| 签名字段与策略输入对齐 | [#177](https://github.com/pgsty/silo/pull/177)、`87d8b5967` | 拒绝有歧义的重复 copy-source 值，由签名输入推导年龄，并对齐有效载荷哈希的策略值。这与最初的头覆盖修复不同；在 main，不在 Server 20260903。 |
-| 跨池条件 PUT | [#207](https://github.com/pgsty/silo/pull/207)、`5e7d60308` | 在共享池锁下按逻辑当前对象判断写入条件，旧池副本不能授权覆盖。在 main，不在 Server 20260903，见[多池一致性](/blog/design/multi-pool-object-consistency/)。 |
+| 签名字段与策略输入对齐 | [#177](https://github.com/pgsty/silo/pull/177)、`87d8b5967` | 拒绝有歧义的重复 copy-source 值，由签名输入推导年龄，并对齐有效载荷哈希的策略值。这与最初的头覆盖修复不同；已随 Server 20260916 发布，Server 20260903 不包含。 |
+| 跨池条件 PUT | [#207](https://github.com/pgsty/silo/pull/207)、`5e7d60308` | 在共享池锁下按逻辑当前对象判断写入条件，旧池副本不能授权覆盖。已随 Server 20260916 发布，Server 20260903 不包含，见[多池一致性](/blog/design/multi-pool-object-consistency/)。 |
 
 ## 台账归属 {#attribution}
 

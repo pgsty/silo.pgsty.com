@@ -28,14 +28,15 @@ one and is tracked in the release notes rather than here.
 
 ## Current release boundary {#boundary}
 
-**Verified 2026-09-16.** The latest published Server is
-[`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z).
-[SN-2026-011](#sn-2026-011) is fixed on main but remains present in that
-release and all earlier public Server releases. A newer mcli, pkg or standalone
-Console does not patch an installed Server. See the
-[component matrix](/compatibility/versions/) for source pins.
-
-Server 20260903 also lacks [SN-2026-012](#sn-2026-012) and [SN-2026-013](#sn-2026-013). The standalone Console boundary differs: [SN-2026-014](#sn-2026-014) is fixed in released Console v2.4.1, while an embedded Console requires a repaired Server build.
+**Verified 2026-09-17.** The latest published Server is
+[`RELEASE.2026-09-16T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z).
+It includes [SN-2026-011](#sn-2026-011), [SN-2026-012](#sn-2026-012),
+[SN-2026-013](#sn-2026-013) and the embedded Console repair for
+[SN-2026-014](#sn-2026-014); Server 20260903 lacks these repairs.
+The standalone Console fix is in v2.4.1. Upgrade the component serving the
+affected interface: updating mcli, pkg or a standalone Console does not patch
+an installed Server. See the [component matrix](/compatibility/versions/)
+and [complete release notes](/blog/release/silo-20260916/) for identities and upgrade requirements.
 
 ## Inherited upstream advisory baseline {#inherited}
 
@@ -279,13 +280,13 @@ The streaming SigV4 seed verifier does not call this same coverage helper. Strea
 
 A valid presigned request can bind a SHA-256 value supplied only through `X-Amz-Content-Sha256`, yet affected generic authenticated handlers did not verify the consumed body against it. A URL holder could change the body while retaining the valid signed request; `PutBucketPolicy` is a reproduced surface. This does not create permission the signer never had, but it defeats the intended signed-body restriction.
 
-`c4b5e1cb4` makes generic body verification use the same effective payload hash as signature verification: query value first, header fallback. Tampering with a checksum-bound body is rejected with `XAmzContentSHA256Mismatch`; explicit `UNSIGNED-PAYLOAD` keeps its protocol meaning. This is on main, not Server 20260903. Upgrade before depending on body-bound presigned administration; avoid distributing broad administrative presigned grants. See the [chronicle](/blog/security/20260916-release-hardening/#sn-2026-012).
+`c4b5e1cb4` makes generic body verification use the same effective payload hash as signature verification: query value first, header fallback. Tampering with a checksum-bound body is rejected with `XAmzContentSHA256Mismatch`; explicit `UNSIGNED-PAYLOAD` keeps its protocol meaning. This shipped in Server 20260916 and is absent from Server 20260903. Upgrade before depending on body-bound presigned administration; avoid distributing broad administrative presigned grants. See the [chronicle](/blog/security/20260916-release-hardening/#sn-2026-012).
 
 ### SN-2026-013 — durable IAM revocation {#sn-2026-013}
 
 A revoked identity or grant could return when stale site state, delayed notifications or incomplete recovery reintroduced it. The attacker needs a previously valid credential and an affected replay/recovery scenario; this is not unauthenticated identity creation. #191/#192 preserve deletion revisions, parent revocation boundaries and original group-grant times, and reject old child credentials after same-name parent recreation.
 
-The repair is on main and absent from Server 20260903. **Coordinated upgrade is required for every site and every process sharing an IAM backend, including shared backends without site replication.** Back up complete persistent IAM state, not only a live-record export. Keep tombstones, reissue the required child credentials and reconcile revocations missing from older backups before reopening access. Ordinary group-member removal during an outage remains a separate limitation. See the [design](/blog/design/iam-revocations/) and [recovery runbook](/operations/replication/iam-upgrade/).
+The repair shipped in Server 20260916 and is absent from Server 20260903. **Coordinated upgrade is required for every site and every process sharing an IAM backend, including shared backends without site replication.** Back up complete persistent IAM state, not only a live-record export. Keep tombstones, reissue the required child credentials and reconcile revocations missing from older backups before reopening access. Ordinary group-member removal during an outage remains a separate limitation. See the [design](/blog/design/iam-revocations/) and [recovery runbook](/operations/replication/iam-upgrade/).
 
 ### SN-2026-014 — anonymous share-download proxy {#sn-2026-014}
 
@@ -293,7 +294,7 @@ The public Console download proxy could fetch non-object paths on its configured
 
 Console #56 limits forwarding to object-content GETs at the configured origin, rejects system paths and query-selected non-download APIs before sending a request, and refuses all redirects. Ordinary public, presigned and versioned downloads remain supported; the existing shared-link format setting is not a global sharing-disable switch. Reported by Jiri Pejchal (@jiri-pejchal).
 
-The standalone repair is published in **Console v2.4.1**. Server #209 selects the repaired Console on main, but published Server 20260903 still embeds an older Console. Upgrade the component that actually serves the UI; installing a standalone Console does not replace an embedded bundle. While awaiting a repaired Server build, restrict access to the exposed Console proxy and review the configured origin's public endpoints. See the [chronicle](/blog/security/20260916-release-hardening/#sn-2026-014).
+The standalone repair is published in **Console v2.4.1**. Server 20260916 embeds the repaired Console through #209; Server 20260903 still embeds an older Console. Upgrade the component that actually serves the UI; installing a standalone Console does not replace an embedded bundle. Until the serving Server has been upgraded, restrict access to the exposed Console proxy and review the configured origin's public endpoints. See the [chronicle](/blog/security/20260916-release-hardening/#sn-2026-014).
 
 ## Dependency security updates {#dependencies}
 
@@ -316,7 +317,7 @@ Silo.
 | [GO-2026-6354](https://pkg.go.dev/vuln/GO-2026-6354) / [GO-2026-6355](https://pkg.go.dev/vuln/GO-2026-6355) | `golang.org/x/crypto` `v0.56.0` ([`edf36bcbf`](https://github.com/pgsty/silo/commit/edf36bcbf)) | Updates `x/crypto/ssh` to the first fixed version for denial of service on deadlocked undecided and established channels. Reachable through the SFTP server (`startSFTPServer` → `sftp.Server.Listen` → `ssh.NewServerConn`); every earlier release that enables SFTP is affected. |
 | [CVE-2026-84304](https://github.com/advisories/GHSA-vp52-pcj8-j9qc) | gRPC `v1.83.1` | Updates gRPC-Go to the first fixed version for unauthenticated heap exhaustion through highly fragmented HTTP/2 DATA frames. Silo pulls gRPC transitively rather than registering a gRPC server itself, but selects the fixed version for the complete module graph. |
 | [GO-2026-5970](https://pkg.go.dev/vuln/GO-2026-5970) / `CVE-2026-56852` | `x/text` `v0.39.0` | Updates `x/text` to the first fixed version for an infinite loop on invalid input. |
-| [CVE-2026-79921 / GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) | `d63c92e39`: `amqp091-go` v1.14.0 (upstream first fixed v1.13.0) | A malicious AMQP broker can send oversized frames and exhaust client memory. Relevant when an AMQP notification target is configured; this is not an unauthenticated S3 request path. The update is on main, not Server 20260903. |
+| [CVE-2026-79921 / GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) | `d63c92e39`: `amqp091-go` v1.14.0 (upstream first fixed v1.13.0) | A malicious AMQP broker can send oversized frames and exhaust client memory. Relevant when an AMQP notification target is configured; this is not an unauthenticated S3 request path. The update shipped in Server 20260916 and is absent from Server 20260903. |
 
 ## Operationally significant security-related fixes {#operational}
 
@@ -324,8 +325,8 @@ Silo.
 | :-- | :-- | :-- |
 | Replicated Object Lock updates ignored their timestamps | [`f4c1286c9`](https://github.com/pgsty/silo/commit/f4c1286c9), included in [Server 20260903](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) | A replicated `CopyObject` rebuilt the metadata from the request before comparing replication timestamps, so the stored retention and legal-hold timestamps were never seen: any replica update was applied regardless of order, and the legal-hold timestamp was written under the retention key. A stale replica could therefore turn a newer legal hold off or shorten a newer retention. The stored state is now captured first, a replica update is applied only when its timestamp is newer, a stale one leaves the stored state in place, and each timestamp is kept under its own key. Inherited from upstream; builds preceding the fix are affected. |
 | LDAP TLS regression | [`ce1c537eb`](https://github.com/pgsty/silo/commit/ce1c537eb1dd6c4efa1cf75cf5df0e2c489c947a), released in `RELEASE.2026-03-25` | Restores TLS configuration propagation for `ldaps://` `DialURL()` connections so `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` and custom root CAs work again. |
-| Signed-field and policy-input alignment | [#177](https://github.com/pgsty/silo/pull/177), `87d8b5967` | Rejects ambiguous repeated copy-source values, derives signature age from signed input and aligns the effective payload-hash policy value. Distinct from the original header-coverage fix; on main, not Server 20260903. |
-| Cross-pool conditional PUT | [#207](https://github.com/pgsty/silo/pull/207), `5e7d60308` | Evaluates write conditions against the current logical object under the shared pool lock; a stale pool copy must not authorize an overwrite. On main, not Server 20260903; see [multi-pool consistency](/blog/design/multi-pool-object-consistency/). |
+| Signed-field and policy-input alignment | [#177](https://github.com/pgsty/silo/pull/177), `87d8b5967` | Rejects ambiguous repeated copy-source values, derives signature age from signed input and aligns the effective payload-hash policy value. Distinct from the original header-coverage fix; shipped in Server 20260916, absent from Server 20260903. |
+| Cross-pool conditional PUT | [#207](https://github.com/pgsty/silo/pull/207), `5e7d60308` | Evaluates write conditions against the current logical object under the shared pool lock; a stale pool copy must not authorize an overwrite. Shipped in Server 20260916, absent from Server 20260903; see [multi-pool consistency](/blog/design/multi-pool-object-consistency/). |
 
 ## Attribution of this ledger {#attribution}
 

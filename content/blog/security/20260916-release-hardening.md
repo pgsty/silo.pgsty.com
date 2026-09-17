@@ -9,6 +9,9 @@ weight: 1
 url: "/blog/security/20260916-release-hardening/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+
 This record covers three repairs and their delivery boundaries as of September 16.
 The identifiers are SILO-local advisory numbers, not CVEs or assigned CVSS scores.
 The [security ledger](/about/security-advisories/) is the maintained index.

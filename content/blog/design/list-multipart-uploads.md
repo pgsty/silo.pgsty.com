@@ -12,6 +12,9 @@ draft: false
 url: "/blog/design/list-multipart-uploads/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+
 This is the problem, design, and decision record for [SILO issue #79](https://github.com/pgsty/silo/issues/79).
 
 ## September 16 implementation and upgrade contract {#implementation}

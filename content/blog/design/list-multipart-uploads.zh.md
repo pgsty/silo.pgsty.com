@@ -12,6 +12,9 @@ draft: false
 url: "/zh/blog/design/list-multipart-uploads/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
 这是 [SILO Issue #79](https://github.com/pgsty/silo/issues/79) 的问题说明、设计分析与决策记录。
 
 ## 9 月 16 日实现与升级契约 {#implementation}

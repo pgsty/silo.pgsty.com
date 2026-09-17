@@ -15,10 +15,16 @@ Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub 
 从 release 资产中选取与平台匹配的软件包，安装前先校验：
 
 ```bash
-curl -fLO https://github.com/pgsty/silo/releases/download/<RELEASE-tag>/silo-<version>.<arch>.rpm
-sha256sum --check silo-<version>.<arch>.rpm.sha256sum   # 或手动比对
-sudo rpm -i silo-<version>.<arch>.rpm                    # Debian/Ubuntu：sudo dpkg -i silo_<version>_<arch>.deb
+SILO_TAG=RELEASE.2026-09-16T00-00-00Z
+SILO_RPM=silo-20260916000000.0.0-1PGSTY.x86_64.rpm
+SILO_URL="https://github.com/pgsty/silo/releases/download/$SILO_TAG"
+curl -fLO "$SILO_URL/$SILO_RPM"
+curl -fLO "$SILO_URL/$SILO_RPM.sha256sum"
+sha256sum --check "$SILO_RPM.sha256sum" && \
+  sudo dnf install "./$SILO_RPM"
 ```
+以上为 x86_64 RPM 示例；ARM64 使用 `.aarch64.rpm`，Debian/Ubuntu 使用下载页列出的 `.deb` 文件和对应校验和。
+
 
 使用 Pigsty 软件仓库时，`dnf install silo` / `apt install silo` 解析同样的工件（仓库可能落后于 GitHub Releases）。该软件包刻意**不**提供任何 `minio` 别名或 `Provides:` 关系——`minio` 与 `silo` 是并存的独立软件包，接管发生在 systemd 层而不是软件包替换层（见[接管](#takeover)）。
 

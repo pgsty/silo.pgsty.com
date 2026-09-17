@@ -454,7 +454,7 @@ This setting does not have a configuration setting option.
 
 ## Multipart listing mode {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**Current main only; absent from Server 20260903.** `MINIO_API_MULTIPART_LISTING` accepts `legacy` or `strict`. The default is **`legacy`**. Set it in each server process environment and restart; there is no supported shared `api multipart_listing` key and `mcli admin config set` must not be used to select the mode. Invalid values log a diagnostic and use `legacy` without discarding other API settings.
+**Available since Server 20260916; absent from Server 20260903.** `MINIO_API_MULTIPART_LISTING` accepts `legacy` or `strict`. The default is **`legacy`**. Set it in each server process environment and restart; there is no supported shared `api multipart_listing` key and `mcli admin config set` must not be used to select the mode. Invalid values log a diagnostic and use `legacy` without discarding other API settings.
 
 Legacy keeps exact-key/cache listing limitations. Strict mode scans durable upload metadata and requires all writers to be upgraded and old uploads to be drained first. Missing identity can prevent proving which bucket owns a legacy upload, so **an upload in another bucket can still make this bucket's strict listing return 503**. A valid identity can be filtered early; this is not an unconditional cross-bucket failure for every old native-ID record.
 
@@ -462,7 +462,7 @@ Use the read-only, SigV4-authenticated `GET /minio/admin/v3/multipart-preflight`
 
 ## HTTP header and idle timeouts {#envvar.MINIO_READ_HEADER_TIMEOUT}
 
-`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` defaults to `30s`. The flag is accepted but hidden from ordinary CLI help. Current main wires it to an absolute HTTP/1 header deadline; Server 20260903 did not correctly enforce this configured limit. Zero falls back to the read timeout; a negative value disables the header cap and permits a slow-header resource-exhaustion path. The header limit also affects TLS handshake reads. A cutoff can close the connection without an HTTP error status.
+`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` defaults to `30s`. The flag is accepted but hidden from ordinary CLI help. Server 20260916 wires it to an absolute HTTP/1 header deadline; Server 20260903 did not correctly enforce this configured limit. Zero falls back to the read timeout; a negative value disables the header cap and permits a slow-header resource-exhaustion path. The header limit also affects TLS handshake reads. A cutoff can close the connection without an HTTP error status.
 
 <a id="envvar.MINIO_IDLE_TIMEOUT"></a>
 
