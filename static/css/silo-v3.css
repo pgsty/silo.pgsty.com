@@ -266,8 +266,8 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
-/* Three rows travelling against each other — left, right, left. Durations are
-   staggered so the rows never lock step into a single moving block. */
+/* Four rows travelling against each other — left, right, left, right. Durations
+   are staggered so the rows never lock step into a single moving block. */
 .key-metrics .adoption-logos {
   display: flex;
   flex-direction: column;
