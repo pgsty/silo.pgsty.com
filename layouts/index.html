@@ -17,6 +17,16 @@
     <section class="hero" id="hero">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="landing-container">
+        {{- /* Latest server release badge, driven by data/releases.yaml; the
+             target is that release's note under blog/release/silo-<version>/. */ -}}
+        {{- $serverVer := replace hugo.Data.releases.server.date "-" "" -}}
+        <p class="hero-news anim" style="--d:0">
+          <a class="hero-news-badge" href="{{ relLangURL (printf "blog/release/silo-%s/" $serverVer) }}" aria-label="{{ if $zh }}SILO {{ $serverVer }} 已发布，阅读发布说明{{ else }}SILO {{ $serverVer }} released, read the release notes{{ end }}">
+            <span class="hero-news-tag">NEWS</span>
+            <span class="hero-news-text">{{ if $zh }}{{ $serverVer }} 已发布！{{ else }}{{ $serverVer }} Released!{{ end }}</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </a>
+        </p>
         <div class="hero-grid">
           <div class="hero-copy" id="about">
             <p class="hero-eyebrow anim" style="--d:0">
@@ -43,8 +53,6 @@
               <a href="{{ relLangURL "docs/" }}" class="btn btn-primary"><i class="fas fa-book-open" aria-hidden="true"></i> {{ if $zh }}浏览文档{{ else }}Docs{{ end }}</a>
               <a href="{{ relLangURL "download/" }}" class="btn btn-ghost"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Install{{ end }}</a>
             </div>
-
-            <p class="hero-manifesto anim" style="--d:4"><a href="{{ relLangURL "compatibility/versions/" }}">{{ if $zh }}组件版本：Server {{ replace hugo.Data.releases.server.date "-" "" }} · Console 2.4.1 · mcli 20260916 · pkg 3.14.1{{ else }}Component versions: Server {{ replace hugo.Data.releases.server.date "-" "" }} · Console 2.4.1 · mcli 20260916 · pkg 3.14.1{{ end }} →</a></p>
 
             <p class="hero-manifesto anim" style="--d:4">
               <a href="{{ relLangURL "about/manifesto/" }}"><i class="fas fa-scroll" aria-hidden="true"></i> {{ if $zh }}我们承诺什么，不承诺什么：PGSTY SILO 宣言{{ else }}The PGSTY SILO Manifesto: our commitments, and limits{{ end }} →</a>
