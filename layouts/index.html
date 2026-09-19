@@ -121,13 +121,13 @@
           </a>
         </div>
 
-        <div class="logos-marquee adoption-logos" data-reveal aria-label="{{ if $zh }}采用 SILO 镜像并带有公开证据的开源项目{{ else }}Open-source projects with public SILO adoption evidence{{ end }}">
+        <div class="logos-marquee adoption-logos" data-reveal aria-label="{{ if $zh }}公开使用或引用 PGSTY 对象存储的项目{{ else }}Projects with public PGSTY object storage usage or references{{ end }}">
           {{ range $i, $row := $evidenceProjects.rows }}
           <div class="logos-marquee-row" data-direction="{{ cond (eq (mod $i 2) 0) "left" "right" }}">
             <div class="logos-marquee-content">
               <div class="evidence-logo-set">
                 {{ range $row }}
-                <a class="logo-item evidence-logo-item" href="{{ .href }}" target="_blank" rel="noopener" aria-label="{{ .name }} — {{ if $zh }}查看采用证据{{ else }}view adoption evidence{{ end }}">
+                <a class="logo-item evidence-logo-item" href="{{ .href }}" target="_blank" rel="noopener" aria-label="{{ .name }} — {{ if $zh }}查看使用或引用证据{{ else }}view usage or reference evidence{{ end }}">
                   <img src="{{ .logo | relURL }}" alt="" loading="lazy">
                   <span class="evidence-logo-copy"><strong>{{ .name }}</strong><small>{{ if $zh }}{{ .kindZh }}{{ else }}{{ .kind }}{{ end }}</small></span>
                 </a>

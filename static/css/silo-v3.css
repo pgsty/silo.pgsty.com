@@ -329,7 +329,7 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
-/* Four rows travelling against each other — left, right, left, right. Durations
+/* Five rows travelling against each other — left, right, left, right, left. Durations
    are staggered so the rows never lock step into a single moving block. */
 .key-metrics .adoption-logos {
   display: flex;
@@ -343,6 +343,8 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
 }
 .adoption-logos .logos-marquee-row:nth-of-type(2) .logos-marquee-content { animation-duration: 77s; }
 .adoption-logos .logos-marquee-row:nth-of-type(3) .logos-marquee-content { animation-duration: 72s; }
+.adoption-logos .logos-marquee-row:nth-of-type(4) .logos-marquee-content { animation-duration: 81s; }
+.adoption-logos .logos-marquee-row:nth-of-type(5) .logos-marquee-content { animation-duration: 74s; }
 .evidence-logo-set {
   display: flex;
   align-items: center;
