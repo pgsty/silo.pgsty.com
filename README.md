@@ -1,6 +1,6 @@
 # Silo Documentation
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.0.0](https://github.com/pgsty/oink/tree/v1.0.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.1.0](https://github.com/pgsty/oink/tree/v1.1.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Release state and publication
 
