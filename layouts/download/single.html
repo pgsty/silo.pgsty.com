@@ -1,8 +1,6 @@
 {{- /* SILO's download page, rendered inside OINK's landing shell.
-     baseof.landing.html supplies <head> and the site navbar; the page keeps
-     its own sections and footer. Front matter carries `layout: landing` so
-     the landing base template applies, `body_class` so the bespoke CSS keeps
-     its scope, and `footer_style: none` so only one footer renders. */ -}}
+     The theme shell supplies <head>, the site navbar, and the shared footer;
+     the page keeps its own sections, with `body_class` scoping the bespoke CSS. */ -}}
 {{ define "main" }}
 {{- $zh := eq .Site.Language.Lang "zh" -}}
 {{- $description := .Description | default .Site.Params.description -}}
@@ -561,5 +559,4 @@ make build
       </div>
     </section>
 
-  {{ partial "silo-footer.html" . }}
 {{ end }}

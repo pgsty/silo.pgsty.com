@@ -6,7 +6,7 @@ url: "/zh/compatibility/"
 weight: 7
 type: docs
 icon: fa-solid fa-code-compare
-sidebar_expanded: true
+sidebar_expanded: false
 ---
 
 **普通 S3 应用通常可以不改代码，用 SILO 替换 MinIO。** 常用 S3 API、SigV4、SDK 接入方式和对象磁盘布局延续上游；部署、权限及复制状态需要按下列条件检查。因此，SILO 是**有条件的 drop-in replacement**。

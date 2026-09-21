@@ -6,7 +6,7 @@ url: "/compatibility/"
 weight: 7
 type: docs
 icon: fa-solid fa-code-compare
-sidebar_expanded: true
+sidebar_expanded: false
 ---
 
 **Most applications using standard S3 APIs can switch from MinIO to SILO without code changes.** Common S3 APIs, SigV4, SDK integration and object storage layouts carry over. Deployment, authorization and replicated state require the checks below: SILO is a **conditional drop-in replacement**.

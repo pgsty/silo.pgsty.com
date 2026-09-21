@@ -9,7 +9,6 @@ cascade:
 upstream_link: https://github.com/minio/docs
 upstream_modified: true
 body_class: landing-page
-footer_style: none
 ---
 
 Components release independently; see the [component matrix](/compatibility/versions/) for published versions and development source.

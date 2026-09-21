@@ -6,7 +6,7 @@
  * 再没有才用硬编码值。两边各自的深浅色切换（data-bs-theme / data-theme）
  * 都作用在这些底层令牌上，页脚跟着变，不需要各写一套。
  *
- * 标记见 layouts/_partials/silo-footer.html，仅供产品首页与下载页使用。
+ * 全站从 layouts/_partials/footer.html 调用同一份 SILO 标记。
  */
 
 .silo-footer {
@@ -16,12 +16,17 @@
   --sf-soft: var(--bs-secondary-color, var(--ink-soft, #3d4e61));
   --sf-mute: var(--bs-tertiary-color, var(--ink-mute, #66788c));
   --sf-hover: var(--bs-link-hover-color, var(--pg-strong, #1d588c));
-  --sf-silk: var(--silo-silk, var(--silk, #5d7189));
+  --sf-silk: var(--td-shell-muted-fg, #5d7189);
   --sf-mono: var(--bs-font-monospace, var(--font-mono, ui-monospace, monospace));
   margin-top: 3rem;
+  position: relative;
+  z-index: 115;
   border-top: 1px solid var(--sf-line);
   background: var(--sf-bg);
   font-size: 0.9rem;
+  font-family: var(--bs-body-font-family);
+  line-height: 1.7;
+  letter-spacing: normal;
 }
 
 .silo-footer a {
@@ -43,7 +48,7 @@
 
 .silo-footer__grid {
   display: grid;
-  grid-template-columns: 2.2fr repeat(4, 1fr);
+  grid-template-columns: minmax(0, 2.2fr) repeat(4, minmax(0, 1fr));
   gap: 2rem 1.5rem;
   margin-bottom: 2rem;
 }
@@ -122,7 +127,7 @@
   text-decoration-color: currentColor;
 }
 
-.silo-footer__title {
+.silo-footer .silo-footer__title {
   margin: 0 0 0.85rem;
   font-family: var(--sf-mono);
   font-size: 0.68rem;
@@ -143,10 +148,9 @@
 }
 
 .silo-footer__bottom {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: 0.75rem 1.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--sf-line);
@@ -156,20 +160,19 @@
 
 .silo-footer__lang {
   display: flex;
+  justify-content: flex-end;
   gap: 0.9rem;
 }
 
-/* 居中的署名行。左右两块宽度不等，space-between 放不到真正的中点，
-   所以这一条脱离流居中；窄屏底栏改为纵向排列时再退回文档流。 */
-.silo-footer__bottom {
-  position: relative;
+.silo-footer__powered {
+  text-align: center;
+  white-space: nowrap;
 }
 
-.silo-footer__powered {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
+.silo-footer__icp {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  text-align: center;
 }
 
 /* Bootstrap 断点：lg / sm */
@@ -185,13 +188,9 @@
 
 @media (max-width: 575.98px) {
   .silo-footer__bottom {
+    display: flex;
     flex-direction: column;
     text-align: center;
-  }
-
-  .silo-footer__powered {
-    position: static;
-    transform: none;
   }
 }
 

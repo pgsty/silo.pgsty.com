@@ -1,8 +1,9 @@
 {{- $zh := eq .Site.Language.Lang "zh" -}}
-<footer class="silo-footer d-print-none">
+{{- $data := partial "footer-data.html" . -}}
+<footer class="silo-footer d-print-none" data-td-shell-footer>
   <div class="silo-footer__container">
     <div class="silo-footer__grid">
-      {{/* Product footer shared by the bespoke landing and download pages. */ -}}
+      {{/* Product identity shared by the homepage, documentation, and downloads. */ -}}
       <div class="silo-footer__brand">
         <a href="{{ relLangURL "" }}" class="silo-footer__logo" aria-label="{{ if $zh }}SILO 首页{{ else }}SILO home{{ end }}">
           <img class="silo-footer__mark" src="{{ .Site.Params.logo | relURL }}" alt="" width="28" height="28">
@@ -13,49 +14,20 @@
         <p class="silo-footer__legal">{{ if $zh }}MinIO<sup>®</sup> 是 MinIO, Inc. 的 <a href="{{ relLangURL "about/trademark/" }}">注册商标</a><br>Silo 并非其关联、或背书的项目。{{ else }}MinIO<sup>®</sup> is a <a href="{{ relLangURL "about/trademark/" }}">registered trademark</a> of <a href="https://www.min.io/about" target="_blank" rel="noopener">MinIO, Inc.</a><br>Silo is not affiliated with or endorsed by MinIO, Inc.{{ end }}</p>
       </div>
 
-      <div>
-        <h4 class="silo-footer__title">{{ if $zh }}资源{{ else }}Resources{{ end }}</h4>
+      {{ range $data.columns -}}
+      <nav class="silo-footer__column" aria-label="{{ .title }}">
+        <h2 class="silo-footer__title">{{ .title }}</h2>
         <ul class="silo-footer__links">
-          <li><a href="{{ relLangURL "download/" }}#server">{{ if $zh }}SILO 下载{{ else }}SILO Download{{ end }}</a></li>
-          <li><a href="{{ relLangURL "download/" }}#client">{{ if $zh }}MCLI 下载{{ else }}MCLI Download{{ end }}</a></li>
-          <li><a href="{{ relLangURL "blog/release/" }}">{{ if $zh }}发布注记{{ else }}Release Notes{{ end }}</a></li>
-          <li><a href="{{ relLangURL "blog/security/" }}">{{ if $zh }}安全注记{{ else }}Security Notes{{ end }}</a></li>
+          {{- range .links }}
+          <li><a href="{{ .url | relLangURL }}"{{ if .external }} target="_blank" rel="noopener"{{ end }}{{ with .hreflang }} hreflang="{{ . }}"{{ end }}>{{ .label }}</a></li>
+          {{- end }}
         </ul>
-      </div>
-
-      <div>
-        <h4 class="silo-footer__title">{{ if $zh }}文档{{ else }}Documentation{{ end }}</h4>
-        <ul class="silo-footer__links">
-          <li><a href="{{ relLangURL "operations/" }}">{{ if $zh }}运维{{ else }}Operations{{ end }}</a></li>
-          <li><a href="{{ relLangURL "administration/" }}">{{ if $zh }}管理{{ else }}Administration{{ end }}</a></li>
-          <li><a href="{{ relLangURL "developers/" }}">{{ if $zh }}开发{{ else }}Developers{{ end }}</a></li>
-          <li><a href="{{ relLangURL "reference/" }}">{{ if $zh }}参考{{ else }}Reference{{ end }}</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="silo-footer__title">{{ if $zh }}社区{{ else }}Community{{ end }}</h4>
-        <ul class="silo-footer__links">
-          <li><a href="https://github.com/pgsty/silo" target="_blank" rel="noopener">GitHub</a></li>
-          <li><a href="https://github.com/pgsty/silo/issues" target="_blank" rel="noopener">Issues</a></li>
-          <li><a href="https://pgsty.com/" target="_blank" rel="noopener">PGSTY</a></li>
-          <li><a href="{{ if $zh }}https://pigsty.cc{{ else }}https://pigsty.io{{ end }}" target="_blank" rel="noopener">Pigsty</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="silo-footer__title">{{ if $zh }}关于{{ else }}About{{ end }}</h4>
-        <ul class="silo-footer__links">
-          <li><a href="{{ relLangURL "about/license/" }}">{{ if $zh }}开源许可{{ else }}License{{ end }}</a></li>
-          <li><a href="{{ relLangURL "about/trademark/" }}">{{ if $zh }}商标政策{{ else }}Trademark{{ end }}</a></li>
-          <li><a href="{{ relLangURL "about/attribution/" }}">{{ if $zh }}署名归属{{ else }}Attribution{{ end }}</a></li>
-          <li><a href="{{ relLangURL "about/security/" }}">{{ if $zh }}安全策略{{ else }}Security Policy{{ end }}</a></li>
-        </ul>
-      </div>
+      </nav>
+      {{- end }}
     </div>
 
     <div class="silo-footer__bottom">
-      {{/* 产品页底行保留维护者归属，文档壳使用 OINK 的紧凑页脚。 */ -}}
+      {{/* 全站保留相同的维护者与主题归属。 */ -}}
       <span>&copy; {{ .Site.Params.copyright.from_year }}-{{ now.Year }} <a href="https://vonng.com" target="_blank" rel="noopener">{{ T "silo_footer_author" }}</a> (<a href="https://github.com/Vonng" target="_blank" rel="noopener">Vonng</a>) @ <a href="https://pgsty.com" target="_blank" rel="noopener">PGSTY</a></span>
       {{/* 与 OINK 单行页脚同一条署名，居中；中文指向主题站的中文版。 */ -}}
       {{ $powered := cond $zh "由 [Oink](https://oink.pgsty.com/zh) 主题强力驱动" "Powered by [Oink](https://oink.pgsty.com)" -}}
@@ -63,9 +35,9 @@
       {{ with .Site.Params.footer_icp -}}
       <span class="silo-footer__icp"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{{ . }}</a></span>
       {{- end }}
-      {{/* 单向语言切换：只显示「对面语言」（与 docs 单行页脚同约定）。 */ -}}
+      {{/* 优先切到当前页的译文；无译文时才回退到另一语言首页。 */ -}}
       <span class="silo-footer__lang">
-        {{- range .Site.Home.Translations -}}
+        {{- range (.Translations | default .Site.Home.Translations) -}}
           <a href="{{ .RelPermalink }}" lang="{{ .Language.Locale }}">{{ .Language.Label }}</a>
         {{- end -}}
       </span>

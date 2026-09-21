@@ -9,7 +9,6 @@ cascade:
 upstream_link: https://github.com/minio/docs
 upstream_modified: true
 body_class: landing-page
-footer_style: none
 ---
 
 组件独立发布，已发布版本与开发分支的区别见[组件版本矩阵](/zh/compatibility/versions/)。

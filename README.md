@@ -39,7 +39,7 @@ from `bin/requirements-test.txt`. Subsequent checks reuse that environment.
 `make test` runs the link-checker and replica-audit regression tests without
 rebuilding the site.
 
-OINK is pinned as a Hugo Module in `go.mod`. Its wordmark, featured-image cascade, and Markdown-first steps are configured or used directly by this site. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, provenance notice, and imported-document ordering. Documentation chrome, search, footer, content components, blog feeds, and blocks come from the theme.
+OINK is pinned as a Hugo Module in `go.mod`. Its wordmark, featured-image cascade, and Markdown-first steps are configured or used directly by this site. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, shared product footer, provenance notice, and imported-document ordering. Documentation chrome, search, content components, blog feeds, and blocks come from the theme. The theme's footer entry point renders the same SILO footer on every page, with language-specific links in `data/footer/en.yaml` and `data/footer/zh.yaml`.
 
 ## Content convention
 
