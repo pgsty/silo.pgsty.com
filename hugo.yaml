@@ -255,6 +255,9 @@ params:
     sidebar_root_enabled: true
     sidebar_expand_levels: 2
     dark_mode: true
+    # OINK 1.2 外观菜单：风格选择独立于明暗模式，并保存读者偏好。
+    preset: paper
+    preset_menu: [paper, slate, ink, terminal]
     # OINK 的文档壳自行维护 TOC 高亮，不需要 Bootstrap ScrollSpy。
     scroll_spy: false
     # ---- OINK 文档壳 ----

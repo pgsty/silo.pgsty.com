@@ -1,5 +1,46 @@
 /* SILO content mapped onto Pigsty Landing v3's typography, layout, and sections. */
 
+/* Map the bespoke homepage and download page to OINK's selected preset.
+   Slate keeps the original blueprint palette from landing-v3.css. */
+:is([data-td-preset='paper'], [data-td-preset='ink'], [data-td-preset='terminal']) .landing-page {
+  --bg: var(--bs-body-bg);
+  --bg-soft: var(--bs-secondary-bg);
+  --bg-elev: var(--td-brand-elev);
+  --bg-elev-2: var(--bs-tertiary-bg);
+  --paper: var(--td-brand-elev);
+  --paper-ink: var(--bs-body-color);
+  --ink: var(--bs-body-color);
+  --ink-soft: var(--bs-secondary-color);
+  --ink-mute: var(--bs-tertiary-color);
+  --line: var(--bs-border-color);
+  --line-strong: var(--td-brand-line-strong);
+  --silk: var(--td-brand-silk);
+  --pg: var(--bs-link-color);
+  --pg-strong: var(--bs-link-hover-color);
+  --copper: var(--td-brand-copper);
+  --copper-dim: var(--td-brand-copper-dim);
+  --trace: var(--td-brand-copper-dim);
+  --header-bg: var(--td-brand-header-bg);
+  --pill-bg: var(--bs-tertiary-bg);
+  --card-hover-border: var(--td-brand-copper-dim);
+  --btn-primary-bg: var(--bs-link-color);
+  --btn-primary-bg-hover: var(--bs-link-hover-color);
+  --btn-primary-ink: var(--td-on-link);
+  --shadow-sm: var(--td-brand-shadow-sm);
+  --shadow-md: var(--td-brand-shadow-md);
+  --shadow-lg: var(--td-brand-shadow-md);
+  --font-body: var(--td-body-font-family);
+  --font-head: var(--td-heading-font-family);
+  --font-display: var(--td-display-font-family);
+  --font-mono: var(--bs-font-monospace);
+  --radius-sm: var(--td-experiment-radius, 8px);
+  --radius-md: var(--td-experiment-radius, 12px);
+  --radius-lg: var(--td-experiment-radius, 18px);
+  --grid-line: transparent;
+  --glow-blue: transparent;
+  --glow-copper: transparent;
+}
+
 .skip-link {
   position: fixed;
   top: 8px;
@@ -90,7 +131,7 @@
   padding: 5px 9px;
   border-radius: 999px;
   background: var(--copper);
-  color: #16222e;
+  color: var(--td-on-link, #16222e);
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.18em;

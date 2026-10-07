@@ -1,6 +1,6 @@
 # Silo Documentation
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.1.0](https://github.com/pgsty/oink/tree/v1.1.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.2.0](https://github.com/pgsty/oink/tree/v1.2.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Release state and publication
 
@@ -40,6 +40,8 @@ from `bin/requirements-test.txt`. Subsequent checks reuse that environment.
 rebuilding the site.
 
 OINK is pinned as a Hugo Module in `go.mod`. Its wordmark, featured-image cascade, and Markdown-first steps are configured or used directly by this site. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, shared product footer, provenance notice, and imported-document ordering. Documentation chrome, search, content components, blog feeds, and blocks come from the theme. The theme's footer entry point renders the same SILO footer on every page, with language-specific links in `data/footer/en.yaml` and `data/footer/zh.yaml`.
+
+The appearance menu offers Paper (default), Slate, Ink, and Terminal in both languages, independently of light/dark mode. Configure the default and available styles through `params.ui.preset` and `params.ui.preset_menu` in `hugo.yaml`.
 
 ## Content convention
 
