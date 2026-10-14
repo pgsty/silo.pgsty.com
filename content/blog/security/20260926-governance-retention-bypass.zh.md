@@ -9,11 +9,13 @@ weight: 1
 url: "/zh/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**2026-09-26 状态：设计阶段，尚未修复。** 本文是待评审的修复设计。
-目前没有任何 SILO 发布修复此缺陷。所有已发布的 Server 版本都受影响，包括
-`RELEASE.2026-09-16T00-00-00Z`；Server main
-[`b0a540190`](https://github.com/pgsty/silo/commit/b0a540190) 同样受影响。
-这段代码继承自上游 MinIO，上游 master 是同样的逻辑。
+**2026-10-14 状态：修复候选已实现，尚无修复发行。** 所有已发布的 Server 版本都受影响，包括
+最新的 `RELEASE.2026-09-16T00-00-00Z`。本次核验的 main 提交
+[`4f62e8f19`](https://github.com/pgsty/silo/commit/4f62e8f19) 仍包含缺陷。
+本文聚焦 **`SN-2026-015`（`PutObjectRetention` 保留期写入路径的授权绕过，F1–F3）**；
+评审期间发现的配套写路径问题 **`SN-2026-016`（客户端指定 `versionId` 原地改写既有版本及写路径对象锁绕过，F4）** 与两项问题的完整修复设计、有效性证明及副作用权衡，见配套设计文档
+[《SN-2026-015 与 SN-2026-016：对象锁保留期绕过与指定版本原地覆写修复设计》](/zh/blog/design/governance-retention-bypass-repair/)。
+缺陷均继承自上游 MinIO。
 
 `PutObjectRetention` 请求带上 `x-amz-bypass-governance-retention: true` 时，
 服务端把这个请求头当成了授权，而它本应只表达意图。由此产生三个问题，按严重程度排列：
@@ -25,7 +27,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 | **F3** | 持有 `s3:BypassGovernanceRetention` 的主体 | 无视对 `s3:PutObjectRetention` 的条件 Deny |
 
 F1 与 F2 让 GOVERNANCE 保留期失效：保留期被清除或缩短后的日期一过，
-拥有普通删除权限的主体就能删除该版本。F1 还能把对象锁反过来用在数据属主身上：
+持有该版本 `s3:DeleteObjectVersion` 权限的主体就能删除它；只有 `s3:DeleteObject` 不足以删除明确指定的版本。F1 还能把对象锁反过来用在数据属主身上：
 被加上 COMPLIANCE 保留期的版本，在到期前任何人都删不掉，包括 root，
 这段时间里桶的存储空间也一直被占用。匿名请求不受影响，没有访问密钥即被拒绝。
 
@@ -205,10 +207,10 @@ case objectlock.RetGovernance: // 保留期尚未到期
 | --- | --- | --- | --- | --- | --- | --- |
 | 任意 | 任意 | 任意 | 否 | 任意 | 常为 200（F1、F3） | 入口 **403** |
 | 未到期 GOVERNANCE | 延长 | 任意 | 是 | 任意 | 200 | 200 |
-| 未到期 GOVERNANCE | 削弱 | 无 | 是 | 任意 | 400 `ObjectLocked` | 400 `ObjectLocked` |
+| 未到期 GOVERNANCE | 削弱 | 无 | 是 | 任意 | 400 `InvalidRequest`（`ObjectLocked`） | 400 `InvalidRequest`（`ObjectLocked`） |
 | 未到期 GOVERNANCE | 削弱 | 有 | 是 | 否 | **200**（F2） | **403** |
 | 未到期 GOVERNANCE | 削弱 | 有 | 是 | 是 | 200 | 200 |
-| 未到期 COMPLIANCE | 缩短或改模式 | 任意 | 是 | 任意 | 400 `ObjectLocked` | 400 `ObjectLocked` |
+| 未到期 COMPLIANCE | 缩短或改模式 | 任意 | 是 | 任意 | 400 `InvalidRequest`（`ObjectLocked`） | 400 `InvalidRequest`（`ObjectLocked`） |
 | 无保留期或已到期 | 任意 | 任意 | 是 | 任意 | 200 | 200 |
 
 持有 `retOK` 的调用者，除 F2 那一行外看不到变化。未授权削弱返回 403，
@@ -239,13 +241,13 @@ case objectlock.RetGovernance: // 保留期尚未到期
 
 - `ParseObjectRetention` 拒绝过去的日期（`ErrPastObjectLockRetainDate`），
   并要求空 `Mode` 不带日期，所以清除保留期总是空的 `<Retention/>`。
-- `s3:object-lock-remaining-retention-days` 按 `ceil(|date − now| / 24h)` 计算。
-  清除时日期为零，该键会是一个非常大的值（见[缓解措施](#mitigation)）。
-  修复后清除需要 bypass 权限，但该键在清除请求上的取值仍有误导性，另行跟进。
+- 未修复实现中，`s3:object-lock-remaining-retention-days` 按 `ceil(|date − now| / 24h)` 计算，
+  清除保留期（空 `<Retention/>`）时日期为零值，取绝对值会算出极大的天数（见[缓解措施](#mitigation)）。
+  修复后非未来日期的该条件键始终存在且值为 `"0"`，防止通过清除保留期绕过最短保留天数策略。未来日期使用不会饱和的秒数差计算，确保超过 `time.Duration` 范围的日期仍受最长保留天数策略约束。
 - 目前 `PutObjectRetention` 不求值基于现有对象标签的条件（`s3:ExistingObjectTag/<key>`），
   本设计不改变这一点。
 
-## 兼容性 {#compatibility}
+## 拟议修复的兼容性 {#compatibility}
 
 - 持有 `s3:PutObjectRetention` 的调用者没有变化，只有削弱 GOVERNANCE 时现在还需要
   `s3:BypassGovernanceRetention`。
