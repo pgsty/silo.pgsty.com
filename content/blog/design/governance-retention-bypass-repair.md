@@ -14,7 +14,7 @@ url: "/blog/design/governance-retention-bypass-repair/"
 > **Status on 2026-10-14: fix candidate implemented; no fixed release yet.** For public impact and mitigations, see the
 > [SN-2026-015 security advisory](/blog/security/20260926-governance-retention-bypass/).
 > Fixing commits and the first fixed release will be recorded in the
-> [security ledger](/about/security-advisories/#sn-2026-015).
+> [security ledger](/about/security-advisories/).
 
 Following the engineering standard of minimal complexity cost, sufficiency, and necessity, this document explains **SN-2026-015** (`PutObjectRetention` authorization bypass) and **SN-2026-016** (in-place version overwrite via data write paths) across four questions:
 

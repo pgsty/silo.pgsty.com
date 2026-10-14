@@ -13,7 +13,7 @@ url: "/zh/blog/design/governance-retention-bypass-repair/"
 
 > **2026-10-14 状态：修复候选已实现，尚无修复发行。** 公开影响范围与缓解措施见
 > [SN-2026-015 安全公告](/zh/blog/security/20260926-governance-retention-bypass/)，
-> 修复提交与首个修复发行将在[安全公告台账](/zh/about/security-advisories/#sn-2026-015)登记。
+> 修复提交与首个修复发行将在[安全公告台账](/zh/about/security-advisories/)登记。
 
 本文围绕“最小复杂度代价、充分且必要”的工程原则，完整说明 **SN-2026-015**（保留期写入路径授权绕过）与 **SN-2026-016**（数据写入路径按版本号原地覆写绕过）四个核心问题：
 
