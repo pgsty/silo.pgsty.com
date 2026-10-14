@@ -9,11 +9,14 @@ weight: 1
 url: "/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**Status on 2026-09-26: design, not fixed.** This is a fix design for review.
-No SILO release fixes this defect yet. Every published Server release is
-affected, including `RELEASE.2026-09-16T00-00-00Z`, and so is Server main at
-[`b0a540190`](https://github.com/pgsty/silo/commit/b0a540190). The code came
-from upstream MinIO, and upstream master has the same logic.
+**Status on 2026-10-14: fix candidate implemented; no fixed release yet.** Every published Server release is
+affected, including the latest `RELEASE.2026-09-16T00-00-00Z`. The inspected main
+commit [`4f62e8f19`](https://github.com/pgsty/silo/commit/4f62e8f19) still contains
+the defect.
+This advisory covers **`SN-2026-015` (`PutObjectRetention` authorization bypass on the retention-write path, F1–F3)**.
+The companion write-path issue discovered during design review — **`SN-2026-016` (caller-addressed `versionId` in-place overwrite and write-path Object Lock bypass, F4)** — along with the complete repair design, proof of effectiveness, and trade-off analysis for both issues, is documented in
+[SN-2026-015 & SN-2026-016: Object Lock Retention Bypass and Version-Addressed Overwrite Repair Design](/blog/design/governance-retention-bypass-repair/).
+Both defects were inherited from upstream MinIO.
 
 When a `PutObjectRetention` request carries
 `x-amz-bypass-governance-retention: true`, the server treats that header as
@@ -27,8 +30,9 @@ in decreasing severity:
 | **F3** | A principal with `s3:BypassGovernanceRetention` | Ignore a conditional Deny on `s3:PutObjectRetention` |
 
 F1 and F2 defeat GOVERNANCE retention. After the retention is gone, or its
-shortened date has passed, a principal with ordinary delete permission can
-remove the version. F1 also turns object lock against the data owner. A version
+shortened date has passed, a principal with `s3:DeleteObjectVersion` for that
+version can remove it. `s3:DeleteObject` alone does not authorize explicit
+version deletion. F1 also turns object lock against the data owner. A version
 put under COMPLIANCE retention cannot be deleted by anyone, including root,
 until the date passes, and the bucket's storage stays consumed for that time.
 Anonymous requests are not affected: they are rejected because they carry no
@@ -239,10 +243,10 @@ the same keys.
 | --- | --- | --- | --- | --- | --- | --- |
 | any | any | any | no | any | often 200 (F1, F3) | **403** at entry |
 | unexpired GOVERNANCE | extend | any | yes | any | 200 | 200 |
-| unexpired GOVERNANCE | weaken | absent | yes | any | 400 `ObjectLocked` | 400 `ObjectLocked` |
+| unexpired GOVERNANCE | weaken | absent | yes | any | 400 `InvalidRequest` (`ObjectLocked`) | 400 `InvalidRequest` (`ObjectLocked`) |
 | unexpired GOVERNANCE | weaken | present | yes | no | **200** (F2) | **403** |
 | unexpired GOVERNANCE | weaken | present | yes | yes | 200 | 200 |
-| unexpired COMPLIANCE | shorten or mode change | any | yes | any | 400 `ObjectLocked` | 400 `ObjectLocked` |
+| unexpired COMPLIANCE | shorten or mode change | any | yes | any | 400 `InvalidRequest` (`ObjectLocked`) | 400 `InvalidRequest` (`ObjectLocked`) |
 | no retention, or expired | any | any | yes | any | 200 | 200 |
 
 A caller with `retOK` sees no change except in the F2 row. A 403 for an
@@ -284,16 +288,17 @@ or 400 for such requests.
 - `ParseObjectRetention` rejects dates in the past (`ErrPastObjectLockRetainDate`)
   and requires an empty `Mode` to come with no date. Removal is therefore always
   an empty `<Retention/>` body.
-- `s3:object-lock-remaining-retention-days` is computed as
-  `ceil(|date − now| / 24h)`. For a removal the date is zero, so the key takes a
-  very large value (see [mitigation](#mitigation)). After the fix, removal
-  needs the bypass permission, but the key's value for removal is still
-  misleading. It is tracked as a follow-up.
+- In the unpatched implementation, `s3:object-lock-remaining-retention-days` is computed as
+  `ceil(|date − now| / 24h)`. For a removal the date is zero, so taking the absolute value produces a
+  very large day count (see [mitigation](#mitigation)). The fix always includes the key and evaluates it as
+  `"0"` whenever `RetainUntilDate` is zero or not in the future, so clearing retention cannot bypass a
+  minimum-retention-days policy. Future dates use a non-saturating difference in seconds so
+  maximum-retention-days policies also apply beyond the range of `time.Duration`.
 - Conditions on existing object tags (`s3:ExistingObjectTag/<key>`) are not
   evaluated for `PutObjectRetention` today. That limitation is unchanged by
   this design.
 
-## Compatibility {#compatibility}
+## Compatibility of the proposed fix {#compatibility}
 
 - Callers that hold `s3:PutObjectRetention` see no change, except that
   weakening GOVERNANCE now also requires `s3:BypassGovernanceRetention`.
@@ -309,10 +314,10 @@ or 400 for such requests.
   already accepted. Every site that accepts S3 writes must be upgraded before
   the guarantee holds for a replicated bucket.
 
-## Tests {#tests}
+## Planned tests {#tests}
 
-The tests run at handler level against a real IAM subsystem. They cover every
-row of the [decision table](#decision-table), plus these cases:
+Fix acceptance should run at handler level against a real IAM subsystem, covering
+every row of the [decision table](#decision-table) and these cases:
 
 - F1 against an unpatched build and the fix: a principal with no grant, and one
   with explicit Denies, attempting removal, GOVERNANCE→COMPLIANCE and a new
