@@ -153,3 +153,13 @@ Server 20260916 源码 [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4
 相关 Server 后续修复均未进入 20260903；文章中的原有 Object Lock 修复及其它已发布前置项按各自明确的版本记载。
 
 最后的存储修复还包括 [`fced86303`](https://github.com/pgsty/silo/commit/fced8630365fd57d6116c595b65252bcd12e13be) 的迁移标签保留、[`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b126b4ac640cd076a4585b66f2ec753a6) 的 null 版本 quorum，以及 `eb4f5e5b3` / `254b19ac0` / `358ab38fb` 的版本 purge、标记元数据和排队创建修复。仍需注意 [#217](https://github.com/pgsty/silo/issues/217) 的迟到创建/崩溃残留和 [#218](https://github.com/pgsty/silo/issues/218) 的重启期间列表遗漏。
+
+## 10 月 15 日源码验收 {#october-source}
+
+**2026-10-15 核验；未包含在 Server 20260916 中。**
+[PR #233](https://github.com/pgsty/silo/pull/233) 已以
+[`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a)
+合入，修复旧版 `xl.meta` 头部复用时的缺失字段残留，并使扫描更新与最终缓存保持互斥。
+存储格式、RPC 字段与依赖版本均未变化。[问题与修复说明](/zh/blog/design/stale-metadata-reuse/)
+记录了确定性回归测试、双进程扫描验证、合并后 CI 和运维核验方法。
+此次源码验收不改变上面的已发布组件版本，也不代表已经升级生产集群。
