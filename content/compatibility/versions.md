@@ -258,3 +258,23 @@ documents deterministic regression coverage, a two-process scanner check,
 post-merge CI, and operator verification. The source repair is included in
 [Server 20261015](/blog/release/silo-20261015/); artifact release does not establish
 a production rollout.
+
+## Server fixes after 20261015 {#post-20261015}
+
+The following fixes target the next Server release. They are not included in
+`RELEASE.2026-10-15T00-00-00Z`; merging source does not update installed binaries
+or container images.
+
+- [PR #232](https://github.com/pgsty/silo/pull/232) distinguishes missing staged
+  `xl.meta` at the final write commit from an incomplete client upload or a
+  missing object. PUT and multipart completion report HTTP 503 `SlowDownWrite`
+  for this commit failure. The storage RPC and healing paths preserve that
+  classification. Client retries remain subject to SDK policy; the fix does
+  not recover missing staging data or guarantee a successful retry.
+- [PR #236](https://github.com/pgsty/silo/pull/236) parses the native multipart
+  directory timestamp before trying the existing Base64 compatibility path.
+  This avoids unnecessary local `xl.meta` reads, including plaintext UUIDs
+  that also decode as Base64. Legacy or unrecognized directory names still
+  fall back to metadata. Storage formats, S3 upload IDs and cleanup settings
+  are unchanged: the default expiry is 24 hours and the default scan interval
+  is 6 hours.

@@ -35,6 +35,16 @@ This page documents S3 APIs supported by MinIO Object Storage. For reference doc
 - [RestoreObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_RestoreObject.html)
 - [SelectObjectContent](https://docs.aws.amazon.com/AmazonS3/latest/API/API_SelectObjectContent.html)
 
+### Write commit errors {#write-commit-errors}
+
+[PR #232](https://github.com/pgsty/silo/pull/232), targeting the next Server
+release after 20261015, returns HTTP 503 `SlowDownWrite` when staged `xl.meta`
+disappears at the final commit of PUT or multipart completion. Earlier code
+could report `400 IncompleteBody` for PUT or `404 NoSuchKey` for completion.
+Actual incomplete client uploads retain their existing error handling. This
+classification allows SDK retries; it does not restore lost staging data.
+See the [source and release boundary](/compatibility/versions/#post-20261015).
+
 ### Object Locking {#object-locking}
 
 - [GetObjectRetention](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectRetention.html)
