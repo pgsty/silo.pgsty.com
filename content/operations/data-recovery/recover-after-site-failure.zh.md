@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-restore-hardware-failure-site"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 尽管整个站点丢失属于重大事故，MinIO 仍可将其影响控制在相对较小且可恢复的范围内。 站点恢复方式取决于该站点使用的复制方案。
 

@@ -10,7 +10,7 @@ upstream_modified: true
 > **SILO 升级说明：** 九月 IAM 修复要求所有参与节点协调升级，并备份完整删除历史。请先阅读 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)及[历史复制状态检查](/zh/operations/replication/replica-metadata-audit/)，并按[组件版本表](/zh/compatibility/versions/)区分主分支修复与已发布制品。
 
 <a id="minio-site-replication-overview"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 站点复制将多个相互独立的 MinIO 部署配置为一个由副本组成的集群，这些副本称为对等站点。
 
@@ -29,7 +29,7 @@ upstream_modified: true
 
 ## 概览 {#id3}
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ### 所有站点之间会复制哪些内容 {#minio-site-replication-what-replicates}
 
@@ -194,7 +194,7 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
 
 ## 教程 {#id17}
 
-<a id="id18"></a>
+<a id="id18" data-td-print-local></a>
 
 ### 配置站点复制 {#minio-configure-site-replication}
 

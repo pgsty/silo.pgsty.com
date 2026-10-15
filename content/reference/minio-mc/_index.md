@@ -8,7 +8,7 @@ upstream_modified: true
 ---
 
 <a id="minio-client"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 <a id="command-mc"></a>
 
@@ -451,7 +451,7 @@ Alternatively, set the environment variable [`MC_INSECURE`](/reference/minio-mc/
 
 *option*
 
-Enables [JSON lines](http://jsonlines.org/)<a id="json-lines"></a> formatted output to the console.
+Enables [JSON lines](http://jsonlines.org/)<a id="json-lines" data-td-print-local></a> formatted output to the console.
 
 For example, the following operation adds JSON Lines output to the [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) command:
 

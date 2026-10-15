@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: false
 ---
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 - [使用 MinIO 和 Prometheus 进行监控：概览](https://youtu.be/A3vCDaFWNNs?ref=docs)
 - [使用 MinIO 和 Prometheus 进行监控：实验](https://youtu.be/Oix9iXndSUY?ref=docs)

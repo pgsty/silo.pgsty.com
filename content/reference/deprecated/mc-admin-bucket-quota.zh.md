@@ -28,7 +28,7 @@ upstream_modified: false
 >
 > MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ### 计量单位 {#mc-admin-bucket-quota-units}
 

@@ -1205,9 +1205,6 @@
       "reference/deprecated/mc-ilm-ls",
       "reference/deprecated/mc-ilm-rm",
       "reference/deprecated/mc-quota",
-      "reference/deprecated/mc-quota-clear",
-      "reference/deprecated/mc-quota-info",
-      "reference/deprecated/mc-quota-set",
       "reference/deprecated/mc-admin-bucket-quota",
       "reference/deprecated/mc-admin-bucket-remote",
       "reference/deprecated/mc-admin-console",
@@ -3720,14 +3717,14 @@
       "page": "docs",
       "url": "/docs/",
       "title_en": "Documentation",
-      "title_zh": "\u6587\u6863",
+      "title_zh": "文档",
       "children": []
     },
     {
       "page": "about",
       "url": "/about/",
       "title_en": "About",
-      "title_zh": "\u5173\u4e8e",
+      "title_zh": "关于",
       "children": [
         {
           "page": "about/manifesto",
@@ -3765,7 +3762,7 @@
       "page": "compatibility",
       "url": "/compatibility/",
       "title_en": "Compatibility",
-      "title_zh": "\u517c\u5bb9\u6027",
+      "title_zh": "兼容性",
       "children": [
         {
           "page": "compatibility/versions",
@@ -3819,7 +3816,7 @@
       "page": "operations",
       "url": "/operations/",
       "title_en": "Operations",
-      "title_zh": "\u8fd0\u7ef4",
+      "title_zh": "运维",
       "children": [
         {
           "source_doc": "operations/deployments/installation",
@@ -4209,7 +4206,7 @@
       "page": "administration",
       "url": "/administration/",
       "title_en": "Administration",
-      "title_zh": "\u7ba1\u7406",
+      "title_zh": "管理",
       "children": [
         {
           "source_doc": "administration/minio-console",
@@ -4539,7 +4536,7 @@
       "page": "developers",
       "url": "/developers/",
       "title_en": "Developers",
-      "title_zh": "\u5f00\u53d1",
+      "title_zh": "开发",
       "children": [
         {
           "source_doc": "developers/minio-drivers",
@@ -4639,7 +4636,7 @@
       "page": "reference",
       "url": "/reference/",
       "title_en": "Reference",
-      "title_zh": "\u53c2\u8003",
+      "title_zh": "参考",
       "children": [
         {
           "source_doc": "reference/kubernetes",
@@ -6115,24 +6112,6 @@
                   ]
                 },
                 {
-                  "source_doc": "reference/deprecated/mc-quota-clear",
-                  "page": "reference/deprecated/mc-quota-clear",
-                  "url": "/reference/deprecated/mc-quota-clear/",
-                  "children": []
-                },
-                {
-                  "source_doc": "reference/deprecated/mc-quota-info",
-                  "page": "reference/deprecated/mc-quota-info",
-                  "url": "/reference/deprecated/mc-quota-info/",
-                  "children": []
-                },
-                {
-                  "source_doc": "reference/deprecated/mc-quota-set",
-                  "page": "reference/deprecated/mc-quota-set",
-                  "url": "/reference/deprecated/mc-quota-set/",
-                  "children": []
-                },
-                {
                   "source_doc": "reference/deprecated/mc-admin-bucket-quota",
                   "page": "reference/deprecated/mc-admin-bucket-quota",
                   "url": "/reference/deprecated/mc-admin-bucket-quota/",
@@ -6215,7 +6194,7 @@
       "page": "integrations",
       "url": "/integrations/",
       "title_en": "Integrations",
-      "title_zh": "\u96c6\u6210",
+      "title_zh": "集成",
       "children": [
         {
           "source_doc": "integrations/using-minio-with-veeam",

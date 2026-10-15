@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: false
 ---
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 存储桶通知 {#id3}
 

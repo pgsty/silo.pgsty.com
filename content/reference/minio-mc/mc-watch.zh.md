@@ -94,7 +94,7 @@ mc watch myminio/mybucket
 
 *Optional*
 
-启用 [JSON lines](http://jsonlines.org/)<a id="json-lines"></a> 格式的控制台输出。
+启用 [JSON lines](http://jsonlines.org/)<a id="json-lines" data-td-print-local></a> 格式的控制台输出。
 
 例如：
 

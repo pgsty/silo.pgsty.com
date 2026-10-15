@@ -8,7 +8,7 @@ upstream_modified: true
 math: true
 ---
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## MinIO 部署由哪些组件构成？ {#minio}
 
@@ -40,7 +40,7 @@ MinIO 可以部署到以下三种拓扑：
 
 分布式部署会利用多台物理机或虚拟机的计算和存储资源。 在现代场景中，这通常意味着在私有云或公有云环境中运行 MinIO，例如 Amazon Web Services、Google Cloud Platform、Microsoft Azure 等。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ### MinIO 如何管理多个虚拟或物理服务器？ {#minio-intro-server-pool}
 
@@ -119,7 +119,7 @@ MinIO [分布式部署](/zh/operations/deployments/installation/#minio-mnmd) 支
 - 使用命令行工具 [`mc`](/zh/reference/minio-mc/#command-mc) 和 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin)
 - 使用 [MinIO Console](/zh/administration/minio-console/#minio-console) 图形用户界面管理单个实例
 
-<a id="id8"></a>
+<a id="id8" data-td-print-local></a>
 
 ### MinIO 如何管理对象在部署中的分布？ {#minio-rebalance}
 

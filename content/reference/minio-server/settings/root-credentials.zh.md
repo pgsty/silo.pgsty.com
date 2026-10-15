@@ -71,7 +71,7 @@ upstream_modified: true
 {{< /tab >}}
 {{< /tabs >}}
 
-<a id="id2"></a>
+<a id="id2" data-td-print-local></a>
 
 ## Root 访问 {#minio-disable-root-access}
 

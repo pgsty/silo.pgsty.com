@@ -8,7 +8,7 @@ upstream_modified: false
 ---
 
 <a id="minio-server-envvar-iam"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本节页面记录了用于配置 MinIO 与身份与访问管理（IAM）方案协同工作的相关设置。 MinIO 支持的每种 IAM 方法都对应一个独立的设置页面。
 

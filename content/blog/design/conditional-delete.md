@@ -107,6 +107,6 @@ The maintained policy package does not define `s3:if-match`. Supporting it requi
 
 ## Design cost {#tradeoff}
 
-<a id="conclusion"></a>
+<a id="conclusion" data-td-print-local></a>
 
 Single-object execution reuses the established object-selection and locking boundary. Full batch conditions and policy enforcement cross additional interfaces and remain separate work. The useful invariant is narrow: a false supported single-object condition must be decided before deletion, once for the selected logical representation.

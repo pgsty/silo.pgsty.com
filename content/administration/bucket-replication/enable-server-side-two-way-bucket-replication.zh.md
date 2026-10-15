@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-bucket-replication-serverside-twoway"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页中的过程会创建新的存储桶复制规则，用于在 MinIO 存储桶之间对对象执行双向“主动-主动”同步。
 
@@ -19,7 +19,7 @@ upstream_modified: false
 
 本教程介绍如何在两个 MinIO 集群之间配置主动-主动复制。有关在三个或更多 MinIO 集群之间进行多站点复制的教程，请参见 [启用多站点服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/#minio-bucket-replication-serverside-multi)。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 要求 {#minio-bucket-replication-serverside-twoway-requirements}
 
@@ -27,7 +27,7 @@ upstream_modified: false
 
 此外，要设置主动-主动存储桶复制，您还必须满足以下附加要求：
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ### 访问两个集群 {#minio-bucket-replication-serverside-twoway-permissions}
 
@@ -102,7 +102,7 @@ upstream_modified: false
 > [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本文档仅说明自该版本起的过程。
 
 <a id="minio-bucket-replication-two-way-minio-cli-create-remote-targets"></a>
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 #### 1) 在每个部署上创建新的存储桶复制规则 {#minio-bucket-replication-two-way-minio-cli-create-replication-rules}
 
@@ -134,7 +134,7 @@ mc replicate add ALIAS/BUCKET \
 
 完成此步骤后，您应已配置两条复制规则：每个部署上一条，并指向另一个部署上的存储桶。 使用 [`mc replicate ls`](/zh/reference/minio-mc/mc-replicate-ls/#command-mc.replicate.ls) 命令验证已创建的复制规则。
 
-<a id="id8"></a>
+<a id="id8" data-td-print-local></a>
 
 #### 2) 验证复制配置 {#minio-bucket-replication-two-way-minio-cli-verify-replication-config}
 

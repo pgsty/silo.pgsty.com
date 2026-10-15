@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-external-access-management-plugin"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## Overview {#overview}
 

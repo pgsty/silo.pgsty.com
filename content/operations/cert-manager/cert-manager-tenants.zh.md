@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: false
 ---
 
-<a id="cert-manager"></a>
+<a id="cert-manager" data-td-print-local></a>
 <a id="minio-certmanager-tenants"></a>
 
 以下过程用于创建并应用在租户内使用 cert-manager 管理 TLS 证书所需的资源。

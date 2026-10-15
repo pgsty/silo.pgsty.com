@@ -8,7 +8,7 @@ upstream_modified: true
 ---
 
 <a id="minio-architecture"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页从生产视角概述 MinIO 的部署架构。 有关具体硬件或软件配置的信息，请参阅：
 
@@ -97,7 +97,7 @@ upstream_modified: true
 >
 > 虽然 S3 API 的所有操作都使用 `GET` 和 `POST` 等 HTTP 方法，应用通常仍会使用 SDK 来执行 S3 操作。 特别是签名计算的复杂性，通常使通过 `curl` 或类似 REST 客户端直接交互变得不切实际。 MinIO 建议使用能够自动完成签名计算的兼容 S3 SDK 或库。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 复制型 MinIO 部署 {#minio-deployment-architecture-replicated}
 

@@ -8,14 +8,14 @@ upstream_modified: true
 
 <a id="mc-support-upload"></a>
 <a id="command-mc.support.upload"></a>
-<a id="parameters"></a>
+<a id="parameters" data-td-print-local></a>
 <a id="mc.support.upload.ALIAS"></a>
 <a id="mc.support.upload.FILE"></a>
 <a id="mc.support.upload.-comment"></a>
 <a id="mc.support.upload.-enc"></a>
 <a id="mc.support.upload.-issue"></a>
-<a id="global-flags"></a>
-<a id="examples"></a>
+<a id="global-flags" data-td-print-local></a>
+<a id="examples" data-td-print-local></a>
 <a id="upload-a-file-to-an-issue"></a>
 <a id="upload-a-file-to-an-issue-with-a-comment-for-minio-engineers"></a>
 

@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-server-envvar-core"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页介绍用于控制 SILO 进程核心行为的设置。
 
@@ -148,7 +148,7 @@ silo server $MINIO_OPTS ...
 {{< /tab >}}
 {{< /tabs >}}
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 ## 扫描器速度 {#minio-scanner-speed-options}
 
@@ -472,7 +472,7 @@ Legacy 保留精确键/cache 列举限制。Strict 扫描持久上传元数据�
 
 `MINIO_IDLE_TIMEOUT` / `--idle-timeout` 同样默认 `30s`，控制请求体的滚动空闲超时。持续有进展的长 HTTP/1 上传不会因此被限制为总共 30 秒。两者都没有服务端 YAML 字段；启动时 CLI 参数优先于环境变量。HTTP/2 及 TLS 写侧限制见[超时设计](/blog/design/request-header-timeouts/)。
 
-## 旧式桶资源匹配 {#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH}
+## 旧式桶资源匹配 {#legacy-bucket-resource-matching-compatibility}
 
 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` 是恢复桶级策略动作旧对象资源匹配行为的兼容开关，值区分大小写。策略包在进程初始化时读取它，早于 SILO 加载 `MINIO_CONFIG_ENV_FILE`；只在后者文件中设置不会生效。必须在启动前通过真实进程环境传入，例如 systemd 的 `EnvironmentFile`。应优先修正策略，避免恢复较弱的匹配规则。详见 [SN-2026-004](/about/security-advisories/#sn-2026-004)。
 

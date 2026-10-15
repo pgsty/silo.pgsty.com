@@ -10,7 +10,7 @@ upstream_modified: false
 sidebar_expanded: false
 ---
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 以下页面提供 MinIO 与部分第三方软件的集成指南。 本页中的指南此前托管在旧版文档的 **Cookbook** 栏目下。
 

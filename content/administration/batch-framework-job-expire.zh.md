@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-batch-framework-expire-job"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 > [!NOTE]
 > **新增: MinIO**

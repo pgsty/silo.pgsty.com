@@ -468,7 +468,7 @@ Use the read-only, SigV4-authenticated `GET /minio/admin/v3/multipart-preflight`
 
 `MINIO_IDLE_TIMEOUT` / `--idle-timeout` also defaults to `30s` and controls rolling body idle timeouts. A progressing long HTTP/1 upload is not capped at 30 seconds in total. Neither setting has a server YAML field; CLI flags override environment values at startup. HTTP/2 and TLS write-side limitations are described in the [deadline design](/blog/design/request-header-timeouts/).
 
-## Legacy bucket-resource matching {#envvar.MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH}
+## Legacy bucket-resource matching {#legacy-bucket-resource-matching-compatibility}
 
 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` is a compatibility escape hatch that restores the old object-resource matching behavior for bucket-level policy actions. The value is case-sensitive. The policy package reads it during process initialization, before SILO loads `MINIO_CONFIG_ENV_FILE`: setting it only in that file has no effect. Supply it in the actual process environment, such as systemd's `EnvironmentFile`, before startup. Prefer correcting the policy rather than restoring the weaker matching rule. See [SN-2026-004](/about/security-advisories/#sn-2026-004).
 

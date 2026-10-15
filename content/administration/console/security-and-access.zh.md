@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-console-security-access"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 你可以使用 MinIO Console 执行 MinIO 提供的多种身份与访问管理功能，例如：
 
@@ -15,7 +15,7 @@ upstream_modified: false
 - 查看、管理和创建访问 [策略](#minio-console-admin-policies)。
 - 使用内置的 MinIO IDP 创建和管理 [用户凭证](#minio-console-admin-identity) 或组，连接一个或多个 OIDC provider，或添加 AD/LDAP provider 以实现 SSO。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 访问密钥 {#minio-console-user-access-keys}
 
@@ -38,7 +38,7 @@ upstream_modified: false
   >
   > 如需轮换应用程序凭证，请创建新的访问密钥，并在应用程序切换为使用新凭证后删除旧密钥。
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 策略 {#minio-console-admin-policies}
 
@@ -63,7 +63,7 @@ upstream_modified: false
 
 使用 **Users** 和 **Groups** 视图，可分别将已创建的策略分配给用户和组。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 身份 {#minio-console-admin-identity}
 

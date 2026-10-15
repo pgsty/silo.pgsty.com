@@ -80,7 +80,7 @@ mc admin heal play/mybucket/myprefix
 
 显示离线和故障驱动器的自愈信息。
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 自愈颜色 {#minio-concepts-healing-colors}
 

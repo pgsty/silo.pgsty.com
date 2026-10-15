@@ -10,7 +10,7 @@ upstream_modified: true
 <a id="minio-metrics-and-alerts"></a>
 <a id="minio-metrics-and-alerts-alerting"></a>
 <a id="minio-metrics-and-alerts-endpoints"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_model/) 发布指标。 你可以使用任意抓取工具从 MinIO 拉取指标数据，以执行进一步分析和配置告警。
 
@@ -100,7 +100,7 @@ http://HOSTNAME:PORT/minio/metrics/v3/audit
 - 将 [`MINIO_PROMETHEUS_URL`](/zh/reference/minio-server/settings/console/#envvar.MINIO_PROMETHEUS_URL) 设置为 Prometheus 服务的 URL
 - 将 [`MINIO_PROMETHEUS_JOB_ID`](/zh/reference/minio-server/settings/console/#envvar.MINIO_PROMETHEUS_JOB_ID) 设置为分配给已采集指标的唯一 job ID
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 可用的 version 3 指标 {#minio-metrics-and-alerts-available-metrics}
 

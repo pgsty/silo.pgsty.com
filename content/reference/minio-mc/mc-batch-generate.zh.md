@@ -104,7 +104,7 @@ mc batch generate alias replicate > replicate.yaml
 
 对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 作业类型 {#minio-batch-job-types}
 

@@ -74,7 +74,7 @@ MinIO 返回一个 `AssumeRoleWithCustomTokenResult` 对象，其中 `AssumedRol
 
 - `AccessKeyId` - 应用程序用于认证的访问密钥。
 - `SecretKeyId` - 应用程序用于认证的 Secret Key。
-- `Expiration` - 凭证过期的 <a id="index-0"></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) 日期和时间。
+- `Expiration` - 凭证过期的 <a id="index-0" data-td-print-local></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) 日期和时间。
 - `SessionToken` - 应用程序用于认证的会话令牌。某些 SDK 在使用临时凭证时可能要求此字段。
 
 以下示例与 MinIO STS `AssumeRoleWithCustomToken` 端点返回的响应类似：

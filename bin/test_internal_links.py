@@ -22,6 +22,16 @@ class InternalLinkTests(unittest.TestCase):
             return subprocess.run([sys.executable, str(CHECKER), str(public)],
                                   text=True, capture_output=True)
 
+    def test_duplicate_ids_fail(self):
+        result = self.check('<h2 id="same">First</h2><h2 id="same">Second</h2>')
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("duplicate id same", result.stderr)
+
+    def test_absolute_site_fragment_is_checked(self):
+        result = self.check('<a href="https://silo.pgsty.com/guide/#missing">broken</a>', '<h2 id="section">Guide</h2>')
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("missing fragment /guide/#missing", result.stderr)
+
     def test_pretty_url_fragment_exists(self):
         result = self.check('<a href="/guide/#section">ok</a>', '<h2 id="section">Guide</h2>')
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -30,6 +40,11 @@ class InternalLinkTests(unittest.TestCase):
         result = self.check('<a href="/guide/#missing">broken</a>', '<h2 id="section">Guide</h2>')
         self.assertEqual(result.returncode, 1)
         self.assertIn("missing fragment /guide/#missing", result.stderr)
+
+    def test_dotted_directory_route(self):
+        result = self.check('<a href="/ext/os/d12.x86_64#section">ok</a>',
+                            '<h2 id="section">Platform</h2>', "ext/os/d12.x86_64/index.html")
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_directory_without_index_is_missing(self):
         result = self.check('<a href="/guide/">broken</a>')

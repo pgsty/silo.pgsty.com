@@ -87,7 +87,7 @@ You can alternatively perform manual removal of object versions using the follow
 
 ### Version ID Generation {#version-id-generation}
 
-MinIO generates a unique and immutable identifier for each versioned object as part of write operations. Each object version ID consists of a 128-bit fixed-size <a id="index-0"></a>[**UUIDv4**](https://datatracker.ietf.org/doc/html/rfc4122.html#section-4.4). UUID generation is sufficiently random to ensure high likelihood of uniqueness for any environment, are computationally difficult to guess, and do not require centralized registration process and authority to guarantee uniqueness.
+MinIO generates a unique and immutable identifier for each versioned object as part of write operations. Each object version ID consists of a 128-bit fixed-size <a id="index-0" data-td-print-local></a>[**UUIDv4**](https://datatracker.ietf.org/doc/html/rfc4122.html#section-4.4). UUID generation is sufficiently random to ensure high likelihood of uniqueness for any environment, are computationally difficult to guess, and do not require centralized registration process and authority to guarantee uniqueness.
 
 <img src="/images/retention/minio-versioning-multiple-versions.svg" alt="Object with Multiple Versions" style="max-width: 600px; height: auto;" />
 

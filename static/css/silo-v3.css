@@ -636,8 +636,8 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 .faq-item[open] .faq-toggle::after { transform: rotate(90deg); }
 .faq-a { padding: 0 46px 18px 60px; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.75; }
 .faq-a p { margin: 0; }
-.faq-a a { color: var(--pg); text-decoration: underline; text-underline-offset: 3px; }
-.faq-a a:hover { color: var(--pg-strong); }
+.landing-page .faq-a a { color: var(--pg); text-decoration: underline !important; text-underline-offset: 3px; }
+.landing-page .faq-a a:hover { color: var(--pg-strong); }
 .faq-a code { padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.85em; color: var(--ink); background: color-mix(in srgb, var(--line) 40%, transparent); }
 /* 展开动画：支持 ::details-content 的浏览器渐进增强，其余浏览器直接显隐 */
 .faq-item::details-content {

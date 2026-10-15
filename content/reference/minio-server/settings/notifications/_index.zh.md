@@ -9,7 +9,7 @@ upstream_modified: false
 
 <a id="minio-server-config-logging-logs"></a>
 <a id="minio-server-envvar-notifications"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页介绍用于控制 [MinIO bucket notifications](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications) 相关行为的设置。
 

@@ -8,7 +8,7 @@ upstream_modified: false
 ---
 
 <a id="minio-batch-framework"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 概述 {#id3}
 

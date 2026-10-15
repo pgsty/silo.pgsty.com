@@ -65,7 +65,7 @@ MinIO 部署必须与目标 AD / LDAP 服务保持双向网络连通。
 
 MinIO 需要一组只读访问凭证，以便通过 [bind](/zh/operations/external-iam/#minio-external-identity-management-ad-ldap-lookup-bind) 执行认证用户和组查询。 请确保每个打算与 MinIO 配合使用的 AD/LDAP 用户和组，都在 MinIO 部署上拥有对应的 [策略](/zh/operations/external-iam/#minio-external-identity-management-ad-ldap-access-control)。 如果某个 AD/LDAP 用户没有分配任何策略，*并且* 所属组也都没有分配任何策略，那么该用户无权访问 MinIO 集群中的任何操作或资源。
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 为 MinIO 配置 Active Directory 或 LDAP 外部身份管理 {#minio-external-identity-management-ad-ldap-configure}
 

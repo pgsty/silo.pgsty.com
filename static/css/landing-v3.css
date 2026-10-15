@@ -92,7 +92,7 @@ html[data-theme="light"] {
   --pg-strong: #1d588c;
   --copper: #b4762e;
   --copper-dim: rgba(180, 118, 46, 0.6);
-  --ok: #178a53;
+  --ok: #147a49;
   --alert: #c2403a;
   --grid-line: rgba(47, 103, 147, 0.06);
   --trace: rgba(180, 118, 46, 0.35);
@@ -697,7 +697,7 @@ html[data-theme="dark"] .ini-s { color: #8b93a0; }
   flex: none;
   border: none;
   background: none;
-  color: rgba(200, 215, 235, 0.55);
+  color: rgba(200, 215, 235, 0.70);
   font-size: 0.95rem;
   cursor: pointer;
   padding: 4px 6px;
@@ -1041,7 +1041,7 @@ html[data-theme="light"] .module-img img {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.12em;
-  color: rgba(200, 215, 235, 0.55);
+  color: rgba(200, 215, 235, 0.70);
 }
 .code-body {
   margin: 0;
@@ -1052,7 +1052,7 @@ html[data-theme="light"] .module-img img {
   color: #c9d6e8;
   overflow-x: auto;
 }
-.code-body .c { color: #64748b; }
+.code-body .c { color: #94a3b8; }
 .code-body .k { color: #6fb1e8; }
 .code-body .v { color: #e0a35c; }
 .code-body .s { color: #7fd39a; }
@@ -1095,11 +1095,11 @@ html[data-theme="light"] .module-img img {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.02em;
-  color: #64748b;
+  color: #94a3b8;
 }
 .advisory-list a:hover time { color: #8ea3bd; }
 .advisory-list span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.advisory-foot {
+.landing-page .advisory-foot {
   display: block;
   padding: 9px 16px;
   border-top: 1px solid rgba(148, 176, 210, 0.14);
@@ -1110,7 +1110,7 @@ html[data-theme="light"] .module-img img {
   color: rgba(200, 215, 235, 0.6);
   transition: color 150ms ease;
 }
-.advisory-foot:hover { color: #ffffff; }
+.landing-page .advisory-foot:hover { color: #ffffff; }
 
 /* ------------------------------------------------------------
    8. Kernels & Extension Bus
@@ -1580,7 +1580,7 @@ a.stat-item:hover { transform: translateY(-3px); border-color: var(--card-hover-
   flex: none;
   border: none;
   background: none;
-  color: rgba(200, 215, 235, 0.55);
+  color: rgba(200, 215, 235, 0.70);
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 5px;
@@ -1825,3 +1825,5 @@ html.js [data-reveal].revealed { opacity: 1; transform: none; }
   .pin-dot::after,
   .eyebrow-mark { animation: none !important; }
 }
+
+/* Inline legal and author links remain identifiable without relying on color. */

@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-policy"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 概述 {#id3}
 
@@ -28,7 +28,7 @@ MinIO PBAC 在设计上兼容 AWS IAM 策略语法、结构和行为。 MinIO �
 >
 > 存储桶标签与对象标签不是同一类数据。`PutBucketTagging` 不会从 XML 正文填充 `s3:RequestObjectTag*` 条件键。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 内置策略 {#minio-policy-built-in}
 
@@ -128,7 +128,7 @@ MinIO 提供以下内置策略，可分配给 [users](/zh/administration/identit
 >
 > 有关 IAM 策略求值逻辑的更多信息，请参见 IAM 文档中的 [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow)。
 
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ## 策略文档结构 {#minio-policy-document}
 

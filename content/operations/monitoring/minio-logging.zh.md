@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-logging"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 会将所有 [`minio server`](/zh/reference/minio-server/#command-minio.server) 操作输出到系统控制台。 如何读取这些日志取决于 server 进程的管理方式。 例如，如果 server 通过 `systemd` 脚本进行管理， 你可以使用 `journalctl -u SERVICENAME.service` 读取日志。 请将 `SERVICENAME` 替换为 MinIO 服务名称。
 
@@ -134,7 +134,7 @@ mc admin config set ALIAS/ logger_webhook:IDENTIFIER  \
 {{< /tab >}}
 {{< /tabs >}}
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 将审计日志发布到 HTTP Webhook {#minio-logging-publish-audit-logs}
 

@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio-tenant"></a>
+<a id="minio-tenant" data-td-print-local></a>
 <a id="minio-k8s-expand-minio-tenant"></a>
 
 本步骤说明如何通过在 Kubernetes 基础设施中部署额外的一组 MinIO pod，来扩展现有 MinIO tenant 的可用存储容量。

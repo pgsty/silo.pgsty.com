@@ -8,7 +8,7 @@ upstream_modified: true
 ---
 
 <a id="minio-availability-resiliency"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页从生产视角概述 MinIO 在可用性与韧性方面的设计和特性。
 

@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-upgrade"></a>
 
 > [!WARNING]
@@ -73,7 +73,7 @@ upstream_modified: true
 5. 使用 [`mc admin info`](/zh/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) 验证部署，然后测试代表性的 S3 读写、控制台访问、身份登录以及已配置的复制或通知。
 6. 从[下载与安装](/zh/download/#client)单独升级客户端。独立制品使用 `mcli`，源码构建与容器保留 `mc`。
 
-<a id="id8"></a>
+<a id="id8" data-td-print-local></a>
 
 ## 手工管理的部署 {#minio-upgrade-mc-admin-update}
 

@@ -102,7 +102,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 
 现在你可以 [使用 Helm Charts 部署租户](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/#deploy-tenant-helm)。
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 使用本地 Helm Charts 安装 MinIO Operator {#minio-k8s-deploy-operator-helm-local}
 

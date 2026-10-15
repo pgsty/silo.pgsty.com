@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-server-envvar-deprecated"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页介绍用于控制 MinIO 进程核心行为的已弃用设置。
 

@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-restore-hardware-failure-node"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 如果某个 MinIO 节点发生完全硬件故障（例如所有驱动器、数据等全部丢失），则该节点在重新加入部署后会开始执行 [自愈操作](/zh/operations/concepts/healing/#minio-concepts-healing)。 MinIO 自愈仅发生在被替换的硬件上，通常不会影响部署性能。
 

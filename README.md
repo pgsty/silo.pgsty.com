@@ -1,6 +1,6 @@
 # Silo Documentation
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.2.0](https://github.com/pgsty/oink/tree/v1.2.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.3.0](https://github.com/pgsty/oink/tree/v1.3.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Release state and publication
 
@@ -16,7 +16,7 @@ its commit check and the live English/Chinese pages after publication.
 
 ## Local development
 
-Install Hugo Extended 0.160.1 or newer, Go, Git, and Python 3.10 or newer with `venv` support. OINK vendors the browser and styling dependencies required by the site, so a Node.js toolchain is not needed.
+Install Hugo Extended 0.166.0 or newer, Go, Git, and Python 3.10 or newer with `venv` support. OINK vendors the browser and styling dependencies required by the site, so a Node.js toolchain is not needed.
 
 ```bash
 make dev

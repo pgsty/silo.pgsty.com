@@ -8,16 +8,16 @@ upstream_modified: true
 
 <a id="mc-support-proxy"></a>
 <a id="command-mc.support.proxy"></a>
-<a id="id2"></a>
-<a id="id3"></a>
+<a id="id2" data-td-print-local></a>
+<a id="id3" data-td-print-local></a>
 <a id="url"></a>
-<a id="id4"></a>
-<a id="callhome"></a>
-<a id="id5"></a>
+<a id="id4" data-td-print-local></a>
+<a id="callhome" data-td-print-local></a>
+<a id="id5" data-td-print-local></a>
 <a id="mc.support.proxy.set"></a>
 <a id="mc.support.proxy.show"></a>
 <a id="mc.support.proxy.remove"></a>
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ## 当前行为 {#description}
 

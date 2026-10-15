@@ -15,7 +15,7 @@ MinIO Server-Side Encryption (SSE) 在写入操作过程中保护对象， 使�
 
 MinIO SSE-C 在功能上兼容 Amazon [Server-Side Encryption with Customer-Provided Keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerSideEncryptionCustomerKeys.html).
 
-<a id="id2"></a>
+<a id="id2" data-td-print-local></a>
 
 ## 安全擦除与锁定 {#minio-encryption-sse-c-erasure-locking}
 

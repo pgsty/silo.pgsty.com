@@ -13,12 +13,12 @@ upstream_modified: true
 <a id="minio-support-diagnostics-airgap"></a>
 <a id="generate-health-data-for-a-cluster-to-upload-manually"></a>
 <a id="upload-data-to-subnet-with-strict-anonymization"></a>
-<a id="parameters"></a>
+<a id="parameters" data-td-print-local></a>
 <a id="mc.support.diag.ALIAS"></a>
 <a id="mc.support.diag.-airgap"></a>
 <a id="mc.support.diag.-anonymize"></a>
 <a id="mc.support.diag.-api-key"></a>
-<a id="global-flags"></a>
+<a id="global-flags" data-td-print-local></a>
 
 ## Health diagnostics {#description}
 

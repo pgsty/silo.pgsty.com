@@ -8,14 +8,14 @@ upstream_modified: true
 
 <a id="mc-support-proxy"></a>
 <a id="command-mc.support.proxy"></a>
-<a id="examples"></a>
+<a id="examples" data-td-print-local></a>
 <a id="set-a-proxy-url"></a>
 <a id="remove-the-proxy-url-configured-for-a-deployment"></a>
 <a id="disable-callhome-logs"></a>
 <a id="mc.support.proxy.set"></a>
 <a id="mc.support.proxy.show"></a>
 <a id="mc.support.proxy.remove"></a>
-<a id="global-flags"></a>
+<a id="global-flags" data-td-print-local></a>
 
 ## Current behavior {#description}
 
