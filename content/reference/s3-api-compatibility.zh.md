@@ -35,6 +35,14 @@ upstream_modified: true
 - [RestoreObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_RestoreObject.html)
 - [SelectObjectContent](https://docs.aws.amazon.com/AmazonS3/latest/API/API_SelectObjectContent.html)
 
+### 写入提交错误 {#write-commit-errors}
+
+[PR #232](https://github.com/pgsty/silo/pull/232) 面向 20261015 之后的下一次 Server
+发布：PUT 或分片上传完成操作在最终提交时丢失暂存的 `xl.meta`，返回 HTTP 503
+`SlowDownWrite`。原代码可能对 PUT 返回 `400 IncompleteBody`，对分片完成返回
+`404 NoSuchKey`。真正的客户端上传不完整仍保留原有错误处理。这项分类修复允许 SDK
+重试，但不会恢复丢失的暂存数据。见[源码与发布边界](/zh/compatibility/versions/#post-20261015)。
+
 ### 对象锁定 {#id2}
 
 - [GetObjectRetention](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectRetention.html)

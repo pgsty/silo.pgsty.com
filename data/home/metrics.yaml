@@ -1,7 +1,7 @@
 # Remote counters; refresh with: bin/metrics.py
 # docker_pulls sums pgsty/minio (archived, pre-rename) and pgsty/silo.
-github_stars: 4071
-docker_pulls: 3363644
+github_stars: 4084
+docker_pulls: 3396983
 
 # Editorial counters; maintain these values here.
 security_fixes: 14
