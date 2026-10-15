@@ -238,3 +238,15 @@ Server 20260916 source [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4
 These later Server repairs are not in 20260903; original Object Lock fixes and other released prerequisites retain their explicitly identified earlier release boundaries.
 
 Final storage repairs also include migration tag preservation in [`fced86303`](https://github.com/pgsty/silo/commit/fced8630365fd57d6116c595b65252bcd12e13be), null-version quorum in [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b126b4ac640cd076a4585b66f2ec753a6), and exact-version purge, marker metadata and queued-creation fixes in `eb4f5e5b3` / `254b19ac0` / `358ab38fb`. Late creation/crash residue in [#217](https://github.com/pgsty/silo/issues/217) and restart-time listing omissions in [#218](https://github.com/pgsty/silo/issues/218) remain known limitations.
+
+## October 15 source acceptance {#october-source}
+
+**Verified on 2026-10-15; not included in Server 20260916.**
+[PR #233](https://github.com/pgsty/silo/pull/233), merged as
+[`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a),
+clears absent fields when reusing legacy `xl.meta` headers and keeps scanner
+updates separate from final caches. Storage formats, RPC fields and dependency
+versions are unchanged. The [problem and repair record](/blog/design/stale-metadata-reuse/)
+documents deterministic regression coverage, a two-process scanner check,
+post-merge CI, and operator verification. This source acceptance does not change
+the published component versions above or establish a production rollout.
