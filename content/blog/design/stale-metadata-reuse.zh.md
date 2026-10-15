@@ -12,6 +12,8 @@ draft: false
 url: "/zh/blog/design/stale-metadata-reuse/"
 ---
 
+**发布更新（2026-10-15）：** 本修复首次随 [Server 20261015](/zh/blog/release/silo-20261015/) 交付。下文源码验收记录保留此前发布前的验证结论。
+
 **2026-10-15 核验状态：已合入 main，尚未进入已发布的 Server 版本。**
 修复通过 [PR #233](https://github.com/pgsty/silo/pull/233) 合入，合并提交为
 [`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a)。

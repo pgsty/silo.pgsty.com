@@ -1,11 +1,12 @@
 ---
 title: "对象锁保留期越权与版本覆写漏洞修复设计（SN-2026-015 / SN-2026-016）"
 date: 2026-10-14
+lastmod: 2026-10-15
 summary: "梳理对象锁保留期鉴权短路缺陷（SN-2026-015）与版本寻址写入覆写缺陷（SN-2026-016）的外部报告验证、完整历史溯源、入口与存储写锁双重防线设计、预检 Fail-Closed 加固，以及候选方案的对抗评测与取舍。"
 tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 ---
 
-**2026-10-14 状态：** 基础修复已通过 [PR #234](https://github.com/pgsty/silo/pull/234) 合入 `main`（合并提交 `14042b5aa`）。预检 Fail-Closed 加固、四组新增对抗回归及 CI race 门禁见 [PR #235](https://github.com/pgsty/silo/pull/235)。尚无包含这些修复的正式发行；已发布的 `RELEASE.2026-09-16T00-00-00Z` 仍受影响。
+**2026-10-15 状态：** [PR #234](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 [PR #235](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）的完整修复首次随 [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z) 正式交付。此前发布的 `RELEASE.2026-09-16T00-00-00Z` 仍受影响。升级要求与制品验收见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)和[发布说明](/zh/blog/release/silo-20261015/)。
 
 本文档完整记录针对外部报告与内部关联排查发现的两处对象锁（Object Lock / WORM）安全缺陷——**`SN-2026-015`（`PutObjectRetention` 绕过请求头越权与条件策略失灵）**与 **`SN-2026-016`（版本寻址写入覆写绕过及写路径锁缺口）**——的事实核验、Git 历史溯源、修复设计、关键路径影响评估与候选方案的对抗验证取舍。
 

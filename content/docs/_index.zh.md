@@ -1,7 +1,7 @@
 ---
 title: "PGSTY SILO 文档"
 linkTitle: "文档"
-description: "pgsty/silo 20260916 文档手册"
+description: "pgsty/silo 20261015 文档手册"
 url: "/zh/docs/"
 weight: 1
 type: docs

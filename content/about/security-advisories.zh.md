@@ -19,13 +19,17 @@ changelog 更窄，只关注影响发布的安全行为。每个经过完整调�
 
 ## 当前发布边界 {#boundary}
 
-**核验于 2026-09-17。** 最新已发布 Server 为
-[`RELEASE.2026-09-16T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z)，
-已包含 [SN-2026-011](#sn-2026-011)、[SN-2026-012](#sn-2026-012)、[SN-2026-013](#sn-2026-013)
-及内嵌 Console 的 [SN-2026-014](#sn-2026-014) 修复；Server 20260903 不包含这些修复。
-独立 Console 的修复版为 v2.4.1。应升级实际提供相应服务的组件，
-升级 mcli、pkg 或独立 Console 不会修补已安装的 Server。
-组件身份与升级要求见[版本矩阵](/zh/compatibility/versions/)和[完整发布说明](/zh/blog/release/silo-20260916/)。
+**核验于 2026-10-15。** 最新已发布 Server 为
+[RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z)，
+首次包含 [SN-2026-015](#sn-2026-015) 与 [SN-2026-016](#sn-2026-016) 的完整修复。
+Server 20260916 和此前实测的 Server 20260903 均受影响；更早的 SILO 发行版均未包含这些修复。
+请升级全部 Server 进程及所有接受 S3 写入的复制站点。
+更新 mcli、pkg 或独立 Console 不会修补已安装的 Server。
+组件身份与升级要求见[版本矩阵](/zh/compatibility/versions/)和[发布说明](/zh/blog/release/silo-20261015/)。
+
+Server 20260916 首次包含 [SN-2026-011](#sn-2026-011)、[SN-2026-012](#sn-2026-012)、
+[SN-2026-013](#sn-2026-013) 及内嵌 Console 的 [SN-2026-014](#sn-2026-014) 修复；
+Server 20260903 不包含这些修复。独立 Console 的修复版为 v2.4.1。
 
 ## 继承自上游的公告基线 {#inherited}
 
@@ -61,6 +65,8 @@ fork 保留了同一提交对象与 SHA；该同一性是继承证据，不表�
 | [`SN-2026-012`](#sn-2026-012) | [`c4b5e1cb4`](https://github.com/pgsty/silo/commit/c4b5e1cb4)、[#177](https://github.com/pgsty/silo/pull/177) | 仅头部预签名载荷哈希验证 | [编年史](/blog/security/20260916-release-hardening/#sn-2026-012) |
 | [`SN-2026-013`](#sn-2026-013) | [#191](https://github.com/pgsty/silo/pull/191)、[#192](https://github.com/pgsty/silo/pull/192) | IAM 撤销重放与恢复 | [设计](/blog/design/iam-revocations/) · [编年史](/blog/security/20260916-release-hardening/#sn-2026-013) |
 | [`SN-2026-014`](#sn-2026-014) | [Console #56](https://github.com/pgsty/silo-console/pull/56)、[Server #209](https://github.com/pgsty/silo/pull/209) | 匿名分享下载代理范围 | [编年史](/blog/security/20260916-release-hardening/#sn-2026-014) · [Console v2.4.1](/blog/release/console-2.4.1/) |
+| [`SN-2026-015`](#sn-2026-015) | [#234](https://github.com/pgsty/silo/pull/234)、[#235](https://github.com/pgsty/silo/pull/235)；首次随 [Server 20261015](/zh/blog/release/silo-20261015/) 发布 | `PutObjectRetention` 授权与请求体条件键 | [公告](/zh/blog/security/20260926-governance-retention-bypass/) |
+| [`SN-2026-016`](#sn-2026-016) | [#234](https://github.com/pgsty/silo/pull/234)、[#235](https://github.com/pgsty/silo/pull/235)；首次随 [Server 20261015](/zh/blog/release/silo-20261015/) 发布 | 版本寻址与原地写入绕过对象锁 | [设计](/zh/blog/design/governance-retention-bypass-repair/#sn-2026-016) |
 
 各条目的升级与兼容性说明如下。有编年史文章的条目在此只做摘要；威胁模型、被否决方案与验证细节请 follow 链接。
 
@@ -162,6 +168,14 @@ Console #56 将转发限制为配置源站上的对象内容 GET，在发出请�
 
 独立版本修复已随 **Console v2.4.1** 发布。Server 20260916 通过 #209 内嵌修复后的 Console，Server 20260903 仍内嵌旧版。应升级实际提供 UI 的组件；安装独立 Console 不会替换内嵌包。升级实际提供服务的旧 Server 前，应限制暴露的 Console 代理访问并检查配置源站的公共端点。详见[编年史](/blog/security/20260916-release-hardening/#sn-2026-014)。
 
+### SN-2026-015 — 保留期授权绕过 {#sn-2026-015}
+
+已认证调用方可凭 governance-bypass 请求头，在缺少 `s3:PutObjectRetention` 时修改保留期，在缺少 bypass 权限时削弱 GOVERNANCE，或绕过请求体条件键上的 Deny。Server 20261015 首次要求在读取对象前授予 `s3:PutObjectRetention`，并在削弱未到期 GOVERNANCE 时同时要求明确请求头与 `s3:BypassGovernanceRetention`。清除保留期按剩余零天求值，已有 COMPLIANCE 保护继续生效。详见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
+
+### SN-2026-016 — 版本寻址与原地覆写 {#sn-2026-016}
+
+客户端指定写入版本、目录 `null` 版本与持久化分片目标可能覆写受锁定的版本。Server 20261015 首次要求客户端指定的版本 ID 具备复制信任，并在实际写锁下复查目标对象锁，覆盖旧版或恢复后的分片上传。锁状态不可读时拒绝操作。请升级所有写入进程及接受 S3 写入的复制站点；已修复站点不会重新授权旧站点已经接受的变更。升级不能恢复已覆写的数据或此前的保留期。详见[修复与兼容性说明](/zh/blog/design/governance-retention-bypass-repair/)。
+
 ## 依赖安全更新 {#dependencies}
 
 各行列出吸收的修复与首个携带它的提交或发布。可达性与部署暴露面仍需按发布单独判断：吸收了依赖修复不等于该漏洞在 Silo 中可达。
@@ -195,3 +209,5 @@ Console #56 将转发限制为配置源站上的对象内容 GET，在发出请�
 
 本页由仓库内原 `docs/security/advisories.md` 台账维护而来，更新至已核验的 main
 `40220bd836cb`（2026-09-16）。发布状态表述与[组件版本矩阵](/zh/compatibility/versions/)对齐；每个修复的调查、评审与验证细节见链接的编年史文章或发布说明。
+
+对象锁发布边界已更新至 Server 20261015，该版本首次包含 PR #234 与 PR #235。
