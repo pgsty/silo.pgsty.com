@@ -41,7 +41,7 @@ links directly to the published artifacts.
 
 Server **20261015 remains a Draft**. Earlier website statements that it was a public release are superseded. Its [Object Lock repairs and artifact checks](/blog/release/silo-20261015/) describe candidate acceptance; the fixes are absent from the current public Server 20260916. See the [security advisory](/blog/security/20260926-governance-retention-bypass/).
 
-Server **20261018 is being prepared as a tag and draft**, with pkg v3.14.2, upstream SDK v7.4.1, mcli 20261018 and Console v2.4.2. Public Server release, image promotion and production deployment remain separate steps. Publishing mcli or Console does not repair an existing Server installation.
+Server **20261018 has a signed [source tag](https://github.com/pgsty/silo/tree/RELEASE.2026-10-18T00-00-00Z) and a verified Draft**, with pkg v3.14.2, upstream SDK v7.4.1, mcli 20261018 and the Console v2.4.2 source tag. Console v2.4.2 standalone publication is still pending; the table above lists published components. Public Server release, image promotion and production deployment remain separate steps. Publishing mcli or Console does not repair an existing Server installation.
 
 ## September 16 dependency graph {#source}
 

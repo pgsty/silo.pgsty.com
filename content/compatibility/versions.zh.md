@@ -39,7 +39,7 @@ icon: fa-solid fa-code-branch
 
 Server **20261015 仍为 Draft**。官网此前称其正式发布的表述已失效。[对象锁修复及制品验收](/zh/blog/release/silo-20261015/)记录的是候选版验收；当前正式 Server 20260916 尚未包含这些修复，参见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
 
-Server **20261018 正在准备标签和发布草稿**，计划引用 pkg v3.14.2、上游 SDK v7.4.1、mcli 20261018 与 Console v2.4.2。Server 正式发布、镜像提升和生产部署分别执行。发布 mcli 或 Console 不会修复已经安装的 Server。
+Server **20261018 已准备签名[源码标签](https://github.com/pgsty/silo/tree/RELEASE.2026-10-18T00-00-00Z)和通过验收的发布草稿**，引用 pkg v3.14.2、上游 SDK v7.4.1、mcli 20261018 与 Console v2.4.2 源码标签。Console v2.4.2 的独立发行尚未完成；上方矩阵只列已正式发布的组件。Server 正式发布、镜像提升和生产部署分别执行。发布 mcli 或 Console 不会修复已经安装的 Server。
 
 ## 9 月 16 日依赖图 {#source}
 
