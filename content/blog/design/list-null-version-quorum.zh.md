@@ -12,6 +12,13 @@ draft: false
 url: "/zh/blog/design/list-null-version-quorum/"
 ---
 
+> [!WARNING]
+> **历史 LIST 设计已由新决策覆盖 · Earlier LIST design superseded (2026-10-17)**
+>
+> **English:** The investigation below is retained as historical evidence. Its current-design and pending-work guidance is superseded by the [latest LIST recovery decision (English)](https://silo.pgsty.com/blog/design/listing-recovery-lock-cost/). Refer to that decision for the final scope, compatibility, costs and acceptance limits. This does not change older binaries or announce a production release.
+>
+> **中文：** 下文保留历史调查证据；其中关于当前方案和待办的说明已被新设计覆盖，请参考[最新 LIST 恢复设计决策（中文）](https://silo.pgsty.com/zh/blog/design/listing-recovery-lock-cost/)，以了解最终范围、兼容性、代价和验收边界。这不改变旧二进制行为，也不是生产发布公告。
+
 > **发布更新，2026-09-20：** null 版本仲裁修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布。[#218](https://github.com/pgsty/silo/issues/218) 跟踪的滚动重启列举限制仍然开放。以下调查与验证记录保留当时的日期和范围。
 
 本文记录 2026-09-16 调查的列举漏项：未开版本控制的桶在并发覆盖写下返回 HTTP 200 的列表，却少了同一端点仍能 GET 的 key。这里说明已确认的机制、提交 [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) 的窄修复、这个修复证明了什么，以及仍由 [#218](https://github.com/pgsty/silo/issues/218) 跟踪的反例。
