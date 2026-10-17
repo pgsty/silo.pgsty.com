@@ -2,22 +2,74 @@
 title: "ListMultipartUploads: Implementation, Upgrade Contract and Design History"
 linkTitle: "ListMultipartUploads Compatibility"
 date: 2026-08-30
-lastmod: 2026-09-16
+lastmod: 2026-10-17
 author: "Ruohang Feng"
 summary: >
-  Main implements durable scanning and preflight, with legacy as the default and strict as a process-environment opt-in. Pagination, quorum, capacity, migration and remaining limits; not included in Server 20260903.
+  The unreleased candidate unifies durable listing and skips confirmed unidentified historical uploads without a migration switch. API behavior, scan cost, cancellation boundaries and historical release contracts.
 tags: [Design, S3, Compatibility, Multipart]
 weight: 35
 draft: false
 url: "/blog/design/list-multipart-uploads/"
 ---
 
-> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Its opt-in contract is preserved in the historical section; the unreleased follow-up is described next. Dated source-status and validation records below retain their original scope.
 
 
 This is the problem, design, and decision record for [SILO issue #79](https://github.com/pgsty/silo/issues/79).
 
-## September 16 implementation and upgrade contract {#implementation}
+## Unreleased: one persistent listing path {#implementation}
+
+**This section describes the #79 follow-up candidate, not a published release.** It supersedes the mode-switch design below for builds containing this change. Server 20260916 keeps its documented `legacy`/`strict` behavior. The follow-up removes the switch and makes durable listing automatic, including on an existing cluster.
+
+### What the client sees
+
+`prefix` is an existing S3 string parameter, not a new boolean option. For example, `GET /photos?uploads&prefix=trips/` lists unfinished uploads whose object names start with `trips/`. `GET /photos?uploads&max-uploads=1` lists one entry and returns continuation markers when more entries exist. Both requests now discover the same on-disk records before filtering and pagination; neither depends on a node's upload cache or treats the prefix as an exact filename.
+
+New uploads already store two internal identity fields in their existing `xl.meta`. No additional fields, metadata file, database, index or directory migration are introduced by this follow-up. Conceptually the existing metadata includes:
+
+```json
+{
+  "x-minio-internal-multipart-v1-bucket": "photos",
+  "x-minio-internal-multipart-v1-object": "trips/2026/video.mp4"
+}
+```
+
+This is an illustration of the metadata map, not the binary `xl.meta` encoding. The map is written with the upload's existing metadata quorum, and completion removes the upload-only fields. Older map-based readers accept unknown entries; this follow-up changes neither the encoding nor the storage format. Reverting the listing change restores the older listing limitations rather than reconstructing missing identities.
+
+### Historical uploads do not block new uploads
+
+The rule depends on the record, not the cluster's installation date:
+
+| Record found on disk | Listing behavior |
+| --- | --- |
+| Both identity fields are present, valid and match the hashed directory | Include the upload if it matches the requested bucket and prefix |
+| Both fields are absent in readable metadata selected through the existing read quorum | Omit that historical upload and continue listing |
+| Only one field is present, an identity is empty/invalid, readable copies contradict each other, the hash is inconsistent, or an identified record has an unsupported native upload ID | Return an error; do not disguise damage as historical data |
+| Insufficient discovery coverage, unreadable metadata without quorum, timeout or budget exhaustion | Return an error; do not return a successful incomplete page |
+
+An omitted historical upload can still receive parts, complete or abort using its known bucket, object key and upload ID. It is also omitted when a prefix happens to equal its entire key; the public API no longer takes the old exact-key shortcut. Existing stale-upload cleanup is unchanged. It is based on initiation age, not recent part activity, so do not shorten expiry just to clear the historical exception.
+
+There is no backfill, forced drain or preflight gate. Upgrade all writers if every subsequently created upload must carry identity. During a rolling upgrade, an older writer can still create an unidentified upload, and an older serving endpoint can still return its old listing semantics. Restart a paginated traversal after changing serving versions. The documented omission of historical uploads is a compatibility exception: an empty result alone does not prove there is no old unfinished upload on disk.
+
+### Retired configuration and diagnostic API
+
+`MINIO_API_MULTIPART_LISTING` has no effect in this candidate, whatever its value; a startup warning explains that it is ignored. Remove it from deployment configuration when convenient. The obsolete shared `api multipart_listing` key remains tolerated without invalidating other API settings. No new environment variable replaces it. The historical targeted-reset procedure below remains relevant when reverting to a build that rejects that shared key.
+
+The existing signed, read-only `GET /minio/admin/v3/multipart-preflight` endpoint still requires `admin:StorageInfo`. It now reports `mode: "persistent"`. `legacyUploads` counts observed historical records, `complete` says every drive was inspected without scan errors, and `ready` means a complete diagnosis found no historical records. **`ready=false` does not disable listing.** Unreadable or offline copies can still make the diagnosis incomplete; an incomplete count is not proof of absence.
+
+### Cost and remaining boundaries
+
+This follow-up adds no upload-path disk write, RPC, lock, tombstone or secondary index. The two identity fields were already persisted by the earlier implementation. The extra work is on listing: every page traverses multipart directories across pools and sets, reads candidate metadata, sorts and filters the result. Other buckets and skipped historical records still consume scan work. Setting a small page size limits the response, not the discovery work.
+
+The existing limits remain: two concurrent scans per process, 16 identity workers and four full-metadata workers per scan, a 30-second context budget, and 100,000 aggregate returned directory entries. The entry count includes both directory levels and duplicate entries across drives. One upload per unique key on all 16 drives costs about 32 entries, so 10,000 such uploads exceed the budget and return `SlowDown` (503). Retrying without reducing that workload will not resolve a deterministic budget overflow. This candidate fixes listing semantics; it does not claim to solve large-scale enumeration performance. A durable index or a different bounded discovery strategy needs separate performance work and acceptance.
+
+Cancellation keeps the previous **default** read-quorum check, best-effort deletion and first-matching-pool behavior. Retiring the listing switch also removes its optional strict cancellation branch. A caller previously relying on strict majority deletion acknowledgement must account for this change. HTTP 204 is not proof that every physical copy is gone. The delayed-create race remains separate: the default-path fault test demonstrates seven delayed writes plus one offline old copy restoring eight readable copies in a 16-drive/EC:8 set after cancellation. This candidate deliberately adds no creation fence.
+
+Regression coverage includes mixed old/new HTTP pages, delimiter groups, old uploads continued and completed by known ID, invalid/partial identities, read failures, actual storage-layer reopen without an upload cache, multi-set/pool results, removed markers, scan admission and preserved default cancellation. The explicit `BenchmarkMultipartListingCapacity` fixture exercises 1,000 and 10,000 real on-disk uploads, including mixed old/new records and another bucket; its overflow case checks for an error rather than a partial successful response. These local checks do not certify distributed storage latency or foreground upload throughput in production.
+
+## Historical: September 16 implementation and upgrade contract {#implementation-20260916}
+
+> This section describes Server 20260916, not operating instructions for the unreleased candidate.
 
 [PR #198](https://github.com/pgsty/silo/pull/198) retains mr javad seydi's original metadata-and-scan contribution and adds maintainer fixes for disappearing markers, incomplete discovery, cancellation confirmation and upgrade diagnostics. The pre-release compatibility follow-up restores `legacy` as the default and makes strict mode an explicit process-environment opt-in. This section describes those source changes. **It is not included in Server 20260903, and does not establish production performance or deployment acceptance.** The August 30 analysis below remains a historical design record.
 

@@ -452,13 +452,13 @@ This setting does not have a configuration setting option.
 
 <a id="multipart-listing"></a>
 
-## Multipart listing mode {#envvar.MINIO_API_MULTIPART_LISTING}
+## Multipart listing: retired mode switch {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**Available since Server 20260916; absent from Server 20260903.** `MINIO_API_MULTIPART_LISTING` accepts `legacy` or `strict`. The default is **`legacy`**. Set it in each server process environment and restart; there is no supported shared `api multipart_listing` key and `mcli admin config set` must not be used to select the mode. Invalid values log a diagnostic and use `legacy` without discarding other API settings.
+**Unreleased #79 follow-up:** `MINIO_API_MULTIPART_LISTING` is ignored with a startup warning. Listing always scans persistent upload metadata. No replacement setting is needed. Confirmed historical records missing both identity fields are omitted; partial/invalid identities, uncertain coverage and scan resource limits remain errors. Known historical uploads still support ordinary part upload, completion and cancellation. The obsolete shared `api multipart_listing` key is tolerated without discarding other API settings.
 
-Legacy keeps exact-key/cache listing limitations. Strict mode scans durable upload metadata and requires all writers to be upgraded and old uploads to be drained first. Missing identity can prevent proving which bucket owns a legacy upload, so **an upload in another bucket can still make this bucket's strict listing return 503**. A valid identity can be filtered early; this is not an unconditional cross-bucket failure for every old native-ID record.
+The signed, read-only `GET /minio/admin/v3/multipart-preflight` endpoint still requires `admin:StorageInfo`. It reports `mode=persistent`; `ready` means all drives were inspected without errors or observed historical records, **not** that listing is enabled. No forced drain or successful preflight is required. Every new writer must be upgraded for all subsequently created uploads to carry identity. Each page still scans the multipart namespace within the existing 100,000 aggregate directory-entry and 30-second budgets. See the [candidate contract and limits](/blog/design/list-multipart-uploads/#implementation).
 
-Use the read-only, SigV4-authenticated `GET /minio/admin/v3/multipart-preflight` endpoint with `admin:StorageInfo`. Check `mode`, `ready`, `complete`, `scannedEntries`, `legacyUploads` and all per-set drive coverage. An incomplete scan is not a clean result; readiness cannot prove that an old writer will not create another legacy upload. The 100,000-entry budget counts directory entries on every drive, including hash directories, not unique uploads. Both modes now cap pages at 1,000 uploads, reduced from 10,000. See the [upgrade, preflight and rollback procedure](/blog/design/list-multipart-uploads/#implementation).
+**Published Server 20260916:** the old environment switch still accepts `legacy` (default) or `strict`, and strict requires its historical upgrade, drain and capacity prerequisites. Server 20260903 has no such switch. Follow the [September 16 contract](/blog/design/list-multipart-uploads/#implementation-20260916) when operating those older binaries.
 
 ## HTTP header and idle timeouts {#envvar.MINIO_READ_HEADER_TIMEOUT}
 

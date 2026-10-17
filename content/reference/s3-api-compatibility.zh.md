@@ -64,7 +64,8 @@ PutObjectAcl
 #### 与 S3 API 在多部分上传方面的差异 {#id5}
 
 - 已发布的 Server 20260903：`ListMultipartUploads` 将非空 `prefix` 当成精确对象名；空 prefix 使用节点本地易失缓存，不具备完整分页、marker 和 delimiter 语义。
-- Server 20260916 通过 [PR #198](https://github.com/pgsty/silo/pull/198) 增加持久扫描与全局分页，并在原生 marker 对应上传被删除后继续翻页。经 #213 的兼容性修复，默认使用保留旧限制的 `legacy` 模式；严格模式仅通过 `MINIO_API_MULTIPART_LISTING=strict` 显式启用。启用严格模式前需要所有 writer 升级、旧上传排空、只读预检及容量验收；严格模式在覆盖不足、旧格式或资源超限时返回 503。普通升级不要求切换模式或强制排空上传。排序、扫描容量与迟到创建写入的取消边界见[实现与升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。发布不代表严格模式已通过各部署的容量验收。
+- Server 20260916 以可选 strict 模式增加持久扫描，默认仍保留 legacy 精确键／缓存行为。运行该版本时仍适用其[历史升级契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
+- **#79 待发布后续修复：** 统一使用持久列举，全局处理前缀、目录分组和分页；忽略模式环境变量。确认可读且两个身份字段都不存在的旧上传被省略，不再阻断新上传；删除旧精确键捷径。省略历史记录是明确的 S3 兼容性例外。元数据错误、覆盖不足和资源超限仍报错。预检只作诊断，取消保留原有默认的读取 quorum／尽力删除行为。每页仍需扫描磁盘，迟到创建写入仍可能在取消后恢复上传。详见[候选契约、容量与限制](/zh/blog/design/list-multipart-uploads/#implementation)。
 - `PutBucketLifecycle` 不支持 `AbortIncompleteMultipartUpload` 生命周期动作。
 
 ## 存储桶 API {#id6}
