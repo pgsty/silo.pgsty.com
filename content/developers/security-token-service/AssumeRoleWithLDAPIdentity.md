@@ -91,7 +91,7 @@ The XML response for this API endpoint is similar to the AWS [AssumeRoleWithLDAP
 
 - `AccessKeyId` - The access key applications use for authentication.
 - `SecretKeyId` - The secret key applications use for authentication.
-- `Expiration` - The <a id="index-0"></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) date and time after which the credentials expire.
+- `Expiration` - The <a id="index-0" data-td-print-local></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) date and time after which the credentials expire.
 - `SessionToken` - The session token applications use for authentication. Some SDKs may require this field when using temporary credentials.
 
 The following example is similar to the response returned by the MinIO STS `AssumeRoleWithLDAPIdentity` endpoint:

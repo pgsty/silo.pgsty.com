@@ -103,9 +103,9 @@ We did consider several [**alternatives**](/blog/post/minio-alternative/), but n
 We use MinIO ourselves, so keeping the supply chain alive was not optional — **it had to be done.**
 As early as December 2025, when MinIO announced maintenance mode, I had already built [CVE-patched](https://nvd.nist.gov/vuln/detail/CVE-2025-62506) binaries and switched to them.
 
-[![releases.webp](releases.webp)](https://github.com/pgsty/minio/releases/tag/RELEASE.2025-12-03T12-00-00Z)
+[![releases.webp](releases.webp)](https://github.com/pgsty/silo/releases/tag/RELEASE.2025-12-03T12-00-00Z)
 
-> [pgsty/minio RELEASE.2025-12-03T12-00-00Z](https://github.com/pgsty/minio/releases/tag/RELEASE.2025-12-03T12-00-00Z)
+> [pgsty/minio RELEASE.2025-12-03T12-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2025-12-03T12-00-00Z)
 
 ------
 
@@ -128,7 +128,7 @@ The ironic part: this didn't even require reverse engineering.
 You just revert the `minio/console` submodule to the previous version.
 They swapped a dependency version to replace the full console with a stripped-down one. The code was always there.
 
-[![console.webp](console.webp)](https://github.com/pgsty/minio/commit/8630937e7d1c3426ae28508e06f7091d7bde3a49#diff-3295df7234525439d778f1b282d146a4f1ff6b415248aaac074e8042d9f42d63L424)
+[![console.webp](console.webp)](https://github.com/pgsty/silo/commit/8630937e7d1c3426ae28508e06f7091d7bde3a49#diff-3295df7234525439d778f1b282d146a4f1ff6b415248aaac074e8042d9f42d63L424)
 
 We put it back.
 
@@ -153,7 +153,7 @@ You need a stable artifact you can put in a Dockerfile, an Ansible playbook, or 
 
 If you're using Docker, just swap `minio/minio` for `pgsty/minio`.
 
-For native Linux installs, grab RPM/DEB packages from the [GitHub Release](https://github.com/pgsty/minio/releases/tag/RELEASE.2026-02-14T12-00-00Z) page.
+For native Linux installs, grab RPM/DEB packages from the [GitHub Release](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-02-14T12-00-00Z) page.
 You can also use [pig](https://github.com/pgsty/pig) (the PG extension package manager) for easy installation,
 or configure the [**pigsty-infra**](https://pigsty.io/docs/repo/infra) APT/DNF repo to install from it:
 

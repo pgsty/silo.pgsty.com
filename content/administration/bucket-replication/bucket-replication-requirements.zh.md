@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-bucket-replication-requirements"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 存储桶复制使用规则将一个 MinIO 部署中的存储桶内容同步到远端 MinIO 部署中的存储桶。
 

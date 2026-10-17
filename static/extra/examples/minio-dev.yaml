@@ -22,15 +22,15 @@ metadata:
 spec:
   containers:
   - name: minio
-    image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
+    image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
     env:
     - name: MINIO_UPDATE
       value: "off"
-    command:
-    - /bin/bash
-    - -c
-    args: 
-    - minio server /data --console-address :9001
+    args:
+    - server
+    - /data
+    - --console-address
+    - ":9001"
     volumeMounts:
     - mountPath: /data
       name: localvolume # Corresponds to the `spec.volumes` Persistent Volume

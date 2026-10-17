@@ -80,7 +80,7 @@ The directories or drives the [`minio server`](#command-minio.server) process us
 
 The [`DIRECTORIES`](#minio.server.DIRECTORIES) path(s) *must* be empty when first starting the [`minio`](#command-minio.server) process.
 
-The [`minio server`](#command-minio.server) process requires *at least* 4 drives or directories to enable [erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding).
+SILO supports [erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding) with a minimum of 2 drives or directory endpoints. A two-drive set defaults to `EC:1`: one data shard and one parity shard, with a read quorum of 1 and a write quorum of 2. If one drive becomes unavailable while the service is running, existing objects can still be read when their data and metadata on the remaining drive are intact, but writes cannot continue. A single-drive deployment uses `EC:0` and provides no erasure-code redundancy.
 
 > [!WARNING]
 > **Important**

@@ -202,3 +202,5 @@ Left open: the three follow-ups above, and one cosmetic consequence — a store 
 Every one of these keys worked perfectly through the environment variable, which is why three feature PRs could ship, get reviewed, get used, and never notice that the config-file half of the interface was stillborn. The parser and the schema are two descriptions of the same contract, maintained by hand, four surfaces wide — and for two and a half years nothing in the build checked that they agree.
 
 If only one sentence survives: **when two artifacts must stay identical and only convention binds them, the divergence is not a risk but a schedule** — put a machine between them, then mutate the machine until you have watched it catch the drift you fear.
+
+**Follow-up status:** the Postgres/MySQL discrete-field migration left open at this review point was repaired by `f1ba68358` and shipped in Server 20260903. Enabled targets without a canonical DSN now explicitly prevent startup. See [database notification migration](/blog/design/notify-url/); this does not close the separate tokenizer observations.

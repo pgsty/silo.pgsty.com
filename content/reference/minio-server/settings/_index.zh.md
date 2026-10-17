@@ -10,7 +10,7 @@ upstream_modified: false
 <a id="minio-server-configuration-settings"></a>
 <a id="minio-server-environment-variables"></a>
 <a id="minio-environment-variables"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程将其配置存储在存储后端 [`directory`](/zh/reference/minio-server/#minio.server.DIRECTORIES) 中。
 

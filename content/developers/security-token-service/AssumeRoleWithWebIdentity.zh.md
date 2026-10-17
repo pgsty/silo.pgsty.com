@@ -31,7 +31,7 @@ POST https://minio.example.net?Action=AssumeRoleWithWebIdentity
 &Policy={}
 ```
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ### 请求查询参数 {#minio-assumerolewithwebidentity-query-parameters}
 
@@ -92,7 +92,7 @@ POST https://minio.example.net?Action=AssumeRoleWithWebIdentity
 
 - `AccessKeyId` - 应用用于认证的访问密钥。
 - `SecretKeyId` - 应用用于认证的 Secret Key。
-- `Expiration` - 凭证过期的 <a id="index-0"></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) 日期和时间。
+- `Expiration` - 凭证过期的 <a id="index-0" data-td-print-local></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) 日期和时间。
 - `SessionToken` - 应用用于认证的会话 token。某些 SDK 在使用临时凭证时可能需要此字段。
 
 以下示例与 MinIO STS `AssumeRoleWithWebIdentity` 端点返回的响应类似：

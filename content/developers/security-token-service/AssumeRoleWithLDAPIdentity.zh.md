@@ -83,7 +83,7 @@ Name (DN) 匹配的 <a href="/zh/operations/external-iam/#minio-external-identit
 
 - `AccessKeyId` - 应用用于认证的访问密钥。
 - `SecretKeyId` - 应用用于认证的密钥。
-- `Expiration` - 凭据过期时间，采用 <a id="index-0"></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) 日期时间格式。
+- `Expiration` - 凭据过期时间，采用 <a id="index-0" data-td-print-local></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) 日期时间格式。
 - `SessionToken` - 应用用于认证的会话令牌。某些 SDK 在使用临时凭据时可能需要此字段。
 
 以下示例与 MinIO STS `AssumeRoleWithLDAPIdentity` 端点返回的响应类似：

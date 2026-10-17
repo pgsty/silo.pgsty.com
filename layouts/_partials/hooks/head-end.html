@@ -13,7 +13,10 @@
       Both render inside the theme shell now, so the links load here rather
       than from a hand-written <head>. */ -}}
 {{- if and (ne $outputFormat "print") (or .IsHome (eq .Type "download")) }}
-{{- range slice "css/landing-v3.css" "css/silo-v3.css" "css/download.css" "css/silo-footer.css" }}
+{{- range slice "css/landing-v3.css" "css/silo-v3.css" "css/download.css" }}
 <link rel="stylesheet" href="{{ . | relURL }}?v={{ substr (md5 (readFile (printf "static/%s" .))) 0 8 }}">
 {{- end }}
+{{- end }}
+{{- if ne $outputFormat "print" }}
+<link rel="stylesheet" href="{{ "css/silo-footer.css" | relURL }}?v={{ substr (md5 (readFile "static/css/silo-footer.css")) 0 8 }}">
 {{- end }}

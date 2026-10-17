@@ -1,0 +1,7 @@
+{{- /* Keep SILO's product footer at the theme's shared footer entry point. */ -}}
+{{- $style := partial "footer-style.html" . -}}
+{{- if eq $style "fat" -}}
+  {{- partial "silo-footer.html" . -}}
+{{- else if eq $style "slim" -}}
+  {{- partial "shell/footer-line.html" . -}}
+{{- end -}}

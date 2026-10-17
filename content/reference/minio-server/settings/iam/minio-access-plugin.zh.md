@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-server-envvar-external-access-management-plugin"></a>
 
 本页说明如何配置 MinIO Access Management Plugin 以启用外部授权管理。 有关这些设置的使用教程，请参见 [MinIO 外部访问管理插件](/zh/administration/identity-access-management/pluggable-authorization/#minio-external-access-management-plugin)。

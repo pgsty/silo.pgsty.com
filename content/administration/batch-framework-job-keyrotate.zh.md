@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-batch-framework-keyrotate-job"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 > [!NOTE]
 > **新增: MinIO**
@@ -20,7 +20,7 @@ MinIO Batch Framework 允许你使用 YAML 格式的作业定义文件（“批�
 
 YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，将密钥轮换限制在特定对象集合上。 你还可以定义重试次数，或设置通知 endpoint 和 token。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 密钥轮换批处理作业参考 {#minio-batch-framework-keyrotate-job-ref}
 

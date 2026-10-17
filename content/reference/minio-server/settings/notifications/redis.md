@@ -3,7 +3,7 @@ title: "Redis Notification Settings"
 url: "/reference/minio-server/settings/notifications/redis/"
 weight: 90
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/redis.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="redis-notification-settings"></a>
@@ -38,7 +38,7 @@ export MINIO_NOTIFY_REDIS_FORMAT_PRIMARY="namespace"
 
 
 export MINIO_NOTIFY_REDIS_ENABLE_SECONDARY="on"
-export MINIO_NOTIFY_REDIS_REDIS_ADDRESS_SECONDARY="redis-endpoint2.example.net:9200"
+export MINIO_NOTIFY_REDIS_ADDRESS_SECONDARY="redis-endpoint2.example.net:9200"
 export MINIO_NOTIFY_REDIS_KEY_SECONDARY="bucketevents"
 export MINIO_NOTIFY_REDIS_FORMAT_SECONDARY="namespace"
 ```

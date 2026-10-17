@@ -38,23 +38,23 @@ While you can change erasure parity settings at any time, objects written with a
 
 ### 1. Download the Silo Binary {#download-the-minio-binary}
 
-Download the Windows archive for your architecture from [Download & Install](/download/#server), verify it against the checksum published with the same release, and extract `minio.exe`.
+Download the Windows archive for your architecture from [Download & Install](/download/#server), verify it against the checksum published with the same release, and extract `silo.exe`.
 
 The next step includes instructions for running the executable. Launch the server from PowerShell or the Command Prompt rather than by double-clicking it in Explorer.
 
 ### 2. Launch the MinIO Server {#launch-the-minio-server}
 
-In PowerShell or the Command Prompt, navigate to the location of the executable or add the path of the `minio.exe` file to the system `$PATH`. computer.
+In PowerShell or the Command Prompt, navigate to the location of the executable or add the path of the `silo.exe` file to the system `$PATH`. computer.
 
 {{< tabs group="multi-drive-single-drive" >}}
 {{< tab label="Multi-Drive" value="multi-drive" >}}
 For Windows hosts with multiple drives, you can specify a sequential set of drives to use for configuring MinIO in the Single-Node Multi-Drive (SNMD) topology:
 
 ```text
-.\minio.exe server {D...G}:\minio --console-address :9001
+.\silo.exe server {D...G}:\minio --console-address :9001
 ```
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints its output to the system console, similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints its output to the system console, similar to the following:
 
 ```shell
 API: http://192.0.2.10:9000  http://127.0.0.1:9000
@@ -79,10 +79,10 @@ The process is tied to the current PowerShell or Command Prompt window. Closing 
 Use this command to start a local MinIO instance in the `C:\minio` folder. You can replace `C:\minio` with another drive or folder path on the local
 
 ```text
-.\minio.exe server C:\minio --console-address :9001
+.\silo.exe server C:\minio --console-address :9001
 ```
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints its output to the system console, similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints its output to the system console, similar to the following:
 
 ```shell
 API: http://192.0.2.10:9000  http://127.0.0.1:9000
@@ -107,7 +107,7 @@ The process is tied to the current PowerShell or Command Prompt window. Closing 
 
 ### 3. Connect your Browser to the MinIO Server {#connect-your-browser-to-the-minio-server}
 
-Access the [MinIO Console](/administration/minio-console/#minio-console) by going to a browser (such as Microsoft Edge) and going to `http://127.0.0.1:9001` or one of the Console addresses specified in the [`minio server`](/reference/minio-server/#command-minio.server) command’s output. For example, `Console: http://192.0.2.10:9001 http://127.0.0.1:9001` in the example output indicates two possible addresses to use for connecting to the Console.
+Access the [MinIO Console](/administration/minio-console/#minio-console) by going to a browser (such as Microsoft Edge) and going to `http://127.0.0.1:9001` or one of the Console addresses specified in the [`silo server`](/reference/minio-server/#command-minio.server) command’s output. For example, `Console: http://192.0.2.10:9001 http://127.0.0.1:9001` in the example output indicates two possible addresses to use for connecting to the Console.
 
 While port `9000` is used for connecting to the API, MinIO automatically redirects browser access to the MinIO Console.
 

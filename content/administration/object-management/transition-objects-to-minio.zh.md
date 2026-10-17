@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-lifecycle-management-transition-to-minio"></a>
 
 本页中的操作步骤用于创建新的对象生命周期管理规则，将对象从主 MinIO 部署上的某个存储桶迁移到远程 MinIO 部署上的某个存储桶。 该流程支持成本管理策略，例如将对象从使用 NVMe 存储的“热” MinIO 部署分层到使用 SSD 的“温” MinIO 部署。
@@ -19,7 +19,7 @@ upstream_modified: true
 
 使用 [`mc alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 命令为源 MinIO 集群创建别名。 创建别名时，需要为源集群和目标集群上的用户指定 access key。 所指定的用户必须具备配置和应用迁移操作所需的 [权限](#minio-lifecycle-management-transition-to-minio-permissions)。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ### 所需的源 MinIO 权限 {#minio-lifecycle-management-transition-to-minio-permissions}
 
@@ -62,7 +62,7 @@ MinIO 要求对要为其创建生命周期管理规则的存储桶授予以下�
 }
 ```
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ### 所需的远程 MinIO 权限 {#minio-lifecycle-management-transition-to-minio-permissions-remote}
 

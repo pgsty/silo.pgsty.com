@@ -2,15 +2,18 @@
 title: "When the Total Is Unknown: Folder Download Progress"
 linkTitle: "Folder Download Progress"
 date: 2026-08-23
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "Ruohang Feng"
-description: "PRD for replacing NaN% with truthful indeterminate progress when SILO Console downloads a streamed folder ZIP, without changing the server API or ordinary file downloads."
+summary: "PRD for replacing NaN% with truthful indeterminate progress when SILO Console downloads a streamed folder ZIP, without changing the server API or ordinary file downloads."
 tags: [Design, Console, Download]
 weight: 20
+draft: false
 url: "/blog/design/dir-percentage/"
 ---
 
-> **Status**: Shipped in SILO Console 2.2.0 (`16960f7ab`); the server embeds it since its Console pin was updated (`4d6e1ea8e`) · **Priority**: P1 · **Owner**: [`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **Related issue**: [`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD review**: Claude Fable 5 (`xhigh`) — **APPROVE** · **Implementation review**: Claude Fable 5 (`xhigh`), 2026-08-23 — **APPROVE**, no P0/P1/P2 findings
+> **Historical scope:** this is the Console 2.2.0 progress repair, included in Server 20260903's embedded Console. [Console 2.4.1](/blog/release/console-2.4.1/#browser) subsequently added file streaming and native browser handoff, eliminating the complete JavaScript ZIP Blob. Transport descriptions and follow-ups in the original PRD below refer to the 2.2.0 design point.
+
+> **Status**: Shipped in SILO Console 2.2.0 (`16960f7ab`); the server embeds it since its Console pin was updated (`edc8be6ed`) · **Priority**: P1 · **Owner**: [`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **Related issue**: [`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD review**: Claude Fable 5 (`xhigh`) — **APPROVE** · **Implementation review**: Claude Fable 5 (`xhigh`), 2026-08-23 — **APPROVE**, no P0/P1/P2 findings
 
 SILO Console shows `NaN%` in Downloads / Uploads while downloading a folder. The ZIP normally keeps streaming and the stored objects are intact, but the progress bar has crossed from "unknown" into an invalid determinate state. Users see a full-looking bar, assume the transfer failed or finished, and retry it.
 
@@ -417,12 +420,12 @@ There is no data migration. If the frontend change regresses, Silo can roll back
 - [x] Complete, failed, and cancelled rows all leave indeterminate mode.
 - [x] The streamed ZIP and server response contract remain unchanged.
 - [x] Typecheck, production build, and automated regressions pass locally.
-- [ ] A Console release is published.
-- [ ] Silo updates the Console dependency and passes candidate verification.
+- [x] Console 2.2.0 is published.
+- [x] Server 20260903 includes the updated Console; see its release evidence.
 
 ## Follow-up work {#follow-ups}
 
-Four adjacent improvements deserve separate design records:
+Five adjacent improvements deserve separate design records:
 
 1. Stream large folder downloads directly to the browser or filesystem instead of holding the full Blob in memory.
 2. Replace the Object Manager's boolean combination with a discriminated progress/terminal state.
@@ -431,3 +434,9 @@ Four adjacent improvements deserve separate design records:
 5. Repair the pre-existing Blob JSON error decoder and request-trace cleanup on HTTP failure paths.
 
 None is required to stop the current UI from lying. The next maintenance iteration should first restore the smallest honest contract: known totals get percentages; unknown totals remain unknown.
+
+## Later implementation and the original design {#later-contract}
+
+The Console 2.2.0 integration also made `size` an always-present JSON field and repaired ZIP error propagation: unreadable entries are no longer silently skipped; errors before output can return 500 and errors afterward interrupt the stream. The no-API/resource-management-change statements above describe only the original progress-calculation patch, not the whole release.
+
+Current single-folder downloads are handed to the browser. A completed Console row records the handoff, not completion of all bytes; track and cancel the transfer in the browser download manager. Multi-selection file-writer/native handoff paths are described in [Console 2.4.1](/blog/release/console-2.4.1/#browser). Size normalization remains defensive support for old responses, not evidence that the current model omits zero values.

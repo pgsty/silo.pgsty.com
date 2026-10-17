@@ -56,7 +56,7 @@ MinIO 为 MinIO Server 指标提供了专用的 Grafana 仪表板。 关于该�
 
 <img src="/images/grafana-bucket.png" alt="MinIO Grafana 仪表板示例，展示了 MinIO 存储桶的多种采集指标。" style="max-width: 600px; height: auto;" />
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ### MinIO 节点指标仪表板 {#minio-node-grafana-metrics}
 
@@ -64,7 +64,7 @@ MinIO 为 MinIO Server 指标提供了专用的 Grafana 仪表板。 关于该�
 
 <img src="/images/grafana-node.png" alt="MinIO Grafana 仪表板示例，展示了 MinIO 节点的多种采集指标。" style="max-width: 600px; height: auto;" />
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ### MinIO 复制指标仪表板 {#minio-replication-grafana-metrics}
 

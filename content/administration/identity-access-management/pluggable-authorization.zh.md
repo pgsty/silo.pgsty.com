@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-external-access-management-plugin"></a>
 
 ## 概述 {#id2}

@@ -95,9 +95,9 @@ MinIO 公司可以归档一个仓库，但它归档不了 [AGPL](https://github.
 这不是一个 “要不要做” 的问题，而是 **不做不行**。
 早在2025年12月 MinIO 宣布维护模式时，我就已经自己动手创建了修复了 CVE 的二进制。
 
-[![releases.webp](releases.webp)](https://github.com/pgsty/minio/releases/tag/RELEASE.2025-12-03T12-00-00Z)
+[![releases.webp](releases.webp)](https://github.com/pgsty/silo/releases/tag/RELEASE.2025-12-03T12-00-00Z)
 
-> [pgsty/minio RELEASE.2025-12-03T12-00-00Z](https://github.com/pgsty/minio/releases/tag/RELEASE.2025-12-03T12-00-00Z)
+> [pgsty/minio RELEASE.2025-12-03T12-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2025-12-03T12-00-00Z)
 
 ------
 
@@ -119,7 +119,7 @@ MinIO 公司可以归档一个仓库，但它归档不了 [AGPL](https://github.
 讽刺的是，这甚至不需要逆向工程。你只需要把 `minio/console` 子模块的版本号改回去就行了。
 也就是说，MinIO 当初做的事情就是 改了一个依赖版本号，把完整控制台换成了残废版。功能都在那，代码都在那，他们只是给你关上了门。
 
-[![console.webp](console.webp)](https://github.com/pgsty/minio/commit/8630937e7d1c3426ae28508e06f7091d7bde3a49#diff-3295df7234525439d778f1b282d146a4f1ff6b415248aaac074e8042d9f42d63L424)
+[![console.webp](console.webp)](https://github.com/pgsty/silo/commit/8630937e7d1c3426ae28508e06f7091d7bde3a49#diff-3295df7234525439d778f1b282d146a4f1ff6b415248aaac074e8042d9f42d63L424)
 
 他们拆了门窗，我们给装回去了。
 
@@ -143,7 +143,7 @@ MinIO 公司可以归档一个仓库，但它归档不了 [AGPL](https://github.
 
 如果你在用 Docker 镜像，把 `minio/minio` 简单换成 `pgsty/minio` 就好了
 
-喜欢原生 Linux 安装的朋友，可以直接从 [GitHub Release](https://github.com/pgsty/minio/releases/tag/RELEASE.2026-02-14T12-00-00Z) 页面下载 RPM/DEB 包。
+喜欢原生 Linux 安装的朋友，可以直接从 [GitHub Release](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-02-14T12-00-00Z) 页面下载 RPM/DEB 包。
 老冯的 pig （PG扩展包管理器）也可以简单的免翻墙安装。你也可以自己配置启用 [**pigsty-infra**](https://pigsty.cc/docs/repo/infra) APT/DNF 软件仓库来安装。
 
 ```bash

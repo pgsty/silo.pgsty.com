@@ -8,7 +8,7 @@ math: true
 ---
 
 <a id="minio-hardware-checklist"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 在为生产级分布式 MinIO 部署规划硬件配置时，请使用以下检查清单。
 
@@ -23,7 +23,7 @@ math: true
 - 计划部署的站点数量
 - 预期的存储桶数量
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 生产硬件建议 {#deploy-minio-distributed-recommendations}
 
@@ -155,7 +155,7 @@ math: true
 
 上述最低建议体现了 MinIO 在协助企业客户部署到多种 IT 基础设施、同时保持目标 SLA/SLO 方面的实践经验。 虽然 MinIO 可能在低于最低建议的拓扑上运行，但任何潜在的成本节省都要以可靠性、性能或整体功能下降为代价。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ### 网络 {#minio-hardware-checklist-network}
 
@@ -192,7 +192,7 @@ MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、�
 - 10GbE 网络大约可支撑 1.25GB/s，理论上可支撑 10 到 12 块机械盘
 - 25GbE 网络大约可支撑 3.125GB/s，理论上可支撑约 30 块机械盘
 
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ### 内存 {#minio-hardware-checklist-memory}
 
@@ -231,7 +231,7 @@ MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、�
 >
 > 从 [RELEASE.2024-01-28T22-35-53Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-01-28T22-35-53Z) 开始，MinIO 在分布式部署中会为每个节点预分配 2GiB 内存，在单节点部署中会预分配 1GiB 内存。
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 ### 存储 {#minio-hardware-checklist-storage}
 

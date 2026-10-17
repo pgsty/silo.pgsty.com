@@ -6,6 +6,13 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
+>
+> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
+
 The IAM repairs in [Server #191](https://github.com/pgsty/silo/pull/191) and
 [#192](https://github.com/pgsty/silo/pull/192) persist deletion revisions and
 parent revocation boundaries. They prevent delayed site events from restoring
@@ -13,9 +20,9 @@ revoked identities and older grants. They require a coordinated upgrade of all
 participating servers, including nodes without site replication that share an
 IAM backend. Mixed old/new nodes on that backend and rolling downgrade are unsupported.
 
-**Release status:** these repairs are in the [September source baseline](/compatibility/versions/#september-reliability),
-not Server 20260903. This procedure is preparation for a build containing those
-repairs. Isolated upgrade/restore observations and remaining recovery checks are
+**Release status:** these repairs shipped in [Server 20260916](/blog/release/silo-20260916/)
+and are absent from Server 20260903. This procedure covers coordinated upgrades
+and recovery for the repaired version. Isolated upgrade/restore observations and remaining recovery checks are
 tracked in [#200](https://github.com/pgsty/silo/issues/200); see the
 [validation scope](#validation). Publication of this page does not establish
 production upgrade acceptance.
@@ -58,6 +65,13 @@ deletion history cannot be reconstructed from a missing user record.
 **Stop here** if any participating node, backend, backup, required key, unknown
 peer or rollback procedure is unaccounted for. Do not admit an old snapshot to a
 live replication group merely to inspect its contents.
+
+Before upgrading, follow the [password-policy migration](/compatibility/password-permissions/).
+Where an existing `Deny admin:CreateUser` also meant to prohibit changing one's own
+password, add `admin:ChangeMyPassword` to the same Deny with its existing scope and
+conditions; retain both through rollback. Server 20260916 keeps multipart listing in
+`legacy` by default. An ordinary upgrade does not require strict mode; only an
+explicit opt-in needs the [multipart preflight and drain procedure](/blog/design/list-multipart-uploads/#implementation-20260916).
 
 ## Preserve a complete recovery point {#backup}
 
@@ -140,6 +154,41 @@ Reopen access only after version identity, backend recovery, IAM loading,
 replication and both credential checks pass. If a stale credential succeeds,
 keep affected sites isolated and investigate; restarting until health is green
 does not resolve the authorization failure.
+
+## Errors and observability {#observability}
+
+A revocation can persist and then return HTTP 500 with
+`IAM revocation committed; cleanup failed` when dependent cleanup fails. This does
+not roll back the revocation. Keep IAM writes paused, inspect the identity and
+logs, and retry cleanup; do not blindly repeat deletion after a same-name identity
+has been recreated. This path publishes to local sibling caches but may skip the
+immediate cross-site hook, so verify later site reconciliation. STS fails closed
+with `STSInternalError` if it cannot read the parent revocation boundary; that is
+neither successful issuance nor proof of a revoked credential.
+
+Collect these from every process at `/minio/metrics/v3/cluster/iam`:
+
+| Metric | Meaning |
+| --- | --- |
+| `minio_cluster_iam_revocation_records` | Persistent revocation records observed by this process |
+| `minio_cluster_iam_revocation_heal_failures` | IAM reconciliation failure count |
+| `minio_cluster_iam_revocation_heal_duration_millis` | Latest reconciliation duration |
+| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | Unix time of the last successful reconciliation |
+
+These are process metrics, not additive unique-record counts. The three `heal_*`
+metrics advance only with site replication enabled and on the node holding the
+leader lease. A shared-backend deployment without site replication performs no
+such pass; zero healing metrics are expected. Tombstones have no TTL or automatic
+compaction: budget for durable capacity and startup reads. Initial reconciliation
+may backfill missing revisions and produce a write burst. Neither its interval
+nor these metrics establish a convergence SLA.
+
+A deleted access-key canary normally returns `403 InvalidAccessKeyId`; other
+revocation mechanisms require their appropriate authorization failure, not a
+universal error-code assertion. A 5xx, timeout or missing object is inconclusive.
+Live-record export/import omits deletion history and cannot preserve the guarantee
+of earlier revocations by itself. See the [IAM design](/blog/design/iam-revocations/)
+for ordering and remaining limitations.
 
 ## Rollback and restore {#rollback}
 

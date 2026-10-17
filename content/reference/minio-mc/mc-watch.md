@@ -94,7 +94,7 @@ For example, given a [`ALIAS`](#mc.watch.ALIAS) of `play/mybucket` and a [`--suf
 
 *Optional*
 
-Enables [JSON lines](http://jsonlines.org/)<a id="json-lines"></a> formatted output to the console.
+Enables [JSON lines](http://jsonlines.org/)<a id="json-lines" data-td-print-local></a> formatted output to the console.
 
 For example:
 

@@ -1,0 +1,25 @@
+columns:
+  - title: "Resources"
+    links:
+      - { label: "SILO Download", url: "download/#server" }
+      - { label: "MCLI Download", url: "download/#client" }
+      - { label: "Release Notes", url: "blog/release/" }
+      - { label: "Security Notes", url: "blog/security/" }
+  - title: "Documentation"
+    links:
+      - { label: "Operations", url: "operations/" }
+      - { label: "Administration", url: "administration/" }
+      - { label: "Developers", url: "developers/" }
+      - { label: "Reference", url: "reference/" }
+  - title: "Ecosystem"
+    links:
+      - { label: "GitHub", url: "https://github.com/pgsty/silo", external: true }
+      - { label: "Issue", url: "https://github.com/pgsty/silo/issues", external: true }
+      - { label: "Pigsty", url: "https://pigsty.io/", external: true }
+      - { label: "PG Center", url: "https://pg.center/docs/reference/", external: true, hreflang: "en" }
+  - title: "About"
+    links:
+      - { label: "License", url: "about/license/" }
+      - { label: "Trademark", url: "about/trademark/" }
+      - { label: "Attribution", url: "about/attribution/" }
+      - { label: "Security Policy", url: "about/security/" }

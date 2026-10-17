@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="kubernetes-minio"></a>
+<a id="kubernetes-minio" data-td-print-local></a>
 
 一个 MinIO 租户由部署在单个命名空间中的一整组 Kubernetes 资源组成，用于支撑 MinIO 对象存储服务。
 
@@ -31,7 +31,7 @@ MinIO **强烈建议** 将租户部署到带有本地直连存储的 Kubernetes 
 
 应避免将 MinIO 租户与其他高性能软件部署在同一 worker node 上；如果确有必要，则必须配置合适的限制和约束，以保证 MinIO 获得所需的计算与存储资源。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ### 持久卷 {#deploy-minio-tenant-pv}
 

@@ -2,7 +2,7 @@
 title: "Config Environment Files Are Not Shell Scripts"
 linkTitle: "Config Env File Contract"
 date: 2026-08-28
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   MINIO_CONFIG_ENV_FILE is parsed directly by SILO, not sourced by a shell. A shell-identifier check therefore rejected valid named configuration targets such as my-hook. This record defines the compatible key grammar, whitespace and quoting rules, failure behavior, security boundary, and regression tests.
@@ -11,6 +11,8 @@ weight: 16
 draft: false
 url: "/blog/design/config-env-file/"
 ---
+
+> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
 
 This record defines the startup contract for `MINIO_CONFIG_ENV_FILE` and explains the compatibility repair committed in SILO as `2aea7fe9c`.
 
@@ -139,8 +141,10 @@ The visible compatibility changes are intentional:
 - malformed input stops startup with a redacted location-aware error;
 - a valid punctuation-bearing target is no longer rejected merely because a shell could not assign it with `NAME=value` syntax.
 
-This record describes a source commit, not a delivered release. Until the commit is pushed, tested remotely, merged, tagged, packaged, imaged, and deployed, operators must not assume a public SILO binary contains this parser contract.
+The parser contract is included in Server 20260903. Verify the artifact running in each deployment separately.
 
 ## Conclusion {#conclusion}
 
 Configuration compatibility depends on validating the format SILO actually consumes. `MINIO_CONFIG_ENV_FILE` borrows a small amount of dotenv-like syntax for operator convenience, but it is not executed by a shell. The repair restores named-target compatibility while retaining strict NUL, invisibility, redaction, and fail-fast guarantees.
+
+The original [#65](https://github.com/pgsty/silo/issues/65) also exposed a restart trap: the old parser stored `KEY = new` as a trailing-space key `KEY `. A systemd cold start could work because systemd parses EnvironmentFile itself; an admin API re-exec inherited `KEY=old`, and the malformed new key did not replace it. Restart could succeed with stale credentials or KMS/IdP settings. The repair makes whitespace assignments take effect, so review their intended values before upgrading.

@@ -1,8 +1,9 @@
 // Silo-specific presentation layered on top of OINK. Documentation chrome,
 // search, content components, and blocks intentionally stay in the theme.
 
-:root,
-[data-bs-theme='light'] {
+// Preserve SILO's original palette for Slate; the other presets own their colors.
+:root[data-td-preset='slate'],
+[data-td-preset='slate'] [data-bs-theme='light'] {
   --bs-body-bg: #f1f4f8;
   --bs-body-bg-rgb: 241, 244, 248;
   --bs-body-color: #16222e;
@@ -31,7 +32,8 @@
   --td-brand-mark-gradient: linear-gradient(115deg, #1d588c 6%, #b4762e 94%);
 }
 
-[data-bs-theme='dark'] {
+[data-td-preset='slate'][data-bs-theme='dark'],
+[data-td-preset='slate'] [data-bs-theme='dark'] {
   --bs-body-bg: #0b1119;
   --bs-body-bg-rgb: 11, 17, 25;
   --bs-body-color: #e8eef6;
@@ -114,6 +116,20 @@ a {
   td:last-child {
     width: auto;
   }
+}
+
+// Keep the compatibility index readable inside OINK's scrollable table wrapper.
+.td-content .td-table-scroll > table.silo-compatibility-table {
+  width: 100%;
+  min-width: 44rem;
+  table-layout: fixed;
+
+  th:nth-child(1) { width: 36%; }
+  th:nth-child(2) { width: 20%; }
+  th:nth-child(3) { width: 28%; }
+  th:nth-child(4) { width: 16%; }
+
+  @media print { min-width: 0; }
 }
 
 // Imported MinIO docs cap screenshots with inline pixel max-width values.

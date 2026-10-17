@@ -10,12 +10,18 @@ icon: fa-solid fa-terminal
 
 `mcli` is Silo's build of the MinIO Client (`mc`). This page records where the two are interchangeable and where they differ.
 
-[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/) and [20260913](/blog/release/mcli-20260913/). The latest is [20260916](/blog/release/mcli-20260916/); historical notes retain their own comparison baselines.
+[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/) and [20260913](/blog/release/mcli-20260913/). The latest is [20261018](/blog/release/mcli-20261018/); historical notes retain their own comparison baselines.
 
 > [!TIP]
-> **Current release:** [RELEASE.2026-09-16T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z), package `20260916000000.0.0`, source `e952aa78f10a`. Six OS/architecture archives, RPM/DEB/APK and multi-architecture images are published. See the [release notes](/blog/release/mcli-20260916/) and [component matrix](/compatibility/versions/).
+> **Current release:** [RELEASE.2026-10-18T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z), package `20261018000000.0.0`, source `fa3b8bf72458`. Six OS/architecture archives, RPM/DEB/APK and multi-architecture images are published. See the [release notes](/blog/release/mcli-20261018/) and [component matrix](/compatibility/versions/).
 
 ## Current release changes {#current-release}
+
+20261018 uses **Go 1.27.2**, **silo-pkg v3.14.2** and upstream **minio-go v7.4.1**, with current Go x/* modules and targeted dependency fixes. The SDK cleans up failed multipart uploads after cancellation, sends retention timestamps in UTC and preserves requested STS durations. Parallel GET and ComposeObject remain opt-in; default transfers are unchanged.
+
+Command syntax, configuration, aliases and existing failure exit codes remain unchanged. Anonymous access to the release image and `latest` is verified for Linux amd64/arm64. Go embedders select `github.com/pgsty/mc v0.0.0-20261017101407-fa3b8bf72458`; see the [20261018 release notes](/blog/release/mcli-20261018/) for the dependency and artifact details.
+
+## Changes inherited from 20260916 {#release-20260916}
 
 20260916 uses pkg v3.14.1, upstream SDK `32e1f32cb176`, JWX v3.3.0 and Go 1.27.1.
 The SDK retries and reports S3 errors embedded in CopyObject HTTP 200 responses,
@@ -145,3 +151,5 @@ Moving from an official `mc` binary to `mcli`:
 [20260313]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-13T08-57-32Z
 [20260321]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-21T00-00-00Z
 [20260417]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-04-17T00-00-00Z
+
+The HTTP-200 CopyObject repair applies when mcli selects a single CopyObject: objects smaller than 64 MiB or explicit `--disable-multipart`. Larger copies normally use ComposeObject; this fix does not substitute for separate evidence for that path.

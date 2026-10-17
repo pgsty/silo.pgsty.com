@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-server-envvar-kes"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO Server 提供三组环境变量，用于管理 MinIO Server 与 Key Encryption Service (KES)、Key Management Service (KMS) 或静态密钥文件的交互方式。 这三组中只能定义一组。 如果定义了多种类型的环境变量组，MinIO 会返回错误。
 

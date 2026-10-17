@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-bucket-replication-serverside-oneway"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页面中的过程会创建一条新的存储桶复制规则，用于将对象从一个 MinIO 存储桶单向复制到另一个 MinIO 存储桶。 这些存储桶既可以位于同一个 MinIO 部署中，也可以位于不同的 MinIO 部署中。
 
@@ -75,7 +75,7 @@ upstream_modified: false
 > [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本过程仅说明该版本起的操作流程。
 
 <a id="minio-bucket-replication-one-way-minio-cli-create-remote-targets"></a>
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 #### 1) 创建新的存储桶复制规则 {#minio-bucket-replication-one-way-minio-cli-create-replication-rules}
 
@@ -103,7 +103,7 @@ mc replicate add ALIAS/BUCKET \
 
 可按需为 [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 指定其他受支持的可选参数。
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 #### 2) 验证复制配置 {#minio-bucket-replication-one-way-minio-cli-verify-replication-config}
 

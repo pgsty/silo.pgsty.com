@@ -15,10 +15,16 @@ Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub 
 从 release 资产中选取与平台匹配的软件包，安装前先校验：
 
 ```bash
-curl -fLO https://github.com/pgsty/silo/releases/download/<RELEASE-tag>/silo-<version>.<arch>.rpm
-sha256sum --check silo-<version>.<arch>.rpm.sha256sum   # 或手动比对
-sudo rpm -i silo-<version>.<arch>.rpm                    # Debian/Ubuntu：sudo dpkg -i silo_<version>_<arch>.deb
+SILO_TAG=RELEASE.2026-09-16T00-00-00Z
+SILO_RPM=silo-20260916000000.0.0-1PGSTY.x86_64.rpm
+SILO_URL="https://github.com/pgsty/silo/releases/download/$SILO_TAG"
+curl -fLO "$SILO_URL/$SILO_RPM"
+curl -fLO "$SILO_URL/$SILO_RPM.sha256sum"
+sha256sum --check "$SILO_RPM.sha256sum" && \
+  sudo dnf install "./$SILO_RPM"
 ```
+以上为 x86_64 RPM 示例；ARM64 使用 `.aarch64.rpm`，Debian/Ubuntu 使用下载页列出的 `.deb` 文件和对应校验和。
+
 
 使用 Pigsty 软件仓库时，`dnf install silo` / `apt install silo` 解析同样的工件（仓库可能落后于 GitHub Releases）。该软件包刻意**不**提供任何 `minio` 别名或 `Provides:` 关系——`minio` 与 `silo` 是并存的独立软件包，接管发生在 systemd 层而不是软件包替换层（见[接管](#takeover)）。
 
@@ -75,7 +81,7 @@ ExecStart=/usr/bin/silo server $MINIO_OPTS $MINIO_VOLUMES
 Restart=always
 ```
 
-- `Conflicts=minio.service`：systemd 不允许两者同时运行，起一个即停另一个，双向实现接管与回滚。
+- `Conflicts=minio.service`：systemd 不允许两个 unit 同时运行，起一个即停另一个。这只实现进程切换，不保证新旧版本的状态可安全回滚。
 - `EnvironmentFile` 链使 `/etc/default/minio` 中的 `MINIO_VOLUMES`、`MINIO_OPTS`、凭据与 KMS 配置原样生效。
 - `Type=notify`：`systemctl start` 仅在服务端真正就绪后返回成功。
 
@@ -89,7 +95,7 @@ silo healthcheck --url https://127.0.0.1:9000 ready    # 未启用 TLS 用 http:
 mc admin info <现有别名>
 ```
 
-回滚（无需还原任何东西——数据属主、证书与旧 unit 均未被触碰）：
+回滚前先按[回滚边界](/zh/compatibility/migration/#rollback)验证目标版本、完整恢复点及 IAM/桶配置状态。保留数据属主、证书与旧 unit 不等于无需恢复状态；以下命令仅表示单节点的服务切换步骤：
 
 ```bash
 sudo systemctl disable --now silo.service
@@ -104,7 +110,7 @@ sudo systemctl mask minio.service
 
 ## 注意事项 {#caveats}
 
-- **集群所有节点一起切换。** 任意两个不同的二进制都无法组成集群——MinIO 与 Silo 之间如此，两个不同版本的 Silo 之间亦然；混跑节点无限停在 `activating`（[细节](/zh/compatibility/migration/#one-binary)）。先在所有节点完成准备（装包、建 drop-in），再快速连续翻转所有节点：`systemctl disable --now minio && systemctl enable --now --no-block silo`。回滚与将来的升级同理，所有节点一起。
+- **集群所有节点协调切换。** 先在所有节点完成准备（装包、建 drop-in），再停止所有旧进程，确认退出后启动所有新进程，避免新旧版本同时操作存储。混跑和二进制一致性见[迁移说明](/zh/compatibility/migration/#one-binary)；涉及共享 IAM 或站点复制时，按 [IAM 升级流程](/zh/operations/replication/iam-upgrade/)协调所有参与端。回滚也需满足对应状态恢复条件。
 - **非软件包安装同样适用。**`/usr/local/bin/minio` 加自定义 unit 的部署以相同方式被接管，只要其配置位于 `/etc/default/minio`。
 - **崩溃循环有频率限制。** 配置错误（如缺证书）时 `Restart=always` 反复重启，直至触发 systemd 启动限制（`Start request repeated too quickly`）。修复根因后执行 `systemctl reset-failed silo && systemctl start silo`。
 - **旧 `minio.service` 停止时可能卡住。** 旧 unit 常见 `TimeoutSec=infinity`。排空流量、等候约定的优雅退出时间后仍卡住时，可由运维者执行 `sudo systemctl kill --signal=SIGKILL minio.service` 强制结束，确认旧进程退出后再启动 Silo。这会中断残余请求；不带信号参数的 `systemctl kill` 默认只是再发一次 `SIGTERM`，不能解决忽略该信号的进程。

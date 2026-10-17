@@ -11,19 +11,19 @@ upstream_modified: true
 <a id="command-mc.support.logs.enable"></a>
 <a id="command-mc.support.logs.status"></a>
 <a id="command-mc.support.callhome"></a>
-<a id="id2"></a>
-<a id="id3"></a>
+<a id="id2" data-td-print-local></a>
+<a id="id3" data-td-print-local></a>
 <a id="mc.support.callhome.enable"></a>
 <a id="mc.support.callhome.disable"></a>
 <a id="mc.support.callhome.status"></a>
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 <a id="mc.support.callhome.ALIAS"></a>
 <a id="mc.support.callhome.-diag"></a>
-<a id="id5"></a>
-<a id="callhome"></a>
-<a id="id6"></a>
-<a id="id7"></a>
-<a id="id8"></a>
+<a id="id5" data-td-print-local></a>
+<a id="callhome" data-td-print-local></a>
+<a id="id6" data-td-print-local></a>
+<a id="id7" data-td-print-local></a>
+<a id="id8" data-td-print-local></a>
 
 ## 当前行为 {#description}
 

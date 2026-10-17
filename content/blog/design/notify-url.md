@@ -1,7 +1,8 @@
 ---
+linkTitle: "Database notification migration"
 title: "DSN-Only Database Notifications: A Compatibility Boundary for #53"
 date: 2026-08-23
-lastmod: 2026-08-24
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   SILO will keep PostgreSQL and MySQL notification targets, but standardize their configuration on complete connection strings. Pre-KV discrete database fields are an unsupported migration input and must abort server startup with an explicit error instead of being accepted and silently disabling every bucket notification.
@@ -10,6 +11,8 @@ weight: 10
 draft: false
 url: "/blog/design/notify-url/"
 ---
+
+> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
 
 This document is the product requirements and final design record for [SILO issue #53](https://github.com/pgsty/silo/issues/53). It records the accepted compatibility boundary, implementation, and verification for PostgreSQL and MySQL bucket-notification targets.
 
@@ -32,9 +35,9 @@ The legacy migration contract is deliberately narrow:
 
 This is a configuration-boundary decision, not removal of the database-notification feature.
 
-**Status:** implemented in server commit `f1ba68358`; release pending.<br>
-**Owner:** SILO server repository.  
-**Tracking:** [pgsty/silo#53](https://github.com/pgsty/silo/issues/53).  
+**Status:** implemented in `f1ba68358` and included in Server 20260903.<br>
+**Owner:** SILO server repository.<br>
+**Tracking:** [pgsty/silo#53](https://github.com/pgsty/silo/issues/53).<br>
 **Target:** the next SILO patch release after implementation and verification.
 
 ## Context {#context}
@@ -151,7 +154,7 @@ The product decision is therefore to keep the capability and remove the compatib
 9. The propagated typed migration error must abort server startup. It must not be downgraded to the non-fatal "some features may be missing" path in `initConfigSubsystem`, and it must not enter the retriable-error loop.
 10. Validation errors for a supplied canonical string follow the same startup-fatal and secrecy rules; wrapping must add target context without repeating the DSN or its components.
 
-Recommended error shape:
+Original proposed error shape (illustrative, not the shipped literal):
 
 ```text
 notify_postgres:archive uses unsupported legacy discrete connection fields;
@@ -186,27 +189,27 @@ That cost is accepted because an object server that appears healthy while config
 
 ### Register and parse the discrete fields {#alternative-register}
 
-**Benefit:** preserves the old source form and uses already existing argument fields.  
+**Benefit:** preserves the old source form and uses already existing argument fields.<br>
 **Rejected because:** registration makes common field names visible to the shared tokenizer and corrupts quoted connection strings. It also expands the supported public configuration surface after the fields were deprecated in 2020.
 
 ### Synthesize a canonical string during migration {#alternative-synthesize}
 
-**Benefit:** preserves discrete-only legacy installations.  
+**Benefit:** preserves discrete-only legacy installations.<br>
 **Rejected because:** it creates permanent code and test ownership for an obsolete input form, including PostgreSQL quoting, MySQL DSN formatting, socket and IPv6 behavior, defaults, and future driver drift. For a new fork with an explicit migration boundary, the benefit does not justify the continuing surface.
 
 ### Skip only the unsupported target {#alternative-skip}
 
-**Benefit:** keeps the object server and other notification targets running.  
+**Benefit:** keeps the object server and other notification targets running.<br>
 **Rejected because:** silently discarding a configured event sink can cause unobservable and unrecoverable event loss. A clear migration failure is safer than an apparently successful upgrade with reduced notification coverage.
 
 ### Change global notification fail-fast behavior {#alternative-fail-fast}
 
-**Benefit:** limits the blast radius of future invalid targets.  
+**Benefit:** limits the blast radius of future invalid targets.<br>
 **Rejected for this change because:** it neither repairs the database target nor closes the credential-exposure path, and it changes system-wide error semantics. It may be evaluated independently with its own operational contract.
 
 ### Remove database notification targets {#alternative-remove-targets}
 
-**Benefit:** removes the complete database-specific maintenance surface.  
+**Benefit:** removes the complete database-specific maintenance surface.<br>
 **Rejected because:** the targets remain useful and self-contained. The defect belongs to an obsolete configuration form, not to the notification capability itself.
 
 ## Implementation scope {#implementation-scope}

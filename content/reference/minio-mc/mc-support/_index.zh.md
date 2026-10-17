@@ -9,8 +9,8 @@ upstream_modified: true
 
 <a id="mc-support"></a>
 <a id="command-mc.support"></a>
-<a id="id2"></a>
-<a id="id3"></a>
+<a id="id2" data-td-print-local></a>
+<a id="id3" data-td-print-local></a>
 
 ## 本地诊断工具 {#description}
 

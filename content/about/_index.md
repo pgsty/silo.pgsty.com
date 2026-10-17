@@ -6,7 +6,7 @@ url: "/about/"
 weight: 5
 type: docs
 icon: fa-solid fa-circle-info
-sidebar_expanded: true
+sidebar_expanded: false
 ---
 
 Silo is a community fork of MinIO, published and maintained by [Pigsty](https://pgsty.com). This section collects the terms the project publishes about itself: the [**Manifesto**](/about/manifesto/) with the project's public commitments, what license the code and the documentation are under, how the MinIO name is used, whom this documentation is attributed to, and how to report a security issue.
@@ -16,3 +16,5 @@ Silo is not affiliated with, endorsed by, or sponsored by MinIO, Inc. MinIO® is
 Meet the [**community contributors**](/about/contributors/) behind SILO, Console,
 mcli, shared packages, and this documentation. Issue reports and unmerged pull
 requests are recognized alongside merged work and security disclosures.
+
+The [security advisory ledger](/about/security-advisories/) records confirmed findings, repair evidence and upgrade boundaries. The [component matrix](/compatibility/versions/) distinguishes each public component release from unreleased source changes.

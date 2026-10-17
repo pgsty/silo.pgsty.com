@@ -56,7 +56,7 @@ For any of these circumstances, the MinIO Operator *requires* that the Kubernete
 - `--cluster-signing-key-file` - Specify the PEM-encoded RSA or ECDSA private key used to sign cluster-scoped certificates.
 - `--cluster-signing-cert-file` - Specify the PEM-encoded x.509 Certificate Authority certificate used to issue cluster-scoped certificates.
 
-The Kubernetes TLS API uses the CA signature algorithm when generating a new certificate. ECDSA (for example, the [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)) or EdDSA (for example, <a id="index-0"></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)) can require less computation than RSA. See [Supported TLS Cipher Suites](/operations/network-encryption/#minio-tls-supported-cipher-suites) for the Silo server's supported suites.
+The Kubernetes TLS API uses the CA signature algorithm when generating a new certificate. ECDSA (for example, the [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)) or EdDSA (for example, <a id="index-0" data-td-print-local></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)) can require less computation than RSA. See [Supported TLS Cipher Suites](/operations/network-encryption/#minio-tls-supported-cipher-suites) for the Silo server's supported suites.
 
 If the Kubernetes cluster is not configured to respond to a generated <abbr title="Certificate Signing Request">CSR</abbr>, the Operator cannot complete initialization. Some Kubernetes providers do not specify these configuration values by default.
 

@@ -21,6 +21,14 @@ icon: fa-solid fa-magnifying-glass
 使用安全配置的 AWS profile，为目标范围授予 `s3:ListBucketVersions` 与 `s3:GetObjectVersion` 只读权限；
 该 profile 与 `mcli` 别名独立。需要检查 Object Lock 的部署还应配置相应只读权限。
 
+下载脚本及其[SHA-256 文件](/tools/replica-metadata-audit.py.sha256)，先验证再执行。此版本摘要为 `ccc9d035809b2b41157b4a3f1d35a21108ae4b3af2836e99416a1d2eec1efef2`。
+
+```bash
+curl --fail --location --output replica-metadata-audit.py https://silo.pgsty.com/tools/replica-metadata-audit.py
+curl --fail --location --output replica-metadata-audit.py.sha256 https://silo.pgsty.com/tools/replica-metadata-audit.py.sha256
+shasum -a 256 --check replica-metadata-audit.py.sha256
+```
+
 ```bash
 umask 077
 python3 -m venv audit-venv
@@ -137,3 +145,5 @@ audit-venv/bin/python replica-metadata-audit.py \
 
 清单工具用于准备，不执行修复。具体 Object Lock/SSE/复制配置的验证仍由
 [#201](https://github.com/pgsty/silo/issues/201) 跟踪。生产清单扫描与写入应针对选定部署和经评审的变更清单分别记录。
+
+对 `confirmed-header` 行，`proposed_content_encoding: null` 表示移除整个 Content-Encoding 字段，不是写入空字符串。其它分类的 null 不代表修复建议。设计背景见[副本元数据规范化](/blog/design/replica-metadata-normalization/)。

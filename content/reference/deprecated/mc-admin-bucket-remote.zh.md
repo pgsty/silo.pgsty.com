@@ -60,7 +60,7 @@ mc admin bucket remote rm SOURCE/BUCKET --arn ARN
 
 删除该目标会停止所有正在进行的、 发往该目标的 [`bucket replication`](/zh/reference/minio-mc/mc-replicate/#command-mc.replicate)。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ### 查询已配置的复制目标 {#minio-retrieve-remote-bucket-targets}
 

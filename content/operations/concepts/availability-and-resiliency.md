@@ -43,7 +43,7 @@ This page provides an overview of MinIO’s availability and resiliency design a
 
 **MinIO requires [read and write quorum](/operations/concepts/erasure-coding/#minio-read-quorum) to perform read and write operations against an erasure set.**
 
-> The quorum depends on the configured parity for the deployment. Read quorum always equals the configured parity, such that MinIO can perform read operations against any erasure set that has not lost more drives than parity.
+> For an ordinary, non-empty object stored locally, let `N` be the number of drives in its erasure set, `M` its parity shard count, and `K=N-M` its data shard count. The normal read quorum is `K`, not `M`: its data can be reconstructed from `K` healthy shards, tolerating up to `M` unavailable shards. Object access must also satisfy the applicable metadata quorum. Use the parity recorded for that object: changing the configured default does not change its existing shards. These shard counts do not cover all metadata or initialization requirements; for example, tiered objects and delete markers follow different metadata quorum rules, and disabling default parity can require all drives for metadata reads.
 >
 > <figure>
 >   <img src="/images/availability/availability-erasure-sharding-degraded.svg" alt="Diagram of degraded erasure set, where two parity shards replace two data shards" />
@@ -51,25 +51,25 @@ This page provides an overview of MinIO’s availability and resiliency design a
 > MinIO uses parity shards to replace the lost data shards automatically and serves the reconstructed object to the requesting client.</figcaption>
 > </figure>
 >
-> With the default parity of `EC:4`, the deployment can tolerate the loss of 4 (four) drives per erasure set and still serve read operations.
+> An object stored with `EC:4` can tolerate 4 (four) unavailable shards in its erasure set and remain readable if the remaining shards are intact and metadata quorum is met.
 
 **Write quorum depends on the configured parity and the size of the erasure set.**
 
-> If parity is less than 1/2 (half) the number of erasure set drives, write quorum equals parity and functions similarly to read quorum.
+> If `M < N/2`, write quorum is `K=N-M`. If `M=N/2`, write quorum is `K+1`. For a new write, calculate these values from the shard layout selected for that write.
 >
-> MinIO automatically increases the parity of objects written to a degraded erasure set to ensure that object can meet the same <abbr title="Service Level Agreement">SLA</abbr> as objects in healthy erasure sets. The parity upgrade behavior provides an additional layer of risk mitigation, but cannot replace the long-term solution of repairing or replacing damaged drives to bring the erasure set back to full healthy status.
+> With `MINIO_STORAGE_CLASS_OPTIMIZE=availability`, SILO can increase parity for new objects written to a degraded erasure set, up to `floor(N/2)` parity shards. This can improve redundancy for those new objects, but does not guarantee unchanged availability or bypass write quorum. Repair or replace failed drives to restore the set to full health.
 >
 > <figure>
 >   <img src="/images/availability/availability-erasure-sharding-degraded-write.svg" alt="Diagram of degraded erasure set, where two drives have failed" />
 >   <figcaption>This node has two failed drives.
-> MinIO writes the object with an upgraded parity of <code>EC:6</code> to ensure this object meets the same SLA as other objects.</figcaption>
+> In this example, SILO increases the parity of the new object to <code>EC:6</code>.</figcaption>
 > </figure>
 >
-> With the default parity of `EC:4`, the deployment can tolerate the loss of 4 drives per erasure set and still serve write operations.
+> For a fixed `EC:4` layout in the 16-drive example above, `K=12` and write quorum is 12, leaving room for 4 unavailable drives. Parity upgrades for new writes can change that layout and its write quorum; this example is not a universal failure limit for all deployments that use `EC:4`.
 
 **If parity equals 1/2 (half) the number of erasure set drives, write quorum equals parity + 1 (one) to avoid data inconsistency due to “split brain” scenarios.**
 
-> For example, if exactly half the drives in the erasure set become isolated due to a network fault, MinIO would consider quorum lost as it cannot establish a N+1 group of drives for the write operation.
+> For example, if a network fault isolates exactly half the drives and `M=N/2`, neither half can meet the required write quorum of `K+1=N/2+1`.
 >
 > <figure>
 >   <img src="/images/availability/availability-erasure-sharding-split-brain.svg" alt="Diagram of erasure set where half the drives have failed" />
@@ -78,21 +78,21 @@ This page provides an overview of MinIO’s availability and resiliency design a
 > Since the erasure set still maintains read quorum, read operations to existing objects can still succeed.</figcaption>
 > </figure>
 
-**An erasure set which permanently loses more drives than the configured parity has suffered data loss.**
+**An object's data cannot be reconstructed from its erasure set if more than its own `M` shards are permanently lost.**
 
-> For maximum parity configurations, the erasure set goes into “read only” mode if drive loss equals parity. For the maximum erasure set size of 16 and maximum parity of 8, this would require the loss of 9 drives for data loss to occur.
+> In an even-sized set with maximum parity (`K=M=N/2`), losing half the drives can leave enough intact shards to read an object, but not enough drives to write to the set. For example, a 16-drive object written with `EC:8` has a read quorum of 8 and a write quorum of 9. Permanently losing 9 of its shards prevents reconstruction of that object. Objects written with lower parity have lower failure tolerance.
 >
 > <figure>
 >   <img src="/images/availability/availability-erasure-sharding-degraded-set.svg" alt="Diagram of completely degraded erasure set" />
->   <figcaption>This erasure set has lost more drives than the configured parity of <code>EC:4</code> and has therefore lost both read and write quorum.
-> MinIO cannot recover any data stored on this erasure set.</figcaption>
+>   <figcaption>This erasure set has permanently lost more than 4 drives.
+> Objects stored with <code>EC:4</code> cannot be reconstructed from their remaining shards.</figcaption>
 > </figure>
 >
 > Transient or temporary drive failures, such as due to a failed storage controller or connecting hardware, may recover back to normal operational status within the erasure set.
 
 **MinIO further mitigates the risk of erasure set failure by “striping” erasure set drives symmetrically across each node in the pool.**
 
-> MinIO automatically calculates the optimal erasure set size based on the number of nodes and drives, where the maximum set size is 16 (sixteen). It then selects one drive per node going across the pool for each erasure set, circling around if the erasure set stripe size is greater than the number of nodes. This topology provides resiliency to the loss of a single node, or even a storage controller on that node.
+> MinIO automatically calculates the optimal erasure set size based on the number of nodes and drives, where the maximum set size is 16 (sixteen). It then selects one drive per node going across the pool for each erasure set, circling around if the erasure set stripe size is greater than the number of nodes. Spreading a set across nodes limits the shards lost with one node, but continued reads and writes still depend on each affected set meeting the corresponding quorum.
 >
 > <figure>
 >   <img src="/images/availability/availability-erasure-sharding-striped.svg" alt="Diagram of a sixteen node by eight drive per node cluster, consisting of eight sixteen drive erasure sets striped evenly across each node." />

@@ -1,0 +1,25 @@
+columns:
+  - title: "资源"
+    links:
+      - { label: "SILO 下载", url: "download/#server" }
+      - { label: "MCLI 下载", url: "download/#client" }
+      - { label: "发布注记", url: "blog/release/" }
+      - { label: "安全注记", url: "blog/security/" }
+  - title: "文档"
+    links:
+      - { label: "运维", url: "operations/" }
+      - { label: "管理", url: "administration/" }
+      - { label: "开发", url: "developers/" }
+      - { label: "参考", url: "reference/" }
+  - title: "社区"
+    links:
+      - { label: "PGSTY", url: "https://pgsty.com/zh/", external: true }
+      - { label: "Pigsty", url: "https://pigsty.cc/", external: true }
+      - { label: "PG 中文文档", url: "https://pgsql.cc/docs/", external: true, hreflang: "zh" }
+      - { label: "PG 知识图谱", url: "https://pg.center/docs/reference/", external: true, hreflang: "en" }
+  - title: "关于"
+    links:
+      - { label: "开源许可", url: "about/license/" }
+      - { label: "商标政策", url: "about/trademark/" }
+      - { label: "署名归属", url: "about/attribution/" }
+      - { label: "安全策略", url: "about/security/" }

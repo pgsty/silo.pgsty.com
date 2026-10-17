@@ -9,6 +9,9 @@ weight: 1
 url: "/zh/blog/security/20260913-signed-header-status/"
 ---
 
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+
+
 **截至 2026-09-13：** SN-2026-011 已在 Server 主分支修复，起始提交为
 [`123325430`](https://github.com/pgsty/silo/commit/1233254309b15571f101b2b26d531951ceaeef1e)。
 最新公开 Server `RELEASE.2026-09-03T13-18-01Z` 及此前公开版本仍受影响。

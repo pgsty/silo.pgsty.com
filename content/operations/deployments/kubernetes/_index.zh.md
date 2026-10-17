@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="kubernetes-minio"></a>
+<a id="kubernetes-minio" data-td-print-local></a>
 <a id="minio-operator-installation"></a>
 <a id="deploy-operator-aks"></a>
 <a id="deploy-operator-gke"></a>

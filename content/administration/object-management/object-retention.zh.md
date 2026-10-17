@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-object-retention"></a>
 <a id="minio-object-locking"></a>
 
@@ -38,7 +38,7 @@ MinIO 对象锁定在功能和 API 层面与 AWS S3 [兼容](https://docs.aws.am
 
 按照 [S3 的行为](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html#object-lock-bucket-config)， 只能在创建存储桶时启用对象锁定。对于创建时未启用锁定的存储桶，之后无法再启用对象锁定。启用后，你可以在任意时刻配置对象保留规则。对象锁定依赖 [版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)，并会隐式启用该特性。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ### 与版本控制的交互 {#minio-bucket-locking-interactions-versioning}
 
@@ -155,7 +155,7 @@ mc legalhold set ALIAS/PATH
 - 将 [`ALIAS`](/zh/reference/minio-mc/mc-legalhold-set/#mc.legalhold.set.ALIAS) 替换为已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](/zh/reference/minio-mc/mc-legalhold-set/#mc.legalhold.set.ALIAS) 替换为要启用 legal hold 的对象路径。
 
-<a id="id8"></a>
+<a id="id8" data-td-print-local></a>
 
 ## 对象保留模式 {#minio-object-locking-retention-modes}
 
@@ -200,7 +200,7 @@ MinIO 的 `GOVERNANCE` 锁在功能上与 [S3 GOVERNANCE 模式](https://docs.aw
 
 MinIO 的 `COMPLIANCE` 锁在功能上与 [S3 COMPLIANCE 模式](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html#object-lock-retention-modes) 完全一致。
 
-<a id="id9"></a>
+<a id="id9" data-td-print-local></a>
 
 ## Legal Hold {#minio-object-locking-legalhold}
 

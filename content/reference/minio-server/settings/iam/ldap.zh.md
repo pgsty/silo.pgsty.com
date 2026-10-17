@@ -3,7 +3,7 @@ title: "Active Directory / LDAP 设置"
 url: "/zh/reference/minio-server/settings/iam/ldap/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/iam/ldap.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="active-directory-ldap"></a>
@@ -391,6 +391,29 @@ MinIO 会以明文形式将 AD/LDAP 用户凭证发送到 AD/LDAP server，因�
 默认值为 `off`
 
 有关 `StartTLS` 的更多信息，请参见 [LDAP RFC 4511 specification](https://docs.ldap.com/specs/rfc4511.txt) 第 4.14 节。
+
+### STS 可信代理 {#sts-trusted-proxies}
+
+*可选*
+
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
+##### `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES` {#envvar.MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES}
+
+*envvar*
+{{< /tab >}}
+{{< tab label="配置设置" value="tab2" >}}
+##### `identity_ldap sts_trusted_proxies` {#mc-conf.identity_ldap.sts_trusted_proxies}
+
+*mc-conf*
+{{< /tab >}}
+{{< /tabs >}}
+
+以逗号、分号或空白分隔的代理 IP 地址或 CIDR 列表：只有名单内对端提供的转发客户端 IP 头，才会用于 LDAP STS [登录限流](/zh/blog/security/cve-2026-33419/)的分桶。该名单与 [`MINIO_API_TRUSTED_PROXIES`](/zh/reference/minio-server/settings/core/#client-source-address-trust) 刻意相互独立：它不会影响 `aws:SourceIp`、审计中的客户端地址或事件通知的 `Host` 取值。
+
+未设置时，此用途完全忽略转发头，每次登录按直接对端地址分桶。当直接对端在名单内时，优先逐字采信干净的 `X-Real-IP`（代理**必须**覆盖而非透传客户端提供的 `X-Real-IP`），否则从右向左遍历 `X-Forwarded-For`、跳过名单内的跳数，取第一个不受信地址。这里不解析 RFC 7239 `Forwarded` 头。
+
+除非刻意想让两种用途信任不同的对端，否则应将此列表设为与 `MINIO_API_TRUSTED_PROXIES` 相同的值。
 
 ### SRV 记录名称 {#srv}
 

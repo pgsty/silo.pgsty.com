@@ -8,7 +8,7 @@ upstream_modified: true
 
 <a id="minio-object-retention"></a>
 <a id="minio-object-locking"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 - [Object locking and retention overview](https://youtu.be/Hk9Z-sltUu8?ref=docs)
 - [Object locking and retention lab](https://youtu.be/thNus-DL1u4?ref=docs)

@@ -1,5 +1,46 @@
 /* SILO content mapped onto Pigsty Landing v3's typography, layout, and sections. */
 
+/* Map the bespoke homepage and download page to OINK's selected preset.
+   Slate keeps the original blueprint palette from landing-v3.css. */
+:is([data-td-preset='paper'], [data-td-preset='ink'], [data-td-preset='terminal']) .landing-page {
+  --bg: var(--bs-body-bg);
+  --bg-soft: var(--bs-secondary-bg);
+  --bg-elev: var(--td-brand-elev);
+  --bg-elev-2: var(--bs-tertiary-bg);
+  --paper: var(--td-brand-elev);
+  --paper-ink: var(--bs-body-color);
+  --ink: var(--bs-body-color);
+  --ink-soft: var(--bs-secondary-color);
+  --ink-mute: var(--bs-tertiary-color);
+  --line: var(--bs-border-color);
+  --line-strong: var(--td-brand-line-strong);
+  --silk: var(--td-brand-silk);
+  --pg: var(--bs-link-color);
+  --pg-strong: var(--bs-link-hover-color);
+  --copper: var(--td-brand-copper);
+  --copper-dim: var(--td-brand-copper-dim);
+  --trace: var(--td-brand-copper-dim);
+  --header-bg: var(--td-brand-header-bg);
+  --pill-bg: var(--bs-tertiary-bg);
+  --card-hover-border: var(--td-brand-copper-dim);
+  --btn-primary-bg: var(--bs-link-color);
+  --btn-primary-bg-hover: var(--bs-link-hover-color);
+  --btn-primary-ink: var(--td-on-link);
+  --shadow-sm: var(--td-brand-shadow-sm);
+  --shadow-md: var(--td-brand-shadow-md);
+  --shadow-lg: var(--td-brand-shadow-md);
+  --font-body: var(--td-body-font-family);
+  --font-head: var(--td-heading-font-family);
+  --font-display: var(--td-display-font-family);
+  --font-mono: var(--bs-font-monospace);
+  --radius-sm: var(--td-experiment-radius, 8px);
+  --radius-md: var(--td-experiment-radius, 12px);
+  --radius-lg: var(--td-experiment-radius, 18px);
+  --grid-line: transparent;
+  --glow-blue: transparent;
+  --glow-copper: transparent;
+}
+
 .skip-link {
   position: fixed;
   top: 8px;
@@ -50,6 +91,69 @@
 }
 
 .hero-sub a:hover { text-decoration-color: var(--copper); }
+
+/* Hero news badge: the latest server release, sitting in the hero's top
+   padding at the right edge. Static on narrow screens so it never overlaps. */
+.hero-news {
+  display: flex;
+  justify-content: flex-end;
+  margin: calc(-1 * clamp(20px, 3vw, 44px)) 0 clamp(10px, 1.5vw, 18px);
+}
+
+.landing-page .hero-news-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 6px 14px 6px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.landing-page .hero-news-badge:hover,
+.landing-page .hero-news-badge:focus-visible {
+  color: var(--ink);
+  border-color: var(--copper);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.hero-news-tag {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--copper);
+  color: var(--td-on-link, #16222e);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.hero-news-text { font-weight: 600; }
+
+.hero-news-badge i {
+  color: var(--copper);
+  font-size: 0.8em;
+  transition: transform 150ms ease;
+}
+
+.hero-news-badge:hover i { transform: translateX(3px); }
+
+@media (max-width: 980px) {
+  .hero-news { justify-content: flex-start; margin: 0 0 18px; }
+}
+
+@media (max-width: 420px) {
+  .landing-page .hero-news-badge { white-space: normal; line-height: 1.3; }
+}
 
 /* Hero storage board */
 .silo-board-stage { padding: 8px 12px; }
@@ -266,8 +370,8 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
-/* Three rows travelling against each other — left, right, left. Durations are
-   staggered so the rows never lock step into a single moving block. */
+/* Five rows travelling against each other — left, right, left, right, left. Durations
+   are staggered so the rows never lock step into a single moving block. */
 .key-metrics .adoption-logos {
   display: flex;
   flex-direction: column;
@@ -280,6 +384,8 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
 }
 .adoption-logos .logos-marquee-row:nth-of-type(2) .logos-marquee-content { animation-duration: 77s; }
 .adoption-logos .logos-marquee-row:nth-of-type(3) .logos-marquee-content { animation-duration: 72s; }
+.adoption-logos .logos-marquee-row:nth-of-type(4) .logos-marquee-content { animation-duration: 81s; }
+.adoption-logos .logos-marquee-row:nth-of-type(5) .logos-marquee-content { animation-duration: 74s; }
 .evidence-logo-set {
   display: flex;
   align-items: center;
@@ -530,8 +636,8 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 .faq-item[open] .faq-toggle::after { transform: rotate(90deg); }
 .faq-a { padding: 0 46px 18px 60px; color: var(--ink-soft); font-size: 0.92rem; line-height: 1.75; }
 .faq-a p { margin: 0; }
-.faq-a a { color: var(--pg); text-decoration: underline; text-underline-offset: 3px; }
-.faq-a a:hover { color: var(--pg-strong); }
+.landing-page .faq-a a { color: var(--pg); text-decoration: underline !important; text-underline-offset: 3px; }
+.landing-page .faq-a a:hover { color: var(--pg-strong); }
 .faq-a code { padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.85em; color: var(--ink); background: color-mix(in srgb, var(--line) 40%, transparent); }
 /* 展开动画：支持 ::details-content 的浏览器渐进增强，其余浏览器直接显隐 */
 .faq-item::details-content {

@@ -204,10 +204,11 @@ MINIO_LAMBDA_WEBHOOK_ENABLE_myfunction=on MINIO_LAMBDA_WEBHOOK_ENDPOINT_myfuncti
 将 `myfunction` 替换为你的 handler 函数名，并将 `/data` 替换为本地部署中 MinIO 目录的位置。 输出类似如下：
 
 ```shell
-MinIO Object Storage Server
-Copyright: 2015-2023 MinIO, Inc.
+Silo Object Storage Server
+Copyright: 2015-2025 MinIO, Inc.
+Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl-3.0.html>
-Version: RELEASE.2023-03-24T21-41-23Z (go1.19.7 linux/arm64)
+Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 linux/arm64)
 
 Status:         1 Online, 0 Offline.
 API: http://192.168.64.21:9000  http://127.0.0.1:9000

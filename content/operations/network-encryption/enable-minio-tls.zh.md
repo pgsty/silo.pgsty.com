@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio-tls"></a>
+<a id="minio-tls" data-td-print-local></a>
 
 MinIO 支持使用 Transport Layer Security (TLS) 1.2+ 对入站和出站流量进行加密。
 

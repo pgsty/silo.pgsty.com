@@ -3,7 +3,7 @@ title: "Thresholds and Limits"
 url: "/operations/concepts/thresholds/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts/thresholds.rst
-upstream_modified: false
+upstream_modified: true
 math: true
 ---
 
@@ -84,8 +84,12 @@ Refer to the [hardware](/operations/checklists/hardware/#minio-hardware-checklis
 | Minimum number of drives per server when server count is 1 | 1 (for <abbr title="Single-Node Single-Drive">SNSD</abbr> deployments, which do not provide additional reliability or availability) |
 | Minimum number of drives per server when server count is 2 or more | 1 |
 | Maximum number of drives per server | no limit |
-| Read quorum | \(N/2\) |
-| Write quorum | \((N/2)+1\) |
+| Minimum number of drives per multi-drive erasure set | 2 |
+| Maximum number of drives per erasure set | 16 |
+| Object read quorum | `K=N-M` |
+| Object write quorum | `K` when `K>M`; `K+1` when `K=M` |
+
+Here `N` is the number of drives in one erasure set, `M` is the object's parity shard count, and `K` is its data shard count. These formulas describe ordinary, non-empty objects stored locally; reads also require intact shards and the applicable [metadata quorum](/operations/concepts/availability-and-resiliency/#minio-availability-resiliency). New writes may use increased parity in a degraded set. The formulas `N/2` and `N/2+1` apply only when `K=M=N/2`. A single-drive `EC:0` deployment has no erasure-code redundancy; a two-drive `EC:1` set requires 1 drive to read and 2 to write.
 
 ## Object Name Limitations {#object-name-limitations}
 

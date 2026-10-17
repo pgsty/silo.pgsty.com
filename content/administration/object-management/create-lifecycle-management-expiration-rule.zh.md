@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-lifecycle-management-create-expiry-rule"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页中的每个过程都会创建一条新的对象生命周期管理规则，用于让 MinIO 存储桶中的对象过期。该过程适用于在特定时间段或日历日期之后删除“旧”对象 等场景。
 
@@ -19,7 +19,7 @@ upstream_modified: false
 
 使用 [`mc alias set`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set) 命令为源 MinIO 集群和目标 S3 兼容服务创建别名。 创建别名时，需要为源集群和目标集群上的用户指定访问密钥。指定的用户必须具备 配置和应用过期操作所需的 [权限](#minio-lifecycle-management-create-expiry-rule-permissions)。
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ### 所需权限 {#minio-lifecycle-management-create-expiry-rule-permissions}
 

@@ -8,9 +8,9 @@ upstream_modified: true
 
 <a id="subnet"></a>
 <a id="minio-console-subscription"></a>
-<a id="id2"></a>
-<a id="id3"></a>
-<a id="id4"></a>
+<a id="id2" data-td-print-local></a>
+<a id="id3" data-td-print-local></a>
+<a id="id4" data-td-print-local></a>
 
 ## SILO 的许可与支持 {#license}
 

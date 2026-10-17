@@ -70,7 +70,7 @@ MinIO 部署必须与目标 OIDC 服务保持双向访问。
 {{< /tab >}}
 {{< /tabs >}}
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 为 MinIO 配置 Keycloak 身份管理 {#minio-external-identity-management-keycloak-configure}
 

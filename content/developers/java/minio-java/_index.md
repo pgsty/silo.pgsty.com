@@ -8,6 +8,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="minio-java-quickstart"></a>
+
 ## MinIO Java SDK {#java-sdk}
 
 SILO implements the S3-compatible server contract, so Java applications can use the upstream [MinIO Java SDK](https://github.com/minio/minio-java) directly. The SDK supports Java 8 and later; select a runtime that is also supported by your application framework.

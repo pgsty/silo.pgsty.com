@@ -8,7 +8,7 @@ upstream_modified: false
 ---
 
 <a id="minio-lifecycle-management"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 - [MinIO Object Lifecycle Management Part I](https://youtu.be/Exg2KsfzHzI?ref=docs)
 - [MinIO Object Lifecycle Management Part II](https://youtu.be/5fz3rE3wjGg?ref=docs)
@@ -85,7 +85,7 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 
 如需迁移对象的非当前版本，请在创建迁移规则时指定 [`--noncurrent-transition-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-days) 和 [`--noncurrent-transition-tier`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-tier) 选项。
 
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ## 对象过期 {#minio-lifecycle-management-expiration}
 
@@ -114,7 +114,7 @@ MinIO 生命周期管理支持对存储桶中的对象执行过期操作。 对�
   >
   > 此标志仅适用于没有删除标记的对象。
 
-<a id="id8"></a>
+<a id="id8" data-td-print-local></a>
 
 ## 生命周期管理对象扫描器 {#minio-lifecycle-management-scanner}
 

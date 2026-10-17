@@ -8,9 +8,16 @@ type: docs
 icon: fa-solid fa-server
 ---
 
-> **Current Console:** [v2.4.1](/blog/release/console-2.4.1/), with mcli 20260916 and pkg v3.14.1. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
+>
+> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
 
-Silo is a maintained fork of the MinIO server. It preserves MinIO's S3-facing and on-disk compatibility, but it is **not a byte-for-byte, operationally invisible rename**. This page is the compatibility contract for moving from the upstream baseline to the Silo source prepared on 2026-08-06.
+> **Embedded Console in public Server 20260916:** [v2.4.1](/blog/release/console-2.4.1/), with mcli 20260916 and pkg v3.14.1. Standalone [Console v2.4.2](/blog/release/console-2.4.2/) is released separately with mcli 20261018 and pkg v3.14.2. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
+
+**Start with the [three-level overview](/compatibility/): 12 compatible improvements, 4 minor differences and 8 conditional checks.** This page provides server details, preserving the fixed 2026-08-06 audit baseline and separating [subsequently released changes](#since-20260806) from [September 16 source changes](#september-2026). The historical audit baseline differs from the [original fork baseline](/compatibility/#scope), and does not imply that current artifacts include every source fix.
 
 > [!WARNING]
 > **Read this before replacing a MinIO deployment.** The binary, package, service account, systemd unit, default local configuration directory, container path, Helm resource names, embedded Console, update behavior, several authorization decisions, and some error responses changed. Data disks and the `MINIO_*` configuration namespace did not receive a matching rename.
@@ -62,7 +69,7 @@ The following MinIO identifiers are compatibility identifiers, not unfinished br
 - the default S3 port `9000`, existing `--address` / `--console-address` flags, and release tags of the form `RELEASE.YYYY-MM-DDTHH-MM-SSZ`;
 - configuration KV formats, IAM data, KMS/KES configuration, encryption metadata, bucket metadata, replication state, and healing state.
 
-The automated rebrand baseline records 137 compatible imports, 437 environment names, 19 metric namespaces, 84 headers, 334 routes, one internal root, three Grid namespaces, 15 storage-REST identifiers, 58 policy identifiers, and 9,014 exported symbols. The guard treats an unreviewed change to that manifest as a compatibility failure.
+The rebrand guard checks an explicit identifier inventory; counts are not runtime compatibility tests. The archived `219670d3` manifest contained 137 imports, 436 environment names, 19 metric namespaces, 84 headers, 330 routes, one root, three Grid namespaces, 15 storage identifiers, 58 policy identifiers and 9,014 exported symbols. The [current source manifest](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/buildscripts/rebrand-guard/compat-baseline.json) is version 4 and no longer tracks exported symbols. Run `make rebrand-guard` against the exact source revision and review intentional inventory changes; passing it does not prove wire or upgrade compatibility.
 
 No data copy or metadata rewrite is required when the same disks move from MinIO to Silo. This does not mean every malformed historical object is accepted: the storage hardening described below rejects unsafe paths, invalid erasure geometry, negative part sizes, and poisoned metadata that older code could carry farther into the stack.
 
@@ -78,7 +85,7 @@ replace github.com/minio/mc      => github.com/pgsty/mc ...
 The shared package is the deliberate exception. Since [pkg v3.13.0](/blog/release/pkg-3.13.0/) it builds under its own module path, and every maintained component — including the server — consumes it **directly**:
 
 ```go
-require github.com/pgsty/silo-pkg/v3 v3.14.0   // no replace arrangement
+require github.com/pgsty/silo-pkg/v3 v3.14.1   // no replace arrangement
 ```
 
 The historical `replace github.com/minio/pkg/v3 => ...` arrangement is retired; `github.com/minio/pkg/v3` now appears only as a legacy *indirect* dependency (via `colorjson`/`dperf`), separate from the maintained policy implementation. The upstream SDK `github.com/minio/minio-go/v7` is the other explicit exception: it is consumed directly from upstream at a verified commit, and the retired `silo-go` fork is not part of the maintained graph.
@@ -257,7 +264,7 @@ The inherited `_MINIO_API_XFF_HEADER=off` retains its exact old semantics and in
 | Snowball                       | Authorization happens before tar extraction; the streaming-trailer bypass cannot write objects before a later failure                                                                                                                                                                    |
 | S3 Select record limits        | CSV input, JSON Lines input, and output records over 1 MiB return an `OverMaxRecordSize` event. JSON Lines always uses the bounded reader (possibly slower on SIMD-capable CPUs), JSON parse errors use `JSONParsingError`, and already completed records can precede the terminal error |
 | Streaming responses            | The tracking writer implements `Flush`; Write/Flush records an implicit HTTP 200. ListenBucketNotification/watch streams and S3 Select keepalives reach clients, while audit/status metrics record the committed status correctly                                                        |
-| Multipart full-object checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME completion may omit every per-part checksum. If any are supplied they are still checked; COMPOSITE still requires every part. Explicit completion type is validated even without an object checksum value: mismatch is `BadDigest`, unknown type is `InvalidArgument`. CRC64NVME canonicalization is unchanged. A zero-byte multipart object's checksum is retained correctly |
+| Multipart full-object checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME completion may omit every per-part checksum. If any are supplied they are still checked; COMPOSITE still requires every part. Explicit completion type is validated even without an object checksum value: mismatch is `BadDigest`, unknown type is `InvalidArgument`. CRC64NVME + COMPOSITE is rejected by the later #93/#96 repairs, included in Server 20260903. A zero-byte multipart object's checksum is retained correctly |
 | CopyObject checksum response | CopyObject XML and HTTP headers report the committed checksum using destination encryption context. SSE-C source key A and destination key B remain separate; same-object key rotation reports checksum fields under the new key. Stored data and checksum format are unchanged |
 | Multipart part ordering        | Duplicate or non-increasing part numbers fail with `InvalidPartOrder` before assembly. Gaps and a first part other than 1 remain legal; the upload stays available for retry                                                                                                             |
 | Erasure read pooling           | Correct shard-buffer ownership is restored, avoiding loss of pooling and a wrong-buffer association that could cause hangs, corruption, or severe performance loss                                                                                                                       |
@@ -299,7 +306,7 @@ Important deliberate dependency decisions are:
 |:----------------|:--------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------|
 | Console         | `pgsty/silo-console` v2.1.1 behind `github.com/minio/console` | Restores the embedded UI, applies Silo branding and bilingual text, adds Metrics V3, removes SUBNET flows, and fixes untranslated metric legends |
 | Client library  | `pgsty/mc` behind `github.com/minio/mc`                       | Keeps Console's import path while consuming the maintained MCLI fork                                                                             |
-| Shared package  | `pgsty/silo-pkg/v3`, consumed directly at its own module path (v3.14.0; behind `minio/pkg/v3` via `replace` up to v3.12.x) | Breaking module-path move in [v3.13.0](/blog/release/pkg-3.13.0/); supplies the IAM exact-match half, LDAP TLS/StartTLS/deadline/close fixes, certificate-watcher cleanup, and RNG fixes |
+| Shared package  | `pgsty/silo-pkg/v3`, consumed directly at its own module path (v3.14.1; behind `minio/pkg/v3` via `replace` up to v3.12.x) | Breaking module-path move in [v3.13.0](/blog/release/pkg-3.13.0/); supplies the IAM exact-match half, LDAP TLS/StartTLS/deadline/close fixes, certificate-watcher cleanup, and RNG fixes |
 | Kafka           | Sarama 1.45.1                                                 | Pinned to avoid a breaking broker-negotiation drift                                                                                              |
 | PostgreSQL      | lib/pq 1.10.9                                                 | Pinned to avoid a nil-`[]byte` / PostgreSQL-before-14 behavior regression; generated DSN quoting is fixed in server code                         |
 | Compression     | klauspost/compress 1.18.7                                     | Explicit security/correctness upgrade                                                                                                            |
@@ -329,21 +336,45 @@ The sections above describe the `219670d3` snapshot. The table below records the
 | Configuration | Legacy database notification targets require a DSN; `MINIO_CONFIG_ENV_FILE` uses a dedicated parser that keeps named targets | `f1ba68358`, `6b0998157`, `2aea7fe9c` |
 | Toolchain and components | Go 1.27.1; upstream `minio-go` at `0e78d3f18efe` (`silo-go` retired); `silo-pkg` v3.13.2; Console v2.3.0 (see the [Console page](/compatibility/console/)); bundled [mcli 20260903](/blog/release/mcli-20260903/) | `43f4bb7ed`, `4d6e1ea8e`, final dependency refresh |
 
-The shared package's own-module move ([v3.13.0](/blog/release/pkg-3.13.0/), a **breaking** change for Go consumers) was already adopted by published Server 20260903: that tag directly requires `github.com/pgsty/silo-pkg/v3 v3.13.2`. The September 13 refresh moves the maintained stack to v3.14.0; it is not the first Server adoption of the new path. See the [component matrix](/compatibility/versions/) for each build.
+The shared package's own-module move ([v3.13.0](/blog/release/pkg-3.13.0/), a **breaking** change for Go consumers) was already adopted by published Server 20260903: that tag directly requires `github.com/pgsty/silo-pkg/v3 v3.13.2`. The September 13 refresh moved the maintained stack to v3.14.0 and Server 20260916 requires v3.14.1; neither is the first Server adoption of the new path. See the [component matrix](/compatibility/versions/) for each build.
+
+## Changes released in Server 20260916 {#september-2026}
+
+These changes shipped in [Server 20260916](/blog/release/silo-20260916/) and are **not included in Server 20260903**. See the [version matrix](/compatibility/versions/#source-review) for per-repair scope and companion-component status, and the overview IDs for user impact.
+
+| Area | Observable change | Classification and details |
+| --- | --- | --- |
+| New administration APIs | `GET /minio/admin/v3/multipart-preflight` checks multipart migration readiness without modifying state. New peer `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` operations synchronize revisions and revocations. | [O06](/compatibility/#o06) / [multipart preflight](/blog/design/list-multipart-uploads/#implementation-20260916); [O07](/compatibility/#o07) / [IAM protocol](/blog/design/iam-revocations/#upgrade) |
+| S3 conditions and multipart listing | Multi-pool conditional writes, multipart completion and version deletion verify metadata more strictly. Multipart listings are capped at 1,000; legacy remains the default, while strict requires explicit opt-in and preparation. | [O04](/compatibility/#o04), [O06](/compatibility/#o06) / [multi-pool consistency](/blog/design/multi-pool-object-consistency/), [listing modes](/blog/design/list-multipart-uploads/#implementation-20260916) |
+| Authorization and persistent state | Self-service password changes and user creation use separate permissions. Persistent IAM revocations and bucket-configuration deletion state affect coordinated upgrades and recovery; general bucket-configuration tombstone export is off by default. | [O02](/compatibility/#o02), [O07](/compatibility/#o07) / [password migration](/compatibility/password-permissions/), [IAM upgrades](/operations/replication/iam-upgrade/), [configuration convergence](/blog/design/bucket-metadata-convergence/#rollout) |
+| Data and replication | Further fixes cover multi-pool replicas, tag and Object Lock ordering, delete-marker recovery, SSE-C and federated copies; they do not reconstruct lost historical state automatically. | [G07–G10](/compatibility/#g07) / [replica audit](/operations/replication/replica-metadata-audit/), [version notes](/compatibility/versions/#source-review) |
+| HTTP and TLS | Request headers use an absolute read deadline. TLS defaults need checking with older proxies and identity providers; bodies retain the existing rolling idle timeout. | [O03](/compatibility/#o03) / [header timeouts](/blog/design/request-header-timeouts/), [TLS/OIDC](/blog/design/go127-tls-oidc-discovery/) |
+
+Distinguish API additions, removals and behavioral changes: per-bucket CORS [implements existing placeholder APIs](#since-20260806); `ReadMultiple` is a [removed private storage operation](#storage-rest); online updates [retain an entry point with the function disabled](#offline-services). `silo healthcheck` and `mcli checksum verify` are new commands that call existing health endpoints and read objects for local auditing, respectively.
+
+### Runtime and observability {#observability}
+
+See [G12](/compatibility/#g12) and [B03](/compatibility/#b03). The `minio_*` namespace and existing metric paths remain, but the metric set and value meanings are not frozen:
+
+- [MRF drop counters](/blog/design/replication-reliability/#mrf) are exposed through administration statistics and Prometheus v2/v3. They count queue entries; several may refer to one object, so they are not counts of lost objects.
+- [IAM revocation metrics](/blog/design/iam-revocations/#errors) report retained deletion records, reconciliation failures, duration and last success. Interpret them using each node's collection semantics.
+- Bucket-quota metrics report effective quotas, and CPU metric collection gains concurrency protection. These affect monitoring values and runtime stability respectively; no universal speedup is implied.
+
+Review affected dashboards and alerts, and verify object and replication state independently. Healthy monitoring does not establish that all historical problems have been repaired.
 
 ## Known residual risks and non-fixes {#limits}
 
 This audit does not turn inherited limitations into claims of compatibility:
 
 1. **Source IP is still forgeable by default.** Unset `MINIO_API_TRUSTED_PROXIES` deliberately retains upstream trust-any behavior. Set `none` for direct deployments or an exact proxy allowlist for proxied deployments.
-2. **Some version-condition gaps remain.** MultiDelete governance-bypass reauthorization still consults the query/absent version rather than each XML entry, and Snowball reads the PAX `minio.versionId` after per-file authorization. Empty `username`, `userid`, `signatureversion`, and `authType` condition keys are also still inserted, so `Null` on them has present-empty semantics.
+2. **Version-condition follow-up.** #104 repaired per-entry governance-bypass version authorization in Server 20260903. The Snowball PAX-version ordering observation concerns a separate path. Some identity conditions still retain present-empty semantics.
 3. **Multipart parser defense is not complete.** Handler-level ordering is fixed, but the object layer has no independent uniqueness defense; XML-root validation and the inherited nonnumeric-part error mapping were not changed.
 4. **Legacy notification migration remains risky.** Review it as described above.
 5. **Storage path validation is lexical.** Symlinks are not resolved; native Windows execution was not independently covered.
 6. **Private APIs are not a stable compatibility promise.** `ReadMultiple` proves that a same-numbered storage REST protocol can still lose an operation. Do not run a rolling mixed build across this boundary.
 7. **A source result is not a released artifact.** This page does not assert that GitHub tags, packages, OCI manifests, signatures, or the public site contain the three audit-head-only commits until each channel is verified separately.
 8. **Informational HTTP responses remain imperfectly tracked.** The response-tracking layer treats a 1xx response as final. The Flush/implicit-200 change did not introduce this behavior and does not claim to fix it.
-9. **Conditional delete is not implemented.** `DeleteObject` ignores the HTTP `If-Match` header and `DeleteObjects` ignores each `<Object><ETag>` element; both delete unconditionally ([#10](https://github.com/pgsty/silo/issues/10)).
+9. **Conditional deletion has a release boundary.** Server 20260903 ignores `If-Match` on `DeleteObject`; Server 20260916 implements it through #145/#178, comparing the explicitly addressed version when one is given. `DeleteObjects` still ignores per-item `<ETag>`, and no extra `s3:GetObject` condition permission is implemented. See the [implemented contract](/blog/design/conditional-delete/).
 10. **Historical convergence limit for multi-site bucket-configuration deletion.** In the released versions covered by this page, deleting a bucket policy, SSE, tag, or quota configuration on one site can be restored by a peer that still holds it ([#77](https://github.com/pgsty/silo/issues/77)); only per-bucket CORS used a tombstone-aware register at that point. Deployments that rely on multi-site deletion of these configurations must verify every site after a delete. On 2026-09-12, [PR #180](https://github.com/pgsty/silo/pull/180) merged the repair into main. Full deletion recovery requires every node to be upgraded and deletion export to be enabled consistently; see the [bucket configuration convergence record](/blog/design/bucket-metadata-convergence/). Check each release artifact's version for inclusion of the repair.
 
 ## Migration checklist {#migration}
@@ -358,7 +389,7 @@ For a MinIO-to-Silo move, use this order:
 6. For Helm, render the old and new charts with the complete old values, preserve names with `nameOverride` / `fullnameOverride` / `serviceAccount.name` where required, and change chart plus image atomically.
 7. Remove updater, callhome, SUBNET-registration, and support-upload automation. Replace it with package/image/orchestrator rollout and your own diagnostic transfer path.
 8. Change HMAC-signed OIDC tokens to asymmetric JWKS. Exercise success, bad-password, unknown-user, backend-failure, and rate-limit LDAP paths.
-9. Add bare bucket ARNs for the twelve protected actions. Test effective tag, signature-age, source-IP, and per-version delete conditions. Use the legacy bucket switch only as a temporary rollback lever.
+9. **Conditional deletion has a release boundary.** Server 20260903 ignores `If-Match` on `DeleteObject`; Server 20260916 implements it through #145/#178, comparing the explicitly addressed version when one is given. `DeleteObjects` still ignores per-item `<ETag>`, and no extra `s3:GetObject` condition permission is implemented. See the [implemented contract](/blog/design/conditional-delete/).
 10. Set `MINIO_API_TRUSTED_PROXIES=none` or an exact allowlist, sanitize all three source-address headers, and include cluster peers that forward authenticated requests.
 11. Test oversized S3 Select records, streaming notifications, unsigned-trailer rejection, multipart full-object checksums, duplicate parts, replication, healing, KMS, every notification target, audit ingestion, and graceful container shutdown.
 12. Upgrade all distributed nodes as one build. Keep the old chart and image paired for rollback; never roll back only one of them.

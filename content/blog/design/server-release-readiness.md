@@ -2,7 +2,7 @@
 title: "SILO Server 20260903 Pre-release Review"
 linkTitle: "Server 20260903 Review"
 date: 2026-09-03
-lastmod: 2026-09-16
+lastmod: 2026-10-17
 author: "Ruohang Feng"
 summary: >
   The final adversarial review of every server change after 20260806: confirmed defects, fixes, rejected simplifications, necessary complexity, validation evidence, explicit deferrals, and the distinction between code-level GO and production release. Updated 2026-09-16 with the #116 restart-and-readback verification method.
@@ -11,6 +11,13 @@ weight: 8
 draft: false
 url: "/blog/design/server-release-readiness/"
 ---
+
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The #79 multipart-listing proposals, enablement advice and status in this article are historical. Subsequent design work is governed by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017), which supersedes those earlier proposals. The new implementation is merged into main and remains unreleased; this does not change the documented behavior of older releases or conclusions on other topics.
+>
+> **中文：** 本文关于 #79 分片上传列举的旧方案、启用建议与当时进度仅保留为历史记录；后续设计已由[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。新实现已合入主干、尚未随 Server 版本发布；这里记载的旧版本行为和其他主题结论不因此改变。
 
 This is the durable pre-release engineering record behind [SILO 20260903](/blog/release/silo-20260903/). It explains why an earlier “all issues are solved” assessment was not accepted at face value, what the independent review found, how the fixes were narrowed, and which gates still remained at the review point. The linked release note records the later publication result.
 
@@ -214,17 +221,19 @@ Operators should delay even a successfully published release when they cannot ye
 - revise IAM policies for `s3:DeleteObjectVersion` and status-action separation;
 - avoid or explicitly accept the known #10, #77, #79, #99, or #100 path their workload depends on.
 
-The final conclusion at the review point was intentionally narrower than “everything is fixed”: **the reviewed candidate was ready to enter the release machinery, the remaining limitations were explicit, and production publication was gated by verifiable artifacts rather than confidence.** Those gates later completed for the release linked above; the deployment-specific conditions remain applicable.
+The final conclusion at the review point was intentionally narrower than “everything is fixed”: **the reviewed candidate was ready to enter the release machinery, the remaining limitations were explicit, and production publication was gated by verifiable artifacts rather than confidence.** Those gates later completed for the release linked above; these deployment conditions describe Server 20260903, the release this record reviewed.
 
 ## Restart and readback verification (2026-09-11, #116) {#restart-readback}
 
-A later acceptance ([#116](https://github.com/pgsty/silo/issues/116), run on 2026-09-11) established the restart-persistence half of readiness. The durable part is the *method*, which any operator can reuse when validating a restart or upgrade window:
+A later acceptance ([#116](https://github.com/pgsty/silo/issues/116), run on 2026-09-11) measured bounded restart/readback behavior, including the inherited readiness gap. The durable part is the *method*, which any operator can reuse when validating a restart or upgrade window:
 
 - **Acknowledgement ledger.** Every acknowledged PUT writes to a unique versioned key, and the acknowledgement records the VersionId, byte count, and SHA-256 immediately. Readback fetches by exact VersionId and asserts all three — an early confirmation cannot be silently replaced by a later write.
 - **Readback timing.** Periodic re-reads happen at 15/30/60 s after the data canary succeeds, through every peer, and the final check includes writes made during a single-node outage and after its rejoin.
 - **No retry masking.** Each canary carries a hard 60 s deadline covering setup, request, response-body read, and sleep, and SDK retries are disabled so a recovery window cannot be papered over by client-side retries.
 - **Driver topology.** Four Linux/arm64 containers on one host with independent network identities, one drive each (EC 2+2), and tmpfs volumes kept mounted by a holder container through the full shutdown; nodes stop in parallel with a 10 s grace period, then start in parallel.
 
-The operational finding worth remembering: **admin-endpoint readiness is not data readiness.** In the recorded run the candidate's admin endpoint was online at roughly 2.5 s while the first full data canary completed only near 14 s. A readiness probe against admin/health says nothing about the data plane during that window, and no fixed sleep substitutes for an actual data-plane check.
+The operational finding worth remembering: **admin-endpoint readiness is not data readiness.** The [fixed historical record](https://github.com/pgsty/silo/blob/82948d63060839f6d18c9da8cfd03e8b6d95bc49/docs/investigations/release-readiness-20260911.md#linux-restartreadback-116) tested 0806, 0903 and the then-current main repair build. The main build reached the admin gate 2.461 s after restart, then needed another 14.489 s for the data canary: different timing origins. The 0903 run took 0.191 s after its gate, which does not establish immunity to the inherited startup window. A readiness probe against admin/health says nothing about the data plane during that window, and no fixed sleep substitutes for an actual data-plane check.
 
 Boundaries, stated as boundaries: this acceptance covers process/container restart and TCP peer reconnection on a single Linux host. It does not prove persistence across independent hosts, host reboots, or physical media failure, and the timings are individual observations, not latency guarantees. The run artifacts are retained outside the documentation tree; the method above is the part that generalizes.
+
+**September 16 source follow-up:** #10 closed through the independent single-object repair #145; batch ETag deletion is still absent. #77 and #99/#100 were repaired on main. #133/#144 were subsequently addressed by #178; #79's default listing limitations remain open. These changes must not be retroactively attributed to Server 20260903; they shipped in [Server 20260916](/blog/release/silo-20260916/). See the [current component/source matrix](/compatibility/versions/).

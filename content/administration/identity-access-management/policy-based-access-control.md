@@ -918,19 +918,20 @@ MinIO supports the following condition keys for all supported [actions](#minio-p
 
 ### Condition Value Sources and Precedence {#condition-value-sources}
 
-> [!WARNING]
-> **Unreleased server behavior (as of 2026-08-03)**
+> [!NOTE]
+> **Release boundary and precedence**
 >
-> The table below describes behavior after companion server change `2f55347f7` (recorded as SN-2026-003), which ships in `RELEASE.2026-08-04T00-00-00Z` and every later Silo release. Verify the server release notes before relying on these precedence guarantees.
+> Condition-source isolation in `2f55347f7` (SN-2026-003) shipped in `RELEASE.2026-08-04T00-00-00Z`. This table describes Server 20260916, including #177's later signature-age and effective-payload-hash fixes; older releases do not have all of these precedence guarantees.
 
 Silo constructs the condition-value map from semantic request sources instead of treating every header and query parameter as interchangeable. A raw header or query parameter whose name resembles an internal condition key cannot replace a value calculated by the server or create one that the server did not provide.
 
 | Condition family | Source used for policy evaluation | Precedence and compatibility |
 | :-- | :-- | :-- |
 | Identity, time, transport, authentication, `s3:versionid`, `s3:LocationConstraint`, LDAP, and JWT values | Authenticated credentials and claims, the server clock and transport, or the API field parsed for that operation | Same-named raw headers and query parameters cannot add or replace these values. `aws:Referer` and `aws:UserAgent` remain client-controlled by definition; see the warning above for `aws:SourceIp`. |
-| `s3:signatureAge` | Elapsed time calculated by the SigV4 presigned-request verifier | Available only for a verified SigV4 presigned request. A client-supplied `x-amz-signature-age` Header on any other request type is ignored. |
+| `s3:signatureAge` | Elapsed milliseconds since the SigV4 presigned request's `X-Amz-Date` | Available for a SigV4 presigned request with a parseable date; the request must still pass signature verification before acceptance. A client-supplied `x-amz-signature-age` header is ignored. |
 | `s3:prefix`, `s3:delimiter`, `s3:max-keys` | Query string only | A similarly named request header is ignored for these list conditions. |
-| `s3:x-amz-content-sha256`, `s3:x-amz-copy-source`, `s3:x-amz-metadata-directive`, and server-side-encryption keys | Their corresponding HTTP headers only | Query-string substitutes do not satisfy these conditions. In particular, the `X-Amz-Content-Sha256` query value used while verifying a presigned request is not exposed as the policy condition value. |
+| `s3:x-amz-content-sha256` | The single effective hash used by signature and body verification | The condition key exists only when the `X-Amz-Content-Sha256` header is present. A presigned query value takes precedence over the header; otherwise the first header value is used. A query value alone, without the header, leaves this condition key absent. |
+| `s3:x-amz-copy-source`, `s3:x-amz-metadata-directive`, and server-side-encryption keys | Their corresponding HTTP headers only | Same-named query-string fields cannot substitute for these condition values. |
 | `s3:x-amz-storage-class` | `X-Amz-Storage-Class` header, with a compatible query-string fallback | Header presence wins even when the header value is empty. The query form remains available for compatibility with existing upload paths. |
 | `s3:RequestObjectTag/<key>` and `s3:RequestObjectTagKeys` | The `X-Amz-Tagging` Header by default; an explicitly supplied effective tag set on tag-aware handlers | `PutObject` and `CreateMultipartUpload` accept the Header or their compatible query fallback, with Header presence winning. `PutObjectTagging` uses the parsed XML request body. Query tagging is ignored on unrelated operations. The historical Header fallback remains for compatibility on actions whose policy map admits these keys, so outside the three handlers above a request-tag condition does not by itself prove that the operation consumes or stores those tags. |
 | `s3:ExistingObjectTag/<key>` | Tags loaded from the stored target object | Request headers and query parameters never provide existing-object tags. The value is available only on API paths that load those tags before authorization, including object GET/HEAD and object-tagging handlers. |

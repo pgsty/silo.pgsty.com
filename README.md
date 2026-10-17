@@ -1,6 +1,6 @@
 # Silo Documentation
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.0.0](https://github.com/pgsty/oink/tree/v1.0.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.3.0](https://github.com/pgsty/oink/tree/v1.3.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Release state and publication
 
@@ -16,7 +16,7 @@ its commit check and the live English/Chinese pages after publication.
 
 ## Local development
 
-Install Hugo Extended 0.160.1 or newer, Go, and Git. OINK vendors the browser and styling dependencies required by the site, so a Node.js toolchain is not needed.
+Install Hugo Extended 0.166.0 or newer, Go, Git, and Python 3.10 or newer with `venv` support. OINK vendors the browser and styling dependencies required by the site, so a Node.js toolchain is not needed.
 
 ```bash
 make dev
@@ -34,7 +34,14 @@ Run the module verification and warning-strict production build with:
 make check
 ```
 
-OINK is pinned as a Hugo Module in `go.mod`. Its wordmark, featured-image cascade, and Markdown-first steps are configured or used directly by this site. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, provenance notice, and imported-document ordering. Documentation chrome, search, footer, content components, blog feeds, and blocks come from the theme.
+The first check creates `.venv-check` and installs the pinned test dependencies
+from `bin/requirements-test.txt`. Subsequent checks reuse that environment.
+`make test` runs the link-checker and replica-audit regression tests without
+rebuilding the site.
+
+OINK is pinned as a Hugo Module in `go.mod`. Its wordmark, featured-image cascade, and Markdown-first steps are configured or used directly by this site. The project keeps only Silo-specific layouts and styles: the product homepage, download matrix, shared product footer, provenance notice, and imported-document ordering. Documentation chrome, search, content components, blog feeds, and blocks come from the theme. The theme's footer entry point renders the same SILO footer on every page, with language-specific links in `data/footer/en.yaml` and `data/footer/zh.yaml`.
+
+The appearance menu offers Paper (default), Slate, Ink, and Terminal in both languages, independently of light/dark mode. Configure the default and available styles through `params.ui.preset` and `params.ui.preset_menu` in `hugo.yaml`.
 
 ## Content convention
 

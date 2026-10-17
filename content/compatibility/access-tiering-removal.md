@@ -10,8 +10,9 @@ icon: fa-solid fa-code-compare
 
 > **Release boundary:** the opt-in GET-frequency pool-tiering feature (community
 > [PR #60](https://github.com/pgsty/silo/pull/60)) existed only in main/snapshot
-> builds. The published Server 20260903 predates it, and upgrading from the
-> published version needs **no** access-tier configuration cleanup. The removal
+> builds. Server 20260903 predates it and Server 20260916 was tagged after its
+> removal, so upgrading from either published version needs **no** access-tier
+> configuration cleanup. The removal
 > merged as [PR #188](https://github.com/pgsty/silo/pull/188); only deployments
 > that ran a build containing the feature need this page.
 

@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-restore-hardware-failure-drive"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 支持将故障驱动器热替换为新的健康驱动器。 MinIO 会检测这些驱动器并对其执行自愈，无需在节点级或部署级执行重启。 [MinIO 自愈](/zh/operations/concepts/healing/#minio-concepts-healing) 仅发生在被替换的驱动器上，大多数情况下对部署性能影响很小或几乎可以忽略。
 

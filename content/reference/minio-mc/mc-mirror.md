@@ -494,7 +494,7 @@ See the Amazon documentation on [Storage Classes](https://docs.aws.amazon.com/Am
 >
 > RELEASE.2024-01-28T16-23-14Z
 
-Skip any objects that produce errors while mirroring.
+Continue after per-object errors; recorded failures still make a finite mirror exit 1. In mcli 20260916, per-object permission errors already continue without this flag. Listing/watcher errors retain their cancellation/retry path.
 
 ##### `--summary` {#mc.mirror.-summary}
 
@@ -502,7 +502,7 @@ Skip any objects that produce errors while mirroring.
 
 *Optional*
 
-On completion, output a summary of the data that was synchronized.
+Output final statistics, including failed runs. In mcli 20260916 JSON summaries use `status: failure` on failure; without this flag a failed quiet/JSON mirror emits no trailing statistics record.
 
 ##### `--watch, w` {#mc.mirror.-watch}
 

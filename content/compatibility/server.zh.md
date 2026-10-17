@@ -8,9 +8,16 @@ type: docs
 icon: fa-solid fa-server
 ---
 
-> **当前控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
+>
+> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
 
-Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端和磁盘数据的兼容性，但 **绝不是一次在运维层面完全无感的二进制改名**。本页是从上游基线迁移到 2026-08-06 所准备 Silo 源码时的兼容性契约。
+> **正式 Server 20260916 内嵌控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。独立 [Console v2.4.2](/zh/blog/release/console-2.4.2/) 已另行发布，引用 mcli 20261018 与 pkg v3.14.2。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
+
+**先看[三档兼容性总览](/zh/compatibility/)：12 类兼容或改进、4 类轻微差异、8 类按条件检查。** 本页提供服务端细节，保留 2026-08-06 审计的固定基线，并分别记录[后续已发布变化](#since-20260806)与[9 月 16 日源码变化](#september-2026)。历史审计基线不等于[最初分叉基线](/zh/compatibility/#scope)，也不代表最新制品已经包含全部源码修复。
 
 > [!WARNING]
 > **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
@@ -62,7 +69,7 @@ Silo 是持续维护的 MinIO 服务端分叉。它保留了面向 S3 客户端�
 - 默认 S3 端口 `9000`、既有 `--address` / `--console-address` 参数，以及 `RELEASE.YYYY-MM-DDTHH-MM-SSZ` 标签格式；
 - 配置 KV 格式、IAM 数据、KMS/KES 配置、加密元数据、桶元数据、复制状态与修复状态。
 
-自动化 rebrand 基线记录了 137 个兼容 import、437 个环境变量名、19 个指标命名空间、84 个头、334 条路由、1 个内部根目录、3 个 Grid 命名空间、15 个 storage-REST 标识、58 个策略标识和 9,014 个导出符号。Guard 会把任何未评审的基线漂移视为兼容性失败。
+rebrand guard 检查显式标识清单，数量并不是运行时兼容性测试。归档的 `219670d3` 清单包含 137 个 import、436 个环境变量名、19 个指标命名空间、84 个头、330 条路由、1 个根目录、3 个 Grid 命名空间、15 个存储标识、58 个策略标识和 9,014 个导出符号。[当前源码清单](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/buildscripts/rebrand-guard/compat-baseline.json) 为版本 4，已不再跟踪导出符号。应在实际源码版本运行 `make rebrand-guard` 并评审有意的清单变化；检查通过不等于证明协议或升级兼容。
 
 同一组数据盘从 MinIO 切到 Silo 时不需要复制数据或重写元数据。但这并不意味着一切畸形历史对象都会继续被接受：下文的存储加固会拒绝不安全路径、非法纠删码几何、负 part size 以及过去可能继续向下传播的污染元数据。
 
@@ -78,7 +85,7 @@ replace github.com/minio/mc      => github.com/pgsty/mc ...
 公共包是刻意的例外。[pkg v3.13.0](/zh/blog/release/pkg-3.13.0/) 起它使用自己的模块路径构建，所有维护中的组件——包括服务端——都**直接**消费它：
 
 ```go
-require github.com/pgsty/silo-pkg/v3 v3.14.0   // 不再使用 replace 安排
+require github.com/pgsty/silo-pkg/v3 v3.14.1   // 不再使用 replace 安排
 ```
 
 历史的 `replace github.com/minio/pkg/v3 => ...` 安排已退役；`github.com/minio/pkg/v3` 现在仅作为遗留的*间接*依赖出现（经 `colorjson`/`dperf`），与维护中的策略实现相互独立。上游 SDK `github.com/minio/minio-go/v7` 是另一个明确例外：以经过验证的 commit 直接消费上游，退役的 `silo-go` 分叉不属于维护依赖图。
@@ -257,7 +264,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 | Snowball               | 先授权后解包 tar；流式 trailer 绕过无法在后续失败前写入对象                                                                                                                     |
 | S3 Select 记录限制         | CSV 输入、JSON Lines 输入和输出记录超过 1 MiB 时返回 `OverMaxRecordSize` 事件。JSON Lines 始终使用有界 reader（在支持 SIMD 的 CPU 上可能变慢），JSON 解析错误为 `JSONParsingError`，已完成记录可先于终止错误送达 |
 | 流式响应                   | tracking writer 实现 `Flush`；Write/Flush 会记录隐式 HTTP 200。ListenBucketNotification/watch 流及 S3 Select keepalive 能及时送达，审计/状态指标也能记录已提交状态                       |
-| Multipart 整对象 checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME 完成时可完全省略每 part checksum；只要提供任意一个仍会校验；COMPOSITE 仍要求每个 part。即使不提供对象 checksum value，显式 completion type 仍会校验：不匹配返回 `BadDigest`，未知 type 返回 `InvalidArgument`。CRC64NVME canonicalization 保持不变。零字节 multipart 对象 checksum 会正确保存 |
+| Multipart 整对象 checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME 完成时可完全省略每 part checksum；只要提供任意一个仍会校验；COMPOSITE 仍要求每个 part。即使不提供对象 checksum value，显式 completion type 仍会校验：不匹配返回 `BadDigest`，未知 type 返回 `InvalidArgument`。后续 #93/#96 已拒绝 CRC64NVME + COMPOSITE，修复包含在 Server 20260903 中。零字节 multipart 对象 checksum 会正确保存 |
 | CopyObject checksum 响应 | CopyObject XML 与 HTTP header 使用目标加密上下文报告已提交 checksum。SSE-C 源 key A 与目标 key B 严格分开；同对象换钥会用新 key 返回 checksum 字段。存储数据与 checksum format 均不改变 |
 | Multipart part 顺序      | 重复或非递增 part number 在组装前以 `InvalidPartOrder` 失败；允许空洞及不从 1 开始；upload 保留供重试                                                                                 |
 | 纠删码读缓冲池                | 恢复正确 shard buffer 所有权，避免池失效以及可能造成卡死、损坏或严重性能下降的错误缓冲关联                                                                                                     |
@@ -299,7 +306,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 |:-----------|:-------------------------------------------------------------|:-------------------------------------------------------------------------|
 | Console    | `pgsty/silo-console` v2.1.1，保持 `github.com/minio/console` 路径 | 恢复内嵌 UI，应用 Silo 品牌和双语文本，加入 Metrics V3，移除 SUBNET 流程并修复指标图例未翻译问题           |
 | 客户端库       | `pgsty/mc`，保持 `github.com/minio/mc` 路径                       | Console import path 不变，同时使用维护中的 MCLI 分叉                                  |
-| 公共包        | `pgsty/silo-pkg/v3`，以自有模块路径直接消费（v3.14.0；v3.12.x 及之前经 `minio/pkg/v3` replace） | [v3.13.0](/zh/blog/release/pkg-3.13.0/) 的破坏性模块路径迁移；提供 IAM 精确匹配的一半、LDAP TLS/StartTLS/deadline/close 修复、证书 watcher 清理和 RNG 修复 |
+| 公共包        | `pgsty/silo-pkg/v3`，以自有模块路径直接消费（v3.14.1；v3.12.x 及之前经 `minio/pkg/v3` replace） | [v3.13.0](/zh/blog/release/pkg-3.13.0/) 的破坏性模块路径迁移；提供 IAM 精确匹配的一半、LDAP TLS/StartTLS/deadline/close 修复、证书 watcher 清理和 RNG 修复 |
 | Kafka      | Sarama 1.45.1                                                | 固定以避免破坏性的 broker 协商漂移                                                    |
 | PostgreSQL | lib/pq 1.10.9                                                | 固定以避免 nil `[]byte` / PostgreSQL 14 以前版本的行为回归；自动 DSN 引用在服务端代码中修复          |
 | 压缩         | klauspost/compress 1.18.7                                    | 显式安全/正确性升级                                                               |
@@ -329,21 +336,45 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
 | 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
 
-公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，并非 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
+公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，Server 20260916 则要求 v3.14.1；两者都不是 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
+
+## Server 20260916 发布的变化 {#september-2026}
+
+以下变化已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，**不在 Server 20260903 中**。逐项修复范围及配套组件见[版本矩阵](/zh/compatibility/versions/#source-review)，用户影响按总览编号查阅。
+
+| 范围 | 用户可见变化 | 对应分类与详情 |
+| --- | --- | --- |
+| 新增管理 API | `GET /minio/admin/v3/multipart-preflight` 只读检查分片迁移准备；站点间新增 `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` 同步修订与撤销状态。 | [O06](/zh/compatibility/#o06) / [分片预检](/zh/blog/design/list-multipart-uploads/#implementation-20260916)；[O07](/zh/compatibility/#o07) / [IAM 协议](/zh/blog/design/iam-revocations/#upgrade) |
+| S3 条件与分片列表 | 多池条件写入、分片完成及版本删除更严格地核实元数据；分片列表上限为 1,000，默认仍为 legacy，strict 必须显式启用并完成准备。 | [O04](/zh/compatibility/#o04)、[O06](/zh/compatibility/#o06) / [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[分片模式](/zh/blog/design/list-multipart-uploads/#implementation-20260916) |
+| 权限与持久状态 | 自助改密与创建用户使用独立权限；IAM 持久撤销和桶配置删除状态影响协调升级与恢复，通用桶配置墓碑导出默认关闭。 | [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) / [密码迁移](/zh/compatibility/password-permissions/)、[IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout) |
+| 数据与复制 | 继续修复多池副本、标签与 Object Lock 排序、删除标记恢复、SSE-C 与联邦复制；不自动重建已丢失的历史状态。 | [G07–G10](/zh/compatibility/#g07) / [复制状态检查](/zh/operations/replication/replica-metadata-audit/)、[版本说明](/zh/compatibility/versions/#source-review) |
+| HTTP 与 TLS | 请求头使用绝对读取期限；TLS 默认选择与旧代理、IdP 的互操作需要核对，正文仍使用既有滚动空闲超时。 | [O03](/zh/compatibility/#o03) / [请求头超时](/zh/blog/design/request-header-timeouts/)、[TLS/OIDC](/zh/blog/design/go127-tls-oidc-discovery/) |
+
+API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占位接口的实质启用](#since-20260806)，`ReadMultiple` 是[私有存储接口删除](#storage-rest)，在线更新是[保留入口但停用功能](#offline-services)。`silo healthcheck` 与 `mcli checksum verify` 是新增命令，分别调用既有健康端点、读取对象做本地审计。
+
+### 运行与观测变化 {#observability}
+
+对应 [G12](/zh/compatibility/#g12)、[B03](/zh/compatibility/#b03)。`minio_*` 命名空间与既有指标路径保留，但指标集合和数值含义并未冻结：
+
+- [MRF 丢弃计数](/zh/blog/design/replication-reliability/#mrf)进入管理统计及 Prometheus v2/v3。它统计队列条目，同一对象可对应多个条目，不能当成丢失对象数。
+- [IAM 撤销指标](/zh/blog/design/iam-revocations/#errors)反映删除记录、协调失败、耗时与最近成功时间，需按各节点的采集语义解释。
+- 桶配额指标改为报告实际有效配额；CPU 指标采集增加并发保护。它们分别影响监控数值与运行稳定性，不代表统一性能提升。
+
+核对受影响的仪表盘和告警，并独立验证对象及复制状态；监控正常不代表所有历史问题已经修复。
 
 ## 已知残余风险与未修复项 {#limits}
 
 本次审计不会把继承的限制包装成兼容性承诺：
 
 1. **默认来源 IP 仍可伪造。** 未设置 `MINIO_API_TRUSTED_PROXIES` 时刻意保留上游 trust-any 行为。直连部署设为 `none`，代理部署使用精确 allowlist。
-2. **版本条件仍有缺口。** MultiDelete governance bypass 的二次授权仍读取 query/缺失 version，而非每个 XML entry；Snowball 在逐文件授权后才读 PAX `minio.versionId`。`username`、`userid`、`signatureversion`、`authType` 条件 key 仍无条件插入空值，因此对它们使用 `Null` 仍是“存在但为空”的语义。
+2. **版本条件的后续修复。** #104 已在 Server 20260903 中修复 governance bypass 的逐条目版本授权。Snowball PAX 版本的授权时序是另一条路径；部分身份条件仍保留“存在但为空”的语义。
 3. **Multipart parser 防御尚未完整。** Handler 已修复顺序，但 object layer 没有独立 uniqueness 防线；XML root 验证和继承的非数字 part 错误映射未修改。
 4. **旧通知迁移仍有风险。** 按上文说明审核。
 5. **存储路径校验为词法层面。** 不解析符号链接；未独立覆盖原生 Windows 执行。
 6. **私有 API 不是稳定兼容承诺。** `ReadMultiple` 表明即便 storage REST 协议号不变，操作仍可能消失。不要跨越该边界滚动运行混合构建。
 7. **源码结果不等于已发布制品。** 在逐渠道验证前，本页不声称 GitHub 标签、软件包、OCI manifest、签名或线上站点已经包含仅存在于审计 HEAD 的最后三个提交。
 8. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
-9. **未实现条件删除。** `DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object><ETag>` 元素，两者都执行无条件删除（[#10](https://github.com/pgsty/silo/issues/10)）。
+9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
 10. **多站点删除桶配置的历史收敛限制。** 本页所述已发布版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。依赖多站点同步删除这些配置的部署，删除后必须逐站核对。2026-09-12，[PR #180](https://github.com/pgsty/silo/pull/180) 已将修复合入主干；完整删除自愈要求全部节点升级并统一开启删除导出，详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。发行制品是否包含修复仍需按版本核对。
 
 ## 迁移检查清单 {#migration}
@@ -358,7 +389,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 6. 使用 Helm 时，以完整旧 values 分别渲染新旧 Chart；需要时用 `nameOverride` / `fullnameOverride` / `serviceAccount.name` 保留名称；Chart 与镜像原子切换。
 7. 删除 updater、callhome、SUBNET 注册和支持上传自动化，改用软件包/镜像/编排器滚动及自己的诊断传输渠道。
 8. 把 HMAC OIDC token 改为非对称 JWKS。分别测试 LDAP 成功、错密码、未知用户、后端故障和限流路径。
-9. 为 12 个受保护 action 加裸桶 ARN；测试有效 tag、signature-age、source-IP 和逐版本删除条件。旧桶开关只作为临时回退杆。
+9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
 10. 设置 `MINIO_API_TRUSTED_PROXIES=none` 或精确列表，清洗三种来源地址头，并加入会转发认证请求的集群 peer。
 11. 测试超大 S3 Select 记录、流式通知、unsigned trailer 拒绝、multipart 整对象 checksum、重复 part、复制、修复、KMS、每个通知 target、审计摄取及容器优雅关停。
 12. 把分布式集群所有节点作为同一构建升级。回滚时旧 Chart 与旧镜像成对使用，绝不能只回滚一个。

@@ -52,7 +52,7 @@ Self-update is disabled in the Pigsty mc fork; upgrade only through the Pigsty p
 
 *Optional*
 
-把“更新已禁用”的错误格式化为一条 [JSON Lines](https://jsonlines.org/)<a id="json-lines"></a> 对象。该参数不会启用更新。
+把“更新已禁用”的错误格式化为一条 [JSON Lines](https://jsonlines.org/)<a id="json-lines" data-td-print-local></a> 对象。该参数不会启用更新。
 
 例如：
 

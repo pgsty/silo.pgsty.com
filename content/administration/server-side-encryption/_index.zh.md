@@ -9,7 +9,7 @@ upstream_modified: true
 
 <a id="minio-encryption-overview"></a>
 <a id="minio-sse"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 服务器端加密（SSE）在写入操作期间保护对象，使客户端能够利用服务器的处理能力在存储层保障对象安全（静态加密）。 SSE 还为与安全锁定和擦除相关的监管与合规要求提供关键能力。
 
@@ -63,7 +63,7 @@ SSE-C 不支持存储桶默认加密设置，并要求客户端执行所有密�
 
 MinIO SSE 需要启用 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 安全擦除与锁定 {#minio-encryption-sse-secure-erasure-locking}
 

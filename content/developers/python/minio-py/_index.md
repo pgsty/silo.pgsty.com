@@ -8,6 +8,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="minio-python-quickstart"></a>
+
 ## MinIO Python SDK {#python-sdk}
 
 SILO implements the S3-compatible server contract, so Python applications can use the upstream [MinIO Python SDK](https://github.com/minio/minio-py) directly.

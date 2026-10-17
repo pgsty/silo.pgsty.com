@@ -2,7 +2,7 @@
 title: "ListObjects 快捷路径不能把不存在的桶伪装成空桶"
 linkTitle: "ListObjects NoSuchBucket"
 date: 2026-08-26
-lastmod: 2026-08-26
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   三条 ListObjects 快捷路径会在访问存储前直接返回 EOF，导致不存在的桶被错误地表示为空列表。本文记录 SILO #32 / PR #37 的回归来源、S3 兼容性价值、只在快捷路径检查桶存在性的最小修复、集群扇出代价、衍生边界与验收决策。
@@ -11,6 +11,8 @@ weight: 25
 draft: false
 url: "/zh/blog/design/listobjects-nosuchbucket/"
 ---
+
+> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
 
 本文是 [SILO #32](https://github.com/pgsty/silo/issues/32) 与 [PR #37](https://github.com/pgsty/silo/pull/37) 的问题分析、设计讨论与修复决策归档。
 

@@ -8,13 +8,13 @@ upstream_modified: true
 
 <a id="mc-license-update"></a>
 <a id="command-mc.license.update"></a>
-<a id="examples"></a>
+<a id="examples" data-td-print-local></a>
 <a id="update-the-license-key-for-a-deployment-with-alias-minio1"></a>
-<a id="parameters"></a>
+<a id="parameters" data-td-print-local></a>
 <a id="mc.license.update.ALIAS"></a>
 <a id="mc.license.update.LICENSE-FILE-WITH-PATH"></a>
 <a id="mc.license.update.-airgap"></a>
-<a id="global-flags"></a>
+<a id="global-flags" data-td-print-local></a>
 
 ## License commands {#description}
 

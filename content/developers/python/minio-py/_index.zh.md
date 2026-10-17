@@ -8,6 +8,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="minio-python-quickstart"></a>
+
 ## MinIO Python SDK {#python-sdk}
 
 SILO 实现兼容 S3 的服务端契约，因此 Python 应用可以直接使用上游 [MinIO Python SDK](https://github.com/minio/minio-py)。

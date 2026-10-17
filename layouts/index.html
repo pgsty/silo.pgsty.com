@@ -1,6 +1,5 @@
 {{- /* SILO's landing page, rendered inside OINK's landing shell.
-     baseof.landing.html supplies <head> and the site navbar; the page keeps
-     its own footer, so params.ui.footer_style is none here. The page
+     baseof.landing.html supplies <head>, the site navbar, and the shared footer. The page
      sets `body_class: landing-page` so the bespoke section CSS keeps its
      scope, and its stylesheet/runtime load through the theme's head-end
      and body-end hooks. */ -}}
@@ -17,6 +16,16 @@
     <section class="hero" id="hero">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="landing-container">
+        {{- /* Latest server release badge, driven by data/releases.yaml; the
+             target is that release's note under blog/release/silo-<version>/. */ -}}
+        {{- $serverVer := replace hugo.Data.releases.server.date "-" "" -}}
+        <p class="hero-news anim" style="--d:0">
+          <a class="hero-news-badge" href="{{ relLangURL (printf "blog/release/silo-%s/" $serverVer) }}" aria-label="{{ if $zh }}SILO {{ $serverVer }} 已发布，阅读发布说明{{ else }}SILO {{ $serverVer }} released, read the release notes{{ end }}">
+            <span class="hero-news-tag">NEWS</span>
+            <span class="hero-news-text">{{ if $zh }}{{ $serverVer }} 已发布！{{ else }}{{ $serverVer }} Released!{{ end }}</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </a>
+        </p>
         <div class="hero-grid">
           <div class="hero-copy" id="about">
             <p class="hero-eyebrow anim" style="--d:0">
@@ -43,8 +52,6 @@
               <a href="{{ relLangURL "docs/" }}" class="btn btn-primary"><i class="fas fa-book-open" aria-hidden="true"></i> {{ if $zh }}浏览文档{{ else }}Docs{{ end }}</a>
               <a href="{{ relLangURL "download/" }}" class="btn btn-ghost"><i class="fas fa-download" aria-hidden="true"></i> {{ if $zh }}下载安装{{ else }}Install{{ end }}</a>
             </div>
-
-            <p class="hero-manifesto anim" style="--d:4"><a href="{{ relLangURL "compatibility/versions/" }}">{{ if $zh }}组件版本：Server 20260903 · Console 2.4.1 · mcli 20260916 · pkg 3.14.1{{ else }}Component versions: Server 20260903 · Console 2.4.1 · mcli 20260916 · pkg 3.14.1{{ end }} →</a></p>
 
             <p class="hero-manifesto anim" style="--d:4">
               <a href="{{ relLangURL "about/manifesto/" }}"><i class="fas fa-scroll" aria-hidden="true"></i> {{ if $zh }}我们承诺什么，不承诺什么：PGSTY SILO 宣言{{ else }}The PGSTY SILO Manifesto: our commitments, and limits{{ end }} →</a>
@@ -113,13 +120,13 @@
           </a>
         </div>
 
-        <div class="logos-marquee adoption-logos" data-reveal aria-label="{{ if $zh }}采用 SILO 镜像并带有公开证据的开源项目{{ else }}Open-source projects with public SILO adoption evidence{{ end }}">
+        <div class="logos-marquee adoption-logos" data-reveal aria-label="{{ if $zh }}公开使用或引用 PGSTY 对象存储的项目{{ else }}Projects with public PGSTY object storage usage or references{{ end }}">
           {{ range $i, $row := $evidenceProjects.rows }}
           <div class="logos-marquee-row" data-direction="{{ cond (eq (mod $i 2) 0) "left" "right" }}">
             <div class="logos-marquee-content">
               <div class="evidence-logo-set">
                 {{ range $row }}
-                <a class="logo-item evidence-logo-item" href="{{ .href }}" target="_blank" rel="noopener" aria-label="{{ .name }} — {{ if $zh }}查看采用证据{{ else }}view adoption evidence{{ end }}">
+                <a class="logo-item evidence-logo-item" href="{{ .href }}" target="_blank" rel="noopener" aria-label="{{ .name }} — {{ if $zh }}查看使用或引用证据{{ else }}view usage or reference evidence{{ end }}">
                   <img src="{{ .logo | relURL }}" alt="" loading="lazy">
                   <span class="evidence-logo-copy"><strong>{{ .name }}</strong><small>{{ if $zh }}{{ .kindZh }}{{ else }}{{ .kind }}{{ end }}</small></span>
                 </a>
@@ -176,7 +183,7 @@
             <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}公告与修复它的代码放在同一个地方{{ else }}Advisories published next to the code that fixes them{{ end }}</p>
             <ul class="module-list">
               <li>{{ if $zh }}上游社区版已归档——新 CVE 落到无人处理{{ else }}Upstream's community edition is archived—new CVEs land on no one's desk{{ end }}</li>
-              <li>{{ if $zh }}活跃发行线已交付 <strong>19 项安全修复</strong>，每项都附公告{{ else }}<strong>14 security fixes</strong> shipped on the active release line, each with an advisory{{ end }}</li>
+              <li>{{ if $zh }}<strong>安全修复与公开公告</strong>，逐项记录受影响版本和交付状态{{ else }}<strong>Security fixes with public advisories</strong>, documenting affected versions and delivery status{{ end }}</li>
               <li>{{ if $zh }}私下报告、可复现地分诊、透明地公开{{ else }}Report privately, triage reproducibly, publish transparently{{ end }}</li>
             </ul>
             <p class="module-value">{{ if $zh }}不停摆的安全维护{{ else }}Security that keeps moving{{ end }}</p>
@@ -227,23 +234,23 @@
         <div class="module-row module-row--reverse" data-reveal>
           <div class="module-content">
             <p class="module-ref silkscreen">{{ if $zh }}兼容性{{ else }}COMPATIBILITY{{ end }}</p>
-            <h3 class="module-title"><a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}原地替换 MinIO{{ else }}A drop-in MinIO replacement{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">⇄</span> {{ if $zh }}换一个镜像名即可迁移，数据原地不动{{ else }}Swap the image name; your data stays in place{{ end }}</p>
+            <h3 class="module-title"><a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}从 MinIO 迁移{{ else }}Migrate from MinIO{{ end }}</a></h3>
+            <p class="module-motto"><span aria-hidden="true">⇄</span> {{ if $zh }}保留数据卷，按版本核对迁移条件{{ else }}Keep your data volumes; check the version-specific migration requirements{{ end }}</p>
             <ul class="module-list">
-              <li>{{ if $zh }}产品与交付物改名为 <strong>silo</strong>，协议与数据格式保持不变{{ else }}The delivery surface is renamed <strong>silo</strong>; the protocol and data are not{{ end }}</li>
-              <li>{{ if $zh }}S3 API、<strong>MINIO_* 变量</strong>、指标、路由与磁盘格式原样保留{{ else }}S3 API, <strong>MINIO_* variables</strong>, metrics, routes, and disk format unchanged{{ end }}</li>
+              <li>{{ if $zh }}产品与交付物使用 <strong>silo</strong>，保留既有对象布局和协议标识{{ else }}Artifacts use <strong>silo</strong>, retaining the object layout and protocol identifiers{{ end }}</li>
+              <li>{{ if $zh }}沿用 S3 API 与 <strong>MINIO_* 配置名</strong>；权限、元数据与回滚变化按版本说明{{ else }}Retain the S3 API and <strong>MINIO_* configuration names</strong>; policy, metadata and rollback changes are documented per release{{ end }}</li>
               <li>{{ if $zh }}参见<a href="{{ relLangURL "compatibility/server/" }}">兼容性审计</a>与<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>，回滚路径同样在册{{ else }}See the <a href="{{ relLangURL "compatibility/server/" }}">compatibility audit</a> and <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a>, rollback included{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}把镜像换成 pgsty/silo，其余一切照旧{{ else }}Point the image at pgsty/silo — everything else stays{{ end }}</p>
+            <p class="module-value">{{ if $zh }}正式支持 SILO 四组件组合，上游兼容尽力保留{{ else }}The four-component SILO stack is supported; upstream compatibility is best effort{{ end }}</p>
           </div>
           <div class="module-visual">
             <a href="{{ relLangURL "compatibility/migration/" }}" class="code-plate migrate-plate" aria-label="{{ if $zh }}查看从 MinIO 迁移到 PGSTY SILO 的指南{{ else }}Read the MinIO to PGSTY SILO migration guide{{ end }}">
               <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">docker-compose.yml</span></span>
-              <pre class="code-body"><span class="c"># {{ if $zh }}从 MinIO 迁移到 PGSTY SILO{{ else }}Migrate from MinIO to PGSTY SILO{{ end }}</span>
+              <pre class="code-body" tabindex="0" role="region" aria-label="{{ if $zh }}迁移示例{{ else }}Migration example{{ end }}"><span class="c"># {{ if $zh }}从 MinIO 迁移到 PGSTY SILO{{ else }}Migrate from MinIO to PGSTY SILO{{ end }}</span>
 <span class="k">services</span>:
   <span class="k">minio</span>:
 <span class="del">-   image: minio/minio:latest</span>
-<span class="add">+   image: pgsty/silo:latest</span>
+<span class="add">+   image: docker.io/pgsty/silo:{{ hugo.Data.releases.server.tag }}</span>
     <span class="k">environment</span>:  <span class="c"># MINIO_* unchanged</span>
     <span class="k">volumes</span>:      <span class="c"># same volume, same data</span></pre>
             </a>
@@ -257,7 +264,7 @@
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">S3 INTERFACE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title">{{ if $zh }}还是那套接口{{ else }}Same interface{{ end }}</h2>
-          <p class="section-subtitle section-subtitle--wide">{{ if $zh }}客户端、SDK 与脚本都不用改：同样的 S3 API，同样的 MINIO_* 配置，同样的指标，同样的磁盘格式。{{ else }}Your clients, SDKs, and scripts keep working: same S3 API, same MINIO_* variables, same metrics, same on-disk format.{{ end }}</p>
+          <p class="section-subtitle section-subtitle--wide">{{ if $zh }}保留客户端熟悉的 S3 API、MINIO_* 配置名和指标标识；升级前核对目标版本的权限与持久状态变化。{{ else }}Keep familiar S3 APIs, MINIO_* configuration names and metric identifiers. Review the target release's policy and persistent-state changes before upgrading.{{ end }}</p>
           <div class="section-links">
             <a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}兼容性说明{{ else }}Compatibility Notes{{ end }} →</a>
             <a href="{{ relLangURL "developers/minio-drivers/" }}">{{ if $zh }}S3 客户端{{ else }}S3 Clients{{ end }} →</a>
@@ -301,22 +308,22 @@
       </div>
       <div class="dashboard-gallery-marquee" data-reveal>
         <div class="dashboard-gallery-track">
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-bucket-manage.webp" | relURL }}" data-alt="Bucket Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-iam.webp" | relURL }}" data-alt="Identity and Access Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-settings-site-replication.webp" | relURL }}" data-alt="Site Replication"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-overview.webp" | relURL }}" data-alt="SILO Overview Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-instance.webp" | relURL }}" data-alt="SILO Instance Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-disk.webp" | relURL }}" data-alt="SILO Disk Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-bucket-manage.webp" | relURL }}" data-alt="Bucket Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-iam.webp" | relURL }}" data-alt="Identity and Access Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-settings-site-replication.webp" | relURL }}" data-alt="Site Replication"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-overview.webp" | relURL }}" data-alt="SILO Overview Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-instance.webp" | relURL }}" data-alt="SILO Instance Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-disk.webp" | relURL }}" data-alt="SILO Disk Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console" aria-label="SILO Console"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-bucket-manage.webp" | relURL }}" data-alt="Bucket Management" aria-label="Bucket Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-iam.webp" | relURL }}" data-alt="Identity and Access Management" aria-label="Identity and Access Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-settings-site-replication.webp" | relURL }}" data-alt="Site Replication" aria-label="Site Replication"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring" aria-label="Console Monitoring"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-overview.webp" | relURL }}" data-alt="SILO Overview Dashboard" aria-label="SILO Overview Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-instance.webp" | relURL }}" data-alt="SILO Instance Dashboard" aria-label="SILO Instance Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-disk.webp" | relURL }}" data-alt="SILO Disk Dashboard" aria-label="SILO Disk Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console" aria-label="SILO Console"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-bucket-manage.webp" | relURL }}" data-alt="Bucket Management" aria-label="Bucket Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-iam.webp" | relURL }}" data-alt="Identity and Access Management" aria-label="Identity and Access Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-settings-site-replication.webp" | relURL }}" data-alt="Site Replication" aria-label="Site Replication"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring" aria-label="Console Monitoring"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-overview.webp" | relURL }}" data-alt="SILO Overview Dashboard" aria-label="SILO Overview Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-instance.webp" | relURL }}" data-alt="SILO Instance Dashboard" aria-label="SILO Instance Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-disk.webp" | relURL }}" data-alt="SILO Disk Dashboard" aria-label="SILO Disk Dashboard"></a>
         </div>
       </div>
     </section>
@@ -485,5 +492,4 @@
       </div>
     </section>
 
-  {{ partial "silo-footer.html" . }}
 {{ end }}

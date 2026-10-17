@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-client"></a>
 
 <a id="command-mc"></a>
@@ -28,7 +28,7 @@ mc [GLOBALFLAGS] COMMAND --help
 
 支持的命令列表参见 [命令速查](#minio-mc-commands)。
 
-<a id="id2"></a>
+<a id="id2" data-td-print-local></a>
 
 ## 与 Silo 服务端的版本对齐 {#mc-client-versioning}
 
@@ -38,7 +38,7 @@ mc [GLOBALFLAGS] COMMAND --help
 
 可以安装比服务端更新的客户端。但如果版本偏差过大，即使 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp) 等核心 S3 操作仍兼容，管理功能或 flag 也可能存在差异。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 <a id="quickstart"></a>
 
@@ -53,7 +53,7 @@ mc [GLOBALFLAGS] COMMAND --help
 从源码构建维护分支：
 
 ```shell
-git clone https://github.com/pgsty/mc.git
+git clone --branch RELEASE.2026-09-16T00-00-00Z --depth 1 https://github.com/pgsty/mc.git
 cd mc
 make build
 ./mc --version
@@ -115,7 +115,7 @@ mc admin info silo
 
   对于 MinIO 部署，参见 [Access Management](/zh/administration/identity-access-management/#minio-access-management) 获取更多用户访问权限信息。对于其他兼容 S3 的 服务，请参考该服务文档。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 命令速查 {#minio-mc-commands}
 
@@ -327,7 +327,7 @@ MinIO 会使用指定的 SSE 模式自动加密对象。</p></td>
   </tbody>
 </table>
 
-<a id="id8"></a>
+<a id="id8" data-td-print-local></a>
 
 ## 配置文件 {#mc-configuration}
 
@@ -343,7 +343,7 @@ MinIO 会使用指定的 SSE 模式自动加密对象。</p></td>
 
 可使用 `--config-dir`
 
-<a id="id9"></a>
+<a id="id9" data-td-print-local></a>
 
 ## 证书 {#minio-mc-certificates}
 
@@ -370,7 +370,7 @@ C:\Users\[username]\mc\certs\CAs\ # Certificate Authorities
 >
 > 在测试环境中，你可以通过传入 `--insecure` flag，跳过部分 MinIO Client 命令的证书检查。
 
-<a id="id10"></a>
+<a id="id10" data-td-print-local></a>
 
 ## 模式匹配 {#minio-wildcard-matching}
 
@@ -392,7 +392,7 @@ C:\Users\[username]\mc\certs\CAs\ # Certificate Authorities
 | `ab??d` | abc | 匹配 |
 | `ab??d` | abcxdd | 不匹配 |
 
-<a id="id11"></a>
+<a id="id11" data-td-print-local></a>
 
 ## 全局选项 {#minio-mc-global-options}
 
@@ -445,7 +445,7 @@ mc --debug ls play
 
 *option*
 
-启用 [JSON lines](http://jsonlines.org/)<a id="json-lines"></a> 格式输出到 控制台。
+启用 [JSON lines](http://jsonlines.org/)<a id="json-lines" data-td-print-local></a> 格式输出到 控制台。
 
 例如，以下操作会为 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls) 命令增加 JSON Lines 输出：
 

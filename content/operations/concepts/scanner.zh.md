@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-concepts-scanner"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 概览 {#id3}
 

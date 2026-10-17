@@ -154,7 +154,7 @@ mc event add ALIAS ARN
 
 ## 行为 {#id7}
 
-<a id="id8"></a>
+<a id="id8" data-td-print-local></a>
 
 ### 支持的存储桶事件 {#mc-event-supported-events}
 

@@ -96,7 +96,7 @@ metadata:
   namespace: my-tenant-ns
 
 spec:
-  image: pgsty/silo:RELEASE.2026-09-03T13-18-01Z
+  image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
   env:
     - name: MINIO_UPDATE
       value: "off"

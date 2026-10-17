@@ -9,19 +9,19 @@ upstream_modified: true
 <a id="mc-license-register"></a>
 <a id="command-mc.support.register"></a>
 <a id="command-mc.license.register"></a>
-<a id="parameters"></a>
+<a id="parameters" data-td-print-local></a>
 <a id="mc.license.register.ALIAS"></a>
 <a id="mc.license.register.-airgap"></a>
 <a id="mc.license.register.-api-key"></a>
 <a id="mc.license.register.-license"></a>
 <a id="mc.license.register.-name"></a>
-<a id="examples"></a>
+<a id="examples" data-td-print-local></a>
 <a id="register-a-deployment-using-the-deployment-s-name"></a>
 <a id="register-a-deployment-using-the-account-s-license-file"></a>
 <a id="register-a-deployment-with-a-different-deployment-name"></a>
 <a id="minio-license-register-airgap"></a>
 <a id="register-a-deployment-without-direct-internet-access"></a>
-<a id="global-flags"></a>
+<a id="global-flags" data-td-print-local></a>
 <a id="behavior"></a>
 <a id="automatic-license-updates"></a>
 

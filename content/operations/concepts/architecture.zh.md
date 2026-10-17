@@ -8,7 +8,7 @@ upstream_modified: true
 ---
 
 <a id="minio-architecture"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页从生产视角概述 MinIO 的部署架构。 有关具体硬件或软件配置的信息，请参阅：
 
@@ -19,7 +19,9 @@ upstream_modified: true
 
 ## 分布式 MinIO 部署 {#minio}
 
-**生产级 MinIO 部署至少由 4 台具有同构存储和计算资源的 MinIO 主机构成。**
+**对于需要容忍节点故障的生产部署，SILO 建议以至少 4 台具有同构存储和计算资源的主机规划拓扑。这是部署建议，不是运行 SILO 或启用纠删码的最低要求。**
+
+> 应按每个纠删集合的读写仲裁，验证规划中的节点故障是否仍可容忍。SILO 支持单节点双盘 `EC:1` 部署，但任一盘不可用时无法继续写入，主机宕机时服务也不可用。
 
 > MinIO 会将这些资源聚合为一个 [pool](/zh/operations/concepts/#minio-intro-server-pool)，并以单一对象存储服务的形式对外提供。
 >
@@ -95,7 +97,7 @@ upstream_modified: true
 >
 > 虽然 S3 API 的所有操作都使用 `GET` 和 `POST` 等 HTTP 方法，应用通常仍会使用 SDK 来执行 S3 操作。 特别是签名计算的复杂性，通常使通过 `curl` 或类似 REST 客户端直接交互变得不切实际。 MinIO 建议使用能够自动完成签名计算的兼容 S3 SDK 或库。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 复制型 MinIO 部署 {#minio-deployment-architecture-replicated}
 

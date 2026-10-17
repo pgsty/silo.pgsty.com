@@ -439,3 +439,5 @@ mc mv play/mybucket/object.txt play/mybucket/myobject.txt
 **`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
 
 对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+
+这项 HTTP-200 CopyObject 修复适用于 mcli 选择单次 CopyObject 的路径：对象小于 64 MiB，或显式 `--disable-multipart`。更大复制默认走 ComposeObject，不能用该修复替代对此路径的单独验证。

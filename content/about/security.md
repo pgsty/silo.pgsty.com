@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
-> **Current release boundary:** latest Server 20260903 remains affected by [SN-2026-011](/blog/security/20260913-signed-header-status/), fixed on main. A client/pkg release is separate from publication of a fixed Server; see the [component matrix](/compatibility/versions/).
+> **Current release boundary:** [Server 20260916](/blog/release/silo-20260916/) includes the Server/embedded Console repairs for SN-2026-011 through SN-2026-014; Server 20260903 lacks them. See the [component matrix](/compatibility/versions/) and [security ledger](/about/security-advisories/) for upgrade requirements and component delivery status.
 
 Security maintenance is the reason this fork exists. Upstream `minio/minio` is archived; Silo tracks CVEs against the codebase, backports or writes the fixes, and publishes what it found.
 

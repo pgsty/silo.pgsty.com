@@ -90,7 +90,7 @@ context decision 才是 authority。stripping 保护旧 consumer，却不能自�
 ## SN-2026-009：用户与组状态授权 {#sn-2026-009}
 
 **影响操作：** 管理 API `SetUserStatus`、`SetGroupStatus`。<br>
-**跟踪：** [PR #73](https://github.com/pgsty/silo/pull/73)。<br>
+**跟踪：** [PR #73](https://github.com/pgsty/silo/pull/73) / [PR #85](https://github.com/pgsty/silo/pull/85)。<br>
 **修复：** `58735ee38`、`229fe2b3c`。
 
 继承 handler 无论目标状态是什么都检查 `admin:EnableUser` 或 `admin:EnableGroup`。一个只能 enable 身份的最小权限管理员因此也能 disable；只应持有 disable action 的身份则可能失败或按错误 grant 评估。

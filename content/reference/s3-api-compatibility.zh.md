@@ -7,6 +7,9 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+> [!WARNING]
+> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
+
 <a id="s3-api"></a>
 
 本页面记录 MinIO 对象存储支持的 S3 API。 如需查看任意 API 的参考文档，请参阅 Amazon S3 的对应文档。
@@ -21,7 +24,7 @@ upstream_modified: true
 - [CopyObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html)
 - [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
 - [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
-  - 不支持条件删除：`DeleteObject` 忽略 HTTP `If-Match` 头，`DeleteObjects` 忽略每个 `<Object><ETag>` 元素，两者都执行无条件删除（[#10](https://github.com/pgsty/silo/issues/10)）。
+  - **条件 DELETE：**已发布的 Server 20260903 忽略 `If-Match`。Server 20260916 通过 #145/#178 支持单个 `DeleteObject` 的非空 `If-Match`，显式版本比较指定版本。批量 `DeleteObjects` 仍忽略 `<Object><ETag>`，没有逐项条件保护。详见[范围与限制](/blog/design/conditional-delete/)。
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)
@@ -34,6 +37,14 @@ upstream_modified: true
 - [PutObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObjectTagging.html)
 - [RestoreObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_RestoreObject.html)
 - [SelectObjectContent](https://docs.aws.amazon.com/AmazonS3/latest/API/API_SelectObjectContent.html)
+
+### 写入提交错误 {#write-commit-errors}
+
+[PR #232](https://github.com/pgsty/silo/pull/232) 面向 20261015 之后的下一次 Server
+发布：PUT 或分片上传完成操作在最终提交时丢失暂存的 `xl.meta`，返回 HTTP 503
+`SlowDownWrite`。原代码可能对 PUT 返回 `400 IncompleteBody`，对分片完成返回
+`404 NoSuchKey`。真正的客户端上传不完整仍保留原有错误处理。这项分类修复允许 SDK
+重试，但不会恢复丢失的暂存数据。见[源码与发布边界](/zh/compatibility/versions/#post-20261015)。
 
 ### 对象锁定 {#id2}
 
@@ -64,7 +75,8 @@ PutObjectAcl
 #### 与 S3 API 在多部分上传方面的差异 {#id5}
 
 - 已发布的 Server 20260903：`ListMultipartUploads` 将非空 `prefix` 当成精确对象名；空 prefix 使用节点本地易失缓存，不具备完整分页、marker 和 delimiter 语义。
-- [PR #198](https://github.com/pgsty/silo/pull/198) 增加持久扫描与全局分页，并在原生 marker 对应上传被删除后继续翻页。发布前兼容性修复默认使用保留旧限制的 `legacy` 模式；严格模式仅通过 `MINIO_API_MULTIPART_LISTING=strict` 显式启用。启用严格模式前需要所有 writer 升级、旧上传排空、只读预检及容量验收；严格模式在覆盖不足、旧格式或资源超限时返回 503。普通升级不要求切换模式或强制排空上传。排序、扫描容量与迟到创建写入的取消边界见[实现与升级契约](/zh/blog/design/list-multipart-uploads/#implementation)。这不表示发布产物或生产验收完成。
+- Server 20260916 以可选 strict 模式增加持久扫描，默认仍保留 legacy 精确键／缓存行为。运行该版本时仍适用其[历史升级契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
+- **#79 待发布后续修复：** 统一使用持久列举，全局处理前缀、目录分组和分页；忽略模式环境变量。确认可读且两个身份字段都不存在的旧上传被省略，不再阻断新上传；删除旧精确键捷径。省略历史记录是明确的 S3 兼容性例外。元数据错误、覆盖不足和资源超限仍报错。预检只作诊断，取消保留原有默认的读取 quorum／尽力删除行为。每页仍需扫描磁盘，迟到创建写入仍可能在取消后恢复上传。详见[候选契约、容量与限制](/zh/blog/design/list-multipart-uploads/#implementation)。
 - `PutBucketLifecycle` 不支持 `AbortIncompleteMultipartUpload` 生命周期动作。
 
 ## 存储桶 API {#id6}

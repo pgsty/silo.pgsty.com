@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-bucket-versioning"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 - [Versioning overview](https://youtu.be/XGOiwV6Cbuk?ref=docs)
 - [Versioning lab](https://youtu.be/nFUI2N5zH34?ref=docs)
@@ -87,7 +87,7 @@ MinIO 支持配置 [对象生命周期管理规则](/zh/administration/object-ma
 
 ### 版本 ID 生成 {#minio-bucket-versioning-id}
 
-MinIO 会在写入操作中为每个对象版本生成唯一且不可变的标识符。 每个对象版本 ID 都由一个 128 位固定长度的 <a id="index-0"></a>[**UUIDv4**](https://datatracker.ietf.org/doc/html/rfc4122.html#section-4.4) 组成。 UUID 的生成具有足够随机性，可在任何环境中以极高概率保证唯一性，计算上也难以猜测，并且无需依赖中心化注册流程或机构来保证唯一性。
+MinIO 会在写入操作中为每个对象版本生成唯一且不可变的标识符。 每个对象版本 ID 都由一个 128 位固定长度的 <a id="index-0" data-td-print-local></a>[**UUIDv4**](https://datatracker.ietf.org/doc/html/rfc4122.html#section-4.4) 组成。 UUID 的生成具有足够随机性，可在任何环境中以极高概率保证唯一性，计算上也难以猜测，并且无需依赖中心化注册流程或机构来保证唯一性。
 
 <img src="/images/retention/minio-versioning-multiple-versions.svg" alt="多版本对象" style="max-width: 600px; height: auto;" />
 
@@ -95,7 +95,7 @@ MinIO 不支持由客户端管理版本 ID 的分配。 所有版本 ID 的生�
 
 对于在版本控制禁用或挂起期间创建的对象，MinIO 会使用 `null` 版本 ID。 在 S3 操作中将 `null` 指定为版本 ID，即可访问或移除这些对象。
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 ### 版本控制下的删除操作 {#minio-bucket-versioning-delete}
 

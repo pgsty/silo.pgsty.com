@@ -2,7 +2,7 @@
 title: "No I/O Before Auth, No Privilege From Headers"
 linkTitle: "CORS & Replication Trust"
 date: 2026-09-01
-lastmod: 2026-09-09
+lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
   A pre-authentication CORS lookup turned arbitrary path segments into metadata I/O and cache entries, while a client-controlled replication marker acquired privileges across SSE-C reads, source timestamps, checksums, object lock, events, and deletes. This record defines SILO's resident-only CORS hot path, two-level replication trust model, post-signature sanitization boundary, wire-compatibility matrix, and release evidence.
@@ -11,6 +11,8 @@ weight: 12
 draft: false
 url: "/blog/design/cors-replication-trust/"
 ---
+
+> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
 
 This record describes the CORS hot-path and replication-request trust repair merged into SILO as [PR #101](https://github.com/pgsty/silo/pull/101) (`938603458` through `04b097fd9`).
 
@@ -265,3 +267,5 @@ An internal-looking header is still client input. A bucket-shaped URL segment is
 > Before authentication, do no backend work. After authentication, derive trust once and pass the decision—not the claim—downstream.
 
 That rule is broader than CORS or replication. It is the boundary future SILO handlers should preserve whenever inexpensive public request syntax meets expensive or privileged internal state.
+
+This repair is [SN-2026-008 in the ledger](/about/security-advisories/#sn-2026-008), with delivery in the [20260903 chronicle](/blog/security/20260903-server-hardening/#sn-2026-008). The silo-go reference above describes the original temporary dependency. After `0079723d3`, Server returned to verified upstream minio-go; the [component matrix](/compatibility/versions/) records selected versions.

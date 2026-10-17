@@ -20,6 +20,7 @@ repositories:
   - repo: "pgsty/silo-pkg"
     issues: 0
     pullRequests: 9
+  # Retired upstream-SDK fork; kept for the cross-repository audit history.
   - repo: "pgsty/silo-go"
     issues: 0
     pullRequests: 0
@@ -129,9 +130,9 @@ code:
     whatZh: "修复桶配额指标，贡献按访问频率分层的 ILM 与 S3 兼容分片上传列表方案"
     note: "The access-frequency feature in [#60](https://github.com/pgsty/silo/pull/60) was merged and later removed.\
       \ The multipart-listing contribution in [#198](https://github.com/pgsty/silo/pull/198) was merged after follow-up\
-      \ durability and cancellation repairs; it remains unreleased."
+      \ durability and cancellation repairs; it shipped in Server 20260916 with legacy as the default and strict as an opt-in."
     noteZh: "[#60](https://github.com/pgsty/silo/pull/60) 的访问频率功能合并后被移除；[#198](https://github.com/pgsty/silo/pull/198)\
-      \ 的分片列表贡献在补充持久发现与取消修复后已合并，尚未发布。"
+      \ 的分片列表贡献在补充持久发现与取消修复后已随 Server 20260916 发布，默认 legacy，strict 需显式启用。"
     firstContribution: "2026-08-15"
     activity:
       - repo: "pgsty/silo"

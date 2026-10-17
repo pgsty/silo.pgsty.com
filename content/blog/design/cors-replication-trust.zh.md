@@ -2,7 +2,7 @@
 title: "鉴权前不做 I/O，Header 不授予权限"
 linkTitle: "CORS 与复制信任边界"
 date: 2026-09-01
-lastmod: 2026-09-09
+lastmod: 2026-09-16
 author: "冯若航"
 summary: >
   CORS 预鉴权查询曾把任意 URL 路径段变成 metadata I/O 与缓存条目；客户端可控的 replication marker 又会影响 SSE-C 读取、源时间戳、checksum、对象锁、事件与删除语义。本文记录 SILO 的 resident-only CORS 热路径、两级复制信任模型、验签后清洗边界、真实 wire 兼容矩阵与发布前证据。
@@ -11,6 +11,8 @@ weight: 12
 draft: false
 url: "/zh/blog/design/cors-replication-trust/"
 ---
+
+> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
 
 本文记录以 [PR #101](https://github.com/pgsty/silo/pull/101)（`938603458` 至 `04b097fd9`）合并进 SILO 的 CORS 热路径与复制请求信任边界修复。
 
@@ -263,3 +265,5 @@ Object-lock parser 过去只要看到原始 marker header，就会接受已经�
 > 鉴权之前不做 backend work；鉴权之后只派生一次 trust，并把决定而不是声明传给下游。
 
 这条规则并不只属于 CORS 或 replication。当廉价的公开请求语法与昂贵或特权化的内部状态相遇时，未来 SILO handler 都应该保持这条边界。
+
+本修复在[安全台账](/zh/about/security-advisories/#sn-2026-008)中编号为 SN-2026-008，[20260903 纪事](/zh/blog/security/20260903-server-hardening/#sn-2026-008)记录发布范围。上文 silo-go 指原评审的临时依赖；`0079723d3` 后 Server 恢复使用经过验证的上游 minio-go，当前所选版本见[组件矩阵](/zh/compatibility/versions/)。

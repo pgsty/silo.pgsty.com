@@ -8,7 +8,7 @@ upstream_modified: false
 ---
 
 <a id="minio-bucket-replication"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 支持在源存储桶与目标存储桶之间进行服务端和客户端对象复制。
 
@@ -34,7 +34,7 @@ MinIO 支持在源存储桶与目标存储桶之间进行服务端和客户端�
 >
 >   站点复制通常在最初部署 MinIO 对等站点时配置。 在初始配置时，任意存储桶或对象只能由一个站点持有。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 服务端存储桶复制 {#minio-bucket-replication-serverside}
 
@@ -49,7 +49,7 @@ MinIO 服务端存储桶复制在功能上类似于 Amazon S3 replication，同�
 - 支持源存储桶与目标存储桶之间对象的 Active-Active（双向）复制。
 - 支持在三个或更多 MinIO 部署之间进行对象的多站点复制
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ### 重新同步（灾难恢复） {#minio-replication-behavior-resync}
 
@@ -63,7 +63,7 @@ MinIO 服务端存储桶复制在功能上类似于 Amazon S3 replication，同�
 
 对于已配置 [对象转换（分层）](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) 的存储桶，复制重新同步会以未转换状态恢复对象，且不包含任何关联的转换元数据。 因此，任何先前已转换到远端存储的数据都会与远端 MinIO 部署永久断开关联。 对于在远端配置中将明确的人类可读前缀作为一部分指定的分层配置，你可以安全地清除该前缀中的已转换数据，以避免与这些“丢失”数据相关的成本。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ### 删除操作的复制 {#minio-replication-behavior-delete}
 
@@ -94,7 +94,7 @@ MinIO 仅复制由客户端显式发起的删除操作。 MinIO *不会* 复制�
 > - 随后某个命令删除了 `myotherphoto.jpg`。MinIO 会自动裁剪 `/february` 前缀以及此时已为空的 `/2021` 前缀。
 > - 某个命令删除了 `NewYears.jpg` 对象。MinIO 会保留 `/NYE21` 前缀，因为它是 *显式* 创建的。
 
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ### 现有对象的复制 {#minio-replication-behavior-existing-objects}
 
@@ -123,7 +123,7 @@ MinIO 会将所有满足复制规则的对象或对象前缀标记为可同步�
 
 本节记录复制的内部行为，对使用或实现复制而言并非关键。 本文档仅用于学习和教育目的。
 
-<a id="id9"></a>
+<a id="id9" data-td-print-local></a>
 
 #### 复制流程 {#minio-replication-process}
 

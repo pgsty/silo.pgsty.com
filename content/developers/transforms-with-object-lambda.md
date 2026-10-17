@@ -204,10 +204,11 @@ MINIO_LAMBDA_WEBHOOK_ENABLE_myfunction=on MINIO_LAMBDA_WEBHOOK_ENDPOINT_myfuncti
 Replace `myfunction` with the name of your handler function and `/data` with the location of the MinIO directory for your local deployment. The output resembles the following:
 
 ```shell
-MinIO Object Storage Server
-Copyright: 2015-2023 MinIO, Inc.
+Silo Object Storage Server
+Copyright: 2015-2025 MinIO, Inc.
+Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl-3.0.html>
-Version: RELEASE.2023-03-24T21-41-23Z (go1.19.7 linux/arm64)
+Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 linux/arm64)
 
 Status:         1 Online, 0 Offline.
 API: http://192.168.64.21:9000  http://127.0.0.1:9000

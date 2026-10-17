@@ -52,7 +52,7 @@ Self-update is disabled in the Pigsty mc fork; upgrade only through the Pigsty p
 
 *Optional*
 
-Formats the disabled-update error as one [JSON Lines](https://jsonlines.org/)<a id="json-lines"></a> object. This flag does not enable updating.
+Formats the disabled-update error as one [JSON Lines](https://jsonlines.org/)<a id="json-lines" data-td-print-local></a> object. This flag does not enable updating.
 
 For example:
 

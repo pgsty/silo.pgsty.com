@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-server-envvar-external-identity-management-plugin"></a>
 
 本页介绍如何通过 MinIO Identity Management Plugin 启用外部身份管理的相关设置。 有关如何使用这些设置的教程，请参阅 [MinIO External Identity Management Plugin](/zh/administration/identity-access-management/pluggable-authentication/#minio-external-identity-management-plugin)。
@@ -119,12 +119,12 @@ mc admin config set identity_plugin                  \
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-##### `MINIO_IDENTITY_PLUGIN_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_TOKEN}
+##### `MINIO_IDENTITY_PLUGIN_AUTH_TOKEN` {#envvar.MINIO_IDENTITY_PLUGIN_AUTH_TOKEN}
 
 *envvar*
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
-##### `identity_plugin token` {#mc-conf.identity_plugin.token}
+##### `identity_plugin auth_token` {#mc-conf.identity_plugin.auth_token}
 
 *mc-conf*
 {{< /tab >}}

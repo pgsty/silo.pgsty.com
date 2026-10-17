@@ -9,6 +9,9 @@ weight: 1
 url: "/blog/security/20260913-signed-header-status/"
 ---
 
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+
 **Status on 2026-09-13:** SN-2026-011 is fixed on Server main, starting with
 [`123325430`](https://github.com/pgsty/silo/commit/1233254309b15571f101b2b26d531951ceaeef1e).
 The latest published Server, `RELEASE.2026-09-03T13-18-01Z`, and earlier public

@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-users"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 概述 {#id3}
 
@@ -25,7 +25,7 @@ MinIO 用户由唯一的访问密钥（用户名）及其对应的密钥（密�
 启用外部身份管理后，会禁用 MinIO 内部 IDP，但仍可创建 [访问密钥](#minio-idp-service-account)。
 
 <a id="minio-idp-service-account"></a>
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 访问密钥 {#minio-id-access-keys}
 

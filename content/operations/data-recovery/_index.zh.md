@@ -8,7 +8,7 @@ upstream_modified: false
 ---
 
 <a id="minio-restore-hardware-failure"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 分布式 MinIO 部署依赖 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding)，对多块驱动器或多个节点故障提供内建容错能力。 根据部署拓扑和所选纠删码校验位，MinIO 在保持对象读取访问能力（“read quorum”）的前提下，最多可容忍部署中一半驱动器或节点丢失。
 

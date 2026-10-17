@@ -20,7 +20,7 @@ the non-TTY output defect found during release review.
 > command merged to `main` through pull requests [#8](https://github.com/pgsty/mc/pull/8)
 > and [#13](https://github.com/pgsty/mc/pull/13), is exercised against a real
 > SILO server in hosted CI, and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)
-> is closed. Bundling the client into the Server image remains a separate gate.<br>
+> is closed. Server 20260903 images bundle mcli 20260903, including this command.<br>
 > **Owner:** [`pgsty/mc`](https://github.com/pgsty/mc).<br>
 > **Tracking:** [pgsty/mc#5](https://github.com/pgsty/mc/issues/5).<br>
 > **Safety boundary:** verification is read-only; repair is not part of this
@@ -167,6 +167,6 @@ S3 server.
 The command shipped in the final [mcli 20260903](/blog/release/mcli-20260903/) release from a
 signed tag at the tip of `main`, with the functional suite - including a
 checksum verification run against a real SILO server - green for that commit,
-and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) is closed. Bundling the
-client into the Server image and a production audit remain later, separately
-evidenced gates.
+and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) is closed. Server 20260903 images bundle that client. A production audit remains a separate execution with its own evidence.
+
+JSON consumers should check `schemaVersion: 1` and distinguish per-object records (`type: object`) from the final summary (`type: summary`). `--max-workers` defaults to 4 and accepts 1–64; it bounds concurrent object work, not total memory or server I/O.

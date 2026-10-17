@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "Published SILO releases, source fixes verified on September 16, and coordinated upgrade requirements."
+description: "Published SILO components, mcli 20261018, and pending Server release status."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,24 +9,55 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-**Verified on 2026-09-16.** SILO releases its four components independently.
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
+>
+> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
+
+**Public release state verified on 2026-10-18.** SILO releases its four components independently.
 A merged dependency update does not change an existing binary or image.
 
 ## Published components {#published}
 
 | Component | Latest published version | What it contains |
 | --- | --- | --- |
-| Server | <a href="https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z" style="white-space:nowrap">20260903</a> | pkg v3.13.2; upstream SDK `0e78d3f18efe`; mcli 20260903; embedded Console source `464a59d73ada` with v2.3.0 version identity |
-| <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) | pkg v3.14.1; mcli 20260916; upstream SDK `32e1f32cb176`; restricted shared downloads, streaming ZIPs and signed artifacts |
-| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1; upstream SDK `32e1f32cb176`; package version `20260916000000.0.0` |
-| Shared pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | Own module path `github.com/pgsty/silo-pkg/v3`; CopyObject embedded-error handling; JWX v3.3.0 field-name escaping; upstream SDK `32e1f32cb176` |
+| Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | Go 1.27.1; pkg v3.14.1; upstream SDK `32e1f32cb176`; mcli 20260916; embedded Console v2.4.1, source `1360e26d976d` |
+| <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.2](https://github.com/pgsty/silo-console/releases/tag/v2.4.2) | Go 1.27.2; pkg v3.14.2; mcli 20261018; upstream SDK v7.4.1; correct bucket-versioning errors; public Docker amd64/arm64 images |
+| mcli | [20261018](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z) | Go 1.27.2; pkg v3.14.2; upstream SDK v7.4.1; package version `20261018000000.0.0`; public Docker amd64/arm64 images |
+| Shared pkg | [v3.14.3](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.3) | Faster admin-action classification with unchanged policy behavior; dependencies unchanged from v3.14.2; Go 1.26 library floor |
 
-Release notes: [Server 20260903](/blog/release/silo-20260903/),
-[Console v2.4.1](/blog/release/console-2.4.1/),
-[mcli 20260916](/blog/release/mcli-20260916/), [pkg v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1).
+Release notes: [Server 20260916](/blog/release/silo-20260916/),
+[Console v2.4.2](/blog/release/console-2.4.2/),
+[mcli 20261018](/blog/release/mcli-20261018/), [pkg v3.14.3](/blog/release/pkg-3.14.3/).
 For embedded deployments, select Console and MC explicitly in the Server build.
 Package-repository mirrors may lag GitHub; the [download page](/download/)
 links directly to the published artifacts.
+
+**Standalone Console image:** `docker.io/pgsty/silo-console:v2.4.2` passed anonymous Linux amd64/arm64 pulls, signature and provenance checks. Its digest is `sha256:4cf47061e0d2f249df3c1cd2a939966ff3c69cc3cf7d10a7b1b39d5c110ae999`.
+
+The [pkg v3.14.3 policy optimization](/blog/release/pkg-3.14.3/) preserves APIs,
+policy formats, and authorization behavior. Server builds may adopt it while
+the published mcli and standalone Console keep using v3.14.2. Existing binaries
+and Server drafts retain the dependencies recorded below until rebuilt.
+
+## Pending Server releases {#october-release}
+
+Server **20261015 remains a Draft**. Earlier website statements that it was a public release are superseded. Its [Object Lock repairs and artifact checks](/blog/release/silo-20261015/) describe candidate acceptance; the fixes are absent from the current public Server 20260916. See the [security advisory](/blog/security/20260926-governance-retention-bypass/).
+
+Server **20261018 has a signed [source tag](https://github.com/pgsty/silo/tree/RELEASE.2026-10-18T00-00-00Z) and a verified Draft**, with pkg v3.14.2, upstream SDK v7.4.1, mcli 20261018 and the Console v2.4.2 source tag. Console v2.4.2 is now independently published; the table above lists published components. Public Server release, image promotion and production deployment remain separate steps. Publishing mcli or Console does not repair an existing Server installation.
+
+## October component graph {#october-components}
+
+Standalone Console v2.4.2, mcli 20261018 and the Server 20261018 draft select:
+
+- **Console:** `v0.0.0-20261017112417-ef2dd2c41d21`, tag `v2.4.2`.
+- **MC:** `v0.0.0-20261017101407-fa3b8bf72458`, tag `RELEASE.2026-10-18T00-00-00Z`.
+- **pkg / upstream minio-go:** `v3.14.2` / `v7.4.1`.
+- **Build environment:** Go `1.27.2`; Console frontend uses Node `24.22.0` LTS.
+
+Server must select both Console and MC replacements explicitly; Go does not inherit Console's replacements. Publishing these standalone components does not change the versions embedded in the current public Server 20260916.
 
 ## September 16 dependency graph {#source}
 
@@ -55,18 +86,20 @@ coordinated Server upgrades.
 
 ### Storage, IAM and HTTP repairs {#september-reliability}
 
-The following changes have merged into Server main. They remain absent from
-the published Server 20260903; use the linked PRs and source records to identify
-a build containing them.
+The following changes shipped in Server 20260916 and are absent from Server
+20260903. Use the linked PRs and source records to check each repair's scope.
 
 | <span style="display:inline-block;min-width:10rem">Area</span> | <span style="white-space:nowrap">Merged PRs</span> | Operator-visible behavior |
 | --- | --- | --- |
 | Multi-pool storage | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189) | Ordinary single-object version DELETE reconciles copies across pools; reconciliation preserves tag state. The opt-in GET-frequency pool-tiering feature was removed. |
 | Conditional multipart completion | [#190](https://github.com/pgsty/silo/pull/190) | Preconditions use the logical current object across all pools, preventing an older pool copy from accepting a stale ETag or rejecting the current one. |
-| Multipart discovery and cancellation | [#198](https://github.com/pgsty/silo/pull/198) | Default legacy listing and cancellation retain released behavior. Opt-in strict mode discovers durable uploads across pools/sets, continues after marker uploads disappear, and requires majority cancellation acknowledgements ([#213](https://github.com/pgsty/silo/pull/213)). Strict mode requires a coordinated writer upgrade and legacy drain; see the [upgrade contract](/blog/design/list-multipart-uploads/#implementation). |
+| Multipart discovery and cancellation | [#198](https://github.com/pgsty/silo/pull/198)<br>[#213](https://github.com/pgsty/silo/pull/213) | Server 20260916 defaults to legacy listing and cancellation. Explicit strict mode discovers persistent uploads across pools and sets, continues after native marker uploads disappear, and requires majority cancellation confirmations. Strict mode requires a coordinated writer upgrade and legacy drain; see the [upgrade contract](/blog/design/list-multipart-uploads/#implementation-20260916). |
 | Ordinary conditional PUT | [#207](https://github.com/pgsty/silo/pull/207) | Public write conditions use the logical current object across all pools, including draining pools. Readability and destination-version changes are detailed [below](#conditional-put). |
 | IAM revocations | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | Peer deletion notifications reload committed state. Durable deletion versions and retained revocation boundaries prevent stale site replay from restoring revoked identities or their older grants. |
 | Replicated tags and delete markers | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS copies preserve tag revision times; tag deletion advances its revision and resists delayed events. Delete-marker purges retain their identity and retry state through MRF recovery. |
+| Delete-marker purges | [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)<br>[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0)<br>[`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) | An exact-version purge never creates the marker on drives that lack it, a retried purge of a missing version needs a write-quorum majority of absent drives, healed markers keep their replication and purge metadata, and a queued marker creation is re-checked against the source under the replication lock before it is sent. Remaining gaps are listed [below](#pending) and in [#217](https://github.com/pgsty/silo/issues/217); see the [third round of the replication record](/blog/design/replication-reliability/#third-round). |
+| Listing under drive disagreement | [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) | A null object version that has listing quorum is kept when a newer minority of drives would otherwise hide it. Rolling restarts with concurrent overwrites can still omit readable keys from a successful LIST; see [below](#pending), [#218](https://github.com/pgsty/silo/issues/218) and the [design record](/blog/design/list-null-version-quorum/). |
+| Pool migration tags | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) | Rebalance and decommission carry object tags and their revision fields to the destination pool for ordinary and multipart writes. Tags lost by earlier migrations are not recovered; see [multi-pool object consistency](/blog/design/multi-pool-object-consistency/#migration-tags). |
 | Replica metadata | [#194](https://github.com/pgsty/silo/pull/194) | Restoring replication metadata no longer reintroduces the transport-only `aws-chunked` encoding into stored object metadata. |
 | Request-header timeout | [#196](https://github.com/pgsty/silo/pull/196) | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` reaches the HTTP server and imposes an absolute HTTP/1 header-reading deadline, even while bytes keep arriving. HTTP/1 bodies retain the existing rolling idle timeout. |
 
@@ -130,7 +163,7 @@ The separate cross-pool conditional PUT defect in
 Server 20260903. [PR #207](https://github.com/pgsty/silo/pull/207) was merged as
 [`9b4ae82a29cc`](https://github.com/pgsty/silo/commit/9b4ae82a29cc2290fb5be7b551ec3d8cf7acdd99)
 after its head `4620be394b52` passed all eight CI checks on 2026-09-16.
-**The repair is on main and remains unreleased.** Its behavior is:
+**The repair shipped in Server 20260916.** Its behavior is:
 
 - Ordinary multi-pool `If-Match` / `If-None-Match` conditions use the logical
   current object across all pools. Unreadable metadata can prevent acceptance
@@ -157,14 +190,33 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
   Source repairs do not automatically repair old state.
 - **Release delivery:** [#202](https://github.com/pgsty/silo/issues/202)
   collects release notes and component identities; [#203](https://github.com/pgsty/silo/issues/203)
-  separately validates final artifacts and multi-process behavior. No new Server
-  release is established by these tracking issues.
+  separately validates final artifacts and multi-process behavior. Release-artifact acceptance and production rollout remain separate.
+- **Multi-site delete-marker convergence:** the source-side re-check in
+  `254b19ac0` does not cover creations already in flight or replayed from
+  another site, and minority marker copies left by a crash after a
+  majority-acknowledged purge have no proven persistent cleanup owner.
+  [#217](https://github.com/pgsty/silo/issues/217) tracks the receiver-side
+  design. The three-site evidence for the purge repairs came from a combined
+  build, not from the final main; see the
+  [design record](/blog/design/replication-reliability/#third-round-limits).
+- **Listing during rolling restarts:** [#239](https://github.com/pgsty/silo/pull/239)
+  carries the follow-up to [#218](https://github.com/pgsty/silo/issues/218): confirm
+  eligible unresolved latest-object entries, distinguish deletion from read
+  failure and preserve terminal errors through pagination. It adds no disk
+  format, client parameter or migration switch. The [current design and
+  acceptance limits](/blog/design/listing-recovery-lock-cost/) supersede the
+  earlier investigation guidance. Until running a release that contains this
+  repair, retain the warning against destination-deleting synchronization
+  during rolling restarts. Source integration does not update installed binaries.
+- **Pool migration tags:** `fced86303` has unit and race coverage; the
+  post-repair eight-node rebalance/decommission acceptance was not completed.
+  Tags dropped by earlier migrations must be audited, not assumed.
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
   open for capacity/release acceptance and the known delayed-creation-write
   boundary. PR #198 repairs durable discovery, global pagination and static
   cancellation confirmation; it does not add a creation fence or certify
   large-scale scanning. The temporary 10,000-upload trial missed the provisional
-  five-second page target; see the [design record](/blog/design/list-multipart-uploads/#implementation).
+  five-second page target; see the [design record](/blog/design/list-multipart-uploads/#implementation-20260916).
 
 ## Dependency and release order {#order}
 
@@ -188,7 +240,8 @@ selects MC. Console and MC retain their historical MinIO module paths; pkg uses
 its own path directly. Legacy transitive `minio/pkg/v3` from `colorjson`/`dperf`
 is separate from the maintained policy implementation.
 
-The main stack uses Go **1.27.1**; pkg retains a Go **1.26** library floor and
+Console v2.4.2, mcli 20261018 and the Server 20261018 draft use Go **1.27.2**; the September stack used Go **1.27.1**.
+pkg retains a Go **1.26** library floor and
 was also race-tested with Go **1.26.8**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
 on NetBSD; Console's tablewriter **v0.0.5** replacement preserves its MC API.
@@ -201,3 +254,57 @@ reachability result is not a claim that every selected module is advisory-free.
 
 The supported integration target is the coordinated PGSTY stack. Compatibility
 with unmodified upstream MinIO/MC and other S3 implementations is best effort.
+
+## September 16 Server source review {#source-review}
+
+Server 20260916 source [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4d51406b7ed87af5fe6fe0f801f3290f96eb3c) selects pkg v3.14.1, upstream minio-go `32e1f32cb176`, Console v2.4.1 source `1360e26d976d`, and MC `e952aa78f10a` (mcli 20260916). The published Server tag is `RELEASE.2026-09-16T00-00-00Z`, package version `20260916000000.0.0`.
+
+- #213 retains **legacy as the multipart default**. Strict requires `MINIO_API_MULTIPART_LISTING` in the process environment and restart, with no shared dynamic key. Majority cancellation confirmation is strict-only. See [settings](/reference/minio-server/settings/core/#multipart-listing) and the [upgrade contract](/blog/design/list-multipart-uploads/#implementation-20260916).
+- [Multi-pool consistency](/blog/design/multi-pool-object-consistency/), [conditional DELETE](/blog/design/conditional-delete/) and [Object Lock replication ordering](/blog/design/object-lock-replication-ordering/) distinguish logical current objects, addressed versions and persistence locks.
+- [Federated CopyObject](/blog/design/federated-copy-object/) and [SSE-C replica integrity](/blog/design/ssec-replica-integrity/) describe logical-byte checksums, encryption and historical-object limits.
+- [Durable IAM revocation](/blog/design/iam-revocations/) and [bucket configuration convergence](/blog/design/bucket-metadata-convergence/) document coordinated upgrades, deletion history and the default-off `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES` switch.
+- [Request-header timeouts](/blog/design/request-header-timeouts/) and [Go 1.27 TLS/OIDC](/blog/design/go127-tls-oidc-discovery/) explain their separate scopes.
+- The [September security chronicle](/blog/security/20260916-release-hardening/) records SN-2026-012/013/014 and their distinct component delivery boundaries.
+
+These later Server repairs are not in 20260903; original Object Lock fixes and other released prerequisites retain their explicitly identified earlier release boundaries.
+
+Final storage repairs also include migration tag preservation in [`fced86303`](https://github.com/pgsty/silo/commit/fced8630365fd57d6116c595b65252bcd12e13be), null-version quorum in [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b126b4ac640cd076a4585b66f2ec753a6), and exact-version purge, marker metadata and queued-creation fixes in `eb4f5e5b3` / `254b19ac0` / `358ab38fb`. Late creation/crash residue in [#217](https://github.com/pgsty/silo/issues/217) and restart-time listing omissions in [#218](https://github.com/pgsty/silo/issues/218) remain known limitations.
+
+## October 15 source acceptance {#october-source}
+
+**Included in the Server 20261015 draft; not shipped in the public Server 20260916.**
+[PR #233](https://github.com/pgsty/silo/pull/233), merged as
+[`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a),
+clears absent fields when reusing legacy `xl.meta` headers and keeps scanner
+updates separate from final caches. Storage formats, RPC fields and dependency
+versions are unchanged. The [problem and repair record](/blog/design/stale-metadata-reuse/)
+documents deterministic regression coverage, a two-process scanner check,
+post-merge CI, and operator verification. The source repair is included in
+[Server 20261015](/blog/release/silo-20261015/); draft artifact acceptance does not establish a public release or production rollout.
+
+## Server fixes after 20261015 {#post-20261015}
+
+The following fixes target the next Server release. They are not included in
+`RELEASE.2026-10-15T00-00-00Z`; merging source does not update installed binaries
+or container images.
+
+- [PR #232](https://github.com/pgsty/silo/pull/232) distinguishes missing staged
+  `xl.meta` at the final write commit from an incomplete client upload or a
+  missing object. PUT and multipart completion report HTTP 503 `SlowDownWrite`
+  for this commit failure. The storage RPC and healing paths preserve that
+  classification. Client retries remain subject to SDK policy; the fix does
+  not recover missing staging data or guarantee a successful retry.
+- [PR #236](https://github.com/pgsty/silo/pull/236) parses the native multipart
+  directory timestamp before trying the existing Base64 compatibility path.
+  This avoids unnecessary local `xl.meta` reads, including plaintext UUIDs
+  that also decode as Base64. Legacy or unrecognized directory names still
+  fall back to metadata. Storage formats, S3 upload IDs and cleanup settings
+  are unchanged: the default expiry is 24 hours and the default scan interval
+  is 6 hours.
+- [PR #243](https://github.com/pgsty/silo/pull/243), merged on October 17, makes
+  persistent multipart listing the only public path and retires the migration
+  switch. Confirmed readable historical uploads lacking both identity fields
+  are omitted individually; invalid metadata and incomplete scan coverage
+  remain errors. Default Abort availability is retained. Repeated scan cost,
+  capacity limits and delayed creation after cancellation remain explicit
+  boundaries; see the [decision record](/blog/design/list-multipart-uploads/#decision-20261017).

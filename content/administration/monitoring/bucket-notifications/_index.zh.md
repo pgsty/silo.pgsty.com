@@ -8,7 +8,7 @@ upstream_modified: true
 ---
 
 <a id="minio-bucket-notifications"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 存储桶通知允许管理员在特定对象或存储桶事件发生时，将通知发送到受支持的外部服务。 MinIO 支持与 [Amazon S3 Event Notifications](https://docs.aws.amazon.com/AmazonS3/latest/userguide/NotificationHowTo.html) 类似的存储桶级和对象级 S3 事件。
 

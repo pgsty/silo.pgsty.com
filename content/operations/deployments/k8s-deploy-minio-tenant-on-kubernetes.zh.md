@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio-tenant"></a>
+<a id="minio-tenant" data-td-print-local></a>
 <a id="deploy-minio-tenant-redhat-openshift"></a>
 <a id="minio-k8s-deploy-minio-tenant"></a>
 
@@ -46,7 +46,7 @@ upstream_modified: true
 
    ```yaml
    spec:
-     image: pgsty/silo:RELEASE.2026-09-03T13-18-01Z
+     image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
      env:
        - name: MINIO_UPDATE
          value: "off"

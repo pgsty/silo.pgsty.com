@@ -56,7 +56,7 @@ MinIO Operator 会读取 `operator-ca-tls` secret 中的证书，并在 tenant �
 - `--cluster-signing-key-file` - 指定用于签发集群级证书的 PEM 编码 RSA 或 ECDSA 私钥。
 - `--cluster-signing-cert-file` - 指定用于签发集群级证书的 PEM 编码 x.509 Certificate Authority 证书。
 
-Kubernetes TLS API 会使用 CA 的签名算法生成新证书。与 RSA 相比，ECDSA（例如 [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)）或 EdDSA（例如 <a id="index-0"></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)）通常需要更少的计算资源。Silo 服务端支持的套件请参阅 [支持的 TLS Cipher Suite](/zh/operations/network-encryption/#minio-tls-supported-cipher-suites)。
+Kubernetes TLS API 会使用 CA 的签名算法生成新证书。与 RSA 相比，ECDSA（例如 [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)）或 EdDSA（例如 <a id="index-0" data-td-print-local></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)）通常需要更少的计算资源。Silo 服务端支持的套件请参阅 [支持的 TLS Cipher Suite](/zh/operations/network-encryption/#minio-tls-supported-cipher-suites)。
 
 如果 Kubernetes 集群未配置为对生成的 <abbr title="Certificate Signing Request">CSR</abbr> 作出响应，Operator 将无法完成初始化。 某些 Kubernetes 提供方默认不会指定这些配置值。
 

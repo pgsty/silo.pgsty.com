@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-concepts-healing"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 什么是自愈？ {#id3}
 

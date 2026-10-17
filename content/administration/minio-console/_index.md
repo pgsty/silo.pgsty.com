@@ -8,7 +8,7 @@ upstream_modified: true
 ---
 
 <a id="minio-console"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 The MinIO Console is a rich graphical user interface that provides similar functionality to the [`mc`](/reference/minio-mc/#command-mc) command line tool.
 

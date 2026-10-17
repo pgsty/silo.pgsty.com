@@ -10,7 +10,7 @@ upstream_modified: true
 <a id="minio-metrics-and-alerts"></a>
 <a id="minio-metrics-and-alerts-alerting"></a>
 <a id="minio-metrics-and-alerts-endpoints"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_model/) 发布指标。 你可以使用任意抓取工具从 MinIO 拉取指标数据，以执行进一步分析和配置告警。
 
@@ -100,21 +100,41 @@ http://HOSTNAME:PORT/minio/metrics/v3/audit
 - 将 [`MINIO_PROMETHEUS_URL`](/zh/reference/minio-server/settings/console/#envvar.MINIO_PROMETHEUS_URL) 设置为 Prometheus 服务的 URL
 - 将 [`MINIO_PROMETHEUS_JOB_ID`](/zh/reference/minio-server/settings/console/#envvar.MINIO_PROMETHEUS_JOB_ID) 设置为分配给已采集指标的唯一 job ID
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 可用的 version 3 指标 {#minio-metrics-and-alerts-available-metrics}
 
 MinIO 为集群、API 请求、存储桶以及 MinIO 服务的其他方面发布多类指标：
 
-- [API 指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-api-metrics)
-- [审计指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-audit-metrics)
-- [集群指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-cluster-metrics)
-- [调试指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-debug-metrics)
-- [ILM 指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-ilm-metrics)
-- [日志 Webhook 指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-logger-webhook-metrics)
-- [通知指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-notification-metrics)
-- [复制指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-replication-metrics)
-- [扫描器指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-scanner-metrics)
-- [系统指标（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-system-metrics)
+<a id="minio-available-v3-api-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-api-metrics">API 指标（英文详细表）</a>
+<a id="minio-available-v3-audit-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-audit-metrics">审计指标（英文详细表）</a>
+<a id="minio-available-v3-cluster-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-cluster-metrics">集群指标（英文详细表）</a>
+<a id="minio-available-v3-debug-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-debug-metrics">调试指标（英文详细表）</a>
+<a id="minio-available-v3-ilm-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-ilm-metrics">ILM 指标（英文详细表）</a>
+<a id="minio-available-v3-logger-webhook-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-logger-webhook-metrics">日志 Webhook 指标（英文详细表）</a>
+<a id="minio-available-v3-notification-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-notification-metrics">通知指标（英文详细表）</a>
+<a id="minio-available-v3-replication-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-replication-metrics">复制指标（英文详细表）</a>
+<a id="minio-available-v3-scanner-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-scanner-metrics">扫描器指标（英文详细表）</a>
+<a id="minio-available-v3-system-metrics"></a>
+
+- <a href="https://silo.pgsty.com/operations/monitoring/metrics-and-alerts/#minio-available-v3-system-metrics">系统指标（英文详细表）</a>
 
 许多指标都包含标签，用于标识生成该指标的资源及其他相关信息。

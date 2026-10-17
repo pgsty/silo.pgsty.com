@@ -9,8 +9,8 @@ upstream_modified: true
 
 <a id="mc-license"></a>
 <a id="command-mc.license"></a>
-<a id="id2"></a>
-<a id="id3"></a>
+<a id="id2" data-td-print-local></a>
+<a id="id3" data-td-print-local></a>
 
 ## 许可命令 {#description}
 

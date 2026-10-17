@@ -8,20 +8,20 @@ upstream_modified: true
 
 <a id="mc-support-diag"></a>
 <a id="command-mc.support.diag"></a>
-<a id="id2"></a>
-<a id="id3"></a>
-<a id="id4"></a>
+<a id="id2" data-td-print-local></a>
+<a id="id3" data-td-print-local></a>
+<a id="id4" data-td-print-local></a>
 <a id="subnet"></a>
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 <a id="minio-support-diagnostics-airgap"></a>
-<a id="id6"></a>
-<a id="id7"></a>
-<a id="id8"></a>
+<a id="id6" data-td-print-local></a>
+<a id="id7" data-td-print-local></a>
+<a id="id8" data-td-print-local></a>
 <a id="mc.support.diag.ALIAS"></a>
 <a id="mc.support.diag.-airgap"></a>
 <a id="mc.support.diag.-anonymize"></a>
 <a id="mc.support.diag.-api-key"></a>
-<a id="id9"></a>
+<a id="id9" data-td-print-local></a>
 
 ## 健康诊断 {#description}
 

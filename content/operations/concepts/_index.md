@@ -4,7 +4,7 @@ url: "/operations/concepts/"
 weight: 30
 icon: fa-solid fa-diagram-project
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/concepts.rst
-upstream_modified: false
+upstream_modified: true
 math: true
 ---
 
@@ -165,7 +165,7 @@ MinIO can also perform bit rot checks and healing using the [MinIO Scanner](/ope
 
 An erasure set is a group of multiple drives that supports MinIO [Erasure Coding](/operations/concepts/erasure-coding/#minio-erasure-coding). Erasure Coding provides high availability, reliability, and redundancy of data stored on a MinIO deployment.
 
-MinIO divides objects into chunks — called *shards* — and evenly distributes them among each drive in the Erasure Set. MinIO can continue seamlessly serving read and write requests despite the loss of any single drive. At the highest redundancy levels, MinIO can serve read requests with minimal performance impact despite the loss of up to half (\(N / 2\)) of the total drives in the deployment.
+SILO divides objects into shards and distributes them across the drives in an erasure set. Continued read and write access depends on the object's parity and the available drives in that set meeting the corresponding quorum. A two-drive `EC:1` set has a read quorum of 1 and a write quorum of 2: losing one drive can preserve access to existing intact objects, but prevents writes. At maximum parity, an object can be reconstructed from `ceil(N/2)` healthy shards in its `N`-drive erasure set; for an even-sized set this is exactly half the drives. Object access also requires the applicable metadata quorum. These limits apply to each erasure set, not to the deployment's aggregate drive count.
 
 MinIO calculates the size and number of Erasure Sets in a Server Pool based on the total number of drives in the set *and* the number of [`minio`](/reference/minio-server/#command-minio) servers in the set. See [Erasure Coding Basics](/operations/concepts/erasure-coding/#minio-ec-erasure-set) for more information.
 

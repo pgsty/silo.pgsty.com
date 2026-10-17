@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: false
 ---
 
-<a id="cert-manager"></a>
+<a id="cert-manager" data-td-print-local></a>
 <a id="minio-certmanager"></a>
 
 ## 使用 cert-manager 管理 TLS 证书 {#cert-manager-tls}
@@ -44,7 +44,7 @@ cert-manager 从 `Issuer` 或 `ClusterIssuer` 获取有效证书，并能在证�
 - 已安装 [kustomize](https://kustomize.io/)
 - 可通过 `kubectl` 访问你的 `k8s` 集群
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 配置 cert-manager {#minio-setup-certmanager}
 

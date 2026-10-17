@@ -284,7 +284,7 @@ Two rules apply to every allow-list deployment. Name proxies, not the subnet the
 
 - **Automatic seeding of cluster node addresses.** Feasible via `EndpointServerPools`, but it needs DNS resolution and re-resolution on address changes. Explicit configuration was judged the smaller risk.
 - **Registration as an `api` config key.** See the fail-open window above. Revisitable if observability turns out to matter more than the startup guarantee.
-- **`ExistingObjectTag/*`.** The sibling defect from the condition-value hardening — it carries the request's own tags rather than the object's stored tags — remains open by decision, and is unaffected by any of this.
+- **`ExistingObjectTag/*`.** This adjacent condition-source defect was subsequently fixed by `2f55347f7` and shipped in 20260804: only loaded stored tags supply this condition, not client request tags. This does not add tag loading to every S3 operation.
 
 ## Verdict on severity {#severity}
 

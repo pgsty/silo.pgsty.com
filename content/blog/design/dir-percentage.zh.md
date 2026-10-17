@@ -2,15 +2,18 @@
 title: "总量未知时，进度条应该说什么"
 linkTitle: "文件夹下载进度"
 date: 2026-08-23
-lastmod: 2026-09-02
+lastmod: 2026-09-16
 author: "冯若航"
-description: "文件夹流式 ZIP 下载显示 NaN% 的修复 PRD：不改变服务端 API 与普通文件下载，用诚实的不确定进度替代非法百分比。"
+summary: "文件夹流式 ZIP 下载显示 NaN% 的修复 PRD：不改变服务端 API 与普通文件下载，用诚实的不确定进度替代非法百分比。"
 tags: [设计, Console, 下载]
 weight: 20
+draft: false
 url: "/zh/blog/design/dir-percentage/"
 ---
 
-> **状态**：已随 SILO Console 2.2.0 发布（`16960f7ab`）；服务端自更新 Console pin（`4d6e1ea8e`）起内嵌该修复 · **优先级**：P1 · **归属**：[`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **关联问题**：[`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD 复核**：Claude Fable 5（`xhigh`）— **APPROVE** · **实现复核**：Claude Fable 5（`xhigh`），2026-08-23 — **APPROVE**，无 P0/P1/P2 发现
+> **历史范围：** 本页记录 Console 2.2.0 的进度修复，已随 Server 20260903 的内嵌 Console 交付。[Console 2.4.1](/zh/blog/release/console-2.4.1/#browser) 后续增加文件流写入与浏览器原生下载交接，已不再把整个 ZIP 缓存在 JavaScript Blob 中。下方原始 PRD 的传输路径与待办按 2.2.0 时点理解。
+
+> **状态**：已随 SILO Console 2.2.0 发布（`16960f7ab`）；服务端自更新 Console pin（`edc8be6ed`）起内嵌该修复 · **优先级**：P1 · **归属**：[`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **关联问题**：[`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD 复核**：Claude Fable 5（`xhigh`）— **APPROVE** · **实现复核**：Claude Fable 5（`xhigh`），2026-08-23 — **APPROVE**，无 P0/P1/P2 发现
 
 SILO Console 下载文件夹时，Downloads / Uploads 面板会显示 `NaN%`。ZIP 通常仍在正常传输，存储对象也完好无损，但进度条已经从“总量未知”错误地跨进了一个非法的确定进度状态。用户看到一条近乎满格的进度条，以为下载失败或已经完成，于是重复点击。
 
@@ -417,8 +420,8 @@ XHR 边界还需要一条事件顺序守卫。`abort()` 会先触发 `readystate
 - [x] 完成、失败与取消任务都离开 indeterminate。
 - [x] 流式 ZIP 与服务端响应契约保持不变。
 - [x] typecheck、生产构建与自动化回归已在本地通过。
-- [ ] Console 发布完成。
-- [ ] Silo 更新 Console 依赖并通过候选版本验证。
+- [x] Console 2.2.0 已发布。
+- [x] Server 20260903 已包含更新的 Console，见发布记录。
 
 ## 后续工作 {#follow-ups}
 
@@ -431,3 +434,9 @@ XHR 边界还需要一条事件顺序守卫。`abort()` 会先触发 `readystate
 5. 修复既有的 Blob JSON 错误解码与 HTTP 失败路径请求引用清理问题。
 
 它们都不是停止当前 UI 撒谎所必需的。下一阶段维护迭代应先恢复最小而诚实的契约：已知总量才显示百分比，未知总量就保持未知。
+
+## 后续实现与原设计的差异 {#later-contract}
+
+Console 2.2.0 的整合还把 `size` 改为必输出的 JSON 字段，并修复 ZIP 错误传播：读取失败不再静默跳过条目；响应尚未开始可返回 500，开始后以流中断暴露失败。因此上文“不改 API/资源管理”的约束仅适用于最初进度计算补丁，不能概括整个发布。
+
+当前单目录下载会交给浏览器，Console 的完成行表示交接，不证明字节已经全部下载；跟踪和取消应在浏览器下载管理器中进行。多选 ZIP 的文件 writer 与原生交接路径见 [Console 2.4.1](/zh/blog/release/console-2.4.1/#browser)。大小归一化仍可兼容旧响应，但不再说明当前模型缺少零值字段。

@@ -3,7 +3,7 @@ title: "Active Directory / LDAP Settings"
 url: "/reference/minio-server/settings/iam/ldap/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/iam/ldap.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="active-directory-ldap-settings"></a>
@@ -391,6 +391,29 @@ Specify `on` to enable `StartTLS` connections to an AD/LDAP server.
 Defaults to `off`
 
 For more about `StartTLS`, refer to section 4.14 of the [LDAP RFC 4511 specification](https://docs.ldap.com/specs/rfc4511.txt).
+
+### STS Trusted Proxies {#sts-trusted-proxies}
+
+*Optional*
+
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
+##### `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES` {#envvar.MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES}
+
+*envvar*
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
+##### `identity_ldap sts_trusted_proxies` {#mc-conf.identity_ldap.sts_trusted_proxies}
+
+*mc-conf*
+{{< /tab >}}
+{{< /tabs >}}
+
+A comma-, semicolon- or whitespace-separated list of proxy IP addresses or CIDR blocks whose forwarded client-IP headers may be used when bucketing LDAP STS logins for [login rate limiting](/blog/security/cve-2026-33419/). This list is deliberately independent of [`MINIO_API_TRUSTED_PROXIES`](/reference/minio-server/settings/core/#client-source-address-trust): it never feeds `aws:SourceIp`, the audit client address, or event notification `Host` values.
+
+When unset, forwarded headers are ignored for this purpose and each login is bucketed by its direct peer address. When the direct peer is on the list, a clean `X-Real-IP` is taken verbatim (the proxy **must** overwrite, not forward, any client-supplied `X-Real-IP`), otherwise `X-Forwarded-For` is walked right-to-left past listed hops to the first untrusted address. RFC 7239 `Forwarded` is not honored here.
+
+Unless you deliberately want different trust for the two purposes, set this list to the same value as `MINIO_API_TRUSTED_PROXIES`.
 
 ### SRV Record Name {#srv-record-name}
 

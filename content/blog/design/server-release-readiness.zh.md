@@ -2,7 +2,7 @@
 title: "SILO Server 20260903 发布前复审"
 linkTitle: "Server 20260903 复审"
 date: 2026-09-03
-lastmod: 2026-09-16
+lastmod: 2026-10-17
 author: "冯若航"
 summary: >
   对 20260806 之后全部服务端变更的最终对抗性复审：已确认缺陷、修复、否决的简化、必要复杂度、验证证据、明确延期，以及代码 GO 与生产发布之间的区别。2026-09-16 增补 #116 重启与读回验证方法。
@@ -11,6 +11,13 @@ weight: 8
 draft: false
 url: "/zh/blog/design/server-release-readiness/"
 ---
+
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **中文：** 本文关于 #79 分片上传列举的旧方案、启用建议与当时进度仅保留为历史记录；后续设计已由[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。新实现已合入主干、尚未随 Server 版本发布；这里记载的旧版本行为和其他主题结论不因此改变。
+>
+> **English:** The #79 multipart-listing proposals, enablement advice and status in this article are historical. Subsequent design work is governed by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017), which supersedes those earlier proposals. The new implementation is merged into main and remains unreleased; this does not change the documented behavior of older releases or conclusions on other topics.
 
 这是 [SILO 20260903](/zh/blog/release/silo-20260903/) 背后的发布前长期工程记录：为什么不能直接接受早期“所有问题都已解决”的结论，独立复审发现了什么，修复如何收窄，以及复审时距离生产发布还差哪些门禁。链接的发布说明记录了之后的正式交付结果。
 
@@ -225,6 +232,8 @@ CORS hot path 必须区分四种状态：
 - **不允许重试掩盖。** 每个 canary 带 60 秒硬性期限，覆盖 setup、请求、响应体读取与 sleep；SDK 重试禁用，恢复窗口不能被客户端重试糊弄过去。
 - **驱动拓扑。** 同一主机上四个 Linux/arm64 容器，独立网络身份，每节点一盘（EC 2+2）；tmpfs 卷由 holder 容器在整个停机期间保持挂载；节点以 10 秒宽限期并行优雅停止，再并行启动。
 
-值得记住的运维结论：**admin 端点就绪不等于数据就绪。** 在记录的这次运行中，候选版本的 admin 端点约 2.5 秒上线，而第一个完整数据 canary 到约 14 秒才完成。在该窗口内，对 admin/health 的就绪探测对数据面一无所知，任何固定 sleep 都不能替代实际的数据面检查。
+值得记住的运维结论：**admin 端点就绪不等于数据就绪。** [原始固定提交记录](https://github.com/pgsty/silo/blob/82948d63060839f6d18c9da8cfd03e8b6d95bc49/docs/investigations/release-readiness-20260911.md#linux-restartreadback-116)测了三个二进制：0806、0903 与当时的 main 修复构建。main 构建在重启后 2.461 秒通过 admin 门禁，再经过 14.489 秒才完成数据 canary；这两个数的计时起点不同。0903 在该次实验的门禁后延迟为 0.191 秒，但不能据此认为它没有继承的启动窗口。在该窗口内，对 admin/health 的就绪探测对数据面一无所知，任何固定 sleep 都不能替代实际的数据面检查。
 
 边界按边界陈述：该验收覆盖单台 Linux 主机上的进程/容器重启与 TCP 对端重连。它不证明跨独立主机、主机重启或物理介质故障的持久性；计时是个体观测，不是延迟保证。运行工件保留在文档树之外；上文方法是可泛化的部分。
+
+**9 月 16 日源码进展：** #10 已由独立的单对象条件删除 #145 关闭，批量 ETag 删除仍未实现；#77 及 #99/#100 已在 main 修复。#133/#144 后续由 #178 处理，#79 默认列表限制仍开放。它们均不能倒写为 20260903 的保证，已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布。见[当前组件与源码矩阵](/zh/compatibility/versions/)。

@@ -8,3 +8,5 @@ node_modules/
 npm-debug.log*
 scripts/**/__pycache__/
 *.py[cod]
+.venv-check/
+__pycache__/

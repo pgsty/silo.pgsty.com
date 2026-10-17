@@ -16,6 +16,10 @@ draft: false
 url: "/blog/design/go127-tls-oidc-discovery/"
 ---
 
+> **Publication update, 2026-09-17:** The Go TLS default repair (`48e184652`) shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+
+> **Follow-up, 2026-09-17:** the #154 reporter retested on 20260916 and reports the same failure. The repair restores the effect of `GODEBUG=tlsmlkem=0`; it does not change the default handshake, and it cannot address an ingress that rejects the new ML-DSA signature identifiers. The mechanism analysis, the full option space and the release-communication gates that follow from this are recorded in [Pinned TLS Parameters and Handshake Compatibility](/blog/design/tls-parameter-pinning/).
+
 After SILO's toolchain moved to Go 1.27, the Server TLS repair
 [`48e184652`](https://github.com/pgsty/silo/commit/48e1846525cce0a870fec9720cc9bf078fa4bf31)
 ("fix(tls): honor Go key exchange defaults across transports") removed its
@@ -34,14 +38,15 @@ at startup.
 > configuration were never obtained, so **no root cause is claimed for that
 > deployment** — two locally verified mechanisms could each produce the
 > reported symptom, and either the ingress rejecting the new handshake, or a
-> proxy rejecting the changed User-Agent, remains plausible. #154 stays open
-> for an affected-environment retest.
+> proxy rejecting the changed User-Agent, remains plausible. #154 was closed on
+> 2026-09-11 on the strength of the merge; the 2026-09-17 retest on 20260916
+> still fails, so an affected-environment retest with phase-level evidence is
+> still owed.
 
 ## What Go 1.27 changed {#go127}
 
 - **Explicit curve preferences now override the ML-KEM compat switches.**
-  `GODEBUG=tlsmlkem=0` (and `tlssecpmlkem=0`) only remove post-quantum
-  hybrids from the *default* curve set. An application that configures
+  `GODEBUG=tlsmlkem=0` removes all ML-KEM hybrids from the default set; `tlssecpmlkem=0` removes only the P-256/P-384 hybrids introduced in Go 1.26 and retains X25519MLKEM768. An application that configures
   `CurvePreferences` explicitly keeps ML-KEM in whatever list it names — a
   deliberate Go 1.27 change. SILO had eight TLS configuration points setting
   an explicit list including X25519MLKEM768; the fix removes all eight
@@ -131,7 +136,7 @@ incompatibility — a hello the ingress rejects stays rejected.
 
 The discovery/JWKS client builds its own transport: HTTP/2 disabled (no ALPN,
 HTTP/1.1), proxies taken only from `HTTPS_PROXY`/`NO_PROXY` (uppercase
-preferred; `ALL_PROXY` unused), a 30 s DNS cache, dialing that walks
+preferred; `ALL_PROXY` unused), DNS refresh defaulting to 30 s in Kubernetes/Docker and 10 min otherwise (overridable by the DNS cache TTL setting), dialing that walks
 addresses in order without shuffling, and timeouts of 5 s per TCP dial,
 10 s for the TLS handshake, and 1 min to response headers. There is **no
 total timeout on the discovery or JWKS fetch itself** — a slow IdP can hold
@@ -145,5 +150,7 @@ artifacts and the full evidence chain are retained outside the documentation
 tree. The supported statement is: the merged fix restores Go key-exchange
 defaults at the eight affected Server configuration points, verified with synthetic negative
 controls — it does not claim to have diagnosed any specific hidden
-deployment, and #154 remains open pending a retest in the affected
-environment.
+deployment, and no root cause is established for #154 until a retest in the
+affected environment supplies phase-level evidence.
+
+Go behavior is grounded in the [official 1.27 release notes](https://go.dev/doc/go1.27) and the actual toolchain. ClientHello byte counts above describe the recorded fixtures, not a fixed size for every connection.

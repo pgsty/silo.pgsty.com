@@ -9,23 +9,25 @@ upstream_modified: true
 <a id="core-settings"></a>
 <a id="minio-server-envvar-core"></a>
 
-This page covers settings that control core behavior of the MinIO process.
+This page covers settings that control core behavior of the SILO process.
 
 You can establish or modify settings by defining:
 
-- an *environment variable* on the host system prior to starting or restarting the MinIO Server. Refer to your operating system’s documentation for how to define an environment variable.
+- an *environment variable* on the host system prior to starting or restarting the SILO Server. Refer to your operating system’s documentation for how to define an environment variable.
 - a *configuration setting* using [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set).
 
-If you define both an environment variable and the similar configuration setting, MinIO uses the environment variable value.
+If you define both an environment variable and the similar configuration setting, SILO uses the environment variable value.
 
 Some settings have only an environment variable or a configuration setting, but not both.
 
 > [!WARNING]
 > **Important**
 >
-> Each configuration setting controls fundamental MinIO behavior and functionality. MinIO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
+> Each configuration setting controls fundamental SILO behavior and functionality. SILO **strongly recommends** testing configuration changes in a lower environment, such as DEV or QA, before applying to production.
 
-## MinIO Server CLI Options {#minio-server-cli-options}
+The SILO package installs `silo.service`. Its unit reads `/etc/default/minio` first for migration compatibility, then `/etc/default/silo`, whose duplicate variables take precedence. Use the latter for SILO settings. The `MINIO_*` variable names and existing reference anchors are retained.
+
+## SILO Server CLI Options {#minio-server-cli-options}
 
 {{< tabs group="environment-variable-configuration-setting" >}}
 {{< tab label="Environment Variable" value="environment-variable" >}}
@@ -40,25 +42,25 @@ There is no configuration setting for this variable, as these settings apply at 
 
 *Optional*
 
-Set a string of [parameters](/reference/minio-server/#minio-server-parameters) to use when starting the MinIO Server.
+Set a string of [parameters](/reference/minio-server/#minio-server-parameters) to use when starting the SILO Server.
 
-For Unix-like systems using the recommended MinIO `systemd` service, use the `/etc/default/minio` file and create an environment variable `MINIO_OPTS` for specifying parameters to append to the `minio` systemd process:
+For Unix-like systems using the recommended SILO `systemd` service, use the `/etc/default/silo` file and create an environment variable `MINIO_OPTS` for specifying parameters to append to the `silo` systemd process:
 
 ```shell
-# Editing /etc/default/minio
+# Editing /etc/default/silo
 
-MINIO_OPTS=' --console-address=":9001" --ftp="address=:8021" --ftp="passive-port-range=30000-40000" '
+MINIO_OPTS='--console-address=:9001 --ftp=address=:8021 --ftp=passive-port-range=30000-40000'
 ```
 
-For systems running `minio` on the command line, `MINIO_OPTS` is optional. To use it, declare the environment variable using standard shell semantics, then reference the environment variable when starting up the MinIO Server:
+For systems running `silo` on the command line, `MINIO_OPTS` is optional. To use it, declare the environment variable using standard shell semantics, then reference the environment variable when starting up the SILO Server:
 
 ```shell
-export MINIO_OPTS=' --console-address=":9001" --ftp="address=:8021" --ftp="passive-port-range=30000-40000" '
+export MINIO_OPTS='--console-address=:9001 --ftp=address=:8021 --ftp=passive-port-range=30000-40000'
 
-minio server $MINIO_OPTS ...
+silo server $MINIO_OPTS ...
 
 # The above is equivalent to running the following:
-# minio server --console-address=":9001" \
+# silo server --console-address=":9001" \
 #              --ftp="address=:8021"     \
 #              --ftp="passive-port-range=30000-40000"
 ```
@@ -66,7 +68,7 @@ minio server $MINIO_OPTS ...
 > [!WARNING]
 > **Important**
 >
-> The `minio server` command does not read `$MINIO_OPTS` directly. The variable only functions if used as described above.
+> The `silo server` command does not read `$MINIO_OPTS` directly. The variable only functions if used as described above.
 
 ## Storage Volumes {#storage-volumes}
 
@@ -76,9 +78,9 @@ minio server $MINIO_OPTS ...
 
 *envvar*
 
-The directories or drives the [`minio server`](/reference/minio-server/#command-minio.server) process uses as the storage backend.
+The directories or drives the [`silo server`](/reference/minio-server/#command-minio.server) process uses as the storage backend.
 
-Functionally equivalent to setting [`minio server DIRECTORIES`](/reference/minio-server/#minio.server.DIRECTORIES). Use this value when configuring MinIO to run using an environment file.
+Functionally equivalent to setting [`silo server DIRECTORIES`](/reference/minio-server/#minio.server.DIRECTORIES). Use this value when configuring SILO to run using an environment file.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
@@ -93,9 +95,9 @@ This setting does not have a configuration setting option.
 
 *envvar*
 
-Specifies the full path to the file the MinIO server process uses for loading environment variables.
+Specifies the full path to the file the SILO server process uses for loading environment variables.
 
-For `systemd`-managed files, set this value to the path of the environment file (`/etc/default/minio`) to direct MinIO to reload changes to that file when using [`mc admin service restart`](/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) to restart the deployment.
+For `systemd`-managed files, set this value to the path of the environment file (`/etc/default/silo`) to direct SILO to reload changes to that file when using [`mc admin service restart`](/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) to restart the deployment.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
@@ -106,14 +108,14 @@ This setting does not have a configuration setting option.
 
 {{< tabs group="environment-variable-configuration-setting" >}}
 {{< tab label="Environment Variable" value="environment-variable" >}}
-#### `MINIO_ILM_EXPIRY_WORKERS` {#envvar.MINIO_ILM_EXPIRY_WORKERS}
+#### `MINIO_ILM_EXPIRATION_WORKERS` {#envvar.MINIO_ILM_EXPIRATION_WORKERS}
 
 *envvar*
 
-Specifies the number of workers to make available to expire objects configured with ILM rules for expiration. When not set, MinIO defaults to using up to half of the available processing cores available.
+Specifies the number of workers to use for expiring objects configured with ILM rules for expiration. Valid values are `1` to `500`. The default value is `100`. See [ILM settings](/reference/minio-server/settings/ilm/#expiration-workers) for details.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
-This setting does not have a configuration setting option.
+This setting corresponds to the [`ilm expiration_workers`](/reference/minio-server/settings/ilm/#expiration-workers) configuration key.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -446,3 +448,34 @@ Setting this to `on` returns to matching bucket-level requests against the strin
 This setting does not have a configuration setting option.
 {{< /tab >}}
 {{< /tabs >}}
+
+
+<a id="multipart-listing"></a>
+
+## Multipart listing: retired mode switch {#envvar.MINIO_API_MULTIPART_LISTING}
+
+**Unreleased #79 follow-up:** `MINIO_API_MULTIPART_LISTING` is ignored with a startup warning. Listing always scans persistent upload metadata. No replacement setting is needed. Confirmed historical records missing both identity fields are omitted; partial/invalid identities, uncertain coverage and scan resource limits remain errors. Known historical uploads still support ordinary part upload, completion and cancellation. The obsolete shared `api multipart_listing` key is tolerated without discarding other API settings.
+
+The signed, read-only `GET /minio/admin/v3/multipart-preflight` endpoint still requires `admin:StorageInfo`. It reports `mode=persistent`; `ready` means all drives were inspected without errors or observed historical records, **not** that listing is enabled. No forced drain or successful preflight is required. Every new writer must be upgraded for all subsequently created uploads to carry identity. Each page still scans the multipart namespace within the existing 100,000 aggregate directory-entry and 30-second budgets. See the [candidate contract and limits](/blog/design/list-multipart-uploads/#implementation).
+
+**Published Server 20260916:** the old environment switch still accepts `legacy` (default) or `strict`, and strict requires its historical upgrade, drain and capacity prerequisites. Server 20260903 has no such switch. Follow the [September 16 contract](/blog/design/list-multipart-uploads/#implementation-20260916) when operating those older binaries.
+
+## HTTP header and idle timeouts {#envvar.MINIO_READ_HEADER_TIMEOUT}
+
+`MINIO_READ_HEADER_TIMEOUT` / `--read-header-timeout` defaults to `30s`. The flag is accepted but hidden from ordinary CLI help. Server 20260916 wires it to an absolute HTTP/1 header deadline; Server 20260903 did not correctly enforce this configured limit. Zero falls back to the read timeout; a negative value disables the header cap and permits a slow-header resource-exhaustion path. The header limit also affects TLS handshake reads. A cutoff can close the connection without an HTTP error status.
+
+<a id="envvar.MINIO_IDLE_TIMEOUT"></a>
+
+`MINIO_IDLE_TIMEOUT` / `--idle-timeout` also defaults to `30s` and controls rolling body idle timeouts. A progressing long HTTP/1 upload is not capped at 30 seconds in total. Neither setting has a server YAML field; CLI flags override environment values at startup. HTTP/2 and TLS write-side limitations are described in the [deadline design](/blog/design/request-header-timeouts/).
+
+## Legacy bucket-resource matching {#legacy-bucket-resource-matching-compatibility}
+
+`MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` is a compatibility escape hatch that restores the old object-resource matching behavior for bucket-level policy actions. The value is case-sensitive. The policy package reads it during process initialization, before SILO loads `MINIO_CONFIG_ENV_FILE`: setting it only in that file has no effect. Supply it in the actual process environment, such as systemd's `EnvironmentFile`, before startup. Prefer correcting the policy rather than restoring the weaker matching rule. See [SN-2026-004](/about/security-advisories/#sn-2026-004).
+
+SILO's own environment-file parser differs from systemd's parser; see the [environment-file design](/blog/design/config-env-file/). For toolchain-sensitive identity-provider startup failures, see [TLS and OIDC discovery](/blog/design/go127-tls-oidc-discovery/).
+
+## Site-replication metadata tombstones {#envvar.MINIO_SITE_REPLICATION_METADATA_TOMBSTONES}
+
+`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES` accepts `on` or `off` and defaults to **`off`**. It gates whether site-replication metadata export exposes real deletion-time (tombstone) information for the deletable bucket metadata types. With `off`, ordinary deletion events still replicate and the pre-existing policy deletion-time export is preserved, but the newly exposed deletion times stay hidden. With `on`, deletion times for absent tags, SSE configuration and quota are also exported, and initial synchronization includes all four deletable types.
+
+The flag does not detect what the remote sites can consume: enable it only after every site in the mesh runs a build that understands tombstones, and treat it as part of a coordinated upgrade. See the [rollout section of the bucket metadata convergence design](/blog/design/bucket-metadata-convergence/#rollout).
