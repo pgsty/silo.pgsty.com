@@ -337,8 +337,8 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 
 | 范围 | 用户可见变化 | 对应分类与详情 |
 | --- | --- | --- |
-| 新增管理 API | `GET /minio/admin/v3/multipart-preflight` 只读检查分片迁移准备；站点间新增 `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` 同步修订与撤销状态。 | [O06](/zh/compatibility/#o06) / [分片预检](/zh/blog/design/list-multipart-uploads/#implementation)；[O07](/zh/compatibility/#o07) / [IAM 协议](/zh/blog/design/iam-revocations/#upgrade) |
-| S3 条件与分片列表 | 多池条件写入、分片完成及版本删除更严格地核实元数据；分片列表上限为 1,000，默认仍为 legacy，strict 必须显式启用并完成准备。 | [O04](/zh/compatibility/#o04)、[O06](/zh/compatibility/#o06) / [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[分片模式](/zh/blog/design/list-multipart-uploads/#implementation) |
+| 新增管理 API | `GET /minio/admin/v3/multipart-preflight` 只读检查分片迁移准备；站点间新增 `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` 同步修订与撤销状态。 | [O06](/zh/compatibility/#o06) / [分片预检](/zh/blog/design/list-multipart-uploads/#implementation-20260916)；[O07](/zh/compatibility/#o07) / [IAM 协议](/zh/blog/design/iam-revocations/#upgrade) |
+| S3 条件与分片列表 | 多池条件写入、分片完成及版本删除更严格地核实元数据；分片列表上限为 1,000，默认仍为 legacy，strict 必须显式启用并完成准备。 | [O04](/zh/compatibility/#o04)、[O06](/zh/compatibility/#o06) / [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[分片模式](/zh/blog/design/list-multipart-uploads/#implementation-20260916) |
 | 权限与持久状态 | 自助改密与创建用户使用独立权限；IAM 持久撤销和桶配置删除状态影响协调升级与恢复，通用桶配置墓碑导出默认关闭。 | [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) / [密码迁移](/zh/compatibility/password-permissions/)、[IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout) |
 | 数据与复制 | 继续修复多池副本、标签与 Object Lock 排序、删除标记恢复、SSE-C 与联邦复制；不自动重建已丢失的历史状态。 | [G07–G10](/zh/compatibility/#g07) / [复制状态检查](/zh/operations/replication/replica-metadata-audit/)、[版本说明](/zh/compatibility/versions/#source-review) |
 | HTTP 与 TLS | 请求头使用绝对读取期限；TLS 默认选择与旧代理、IdP 的互操作需要核对，正文仍使用既有滚动空闲超时。 | [O03](/zh/compatibility/#o03) / [请求头超时](/zh/blog/design/request-header-timeouts/)、[TLS/OIDC](/zh/blog/design/go127-tls-oidc-discovery/) |
