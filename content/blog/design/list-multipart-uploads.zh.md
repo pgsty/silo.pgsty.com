@@ -12,6 +12,8 @@ draft: false
 url: "/zh/blog/design/list-multipart-uploads/"
 ---
 
+> **2026-10-17 源码集成更新：** 统一列举修复通过全部八项 PR 检查，经 [PR #243](https://github.com/pgsty/silo/pull/243) 合入主干，合并提交为 [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894)。它面向下一次 Server 发布，未包含在 [Server 20261015](/zh/blog/release/silo-20261015/) 中；源码接入不会更新已安装的二进制或容器镜像。
+
 > **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；发布时的启用条件保留在历史章节；待发布候选的变化见下节。下方带日期的源码状态与验证记录保留当时的范围。
 
 
@@ -71,7 +73,7 @@ url: "/zh/blog/design/list-multipart-uploads/"
 
 ## 2026-10-17 决策记录：统一列举，接受历史例外 {#decision-20261017}
 
-**状态：方案已选定，候选实现与本地验证已完成，尚未发布。** 本节对应服务端候选提交 `4ed86dfe62ed6e07016885552feebcb59f779631`；记录日期为 2026-10-17，不将它视为已合入主分支或已有发行制品的证明。Server 20260916 的部署仍应遵循下方带日期的旧契约。
+**状态：方案已选定，本地验证与 PR CI 已通过，源码已合入主干，尚未发布。** 本节对应实现提交 `4ed86dfe62ed6e07016885552feebcb59f779631`，于 2026-10-17 经 [PR #243](https://github.com/pgsty/silo/pull/243) 接入。源码合并不代表已有发行制品或已部署生产。Server 20260916 与 Server 20261015 的二进制仍适用下方的历史 legacy／strict 契约。
 
 ### 决策与优先级 {#decision-contract}
 

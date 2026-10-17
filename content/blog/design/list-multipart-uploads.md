@@ -12,6 +12,8 @@ draft: false
 url: "/blog/design/list-multipart-uploads/"
 ---
 
+> **Source integration, 2026-10-17:** The unified-listing repair passed all eight PR checks and merged through [PR #243](https://github.com/pgsty/silo/pull/243) as [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894). It targets the next Server release and is not included in [Server 20261015](/blog/release/silo-20261015/). Source acceptance does not change installed binaries or container images.
+
 > **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Its opt-in contract is preserved in the historical section; the unreleased follow-up is described next. Dated source-status and validation records below retain their original scope.
 
 
@@ -71,7 +73,7 @@ Regression coverage includes mixed old/new HTTP pages, delimiter groups, old upl
 
 ## October 17 decision record: unified listing with a historical exception {#decision-20261017}
 
-**Status: selected design, candidate implementation and local validation complete; unreleased.** This section describes server candidate commit `4ed86dfe62ed6e07016885552feebcb59f779631` as of October 17, 2026. It is not evidence of a main-branch merge or a published artifact. Deployments of Server 20260916 still follow the dated release contract below.
+**Status: selected design, local validation and PR CI complete; merged into main, unreleased.** This section describes implementation commit `4ed86dfe62ed6e07016885552feebcb59f779631`, accepted through [PR #243](https://github.com/pgsty/silo/pull/243) on October 17, 2026. The merge does not establish a published artifact or production rollout. Server 20260916 and Server 20261015 binaries still use the historical legacy/strict contract below.
 
 ### Decision and priorities {#decision-contract}
 

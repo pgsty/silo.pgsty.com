@@ -278,3 +278,10 @@ or container images.
   fall back to metadata. Storage formats, S3 upload IDs and cleanup settings
   are unchanged: the default expiry is 24 hours and the default scan interval
   is 6 hours.
+- [PR #243](https://github.com/pgsty/silo/pull/243), merged on October 17, makes
+  persistent multipart listing the only public path and retires the migration
+  switch. Confirmed readable historical uploads lacking both identity fields
+  are omitted individually; invalid metadata and incomplete scan coverage
+  remain errors. Default Abort availability is retained. Repeated scan cost,
+  capacity limits and delayed creation after cancellation remain explicit
+  boundaries; see the [decision record](/blog/design/list-multipart-uploads/#decision-20261017).
