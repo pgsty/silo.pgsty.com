@@ -24,24 +24,35 @@ A merged dependency update does not change an existing binary or image.
 | Component | Latest published version | What it contains |
 | --- | --- | --- |
 | Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | Go 1.27.1; pkg v3.14.1; upstream SDK `32e1f32cb176`; mcli 20260916; embedded Console v2.4.1, source `1360e26d976d` |
-| <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) | pkg v3.14.1; mcli 20260916; upstream SDK `32e1f32cb176`; restricted shared downloads, streaming ZIPs and signed artifacts |
+| <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.2](https://github.com/pgsty/silo-console/releases/tag/v2.4.2) | Go 1.27.2; pkg v3.14.2; mcli 20261018; upstream SDK v7.4.1; correct bucket-versioning errors; public Docker amd64/arm64 images |
 | mcli | [20261018](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z) | Go 1.27.2; pkg v3.14.2; upstream SDK v7.4.1; package version `20261018000000.0.0`; public Docker amd64/arm64 images |
 | Shared pkg | [v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2) | Own module path `github.com/pgsty/silo-pkg/v3`; SDK v7.4.1; go-jose v4.1.6; LDAP v3.4.15; Go 1.26 library floor |
 
 Release notes: [Server 20260916](/blog/release/silo-20260916/),
-[Console v2.4.1](/blog/release/console-2.4.1/),
+[Console v2.4.2](/blog/release/console-2.4.2/),
 [mcli 20261018](/blog/release/mcli-20261018/), [pkg v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2).
 For embedded deployments, select Console and MC explicitly in the Server build.
 Package-repository mirrors may lag GitHub; the [download page](/download/)
 links directly to the published artifacts.
 
-**Standalone Console image:** anonymous token requests for `docker.io/pgsty/silo-console` returned HTTP 401 on 2026-09-17; public pulls are not confirmed. v2.4.1 GitHub binaries, packages and source are published. This limitation does not affect Server embedding.
+**Standalone Console image:** `docker.io/pgsty/silo-console:v2.4.2` passed anonymous Linux amd64/arm64 pulls, signature and provenance checks. Its digest is `sha256:4cf47061e0d2f249df3c1cd2a939966ff3c69cc3cf7d10a7b1b39d5c110ae999`.
 
 ## Pending Server releases {#october-release}
 
 Server **20261015 remains a Draft**. Earlier website statements that it was a public release are superseded. Its [Object Lock repairs and artifact checks](/blog/release/silo-20261015/) describe candidate acceptance; the fixes are absent from the current public Server 20260916. See the [security advisory](/blog/security/20260926-governance-retention-bypass/).
 
-Server **20261018 has a signed [source tag](https://github.com/pgsty/silo/tree/RELEASE.2026-10-18T00-00-00Z) and a verified Draft**, with pkg v3.14.2, upstream SDK v7.4.1, mcli 20261018 and the Console v2.4.2 source tag. Console v2.4.2 standalone publication is still pending; the table above lists published components. Public Server release, image promotion and production deployment remain separate steps. Publishing mcli or Console does not repair an existing Server installation.
+Server **20261018 has a signed [source tag](https://github.com/pgsty/silo/tree/RELEASE.2026-10-18T00-00-00Z) and a verified Draft**, with pkg v3.14.2, upstream SDK v7.4.1, mcli 20261018 and the Console v2.4.2 source tag. Console v2.4.2 is now independently published; the table above lists published components. Public Server release, image promotion and production deployment remain separate steps. Publishing mcli or Console does not repair an existing Server installation.
+
+## October component graph {#october-components}
+
+Standalone Console v2.4.2, mcli 20261018 and the Server 20261018 draft select:
+
+- **Console:** `v0.0.0-20261017112417-ef2dd2c41d21`, tag `v2.4.2`.
+- **MC:** `v0.0.0-20261017101407-fa3b8bf72458`, tag `RELEASE.2026-10-18T00-00-00Z`.
+- **pkg / upstream minio-go:** `v3.14.2` / `v7.4.1`.
+- **Build environment:** Go `1.27.2`; Console frontend uses Node `24.22.0` LTS.
+
+Server must select both Console and MC replacements explicitly; Go does not inherit Console's replacements. Publishing these standalone components does not change the versions embedded in the current public Server 20260916.
 
 ## September 16 dependency graph {#source}
 
@@ -224,7 +235,7 @@ selects MC. Console and MC retain their historical MinIO module paths; pkg uses
 its own path directly. Legacy transitive `minio/pkg/v3` from `colorjson`/`dperf`
 is separate from the maintained policy implementation.
 
-The Server 20261015 candidate uses Go **1.27.2**; the September stack used Go **1.27.1**.
+Console v2.4.2, mcli 20261018 and the Server 20261018 draft use Go **1.27.2**; the September stack used Go **1.27.1**.
 pkg retains a Go **1.26** library floor and
 was also race-tested with Go **1.26.8**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile

@@ -15,7 +15,7 @@ icon: fa-solid fa-server
 >
 > **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
 
-> **当前控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
+> **正式 Server 20260916 内嵌控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。独立 [Console v2.4.2](/zh/blog/release/console-2.4.2/) 已另行发布，引用 mcli 20261018 与 pkg v3.14.2。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
 
 **先看[三档兼容性总览](/zh/compatibility/)：12 类兼容或改进、4 类轻微差异、8 类按条件检查。** 本页提供服务端细节，保留 2026-08-06 审计的固定基线，并分别记录[后续已发布变化](#since-20260806)与[9 月 16 日源码变化](#september-2026)。历史审计基线不等于[最初分叉基线](/zh/compatibility/#scope)，也不代表最新制品已经包含全部源码修复。
 

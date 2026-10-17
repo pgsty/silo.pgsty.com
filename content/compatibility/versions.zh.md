@@ -23,23 +23,34 @@ icon: fa-solid fa-code-branch
 | 组件 | 发行版本 | 实际包含内容 |
 | --- | --- | --- |
 | Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | Go 1.27.1；pkg v3.14.1；上游 SDK `32e1f32cb176`；mcli 20260916；内嵌 Console v2.4.1，源码 `1360e26d976d` |
-| <span style="white-space:nowrap">独立<br>Console</span> | [v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) | pkg v3.14.1；mcli 20260916；上游 SDK `32e1f32cb176`；共享下载限制、流式 ZIP 与签名制品 |
+| <span style="white-space:nowrap">独立<br>Console</span> | [v2.4.2](https://github.com/pgsty/silo-console/releases/tag/v2.4.2) | Go 1.27.2；pkg v3.14.2；mcli 20261018；上游 SDK v7.4.1；正确返回桶版本控制错误；Docker amd64/arm64 镜像已公开 |
 | mcli | [20261018](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z) | Go 1.27.2；pkg v3.14.2；上游 SDK v7.4.1；软件包版本 `20261018000000.0.0`；Docker amd64/arm64 镜像已公开 |
 | 共享 pkg | [v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；SDK v7.4.1；go-jose v4.1.6；LDAP v3.4.15；Go 1.26 库最低要求 |
 
 发布说明：[Server 20260916](/zh/blog/release/silo-20260916/)、
-[Console v2.4.1](/zh/blog/release/console-2.4.1/)、
+[Console v2.4.2](/zh/blog/release/console-2.4.2/)、
 [mcli 20261018](/zh/blog/release/mcli-20261018/)、[pkg v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2)。
 内嵌部署需要在 Server 构建中显式选择 Console 与 MC。
 软件包仓库镜像可能晚于 GitHub 更新；[下载页](/zh/download/)直接链接已发布的制品。
 
-**独立 Console 镜像：** 2026-09-17 匿名访问 `docker.io/pgsty/silo-console` 的 token 请求返回 HTTP 401，尚不能确认公开拉取。v2.4.1 的 GitHub 二进制、软件包和源码已发布；此限制不影响 Server 内嵌的源码选择。
+**独立 Console 镜像：** `docker.io/pgsty/silo-console:v2.4.2` 已通过 Linux amd64/arm64 匿名拉取、签名及来源证明检查，摘要为 `sha256:4cf47061e0d2f249df3c1cd2a939966ff3c69cc3cf7d10a7b1b39d5c110ae999`。
 
 ## Server 待发布版本 {#october-release}
 
 Server **20261015 仍为 Draft**。官网此前称其正式发布的表述已失效。[对象锁修复及制品验收](/zh/blog/release/silo-20261015/)记录的是候选版验收；当前正式 Server 20260916 尚未包含这些修复，参见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
 
-Server **20261018 已准备签名[源码标签](https://github.com/pgsty/silo/tree/RELEASE.2026-10-18T00-00-00Z)和通过验收的发布草稿**，引用 pkg v3.14.2、上游 SDK v7.4.1、mcli 20261018 与 Console v2.4.2 源码标签。Console v2.4.2 的独立发行尚未完成；上方矩阵只列已正式发布的组件。Server 正式发布、镜像提升和生产部署分别执行。发布 mcli 或 Console 不会修复已经安装的 Server。
+Server **20261018 已准备签名[源码标签](https://github.com/pgsty/silo/tree/RELEASE.2026-10-18T00-00-00Z)和通过验收的发布草稿**，引用 pkg v3.14.2、上游 SDK v7.4.1、mcli 20261018 与 Console v2.4.2 源码标签。Console v2.4.2 已独立发布；上方矩阵只列已正式发布的组件。Server 正式发布、镜像提升和生产部署分别执行。发布 mcli 或 Console 不会修复已经安装的 Server。
+
+## 10 月组件依赖图 {#october-components}
+
+独立 Console v2.4.2、mcli 20261018 与 Server 20261018 草稿选择以下版本：
+
+- **Console：** `v0.0.0-20261017112417-ef2dd2c41d21`，标签 `v2.4.2`。
+- **MC：** `v0.0.0-20261017101407-fa3b8bf72458`，标签 `RELEASE.2026-10-18T00-00-00Z`。
+- **pkg / 上游 minio-go：** `v3.14.2` / `v7.4.1`。
+- **构建环境：** Go `1.27.2`；Console 前端使用 Node `24.22.0` LTS。
+
+Server 必须显式选择 Console 和 MC 的 replacement，不能继承 Console 的替换配置。上述独立组件发布不会改变当前正式 Server 20260916 的内嵌版本。
 
 ## 9 月 16 日依赖图 {#source}
 
@@ -142,7 +153,7 @@ Go 不继承依赖模块的 `replace`。即使 Console 已选择 MC，Server 仍
 Console 和 MC 保留历史 MinIO 模块路径，pkg 直接使用自己的路径。
 `colorjson`/`dperf` 带入的旧 `minio/pkg/v3` 传递依赖与维护中的策略实现相互独立。
 
-Server 20261015 候选版使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg 保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。
+Console v2.4.2、mcli 20261018 与 Server 20261018 草稿使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg 保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。
 Go x/* 依赖已刷新。go-systemd 实际仍选 **v22.6.0**，因为 v22.7.0 在 NetBSD 编译失败；
 Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。这些是有原因的兼容性固定版本。
 
