@@ -10,12 +10,18 @@ icon: fa-solid fa-terminal
 
 `mcli` 是 Silo 构建的 MinIO 客户端（`mc`）。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
-[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/) 与 [20260913](/zh/blog/release/mcli-20260913/)。最新版本为 [20260916](/zh/blog/release/mcli-20260916/)；历史说明保留各自比较基线。
+[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/) 与 [20260913](/zh/blog/release/mcli-20260913/)。最新版本为 [20261018](/zh/blog/release/mcli-20261018/)；历史说明保留各自比较基线。
 
 > [!TIP]
-> **当前版本：** [RELEASE.2026-09-16T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z)，软件包 `20260916000000.0.0`，源码 `e952aa78f10a`。已提供六个系统/架构归档、RPM/DEB/APK 与多架构镜像。见[发布说明](/zh/blog/release/mcli-20260916/)和[组件矩阵](/zh/compatibility/versions/)。
+> **当前版本：** [RELEASE.2026-10-18T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z)，软件包 `20261018000000.0.0`，源码 `fa3b8bf72458`。已提供六个系统/架构归档、RPM/DEB/APK 与多架构镜像。见[发布说明](/zh/blog/release/mcli-20261018/)和[组件矩阵](/zh/compatibility/versions/)。
 
 ## 当前版本变化 {#current-release}
+
+20261018 使用 **Go 1.27.2**、**silo-pkg v3.14.2** 和上游 **minio-go v7.4.1**，更新 Go x/* 与针对性的依赖修复。SDK 修复取消操作后的失败分片上传清理，按 UTC 发送保留时间，并保留请求指定的 STS 时长；并行 GET 与 ComposeObject 仍需显式选择，不改变默认传输方式。
+
+命令语法、配置、别名和已有失败退出码保持不变。版本镜像与 `latest` 已通过匿名访问验证，均提供 Linux amd64/arm64。Go 嵌入方选择 `github.com/pgsty/mc v0.0.0-20261017101407-fa3b8bf72458`，完整依赖与制品说明见 [20261018 发布说明](/zh/blog/release/mcli-20261018/)。
+
+## 继承自 20260916 的变化 {#release-20260916}
 
 20260916 使用 pkg v3.14.1、上游 SDK `32e1f32cb176`、JWX v3.3.0 和 Go 1.27.1。
 SDK 会重试并报告 CopyObject HTTP 200 响应内嵌的 S3 错误，避免复制失败后授权 `mv` 删除源对象。
