@@ -7,6 +7,9 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+> [!WARNING]
+> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
+
 <a id="s3-api-compatibility"></a>
 
 This page documents S3 APIs supported by MinIO Object Storage. For reference documentation on any given API, see the corresponding documentation for Amazon S3.

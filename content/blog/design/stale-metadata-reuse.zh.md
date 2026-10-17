@@ -12,6 +12,9 @@ draft: false
 url: "/zh/blog/design/stale-metadata-reuse/"
 ---
 
+> [!WARNING]
+> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
+
 **发布更新（2026-10-15）：** 本修复首次随 [Server 20261015](/zh/blog/release/silo-20261015/) 交付。下文源码验收记录保留此前发布前的验证结论。
 
 **2026-10-15 核验状态：已合入 main，尚未进入已发布的 Server 版本。**

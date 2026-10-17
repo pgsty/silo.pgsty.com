@@ -16,30 +16,30 @@ icon: fa-solid fa-code-branch
 >
 > **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
 
-**Server 发布状态更新于 2026-10-15；其他组件身份核验于 2026-09-17。** SILO 的四个组件独立发布。依赖更新合入主分支，不会改变已经发布的二进制或镜像。
+**公开发布状态核验于 2026-10-17。** SILO 的四个组件独立发布。依赖更新合入主分支，不会改变已经发布的二进制或镜像。
 
 ## 已发布组件 {#published}
 
 | 组件 | 发行版本 | 实际包含内容 |
 | --- | --- | --- |
-| Server | [20261015](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z) | 首次完整修复 SN-2026-015/016 对象锁问题；Go 1.27.2；pkg v3.14.1；上游 SDK `32e1f32cb176`；mcli 20260916；内嵌 Console v2.4.1，源码 `1360e26d976d` |
+| Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | Go 1.27.1；pkg v3.14.1；上游 SDK `32e1f32cb176`；mcli 20260916；内嵌 Console v2.4.1，源码 `1360e26d976d` |
 | <span style="white-space:nowrap">独立<br>Console</span> | [v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) | pkg v3.14.1；mcli 20260916；上游 SDK `32e1f32cb176`；共享下载限制、流式 ZIP 与签名制品 |
-| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1；上游 SDK `32e1f32cb176`；软件包版本 `20260916000000.0.0` |
-| 共享 pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；CopyObject 内嵌错误处理；JWX v3.3.0 字段名转义；上游 SDK `32e1f32cb176` |
+| mcli | [20261018](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z) | Go 1.27.2；pkg v3.14.2；上游 SDK v7.4.1；软件包版本 `20261018000000.0.0`；Docker amd64/arm64 镜像已公开 |
+| 共享 pkg | [v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；SDK v7.4.1；go-jose v4.1.6；LDAP v3.4.15；Go 1.26 库最低要求 |
 
-发布说明：[Server 20261015](/zh/blog/release/silo-20261015/)、
+发布说明：[Server 20260916](/zh/blog/release/silo-20260916/)、
 [Console v2.4.1](/zh/blog/release/console-2.4.1/)、
-[mcli 20260916](/zh/blog/release/mcli-20260916/)、[pkg v3.14.1](/zh/blog/release/pkg-3.14.1/)。
+[mcli 20261018](/zh/blog/release/mcli-20261018/)、[pkg v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2)。
 内嵌部署需要在 Server 构建中显式选择 Console 与 MC。
 软件包仓库镜像可能晚于 GitHub 更新；[下载页](/zh/download/)直接链接已发布的制品。
 
 **独立 Console 镜像：** 2026-09-17 匿名访问 `docker.io/pgsty/silo-console` 的 token 请求返回 HTTP 401，尚不能确认公开拉取。v2.4.1 的 GitHub 二进制、软件包和源码已发布；此限制不影响 Server 内嵌的源码选择。
 
-## Server 20261015 安全更新 {#october-release}
+## Server 待发布版本 {#october-release}
 
-[Server 20261015](/zh/blog/release/silo-20261015/) 首次包含 [SN-2026-015/016 对象锁问题](/zh/blog/security/20260926-governance-retention-bypass/)的完整修复。请升级全部 Server 进程与接受 S3 写入的复制站点。该版沿用下列 Console、mcli、pkg 与上游 SDK 身份；这些组件无需为此次 Server 修复重新发布。Go 更新为 1.27.2，`golang.org/x/net` 更新为 v0.60.0。
+Server **20261015 仍为 Draft**。官网此前称其正式发布的表述已失效。[对象锁修复及制品验收](/zh/blog/release/silo-20261015/)记录的是候选版验收；当前正式 Server 20260916 尚未包含这些修复，参见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
 
-本版同时包含 #233 旧元数据与扫描响应复用修复、#225 校验和错误文案对齐、#220 Lambda 目标集合判空修复。准确制品身份与验收结果见[发布记录](/zh/blog/release/silo-20261015/#acceptance)。升级不重写已有数据，生产部署仍需运维人员实际升级。
+Server **20261018 正在准备标签和发布草稿**，计划引用 pkg v3.14.2、上游 SDK v7.4.1、mcli 20261018 与 Console v2.4.2。Server 正式发布、镜像提升和生产部署分别执行。发布 mcli 或 Console 不会修复已经安装的 Server。
 
 ## 9 月 16 日依赖图 {#source}
 
@@ -142,7 +142,7 @@ Go 不继承依赖模块的 `replace`。即使 Console 已选择 MC，Server 仍
 Console 和 MC 保留历史 MinIO 模块路径，pkg 直接使用自己的路径。
 `colorjson`/`dperf` 带入的旧 `minio/pkg/v3` 传递依赖与维护中的策略实现相互独立。
 
-Server 20261015 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg 保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。
+Server 20261015 候选版使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg 保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。
 Go x/* 依赖已刷新。go-systemd 实际仍选 **v22.6.0**，因为 v22.7.0 在 NetBSD 编译失败；
 Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。这些是有原因的兼容性固定版本。
 
@@ -169,13 +169,13 @@ Server 20260916 源码 [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4
 
 ## 10 月 15 日源码验收 {#october-source}
 
-**已随 Server 20261015 发布；Server 20260916 不包含。**
+**已纳入 Server 20261015 草稿；当前正式 Server 20260916 不包含。**
 [PR #233](https://github.com/pgsty/silo/pull/233) 已以
 [`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a)
 合入，修复旧版 `xl.meta` 头部复用时的缺失字段残留，并使扫描更新与最终缓存保持互斥。
 存储格式、RPC 字段与依赖版本均未变化。[问题与修复说明](/zh/blog/design/stale-metadata-reuse/)
 记录了确定性回归测试、双进程扫描验证、合并后 CI 和运维核验方法。
-该源码修复已包含在 [Server 20261015](/zh/blog/release/silo-20261015/) 中；正式制品发布不代表生产集群已经升级。
+该源码修复已包含在 [Server 20261015](/zh/blog/release/silo-20261015/) 中；草稿制品验收不代表正式发布或生产集群已经升级。
 
 ## 20261015 之后的 Server 修复 {#post-20261015}
 

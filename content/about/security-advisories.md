@@ -8,6 +8,9 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
+> [!WARNING]
+> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
+
 This ledger summarizes fork-specific security fixes and closely related
 upgrade-impacting security notes in `pgsty/silo`. It is intentionally narrower
 than a changelog and focuses on release-impacting security behavior. Each

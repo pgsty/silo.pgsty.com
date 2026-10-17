@@ -10,6 +10,9 @@ weight: 1
 url: "/blog/security/20260926-governance-retention-bypass/"
 ---
 
+> [!WARNING]
+> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
+
 **First fixed release: [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z) (2026-10-15).**
 It contains the complete repairs for **SN-2026-015 and SN-2026-016**, merged through
 [PR #234](https://github.com/pgsty/silo/pull/234) and

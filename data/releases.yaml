@@ -1,10 +1,10 @@
-# Server release updated on 2026-10-15; client release verified on 2026-09-17.
+# Public releases verified on 2026-10-17. Server 20261015 remains a draft.
 # Component identities are documented in content/compatibility/versions*.md.
 server:
-  tag: RELEASE.2026-10-15T00-00-00Z
-  build: 20261015000000.0.0
-  date: "2026-10-15"
-client:
   tag: RELEASE.2026-09-16T00-00-00Z
   build: 20260916000000.0.0
   date: "2026-09-16"
+client:
+  tag: RELEASE.2026-10-18T00-00-00Z
+  build: 20261018000000.0.0
+  date: "2026-10-18"

@@ -7,6 +7,9 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+> [!WARNING]
+> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
+
 <a id="s3-api"></a>
 
 本页面记录 MinIO 对象存储支持的 S3 API。 如需查看任意 API 的参考文档，请参阅 Amazon S3 的对应文档。

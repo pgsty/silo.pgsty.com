@@ -13,6 +13,9 @@ url: "/blog/design/list-multipart-uploads/"
 ---
 
 > [!WARNING]
+> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
+
+> [!WARNING]
 > **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
 >
 > **English:** The August analysis and September `legacy`/`strict` proposal retained below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). It selects one persistent listing path, individual omission of confirmed unidentified historical uploads, and no migration switch. The code is merged into main but has not shipped in a Server release. Historical sections do not change the behavior of older binaries.

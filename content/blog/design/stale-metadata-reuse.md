@@ -12,6 +12,9 @@ draft: false
 url: "/blog/design/stale-metadata-reuse/"
 ---
 
+> [!WARNING]
+> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
+
 **Release follow-up (2026-10-15):** This repair first shipped in [Server 20261015](/blog/release/silo-20261015/). The source acceptance below records the earlier pre-release verification.
 
 **Verified on 2026-10-15: merged on main, not yet in a published Server release.**

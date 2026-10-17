@@ -13,6 +13,9 @@ url: "/zh/blog/design/list-multipart-uploads/"
 ---
 
 > [!WARNING]
+> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
+
+> [!WARNING]
 > **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
 >
 > **中文：** 本页保留的 8 月分析与 9 月 `legacy`/`strict` 方案已被新设计覆盖，请以[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)为准。新设计统一使用持久列举，逐条跳过经确认缺少身份的历史上传，取消迁移开关；代码已合入主干，尚未随 Server 版本发布。旧章节只用于理解历史，不改变旧版本二进制的实际行为。

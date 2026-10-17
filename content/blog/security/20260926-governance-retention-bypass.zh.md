@@ -10,6 +10,9 @@ weight: 1
 url: "/zh/blog/security/20260926-governance-retention-bypass/"
 ---
 
+> [!WARNING]
+> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
+
 **首次修复版本：[RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z)（2026-10-15）。**
 该版包含 [PR #234](https://github.com/pgsty/silo/pull/234) 与
 [PR #235](https://github.com/pgsty/silo/pull/235) 对 **SN-2026-015 与 SN-2026-016** 的完整修复。

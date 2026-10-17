@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "Published SILO components, Server 20261015 Object Lock fixes, and coordinated upgrade requirements."
+description: "Published SILO components, mcli 20261018, and pending Server release status."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -16,32 +16,32 @@ icon: fa-solid fa-code-branch
 >
 > **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
 
-**Server release updated on 2026-10-15; other component identities verified on 2026-09-17.** SILO releases its four components independently.
+**Public release state verified on 2026-10-17.** SILO releases its four components independently.
 A merged dependency update does not change an existing binary or image.
 
 ## Published components {#published}
 
 | Component | Latest published version | What it contains |
 | --- | --- | --- |
-| Server | [20261015](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z) | First complete SN-2026-015/016 Object Lock repair; Go 1.27.2; pkg v3.14.1; upstream SDK `32e1f32cb176`; mcli 20260916; embedded Console v2.4.1, source `1360e26d976d` |
+| Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | Go 1.27.1; pkg v3.14.1; upstream SDK `32e1f32cb176`; mcli 20260916; embedded Console v2.4.1, source `1360e26d976d` |
 | <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.1](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) | pkg v3.14.1; mcli 20260916; upstream SDK `32e1f32cb176`; restricted shared downloads, streaming ZIPs and signed artifacts |
-| mcli | <a href="https://github.com/pgsty/mc/releases/tag/RELEASE.2026-09-16T00-00-00Z" style="white-space:nowrap">20260916</a> | pkg v3.14.1; upstream SDK `32e1f32cb176`; package version `20260916000000.0.0` |
-| Shared pkg | [v3.14.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.1) | Own module path `github.com/pgsty/silo-pkg/v3`; CopyObject embedded-error handling; JWX v3.3.0 field-name escaping; upstream SDK `32e1f32cb176` |
+| mcli | [20261018](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z) | Go 1.27.2; pkg v3.14.2; upstream SDK v7.4.1; package version `20261018000000.0.0`; public Docker amd64/arm64 images |
+| Shared pkg | [v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2) | Own module path `github.com/pgsty/silo-pkg/v3`; SDK v7.4.1; go-jose v4.1.6; LDAP v3.4.15; Go 1.26 library floor |
 
-Release notes: [Server 20261015](/blog/release/silo-20261015/),
+Release notes: [Server 20260916](/blog/release/silo-20260916/),
 [Console v2.4.1](/blog/release/console-2.4.1/),
-[mcli 20260916](/blog/release/mcli-20260916/), [pkg v3.14.1](/blog/release/pkg-3.14.1/).
+[mcli 20261018](/blog/release/mcli-20261018/), [pkg v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2).
 For embedded deployments, select Console and MC explicitly in the Server build.
 Package-repository mirrors may lag GitHub; the [download page](/download/)
 links directly to the published artifacts.
 
 **Standalone Console image:** anonymous token requests for `docker.io/pgsty/silo-console` returned HTTP 401 on 2026-09-17; public pulls are not confirmed. v2.4.1 GitHub binaries, packages and source are published. This limitation does not affect Server embedding.
 
-## Server 20261015 security update {#october-release}
+## Pending Server releases {#october-release}
 
-[Server 20261015](/blog/release/silo-20261015/) is the first release containing the complete [SN-2026-015/016 Object Lock repairs](/blog/security/20260926-governance-retention-bypass/). Upgrade every Server process and replication site that accepts S3 writes. The release retains the Console, mcli, pkg and upstream SDK identities listed below; those components do not need a new release for this Server fix. Go is updated to 1.27.2 and `golang.org/x/net` to v0.60.0.
+Server **20261015 remains a Draft**. Earlier website statements that it was a public release are superseded. Its [Object Lock repairs and artifact checks](/blog/release/silo-20261015/) describe candidate acceptance; the fixes are absent from the current public Server 20260916. See the [security advisory](/blog/security/20260926-governance-retention-bypass/).
 
-The release also contains #233 stale metadata/scanner fixes, #225 checksum error wording and #220 Lambda target-set emptiness. Exact artifact identities and acceptance results are in the [release record](/blog/release/silo-20261015/#acceptance). Existing data is not rewritten and production upgrades remain an operator action.
+Server **20261018 is being prepared as a tag and draft**, with pkg v3.14.2, upstream SDK v7.4.1, mcli 20261018 and Console v2.4.2. Public Server release, image promotion and production deployment remain separate steps. Publishing mcli or Console does not repair an existing Server installation.
 
 ## September 16 dependency graph {#source}
 
@@ -224,7 +224,7 @@ selects MC. Console and MC retain their historical MinIO module paths; pkg uses
 its own path directly. Legacy transitive `minio/pkg/v3` from `colorjson`/`dperf`
 is separate from the maintained policy implementation.
 
-Server 20261015 uses Go **1.27.2**; the September stack used Go **1.27.1**.
+The Server 20261015 candidate uses Go **1.27.2**; the September stack used Go **1.27.1**.
 pkg retains a Go **1.26** library floor and
 was also race-tested with Go **1.26.8**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
@@ -256,7 +256,7 @@ Final storage repairs also include migration tag preservation in [`fced86303`](h
 
 ## October 15 source acceptance {#october-source}
 
-**Shipped in Server 20261015; not included in Server 20260916.**
+**Included in the Server 20261015 draft; not shipped in the public Server 20260916.**
 [PR #233](https://github.com/pgsty/silo/pull/233), merged as
 [`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a),
 clears absent fields when reusing legacy `xl.meta` headers and keeps scanner
@@ -264,8 +264,7 @@ updates separate from final caches. Storage formats, RPC fields and dependency
 versions are unchanged. The [problem and repair record](/blog/design/stale-metadata-reuse/)
 documents deterministic regression coverage, a two-process scanner check,
 post-merge CI, and operator verification. The source repair is included in
-[Server 20261015](/blog/release/silo-20261015/); artifact release does not establish
-a production rollout.
+[Server 20261015](/blog/release/silo-20261015/); draft artifact acceptance does not establish a public release or production rollout.
 
 ## Server fixes after 20261015 {#post-20261015}
 
