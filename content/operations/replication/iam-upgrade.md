@@ -6,6 +6,13 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
+>
+> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
+
 The IAM repairs in [Server #191](https://github.com/pgsty/silo/pull/191) and
 [#192](https://github.com/pgsty/silo/pull/192) persist deletion revisions and
 parent revocation boundaries. They prevent delayed site events from restoring
@@ -64,7 +71,7 @@ Where an existing `Deny admin:CreateUser` also meant to prohibit changing one's 
 password, add `admin:ChangeMyPassword` to the same Deny with its existing scope and
 conditions; retain both through rollback. Server 20260916 keeps multipart listing in
 `legacy` by default. An ordinary upgrade does not require strict mode; only an
-explicit opt-in needs the [multipart preflight and drain procedure](/blog/design/list-multipart-uploads/#implementation).
+explicit opt-in needs the [multipart preflight and drain procedure](/blog/design/list-multipart-uploads/#implementation-20260916).
 
 ## Preserve a complete recovery point {#backup}
 

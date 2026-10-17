@@ -12,6 +12,13 @@ draft: false
 url: "/blog/design/list-multipart-uploads/"
 ---
 
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The August analysis and September `legacy`/`strict` proposal retained below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). It selects one persistent listing path, individual omission of confirmed unidentified historical uploads, and no migration switch. The code is merged into main but has not shipped in a Server release. Historical sections do not change the behavior of older binaries.
+>
+> **中文：** 本页保留的 8 月分析与 9 月 `legacy`/`strict` 方案已被新设计覆盖，请以[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)为准。新设计统一使用持久列举，逐条跳过经确认缺少身份的历史上传，取消迁移开关；代码已合入主干，尚未随 Server 版本发布。旧章节只用于理解历史，不改变旧版本二进制的实际行为。
+
 > **Source integration, 2026-10-17:** The unified-listing repair passed all eight PR checks and merged through [PR #243](https://github.com/pgsty/silo/pull/243) as [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894). It targets the next Server release and is not included in [Server 20261015](/blog/release/silo-20261015/). Source acceptance does not change installed binaries or container images.
 
 > **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Its opt-in contract is preserved in the historical section; the unreleased follow-up is described next. Dated source-status and validation records below retain their original scope.
@@ -246,7 +253,12 @@ Retain the defined scope: ordinary upgrades should gain reliable listing for ide
 
 ## Historical: September 16 implementation and upgrade contract {#implementation-20260916}
 
-> This section describes Server 20260916, not operating instructions for the unreleased candidate.
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** This mode-switch and drain-before-enabling design is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017); use that record for the new design. The text below preserves the Server 20260916 contract, which still applies to those installed binaries. The new code is merged into main and remains unreleased.
+>
+> **中文：** 本节的模式开关与排空启用方案已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。以下仅保留 Server 20260916 的历史契约；已安装旧版本仍按该契约运行。新设计已合入主干，尚未发布。
 
 [PR #198](https://github.com/pgsty/silo/pull/198) retains mr javad seydi's original metadata-and-scan contribution and adds maintainer fixes for disappearing markers, incomplete discovery, cancellation confirmation and upgrade diagnostics. The pre-release compatibility follow-up restores `legacy` as the default and makes strict mode an explicit process-environment opt-in. This section describes those source changes. **It is not included in Server 20260903, and does not establish production performance or deployment acceptance.** The August 30 analysis below remains a historical design record.
 
@@ -306,6 +318,13 @@ Every page still rescans durable state: total enumeration cost grows with both s
 A September 16 temporary Docker Desktop arm64 run used two nodes, four APFS-backed bind volumes and 11,000 uploads across two buckets, while other local validation was running. One 1,000-entry page for the 10,000-upload target bucket took 18.7 seconds; two concurrent requests returned retryable `SlowDownRead` responses after about 25–27 seconds. These observations do not meet the provisional five-second page target and are not an isolated SSD benchmark. Capacity and foreground-load acceptance remain open; the bounded scanner must not be advertised as a large-scale performance fix.
 
 ## Historical: August 30 analysis and proposal {#analysis-20260830}
+
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The early proposals, recommendation and migration gates below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). They remain only as historical reasoning; their option numbers, capability advertisement, drain estimate and enablement advice do not define the implementation now on main.
+>
+> **中文：** 以下早期分析、推荐方案和迁移门槛已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。这里保留原始思考供追溯；其中的方案编号、能力广播、排空估算和启用建议均不是本次主干实现的要求。
 
 > **Archived analysis (2026-08-30):** “current”, “recommended”, option numbers and gate language below refer to that review and proposal. For the unreleased candidate, use the [October 17 decision](#decision-20261017); for Server 20260916, use its [dated contract](#implementation-20260916). The old writer-upgrade/drain gate is not the candidate's prerequisite. Capability advertisement and the one-day drain estimate were proposals, not current guarantees.
 
