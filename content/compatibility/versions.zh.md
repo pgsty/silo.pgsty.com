@@ -16,7 +16,7 @@ icon: fa-solid fa-code-branch
 >
 > **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
 
-**公开发布状态核验于 2026-10-17。** SILO 的四个组件独立发布。依赖更新合入主分支，不会改变已经发布的二进制或镜像。
+**公开发布状态核验于 2026-10-18。** SILO 的四个组件独立发布。依赖更新合入主分支，不会改变已经发布的二进制或镜像。
 
 ## 已发布组件 {#published}
 
@@ -25,15 +25,19 @@ icon: fa-solid fa-code-branch
 | Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | Go 1.27.1；pkg v3.14.1；上游 SDK `32e1f32cb176`；mcli 20260916；内嵌 Console v2.4.1，源码 `1360e26d976d` |
 | <span style="white-space:nowrap">独立<br>Console</span> | [v2.4.2](https://github.com/pgsty/silo-console/releases/tag/v2.4.2) | Go 1.27.2；pkg v3.14.2；mcli 20261018；上游 SDK v7.4.1；正确返回桶版本控制错误；Docker amd64/arm64 镜像已公开 |
 | mcli | [20261018](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z) | Go 1.27.2；pkg v3.14.2；上游 SDK v7.4.1；软件包版本 `20261018000000.0.0`；Docker amd64/arm64 镜像已公开 |
-| 共享 pkg | [v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2) | 独立模块路径 `github.com/pgsty/silo-pkg/v3`；SDK v7.4.1；go-jose v4.1.6；LDAP v3.4.15；Go 1.26 库最低要求 |
+| 共享 pkg | [v3.14.3](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.3) | 加速 admin action 分类，保持策略行为不变；依赖与 v3.14.2 相同；Go 1.26 库最低要求 |
 
 发布说明：[Server 20260916](/zh/blog/release/silo-20260916/)、
 [Console v2.4.2](/zh/blog/release/console-2.4.2/)、
-[mcli 20261018](/zh/blog/release/mcli-20261018/)、[pkg v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2)。
+[mcli 20261018](/zh/blog/release/mcli-20261018/)、[pkg v3.14.3](/zh/blog/release/pkg-3.14.3/)。
 内嵌部署需要在 Server 构建中显式选择 Console 与 MC。
 软件包仓库镜像可能晚于 GitHub 更新；[下载页](/zh/download/)直接链接已发布的制品。
 
 **独立 Console 镜像：** `docker.io/pgsty/silo-console:v2.4.2` 已通过 Linux amd64/arm64 匿名拉取、签名及来源证明检查，摘要为 `sha256:4cf47061e0d2f249df3c1cd2a939966ff3c69cc3cf7d10a7b1b39d5c110ae999`。
+
+[pkg v3.14.3 的策略优化](/zh/blog/release/pkg-3.14.3/)保持 API、策略格式和授权行为不变。
+Server 构建可以采用新版包，已发布的 mcli 和独立 Console 继续使用 v3.14.2。
+现有二进制和 Server 草稿在重新构建前，仍使用下文记录的依赖。
 
 ## Server 待发布版本 {#october-release}
 
