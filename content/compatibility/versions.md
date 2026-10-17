@@ -183,14 +183,15 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
   design. The three-site evidence for the purge repairs came from a combined
   build, not from the final main; see the
   [design record](/blog/design/replication-reliability/#third-round-limits).
-- **Listing during rolling restarts:** with `8d06424b1` included, a four-node
-  rolling restart under concurrent overwrites returned 2,624 of 27,966
-  successful LISTs with one to four readable keys missing; steady state
-  returned 0 of 20,000. The internal cause is not bound;
-  [#218](https://github.com/pgsty/silo/issues/218) tracks the diagnostic
-  capture and contract decision. Do not run destination-deleting sync tools
-  against listings taken during a rolling restart; see the
-  [design record](/blog/design/list-null-version-quorum/#boundary).
+- **Listing during rolling restarts:** [#239](https://github.com/pgsty/silo/pull/239)
+  carries the follow-up to [#218](https://github.com/pgsty/silo/issues/218): confirm
+  eligible unresolved latest-object entries, distinguish deletion from read
+  failure and preserve terminal errors through pagination. It adds no disk
+  format, client parameter or migration switch. The [current design and
+  acceptance limits](/blog/design/listing-recovery-lock-cost/) supersede the
+  earlier investigation guidance. Until running a release that contains this
+  repair, retain the warning against destination-deleting synchronization
+  during rolling restarts. Source integration does not update installed binaries.
 - **Pool migration tags:** `fced86303` has unit and race coverage; the
   post-repair eight-node rebalance/decommission acceptance was not completed.
   Tags dropped by earlier migrations must be audited, not assumed.

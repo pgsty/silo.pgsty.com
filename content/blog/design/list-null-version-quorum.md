@@ -12,6 +12,13 @@ draft: false
 url: "/blog/design/list-null-version-quorum/"
 ---
 
+> [!WARNING]
+> **历史 LIST 设计已由新决策覆盖 · Earlier LIST design superseded (2026-10-17)**
+>
+> **English:** The investigation below is retained as historical evidence. Its current-design and pending-work guidance is superseded by the [latest LIST recovery decision (English)](https://silo.pgsty.com/blog/design/listing-recovery-lock-cost/). Refer to that decision for the final scope, compatibility, costs and acceptance limits. This does not change older binaries or announce a production release.
+>
+> **中文：** 下文保留历史调查证据；其中关于当前方案和待办的说明已被新设计覆盖，请参考[最新 LIST 恢复设计决策（中文）](https://silo.pgsty.com/zh/blog/design/listing-recovery-lock-cost/)，以了解最终范围、兼容性、代价和验收边界。这不改变旧二进制行为，也不是生产发布公告。
+
 > **Publication update, 2026-09-20:** The null-version quorum repair shipped in [Server 20260916](/blog/release/silo-20260916/). The rolling-restart limitation tracked in [#218](https://github.com/pgsty/silo/issues/218) remains open. The dated investigation and validation record below retains its original scope.
 
 This record covers the listing omission investigated on 2026-09-16: an unversioned bucket under concurrent overwrites returned HTTP 200 listings that lacked keys the same endpoint could still GET. It describes the confirmed mechanism, the narrow repair in commit [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1), what that repair proves, and the counterexample that remains open in [#218](https://github.com/pgsty/silo/issues/218).

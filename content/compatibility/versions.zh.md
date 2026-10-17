@@ -126,7 +126,7 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 - **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。源码修复不会自动修复旧状态。
 - **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 单独验收最终制品与多进程栈，发布制品和实际生产升级分别验收。
 - **多站删除标记收敛：** `254b19ac0` 的源端复核覆盖不了已经在网络上在途、或由另一站点重放的创建；多数确认的清除之后崩溃留下的少数标记副本，也没有证明持久的清理责任人。[#217](https://github.com/pgsty/silo/issues/217) 跟踪接收端方案。清除修复的三站证据来自组合构建，不是最终 main；见[设计记录](/zh/blog/design/replication-reliability/#third-round-limits)。
-- **滚动重启期间的列举：** 在包含 `8d06424b1` 的构建上，四节点滚动重启叠加并发覆盖写时，27,966 次成功 LIST 中有 2,624 次少了一到四个可读的 key；稳态 20,000 次为零。内部原因尚未绑定，[#218](https://github.com/pgsty/silo/issues/218) 跟踪取证与契约裁决。滚动重启期间不要用会删除目标端对象的同步工具；见[设计记录](/zh/blog/design/list-null-version-quorum/#boundary)。
+- **滚动重启期间的列举：** [#239](https://github.com/pgsty/silo/pull/239) 承接 [#218](https://github.com/pgsty/silo/issues/218)，对符合条件的最新对象分歧进行确认，区分真实删除与读取故障，并把最终错误传递到分页响应。不增加磁盘格式、客户端参数或迁移开关；[最新设计与验收边界](/zh/blog/design/listing-recovery-lock-cost/)已覆盖早期调查中的方案说明。在运行包含此修复的正式版本之前，仍应避免在滚动重启期间使用会删除目标端对象的同步方式。源码合并不会自动更新已安装的二进制。
 - **跨池迁移标签：** `fced86303` 有单元与 race 覆盖，修复后的八节点 rebalance/decommission 验收尚未完成。此前迁移丢失的标签需要审计，不能默认仍在。
 - **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 保留开放，继续跟踪容量、发布验收和迟到创建写入边界。PR #198 已修复持久发现、全局分页与静态残留取消确认，但没有新增创建屏障，也没有完成大规模扫描验收。临时 10,000 上传试验未达到暂定的单页五秒目标，见[设计记录](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
 
