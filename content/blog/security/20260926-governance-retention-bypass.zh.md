@@ -2,16 +2,23 @@
 title: "SN-2026-015：PutObjectRetention 授权绕过"
 linkTitle: "SN-2026-015：保留期授权"
 date: 2026-09-26
+lastmod: 2026-10-15
 author: "冯若航"
-description: "PutObjectRetention 以 governance bypass 请求头代替授权。影响范围、根因、实测与修复设计。"
+description: "SN-2026-015 与 SN-2026-016：对象锁授权与覆写修复，首次修复于 Server 20261015，附升级要求与验证。"
 tags: [安全, Object Lock, IAM, silo]
 weight: 1
 url: "/zh/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**2026-10-14 状态：修复候选已实现，尚无修复发行。** 所有已发布的 Server 版本都受影响，包括
-最新的 `RELEASE.2026-09-16T00-00-00Z`。本次核验的 main 提交
-[`4f62e8f19`](https://github.com/pgsty/silo/commit/4f62e8f19) 仍包含缺陷。
+**首次修复版本：[RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z)（2026-10-15）。**
+该版包含 [PR #234](https://github.com/pgsty/silo/pull/234) 与
+[PR #235](https://github.com/pgsty/silo/pull/235) 对 **SN-2026-015 与 SN-2026-016** 的完整修复。
+Server `RELEASE.2026-09-16T00-00-00Z` 和此前实测的 `RELEASE.2026-09-03T13-18-01Z` 均受影响；
+更早的 SILO 发行版均未包含这些修复。请升级全部 Server 进程及所有接受 S3 写入的复制站点。
+更新 mcli、pkg 或独立 Console 不能修复 Server。制品身份与验收结果见[发布说明](/zh/blog/release/silo-20261015/)。
+
+下文根因分析与复现结果描述的是修复前的受影响版本。
+
 本文聚焦 **`SN-2026-015`（`PutObjectRetention` 保留期写入路径的授权绕过，F1–F3）**；
 评审期间发现的配套写路径问题 **`SN-2026-016`（客户端指定 `versionId` 原地改写既有版本及写路径对象锁绕过，F4）** 与两项问题的完整修复设计、有效性证明及副作用权衡，见配套设计文档
 [《SN-2026-015 与 SN-2026-016：对象锁保留期绕过与指定版本原地覆写修复设计》](/zh/blog/design/governance-retention-bypass-repair/)。
@@ -38,7 +45,7 @@ F2 由 szopi00 以
 [GHSA-67mv-7hc9-wj88](https://github.com/pgsty/pigsty/security/advisories/GHSA-67mv-7hc9-wj88)
 报告。报告提交到了 Pigsty 仓库，因为 `pgsty/silo` 当时没有开启私密漏洞报告。
 F1 与 F3 是我们在设计修复、评审设计的过程中发现的。`SN-2026-015` 是暂定的台账编号。
-F1 只需要一个有效凭据，因此我们把整体评为 **High**。尚未申请 CVE。
+F1 只需要一个有效凭据，因此我们把整体评为 **High**。SN 是 SILO 公告编号，不是 CVE 编号。
 
 ## 应有语义 {#semantics}
 
@@ -146,7 +153,8 @@ return ErrAccessDenied
   `checkRequestAuthType(..., PutObjectRetentionAction, ...)`，堵住了 F1，F2 与 F3 仍在。
 - 上游 [#21103](https://github.com/minio/minio/pull/21103)（`8c7097528`，
   MinIO `RELEASE.2025-04-03T14-56-28Z`）重做签名校验时，把入口检查换成了
-  `authenticateRequest`，F1 随之回归。SILO 分叉于此之后，所有 SILO 发布三者俱在。
+  `authenticateRequest`，F1 随之回归。SILO 分叉于此之后，继承了这三个缺陷；
+  `RELEASE.2026-10-15T00-00-00Z` 之前的发行版均未包含 SILO 的修复。
 
 ## 修复设计 {#design}
 
@@ -247,7 +255,7 @@ case objectlock.RetGovernance: // 保留期尚未到期
 - 目前 `PutObjectRetention` 不求值基于现有对象标签的条件（`s3:ExistingObjectTag/<key>`），
   本设计不改变这一点。
 
-## 拟议修复的兼容性 {#compatibility}
+## 修复的兼容性 {#compatibility}
 
 - 持有 `s3:PutObjectRetention` 的调用者没有变化，只有削弱 GOVERNANCE 时现在还需要
   `s3:BypassGovernanceRetention`。
@@ -259,9 +267,9 @@ case objectlock.RetGovernance: // 保留期尚未到期
   不经过这个处理器。已修复站点不会复查未修复对端已经接受的变更。
   对复制桶而言，所有接受 S3 写入的站点都升级之后，这一保证才成立。
 
-## 测试 {#tests}
+## 回归要求 {#tests}
 
-测试在处理器层进行，使用真实 IAM 子系统，覆盖[判定表](#decision-table)每一行，另加：
+处理器层的回归要求使用真实 IAM 子系统，覆盖[判定表](#decision-table)每一行，另加：
 
 - F1，分别在未修复构建与修复后构建上：无任何授权的主体、挂显式 Deny 的主体，
   尝试清除、GOVERNANCE→COMPLIANCE、新建 COMPLIANCE，分别带与不带请求头、
@@ -275,14 +283,16 @@ case objectlock.RetGovernance: // 保留期尚未到期
   从响应上无法区分是哪一种。
 - 未到期 COMPLIANCE：缩短与改模式仍被拒绝，响应不变。
 
-## 修复发布前的缓解措施 {#mitigation}
+## 升级前的缓解措施 {#mitigation}
 
-F1 无法用 IAM 策略挡住，因为服务端在接受请求前不求值任何策略。在修复发布之前：
+请升级到 `RELEASE.2026-10-15T00-00-00Z` 或更新版本。以下措施仅适用于仍在运行受影响 Server 的阶段，
+只能限制 SN-2026-015 保留期写入路径，不能替代 SN-2026-016 写路径的完整修复。
+受影响 Server 上的 F1 无法用 IAM 策略挡住，因为服务端在接受请求前不求值任何策略：
 
 - 视所有能向该部署签名请求的凭据，都能在所有启用锁的桶中清除 GOVERNANCE 保留期、
   加上 COMPLIANCE 保留期。不要把凭据发给你不愿赋予这种能力的一方。
-- 需要对这类主体保证保留期时，使用 COMPLIANCE 模式：F1 能新建 COMPLIANCE 保留期，
-  但不能清除或缩短它。
+- COMPLIANCE 能阻止 F1 通过 `PutObjectRetention` 清除或缩短已有保留期，
+  但无法挡住受影响 Server 上独立的 SN-2026-016 覆写路径，仍须升级。
 - 如果 Server 前面有反向代理，可以拒绝来自不受信客户端、带
   `x-amz-bypass-governance-retention` 的 `PUT ?retention` 请求。
   拒绝比剥掉请求头更好，因为已签名的请求头删掉后签名就会失效。
@@ -293,10 +303,10 @@ F1 无法用 IAM 策略挡住，因为服务端在接受请求前不求值任何
   请排查带 `x-amz-bypass-governance-retention` 的 `PutObjectRetention` 请求，
   并检查版本上是否出现了意料之外的 COMPLIANCE 保留期。
 
-## 交付计划 {#delivery}
+## 交付状态 {#delivery}
 
-1. 本设计先经对抗性评审，然后提交带上述测试的 Server 补丁。
-2. 发布包含修复的 Server，然后在台账登记 `SN-2026-015` 的修复提交与首个包含版本。
-3. 在 GHSA-67mv-7hc9-wj88 回复修复情况、扩大后的范围并致谢，然后申请 CVE。
-4. 在 `pgsty/silo` 开启私密漏洞报告。
-5. 按尽力而为原则通知上游 MinIO：F1 随 #21103 在上游回归。
+修复通过 [PR #234](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与
+[PR #235](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）合入，
+首次修复发行是 [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z)。
+现有 Object Lock race 回归已作为发行工作流的前置门禁。
+[发布说明](/zh/blog/release/silo-20261015/#acceptance)记录验收后的源码、二进制、安装包与 Docker 镜像身份。

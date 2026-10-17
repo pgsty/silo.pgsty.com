@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-batch-framework-replicate-job"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 > [!NOTE]
 > **新增: MinIO**
@@ -147,7 +147,7 @@ MinIO 批处理框架允许您使用 YAML 格式的作业定义文件（“批�
 
 您可以在 [replicate](/zh/reference/minio-mc/mc-batch-generate/#minio-batch-job-types) 作业配置中修改压缩设置。
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 ## 复制批处理作业参考 {#minio-batch-framework-replicate-job-ref}
 

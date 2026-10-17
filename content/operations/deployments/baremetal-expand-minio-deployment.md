@@ -177,7 +177,7 @@ This tutorial assumes all hosts running MinIO use a [recommended Linux operating
 
 All hosts in the deployment should run with matching [software configurations](/operations/checklists/software/#minio-software-checklists).
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## Expand a Distributed MinIO Deployment {#expand-minio-distributed-baremetal}
 

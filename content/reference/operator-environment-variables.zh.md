@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: false
 ---
 
-<a id="minio-operator"></a>
+<a id="minio-operator" data-td-print-local></a>
 <a id="minio-operator-envvars"></a>
 
 [MinIO Operator](/zh/operations/deployments/kubernetes/#minio-operator-installation) 在启动期间使用以下环境变量来设置配置项。 请在 `minio-operator` 容器中配置这些变量。

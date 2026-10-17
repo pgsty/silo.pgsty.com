@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-server-envvar-external-identity-management-plugin"></a>
 
 本页介绍如何通过 MinIO Identity Management Plugin 启用外部身份管理的相关设置。 有关如何使用这些设置的教程，请参阅 [MinIO External Identity Management Plugin](/zh/administration/identity-access-management/pluggable-authentication/#minio-external-identity-management-plugin)。

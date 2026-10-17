@@ -8,7 +8,7 @@ math: true
 ---
 
 <a id="minio-server-limits"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页列出了适用于 MinIO 的阈值与限制。
 

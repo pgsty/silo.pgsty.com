@@ -1,1 +1,2 @@
-{{- .Site.Home.Content -}}
+{{- /* Render shared Markdown in the including page and output format. */ -}}
+{{- .Page.RenderString (dict "display" "block") .Site.Home.RawContent -}}

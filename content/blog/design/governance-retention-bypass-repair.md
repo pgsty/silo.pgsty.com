@@ -1,11 +1,12 @@
 ---
 title: "Object Lock Retention Bypass and Version-Overwrite Repair Design (SN-2026-015 / SN-2026-016)"
 date: 2026-10-14
+lastmod: 2026-10-15
 summary: "Report verification, Git provenance, entry and write-lock defense-in-depth design, fail-closed preflight hardening, and adversarial trade-off evaluation for SN-2026-015 and SN-2026-016."
 tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 ---
 
-**Status on 2026-10-14:** The base repair was merged into `main` through [PR #234](https://github.com/pgsty/silo/pull/234), merge commit `14042b5aa`. [PR #235](https://github.com/pgsty/silo/pull/235) adds fail-closed preflight hardening, four adversarial regressions and the Object Lock CI race gate. No published release contains these repairs yet; `RELEASE.2026-09-16T00-00-00Z` remains affected.
+**Status on 2026-10-15:** The complete repair in [PR #234](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and [PR #235](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`) first shipped in [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z). The previously published `RELEASE.2026-09-16T00-00-00Z` remains affected. See the [advisory](/blog/security/20260926-governance-retention-bypass/) and [release notes](/blog/release/silo-20261015/) for upgrade requirements and artifact acceptance.
 
 This document records the verification, Git provenance, repair design, critical-path evaluation, and adversarial candidate trade-offs for two Object Lock (WORM) security vulnerabilities identified through external reports and an internal write-path audit: **`SN-2026-015` (`PutObjectRetention` bypass header authorization and condition-key short-circuit)** and **`SN-2026-016` (version-addressed write overwrite bypass and write-path lock gaps)**.
 

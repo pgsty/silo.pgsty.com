@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-support-encryption"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 说明 {#id3}
 
@@ -31,7 +31,7 @@ mc: Even with the decryption key, data stored with encryption cannot be accessed
 
 如输出所示，MinIO 只会显示这一次加密密钥，之后将无法再次显示或恢复。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 解密 {#minio-support-decryption}
 

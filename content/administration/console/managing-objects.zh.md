@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-console-managing-objects"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 你可以使用 MinIO Console 执行 MinIO 提供的多种存储桶和对象管理及交互操作。 根据已认证用户的权限和 IAM 策略，你可以：
 
@@ -15,7 +15,7 @@ upstream_modified: true
 - [浏览、创建和管理存储桶](#minio-console-buckets)。
 - [创建或监控远程层](#minio-console-tiers)，以支持对象转换规则。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 对象浏览器 {#minio-console-object-browser}
 
@@ -68,7 +68,7 @@ Console 会明确提示原生下载交接，此后请在浏览器下载管理器
 详见[分享边界](/zh/reference/minio-server/settings/console/#object-sharing)。
 
 <a id="minio-console-buckets"></a>
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 存储桶 {#minio-console-admin-buckets}
 
@@ -113,7 +113,7 @@ MinIO 不限制单个部署允许创建的存储桶总数。 不过，作为通�
 - 在 **Access** 部分通过列出对该存储桶有访问权限的 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 和 [用户](/zh/administration/identity-access-management/minio-user-management/#minio-users) 来审查安全设置。
 - 在 **Anonymous** 部分管理未认证用户可用于读取或写入对象的前缀规则，以妥善保护匿名访问。
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 ## 层 {#minio-console-tiers}
 

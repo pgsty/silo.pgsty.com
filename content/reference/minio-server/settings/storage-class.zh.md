@@ -9,7 +9,7 @@ math: true
 
 <a id="minio-ec-storage-class"></a>
 <a id="minio-server-envvar-storage-class"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页介绍用于配置写入 MinIO 集群对象时所使用 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) [校验](/zh/operations/concepts/erasure-coding/#minio-ec-parity) 的相关设置。 这会影响 MinIO 如何使用驱动器空间，以及 MinIO 如何在驱动器丢失或类似问题发生时恢复已存储对象。
 
@@ -27,7 +27,7 @@ math: true
 >
 > 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 标准存储类 {#minio-ec-storage-class-standard}
 

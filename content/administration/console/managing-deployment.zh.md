@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-console-managing-deployment"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 你可以使用 MinIO Console 执行 MinIO 提供的多种部署监控与管理功能，例如：
 
@@ -23,7 +23,7 @@ upstream_modified: true
 >
 > 它与 MinIO Kubernetes Operator Console 相互独立，二者并不相同；后者已在 Operator 6.0.0 起废弃并移除。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 监控 {#minio-console-monitoring}
 
@@ -72,7 +72,7 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 
 **Encryption** 部分允许你查看已配置 [Key Encryption Service](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) 提供方的状态和指标。
 
-<a id="id10"></a>
+<a id="id10" data-td-print-local></a>
 
 ## 事件 {#minio-console-notifications}
 
@@ -91,7 +91,7 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 
 你可以从列表中选择现有通知目标，查看其详细信息或删除该目标。
 
-<a id="id11"></a>
+<a id="id11" data-td-print-local></a>
 
 ## 站点复制 {#minio-console-site-replication}
 

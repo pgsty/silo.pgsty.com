@@ -34,7 +34,7 @@ MinIO SSE-KMS 在功能上与 AWS S3 [使用存储在 AWS 中的 KMS 密钥进�
 - [HashiCorp Vault Keystore](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
-<a id="id2"></a>
+<a id="id2" data-td-print-local></a>
 
 ## 快速开始 {#minio-encryption-sse-kms-quickstart}
 
@@ -181,7 +181,7 @@ mc encrypt set sse-kms my-minio-sse-kms-key ALIAS/BUCKET
 
 对于每个要启用自动 SSE-KMS 加密的存储桶，请重复此步骤。 你可以按存储桶或存储桶前缀生成额外的密钥，从而将每个 <abbr title="外部密钥">EK</abbr> 的作用范围限制为对象子集。
 
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ## 安全擦除与锁定 {#minio-encryption-sse-kms-erasure-locking}
 
@@ -197,7 +197,7 @@ SSE-KMS 使用在存储桶自动加密设置中指定的 <abbr title="外部密�
 
 例如，假设一个 MinIO 部署为每个存储桶使用一个 <abbr title="外部密钥">EK</abbr>。 禁用其中一个 <abbr title="外部密钥">EK</abbr> 会使关联存储桶中的所有对象不可读，而不会影响其他存储桶。 如果该部署改为对所有对象和存储桶使用同一个 <abbr title="外部密钥">EK</abbr>，则禁用该 <abbr title="外部密钥">EK</abbr> 会使部署中的所有对象都不可读。
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 ## 加密过程 {#minio-encryption-sse-kms-encryption-process}
 

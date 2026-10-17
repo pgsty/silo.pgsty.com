@@ -25,7 +25,7 @@ curl -I https://minio.example.net:9000/minio/health/live
 
 单靠 healthcheck probe 无法判断某个 MinIO server 是否离线。 它只能判断当前主机是否能够访问该 server。 建议配置 Prometheus [告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)，使用 [metrics v3（英文详细表）](/operations/monitoring/metrics-and-alerts/#minio-available-v3-cluster-metrics) 的 `minio_cluster_health_nodes_offline_count` 或 [metrics v2（英文详细表）](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics) 的 `minio_cluster_nodes_offline_total`，以检测一个或多个 MinIO 节点是否离线。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 集群写仲裁 {#minio-cluster-write-quorum}
 

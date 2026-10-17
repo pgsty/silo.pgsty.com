@@ -13,7 +13,7 @@ upstream_modified: true
 <a id="minio-installation"></a>
 <a id="minio-mnmd"></a>
 <a id="deploy-minio-distributed"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本节介绍如何在 [Kubernetes](/zh/operations/deployments/kubernetes/#minio-kubernetes) 和 [裸机或虚拟化](/zh/operations/deployments/baremetal/#minio-baremetal) 基础设施上安装与管理采用 AGPLv3 许可的 Silo 对象存储服务端。
 

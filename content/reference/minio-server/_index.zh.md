@@ -9,7 +9,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 
 <a id="command-minio"></a>
 
@@ -25,7 +25,7 @@ minio server /mnt/disk{1...4}
 
 有关在 Kubernetes 环境中部署 [`minio server`](#command-minio.server) 的示例，请参阅 [部署 Silo Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant)。
 
-<a id="id2"></a>
+<a id="id2" data-td-print-local></a>
 <a id="minio-server-parameters"></a>
 
 ### 语法 {#command-minio.server}

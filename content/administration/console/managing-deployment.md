@@ -99,7 +99,7 @@ The **Site Replication** section provides an interface for adding and managing t
 
 Configuring site replication requires that only a single site have existing buckets or objects (if any).
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## Encryption {#minio-console-encryption}
 

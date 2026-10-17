@@ -10,7 +10,7 @@ upstream_modified: false
 <a id="network-encryption-tls"></a>
 <a id="minio-tls-user-generated"></a>
 <a id="minio-tls-third-party-ca"></a>
-<a id="minio-tls"></a>
+<a id="minio-tls" data-td-print-local></a>
 
 > [!NOTE]
 > **SSL is Deprecated**
@@ -187,7 +187,7 @@ Place the certificate file for each CA into the `/CAs` subdirectory. Ensure all 
 
 ### Supported TLS Cipher Suites {#supported-tls-cipher-suites}
 
-MinIO recommends generating ECDSA (e.g. [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)) or EdDSA (e.g. <a id="index-0"></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)) TLS private keys/certificates due to their lower computation requirements compared to RSA.
+MinIO recommends generating ECDSA (e.g. [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)) or EdDSA (e.g. <a id="index-0" data-td-print-local></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)) TLS private keys/certificates due to their lower computation requirements compared to RSA.
 
 MinIO supports the following TLS 1.2 and 1.3 cipher suites as supported by [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17.1:src/crypto/tls/cipher_suites.go;l=52). The lists mark recommended algorithms with a <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> icon:
 

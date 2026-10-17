@@ -114,10 +114,10 @@
   font-size: 0.7em;
 }
 
-/* 这两行里的链接没有其他视觉提示，给一条克制的下划线 */
+/* 正文内链接保留下划线；覆盖 OINK 全局 no-underline reset。 */
 .silo-footer__origin a,
 .silo-footer__legal a {
-  text-decoration: underline;
+  text-decoration: underline !important;
   text-decoration-color: var(--sf-line);
   text-underline-offset: 2px;
 }
@@ -206,3 +206,5 @@
  * 让页脚在两边的深色表现完全一致。 */
 [data-bs-theme='dark'] .silo-footer__tagline .ini-p { color: #4d89ba; }
 [data-bs-theme='dark'] .silo-footer__tagline .ini-s { color: #8b93a0; }
+
+.silo-footer__bottom a { text-decoration: underline !important; text-underline-offset: 0.15em; }

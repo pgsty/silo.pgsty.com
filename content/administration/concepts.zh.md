@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: false
 ---
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 以下核心概念是管理 MinIO 部署的基础，包括但不限于对象保留、加密和访问管理。
 
@@ -43,7 +43,7 @@ MinIO 支持 **Transport Layer Security** (TLS) 1.2 和 1.3，可对对象传输
 
 MinIO 支持多种 [服务器端加密](/zh/administration/server-side-encryption/#minio-encryption-overview) 方法。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 我可以在存储桶内按文件夹结构组织对象吗？ {#minio-admin-concepts-organize-objects}
 

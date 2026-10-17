@@ -40,7 +40,7 @@ MinIO 集群必须与 OIDC 提供方保持双向连通。
 
 本流程使用 [`mc`](/zh/reference/minio-mc/#command-mc) 对 MinIO 集群执行操作。 请在一台能够访问该集群网络的机器上安装 `mc`。 关于如何下载和安装 `mc`，请参见 `mc` [安装快速开始](/zh/reference/minio-mc/#mc-install)。 本流程假定已为 MinIO 集群配置 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 为 MinIO 配置 OpenID 外部身份管理 {#minio-external-identity-management-openid-configure}
 

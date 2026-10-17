@@ -8,7 +8,7 @@ upstream_modified: true
 
 <a id="poolstate"></a>
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-operator-crd"></a>
 
 MinIO Operator 会安装一个 [Custom Resource Definition (CRD)](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources)，用于描述 MinIO Tenant 对象。 Operator 使用该 CRD 在 Kubernetes 集群中对 Tenant 资源进行配置和管理。

@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-security-checklist"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 在为生产级分布式 MinIO 部署规划安全配置时，请使用以下检查清单。
 

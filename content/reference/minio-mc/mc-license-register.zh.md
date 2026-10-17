@@ -9,23 +9,23 @@ upstream_modified: true
 <a id="mc-license-register"></a>
 <a id="command-mc.support.register"></a>
 <a id="command-mc.license.register"></a>
-<a id="id2"></a>
-<a id="id3"></a>
+<a id="id2" data-td-print-local></a>
+<a id="id3" data-td-print-local></a>
 <a id="mc.license.register.ALIAS"></a>
 <a id="mc.license.register.-airgap"></a>
 <a id="mc.license.register.-api-key"></a>
 <a id="mc.license.register.-license"></a>
 <a id="mc.license.register.-name"></a>
-<a id="id4"></a>
-<a id="id5"></a>
+<a id="id4" data-td-print-local></a>
+<a id="id5" data-td-print-local></a>
 <a id="license"></a>
-<a id="id6"></a>
-<a id="id7"></a>
+<a id="id6" data-td-print-local></a>
+<a id="id7" data-td-print-local></a>
 <a id="minio-license-register-airgap"></a>
-<a id="id8"></a>
-<a id="id9"></a>
-<a id="id10"></a>
-<a id="id11"></a>
+<a id="id8" data-td-print-local></a>
+<a id="id9" data-td-print-local></a>
+<a id="id10" data-td-print-local></a>
+<a id="id11" data-td-print-local></a>
 
 ## 当前行为 {#description}
 

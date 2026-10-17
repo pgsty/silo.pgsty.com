@@ -8,14 +8,14 @@ upstream_modified: true
 
 <a id="mc-license-info"></a>
 <a id="command-mc.license.info"></a>
-<a id="id2"></a>
-<a id="id3"></a>
-<a id="minio1"></a>
-<a id="id4"></a>
-<a id="id5"></a>
+<a id="id2" data-td-print-local></a>
+<a id="id3" data-td-print-local></a>
+<a id="minio1" data-td-print-local></a>
+<a id="id4" data-td-print-local></a>
+<a id="id5" data-td-print-local></a>
 <a id="mc.license.info.ALIAS"></a>
 <a id="mc.license.info.-airgap"></a>
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ## 许可命令 {#description}
 

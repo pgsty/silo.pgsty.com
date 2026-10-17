@@ -73,7 +73,7 @@ url: "/zh/blog/design/complete-multipart-checksum-errors/"
 仍有较窄的差异：初始化未记录校验和却在完成时提供最终摘要，会返回 `BadDigest`；组合分片数与值不匹配使用相同描述；
 整对象校验和的 `-N` 后缀本身不作为分片数验证。这些是已记录的观察，不表示已分别建立公开 issue，也不代表完整 AWS 一致性。
 
-<span id="conclusion"></span>
+<span id="conclusion" data-td-print-local></span>
 <span id="contract"></span>
 <span id="design"></span>
 <span id="evidence"></span>
@@ -85,7 +85,7 @@ url: "/zh/blog/design/complete-multipart-checksum-errors/"
 <span id="precise-missing"></span>
 <span id="scope"></span>
 <span id="symmetric-validation"></span>
-<span id="tldr"></span>
+<span id="tldr" data-td-print-local></span>
 <span id="type-mismatch"></span>
 <span id="type-only-follow-up"></span>
 <span id="upstream"></span>

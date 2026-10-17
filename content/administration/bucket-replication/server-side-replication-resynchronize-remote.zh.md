@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-bucket-replication-resynchronize"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页中的步骤使用健康的复制远端来重新同步 MinIO 存储桶中的内容。重新同步可用于在副本配置下的 MinIO 部署发生部分或全部数据丢失后进行恢复。
 
@@ -26,7 +26,7 @@ upstream_modified: false
 >
 > 社区用户可以通过 [MinIO Community Slack](https://slack.min.io) 寻求支持。社区支持仅按尽力而为原则提供，不对响应速度提供 SLA。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 要求 {#minio-bucket-replication-serverside-resynchronize-requirements}
 

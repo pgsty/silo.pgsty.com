@@ -28,15 +28,20 @@ one and is tracked in the release notes rather than here.
 
 ## Current release boundary {#boundary}
 
-**Verified 2026-09-17.** The latest published Server is
-[`RELEASE.2026-09-16T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z).
-It includes [SN-2026-011](#sn-2026-011), [SN-2026-012](#sn-2026-012),
-[SN-2026-013](#sn-2026-013) and the embedded Console repair for
-[SN-2026-014](#sn-2026-014); Server 20260903 lacks these repairs.
-The standalone Console fix is in v2.4.1. Upgrade the component serving the
-affected interface: updating mcli, pkg or a standalone Console does not patch
-an installed Server. See the [component matrix](/compatibility/versions/)
-and [complete release notes](/blog/release/silo-20260916/) for identities and upgrade requirements.
+**Verified 2026-10-15.** The latest published Server is
+[RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z),
+the first release containing [SN-2026-015](#sn-2026-015) and
+[SN-2026-016](#sn-2026-016). Server 20260916 and the earlier tested Server
+20260903 are affected; no earlier SILO release contains these repairs.
+Upgrade every Server process and every replication site that accepts S3 writes.
+Updating mcli, pkg or a standalone Console does not patch an installed Server.
+See the [component matrix](/compatibility/versions/) and
+[release notes](/blog/release/silo-20261015/) for identities and upgrade requirements.
+
+Server 20260916 first included [SN-2026-011](#sn-2026-011),
+[SN-2026-012](#sn-2026-012), [SN-2026-013](#sn-2026-013) and the embedded Console
+repair for [SN-2026-014](#sn-2026-014); Server 20260903 lacks these repairs.
+The standalone Console fix is in v2.4.1.
 
 ## Inherited upstream advisory baseline {#inherited}
 
@@ -75,6 +80,8 @@ patch.
 | [`SN-2026-012`](#sn-2026-012) | [`c4b5e1cb4`](https://github.com/pgsty/silo/commit/c4b5e1cb4), [#177](https://github.com/pgsty/silo/pull/177) | Header-only presigned payload hash verification | [Chronicle](/blog/security/20260916-release-hardening/#sn-2026-012) |
 | [`SN-2026-013`](#sn-2026-013) | [#191](https://github.com/pgsty/silo/pull/191), [#192](https://github.com/pgsty/silo/pull/192) | IAM revocation replay and recovery | [Design](/blog/design/iam-revocations/) · [Chronicle](/blog/security/20260916-release-hardening/#sn-2026-013) |
 | [`SN-2026-014`](#sn-2026-014) | [Console #56](https://github.com/pgsty/silo-console/pull/56), [Server #209](https://github.com/pgsty/silo/pull/209) | Anonymous shared-download proxy scope | [Chronicle](/blog/security/20260916-release-hardening/#sn-2026-014) · [Console v2.4.1](/blog/release/console-2.4.1/) |
+| [`SN-2026-015`](#sn-2026-015) | [#234](https://github.com/pgsty/silo/pull/234), [#235](https://github.com/pgsty/silo/pull/235); first released in [Server 20261015](/blog/release/silo-20261015/) | `PutObjectRetention` authorization and request-body condition keys | [Advisory](/blog/security/20260926-governance-retention-bypass/) |
+| [`SN-2026-016`](#sn-2026-016) | [#234](https://github.com/pgsty/silo/pull/234), [#235](https://github.com/pgsty/silo/pull/235); first released in [Server 20261015](/blog/release/silo-20261015/) | Version-addressed and in-place Object Lock overwrites | [Design](/blog/design/governance-retention-bypass-repair/#sn-2026-016) |
 
 Upgrade and compatibility notes for each entry follow. Entries whose full
 investigation is told in a chronicle article are summarized here; follow the
@@ -296,6 +303,14 @@ Console #56 limits forwarding to object-content GETs at the configured origin, r
 
 The standalone repair is published in **Console v2.4.1**. Server 20260916 embeds the repaired Console through #209; Server 20260903 still embeds an older Console. Upgrade the component that actually serves the UI; installing a standalone Console does not replace an embedded bundle. Until the serving Server has been upgraded, restrict access to the exposed Console proxy and review the configured origin's public endpoints. See the [chronicle](/blog/security/20260916-release-hardening/#sn-2026-014).
 
+### SN-2026-015 — Retention authorization bypass {#sn-2026-015}
+
+An authenticated caller could use the governance-bypass header to modify retention without `s3:PutObjectRetention`, weaken GOVERNANCE without the bypass permission, or bypass request-body condition-key Deny rules. Server 20261015 first requires `s3:PutObjectRetention` before object lookup and both explicit intent and `s3:BypassGovernanceRetention` when weakening active GOVERNANCE. Removing retention evaluates remaining days as zero. Existing COMPLIANCE protection remains enforced. See the [advisory](/blog/security/20260926-governance-retention-bypass/).
+
+### SN-2026-016 — Version-addressed and in-place overwrites {#sn-2026-016}
+
+Caller-selected write versions, directory `null` versions and persisted multipart targets could overwrite locked versions. Server 20261015 first requires replication trust for caller-selected version IDs and rechecks destination locks under the write lock, including legacy or recovered multipart uploads. Unreadable lock state fails closed. Upgrade every writer and every replication site accepting S3 writes; a fixed site does not reauthorize a change already accepted by an old peer. The upgrade does not restore overwritten data or prior retention. See the [repair and compatibility notes](/blog/design/governance-retention-bypass-repair/).
+
 ## Dependency security updates {#dependencies}
 
 Rows list the absorbed fix and the commit or release that first carried it.
@@ -335,3 +350,5 @@ This page is maintained from the ledger previously carried in the repository at
 (2026-09-16). Release status statements are calibrated against the
 [component matrix](/compatibility/versions/); each fix's investigation, review,
 and verification detail lives in the linked chronicle article or release note.
+
+The Object Lock release boundary was updated for Server 20261015, the first release containing PR #234 and PR #235.

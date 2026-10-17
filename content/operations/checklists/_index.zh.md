@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: false
 ---
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 以下检查清单为验证 MinIO 部署是否具备生产就绪条件提供高层指导。
 

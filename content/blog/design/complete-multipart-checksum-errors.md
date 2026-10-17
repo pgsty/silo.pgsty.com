@@ -90,7 +90,7 @@ mismatches share one description; a `-N` suffix on a full-object checksum is
 not itself validated as a part count. These are documented observations, not
 claims of separately filed public issues or complete AWS parity.
 
-<span id="conclusion"></span>
+<span id="conclusion" data-td-print-local></span>
 <span id="contract"></span>
 <span id="design"></span>
 <span id="evidence"></span>
@@ -102,7 +102,7 @@ claims of separately filed public issues or complete AWS parity.
 <span id="precise-missing"></span>
 <span id="scope"></span>
 <span id="symmetric-validation"></span>
-<span id="tldr"></span>
+<span id="tldr" data-td-print-local></span>
 <span id="type-mismatch"></span>
 <span id="type-only-follow-up"></span>
 <span id="upstream"></span>

@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="deploy-minio-container"></a>
 
 本页说明如何在支持容器化进程的操作系统上以容器方式部署 Silo。

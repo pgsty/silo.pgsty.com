@@ -8,7 +8,7 @@ upstream_modified: false
 ---
 
 <a id="minio-authentication-and-identity-management"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 要求客户端在每次发起新操作时同时完成认证与授权。
 

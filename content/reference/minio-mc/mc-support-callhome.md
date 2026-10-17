@@ -14,14 +14,14 @@ upstream_modified: true
 <a id="mc.support.callhome.enable"></a>
 <a id="mc.support.callhome.disable"></a>
 <a id="mc.support.callhome.status"></a>
-<a id="parameters"></a>
+<a id="parameters" data-td-print-local></a>
 <a id="mc.support.callhome.ALIAS"></a>
 <a id="mc.support.callhome.-diag"></a>
-<a id="examples"></a>
+<a id="examples" data-td-print-local></a>
 <a id="enable-callhome-reporting"></a>
 <a id="disable-callhome-reporting"></a>
 <a id="display-current-callhome-settings"></a>
-<a id="global-flags"></a>
+<a id="global-flags" data-td-print-local></a>
 
 ## Current behavior {#description}
 

@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-console"></a>
 
 MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具类似的功能。
@@ -71,7 +71,7 @@ MinIO Console 使用该服务器填充指标仪表板。</p><p>有关如何配�
   </tbody>
 </table>
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ### 静态端口分配与动态端口分配 {#minio-console-port-assignment}
 
@@ -90,7 +90,7 @@ minio server https://minio-{1...4}.example.net/mnt/drive-{1...4} \
 
 您还必须确保主机系统防火墙允许访问已配置的 Console 端口。
 
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ## 登录 {#minio-console-play-login}
 

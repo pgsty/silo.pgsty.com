@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: false
 ---
 
-<a id="minio-operator"></a>
+<a id="minio-operator" data-td-print-local></a>
 <a id="minio-k8s-upgrade-minio-operator"></a>
 
 你可以随时升级 MinIO Operator，而不会影响其管理的 MinIO Tenant。

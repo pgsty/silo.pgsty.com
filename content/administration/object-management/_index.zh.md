@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 - [Versioning overview](https://youtu.be/XGOiwV6Cbuk?ref=docs)
 - [Object locking and retention overview](https://youtu.be/Hk9Z-sltUu8?ref=docs)
@@ -142,7 +142,7 @@ MinIO 对于给定部署中的存储桶、对象或前缀数量没有硬性的 [
 
 有关更完整的文档，请参见 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 对象标签 {#minio-object-tagging}
 

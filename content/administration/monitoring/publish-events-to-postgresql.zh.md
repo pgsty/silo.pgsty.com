@@ -150,7 +150,7 @@ SQS ARNs: arn:minio:sqs::primary:postgresql
 >
 > **使用 jq 从 JSON 中解析该值**
 >
-> 1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq"></a>
+> 1. [安装 jq](https://stedolan.github.io/jq/)<a id="jq" data-td-print-local></a>
 > 2. 复制并运行以下命令，将 `ALIAS` 替换为该部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
 >
 >    ```shell

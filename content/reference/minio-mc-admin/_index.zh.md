@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 
 <a id="command-mc.admin"></a>
 
@@ -118,7 +118,7 @@ MinIO PBAC 使用与 IAM 兼容的策略 JSON 文档来定义访问 MinIO 服务
   </tbody>
 </table>
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 安装 {#mc-admin-install}
 

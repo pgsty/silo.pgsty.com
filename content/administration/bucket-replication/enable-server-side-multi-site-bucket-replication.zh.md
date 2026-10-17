@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-bucket-replication-serverside-multi"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页中的过程用于在多个 MinIO 部署之间配置自动化的服务端存储桶复制。多站点 Active-Active 复制基于 [启用双向服务端存储桶复制](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 过程，并增加了额外注意事项，以确保所有站点上的复制行为可预测。
 
@@ -26,7 +26,7 @@ upstream_modified: false
 > - 使用带有 [`--state "disable"`](/zh/reference/minio-mc/mc-replicate-update/#mc.replicate.update.-state) 标志的 [`mc replicate update`](/zh/reference/minio-mc/mc-replicate-update/#command-mc.replicate.update) 命令禁用现有复制规则。
 > - 使用 [`mc replicate rm`](/zh/reference/minio-mc/mc-replicate-rm/#command-mc.replicate.rm) 命令删除现有复制规则。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 要求 {#minio-bucket-replication-serverside-multi-requirements}
 
@@ -100,7 +100,7 @@ upstream_modified: false
 >
 > [`mc replicate add`](/zh/reference/minio-mc/mc-replicate-add/#command-mc.replicate.add) 会自动创建所需的复制目标，因此不再需要使用已弃用的 `mc admin remote bucket add` 命令。 本过程仅记录该版本及之后的操作方式。
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 #### 1) 创建新的存储桶复制规则 {#minio-bucket-replication-multi-site-minio-cli-create-replication-rules}
 
@@ -136,7 +136,7 @@ mc replicate add ALIAS/BUCKET \
 - 在 `minio2` 部署上，为 `minio1` 创建一条规则，再为 `minio3` 单独创建另一条规则。
 - 在 `minio3` 部署上，为 `minio1` 创建一条规则，再为 `minio2` 单独创建另一条规则。
 
-<a id="id8"></a>
+<a id="id8" data-td-print-local></a>
 
 #### 2) 验证复制配置 {#minio-bucket-replication-multi-site-minio-cli-verify-replication-config}
 

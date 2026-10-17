@@ -10,7 +10,7 @@ upstream_modified: true
 <a id="tls"></a>
 <a id="minio-tls-user-generated"></a>
 <a id="minio-tls-third-party-ca"></a>
-<a id="minio-tls"></a>
+<a id="minio-tls" data-td-print-local></a>
 
 > [!NOTE]
 > **SSL 已弃用**
@@ -96,7 +96,7 @@ Operator 会将指定的 CA 放置到每个 MinIO Server pod 上，从而确保�
 
 如果 MinIO Server 无法将传入客户端的 TLS 证书签发者与任一可用 CA 匹配，则会将该连接视为无效并拒绝。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 裸金属上的 MinIO TLS {#minio-tls-baremetal}
 
@@ -185,7 +185,7 @@ mv myCA.crt /opt/minio/certs/CAs/
 
 ### 支持的 TLS Cipher Suite {#tls-cipher-suite}
 
-与 RSA 相比，MinIO 更推荐生成 ECDSA（例如 [NIST P-256 曲线](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)）或 EdDSA（例如 <a id="index-0"></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)）TLS 私钥/证书，因为它们的计算开销更低。
+与 RSA 相比，MinIO 更推荐生成 ECDSA（例如 [NIST P-256 曲线](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)）或 EdDSA（例如 <a id="index-0" data-td-print-local></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)）TLS 私钥/证书，因为它们的计算开销更低。
 
 MinIO 支持以下由 [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17.1:src/crypto/tls/cipher_suites.go;l=52) 支持的 TLS 1.2 和 TLS 1.3 cipher suite。列表中使用 <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 标记推荐算法：
 

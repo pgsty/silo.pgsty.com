@@ -33,7 +33,7 @@ MinIO SSE-S3 在功能上兼容 AWS S3 [Server-Side Encryption with Amazon S3-Ma
 - [HashiCorp Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 
-<a id="id2"></a>
+<a id="id2" data-td-print-local></a>
 
 ## 快速开始 {#minio-encryption-sse-s3-quickstart}
 
@@ -189,7 +189,7 @@ mc encrypt set sse-s3 ALIAS/BUCKET
 - 将 [`ALIAS`](/zh/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) 替换为已启用 SSE-S3 的 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`BUCKET`](/zh/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) 替换为你要启用自动 SSE-S3 的 存储桶或存储桶前缀的完整路径。
 
-<a id="id6"></a>
+<a id="id6" data-td-print-local></a>
 
 ## 安全擦除与锁定 {#minio-encryption-sse-s3-erasure-locking}
 
@@ -203,7 +203,7 @@ SSE-S3 使用服务器启动时通过 [`MINIO_KMS_KES_KEY_NAME`](/zh/reference/m
 - 哪些存储桶指定了自动 SSE-S3 加密，*以及*
 - 哪些写入操作请求了 SSE-S3 加密。
 
-<a id="id7"></a>
+<a id="id7" data-td-print-local></a>
 
 ## 加密过程 {#minio-encryption-sse-s3-encryption-process}
 

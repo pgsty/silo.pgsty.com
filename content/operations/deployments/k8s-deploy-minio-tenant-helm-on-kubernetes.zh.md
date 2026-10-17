@@ -40,7 +40,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 
 租户必须使用自己的命名空间，不能与其他租户共享命名空间。 此外，MinIO 强烈建议为租户使用专用命名空间，且该命名空间内不要运行其他应用。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 使用 Helm Charts 部署 Silo Tenant {#deploy-tenant-helm-repo}
 

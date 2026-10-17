@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-data-compression"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 概述 {#id3}
 
@@ -17,7 +17,7 @@ MinIO Server 支持对对象进行压缩，以减少磁盘使用量。 对象在
 
 为获得最佳效果，请参阅 MinIO 的 [推荐硬件配置](/zh/operations/checklists/hardware/#deploy-minio-distributed-recommendations)，或使用 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 与工程师直接协作分析压缩性能。
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ### 默认文件类型 {#minio-data-compression-default-types}
 
@@ -45,7 +45,7 @@ MinIO Server 支持对对象进行压缩，以减少磁盘使用量。 对象在
 >
 > 启用、禁用或更新某个部署的压缩设置时，不会修改现有对象。 新对象会根据其创建时生效的设置进行压缩。
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ### 排除的文件类型 {#minio-data-compression-excluded-types}
 
@@ -157,7 +157,7 @@ mc admin config set ALIAS compression enable=off
 
 现有的已压缩对象不会被修改。
 
-<a id="id10"></a>
+<a id="id10" data-td-print-local></a>
 
 ### 配置要压缩哪些对象 {#minio-data-compression-configure-objects}
 

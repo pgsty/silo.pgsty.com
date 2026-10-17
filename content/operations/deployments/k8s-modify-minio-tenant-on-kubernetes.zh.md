@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio-tenant"></a>
+<a id="minio-tenant" data-td-print-local></a>
 <a id="minio-k8s-modify-minio-tenant-security"></a>
 <a id="minio-k8s-modify-minio-tenant"></a>
 

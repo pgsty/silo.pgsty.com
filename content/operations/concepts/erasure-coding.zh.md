@@ -8,7 +8,7 @@ upstream_modified: true
 ---
 
 <a id="minio-erasure-coding"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 - [MinIO 纠删码概览](https://www.youtube.com/watch?v=QniHMNNmbfI)
 
@@ -18,7 +18,7 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 
 <a id="minio-ec-erasure-set"></a>
 <a id="minio-ec-basics"></a>
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 纠删码基础 {#minio-read-quorum}
 
@@ -120,7 +120,7 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 >
 > 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 纠删码校验与存储效率 {#minio-ec-parity}
 
@@ -134,7 +134,7 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 | `EC: 6` | 10 Tebibytes | 0.625 | 10 | 10 |
 | `EC: 8` | 8 Tebibytes | 0.500 | 8 | 9 |
 
-<a id="id5"></a>
+<a id="id5" data-td-print-local></a>
 
 ## 位腐化防护 {#minio-ec-bitrot}
 

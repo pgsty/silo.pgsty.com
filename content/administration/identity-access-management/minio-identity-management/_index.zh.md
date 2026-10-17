@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="minio-internal-idp"></a>
 
 MinIO 内置一个 IDentity Provider (IDP)，提供核心身份管理功能。 MinIO IDP 支持在部署中创建任意数量的长期有效用户，以支持客户端认证。

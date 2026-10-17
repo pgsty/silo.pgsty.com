@@ -2,17 +2,27 @@
 title: "SN-2026-015: PutObjectRetention Authorization Bypass"
 linkTitle: "SN-2026-015: Retention Authorization"
 date: 2026-09-26
+lastmod: 2026-10-15
 author: "Vonng"
-description: "PutObjectRetention trusts the governance-bypass header in place of authorization. Scope, root cause, verification and the proposed fix design."
+description: "SN-2026-015 and SN-2026-016: Object Lock authorization and overwrite repairs, first fixed in Server 20261015, with upgrade requirements and verification."
 tags: [Security, Object Lock, IAM, silo]
 weight: 1
 url: "/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**Status on 2026-10-14: fix candidate implemented; no fixed release yet.** Every published Server release is
-affected, including the latest `RELEASE.2026-09-16T00-00-00Z`. The inspected main
-commit [`4f62e8f19`](https://github.com/pgsty/silo/commit/4f62e8f19) still contains
-the defect.
+**First fixed release: [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z) (2026-10-15).**
+It contains the complete repairs for **SN-2026-015 and SN-2026-016**, merged through
+[PR #234](https://github.com/pgsty/silo/pull/234) and
+[PR #235](https://github.com/pgsty/silo/pull/235).
+Server `RELEASE.2026-09-16T00-00-00Z` and the earlier tested
+`RELEASE.2026-09-03T13-18-01Z` are affected; no earlier SILO release contains
+these repairs. Upgrade every Server process and every replication site that
+accepts S3 writes. Updating mcli, pkg or a standalone Console does not patch the
+Server. See the [release notes](/blog/release/silo-20261015/) for artifact identities
+and acceptance results.
+
+The analysis and reproduction below describe the affected versions before this fix.
+
 This advisory covers **`SN-2026-015` (`PutObjectRetention` authorization bypass on the retention-write path, F1–F3)**.
 The companion write-path issue discovered during design review — **`SN-2026-016` (caller-addressed `versionId` in-place overwrite and write-path Object Lock bypass, F4)** — along with the complete repair design, proof of effectiveness, and trade-off analysis for both issues, is documented in
 [SN-2026-015 & SN-2026-016: Object Lock Retention Bypass and Version-Addressed Overwrite Repair Design](/blog/design/governance-retention-bypass-repair/).
@@ -47,7 +57,7 @@ The report went to the Pigsty repository because private vulnerability
 reporting was disabled on `pgsty/silo`. We found F1 and F3 while designing the
 fix and reviewing that design. `SN-2026-015` is the provisional ledger
 identifier. We assess the combined issue as **High**, because F1 requires only
-a valid credential. A CVE has not been requested yet.
+a valid credential. The SN identifiers are SILO advisory identifiers, not CVEs.
 
 ## Expected semantics {#semantics}
 
@@ -170,7 +180,8 @@ return ErrAccessDenied
 - Upstream [#21103](https://github.com/minio/minio/pull/21103)
   (`8c7097528`, MinIO `RELEASE.2025-04-03T14-56-28Z`) replaced that entry check
   with `authenticateRequest` while reworking signature validation, and F1
-  returned. SILO forked after this change, so every SILO release has all three.
+  returned. SILO forked after this change and inherited all three defects;
+  releases before `RELEASE.2026-10-15T00-00-00Z` do not contain the SILO repair.
 
 ## Fix design {#design}
 
@@ -298,7 +309,7 @@ or 400 for such requests.
   evaluated for `PutObjectRetention` today. That limitation is unchanged by
   this design.
 
-## Compatibility of the proposed fix {#compatibility}
+## Compatibility of the fix {#compatibility}
 
 - Callers that hold `s3:PutObjectRetention` see no change, except that
   weakening GOVERNANCE now also requires `s3:BypassGovernanceRetention`.
@@ -314,9 +325,9 @@ or 400 for such requests.
   already accepted. Every site that accepts S3 writes must be upgraded before
   the guarantee holds for a replicated bucket.
 
-## Planned tests {#tests}
+## Regression requirements {#tests}
 
-Fix acceptance should run at handler level against a real IAM subsystem, covering
+The handler-level regression requirements use a real IAM subsystem, covering
 every row of the [decision table](#decision-table) and these cases:
 
 - F1 against an unpatched build and the fix: a principal with no grant, and one
@@ -336,17 +347,21 @@ every row of the [decision table](#decision-table) and these cases:
 - Unexpired COMPLIANCE: shortening and mode changes are still refused with the
   same response.
 
-## Mitigation before a fixed release {#mitigation}
+## Mitigation before upgrading {#mitigation}
 
-No IAM policy blocks F1, because the server evaluates no policy before
-accepting the request. Until the fix ships:
+Upgrade to `RELEASE.2026-10-15T00-00-00Z` or a later release. The following measures
+apply while an affected Server is still running. They limit the SN-2026-015
+retention-write path and do not replace the complete SN-2026-016 write-path
+repair. No IAM policy blocks F1 on an affected Server, because it evaluates no
+policy before accepting the request:
 
 - Treat every credential that can sign requests to the deployment as able to
   remove GOVERNANCE retention and to apply COMPLIANCE retention in every
   lock-enabled bucket. Do not issue credentials to parties you do not trust
   with that ability.
-- Where retention must hold against such principals, use COMPLIANCE mode. F1
-  can create COMPLIANCE retention but cannot remove or shorten it.
+- COMPLIANCE prevents F1 from removing or shortening existing retention through
+  `PutObjectRetention`. It does not protect an affected Server from the separate
+  SN-2026-016 overwrite paths; upgrading remains necessary.
 - If a reverse proxy sits in front of the Server, it can reject
   `PUT ?retention` requests that carry `x-amz-bypass-governance-retention`
   from untrusted clients. Rejecting works better than stripping the header,
@@ -362,13 +377,11 @@ accepting the request. Until the fix ships:
   `x-amz-bypass-governance-retention`. Also check for unexpected COMPLIANCE
   retention on versions.
 
-## Delivery plan {#delivery}
+## Delivery status {#delivery}
 
-1. Adversarial review of this design, then the Server patch with the tests
-   above.
-2. A Server release containing the fix, then a ledger entry for `SN-2026-015`
-   with the fixing commit and first release.
-3. A reply on GHSA-67mv-7hc9-wj88 with the fix, the widened scope and credit,
-   then a CVE request.
-4. Enable private vulnerability reporting on `pgsty/silo`.
-5. Notify upstream MinIO on a best-effort basis: F1 reappeared there with #21103.
+The repairs merged through [PR #234](https://github.com/pgsty/silo/pull/234)
+(`14042b5aa`) and [PR #235](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`).
+Their first fixed Server release is [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z).
+The existing Object Lock race regressions are a prerequisite for the release
+workflow. The [release notes](/blog/release/silo-20261015/#acceptance) record the
+accepted source, binaries, packages and Docker image identity.

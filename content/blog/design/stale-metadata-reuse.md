@@ -12,6 +12,8 @@ draft: false
 url: "/blog/design/stale-metadata-reuse/"
 ---
 
+**Release follow-up (2026-10-15):** This repair first shipped in [Server 20261015](/blog/release/silo-20261015/). The source acceptance below records the earlier pre-release verification.
+
 **Verified on 2026-10-15: merged on main, not yet in a published Server release.**
 [PR #233](https://github.com/pgsty/silo/pull/233) was merged as
 [`d94b3b3c9251`](https://github.com/pgsty/silo/commit/d94b3b3c9251af5a9dbdb2d178e892c4de75204a).

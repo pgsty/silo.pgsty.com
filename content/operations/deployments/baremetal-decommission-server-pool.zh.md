@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-decommissioning"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 支持从包含两个或更多 pool 的部署中退役并移除 [服务器池s](/zh/operations/concepts/#minio-intro-server-pool)。 执行退役前，至少必须保留一个具有足够可用空间的 pool，以接收被退役 pool 中的对象。
 
@@ -30,7 +30,7 @@ MinIO 支持从包含两个或更多 pool 的部署中退役并移除 [服务器
 >
 > 社区用户可以在 [MinIO Community Slack](https://slack.min.io) 寻求支持。 社区支持仅为 best-effort，不对响应速度提供任何 SLA。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 前提条件 {#minio-decommissioning-prereqs}
 
@@ -278,7 +278,7 @@ MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 
 
 部署重新上线后，使用 [`mc admin info`](/zh/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) 确认部署中所有剩余 server 的运行状态。
 
-<a id="id18"></a>
+<a id="id18" data-td-print-local></a>
 
 ## 退役多个 服务器池 {#minio-decommission-multiple-pools}
 

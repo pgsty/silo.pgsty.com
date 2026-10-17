@@ -68,7 +68,7 @@ are separate changes, also included in Server 20260903. In particular,
 <span id="algorithm-scope"></span>
 <span id="baseline"></span>
 <span id="before"></span>
-<span id="conclusion"></span>
+<span id="conclusion" data-td-print-local></span>
 <span id="decision"></span>
 <span id="evaluation"></span>
 <span id="field"></span>
@@ -78,5 +78,5 @@ are separate changes, also included in Server 20260903. In particular,
 <span id="review"></span>
 <span id="strengths"></span>
 <span id="tests"></span>
-<span id="tldr"></span>
+<span id="tldr" data-td-print-local></span>
 <span id="why-it-works"></span>

@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio-tenant"></a>
+<a id="minio-tenant" data-td-print-local></a>
 <a id="minio-k8s-upgrade-minio-tenant"></a>
 
 以下步骤用于使用 Kustomize 或 Helm 升级单个 Silo Tenant。请先在非生产 Tenant 中测试确切的服务端镜像、Operator/Chart 版本与回滚流程。

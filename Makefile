@@ -5,7 +5,7 @@ CHECK_PYTHON := .venv-check/bin/python
 .PHONY: dev serve build check test
 
 dev:
-	HUGO_MODULE_REPLACEMENTS='github.com/pgsty/oink -> $(abspath ../oink)' $(HUGO) server --renderToMemory
+	GOWORK=off HUGO_MODULE_WORKSPACE=off HUGO_MODULE_REPLACEMENTS='github.com/pgsty/oink -> $(abspath ../oink)' $(HUGO) server --renderToMemory
 
 serve:
 	$(HUGO) server --environment production --minify --disableFastRender --disableLiveReload

@@ -7,7 +7,7 @@ upstream_modified: true
 math: true
 ---
 
-<a id="minio"></a>
+<a id="minio" data-td-print-local></a>
 <a id="expand-minio-distributed"></a>
 
 Silo 支持通过添加新的[服务器池](/zh/operations/concepts/#minio-intro-server-pool)扩展现有分布式部署。每个 pool 都会增加集群的总可用存储容量。
@@ -25,7 +25,7 @@ Silo 支持通过添加新的[服务器池](/zh/operations/concepts/#minio-intro
 >
 > MinIO 不支持扩展 单机单盘 拓扑。
 
-<a id="id2"></a>
+<a id="id2" data-td-print-local></a>
 
 ## 前提条件 {#expand-minio-distributed-prereqs}
 
@@ -127,7 +127,7 @@ MinIO 要求每个 pool 都满足部署的 [纠删码](/zh/operations/concepts/e
 
 ## 注意事项 {#id9}
 
-<a id="id10"></a>
+<a id="id10" data-td-print-local></a>
 
 ### 写入文件 {#minio-writing-files}
 

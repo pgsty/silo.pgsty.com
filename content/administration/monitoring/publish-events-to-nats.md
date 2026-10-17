@@ -161,7 +161,7 @@ You must specify the ARN resource when configuring bucket notifications with the
 >
 > **Use jq to parse the JSON for the value**
 >
-> 1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq"></a>
+> 1. [Install jq](https://stedolan.github.io/jq/)<a id="install-jq" data-td-print-local></a>
 > 2. Copy and run the following command, replacing `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment.
 >
 >    ```shell

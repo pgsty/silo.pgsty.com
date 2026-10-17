@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-external-identity-management-plugin"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 概述 {#id3}
 

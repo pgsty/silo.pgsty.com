@@ -8,12 +8,12 @@ upstream_modified: true
 
 <a id="mc-license-info"></a>
 <a id="command-mc.license.info"></a>
-<a id="examples"></a>
+<a id="examples" data-td-print-local></a>
 <a id="display-the-current-license-for-a-deployment-with-alias-minio1"></a>
-<a id="parameters"></a>
+<a id="parameters" data-td-print-local></a>
 <a id="mc.license.info.ALIAS"></a>
 <a id="mc.license.info.-airgap"></a>
-<a id="global-flags"></a>
+<a id="global-flags" data-td-print-local></a>
 
 ## License commands {#description}
 

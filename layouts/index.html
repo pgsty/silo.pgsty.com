@@ -246,7 +246,7 @@
           <div class="module-visual">
             <a href="{{ relLangURL "compatibility/migration/" }}" class="code-plate migrate-plate" aria-label="{{ if $zh }}查看从 MinIO 迁移到 PGSTY SILO 的指南{{ else }}Read the MinIO to PGSTY SILO migration guide{{ end }}">
               <span class="code-plate-head"><span class="code-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="code-file">docker-compose.yml</span></span>
-              <pre class="code-body"><span class="c"># {{ if $zh }}从 MinIO 迁移到 PGSTY SILO{{ else }}Migrate from MinIO to PGSTY SILO{{ end }}</span>
+              <pre class="code-body" tabindex="0" role="region" aria-label="{{ if $zh }}迁移示例{{ else }}Migration example{{ end }}"><span class="c"># {{ if $zh }}从 MinIO 迁移到 PGSTY SILO{{ else }}Migrate from MinIO to PGSTY SILO{{ end }}</span>
 <span class="k">services</span>:
   <span class="k">minio</span>:
 <span class="del">-   image: minio/minio:latest</span>
@@ -308,22 +308,22 @@
       </div>
       <div class="dashboard-gallery-marquee" data-reveal>
         <div class="dashboard-gallery-track">
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-bucket-manage.webp" | relURL }}" data-alt="Bucket Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-iam.webp" | relURL }}" data-alt="Identity and Access Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-settings-site-replication.webp" | relURL }}" data-alt="Site Replication"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-overview.webp" | relURL }}" data-alt="SILO Overview Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-instance.webp" | relURL }}" data-alt="SILO Instance Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-disk.webp" | relURL }}" data-alt="SILO Disk Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-bucket-manage.webp" | relURL }}" data-alt="Bucket Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-iam.webp" | relURL }}" data-alt="Identity and Access Management"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-settings-site-replication.webp" | relURL }}" data-alt="Site Replication"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-overview.webp" | relURL }}" data-alt="SILO Overview Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-instance.webp" | relURL }}" data-alt="SILO Instance Dashboard"></a>
-          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-disk.webp" | relURL }}" data-alt="SILO Disk Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console" aria-label="SILO Console"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-bucket-manage.webp" | relURL }}" data-alt="Bucket Management" aria-label="Bucket Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-iam.webp" | relURL }}" data-alt="Identity and Access Management" aria-label="Identity and Access Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-settings-site-replication.webp" | relURL }}" data-alt="Site Replication" aria-label="Site Replication"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring" aria-label="Console Monitoring"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-overview.webp" | relURL }}" data-alt="SILO Overview Dashboard" aria-label="SILO Overview Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-instance.webp" | relURL }}" data-alt="SILO Instance Dashboard" aria-label="SILO Instance Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-disk.webp" | relURL }}" data-alt="SILO Disk Dashboard" aria-label="SILO Disk Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-object-browser.webp" | relURL }}" data-alt="SILO Console" aria-label="SILO Console"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-bucket-manage.webp" | relURL }}" data-alt="Bucket Management" aria-label="Bucket Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-iam.webp" | relURL }}" data-alt="Identity and Access Management" aria-label="Identity and Access Management"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-settings-site-replication.webp" | relURL }}" data-alt="Site Replication" aria-label="Site Replication"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "administration/minio-console/" }}" data-src="{{ "images/silo-console/console-metrics-simple.webp" | relURL }}" data-alt="Console Monitoring" aria-label="Console Monitoring"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-overview.webp" | relURL }}" data-alt="SILO Overview Dashboard" aria-label="SILO Overview Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-instance.webp" | relURL }}" data-alt="SILO Instance Dashboard" aria-label="SILO Instance Dashboard"></a>
+          <a class="dashboard-gallery-slide" href="{{ relLangURL "operations/monitoring/" }}" data-src="{{ "images/dashboard/minio-disk.webp" | relURL }}" data-alt="SILO Disk Dashboard" aria-label="SILO Disk Dashboard"></a>
         </div>
       </div>
     </section>

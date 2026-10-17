@@ -7,7 +7,7 @@ upstream_modified: false
 ---
 
 <a id="minio-server-envvar-metrics-logging"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 本页面介绍用于控制 MinIO 指标与日志相关行为的设置。 更多信息请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
 
@@ -54,7 +54,7 @@ upstream_modified: false
 - `public` MinIO 不要求抓取客户端对其请求进行认证。
 
 <a id="minio-server-envvar-logging-regular"></a>
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ## 服务器日志 {#minio-server-config-logging-regular}
 

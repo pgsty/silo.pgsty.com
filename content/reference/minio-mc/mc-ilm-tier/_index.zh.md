@@ -63,7 +63,7 @@ upstream_modified: false
   </tbody>
 </table>
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 ## 所需权限 {#minio-mc-ilm-tier-permissions}
 

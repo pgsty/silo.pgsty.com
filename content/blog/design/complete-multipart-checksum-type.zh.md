@@ -55,7 +55,7 @@ ETag 是独立字段，不能替代额外的 S3 校验和。
 <span id="algorithm-scope"></span>
 <span id="baseline"></span>
 <span id="before"></span>
-<span id="conclusion"></span>
+<span id="conclusion" data-td-print-local></span>
 <span id="decision"></span>
 <span id="evaluation"></span>
 <span id="field"></span>
@@ -65,5 +65,5 @@ ETag 是独立字段，不能替代额外的 S3 校验和。
 <span id="review"></span>
 <span id="strengths"></span>
 <span id="tests"></span>
-<span id="tldr"></span>
+<span id="tldr" data-td-print-local></span>
 <span id="why-it-works"></span>

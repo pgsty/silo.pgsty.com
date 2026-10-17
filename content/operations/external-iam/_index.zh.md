@@ -8,7 +8,7 @@ upstream_modified: false
 ---
 
 <a id="minio-external-identity-management"></a>
-<a id="id1"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO 支持通过以下 IDentity Providers (IDP) 对接多种外部身份管理器：
 
@@ -51,7 +51,7 @@ policy="readwrite_data,read_analytics,read_logs"
 
 MinIO 支持使用 Active Directory 或 LDAP (AD/LDAP) 服务对用户身份进行外部管理。 配置外部 IDentity Provider (IDP) 后，即可启用 Single-Sign On (SSO) 工作流，应用程序会先向外部 IDP 认证，再访问 MinIO。
 
-<a id="id3"></a>
+<a id="id3" data-td-print-local></a>
 
 ### 查询 Active Directory / LDAP 服务 {#minio-external-identity-management-ad-ldap-lookup-bind}
 
@@ -92,7 +92,7 @@ MinIO 默认采用 deny-by-default 行为，即未显式分配任何策略、也
 
 MinIO 提供 [内置策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy-built-in) 以满足基础访问控制需求。 你可以使用 [`mc admin policy create`](/zh/reference/minio-mc-admin/mc-admin-policy-create/#command-mc.admin.policy.create) 命令创建新策略。
 
-<a id="id4"></a>
+<a id="id4" data-td-print-local></a>
 
 #### 组查询 {#minio-external-identity-management-ad-ldap-access-control-group-lookup}
 
