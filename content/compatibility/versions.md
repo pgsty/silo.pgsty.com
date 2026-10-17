@@ -70,7 +70,7 @@ The following changes shipped in Server 20260916 and are absent from Server
 | --- | --- | --- |
 | Multi-pool storage | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189) | Ordinary single-object version DELETE reconciles copies across pools; reconciliation preserves tag state. The opt-in GET-frequency pool-tiering feature was removed. |
 | Conditional multipart completion | [#190](https://github.com/pgsty/silo/pull/190) | Preconditions use the logical current object across all pools, preventing an older pool copy from accepting a stale ETag or rejecting the current one. |
-| Multipart discovery and cancellation | [#198](https://github.com/pgsty/silo/pull/198) | Discover persistent uploads across pools and sets, continue after native marker uploads disappear, and require majority cancellation confirmations. Strict mode requires a coordinated writer upgrade and legacy drain; see the [upgrade contract](/blog/design/list-multipart-uploads/#implementation). |
+| Multipart discovery and cancellation | [#198](https://github.com/pgsty/silo/pull/198) | Discover persistent uploads across pools and sets, continue after native marker uploads disappear, and require majority cancellation confirmations. Strict mode requires a coordinated writer upgrade and legacy drain; see the [upgrade contract](/blog/design/list-multipart-uploads/#implementation-20260916). |
 | Ordinary conditional PUT | [#207](https://github.com/pgsty/silo/pull/207) | Public write conditions use the logical current object across all pools, including draining pools. Readability and destination-version changes are detailed [below](#conditional-put). |
 | IAM revocations | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | Peer deletion notifications reload committed state. Durable deletion versions and retained revocation boundaries prevent stale site replay from restoring revoked identities or their older grants. |
 | Replicated tags and delete markers | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS copies preserve tag revision times; tag deletion advances its revision and resists delayed events. Delete-marker purges retain their identity and retry state through MRF recovery. |
@@ -192,7 +192,7 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
   boundary. PR #198 repairs durable discovery, global pagination and static
   cancellation confirmation; it does not add a creation fence or certify
   large-scale scanning. The temporary 10,000-upload trial missed the provisional
-  five-second page target; see the [design record](/blog/design/list-multipart-uploads/#implementation).
+  five-second page target; see the [design record](/blog/design/list-multipart-uploads/#implementation-20260916).
 
 ## Dependency and release order {#order}
 
@@ -235,7 +235,7 @@ with unmodified upstream MinIO/MC and other S3 implementations is best effort.
 
 Server 20260916 source [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4d51406b7ed87af5fe6fe0f801f3290f96eb3c) selects pkg v3.14.1, upstream minio-go `32e1f32cb176`, Console v2.4.1 source `1360e26d976d`, and MC `e952aa78f10a` (mcli 20260916). The published Server tag is `RELEASE.2026-09-16T00-00-00Z`, package version `20260916000000.0.0`.
 
-- #213 retains **legacy as the multipart default**. Strict requires `MINIO_API_MULTIPART_LISTING` in the process environment and restart, with no shared dynamic key. Majority cancellation confirmation is strict-only. See [settings](/reference/minio-server/settings/core/#multipart-listing) and the [upgrade contract](/blog/design/list-multipart-uploads/#implementation).
+- #213 retains **legacy as the multipart default**. Strict requires `MINIO_API_MULTIPART_LISTING` in the process environment and restart, with no shared dynamic key. Majority cancellation confirmation is strict-only. See [settings](/reference/minio-server/settings/core/#multipart-listing) and the [upgrade contract](/blog/design/list-multipart-uploads/#implementation-20260916).
 - [Multi-pool consistency](/blog/design/multi-pool-object-consistency/), [conditional DELETE](/blog/design/conditional-delete/) and [Object Lock replication ordering](/blog/design/object-lock-replication-ordering/) distinguish logical current objects, addressed versions and persistence locks.
 - [Federated CopyObject](/blog/design/federated-copy-object/) and [SSE-C replica integrity](/blog/design/ssec-replica-integrity/) describe logical-byte checksums, encryption and historical-object limits.
 - [Durable IAM revocation](/blog/design/iam-revocations/) and [bucket configuration convergence](/blog/design/bucket-metadata-convergence/) document coordinated upgrades, deletion history and the default-off `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES` switch.

@@ -456,13 +456,13 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 
 <a id="multipart-listing"></a>
 
-## 多段上传列举模式 {#envvar.MINIO_API_MULTIPART_LISTING}
+## 多段上传列举：退役模式开关 {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**自 Server 20260916 起提供，Server 20260903 不包含。** `MINIO_API_MULTIPART_LISTING` 接受 `legacy` 或 `strict`，默认 **`legacy`**。在每个服务进程的环境中设置并重启；不支持共享的 `api multipart_listing` 配置键，不能用 `mcli admin config set` 选择模式。无效值会记录诊断并使用 `legacy`，不会丢弃其它 API 设置。
+**#79 待发布后续修复：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时给出提示；列表统一扫描持久上传元数据，不需要替代设置。确认两个身份字段都不存在的历史记录被省略；字段不完整或损坏、扫描覆盖不确定、资源超限仍返回错误。已知身份的旧上传仍可继续传分片、完成和取消。历史共享配置键 `api multipart_listing` 仍被容忍，不影响其它 API 设置。
 
-Legacy 保留精确键/cache 列举限制。Strict 扫描持久上传元数据，启用前必须升级所有写入方并排空旧上传。缺少身份字段时无法证明旧上传属于哪个桶，因此**另一个桶的上传仍可能导致本桶 strict 列举返回 503**。有效身份可以提前过滤，所以并不是所有旧原生 ID 记录都会无条件导致跨桶失败。
+只读签名接口 `GET /minio/admin/v3/multipart-preflight` 仍要求 `admin:StorageInfo`。它报告 `mode=persistent`；`ready` 表示所有盘都已扫描、没有错误及观察到的历史记录，**不表示列表功能是否开放**。无需强制排空或等待预检通过；要让之后创建的所有上传都带身份，仍需升级所有写入节点。每页仍在既有的 100,000 个累计目录条目及 30 秒预算内扫描上传命名空间。见[候选版本契约与限制](/zh/blog/design/list-multipart-uploads/#implementation)。
 
-使用只读、SigV4 认证的 `GET /minio/admin/v3/multipart-preflight`，需要 `admin:StorageInfo`。检查 `mode`、`ready`、`complete`、`scannedEntries`、`legacyUploads` 以及各 set 的磁盘覆盖。扫描不完整不等于结果干净；就绪结果也不能证明旧写入方不会再产生旧格式上传。100,000 条预算统计每块盘返回的目录条目，包括哈希目录，而不是唯一上传数。两种模式的每页上限均从 10,000 降为 1,000。详见[升级、预检与回滚步骤](/blog/design/list-multipart-uploads/#implementation)。
+**已发布的 Server 20260916：** 旧环境开关仍接受 `legacy`（默认）或 `strict`，strict 仍需满足当时的升级、排空和容量条件；Server 20260903 不提供该开关。运行旧二进制时，请参考 [9 月 16 日契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
 
 ## HTTP 请求头与空闲超时 {#envvar.MINIO_READ_HEADER_TIMEOUT}
 
