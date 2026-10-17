@@ -6,6 +6,13 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
+>
+> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
+
 [Server #191](https://github.com/pgsty/silo/pull/191) 与
 [#192](https://github.com/pgsty/silo/pull/192) 持久化删除修订及父身份撤销边界，防止延迟的站点事件恢复已撤销身份和旧授权。
 所有参与服务器必须协调升级，包括没有配置站点复制、但共享 IAM 后端的节点。不支持共享后端的新旧节点混用，也不支持滚动降级。
@@ -45,7 +52,7 @@ mcli ready site-a
 升级前按[密码策略迁移指南](/zh/compatibility/password-permissions/)检查所有原有 `Deny admin:CreateUser`：
 若其意图包含禁止修改自身密码，在保留原 scope 与条件的同一 Deny 中加入 `admin:ChangeMyPassword`，并贯穿回滚窗口。
 Server 20260916 的分段上传默认仍为 `legacy`；普通升级不要求切换为严格模式。只有主动启用严格模式时才执行
-[分段上传预检与排空流程](/zh/blog/design/list-multipart-uploads/#implementation)。
+[分段上传预检与排空流程](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
 
 ## 保存完整恢复点 {#backup}
 

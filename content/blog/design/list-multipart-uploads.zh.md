@@ -12,6 +12,15 @@ draft: false
 url: "/zh/blog/design/list-multipart-uploads/"
 ---
 
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **中文：** 本页保留的 8 月分析与 9 月 `legacy`/`strict` 方案已被新设计覆盖，请以[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)为准。新设计统一使用持久列举，逐条跳过经确认缺少身份的历史上传，取消迁移开关；代码已合入主干，尚未随 Server 版本发布。旧章节只用于理解历史，不改变旧版本二进制的实际行为。
+>
+> **English:** The August analysis and September `legacy`/`strict` proposal retained below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). It selects one persistent listing path, individual omission of confirmed unidentified historical uploads, and no migration switch. The code is merged into main but has not shipped in a Server release. Historical sections do not change the behavior of older binaries.
+
+> **2026-10-17 源码集成更新：** 统一列举修复通过全部八项 PR 检查，经 [PR #243](https://github.com/pgsty/silo/pull/243) 合入主干，合并提交为 [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894)。它面向下一次 Server 发布，未包含在 [Server 20261015](/zh/blog/release/silo-20261015/) 中；源码接入不会更新已安装的二进制或容器镜像。
+
 > **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；发布时的启用条件保留在历史章节；待发布候选的变化见下节。下方带日期的源码状态与验证记录保留当时的范围。
 
 
@@ -71,7 +80,7 @@ url: "/zh/blog/design/list-multipart-uploads/"
 
 ## 2026-10-17 决策记录：统一列举，接受历史例外 {#decision-20261017}
 
-**状态：方案已选定，候选实现与本地验证已完成，尚未发布。** 本节对应服务端候选提交 `4ed86dfe62ed6e07016885552feebcb59f779631`；记录日期为 2026-10-17，不将它视为已合入主分支或已有发行制品的证明。Server 20260916 的部署仍应遵循下方带日期的旧契约。
+**状态：方案已选定，本地验证与 PR CI 已通过，源码已合入主干，尚未发布。** 本节对应实现提交 `4ed86dfe62ed6e07016885552feebcb59f779631`，于 2026-10-17 经 [PR #243](https://github.com/pgsty/silo/pull/243) 接入。源码合并不代表已有发行制品或已部署生产。Server 20260916 与 Server 20261015 的二进制仍适用下方的历史 legacy／strict 契约。
 
 ### 决策与优先级 {#decision-contract}
 
@@ -244,7 +253,12 @@ go test ./cmd -run '^$' \
 
 ## 历史：9 月 16 日实现与升级契约 {#implementation-20260916}
 
-> 本节只描述 Server 20260916 的旧契约，不是待发布候选的操作说明。
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **中文：** 本节的模式开关与排空启用方案已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。以下仅保留 Server 20260916 的历史契约；已安装旧版本仍按该契约运行。新设计已合入主干，尚未发布。
+>
+> **English:** This mode-switch and drain-before-enabling design is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017); use that record for the new design. The text below preserves the Server 20260916 contract, which still applies to those installed binaries. The new code is merged into main and remains unreleased.
 
 [PR #198](https://github.com/pgsty/silo/pull/198) 保留 mr javad seydi 的原始元数据与扫描实现，并追加维护者对 marker 消失、发现覆盖不足、取消确认和升级诊断的修复。发布前的兼容性修复将默认模式恢复为 `legacy`，严格模式仅通过进程环境显式启用。本节说明这些源码变更。**Server 20260903 不包含此修复；源码实现也不代表生产性能与部署验收完成。** 下方 8 月 30 日的分析保留为历史设计记录。
 
@@ -304,6 +318,13 @@ curl --aws-sigv4 'aws:amz:us-east-1:s3' \
 9 月 16 日的临时 Docker Desktop arm64 测试使用两节点、四个 APFS 绑定卷，两个 bucket 共 11,000 个上传，期间还有其他本地验证负载。目标 bucket 有 10,000 个上传，单次返回 1,000 项耗时 18.7 秒；两个并发请求约 25–27 秒后返回可重试的 `SlowDownRead`。这组观察没有达到暂定的单页五秒目标，也不是隔离的 SSD 基准。容量和前台负载验收仍未完成，不能把有界扫描宣传为大规模性能修复。
 
 ## 历史：8 月 30 日分析与提案 {#analysis-20260830}
+
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **中文：** 以下早期分析、推荐方案和迁移门槛已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。这里保留原始思考供追溯；其中的方案编号、能力广播、排空估算和启用建议均不是本次主干实现的要求。
+>
+> **English:** The early proposals, recommendation and migration gates below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). They remain only as historical reasoning; their option numbers, capability advertisement, drain estimate and enablement advice do not define the implementation now on main.
 
 > **归档分析（2026-08-30）：** 以下“当前”“建议”、方案编号与门禁描述当时的审查和提案。待发布候选以 [10 月 17 日决策](#decision-20261017)为准；Server 20260916 以其[带日期的契约](#implementation-20260916)为准。旧提案中的 writer 升级／排空门槛不是本次候选的启用前提；能力广播、预计一天排空也只是当时提案，不是当前保证。
 

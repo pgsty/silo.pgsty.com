@@ -2,7 +2,7 @@
 title: "SILO Server 20260903 Pre-release Review"
 linkTitle: "Server 20260903 Review"
 date: 2026-09-03
-lastmod: 2026-09-16
+lastmod: 2026-10-17
 author: "Ruohang Feng"
 summary: >
   The final adversarial review of every server change after 20260806: confirmed defects, fixes, rejected simplifications, necessary complexity, validation evidence, explicit deferrals, and the distinction between code-level GO and production release. Updated 2026-09-16 with the #116 restart-and-readback verification method.
@@ -11,6 +11,13 @@ weight: 8
 draft: false
 url: "/blog/design/server-release-readiness/"
 ---
+
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The #79 multipart-listing proposals, enablement advice and status in this article are historical. Subsequent design work is governed by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017), which supersedes those earlier proposals. The new implementation is merged into main and remains unreleased; this does not change the documented behavior of older releases or conclusions on other topics.
+>
+> **中文：** 本文关于 #79 分片上传列举的旧方案、启用建议与当时进度仅保留为历史记录；后续设计已由[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。新实现已合入主干、尚未随 Server 版本发布；这里记载的旧版本行为和其他主题结论不因此改变。
 
 This is the durable pre-release engineering record behind [SILO 20260903](/blog/release/silo-20260903/). It explains why an earlier “all issues are solved” assessment was not accepted at face value, what the independent review found, how the fixes were narrowed, and which gates still remained at the review point. The linked release note records the later publication result.
 

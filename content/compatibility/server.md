@@ -8,6 +8,13 @@ type: docs
 icon: fa-solid fa-server
 ---
 
+> [!WARNING]
+> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+>
+> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
+>
+> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
+
 > **Current Console:** [v2.4.1](/blog/release/console-2.4.1/), with mcli 20260916 and pkg v3.14.1. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
 
 **Start with the [three-level overview](/compatibility/): 12 compatible improvements, 4 minor differences and 8 conditional checks.** This page provides server details, preserving the fixed 2026-08-06 audit baseline and separating [subsequently released changes](#since-20260806) from [September 16 source changes](#september-2026). The historical audit baseline differs from the [original fork baseline](/compatibility/#scope), and does not imply that current artifacts include every source fix.
