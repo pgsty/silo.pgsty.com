@@ -16,7 +16,7 @@ icon: fa-solid fa-code-branch
 >
 > **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
 
-**Public release state verified on 2026-10-17.** SILO releases its four components independently.
+**Public release state verified on 2026-10-18.** SILO releases its four components independently.
 A merged dependency update does not change an existing binary or image.
 
 ## Published components {#published}
@@ -26,16 +26,21 @@ A merged dependency update does not change an existing binary or image.
 | Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | Go 1.27.1; pkg v3.14.1; upstream SDK `32e1f32cb176`; mcli 20260916; embedded Console v2.4.1, source `1360e26d976d` |
 | <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.2](https://github.com/pgsty/silo-console/releases/tag/v2.4.2) | Go 1.27.2; pkg v3.14.2; mcli 20261018; upstream SDK v7.4.1; correct bucket-versioning errors; public Docker amd64/arm64 images |
 | mcli | [20261018](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z) | Go 1.27.2; pkg v3.14.2; upstream SDK v7.4.1; package version `20261018000000.0.0`; public Docker amd64/arm64 images |
-| Shared pkg | [v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2) | Own module path `github.com/pgsty/silo-pkg/v3`; SDK v7.4.1; go-jose v4.1.6; LDAP v3.4.15; Go 1.26 library floor |
+| Shared pkg | [v3.14.3](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.3) | Faster admin-action classification with unchanged policy behavior; dependencies unchanged from v3.14.2; Go 1.26 library floor |
 
 Release notes: [Server 20260916](/blog/release/silo-20260916/),
 [Console v2.4.2](/blog/release/console-2.4.2/),
-[mcli 20261018](/blog/release/mcli-20261018/), [pkg v3.14.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.2).
+[mcli 20261018](/blog/release/mcli-20261018/), [pkg v3.14.3](/blog/release/pkg-3.14.3/).
 For embedded deployments, select Console and MC explicitly in the Server build.
 Package-repository mirrors may lag GitHub; the [download page](/download/)
 links directly to the published artifacts.
 
 **Standalone Console image:** `docker.io/pgsty/silo-console:v2.4.2` passed anonymous Linux amd64/arm64 pulls, signature and provenance checks. Its digest is `sha256:4cf47061e0d2f249df3c1cd2a939966ff3c69cc3cf7d10a7b1b39d5c110ae999`.
+
+The [pkg v3.14.3 policy optimization](/blog/release/pkg-3.14.3/) preserves APIs,
+policy formats, and authorization behavior. Server builds may adopt it while
+the published mcli and standalone Console keep using v3.14.2. Existing binaries
+and Server drafts retain the dependencies recorded below until rebuilt.
 
 ## Pending Server releases {#october-release}
 
