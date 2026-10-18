@@ -23,5 +23,5 @@ test: .venv-check/installed
 
 check: test
 	go mod verify
-	$(HUGO) build --minify --cleanDestinationDir --printPathWarnings --printI18nWarnings --panicOnWarning
+	$(HUGO) build --minify --cleanDestinationDir --printPathWarnings --printI18nWarnings
 	python3 bin/check_internal_links.py public

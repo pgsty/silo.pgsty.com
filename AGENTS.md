@@ -2,6 +2,13 @@
 
 silo.pgsty.com —— SILO 官网（Hugo）。给 AI agent 的项目约定，改动前先读这里。
 
+## OINK build baseline
+
+As of 2026-10-18, this site uses OINK v1.3.2 and Hugo Extended 0.168.0.
+Keep CI and local builds on this baseline. Do not enable `--panicOnWarning`
+or `HUGO_PANICONWARNING`; keep warnings visible and review them. The upstream
+LibSass deprecation warning is accepted. No external Sass compiler is required.
+
 ## 硬性约定（不要“顺手修正”）
 
 ### Docker Pulls 卡片必须指向 `pgsty/minio`
