@@ -458,9 +458,9 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 
 ## 多段上传列举：退役模式开关 {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**#79 待发布后续修复：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时给出提示；列表统一扫描持久上传元数据，不需要替代设置。确认两个身份字段都不存在的历史记录被省略；字段不完整或损坏、扫描覆盖不确定、资源超限仍返回错误。已知身份的旧上传仍可继续传分片、完成和取消。历史共享配置键 `api multipart_listing` 仍被容忍，不影响其它 API 设置。
+**2026-10-18 回退实现，尚未正式发布：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时说明公开列表恢复旧缓存／精确 key 行为，持久列举延期。不增加替代设置。旧共享配置键 `api multipart_listing` 继续被容忍，不因它拒绝启动或丢弃其他 API 设置，也不自动清理用户配置。此前启用 strict 的用户会失去可选持久列表和严格取消能力，需要评估升级影响。
 
-只读签名接口 `GET /minio/admin/v3/multipart-preflight` 仍要求 `admin:StorageInfo`。它报告 `mode=persistent`；`ready` 表示所有盘都已扫描、没有错误及观察到的历史记录，**不表示列表功能是否开放**。无需强制排空或等待预检通过；要让之后创建的所有上传都带身份，仍需升级所有写入节点。每页仍在既有的 100,000 个累计目录条目及 30 秒预算内扫描上传命名空间。见[候选版本契约与限制](/zh/blog/design/list-multipart-uploads/#implementation)。
+只读签名接口 `GET /minio/admin/v3/multipart-preflight` 仍要求 `admin:StorageInfo`，返回 `mode=legacy`。`complete` 和 `ready` 描述磁盘诊断覆盖与历史记录，不是启动或列表开关。仅诊断保留 100,000 目录项、30 秒和并发预算；公开列表不依赖这些预算。无 prefix 的旧缓存仍有重启漏项和分页缺陷；非空 prefix 仍按完整对象名查找。已知 ID 的操作及后台清理保留。见[最新决策与取舍](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
 
 **已发布的 Server 20260916：** 旧环境开关仍接受 `legacy`（默认）或 `strict`，strict 仍需满足当时的升级、排空和容量条件；Server 20260903 不提供该开关。运行旧二进制时，请参考 [9 月 16 日契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
 

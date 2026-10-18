@@ -10,11 +10,11 @@ icon: fa-solid fa-code-branch
 ---
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 >
-> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 
 **公开发布状态核验于 2026-10-18。** SILO 的四个组件独立发布。依赖更新合入主分支，不会改变已经发布的二进制或镜像。
 
@@ -205,7 +205,7 @@ Server 20260916 源码 [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4
   再尝试已有的 Base64 兼容路径，避免不必要的本地 `xl.meta` 读取。合法明文 UUID 恰好
   能被 Base64 解码时，也能正确走快速路径。旧格式或无法识别的目录名仍回退读取元数据。
   存储格式、S3 上传 ID 和清理配置均不变：默认过期时间为 24 小时，默认扫描间隔为 6 小时。
-- [PR #243](https://github.com/pgsty/silo/pull/243) 于 10 月 17 日合入，统一公开分片
-  列表为持久扫描并退役迁移开关。确认可读且两个身份字段都不存在的历史上传逐条省略，
-  非法元数据或扫描覆盖不足仍报错，默认 Abort 可用性得到保留。重复扫描成本、容量
-  限制和取消后的迟到创建仍属于明确边界，见[设计决策](/zh/blog/design/list-multipart-uploads/#decision-20261017)。
+- [PR #243](https://github.com/pgsty/silo/pull/243) 于 10 月 17 日合入，曾将持久扫描设为唯一公开列表路径。
+  **10 月 18 日新决策：定向回退默认扫描，恢复旧缓存／精确 key 行为；保留身份、安全、默认 Abort 和清理修复，不恢复 strict 开关。**
+  回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布；已有 strict 用户会失去可选能力，旧列表的重启漏项和分页限制继续保留。
+  诊断不作为业务门槛，#79 继续开放。见[最新设计决策](/zh/blog/design/list-multipart-uploads/#decision-20261018)。

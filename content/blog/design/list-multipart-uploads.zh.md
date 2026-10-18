@@ -1,11 +1,11 @@
 ---
-title: "ListMultipartUploads：实现、升级契约与历史设计"
+title: "ListMultipartUploads：默认扫描回退与后续设计"
 linkTitle: "ListMultipartUploads 兼容性"
 date: 2026-08-30
-lastmod: 2026-10-17
+lastmod: 2026-10-18
 author: "冯若航"
 summary: >
-  记录 #79 的最终设计取舍：统一持久列表、逐条省略无身份的历史上传、退役迁移开关；解释备选方案、格式兼容性、读写成本、验收证据与尚未解决的边界。
+  记录 2026-10-18 的定向回退决策：撤回默认全盘扫描，保留身份、安全与清理修复；说明容量断点、环境开关退役、旧列表代价、后续索引方向及相关文档。
 tags: [设计, S3, 兼容性, 分段上传]
 weight: 35
 draft: false
@@ -16,22 +16,134 @@ url: "/zh/blog/design/list-multipart-uploads/"
 > **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **中文：** 本页保留的 8 月分析与 9 月 `legacy`/`strict` 方案已被新设计覆盖，请以[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)为准。新设计统一使用持久列举，逐条跳过经确认缺少身份的历史上传，取消迁移开关；代码已合入主干，尚未随 Server 版本发布。旧章节只用于理解历史，不改变旧版本二进制的实际行为。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 >
-> **English:** The August analysis and September `legacy`/`strict` proposal retained below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). It selects one persistent listing path, individual omission of confirmed unidentified historical uploads, and no migration switch. The code is merged into main but has not shipped in a Server release. Historical sections do not change the behavior of older binaries.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 
-> **2026-10-17 源码集成更新：** 统一列举修复通过全部八项 PR 检查，经 [PR #243](https://github.com/pgsty/silo/pull/243) 合入主干，合并提交为 [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894)。它面向下一次 Server 发布，未包含在 [Server 20261015](/zh/blog/release/silo-20261015/) 中；源码接入不会更新已安装的二进制或容器镜像。
+> **2026-10-17 源码集成更新：** 统一列举修复通过全部八项 PR 检查，经 [PR #243](https://github.com/pgsty/silo/pull/243) 合入主干，合并提交为 [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894)。其默认扫描选择现已被下方 10 月 18 日决策覆盖；该提交未包含在 [Server 20261015](/zh/blog/release/silo-20261015/) 中；源码接入不会更新已安装的二进制或容器镜像。
 
 > **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；发布时的启用条件保留在历史章节；待发布候选的变化见下节。下方带日期的源码状态与验证记录保留当时的范围。
 
 
 这是 [SILO Issue #79](https://github.com/pgsty/silo/issues/79) 的问题说明、设计分析与决策记录。
 
-阅读顺序：[待发布行为](#implementation)说明客户端与运维会看到什么；[2026-10-17 决策记录](#decision-20261017)解释为什么这样改、放弃了什么、付出什么代价；[9 月发布契约](#implementation-20260916)与[8 月设计分析](#analysis-20260830)保留历史依据。
+阅读顺序：[待发布行为](#implementation)说明当前候选；[10 月 18 日决策](#decision-20261018)解释回退范围与代价；[相关文档清单](#related-records)汇总本文及关联页面。10 月 17 日、9 月和 8 月章节保留为历史。
 
-## 待发布：统一使用持久元数据列举 {#implementation}
+## 待发布：恢复旧列表，延期完整持久列举 {#implementation}
+
+**2026-10-18 决定：定向部分回退。** 撤回 #243 将全盘扫描设为唯一公开列表路径的行为，保留身份元数据、安全校验、默认取消语义和清理修复；不恢复 `legacy`／`strict` 运行时开关。本节描述回退提交 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) 的行为，尚未正式发布。已安装的 Server 20260916 不受文档更新影响，仍按其原有契约运行。
+
+公开 `ListMultipartUploads` 恢复两条旧路径：无 `prefix` 时读取节点内存缓存；非空 `prefix` 按完整对象名查找。这意味着重启或换节点可能漏项，真正的前缀筛选、目录分组及缓存分页仍不完整。比如 `prefix=trips/` 不会列出 `trips/a.mp4`，而 `prefix=trips/a.mp4` 可以查找该对象的上传。**这是明确保留的缺陷，不是完成了 #79。**
+
+保留 `MINIO_API_MULTIPART_LISTING` 的识别和启动告警，但忽略其取值；旧共享配置键 `api multipart_listing` 继续被容忍，不因一个废弃键拒绝启动或丢弃其他设置，不自动删除用户配置，也不增加替代开关。**此前显式启用 strict 的用户会失去可选持久列表和严格取消能力，升级并非无损。** 他们必须先评估对完整清单的依赖；已发布旧版本的 strict 行为不会因本次文档修改而改变。
+
+管理诊断 `GET /minio/admin/v3/multipart-preflight` 保留原来的 `admin:StorageInfo` 授权，返回 `mode: "legacy"` 以说明公开列表行为。`complete` 和 `ready` 仍描述诊断扫描的覆盖与历史记录，不控制启动、上传或公开列表。诊断按需执行，仍受扫描预算限制，不能被当作高容量清理工具，也不应在失败后无休止自动重试。
+
+## 2026-10-18 决策：撤回默认扫描，保留独立修复 {#decision-20261018}
+
+本节覆盖 [10 月 17 日的默认持久列举决策](#decision-20261017)。保留那次分析和实现记录用于追溯，不再把它作为本次发布的目标行为。
+
+### 问题不在“重启没有清零”
+
+旧版上传元数据和分片本来就在磁盘上。重启丢失的是内存清单，不是上传本身；清单为空从来不代表空间已经释放。新增 bucket/object 身份字段只是让记录可以被识别，没有把原本临时的数据突然变成永久数据。
+
+真正新增的故障链是：磁盘记录积累，每次列举重新扫描全部相关上传，消耗完固定目录预算，返回 503；重启之后记录还在，下次请求再次失败。其他桶、两层目录和各盘副本都消耗同一个请求的预算，较小的 `max-uploads` 不能减少发现工作。
+
+100,000 是实现的物理目录项预算，不是 S3 上传数限制，也不是累计完成过的上传总数。在一个健康的 16 盘 erasure set 中，若每个未完成上传使用不同对象名且各盘都有目录，3,126 个上传需要约 `16 × (3,126 + 3,126) = 100,032` 项，已足以越界。具体断点受布局、目录和副本情况影响，不能把这个数字推广为所有集群的统一限额。
+
+资源保护本身有必要；问题在于把一个每页全量发现、规模边界过低的实现设为普通请求的唯一入口。测试证明超限时正确返回 `SlowDown`，只能证明保护生效，不能证明这一级上传规模可用。
+
+### 实现来源与责任边界
+
+三个决定应分别追溯，不能把后续限制都归给原始贡献者：
+
+| 变更 | 可核查的来源 |
+| --- | --- |
+| 保存上传身份、扫描磁盘并统一分页 | mr javad seydi 的 [原始提交 `4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074ccdd3d1fc2453e68f6a18d76abd16e253)，经 #198 引入；没有这项 100,000 条目预算 |
+| 100,000 目录项、两个扫描名额和 30 秒预算 | 后续维护补丁 [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d8639843e19412fe2607bf3bad734bb1)，用于限制扫描资源消耗 |
+| 将扫描设为唯一公开列表路径 | 后续维护补丁 [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe62ed6e07016885552feebcb59f779631)，经 #243 合入 |
+
+具体预算和默认切换属于项目后续维护决定，不是原贡献者提出的上传配额。此次应纠正的是：容量反例尚在时，把资源保护下仍会失败的扫描器推广成唯一默认入口。维护者应对这项集成取舍负责，原始身份元数据与扫描工作的价值仍应得到保留。
+
+### 为什么选择部分回退
+
+| 选项 | 收益 | 代价 | 决定 |
+| --- | --- | --- | --- |
+| 保留默认持久扫描 | 身份完整的上传可跨重启发现，支持统一前缀和分页 | 每页重复扫描；跨桶影响；存量达到预算后持续失败 | 不采用 |
+| 完整撤回 #243 | 恢复此前默认和可选 strict 契约 | 恢复开关、两套列表及 strict 取消；原扫描问题仍可被启用 | 若必须保留所有既有 strict 行为，这是兼容性优先的备选 |
+| **定向部分回退** | 移除新默认故障机制，保留独立修复，减少运行模式 | 旧列表缺陷继续存在；strict 用户失去可选能力；需要独立补丁与验收 | **本次采用** |
+| 回退所有 Multipart 改动 | 大幅恢复历史代码 | 丢掉身份、安全、清理等有价值修复，扩大回归范围 | 不采用 |
+| 发布前完成持久索引 | 有机会同时满足可发现性、分页和规模要求 | 扩展为索引一致性、恢复和迁移工程，增加维护版本风险 | 后续专项 |
+
+保留 `xl.meta` 中已有的 bucket/object 身份字段及完成时清除、UploadID 路径校验、成功取消后的缓存与节点通知、原生上传时间解析和过期清理修复。保留当前读取 quorum 加尽力删除的 Abort 行为，不恢复 strict 分支，也不宣称 HTTP 204 证明每份物理副本已经删除。迟到创建写入仍可能恢复上传，本次没有增加持久创建屏障。
+
+扫描器及身份冲突校验保留在显式诊断路径；排序和分页算法的已有测试保留为后续基础，不把它们当作旧缓存路径具备这些能力的证据。IAM、对象锁和普通对象列表等独立修复继续按各自证据验收，不与此次回退绑定。
+
+### 会不会仍然积累出问题
+
+定向回退切断的是“全局磁盘存量 → 每次普通列表全量扫描 → 固定预算耗尽”的链条。公开列表和底层精确查询均不获取诊断扫描槽位，也不因诊断的 100,000 项预算、30 秒期限或并发额度而失败。
+
+它不是无限容量保证：无 prefix 的缓存仍需遍历、排序和构造响应，大量活跃上传会增加 CPU、内存与响应体开销；单个对象的精确查找仍需读取该对象的上传目录，集中创建大量上传也会变慢。其他桶的内存记录仍可能增加缓存遍历成本。磁盘残留会占空间，诊断仍可能超限并与前台竞争 I/O。
+
+后台过期清理直接遍历磁盘，不依赖先通过公开列表获取清单，因此不存在由该列表预算必然导致的清理死锁。但离线盘、删除失败和扫描耗时会延后清理。默认 24 小时过期、6 小时检查间隔不变；不能为了降低扫描数量而擅自缩短上传生命周期，重启也不是释放分片空间的手段。
+
+集成时另行合入的[空上传父目录清理修复](https://github.com/pgsty/silo/commit/0f9199e0c3e768bb7699bd640ddad3d6b5d0628b)也予以保留：一轮清理结束时尝试移除已经清空的哈希父目录，不再因删除子目录刷新了父目录时间而再等一个过期周期；活跃或不可读的上传仍保留。这减少了残留目录，不会使全盘扫描自动具备可扩展的分页成本。
+
+这个取舍适合作为维护版本的止损：撤掉新增默认故障，接受并说明旧功能局限。依赖完整清单恢复、审计或批量取消的工作流仍未得到满足，不能称为问题已经完整解决。
+
+### 有序性值得付出多大代价
+
+排序不是这个硬断点的直接原因：目录预算可能在开始排序前就已耗尽，删除排序不会消除磁盘发现成本。当前也没有 CPU profile 支持“排序占用了大多数时间”的判断。
+
+合理的目标是让一页请求主要为该页及必要索引查找付费，或把一次发现和整理的成本分摊到一次完整遍历，而非每一页重新读取其他桶和所有副本。仅采用 top-K 排序可以降低内存，不能消除全量发现的 I/O；仅提高预算则只是把失败点推远。
+
+后续可以先评估按桶发现、一次遍历复用和有界缓存，明确缓存过期、并发变化与续页语义。若要求大量上传、频繁列举、跨节点和重启后稳定分页，则需要桶级有序持久索引，并定义创建、完成、取消与清理如何更新它，崩溃和迟到写入如何修复，以及索引如何重建。底层哈希目录不能凭一个 continuation token 就变成按 key 的范围索引。这些成本必须与业务规模相称，不在本版临时扩展存储协议。
+
+### 验收边界 {#rollback-validation}
+
+验收必须分别覆盖有大量活跃缓存、超过旧预算的真实磁盘存量、其他桶干扰、同一 key 的大量上传和真正重新打开存储后的行为。空缓存返回 HTTP 200 不能单独充当容量通过；需要同时记录返回数量、调用次数、耗时与内存。公开入口即使遇到诊断槽位占满或上传根目录不可读，也不能重新落入全局扫描。
+
+已知 ID 的上传、分片、完成、取消及后台清理仍需通过原有回归。旧配置必须被容忍，启动告警和诊断 mode 必须与实际行为一致。测试结果只对应被测试的源码；合入、制品发布、生产部署是另外的交付步骤。
+
+2026-10-18 本地验证已通过公开入口隔离、重启后已知 ID 操作、诊断身份／预算／取消回归、相关 race 测试、配置兼容、lint、生成文件与兼容标识检查及服务端构建。入口隔离用例在修改前分别返回 503 `SlowDownRead` 和 `SlowDown`，修改后返回 200，并确认没有扫描上传根目录。一个独立四目录服务进程也验证了旧 strict 环境变量告警、真实进程重启、继续上传、完成读回及取消。
+
+在回退提交 `4733e1423cfe703951f52ff9cbd286df2cf9d79d` 上显式运行 `BenchmarkMultipartPublicListingCapacity -benchtime=1x` 的结果如下。测试使用 macOS arm64 本地目录，未对系统其他负载做隔离；两组不同 key 的数据各有一半在另一桶，建数据时间不计入请求耗时。
+
+| 布局与真实上传存量 | 请求 | 返回数 | 对象层耗时 | Multipart ListDir 调用 |
+| --- | --- | --- | --- | --- |
+| 4 盘，10,000 个不同 key | 已填充缓存，max-uploads=1,000 | 5,000 | 1.298 ms | 0 |
+| 16 盘，3,126 个不同 key | 已填充缓存，max-uploads=1,000 | 1,563 | 0.623 ms | 0 |
+| 16 盘，同一 key 的 10,000 个上传 | 已填充缓存，max-uploads=1,000 | 10,000 | 2.453 ms | 0 |
+| 同上，清空缓存后 | 精确 key，max-uploads=1,000 | 1,000 | 18.416 ms | 1 |
+
+16 盘／3,126 用例先确认保留的扫描器仍会超预算，再验证公开路径成功。缓存返回数超过请求页长，恰好显示旧分页缺陷仍在；不是分页修复。清空缓存后的无 prefix 请求也验证返回空，不能把这点算作完整清单验收。同一 key 精确查询单次分配约 11.4 MB，说明旧路径也有规模成本。这些是单次对象层测量，不包含 HTTP 序列化与网络成本，不是吞吐、p95 延迟或生产分布式存储保证。实际进程验证使用测试模式允许根文件系统上的临时目录，不等同于独立物理盘部署。
+
+### 相关文档清单 {#related-records}
+
+下面列出本站与本次列举修复直接相关的文章和引用页面，中英文内容成对维护；不把所有提到 Multipart 校验和、对象锁的文章都算作本次修复。
+
+| 文档 | 与本次修复的关系 |
+| --- | --- |
+| [本文：ListMultipartUploads](#decision-20261018) | #79 主设计记录；包含 8 月分析、9 月契约、10 月 17 日选择及本次回退 |
+| [SILO Server 20260903 发布前复审](/zh/blog/design/server-release-readiness/) | 将 #79 列为已知列表缺陷，区分代码验收与发布 |
+| [Silo 20260903 正式发布](/zh/blog/release/silo-20260903/) | 记录当时保留的前缀和分页问题 |
+| [SILO 20260916 发布注记](/zh/blog/release/silo-20260916/) | 记录已发布的 legacy 默认、strict 可选和取消边界 |
+| [多池对象一致性](/zh/blog/design/multi-pool-object-consistency/) | 关联引用，明确该修复与分片列举是不同问题 |
+| [LIST 漏项修复：只在有疑问时确认，并把等待控制住](/zh/blog/design/listing-recovery-lock-cost/) | 关联辨析：普通 ListObjects 修复与 #79 属于不同接口，不应混为一次回滚 |
+| [兼容性总览](/zh/compatibility/) | 列表与升级影响索引 |
+| [服务端兼容性](/zh/compatibility/server/) | 行为差异及管理接口 |
+| [组件版本](/zh/compatibility/versions/) | 已发布版本与后续源码状态 |
+| [核心设置](/zh/reference/minio-server/settings/core/#multipart-listing) | 环境变量退役、旧配置容忍和诊断说明 |
+| [S3 API 兼容性](/zh/reference/s3-api-compatibility/#id5) | 公开列表仍保留的协议局限 |
+| [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/) | 历史升级文档中的独立分片准备流程引用 |
+| [贡献者](/zh/about/contributors/) | #79 报告人与 #198 原始贡献；不将后续维护决定归给原贡献者 |
+
+
+## 2026-10-17 实现记录：持久列举（已被覆盖） {#implementation-20261017}
+
+> **历史记录：** 以下是 #243 当时的实现说明，其默认行为已被 10 月 18 日决策覆盖；不再是本次候选目标。
 
 **本节描述 #79 后续修复候选，不代表已经发布。** 对包含本次修改的构建，本节取代下方的模式切换设计；Server 20260916 仍按其发布时的 `legacy`／`strict` 行为运行。此次去掉模式选择，在已有集群上升级后也自动使用磁盘元数据列举。
 
@@ -82,6 +194,8 @@ url: "/zh/blog/design/list-multipart-uploads/"
 回归覆盖新旧混合 HTTP 分页、目录分组、按已知 ID 继续并完成旧上传、字段缺失或损坏、读取失败、重新打开存储层后无缓存列举、多 set/pool、已删除的翻页标记、扫描限流，以及原有默认取消行为。显式运行的 `BenchmarkMultipartListingCapacity` 使用 1,000 和 10,000 个真实磁盘上传，包含新旧混合与其它桶；超限场景验证返回错误而非成功的残缺页面。这些本地检查不等于生产分布式存储延迟和前台上传吞吐验收。
 
 ## 2026-10-17 决策记录：统一列举，接受历史例外 {#decision-20261017}
+
+> **历史记录：** 以下是 #243 当时的实现说明，其默认行为已被 10 月 18 日决策覆盖；不再是本次候选目标。
 
 **状态：方案已选定，本地验证与 PR CI 已通过，源码已合入主干，尚未发布。** 本节对应实现提交 `4ed86dfe62ed6e07016885552feebcb59f779631`，于 2026-10-17 经 [PR #243](https://github.com/pgsty/silo/pull/243) 接入。源码合并不代表已有发行制品或已部署生产。Server 20260916 与 Server 20261015 的二进制仍适用下方的历史 legacy／strict 契约。
 
@@ -203,6 +317,8 @@ go test ./cmd -run '^$' \
   -benchtime=1x -benchmem -timeout=10m
 ```
 
+这条命令对应本节的 10 月 17 日实现提交。10 月 18 日回退后的同一扫描基准已改名为 `BenchmarkMultipartDiagnosticScanCapacity`，只验证保留的诊断扫描；公开列表使用上节的 `BenchmarkMultipartPublicListingCapacity`，两者不能混作同一条请求路径的证据。
+
 ### 为什么这次不修“取消后又出现” {#decision-abort}
 
 列表与取消有关联，但不是同一个问题。可靠列表负责发现仍然存在的上传；“取消返回后，任何在途创建都不能再使它出现”需要创建与取消共同遵守一个持久的顺序规则。
@@ -257,11 +373,11 @@ go test ./cmd -run '^$' \
 ## 历史：9 月 16 日实现与升级契约 {#implementation-20260916}
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **中文：** 本节的模式开关与排空启用方案已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。以下仅保留 Server 20260916 的历史契约；已安装旧版本仍按该契约运行。新设计已合入主干，尚未发布。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 >
-> **English:** This mode-switch and drain-before-enabling design is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017); use that record for the new design. The text below preserves the Server 20260916 contract, which still applies to those installed binaries. The new code is merged into main and remains unreleased.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 
 [PR #198](https://github.com/pgsty/silo/pull/198) 保留 mr javad seydi 的原始元数据与扫描实现，并追加维护者对 marker 消失、发现覆盖不足、取消确认和升级诊断的修复。发布前的兼容性修复将默认模式恢复为 `legacy`，严格模式仅通过进程环境显式启用。本节说明这些源码变更。**Server 20260903 不包含此修复；源码实现也不代表生产性能与部署验收完成。** 下方 8 月 30 日的分析保留为历史设计记录。
 
@@ -323,13 +439,13 @@ curl --aws-sigv4 'aws:amz:us-east-1:s3' \
 ## 历史：8 月 30 日分析与提案 {#analysis-20260830}
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **中文：** 以下早期分析、推荐方案和迁移门槛已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。这里保留原始思考供追溯；其中的方案编号、能力广播、排空估算和启用建议均不是本次主干实现的要求。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 >
-> **English:** The early proposals, recommendation and migration gates below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). They remain only as historical reasoning; their option numbers, capability advertisement, drain estimate and enablement advice do not define the implementation now on main.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 
-> **归档分析（2026-08-30）：** 以下“当前”“建议”、方案编号与门禁描述当时的审查和提案。待发布候选以 [10 月 17 日决策](#decision-20261017)为准；Server 20260916 以其[带日期的契约](#implementation-20260916)为准。旧提案中的 writer 升级／排空门槛不是本次候选的启用前提；能力广播、预计一天排空也只是当时提案，不是当前保证。
+> **归档分析（2026-08-30）：** 以下“当前”“建议”、方案编号与门禁描述当时的审查和提案。待发布候选以 [10 月 18 日决策](#decision-20261018)为准；Server 20260916 以其[带日期的契约](#implementation-20260916)为准。旧提案中的 writer 升级／排空门槛不是本次候选的启用前提；能力广播、预计一天排空也只是当时提案，不是当前保证。
 
 ### 先用最简单的话说明问题 {#plain-language}
 

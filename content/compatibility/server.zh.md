@@ -9,11 +9,11 @@ icon: fa-solid fa-server
 ---
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **中文：** 本页保留的 #79 分片列举旧模式及预检、排空启用建议，已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版设计。旧说明仍适用于其明确标注的已发布版本；统一持久列举已合入主干、尚未发布，不能据此认定现有二进制已改变。本提示只针对分片列举，不替代其他兼容性或 IAM 升级要求。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 >
-> **English:** The earlier #79 listing-mode and preflight/drain enablement design retained here is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). Dated instructions still describe their named releases. Unified persistent listing is merged into main but remains unreleased; existing binaries do not gain it from a documentation update. This notice concerns multipart listing only and does not replace other compatibility or IAM upgrade requirements.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 
 > **正式 Server 20260916 内嵌控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。独立 [Console v2.4.2](/zh/blog/release/console-2.4.2/) 已另行发布，引用 mcli 20261018 与 pkg v3.14.2。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
 
@@ -345,7 +345,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 范围 | 用户可见变化 | 对应分类与详情 |
 | --- | --- | --- |
 | 新增管理 API | `GET /minio/admin/v3/multipart-preflight` 只读检查分片迁移准备；站点间新增 `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` 同步修订与撤销状态。 | [O06](/zh/compatibility/#o06) / [分片预检](/zh/blog/design/list-multipart-uploads/#implementation-20260916)；[O07](/zh/compatibility/#o07) / [IAM 协议](/zh/blog/design/iam-revocations/#upgrade) |
-| S3 条件与分片列表 | 多池条件写入、分片完成及版本删除更严格地核实元数据；分片列表上限为 1,000，默认仍为 legacy，strict 必须显式启用并完成准备。 | [O04](/zh/compatibility/#o04)、[O06](/zh/compatibility/#o06) / [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[分片模式](/zh/blog/design/list-multipart-uploads/#implementation-20260916) |
+| S3 条件与分片列表 | 多池条件写入、分片完成及版本删除更严格地核实元数据；strict 分片分页上限为 1,000，必须显式启用并完成准备。默认仍为 legacy，其缓存路径仍可能超过请求的页长。 | [O04](/zh/compatibility/#o04)、[O06](/zh/compatibility/#o06) / [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[分片模式](/zh/blog/design/list-multipart-uploads/#implementation-20260916) |
 | 权限与持久状态 | 自助改密与创建用户使用独立权限；IAM 持久撤销和桶配置删除状态影响协调升级与恢复，通用桶配置墓碑导出默认关闭。 | [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) / [密码迁移](/zh/compatibility/password-permissions/)、[IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout) |
 | 数据与复制 | 继续修复多池副本、标签与 Object Lock 排序、删除标记恢复、SSE-C 与联邦复制；不自动重建已丢失的历史状态。 | [G07–G10](/zh/compatibility/#g07) / [复制状态检查](/zh/operations/replication/replica-metadata-audit/)、[版本说明](/zh/compatibility/versions/#source-review) |
 | HTTP 与 TLS | 请求头使用绝对读取期限；TLS 默认选择与旧代理、IdP 的互操作需要核对，正文仍使用既有滚动空闲超时。 | [O03](/zh/compatibility/#o03) / [请求头超时](/zh/blog/design/request-header-timeouts/)、[TLS/OIDC](/zh/blog/design/go127-tls-oidc-discovery/) |

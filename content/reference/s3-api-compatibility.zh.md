@@ -76,7 +76,7 @@ PutObjectAcl
 
 - 已发布的 Server 20260903：`ListMultipartUploads` 将非空 `prefix` 当成精确对象名；空 prefix 使用节点本地易失缓存，不具备完整分页、marker 和 delimiter 语义。
 - Server 20260916 以可选 strict 模式增加持久扫描，默认仍保留 legacy 精确键／缓存行为。运行该版本时仍适用其[历史升级契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
-- **#79 待发布后续修复：** 统一使用持久列举，全局处理前缀、目录分组和分页；忽略模式环境变量。确认可读且两个身份字段都不存在的旧上传被省略，不再阻断新上传；删除旧精确键捷径。省略历史记录是明确的 S3 兼容性例外。元数据错误、覆盖不足和资源超限仍报错。预检只作诊断，取消保留原有默认的读取 quorum／尽力删除行为。每页仍需扫描磁盘，迟到创建写入仍可能在取消后恢复上传。详见[候选契约、容量与限制](/zh/blog/design/list-multipart-uploads/#implementation)。
+- **2026-10-18 回退实现（尚未正式发布）：** 撤回默认持久扫描，公开列表恢复无 prefix 的节点缓存和非空 prefix 的精确对象查找；重启漏项、真正前缀筛选及缓存分页缺陷仍然存在。模式开关被忽略并告警，旧共享配置键被容忍；已有 strict 用户会失去可选持久列表和严格取消。诊断扫描保留资源限制但不控制业务入口。身份字段、安全校验、默认尽力取消和后台清理修复保留。见[决策、容量与限制](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
 - `PutBucketLifecycle` 不支持 `AbortIncompleteMultipartUpload` 生命周期动作。
 
 ## 存储桶 API {#id6}

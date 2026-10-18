@@ -2,7 +2,7 @@
 title: "SILO Server 20260903 发布前复审"
 linkTitle: "Server 20260903 复审"
 date: 2026-09-03
-lastmod: 2026-10-17
+lastmod: 2026-10-18
 author: "冯若航"
 summary: >
   对 20260806 之后全部服务端变更的最终对抗性复审：已确认缺陷、修复、否决的简化、必要复杂度、验证证据、明确延期，以及代码 GO 与生产发布之间的区别。2026-09-16 增补 #116 重启与读回验证方法。
@@ -13,11 +13,11 @@ url: "/zh/blog/design/server-release-readiness/"
 ---
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **中文：** 本文关于 #79 分片上传列举的旧方案、启用建议与当时进度仅保留为历史记录；后续设计已由[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。新实现已合入主干、尚未随 Server 版本发布；这里记载的旧版本行为和其他主题结论不因此改变。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 >
-> **English:** The #79 multipart-listing proposals, enablement advice and status in this article are historical. Subsequent design work is governed by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017), which supersedes those earlier proposals. The new implementation is merged into main and remains unreleased; this does not change the documented behavior of older releases or conclusions on other topics.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 
 这是 [SILO 20260903](/zh/blog/release/silo-20260903/) 背后的发布前长期工程记录：为什么不能直接接受早期“所有问题都已解决”的结论，独立复审发现了什么，修复如何收窄，以及复审时距离生产发布还差哪些门禁。链接的发布说明记录了之后的正式交付结果。
 

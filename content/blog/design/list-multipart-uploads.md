@@ -1,11 +1,11 @@
 ---
-title: "ListMultipartUploads: Implementation, Upgrade Contract and Design History"
+title: "ListMultipartUploads: Default Scan Rollback and Future Design"
 linkTitle: "ListMultipartUploads Compatibility"
 date: 2026-08-30
-lastmod: 2026-10-17
+lastmod: 2026-10-18
 author: "Ruohang Feng"
 summary: >
-  Records the final #79 design choices: one persistent listing path, per-record omission of unidentified historical uploads and retirement of the migration switch; explains alternatives, format compatibility, read/write costs, validation and remaining limits.
+  Records the October 18 targeted rollback: withdraw default global scanning while retaining identity, safety and cleanup repairs; explains capacity limits, switch retirement, legacy tradeoffs, future indexing and related records.
 tags: [Design, S3, Compatibility, Multipart]
 weight: 35
 draft: false
@@ -16,22 +16,134 @@ url: "/blog/design/list-multipart-uploads/"
 > **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **English:** The August analysis and September `legacy`/`strict` proposal retained below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). It selects one persistent listing path, individual omission of confirmed unidentified historical uploads, and no migration switch. The code is merged into main but has not shipped in a Server release. Historical sections do not change the behavior of older binaries.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 >
-> **中文：** 本页保留的 8 月分析与 9 月 `legacy`/`strict` 方案已被新设计覆盖，请以[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)为准。新设计统一使用持久列举，逐条跳过经确认缺少身份的历史上传，取消迁移开关；代码已合入主干，尚未随 Server 版本发布。旧章节只用于理解历史，不改变旧版本二进制的实际行为。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 
-> **Source integration, 2026-10-17:** The unified-listing repair passed all eight PR checks and merged through [PR #243](https://github.com/pgsty/silo/pull/243) as [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894). It targets the next Server release and is not included in [Server 20261015](/blog/release/silo-20261015/). Source acceptance does not change installed binaries or container images.
+> **Source integration, 2026-10-17:** The unified-listing repair passed all eight PR checks and merged through [PR #243](https://github.com/pgsty/silo/pull/243) as [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894). Its default-scan choice is now superseded by the October 18 decision below; it is not included in [Server 20261015](/blog/release/silo-20261015/). Source acceptance does not change installed binaries or container images.
 
 > **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Its opt-in contract is preserved in the historical section; the unreleased follow-up is described next. Dated source-status and validation records below retain their original scope.
 
 
 This is the problem, design, and decision record for [SILO issue #79](https://github.com/pgsty/silo/issues/79).
 
-Reading guide: [unreleased behavior](#implementation) describes the client and operator contract; the [October 17 decision record](#decision-20261017) explains the choices, rejected alternatives and costs; the [September release contract](#implementation-20260916) and [August analysis](#analysis-20260830) preserve the historical rationale.
+Reading guide: [candidate behavior](#implementation), the [October 18 rollback decision](#decision-20261018), and the [related-document inventory](#related-records). October 17, September and August sections remain historical records.
 
-## Unreleased: one persistent listing path {#implementation}
+## Unreleased: restore legacy listing and defer durable enumeration {#implementation}
+
+**October 18 decision: a targeted partial rollback.** Withdraw #243's mandatory persistent scan from public listing, retaining identity metadata, safety checks, default cancellation and cleanup repairs. Do not restore the `legacy`/`strict` runtime switch. This section describes rollback commit [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d), which remains unreleased. Documentation updates do not change installed Server 20260916 binaries or their existing contract.
+
+Public `ListMultipartUploads` returns to the two older paths: an empty `prefix` reads the node-local cache; a nonempty `prefix` looks up an exact object key. Restarting or changing serving nodes can omit uploads. True prefix filtering, grouping and cache pagination remain incomplete: `prefix=trips/` does not enumerate `trips/a.mp4`, while `prefix=trips/a.mp4` can find uploads for that object. **These are retained defects, not completion of #79.**
+
+Keep recognition of `MINIO_API_MULTIPART_LISTING` and a startup warning, but ignore its value. Tolerate the obsolete shared `api multipart_listing` key without rejecting startup, discarding other settings or automatically deleting user configuration. Add no replacement switch. **Existing strict users lose optional durable listing and strict cancellation; this upgrade is not behavior-preserving for them.** They must assess workflows that depend on complete discovery. Published older binaries retain their original strict behavior.
+
+The signed `GET /minio/admin/v3/multipart-preflight` diagnostic retains `admin:StorageInfo` authorization and reports `mode: "legacy"` to describe public listing. `complete` and `ready` still describe diagnostic coverage and historical records; they do not gate startup, uploads or public listing. Run diagnostics on demand. They retain scan limits, are not a large-scale cleanup tool and should not be retried indefinitely on failure.
+
+## October 18 decision: withdraw default scanning, retain independent repairs {#decision-20261018}
+
+This decision supersedes the [October 17 choice of persistent listing by default](#decision-20261017). Its analysis and implementation record remain below as history, not the target behavior for this release.
+
+### Restart never deleted the uploads
+
+Upload metadata and parts were already on disk in older versions. Restarting discarded the in-memory inventory, not the uploads; an empty list never proved that storage had been reclaimed. The bucket/object identity fields make records identifiable. They do not turn previously temporary data into persistent data.
+
+The newly introduced failure chain was different: records accumulate on disk; every listing scans the namespace again; a fixed directory-entry budget is exhausted; the request returns 503. Restart preserves those records, so the next request fails again. Other buckets, both directory levels and duplicate entries on each drive consume the same request budget. Reducing `max-uploads` does not reduce discovery work.
+
+100,000 is an implementation budget for physical directory entries, not an S3 upload-count limit or a lifetime count of completed uploads. In one healthy 16-drive erasure set, with each incomplete upload using a distinct key and directories on every drive, 3,126 uploads require approximately `16 × (3,126 + 3,126) = 100,032` entries. Layout and replica differences change that boundary; it is not a universal cluster quota.
+
+Resource protection is necessary. The mistake is making repeated global discovery with this scale boundary the only normal listing path. A passing test that expects `SlowDown` above the limit proves that protection works, not that the workload is supported.
+
+### Implementation provenance and responsibility
+
+Trace the three decisions separately rather than attributing later restrictions to the original contributor:
+
+| Change | Verifiable source |
+| --- | --- |
+| Store upload identity, discover disk records and paginate globally | mr javad seydi's [original commit `4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074ccdd3d1fc2453e68f6a18d76abd16e253), incorporated through #198; it did not contain this 100,000-entry budget |
+| 100,000 directory entries, two scan slots and a 30-second budget | Subsequent maintenance commit [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d8639843e19412fe2607bf3bad734bb1), bounding scan resource use |
+| Make scanning the only public listing path | Subsequent maintenance commit [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe62ed6e07016885552feebcb59f779631), merged through #243 |
+
+The budget and default switch were subsequent project maintenance decisions, not an upload quota proposed by the original contributor. The integration mistake was making a protected but capacity-limited scanner the mandatory default while its capacity counterexample remained. Maintainers own that tradeoff; the original identity metadata and discovery work retain their value.
+
+### Why a partial rollback
+
+| Option | Benefit | Cost | Decision |
+| --- | --- | --- | --- |
+| Keep persistent scanning as default | Identified uploads survive restart discovery; uniform prefixes and pagination | Repeated full scans, cross-bucket effects and persistent failure above the budget | Reject |
+| Revert all of #243 | Restore the previous default and opt-in strict contract | Restore the switch, two listing/cancellation modes and an option that still has the scan problem | Compatibility-first alternative if all existing strict behavior must survive |
+| **Targeted partial rollback** | Remove the new default failure mechanism, retain independent repairs and fewer runtime modes | Retain old listing defects; retire optional strict capability; require a dedicated patch and acceptance | **Selected** |
+| Revert all multipart work | Broad return to older code | Lose useful identity, safety and cleanup repairs; larger regression scope | Reject |
+| Finish a persistent index before release | Potentially combine discovery, pagination and scalability | Introduce index consistency, recovery and migration work into a maintenance release | Separate follow-up |
+
+Retain the existing bucket/object identity fields in `xl.meta` and their removal on completion, UploadID path validation, successful-abort cache and peer notification, native upload-time parsing and stale-upload cleanup repairs. Preserve current read-quorum validation and best-effort Abort; do not restore the strict branch or claim HTTP 204 confirms deletion of every physical copy. Delayed creation writes can still restore an upload; no persistent creation fence is added.
+
+Retain the scanner and identity-conflict checks for explicit diagnostics. Preserve ordering and pagination tests as a foundation, not evidence that the legacy cache path supports those features. IAM, Object Lock and ordinary object-listing repairs retain their own acceptance boundaries.
+
+### What accumulation can still break
+
+The rollback cuts the chain from global persistent upload count to mandatory discovery and exhaustion of a fixed budget on every public request. Public listing and lower-level exact lookups do not acquire diagnostic scan slots or inherit its 100,000-entry budget, 30-second deadline or admission limit.
+
+This is not unlimited-capacity support. The empty-prefix cache path still traverses, sorts and constructs responses; many active uploads increase CPU, memory and response size. Exact lookup still reads the chosen object's upload directory, so many uploads for one key can be expensive. Other buckets' in-memory records can still increase cache traversal work. Residual parts consume storage, and explicit diagnostics can still exceed their budget or compete with foreground I/O.
+
+Stale cleanup walks disk directories directly rather than discovering records through the public API. The listing budget therefore does not inherently deadlock cleanup. Offline drives, deletion failures and scan time can still delay reclamation. Default 24-hour expiry and six-hour cleanup checks remain unchanged. Do not shorten upload lifetime to reduce listing work, or treat a restart as part-data cleanup.
+
+The separately merged [empty upload-parent cleanup repair](https://github.com/pgsty/silo/commit/0f9199e0c3e768bb7699bd640ddad3d6b5d0628b) is also retained: each cleanup pass attempts to remove emptied hash parents without waiting another expiry period after child deletion refreshed their modification time. Active or unreadable uploads remain. This reduces leftover directories; it does not make full scans scale with page size.
+
+This is an acceptable maintenance-release containment measure: withdraw the newly introduced default failure while documenting the old limitations. Workflows requiring complete inventories for recovery, auditing or bulk cancellation remain unsupported by this solution.
+
+### The reasonable cost of ordering
+
+Sorting is not the direct cause of the hard boundary: directory discovery can exhaust the budget before sorting starts. Removing ordering does not remove discovery I/O, and no CPU profile here establishes that sorting dominates runtime.
+
+A reasonable target is for a page to pay mainly for that page and necessary index access, or to amortize discovery and sorting across a complete traversal. It should not rediscover other buckets and every replica for each page. Top-K selection can reduce memory without reducing full-discovery I/O; a higher budget merely moves the failure point.
+
+Future work can evaluate bucket-scoped discovery, traversal reuse and bounded caches with explicit expiry, concurrent-update and continuation semantics. Large or frequent listings with cross-node and restart behavior require a bucket-scoped ordered persistent index, including its updates on create, complete, abort and cleanup, crash/late-write reconciliation, and rebuild behavior. A continuation token alone cannot turn hashed directories into a key-range index. Match these costs to the required workload rather than expanding the storage protocol during this release.
+
+### Acceptance boundaries {#rollback-validation}
+
+Test populated active caches, real on-disk inventories beyond the old budget, other buckets, many uploads for one key and actual storage reopening separately. HTTP 200 from an empty cache is not sufficient capacity evidence: record returned counts, storage calls, latency and allocation as well. Busy diagnostic slots or an unreadable multipart root must not redirect public requests into global scanning.
+
+Known-ID part upload, completion, cancellation and background cleanup retain their regression requirements. Obsolete configuration must remain tolerated; startup warnings and diagnostic mode must match actual behavior. Evidence applies only to the tested source. Integration, artifact publication and deployment remain separate deliverables.
+
+Local validation on October 18 passed public-entry isolation, known-ID operations after reopening, diagnostic identity/budget/cancellation regressions, relevant race tests, configuration compatibility, lint, generation and compatibility-identifier checks, and the server build. The isolation test returned 503 `SlowDownRead` and `SlowDown` before the change; afterward it returned 200 with no multipart-root scan. A separate four-directory server process verified the ignored strict setting and warning, an actual process restart, resumed upload, completion/readback and cancellation.
+
+Running `BenchmarkMultipartPublicListingCapacity -benchtime=1x` explicitly at rollback commit `4733e1423cfe703951f52ff9cbd286df2cf9d79d` produced the following results using local directories on macOS arm64, without isolation from other local system load. Half of each distinct-key fixture belongs to another bucket. Fixture creation is excluded from request timing.
+
+| Layout and real upload inventory | Request | Returned | Object-layer time | Multipart ListDir calls |
+| --- | --- | --- | --- | --- |
+| 4 drives, 10,000 distinct keys | Populated cache, max-uploads=1,000 | 5,000 | 1.298 ms | 0 |
+| 16 drives, 3,126 distinct keys | Populated cache, max-uploads=1,000 | 1,563 | 0.623 ms | 0 |
+| 16 drives, 10,000 uploads for one key | Populated cache, max-uploads=1,000 | 10,000 | 2.453 ms | 0 |
+| Same inventory after clearing the cache | Exact key, max-uploads=1,000 | 1,000 | 18.416 ms | 1 |
+
+The 16-drive/3,126 case first confirms that the retained scanner still exhausts its budget, then verifies public-path success. Cache responses exceeding the requested page size demonstrate the retained pagination defect; this is not a pagination repair. Empty-prefix requests after cache loss were also checked to return empty, without treating that as complete-inventory acceptance. The single-key lookup allocated about 11.4 MB, illustrating the legacy path's own scaling cost. These are single object-layer measurements excluding HTTP serialization and network work, not throughput, p95 latency or distributed-production guarantees. The process test uses test mode to permit temporary directories on the root filesystem, not independent physical drives.
+
+### Related documentation {#related-records}
+
+These are the site's articles and reference pages directly connected to this listing repair, maintained in both languages. Unrelated multipart checksum and Object Lock articles are outside this inventory.
+
+| Document | Relationship |
+| --- | --- |
+| [This ListMultipartUploads record](#decision-20261018) | Main #79 record: August analysis, September contract, October 17 decision and this rollback |
+| [SILO Server 20260903 release review](/blog/design/server-release-readiness/) | Classifies #79 as a known listing defect and separates code acceptance from publication |
+| [Silo 20260903 release](/blog/release/silo-20260903/) | Records retained prefix and pagination limitations |
+| [SILO 20260916 release notes](/blog/release/silo-20260916/) | Published legacy default, opt-in strict behavior and cancellation boundaries |
+| [Multi-pool object consistency](/blog/design/multi-pool-object-consistency/) | Related reference distinguishing that repair from multipart listing |
+| [LIST recovery and lock cost](/blog/design/listing-recovery-lock-cost/) | Related distinction: ordinary ListObjects recovery is separate from #79 and is not part of this rollback |
+| [Compatibility overview](/compatibility/) | Index of listing and upgrade impacts |
+| [Server compatibility](/compatibility/server/) | Behavior differences and admin interfaces |
+| [Component versions](/compatibility/versions/) | Published versions and subsequent source status |
+| [Core settings](/reference/minio-server/settings/core/#multipart-listing) | Retired environment switch, obsolete configuration and diagnostics |
+| [S3 API compatibility](/reference/s3-api-compatibility/#differences-from-s3-apis-for-multipart-uploads) | Remaining public listing limitations |
+| [IAM upgrade and recovery](/operations/replication/iam-upgrade/) | Historical reference to separate multipart preparation |
+| [Contributors](/about/contributors/) | #79 reporter and original #198 contribution; later maintenance choices are separate |
+
+
+## October 17 implementation: persistent listing (superseded) {#implementation-20261017}
+
+> **Historical record:** The following describes #243 at the time. Its default behavior is superseded by the October 18 decision and is no longer the candidate target.
 
 **This section describes the #79 follow-up candidate, not a published release.** It supersedes the mode-switch design below for builds containing this change. Server 20260916 keeps its documented `legacy`/`strict` behavior. The follow-up removes the switch and makes durable listing automatic, including on an existing cluster.
 
@@ -82,6 +194,8 @@ Cancellation keeps the previous **default** read-quorum check, best-effort delet
 Regression coverage includes mixed old/new HTTP pages, delimiter groups, old uploads continued and completed by known ID, invalid/partial identities, read failures, actual storage-layer reopen without an upload cache, multi-set/pool results, removed markers, scan admission and preserved default cancellation. The explicit `BenchmarkMultipartListingCapacity` fixture exercises 1,000 and 10,000 real on-disk uploads, including mixed old/new records and another bucket; its overflow case checks for an error rather than a partial successful response. These local checks do not certify distributed storage latency or foreground upload throughput in production.
 
 ## October 17 decision record: unified listing with a historical exception {#decision-20261017}
+
+> **Historical record:** The following describes #243 at the time. Its default behavior is superseded by the October 18 decision and is no longer the candidate target.
 
 **Status: selected design, local validation and PR CI complete; merged into main, unreleased.** This section describes implementation commit `4ed86dfe62ed6e07016885552feebcb59f779631`, accepted through [PR #243](https://github.com/pgsty/silo/pull/243) on October 17, 2026. The merge does not establish a published artifact or production rollout. Server 20260916 and Server 20261015 binaries still use the historical legacy/strict contract below.
 
@@ -203,6 +317,8 @@ go test ./cmd -run '^$' \
   -benchtime=1x -benchmem -timeout=10m
 ```
 
+This command belongs to the October 17 implementation described in this section. After the October 18 rollback, the retained scan benchmark is named `BenchmarkMultipartDiagnosticScanCapacity` and covers diagnostic scanning only. Public listing uses `BenchmarkMultipartPublicListingCapacity` above; the two are not evidence for the same request path.
+
 ### Why “reappears after cancellation” is separate {#decision-abort}
 
 Listing and cancellation are related but distinct. A reliable list discovers uploads that still exist. Guaranteeing that no in-flight creation can restore an upload after successful cancellation requires creation and cancellation to share a durable ordering rule.
@@ -257,11 +373,11 @@ Retain the defined scope: ordinary upgrades should gain reliable listing for ide
 ## Historical: September 16 implementation and upgrade contract {#implementation-20260916}
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **English:** This mode-switch and drain-before-enabling design is superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017); use that record for the new design. The text below preserves the Server 20260916 contract, which still applies to those installed binaries. The new code is merged into main and remains unreleased.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 >
-> **中文：** 本节的模式开关与排空启用方案已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。以下仅保留 Server 20260916 的历史契约；已安装旧版本仍按该契约运行。新设计已合入主干，尚未发布。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 
 [PR #198](https://github.com/pgsty/silo/pull/198) retains mr javad seydi's original metadata-and-scan contribution and adds maintainer fixes for disappearing markers, incomplete discovery, cancellation confirmation and upgrade diagnostics. The pre-release compatibility follow-up restores `legacy` as the default and makes strict mode an explicit process-environment opt-in. This section describes those source changes. **It is not included in Server 20260903, and does not establish production performance or deployment acceptance.** The August 30 analysis below remains a historical design record.
 
@@ -323,13 +439,13 @@ A September 16 temporary Docker Desktop arm64 run used two nodes, four APFS-back
 ## Historical: August 30 analysis and proposal {#analysis-20260830}
 
 > [!WARNING]
-> **旧版分片列举设计已被覆盖 · Earlier multipart-listing designs superseded (2026-10-17)**
+> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
 >
-> **English:** The early proposals, recommendation and migration gates below are superseded by the [latest design decision (English)](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261017). They remain only as historical reasoning; their option numbers, capability advertisement, drain estimate and enablement advice do not define the implementation now on main.
+> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
 >
-> **中文：** 以下早期分析、推荐方案和迁移门槛已被[最新设计决策（中文）](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261017)覆盖，请参考新版。这里保留原始思考供追溯；其中的方案编号、能力广播、排空估算和启用建议均不是本次主干实现的要求。
+> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 
-> **Archived analysis (2026-08-30):** “current”, “recommended”, option numbers and gate language below refer to that review and proposal. For the unreleased candidate, use the [October 17 decision](#decision-20261017); for Server 20260916, use its [dated contract](#implementation-20260916). The old writer-upgrade/drain gate is not the candidate's prerequisite. Capability advertisement and the one-day drain estimate were proposals, not current guarantees.
+> **Archived analysis (2026-08-30):** “current”, “recommended”, option numbers and gate language below refer to that review and proposal. For the unreleased candidate, use the [October 18 decision](#decision-20261018); for Server 20260916, use its [dated contract](#implementation-20260916). The old writer-upgrade/drain gate is not the candidate's prerequisite. Capability advertisement and the one-day drain estimate were proposals, not current guarantees.
 
 ### The problem in plain language {#plain-language}
 
