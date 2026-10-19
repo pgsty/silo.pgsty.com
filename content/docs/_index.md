@@ -1,7 +1,7 @@
 ---
 title: "PGSTY SILO Documentation"
 linkTitle: "Docs"
-description: "pgsty/silo 20261015 Documentation"
+description: "pgsty/silo 20261018 Documentation"
 url: "/docs/"
 weight: 1
 type: docs
@@ -10,9 +10,8 @@ sidebar_expanded: true
 upstream_link: ""
 ---
 
-> [!WARNING]
-> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
+**This manual targets [SILO Server 20261018](/blog/release/silo-20261018/), now publicly available.** Key changes are Object Lock and IAM authorization, ordinary LIST recovery, multipart cleanup and retirement of strict multipart listing. The current public Server is 20261018.
 
-> **Current Console:** [v2.4.1](/blog/release/console-2.4.1/), with mcli 20260916 and pkg v3.14.1. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
+The selected stack is Console v2.4.2, mcli 20261018, Server pkg v3.14.3 and minio-go v7.4.1; standalone Console and mcli still use pkg v3.14.2. Before upgrading, read the [component matrix](/compatibility/versions/), [upgrade requirements](/blog/release/silo-20261018/#upgrade) and [security update](/blog/security/20261018-release-hardening/).
 
 {{< home-docs >}}

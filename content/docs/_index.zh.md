@@ -1,7 +1,7 @@
 ---
 title: "PGSTY SILO 文档"
 linkTitle: "文档"
-description: "pgsty/silo 20261015 文档手册"
+description: "pgsty/silo 20261018 文档手册"
 url: "/zh/docs/"
 weight: 1
 type: docs
@@ -10,9 +10,8 @@ upstream_link: ""
 sidebar_expanded: true
 ---
 
-> [!WARNING]
-> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
+**本手册以 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 为目标版本，现已正式发布。** 重点变化包括 Object Lock 与 IAM 授权修复、普通 LIST 恢复、分片清理和 strict 分片列表退役。当前正式 Server 为 20261018。
 
-> **当前控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
+配套组件为 Console v2.4.2、mcli 20261018、Server pkg v3.14.3 和 minio-go v7.4.1；独立 Console 与 mcli 的 pkg 仍为 v3.14.2。开始升级前，阅读[组件矩阵](/zh/compatibility/versions/)、[本版升级要求](/zh/blog/release/silo-20261018/#upgrade)和[安全更新](/zh/blog/security/20261018-release-hardening/)。
 
 {{< home-docs >}}

@@ -9,10 +9,23 @@
 {{- $socialImage := "images/silo-social-card.webp" | absURL -}}
 {{- $serverTag := hugo.Data.releases.server.tag -}}
 {{- $serverBuild := hugo.Data.releases.server.build -}}
+{{- $serverPublished := hugo.Data.releases.server.published -}}
+{{- $serverVer := replace hugo.Data.releases.server.date "-" "" -}}
+{{- $serverNotes := relLangURL (printf "blog/release/silo-%s/" $serverVer) -}}
+{{- $serverReleaseURL := $serverNotes -}}
+{{- if $serverPublished -}}
+  {{- $serverReleaseURL = printf "https://github.com/pgsty/silo/releases/tag/%s" $serverTag -}}
+{{- end -}}
 {{- $serverBase := printf "https://github.com/pgsty/silo/releases/download/%s" $serverTag -}}
 {{- $clientTag := hugo.Data.releases.client.tag -}}
 {{- $clientBuild := hugo.Data.releases.client.build -}}
 {{- $clientBase := printf "https://github.com/pgsty/mc/releases/download/%s" $clientTag -}}
+{{- $consoleTag := hugo.Data.releases.console.tag -}}
+{{- $consoleBuild := hugo.Data.releases.console.build -}}
+{{- $consoleBase := printf "https://github.com/pgsty/silo-console/releases/download/%s" $consoleTag -}}
+{{- $kesTag := hugo.Data.releases.kes.tag -}}
+{{- $kesBuild := hugo.Data.releases.kes.build -}}
+{{- $kesBase := printf "https://github.com/pgsty/kes/releases/download/%s" $kesTag -}}
     <section class="download-hero" aria-labelledby="download-title">
       <div class="download-grid-bg" aria-hidden="true"></div>
       <div class="landing-container">
@@ -20,13 +33,17 @@
           <p class="section-eyebrow download-eyebrow"><span class="silkscreen">DOWNLOAD MATRIX</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h1 id="download-title">{{ if $zh }}下载与安装 <span>SILO</span>{{ else }}Download &amp; Install <span>SILO</span>{{ end }}</h1>
           <p>{{ if $zh }}选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Choose the server or admin client first, then use the install path that matches your operating system, architecture, and deployment model.{{ end }}</p>
-          <p>{{ if $zh }}Console v2.4.2、mcli 20261018 与 pkg v3.14.2 已发布，见 <a href="/zh/compatibility/versions/">组件版本与升级顺序</a>。{{ else }}Console v2.4.2, mcli 20261018 and pkg v3.14.2 are available; see <a href="/compatibility/versions/">component versions and upgrade order</a>.{{ end }}</p>
+          <p>{{ if $zh }}已发布：<a href="#console">Console {{ $consoleTag }}</a>、<a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>、<a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a>、<a href="#pkg">pkg {{ hugo.Data.releases.pkg.tag }}</a>。见<a href="{{ relLangURL "compatibility/versions/" }}">组件版本与升级顺序</a>。{{ else }}Available now: <a href="#console">Console {{ $consoleTag }}</a>, <a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>, <a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a> and <a href="#pkg">pkg {{ hugo.Data.releases.pkg.tag }}</a>. See <a href="{{ relLangURL "compatibility/versions/" }}">component versions and upgrade order</a>.{{ end }}</p>
           <div class="download-release-line">
-            <span class="release-live"><i aria-hidden="true"></i>{{ if $zh }}当前服务端发行版{{ else }}CURRENT SERVER RELEASE{{ end }}</span>
-            <a href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
+            <span class="release-live"><i aria-hidden="true"></i>{{ if $serverPublished }}{{ if $zh }}当前服务端发行版{{ else }}CURRENT SERVER RELEASE{{ end }}{{ else }}{{ if $zh }}服务端发布准备{{ else }}SERVER RELEASE PREPARATION{{ end }}{{ end }}</span>
+            <a href="{{ $serverReleaseURL }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
             <span>{{ hugo.Data.releases.server.date }} · amd64 / arm64</span>
           </div>
         </div>
+
+        {{ if not $serverPublished }}
+        <div class="security-note" role="note"><i class="fas fa-clock" aria-hidden="true"></i><span>{{ if $zh }}Server {{ $serverVer }} 仍为 Draft。下方 Server 命令与文件名为新版安装模板，应在制品公开并验收后使用；待发布的制品按钮暂时指向版本说明。当前正式 Server 为 <a href="https://github.com/pgsty/silo/releases/tag/{{ hugo.Data.releases.published_server.tag }}">{{ replace hugo.Data.releases.published_server.date "-" "" }}</a>。mcli 与 Console 独立发布。{{ else }}Server {{ $serverVer }} remains a Draft. Server commands and filenames below are installation templates for use after public artifacts are accepted; pending artifact buttons open the release notes. The current public Server is <a href="https://github.com/pgsty/silo/releases/tag/{{ hugo.Data.releases.published_server.tag }}">{{ replace hugo.Data.releases.published_server.date "-" "" }}</a>. mcli and Console release independently.{{ end }}</span></div>
+        {{ end }}
 
         <div class="product-choice-grid" aria-label="{{ if $zh }}选择下载产品{{ else }}Choose a product{{ end }}">
           <a class="product-choice-card product-choice-card--server" href="#server" data-reveal>
@@ -66,10 +83,10 @@
             <h2 id="server-title">SILO Server</h2>
             <p>{{ if $zh }}从本地验证到多节点生产集群，选择与你的控制边界相匹配的交付方式。{{ else }}From local validation to a multi-node production cluster, choose the delivery path that matches your control boundary.{{ end }}</p>
           </div>
-          <a class="version-card" href="https://github.com/pgsty/silo/releases/tag/{{ $serverTag }}" target="_blank" rel="noopener">
-            <span>{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}</span>
+          <a class="version-card" href="{{ $serverReleaseURL }}" target="_blank" rel="noopener">
+            <span>{{ if $serverPublished }}{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}{{ else }}{{ if $zh }}目标版本 · 待发布{{ else }}TARGET VERSION · PENDING{{ end }}{{ end }}</span>
             <strong>{{ hugo.Data.releases.server.date }}</strong>
-            <small>{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }} ↗</small>
+            <small>{{ if $serverPublished }}{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }}{{ else }}{{ if $zh }}查看发布准备说明{{ else }}Read the preparation notes{{ end }}{{ end }} ↗</small>
           </a>
         </div>
 
@@ -208,26 +225,26 @@
                 <div><span class="method-kicker">NATIVE PACKAGES</span><h3>{{ if $zh }}使用系统软件包管理器安装{{ else }}Install with native system packages{{ end }}</h3></div>
                 <div class="method-tags"><span>RPM</span><span>DEB</span><span>APK</span><span>SHA-256</span></div>
               </div>
-              <p class="method-lead">{{ if $zh }}每个发行版都提供 x86_64 与 ARM64 软件包。直接下载当前版本，或前往 GitHub Releases 选择旧版本。{{ else }}Every release includes x86_64 and ARM64 packages. Download the current build directly, or use GitHub Releases for older versions.{{ end }}</p>
+              <p class="method-lead">{{ if $zh }}每个发行版都提供 x86_64 与 ARM64 软件包。下方列出目标版本文件名；公开后可直接下载，历史版本见 GitHub Releases。{{ else }}Every release includes x86_64 and ARM64 packages. Target filenames are listed below and become direct downloads after publication; use GitHub Releases for older versions.{{ end }}</p>
               <div class="asset-family-grid">
                 <article class="asset-family">
                   <div class="asset-family-head"><span>RPM</span><p>RHEL · Rocky · Alma · Fedora</p></div>
-                  <a href="{{ printf "%s/silo-%s-1PGSTY.x86_64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo-%s-1PGSTY.x86_64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo-%s-1PGSTY.aarch64.rpm" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo-%s-1PGSTY.aarch64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo-%s-1PGSTY.x86_64.rpm" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo-%s-1PGSTY.x86_64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo-%s-1PGSTY.aarch64.rpm" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo-%s-1PGSTY.aarch64.rpm" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>DEB</span><p>Debian · Ubuntu</p></div>
-                  <a href="{{ printf "%s/silo_%s-1PGSTY_amd64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>amd64</b><small>{{ printf "silo_%s-1PGSTY_amd64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s-1PGSTY_arm64.deb" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s-1PGSTY_arm64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s-1PGSTY_amd64.deb" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>amd64</b><small>{{ printf "silo_%s-1PGSTY_amd64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s-1PGSTY_arm64.deb" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s-1PGSTY_arm64.deb" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="asset-family">
                   <div class="asset-family-head"><span>APK</span><p>Alpine Linux</p></div>
-                  <a href="{{ printf "%s/silo_%s_x86_64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_x86_64.apk" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_aarch64.apk" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_aarch64.apk" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_x86_64.apk" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_x86_64.apk" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_aarch64.apk" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_aarch64.apk" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="package-footer">
-                <a href="{{ printf "%s/silo_%s_packages_checksums.txt" $serverBase $serverBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}软件包校验和{{ else }}package checksums{{ end }}</a>
+                <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_packages_checksums.txt" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}软件包校验和{{ else }}package checksums{{ end }}</a>
                 <a href="https://github.com/pgsty/silo/releases" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}全部发行制品{{ else }}All release artifacts{{ end }}</a>
               </div>
             </section>
@@ -241,18 +258,18 @@
               <div class="binary-grid">
                 <article class="binary-platform" data-platform="linux">
                   <div><span class="platform-icon"><i class="fab fa-linux" aria-hidden="true"></i></span><h4>Linux</h4><small>GNU / musl environments</small></div>
-                  <a href="{{ printf "%s/silo_%s_linux_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_linux_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_linux_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_linux_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_linux_amd64.tar.gz" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_linux_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_linux_arm64.tar.gz" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_linux_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="binary-platform" data-platform="macos">
                   <div><span class="platform-icon"><i class="fab fa-apple" aria-hidden="true"></i></span><h4>macOS</h4><small>Intel / Apple Silicon</small></div>
-                  <a href="{{ printf "%s/silo_%s_darwin_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>Intel</b><small>{{ printf "silo_%s_darwin_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_darwin_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>Apple Silicon</b><small>{{ printf "silo_%s_darwin_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_darwin_amd64.tar.gz" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>Intel</b><small>{{ printf "silo_%s_darwin_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_darwin_arm64.tar.gz" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>Apple Silicon</b><small>{{ printf "silo_%s_darwin_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
                 <article class="binary-platform" data-platform="windows">
                   <div><span class="platform-icon"><i class="fab fa-windows" aria-hidden="true"></i></span><h4>Windows</h4><small>PowerShell / Windows Server</small></div>
-                  <a href="{{ printf "%s/silo_%s_windows_amd64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_windows_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/silo_%s_windows_arm64.tar.gz" $serverBase $serverBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_windows_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_windows_amd64.tar.gz" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_windows_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_windows_arm64.tar.gz" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_windows_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="download-code download-code--compact">
@@ -263,7 +280,7 @@ sudo install -m 0755 silo /usr/local/bin/silo
 silo --version</code></pre>
               </div>
               <div class="package-footer">
-                <a href="{{ printf "%s/silo_%s_checksums.txt" $serverBase $serverBuild }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}归档校验和{{ else }}archive checksums{{ end }}</a>
+                <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_checksums.txt" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}归档校验和{{ else }}archive checksums{{ end }}</a>
               </div>
             </section>
 
@@ -320,7 +337,7 @@ mcli ls sss/</code></pre>
             <section class="download-panel" id="server-source" role="tabpanel" aria-labelledby="tab-server-source" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}从发行标签构建{{ else }}Build from the release tag{{ end }}</h3></div>
-                <div class="method-tags"><span>Go 1.27.1+</span><span>AGPLv3</span><span>make</span></div>
+                <div class="method-tags"><span>Go 1.27.2+</span><span>AGPLv3</span><span>make</span></div>
               </div>
               <div class="method-grid">
                 <div class="method-main">
@@ -463,7 +480,7 @@ make build
                     <span class="aside-icon"><i class="fas fa-box-open" aria-hidden="true"></i></span>
                     <p class="silkscreen">BUNDLED CLIENT</p>
                     <h4>{{ if $zh }}SILO 镜像内置 mcli{{ else }}mcli ships inside the SILO image{{ end }}</h4>
-                    <p>{{ if $zh }}默认服务端镜像已提供 <code>mc</code> 命令。{{ else }}The default server image already ships the <code>mc</code> command.{{ end }}</p>
+                    <p>{{ if $zh }}默认服务端镜像提供 <code>mcli</code>，并保留 <code>mc</code> 兼容别名。{{ else }}The default server image ships <code>mcli</code> with a compatible <code>mc</code> alias.{{ end }}</p>
                   </div>
                 </aside>
               </div>
@@ -472,7 +489,7 @@ make build
             <section class="download-panel" id="client-source" role="tabpanel" aria-labelledby="tab-client-source" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}构建维护版客户端{{ else }}Build the maintained client{{ end }}</h3></div>
-                <div class="method-tags"><span>Go 1.27.1+</span><span>AGPLv3</span><span>make</span></div>
+                <div class="method-tags"><span>Go 1.27.2+</span><span>AGPLv3</span><span>make</span></div>
               </div>
               <div class="method-grid">
                 <div class="method-main">
@@ -493,6 +510,94 @@ make build
             </section>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="download-product-section" id="console" aria-labelledby="console-title">
+      <div class="landing-container">
+        <div class="download-section-head" data-reveal>
+          <div>
+            <p class="section-eyebrow"><span class="silkscreen">03 / WEB CONSOLE</span></p>
+            <h2 id="console-title">SILO Console {{ $consoleTag }}</h2>
+            <p>{{ if $zh }}独立部署的管理控制台。Server 已嵌入 Console；更新独立 Console 不会替换 Server 或修复其安全问题。{{ else }}The separately deployed administration console. Server already embeds Console; updating a standalone Console does not replace Server or apply its security repairs.{{ end }}</p>
+          </div>
+          <a class="version-card" href="{{ relLangURL (printf "blog/release/console-%s/" $consoleBuild) }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ $consoleTag }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
+        </div>
+        <div class="asset-family-grid">
+          <article class="asset-family">
+            <div class="asset-family-head"><span>Linux</span><p>amd64 / arm64</p></div>
+            {{ range slice "amd64" "arm64" }}
+            <a href="{{ $consoleBase }}/silo-console-linux-{{ . }}.tar.gz"><b>{{ . }}</b><small>silo-console-linux-{{ . }}.tar.gz</small><i class="fas fa-download" aria-hidden="true"></i></a>
+            {{ end }}
+          </article>
+          <article class="asset-family">
+            <div class="asset-family-head"><span>macOS</span><p>Intel / Apple Silicon</p></div>
+            {{ range slice "amd64" "arm64" }}
+            <a href="{{ $consoleBase }}/silo-console-darwin-{{ . }}.tar.gz"><b>{{ . }}</b><small>silo-console-darwin-{{ . }}.tar.gz</small><i class="fas fa-download" aria-hidden="true"></i></a>
+            {{ end }}
+          </article>
+          <article class="asset-family">
+            <div class="asset-family-head"><span>Windows / Packages</span><p>RPM · DEB · APK</p></div>
+            <a href="{{ $consoleBase }}/silo-console-windows-amd64.zip"><b>Windows</b><small>silo-console-windows-amd64.zip</small><i class="fas fa-download" aria-hidden="true"></i></a>
+            <a href="https://github.com/pgsty/silo-console/releases/tag/{{ $consoleTag }}"><b>Linux</b><small>{{ if $zh }}全部软件包与 ARMv6 制品{{ else }}All packages and ARMv6 artifacts{{ end }}</small><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+          </article>
+        </div>
+        <div class="method-actions">
+          <a class="btn btn-line" href="{{ $consoleBase }}/silo-console_{{ $consoleBuild }}_checksums.txt">SHA-256</a>
+          <a class="btn btn-line" href="https://hub.docker.com/r/pgsty/silo-console">Docker Hub · {{ $consoleTag }}</a>
+          <a class="btn btn-line" href="https://github.com/pgsty/silo-console/blob/{{ $consoleTag }}/README.md">{{ if $zh }}配置与启动{{ else }}Configuration and startup{{ end }}</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="download-product-section" id="kes" aria-labelledby="kes-title">
+      <div class="landing-container">
+        <div class="download-section-head" data-reveal>
+          <div>
+            <p class="section-eyebrow"><span class="silkscreen">04 / KEY ENCRYPTION SERVICE</span></p>
+            <h2 id="kes-title">PGSTY KES {{ replace hugo.Data.releases.kes.date "-" "" }}</h2>
+            <p>{{ if $zh }}按需独立部署的外部密钥服务。先配置 TLS、应用身份、策略与持久密钥存储；SILO 连接 KES，KES 再连接 OpenBao。{{ else }}An optional, separate key service. Configure TLS, application identities, policies and a persistent key store first. SILO connects to KES; KES connects to OpenBao.{{ end }}</p>
+          </div>
+          <a class="version-card" href="{{ relLangURL (printf "blog/release/kes-%s/" (replace hugo.Data.releases.kes.date "-" "")) }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.kes.date }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
+        </div>
+        <div class="asset-family-grid">
+          {{ range slice "linux" "darwin" "windows" }}
+          {{ $os := . }}
+          <article class="asset-family">
+            <div class="asset-family-head"><span>{{ if eq $os "darwin" }}macOS{{ else }}{{ title $os }}{{ end }}</span><p>amd64 / arm64</p></div>
+            {{ range slice "amd64" "arm64" }}
+            {{ $archive := printf "kes_%s_%s_%s.tar.gz" $kesBuild $os . }}
+            <a href="{{ $kesBase }}/{{ $archive }}"><b>{{ . }}</b><small>{{ $archive }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+            {{ end }}
+          </article>
+          {{ end }}
+        </div>
+        <div class="method-actions">
+          <a class="btn btn-line" href="{{ $kesBase }}/kes_{{ $kesBuild }}_checksums.txt">SHA-256</a>
+          <a class="btn btn-line" href="https://github.com/pgsty/kes/releases/tag/{{ $kesTag }}">RPM · DEB · APK</a>
+          <a class="btn btn-line" href="https://hub.docker.com/r/pgsty/kes">Docker Hub</a>
+          <a class="btn btn-line" href="{{ relLangURL "blog/design/kes-openbao/" }}">{{ if $zh }}部署与恢复设计{{ else }}Deployment and recovery{{ end }}</a>
+        </div>
+        <div class="download-code">
+          <div class="download-code-head"><span>Docker · {{ if $zh }}检查版本{{ else }}Check version{{ end }}</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 KES 版本检查命令{{ else }}Copy KES version command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+          <pre><code>docker run --rm docker.io/pgsty/kes:{{ $kesTag }} --version</code></pre>
+        </div>
+        <p>{{ if $zh }}容器以 <code>1000:1000</code> 运行；Linux 包安装 <code>/usr/local/bin/kes</code>。开发模式不持久保存密钥。请保留原密钥并验证重启后仍可解密；配置示例见{{ else }}Containers run as <code>1000:1000</code>; Linux packages install <code>/usr/local/bin/kes</code>. Development mode does not persist keys. Preserve existing keys and verify decryption after restart; see the{{ end }} <a href="https://github.com/pgsty/kes/blob/{{ $kesTag }}/{{ if $zh }}README_ZH.md{{ else }}README.md{{ end }}">README</a>{{ if $zh }}。{{ else }}.{{ end }}</p>
+      </div>
+    </section>
+
+    <section class="download-product-section" id="pkg" aria-labelledby="pkg-title">
+      <div class="landing-container">
+        <div class="download-section-head" data-reveal>
+          <div>
+            <p class="section-eyebrow"><span class="silkscreen">05 / GO LIBRARY</span></p>
+            <h2 id="pkg-title">silo-pkg {{ hugo.Data.releases.pkg.tag }}</h2>
+            <p>{{ if $zh }}纯源码 Go 模块，没有独立可执行程序或容器。Server 20261018 选用 v3.14.3；已发布的 mcli 20261018 与 Console v2.4.2 仍使用 v3.14.2。采用新版需要重新构建应用。{{ else }}A source-only Go module, with no standalone executable or container. Server 20261018 selects v3.14.3; published mcli 20261018 and Console v2.4.2 still use v3.14.2. Rebuild the application to adopt it.{{ end }}</p>
+          </div>
+          <a class="version-card" href="{{ relLangURL (printf "blog/release/pkg-%s/" (strings.TrimPrefix "v" hugo.Data.releases.pkg.tag)) }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.pkg.tag }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
+        </div>
+        <div class="download-code"><div class="download-code-head"><span>go.mod · Go 1.26+</span></div><pre><code>require github.com/pgsty/silo-pkg/v3 {{ hugo.Data.releases.pkg.tag }}</code></pre></div>
+        <div class="method-actions"><a class="btn btn-line" href="https://github.com/pgsty/silo-pkg/releases/tag/{{ hugo.Data.releases.pkg.tag }}">GitHub Release</a><a class="btn btn-line" href="{{ relLangURL "blog/release/pkg-3.14.2/" }}">{{ if $zh }}v3.14.2 依赖基线{{ else }}v3.14.2 dependency baseline{{ end }}</a></div>
       </div>
     </section>
 

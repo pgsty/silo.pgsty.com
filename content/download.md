@@ -1,6 +1,6 @@
 ---
 title: "Download & Install SILO"
-description: "Download the SILO server and MCLI Client for Linux, macOS, and Windows, or deploy with Docker, Linux packages, source, and Pigsty Ansible automation."
+description: "SILO Server 20261018 release and published mcli 20261018, Console v2.4.2, KES 20261018 and pkg v3.14.3: Docker, Linux packages, binaries and source installation."
 url: "/download/"
 type: download
 layout: single

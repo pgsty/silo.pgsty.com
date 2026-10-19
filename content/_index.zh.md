@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-组件独立发布，已发布版本与开发分支的区别见[组件版本矩阵](/zh/compatibility/versions/)。
+本站以 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，已正式发布；配套 Console v2.4.2、mcli 20261018 与 Server pkg v3.14.3，可选外部密钥服务 KES 20261018 已独立发布。各组件独立发布，见[组件矩阵](/zh/compatibility/versions/)。
 
 > [!WARNING]
 > **SILO 是由 Pigsty 社区维护的 MinIO 分支。** 本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。“MinIO” 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。源码与许可信息详见[归属与署名](/zh/about/attribution/)。
@@ -22,7 +22,7 @@ SILO 在保留 S3 API、配置与运维契约的同时，为现有 MinIO 部署�
 
 {{< tabs group="docker-linux-minio-kubernetes" >}}
 {{< tab label="Docker" value="docker" >}}
-下面的命令固定到当前 SILO 服务端发行版。示例凭据仅适用于本地评估。
+下面的命令固定使用 Server 20261018，现已公开提供，见[交付状态](/zh/blog/release/silo-20261018/#delivery)。示例凭据只适合本地评估。
 
 {{% steps %}}
 
@@ -34,7 +34,7 @@ docker run -d --name silo \
   -e MINIO_ROOT_USER=silo-admin \
   -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
   -v silo-data:/data \
-  docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z \
+  docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z \
   server /data --console-address :9001
 ```
 

@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "Published SILO components, mcli 20261018, and pending Server release status."
+description: "Server 20261018 release, exact component identities and upgrade boundaries."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,55 +9,37 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
+**Status verified on 2026-10-19.** The four maintained stack components and optional KES release independently. The tables identify the public releases and their component graphs; deployment to a particular production environment requires separate verification.
 
-**Public release state verified on 2026-10-18.** SILO releases its four components independently.
-A merged dependency update does not change an existing binary or image.
+## Server 20261018 release {#october-release}
 
-## Published components {#published}
+The target is `RELEASE.2026-10-18T00-00-00Z`, package version `20261018000000.0.0`, selected source [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce). The GitHub release is **public**, with anonymous downloads and Docker Hub images verified on 2026-10-19. See the [20261018 release notes](/blog/release/silo-20261018/) for features, security changes, compatibility and remaining limits.
 
-| Component | Latest published version | What it contains |
-| --- | --- | --- |
-| Server | [20260916](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-16T00-00-00Z) | Go 1.27.1; pkg v3.14.1; upstream SDK `32e1f32cb176`; mcli 20260916; embedded Console v2.4.1, source `1360e26d976d` |
-| <span style="white-space:nowrap">Standalone<br>Console</span> | [v2.4.2](https://github.com/pgsty/silo-console/releases/tag/v2.4.2) | Go 1.27.2; pkg v3.14.2; mcli 20261018; upstream SDK v7.4.1; correct bucket-versioning errors; public Docker amd64/arm64 images |
-| mcli | [20261018](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z) | Go 1.27.2; pkg v3.14.2; upstream SDK v7.4.1; package version `20261018000000.0.0`; public Docker amd64/arm64 images |
-| Shared pkg | [v3.14.3](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.3) | Faster admin-action classification with unchanged policy behavior; dependencies unchanged from v3.14.2; Go 1.26 library floor |
-
-Release notes: [Server 20260916](/blog/release/silo-20260916/),
-[Console v2.4.2](/blog/release/console-2.4.2/),
-[mcli 20261018](/blog/release/mcli-20261018/), [pkg v3.14.3](/blog/release/pkg-3.14.3/).
-For embedded deployments, select Console and MC explicitly in the Server build.
-Package-repository mirrors may lag GitHub; the [download page](/download/)
-links directly to the published artifacts.
-
-**Standalone Console image:** `docker.io/pgsty/silo-console:v2.4.2` passed anonymous Linux amd64/arm64 pulls, signature and provenance checks. Its digest is `sha256:4cf47061e0d2f249df3c1cd2a939966ff3c69cc3cf7d10a7b1b39d5c110ae999`.
-
-The [pkg v3.14.3 policy optimization](/blog/release/pkg-3.14.3/) preserves APIs,
-policy formats, and authorization behavior. Server builds may adopt it while
-the published mcli and standalone Console keep using v3.14.2. Existing binaries
-and Server drafts retain the dependencies recorded below until rebuilt.
-
-## Pending Server releases {#october-release}
-
-Server **20261015 remains a Draft**. Earlier website statements that it was a public release are superseded. Its [Object Lock repairs and artifact checks](/blog/release/silo-20261015/) describe candidate acceptance; the fixes are absent from the current public Server 20260916. See the [security advisory](/blog/security/20260926-governance-retention-bypass/).
-
-Server **20261018 has a signed [source tag](https://github.com/pgsty/silo/tree/RELEASE.2026-10-18T00-00-00Z) and a verified Draft**, with pkg v3.14.2, upstream SDK v7.4.1, mcli 20261018 and the Console v2.4.2 source tag. Console v2.4.2 is now independently published; the table above lists published components. Public Server release, image promotion and production deployment remain separate steps. Publishing mcli or Console does not repair an existing Server installation.
+20261015 remains a historical Draft. Its [artifact record](/blog/release/silo-20261015/) does not substitute for the 20261018 [delivery evidence](/blog/release/silo-20261018/#delivery). Server 20260916 lacks the October Object Lock, IAM and LIST repairs. Installing a newer standalone Console or mcli does not update an installed Server.
 
 ## October component graph {#october-components}
 
-Standalone Console v2.4.2, mcli 20261018 and the Server 20261018 draft select:
+| Component | Selected by Server 20261018 |
+| --- | --- |
+| Embedded Console | v2.4.2, `v0.0.0-20261017112417-ef2dd2c41d21` |
+| MC module / image-bundled mcli | 20261018, `v0.0.0-20261017101407-fa3b8bf72458` |
+| Server shared package | `github.com/pgsty/silo-pkg/v3 v3.14.3` |
+| Upstream S3 SDK | `github.com/minio/minio-go/v7 v7.4.1` |
+| Build toolchain | Go 1.27.2; Console frontend uses Node 24.22.0 LTS |
 
-- **Console:** `v0.0.0-20261017112417-ef2dd2c41d21`, tag `v2.4.2`.
-- **MC:** `v0.0.0-20261017101407-fa3b8bf72458`, tag `RELEASE.2026-10-18T00-00-00Z`.
-- **pkg / upstream minio-go:** `v3.14.2` / `v7.4.1`.
-- **Build environment:** Go `1.27.2`; Console frontend uses Node `24.22.0` LTS.
+Standalone Console v2.4.2 and mcli 20261018 still declare pkg v3.14.2; Server's module graph selects v3.14.3. The [v3.14.2 dependency baseline](/blog/release/pkg-3.14.2/) and v3.14.3 [admin-action classification optimization](/blog/release/pkg-3.14.3/) preserve APIs, policy formats and authorization behavior. Server must select Console and MC replacements explicitly; Go does not inherit dependency replacements. The supported integration target is the PGSTY stack, with best-effort upstream MinIO/MC compatibility.
 
-Server must select both Console and MC replacements explicitly; Go does not inherit Console's replacements. Publishing these standalone components does not change the versions embedded in the current public Server 20260916.
+## Published components {#published}
+
+| Component | Current public version | Contents |
+| --- | --- | --- |
+| Server | [20261018](/blog/release/silo-20261018/) | Go 1.27.2; pkg v3.14.3; SDK v7.4.1; mcli 20261018; Console v2.4.2 (`ef2dd2c41d21`) |
+| Standalone Console | [v2.4.2](/blog/release/console-2.4.2/) | Go 1.27.2; pkg v3.14.2; SDK v7.4.1; mcli 20261018; correct bucket-versioning errors |
+| mcli | [20261018](/blog/release/mcli-20261018/) | Go 1.27.2; pkg v3.14.2; SDK v7.4.1; package version `20261018000000.0.0` |
+| Shared pkg | [v3.14.3](/blog/release/pkg-3.14.3/) | Policy performance improvement; dependencies unchanged from v3.14.2; Go 1.26 library floor |
+| Optional KES | [20261018](/blog/release/kes-20261018/) | Separate key service; Go 1.27.2; AWS SDK v2; OpenBao KV v2 and Moto acceptance |
+
+Official images use Docker Hub: `docker.io/pgsty/silo`, `docker.io/pgsty/silo-console` and `docker.io/pgsty/mc`, `docker.io/pgsty/kes`. Console v2.4.2 image acceptance is recorded in its [release notes](/blog/release/console-2.4.2/#delivery). Package-repository mirrors may lag GitHub. The [download page](/download/) provides public Server 20261018 artifacts and pinned installation commands.
 
 ## September 16 dependency graph {#source}
 
@@ -208,15 +190,18 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
   earlier investigation guidance. Until running a release that contains this
   repair, retain the warning against destination-deleting synchronization
   during rolling restarts. Source integration does not update installed binaries.
-- **Pool migration tags:** `fced86303` has unit and race coverage; the
-  post-repair eight-node rebalance/decommission acceptance was not completed.
-  Tags dropped by earlier migrations must be audited, not assumed.
+- **Pool migration and historical tags:** the final 20261018 artifacts passed
+  four local 2/3-pool rebalance/decommission cases, including tags, versions,
+  markers and interruption/recovery. See the [October migration repair](/blog/design/multi-pool-object-consistency/#migration-20261018).
+  This is shared-host evidence; multi-host migration and production performance
+  need deployment-specific validation. Tags lost before the repair need an audit.
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
-  open for capacity/release acceptance and the known delayed-creation-write
-  boundary. PR #198 repairs durable discovery, global pagination and static
-  cancellation confirmation; it does not add a creation fence or certify
-  large-scale scanning. The temporary 10,000-upload trial missed the provisional
-  five-second page target; see the [design record](/blog/design/list-multipart-uploads/#implementation-20260916).
+  open. Server 20261018 withdraws the default persistent scan and retires the
+  optional strict mode. Public listing again uses a node-local cache or an
+  exact-key lookup; complete discovery, prefix/pagination semantics and delayed
+  creation writes remain unresolved. The #198 discovery and strict-cancellation
+  capabilities describe the older opt-in implementation, not this candidate.
+  See the [current contract and capacity evidence](/blog/design/list-multipart-uploads/#implementation).
 
 ## Dependency and release order {#order}
 
@@ -240,7 +225,7 @@ selects MC. Console and MC retain their historical MinIO module paths; pkg uses
 its own path directly. Legacy transitive `minio/pkg/v3` from `colorjson`/`dperf`
 is separate from the maintained policy implementation.
 
-Console v2.4.2, mcli 20261018 and the Server 20261018 draft use Go **1.27.2**; the September stack used Go **1.27.1**.
+Console v2.4.2, mcli 20261018 and the Server 20261018 release use Go **1.27.2**; the September stack used Go **1.27.1**.
 pkg retains a Go **1.26** library floor and
 was also race-tested with Go **1.26.8**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
@@ -282,26 +267,8 @@ documents deterministic regression coverage, a two-process scanner check,
 post-merge CI, and operator verification. The source repair is included in
 [Server 20261015](/blog/release/silo-20261015/); draft artifact acceptance does not establish a public release or production rollout.
 
-## Server fixes after 20261015 {#post-20261015}
+## Repairs after 20261015 included in 20261018 {#post-20261015}
 
-The following fixes target the next Server release. They are not included in
-`RELEASE.2026-10-15T00-00-00Z`; merging source does not update installed binaries
-or container images.
+20261018 adds commit-metadata error classification (#232), upload-time parsing (#236), checksum and Console errors (#229/#238), IAM Admin authorization and bulk self-listing (#242, `995439260`), LIST recovery and directory preservation (#239, `3dd53eb81`, `2080b3d03`), empty upload-parent cleanup (`0f9199e0c`) and withdrawal of public persistent scanning (`4733e1423`). The shared package is now v3.14.3. The final candidate also includes migration overwrite/delete-marker repairs (`60c7179dd`, `1748f62c7`) and durable STS enumeration, revocation propagation and missed-notification recovery (`0cd388c66`).
 
-- [PR #232](https://github.com/pgsty/silo/pull/232) distinguishes missing staged
-  `xl.meta` at the final write commit from an incomplete client upload or a
-  missing object. PUT and multipart completion report HTTP 503 `SlowDownWrite`
-  for this commit failure. The storage RPC and healing paths preserve that
-  classification. Client retries remain subject to SDK policy; the fix does
-  not recover missing staging data or guarantee a successful retry.
-- [PR #236](https://github.com/pgsty/silo/pull/236) parses the native multipart
-  directory timestamp before trying the existing Base64 compatibility path.
-  This avoids unnecessary local `xl.meta` reads, including plaintext UUIDs
-  that also decode as Base64. Legacy or unrecognized directory names still
-  fall back to metadata. Storage formats, S3 upload IDs and cleanup settings
-  are unchanged: the default expiry is 24 hours and the default scan interval
-  is 6 hours.
-- [PR #243](https://github.com/pgsty/silo/pull/243), merged on October 17, selected persistent scanning as the only public listing path.
-  **October 18 decision: withdraw that default, restore legacy cache/exact-key behavior, retain identity, safety, default Abort and cleanup repairs, and do not restore the strict switch.**
-  The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Existing strict users lose optional capabilities; restart omissions and incomplete cache pagination remain.
-  Diagnostics do not gate public operations and #79 remains open. See the [latest decision](/blog/design/list-multipart-uploads/#decision-20261018).
+The [20261018 release notes](/blog/release/silo-20261018/) cover behavior, upgrade steps and remaining work. Former strict users lose durable listing and strict cancellation; #79 and #217 remain unresolved.

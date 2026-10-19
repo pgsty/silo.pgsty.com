@@ -11,6 +11,8 @@ url: "/zh/blog/release/console-2.4.2/"
 
 **版本：** [v2.4.2](https://github.com/pgsty/silo-console/releases/tag/v2.4.2) · **源码：** [`ef2dd2c41d21`](https://github.com/pgsty/silo-console/commit/ef2dd2c41d212ed6405c90fa8e5ab671899a7365)。
 
+本文记录已发布标签的依赖；当前开发分支后续采用 pkg v3.14.3，不会改变这些已发布二进制。参见 [Server 20261018 配套矩阵](/zh/blog/release/silo-20261018/#components)和 [pkg v3.14.2 发布说明](/zh/blog/release/pkg-3.14.2/)。
+
 ## 更新内容 {#changes}
 
 - 引用已正式发布的 **mcli 20261018**、**silo-pkg v3.14.2** 和上游 **minio-go v7.4.1**。SDK 修复取消后的失败分段上传清理、保留时间 UTC 格式及 STS 时长传递。并行 GET 与 ComposeObject 仍需显式启用。
@@ -29,7 +31,7 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261017101407-fa3b8bf
 
 Console 直接依赖 `github.com/pgsty/silo-pkg/v3 v3.14.2`。既有密码权限迁移规则仍然适用，参见[迁移指南](/zh/compatibility/password-permissions/)。go-jose **v4.1.6** 的 RSA JWK 大小限制适用于导入该库的 Server OIDC 代码；独立 Console 二进制并未链接 go-jose 和 go-ldap。
 
-升级独立 Console 不会替换 Server 二进制，也不代表 Server 待发布的安全和存储修复已经交付。当前正式 Server 仍为 20260916，Server 20261018 已准备签名标签和通过制品验收的草稿。正式支持的管理集成目标为 SILO，与原版上游 MinIO 的兼容属于尽力支持。
+升级独立 Console 不会替换 Server 二进制，也不代表 Server 待发布的安全和存储修复已经交付。Server 20261018 已正式发布，Server 制品与镜像以其独立发行记录为准。正式支持的管理集成目标为 SILO，与原版上游 MinIO 的兼容属于尽力支持。
 
 ## 发布与验证 {#delivery}
 

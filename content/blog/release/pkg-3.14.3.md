@@ -1,13 +1,15 @@
 ---
 title: "silo-pkg 3.14.3 Released"
 linkTitle: "silo-pkg 3.14.3"
-date: 2026-10-18T07:25:00+08:00
+date: 2026-10-18T07:29:13+08:00
 author: "Vonng"
 description: "Faster policy evaluation with unchanged authorization behavior."
 tags: [Release, pkg]
 weight: 1
 url: "/blog/release/pkg-3.14.3/"
 ---
+
+**Source:** [`e9d585ba1e7a`](https://github.com/pgsty/silo-pkg/commit/e9d585ba1e7a30ee5eb85b992d883820b83768f5). See [v3.14.2 release notes](/blog/release/pkg-3.14.2/) for the dependency baseline.
 
 [silo-pkg v3.14.3](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.3)
 reduces the cost of classifying admin actions during policy evaluation.

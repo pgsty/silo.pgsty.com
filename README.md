@@ -1,8 +1,20 @@
 # Silo Documentation
 
+[English](README.md) · [简体中文](README_ZH.md)
+
 This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.3.2](https://github.com/pgsty/oink/tree/v1.3.2), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Release state and publication
+
+The current public release is **SILO Server 20261018** (`RELEASE.2026-10-18T00-00-00Z`, package `20261018000000.0.0`), source `0cd388c666f8211f552604ae73448a066e9c25ce`. Its GitHub assets and Docker Hub images were verified on 2026-10-19. The selected graph is Console v2.4.2, mcli 20261018, Server pkg v3.14.3 and upstream minio-go v7.4.1; standalone Console/mcli still declare pkg v3.14.2.
+
+Optional PGSTY KES 20261018 is published separately. The October batch includes
+paired release notes for Server, Console, mcli, pkg v3.14.2/v3.14.3 and KES,
+with deployment and recovery design records linked from each relevant note.
+The Server's exact-source local artifact acceptance is recorded in its release
+note. Public release and deployment to a particular production environment remain separate steps.
+
+Review the paired [English](content/blog/release/silo-20261018.md) / [Chinese](content/blog/release/silo-20261018.zh.md) release notes and security notes before upgrading. `data/releases.yaml` drives the homepage and download templates: `server.published: true` enables public asset links; `published_server` records the current public release. For future releases, keep the flag false until the matching Server assets and Docker images are publicly verified, and update both languages together.
 
 The [component matrix](https://silo.pgsty.com/compatibility/versions/) separates
 published artifacts from accepted main-branch source. Update both languages,

@@ -1,13 +1,15 @@
 ---
 title: "silo-pkg 3.14.3 发布"
 linkTitle: "silo-pkg 3.14.3"
-date: 2026-10-18T07:25:00+08:00
+date: 2026-10-18T07:29:13+08:00
 author: "冯若航"
 description: "降低策略判定开销，保持授权行为不变。"
 tags: [发布, pkg]
 weight: 1
 url: "/zh/blog/release/pkg-3.14.3/"
 ---
+
+**源码：**[`e9d585ba1e7a`](https://github.com/pgsty/silo-pkg/commit/e9d585ba1e7a30ee5eb85b992d883820b83768f5)。依赖基线见 [v3.14.2 发布说明](/zh/blog/release/pkg-3.14.2/)。
 
 [silo-pkg v3.14.3](https://github.com/pgsty/silo-pkg/releases/tag/v3.14.3)
 降低了策略判定中识别 admin action 的开销。这是

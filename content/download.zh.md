@@ -1,6 +1,6 @@
 ---
 title: "下载与安装 SILO"
-description: "下载适用于 Linux、macOS 与 Windows 的 SILO server 与 MCLI Client，或通过 Docker、Linux 软件包、源码与 Pigsty Ansible 自动化完成部署。"
+description: "SILO Server 20261018 正式发布，以及已发布的 mcli 20261018、Console v2.4.2、KES 20261018、pkg v3.14.3：Docker、Linux 软件包、二进制与源码安装。"
 url: "/zh/download/"
 type: download
 layout: single

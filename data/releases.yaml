@@ -1,10 +1,28 @@
-# Public releases verified on 2026-10-17. Server 20261015 remains a draft.
-# Component identities are documented in content/compatibility/versions*.md.
+# Public release assets and Docker Hub image sources verified on 2026-10-19.
 server:
-  tag: RELEASE.2026-09-16T00-00-00Z
-  build: 20260916000000.0.0
-  date: "2026-09-16"
+  tag: RELEASE.2026-10-18T00-00-00Z
+  build: 20261018000000.0.0
+  date: "2026-10-18"
+  published: true
+  source: 0cd388c666f8211f552604ae73448a066e9c25ce
+published_server:
+  tag: RELEASE.2026-10-18T00-00-00Z
+  build: 20261018000000.0.0
+  date: "2026-10-18"
 client:
   tag: RELEASE.2026-10-18T00-00-00Z
   build: 20261018000000.0.0
   date: "2026-10-18"
+  source: fa3b8bf72458b9b5480c4da0ce63a4f224e058c8
+console:
+  tag: v2.4.2
+  build: 2.4.2
+  source: ef2dd2c41d212ed6405c90fa8e5ab671899a7365
+pkg:
+  tag: v3.14.3
+  source: e9d585ba1e7a30ee5eb85b992d883820b83768f5
+kes:
+  tag: RELEASE.2026-10-18T00-00-00Z
+  build: 20261018000000.0.0
+  date: "2026-10-18"
+  source: 2f7e741db905d7ea755967b29666657d819d7ad0

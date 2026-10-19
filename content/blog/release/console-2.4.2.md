@@ -11,6 +11,8 @@ url: "/blog/release/console-2.4.2/"
 
 **Release:** [v2.4.2](https://github.com/pgsty/silo-console/releases/tag/v2.4.2) · **Source:** [`ef2dd2c41d21`](https://github.com/pgsty/silo-console/commit/ef2dd2c41d212ed6405c90fa8e5ab671899a7365).
 
+This note records the published tag. Later development branches adopting pkg v3.14.3 do not change these published binaries. See the [Server 20261018 component matrix](/blog/release/silo-20261018/#components) and [pkg v3.14.2 release notes](/blog/release/pkg-3.14.2/).
+
 ## Changes {#changes}
 
 - Select published **mcli 20261018**, **silo-pkg v3.14.2** and upstream **minio-go v7.4.1**. The SDK cleans up failed multipart uploads after cancellation, sends retention timestamps in UTC and preserves requested STS durations. Parallel GET and ComposeObject remain opt-in.
@@ -29,7 +31,7 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261017101407-fa3b8bf
 
 Console directly requires `github.com/pgsty/silo-pkg/v3 v3.14.2`. Existing password-permission migration rules remain in effect; see the [migration guide](/compatibility/password-permissions/). The go-jose **v4.1.6** RSA JWK limit applies to Server OIDC code that imports it; go-jose and go-ldap are not linked into the standalone Console binary.
 
-A standalone Console upgrade does not replace the Server binary or apply pending Server security and storage repairs. The current public Server remains 20260916; Server 20261018 has a signed tag and a verified Draft. The supported administrative target is SILO, with unmodified upstream MinIO compatibility on a best-effort basis.
+A standalone Console upgrade does not replace the Server binary or apply pending Server security and storage repairs. Server 20261018 is publicly released; its own release record covers the Server artifacts and images. The supported administrative target is SILO, with unmodified upstream MinIO compatibility on a best-effort basis.
 
 ## Delivery and validation {#delivery}
 

@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-Components release independently; see the [component matrix](/compatibility/versions/) for published versions and development source.
+This site targets [SILO Server 20261018](/blog/release/silo-20261018/), released with Console v2.4.2, mcli 20261018 and Server pkg v3.14.3. Optional KES 20261018 is published separately for external key management. Components release independently; see the [component matrix](/compatibility/versions/).
 
 > [!WARNING]
 > **SILO is a MinIO fork maintained by the Pigsty community.** It is not affiliated with, endorsed by, or sponsored by MinIO, Inc. “MinIO” is a trademark of MinIO, Inc., used here only to identify the upstream project. See [Attribution](/about/attribution/) for source and licensing details.
@@ -22,7 +22,7 @@ SILO gives existing MinIO deployments an open release and security-maintenance p
 
 {{< tabs group="docker-linux-packages-existing-minio-kubernetes" >}}
 {{< tab label="Docker" value="docker" >}}
-The commands below pin the current SILO server release. Example credentials are suitable only for a local evaluation.
+The commands below pin Server 20261018, now publicly available; see [release status](/blog/release/silo-20261018/#delivery). Example credentials are suitable only for a local evaluation.
 
 {{% steps %}}
 
@@ -34,7 +34,7 @@ docker run -d --name silo \
   -e MINIO_ROOT_USER=silo-admin \
   -e MINIO_ROOT_PASSWORD=replace-with-a-strong-secret \
   -v silo-data:/data \
-  docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z \
+  docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z \
   server /data --console-address :9001
 ```
 
