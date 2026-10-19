@@ -25,7 +25,7 @@ same-name recreation.
 
 ## October 18: scoped STS revocation {#scoped-sts-20261018}
 
-**Candidate source:** [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce), included in [Server 20261018](/blog/release/silo-20261018/), still Draft. This extends the September mechanism to direct `RevokeTokens` operations; it does not change the historical September acceptance below.
+**Release source:** [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce), included in [Server 20261018](/blog/release/silo-20261018/), now publicly released. This extends the September mechanism to direct `RevokeTokens` operations; it does not change the historical September acceptance below.
 
 Previously, a node could miss an issuance notification and revoke only the tokens present in its own cache. The operation now reads durable STS identities, combines them with cached entries, and selects the requested parent and optional token type at the operation cutoff. It commits a tombstone per selected immutable token key. Every committed key is notified to sibling nodes and sent to replication peers, even if another key fails to save; the caller still receives the save error.
 

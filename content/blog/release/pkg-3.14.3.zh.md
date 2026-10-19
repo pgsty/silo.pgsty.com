@@ -35,7 +35,7 @@ url: "/zh/blog/release/pkg-3.14.3/"
 应用需要升级依赖并重新构建，才能采用这项优化。Server 可以使用 v3.14.3，
 已发布的 mcli 20261018 和独立 Console v2.4.2 继续使用 v3.14.2；本补丁不要求组件同步发版。
 
-发布这个模块不会更新现有 Server 草稿或已安装的二进制。各组件实际选择的依赖见
+发布这个模块不会更新现有 Server 制品或已安装的二进制。各组件实际选择的依赖见
 [组件版本表](/zh/compatibility/versions/)。
 
 感谢 [Denis Babchuk（@botdeniska）](https://github.com/botdeniska) 提交

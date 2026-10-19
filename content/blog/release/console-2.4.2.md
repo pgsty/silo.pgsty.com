@@ -31,7 +31,7 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261017101407-fa3b8bf
 
 Console directly requires `github.com/pgsty/silo-pkg/v3 v3.14.2`. Existing password-permission migration rules remain in effect; see the [migration guide](/compatibility/password-permissions/). The go-jose **v4.1.6** RSA JWK limit applies to Server OIDC code that imports it; go-jose and go-ldap are not linked into the standalone Console binary.
 
-A standalone Console upgrade does not replace the Server binary or apply pending Server security and storage repairs. Server 20261018 is publicly released; its own release record covers the Server artifacts and images. The supported administrative target is SILO, with unmodified upstream MinIO compatibility on a best-effort basis.
+A standalone Console upgrade does not replace the Server binary or automatically deploy Server security and storage repairs. Server 20261018 is publicly released; its own release record covers the Server artifacts and images. The supported administrative target is SILO, with unmodified upstream MinIO compatibility on a best-effort basis.
 
 ## Delivery and validation {#delivery}
 

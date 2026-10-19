@@ -42,7 +42,7 @@ and rebuild to use the optimization. A server can adopt v3.14.3 while the
 published mcli 20261018 and standalone Console v2.4.2 continue using v3.14.2;
 this patch does not require simultaneous component releases.
 
-Publishing this module does not update the existing Server draft or installed
+Publishing this module does not update existing Server artifacts or installed
 binaries. See the [component matrix](/compatibility/versions/) for their
 selected dependencies.
 
