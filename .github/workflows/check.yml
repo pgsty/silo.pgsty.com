@@ -29,7 +29,7 @@ jobs:
 
       - uses: actions/setup-go@v7
         with:
-          go-version-file: go.mod
+          go-version: "1.27.2"
           cache: true
 
       - uses: actions/setup-python@v6
@@ -40,6 +40,11 @@ jobs:
         with:
           hugo-version: "0.168.0"
           extended: true
+
+      - name: Record build tool versions
+        run: |
+          go version
+          hugo version
 
       - name: Test, build and verify internal links
         run: env -u HUGO_MODULE_REPLACEMENTS make check

@@ -2,10 +2,15 @@ HUGO ?= hugo
 PYTHON ?= python3
 CHECK_PYTHON := .venv-check/bin/python
 
+# Build the published theme pin, even when a local theme workspace exists.
+export GOWORK := off
+export HUGO_MODULE_WORKSPACE := off
+unexport HUGO_MODULE_REPLACEMENTS
+
 .PHONY: dev serve build check test
 
 dev:
-	GOWORK=off HUGO_MODULE_WORKSPACE=off HUGO_MODULE_REPLACEMENTS='github.com/pgsty/oink -> $(abspath ../oink)' $(HUGO) server --renderToMemory
+	$(HUGO) server --renderToMemory
 
 serve:
 	$(HUGO) server --environment production --minify --disableFastRender --disableLiveReload
