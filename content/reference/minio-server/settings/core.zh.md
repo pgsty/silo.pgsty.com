@@ -458,7 +458,7 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 
 ## 多段上传列举：退役模式开关 {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**2026-10-18 回退实现，尚未正式发布：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时说明公开列表恢复旧缓存／精确 key 行为，持久列举延期。不增加替代设置。旧共享配置键 `api multipart_listing` 继续被容忍，不因它拒绝启动或丢弃其他 API 设置，也不自动清理用户配置。此前启用 strict 的用户会失去可选持久列表和严格取消能力，需要评估升级影响。
+**Server 20261018：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时说明公开列表恢复旧缓存／精确 key 行为，持久列举延期。不增加替代设置。旧共享配置键 `api multipart_listing` 继续被容忍，不因它拒绝启动或丢弃其他 API 设置，也不自动清理用户配置。此前启用 strict 的用户会失去可选持久列表和严格取消能力，需要评估升级影响。
 
 只读签名接口 `GET /minio/admin/v3/multipart-preflight` 仍要求 `admin:StorageInfo`，返回 `mode=legacy`。`complete` 和 `ready` 描述磁盘诊断覆盖与历史记录，不是启动或列表开关。仅诊断保留 100,000 目录项、30 秒和并发预算；公开列表不依赖这些预算。无 prefix 的旧缓存仍有重启漏项和分页缺陷；非空 prefix 仍按完整对象名查找。已知 ID 的操作及后台清理保留。见[最新决策与取舍](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
 

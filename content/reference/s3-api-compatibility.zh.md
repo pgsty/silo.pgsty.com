@@ -7,8 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> [!WARNING]
-> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
+**SILO 20261018 契约：** 本页继承 S3 API 目录；本次目标为[已发布的 20261018](/zh/blog/release/silo-20261018/)。[普通 LIST](/zh/blog/design/listing-recovery-lock-cost/)、[Object Lock](/zh/blog/security/20260926-governance-retention-bypass/)和[分片列表](/zh/blog/design/list-multipart-uploads/#implementation)的限定与错误行为以这些记录为准。校验和消息可能改变，错误码契约见[校验和说明](/zh/blog/design/complete-multipart-checksum-errors/#october-errors)。
 
 <a id="s3-api"></a>
 
@@ -40,8 +39,7 @@ upstream_modified: true
 
 ### 写入提交错误 {#write-commit-errors}
 
-[PR #232](https://github.com/pgsty/silo/pull/232) 面向 20261015 之后的下一次 Server
-发布：PUT 或分片上传完成操作在最终提交时丢失暂存的 `xl.meta`，返回 HTTP 503
+[PR #232](https://github.com/pgsty/silo/pull/232) 包含于 Server 20261018 正式版：PUT 或分片上传完成操作在最终提交时丢失暂存的 `xl.meta`，返回 HTTP 503
 `SlowDownWrite`。原代码可能对 PUT 返回 `400 IncompleteBody`，对分片完成返回
 `404 NoSuchKey`。真正的客户端上传不完整仍保留原有错误处理。这项分类修复允许 SDK
 重试，但不会恢复丢失的暂存数据。见[源码与发布边界](/zh/compatibility/versions/#post-20261015)。
@@ -76,7 +74,7 @@ PutObjectAcl
 
 - 已发布的 Server 20260903：`ListMultipartUploads` 将非空 `prefix` 当成精确对象名；空 prefix 使用节点本地易失缓存，不具备完整分页、marker 和 delimiter 语义。
 - Server 20260916 以可选 strict 模式增加持久扫描，默认仍保留 legacy 精确键／缓存行为。运行该版本时仍适用其[历史升级契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。
-- **2026-10-18 回退实现（尚未正式发布）：** 撤回默认持久扫描，公开列表恢复无 prefix 的节点缓存和非空 prefix 的精确对象查找；重启漏项、真正前缀筛选及缓存分页缺陷仍然存在。模式开关被忽略并告警，旧共享配置键被容忍；已有 strict 用户会失去可选持久列表和严格取消。诊断扫描保留资源限制但不控制业务入口。身份字段、安全校验、默认尽力取消和后台清理修复保留。见[决策、容量与限制](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
+- **Server 20261018：** 撤回默认持久扫描，公开列表恢复无 prefix 的节点缓存和非空 prefix 的精确对象查找；重启漏项、真正前缀筛选及缓存分页缺陷仍然存在。模式开关被忽略并告警，旧共享配置键被容忍；已有 strict 用户会失去可选持久列表和严格取消。诊断扫描保留资源限制但不控制业务入口。身份字段、安全校验、默认尽力取消和后台清理修复保留。见[决策、容量与限制](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
 - `PutBucketLifecycle` 不支持 `AbortIncompleteMultipartUpload` 生命周期动作。
 
 ## 存储桶 API {#id6}

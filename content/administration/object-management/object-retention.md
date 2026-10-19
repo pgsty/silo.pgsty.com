@@ -15,6 +15,8 @@ upstream_modified: true
 
 ## Overview {#overview}
 
+**SILO 20261018 upgrade:** the [release](/blog/release/silo-20261018/#security) repairs retention authorization and protected-version overwrites (SN-2026-015/016). Server 20260916 remains affected. Every retention update requires `s3:PutObjectRetention`; weakening active GOVERNANCE additionally requires the bypass header and `s3:BypassGovernanceRetention`. Upgrade every write-accepting Server and replication site. Updating a client or Console does not patch the Server, and upgrading does not restore previously overwritten data or retention. See the [security advisory](/blog/security/20260926-governance-retention-bypass/) for affected paths and mitigations.
+
 MinIO Object Locking (“Object Retention”) enforces Write-Once Read-Many (WORM) immutability to protect [versioned objects](/administration/object-management/object-versioning/#minio-bucket-versioning) from deletion. MinIO supports both [duration based object retention](#minio-object-locking-retention-modes) and [indefinite legal hold retention](#minio-object-locking-legalhold).
 
 MinIO Object Locking provides key data retention compliance and meets SEC17a-4(f), FINRA 4511(C), and CFTC 1.31(c)-(d) requirements as per [Cohasset Associates](https://min.io/cohasset?ref-docs).

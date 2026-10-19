@@ -6,13 +6,15 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**Version scope:** commands and illustrative output target [Server 20261018](/blog/release/silo-20261018/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261018/#upgrade).
+
 <a id="upgrade-a-minio-tenant"></a>
 <a id="minio-k8s-upgrade-minio-tenant"></a>
 
 The following procedures upgrade a single Silo Tenant using either Kustomize or Helm. Test the exact server image, Operator/chart version, and rollback procedure in a non-production Tenant first.
 
 > [!CAUTION]
-> Keep the server image on `pgsty/silo` and use only a tag or digest published on the [Silo download page](/download/#server). The upstream Tenant defaults use a MinIO image. Also keep `MINIO_UPDATE=off`; the inherited in-place updater still targets the upstream MinIO feed and is not a Silo upgrade path.
+> Keep the server image on `pgsty/silo` and use only a tag or digest published on the [Silo download page](/download/#server). The upstream Tenant defaults use a MinIO image. SILO disables in-place self-update; `MINIO_UPDATE=off` does not re-enable it. Upgrade by changing the Tenant image version.
 
 > [!WARNING]
 > **Important**
@@ -96,7 +98,7 @@ metadata:
   namespace: my-tenant-ns
 
 spec:
-  image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+  image: docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z
   env:
     - name: MINIO_UPDATE
       value: "off"

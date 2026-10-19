@@ -6,6 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**版本说明：** 本页命令与输出示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261018/#upgrade)。
+
 <a id="redhat-linux-minio"></a>
 <a id="deploy-minio-rhel"></a>
 
@@ -25,7 +27,7 @@ Silo 为 x86-64 与 ARM64 发布 RPM 软件包和独立 Linux 归档。项目没
 
 ### 纠删码校验 {#id4}
 
-MinIO 会根据拓扑中的节点和驱动器总数，自动为集群确定默认的 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) 配置。 你可以在设置集群时配置按对象生效的 [parity](/zh/glossary/#term-parity)，也可以让 MinIO 选择默认值（生产级集群默认为 `EC:4`）。
+SILO 根据**每个纠删集合的盘数**选择默认校验块数量，而非按集群总盘数计算；8–16 盘集合默认 `EC:4`，较小集合使用不同默认值。完整对应关系与可配置范围见[存储类设置](/zh/reference/minio-server/settings/storage-class/)。校验布局按对象保存，可用性须按该对象所在集合和实际布局评估。
 
 校验值决定了对象可用性与磁盘存储占用之间的关系。 可使用 MinIO [纠删码计算器](https://min.io/product/erasure-code-calculator) 选择适合你集群的纠删码校验级别。
 
@@ -277,7 +279,7 @@ Silo 对象存储服务端
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 linux/amd64)
+Version: RELEASE.2026-10-18T00-00-00Z (go1.27.2 linux/amd64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin

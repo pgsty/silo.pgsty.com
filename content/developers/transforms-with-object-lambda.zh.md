@@ -7,6 +7,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**版本说明：** 本页命令与输出示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261018/#upgrade)。
+
 <a id="object-lambda"></a>
 <a id="developers-object-lambda"></a>
 
@@ -198,7 +200,7 @@ handler 运行后，使用 [`MINIO_LAMBDA_WEBHOOK_ENABLE`](/zh/reference/minio-s
 以下命令在本地开发环境中启动 MinIO：
 
 ```shell
-MINIO_LAMBDA_WEBHOOK_ENABLE_myfunction=on MINIO_LAMBDA_WEBHOOK_ENDPOINT_myfunction=http://localhost:5000 minio server /data
+MINIO_LAMBDA_WEBHOOK_ENABLE_myfunction=on MINIO_LAMBDA_WEBHOOK_ENDPOINT_myfunction=http://localhost:5000 silo server /data
 ```
 
 将 `myfunction` 替换为你的 handler 函数名，并将 `/data` 替换为本地部署中 MinIO 目录的位置。 输出类似如下：
@@ -208,7 +210,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl-3.0.html>
-Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 linux/arm64)
+Version: RELEASE.2026-10-18T00-00-00Z (go1.27.2 linux/arm64)
 
 Status:         1 Online, 0 Offline.
 API: http://192.168.64.21:9000  http://127.0.0.1:9000

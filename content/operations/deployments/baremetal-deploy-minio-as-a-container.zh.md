@@ -22,7 +22,7 @@ Silo 容器的功能和性能可能会受到基础操作系统的限制。
 >
 > 下面的示例仅覆盖用于开发或评估的单机单盘和单机多盘部署；它们不构成 Docker Compose、Docker Swarm 或其他容器编排器上的生产级多机多盘拓扑或升级契约。生产环境的分布式部署应使用经过验证的 [Kubernetes Tenant 流程](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)，并针对实际环境验证持久化、网络、故障域与升级。
 >
-> 示例固定到已发布 Server 标签。生产部署仍需验证该版本与实际负载，并记录镜像摘要以便回滚。
+> 示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为目标，现已公开发布。生产部署还需验证实际负载，并记录镜像摘要以便回滚。
 >
 > SILO 禁止原地自更新，`MINIO_UPDATE=off` 不会重新启用它。容器升级应替换为经过验证的 SILO 标签或摘要，不应调用 `mc admin update`。
 
@@ -34,7 +34,7 @@ Silo 容器的功能和性能可能会受到基础操作系统的限制。
 
 ### 纠删码校验 {#id4}
 
-Silo 会根据拓扑中的节点和驱动器总数，自动为集群确定默认的 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) 配置。你可以在设置集群时配置按对象生效的 [parity](/zh/glossary/#term-parity)，也可以让 Silo 选择默认值（生产级集群默认为 `EC:4`）。
+SILO 根据**每个纠删集合的盘数**选择默认校验块数量，而非按集群总盘数计算；8–16 盘集合默认 `EC:4`，较小集合使用不同默认值。完整对应关系与可配置范围见[存储类设置](/zh/reference/minio-server/settings/storage-class/)。校验布局按对象保存，可用性须按该对象所在集合和实际布局评估。
 
 校验值决定了对象可用性与磁盘存储占用之间的关系。可使用上游 MinIO [纠删码计算器](https://min.io/product/erasure-code-calculator) 比较校验级别，但应将它视为上游规划工具，而不是 Silo 支持契约。
 
@@ -69,7 +69,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /data --console-address ":9001"
 ```
 
 该命令分别将端口 `9000` 和 `9001` 绑定到 S3 API 和 Web Console。
@@ -92,7 +92,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 对于 Windows 主机，请使用 Windows 文件系统语义指定本地文件夹路径，例如 `C:\minio\:/data`。
@@ -111,7 +111,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /data --console-address ":9001"
 ```
 
 该命令分别将端口 `9000` 和 `9001` 绑定到 S3 API 和 Web Console。
@@ -134,7 +134,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 对于 Windows 主机，请使用 Windows 文件系统语义指定本地文件夹路径，例如 `C:\minio\:/data`。

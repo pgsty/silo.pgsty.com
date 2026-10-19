@@ -7,6 +7,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**Version scope:** commands and illustrative output target [Server 20261018](/blog/release/silo-20261018/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261018/#upgrade).
+
 <a id="transforms-with-object-lambda"></a>
 <a id="developers-object-lambda"></a>
 
@@ -198,7 +200,7 @@ Once the handler is running, start MinIO with the [`MINIO_LAMBDA_WEBHOOK_ENABLE`
 The following command starts MinIO in your local development environment:
 
 ```shell
-MINIO_LAMBDA_WEBHOOK_ENABLE_myfunction=on MINIO_LAMBDA_WEBHOOK_ENDPOINT_myfunction=http://localhost:5000 minio server /data
+MINIO_LAMBDA_WEBHOOK_ENABLE_myfunction=on MINIO_LAMBDA_WEBHOOK_ENDPOINT_myfunction=http://localhost:5000 silo server /data
 ```
 
 Replace `myfunction` with the name of your handler function and `/data` with the location of the MinIO directory for your local deployment. The output resembles the following:
@@ -208,7 +210,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl-3.0.html>
-Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 linux/arm64)
+Version: RELEASE.2026-10-18T00-00-00Z (go1.27.2 linux/arm64)
 
 Status:         1 Online, 0 Offline.
 API: http://192.168.64.21:9000  http://127.0.0.1:9000

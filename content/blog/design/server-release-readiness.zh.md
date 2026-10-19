@@ -12,12 +12,8 @@ draft: false
 url: "/zh/blog/design/server-release-readiness/"
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
+**20261018 入口：**本文保留 20260903 的历史评审；本批次的最终源码、修复与本机制品验收见 [20261018 发布说明](/zh/blog/release/silo-20261018/#delivery)。
+
 
 这是 [SILO 20260903](/zh/blog/release/silo-20260903/) 背后的发布前长期工程记录：为什么不能直接接受早期“所有问题都已解决”的结论，独立复审发现了什么，修复如何收窄，以及复审时距离生产发布还差哪些门禁。链接的发布说明记录了之后的正式交付结果。
 

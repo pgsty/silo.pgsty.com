@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
-> **当前发布边界：** [Server 20260916](/zh/blog/release/silo-20260916/) 已包含 SN-2026-011 至 SN-2026-014 的 Server/内嵌 Console 修复；Server 20260903 不包含。升级要求与各组件交付状态见[组件矩阵](/zh/compatibility/versions/)及[安全台账](/zh/about/security-advisories/)。
+> **20261018 正式发布：** [正式版](/zh/blog/release/silo-20261018/)包含 Object Lock（SN-2026-015/016）、IAM 管理凭据（SN-2026-017）与依赖安全更新，Server 20261018 已正式发布。Server 20260916 已包含 SN-2026-011 至 SN-2026-014，仍缺少本轮修复。升级要求见[十月安全笔记](/zh/blog/security/20261018-release-hardening/)、[组件矩阵](/zh/compatibility/versions/)和[安全台账](/zh/about/security-advisories/)。
 
 安全维护正是这个分支存在的理由。上游 `minio/minio` 已经归档，Silo 持续跟踪针对该代码库的 CVE，
 回合并或自行编写修复，并把调查过程公之于众。

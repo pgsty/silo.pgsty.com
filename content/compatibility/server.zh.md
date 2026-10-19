@@ -8,19 +8,27 @@ type: docs
 icon: fa-solid fa-server
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
-
 > **正式 Server 20260916 内嵌控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。独立 [Console v2.4.2](/zh/blog/release/console-2.4.2/) 已另行发布，引用 mcli 20261018 与 pkg v3.14.2。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
 
 **先看[三档兼容性总览](/zh/compatibility/)：12 类兼容或改进、4 类轻微差异、8 类按条件检查。** 本页提供服务端细节，保留 2026-08-06 审计的固定基线，并分别记录[后续已发布变化](#since-20260806)与[9 月 16 日源码变化](#september-2026)。历史审计基线不等于[最初分叉基线](/zh/compatibility/#scope)，也不代表最新制品已经包含全部源码修复。
 
 > [!WARNING]
 > **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
+
+## Server 20261018 升级检查 {#october-2026}
+
+本节针对 [20261018 正式版](/zh/blog/release/silo-20261018/)，现已正式发布；下文旧审计与 20260916 章节保留各自历史范围。
+
+| 使用场景 | 本版变化与操作 |
+| --- | --- |
+| Object Lock / 指定版本写入 | 保留期必须满足基本权限和适用的绕过权限；指定写入版本要求可信复制；目录与旧分片完成在写锁内复查保护，失败关闭。升级全部写入站点。 |
+| 服务账户 / STS / 管理自动化 | 显式自助 Deny 和会话限制生效；受限凭据不能委派更宽权限，非 root 不能修改 root 派生凭据。核对实际管理身份与外部插件。 |
+| 对象清单与备份同步 | 符合条件的不确定 LIST 条目被重新确认，无法确认则返回错误。读取完整分页，不将错误当成空清单；不保证跨页快照。 |
+| 分片列表与取消 | 默认仍为缓存／精确 key；strict 开关忽略并警告。原 strict 用户失去持久枚举与严格取消；重启遗漏、前缀／分页边界和延迟创建仍存在。 |
+| 错误处理 / OIDC | 暂存提交元数据丢失返回 `503 SlowDownWrite`；校验和消息可能变化。JOSE 拒绝超过 4096 位的 RSA JWK，升级前验证登录。 |
+
+详细契约见 [IAM 设计](/zh/blog/design/iam-admin-authorization/)、[LIST 恢复](/zh/blog/design/listing-recovery-lock-cost/)、[分片决策](/zh/blog/design/list-multipart-uploads/#implementation)与[安全更新](/zh/blog/security/20261018-release-hardening/)。#79 和 #217 仍未解决；磁盘格式与既有配置命名不变。正式支持 PGSTY 四组件组合，上游兼容尽最大努力。
+
 
 ## 审计范围与方法 {#scope}
 

@@ -2,7 +2,7 @@
 title: "多池对象一致性"
 linkTitle: "多池对象一致性"
 date: 2026-09-16
-lastmod: 2026-09-16
+lastmod: 2026-10-19
 author: "冯若航"
 summary: "先在共享锁下选择一个逻辑对象，再判断条件或合并标签和 Object Lock 状态。"
 tags: [Design, S3, Operations]
@@ -15,6 +15,19 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 
 **2026-09-16 源码状态：**[#178](https://github.com/pgsty/silo/pull/178) 修复多池修改顺序，随后 [#207](https://github.com/pgsty/silo/pull/207) 把当前对象选择扩展到条件 PUT。它们已合入 main，但不在 Server 20260903 中，关闭了 [#133](https://github.com/pgsty/silo/issues/133) 与 [#144](https://github.com/pgsty/silo/issues/144) 跟踪的源码缺陷；这不构成新发布产物的验收。
+
+## 十月十八日：保护池迁移中的数据 {#migration-20261018}
+
+[20261018 正式版](/zh/blog/release/silo-20261018/)新增 [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)（纳入 [#248](https://github.com/pgsty/silo/pull/248)）与 [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951)，修复 rebalance/decommission 中旧载荷覆盖新副本及删除标记丢失。上文的九月修复不包含这些后续改动。
+
+提交迁移版本前，池层在共同对象锁内检查当前副本，拒绝源快照已消失／已被替换，或其他池存在更新副本的搬迁。同时间戳冲突沿用读取时的池顺序胜出规则。所得元数据快照用于后续协调，避免重复读取；分片完成在复制完各分片后再次检查，分层对象搬迁也使用该保护。
+
+即便删除标记是源池内唯一版本，也要迁移，因为其他池可能存在更旧的数据。null 与 UUID 标记保留各自的替换与重试语义。源清理改为在对象写锁内逐一复核并删除遍历快照中的版本；若源已改变，或没有保留的目标副本维持读取结果，则停止清理，不再删除可能包含并发写入或新标记的整个前缀。
+
+**成本与边界：**迁移增加逐池元数据读取与逐版本清理。P 个池、V 个源版本的清理至少有 O(P × V) 次元数据操作，版本元数据的解码和重写还可能随历史长度增加开销。应以代表性版本历史测量维护时长与同 key 锁等待。普通已解析读取不会无条件进入迁移检查；没有新增对象磁盘格式、公开 S3 参数或依赖。历史已丢失的数据、标签和标记不会重建，跨站延迟标记问题 [#217](https://github.com/pgsty/silo/issues/217)仍属独立范围。
+
+最终源码的本机制品验收运行了真实 2/3 池 rebalance 与 decommission，覆盖普通／分片数据、null／UUID 版本和标记、并发写删，以及两池中断恢复，四组均通过。同一宿主机上的这些测试不证明物理故障域容灾或生产吞吐目标。退役源池前，应通过公开 API 对照已确认的版本 ID、字节、ETag、标签及删除状态。参见[发布证据与边界](/zh/blog/release/silo-20261018/#delivery)。
+
 
 ## 一个键可以有多份物理副本 {#problem}
 
@@ -34,11 +47,11 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 条件 DELETE 在清理前判断一次，并在进入下层前清掉回调；显式 `versionId` 比较该版本。条件 PUT 在外层锁内从相关池选择最新逻辑表示，包括删除标记状态，再安装新内容。[#207](https://github.com/pgsty/silo/pull/207) 修复的是目标池旧副本让 `If-Match`/`If-None-Match` 与当前对象不一致的情况。
 
-清理或元数据传播仍可能先修改一部分物理副本，再遇到存储错误。仲裁/清理失败不能解释为对象没变，也不能证明所有旧副本都已消失。恢复后应核对状态并重试。批量 XML ETag 条件仍未支持，见[条件 DELETE](/blog/design/conditional-delete/)。
+清理或元数据传播仍可能先修改一部分物理副本，再遇到存储错误。仲裁/清理失败不能解释为对象没变，也不能证明所有旧副本都已消失。恢复后应核对状态并重试。批量 XML ETag 条件仍未支持，见[条件 DELETE](/zh/blog/design/conditional-delete/)。
 
 ## Object Lock 与复制 {#replication}
 
-副本写入从跨池同版本的权威副本中协调目标保留期和 legal hold。较旧入站副本不能缩短较新的保留期或关闭较新的 hold。标签同样与其时间戳共同传递，包括表示删除的空值。详见 [Object Lock 排序](/blog/design/object-lock-replication-ordering/)及[复制标签](/blog/design/replicated-tag-ordering/)。
+副本写入从跨池同版本的权威副本中协调目标保留期和 legal hold。较旧入站副本不能缩短较新的保留期或关闭较新的 hold。标签同样与其时间戳共同传递，包括表示删除的空值。详见 [Object Lock 排序](/zh/blog/design/object-lock-replication-ordering/)及[复制标签](/zh/blog/design/replicated-tag-ordering/)。
 
 ## 跨池迁移中的标签 {#migration-tags}
 
@@ -50,4 +63,4 @@ rebalance 与 decommission 把每个版本读成 `FileInfo`，转换成 `ObjectI
 
 [协调层实现](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/erasure-server-pool-consistency.go)、[池入口](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/erasure-server-pool.go)和两份已合并 PR 界定源码契约。覆盖包含多池、旧副本、删除标记、显式版本、并发写入及失败路径，不代表原子回滚或任意故障容错。
 
-依赖共享锁保证前应升级所有参与节点。可能已遇到缺陷的部署仍需清点历史副本、标签和 Object Lock 状态；源码修复不证明历史清理完成。使用[副本审计手册](/operations/replication/replica-metadata-audit/)及[组件矩阵](/compatibility/versions/)。本修复与[多段上传列举](/blog/design/list-multipart-uploads/)的默认限制和扫描成本是不同问题。
+依赖共享锁保证前应升级所有参与节点。可能已遇到缺陷的部署仍需清点历史副本、标签和 Object Lock 状态；源码修复不证明历史清理完成。使用[副本审计手册](/zh/operations/replication/replica-metadata-audit/)及[组件矩阵](/zh/compatibility/versions/)。本修复与[多段上传列举](/zh/blog/design/list-multipart-uploads/)的默认限制和扫描成本是不同问题。

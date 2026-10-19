@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
-> **Current release boundary:** [Server 20260916](/blog/release/silo-20260916/) includes the Server/embedded Console repairs for SN-2026-011 through SN-2026-014; Server 20260903 lacks them. See the [component matrix](/compatibility/versions/) and [security ledger](/about/security-advisories/) for upgrade requirements and component delivery status.
+> **20261018 release:** the [release](/blog/release/silo-20261018/) contains Object Lock (SN-2026-015/016), IAM Admin credential (SN-2026-017) and dependency security repairs. Server 20261018 is publicly released. Server 20260916 includes SN-2026-011 through SN-2026-014 and still lacks these October repairs. See the [October security note](/blog/security/20261018-release-hardening/), [component matrix](/compatibility/versions/) and [security ledger](/about/security-advisories/) for upgrade requirements.
 
 Security maintenance is the reason this fork exists. Upstream `minio/minio` is archived; Silo tracks CVEs against the codebase, backports or writes the fixes, and publishes what it found.
 

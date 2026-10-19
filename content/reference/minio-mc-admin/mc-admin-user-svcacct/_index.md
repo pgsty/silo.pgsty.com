@@ -4,8 +4,10 @@ url: "/reference/minio-mc-admin/mc-admin-user-svcacct/"
 weight: 80
 icon: fa-solid fa-user-tag
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+**Server 20261018 authorization change:** Self inspection/cleanup must respect explicit denies, session restrictions and authorization-plugin decisions. Built-in authorization rejects service-account creation/update by restricted derived credentials and protects root-derived credentials. Ordinary users retain established self rights; bulk self aliases resolve to the parent. No new action or storage migration is required. Review the [Admin authorization contract](/blog/design/iam-admin-authorization/) and [SN-2026-017](/blog/security/20261018-release-hardening/#sn-2026-017). Older client command names do not change Server authorization rules.
 
 <a id="mc-admin-user-svcacct"></a>
 <a id="minio-mc-admin-user-svcacct"></a>

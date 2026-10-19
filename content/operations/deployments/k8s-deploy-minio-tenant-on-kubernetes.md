@@ -6,6 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**Version scope:** commands and illustrative output target [Server 20261018](/blog/release/silo-20261018/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261018/#upgrade).
+
 <a id="deploy-a-minio-tenant"></a>
 <a id="deploy-minio-tenant-redhat-openshift"></a>
 <a id="minio-k8s-deploy-minio-tenant"></a>
@@ -46,7 +48,7 @@ This procedure is not exhaustive of all possible configuration options available
 
    ```yaml
    spec:
-     image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+     image: docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z
      env:
        - name: MINIO_UPDATE
          value: "off"

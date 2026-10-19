@@ -2,7 +2,7 @@
 title: "ListMultipartUploads：默认扫描回退与后续设计"
 linkTitle: "ListMultipartUploads 兼容性"
 date: 2026-08-30
-lastmod: 2026-10-18
+lastmod: 2026-10-19
 author: "冯若航"
 summary: >
   记录 2026-10-18 的定向回退决策：撤回默认全盘扫描，保留身份、安全与清理修复；说明容量断点、环境开关退役、旧列表代价、后续索引方向及相关文档。
@@ -12,28 +12,20 @@ draft: false
 url: "/zh/blog/design/list-multipart-uploads/"
 ---
 
-> [!WARNING]
-> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
-
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
+**版本范围：** [Server 20261018 正式版](/zh/blog/release/silo-20261018/#multipart)采用下文 10 月 18 日契约，现已正式发布。当前 Server 20260916 的默认 legacy／可选 strict 契约保留在[历史章节](#implementation-20260916)，不能将两版能力混用。
 
 > **2026-10-17 源码集成更新：** 统一列举修复通过全部八项 PR 检查，经 [PR #243](https://github.com/pgsty/silo/pull/243) 合入主干，合并提交为 [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894)。其默认扫描选择现已被下方 10 月 18 日决策覆盖；该提交未包含在 [Server 20261015](/zh/blog/release/silo-20261015/) 中；源码接入不会更新已安装的二进制或容器镜像。
 
-> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；发布时的启用条件保留在历史章节；待发布候选的变化见下节。下方带日期的源码状态与验证记录保留当时的范围。
+> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；发布时的启用条件保留在历史章节；十月后续变化见下节。下方带日期的源码状态与验证记录保留当时的范围。
 
 
 这是 [SILO Issue #79](https://github.com/pgsty/silo/issues/79) 的问题说明、设计分析与决策记录。
 
-阅读顺序：[待发布行为](#implementation)说明当前候选；[10 月 18 日决策](#decision-20261018)解释回退范围与代价；[相关文档清单](#related-records)汇总本文及关联页面。10 月 17 日、9 月和 8 月章节保留为历史。
+阅读顺序：[当前发布行为](#implementation)说明当前发行版；[10 月 18 日决策](#decision-20261018)解释回退范围与代价；[相关文档清单](#related-records)汇总本文及关联页面。10 月 17 日、9 月和 8 月章节保留为历史。
 
-## 待发布：恢复旧列表，延期完整持久列举 {#implementation}
+## Server 20261018 正式版：恢复旧列表，延期完整持久列举 {#implementation}
 
-**2026-10-18 决定：定向部分回退。** 撤回 #243 将全盘扫描设为唯一公开列表路径的行为，保留身份元数据、安全校验、默认取消语义和清理修复；不恢复 `legacy`／`strict` 运行时开关。本节描述回退提交 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) 的行为，尚未正式发布。已安装的 Server 20260916 不受文档更新影响，仍按其原有契约运行。
+**2026-10-18 决定：定向部分回退。** 撤回 #243 将全盘扫描设为唯一公开列表路径的行为，保留身份元数据、安全校验、默认取消语义和清理修复；不恢复 `legacy`／`strict` 运行时开关。本节描述回退提交 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) 的行为，已随 Server 20261018 发布。已安装的 Server 20260916 不受文档更新影响，仍按其原有契约运行。
 
 公开 `ListMultipartUploads` 恢复两条旧路径：无 `prefix` 时读取节点内存缓存；非空 `prefix` 按完整对象名查找。这意味着重启或换节点可能漏项，真正的前缀筛选、目录分组及缓存分页仍不完整。比如 `prefix=trips/` 不会列出 `trips/a.mp4`，而 `prefix=trips/a.mp4` 可以查找该对象的上传。**这是明确保留的缺陷，不是完成了 #79。**
 
@@ -372,13 +364,6 @@ go test ./cmd -run '^$' \
 
 ## 历史：9 月 16 日实现与升级契约 {#implementation-20260916}
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
-
 [PR #198](https://github.com/pgsty/silo/pull/198) 保留 mr javad seydi 的原始元数据与扫描实现，并追加维护者对 marker 消失、发现覆盖不足、取消确认和升级诊断的修复。发布前的兼容性修复将默认模式恢复为 `legacy`，严格模式仅通过进程环境显式启用。本节说明这些源码变更。**Server 20260903 不包含此修复；源码实现也不代表生产性能与部署验收完成。** 下方 8 月 30 日的分析保留为历史设计记录。
 
 ### 列表与取消语义
@@ -438,14 +423,7 @@ curl --aws-sigv4 'aws:amz:us-east-1:s3' \
 
 ## 历史：8 月 30 日分析与提案 {#analysis-20260830}
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
-
-> **归档分析（2026-08-30）：** 以下“当前”“建议”、方案编号与门禁描述当时的审查和提案。待发布候选以 [10 月 18 日决策](#decision-20261018)为准；Server 20260916 以其[带日期的契约](#implementation-20260916)为准。旧提案中的 writer 升级／排空门槛不是本次候选的启用前提；能力广播、预计一天排空也只是当时提案，不是当前保证。
+> **归档分析（2026-08-30）：** 以下“当前”“建议”、方案编号与门禁描述当时的审查和提案。本次发行版以 [10 月 18 日决策](#decision-20261018)为准；Server 20260916 以其[带日期的契约](#implementation-20260916)为准。旧提案中的 writer 升级／排空门槛不是本次发行版的启用前提；能力广播、预计一天排空也只是当时提案，不是当前保证。
 
 ### 先用最简单的话说明问题 {#plain-language}
 

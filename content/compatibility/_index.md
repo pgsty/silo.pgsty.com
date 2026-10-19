@@ -9,13 +9,6 @@ icon: fa-solid fa-code-compare
 sidebar_expanded: false
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
-
 **Most applications using standard S3 APIs can switch from MinIO to SILO without code changes.** Common S3 APIs, SigV4, SDK integration and object storage layouts carry over. Deployment, authorization and replicated state require the checks below: SILO is a **conditional drop-in replacement**.
 
 {{< cards >}}
@@ -31,6 +24,11 @@ When a condition applies, verify or adjust deployment, policies, tools or upgrad
 {{< /cards >}}
 
 **Reviewed: 2026-09-16; release status updated 2026-09-17.** This index covers source and companion-component changes since the fork. The server-side changes described here shipped in [Server 20260916](/blog/release/silo-20260916/); the [component matrix](/compatibility/versions/) records which repairs are absent from the earlier Server 20260903. The 24 entries group user scenarios; they are **not API counts, compatibility percentages or failure probabilities**.
+
+## 20261018 release {#october-2026}
+
+The target is [Server 20261018](/blog/release/silo-20261018/), publicly released. Additional upgrade checks cover Object Lock, IAM Admin authorization, ordinary LIST recovery, retirement of strict multipart listing and OIDC/JWK key limits; see [Server compatibility](/compatibility/server/#october-2026). The 24 categories below remain the 20260916 audit grouping, not a feature count for the new release. Their strict-mode prerequisites apply only to the older optional mode.
+
 
 ## 🟢 Compatible improvements: 12 categories {#compatible}
 

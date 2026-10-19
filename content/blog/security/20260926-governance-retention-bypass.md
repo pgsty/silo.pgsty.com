@@ -2,27 +2,17 @@
 title: "SN-2026-015: PutObjectRetention Authorization Bypass"
 linkTitle: "SN-2026-015: Retention Authorization"
 date: 2026-09-26
-lastmod: 2026-10-15
+lastmod: 2026-10-19
 author: "Vonng"
-description: "SN-2026-015 and SN-2026-016: Object Lock authorization and overwrite repairs, first fixed in Server 20261015, with upgrade requirements and verification."
+description: "SN-2026-015 and SN-2026-016: Object Lock authorization and overwrite repairs, included in the Server 20261018 release, with upgrade requirements and verification."
 tags: [Security, Object Lock, IAM, silo]
 weight: 1
 url: "/blog/security/20260926-governance-retention-bypass/"
 ---
 
-> [!WARNING]
-> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
+**Repair target: [Server 20261018](/blog/release/silo-20261018/), now publicly released.** The selected source contains the complete SN-2026-015/016 repairs from PR #234 and #235. 20261015 is a superseded draft. Server 20260916 and the previously tested 20260903 are affected; earlier SILO releases also lack these repairs.
 
-**First fixed release: [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z) (2026-10-15).**
-It contains the complete repairs for **SN-2026-015 and SN-2026-016**, merged through
-[PR #234](https://github.com/pgsty/silo/pull/234) and
-[PR #235](https://github.com/pgsty/silo/pull/235).
-Server `RELEASE.2026-09-16T00-00-00Z` and the earlier tested
-`RELEASE.2026-09-03T13-18-01Z` are affected; no earlier SILO release contains
-these repairs. Upgrade every Server process and every replication site that
-accepts S3 writes. Updating mcli, pkg or a standalone Console does not patch the
-Server. See the [release notes](/blog/release/silo-20261015/) for artifact identities
-and acceptance results.
+After repaired artifacts are published and accepted, upgrade every Server process and replication site accepting S3 writes. Updating mcli, pkg or standalone Console does not patch the Server. See the [release notes](/blog/release/silo-20261018/#delivery) for current identities and delivery boundaries.
 
 The analysis and reproduction below describe the affected versions before this fix.
 
@@ -253,7 +243,7 @@ rejected, as they are today.
 condition keys. `bypassOK` means `s3:BypassGovernanceRetention` is allowed with
 the same keys.
 
-| Target version | Change | Header | `retOK` | `bypassOK` | Today | Proposed |
+| Target version | Change | Header | `retOK` | `bypassOK` | Affected versions | 20261018 release |
 | --- | --- | --- | --- | --- | --- | --- |
 | any | any | any | no | any | often 200 (F1, F3) | **403** at entry |
 | unexpired GOVERNANCE | extend | any | yes | any | 200 | 200 |
@@ -352,7 +342,7 @@ every row of the [decision table](#decision-table) and these cases:
 
 ## Mitigation before upgrading {#mitigation}
 
-Upgrade to `RELEASE.2026-10-15T00-00-00Z` or a later release. The following measures
+Plan deployment of `RELEASE.2026-10-18T00-00-00Z` after its public artifacts are accepted. It remains Draft at this review; do not treat the superseded 20261015 draft as a current public fix. The following measures
 apply while an affected Server is still running. They limit the SN-2026-015
 retention-write path and do not replace the complete SN-2026-016 write-path
 repair. No IAM policy blocks F1 on an affected Server, because it evaluates no
@@ -382,9 +372,4 @@ policy before accepting the request:
 
 ## Delivery status {#delivery}
 
-The repairs merged through [PR #234](https://github.com/pgsty/silo/pull/234)
-(`14042b5aa`) and [PR #235](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`).
-Their first fixed Server release is [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z).
-The existing Object Lock race regressions are a prerequisite for the release
-workflow. The [release notes](/blog/release/silo-20261015/#acceptance) record the
-accepted source, binaries, packages and Docker image identity.
+The repairs merged through [PR #234](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and [PR #235](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`) and are included in the [20261018 release](/blog/release/silo-20261018/). Object Lock race regressions gate release builds. The [historical 20261015 acceptance](/blog/release/silo-20261015/#acceptance) applies only to its recorded source and artifacts; it establishes neither a public 20261018 release nor an upgraded production deployment.

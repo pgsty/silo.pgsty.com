@@ -9,13 +9,6 @@ icon: fa-solid fa-code-compare
 sidebar_expanded: false
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
-
 **普通 S3 应用通常可以不改代码，用 SILO 替换 MinIO。** 常用 S3 API、SigV4、SDK 接入方式和对象磁盘布局延续上游；部署、权限及复制状态需要按下列条件检查。因此，SILO 是**有条件的 drop-in replacement**。
 
 {{< cards >}}
@@ -31,6 +24,11 @@ sidebar_expanded: false
 {{< /cards >}}
 
 **核对日期：2026-09-16，发布状态更新于 2026-09-17。** 下表汇总分叉以来的源码与配套组件变化；其中的服务端变化已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，哪些修复不在更早的 Server 20260903 中，以[组件版本矩阵](/zh/compatibility/versions/)为准。24 项是用户场景分类，**不是 API 数量、兼容率或故障概率**。
+
+## 20261018 正式发布 {#october-2026}
+
+本次目标为 [Server 20261018](/zh/blog/release/silo-20261018/)，现已正式发布。新增升级检查包括 Object Lock、IAM 管理凭据授权、普通 LIST 恢复、strict 分片列表退役及 OIDC/JWK 密钥限制，见[服务端兼容性](/zh/compatibility/server/#october-2026)。下方 24 类仍是 20260916 审计分类，不是新版本能力总数；其中 strict 前提仅适用于旧版可选模式。
+
 
 ## 🟢 兼容或改进：12 类 {#compatible}
 

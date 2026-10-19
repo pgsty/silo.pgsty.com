@@ -2,7 +2,7 @@
 title: "Clearing Stale Fields in Legacy Metadata and Scanner Responses"
 linkTitle: "Stale Metadata Reuse"
 date: 2026-10-15
-lastmod: 2026-10-15
+lastmod: 2026-10-19
 author: "Ruohang Feng"
 summary: >
   PR #233 fixes fields carried over when legacy xl.meta headers and namespace-scanner responses are reused. This record explains the triggers, observed impact, local reset strategy, deterministic regression tests, distributed scanner verification, and release boundary.
@@ -12,10 +12,7 @@ draft: false
 url: "/blog/design/stale-metadata-reuse/"
 ---
 
-> [!WARNING]
-> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
-
-**Release follow-up (2026-10-15):** This repair first shipped in [Server 20261015](/blog/release/silo-20261015/). The source acceptance below records the earlier pre-release verification.
+**Release status verified 2026-10-19:** The repair is included in the [Server 20261018 release](/blog/release/silo-20261018/), publicly released. 20261015 is a historical draft; the original source acceptance below retains its recorded scope.
 
 **Verified on 2026-10-15: merged on main, not yet in a published Server release.**
 [PR #233](https://github.com/pgsty/silo/pull/233) was merged as

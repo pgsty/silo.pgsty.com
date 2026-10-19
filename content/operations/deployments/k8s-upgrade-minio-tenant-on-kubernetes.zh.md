@@ -6,13 +6,15 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**版本说明：** 本页命令与输出示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261018/#upgrade)。
+
 <a id="minio-tenant" data-td-print-local></a>
 <a id="minio-k8s-upgrade-minio-tenant"></a>
 
 以下步骤用于使用 Kustomize 或 Helm 升级单个 Silo Tenant。请先在非生产 Tenant 中测试确切的服务端镜像、Operator/Chart 版本与回滚流程。
 
 > [!CAUTION]
-> 服务端镜像必须保持为 `pgsty/silo`，并仅使用 [Silo 下载页](/zh/download/#server) 已发布的标签或摘要。上游 Tenant 默认值使用 MinIO 镜像。同时保留 `MINIO_UPDATE=off`；继承的原地更新器仍指向上游 MinIO 发布源，不是 Silo 升级路径。
+> 服务端镜像必须保持为 `pgsty/silo`，并仅使用 [Silo 下载页](/zh/download/#server) 已发布的标签或摘要。上游 Tenant 默认值使用 MinIO 镜像。SILO 已禁用原地自更新；`MINIO_UPDATE=off` 不会重新启用它。通过更新 Tenant 的镜像版本升级。
 
 > [!WARNING]
 > **重要**
@@ -96,7 +98,7 @@ metadata:
   namespace: my-tenant-ns
 
 spec:
-  image: docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z
+  image: docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z
   env:
     - name: MINIO_UPDATE
       value: "off"

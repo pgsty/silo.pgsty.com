@@ -2,7 +2,7 @@
 title: "Multi-Pool Object Consistency"
 linkTitle: "Multi-Pool Object Consistency"
 date: 2026-09-16
-lastmod: 2026-09-16
+lastmod: 2026-10-19
 author: "Ruohang Feng"
 summary: "Select one logical object under a shared lock before evaluating conditions or merging tags and Object Lock state."
 tags: [Design, S3, Operations]
@@ -15,6 +15,19 @@ url: "/blog/design/multi-pool-object-consistency/"
 
 
 **Source status, 2026-09-16:** [#178](https://github.com/pgsty/silo/pull/178) repairs multi-pool mutation ordering; [#207](https://github.com/pgsty/silo/pull/207) extends current-object selection to conditional PUT. These changes are merged into main and absent from Server 20260903. They close the source defects tracked by [#133](https://github.com/pgsty/silo/issues/133) and [#144](https://github.com/pgsty/silo/issues/144); this does not establish acceptance of a new release artifact.
+
+## October 18: preserve data during pool migration {#migration-20261018}
+
+The [20261018 release](/blog/release/silo-20261018/) adds [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020), incorporating [#248](https://github.com/pgsty/silo/pull/248), and [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951). They repair stale payload overwrite and delete-marker loss in rebalance/decommission; the September fixes above do not cover these later repairs.
+
+Before committing a moved version, the pool layer checks current copies under the common object lock. It rejects an absent/replaced source snapshot or a copy superseded by another pool. Conflicting equal timestamps retain the same pool-order winner as reads. The resulting metadata snapshot is reused for reconciliation; multipart completion rechecks after the parts have been copied. Tiered-object movement also uses the guard.
+
+Delete markers are moved even when they are the only version in the source pool, because older data may exist elsewhere. Null and UUID markers retain their intended replacement/retry semantics. Source cleanup now checks and deletes the walker's individual versions under the object write lock. It stops if the source changed or no retained destination copy preserves the read result, rather than deleting a whole prefix that may contain a concurrent write or new marker.
+
+**Cost and limits:** migration adds per-pool metadata reads and per-version cleanup. For P pools and V source versions, cleanup performs at least O(P × V) metadata operations; decoding and rewriting version metadata can add cost as history grows. Measure maintenance duration and same-key lock waiting on representative histories. Ordinary resolved reads are not unconditionally routed through this migration check. No new object disk format, public S3 parameter or dependency is introduced. Previously lost data/tags/markers are not reconstructed, and the cross-site late-marker issue [#217](https://github.com/pgsty/silo/issues/217) remains separate.
+
+The final-source local artifact acceptance ran actual 2/3-pool rebalance and decommission, including ordinary/multipart data, null/UUID versions and markers, concurrent writes/deletes and two-pool interruption/recovery. All four cases passed. These shared-host tests do not establish physical failure-domain resilience or a production throughput target. Before retiring a source pool, compare acknowledged version IDs, bytes, ETags, tags and deletion state through the public API. See the [release evidence and boundaries](/blog/release/silo-20261018/#delivery).
+
 
 ## One key can have several physical copies {#problem}
 

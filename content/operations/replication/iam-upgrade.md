@@ -6,12 +6,10 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
+**STS revocation verification:** 20261018 also adds [durable enumeration and propagation](/blog/design/iam-revocations/#scoped-sts-20261018). After revoking the actual parent/token type, check old-token rejection and fresh-token validity at every node and site, including a reconnecting peer. Tokens never received from an isolated site are outside the requesting cluster snapshot; one successful response does not establish instantaneous global invalidation during a partition.
+
+
+**20261018 addition:** The 20260916 revocation-history requirements in this procedure still apply. This release adds [IAM Admin authorization repairs](/blog/design/iam-admin-authorization/). Before the maintenance window, verify self denies, session restrictions, root targets and bulk-list aliases; historical keys are not rewritten automatically. See the [20261018 release notes](/blog/release/silo-20261018/) for version and release status.
 
 The IAM repairs in [Server #191](https://github.com/pgsty/silo/pull/191) and
 [#192](https://github.com/pgsty/silo/pull/192) persist deletion revisions and

@@ -2,7 +2,7 @@
 title: "Durable IAM Revocations"
 linkTitle: "Durable IAM Revocations"
 date: 2026-09-16
-lastmod: 2026-09-16
+lastmod: 2026-10-18
 author: "Ruohang Feng"
 summary: "Persistent deletion revisions, signed parent boundaries, safe replay, coordinated upgrades and the limits of IAM recovery."
 tags: [Design, S3, Operations]
@@ -22,6 +22,21 @@ users, service accounts, groups, policy documents, and policy mappings in their
 actual user/STS-parent/group namespaces. It also revokes the deleted built-in
 user's older service accounts, STS credentials and group grants across deliberate
 same-name recreation.
+
+## October 18: scoped STS revocation {#scoped-sts-20261018}
+
+**Candidate source:** [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce), included in [Server 20261018](/blog/release/silo-20261018/), still Draft. This extends the September mechanism to direct `RevokeTokens` operations; it does not change the historical September acceptance below.
+
+Previously, a node could miss an issuance notification and revoke only the tokens present in its own cache. The operation now reads durable STS identities, combines them with cached entries, and selects the requested parent and optional token type at the operation cutoff. It commits a tombstone per selected immutable token key. Every committed key is notified to sibling nodes and sent to replication peers, even if another key fails to save; the caller still receives the save error.
+
+The private IAM replication message carries the token deletion and expiration. A revocation arriving before its creation still prevents later replay; a creation with a later event timestamp cannot revive that immutable token. Existing deletion healing retries offline delivery. Full object/etcd IAM refreshes rebuild STS revisions and evict revoked cache entries even when concurrent IAM writes defer a complete cache swap. Tombstones retain the token expiration plus clock-skew allowance, or remain conservative when expiration is unknown.
+
+The snapshot covers identities known to the requesting cluster before the cutoff. A token issued at an isolated site and never replicated into this cluster is outside that snapshot. Newly issued keys, unrelated users and reusable parent-policy mappings are unchanged. This adds neither a global issuance barrier nor instantaneous revocation during a network partition. Upgrade all participating servers together: older peers do not implement the new private STS message.
+
+**Cost:** an administrative revoke enumerates all durable STS identities, then filters by parent/type; its read and temporary-map cost grows with token count. The scan releases the authentication-cache lock while retaining IAM write serialization, so other IAM writes may wait. Etcd's existing periodic refresh also reads STS records. Ordinary cached authentication gains no network call, and no new background timer or dependency is introduced.
+
+Regression coverage is in [`iam-sts-revocation_test.go`](https://github.com/pgsty/silo/blob/0cd388c666f8211f552604ae73448a066e9c25ce/cmd/iam-sts-revocation_test.go). The same-source local artifact acceptance covered three-site outage/restart recovery and four processes sharing IAM storage. It does not establish a cross-site convergence SLA. Verify old-token rejection at every endpoint, a fresh token's continued validity and recovery after a peer restart; see the [upgrade procedure](/operations/replication/iam-upgrade/).
+
 
 ## Ordering and persistence {#ordering}
 
@@ -122,7 +137,7 @@ and its cached STS and service accounts are included in cleanup. Expiring servic
 accounts retain a durable revision because their access keys are reusable and
 an older version might have no expiration.
 
-Direct per-token `RevokeTokens` delivery between sites is not a new guarantee of
+In the September implementation, direct per-token `RevokeTokens` delivery between sites was not a guarantee of
 this change. The guarantee for built-in parent deletion follows from the durable
 parent boundary, including children not currently present in the deleting node's
 cache.

@@ -2,7 +2,7 @@
 title: "A Listing Must Not Drop a Null Version That Still Has Quorum"
 linkTitle: "Listing Null-Version Quorum"
 date: 2026-09-16
-lastmod: 2026-09-20
+lastmod: 2026-10-19
 author: "Ruohang Feng"
 summary: >
   A successful ListObjects omitted keys that existed and were readable. One cause is an order-sensitive version selection inherited from upstream healing tolerance; it is repaired on main. A second, rolling-restart omission reproduced on the repaired build and is tracked separately.
@@ -12,12 +12,7 @@ draft: false
 url: "/blog/design/list-null-version-quorum/"
 ---
 
-> [!WARNING]
-> **历史 LIST 设计已由新决策覆盖 · Earlier LIST design superseded (2026-10-17)**
->
-> **English:** The investigation below is retained as historical evidence. Its current-design and pending-work guidance is superseded by the [latest LIST recovery decision (English)](https://silo.pgsty.com/blog/design/listing-recovery-lock-cost/). Refer to that decision for the final scope, compatibility, costs and acceptance limits. This does not change older binaries or announce a production release.
->
-> **中文：** 下文保留历史调查证据；其中关于当前方案和待办的说明已被新设计覆盖，请参考[最新 LIST 恢复设计决策（中文）](https://silo.pgsty.com/zh/blog/design/listing-recovery-lock-cost/)，以了解最终范围、兼容性、代价和验收边界。这不改变旧二进制行为，也不是生产发布公告。
+**Current boundary (2026-10-18):** This page retains the September 16 repair and its counterexamples. #218 is closed by #239, included in the [20261018 release](/blog/release/silo-20261018/#listing); see the [LIST recovery design](/blog/design/listing-recovery-lock-cost/) for the current approach and limits. “Open” and “next step” below describe that historical investigation, not the current backlog. Server 20260916 still contains only the earlier repair.
 
 > **Publication update, 2026-09-20:** The null-version quorum repair shipped in [Server 20260916](/blog/release/silo-20260916/). The rolling-restart limitation tracked in [#218](https://github.com/pgsty/silo/issues/218) remains open. The dated investigation and validation record below retains its original scope.
 

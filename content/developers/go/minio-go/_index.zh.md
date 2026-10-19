@@ -8,7 +8,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO 验证过的版本，2026-09-16：** pkg v3.14.1 与 mcli 20260916 使用 `v7.3.1-0.20260915093545-32e1f32cb176`。可执行 `go get github.com/minio/minio-go/v7@v7.3.1-0.20260915093545-32e1f32cb176` 选择同一版本。该版本修复 CopyObject 在 HTTP 200 响应中包含 S3 错误时的重试与错误传播。Server/Console 的版本选择独立，见[组件矩阵](/zh/compatibility/versions/)。
+> **20261018 配套 SDK：** Server 候选、Console v2.4.2、mcli 20261018 与 pkg v3.14.3 均选择上游 `github.com/minio/minio-go/v7 v7.4.1`。保留 CopyObject HTTP 200 内嵌错误处理，并纳入取消后的失败上传清理、UTC 保留时间与 STS 时长修复。并行 GET/Compose 仍需显式启用。独立组件发布不等于 Server 已发布，见[组件矩阵](/zh/compatibility/versions/)和[本版说明](/zh/blog/release/silo-20261018/#components)。
 
 ## MinIO Go SDK {#go-sdk}
 
@@ -22,7 +22,7 @@ SILO 实现兼容 S3 的服务端契约，因此 Go 应用可以直接使用上�
 在现有 Go 模块中执行：
 
 ```shell
-go get github.com/minio/minio-go/v7
+go get github.com/minio/minio-go/v7@v7.4.1
 ```
 
 ## 配置连接 {#configure}

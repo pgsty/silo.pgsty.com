@@ -8,6 +8,8 @@ type: docs
 icon: fa-solid fa-box
 ---
 
+**版本说明：** 本页命令与输出示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261018/#upgrade)。
+
 Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub Releases](https://github.com/pgsty/silo/releases)，附 SHA-256 校验和与构建溯源 attestation。本页记录相对 `minio` 软件包安装的变化：文件布局、服务账号与注意事项。迁移的总体范围见[迁移指南](/zh/compatibility/migration/)。
 
 ## 安装 {#install}
@@ -15,8 +17,8 @@ Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub 
 从 release 资产中选取与平台匹配的软件包，安装前先校验：
 
 ```bash
-SILO_TAG=RELEASE.2026-09-16T00-00-00Z
-SILO_RPM=silo-20260916000000.0.0-1PGSTY.x86_64.rpm
+SILO_TAG=RELEASE.2026-10-18T00-00-00Z
+SILO_RPM=silo-20261018000000.0.0-1PGSTY.x86_64.rpm
 SILO_URL="https://github.com/pgsty/silo/releases/download/$SILO_TAG"
 curl -fLO "$SILO_URL/$SILO_RPM"
 curl -fLO "$SILO_URL/$SILO_RPM.sha256sum"

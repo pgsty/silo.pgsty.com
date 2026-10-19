@@ -2,7 +2,7 @@
 title: "BadDigest、InvalidRequest 与 CompleteMultipartUpload 校验和契约"
 linkTitle: "分片完成校验和错误"
 date: 2026-08-27
-lastmod: 2026-09-16
+lastmod: 2026-10-19
 author: "冯若航"
 summary: >
   完成上传依据已存储的类型校验并返回操作专用错误。Server 20260903 已拒绝 CRC64NVME 与 COMPOSITE；流式后续修复另行记录。
@@ -17,6 +17,13 @@ url: "/zh/blog/design/complete-multipart-checksum-errors/"
 [#48](https://github.com/pgsty/silo/issues/48) 与 [#50](https://github.com/pgsty/silo/issues/50) 的修复
 已包含在 [Server 20260903](/zh/blog/release/silo-20260903/) 中。
 本文取代八月提案中“暂时保持 CRC64NVME 规范化”的结论。
+
+## 20261018：消息文字与提交失败 {#october-errors}
+
+[20261018 正式版](/zh/blog/release/silo-20261018/#reliability)包含 #225/#229/#238 的消息修复：`Content-MD5` 大小写对齐 S3，PUT／UploadPart 校验失败显示已知算法名，CompleteMultipartUpload 消息移除重复的 “checksum”。未知算法仍使用通用描述，操作对应的错误码与校验要求不变。下面的“UploadPart mapper 不变”描述原始八月修复范围；十月更新了其消息生成。调用方应按 HTTP/S3 错误码判断，不应解析完整英文消息。
+
+#232 另把最终提交时暂存 `xl.meta` 丢失分类为 `503 SlowDownWrite`。它与表中客户端提供错误校验和的 HTTP 400 不同，也不改变真正请求体不完整的处理。详见 [S3 提交错误参考](/zh/reference/s3-api-compatibility/#write-commit-errors)。
+
 
 ## 为什么必须在完成时校验 {#problem}
 

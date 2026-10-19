@@ -22,7 +22,7 @@ The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and
 >
 > These examples cover Single-Node Single-Drive and Single-Node Multi-Drive development or evaluation deployments. They do not define a production Multi-Node Multi-Drive topology or an upgrade contract for Docker Compose, Docker Swarm, or another container orchestrator. For a production distributed deployment, use a tested [Kubernetes tenant workflow](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and validate persistence, networking, failure domains, and upgrades for your environment.
 >
-> The examples pin a published Server tag. Validate that version with your workload and record the image digest for rollback.
+> The examples target [Server 20261018](/blog/release/silo-20261018/), now publicly available. Validate the version with your workload and record the image digest for rollback.
 >
 > SILO disables in-place self-update; `MINIO_UPDATE=off` does not re-enable it. Upgrade containers by replacing the image with a verified SILO tag or digest, not with `mc admin update`.
 
@@ -34,7 +34,7 @@ Ensure you have reviewed our published Hardware, Software, and Security checklis
 
 ### Erasure Coding Parity {#erasure-coding-parity}
 
-Silo automatically determines the default [erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding) configuration for the cluster based on the total number of nodes and drives in the topology. You can configure the per-object [parity](/glossary/#term-parity) setting when you set up the cluster *or* let Silo select the default (`EC:4` for production-grade clusters).
+SILO selects default parity from the number of drives **in each erasure set**, not the cluster-wide drive count. Sets with 8–16 drives default to `EC:4`; smaller sets have different defaults. See [storage-class settings](/reference/minio-server/settings/storage-class/) for the full table and configurable ranges. Parity is stored per object, so evaluate availability against that object’s set and actual layout.
 
 Parity controls the relationship between object availability and storage on disk. The upstream MinIO [Erasure Code Calculator](https://min.io/product/erasure-code-calculator) can help compare parity levels; treat it as an upstream planning aid rather than a Silo support contract.
 
@@ -69,7 +69,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /data --console-address ":9001"
 ```
 
 The command binds ports `9000` and `9001` to the S3 API and Web Console respectively.
@@ -92,7 +92,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.
@@ -111,7 +111,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /data --console-address ":9001"
 ```
 
 The command binds ports `9000` and `9001` to the S3 API and Web Console respectively.
@@ -134,7 +134,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.

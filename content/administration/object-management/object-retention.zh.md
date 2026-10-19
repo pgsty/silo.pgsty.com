@@ -15,6 +15,8 @@ upstream_modified: true
 
 ## 概述 {#id2}
 
+**SILO 20261018 升级：** [正式版](/zh/blog/release/silo-20261018/#security)修复保留期授权与受保护版本覆盖问题（SN-2026-015/016），Server 20260916 仍受影响。每次保留期修改都需要 `s3:PutObjectRetention`；削弱未到期的 GOVERNANCE 还需要绕过头和 `s3:BypassGovernanceRetention`。必须升级所有接受写入的 Server 和复制站点，更新客户端或 Console 不能修复 Server；升级也不会恢复此前被覆盖的数据或保留期。受影响路径与缓解措施见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
+
 MinIO 对象锁定（“对象保留”）通过强制执行一次写入、多次读取（WORM）不可变性，防止 [已启用版本控制的对象](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 被删除。MinIO 同时支持 [基于时长的对象保留](#minio-object-locking-retention-modes) 和 [无限期 legal hold 保留](#minio-object-locking-legalhold)。
 
 根据 [Cohasset Associates](https://min.io/cohasset?ref-docs) 的说明，MinIO 对象锁定 提供关键的数据保留合规能力，并满足 SEC17a-4(f)、FINRA 4511(C) 和 CFTC 1.31(c)-(d) 的要求。

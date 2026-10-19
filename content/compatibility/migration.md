@@ -8,6 +8,8 @@ type: docs
 icon: fa-solid fa-arrow-right-arrow-left
 ---
 
+**20261018 upgrade entry point:** This guide preserves the existing data, service and configuration migration procedure. Also review the [20261018 upgrade requirements](/blog/release/silo-20261018/#upgrade) and [compatibility delta](/compatibility/server/#october-2026), especially for former strict multipart users. The Server release is public; deploy after public artifacts have been accepted.
+
 Migrating from MinIO to Silo normally reuses existing object data and volumes without an object-by-object export and import. **Ordinary S3 applications usually need no code changes; administrators still need to check deployment, authorization and state compatibility.** Select the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level overview](/compatibility/) before following this guide. RPM/DEB installs are covered in [Native Package Migration](/compatibility/binary/); check the [component matrix](/compatibility/versions/) for version-specific requirements.
 
 ## What changes {#scope}
@@ -24,7 +26,7 @@ In order of importance:
 ## What stays {#unchanged}
 
 - **Object layouts, erasure formats and the `.minio.sys` directory remain, allowing data disks from compatible baselines to be reused.** This does not guarantee arbitrary downgrades; see [rollback scope](#rollback).
-- Existing buckets, object versions, users, access keys, policies, lifecycle and encryption configuration remain usable. Authorization decisions, replication state and new metadata have exceptions in [O02](/compatibility/#o02) and [O07](/compatibility/#o07); the target [release notes](/blog/release/silo-20260916/) list the specifics.
+- Existing buckets, object versions, users, access keys, policies, lifecycle and encryption configuration remain usable. Authorization decisions, replication state and new metadata have exceptions in [O02](/compatibility/#o02) and [O07](/compatibility/#o07); the target [release notes](/blog/release/silo-20261018/) list the specifics.
 - Common S3 APIs, SigV4, SDK, `mc`/`mcli` and presigned URL integration carry over. Validation, conditional requests and error behavior have changes in [O04](/compatibility/#o04).
 - Endpoint hostname, API port `9000`, Console port, volume mounts.
 - `MINIO_*` environment variables and existing server options.

@@ -2,7 +2,7 @@
 title: "ListMultipartUploads: Default Scan Rollback and Future Design"
 linkTitle: "ListMultipartUploads Compatibility"
 date: 2026-08-30
-lastmod: 2026-10-18
+lastmod: 2026-10-19
 author: "Ruohang Feng"
 summary: >
   Records the October 18 targeted rollback: withdraw default global scanning while retaining identity, safety and cleanup repairs; explains capacity limits, switch retirement, legacy tradeoffs, future indexing and related records.
@@ -12,28 +12,20 @@ draft: false
 url: "/blog/design/list-multipart-uploads/"
 ---
 
-> [!WARNING]
-> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
-
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
+**Version scope:** The [Server 20261018 release](/blog/release/silo-20261018/#multipart), publicly released, uses the October 18 contract below. Server 20260916 retains its default-legacy/optional-strict contract in the [historical section](#implementation-20260916); do not mix the two versions' capabilities.
 
 > **Source integration, 2026-10-17:** The unified-listing repair passed all eight PR checks and merged through [PR #243](https://github.com/pgsty/silo/pull/243) as [`7e9454456`](https://github.com/pgsty/silo/commit/7e9454456ee7065cd1d782fc4498338324a94894). Its default-scan choice is now superseded by the October 18 decision below; it is not included in [Server 20261015](/blog/release/silo-20261015/). Source acceptance does not change installed binaries or container images.
 
-> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Its opt-in contract is preserved in the historical section; the unreleased follow-up is described next. Dated source-status and validation records below retain their original scope.
+> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Its opt-in contract is preserved in the historical section; the October follow-up is described next. Dated source-status and validation records below retain their original scope.
 
 
 This is the problem, design, and decision record for [SILO issue #79](https://github.com/pgsty/silo/issues/79).
 
-Reading guide: [candidate behavior](#implementation), the [October 18 rollback decision](#decision-20261018), and the [related-document inventory](#related-records). October 17, September and August sections remain historical records.
+Reading guide: [released behavior](#implementation), the [October 18 rollback decision](#decision-20261018), and the [related-document inventory](#related-records). October 17, September and August sections remain historical records.
 
-## Unreleased: restore legacy listing and defer durable enumeration {#implementation}
+## Server 20261018 release: legacy listing and deferred durable enumeration {#implementation}
 
-**October 18 decision: a targeted partial rollback.** Withdraw #243's mandatory persistent scan from public listing, retaining identity metadata, safety checks, default cancellation and cleanup repairs. Do not restore the `legacy`/`strict` runtime switch. This section describes rollback commit [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d), which remains unreleased. Documentation updates do not change installed Server 20260916 binaries or their existing contract.
+**October 18 decision: a targeted partial rollback.** Withdraw #243's mandatory persistent scan from public listing, retaining identity metadata, safety checks, default cancellation and cleanup repairs. Do not restore the `legacy`/`strict` runtime switch. This section describes rollback commit [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d), which shipped in Server 20261018. Documentation updates do not change installed Server 20260916 binaries or their existing contract.
 
 Public `ListMultipartUploads` returns to the two older paths: an empty `prefix` reads the node-local cache; a nonempty `prefix` looks up an exact object key. Restarting or changing serving nodes can omit uploads. True prefix filtering, grouping and cache pagination remain incomplete: `prefix=trips/` does not enumerate `trips/a.mp4`, while `prefix=trips/a.mp4` can find uploads for that object. **These are retained defects, not completion of #79.**
 
@@ -372,13 +364,6 @@ Retain the defined scope: ordinary upgrades should gain reliable listing for ide
 
 ## Historical: September 16 implementation and upgrade contract {#implementation-20260916}
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
-
 [PR #198](https://github.com/pgsty/silo/pull/198) retains mr javad seydi's original metadata-and-scan contribution and adds maintainer fixes for disappearing markers, incomplete discovery, cancellation confirmation and upgrade diagnostics. The pre-release compatibility follow-up restores `legacy` as the default and makes strict mode an explicit process-environment opt-in. This section describes those source changes. **It is not included in Server 20260903, and does not establish production performance or deployment acceptance.** The August 30 analysis below remains a historical design record.
 
 ### Listing and cancellation
@@ -437,13 +422,6 @@ Every page still rescans durable state: total enumeration cost grows with both s
 A September 16 temporary Docker Desktop arm64 run used two nodes, four APFS-backed bind volumes and 11,000 uploads across two buckets, while other local validation was running. One 1,000-entry page for the 10,000-upload target bucket took 18.7 seconds; two concurrent requests returned retryable `SlowDownRead` responses after about 25–27 seconds. These observations do not meet the provisional five-second page target and are not an isolated SSD benchmark. Capacity and foreground-load acceptance remain open; the bounded scanner must not be advertised as a large-scale performance fix.
 
 ## Historical: August 30 analysis and proposal {#analysis-20260830}
-
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
 
 > **Archived analysis (2026-08-30):** “current”, “recommended”, option numbers and gate language below refer to that review and proposal. For the unreleased candidate, use the [October 18 decision](#decision-20261018); for Server 20260916, use its [dated contract](#implementation-20260916). The old writer-upgrade/drain gate is not the candidate's prerequisite. Capability advertisement and the one-day drain estimate were proposals, not current guarantees.
 

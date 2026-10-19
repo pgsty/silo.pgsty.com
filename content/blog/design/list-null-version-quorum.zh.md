@@ -2,7 +2,7 @@
 title: "列举不能丢掉仍有仲裁的 null 版本"
 linkTitle: "列举 null 版本仲裁"
 date: 2026-09-16
-lastmod: 2026-09-20
+lastmod: 2026-10-19
 author: "冯若航"
 summary: >
   成功返回的 ListObjects 漏掉了存在且可读的 key。一个原因是继承自上游 healing 容错的、对输入顺序敏感的版本选择，已在 main 修复；另一个滚动重启下的漏项在修复后的构建上仍然复现，单独跟踪。
@@ -12,12 +12,7 @@ draft: false
 url: "/zh/blog/design/list-null-version-quorum/"
 ---
 
-> [!WARNING]
-> **历史 LIST 设计已由新决策覆盖 · Earlier LIST design superseded (2026-10-17)**
->
-> **English:** The investigation below is retained as historical evidence. Its current-design and pending-work guidance is superseded by the [latest LIST recovery decision (English)](https://silo.pgsty.com/blog/design/listing-recovery-lock-cost/). Refer to that decision for the final scope, compatibility, costs and acceptance limits. This does not change older binaries or announce a production release.
->
-> **中文：** 下文保留历史调查证据；其中关于当前方案和待办的说明已被新设计覆盖，请参考[最新 LIST 恢复设计决策（中文）](https://silo.pgsty.com/zh/blog/design/listing-recovery-lock-cost/)，以了解最终范围、兼容性、代价和验收边界。这不改变旧二进制行为，也不是生产发布公告。
+**当前边界（2026-10-18）：** 本文保留 9 月 16 日修复与当时反例。#218 已由 #239 关闭，后续修复包含于 [20261018 正式版](/zh/blog/release/silo-20261018/#listing)；当前方案与限制见 [LIST 恢复设计](/zh/blog/design/listing-recovery-lock-cost/)。下文“仍开放”“下一步”均指历史调查状态，不是当前待办；Server 20260916 仍只有早期修复。
 
 > **发布更新，2026-09-20：** null 版本仲裁修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布。[#218](https://github.com/pgsty/silo/issues/218) 跟踪的滚动重启列举限制仍然开放。以下调查与验证记录保留当时的日期和范围。
 

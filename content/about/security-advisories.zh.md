@@ -8,9 +8,6 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
-> [!WARNING]
-> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
-
 本台账汇总 `pgsty/silo` 的 fork 专属安全修复及密切相关的升级影响说明。它有意比
 changelog 更窄，只关注影响发布的安全行为。每个经过完整调查的公告在[安全编年史](/zh/blog/security/)另有独立文章；本页是编号、修复与发布边界的稳定索引。
 
@@ -22,17 +19,11 @@ changelog 更窄，只关注影响发布的安全行为。每个经过完整调�
 
 ## 当前发布边界 {#boundary}
 
-**核验于 2026-10-15。** 最新已发布 Server 为
-[RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z)，
-首次包含 [SN-2026-015](#sn-2026-015) 与 [SN-2026-016](#sn-2026-016) 的完整修复。
-Server 20260916 和此前实测的 Server 20260903 均受影响；更早的 SILO 发行版均未包含这些修复。
-请升级全部 Server 进程及所有接受 S3 写入的复制站点。
-更新 mcli、pkg 或独立 Console 不会修补已安装的 Server。
-组件身份与升级要求见[版本矩阵](/zh/compatibility/versions/)和[发布说明](/zh/blog/release/silo-20261015/)。
+**2026-10-19 核验。** 当前正式 Server 为 [20261018](/zh/blog/release/silo-20261018/)，包含 [SN-2026-015](#sn-2026-015)、[SN-2026-016](#sn-2026-016) 与 [SN-2026-017](#sn-2026-017) 的修复。GitHub Release 与 Docker Hub 镜像均已公开；20261015 保留为已被替代的草稿。
 
-Server 20260916 首次包含 [SN-2026-011](#sn-2026-011)、[SN-2026-012](#sn-2026-012)、
-[SN-2026-013](#sn-2026-013) 及内嵌 Console 的 [SN-2026-014](#sn-2026-014) 修复；
-Server 20260903 不包含这些修复。独立 Console 的修复版为 v2.4.1。
+Server 20260916 仍受这三组缺陷影响。修复必须部署到全部 Server 进程及所有接受写入的复制站点；更新 mcli、pkg 或独立 Console 不会修复 Server。升级要求见[十月安全更新](/zh/blog/security/20261018-release-hardening/)和[组件矩阵](/zh/compatibility/versions/)。
+
+Server 20260916 已包含 SN-2026-011、012、013 与嵌入式 Console 的 SN-2026-014 修复；Server 20260903 缺少这些修复。独立 Console 的 SN-2026-014 修复自 v2.4.1 起提供。
 
 ## 继承自上游的公告基线 {#inherited}
 
@@ -68,8 +59,9 @@ fork 保留了同一提交对象与 SHA；该同一性是继承证据，不表�
 | [`SN-2026-012`](#sn-2026-012) | [`c4b5e1cb4`](https://github.com/pgsty/silo/commit/c4b5e1cb4)、[#177](https://github.com/pgsty/silo/pull/177) | 仅头部预签名载荷哈希验证 | [编年史](/blog/security/20260916-release-hardening/#sn-2026-012) |
 | [`SN-2026-013`](#sn-2026-013) | [#191](https://github.com/pgsty/silo/pull/191)、[#192](https://github.com/pgsty/silo/pull/192) | IAM 撤销重放与恢复 | [设计](/blog/design/iam-revocations/) · [编年史](/blog/security/20260916-release-hardening/#sn-2026-013) |
 | [`SN-2026-014`](#sn-2026-014) | [Console #56](https://github.com/pgsty/silo-console/pull/56)、[Server #209](https://github.com/pgsty/silo/pull/209) | 匿名分享下载代理范围 | [编年史](/blog/security/20260916-release-hardening/#sn-2026-014) · [Console v2.4.1](/blog/release/console-2.4.1/) |
-| [`SN-2026-015`](#sn-2026-015) | [#234](https://github.com/pgsty/silo/pull/234)、[#235](https://github.com/pgsty/silo/pull/235)；首次随 [Server 20261015](/zh/blog/release/silo-20261015/) 发布 | `PutObjectRetention` 授权与请求体条件键 | [公告](/zh/blog/security/20260926-governance-retention-bypass/) |
-| [`SN-2026-016`](#sn-2026-016) | [#234](https://github.com/pgsty/silo/pull/234)、[#235](https://github.com/pgsty/silo/pull/235)；首次随 [Server 20261015](/zh/blog/release/silo-20261015/) 发布 | 版本寻址与原地写入绕过对象锁 | [设计](/zh/blog/design/governance-retention-bypass-repair/#sn-2026-016) |
+| [`SN-2026-015`](#sn-2026-015) | [#234](https://github.com/pgsty/silo/pull/234)、[#235](https://github.com/pgsty/silo/pull/235)；包含于 [20261018 正式版](/zh/blog/release/silo-20261018/) | `PutObjectRetention` 授权与请求体条件键 | [公告](/zh/blog/security/20260926-governance-retention-bypass/) |
+| [`SN-2026-016`](#sn-2026-016) | [#234](https://github.com/pgsty/silo/pull/234)、[#235](https://github.com/pgsty/silo/pull/235)；包含于 [20261018 正式版](/zh/blog/release/silo-20261018/) | 版本寻址与原地写入绕过对象锁 | [设计](/zh/blog/design/governance-retention-bypass-repair/#sn-2026-016) |
+| [`SN-2026-017`](#sn-2026-017) | [#242](https://github.com/pgsty/silo/pull/242)、[`995439260`](https://github.com/pgsty/silo/commit/995439260)；20261018 正式版 | Admin 自助授权、受限凭据委派与 root 派生凭据 | [安全笔记](/zh/blog/security/20261018-release-hardening/#sn-2026-017) |
 
 各条目的升级与兼容性说明如下。有编年史文章的条目在此只做摘要；威胁模型、被否决方案与验证细节请 follow 链接。
 
@@ -173,13 +165,20 @@ Console #56 将转发限制为配置源站上的对象内容 GET，在发出请�
 
 ### SN-2026-015 — 保留期授权绕过 {#sn-2026-015}
 
-已认证调用方可凭 governance-bypass 请求头，在缺少 `s3:PutObjectRetention` 时修改保留期，在缺少 bypass 权限时削弱 GOVERNANCE，或绕过请求体条件键上的 Deny。Server 20261015 首次要求在读取对象前授予 `s3:PutObjectRetention`，并在削弱未到期 GOVERNANCE 时同时要求明确请求头与 `s3:BypassGovernanceRetention`。清除保留期按剩余零天求值，已有 COMPLIANCE 保护继续生效。详见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
+已认证调用方可凭 governance-bypass 请求头，在缺少 `s3:PutObjectRetention` 时修改保留期，在缺少 bypass 权限时削弱 GOVERNANCE，或绕过请求体条件键上的 Deny。20261018 正式版要求在读取对象前授予 `s3:PutObjectRetention`，并在削弱未到期 GOVERNANCE 时同时要求明确请求头与 `s3:BypassGovernanceRetention`。清除保留期按剩余零天求值，已有 COMPLIANCE 保护继续生效。详见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
 
 ### SN-2026-016 — 版本寻址与原地覆写 {#sn-2026-016}
 
-客户端指定写入版本、目录 `null` 版本与持久化分片目标可能覆写受锁定的版本。Server 20261015 首次要求客户端指定的版本 ID 具备复制信任，并在实际写锁下复查目标对象锁，覆盖旧版或恢复后的分片上传。锁状态不可读时拒绝操作。请升级所有写入进程及接受 S3 写入的复制站点；已修复站点不会重新授权旧站点已经接受的变更。升级不能恢复已覆写的数据或此前的保留期。详见[修复与兼容性说明](/zh/blog/design/governance-retention-bypass-repair/)。
+客户端指定写入版本、目录 `null` 版本与持久化分片目标可能覆写受锁定的版本。20261018 正式版要求客户端指定的版本 ID 具备复制信任，并在实际写锁下复查目标对象锁，覆盖旧版或恢复后的分片上传。锁状态不可读时拒绝操作。请升级所有写入进程及接受 S3 写入的复制站点；已修复站点不会重新授权旧站点已经接受的变更。升级不能恢复已覆写的数据或此前的保留期。详见[修复与兼容性说明](/zh/blog/design/governance-retention-bypass-repair/)。
+
+### SN-2026-017 — 管理凭据授权边界 {#sn-2026-017}
+
+Server 20260916 的部分自助查询与清理路径可能绕过显式 Deny、会话策略或插件拒绝；受限派生凭据可通过管理操作越过自身限制，非 root 管理员也可能修改 root 派生凭据。20261018 正式版落实这些授权边界，同时保留空策略继承、损坏非 root 密钥清理和普通用户无策略绑定时的自查询。批量查询别名统一到父身份。没有新增 action 或存储迁移，历史凭据不会被自动撤销或重写。见[安全笔记](/zh/blog/security/20261018-release-hardening/#sn-2026-017)与[设计](/zh/blog/design/iam-admin-authorization/)。
+
 
 ## 依赖安全更新 {#dependencies}
+
+20261018 正式版另选用 Go 1.27.2、x/net v0.61.0、x/crypto v0.58.0、x/text v0.43.0 与 go-jose v4.1.6。JOSE 的 [RSA JWK 解析修复](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q)同时引入超过 4096 位密钥的拒绝行为；部署前验证 OIDC/JWKS。组件实际链接范围见[十月依赖安全说明](/zh/blog/security/20261018-release-hardening/#dependencies)。
 
 各行列出吸收的修复与首个携带它的提交或发布。可达性与部署暴露面仍需按发布单独判断：吸收了依赖修复不等于该漏洞在 Silo 中可达。
 
@@ -213,4 +212,4 @@ Console #56 将转发限制为配置源站上的对象内容 GET，在发出请�
 本页由仓库内原 `docs/security/advisories.md` 台账维护而来，更新至已核验的 main
 `40220bd836cb`（2026-09-16）。发布状态表述与[组件版本矩阵](/zh/compatibility/versions/)对齐；每个修复的调查、评审与验证细节见链接的编年史文章或发布说明。
 
-对象锁发布边界已更新至 Server 20261015，该版本首次包含 PR #234 与 PR #235。
+十月边界按 20261018 发行源码更新，包含 PR #234、#235、#242 与后续修复；正式发布和生产升级分别核验。

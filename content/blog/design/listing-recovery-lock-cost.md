@@ -2,7 +2,7 @@
 title: "LIST Recovery: Confirm Only Uncertain Names and Bound the Waiting Cost"
 linkTitle: "LIST Recovery and Lock Cost"
 date: 2026-10-17
-lastmod: 2026-10-17
+lastmod: 2026-10-19
 author: "Ruohang Feng"
 summary: >
   The final #218 / #239 decision keeps ordinary listings on their fast path, confirms eligible disagreements, distinguishes deletion from failure, covers existing writer lock domains and limits short-conflict waiting. Alternatives, compatibility and verification limits are explicit.
@@ -12,7 +12,9 @@ draft: false
 url: "/blog/design/listing-recovery-lock-cost/"
 ---
 
-> **Source merged; no new production release:** [PR #239](https://github.com/pgsty/silo/pull/239) merged into main on 2026-10-17 as [`fbcb51197`](https://github.com/pgsty/silo/commit/fbcb5119782a3ec0f2198fd9f42891a11dc4183f), closing #218 and retaining the original author commits. Merging source does not update installed software.
+**20261018 release:** The [release source](/blog/release/silo-20261018/) contains #239 and the directory/common-prefix follow-ups, publicly released. Performance figures below apply only to their recorded historical sources and environments.
+
+> **Historical source integration (2026-10-17):** [PR #239](https://github.com/pgsty/silo/pull/239) merged into main on 2026-10-17 as [`fbcb51197`](https://github.com/pgsty/silo/commit/fbcb5119782a3ec0f2198fd9f42891a11dc4183f), closing #218 and retaining the original author commits. Merging source does not update installed software.
 
 This is the current design decision for [#218](https://github.com/pgsty/silo/issues/218) and [#239](https://github.com/pgsty/silo/pull/239). It follows the [September null-version quorum repair](/blog/design/list-null-version-quorum/) and supersedes the earlier recovery proposal that called the ordinary GET metadata path directly. #239 retains mr javad seydi's original signed commits from [#221](https://github.com/pgsty/silo/pull/221). Source integration, a production release and deployment are separate deliveries. This page is not a production release announcement.
 
@@ -36,9 +38,16 @@ Carry an eligible unresolved name to the pool merger and confirm its complete sa
 
 A full page can still return before the entire bucket scan finishes. Clients must consume all continuation pages; if any page fails, the preceding pages are not a complete inventory. This preserves streaming pagination's latency and memory advantages.
 
+Asynchronous cache cleanup also retains the original request identity. [`2a4db6a4f`](https://github.com/pgsty/silo/commit/2a4db6a4f9d0dedf7229a3b1c5866d2a1bbb22ab) captures the cache peer before starting the background task and passes listing options by value. Clearing the foreground cache ID can no longer race with cleanup or send its RPC an empty ID. This changes neither the cache format nor the pagination token.
+
 Why inspect other pools after source absence? Pool A's old directory can contain `a.csv`, while B's earlier directory is empty. A migration then publishes the object in B and removes A's copy. Omitting the name merely because A is now empty would miss B's current object. After strict source absence, current pool results replace the entire stale same-name group. Each distinct set is reread at most once per recovery.
 
 Legitimate DELETE is another concrete case: six of sixteen directory inputs contain old records, six new records and four no record, so the directory cannot resolve quorum. But DELETE has returned 204, GET returns 404 and all sixteen current drive reads say absent. Early #239 turned even this healthy deletion into a 503. The final design confirms deletion while preserving errors for genuinely unknown results.
+
+### Object absence must not swallow a directory {#directory-followup}
+
+The October 18 [`3dd53eb81`](https://github.com/pgsty/silo/commit/3dd53eb81) repair handles a same-name group whose object is confirmed absent while a directory entry remains valid: drop only the absent object and retain the directory/common prefix. [`2080b3d03`](https://github.com/pgsty/silo/commit/2080b3d03) covers ordering when pending objects, ordinary objects and directories occur together. Duplicate directories collapse into one common prefix; present objects remain object results. Confirmed object absence must not become absence of the entire directory group. This changes neither version history nor the pagination protocol or ordinary-path locking.
+
 
 ## What metadata is stored {#metadata}
 

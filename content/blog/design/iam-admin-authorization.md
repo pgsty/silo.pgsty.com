@@ -2,7 +2,7 @@
 title: "IAM Admin API Authorization Boundaries"
 linkTitle: "IAM Admin Authorization"
 date: 2026-10-16
-lastmod: 2026-10-16
+lastmod: 2026-10-19
 author: "SILO"
 summary: >
   Enforcing self-service policy decisions, preventing session credentials from
@@ -13,6 +13,8 @@ weight: 16
 draft: false
 url: "/blog/design/iam-admin-authorization/"
 ---
+
+**20261018 release:** The [selected source](/blog/release/silo-20261018/) contains #242 and the bulk self-listing follow-up `995439260`. The Server release is public; October 16 verification below applies to its recorded source. See [SN-2026-017](/blog/security/20261018-release-hardening/#sn-2026-017) for security impact.
 
 **Decision, 2026-10-16: GO; source acceptance and merge complete.**
 [Server PR #242](https://github.com/pgsty/silo/pull/242) merged the signed repair
@@ -41,8 +43,8 @@ an update. A non-root administrator with broad Admin permissions could also
 manage root's derived credentials. An action grant alone is insufficient for
 these operations under built-in authorization.
 
-The repair covers five inspection/cleanup handlers and two creation/update
-paths, including the LDAP creation endpoint. It preserves the policy engine's
+The repair covers inspection/cleanup and creation/update handlers, including
+bulk key listing and the LDAP creation endpoint. It preserves the policy engine's
 global behavior, existing Admin routes and actions, request/response formats,
 and IAM storage formats. No dependency version changes are required.
 
@@ -71,6 +73,7 @@ denial into success merely because the target belongs to the caller.
 | --- | --- | --- |
 | `InfoServiceAccount` | `admin:ListServiceAccounts` | Compare the effective user with the stored service account parent; authorize before returning information. |
 | `ListServiceAccounts` | `admin:ListServiceAccounts` | Empty user, caller access key, and caller parent are self aliases. Authorize every request and list the parent for these aliases. |
+| `ListAccessKeysBulk` | `admin:ListServiceAccounts` | Normalize self aliases to the parent and use the same self-service helper; cross-user and `all=true` requests retain their additional authorization requirements. |
 | `InfoAccessKey` | `admin:ListServiceAccounts` | Self requires an existing derived target with the same parent. Missing targets do not create a self exception. |
 | `DeleteServiceAccount` | `admin:RemoveServiceAccount` | Authorize self cleanup; apply the root boundary; use stored identity metadata even when the target token is damaged. |
 | `RevokeTokens` | `admin:RemoveServiceAccount` | Omitted user or the resolved caller parent is self. Authorize before revocation and protect root targets. |
@@ -198,11 +201,7 @@ are no longer copied from the caller to the newly issued key. External plugins
 that inspect those internal fields should treat them as properties of the new
 credential, rather than a copy of the caller's session restriction.
 
-`ListAccessKeysBulk` remains outside this patch. Its existing self path uses
-`IAMSys.IsAllowed`, so an ordinary user without any policy attachment can be
-denied there while `ListServiceAccounts` permits self inspection. This is an
-existing endpoint difference, not an authorization bypass introduced by the
-repair. Broadening that endpoint solely for consistency is unnecessary here.
+`ListAccessKeysBulk` now uses the same self-service helper through the October 18 follow-up [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8). Ordinary users without attached policies can inspect themselves; explicit denies, derived-credential session restrictions and cross-user authorization remain effective. Omitted users, or a single users parameter naming the caller key or parent, resolve to exactly the parent inventory. `all=true` still additionally requires `admin:ListUsers` and is not a self alias. Regressions decrypt responses and check identity contents for ordinary, service-account and STS aliases.
 
 Existing unusable expiring credentials are not automatically repaired. An
 authorized parent or administrator should reissue the intended key, verify its
@@ -219,7 +218,7 @@ atomic authorization across concurrent administrative mutations; see
 
 ## Cost and rejected alternatives {#cost}
 
-The production delta is 59 net added lines across two handler files. There is
+The original #242 production delta was 59 net added lines across two handler files; the October 18 bulk-list follow-up reuses its helper. There is
 no new cache, background worker, lock protocol, storage migration, or S3 data
 path change. Claim filtering uses existing copy loops; normalization reuses
 the policy already parsed for creation.

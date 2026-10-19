@@ -4,8 +4,10 @@ url: "/zh/reference/minio-mc-admin/mc-admin-user-svcacct/"
 weight: 80
 icon: fa-solid fa-user-tag
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-user-svcacct.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+**Server 20261018 授权变化：** 自助查询／清理也必须遵守显式 Deny、会话限制与授权插件决定。内置授权拒绝受限派生凭据创建／更新服务账户，也保护 root 派生凭据。普通用户保留既有自助权利，批量自查询别名统一到父身份；无须新增 action 或存储迁移。升级前核对[管理授权契约](/zh/blog/design/iam-admin-authorization/)和 [SN-2026-017](/zh/blog/security/20261018-release-hardening/#sn-2026-017)。旧版客户端命令名称不改变服务端的授权规则。
 
 <a id="mc-admin-user-svcacct"></a>
 <a id="minio-mc-admin-user-svcacct"></a>

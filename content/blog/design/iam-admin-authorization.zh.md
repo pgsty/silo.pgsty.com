@@ -2,7 +2,7 @@
 title: "IAM Admin API 授权边界修复"
 linkTitle: "IAM Admin 授权边界"
 date: 2026-10-16
-lastmod: 2026-10-16
+lastmod: 2026-10-19
 author: "SILO"
 summary: >
   用局部 Handler 修补落实自管理授权，阻止会话凭据逃逸限制，保护 root 凭据，
@@ -12,6 +12,8 @@ weight: 16
 draft: false
 url: "/zh/blog/design/iam-admin-authorization/"
 ---
+
+**20261018 正式发布：** [选定源码](/zh/blog/release/silo-20261018/)包含 #242 与批量自查询后续修复 `995439260`。Server Release 已正式发布；下文 10 月 16 日验证记录仅对应当时源码。安全影响见 [SN-2026-017](/zh/blog/security/20261018-release-hardening/#sn-2026-017)。
 
 **2026-10-16 决策：GO，源码验收与合并已完成。**
 [服务端 PR #242](https://github.com/pgsty/silo/pull/242) 已将带 DCO 签署的修复提交
@@ -35,7 +37,7 @@ url: "/zh/blog/design/iam-admin-authorization/"
 拥有广泛 Admin 权限的非 root 管理员也可能管理 root 的派生凭据。
 在内置授权下，仅获准执行某个 Action，不足以放行这些操作。
 
-本次修复覆盖五个查询/清理 Handler 和两条创建/更新路径，包括 LDAP 创建入口。
+修复覆盖查询／清理与创建／更新 Handler，包括批量密钥查询和 LDAP 创建入口。
 保留策略引擎的全局语义、现有 Admin 路由和 Action、请求响应格式及 IAM 存储格式，
 不需要修改依赖版本。
 
@@ -59,6 +61,7 @@ Handler 不再因为目标属于调用者，就把拒绝改成成功。
 | --- | --- | --- |
 | `InfoServiceAccount` | `admin:ListServiceAccounts` | 比较有效用户与服务账号的存储父账号，授权通过后返回信息。 |
 | `ListServiceAccounts` | `admin:ListServiceAccounts` | 空用户参数、调用者 AccessKey、调用者父账号均为自身别名；每次请求都授权，并为这些别名列出父账号的密钥。 |
+| `ListAccessKeysBulk` | `admin:ListServiceAccounts` | 自身别名按父身份规范化并调用同一自助授权 helper；跨用户和 `all=true` 保留额外权限要求。 |
 | `InfoAccessKey` | `admin:ListServiceAccounts` | 目标必须存在、属于派生凭据且父账号相同才算自身；不存在的目标不能形成自身例外。 |
 | `DeleteServiceAccount` | `admin:RemoveServiceAccount` | 自清理先授权，再检查 root 边界；目标 token 损坏时仍使用存储身份元数据。 |
 | `RevokeTokens` | `admin:RemoveServiceAccount` | 省略用户或解析后的用户等于调用者父账号时视为自身；先授权，且保护 root 目标。 |
@@ -157,10 +160,7 @@ Version 而拒绝请求，造成“创建成功，但密钥不能执行预期操
 检查这些内部字段的外部插件应将其视为新凭据自身的属性，而不是调用者会话限制的
 副本。
 
-`ListAccessKeysBulk` 不在本次修改范围内。其自身路径仍使用 `IAMSys.IsAllowed`，
-所以没有任何绑定策略的普通用户可能在该接口被拒绝，但能通过
-`ListServiceAccounts` 自查。这是既有端点差异，不是本次引入的授权旁路，没必要
-仅为一致性而在此扩大权限。
+`ListAccessKeysBulk` 已由 2026-10-18 后续提交 [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8) 纳入同一自助授权 helper。普通用户没有策略绑定时可自查询；显式 Deny、派生凭据的会话限制和跨用户授权仍生效。省略 users，或唯一 users 参数是调用者自己的 key／父身份时，统一只查询解析后的父身份。`all=true` 仍要求额外的 `admin:ListUsers`，不会变成自查询。回归会解密响应并核对身份内容，覆盖普通用户、服务账户与 STS 别名。
 
 已经不可用、带过期时间的历史凭据不会被自动修复。应由有权限的父账号或管理员重新签发
 预期密钥，验证访问后移除旧密钥。不要通过批量擦除导入或复制凭据的策略 claims
@@ -173,7 +173,7 @@ MinIO/MC 保持尽最大努力的兼容。本次不改变依赖选择，也不�
 
 ## 成本与替代方案 {#cost}
 
-两个生产 Handler 文件合计净增 59 行。没有新增缓存、后台任务、锁协议、存储迁移，
+原 #242 在两个生产 Handler 文件中合计净增 59 行；10 月 18 日的批量查询修复复用其 helper。没有新增缓存、后台任务、锁协议、存储迁移，
 也没有修改 S3 数据路径。字段过滤使用已有复制循环，空策略规范化复用创建请求
 已经解析的策略。
 

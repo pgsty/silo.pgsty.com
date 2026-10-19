@@ -7,8 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> [!WARNING]
-> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
+**SILO 20261018 contract:** This page retains the inherited S3 API catalog. The target is the [20261018 release](/blog/release/silo-20261018/). Apply the documented limits and error behavior for [ordinary LIST](/blog/design/listing-recovery-lock-cost/), [Object Lock](/blog/security/20260926-governance-retention-bypass/) and [multipart listing](/blog/design/list-multipart-uploads/#implementation). Checksum message text can change; see the [checksum contract](/blog/design/complete-multipart-checksum-errors/#october-errors).
 
 <a id="s3-api-compatibility"></a>
 
@@ -40,8 +39,8 @@ This page documents S3 APIs supported by MinIO Object Storage. For reference doc
 
 ### Write commit errors {#write-commit-errors}
 
-[PR #232](https://github.com/pgsty/silo/pull/232), targeting the next Server
-release after 20261015, returns HTTP 503 `SlowDownWrite` when staged `xl.meta`
+[PR #232](https://github.com/pgsty/silo/pull/232), included in the Server 20261018
+candidate, returns HTTP 503 `SlowDownWrite` when staged `xl.meta`
 disappears at the final commit of PUT or multipart completion. Earlier code
 could report `400 IncompleteBody` for PUT or `404 NoSuchKey` for completion.
 Actual incomplete client uploads retain their existing error handling. This
@@ -78,7 +77,7 @@ PutObjectAcl
 
 - Published Server 20260903 treats a non-empty `ListMultipartUploads` prefix as an exact object name. An empty prefix uses node-local volatile state without complete pagination, marker or delimiter semantics.
 - Server 20260916 adds persistent scanning as an opt-in strict mode while retaining legacy exact-key/cache behavior by default. Its [historical upgrade contract](/blog/design/list-multipart-uploads/#implementation-20260916) still applies to those binaries.
-- **October 18 rollback implementation (unreleased):** withdraw default persistent scanning and restore node-local cache listing for an empty prefix and exact-key lookup otherwise. Restart omissions, true-prefix and cache-pagination defects remain. Ignore the retired mode switch with a warning and tolerate its obsolete shared key; existing strict users lose optional durable listing and strict cancellation. Diagnostic scans retain resource limits without gating public operations. Preserve identity fields, safety checks, default best-effort Abort and cleanup repairs. See the [decision, capacity and limits](/blog/design/list-multipart-uploads/#decision-20261018).
+- **Server 20261018:** withdraw default persistent scanning and restore node-local cache listing for an empty prefix and exact-key lookup otherwise. Restart omissions, true-prefix and cache-pagination defects remain. Ignore the retired mode switch with a warning and tolerate its obsolete shared key; existing strict users lose optional durable listing and strict cancellation. Diagnostic scans retain resource limits without gating public operations. Preserve identity fields, safety checks, default best-effort Abort and cleanup repairs. See the [decision, capacity and limits](/blog/design/list-multipart-uploads/#decision-20261018).
 - The `AbortIncompleteMultipartUpload` lifecycle action is not supported with `PutBucketLifecycle`.
 
 ## Bucket APIs {#bucket-apis}

@@ -2,7 +2,7 @@
 title: "BadDigest, InvalidRequest, and the CompleteMultipartUpload Checksum Contract"
 linkTitle: "Multipart Checksum Errors"
 date: 2026-08-27
-lastmod: 2026-09-16
+lastmod: 2026-10-19
 author: "Ruohang Feng"
 summary: >
   Completion validates stored checksum types and returns operation-specific errors. CRC64NVME plus COMPOSITE is rejected in Server 20260903; streaming follow-up remains separate.
@@ -18,6 +18,13 @@ The repairs for [#48](https://github.com/pgsty/silo/issues/48) and
 [#50](https://github.com/pgsty/silo/issues/50) are included in
 [Server 20260903](/blog/release/silo-20260903/). This record supersedes the
 August proposal to leave CRC64NVME canonicalization unchanged.
+
+## 20261018: message text and commit failures {#october-errors}
+
+The [20261018 release](/blog/release/silo-20261018/#reliability) includes #225/#229/#238 message fixes: S3-compatible `Content-MD5` capitalization, known algorithm names for PUT/UploadPart mismatches, and removal of redundant “checksum” wording at completion. Unknown algorithms retain the generic description; operation-specific error codes and validation requirements are unchanged. The unchanged UploadPart mapper described below refers to the original August repair; October updates its message rendering. Clients should match HTTP/S3 codes rather than parse the full English text.
+
+Separately, #232 classifies staged `xl.meta` loss at final commit as `503 SlowDownWrite`. It is distinct from the HTTP 400 client-checksum errors in the table and does not change genuine incomplete-body handling. See the [S3 write-commit reference](/reference/s3-api-compatibility/#write-commit-errors).
+
 
 ## Why validation belongs at completion {#problem}
 

@@ -6,6 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**版本说明：** 本页命令与输出示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261018/#upgrade)。
+
 <a id="certbot-minio-let-s-encrypt"></a>
 
 [![Slack](https://slack.min.io/slack?type=svg)](https://slack.min.io)
@@ -92,7 +94,7 @@ $ ./minio server --address ":443" /mnt/data
 如果你使用的是 MinIO 的 dockerized 版本，那么你需要
 
 ```sh
-$ sudo docker run -p 443:443 -v /home/user/.minio:/root/.minio/ -v /home/user/data:/data docker.io/pgsty/silo:RELEASE.2026-09-16T00-00-00Z server --address ":443" /data
+$ sudo docker run -p 443:443 -v /home/user/.minio:/root/.minio/ -v /home/user/data:/data docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server --address ":443" /data
 
 ```
 

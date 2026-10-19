@@ -8,7 +8,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO-verified pin, 2026-09-16:** pkg v3.14.1 and mcli 20260916 use `v7.3.1-0.20260915093545-32e1f32cb176`. Select it with `go get github.com/minio/minio-go/v7@v7.3.1-0.20260915093545-32e1f32cb176`. It retries and propagates S3 errors embedded in CopyObject HTTP 200 responses. Server/Console select their versions independently; see the [component matrix](/compatibility/versions/).
+> **SDK selected for 20261018:** the Server candidate, Console v2.4.2, mcli 20261018 and pkg v3.14.3 select upstream `github.com/minio/minio-go/v7 v7.4.1`. It retains CopyObject HTTP 200 embedded-error handling and adds failed-upload cleanup after cancellation, UTC retention timestamps and STS duration fixes. Parallel GET/Compose remain opt-in. Independent component releases do not publish Server; see the [component matrix](/compatibility/versions/) and [release notes](/blog/release/silo-20261018/#components).
 
 ## MinIO Go SDK {#go-sdk}
 
@@ -22,7 +22,7 @@ SILO implements the S3-compatible server contract, so Go applications can use th
 From an existing Go module:
 
 ```shell
-go get github.com/minio/minio-go/v7
+go get github.com/minio/minio-go/v7@v7.4.1
 ```
 
 ## Configure the connection {#configure}

@@ -8,6 +8,8 @@ type: docs
 icon: fa-solid fa-arrow-right-arrow-left
 ---
 
+**20261018 升级入口：** 本文保留既有数据、服务与配置迁移方式。本次安全与行为变化必须同时检查 [20261018 升级要求](/zh/blog/release/silo-20261018/#upgrade)和[兼容性增量](/zh/compatibility/server/#october-2026)，尤其是旧 strict 分片用户。Server 20261018 已正式发布，部署前仍须按目标环境完成验收。
+
 从 MinIO 迁移到 Silo，通常可以复用现有对象数据和卷，无需逐对象导出、重新导入。**普通 S3 应用通常不改代码，管理员仍需检查部署、权限与状态兼容性。** 先用[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 安装见[原生软件包迁移](/zh/compatibility/binary/)，各版本要求见[组件矩阵](/zh/compatibility/versions/)。
 
 ## 哪些改变 {#scope}
@@ -24,7 +26,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 ## 哪些不变 {#unchanged}
 
 - **对象布局、纠删码格式和 `.minio.sys` 目录保留，可以复用兼容基线的数据盘。** 这不等于任意版本都能双向降级，见[回滚边界](#rollback)。
-- 既有桶、对象版本、用户、Access Key、策略、生命周期与加密配置继续使用；授权判定、复制状态和新增元数据的例外见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07)，具体以目标版本的[发布说明](/zh/blog/release/silo-20260916/)为准。
+- 既有桶、对象版本、用户、Access Key、策略、生命周期与加密配置继续使用；授权判定、复制状态和新增元数据的例外见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07)，具体以目标版本的[发布说明](/zh/blog/release/silo-20261018/)为准。
 - 常用 S3 API、SigV4、SDK、`mc`/`mcli` 与预签名 URL 接入方式延续上游；校验、条件请求和错误行为变化见 [O04](/zh/compatibility/#o04)。
 - 端点主机名、API 端口 `9000`、Console 端口、卷挂载。
 - `MINIO_*` 环境变量与既有服务端参数。

@@ -1,15 +1,12 @@
 ---
 title: "Object Lock Retention Bypass and Version-Overwrite Repair Design (SN-2026-015 / SN-2026-016)"
 date: 2026-10-14
-lastmod: 2026-10-15
+lastmod: 2026-10-19
 summary: "Report verification, Git provenance, entry and write-lock defense-in-depth design, fail-closed preflight hardening, and adversarial trade-off evaluation for SN-2026-015 and SN-2026-016."
 tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 ---
 
-> [!WARNING]
-> **Release-status correction (2026-10-17):** SILO `RELEASE.2026-10-15T00-00-00Z` was returned to Draft and is not the current public release; the published Server remains 20260916. Historical statements below that 20261015 is published or downloadable are superseded, and its fixes must not be treated as delivered in a public release. 20261018 is being prepared as a tag and draft only. See the [component matrix](/compatibility/versions/) and [download page](/download/).
-
-**Status on 2026-10-15:** The complete repair in [PR #234](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and [PR #235](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`) first shipped in [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z). The previously published `RELEASE.2026-09-16T00-00-00Z` remains affected. See the [advisory](/blog/security/20260926-governance-retention-bypass/) and [release notes](/blog/release/silo-20261015/) for upgrade requirements and artifact acceptance.
+**Status verified 2026-10-19:** The complete PR #234 / #235 repair is included in the [Server 20261018 release](/blog/release/silo-20261018/), whose GitHub release is now public. 20261015 is a superseded draft; Server 20260916 remains affected. This page retains the original design and source verification; see the [advisory](/blog/security/20260926-governance-retention-bypass/) for upgrade requirements.
 
 This document records the verification, Git provenance, repair design, critical-path evaluation, and adversarial candidate trade-offs for two Object Lock (WORM) security vulnerabilities identified through external reports and an internal write-path audit: **`SN-2026-015` (`PutObjectRetention` bypass header authorization and condition-key short-circuit)** and **`SN-2026-016` (version-addressed write overwrite bypass and write-path lock gaps)**.
 

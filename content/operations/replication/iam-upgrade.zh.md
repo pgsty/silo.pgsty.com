@@ -6,12 +6,10 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
+**STS 撤销验证：**20261018 同时补齐[持久枚举与撤销传播](/zh/blog/design/iam-revocations/#scoped-sts-20261018)。用实际父身份／令牌类型撤销后，逐个节点与站点确认旧令牌被拒绝、新令牌仍可用，并覆盖离线节点重连。请求集群未曾收到的孤立站点令牌不在撤销快照中；不要据一次成功响应推断分区中的全局瞬时失效。
+
+
+**20261018 补充：** 本流程中的 20260916 撤销历史要求继续适用；本次另增加 [IAM 管理凭据授权修复](/zh/blog/design/iam-admin-authorization/)。维护窗口前验证自助 Deny、会话限制、root 目标和批量查询别名，历史密钥不会自动重写。版本与发布状态见 [20261018 发布说明](/zh/blog/release/silo-20261018/)。
 
 [Server #191](https://github.com/pgsty/silo/pull/191) 与
 [#192](https://github.com/pgsty/silo/pull/192) 持久化删除修订及父身份撤销边界，防止延迟的站点事件恢复已撤销身份和旧授权。

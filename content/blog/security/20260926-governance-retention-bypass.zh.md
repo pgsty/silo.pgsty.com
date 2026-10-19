@@ -2,23 +2,17 @@
 title: "SN-2026-015：PutObjectRetention 授权绕过"
 linkTitle: "SN-2026-015：保留期授权"
 date: 2026-09-26
-lastmod: 2026-10-15
+lastmod: 2026-10-19
 author: "冯若航"
-description: "SN-2026-015 与 SN-2026-016：对象锁授权与覆写修复，首次修复于 Server 20261015，附升级要求与验证。"
+description: "SN-2026-015 与 SN-2026-016：对象锁授权与覆写修复，包含于 Server 20261018 正式版，附升级要求与验证。"
 tags: [安全, Object Lock, IAM, silo]
 weight: 1
 url: "/zh/blog/security/20260926-governance-retention-bypass/"
 ---
 
-> [!WARNING]
-> **发布状态更正（2026-10-17）：** SILO `RELEASE.2026-10-15T00-00-00Z` 已恢复为 Draft，未作为当前正式版本提供；正式 Server 仍为 20260916。下文关于 20261015 已发布或可下载的历史表述已失效，其中修复尚不能视为正式版已交付。20261018 仅准备标签和草稿，尚未正式发布。请以[组件版本表](/zh/compatibility/versions/)和[下载页](/zh/download/)为准。
+**修复目标：[Server 20261018](/zh/blog/release/silo-20261018/)，现已正式发布。** PR #234 与 #235 的 SN-2026-015/016 完整修复已包含在选定源码中。20261015 是已被替代的草稿。Server 20260916 与此前实测的 20260903 均受影响，更早的 SILO 发行版也未包含这些修复。
 
-**首次修复版本：[RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z)（2026-10-15）。**
-该版包含 [PR #234](https://github.com/pgsty/silo/pull/234) 与
-[PR #235](https://github.com/pgsty/silo/pull/235) 对 **SN-2026-015 与 SN-2026-016** 的完整修复。
-Server `RELEASE.2026-09-16T00-00-00Z` 和此前实测的 `RELEASE.2026-09-03T13-18-01Z` 均受影响；
-更早的 SILO 发行版均未包含这些修复。请升级全部 Server 进程及所有接受 S3 写入的复制站点。
-更新 mcli、pkg 或独立 Console 不能修复 Server。制品身份与验收结果见[发布说明](/zh/blog/release/silo-20261015/)。
+修复制品正式发布并验收后，升级全部 Server 进程及所有接受 S3 写入的复制站点。更新 mcli、pkg 或独立 Console 不能修复 Server。当前身份与交付边界见[发布说明](/zh/blog/release/silo-20261018/#delivery)。
 
 下文根因分析与复现结果描述的是修复前的受影响版本。
 
@@ -288,7 +282,7 @@ case objectlock.RetGovernance: // 保留期尚未到期
 
 ## 升级前的缓解措施 {#mitigation}
 
-请升级到 `RELEASE.2026-10-15T00-00-00Z` 或更新版本。以下措施仅适用于仍在运行受影响 Server 的阶段，
+应在公开制品验收后部署 `RELEASE.2026-10-18T00-00-00Z`。本次核对时仍为 Draft，不要将已被替代的 20261015 草稿视为当前正式修复版。以下措施仅适用于仍在运行受影响 Server 的阶段，
 只能限制 SN-2026-015 保留期写入路径，不能替代 SN-2026-016 写路径的完整修复。
 受影响 Server 上的 F1 无法用 IAM 策略挡住，因为服务端在接受请求前不求值任何策略：
 
@@ -308,8 +302,4 @@ case objectlock.RetGovernance: // 保留期尚未到期
 
 ## 交付状态 {#delivery}
 
-修复通过 [PR #234](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与
-[PR #235](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）合入，
-首次修复发行是 [RELEASE.2026-10-15T00-00-00Z](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-15T00-00-00Z)。
-现有 Object Lock race 回归已作为发行工作流的前置门禁。
-[发布说明](/zh/blog/release/silo-20261015/#acceptance)记录验收后的源码、二进制、安装包与 Docker 镜像身份。
+修复通过 [PR #234](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 [PR #235](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）合入，包含于 [20261018 正式版](/zh/blog/release/silo-20261018/)。Object Lock race 回归是发行工作流前置检查。20261015 的[历史验收](/zh/blog/release/silo-20261015/#acceptance)只证明其记录的源码与制品，不证明新版公开或生产环境已升级。

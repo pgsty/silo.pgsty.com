@@ -8,19 +8,26 @@ type: docs
 icon: fa-solid fa-server
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
-
-> **Embedded Console in public Server 20260916:** [v2.4.1](/blog/release/console-2.4.1/), with mcli 20260916 and pkg v3.14.1. Standalone [Console v2.4.2](/blog/release/console-2.4.2/) is released separately with mcli 20261018 and pkg v3.14.2. See the [component matrix](/compatibility/versions/) and [password-policy migration](/compatibility/password-permissions/).
 
 **Start with the [three-level overview](/compatibility/): 12 compatible improvements, 4 minor differences and 8 conditional checks.** This page provides server details, preserving the fixed 2026-08-06 audit baseline and separating [subsequently released changes](#since-20260806) from [September 16 source changes](#september-2026). The historical audit baseline differs from the [original fork baseline](/compatibility/#scope), and does not imply that current artifacts include every source fix.
 
 > [!WARNING]
 > **Read this before replacing a MinIO deployment.** The binary, package, service account, systemd unit, default local configuration directory, container path, Helm resource names, embedded Console, update behavior, several authorization decisions, and some error responses changed. Data disks and the `MINIO_*` configuration namespace did not receive a matching rename.
+
+## Server 20261018 upgrade checks {#october-2026}
+
+This section targets the [20261018 release](/blog/release/silo-20261018/), now publicly released. Older audits and the 20260916 sections below retain their historical scope.
+
+| Workload | Change and action |
+| --- | --- |
+| Object Lock / version-addressed writes | Retention requires its base permission and applicable bypass permission; addressed writes require trusted replication; directory and old multipart targets are rechecked under the write lock and fail closed. Upgrade all write-accepting sites. |
+| Service accounts / STS / Admin automation | Explicit self denies and session restrictions apply. Restricted credentials cannot delegate broader access; non-root administrators cannot mutate root-derived credentials. Check the actual actor and external plugin. |
+| Object inventories and backup synchronization | Eligible uncertain LIST entries are confirmed or cause an error. Read every page and never turn an error into an empty inventory; no cross-page snapshot is promised. |
+| Multipart listing and cancellation | The default remains cache/exact-key lookup. The strict switch is ignored with a warning; former strict users lose durable enumeration and strict cancellation. Restart omissions, prefix/pagination limits and delayed creation remain. |
+| Errors / OIDC | Lost staged commit metadata returns `503 SlowDownWrite`; checksum message text can change. JOSE rejects RSA JWKs above 4096 bits, so verify login before upgrading. |
+
+See [IAM authorization](/blog/design/iam-admin-authorization/), [LIST recovery](/blog/design/listing-recovery-lock-cost/), the [multipart decision](/blog/design/list-multipart-uploads/#implementation) and [security update](/blog/security/20261018-release-hardening/). #79 and #217 remain unresolved; disk formats and established configuration names are unchanged. The PGSTY stack is supported, with best-effort upstream compatibility.
+
 
 ## Audit scope and method {#scope}
 

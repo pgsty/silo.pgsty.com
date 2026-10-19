@@ -12,12 +12,8 @@ draft: false
 url: "/blog/design/server-release-readiness/"
 ---
 
-> [!WARNING]
-> **分片列表最新决策 · Latest multipart-listing decision (2026-10-18)**
->
-> **English:** The October 18 decision withdraws default persistent scanning, restores cache/exact-key listing, retains identity, safety and cleanup repairs, and does not restore the strict switch. See the [latest decision](https://silo.pgsty.com/blog/design/list-multipart-uploads/#decision-20261018). The rollback is implemented in [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d) and remains unreleased. Historical sections retain their named releases' contracts; installed binaries and unrelated upgrade requirements do not change.
->
-> **中文：** 2026-10-18 决定定向撤回默认持久扫描，恢复缓存／精确 key 列表；保留身份、安全和清理修复，不恢复 strict 开关。参见[最新决策](https://silo.pgsty.com/zh/blog/design/list-multipart-uploads/#decision-20261018)。回退实现见 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423cfe703951f52ff9cbd286df2cf9d79d)，尚未正式发布。旧章节保留对应版本的历史契约，不改变已安装二进制，也不替代其他主题的升级要求。
+**For 20261018:** this page preserves the historical 20260903 review. See the [October release record](/blog/release/silo-20261018/#delivery) for the final candidate, repairs and local artifact acceptance.
+
 
 This is the durable pre-release engineering record behind [SILO 20260903](/blog/release/silo-20260903/). It explains why an earlier “all issues are solved” assessment was not accepted at face value, what the independent review found, how the fixes were narrowed, and which gates still remained at the review point. The linked release note records the later publication result.
 

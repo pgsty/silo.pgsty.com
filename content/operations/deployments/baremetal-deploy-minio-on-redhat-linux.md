@@ -6,6 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**Version scope:** commands and illustrative output target [Server 20261018](/blog/release/silo-20261018/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261018/#upgrade).
+
 <a id="deploy-minio-on-redhat-linux"></a>
 <a id="deploy-minio-rhel"></a>
 
@@ -25,7 +27,7 @@ Ensure you have reviewed our published Hardware, Software, and Security checklis
 
 ### Erasure Coding Parity {#erasure-coding-parity}
 
-MinIO automatically determines the default [erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding) configuration for the cluster based on the total number of nodes and drives in the topology. You can configure the per-object [parity](/glossary/#term-parity) setting when you set up the cluster *or* let MinIO select the default (`EC:4` for production-grade clusters).
+SILO selects default parity from the number of drives **in each erasure set**, not the cluster-wide drive count. Sets with 8–16 drives default to `EC:4`; smaller sets have different defaults. See [storage-class settings](/reference/minio-server/settings/storage-class/) for the full table and configurable ranges. Parity is stored per object, so evaluate availability against that object’s set and actual layout.
 
 Parity controls the relationship between object availability and storage on disk. Use the MinIO [Erasure Code Calculator](https://min.io/product/erasure-code-calculator) for guidance in selecting the appropriate erasure code parity level for your cluster.
 
@@ -275,7 +277,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-09-16T00-00-00Z (go1.27.1 linux/amd64)
+Version: RELEASE.2026-10-18T00-00-00Z (go1.27.2 linux/amd64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin
