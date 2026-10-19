@@ -55,14 +55,6 @@
             </div>
 
             <p class="hero-manifesto anim" style="--d:4">
-              <a href="{{ relLangURL "compatibility/versions/" }}">{{ if $zh }}配套已发布{{ else }}Released components{{ end }}:</a>
-              <a href="{{ relLangURL "download/#console" }}">Console {{ hugo.Data.releases.console.tag }}</a> ·
-              <a href="{{ relLangURL "download/#client" }}">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a> ·
-              <a href="{{ relLangURL "download/#kes" }}">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a> ·
-              <a href="{{ relLangURL "download/#pkg" }}">pkg {{ hugo.Data.releases.pkg.tag }}</a>
-            </p>
-
-            <p class="hero-manifesto anim" style="--d:4">
               <a href="{{ relLangURL "about/manifesto/" }}"><i class="fas fa-scroll" aria-hidden="true"></i> {{ if $zh }}我们承诺什么，不承诺什么：PGSTY SILO 宣言{{ else }}The PGSTY SILO Manifesto: our commitments, and limits{{ end }} →</a>
             </p>
 
@@ -192,7 +184,7 @@
             <p class="module-motto"><span aria-hidden="true">＋</span> {{ if $zh }}公告与修复它的代码放在同一个地方{{ else }}Advisories published next to the code that fixes them{{ end }}</p>
             <ul class="module-list">
               <li>{{ if $zh }}上游社区版已归档——新 CVE 落到无人处理{{ else }}Upstream's community edition is archived—new CVEs land on no one's desk{{ end }}</li>
-              <li>{{ if $zh }}<strong>安全修复与公开公告</strong>，逐项记录受影响版本和交付状态{{ else }}<strong>Security fixes with public advisories</strong>, documenting affected versions and delivery status{{ end }}</li>
+              <li>{{ if $zh }}<strong>公开安全公告</strong>，列明受影响版本与修复状态{{ else }}<strong>Public advisories</strong> list affected versions and fix status{{ end }}</li>
               <li>{{ if $zh }}私下报告、可复现地分诊、透明地公开{{ else }}Report privately, triage reproducibly, publish transparently{{ end }}</li>
             </ul>
             <p class="module-value">{{ if $zh }}不停摆的安全维护{{ else }}Security that keeps moving{{ end }}</p>
@@ -244,13 +236,13 @@
           <div class="module-content">
             <p class="module-ref silkscreen">{{ if $zh }}兼容性{{ else }}COMPATIBILITY{{ end }}</p>
             <h3 class="module-title"><a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}从 MinIO 迁移{{ else }}Migrate from MinIO{{ end }}</a></h3>
-            <p class="module-motto"><span aria-hidden="true">⇄</span> {{ if $zh }}保留数据卷，按版本核对迁移条件{{ else }}Keep your data volumes; check the version-specific migration requirements{{ end }}</p>
+            <p class="module-motto"><span aria-hidden="true">⇄</span> {{ if $zh }}保留数据卷，按版本核对迁移条件{{ else }}Keep data volumes; check version-specific requirements{{ end }}</p>
             <ul class="module-list">
               <li>{{ if $zh }}产品与交付物使用 <strong>silo</strong>，保留既有对象布局和协议标识{{ else }}Artifacts use <strong>silo</strong>, retaining the object layout and protocol identifiers{{ end }}</li>
-              <li>{{ if $zh }}沿用 S3 API 与 <strong>MINIO_* 配置名</strong>；权限、元数据与回滚变化按版本说明{{ else }}Retain the S3 API and <strong>MINIO_* configuration names</strong>; policy, metadata and rollback changes are documented per release{{ end }}</li>
+              <li>{{ if $zh }}沿用 S3 API 与 <strong>MINIO_* 配置</strong>，变更详见版本说明{{ else }}Keep S3 APIs and <strong>MINIO_* settings</strong>; release notes cover changes{{ end }}</li>
               <li>{{ if $zh }}参见<a href="{{ relLangURL "compatibility/server/" }}">兼容性审计</a>与<a href="{{ relLangURL "compatibility/migration/" }}">迁移指南</a>，回滚路径同样在册{{ else }}See the <a href="{{ relLangURL "compatibility/server/" }}">compatibility audit</a> and <a href="{{ relLangURL "compatibility/migration/" }}">migration guide</a>, rollback included{{ end }}</li>
             </ul>
-            <p class="module-value">{{ if $zh }}正式支持 SILO 四组件组合，上游兼容尽力保留{{ else }}The four-component SILO stack is supported; upstream compatibility is best effort{{ end }}</p>
+            <p class="module-value">{{ if $zh }}正式支持 SILO 四组件，上游兼容尽力保留{{ else }}SILO stack supported; upstream compatibility is best effort{{ end }}</p>
           </div>
           <div class="module-visual">
             <a href="{{ relLangURL "compatibility/migration/" }}" class="code-plate migrate-plate" aria-label="{{ if $zh }}查看从 MinIO 迁移到 PGSTY SILO 的指南{{ else }}Read the MinIO to PGSTY SILO migration guide{{ end }}">
@@ -273,7 +265,7 @@
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">S3 INTERFACE</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title">{{ if $zh }}还是那套接口{{ else }}Same interface{{ end }}</h2>
-          <p class="section-subtitle section-subtitle--wide">{{ if $zh }}保留客户端熟悉的 S3 API、MINIO_* 配置名和指标标识；升级前核对目标版本的权限与持久状态变化。{{ else }}Keep familiar S3 APIs, MINIO_* configuration names and metric identifiers. Review the target release's policy and persistent-state changes before upgrading.{{ end }}</p>
+          <p class="section-subtitle section-subtitle--wide">{{ if $zh }}沿用 S3 API、MINIO_* 配置名与指标标识，升级前查看版本说明。{{ else }}Same S3 APIs, MINIO_* settings and metric names. Check release notes before upgrading.{{ end }}</p>
           <div class="section-links">
             <a href="{{ relLangURL "compatibility/" }}">{{ if $zh }}兼容性说明{{ else }}Compatibility Notes{{ end }} →</a>
             <a href="{{ relLangURL "developers/minio-drivers/" }}">{{ if $zh }}S3 客户端{{ else }}S3 Clients{{ end }} →</a>
