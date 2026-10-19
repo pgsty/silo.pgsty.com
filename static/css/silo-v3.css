@@ -380,12 +380,12 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
 .adoption-logos .logos-marquee-content {
   gap: 0;
   /* Duration covers the whole strip, so it scales with the number of logos. */
-  animation-duration: 68s;
+  animation-duration: 110s;
 }
-.adoption-logos .logos-marquee-row:nth-of-type(2) .logos-marquee-content { animation-duration: 77s; }
-.adoption-logos .logos-marquee-row:nth-of-type(3) .logos-marquee-content { animation-duration: 72s; }
-.adoption-logos .logos-marquee-row:nth-of-type(4) .logos-marquee-content { animation-duration: 81s; }
-.adoption-logos .logos-marquee-row:nth-of-type(5) .logos-marquee-content { animation-duration: 74s; }
+.adoption-logos .logos-marquee-row:nth-of-type(2) .logos-marquee-content { animation-duration: 124s; }
+.adoption-logos .logos-marquee-row:nth-of-type(3) .logos-marquee-content { animation-duration: 116s; }
+.adoption-logos .logos-marquee-row:nth-of-type(4) .logos-marquee-content { animation-duration: 131s; }
+.adoption-logos .logos-marquee-row:nth-of-type(5) .logos-marquee-content { animation-duration: 120s; }
 .evidence-logo-set {
   display: flex;
   align-items: center;
