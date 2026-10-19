@@ -1,39 +1,40 @@
 # Reviewed SILO contribution record; all human issue / PR authors count, in every state.
 # Public API scope and counts include bots; the community roll excludes them.
-# Existing security-disclosure credit is retained in addition to public issue / PR authors.
+# Security disclosures are included with permission in addition to public issue / PR authors.
 # Order: merged PR authors, other PR authors, then reports; significant contributions
 # first within each group, followed by first recorded participation. Maintainer first.
 # firstContribution is the first public issue / PR date; omitted for private disclosures.
 # Sync repository records, README sections, and bilingual pages: python3 bin/contributors.py
 # Refresh avatars: python3 bin/contributor_avatars.py
-updated: "2026-09-16T08:13:18+00:00"
+updated: "2026-10-18T23:46:04+00:00"
 repositories:
   - repo: "pgsty/silo"
-    issues: 108
-    pullRequests: 99
+    issues: 119
+    pullRequests: 126
   - repo: "pgsty/silo-console"
     issues: 35
-    pullRequests: 22
+    pullRequests: 26
   - repo: "pgsty/mc"
-    issues: 18
-    pullRequests: 25
+    issues: 19
+    pullRequests: 28
   - repo: "pgsty/silo-pkg"
     issues: 0
-    pullRequests: 9
-  # Retired upstream-SDK fork; kept for the cross-repository audit history.
+    pullRequests: 12
   - repo: "pgsty/silo-go"
     issues: 0
     pullRequests: 0
   - repo: "pgsty/kes"
     issues: 0
-    pullRequests: 0
+    pullRequests: 1
   - repo: "pgsty/silo.pgsty.com"
     issues: 1
-    pullRequests: 26
+    pullRequests: 43
   - repo: "pgsty/minio-docs"
     issues: 0
     pullRequests: 0
-bots: ["Copilot", "dependabot[bot]"]
+bots:
+  - "Copilot"
+  - "dependabot[bot]"
 code:
   - handle: "Vonng"
     name: "Feng Ruohang"
@@ -43,34 +44,40 @@ code:
     firstContribution: "2026-04-14"
     activity:
       - repo: "pgsty/silo"
+        issuesClosed: [22, 23, 24, 25, 26, 27, 28, 46, 47, 48, 49, 50, 52, 53, 55, 63, 64, 65, 67, 68, 75, 76,
+          77, 78, 82, 83, 84, 99, 100, 102, 105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 133,
+          136, 137, 139, 141, 144, 147, 148, 158, 165, 166, 167, 168, 169, 170, 171, 199, 200, 201, 202, 204, 218]
         merged: [44, 45, 56, 66, 69, 70, 72, 73, 74, 80, 81, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97,
           98, 101, 103, 104, 121, 122, 123, 124, 126, 127, 128, 129, 130, 131, 134, 135, 138, 140, 142, 143, 145,
           146, 149, 156, 157, 159, 161, 162, 163, 164, 173, 174, 175, 177, 178, 179, 180, 181, 182, 188, 189, 190,
-          191, 192, 193, 194, 196, 205, 206, 207, 208, 209, 211]
+          191, 192, 193, 194, 196, 205, 206, 207, 208, 209, 211, 212, 213, 214, 216, 234, 235, 237, 238, 239, 242,
+          243, 244]
         closed: [155, 195]
-        issuesClosed: [22, 23, 24, 25, 26, 27, 28, 46, 47, 48, 49, 50, 52, 53, 55, 63, 64, 65, 67, 68, 75, 76, 77,
-          78, 82, 83, 84, 99, 100, 102, 105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 133, 136,
-          137, 139, 141, 144, 147, 148, 158, 165, 166, 167, 168, 169, 170, 171, 204]
-        issuesOpen: [199, 200, 201, 202, 203]
+        issuesOpen: [203, 217, 246]
       - repo: "pgsty/silo-console"
         what: "Maintains SILO Console, including fixes, tests, releases, and documentation"
         whatZh: "维护 SILO Console 的修复、测试、发行与文档"
-        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57]
-        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
-          29, 30, 31, 33, 35, 36, 37]
-        issuesOpen: [32, 34]
+        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
+          28, 29, 30, 31, 32, 33, 35, 36, 37]
+        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59,
+          60, 61]
+        issuesOpen: [34]
       - repo: "pgsty/mc"
         what: "Maintains mcli, including fixes, tests, packaging, and releases"
         whatZh: "维护 mcli 的修复、测试、打包与发行"
-        merged: [1, 2, 3, 4, 8, 9, 10, 11, 13, 22, 24, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43]
+        merged: [1, 2, 3, 4, 8, 9, 10, 11, 13, 22, 24, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 46,
+          47]
         issuesClosed: [5, 6, 7, 12, 14, 15, 16, 17, 18, 19, 20, 21, 23, 25, 28, 29, 30, 31]
       - repo: "pgsty/silo-pkg"
         what: "Maintains shared packages, including policy fixes and component coordination"
         whatZh: "维护共享包、策略修复与组件协调"
-        merged: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        merged: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]
+      - repo: "pgsty/kes"
+        merged: [1]
       - repo: "pgsty/silo.pgsty.com"
-        merged: [2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29]
-        open: [25]
+        merged: [2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+          30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46]
+        closed: [36]
   - handle: "ZouhairCharef"
     featured: true
     what: "Patched CVE-2026-34986 in go-jose"
@@ -88,6 +95,16 @@ code:
     activity:
       - repo: "pgsty/silo"
         merged: [19]
+  - handle: "cbornet"
+    name: "Christophe Bornet"
+    featured: true
+    what: "Reported checksum and missing-bucket defects and aligned S3 checksum error messages"
+    whatZh: "报告校验和及缺失桶语义问题，并改进 S3 校验和错误消息"
+    firstContribution: "2026-04-24"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [31, 32, 107, 226]
+        merged: [225]
   - handle: "pinginfo"
     name: "ping"
     featured: true
@@ -130,13 +147,18 @@ code:
     whatZh: "修复桶配额指标，贡献按访问频率分层的 ILM 与 S3 兼容分片上传列表方案"
     note: "The access-frequency feature in [#60](https://github.com/pgsty/silo/pull/60) was merged and later removed.\
       \ The multipart-listing contribution in [#198](https://github.com/pgsty/silo/pull/198) was merged after follow-up\
-      \ durability and cancellation repairs; it shipped in Server 20260916 with legacy as the default and strict as an opt-in."
+      \ durability and cancellation repairs; it shipped in Server 20260916 with legacy as the default and strict\
+      \ as an opt-in."
     noteZh: "[#60](https://github.com/pgsty/silo/pull/60) 的访问频率功能合并后被移除；[#198](https://github.com/pgsty/silo/pull/198)\
       \ 的分片列表贡献在补充持久发现与取消修复后已随 Server 20260916 发布，默认 legacy，strict 需显式启用。"
     firstContribution: "2026-08-15"
     activity:
       - repo: "pgsty/silo"
-        merged: [60, 132, 198]
+        merged: [60, 132, 198, 221]
+        closed: [215]
+        open: [249]
+      - repo: "pgsty/mc"
+        open: [44]
   - handle: "h5vx"
     featured: true
     what: "Implemented per-bucket CORS configuration and enforcement"
@@ -153,8 +175,24 @@ code:
     firstContribution: "2026-09-07"
     activity:
       - repo: "pgsty/silo"
-        merged: [151]
         issuesClosed: [150]
+        merged: [151]
+  - handle: "julienlau"
+    name: "Julien Laurenceau"
+    featured: true
+    what: "Fixed missing-commit-metadata error handling and stale metadata reuse; contributed replication reports\
+      \ and proposals"
+    whatZh: "修复提交元数据缺失的错误处理与旧元数据复用，贡献复制问题报告和方案"
+    note: "The original PR was not merged directly. Its purge-state and recovery analysis, proposed fix, tests,\
+      \ and documentation helped shape [#196](https://github.com/pgsty/silo/pull/196); see the [maintainer acknowledgement](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)."
+    noteZh: "原 PR 未直接合并；其中的清理状态与恢复分析、修复方案、测试和文档帮助完善了 [#196](https://github.com/pgsty/silo/pull/196)，见[维护者致谢](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)。"
+    firstContribution: "2026-09-07"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [152, 153]
+        closed: [184]
+        merged: [232, 233]
+        open: [240, 241]
   - handle: "Aeirx"
     name: "Ayush Sharma"
     featured: true
@@ -164,6 +202,56 @@ code:
     activity:
       - repo: "pgsty/silo"
         merged: [172]
+  - handle: "AleksaMCode"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [220]
+    firstContribution: "2026-09-17"
+    what: "Fixed the Lambda target-set emptiness check and added a regression test"
+    whatZh: "修复 Lambda 目标集合的空值判断，并补充回归测试"
+    featured: true
+    name: "Aleksa Majkić"
+  - handle: "yupoet"
+    activity:
+      - repo: "pgsty/silo"
+        open: [228, 230]
+        merged: [229]
+    firstContribution: "2026-09-26"
+    what: "Improved checksum mismatch messages, verified erasure-coding documentation, and proposed an upgrade\
+      \ guide"
+    whatZh: "改进校验和不匹配错误，核验纠删码文档，并提交升级指南"
+    featured: true
+    name: "Paris Y."
+    note: "Also [cross-checked the two-drive EC:1 documentation](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939).\
+      \ Open upgrade-guide and registry-mirror proposals are credited as proposals, not shipped features."
+    noteZh: "还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。尚未合并的升级指南与镜像仓库方案按提案署名，不计作已发布功能。"
+  - handle: "clown15"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [236]
+    firstContribution: "2026-10-15"
+    what: "Fixed native multipart-upload timestamp parsing during stale-upload cleanup"
+    whatZh: "修复过期分片上传清理中的原生时间戳解析"
+    featured: true
+    name: "GiBum Park"
+  - handle: "botdeniska"
+    activity:
+      - repo: "pgsty/silo"
+        open: [245, 248]
+      - repo: "pgsty/silo-pkg"
+        merged: [11]
+        what: "Added policy-evaluation fast paths and regression coverage, adapting the original work by Klaus\
+          \ Post"
+        whatZh: "基于 Klaus Post 的原始工作，贡献策略求值快速路径与回归覆盖"
+    firstContribution: "2026-10-17"
+    what: "Contributed multi-pool migration safety repairs and faster policy evaluation in silo-pkg"
+    whatZh: "贡献多池迁移安全修复与 silo-pkg 策略求值性能优化"
+    featured: true
+    name: "Denis Babchuk"
+    note: "The migration repair from [#248](https://github.com/pgsty/silo/pull/248) was incorporated in [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020),\
+      \ retaining the original authorship and DCO. The original PR remains open; this does not imply that #245 shipped."
+    noteZh: "[#248](https://github.com/pgsty/silo/pull/248) 的迁移修复已纳入 [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)，保留原作者与\
+      \ DCO。原 PR 仍开启；这不表示 #245 已发布。"
 proposed:
   - handle: "magicxor"
     name: "Ilia Burakov"
@@ -175,8 +263,8 @@ proposed:
     firstContribution: "2026-03-21"
     activity:
       - repo: "pgsty/silo"
-        closed: [12]
         issuesClosed: [10]
+        closed: [12]
   - handle: "davinkevin"
     name: "Davin Kevin"
     featured: true
@@ -188,8 +276,8 @@ proposed:
     firstContribution: "2026-04-10"
     activity:
       - repo: "pgsty/silo"
-        closed: [21]
         issuesOpen: [20]
+        closed: [21]
   - handle: "metaneutrons"
     name: "Fabian Schmieder"
     featured: true
@@ -200,8 +288,8 @@ proposed:
     firstContribution: "2026-08-15"
     activity:
       - repo: "pgsty/silo"
-        closed: [59]
         issuesClosed: [58]
+        closed: [59]
   - handle: "mikemikimike"
     featured: true
     what: "Contributed the replicated SSE-C plaintext part-size fix"
@@ -213,19 +301,6 @@ proposed:
     activity:
       - repo: "pgsty/silo"
         closed: [125]
-  - handle: "julienlau"
-    name: "Julien Laurenceau"
-    featured: true
-    what: "Reported MRF queue and delete-marker retry defects; contributed repair proposals, tests, and documentation"
-    whatZh: "报告 MRF 队列与删除标记重试缺陷，贡献修复方案、测试与文档"
-    note: "The original PR was not merged directly. Its purge-state and recovery analysis, proposed fix, tests,\
-      \ and documentation helped shape [#196](https://github.com/pgsty/silo/pull/196); see the [maintainer acknowledgement](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)."
-    noteZh: "原 PR 未直接合并；其中的清理状态与恢复分析、修复方案、测试和文档帮助完善了 [#196](https://github.com/pgsty/silo/pull/196)，见[维护者致谢](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)。"
-    firstContribution: "2026-09-07"
-    activity:
-      - repo: "pgsty/silo"
-        closed: [184]
-        issuesClosed: [152, 153]
   - handle: "chodorenko"
     featured: true
     what: "Reported and contributed the fix for aws-chunked leaking into replica metadata"
@@ -238,8 +313,8 @@ proposed:
     firstContribution: "2026-09-14"
     activity:
       - repo: "pgsty/silo"
-        closed: [187]
         issuesClosed: [185]
+        closed: [187]
   - handle: "sulin37392"
     what: "Proposed dependency updates"
     whatZh: "提交依赖更新"
@@ -264,26 +339,6 @@ reports:
     activity:
       - repo: "pgsty/silo"
         issuesClosed: [15, 108]
-  - handle: "cbornet"
-    name: "Christophe Bornet"
-    featured: true
-    what: "Reported multipart and streaming checksum defects and missing-bucket semantics"
-    whatZh: "报告分片与流式校验和缺陷及缺失桶语义问题"
-    firstContribution: "2026-04-24"
-    activity:
-      - repo: "pgsty/silo"
-        issuesClosed: [31, 32, 107]
-  - handle: "orenyomtov"
-    name: "Oren Yomtov"
-    featured: true
-    what: "Reported the unsigned-header CopyObject cross-object read (SN-2026-011)"
-    whatZh: "报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011）"
-    note: "Security disclosure credited in [SN-2026-011](https://silo.pgsty.com/about/security-advisories/#sn-2026-011),\
-      \ with the source fix in [#173](https://github.com/pgsty/silo/pull/173). This credit is retained separately\
-      \ from public issue/PR authorship."
-    noteZh: "安全披露署名见 [SN-2026-011](https://silo.pgsty.com/zh/about/security-advisories/#sn-2026-011)，源码修复见 [#173](https://github.com/pgsty/silo/pull/173)。此项署名单独保留，不计作公开\
-      \ issue/PR 作者。"
-    activity: []
   - handle: "jiri-pejchal"
     name: "Jiri Pejchal"
     featured: true
@@ -307,6 +362,42 @@ reports:
     activity:
       - repo: "pgsty/silo"
         issuesClosed: [183]
+  - handle: "naiveHobo"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [222]
+    firstContribution: "2026-09-22"
+    what: "Reported an IAM admin API access-control issue and the unavailable private reporting channel"
+    whatZh: "报告 IAM 管理 API 访问控制问题及私密报告通道不可用"
+    featured: true
+    name: "Sarthak Mittal"
+  - handle: "orenyomtov"
+    name: "Oren Yomtov"
+    featured: true
+    what: "Reported the unsigned-header CopyObject cross-object read (SN-2026-011)"
+    whatZh: "报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011）"
+    note: "Security disclosure credited in [SN-2026-011](https://silo.pgsty.com/about/security-advisories/#sn-2026-011),\
+      \ with the source fix in [#173](https://github.com/pgsty/silo/pull/173). This credit is retained separately\
+      \ from public issue/PR authorship."
+    noteZh: "安全披露署名见 [SN-2026-011](https://silo.pgsty.com/zh/about/security-advisories/#sn-2026-011)，源码修复见 [#173](https://github.com/pgsty/silo/pull/173)。此项署名单独保留，不计作公开\
+      \ issue/PR 作者。"
+    activity: []
+  - handle: "nik0xFF"
+    name: "Dominik Klug"
+    featured: true
+    what: "Reported a security issue privately by email"
+    whatZh: "通过邮件私下报告安全问题"
+    note: "Dominik Klug is credited under his full name with his permission."
+    noteZh: "经 Dominik Klug 本人同意，以真实姓名署名。"
+    activity: []
+  - handle: "szopi00"
+    featured: true
+    what: "Reported the Object Lock GOVERNANCE retention authorization bypass"
+    whatZh: "报告 Object Lock GOVERNANCE 保留期鉴权绕过问题"
+    note: "The report led to the Object Lock repairs in [#234](https://github.com/pgsty/silo/pull/234) and [#235](https://github.com/pgsty/silo/pull/235)."
+    noteZh: "该报告推动了 [#234](https://github.com/pgsty/silo/pull/234) 与 [#235](https://github.com/pgsty/silo/pull/235)\
+      \ 的 Object Lock 修复。"
+    activity: []
   - handle: "mosesdd"
     what: "Requested a maintained Helm chart"
     whatZh: "提出维护 Helm Chart 的需求"
@@ -379,7 +470,7 @@ reports:
     firstContribution: "2026-03-22"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [13]
+        issuesClosed: [13, 231]
   - handle: "chalukyaj"
     what: "Proposed making the SILO Operator easier to discover"
     whatZh: "提出改善 SILO Operator 可发现性的建议"
@@ -495,11 +586,65 @@ reports:
     firstContribution: "2026-09-15"
     activity:
       - repo: "pgsty/silo"
-        issuesOpen: [197]
+        issuesClosed: [197]
   - handle: "aschyolkin"
     what: "Reported a data race in CPU metrics collection"
     whatZh: "报告 CPU 指标采集中的数据竞争"
     activity:
       - repo: "pgsty/silo"
-        issuesOpen: [210]
+        issuesClosed: [210]
     firstContribution: "2026-09-16"
+  - handle: "0mp"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [219]
+    firstContribution: "2026-09-17"
+    what: "Requested and discussed FreeBSD support"
+    whatZh: "提出并讨论 FreeBSD 支持"
+    featured: false
+    name: "Mateusz Piotrowski"
+  - handle: "ztarbug"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [223]
+    firstContribution: "2026-09-22"
+    what: "Requested publication of the Helm chart"
+    whatZh: "提出公开发布 Helm Chart 的建议"
+    featured: false
+    name: "Markus"
+  - handle: "zmstone"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [224]
+    firstContribution: "2026-09-24"
+    what: "Requested a GitHub Container Registry mirror"
+    whatZh: "提出增加 GitHub Container Registry 镜像的建议"
+    featured: false
+    name: "zmstone"
+  - handle: "Crowley723"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [227]
+    firstContribution: "2026-09-25"
+    what: "Requested friendly names for users"
+    whatZh: "提出为用户添加易读名称的建议"
+    featured: false
+    name: "Brynn Crowley"
+  - handle: "geraldcombs"
+    activity:
+      - repo: "pgsty/mc"
+        issuesOpen: [45]
+    firstContribution: "2026-09-30"
+    what: "Suggested zip or 7z packaging for Windows artifacts"
+    whatZh: "建议使用 zip 或 7z 分发 Windows 制品"
+    featured: false
+    name: "Gerald Combs"
+  - handle: "devTeam-AiReg"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [247]
+    firstContribution: "2026-10-18"
+    what: "Asked about availability of the release containing IAM security fixes"
+    whatZh: "反馈包含 IAM 安全修复的版本发布需求"
+    featured: false
+    name: "Ai Registrar"
