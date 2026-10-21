@@ -6,7 +6,7 @@
 # recognisable ones land in slots 2-5, where the first screenful lands.
 rows:
   - - name: "Mockestra"
-      kind: "TESTCONTAINERS MODULE"
+ 
       kindZh: "Testcontainers 模块"
       logo: "images/projects/mockestra.webp"
       href: "https://github.com/narwhl/mockestra/blob/71058e9fb4e3d9b585afab43eb36e87c6add6864/minio/minio.go"
