@@ -1,9 +1,12 @@
 # Public release assets and Docker Hub image sources verified on 2026-10-19.
+# Keep the Windows format tied to each published version. Switch a component
+# to zip only when its new Windows assets have been published and verified.
 server:
   tag: RELEASE.2026-10-18T00-00-00Z
   build: 20261018000000.0.0
   date: "2026-10-18"
   published: true
+  windows_archive_format: tar.gz
   source: 0cd388c666f8211f552604ae73448a066e9c25ce
 published_server:
   tag: RELEASE.2026-10-18T00-00-00Z
@@ -12,11 +15,13 @@ published_server:
 client:
   tag: RELEASE.2026-10-18T00-00-00Z
   build: 20261018000000.0.0
+  windows_archive_format: tar.gz
   date: "2026-10-18"
   source: fa3b8bf72458b9b5480c4da0ce63a4f224e058c8
 console:
   tag: v2.4.2
   build: 2.4.2
+  windows_archive_format: zip
   source: ef2dd2c41d212ed6405c90fa8e5ab671899a7365
 pkg:
   tag: v3.14.3
@@ -24,5 +29,6 @@ pkg:
 kes:
   tag: RELEASE.2026-10-18T00-00-00Z
   build: 20261018000000.0.0
+  windows_archive_format: tar.gz
   date: "2026-10-18"
   source: 2f7e741db905d7ea755967b29666657d819d7ad0

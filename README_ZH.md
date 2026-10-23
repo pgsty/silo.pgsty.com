@@ -21,6 +21,8 @@ Server 选用 Console v2.4.2、mcli 20261018、pkg v3.14.3、上游 minio-go v7.
 
 `data/releases.yaml` 驱动首页与下载页。`server.published: true` 启用公开制品下载链接，`published_server` 记录当前公开版本。准备后续版本时应保持 false，直到匹配的 Server 制品与 Docker 镜像公开并完成核验，同时更新两种语言的交付说明。
 
+`windows_archive_format` 记录各组件已发布的 Windows 归档格式：Server、mcli、KES 20261018 保持 `tar.gz`，Console v2.4.2 使用 `zip`。后续发布 ZIP 版本时，核验制品后同时更新对应组件的版本与格式，不改写旧版本下载链接。Linux 与 macOS 归档继续使用 `tar.gz`。
+
 ## 本地开发与校验
 
 使用 Hugo Extended 0.168.0、Go 1.27.2、Git 与支持 venv 的 Python 3.10+。使用 Hugo 内置 LibSass，不需要另装 Sass 编译器或 Node.js。保留可见的构建诊断；当前接受上游 LibSass 弃用警告，不启用 `--panicOnWarning`。

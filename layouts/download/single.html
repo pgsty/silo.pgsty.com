@@ -9,6 +9,7 @@
 {{- $socialImage := "images/silo-social-card.webp" | absURL -}}
 {{- $serverTag := hugo.Data.releases.server.tag -}}
 {{- $serverBuild := hugo.Data.releases.server.build -}}
+{{- $serverWindowsFormat := hugo.Data.releases.server.windows_archive_format | default "tar.gz" -}}
 {{- $serverPublished := hugo.Data.releases.server.published -}}
 {{- $serverVer := replace hugo.Data.releases.server.date "-" "" -}}
 {{- $serverNotes := relLangURL (printf "blog/release/silo-%s/" $serverVer) -}}
@@ -19,12 +20,15 @@
 {{- $serverBase := printf "https://github.com/pgsty/silo/releases/download/%s" $serverTag -}}
 {{- $clientTag := hugo.Data.releases.client.tag -}}
 {{- $clientBuild := hugo.Data.releases.client.build -}}
+{{- $clientWindowsFormat := hugo.Data.releases.client.windows_archive_format | default "tar.gz" -}}
 {{- $clientBase := printf "https://github.com/pgsty/mc/releases/download/%s" $clientTag -}}
 {{- $consoleTag := hugo.Data.releases.console.tag -}}
 {{- $consoleBuild := hugo.Data.releases.console.build -}}
+{{- $consoleWindowsFormat := hugo.Data.releases.console.windows_archive_format | default "zip" -}}
 {{- $consoleBase := printf "https://github.com/pgsty/silo-console/releases/download/%s" $consoleTag -}}
 {{- $kesTag := hugo.Data.releases.kes.tag -}}
 {{- $kesBuild := hugo.Data.releases.kes.build -}}
+{{- $kesWindowsFormat := hugo.Data.releases.kes.windows_archive_format | default "tar.gz" -}}
 {{- $kesBase := printf "https://github.com/pgsty/kes/releases/download/%s" $kesTag -}}
     <section class="download-hero" aria-labelledby="download-title">
       <div class="download-grid-bg" aria-hidden="true"></div>
@@ -252,7 +256,7 @@
             <section class="download-panel" id="server-binary" role="tabpanel" aria-labelledby="tab-server-binary" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">STANDALONE ARCHIVES</span><h3>{{ if $zh }}下载无需安装器的原生二进制{{ else }}Download native, installer-free binaries{{ end }}</h3></div>
-                <div class="method-tags"><span>Linux</span><span>macOS</span><span>Windows</span><span>tar.gz</span></div>
+                <div class="method-tags"><span>Linux</span><span>macOS</span><span>Windows</span><span>tar.gz</span>{{ if ne $serverWindowsFormat "tar.gz" }}<span>{{ $serverWindowsFormat }}</span>{{ end }}</div>
               </div>
               <p class="method-lead">{{ if $zh }}适合 CI、离线交付和自行管理 systemd 服务的主机。所有归档均来自同一个 GitHub 发行版。{{ else }}Useful for CI, offline delivery, and hosts where you manage the systemd unit yourself. Every archive comes from the same GitHub release.{{ end }}</p>
               <div class="binary-grid">
@@ -268,8 +272,8 @@
                 </article>
                 <article class="binary-platform" data-platform="windows">
                   <div><span class="platform-icon"><i class="fab fa-windows" aria-hidden="true"></i></span><h4>Windows</h4><small>PowerShell / Windows Server</small></div>
-                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_windows_amd64.tar.gz" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_windows_amd64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_windows_arm64.tar.gz" $serverBase $serverBuild }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_windows_arm64.tar.gz" $serverBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_windows_amd64.%s" $serverBase $serverBuild $serverWindowsFormat }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "silo_%s_windows_amd64.%s" $serverBuild $serverWindowsFormat }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ if $serverPublished }}{{ printf "%s/silo_%s_windows_arm64.%s" $serverBase $serverBuild $serverWindowsFormat }}{{ else }}{{ $serverNotes }}{{ end }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "silo_%s_windows_arm64.%s" $serverBuild $serverWindowsFormat }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="download-code download-code--compact">
@@ -446,8 +450,8 @@ make build
                 </article>
                 <article class="binary-platform" data-platform="windows">
                   <div><span class="platform-icon"><i class="fab fa-windows" aria-hidden="true"></i></span><h4>Windows</h4><small>desktop / server</small></div>
-                  <a href="{{ printf "%s/mcli_%s_windows_amd64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "mcli_%s_windows_amd64.tar.gz" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-                  <a href="{{ printf "%s/mcli_%s_windows_arm64.tar.gz" $clientBase $clientBuild }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "mcli_%s_windows_arm64.tar.gz" $clientBuild }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_windows_amd64.%s" $clientBase $clientBuild $clientWindowsFormat }}" target="_blank" rel="noopener"><b>x86_64</b><small>{{ printf "mcli_%s_windows_amd64.%s" $clientBuild $clientWindowsFormat }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+                  <a href="{{ printf "%s/mcli_%s_windows_arm64.%s" $clientBase $clientBuild $clientWindowsFormat }}" target="_blank" rel="noopener"><b>ARM64</b><small>{{ printf "mcli_%s_windows_arm64.%s" $clientBuild $clientWindowsFormat }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
                 </article>
               </div>
               <div class="client-quick-command">
@@ -538,7 +542,7 @@ make build
           </article>
           <article class="asset-family">
             <div class="asset-family-head"><span>Windows / Packages</span><p>RPM · DEB · APK</p></div>
-            <a href="{{ $consoleBase }}/silo-console-windows-amd64.zip"><b>Windows</b><small>silo-console-windows-amd64.zip</small><i class="fas fa-download" aria-hidden="true"></i></a>
+            <a href="{{ $consoleBase }}/silo-console-windows-amd64.{{ $consoleWindowsFormat }}"><b>Windows</b><small>silo-console-windows-amd64.{{ $consoleWindowsFormat }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
             <a href="https://github.com/pgsty/silo-console/releases/tag/{{ $consoleTag }}"><b>Linux</b><small>{{ if $zh }}全部软件包与 ARMv6 制品{{ else }}All packages and ARMv6 artifacts{{ end }}</small><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
           </article>
         </div>
@@ -563,10 +567,12 @@ make build
         <div class="asset-family-grid">
           {{ range slice "linux" "darwin" "windows" }}
           {{ $os := . }}
+          {{ $format := "tar.gz" }}
+          {{ if eq $os "windows" }}{{ $format = $kesWindowsFormat }}{{ end }}
           <article class="asset-family">
             <div class="asset-family-head"><span>{{ if eq $os "darwin" }}macOS{{ else }}{{ title $os }}{{ end }}</span><p>amd64 / arm64</p></div>
             {{ range slice "amd64" "arm64" }}
-            {{ $archive := printf "kes_%s_%s_%s.tar.gz" $kesBuild $os . }}
+            {{ $archive := printf "kes_%s_%s_%s.%s" $kesBuild $os . $format }}
             <a href="{{ $kesBase }}/{{ $archive }}"><b>{{ . }}</b><small>{{ $archive }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
             {{ end }}
           </article>

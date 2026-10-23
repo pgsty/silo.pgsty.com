@@ -22,6 +22,12 @@ component changelogs and GitHub release notes together. Download artifact inputs
 live in `data/releases.yaml`; historical articles retain their original version
 numbers and receive a dated follow-up when status changes.
 
+`windows_archive_format` records each component's published Windows archive
+format. Keep `tar.gz` for Server, mcli and KES 20261018, and `zip` for Console
+v2.4.2. When publishing a subsequent ZIP release, update that component's
+version and format together after verifying its assets; do not rewrite old
+release links. Linux and macOS archives continue to use `tar.gz`.
+
 Before publishing, run `python3 bin/metrics.py`, review its generated metrics
 diff, then run `make check`. Cloudflare Pages deploys the `main` branch; verify
 its commit check and the live English/Chinese pages after publication.
