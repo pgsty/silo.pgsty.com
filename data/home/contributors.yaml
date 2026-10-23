@@ -214,17 +214,15 @@ code:
   - handle: "yupoet"
     activity:
       - repo: "pgsty/silo"
-        open: [228, 230]
-        merged: [229]
+        open: [230]
+        merged: [228, 229]
     firstContribution: "2026-09-26"
-    what: "Improved checksum mismatch messages, verified erasure-coding documentation, and proposed an upgrade\
-      \ guide"
-    whatZh: "改进校验和不匹配错误，核验纠删码文档，并提交升级指南"
+    what: "Improved checksum mismatch messages, verified erasure-coding documentation, and contributed a single-node migration case"
+    whatZh: "改进校验和不匹配错误，核验纠删码文档，并贡献单节点迁移案例"
     featured: true
     name: "Paris Y."
-    note: "Also [cross-checked the two-drive EC:1 documentation](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939).\
-      \ Open upgrade-guide and registry-mirror proposals are credited as proposals, not shipped features."
-    noteZh: "还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。尚未合并的升级指南与镜像仓库方案按提案署名，不计作已发布功能。"
+    note: "Also [cross-checked the two-drive EC:1 documentation](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939). The single-node migration report in #228 was merged on 2026-10-23; it records a contributor-reported forward upgrade, not a downgrade guarantee. The registry-mirror proposal remains open."
+    noteZh: "还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。#228 单节点迁移报告于 2026-10-23 合并，记录的是贡献者报告的正向升级，不构成降级保证；镜像仓库提案仍未合并。"
   - handle: "clown15"
     activity:
       - repo: "pgsty/silo"
