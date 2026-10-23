@@ -2,7 +2,7 @@
 title: "Durable IAM Revocations"
 linkTitle: "Durable IAM Revocations"
 date: 2026-09-16
-lastmod: 2026-10-18
+lastmod: 2026-10-23
 author: "Ruohang Feng"
 summary: "Persistent deletion revisions, signed parent boundaries, safe replay, coordinated upgrades and the limits of IAM recovery."
 tags: [Design, S3, Operations]
@@ -254,6 +254,12 @@ signed S3/STS tests and deployment-specific latency/scale measurements in
 addition to these component tests.
 
 ## Errors and observability {#errors}
+
+**October 23 clarification:** [LDAP long-DN reads](/blog/design/ldap-long-dn/)
+distinguish an ASCII key component that cannot be stored from an existing record
+that cannot currently be read. Server #250 handles only the former as absence;
+full-path limits and genuine storage failures still propagate. Overlong parent
+revision writes remain unsupported by the object backend.
 
 An admin delete can return HTTP 500 after the authoritative revocation has committed but dependent cleanup failed. It is not evidence that the old identity remains usable. Retry the intended revocation while IAM changes and same-name recreation are paused, then verify old and reissued credentials at every site. When a persistent parent revision cannot be read or issuance cannot be committed, STS fails closed through an internal-error path, including `STSInternalError`; it must not mint a credential by guessing a missing boundary.
 

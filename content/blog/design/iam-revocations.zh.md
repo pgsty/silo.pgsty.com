@@ -2,7 +2,7 @@
 title: "持久化 IAM 撤销"
 linkTitle: "持久化 IAM 撤销"
 date: 2026-09-16
-lastmod: 2026-10-18
+lastmod: 2026-10-23
 author: "冯若航"
 summary: "持久删除版本、签名父边界、安全重放、协调升级以及 IAM 恢复限制。"
 tags: [Design, S3, Operations]
@@ -104,6 +104,9 @@ SILO 保留已删除 IAM 记录的版本，使离线站点重新连接后不能�
 `BenchmarkIAMCachedCredential`、`BenchmarkIAMSetTempUser` 可与修复前源码比较。`BenchmarkIAMRevisionConvergedHealing` 覆盖 1,000/10,000 条保留记录，测量稳定状态的索引/网络工作，并断言没有重复 PUT；模拟 peer 不测持久追赶吞吐。`BenchmarkIAMColdLoadExpiredServices` 覆盖 100/1,000 个过期可复用凭证，使用 `-benchtime=1x`。还需要实际多站点签名 S3/STS 验证以及部署规模与延迟测量。
 
 ## 错误与可观测性 {#errors}
+
+**十月二十三日补充：**[LDAP 长 DN 读取](/zh/blog/design/ldap-long-dn/)区分无法保存的 ASCII 键分量与当前无法读取的已有记录。
+Server #250 只将前者按不存在处理；完整路径过长和真实存储故障继续报错。对象后端仍不支持超长父身份版本记录写入。
 
 权威撤销提交后，依赖清理失败可能让 admin 删除返回 HTTP 500。这不是旧身份仍可使用的证据。暂停 IAM 修改和同名重建后重试预期撤销，再逐站点验证旧凭证与重新签发的凭证。持久父版本不可读或签发无法提交时，STS 通过内部错误路径拒绝签发，包括 `STSInternalError`，不能猜测一个缺失边界后放行。
 
