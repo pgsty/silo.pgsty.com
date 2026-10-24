@@ -15,6 +15,8 @@ url: "/blog/design/overwrite-pool-affinity/"
 
 Denis Babchuk proposed keeping overwrites in the pool that already holds the object. Review identified and fixed a request-specific write-quorum bug, tightened the health policy, and validated the behavior. Performance measurements then changed the recommendation: the broad policy made deep version histories substantially more expensive, and a second iteration restricted to ordinary unversioned overwrites still regressed small-object writes.
 
+The subsequent [multi-pool deletion fix (#257)](/blog/design/multi-pool-delete-safety/) was merged independently on October 24: while retaining capacity-weighted allocation, it cleans up non-authoritative copies before deleting the authoritative copy so a mid-delete failure cannot expose an overwritten value.
+
 ## The problem: an overwrite can leave its old copy in another pool {#problem}
 
 Consider an unversioned key, `reports/latest.json`, in pool A. A subsequent `PUT` writes its replacement to pool B. Reads select the newest logical object, while the old physical copy in A continues to occupy space because ordinary overwrites do not clean up obsolete copies across other pools.

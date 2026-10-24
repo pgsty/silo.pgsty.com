@@ -2,7 +2,7 @@
 title: "多池对象一致性"
 linkTitle: "多池对象一致性"
 date: 2026-09-16
-lastmod: 2026-10-19
+lastmod: 2026-10-24
 author: "冯若航"
 summary: "先在共享锁下选择一个逻辑对象，再判断条件或合并标签和 Object Lock 状态。"
 tags: [Design, S3, Operations]
@@ -12,6 +12,10 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 ---
 
 随 [SILO Server 20260916](/zh/blog/release/silo-20260916/) 发布的 [PR #178](https://github.com/pgsty/silo/pull/178) 修复了多存储池修改顺序问题，[PR #207](https://github.com/pgsty/silo/pull/207) 将当前逻辑对象选择扩展至条件 `PUT`（关闭 [#133](https://github.com/pgsty/silo/issues/133) 与 [#144](https://github.com/pgsty/silo/issues/144)），提交 [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) 则修复了跨池再平衡（rebalance）与退役（decommission）迁移丢失对象标签的缺陷。随后的 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 进一步合入 [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)（纳入 [PR #248](https://github.com/pgsty/silo/pull/248)）与 [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951)，修复了跨池迁移期间旧数据覆盖新副本以及删除标记（Delete Marker）丢失的问题。
+
+## 10 月 24 日更新：删除失败时保护最新副本 {#delete-20261024}
+
+[PR #257](https://github.com/pgsty/silo/pull/257)（提交 [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd)）将多池删除保护扩展到普通无条件删除与批量删除入口。批量数据删除复用既有共享锁与解析器，先清理非权威池中的旧副本，再删除每项的权威副本，同时完整保留请求项的响应身份、支持部分物理删除后的 quorum 重试，并保护共享远端分层引用。该修改直接作用于现有的容量加权分配器，不依赖 [#245](https://github.com/pgsty/silo/pull/245)。详见[多池删除：失败时保住最新副本](/zh/blog/design/multi-pool-delete-safety/)。
 
 ## 10 月 18 日更新：在池迁移期间保护数据与删除标记 {#migration-20261018}
 

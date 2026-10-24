@@ -13,7 +13,13 @@ cascade:
 
 Design records document the engineering decisions behind PGSTY SILO: root causes, S3 and IAM protocol invariants, trade-offs against rejected alternatives, operational limits, and regression coverage.
 
-## October 24: Overwrite Affinity Decision
+## October 24: FULL_OBJECT Checksum Replication
+
+- [FULL_OBJECT Checksum Replication: Preserve the Type at Upload Initiation](/blog/design/replication-full-object-checksum/) (`#254`, `#255`): Why dropping the checksum type makes valid multipart CRC objects fail replication, how one shared header fix also restores the existing CopyObject path, and the source-upgrade and acceptance boundaries.
+
+## October 24: Multi-Pool Deletion and Placement
+
+- [Multi-Pool Deletion: Preserve the Latest Copy on Failure](/blog/design/multi-pool-delete-safety/) (`#256`, `#257`): Why an online-drive preflight cannot protect against later I/O failures, how staged cleanup preserves each item's authoritative copy, and the retry, tier-reference, performance, and compatibility boundaries of the merged fix.
 
 - [Overwrite Pool Affinity: Why #245 Was Not Adopted](/blog/design/overwrite-pool-affinity/) (`#245`): The original placement problem, request-aware quorum and health improvements, unversioned-only scope, two rounds of m3 performance measurements, and the decision to stop after small-object overwrite regressions remained. The experimental changes were not merged.
 
