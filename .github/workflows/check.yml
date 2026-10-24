@@ -32,10 +32,6 @@ jobs:
           go-version: "1.27.3"
           cache: true
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
       - uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: "0.168.0"
@@ -45,6 +41,7 @@ jobs:
         run: |
           go version
           hugo version
+          python3 --version
 
       - name: Test, build and verify internal links
         run: env -u HUGO_MODULE_REPLACEMENTS make check
