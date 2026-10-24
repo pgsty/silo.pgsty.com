@@ -4,74 +4,56 @@ linkTitle: "Folder Download Progress"
 date: 2026-08-23
 lastmod: 2026-09-16
 author: "Ruohang Feng"
-summary: "PRD for replacing NaN% with truthful indeterminate progress when SILO Console downloads a streamed folder ZIP, without changing the server API or ordinary file downloads."
+summary: "Design for replacing NaN% with truthful indeterminate progress when SILO Console downloads a streamed folder ZIP, without changing the server API or ordinary file downloads."
 tags: [Design, Console, Download]
 weight: 20
 draft: false
 url: "/blog/design/dir-percentage/"
 ---
 
-> **Historical scope:** this is the Console 2.2.0 progress repair, included in Server 20260903's embedded Console. [Console 2.4.1](/blog/release/console-2.4.1/#browser) subsequently added file streaming and native browser handoff, eliminating the complete JavaScript ZIP Blob. Transport descriptions and follow-ups in the original PRD below refer to the 2.2.0 design point.
+SILO Console v2.1.1 displayed `NaN%` in the **Downloads / Uploads** drawer while downloading a folder. Although the streamed ZIP archive continued transferring normally and stored objects were intact, the progress bar entered an invalid determinate state—causing operators to assume the transfer had stalled or failed and to click **Download** repeatedly.
 
-> **Status**: Shipped in SILO Console 2.2.0 (`16960f7ab`); the server embeds it since its Console pin was updated (`edc8be6ed`) · **Priority**: P1 · **Owner**: [`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **Related issue**: [`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD review**: Claude Fable 5 (`xhigh`) — **APPROVE** · **Implementation review**: Claude Fable 5 (`xhigh`), 2026-08-23 — **APPROVE**, no P0/P1/P2 findings
-
-SILO Console shows `NaN%` in Downloads / Uploads while downloading a folder. The ZIP normally keeps streaming and the stored objects are intact, but the progress bar has crossed from "unknown" into an invalid determinate state. Users see a full-looking bar, assume the transfer failed or finished, and retry it.
-
-The proposed repair is intentionally narrow:
+The repair shipped in [Console 2.2.0](/blog/release/console-2.2.0/) (`16960f7ab`, tracking [#62](https://github.com/pgsty/silo/issues/62)) and was embedded in [Server 20260903](/blog/release/silo-20260903/) (`edc8be6ed`). It enforces a single rule:
 
 > A download may enter determinate mode only when it has a finite, positive total measured in bytes applicable to that response. Without such a total, it remains indeterminate until completion, failure, or cancellation.
 
-The server keeps streaming ZIPs. Ordinary files keep their percentages. The frontend gains one safe calculation boundary, reuses its existing indeterminate renderer, and closes one missing cancellation transition. This record defines why that is both sufficient and the smallest truthful fix.
+([Console 2.4.1](/blog/release/console-2.4.1/#browser) later evolved folder and multi-selection downloads to use file-stream writers and native browser download handoff; see [Subsequent Evolution](#later-contract) below.)
 
-## The observed failure {#failure}
+## Observed Failure {#failure}
 
-The defect was observed in the then-current `silo-console v2.1.1`, which is embedded by Silo `RELEASE.2026-08-06T00-00-00Z`.
+In SILO Console v2.1.1:
 
-Reproduction:
+1. Upload several objects under a common prefix such as `folder/`.
+2. In the parent bucket listing, select `folder/` and click **Download**.
+3. Open **Downloads / Uploads** while the transfer is in flight.
+4. The active row displays `NaN%` while the ZIP stream continues downloading.
 
-1. Put several objects below a prefix such as `folder/`.
-2. Stay in the parent listing, select `folder/`, and click **Download**.
-3. Open **Downloads / Uploads** before the transfer finishes.
-4. The row displays `NaN%`; the ZIP request continues.
+## Root Cause {#root-cause}
 
-The runtime check used a prefix containing about 88.7 MiB and throttled Chromium to preserve the observation window. Two independent downloads produced the same `NaN%` state.
+The visible `NaN%` resulted from a three-layer mismatch between S3 prefix metadata, streamed ZIP responses, and XHR progress arithmetic.
 
-This is a frontend correctness bug. It is not evidence of corrupted objects, an altered disk format, or a failed S3 `GET`.
+### A Prefix Has No Object Size {#prefix-size}
 
-## What is actually happening {#root-cause}
+S3 folders are logical common prefixes rather than stored directory objects. In the bucket listing model, a prefix ends with `/` and carries logical `size = 0` (which Console renders as `-` in the table). Because the generated API schema marks `size` as `omitempty`, zero-valued sizes are omitted from listing JSON. The single-selection download thunk passed `object.size` directly into the download helper, supplying `undefined` (or `0` for synthetic prefix records) as `fileSize`. Neither is a valid denominator.
 
-The visible `NaN%` is the end of a contract mismatch across three layers.
+### A Streamed ZIP Has No Known Wire Length {#streamed-zip}
 
-### A prefix has no object size {#prefix-size}
+When the server receives a download request for a path ending in `/`, it lists objects recursively under that prefix and connects a `zip.Writer` directly to an `io.Pipe`. Objects are read, compressed with Deflate, and flushed to the HTTP response stream on the fly.
 
-S3 folders are common prefixes, not stored directory objects. In the listing model, a prefix ends in `/` and carries `size=0`. The Console already renders that size as `-`, correctly treating it as not applicable.
+Streaming the ZIP avoids buffering the entire archive in server RAM or temporary disk space and delivers the first response byte immediately. However, because the final compressed archive size does not exist when HTTP response headers are written, the server sends `Content-Type: application/zip` without a `Content-Length` header. Summing uncompressed source object sizes cannot substitute for `Content-Length` because `ProgressEvent.loaded` measures compressed wire bytes plus ZIP framing headers—two different units.
 
-The generated API model marks `size` as `omitempty`, so logical zeroes are absent from listing JSON. The single-selection thunk nevertheless passes `object.size` straight into the download helper: a prefix or zero-byte object therefore supplies `undefined` at runtime (while synthetic prefix records may supply `0`). Neither value is a valid denominator.
+### Progress Events Without a Valid Denominator {#progress-event}
 
-### A streamed ZIP has no known wire length {#streamed-zip}
-
-The server recognizes the trailing `/`, recursively lists the objects, then connects a `zip.Writer` to an `io.Pipe`. Objects are read, deflated, and copied to the HTTP response as the archive is produced.
-
-That behavior is desirable: the server can send the first bytes without holding the complete archive in memory or on disk. Its consequence is equally deliberate: the final compressed byte length does not exist when headers are sent, so the response has `Content-Type: application/zip` and a filename, but no `Content-Length`.
-
-The sum of source object sizes is not a substitute. Source sizes are uncompressed bytes; `ProgressEvent.loaded` counts response bytes after ZIP compression and framing. They are different units.
-
-### A progress event does not imply a computable percentage {#progress-event}
-
-The client currently computes every event as:
+The XHR `progress` listener unconditionally evaluated:
 
 ```ts
 Math.round((event.loaded / fileSize) * 100)
 ```
 
-For a prefix, the denominator is zero or absent. Depending on the value and event, JavaScript produces `NaN` (`loaded / undefined` or `0 / 0`) or `Infinity` (positive bytes divided by zero).
-
-The progress callback then writes that non-finite value into Redux and sets `waitingForFile=false`. That second operation is the decisive state error: the task leaves the existing indeterminate branch merely because an event arrived, not because the event contained a usable total. The determinate progress component receives the invalid value and renders an invalid label.
-
-The complete chain is:
+For a folder prefix or zero-byte object, `fileSize` was `undefined` or `0`, producing `NaN` (`loaded / undefined` or `0 / 0`) or `Infinity` (`loaded / 0`):
 
 ```text
-common prefix: size = 0
+common prefix: size = 0 (or undefined)
         |
         v
 download(..., fileSize = 0)
@@ -86,61 +68,46 @@ event.loaded / 0 => NaN or Infinity
 invalid percentage enters Redux; waitingForFile becomes false
         |
         v
-determinate ProgressBar renders NaN%
+determinate ProgressBar renders "NaN%"
 ```
 
-Ordinary non-empty files avoid the defect because the server can stat the object, sets `Content-Length`, and the list size is positive. If the browser emits a progress event for an empty response, a zero-byte file reaches the same arithmetic boundary as a prefix even though it is a real object; it therefore belongs in the regression contract.
+## Product Contract {#contract}
 
-## Product contract {#contract}
-
-The UI needs one honest distinction:
-
-- **Determinate** means both transferred bytes and total bytes are known in the same unit.
-- **Indeterminate** means the request is active but the total is unknown.
-
-This yields four load-bearing invariants:
+The progress UI requires four invariants:
 
 ```text
-determinate  => total is finite and total > 0
-determinate  => percentage is finite and 0 <= percentage <= 100
-unknown total => indeterminate
+determinate    => total is finite and total > 0
+determinate    => percentage is finite and 0 <= percentage <= 100
+unknown total  => indeterminate
 terminal state => not indeterminate
 ```
 
-These invariants are more general than `objectPath.endsWith("/")`: they cover prefixes, zero-byte files, malformed metadata, and any future unknown-length response without inventing object-type exceptions.
+Formulating the contract in terms of denominator validity rather than `objectPath.endsWith("/")` covers folder prefixes, zero-byte objects, omitted size metadata, and any future chunked response without special-casing object types.
 
-## Goals and non-goals {#scope}
+## Goals and Non-Goals {#scope}
 
 ### Goals {#goals}
 
-1. A folder download never displays `NaN%`, `Infinity%`, or a fabricated percentage.
-2. Unknown-length transfers use the existing indeterminate animation.
-3. Known-length ordinary files retain their current percentage behavior.
-4. Completion, failure, and cancellation always leave indeterminate mode.
-5. A zero-byte file never produces a non-finite percentage and still reaches success.
-6. No non-finite or out-of-range download percentage enters Redux.
-7. The fix can ship in Console first and then be consumed by Silo as a dependency update.
+1. Never render `NaN%`, `Infinity%`, or a fabricated percentage during folder downloads.
+2. Keep unknown-length transfers in the existing indeterminate progress animation.
+3. Preserve determinate percentage progress for ordinary non-empty files.
+4. Ensure completion, failure, and cancellation all exit indeterminate mode.
+5. Ensure zero-byte files complete cleanly at `100%` without intermediate `NaN%`.
+6. Prevent non-finite or out-of-range numbers from entering Redux state.
 
-### Non-goals {#non-goals}
+### Non-Goals {#non-goals}
 
-- Do not pre-generate or buffer a complete ZIP on the server.
-- Do not use the sum of uncompressed object sizes as network progress.
-- Do not redesign the entire Object Manager state model.
-- Do not route folders through the current immediately-completing `BrowserDownload` path.
-- Do not solve the browser memory cost of `XMLHttpRequest.responseType="blob"` here.
-- Do not change whether a cancelled row remains visible until the user clears it.
-- Do not redesign mid-stream ZIP error signaling after HTTP headers have been sent.
-- Do not modify the S3 API, Console API, object layout, or archive contents.
+- Buffering complete ZIP archives on the server just to compute `Content-Length`.
+- Using the sum of uncompressed object sizes as a denominator for compressed ZIP wire bytes.
+- Redesigning the Redux store schema in this bugfix.
 
-Those are legitimate follow-ups, but coupling them to this defect would enlarge risk without being necessary to restore truthful progress.
+## Technical Decision {#decision}
 
-## The decision {#decision}
+The repair comprises five focused rules:
 
-The minimum production repair has four parts.
+### D1. Calculate Only from a Valid Total {#d1}
 
-### D1. Calculate only from a valid total {#d1}
-
-Add a small pure function, separate from DOM and Redux side effects:
+Extract progress arithmetic into a pure helper (`downloadProgress.ts`) with no DOM or Redux dependencies:
 
 ```ts
 type DownloadProgressEvent = Pick<
@@ -179,17 +146,13 @@ export const calculateDownloadPercent = (
 };
 ```
 
-The source priority preserves compatibility:
+1. A finite positive `objectSize` preserves existing ordinary-file progress calculation.
+2. When `objectSize` is unavailable (`0` or `undefined`), a finite positive `event.total` with `event.lengthComputable === true` serves as fallback.
+3. Otherwise, the function returns `null`, signaling that no truthful percentage exists.
 
-1. A finite positive `objectSize` retains the current ordinary-file calculation.
-2. If object size is unavailable but the browser declares the response length computable and supplies a finite positive `event.total`, use it.
-3. Otherwise return `null`: no truthful percentage exists yet.
+### D2. Keep Unknown Totals Indeterminate {#d2}
 
-The helper's output contract is complete: either `null`, or a finite number in `[0,100]`.
-
-### D2. Keep unknown totals indeterminate {#d2}
-
-Change the XHR handler to dispatch only a real percentage:
+Update the XHR `progress` listener to dispatch `progressCallback` only when `calculateDownloadPercent` returns a non-null number:
 
 ```ts
 req.addEventListener("progress", (event) => {
@@ -198,245 +161,153 @@ req.addEventListener("progress", (event) => {
   if (percent !== null) {
     progressCallback(percent);
   }
-
-  // No valid total: preserve waitingForFile=true so the existing UI remains
-  // indeterminate instead of manufacturing a determinate value.
 });
 ```
 
-Download rows already start with `waitingForFile=true`, and `ObjectHandled` already renders that state with `variant="indeterminate"`. There is no need to widen Redux to `number | null`, add another boolean, or change MDS.
+Because download items initialize with `waitingForFile = true`—which `ObjectHandled` already renders as `<ProgressBar variant="indeterminate" />`—skipping `progressCallback` when `percent === null` keeps the row in indeterminate mode until completion, failure, or cancellation.
 
-When the first valid percentage arrives, the existing `updateProgress` action stores it and sets `waitingForFile=false`. When no valid percentage ever arrives, the row remains indeterminate until a terminal action.
+### D3. Make Cancellation Terminal {#d3}
 
-### D3. Make cancellation terminal {#d3}
+Completion and failure already cleared `waitingForFile`, but `cancelObjectInList` did not. Setting `item.waitingForFile = false` on cancellation prevents an aborted indeterminate folder download from continuing to animate as if it were still active.
 
-Completion and failure already clear `waitingForFile`. Cancellation does not. Add the missing transition in `cancelObjectInList`:
+At the XHR boundary, calling `req.abort()` fires `readystatechange (DONE, status = 0)` before firing `onabort`. Guarding the generic `DONE` branch so `status === 0` defers to `onabort` / `onerror` ensures user cancellation is recorded as **Cancelled** rather than **Failed**.
 
-```ts
-item.waitingForFile = false;
-```
+### D4. Normalize Omitted Zero-Byte Sizes {#d4}
 
-Without that line, the repaired prefix download would remain in the indeterminate rendering branch after abort, masking the Cancelled state. The row continues to follow the current product behavior: it remains as a cancelled record and can be removed manually. Automatic removal is not part of this change.
+Passing `object.size || 0` in the single-selection download thunk restores the omitted logical zero before the response handler checks `Blob.size === fileSize`, allowing zero-byte objects to transition cleanly to `100%` on HTTP 200 completion.
 
-There is one event-order guard at the XHR boundary as well. `abort()` first produces `readystatechange(DONE, status=0)` and only then the `abort` event; without a status-zero return, the generic DONE branch marks the request failed before `onabort` can mark it cancelled. DONE/status zero is therefore left to the dedicated `onerror` or `onabort` handler, and `onabort` removes the stored request reference.
+### D5. Keep Server ZIP Streaming Unchanged {#d5}
 
-### D4. Normalize an omitted zero-byte size {#d4}
+The Go folder-download handler continues streaming Deflate-compressed ZIP archives over `io.Pipe` without buffering on disk or in memory.
 
-The single-selection thunk passes `object.size || 0`, matching the other download entry point. This restores the API model's omitted logical zero before the helper checks `Blob.size === fileSize`, so an HTTP 200 zero-byte object completes at 100% instead of being reported as incomplete.
+## Progress State Machine {#state-machine}
 
-### D5. Keep the server stream unchanged {#d5}
-
-The folder handler continues to generate a deflated ZIP through `io.Pipe` and omit `Content-Length`. No API, archive, storage, or resource-management contract changes.
-
-## State machine {#state-machine}
-
-| State | `waitingForFile` | `percentage` | Terminal flag | Rendering |
+| State | `waitingForFile` | `percentage` | Terminal Flags | Rendered UI |
 | --- | ---: | ---: | --- | --- |
-| Queued / no valid progress yet | `true` | `0` | none | indeterminate |
-| Unknown-total transfer | `true` | `0` | none | indeterminate |
-| Known-total transfer | `false` | `0..100` | none | determinate percentage |
-| Completed | `false` | `100` | `done=true` | success |
-| Failed | `false` | last value | `failed=true, done=true` | error |
-| Cancelled | `false` | `0` | `cancelled=true, done=true` | cancelled |
+| Queued / awaiting first progress | `true` | `0` | None | Indeterminate bar |
+| Active unknown-total transfer | `true` | `0` | None | Indeterminate bar |
+| Active known-total transfer | `false` | `0..100` | None | Determinate percentage |
+| Completed | `false` | `100` | `done = true` | Completed (`100%`) |
+| Failed | `false` | Last valid | `failed = true, done = true` | Error state |
+| Cancelled | `false` | `0` | `cancelled = true, done = true` | Cancelled state |
 
-The state does not move back from determinate to indeterminate. If a later event lacks a valid total after a valid percentage was observed, the handler simply retains the last valid value.
+## Why This Design Is Sufficient {#proof}
 
-Failed and Cancelled both set `done=true` in the existing reducers. `ObjectHandled` uses `done` to change its close button from "abort request" to "remove record"; this repair preserves that behavior. The cancelled Redux value remains `0`, while the existing `ProgressBarWrapper` renders a full orange terminal bar with a Cancelled label because `ready=true`. That established presentation is not part of this repair.
+### Ordinary Non-Empty File {#case-file}
 
-`waitingForFile` is not the ideal long-term name for "no computable progress." Renaming it or replacing the booleans with a discriminated union would improve the model, but that is a separate refactor. In this repair, the field already expresses and renders the required state, so reusing it minimizes compatibility risk.
+`objectSize > 0` provides a finite positive denominator, `calculateDownloadPercent` returns a clamped integer in `[0, 100]`, `updateProgress` sets `waitingForFile = false`, and completion sets `100%`.
 
-## Why this is sufficient {#proof}
+### Streamed Folder ZIP {#case-folder}
 
-The repair closes the bug by cases.
+`objectSize` is `0`, `lengthComputable` is `false`, and `event.total` is `0`. `calculateDownloadPercent` returns `null`, no progress action is dispatched, and the row stays indeterminate until the stream finishes and sets `waitingForFile = false`, `percentage = 100`, and `done = true`.
 
-### Ordinary non-empty file {#case-file}
+### Future Response with Known Length {#case-future}
 
-`objectSize > 0`, so the helper uses the same denominator as today. The result is finite and clamped, `updateProgress` enters determinate mode, and completion still sets 100%.
+If a proxy or future archive endpoint supplies `Content-Length` (`lengthComputable = true` and `event.total > 0`), the fallback branch automatically renders determinate percentages without further code changes.
 
-### Current streamed folder {#case-folder}
+### Zero-Byte File {#case-zero}
 
-`objectSize` is normalized to `0`, while `lengthComputable=false` and `event.total=0`. The helper returns `null`; no invalid action is dispatched, so the row remains indeterminate. Completion sets `waitingForFile=false`, `percentage=100`, and `done=true`.
+The omitted size normalizes to `0`. Any intermediate progress event returns `null` rather than evaluating `0 / 0`, and upon receiving the empty `200 OK` body, `Blob.size === 0` matches `fileSize === 0` and transitions directly to `100%`.
 
-### Future response with a real length {#case-future}
+### Failure and Cancellation {#case-terminal}
 
-If a proxy or later server implementation provides a trustworthy response total, `lengthComputable=true` and `event.total>0`. The same code automatically produces a real percentage without another product change.
+Both failure and cancellation set `waitingForFile = false` and `done = true`, guaranteeing that no terminated transfer continues showing an active indeterminate animation.
 
-### Zero-byte file {#case-zero}
+## Rejected Alternatives {#alternatives}
 
-The omitted listing size is normalized to zero, and both totals are then zero, so an intermediate percentage is mathematically undefined. The row stays indeterminate for its usually brief lifetime; the zero-byte Blob now equals the normalized expected size, and the successful response transitions directly to 100%. `0/0` is never evaluated.
+### Buffer the Entire ZIP on the Server {#alt-buffer}
 
-### Failure and cancellation {#case-terminal}
+Generating the full ZIP in server memory or temporary disk storage just to populate `Content-Length` would delay time-to-first-byte, increase server memory/disk pressure, and degrade concurrent downloads.
 
-Failure already exits indeterminate. The added cancellation transition does the same on abort. No terminal row can continue to look active merely because its total was unknown.
+### Sum Uncompressed Object Sizes Under the Prefix {#alt-sum}
 
-Mathematically, division occurs only when `total` belongs to `(0, +infinity)`. The result is then clamped to `[0,100]`. Therefore neither `NaN` nor `Infinity` can cross the calculation boundary into Redux or the determinate renderer.
+Summing logical source object sizes measures uncompressed input bytes, whereas `event.loaded` measures Deflate-compressed output bytes plus ZIP headers. Because the numerator and denominator have different units, the progress bar would stall below `100%` or jump erratically with compression ratio.
 
-## Rejected alternatives {#alternatives}
+### Coerce Invalid Progress to `0%` {#alt-zero}
 
-### Buffer the ZIP to obtain Content-Length {#alt-buffer}
+Displaying a determinate `0%` bar throughout a multi-gigabyte folder download misleads users into thinking zero bytes have transferred and the connection is dead.
 
-The server could generate the complete archive in memory or a temporary file, measure it, and then send it. That would provide an exact wire total, but at the cost of memory or disk pressure, delayed first byte, cleanup complexity, and worse concurrent-download behavior. An observability defect does not justify discarding streaming.
+### Special-Case Paths Ending in `/` {#alt-folder-check}
 
-### Sum the objects under the prefix {#alt-sum}
+Checking `objectPath.endsWith("/")` would miss zero-byte files, missing metadata fields, and any other chunked response lacking `Content-Length`. Checking denominator validity handles all of them uniformly.
 
-That sum is uncompressed logical data. `event.loaded` measures compressed response bytes plus ZIP framing. The units differ, so the bar could stop below 100%, exceed 100%, or move according to compression ratio rather than transfer completion. Reject.
+### Route Folders Through Immediate `BrowserDownload` {#alt-browser-download}
 
-### Convert invalid progress to 0% {#alt-zero}
+In Console 2.2.0, the legacy `BrowserDownload` helper clicked a hidden `<a>` tag and immediately marked the download `100%` complete before the first byte arrived, sacrificing error detection and cancellation. (A proper native browser handoff was later designed in [Console 2.4.1](#later-contract).)
 
-This hides the string but lies about the state: determinate 0% means the total is known and no portion has transferred. Users would still interpret the transfer as stalled. Unknown must remain unknown.
+### Sanitize `NaN` Inside `ProgressBar` Only {#alt-component}
 
-### Special-case paths ending in `/` {#alt-folder-check}
+Masking `NaN` only inside the React view component would leave corrupted `NaN` values in the Redux store and fail to keep `waitingForFile` in indeterminate mode.
 
-That fixes the reported prefix but misses a real zero-byte object, invalid metadata, and other unknown-length responses. The correct boundary is denominator capability, not object type.
+### Widen Redux State to `percentage: number | null` Immediately {#alt-null-state}
 
-### Send folders through `BrowserDownload` {#alt-browser-download}
+Adding `null` alongside existing `waitingForFile`, `done`, `failed`, and `cancelled` booleans would multiply state combinations unnecessarily when `waitingForFile = true` already models and renders indeterminate progress.
 
-The current large-file path creates an anchor and immediately calls the completion callback after clicking it. It cannot report true completion, console-managed cancellation, or a subsequent HTTP failure. It may be the basis of a later streaming-download design, but today it would replace one lie with another.
+## Requirements and Acceptance {#requirements}
 
-### Sanitize inside ProgressBar {#alt-component}
+### Functional Requirements {#functional}
 
-A generic component guard could be useful defense in depth, but it would leave invalid data in Redux and hide the broken state transition from every other consumer. The primary repair belongs where progress becomes application state.
+- **FR1–FR3:** Return only `null` or an integer in `[0, 100]` from `calculateDownloadPercent`, keep unknown-total folder transfers in indeterminate mode (`waitingForFile = true`), and preserve determinate percentages for known-total object downloads.
+- **FR4–FR5:** Normalize omitted zero-byte sizes so empty objects complete cleanly at `100%`, and clear `waitingForFile = false` across completion, failure, and cancellation.
 
-### Introduce `percentage: number | null` now {#alt-null-state}
+### Non-Functional Requirements {#non-functional}
 
-A discriminated progress state would be cleaner than the current booleans if the Object Manager were being redesigned. Adding `null` while retaining `waitingForFile`, `done`, `failed`, and `cancelled` would instead create more contradictory combinations. Removing the old fields is larger than this bug requires. Reuse the already-rendered indeterminate state now; redesign it separately.
+- Keep server-side ZIP streaming (`io.Pipe` without full-archive buffering), S3/Console API routes, and Redux state types unchanged.
 
-## Requirements and acceptance {#requirements}
+### Acceptance Criteria {#acceptance}
 
-### Functional requirements {#functional}
+- Zero `NaN%` or `Infinity%` labels appear in the download drawer across folder, ordinary-file, zero-byte, and cancelled transfers.
 
-- **FR1:** An unknown total keeps the task indeterminate.
-- **FR2:** A finite positive object size preserves ordinary-file percentages.
-- **FR3:** A finite positive `event.total` is a fallback only when `lengthComputable=true`.
-- **FR4:** Every dispatched percentage is finite and within `[0,100]`.
-- **FR5:** A zero-byte file never displays non-finite progress and reaches success.
-- **FR6:** Completion, failure, and cancellation leave indeterminate mode.
-- **FR7:** Versioned objects, anonymous downloads, previews, and long-filename entry points retain their existing call contract.
+## Verification Plan {#tests}
 
-### Non-functional requirements {#non-functional}
-
-- No new server CPU, memory, disk-buffer, or request cost.
-- No new frontend dependency or build step.
-- No change to the S3 API, Console API, ZIP content, or stored objects.
-- The calculation must be testable without a DOM or live store.
-- TypeScript typecheck and the production frontend build must pass.
-
-### Acceptance criteria {#acceptance}
-
-1. While a folder ZIP without `Content-Length` is active, its row shows an indeterminate animation and no percentage text.
-2. On successful completion, the row reports success/100% and the ZIP can be opened.
-3. A normal non-empty file continues to show finite determinate progress and completes at 100%.
-4. A zero-byte file never shows `NaN%` or `Infinity%` and completes successfully.
-5. Cancelling an unknown-total download aborts the request and shows Cancelled, not an active animation.
-6. No download path can place a non-finite or out-of-range percentage in Redux.
-
-## Test plan {#tests}
-
-### Pure calculation matrix {#unit-tests}
-
-Use the existing `@playwright/test` runner for the pure module rather than adding a test framework. This needs one config-only addition in `web-app/playwright.config.ts`: a dependency-free `unit` project, for example with `testMatch: /.*\.unit\.ts/`. The existing `chromium` project depends on the auth setup against a live Console at `localhost:9090`; pure calculation and reducer tests must not be gated by that environment. No new dependency is introduced.
+### Pure Calculation Matrix {#unit-tests}
 
 | Case | `loaded` | `objectSize` | `lengthComputable` | `event.total` | Expected |
 | --- | ---: | ---: | --- | ---: | --- |
-| Ordinary file, halfway | 50 | 100 | false | 0 | `50` |
-| Common prefix | 1024 | 0 | false | 0 | `null` |
-| Initial zero over zero | 0 | 0 | false | 0 | `null` |
-| Response-total fallback | 50 | 0 | true | 200 | `25` |
-| Zero total is unusable | 0 | 0 | true | 0 | `null` |
-| Loaded exceeds total | 150 | 100 | true | 100 | `100` |
-| Invalid object size | 10 | `NaN` | false | 0 | `null` |
-| Omitted zero size | 10 | `undefined` | false | 0 | `null` |
-| Invalid response total | 10 | 0 | true | `Infinity` | `null` |
-| Negative loaded | -1 | 100 | true | 100 | `null` |
+| Ordinary file, halfway | `50` | `100` | `false` | `0` | `50` |
+| Common prefix (`folder/`) | `1024` | `0` | `false` | `0` | `null` |
+| Initial `0 / 0` | `0` | `0` | `false` | `0` | `null` |
+| Response-total fallback | `50` | `0` | `true` | `200` | `25` |
+| Zero response total | `0` | `0` | `true` | `0` | `null` |
+| Loaded exceeds total | `150` | `100` | `true` | `100` | `100` |
+| Invalid `NaN` object size | `10` | `NaN` | `false` | `0` | `null` |
+| Omitted `undefined` size | `10` | `undefined` | `false` | `0` | `null` |
+| Non-finite `Infinity` total | `10` | `0` | `true` | `Infinity` | `null` |
+| Negative `loaded` | `-1` | `100` | `true` | `100` | `null` |
 
-### State tests {#state-tests}
+### Reducer State Transitions {#state-tests}
 
-Cover the transition contract directly:
+Unit tests verify that new downloads start with `waitingForFile = true`, remain indeterminate when no numeric progress action is dispatched, transition to determinate on valid progress, and clear `waitingForFile = false` across completion, failure, and cancellation.
 
-1. A new download starts with `waitingForFile=true`.
-2. No valid progress action means it remains indeterminate.
-3. Valid progress produces a finite value and `waitingForFile=false`.
-4. Complete produces `done=true`, `waitingForFile=false`, `percentage=100`.
-5. Failure produces `failed=true`, `done=true`, `waitingForFile=false`.
-6. Cancel produces `cancelled=true`, `done=true`, `waitingForFile=false`, `percentage=0`.
+### End-to-End Browser Regression {#e2e-tests}
 
-### Browser regression {#e2e-tests}
+Playwright tests against a live SILO + Console instance use Chromium CDP network throttling to observe an active folder download, verify that the drawer shows an indeterminate bar with zero `NaN%` or `Infinity%` text, test mid-stream cancellation, and verify full ZIP completion alongside ordinary and zero-byte files.
 
-Use the real Console test instance and Chromium:
+## Implementation Scope {#implementation}
 
-1. Create a temporary bucket with several objects below `folder/`.
-2. Select the prefix from its parent and start the download.
-3. Apply CDP download throttling so the intermediate state is observable.
-   Throttled runs must raise the default 30-second test timeout with `test.setTimeout`.
-4. Open Downloads / Uploads and verify that the row exists, has no percentage label, and contains neither `NaN%` nor `Infinity%`.
-5. Cancel it and verify the Cancelled terminal state.
-6. Restore network conditions in `finally`.
-7. Download again without throttling, wait for the browser download, and verify the ZIP.
-8. Repeat the relevant assertions for one ordinary non-empty file and one zero-byte file.
-9. Remove the bucket, objects, downloads, and temporary files in teardown.
+1. Add `downloadProgress.ts` with `calculateDownloadPercent`.
+2. Update `Objects/utils.ts` to dispatch `progressCallback` only for non-null percentages and let `status === 0` XHR completions reach `onabort` / `onerror`.
+3. Normalize `object.size || 0` in the single-selection download thunk.
+4. Set `item.waitingForFile = false` in `cancelObjectInList`.
+5. Add unit, reducer, and throttled Chromium Playwright regression tests.
 
-The current Playwright project is Chromium-only, so CDP is an acceptable test mechanism. If Firefox or WebKit projects are later enabled, keep the pure and state tests cross-browser and gate only the throttled observation behind the Chromium project.
+## Delivery and Rollback {#delivery}
 
-## Implementation boundary {#implementation}
+Shipped in [Console v2.2.0](/blog/release/console-2.2.0/) ([silo-console#29](https://github.com/pgsty/silo-console/pull/29)) and embedded in [SILO Server 20260903](/blog/release/silo-20260903/), resolving [pgsty/silo#62](https://github.com/pgsty/silo/issues/62). No storage or API migration is required.
 
-Expected Console changes:
+### Definition of Done {#done}
 
-1. Add `downloadProgress.ts` containing the pure calculation.
-2. Change `Objects/utils.ts` to dispatch only a non-null percentage, let status-zero terminal events reach their dedicated handlers, and clean up an aborted request.
-3. Normalize omitted zero sizes in the single-selection thunk.
-4. Change `cancelObjectInList` to clear `waitingForFile`.
-5. Add calculation, state, and browser regression coverage using existing dependencies, with a dependency-free `unit` project in `playwright.config.ts`.
+- [x] `calculateDownloadPercent` returns only `null` or a finite integer in `[0, 100]`.
+- [x] Active unknown-total folder downloads render indeterminate progress; ordinary and zero-byte files render valid determinate completion.
+- [x] Completed, failed, and cancelled rows exit indeterminate mode (`waitingForFile = false`).
+- [x] Shipped in Console `2.2.0` and Server `20260903`.
 
-Expected unchanged code and contracts:
+### Follow-Up Work {#follow-ups}
 
-- The Go folder-download handler and its streaming ZIP.
-- `ObjectHandled`, `ProgressBarWrapper`, and MDS.
-- `IFileItem.percentage: number` and the existing thunk callback types.
-- S3 and Console API routes.
-- Stored object and archive formats.
+ Five follow-up items identified during this review—streaming downloads directly to the browser without in-memory `Blob` buffering, discriminated progress state, mid-stream ZIP error signaling, component-level non-finite guards, and `Blob` JSON error decoding—were tracked separately and addressed in subsequent Console releases.
 
-## Delivery and rollback {#delivery}
+## Subsequent Evolution: Browser Streaming Handoff in Console 2.4.1 {#later-contract}
 
-The fix belongs in `pgsty/silo-console`, not the Silo server repository where the issue was reported.
+Alongside this progress repair, [Console 2.2.0](/blog/release/console-2.2.0/) also made `size` an always-present JSON field in object listings and hardened server-side ZIP error propagation so unreadable entries abort the stream rather than being silently omitted.
 
-Delivery order:
-
-1. Transfer or cross-reference issue #62 to `pgsty/silo-console`.
-2. Implement the bounded Console change.
-3. Pass typecheck, production build, pure/state tests, and real browser regression.
-4. Publish a new Console release.
-5. Update Silo's pinned Console pseudo-version or release dependency.
-6. Build a Silo candidate and repeat folder, ordinary-file, zero-byte, cancel, and ZIP-integrity checks.
-7. Publish Silo and record both affected and fixed versions on the issue.
-
-There is no data migration. If the frontend change regresses, Silo can roll back only the Console dependency; server data and API behavior remain compatible.
-
-## Definition of done {#done}
-
-- [x] The calculation returns only `null` or a finite `[0,100]` number.
-- [x] Active unknown-total folder downloads render indeterminate.
-- [x] Ordinary files retain determinate progress.
-- [x] Zero-byte files never render invalid progress.
-- [x] Complete, failed, and cancelled rows all leave indeterminate mode.
-- [x] The streamed ZIP and server response contract remain unchanged.
-- [x] Typecheck, production build, and automated regressions pass locally.
-- [x] Console 2.2.0 is published.
-- [x] Server 20260903 includes the updated Console; see its release evidence.
-
-## Follow-up work {#follow-ups}
-
-Five adjacent improvements deserve separate design records:
-
-1. Stream large folder downloads directly to the browser or filesystem instead of holding the full Blob in memory.
-2. Replace the Object Manager's boolean combination with a discriminated progress/terminal state.
-3. Improve end-to-end integrity and error signaling for ZIP failures after headers have been sent.
-4. Add a generic non-finite-value guard to shared progress components as defense in depth.
-5. Repair the pre-existing Blob JSON error decoder and request-trace cleanup on HTTP failure paths.
-
-None is required to stop the current UI from lying. The next maintenance iteration should first restore the smallest honest contract: known totals get percentages; unknown totals remain unknown.
-
-## Later implementation and the original design {#later-contract}
-
-The Console 2.2.0 integration also made `size` an always-present JSON field and repaired ZIP error propagation: unreadable entries are no longer silently skipped; errors before output can return 500 and errors afterward interrupt the stream. The no-API/resource-management-change statements above describe only the original progress-calculation patch, not the whole release.
-
-Current single-folder downloads are handed to the browser. A completed Console row records the handoff, not completion of all bytes; track and cancel the transfer in the browser download manager. Multi-selection file-writer/native handoff paths are described in [Console 2.4.1](/blog/release/console-2.4.1/#browser). Size normalization remains defensive support for old responses, not evidence that the current model omits zero values.
+Subsequently, [Console 2.4.1](/blog/release/console-2.4.1/#browser) eliminated in-memory XHR `Blob` buffering for downloads by handing single-folder and single-object downloads directly to the browser's native download manager and streaming multi-selection archives through file-system writers where supported. Under that newer architecture, the Console transfer row records the handoff to the browser, while ongoing byte progress and cancellation are managed natively by the browser's download manager.

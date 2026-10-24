@@ -1,123 +1,109 @@
 ---
-title: "未签名的 Header 不属于请求"
+title: "SigV4 签名头覆盖边界：拒绝未签名的 x-amz-* 请求头"
 linkTitle: "签名头覆盖边界"
 date: 2026-09-09
 lastmod: 2026-09-16
 author: "冯若航"
 summary: >
-  一个只授权写单个对象的 presigned/签名 PUT，可被转化为读取签名密钥可及的任意对象的服务端复制——因为 SigV4 验签只遍历"签名头名单"，从不检查真正到达的 x-amz-* 头，而路由又仅凭一个未签名的 x-amz-copy-source 头就派发到 CopyObject。本文记录 SILO 的未签名头拒绝边界、载荷哈希豁免与可信签名年龄的计算、PutObjectTagging 注入时序调整、跨签名模式的适用范围与发布前证据。
+  仅授权写入单个对象的预签名或普通签名 PUT 请求，此前可被转化为读取签名密钥可访问的任意对象的服务端复制——原因在于 SigV4 验签只正向遍历签名头列表，未反向检查实际收到的 x-amz-* 请求头，而路由层又仅凭未签名的 x-amz-copy-source 头将请求分发至 CopyObject。本文记录 SILO 的未签名头拒绝边界、载荷哈希豁免与可信签名年龄计算、PutObjectTagging 注入时序调整、跨签名模式的适用范围与验证证据。
 tags: [设计, 安全, SigV4, CopyObject, Presigned, 兼容性]
 weight: 6
 draft: false
 url: "/zh/blog/design/signed-header-coverage/"
 ---
 
-> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+本文记录 SILO 的未签名请求头覆盖修复（核心提交 [`123325430`](https://github.com/pgsty/silo/commit/123325430)，经 [PR #173](https://github.com/pgsty/silo/pull/173) 合入，安全通告编号 `SN-2026-011`）以及 [PR #177](https://github.com/pgsty/silo/pull/177) 中的后续签名与载荷校验修复（安全通告编号 `SN-2026-012`）。上述修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布。该漏洞由 Oren Yomtov 报告，并在本地预签名与 `Authorization` 请求头两条 SigV4 路径上复现。
 
+## 核心结论（TL;DR） {#tldr}
 
-本文记录 SILO 的未签名头覆盖修复，核心提交为 [`123325430`](https://github.com/pgsty/silo/commit/123325430)，已通过 [PR #173](https://github.com/pgsty/silo/pull/173) 合并，台账编号 `SN-2026-011`。该问题由 Oren Yomtov 针对已发布版本报告，并在本地两条签名路径上均已复现。
+预签名 `PUT` URL 可以只对 `host` 一个请求头签名。此前 SILO 只校验签名头列表（`SignedHeaders`）中声明的请求头是否已到达，却未反向检查请求实际携带的全部请求头，导致列表之外的 `x-amz-*` 请求头被直接接受并参与业务处理。与此同时，`cmd/api-router.go` 仅凭请求中存在 `x-amz-copy-source` 头，就会将任意 `PUT` 请求分发至 `CopyObjectHandler`。两处逻辑叠加后，原本仅授权写入单个对象的预签名 URL，可被攻击者转化为**以签名者身份读取该密钥可访问的任意对象的服务端复制操作**（混淆代理，confused deputy）。当 `Authorization` 头签名请求未将 `x-amz-copy-source` 纳入 `SignedHeaders` 时，同样会触发该问题。
 
-> **2026-09-11 状态：** 原始修复已推送，并通过 [PR #173](https://github.com/pgsty/silo/pull/173) 合并。下文的后续签名与正文校验修复也已通过 [PR #177](https://github.com/pgsty/silo/pull/177) 合并，8 项 PR 检查全部通过。源码验证与正式发布分别计数：当前已发布的 9 月 3 日 Server 版本尚未包含这些修复。<br>
-> **范围：** SigV4 请求头覆盖、策略输入一致性与正文摘要校验。不改变 S3 字段名称、对象或桶元数据格式、复制协议、加密格式和客户端命令。<br>
-> **普通签名与预签名 SigV4 的安全性质：** 客户端未签名的 `x-amz-*` 操作头不能改变已授权请求；策略求值与正文校验使用实际参与签名的有效输入。
-
-## 太长不看（TL;DR） {#tldr}
-
-一个 presigned `PUT` URL 可以只签一个头：`host`。SILO 会确认签名头名单里点名的每个头都已到达，却从不遍历*真正*到达的头，于是名单之外的 `x-amz-*` 头被照单接受并使用。`cmd/api-router.go` 仅凭 `x-amz-copy-source` 头就把任意 `PUT` 派发到 `CopyObjectHandler`。两者相加，把"只能写某个对象"的授权，变成了**以签名者身份读取签名密钥可及的任意对象的服务端复制**——一个混淆代理（confused deputy）。当该头被排除在 `SignedHeaders` 之外时，Authorization 头路径也是同样的行为。
-
-修复只确立一条不变式：
+本次修复确立了一条核心不变式：
 
 ```text
-普通签名与预签名 SigV4 中，x-amz-* 操作头必须被签名覆盖。
-唯一豁免 X-Amz-Content-Sha256，其有效值另行绑定和校验；streaming seed 不在此覆盖内。
+在普通签名与预签名 SigV4 路径中，收到的所有 x-amz-* 请求头均须在签名覆盖范围内；
+唯一豁免项为通过规范请求单独绑定和校验的 X-Amz-Content-Sha256。
 ```
 
-这与 AWS S3 一致——AWS 对同一请求返回 `AccessDenied`（“There were headers present in the request which were not signed”）。受影响的签名代码继承自上游 `minio/minio`，已发布的 SILO 基线尚未包含本修复；源码谱系本身不能证明所有上游构建或其他分叉的状态。
+这一行为与 AWS S3 一致——AWS S3 对携带未签名 `x-amz-*` 头的同类请求同样返回 `AccessDenied`（“There were headers present in the request which were not signed”）。
 
-## 缺陷：覆盖缺口 {#failure}
+## 缺陷机制：单向覆盖缺口 {#failure}
 
-`cmd/signature-v4-utils.go` 里的 `extractSignedHeaders` 遍历*签名头名单*，逐个从请求（或 query string）里取值。它证明了"承诺过的头都在"，却从不问反方向的问题——*到达的每个 `x-amz-*` 头，是否都在名单里*？
+`cmd/signature-v4-utils.go` 中的 `extractSignedHeaders` 遍历*签名头列表*，按名称逐一从请求头（或 query 参数）中提取对应值。这仅验证了签名声明的请求头均已存在，却遗漏了反向检查：*实际收到的每一个 `x-amz-*` 请求头是否都包含在签名头列表中？*
 
-唯一遍历到达头的地方 `checkMetaHeaders`，只匹配 `X-Amz-Meta-` 前缀，且只被 presigned 路径（`doesPresignedSignatureMatch`）调用。Authorization 头验签器（`doesSignatureMatch`）没有任何等价调用。于是未签名的 `x-amz-copy-source`——或任何其它塑造操作的 `x-amz-*` 头——在两条路径上都能通过：
+此前代码中唯一遍历实际到达请求头的函数是 `checkMetaHeaders`，但它仅匹配 `X-Amz-Meta-` 前缀，且只在预签名路径（`doesPresignedSignatureMatch`）中调用；`Authorization` 头验签路径（`doesSignatureMatch`）则完全没有对应检查。因此，未签名的 `x-amz-copy-source`（或任何其他影响操作语义的 `x-amz-*` 请求头）在两条路径上均能畅通无阻：
 
 ```text
-presigned PUT（SignedHeaders=host）  ->  加一个未签名的  x-amz-copy-source: /src/secret
-  -> 路由看到 x-amz-copy-source  -> CopyObjectHandler
-  -> 复制以签名者身份运行，读取了 URL 从未点名的桶
+预签名 PUT（SignedHeaders=host）  ->  附加未签名的 x-amz-copy-source: /src/secret
+  -> 路由层检测到 x-amz-copy-source  -> 分发至 CopyObjectHandler
+  -> 以签名者身份执行服务端复制，读取预签名 URL 从未授权的源存储桶
 ```
 
-本地复现：对照组 `PUT` 返回 `200` 且响应体为空；同一 URL 加上那一个未签名头返回 `200`，响应是一个 `CopyObjectResult`，其 ETag 正是受害对象的 md5，且目标处回读出的就是受害者的字节。若目标桶本就允许匿名 `GetObject`，被复制进去的私有字节此后无需任何凭据即可读取。
+本地复现结果：对照组普通 `PUT` 返回 `200` 且响应体为空；对同一预签名 URL 附加一个未签名的 `x-amz-copy-source` 头后，请求同样返回 `200`，但响应体变为 `CopyObjectResult`（其 ETag 即为源对象的 MD5），从目标对象回读即可拿到源对象的完整内容。若目标存储桶本身允许匿名 `GetObject`，攻击者无需任何凭据即可直接读取被复制出来的私有对象。
 
-## 溯源 {#provenance}
+## 历史溯源 {#provenance}
 
-这个缺口继承自上游 MinIO，并非 SILO 引入。`cmd/signature-v4-utils.go` 里的 SigV4 验签器、以及 `cmd/signature-v4.go` 里的 Authorization 头路径 `doesSignatureMatch`，都是可追溯到 2016 年的原始 MinIO 代码；`cmd/api-router.go` 里由头驱动的 CopyObject 派发可追溯到 2019 年。唯一遍历到达头的例程 `checkMetaHeaders`，是上游在 2023-07-27 通过 [minio/minio#17737](https://github.com/minio/minio/pull/17737)（`535f97ba6`）加入的。也就是说，上游其实已经意识到了这一类问题——未签名的头必须与签名集合相符——却把检查限定在 `X-Amz-Meta-` 前缀和 presigned 路径上，把 `x-amz-copy-source` 和整条 Authorization 头路径都漏在外面。继承的验证器早于 SILO 分叉。
+该缺陷继承自上游 MinIO。`cmd/signature-v4-utils.go` 中的 SigV4 验签逻辑与 `cmd/signature-v4.go` 中的 `doesSignatureMatch` 可追溯至 2016 年；`cmd/api-router.go` 中基于请求头分发 `CopyObject` 的路由规则可追溯至 2019 年。上游曾在 2023-07-27 通过 [minio/minio#17737](https://github.com/minio/minio/pull/17737)（提交 `535f97ba6`）引入 `checkMetaHeaders`，当时已注意到未签名请求头需与签名集合保持一致，但将该检查局限在 `X-Amz-Meta-` 前缀与预签名路径，遗漏了 `x-amz-copy-source` 等操作控制头以及整条 `Authorization` 头验签路径。
 
-在未签名头修复之前，SILO 对 `cmd/signature-v4-utils.go` 的改动是一行依赖路径迁移：`9b11dc946` 将 `policy` 导入改为 `pgsty/silo-pkg/v3`。存在缺陷的验签行为来自上游。原始修复（`123325430`）以及 [PR #177](https://github.com/pgsty/silo/pull/177) 的后续修复改变了这条边界。存在缺陷的代码早于 SILO 的分叉基线——即上游 2025-12-03 的 “maintenance mode” 提交，第一个 SILO 发布版本正是从那里切出的。
+在本次修复前，SILO 对 `cmd/signature-v4-utils.go` 仅做过一行依赖导入路径调整（`9b11dc946` 将 `policy` 包导入迁移至 `pgsty/silo-pkg/v3`）。核心修复（`123325430`）与 [PR #177](https://github.com/pgsty/silo/pull/177) 的后续加固完整闭合了这一边界。
 
-本文确认维护中的 SILO 源码已修复该边界，不声称 SILO 是唯一已有修复的实现，也不据此判断其他项目当前的维护状态。
+## 修复设计 {#repair}
 
-## 修复 {#repair}
+修复将 `checkMetaHeaders` 重命名为 `checkUnsignedHeaders`，将匹配前缀从 `X-Amz-Meta-` 扩展至整个 `X-Amz-` 命名空间，并在**预签名**与 **`Authorization` 头**两条路径上统一调用。任何未被签名集合覆盖的 `x-amz-*` 请求头，都会在进入业务 handler 之前被直接拒绝并返回 `ErrUnsignedHeaders`。
 
-`checkMetaHeaders` 更名为 `checkUnsignedHeaders`，把匹配前缀从 `X-Amz-Meta-` 拓宽到整个 `X-Amz-`，并在**两条**路径（presigned 与 Authorization 头）上都调用。不被签名集合覆盖的头，会在任何 handler 逻辑运行前以 `ErrUnsignedHeaders` 拒绝。
+以下四项设计决策界定了具体的检验边界：
 
-有四个决策界定了这条边界的确切位置。每个都有一个看似合理、但因具体理由被否掉的替代方案。
+### 检查集合成员资格 {#membership}
 
-### 判成员资格，而非判值相等 {#membership}
-
-继承来的检查比较的是 `signedHeadersMap.Get(k) == val[0]`。对一个不在签名集合里的头，`Get` 返回空串，于是*首值*为空的头会比出相等而通过。像 `X-Amz-Copy-Source: ["", "/src/secret"]` 这样的多值头，就能借此把未签名的 copy-source 从值相等检查下夹带过去。修复改为判**成员资格**（该头是否在签名集合中）。签名头的值本就被签名绑定，所以值相等从来不是关键性质；在名单里才是。
+原先的 `checkMetaHeaders` 采用 `signedHeadersMap.Get(k) == val[0]` 比较值是否相等。对于不在签名映射表中的请求头，`Get` 会返回空字符串 `""`；一旦攻击者构造首个元素为空串的多值请求头（例如 `X-Amz-Copy-Source: ["", "/src/secret"]`），`val[0]` 同样为空串，就能绕过相等比较并将第二个未签名的复制源路径注入后端。修复改为直接检查键是否存在于 `signedHeadersMap` 中：只要请求头已纳入签名列表，其具体取值自然受签名摘要保护，验签阶段只需判定集合成员资格。
 
 ### 豁免 `X-Amz-Content-Sha256` {#exempt-content-sha256}
 
-`X-Amz-Content-Sha256` 可以不列入 `SignedHeaders`，因为有效载荷哈希已被单独绑定到规范请求。预签名请求优先使用 query 值，仅在 query 缺失时回退到 header；显式的 `UNSIGNED-PAYLOAD` 仍然有效。[PR #177](https://github.com/pgsty/silo/pull/177) 让策略条件使用同一个有效值，同时保留 header 存在性的语义，并补齐通用认证路径中 header-only 预签名请求的正文摘要校验。这项豁免不允许策略求值或正文校验另取一个不同的值。
+客户端发送 `X-Amz-Content-Sha256` 时可以不将其列入 `SignedHeaders`，因为有效载荷哈希已作为独立字段写入 SigV4 规范请求（Canonical Request）。预签名请求优先取 query 参数中的哈希值，仅在 query 未提供时回退读取请求头，显式的 `UNSIGNED-PAYLOAD` 同样受支持。[PR #177](https://github.com/pgsty/silo/pull/177) 将 IAM 策略条件求值统一对齐到这一有效哈希值（同时保留判断请求头是否存在的语义），并在通用认证路径中补齐了仅通过请求头携带哈希的预签名请求正文摘要校验，确保签名绑定、策略评估与正文校验使用同一个值。
 
-### 从签名日期计算签名年龄 {#exempt-signature-age}
+### 直接从签名日期计算签名年龄 {#exempt-signature-age}
 
-原始修复曾豁免验签后写入的内部 scratch 头 `x-amz-signature-age`，但 PUT 和 UploadPart 的授权发生在验签之前，这个值建立得太晚。[PR #177](https://github.com/pgsty/silo/pull/177) 改为直接从已签名的 `X-Amz-Date` 计算 `s3:signatureAge`，并删除 scratch 头、对应常量和豁免。伪造日期会导致验签失败；客户端提交旧名称的未签名头会被拒绝。验签不再修改请求头，重复验签仍然幂等。
+初版修复曾豁免验签后写入内部请求头的临时字段 `x-amz-signature-age`，但 `PUT` 和 `UploadPart` 的授权评估发生在流式验签之前，此时该内部头尚未生成。[PR #177](https://github.com/pgsty/silo/pull/177) 改为直接根据已受签名保护的 `X-Amz-Date` 计算 `s3:signatureAge`，并彻底移除了内部临时头、相关常量及豁免分支。伪造日期会直接导致验签失败，客户端自行传入的同名未签名头则会被拦截；同时验签过程不再修改请求头映射，多次调用保持幂等。
 
-### 把 `X-Amz-Tagging` 注入挪到鉴权之后 {#tagging-reorder}
+### 将 `X-Amz-Tagging` 注入移至验签之后 {#tagging-reorder}
 
-`PutObjectTaggingHandler` 会从请求*体*派生出一个 `X-Amz-Tagging` 头供策略条件读取，此前是在 `authenticateRequest` *之前*注入的。有了拓宽后的检查，这个服务端合成、客户端从不签名的头，会被当作未签名而拒绝。注入现在改到验签之后、授权之前——授权仍然拿得到它来做策略条件。**否掉的替代方案：** 像豁免 content-sha256 那样，直接整体豁免 `X-Amz-Tagging`。那会允许客户端在任意签名/presigned 写请求上，通过一个未签名头设置对象标签，重新打开这一类缺陷的一个缩小版本。
+`PutObjectTaggingHandler` 会从请求正文 XML 中解析并合成 `X-Amz-Tagging` 请求头供 IAM 策略条件评估读取，而原先这一注入发生在调用 `authenticateRequest` *之前*。将未签名头检查扩展到全部 `X-Amz-` 前缀后，这个由服务端合成、客户端从未签名的请求头会被误判为未签名头而遭到拒绝。修复将注入时机调整至签名验证通过之后、策略授权评估之前，既不影响策略条件读取标签，又保持了验签边界的纯净。我们否决了“像豁免 `content-sha256` 一样全局豁免 `X-Amz-Tagging`”的替代方案——因为一旦全局豁免，客户端就能在任意签名或预签名写入请求上附加未签名的 `X-Amz-Tagging` 头来篡改对象标签。
 
 ## 跨签名模式的适用范围 {#scope}
 
-- **Authorization 头（签名）与 presigned SigV4：** 两者现均已强制。这是可达的路径。
-- **Streaming SigV4：**种子验签没有调用 `checkUnsignedHeaders`。COPY 处理器通过普通认证分发拒绝 streaming auth，但不代表 streaming PUT/UploadPart 的所有头都已覆盖。这里不声称存在专门验证 streaming COPY 拒绝的回归测试；完整覆盖需要单独实现和证据。
-- **SigV2：** 不受影响。V2 的规范化本就把 `x-amz-*` 头折进 string-to-sign，因此新增一个 `x-amz-*` 头会改变算出的签名，被当作签名不匹配拒绝。
+- **`Authorization` 头签名与预签名 SigV4：** 两条路径均已强制执行 `checkUnsignedHeaders`。
+- **流式 SigV4（Streaming SigV4）：** 种子签名校验器未调用 `checkUnsignedHeaders`。Copy 系列 handler 通过常规认证分发直接拒绝流式认证，而流式 `PUT` / `UploadPart` 的请求头覆盖属于独立边界。
+- **SigV2：** 不受影响。SigV2 规范化算法在构造待签字符串（string-to-sign）时默认纳入全部 `x-amz-*` 请求头，任何额外附加的 `x-amz-*` 头都会改变计算出的签名并触发签名不匹配错误。
 
-## 状态码：400 还是 403 {#status-code}
+## 状态码权衡：400 与 403 {#status-code}
 
-AWS 对未签名头返回 `403 Forbidden`；SILO 返回 `400 AccessDenied`（`ErrUnsignedHeaders`），继承自上游。两种方式都拒绝了攻击，错误 `Code` 字符串也一致，仅 HTTP 状态码不同。把它提升到 `403` 是 `cmd/api-errors.go` 里一行的改动，同时也会改变既有的 meta 头拒绝路径。此处把它留作一个刻意的、可逆的选择，而非在安全修复里悄悄夹带，因为它对既有的未签名 meta 头路径是一个行为变更，且并非关闭该漏洞所必需。
+AWS S3 对未签名请求头返回 `403 Forbidden`，而 SILO 沿用上游 `ErrUnsignedHeaders` 定义返回 `400 AccessDenied`。两者的 S3 错误码字符串均为 `AccessDenied`，仅 HTTP 状态码不同。若将 `cmd/api-errors.go` 中的状态码改为 `403`，虽然只需修改一行代码，但会同步改变既有的未签名 `x-amz-meta-*` 请求头返回码。为避免在安全补丁中引入额外的状态码兼容变更，此处保持 `400 AccessDenied` 不变。
 
-## 测试 {#tests}
+## 回归测试 {#tests}
 
-有几个既有测试先构造一个签名请求，然后*在签名之后*才设置 `x-amz-copy-source`、`x-amz-copy-source-range` 或 `x-amz-metadata-directive`——也就是说，它们依赖的正是本修复所移除的行为。它们现在改为在设置这些头之后用 `signRequestV4` 重新签名，这符合修复后的验证器对操作头的签名要求。`signRequestV4` 会把 `Authorization` 头排除在自己的签名集合之外，因此重签是安全的。当前覆盖包括 `checkUnsignedHeaders` 的单元用例（空首值、载荷哈希豁免，以及旧签名年龄头未签名时的拒绝行为）以及 `TestPresignedVerifyIdempotent`——对同一个 presigned 请求验签两次。
+代码中原有的若干单元测试会先构造签名请求，*在完成签名之后*再手动追加 `x-amz-copy-source`、`x-amz-copy-source-range` 或 `x-amz-metadata-directive` 请求头。这些测试已更新为在设置完操作控制头后重新调用 `signRequestV4` 签名（`signRequestV4` 会自动将已有的 `Authorization` 头排除在签名集合外，因此可安全重签）。新增单元测试覆盖了 `checkUnsignedHeaders` 的空首值多值头拦截、`X-Amz-Content-Sha256` 豁免、旧版未签名 `x-amz-signature-age` 头拒绝，以及对同一预签名请求连续验签两次的幂等性测试 `TestPresignedVerifyIdempotent`。
 
-## 证据 {#evidence}
+## 验证证据 {#evidence}
 
-- 一个构建出的服务端在 presigned 与 Authorization 头两条路径上复现了混淆代理，修复后两者均被拒绝，而对照组 `PUT`、真实的 `minio-go` `CopyObject`、带用户元数据与标签的 `PutObject`、以及基于请求体的 `PutObjectTagging` 全部照常工作。
-- `go test ./cmd/` 在修复树上通过；`gofmt`、`gofumpt`、`vet` 干净。
-- 对抗性评审（第一轮）独立发现了初稿中的三个缺陷——scratch 头导致的验签不幂等、空首值绕过、以及对未签名 `x-amz-content-sha256` 的过度拒绝——均在上文处理，并通过把评审方自建的对抗测试套件跑在最终树上得到确认。
-- 对抗性评审（第二轮，针对已提交的修复）未发现回归，并确认重签后的测试保留了原意：无效 access key 仍返回 `InvalidAccessKeyId`，错误 SSE-C key 在签名通过后仍返回 `403`。它另外发现了三处*相邻的、既有的*缺口——在父提交上同样失败，且不在本次改动范围内——记录在下文后续项。
+- 在真实构建的服务端实例上，复现脚本在预签名与 `Authorization` 头两条路径上均确认了修复前的混淆代理行为，并在修复后验证两者均被拒绝；与此同时，对照组的普通 `PUT`、标准 `minio-go` `CopyObject`、携带用户元数据与标签的 `PutObject` 以及基于请求正文的 `PutObjectTagging` 均正常通过。
+- `go test ./cmd/` 全量通过，`gofmt`、`gofumpt` 与 `go vet` 检查无告警。
+- 首轮代码审查指出的三处边界问题（临时请求头破坏验签幂等性、空首值绕过相等检查、未签名 `x-amz-content-sha256` 误拒）均已修复并通过回归测试验证。
+- 第二轮复核确认重签后的既有测试保持原有测试意图：无效 AccessKey 仍返回 `InvalidAccessKeyId`，错误的 SSE-C 密钥在签名校验通过后仍返回 `403`。
 
-## 兼容性与运维 {#impact}
+## 兼容性与运维影响 {#impact}
 
-- **普通客户端：** 请求无变化。已验证的标准 SDK 路径会签入其操作头；这不是对所有 SDK 版本和自定义签名器的保证。
-- **未签名的 `x-amz-*` 头：** 现在以 `AccessDenied` 拒绝，与 AWS 一致。一个不签名就加上此类头的客户端，本就在 SigV4 契约之外。
-- **滚动升级：** wire 与存储格式不变。已升级节点强制该边界；仍跑旧版本的节点在升级前仍然暴露，因此滚动窗口内不同节点行为可能不同。
-- **回滚：** 修复版本写入的数据仍可被旧版本读取，但回滚会重新打开混淆代理。
+- **标准客户端：** 零影响。遵循 SigV4 规范的客户端与 SDK 会自动将发送的非豁免 `x-amz-*` 请求头纳入 `SignedHeaders`。
+- **附加未签名 `x-amz-*` 头的客户端：** 请求将被拒绝并返回 `AccessDenied`，与 AWS S3 行为一致。
+- **滚动升级：** 线协议与底层存储格式无变化。升级过程中，已升级节点立即强制执行新边界，未升级节点在完成替换前仍存在暴露窗口。
+- **版本回滚：** 新版本写入的数据可被旧版本正常读取，但回滚服务端二进制会重新暴露该混淆代理漏洞。
 
-## 残余风险与后续 {#residual-risks}
+## 关联修复与延伸原则 {#residual-risks}
 
-- **发布交付：** 源码修复与公开工程记录不代表已发布的二进制或镜像包含修复；需要单独核对所选发布版本与制品。
-- **CVE：** 报告人申请了一个；在 CVE 分配前，该发现以稳定的 fork 本地编号 `SN-2026-011` 追踪。
-- **状态码选择：** 上文 `400` 与 `403` 的取舍仍开放。
-- **相邻签名修复：** [PR #177](https://github.com/pgsty/silo/pull/177) 处理重复复制源头的歧义、签名年龄的授权时序和载荷哈希策略有效值，并补齐另行复现的 header-only 预签名正文摘要校验缺口。回归覆盖普通签名与预签名、上传验签前的策略求值，以及真实 HTTP 桶策略篡改。这些后续项与原始 `SN-2026-011` 分开记录；合并和发布状态见页首。
-- **通用问题：** 本次修复覆盖的是 `x-amz-*` 请求头。任何未来让请求语法去选择操作的控制项，都必须回答这次同样的问题——*在这个值被允许具有任何含义之前，它是否被签名覆盖了？* 上面那处重复头缺口是同一问题的另一副面孔：签名所绑定的值，与处理器所消费的值，必须是同一个。
+- **安全通告编号：** 未签名请求头覆盖修复对应 `SN-2026-011`，[PR #177](https://github.com/pgsty/silo/pull/177) 中的相邻签名与载荷校验修复对应 [`SN-2026-012`](/zh/about/security-advisories/#sn-2026-012)。
+- **HTTP 状态码：** 上述 `400` 与 `403` 的状态码对齐留待后续大版本评估。
+- **相邻签名修复：** [PR #177](https://github.com/pgsty/silo/pull/177) 一并消除了重复 `x-amz-copy-source` 请求头的解析歧义、修正了签名年龄的授权评估时序与载荷哈希策略条件取值，并补齐了仅通过请求头携带哈希的预签名请求正文摘要校验。回归测试覆盖了普通签名与预签名请求、上传验签前的策略评估以及真实 HTTP 存储桶策略防篡改验证。
+- **通用设计原则：** 凡是允许请求语法改变服务端操作语义的控制项，都必须在进入路由或业务分发前确认其已受签名保护，且验签所绑定的值与业务处理器实际消费的值必须严格一致。
 
-## 结语 {#conclusion}
+## 总结 {#conclusion}
 
-签名即请求。`x-amz-*` 头所声称的一切，在签名覆盖它之前都只是声称：
-
-> 确认"承诺过的头都到了"，不等于确认"到了的头都被承诺过"。应让参与普通签名与预签名操作的头受同一认证契约约束；载荷哈希豁免与 streaming seed 限制仍如上文。
-
-台账把[载荷验证修复单列为 SN-2026-012](/about/security-advisories/#sn-2026-012)。签名修改本身不改变存储格式，但同一 main 候选还包含[要求协调升级的 IAM 变化](/operations/replication/iam-upgrade/)，不能用本文授权整个候选版本滚动升级。
+SigV4 验签不仅要确认签名头列表声明的请求头悉数到达，还必须反向确认实际收到的每一个 `x-amz-*` 请求头都已纳入签名列表。在业务处理器执行前拒绝未签名的 `x-amz-*` 请求头，从根源上闭合了普通签名与预签名 SigV4 路径上的混淆代理漏洞。虽然签名校验改动本身不涉及存储格式变更，但升级至 [Server 20260916](/zh/blog/release/silo-20260916/) 同时包含[需要协调升级的 IAM 变更](/zh/operations/replication/iam-upgrade/)。

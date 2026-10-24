@@ -5,24 +5,18 @@ date: 2026-08-28
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  MINIO_CONFIG_ENV_FILE is parsed directly by SILO, not sourced by a shell. A shell-identifier check therefore rejected valid named configuration targets such as my-hook. This record defines the compatible key grammar, whitespace and quoting rules, failure behavior, security boundary, and regression tests.
+  MINIO_CONFIG_ENV_FILE is parsed directly by SILO, not sourced by a shell. A shell-identifier check rejected valid named configuration targets such as my-hook. This note defines the key grammar, whitespace and quoting rules, failure behavior, and the #65 restart trap.
 tags: [Design, Configuration, Compatibility, Operations]
 weight: 16
 draft: false
 url: "/blog/design/config-env-file/"
 ---
 
-> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
+This note defines the startup contract for `MINIO_CONFIG_ENV_FILE` and documents the compatibility repair committed as `2aea7fe9c` and shipped in [Server 20260903](/blog/release/silo-20260903/). The file is a SILO input format; supporting an optional `export` prefix for operator convenience does not make it a POSIX shell script.
 
-This record defines the startup contract for `MINIO_CONFIG_ENV_FILE` and explains the compatibility repair committed in SILO as `2aea7fe9c`.
+## Overview {#tldr}
 
-> **Status on 2026-08-28:** implementation, focused tests, the complete `cmd` and `internal` suites, tagged tests, race tests, vet, lint, generated-file checks, rebrand guards, build, and an independent local Fable Max review are complete. The commit was merged into `main` on 2026-08-29 as `2aea7fe9c`; tag, package, image, deployment, and production verification remain separate gates.<br>
-> **Scope:** environment-file parsing and named-target discovery only. No configuration key, subsystem, value, precedence, storage format, or client API changes.<br>
-> **Compatibility rule:** the file is a SILO input format. Supporting an optional `export` prefix does not make it a POSIX shell program.
-
-## Too Long; Didn't Read (TL;DR) {#tldr}
-
-SILO can load startup variables from a file:
+SILO can load startup environment variables from a file:
 
 ```shell
 export MINIO_CONFIG_ENV_FILE=/etc/default/silo
@@ -38,21 +32,21 @@ MINIO_NOTIFY_WEBHOOK_ENABLE_my-hook = off
 MINIO_NOTIFY_WEBHOOK_ENDPOINT_my-hook = https://events.example.com/minio
 ```
 
-The last two names are important. Multi-target configuration appends the target name verbatim after an underscore. The configuration subsystem does not restrict a target to a shell identifier; names containing `-`, `.`, `:`, digits, or printable Unicode can be discovered and resolved exactly.
+The last two keys illustrate why shell-identifier validation is too narrow. Multi-target configuration appends the target name verbatim after an underscore. The configuration subsystem does not restrict target names to POSIX shell identifiers: names containing `-`, `.`, `:`, digits, or printable Unicode can be discovered and resolved directly.
 
-A hardening change accidentally validated every key as `[A-Za-z_][A-Za-z0-9_]*`. It made `my-hook` invalid and stopped the server during restart even though the previous loader and the configuration target model accepted it. The repair validates what SILO actually needs instead:
+An earlier hardening change validated every environment-file key against `[A-Za-z_][A-Za-z0-9_]*`. That regex rejected `my-hook` and prevented the server from starting on restart even though the previous loader and the configuration target subsystem accepted it. The repair validates the invariants that SILO and the operating-system environment actually require:
 
-- the name is non-empty, valid UTF-8, and made of visible non-whitespace characters;
-- `=` and NUL are not allowed in a name;
-- NUL is not allowed in a value;
-- invalid input reports file and line without reporting the value;
-- the complete file is parsed before any assignment is applied.
+- The key name is non-empty, valid UTF-8, and composed of visible non-whitespace characters.
+- `=` and NUL are forbidden in a key name.
+- NUL is forbidden in a value.
+- Invalid input reports the file path and line number without logging the value.
+- The entire file is parsed and validated before any environment assignment is applied.
 
-## Why the regression was real {#regression}
+## Why the Regression Was Real {#regression}
 
-The environment-file loader calls `os.Setenv` after parsing. An operating-system environment is a list of strings, not a shell variable namespace. Shell assignment syntax is narrower because the shell must tokenize and expand variable names in its own language.
+The environment-file loader calls `os.Setenv` after parsing. An operating-system environment block is an array of `KEY=VALUE` strings, not a POSIX shell variable namespace. Shell assignment syntax is narrower only because a shell must tokenize and expand variable references inside its own command language.
 
-Named SILO configuration targets are built differently:
+Named SILO configuration targets follow the pattern:
 
 ```text
 MINIO_<SUBSYSTEM>_<PARAMETER>_<target>
@@ -65,35 +59,35 @@ MINIO_NOTIFY_WEBHOOK_ENABLE_my-hook
 MINIO_NOTIFY_WEBHOOK_ENDPOINT_my-hook
 ```
 
-Target discovery lists variables by the fixed parameter prefix and treats the remaining suffix as the target name. Target lookup reconstructs the same name without uppercasing or sanitizing that suffix. Rejecting `-` in the file parser therefore broke a valid discover-to-resolve path; it did not protect a shell evaluation path because no shell evaluates the file.
+Target discovery enumerates environment variables by matching the fixed `MINIO_<SUBSYSTEM>_<PARAMETER>_` prefix and treats the remaining suffix verbatim as the target ID. Target lookup reconstructs the exact environment variable name without uppercasing or sanitizing that suffix. Rejecting `-` in the environment-file parser broke a valid discover-to-resolve path without protecting any shell evaluation path, because no shell ever evaluates `MINIO_CONFIG_ENV_FILE`.
 
-The failure is operationally sharp. `MINIO_CONFIG_ENV_FILE` is loaded only at startup. A server can continue running with an old process environment, then fail on its next restart after the file or binary changes. Startup must fail on malformed input, but it must not invent a narrower target grammar than the configuration system.
+The failure mode is operationally sharp because `MINIO_CONFIG_ENV_FILE` is read only at process startup. A server could continue running with its existing in-memory environment and then fail on its next restart after a binary upgrade or config reload. Startup must fail fast on malformed input, but the file parser must not enforce a narrower target grammar than the configuration subsystem itself.
 
-## The file grammar {#grammar}
+## File Grammar {#grammar}
 
-### Lines and comments {#lines}
+### Lines and Comments {#lines}
 
-- blank lines are ignored;
-- a line whose first non-whitespace character is `#` is ignored;
-- an optional standalone `export` followed by whitespace is removed;
-- `exportFOO=value` remains the key `exportFOO`; it is not mistaken for the prefix;
-- the first `=` separates key and value, so additional `=` characters remain part of the value.
+- Blank lines and whitespace-only lines are ignored.
+- Any line whose first non-whitespace character is `#` is ignored as a comment.
+- An optional standalone `export` keyword followed by whitespace is stripped before key parsing.
+- `exportFOO=value` preserves the key `exportFOO`; it is not mistaken for the `export` prefix.
+- The first `=` separates the key from the value; any subsequent `=` characters remain part of the value.
 
-The file is not a shell. It does not perform variable expansion, command substitution, backslash processing, or inline-comment interpretation.
+The file is not executed by a shell. It does not perform `$VAR` expansion, command substitution, backslash escape processing, or inline `#` comment stripping inside values.
 
 ### Keys {#keys}
 
-Surrounding whitespace around the key is removed. The remaining key must:
+Leading and trailing whitespace around the key is trimmed. The remaining key must:
 
-1. be non-empty valid UTF-8;
-2. contain only Unicode graphic characters;
-3. contain no whitespace, `=`, NUL, control, or invisible format characters.
+1. Be non-empty valid UTF-8.
+2. Contain only Unicode graphic characters (`unicode.IsGraphic`).
+3. Contain no whitespace, `=`, NUL, control characters, or invisible Unicode format characters.
 
-This preserves OS-compatible names and multi-target suffixes while rejecting visually empty or structurally ambiguous keys. A key beginning with a digit or punctuation is accepted by the parser; SILO still reads only the exact names used by its configuration and runtime components.
+This grammar preserves OS-compatible variable names and multi-target suffixes while rejecting visually empty or structurally ambiguous keys. Keys beginning with a digit or punctuation character are accepted by the parser; SILO still reads only the exact configuration names used by its subsystems.
 
-### Values and quoting {#values}
+### Values and Quoting {#values}
 
-Unquoted values are trimmed. To retain leading or trailing spaces, quote the complete value with matching single or double quotes:
+Unquoted values have leading and trailing whitespace trimmed. To preserve significant leading or trailing spaces, wrap the entire value in matching single or double quotes:
 
 ```dotenv
 PLAIN = value
@@ -102,49 +96,45 @@ TOKEN = scheme://user:password@example.com?a=b
 EMPTY =
 ```
 
-The parser removes one matching outer quote pair. It does not interpret escapes inside the quoted value. NUL is always rejected because it cannot be represented in an environment entry.
+The parser strips at most one matching outer quote pair and does not interpret backslash escapes inside quotes. NUL bytes are always rejected because operating-system environment entries are NUL-terminated C strings.
 
-## Failure and secrecy contract {#failure}
+## Failure and Secrecy Contract {#failure}
 
-Syntax errors stop startup. Diagnostics include the file path, line number, and the invalid key or error class, but never the value. A password on a malformed line must not be copied into logs.
+Syntax errors abort server startup immediately. Diagnostic messages include the file path, 1-based line number, and the invalid key name or error category, but never print the value—ensuring that a secret or password on a malformed line is never copied into startup logs.
 
-Parsing is all-or-nothing: a syntax error returns no entries, and assignment starts only after the complete file has parsed. If the operating system rejects a validated assignment, SILO also stops startup and identifies the key and file. Since the process exits, it never serves requests with a partially loaded environment.
+Parsing is atomic (all-or-nothing): a syntax error on any line discards all parsed entries, and `os.Setenv` calls begin only after the entire file validates. If the operating system rejects a validated `os.Setenv` call, SILO aborts startup and reports the key name and file path so the process never serves traffic with a partially applied environment.
 
-The file itself remains a privileged secret-bearing input. Operators must protect it with appropriate ownership and mode; parser validation is not a substitute for filesystem permissions.
+Because `MINIO_CONFIG_ENV_FILE` carries root credentials, KMS keys, and webhook tokens, operators must still protect the file with strict filesystem ownership and permissions (`0600`).
 
-## Regression matrix {#tests}
+## Regression Matrix {#tests}
 
-The committed tests cover:
+The unit and configuration test suites cover:
 
-- spaces and tabs around `=`;
-- quoted values with significant spaces;
-- standalone `export`, including Unicode whitespace after it;
-- keys beginning with `_`, a digit, or punctuation;
-- named targets using `-`, `.`, `:`, and Unicode;
-- exact named-target discovery through the configuration subsystem;
-- empty keys, whitespace, NUL, and invisible format characters;
-- NUL values;
-- multiple `=` characters in URLs and tokens;
-- file-and-line diagnostics that redact values;
-- all-or-nothing parse results.
+- Spaces and tabs around `=`.
+- Single- and double-quoted values with significant surrounding spaces.
+- Standalone `export` prefixes, including Unicode whitespace after `export`.
+- Keys beginning with `_`, a digit, or punctuation.
+- Named targets containing `-`, `.`, `:`, and printable Unicode characters.
+- End-to-end named-target discovery through the configuration subsystem.
+- Empty keys, whitespace inside keys, NUL bytes, and invisible Unicode format characters (such as zero-width spaces).
+- NUL bytes inside values.
+- Multiple `=` characters in URLs, query strings, and base64 tokens.
+- File-and-line diagnostics that redact secret values.
+- All-or-nothing parse failure guarantees.
 
-The implementation passed the complete local server verification matrix and a read-only adversarial review. Windows-specific `os.Setenv` behavior has not been exercised on a Windows runner; unsupported platform rejection remains fail-fast rather than silent.
+## Compatibility and the Warm-Restart Trap {#compatibility}
 
-## Compatibility and delivery {#compatibility}
+No configuration migration is required. Existing standard environment variable names behave identically, files using spaces around `=` parse predictably, and named targets with hyphens or dots work again.
 
-No configuration migration is required. Existing ordinary environment names behave unchanged. Files using shell-style whitespace become more predictable, and previously accepted named targets work again.
+Four visible behaviors are intentional:
 
-The visible compatibility changes are intentional:
+- Invalid or invisible key names fail startup immediately instead of being silently ignored.
+- Unquoted surrounding value whitespace is trimmed; quote values when leading or trailing spaces are significant.
+- Malformed lines stop startup with a redacted, line-numbered diagnostic.
+- Valid punctuation-bearing target names are no longer rejected merely because POSIX `sh` cannot assign them with literal `NAME=value` syntax.
 
-- invalid or invisible names now fail instead of being silently ignored;
-- unquoted surrounding value whitespace is trimmed; quote it when significant;
-- malformed input stops startup with a redacted location-aware error;
-- a valid punctuation-bearing target is no longer rejected merely because a shell could not assign it with `NAME=value` syntax.
-
-The parser contract is included in Server 20260903. Verify the artifact running in each deployment separately.
+The original [#65](https://github.com/pgsty/silo/issues/65) investigation also uncovered a subtle warm-restart trap: the legacy parser split on `=` without trimming key whitespace, storing `KEY = new` as the trailing-space key `KEY `. A `systemd` cold start often masked this bug because `systemd` parses `EnvironmentFile=` itself and strips spaces around `=`. However, when an operator triggered an in-place warm restart (`mcli admin service restart`), the re-executed SILO process inherited `KEY=old` from the parent environment, and the newly parsed `KEY ` entry failed to overwrite `KEY`. The server could therefore restart and continue running with stale root credentials, KMS settings, or identity provider configuration. With key trimming restored in [Server 20260903](/blog/release/silo-20260903/), `KEY = new` overwrites `KEY` on both cold start and warm restart; operators who had space-padded assignments in `MINIO_CONFIG_ENV_FILE` should verify that those values match their intended active configuration before upgrading.
 
 ## Conclusion {#conclusion}
 
-Configuration compatibility depends on validating the format SILO actually consumes. `MINIO_CONFIG_ENV_FILE` borrows a small amount of dotenv-like syntax for operator convenience, but it is not executed by a shell. The repair restores named-target compatibility while retaining strict NUL, invisibility, redaction, and fail-fast guarantees.
-
-The original [#65](https://github.com/pgsty/silo/issues/65) also exposed a restart trap: the old parser stored `KEY = new` as a trailing-space key `KEY `. A systemd cold start could work because systemd parses EnvironmentFile itself; an admin API re-exec inherited `KEY=old`, and the malformed new key did not replace it. Restart could succeed with stale credentials or KMS/IdP settings. The repair makes whitespace assignments take effect, so review their intended values before upgrading.
+Restoring `config.ReadEnvFile` in `silo-pkg/v3` (`1a0d788`) and updating the server (`a643483be`) aligns `MINIO_CONFIG_ENV_FILE` parsing across cold starts and warm restarts while preserving full backward compatibility with standard shell-style environment files.

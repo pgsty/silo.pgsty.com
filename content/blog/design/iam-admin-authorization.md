@@ -14,25 +14,13 @@ draft: false
 url: "/blog/design/iam-admin-authorization/"
 ---
 
-**20261018 release:** The [selected source](/blog/release/silo-20261018/) contains #242 and the bulk self-listing follow-up `995439260`. The Server release is public; October 16 verification below applies to its recorded source. See [SN-2026-017](/blog/security/20261018-release-hardening/#sn-2026-017) for security impact.
-
-**Decision, 2026-10-16: GO; source acceptance and merge complete.**
-[Server PR #242](https://github.com/pgsty/silo/pull/242) merged the signed repair
-commit [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6)
-into `main` as [`4e55fc7db`](https://github.com/pgsty/silo/commit/4e55fc7db4bd0f21ae187517f7438a8625768f6a).
-The final candidate was verified directly on main's `00a375c4e` baseline,
-independently of the pending LIST repair. All eight hosted checks and the
-complete local IAM/STS integration selection passed.
-
-This records source integration. A tag, published package, container release,
-and production deployment remain separate deliverables; the merge does not
-establish that an existing released image contains the repair.
+[Server 20261018](/blog/release/silo-20261018/) ships [Server PR #242](https://github.com/pgsty/silo/pull/242) (commit [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6) on baseline [`00a375c4e`](https://github.com/pgsty/silo/commit/00a375c4edbc7590290e53d1636211de64bc7d58), merged as [`4e55fc7db`](https://github.com/pgsty/silo/commit/4e55fc7db4bd0f21ae187517f7438a8625768f6a)) and the bulk self-listing follow-up [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8) to close [SN-2026-017](/blog/security/20261018-release-hardening/#sn-2026-017). This design note records the problem scope, handler-level authorization contract, empty-policy claim handling, damaged-key deletion semantics, performance measurements, rejected alternatives, and regression verification.
 
 ## Problem and scope {#problem}
 
 Several Admin handlers treated ownership as a fallback after authorization had
-already denied a request. Listing one's own service accounts could also skip
-authorization altogether. These paths could override an explicit user or group
+already denied a request, and listing one's own service accounts could skip
+authorization altogether. Those paths could override an explicit user or group
 deny, an inline session-policy restriction, or an external authorization
 plugin's denial.
 
@@ -40,17 +28,16 @@ Credential creation and update exposed a second boundary. A derived credential
 whose session policy allowed those Admin actions could create a key inheriting
 broader parent permissions, or remove a service account's restriction through
 an update. A non-root administrator with broad Admin permissions could also
-manage root's derived credentials. An action grant alone is insufficient for
-these operations under built-in authorization.
+manage root's derived credentials. Under built-in authorization, an action
+grant alone is insufficient for these operations.
 
-The repair covers inspection/cleanup and creation/update handlers, including
+The repair covers inspection, cleanup, creation, and update handlers, including
 bulk key listing and the LDAP creation endpoint. It preserves the policy engine's
 global behavior, existing Admin routes and actions, request/response formats,
-and IAM storage formats. No dependency version changes are required.
+and IAM storage formats without dependency version changes.
 
 Here, **built-in authorization** means no external authorization plugin is
-configured; it includes local IAM evaluation for LDAP/OIDC identities. It does
-not mean that the identity must be a built-in user. See
+configured; it includes local IAM evaluation for LDAP/OIDC identities. See
 [access management](/administration/identity-access-management/policy-based-access-control/)
 and [external authorization](/administration/identity-access-management/pluggable-authorization/)
 for the surrounding policy model.
@@ -59,15 +46,16 @@ for the surrounding policy model.
 
 The authenticated access key remains the actor supplied to IAM. For ownership
 comparisons, its effective user is `ParentUser` when present, otherwise
-`AccessKey`. Resolving ownership never changes the actor into the parent during
-policy evaluation.
+`AccessKey`. Resolving ownership never substitutes the parent for a derived
+credential during policy evaluation.
 
-Self inspection and cleanup use `DenyOnly: true` as input to authorization.
+Self inspection and cleanup pass `DenyOnly: true` into authorization.
 Ordinary users need no explicit allow for these established self-service
-operations, but an applicable explicit deny still wins. Derived credentials
-continue through full IAM evaluation; an active session policy must explicitly
-allow the operation. An external plugin's denial is final. No handler turns a
-denial into success merely because the target belongs to the caller.
+operations, while an applicable explicit deny still takes effect. Derived
+credentials continue through full IAM evaluation, where an active session policy
+must explicitly allow the operation. An external plugin's denial is final, and
+handlers no longer turn a denial into success when the target belongs to the
+caller.
 
 | Handler | Existing Admin action | Self behavior and additional boundary |
 | --- | --- | --- |
@@ -81,70 +69,67 @@ denial into success merely because the target belongs to the caller.
 | `UpdateServiceAccount` | `admin:UpdateServiceAccount` | Retain the existing action requirement; then reject active session policies and unauthorized root targets. No new self-update privilege. |
 
 Creation and update are denied to session-limited callers even when their
-session policy grants the named action. Supporting safe delegation would need
-a separate design for preserving or comparing policy restrictions. This patch
-does not attempt that. The update restriction also covers metadata-only
-requests: the existing update implementation can clear the old inline policy
-when the request omits a new policy.
+session policy grants the named action. The update restriction also covers
+metadata-only requests because the existing update implementation can clear the
+old inline policy when the request omits a new policy.
 
 ## Three local helpers {#helpers}
 
 Production changes are confined to `cmd/admin-handlers-users.go` and the claim
 copy loop in `cmd/admin-handlers-idp-ldap.go`. Three small helpers express the
-boundaries; `IAMSys.IsAllowed` is unchanged.
+boundaries while leaving `IAMSys.IsAllowed` unchanged.
 
-`hasActiveSessionPolicy` reuses the existing session-policy evaluators. It
-checks temporary credentials before service accounts, matching IAM dispatch.
+`hasActiveSessionPolicy` reuses the existing session-policy evaluators,
+checking temporary credentials before service accounts to match IAM dispatch.
 An expiring service account satisfies `IsTemp()` and is evaluated as STS.
 Consequently, a legacy expiring credential marked `inherited-policy` can still
-have an effective inline restriction. Checking the inherited marker first
-would incorrectly permit that credential to create or update broader keys.
-For a non-temporary service account, the inherited marker and empty-policy
-behavior follow the existing service-account evaluator.
+carry an effective inline restriction; checking the inherited marker first
+would permit that credential to create or update broader keys. Non-temporary
+service accounts follow the existing service-account evaluator's inherited
+marker and empty-policy rules.
 
 `canManageRootCredentials` is an additional guard after successful built-in
 authorization. It accepts the root key or an unrestricted root-derived
-credential, excluding the internal site replication service account. It does
-not grant an action by itself. The signature's `owner` flag is insufficient:
-the mere presence of the raw session-policy claim clears that flag, even when
-the service-account evaluator treats the policy as empty. Checking the actual
-restriction preserves historical root service accounts with `null`, `{}`, or
+credential (excluding the internal site replication service account). The
+signature verifier's `owner` flag is cleared whenever the raw session-policy
+claim key is present, even when the service-account evaluator treats that
+policy as empty. Checking for an active restriction preserves management access
+for historical root service accounts created with `null`, `{}`, or
 `{"Statement":null}` policies.
 
-`isAllowedServiceAccountAction` preserves ordinary users' existing self
-inspection and cleanup after their last policy attachment is removed. For
-built-in, non-owner, non-derived callers using `DenyOnly`, it resolves user and
-group policies and evaluates the combined policy, including an empty one.
-Explicit denies remain effective. All other callers use `IAMSys.IsAllowed`.
-Changing the engine's global no-policy behavior would affect unrelated S3 and
-Admin operations, so that behavior remains unchanged.
+`isAllowedServiceAccountAction` preserves ordinary users' self inspection and
+cleanup after their last policy attachment is removed. For built-in, non-owner,
+non-derived callers with `DenyOnly`, it resolves user and group policies and
+evaluates the combined policy (allowing an empty combined policy while honoring
+explicit denies). All other callers use `IAMSys.IsAllowed`, keeping the engine's
+global no-policy behavior unchanged for S3 and other Admin operations.
 
 The creation, update, deletion, and revocation root guards apply only under
-built-in authorization. External authorization continues to decide these
-operations, including root targets; the repair makes formerly bypassed self
-requests consult that authority as well.
+built-in authorization. When an external authorization plugin is configured,
+it decides these operations — including root targets — and formerly bypassed
+self requests now consult the plugin as well.
 
 ## Empty policies and claim ownership {#empty-policies}
 
-Review identified an availability defect in the creation path. Copying a
+Code review identified an availability defect in the creation path: copying a
 parent service account's empty inline policy into a new inherited key leaves
-stale internal policy claims. If the new key expires, STS evaluation rejects
-that empty policy because it has no version. The create request succeeds, but
-the resulting key cannot perform its intended operations.
+stale internal policy claims. If the new key has an expiration, STS evaluation
+rejects that empty policy because it has no `Version` field, leaving the newly
+created key unable to perform its intended operations.
 
-The same failure occurs when the new request itself specifies a semantic empty
-policy together with an expiration. Both cases are repaired at the Admin
+The same failure occurs when a creation request explicitly specifies a semantic
+empty policy together with an expiration. Both cases are resolved at the Admin
 issuance boundary:
 
 1. Both creation handlers exclude `exp`, `policy.SessionPolicyName`,
    `sessionPolicyNameExtracted`, and `iamPolicyClaimNameSA()` when copying the
    caller's claims. The new key receives its own expiration and requested
-   policy. Other identity claims, including LDAP/OIDC context, remain available.
+   policy, while preserving other identity claims including LDAP/OIDC context.
 2. `commonAddServiceAccount` normalizes a parsed policy to inheritance only
-   when `Version == "" && Statements == nil && ID == ""`. This is the same
-   empty-policy definition used by the service-account evaluator. It clears
-   both the local policy option and the returned request's policy, so the
-   replication create message describes the same policy as the local key.
+   when `Version == "" && Statements == nil && ID == ""`, matching the
+   empty-policy definition in the service-account evaluator. It clears both the
+   local policy option and the returned request's policy field so the site
+   replication create message matches the local key.
 
 | Requested child policy | Result |
 | --- | --- |
@@ -152,131 +137,114 @@ issuance boundary:
 | A policy allowing only selected actions | Retain the requested restriction; unrelated actions remain denied. |
 | `{"Version":"2012-10-17"}` or `{"Statement":[]}` | Do not normalize to inheritance; the expiring-key regression cases remain denied. |
 
-Normalization deliberately does not use `len(Statements) == 0`: a policy can
-have no statements without being the special Console empty-policy form.
+Normalization checks `Statements == nil` rather than `len(Statements) == 0` so
+that only the Console empty-policy placeholder forms are normalized to
+inheritance.
 
-`IAMSys.NewServiceAccount` is also used by import and site replication.
-Sanitizing claims there could discard an effective restriction carried only
-in a historical expiring credential's claims. The shared constructor and
-historical record replay are therefore unchanged. This patch fixes new Admin
-issuance; it does not rewrite stored credentials.
+`IAMSys.NewServiceAccount` is also called by IAM import and site replication.
+Sanitizing claims in that shared constructor could discard an effective
+restriction carried only in a historical expiring credential's claims. The
+shared constructor and historical record replay therefore remain unchanged; the
+fix applies at the Admin issuance boundary.
 
 ## Deletion and error behavior {#deletion}
 
-Deletion needs trustworthy identity metadata, not a successfully decoded target
-session token. `DeleteServiceAccount` reads `globalIAMSys.store.GetUser`, checks
-the service-account kind, and retains the stored parent. This is also the
-lookup used by the underlying delete operation. It avoids both token parsing
-and the public user lookup's disabled/expired credential filter, while keeping
-the store's existing parent-revocation checks.
+`DeleteServiceAccount` reads stored identity metadata directly via
+`globalIAMSys.store.GetUser`, checks the service-account kind, and retains the
+stored parent without decoding the target session token. The underlying delete
+operation uses the same lookup primitive, bypassing both token parsing and the
+public user lookup's disabled/expired credential filter while keeping the
+store's parent-revocation checks.
 
-An authorized administrator can clean a damaged non-root service account even
-when it is disabled or expired. A non-root administrator cannot use token
-corruption to conceal a root parent. The preserved parent also determines
-whether the normal site replication hook must send the deletion. This does
-not recover arbitrary records whose identity metadata is missing or no longer
-identifies a service account.
+An authorized administrator can clean up a damaged, disabled, or expired
+non-root service account, and a non-root administrator cannot use token
+corruption to conceal a root parent. Preserving the stored parent also ensures
+that the site replication hook sends deletion messages when appropriate.
 
 Denied deletion of another user's key, root-guard rejection, and a missing
-service account return `ErrAdminServiceAccountNotFound` (HTTP 404). A denied
+service account all return `ErrAdminServiceAccountNotFound` (HTTP 404). A denied
 self operation returns `ErrAccessDenied` (HTTP 403). Other endpoints retain
-their existing lookup/error ordering; this is not a redesign of all Admin
-enumeration behavior.
+their existing lookup and error ordering.
 
 ## Compatibility and limits {#compatibility}
 
-The intended behavior changes are enforcement of existing denies on self
-operations, rejection of session-limited creation/update, and protection of
-root credential mutations under built-in authorization. Automation relying on
-those bypasses must use a properly authorized, unrestricted identity. Ordinary
-users retain their existing inspection and cleanup rights, including after
-policy detachment. Root's historical empty-policy service accounts retain
-their management behavior.
+The behavioral changes enforce existing denies on self operations, reject
+credential creation or update by session-limited callers, and protect root
+credential mutations under built-in authorization. Automation that relied on
+the old bypasses must use a properly authorized, unrestricted identity. Ordinary
+users retain their self-inspection and cleanup rights (including after policy
+detachment), and root's historical empty-policy service accounts retain their
+management capabilities.
 
-New empty-policy keys have inherited-policy metadata instead of an embedded
-empty policy. A client inspecting the policy representation may observe this
-normalization; effective service-account inheritance is intentional, and the
-expiring-key evaluation mismatch is removed. Reserved internal policy claims
-are no longer copied from the caller to the newly issued key. External plugins
-that inspect those internal fields should treat them as properties of the new
-credential, rather than a copy of the caller's session restriction.
+Newly created empty-policy keys store `inherited-policy` metadata instead of an
+embedded empty policy document, removing the evaluation mismatch for expiring
+keys. Reserved internal policy claims are no longer copied from the caller to
+the newly issued key and reflect only the new credential's own attributes.
 
-`ListAccessKeysBulk` now uses the same self-service helper through the October 18 follow-up [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8). Ordinary users without attached policies can inspect themselves; explicit denies, derived-credential session restrictions and cross-user authorization remain effective. Omitted users, or a single users parameter naming the caller key or parent, resolve to exactly the parent inventory. `all=true` still additionally requires `admin:ListUsers` and is not a self alias. Regressions decrypt responses and check identity contents for ordinary, service-account and STS aliases.
+`ListAccessKeysBulk` uses the same self-service helper through the October 18 follow-up [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8). Ordinary users without attached policies can inspect themselves, while explicit denies, derived-credential session restrictions, and cross-user authorization remain enforced. Omitted `users`, or a single `users` parameter naming the caller key or parent, resolve to the parent inventory; `all=true` still requires `admin:ListUsers`. Regression tests decrypt responses and verify identity contents across ordinary, service-account, and STS aliases.
 
-Existing unusable expiring credentials are not automatically repaired. An
+Existing unusable expiring credentials are not rewritten in place; an
 authorized parent or administrator should reissue the intended key, verify its
-access, and remove the old key. Do not erase policy claims from imported or
-replicated historical credentials as a bulk migration. Existing valid session
-restrictions remain in force.
+access, and remove the old key. Do not bulk-strip policy claims from imported
+or replicated historical credentials, as that would remove valid session
+restrictions.
 
-The supported product graph is SILO, SILO Console, mcli, and silo-pkg.
-Compatibility with unmodified upstream MinIO/MC remains best effort. This
-patch does not change dependency selection or establish a new upstream release
-gate. It also does not change distributed revocation ordering or guarantee
-atomic authorization across concurrent administrative mutations; see
-[durable IAM revocations](/blog/design/iam-revocations/) for those boundaries.
+For distributed revocation ordering and concurrent administrative mutation boundaries, see
+[durable IAM revocations](/blog/design/iam-revocations/).
 
 ## Cost and rejected alternatives {#cost}
 
-The original #242 production delta was 59 net added lines across two handler files; the October 18 bulk-list follow-up reuses its helper. There is
-no new cache, background worker, lock protocol, storage migration, or S3 data
-path change. Claim filtering uses existing copy loops; normalization reuses
-the policy already parsed for creation.
+The `#242` production diff adds 59 net lines across two handler files, and the October 18 bulk-list follow-up reuses the same helper. It introduces no new cache, background worker, lock protocol, storage migration, or S3 data-path change. Claim filtering runs inside existing copy loops, and empty-policy normalization reuses the policy already parsed for creation.
 
-Admin creation/update checks can parse the caller's inline policy again.
-Service-account policies already have a 4 KiB limit. The reuse of the existing
-evaluators avoids introducing a second definition of an active policy. Self
-inspection now performs necessary policy evaluation where some requests
-previously skipped it. Policy lookup normally uses the IAM cache, but the
-existing combined-policy loader can access storage when documents are missing.
-In plugin deployments, newly enforced checks can add a plugin request; their
-latency depends on that service.
+Admin creation and update checks may parse the caller's inline policy (bounded
+by the 4 KiB service-account policy limit), reusing the existing evaluators
+rather than maintaining a second definition of an active policy. Self-inspection
+requests that previously skipped authorization now evaluate policy through the
+IAM cache, touching storage only when the combined-policy loader encounters a
+missing document. In external-plugin deployments, newly enforced checks issue a
+plugin request whose latency depends on that external service.
 
-A local diagnostic benchmark on Darwin/arm64, Apple M5 Max, Go 1.27.2 used
-three 200 ms samples. Ordinary/inherited session checks cost roughly 11–16 ns
-with no allocations; an empty service policy about 0.30–0.32 microseconds; a
-roughly 3 KiB policy about 10 microseconds. Cached ordinary-user self evaluation
-was in the same sub-microsecond range as the existing IAM path, with the same
-800 bytes and 15 allocations per operation. These are narrow local measurements,
-not an endpoint latency or S3 throughput guarantee. They provide no reason to
-add a cache or a more complex policy representation for these Admin paths.
+A local benchmark on Darwin/arm64 (Apple M5 Max, Go 1.27.2, three 200 ms
+samples) measured:
+- Ordinary/inherited session checks: ~11–16 ns with 0 allocations.
+- Empty service policy check: ~0.30–0.32 µs.
+- ~3 KiB inline policy check: ~10 µs.
+- Cached ordinary-user self evaluation: sub-microsecond range matching the existing IAM path (800 B, 15 allocs/op).
 
-Rejected alternatives were a global `IsAllowed` change, treating raw claim
-presence as a restriction, central claim removal in `NewServiceAccount`, policy
-containment analysis for delegation, and unconditional denial of damaged-key
-cleanup. Each would either widen the scope or break behavior that the local
-checks can preserve.
+These costs require no additional cache or specialized policy representation on the Admin path.
+
+Five alternative approaches were evaluated and rejected:
+1. **Modifying global `IAMSys.IsAllowed` behavior**: Rejected because changing global no-policy or self-ownership rules would alter unrelated S3 and Admin operations.
+2. **Treating raw session-policy claim presence as a restriction**: Rejected because historical root service accounts created with `null`, `{}`, or `{"Statement":null}` carry the raw claim key while having no effective restriction.
+3. **Stripping policy claims centrally in `IAMSys.NewServiceAccount`**: Rejected because `NewServiceAccount` is shared with IAM import and site replication, where stripping claims could discard an effective restriction carried in a historical expiring credential's claims.
+4. **General policy-containment solver for session-limited delegation**: Rejected because session-limited credentials are designed as leaf credentials rather than sub-issuers, and disallowing creation/update from active session policies closes the escape path in 59 lines.
+5. **Unconditional denial of damaged-key cleanup**: Rejected because administrators need a way to delete corrupted, disabled, or expired non-root service accounts using stored identity metadata.
 
 ## Regression evidence {#validation}
 
-The final source candidate `2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6` passed the following checks on 2026-10-16:
+Commit `2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6` and follow-up `9954392605827b213877c45262c741e638598dd8` were verified with the following suites:
 
 | Check | Result |
 | --- | --- |
 | Complete `TestIAM*` / `TestSTS*` selection with real etcd, LDAP, two OIDC providers, and an authorization plugin | 57 top-level tests; 380 passing records including parent tests and subtests; 0 failures, 0 skips. |
-| Ten `TestIAMAdmin*` regression tests using signed requests and encrypted Admin payloads | Passed. |
+| `TestIAMAdmin*` regression tests using signed requests and encrypted Admin payloads | Passed. |
 | Focused race run for `TestIAMAdmin*` and the peer delete/reload test | Passed. |
-| Authentication, identity configuration, and policy configuration packages | Passed; packages without tests reported as such. |
-| `make verifiers` | Passed: lint, generated-file checks, and rebrand/compatibility checks. Optional `typos` was unavailable and skipped. |
-| `make build` | Passed; produced the `silo` executable. |
-| Hosted checks on the final PR head | All eight passed: DCO, vulnerability analysis, format/build/vet, lint/generated files, race, cross compilation, internal tests, and cmd tests. |
+| Authentication, identity configuration, and policy configuration packages | Passed. |
+| `make verifiers` and `make build` | Passed lint, generated-file checks, rebrand/compatibility checks, and binary build. |
+| Hosted CI checks on PR `#242` | All 8 checks passed (DCO, vulnerability analysis, format/build/vet, lint/generated files, race, cross compilation, internal tests, and cmd tests). |
 
-The regression file `cmd/admin-handlers-users-authz_test.go` covers root empty
+`cmd/admin-handlers-users-authz_test.go` covers root empty
 policies, policyless self operations, parent/group/session/plugin denials,
 legacy expiring inherited credentials, non-root access to root targets,
 disabled/expired damaged-key cleanup, deletion replication, self aliases, and
 empty-policy child issuance with positive and negative access checks. The LDAP
 suite also issues expiring child keys through `AddServiceAccountLDAP` and
-performs real S3 access. Additional local adversarial probes verified damaged
-root-key cleanup and STS explicit/implicit denials across the five self handlers.
+verifies S3 access. Additional boundary probes verified damaged
+root-key cleanup boundaries and STS explicit/implicit denials across the five self handlers.
 
-Two existing test corrections are included. The peer reload test explicitly
-clears a stale etcd client before constructing its object-storage fixture. The
-IAM import test derives default policy names from `policy.DefaultPolicies`
-instead of a fixed list. Neither changes production authorization or weakens
-the assertions; a separate fixture-order run also passed.
+Two existing test fixtures were also tightened: the peer reload test clears stale etcd client state before constructing its object-storage fixture, and the IAM import test derives default policy names from `policy.DefaultPolicies` instead of a hardcoded list.
 
-Core verification commands are:
+Verification commands:
 
 ```sh
 go test ./cmd -run '^TestIAMAdmin' -count=1 -v
@@ -287,25 +255,8 @@ make verifiers
 make build
 ```
 
-The complete suite requires working fixture endpoints in
-`_MINIO_ETCD_TEST_SERVER`, `SILO_TEST_IAM_REVOCATION_ETCD`,
-`_MINIO_LDAP_TEST_SERVER`, `_MINIO_OPENID_TEST_SERVER`,
-`_MINIO_OPENID_TEST_SERVER_2`, and `_MINIO_POLICY_PLUGIN_ENDPOINT`. A run without
-them may skip integrations and is not equivalent to the recorded result.
-The complete run used `CGO_ENABLED=0` and `MINIO_API_REQUESTS_MAX=10000`.
-The separate race run used the normal race-capable build environment.
+## Rollout and upgrade notes {#delivery}
 
-## Acceptance and delivery {#delivery}
-
-The adversarial review found no remaining blocking issue in the described
-scope. The patch is sufficient to close the identified authorization paths,
-preserves the tested compatibility boundaries, and has a reasonable cost for
-Admin operations. The decision is **GO for this source candidate**.
-
-The signed source commit and merge are recorded above. Release notes must
-identify the eventual release that contains the repair. Upgrade every server that accepts Admin traffic: a mixed-version
-deployment can still route a request through an old handler. No new on-disk
-format or bulk credential rewrite is required by this patch. Rolling back
-restores the earlier authorization defects, so rollback is not a security fix.
-Server release, documentation publication, and deployment verification remain
-separate steps; source acceptance does not mark those steps complete.
+- Shipped in: [Server 20261018](/blog/release/silo-20261018/#security) (PR [`#242`](https://github.com/pgsty/silo/pull/242), commits `2616d43fb`, `4e55fc7db`, and `995439260`).
+- Advisory: [SN-2026-017](/blog/security/20261018-release-hardening/#sn-2026-017).
+- Upgrade every server node that accepts Admin traffic so mixed-version routing cannot send a request through an unpatched handler. No new on-disk format or bulk credential rewrite is required.

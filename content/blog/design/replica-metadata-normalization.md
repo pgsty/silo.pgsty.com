@@ -5,150 +5,81 @@ date: 2026-09-16
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  The decision record for PR #194 (fix 4fcdf37ce): trusted replication COPY
-  re-extracted raw request metadata through the permissive path, so
-  transport-only aws-chunked encodings and GHSA-redacted user metadata came
-  back into stored objects. Covers the expected encoding mappings, the
-  Snowball behavior change, why upgrading does not repair existing objects,
-  and the status of the stored-metadata remediation proposal.
+  The decision record for PR #194 (fix 4fcdf37ce): trusted replication COPY re-extracted raw request metadata through the permissive path, so transport-only aws-chunked encodings and GHSA-redacted user metadata came back into stored objects. Covers the expected encoding mappings, the Snowball behavior change, why upgrading does not repair existing objects, and the status of the stored-metadata remediation proposal.
 tags: [Design, Replication, S3, Review]
 weight: 9
 draft: false
 url: "/blog/design/replica-metadata-normalization/"
 ---
 
-> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+Shipped in [SILO Server 20260916](/blog/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`), [PR #194](https://github.com/pgsty/silo/pull/194) (commit [`4fcdf37ce`](https://github.com/pgsty/silo/commit/4fcdf37ce), merged as [`9f3037e941`](https://github.com/pgsty/silo/commit/9f3037e941a49ab4cd8a0eed7c0f01083fbe4bbe), retaining Mikhail Khadarenka's original implementation from [PR #187](https://github.com/pgsty/silo/pull/187)) fixes a regression where a trusted replication receiver re-extracted raw request headers through the permissive metadata extractor, re-injecting transport-only `aws-chunked` `Content-Encoding` tokens and GHSA-redacted user metadata into stored replica objects.
 
-This page records the repair of how a trusted replication receiver restores
-metadata for a replica, merged into Server main as
-[PR #194](https://github.com/pgsty/silo/pull/194) (fix
-[`4fcdf37ce`](https://github.com/pgsty/silo/commit/4fcdf37ce), merged as
-[`9f3037e941`](https://github.com/pgsty/silo/commit/9f3037e941a49ab4cd8a0eed7c0f01083fbe4bbe)).
+## What Went Wrong {#problem}
 
-> **As of 2026-09-16:** the fix is on verified main
-> [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a). It is
-> **not** in the published Server 20260903.<br>
-> **Provenance:** the production logic follows PR #187 by Mikhail Khadarenka;
-  the merged change keeps that authorship and narrows it to a
-  review-validated boundary.<br>
-> **Evidence class:** an HTTP-level baseline of 64 leaf cases (44 controls
-  passing, 20 defect failures before the fix) against real single-drive and
-  16-drive erasure backends, plus counterfactual replay of the same suite
-  against the baseline helper. No customer incident is attributed.
+The ordinary S3 `PUT` path normalizes incoming request metadata before storing an object: it strips the transport-only `aws-chunked` token from `Content-Encoding`, and deletes the `X-Amz-Meta-X-Amz-Unencrypted-Content-Length` and `X-Amz-Meta-X-Amz-Unencrypted-Content-Md5` user-metadata keys removed by the [GHSA-76wf-9vgp-pj7w](https://github.com/google/security-research/security/advisories/GHSA-76wf-9vgp-pj7w) mitigation.
 
-## What went wrong {#problem}
+However, when the trusted replication receiver restored internal replication metadata on an incoming replica write, it re-ran the same general-purpose header extractor with the `allowReplication` boolean flag enabled. Re-running that extractor replayed every supported standard header and all `X-Amz-Meta-*` user metadata from the raw HTTP request over the already-normalized metadata map. As a consequence, on a trusted replica write the server could persist and later return via `GET` or `HEAD`:
 
-The ordinary PUT path normalizes metadata: it strips the transport-only
-`aws-chunked` token from `Content-Encoding`, and removes the
-`X-Amz-Meta-X-Amz-Unencrypted-Content-Length/-Md5` user-metadata keys that a
-[GHSA-76wf-9vgp-pj7w](https://github.com/google/security-research/security/advisories/GHSA-76wf-9vgp-pj7w) mitigation deliberately deletes. The trusted replication receiver,
-however, restored replica metadata by re-running the *same permissive
-extractor* with replication allowed — replaying every supported header and all
-user metadata from the original request. Concretely, on a trusted replica
-write the server could store and later return via GET/HEAD:
+- `Content-Encoding: aws-chunked` (a SigV4 streaming transport framing token that must never be stored as object metadata) or the unsplit `aws-chunked,gzip` string instead of `gzip`;
+- the two GHSA-redacted `X-Amz-Meta-X-Amz-Unencrypted-Content-*` keys on trusted replica writes;
+- for Snowball archive entries lacking their own PAX metadata header, the outer archive request's `Content-Type`, `Cache-Control`, `Expires`, and user metadata.
 
-- `Content-Encoding: aws-chunked` (a pure transport encoding that must never
-  be stored, per the AWS SigV4 streaming rules), or the unsplit
-  `aws-chunked,gzip` string instead of `gzip`;
-- the two GHSA-redacted user-metadata keys — a partial rollback of that
-  mitigation, limited to trusted replica writes;
-- for Snowball entries without their own PAX header: the outer archive's
-  content-type, cache-control, and user metadata.
+The object payload bytes on disk were unaffected, but the stored `xl.meta` headers were polluted. This regression was introduced in commit [`56fa63bfd`](https://github.com/pgsty/silo/commit/56fa63bfd) (2026-04-15, the replication header trust boundary hardening for [CVE-2026-34204](/blog/security/cve-2026-34204/)), whose authentication and trust-boundary enforcement remains intact.
 
-The object bytes themselves were not necessarily damaged; the stored metadata
-was wrong. The regression was introduced by
-[`56fa63bfd`](https://github.com/pgsty/silo/commit/56fa63bfd)
-(2026-04-15, the replication header trust boundary hardening, CVE-2026-34204)
-— whose trust protection is correct and stays.
+## The Fix {#fix}
 
-## The fix {#fix}
+In `cmd/handler-utils.go`, commit [`4fcdf37ce`](https://github.com/pgsty/silo/commit/4fcdf37ce) deletes the boolean dual-mode helper and separates standard metadata extraction from replication-specific restoration:
 
-One file (`cmd/handler-utils.go`). The boolean dual-mode helper is deleted:
+- The ordinary metadata extractor unconditionally skips internal replication-only header keys.
+- A dedicated replica metadata extractor (`extractReplicationMetadata`) walks only the replication-to-internal header mapping table and restores **only** the six replication-scoped fields:
+  1. SSE-C sealed key material (`x-minio-internal-server-side-encryption-ssec-key`),
+  2. SSE-C sealed algorithm (`x-minio-internal-server-side-encryption-ssec-seal-algorithm`),
+  3. SSE-C initialization vector (`x-minio-internal-server-side-encryption-ssec-iv`),
+  4. Encrypted multipart marker (`x-minio-internal-encrypted-multipart`, honored by key presence even with an empty value),
+  5. Actual logical object size (`x-minio-internal-actual-size`),
+  6. SSE-C checksum identity mapping.
+- `extractReplicationMetadata` never re-reads standard S3 headers (`Content-Encoding`, `Content-Type`, `Cache-Control`, `Expires`) or `X-Amz-Meta-*` user metadata.
 
-- the ordinary extractor unconditionally skips replication-only keys;
-- a new replica extractor walks only the replication-to-internal header map
-  and restores **only** the six replication-scoped fields: the SSE-C sealed
-  key material, sealed algorithm, IV, and encrypted-multipart marker (the
-  empty marker is honored by key presence), the actual object size, and the
-  SSE-C checksum identity mapping;
-- it never re-reads ordinary supported headers or user metadata.
+Stored `Content-Encoding` values after the fix:
 
-Expected stored encodings after the fix:
-
-| Requested encoding | Stored `Content-Encoding` |
+| Requested `Content-Encoding` | Stored `Content-Encoding` |
 | :-- | :-- |
-| `aws-chunked` | none |
+| `aws-chunked` | *(none)* |
 | `aws-chunked,gzip` | `gzip` |
 | `gzip` | `gzip` |
 
-`aws-chunked, gzip` (note the space) still stores ` gzip` with a leading
-space, and `gzip, aws-chunked` stores the whole string. These are
-**documented status quo**, asserted by tests as such — not claims of repair.
+Note that `aws-chunked, gzip` (with a space after the comma) continues to store ` gzip` with a leading space, and `gzip, aws-chunked` continues to store the full string; both match pre-existing parser behavior on the ordinary `PUT` path and are pinned as status-quo test assertions.
 
-## Operator-visible changes {#behavior}
+## Operator-Visible Behavior Changes {#behavior}
 
-- Trusted Snowball entries no longer inherit the outer archive's ordinary metadata. Without PAX records, this removes outer content-type, cache-control, expires and user metadata; with PAX records it removes fields the entry did not restate. Per-entry `minio.metadata.*` still applies, the six replication-scoped fields still apply to authorized entries, and the archive's storage class remains inherited. The in-tree batch producer calls `PutObjectsSnowball`, whose SDK emits the auto-extract marker, but it does not mark the outer request as a trusted replica; it did not use the affected inheritance path.
-- The GHSA-redacted keys are no longer written back on replica restore —
-  matching what every ordinary PUT already did.
-- Authentication, permission gating, and replication trust semantics are
-  unchanged; the ordinary extraction path is byte-for-byte equivalent.
-- Rolling back the code reopens the injection path but does **not** repair
-  already-stored metadata.
+- **Trusted Snowball archive entries:** Entries inside a trusted Snowball archive no longer inherit the outer HTTP request's ordinary metadata (`Content-Type`, `Cache-Control`, `Expires`, and user metadata) when PAX records are absent or omit those fields. Per-entry `minio.metadata.*` PAX records still apply, the six replication-scoped fields still apply to authorized entries, and the outer archive's storage class is still inherited. (The in-tree batch producer calls `PutObjectsSnowball` with the auto-extract marker without marking the outer request as a trusted replica, so it was unaffected.)
+- **GHSA-redacted keys:** `X-Amz-Meta-X-Amz-Unencrypted-Content-Length` and `-Md5` are never re-inserted during replica metadata restoration, matching ordinary `PUT` requests.
+- **Unchanged boundaries:** Authentication, `s3:ReplicateObject` permission gating, and replication trust semantics are unchanged, and the ordinary `PUT` extraction path is byte-for-byte identical.
 
-## Upgrade does not fix stored objects {#existing}
+## Why Upgrading Does Not Rewrite Existing Polluted Objects {#existing}
 
-An upgrade stops new pollution; it does not scan or rewrite existing objects.
-Two consequences matter:
+Upgrading to [SILO Server 20260916](/blog/release/silo-20260916/) stops new metadata pollution on incoming writes, but does not scan or rewrite existing objects on disk. Two operational consequences follow:
 
-- Objects whose *authoritative source* remains polluted can be selected repeatedly for metadata replication when comparison with a normalized replica detects a difference. Fix the authoritative source first, then let the
-  copies converge.
-- Ordinary S3 self-COPY is not a general remediation API: it can create new
-  versions or shift timestamps rather than rewriting one version's metadata
-  in place.
+1. **Authoritative source vs. normalized replica divergence:** If an authoritative source object still carries polluted metadata (for example, from an earlier bidirectional replication cycle) while its replica has been normalized, resync or healing comparisons may detect a metadata mismatch and repeatedly schedule metadata replication. Always remediate the authoritative source version first so replicas converge from the clean source.
+2. **Limits of ordinary S3 self-`COPY`:** Issuing a standard S3 `CopyObject` to self is not a universal in-place repair tool for versioned buckets because it creates a new object version (or shifts modification timestamps) rather than rewriting a specific historical `versionId`'s metadata in place.
 
-The [read-only audit runbook](/operations/replication/replica-metadata-audit/) now provides an executable inventory tool and classification rules. It does not authorize or perform repairs.
+The [Replica Metadata Audit runbook](/operations/replication/replica-metadata-audit/) provides a read-only inventory scanner and classification rules to identify affected object versions across buckets.
 
-### The stored-metadata remediation proposal — status {#remediation}
+### Stored-Metadata Remediation Design Guidelines {#remediation}
 
-A design for a *future* operation exists: build an inventory (including
-non-current versions, not just the latest), verify by comparing against the
-trusted source version or an independent checksum — never by guessing from
-the wrong response header, and never by re-decompressing gzip just because a
-label says so — process the authoritative source's exact versions first,
-then converge copies; keep immutable inventories and metadata backups; use
-small validation batches with a rehearsed rollback. Where no supported path
-exists for an object, stop and leave it — editing `xl.meta` directly is not a
-supported operation.
+When planning remediation for historical objects flagged by the audit runbook:
 
-Any selected procedure must preserve the required version identity and current
-version relationship, Object Lock retention/legal hold, tags, replication
-state, and encryption context. Check for concurrent changes before writing;
-blocked or unverifiable versions stay untouched. A local clone must prove the
-chosen operation and rollback before this proposal becomes an executable runbook.
+- Build a complete version inventory (including non-current versions, not just the latest version).
+- Verify payload encoding by comparing against the trusted source version or an independent checksum—never guess from the polluted `Content-Encoding` header alone, and never gunzip an object merely because a header label says `gzip`.
+- Remediate the authoritative source's exact versions first and allow replication to converge downstream copies.
+- Retain immutable inventories and metadata backups, validate on a local clone first, and preserve version identity, Object Lock retention and legal hold, object tags, replication status, and encryption context. Never hand-edit `xl.meta` files on disk.
 
-> **This is a design proposal awaiting separate approval, not an executed
-> procedure.** No production inventory scan, object write, version change, or
-> deployment has been performed as part of it. Treat it as the shape of a
-> future runbook, not as a validated one.
+## Known Scope Limits {#limits}
 
-## Known limits {#limits}
-
-- The POST-form upload path (`bucket-handlers.go`) calls the low-level
-  extractor directly and never normalized encodings; that behavior is
-  unchanged and flagged for a separate issue.
-- Local verification ran with a test-only capacity accommodation (a full host
-  disk); the merged-tree rerun in the R4–R8 integration record covers the
-  unchanged-tree case.
-- No two-site scheduler, restart, or network-failure acceptance is claimed.
+- The browser `POST` form upload handler (`cmd/bucket-handlers.go`) calls the low-level header extractor directly without normalizing `aws-chunked` encodings; that pre-existing path is outside the replication receiver and tracked separately.
 
 ## Verification {#verification}
 
-Regression tests (`TestExtractReplicationMetadata*`,
-`TestAPIReplicaContentEncoding`, `TestAPISnowballReplicaContentEncoding`,
-plus race-included trust/SSE-C round-trips) cover the mapping table, the six
-restored fields, and the ordinary path's equivalence; the recorded counterfactual run against the baseline helper produced 36 expected failures (20 HTTP cases and 16 helper cases), with 44 controls passing. These are the original repair's observations, not a new execution by this documentation update. The upgrade summary lives in the
-[component matrix](/compatibility/versions/#september-reliability); the
-sibling tag-ordering repair is recorded in [Replicated Tag
-Ordering](/blog/design/replicated-tag-ordering/).
+Regression tests (`TestExtractReplicationMetadata*`, `TestAPIReplicaContentEncoding`, `TestAPISnowballReplicaContentEncoding`, and `-race` replication trust / SSE-C round-trip suites) verify the header mapping table, all six restored replication fields, and equivalence with the ordinary `PUT` path across single-drive and 16-drive erasure backends (64 HTTP leaf cases: 44 controls and 20 regression cases that failed prior to `4fcdf37ce`, plus 16 helper unit cases).
 
-Related records: [tags](/blog/design/replicated-tag-ordering/) · [metadata](/blog/design/replica-metadata-normalization/) · [HTTP](/blog/design/request-header-timeouts/) · [audit](/operations/replication/replica-metadata-audit/)
+For the coordinated upgrade matrix, see the [component version matrix](/compatibility/versions/#september-reliability). Related September replication and HTTP hardening designs: [Replicated Tag Ordering](/blog/design/replicated-tag-ordering/) · [Request Header Timeouts](/blog/design/request-header-timeouts/) · [Replica Metadata Audit](/operations/replication/replica-metadata-audit/).

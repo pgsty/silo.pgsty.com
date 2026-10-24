@@ -2,13 +2,11 @@
 title: "对象锁保留期越权与版本覆写漏洞修复设计（SN-2026-015 / SN-2026-016）"
 date: 2026-10-14
 lastmod: 2026-10-19
-summary: "梳理对象锁保留期鉴权短路缺陷（SN-2026-015）与版本寻址写入覆写缺陷（SN-2026-016）的外部报告验证、完整历史溯源、入口与存储写锁双重防线设计、预检 Fail-Closed 加固，以及候选方案的对抗评测与取舍。"
+summary: "梳理对象锁保留期鉴权短路缺陷（SN-2026-015）与版本寻址写入覆写缺陷（SN-2026-016）的外部报告验证、完整历史溯源、入口与存储写锁双重防线设计、预检 Fail-Closed 加固，以及候选方案的评估与取舍。"
 tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 ---
 
-**2026-10-19 核验状态：** PR #234 与 #235 的完整修复包含于 [Server 20261018 正式版](/zh/blog/release/silo-20261018/)，GitHub Release 已正式发布。20261015 为已被替代的草稿，Server 20260916 仍受影响。本文保留原始设计与源码验证，升级要求见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
-
-本文档完整记录针对外部报告与内部关联排查发现的两处对象锁（Object Lock / WORM）安全缺陷——**`SN-2026-015`（`PutObjectRetention` 绕过请求头越权与条件策略失灵）**与 **`SN-2026-016`（版本寻址写入覆写绕过及写路径锁缺口）**——的事实核验、Git 历史溯源、修复设计、关键路径影响评估与候选方案的对抗验证取舍。
+本文档完整记录针对外部报告与内部关联排查发现的两处对象锁（Object Lock / WORM）安全缺陷——**`SN-2026-015`（`PutObjectRetention` 绕过请求头越权与条件策略失灵）**与 **`SN-2026-016`（版本寻址写入覆写绕过及写路径锁缺口）**——的事实核验、Git 历史溯源、修复设计、关键路径影响评估与候选方案的权衡取舍。完整修复（`#234`、`#235`、`#241`）已随 [Server 20261018](/zh/blog/release/silo-20261018/#security) 正式发布。
 
 关联公开安全公告：
 - [SN-2026-015 / SN-2026-016：对象锁保留期授权绕过与带版本写入覆写漏洞](/zh/blog/security/20260926-governance-retention-bypass/)
@@ -401,7 +399,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 ---
 
-## 5. 为什么这个方案有效，以及有哪些兼容性注意事项 {#why-it-works}
+## 5. 核心安全不变量与升级兼容性说明 {#why-it-works}
 
 ### 5.1 三条核心安全不变量
 
@@ -425,7 +423,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | 未到期 `GOVERNANCE` | 缩短 / 清除 / 改模式 | 无 | 是 | 任意 | 400 `InvalidRequest`（`ObjectLocked`） | **400 `InvalidRequest`（`ObjectLocked`）** |
 | 未到期 `GOVERNANCE` | 缩短 / 清除 / 改模式 | 有 | 是 | **否** | **200**（F2 漏洞） | **403 AccessDenied** |
 | 未到期 `GOVERNANCE` | 缩短 / 清除 / 改模式 | 有 | 是 | **是** | 200 | **200 OK** |
-| 未到期 `COMPLIANCE` | Shorten / 清除 / 改模式 | 任意 | 是 | 任意 | 400 `InvalidRequest`（`ObjectLocked`） | **400 `InvalidRequest`（`ObjectLocked`）** |
+| 未到期 `COMPLIANCE` | 缩短 / 清除 / 改模式 | 任意 | 是 | 任意 | 400 `InvalidRequest`（`ObjectLocked`） | **400 `InvalidRequest`（`ObjectLocked`）** |
 | 无保留期或已到期 | 任意 | 任意 | 是 | 任意 | 200 | **200 OK** |
 
 #### 写路径不变量覆盖表
@@ -442,7 +440,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 ---
 
-### 5.2 可能产生的业务与兼容性副作用（Upgrade Notes） {#side-effects}
+### 5.2 升级与兼容性注意事项 {#side-effects}
 
 常规的新版本创建、普通对象读写与已获授权的保留期延长保持原有行为。以下收紧的边界行为需在升级与发布说明中提示运维人员：
 
@@ -469,7 +467,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 ---
 
-## 6. 候选方案对抗评测与最终取舍 {#tradeoffs}
+## 6. 候选方案权衡评估与最终取舍 {#tradeoffs}
 
 在设计评审期间，我们针对写路径防护评估并实际构造测试检验了以下四套候选方案：
 
@@ -484,4 +482,4 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 ### 最终结论
 
-采用**`fe3935476` 完整写锁防线 + 预检 Fail-Closed 加固**作为最终落地实现，并将慢速目录写入（`TestPlanReviewSlowDirectoryPut`）、预检读故障（`TestPlanReviewPreflightReadFailure`）、遗留分段上传（`TestPlanReviewLegacyMPUCompliance`）及恢复后分段上传碰撞（`TestRecoveredMultipartUploadAfterReplica`）四组对抗复现测试全部纳入 `cmd/object-retention-overwrite_test.go` 回归测试集。
+采用**`fe3935476` 完整写锁防线 + 预检 Fail-Closed 加固**作为最终落地实现，并将慢速目录写入（`TestPlanReviewSlowDirectoryPut`）、预检读故障（`TestPlanReviewPreflightReadFailure`）、遗留分段上传（`TestPlanReviewLegacyMPUCompliance`）及恢复后分段上传碰撞（`TestRecoveredMultipartUploadAfterReplica`）四组复现用例全部纳入 `cmd/object-retention-overwrite_test.go` 回归测试集。

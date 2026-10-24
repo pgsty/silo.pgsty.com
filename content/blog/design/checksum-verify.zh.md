@@ -2,38 +2,23 @@
 title: "只读 Checksum 审计与可靠的 CLI 输出契约"
 linkTitle: "Checksum Verify"
 date: 2026-08-29
-lastmod: 2026-09-01
+lastmod: 2026-09-03
 author: "冯若航"
 summary: >
-  MCLI 可以在不修改数据的前提下，将 S3 已存 checksum 与对象逻辑字节重新比对。本文定义候选选择、结果分类、report、退出码，以及管道和 CI 所依赖的 non-TTY 输出契约。
+  MCLI 可以在不修改数据的前提下，将 S3 已存 checksum 与对象逻辑字节重新比对。随 mcli 20260903（PR #8、PR #13、#5）发布，本文定义候选选择、结果分类、报告、退出码，以及管道和 CI 所依赖的 non-TTY 输出契约。
 tags: [设计, S3, 兼容性, Checksum, mcli]
 weight: 28
 draft: false
 url: "/zh/blog/design/checksum-verify/"
 ---
 
-本文是 MCLI 只读 checksum 校验流程，以及发布审查中发现的 non-TTY 输出缺陷
-[pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 的设计与实现记录。
+本文记录 MCLI 只读 checksum 校验工作流，以及发布复核阶段发现的 non-TTY 输出缺陷 [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 的设计与实现。该命令经由 [`pgsty/mc`](https://github.com/pgsty/mc) 的 pull request [#8](https://github.com/pgsty/mc/pull/8) 与 [#13](https://github.com/pgsty/mc/pull/13) 合入主干，并随 [mcli 20260903](/zh/blog/release/mcli-20260903/) 正式发布（已内置于 [Server 20260903](/zh/blog/release/silo-20260903/) 容器镜像）。
 
-> **状态：** 已随最终的 [mcli 20260903](/zh/blog/release/mcli-20260903/) 正式发布。命令经
-> pull request [#8](https://github.com/pgsty/mc/pull/8) 与 [#13](https://github.com/pgsty/mc/pull/13)
-> 合入 `main`，在托管 CI 中针对真实 SILO 服务器验证，
-> [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。Server 20260903 镜像已捆绑包含本命令的 mcli 20260903。<br>
-> **归属：** [`pgsty/mc`](https://github.com/pgsty/mc)。<br>
-> **跟踪：** [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)。<br>
-> **安全边界：** 本命令只读校验，不负责修复。
+## 核心概览 {#tldr}
 
-## 太长不看（TL;DR） {#tldr}
+历史版本的 `CopyObject` 实现可能在压缩或加密后的底层存储字节上计算附加校验和（additional checksum），而非在 S3 `GET` 返回给客户端的逻辑对象字节上计算。`mcli checksum verify` 会筛选候选对象，独立地将逻辑对象流送入已记录的校验和算法，并把每个候选分类为 `MATCH`、`MISMATCH`、`NO_CHECKSUM`、`WOULD_VERIFY`（dry run）、十种 `UNKNOWN_*` 分类之一，或三种 `SKIPPED_*` 结果之一。
 
-历史 CopyObject 实现可能在转换后的存储字节上计算 additional checksum，而不是在
-S3 返回给客户端的逻辑对象字节上计算。`mcli checksum verify` 会筛选对象，独立地
-把逻辑对象流送入已记录的算法，并把每个候选分类为 `MATCH`、`MISMATCH`、
-`NO_CHECKSUM`、`WOULD_VERIFY`（dry run）、十种 `UNKNOWN_*` 分类之一，或三种 `SKIPPED_*` 之一。
-
-首版实现在终端中工作正常，但 stdout 被重定向时完全不输出。MCLI 为了在非终端
-环境中禁用进度 UI，会自动把执行状态标记为 quiet；新命令错误地把这项内部状态
-理解成了“用户要求隐藏审计结果”。修复将语义输出与进度抑制分离，同时不改变
-全局 quiet 行为，也不会在 CI 中重新打开进度条。
+首版实现在交互式终端中工作正常，但当 stdout 被重定向到文件或管道时却没有任何输出（[#5](https://github.com/pgsty/mc/issues/5)）。原因在于 MCLI 为在非终端环境中禁用进度条 UI，会自动将内部状态 `globalQuiet` 标记为启用；新命令误把这项内部状态当成了“用户要求隐藏审计结果”。[PR #13](https://github.com/pgsty/mc/pull/13) 将语义输出与进度条抑制解耦，在不改变全局 quiet 行为、也不在 CI 中重新打开进度条的前提下恢复了非终端输出。
 
 ## 命令与范围 {#scope}
 
@@ -43,104 +28,78 @@ mcli checksum verify --recursive ALIAS/BUCKET[/PREFIX]
 mcli checksum verify --manifest candidates.jsonl ALIAS
 ```
 
-V1 支持标记为 `FULL_OBJECT` 的 CRC32、CRC32C、CRC64NVME、SHA1 与 SHA256。
-候选可以是单个对象、精确 VersionID、前缀下的当前对象、所有版本，或 JSON Lines
-manifest 给出的精确条目。它还支持 SSE-C key 映射、时间与大小过滤、dry-run 成本
-估计、有界 worker、下载限速、JSON 输出和可选的 JSON Lines report。
+第一版支持标记为 `FULL_OBJECT` 的 `CRC32`、`CRC32C`、`CRC64NVME`、`SHA1` 与 `SHA256` 校验和。检查目标可以是单个对象、精确 `VersionID`、前缀下的当前对象、所有历史版本，或由 JSON Lines manifest 给出的精确条目。命令同时支持 SSE-C 密钥映射、时间与大小过滤、`--dry-run` 成本预估、有界并发 worker（`--max-workers`）、全局下载限速、`--json` 输出以及可选的 `--report` JSON Lines 报告。
 
-V1 不验证 `COMPOSITE` checksum，不从 ETag 推断类型，不读取 `xl.meta`，不能确定
-历史 writer，也不会修复 metadata。端点必须随 checksum 一并报告其类型
-（`x-amz-checksum-type`）；对不报告类型的端点，每个带 checksum 的对象都会被归为
-`UNKNOWN_CHECKSUM_TYPE`，而不是靠猜。
+该命令严格只读：不校验分段复合校验和（`COMPOSITE`），不从 `ETag` 推断校验和类型，不直接读取底层 `xl.meta`，也不修改任何对象元数据。服务端点必须随校验和一并返回类型头（`x-amz-checksum-type`）；对于不返回该头的端点，所有带校验和的对象都会被归类为 `UNKNOWN_CHECKSUM_TYPE`，绝不猜测类型。
+
+当前不支持 `--rewind`、分层恢复、服务端批处理、断点续查或修复。
 
 ## 只读数据路径 {#data-path}
 
-对每个候选对象，MCLI：
+对每个候选对象，`mcli checksum verify` 执行以下五步：
 
-1. 使用 checksum mode 执行 `HEAD`，保留所有支持的 checksum 与 `ChecksumType`；
-2. 对不支持或含糊的状态返回 `UNKNOWN_*`，绝不猜测；
-3. 将 `GET` 返回的逻辑字节流送入有界 hasher，不把对象体写入磁盘；
-4. 对固定版本使用 VersionID；对可变的未版本化/null 对象使用 `If-Match`，并在
-   读取后再次 `HEAD`；
-5. 将独立计算结果与已存值比较。
+1. 启用 checksum mode 发送 `HEAD` 请求，保留所有受支持的校验和摘要与 `ChecksumType`。
+2. 对不支持或含糊的元数据状态直接归入 `UNKNOWN_*`，不做猜测。
+3. 将 `GET` 返回的逻辑字节流送入有界内存哈希器，不把对象正文写入本地磁盘。
+4. 对不可变历史版本使用 `VersionID` 固定目标；对可变的未版本化或 `null` 版本对象使用 `If-Match`，并在流式读取完成后再次 `HEAD` 核验以防并发替换。
+5. 将独立计算的摘要与已存摘要逐一比较。
 
-S3 边界只允许 LIST、HEAD 与 GET；如果 mock endpoint 收到写方法，测试必须失败。
+S3 传输边界仅允许 `LIST`、`HEAD` 与 `GET`；若 mock endpoint 收到任何写方法，自动化测试立即失败。
+
+专用 S3 helper 通过 `StatObject` 保留所有校验和与类型，再用 `Core.GetObject` 读取逻辑字节，不启用 SDK 自动校验器。这样无需改变共享 `ClientContent`，也不会改变 `stat`、复制、镜像或 JSON 输出的既有契约。
 
 ## 结果与退出码契约 {#result-contract}
 
-每个候选只产生一个稳定结果：
+每个候选对象只产生一个稳定的分类结果：
 
 | 结果 | 含义 |
-|:--|:--|
-| `MATCH` | 所有支持的已存 checksum 都匹配逻辑对象字节 |
-| `MISMATCH` | 至少一个已存 checksum 不同 |
-| `NO_CHECKSUM` | 没有 additional checksum，因此不读取对象体 |
-| `WOULD_VERIFY` | dry-run 找到可验证的 full-object checksum |
-| `UNKNOWN_*` | MCLI 无法给出可靠判断 |
-| `SKIPPED_*` | 过滤器主动排除了对象 |
+| :-- | :-- |
+| `MATCH` | 所有受支持的已存校验和均匹配 `GET` 返回的逻辑对象字节 |
+| `MISMATCH` | 至少一个已存校验和与逻辑对象字节不一致 |
+| `NO_CHECKSUM` | 对象没有附加校验和，不读取对象正文 |
+| `WOULD_VERIFY` | `--dry-run` 发现可校验的 `FULL_OBJECT` 校验和 |
+| `UNKNOWN_*` | MCLI 无法给出可靠校验结论（如 `COMPOSITE` 或缺失 `ChecksumType`） |
+| `SKIPPED_*` | 过滤条件排除了该对象（`SKIPPED_TOO_LARGE`、时间过滤或删除标记） |
 
-summary 携带 `objects`、`verified` 计数、每种结果状态的计数以及 `incomplete`。
-`verified` 等于 `MATCH` 加 `MISMATCH`：只有这两种结果真正把对象体流过了哈希器。
-枚举了很多对象却一个都没核验的运行，会如实地显示出来。
+最终汇总（summary）携带 `objects`、`verified` 计数、每种结果状态的计数以及 `incomplete` 标志。`verified` 等于 `MATCH` 加 `MISMATCH`——只有这两种结果真正把对象正文流过了哈希器。枚举了大量对象却实际核验为零的运行，会在汇总中清晰体现。
 
-`--fail-on` 支持 `mismatch`、`unknown`、`no-checksum`、`any` 与 `none`。默认 `any`
-会在 mismatch 或校验不完整时返回 exit 1。`no-checksum` 在任一对象没有 checksum
-**或根本没有核验任何对象**时返回 exit 1，因此空前缀或过期的 manifest 不可能冒充
-一次干净的审计。dry-run 不应用 `--fail-on`。参数、认证、枚举与 report
-写入失败属于命令失败，而不是对象分类。
+`--fail-on` 支持 `mismatch`、`unknown`、`no-checksum`、`any` 与 `none`：
 
-其中，`SKIPPED_TOO_LARGE` 会让默认 `any` 返回 exit 1，因为大小上限使审计不完整；
-时间过滤与 delete-marker skip 本身不会触发失败。
+- 默认值 `any` 在出现 `MISMATCH`、`UNKNOWN_*` 或审计不完整时返回退出码 `1`。其中 `SKIPPED_TOO_LARGE` 会使 `any` 返回退出码 `1`（因为大小上限使审计不完整），而时间过滤与删除标记跳过不会触发失败。
+- `no-checksum` 包含 `any` 的全部失败条件，并在任一对象缺少校验和或 `verified == 0` 时返回 `1`。
+- `--dry-run` 不执行 `--fail-on` 失败判定。
+- 命令行参数、认证、对象枚举与报告写入失败属于命令级错误，直接返回非零退出码。
 
 ## 输出与自动化契约 {#output-contract}
 
-对象记录和最终 summary 都是命令的语义输出：
+逐对象记录和最终 summary 都是命令的语义输出：
 
-- 除非调用方显式设置 `--quiet`、`-q` 或 `MC_QUIET=true`，TTY 与 non-TTY stdout
-  都必须收到全部对象记录和最终 summary。
-- non-TTY `--json` 每行输出一个紧凑 JSON 值；TTY JSON 保留 MCLI 既有的美化格式。
-- 全局参数在 app、`checksum` 与 `verify` 三层位置都必须生效。
-- `--report` 独立于 stdout；即使显式 quiet 让 stdout 静默，它仍会写入对象记录和
-  最终 summary 的 JSON Lines。
-- 输出通道不会改变 `--fail-on` 的判定。
+- 除非调用方显式指定 `--quiet`、`-q` 或 `MC_QUIET=true`，TTY 与 non-TTY 下的 stdout 都必须收到全部对象记录和最终 summary。
+- non-TTY 下的 `--json` 每行输出一个紧凑 JSON 值（JSON Lines）；TTY 下的 `--json` 保留 MCLI 既有的缩进美化格式。
+- 全局参数（`--json`、`--quiet`）在根命令 `mcli`、`checksum` 与 `verify` 三层位置均生效。
+- `--report` 独立于 stdout：即使显式 `--quiet` 让 stdout 静默，`--report` 仍会完整写入对象记录和最终 summary 的 JSON Lines。
+- 输出通道不会改变 `--fail-on` 的退出码判定。
 
-这一区分之所以必要，是因为 MCLI 历史上的 `globalQuiet` 有两个来源：用户显式的
-quiet 参数，以及拿不到终端尺寸时自动启用、用于关闭进度 UI 的 non-TTY 状态。
-直接修改这个全局量，可能让 copy、get、put、mirror 等命令在 CI 中重新输出进度条。
+这一区分非常关键：MCLI 历史上的 `globalQuiet` 混合了两个来源——用户显式传入的 quiet 参数，以及拿不到终端尺寸时自动启用、用于关闭进度条 UI 的 non-TTY 状态。如果直接修改全局 `globalQuiet`，会让 `cp`、`get`、`put`、`mirror` 等命令在 CI 日志中重新输出进度条。
 
-最终修复只作用于 checksum 命令。它沿完整 CLI context 链查找显式 quiet/JSON
-参数，因为 CLI 库的 `GlobalBool` 会停在最近的祖先 flag set；同时在 checksum action
-内部恢复 JSON Lines，因为嵌套 `Before` hook 可能在 app-level `--json` 之后重置它。
-其他命令的进度与输出行为均不改变。
+因此 [PR #13](https://github.com/pgsty/mc/pull/13) 的修复仅作用于 `checksum` 命令内部：它沿完整 CLI context 链查找显式 quiet/JSON 参数（绕开 CLI 库 `GlobalBool` 只检查最近一层父级 flag set 的限制），并在 `verify` action 内部恢复被嵌套 `Before` 钩子重置的 JSON Lines 模式。
 
-## Report、秘密与运行成本 {#operations}
+## 报告、密钥安全与运行成本 {#operations}
 
-Report 文件以 `0600` 新建，目标必须不存在；它只包含 metadata 与结果，不包含对象体
-或 SSE-C key。Manifest 同样只保存 bucket、key 与可选 VersionID。
+报告文件（`--report`）在 POSIX 系统上以 `0600` 权限新建，Windows 使用账户的文件系统 ACL。若目标路径已存在则报错退出；报告中只保存对象元数据与校验结果，绝不包含对象正文或 SSE-C 客户密钥。输入清单（`--manifest`）同样只记录 `bucket`、`key` 与可选 `versionId`。
 
-校验会下载每个受支持对象的完整逻辑内容。运维人员应使用 `--dry-run`、`--max-size`、
-时间过滤、`--max-workers` 与全局下载限速控制成本和负载。`NO_CHECKSUM` 与
-`UNKNOWN_*` 数量必须显式展示，二者都不能被包装成“校验成功”。
+由于校验过程会完整下载每个受支持对象的逻辑正文，运维人员应组合使用 `--dry-run`、`--max-size`、时间过滤、`--max-workers` 与全局下载限速控制网络与存储负载。`NO_CHECKSUM` 与 `UNKNOWN_*` 计数在汇总中独立展示，绝不与 `MATCH` 混同。
 
 ## Mismatch 能证明什么 {#meaning}
 
-Mismatch 只能证明：校验时 endpoint 返回的 additional checksum，不能描述同一时刻
-返回的逻辑对象字节。它不能单独证明对象一定由某个历史压缩缺陷生成，也不是与外部
-真值的比较。
+`MISMATCH` 证明：校验时刻 `HEAD` 返回的附加校验和，与同一时刻 `GET` 返回的逻辑对象字节不一致。单凭 `MISMATCH` 本身，不能直接断定对象一定由某个历史压缩复制缺陷生成，也不能替代与外部权威数据源的比对。
 
-不要原地覆盖 checksum metadata。应先只读审计和分类。对已经确认且确有业务影响的
-mismatch，优先写入新 key 或新 version，验证替代对象后再显式切换消费者；
-`UNKNOWN_*` 对象不得进入自动修复。
+排查出 `MISMATCH` 时，不要原地覆写底层校验和元数据。应先通过只读审计完成分类；对确认受影响且有业务消费的对象，优先写入新对象键或新版本，用 `mcli checksum verify` 验证新对象返回 `MATCH` 后再切换下游消费方。`UNKNOWN_*` 对象不得纳入自动化修复脚本。
 
-## 验证记录与发布边界 {#verification}
+## 验证记录与输出 Schema {#verification}
 
-本地验收矩阵覆盖 TTY human/JSON、non-TTY pipe、普通文件重定向、app/parent/leaf
-三层 JSON 与 quiet、环境变量 quiet、quiet 下的 report、report 写失败，以及
-MISMATCH/UNKNOWN 退出码。真实本地 S3 还覆盖了历史 `MATCH`、`MISMATCH` 与不支持
-的 composite 对象。
+验收矩阵覆盖 TTY 人类可读与 JSON 输出、non-TTY 管道、普通文件重定向、app/parent/leaf 三层 JSON 与 quiet 参数、环境变量 `MC_QUIET=true`、quiet 模式下的 `--report`、报告写入失败、`MISMATCH`/`UNKNOWN_*` 退出码，以及针对真实 SILO 服务端的 `MATCH`、`MISMATCH` 与 `COMPOSITE` 对象实测（详见 [`mc checksum verify` 命令参考](/zh/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify)）。
 
-该命令已随最终的 [mcli 20260903](/zh/blog/release/mcli-20260903/) 从 `main` 顶端的签名
-tag 发布，功能套件 —— 包括针对真实 SILO 服务器的一次 checksum 校验 —— 对该提交
-全部通过，[pgsty/mc#5](https://github.com/pgsty/mc/issues/5) 已关闭。Server 20260903 已内置该客户端；生产审计仍是需要独立执行并提供证据的工作。
+JSON 消费方应校验 `schemaVersion: 1`，并通过 `type: object` 与 `type: summary` 区分逐对象记录和最终汇总。`--max-workers` 默认为 `4`（范围 `1`–`64`），用于限制并发对象校验协程数。
 
-JSON 消费者应检查 `schemaVersion: 1`，以 `type: object` 与 `type: summary` 区分逐对象记录和最终汇总。`--max-workers` 默认 4，接受 1–64，限制并发对象处理数，不是总内存或服务端 I/O 上限。
+测试还覆盖多校验和任一不匹配、固定与 `null` 版本、正常完成时每个候选只输出一次，以及 worker 取消后正常关闭结果流。`InvalidObjectState` 优先归类为需要恢复的存储状态，不能误作通用 403；SSE-C 错误分类不依赖 URL 或对象名文本。

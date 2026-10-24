@@ -2,13 +2,11 @@
 title: "Object Lock Retention Bypass and Version-Overwrite Repair Design (SN-2026-015 / SN-2026-016)"
 date: 2026-10-14
 lastmod: 2026-10-19
-summary: "Report verification, Git provenance, entry and write-lock defense-in-depth design, fail-closed preflight hardening, and adversarial trade-off evaluation for SN-2026-015 and SN-2026-016."
+summary: "Report verification, Git provenance, entry and write-lock defense-in-depth design, fail-closed preflight hardening, and candidate trade-off evaluation for SN-2026-015 and SN-2026-016."
 tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 ---
 
-**Status verified 2026-10-19:** The complete PR #234 / #235 repair is included in the [Server 20261018 release](/blog/release/silo-20261018/), whose GitHub release is now public. 20261015 is a superseded draft; Server 20260916 remains affected. This page retains the original design and source verification; see the [advisory](/blog/security/20260926-governance-retention-bypass/) for upgrade requirements.
-
-This document records the verification, Git provenance, repair design, critical-path evaluation, and adversarial candidate trade-offs for two Object Lock (WORM) security vulnerabilities identified through external reports and an internal write-path audit: **`SN-2026-015` (`PutObjectRetention` bypass header authorization and condition-key short-circuit)** and **`SN-2026-016` (version-addressed write overwrite bypass and write-path lock gaps)**.
+This document records the verification, Git provenance, repair design, critical-path evaluation, and candidate trade-offs for two Object Lock (WORM) security vulnerabilities identified through external reports and an internal write-path audit: **`SN-2026-015` (`PutObjectRetention` bypass header authorization and condition-key short-circuit)** and **`SN-2026-016` (version-addressed write overwrite bypass and write-path lock gaps)**. The complete repair (`#234`, `#235`, `#241`) shipped in [Server 20261018](/blog/release/silo-20261018/#security).
 
 Companion public security advisory:
 - [SN-2026-015 / SN-2026-016: Object Lock Retention Authorization Bypass and Versioned Write Overwrite](/blog/security/20260926-governance-retention-bypass/)
@@ -401,7 +399,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 ---
 
-## 5. Why It Works and Upgrade Notes {#why-it-works}
+## 5. Core Security Invariants and Upgrade Compatibility {#why-it-works}
 
 ### 5.1 Three Core Security Invariants
 
@@ -441,7 +439,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 
 ---
 
-### 5.2 Upgrade and Compatibility Notes {#side-effects}
+### 5.2 Upgrade and Compatibility Side Effects {#side-effects}
 
 Normal new-version writes, object reads, and authorized retention extensions are unchanged. Operators should note the following tightened behaviors:
 
@@ -468,9 +466,9 @@ Normal new-version writes, object reads, and authorized retention extensions are
 
 ---
 
-## 6. Adversarial Evaluation Across Candidate Designs {#tradeoffs}
+## 6. Candidate Design Evaluation and Trade-Offs {#tradeoffs}
 
-During design review, four candidate write-path designs were evaluated against adversarial reproducers:
+During design review, four candidate write-path designs were evaluated against concurrency and recovery reproducers:
 
 | Dimension | Candidate 1: HTTP Entry & Preflight Only<br>(Rejected) | Candidate 2: Skipping Write-Lock UUID Check via Multipart Origin Marker<br>(Rejected) | Candidate 3: `fe3935476` Full Write-Lock Checks<br>(Without Fail-Closed Preflight) | **Final Adopted Design**: `fe3935476` Full Write-Lock Checks + Fail-Closed Preflight |
 | --- | --- | --- | --- | --- |
@@ -483,4 +481,4 @@ During design review, four candidate write-path designs were evaluated against a
 
 ### Conclusion
 
-We adopt the **`fe3935476` full write-lock defense + fail-closed preflight hardening** as the final implementation, and incorporate all four adversarial regression tests (`TestPlanReviewSlowDirectoryPut`, `TestPlanReviewPreflightReadFailure`, `TestPlanReviewLegacyMPUCompliance`, and `TestRecoveredMultipartUploadAfterReplica`) into `cmd/object-retention-overwrite_test.go`.
+We adopt the **`fe3935476` full write-lock defense + fail-closed preflight hardening** as the final implementation, and incorporate all four regression reproducers (`TestPlanReviewSlowDirectoryPut`, `TestPlanReviewPreflightReadFailure`, `TestPlanReviewLegacyMPUCompliance`, and `TestRecoveredMultipartUploadAfterReplica`) into `cmd/object-retention-overwrite_test.go`.

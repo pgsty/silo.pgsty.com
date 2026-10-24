@@ -5,28 +5,20 @@ date: 2026-08-26
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  Shared user and group status endpoints historically checked their Enable action even for disable requests. This record explains the least-privilege defect, SILO's strict target-state authorization design, the user repair merged through PR #73, the group follow-up, four-way IAM tests, and the boundary between committed code and a delivered release.
+  Shared user and group status endpoints historically checked their Enable action even for disable requests. This record explains the least-privilege defect, SILO's strict target-state authorization design, the user repair merged through PR #73, the group follow-up, four-way IAM tests, and migration guidance.
 tags: [Design, IAM, Security, Compatibility]
 weight: 15
 draft: false
 url: "/blog/design/user-status-permissions/"
 ---
 
-> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
-
-This document records the discussion, repair, and final authorization design for [upstream issue minio/minio#21478](https://github.com/minio/minio/issues/21478) and [SILO PR #73](https://github.com/pgsty/silo/pull/73).
-
-> **Status on 2026-08-26:** SILO PR #73 was merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5), preserving the signed-off repair commit [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1). All eight reported checks passed. Upstream issue #21478 and PR #21482 remain open, but `minio/minio` is archived and read-only, so no further issue comment or merge can be made there.<br>
-> **Group follow-up on 2026-08-28:** final release review found the same fixed-action defect in `set-group-status`. Signed-off server commit `229fe2b3c` now selects `admin:EnableGroup` or `admin:DisableGroup` from the requested target state and adds a real four-way IAM authorization test. Local verification and independent review are complete; it was merged into `main` on 2026-08-29, and tag and delivery remain pending.<br>
-> **Scope:** authorize enabling and disabling a user with their respective existing Admin Actions. Do not change the route, status values, account storage, replication record, or client API.<br>
-> **Security property:** possessing `admin:DisableUser` must not grant the ability to enable an account, and possessing `admin:EnableUser` must not grant the ability to disable one.<br>
-> **Release boundary:** merge, tag, release package, container image, deployment, and production verification remain separate gates.
+This article records the authorization design and verification for [upstream issue minio/minio#21478](https://github.com/minio/minio/issues/21478), [SILO PR #73](https://github.com/pgsty/silo/pull/73) (commits [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) / [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)), and the `set-group-status` follow-up (`229fe2b3c`), which shipped in [Server 20260903](/blog/release/silo-20260903/).
 
 ## Too Long; Didn't Read (TL;DR) {#tldr}
 
-SILO exposes both `admin:EnableUser` and `admin:DisableUser`, but the shared `set-user-status` handler historically authorized every request with `admin:EnableUser`. A policy that granted only `admin:DisableUser` therefore could not disable an account. The workaround was to grant `admin:EnableUser` as well, which destroyed the least-privilege boundary that the two action names promised.
+SILO exposes both `admin:EnableUser` and `admin:DisableUser`, but the shared `set-user-status` handler historically authorized every request with `admin:EnableUser`. A policy granting only `admin:DisableUser` could not disable an account; operators had to grant `admin:EnableUser` as well, breaking the least-privilege boundary between the two actions.
 
-The selected repair derives exactly one required action from the requested target state before authorization:
+The fix selects a single required action from the requested target state before authorization:
 
 | Requested status | Required action |
 | --- | --- |
@@ -34,9 +26,9 @@ The selected repair derives exactly one required action from the requested targe
 | `disabled` | `admin:DisableUser` |
 | invalid or unknown | `admin:EnableUser`, preserving the previous authorization-before-validation default |
 
-The handler then calls `validateAdminReq` once. A four-way IAM test proves both positive operations and both denied cross-action operations. This is intentionally stricter than preserving the accidental historical behavior in which an Enable-only policy could also disable users.
+The handler then calls `validateAdminReq` once. A four-way IAM integration test verifies both allowed operations and both denied cross-action operations. Enable-only policies can no longer disable accounts.
 
-The same rule now applies to group status:
+The same rule applies to group status:
 
 | Requested group status | Required action |
 | --- | --- |
@@ -44,9 +36,9 @@ The same rule now applies to group status:
 | `disabled` | `admin:DisableGroup` |
 | invalid or unknown | `admin:EnableGroup`, preserving the previous authorization-before-validation default |
 
-Before the follow-up, an EnableGroup-only principal could disable a group, while a DisableGroup-only principal received `AccessDenied` for that exact operation. The group repair uses the same one-selector, one-authorization design rather than treating the two actions as aliases.
+Before the follow-up, an EnableGroup-only principal could disable a group, while a DisableGroup-only principal received `AccessDenied` for that operation. The group repair uses the same single-selector, single-authorization structure.
 
-## The reported defect {#defect}
+## The Reported Defect {#defect}
 
 The Admin API uses one route for both state transitions:
 
@@ -62,11 +54,9 @@ Before the repair, the handler checked one fixed action before reading the reque
 objectAPI, creds := validateAdminReq(ctx, w, r, policy.EnableUserAdminAction)
 ```
 
-The later call to `SetUserStatus` correctly received either `enabled` or `disabled`, but authorization had already treated both as Enable operations. `admin:DisableUser` existed in the policy vocabulary and documentation while being ineffective for this endpoint on its own.
+The subsequent call to `SetUserStatus` accepted either `enabled` or `disabled`, but authorization had already treated both requests as Enable operations. `admin:DisableUser` existed in the policy vocabulary and documentation but could not authorize this endpoint on its own.
 
-Issue #21478 supplied the practical counterexample: an operator wanted a policy that could disable accounts during an incident without being able to restore them. A policy containing `admin:DisableUser` received `AccessDenied`; adding `admin:EnableUser` made the request work, but also gave the operator the more powerful recovery transition that the policy intentionally withheld.
-
-This is not a missing convenience permission. It is a mismatch between the policy model and the enforcement point:
+Issue #21478 demonstrated the operational impact: an operator wanted an incident-response policy that could disable compromised accounts without being able to re-enable them. A policy containing only `admin:DisableUser` failed with `AccessDenied`; adding `admin:EnableUser` allowed the disable call to succeed, but also granted the account-recovery permission the policy was meant to withhold:
 
 ```text
 policy says:     DisableUser only
@@ -76,11 +66,11 @@ result:          legitimate disable denied
 workaround:      grant an unwanted enable capability
 ```
 
-## Why two actions must mean two capabilities {#policy-contract}
+## Why Two Actions Must Mean Two Capabilities {#policy-contract}
 
-An account state transition has direction. Disabling is commonly delegated to incident responders, fraud controls, compliance automation, or a break-glass process. Enabling restores access and may require a separate approver.
+Account state transitions are directional. Disabling is frequently delegated to incident responders, fraud controls, or compliance automation, whereas re-enabling restores access and often requires a separate approver.
 
-If either action authorizes both transitions, a policy author cannot express that separation. The server would publish two names while enforcing one combined capability. The design contract is therefore strict:
+The authorization contract therefore enforces strict separation:
 
 | Principal policy | Disable target | Enable target |
 | --- | --- | --- |
@@ -89,59 +79,56 @@ If either action authorizes both transitions, a policy author cannot express tha
 | both actions | allow | allow |
 | neither action | deny | deny |
 
-The built-in `consoleAdmin` policy grants `admin:*`, so full administrators retain both operations. The compatibility impact is limited to custom restricted policies that relied on the old accidental behavior.
+The built-in `consoleAdmin` policy grants `admin:*`, so full administrators retain both operations. Only custom restricted policies that relied on `admin:EnableUser` to disable accounts are affected. The public PBAC reference documents the same contract for [`admin:EnableUser`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-EnableUser) and [`admin:DisableUser`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-DisableUser).
 
-The public PBAC reference now states the same contract for [`admin:EnableUser`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-EnableUser) and [`admin:DisableUser`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-DisableUser).
-
-## Design goals and non-goals {#scope}
+## Design Goals and Non-Goals {#scope}
 
 ### Goals {#goals}
 
-1. Make both existing Admin Actions enforceable according to their names.
+1. Enforce both existing Admin Actions according to their names.
 2. Preserve least privilege in both directions.
-3. Perform one authorization decision and write at most one authorization error.
-4. Preserve the route, request values, response format, self-mutation guard, IAM storage call, and site-replication hook.
-5. Encode the contract in tests that fail if the two permissions are broadened or swapped again.
+3. Perform one authorization decision and write at most one authorization error per request.
+4. Preserve the route, query parameters, response format, self-mutation guard, IAM storage call, and site-replication hook.
+5. Lock in the four-way permission matrix with regression tests.
 
-### Non-goals {#non-goals}
+### Non-Goals {#non-goals}
 
 - split the endpoint into separate enable and disable routes;
 - add a new combined action or change policy syntax;
 - change user status persistence or replication;
-- redesign Console permissions;
-- infer release, image, deployment, or production delivery from a source merge.
+- redesign Console permissions.
 
-## Alternatives considered {#alternatives}
+## Evaluated and Rejected Alternatives {#alternatives}
 
-### Keep checking `admin:EnableUser` for both states {#always-enable}
+### Keep Checking `admin:EnableUser` for Both States {#always-enable}
 
-This preserves behavior but leaves `admin:DisableUser` unusable and forces over-privileged policies. It is the defect, not a compatibility contract worth retaining.
+This leaves `admin:DisableUser` non-functional and forces over-privileged policies.
 
-### Require both actions for either transition {#require-both}
+### Require Both Actions for Either Transition {#require-both}
 
-This makes the two labels decorative and prevents delegated disable-only operation. It is stricter in quantity but weaker in expressiveness and least privilege.
+This prevents delegating disable-only permissions to incident-response roles.
 
-### Try Enable authorization, then retry Disable authorization {#double-validation}
+### Try Enable Authorization, Then Retry Disable Authorization {#double-validation}
 
-Upstream PR #21482 attempted this shape for a disabled request. It first called `validateAdminReq` with `EnableUser`, then called it again with `DisableUser` if the first result was nil.
+Upstream PR #21482 attempted this approach for disable requests: it called `validateAdminReq` with `EnableUser`, and if that returned `nil`, called `validateAdminReq` a second time with `DisableUser`.
 
-That helper has an important contract: when it returns a nil object layer, it has already written an error response. A Disable-only request can therefore commit a 403 response before the second authorization succeeds and the handler proceeds to mutate account state. Authorization fallback must never continue after an error response has been committed.
+However, when `validateAdminReq` returns a `nil` object layer, it has already written an HTTP error response. For a Disable-only caller, the first check commits a 403 response before the second check succeeds and mutates account state. Authorization fallback must never mutate state after committing an error response.
 
-### Accept either Enable or Disable for a disabled request {#allow-either}
+### Accept Either Enable or Disable for a Disabled Request {#allow-either}
 
-`validateAdminReq` already accepts multiple actions and succeeds if any one is allowed, so compatibility behavior could be implemented safely with one variadic call. That would let Disable-only policies work while preserving the historical ability of Enable-only policies to disable.
+`validateAdminReq` accepts a variadic action list and succeeds if any listed action is allowed. Passing both actions in a single variadic call would allow Disable-only policies to work while letting Enable-only policies continue to disable users.
 
-SILO rejected this option because the historical ability was the enforcement bug. It would solve the reporter's positive case but retain a cross-action privilege that contradicts the two-action model. Operators who want both transitions can grant both actions explicitly.
+SILO rejected this option because allowing Enable-only policies to disable accounts violates least privilege. Roles that manage the full account lifecycle should grant both actions explicitly.
 
-### Validate the status before authenticating {#validate-first}
+### Validate the Status Before Authenticating {#validate-first}
 
-Rejecting unknown status values first would change error precedence: a caller that previously had to pass the Enable authorization gate could now receive a validation result before authorization. The repair does not need that broader behavioral change.
+Rejecting unknown `status` values before calling `validateAdminReq` would change error precedence, allowing unauthenticated or unauthorized callers to probe parameter validation before passing the authorization gate.
 
-Unknown values therefore retain `admin:EnableUser` as the authorization default. Valid `disabled` is the only value that selects `admin:DisableUser`; the existing IAM layer remains responsible for rejecting invalid status values after authorization.
+Unknown values therefore continue to select `admin:EnableUser` as the default authorization action. Only `disabled` selects `admin:DisableUser`; after authorization succeeds, the existing IAM layer rejects invalid status strings.
 
-## The selected implementation {#implementation}
+## The Selected Implementation {#implementation}
 
-The repair adds a pure selector:
+The repair adds a pure selector function:
 
 ```go
 func setUserStatusAdminAction(status string) policy.AdminAction {
@@ -152,7 +139,7 @@ func setUserStatusAdminAction(status string) policy.AdminAction {
 }
 ```
 
-The handler reads the route variables, selects the action, and authorizes exactly once:
+The handler reads the route variables, selects the action, and authorizes once:
 
 ```go
 vars := mux.Vars(r)
@@ -165,32 +152,30 @@ if objectAPI == nil {
 }
 ```
 
-Everything after the gate remains unchanged:
+All logic after the authorization gate is unchanged:
 
-- a caller still cannot enable or disable its own account;
+- callers still cannot enable or disable their own account;
 - `globalIAMSys.SetUserStatus` validates and persists the requested status;
-- site replication records the same status and timestamp;
-- response and audit behavior use the existing path.
+- site replication records the status and timestamp;
+- response formatting and audit logging follow the existing path.
 
-The selector depends only on the requested target state. It does not load the current user, infer a transition from stored state, or make authorization depend on whether the target exists. This keeps authorization deterministic and avoids a read-before-authentication dependency.
+The selector inspects only the requested target state in the query string. It does not load the target user before authentication or branch on whether the target exists.
 
-## Why the repair is safe {#safety}
+## Why the Repair Is Safe {#safety}
 
-The correctness argument consists of five invariants:
+Five invariants hold after the change:
 
 1. Every valid status maps to exactly one Admin Action.
-2. `validateAdminReq` is invoked once, so a failed authorization cannot be followed by mutation.
-3. The mutation call is reachable only after the selected action succeeds.
-4. Invalid status values preserve the old Enable authorization boundary and are still rejected by the existing status-validation path.
-5. No storage, replication, wire, or client contract changes; only the permission required to reach the existing mutation changes.
+2. `validateAdminReq` is called once, so a failed authorization never proceeds to mutation.
+3. State mutation is reachable only after the selected action is authorized.
+4. Invalid status values preserve the prior Enable authorization boundary and are rejected afterward by the existing validation path.
+5. Storage, replication, wire format, and client SDK contracts remain unchanged.
 
-The change is a deliberate authorization tightening for Enable-only custom policies that used the disable operation. That tightening is the mechanism that makes `admin:DisableUser` a real independent capability.
+## Test Design {#tests}
 
-## Test design {#tests}
+### Pure Action Mapping {#mapping-test}
 
-### Pure action mapping {#mapping-test}
-
-The unit test fixes three selector cases:
+The unit test covers all three selector outcomes:
 
 | Input | Expected action |
 | --- | --- |
@@ -198,24 +183,20 @@ The unit test fixes three selector cases:
 | `disabled` | `DisableUser` |
 | invalid | legacy `EnableUser` default |
 
-### Four-way IAM authorization matrix {#iam-test}
+### Four-Way IAM Authorization Matrix {#iam-test}
 
-The integration test creates separate users and policies, then exercises the real Admin API:
+The integration test creates dedicated users and policies and exercises the Admin API across all four combinations:
 
-1. a Disable-only client successfully disables a target;
-2. the same client receives `AccessDenied` when enabling it;
-3. an Enable-only client successfully enables the target;
-4. the same client receives `AccessDenied` when disabling it.
+1. a Disable-only client disables a target user;
+2. the same client receives `AccessDenied` when attempting to enable that user;
+3. an Enable-only client enables the target user;
+4. the same client receives `AccessDenied` when attempting to disable that user.
 
-Positive assertions alone would not prove least privilege: both policies could accidentally authorize both states and still pass. The two negative cross-action assertions are the security regression tests.
+The two cross-action denial checks guard against regressions that might accidentally permit both transitions. The test runs inside the IAM server suite — covering request signing, policy attachment, handler authorization, persistence, and Admin-client error decoding — and cleans up all temporary users and policies on completion.
 
-The test removes every temporary user and policy after execution. It runs inside the existing IAM server suite, so it covers request signing, policy attachment, handler authorization, persistence, and Admin-client error decoding rather than testing only the helper.
+## Verification Record {#verification}
 
-## Repair and verification record {#verification}
-
-The server checkout originally contained unrelated dependency, generated-credit, checksum-test, and security-document changes, while local `main` was behind the remote. The two user-status files were isolated into a clean worktree based on current `origin/main`; no unrelated file entered the repair commit.
-
-Local verification passed:
+Local verification commands:
 
 ```text
 go test ./cmd -run '^TestSetUserStatusAdminAction$' -count=1
@@ -223,22 +204,11 @@ go test ./cmd -run '^TestIAMInternalIDPServerSuite$' -count=1
 git diff --check
 ```
 
-The signed-off commit `58735ee38` was pushed in PR #73. Its eight remote checks all passed:
+Commit `58735ee38` in PR #73 passed all eight remote CI checks (DCO sign-off, format/build/vet, lint and generated files, `cmd/` tests, `internal/` tests, race detector and S3 Select, cross compilation, and vulnerability analysis) and merged as `2e2377d1c`.
 
-- DCO sign-off;
-- format, build, and vet;
-- lint and generated files;
-- `cmd/` tests;
-- `internal/` tests;
-- race detector and S3 Select;
-- cross compilation;
-- vulnerability analysis.
+## Least-Privilege Policy Examples {#examples}
 
-The PR was merged with the repository's normal merge strategy as `2e2377d1c`. Local `main` was then fast-forwarded only after the two original working files were byte-for-byte and patch-ID identical to the merged result. The unrelated local changes remained intact, and the temporary worktree and task branch were removed after the code became recoverable from `main` and PR #73.
-
-## Least-privilege policy examples {#examples}
-
-### Disable-only operator {#disable-only}
+### Disable-Only Operator {#disable-only}
 
 ```json
 {
@@ -255,9 +225,9 @@ The PR was merged with the repository's normal merge strategy as `2e2377d1c`. Lo
 }
 ```
 
-This principal can inspect and disable another user, but cannot enable it.
+This principal can inspect and disable another user, but cannot re-enable it.
 
-### Enable-only operator {#enable-only}
+### Enable-Only Operator {#enable-only}
 
 ```json
 {
@@ -274,11 +244,11 @@ This principal can inspect and disable another user, but cannot enable it.
 }
 ```
 
-This principal can inspect and enable another user, but cannot disable it. Grant both actions explicitly to roles responsible for the complete account lifecycle.
+This principal can inspect and enable another user, but cannot disable it. Roles responsible for the full account lifecycle should grant both actions explicitly.
 
-## Group-status follow-up {#group-follow-up}
+## Group-Status Follow-Up {#group-follow-up}
 
-The group endpoint has the same shape as the user endpoint:
+The group status endpoint shares the same structure as the user endpoint:
 
 ```text
 PUT /minio/admin/v3/set-group-status
@@ -286,9 +256,9 @@ PUT /minio/admin/v3/set-group-status
     &status=enabled|disabled
 ```
 
-It also publishes two existing actions, `admin:EnableGroup` and `admin:DisableGroup`. The inherited handler nevertheless authorized every request with `EnableGroup` before reading `status`. This was not merely a dead permission: it reversed least privilege in both directions. The wrong principal could disable a group, and the intended disable-only principal could not.
+It exposes `admin:EnableGroup` and `admin:DisableGroup`, but the inherited handler likewise checked `EnableGroup` before inspecting `status`.
 
-The follow-up adds `setGroupStatusAdminAction`, deliberately matching `setUserStatusAdminAction`:
+The follow-up commit (`229fe2b3c`) adds `setGroupStatusAdminAction`, mirroring `setUserStatusAdminAction`:
 
 ```go
 func setGroupStatusAdminAction(status string) policy.AdminAction {
@@ -299,63 +269,47 @@ func setGroupStatusAdminAction(status string) policy.AdminAction {
 }
 ```
 
-The integration test creates separate EnableGroup-only and DisableGroup-only administrators and a real target group. It proves:
+The accompanying integration test creates isolated EnableGroup-only and DisableGroup-only administrators and a target group, verifying that:
 
 1. DisableGroup-only can disable;
 2. DisableGroup-only cannot enable;
 3. EnableGroup-only can enable;
 4. EnableGroup-only cannot disable.
 
-The suite exercises signed Admin requests, policy attachment, handler authorization, IAM mutation, response decoding, and cleanup. Invalid status still selects the legacy Enable action before the existing validation error, so the change does not expose a new pre-authentication oracle. The successful site-replication hook remains after mutation and is not called for denied requests.
+Invalid `status` values still select the default Enable action before hitting the existing validation error, avoiding any pre-authentication validation oracle. The site-replication hook runs only after a permitted mutation succeeds.
 
-This follow-up changes no user behavior and introduces no new policy action. It makes the two already documented group actions enforce the same state-specific contract as their user counterparts.
+## Compatibility and Migration {#compatibility}
 
-## Compatibility and migration {#compatibility}
+No client or API changes are required; the endpoint, query parameters, status strings, response format, and Admin-client methods are unchanged.
 
-No client or API migration is required. The endpoint, query parameters, status strings, success response, and Admin-client method are unchanged.
+Administrators should review custom restricted policies:
 
-Policy review is required for restricted administrative roles:
-
-- a role that should only disable users needs `admin:DisableUser`;
-- a role that should only enable users needs `admin:EnableUser`;
-- a role that must do both needs both actions;
+- roles that only disable users require `admin:DisableUser`;
+- roles that only enable users require `admin:EnableUser`;
+- roles that perform both operations require both actions;
 - `consoleAdmin` and other `admin:*` policies are unaffected;
-- a legacy custom policy containing only `admin:EnableUser` can no longer use that permission to disable users and must add `admin:DisableUser` if both operations are intended.
+- legacy custom policies granting only `admin:EnableUser` can no longer disable users and must add `admin:DisableUser` if both operations are intended.
 
-The equivalent rules now apply to group-management roles:
+The same rules apply to group-management roles:
 
-- a role that should only disable groups needs `admin:DisableGroup`;
-- a role that should only enable groups needs `admin:EnableGroup`;
-- a role that must do both needs both actions;
-- a legacy EnableGroup-only role can no longer disable groups.
+- roles that only disable groups require `admin:DisableGroup`;
+- roles that only enable groups require `admin:EnableGroup`;
+- roles that perform both operations require both actions;
+- legacy EnableGroup-only roles can no longer disable groups.
 
-This is a source-level compatibility change in authorization behavior, not a wire-protocol break.
+## Upstream Disposition and Delivery {#upstream}
 
-## Upstream disposition {#upstream}
+Upstream issue #21478 and PR #21482 remain on the archived `minio/minio` repository as historical context.
 
-As of this record, upstream issue #21478 and PR #21482 are still displayed as open. The upstream repository is archived and read-only. An attempt to leave the single-authorization analysis on the PR was rejected by GitHub because archived, locked discussions cannot accept comments.
+### Delivery State {#delivery}
 
-The upstream artifacts remain useful provenance but are no longer an actionable delivery path. SILO owns its implemented semantics, tests, merge, release note, and eventual production verification.
-
-## Delivery state {#delivery}
-
-| Gate | User repair | Group follow-up on 2026-08-28 |
+| Milestone | User repair | Group follow-up |
 | --- | --- | --- |
-| Design decision | complete | complete |
-| Implementation and local tests | complete | complete |
-| Independent adversarial review | complete | complete, GO |
-| Signed-off commit | complete | `229fe2b3c` on `main` |
-| Push, PR CI, and merge | complete | merged 2026-08-29 |
-| Tagged SILO release | Server 20260903 | Server 20260903 |
-| Release package or container image | See the 20260903 release record | See the 20260903 release record |
-| Deployment | not established | not established |
-| Production behavior | not established | not established |
-| Upstream merge | unavailable; repository archived | not applicable |
+| Signed-off commit | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) (merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)) | `229fe2b3c` |
+| Shipped release | [Server 20260903](/blog/release/silo-20260903/) | [Server 20260903](/blog/release/silo-20260903/) |
 
 ## Conclusion {#conclusion}
 
-The repairs make the authorization model tell the truth. Enabling and disabling users or groups are opposite state transitions with different operational risk, and SILO already exposes different policy actions for each direction. Each handler must therefore select the action from the requested target state and authorize once before mutation.
+Enabling and disabling users or groups carry opposite operational risks. Selecting the required action from the target state and authorizing once before mutation aligns handler enforcement with the IAM policy vocabulary.
 
-The code change is small because the design boundary is clear. The durable result is larger: an explicit permission matrix, rejected compatibility alternatives, an invalid-input rule, a four-way integration test, a clean merge record, migration guidance, and an honest release boundary.
-
-The enable/disable repair is separate from the later `admin:ChangeMyPassword` split. Before upgrading the September candidate, preserve the paired Deny needed for an existing self-password restriction using the [password migration guide](/compatibility/password-permissions/).
+This enable/disable repair is independent of the later `admin:ChangeMyPassword` split; see the [password migration guide](/compatibility/password-permissions/) when upgrading across September releases.

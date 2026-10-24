@@ -11,271 +11,124 @@ draft: false
 url: "/blog/design/iam-revocations/"
 ---
 
-> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+SILO retains the revision of every deleted IAM record so an offline site cannot resurrect a deleted identity or policy grant when it reconnects. This mechanism covers built-in users, service accounts, groups, policy documents, and policy mappings across the user, STS-parent, and group namespaces. When a built-in user is deleted, older service accounts, STS temporary credentials, and group memberships remain revoked even if an administrator later recreates a built-in user with the same name.
 
+The persistent IAM revocation architecture (PR [`#191`](https://github.com/pgsty/silo/pull/191), [`#192`](https://github.com/pgsty/silo/pull/192), commit `f99ed829b5eba549160725f035156c9e020b6a07`) shipped in [Server 20260916](/blog/release/silo-20260916/) to close [SN-2026-013](/blog/security/20260916-release-hardening/#sn-2026-013); the scoped STS revocation extension for direct `RevokeTokens` operations ([`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce)) shipped in [Server 20261018](/blog/release/silo-20261018/#security). For multi-site rollout procedures, see the [IAM upgrade and recovery runbook](/operations/replication/iam-upgrade/).
 
-**Source status, 2026-09-16:** [#191](https://github.com/pgsty/silo/pull/191) and [#192](https://github.com/pgsty/silo/pull/192) are merged into main, but are absent from published Server 20260903. They change persistent IAM state and require a coordinated upgrade. Follow the [upgrade and recovery runbook](/operations/replication/iam-upgrade/) and [SN-2026-013](/about/security-advisories/#sn-2026-013).
+## October 18: Scoped STS Revocation {#scoped-sts-20261018}
 
-SILO retains the version of a deleted IAM record so an offline site cannot
-restore an older identity or grant when it reconnects. This covers built-in
-users, service accounts, groups, policy documents, and policy mappings in their
-actual user/STS-parent/group namespaces. It also revokes the deleted built-in
-user's older service accounts, STS credentials and group grants across deliberate
-same-name recreation.
+Commit [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce) in [Server 20261018](/blog/release/silo-20261018/#security) extends the September durable revocation mechanism to direct `RevokeTokens` operations.
 
-## October 18: scoped STS revocation {#scoped-sts-20261018}
+In earlier releases, a node could miss an issuance notification and revoke only the tokens present in its local memory cache. With this fix, `RevokeTokens` reads persisted STS identity records, merges them with in-memory entries, filters by the target parent identity and optional token type at the operation cutoff, and commits a dedicated tombstone for each matching immutable token key. Even if one key in the batch fails to save, all committed keys are immediately notified to sibling nodes and replicated to peer sites while returning the save error to the caller for retry.
 
-**Release source:** [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce), included in [Server 20261018](/blog/release/silo-20261018/), now publicly released. This extends the September mechanism to direct `RevokeTokens` operations; it does not change the historical September acceptance below.
+Private IAM replication messages carry the token deletion marker and expiration time. A revocation message that arrives before its corresponding creation message still blocks subsequent replay, and a creation message with a newer event timestamp cannot resurrect an immutable token. Existing deletion healing retries offline delivery. Full IAM refreshes on both object storage and `etcd` rebuild STS revision records and evict revoked entries from the active cache even if concurrent IAM writes defer a full cache swap. Tombstones are retained until the token's natural expiration plus clock-skew allowance, or retained conservatively when expiration is unknown.
 
-Previously, a node could miss an issuance notification and revoke only the tokens present in its own cache. The operation now reads durable STS identities, combines them with cached entries, and selects the requested parent and optional token type at the operation cutoff. It commits a tombstone per selected immutable token key. Every committed key is notified to sibling nodes and sent to replication peers, even if another key fails to save; the caller still receives the save error.
+A single revocation snapshot covers STS identities known to the requesting cluster prior to the cutoff; tokens issued at an isolated site and never replicated into this cluster fall outside that snapshot. Keys issued after the cutoff, unrelated users, and reusable parent-policy mappings are unaffected. All participating nodes must be upgraded together because older binaries do not implement the private STS replication message.
 
-The private IAM replication message carries the token deletion and expiration. A revocation arriving before its creation still prevents later replay; a creation with a later event timestamp cannot revive that immutable token. Existing deletion healing retries offline delivery. Full object/etcd IAM refreshes rebuild STS revisions and evict revoked cache entries even when concurrent IAM writes defer a complete cache swap. Tombstones retain the token expiration plus clock-skew allowance, or remain conservative when expiration is unknown.
+**Execution cost:** An administrative revocation enumerates persisted STS identities and filters by parent and token type, so read volume and temporary map allocations scale linearly with active token count. The scan releases the authentication-cache lock while holding the IAM write serialization lock (`writeMu`), so concurrent IAM admin writes may briefly wait. `etcd`'s periodic refresh also reads STS records. Ordinary cached S3 authentication incurs zero extra network calls, and no new background timers or external dependencies are introduced.
 
-The snapshot covers identities known to the requesting cluster before the cutoff. A token issued at an isolated site and never replicated into this cluster is outside that snapshot. Newly issued keys, unrelated users and reusable parent-policy mappings are unchanged. This adds neither a global issuance barrier nor instantaneous revocation during a network partition. Upgrade all participating servers together: older peers do not implement the new private STS message.
+Regression tests in [`iam-sts-revocation_test.go`](https://github.com/pgsty/silo/blob/0cd388c666f8211f552604ae73448a066e9c25ce/cmd/iam-sts-revocation_test.go) cover three-site outage/restart recovery and four processes sharing IAM storage. After upgrading, verify old-token rejection across endpoints, continued validity of newly issued tokens, and state recovery across restarts as detailed in the [upgrade procedure](/operations/replication/iam-upgrade/).
 
-**Cost:** an administrative revoke enumerates all durable STS identities, then filters by parent/type; its read and temporary-map cost grows with token count. The scan releases the authentication-cache lock while retaining IAM write serialization, so other IAM writes may wait. Etcd's existing periodic refresh also reads STS records. Ordinary cached authentication gains no network call, and no new background timer or dependency is introduced.
+## Ordering and Persistence {#ordering}
 
-Regression coverage is in [`iam-sts-revocation_test.go`](https://github.com/pgsty/silo/blob/0cd388c666f8211f552604ae73448a066e9c25ce/cmd/iam-sts-revocation_test.go). The same-source local artifact acceptance covered three-site outage/restart recovery and four processes sharing IAM storage. It does not establish a cross-site convergence SLA. Verify old-token rejection at every endpoint, a fresh token's continued validity and recovery after a peer restart; see the [upgrade procedure](/operations/replication/iam-upgrade/).
+Deletion records are stored at the original IAM configuration paths and contain the originating timestamp, `Deleted`, and any required `RevokedBefore` boundary; identity deletion records never store secret keys or session tokens. Normal IAM listings and policy evaluation hide deleted records automatically. Both object storage and `etcd` serialize version comparisons and writes per path using a distributed lock, persisting the originating source timestamp directly rather than overwriting it with the receiving node's local clock.
 
+Revision ordering follows five deterministic rules:
+- Older events never overwrite a newer revision; at an identical timestamp, a deletion wins over a live record.
+- A deliberate local same-name recreation receives a revision newer than the stored deletion tombstone.
+- If an older user or group deletion message arrives late after a same-name recreation, the server updates and retains its `RevokedBefore` boundary while keeping the newer recreated live record intact.
+- Receiving an already-applied tombstone is a no-op that neither rewrites the record nor advances its revision.
+- Cold-loading persisted IAM state on startup applies the exact same merge rules.
 
-## Ordering and persistence {#ordering}
+Writing the user or group revision is the authoritative commit point of a deletion; cleanup of policy mappings and child credentials follows afterward. A failure during dependent cleanup never rolls back the committed parent revocation: the API returns the cleanup error to the caller while still notifying sibling nodes on the same backend to reload the committed revocation state. Consequently, an `HTTP 500` cleanup error on admin delete does **not** mean the old identity remains active. Administrators can safely retry the deletion while keeping IAM writes and same-name recreation paused. When dependent cleanup fails after commit, the admin handler skips the immediate cross-site push hook and lets the background deletion-healing loop propagate the tombstone across sites. Sibling nodes reload current shared state upon notification, so a delayed notification cannot delete a subsequently recreated identity; `etcd` siblings also receive persisted changes via watches.
 
-Deletion records occupy the original IAM configuration paths. They contain the
-originating timestamp, `Deleted`, and, where required, `RevokedBefore`; identity
-deletion records contain no secret key or session token. Normal IAM listings and
-authorization hide deleted records. Object storage and etcd both serialize each
-path's version comparison and write with a distributed lock. The source timestamp
-is persisted without replacing it with the receiving node's clock.
+Operators must keep node clocks synchronized via NTP and monitor clock skew. Revision ordering relies on source wall-clock timestamps with monotonic advancement for consecutive local writes to the same path, without establishing cross-site causal ordering for concurrent writes.
 
-Older events cannot overwrite a newer revision. At an identical timestamp, a
-deletion wins over a live record. A local deliberate recreation receives a
-version newer than the stored deletion. An older user/group deletion arriving
-after recreation retains its revocation boundary while preserving the newer
-live record. Receiving an already-applied tombstone does not rewrite or advance
-it. These rules also apply after cold loading persistent IAM state.
+## Users, Child Credentials, and Groups {#identities}
 
-The user or group revision is the commit point of deletion. Cleanup of mappings
-and children follows that commit; cleanup failure cannot undo it. The API returns
-the cleanup error and still notifies sibling nodes to reload the committed
-state. Such an error does **not** mean the identity is still active. Retry the intended revocation only while IAM writes and same-name recreation are paused. When the API returns a committed-cleanup error, the admin
-handler does not send its immediate cross-site hook; cross-site propagation
-relies on the normal deletion-healing retry. Sibling deletion notifications reload current shared state,
-so a delayed notification cannot delete a subsequently recreated identity.
-Etcd siblings also receive persistent changes through watches. Failed
-notifications/watches remain eventual propagation, not a distributed
-instantaneous revocation transaction.
+A recreated user retains its historical `RevokedBefore` boundary. Newly created service accounts and built-in STS credentials carry a cryptographically signed `siloParentRevocation` claim recording the parent revocation boundary known at issuance. Editing or replaying an old child credential never updates this signed claim; thus old children remain invalid even if their own `UpdatedAt` timestamp is newer than the parent deletion, whereas children minted for the recreated parent work normally. The claim is extracted from verified tokens during credential load and write.
 
-Keep node clocks synchronized and monitor offsets. Ordering uses source wall
-clock timestamps, with monotonic advancement for local writes to the same path.
-It does not establish causal order between concurrent writers at different sites
-or resolve conflicting live updates with identical timestamps deterministically.
+In site replication, a service-account snapshot with a newer revision can replace an older service account with the same `AccessKey` (including deliberate owner changes or secret rotations), while local duplicate `AccessKey` creation remains rejected. Replicated snapshots preserve the `Disabled` status and the service account's own revocation boundary so older policy mappings cannot reattach to the replacement service account. Equal-revision retries reload the committed identity without rewriting storage. Periodic live healing compares source revisions directly—even when the public status summary is unchanged—and includes disabled identities as healing sources.
 
-## Users, child credentials and groups {#identities}
+Service-account snapshots also preserve their absolute expiration timestamp instead of reapplying the receiving site's minimum lifetime for newly minted credentials. A newer but already-expired snapshot still supersedes the old key, is denied by authentication, and is collected into a durable service-account tombstone during normal loading. If cache or claim loading fails, the receiver returns an error to trigger retry rather than acknowledging prematurely; once a replacement commits, the stale cached secret is evicted immediately. If a replicated snapshot collides with an existing built-in user or cached STS identity of a different credential kind, the server rejects the type conversion and logs an error for explicit administrative resolution.
 
-A recreated user retains `RevokedBefore`. New service accounts and built-in STS
-issuances carry a signed `siloParentRevocation` claim identifying the parent
-boundary known at issuance. Editing or replaying an old child does not update
-this claim. Old children remain invalid even when their own update timestamp is
-newer than the parent deletion; children issued for the recreated parent remain
-valid. Claims are read from verified tokens on credential load/write.
+Each group member carries an individual `MemberGrants` timestamp. Adding or removing other members or toggling the group's enabled status does not refresh existing members' grant timestamps. A membership is effective only when its `MemberGrants` timestamp is newer than both the user's and the group's retained `RevokedBefore` boundaries; both group listings and IAM policy evaluation enforce the same effective-membership check. Peer replication snapshots preserve original grant timestamps (including unknown legacy timestamps) rather than treating a recent snapshot sync time as a fresh grant to a revoked user; only a new explicit administrative group grant restores group access.
 
-A newer replicated service-account snapshot can replace an older service with
-the same access key, including a deliberate change of owner or secret. Local
-duplicate creates remain rejected. Snapshots preserve disabled status and the
-service's own revocation boundary, so earlier mappings cannot attach to the new
-service. Equal-version retries reload the committed identity without rewriting
-it. Periodic live healing compares source versions even when the public status
-summary is unchanged, and includes disabled identities as healing sources.
-Service snapshots also preserve their absolute expiration. The receiving site
-does not reapply the local minimum lifetime for a newly issued credential. A
-newer already-expired snapshot still supersedes the old key, is denied by
-authentication, and is collected into a durable service tombstone by normal
-loading. Cache/claims loading failures are returned for retry, not acknowledged;
-after a committed replacement the stale cached secret is evicted immediately.
-Collisions with an existing built-in or cached STS identity report an error and
-require an explicit administrative resolution; replication cannot change its
-credential kind. Concurrent conflicting service updates with exactly the same
-timestamp can retain different winners at different sites; the status summary
-does not resolve that case.
+The inherited live-group snapshot merge adds members incrementally and does not automatically reconcile an ordinary member removal missed during a site outage; the mechanism here governs user/group deletion boundaries and isolation across same-name recreation.
 
-Each group member has its own `MemberGrants` timestamp. Changing another member
-or the group's enabled status does not reissue everyone else's grants. Effective
-membership requires the grant to be newer than both the user's and the group's
-retained boundaries. Listings and policy evaluation use the same effective
-membership. Peer snapshots preserve grant times, including unknown legacy grant
-times; they cannot treat a recent snapshot time as a fresh grant to a revoked
-identity. A new explicit administrative group grant can restore access.
+## Retention and Expiration Reclamation {#retention}
 
-This does not implement a general conflict-resolution protocol for all group
-membership edits. In particular, the inherited live-group snapshot merge adds
-members and does not reconcile a missed ordinary member removal. Removing a
-member from a live group during a site outage is a separate known limitation;
-do not infer that this change resolves it. User/group deletion boundaries and
-same-name recreation are covered here.
+Tombstones for permanent identities (built-in users and service accounts), groups, policy documents, and policy mappings have no automatic TTL. Disconnected remote sites or cold backups may reconnect after arbitrary intervals; peer replay acknowledgements suppress redundant network sends but **never** trigger physical garbage collection of permanent tombstones.
 
-## Retention and expiration {#retention}
+When an immutable STS temporary token expires naturally, the server physically removes its token-key record and any legacy mapping without creating a permanent tombstone. Conversely, an explicitly revoked STS token retains its tombstone until the token's original expiration plus clock-skew allowance, blocking any replay carrying a later event timestamp. The `etcd` backend uses native expiration leases, while the object-storage backend reclaims expired STS tombstones during its existing credential load and purge cycles. Records with unknown expiration are retained conservatively.
 
-Permanent identities, groups, policy documents and mappings have no automatic
-tombstone TTL. A disconnected peer or an old backup may return arbitrarily late.
-Successful replay acknowledgements are an optimization, **not** permission to
-garbage-collect this history.
+Optional expiration-reclamation writes run best-effort under a short lock timeout budget: if a cleanup write fails, that load cycle halts optional reclamation, logs the error, and continues loading active users while leaving expired credentials denied under their existing durable revision until the next cycle retries. External IdP identity disablement is treated as an early revocation rather than natural expiration, so its cached STS tokens and service accounts are included in cleanup. Expiring service accounts retain a durable revision record because their `AccessKey` can be updated and reused and an earlier version might have had no expiration.
 
-Natural expiration of an immutable STS token physically removes its token-key
-record and any legacy token-key mapping, without generating a permanent
-tombstone. An early STS revocation is retained until that token's expiration plus
-the existing clock-skew allowance. Replaying the same revoked token with a later
-event timestamp cannot recreate it. Etcd uses an expiration lease; object storage
-collects expired STS tombstones during its existing credential loading/purge.
-A record with unknown expiration is retained conservatively. Cleanup writes are
-best effort and use a short lock budget. If one fails, that load stops optional
-reclamation, reports the error and still loads healthy users; expired credentials
-stay denied and retain their existing durable version. The next load retries.
-Healthy cleanup has no fixed record quota. The reusable STS
-parent policy mapping is not assigned the token's TTL by deletion cleanup.
-External-IDP disablement is an early revocation, not natural token expiration,
-and its cached STS and service accounts are included in cleanup. Expiring service
-accounts retain a durable revision because their access keys are reusable and
-an older version might have no expiration.
+In the September `20260916` release, deleting a built-in parent user invalidated all older child credentials via the persisted parent boundary (including children absent from the deleting node's cache); cross-site per-token sync for direct `RevokeTokens` calls was completed by the [October 18 scoped STS extension](#scoped-sts-20261018).
 
-In the September implementation, direct per-token `RevokeTokens` delivery between sites was not a guarantee of
-this change. The guarantee for built-in parent deletion follows from the durable
-parent boundary, including children not currently present in the deleting node's
-cache.
+## Healing Loop, Failure Handling, and Operational Cost {#healing}
 
-## Healing, failures and operational cost {#healing}
+Each server process starts a single background healing loop. Losing its distributed leader lease pauses the loop until leadership is reacquired rather than terminating it permanently, and configuration hot-reloads do not spawn duplicate loops. A 30-second interval separates leadership acquisition and each completed healing pass.
 
-Each process starts one healing loop. Losing its distributed leadership lease
-pauses work until leadership is reacquired; it does not permanently terminate
-healing. Configuration reloads do not create extra loops. The 30-second interval
-starts after leadership is acquired and after each completed pass. Initial lock
-retries and endpoint recovery can add further delay; it is not a convergence SLA.
+Normal IAM loaders maintain an in-memory index of deletion records and revocation boundaries (without secrets). The healing loop reads this in-memory index directly, avoiding a repeated full disk walk of `config/iam/` every 30 seconds; persistent storage records (including tombstones) are scanned only on process startup and full IAM refresh.
 
-The normal IAM loaders maintain an in-memory index of deletion records and
-retained boundaries, without secrets. Healing uses this index; it does not add a
-second full walk of `config/iam/` every cycle. Existing full IAM loading still
-scans persistent records, including tombstones, at startup and on refresh.
+Healing sends batches of at most 128 records per peer. The sender tracks the highest revision acknowledged per path and peer, and unrelated mutations on either site do not reset existing acknowledgement progress. If a batch fails, it stays pending for retry while subsequent independent batches proceed; a lost response simply triggers a safe idempotent replay. Each pass has a bounded total duration, preserving acknowledgements received before timeout. The sync protocol reports both node name and process instance ID: load-balancer switching across known instances preserves acknowledgements, whereas a newly started process instance conservatively invalidates prior acknowledgements once to re-verify state. Always stop affected server processes before restoring persistent IAM state from backup so a restored node cannot reuse stale in-memory acknowledgements.
 
-Each peer receives batches of at most 128 records. The sender remembers which
-path/version each peer acknowledged. Unrelated new changes at either site do not
-reset that progress. A failed batch remains pending while later independent
-batches can progress; a lost response may cause safe idempotent replay. A pass
-has a bounded duration, and its successful acknowledgements survive that timeout.
-The protocol reports each node name and process instance. Switching between
-known node instances behind a load balancer preserves acknowledgements. A new
-node instance conservatively invalidates prior acknowledgements once; repeated
-switches among those known instances do not reset progress. Restore persistent state only with the affected processes
-stopped, so a restore cannot reuse an old process acknowledgement.
+In steady state, healing iterates and sorts the retained in-memory set, checks peer protocol status, and suppresses repeated deletion `PUT` requests once acknowledged. Memory usage scales linearly with retained path count and peer count, while cold-start storage reads scale with total historical records. On first upgrade, existing live records that previously received different local timestamps on different receiving sites will trigger a one-time revision-alignment wave; factor those storage writes and sibling notifications into maintenance window planning.
 
-Steady-state healing still traverses/sorts the retained in-memory set and checks
-the peer's protocol status. It suppresses repeated deletion PUTs once acknowledged.
-Memory use scales with retained paths and peers; startup storage reads scale with
-history. This release does not provide general history compaction.
-After upgrading, older live records whose receiving sites originally assigned
-different timestamps can require an initial reconciliation wave. Allow for its
-storage writes and sibling notifications when planning the maintenance window.
+Cached credential lookups check only the in-memory parent-revision index with zero extra storage I/O, while STS issuance and cold credential loads check the persisted parent revision. Revision I/O and distributed lock waits release the IAM cache read/write lock while a dedicated local writer mutex (`writeMu`) preserves per-node write ordering under bounded timeout contexts (see [IAM Policy Reloads: Lock Scope, Cancellation, and Time Budgets](/blog/design/iam-policy-cancellation/)).
 
-The cluster IAM metrics include `revocation_records`,
-`revocation_heal_failures`, `revocation_heal_duration_millis`, and
-`revocation_heal_last_success_timestamp_seconds`. Errors are also logged. A
-nominal 30-second scheduler interval is not a convergence deadline: outages,
-large backlogs, lock contention and failed requests can require more passes.
+## Replication Protocol and Coordinated Upgrade {#upgrade}
 
-Cached credential lookup checks the in-memory parent revision index and performs
-no additional storage read. STS issuance and cold credential loading still consult
-the persistent parent revision. Revision I/O and distributed lock waits release
-the IAM cache lock while a separate local writer mutex preserves write order.
-These operations have bounded contexts, including etcd lock and lease cleanup.
+The versioned inter-site replication endpoint `/minio/admin/v3/site-replication/peer/iam-revisions` transports source revisions, member grant timestamps, and user/group revocation items without altering public Admin client SDKs or S3 APIs. Older server binaries reject this route, and the sender reports the sync failure directly rather than falling back to legacy routes that would strip revision metadata. Existing legacy IAM routes remain readable for backward compatibility.
 
-## Protocol and supported upgrade {#upgrade}
+All participating nodes—including nodes that share an IAM storage backend without site replication—must be upgraded together; mixed old/new binaries on the same backend and rolling downgrades are unsupported because older binaries do not understand tombstones or signed parent boundaries. Execute coordinated upgrades during a planned maintenance window:
 
-The server-owned versioned route is
-`/minio/admin/v3/site-replication/peer/iam-revisions`. It carries source versions,
-member grant times and distinct user/group revocation items without changing the
-admin client SDK or S3 API. Older servers reject this route. The sender reports
-the failure and does not fall back to a route that would discard the metadata.
-The existing legacy IAM route remains readable for best-effort compatibility;
-this does not confer the new guarantees on an older peer.
+1. Pause all IAM mutations and isolate any offline site or backup whose state is unknown.
+2. Back up each site's underlying IAM storage and required KMS/encryption keys; online IAM admin exports omit deletion tombstones and cannot substitute for a storage-level backup.
+3. Stop all nodes sharing the same IAM backend, replace the binaries, and start them on the new version. Resume IAM writes only after all participating sites are upgraded.
+4. Inspect IAM load logs, site-replication status, and revocation convergence metrics; verify that representative revoked credentials are rejected and newly issued credentials succeed.
+5. Explicitly reconcile any revocations lost prior to upgrade: delete surviving stale records on sites that still hold them, and rebuild long-offline peers from approved state before reconnecting them rather than joining an unknown old snapshot to the cluster.
 
-All participating servers must be upgraded for the guarantee in this document.
-Mixed old/new nodes sharing an IAM backend and rolling downgrade are unsupported:
-older binaries do not interpret tombstones or signed parent boundaries correctly.
-Use a maintenance window for coordinated upgrade:
+Child credentials issued by pre-upgrade binaries for a recreated parent lack the signed `siloParentRevocation` claim and must be reissued after upgrading; parent identities that have never undergone deletion and same-name recreation keep their existing credential behavior unchanged.
 
-1. Pause IAM changes and isolate any offline site or backup whose state is unknown.
-2. Back up each site's complete IAM storage and required encryption material. A
-   live IAM admin export omits deletion history and is not an adequate backup.
-3. Stop all nodes sharing each site's IAM backend, replace their binaries, and
-   restart them on the upgraded version. Complete this for every participating
-   site before relying on the new revocation semantics.
-4. Check IAM loading, site-replication errors and revocation convergence. Verify
-   representative old credentials are denied and deliberately reissued ones work.
-5. Resolve pre-upgrade revocations explicitly. Absence cannot reconstruct an
-   already-lost deletion version: remove surviving old records on the sites that
-   still have them, and rebuild stale offline peers from approved state before
-   admitting them. Do not reconnect an unknown old snapshot just to discover its
-   deleted credentials.
+Unmodified built-in policies remain protected against local deletion. If an administrator explicitly overrides a built-in policy and later deletes that override, the durable deletion tombstone prevents reload from automatically recreating the default built-in policy; to restore it, run an explicit policy-create operation. Deleting a non-existent policy locally remains idempotent without creating a tombstone, whereas a replicated deletion for an unknown policy retains its revision record.
 
-Credentials issued by an older server for a recreated parent lack the required
-signed boundary and must be reissued by an upgraded server. Parents without any
-retained revocation history preserve existing credential behavior.
+To roll back, stop and isolate the affected sites and audit permission changes since the backup before restoring compatible state. Restoring an older backup discards revocations committed after the backup point and requires permission reconciliation and key rotation before reopening traffic. Never manually delete tombstone files online or convert only live records to force an older binary to start.
 
-A pristine built-in policy remains protected from local deletion. If an
-administrator explicitly overrides that policy and later deletes the override,
-the durable deletion now suppresses automatic recreation of the built-in policy
-on reload. This prevents reload from undoing the deletion. Restore the policy by
-an explicit policy-create operation if desired. Local deletion of a nonexistent
-policy remains idempotent and does not create a new tombstone; replicated
-unknown deletions retain their version.
+## Regression and Performance Verification {#verification}
 
-For rollback, stop and isolate the affected sites and assess changes since the
-backup before restoring compatible state. Restoring an older backup can itself
-lose later revocations and requires reconciliation/rekeying before access is
-reopened. Do not delete tombstones online or convert only live IAM records to
-make an older binary start. Server, client, Console, package and deployment
-acceptance remain separate delivery gates of the maintained PGSTY stack.
+Focused regression suites reside in `iam-revocation_test.go`, `iam-revision_test.go`, `iam-revision-lock_test.go`, `iam-revision-boundary_test.go`, `iam-replication-protocol_test.go`, `iam-credential-retention_test.go`, `iam-peer-reload_test.go`, and `iam-replay_test.go`. Point `SILO_TEST_IAM_REVOCATION_ETCD` at a disposable `etcd` instance to run the `etcd` lifecycle, distributed lock, and boundary suites under isolated key namespaces.
 
-## Regression and performance checks {#verification}
+Benchmarks cover:
+- `BenchmarkIAMCachedCredential` and `BenchmarkIAMSetTempUser`: baseline latency for cached authentication and temporary user issuance.
+- `BenchmarkIAMRevisionConvergedHealing`: steady-state in-memory index traversal and zero-duplicate-`PUT` verification at 1,000 and 10,000 retained records.
+- `BenchmarkIAMColdLoadExpiredServices`: cold-start loading and cleanup latency with 100 or 1,000 expired reusable credentials (run with `-benchtime=1x`).
 
-Focused coverage is in `iam-revocation_test.go`, `iam-revision_test.go`,
-`iam-revision-lock_test.go`, `iam-revision-boundary_test.go`,
-`iam-replication-protocol_test.go`, `iam-credential-retention_test.go`,
-`iam-peer-reload_test.go`, and `iam-replay_test.go`. Set
-`SILO_TEST_IAM_REVOCATION_ETCD` to a disposable etcd endpoint to include backend
-lifecycle/locking/boundary tests; they use isolated key namespaces.
+## Error Semantics and Observability {#errors}
 
-`BenchmarkIAMCachedCredential` and `BenchmarkIAMSetTempUser` can be run against
-the pre-change source for a comparable local baseline.
-`BenchmarkIAMRevisionConvergedHealing` covers 1,000 and 10,000 retained records;
-it measures steady-state index/network work and asserts zero repeated PUTs. Its
-fake peer does not measure durable catch-up throughput.
-`BenchmarkIAMColdLoadExpiredServices` measures loading and cleanup with 100 or
-1,000 expired reusable credentials; run it with `-benchtime=1x`. Use actual multi-site
-signed S3/STS tests and deployment-specific latency/scale measurements in
-addition to these component tests.
+**October 23 update ([`pgsty/silo#250`](https://github.com/pgsty/silo/pull/250)):** [LDAP Long DNs](/blog/design/ldap-long-dn/) distinguishes a pure-ASCII path component that exceeds 255 bytes (and therefore could never be persisted on the object IAM backend) from an existing record that cannot currently be read. `loadIAMConfigBytesWithMetadata` translates only the former to `errConfigNotFound`; full-path length errors (`PATH_MAX`) and genuine storage failures still fail closed so an existing revocation record can never be masked. Writing direct user policies or parent-revision tombstones for overlong DNs remains unsupported on the object backend.
 
-## Errors and observability {#errors}
+When an authoritative revocation revision commits to storage but a subsequent dependent cleanup step fails, the Admin delete endpoint may return `HTTP 500`; the old identity is already revoked. Pause IAM mutations and same-name recreation, retry the delete operation, and verify old-credential rejection across sites. Whenever a persisted parent revision cannot be read or token issuance cannot be committed, STS fails closed via `STSInternalError` rather than minting a credential with a guessed boundary.
 
-**October 23 clarification:** [LDAP long-DN reads](/blog/design/ldap-long-dn/)
-distinguish an ASCII key component that cannot be stored from an existing record
-that cannot currently be read. Server #250 handles only the former as absence;
-full-path limits and genuine storage failures still propagate. Overlong parent
-revision writes remain unsupported by the object backend.
+Scrape each process's authenticated `/minio/metrics/v3/cluster/iam` endpoint for observability:
 
-An admin delete can return HTTP 500 after the authoritative revocation has committed but dependent cleanup failed. It is not evidence that the old identity remains usable. Retry the intended revocation while IAM changes and same-name recreation are paused, then verify old and reissued credentials at every site. When a persistent parent revision cannot be read or issuance cannot be committed, STS fails closed through an internal-error path, including `STSInternalError`; it must not mint a credential by guessing a missing boundary.
+| Metric Name | Description |
+| :--- | :--- |
+| `minio_cluster_iam_revocation_records` | Total deletion tombstones and parent revocation boundaries in this process's in-memory index |
+| `minio_cluster_iam_revocation_heal_failures` | Failed healing convergence passes since process startup |
+| `minio_cluster_iam_revocation_heal_duration_millis` | Duration of the most recent healing pass in milliseconds |
+| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | Unix timestamp (seconds) of the last successful healing pass |
 
-Scrape each process's authenticated `/minio/metrics/v3/cluster/iam` endpoint:
+Index metrics are reported per process; summing across sibling nodes sharing a backend double-counts shared records. Healing metrics advance only when site replication is enabled and the node holds the leader lease; in shared-backend deployments without site replication, zero values on the last three metrics are expected.
 
-| Metric | Interpretation |
-| --- | --- |
-| `minio_cluster_iam_revocation_records` | Retained deletion records and parent boundaries in this process's index |
-| `minio_cluster_iam_revocation_heal_failures` | Failed convergence passes since process start |
-| `minio_cluster_iam_revocation_heal_duration_millis` | Duration of the last pass |
-| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | Unix time of the last successful pass |
+## Why Simpler Alternatives Fail {#alternatives}
 
-The index is per process; summing it across siblings double-counts shared state. Healing requires site replication and a leadership lease. Shared-backend deployments without site replication do not run the site healing pass; zero healing metrics are not evidence of a failure there. A healthy counter on one leader does not prove every peer's credential checks pass.
+In multi-site deployments with offline reconnection, simpler designs fail closed-world security invariants:
 
-## Why simpler alternatives fail {#alternatives}
+1. **Physical deletion without tombstones**: Deleting configuration files outright destroys the ordering evidence needed when an offline node or delayed replication message reconnects, allowing old snapshots to resurrect deleted identities.
+2. **Comparing only the child credential's `UpdatedAt` timestamp**: After a parent user is deleted and recreated, a metadata edit or delayed replay on an old child credential would give it an `UpdatedAt` timestamp newer than the parent deletion and restore access; embedding the signed `siloParentRevocation` boundary at issuance prevents any post-issuance edit from crossing the parent deletion boundary.
+3. **Overwriting source event timestamps with receiver local time**: Destroys source causality and turns an idempotent network retry into a new mutation with a newer timestamp. SILO preserves source timestamps and advances revisions monotonically only on deliberate local writes.
+4. **Assigning a fixed TTL to permanent identity tombstones or exporting only live records**: Offline sites or cold backups can remain disconnected longer than any fixed TTL; expiring permanent identity tombstones or restoring live-only exports erases the historical boundary that blocks credential replay.
 
-Physical deletion alone loses the ordering evidence an offline peer needs. Comparing only the child's update timestamp is also insufficient: editing an old child after a parent deletion would appear newer and could restore access. The signed issuance boundary remains unchanged by such an edit. Replacing a received source revision with local receive time breaks source order and can turn a retry into a new mutation. The implementation preserves source timestamps and separately advances only deliberate local writes. Tombstone TTL or restoring only live export records discards the very history that prevents replay.
-
-The [versioned source](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/iam-revision.go) and [metrics definitions](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/metrics-v3-cluster-iam.go) define this contract. This record replaces the former in-repository IAM design; it is not a production recovery certificate.
+For implementation details, see [`cmd/iam-revision.go`](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/iam-revision.go) and [`cmd/metrics-v3-cluster-iam.go`](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/metrics-v3-cluster-iam.go).

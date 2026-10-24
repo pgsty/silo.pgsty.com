@@ -5,204 +5,72 @@ date: 2026-09-16
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  The decision record for the replicated-tag repairs merged as PR #193 and #196:
-  SSE-KMS destination copies silently dropped tag revision timestamps, and an
-  empty tag value had no representable revision, so a delayed replication event
-  could resurrect deleted tags. Covers the tombstone semantics, the
-  stored-wins tie change, the two-ended upgrade requirement, and the cost of
-  extra metadata copies during resync.
+  The decision record for the replicated-tag repairs merged as PR #193 and #196: SSE-KMS destination copies silently dropped tag revision timestamps, and an empty tag value had no representable revision, so a delayed replication event could resurrect deleted tags. Covers the tombstone semantics, the stored-wins tie change, the two-ended upgrade requirement, and the cost of extra metadata copies during resync.
 tags: [Design, Replication, S3, Review]
 weight: 8
 draft: false
 url: "/blog/design/replicated-tag-ordering/"
 ---
 
-> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+Shipped in [SILO Server 20260916](/blog/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`), [PR #193](https://github.com/pgsty/silo/pull/193) (commit [`03027727d`](https://github.com/pgsty/silo/commit/03027727d)) and [PR #196](https://github.com/pgsty/silo/pull/196) (commit [`680eac66e`](https://github.com/pgsty/silo/commit/680eac66e)) fix two defects in how object tags preserve ordering across bucket replication: SSE-KMS destination copies silently dropping tag revision timestamps (`R4`), and empty tag values lacking a revision timestamp so delayed replication events could resurrect deleted tags (`R5`).
 
-This page records the analysis and repair of two defects in how object tags
-keep their ordering across replication, merged into Server main as
-[PR #193](https://github.com/pgsty/silo/pull/193) (fix
-[`03027727d`](https://github.com/pgsty/silo/commit/03027727d)) and
-[PR #196](https://github.com/pgsty/silo/pull/196) (fix
-[`680eac66e`](https://github.com/pgsty/silo/commit/680eac66e)).
+## The Shared Model: A Tag Value and Its Revision Form One State {#model}
 
-> **As of 2026-09-16:** both fixes are on verified main
-> [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a).
-> They are **not** in the published Server 20260903; use the linked PRs to
-> identify a build containing them.<br>
-> **Delivery boundary:** source acceptance (regression tests plus the R4–R8
-> integration run whose PR #196 checks passed) only. No tag, package, image,
-> or production rollout is established by this record.<br>
-> **Evidence class:** synthetic signed HTTP tests use real single-drive, 16-drive and multi-pool erasure backends; sender, wire-shape and precondition checks also include function-level tests. No customer incident is attributed to these paths.
+Object tags replicate alongside an internal revision timestamp (transmitted over the wire as `X-Minio-Source-Tagging-Timestamp` and stored in `xl.meta` as `x-minio-internal-tagging-timestamp`). On the receiving cluster, `reconcileStoredObjectTags` enforces a simple ordering rule under the object write lock: an incoming replicated tag state wins only when its revision timestamp is strictly newer than the stored revision timestamp.
 
-## The shared model: a tag value and its revision are one state {#model}
+Both defects broke that invariant by dropping the revision timestamp rather than the tag value:
 
-Tags replicate with an internal revision timestamp
-(wire header `X-Minio-Source-Tagging-Timestamp`, stored as `x-minio-internal-tagging-timestamp`). The ordering rule on the receiving
-side is simple: a replicated tagging state wins only when its revision is
-newer than the stored one. Both defects in this family break that rule by
-making the revision — not the value — the part that gets lost:
+- **R4 ([PR #193](https://github.com/pgsty/silo/pull/193)):** Dropped `ReplicationSourceTaggingTimestamp` when constructing `ObjectOptions` on an SSE-KMS destination, causing newer incoming tag updates to lose to older stored state during storage-layer reconciliation.
+- **R5 ([PR #196](https://github.com/pgsty/silo/pull/196)):** Treated an empty tag string (a tag deletion) as having no revision timestamp at all, leaving the replication protocol unable to express *"tags deleted at time $T$"* and allowing delayed pre-delete replication events to resurrect deleted tags.
 
-- **R4** dropped the timestamp on the way *into* an SSE-KMS destination, so
-  newer tag updates lost to stale stored state inside the storage-layer
-  reconciliation.
-- **R5** meant an *empty* value (a deletion) carried no revision at all, so
-  the protocol could not express "deleted at time T" — and a delayed event
-  could resurrect what a client had already deleted.
+## R4: SSE-KMS Destination Copies Dropped Tag Revision Timestamps {#r4}
 
-## R4: SSE-KMS destination copies dropped tag revision timestamps {#r4}
+**Failure mode:** A trusted replication `COPY` to an SSE-KMS encrypted destination returned HTTP `200 OK`, encrypted the object properly, and served plaintext `GET` requests—yet the destination object's tags and tag revision timestamp remained stuck at their previous values. Because the HTTP request succeeded, no replication error or MRF retry was triggered. Inside `reconcileStoredObjectTags`, the missing incoming timestamp caused the older stored tag state to win every comparison.
 
-**Failure form.** A trusted replication COPY to an SSE-KMS encrypted
-destination returned `200`, the object was correctly encrypted, plaintext GETs
-worked — and the destination's tags and their timestamps stayed at the old
-values. Because the HTTP request succeeded, nothing surfaced the loss. The
-storage-layer reconciliation (`reconcileStoredObjectTags`) compares revisions
-under the object write lock; without the incoming timestamp, the old stored
-state won.
+**Trigger surface:** This path is entered not only when a request carries explicit SSE-KMS headers, but also whenever the destination bucket has default SSE-KMS configured or the cluster enables global auto-encryption.
 
-**Trigger surface.** Not only explicit SSE-KMS headers. Bucket-default KMS
-and global automatic encryption hit the same code path, so the defect could
-fire with no KMS header in the request at all.
+**Root cause:** In `putOptsFromReq`, the option builder parsed the trusted `X-Minio-Source-Tagging-Timestamp` header into `ObjectOptions`. Immediately afterward, the SSE-KMS branch constructed and returned a fresh `ObjectOptions` struct literal copying `MTime`, `ETag`, replication trust flags, and the two Object Lock timestamps—while omitting `ReplicationSourceTaggingTimestamp`. That omission originated in upstream commit `c4373ef290` (2021) and survived a 2026 Object Lock patch that added two retention/legal-hold timestamps to the same struct literal.
 
-**Root cause.** The option builder for PUT-like requests parsed the trusted
-source-tagging timestamp into `ObjectOptions`, then the SSE-KMS branch
-constructed and returned a *different* `ObjectOptions` carrying mtime, ETag,
-replication trust, and two Object Lock timestamps — but not
-`ReplicationSourceTaggingTimestamp`. The omission dated back to upstream
-`c4373ef290` (2021); a 2026 Object Lock repair added two more timestamps to
-that literal and still missed this one. Before R5, the consuming path was COPY ordering. R5 adds timestamp persistence for replica PUT and multipart initiation, as well as the duplicate-precondition consumer. Those SSE-KMS paths also depend on R4 preserving the option, so backports must consider the pair together.
+**Fix ([`03027727d`](https://github.com/pgsty/silo/commit/03027727d)):** Forwards `ReplicationSourceTaggingTimestamp: opts.ReplicationSourceTaggingTimestamp` in the SSE-KMS `ObjectOptions` literal. Regression tests verify the full cartesian matrix of destination encryption modes (none, SSE-S3, SSE-KMS with and without key context, SSE-C), trusted vs. untrusted callers, missing/valid/malformed timestamps, and 50 signed ordered `COPY`+`GET` cycles with 1–3 ns spacing across single-drive and 16-drive erasure backends.
 
-**Fix.** One field added to the existing SSE-KMS `ObjectOptions` literal
-([`03027727d`](https://github.com/pgsty/silo/commit/03027727d)), nothing
-else. Regression tests cover every destination encryption (none, SSE-S3,
-SSE-KMS with and without key context, SSE-C) crossed with trusted/untrusted
-source, missing/valid/malformed timestamps, and 50 signed ordered COPY+GET
-cycles across two single-pool backends (single-drive and 16-drive erasure)
-with 1–3 ns event spacing. The KMS cases use a test stub.
+*Note on adjacent SSE-KMS struct fields:* The same SSE-KMS `ObjectOptions` literal also omits the `ProxyRequest` and `Speedtest` fields; that separate observation is tracked independently outside this replication fix.
 
-**No backfill.** A lost source-tagging timestamp cannot be reconstructed at
-the destination. After upgrading, *new* tag events replicate in order; replay
-of old events still follows the timestamp comparison: an incoming event must
-be strictly newer; the stored value wins ties and rejects older events.
+## R5: Empty Tag Values Carried No Revision, Allowing Deleted Tags to Resurrect {#r5}
 
-**Deferred observation.** The same SSE-KMS literal also omits the proxy and
-speedtest option fields; the speedtest flag is read on the storage path, so
-global auto-encryption would drop it on a speedtest PUT. Recorded here as a separate follow-up, without asserting a public issue exists; deliberately not bundled into this repair.
+**Failure mode:** Baseline testing uncovered nine distinct failure cases across single-pool and multi-pool storage backends:
 
-## R5: empty tag values had no revision, so deletions could resurrect {#r5}
+1. `DeleteObjectTagging` never minted a new revision timestamp, so a delayed metadata `COPY` carrying an older tag snapshot overwrote the deletion and restored the old tags.
+2. An incoming replication `COPY` carrying an empty tag set was treated as "no tag update supplied" rather than "tags cleared at timestamp $T$."
+3. An initial replica `PUT` parsed `X-Minio-Source-Tagging-Timestamp` from the wire but never persisted it to `xl.meta`.
+4. When source and target visible tag strings were both empty (or equal), the replication sender skipped metadata replication because `HEAD` does not expose the internal tag revision timestamp, leaving newer deletions or re-additions unreplicated.
+5. When a queued replication event completed, its local status callback wrote the snapshot's old tags back into local metadata over a newer committed `DeleteObjectTagging`—and because the deletion had minted a timestamp in early prototypes or lacked one, the resurrected tags inherited the wrong revision state.
 
-**Failure form.** Nine baseline regressions across real-storage and function-level tests:
+**Root cause:** A tag set and its revision timestamp (including the timestamp of an empty tag set) form a single versioned register. The legacy implementation only stamped, transmitted, and reconciled timestamps when the tag string was non-empty.
 
-- A successful `DeleteObjectTagging` never minted a new revision, so a
-  *later-arriving* trusted metadata COPY with an older view of the tags
-  re-instated them.
-- A newer COPY carrying an *empty* tagging state was ignored — empty meant
-  "nothing to say" instead of "deleted".
-- The first replica PUT parsed the source tag timestamp and never persisted
-  it.
-- Equal visible tag values collapsed to "no replication needed". HEAD does not expose a tag revision, so a newer deletion or re-addition was invisible and ordering was not restored.
-- A queued replication event's completion callback wrote the old tags from its
-  snapshot back over an already-committed deletion — and without a timestamp,
-  the resurrected set inherited the deletion's newer revision, which is worse
-  than the originally-reported symptom.
+**Fix ([`680eac66e`](https://github.com/pgsty/silo/commit/680eac66e)):**
 
-**Root cause.** A tag value and its timestamp (including the empty value's
-timestamp) constitute one state. The old protocol could only represent
-non-empty states: DELETE-tagging never minted a revision, the sender only
-attached timestamps in the non-empty branch, and the receiver only made
-decisions in the non-empty branch.
+1. **Every tagging mutation mints a monotonic revision:** `PutObjectTagging` and `DeleteObjectTagging` unconditionally stamp a UTC `RFC3339Nano` revision timestamp regardless of whether replication is currently active on the bucket. Under the object write lock, the storage layer enforces strict monotonicity: if a new local timestamp is $\le$ the stored revision, it advances to $\text{stored} + 1\text{ ns}$; on multi-pool clusters, the coordinator computes a unified timestamp strictly greater than the maximum revision across all pools.
+2. **Sender transmits tombstones:** Empty tag sets with a recorded revision timestamp transmit `X-Minio-Source-Tagging-Timestamp` as a deletion tombstone. Objects that never had tags (empty value and no recorded revision) do not fabricate a tombstone. If a stored timestamp is malformed on disk, the sender fails closed and retries via MRF until an explicit tag write replaces it.
+3. **Receiver reconciles tombstones:** Replication `COPY` captures the existing `(tags, timestamp)` pair before rebuilding metadata so a timestamped empty value participates in `reconcileStoredObjectTags` and clears older stored tags. Internal duplicate-version suppression (`412 PreconditionFailed`) is relaxed when the incoming trusted tag revision is strictly newer than the stored revision (while client `If-Match` and `If-None-Match` headers remain strictly enforced). Multipart completion orders tags using the persisted upload metadata, the replication completion callback no longer writes snapshot tags back over local state, and ordinary SSE-C key rotation strips old tag timestamps from copied encryption metadata so a rotation mints a clean local revision.
 
-**Fix** ([`680eac66e`](https://github.com/pgsty/silo/commit/680eac66e)):
+### Operator-Visible Changes and Upgrade Requirements
 
-1. **Every tagging mutation mints one revision.** PUT/DELETE tagging handlers
-   unconditionally stamp a single UTC RFC3339Nano revision, whether or not
-   replication selects the object. The storage layer enforces monotonicity
-   under the write lock: a local revision that is not strictly newer is
-   advanced to stored+1 ns, and multi-pool backends compute one value that
-   strictly exceeds every pool's copy.
-2. **The sender transmits tombstones.** Empty values carry their recorded
-   revision; empty-without-revision is not fabricated; a malformed recorded
-   timestamp fails closed rather than being silently repaired.
-3. **The receiver accepts tombstones.** Replication COPY captures the stored
-   tag pair before rebuilding, so an empty value with a timestamp enters the
-   existing reconciliation as a state that can win. Duplicate suppression is
-   relaxed only for a strictly newer source revision. Multipart completion
-   orders tags from the persisted upload metadata. The delete-acknowledgement
-   path no longer writes snapshot tags back. Ordinary SSE-C rotation drops the old tag timestamp from copied encryption metadata so it cannot overwrite the new local revision.
+- **Equal-timestamp ties resolve to stored-wins:** Both unversioned and explicit `null`-version `COPY` requests now keep the stored destination state when incoming and stored tag timestamps are identical.
+- **Ordinary `COPY` with `X-Amz-Tagging-Directive: REPLACE` and empty tags:** Now clears destination tags as required by S3, instead of falling back to copying source tags.
+- **Coordinated two-ended upgrade required:** Both source and target clusters in a replication pair must be upgraded to [SILO Server 20260916](/blog/release/silo-20260916/) (see also the [IAM and replication upgrade guide](/operations/replication/iam-upgrade/)). An unupgraded peer still ignores empty-value revision headers.
+- **One additional metadata `COPY` per tagged object during resync/heal:** Because `HEAD` does not expose internal tag revision headers through `minio-go`, explicit resync/heal issues one metadata `COPY` for objects that carry a recorded tag revision. On destination buckets with default or global SSE-KMS encryption, that metadata `COPY` rewrites the object payload—account for this I/O when scheduling bulk resyncs.
+- **Scope boundaries:** Historical missing or overwritten deletion timestamps are not reconstructed automatically; repair affected objects by issuing a fresh `PutObjectTagging` or `DeleteObjectTagging` on the authoritative source. Tag-filtered replication rules continue to evaluate target eligibility against the post-mutation tag set, and per-hop timestamp comparison relies on synchronized wall clocks (NTP) across sites.
 
-**Operator-visible changes:**
+## Rejected Alternatives {#rejected}
 
-- **Equal timestamps now resolve to stored-wins** on unqualified and explicit
-  null COPY requests. The old handler let the incoming state win ties on the
-  unqualified path; the change is a compatibility-visible tightening in the
-  correct direction.
-- An ordinary COPY with `tagging REPLACE` and no tags now genuinely clears
-  destination tags. The old default-metadata path carried source tags over —
-  an S3 consistency improvement, but a behavior change.
-- Every ordinary COPY (including key rotations that change nothing) records
-  one new local revision.
-- **Both ends of a replication pair must upgrade together.** An old peer
-  still drops empty-value revisions, so a new sender's tombstones are
-  invisible to it.
-- Objects with recorded revisions incur **one extra metadata COPY per object**
-  during explicit resync/heal. When the destination has bucket-default or
-  automatic KMS encryption, that "metadata" COPY rewrites the object data —
-  budget accordingly for bulk resync.
+- **Synthesize a tombstone from `ModTime` for untagged objects:** Would assign a synthetic tag revision to every object ever written, forcing every untagged object through an extra metadata `COPY` on every replication hop.
+- **Transmit the revision header only when the tag value is empty:** Withdrawn during review because the sequence *"set tag `X` at $T_1$ $\to$ delete at $T_2$ $\to$ re-add identical tag `X` at $T_3$"* loses the $T_3$ revision if non-empty updates omit the timestamp when visible values match (`TestTaggingRepeatedValueNeedsRevisionDelivery`).
+- **Extend the `HEAD` wire protocol to return internal tag revisions:** The pinned `minio-go` metadata reader strips internal `X-Minio-*` response headers, so exposing revisions on `HEAD` would require a cross-SDK wire change while still needing a metadata `COPY` whenever revisions differ.
+- **Introduce vector clocks or regenerate timestamps at storage commit:** A wall-clock `RFC3339Nano` timestamp paired with the `+1 ns` monotonic floor under the object write lock achieves per-key monotonicity without changing on-disk formats.
+- **Enforce monotonicity per pool instead of across all pools:** Because ordinary reads can return metadata from a single pool, per-pool monotonic counters could still emit a timestamp older than a sibling pool's copy; computing the maximum across all pools under the namespace lock prevents cross-pool regression.
 
-A nonempty legacy tag set without a revision uses object ModTime as its sender fallback; an empty set without a revision does not acquire a fabricated tombstone. A strictly newer trusted tag revision bypasses only the internal ETag/version duplicate guard (otherwise 412 `PreconditionFailed`); client `If-Match` and `If-None-Match` remain enforced.
+## Verification {#verification}
 
-The tag repair adds no wire field or storage format and has no capability negotiation. Both endpoints are needed for ordered deletions; an old hop retains the old behavior. This statement does not authorize rolling upgrade or downgrade of the entire September candidate, which also contains the separate [IAM migration](/operations/replication/iam-upgrade/). Reconcile already-damaged tags from an authoritative source by a new explicit tag change; the lost historical order cannot be reconstructed.
+`R4` and `R5` regression suites cover the full encryption $\times$ trust $\times$ timestamp matrix across single-drive, 16-drive erasure, and multi-pool erasure backends (with all 11 CI checks passing on [PR #196](https://github.com/pgsty/silo/pull/196)).
 
-**Limits, stated as limits:**
-
-- No migration: history with missing or wrong deletion timestamps cannot be
-  reconstructed, and no historical tombstones are fabricated.
-- Replication rules with tag filters evaluate target eligibility against the
-  post-deletion (empty) tagging state, so a rule filtered on the deleted tag
-  never sees the deletion. This is a pre-existing scoping decision, unchanged
-  here.
-- Arbitrary clock skew is not a total order. The repair establishes
-  per-hop ordering, not multi-site causality.
-- A malformed *recorded* timestamp makes the sender's construction fail
-  permanently and the event retry through MRF until an explicit, correct tag
-  change replaces it — deliberately fail-closed.
-
-## Rejected alternatives {#rejected}
-
-- **Synthesize a tombstone from ModTime for empty-without-revision objects.**
-  Every object that never carried tags would gain a revision; combined with
-  forced metadata replication, every object would take the metadata-COPY path
-  on every hop.
-- **Transmit only when the value is empty.** Withdrawn by its own proposer
-  during review: the equal-value re-add sequence (set X at T1, delete at T2,
-  re-add X at T3) loses the re-add's revision under that condition. A
-  regression test (`TestTaggingRepeatedValueNeedsRevisionDelivery`) pins the
-  counterexample.
-- **A new HEAD revision protocol.** The pinned `minio-go` metadata extractor
-  discards internal response headers, so this needs a new wire contract for
-  marginal benefit; the worst case is still a forced metadata COPY.
-- **A distributed causal clock, or regenerating timestamps at commit.** The
-  wall-clock model plus the in-lock monotonic guard is the minimal correct
-  fix.
-- **Per-pool monotonic guards only.** Ordinary reads return single-pool
-  object info, so a sender could emit a stale primary-pool revision; the
-  unified multi-pool value is required.
-
-## Verification and what it does not prove {#verification}
-
-R4 regressions cover the encryption × trust × timestamp matrix and the ordered
-sequence on two single-pool backends (single-drive and 16-drive erasure), with
-a stub KMS. R5 separately has a multi-pool tagging-deletion regression. The
-R4–R8 integration run repeated targeted tests on the merged tree, including
-the isolated R5 multi-pool test; all eleven PR #196 checks passed.
-These establish the tested ordering cases. They do not establish
-multi-site scheduling under real clock skew, cross-region failover, or
-behavior of deployments that upgrade one end of a pair only.
-
-The upgrade summary and release boundary live in the
-[component matrix](/compatibility/versions/#september-reliability); the
-sibling repair that stops normalized replica metadata from being re-injected
-is recorded separately in [Replica Metadata
-Normalization](/blog/design/replica-metadata-normalization/).
-
-Related records: [tags](/blog/design/replicated-tag-ordering/) · [metadata](/blog/design/replica-metadata-normalization/) · [HTTP](/blog/design/request-header-timeouts/) · [audit](/operations/replication/replica-metadata-audit/)
+See the [component version matrix](/compatibility/versions/#september-reliability) for release alignment and [Replica Metadata Normalization](/blog/design/replica-metadata-normalization/) for the companion metadata extraction fix. Related records: [Replicated Tag Ordering](/blog/design/replicated-tag-ordering/) · [Replica Metadata Normalization](/blog/design/replica-metadata-normalization/) · [Request Header Timeouts](/blog/design/request-header-timeouts/) · [Replica Metadata Audit](/operations/replication/replica-metadata-audit/).

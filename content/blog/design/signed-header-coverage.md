@@ -1,123 +1,109 @@
 ---
-title: "An Unsigned Header Is Not Part of the Request"
+title: "SigV4 Signed-Header Coverage: Rejecting Unsigned x-amz-* Headers"
 linkTitle: "Signed-Header Coverage"
 date: 2026-09-09
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  A presigned or signed PUT authorized for one object could be turned into a server-side copy of any object the signing key can read, because SigV4 verification only walked the list of signed header names and never the x-amz-* headers that actually arrived, while the router selects CopyObject from an unsigned x-amz-copy-source header. This record defines SILO's unsigned-header rejection boundary, the payload-hash exception and trusted signature-age derivation, the PutObjectTagging injection reorder, the scope across signature modes, and the release evidence.
+  A presigned or signed PUT authorized for a single object could be turned into a server-side copy of any object the signing key can read, because SigV4 verification only walked the list of signed header names without checking the x-amz-* headers that actually arrived, while the router dispatches CopyObject from an unsigned x-amz-copy-source header. This record documents SILO's unsigned-header rejection boundary, the payload-hash exemption and signature-age derivation, the PutObjectTagging injection reorder, scope across signature modes, and verification evidence.
 tags: [Design, Security, SigV4, CopyObject, Presigned, Compatibility]
 weight: 6
 draft: false
 url: "/blog/design/signed-header-coverage/"
 ---
 
-> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+This article records the unsigned-header coverage repair committed to SILO as [`123325430`](https://github.com/pgsty/silo/commit/123325430) in [PR #173](https://github.com/pgsty/silo/pull/173) (tracked as `SN-2026-011`) and the follow-up signing and payload-verification fixes in [PR #177](https://github.com/pgsty/silo/pull/177) (tracked as `SN-2026-012`), which shipped in [Server 20260916](/blog/release/silo-20260916/). The vulnerability was reported by Oren Yomtov and reproduced locally on both presigned and `Authorization`-header SigV4 paths.
 
+## Summary (TL;DR) {#tldr}
 
-This record describes the unsigned-header coverage repair committed to SILO as [`123325430`](https://github.com/pgsty/silo/commit/123325430) and merged through [PR #173](https://github.com/pgsty/silo/pull/173), tracked as `SN-2026-011`. It was reported by Oren Yomtov against a released build and reproduced locally on both signature paths.
+A presigned `PUT` URL can sign only the `host` header. SILO confirmed that each header listed in `SignedHeaders` had arrived, but never inspected the full set of headers present on the incoming request, allowing `x-amz-*` headers outside `SignedHeaders` to pass through untouched. Meanwhile, `cmd/api-router.go` routes any `PUT` carrying `x-amz-copy-source` to `CopyObjectHandler` based on that header alone. Combined, these two behaviors allowed a caller to turn a single-object write grant into a **server-side copy that reads any object reachable by the signing key, executed under the signer's authority** — a confused deputy. The `Authorization`-header path behaved the same way whenever `x-amz-copy-source` was omitted from `SignedHeaders`.
 
-> **Status on 2026-09-11:** the original repair is pushed and merged through [PR #173](https://github.com/pgsty/silo/pull/173). The follow-up signing and payload-verification fixes described below are also merged through [PR #177](https://github.com/pgsty/silo/pull/177), with all eight PR checks passing. Source validation and published releases are separate: the currently published September 3 Server release does not contain these fixes.<br>
-> **Scope:** SigV4 header coverage, consistent policy inputs and body-checksum verification. S3 field names, object and bucket metadata formats, replication protocols, encryption formats and client commands are unchanged.<br>
-> **Security property for ordinary signed and presigned SigV4:** unsigned client-supplied `x-amz-*` operation headers cannot change an authorized request; policy evaluation and body verification use the effective signed inputs.
-
-## Too Long; Didn't Read (TL;DR) {#tldr}
-
-A presigned `PUT` URL can sign only the `host` header. SILO confirmed that each header named in the signed-headers list had arrived, but it never walked the headers that *actually* arrived, so an `x-amz-*` header outside that list was accepted and used. `cmd/api-router.go` routes any `PUT` carrying `x-amz-copy-source` to `CopyObjectHandler` on that header alone. Together these turned a write grant for one object into a **server-side copy that reads any object the signing key can reach, executed as the signer** — a confused deputy. The Authorization-header path behaved the same way when the header was left out of `SignedHeaders`.
-
-The repair states one invariant:
+The repair enforces one invariant:
 
 ```text
-On ordinary signed and presigned SigV4 paths, received x-amz-* headers
-must be signed, except for the separately bound X-Amz-Content-Sha256.
+On ordinary signed and presigned SigV4 paths, every received x-amz-* header
+must be covered by the signature, except for the separately bound X-Amz-Content-Sha256.
 ```
 
-This matches AWS S3, which refuses the same request with `AccessDenied` ("There were headers present in the request which were not signed"). The affected signing code was inherited from upstream `minio/minio`. The released SILO baseline predates this repair; source provenance alone does not establish the status of every upstream build or other fork.
+This matches AWS S3, which rejects the same request with `AccessDenied` ("There were headers present in the request which were not signed").
 
-## Failure: the coverage gap {#failure}
+## Failure: The One-Way Coverage Gap {#failure}
 
-`extractSignedHeaders` in `cmd/signature-v4-utils.go` iterates the *signed-headers list* and, for each name, pulls the value from the request (or the query string). It proves that every promised header is present. It never asks the opposite question — *is every `x-amz-*` header that arrived actually in the list?*
+`extractSignedHeaders` in `cmd/signature-v4-utils.go` iterates over the *signed-headers list* and pulls each named header from the request (or query string). That verifies that every promised header is present, but omits the converse check: *whether every arriving `x-amz-*` header is included in `SignedHeaders`*.
 
-The one place that walked the arriving headers, `checkMetaHeaders`, matched only the `X-Amz-Meta-` prefix and was called only from the presigned path (`doesPresignedSignatureMatch`). The Authorization-header verifier (`doesSignatureMatch`) called nothing equivalent. So an unsigned `x-amz-copy-source` — or any other operation-shaping `x-amz-*` header — sailed through on both paths:
+The only routine that inspected arriving headers, `checkMetaHeaders`, matched only the `X-Amz-Meta-` prefix and ran only on the presigned path (`doesPresignedSignatureMatch`). The `Authorization`-header verifier (`doesSignatureMatch`) had no equivalent check. As a result, an unsigned `x-amz-copy-source` — or any other operation-shaping `x-amz-*` header — passed through on both paths:
 
 ```text
-presigned PUT (SignedHeaders=host)  ->  add unsigned  x-amz-copy-source: /src/secret
-  -> router sees x-amz-copy-source  -> CopyObjectHandler
-  -> copy runs as the signer, reading a bucket the URL never named
+presigned PUT (SignedHeaders=host)  ->  append unsigned x-amz-copy-source: /src/secret
+  -> router matches x-amz-copy-source  -> dispatches CopyObjectHandler
+  -> copy executes as the signer, reading a source bucket the URL never authorized
 ```
 
-Reproduced locally on `RELEASE`-style builds: the control `PUT` returns `200` with an empty body; the same URL plus the one unsigned header returns `200` with a `CopyObjectResult` whose ETag is the md5 of the victim object, and the destination reads back the victim's bytes. Where the destination bucket already allows anonymous `GetObject`, the copied private bytes are then readable with no credentials at all.
+In local reproduction, the control `PUT` returns `200` with an empty body; the same presigned URL with an appended unsigned `x-amz-copy-source` header also returns `200`, returning a `CopyObjectResult` whose ETag matches the victim object's MD5 and writing the victim's bytes into the destination object. If the destination bucket permits anonymous `GetObject`, the copied private object becomes readable without credentials.
 
 ## Provenance {#provenance}
 
-The gap is inherited from upstream MinIO; SILO did not introduce it. The SigV4 verifier in `cmd/signature-v4-utils.go` and the Authorization-header path `doesSignatureMatch` in `cmd/signature-v4.go` are original MinIO code dating to 2016, and the header-driven CopyObject dispatch in `cmd/api-router.go` traces to 2019. The only routine that ever walked the arriving headers, `checkMetaHeaders`, was added upstream on 2023-07-27 in [minio/minio#17737](https://github.com/minio/minio/pull/17737) (`535f97ba6`). Upstream therefore recognized the class — an unsigned header must match the signed set — but scoped the check to the `X-Amz-Meta-` prefix and to the presigned path, leaving `x-amz-copy-source` and the whole Authorization-header path uncovered. The inherited verifier predates the SILO fork.
+This gap was inherited from upstream MinIO. The SigV4 verifier in `cmd/signature-v4-utils.go` and `doesSignatureMatch` in `cmd/signature-v4.go` date back to 2016, and the header-driven `CopyObject` router dispatch in `cmd/api-router.go` dates to 2019. Upstream added `checkMetaHeaders` on 2023-07-27 in [minio/minio#17737](https://github.com/minio/minio/pull/17737) (`535f97ba6`), recognizing that arriving headers must be checked against the signed set, but scoped that check to the `X-Amz-Meta-` prefix on the presigned path — leaving `x-amz-copy-source` and the entire `Authorization`-header path uncovered.
 
-Before the unsigned-header repair, SILO's change to `cmd/signature-v4-utils.go` was the one-line dependency-path migration in `9b11dc946`, moving the `policy` import to `pgsty/silo-pkg/v3`. The vulnerable verification behavior came from upstream. The original repair (`123325430`) and the follow-ups in [PR #177](https://github.com/pgsty/silo/pull/177) change that boundary. The vulnerable code predates SILO's fork baseline, the upstream 2025-12-03 maintenance-mode commit from which the first SILO release was cut.
+Prior to this fix, SILO's only modification to `cmd/signature-v4-utils.go` was a single-line import path update in `9b11dc946` (`policy` moved to `pgsty/silo-pkg/v3`). Commit `123325430` and the follow-ups in [PR #177](https://github.com/pgsty/silo/pull/177) close the boundary across both paths.
 
-This record establishes the repair in the maintained SILO source graph. It does not claim that SILO is the only implementation with a fix, or establish the current maintenance status of other projects.
+## The Repair {#repair}
 
-## The repair {#repair}
+`checkMetaHeaders` is renamed to `checkUnsignedHeaders`, widened from `X-Amz-Meta-` to the full `X-Amz-` prefix, and invoked on **both** the presigned and `Authorization`-header paths. Any arriving `x-amz-*` header missing from the signed set is rejected with `ErrUnsignedHeaders` before handler logic runs.
 
-`checkMetaHeaders` becomes `checkUnsignedHeaders`, is broadened from the `X-Amz-Meta-` prefix to all of `X-Amz-`, and is called on **both** the presigned and Authorization-header paths. A header that is not covered by the signed set is refused with `ErrUnsignedHeaders` before any handler logic runs.
+Four design decisions define the exact boundary:
 
-Four decisions shaped the exact boundary. Each had a plausible alternative that was rejected for a concrete reason.
+### Set Membership Lookup {#membership}
 
-### Membership, not value equality {#membership}
-
-The inherited check compared `signedHeadersMap.Get(k) == val[0]`. For a header absent from the signed map, `Get` returns the empty string, so a header whose *first* value is empty compared equal and passed. A multi-value header such as `X-Amz-Copy-Source: ["", "/src/secret"]` could therefore smuggle an unsigned copy-source past a value-equality check. The repair tests **membership** in the signed set instead. A signed header's value is already bound by the signature, so value equality was never the property that mattered; presence in the list is.
+The inherited `checkMetaHeaders` function evaluated `signedHeadersMap.Get(k) == val[0]`. For a header absent from `signedHeadersMap`, `Get` returns `""`, so an unsigned multi-value header whose first element is empty — such as `X-Amz-Copy-Source: ["", "/src/secret"]` — evaluated equal and bypassed the check. `checkUnsignedHeaders` checks key membership in `signedHeadersMap` directly; once a header name is in the signed set, its values are already bound by the signature digest.
 
 ### Exempt `X-Amz-Content-Sha256` {#exempt-content-sha256}
 
-`X-Amz-Content-Sha256` can be omitted from `SignedHeaders` because the effective payload hash is bound separately in the canonical request. For presigned requests, the query value takes precedence, with a header fallback when the query value is absent. An explicit `UNSIGNED-PAYLOAD` remains valid. [PR #177](https://github.com/pgsty/silo/pull/177) aligns the policy condition with this effective value while preserving header-presence semantics, and checks header-only presigned body hashes in the generic authentication path as well as upload paths. The exception does not permit policy evaluation or body verification to use a different value.
+`X-Amz-Content-Sha256` may be omitted from `SignedHeaders` because the effective payload hash is bound separately in the SigV4 canonical request. On presigned requests, the query parameter takes precedence and falls back to the header only when the query parameter is absent; an explicit `UNSIGNED-PAYLOAD` remains valid. [PR #177](https://github.com/pgsty/silo/pull/177) aligns policy-condition evaluation with this effective payload hash while preserving header-presence semantics, and enforces body-hash verification for header-only presigned requests in the generic authentication path as well as upload paths. Signature verification, policy evaluation, and payload verification all consume the same bound value.
 
-### Derive signature age from the signed date {#exempt-signature-age}
+### Derive Signature Age from the Signed Date {#exempt-signature-age}
 
-The original repair exempted an internal `x-amz-signature-age` scratch header written after verification. That was too late for PUT and UploadPart authorization, which runs before signature verification. [PR #177](https://github.com/pgsty/silo/pull/177) instead derives `s3:signatureAge` directly from the signed `X-Amz-Date`, and removes the scratch header, its constant and its exemption. A forged date fails signature verification; an unsigned client header under the old name is rejected. Verification remains idempotent without mutating request headers.
+The initial fix exempted an internal `x-amz-signature-age` scratch header written after signature verification. However, `PUT` and `UploadPart` evaluate authorization before signature verification, before that scratch header existed. [PR #177](https://github.com/pgsty/silo/pull/177) computes `s3:signatureAge` directly from the signed `X-Amz-Date` value and removes the scratch header, its constant, and its exemption. A tampered date fails signature verification, an unsigned client-supplied `x-amz-signature-age` header is rejected, and verification remains idempotent without mutating request headers.
 
-### Inject `X-Amz-Tagging` after authentication {#tagging-reorder}
+### Inject `X-Amz-Tagging` After Signature Verification {#tagging-reorder}
 
-`PutObjectTaggingHandler` derives an `X-Amz-Tagging` header from the request *body* so that policy conditions can read it, and it previously did so before `authenticateRequest`. With the broadened check, that server-synthesized header — which the client never signs — would be refused as unsigned. The injection now happens after signature verification and before authorization, which still has it for policy conditions. **Rejected alternative:** blanket-exempt `X-Amz-Tagging` the way content-sha256 is exempt. That would let a client set object tags through an unsigned header on any signed or presigned write, reopening a smaller version of the same class of bug.
+`PutObjectTaggingHandler` synthesizes an `X-Amz-Tagging` header from the XML request body so that IAM policy conditions can inspect object tags, and previously injected that header before `authenticateRequest`. Under the widened `X-Amz-` check, that server-synthesized header would be rejected as unsigned. Moving the injection to run after signature verification and before policy authorization preserves tag condition evaluation while keeping signature verification strict. We rejected the alternative of blanket-exempting `X-Amz-Tagging`, which would have allowed clients to attach unsigned `X-Amz-Tagging` headers to arbitrary signed or presigned write requests.
 
-## Scope across signature modes {#scope}
+## Scope Across Signature Modes {#scope}
 
-- **Authorization-header (signed) and presigned SigV4:** both now enforced. These are the reachable paths.
-- **Streaming SigV4:** the seed verifier does not call `checkUnsignedHeaders`. The copy handlers reject streaming authentication through their ordinary authentication dispatch, but that does not establish complete header coverage for streaming PUT/UploadPart paths. No dedicated streaming-copy rejection test is claimed here. A universal coverage guarantee requires separate implementation and regression evidence.
-- **SigV2:** unaffected. V2 canonicalization folds the `x-amz-*` headers into the string-to-sign by construction, so an added `x-amz-*` header changes the computed signature and is rejected as a signature mismatch.
+- **`Authorization`-header (signed) and presigned SigV4:** both enforce `checkUnsignedHeaders`.
+- **Streaming SigV4:** the seed verifier does not call `checkUnsignedHeaders`. Copy handlers reject streaming authentication through their standard authentication dispatch, while streaming `PUT` and `UploadPart` header coverage remains a separate boundary.
+- **SigV2:** unaffected. V2 canonicalization folds all `x-amz-*` headers into the string-to-sign by construction, so any added `x-amz-*` header alters the expected signature and fails verification.
 
-## Status code: 400 versus 403 {#status-code}
+## Status Code: 400 vs. 403 {#status-code}
 
-AWS returns `403 Forbidden` for an unsigned header; SILO returns `400 AccessDenied` (`ErrUnsignedHeaders`), inherited from upstream. The attack is refused either way, and the error `Code` string is identical; only the HTTP status differs. Raising it to `403` is a one-line change to `cmd/api-errors.go` that also shifts the pre-existing meta-header rejection. It is left as a deliberate, reversible election rather than folded silently into a security fix, because it is a behavior change for the existing unsigned-meta-header path and is not required to close the vulnerability.
+AWS S3 returns `403 Forbidden` for an unsigned header, whereas SILO returns `400 AccessDenied` (`ErrUnsignedHeaders`), inherited from upstream. Both reject the request with the `AccessDenied` S3 error code; only the HTTP status code differs. Changing `ErrUnsignedHeaders` to `403` in `cmd/api-errors.go` is a one-line change, but it would also alter the HTTP status for the existing unsigned `x-amz-meta-*` rejection path, so `400 AccessDenied` is retained for compatibility.
 
 ## Tests {#tests}
 
-Several existing tests built a signed request and then set `x-amz-copy-source`, `x-amz-copy-source-range`, or `x-amz-metadata-directive` *after* signing — that is, they depended on the very behavior this fix removes. They now re-sign with `signRequestV4` after setting those headers, as required for these operation-shaping headers by the repaired verifier. `signRequestV4` excludes the `Authorization` header from its own signed set, so re-signing is safe. Current coverage includes `checkUnsignedHeaders` unit cases for empty first values, the payload-hash exception and rejection of the obsolete unsigned signature-age header and `TestPresignedVerifyIdempotent`, which verifies the same presigned request twice.
+Several existing unit tests constructed a signed request and then attached `x-amz-copy-source`, `x-amz-copy-source-range`, or `x-amz-metadata-directive` *after* signing. Those tests now re-sign with `signRequestV4` after setting operation-shaping headers (`signRequestV4` excludes `Authorization` from its own signed set, making re-signing safe). Unit tests cover `checkUnsignedHeaders` against empty first values, the `X-Amz-Content-Sha256` exemption, rejection of unsigned `x-amz-signature-age` headers, and `TestPresignedVerifyIdempotent`, which verifies the same presigned request twice.
 
 ## Evidence {#evidence}
 
-- A built server reproduced the confused deputy on both the presigned and Authorization-header paths, then refused both after the fix while the control `PUT`, a real `minio-go` `CopyObject`, `PutObject` with user metadata and tags, and body-based `PutObjectTagging` all continued to work.
-- `go test ./cmd/` passes on the fix tree; `gofmt`, `gofumpt`, and `vet` are clean.
-- Adversarial review (round one) independently surfaced three defects in the first draft — non-idempotent verification via the scratch header, the empty-first-value bypass, and over-rejection of an unsigned `x-amz-content-sha256` — each of which is addressed above and confirmed by re-running the reviewer's own adversarial test suite against the final tree.
-- Adversarial review (round two, against the committed fix) found no regression and confirmed the re-signed tests keep their original intent: an invalid access key still returns `InvalidAccessKeyId`, and a wrong SSE-C key still returns `403` after the signature validates. It surfaced three *adjacent, pre-existing* gaps that also fail on the parent commit and are out of this change's scope; they are recorded under follow-ups below.
+- Against a built server instance, the reproduction harness confirmed the confused-deputy copy on both presigned and `Authorization`-header paths before the fix, and confirmed that both are rejected after the fix while control `PUT` requests, `minio-go` `CopyObject`, `PutObject` with user metadata and tags, and body-based `PutObjectTagging` continue to succeed.
+- `go test ./cmd/` passes cleanly, along with `gofmt`, `gofumpt`, and `go vet`.
+- First-round code review identified three issues in the initial draft — non-idempotent verification via the scratch header, the empty-first-value bypass, and over-rejection of unsigned `x-amz-content-sha256` — all of which are resolved and covered by regression tests.
+- Second-round review confirmed that the re-signed tests preserve their original assertions: an invalid access key still returns `InvalidAccessKeyId`, and a mismatched SSE-C key still returns `403` after signature verification.
 
-## Compatibility and operations {#impact}
+## Compatibility and Operations {#impact}
 
-- **Ordinary clients:** no request change. Conforming ordinary signers include the nonexempt `x-amz-*` headers they send. Custom signers must verify this contract; streaming modes have the separate boundary above.
-- **Unsigned `x-amz-*` headers:** now refused with `AccessDenied`, as on AWS. A client that added such a header without signing it was already outside the SigV4 contract.
-- **Rolling upgrade:** wire and storage formats are unchanged. Upgraded nodes enforce the boundary; nodes still running an older build remain exposed until upgraded, so behavior can differ by node during the rolling window.
-- **Rollback:** data written by the fixed version stays readable by the previous version, but rollback reopens the confused deputy.
+- **Standard clients:** unaffected. Conforming SigV4 signers include all non-exempt `x-amz-*` headers they send in `SignedHeaders`.
+- **Unsigned `x-amz-*` headers:** rejected with `AccessDenied`, matching AWS S3.
+- **Rolling upgrade:** wire and on-disk storage formats are unchanged. Upgraded nodes enforce the check immediately, while unupgraded nodes remain exposed until replaced during a rolling upgrade.
+- **Rollback:** data written under the patched version remains readable by older binaries, though rolling back reopens the confused-deputy vulnerability.
 
-## Residual risks and follow-ups {#residual-risks}
+## Related Fixes and General Principle {#residual-risks}
 
-- **Release delivery:** a source fix and a public engineering record do not establish that a published binary or image contains the fix. Verify the selected release and artifact separately.
-- **CVE:** the reporter requested one; the finding carries the stable fork-local `SN-2026-011` identifier until a CVE is assigned.
-- **Status code election:** the `400`-versus-`403` choice above is open.
-- **Adjacent signing fixes:** [PR #177](https://github.com/pgsty/silo/pull/177) addresses repeated copy-source ambiguity, signature-age authorization ordering, and the effective payload-hash policy value. It also closes the separately reproduced header-only presigned body-checksum gap. The regression set covers signed and presigned requests, policy enforcement before upload verification, and real HTTP bucket-policy tampering. These follow-ups are distinct from the original `SN-2026-011` finding; their merge and release status is recorded above.
-- **The general question:** this repair covers `x-amz-*` request headers. Any future control that lets request syntax select an operation must answer the same question this one did — *is this value covered by the signature before it is allowed to mean anything?* The repeated-header gap above is the same question in a different guise: the value the signature binds and the value the handler consumes must be the one and the same.
+- **Advisory identifiers:** the unsigned-header repair is tracked as `SN-2026-011`, and the companion payload-verification and signing fixes in [PR #177](https://github.com/pgsty/silo/pull/177) are tracked as [`SN-2026-012`](/about/security-advisories/#sn-2026-012).
+- **Status code alignment:** the `400`-versus-`403` HTTP status question remains open for a future major release.
+- **Adjacent signing fixes:** [PR #177](https://github.com/pgsty/silo/pull/177) resolves duplicate `x-amz-copy-source` header ambiguity, fixes signature-age authorization ordering and effective payload-hash policy evaluation, and closes the header-only presigned body-checksum gap. Regression tests cover signed and presigned requests, policy evaluation before upload verification, and live HTTP bucket-policy tampering.
+- **General principle:** any request element that selects or shapes an operation must be covered by the signature before routing or handler logic acts on it, and the value bound by the signature must be identical to the value consumed by the handler.
 
 ## Conclusion {#conclusion}
 
-The signature is the request. Everything an `x-amz-*` header claims is a claim until the signature covers it:
-
-> Confirming that the promised headers arrived is not the same as confirming that the arrived headers were promised. Refuse any unsigned `x-amz-*` header before the handler runs, on the ordinary signed and presigned paths covered by this repair. Streaming coverage remains a separate boundary.
-
-The ledger separately tracks the [payload-verification repair as SN-2026-012](/about/security-advisories/#sn-2026-012). The signing change alone does not change storage formats, but the same main candidate also contains [IAM changes requiring coordinated upgrade](/operations/replication/iam-upgrade/). Do not use this record as approval for a rolling upgrade of that entire candidate.
+SigV4 verification must verify both that every header listed in `SignedHeaders` is present and that every arriving `x-amz-*` header is listed in `SignedHeaders`. Rejecting unsigned `x-amz-*` headers before handler dispatch closes the confused-deputy boundary on both signed and presigned SigV4 paths. While this signing fix does not alter storage formats, upgrading to [Server 20260916](/blog/release/silo-20260916/) also includes [IAM changes requiring a coordinated upgrade](/operations/replication/iam-upgrade/).

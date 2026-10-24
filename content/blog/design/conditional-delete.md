@@ -5,108 +5,95 @@ date: 2026-08-26
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  Single-object If-Match DELETE is implemented on main, with addressed-version semantics and a shared multi-pool lock. Batch ETags, the additional GetObject permission check, and malformed or recursive-request guards from the early proposal are not implemented. This record separates the merged contract from that proposal.
+  Single-object If-Match DELETE evaluates the addressed version once under the outer multi-pool lock before mutating storage. Batch DeleteObjects ETags, extra GetObject checks, and recursive prefix guards remain outside this contract.
 tags: [Design, S3, Compatibility, DELETE]
 weight: 10
 draft: false
 url: "/blog/design/conditional-delete/"
 ---
 
-> **Publication update, 2026-09-17:** The September source repairs discussed here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+Single-object conditional deletion (`If-Match` on `DeleteObject`) landed in [PR #145](https://github.com/pgsty/silo/pull/145), and [PR #178](https://github.com/pgsty/silo/pull/178) repaired multi-pool serialization and reconciliation. Both changes shipped in [Server 20260916](/blog/release/silo-20260916/).
 
+An earlier August proposal around [PR #12](https://github.com/pgsty/silo/pull/12) sketched a broader scope—including batch `DeleteObjects` rejection, an extra `s3:GetObject` authorization check, and a current-version-only rule—that was not adopted in the merged implementation. This note documents the shipped behavior in [`f99ed829b`](https://github.com/pgsty/silo/tree/f99ed829b5eba549160725f035156c9e020b6a07) and why precondition evaluation must sit above individual storage pools.
 
-**Status, 2026-09-16:** [PR #145](https://github.com/pgsty/silo/pull/145) added single-object conditional deletion; [PR #178](https://github.com/pgsty/silo/pull/178) subsequently repaired multi-pool serialization and reconciliation. Neither change is in published Server 20260903. Check the [component matrix](/compatibility/versions/) before relying on this behavior.
+## Implemented Contract {#tldr}
 
-The August proposal around [PR #12](https://github.com/pgsty/silo/pull/12) was broader than the code that merged. In particular, its proposed batch rejection, extra read authorization and current-version-only rule are **not implemented guarantees**. This page describes the maintained source at [`f99ed829b`](https://github.com/pgsty/silo/tree/f99ed829b5eba549160725f035156c9e020b6a07).
-
-## Implemented contract {#tldr}
-
-| Request | Current main behavior |
+| Request | Shipped Behavior |
 | --- | --- |
-| Single `DeleteObject`, nonempty `If-Match: <ETag>` | Check the client-visible ETag under the deletion lock; mismatch returns 412 before deletion |
-| `If-Match: *` | Require an existing, non-delete-marker representation |
-| Explicit `versionId` | Evaluate the **addressed version**, not an unrelated current version |
-| No `If-Match`, or an empty header value | No conditional callback is installed; ordinary deletion applies |
-| Batch `DeleteObjects` with per-item `<ETag>` | The request model has no ETag field; the XML field supplies **no deletion protection** |
+| Single `DeleteObject`, non-empty `If-Match: <ETag>` | Evaluates the client-visible ETag under the outer deletion lock; mismatch returns `412 PreconditionFailed` before any deletion |
+| `If-Match: *` | Requires an existing, non-delete-marker representation |
+| Explicit `versionId` | Evaluates the **addressed version**, not an unrelated current version |
+| No `If-Match`, or an empty header value | Installs no conditional callback; ordinary deletion applies |
+| Batch `DeleteObjects` with per-item `<ETag>` | `ObjectToDelete` has no ETag field; the XML element supplies **no deletion protection** |
 | Internal recursive `x-minio-force-delete` | Prefix deletion returns before the object-condition path; do not use it as conditional deletion |
 
-These conditions do not add an `s3:GetObject` authorization check. Ordinary deletion authorization still applies, including `s3:DeleteObjectVersion` for an explicitly addressed version, Object Lock checks and the separate trusted-replication path.
+These preconditions do not add an `s3:GetObject` authorization check. Ordinary deletion authorization applies—including `s3:DeleteObjectVersion` for an explicitly addressed version, Object Lock checks, and the separate trusted-replication path.
 
-## Why the condition belongs above individual pools {#problem}
+## Why the Condition Belongs Above Individual Pools {#problem}
 
-<a id="silent-downgrade"></a><a id="good-direction"></a><a id="atomicity-boundary"></a>
+In a multi-pool deployment, an object can have copies of different ages in more than one pool. A request precondition applies to the single logical object selected for the operation. Evaluating and mutating independently inside each pool can delete one copy and then return `412 PreconditionFailed` from another, or delete the newest copy and uncover a stale one.
 
-An object can have copies of different ages in more than one pool. A request condition concerns the logical object selected for the operation. Evaluating and mutating independently in each pool can delete one copy and then return 412 from another, or delete the latest copy and expose an older one.
+The multi-pool coordinator (`erasureServerPools.DeleteObject`) therefore acquires the shared namespace write lock, gathers the relevant pool states, evaluates the condition once, clears the callback for lower layers, and reconciles the selected deletion across pools. The same lock boundary covers concurrent object writes and metadata updates.
 
-The multi-pool path therefore acquires the shared namespace write lock, gathers the relevant states, evaluates the condition once, clears the callback for lower layers, and reconciles the selected deletion across pools. The same lock boundary must cover concurrent writes and metadata updates. This is the purpose of the later multi-pool repair, not a claim that every physical disk is atomically updated.
+### Counterexamples from the Early Design {#two-pool-counterexamples}
 
-### Counterexamples from the early design {#two-pool-counterexamples}
+Suppose Pool 1 holds an older copy with ETag `A` and Pool 2 holds the current copy with ETag `B`:
 
-<a id="partial-delete-on-412"></a><a id="stale-copy-after-success"></a>
+- **`If-Match: A` (partial delete on `412`):** Per-pool evaluation deletes copy `A` in Pool 1 and only then fails with `412 PreconditionFailed` against `B` in Pool 2, mutating storage on a rejected request.
+- **`If-Match: B` (stale copy exposure after `204`):** Per-pool evaluation deletes `B` in Pool 2 while failing or skipping Pool 1, leaving stale copy `A` visible as the current object.
 
-With old ETag A in one pool and current ETag B in another:
+Executing an HTTP precondition callback inside per-pool workers also risks concurrent writes to a single `http.ResponseWriter`. Consuming the request condition once at the coordinating layer eliminates both hazards.
 
-- `If-Match: A` must not delete A first and only then fail against B.
-- `If-Match: B` must not remove B while leaving A to become visible again.
+### Failure Boundaries {#degraded-pool-limitation}
 
-A per-pool HTTP callback also risks concurrent writes to one response writer. Consume the request condition at the coordinating layer instead.
+The reconciliation path reads pool state before evaluating the condition and surfaces read quorum failures instead of treating an unreachable pool as empty. Physical cleanup errors can still occur after a partial mutation: a failed request is not a distributed multi-pool rollback transaction. Retrying and verifying object state remain necessary after a storage failure; see [Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/).
 
-### Failure boundaries {#degraded-pool-limitation}
+## Selection and Evaluation {#selected-fix}
 
-The reconciliation path reads pool state before evaluating the condition and surfaces failures instead of treating an unknown pool as empty. Cleanup errors can still follow a partial physical mutation: a failed request is not a distributed rollback guarantee. Retrying and checking actual state remain necessary after a storage failure. See [multi-pool consistency](/blog/design/multi-pool-object-consistency/).
+### Evaluate Once {#evaluate-once}
 
-## Selection and evaluation {#selected-fix}
+`erasureServerPools.DeleteObject` holds the outer namespace lock. Multi-pool deployments call `deleteObjectReconciled`; single-pool deployments read the selected representation and invoke `CheckPrecondFn` before taking the delete-marker shortcut. Lower storage layers never reinterpret the precondition per copy.
 
-### Evaluate once {#evaluate-once}
+### Wildcards and Delete Markers {#wildcard}
 
-`erasureServerPools.DeleteObject` holds the outer lock. Multiple pools use `deleteObjectReconciled`; the single-pool path reads the selected representation and invokes `CheckPrecondFn` before its delete-marker shortcut. Lower layers do not reinterpret the condition per copy.
-
-### Wildcards and delete markers {#wildcard}
-
-<a id="delete-marker"></a>
-
-The DELETE helper treats `*` as representation existence. A delete marker does not satisfy it. A missing key or addressed version follows the corresponding not-found path; it is not manufactured into an empty ETag match.
+The `DELETE` precondition helper treats `If-Match: *` as requiring an active object representation. A delete marker does not satisfy `*`. A missing key or missing addressed version follows the normal not-found path and is never coerced into an empty-ETag match.
 
 ### Authorization {#permission}
 
-The handler authorizes deletion using the effective version. It does **not** perform the additional `s3:GetObject` check described in the original proposal for a specific ETag. Do not treat the proposal's permission matrix as implemented AWS parity.
+The handler authorizes deletion against the effective target version (`s3:DeleteObject` or `s3:DeleteObjectVersion`). It does not require `s3:GetObject` when a specific ETag is supplied in `If-Match`.
 
 ### SSE-C ETags {#encrypted-etag}
 
-Conditional deletion compares the established client-visible ETag projection; it does not read or decrypt the object's payload. SSE-C read-key authentication is a separate contract from deleting an object.
+Conditional deletion compares the established client-visible ETag projection stored in metadata; it does not read or decrypt the object payload. SSE-C read-key authentication remains separate from object deletion.
 
-### Explicit versions {#current-version}
+### Explicit Versions {#current-version}
 
-An explicit `versionId` selects that version for comparison and deletion. A matching historical ETag can therefore allow deletion of the historical version even if the current version has another ETag. This differs from the early proposal's current-version-only rule.
+Supplying an explicit `versionId` selects that exact version for both ETag comparison and deletion. A matching historical ETag allows deleting that historical version even when the current version has a different ETag.
 
-### Unsupported edges {#fail-closed-edges}
+### Fail-Closed and Unsupported Edges {#fail-closed-edges}
 
-An empty `If-Match` installs no condition. The recursive prefix-delete extension bypasses object preconditions. Batch XML ETags are not recognized by `ObjectToDelete`; there is no request-wide `NotImplemented` guard. Callers needing compare-and-delete must use the supported single-object path with a nonempty condition and verify their selected release.
+An empty `If-Match` header installs no precondition. The internal recursive prefix-delete extension (`x-minio-force-delete`) bypasses object preconditions. Batch XML `<ETag>` elements in `DeleteObjects` are not parsed by `ObjectToDelete`, and there is no request-wide `NotImplemented` rejection guard. Callers requiring compare-and-delete semantics must use single-object `DeleteObject` with a non-empty `If-Match` header.
 
-## Alternatives and scope {#rejected}
+## Rejected Alternatives and Scope {#rejected}
 
-<a id="reject-comparator"></a><a id="reject-per-pool"></a><a id="reject-framework"></a><a id="reject-scope-expansion"></a>
+- **Modifying a shared ETag comparator:** Changing low-level string comparison cannot fix multi-pool winner selection or prevent mutations before a precondition check.
+- **Aggregating errors after per-pool callbacks:** Returning `412` after one pool has already deleted its copy cannot undo the physical deletion.
+- **Introducing a new distributed transaction framework:** Consuming one precondition callback under the existing outer namespace lock is sufficient for single-object `DeleteObject`; batch execution and policy keys require separate surface changes.
 
-Changing a shared ETag comparator cannot fix pool selection or mutation ordering. Aggregating errors after per-pool callbacks cannot undo deletions already performed. A new transaction framework is unnecessary for consuming one callback at the existing namespace lock, but batch execution and policy enforcement require separate implementation.
+## Source Evidence {#tests}
 
-## Evidence and release boundary {#tests}
+The implementation lives in [`cmd/object-handlers.go`](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/object-handlers.go), [`cmd/erasure-server-pool.go`](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/erasure-server-pool.go), and [`cmd/api-datatypes.go`](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/api-datatypes.go), with regression tests covering ETag mismatches, wildcard and delete-marker handling, explicit `versionId` targeting, quorum failures, and multi-pool reconciliation.
 
-<a id="adversarial-review"></a><a id="merge-gates"></a>
+## Follow-Up Work {#follow-up}
 
-The source evidence is the [handler](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/object-handlers.go), [pool coordinator](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/erasure-server-pool.go), and [batch request model](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/api-datatypes.go). Relevant coverage includes ETag mismatch, wildcard/delete markers, explicit versions, quorum failures and multiple pools. Earlier local review or test claims for a different implementation do not establish these missing guards. A merged implementation and a released, deployed binary remain separate facts.
+### Batch Conditions {#delete-objects}
 
-## Follow-up work {#follow-up}
+Supporting per-item `<ETag>` preconditions in `DeleteObjects` requires unmarshaling the XML field, evaluating each logical object under its outer lock, honoring `Quiet` mode, and reporting per-item precondition failures in the XML result. Until that path is implemented, batch `<ETag>` elements are ignored and must not be used as a concurrency guard.
 
-### Batch conditions {#delete-objects}
+### Policy Enforcement {#policy-key}
 
-Implementing per-item ETags requires parsing them, evaluating each logical object under the correct lock, preserving quiet mode and reporting each failed condition in the per-item response. Until then, a batch ETag is ignored and must not be used as a concurrency guard.
+The IAM policy package does not yet define the `s3:if-match` condition key. Supporting policy-enforced conditional deletes requires adding the condition key in `silo-pkg`, populating request condition values in the server handler, and adding policy evaluation tests.
 
-### Policy enforcement {#policy-key}
+## Design Trade-Off {#tradeoff}
 
-The maintained policy package does not define `s3:if-match`. Supporting it requires a package change and release, correct request condition values, a Server dependency update and authorization tests. Existing `If-Match` execution does not by itself provide policy enforcement.
-
-## Design cost {#tradeoff}
-
-<a id="conclusion" data-td-print-local></a>
-
-Single-object execution reuses the established object-selection and locking boundary. Full batch conditions and policy enforcement cross additional interfaces and remain separate work. The useful invariant is narrow: a false supported single-object condition must be decided before deletion, once for the selected logical representation.
+Single-object conditional `DELETE` reuses the existing multi-pool object-selection and locking boundary without inventing a new transaction layer. Full batch preconditions and IAM policy condition keys cross additional API and package boundaries and remain separate work. The core invariant is strict: a false single-object `If-Match` precondition is decided once against the selected logical representation before any pool deletes data.

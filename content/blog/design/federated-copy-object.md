@@ -2,47 +2,44 @@
 title: "Federated CopyObject: Preserve the Destination Contract"
 linkTitle: "Federated CopyObject: Preserve the Destination Contract"
 date: 2026-09-16
-lastmod: 2026-09-16
+lastmod: 2026-09-17
 author: "Ruohang Feng"
-summary: "Legacy etcd federation must forward logical bytes, preserve destination encryption and Object Lock, and return the exact committed write."
+summary: >
+  Shipped in Server 20260916 (PR #157, #159, #163, #177, #179), legacy etcd federated CopyObject forwards logical source bytes, preserves destination encryption defaults and Object Lock headers, validates full-object checksums, and returns the exact committed write identity.
 tags: [Design, S3, Operations]
 weight: 7
 draft: false
 url: "/blog/design/federated-copy-object/"
 ---
 
-> **Publication update, 2026-09-17:** The federated CopyObject repairs recorded here shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+[Server 20260916](/blog/release/silo-20260916/) repairs the legacy etcd bucket-federation `CopyObject` path across [PR #157](https://github.com/pgsty/silo/pull/157), [PR #159](https://github.com/pgsty/silo/pull/159), [PR #163](https://github.com/pgsty/silo/pull/163), [PR #177](https://github.com/pgsty/silo/pull/177), and [PR #179](https://github.com/pgsty/silo/pull/179). When `CopyObject` forwards a copy across federated deployments as a remote `PutObject`, the proxy streams logical source bytes, delegates destination encryption and Object Lock enforcement to the destination deployment, validates full-object checksums, and returns the exact committed version metadata.
 
-**Source status, 2026-09-16:** this records the main-branch CopyObject fixes in [#157](https://github.com/pgsty/silo/pull/157), [#159](https://github.com/pgsty/silo/pull/159), [#163](https://github.com/pgsty/silo/pull/163), [#177](https://github.com/pgsty/silo/pull/177) and [#179](https://github.com/pgsty/silo/pull/179). They are absent from Server 20260903. The subject is the **legacy etcd bucket-federation** path that forwards a copy to another deployment as `PutObject`, not the bucket/site replication scheduler.
+## Logical Byte Streaming and Destination Encryption {#bytes}
 
-## Forward bytes once, encrypt at the destination {#bytes}
+The proxy reads logical source bytes by decrypting and decompressing the source object locally and declaring the logical content length on the outbound `PutObject` request:
 
-The proxy reads logical source bytes: it decrypts and decompresses as needed, then declares the logical length to the destination. It must not locally encrypt/compress and ask the remote to do it again. SSE-C reads still require the source key and secure transport. The destination's explicit SSE headers or its own encryption defaults choose how the new object is stored; the proxy must not inject its local defaults when the caller selected none. SSE-KMS context is forwarded in the expected JSON-object form.
+- **No double transformation:** The proxy never encrypts or compresses payload bytes locally before forwarding them to the remote deployment.
+- **SSE-C and SSE-KMS handling:** Reading an SSE-C source requires the source customer key over TLS. Destination encryption is governed by the request's explicit destination SSE headers or the destination bucket's default encryption configuration; the proxy never injects its own local encryption defaults when the caller omits SSE headers. SSE-KMS context headers are forwarded as valid JSON objects.
+- **Raw SSE-C replica exclusion:** Trusted raw SSE-C replica `CopyObject` requests are rejected with `501 NotImplemented` on the federated path before creating any destination object.
 
-Trusted raw SSE-C replica CopyObject is explicitly rejected with `501 NotImplemented` in this federation path, before creating the destination. That combination is not made safe merely by passing replication markers. Ordinary key-authorized SSE-C copies and the dedicated replica path are different operations.
+## Checksum and Metadata Forwarding {#checksums}
 
-## Checksum and metadata rules {#checksums}
+The proxy strips all reserved internal metadata prefixes (case-insensitively) from the outbound `PutObject` call and forwards only public user metadata and tags through standard S3 headers. Checksums on the forwarded write must describe the logical full object written at the destination:
 
-Remove every reserved internal metadata prefix, case-insensitively, from the ordinary forwarded write. Forward public metadata and tags through supported fields, not internal storage encoding. The checksum must describe the logical full object actually written:
+- **Algorithm and composite conversion:** When the request specifies a checksum algorithm or the source carries a multipart `COMPOSITE` checksum, the destination write computes and stores a `FULL_OBJECT` checksum.
+- **Trailer vs. header delivery:** Nonempty streams deliver computed digests in an `x-amz-trailer` checksum trailer, which the destination validates. Zero-byte objects use a standard `x-amz-checksum-*` request header, and existing `FULL_OBJECT` source checksums are forwarded via standard checksum headers.
+- **Remote response verification:** If a required checksum in the remote `PutObject` response is missing, malformed, or carries a multipart `-N` suffix, the proxy returns an error. Because the remote write may already have committed before response validation fails, callers copying into a versioned bucket should inspect the destination before retrying.
 
-- A requested algorithm or a multipart-composite source requires a full-object checksum at the destination.
-- For a nonempty stream, the client uses a trailing checksum, including `x-amz-trailer`; the destination must consume and validate that trailer.
-- Empty content uses the ordinary checksum header because there is no streamed checksum trailer to carry its digest.
-- A stored full-object source checksum can be forwarded as an ordinary checksum header for validation.
-- A required remote checksum that is missing, malformed or has a multipart `-N` suffix is an error; it must not be reported as a valid full-object result.
+## Object Lock Precision and Typed Headers {#lock}
 
-The remote write may already have committed when a malformed success response is detected. A resulting error does not prove destination absence. Inspect the written version before blindly retrying a versioned copy.
+The proxy forwards legal hold state through the typed `LegalHold` client option so it is sent as `x-amz-object-lock-legal-hold` rather than `x-amz-meta-*` user metadata. Retention timestamps retain full sub-second precision instead of being truncated to whole seconds. The destination deployment enforces authentication and bucket Object Lock rules.
 
-## Object Lock is not user metadata {#lock}
+## Committed Write Identity {#result}
 
-Forward legal hold through the typed `LegalHold` option so it becomes `x-amz-object-lock-legal-hold`, not `x-amz-meta-*`. Retain the full precision of the retention timestamp; routing it through a whole-second conversion would weaken the requested value. Authentication and the destination's Object Lock rules still apply.
+Both the `CopyObjectResult` XML response and the `ObjectCreated:Copy` notification event report the committed destination key, logical size, ETag, exact `VersionID`, and modification time returned in the authenticated write-time response from the destination deployment. The proxy neither fabricates a local timestamp nor issues a follow-up unversioned `HEAD` request that could observe a concurrent writer. When the caller specifies a source `versionId`, source-version response headers continue to identify the selected source version.
 
-## Return the committed write {#result}
+## Source and Test Index {#verification}
 
-The response and `ObjectCreated:Copy` event describe the destination key, logical size, ETag and exact version ID. Modification time is obtained from the destination write, not invented at the proxy or obtained through a later unversioned HEAD that could observe another writer. The internal write-time response is bound to the authenticated federation request. Source-version response headers still identify the selected source when one was provided.
-
-## Evidence and deployment boundary {#verification}
-
-See the [handler](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/object-handlers.go), [write-time transport](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/object-handlers-common.go), and `object-copy-federation*_test.go` / `object-federation-time_test.go`. Tests cover ordinary, empty, multipart, compressed and encrypted sources, remote checksum failures, destination defaults, legal hold, response identity and events. These component fixtures do not certify a production etcd federation or every S3-compatible destination.
-
-Verify both forwarding and destination builds from the [component matrix](/compatibility/versions/). Existing objects are not rewritten by upgrading. Related records cover [SSE-C replica integrity](/blog/design/ssec-replica-integrity/) and [Object Lock ordering](/blog/design/object-lock-replication-ordering/).
+- **Implementation:** [`cmd/object-handlers.go`](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/object-handlers.go), [`cmd/object-handlers-common.go`](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/cmd/object-handlers-common.go) ([PR #157](https://github.com/pgsty/silo/pull/157), [PR #159](https://github.com/pgsty/silo/pull/159), [PR #163](https://github.com/pgsty/silo/pull/163), [PR #177](https://github.com/pgsty/silo/pull/177), [PR #179](https://github.com/pgsty/silo/pull/179))
+- **Regression tests:** `cmd/object-copy-federation*_test.go`, `cmd/object-federation-time_test.go`
+- **Related records:** [SSE-C Replica Integrity](/blog/design/ssec-replica-integrity/) · [Object Lock Replication Ordering](/blog/design/object-lock-replication-ordering/) · [Component Version Matrix](/compatibility/versions/)

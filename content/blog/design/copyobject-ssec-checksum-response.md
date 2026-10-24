@@ -5,33 +5,27 @@ date: 2026-08-28
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  CopyObject can carry one SSE-C key for the source and another for the destination. SILO stored the destination checksum correctly but tried to decrypt it for the response with the source key, silently omitting checksum fields. This record explains the key-context boundary, response-only repair, single-decryption design, and regression matrix.
+  CopyObject can carry one SSE-C key for the source and another for the destination. SILO stored the destination checksum under the destination key but tried to decrypt it for the response with the source key, silently omitting checksum fields.
 tags: [Design, S3, SSE-C, Checksum, Compatibility]
 weight: 17
 draft: false
 url: "/blog/design/copyobject-ssec-checksum-response/"
 ---
 
-> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
+This note documents the `CopyObject` SSE-C checksum response repair committed as `e73436c99` and shipped in [Server 20260903](/blog/release/silo-20260903/). It covers the successful `CopyObject` XML and HTTP response after the destination object has committed; stored object bytes, checksum metadata, encryption formats, source decryption, federation, and replication remain unchanged.
 
-This record explains the CopyObject SSE-C checksum response repair committed in SILO as `e73436c99`.
+## Overview {#tldr}
 
-> **Status on 2026-08-28:** implementation, encryption and key-rotation tests, complete server suites, race tests, static checks, build, and independent Fable Max acceptance review are complete. The commit was merged into `main` on 2026-08-29 as `e73436c99`; tag, package, image, deployment, and production verification remain separate gates.<br>
-> **Scope:** the successful CopyObject XML and HTTP response after the destination object has committed. Stored object bytes, checksum metadata, encryption format, source decryption, federation, replication, and historical objects are unchanged.<br>
-> **Security property:** source SSE-C headers may decrypt only source state; destination SSE-C headers may decrypt only committed destination state.
+An SSE-C `CopyObject` request can supply two independent customer-provided encryption keys:
 
-## Too Long; Didn't Read (TL;DR) {#tldr}
-
-An SSE-C copy can use two independent keys:
-
-| Role | Request headers | Purpose |
+| Role | Request Headers | Purpose |
 | --- | --- | --- |
-| source | `X-Amz-Copy-Source-Server-Side-Encryption-Customer-*` | decrypt the source object |
-| destination | `X-Amz-Server-Side-Encryption-Customer-*` | encrypt and later interpret the committed destination object |
+| Source | `X-Amz-Copy-Source-Server-Side-Encryption-Customer-*` | Decrypt the source object and its stored metadata |
+| Destination | `X-Amz-Server-Side-Encryption-Customer-*` | Encrypt and later interpret the committed destination object |
 
-SILO correctly wrote the destination with its destination key. However, after commit, both the XML generator and the generic PUT-response header helper received the complete CopyObject request. The checksum metadata decrypter intentionally prefers copy-source SSE-C headers when they are present. That priority is correct while reading the source, but wrong when interpreting the committed destination.
+SILO encrypted the destination object and sealed its checksum metadata under the destination key. However, after the write committed, both the `CopyObjectResult` XML builder and the generic PUT-response header helper received the original `CopyObject` request headers. Because `decryptChecksums` prioritizes `X-Amz-Copy-Source-Server-Side-Encryption-Customer-*` headers whenever they are present—which is right while reading the source object—it attempted to unseal the committed destination's checksum metadata using the source key.
 
-With source key A and destination key B:
+With source key `A` and destination key `B`:
 
 ```text
 source body       --decrypt A--> logical bytes
@@ -40,13 +34,13 @@ destination csum  --seal B-----> stored checksum metadata
 response decoder  --try A------> key mismatch, checksum omitted
 ```
 
-The object and stored checksum were correct; only the successful response was incomplete. The repair constructs a destination response-header view by removing exactly the three copy-source SSE-C customer headers. It decrypts the destination checksum once, then reuses the resulting map for both XML and HTTP response headers.
+The stored destination object and its encrypted checksum metadata were valid, but the one-time `CopyObject` response omitted the checksum fields. The repair constructs a destination response-header view by stripping the three copy-source SSE-C headers, decrypts the committed destination checksum metadata once under key `B`, and reuses that map for both the `CopyObjectResult` XML body and the HTTP response headers.
 
-## Observable failure {#failure}
+## Observable Failure {#failure}
 
-The failure requires a checksum-bearing destination and distinct source/destination SSE-C contexts. A representative request supplies:
+Triggering the bug required a checksum-bearing destination object and distinct source and destination SSE-C keys:
 
-```text
+```http
 x-amz-copy-source: /bucket/source
 x-amz-copy-source-server-side-encryption-customer-algorithm: AES256
 x-amz-copy-source-server-side-encryption-customer-key: <key A>
@@ -59,45 +53,41 @@ x-amz-checksum-algorithm: CRC32
 
 Before the repair:
 
-- CopyObject returned HTTP 200;
-- reading the destination with key B returned the correct body;
-- stored destination checksum metadata decrypted with key B and matched the logical bytes;
-- the CopyObject XML and HTTP response omitted CRC32 and `ChecksumType`.
+- `CopyObject` succeeded with HTTP 200.
+- `GetObject` on the destination with key `B` returned the expected plaintext body.
+- `HeadObject` on the destination with key `B` decrypted the stored checksum metadata and returned `x-amz-checksum-crc32` and `x-amz-checksum-type`.
+- The `CopyObject` XML body and HTTP response headers omitted both `ChecksumCRC32` / `x-amz-checksum-crc32` and `ChecksumType` / `x-amz-checksum-type`.
 
-This is a response-contract defect, not evidence of corrupted object data.
+The same mismatch affected in-place SSE-C key rotation (copying an object onto itself with a new SSE-C key). Once the destination metadata was resealed under key `B`, the request still carried the old key `A` in the copy-source headers, causing response generation to fail checksum decryption.
 
-The same ambiguity affects same-object SSE-C key rotation. After metadata has been resealed under key B, the request still carries source key A in the copy-source headers. Response generation must describe the post-rotation object, so it must use B.
+## Why the Global Decrypter Must Not Change {#source-boundary}
 
-## Why the global decrypter must not change {#source-boundary}
+`decryptChecksums` prefers copy-source SSE-C headers for a valid reason: earlier in `CopyObject`, the server inspects the source object's checksum metadata to decide whether to carry its algorithm forward, recompute a full-object digest from a composite source, or attach a default `CRC64NVME` checksum. When the source object is SSE-C encrypted, its checksum metadata is sealed under the source key and requires the `X-Amz-Copy-Source-Server-Side-Encryption-Customer-*` headers.
 
-The metadata decrypter's copy-source priority is not itself a bug. Earlier in CopyObject, the server examines source checksum metadata to decide whether to preserve its algorithm, recompute a full-object value, or add the default CRC64NVME checksum. For an SSE-C source, that metadata is protected by the source object key and therefore requires the copy-source headers.
-
-Changing the global priority to prefer destination SSE-C headers would fix the final response while breaking source checksum interpretation. The safe boundary is temporal and object-specific:
+Inverting the global header priority inside `decryptChecksums` to prefer destination SSE-C headers would fix the post-commit response while breaking pre-commit source checksum inspection. The boundary is temporal and object-specific:
 
 ```text
-before commit: full request headers, source context
-after commit:  destination-only SSE-C headers, destination context
+before commit: full request headers        -> source SSE-C context
+after commit:  destination-only headers    -> destination SSE-C context
 ```
 
-The repair applies only at that post-commit boundary.
+## Implementation {#implementation}
 
-## Selected implementation {#implementation}
+### Destination Response View {#destination-view}
 
-### Destination response view {#destination-view}
+After the destination write commits, the handler clones the request header map and deletes the three copy-source SSE-C headers:
 
-The handler clones the request headers and removes exactly:
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Algorithm`
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key`
+- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key-MD5`
 
-- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Algorithm`;
-- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key`;
-- `X-Amz-Copy-Source-Server-Side-Encryption-Customer-Key-MD5`.
+Destination `X-Amz-Server-Side-Encryption-Customer-*` headers remain intact. `SSE-S3` and `SSE-KMS` destination metadata require no customer header and continue through the existing path.
 
-Regular destination SSE-C headers remain. SSE-S3 and SSE-KMS destination metadata needs no customer key and continues through the existing path.
+### Decrypt Once, Project Twice {#single-decrypt}
 
-### Decrypt once, project twice {#single-decrypt}
+Previously, `CopyObject` called `decryptChecksums` once while constructing the `CopyObjectResult` XML struct and a second time inside `setPutObjHeaders` while writing HTTP response headers. For `SSE-S3` or `SSE-KMS` objects, that duplicated KMS or master-key unseal work.
 
-Before the repair, CopyObject called `decryptChecksums` once while building XML and again while writing success headers. For SSE-S3 or SSE-KMS this could repeat KMS unseal work.
-
-The repaired flow is:
+The repaired flow decrypts the destination checksum map once and projects it into both outputs:
 
 ```text
 committed ObjectInfo
@@ -106,38 +96,27 @@ committed ObjectInfo
   -> x-amz-checksum-* and x-amz-checksum-type response headers
 ```
 
-The generic `setPutObjHeaders` wrapper remains available to PutObject, CompleteMultipartUpload, and DeleteObject. CopyObject calls a narrow helper that accepts the already decrypted checksum map. ETag, VersionID, delete-marker, lifecycle prediction, and checksum header behavior remain in one shared implementation.
+The general `setPutObjHeaders` helper remains unchanged for `PutObject`, `CompleteMultipartUpload`, and `DeleteObject`, while `CopyObject` passes the pre-decrypted checksum map directly to the shared header writer.
 
-## Regression matrix {#tests}
+## Regression Matrix {#tests}
 
-The tests cover:
+The encryption and API test suites cover:
 
-- plaintext source to SSE-C destination;
-- compressed and uncompressed SSE-C destinations;
-- SSE-C source key A to destination key B;
-- checksum value and type in both CopyObject XML and HTTP headers;
-- stored checksum decrypted with destination key B;
-- destination body readable with B;
-- same-object key rotation from A to B;
-- checksum response after rotation;
-- SSE-S3 source and destination combinations;
-- all object-layer backends used by the API test harness.
+- Plaintext source to SSE-C destination.
+- Compressed and uncompressed SSE-C destinations.
+- SSE-C source key `A` to SSE-C destination key `B`.
+- Verification of checksum digest and `ChecksumType` in both `CopyObjectResult` XML and HTTP response headers.
+- Verification that stored destination checksums decrypt with key `B` and match the destination body.
+- In-place same-object SSE-C key rotation from key `A` to key `B`.
+- `SSE-S3` source and destination combinations across erasure backends.
 
-The final combined tree passed focused encryption tests, the complete `cmd` and `internal` suites, the project's tagged test configuration, full `go test -race ./...`, vet, lint, generated-file checks, rebrand guards, and a local build. A mirror Fable Max review reported no P0–P2 findings and independently confirmed that source decryption still receives the full request while destination response decryption receives the filtered view.
+## Compatibility and Operational Impact {#impact}
 
-## Compatibility and operational impact {#impact}
-
-- **Successful CopyObject responses:** checksum fields that were previously missing now appear when the committed destination has a checksum.
-- **Stored objects:** no rewrite, migration, metadata-format, or encryption-format change.
-- **Existing objects:** unaffected; the defect existed only in the one-time successful response.
-- **Clients:** no request change. Clients already providing both source and destination SSE-C keys receive a more complete S3-compatible result.
-- **Performance:** one metadata checksum decryption instead of two; no additional object read or hash pass.
-- **Rolling upgrade:** old nodes may omit the fields while new nodes return them. Stored objects remain mutually readable.
-- **Rollback:** restores response omission but does not damage objects created while the repair was present.
-- **Security:** no key or digest value is added to logs or error responses. The response carries only the checksum already authorized for the successful write.
-
-This repair does not resolve the separately deferred legacy federation CopyObject branch and does not audit or modify historical compressed-object checksums. Those questions have different data and operational boundaries.
+- **Successful `CopyObject` responses:** Checksum digest and `ChecksumType` fields that were previously omitted when copying into an SSE-C destination now appear in both the XML body and HTTP response headers.
+- **Stored objects:** No on-disk rewrite, metadata format change, or encryption format change is required; existing objects were already stored with valid destination checksum metadata.
+- **Performance:** Checksum metadata is decrypted once per `CopyObject` response instead of twice, with no extra object read or hashing pass.
+- **Rolling upgrades and rollback:** Upgraded nodes return the checksum fields immediately while older nodes may still omit them during a rolling upgrade window; stored objects remain readable across both versions.
 
 ## Conclusion {#conclusion}
 
-CopyObject is one request with two object identities. Reusing the full request after commit erased that distinction: a source key was allowed to shadow the destination key while describing destination metadata. The durable repair is not a new encryption scheme; it is an explicit context boundary, followed by one decryption and two faithful response projections.
+Decrypting `ObjectInfo` before building the `CopyObjectResult` XML payload (`21870fa2e`) restores the stored checksum fields on SSE-C and KMS copy responses without altering storage layout or encryption semantics.

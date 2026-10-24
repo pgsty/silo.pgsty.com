@@ -5,265 +5,204 @@ date: 2026-09-01
 lastmod: 2026-09-16
 author: "冯若航"
 summary: >
-  CORS 预鉴权查询曾把任意 URL 路径段变成 metadata I/O 与缓存条目；客户端可控的 replication marker 又会影响 SSE-C 读取、源时间戳、checksum、对象锁、事件与删除语义。本文记录 SILO 的 resident-only CORS 热路径、两级复制信任模型、验签后清洗边界、真实 wire 兼容矩阵与发布前证据。
+  CORS 预鉴权查询曾将任意 URL 路径段转化为磁盘元数据读取与缓存条目，而客户端可控的复制标记请求头又能在未鉴权情况下触发 SSE-C 密文读取、源时间戳覆盖、校验和注入、对象锁豁免与事件抑制。本文记录 SILO 的纯内存驻留 CORS 热路径、两级复制信任模型与验签后清洗边界。
 tags: [设计, 安全, CORS, Replication, SSE-C, 兼容性]
 weight: 12
 draft: false
 url: "/zh/blog/design/cors-replication-trust/"
 ---
 
-> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
+本文记录通过 [PR #101](https://github.com/pgsty/silo/pull/101)（提交 `938603458` 至 `04b097fd9`）合入 SILO、编号为 [SN-2026-008](/zh/about/security-advisories/#sn-2026-008) 并随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布的 CORS 热路径与复制请求信任边界修复。
 
-本文记录以 [PR #101](https://github.com/pgsty/silo/pull/101)（`938603458` 至 `04b097fd9`）合并进 SILO 的 CORS 热路径与复制请求信任边界修复。
+## 概览 {#tldr}
 
-> **截至 2026-09-03 的状态：** [PR #101](https://github.com/pgsty/silo/pull/101) 已于 2026-09-01 合并进 `main`，并带四个后续提交：Snowball 逐条目信任隔离（`ff44527a3`）、Snowball worker 间保留请求默认值（`ab3ae99ca`）、复制有效性探针校验复制权限（`c9ad74673`）且合成 key 置于规则前缀下（`5db7be4ee`）。实现、定向与 race 测试、完整服务端 package 套件、对象锁测试、vet、build、两轮 Fable 5 设计评审、多轮 Opus 5 对抗验收，以及真实本地 TLS 双站复制均已完成。随后的发布前清理保留了 resident-only 查找及其启动期与加载失败的 fail closed 状态，只去掉了内部 namespace 的特殊分支；剥头后的请求克隆与原请求共享 trailer，使不可信请求的流式校验和上传照常工作。tag、软件包、镜像、部署与生产验证仍是独立门槛。<br>
-> **范围：** S3 handler 之前与内部的 HTTP 请求解释。不修改 S3 wire field、对象格式、bucket metadata 格式、复制协议、加密格式或客户端命令。<br>
-> **安全属性：** CORS 预鉴权处理不执行对象层 I/O；header 本身永远不授予复制语义；SSE-C 密文路径与 replica-only metadata 必须同时通过身份认证与对应复制权限检查。
+两个表面上互不相关的缺陷，实际上源于同一个架构层面的设计失误：
 
-## 太长不看（TL;DR） {#tldr}
+1. 任何携带 `Origin` 请求头的 HTTP 请求都会促使最外层 CORS 中间件把 URL 第一段路径当成存储桶名称，并在身份认证之前同步从磁盘加载该桶的元数据。
+2. 任何携带 `X-Minio-Source-Replication-Request` 请求头的请求，仅凭该请求头存在就会让下游处理器将其视为内部复制请求。
 
-两个问题表面上互不相干：
+两者的共同根因在于：**不可信的请求语法在跨越授权边界之前，就已经获得了高开销或高特权的内部语义**。
 
-1. `Origin` header 会让最外层 CORS middleware 把 URL 第一段当成桶，在鉴权前同步加载它的 metadata；
-2. `X-Minio-Source-Replication-Request` 只要存在，下游代码就会把请求当作内部复制。
-
-它们共享同一个设计错误：**不可信的请求形态在越过授权边界之前，就获得了昂贵或特权化的内部含义。**
-
-修复建立了两个不变量：
+本次修复确立了两条核心安全不变量：
 
 ```text
-鉴权之前：只做廉价解析，绝不加载 bucket metadata
-鉴权之后：只计算一次信任结论，下游只消费这个结论
+鉴权之前：只做廉价语法解析，绝不触发存储层 I/O
+鉴权之后：只派生一次信任结论，下游仅消费该结论
 ```
 
-对于 CORS，外层 middleware 只读已经 resident 的内存 metadata。对于复制，handler 先认证原始签名请求，再检查对应复制权限，最后把私有信任结论写入 request context。不可信内部 header 只在验签完成后剥离。真正的权威是 context 中的决定，而不是“是否成功删掉了某个 header”；option builder、加密路径、对象锁、事件与 metadata 持久化都只读取这一决定。
+对于 CORS，最外层中间件现在只读取已驻留在内存中的存储桶元数据。对于复制，处理器先对原始签名请求完成身份认证，再校验对应的复制权限（`s3:ReplicateObject` 或 `s3:ReplicateDelete`），随后将私有的信任结论写入请求上下文（`context.Context`）。不可信的内部请求头仅在 SigV4 验签完成后才被剥离。下游选项构造器、加密路径、Object Lock 检查、事件通知与元数据持久化统一读取上下文中的信任结论，而不再检查原始请求头。
 
-## 故障 A：CORS 预鉴权资源放大 {#cors-failure}
+## 缺陷 A：鉴权前的 CORS 元数据放大攻击 {#cors-failure}
 
-`corsHandler` 包在完整服务器 router 的最外层。任何携带 `Origin` 的请求都会在 S3 鉴权、请求有效性检查与普通 API 限流之前到达这里。
+`corsHandler` 包裹了整个服务端路由器。任何携带 `Origin` 请求头的请求都会在进入 S3 签名认证、请求合法性检查和常规 API 并发限流器之前先经过该中间件。
 
-Per-bucket CORS 最初调用普通 bucket metadata getter：
+在旧实现中，按桶 CORS 检查直接调用了通用的存储桶元数据加载器：
 
 ```text
 携带 Origin 的请求
-  -> URL 第一段变成“桶名”
+  -> URL 第一段被当作 "bucket"
   -> GetCorsConfig
-  -> GetConfig cache miss
+  -> GetConfig 缓存未命中
   -> 读取 .metadata.bin
-  -> 探测十个 legacy config 路径
-  -> 缓存一条默认 BucketMetadata
+  -> 依次探测 10 个旧版配置文件路径
+  -> 向 metadataMap 写入默认的空 BucketMetadata 记录
 ```
 
-`.metadata.bin` 不存在时，loader 会按兼容要求继续寻找 legacy 配置；什么都没找到后，它返回一条合法的空 metadata，而不是 `NoSuchBucket`。通用 getter 随后把这条记录写入 `metadataMap`。
+当磁盘上不存在 `.metadata.bin` 时，加载器会继续探测 10 个历史遗留配置路径；全部未命中后，它不会返回 `NoSuchBucket`，而是构造并返回一条合法的空 `BucketMetadata` 记录，随后由通用读取器插入内存映射表 `metadataMap`。
 
-未认证客户端只需不断变化看似合理的名字，就能让每个新值产生两种代价：
+因此，未认证客户端只需不断变换语法合法但并不存在的存储桶名称，每个新名称都会触发双重放大效应：
 
-- 在普通 limiter 之前反复执行纠删码/对象 metadata 读取；
-- 增长内存中的 bucket metadata map。
+- 在进入 API 限流器之前触发未受限的纠删码/存储层元数据读取（1 次 `.metadata.bin` 加 10 次旧路径探测）；
+- 导致内存中的 `metadataMap` 持续膨胀（分布式部署每 15 分钟才清理一次过期项，而单节点部署不启动后台刷新循环，伪造条目会一直驻留到进程重启）。
 
-只校验桶名不能修复：攻击者可以生成近乎无限的、语法合法但不存在的桶名。分布式部署会在 15 分钟 metadata refresh 中最终清理 stale entry；单节点不会启动这条 refresh loop，因此合成条目会一直存在到重启。
+## 缺陷 B：标记请求头被直接当作权限权威 {#replication-failure}
 
-## 故障 B：marker header 变成了权威 {#replication-failure}
+SILO 与兼容 MinIO 的复制客户端在跨站复制时通过内部请求头传递源端状态，其中最核心的标记头是：
 
-SILO 及其 MinIO-compatible 客户端使用内部 header，在复制期间保留源状态。其中最重要的 marker 是：
-
-```text
+```http
 X-Minio-Source-Replication-Request: true
 ```
 
-修复前，多条路径把 header 存在，或未经授权的原始字符串值，当成复制请求证明。影响远不止 metadata extraction：
+在本次修复前，多条代码路径只要看到该请求头存在（或其字符串值为 `"true"`），就会直接认定当前请求来自受信任的复制对端，影响范围遍及多个子系统：
 
-- SSE-C 对象的 `GET` 可以设置 `NoDecryption`，让只有普通读取权限、没有 customer key 的调用者取得密文；
-- source ETag 与 modification time 可以覆盖服务器生成值；
-- source tagging、retention、legal-hold timestamp 可以进入 last-writer-wins 比较；
-- 仅凭 marker 就可以接受已经过去的 object-lock retention date；
-- delete marker 的 identity 与 modification time 可以由调用者提供；
-- 成功对象事件可以被抑制；
-- multipart completion 可以注入 actual size 与加密 checksum metadata；
-- 普通 PUT、COPY 或 POST-policy metadata extraction 可以持久化 `X-Amz-Replication-Status`。
+- 仅具备普通 `s3:GetObject` 权限的调用方在对 SSE-C 对象发起 `GetObject`、`HeadObject` 或 `GetObjectAttributes` 时，可利用该标记触发 `NoDecryption` 分支，无需提供客户端密钥即可直接读取原始密文；
+- 客户端提供的源 ETag 与修改时间（`MTime`）可以覆盖服务端生成的值；
+- 源端标签、对象锁保留期与法律保留（Legal Hold）时间戳可渗入“最后写入者胜出”（LWW）冲突比较；
+- 对象锁解析器通过检查原始标记头即可放行已经过期的 `RetainUntilDate` 保留时间；
+- 调用方可自行指定删除标记（Delete Marker）的 `VersionID` 与修改时间；
+- 成功的对象创建与访问通知事件可被静默抑制；
+- 分片上传完成（`CompleteMultipartUpload`）阶段可注入实际对象大小与加密校验和元数据；
+- 普通 `PutObject`、`CopyObject`、Snowball/PAX 归档解压或浏览器 `POST` 表单策略上传只要附带 `X-Amz-Replication-Status: REPLICA`，就能将该状态直接持久化到对象元数据中。
 
-此前的 [CVE-2026-34204 修复](/zh/blog/security/cve-2026-34204/) 已经正确阻止普通 PUT/COPY 导入可能让对象不可读的 replication SSE metadata。但它尚未为 marker、source field、event state、object-lock exception 与 multipart completion metadata 的所有消费者提供同一个权威。
+此前的 [CVE-2026-34204 修复](/zh/blog/security/cve-2026-34204/)已经阻止了普通 `PutObject` 与 `CopyObject` 导入会导致对象不可读的复制 SSE 元数据，但当时尚未为所有读取复制标记、源时间戳、事件状态、对象锁豁免与分片完成元数据的消费者建立统一的授权后信任源。
 
-## 最终设计 {#design}
+## 复制信任模型设计 {#design}
 
-### 一个精确 marker，两级信任 {#trust-levels}
+### 精确标记解析与两级信任模型 {#trust-levels}
 
-只有 marker 恰好出现一次、且值恰好为小写 `true` 时，才承认其形态。重复值、大小写变化与任何其他值都不可信。
+仅当 `X-Minio-Source-Replication-Request` 恰好出现一次且其值严格等于小写 `"true"` 时，解析器才视其为有效标记；重复请求头、大小写混合或任何其他字符串一律视为不可信。
 
-Handler 随后派生两个相关结论：
+完成身份认证后，处理器派生出两个层次的信任决策：
 
-| 决定 | 必须满足 | 可以启用的语义 |
+| 信任级别 | 准入要求 | 允许启用的内部语义 |
 | --- | --- | --- |
-| `trusted` | 原始请求完成认证；非匿名主体；精确 marker；目标资源上具有 `s3:ReplicateObject` 或 `s3:ReplicateDelete` | source ETag/MTime 与 source timestamp；actual size 与加密 checksum 传递；event 与重复复制抑制；复制删除的 pool/version pinning |
-| `replicaTrusted` | `trusted`，再加原始请求状态为 `REPLICA`，或 multipart upload 已保存 `REPLICA` 状态 | replica status 持久化；replication SSE sealed-key 导入；SSE-C 密文/NoDecryption 路径；replica-only 对象锁行为 |
+| `trusted` | 原始请求已通过非匿名身份认证 + 精确标记头 + 对目标资源具备 `s3:ReplicateObject`（或 `s3:ReplicateDelete`）权限 | 保留源端 ETag/MTime 及子系统时间戳；传递分片实际大小与加密校验和；抑制重复事件通知与二次复制；固定复制删除的目标版本与存储池 |
+| `replicaTrusted` | 满足 `trusted`，且当前请求携带原始状态 `REPLICA`（或分片上传初始化时已持久化 `REPLICA` 状态） | 持久化 `REPLICA` 状态；导入复制 SSE 密封密钥；启用 SSE-C 免解密原始密文读取路径（`NoDecryption`）；启用副本专用的对象锁豁免规则 |
 
-必须拆成两级，因为真实 wire 并不会在每个合法复制请求上重复 `X-Amz-Replication-Status: REPLICA`。
+之所以必须区分 `trusted` 与 `replicaTrusted`，是由真实线缆协议决定的：合法的分片上传（`UploadPart`）、分片完成（`CompleteMultipartUpload`）以及批量复制（Batch Replication）请求只会携带 `X-Minio-Source-Replication-Request: true`，而不会在每个子请求上重复附带 `X-Amz-Replication-Status: REPLICA`。
 
-接收端遵守以下矩阵：
+接收端按以下矩阵处理入站请求：
 
-| 输入形态 | 结果 |
+| 入站请求形态 | 接收端行为 |
 | --- | --- |
-| 没有 marker | 普通 S3 操作 |
-| marker 但没有复制权限 | 忽略内部字段，按普通语义继续执行 |
-| `REPLICA` 但没有复制权限 | `403 AccessDenied` |
-| 精确 marker + 复制权限，没有 `REPLICA` | 只有 `trusted` |
-| 精确 marker + 复制权限 + `REPLICA` | 同时获得 `trusted` 与 `replicaTrusted` |
+| 无标记头 | 按普通 S3 请求处理 |
+| 携带标记头，但缺少复制权限 | 剥离并忽略内部复制请求头，按普通 S3 语义继续执行 |
+| 携带 `X-Amz-Replication-Status: REPLICA`，但缺少复制权限 | 直接返回 `403 AccessDenied` |
+| 精确标记头 + 具备复制权限，无 `REPLICA` 状态头 | 仅授予 `trusted` |
+| 精确标记头 + 具备复制权限 + `REPLICA` 状态头 | 同时授予 `trusted` 与 `replicaTrusted` |
 
-未授权 `REPLICA` 必须明确返回 `403`，不能静默降级成一个会再次被复制的新普通对象。
+对未获授权却声称 `REPLICA` 的请求显式返回 `403 AccessDenied`，可以防止配置错误的副本写入被静默降级为普通新对象写入并触发反向复制循环。
 
-### 先认证原始请求，再做清洗 {#signature-boundary}
+### 先验签原始请求，再清洗内部请求头 {#signature-boundary}
 
-SigV4 会签名请求 header。如果在鉴权前删除内部 header，canonical request 会发生变化，原本有效的签名将变成 `SignatureDoesNotMatch`。
-
-因此顺序是硬约束：
+由于 AWS SigV4 会将 `x-amz-*` 与 `x-minio-*` 请求头纳入签名计算，若在验签前删除内部请求头，就会破坏规范化请求（Canonical Request）并导致合法签名报 `SignatureDoesNotMatch`。因此处理顺序必须严格固定：
 
 ```text
-原始请求
-  -> 既有 signature/authentication path
-  -> 普通 S3 action 授权
-  -> replication action 授权
-  -> 计算 trusted / replicaTrusted
-  -> 把决定写入 request context
-  -> clone 并剥离不可信内部字段
-  -> option 解析、加密、对象锁、存储、事件
+原始 HTTP 请求
+  -> SigV4 签名与身份认证
+  -> 常规 S3 操作权限检查
+  -> 复制操作权限检查（s3:ReplicateObject / s3:ReplicateDelete）
+  -> 计算 trusted / replicaTrusted 决策
+  -> 将信任决策绑定到请求 context
+  -> 克隆请求并剥离不可信内部请求头（共享原始 Trailer 映射）
+  -> 选项解析、加密处理、对象锁、存储落盘与事件通知
 ```
 
-Audit logger 仍保留原始请求。Effective request clone 保留公开 S3、SSE、checksum、object-lock、copy-source、proxy 与 replication validity header；只剥离内部 source/replication control，包括 source ETag/MTime/delete-marker/timestamp、replication SSE state、actual object size、加密 checksum 传递，以及作为内部请求控制使用的 `X-Amz-Replication-Status`。
+剥离请求头后的克隆请求会与原请求共享底层 `http.Request.Trailer` 映射，确保普通客户端的 `aws-chunked` 流式校验和上传不受影响。Snowball/PAX 批量归档路径则按归档条目独立隔离信任状态（`ff44527a3`），同时在后台工作协程之间保留合法的请求默认属性（`ab3ae99ca`）。
 
-Header stripping 只是纵深防御。所有特权消费者都读取私有 context 决定或显式 Boolean，不会再靠检查 clone 来猜测信任。
+### 将副本状态移出通用用户元数据白名单 {#replica-status}
 
-### Replica status 不是普通用户 metadata {#replica-status}
+`X-Amz-Replication-Status` 已从通用的受支持请求元数据提取列表中移除。普通 `PutObject`、`CopyObject`、分片上传初始化、Snowball 归档提取以及浏览器 `POST` 表单策略均无法再通过提交同名字段来持久化 `REPLICA` 状态；服务端仅在通过验证的 `replicaTrusted` 分支中显式写入 `REPLICA`。
 
-`X-Amz-Replication-Status` 是一个 S3 response header，MinIO-compatible server 同时把它用作内部请求控制。它不再属于通用 supported-request-metadata 列表。
+### 对象锁显式接收信任决策 {#object-lock}
 
-普通 PUT、COPY、multipart initiation、Snowball/PAX extraction 与 POST policy 不能仅凭提交字段就持久化它。接收端只在 `replicaTrusted` 分支显式写入 `REPLICA`。
+对象锁解析包不再直接读取 `X-Minio-Source-Replication-Request` 请求头，而是由外层处理器根据 `replicaTrusted` 状态显式传入 `allowPastRetainDate` 参数；外层处理器在判断入站副本是否允许覆盖既有合规模式（Compliance）或法律保留版本时，同样使用同一个 `replicaTrusted` 决策。
 
-这同时关闭了一条隐蔽的 POST-policy 路径：form field 曾经可以写入 `REPLICA`，让对象绕开正常复制调度，而 POST principal 根本没有复制权限。
+## 真实复制线缆协议矩阵 {#wire-matrix}
 
-### 对象锁接收显式决定 {#object-lock}
-
-Object-lock parser 过去只要看到原始 marker header，就会接受已经过去的 retention date。现在它从 `replicaTrusted` 接收显式的 `allowPastRetainDate`。
-
-外围 handler 在判断 replica 能否覆盖既有 compliance/legal-hold version 时也使用同一个决定。可复用的 object-lock package 不再依赖内部 HTTP header。
-
-## 真实复制 wire 矩阵 {#wire-matrix}
-
-设计核对的是服务器 `go.mod` 实际选择的 silo-go v7.3.1 emitter，而不是注释或上游文档中的假设。
-
-| 操作 | Marker | 本请求携带 `REPLICA` | 接收端决定 |
+| 操作类型 | 标记头 | 当前请求是否携带 `REPLICA` | 接收端信任决策 |
 | --- | --- | --- | --- |
-| 普通对象复制 `PutObject` | 是 | 是 | `replicaTrusted` |
-| 复制 `NewMultipartUpload` | 是 | 是 | 保存可信 MPU replica provenance |
-| 复制 `PutObjectPart` | 是 | 否 | `trusted`；只有已存 MPU 状态为 `REPLICA` 才获得 `replicaTrusted` |
-| 复制 `CompleteMultipartUpload` | 是 | 否 | `trusted`；保留 source ETag/MTime、actual size 与加密 checksum |
-| CopyObject metadata replication | 是 | 是 | `replicaTrusted` |
-| 复制 `RemoveObject` | 是 | 是 | 具有 `s3:ReplicateDelete` 的 `replicaTrusted` |
-| Batch replication PUT/Complete | 是 | 否 | `trusted`；目标凭据必须拥有 `s3:ReplicateObject` |
-| Proxy/readiness/validity probe | 独立 probe header | marker 不授予权限 | 保持 probe 行为；本修复不会剥离这些 header |
+| 常规复制 `PutObject` | 是 | 是 | `replicaTrusted` |
+| 复制 `CreateMultipartUpload` | 是 | 是 | 持久化受信任的分片上传 `REPLICA` 来源状态 |
+| 复制 `UploadPart` | 是 | 否 | `trusted`；仅当已保存的分片上传状态为 `REPLICA` 时提升为 `replicaTrusted` |
+| 复制 `CompleteMultipartUpload` | 是 | 否 | `trusted`；保留源端 ETag/MTime、实际大小与加密校验和 |
+| `CopyObject` 元数据复制 | 是 | 是 | `replicaTrusted` |
+| 复制 `DeleteObject` | 是 | 是 | `replicaTrusted`（需具备 `s3:ReplicateDelete` 与 `s3:DeleteObject`，且 `s3:DeleteObjectVersion` 未被显式拒绝） |
+| 批量复制 `PUT` / `Complete` | 是 | 否 | `trusted`（目标端凭据必须包含 `s3:ReplicateObject`） |
+| 代理转发 / 就绪检查 / 有效性探针 | 独立探针头 | 否 | 保留探针头；有效性探针在规则前缀下校验复制权限（`c9ad74673`、`5db7be4ee`） |
 
-`s3:ReplicateDelete` 是信任闸门，但不是 receiver 的唯一权限。为了兼容已经部署的
-目标端策略，可信复制删除仍要求 `s3:DeleteObject`；显式 Deny
-`s3:DeleteObjectVersion` 仍会阻止指定版本的清理。普通客户端不走这条兼容路径：
-显式 UUID 或 `versionId=null` 必须获得 `s3:DeleteObjectVersion` 的 Allow。
+## CORS 纯内存驻留状态机 {#cors-state-machine}
 
-如果要求所有可信请求都带 `REPLICA`，PutPart、multipart completion 与 batch replication 会立即回归；如果相信所有 marker，则漏洞会原样重现。已保存的 multipart provenance 在加密 raw part 上连接了这两个要求。
+最外层 CORS 中间件现在调用专用的纯内存驻留（resident-only）访问器，仅获取一次内存读锁，绝不触发任何存储层 I/O：
 
-## CORS resident-only 状态机 {#cors-state-machine}
-
-最外层 CORS middleware 必须比即将进入的请求更便宜。它现在调用专用 resident-only getter，只拿一次读锁并读取内存状态。
-
-| Bucket metadata 状态 | CORS 结果 | 对象层工作 |
+| 存储桶元数据内存状态 | CORS 决策 | 存储层 I/O |
 | --- | --- | --- |
-| resident，per-bucket CORS 合法 | 应用桶级规则；refresh 失败时沿用最近一次加载的文档，与其它所有桶配置一致 | 无 |
-| resident，没有 CORS 文档 | 使用 global CORS fallback | 无 |
-| resident，持久化 CORS 非法 | fail closed；继续处理请求但不加 CORS header，并只记一次日志 | 无 |
-| 启动加载仍在进行时的不驻留名字 | fail closed | 无 |
-| 启动完成后的不驻留名字：metadata 加载失败的真实桶 | fail closed | 无 |
-| 启动完成后的不驻留名字：reserved、非法、内部或未知 | global fallback | 无 |
+| 已驻留，且包含合法的桶级 CORS 配置 | 应用桶级 CORS 规则（后台刷新失败时保留上一次成功加载的配置） | 无 |
+| 已驻留，但未配置桶级 CORS | 回退使用全局 CORS 配置 | 无 |
+| 已驻留，但持久化的 CORS XML 损坏 | 失败关闭（Fail closed：不输出 CORS 响应头并记录一次日志） | 无 |
+| 未驻留，且启动期初始加载尚未完成 | 失败关闭（Fail closed） | 无 |
+| 启动完成后未驻留：磁盘上真实存在但元数据加载失败的桶 | 失败关闭（Fail closed） | 无 |
+| 启动完成后未驻留：不存在、保留名、非法名或 `.minio.sys` 命名空间 | 回退使用全局 CORS 配置 | 无 |
 
-查找只看驻留 map 和一个有界集合——启动或 refresh 时 metadata 加载失败的真实桶。该集合只从磁盘得到的桶列表写入，客户端路径无法增长它，也从不记录已经驻留的桶；加载成功、`Set`、桶删除、stale 桶清理与 subsystem reset 都会清除相应条目。两种不驻留状态都 fail closed：预签名 URL 以自身签名完成认证，桶级 CORS 文档是浏览器对它施加的唯一 origin 边界，若回落到全局策略，泄露的 URL 就能从任意 origin 使用。内部 `.minio.sys` namespace 不再特殊处理：它与任何 reserved 或非法名字一样不是桶，使用 global fallback，请求随后会在下游被拒绝。
+启动加载期与已知加载失败状态均采用失败关闭（fail closed）策略：由于预签名 URL（Presigned URL）本身已在查询字符串中携带认证签名，存储桶自定义的 CORS 配置是浏览器端唯一能够约束其调用源（Origin）的边界；若在桶元数据加载失败时回退到宽松的全局 CORS 策略，泄露的预签名 URL 就可能被任意网页源跨域调用。
 
-## 被否决的方案 {#alternatives}
+## 被拒绝的替代方案 {#alternatives}
 
-| 方案 | 为什么否决 |
+| 被拒绝的替代方案 | 拒绝原因 |
 | --- | --- |
-| 在旧 CORS getter 前校验桶名 | 合法但不存在的名字仍提供无限攻击空间，且继续触发预鉴权 I/O |
-| 加载 CORS 前调用 `GetBucketInfo` | 只是把十一轮 metadata 读取换成每个攻击者名字至少一次未限流 backend operation |
-| 给每个 negative result 做 TTL cache | 只限制持续时间，不限制攻击者 cardinality 与第一次 I/O 放大 |
-| 鉴权前剥离 replication header | 破坏 SigV4 canonical request 验证 |
-| 拒绝任何携带内部 marker 的请求 | 把过去被忽略的多余 header 扩大成普遍客户端失败，并破坏合法 marker-only 复制调用 |
-| 要求所有可信调用都携带 `REPLICA` | 破坏复制 PutPart、CompleteMultipartUpload 与 batch replication wire |
-| 每个 handler 各自重新检查 raw header | 重建不一致信任规则，未来新增消费者也极易漏掉 |
-| 只在 `ObjectOptions` 放 Boolean，event/object lock 仍看 header | 产生两个可能互相矛盾的权威，原漏洞类别仍然存在 |
+| 在调用旧 CORS 加载器前先校验桶名语法 | 攻击者仍可构造无穷多个语法合法但并不存在的桶名，依然会触发鉴权前磁盘 I/O |
+| 加载 CORS 前先调用 `GetBucketInfo` | 只是把 11 次元数据探测替换成每个伪造桶名至少 1 次不受限的后端存储探测 |
+| 为不存在的桶增加带 TTL 的负缓存 | 只能限制单条缓存存活时间，无法限制攻击者构造海量不同桶名的基数（Cardinality）与初始 I/O 放大 |
+| 在 SigV4 验签前直接剥离复制请求头 | 破坏 SigV4 规范化请求计算，导致合法请求报 `SignatureDoesNotMatch` |
+| 拒绝所有携带内部复制标记头的请求 | 会使原本应被忽略的多余请求头引发大面积客户端报错，并打断合法的仅标记（marker-only）复制调用 |
+| 要求所有受信任复制请求都携带 `REPLICA` | 破坏复制 `UploadPart`、`CompleteMultipartUpload` 与批量复制的真实线缆兼容性 |
+| 在 `ObjectOptions` 中保存布尔值，但让事件与对象锁继续读请求头 | 留下两个可能互相矛盾的信任源 |
 
-## 实现边界 {#implementation}
+## 实现分层与验证矩阵 {#implementation}
 
-最终改动按层组织：
+整体实现划分为七个清晰边界：
 
-1. 一个小型 request-trust 模块定义精确 marker 解析、复制授权、私有 context state 与鉴权后的 effective request；
-2. object option builder 只有在调用方提供可信状态时才解析 source field；
-3. `DecryptObjectInfo`、event request parameter、multipart completion、delete option 与 object lock 消费同一个决定；
-4. handler 在既有 authentication path 之后立即计算信任；
-5. multipart part 把当前请求信任与已保存 MPU replica provenance 结合；
-6. 通用 metadata extraction 不再接受 replica status；
-7. CORS middleware 使用独立的 resident-only accessor，永远不调用 load-on-miss getter。
+1. 独立的请求信任模块负责精确解析标记头、评估复制 IAM 权限、将私有信任结构体写入 `req.Context()`，并生成验签后的清洗版请求克隆；
+2. `putOpts`、`copyDstOpts`、`getOpts` 与 `delOpts` 构造器仅在调用方传入受信任状态时才解析源端复制字段；
+3. `DecryptObjectInfo`、通知事件参数构造、分片上传完成、删除选项与对象锁统一消费同一份上下文决策；
+4. 各 S3 处理器在现有身份认证通过后立即计算复制信任结论；
+5. 分片上传（`PutObjectPart`）将当前请求的 `trusted` 状态与分片上传初始化时持久化的 `REPLICA` 来源状态结合判定；
+6. 通用用户元数据提取器不再接受 `X-Amz-Replication-Status`；
+7. `corsHandler` 使用独立的纯内存驻留访问器，绝不调用缓存未命中即读盘的通用加载器。
 
-对象层 API 无需再猜测 HTTP trust。内部程序化调用者直接构造的 `ObjectOptions{ReplicationRequest: true}` 不受影响。
+### 验证矩阵 {#verification}
 
-## 验证与对抗审查 {#verification}
+自动化回归测试与真实双站点 TLS 黑盒复制测试共同验证了以下场景：
 
-回归覆盖包括：
+- 数百个不同的合法未创建桶名在预检（preflight）与实际 CORS 请求下，磁盘元数据读取次数为零且 `metadataMap` 大小不增长；
+- 最小权限的 SSE-C `GetObject`、`HeadObject` 与 `GetObjectAttributes` 调用方在缺失、大小写错误或未授权复制标记下均无法绕过密钥检查；
+- 仅携带标记头的批量风格 `PutObject` 只有在具备 `s3:ReplicateObject` 权限时才保留源端 ETag 与 `MTime`；
+- 未获授权的 `REPLICA` `PutObject` 与 `DeleteObject` 稳定返回 `403 AccessDenied`；
+- 浏览器 `POST` 表单策略无法伪造 `REPLICA` 状态；
+- 对象锁过去保留时间在无 `replicaTrusted` 时被拒绝、在受信任副本写入时正常放行；
+- 两个启用 TLS 的 SILO 节点通过真实站点复制同步 SSE-C 4 KiB 单对象、SSE-C 12 MiB 三分片对象、SSE-C `CopyObject` 以及复制删除标记，源端与目标端的 ETag、大小、`VersionID`、SSE-C 密钥 MD5 及解密后 SHA-256 完全一致。
 
-- 数百个不同的合法缺失桶名，actual/preflight 两类 CORS 请求，metadata read 为零且 map 不增长；
-- Console、reserved、invalid、startup、内部 namespace 与非法持久化 CORS；
-- 最小权限 SSE-C GET、HEAD、GetObjectAttributes，对正确、缺失、大小写错误与未授权 marker 的处理；
-- marker-only batch 风格 PUT 只有在具备 `s3:ReplicateObject` 时才保留 source ETag/MTime；
-- 未授权 `REPLICA` PUT/DELETE 返回 `403`；
-- POST policy 无法伪造 replica status；
-- object-lock past-date 在有无 replica trust 时的差异；
-- marker-only CopyObject 携带 SSE-C source header 时复制明文而不是密文；
-- 普通 SSE-C MPU 上的伪 marker 失败，不会写入 raw byte；
-- 一条真实的进程内 SSE-C multipart 复制链：加密源、raw ciphertext part、可信 replica initiation、marker-only PutPart/Complete，以及用原密钥精确恢复明文。
+## 兼容性与后续工作 {#impact}
 
-最终本地 tree 通过定向与 race 测试、完整 `cmd` suite、对象锁测试、vet、build 与 diff check。
+- **普通客户端：** 请求无需任何修改；不可信的内部复制请求头会被安全忽略，不再获得特权语义。
+- **批量复制（Batch Replication）：** 目标端凭据必须包含 `s3:ReplicateObject` 权限（详见[批量复制配置文档](/zh/administration/batch-framework-job-replicate/)）；缺少该权限时，接收端会将仅带标记头的写入当作普通写入处理，不再保留源端 ETag 与 `MTime`。
+- **滚动升级：** 线缆协议与磁盘格式完全不变。新节点立即执行纯内存 CORS 查询与复制信任边界。
 
-另一轮黑盒测试用候选二进制启动两个 TLS-enabled SILO 实例并启用真实 site replication，验证：
+### 后续演进 {#residual-risks}
 
-- SSE-C 4 KiB 对象；
-- SSE-C 12 MiB、三个 part 的 multipart 对象；
-- SSE-C CopyObject；
-- replicated delete marker。
-
-源/目标 ETag、size、version ID、SSE-C key MD5、解密后 SHA-256 与 delete-marker version ID 均一致，目标报告 `REPLICA`。
-
-前两轮 Fable 5 评审先纠正 marker-only batch 与 multipart 调用的信任模型，再审计实现。最终独立 Claude Code Opus 5 给出 **GO**，没有 P0/P1，并独立重跑 build、vet、race、object-lock 与完整 `cmd` 测试。
-
-## 兼容性与运维影响 {#impact}
-
-- **普通客户端：** 请求无需改变；不可信内部 header 现在会被忽略，而不是获得内部语义。
-- **未授权 replica 声明：** 携带 `X-Amz-Replication-Status: REPLICA` 的请求现在统一返回 `403`；过去部分 multipart 子路径没有这条一致检查。
-- **Batch replication：** 目标凭据必须包含 `s3:ReplicateObject`，参见 [batch replication requirements](/zh/administration/batch-framework-job-replicate/)。缺失权限时，接收端会把 marker-only write 当作普通写入，不保留 source ETag/MTime。
-- **SSE-C：** 普通读取仍需要 customer key；授权 replica read 可以使用保留加密字节所需的 raw ciphertext path。
-- **事件：** 只有可信复制才抑制 replica creation/access event；伪 marker 不再让事件静默消失。
-- **对象锁：** replica exception 来自权限决定，不再来自 header。
-- **性能：** CORS 移除了预鉴权 backend work。可信写入增加的是复制契约本来就要求的 policy check，不增加对象数据 pass。
-- **滚动升级：** wire 与 storage format 不变。新 receiver 执行信任边界；旧 receiver 在升级前仍保留旧 header 漏洞。滚动窗口中节点的 per-bucket CORS 行为可能不同。
-- **回滚：** 修复版本写入的数据仍可被旧版本读取，但 rollback 会重新打开两个信任缺陷并恢复预鉴权 metadata load。
-
-## 残余风险与后续 {#residual-risks}
-
-- **2026-09-09 复制可靠性后续：** [删除完成、MRF 可见性与 resync 取消](/zh/blog/design/replication-reliability/) 记录 #153、#152、#137 的复现、最小修复、Fable 评审与 PR #162 验收。它处理可信复制请求进入执行路径后的可靠性，沿用本文的权限边界。
-
-- 当 marker-bearing request 缺少复制权限时记录限频诊断；安全的 ordinary fallback 否则容易被误诊为 ETag/MTime 不一致。
-- Replication validity probe 现在会校验目标凭据所需的复制权限，并把合成的校验 key 放在规则前缀之下（`c9ad74673`、`5db7be4ee`）。
-- 本次覆盖已命名的 source/replication header。未来任何内部控制都仍需回答同一个问题：哪一个认证后的决定允许这个客户端值获得内部含义？
+- **复制执行可靠性（2026-09-09）：** [复制可靠性：删除完成、MRF 可见性与重同步取消](/zh/blog/design/replication-reliability/)记录了 [PR #162](https://github.com/pgsty/silo/pull/162) 对 [#153](https://github.com/pgsty/silo/issues/153)、[#152](https://github.com/pgsty/silo/issues/152) 与 [#137](https://github.com/pgsty/silo/issues/137) 的修复，处理受信任复制请求进入执行流水线后的状态收敛问题。
+- **限频诊断日志：** 当携带复制标记头的请求缺少复制权限并回退为普通写入时，接收端会输出限频告警日志，帮助运维人员快速排查缺少 `s3:ReplicateObject` 权限的批量复制任务，避免将其误判为底层 ETag/MTime 不一致。
 
 ## 结论 {#conclusion}
 
-看起来像内部字段的 header 仍然是客户端输入；看起来像桶名的 URL 段也仍然是攻击者输入。耐久修复是阻止两者意外成为权威：
-
-> 鉴权之前不做 backend work；鉴权之后只派生一次 trust，并把决定而不是声明传给下游。
-
-这条规则并不只属于 CORS 或 replication。当廉价的公开请求语法与昂贵或特权化的内部状态相遇时，未来 SILO handler 都应该保持这条边界。
-
-本修复在[安全台账](/zh/about/security-advisories/#sn-2026-008)中编号为 SN-2026-008，[20260903 纪事](/zh/blog/security/20260903-server-hardening/#sn-2026-008)记录发布范围。上文 silo-go 指原评审的临时依赖；`0079723d3` 后 Server 恢复使用经过验证的上游 minio-go，当前所选版本见[组件矩阵](/zh/compatibility/versions/)。
+该修复于 [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d38b59cc37781523915a60bcfa21c9706)（[PR #159](https://github.com/pgsty/silo/pull/159)）合入主分支并随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，通过纯内存驻留 CORS 查询与鉴权后统一计算的复制信任边界，彻底消除了未认证桶元数据磁盘探测与未受信任复制请求头注入。

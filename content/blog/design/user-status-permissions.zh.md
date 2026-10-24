@@ -5,50 +5,42 @@ date: 2026-08-26
 lastmod: 2026-09-16
 author: "冯若航"
 summary: >
-  用户与组状态端点过去即使处理禁用请求，也固定检查各自的 Enable action。本文记录最小权限缺陷、SILO 基于目标状态严格选权的设计、通过 PR #73 合并的用户修复、后续组修复、四向 IAM 测试，以及代码提交与版本交付之间的边界。
+  用户与组状态管理端点过去即使处理禁用请求，也固定检查各自的启用权限。本文记录最小权限缺陷、SILO 按目标状态严格选权的设计、PR #73 的用户状态修复、后续组状态修复、四向 IAM 矩阵测试与策略迁移指引。
 tags: [设计, IAM, 安全, 兼容性]
 weight: 15
 draft: false
 url: "/zh/blog/design/user-status-permissions/"
 ---
 
-> **发布核对（2026-09-16）：** 本文原始修复已进入 [Server 20260903](/zh/blog/release/silo-20260903/)。下文带日期的评审与测试叙述记录当时证据，不代表当前仍待发布，也不代表特定生产部署已验收。后续源码与组件选择见[版本表](/zh/compatibility/versions/)。
-
-本文完整记录 [上游 issue minio/minio#21478](https://github.com/minio/minio/issues/21478) 与 [SILO PR #73](https://github.com/pgsty/silo/pull/73) 的讨论、修复过程和最终鉴权设计。
-
-> **截至 2026-08-26 的状态：** SILO PR #73 已合并为 [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)，并保留带 DCO sign-off 的修复提交 [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1)；八项远端检查全部通过。上游 #21478 与 PR #21482 仍显示 open，但 `minio/minio` 已归档为只读仓库，无法继续评论或合并。<br>
-> **2026-08-28 组权限善后：** 最终发布审查发现 `set-group-status` 存在同样的固定 action 问题。带 sign-off 的服务器提交 `229fe2b3c` 现已根据目标状态选择 `admin:EnableGroup` 或 `admin:DisableGroup`，并加入真实四向 IAM 鉴权测试。本地验证与独立评审完成；已于 2026-08-29 合并进 `main`，tag 与交付仍待后续。<br>
-> **本轮范围：** 分别使用已有的两个 Admin Action 鉴权用户启用与禁用；不修改路由、状态值、账户存储、复制记录或客户端 API。<br>
-> **安全属性：** 持有 `admin:DisableUser` 不能因此获得启用账户的能力，持有 `admin:EnableUser` 也不能因此获得禁用账户的能力。<br>
-> **发布边界：** merge、tag、release package、container image、deployment 与 production verification 仍是相互独立的门槛。
+本文记录 [上游议题 minio/minio#21478](https://github.com/minio/minio/issues/21478)、[SILO PR #73](https://github.com/pgsty/silo/pull/73)（提交 [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) / [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)）以及 `set-group-status` 组状态权限善后提交（`229fe2b3c`）的鉴权设计与验证记录。上述修复已随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布。
 
 ## 太长不看（TL;DR） {#tldr}
 
-SILO 同时提供 `admin:EnableUser` 与 `admin:DisableUser`，但共用的 `set-user-status` handler 过去无论目标状态是什么，都只检查 `admin:EnableUser`。因此，只授予 `admin:DisableUser` 的策略反而无法禁用账户；想让它工作，就必须额外授予 `admin:EnableUser`，等于主动破坏这两个 action 承诺的最小权限边界。
+SILO 同时定义了 `admin:EnableUser` 与 `admin:DisableUser` 两项策略权限，但共用的 `set-user-status` 处理函数过去无论目标状态是什么，都固定检查 `admin:EnableUser`。结果，仅授予 `admin:DisableUser` 的策略反而无法禁用账户；要想执行禁用，就必须额外授予 `admin:EnableUser`，直接打破了这两项权限的最小权限边界。
 
-最终修复在鉴权前，根据请求的目标状态选择且只选择一个 action：
+修复方案在鉴权前根据请求的目标状态映射出唯一对应的权限动作：
 
-| 请求状态 | 必须具备的 action |
+| 请求状态 | 必须具备的权限 |
 | --- | --- |
 | `enabled` | `admin:EnableUser` |
 | `disabled` | `admin:DisableUser` |
-| 非法或未知值 | `admin:EnableUser`，保留原有“先鉴权、后校验”的默认边界 |
+| 非法或未知值 | `admin:EnableUser`，保留原有的“先鉴权、后校验”默认边界 |
 
-随后 handler 只调用一次 `validateAdminReq`。四向 IAM 集成测试同时证明两个允许路径与两个交叉拒绝路径。这个选择刻意比“兼容 Enable-only 策略过去也能禁用用户”的方案更严格，因为那种历史能力本身就是本次要修复的鉴权错误。
+随后处理函数仅调用一次 `validateAdminReq`。四向 IAM 集成测试同时验证了两条正向放行路径与两条交叉拒绝路径。这一设计不再允许“仅含 `admin:EnableUser` 的策略也能禁用用户”的历史行为，使两项权限各自严格对应单向操作。
 
-同一规则现在也适用于组状态：
+相同的规则也同步应用于组状态端点：
 
-| 请求的组状态 | 必须具备的 action |
+| 请求的组状态 | 必须具备的权限 |
 | --- | --- |
 | `enabled` | `admin:EnableGroup` |
 | `disabled` | `admin:DisableGroup` |
-| 非法或未知值 | `admin:EnableGroup`，保留原有“先鉴权、后校验”的默认边界 |
+| 非法或未知值 | `admin:EnableGroup`，保留原有的“先鉴权、后校验”默认边界 |
 
-善后修复前，只有 EnableGroup 的 principal 可以禁用组，只有 DisableGroup 的 principal 反而会在执行禁用时收到 `AccessDenied`。组修复沿用“一个 selector、一次鉴权”的设计，不把两个 action 当成别名。
+修复前，仅持有 `admin:EnableGroup` 的调用方可以禁用组，而仅持有 `admin:DisableGroup` 的调用方在执行禁用时却会收到 `AccessDenied`。组状态修复同样采用“单一选择函数、单次鉴权调用”的结构。
 
 ## 被报告的问题 {#defect}
 
-Admin API 用同一个路由处理两个方向的状态变化：
+管理 API 使用同一个路由处理启用与禁用两种状态变更：
 
 ```text
 PUT /minio/admin/v3/set-user-status
@@ -56,92 +48,87 @@ PUT /minio/admin/v3/set-user-status
     &status=enabled|disabled
 ```
 
-修复前，handler 在读取目标状态之前，就固定检查一个 action：
+修复前，处理函数在读取目标状态参数之前就硬编码检查了启用权限：
 
 ```go
 objectAPI, creds := validateAdminReq(ctx, w, r, policy.EnableUserAdminAction)
 ```
 
-后面的 `SetUserStatus` 虽然会正确接收 `enabled` 或 `disabled`，鉴权却已经把两种操作都当成 Enable。于是，`admin:DisableUser` 明明存在于策略词汇和公开文档中，却无法独立授权这个端点。
+后续调用的 `SetUserStatus` 虽然能正确处理 `enabled` 或 `disabled`，但前置鉴权已经将两种操作一律视为启用。`admin:DisableUser` 虽存在于策略语法与公开文档中，却无法独立授权该端点。
 
-#21478 给出了真实反例：操作员希望在事件处置期间拥有“只能禁用、不能恢复账户”的策略。策略只包含 `admin:DisableUser` 时会收到 `AccessDenied`；加上 `admin:EnableUser` 后禁用才能成功，但操作员也同时获得了策略原本刻意不授予的恢复权限。
-
-这不是少了一个便利权限，而是策略模型与执行点错位：
+议题 #21478 给出了典型的生产场景：安全运维人员在应急响应期间需要一份“只能禁用异常账户、不能恢复账户”的受限策略。然而仅配置 `admin:DisableUser` 时请求会返回 `AccessDenied`；补上 `admin:EnableUser` 后禁用才得以执行，但调用方也同时获得了本应受控的账户恢复权限：
 
 ```text
-策略表达：      仅 DisableUser
-请求表达：      目标状态 = disabled
-Handler 检查：  EnableUser
-结果：          合法禁用被拒绝
-临时绕过：      额外授予不需要的启用能力
+策略声明：      仅授予 DisableUser
+请求参数：      目标状态 = disabled
+服务端检查：    EnableUser
+执行结果：      合法的禁用请求被拒绝
+被迫绕过：      额外授予不需要的启用权限
 ```
 
 ## 为什么两个 action 必须代表两种能力 {#policy-contract}
 
-账户状态变化具有方向性。禁用通常可以委派给事件响应人员、反欺诈控制、合规自动化或 break-glass 流程；重新启用意味着恢复访问，完全可能要求另一位审批者。
+账户状态变更具有明确的方向性。禁用操作通常下放给应急响应值班人员、反欺诈系统或合规自动化流程；而重新启用会恢复访问权限，往往需要更高层级的审批。
 
-如果任意一个 action 都能授权两个方向，策略作者就无法表达这种职责分离。服务器表面上公布两个名字，实际却只执行一个合并能力。因此最终契约必须严格：
+因此，两项权限必须严格正交：
 
-| Principal 策略 | 禁用目标 | 启用目标 |
+| 调用方策略 | 禁用目标 | 启用目标 |
 | --- | --- | --- |
 | 仅 `admin:DisableUser` | 允许 | 拒绝 |
 | 仅 `admin:EnableUser` | 拒绝 | 允许 |
 | 两者都有 | 允许 | 允许 |
 | 两者都没有 | 拒绝 | 拒绝 |
 
-内置 `consoleAdmin` 授予 `admin:*`，完整管理员仍然拥有两个操作。兼容性影响仅限于曾经依赖错误行为的自定义受限策略。
-
-公开 PBAC 参考现在也为 [`admin:EnableUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-EnableUser) 与 [`admin:DisableUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-DisableUser) 明确写入同一契约。
+内置的 `consoleAdmin` 策略授予 `admin:*`，完整管理员仍可执行双向操作；受影响的仅是曾依赖旧缺陷的自定义受限策略。公开的 PBAC 参考文档同样为 [`admin:EnableUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-EnableUser) 与 [`admin:DisableUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-DisableUser) 记录了这一契约。
 
 ## 设计目标与非目标 {#scope}
 
 ### 设计目标 {#goals}
 
-1. 让两个现有 Admin Action 按照各自名字真正生效；
-2. 在两个方向上都满足最小权限；
-3. 每个请求只做一次鉴权决策，最多写出一次鉴权错误；
-4. 保持路由、请求值、响应格式、自操作保护、IAM 存储调用和站点复制 hook 不变；
-5. 用测试锁死契约，防止两个权限再次被扩宽、合并或调换。
+1. 让现有的两项管理权限严格按各自名称生效；
+2. 在启用与禁用两个方向上同时满足最小权限原则；
+3. 每个请求只执行一次鉴权判定，最多写出一次鉴权错误响应；
+4. 保持路由、查询参数、响应格式、禁止修改自身状态保护、IAM 存储调用与站点复制钩子不变；
+5. 用自动化测试锁定四向权限矩阵，防止两项权限再次被合并或错位。
 
 ### 非目标 {#non-goals}
 
-- 把端点拆成单独的 enable 与 disable 路由；
-- 增加新的合并 action 或改变策略语法；
-- 修改用户状态持久化或复制机制；
-- 重新设计 Console 权限；
-- 把 source merge 推断为 release、镜像、部署或生产交付。
+- 将端点拆分为独立的启用路由与禁用路由；
+- 新增合并权限名称或修改 IAM 策略语法；
+- 修改用户状态的持久化格式或站点复制机制；
+- 重新设计 Console 前端权限模型。
 
 ## 讨论过但没有采用的方案 {#alternatives}
 
 ### 两种状态继续只检查 `admin:EnableUser` {#always-enable}
 
-这能维持旧行为，却继续让 `admin:DisableUser` 失效，并迫使策略过度授权。它就是问题本身，不是值得保留的兼容契约。
+这会保留缺陷原状，使 `admin:DisableUser` 持续失效并迫使策略过度授权。
 
 ### 任一状态都同时要求两个 action {#require-both}
 
-这样两个名字只剩装饰作用，也无法委派 disable-only 操作。它在权限数量上更严格，却在表达能力和最小权限上更差。
+这会让两项权限失去独立意义，无法下放“仅允许禁用”的最小权限。
 
 ### Enable 鉴权失败后，再尝试 Disable 鉴权 {#double-validation}
 
-上游 PR #21482 对禁用请求采用了类似形态：先用 `EnableUser` 调用 `validateAdminReq`，结果为 nil 时再用 `DisableUser` 调用一次。
+上游 PR #21482 对禁用请求采用了串联调用方案：先以 `EnableUser` 调用 `validateAdminReq`，若返回 `nil` 再以 `DisableUser` 调用第二次。
 
-这个 helper 有一条关键契约：返回 nil object layer 时，它已经向响应写入错误。于是 Disable-only 请求可能先提交 403，第二次鉴权又成功，随后 handler 继续修改账户状态。鉴权 fallback 绝不能在错误响应已经提交后继续执行 mutation。
+然而 `validateAdminReq` 有一项关键副作用：当它返回 `nil` 对象层时，已经向 `http.ResponseWriter` 写出了错误响应。对仅持有 `admin:DisableUser` 的调用方而言，第一次调用已经向客户端提交了 HTTP 403，第二次调用随后通过鉴权并继续修改账户状态。鉴权回退分支绝不能在错误响应已经写出后继续修改状态。
 
 ### 禁用请求接受 Enable 或 Disable 任一个 action {#allow-either}
 
-`validateAdminReq` 本身支持多个 action，只要其中一个允许就成功。因此，如果目标是兼容旧行为，可以通过单次 variadic 调用安全实现：让 Disable-only 策略开始工作，同时保留 Enable-only 策略也能禁用用户的历史能力。
+`validateAdminReq` 支持传入可变参数（variadic）权限列表，只要其中任一权限匹配即放行。若想兼容旧行为，只需向单次 `validateAdminReq` 调用同时传入两项权限，即可在放行 `admin:DisableUser` 的同时，保留“仅含 `admin:EnableUser` 也能禁用账户”的历史行为。
 
-SILO 没有选择它，因为那项历史能力正是鉴权错误。它只能修复报告者的正向用例，却继续保留与双 action 模型冲突的交叉权限。需要完整账户生命周期的角色应显式授予两个 action。
+SILO 否决了该方案，因为“仅持启用权限即可禁用账户”正是需要修复的越权缺陷。需要管理完整账户生命周期的角色应当显式配置两项权限。
 
 ### 先校验 status，再进行鉴权 {#validate-first}
 
-先拒绝未知状态会改变错误优先级：过去必须先通过 Enable 鉴权门槛的调用者，现在可能在鉴权前得到参数校验结果。本次修复不需要扩大行为变化。
+若在鉴权前先拦截非法 `status` 参数，就会改变错误响应优先级：原本未获授权的调用方在鉴权前就能探测参数格式校验结果。
 
-因此未知值继续采用 `admin:EnableUser` 作为默认鉴权 action；只有合法的 `disabled` 会选择 `admin:DisableUser`。通过鉴权后，仍由既有 IAM 路径拒绝非法状态值。
+因此，对于非法或未知的 `status` 值，选择函数继续返回默认的 `admin:EnableUser`；仅当 `status` 精确为 `disabled` 时才选择 `admin:DisableUser`。通过鉴权后，仍由既有的 IAM 逻辑拒绝非法状态值。
 
 ## 最终实现 {#implementation}
 
-修复增加一个纯选择函数：
+实现新增了一个无副作用的纯选择函数：
 
 ```go
 func setUserStatusAdminAction(status string) policy.AdminAction {
@@ -152,7 +139,7 @@ func setUserStatusAdminAction(status string) policy.AdminAction {
 }
 ```
 
-Handler 先读取路由变量，选择 action，然后只鉴权一次：
+处理函数先读取路由变量，选定所需权限，然后仅执行一次鉴权：
 
 ```go
 vars := mux.Vars(r)
@@ -165,57 +152,51 @@ if objectAPI == nil {
 }
 ```
 
-鉴权门之后的逻辑完全不变：
+鉴权通过后的业务逻辑完全保持不变：
 
-- 调用者仍不能启用或禁用自己的账户；
+- 调用方仍不能启用或禁用自身账户；
 - `globalIAMSys.SetUserStatus` 继续校验并持久化目标状态；
-- 站点复制继续记录同一状态和更新时间；
-- 响应与审计仍走已有路径。
+- 站点复制继续同步状态与更新时间；
+- 响应格式与审计日志仍走原有路径。
 
-选择函数只依赖请求明确给出的目标状态。它不会读取当前用户，不会根据存储状态猜测 transition，也不会让鉴权结果取决于目标是否存在。这样既保证鉴权确定性，也避免在鉴权前引入读取依赖。
+选择函数仅依赖请求传入的目标状态字面量，不在鉴权前读取目标用户当前状态，也不依赖目标账户是否存在，从而保持鉴权判定确定且无前置存储读取。
 
 ## 为什么这个修复是安全的 {#safety}
 
-正确性由五条不变量组成：
+该实现满足五条安全不变量：
 
-1. 每个合法状态只映射到一个 Admin Action；
-2. `validateAdminReq` 只调用一次，鉴权失败后不可能继续 mutation；
-3. 只有选定 action 鉴权成功，状态修改调用才可达；
-4. 非法状态保留旧的 Enable 鉴权边界，之后仍由已有状态校验路径拒绝；
-5. 存储、复制、wire 与 client contract 都不改变，变化的只有进入既有 mutation 所需的权限。
-
-对于曾经用 Enable-only 自定义策略执行禁用操作的调用者，这是一项有意的鉴权收紧。也正是这项收紧，才让 `admin:DisableUser` 成为真正独立的能力。
+1. 每个合法的目标状态严格映射到唯一一项管理权限；
+2. `validateAdminReq` 仅调用一次，鉴权失败后立即返回，绝不执行状态修改；
+3. 状态修改调用仅在目标状态对应的权限通过校验后可达；
+4. 非法状态值保留原有的启用权限鉴权门槛，鉴权通过后仍由既有校验分支拒绝；
+5. 存储格式、站点复制、网络协议与客户端 SDK 接口均无变化。
 
 ## 测试设计 {#tests}
 
 ### 纯 action 映射 {#mapping-test}
 
-单元测试锁定三个选择结果：
+单元测试覆盖选择函数的三类输入：
 
-| 输入 | 期望 action |
+| 输入 | 期望权限 |
 | --- | --- |
 | `enabled` | `EnableUser` |
 | `disabled` | `DisableUser` |
-| 非法值 | 旧的 `EnableUser` 默认值 |
+| 非法值 | 保持默认的 `EnableUser` |
 
 ### 四向 IAM 鉴权矩阵 {#iam-test}
 
-集成测试创建彼此独立的用户和策略，再通过真实 Admin API 执行：
+集成测试创建彼此独立的管理员账户与受限策略，通过真实管理 API 验证完整四向矩阵：
 
-1. Disable-only client 可以成功禁用目标；
-2. 同一 client 尝试启用目标时得到 `AccessDenied`；
-3. Enable-only client 可以成功启用目标；
-4. 同一 client 尝试禁用目标时得到 `AccessDenied`。
+1. 仅持有禁用权限的客户端可以成功禁用目标用户；
+2. 同一客户端尝试启用目标用户时收到 `AccessDenied`；
+3. 仅持有启用权限的客户端可以成功启用目标用户；
+4. 同一客户端尝试禁用目标用户时收到 `AccessDenied`。
 
-只检查两个正向用例不能证明最小权限：如果两个策略意外都能执行两个操作，正向测试仍会通过。两个交叉拒绝断言才是安全回归测试。
-
-测试结束后会删除所有临时用户和策略。它运行在既有 IAM server suite 中，覆盖请求签名、策略挂载、handler 鉴权、状态持久化和 Admin client 错误解码，而不只是测试 helper。
+两个交叉拒绝断言确保任一策略都不会意外放行反方向操作。测试在既有 IAM 服务端测试套件中运行，完整覆盖请求签名、策略绑定、处理函数鉴权、状态持久化与管理客户端错误解析，并在执行结束后清理所有临时用户与策略。
 
 ## 修复与验证记录 {#verification}
 
-服务端原工作树中混有依赖升级、生成的 credits、checksum 测试和安全文档修改，本地 `main` 也落后远端。两个用户状态文件因此被隔离到基于最新 `origin/main` 的干净 worktree；无关文件没有进入修复提交。
-
-本地验证通过：
+本地验证命令：
 
 ```text
 go test ./cmd -run '^TestSetUserStatusAdminAction$' -count=1
@@ -223,18 +204,7 @@ go test ./cmd -run '^TestIAMInternalIDPServerSuite$' -count=1
 git diff --check
 ```
 
-带 sign-off 的 `58735ee38` 被推送到 PR #73，八项远端检查全部通过：
-
-- DCO sign-off；
-- format、build 与 vet；
-- lint 与 generated files；
-- `cmd/` tests；
-- `internal/` tests；
-- race detector 与 S3 Select；
-- cross compile；
-- vulnerability analysis。
-
-PR 使用仓库常规 merge 策略合并为 `2e2377d1c`。随后只有在原工作树中的两个文件与远端合并结果通过逐字节比较、patch ID 也完全一致后，本地 `main` 才被 fast-forward。其余无关本地改动完整保留；代码已经可以从 `main` 与 PR #73 恢复后，临时 worktree 与任务分支才被删除。
+带 DCO 签名的提交 `58735ee38` 推送至 PR #73 后，全部八项远端 CI 检查（DCO 签名、代码格式/编译/`go vet`、静态检查与生成文件、`cmd/` 单元测试、`internal/` 单元测试、并发竞态与 S3 Select、交叉编译、漏洞扫描）均一次通过，并以 `2e2377d1c` 合入主干。
 
 ## 最小权限策略示例 {#examples}
 
@@ -255,7 +225,7 @@ PR 使用仓库常规 merge 策略合并为 `2e2377d1c`。随后只有在原工�
 }
 ```
 
-该 principal 可以查看并禁用另一用户，但不能重新启用。
+持有该策略的调用方可以查看并禁用其他用户，但不能重新启用账户。
 
 ### 只能启用的操作员 {#enable-only}
 
@@ -274,11 +244,11 @@ PR 使用仓库常规 merge 策略合并为 `2e2377d1c`。随后只有在原工�
 }
 ```
 
-该 principal 可以查看并启用另一用户，但不能禁用。负责完整账户生命周期的角色应显式授予两个 action。
+持有该策略的调用方可以查看并启用其他用户，但不能禁用账户。负责完整账户生命周期管理的角色应同时授予这两项权限。
 
 ## 组状态权限善后 {#group-follow-up}
 
-组端点与用户端点具有相同结构：
+组状态管理端点与用户状态端点结构完全对称：
 
 ```text
 PUT /minio/admin/v3/set-group-status
@@ -286,9 +256,9 @@ PUT /minio/admin/v3/set-group-status
     &status=enabled|disabled
 ```
 
-它也公开了 `admin:EnableGroup` 与 `admin:DisableGroup` 两个既有 action，但继承 handler 在读取 `status` 前固定用 `EnableGroup` 鉴权。这不是一个“没有用到的权限”而已，而是同时反转了两个方向的最小权限：不该拥有禁用能力的 principal 可以禁用，真正的 disable-only principal 却不能。
+该端点同样定义了 `admin:EnableGroup` 与 `admin:DisableGroup`，但原有处理函数也在读取 `status` 参数前固定检查了 `EnableGroup`，导致两方向的最小权限同时错位。
 
-善后提交增加 `setGroupStatusAdminAction`，刻意与 `setUserStatusAdminAction` 同构：
+善后提交（`229fe2b3c`）新增了与 `setUserStatusAdminAction` 同构的 `setGroupStatusAdminAction`：
 
 ```go
 func setGroupStatusAdminAction(status string) policy.AdminAction {
@@ -299,63 +269,47 @@ func setGroupStatusAdminAction(status string) policy.AdminAction {
 }
 ```
 
-集成测试创建相互独立的 EnableGroup-only、DisableGroup-only 管理员与真实目标组，证明：
+配套集成测试创建了仅持 `EnableGroup`、仅持 `DisableGroup` 的独立管理员账户及目标用户组，验证：
 
-1. DisableGroup-only 可以禁用；
-2. DisableGroup-only 不能启用；
-3. EnableGroup-only 可以启用；
-4. EnableGroup-only 不能禁用。
+1. 仅持 `DisableGroup` 可以禁用目标组；
+2. 仅持 `DisableGroup` 不能启用目标组；
+3. 仅持 `EnableGroup` 可以启用目标组；
+4. 仅持 `EnableGroup` 不能禁用目标组。
 
-测试覆盖签名 Admin 请求、策略挂载、handler 鉴权、IAM mutation、错误解码与清理。非法 status 仍先选择历史默认的 Enable action，再由既有逻辑返回校验错误，因此没有新增鉴权前信息泄漏。成功后的 site-replication hook 保持不变，被拒绝请求不会触发。
-
-这个善后不改变用户状态行为，也没有新增 policy action；它只是让两个早已公开的组 action，执行与用户 action 相同的按目标状态严格选权契约。
+非法 `status` 参数仍先按默认启用权限完成鉴权，再由既有逻辑返回参数校验错误，不会在鉴权前暴露参数校验差异。请求通过后的站点复制钩子保持不变，被拒绝的请求不会触发复制。
 
 ## 兼容性与迁移 {#compatibility}
 
-客户端和 API 都不需要迁移：endpoint、query parameter、status string、成功响应与 Admin client method 全部不变。
+客户端与 API 无需任何改动：路由地址、查询参数、状态字符串、响应格式与管理客户端方法完全保持不变。
 
-但受限管理员角色需要检查策略：
+自定义受限管理员策略需按以下规则核对：
 
-- 只负责禁用用户的角色需要 `admin:DisableUser`；
-- 只负责启用用户的角色需要 `admin:EnableUser`；
-- 两种操作都需要的角色必须同时授予两个 action；
-- `consoleAdmin` 与其他 `admin:*` 策略不受影响；
-- 旧的自定义策略若只包含 `admin:EnableUser`，将不能再借此禁用用户；确实需要两个操作时，应增加 `admin:DisableUser`。
+- 仅负责禁用用户的角色需授予 `admin:DisableUser`；
+- 仅负责启用用户的角色需授予 `admin:EnableUser`；
+- 需要执行双向操作的角色必须同时授予这两项权限；
+- `consoleAdmin` 及其他包含 `admin:*` 的策略不受影响；
+- 过去仅配置 `admin:EnableUser` 的自定义策略将无法再禁用用户；若业务确需双向操作，请补充 `admin:DisableUser`。
 
-组管理角色现在遵循完全对称的规则：
+组管理角色遵循完全对称的规则：
 
-- 只负责禁用组的角色需要 `admin:DisableGroup`；
-- 只负责启用组的角色需要 `admin:EnableGroup`；
-- 两个方向都需要时，必须同时授予两个 action；
-- 旧 EnableGroup-only 角色不能再借此禁用组。
+- 仅负责禁用组的角色需授予 `admin:DisableGroup`；
+- 仅负责启用组的角色需授予 `admin:EnableGroup`；
+- 需要执行双向操作的角色必须同时授予这两项权限；
+- 仅配置 `admin:EnableGroup` 的旧策略将无法再禁用组。
 
-这是 source-level 的鉴权行为兼容性变化，不是 wire-protocol break。
+## 上游处置与交付 {#upstream}
 
-## 上游处置 {#upstream}
+上游议题 #21478 与 PR #21482 保留在已归档为只读的 `minio/minio` 仓库中作为历史记录。
 
-在本文记录时，上游 #21478 与 PR #21482 仍显示 open，但上游仓库已经归档为只读。我们尝试把“只做一次鉴权”的分析留在 PR 上，GitHub 因归档、锁定的讨论不能新增评论而拒绝了请求。
+### 交付状态 {#delivery}
 
-上游 issue 与 PR 仍然是有价值的来源证据，但已经不再是可执行的交付路径。SILO 必须独立拥有自己的语义、测试、merge、release note 与最终生产验证。
-
-## 交付状态 {#delivery}
-
-| 门槛 | 用户修复 | 2026-08-28 组善后 |
+| 里程碑 | 用户状态修复 | 组状态善后 |
 | --- | --- | --- |
-| 设计决策 | 完成 | 完成 |
-| 实现与本地测试 | 完成 | 完成 |
-| 独立对抗评审 | 完成 | 完成，GO |
-| 带 sign-off 的提交 | 完成 | `229fe2b3c`（已在 `main`）|
-| Push、PR CI 与 merge | 完成 | 已于 2026-08-29 合并 |
-| SILO tag | Server 20260903 | Server 20260903 |
-| Release package 或 container image | 见 20260903 发布记录 | 见 20260903 发布记录 |
-| 部署 | 尚未确认 | 尚未确认 |
-| 生产行为 | 尚未确认 | 尚未确认 |
-| 上游合并 | 不可用；仓库已归档 | 不适用 |
+| 带 DCO 签名的提交 | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1)（合并为 [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)） | `229fe2b3c` |
+| 发布版本 | [Server 20260903](/zh/blog/release/silo-20260903/) | [Server 20260903](/zh/blog/release/silo-20260903/) |
 
 ## 结论 {#conclusion}
 
-这些修复让鉴权模型说真话。启用和禁用用户或组，都是风险方向相反的状态变化，SILO 也早已为每个方向提供不同 policy action；每个 handler 都应该从请求的目标状态选择 action，并在 mutation 前只鉴权一次。
+启用与禁用用户或组具有截然相反的安全风险方向。处理函数根据请求的目标状态选择对应的策略权限，并在修改状态前执行单次鉴权，使权限检查与策略定义严格对齐。
 
-代码很小，是因为设计边界足够清晰。真正需要长期保留的是更完整的结果：明确的权限矩阵、被否决的兼容方案、非法输入规则、四向集成测试、干净的合并证据、迁移指引，以及不把“已合并”误报成“已发布”的交付边界。
-
-本页的 enable/disable 权限修复与后续 `admin:ChangeMyPassword` 拆分是不同改动。升级九月候选前须按[密码迁移指南](/zh/compatibility/password-permissions/)为原有自助改密限制保留配对 Deny。
+本文记录的启停权限修复与后续 `admin:ChangeMyPassword` 权限拆分相互独立；跨九月版本升级时请一并参考[密码迁移指南](/zh/compatibility/password-permissions/)。

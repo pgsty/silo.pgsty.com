@@ -5,46 +5,35 @@ date: 2026-08-23
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  SILO will keep PostgreSQL and MySQL notification targets, but standardize their configuration on complete connection strings. Pre-KV discrete database fields are an unsupported migration input and must abort server startup with an explicit error instead of being accepted and silently disabling every bucket notification.
+  SILO retains PostgreSQL and MySQL notification targets while standardizing their configuration on complete connection strings. Pre-KV discrete database fields are an unsupported migration input and abort server startup with an explicit error instead of silently disabling every bucket notification.
 tags: [Design, Notification, Compatibility]
 weight: 10
 draft: false
 url: "/blog/design/notify-url/"
 ---
 
-> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
-
-This document is the product requirements and final design record for [SILO issue #53](https://github.com/pgsty/silo/issues/53). It records the accepted compatibility boundary, implementation, and verification for PostgreSQL and MySQL bucket-notification targets.
+Shipped in [SILO Server 20260903](/blog/release/silo-20260903/) via commit [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358), this design resolves [SILO issue #53](https://github.com/pgsty/silo/issues/53) by establishing the compatibility boundary, legacy-migration behavior, and startup error handling for PostgreSQL and MySQL bucket-notification targets.
 
 ## Decision {#decision}
 
-SILO will retain PostgreSQL and MySQL notification targets, but support exactly one current configuration form for each:
+SILO retains PostgreSQL and MySQL notification targets and standardizes each on a single canonical configuration key:
 
 - PostgreSQL requires a complete `connection_string`.
 - MySQL requires a complete `dsn_string`.
 
-The old five-field form — `host`, `port`, `username`, `password`, and `database` — remains unsupported by the current KV configuration system. SILO will not re-register those keys and will not synthesize a DSN from them during legacy migration.
+The pre-2020 five-field form—`host`, `port`, `username`, `password`, and `database`—remains unsupported by the KV configuration system. SILO does not register those five keys and does not synthesize a DSN from them during legacy JSON migration.
 
-The legacy migration contract is deliberately narrow:
+The legacy migration contract handles three input states:
 
-| Legacy target | Result |
+| Legacy Target State | Migration Result |
 | --- | --- |
-| Disabled | Ignore it; no target is emitted. |
-| Enabled with a non-empty `connection_string` or `dsn_string` | Migrate only the canonical connection-string key and the other registered target settings. |
-| Enabled with only discrete connection fields | Reject migration and abort server startup before the new configuration is activated, with an actionable error that names the subsystem and target but never prints a credential. |
-
-This is a configuration-boundary decision, not removal of the database-notification feature.
-
-**Status:** implemented in `f1ba68358` and included in Server 20260903.<br>
-**Owner:** SILO server repository.<br>
-**Tracking:** [pgsty/silo#53](https://github.com/pgsty/silo/issues/53).<br>
-**Target:** the next SILO patch release after implementation and verification.
+| Disabled | Ignored; no KV target is emitted. |
+| Enabled with a non-empty `connection_string` or `dsn_string` | Migrates only the canonical connection-string key and registered target settings. |
+| Enabled with only discrete connection fields | Rejects migration and aborts server startup before activating the new configuration, logging an actionable error that names the subsystem and target without printing credentials. |
 
 ## Context {#context}
 
-SILO inherited two generations of database-notification configuration from MinIO.
-
-The pre-KV JSON configuration could describe a database connection either as a complete string or as five fields:
+SILO inherited two generations of database-notification configuration from upstream MinIO. The pre-KV JSON configuration could represent a database connection either as a single connection string or as five discrete fields:
 
 ```text
 host
@@ -54,232 +43,187 @@ password
 database
 ```
 
-The current KV configuration exposes only the driver-native form:
+The current KV configuration system exposes only the driver-native connection string:
 
 ```text
 notify_postgres  -> connection_string
 notify_mysql     -> dsn_string
 ```
 
-This direction is not new. MinIO deprecated the five discrete fields in `RELEASE.2020-04-10T03-34-42Z` and instructed operators to move to `connection_string` or `dsn_string`. SILO's current help tables, environment-variable documentation, and examples already present the complete string as the supported interface.
+Upstream deprecated the five discrete fields in `RELEASE.2020-04-10T03-34-42Z` and directed operators to migrate to `connection_string` or `dsn_string`. SILO's CLI help tables, environment-variable documentation, and Console UI already use the complete connection string as the supported interface.
 
-SILO is a new community fork with an explicit migration step. Its compatibility contract prioritizes the S3 and Admin APIs, current `MINIO_*` settings, on-disk data, and current KV configuration. It does not need to perpetuate every pre-2020 configuration spelling when a supported canonical form has existed for years.
+## The Defect {#defect}
 
-## The defect {#defect}
+Before [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358), the legacy migration helpers `SetNotifyPostgres` and `SetNotifyMySQL` wrote both representations into the new KV configuration. Even when the legacy JSON target already specified a complete `connection_string` or `dsn_string`, the helpers also emitted all five discrete keys (typically with empty values).
 
-Before the fix, the legacy migration helpers, `SetNotifyPostgres` and `SetNotifyMySQL`, wrote both forms into the new KV configuration. Even when the old target already had a complete connection string, the helpers also emitted all five discrete keys, usually with empty values.
-
-The new parser rejects those keys because neither `DefaultPostgresKVS` nor `DefaultMySQLKVS` registers them. Key validation checks key presence, not whether the corresponding value is empty. Both legacy source forms therefore fail:
+The KV parser rejected those migrated entries because neither `DefaultPostgresKVS` nor `DefaultMySQLKVS` registers the five discrete keys, and `CheckValidKeys` validates key names regardless of whether their values are empty. Both legacy JSON forms therefore failed KV validation:
 
 ```text
 old complete string -> canonical string + five empty unknown keys -> rejected
 old discrete fields -> empty canonical string + five populated unknown keys -> rejected
 ```
 
-The failure is amplified by notification initialization. `FetchEnabledTargets` is fail-fast across notification subsystems: the first invalid subsystem returns an error and a nil target list. The caller logs the error and continues starting the object server, leaving healthy Webhook, Kafka, NATS, and other targets unavailable as well.
+Notification initialization amplified the impact of that parser error. `FetchEnabledTargets` evaluates notification subsystems fail-fast: the first invalid subsystem returns an error and a `nil` target list. The caller logged the error and continued starting the object server, leaving healthy Webhook, Kafka, NATS, and other notification targets disabled as well.
 
-Merely returning an error from the two migration helpers does not fix that behavior. The error propagates through `readConfigWithoutMigrate` and `initConfig`, but `initConfigSubsystem` currently logs non-retriable configuration errors as "some features may be missing" and returns success. The server then starts without assigning `globalServerConfig`; notification failure is only one consequence, because region, storage class, compression, identity, and other stored settings may also be absent. The implementation must therefore carry a typed database-migration error to the startup boundary and make that error fatal. Classifying it as retriable is also wrong because the server would retry forever without any state change that could repair the configuration.
+Simply returning an error from `SetNotifyPostgres` and `SetNotifyMySQL` was not sufficient on its own. While that error propagates through `readConfigWithoutMigrate` and `initConfig`, `initConfigSubsystem` previously logged non-retriable configuration errors as `"some features may be missing"` and returned success. The server then started without assigning `globalServerConfig`, leaving not only notifications broken but also region, storage class, compression, identity, and other persisted settings unapplied. Conversely, marking the error as retriable would cause the server to loop indefinitely on a static configuration error. The migration failure therefore has to propagate as a typed, non-retriable, startup-fatal error (`LegacyDatabaseTargetError`).
 
-The resulting behavior is especially dangerous because object I/O still works. Operators can see a healthy S3 service while every configured event pipeline has stopped. Targets are never constructed, so delivery or later replay of events produced during the outage must not be assumed.
+This failure mode was particularly hazardous because S3 object reads and writes continued normally while every configured event pipeline was offline. In addition, the unregistered `password` key lacked secret-redaction metadata and could be included in plain text inside diagnostic bundles, whereas `connection_string` and `dsn_string` are registered as sensitive keys.
 
-There is also a diagnostic-exposure issue. The unregistered `password` key has no sensitivity metadata and may be copied verbatim into health or diagnostic material. The registered `connection_string` and `dsn_string` keys are already treated as sensitive values.
+## Why the First Fix Was Reverted {#reverted-fix}
 
-## Why the first fix was reverted {#reverted-fix}
+An initial fix in `20260804` ([`SN-2026-019`](/blog/security/notify-keyspace-registration/)) registered the five discrete keys in `DefaultPostgresKVS` and `DefaultMySQLKVS` and wired the parser to read them. While that allowed migrated targets to pass `CheckValidKeys`, it broke the documented `connection_string` interface.
 
-The first repair registered the five discrete keys and taught the parser to read them. That made migrated targets pass `CheckValidKeys`, and it appeared attractive because the target argument structures and constructors still contain code for the old fields.
-
-It also broke the documented connection-string path.
-
-The shared `mc admin config set` tokenizer discovers field boundaries by looking for registered key names. It is not fully quote-aware. Once `port` became a registered key, this valid input contained what looked like a second top-level field:
+The shared `mcli admin config set` KV tokenizer identifies key/value boundaries by scanning for registered key names and is not quote-aware. Once `port` was registered as a top-level key in `notify_postgres`, a valid libpq key/value connection string inside quotes looked like a second top-level KV parameter:
 
 ```text
 connection_string="host=db port=5432 dbname=events user=app"
 ```
 
-The tokenizer split at the `port=` inside the quoted value, truncated `connection_string`, and handed the remainder to the `port` parser. The command then failed with `invalid port`.
+The tokenizer split the input at `port=` inside the quoted string, truncated `connection_string` to `"host=db`, and passed `5432 dbname=events user=app"` to the integer `port` parser, failing with `invalid port`.
 
-Under the current tokenizer, registering common words such as `host`, `port`, and `password` creates a direct conflict between the connection-string grammar and the top-level KV grammar. The attempted registration fix was therefore reverted. Re-registering those keys is not an acceptable solution.
+Under the shared KV tokenizer grammar, registering common words such as `host`, `port`, and `password` creates an irreconcilable grammar collision with key/value connection strings. That registration change was therefore reverted in favor of enforcing `connection_string` and `dsn_string` exclusively.
 
-## Product judgment {#product-judgment}
+## Product Judgment {#product-judgment}
 
-Database notification targets are a specialized but useful capability. They provide a direct database-backed namespace view or access journal without requiring an external event bus. That remains valuable for small deployments and for users already operating PostgreSQL or MySQL.
+Database notification targets provide a direct database-backed namespace view or access journal without requiring an external message broker, which remains valuable for deployments already operating PostgreSQL or MySQL.
 
-The legacy spelling of their connection parameters has much less value. A five-field model cannot represent the useful range of driver options: TLS modes and certificates, connection timeouts, application names, Unix sockets, multi-host PostgreSQL settings, MySQL driver parameters, and future driver capabilities. Supporting both forms also creates precedence, merging, redaction, and testing questions that do not exist with one canonical value.
-
-The complete string is the better abstraction boundary: SILO owns notification semantics, while the database driver owns connection syntax.
-
-The product decision is therefore to keep the capability and remove the compatibility illusion. An unsupported legacy target must be rejected clearly; it must not be accepted and transformed into a configuration that later disables unrelated targets.
+By contrast, the five-field parameter model cannot express standard driver options such as TLS modes and CA paths, connect timeouts, application names, Unix domain sockets, multi-host PostgreSQL failover, or MySQL driver flags. Maintaining both forms also creates precedence, merging, and secret-redaction ambiguity. Keeping SILO responsible for notification delivery semantics while delegating connection syntax to the database driver's native DSN string provides a clean boundary.
 
 ## Goals {#goals}
 
-1. Establish `connection_string` and `dsn_string` as the only supported live configuration interfaces for database notifications.
-2. Allow a legacy JSON target that already contains the canonical string to cross the migration boundary without modification to its connection semantics.
-3. Reject enabled discrete-only legacy targets before a partial or invalid KV configuration is activated.
-4. Replace the current silent runtime failure mode of #53 — healthy targets disabled while the server appears healthy — with an explicit startup-time failure that operators must resolve before the server runs.
-5. Ensure no migration error, log line, health report, or diagnostic bundle exposes a database password.
-6. Remove the ten Postgres/MySQL exceptions from the source-level unregistered-write audit.
-7. Make the compatibility boundary and operator remediation explicit in release and migration documentation.
+1. Establish `connection_string` and `dsn_string` as the sole supported configuration keys for PostgreSQL and MySQL notifications.
+2. Allow legacy JSON targets that already contain a non-empty canonical connection string to migrate cleanly.
+3. Reject enabled discrete-only legacy targets before activating or persisting a partial KV configuration.
+4. Replace silent runtime notification failure with an explicit startup-time failure (`LegacyDatabaseTargetError`).
+5. Ensure no migration error, log line, health report, or diagnostic bundle leaks a database password.
+6. Remove all ten Postgres/MySQL exceptions from the `knownUnregisteredWrites` audit ratchet.
+7. Document operator remediation paths clearly.
 
-## Non-goals {#non-goals}
+## Non-Goals {#non-goals}
 
-- Supporting both DSN and discrete database fields in the current KV interface.
-- Automatically synthesizing a DSN from old discrete fields.
-- Rewriting the shared KV tokenizer.
-- Changing `FetchEnabledTargets` fail-fast semantics in this patch.
-- Silently skipping an enabled database target and continuing with partial notification coverage.
-- Removing PostgreSQL or MySQL notification targets.
-- Deleting the legacy struct fields needed to decode and identify unsupported input. They remain on shared target argument structs that are also used by live constructors, whose discrete-field connection-string synthesis is unreachable from current KV configuration; those fields must not become supported configuration keys.
-- Correcting ignored errors from the other eight legacy notification setters. Their pre-existing silent-skip behavior remains unchanged in this narrowly scoped database-migration patch and requires a separate audit and design decision.
+- Supporting both DSN strings and discrete database fields in the KV interface.
+- Synthesizing a DSN string from legacy discrete fields during migration.
+- Rewriting the shared KV tokenizer grammar.
+- Altering `FetchEnabledTargets` fail-fast semantics across notification subsystems.
+- Silently skipping an enabled invalid database target and starting with partial notification coverage.
+- Removing PostgreSQL or MySQL notification support.
+- Deleting the legacy Go struct fields used to unmarshal old JSON files and detect unsupported discrete-only configurations.
+- Changing error handling for the other eight legacy notification setters outside PostgreSQL and MySQL.
 
-## Functional requirements {#functional-requirements}
+## Functional Requirements {#functional-requirements}
 
-### Current configuration {#current-configuration}
+### Current Configuration {#current-configuration}
 
 1. `notify_postgres` accepts `connection_string`; `notify_mysql` accepts `dsn_string`.
-2. The five discrete keys remain unregistered and rejected by current configuration commands.
-3. Existing full strings must continue to support the database driver's syntax, including parameters whose names contain `host`, `port`, `user`, `password`, or `database`.
-4. No new public environment variables or KV keys are introduced.
-5. The declared legacy variables `MINIO_NOTIFY_POSTGRES_HOST`/`PORT`/`USERNAME`/`PASSWORD`/`DATABASE` and their MySQL equivalents are not wired into current parsing and remain unsupported. They must not be documented as working alternatives to the complete-string variables.
+2. The five discrete keys (`host`, `port`, `username`, `password`, `database`) remain unregistered and are rejected by `admin config set`.
+3. Complete connection strings continue to support native driver syntax, including embedded `host=`, `port=`, `user=`, `password=`, and `dbname=` tokens.
+4. Legacy environment variables `MINIO_NOTIFY_POSTGRES_HOST`/`PORT`/`USERNAME`/`PASSWORD`/`DATABASE` and their MySQL equivalents remain unwired and unsupported.
 
-### Legacy migration {#legacy-migration}
+### Legacy Migration {#legacy-migration}
 
-1. `SetNotifyPostgres` must return without emitting a target when the legacy target is disabled.
-2. For an enabled target, `SetNotifyPostgres` must require a non-empty `ConnectionString` and write only registered Postgres keys. If both a canonical string and discrete fields are present, the canonical string wins and every discrete value is discarded.
-3. `SetNotifyMySQL` must apply the equivalent rule to `DSN`.
-4. Neither helper may emit `host`, `port`, `username`, `password`, or `database`.
-5. A missing canonical string must return a typed or wrapped migration error identifying the subsystem and target name.
-6. `cmd/config-migrate.go` must check and propagate both helper errors. Ignoring them is forbidden.
-7. No partially migrated configuration may be activated or persisted after either helper fails.
-8. Error text may name the required key and remediation, but must not include any connection-field value.
-9. The propagated typed migration error must abort server startup. It must not be downgraded to the non-fatal "some features may be missing" path in `initConfigSubsystem`, and it must not enter the retriable-error loop.
-10. Validation errors for a supplied canonical string follow the same startup-fatal and secrecy rules; wrapping must add target context without repeating the DSN or its components.
-
-Original proposed error shape (illustrative, not the shipped literal):
+1. `SetNotifyPostgres` and `SetNotifyMySQL` return `nil` without emitting a target when the legacy target is disabled (`Enable == false`).
+2. When enabled, `SetNotifyPostgres` requires a non-empty `ConnectionString` and writes only registered Postgres keys. If both `ConnectionString` and discrete fields are present in the legacy JSON, `ConnectionString` wins and the discrete values are discarded.
+3. `SetNotifyMySQL` applies the identical rule to `DSN`.
+4. Neither helper ever emits `host`, `port`, `username`, `password`, or `database`.
+5. An enabled target with an empty canonical connection string returns a `LegacyDatabaseTargetError` identifying the subsystem (`notify_postgres` or `notify_mysql`) and target ID without echoing field values:
 
 ```text
 notify_postgres:archive uses unsupported legacy discrete connection fields;
 set connection_string before migrating to SILO
 ```
 
-### Operator remediation {#operator-remediation}
+6. `cmd/config-migrate.go` checks and propagates errors from both database migration helpers before persisting or activating the migrated configuration.
+7. `initConfigSubsystem` propagates `LegacyDatabaseTargetError` as a non-retriable fatal error to `serverMain`.
 
-An operator encountering the error must choose an explicit remediation path. This applies both before an initial switch to SILO and when upgrading a deployment that is already running SILO: legacy migration output is not persisted, so the same old JSON source can re-enter migration on every start. A deployment that currently starts with notifications silently broken can therefore fail to start after this repair until the source configuration is corrected.
+### Operator Remediation {#operator-remediation}
 
-1. On a compatible intermediate MinIO release, replace the old fields with `connection_string` or `dsn_string`, verify the target, and then migrate to SILO.
-2. Disable or remove the legacy database target, migrate the server, and recreate the target with the canonical string afterward.
-3. For a fresh SILO installation, create the target directly with the canonical string; no legacy migration is involved.
-4. For an existing SILO deployment that still reads a legacy JSON file, stop on the previous working release, back up the source configuration, then convert, disable, or remove the database target before starting the fixed release. Do not delete or rewrite unrelated configuration.
+Because legacy JSON migration output is only persisted after a successful migration pass, a deployment that still boots from an old JSON configuration file will re-enter migration on startup. Operators with enabled discrete-only database targets should follow one of four paths:
 
-Documentation must not suggest that a discrete-only target will be converted automatically.
+1. **Before migrating to SILO:** On the prior release, replace the discrete fields with `connection_string` or `dsn_string`, verify event delivery, and then upgrade.
+2. **Disable and recreate:** Disable or remove the legacy database target, upgrade the server, and recreate the target using `connection_string` or `dsn_string`.
+3. **Fresh installation:** Configure `notify_postgres` or `notify_mysql` directly with `connection_string` or `dsn_string`.
+4. **Existing deployment reading legacy JSON:** Back up the source configuration, then convert, disable, or remove the discrete database target before starting SILO Server 20260903 or later.
 
-## Availability trade-off {#availability-trade-off}
+## Availability Trade-Off {#availability-trade-off}
 
-This decision intentionally turns one unsupported configuration from a degraded startup into a hard startup failure. The immediate availability cost is real: a server that previously served objects while all notifications were silently dead may refuse to start after the repair.
+This design intentionally converts an unsupported legacy database target from a degraded startup (where S3 I/O works while all bucket notifications are silently offline) into an immediate startup abort. An object store that appears healthy while dropping every configured audit or pipeline event creates unrecoverable downstream data loss; failing fast at startup forces the configuration error to be resolved before traffic is served.
 
-That cost is accepted because an object server that appears healthy while configured event sinks are absent creates silent, potentially unrecoverable downstream data loss. SILO is a new fork with an explicit migration boundary, and the discrete form has been deprecated since 2020. A fatal, actionable precondition is preferable to an upgrade that reports success with reduced notification coverage. The release note must make this startup behavior prominent; it must not be buried as an internal migration cleanup.
+## Security Requirements {#security-requirements}
 
-## Security requirements {#security-requirements}
+1. `LegacyDatabaseTargetError` never formats the legacy struct or its field values into the error message.
+2. Regression tests inject sentinel passwords and assert that neither returned errors nor captured logs contain the sentinel.
+3. Migrated KV output uses only the registered sensitive keys (`connection_string` and `dsn_string`).
+4. Operators who exported diagnostic bundles from an affected pre-20260903 deployment with discrete database targets should rotate that database password.
 
-1. The unsupported-input error must never format the legacy argument structure or its values.
-2. Tests must use a sentinel password and assert that it is absent from returned errors and captured logs.
-3. Migrated output must contain the registered sensitive connection-string key and no standalone password key.
-4. If a diagnostic bundle was exported from an affected deployment before this repair, operators should treat the database password as potentially disclosed and rotate it.
+## Rejected Alternatives {#alternatives}
 
-## Alternatives considered {#alternatives}
+### Register and Parse the Five Discrete Fields {#alternative-register}
 
-### Register and parse the discrete fields {#alternative-register}
+**Benefit:** Preserves the pre-2020 JSON field names and reuses existing struct fields.<br>
+**Reason rejected:** Registering `host`, `port`, and `password` causes the shared KV tokenizer to split quoted `connection_string` values containing `port=` or `host=`, breaking the primary documented interface.
 
-**Benefit:** preserves the old source form and uses already existing argument fields.<br>
-**Rejected because:** registration makes common field names visible to the shared tokenizer and corrupts quoted connection strings. It also expands the supported public configuration surface after the fields were deprecated in 2020.
+### Synthesize a Canonical Connection String During Migration {#alternative-synthesize}
 
-### Synthesize a canonical string during migration {#alternative-synthesize}
+**Benefit:** Automatically converts discrete-only legacy configurations.<br>
+**Reason rejected:** Requires permanent code and test maintenance for PostgreSQL quoting rules, MySQL DSN escaping, Unix sockets, IPv6 brackets, and driver defaults for a format deprecated since 2020.
 
-**Benefit:** preserves discrete-only legacy installations.<br>
-**Rejected because:** it creates permanent code and test ownership for an obsolete input form, including PostgreSQL quoting, MySQL DSN formatting, socket and IPv6 behavior, defaults, and future driver drift. For a new fork with an explicit migration boundary, the benefit does not justify the continuing surface.
+### Skip Only the Unsupported Target {#alternative-skip}
 
-### Skip only the unsupported target {#alternative-skip}
+**Benefit:** Keeps S3 object service and other notification targets online.<br>
+**Reason rejected:** Silently dropping an enabled notification target causes unannounced event loss.
 
-**Benefit:** keeps the object server and other notification targets running.<br>
-**Rejected because:** silently discarding a configured event sink can cause unobservable and unrecoverable event loss. A clear migration failure is safer than an apparently successful upgrade with reduced notification coverage.
+### Change Global `FetchEnabledTargets` Fail-Fast Behavior {#alternative-fail-fast}
 
-### Change global notification fail-fast behavior {#alternative-fail-fast}
+**Benefit:** Isolates failures between independent notification subsystems.<br>
+**Reason rejected:** Does not fix the broken database migration helper or the unredacted `password` key, and alters system-wide notification startup semantics outside the scope of `#53`.
 
-**Benefit:** limits the blast radius of future invalid targets.<br>
-**Rejected for this change because:** it neither repairs the database target nor closes the credential-exposure path, and it changes system-wide error semantics. It may be evaluated independently with its own operational contract.
+### Remove Database Notification Targets Entirely {#alternative-remove-targets}
 
-### Remove database notification targets {#alternative-remove-targets}
+**Benefit:** Eliminates all database-specific notification code.<br>
+**Reason rejected:** PostgreSQL and MySQL notification targets remain useful and self-contained; the defect lies solely in the obsolete five-field configuration format.
 
-**Benefit:** removes the complete database-specific maintenance surface.<br>
-**Rejected because:** the targets remain useful and self-contained. The defect belongs to an obsolete configuration form, not to the notification capability itself.
+## Implementation Scope {#implementation-scope}
 
-## Implementation scope {#implementation-scope}
+The implementation in [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) touches six files across `internal/config/notify/legacy.go`, `cmd/config-migrate.go`, and `cmd/server-main.go`:
 
-The server change should remain narrow:
+1. Update `internal/config/notify/legacy.go` so the two database setters emit only canonical registered keys and reject enabled targets lacking a canonical string.
+2. Update `cmd/config-migrate.go` to propagate the two database helper errors with subsystem and target context.
+3. Define `LegacyDatabaseTargetError` and update `cmd/server-main.go` so `initConfigSubsystem` returns it as a non-retriable fatal error instead of logging and continuing.
+4. Remove all ten Postgres/MySQL entries from `knownUnregisteredWrites`.
 
-1. Update `internal/config/notify/legacy.go` so the two database setters emit only canonical registered keys and reject enabled targets without a canonical string.
-2. Update `cmd/config-migrate.go` to propagate the two database-helper errors with subsystem and target context.
-3. Define a typed database-migration error and update `cmd/server-main.go` so `initConfigSubsystem` returns it as fatal instead of logging and ignoring it. It must remain non-retriable.
-4. Leave ignored errors from the other eight legacy notification setters unchanged in this patch; record them for a separate audit rather than expanding #53 implicitly.
-5. Remove all ten Postgres/MySQL entries from `knownUnregisteredWrites`; the ratchet should become empty unless another independently justified legacy exception exists.
-6. Add focused migration, startup, validation, secrecy, and coexistence tests.
-7. Update database-notification and migration documentation in `silo.pgsty.com`.
+## Acceptance Criteria {#acceptance-criteria}
 
-The patch must not register the old keys, change the generic tokenizer, or refactor unrelated notification targets.
+1. Legacy PostgreSQL targets with a non-empty `connection_string` migrate cleanly, pass `CheckValidKeys`, and round-trip through `GetNotifyPostgres`.
+2. Legacy MySQL targets with a non-empty `dsn_string` migrate cleanly, pass `CheckValidKeys`, and round-trip through `GetNotifyMySQL`.
+3. Enabled discrete-only targets for either database fail before target initialization with `LegacyDatabaseTargetError` naming the subsystem and target ID, aborting server startup.
+4. Missing-string and malformed-string errors never include sentinel host, username, password, database, or DSN values.
+5. Disabled discrete legacy targets emit no KVS entries and do not block startup.
+6. Migrated KVS output never contains any of the ten discrete keys, even with empty values.
+7. When a legacy target contains both a canonical string and conflicting discrete values, only the canonical string is migrated.
+8. `SetKVS` regression tests against `DefaultPostgresKVS` and `DefaultMySQLKVS` accept quoted connection strings containing `port=`, `host=`, and `password=`.
+9. Configurations pairing healthy Webhook, Kafka, or NATS targets with an invalid legacy database target fail in `readConfigWithoutMigrate` without persisting or activating partial state.
+10. `initConfigSubsystem` returns `LegacyDatabaseTargetError` directly without logging-and-continuing or entering the retry loop.
+11. `knownUnregisteredWrites` removes all ten Postgres/MySQL exceptions.
+12. All unit, race, and startup suites pass:
 
-## Acceptance criteria {#acceptance-criteria}
+```sh
+go test ./internal/config/notify ./internal/config ./internal/event/target -count=1
+go test -v ./cmd -run 'Test(ReadConfigWithoutMigrate|InitConfigSubsystem)' -count=1
+```
 
-The implementation is complete only when all of the following are demonstrated:
+## Implementation Result {#implementation-result}
 
-1. A legacy PostgreSQL target with a complete connection string migrates, passes `CheckValidKeys`, and is returned by `GetNotifyPostgres` unchanged.
-2. A legacy MySQL target with a complete DSN does the equivalent.
-3. Discrete-only enabled targets for both databases fail before target initialization with an actionable error containing the subsystem and target name, and server startup aborts.
-4. Missing-string and malformed-string errors contain none of the sentinel host, username, password, database, or DSN values.
-5. Disabled discrete legacy targets do not create configuration entries and do not block migration.
-6. Migrated KVS output contains none of the ten discrete keys, including empty ones.
-7. When a legacy target contains both a canonical string and conflicting discrete values, only the canonical string is migrated and no discrete sentinel appears in any output KVS value.
-8. A `SetKVS` regression test using the real `DefaultPostgresKVS` and `DefaultMySQLKVS` key sets accepts a quoted connection string containing `port=`, `host=`, or `password=`.
-9. A configuration containing healthy Webhook, Kafka, or NATS targets cannot reach `FetchEnabledTargets` with an invalid migrated database target because `readConfigWithoutMigrate` fails without yielding, persisting, or activating a partial configuration, and startup aborts on that typed error.
-10. `initConfigSubsystem` returns the typed migration error; it neither logs-and-continues nor enters the retriable loop.
-11. `knownUnregisteredWrites` no longer contains Postgres or MySQL exceptions.
-12. The following verification passes:
+Commit [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) implements the design without expanding the public configuration surface. Cross-repository verification confirmed that `pgsty/mc`, `pgsty/silo-pkg`, and `pgsty/silo-console` require no changes because `mcli` forwards raw KV text and Console already serializes database forms into `connection_string` and `dsn_string`.
 
-    ```sh
-    go test ./internal/config/notify ./internal/config ./internal/event/target -count=1
-    go test -v ./cmd -run 'Test(ReadConfigWithoutMigrate|InitConfigSubsystem)' -count=1
-    git diff --check
-    ```
+### Release Compatibility Statement {#release}
 
-    The verbose `cmd` output must show that tests with both prefixes actually ran; a zero-match warning is a failed acceptance check. The normal server CI suite must also pass. In the documentation checkout, run `make check`.
+SILO database notification targets require `connection_string` for PostgreSQL and `dsn_string` for MySQL. The pre-2020 discrete `host`/`port`/`username`/`password`/`database` form is not migrated; convert, disable, or remove such targets before upgrading to [SILO Server 20260903](/blog/release/silo-20260903/) or later.
 
-## Implementation result {#implementation-result}
+### Design Review Calibration {#review-record}
 
-Server commit [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) implements the accepted design without expanding the public configuration surface:
+During design review of the initial specification, four calibrations were incorporated before landing the commit:
 
-- the two legacy database setters emit only `connection_string` or `dsn_string` plus registered target settings;
-- disabled targets remain ignored, while enabled targets without a canonical string return a value-free `LegacyDatabaseTargetError`;
-- only the two database migration errors are newly propagated;
-- the typed error is non-retriable, escapes `initConfigSubsystem`, and is classified as fatal by `serverMain` before `logger.FatalIf` exits the process;
-- the ten Postgres/MySQL exceptions were removed from `knownUnregisteredWrites`;
-- focused tests cover complete-string round trips, canonical precedence, discarded discrete values, secrecy, failed-migration atomicity, startup classification, and the real tokenizer key sets.
-
-The final local Claude Code review used Claude Fable 5 at `max` effort and returned **GO** with high confidence and no blocking findings. Verification included the focused package set, race tests, `go vet ./cmd`, and the complete `go test ./cmd -count=1` suite. The review authorized only the six-file server commit; publication remains a separate gate.
-
-Cross-repository review found no implementation changes are required in `pgsty/mc`, `pgsty/silo-pkg`, or `pgsty/silo-console`: the client forwards configuration text, the package repository owns no notification schema, and Console already serializes its form into the canonical `connection_string` or `dsn_string`. The public reference and compatibility documentation is updated with this record.
-
-## Release and compatibility statement {#release}
-
-The release note must describe this as an enforced compatibility boundary:
-
-> SILO database notification targets require `connection_string` for PostgreSQL and `dsn_string` for MySQL. The pre-2020 discrete `host`/`port`/`username`/`password`/`database` form is not migrated. Convert or recreate such targets before switching the deployment to SILO.
-
-Deployments already running SILO with an old-format source configuration are equally affected: after this release the server will not start until each enabled legacy database target is converted, disabled, or removed.
-
-The issue should close only after the repair is present in a published server tag. A merged patch, a local site build, and a published release are separate completion gates.
-
-## Review record {#review-record}
-
-Claude Fable 5 reviewed the first draft at `xhigh` effort on 2026-08-23 and returned **approve with required changes**. The required calibration was incorporated: startup-fatal propagation now extends through `initConfigSubsystem`; already-running SILO deployments are covered; the availability trade-off is explicit; canonical-string precedence, dead legacy environment variables, other ignored helper errors, and executable tests are specified.
-
-The same model then completed a final source-backed verification pass. Final verdict: **approve**, with no blocking findings. It confirmed that the English and Chinese records are aligned, the requirements are implementable against the current server tree, and the acceptance criteria cover the startup, migration, parser-regression, and secrecy boundaries.
-
-After implementation, a separate local Claude Code review using Claude Fable 5 at `max` effort traced the path through `ExitFunc(1)`, inspected driver error behavior, ran the focused, race, vet, and full `cmd` suites, and returned **GO** with high confidence and no blocking findings.
+- extending fatal error propagation through `initConfigSubsystem` to `ExitFunc(1)` so `serverMain` terminates via `logger.FatalIf` instead of starting without `globalServerConfig`;
+- documenting that existing deployments still booting from unmigrated legacy JSON files also hit the startup gate;
+- specifying canonical-string precedence when a legacy JSON record contains both `ConnectionString`/`DSN` and leftover discrete fields;
+- leaving error handling of the other eight non-database legacy notification setters unchanged to keep `#53` tightly scoped.

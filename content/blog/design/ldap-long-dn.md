@@ -4,234 +4,107 @@ linkTitle: "LDAP Long DNs"
 date: 2026-10-23
 lastmod: 2026-10-23
 author: "Ruohang Feng"
-summary: "Why LDAP DN normalization exposed an IAM filename limit, how a parent-revision read turned it into a login regression, and why the repair narrowly classifies impossible records as absent."
+summary: "Why LDAP DN normalization exposed an IAM filename limit, how parent-revision reads turned it into a login regression, and why the fix classifies only impossible ASCII path components as absent."
 tags: [Design, LDAP, IAM, Operations]
 weight: 8
 draft: false
 url: "/blog/design/ldap-long-dn/"
 ---
 
-**Decision, 2026-10-23:** [Server PR #250](https://github.com/pgsty/silo/pull/250)
-is merged at [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0).
-The repair restores the tested long-DN LDAP login paths while preserving errors
-that could hide an existing IAM revocation. This is a source acceptance record;
-it does not announce a Server release, image, package or production deployment.
+[Server PR #250](https://github.com/pgsty/silo/pull/250) (merged at [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0)) fixes a login failure affecting LDAP users whose normalized Distinguished Name (DN) exceeds the 255-byte single-component filename limit of the object-storage IAM backend, while preserving read errors that protect the [durable IAM revocation boundary](/blog/design/iam-revocations/).
 
-The original report, patch and long-DN regression tests came from
-[@910patin](https://github.com/910patin). Their original
-[`9faeb7a11`](https://github.com/pgsty/silo/commit/9faeb7a1147435aa7ebc02bb997837ddfbdd2a81)
-commit remains in main. The maintainer follow-up narrowed the error classification
-and added counterexamples before merging the original PR.
+The initial bug report, patch ([`9faeb7a11`](https://github.com/pgsty/silo/commit/9faeb7a1147435aa7ebc02bb997837ddfbdd2a81)), and long-DN regression tests were contributed by [`@910patin`](https://github.com/910patin). During design review prior to merge, maintainers narrowed the error-classification guard to ensure that full-path length errors or unreadable multibyte records on disk can never mask an existing revocation record.
 
-## Problem and significance {#problem}
+## Problem and Impact {#problem}
 
-A valid LDAP account can have a long distinguished name (DN), particularly when
-its name and organizational units contain non-ASCII text. A group-authorized
-user may need no directly attached user policy and no local parent-identity
-record. Nevertheless, login reads those optional records. In the failing path,
-the normalized DN becomes a directory or filename component that the object
-backend cannot store. A name-length error then aborts an otherwise valid login.
+An enterprise LDAP user can have a long Distinguished Name (DN), especially when user names and multi-level organizational units (`ou=`) contain non-ASCII UTF-8 characters (such as Chinese or Cyrillic text). Even when a user derives all permissions from LDAP group memberships and has no directly attached user policy or local parent-identity record, SILO's login flow still probes those optional IAM records.
 
-This is not an LDAP rejection of the account's name or password. It is a mismatch
-between an external identity and SILO's internal storage key. The same class of
-failure can affect STS issuance, service-account creation and credential loading.
-The repair matters because restoring availability must not weaken the
-[durable IAM revocation boundary](/blog/design/iam-revocations/).
+On the object-storage IAM backend, the normalized DN is embedded directly as a directory or filename component. When that component exceeds 255 bytes, the filesystem returns a filename-length error (`ENAMETOOLONG` / `ObjectNameInvalid`) that aborts an otherwise valid LDAP login, STS token request, or service-account lookup.
 
-## Why the name becomes longer {#normalization}
+## Why DN Normalization Triples Non-ASCII Byte Length {#normalization}
 
-A DN identifies an entire directory entry, for example
-`cn=张三,ou=研发,dc=example,dc=com`; it is not merely a login name.
-The escape notation is **`\xx`**, a backslash followed by two hexadecimal digits
-for one byte. It is neither a hyphen notation nor one escape per Unicode character.
+An LDAP DN identifies a full directory entry (for example, `cn=张三,ou=研发,dc=example,dc=com`). Under [RFC 4514 §2.4](https://www.rfc-editor.org/rfc/rfc4514.html#section-2.4), syntax characters must be escaped, and arbitrary bytes may be escaped using `\xx` (a backslash followed by two hexadecimal digits per byte). While RFC 4514 allows UTF-8 text to remain literal, the upstream `go-ldap` library's `DN.String()` serializer hex-escapes every non-ASCII UTF-8 byte.
 
-[RFC 4514 §2.4](https://www.rfc-editor.org/rfc/rfc4514.html#section-2.4)
-requires escaping certain syntax characters and permits escaping others.
-Ordinary UTF-8 text can remain literal. The RFC does not require all non-ASCII
-characters to be escaped and does not define a unique canonical DN string.
+SILO's `NormalizeDN` parses the DN returned by the LDAP server and formats it via `DN.String()` so attribute-type names and escape sequences have a canonical string representation:
 
-The `go-ldap` library's `DN.String()` chooses to hex-escape non-ASCII UTF-8 bytes.
-SILO's `NormalizeDN` parses the DN and uses that serializer. Attribute-type names
-and escape spellings become consistent; this is the library's representation,
-not a claim that every LDAP equality rule is reducible to string equality.
+| Representation | Byte Length |
+| :--- | ---: |
+| Single UTF-8 character `张` | 3 bytes |
+| Serialized by `DN.String()` as `\e5\bc\a0` | 9 ASCII bytes |
+| `cn=` + 40 copies of `张` + `,dc=example,dc=com` (raw UTF-8) | 141 bytes |
+| The same complete DN after `NormalizeDN` | 381 ASCII bytes |
 
-| Representation | Bytes |
-| --- | ---: |
-| `张` in UTF-8 | 3 |
-| The serialized value `\e5\bc\a0` | 9 |
-| `cn=` + 40 copies of `张` + `,dc=example,dc=com` | 141 before serialization |
-| The same complete DN after serialization | 381 |
+Because each 3-byte UTF-8 character expands into 9 ASCII characters (`\xx\xx\xx`), a 141-byte UTF-8 DN expands to 381 ASCII bytes on disk.
 
-The last two values were checked with the dependency used for acceptance.
-The account remains the same; only its representation expands. When that text
-is used as a filename, the filesystem sees the expanded bytes. Counting the
-decoded Chinese characters cannot make the actual filename fit.
+This lookup-result normalization was introduced upstream on March 27, 2024 in [`minio/pkg efb73fa5`](https://github.com/minio/pkg/commit/efb73fa5d52fc1f217c58d51544f448e3862ab61) ([MinIO PR #19358](https://github.com/minio/minio/pull/19358), by Aditya Manthramurthy / `@donatello`) so that the server uses the authoritative DN returned by the LDAP directory rather than trusting the user's raw login input spelling (for example, when a user inputs a Unicode fullwidth period that the directory resolves to an ASCII period).
 
-MinIO introduced lookup-result normalization on March 27, 2024 in
-[`minio/pkg efb73fa5`](https://github.com/minio/pkg/commit/efb73fa5d52fc1f217c58d51544f448e3862ab61),
-authored by Aditya Manthramurthy (@donatello). The related
-[MinIO PR #19358](https://github.com/minio/minio/pull/19358) explains the identity
-consistency requirement: use the DN returned by the LDAP server instead of
-assuming the user's input spelling is the authoritative identity. Its example
-uses a Unicode variant of a full stop that the directory resolves to an ordinary
-full stop. SILO inherited this normalization path; September's revocation work
-did not introduce the escaping.
+## How the Login Regression Arose {#cause}
 
-## How the login regression arose {#cause}
-
-The object IAM backend uses paths such as:
+The object-storage IAM backend stores per-user records at paths constructed from the normalized DN:
 
 ```text
 config/iam/users/<normalized-DN>/identity.json
 config/iam/policydb/sts-users/<normalized-DN>.json
 ```
 
-The relevant limit is a **single path component**, not the total DN's character
-count. For a DN occupying one component, the mapping's `.json` suffix also counts:
-250 ASCII bytes plus the suffix fit 255 bytes; 251 plus the suffix do not.
+POSIX filesystems enforce a 255-byte limit on each individual `/`‑delimited path component (`NAME_MAX`). When the normalized DN is used as the filename in `sts-users/<normalized-DN>.json`, the 5-byte `.json` suffix shares the same component budget: a 250-byte escaped DN (`250 + 5 = 255`) fits, whereas a 251-byte escaped DN (`251 + 5 = 256`) fails with `ENAMETOOLONG`.
 
-Two inherited behaviors complicate the symptom. First, `checkPathLength` does
-not count backslashes on Unix. A 271-byte escaped DN in the reproduction is
-counted as 197, so it passes that check and can fail later in the filesystem.
-Second, a missing ancestor directory can produce a missing-file result before
-the filesystem reaches the overlong component. Whether an IAM prefix already
-exists can therefore change the result. The directory state was part of the
-reproduction, not a recommended workaround.
+Two historical behaviors shaped how this failure surfaced:
 
-| Change | Contribution to the failure |
-| --- | --- |
-| MinIO [`ee9077db`](https://github.com/minio/minio/commit/ee9077db7d5f23de17cedbb6d7e7c99b1638ad6e), May 2020 | Introduced the Unix backslash-counting behavior in the path-length precheck. |
-| MinIO [`280526ca`](https://github.com/minio/minio/commit/280526caf7e41881f7cd9a3c97028e1f56df41ef), March 2024 | Propagated policy lookup read errors after a cache miss, providing an older failure path. |
-| MinIO normalization and [`7e45d84a`](https://github.com/minio/minio/commit/7e45d84acebf9eac5391ec7676c4a7f92e52fd75), March 2024 | Made normalized, potentially expanded DNs the identity/mapping representation. |
-| SILO [`709d50a9`](https://github.com/pgsty/silo/commit/709d50a916bf3311eda2b3882ac5f2a0251f4223), shipped in Server 20260916 | Added persistent parent-revision reads for revocation and replay protection, exposing another required read during login. |
+1. **Unix backslash omission in `checkPathLength`**: SILO's pre-flight `checkPathLength` helper does not count backslash (`\`) characters on Unix. In reproduction testing, a 271-byte hex-escaped DN was counted as 197 bytes by `checkPathLength`, bypassing pre-flight validation and failing only when the OS filesystem attempted the lookup.
+2. **Ancestor directory existence sensitivity**: When the parent prefix directory (`config/iam/users/`) did not exist yet on disk, the kernel returned `ENOENT` while resolving the missing parent directory—before reaching the overlong `<normalized-DN>` component—allowing login to succeed (`HTTP 200`). Once any user record created the `config/iam/users/` prefix directory, the kernel reached the 271-byte component and returned `ENAMETOOLONG`, causing login to fail with `HTTP 500`.
 
-The reproduced 271-byte case returned HTTP 200 when the users prefix was absent
-and HTTP 500 when it existed on the unfixed implementation. The repaired path
-returned HTTP 200 in both states and supported the tested S3 and service-account
-operations. A 384-byte DN also exercised the earlier policy-read path.
+| Commit | Role in the Failure Chain |
+| :--- | :--- |
+| MinIO [`ee9077db`](https://github.com/minio/minio/commit/ee9077db7d5f23de17cedbb6d7e7c99b1638ad6e) (May 2020) | Introduced Unix backslash skipping in `checkPathLength`. |
+| MinIO [`280526ca`](https://github.com/minio/minio/commit/280526caf7e41881f7cd9a3c97028e1f56df41ef) (Mar 2024) | Propagated policy lookup read errors after a cache miss instead of swallowing them. |
+| MinIO [`efb73fa5`](https://github.com/minio/pkg/commit/efb73fa5d52fc1f217c58d51544f448e3862ab61) & [`7e45d84a`](https://github.com/minio/minio/commit/7e45d84acebf9eac5391ec7676c4a7f92e52fd75) (Mar 2024) | Adopted `NormalizeDN` (with `\xx` hex expansion) for LDAP identity and policy-mapping keys. |
+| SILO [`709d50a9`](https://github.com/pgsty/silo/commit/709d50a916bf3311eda2b3882ac5f2a0251f4223) (Server 20260916) | Added persistent parent-revision reads (`config/iam/users/<DN>/identity.json`) during login for revocation and replay protection, triggering the read on every LDAP login even when the policy cache hit. |
 
-These are distinct causes with different histories. The September change
-introduced the parent-read regression, but reverting to an earlier release does
-not establish support for every long DN. Historical attribution was checked
-against source and release ancestry; historical release binaries were not run.
+## The Fix: Narrowly Classify Impossible ASCII Components as Absent {#decision}
 
-## Decision: narrowly classify an impossible record as absent {#decision}
+The fix is implemented in the shared object-storage IAM reader, [`loadIAMConfigBytesWithMetadata`](https://github.com/pgsty/silo/blob/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0/cmd/iam-object-store.go#L137). It attempts the normal storage read first. Only if the read fails does it translate the error to `errConfigNotFound`, and **only when all three conditions hold**:
 
-The repair is in the shared object IAM reader,
-[`loadIAMConfigBytesWithMetadata`](https://github.com/pgsty/silo/blob/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0/cmd/iam-object-store.go#L137).
-It attempts the normal read first. Only after a failure does it classify the
-lookup as `errConfigNotFound`, and only when **all three** conditions hold:
+1. The returned error is `errFileNameTooLong` or `ObjectNameInvalid` (including wrapped errors).
+2. The complete object key passes standard bucket and object-name validation (`isValidBucketName` and `isValidObjectName`).
+3. At least one `/`-delimited path component consists entirely of ASCII characters (`utf8.RuneCountInString(component) == len(component)`) and exceeds 255 bytes (`len(component) > 255`).
 
-1. The error is `errFileNameTooLong` or `ObjectNameInvalid`, including recognized wrappers.
-2. The complete object key passes the normal bucket/object-name validation.
-3. At least one slash-delimited component is entirely ASCII and exceeds 255 bytes.
+Because a pure-ASCII path component longer than 255 bytes can never be written to the object-storage IAM backend in the first place, no persisted user policy or parent-revision record can exist at that key. Returning `errConfigNotFound` allows the caller to follow its normal record-absent path—for example, authenticating the LDAP user and evaluating permissions strictly from their LDAP group policies—without granting any default permissions or bypassing revocation checks for storable keys.
 
-The implementation checks both `len(component) > 255` and
-`utf8.RuneCountInString(component) == len(component)`. The second condition only
-establishes that the component is ASCII. **It does not decode `\xx`, count the
-original user's characters, or relax the filesystem limit.** Normalized escaped
-DNs meet the ASCII condition, and checking the complete key includes suffixes.
+Writes, deletes, the `etcd` IAM backend, and global object path validation remain unchanged. The production change adds 25 lines in `cmd/iam-object-store.go` accompanied by 318 lines of regression tests, with zero extra I/O on normal reads.
 
-For that narrow case, a record cannot have been persisted at the requested
-component. The existing caller can handle absence: for example, continue with
-group-derived policy instead of requiring a user-specific policy file. LDAP
-authentication and authorization still run. This adds no default grant and does
-not skip parent-revision checks.
+## Why the Initial Error Classification Required Narrowing {#safety}
 
-Successful reads retain their existing decryption, parsing and index behavior.
-Other errors still propagate. Writes, deletes, the etcd backend and the global
-path-length checker are unchanged. The production change adds 25 lines, with
-318 lines of regression coverage in the final PR. It adds no storage format,
-migration, configuration switch, background task or extra I/O; the additional
-name scan occurs only after a failed read and is linear in the path length.
+The initial patch treated any `ObjectNameInvalid` / `errFileNameTooLong` error on a syntactically valid key as `errConfigNotFound`. Design review identified two concrete counterexamples where a length error does **not** prove that the record never existed on disk:
 
-## Why the original classification needed a guard {#safety}
+1. **Full-path length overflow (`PATH_MAX`) hiding an existing revocation**: Suppose an administrator revokes an identity whose individual path components are $\le 255$ bytes (so the revocation tombstone is successfully written to disk), and the server's data directory is later mounted or moved under a deeper parent path on macOS. A read can then fail due to the total path length limit even though the revocation record exists on disk. Treating that error as `errConfigNotFound` would hide the revocation tombstone and allow a revoked parent identity to pass verification. Checking `len(component) > 255` on individual `/`-delimited components ensures full-path overflow errors still fail closed.
+2. **Multibyte UTF-8 filenames on character-counted filesystems (macOS APFS/HFS+)**: On macOS, filesystem component limits are enforced in UTF-16 code units / characters (up to 255 characters) rather than raw UTF-8 bytes. In filesystem boundary testing on macOS, a single component consisting of 100 copies of `界` occupies **300 UTF-8 bytes** (`len(component) == 300`, `RuneCount == 100`) and **can** be created and persisted on disk. If the guard checked only `len(component) > 255`, an existing 300-byte Unicode record could be misclassified as impossible. Requiring `utf8.RuneCountInString(component) == len(component)` restricts the absence classification to pure-ASCII components (which includes all `\xx`-escaped DNs), where 1 character is always 1 byte on every platform.
 
-The original PR classified `ObjectNameInvalid` on a syntactically valid key as
-absence. That is too broad: a length error does not always prove that a record
-could never have existed.
+The resulting safety invariant is exact: **only a path component that is provably uncreatable may take the `errConfigNotFound` branch; any potentially existing record that cannot be read must fail closed.**
 
-One counterexample writes a real revocation record, then moves the data directory
-under a deeper path on macOS. Its individual key components still fit, and a
-relative-path read proves that the stored record remains present. The full-path
-limit now prevents the usual read. Treating that failure as absence can hide the
-revocation and let a parent check succeed. The final guard preserves the error.
+## Alternatives Considered {#alternatives}
 
-Checking only the UTF-8 byte length is also too broad across filesystems. In the
-macOS probe, a component containing 100 copies of `界` occupies 300 UTF-8 bytes
-yet can be stored. Such an existing record must not be classified as impossible
-merely because its byte count exceeds 255. The ASCII restriction avoids making
-that inference for Unicode filenames.
+| Candidate Approach | Decision and Rationale |
+| :--- | :--- |
+| **Narrow ASCII component (> 255 B) classification in `loadIAMConfigBytesWithMetadata`** | **Selected.** Restores LDAP login and STS lookup across all callers using the shared IAM reader while failing closed on full-path errors and storable Unicode names. |
+| **Treat every `ObjectNameInvalid` on a valid key as `errConfigNotFound`** | **Rejected.** Full-path (`PATH_MAX`) errors on deep mount points could hide an existing revocation tombstone on disk. |
+| **Count decoded UTF-8 characters or ignore `\xx` escape overhead** | **Rejected.** The OS filesystem stores the literal `\xx`-expanded ASCII string, not the unescaped UTF-8 runes. |
+| **Fix only Unix backslash counting in `checkPathLength`** | **Insufficient.** Counting backslashes in `checkPathLength` would merely reject the same long DN earlier (with `ObjectNameInvalid`) without restoring login. |
+| **Change `NormalizeDN` to preserve raw UTF-8 instead of `\xx` hex escapes** | **Deferred.** Would incompatibly alter existing persisted LDAP identity and policy-mapping keys on disk, and still would not eliminate component limits for genuinely long DNs. |
+| **Skip parent-revision checks for LDAP or revert `709d50a9`** | **Rejected.** Would sacrifice durable revocation and replay protection while leaving the older March 2024 policy-mapping read failure (`sts-users/<DN>.json`) unfixed. |
+| **Hash overlong DNs into fixed-length storage keys** | **Separate feature scope.** Full write support for arbitrary-length DNs requires a new storage schema across lookup, listing, import/export, site replication, and mixed-version upgrades. |
 
-The safety rule is therefore precise: **proved absence may use the existing
-absence path; an unreadable, potentially existing revocation must remain an
-error.** This is why the patch restores login without generally ignoring IAM
-storage failures.
+## Verification Matrix {#verification}
 
-## Alternatives considered {#alternatives}
+| Test Suite / Probe | Coverage and Results |
+| :--- | :--- |
+| **Unit & boundary tests** ([`cmd/iam-revision_test.go`](https://github.com/pgsty/silo/blob/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0/cmd/iam-revision_test.go#L103)) | Covers escaped 271-byte and 384-byte DNs, exact 255/256-byte component boundaries, `.json` suffix accounting, multibyte Unicode components, wrapped errors, invalid object names, and existing revocation records moved under deep directory paths. |
+| **End-to-end LDAP STS login** ([`cmd/sts-handlers_test.go`](https://github.com/pgsty/silo/blob/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0/cmd/sts-handlers_test.go#L3300)) | Verifies STS login, signed S3 access, and service-account operations for a group-authorized user with a 384-byte normalized DN across 8 object/etcd configurations. |
+| **Cross-platform filesystem probes** | Tested 72 physical filename shapes on macOS (49 creatable) and Linux `tmpfs` (32 creatable): zero storable filenames were classified as impossible. Verified 105 error-propagation assertions (5 parent-name classes $\times$ 7 storage errors $\times$ 3 entry points) per platform. |
+| **CI & Toolchain VulnCheck** | All 11 PR CI jobs on [`3df51549bbbd6e57a6a5f11ac77535390517db65`](https://github.com/pgsty/silo/commit/3df51549bbbd6e57a6a5f11ac77535390517db65) (merged as [`a07d655dc69cf04b130c2634d9fa5301078af546`](https://github.com/pgsty/silo/commit/a07d655dc69cf04b130c2634d9fa5301078af546)) and 7 post-merge `main` jobs passed on [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0) ([Go CI](https://github.com/pgsty/silo/actions/runs/39894613094), [VulnCheck](https://github.com/pgsty/silo/actions/runs/39894613091)), alongside raising the minimum toolchain to Go 1.27.3 for `GO-2026-6809`. |
 
-| Approach | Decision and reason |
-| --- | --- |
-| Narrow classification in the shared object IAM reader | Selected. Covers the relevant callers and preserves genuine failure handling without changing stored keys. |
-| Treat every valid-key name error as absence | Rejected. A full-path limit can hide a record that already exists. |
-| Count decoded characters or exclude escape overhead | Rejected. The expanded filename is what the filesystem must store. |
-| Fix only the global backslash counter | Insufficient for this repair. It would reject the same name earlier and affect ordinary object paths without restoring login. |
-| Preserve literal UTF-8 instead of the current serializer output | Deferred. It may shorten some names, but changes established identity/mapping keys and does not remove component limits. |
-| Skip parent checks or revert durable revocation | Rejected. It would trade availability for lost revocation and replay protection, while retaining older policy-read failures. |
-| Use a short or hashed storage key and keep the full DN in the record | A separate design if full long-identity persistence is needed. It requires lookup, listing, migration, import/export, replication and mixed-version rules. |
+## Operational Boundaries and Guidance {#limits}
 
-Deleting IAM directories to obtain a missing-file result is not a repair. It
-destroys state and relies on an incidental lookup order.
-
-## Verification and delivery {#verification}
-
-Acceptance separated source behavior, CI, merge state and deployment:
-
-| Evidence | Result and scope |
-| --- | --- |
-| [Committed name/revision tests](https://github.com/pgsty/silo/blob/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0/cmd/iam-revision_test.go#L103) | Cover escaped 271/384-byte names, 255/256-byte boundaries, `.json` suffixes, Unicode, wrapped errors, invalid names, backend behavior and real records under deep paths. |
-| [Committed LDAP scenario](https://github.com/pgsty/silo/blob/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0/cmd/sts-handlers_test.go#L3300) | A group-authorized 384-byte normalized DN; the LDAP suite passed across eight object/etcd configurations. |
-| Additional isolated adversarial probes | 72 physical filename cases per platform: macOS could create 49; Linux tmpfs could create 32. None of the storable names was classified as impossible. Five parent-name classes × seven storage errors × three entry points gave 105 error-propagation assertions per platform. |
-| Post-merge local regression | 62 top-level tests passed, none failed; four tests requiring external OpenID services were skipped. IAM, LDAP, object/etcd revocation and the adversarial probes were included. Build and repository verifiers passed; the optional `typos` tool was unavailable and skipped. |
-| [PR Go CI](https://github.com/pgsty/silo/actions/runs/39893124621), [DCO](https://github.com/pgsty/silo/actions/runs/39893124584), [VulnCheck](https://github.com/pgsty/silo/actions/runs/39893124615), [release-pipeline validation](https://github.com/pgsty/silo/actions/runs/39893124499) | All 11 jobs passed on final PR head `3df51549bbbd6e57a6a5f11ac77535390517db65` before merge. The release-pipeline check did not publish a release. |
-| [Merged-main Go CI](https://github.com/pgsty/silo/actions/runs/39894613094) and [VulnCheck](https://github.com/pgsty/silo/actions/runs/39894613091) | All seven jobs passed on merge commit `d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0`. |
-
-The post-merge local run used integration commit
-`a07d655dc69cf04b130c2634d9fa5301078af546`
-in the maintainer's checkout; the three changed implementation/test files were
-byte-identical to the merged PR. That local integration also retained pre-existing
-dependency/documentation work, so its broader environment is not presented as
-the remote main snapshot. The authoritative public source and CI links above
-refer to the remote merge commit.
-
-CI also found a separate Go 1.27.2 certificate-verification vulnerability,
-`GO-2026-6809`. A distinct follow-up raised the minimum to Go 1.27.3 and passed
-VulnCheck. This was a merge prerequisite, not the cause of the LDAP failure.
-
-The temporary probes supplemented committed regression tests; they are not a
-new product interface. Production AD/XFS, Windows execution and a deployed
-multi-node cluster were not acceptance targets here. Those environments need
-their own artifact and deployment checks.
-
-## Remaining boundary and operating guidance {#limits}
-
-This decision restores the verified login/read paths. It does **not** make the
-object backend capable of writing arbitrary-length identity records. Direct
-policy mappings and parent-revision records with overlong components still fail
-to save. Do not infer support for a parent-wide revocation operation that requires
-such a write. The existing per-access-key/token mechanisms are separate; follow
-their documented scope and verify rejection at the relevant endpoints.
-
-For affected deployments, use group-based authorization where the group mapping
-itself fits, and deploy a Server artifact verified to contain the merge. Before
-acceptance, check an affected user's STS login and signed S3 access, service-account
-behavior, and old-credential rejection for identities whose revocation records
-can be stored. Do not delete IAM metadata or disable revocation checks as a
-workaround. No data migration is introduced by this patch, and existing
-[upgrade/recovery requirements](/operations/replication/iam-upgrade/) still apply.
-
-The design lesson is to keep external identity syntax separate from internal
-storage naming. When a storage constraint leaks into authentication, the repair
-must establish what an error proves before changing its meaning. Here, the
-smallest sufficient change was a narrowly justified absence classification;
-full long-DN persistence remains a different problem.
+- **Read vs. Write asymmetry**: This fix restores **read/login** paths when optional per-user IAM records do not exist. It does **not** enable the object-storage IAM backend to **write** files whose component length exceeds 255 bytes. Attaching a policy directly to a >250-byte normalized user DN (`sts-users/<DN>.json`) or writing a persistent parent-revision tombstone (`users/<DN>/identity.json`) on the object backend will still fail with a filename-length error.
+- **Recommended LDAP authorization pattern**: For LDAP users with long or non-ASCII DNs on object-backed IAM deployments, grant permissions through **LDAP group mappings** (where the group DN itself fits within 250 ASCII bytes after normalization) rather than direct per-user policy attachments.
+- **No migration required**: Upgrading requires no on-disk data migration. Never delete `.minio.sys/config/iam/` directories manually to work around path-length errors; follow the standard [IAM upgrade and recovery guide](/operations/replication/iam-upgrade/).

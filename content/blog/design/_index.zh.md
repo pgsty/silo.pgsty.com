@@ -1,7 +1,7 @@
 ---
 title: 设计归档
 linkTitle: 设计
-description: SILO 的产品需求、实现决策、兼容性评审与发布准备记录。
+description: PGSTY SILO 的架构设计、S3 兼容性契约、复制不变量与工程决策记录。
 weight: 40
 icon: fa-solid fa-pen-ruler
 sidebar_expanded: true
@@ -11,23 +11,25 @@ cascade:
   images: [/images/blog/silo-design.webp]
 ---
 
-这里归档 SILO 维护决策背后的完整思考：要解决的问题、兼容性边界、被否决的方案、实现要求，以及进入发布版本前必须取得的验证证据。
+设计归档记录 PGSTY SILO 的核心工程决策：缺陷根因、S3 与 IAM 协议不变量、备选方案取舍、运维边界与回归测试索引。
 
-阅读时先看日期与状态：**设计提案**说明尚待实现或验证的方案；**已合入 main**只说明源码包含改动；**已发布**必须关联实际 tag/发布说明。历史评审和当时的未完成项不自动代表当前行为，后续更正应明确版本。证据优先使用固定提交、PR、稳定测试及发布记录；本地测试、远端 CI、制品与生产部署分别计数。
+## 2026-10-24 覆盖亲和决策
 
-## 20261023：LDAP 长 DN 登录
+- [多池覆盖亲和：为何最终没有采纳 #245](/zh/blog/design/overwrite-pool-affinity/)（`#245`）：记录原始放置问题、请求级 quorum 与健康判断改进、仅限普通无版本覆盖的收窄设计、两轮 m3 性能实测，以及小对象覆盖仍未达标后的停止决定。实验修改没有合并。
 
-[LDAP 长 DN](/zh/blog/design/ldap-long-dn/)记录规范化与存储限制、父身份版本读取造成的登录回归，以及 Server #250 合入的窄范围缺失分类。
-源码验收与完整长身份持久化是两个不同范围。
+## 2026-10-23 IAM 与 KMS 设计记录
 
-## 20261018 设计入口
+- [LDAP 长 DN：恢复登录可用性并守住 IAM 撤销安全边界](/zh/blog/design/ldap-long-dn/)（`#250`）：解析 `NormalizeDN` 的 `\xx` 十六进制转义为何触发对象 IAM 后端的单路径分量 255 字节上限，以及为何仅将物理上无法落盘的纯 ASCII 超长分量归类为 `errConfigNotFound`。
+- [IAM 策略重载：锁粒度、请求取消与超时预算隔离](/zh/blog/design/iam-policy-cancellation/)（`#251`）：在保留 `writeMu` 写串行锁的前提下将慢速策略加载与 KMS 解密移出内存鉴权缓存锁，将取消信号贯通至 `KES.Decrypt`，并将 `etcd` 单步读取超时与整批解密预算解耦。
 
-以 [Server 20261018 发布说明](/zh/blog/release/silo-20261018/)中的发行源码和状态为准。本批次应结合阅读：
+## Server 20261018 核心设计记录
 
-- [Object Lock](/zh/blog/design/governance-retention-bypass-repair/)
-- [IAM Admin](/zh/blog/design/iam-admin-authorization/)
-- [STS](/zh/blog/design/iam-revocations/#scoped-sts-20261018)
-- [LIST](/zh/blog/design/listing-recovery-lock-cost/)
-- [Multipart](/zh/blog/design/list-multipart-uploads/#implementation)
-- [Rebalance / decommission](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)
-- [KES / OpenBao](/zh/blog/design/kes-openbao/)
+围绕 [Server 20261018 正式版](/zh/blog/release/silo-20261018/)的核心架构改动，请参阅：
+
+- [Object Lock 治理保留期与覆写防护](/zh/blog/design/governance-retention-bypass-repair/)（`SN-2026-015`、`SN-2026-016`）
+- [IAM Admin 凭据授权边界](/zh/blog/design/iam-admin-authorization/)（`SN-2026-017`）
+- [持久化 IAM 撤销与按范围撤销 STS](/zh/blog/design/iam-revocations/#scoped-sts-20261018)（`SN-2026-013`）
+- [LIST 恢复锁开销优化](/zh/blog/design/listing-recovery-lock-cost/)
+- [ListMultipartUploads 回退决策与容量边界](/zh/blog/design/list-multipart-uploads/#implementation)
+- [多池对象一致性与迁移保护](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)
+- [KES 与 OpenBao 集成](/zh/blog/design/kes-openbao/)

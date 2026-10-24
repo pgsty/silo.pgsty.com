@@ -5,83 +5,71 @@ date: 2026-09-03
 lastmod: 2026-10-18
 author: "冯若航"
 summary: >
-  对 20260806 之后全部服务端变更的最终对抗性复审：已确认缺陷、修复、否决的简化、必要复杂度、验证证据、明确延期，以及代码 GO 与生产发布之间的区别。2026-09-16 增补 #116 重启与读回验证方法。
+  20260806 之后全部服务端变更的发布前复审记录：已确认缺陷、修复方案、复杂度取舍、验收证据、延期事项与发布门禁，并附 #116 重启与读回验证方法。
 tags: [Design, Review, Security, Compatibility, Release]
 weight: 8
 draft: false
 url: "/zh/blog/design/server-release-readiness/"
 ---
 
-**20261018 入口：**本文保留 20260903 的历史评审；本批次的最终源码、修复与本机制品验收见 [20261018 发布说明](/zh/blog/release/silo-20261018/#delivery)。
-
-
-这是 [SILO 20260903](/zh/blog/release/silo-20260903/) 背后的发布前长期工程记录：为什么不能直接接受早期“所有问题都已解决”的结论，独立复审发现了什么，修复如何收窄，以及复审时距离生产发布还差哪些门禁。链接的发布说明记录了之后的正式交付结果。
-
-> **结论：** `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3` 源码候选在**代码层面可以 GO 到远端复审**；生产发布仍是**有条件 GO**，必须等待远端 CI、Test Release、tag 与构件校验、签名、容器发布及公开 pull 验证完成。<br>
-> **基线：** `RELEASE.2026-08-06T00-00-00Z`，提交 `3be10fcc1a44f6620ded0bd303461f9d688cca23`。<br>
-> **范围：** SILO Server 行为及其内嵌/锁定的运行时组件。文档、独立 Console、mcli、软件仓库、镜像与线上站点是彼此独立的交付物。<br>
-> **发布闭环：** 后续最终源码树 `9b11dc9469e650815b775cb47b039610644f5da4` 在完成下列远端、软件包、provenance、容器与公开下载门禁后，于 2026-09-04 以 [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) 正式发布。本页的有条件结论保留为当时的复审标准，不代表当前仍未发布。
-
-**2026-09-09 后续：** #153、#152、#137 的修复与主干验收另见 [复制可靠性设计归档](/zh/blog/design/replication-reliability/)。新文保留 #136 的计数契约、记录取消生命周期决策，并明确 #133 仍单独跟踪；它不改变下文对 0903 发布候选的历史判断。
+本文记录 [SILO 20260903](/zh/blog/release/silo-20260903/)（`RELEASE.2026-09-03T13-18-01Z`，对应提交 `9b11dc9469e650815b775cb47b039610644f5da4`，候选复审提交 `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3`，对比基线 `RELEASE.2026-08-06T00-00-00Z` 即 `3be10fcc1a44f6620ded0bd303461f9d688cca23`）的发布前工程复审：第二轮复审发现了哪些遗漏缺陷、修复边界如何收窄，以及发布门禁如何组织。后续九月与十月版本的修复见[复制可靠性](/zh/blog/design/replication-reliability/)、[Server 20260916](/zh/blog/release/silo-20260916/) 与 [Server 20261018](/zh/blog/release/silo-20261018/#delivery)。
 
 ## 为什么需要第二轮审查 {#why-review}
 
-第一轮实现有很强的测试结果，也解决了大多数报告缺陷。但“已经全部就绪”的结论仍然过宽：它把绿灯测试与干净工作树当成了所有安全不变量均已闭合的证明。
+第一轮实现修复了大多数已知问题并通过了现有测试。第二轮复审进一步检查各安全不变量在所有合法协议形态与异常状态下是否严密：
 
-对抗性复审换了一组问题：
+- 同一条不变量能否被另一种合法的请求格式（wire representation）绕过？
+- 鉴权前的快路径是否仍会触发磁盘 I/O 或修改内存状态？
+- 元数据存在但加载失败时会发生什么？
+- 两条各自正确的“读-改-写”路径是否共享同一个串行化边界？
+- 请求头清洗是否保留了完整的 SigV4 流式签名状态？
+- 验收记录对应的是最终代码树，还是此前的中间提交？
+- 复杂的防御逻辑对应的是已复现的故障，还是仅停留在假想场景？
 
-- 同一不变量能否被另一种合法 wire representation 绕过？
-- 预鉴权 fast path 是否仍会做 I/O 或获得状态？
-- metadata 存在但加载失败时会怎样？
-- 两条各自正确的 read-modify-write path 是否共享同一 serialization boundary？
-- request sanitization 是否保留了全部 SigV4 streaming state？
-- 验证声明说的是最终树，还是此前某棵树？
-- 一个复杂机制是在保护已复现故障，还是只保护假想未来？
-
-这轮审查在第一次“ready”之后继续找到了真实缺陷。正确做法不是推翻全部既有工作，而是把每个结论收窄到具体不变量与具体源码树。
+第二轮复审在首轮实现之上定位出多处真实缺陷，并将每项修复与验收结论严格收窄到具体的不变量与代码提交。
 
 ## 分领域复审结果 {#review-result}
 
-| 领域 | 对抗性发现 | 最终解决方案 | 状态 |
+| 领域 | 第二轮复审发现 | 最终解决方案 | 状态 |
 | :-- | :-- | :-- | :-- |
-| 桶元数据 | 独立配置锁会丢失共享 `.metadata.bin` 记录中的更新（[#102](https://github.com/pgsty/silo/issues/102)） | 一个有界 `metadata.lock` 包围所有整记录 writer、migration、import、adoption、healing；复制只应用变化字段，避免陈旧整记录替换 | 候选已关闭 |
-| 桶创建 | `ForceCreate` 与站点 adoption 可能用默认值覆盖既有配置 | 保留既有记录，只更新 creation/adoption 状态；增加 clobber regression test | 候选已关闭 |
-| Object Lock | 将 lock 文档字节与一个 canonical XML 比较，会漏掉带 Default Retention rule 的合法配置 | 先 parse Object Lock，再从解析后的 enabled 状态推导 versioning 不变量；验证更新、读回、磁盘重载 | 候选已关闭 |
-| 预鉴权 CORS | 任意 path segment 会触发 metadata read 与 cache growth | CORS lookup 只读 resident metadata，不进行 object-layer I/O | 候选已关闭 |
-| CORS 启动期 | metadata 尚未初始化时，非驻留名字可能回落全局 CORS | 保留显式 fail-closed startup state | 候选已关闭 |
-| CORS 加载失败 | 忘记一个真实桶曾加载失败，会让它与不存在的桶无法区分，使预签名请求落到全局 fallback | 维护有界 failed-bucket set；成功加载、删除、refresh 等路径清除；这些桶保持 fail-closed | 候选已关闭 |
-| CORS 恢复 | 按需 `GetConfig` 成功重载最初没有清除 load-failure bit | 最后一行修复 `84e1580a4`，加定向 race 覆盖 | 候选已关闭 |
-| 复制信任 | 多个 handler 把客户端可控内部 header 的存在当作特权 | 先鉴权；要求精确 marker 与 `s3:ReplicateObject` / `s3:ReplicateDelete`；用私有 context decision；之后再清洗 | 候选已关闭 |
-| Streaming upload | 清洗后的 request clone 起初没有共享原 trailer map | 保留 trailer map，使迟到的 streaming checksum 可见 | 候选已关闭 |
-| Snowball | request-wide trust bit 可能在解压 entry 间泄漏 | 每个 entry 独立推导 trust，并在 worker 间保留请求默认值 | 候选已关闭 |
-| SSE-C | 零字节读取与 `GetObjectAttributes` 可跳过客户密钥认证 | 要求成功解封 key；真正授权的 replica 走独立例外 | 候选已关闭 |
-| 删除授权 | 显式版本删除检查普通 delete action，而不是要求 `s3:DeleteObjectVersion` | 对齐单删与批删授权；复制删除保留 `s3:ReplicateDelete`；保留 auth/audit context | 候选已关闭 |
-| 管理授权 | 用户/组状态变更始终检查 enable action | 检查与目标状态匹配的 action | 候选已关闭 |
-| Checksum | Multipart/copy 路径漏字段、接受非法组合，或在错误 representation 上计算 | 补齐算法/类型校验、服务端 part 计算、联邦传递、AWS 错误、CopyObject transform 顺序 | 候选已关闭 |
-| 发布证据 | 完整验收最初描述的是之后仍发生变化的树 | 分别记录 `ebac0ca73` 的完整验收与当前树的定向门禁 | 证据缺陷已关闭 |
+| 桶元数据 | 各自独立的配置锁会丢失共享 `.metadata.bin` 记录中的并发更新（[#102](https://github.com/pgsty/silo/issues/102)） | 用一把有界的 `metadata.lock` 覆盖所有整记录写入、迁移、导入、纳管与自愈路径；站点复制仅合并变更字段，避免旧快照覆盖整条记录 | 候选已关闭 |
+| 桶创建 | `ForceCreate` 与站点纳管可能用默认值覆盖已有桶配置 | 保留已有记录，仅更新创建与纳管状态；补充防覆盖回归测试 | 候选已关闭 |
+| Object Lock | 直接将配置字节与单一标准 XML 比对，会漏判包含默认保留规则（Default Retention）的合法配置 | 先解析 Object Lock 配置，再从启用状态推导版本控制不变量；验证更新、读回与磁盘重载 | 候选已关闭 |
+| 预鉴权 CORS | 任意 URL 路径段都会触发元数据读取与缓存膨胀 | CORS 查询仅读取常驻内存的元数据，不触发对象层 I/O | 候选已关闭 |
+| CORS 启动期 | 元数据尚未初始化时，非常驻桶名可能回退到全局 CORS | 保持显式的启动期默认拒绝（fail-closed）状态 | 候选已关闭 |
+| CORS 加载失败 | 真实桶一旦丢失加载失败记录，就会与不存在的桶混淆，导致预签名请求回退到全局 CORS 配置 | 维护有界的失败桶集合，在成功加载、删除与刷新路径上清除记录；集合内的桶保持默认拒绝 | 候选已关闭 |
+| CORS 恢复 | 按需调用 `GetConfig` 成功重载后，最初未清除加载失败标记 | 提交 `84e1580a4` 补齐单行状态清除，并增加定向并发竞态测试 | 候选已关闭 |
+| 复制信任 | 多个处理函数仅凭客户端可控的内部请求头就放行特权分支 | 先完成鉴权，要求精确标记并具备 `s3:ReplicateObject` 或 `s3:ReplicateDelete` 权限，将决策写入私有上下文后再清洗请求头 | 候选已关闭 |
+| 流式上传 | 清洗请求头时克隆出的请求对象起初未共享原请求的 `Trailer` 映射 | 保留 `Trailer` 映射，确保流式上传末尾到达的校验和可见 | 候选已关闭 |
+| Snowball | 请求级的信任标记可能在归档解压条目之间串用 | 按归档条目独立推导信任状态，并在并发工作协程间保留请求默认值 | 候选已关闭 |
+| SSE-C | 零字节读取与 `GetObjectAttributes` 可能跳过客户端密钥认证 | 强制要求成功解封客户端密钥；仅对已授权的副本请求保留独立豁免分支 | 候选已关闭 |
+| 删除授权 | 指定版本删除仅检查普通删除权限，未要求 `s3:DeleteObjectVersion` | 统一单对象与批量删除的权限检查，复制删除继续检查 `s3:ReplicateDelete`，并保留鉴权与审计上下文 | 候选已关闭 |
+| 管理授权 | 用户与组状态变更始终检查启用权限 | 按请求的目标状态检查对应的启用或禁用权限 | 候选已关闭 |
+| Checksum | 分片上传与复制路径遗漏校验和字段、接受非法组合，或在压缩/加密后的字节流上计算校验和 | 补齐算法与类型校验、服务端分片校验和计算、联邦透传、AWS 错误码及 `CopyObject` 流变换顺序 | 候选已关闭 |
+| 发布证据 | 全量验收记录最初对应的是后续仍有改动的中间提交 | 分别记录 `ebac0ca73` 的全量验收结果与最终候选提交的定向门禁 | 证据缺陷已关闭 |
 
 ## 定义候选的四条不变量 {#invariants}
 
 ### 信任只在鉴权后推导一次 {#trust-invariant}
 
-看起来像内部字段的 header 仍然是客户端输入。请求必须保持原始签名形态，先通过现有 authentication path；随后 handler 才能组合：
+看似内部专用的请求头本质上仍是客户端输入。请求必须先以原始签名形态通过既有鉴权路径，随后处理函数才能综合以下四项条件推导复制特权：
 
-1. 唯一且精确的 replication marker；
-2. 非匿名、已认证身份；
-3. 对目标 resource 的 `s3:ReplicateObject` 或 `s3:ReplicateDelete`；
-4. 在更窄的 replica-only 语义中所需的 replica status。
+1. 唯一且精确匹配的复制标记；
+2. 非匿名的已认证身份；
+3. 目标资源上的 `s3:ReplicateObject` 或 `s3:ReplicateDelete` 权限；
+4. 仅限副本（replica-only）语义所要求的副本状态。
 
-结果存入私有 request context。header stripping 是给旧 consumer 的纵深防御，不是 authority 来源。
+推导结果存入私有请求上下文；后续剥离内部请求头仅作为面向旧调用链的纵深防御，而非权限来源。
 
-顺序很重要，因为 SigV4 可能签了这些 header。鉴权前清洗会让合法复制返回 `SignatureDoesNotMatch`。sanitized clone 还必须共享 request trailer：trailer 在初始 header parse 之后到达，承载 streaming checksum。
+这一顺序至关重要：SigV4 签名可能覆盖这些请求头，若在鉴权前剥离，合法的复制请求就会因 `SignatureDoesNotMatch` 被拒绝。此外，清洗后的克隆请求必须与原请求共享 `Trailer` 映射，因为流式上传的校验和会在请求体读取完毕后通过 trailer 到达。
 
-完整接收端模型见 [鉴权前不做 I/O，Header 不产生权限](/zh/blog/design/cors-replication-trust/)。
+完整的接收端信任模型见[鉴权前不做 I/O，Header 不产生权限](/zh/blog/design/cors-replication-trust/)。
 
 ### 共享记录只有一个写边界 {#metadata-invariant}
 
-Policy、lifecycle、SSE、tags、quota、replication、Object Lock、versioning、CORS 是逻辑字段，却是同一 bucket record 的物理成员。每字段 mutex 无法保护整记录 read-modify-write。
+桶策略、生命周期、服务端加密（SSE）、标签、配额、复制、Object Lock、版本控制与 CORS 在逻辑上各自独立，但在存储层同属一条桶元数据记录。按字段拆分的互斥锁无法保护整条记录的“读-改-写”周期。
 
-选定修复比引入数据库或通用 transaction layer 更小：
+修复方案没有引入重型的事务层，而是统一收敛到单一的元数据写锁：
 
 ```text
 acquire metadata.lock
@@ -93,143 +81,132 @@ acquire metadata.lock
 release metadata.lock
 ```
 
-锁不覆盖对象数据 I/O，只限于一次 bucket-metadata 操作。Migration 与 healing 同样参与，因为它们也会替换整条记录。Replication receiver 只 merge 变化字段，避免远端旧 snapshot 擦除无关本地状态。
+该锁不涉及对象数据 I/O，生命周期严格限制在单次桶元数据操作内。元数据迁移与自愈同样会替换整条记录，因此也必须受该锁保护。站点复制的接收端仅合并发生变更的字段，防止远端较旧的快照覆盖本地其他配置。
 
-### 失败是一种状态，不等于不存在 {#cors-failure-invariant}
+### 区分 CORS 加载失败与桶不存在 {#cors-failure-invariant}
 
-CORS hot path 必须区分四种状态：
+CORS 热路径必须明确区分以下四种状态：
 
-| 状态 | 结果 |
+| 状态 | 处理结果 |
 | :-- | :-- |
-| Metadata system 尚未初始化 | 不返回 CORS header |
-| 已知真实桶，但 metadata load 失败 | 不返回 CORS header |
-| Resident bucket 且有桶级 CORS 文档 | 评估该文档 |
-| 无 resident metadata，也没有已知失败 | 使用服务端全局 fallback |
+| 元数据子系统尚未初始化 | 不返回 CORS 响应头 |
+| 已知存在的真实桶，但元数据加载失败 | 不返回 CORS 响应头 |
+| 内存常驻桶且配有桶级 CORS 规则 | 按该桶的 CORS 规则求值 |
+| 无常驻元数据，且无已知的加载失败记录 | 回退至服务端全局 CORS 配置 |
 
-第二行解释了为什么 failed-bucket set 在简化审查后仍然保留。预签名 URL 已经通过自身签名获得授权，无需 bucket-policy evaluation；此时 bucket CORS 文档就是 browser-origin boundary。丢掉失败 bit 并使用宽松全局 fallback，会削弱该边界。
+表中第二行是保留失败桶集合的原因。预签名 URL 由签名本身完成授权，可在不经过桶策略求值的情况下访问私有对象；此时桶级 CORS 配置就是浏览器跨源访问的唯一边界。如果丢弃加载失败状态并回退到宽松的全局 CORS 配置，这一隔离边界就会失效。
 
-集合只由真实 bucket load attempt 产生，因此有界；生命周期通过两个 helper 维护。成功 load、remove、stale-bucket cleanup、refresh、reset、concurrent load 都有测试。
+该集合仅在真实桶加载失败时记录，规模受实际桶数量约束，并通过 `noteLoadFailure` 与 `clearLoadFailure` 两个辅助函数维护。成功加载、删桶、陈旧桶清理、刷新、重置与并发加载均已补齐测试覆盖。
 
-### Object Lock 看语义，不看文本 {#object-lock-invariant}
+### 按解析后的 XML 语义归一化 Object Lock {#object-lock-invariant}
 
-任何解析有效且 enabled 的 Object Lock 配置都意味着 versioning。XML whitespace、element order 与 Default Retention rule 不改变语义。因此 normalization 必须发生在 parse 之后，而不是将 bytes 与某一个 canonical document 比较。
+任何合法且处于启用状态的 Object Lock 配置都要求开启版本控制。XML 空白字符、元素顺序以及是否包含默认保留规则（Default Retention）都不会改变这一语义。因此，状态归一化必须在解析 XML 之后执行，而不能通过与单一标准 XML 进行字节比对来判断。
 
-最终 versioning record 是纯 `Enabled`；suspended state 与 exclude-prefix 扩展和 lock 不变量冲突，会在 update、read-back、reload 时移除。
+开启 Object Lock 后的版本控制状态固定为纯粹的 `Enabled`；暂停状态（`Suspended`）与前缀排除扩展均与 Object Lock 不变量冲突，会在配置更新、读回和磁盘重载时自动剥离。
 
 ## 复杂度审计 {#complexity-audit}
 
-发布前审查专门查找 over-design、重复、没有 threat model 的过度防御，以及陈旧兼容 machinery。
+发布前复审专门排查了过度设计、重复逻辑、缺乏威胁模型的防御性代码，以及陈旧的兼容机制。
 
 ### 因保护已复现故障而保留 {#retained}
 
-- **一把 metadata lock：** deterministic cross-type lost-update 测试已经复现数据丢失。
-- **CORS tombstone：** 没有 tombstone，站点复制无法区分删除与“从未观察到”。
-- **CORS load-failure state：** 预签名 URL 给出了已认证且不经 policy 的具体反例。
-- **两级 replication trust：** 普通 replication 与 replica ciphertext/SSE 语义并不使用完全相同的 wire shape。
-- **鉴权后清洗：** SigV4 之前清洗会破坏合法签名请求。
-- **多池/null-version 对抗测试：** 单池 happy path 无法覆盖它们抓到的状态选择故障。
+- **单一元数据锁：** 确定性的跨配置类型并发测试已复现更新丢失。
+- **CORS 删除墓碑（tombstone）：** 缺少墓碑记录时，站点复制无法区分“配置已删除”与“从未配置”。
+- **CORS 加载失败状态：** 预签名 URL 提供了已通过认证但绕过桶策略的具体反例。
+- **两级复制信任判定：** 普通复制与副本密文/SSE 透传具有不同的请求特征与权限要求。
+- **鉴权后清洗请求头：** 在 SigV4 验签前剥离请求头会破坏合法的签名请求。
+- **多存储池与 `null` 版本边界测试：** 单池常规路径无法覆盖它们捕获到的跨池状态选择缺陷。
 
 ### 删除或收窄的复杂度 {#removed}
 
-- CORS failure-set mutation 收口到 `noteLoadFailure` 与 `clearLoadFailure`。
-- Replication import 只应用变化字段，不复制陈旧的完整记录。
-- 删除过期 encryption helper、死 event-target function 与废弃 handler branch。
-- Compatibility guard 不再枚举每个 exported source symbol，只保护真实 served route 与冻结的 wire/config surface。
-- 删除旧 `wait_pipe` lint exemption；用 `gomodguard_v2` 替代弃用配置。
-- Dynamic timeout 测试不再从 parallel package 调用全局 `rand.Seed`。
-- 服务端从临时 `silo-go` 分叉回到已审查的上游兼容 `minio-go` revision。
+- CORS 失败集合的修改统一收口到 `noteLoadFailure` 与 `clearLoadFailure`。
+- 站点复制导入路径改为仅应用变更字段，不再整条覆盖可能过期的记录。
+- 删除废弃的加密辅助函数、无调用的事件目标函数与死代码分支。
+- 兼容性守卫不再逐一枚举所有导出的源码符号，改为保护实际对外暴露的路由及冻结的协议/配置表面。
+- 移除旧的 `wait_pipe` 静态检查豁免，并以 `gomodguard_v2` 替代已弃用的配置。
+- 动态超时测试不再从并行测试包中调用全局 `rand.Seed`。
+- 服务端依赖从临时 `silo-go` 分叉切回经审查的上游兼容 `minio-go` 版本。
 
 ### 刻意没有引入 {#not-introduced}
 
-- 没有通用 metadata transaction framework；
-- 没有第二套 CORS cache 或无界 negative cache；
-- 没有新增公开“trusted replication”请求 header；
-- 没有让服务端发布依赖未来 Console 或文档发布的跨仓库 gate；
-- 没有把半套 conditional-delete contract 塞进候选；
-- 没有在缺少专用 convergence test 时重写全部继承的 site-replication register。
+- 不引入通用的元数据事务框架；
+- 不引入第二套 CORS 缓存或无界的负缓存；
+- 不新增公开的“可信复制”请求头；
+- 不设置让服务端发布受制于后续 Console 或文档站发布的跨仓库门禁；
+- 不在候选版本中塞入半成品的条件删除契约；
+- 不在缺少专项收敛测试的前提下重写继承的站点复制状态寄存器。
 
 ## 延期事项，以及为什么严重度不同 {#deferrals}
 
-| 事项 | 分类 | 发布决定 |
+| 事项 | 分类 | 20260903 发布决定（及后续状态） |
 | :-- | :-- | :-- |
-| 条件删除 [#10](https://github.com/pgsty/silo/issues/10) | 继承的 S3 缺失功能；只对假定服务器会执行未支持 `If-Match` / per-object ETag 的调用方危险 | 显著记录；不合并不完整 PR，也不发布只有单对象的一半合同 |
-| 多站点配置删除 [#77](https://github.com/pgsty/silo/issues/77) | policy/SSE/tags/quota 的继承收敛缺陷；CORS 使用独立已修 register | 不是单站点 blocker；依赖这些多站点删除的用户需要附加部署条件 |
-| `ListMultipartUploads` [#79](https://github.com/pgsty/silo/issues/79) | 继承的 listing conformance gap | 已知问题；不是普通 multipart workflow 的数据完整性 blocker |
-| 联邦 `CopyObject` [#99](https://github.com/pgsty/silo/issues/99)、[#100](https://github.com/pgsty/silo/issues/100) | 旧后端 checksum/inline-object 缺口 | 阻塞受影响 feature 的使用，不阻塞通用 server 发布 |
-| ILM relocation PR #60 与 broad SSE issue #61 | 新能力请求 | 不属于本版本安全边界 |
-
-“继承”不等于无害，而是说明缺陷不是本变更集引入，应按公开 release contract 评估。若某个部署依赖受影响路径，即使通用版本仍是 conditional GO，该部署也有自己的 stop condition。
+| 条件删除 [#10](https://github.com/pgsty/silo/issues/10) | 继承的 S3 功能缺口；影响假定服务端会强制校验 `If-Match` / 单对象 ETag 的调用方 | 0903 发布说明中明确标注；单对象条件删除已随 20260916（#145）交付，批量 ETag 条件删除仍待实现 |
+| 多站点配置删除 [#77](https://github.com/pgsty/silo/issues/77) | 桶策略、SSE、标签与配额的跨站点删除收敛缺陷；CORS 已使用独立的修复寄存器 | 0903 作为多站点删除配置时的部署注意事项；已随 20260916 修复 |
+| `ListMultipartUploads` [#79](https://github.com/pgsty/silo/issues/79) | 继承的列表格式一致性缺口 | 作为已知问题记录，不影响常规分片上传的数据完整性 |
+| 联邦 `CopyObject` [#99](https://github.com/pgsty/silo/issues/99)、[#100](https://github.com/pgsty/silo/issues/100) | 旧版联邦后端的校验和与内联小对象兼容缺口 | 0903 仅影响特定联邦特性；已随 20260916 修复 |
+| ILM 迁移 PR #60 与通用 SSE 议题 #61 | 新功能需求 | 不属于本次发布的安全与稳定性范围 |
 
 ## 证据 {#evidence}
 
 ### 完整验收树 {#full-acceptance}
 
-完整本地验收对应 `ebac0ca73bbf251b070bb6df4d8005015841f901`：
+全量本地验收基于提交 `ebac0ca73bbf251b070bb6df4d8005015841f901`：
 
-- 完整 `cmd` 与 `internal` 套件；
-- 完整 `cmd` race：365.448 秒，通过；
-- lint：0 issue；
-- rebrand/compatibility 与 generated-file guard；
-- `govulncheck` 无 reachable vulnerability；
-- 六种 `make verify` 部署形态：174 PASS / 0 FAIL。
+- 完整的 `cmd` 与 `internal` 测试套件通过；
+- 完整的 `cmd` 并发竞态套件（`-race`）耗时 365.448 秒，全部通过；
+- 静态检查（lint）：0 告警；
+- 品牌重命名/兼容性守卫与生成文件检查通过；
+- `govulncheck` 扫描无可达漏洞；
+- 六种 `make verify` 部署拓扑验收：174 PASS / 0 FAIL。
 
-前两次 `make verify` 在获取 mcli 时遇到环境/准备失败，并非测试失败。成功运行使用本地 checksum-pinned mcli，保留到 GitHub 的 outbound proxy，对 localhost 绕过代理，并把 GNU userland tool 放在 `PATH` 前部。这个区别属于证据，不应隐藏。
+前两次运行 `make verify` 在拉取 `mcli` 时因网络代理与环境准备中断，并非测试用例失败。最终通过的运行使用了本地固定校验和的 `mcli` 二进制，保留访问 GitHub 的出站代理、对 `localhost` 绕过代理，并将 GNU 工具链置于 `PATH` 首位。
 
 ### 验收后的候选 {#post-acceptance}
 
-完整运行之后唯一代码修改是 `84e1580a4`：metadata 按需重载成功后清除一个 CORS failure-state bit。候选 merge 不改代码；`6e112d185` 只修改 Helm 发布元数据与文档。在最终候选上以下门禁通过：
+全量验收之后唯一的代码改动是 `84e1580a4`：在按需重载桶元数据成功后清除对应的 CORS 加载失败标记。随后的候选合并未改动业务代码，`6e112d185` 仅更新了 Helm Chart 发布元数据与文档。最终候选提交通过了以下门禁：
 
 - `git diff --check`；
 - CORS 与 Object Lock 定向 `go test -race`；
-- rebrand guard；
-- generated-file check；
-- lint 0 issue。
-- Helm lint、默认与可选 render、chart package，以及七资源旧版升级身份守卫。
+- 品牌重命名与兼容性守卫（`rebrand-guard`）；
+- 生成文件一致性检查；
+- 静态检查（lint）0 告警；
+- Helm Chart 语法检查、默认与可选模板渲染、Chart 打包，以及七类资源的旧版升级身份守卫。
 
-证据强度与一行状态迁移修复相称，但推送后的树仍必须运行远端 CI 与 release workflow。
-
-## Go、No-Go 与剩余门禁归属 {#decision}
+## Go、No-Go 与发布门禁 {#decision}
 
 ### 代码结论：GO {#code-go}
 
-两轮复审确认的代码缺陷在候选中均已解决。修复落在对应不变量所在层；保留的复杂度都有已复现反例支撑。
+两轮复审确认的代码缺陷在候选版本中均已闭合。各项修复直接作用于对应不变量所在的模块边界，保留的防御机制均有可复现的故障反例支撑。
 
-### 生产结论：有条件 GO {#production-conditional-go}
+### 生产发布门禁 {#production-conditional-go}
 
-以下全部成为事实前，不能把服务端称为“已发布”：
+在正式发布 `RELEASE.2026-09-03T13-18-01Z` 前，候选版本依次通过了七道发布门禁：
 
-1. 候选提交推送并完成 review；
-2. 远端 CI 与 Test Release 在 pushed head 通过；
-3. 预定 tag 指向已审查的 chart 7.0.2、Server 0903、Client 0903 release tree；
-4. Draft artifact、checksum、SBOM、attestation、签名 RPM 全部通过校验；
-5. finalize 与 Docker release 发布 classic、distroless 两种镜像；
-6. 匿名下载与 pull 测试通过；
-7. 发布说明用 tagged fact 更新，文档站部署完成。
+1. 候选提交推送至远端并完成代码审查；
+2. 远端 CI 与测试发布流水线在最新提交上全部通过；
+3. 预发布标签精确指向经审查的 Chart 7.0.2、Server 0903 与 Client 0903 代码树；
+4. 构建产物、校验和、SBOM、构建证明（attestation）与签名 RPM 包全部通过校验；
+5. 正式发布与容器镜像流水线完成 classic 与 distroless 两种镜像的构建与推送；
+6. 匿名下载与镜像拉取验证通过；
+7. 基于正式标签更新发布说明并完成文档站部署。
 
-第 1～6 项任一失败都是 release blocker；本地绿灯无法替代它们。
+### 20260903 部署注意事项 {#deployment-conditions}
 
-### 部署特定停止条件 {#deployment-conditions}
+升级至 20260903 时需满足以下部署前提：
 
-即使版本成功发布，以下条件无法满足的运维方也应延后升级：
-
-- 无法在同一维护操作中更新分布式集群全部节点；
-- 无法在使用桶级 CORS 前更新站点复制组全部成员；
-- 无法调整 `s3:DeleteObjectVersion` 与 status-action separation 相关 IAM 策略；
-- 业务依赖 #10、#77、#79、#99 或 #100 路径，却不能显式接受对应已知限制。
-
-复审时的最终结论有意比“所有问题都已修好”更窄：**经审候选已经可以进入发布机器；剩余限制全部显式；生产发布由可验证构件把关，而不是由信心把关。** 上述门禁后来已为链接的正式版本闭环；部署特定条件仍然有效。
+- 在同一维护窗口内完成分布式集群所有节点的同步升级；
+- 在启用桶级 CORS 配置前，先升级站点复制组内的全部成员；
+- 核对并更新涉及 `s3:DeleteObjectVersion` 及用户/组状态启停权限分离的 IAM 策略。
 
 ## 重启与读回验证（2026-09-11，#116） {#restart-readback}
 
-后续的一次验收（[#116](https://github.com/pgsty/silo/issues/116)，2026-09-11 执行）补上了就绪判断中"重启持久性"这一半。有长期价值的是*方法*，任何运维者在验证重启或升级窗口时都可以复用：
+后续的 [#116](https://github.com/pgsty/silo/issues/116) 专项验收（2026-09-11 执行）测量了集群在有界重启窗口内的写入确认与读回一致性，验证方法涵盖四个要点：
 
-- **确认台账。** 每次被确认的 PUT 写入唯一的带版本键，确认时立即记录 VersionId、字节数与 SHA-256。读回按精确 VersionId 取回并断言三者一致——早期确认不可能被后续写入悄悄替换。
-- **读回时机。** 数据 canary 成功后 15/30/60 秒经所有对端周期性重读；最终检查包含单节点中断期间写入的数据及其 rejoin 之后的写入。
-- **不允许重试掩盖。** 每个 canary 带 60 秒硬性期限，覆盖 setup、请求、响应体读取与 sleep；SDK 重试禁用，恢复窗口不能被客户端重试糊弄过去。
-- **驱动拓扑。** 同一主机上四个 Linux/arm64 容器，独立网络身份，每节点一盘（EC 2+2）；tmpfs 卷由 holder 容器在整个停机期间保持挂载；节点以 10 秒宽限期并行优雅停止，再并行启动。
+- **确认台账。** 每次返回成功的 PUT 都写入带版本的唯一对象键，并在收到响应时立即记录 `VersionId`、字节数与 SHA-256。后续读回按精确的 `VersionId` 获取对象并同时校验三项指标，防止早期确认的写入被后续写入静默覆盖。
+- **读回时机。** 数据探针（canary）写入成功后，分别在 15 秒、30 秒和 60 秒经由所有对端节点周期性重读；最终检查同时覆盖单节点中断期间写入的对象及其重新加入集群后写入的对象。
+- **禁用重试掩盖。** 每次探针操作设置 60 秒硬超时（涵盖连接建立、请求发送、响应体读取与等待间隔），并关闭客户端 SDK 自动重试，防止恢复窗口内的短暂失败被客户端重试掩盖。
+- **容器拓扑。** 单机运行四个拥有独立网络标识的 Linux/arm64 容器，每节点挂载一块盘（EC 2+2）；`tmpfs` 卷由占位容器在整个停机窗口内保持挂载；四个节点以 10 秒宽限期并行优雅停止，随后并行启动。
 
-值得记住的运维结论：**admin 端点就绪不等于数据就绪。** [原始固定提交记录](https://github.com/pgsty/silo/blob/82948d63060839f6d18c9da8cfd03e8b6d95bc49/docs/investigations/release-readiness-20260911.md#linux-restartreadback-116)测了三个二进制：0806、0903 与当时的 main 修复构建。main 构建在重启后 2.461 秒通过 admin 门禁，再经过 14.489 秒才完成数据 canary；这两个数的计时起点不同。0903 在该次实验的门禁后延迟为 0.191 秒，但不能据此认为它没有继承的启动窗口。在该窗口内，对 admin/health 的就绪探测对数据面一无所知，任何固定 sleep 都不能替代实际的数据面检查。
+**管理接口就绪不代表数据面就绪。** [原始测试记录](https://github.com/pgsty/silo/blob/82948d63060839f6d18c9da8cfd03e8b6d95bc49/docs/investigations/release-readiness-20260911.md#linux-restartreadback-116)对比了 0806、0903 与当时的 `main` 修复构建。`main` 构建在重启后 2.461 秒通过管理接口检查，但随后又经过 14.489 秒才完成首次数据探针读写。在该启动窗口内，`admin/health` 探针无法反映数据面状态，滚动升级脚本必须验证实际的数据面读写，而不能依赖固定时长的等待。
 
-边界按边界陈述：该验收覆盖单台 Linux 主机上的进程/容器重启与 TCP 对端重连。它不证明跨独立主机、主机重启或物理介质故障的持久性；计时是个体观测，不是延迟保证。运行工件保留在文档树之外；上文方法是可泛化的部分。
-
-**9 月 16 日源码进展：** #10 已由独立的单对象条件删除 #145 关闭，批量 ETag 删除仍未实现；#77 及 #99/#100 已在 main 修复。#133/#144 后续由 #178 处理，#79 默认列表限制仍开放。它们均不能倒写为 20260903 的保证，已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布。见[当前组件与源码矩阵](/zh/compatibility/versions/)。
+后续各项修复的交付状态见[组件与源码矩阵](/zh/compatibility/versions/)。

@@ -5,50 +5,38 @@ date: 2026-08-24
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  SILO required every part in a checksum-enabled multipart upload to carry a per-part checksum. That rejected ordinary UploadPart requests that omitted an optional header and made UploadPartCopy unusable. This record covers discovery, AWS and AIStor research, rejected designs, the one-pass plaintext solution, the compatibility-baseline blocker, adversarial review, and the consistency contract for follow-up repairs.
+  SILO required every part in a checksum-enabled multipart upload to carry a per-part checksum. That rejected ordinary UploadPart requests that omitted an optional header and made UploadPartCopy unusable. This record covers discovery, AWS and AIStor research, rejected designs, the one-pass plaintext solution, the compatibility-baseline blocker, design review, and the consistency contract for follow-up repairs.
 tags: [Design, S3, Compatibility, Checksum]
 weight: 30
 draft: false
 url: "/blog/design/uploadpart-checksum/"
 ---
 
-> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
-
-This is the complete design and implementation record for [SILO #46](https://github.com/pgsty/silo/issues/46). The repair was not merely a changed `if` statement. One apparently optional S3 header reached into multipart completion semantics, copy responses, compression and encryption pipelines, compatibility baselines, and release verification.
-
-> **Status:** merged into `main` as `7fea6d5a5` on 2026-08-24 ([pgsty/silo#46](https://github.com/pgsty/silo/issues/46) closed); included in Server 20260903; deployment verification is installation-specific.<br>
-> **Owner:** [`pgsty/silo`](https://github.com/pgsty/silo), the SILO server repository.<br>
-> **Tracking:** [#46](https://github.com/pgsty/silo/issues/46).<br>
-> **Independent follow-ups:** [#63 CopyObject + compression checksum](https://github.com/pgsty/silo/issues/63), [#64 federated UploadPartCopy checksum](https://github.com/pgsty/silo/issues/64).<br>
-> **Adversarial review:** local Claude Code, Fable 5, `--effort max`; final verdict **GO**, with no blocking findings.
+This is the design and implementation record for [SILO #46](https://github.com/pgsty/silo/issues/46) (merged as [`7fea6d5a5`](https://github.com/pgsty/silo/commit/7fea6d5a5) and shipped in [Server 20260903](/blog/release/silo-20260903/), with follow-up items [#63](https://github.com/pgsty/silo/issues/63) and [#64](https://github.com/pgsty/silo/issues/64)). It documents how handling an optional S3 part checksum header affected multipart completion semantics, copy responses, compression and encryption pipelines, and compatibility baselines.
 
 ## Too Long; Didn't Read (TL;DR) {#tldr}
 
-A multipart upload splits a large file into smaller parts. A client may attach a checksum to each part so the server can verify the transfer, but AWS defines that checksum as optional. SILO used to treat it as mandatory: an ordinary `UploadPart` failed without one, and `UploadPartCopy` could never work because it has no part-body checksum to provide.
+A multipart upload (MPU) splits a large object into smaller parts. A client may attach a checksum to each part so the server can verify the transfer, but AWS defines that per-part header as optional. SILO previously treated it as mandatory: an ordinary `UploadPart` failed without one, and `UploadPartCopy` could never succeed because it has no request body to checksum.
 
-After the repair, SILO still validates a checksum when the client sends one. When the client omits it, SILO computes the checksum while reading the original bytes and saves the result. This happens before compression and encryption, requires no second read, and changes no on-disk format. The result is AWS-compatible behavior without weakening data integrity.
+After the fix, SILO still validates a checksum when the client sends one. When the client omits it, SILO computes the checksum in a single pass while reading the logical plaintext bytes and persists the result in part metadata. This happens before compression and encryption, requires no second disk read, and changes no on-disk format.
 
 ## Decision {#decision}
 
-When a multipart upload declares a checksum algorithm in `CreateMultipartUpload`, SILO applies this contract:
+When a multipart upload declares a checksum algorithm in `CreateMultipartUpload`, SILO enforces the following contract:
 
-1. If the client supplies a part checksum, the server continues to validate it. A wrong value or algorithm fails and is never hidden by fallback computation.
+1. If the client supplies a part checksum, the server validates it; a mismatched value or algorithm fails immediately and is never masked by server-side fallback computation.
 2. If the client omits the part checksum, the server computes it in one pass with the MPU algorithm over the logical plaintext stream, before compression and encryption, and persists the result.
-3. A normal `UploadPart` echoes a checksum response header only when the client supplied the checksum. A server-computed fallback is not echoed.
+3. A normal `UploadPart` echoes a checksum response header only when the client supplied the checksum in the request; a server-computed fallback value is not echoed.
 4. `UploadPartCopy` has no client part-body checksum, so the server computes the value and returns it in `CopyPartResult`.
 5. `ListParts` returns the persisted part checksum.
-6. `FULL_OBJECT` completion continues to linearize the full checksum from stored part checksums. `COMPOSITE` completion continues to require a checksum for every part; clients can recover those values with `ListParts`.
-7. Computation occurs during the existing read. Completion never re-reads the entire object merely to manufacture missing state.
+6. `FULL_OBJECT` completion continues to combine the full-object checksum linearly from stored part checksums. `COMPOSITE` completion continues to require a checksum for every part, which clients can retrieve via `ListParts`.
+7. Computation happens during the initial read; completion never re-reads the entire object.
 
-In one sentence:
+## How We Found It {#discovery}
 
-> The optional input is the client-provided checksum value, not the server's responsibility to maintain a consistent checksum-enabled MPU.
+The defect surfaced while investigating a separate multipart checksum issue, [#31](https://github.com/pgsty/silo/issues/31).
 
-## How we found it {#discovery}
-
-The defect surfaced while investigating a different multipart checksum issue, [#31](https://github.com/pgsty/silo/issues/31).
-
-#31 concerned `CompleteMultipartUpload`: for `FULL_OBJECT`, a client can complete with part numbers, ETags, and an optional full-object checksum without retaining every part checksum in the completion XML. Tracing that path backward exposed a stronger, earlier condition in `erasureObjects.PutObjectPart`:
+#31 concerned `CompleteMultipartUpload`: for `FULL_OBJECT`, a client can complete an upload with part numbers, ETags, and an optional full-object checksum without listing every part checksum in the completion XML. Tracing that path backward exposed a stricter check in `erasureObjects.PutObjectPart`:
 
 ```go
 if cs := fi.Metadata[hash.MinIOMultipartChecksum]; cs != "" {
@@ -58,28 +46,26 @@ if cs := fi.Metadata[hash.MinIOMultipartChecksum]; cs != "" {
 }
 ```
 
-Once an MPU declared a checksum algorithm, every `UploadPart` had to carry the matching `x-amz-checksum-*` value. Omitting it returned:
+Once an MPU declared a checksum algorithm, every `UploadPart` had to carry a matching `x-amz-checksum-*` header. Omitting it returned:
 
 ```text
 400 InvalidArgument:
 checksum missing, want "CRC32", got ""
 ```
 
-API-level probes reproduced the behavior on both the single-drive and erasure backends.
+API probes reproduced this error on both single-drive and erasure backends.
 
-Reviewing `CopyObjectPartHandler` raised the severity from a client-configuration incompatibility to P0. `UploadPartCopy` has no request body for the caller to checksum. The handler reads the source object, constructs an internal reader, and eventually enters the same `PutObjectPart` implementation. There is no client header and no SDK setting that can repair the request. Every checksum-enabled MPU therefore rejected `UploadPartCopy` by construction.
+Inspecting `CopyObjectPartHandler` elevated the issue to P0. `UploadPartCopy` has no request body for the caller to checksum: the handler reads the source object, constructs an internal reader, and calls `PutObjectPart`. No client header or SDK setting could satisfy the check, so every checksum-enabled MPU rejected `UploadPartCopy` unconditionally.
 
-## What AWS requires {#aws-contract}
+## What AWS Requires {#aws-contract}
 
-This cannot be decided by saying that MinIO has historically behaved a certain way. The S3 protocol is the authority.
+The S3 API specification defines distinct behavior across the three operations:
 
-The [AWS UploadPart API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_UploadPart.html) describes each algorithm-specific checksum header as something that “can be used as a data integrity check.” More importantly, its response fields say that the checksum is present only when it was provided in the request.
+- The [AWS UploadPart API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_UploadPart.html) defines each algorithm-specific checksum header as an optional data-integrity check and specifies that the response header is returned only when the checksum was provided in the request.
+- The [AWS UploadPartCopy API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_UploadPartCopy.html) specifies that when an MPU was created with a checksum algorithm, `CopyPartResult` includes the computed checksum for the copied part.
+- The [AWS ListParts API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListParts.html) returns the stored checksums for parts in an in-progress upload.
 
-The [AWS UploadPartCopy API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_UploadPartCopy.html) is different: when the MPU was created with an algorithm, the copy result contains that part checksum. There is no copy request body, so this is necessarily a server-computed value.
-
-The [AWS ListParts API](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListParts.html) is the standard way to recover checksums for parts in an upload that is still in progress.
-
-The algorithm/type matrix also rules out treating the repair as one Boolean flag:
+The algorithm and checksum-type support matrix is:
 
 | Algorithm | `FULL_OBJECT` | `COMPOSITE` |
 | --- | --- | --- |
@@ -87,61 +73,55 @@ The algorithm/type matrix also rules out treating the repair as one Boolean flag
 | CRC32 / CRC32C | Supported | Supported |
 | SHA1 / SHA256 | Unsupported | Supported |
 
-`FULL_OBJECT` is limited to CRCs that can be linearized, but SHA1 and SHA256 still need correct per-part digests for `COMPOSITE` completion.
+`FULL_OBJECT` applies only to linearizable CRCs, whereas SHA1 and SHA256 require per-part digests to compute the `COMPOSITE`checksum at completion.
 
-SDK configuration makes the gap practical. Current AWS SDKs usually calculate request checksums when an operation supports them, but users can choose `request_checksum_calculation = when_required`, and low-level callers can initiate an algorithm without repeating it on every part. S3 accepts those requests; SILO did not.
+Although recent AWS SDKs calculate request checksums by default when supported, callers can set `request_checksum_calculation = when_required` or use low-level APIs that declare an algorithm on `CreateMultipartUpload` without sending checksum headers on every `UploadPart`.
 
-## Why removing the check is not a fix {#completion-invariant}
+## Why Removing the Check Is Not a Fix {#completion-invariant}
 
-The most tempting patch is to delete the comparison and allow a checksum-less part to proceed. That only moves the failure to completion.
+Simply deleting the check in `PutObjectPart` would defer the failure to `CompleteMultipartUpload`.
 
-SILO does not reconstruct and re-read all object bytes during MPU completion. It reads `ObjectPartInfo.Checksums` from each `part.N.meta`:
+SILO does not re-read all object bytes during MPU completion. Instead, it reads `ObjectPartInfo.Checksums` from each `part.N.meta`:
 
-- a missing entry immediately becomes `InvalidPart`;
-- `FULL_OBJECT` calls `Checksum.AddPart`, combining digests with their part lengths;
-- `COMPOSITE` concatenates the raw digest bytes and hashes them into the object checksum.
+- a missing entry immediately fails with `InvalidPart`;
+- `FULL_OBJECT` calls `Checksum.AddPart` to combine part digests using their part lengths;
+- `COMPOSITE` concatenates the raw part digest bytes and hashes them into the object-level digest.
 
-The actual invariant is therefore:
+The storage invariant is therefore:
 
 ```text
 checksum-enabled MPU
         => every committed part has a checksum for the MPU algorithm
 ```
 
-Deleting the upload check without filling the metadata would make `UploadPart` appear successful, leave `ListParts` incomplete, omit the `UploadPartCopy` response value, and fail later during completion. A delayed failure is harder to diagnose than the original immediate one.
+Removing the upload check without populating part metadata would let `UploadPart` succeed, omit checksums from `ListParts` and `UploadPartCopy`, and fail during `CompleteMultipartUpload`.
 
-## Alternatives considered {#alternatives}
+## Alternatives Considered {#alternatives}
 
 | Option | Benefit | Fatal problem | Decision |
 | --- | --- | --- | --- |
-| Delete the strict check | Smallest diff | Part metadata still lacks the checksum; completion must fail | Rejected |
-| Relax only `FULL_OBJECT` | Unblocks some default CRC clients | Leaves `COMPOSITE` and SHA incompatible; cannot close #46 | Rejected |
-| Re-read every part at completion | Avoids storing a digest during upload | Adds O(object size) second-pass I/O and still cannot fix `ListParts` or the copy response | Rejected |
-| Always return the server value from normal `UploadPart` | Makes federation forwarding easy | Violates the AWS response contract | Rejected |
-| Copy the AIStor implementation exactly | Commercial precedent | CRC-only fallback and a transformed-stream placement risk | Rejected |
-| Compute and persist in one pass over logical plaintext | Complete protocol behavior, no second I/O, CRC and SHA support | Requires an explicit plaintext checksum reader distinct from the storage reader | Accepted |
+| Delete the strict check | Smallest diff | Part metadata still lacks the checksum; completion fails with `InvalidPart` | Rejected |
+| Relax only `FULL_OBJECT` | Unblocks some default CRC clients | Leaves `COMPOSITE` and SHA1/SHA256 broken; cannot close #46 | Rejected |
+| Re-read every part at completion | Avoids storing a digest during upload | Adds $O(\text{object size})$ second-pass I/O and leaves `ListParts` and copy responses incomplete | Rejected |
+| Always return the server value from normal `UploadPart` | Simplifies federation forwarding | Violates the AWS `UploadPart` response contract | Rejected |
+| Copy the AIStor implementation directly | Commercial precedent | Supports only mergeable CRCs and attaches the hasher where streams may already be compressed or encrypted | Rejected |
+| Compute and persist in one pass over logical plaintext | Full protocol compliance, no second I/O, supports both CRC and SHA | Requires an explicit plaintext checksum reader separate from the storage reader | Accepted |
 
-### What the commercial edition taught us {#aistor}
+### What Commercial AIStor Revealed {#aistor}
 
-We downloaded and verified the then-current MinIO AIStor `RELEASE.2026-08-07T18-34-35Z`. Without a commercial license the server enters offline mode and denies S3 operations, so the evidence came from Go pclntab and ARM64 disassembly, not a black-box compatibility run.
-
-The static analysis showed that AIStor already:
+We inspected MinIO AIStor `RELEASE.2026-08-07T18-34-35Z` using Go `pclntab` symbol recovery and ARM64 disassembly. Static analysis showed that AIStor:
 
 - installs a server hasher when the client checksum is absent;
 - persists the result in part metadata;
-- exposes checksum fields in `CopyPartResult`.
+- includes checksum fields in `CopyPartResult`.
 
-It nevertheless applies fallback only to `CanMerge()` algorithms—CRC32, CRC32C, and CRC64NVME. SHA1/SHA256 `COMPOSITE` still follows the old `checksum missing` path. More importantly, the hasher is attached in the object layer to the current `r.Reader`; under compression or encryption that reader may already represent transformed storage bytes.
+However, AIStor enables fallback computation only for `CanMerge()` algorithms (CRC32, CRC32C, and CRC64NVME), leaving SHA1 and SHA256 `COMPOSITE` uploads to fail with `checksum missing`. In addition, AIStor attaches the hasher inside the object layer to `r.Reader`, which under server-side compression or encryption already carries transformed storage bytes rather than logical S3 plaintext.
 
-AIStor validated the general direction—compute and store—but not an implementation that SILO could copy mechanically.
+## How Design Review Overturned the First Design {#adversarial-review}
 
-## How adversarial review overturned the first design {#adversarial-review}
+Our initial design placed the fallback inside `erasureObjects.PutObjectPart`: inspect the MPU metadata in the object layer and attach a server hasher whenever the incoming reader lacked a client checksum.
 
-The first plan tried to centralize every decision inside `erasureObjects.PutObjectPart`: read the MPU metadata in the object layer and install a server hasher when the incoming reader had no client checksum. It looked attractive because all internal callers would share one rule.
-
-The first Fable 5 Max adversarial review found that this design was wrong for compression.
-
-`newS2CompressReader` is not a lazy wrapper. Construction immediately launches a goroutine:
+Design review caught a critical flaw on the compression path. `newS2CompressReader` is not a lazy wrapper; its constructor immediately spawns a goroutine:
 
 ```go
 go func() {
@@ -150,78 +130,77 @@ go func() {
 }()
 ```
 
-The S2 writer also reads several blocks concurrently. After constructing the compressor, the handler still performs option parsing, encryption preparation, and the object-layer call. By the time `PutObjectPart` installed a hasher, the plaintext reader could already have lost several MiB:
+The S2 writer also prefetches multiple blocks concurrently. After constructing the compressor, the HTTP handler still parses options, sets up encryption, and calls into the object layer. By the time `PutObjectPart` attached a hasher, the compressor goroutine could already have consumed several MiB from the plaintext reader:
 
-- a large part would get a checksum with a missing prefix;
-- a small part could reach EOF before installation and produce no result;
-- mutating `ServerSideHasher` concurrently with `Read` would be a data race.
+- a large part would produce a checksum missing its leading bytes;
+- a small part could hit EOF before the hasher was attached and produce no checksum at all;
+- mutating `ServerSideHasher` concurrently with `Read` would trigger a data race.
 
-That finding changed the responsibility split:
+This split the responsibility cleanly across layers:
 
-> The handler installs the hasher before any eager transform starts; the object layer validates the algorithm, requires a result, and persists it atomically.
+- **The HTTP handler** attaches the hasher to the logical plaintext stream before starting any eager transformation (such as concurrent compression or encryption).
+- **The object layer** validates the algorithm, verifies that a checksum result was produced, and persists it atomically in `part.N.meta`.
 
-This was the decisive turn in the design. Putting logic in the lowest layer may look more uniform, but stream correctness depends equally on **when bytes begin moving** and **which representation of those bytes a layer can see**.
+## Final Implementation {#implementation}
 
-## Final implementation {#implementation}
+### A Dedicated Logical Checksum Reader {#checksum-reader}
 
-### A dedicated logical checksum reader {#checksum-reader}
+`PutObjReader` previously carried two readers:
 
-`PutObjReader` originally distinguished two concepts:
+- `Reader`, the stream written to storage (potentially compressed or encrypted);
+- `rawReader`, used for ETag calculation.
 
-- `Reader`, the stream sent to storage, possibly compressed or encrypted;
-- `rawReader`, used by older ETag and checksum code.
-
-Under compression, even `rawReader` may not directly see plaintext; it can merely carry an ETag through an `etag.Tagger` chain. The repair therefore did not overload it. It added an unexported field:
+Under compression, `rawReader` does not always read plaintext bytes directly; it may only forward an ETag through an `etag.Tagger` wrapper. To keep ETag handling untouched, we added an unexported field to `PutObjReader`:
 
 ```go
 checksumReader *hash.Reader
 ```
 
-This reader always represents the logical S3 part bytes. `WithEncryption` can replace the storage `Reader`, but it must preserve `checksumReader`.
+`checksumReader` always wraps the logical S3 plaintext part stream. `WithEncryption` replaces the storage `Reader` while preserving `checksumReader`.
 
-Unexported accessors on `PutObjReader` then:
+Unexported accessors on `PutObjReader`:
 
-- return the effective client or server checksum type;
-- prefer the client value whenever it exists;
-- otherwise return the server result finalized at EOF.
+- report the effective checksum type (client-supplied or server-computed);
+- return the client value when present;
+- otherwise return the server-computed digest finalized at EOF.
 
-Keeping the mechanism unexported minimizes public Go API growth and gives [#63](https://github.com/pgsty/silo/issues/63) a shared internal path without prematurely changing ordinary `CopyObject` behavior.
+Keeping these helpers unexported avoids expanding the public Go API and provides a shared internal mechanism for [#63](https://github.com/pgsty/silo/issues/63).
 
-### Preparing the hasher before transformations {#prepare-reader}
+### Preparing the Hasher Before Transformations {#prepare-reader}
 
-`prepareMultipartChecksumReader` loads the algorithm and checksum type saved with the MPU:
+`prepareMultipartChecksumReader` inspects the algorithm and checksum type stored in the MPU metadata:
 
-1. no declared algorithm means no work;
-2. an existing client checksum is compared by base algorithm;
-3. a wrong algorithm preserves the `InvalidArgument` rejection;
-4. an omitted client checksum installs the corresponding server hasher on the plaintext reader.
+1. if the MPU declared no checksum algorithm, it does nothing;
+2. if the client provided a checksum, it verifies that the base algorithm matches the MPU;
+3. if the algorithm mismatches, it returns `InvalidArgument`;
+4. if the client omitted the checksum, it attaches the matching server-side hasher to the plaintext `hash.Reader`.
 
 For normal `UploadPart`:
 
-- the compressed path prepares `actualReader` after request-checksum parsing but before `newS2CompressReader`;
-- the uncompressed path prepares the request hash reader before the encryption reader is constructed.
+- the compressed path prepares `actualReader` after parsing request checksums (`actualReader.AddChecksum`) and before calling `newS2CompressReader`;
+- the uncompressed path prepares the request hash reader before wrapping it with encryption.
 
 For `UploadPartCopy`:
 
-- a checksum-enabled MPU first gets an inner hash reader over the logical source range;
-- a range copy hashes only the selected bytes;
-- compression and destination encryption start only after that reader is ready.
+- a checksum-enabled MPU wraps the logical source byte range in an inner `hash.Reader`;
+- a range copy hashes only the requested byte interval;
+- compression and destination encryption wrap the stream only after the inner hash reader is installed.
 
-### The object layer remains authoritative {#object-layer}
+### The Object Layer Remains Authoritative {#object-layer}
 
-Early handler preparation does not replace the storage invariant. `erasureObjects.PutObjectPart` still:
+Preparing the hasher in the handler does not relax the object-layer invariant. `erasureObjects.PutObjectPart` still:
 
 - re-parses the expected MPU algorithm;
-- requires an effective checksum type that matches;
-- obtains the checksum map after erasure encoding finishes;
-- reports an internal error instead of committing if an enabled algorithm has no result;
-- writes the checksum with the ETag, sizes, and index into `part.N.meta`, then atomically renames the part.
+- verifies that the effective checksum type matches;
+- reads the computed checksum map after erasure encoding finishes;
+- logs an internal error and aborts if an enabled algorithm produced no digest;
+- writes the checksum alongside the ETag, sizes, and part index into `part.N.meta` before atomically renaming the part.
 
-An internal caller that bypasses the HTTP handler without preparing a valid checksum is therefore rejected just as before. It cannot silently commit a part that violates the MPU invariant.
+Any internal caller that bypasses the HTTP handler without preparing a valid checksum is still rejected before committing the part.
 
-### CopyPart response shape {#copy-response}
+### CopyPart Response Shape {#copy-response}
 
-`CopyObjectPartResponse` gained the five algorithms supported by this source tree:
+`CopyObjectPartResponse` adds the five supported checksum fields:
 
 ```text
 ChecksumCRC32
@@ -231,11 +210,11 @@ ChecksumSHA1
 ChecksumSHA256
 ```
 
-All are `omitempty`, so an MPU without checksums produces the old XML. Normal `UploadPart` still uses the existing `TransferChecksumHeader` and echoes only a client request value; fallback computation does not alter that response.
+Each field uses `omitempty`, preserving the existing XML output for MPUs without checksums. Normal `UploadPart` continues to echo the checksum header via `TransferChecksumHeader` only when supplied by the client.
 
-## Why it works {#why-it-works}
+## Why It Works {#why-it-works}
 
-After the repair, the data flow is:
+The resulting part pipeline is:
 
 ```text
 logical plaintext part
@@ -257,56 +236,52 @@ erasure encode / storage
 persist ETag + size + logical part checksum atomically
 ```
 
-This satisfies four requirements that previously appeared to conflict:
+This satisfies all four constraints:
 
-1. **Protocol compatibility:** omitting an optional header succeeds.
-2. **No integrity downgrade:** a supplied client value is still checked end to end and is never hidden by server fallback.
-3. **Correct object semantics:** the checksum covers logical S3 bytes, not compressed data or ciphertext.
-4. **Controlled cost:** hashing shares the existing read and adds CPU, not a second disk or network pass.
+1. **Protocol compatibility:** omitting the optional per-part checksum header succeeds for `UploadPart`, and `UploadPartCopy` works out of the box.
+2. **End-to-end verification when supplied:** client-provided checksums are still verified and never masked by server computation.
+3. **Plaintext semantics:** checksums always cover logical S3 part bytes rather than compressed or encrypted bytes.
+4. **Single-pass streaming:** hashing shares the existing read pass without buffering the full part in memory or re-reading from disk at completion.
 
-EOF has a precise role. `hash.Reader` finalizes `ServerSideChecksumResult` only when it reaches EOF. Closing the compression pipe synchronizes the compressor goroutine with the storage read; the object layer reads the result only after encoding returns. Targeted `-race` tests verified that concurrency boundary.
+`hash.Reader` finalizes `ServerSideChecksumResult` upon reaching EOF. On the compressed path, closing the compression pipe synchronizes the compressor goroutine with the storage read, so the digest is guaranteed to be finalized before `PutObjectPart` reads it after erasure encoding returns. Targeted `-race` tests verify this synchronization boundary.
 
-## The compatibility-baseline blocker {#compat-baseline}
+## The Compatibility-Baseline Blocker {#compat-baseline}
 
-The five new `CopyObjectPartResponse` fields are exported Go API. SILO's `buildscripts/rebrand-guard` rescans imports, environment variables, headers, routes, storage markers, and exported symbols, then compares them in both directions with `buildscripts/rebrand-guard/compat-baseline.json`. An unacknowledged symbol makes CI fail.
+The five new `CopyObjectPartResponse` fields are exported Go identifiers. SILO's `buildscripts/rebrand-guard` scans imports, environment variables, HTTP headers, routes, storage markers, and exported symbols, comparing them bidirectionally against `buildscripts/rebrand-guard/compat-baseline.json`. Any unrecorded addition fails CI.
 
-After recording the five #46 fields, the guard still reported two additions:
+After adding the five #46 fields to the baseline, the guard reported two remaining additions:
 
 ```text
 internal/config/notify:notify:type:LegacyDatabaseTargetError
 internal/config/notify:notify:method:LegacyDatabaseTargetError.Error
 ```
 
-They did not come from #46. They belong to the earlier database-notification repair `f1ba68358` on the local `main` branch. The `cmd` startup path intentionally needs the exported type for `errors.As`, but that earlier commit had not updated the compatibility baseline. Every later change based on that HEAD would therefore fail the CI guard.
+Those symbols came from an earlier database-notification fix (`f1ba68358`) on `main`, which exported `LegacyDatabaseTargetError` so the `cmd` startup path could match it via `errors.As` but omitted the baseline update.
 
-We chose “option A”: acknowledge the two notification symbols as part of their original repair while retaining the five #46 fields. The final baseline diff is exactly seven additions and zero deletions, and the guard reports:
+Recording both the two notification symbols and the five #46 response fields produced a clean baseline diff of seven additions and zero deletions:
 
 ```text
 exported=9021
 Silo rebrand compatibility baseline is unchanged
 ```
 
-This does not disable the check. Exact set equality means that acknowledging a nonexistent symbol also fails. The change explicitly records two intentional compatibility-surface additions.
+## Verification Evidence {#verification}
 
-`golangci-lint` has not yet run locally; it remains a remote `go.yml` gate. Green local `go test`, `go vet`, race, and rebrand-guard results do not substitute for green remote CI.
-
-## Verification evidence {#verification}
-
-The new tests execute 76 subtests across:
+The regression suite runs 76 subtests covering:
 
 - CRC32, CRC32C, and CRC64NVME `FULL_OBJECT`;
 - CRC32, SHA1, and SHA256 `COMPOSITE`;
-- correct client checksums, wrong algorithms, and wrong values;
-- absence of a server-computed checksum in normal `UploadPart` responses;
-- server values in `UploadPartCopy` responses and `ListParts`;
-- a real 5 MiB + 1 KiB two-part full-object merge;
-- zero-length parts and overwriting the same part number;
-- a range copy whose SHA256 covers only the copied interval;
+- valid client checksums, mismatched algorithms, and corrupted values;
+- omission of server-computed checksums from normal `UploadPart` response headers;
+- presence of server-computed checksums in `UploadPartCopy` responses and `ListParts`;
+- a 5 MiB + 1 KiB two-part full-object merge;
+- zero-length parts and overwriting an existing part number;
+- range copies verifying that SHA256 covers only the copied byte range;
 - single-drive and 16-drive erasure backends;
-- default, versioned, compressed, encrypted, and compressed-plus-encrypted modes;
-- explicit SSE-C and SSE-S3.
+- default, versioned, compressed, encrypted, and compressed-plus-encrypted configurations;
+- explicit SSE-C and SSE-S3 encryption.
 
-Local validation included:
+Local validation commands:
 
 ```text
 go test -race ./cmd -run '^TestAPIUploadPartServerSideChecksum' -count=1
@@ -317,41 +292,33 @@ git diff --check
 go run ./buildscripts/rebrand-guard
 ```
 
-All passed. Two subsequent Claude Code Fable 5 Max implementation reviews and the final acceptance review returned **GO** with no blocking findings.
+## Cost, Risk, and Rolling-Upgrade Tradeoffs {#tradeoffs}
 
-## Cost, risk, and release boundary {#tradeoffs}
+When a client omits a part checksum on a checksum-enabled MPU, the server hashes the plaintext stream during upload. CRC hashing adds negligible CPU overhead; SHA1 and SHA256 use more CPU, but both run inline with the existing stream read without buffering parts in memory or adding disk I/O.
 
-When a client omits its value, the server performs one additional hash over the part. CRC cost is small; SHA costs more CPU. Both share the read that already had to occur, without buffering an entire part in memory or adding a completion-time second pass.
+During a rolling upgrade, upgraded nodes accept checksum-less `UploadPart` requests while unupgraded nodes still return 400. Because the on-disk `ObjectPartInfo.Checksums` format is unchanged, written parts remain compatible across versions, and client-facing behavior converges as soon as all nodes are upgraded.
 
-During a rolling upgrade, old and new nodes may answer the same checksum-less request differently: a new node accepts it while an old node returns 400. `ObjectPartInfo.Checksums` did not change format, so stored data remains downgrade-readable, but client-visible behavior stabilizes only after all serving nodes have upgraded. The release note must call that out.
+## Why Two Follow-Ups Were Split Out {#follow-ups}
 
-The original local implementation later merged and shipped in Server 20260903. Its historical local verification record does not establish the state of any production deployment.
+Design review identified two related issues with separate API and test boundaries:
 
-## Why two follow-ups remain separate {#follow-ups}
+### #63: CopyObject + Compression {#follow-up-copy}
 
-Adversarial review found two related but independent issues.
+Ordinary `CopyObject` with server-side checksums and compression could also attach its hasher to the compressed stream rather than the plaintext stream. [#63](https://github.com/pgsty/silo/issues/63) reuses the `checksumReader` mechanism introduced here to fix `CopyObject` under its own test matrix.
 
-### #63: CopyObject + compression {#follow-up-copy}
+### #64: Legacy Federation {#follow-up-federation}
 
-Ordinary `CopyObject` can also attach a server-side checksum to a transformed stream. It shares the root cause and the new `checksumReader` mechanism, but it is a different API with a different test matrix and rollback boundary. We chose a separate repair and require that PR to reuse this plaintext-reader contract instead of inventing a second abstraction.
+Legacy etcd federation proxies `UploadPartCopy` as a remote `UploadPart` request. Because a standard `UploadPart` response omits server-computed checksums, the proxy cannot read the fallback checksum from the remote response headers to populate `CopyPartResult`. [#64](https://github.com/pgsty/silo/issues/64) addresses the federated proxy path without altering external `UploadPart` response semantics.
 
-### #64: legacy federation {#follow-up-federation}
+Both follow-ups share the same streaming invariant:
 
-Legacy etcd federation turns `UploadPartCopy` into an ordinary remote `UploadPart`. Under the AWS response semantics preserved here, that remote request does not return a server fallback value, so the proxy may still lack the checksum required for `CopyPartResult`. A follow-up must independently choose between a remote-returned value and an ETag-verified `ListParts` fallback. It must not make all external `UploadPart` responses non-compliant merely to simplify an internal proxy.
+> Every server-computed S3 checksum binds to the logical plaintext stream, is installed before any eager transform starts, and is validated and persisted by the object layer.
 
-Separating them does not abandon consistency. Consistency is maintained through one shared rule:
+## Engineering Takeaways {#lessons}
 
-> Every server-computed S3 checksum binds to the logical plaintext stream, is installed before any eager transform, and is validated and persisted by the object layer that owns the storage invariant.
-
-## Lessons retained {#lessons}
-
-The repair leaves lessons more durable than its individual lines of code:
-
-1. **An optional header does not make internal state optional.** If the protocol lets the client omit a value, the server must produce the state its own completion path needs.
-2. **Request acceptance and response disclosure are separate contracts.** A normal UploadPart may compute internally and still omit the value; UploadPartCopy must return it.
-3. **Stream layers are defined by byte semantics.** The lowest layer is not automatically correct if it no longer sees logical bytes, and an eager goroutine turns “install later” into a race.
-4. **A commercial implementation is evidence, not the specification.** AIStor showed the direction and the boundary that could not be copied.
-5. **A compatibility guard is a change-acknowledgment mechanism.** `compat-baseline.json` exists to assign every new compatibility surface, not merely to make CI quiet.
-6. **Independent defects should ship independently while sharing invariants.** #63 and #64 remain separate, but both must cite and obey the checksum-reader contract established here.
-
-The final result is not a broad relaxation. It is a stricter and more accurate boundary: clients may omit optional information; the server may not omit correctness.
+1. **Client-optional headers can still back mandatory storage state.** When the S3 wire protocol allows callers to omit a per-part checksum, the server must compute it during upload so `CompleteMultipartUpload` always finds complete part metadata.
+2. **Internal computation and response headers follow separate rules.** `UploadPart` computes missing part checksums for internal metadata while omitting them from response headers, whereas `UploadPartCopy` returns the server-computed digest in `CopyPartResult`.
+3. **Attach stream hashers before concurrent transforms.** Because `newS2CompressReader` starts reading immediately in a background goroutine, any plaintext hasher must be installed before constructing the compressor.
+4. **Verify third-party behavior against the full matrix.** Disassembling AIStor confirmed the server-side hashing approach, while also showing that SHA1/SHA256 `COMPOSITE` and compressed streams required broader handling.
+5. **Track exported API changes in the compatibility baseline.** Updating `compat-baseline.json` keeps every intentional change to exported symbols explicit and auditable.
+6. **Share core mechanisms across independent fixes.** [#63](https://github.com/pgsty/silo/issues/63) and [#64](https://github.com/pgsty/silo/issues/64) build on the same `checksumReader` design while keeping their own regression suites.

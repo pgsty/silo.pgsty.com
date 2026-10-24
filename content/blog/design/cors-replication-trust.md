@@ -5,267 +5,204 @@ date: 2026-09-01
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  A pre-authentication CORS lookup turned arbitrary path segments into metadata I/O and cache entries, while a client-controlled replication marker acquired privileges across SSE-C reads, source timestamps, checksums, object lock, events, and deletes. This record defines SILO's resident-only CORS hot path, two-level replication trust model, post-signature sanitization boundary, wire-compatibility matrix, and release evidence.
+  A pre-authentication CORS lookup turned arbitrary URL path segments into metadata I/O and cache entries, while a client-controlled replication marker acquired privileges across SSE-C reads, source timestamps, checksums, Object Lock, events, and deletes. This note defines SILO's resident-only CORS hot path, two-level replication trust model, and post-signature sanitization boundary.
 tags: [Design, Security, CORS, Replication, SSE-C, Compatibility]
 weight: 12
 draft: false
 url: "/blog/design/cors-replication-trust/"
 ---
 
-> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
+This note documents the CORS hot-path and replication-request trust repair merged in [PR #101](https://github.com/pgsty/silo/pull/101) (`938603458` through `04b097fd9`), tracked as [SN-2026-008](/about/security-advisories/#sn-2026-008), and shipped in [Server 20260903](/blog/release/silo-20260903/).
 
-This record describes the CORS hot-path and replication-request trust repair merged into SILO as [PR #101](https://github.com/pgsty/silo/pull/101) (`938603458` through `04b097fd9`).
+## Overview {#tldr}
 
-> **Status on 2026-09-03:** [PR #101](https://github.com/pgsty/silo/pull/101) merged into `main` on 2026-09-01 with four follow-up commits: per-entry Snowball trust isolation (`ff44527a3`), request defaults preserved across Snowball workers (`ab3ae99ca`), and replication validity probes that verify the replication permissions (`c9ad74673`) under the rule prefix (`5db7be4ee`). Implementation, focused and race tests, the complete server package suite, object-lock tests, vet, build, two rounds of Fable 5 design review, repeated Opus 5 adversarial acceptance, and a real local TLS two-site replication run are complete. The pre-release cleanup kept the resident-only lookup with its fail-closed startup and load-failure states, dropped only the internal-namespace special case, and made the header-stripped request clone share the original request trailer so streaming-checksum uploads keep working for untrusted requests. Tag, package, image, deployment, and production verification remain separate gates.<br>
-> **Scope:** HTTP request interpretation before and inside the S3 handlers. No S3 wire field, object format, bucket metadata format, replication protocol, encryption format, or client command changes.<br>
-> **Security properties:** pre-authentication CORS processing performs no object-layer I/O; a header never grants replication semantics by itself; SSE-C ciphertext paths and replica-only metadata require both authentication and the corresponding replication permission.
+Two defects that appeared unrelated shared a single architectural root cause:
 
-## Too Long; Didn't Read (TL;DR) {#tldr}
+1. Any request carrying an `Origin` header caused the outermost CORS middleware to treat the first URL path segment as a bucket name and synchronously load its metadata from disk before authentication.
+2. Any request carrying `X-Minio-Source-Replication-Request` caused downstream handlers to treat the operation as internal replication merely because the header was present.
 
-Two bugs looked unrelated:
+In both cases, **untrusted request syntax acquired expensive or privileged internal meaning before crossing an authorization boundary**.
 
-1. an `Origin` header made the outermost CORS middleware treat the first URL segment as a bucket and synchronously load its metadata before authentication;
-2. `X-Minio-Source-Replication-Request` made downstream code believe a request was internal replication merely because the header existed.
-
-They shared the same design failure: **untrusted request shape was allowed to acquire expensive or privileged internal meaning before an authorization boundary**.
-
-The repair establishes two invariants:
+The repair enforces two invariants:
 
 ```text
-before authentication:  parse cheaply; never load bucket metadata
+before authentication:  parse cheaply; never perform storage I/O
 after authentication:   derive one trust decision; downstream code consumes it
 ```
 
-For CORS, the outer middleware now reads only metadata already resident in memory. For replication, handlers authenticate the original signed request first, authorize the appropriate replication action, and then attach a private trust decision to the request context. Untrusted internal headers are stripped only after signature verification. The context decision—not header removal—is the authority used by option builders, encryption paths, object lock, event generation, and metadata persistence.
+For CORS, the outer middleware reads only bucket metadata already resident in memory. For replication, handlers authenticate the original signed request first, authorize the required replication action (`s3:ReplicateObject` or `s3:ReplicateDelete`), and attach a private trust decision to the request context. Untrusted internal headers are stripped only after SigV4 verification completes. Downstream option builders, encryption paths, Object Lock checks, event emitters, and metadata writers consume that context decision rather than inspecting raw headers.
 
-## Failure A: pre-authentication CORS amplification {#cors-failure}
+## Failure A: Pre-Authentication CORS Amplification {#cors-failure}
 
-`corsHandler` wraps the complete server router. Any request carrying `Origin` reaches it before S3 authentication, request validity checks, and the normal API limiter.
+`corsHandler` wraps the entire HTTP router. Every request carrying an `Origin` header reaches it before SigV4 authentication, request validation, and API concurrency limiters.
 
-The per-bucket CORS implementation originally called the normal bucket metadata getter:
+Previously, per-bucket CORS evaluation called the general bucket metadata loader:
 
 ```text
 Origin-bearing request
-  -> first URL segment becomes "bucket"
+  -> first URL segment treated as "bucket"
   -> GetCorsConfig
   -> GetConfig cache miss
   -> read .metadata.bin
   -> probe ten legacy config paths
-  -> cache a default BucketMetadata record
+  -> insert default BucketMetadata record into metadataMap
 ```
 
-When `.metadata.bin` did not exist, the loader intentionally searched legacy configuration files. With none found, it returned a valid empty metadata record rather than `NoSuchBucket`. The generic getter then inserted that record into `metadataMap`.
+When `.metadata.bin` did not exist on disk, the loader probed ten legacy configuration file paths. When none existed, it returned a newly allocated empty `BucketMetadata` struct rather than `NoSuchBucket`, and `GetConfig` inserted that synthetic entry into the in-memory `metadataMap`.
 
-An unauthenticated client could therefore vary otherwise plausible names and obtain two effects per distinct value:
+An unauthenticated client could therefore send `Origin`-bearing requests for an unbounded sequence of syntactically valid, nonexistent bucket names and trigger two effects per distinct name:
 
-- repeated erasure/object metadata reads before the normal request limiter;
-- growth of the in-memory bucket metadata map.
+- Unthrottled erasure/storage metadata reads (`.metadata.bin` plus ten legacy probes) before authentication.
+- Unbounded growth of the in-memory bucket `metadataMap` (pruned only every 15 minutes on distributed clusters, and never pruned until restart on single-node deployments).
 
-Name validation alone cannot repair this. An attacker can generate an effectively unbounded sequence of syntactically valid, nonexistent bucket names. Distributed deployments eventually prune stale map entries during the 15-minute metadata refresh; single-node deployments do not start that refresh loop, so their synthetic entries persist until restart.
+## Failure B: A Marker Header Treated as Authority {#replication-failure}
 
-## Failure B: a marker header became authority {#replication-failure}
+SILO and MinIO-compatible replication engines exchange internal headers to preserve source state across sites, anchored by:
 
-SILO and its MinIO-compatible clients use internal headers to preserve source state during replication. The most important marker is:
-
-```text
+```http
 X-Minio-Source-Replication-Request: true
 ```
 
-Before this repair, several paths treated header presence—or its raw string value—as proof that the request was a replication request. That affected more than metadata extraction:
+Before this repair, multiple code paths treated the presence or string value of that header as proof that the caller was a trusted replication peer:
 
-- `GET` of an SSE-C object could set `NoDecryption` and return ciphertext without the customer key to a caller holding only ordinary read permission;
-- source ETag and modification time could replace server-generated values;
-- source tagging, retention, and legal-hold timestamps could enter last-writer-wins comparisons;
-- a past object-lock retention date could be accepted through a raw marker check;
-- delete-marker identity and modification time could be supplied by the caller;
-- successful object events could be suppressed;
-- multipart actual size and encrypted checksum metadata could be injected at completion;
-- `X-Amz-Replication-Status` could be persisted from ordinary PUT, COPY, or POST-policy metadata extraction.
+- `GetObject`, `HeadObject`, and `GetObjectAttributes` on an SSE-C object could set `NoDecryption` and return raw ciphertext without requiring the customer key to any caller holding ordinary `s3:GetObject` permission.
+- Caller-supplied source ETag and modification time (`MTime`) could overwrite server-generated values.
+- Source tagging, retention, and legal-hold timestamps could influence last-writer-wins conflict resolution.
+- Past Object Lock `RetainUntilDate` timestamps were accepted via a raw header check.
+- Delete-marker version IDs and timestamps could be injected by the caller.
+- Object creation and access notifications could be suppressed.
+- Multipart actual object size and encrypted checksum metadata could be injected during `CompleteMultipartUpload`.
+- `X-Amz-Replication-Status: REPLICA` could be persisted from ordinary `PutObject`, `CopyObject`, Snowball/PAX archives, or browser `POST` policy uploads.
 
-The earlier [CVE-2026-34204 repair](/blog/security/cve-2026-34204/) correctly stopped ordinary PUT and COPY from importing the replication SSE metadata that could make objects unreadable. It did not yet provide one authority shared by every reader of the marker, source fields, event state, object-lock exceptions, or multipart completion metadata.
+The earlier [CVE-2026-34204 repair](/blog/security/cve-2026-34204/) prevented ordinary `PutObject` and `CopyObject` calls from importing replication SSE metadata, but it did not establish a single post-authorization authority shared by all consumers of replication headers.
 
-## Selected design {#design}
+## Replication Trust Design {#design}
 
-### One exact marker, two trust levels {#trust-levels}
+### One Exact Marker, Two Trust Levels {#trust-levels}
 
-The marker is accepted only when it appears exactly once and its value is exactly lowercase `true`. Duplicate values, mixed case, and any other value are untrusted.
+The marker header `X-Minio-Source-Replication-Request` is considered present only when it appears as a single header line with the exact lowercase value `"true"`. Multiple header values, mixed case, or any other string are treated as untrusted.
 
-The handler then derives two related decisions:
+After authenticating the caller, the handler derives two distinct trust flags:
 
-| Decision | Requirements | Semantics it may enable |
+| Decision | Requirements | Enabled Semantics |
 | --- | --- | --- |
-| `trusted` | original request authenticated; non-anonymous principal; exact marker; `s3:ReplicateObject` or `s3:ReplicateDelete` on the addressed resource | source ETag/MTime and source timestamps; actual size and encrypted checksum transfer; event and re-replication suppression; replication delete pool/version pinning |
-| `replicaTrusted` | `trusted`, plus raw request status `REPLICA` or a multipart upload whose stored status is `REPLICA` | replica status persistence; replication SSE sealed-key import; SSE-C ciphertext/no-decryption path; replica-only object-lock behavior |
+| `trusted` | Authenticated non-anonymous principal + exact marker + `s3:ReplicateObject` (or `s3:ReplicateDelete`) on the target resource | Source ETag/MTime and timestamps; multipart actual size and encrypted checksum transfer; notification and re-replication suppression; delete version/pool pinning |
+| `replicaTrusted` | `trusted` + raw request status `REPLICA` (or a multipart upload whose stored initiation status is `REPLICA`) | `REPLICA` status persistence; replication SSE sealed-key import; SSE-C raw ciphertext (`NoDecryption`) path; replica Object Lock exceptions |
 
-The split is required by the real wire protocol. Not every legitimate replication request repeats `X-Amz-Replication-Status: REPLICA`.
+Separating `trusted` from `replicaTrusted` is required by the wire protocol because legitimate multipart part uploads, multipart completions, and batch replication writes send `X-Minio-Source-Replication-Request: true` without repeating `X-Amz-Replication-Status: REPLICA` on every request.
 
-The receiver follows this matrix:
+Incoming requests are classified as follows:
 
-| Incoming shape | Result |
+| Incoming Request Shape | Receiver Outcome |
 | --- | --- |
-| no marker | ordinary S3 operation |
-| marker without replication permission | internal fields ignored; operation continues with ordinary semantics |
-| `REPLICA` without replication permission | `403 AccessDenied` |
-| exact marker + replication permission, no `REPLICA` | `trusted` only |
-| exact marker + replication permission + `REPLICA` | `trusted` and `replicaTrusted` |
+| No marker | Ordinary S3 operation |
+| Marker present, caller lacks replication permission | Internal replication headers stripped and ignored; request proceeds as an ordinary S3 operation |
+| `X-Amz-Replication-Status: REPLICA` without replication permission | Rejected with `403 AccessDenied` |
+| Exact marker + replication permission, no `REPLICA` | `trusted` only |
+| Exact marker + replication permission + `REPLICA` | Both `trusted` and `replicaTrusted` |
 
-The explicit `403` for an unauthorized `REPLICA` request prevents a claimed replica write from being silently downgraded into a new ordinary object that may be replicated again.
+Explicitly rejecting unauthorized `REPLICA` claims with `403 AccessDenied` prevents a misconfigured replica write from silently downgrading into a new `PENDING` source object that would trigger a reverse replication loop.
 
-### Authenticate the original, then sanitize {#signature-boundary}
+### Authenticate Original Request, Then Sanitize {#signature-boundary}
 
-SigV4 signs request headers. Removing an internal header before authentication would change the canonical request and turn a valid signature into `SignatureDoesNotMatch`.
-
-The ordering is therefore mandatory:
+Because AWS SigV4 signs `x-amz-*` and `x-minio-*` headers, stripping internal headers before signature verification would alter the canonical request and fail valid requests with `SignatureDoesNotMatch`. The execution order is therefore strict:
 
 ```text
-original request
-  -> existing signature/authentication path
+original HTTP request
+  -> SigV4 signature and authentication check
   -> ordinary S3 action authorization
-  -> replication action authorization
-  -> derive trusted / replicaTrusted
-  -> bind decision to request context
-  -> clone and strip untrusted internal fields
-  -> option parsing, encryption, object lock, storage, events
+  -> replication action authorization (s3:ReplicateObject / s3:ReplicateDelete)
+  -> derive trusted / replicaTrusted flags
+  -> bind trust decision to request context
+  -> clone request and strip untrusted internal headers (sharing original trailer)
+  -> option builders, encryption, Object Lock, storage, and notifications
 ```
 
-The audit logger retains the original request. The effective request clone retains public S3, SSE, checksum, object-lock, copy-source, proxy, and replication-validity headers. It strips only internal source/replication controls, including source ETag/MTime/delete-marker/timestamps, replication SSE state, actual object size, encrypted checksum transfer, and the request use of `X-Amz-Replication-Status`.
+The header-stripped request clone shares the original `http.Request.Trailer` map so `aws-chunked` streaming-checksum uploads continue working for ordinary clients. Snowball/PAX batch archives isolate trust per archive entry (`ff44527a3`) while preserving legitimate request defaults across worker goroutines (`ab3ae99ca`).
 
-Header stripping is defense in depth. All privileged consumers use the private context decision or an explicit Boolean; they do not infer trust by looking at the clone.
+### Replica Status Removed from Generic Metadata {#replica-status}
 
-### Replica status is not generic user metadata {#replica-status}
+`X-Amz-Replication-Status` is removed from the generic user-metadata extraction allowlist. Ordinary `PutObject`, `CopyObject`, `CreateMultipartUpload`, Snowball extraction, and HTML `POST` policy forms can no longer persist `REPLICA` status by submitting the header or form field; the server sets `REPLICA` only inside a verified `replicaTrusted` branch.
 
-`X-Amz-Replication-Status` is an S3 response header that MinIO-compatible servers also use as an internal request control. It no longer belongs to the generic supported-request-metadata list.
+### Object Lock Receives an Explicit Decision {#object-lock}
 
-Ordinary PUT, COPY, multipart initiation, Snowball/PAX extraction, and POST policy cannot persist it merely by submitting the field. The receiver sets `REPLICA` explicitly only in a `replicaTrusted` branch.
+The Object Lock parser no longer inspects `X-Minio-Source-Replication-Request` directly. Instead, handlers pass `allowPastRetainDate` explicitly from `replicaTrusted`, and use the same `replicaTrusted` decision when checking whether an existing compliance or legal-hold version may be overwritten by an incoming replica.
 
-This closes a subtle POST-policy path: a form field could previously store `REPLICA`, causing the resulting object to evade normal replication scheduling even though the POST principal never held replication permission.
+## Replication Wire Matrix {#wire-matrix}
 
-### Object lock receives an explicit decision {#object-lock}
-
-The object-lock parser used to accept past retention dates when the raw marker header was present. That package now receives `allowPastRetainDate` explicitly from `replicaTrusted` state.
-
-The surrounding handler also uses the same decision when deciding whether an existing compliance/legal-hold version may be overwritten by a replica. This removes an internal-header dependency from the reusable object-lock package.
-
-## Actual replication wire matrix {#wire-matrix}
-
-The design was checked against the silo-go v7.3.1 emitter selected by the server's `go.mod`, not inferred from comments or upstream documentation.
-
-| Operation | Marker | `REPLICA` on this request | Receiver decision |
+| Operation | Marker | `REPLICA` Header on Request | Receiver Decision |
 | --- | --- | --- | --- |
-| regular replicated `PutObject` | yes | yes | `replicaTrusted` |
-| replicated `NewMultipartUpload` | yes | yes | persist trusted multipart replica provenance |
-| replicated `PutObjectPart` | yes | no | `trusted`; `replicaTrusted` only when stored MPU status is `REPLICA` |
-| replicated `CompleteMultipartUpload` | yes | no | `trusted`; preserve source ETag/MTime, actual size, and encrypted checksum |
-| CopyObject metadata replication | yes | yes | `replicaTrusted` |
-| replicated `RemoveObject` | yes | yes | `replicaTrusted` with `s3:ReplicateDelete` |
-| batch replication PUT/Complete | yes | no | `trusted`; target credentials must hold `s3:ReplicateObject` |
-| proxy/readiness/validity probes | separate probe headers | no marker authority | probe behavior retained; those headers are never stripped by this repair |
+| Replicated `PutObject` | Yes | Yes | `replicaTrusted` |
+| Replicated `CreateMultipartUpload` | Yes | Yes | Persist trusted multipart `REPLICA` provenance |
+| Replicated `UploadPart` | Yes | No | `trusted`; promoted to `replicaTrusted` only when stored MPU status is `REPLICA` |
+| Replicated `CompleteMultipartUpload` | Yes | No | `trusted`; preserves source ETag/MTime, actual size, and encrypted checksum |
+| `CopyObject` metadata replication | Yes | Yes | `replicaTrusted` |
+| Replicated `DeleteObject` | Yes | Yes | `replicaTrusted` (requires `s3:ReplicateDelete` plus `s3:DeleteObject`, with no explicit deny on `s3:DeleteObjectVersion`) |
+| Batch replication `PUT` / `Complete` | Yes | No | `trusted` (target credentials must hold `s3:ReplicateObject`) |
+| Proxy / readiness / validity probes | Probe headers | No | Probe headers are preserved; validity probes verify replication permissions under the rule prefix (`c9ad74673`, `5db7be4ee`) |
 
-`s3:ReplicateDelete` is the trust gate, not the receiver's only permission.
-For compatibility with deployed target policies, a trusted replication delete
-also requires `s3:DeleteObject`; an explicit deny on
-`s3:DeleteObjectVersion` still blocks a named-version purge. Ordinary clients
-do not use this compatibility path: an explicit UUID or `versionId=null`
-requires an allow for `s3:DeleteObjectVersion`.
+## CORS Resident-Only State Machine {#cors-state-machine}
 
-Requiring `REPLICA` for every trusted operation would break PutPart, multipart completion, and batch replication. Trusting every marker would recreate the vulnerability. Stored multipart provenance bridges the two requirements for encrypted raw parts.
+The outer CORS middleware calls a dedicated resident-only accessor that acquires a single in-memory read lock and performs zero storage I/O:
 
-## CORS resident-only state machine {#cors-state-machine}
-
-The outer CORS middleware must remain cheaper than the request it is about to route. It now calls a dedicated resident-only getter that takes one read lock and examines only in-memory state.
-
-| Bucket metadata state | CORS result | Object-layer work |
+| In-Memory Bucket Metadata State | CORS Decision | Storage I/O |
 | --- | --- | --- |
-| resident, valid per-bucket CORS | apply per-bucket rule; a failed refresh keeps the last loaded document, as for every other bucket configuration | none |
-| resident, no CORS document | use global CORS fallback | none |
-| resident, invalid stored CORS | fail closed; continue without CORS headers and log once | none |
-| not resident while startup loading is still running | fail closed | none |
-| not resident after startup: real bucket whose metadata failed to load | fail closed | none |
-| not resident after startup: reserved, invalid, internal, or unknown name | global fallback | none |
+| Resident, valid per-bucket CORS config | Apply per-bucket CORS rule (a failed background refresh retains the last valid config) | None |
+| Resident, no per-bucket CORS config | Use global CORS fallback | None |
+| Resident, corrupted stored CORS XML | Fail closed (omit CORS headers and log once) | None |
+| Non-resident while initial startup load is still running | Fail closed | None |
+| Non-resident after startup: known disk bucket whose metadata failed to load | Fail closed | None |
+| Non-resident after startup: nonexistent, reserved, invalid, or `.minio.sys` name | Use global CORS fallback | None |
 
-The lookup consults the resident map and a bounded set of real buckets whose metadata failed to load at startup or during a refresh. That set is filled only from disk-derived bucket lists, never from a client path, never records a bucket that is already resident, and a successful load, `Set`, bucket removal, stale-bucket reconciliation, and subsystem reset clear it. Both non-resident states fail closed: a presigned URL is authenticated by its own signature, so the bucket's CORS document is the only origin boundary a browser enforces for it, and answering with the global policy would let a leaked URL be used from any origin. The internal `.minio.sys` namespace no longer has a special case; like any reserved or invalid name it is not a bucket, gets the global fallback, and is rejected downstream.
+Both startup-in-progress and known load-failure states fail closed: because a presigned URL carries its own credentials in the query string, the bucket's custom CORS policy is the only browser origin boundary protecting it, and falling back to the permissive global CORS policy during a metadata load failure would expose the presigned URL to arbitrary origins.
 
-## Alternatives rejected {#alternatives}
+## Rejected Alternatives {#alternatives}
 
-| Alternative | Why it was rejected |
+| Rejected Alternative | Reason for Rejection |
 | --- | --- |
-| Validate bucket names before the old CORS getter | valid nonexistent names still provide an unbounded attacker-controlled key space and still trigger pre-auth I/O |
-| Call `GetBucketInfo` before loading CORS | replaces eleven metadata reads with at least one unthrottled backend operation per attacker name |
-| Cache every negative result with a TTL | bounds duration, not attacker cardinality or the initial I/O amplification |
-| Strip replication headers before authentication | breaks SigV4 canonical-request verification |
-| Reject every request carrying an internal marker | turns formerly ignored extra headers into broad client failures and breaks legitimate marker-only replication calls |
-| Require `REPLICA` on every trusted call | breaks replicated PutPart, CompleteMultipartUpload, and batch replication wire behavior |
-| Let every handler re-check raw headers independently | recreates inconsistent trust rules and leaves future consumers easy to miss |
-| Store a Boolean in `ObjectOptions` but leave events/object lock on headers | produces two authorities that can disagree; the original bug class remains |
+| Validate bucket syntax before calling the old CORS loader | Attackers can generate an unbounded stream of syntactically valid, nonexistent bucket names that still trigger pre-auth storage I/O |
+| Call `GetBucketInfo` before loading CORS | Replaces 11 metadata probes with at least 1 unthrottled storage stat call per attacker-supplied bucket name |
+| Cache negative bucket lookups with a TTL | Bounds cache lifetime, not attacker key cardinality or initial storage I/O amplification |
+| Strip replication headers before SigV4 authentication | Breaks SigV4 canonical request verification (`SignatureDoesNotMatch`) |
+| Reject every request carrying `X-Minio-Source-Replication-Request` | Breaks legitimate marker-only batch replication and multipart replication calls |
+| Require `REPLICA` on every trusted replication call | Breaks replicated `UploadPart`, `CompleteMultipartUpload`, and batch replication wire compatibility |
+| Store a boolean in `ObjectOptions` while leaving events and Object Lock on raw headers | Leaves two authorities that can disagree |
 
-## Implementation boundary {#implementation}
+## Implementation and Verification {#implementation}
 
-The selected change is intentionally layered:
+The implementation is structured into seven boundaries:
 
-1. a small request-trust module defines exact marker parsing, replication authorization, private context state, and the post-authentication effective request;
-2. object option builders parse source fields only when their caller provides trusted state;
-3. `DecryptObjectInfo`, event request parameters, multipart completion, delete options, and object lock consume the same decision;
-4. handlers calculate trust immediately after their existing authentication path;
-5. multipart part handling combines current-request trust with stored MPU replica provenance;
-6. generic metadata extraction does not accept replica status;
-7. CORS middleware uses a separate resident-only metadata accessor and never calls the load-on-miss getter.
+1. A dedicated request-trust helper parses the exact marker, evaluates replication IAM permissions, binds the private trust struct to `req.Context()`, and returns the post-auth sanitized request clone.
+2. `putOpts`, `copyDstOpts`, `getOpts`, and `delOpts` builders extract source replication fields only when the context decision is `trusted` or `replicaTrusted`.
+3. `DecryptObjectInfo`, notification event builders, multipart completion, delete options, and Object Lock consume the same context decision.
+4. S3 handlers compute replication trust immediately after their authentication check.
+5. `PutObjectPart` combines current-request `trusted` state with the multipart upload's persisted `REPLICA` provenance.
+6. Generic metadata extraction excludes `X-Amz-Replication-Status`.
+7. `corsHandler` calls the resident-only metadata accessor and never invokes the load-on-miss getter.
 
-No object-layer API needs to infer HTTP trust. Programmatic internal callers that construct `ObjectOptions{ReplicationRequest: true}` remain unchanged.
+### Verification Matrix {#verification}
 
-## Verification and adversarial review {#verification}
+Automated and black-box two-site TLS replication tests verify:
 
-Regression coverage includes:
+- Hundreds of distinct nonexistent bucket names across actual and preflight CORS requests with zero storage metadata reads and zero `metadataMap` growth.
+- Least-privilege SSE-C `GetObject`, `HeadObject`, and `GetObjectAttributes` calls rejecting forged, wrong-case, or unauthorized replication markers.
+- Marker-only batch `PutObject` preserving source ETag/MTime only when the caller holds `s3:ReplicateObject`.
+- Unauthorized `REPLICA` `PutObject` and `DeleteObject` returning `403 AccessDenied`.
+- Browser `POST` policy uploads unable to inject `REPLICA` status.
+- Object Lock past retention dates rejected without `replicaTrusted` and accepted for authorized replicas.
+- End-to-end SSE-C single-part (`4 KiB`), multipart (`12 MiB`, 3 parts), `CopyObject`, and delete-marker replication across two live TLS-enabled SILO nodes with matching ETag, version ID, SSE-C key MD5, and decrypted SHA-256 digests.
 
-- hundreds of distinct valid missing bucket names, both actual and preflight CORS requests, with zero metadata reads and no map growth;
-- Console, reserved, invalid, startup, internal namespace, and invalid stored CORS paths;
-- least-privilege SSE-C GET, HEAD, and GetObjectAttributes callers with correct, missing, wrong-case, and unauthorized markers;
-- marker-only batch-style PUT preserving source ETag/MTime only with `s3:ReplicateObject`;
-- unauthorized `REPLICA` PUT and DELETE returning `403`;
-- POST policy unable to forge replica status;
-- object-lock past-date parsing with and without replica trust;
-- marker-only CopyObject with SSE-C source headers copying plaintext rather than ciphertext;
-- fake marker on an ordinary SSE-C MPU failing instead of storing raw bytes;
-- a real in-process SSE-C multipart replication chain: encrypted source, raw ciphertext part, trusted replica initiation, marker-only PutPart and Complete, and exact plaintext recovery with the original key.
+## Compatibility and Follow-Up Work {#impact}
 
-The final local tree passed focused and race tests, the complete `cmd` suite, object-lock tests, vet, build, and diff checks.
+- **Ordinary clients:** Unchanged; untrusted internal replication headers are ignored rather than acquiring privileged internal behavior.
+- **Batch replication:** Target credentials must include `s3:ReplicateObject` as documented in [Batch Replication](/administration/batch-framework-job-replicate/); without it, marker-only writes fall back to ordinary writes and generate fresh ETag and `MTime` values.
+- **Rolling upgrades:** Wire and on-disk formats are unchanged. Upgraded nodes enforce the resident-only CORS lookup and replication trust boundary immediately.
 
-A separate black-box run started two TLS-enabled SILO instances built from the candidate and enabled real site replication. It verified:
+### Subsequent Follow-Ups {#residual-risks}
 
-- an SSE-C 4 KiB object;
-- an SSE-C 12 MiB, three-part multipart object;
-- an SSE-C CopyObject result;
-- a replicated delete marker.
-
-Source and target ETag, size, version ID, SSE-C key MD5, decrypted SHA-256, and delete-marker version ID matched; targets reported `REPLICA`.
-
-Two Fable 5 review rounds first corrected the trust model for marker-only batch and multipart calls, then audited the implementation. A final independent Claude Code Opus 5 review reported **GO**, with no P0/P1 findings, and independently reran build, vet, race, object-lock, and full `cmd` tests.
-
-## Compatibility and operations {#impact}
-
-- **Ordinary clients:** no request change. Untrusted internal headers are ignored instead of acquiring internal semantics.
-- **Unauthorized claimed replica writes:** requests carrying `X-Amz-Replication-Status: REPLICA` now return `403` where some multipart subpaths previously lacked a uniform check.
-- **Batch replication:** destination credentials must include `s3:ReplicateObject`, as documented in the [batch replication requirements](/administration/batch-framework-job-replicate/). Without it, the receiver processes marker-only writes as ordinary writes and does not preserve source ETag/MTime.
-- **SSE-C:** ordinary reads still require the customer key. Authorized replica reads may use the raw ciphertext path needed to preserve encrypted bytes.
-- **Events:** only trusted replication suppresses replica creation/access events; a forged marker no longer silences them.
-- **Object lock:** replica exceptions are permission-derived rather than header-derived.
-- **Performance:** CORS removes pre-authentication backend work. Trusted writes add policy checks already required by the replication contract; no additional object pass is introduced.
-- **Rolling upgrade:** wire and storage formats are unchanged. New receivers enforce the trust boundary; old receivers remain vulnerable to the old header semantics until upgraded. Per-bucket CORS behavior can therefore differ by node during the rolling window.
-- **Rollback:** data written by the repaired version remains readable by the previous version, but rollback reopens both trust defects and restores pre-authentication metadata loads.
-
-## Residual risks and follow-ups {#residual-risks}
-
-- **2026-09-09 replication reliability follow-up:** [Delete completion, MRF visibility, and resync cancellation](/blog/design/replication-reliability/) records the reproductions, minimal fixes, Fable review, and PR #162 validation for #153, #152, and #137. It addresses reliability after trusted requests enter the replication pipeline, preserving this page's authorization boundary.
-
-- Emit a rate-limited diagnostic when a marker-bearing request lacks replication permission; the safe ordinary fallback is otherwise easy to misdiagnose as an ETag/MTime mismatch.
-- Replication validity probes now verify the replication permissions the target credentials need and place the synthetic validation key under the rule prefix (`c9ad74673`, `5db7be4ee`).
-- This review covers the named source/replication headers. Other future internal controls must still answer the same question: which authenticated decision allowed this client value to acquire internal meaning?
+- **Replication execution reliability (2026-09-09):** [Replication Reliability: Delete Completion, MRF Visibility, and Resync Cancellation](/blog/design/replication-reliability/) documents the fixes in [PR #162](https://github.com/pgsty/silo/pull/162) for [#153](https://github.com/pgsty/silo/issues/153), [#152](https://github.com/pgsty/silo/issues/152), and [#137](https://github.com/pgsty/silo/issues/137) after trusted requests enter the replication pipeline.
+- **Rate-limited diagnostics:** Receivers log a rate-limited warning when a marker-bearing request lacks replication permission so operators can spot misconfigured batch replication policies without log flooding.
 
 ## Conclusion {#conclusion}
 
-An internal-looking header is still client input. A bucket-shaped URL segment is still attacker input. The durable repair is to stop either one from becoming authority by accident:
-
-> Before authentication, do no backend work. After authentication, derive trust once and pass the decision—not the claim—downstream.
-
-That rule is broader than CORS or replication. It is the boundary future SILO handlers should preserve whenever inexpensive public request syntax meets expensive or privileged internal state.
-
-This repair is [SN-2026-008 in the ledger](/about/security-advisories/#sn-2026-008), with delivery in the [20260903 chronicle](/blog/security/20260903-server-hardening/#sn-2026-008). The silo-go reference above describes the original temporary dependency. After `0079723d3`, Server returned to verified upstream minio-go; the [component matrix](/compatibility/versions/) records selected versions.
+Merged in [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d38b59cc37781523915a60bcfa21c9706) ([PR #159](https://github.com/pgsty/silo/pull/159)) and shipped in [Server 20260916](/blog/release/silo-20260916/), the resident-only CORS lookup and post-authentication replication trust boundary close both the unauthenticated bucket-metadata probe path and untrusted replication-header injection.

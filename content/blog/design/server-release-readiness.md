@@ -5,44 +5,34 @@ date: 2026-09-03
 lastmod: 2026-10-18
 author: "Ruohang Feng"
 summary: >
-  The final adversarial review of every server change after 20260806: confirmed defects, fixes, rejected simplifications, necessary complexity, validation evidence, explicit deferrals, and the distinction between code-level GO and production release. Updated 2026-09-16 with the #116 restart-and-readback verification method.
+  The pre-release engineering review of every server change after 20260806: confirmed defects, fixes, complexity tradeoffs, validation evidence, explicit deferrals, and release gates. Includes the #116 restart-and-readback verification method.
 tags: [Design, Review, Security, Compatibility, Release]
 weight: 8
 draft: false
 url: "/blog/design/server-release-readiness/"
 ---
 
-**For 20261018:** this page preserves the historical 20260903 review. See the [October release record](/blog/release/silo-20261018/#delivery) for the final candidate, repairs and local artifact acceptance.
+This is the pre-release engineering review behind [SILO 20260903](/blog/release/silo-20260903/) (`RELEASE.2026-09-03T13-18-01Z` at `9b11dc9469e650815b775cb47b039610644f5da4`, reviewed candidate `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3`, against baseline `RELEASE.2026-08-06T00-00-00Z` at `3be10fcc1a44f6620ded0bd303461f9d688cca23`). It records what the second-pass review found after the initial implementation pass, how the fixes were narrowed, and how the release gates were structured. Subsequent September and October releases are covered in [Replication Reliability](/blog/design/replication-reliability/), [Server 20260916](/blog/release/silo-20260916/), and [Server 20261018](/blog/release/silo-20261018/#delivery).
 
+## Why the Second Review Was Necessary {#why-review}
 
-This is the durable pre-release engineering record behind [SILO 20260903](/blog/release/silo-20260903/). It explains why an earlier “all issues are solved” assessment was not accepted at face value, what the independent review found, how the fixes were narrowed, and which gates still remained at the review point. The linked release note records the later publication result.
+The first implementation pass resolved most reported defects and passed the existing test suite, but passing existing tests did not prove that every security invariant held across all valid wire representations and edge states.
 
-> **Decision:** the source candidate at `6e112d1856d4f3655f30fc81ee47e9f43d50d8f3` is a **code-level GO for remote review**. Production release remains a **conditional GO** until remote CI, Test Release, tag and artifact verification, signing, container publication, and public pull checks complete.<br>
-> **Baseline:** `RELEASE.2026-08-06T00-00-00Z` at `3be10fcc1a44f6620ded0bd303461f9d688cca23`.<br>
-> **Scope:** SILO Server behavior and its embedded/pinned runtime components. Documentation, the standalone Console, mcli, package repositories, images, and the deployed site are separate deliverables.<br>
-> **Publication closure:** the later final tree `9b11dc9469e650815b775cb47b039610644f5da4` was published as [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) on 2026-09-04 after the remote, package, provenance, container, and public-download gates below completed. The conditional decision in this page remains the historical review criterion, not the current release state.
-
-**2026-09-09 follow-up:** the repairs and main validation for #153, #152, and #137 are recorded separately in [Replication Reliability](/blog/design/replication-reliability/). That record preserves #136's accounting contract, explains cancellation lifecycle decisions, and keeps #133 separately tracked. It does not change the historical assessment of the 0903 release candidate below.
-
-## Why the second review was necessary {#why-review}
-
-The first implementation pass had strong test results and resolved most reported defects. Its conclusion was nevertheless too broad: it treated green tests and a clean worktree as proof that every security invariant had been closed.
-
-An adversarial review asked different questions:
+The second-pass review tested each change against seven questions:
 
 - Can the same invariant be bypassed by a different valid wire representation?
 - Does a pre-authentication fast path still perform I/O or acquire state?
 - What happens when metadata exists but cannot be loaded?
 - Do two individually correct read-modify-write paths share the same serialization boundary?
 - Does request sanitization preserve all SigV4 streaming state?
-- Does a validation claim describe the final tree or an earlier one?
+- Does a validation record describe the final tree or an earlier commit?
 - Is a complex mechanism protecting a reproduced failure, or only a hypothetical future?
 
-That pass found real defects after the initial “ready” claim. The correct response was not to distrust all prior work, but to narrow every assertion to an invariant and an observed tree.
+That pass uncovered real defects after the first pass and tied every conclusion to a specific invariant and commit.
 
-## Review result by area {#review-result}
+## Review Result by Area {#review-result}
 
-| Area | Adversarial finding | Final resolution | Status |
+| Area | Second-pass finding | Final resolution | Status |
 | :-- | :-- | :-- | :-- |
 | Bucket metadata | Independent config locks could lose updates to the shared `.metadata.bin` record ([#102](https://github.com/pgsty/silo/issues/102)) | One bounded `metadata.lock` surrounds every whole-record writer, migration, import, adoption, and healing path; changed-field replication avoids stale whole-record replacement | Closed in candidate |
 | Bucket creation | `ForceCreate` and site adoption could replace existing config with defaults | Preserve existing records and update only creation/adoption state; add regression tests for clobbering | Closed in candidate |
@@ -60,9 +50,9 @@ That pass found real defects after the initial “ready” claim. The correct re
 | Checksums | Multipart and copy paths omitted fields, accepted invalid combinations, or computed over the wrong representation | Complete algorithm/type validation, server-side part calculation, federated propagation, AWS errors, and CopyObject transform ordering | Closed in candidate |
 | Release evidence | Full acceptance initially described a tree that changed afterward | Record full acceptance at `ebac0ca73` and current-tree targeted gates separately | Closed as an evidence defect |
 
-## The invariants that now define the candidate {#invariants}
+## The Invariants That Define the Candidate {#invariants}
 
-### Trust is derived once, after authentication {#trust-invariant}
+### Trust Is Derived Once, After Authentication {#trust-invariant}
 
 An internal-looking header is still client input. The request must first pass the existing authentication path in its original signed form. Only then can the handler combine:
 
@@ -77,11 +67,11 @@ This ordering matters because SigV4 may sign the headers. Sanitizing first would
 
 The complete receiver-wide model is in [No I/O Before Auth, No Privilege From Headers](/blog/design/cors-replication-trust/).
 
-### A shared record has one write boundary {#metadata-invariant}
+### A Shared Record Has One Write Boundary {#metadata-invariant}
 
 Policy, lifecycle, SSE, tags, quota, replication, Object Lock, versioning, and CORS are logical fields but physical members of one bucket record. A per-field mutex cannot protect a whole-record read-modify-write.
 
-The selected repair is deliberately smaller than a new database or transaction layer:
+Rather than introducing a separate database or transaction layer, the fix serializes bucket-record updates under one bounded lock:
 
 ```text
 acquire metadata.lock
@@ -93,9 +83,9 @@ acquire metadata.lock
 release metadata.lock
 ```
 
-The lock does not cover object data I/O and is bounded to a bucket-metadata operation. Migration and healing must participate because they also replace the whole record. Replication receivers merge only changed fields so an older remote snapshot cannot erase unrelated local state.
+The lock does not cover object data I/O and is bounded to a bucket-metadata operation. Migration and healing participate because they also replace the whole record. Replication receivers merge only changed fields so an older remote snapshot cannot erase unrelated local state.
 
-### Failure is a state, not the same thing as absence {#cors-failure-invariant}
+### Distinguishing CORS Load Failure from Absence {#cors-failure-invariant}
 
 The CORS hot path must distinguish four states:
 
@@ -106,65 +96,63 @@ The CORS hot path must distinguish four states:
 | Resident bucket with a bucket CORS document | Evaluate that document |
 | No resident metadata and no known failure | Use the server-wide fallback |
 
-The second row is why a failed-bucket set survives the simplification pass. A pre-signed URL is already authorized by its signature and may access a private object without bucket-policy evaluation. In that case the bucket CORS document is the browser-origin boundary. Losing the failure bit and using a permissive global fallback would weaken that boundary.
+The second row is why the failed-bucket set is required. A pre-signed URL is already authorized by its signature and may access a private object without bucket-policy evaluation. In that case the bucket CORS document is the browser-origin boundary. Losing the failure bit and using a permissive global fallback would weaken that boundary.
 
-The set remains bounded by real bucket load attempts and is maintained through two helpers. Successful load, removal, stale-bucket cleanup, refresh, reset, and concurrent load all have tests.
+The set remains bounded by real bucket load attempts and is maintained through `noteLoadFailure` and `clearLoadFailure`. Successful load, removal, stale-bucket cleanup, refresh, reset, and concurrent load all have tests.
 
-### Object Lock is semantic, not textual {#object-lock-invariant}
+### Semantic Object Lock Normalization {#object-lock-invariant}
 
-Any valid enabled Object Lock configuration implies versioning. XML whitespace, element order, and the presence of a Default Retention rule do not change that meaning. Therefore normalization follows parsing, not a byte comparison against one canonical document.
+Any valid enabled Object Lock configuration implies versioning. XML whitespace, element order, and the presence of a Default Retention rule do not change that meaning. Normalization therefore follows XML parsing rather than a byte comparison against one canonical document.
 
 The resulting versioning record is plain `Enabled`. A suspended state and an exclude-prefix extension are incompatible with the lock invariant and are removed on update, read-back, and reload.
 
-## Complexity audit {#complexity-audit}
+## Complexity Audit {#complexity-audit}
 
-The pre-release pass explicitly looked for over-design, duplication, defensive programming without a threat model, and stale compatibility machinery.
+The pre-release pass audited the diff for over-design, duplication, defensive code without a threat model, and stale compatibility machinery.
 
-### Complexity retained because it protects a reproduced failure {#retained}
+### Complexity Retained Because It Protects a Reproduced Failure {#retained}
 
-- **One metadata lock:** retained because a deterministic cross-type lost-update test reproduced data loss.
-- **CORS tombstones:** retained because site replication cannot distinguish deletion from “never observed” without them.
-- **CORS load-failure state:** retained because a pre-signed URL provides an authenticated, policy-independent counterexample.
-- **Two replication trust levels:** retained because ordinary replication and replica-ciphertext/SSE semantics do not use identical wire shapes.
-- **Post-authentication sanitization:** retained because sanitizing before SigV4 verification breaks legitimate signed requests.
-- **Adversarial multi-pool/null-version tests:** retained because single-pool happy paths do not exercise the state-selection failures they caught.
+- **One metadata lock:** a deterministic cross-type lost-update test reproduced data loss.
+- **CORS tombstones:** site replication cannot distinguish deletion from "never observed" without them.
+- **CORS load-failure state:** a pre-signed URL provides an authenticated, policy-independent counterexample.
+- **Two replication trust levels:** ordinary replication and replica-ciphertext/SSE semantics do not use identical wire shapes.
+- **Post-authentication sanitization:** sanitizing before SigV4 verification breaks legitimate signed requests.
+- **Multi-pool/null-version edge-case tests:** single-pool happy paths do not exercise the state-selection failures they caught.
 
-### Complexity removed or narrowed {#removed}
+### Complexity Removed or Narrowed {#removed}
 
 - CORS failure-set mutations were centralized in `noteLoadFailure` and `clearLoadFailure`.
-- The replication import path now applies changed fields rather than copying an entire possibly stale record.
+- The replication import path applies changed fields rather than copying an entire possibly stale record.
 - Obsolete encryption helpers, dead event-target functions, and abandoned handler branches were deleted.
 - The compatibility guard stopped inventorying every exported source symbol and now protects the actual served routes and frozen wire/configuration surfaces.
 - The old `wait_pipe` lint exemption was removed; `gomodguard_v2` replaced deprecated configuration.
 - Dynamic timeout tests no longer call global `rand.Seed` from a parallel package.
 - The server returned from the temporary `silo-go` fork to the reviewed upstream-compatible `minio-go` revision.
 
-### Changes deliberately not introduced {#not-introduced}
+### Changes Deliberately Not Introduced {#not-introduced}
 
 - no generic metadata transaction framework;
 - no second CORS cache or unbounded negative cache;
-- no new public “trusted replication” request header;
+- no new public "trusted replication" request header;
 - no cross-repository release gate that makes the server depend on a later Console or documentation release;
 - no partial conditional-delete contract in the release candidate;
 - no broad rewrite of inherited site-replication registers without dedicated convergence tests.
 
-## Deferrals and why they do not all have the same severity {#deferrals}
+## Deferrals and Why They Do Not All Have the Same Severity {#deferrals}
 
-| Item | Classification | Release decision |
+| Item | Classification | 20260903 release decision (and subsequent status) |
 | :-- | :-- | :-- |
-| Conditional delete [#10](https://github.com/pgsty/silo/issues/10) | Inherited missing S3 feature; dangerous only to callers that assume unsupported `If-Match` / per-object ETag is enforced | Document prominently; do not merge the incomplete PR or a single-only half contract |
-| Multi-site config deletion [#77](https://github.com/pgsty/silo/issues/77) | Inherited convergence defect for policy/SSE/tags/quota; CORS has its own fixed register | Not a single-site blocker; deployment condition for users relying on those multi-site deletes |
+| Conditional delete [#10](https://github.com/pgsty/silo/issues/10) | Inherited missing S3 feature; affects callers that assume `If-Match` / per-object ETag is enforced | Documented for 0903; single-object conditional delete later shipped in 20260916 (#145), while batch ETag deletion remains open |
+| Multi-site config deletion [#77](https://github.com/pgsty/silo/issues/77) | Inherited convergence defect for policy/SSE/tags/quota; CORS has its own fixed register | Documented deployment condition for 0903; later repaired in 20260916 |
 | `ListMultipartUploads` [#79](https://github.com/pgsty/silo/issues/79) | Inherited listing-conformance gap | Known issue; not a data-integrity blocker for ordinary multipart workflows |
-| Federated `CopyObject` [#99](https://github.com/pgsty/silo/issues/99), [#100](https://github.com/pgsty/silo/issues/100) | Legacy-backend checksum/inline-object gaps | Block use of the affected features, not the general server release |
+| Federated `CopyObject` [#99](https://github.com/pgsty/silo/issues/99), [#100](https://github.com/pgsty/silo/issues/100) | Legacy-backend checksum/inline-object gaps | Scoped to affected federated features in 0903; later repaired in 20260916 |
 | ILM relocation PR #60 and broad SSE issue #61 | New capability requests | Outside the release safety boundary |
-
-“Inherited” does not mean harmless. It means the defect was not introduced by this change set and should be evaluated against the documented release contract. A deployment that depends on one of the affected paths inherits a deployment-specific stop condition even when the general release remains conditional GO.
 
 ## Evidence {#evidence}
 
-### Full acceptance tree {#full-acceptance}
+### Full Acceptance Tree {#full-acceptance}
 
-The full local acceptance corresponds to `ebac0ca73bbf251b070bb6df4d8005015841f901`:
+The full local acceptance run targeted `ebac0ca73bbf251b070bb6df4d8005015841f901`:
 
 - full `cmd` and `internal` suites;
 - complete `cmd` race suite: 365.448 seconds, pass;
@@ -173,63 +161,54 @@ The full local acceptance corresponds to `ebac0ca73bbf251b070bb6df4d8005015841f9
 - `govulncheck` with no reachable vulnerability;
 - six `make verify` deployment shapes: 174 PASS / 0 FAIL.
 
-The first two `make verify` attempts encountered environment/setup failures while obtaining mcli, not test failures. The successful run used the locally checksum-pinned mcli, retained the outbound proxy for GitHub downloads, bypassed it for localhost, and placed GNU userland tools first in `PATH`. That distinction is part of the evidence rather than something to hide.
+The first two `make verify` runs hit environment/setup issues while fetching `mcli`, not test failures. The passing run used the locally checksum-pinned `mcli`, retained the outbound proxy for GitHub downloads, bypassed it for localhost, and placed GNU userland tools first in `PATH`.
 
-### Post-acceptance candidate {#post-acceptance}
+### Post-Acceptance Candidate {#post-acceptance}
 
-The only code change after that full run is `84e1580a4`, which clears one CORS failure-state bit after a successful on-demand metadata reload. The candidate merge adds no code; `6e112d185` changes only Helm release metadata and documentation. On the final candidate, the following pass:
+The only code change after that full run was `84e1580a4`, which clears one CORS failure-state bit after a successful on-demand metadata reload. The candidate merge added no code; `6e112d185` changed only Helm release metadata and documentation. On the final candidate, the following checks passed:
 
 - `git diff --check`;
 - targeted CORS and Object Lock `go test -race`;
 - rebrand guard;
 - generated-file check;
-- lint with 0 issues.
+- lint with 0 issues;
 - Helm lint, default and optional renders, chart packaging, and the seven-resource legacy-upgrade identity guard.
 
-This evidence is proportional to a one-line state-transition fix, but the remote CI and release workflows must still run against the pushed tree.
+## Go, No-Go, and Ownership of the Release Gates {#decision}
 
-## Go, no-go, and ownership of the remaining gates {#decision}
+### Code Decision: GO {#code-go}
 
-### Code decision: GO {#code-go}
+All confirmed code defects from both review rounds were resolved in the candidate. Each fix was verified at the layer that owns its invariant, and every retained mechanism corresponds to a reproduced failure case.
 
-No confirmed code defect from the two review rounds remains unresolved in the candidate. The fixes are covered at the layer where their invariants live, and the retained complexity corresponds to reproduced counterexamples.
+### Production Release Gates {#production-conditional-go}
 
-### Production decision: conditional GO {#production-conditional-go}
+Before publishing `RELEASE.2026-09-03T13-18-01Z`, the candidate cleared seven release gates:
 
-The server must not be described as released until all of these are facts:
+1. candidate commits pushed and reviewed;
+2. remote CI and Test Release passing on the pushed head;
+3. the release tag pointing at the reviewed chart 7.0.2 / server 0903 / client 0903 release tree;
+4. draft artifacts, checksums, SBOMs, attestations, and signed RPMs verified;
+5. finalize and Docker release publishing both classic and distroless variants;
+6. anonymous download and pull tests passing;
+7. release notes updated from the tagged facts and documentation deployed.
 
-1. candidate commits are pushed and reviewed;
-2. remote CI and Test Release pass on the pushed head;
-3. the intended tag points at the reviewed chart 7.0.2/server 0903/client 0903 release tree;
-4. Draft artifacts, checksums, SBOMs, attestations, and signed RPMs verify;
-5. finalize and Docker release publish both classic and distroless variants;
-6. anonymous download and pull tests pass;
-7. release notes are updated from the tagged facts and the documentation site is deployed.
+### Deployment Considerations for 20260903 {#deployment-conditions}
 
-Any failure in steps 1–6 is a release blocker. A local green suite cannot substitute for them.
+Operators upgrading to 20260903 must account for three requirements:
 
-### Deployment-specific stop conditions {#deployment-conditions}
+- update every node in a distributed cluster within one coordinated maintenance window;
+- update every member of a site-replication group before configuring bucket CORS;
+- update IAM policies for `s3:DeleteObjectVersion` and user/group status-action separation.
 
-Operators should delay even a successfully published release when they cannot yet:
+## Restart and Readback Verification (2026-09-11, #116) {#restart-readback}
 
-- update every node in a distributed cluster within one coordinated maintenance operation;
-- update every member of a site-replication group before using bucket CORS;
-- revise IAM policies for `s3:DeleteObjectVersion` and status-action separation;
-- avoid or explicitly accept the known #10, #77, #79, #99, or #100 path their workload depends on.
+A follow-up acceptance test ([#116](https://github.com/pgsty/silo/issues/116), run on 2026-09-11) measured bounded restart and readback behavior across four dimensions:
 
-The final conclusion at the review point was intentionally narrower than “everything is fixed”: **the reviewed candidate was ready to enter the release machinery, the remaining limitations were explicit, and production publication was gated by verifiable artifacts rather than confidence.** Those gates later completed for the release linked above; these deployment conditions describe Server 20260903, the release this record reviewed.
+- **Acknowledgement ledger.** Every acknowledged PUT writes to a unique versioned key, and the acknowledgement records the `VersionId`, byte count, and SHA-256 immediately. Readback fetches by exact `VersionId` and asserts all three, ensuring an early confirmation cannot be silently replaced by a later write.
+- **Readback timing.** Periodic re-reads run at 15, 30, and 60 seconds after the data canary succeeds, across every peer, and the final check covers writes made both during a single-node outage and after its rejoin.
+- **No retry masking.** Each canary carries a hard 60-second deadline covering setup, request, response-body read, and sleep, with SDK retries disabled so a recovery window cannot be masked by client-side retries.
+- **Driver topology.** Four Linux/arm64 containers on one host with independent network identities, one drive each (EC 2+2), and `tmpfs` volumes kept mounted by a holder container through the full shutdown; nodes stop in parallel with a 10-second grace period, then start in parallel.
 
-## Restart and readback verification (2026-09-11, #116) {#restart-readback}
+**Admin-endpoint readiness is not data readiness.** The [historical test record](https://github.com/pgsty/silo/blob/82948d63060839f6d18c9da8cfd03e8b6d95bc49/docs/investigations/release-readiness-20260911.md#linux-restartreadback-116) compared 0806, 0903, and the `main` repair build. The `main` build passed the admin readiness check 2.461 s after restart, then required another 14.489 s to complete the first data canary. During that startup window, `admin/health` does not reflect data-plane readiness; upgrade automation must verify actual data-plane operations rather than relying on a fixed sleep.
 
-A later acceptance ([#116](https://github.com/pgsty/silo/issues/116), run on 2026-09-11) measured bounded restart/readback behavior, including the inherited readiness gap. The durable part is the *method*, which any operator can reuse when validating a restart or upgrade window:
-
-- **Acknowledgement ledger.** Every acknowledged PUT writes to a unique versioned key, and the acknowledgement records the VersionId, byte count, and SHA-256 immediately. Readback fetches by exact VersionId and asserts all three — an early confirmation cannot be silently replaced by a later write.
-- **Readback timing.** Periodic re-reads happen at 15/30/60 s after the data canary succeeds, through every peer, and the final check includes writes made during a single-node outage and after its rejoin.
-- **No retry masking.** Each canary carries a hard 60 s deadline covering setup, request, response-body read, and sleep, and SDK retries are disabled so a recovery window cannot be papered over by client-side retries.
-- **Driver topology.** Four Linux/arm64 containers on one host with independent network identities, one drive each (EC 2+2), and tmpfs volumes kept mounted by a holder container through the full shutdown; nodes stop in parallel with a 10 s grace period, then start in parallel.
-
-The operational finding worth remembering: **admin-endpoint readiness is not data readiness.** The [fixed historical record](https://github.com/pgsty/silo/blob/82948d63060839f6d18c9da8cfd03e8b6d95bc49/docs/investigations/release-readiness-20260911.md#linux-restartreadback-116) tested 0806, 0903 and the then-current main repair build. The main build reached the admin gate 2.461 s after restart, then needed another 14.489 s for the data canary: different timing origins. The 0903 run took 0.191 s after its gate, which does not establish immunity to the inherited startup window. A readiness probe against admin/health says nothing about the data plane during that window, and no fixed sleep substitutes for an actual data-plane check.
-
-Boundaries, stated as boundaries: this acceptance covers process/container restart and TCP peer reconnection on a single Linux host. It does not prove persistence across independent hosts, host reboots, or physical media failure, and the timings are individual observations, not latency guarantees. The run artifacts are retained outside the documentation tree; the method above is the part that generalizes.
-
-**September 16 source follow-up:** #10 closed through the independent single-object repair #145; batch ETag deletion is still absent. #77 and #99/#100 were repaired on main. #133/#144 were subsequently addressed by #178; #79's default listing limitations remain open. These changes must not be retroactively attributed to Server 20260903; they shipped in [Server 20260916](/blog/release/silo-20260916/). See the [current component/source matrix](/compatibility/versions/).
+See the [current component/source matrix](/compatibility/versions/) for the status of all subsequent repairs.

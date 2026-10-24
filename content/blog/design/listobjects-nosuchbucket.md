@@ -12,39 +12,31 @@ draft: false
 url: "/blog/design/listobjects-nosuchbucket/"
 ---
 
-> **Release check (2026-09-16):** the original repair described here is included in [Server 20260903](/blog/release/silo-20260903/). Dated review and test accounts below record their original evidence, not a still-pending release or acceptance of a particular production installation. Later source changes and component selections are in the [version matrix](/compatibility/versions/).
-
-This document records the problem analysis, design discussion, and repair decision for [SILO #32](https://github.com/pgsty/silo/issues/32) and [PR #37](https://github.com/pgsty/silo/pull/37).
-
-> **Status on 2026-08-26:** [PR #37](https://github.com/pgsty/silo/pull/37) was updated to the DCO-signed head [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377), formally approved, and merged as [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef); [#32](https://github.com/pgsty/silo/issues/32) closed automatically. DCO, VulnCheck, and all six Go CI jobs passed on the exact PR head; the post-merge `main` VulnCheck and all six Go CI jobs also passed. No tagged release, package, container image, deployment, or production endpoint has yet been verified to contain the repair.<br>
-> **Scope:** verify bucket existence only for three listing shortcuts that bypass storage; do not restore the generic `checkBucketExist`, change the normal listing path, or introduce an existence cache.<br>
-> **Release boundary:** local commit, push, remote CI, merge, tag, package, container image, deployment, and production verification are independent gates.
+Shipped in [SILO Server 20260903](/blog/release/silo-20260903/), [PR #37](https://github.com/pgsty/silo/pull/37) (commit [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377), merged as [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef), closing [SILO #32](https://github.com/pgsty/silo/issues/32)) fixes an S3 compatibility regression where three early-return shortcuts in `ListObjects`, `ListObjectsV2`, and `ListObjectVersions` returned HTTP `200 OK` with an empty listing instead of HTTP `404 NoSuchBucket` when called against a non-existent bucket.
 
 ## Too Long; Didn't Read (TL;DR) {#tldr}
 
-The problem is real and worth fixing. A normal `ListObjects`, `ListObjectsV2`, or `ListObjectVersions` request against a missing bucket reaches storage and receives `BucketNotFound`. Three inputs, however, return early:
+A normal `ListObjects`, `ListObjectsV2`, or `ListObjectVersions` request against a missing bucket reaches the storage layer and receives `BucketNotFound`. Three shortcut inputs, however, return early before touching storage:
 
-- a marker outside the prefix;
+- a `marker` (or `start-after`) that does not begin with `prefix`;
 - `max-keys=0`;
-- a prefix beginning with `/`, including the `Prefix="/"` boto3 reproduction from #32.
+- a `prefix` beginning with `/`, including the `Prefix="/"` `boto3` reproduction from [#32](https://github.com/pgsty/silo/issues/32).
 
-Those branches return `io.EOF` directly. The caller treats EOF as a successful end of listing, so the client receives an empty 200 rather than S3's 404 `NoSuchBucket`. The identity of the same missing resource changes from an error to success solely because the selection parameters differ. That breaks S3 compatibility and blocks a real user's upgrade from the pre-regression release.
+Those three branches returned `io.EOF` directly. Because the caller treats `io.EOF` as the normal end of a listing, the client received an empty HTTP 200 response instead of S3's HTTP 404 `NoSuchBucket`. The same missing bucket changed from a `404` resource error to a `200` success solely because the query filter parameters differed, breaking S3 compatibility and blocking upgrades from pre-regression releases.
 
-The repair must not put an expensive bucket check back in every listing. The selected design replaces only the three bare `io.EOF` returns with a small helper. The helper calls `GetBucketInfo` once: it returns the real error if the bucket is absent or cannot be confirmed, and preserves `io.EOF` when the bucket exists. The normal listing hot path is untouched. Only requests that would otherwise exit before storage pay the extra peer-and-disk fan-out.
+Restoring a bucket-existence check on every listing request would reintroduce cluster-wide RPC fan-out on the normal hot path. Instead, PR #37 replaces only the three bare `io.EOF` returns with a helper (`listPathShortcutEOF`) that calls `GetBucketInfo` once: it returns the underlying error when the bucket is absent or cannot be confirmed, and returns `io.EOF` when the bucket exists. Normal listings pay zero extra cost; only requests that would otherwise exit before touching storage pay the `GetBucketInfo` fan-out.
 
-That decision has now been executed: **the strengthened repair passed local review, the exact PR head passed every remote check, and the expected-head-guarded merge entered a green `main`.**
+## What Is the Problem? {#problem}
 
-## What is the problem? {#problem}
+### One API Exposes Two Bucket-Existence Semantics {#two-semantics}
 
-### One API exposes two bucket-existence semantics {#two-semantics}
-
-#32 reproduces the defect by calling the following against a missing bucket:
+Issue [#32](https://github.com/pgsty/silo/issues/32) reproduces the defect with a single call against a missing bucket:
 
 ```python
 s3.list_objects(Bucket="missing-bucket", Prefix="/")
 ```
 
-AWS S3 raises `NoSuchBucket`; SILO returns a successful empty listing. The difference is not in authentication, routing, or XML serialization. It comes from the object-layer `listPath` control flow:
+AWS S3 raises `NoSuchBucket`; SILO returned a successful empty listing. The divergence originates in the object-layer `listPath` control flow:
 
 ```text
 regular prefix
@@ -60,75 +52,68 @@ shortcut input
   -> HTTP 200 with an empty listing
 ```
 
-`/` is not the only trigger:
+`Prefix="/"` is only one of three triggers:
 
-| Shortcut condition | Why the result must be empty | Defect before the repair |
+| Shortcut Condition | Why the Result Must Be Empty | Defect Before the Fix |
 | --- | --- | --- |
-| Marker does not begin with the prefix | The implementation does not scan this disjoint range | Returns EOF without confirming the bucket |
-| `max-keys=0` | The caller asks for zero keys | Incorrectly equates “zero results” with “valid resource” |
-| Prefix begins with `/` | SILO's flat key space produces no entries for this form | The filter short-circuits before bucket identity |
+| `marker` does not begin with `prefix` | The listing engine does not scan a disjoint range | Returns `io.EOF` without confirming bucket existence |
+| `max-keys=0` | The caller explicitly requests zero keys | Equates "zero keys requested" with "valid bucket resource" |
+| `prefix` begins with `/` | SILO's flat key space never produces keys with a leading `/` | Short-circuits on the filter before checking bucket identity |
 
-For an existing bucket, returning an empty listing from these branches is a reasonable optimization. For a missing bucket, the same EOF masks the resource error that should take precedence.
+For an existing bucket, returning an empty listing from these branches is a valid fast path. For a missing bucket, returning bare `io.EOF` masks the resource error that must take precedence.
 
-### The regression has a known origin {#regression}
+### Tracing the Regression to Upstream `#18917` {#regression}
 
-The reporter confirmed correct behavior in `RELEASE.2024-01-29T03-56-32Z` and the regression beginning with `RELEASE.2024-01-31T20-20-33Z`. The corresponding upstream change is [minio/minio#18917](https://github.com/minio/minio/pull/18917) / [`80ca12008`](https://github.com/minio/minio/commit/80ca120088be9950fa35467975dd9d8dc1bd4176). It removed `GetBucketInfo` from generic argument checks and relied on actual Put, List, and Multipart storage operations to expose a missing bucket.
+The reporter confirmed that `RELEASE.2024-01-29T03-56-32Z` returned `NoSuchBucket` and that the regression started in `RELEASE.2024-01-31T20-20-33Z`. Tracing git history pinpoints upstream [minio/minio#18917](https://github.com/minio/minio/pull/18917) ([`80ca12008`](https://github.com/minio/minio/commit/80ca120088be9950fa35467975dd9d8dc1bd4176)), which removed `GetBucketInfo` from generic handler argument checks and relied on the underlying `Put`, `List`, and `Multipart` storage operations to surface `BucketNotFound`.
 
-That optimization works on normal paths but leaves a gap: an early-return path never reaches the storage operation that is now responsible for producing the error. #32 does not require a broad rollback of the upstream optimization. It repairs the overlooked control-flow exits.
+That assumption holds whenever the request reaches storage, but breaks on early-return branches that exit before touching any drive. Fixing [#32](https://github.com/pgsty/silo/issues/32) therefore requires closing the three control-flow exits that bypass storage, rather than reverting `#18917`.
 
-## Why fix it? {#why-fix}
+## Why Fix It? {#why-fix}
 
-### The S3 contract explicitly requires `NoSuchBucket` {#s3-contract}
+### The S3 Contract Requires `NoSuchBucket` {#s3-contract}
 
-Both [AWS ListObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjects.html) and [ListObjectsV2](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html) define `NoSuchBucket` as HTTP 404 when the specified bucket does not exist. `prefix`, marker, `start-after`, and `max-keys` select listing results; they must not turn a missing bucket identity into a successful request.
+Both [AWS `ListObjects`](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjects.html) and [`ListObjectsV2`](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html) specify HTTP 404 `NoSuchBucket` when the target bucket does not exist. Selection parameters (`prefix`, `marker`, `start-after`, and `max-keys`) filter objects inside an existing bucket; they cannot make a non-existent bucket succeed. Because `ListObjectVersions` shares the same object-layer listing engine, applying the fix across all three APIs keeps V1, V2, and version listings consistent.
 
-`ListObjectVersions` shares the same object-layer listing engine. Giving V1, V2, and version listings the same existence behavior on the same shortcut inputs prevents the three public APIs from diverging further.
+### An Empty HTTP 200 Alters Client Control Flow {#client-impact}
 
-### An empty 200 changes client decisions {#client-impact}
+An empty HTTP 200 and an HTTP 404 drive opposite decisions in client applications:
 
-An empty 200 and a 404 are not interchangeable presentation details:
+- HTTP 404 tells provisioning scripts, SDKs, or test harnesses to create the bucket, report a configuration error, or abort;
+- an empty HTTP 200 asserts that the bucket exists and currently holds no matching keys;
+- integration test suites using SILO as a local S3 target pass against a missing bucket locally and then fail against AWS S3.
 
-- 404 tells provisioning or test code to create the bucket, fix configuration, or stop;
-- an empty 200 asserts that the bucket exists but has no matching objects;
-- SDKs, synchronization tools, and integration tests continue down different branches;
-- a test using SILO as an S3 substitute can pass locally and fail against AWS.
+### The Repair Surface Is Narrow and Verifiable {#repair-value}
 
-#32 also establishes a direct upgrade impact: an application relying on the older correct behavior cannot upgrade past the regression. The repair restores both S3 parity and upgrade compatibility.
+The defect is confined to three adjacent early returns in `cmd/metacache-server-pool.go` and does not touch object data, metadata formats, sorting, continuation-token encoding, IAM evaluation, or XML schemas.
 
-### The repair surface is narrow and testable {#repair-value}
+## Why We Cannot Simply Restore a Global Check {#performance-constraint}
 
-The bug is confined to three adjacent early returns. It does not involve object data, metadata formats, sorting, pagination-token encoding, permissions, or wire schemas. A very small production change can be pinned down with object-layer and HTTP-level contracts, so the benefit clearly exceeds the implementation risk.
+Upstream [#18917](https://github.com/minio/minio/pull/18917) removed generic `GetBucketInfo` checks because calling `GetBucketInfo` before every `Put`, `List`, and `Multipart` operation fans out across all servers in the cluster; even after request vectorization, that overhead becomes pronounced past 100 nodes.
 
-## Why not restore the global check? {#performance-constraint}
+In SILO, `erasureServerPools.GetBucketInfo` invokes `S3PeerSys.GetBucketInfo`, which queries every peer concurrently and reduces quorum across pools while each peer inspects its local bucket state. Neither extreme is acceptable:
 
-Upstream did not remove generic `GetBucketInfo` as incidental cleanup. [The motivation for #18917](https://github.com/minio/minio/pull/18917) states that checking the bucket before every Put, List, and Multipart operation fans out across servers; even after vectorization, the cost becomes visible beyond 100 nodes.
+- **Never check on shortcuts:** preserves the bogus HTTP 200 on missing buckets.
+- **Check before every `List`:** restores `404` semantics at the cost of undoing the large-cluster optimization on every normal listing.
 
-In current SILO, `erasureServerPools.GetBucketInfo` calls `S3PeerSys.GetBucketInfo`. That operation concurrently asks every peer and reduces quorum per pool, while each peer checks its local bucket state. It is not a cheap in-memory map lookup.
+Confining the `GetBucketInfo` call to the three branches that bypass storage solves the compatibility bug without taxing normal `ListObjects` traffic.
 
-Two extremes are therefore unacceptable:
+## Implementation {#implementation}
 
-- **never check:** keep the incorrect empty 200;
-- **check before every List:** restore semantics while undoing a critical large-cluster optimization.
+### Replace Only the Three Bare `io.EOF` Returns {#three-shortcuts}
 
-The actual design question is whether the check can be confined to branches that never touch storage and therefore cannot discover the missing bucket naturally. It can.
-
-## How is it fixed? {#implementation}
-
-### Replace only three bare EOF returns {#three-shortcuts}
-
-In `cmd/metacache-server-pool.go`, each shortcut previously executed:
+In `cmd/metacache-server-pool.go`, each of the three shortcut branches previously executed:
 
 ```go
 return entries, io.EOF
 ```
 
-It now executes:
+Each branch now calls `listPathShortcutEOF`:
 
 ```go
 return entries, z.listPathShortcutEOF(ctx, o.Bucket)
 ```
 
-The helper has only two classes of outcome:
+where `listPathShortcutEOF` is defined as:
 
 ```go
 func (z *erasureServerPools) listPathShortcutEOF(ctx context.Context, bucket string) error {
@@ -139,166 +124,120 @@ func (z *erasureServerPools) listPathShortcutEOF(ctx context.Context, bucket str
 }
 ```
 
-- existing bucket: preserve the previous empty-list behavior;
-- missing bucket: pass `BucketNotFound` into the existing error mapping, producing HTTP 404 `NoSuchBucket`;
-- state cannot be confirmed: propagate quorum, offline, timeout, or context errors instead of fabricating success.
+This helper produces three possible outcomes:
 
-The normal `listMerged`, metacache scan, sorting, pagination, and response-generation paths do not change.
+- **Bucket exists:** returns `io.EOF`, preserving the empty listing response.
+- **Bucket does not exist:** returns `BucketNotFound`, which maps to HTTP 404 `NoSuchBucket`.
+- **Cluster state cannot be confirmed:** propagates quorum, offline, timeout, or context cancellation errors rather than fabricating an empty success.
 
-### Why the helper belongs here {#helper-boundary}
+The normal `listMerged`, metacache scan, sorting, pagination, and XML rendering paths remain untouched.
 
-The check must sit next to the shortcut for three reasons:
+### Why the Helper Belongs in `listPath` {#helper-boundary}
 
-1. only this layer knows that it is about to bypass every storage access;
-2. moving it into generic argument validation charges every call;
-3. moving it into the scan layer cannot help because these branches never scan.
+Placing the check directly at the shortcut exits in `listPath` satisfies three constraints:
 
-The name intentionally states the boundary. This is not a new generic `checkBucketExist`; it restores missing existence semantics immediately before a shortcut returns EOF.
+1. Only `listPath` knows that it is about to return early without consulting any storage drive.
+2. Moving the check up into HTTP handler validation would charge every listing request.
+3. Moving the check down into the scanner cannot work because these three branches never enter the scanner.
 
-### Do not add a cache {#no-cache}
+### Why We Do Not Add an Existence Cache {#no-cache}
 
-A bucket-existence cache could reduce fan-out but immediately creates invalidation questions for create, delete, site replication, recovery, and expiry. Adding a second source of truth for three low-frequency shortcuts costs more complexity and consistency risk than it saves.
+Caching bucket existence would reduce shortcut fan-out, but immediately introduces cache-invalidation hazards across bucket creation, deletion, site replication, healing, and TTL expiration. Introducing a second source of truth for three low-frequency shortcut paths adds more consistency risk than it saves. If production telemetry ever shows high-volume `max-keys=0` or leading-slash probing on large clusters, rate limiting or a dedicated metadata fast path can be evaluated with real traffic data.
 
-The selected implementation uses the existing `GetBucketInfo` source of truth. If future telemetry shows that large clusters receive frequent `max-keys=0`, slash-prefix, or disjoint-marker probes, the project can evaluate a dedicated metadata fast path, rate limiting, or a carefully invalidated cache using real data rather than speculative machinery in this compatibility patch.
+## Verification Evidence {#verification}
 
-## Test and review evidence {#verification}
+### Object-Layer Contract {#object-layer-tests}
 
-### Object-layer contract {#object-layer-tests}
+Object-layer regression tests run against both single-drive and multi-drive erasure setups across four inputs:
 
-The object-layer test runs against single-drive and multi-drive erasure setups and exercises four inputs:
+- leading-slash `prefix` (`Prefix="/"` and `Prefix="/sub"`),
+- `max-keys=0`,
+- `marker` outside `prefix`,
+- a regular `prefix` as a control case that naturally receives `BucketNotFound` from storage.
 
-- slash-prefixed prefix;
-- zero limit;
-- marker outside prefix;
-- a regular prefix as a control that still receives the error naturally from storage.
+Every case exercises `ListObjects`, `ListObjectsV2`, and `ListObjectVersions` and asserts `isErrBucketNotFound`.
 
-Each case covers `ListObjects`, `ListObjectsV2`, and `ListObjectVersions`, using the typed `isErrBucketNotFound` predicate rather than brittle English error-string comparison.
+### HTTP Wire Contract {#http-tests}
 
-### HTTP contract {#http-tests}
+The HTTP handler test sends signed S3 requests across all three public listing APIs:
 
-The handler test sends genuine signed requests for all three public APIs:
-
-| API | Request shape | Assertion |
+| API | Request Shape | Assertion |
 | --- | --- | --- |
-| ListObjects | `GET /missing-bucket?prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
-| ListObjectsV2 | Add `list-type=2` | HTTP 404 and XML code `NoSuchBucket` |
-| ListObjectVersions | Add `versions` | HTTP 404 and XML code `NoSuchBucket` |
+| `ListObjects` | `GET /missing-bucket?prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
+| `ListObjectsV2` | `GET /missing-bucket?list-type=2&prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
+| `ListObjectVersions` | `GET /missing-bucket?versions&prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
 
-The HTTP test uses the real slash-prefix reproduction from #32. The other two shortcuts are enumerated at the object layer. This proves final wire behavior without repeating the full matrix in the slower handler fixture.
+### Local and CI Quality Gates {#local-gates}
 
-### Local quality gates {#local-gates}
+The change passed the full local verification suite (`go test ./cmd -count=1` in 116.2 s, the 10 new object-layer and HTTP regression subcases under `-race`, `CGO_ENABLED=0 go build ./...`, `go vet ./...`, and independent design and code review). On GitHub Actions, DCO-signed PR head [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377) passed [DCO](https://github.com/pgsty/silo/actions/runs/32961304270), [VulnCheck](https://github.com/pgsty/silo/actions/runs/32961304271), and all six [Go CI](https://github.com/pgsty/silo/actions/runs/32961304309) jobs, and merge commit [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef) passed post-merge [VulnCheck](https://github.com/pgsty/silo/actions/runs/32962256729) and [Go CI](https://github.com/pgsty/silo/actions/runs/32962256823).
 
-The improved local commit passed:
+## Derived Risks and Edge Cases {#derived-risks}
 
-```text
-go test ./cmd -count=1
-the new object-layer and HTTP regressions (10 subcases)
-focused go test -race
-related existing listing tests
-CGO_ENABLED=0 go build ./...
-go vet ./...
-CI-scope gofmt and git diff --check
-post-commit focused regression rerun
-```
+### Shortcut Requests Now Fan Out Across the Cluster {#fanout-cost}
 
-The full local `cmd` test completed in 116.215 seconds. An independent local Claude Code review used the Fable model at Max effort to inspect the exact tree, call paths, error mapping, tests, performance boundary, and this decision. Its verdict was **GO**, with no mandatory pre-merge change.
+On an existing bucket, a shortcut request previously executed a purely local branch; it now calls `GetBucketInfo`. Local microbenchmarks illustrate the relative shift:
 
-The DCO-signed PR head `e9c5340be` then passed eight remote checks: [DCO](https://github.com/pgsty/silo/actions/runs/32961304270), [VulnCheck](https://github.com/pgsty/silo/actions/runs/32961304271), and six jobs in [Go CI](https://github.com/pgsty/silo/actions/runs/32961304309). After merge, the resulting `main` commit `49c8aeac4` independently passed [VulnCheck](https://github.com/pgsty/silo/actions/runs/32962256729) and all six [Go CI](https://github.com/pgsty/silo/actions/runs/32962256823) jobs. The slowest checks were PR cross-compile at 9 minutes 47 seconds and post-merge cross-compile at 9 minutes 30 seconds.
-
-## Can it introduce new problems? {#derived-risks}
-
-### Shortcut requests now fan out across the cluster {#fanout-cost}
-
-This is the most important and deliberately accepted cost. A shortcut on an existing bucket used to be little more than a local branch; it now calls `GetBucketInfo`. Directional local microbenchmarks observed:
-
-| Path | Observed magnitude |
+| Path | Observed Local Magnitude |
 | --- | ---: |
-| Shortcut before the repair | about 0.55 μs, 7 allocations |
-| Repaired single-drive shortcut | about 7.8–8.1 μs, 45–47 allocations |
-| Repaired 32-drive shortcut | about 70–81 μs, 977 allocations |
-| Normal 32-drive listing | about 0.95 ms |
+| Shortcut before the fix | ~0.55 μs, 7 allocs |
+| Repaired single-drive shortcut | ~7.8–8.1 μs, 45–47 allocs |
+| Repaired 32-drive shortcut | ~70–81 μs, 977 allocs |
+| Normal 32-drive listing | ~0.95 ms |
 
-These numbers show local relative cost only; they are not a latency prediction for a 100+ node deployment. Real distributed execution adds peer networks, quorum, and slowest-node tail latency, potentially making the gap much larger. That is precisely why the check must not expand into the normal listing path.
+In multi-node deployments, `GetBucketInfo` includes peer network round-trips and quorum reduction. That cost is why the check is strictly confined to the three storage-bypassing shortcuts. If a misconfigured client polls `max-keys=0` or `Prefix="/"` at high frequency, S3 audit traces and metrics will surface the pattern.
 
-The risk concentrates in malformed or probe-style traffic. A misconfigured client polling `max-keys=0`, a slash prefix, or disjoint markers at high frequency can amplify what was a cheap request into peer-and-disk work. After merge, the actual frequency of these inputs should be observed through S3 traces or metrics; rate limiting or optimization should follow evidence.
+### Degraded Clusters Surface Real Quorum Errors {#degraded-cluster}
 
-### A degraded cluster exposes more real errors {#degraded-cluster}
+Previously, a shortcut could return an empty HTTP 200 even when peers were offline and bucket read quorum was lost, because it never inspected cluster state. Calling `GetBucketInfo` means a degraded cluster that cannot establish bucket existence now returns a quorum or timeout error rather than asserting that a valid empty bucket exists.
 
-Previously, a shortcut could return an empty 200 while peers were offline or bucket quorum was unavailable because it never consulted cluster state. The repair can return quorum, timeout, or service errors in those conditions.
+### Bucket Create/Delete Races Remain Non-Linearizable {#race-window}
 
-That is more honest behavior, not an availability regression: if the server cannot establish that the bucket exists, it must not assert a valid empty bucket. Clients depending on unconditional empty success will nevertheless observe a behavior change.
+`GetBucketInfo` and returning the empty response are two sequential steps: a bucket can be deleted immediately after `GetBucketInfo` succeeds, or created immediately after `BucketNotFound` is observed. This matches the concurrency model of all other S3 APIs that validate resource existence before acting.
 
-### Bucket create/delete races are not linearizable {#race-window}
+### Clients Relying on the Bug Will Now Receive HTTP 404 {#behavior-change}
 
-`GetBucketInfo` and returning the empty result are two actions. The bucket can be deleted immediately after the check, or created immediately after a missing-bucket result is formed. This patch does not and should not add a transaction spanning bucket lifecycle to a listing shortcut.
+Callers that inadvertently depended on `Prefix="/"` or `max-keys=0` returning HTTP 200 against a non-existent bucket will now receive HTTP 404 `NoSuchBucket`, matching AWS S3 and pre-2024 behavior.
 
-This is the same concurrency class as other APIs that validate a resource before acting. The repair guarantees that the request no longer succeeds with **no existence evidence at all**; it does not promise a cross-node, cross-lifecycle linearizable snapshot of an empty listing.
+### Two Adjacent Edge Cases Left Out of Scope {#remaining-edges}
 
-### Clients relying on the bug will receive 404 {#behavior-change}
+Design review noted two low-severity boundaries intentionally left outside this change:
 
-Some clients may have adopted the missing bucket's empty 200 as fact. They will now enter an error branch. This is a visible compatibility change, but it restores the documented S3 contract and the pre-regression behavior. Preserving the bug merely transfers upgrade cost to clients that correctly rely on 404.
+1. **Stale continuation token after bucket deletion:** When resuming a metacache continuation, the `c.fileNotFound` branch still returns bare `io.EOF`. A stale or crafted continuation token presented after its bucket was deleted could theoretically receive an empty HTTP 200. Calling `GetBucketInfo` on that branch would penalize normal paginated continuations and requires a separate design.
+2. **Handler-level `NotImplemented` checks:** Certain V1 and version-list `marker`/`prefix` combinations return `NotImplemented` during HTTP handler parameter validation before reaching the object layer (whereas V2 `start-after` reaches `listPath`). PR #37 repairs storage shortcuts masking missing buckets without altering HTTP parameter validation precedence.
 
-### Two adjacent edges remain out of scope {#remaining-edges}
+## Rejected Alternatives {#alternatives}
 
-The adversarial review recorded two non-blocking P3 boundaries:
+### Keep Upstream Behavior {#keep-upstream}
 
-1. When resuming a metacache continuation, the `c.fileNotFound` branch still returns bare `io.EOF`. A stale or crafted continuation token used after bucket deletion could theoretically receive an empty 200. Adding `GetBucketInfo` there would affect normal continuation traffic and needs a separate performance and error-precedence design.
-2. Some V1 and version-list marker/prefix combinations return `NotImplemented` during HTTP handler validation before reaching the object layer; the V2 `start-after` route can reach it. This patch fixes storage shortcuts masking a missing bucket; it does not redefine precedence between malformed parameters and resource errors.
+Keeping the bare `io.EOF` returns avoids any shortcut overhead, but preserves a known S3 regression and causes integration tests against SILO to diverge from AWS S3. Rejected.
 
-Neither blocks merge. The first is outside #32's ordinary initial-list reproduction; the second is inherited handler behavior. Recording them prevents “all three shortcuts are covered” from being overstated as byte-for-byte AWS parity for every possible parameter combination.
+### Restore Generic `checkBucketExist` {#restore-global-check}
 
-## Alternatives considered {#alternatives}
+Checking bucket existence before every `Put`, `List`, and `Multipart` call fixes all paths at once, but reintroduces cluster-wide peer fan-out on the normal hot path, undoing upstream `#18917`. Rejected.
 
-### Keep upstream behavior {#keep-upstream}
+### Fix Only `Prefix="/"` {#slash-only}
 
-This has zero performance change and minimizes fork divergence. It also keeps a documented S3 incompatibility, a regression with a known release boundary, and a misleading result when SILO is used as an integration-test substitute. For a narrow and well-tested compatibility repair, that tradeoff is no longer justified.
+Patching only the leading-slash branch passes the single `boto3` snippet from `#32` while leaving the identical bug in `max-keys=0` and disjoint `marker` inputs. Because all three branches sit in `listPath` and share the same root cause, routing all three through `listPathShortcutEOF` is cleaner and complete. Rejected.
 
-### Restore generic `checkBucketExist` {#restore-global-check}
+### Add a Bucket-Existence Cache {#existence-cache}
 
-This covers every path at once but reintroduces peer fan-out into every Put, List, and Multipart operation, directly undoing the large-cluster optimization from #18917. The cost is disproportionate and the option is rejected.
+Adding a TTL cache for bucket existence reduces shortcut latency, but requires invalidation rules across bucket creation, deletion, replication, and healing without any evidence that shortcut traffic warrants a second metadata cache. Rejected.
 
-### Fix only `Prefix="/"` {#slash-only}
-
-That passes the single issue reproduction but leaves the same root defect in `max-keys=0` and marker-outside-prefix. The branches are adjacent and share the same semantics, so one helper is simpler and less likely to regress.
-
-### Add a bucket-existence cache {#existence-cache}
-
-This makes shortcuts cheaper but requires semantics for create, delete, replication, recovery, and stale TTL windows. There is no telemetry showing enough shortcut traffic to justify that complexity, so it is not selected.
-
-## Complexity and cost-benefit {#tradeoff}
+## Complexity and Cost-Benefit Summary {#tradeoff}
 
 | Dimension | Assessment | Rationale |
 | --- | --- | --- |
-| Production-code complexity | Low | Three call sites and a seven-line helper; no new state, dependency, or format |
-| Test complexity | Low to medium | V1, V2, versions, three shortcuts, a control, and HTTP mapping all need coverage |
-| Normal-path risk | Very low | No check is added to the `listMerged` hot path |
-| Shortcut runtime cost | Materially higher | A local EOF becomes cluster-wide `GetBucketInfo` |
-| Compatibility value | High | Restores 404 `NoSuchBucket`, pre-regression behavior, and S3 test fidelity |
-| Operational complexity | Low | No migration, configuration, feature flag, cache, or cross-repository dependency |
+| Production code complexity | Low | Three call sites and a 7-line helper; no new state, dependency, or on-disk format |
+| Test complexity | Low–Medium | Covers V1, V2, version listings, all three shortcuts, a regular-prefix control, and HTTP 404 XML mapping |
+| Normal-path risk | None | Zero changes on the `listMerged` hot path |
+| Shortcut runtime cost | Higher on shortcuts only | Replaces a local branch with `GetBucketInfo` when a shortcut triggers |
+| Compatibility value | High | Restores HTTP 404 `NoSuchBucket`, pre-regression upgrade compatibility, and S3 test fidelity |
+| Operational complexity | None | No migration, configuration knob, feature flag, or cache invalidation |
 
-The overall cost-benefit is favorable. The reason is not that `GetBucketInfo` is cheap—it is not—but that its cost is strictly limited to three shortcuts that otherwise cannot discover the missing bucket. A narrow performance cost in exchange for explicit protocol correctness is better than either a global rollback or indefinitely preserving the incorrect behavior.
+## Acceptance Decision {#decision}
 
-## Acceptance decision and remaining gates {#decision}
+PR #37 was accepted and merged as [`49c8aeac4`](https://github.com/pgsty/silo/commit/49c8aeac403916f52f8588bbe8ee42753d86eeef) (retaining Jason Lin as co-author on [`e9c5340be`](https://github.com/pgsty/silo/commit/e9c5340be94044daf3410272af54bc98832dd377)) with typed error predicates and full V1/V2/version-list object-layer and HTTP-level coverage, and shipped in [SILO Server 20260903](/blog/release/silo-20260903/).
 
-The final decision was: **accept and merge the strengthened PR #37 revision without expanding the production scope.**
+## Summary {#conclusion}
 
-The accepted sequence was:
-
-1. replace the old fork head with the current-`main`, DCO-signed revision while preserving Jason Lin as a co-author;
-2. retain typed error predicates, V1/V2/version-list object-layer coverage, and HTTP-level 404 / `NoSuchBucket` assertions;
-3. update the PR description with the shortcut fan-out cost and unchanged normal-path boundary;
-4. approve the fork workflows and require all eight reported checks to pass on exact head `e9c5340be`;
-5. submit a formal approving review against that head;
-6. merge with an expected-head guard, producing `49c8aeac4`, automatically close #32, and require the resulting `main` Go CI and VulnCheck to pass independently.
-
-No cache, feature flag, additional abstraction, or continuation-token redesign was required. High-frequency shortcut traffic and large-cluster tail latency remain observability follow-ups, not reasons for speculative code expansion.
-
-Repository integration is complete. A tag, package, `docker.io/pgsty/silo` image, deployment, and real S3-client verification must still complete before the repair can be described as delivered to users.
-
-## Conclusion {#conclusion}
-
-The issue is not merely “a slash prefix reports the wrong error.” The listing engine uses `io.EOF` to mean two different things: an empty result from an existing bucket and an early exit that never established whether the bucket exists. Removing generic existence checks for large-cluster performance was a sound upstream optimization, but the shortcuts violate its premise that a real storage operation will naturally surface a missing bucket.
-
-The selected repair restores that premise by calling the existing `GetBucketInfo` only at three storage-bypassing exits. It makes those requests more expensive and exposes real errors on degraded clusters; both are explicit costs. In return, SILO restores S3's 404 semantics, upgrade compatibility, and test fidelity while preserving the upstream optimization on the normal listing hot path.
-
-This worthwhile, controlled compatibility fix is now merged and green on `main`; the repair is included in Server 20260903; production deployment remains installation-specific.
+The listing engine previously overloaded `io.EOF` to represent both "an existing bucket produced zero matching keys" and "an early filter exit returned before touching storage." Removing generic bucket-existence checks in `#18917` relied on the premise that a subsequent storage operation would surface `BucketNotFound`. Calling `GetBucketInfo` at the three storage-bypassing exits in `listPath` restores that invariant and S3 `NoSuchBucket` compatibility while keeping the normal listing path unchanged.

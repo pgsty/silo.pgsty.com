@@ -4,143 +4,110 @@ linkTitle: "文件夹下载进度"
 date: 2026-08-23
 lastmod: 2026-09-16
 author: "冯若航"
-summary: "文件夹流式 ZIP 下载显示 NaN% 的修复 PRD：不改变服务端 API 与普通文件下载，用诚实的不确定进度替代非法百分比。"
+summary: "文件夹流式 ZIP 下载显示 NaN% 的修复设计：不改变服务端流式 API 与普通文件下载，用诚实的不确定进度（Indeterminate）替代非法百分比。"
 tags: [设计, Console, 下载]
 weight: 20
 draft: false
 url: "/zh/blog/design/dir-percentage/"
 ---
 
-> **历史范围：** 本页记录 Console 2.2.0 的进度修复，已随 Server 20260903 的内嵌 Console 交付。[Console 2.4.1](/zh/blog/release/console-2.4.1/#browser) 后续增加文件流写入与浏览器原生下载交接，已不再把整个 ZIP 缓存在 JavaScript Blob 中。下方原始 PRD 的传输路径与待办按 2.2.0 时点理解。
+在 SILO Console v2.1.1 中下载文件夹时，**Downloads / Uploads**（下载/上传）抽屉会显示 `NaN%`。尽管后端的流式 ZIP 归档仍在正常传输、底层存储对象也完好无损，但进度条却从“总量未知”错误地跳入了确定进度（determinate）渲染状态——导致运维人员误以为下载已卡死或失败，进而反复点击 **Download**。
 
-> **状态**：已随 SILO Console 2.2.0 发布（`16960f7ab`）；服务端自更新 Console pin（`edc8be6ed`）起内嵌该修复 · **优先级**：P1 · **归属**：[`pgsty/silo-console`](https://github.com/pgsty/silo-console) · **关联问题**：[`pgsty/silo#62`](https://github.com/pgsty/silo/issues/62) · **PRD 复核**：Claude Fable 5（`xhigh`）— **APPROVE** · **实现复核**：Claude Fable 5（`xhigh`），2026-08-23 — **APPROVE**，无 P0/P1/P2 发现
+该修复已随 [Console 2.2.0](/zh/blog/release/console-2.2.0/)（提交 `16960f7ab`，跟踪议题 [#62](https://github.com/pgsty/silo/issues/62)）发布，并自 [Server 20260903](/zh/blog/release/silo-20260903/)（`edc8be6ed`）起内嵌于服务端。其核心准则只有一条：
 
-SILO Console 下载文件夹时，Downloads / Uploads 面板会显示 `NaN%`。ZIP 通常仍在正常传输，存储对象也完好无损，但进度条已经从“总量未知”错误地跨进了一个非法的确定进度状态。用户看到一条近乎满格的进度条，以为下载失败或已经完成，于是重复点击。
+> 只有当下载任务拥有一个有限、正数且适用于当前响应字节流的总量时，才能进入确定百分比（determinate）模式；否则必须保持不确定（indeterminate）动画状态，直至完成、失败或取消。
 
-建议的修复刻意保持狭窄：
+（后续发布的 [Console 2.4.1](/zh/blog/release/console-2.4.1/#browser) 进一步将文件夹与多选下载演进为文件流写入与浏览器原生下载交接，不再将完整 ZIP 缓存在浏览器内存 `Blob` 中；详见文末[后续演进](#later-contract)。）
 
-> 只有当下载拥有一个有限、正数、并且适用于当前响应字节的总量时，才能进入 determinate 状态；否则必须保持 indeterminate，直到完成、失败或取消。
+## 可观察故障 {#failure}
 
-服务端继续流式生成 ZIP，普通文件继续显示百分比。前端只增加一道安全计算边界，复用已经存在的 indeterminate 渲染，再补齐一条缺失的取消状态转换。本文说明为什么这套方案既充分，又是最小且诚实的修复。
+在 SILO Console v2.1.1 中：
 
-## 已观察到的故障 {#failure}
+1. 在某个公共前缀（如 `folder/`）下上传若干对象；
+2. 停留在父级存储桶列表页，勾选 `folder/` 并点击 **Download**；
+3. 在传输完成前打开 **Downloads / Uploads** 面板；
+4. 当前下载行显示 `NaN%`，而底层 ZIP 流仍在继续传输。
 
-这个缺陷在当时的 `silo-console v2.1.1` 中被观察到，Silo `RELEASE.2026-08-06T00-00-00Z` 内嵌的正是这一版本。
+## 根因分析 {#root-cause}
 
-复现步骤：
+界面上出现的 `NaN%` 是 S3 前缀元数据、服务端流式 ZIP 响应与前端 XHR 进度算术三层契约错位共同作用的结果。
 
-1. 在某个 prefix 下放入若干对象，例如 `folder/`。
-2. 停留在父目录，选择 `folder/` 并点击 **Download**。
-3. 在传输完成前打开 **Downloads / Uploads**。
-4. 任务行显示 `NaN%`，而 ZIP 请求仍在继续。
+### 公共前缀没有对象大小 {#prefix-size}
 
-运行时验证使用了一个约 88.7 MiB 的 prefix，并对 Chromium 限速以保留观察窗口。两次独立下载都进入了相同的 `NaN%` 状态。
+S3 中的“文件夹”只是逻辑上的公共前缀（Common Prefix），并非实际存储的目录对象。在列表模型中，前缀以 `/` 结尾并携带逻辑大小 `size = 0`（Console 列表将其渲染为 `-`，表示大小不适用）。由于自动生成的 API 模型为 `size` 字段标记了 `omitempty`，逻辑零值在列表 JSON 中会被省略。而单选下载 thunk 直接将 `object.size` 原样传给下载辅助函数，导致运行时传入的 `fileSize` 为 `undefined`（或人工构造前缀记录中的 `0`）。这两者都不能作为除法运算的有效分母。
 
-这是前端正确性问题，不代表对象损坏、磁盘格式变化或 S3 `GET` 失败。
+### 流式 ZIP 没有预先可知的网络传输长度 {#streamed-zip}
 
-## 实际发生了什么 {#root-cause}
+当服务端收到以 `/` 结尾的下载请求时，会递归列出该前缀下的所有对象，并将 `zip.Writer` 直接连接到 `io.Pipe`：一边读取源对象、一边执行 Deflate 压缩、一边将生成的字节直接刷入 HTTP 响应流。
 
-可见的 `NaN%` 是三层契约错位的最终结果。
+这种边压缩边流式输出的设计十分合理：服务端无需在内存或临时磁盘中缓存完整 ZIP 归档即可立即发出首字节。但它的必然推论是：在发送 HTTP 响应头的那一刻，最终压缩后的归档总字节数尚不存在，因此响应只包含 `Content-Type: application/zip` 与文件名，不包含 `Content-Length`。源对象的未压缩大小之和也不能替代 `Content-Length`：源大小是未压缩的逻辑字节，而浏览器 `ProgressEvent.loaded` 统计的是经过 Deflate 压缩并附带 ZIP 帧头后的网络传输字节，两者的量纲完全不同。
 
-### Prefix 没有对象大小 {#prefix-size}
+### 进度事件缺乏有效分母时的算术异常 {#progress-event}
 
-S3 的文件夹是 common prefix，不是实际存储的目录对象。在列表模型里，prefix 以 `/` 结尾并携带 `size=0`。Console 已经把这种大小显示为 `-`，正确地表达了“不适用”。
-
-生成的 API 模型为 `size` 标记了 `omitempty`，所以逻辑上的零不会出现在列表 JSON 中。单选下载 thunk 却把 `object.size` 原样传给辅助函数：prefix 与零字节对象在运行时提供的是 `undefined`（人工构造的 prefix 记录也可能提供 `0`）。两者都不是有效分母。
-
-### 流式 ZIP 没有事先可知的网络长度 {#streamed-zip}
-
-服务端通过末尾的 `/` 识别文件夹，递归列出对象，再把 `zip.Writer` 接到 `io.Pipe` 上。对象一边读取、一边 Deflate、一边复制进 HTTP 响应，档案生成多少就发送多少。
-
-这是一项有价值的行为：服务端不用把完整 ZIP 全部放进内存或临时磁盘，就能尽早发出首字节。它也带来一个同样刻意的结果：发送响应头时，最终压缩字节数尚不存在，因此响应只有 `Content-Type: application/zip` 和文件名，没有 `Content-Length`。
-
-源对象大小之和不能替代这个总量。对象大小是压缩前字节；`ProgressEvent.loaded` 统计的是 ZIP 压缩与封装后的响应字节。它们不是同一个单位。
-
-### 收到 progress 事件，不代表百分比可计算 {#progress-event}
-
-客户端当前对每个事件都执行：
+前端 XHR `progress` 监听器此前无条件执行以下计算：
 
 ```ts
 Math.round((event.loaded / fileSize) * 100)
 ```
 
-Prefix 的分母为零或缺失。根据实际值与事件，JavaScript 会产生 `NaN`（`loaded / undefined` 或 `0 / 0`）或 `Infinity`（正数字节除以零）。
-
-progress callback 随后把非有限值写入 Redux，同时设置 `waitingForFile=false`。第二个操作才是决定性的状态错误：任务仅仅因为“来了一个事件”就离开了现有 indeterminate 分支，而不是因为事件真的提供了可用总量。确定进度组件拿到非法值，最终渲染出非法标签。
-
-完整链路如下：
+对于文件夹前缀或零字节对象，分母 `fileSize` 为 `undefined` 或 `0`，JavaScript 会计算出 `NaN`（`loaded / undefined` 或 `0 / 0`）或 `Infinity`（正数除以 `0`）：
 
 ```text
-common prefix: size = 0
+公共前缀：size = 0（或 undefined）
         |
         v
 download(..., fileSize = 0)
         |
         v
-流式 Deflate ZIP，没有 Content-Length
+流式 Deflate ZIP，无 Content-Length 响应头
         |
         v
 event.loaded / 0 => NaN 或 Infinity
         |
         v
-非法百分比进入 Redux；waitingForFile 变成 false
+非法百分比写入 Redux；waitingForFile 被置为 false
         |
         v
-determinate ProgressBar 渲染 NaN%
+确定模式的 ProgressBar 渲染出 "NaN%"
 ```
-
-普通非空文件之所以不出问题，是因为服务端可以 stat 对象、设置 `Content-Length`，列表中的大小也为正数。如果浏览器为空响应触发 progress 事件，零字节文件虽然是真对象，却会抵达与 prefix 相同的算术边界，因此必须纳入回归契约。
 
 ## 产品契约 {#contract}
 
-UI 只需要诚实地区分两种情况：
-
-- **Determinate**：已传输字节与总字节都已知，而且单位相同。
-- **Indeterminate**：请求正在进行，但总量未知。
-
-由此得到四条承重不变量：
+进度展示需要严格遵守四条不变量：
 
 ```text
-determinate  => total 有限且 total > 0
-determinate  => percentage 有限且 0 <= percentage <= 100
-unknown total => indeterminate
-terminal state => 非 indeterminate
+确定进度（determinate）  => 总量有限且 total > 0
+确定进度（determinate）  => 百分比有限且 0 <= percentage <= 100
+总量未知（unknown total）=> 保持不确定进度（indeterminate）
+终态（terminal state）   => 退出不确定进度（not indeterminate）
 ```
 
-这些不变量比 `objectPath.endsWith("/")` 更一般：无需发明对象类型特例，就能同时覆盖 prefix、零字节文件、异常元数据和未来任何未知长度响应。
+以“分母是否合法有效”而非 `objectPath.endsWith("/")` 来定义契约，能够用同一套逻辑同时覆盖文件夹前缀、零字节对象、缺失大小元数据以及任何未来的分块流式响应，无需为特定对象类型编写脆弱的特判分支。
 
 ## 目标与非目标 {#scope}
 
 ### 目标 {#goals}
 
-1. 文件夹下载不再显示 `NaN%`、`Infinity%` 或伪造的确定百分比。
-2. 总长度未知的传输使用现有 indeterminate 动画。
-3. 总长度已知的普通文件保留当前百分比体验。
-4. 完成、失败与取消都必须离开 indeterminate。
-5. 零字节文件不得产生非有限百分比，并且仍能成功完成。
-6. 非有限或越界下载百分比不得进入 Redux。
-7. 修复可以先在 Console 独立发布，再由 Silo 更新依赖。
+1. 文件夹下载在任何时刻都绝不显示 `NaN%`、`Infinity%` 或伪造的百分比。
+2. 总量未知的传输任务复用现有的不确定进度（indeterminate）动画。
+3. 已知大小的普通非空文件保持原有的确定百分比进度行为不变。
+4. 完成、失败与取消三种终态均必须退出不确定进度动画。
+5. 零字节文件下载过程中绝不产生非有限百分比，并在完成时正常到达 `100%`。
+6. 严禁任何非有限数（`NaN`、`Infinity`）或越界百分比写入 Redux 状态树。
 
 ### 非目标 {#non-goals}
 
-- 不在服务端预生成或缓存完整 ZIP。
-- 不把文件夹内对象的未压缩大小之和冒充网络传输总量。
-- 不重构整个 Object Manager 状态模型。
-- 不把文件夹切换到当前“点击即完成”的 `BrowserDownload` 路径。
-- 不在这里解决 `XMLHttpRequest.responseType="blob"` 的浏览器内存占用。
-- 不改变取消记录是否保留到用户手动清理的现有产品行为。
-- 不重新设计 HTTP 响应头发出之后，流式 ZIP 中途失败的错误表达。
-- 不改变 S3 API、Console API、对象布局或 ZIP 内容。
+- 不为了凑出 `Content-Length` 而在服务端预先缓冲整个 ZIP 归档；
+- 不把未压缩源对象大小之和当作压缩后网络传输进度的分母；
+- 不在本次缺陷修复中重构整个 Object Manager 的 Redux 状态结构。
 
-这些都是合理的后续工作，但把它们绑进当前缺陷会扩大风险，却不是恢复诚实进度所必需的。
+## 技术决策 {#decision}
 
-## 最终决策 {#decision}
+最小生产修复由五个紧密配合的部分组成：
 
-最小生产修复由四部分组成。
+### D1. 仅在拥有合法总量时计算百分比 {#d1}
 
-### D1. 只使用有效总量计算 {#d1}
-
-增加一个不依赖 DOM 和 Redux 副作用的小型纯函数：
+将进度算术抽离为独立于 DOM 与 Redux 副作用的纯函数（`downloadProgress.ts`）：
 
 ```ts
 type DownloadProgressEvent = Pick<
@@ -179,17 +146,13 @@ export const calculateDownloadPercent = (
 };
 ```
 
-总量来源的优先级用于保持兼容：
+1. 若存在有限正数 `objectSize`，优先使用它以保持普通文件下载进度计算完全不变；
+2. 若 `objectSize` 不可用（`0` 或 `undefined`），但浏览器声明响应长度可计算（`event.lengthComputable === true`）且提供了有限正数 `event.total`，则将其作为回退分母；
+3. 其他情况下统一返回 `null`，表示当前不存在可诚实计算的百分比。
 
-1. 有限且为正的 `objectSize` 保留普通文件当前算法。
-2. 当对象大小不可用，但浏览器声明响应长度可计算，且 `event.total` 有限为正时，使用响应总量。
-3. 其余情况返回 `null`：此时还不存在诚实的百分比。
+### D2. 总量未知时保持 Indeterminate 状态 {#d2}
 
-辅助函数的输出契约是闭合的：要么是 `null`，要么是 `[0,100]` 内的有限数。
-
-### D2. 未知总量保持 indeterminate {#d2}
-
-XHR handler 只 dispatch 真实百分比：
+修改 XHR `progress` 事件监听器，仅当 `calculateDownloadPercent` 返回非空数值时才派发 `progressCallback`：
 
 ```ts
 req.addEventListener("progress", (event) => {
@@ -198,245 +161,153 @@ req.addEventListener("progress", (event) => {
   if (percent !== null) {
     progressCallback(percent);
   }
-
-  // 没有有效总量：保留 waitingForFile=true，让现有 UI 继续保持
-  // indeterminate，而不是制造一个 determinate 数字。
 });
 ```
 
-下载任务本来就以 `waitingForFile=true` 创建，`ObjectHandled` 也已经把这个状态渲染成 `variant="indeterminate"`。没有必要把 Redux 扩成 `number | null`，也不用再加一个布尔值或修改 MDS。
+由于下载条目初始化时默认 `waitingForFile = true`——且 `ObjectHandled` 组件已经将该状态渲染为 `<ProgressBar variant="indeterminate" />`——当 `percent === null` 时跳过派发即可让任务行自然保持在不确定进度模式，直到终态动作到达。
 
-首次获得有效百分比时，现有 `updateProgress` 会写入数值并设置 `waitingForFile=false`。如果整个请求始终没有有效总量，任务就保持 indeterminate，直到终态 action 到来。
+### D3. 确保取消操作正确进入终态 {#d3}
 
-### D3. 让取消成为真正的终态 {#d3}
+此前完成（complete）与失败（fail）reducer 都会清除 `waitingForFile`，唯独取消（`cancelObjectInList`）遗漏了这一转换。在 `cancelObjectInList` 中补齐 `item.waitingForFile = false`，可防止处于不确定进度模式的文件夹下载在用户点击取消后仍继续播放活动动画。
 
-完成和失败路径已经会清除 `waitingForFile`，取消路径没有。需要在 `cancelObjectInList` 中补上：
+同时在 XHR 边界增加事件顺序保护：调用 `req.abort()` 时会先触发 `readystatechange (DONE, status = 0)`，随后才触发 `onabort` 事件。令通用 `DONE` 分支在 `status === 0` 时直接返回、交由专门的 `onabort` 或 `onerror` 处理器接管，可避免取消操作被抢先误标为下载失败。
 
-```ts
-item.waitingForFile = false;
-```
+### D4. 归一化被省略的零字节大小 {#d4}
 
-没有这一行，修复后的 prefix 下载会在 abort 后继续进入 indeterminate 渲染分支，遮住 Cancelled 状态。任务行继续遵循现有产品行为：保留一条已取消记录，由用户手动移除。本次不要求自动清理。
+在单选下载 thunk 中传入 `object.size || 0`，与多选下载入口对齐。这样可在完成回调检查 `Blob.size === fileSize` 之前恢复 API 模型因 `omitempty` 而省略的逻辑零值，确保零字节对象在收到 HTTP 200 空响应时顺利过渡到 `100%` 完成状态。
 
-XHR 边界还需要一条事件顺序守卫。`abort()` 会先触发 `readystatechange(DONE, status=0)`，随后才触发 `abort` 事件；如果不提前返回，通用 DONE 分支会先把请求标成失败，`onabort` 再把它标成取消。DONE/status zero 因此交给专用的 `onerror` 或 `onabort` handler 处理，`onabort` 同时删除已存储的请求引用。
+### D5. 保持服务端流式 ZIP 不变 {#d5}
 
-### D4. 还原被省略的零字节大小 {#d4}
+Go 后端的文件夹下载处理器继续通过 `io.Pipe` 流式生成 Deflate 压缩 ZIP 并省略 `Content-Length`，无需改动任何服务端 API 或归档格式。
 
-单选下载 thunk 改为传递 `object.size || 0`，与另一个下载入口保持一致。这样会在 `Blob.size === fileSize` 完成校验之前，还原 API 模型省略的逻辑零，使 HTTP 200 的零字节对象以 100% 完成，而不是被误报为 incomplete。
+## 进度状态机 {#state-machine}
 
-### D5. 服务端流式行为保持不变 {#d5}
-
-文件夹 handler 继续通过 `io.Pipe` 生成 Deflate ZIP，并且不设置 `Content-Length`。API、档案、存储和资源管理契约均不变化。
-
-## 状态机 {#state-machine}
-
-| 状态 | `waitingForFile` | `percentage` | 终态标志 | 表现 |
+| 状态 | `waitingForFile` | `percentage` | 终态标志 | 界面渲染 |
 | --- | ---: | ---: | --- | --- |
-| 排队 / 尚无有效进度 | `true` | `0` | 无 | indeterminate |
-| 未知总量传输中 | `true` | `0` | 无 | indeterminate |
-| 已知总量传输中 | `false` | `0..100` | 无 | 确定百分比 |
-| 完成 | `false` | `100` | `done=true` | 成功 |
-| 失败 | `false` | 最后有效值 | `failed=true, done=true` | 错误 |
-| 取消 | `false` | `0` | `cancelled=true, done=true` | 已取消 |
+| 排队中 / 尚未收到有效进度 | `true` | `0` | 无 | 不确定进度条（indeterminate） |
+| 总量未知的传输 | `true` | `0` | 无 | 不确定进度条（indeterminate） |
+| 总量已知的传输 | `false` | `0..100` | 无 | 确定百分比进度条 |
+| 已完成（Completed） | `false` | `100` | `done = true` | 成功（`100%`） |
+| 已失败（Failed） | `false` | 上次有效值 | `failed = true, done = true` | 错误状态 |
+| 已取消（Cancelled） | `false` | `0` | `cancelled = true, done = true` | 已取消状态 |
 
-状态不从 determinate 回退到 indeterminate。如果取得过有效百分比，之后某个事件又没有有效总量，handler 保留最后一个有效值即可。
-
-现有 reducer 会在 Failed 与 Cancelled 时同时设置 `done=true`。`ObjectHandled` 依据 `done` 把关闭按钮从“中止请求”切换为“移除记录”；本次保持这一行为。取消后的 Redux 数值仍为 `0`，但现有 `ProgressBarWrapper` 会因为 `ready=true` 渲染一条满格橙色终态进度条并显示 Cancelled 标签；这种既有表现不属于本次修复范围。
-
-`waitingForFile` 并不是“没有可计算进度”的理想长期命名。重命名它，或用 discriminated union 替代当前多个布尔值，都能改善模型，但那属于独立重构。本次所需的状态和渲染已经存在，复用它的兼容风险最低。
-
-## 为什么这套方案充分 {#proof}
-
-可以按情况验证修复的闭合性。
+## 完备性证明 {#proof}
 
 ### 普通非空文件 {#case-file}
 
-`objectSize > 0`，辅助函数继续使用当前分母。结果有限且经过边界限制，`updateProgress` 进入 determinate，完成时仍为 100%。
+`objectSize > 0` 提供有限正数分母，辅助函数返回 `[0, 100]` 范围内的整数，`updateProgress` 将 `waitingForFile` 置为 `false` 进入确定百分比模式，下载完成时置为 `100%`。
 
-### 当前流式文件夹 {#case-folder}
+### 流式文件夹 ZIP {#case-folder}
 
-`objectSize` 被归一化为 `0`，同时 `lengthComputable=false`、`event.total=0`。辅助函数返回 `null`；没有非法 action 被 dispatch，因此任务保持 indeterminate。完成时现有 reducer 设置 `waitingForFile=false`、`percentage=100`、`done=true`。
+`objectSize` 归一化为 `0`，同时 `lengthComputable = false` 且 `event.total = 0`。辅助函数返回 `null`，不派发进度更新，任务行保持不确定动画；流式传输完成后置为 `waitingForFile = false`、`percentage = 100` 与 `done = true`。
 
-### 未来提供真实长度的响应 {#case-future}
+### 未来带真实长度的响应 {#case-future}
 
-如果代理或未来服务端实现提供了可信响应总量，`lengthComputable=true` 且 `event.total>0`。同一份代码会自动给出真实百分比，不需要再次修改产品逻辑。
+若反向代理或未来的归档端点提供了可信的响应总长度（`lengthComputable = true` 且 `event.total > 0`），同一套代码会自动回退使用 `event.total` 显示真实百分比，无需再次修改前端。
 
 ### 零字节文件 {#case-zero}
 
-列表中被省略的大小先还原为零，此后两个总量都为零，中间百分比在数学上未定义。任务在通常极短的生命周期里保持 indeterminate；零字节 Blob 与归一化后的预期大小相等，成功响应随即切换到 100%。整个过程不会计算 `0/0`。
+被省略的列表大小归一化为 `0`；传输期间若触发进度事件则返回 `null`（绝不计算 `0 / 0`）；收到空响应后，零字节 `Blob.size` 与归一化后的期望大小相等，直接跃迁至 `100%` 完成状态。
 
 ### 失败与取消 {#case-terminal}
 
-失败路径本来就会离开 indeterminate；新增的取消转换让 abort 也同样进入终态。终态任务不会仅仅因为总量未知而继续表现得像正在运行。
+失败与取消均会将 `waitingForFile` 置为 `false` 并将 `done` 置为 `true`，确保没有任何已终止的任务行继续显示活动动画。
 
-从数学上说，只有当 `total` 属于 `(0, +infinity)` 才会执行除法，结果随后被限制到 `[0,100]`。因此 `NaN` 和 `Infinity` 都不可能穿过计算边界进入 Redux 或确定进度组件。
+## 被拒绝的替代方案 {#alternatives}
 
-## 被否决的替代方案 {#alternatives}
+### 在服务端缓冲完整 ZIP 以获取 Content-Length {#alt-buffer}
 
-### 缓存 ZIP 以获得 Content-Length {#alt-buffer}
+在服务端内存或临时磁盘中生成完整归档后再发送，虽然能提供精确的 `Content-Length`，但会显著推迟首字节时间（TTFB）、加剧内存与磁盘压力并恶化并发下载表现。绝不能为了一个前端进度展示缺陷而放弃流式传输。
 
-服务端可以先在内存或临时文件中生成完整档案，测量以后再发送。这样能得到精确网络总量，但代价是内存或磁盘压力、首字节延迟、清理复杂度与更差的并发下载表现。一个可观测性缺陷不足以成为放弃流式行为的理由。
+### 将前缀下所有对象的未压缩大小相加 {#alt-sum}
 
-### 对 prefix 下对象大小求和 {#alt-sum}
+源对象大小之和是未压缩的逻辑字节，而 `event.loaded` 是经过 Deflate 压缩后的网络字节加 ZIP 帧头。由于分子与分母单位不同，进度条会随压缩率剧烈波动，甚至停留在远低于 `100%` 的位置或提前达到 `100%`。
 
-这个和是未压缩逻辑数据；`event.loaded` 是压缩响应加 ZIP 封装后的字节。单位不同，进度条可能停在 100% 以下、提前超过 100%，或随着压缩率而不是传输完成度移动。否决。
+### 将非法进度强制转换为 `0%` {#alt-zero}
 
-### 把非法进度变成 0% {#alt-zero}
+在长达数 GB 的文件夹下载过程中一直显示确定模式的 `0%`，会让用户误以为一个字节都没有传过来、连接已经卡死。“总量未知”必须诚实地表达为未知。
 
-这只会隐藏字符串，却会撒另一个谎：determinate 0% 表示总量已知，只是还没有传输。用户仍然会把它理解为下载卡死。未知就应该保持未知。
+### 仅对 `/` 结尾的路径做特判 {#alt-folder-check}
 
-### 只特判以 `/` 结尾的路径 {#alt-folder-check}
+只检查 `objectPath.endsWith("/")` 会遗漏真实的零字节对象、缺失元数据的响应以及其他不含 `Content-Length` 的分块传输响应。正确的判断边界是“分母是否可计算”，而非路径后缀。
 
-它能修报告中的 prefix，却会漏掉真实零字节对象、非法元数据与其他未知长度响应。正确边界是 denominator 是否可用，而不是对象类型。
+### 将文件夹直接交给旧版 `BrowserDownload` {#alt-browser-download}
 
-### 把文件夹交给 `BrowserDownload` {#alt-browser-download}
+Console 2.2.0 时期的旧版 `BrowserDownload` 辅助函数会在点击隐藏 `<a>` 标签后立即触发完成回调，在首字节到达前就把任务标为 `100%` 完成，无法感知后续 HTTP 错误或支持取消。（真正的浏览器原生流式交接已在后续 [Console 2.4.1](#later-contract) 中独立设计与实现。）
 
-当前大文件路径创建 `<a>` 并在点击后立刻调用完成回调。它无法报告真实完成、Console 内取消或后续 HTTP 失败。它可以成为未来流式下载设计的基础，但今天使用它只会用另一个谎替换当前的谎。
+### 仅在 `ProgressBar` 组件内部过滤 `NaN` {#alt-component}
 
-### 在 ProgressBar 内部吞掉非法值 {#alt-component}
+仅在展示组件内屏蔽 `NaN` 会任由非法数值写入 Redux 状态树，且无法阻止 `waitingForFile` 被错误清零。主防线必须设在进度事件进入应用状态的入口处。
 
-通用组件守卫可以作为第二道防线，但它会把非法数据留在 Redux，并向所有其他消费者隐藏错误状态转换。主要修复应该位于“进度成为应用状态”的边界。
+### 立即将 Redux 状态扩展为 `percentage: number | null` {#alt-null-state}
 
-### 现在引入 `percentage: number | null` {#alt-null-state}
+在保留 `waitingForFile`、`done`、`failed` 与 `cancelled` 四个布尔字段的同时再引入 `null`，只会制造更多自相矛盾的状态组合。既然现有 `waitingForFile = true` 已经准确建模并渲染了不确定进度状态，直接复用它的兼容性风险最小。
 
-如果要重新设计 Object Manager，discriminated progress state 会比当前布尔值组合更干净。但在保留 `waitingForFile`、`done`、`failed`、`cancelled` 的同时再加入 `null`，只会制造更多矛盾组合。彻底移除旧字段又超过当前缺陷所需范围。现在复用已经能渲染的 indeterminate，状态重构另立任务。
-
-## 需求与验收 {#requirements}
+## 需求与验收条件 {#requirements}
 
 ### 功能需求 {#functional}
 
-- **FR1：** 总量未知时，任务保持 indeterminate。
-- **FR2：** 对象大小有限为正时，普通文件保留确定百分比。
-- **FR3：** 只有 `lengthComputable=true` 时，有限为正的 `event.total` 才能作为回退。
-- **FR4：** 所有 dispatch 的百分比都必须有限且位于 `[0,100]`。
-- **FR5：** 零字节文件不显示非有限进度，并且最终成功。
-- **FR6：** 完成、失败与取消都必须离开 indeterminate。
-- **FR7：** 版本化对象、匿名下载、预览与长文件名入口保持现有调用契约。
+- **FR1–FR3：** `calculateDownloadPercent` 仅返回 `null` 或 `[0, 100]` 范围内的有限整数；总量未知的文件夹下载保持不确定模式（`waitingForFile = true`）；已知总量的普通对象下载保持确定百分比进度。
+- **FR4–FR5：** 归一化被省略的零字节大小使空文件正常完成至 `100%`，并在完成、失败与取消时统一将 `waitingForFile` 置为 `false`。
 
 ### 非功能需求 {#non-functional}
 
-- 不增加服务端 CPU、内存、磁盘缓存或请求成本。
-- 不增加前端依赖或构建步骤。
-- 不改变 S3 API、Console API、ZIP 内容或存储对象。
-- 计算函数必须能在没有 DOM 与真实 store 的环境中测试。
-- TypeScript typecheck 与生产前端构建必须通过。
+- 保持服务端流式 ZIP（`io.Pipe` 无全量缓冲）、S3/Console API 路由以及 Redux 状态类型不变。
 
-### 验收标准 {#acceptance}
+### 验收条件 {#acceptance}
 
-1. 没有 `Content-Length` 的文件夹 ZIP 传输期间，任务行显示 indeterminate 动画且没有百分比文本。
-2. 成功完成后，任务显示成功/100%，ZIP 可以正常打开。
-3. 普通非空文件继续显示有限的确定进度，并以 100% 完成。
-4. 零字节文件不显示 `NaN%` 或 `Infinity%`，并且成功完成。
-5. 取消未知总量下载会 abort 请求并显示 Cancelled，而不是继续播放活动动画。
-6. 任何下载路径都不能把非有限或越界百分比放进 Redux。
+- 在文件夹、普通文件、零字节文件与中途取消等全部下载场景中，下载面板均不出现 `NaN%` 或 `Infinity%`。
 
-## 测试计划 {#tests}
+## 验证矩阵 {#tests}
 
-### 纯计算矩阵 {#unit-tests}
+### 纯函数计算矩阵 {#unit-tests}
 
-使用现有 `@playwright/test` runner 测试纯模块，不增加测试框架。这需要在 `web-app/playwright.config.ts` 中新增一个无依赖的 `unit` project，例如使用 `testMatch: /.*\.unit\.ts/`。现有 `chromium` project 依赖针对 `localhost:9090` 真实实例的登录 setup，纯计算与 reducer 测试不应被该环境门控。此为纯配置变更，不引入新依赖。
-
-| 场景 | `loaded` | `objectSize` | `lengthComputable` | `event.total` | 期望 |
+| 场景 | `loaded` | `objectSize` | `lengthComputable` | `event.total` | 期望返回值 |
 | --- | ---: | ---: | --- | ---: | --- |
-| 普通文件一半 | 50 | 100 | false | 0 | `50` |
-| Common prefix | 1024 | 0 | false | 0 | `null` |
-| 初始零除零 | 0 | 0 | false | 0 | `null` |
-| 响应总量回退 | 50 | 0 | true | 200 | `25` |
-| 零总量不可用 | 0 | 0 | true | 0 | `null` |
-| loaded 超过总量 | 150 | 100 | true | 100 | `100` |
-| 非法对象大小 | 10 | `NaN` | false | 0 | `null` |
-| 被省略的零大小 | 10 | `undefined` | false | 0 | `null` |
-| 非法响应总量 | 10 | 0 | true | `Infinity` | `null` |
-| 负 loaded | -1 | 100 | true | 100 | `null` |
+| 普通文件下载过半 | `50` | `100` | `false` | `0` | `50` |
+| 公共前缀（`folder/`） | `1024` | `0` | `false` | `0` | `null` |
+| 初始 `0 / 0` | `0` | `0` | `false` | `0` | `null` |
+| 响应总长度回退 | `50` | `0` | `true` | `200` | `25` |
+| 响应总长度为零 | `0` | `0` | `true` | `0` | `null` |
+| 已加载字节超过总量 | `150` | `100` | `true` | `100` | `100` |
+| 非法对象大小 `NaN` | `10` | `NaN` | `false` | `0` | `null` |
+| 省略的对象大小 `undefined` | `10` | `undefined` | `false` | `0` | `null` |
+| 非有限响应总量 `Infinity` | `10` | `0` | `true` | `Infinity` | `null` |
+| 负数 `loaded` | `-1` | `100` | `true` | `100` | `null` |
 
-### 状态测试 {#state-tests}
+### 状态转换测试 {#state-tests}
 
-直接覆盖状态转换契约：
+单元测试直接验证：新下载任务以 `waitingForFile = true` 启动；无有效百分比派发时保持不确定模式；收到有效进度后更新有限百分比并将 `waitingForFile` 置为 `false`；完成、失败与取消均将 `waitingForFile` 置为 `false`。
 
-1. 新下载以 `waitingForFile=true` 开始。
-2. 没有有效 progress action 时保持 indeterminate。
-3. 有效 progress 产生有限值并设置 `waitingForFile=false`。
-4. complete 产生 `done=true`、`waitingForFile=false`、`percentage=100`。
-5. failure 产生 `failed=true`、`done=true`、`waitingForFile=false`。
-6. cancel 产生 `cancelled=true`、`done=true`、`waitingForFile=false`、`percentage=0`。
+### 真实浏览器端到端回归 {#e2e-tests}
 
-### 浏览器回归 {#e2e-tests}
+Playwright 测试在真实 SILO + Console 实例上利用 Chromium CDP 网络限速保留传输观察窗口，验证文件夹下载期间进度抽屉显示不确定动画且不含 `NaN%` 或 `Infinity%`，验证中途取消能正确进入 **Cancelled** 终态，并验证不限速下载的 ZIP 归档完整性、普通非空文件进度以及零字节文件下载。
 
-使用真实 Console 测试实例与 Chromium：
+## 实现范围 {#implementation}
 
-1. 创建临时桶，在 `folder/` 下放入多个对象。
-2. 从父目录选择 prefix 并开始下载。
-3. 使用 CDP 限制下载速度，保证中间状态可观察。
-   限速用例需用 `test.setTimeout` 放宽默认 30 秒超时。
-4. 打开 Downloads / Uploads，确认任务存在、没有百分比标签，也不存在 `NaN%` 或 `Infinity%`。
-5. 取消下载并验证 Cancelled 终态。
-6. 在 `finally` 中恢复网络条件。
-7. 不限速再次下载，等待浏览器下载事件并验证 ZIP。
-8. 对普通非空文件与零字节文件重复相应断言。
-9. teardown 删除桶、对象、下载与临时文件。
-
-当前 Playwright 项目只启用了 Chromium，因此 CDP 是可接受的测试机制。如果以后启用 Firefox 或 WebKit，纯函数和状态测试保持跨浏览器，只让限速观察测试受 Chromium project 门控。
-
-## 实现边界 {#implementation}
-
-预计 Console 变更：
-
-1. 新增 `downloadProgress.ts`，承载纯计算逻辑。
-2. 修改 `Objects/utils.ts`：只 dispatch 非 null 百分比，把 status-zero 终态交给专用 handler，并清理已取消请求。
-3. 在单选下载 thunk 中还原被省略的零大小。
-4. 修改 `cancelObjectInList`，清除 `waitingForFile`。
-5. 使用现有依赖补充计算、状态与浏览器回归，并在 `playwright.config.ts` 中新增无依赖的 `unit` project。
-
-预计保持不变：
-
-- Go 文件夹下载 handler 与流式 ZIP。
-- `ObjectHandled`、`ProgressBarWrapper` 与 MDS。
-- `IFileItem.percentage: number` 及现有 thunk callback 类型。
-- S3 与 Console API 路径。
-- 存储对象与档案格式。
+1. 新增 `downloadProgress.ts` 纯计算模块；
+2. 修改 `Objects/utils.ts`：仅当计算结果非空时调用 `progressCallback`，并让 `status === 0` 的终止事件交由 `onabort` / `onerror` 处理；
+3. 在单选下载 thunk 中将 `object.size || 0` 归一化；
+4. 在 `cancelObjectInList` reducer 中将 `item.waitingForFile` 置为 `false`；
+5. 在 `playwright.config.ts` 中配置纯单元测试与 Chromium 限速端到端回归测试。
 
 ## 交付与回滚 {#delivery}
 
-修复归属于 `pgsty/silo-console`，而不是当前收到报告的 Silo 服务端仓库。
+该修复已随 [Console v2.2.0](/zh/blog/release/console-2.2.0/)（[silo-console#29](https://github.com/pgsty/silo-console/pull/29)）发布，并内嵌于 [SILO Server 20260903](/zh/blog/release/silo-20260903/)，关闭 [pgsty/silo#62](https://github.com/pgsty/silo/issues/62)。不涉及任何数据或 API 迁移。
 
-交付顺序：
+### 完成定义 {#done}
 
-1. 把 #62 转移或交叉关联到 `pgsty/silo-console`。
-2. 实现边界明确的 Console 修改。
-3. 通过 typecheck、生产构建、纯函数/状态测试与真实浏览器回归。
-4. 发布新的 Console 版本。
-5. 更新 Silo 固定的 Console pseudo-version 或发布依赖。
-6. 构建 Silo 候选版本，重复文件夹、普通文件、零字节、取消与 ZIP 完整性验证。
-7. 发布 Silo，并在 Issue 中记录受影响与已修复版本。
+- [x] `calculateDownloadPercent` 仅返回 `null` 或 `[0, 100]` 范围内的有限整数；
+- [x] 总量未知的文件夹下载展示不确定进度，普通文件与零字节文件正常展示确定进度；
+- [x] 完成、失败与取消均退出不确定进度模式（`waitingForFile = false`）；
+- [x] 随 Console `2.2.0` 与 Server `20260903` 正式发布。
 
-没有数据迁移。如果前端修改出现回归，Silo 只需回退 Console 依赖；服务端数据与 API 行为保持兼容。
+### 后续演进任务 {#follow-ups}
 
-## 完成定义 {#done}
+评审期间识别出的五项演进方向——消除前端整包 `Blob` 内存缓冲并直接流式交接给浏览器、进度终态可辨识联合类型、服务端流式 ZIP 错误中断传播、共享进度条组件的非有限值兜底守卫，以及 `Blob` JSON 错误响应解码——已分别在后续 Console 版本中推进落地。
 
-- [x] 计算函数只返回 `null` 或有限的 `[0,100]` 数字。
-- [x] 活跃的未知总量文件夹下载渲染 indeterminate。
-- [x] 普通文件保留确定进度。
-- [x] 零字节文件不渲染非法进度。
-- [x] 完成、失败与取消任务都离开 indeterminate。
-- [x] 流式 ZIP 与服务端响应契约保持不变。
-- [x] typecheck、生产构建与自动化回归已在本地通过。
-- [x] Console 2.2.0 已发布。
-- [x] Server 20260903 已包含更新的 Console，见发布记录。
+## 后续演进：Console 2.4.1 的浏览器原生流式交接 {#later-contract}
 
-## 后续工作 {#follow-ups}
+在合入上述进度修复的同时，[Console 2.2.0](/zh/blog/release/console-2.2.0/) 还将对象列表中的 `size` 改为始终输出的 JSON 字段，并加固了服务端 ZIP 错误传播：不可读条目不再被静默跳过，响应头发出前的错误返回 HTTP 500，响应开始后的错误则通过中断流暴露给客户端。
 
-四项相邻改进应该分别建立设计档案：
-
-1. 把大文件夹直接流式写入浏览器或文件系统，避免在内存中持有完整 Blob。
-2. 用 discriminated progress/terminal state 替代 Object Manager 的布尔值组合。
-3. 改进响应头已经发出后，ZIP 失败的端到端完整性与错误表达。
-4. 为共享进度组件增加通用非有限值守卫，作为第二道防线。
-5. 修复既有的 Blob JSON 错误解码与 HTTP 失败路径请求引用清理问题。
-
-它们都不是停止当前 UI 撒谎所必需的。下一阶段维护迭代应先恢复最小而诚实的契约：已知总量才显示百分比，未知总量就保持未知。
-
-## 后续实现与原设计的差异 {#later-contract}
-
-Console 2.2.0 的整合还把 `size` 改为必输出的 JSON 字段，并修复 ZIP 错误传播：读取失败不再静默跳过条目；响应尚未开始可返回 500，开始后以流中断暴露失败。因此上文“不改 API/资源管理”的约束仅适用于最初进度计算补丁，不能概括整个发布。
-
-当前单目录下载会交给浏览器，Console 的完成行表示交接，不证明字节已经全部下载；跟踪和取消应在浏览器下载管理器中进行。多选 ZIP 的文件 writer 与原生交接路径见 [Console 2.4.1](/zh/blog/release/console-2.4.1/#browser)。大小归一化仍可兼容旧响应，但不再说明当前模型缺少零值字段。
+随后发布的 [Console 2.4.1](/zh/blog/release/console-2.4.1/#browser) 进一步消除了整包 XHR `Blob` 内存缓冲：单文件夹与单对象下载直接交接给浏览器原生下载管理器，多选打包下载则通过文件系统流式写入器（FileSystemWritableFileStream）或原生流交接落盘。在这一新架构下，Console 下载面板中的完成状态代表“已成功交接给浏览器下载管理器”，后续字节传输进度与取消操作均由浏览器原生下载管理器接管。

@@ -2,47 +2,25 @@
 title: "Read-Only Checksum Audit and Reliable CLI Output"
 linkTitle: "Checksum Verify"
 date: 2026-08-29
-lastmod: 2026-09-01
+lastmod: 2026-09-03
 author: "Ruohang Feng"
 summary: >
-  MCLI can audit stored S3 checksums against logical object bytes without mutating data. This record defines selection, classification, report and exit semantics, and the non-TTY output contract required by pipelines and CI.
+  MCLI can audit stored S3 checksums against logical object bytes without mutating data. Shipped in mcli 20260903 (PR #8, PR #13, #5), this record defines candidate selection, classification, report and exit semantics, and the non-TTY output contract required by pipelines and CI.
 tags: [Design, S3, Compatibility, Checksum, mcli]
 weight: 28
 draft: false
 url: "/blog/design/checksum-verify/"
 ---
 
-This is the design and implementation record for MCLI's read-only checksum
-verification workflow and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5),
-the non-TTY output defect found during release review.
+This is the design and implementation record for MCLI's read-only checksum verification workflow and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5), the non-TTY output defect discovered during release review. The command merged into [`pgsty/mc`](https://github.com/pgsty/mc) through pull requests [#8](https://github.com/pgsty/mc/pull/8) and [#13](https://github.com/pgsty/mc/pull/13) and shipped in [mcli 20260903](/blog/release/mcli-20260903/) (bundled in [Server 20260903](/blog/release/silo-20260903/) container images).
 
-> **Status:** shipped in the final [mcli 20260903](/blog/release/mcli-20260903/) release. The
-> command merged to `main` through pull requests [#8](https://github.com/pgsty/mc/pull/8)
-> and [#13](https://github.com/pgsty/mc/pull/13), is exercised against a real
-> SILO server in hosted CI, and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5)
-> is closed. Server 20260903 images bundle mcli 20260903, including this command.<br>
-> **Owner:** [`pgsty/mc`](https://github.com/pgsty/mc).<br>
-> **Tracking:** [pgsty/mc#5](https://github.com/pgsty/mc/issues/5).<br>
-> **Safety boundary:** verification is read-only; repair is not part of this
-> command.
+## Overview {#tldr}
 
-## Too Long; Didn't Read (TL;DR) {#tldr}
+Historical `CopyObject` implementations could calculate a stored additional checksum over transformed storage bytes (such as compressed or encrypted streams) rather than the logical bytes returned by S3 `GET`. `mcli checksum verify` inventories candidate objects and independently streams each logical body through the recorded checksum algorithm. Every candidate is classified into `MATCH`, `MISMATCH`, `NO_CHECKSUM`, `WOULD_VERIFY` (dry run), one of ten `UNKNOWN_*` classifications, or one of three `SKIPPED_*` results.
 
-Historical CopyObject implementations could calculate a stored additional
-checksum over transformed storage bytes instead of the logical bytes returned
-by S3. `mcli checksum verify` inventories objects and independently streams the
-logical body through the recorded algorithm. Each candidate becomes `MATCH`,
-`MISMATCH`, `NO_CHECKSUM`, `WOULD_VERIFY` (dry run), one of ten `UNKNOWN_*`
-classifications, or one of three `SKIPPED_*` results.
+During release testing, the initial implementation worked in an interactive terminal but printed nothing when stdout was redirected to a file or pipe. MCLI automatically marks non-TTY execution as quiet (`globalQuiet`) to disable interactive progress bars, and the new command initially treated that internal flag as a user request to suppress audit records. The repair in [PR #13](https://github.com/pgsty/mc/pull/13) separates semantic command output from progress-bar suppression without altering global quiet behavior or enabling progress bars in CI.
 
-The first implementation worked in a terminal but printed nothing when stdout
-was redirected. MCLI automatically marked non-TTY execution as quiet to disable
-progress UI, and the new command accidentally treated that internal state as a
-user request to suppress audit records. The repair separates semantic output
-from progress suppression without changing global quiet behavior or enabling
-progress bars in CI.
-
-## Command and scope {#scope}
+## Command and Scope {#scope}
 
 ```console
 mcli checksum verify ALIAS/BUCKET/OBJECT
@@ -50,123 +28,78 @@ mcli checksum verify --recursive ALIAS/BUCKET[/PREFIX]
 mcli checksum verify --manifest candidates.jsonl ALIAS
 ```
 
-Version one supports CRC32, CRC32C, CRC64NVME, SHA1, and SHA256 checksums marked
-as `FULL_OBJECT`. It can select one object, an exact VersionID, current objects
-under a prefix, all versions, or exact entries from a JSON Lines manifest. It
-also supports SSE-C key mappings, time and size filters, dry-run estimation,
-bounded workers, download limits, JSON output, and an optional JSON Lines report.
+Version one supports `CRC32`, `CRC32C`, `CRC64NVME`, `SHA1`, and `SHA256` checksums marked as `FULL_OBJECT`. It can select a single object, an exact `VersionID`, current objects under a prefix, all object versions, or exact entries from a JSON Lines manifest. It also supports SSE-C key mappings, modification-time and size filters, `--dry-run` cost estimation, bounded concurrency (`--max-workers`), global download limits, `--json` output, and an optional `--report` JSON Lines file.
 
-It does not verify `COMPOSITE` checksums, infer type from an ETag, inspect
-`xl.meta`, identify the historical writer with certainty, or repair metadata.
-The endpoint must report the checksum type (`x-amz-checksum-type`) alongside
-the checksum; on one that does not, every checksummed object is classified
-`UNKNOWN_CHECKSUM_TYPE` rather than guessed at.
+The command is strictly read-only: it does not verify `COMPOSITE` multipart checksums, infer checksum types from an `ETag`, inspect raw `xl.meta` on disk, or mutate object metadata. The S3 endpoint must report the checksum type (`x-amz-checksum-type`) alongside the checksum digest; on an endpoint that omits the type header, every checksummed object is classified as `UNKNOWN_CHECKSUM_TYPE` rather than guessed.
 
-## Read-only data path {#data-path}
+`--rewind`, tier restore, server-side batch execution, checkpoint/resume, and repair are outside the current scope.
 
-For every selected object, MCLI:
+## Read-Only Data Path {#data-path}
 
-1. sends `HEAD` with checksum mode enabled and retains every supported checksum
-   plus `ChecksumType`;
-2. rejects unsupported or ambiguous states as `UNKNOWN_*` instead of guessing;
-3. streams `GET` logical bytes through bounded hashers without writing the body
-   to disk;
-4. uses VersionID pinning, or `If-Match` plus a second `HEAD` for mutable
-   unversioned/null objects;
-5. compares independently calculated values with the stored values.
+For every selected object, `mcli checksum verify`:
 
-The S3 boundary allows LIST, HEAD, and GET only. Tests fail if a write method
-reaches the mock endpoint.
+1. Sends `HEAD` with checksum mode enabled and retains every supported `x-amz-checksum-*` digest plus `ChecksumType`.
+2. Classifies unsupported or ambiguous metadata states as `UNKNOWN_*` instead of guessing.
+3. Streams `GET` logical bytes through bounded in-memory hashers without writing the object body to local disk.
+4. Uses `VersionID` pinning for immutable versions, or `If-Match` plus a post-read `HEAD` check for mutable unversioned and `null`-version objects to detect concurrent replacement.
+5. Compares the independently calculated digests against the stored digests.
 
-## Result and exit contract {#result-contract}
+The S3 transport boundary permits `LIST`, `HEAD`, and `GET` only; automated tests fail if any write method reaches the mock endpoint.
 
-Every candidate produces one stable result:
+A dedicated S3 helper retains all checksums and their type through `StatObject`, then reads logical bytes through `Core.GetObject` without the SDK automatic validator. This avoids changing shared `ClientContent` or the existing contracts for `stat`, copy, mirror, and JSON output.
+
+## Result and Exit Contract {#result-contract}
+
+Every candidate produces one stable classification:
 
 | Result | Meaning |
-|:--|:--|
-| `MATCH` | Every supported stored checksum matches the returned logical bytes |
-| `MISMATCH` | At least one stored checksum differs |
-| `NO_CHECKSUM` | No additional checksum exists; the body is not read |
-| `WOULD_VERIFY` | Dry-run found a supported full-object checksum |
-| `UNKNOWN_*` | MCLI cannot make a reliable statement |
-| `SKIPPED_*` | A filter intentionally excluded the object |
+| :-- | :-- |
+| `MATCH` | Every supported stored checksum matches the returned logical object bytes |
+| `MISMATCH` | At least one stored checksum differs from the returned logical bytes |
+| `NO_CHECKSUM` | No additional checksum exists on the object; the body is not read |
+| `WOULD_VERIFY` | `--dry-run` found a supported `FULL_OBJECT` checksum |
+| `UNKNOWN_*` | MCLI cannot make a reliable verification statement (for example, `COMPOSITE` or missing `ChecksumType`) |
+| `SKIPPED_*` | A filter intentionally excluded the object (`SKIPPED_TOO_LARGE`, time filter, or delete marker) |
 
-The summary carries `objects`, a `verified` count, the count of every result
-status, and `incomplete`. `verified` is `MATCH` plus `MISMATCH`: the only results
-that actually streamed a body through a hasher. A run that enumerated many
-objects and verified none is visible as such.
+The final summary carries `objects`, a `verified` count, the count of every result status, and `incomplete`. `verified` equals `MATCH` plus `MISMATCH`—the only classifications that actually streamed an object body through a hasher. A run that enumerated many objects and verified none is therefore explicitly visible.
 
-`--fail-on` accepts `mismatch`, `unknown`, `no-checksum`, `any`, or `none`. The
-default `any` returns exit 1 for mismatches and incomplete verification.
-`no-checksum` returns exit 1 when any object carries no checksum **or when
-nothing was verified at all**, so an empty prefix or a stale manifest cannot
-pass as a clean audit. Dry-run does not apply `--fail-on`. Argument,
-authentication, enumeration, and report-write failures remain command failures
-rather than object classifications.
+`--fail-on` accepts `mismatch`, `unknown`, `no-checksum`, `any`, or `none`:
 
-In particular, `SKIPPED_TOO_LARGE` makes the default `any` return exit 1 because
-the size cap leaves the audit incomplete. Time-filter and delete-marker skips do
-not fail by themselves.
+- The default `any` returns exit code `1` for any `MISMATCH`, `UNKNOWN_*`, or incomplete verification. In particular, `SKIPPED_TOO_LARGE` makes `any` return exit `1` because the size cap leaves the audit incomplete, whereas time-filter and delete-marker skips do not fail by themselves.
+- `no-checksum` includes all `any` failures and also returns `1` when a checksum is absent or `verified == 0`.
+- `--dry-run` does not evaluate `--fail-on`.
+- CLI argument, authentication, listing, and report-write failures remain command errors rather than per-object classifications.
 
-## Output and automation contract {#output-contract}
+## Output and Automation Contract {#output-contract}
 
-Object records and the final summary are semantic output:
+Per-object records and the final summary are semantic command output:
 
-- Unless the caller explicitly sets `--quiet`, `-q`, or `MC_QUIET=true`, stdout
-  receives every object record and the final summary in both TTY and non-TTY
-  execution.
-- Non-TTY `--json` emits exactly one compact JSON value per line. TTY JSON keeps
-  MCLI's existing pretty presentation.
-- Global flags work at the app, `checksum`, and `verify` levels.
-- `--report` is independent of stdout. It still writes object records and the
-  final summary as JSON Lines when explicit quiet suppresses stdout.
-- Output transport does not change `--fail-on` decisions.
+- Unless the caller explicitly sets `--quiet`, `-q`, or `MC_QUIET=true`, stdout receives every object record and the final summary in both TTY and non-TTY execution.
+- Non-TTY `--json` emits one compact JSON value per line (JSON Lines); TTY `--json` retains MCLI's pretty-printed presentation.
+- Global flags (`--json`, `--quiet`) work when placed at the root `mcli`, `checksum`, or `verify` command level.
+- `--report` is independent of stdout: even when explicit `--quiet` suppresses stdout, `--report` still writes all object records and the final summary as JSON Lines.
+- Output transport never alters `--fail-on` exit decisions.
 
-The distinction matters because MCLI's historical `globalQuiet` has two inputs:
-an explicit quiet flag and an automatic non-TTY state used to disable progress
-UI. Changing that global would risk re-enabling progress output across copy,
-get, put, mirror, and other commands.
+This separation is required because MCLI's `globalQuiet` conflates two inputs: an explicit `--quiet` flag and an automatic non-TTY check used to disable interactive progress bars. Mutating `globalQuiet` globally would risk re-enabling progress bar output across `cp`, `get`, `put`, `mirror`, and other commands in CI logs.
 
-The selected repair is command-local. It walks the full CLI context chain for
-explicit quiet/JSON flags because the CLI library's `GlobalBool` stops at the
-nearest ancestor flag set. It also restores JSON Lines mode inside the checksum
-action because nested `Before` hooks can reset it after an app-level `--json`.
-No other command's progress or output behavior changes.
+Instead, the repair in [PR #13](https://github.com/pgsty/mc/pull/13) is command-local. It walks the full CLI context chain to inspect explicit quiet and JSON flags (because the CLI library's `GlobalBool` stops at the nearest ancestor flag set), and it restores JSON Lines mode inside the `verify` action after nested `Before` hooks run.
 
-## Report, secrets, and operational cost {#operations}
+## Report, Secrets, and Operational Cost {#operations}
 
-Report files are created with mode `0600`, must not already exist, and contain
-metadata/results rather than object bodies or SSE-C keys. The manifest likewise
-contains only bucket, key, and optional VersionID.
+Report files (`--report`) use mode `0600` on POSIX systems and the account’s filesystem ACLs on Windows. They fail if the target path already exists and record only object metadata and verification results, with no object bodies or SSE-C keys. Input manifests (`--manifest`) likewise contain only `bucket`, `key`, and optional `versionId`.
 
-Verification downloads every supported object body. Operators should use
-`--dry-run`, `--max-size`, time filters, `--max-workers`, and the global download
-limit to bound cost and load. `NO_CHECKSUM` and `UNKNOWN_*` counts must remain
-visible; neither may be presented as successful verification.
+Because verification streams the full logical body of every supported object, operators should use `--dry-run`, `--max-size`, modification-time filters, `--max-workers`, and the global download rate limit to bound network and storage I/O. `NO_CHECKSUM` and `UNKNOWN_*` counts remain explicit in the summary so unverified objects are never conflated with `MATCH`.
 
-## What a mismatch proves {#meaning}
+## What a Mismatch Proves {#meaning}
 
-A mismatch proves only that the additional checksum returned at verification
-time does not describe the logical bytes returned at verification time. It does
-not prove that a particular historical compression defect created the object,
-and it is not an external source-of-truth comparison.
+A `MISMATCH` result establishes that the additional checksum returned by `HEAD` at verification time does not match the logical bytes returned by `GET` at verification time. By itself, a mismatch does not identify which historical writer path produced the object (for example, whether a historical compressed `CopyObject` computed its checksum over compressed storage bytes or whether storage drift occurred), nor does it compare the object against an external source of truth.
 
-Do not overwrite checksum metadata in place. Audit and classify first. For a
-confirmed, operationally relevant mismatch, prefer a new key or new version,
-verify the replacement, then switch consumers deliberately. Leave `UNKNOWN_*`
-objects out of automatic repair.
+Operators should never overwrite checksum metadata in place on disk. Audit and classify affected objects first. For a confirmed mismatch on an active object, write a replacement object under a new key or new version, verify the replacement with `mcli checksum verify`, and switch downstream consumers to the verified object. Keep `UNKNOWN_*` objects out of automated remediation scripts.
 
-## Verification record and release boundary {#verification}
+## Verification Record and Schema Contract {#verification}
 
-The local acceptance matrix covers TTY human/JSON, non-TTY pipes, regular-file
-redirects, app/parent/leaf JSON and quiet flags, environment quiet, report under
-quiet, report-write failure, and MISMATCH/UNKNOWN exit status. It also includes
-real historical `MATCH`, `MISMATCH`, and unsupported-composite objects on a local
-S3 server.
+The acceptance matrix covers TTY human and JSON output, non-TTY pipes, regular-file redirects, root/parent/leaf `--json` and `--quiet` flags, `MC_QUIET=true`, `--report` under quiet mode, report-write failures, `MISMATCH`/`UNKNOWN_*` exit codes, and real `MATCH`, `MISMATCH`, and unsupported `COMPOSITE` objects against a live SILO server ([`mc checksum verify` reference](/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify)).
 
-The command shipped in the final [mcli 20260903](/blog/release/mcli-20260903/) release from a
-signed tag at the tip of `main`, with the functional suite - including a
-checksum verification run against a real SILO server - green for that commit,
-and [pgsty/mc#5](https://github.com/pgsty/mc/issues/5) is closed. Server 20260903 images bundle that client. A production audit remains a separate execution with its own evidence.
+Automated JSON consumers should validate `schemaVersion: 1` and distinguish per-object records (`type: object`) from the final summary (`type: summary`). `--max-workers` defaults to `4` and accepts `1`–`64`, bounding concurrent object verification workers.
 
-JSON consumers should check `schemaVersion: 1` and distinguish per-object records (`type: object`) from the final summary (`type: summary`). `--max-workers` defaults to 4 and accepts 1–64; it bounds concurrent object work, not total memory or server I/O.
+Tests also cover mismatches among multiple checksums, fixed and `null` versions, one result per candidate on normal completion, and clean result-stream closure after worker cancellation. `InvalidObjectState` is classified as a restore condition before generic HTTP 403 handling; SSE-C error classification does not depend on URL or object-name text.

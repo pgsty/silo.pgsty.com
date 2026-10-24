@@ -1,545 +1,320 @@
 ---
-title: "Preview Text, Never Execute It: SILO Console Text Preview PRD"
+title: "Preview Text, Never Execute It: SILO Console Text Preview Design"
 linkTitle: "Safe Text Preview"
 date: 2026-08-23
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  The accepted PRD for previewing small log, text, JSON, and XML objects in SILO Console as bounded, strict UTF-8 text—never as a same-origin executable document.
-tags: [Design, console, preview, security]
+  Design for previewing small log, text, JSON, and XML objects in SILO Console as bounded, strict UTF-8 text—never as a same-origin executable document.
+tags: [Design, Console, Preview, Security]
 weight: 10
 draft: false
 url: "/blog/design/console-text-preview/"
 ---
 
-> **Status:** shipped in SILO Console 2.2.0 · **Owner:** [pgsty/silo-console](https://github.com/pgsty/silo-console) · **Tracking:** [pgsty/silo#17](https://github.com/pgsty/silo/issues/17) · **Review:** consensus of product, security, and frontend architecture reviews
+SILO Console previews images, PDFs, audio, and video, but in v2.1.1 it could not preview the small logs, text files, JSON documents, and XML documents that operators inspect every day. Even when an object stored an accurate `Content-Type`, the frontend classified it as unsupported before selecting a preview renderer.
 
-SILO Console can preview images, PDFs, audio, and video, but not the small logs, text files, JSON documents, and XML documents that operators inspect every day. A correctly stored <code>Content-Type</code> does not help: these objects are classified as unsupported before the preview renderer is selected.
+Restoring a browser-native iframe viewer would have been easy, and it would have been the wrong fix. An object in storage is controlled by the client that uploaded it. Loading that object as a same-origin HTML or XML document turns a convenience viewer into a script execution boundary.
 
-Restoring the old browser-native behavior would be easy. It would also be the wrong fix. An object in storage is controlled by the user who uploaded it. Loading that object as a same-origin HTML or XML document would turn a convenience feature into an execution boundary.
+The design shipped in [Console 2.2.0](/blog/release/console-2.2.0/) (tracking [#17](https://github.com/pgsty/silo/issues/17)) enforces a strict invariant:
 
-The accepted design therefore makes a stronger promise:
-
-> SILO previews eligible objects as bounded UTF-8 text. It never asks the browser to interpret their markup, MIME type, or file contents as a document.
-
-This record fixes the product boundary, the resource limit, the security invariants, the implementation shape, and the evidence required before the feature can ship.
+> SILO Console previews eligible text objects as bounded UTF-8 text. It never asks the browser to interpret their markup, MIME type, or file contents as an executable document.
 
 ## Decision {#decision}
 
-The first release will add a dedicated <code>text</code> preview type and a <code>PreviewText</code> component.
+Console adds a dedicated `text` preview type and a `PreviewText` component governed by ten rules:
 
-The contract is:
+1. Preserve every existing `image`, `pdf`, `audio`, and `video` classification.
+2. Consider a text fallback only when the existing media classifier returns `none`.
+3. Admit the four target extensions (`.log`, `.txt`, `.json`, `.xml`) or four exact passive text MIME types (`text/plain`, `application/json`, `application/xml`, `text/xml`).
+4. Fetch bytes through the ordinary authenticated download path without `preview=true`.
+5. Enforce a hard application read limit of 1 MiB (`1,048,576` bytes).
+6. Decode only strict UTF-8 (`fatal: true`) and reject payloads containing NUL bytes.
+7. Render a single React text node inside a scrollable `<pre>` element.
+8. Never use an `<iframe>`, HTML parser, XML parser, or HTML injection API.
+9. Show the complete object or no object at all; never render a truncated JSON or XML fragment.
+10. Keep **Download** available for files that exceed the size limit, fail UTF-8 decoding, or cannot be previewed.
 
-1. Preserve every existing image, PDF, audio, and video classification.
-2. Only when the existing classifier returns <code>none</code>, consider a text fallback.
-3. Admit the four target extensions or four exact passive text MIME types.
-4. Fetch bytes through the ordinary authenticated download path, without <code>preview=true</code>.
-5. Enforce a hard application read limit of 1 MiB.
-6. Decode only strict UTF-8 and reject binary-looking content.
-7. Render one React text node inside a scrollable <code>&lt;pre&gt;</code>.
-8. Never use an iframe, HTML parser, XML parser, or HTML injection API.
-9. Show the complete object or no object; do not show a truncated JSON or XML document.
-10. Keep download available for files that are too large, invalidly encoded, or otherwise unavailable.
+No new S3 operation or backend preview route is added, and the backend inline MIME allowlist remains unchanged. Delivering this feature also tightened Console download responses: zero-byte `Range` requests return an empty `200 OK`, unsatisfiable ranges return `416 Range Not Satisfiable` with `Content-Range: bytes */N`, and `size` is always emitted in object JSON metadata (see [Console 2.2.0](/blog/release/console-2.2.0/#byte-ranges)).
 
-No new API route or S3 operation is added, and the backend inline MIME allowlist is unchanged. Delivery did change Console download responses: zero-byte Range requests return an empty 200, unsatisfiable ranges return 416 with `Content-Range: bytes */N`, and `size` is always emitted in object JSON. See [Console 2.2.0](/blog/release/console-2.2.0/#byte-ranges).
+## Previous Behavior in Console 2.1.1 {#current-behavior}
 
-## Current behavior {#current-behavior}
+In SILO Console v2.1.1, the frontend preview type union contained only:
 
-The defect is present in SILO Console v2.1.1, the version currently pinned by SILO when this design was written.
-
-The frontend preview union contains only:
-
-~~~text
+```text
 image | pdf | audio | video | none
-~~~
+```
 
-Its extension table contains media formats, but not <code>.log</code>, <code>.txt</code>, <code>.json</code>, or <code>.xml</code>. Its MIME classifier likewise ignores <code>text/plain</code>, <code>application/json</code>, <code>application/xml</code>, and <code>text/xml</code>.
+Its extension table listed media formats but omitted `.log`, `.txt`, `.json`, and `.xml`. Its MIME classifier likewise ignored `text/plain`, `application/json`, `application/xml`, and `text/xml`. Runtime verification showed the resulting split between frontend classification and backend response headers:
 
-Runtime verification produced this split:
-
-| Object | Frontend result | Console download response |
+| Object | Frontend Classification | Console Download Response |
 | --- | --- | --- |
-| <code>.log</code> / <code>text/plain</code> | <code>none</code> | inline, <code>SAMEORIGIN</code> |
-| <code>.txt</code> / <code>text/plain</code> | <code>none</code> | inline, <code>SAMEORIGIN</code> |
-| <code>.json</code> / <code>application/json</code> | “Preview unavailable” | inline, <code>SAMEORIGIN</code> |
-| <code>.xml</code> / <code>application/xml</code> | <code>none</code> | attachment, <code>DENY</code> |
+| `.log` / `text/plain` | `none` | `inline`, `X-Frame-Options: SAMEORIGIN` |
+| `.txt` / `text/plain` | `none` | `inline`, `X-Frame-Options: SAMEORIGIN` |
+| `.json` / `application/json` | "Preview unavailable" | `inline`, `X-Frame-Options: SAMEORIGIN` |
+| `.xml` / `application/xml` | `none` | `attachment`, `X-Frame-Options: DENY` |
 
-The object-detail action also uses the wrong conjunction when deciding whether Preview should be disabled. An authorized user can click Preview for an unsupported object and receive only the unavailable message; in other combinations, the UI can offer an action before the server rejects it.
+In addition, the object-detail view used the wrong boolean conjunction when deciding whether **Preview** should be disabled: an authorized user could click **Preview** on an unsupported object only to receive an unavailable dialog, or see an enabled action that the server would reject.
 
-The preview component still contains a generic same-origin iframe fallback. It is unreachable under the current type union, so the current defect is not an exploitable text-preview XSS. The dead branch is nevertheless hazardous: adding <code>text</code> to the union and letting it fall through would reactivate precisely the document-loading behavior this design rejects.
+Most importantly, the preview container still held a legacy generic same-origin `<iframe>` fallback. Because that branch was unreachable under the closed five-member type union, v2.1.1 did not have an exploitable text-preview XSS—but adding `text` to the union and letting it fall through to the `<iframe>` branch would have reactivated same-origin document execution.
 
-## Root cause {#root-cause}
+## Root Cause {#root-cause}
 
-This is contract drift across three independently evolved layers.
+The defect came from contract drift across three layers:
 
-### Classification drift {#classification-drift}
+### Classification Drift {#classification-drift}
 
-The browser code decides eligibility from filename and object metadata, but its closed type union has no text representation. Correct metadata cannot select a renderer that does not exist.
+The browser frontend determines preview eligibility from the object's filename and `Content-Type` metadata, but its closed type union had no `text` variant. Even accurate object metadata could not select a renderer that did not exist.
 
-### Response-policy drift {#response-drift}
+### Response-Policy Drift {#response-drift}
 
-The Console server separately decides whether a response may be inline. It still treats plain text and JSON as safe passive MIME types, while XML and HTML remain attachments. That server decision is not reflected in the frontend classifier.
+The Console backend independently decides whether a download response may be served `inline`. It treated `text/plain` and `application/json` as passive inline types while forcing `application/xml` and `text/html` to `attachment`. That server policy was disconnected from the frontend classifier.
 
-### Renderer drift {#renderer-drift}
+### Renderer Drift {#renderer-drift}
 
-The old generic iframe remains after the set of reachable preview types became media-only. The code therefore suggests a capability that the type system can no longer invoke.
+The dead `<iframe>` fallback remained in the component tree after reachable preview types were narrowed to media and PDF. Realigning the three layers required introducing a dedicated inert text renderer and deleting the dead `<iframe>` fallback rather than relying on MIME headers as a security boundary.
 
-The repair must realign the three layers without making MIME metadata a security boundary.
+## Why Same-Origin Iframe Preview Was Rejected {#iframe-risk}
 
-## Why same-origin iframe preview is rejected {#iframe-risk}
+`X-Frame-Options: SAMEORIGIN` is not a sandbox. It restricts which parent origins may embed a response, not what script inside a same-origin frame can execute.
 
-<code>X-Frame-Options: SAMEORIGIN</code> is not a sandbox. It controls who may embed a response; it does not limit what code inside a same-origin frame can do.
+If uploader-controlled HTML, XHTML, SVG, or active XML is ever loaded as an inline same-origin document inside an `<iframe>`, script inside that frame runs in the Console origin. Even with `HttpOnly` session cookies blocking direct `document.cookie` reads, same-origin execution can still issue authenticated state-changing API requests against the Console backend.
 
-If uploader-controlled HTML, XHTML, SVG, or active XML were ever served as an inline same-origin document, it could act with the Console origin. An HttpOnly cookie would prevent direct cookie reads, but it would not prevent authenticated same-origin requests. A permissive or accidentally widened MIME rule would then turn stored content into stored application code.
+`X-Content-Type-Options: nosniff`, Content Security Policy (CSP), and `Content-Disposition` provide defense in depth, but the primary security invariant must live in the data flow itself:
 
-<code>nosniff</code>, Content Security Policy, and <code>Content-Disposition</code> remain useful defense in depth, but none replaces the core invariant:
-
-~~~text
+```text
 untrusted object bytes
         |
         v
-strict text decoder
+strict UTF-8 TextDecoder
         |
         v
-React textContent
+React <pre>{textContent}</pre>
 
 never:
 iframe / innerHTML / DOMParser / XML parser / executable document
-~~~
+```
 
-## Product contract {#product-contract}
+## Product Contract {#product-contract}
 
-The feature is a read-only text viewer, not a web previewer and not an online editor.
+The feature is a read-only source-text viewer, not a web document renderer or an online code editor.
 
-The user should be able to:
+Users can:
 
-- open a small eligible object from either the list or object-detail surface;
-- read whitespace-preserving source text in the existing preview modal;
-- select and copy text using browser-native behavior;
-- understand whether a failure is caused by size, encoding, permission, object replacement, or network error;
-- download the original bytes at any time.
+- Open an eligible small object from either the bucket object list or the object-detail drawer.
+- Read whitespace-preserving source text inside the preview modal.
+- Select and copy text using native browser selection.
+- Distinguish whether a preview refusal is caused by file size, non-UTF-8/binary encoding, missing permissions, object replacement, or network failure.
+- Download the original bytes at any time.
 
-The user must never be led to believe that:
+Users are never misled by silent transformations:
 
-- formatted JSON is the stored object;
-- a partial XML document is complete;
-- replacement characters are original bytes;
-- an unsupported encoding has been decoded faithfully;
-- an active HTML/XML document has been safely “sanitized” and executed.
+- JSON is never parsed and re-serialized (which would alter large integers, duplicate keys, or whitespace).
+- Large XML or JSON objects are never silently truncated into invalid prefix fragments.
+- Invalid UTF-8 sequences are never masked with `U+FFFD` replacement characters.
 
-## Goals and non-goals {#scope}
+## Goals and Non-Goals {#scope}
 
 ### Goals {#goals}
 
-1. Preview small logs, text, JSON, and XML without a local download.
-2. Keep object content inert regardless of extension, MIME, or payload.
-3. Bound retained response bytes and rendered text to 1 MiB.
-4. Preserve the stored text rather than silently reformatting it.
-5. Keep list and detail actions consistent with permissions and type eligibility.
-6. Support current object versions and explicitly selected historical versions.
-7. Preserve anonymous-access and subpath-hosting behavior.
-8. Ship the feature in Console first, then consume that exact Console revision in SILO.
+1. Preview small `.log`, `.txt`, `.json`, and `.xml` objects without requiring a local file download.
+2. Keep object bytes strictly inert regardless of filename extension, `Content-Type`, or payload contents.
+3. Bound retained response bytes and rendered text to 1 MiB (`1,048,576` bytes).
+4. Preserve exact stored UTF-8 text rather than reformatting it.
+5. Unify preview eligibility and permission checks across the list and object-detail views.
+6. Support both current objects and explicitly selected historical `versionId` targets.
+7. Preserve anonymous-access (`X-Anonymous: 1`) and subpath-hosting behavior.
 
-### Non-goals {#non-goals}
+### Non-Goals {#non-goals}
 
-- HTML or XHTML rendering.
-- XML parsing, XSLT, external entities, or schema validation.
-- Markdown rendering.
-- JSON pretty-printing.
-- YAML or CSV-specific behavior.
-- Editing or saving.
-- Syntax highlighting, line numbers, search, folding, ANSI rendering, or linkification.
-- Head, tail, or truncated previews for large objects.
-- Lossy decoding or automatic detection of GBK, UTF-16, Latin-1, or other encodings.
-- A new backend text-preview endpoint.
-- Changes to the existing SVG, media, PDF, download, share, or storage contracts.
+- HTML, XHTML, or Markdown rendering.
+- XML parsing, XSLT evaluation, external entity resolution, or schema validation.
+- Automatic JSON pretty-printing (`JSON.parse` / `JSON.stringify`).
+- In-browser editing, syntax highlighting, line-number gutters, folding, or ANSI escape rendering.
+- Head/tail or truncated prefix previews for objects larger than 1 MiB.
+- Lossy decoding or charset guessing for GBK, UTF-16, or Latin-1 files.
 
-An object such as <code>notes.md</code> may still be shown as raw text when its exact MIME type is <code>text/plain</code>. It does not gain Markdown semantics.
+An object such as `notes.md` stored with `Content-Type: text/plain` is eligible for raw UTF-8 text preview, without Markdown rendering.
 
-## Eligibility contract {#eligibility}
+## Eligibility Contract {#eligibility}
 
-Eligibility is deliberately two-stage.
+Eligibility is evaluated in two stages so existing media behavior never changes.
 
-### Stage 1: preserve the legacy media decision {#legacy-media}
+### Stage 1: Preserve Legacy Media Classification {#legacy-media}
 
-Run the current image, PDF, audio, and video classifier unchanged. If it returns anything other than <code>none</code>, return that result.
+Run the existing `image`, `pdf`, `audio`, and `video` classifier first. If it returns anything other than `none`, use that media classification.
 
-This preserves historical behavior for conflicting filename and MIME combinations.
+### Stage 2: Apply Text Fallback {#text-fallback}
 
-### Stage 2: apply text fallback {#text-fallback}
+Only when the legacy media classifier returns `none`:
 
-Only after the legacy result is <code>none</code>:
+1. Explicitly reject final filename extensions `.html`, `.htm`, and `.xhtml`.
+2. Match the final filename extension case-insensitively against `.log`, `.txt`, `.json`, and `.xml`.
+3. Normalize `Content-Type` by stripping parameters (`; charset=...`), trimming whitespace, and lowercasing.
+4. Match the normalized MIME type against `text/plain`, `application/json`, `application/xml`, and `text/xml`.
 
-1. Reject final extensions <code>.html</code>, <code>.htm</code>, and <code>.xhtml</code>.
-2. Match the final filename extension case-insensitively against:
+Matching either an allowed extension (when not excluded by rule 1) or an allowed exact MIME type selects `text`:
 
-   - <code>.log</code>
-   - <code>.txt</code>
-   - <code>.json</code>
-   - <code>.xml</code>
-
-3. Normalize Content-Type by removing parameters, trimming whitespace, and lowercasing it.
-4. Match the normalized MIME exactly against:
-
-   - <code>text/plain</code>
-   - <code>application/json</code>
-   - <code>application/xml</code>
-   - <code>text/xml</code>
-
-An allowed extension or an allowed exact MIME is sufficient. Broad matches such as <code>text/*</code>, substring tests, and <code>application/*+json</code> are forbidden in this release.
-
-The resulting matrix is normative:
-
-| Filename and MIME | Result | Reason |
+| Filename and MIME | Classification | Reason |
 | --- | --- | --- |
-| <code>report.txt</code> + <code>image/png</code> | image | Existing media decision wins. |
-| <code>report.json</code> + <code>application/pdf</code> | PDF | Existing media decision wins. |
-| <code>server.LOG</code> + <code>application/octet-stream</code> | text | Allowed extension, case-insensitive. |
-| no extension + <code>application/json; charset=utf-8</code> | text | Exact normalized MIME. |
-| <code>page.html</code> + <code>text/plain</code> | none | Explicit active-extension exclusion. |
-| <code>page.txt</code> + <code>text/html</code> | text | Extension admits it; HTML source remains inert text. |
-| <code>notes.md</code> + <code>text/plain</code> | text | Exact MIME admits raw text, not Markdown rendering. |
-| <code>image.svg</code> + <code>image/svg+xml</code> | existing image path | No new text or iframe path. |
+| `report.txt` + `image/png` | `image` | Existing media classification wins |
+| `report.json` + `application/pdf` | `pdf` | Existing media classification wins |
+| `server.LOG` + `application/octet-stream` | `text` | Allowed extension, case-insensitive |
+| No extension + `application/json; charset=utf-8` | `text` | Exact normalized MIME match |
+| `page.html` + `text/plain` | `none` | Explicit HTML extension exclusion |
+| `page.txt` + `text/html` | `text` | Extension admits it; HTML source renders as inert text |
+| `notes.md` + `text/plain` | `text` | Exact MIME admits raw text |
+| `image.svg` + `image/svg+xml` | `image` | Handled by existing image path |
 
-Filename and MIME affect product eligibility only. They never select an executable rendering mode.
+## Resource Contract {#resource-contract}
 
-## Resource contract {#resource-contract}
+The hard binary limit is:
 
-The binary limit is:
-
-~~~text
+```text
 MAX_TEXT_PREVIEW_BYTES = 1,048,576
-~~~
+```
 
-Exactly 1 MiB is eligible. 1 MiB plus one byte is not.
+An object of exactly `1,048,576` bytes is eligible; `1,048,577` bytes is rejected as too large.
 
-### Known sizes {#known-size}
+### Known Sizes {#known-size}
 
-- If the selected version has a known size greater than the limit, the initial attempt does not request its body. Explicit Retry bypasses that possibly stale listed size but retains the bounded Range and byte limit.
-- A known zero size still takes the bounded request path; an empty response produces the empty-file state.
-- If its known size is within the limit, begin a bounded request.
-- An absent size is not the same as zero; it enters the bounded unknown-size path.
+- If the selected object version has a known size exceeding `1,048,576` bytes, opening the modal goes directly to the **Too Large** state without issuing a body download request. Clicking **Retry** re-probes with a bounded `Range` request in case the listed size was stale.
+- A known zero-byte size still issues the bounded request to verify authorization and existence, rendering the explicit **File is empty** state on an empty `200 OK`.
+- Missing size metadata (`undefined`) is preserved as unknown rather than coerced to `0`, entering the bounded stream reader.
 
-The current list-to-modal handoff must therefore preserve <code>undefined</code> rather than converting it to zero with a truthy fallback.
+### Bounded Request and Sentinel Byte {#bounded-request}
 
-### Bounded request {#bounded-request}
+For objects with a size within 1 MiB or an unknown size, the client sends:
 
-For a small or unknown size, request:
-
-~~~http
+```http
 Range: bytes=0-1048576
-~~~
+```
 
-The extra byte is an over-limit sentinel.
+Requesting `1,048,576 + 1` bytes uses the `1,048,577`th byte as an over-limit sentinel. The client:
 
-The client must:
+1. Checks `Content-Range` and `Content-Length` headers immediately on response arrival.
+2. Reads the response body as a `ReadableStream` rather than calling `response.text()` or buffering an unbounded `Blob`.
+3. Accumulates at most `1,048,577` bytes in memory.
+4. Aborts the stream immediately if the sentinel byte arrives (including when an upstream proxy ignores `Range` and streams a `200 OK`).
+5. Renders text only after end-of-stream proves the complete object fits within `1,048,576` bytes.
 
-1. Inspect <code>Content-Range</code> and <code>Content-Length</code> when present.
-2. Read the response as a stream rather than calling <code>response.text()</code> or building a complete Blob.
-3. Retain at most the limit plus the sentinel byte.
-4. Cancel immediately when the sentinel byte is observed.
-5. Enforce the same limit when the server ignores Range and returns 200.
-6. Render only after end-of-stream proves that the complete object is within the limit.
+## Request Identity and Cancellation {#request-lifecycle}
 
-An over-limit object opens an explanation state with its known size, the 1 MiB policy, and a Download action. It never shows a prefix fragment.
+Each preview request is keyed by `bucket + object name + versionId` and preserves same-origin credentials, Console subpath routing, `version_id` query parameters, and `X-Anonymous: 1` headers. Closing the modal, switching objects or versions, or unmounting the component triggers both an `AbortController` signal and a generation-token invalidation check so a late stream completion can never overwrite a newer preview. Aborted requests clean up silently without firing error toasts.
 
-## Request identity and cancellation {#request-lifecycle}
+## Encoding and Fidelity {#encoding}
 
-A preview request is identified by:
+Text decoding uses strict UTF-8:
 
-~~~text
-bucket + object name + version ID
-~~~
-
-The request must use the existing generated API client or an equivalent base-path-safe helper so that it preserves:
-
-- same-origin credentials;
-- the current Console subpath;
-- <code>version_id</code>;
-- anonymous-mode <code>X-Anonymous: 1</code>;
-- current error handling and permission boundaries.
-
-Close, object change, version change, bucket change, and component unmount must abort the active request and clear the old content.
-
-Abort alone is insufficient. A generation token or invalidation flag must also prevent a response that already completed reading or decoding from updating a newer preview.
-
-An aborted request is not an error and must not produce an error toast.
-
-## Encoding and fidelity {#encoding}
-
-The first release supports strict UTF-8 only:
-
-~~~ts
+```ts
 new TextDecoder("utf-8", { fatal: true })
-~~~
+```
 
-Requirements:
+- A leading UTF-8 BOM (`EF BB BF`) is stripped automatically without displaying a zero-width character.
+- Multi-byte Unicode, emoji, tabs, `LF`, and `CRLF` line endings are preserved verbatim.
+- Invalid UTF-8 byte sequences throw a decode error and transition to the **Unsupported Encoding / Binary** state rather than substituting `U+FFFD`.
+- Any decoded string containing a `NUL` (`\0`) character is rejected as binary data.
 
-- handle the UTF-8 BOM without displaying it;
-- preserve Unicode text, emoji, tabs, LF, and CRLF;
-- reject invalid UTF-8 rather than inserting replacement characters;
-- reject decoded NUL characters as binary or unsupported content;
-- do not guess another encoding;
-- do not log or persist object text;
-- always retain Download as the original-byte escape hatch.
+## Safe Renderer and UI States {#safe-renderer}
 
-The unsupported-encoding state should explain:
+The success view renders a single React text node inside `<pre>{content}</pre>` with a monospace font, preserved whitespace, horizontal and vertical scrolling (`white-space: pre` by default to keep aligned logs readable and avoid expensive browser line-wrapping layout on long single-line JSON payloads), and native keyboard focus. The dead `<iframe>` fallback in the preview router is removed.
 
-> This object is not valid UTF-8 text or contains binary data. Download it to inspect the original bytes.
+### UI States and Permissions {#ux}
 
-JSON and XML are displayed exactly as decoded source text. The first release must not run <code>JSON.parse</code> followed by <code>JSON.stringify</code>: that can alter unsafe integers, duplicate keys, whitespace, lexical forms, and the text users copy.
+The **Preview** action is enabled in both list and detail views if and only if:
 
-## Safe renderer {#safe-renderer}
-
-The success state renders one text node:
-
-~~~tsx
-<pre>{content}</pre>
-~~~
-
-The implementation must not use:
-
-- iframe, object, or embed;
-- <code>dangerouslySetInnerHTML</code> or <code>innerHTML</code>;
-- <code>DOMParser</code> or an XML parser;
-- Markdown or HTML rendering;
-- an HTML data/blob URL;
-- per-line or per-token spans;
-- automatic links, ANSI escapes, or syntax markup.
-
-One bounded text node keeps the DOM cost predictable and the security property inspectable.
-
-The preformatted region uses a monospace font, preserves whitespace, defaults to no wrapping, owns both scrollbars, is keyboard focusable, and supports native selection and copy. No-wrap is intentional: it preserves aligned logs and avoids expensive layout of a single very long line.
-
-## UI states and permissions {#ux}
-
-The Preview action is enabled only when:
-
-~~~text
+```text
 eligible preview type
-AND object read permission
+AND s3:GetObject (or s3:GetObjectVersion) permission
 AND not a delete marker
-AND not a prefix
-~~~
+AND not a directory prefix
+```
 
-The object-detail conjunction bug must be fixed, and list and detail surfaces must share the same eligibility function.
+The modal presents distinct states for **Loading**, **Success**, **Empty** (`0` bytes), **Too Large** (`> 1 MiB`, showing object size, policy limit, **Download**, and bounded **Retry**), **Invalid UTF-8 / Binary**, **Forbidden (`403`)**, **Not Found (`404`)**, and **Network / Server Error**. HTTP error response bodies are never decoded into the preview pane.
 
-An eligible over-limit object still offers Preview. The modal explains why content is not loaded; disabling the button would leave the user unable to distinguish size, permission, and type failures.
+## Functional and Security Requirements {#requirements}
 
-The modal distinguishes:
+### Functional Requirements {#functional-requirements}
 
-| State | Required behavior |
-| --- | --- |
-| Loading | Accessible busy state; no stale text. |
-| Success | Scrollable raw text plus Download. |
-| Empty | Explicit “File is empty” state. |
-| Too large | Object size, 1 MiB limit, Download and Retry; no initial body request when size is known to exceed the limit. |
-| Invalid UTF-8 / binary | Dedicated explanation and Download. |
-| Forbidden | Permission-specific message; no retained text. |
-| Not found / replaced | Object-change message; no retained text. |
-| Network / server error | Actionable retry/download state. |
-| Aborted / closed | Silent cleanup. |
+- **FR1–FR3:** Preserve legacy media/PDF routing, classify text fallback via the normative extension/MIME matrix, and render complete eligible objects up to 1 MiB as strict UTF-8 source.
+- **FR4–FR6:** Render no partial content for over-limit objects, provide an explicit empty-file state, and bind metadata, size, and body requests to the selected `versionId`.
+- **FR7–FR9:** Preserve anonymous access, subpath routing, unified list/detail action eligibility, and existing download/share/media contracts.
 
-HTTP error bodies must never be decoded and displayed as object content.
+### Security Requirements {#security-requirements}
 
-All new user-facing strings go through the existing translation layer and ship in English and Chinese together. The content region and controls must remain usable in light and dark themes and at narrow widths.
+- **SR1–SR4:** Render object bytes solely through `<pre>` text content without any HTML/XML/SVG/Markdown parser, retain at most `1,048,577` bytes, and invalidate in-flight requests on close or identity change.
+- **SR5–SR8:** Reject invalid UTF-8 and `NUL` bytes, keep preview text out of Redux/storage/logs/error bodies, rely on server S3 authorization, and leave CSP and `safeMimeTypes` unchanged.
 
-## Functional and security requirements {#requirements}
+## Implementation Scope {#implementation}
 
-### Functional requirements {#functional-requirements}
+1. Refactor preview classification so legacy media precedence is preserved and `text` is an explicit fallback.
+2. Add the `PreviewText` component with streaming byte bounds, strict UTF-8 decoding, `AbortController` cancellation, and explicit modal states.
+3. Remove the unreachable generic `<iframe>` fallback, align object-detail and list `Preview` eligibility, and preserve `undefined` unknown sizes.
 
-- **FR1:** Existing media and PDF classification remains unchanged.
-- **FR2:** The text fallback follows the normative extension/MIME matrix.
-- **FR3:** Eligible complete objects up to 1 MiB render as strict UTF-8 source.
-- **FR4:** Over-limit objects render no partial content.
-- **FR5:** Empty objects have a distinct successful empty state.
-- **FR6:** Current and selected historical versions use the same version for metadata, size, and body.
-- **FR7:** Anonymous access and subpath hosting retain their current request behavior.
-- **FR8:** List and detail actions apply the same type and permission decision.
-- **FR9:** Download, share, media, PDF, and storage behavior do not change.
+## Rejected Alternatives {#alternatives}
 
-### Security requirements {#security-requirements}
+### Keep Text Preview Disabled {#alternative-disabled}
 
-- **SR1:** Object bytes can reach the DOM only through text content.
-- **SR2:** Text Preview contains no document renderer or parser.
-- **SR3:** At most 1 MiB plus one sentinel byte is retained.
-- **SR4:** Closing or changing identity invalidates every previous response.
-- **SR5:** Invalid UTF-8 and NUL content are not shown as faithful text.
-- **SR6:** Errors, Redux, local storage, logs, and telemetry never retain preview text.
-- **SR7:** Server authorization remains authoritative for direct requests.
-- **SR8:** No CSP or backend inline MIME relaxation is introduced.
+Rejected because inspecting small logs, status files, and JSON/XML configurations is a daily operational workflow, and forcing a local file download for every check is unnecessary friction.
 
-## Implementation scope {#implementation}
+### Reuse the Legacy Same-Origin Iframe {#alternative-iframe}
 
-Expected Console changes:
+Rejected because serving uploader-controlled content inside a same-origin `<iframe>` turns mutable MIME metadata into a script execution boundary and leaves browser memory use unbounded.
 
-1. Refactor preview classification so the current media decision is preserved and text is an explicit fallback.
-2. Add <code>text</code> to the preview type union.
-3. Add a dedicated <code>PreviewText</code> component with streaming bounds, strict decode, request cancellation, and explicit states.
-4. Route text objects explicitly to that component.
-5. Remove the unreachable generic iframe fallback.
-6. Fix the object-detail Preview disable expression and share eligibility logic with the list surface.
-7. Preserve unknown size instead of coercing it to zero.
-8. Add English and Chinese strings.
-9. Add classification, component, resource, security, permission, version, and browser tests.
+### Add a Dedicated Backend Preview Endpoint {#alternative-backend}
 
-Expected unchanged areas:
+Rejected because the authenticated download endpoint already enforces `GetObject` / `GetObjectVersion` permissions and supports HTTP `Range` requests (`bytes=0-1048576`). Duplicating that logic in a second endpoint would widen the API surface without adding a new security boundary.
 
-- Console and S3 API paths;
-- the backend <code>safeMimeTypes</code> list;
-- Content Security Policy;
-- object storage and metadata formats;
-- image, PDF, audio, video, download, and share handlers;
-- external frontend dependencies.
+### Truncate Large Files to the First 1 MiB {#alternative-truncation}
 
-If a future product requires tailing, server-side transcoding, organization-wide policy, or reliable behavior through proxies that ignore Range, a dedicated server endpoint may be designed separately.
+Rejected because displaying a 1 MiB prefix of a 50 MiB JSON or XML file presents structurally broken markup as if it were the object, and requires extra multi-byte UTF-8 boundary slicing. Complete-or-nothing preview keeps the contract unambiguous.
 
-## Rejected alternatives {#alternatives}
+### Decode Invalid UTF-8 with Replacement Characters {#alternative-lossy}
 
-### Keep text preview disabled {#alternative-disabled}
+Rejected because silent `U+FFFD` substitution corrupts text that operators copy out of the preview modal. Legacy single-byte or UTF-16 encodings should be inspected via **Download**.
 
-**Benefit:** no new code or browser memory use.  
-**Rejected because:** logs and configuration objects are a routine object-storage workflow, and download-only inspection is an avoidable Console regression.
+### Auto-Format JSON with Parse and Stringify {#alternative-json-format}
 
-### Reuse the same-origin iframe {#alternative-iframe}
+Rejected because `JSON.parse` followed by `JSON.stringify` silently mutates 64-bit integers exceeding `Number.MAX_SAFE_INTEGER`, collapses duplicate keys, and alters source whitespace.
 
-**Benefit:** minimal code and browser-native presentation.  
-**Rejected because:** it turns uploader-controlled content and mutable MIME metadata into a same-origin document boundary. It also leaves resource use unbounded.
+### Embed Monaco or a Full Code Editor {#alternative-editor}
 
-### Add a backend preview API now {#alternative-backend}
+Rejected because web workers, syntax grammars, and editor bundle weight are unjustified for a bounded 1 MiB read-only viewer. A single `<pre>` text node is fast, predictable, and trivial to audit.
 
-**Benefit:** central server-side limits and normalized text responses.  
-**Rejected for the first release because:** the user already has object-read permission, and the existing download endpoint provides versioning, authorization, and Range. A new API would duplicate contracts without establishing a new data-access boundary.
+## Verification and Acceptance Plan {#acceptance}
 
-### Show the first 1 MiB of a large object {#alternative-truncation}
+### Classification Matrix {#classification-tests}
 
-**Benefit:** better large-log convenience.  
-**Rejected because:** partial JSON/XML is structurally misleading, UTF-8 boundaries need additional handling, and a single “preview” action would no longer mean complete content.
+Automated tests lock every row of the two-stage extension/MIME matrix, case insensitivity, parameter stripping, `.html`/`.htm`/`.xhtml` exclusion, and media precedence.
 
-### Decode invalid UTF-8 with replacement characters {#alternative-lossy}
+### Resource Bounds {#resource-tests}
 
-**Benefit:** some damaged or legacy logs remain partially readable.  
-**Rejected because:** copied text would no longer faithfully represent the stored object. Lossy viewing and other encodings require a separate, explicit product mode.
+Tests cover `0` bytes, `1` byte, `1,048,576` bytes, `1,048,577` bytes, known over-limit skip, bounded **Retry**, `206 Partial Content`, `200 OK` when `Range` is ignored, and stream cancellation on close.
 
-### Auto-format JSON {#alternative-json-format}
+### Encoding and Fidelity {#encoding-tests}
 
-**Benefit:** more readable indentation.  
-**Rejected because:** parse/stringify can alter numbers, duplicate keys, lexical representation, and copied content. A future opt-in formatted view may sit beside, never replace, the raw default.
+Covers UTF-8 CJK and emoji, BOM stripping, invalid UTF-8 sequences, embedded `NUL` bytes, 64-bit JSON integers, duplicate JSON keys, and XML `DOCTYPE`/`CDATA`/stylesheet directives.
 
-### Add Monaco or another code editor {#alternative-editor}
+### Security Payloads {#security-tests}
 
-**Benefit:** line numbers, search, highlighting, and folding.  
-**Rejected because:** bundle, worker, CSP, and maintenance costs exceed the needs of a bounded read-only preview. A native <code>&lt;pre&gt;</code> is smaller and easier to audit.
+Verifies that `<script>`, inline event handlers, `<iframe>`, SVG `onload`, and XML XXE/XSLT payloads appear literally in `<pre>.textContent`, create zero child DOM elements, and trigger zero network requests.
 
-## Acceptance and test plan {#acceptance}
+### Permissions and Version Races {#permission-tests}
 
-### Classification matrix {#classification-tests}
+Confirms that `401`/`403`/`404`/`416`/`5xx` bodies never render as preview content and that late responses from an older request generation cannot overwrite a newly selected object or `versionId`.
 
-Automated tests must lock every normative matrix row, extension case handling, MIME parameter stripping, explicit HTML/XHTML denial, and unchanged media conflicts.
+### Browser Regression {#browser-tests}
 
-### Resource tests {#resource-tests}
+End-to-end Playwright checks against a live SILO + Console instance verify English and Chinese locales, light and dark themes, and desktop and narrow viewports alongside media, PDF, download, share, and version workflows.
 
-Cover:
+## Delivery and Completion Gates {#delivery}
 
-- 0 bytes;
-- 1 byte;
-- exactly 1,048,576 bytes;
-- 1,048,577 bytes;
-- known over-limit size with zero body requests;
-- unknown size;
-- 206 with a revealing <code>Content-Range</code>;
-- server ignores Range and returns 200;
-- missing or false <code>Content-Length</code>;
-- close and identity changes during streaming.
+Shipped in [`pgsty/silo-console` v2.2.0](/blog/release/console-2.2.0/) ([PR #30](https://github.com/pgsty/silo-console/pull/30)) and embedded in [SILO Server 20260903](/blog/release/silo-20260903/), resolving [pgsty/silo#17](https://github.com/pgsty/silo/issues/17).
 
-No case may retain or render more than the complete allowed object.
+## Trade-Off Summary {#trade-offs}
 
-### Encoding and fidelity tests {#encoding-tests}
+This design chooses explicit scope over a generic browser viewer, complete small files over truncated fragments, source fidelity over automatic reformatting, strict UTF-8 over lossy decoding, and a single inert text node over an embedded code editor. Large logs (`> 1 MiB`) and non-UTF-8 files still require clicking **Download**—a deliberate boundary that keeps Console text preview small enough to audit and strong enough to trust.
 
-Cover UTF-8 Chinese, emoji, tabs, LF, CRLF, BOM, invalid byte sequences, NUL bytes, JSON unsafe integers, duplicate keys, original whitespace, XML declarations, DOCTYPE, CDATA, and stylesheet processing instructions.
+### Design Review Record {#review-record}
 
-The raw success view must preserve decoded text. Invalid and binary cases must show their dedicated state.
-
-### Security tests {#security-tests}
-
-Payloads containing <code>&lt;script&gt;</code>, event attributes, iframe tags, SVG handlers, XML stylesheets, external entities, and suspicious URLs must:
-
-- appear literally in <code>&lt;pre&gt;.textContent</code>;
-- create no corresponding DOM elements;
-- execute no script or dialog;
-- cause no object-content-originated request;
-- encounter no iframe, object, embed, HTML parser, or XML parser in Text Preview.
-
-### Permission and race tests {#permission-tests}
-
-Verify:
-
-- no <code>GetObject</code> means no usable action and no retained body;
-- historical versions require their corresponding permission;
-- metadata and body use the same version ID;
-- a late old response cannot replace a new object's preview;
-- 401, 403, 404, 416, and 5xx bodies never become preview content;
-- anonymous access and Console subpaths do not regress.
-
-### Browser regression {#browser-tests}
-
-Use a real SILO/Console test instance to inspect both English and Chinese routes, light and dark themes, and narrow and desktop widths. Media, PDF, download, share, and version workflows require smoke coverage alongside the new text states.
-
-## Delivery and completion gates {#delivery}
-
-The change belongs to <code>pgsty/silo-console</code>, even though the user report is tracked in the SILO server repository.
-
-Delivery is staged:
-
-1. Merge the focused Console source and test change.
-2. Pass TypeScript checking, production build, automated matrices, and real-browser security regression.
-3. Update Console release notes and regenerate the actual embedded web assets.
-4. Publish a Console version; a minor release is appropriate for the new visible capability.
-5. Update SILO's <code>github.com/minio/console =&gt; github.com/pgsty/silo-console</code> replacement to the exact new pseudo-version.
-6. Build a SILO candidate from that exact dependency and repeat integration checks.
-7. Publish the SILO binary and image, naming the first version that contains the feature.
-
-These are separate states:
-
-| Gate | Meaning |
-| --- | --- |
-| Console PR merged | Implementation exists in source. |
-| Console assets/tag published | Console is independently consumable. |
-| SILO dependency updated | SILO main has integrated the change. |
-| SILO release published | Users can obtain the feature. |
-
-Issue #17 should not be described as fixed for users merely because a local preview or Console source PR exists.
-
-## Trade-off summary {#trade-offs}
-
-The accepted design favors:
-
-- explicit scope over a generic browser viewer;
-- complete small files over partial large files;
-- source fidelity over automatic formatting;
-- strict UTF-8 over silent lossy decoding;
-- one inert text node over a full editor;
-- the existing download API over a new backend contract;
-- a verifiable security invariant over convenient same-origin rendering.
-
-The cost is real: large logs and legacy encodings still require download, and the first release has no search, line numbers, wrapping toggle, or highlighting. Those omissions are deliberate. They make the feature small enough to audit and strong enough to trust.
-
-## Review record {#review-record}
-
-The design was independently reviewed from three perspectives:
-
-- product scope, delivery, and acceptance;
-- security and frontend architecture;
-- compatibility and current-source verification.
-
-The reviewers initially differed on MIME-only eligibility and lossy UTF-8 fallback. After cross-review they reached a single contract:
-
-- existing media classification wins;
-- text fallback accepts the four target extensions or four exact normalized MIME types;
-- HTML/XHTML extensions are explicitly excluded;
-- strict UTF-8 and NUL rejection are required;
-- lossy viewing is deferred to a separate proposal.
-
-No unresolved design question remains. Implementation may proceed against this record.
-
-**Current Retry boundary:** the too-large state permits reprobe of potentially stale listed size, never an unbounded download. The Range, response-header checks and at-most-1 MiB + 1-byte read limit still apply. Empty files are verified through the response path; unknown size must not be treated as zero.
+Reviewed across product scope, frontend security/CSP isolation, and S3 `Range`/versioning semantics prior to merging [silo-console#30](https://github.com/pgsty/silo-console/pull/30).

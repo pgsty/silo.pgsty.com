@@ -5,65 +5,59 @@ date: 2026-09-09
 lastmod: 2026-09-16
 author: "Ruohang Feng"
 summary: >
-  The decision record for SILO #153, #152, and #137: distinguish external reports from local evidence, classify delete-marker purges correctly, expose drops from the bounded MRF queue, and give resync cancellation a complete lifecycle. Includes review, rejected alternatives, final validation, and a 2026-09-16 second round covering worker-side purge classification and persisted MRF marker recovery (PR #196), and a third round on exact-version purges, marker healing and stale queued creations.
+  The engineering record for SILO #153, #152, and #137: classify delete-marker purges accurately, expose drops from the bounded MRF queue, and bind resync cancellation to per-run contexts. Includes Round 2 on worker-side purge classification and persisted MRF marker recovery (PR #196), and Round 3 on exact-version purges, marker healing, and stale queued creations.
 tags: [Design, Replication, S3, Review]
 weight: 7
 draft: false
 url: "/blog/design/replication-reliability/"
 ---
 
-> **Publication update, 2026-09-17:** The repairs recorded here (PR #162, the second-round PR #196 and the third-round purge repairs) shipped in [Server 20260916](/blog/release/silo-20260916/). Coordinated upgrades, opt-in prerequisites and remaining limitations still apply. Dated source-status and validation records below retain their original scope.
+This article records the root-cause analysis, design tradeoffs, and validation across three rounds of replication reliability repairs shipped in [Server 20260916](/blog/release/silo-20260916/):
 
-This page records the analysis, design choices, review, and implementation of [#153](https://github.com/pgsty/silo/issues/153), [#152](https://github.com/pgsty/silo/issues/152), and [#137](https://github.com/pgsty/silo/issues/137). They belong to the same replication reliability series, but affect operation classification, recovery visibility, and task lifecycle respectively. One general retry patch cannot repair all three.
+- **Round 1 ([PR #162](https://github.com/pgsty/silo/pull/162), merged as [`d1105bbb`](https://github.com/pgsty/silo/commit/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e)):** addresses [#153](https://github.com/pgsty/silo/issues/153), [#152](https://github.com/pgsty/silo/issues/152), and [#137](https://github.com/pgsty/silo/issues/137), covering operation classification at the HTTP handler entry, MRF drop observability, and the resync cancellation lifecycle.
+- **Round 2 ([PR #196](https://github.com/pgsty/silo/pull/196), commit [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2)):** repairs the replication worker's delete exits, outer status aggregation, and the persisted MRF marker-recovery path (see [Round 2](#second-round)).
+- **Round 3 (commits [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3), [`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0), and [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb)):** repairs exact-version purge drive writes and quorum checks, delete-marker healing metadata retention, and pre-send revalidation for queued marker creations (see [Round 3](#third-round)).
 
-> **As of 2026-09-09:** [PR #162](https://github.com/pgsty/silo/pull/162) is merged as [`d1105bbb`](https://github.com/pgsty/silo/commit/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e), and all three issues are closed. All eight checks on the tested PR head, followed by main Go CI and VulnCheck, passed.<br>
-> **Second round, 2026-09-16:** [PR #196](https://github.com/pgsty/silo/pull/196) (fix [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2), verification record `aea3882c9`) repaired the replication worker's own delete exits and the persisted MRF marker-recovery path — a different surface from the first round. It is on main and **not** in Server 20260903; see [the second-round section](#second-round).<br>
-> **Third round, 2026-09-16:** commits [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3), [`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0) and [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) repair what an exact-version purge does to drives and what a queued creation does after a purge. On main, **not** in Server 20260903; see [the third-round section](#third-round).<br>
-> **Review:** the plan was discussed with the installed Claude Code Fable 5.1 Max, followed by a review of the implementation. The final verdict was **GO**.<br>
-> **Delivery boundary:** this work completed code, tests, and main integration. It did not create a Server tag or formal release, and does not establish that existing packages, images, or production deployments contain the fixes.
+## Overall Decision and the Surrounding Series {#decision}
 
-## Overall decision and the surrounding series {#decision}
+Each fix repairs the reproduced invariant at the smallest boundary that owns it, preserves existing background recovery mechanisms, and proves convergence with deterministic tests.
 
-The selection rule was to repair a reproduced invariant at the smallest boundary that owns it, retain existing recovery mechanisms, and use deterministic tests to prove that work can finish. Additional complexity needs a concrete counterexample.
-
-| Issue | Confirmed defect in current SILO | Selected repair |
+| Issue | Confirmed defect in SILO | Selected repair |
 | :-- | :-- | :-- |
-| #153: delete-marker purge | Single-object DELETE classified a permanent deletion as marker replication; the remote marker disappeared while source purge remained PENDING | Classify by purge status, matching bulk delete, scanner/heal, and resync |
+| #153: delete-marker purge | Single-object DELETE classified a permanent deletion as marker replication; the remote marker disappeared while source purge remained `PENDING` | Classify by purge status, matching bulk delete, scanner/heal, and resync |
 | #152: invisible MRF drops | The queue was already bounded, but internal drop counters did not reach administration or monitoring; object and delete worker arguments were reversed | Expose existing counters, warn at actual drop sites with deduplication, and align worker routing |
 | #137: unreliable resync cancellation | One shared token could not stop multiple runs; blocking phases missed cancellation; stale runs could overwrite terminal state | Give each run an owned context, cancel by resync ID, and constrain registration, finalization, and state updates |
 
-The surrounding series had already separated three concepts that are easy to confuse:
+Two earlier fixes in the same series addressed adjacent invariants:
 
-- [#136](https://github.com/pgsty/silo/issues/136) / [PR #138](https://github.com/pgsty/silo/pull/138) repaired **counter completeness**: receive and apply the final result before persisting terminal state, without waiting for the one-minute periodic flush.
-- [#139](https://github.com/pgsty/silo/issues/139) repaired **outcome accuracy**: an existing destination object does not prove that this update succeeded. Success and failure must come from the target's actual replication result.
-- #137 repairs **cancellation and resource lifecycle**: the task must stop, its walker, workers, and result consumer must exit, and an old run must not pollute a new run's state. This change preserves the first two contracts rather than introducing another accounting mechanism.
+- [#136](https://github.com/pgsty/silo/issues/136) / [PR #138](https://github.com/pgsty/silo/pull/138) repaired **counter completeness**: receive and apply the final result before persisting terminal state, rather than waiting for the one-minute periodic flush.
+- [#139](https://github.com/pgsty/silo/issues/139) repaired **outcome accuracy**: record success and failure from the target's actual replication response rather than assuming success because an object already exists at the destination.
+- #137 repairs **cancellation and resource lifecycle**: canceling a run stops its walker, workers, and result consumer, and prevents stale runs from overwriting a newer run's state.
 
-Authorization to use internal replication semantics belongs to the earlier [CORS and replication trust record](/blog/design/cors-replication-trust/). Authoritative Object Lock state across pools remains tracked separately in [#133](https://github.com/pgsty/silo/issues/133), open at the original record date and subsequently repaired on main by #178 (not in Server 20260903); see [multi-pool consistency](/blog/design/multi-pool-object-consistency/). Closing these three issues does not mean every replication concern is resolved.
+Authorization to use internal replication semantics is covered in [No I/O Before Auth, No Privilege From Headers](/blog/design/cors-replication-trust/). Authoritative Object Lock state across pools is tracked in [#133](https://github.com/pgsty/silo/issues/133) and repaired by #178; see [Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/).
 
-The release-gating target is the maintained `pgsty/silo` stack with Console, mcli, and silo-pkg. Compatibility with upstream MinIO/MC remains best effort. Neither a mechanism proposed for upstream nor an external experiment can automatically be treated as an observation on current SILO.
+## #153: Distinguishing Delete-Marker Replication from Version Purge {#delete-marker}
 
-## #153: distinguish marker replication from permanent version deletion {#delete-marker}
+### Why the External Report and Local Reproduction Differ {#reported-vs-observed}
 
-### The report and the reproduction differ {#reported-vs-observed}
+The original issue described a sustained HTTP 405 storm involving ILM and replication, and proposed treating every delete-marker 405 probe as completion. Source inspection and local reproduction showed why that diagnosis was incomplete and why the proposed patch would break deletion guarantees.
 
-The original issue described a sustained HTTP 405 storm involving ILM and replication, and proposed treating every delete-marker 405 probe as completion. Current SILO source and measurements do not justify adopting that explanation and patch directly.
-
-The baseline was [`450dcb848`](https://github.com/pgsty/silo/commit/450dcb8484bc1337deba0cf608cc893a6691d794). The experiment used two locally built SILO servers, separate disposable data directories, and maintained mcli / minio-go clients. A critical observation was that **mcli uses bulk DELETE even for a single key; that route was already correct.** A direct single-object S3 DELETE was therefore necessary to exercise the faulty entry point.
+Starting from baseline [`450dcb848`](https://github.com/pgsty/silo/commit/450dcb8484bc1337deba0cf608cc893a6691d794), the reproduction used two locally built SILO servers, separate data directories, and `mcli` / `minio-go` clients. A key finding was that **`mcli` uses bulk DELETE even for a single key, and the bulk-delete path was already classified properly.** Exercising the faulty entry point required issuing a direct single-object S3 DELETE.
 
 | Observation | Single-object DELETE before the fix | After the fix |
 | :-- | :-- | :-- |
 | Matching delete-marker version at the target | Removed | Removed |
-| Purge state for that version in source `xl.meta` | Still PENDING, although ordinary replication status was complete | Cleanup completed on the first replication attempt |
+| Purge state for that version in source `xl.meta` | Still `PENDING`, although ordinary replication status was complete | Cleanup completed on the first replication attempt |
 | Original data version | Retained | Retained |
-| Scanner needed to finish this cleanup | Required later recovery | No scanner assistance needed in this experiment |
+| Scanner needed to finish this cleanup | Required later recovery | No scanner assistance needed |
 
-Checking only that the remote version disappeared would falsely declare success. Source metadata must be inspected too. The reproduction establishes incorrect initial purge classification and completion state, plus an unnecessary probe. **It did not reproduce the external report's sustained 405 storm or request-volume figures.** Existing scanner/heal and resync producers already select the proper purge path; they cannot be described as necessarily repeating that erroneous probe every cycle.
+Checking only that the remote version disappeared would miss the lingering `PENDING` state in source `xl.meta`. The reproduction confirmed the misclassified initial purge, the wrong completion state, and an unnecessary `HEAD` probe, without triggering a sustained 405 storm because the scanner/heal and resync paths already selected the purge branch.
 
-### Why one classification condition is sufficient {#purge-classification}
+### Why One Classification Condition Is Sufficient {#purge-classification}
 
-When deleting an existing marker, the object layer can return both `DeleteMarker=true` and a nonempty `VersionPurgeStatus`. The former describes the version being operated on; the latter describes the operation now required. They are compatible facts.
+When permanently deleting an existing delete marker, the object layer returns both `DeleteMarker=true` and a non-empty `VersionPurgeStatus`. The former describes the version being acted on; the latter describes the permanent purge now in progress.
 
-The old single-delete handler checked only `DeleteMarker` and populated `DeleteMarkerVersionID`. Completion then updated ordinary `ReplicationStatus` instead of completing the purge. The final condition is:
+The old single-delete handler checked only `DeleteMarker` and populated `DeleteMarkerVersionID`. Completion then updated ordinary `ReplicationStatus` instead of `VersionPurgeStatus`. The repaired condition in the [`DeleteObject` handler](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/object-handlers.go#L3173) is:
 
 ```go
 if objInfo.DeleteMarker && objInfo.VersionPurgeStatus.Empty() {
@@ -73,30 +67,28 @@ if objInfo.DeleteMarker && objInfo.VersionPurgeStatus.Empty() {
 }
 ```
 
-This matches the classification already used by other producers. The fix belongs in the [DeleteObject handler](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/object-handlers.go#L3173). It requires no storage-format change, relaxation of replica deletion protection, or new recovery task. Legacy PENDING entries remain recoverable through the existing scanner/heal purge path.
+This matches the condition already used by bulk delete, scanner/heal, and resync. It requires no on-disk format change and no new recovery loop; existing `PENDING` entries continue to be cleaned up by the scanner/heal purge path.
 
-### Why a 405 is not unconditional success {#why-not-405}
+### Why HTTP 405 Is Not Unconditional Success {#why-not-405}
 
-A 405 from a versioned HEAD can establish that the marker exists at the target. For **replicating a delete marker**, that can mean idempotent completion. For **permanently deleting that version**, it means there is still work to do.
+A `405 Method Not Allowed` from a versioned `HEAD` indicates that a delete marker exists at the target. For **replicating a delete marker**, that proves idempotent completion. For **permanently purging that version**, it proves the marker is still present at the target.
 
-Writing `VersionPurgeComplete` merely because HEAD returned 405 could let the source remove its metadata while leaving the unwanted target version behind. The implementation retains existing 405 semantics. Real remote failures such as 403, 405, and 503 must not be disguised as successful permanent deletion.
+Marking `VersionPurgeComplete` on a `HEAD` 405 would let the source erase its local tracking metadata while leaving the target version behind. Remote 403, 405, and 503 responses during a purge are genuine failures that must be retried.
 
-Source history traces marker-based classification to an upstream [2020-11-19 commit](https://github.com/pgsty/silo/commit/9a34fd5c4a1e1e9f3de050f49c00edea8e32b4b5). The [2023-07-10 optimization](https://github.com/pgsty/silo/commit/e8c98c32464361dd7643b55e028d5735a48ebefc) changed scheduling from `dsc.ReplicateAny()` to the returned object's replication/PENDING purge state while retaining classification based only on `DeleteMarker`. At this location, the [2025-04-02 commit](https://github.com/pgsty/silo/commit/01447d2438c46cb4658c1e5a13f21f56b7f05a92) merely moved `Pending` to `replication.VersionPurgePending`; it did not first introduce that scheduling condition. This identifies lineage, not a bisect across every historical release, and does not establish when the entire externally reported storm was introduced.
+Git blame traces the `DeleteMarker`-only check to an upstream [2020-11-19 commit](https://github.com/pgsty/silo/commit/9a34fd5c4a1e1e9f3de050f49c00edea8e32b4b5). A [2023-07-10 optimization](https://github.com/pgsty/silo/commit/e8c98c32464361dd7643b55e028d5735a48ebefc) changed scheduling from `dsc.ReplicateAny()` to the returned object's replication or `PENDING` purge state while keeping the `DeleteMarker`-only branch, and a [2025-04-02 commit](https://github.com/pgsty/silo/commit/01447d2438c46cb4658c1e5a13f21f56b7f05a92) renamed `Pending` to `replication.VersionPurgePending` at that site.
 
-## #152: expose drops from an already bounded queue {#mrf}
+## #152: Exposing Drops from the Bounded MRF Queue {#mrf}
 
-MRF, or Most Recent Failures, records recent failed replication work for background processing. It already had limits: `mrfSaveCh` has capacity **100000**, and `mrfRetryLimit` is **3**. The code drops a queue entry when `RetryCount > mrfRetryLimit` or the save channel is full.
+MRF (Most Recent Failures) buffers recent failed replication operations for background retry. It enforces two bounds: `mrfSaveCh` has capacity **100000**, and `mrfRetryLimit` is **3**. Entries are dropped from the queue when `RetryCount > mrfRetryLimit` or when `mrfSaveCh` is full. The source object and its pending replication state remain on disk, and dropped queue entries are picked up later by the background scanner.
 
-The source object and its pending replication state remain. Dropping a queue entry does not mean losing source data. However, subsequent repair depends on the scanner; a prompt retry can turn into a wait for a scan, so this mechanism does not establish a fixed recovery deadline.
+The defect was that `TotalDroppedCount` and `TotalDroppedBytes` incremented internally but were omitted from both administration statistics snapshots and from Prometheus v2/v3 metrics. A deterministic capacity-one test fixture reproduces the gap: one entry is queued, a 20-byte overflow entry and a 30-byte retry-exhausted entry are dropped, and internal totals reach **2 / 50** while administration endpoints report **0 / 0**.
 
-The actual defect was that `TotalDroppedCount` / `TotalDroppedBytes` increased internally but were omitted from both public statistics snapshots and from Prometheus v2/v3. A deterministic capacity-one fixture demonstrates the failure: one entry is admitted, a 20-byte overflow entry and a 30-byte retry-exhausted entry are dropped, and internal totals become **2 / 50** while administration reports **0 / 0**.
+### The Selected Minimum Change {#mrf-fix}
 
-### The selected minimum change {#mrf-fix}
-
-1. Atomically read the existing counters into both administration snapshots.
-2. Register and load cumulative counters in metrics v2 and v3, and document their meaning.
-3. Warn at the two **actual drop sites**: retry exhaustion and a full MRF channel. Fixed messages and deduplication keys prevent changing counter values from defeating deduplication. Handing ordinary worker overflow to MRF is not itself a drop, so it does not gain a warning here.
-4. Route ordinary objects, healing, and deletion consistently by `(bucket, objectName)` to restore worker affinity for the same object.
+1. Atomically populate the existing drop counters into both administration snapshots.
+2. Export cumulative drop counters in Prometheus metrics v2 and v3.
+3. Log deduplicated warnings at the two **actual drop sites** (retry exhaustion and a full MRF channel) using static messages and deduplication keys so changing counter values do not defeat log deduplication. Normal worker-queue overflow into MRF does not drop the entry and does not log a drop warning.
+4. Route ordinary object replication, healing, and deletion consistently by `(bucket, objectName)` to preserve per-object worker affinity.
 
 | Interface | New metric |
 | :-- | :-- |
@@ -105,34 +97,34 @@ The actual defect was that `TotalDroppedCount` / `TotalDroppedBytes` increased i
 | Prometheus v3 | `minio_replication_mrf_dropped_operations_total` |
 | Prometheus v3 | `minio_replication_mrf_dropped_bytes_total` |
 
-These counters accumulate since Server startup and reset on restart. **Operations count entries, not unique objects**; one object can contribute repeatedly. Bytes cover known sizes, with deletion entries contributing zero bytes. They measure neither data loss nor the complete backlog. Operators should examine increases alongside replication backlog and target health.
+These counters accumulate since Server startup and reset on restart. **Operations count dropped queue entries**, so repeated failures on the same object increment the counter multiple times; bytes sum known object sizes, with delete entries contributing zero bytes. Operators should monitor the rate of increase alongside replication backlog and target health.
 
-This work does not enlarge the queue, increase retry limits, add a persistent retry scheduler, or introduce another backoff framework. Existing limits continue to bound memory use, and the scanner remains the eventual repair mechanism. The repair makes an invisible condition observable; it does not promise a recovery deadline under arbitrary failures.
+The queue capacity and retry limit remain unchanged, keeping memory bounded while relying on the background scanner for eventual recovery.
 
-## #137: make cancellation part of a run's lifecycle {#resync}
+## #137: Making Cancellation Part of a Run's Lifecycle {#resync}
 
-### One token cannot cancel a group {#cancel-failure}
+### Why One Shared Token Cannot Cancel a Multi-Bucket Group {#cancel-failure}
 
-Previously, cancellation placed one unkeyed token into a shared channel. One site resync can cover several buckets, with up to 10 concurrent bucket runs, while dispatchers and workers compete to consume the token. Only one bucket might stop; an unrelated task might consume it; or a leftover token might affect a later task.
+Previously, cancellation pushed a single unkeyed token into a shared channel. Because a site resync can span multiple buckets (up to 10 concurrent bucket runs) with dispatchers and workers competing to read from the same channel, a cancel request could stop only one bucket, be consumed by an unrelated run, or remain buffered and abort a later run.
 
-Two blocking phases had independent defects: a bare receive from Walk output did not observe cancellation, and sending to a full worker channel did not observe it either. Once a worker exited, the dispatcher could block forever on a channel with no receiver. Walk also inherited the parent context, so an early function return could not stop its own walker.
+Two blocking stages also ignored cancellation: reading from `Walk` output and sending to a full worker channel. If workers exited first, the dispatcher could block indefinitely on a full channel. In addition, `Walk` inherited the parent context directly, so an early return left its walker goroutine running.
 
-State handling had related faults: site `updateState` modified a local value without writing it back to the map; bucket Canceled handling was incomplete; and an old finalizer could overwrite canceled state with Completed.
+State tracking had three accompanying bugs: site-level `updateState` mutated a value copy without writing it back to the map; bucket-level `Canceled` state handling was incomplete; and a late finalizer could overwrite `Canceled` with `Completed`.
 
-### Registration, cancellation, and status share a write boundary {#cancel-design}
+### Registration, Cancellation, and Status Share a Write Boundary {#cancel-design}
 
-Each `resyncBucket` creates an owned `context.WithCancelCause` and registers **before** waiting for a concurrency slot. Registration and `cancelResyncID` share the resyncer's state lock:
+Each `resyncBucket` run now creates an owned `context.WithCancelCause` and registers it **before** waiting for a concurrency slot. Registration and `cancelResyncID` share the resyncer's state lock:
 
-- Registration validates that the target still exists and the resync ID still matches, and reads its current cancellation state.
-- Cancellation marks matching Pending / Started states Canceled before canceling all matching registered contexts.
-- A registered run still waiting for a slot receives cancellation; a run registered after cancellation sees the canceled state.
-- Walk, dispatch, workers, and result sends observe that run's context. Unrelated IDs are unaffected, and there is no buffered token for a later task to consume.
+- Registration verifies that the target still exists and the resync ID still matches, and checks whether the run has already been canceled.
+- Cancellation marks matching `Pending` and `Started` entries `Canceled` before canceling every registered context for that resync ID.
+- Runs waiting for a concurrency slot are canceled immediately, and any run registering after cancellation observes the `Canceled` state on entry.
+- `Walk`, dispatch, workers, and result sends all select on the run's owned context. Unrelated resync IDs are unaffected, and no shared token remains buffered.
 
-A dedicated operation mutex serializes site start/cancel configuration setup. Canceling running work still executes if part of the target-configuration loop fails. Bucket finalizers and counter updates check the current target and resync ID, ignoring late results from removed, replaced, or canceled runs. Site state is actually written back, and a late Completed result cannot overwrite Canceled.
+A dedicated operation mutex serializes site start/cancel configuration updates, and in-flight runs are still canceled even if part of the target-configuration loop fails. Bucket finalizers and progress updates verify both the target and the resync ID, discarding late results from removed, replaced, or canceled runs. Site state writes back to the map, and `Canceled` is never overwritten by a late `Completed`.
 
-### Success and failure require different finalization order {#finish-order}
+### Success and Failure Require Different Finalization Order {#finish-order}
 
-The result-consumer contract from #136 must remain intact: persist terminal state only after the consumer finishes.
+Finalization preserves the #136 ordering contract — terminal state is persisted only after the result consumer drains the channel:
 
 ```text
 Success: close worker inputs → join workers → drain results
@@ -142,21 +134,17 @@ Failure/cancellation: cancel context first to unblock work → join workers and 
                       → persist the appropriate terminal state → return slot → unregister
 ```
 
-Canceling before joining workers on a normal completion path could discard pending work and turn a successful run into Failed. The final code calls `finish` exactly once from one defer, using defer order to complete cleanup. It therefore needs no additional `sync.Once`.
+Canceling the context before joining workers on a normal completion path would abort in-flight work and turn a completing run into `Failed`. Calling `finish` from a single `defer` sequences cleanup deterministically without an extra `sync.Once`.
 
-`WithCancelCause` distinguishes an explicit user cancellation from parent-context interruption. User cancellation becomes Canceled; parent interruption observed during finalization must not leave an interrupted run marked Completed. Shutdown while a run is still waiting for a slot preserves the existing Pending state for restart recovery.
+`WithCancelCause` separates explicit user cancellation (`Canceled`) from parent-context shutdown. A run interrupted by server shutdown is not marked `Completed`, and a run still waiting for a concurrency slot during shutdown keeps its `Pending` state so it can resume on restart.
 
-### Protect terminal state and resumed work {#terminal-and-recovery}
+### Protecting Terminal State and Resumed Work {#terminal-and-recovery}
 
-Cancellation can still arrive between the context check and the terminal save. Under its lock, `markStatus` must persist an existing Canceled state even if the finalizer previously computed Completed. An old resync ID must also be unable to overwrite a new run.
+Because a cancel request can arrive between the context check and the disk write, `markStatus` re-checks the in-memory state under lock and preserves `Canceled` even if the caller computed `Completed`, while rejecting writes from superseded resync IDs. If an individual bucket finished and persisted before a site-wide cancel arrived, its bucket record remains `Completed` while the site record is marked `Canceled`.
 
-This is not a transaction across metadata files. If a bucket completed and persisted before cancellation, a subsequent site cancellation can leave different records reading “bucket Completed, site Canceled.” Completion happened first. The guarantee is that **late completion cannot turn an already canceled run back into Completed**, not that cancellation erases work completed before it.
+On the restart recovery path, `loadResync` previously spawned recovery goroutines and immediately ran `defer cancel()`. In SILO's shared-lock implementation, that `cancel()` terminates the merged leader context, aborting the newly launched recovery goroutines. A `WaitGroup` now keeps the leader context alive until all resumed runs exit, while still canceling them if leadership is lost. Loading on-disk state also avoids overwriting newer in-memory start or cancel state.
 
-The recovery loader, `loadResync`, previously launched goroutines and then immediately executed `defer cancel()`. Inspection of SILO's actual shared-lock implementation confirmed that this cancel ends the merged leader context; it is not a no-op. A WaitGroup now retains that context until resumed runs exit. Losing leadership still cancels the existing context; replacing it with a global context would bypass the leadership constraint. Loading disk state must also preserve newer in-memory start/cancel state.
-
-## Fable review and the complexity decisions {#review}
-
-The review used the installed Claude Code with model argument `claude-fable-5-1[1m]` and `--effort max`. Baseline reproductions and the minimal proposal produced agreement on all three repairs. The final patch and validation were then reviewed again, yielding GO. The conclusion rests on code and evidence, not model agreement alone.
+## Design Review and Complexity Decisions {#review}
 
 | Proposal or review point | Final decision |
 | :-- | :-- |
@@ -165,27 +153,27 @@ The review used the installed Claude Code with model argument `claude-fable-5-1[
 | Send more shared cancellation tokens | Rejected: this still cannot guarantee identity routing, broadcast, or isolation from later tasks |
 | Add a separate cancellation tombstone registry | Unnecessary: existing target status and resync ID under one lock close the registration race |
 | Give each run an owned context and cancelable blocking operations | Retained: full-queue deadlock and walker leaks have deterministic reproductions |
-| Protect `finish` with `sync.Once` | Initial review required protection against double close; the final implementation has one deferred call site, and re-review accepted omitting Once |
-| Wait for resumed runs before releasing leader context | Initial review required checking necessity; SILO's cancel is effective, so the WaitGroup stays, with leadership-loss coverage |
+| Protect `finish` with `sync.Once` | Narrowed: a single deferred call site makes `sync.Once` unnecessary |
+| Wait for resumed runs before releasing leader context | Retained: SILO's leader context cancel is active, so the `WaitGroup` is required and covered by leadership-loss tests |
 
-The final review accepted two further implementation boundaries. The infrequent resync start operation holds the status lock across configuration reads and writes, consistent with existing terminal saves. The active registry uses `resyncOpts`, including `resyncBefore`, as its key; current callers reuse the same in-memory values, and no identity mismatch was reproduced. Future changes that reconstruct time values or restore task identity should revisit equivalence, rather than adding another registry without evidence now.
+Two additional details were kept simple: the infrequent resync start operation reads and writes configuration under the status lock (matching terminal saves), and the active registry keys on `resyncOpts` (including `resyncBefore`).
 
-## Validation and reproducible evidence {#evidence}
+## Validation and Reproducible Evidence {#evidence}
 
-Regressions were added against unchanged production code first, and failed before the fixes. New tests exercise the production handler, real erasure storage, actual metric registration, and `resyncBucket`, rather than only testing helper logic that repeats the implementation.
+Regression tests were written against the unmodified baseline and verified to fail before applying the fixes. The test suite exercises the production HTTP handlers, erasure storage, Prometheus metric registries, and `resyncBucket`.
 
 | Validation area | Result and evidence |
 | :-- | :-- |
-| Single-delete purge | ErasureSD and Erasure source/target cleanup; legacy PENDING recovery; marker idempotency; real 403/405/503 failure semantics |
+| Single-delete purge | ErasureSD and Erasure source/target cleanup; legacy `PENDING` recovery; marker idempotency; real 403/405/503 failure semantics |
 | MRF | Actual capacity-one overflow and retry exhaustion; administration JSON; registered v2/v3 counter types and values; object/delete worker affinity |
-| Resync | `testing/synctest` coverage for blocked Walk, full worker queues, user and queued cancellation, unrelated IDs, later tasks, terminal races, stale IDs, slot release, and leader recovery |
-| Complete local suite | `go test ./... -count=1 -timeout=30m` passed, with 50 tested packages |
+| Resync | `testing/synctest` coverage for blocked `Walk`, full worker queues, user and queued cancellation, unrelated IDs, later tasks, terminal races, stale IDs, slot release, and leader recovery |
+| Complete local suite | `go test ./... -count=1 -timeout=30m` passed across all 50 tested packages |
 | Concurrency and repetition | Focused replication race tests passed; cancellation regressions passed 100 repetitions |
-| Tooling and contracts | Local build, vet, lint, generated-file checks, rebrand compatibility guard, and `git diff --check` passed; dependencies and compatibility baseline unchanged |
-| Two native servers | Built from local source; direct single-object DELETE removed the target marker and source `xl.meta` entry while retaining the original data version; no downloaded Server Docker image |
+| Tooling and contracts | Local build, vet, lint, generated-file checks, rebrand compatibility guard, and `git diff --check` passed |
+| Two native servers | Built from local source; direct single-object DELETE removed the target marker and source `xl.meta` entry while retaining the original data version |
 | Remote integration | All eight PR checks passed, followed by all six main Go CI jobs and VulnCheck |
 
-Tests pinned to the merged revision: [delete markers](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-delete-marker_test.go), [MRF visibility](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-mrf-observability_test.go), and [cancellation lifecycle](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-resync-cancel_test.go). With that revision and Go 1.27.1, the relevant checks can be repeated with:
+Regression test files at the merged commit: [delete markers](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-delete-marker_test.go), [MRF visibility](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-mrf-observability_test.go), and [cancellation lifecycle](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-resync-cancel_test.go). Reproducible test commands:
 
 ```bash
 go test ./cmd -run '^(TestReplication|TestReplicateDeleteMarker|TestResync|TestSiteResync)' -count=1
@@ -194,78 +182,70 @@ go test ./cmd -run '^TestResyncCancel' -count=100
 go test ./... -count=1 -timeout=30m
 ```
 
-After complete local validation, only new-test formatting and fixtures changed: an existing ARN was reused, and the collector supplied the metric prefix, preventing the compatibility scanner from treating test strings as new protocol identifiers. The guard was not weakened. Relevant tests, lint, and compatibility checks were rerun after those adjustments, and remote CI checked the final commit.
-
 | Evidence point | Exact identity |
 | :-- | :-- |
 | Baseline | `450dcb8484bc1337deba0cf608cc893a6691d794` |
 | Final PR head | `66fe61ff65c83d68b74baa637a11623015c7aa21` |
-| Merged main | `d1105bbb3d4a0afa33b3a4ac11b821235038ed0e`, with the same source tree as the final PR head |
+| Merged main | `d1105bbb3d4a0afa33b3a4ac11b821235038ed0e` |
 | PR Go CI | [34320440012](https://github.com/pgsty/silo/actions/runs/34320440012) |
 | Main Go CI | [34321319278](https://github.com/pgsty/silo/actions/runs/34321319278) |
 | Main VulnCheck | [34321319274](https://github.com/pgsty/silo/actions/runs/34321319274) |
 
-## Maintenance and release decisions {#follow-up}
+## Maintenance Principles {#follow-up}
 
-Future changes must continue to establish operation identity, visible failure, truthful per-object outcomes, complete terminal counters, and cancellation that releases its own resources. Neither an API returning Completed nor an object existing at the destination can replace those checks.
+Replication and resync regression tests must independently assert five invariants: accurate operation classification, observable queue drops, per-object replication outcomes derived from target responses, complete terminal counters prior to state persistence, and full goroutine and slot cleanup on cancellation.
 
-The code verdict is GO, and the delivery facts are main integration and passing CI. A formal release still requires selecting a tag, verifying packages and images, and establishing that deployments contain the repair. The scanner-dependent MRF recovery delay, the open cross-pool issue, and the externally reported 405 storm not reproduced on current SILO remain part of this decision record.
+## Second Round (2026-09-16): Worker-Side Purge Classification and Persisted MRF Recovery {#second-round}
 
-## Second round (2026-09-16): worker-side purge classification and persisted MRF recovery {#second-round}
+Round 1 classified deletes at the **HTTP handler entry** (#153), exposed MRF queue drops (#152), and completed the resync cancellation lifecycle (#137). Round 2 — [PR #196](https://github.com/pgsty/silo/pull/196), commit [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2), integration verification `aea3882c9` — repairs the background replication pipeline: the **worker's own delete exits**, outer status aggregation, and the **persisted MRF recovery path** for delete markers.
 
-The first round classified deletes at the **handler entry** (#153), exposed MRF queue drops (#152), and completed resync cancellation (#137). The second round — [PR #196](https://github.com/pgsty/silo/pull/196), fix [`0c61128d2`](https://github.com/pgsty/silo/commit/0c61128d2), integration verification `aea3882c9` — repairs a different surface: the replication **worker's own exits**, the outer aggregation, and the **persisted MRF recovery path** for delete markers. The two rounds are complementary; neither subsumes the other.
+### What Was Still Broken {#second-round-defects}
 
-> **Status:** on verified main [`40220bd836cb`](https://github.com/pgsty/silo/commit/40220bd836cbd066ca424fa4dc5dbb90057fb55a), **not** in Server 20260903. All evidence is synthetic (real single-drive and 16-drive storage, signed DELETEs, controlled HTTP targets, real persisted-MRF disk files replayed through a fresh worker pool). The externally reported 405 storm is **not** reproduced and **not** attributed to these paths.
+- **Legacy-shape tasks were skipped entirely.** A task with an empty `VersionID`, a non-empty `DeleteMarkerVersionID`, a `COMPLETED` creation target, and a `PENDING` purge target never issued its DELETE because the per-target creation early-return suppressed it.
+- **Fixing only the per-target function caused outer aggregation to misreport.** Outer status selection keyed on `VersionID` and creation state, so a failed legacy-shape purge aggregated as `COMPLETED`, emitted `ObjectReplicationComplete`, and **skipped persisted MRF queueing**.
+- **Persisted MRF dropped every delete-marker 405.** Replaying an on-disk MRF entry for a delete-marker version returned the marker metadata alongside `MethodNotAllowed`, and the error branch discarded the entry instead of recovering it.
+- **Status clobbering and duplicate requests.** Failed purges overwrote successful resync markers, completed purges were re-sent, and an unready `HEAD` probe unconditionally overwrote creation state.
+- **Multi-target empty-state regex misparses corrupted creation metadata.** Replaying a disk marker that carried only creation metadata against a task carrying purge state parsed two empty target states as `Pending`; the deleted-flag guard then rewrote the entire creation block as empty entries with fresh timestamps.
 
-### What was still broken {#second-round-defects}
+Three root causes drove these failures: the worker lacked **task-level** purge classification (the per-target predicate in community PR [#184](https://github.com/pgsty/silo/pull/184) prevented composite purge statuses from ever reaching `COMPLETE`, though Julien Laurenceau's investigation and proposed fix informed this round); MRF recovery lacked a **valid-405 identity gate**; and delete tasks carried no retry counter, making `mrfRetryLimit` unreachable on the delete path.
 
-- **Legacy-shape tasks were skipped entirely.** A task with an empty `VersionID`, a non-empty `DeleteMarkerVersionID`, a COMPLETED creation target, and a PENDING purge target never issued its DELETE — the per-target creation early-return suppressed it.
-- **Fixing only the target function made aggregation lie.** The outer status selection keys on `VersionID` and creation state, so a failed legacy-shape purge aggregated as COMPLETED, emitted `ObjectReplicationComplete`, and **skipped queueing to persisted MRF** — worse than the baseline.
-- **Persisted MRF dropped every marker 405.** Replaying a disk MRF entry for a delete-marker version fetched real marker metadata plus `MethodNotAllowed`, and the error path discarded it — the marker MRF recovery route was a dead end.
-- **Failed purges overwrote successful resync markers**, completed purges were re-sent, and a not-yet-ready HEAD unconditionally overwrote creation state.
-- **A multi-target empty-state regex misparse could corrupt creation state once.** A disk marker carrying only creation metadata, replayed against a task with purge state, let two empty target states parse as a bogus `Pending`; the deleted-flag guard then rewrote the whole creation block as empty entries with fresh timestamps — a one-shot corruption that requires disk/task divergence to reach.
+### The Repair {#second-round-fix}
 
-Root causes: the worker had no **task-level** purge classification (the per-target predicate in the community's [#184](https://github.com/pgsty/silo/pull/184) was itself wrong — a composite purge status can never reach COMPLETE through it; its investigation and proposed fix nevertheless shaped this follow-up, with thanks to Julien Laurenceau); MRF recovery had no **valid-405 identity gate**; and the delete task carried no retry count, so the existing `mrfRetryLimit` drop was unreachable on the delete path.
+- **Unified purge classification across all exits.** `isVersionPurge()` (true when `VersionID` is non-empty, or when `DeleteMarkerVersionID` is non-empty alongside a composite purge status) drives both the inner per-target function and outer aggregation. Purge exits write only `VersionPurgeStatus` and leave `ReplicationStatus` empty, which signals the storage layer not to modify creation status.
+- **Three-field clear guard.** On the purge path, all three creation-status fields are explicitly cleared so the multi-target regex misparse cannot occur during disk writes.
+- **Canonical permanent-delete requests.** Purges send an explicit `versionId` with `ReplicationDeleteMarker=false` and skip the pre-flight `HEAD` readiness probe, preventing a lost-response retry from **re-creating a delete marker** via an unversioned fallback.
+- **Valid-405 gate for MRF recovery.** `MethodNotAllowed` schedules recovery only when the returned object is a delete marker, the bucket/object/version identity matches, and the modification time is non-zero.
+- **Bounded retry budget.** Delete tasks carry a retry counter that increments across all three persisted-MRF entry points (aggregation failure, lock failure, and queue-full fallback) up to `mrfRetryLimit`; after exhaustion, the background scanner can still schedule healing.
+- **Boundary-only status mapping.** `COMPLETE` is mapped to `COMPLETED` only at the statistics and event-notification boundary, reusing the existing legacy constant.
 
-### The repair {#second-round-fix}
+### What 405 Means, Precisely {#second-round-405}
 
-- **One classification, every exit.** `isVersionPurge()` (non-empty `VersionID`, or a non-empty `DeleteMarkerVersionID` with a composite purge status) drives both the inner target function and the outer aggregation. Purge exits write only `VersionPurgeStatus` and leave `ReplicationStatus` empty — the storage layer's "do not update" signal.
-- **A three-field clear guard** empties the composite status on the purge path, making the multi-target misparse unreachable at disk writes.
-- **Purges send the canonical permanent-delete request** — explicit `versionId`, `ReplicationDeleteMarker=false`, no HEAD/readiness probe (authorization is the DELETE's own). This also prevents a lost-response retry from **re-creating a marker** at an unversioned fallback.
-- **A valid-405 gate for MRF recovery.** A `MethodNotAllowed` schedules recovery only when the returned object is a delete marker, the bucket/object/version identity matches, and the modification time is non-zero.
-- **A bounded retry budget.** Delete tasks carry a retry counter, incremented at all three persisted-MRF entry points (aggregation failure, lock failure, queue-full fallback), respecting the existing limit; after exhaustion, the scanner can still re-raise healing.
-- **Audit and event status map `COMPLETE` to `COMPLETED`** at the statistics/event boundary only, reusing the existing legacy constant.
+For **creation** (replicating a delete marker), a `HEAD` 405 on the target marker version means the marker *already exists at the target* — idempotent completion. For **purge** (permanently deleting a version), a 405 during local MRF identity probing with a matching marker identity means *the marker still exists and needs purging*; purge completion is decided solely by the remote DELETE response, where 403, 405, and 503 are always real failures. Empty or `null` version markers return `ObjectNotFound` rather than 405 and never enter the 405 gate.
 
-### What 405 means, precisely {#second-round-405}
+### Boundaries That Remain {#second-round-limits}
 
-For **creation** (replicating a delete marker), a HEAD 405 on the target marker version means *already created* — idempotent completion. For **purge** (permanently deleting a version), a 405 from MRF identity probing with full marker identity means *work remains*; the purge's own success is decided by the DELETE alone, and a DELETE 403/405/503 is always a real failure. Empty or null version markers return `ObjectNotFound`, not 405, and sit outside the gate.
+The legacy in-memory task shape does not serialize across restarts and has no active producer; handling it provides defensive coverage. Targets without a configured client still log only, and target-level resync replacing a purge subset remains unchanged. For the tag-ordering and replica-metadata fixes in the same series, see [Replicated Tag Ordering](/blog/design/replicated-tag-ordering/) and [Replica Metadata Normalization](/blog/design/replica-metadata-normalization/).
 
-### Boundaries that remain {#second-round-limits}
+## Third Round (2026-09-16): Exact-Version Purges, Marker Healing, and Stale Creations {#third-round}
 
-The legacy in-memory task shape does not serialize across restart and has no current producer — its handling is robustness, not an active repair. Targets without a configured client still only log. Target-level resync replacing a purge subset is a pre-existing defect this round neither caused nor fixed. Persistence was driven directly in tests; timer-based flush and process-crash durability are not claimed. Multi-process site-replication meshes and cross-region acceptance are out of scope. For the tag-ordering and replica-metadata repairs in the same reliability series, see [Replicated Tag Ordering](/blog/design/replicated-tag-ordering/) and [Replica Metadata Normalization](/blog/design/replica-metadata-normalization/).
+Round 2 made the worker's purge exits truthful. Round 3 — commits [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3), [`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0), and [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb), shipped in [Server 20260916](/blog/release/silo-20260916/) (`40220bd836cbd066ca424fa4dc5dbb90057fb55a`, alongside `silo-pkg` `6f27ee6`) — repairs how an exact-version purge updates drives and how queued marker creations behave after a purge completes. It was prompted by three-site container runs (three sites, four processes and sixteen drives per site, EC 12+4) in which a purged delete marker reappeared on both target sites while the source site still returned the data version.
 
-## Third round (2026-09-16): exact-version purges, marker healing and stale creations {#third-round}
+### What Was Still Broken {#third-round-defects}
 
-The second round made the worker's purge exits truthful. The third round — commits [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3), [`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0) and [`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) — repairs what a purge does to drives and what a queued creation does after a purge. It was driven by three-site container runs (three sites, four processes and sixteen drives each, EC 12+4) in which a purged delete marker came back on both target sites while the source still read the data version.
+- **A purge could write the delete marker it was removing.** Lookup marked a version under purge as deleted for visibility, and the purge write-back treated that flag as an instruction to write a delete marker to disk. Drives that lacked the marker had it written to them, causing a partially purged erasure set to flip-flop on retry rather than converge.
+- **Missing versions were acknowledged without write quorum.** Because the read path reported a version absent once half of the drives said so, a retried purge returned 204 while up to half of the drives still held the delete marker.
+- **Healing a delete marker stripped its replication metadata.** The heal path reconstructed delete markers with an empty metadata map. Healed markers lost their replication and purge state, appeared pending again, and could be re-replicated as fresh marker creations.
+- **Queued marker creations executed after the purge finished.** Every GET, HEAD, or LIST on a pending delete marker, along with the scanner and MRF, queued a creation task carrying a snapshot of the marker; tasks from multiple frontends serialized on the per-object replication lock. In the reproduced timeline, both targets acknowledged the user's purge, and ~85 ms later a queued creation carrying the same `VersionID` and original modification time arrived at both targets. Because nothing in the wire request distinguished an initial creation from a stale replay, both targets recreated 16/16 marker copies while the source held 0/16.
 
-> **Status:** on main after the published Server 20260903. Unit and race coverage on single-drive and 16-drive fixtures. The three-site rounds ran on a combined build (`6f27ee6`) containing the same purge repair, not on the final main. One adversarial review round (Codex, gpt-6-astra) returned REQUEST CHANGES with a single should-fix, corrected in `358ab38fb`.
+### The Repair {#third-round-fix}
 
-### What was still broken {#third-round-defects}
+- **Classify purge intent once (`isVersionPurge`).** A request is a version purge when it carries a valid explicit `VersionID`, sets no marker-creation, prefix, data-movement, free-version, expiry, or transition options, and either carries a completed purge status, has no replication state, or is a trusted replica request. A purge never sets marker-creation flags, and its vote tally combines drives that physically removed the version with drives that confirmed it absent. The response reports a delete marker only when a stored marker was actually removed; a data version with an earlier pending purge is reported as a data version.
+- **Require a write-quorum majority (`N/2+1`) to confirm absence.** When lookup reports a version missing on a retried purge, the server re-reads every drive. Fewer than `N/2+1` absent replies fail with insufficient write quorum, and any erasure set that still holds a copy is scheduled for MRF healing. Offline, corrupt, or unreadable drives never count as absent. The multi-pool layer applies the same check to pools skipped by lookup, and replica receivers resolve purges by version across pools.
+- **Preserve stored metadata when healing markers.** Healing copies the delete marker's persisted metadata map and strips only transient healing, data-movement, and tiering keys. Typed state generation is restricted to fresh creation writes that have no stored metadata, and never fabricates timestamps.
+- **Revalidate marker creations under the replication lock before sending.** Before transmitting a marker creation, the delete replication worker re-reads the source version under the per-object replication lock. If the version is missing, is no longer a delete marker, or is undergoing a purge, the task is stale and is dropped without modifying the source; inconclusive reads are retried via MRF rather than treated as absence.
 
-- **A purge could create the marker it was removing.** The lookup marks a version under purge as deleted for visibility, and the purge write-back reused that flag as a disk instruction. On drives that lacked the marker, the write-back added it; a half-purged set flip-flopped instead of converging.
-- **A missing version was acknowledged too early.** The read path reports a version as absent once half of the drives say so, so a retried purge returned 204 while up to half of the drives still held the marker.
-- **Healing a marker discarded its metadata.** The heal path rebuilt delete markers with an empty metadata map. A healed marker lost its replication and purge state, looked pending again, and could be re-replicated as a fresh creation.
-- **A queued creation ran after the purge.** Every GET/HEAD/LIST of a pending marker, the scanner and MRF queue a creation task carrying a snapshot of the marker, and tasks from several frontends serialize on the per-object replication lock. In the reproduced sequence the user's purge was acknowledged by both targets, and about 85 ms later a queued creation for the same VersionID and original modification time reached both; the source ended with 0/16 marker copies and each target with 16/16. A target that no longer holds the marker creates it: nothing in the request distinguishes a first creation from a stale one.
+### Evidence and Boundaries {#third-round-limits}
 
-### The repair {#third-round-fix}
+Two three-site batched-recovery runs (with and without a source restart, returning one target site in two halves) converged within ~15 s and remained consistent for the rest of a 450 s test window. The stale-creation regression fails on unmodified `main` and passes with the fix on both single-drive and 16-drive erasure fixtures.
 
-- **Purge intent is classified once** (`isVersionPurge`): a valid explicit VersionID; no marker-creation, prefix, movement, free-version, expiry or transition options; and either a completed purge status or no replication state at all, or a trusted replica request. A purge never sets the marker-creation flags, and its result merges physically removed and reliably absent drive replies. The response still reports a delete marker when a stored marker was removed, and only then; a data version whose earlier purge is still pending is reported as a data version.
-- **Absence needs a write-quorum majority.** A retried purge whose lookup reports the version missing re-reads every drive. Fewer than `N/2+1` absent replies fail with insufficient write quorum, and a set with any remaining copy is scheduled for MRF healing. Offline, corrupt or unreadable drives never count as absent. The pools layer applies the same check to pools omitted by lookup, and replica receivers resolve purges by version across pools.
-- **Healed markers keep their stored metadata.** Healing copies the marker's persisted map and drops only operation-time healing, movement and tier keys. Typed state is used only for creation writers without stored metadata, and no timestamp is invented.
-- **Creations are re-checked under the lock.** Before sending, the delete replication worker re-reads the source version. A missing version, a non-marker version or a version under purge makes the task stale, and it is dropped without touching the source. A read that cannot confirm either way is retried through MRF instead of being treated as absence.
-
-### Evidence and boundaries {#third-round-limits}
-
-Two three-site batched-recovery rounds (source restarted and not restarted, one target site returned in two halves) converged within about 15 s and stayed stable for the rest of a 450 s window. The stale-creation sequence reproduced on the combined build; the new regression fails on unmodified main and passes with the repair on both fixtures.
-
-The re-check cannot intercept a creation already on the wire or one replayed by another site. Closing that needs a receiver-side persistent purge record or sequence, tracked in [#217](https://github.com/pgsty/silo/issues/217). After a majority-acknowledged purge followed by the loss of every process, the minority copies on the drives that had been offline remained through 450 s and seven scanner cycles per site. All frontends read the data version, but no persistent owner of that cleanup is proven. These two boundaries are inherited behavior and were not made a condition of the 2026-09-16 release.
+Source-side revalidation under the lock cannot recall a creation request already in flight on the network or replayed by another site; closing that cross-site window requires a receiver-side persistent purge record or sequence number, tracked in [#217](https://github.com/pgsty/silo/issues/217). If all server processes crash simultaneously right after a majority-acknowledged purge, minority copies on drives that were offline during the purge can persist for up to seven scanner cycles, during which all frontends continue to serve the data version.
