@@ -3,7 +3,7 @@ title: "mc admin group"
 url: "/reference/minio-mc-admin/mc-admin-group/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-group.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-group"></a>
@@ -17,9 +17,9 @@ The [`mc admin group`](#command-mc.admin.group) command manages groups on a MinI
 A [group](/administration/identity-access-management/minio-group-management/#minio-groups) is a collection of [users](/administration/identity-access-management/minio-user-management/#minio-users). Each group can have one or more assigned [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) that explicitly list the actions and resources to which group members are allowed or denied access. Groups provide a simplified method for managing shared permissions among users with common access patterns and workloads.
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO. Compatibility with unmodified upstream MinIO is best effort; general S3 compatibility alone does not provide these administrative APIs.
 
 ### Groups and Policy-Based Access Control {#groups-and-policy-based-access-control}
 

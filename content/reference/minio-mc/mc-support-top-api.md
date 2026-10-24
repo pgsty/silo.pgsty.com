@@ -3,7 +3,7 @@ title: "mc support top api"
 url: "/reference/minio-mc/mc-support-top-api/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top-api.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support-top-api"></a>
@@ -11,9 +11,9 @@ upstream_modified: false
 <a id="command-mc.support.top.api"></a>
 
 > [!NOTE]
-> **SUBNET Registration Required**
+> **Local diagnostics**
 >
-> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
+> PGSTY mcli runs these diagnostics against SILO without SUBNET registration. Online registration, uploads, and call-home are disabled; see [client compatibility](/compatibility/mcli/#subnet).
 
 ## Syntax {#syntax}
 

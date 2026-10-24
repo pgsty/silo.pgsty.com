@@ -3,7 +3,7 @@ title: "Decommission Server Pools"
 url: "/operations/deployments/baremetal-decommission-server-pool/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-decommission-server-pool.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="decommission-server-pools"></a>
@@ -26,9 +26,7 @@ The procedures on this page decommission and remove one or more server pools fro
 >
 > Decommissioning is a major administrative operation that requires care in planning and execution, and is not a trivial or ‘daily’ task.
 >
-> [MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to decommissioning. Coordination with MinIO Engineering via SUBNET can ensure successful decommissioning, including performance testing and health diagnostics.
->
-> Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
+> For assistance, see [SILO troubleshooting](/operations/troubleshooting/).
 
 <a id="minio-decommissioning-prereqs"></a>
 
@@ -132,7 +130,7 @@ Once the decommissioning process completes, you can safely shut down that pool. 
 
 At the end of the decommission process, MinIO checks for a list of items on the pool. If the list returns empty, MinIO marks the decommission as successfully completed. If any objects return, MinIO returns an error that the decommission process failed.
 
-If the decommission fails, customers should open a [MinIO SUBNET](https://min.io/pricing?jmp=docs) issue for further assistance before retrying the decommission. Community users without a SUBNET subscription can retry the decommission process or seek additional support through the [MinIO Community Slack](https://slack.min.io/). MinIO provides Community Support at best-effort only and provides no <abbr title="Service Level Agreement">SLA</abbr> around responsiveness.
+If decommissioning fails, preserve the logs, inspect pool health and available capacity, and identify the cause before retrying. For assistance, see [SILO troubleshooting](/operations/troubleshooting/).
 
 ### Decommissioning a Server with Tiering Enabled {#decommissioning-a-server-with-tiering-enabled}
 

@@ -4,7 +4,7 @@ url: "/administration/identity-access-management/"
 weight: 140
 icon: fa-solid fa-users-gear
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-authentication-and-identity-management"></a>
@@ -62,10 +62,10 @@ more information.</p></td>
     </tr>
     <tr>
       <td><p><a href="/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap">Active Directory / LDAP (AD/LDAP)</a></p></td>
-      <td><p>MinIO checks for a policy whose name matches the Distinguished Name (DN)
+      <td><p>SILO loads policies explicitly attached to the Distinguished Name (DN)
 of the authenticated AD/LDAP user.</p><p>MinIO also supports querying for the authenticated AD/LDAP user’s
-group memberships. MinIO assigns any policy whose name matches the
-DN for each returned group.</p><p>If no policies match either the user DN <em>or</em> any of the user’s group DNs,
+group memberships. SILO also loads policies attached to the
+DN of each returned group. Policy names do not need to equal DNs.</p><p>If no policies match either the user DN <em>or</em> any of the user’s group DNs,
 the user cannot perform any action on the MinIO deployment.</p><p>See <a href="/operations/external-iam/#minio-external-identity-management-ad-ldap-access-control">Access Control for Externally Managed Identities</a> for more
 information.</p></td>
     </tr>

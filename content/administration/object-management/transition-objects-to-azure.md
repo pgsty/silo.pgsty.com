@@ -100,7 +100,7 @@ MinIO recommends specifying this optional prefix for remote storage tiers which 
 >
 > MinIO does *not* support changing the account name associated to an Azure remote tier. Azure storage backends are tied to the account, such that changing the account would change the storage backend and prevent access to any objects transitioned to the original account/backend.
 >
-> Please contact [MinIO Support](https://min.io/pricing?ref=docs) if you need situation-specific guidance around configuring Azure remote tiers.
+> Verify the account, container, permissions, and recovery plan before enabling an Azure tier. For assistance, see [SILO troubleshooting](/operations/troubleshooting/).
 
 ### Availability of Remote Data {#availability-of-remote-data}
 

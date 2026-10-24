@@ -13,9 +13,9 @@ upstream_modified: true
 
 MinIO Server-Side Encryption (SSE) protects objects as part of write operations, allowing clients to take advantage of server processing power to secure objects at the storage layer (encryption-at-rest). SSE also provides key functionality to regulatory and compliance requirements around secure locking and erasure.
 
-MinIO SSE uses the [MinIO Key Encryption Service (KES)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) and an external Key Management Service (KMS) for performing secured cryptographic operations at scale. MinIO also supports client-managed key management, where the application takes full responsibility for creating and managing encryption keys for use with MinIO SSE.
+MinIO SSE uses the [PGSTY KES](https://github.com/pgsty/kes) and an external Key Management Service (KMS) for performing secured cryptographic operations at scale. MinIO also supports client-managed key management, where the application takes full responsibility for creating and managing encryption keys for use with MinIO SSE.
 
-MinIO SSE is feature and API compatible with [AWS Server-Side Encryption](https://docs.aws.amazon.com/AmazonS3/latest/userguide/server-side-encryption.html) and supports the following encryption strategies:
+SILO implements the S3 encryption request interfaces described in [AWS Server-Side Encryption](https://docs.aws.amazon.com/AmazonS3/latest/userguide/server-side-encryption.html) and supports the following encryption strategies:
 
 {{< tabs group="sse-kms-recommended-sse-s3-sse-c" >}}
 {{< tab label="SSE-KMS Recommended" value="sse-kms-recommended" >}}
@@ -23,11 +23,11 @@ MinIO supports enabling automatic SSE-KMS encryption of all objects written to a
 
 For buckets without automatic SSE-KMS encryption, clients can specify an <abbr title="External Key">EK</abbr> as part of the write operation instead.
 
-MinIO encrypts backend data as part of enabling server-side encryption. You cannot disable SSE-KMS encryption once enabled.
+SILO can encrypt backend IAM/configuration data through the configured KMS. You can clear a bucket default with `mcli encrypt clear`, but existing encrypted data still requires its original keys. Do not remove the key service while that data depends on it.
 
 SSE-KMS provides more granular and customizable encryption compared to SSE-S3 and SSE-C and is recommended over the other supported encryption methods.
 
-For a tutorial on enabling SSE-KMS in a local (non-production) MinIO Deployment, see [Quickstart](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms-quickstart). For production MinIO deployments, use one of the following guides:
+For a tutorial on enabling SSE-KMS in a local (non-production) MinIO Deployment, see [Quickstart](/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms-quickstart). For persistent deployments, use [PGSTY KES with OpenBao](/operations/server-side-encryption/configure-minio-kes/). These archived upstream guides cover other inherited backends and are not a certification of those services:
 
 - [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
 - [Azure Key Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
@@ -42,9 +42,9 @@ MinIO supports enabling automatic SSE-S3 encryption of all objects written to a 
 
 For buckets without automatic SSE-S3 encryption, clients can request SSE encryption as part of the write operation instead.
 
-MinIO encrypts backend data as part of enabling server-side encryption. You cannot disable SSE-KMS encryption once enabled.
+SILO can encrypt backend IAM/configuration data through the configured KMS. You can clear a bucket default with `mcli encrypt clear`, but existing encrypted data still requires its original keys. Do not remove the key service while that data depends on it.
 
-For a tutorial on enabling SSE-s3 in a local (non-production) MinIO Deployment, see [Quickstart](/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3-quickstart). For production MinIO deployments, use one of the following guides:
+For a tutorial on enabling SSE-s3 in a local (non-production) MinIO Deployment, see [Quickstart](/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3-quickstart). For persistent deployments, use [PGSTY KES with OpenBao](/operations/server-side-encryption/configure-minio-kes/). These archived upstream guides cover other inherited backends and are not a certification of those services:
 
 - [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
 - [Azure Key Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
@@ -55,7 +55,7 @@ For a tutorial on enabling SSE-s3 in a local (non-production) MinIO Deployment, 
 - [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
 {{< /tab >}}
 {{< tab label="SSE-C" value="sse-c" >}}
-Clients specify an <abbr title="External Key">EK</abbr> as part of the write operation for an object. MinIO uses the specified <abbr title="External Key">EK</abbr> to perform SSE-S3.
+Clients specify an <abbr title="External Key">EK</abbr> as part of the write operation for an object. SILO uses the client-supplied key for SSE-C. SSE-C does not require KES or a server-side KMS.
 
 SSE-C does not support bucket-default encryption settings and requires clients perform all key management operations.
 {{< /tab >}}
@@ -67,15 +67,14 @@ MinIO SSE requires enabling [Network Encryption (TLS)](/operations/network-encry
 
 ## Secure Erasure and Locking {#secure-erasure-and-locking}
 
-MinIO requires access to the Encryption Key (EK) *and* external Key Management System (KMS) used as part of SSE operations to decrypt an object. You can use this dependency to securely erase and lock objects from access by disabling access to the EK or KMS used for encryption.
+KES and SILO can cache key material. Sealing a key store or revoking access is not guaranteed to invalidate cached keys immediately; account for cache expiry and active processes when testing revocation.
 
-General strategies include, but are not limited to:
+SSE-KMS and SSE-S3 objects require the external key (EK) recorded in their metadata. Key availability affects access as follows:
 
-- Seal the <abbr title="Key Management System">KMS</abbr> such that it cannot be accessed by MinIO server anymore. This locks all SSE-KMS or SSE-S3 encrypted objects protected by any <abbr title="External Key">EK</abbr> stored on the KMS. The encrypted objects remain unreadable as long as the KMS remains sealed.
-- Seal/Unmount an <abbr title="External Key">EK</abbr>. This locks all SSE-KMS or SSE-S3 encrypted objects protected by that EK. The encrypted objects remain unreadable as long as the CMK(s) remains sealed.
-- Delete an <abbr title="External Key">EK</abbr>. This renders all SSE-KMS or SSE-S3 encrypted objects protected by that EK as permanently unreadable. The combination of deleting an EK and deleting the data may fulfill regulatory requirements around secure deletion of data.
+- Sealing the key store or disabling access to an EK prevents decryption only once usable cached key material is also unavailable. Verify revocation across all SILO and KES instances; sealing the backend alone is not proof that reads have stopped.
+- Permanently losing every usable copy of an EK, including cached copies and backups, makes objects that still depend on it unrecoverable.
 
-  Deleting an <abbr title="External Key">EK</abbr> is typically irreversible. Exercise extreme caution before intentionally deleting a master key.
+Preserve the original keys until all required object versions have been migrated and their decryption verified.
 
 For more information, see:
 

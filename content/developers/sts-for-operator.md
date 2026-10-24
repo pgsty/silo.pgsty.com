@@ -3,13 +3,15 @@ title: "Security Token Service (STS) for MinIO Operator"
 url: "/developers/sts-for-operator/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/sts-for-operator.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="security-token-service-sts-for-minio-operator"></a>
 <a id="minio-sts-operator"></a>
 
 ## Overview {#overview}
+
+This page describes the archived upstream MinIO Operator `v7.1.1` compatibility snapshot. It is separate from the SILO Server STS API and does not establish Kubernetes or Operator support for the coordinated SILO release. See the [Operator scope](/operations/deployments/kubernetes/).
 
 > [!NOTE]
 > **Added: Operator**
@@ -37,7 +39,7 @@ Benefits of STS for MinIO Operator include:
 
 ## How STS Authorization Works in Kubernetes {#how-sts-authorization-works-in-kubernetes}
 
-An application can use an `AssumeRoleWithWebIdentity` call including a [Kubernetes Service Account’s](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/) <abbr title="JSON Web Token">JWT</abbr> to send a request for temporary credentials to the MinIO Operator. When linked to a pod, such as through a deployment’s `.spec.spec.serviceAccountName` field, Kubernetes mounts a <abbr title="JSON Web Token">JWT</abbr> for the service account from a well-known location, such as `/var/run/secrets/kubernetes.io/serviceaccount/token`. The Pod can access those service accounts from that location.
+An application can use an `AssumeRoleWithWebIdentity` call including a [Kubernetes Service Account’s](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/) <abbr title="JSON Web Token">JWT</abbr> to send a request for temporary credentials to the MinIO Operator. When a Pod selects a service account through `.spec.serviceAccountName` (or a Deployment uses `.spec.template.spec.serviceAccountName`), Kubernetes mounts a <abbr title="JSON Web Token">JWT</abbr> for the service account from a well-known location, such as `/var/run/secrets/kubernetes.io/serviceaccount/token`. The Pod can read the mounted token from that location.
 
 The Operator checks the validity of the request, retrieves policies for the application, obtains credentials from the tenant, and then passes the credentials back the application. The application uses the issued credentials to work with the object storage on the tenant.
 
@@ -45,7 +47,7 @@ The Operator checks the validity of the request, retrieves policies for the appl
 
 The complete process includes the following steps:
 
-1. An application sends an `AssumeRoleWithWebidentity` [API request](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) to the MinIO Operator containing the tenant namespace and a service account to use.
+1. An application sends an `AssumeRoleWithWebIdentity` [API request](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) to the MinIO Operator containing the tenant namespace and a service account to use.
 2. The MinIO Operator uses the Kubernetes API to check that the JSON Web Token (JWT) associated with the [service account](#minio-operator-sts-service-account) in the application’s request is valid.
 3. The Kubernetes API returns the results of its validity check.
 4. The MinIO Operator checks for [Policy Bindings](#minio-operator-sts-policy-binding) that matches the application.
@@ -92,12 +94,12 @@ STS for the MinIO Operator requires the following:
 4. Apply the YAML file to create the resources on the deployment
 
    ```shell
-   kubectl apply -k path/to/yaml/file.yaml
+   kubectl apply -f path/to/yaml/file.yaml
    ```
 
 5. Use an SDK that supports the `AssumeRoleWithWebIdentity` like behavior to send a call from your application to the deployment
 
-   The STS API expects a JWT for the service account to exist in the Kubernetes environment. When linked to a pod, such as through a deployment’s `.spec.spec.serviceAccountName` field, Kubernetes mounts a <abbr title="JSON Web Token">JWT</abbr> for the service account from a well-known location, such as `/var/run/secrets/kubernetes.io/serviceaccount/token`.
+   The STS API expects a JWT for the service account to exist in the Kubernetes environment. When a Pod selects a service account through `.spec.serviceAccountName` (or a Deployment uses `.spec.template.spec.serviceAccountName`), Kubernetes mounts a <abbr title="JSON Web Token">JWT</abbr> for the service account from a well-known location, such as `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
    Alternatively, you can define the token path as an environment variable:
 
@@ -105,7 +107,7 @@ STS for the MinIO Operator requires the following:
    AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/kubernetes.io/serviceaccount/token
    ```
 
-   The following MinIO SDKs support `AssumeRoleRoleWithWebIdentity`:
+   The following MinIO SDKs support `AssumeRoleWithWebIdentity`:
 
    - [Golang](/developers/minio-drivers/#go-sdk)
    - [Java](/developers/minio-drivers/#java-sdk)
@@ -121,7 +123,7 @@ STS for the MinIO Operator requires the following:
 
 ### Service Account {#service-account}
 
-A Service Account is a [Kubernetes resource type](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/) that allows an external application to interact with the Kubernetes deployment. When linked to a pod, such as through a deployment’s `.spec.spec.serviceAccountName` field, Kubernetes mounts a <abbr title="JSON Web Token">JWT</abbr> for the service account from a well-known location, such as `/var/run/secrets/kubernetes.io/serviceaccount/token`.
+A Service Account is a [Kubernetes resource type](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/) that allows an external application to interact with the Kubernetes deployment. When a Pod selects a service account through `.spec.serviceAccountName` (or a Deployment uses `.spec.template.spec.serviceAccountName`), Kubernetes mounts a <abbr title="JSON Web Token">JWT</abbr> for the service account from a well-known location, such as `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
 The following yaml creates a service account called `stsclient-sa` for the `sts-client` namespace.
 

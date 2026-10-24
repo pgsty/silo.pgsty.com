@@ -308,7 +308,7 @@ Limit client-side upload rates to no more than the specified rate in KiB/s, MiB/
 For example, to limit upload rates to no more than 1 GiB/s, use the following on a Linux system:
 
 ```shell
-export MC_LIMIT_UPLOAD=1G
+export MC_LIMIT_UPLOAD=1Gi
 ```
 
 Refer to your operating system instructions for equivalent commands on non-Linux systems.
@@ -323,7 +323,7 @@ Encrypt and decrypt options using [SSE-KMS](/operations/server-side-encryption/#
 
 *envvar*
 
-Specify the key with the [`MC_ENC_KMS`](#envvar.MC_ENC_KMS) environment variable.
+Use `ALIAS/BUCKET/PREFIX=KEY_NAME` mappings, for example `MC_ENC_KMS=mysilo/encryptedbucket/=silo-bucket`. Separate multiple mappings with commas. The key name identifies a key managed by the server's KMS; it is not the key material.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
@@ -332,7 +332,7 @@ This setting does not have a configuration setting option.
 
 ### SSE-S3 Encryption {#sse-s3-encryption}
 
-Encrypt and decrypt options using [SSE-KMS](/operations/server-side-encryption/#minio-sse-data-encryption) with server managed keys.
+Request [SSE-S3](/operations/server-side-encryption/#minio-sse-data-encryption) with server managed keys.
 
 {{< tabs group="environment-variable-configuration-setting" default="environment-variable" >}}
 {{< tab label="Environment Variable" value="environment-variable" >}}
@@ -340,7 +340,7 @@ Encrypt and decrypt options using [SSE-KMS](/operations/server-side-encryption/#
 
 *envvar*
 
-Specify the key to use for performing SSE-S3 encryption. The specified value must match the encryption key set in [`MINIO_KMS_KES_KEY_NAME`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME).
+Specify the target alias, bucket, or object prefix, for example `MC_ENC_S3=mysilo/encryptedbucket/`. Separate multiple prefixes with commas. This selects where to request SSE-S3; do not supply a KMS key name or key material. SILO chooses its configured default key, such as `MINIO_KMS_KES_KEY_NAME` for a KES deployment.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.

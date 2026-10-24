@@ -3,7 +3,7 @@ title: "Node Failure Recovery"
 url: "/operations/data-recovery/recover-after-node-failure/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery/recover-after-node-failure.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="node-failure-recovery"></a>
@@ -57,4 +57,4 @@ Use [`mc admin heal`](/reference/minio-mc-admin/mc-admin-heal/#command-mc.admin.
 
 ## 5) Next Steps {#next-steps}
 
-Continue monitoring the deployment until healing completes. Deployments with persistent and repeated node failures should schedule dedicated maintenance to identify the root cause. Consider using [MinIO SUBNET](https://min.io/pricing?jmp=docs) to coordinate with MinIO engineering around guidance for any such operations.
+Continue monitoring the deployment until healing completes. Deployments with persistent and repeated node failures should schedule dedicated maintenance to identify the root cause. For assistance, see [SILO troubleshooting](/operations/troubleshooting/).

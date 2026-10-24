@@ -3,7 +3,7 @@ title: "Active Directory / LDAP Access Management"
 url: "/administration/identity-access-management/ad-ldap-access-management/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/ad-ldap-access-management.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="active-directory-ldap-access-management"></a>
@@ -11,13 +11,13 @@ upstream_modified: false
 
 MinIO supports configuring a single Active Directory or LDAP (AD/LDAP) service for external management of user identities. Enabling AD/LDAP external identity management disables the [MinIO internal IDP](/administration/identity-access-management/minio-identity-management/#minio-internal-idp).
 
-For identities managed by the external AD/LDAP provider, MinIO uses the user’s Distinguished Name and attempts to map it against an existing [policy](/administration/identity-access-management/policy-based-access-control/#minio-policy).
+For identities managed by the external AD/LDAP provider, SILO looks up the existing policies explicitly attached to the user’s Distinguished Name (DN). Policy names do not need to match the DN.
 
-If the AD/LDAP configuration includes the necessary settings to query the user’s AD/LDAP group membership, MinIO *also* uses those group Distinguished Names and attempts to map each against an existing [policy](/administration/identity-access-management/policy-based-access-control/#minio-policy).
+If the AD/LDAP configuration includes the necessary settings to query the user’s AD/LDAP group membership, SILO also includes policies attached to the returned group DNs.
 
-MinIO by default denies access to all actions or resources not explicitly allowed by a user’s assigned or inherited [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy). Users managed by an AD/LDAP provider must specify the necessary policies as part of the user profile data. If no policies match either the user DN or group DNs, MinIO blocks all access to actions and resources on the deployment.
+MinIO by default denies access to all actions or resources not explicitly allowed by a user’s assigned or inherited [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy). An administrator attaches existing SILO policies to LDAP users or groups with `mcli idp ldap policy attach`. If no policies match either the user DN or group DNs, MinIO blocks all access to actions and resources on the deployment.
 
-The specific AD/LDAP queries MinIO issues to authenticate the user and retrieve it’s group membership are configured as part of [deploying the cluster with Active Directory / LDAP identity management](/operations/external-iam/#minio-external-iam-ad-ldap). This page covers creation of MinIO policies to match the possible returned Distinguished Names.
+The specific AD/LDAP queries MinIO issues to authenticate the user and retrieve its group membership are configured as part of [deploying the cluster with Active Directory / LDAP identity management](/operations/external-iam/#minio-external-iam-ad-ldap). This page covers creation of SILO policies and their explicit association with returned Distinguished Names.
 
 ## Authentication and Authorization Flow {#authentication-and-authorization-flow}
 
@@ -25,12 +25,12 @@ The login flow for an application using Active Directory / LDAP credentials is a
 
 1. Specify the AD/LDAP credentials to the MinIO Security Token Service (STS) [AssumeRoleWithLDAPIdentity](/developers/security-token-service/AssumeRoleWithLDAPIdentity/#minio-sts-assumerolewithldapidentity) API endpoint.
 2. MinIO verifies the provided credentials against the AD/LDAP server.
-3. MinIO checks for any [policy](/administration/identity-access-management/policy-based-access-control/#minio-policy) whose name matches the user Distinguished Name (DN) and assigns that policy to the authenticated user.
+3. SILO loads the [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) explicitly attached to the user DN.
 
-   If configured to perform group queries, MinIO also queries for a list of AD/LDAP groups in which the user has membership. MinIO checks for any policy whose name matches a returned group DN and assigns that policy to the authenticated user.
-4. MinIO returns temporary credentials in the STS API response in the form of an access key, secret key, and session token. The credentials have permissions matching those policies whose name matches either the authenticated user DN *or* a group DN.
+   If configured to perform group queries, MinIO also queries for a list of AD/LDAP groups in which the user has membership. SILO includes policies explicitly attached to each returned group DN.
+4. MinIO returns temporary credentials in the STS API response in the form of an access key, secret key, and session token. The credentials have permissions matching those policies attached to either the authenticated user DN *or* a group DN.
 
-MinIO provides an example Go application [ldap.go](https://github.com/minio/minio/blob/master/docs/sts/ldap.go) that handles the full login flow.
+MinIO provides an example Go application [ldap.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-18T00-00-00Z/docs/sts/ldap.go) that handles the full login flow.
 
 AD/LDAP users can alternatively create [access keys](/administration/identity-access-management/minio-user-management/#minio-idp-service-account) associated to their AD/LDAP user Distinguished Name. Access Keys are long-lived credentials which inherit their privileges from the parent user. The parent user can further restrict those privileges while creating the access keys. Use either of the following methods to create a new access key:
 
@@ -44,7 +44,7 @@ The following commands use [`mc idp ldap policy attach`](/reference/minio-mc/mc-
 mc idp ldap policy attach myminio consoleAdmin \
   --user='cn=sisko,cn=users,dc=example,dc=com'
 
-mc idp ldap policy attach myminio readwrite,diagnostics \
+mc idp ldap policy attach myminio readwrite diagnostics \
   --user='cn=dax,cn=users,dc=example,dc=com'
 ```
 
@@ -66,3 +66,7 @@ mc idp ldap policy attach myminio diagnostics \
 
 - MinIO would assign any authenticating user with membership in the `cn=ops,cn=groups,dc=example,dc=com` AD/LDAP group the [`consoleAdmin`](/administration/identity-access-management/policy-based-access-control/#userpolicy.consoleAdmin) policy, granting complete access to the MinIO server.
 - MinIO would assign any authenticating user with membership in the `cn=engineering,cn=groups,dc=example,dc=com` AD/LDAP group the [`diagnostics`](/administration/identity-access-management/policy-based-access-control/#userpolicy.diagnostics) policy, granting access to diagnostic administrative operations.
+
+## Long Distinguished Names
+
+The source prepared for Server 20261024 includes the [LDAP long-DN fix](/blog/design/ldap-long-dn/). A group-only policy lookup can encounter a user DN too long to fit an IAM record filename; the fix treats that absent user record as missing and continues to the group policies. It does not remove every storage filename limit or make arbitrary long-name policy writes valid. Confirm that the chosen published Server contains the fix before relying on it; updating only mcli or Console does not change Server IAM behavior.

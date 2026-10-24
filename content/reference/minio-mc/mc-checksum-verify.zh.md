@@ -12,7 +12,7 @@ upstream_link: ""
 
 这是 [mcli 20260903](/zh/blog/release/mcli-20260903/) 新增的**只读审计命令**，只使用 S3 LIST、HEAD 与 GET；它绝不修复 metadata、改写对象，也不会武断地判断是哪条历史写入路径造成了 mismatch。
 
-命令支持存储为 `FULL_OBJECT` 类型的 CRC32、CRC32C、CRC64NVME、SHA1 与 SHA256。`COMPOSITE` 校验和会被报告为不支持，而不是靠猜测处理。
+命令支持 `FULL_OBJECT` 类型的 CRC32、CRC32C、CRC64NVME、SHA1 与 SHA256。`COMPOSITE` 校验和报告为不支持；缺少 `x-amz-checksum-type` 时报告 `UNKNOWN_CHECKSUM_TYPE`。
 
 本文写作 `mc`；如果安装的可执行文件名是 `mcli`，请直接替换命令名。
 
@@ -24,7 +24,7 @@ mc checksum verify --recursive [FLAGS] ALIAS/BUCKET[/PREFIX]
 mc checksum verify --manifest FILE [FLAGS] ALIAS
 ```
 
-以下选择模式只能使用一种：
+按对象或递归前缀选择目标，并按需指定版本；`--manifest` 是独立的选择模式：
 
 - 对象路径核验单个对象；
 - `--recursive` 核验桶或前缀下的对象；
@@ -32,7 +32,11 @@ mc checksum verify --manifest FILE [FLAGS] ALIAS
 - `--versions` 将对象或递归扫描选中的所有版本纳入核验；
 - `--manifest` 从 JSON Lines 文件读取精确的 bucket、key 与可选 version 身份。
 
-对于未版本化对象，命令使用 `If-Match` 读取，并在消费完 body 后再次 HEAD。如果对象在核验期间发生变化，结果是 `UNKNOWN_OBJECT_CHANGED`，不会误报为 mismatch。
+对于未版本化对象和 `null` 版本，命令使用 `If-Match` 读取，并在读取完成后再次 HEAD。若对象发生变化，报告 `UNKNOWN_OBJECT_CHANGED`。
+
+递归扫描忽略目录标记（以 `/` 结尾的对象键），不为其生成记录或增加 `objects` 计数。需要检查目录标记时，在 manifest 中显式列出。
+
+查询单个对象的所有历史版本时，客户端会枚举同名前缀，再筛选精确键名。若已知 VersionID，使用 manifest 可减少枚举开销。
 
 ## 结果与退出码契约 {#results}
 
@@ -52,10 +56,12 @@ mc checksum verify --manifest FILE [FLAGS] ALIAS
 `--fail-on` 接受：
 
 - `mismatch` —— 只在校验和不匹配时失败；
-- `unknown` —— 在 mismatch 或任意 `UNKNOWN_*` 结果时失败；
-- `no-checksum` —— 额外在缺少校验和或整次运行核验对象数为零时失败；
+- `unknown` —— 只在出现 `UNKNOWN_*` 结果时失败；
+- `no-checksum` —— 包含 `any` 的失败条件，并在缺少校验和或核验对象数为零时失败；
 - `any` —— 默认值，也会把大小上限导致的不完整审计视为失败；
 - `none` —— 报告发现，但不把它们转换成审计失败。
+
+`--dry-run` 不执行 `--fail-on` 判定。默认策略允许只有 `NO_CHECKSUM` 的运行成功退出；要求实际完成校验时，使用 `no-checksum` 或检查 `verified`。
 
 最终汇总包含 `objects`、`verified`、各状态计数与 `incomplete`。`verified` 等于 `MATCH + MISMATCH`；自动化需要证明至少真正重算过一个校验和时，应检查这个字段。
 
@@ -75,7 +81,9 @@ mc checksum verify --manifest FILE [FLAGS] ALIAS
 | `--report FILE` | 把对象记录与汇总写入新的 JSON Lines 文件；POSIX 系统上以 `0600` 创建。 |
 | `--json` | stdout 不是终端时输出紧凑 JSON Lines。 |
 
-全局 `--limit-download` 仍可用于限速。对象 body 以流式方式经过受限 hasher，不会完整缓冲，也不会写入磁盘。
+全局 `--limit-download` 可限制下载速度。对象正文以流式方式校验，不完整缓冲或写入磁盘。时间过滤仍需 HEAD，以对象当前返回的元数据为准。
+
+仅显式 `--quiet`、`-q` 或 `MC_QUIET=true` 抑制 stdout 上的对象记录与汇总；重定向到文件或管道不会隐藏结果。`--report` 独立于 stdout，始终写入 JSON Lines。详见[输出契约](/zh/blog/design/checksum-verify/#output-contract)。
 
 ## Manifest 格式 {#manifest}
 
@@ -85,7 +93,7 @@ mc checksum verify --manifest FILE [FLAGS] ALIAS
 {"bucket":"archive","key":"2025/report.json","versionId":"optional"}
 ```
 
-alias 只在命令行提供一次。Manifest 既不包含校验和，也不包含加密密钥。
+alias 只在命令行提供一次。Manifest 只接受候选对象身份，不是结果文件或断点文件，也不包含校验和或加密密钥。
 
 ## 示例 {#examples}
 

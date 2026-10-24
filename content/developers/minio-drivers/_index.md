@@ -10,7 +10,7 @@ upstream_modified: true
 <a id="software-development-kits-sdk"></a>
 <a id="minio-drivers"></a>
 
-MinIO publishes the following Software Development Kits (SDK):
+SILO applications can use these upstream S3 SDKs. They are released independently of SILO; pin the SDK and runtime versions your application tests. The coordinated SILO product stack selects the upstream Go SDK directly, while the other language SDKs are application integration options. Follow each quickstart for the version and API it demonstrates:
 
 - [Go](#go-sdk)
 - [Python](#python-sdk)
@@ -27,7 +27,7 @@ MinIO publishes the following Software Development Kits (SDK):
 
 GitHub: [minio/minio-go](https://github.com/minio/minio-go)
 
-Latest Version: GOVERSION
+Versions: [upstream releases](https://github.com/minio/minio-go/releases).
 
 Quickstart Guide: [Go Quickstart Guide](/developers/go/minio-go/)
 
@@ -36,7 +36,7 @@ Reference: [MinIO Go SDK API](https://pkg.go.dev/github.com/minio/minio-go/v7)
 Download from GitHub
 
 > ```shell
-> go get github.com/minio/minio-go/v7
+> go get github.com/minio/minio-go/v7@v7.4.1
 > ```
 
 <a id="python-sdk"></a>
@@ -45,7 +45,7 @@ Download from GitHub
 
 GitHub: [minio/minio-py](https://github.com/minio/minio-py)
 
-Latest Version: PYTHONVERSION
+Versions: [upstream releases](https://github.com/minio/minio-py/releases).
 
 Quickstart Guide: [Python Quickstart Guide](/developers/python/minio-py/)
 
@@ -64,7 +64,7 @@ Reference: [MinIO Python SDK](https://github.com/minio/minio-py)
 >   ```shell
 >   git clone https://github.com/minio/minio-py
 >   cd minio-py
->   python setup.py install
+>   python3 -m pip install .
 >   ```
 
 <a id="java-sdk"></a>
@@ -73,7 +73,7 @@ Reference: [MinIO Python SDK](https://github.com/minio/minio-py)
 
 GitHub: [minio/minio-java](https://github.com/minio/minio-java)
 
-Latest version: JAVAVERSION
+Versions: [upstream releases](https://github.com/minio/minio-java/releases).
 
 Quickstart Guide: [Java Quickstart Guide](/developers/java/minio-java/#minio-java-quickstart)
 
@@ -87,7 +87,7 @@ Reference: [MinIO Java SDK](https://github.com/minio/minio-java)
 >   <dependency>
 >       <groupId>io.minio</groupId>
 >       <artifactId>minio</artifactId>
->       <version>JAVAVERSION</version>
+>       <version>9.0.3</version>
 >   </dependency>
 >   ```
 >
@@ -95,13 +95,13 @@ Reference: [MinIO Java SDK](https://github.com/minio/minio-java)
 >
 >   ```java
 >   dependencies {
->       implementation("io.minio:minio:JAVAVERSION")
+>       implementation("io.minio:minio:9.0.3")
 >   }
 >   ```
 >
 > - JAR
 >
->   Download the latest JAR file for version JAVAVERSION of the SDK from the Sonatype Maven Central Repository.
+>   The examples above use version `9.0.3`, matching the Java quickstart. Use Maven or Gradle to resolve its dependencies, and verify the runtime requirements for the version you select.
 
 <a id="dotnet-sdk"></a>
 
@@ -109,7 +109,7 @@ Reference: [MinIO Java SDK](https://github.com/minio/minio-java)
 
 GitHub: [minio/minio-dotnet](https://github.com/minio/minio-dotnet)
 
-Latest Version: DOTNETVERSION
+Versions: [upstream releases](https://github.com/minio/minio-dotnet/releases).
 
 Quickstart Guide: [.NET Quickstart Guide](/developers/dotnet/minio-dotnet/)
 
@@ -129,7 +129,7 @@ Reference: [MinIO .NET SDK](https://github.com/minio/minio-dotnet)
 
 GitHub: [minio/minio-js](https://github.com/minio/minio-js)
 
-Latest Version: JAVASCRIPTVERSION
+Versions: [upstream releases](https://github.com/minio/minio-js/releases).
 
 Quickstart Guide: [JavaScript Quickstart Guide](/developers/javascript/minio-javascript/)
 
@@ -158,7 +158,7 @@ Reference: [MinIO JavaScript SDK](https://github.com/minio/minio-js)
 
 GitHub: [minio/minio-hs](https://github.com/minio/minio-hs)
 
-Latest Version: HASKELLVERSION
+Versions: [upstream releases](https://github.com/minio/minio-hs/releases).
 
 Quickstart Guide: [Haskell Quickstart Guide](/developers/haskell/minio-haskell/)
 
@@ -205,9 +205,7 @@ Reference: [MinIO C++ SDK Reference](https://minio-cpp.min.io/)
 
 GitHub: [minio/minio-rs](https://github.com/minio/minio-rs)
 
-**Latest Version**
-
-> RUSTVERSION
+Versions: [upstream releases](https://github.com/minio/minio-rs/releases).
 
 Reference: [MinIO Rust SDK Reference](https://docs.rs/minio/latest/minio/)
 

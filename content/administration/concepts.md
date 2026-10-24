@@ -4,7 +4,7 @@ url: "/administration/concepts/"
 weight: 180
 icon: fa-solid fa-diagram-project
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/concepts.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="core-administration-concepts"></a>
@@ -80,7 +80,7 @@ MinIO itself does not limit the number of objects that any specific prefix can c
 - Deployments with modest or budget-focused hardware should architect their workloads to target 10,000 objects per prefix as a baseline. Increase this target based on benchmarking and monitoring of real world workloads up to what the hardware can meaningfully handle.
 - Deployments with high-performance or enterprise-grade [hardware](/operations/checklists/hardware/#deploy-minio-distributed-recommendations) can typically handle prefixes with millions of objects or more.
 
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) Enterprise accounts can utilize yearly architecture reviews as part of the deployment and maintenance strategy to ensure long-term performance and success of your MinIO-dependent projects.
+Plan deployment and architecture reviews around your workload, recovery objectives, and measured capacity. For assistance, see [SILO troubleshooting](/operations/troubleshooting/).
 
 For a deeper discussion on the benefits of limiting prefix contents, see the article on [optimizing S3 performance](https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html).
 

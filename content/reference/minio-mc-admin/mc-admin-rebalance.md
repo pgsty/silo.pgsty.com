@@ -3,7 +3,7 @@ title: "mc admin rebalance"
 url: "/reference/minio-mc-admin/mc-admin-rebalance/"
 weight: 130
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-rebalance.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-rebalance"></a>
@@ -32,9 +32,9 @@ mc admin trace --call rebalance ALIAS
 ```
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO. Compatibility with unmodified upstream MinIO is best effort; general S3 compatibility alone does not provide these administrative APIs.
 
 The [`mc admin rebalance`](#command-mc.admin.rebalance) command has the following subcommands:
 

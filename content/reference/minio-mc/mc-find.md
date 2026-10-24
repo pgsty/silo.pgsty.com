@@ -44,7 +44,7 @@ mc [GLOBALFLAGS] find                    \
                  [--print "string"]      \
                  [--regex "string"]      \
                  [--smaller "string"]    \
-                 [--tags "string"]`      \
+                 [--tags "string"]      \
                  [--versions]            \
                  [--watch]               \
                  ALIAS
@@ -123,7 +123,7 @@ Limits directory navigation to the specified depth.
 >
 > RELEASE.2023-04-12T02-21-51Z
 
-**For use with MinIO deployments only.**
+**Requires the SILO/MinIO object-listing extension; compatibility with upstream MinIO is best effort.**
 
 Return objects with metadata that matches a specified `key=value`. Use the format `--metadata="KEY=value"`.
 
@@ -202,9 +202,9 @@ Returns objects or the contents of directories whose names match the specified P
 >
 > RELEASE.2023-04-12T02-21-51Z
 
-**For use with MinIO deployments only.**
+**Requires the SILO/MinIO object-listing extension; compatibility with upstream MinIO is best effort.**
 
-Return objects with a tag that matches a specified [RE2 RegEx pattern](https://github.com/google/re2/wiki/Syntax). Use the format `--tag="KEY=regexValue"`.
+Return objects with a tag that matches a specified [RE2 RegEx pattern](https://github.com/google/re2/wiki/Syntax). Use the format `--tags="KEY=regexValue"`.
 
 You can pass a key with an empty value. In that case, `mc find` matches objects that do not have the metadata key or where the metadata key’s value is empty.
 
@@ -355,6 +355,4 @@ The following keyword is supported only for S3 service targets:
 
 ### S3 Compatibility {#s3-compatibility}
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
-
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).

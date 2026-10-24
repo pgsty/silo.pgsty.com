@@ -3,7 +3,7 @@ title: "mc admin scanner trace"
 url: "/reference/minio-mc-admin/mc-admin-scanner-trace/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-scanner-trace.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-scanner-trace"></a>
@@ -15,9 +15,9 @@ upstream_modified: false
 The [`mc admin scanner trace`](#command-mc.admin.scanner.trace) command displays [scanner](/operations/concepts/scanner/#minio-concepts-scanner)-specific API operations occurring on the target MinIO deployment.
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO. Compatibility with unmodified upstream MinIO is best effort; general S3 compatibility alone does not provide these administrative APIs.
 
 {{< tabs group="example-syntax" >}}
 {{< tab label="EXAMPLE" value="example" >}}

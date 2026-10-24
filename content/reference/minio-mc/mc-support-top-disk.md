@@ -1,9 +1,9 @@
 ---
-title: "mc support top disk"
+title: "mc support top drive (disk alias)"
 url: "/reference/minio-mc/mc-support-top-disk/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top-disk.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support-top-disk"></a>
@@ -11,17 +11,17 @@ upstream_modified: false
 <a id="command-mc.support.top.disk"></a>
 
 > [!NOTE]
-> **SUBNET Registration Required**
+> **Local diagnostics**
 >
-> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
+> PGSTY mcli runs these diagnostics against SILO without SUBNET registration. Online registration, uploads, and call-home are disabled; see [client compatibility](/compatibility/mcli/#subnet).
 
 ## Syntax {#syntax}
 
-The [`mc support top disk`](#command-mc.support.top.disk) command displays current drive statistics.
+The current command is `mcli support top drive`; `disk` remains a compatibility alias. It displays current drive statistics.
 
 {{< tabs group="example-syntax" >}}
 {{< tab label="EXAMPLE" value="example" >}}
-The following command displays the current in-progress S3 API calls on the [alias](/glossary/#term-alias) `myminio`.
+The following command displays current drive metrics on the [alias](/glossary/#term-alias) `myminio`.
 
 ```shell
 mc support top disk myminio/

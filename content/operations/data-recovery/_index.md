@@ -4,7 +4,7 @@ url: "/operations/data-recovery/"
 weight: 90
 icon: fa-solid fa-life-ring
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="recover-after-hardware-failure"></a>
@@ -32,8 +32,7 @@ For nodes with one or more drives that are either partially failed or operating 
 > Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
 
 > [!NOTE]
-> **MinIO Professional Support**
+> **SILO recovery assistance**
 >
-> [MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to drive, node, or site failures. Coordination with MinIO Engineering via SUBNET can ensure successful recovery operations of production MinIO deployments, including root-cause analysis, and health diagnostics.
+> For assistance, see [SILO troubleshooting](/operations/troubleshooting/).
 >
-> Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.

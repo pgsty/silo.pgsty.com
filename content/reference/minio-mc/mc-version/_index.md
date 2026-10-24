@@ -4,7 +4,7 @@ url: "/reference/minio-mc/mc-version/"
 weight: 430
 icon: fa-solid fa-code-branch
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-version.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-version"></a>
@@ -56,6 +56,4 @@ Disabling bucket versioning on a bucket with existing versioned data does *not* 
 
 ### S3 Compatibility {#s3-compatibility}
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
-
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).

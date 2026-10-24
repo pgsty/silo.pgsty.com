@@ -68,19 +68,17 @@ make build
 > [!WARNING]
 > **Important**
 >
-> The following example temporarily disables the bash history to mitigate the risk of authentication credentials leaking in plain text. This is a basic security measure and does not mitigate all possible attack vectors. Defer to security best practices for your operating system for inputting sensitive information on the command line.
+> The example prompts for credentials so they do not appear in the shell command history. Protect the client configuration directory, which stores the alias credentials.
 
 Use the [`mc alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) command to add an Amazon S3-compatible service to the [`mc`](#command-mc) [configuration](#mc-configuration).
 
 ```shell
-bash +o history
-mc alias set ALIAS HOSTNAME ACCESS_KEY SECRET_KEY
-bash -o history
+mcli alias set ALIAS https://silo.example.net
 ```
 
 - Replace `ALIAS` with a name to associate to the S3 service. [`mc`](#command-mc) commands typically require `ALIAS` as an argument for identifying which S3 service to execute against.
-- Replace `HOSTNAME` with the URL endpoint or IP address of the S3 service.
-- Replace `ACCESS_KEY` and `SECRET_KEY` with the access and secret keys for a user on the S3 service.
+- Replace `https://silo.example.net` with the URL endpoint of the S3 service.
+- Enter the access key and secret key for a user on the S3 service when prompted.
 
 Replace each argument with the required values. If you omit the `ACCESS_KEY` and `SECRET_KEY`, the command prompts you to enter those values in the CLI.
 
@@ -157,6 +155,10 @@ display the contents of the specified file or object to <code>STDOUT</code>.
     <tr>
       <td><p><a href="/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify"><code>mc checksum verify</code></a></p></td>
       <td><p>The Silo client extension independently recomputes and compares stored S3 full-object checksums. It is read-only and supports individual objects, recursive prefixes, versions, candidate manifests, dry runs, JSON Lines reports, and explicit failure policies.</p></td>
+    </tr>
+    <tr>
+      <td><p><code>mc cors get</code><br /><code>mc cors set</code><br /><code>mc cors remove</code></p></td>
+      <td><p>Read, replace, or remove a bucket's CORS configuration. Use <code>mcli cors get ALIAS/BUCKET</code>, <code>mcli cors set ALIAS/BUCKET cors.xml</code>, or <code>mcli cors remove ALIAS/BUCKET</code>. The configuration file is XML. See the <a href="/reference/s3-api-compatibility/">S3 API reference</a> for bucket CORS and server-wide fallback behavior.</p></td>
     </tr>
     <tr>
       <td><p><a href="/reference/minio-mc/mc-cp/#command-mc.cp"><code>mc cp</code></a></p></td>

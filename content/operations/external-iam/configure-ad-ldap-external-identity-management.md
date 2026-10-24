@@ -194,9 +194,9 @@ MinIO requires a read-only access keys with which it [binds](/operations/externa
    - Replace the `LDAPPassword` with the password of the AD/LDAP user.
    - Replace the `Policy` with an inline URL-encoded JSON [policy](/administration/identity-access-management/policy-based-access-control/#minio-policy) that further restricts the permissions associated to the temporary credentials.
 
-     Omit to use the [policy whose name matches](/operations/external-iam/#minio-external-identity-management-ad-ldap-access-control) the Distinguished Name (DN) of the AD/LDAP user.
+     Omit to use the [policies attached to](/operations/external-iam/#minio-external-identity-management-ad-ldap-access-control) the user DN and any returned group DNs.
 
-   The API response consists of an XML document containing the access key, secret key, session token, and expiration date. Applications can use the access key and secret key to access and perform operations on MinIO.
+   The API response consists of an XML document containing the access key, secret key, session token, and expiration date. Applications must use the access key, secret key, and session token together to authenticate S3 requests.
 
    See the [AssumeRoleWithLDAPIdentity](/developers/security-token-service/AssumeRoleWithLDAPIdentity/#minio-sts-assumerolewithldapidentity) for reference documentation.
 

@@ -3,7 +3,7 @@ title: "Drive Failure Recovery"
 url: "/operations/data-recovery/recover-after-drive-failure/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery/recover-after-drive-failure.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="drive-failure-recovery"></a>
@@ -97,4 +97,4 @@ Use [`mc admin heal`](/reference/minio-mc-admin/mc-admin-heal/#command-mc.admin.
 
 ## 6) Next Steps {#next-steps}
 
-Monitor the cluster for any further drive failures. Some drive batches may fail in close proximity to each other. Deployments seeing higher than expected drive failure rates should schedule dedicated maintenance around replacing the known bad batch. Consider using [MinIO SUBNET](https://min.io/pricing?jmp=docs) to coordinate with MinIO engineering around guidance for any such operations.
+Monitor the cluster for any further drive failures. Some drive batches may fail in close proximity to each other. Deployments seeing higher than expected drive failure rates should schedule dedicated maintenance around replacing the known bad batch. For assistance, see [SILO troubleshooting](/operations/troubleshooting/).

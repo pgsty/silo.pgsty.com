@@ -12,9 +12,9 @@ upstream_modified: true
 
 ## 语法 {#id2}
 
-Pigsty 维护版客户端为保持命令行兼容而保留 [`mc update`](#command-mc.update)，但 **刻意禁用了自更新**。该命令不会访问发布源、下载二进制，也不会替换已安装的 `mc`/`mcli`；它会打印错误并以状态码 `1` 退出。
+Silo 客户端保留 [`mc update`](#command-mc.update) 以兼容已有命令，但**自更新已禁用**。该命令不联网、不下载或替换二进制，打印错误后以状态码 `1` 退出。
 
-请通过[下载与安装](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
+请通过[下载与安装](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#对象存储)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="示例" value="tab1" >}}
@@ -34,14 +34,13 @@ mc [GLOBALFLAGS] update [--json] [RELEASE-URL]
 - 方括号 `[]` 表示可选参数。
 - `RELEASE-URL` 仅为兼容性而接受，不会被访问。
 
-请先将示例复制到文本编辑器中并按需修改，再在终端 / shell 中运行命令。
 {{< /tab >}}
 {{< /tabs >}}
 
 非 JSON 模式的错误文本为：
 
 ```text
-Self-update is disabled in the Pigsty mc fork; upgrade only through the Pigsty package repository or https://github.com/pgsty/mc/releases.
+Self-update is disabled in this Silo build of mcli; upgrade only through your package repository or https://github.com/pgsty/mc/releases.
 ```
 
 ### 全局参数 {#id3}

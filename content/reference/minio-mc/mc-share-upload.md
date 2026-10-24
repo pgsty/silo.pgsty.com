@@ -3,7 +3,7 @@ title: "mc share upload"
 url: "/reference/minio-mc/mc-share-upload/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-share-upload.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-share-upload"></a>
@@ -168,6 +168,4 @@ This example will upload each file in the directory `~/Documents/photos/` to the
 
 ### S3 Compatibility {#s3-compatibility}
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
-
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).

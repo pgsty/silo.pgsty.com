@@ -3,7 +3,7 @@ title: "mc admin prometheus generate"
 url: "/reference/minio-mc-admin/mc-admin-prometheus-generate/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-prometheus-generate.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-prometheus-generate"></a>
@@ -21,9 +21,9 @@ Starting with MinIO Server [RELEASE.2024-07-15T19-02-30Z](https://github.com/min
 MinIO recommends new deployments use [version 3 (v3)](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts). Existing deployments can continue to use [metrics version 2](/operations/monitoring/metrics-v2/#minio-metrics-v2)
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO. Compatibility with unmodified upstream MinIO is best effort; general S3 compatibility alone does not provide these administrative APIs.
 
 {{< tabs group="example-syntax" >}}
 {{< tab label="EXAMPLE" value="example" >}}

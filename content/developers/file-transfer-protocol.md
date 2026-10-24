@@ -4,11 +4,13 @@ url: "/developers/file-transfer-protocol/"
 weight: 220
 icon: fa-solid fa-file-arrow-up
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/file-transfer-protocol.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="file-transfer-protocol-ftp-sftp"></a>
 <a id="minio-ftp"></a>
+
+The server protocols below are available in SILO. Kubernetes examples describe the [archived upstream Operator compatibility snapshot](/operations/deployments/kubernetes/); validate that integration separately.
 
 - [File Transport Using FTP and SFTP with MinIO](https://www.youtube.com/watch?v=lNZyL8wD-lI)
 
@@ -16,7 +18,7 @@ upstream_modified: false
 {{< tab label="Kubernetes" value="kubernetes" >}}
 Starting with Operator 5.0.7 and [MinIO Server RELEASE.2023-04-20T17-56-55Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-04-20T17-56-55Z), you can use the SSH File Transfer Protocol (SFTP) to interact with the objects on a MinIO Operator Tenant deployment.
 
-SFTP is defined by the Internet Engineering Task Force (IETF) as an extension of SSH 2.0. It allows file transfer over SSH for use with [Transport Layer Security (TLS)](/operations/network-encryption/#minio-tls) and virtual private network (VPN) applications.
+SFTP transfers files over SSH. It uses an SSH host key and does not use the TLS certificates configured for the S3 API or FTPS.
 
 Enabling SFTP does not affect other MinIO features.
 {{< /tab >}}
@@ -40,7 +42,7 @@ When enabled, MinIO supports FTP access over the following protocols:
 
 - SSH File Transfer Protocol (SFTP)
 
-  SFTP is defined by the Internet Engineering Task Force (IETF) as an extension of SSH 2.0. SFTP allows file transfer over SSH for use with [Transport Layer Security (TLS)](/operations/network-encryption/#minio-tls) and virtual private network (VPN) applications.
+  SFTP transfers files over SSH using an SSH host key. It is separate from FTP over TLS (FTPS).
 
   Your FTP client must support SFTP.
 - File Transfer Protocol over SSL/TLS (FTPS)
@@ -98,12 +100,12 @@ The SFTP protocol does not require any of the `admin:*` [permissions](/administr
 {{< tab label="Kubernetes" value="kubernetes" >}}
 - MinIO Operator v5.0.7 or later.
 - Enable an SFTP port (8022) for the server.
-- A port to use for the SFTP commands and a range of ports to allow the SFTP server to request to use for the data transfer.
+- One TCP port for SSH/SFTP (8022 in this example). SFTP does not use the passive data-port range required by FTP/FTPS.
 {{< /tab >}}
 {{< tab label="Baremetal" value="baremetal" >}}
 - MinIO RELEASE.2023-04-20T17-56-55Z or later.
 - Enable an FTP or SFTP port for the server.
-- A port to use for the FTP commands and a range of ports to allow the FTP server to request to use for the data transfer.
+- For FTP/FTPS, allow the control port and configured passive data-port range. SFTP uses only its SSH port.
 {{< /tab >}}
 {{< /tabs >}}
 

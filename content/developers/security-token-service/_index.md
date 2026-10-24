@@ -4,7 +4,7 @@ url: "/developers/security-token-service/"
 weight: 200
 icon: fa-solid fa-key
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/security-token-service.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="security-token-service-sts"></a>
@@ -22,4 +22,6 @@ MinIO supports the following STS API endpoints:
 | --- | --- | --- |
 | [AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) | OpenID Connect | Generates an access key and secret key using the JWT token returned by the OIDC provider |
 | [AssumeRoleWithLDAPIdentity](/developers/security-token-service/AssumeRoleWithLDAPIdentity/#minio-sts-assumerolewithldapidentity) | Active Directory / LDAP | Generates an access key and secret key using the AD/LDAP credentials specified to the API endpoint. |
-| [AssumeRoleWithCustomToken](/developers/security-token-service/AssumeRoleWithCustomToken/#minio-sts-assumerolewithcustomtoken) | MinIO Identity Plugin | Generates a token for use with an external identity provider and the [MinIO Identity Plugin](/administration/identity-access-management/pluggable-authentication/#minio-external-identity-management-plugin). |
+| [AssumeRoleWithCustomToken](/developers/security-token-service/AssumeRoleWithCustomToken/#minio-sts-assumerolewithcustomtoken) | MinIO Identity Plugin | Exchanges a token from an external identity provider for temporary S3 credentials using the [MinIO Identity Plugin](/administration/identity-access-management/pluggable-authentication/#minio-external-identity-management-plugin). |
+
+All three APIs return an access key, secret key, and session token. Pass all three to the S3 SDK. Session lifetimes follow each endpoint's contract; LDAP, OIDC, and the identity plugin do not share one universal duration limit.

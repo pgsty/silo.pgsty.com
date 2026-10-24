@@ -3,7 +3,7 @@ title: "mc admin kms key"
 url: "/reference/minio-mc-admin/mc-admin-kms-key/"
 weight: 90
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-kms-key.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-kms-key"></a>
@@ -15,9 +15,9 @@ upstream_modified: false
 The [`mc admin kms key`](#command-mc.admin.kms.key) command performs cryptographic key management operations through the MinIO Key Encryption Service (KES).
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO. Compatibility with unmodified upstream MinIO is best effort; general S3 compatibility alone does not provide these administrative APIs.
 
 ## Syntax {#syntax}
 

@@ -97,7 +97,9 @@ This setting does not have a configuration setting option.
 
 Specifies the full path to the file the SILO server process uses for loading environment variables.
 
-For `systemd`-managed files, set this value to the path of the environment file (`/etc/default/silo`) to direct SILO to reload changes to that file when using [`mc admin service restart`](/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) to restart the deployment.
+The file is parsed at process startup, including after `mcli admin service restart`. It is not a shell script: use `KEY=value` entries, optionally prefixed with `export`; quoted values and full-line comments are supported, but shell expansion and command substitution are not performed. File entries overwrite existing process environment values.
+
+The supplied systemd unit separately reads `/etc/default/minio` and then `/etc/default/silo`. Editing either `EnvironmentFile` normally requires a systemd service restart. An administrative restart alone does not make systemd reread those files. Set `MINIO_CONFIG_ENV_FILE` explicitly only if SILO should also parse a selected file itself. See the [configuration-file contract](/blog/design/config-env-file/) for precedence and parsing details.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
@@ -350,12 +352,12 @@ The [erasure set size](/operations/concepts/erasure-coding/#minio-ec-basics) to 
 
 If you set this value, you **must** do so *before* you initialize the cluster The selected stripe size is **immutable** after the cluster has been initialized and affects any future server pools added to the cluster.
 
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) users should log in and open an issue to discuss stripe size settings prior to implementing them in any environment.
+Validate the erasure-set layout, quorum, usable capacity, and recovery behavior before initializing the deployment. See [erasure coding](/operations/concepts/erasure-coding/).
 
 > [!CAUTION]
 > **Warning**
 >
-> **Do not** change the stripe size setting unless directed to by MinIO engineering.
+> Select any explicit stripe size before initializing the corresponding pool; do not edit existing storage metadata to force a different layout.
 >
 > Changes to stripe size have significant impact to deployment functionality, availability, performance, and behavior. MinIO’s stripe selection algorithms set appropriate defaults for the majority of workloads. Changing the stripe size from this default is unusual and generally not necessary or advised.
 

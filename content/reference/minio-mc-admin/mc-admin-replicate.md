@@ -3,7 +3,7 @@ title: "mc admin replicate"
 url: "/reference/minio-mc-admin/mc-admin-replicate/"
 weight: 140
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-replicate.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-replicate"></a>
@@ -32,9 +32,9 @@ Only one deployment can have any data when initiating a new site replication con
 Site replication enforces [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) on all buckets, including existing buckets and any buckets added after initiating site replication. Site replication fully synchronizes versioned objects, compared to [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) which operates only on the latest version of an object
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO. Compatibility with unmodified upstream MinIO is best effort; general S3 compatibility alone does not provide these administrative APIs.
 
 The [`mc admin replicate`](#command-mc.admin.replicate) command has the following subcommands:
 

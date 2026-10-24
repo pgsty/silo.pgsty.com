@@ -3,7 +3,7 @@ title: "mc ilm tier add"
 url: "/reference/minio-mc/mc-ilm-tier-add/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-add.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-ilm-tier-add"></a>
@@ -99,9 +99,9 @@ mc ilm tier add TIER_TYPE                    \
                 [--use-aws-role^]            \
                 [--aws-role-arn^]            \
                 [--aws-web-identity-file^]   \
-                [--azure-sp-tenant-id^]      \
-                [--azure-sp-client-id^]      \
-                [--azure-sp-client-secret^]  \
+                [--az-sp-tenant-id^]      \
+                [--az-sp-client-id^]      \
+                [--az-sp-client-secret^]  \
                 [--account-name value^]      \
                 [--account-key value^]       \
                 [--credentials-file value^]  \
@@ -337,7 +337,7 @@ Specify the web identity token file to use when transitioning objects.
 
 This option only applies if [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) is `s3` **and** the source is a MinIO pod on Amazon EKS.
 
-##### `--azure-sp-tenant-id` {#mc.ilm.tier.add.-azure-sp-tenant-id}
+##### `--az-sp-tenant-id` {#mc.ilm.tier.add.-azure-sp-tenant-id}
 
 *mc-cmd*
 
@@ -347,7 +347,7 @@ Tenant ID for the [service principal account](https://learn.microsoft.com/en-us/
 
 This option only applies if [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) is `azure` and you log in using a service principal identity. This option has no effect for any other value of `TIER_TYPE`.
 
-##### `--azure-sp-client-id` {#mc.ilm.tier.add.-azure-sp-client-id}
+##### `--az-sp-client-id` {#mc.ilm.tier.add.-azure-sp-client-id}
 
 *mc-cmd*
 
@@ -357,7 +357,7 @@ Client ID for the [service principal account](https://learn.microsoft.com/en-us/
 
 This option only applies if [`TIER_TYPE`](#mc.ilm.tier.add.TIER_TYPE) is `azure` and you log in using a service principal identity. This option has no effect for any other value of `TIER_TYPE`.
 
-##### `--azure-sp-client-secret` {#mc.ilm.tier.add.-azure-sp-client-secret}
+##### `--az-sp-client-secret` {#mc.ilm.tier.add.-azure-sp-client-secret}
 
 *mc-cmd*
 
@@ -435,9 +435,7 @@ This command creates a new tier called `S3TIER` for a `s3` type of remote storag
 
 ### S3 Compatibility {#s3-compatibility}
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
-
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).
 
 ## Required Permissions {#required-permissions}
 

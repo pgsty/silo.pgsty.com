@@ -3,7 +3,7 @@ title: "mc admin logs"
 url: "/reference/minio-mc-admin/mc-admin-logs/"
 weight: 100
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-logs.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-logs"></a>
@@ -13,9 +13,9 @@ upstream_modified: false
 <a id="command-mc.admin.logs"></a>
 
 > [!NOTE]
-> **SUBNET Registration Required**
+> **Local diagnostics**
 >
-> The `mc support` commands are designed for MinIO deployments registered with [MinIO SUBNET](https://min.io/pricing?jmp=docs) to ensure optimal outcome of diagnostics and performance testing. Deployments not registered with SUBNET cannot use the `mc support` commands.
+> PGSTY mcli runs these diagnostics against SILO without SUBNET registration. Online registration, uploads, and call-home are disabled; see [client compatibility](/compatibility/mcli/#subnet).
 
 > [!NOTE]
 > **Changed: RELEASE.2022-12-02T23-48-47Z**
@@ -27,8 +27,6 @@ upstream_modified: false
 ## Description {#description}
 
 Use the [`mc admin logs`](#command-mc.admin.logs) command to show MinIO server logs.
-
-The uploading feature remains disabled by default until explicitly enabled for a deployment on an opt-in only basis. If enabled, you can disable the feature at any time with [`mc support callhome disable`](/reference/minio-mc/mc-support-callhome/#mc.support.callhome.disable).
 
 ## Examples {#examples}
 

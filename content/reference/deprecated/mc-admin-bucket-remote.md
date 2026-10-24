@@ -3,7 +3,7 @@ title: "mc admin bucket remote"
 url: "/reference/deprecated/mc-admin-bucket-remote/"
 weight: 120
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-bucket-remote.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-bucket-remote"></a>
@@ -30,9 +30,9 @@ upstream_modified: false
 The [`mc admin bucket remote`](#command-mc.admin.bucket.remote) command manages the `ARN` resources for use with [`bucket replication`](/reference/minio-mc/mc-replicate/#command-mc.replicate).
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> This page preserves historical syntax. See the [current administration reference](/reference/minio-mc-admin/) for supported commands and server compatibility.
 
 ## Examples {#examples}
 

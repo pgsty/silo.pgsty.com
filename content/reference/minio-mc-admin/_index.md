@@ -11,9 +11,9 @@ upstream_modified: true
 
 <a id="command-mc.admin"></a>
 
-The Silo client [`mc`](/reference/minio-mc/#command-mc) provides the [`mc admin`](#command-mc.admin) command for performing administrative tasks on Silo and compatible MinIO deployments.
+The Silo client [`mc`](/reference/minio-mc/#command-mc) provides the [`mc admin`](#command-mc.admin) command for performing administrative tasks on SILO. Compatibility with unmodified upstream MinIO is best effort.
 
-While [`mc`](/reference/minio-mc/#command-mc) supports general S3-compatible services, [`mc admin`](#command-mc.admin) uses MinIO-specific administration APIs and therefore only supports Silo or compatible MinIO deployments.
+While [`mc`](/reference/minio-mc/#command-mc) supports general S3-compatible services, [`mc admin`](#command-mc.admin) uses MinIO-specific administration APIs with SILO as the supported server. S3 compatibility alone does not provide these APIs.
 
 [`mc admin`](#command-mc.admin) has the following syntax:
 
@@ -110,8 +110,7 @@ Wherever a change occurs to IAM settings, buckets, or objects across the set of 
     </tr>
     <tr>
       <td><p><a href="/reference/minio-mc-admin/mc-admin-update/#command-mc.admin.update"><code>mc admin update</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc-admin/mc-admin-update/#command-mc.admin.update"><code>mc admin update</code></a> command updates all MinIO servers in the deployment.
-The command also supports using a private mirror server for environments where the deployment does not have public internet access.</p></td>
+      <td><p>The <a href="/reference/minio-mc-admin/mc-admin-update/#command-mc.admin.update"><code>mc admin update</code></a> command retains the inherited server update API. Current SILO permanently disables in-place updates; use verified packages, binaries, or images.</p></td>
     </tr>
     <tr>
       <td><p><a href="/reference/minio-mc-admin/mc-admin-user/#command-mc.admin.user"><code>mc admin user</code></a></p></td>
@@ -133,17 +132,15 @@ Ensure that the host machine has [`mc`](/reference/minio-mc/#command-mc) [instal
 > [!WARNING]
 > **Important**
 >
-> The following example temporarily disables the bash history to mitigate the risk of authentication credentials leaking in plain text. This is a basic security measure and does not mitigate all possible attack vectors. Defer to security best practices for your operating system for inputting sensitive information on the command line.
+> The example prompts for credentials so they do not appear in the shell command history. Protect the client configuration directory, which stores the alias credentials.
 
 Use the [`mc alias set`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) command to add the deployment to the **`mc`** configuration.
 
 ```shell
-bash +o history
-mc config host add <ALIAS> <ENDPOINT> ACCESS_KEY SECRET_KEY
-bash -o history
+mcli alias set ALIAS https://silo.example.net
 ```
 
-Replace each argument with the required values. Specifying only the `mc config host add` command starts an input prompt for entering the required values.
+Replace `ALIAS` and the endpoint, then enter credentials when prompted.
 
 Use the [`mc admin info`](/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) command to test the connection to the newly added MinIO deployment:
 

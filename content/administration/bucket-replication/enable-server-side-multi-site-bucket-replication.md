@@ -3,7 +3,7 @@ title: "Enable Multi-Site Server-Side Bucket Replication"
 url: "/administration/bucket-replication/enable-server-side-multi-site-bucket-replication/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/bucket-replication/enable-server-side-multi-site-bucket-replication.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="enable-multi-site-server-side-bucket-replication"></a>
@@ -17,7 +17,7 @@ The procedure on this page configures automatic server-side bucket replication b
 - To configure one-way “active-active” replication between two MinIO deployments, see [Enable Two-Way Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway).
 - To configure one-way “active-passive” replication between MinIO deployments, see [Enable One-Way Server-Side Bucket Replication](/administration/bucket-replication/enable-server-side-one-way-bucket-replication/#minio-bucket-replication-serverside-oneway).
 
-Multi-Site Active-Active replication configurations can span multiple racks, datacenters, or geographic locations. Complexity of configuring and maintaining multi-site configurations generally increase with the number of sites and size of each site. Enterprises looking to implement multi-site replication should consider leveraging [MinIO SUBNET](https://min.io/pricing?ref=docs) support to access the expertise, planning, and engineering resources required for addressing that use case.
+Multi-Site Active-Active replication configurations can span multiple racks, datacenters, or geographic locations. Complexity of configuring and maintaining multi-site configurations generally increase with the number of sites and size of each site. Test conflict handling, outage recovery, capacity, and network failure scenarios across the exact participating SILO versions before enabling multi-site replication.
 
 > [!NOTE]
 > **See also**

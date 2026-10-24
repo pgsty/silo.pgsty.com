@@ -37,7 +37,7 @@ A MinIO user can generate any number of access keys. This allows application own
 
 You can create access keys by using the [`mc admin user svcacct add`](/reference/minio-mc-admin/mc-admin-user-svcacct-add/#command-mc.admin.user.svcacct.add) command. Identities created by these methods do not expire until you remove the access key or the parent account.
 
-You can also create [security token service](/developers/security-token-service/#minio-security-token-service) accounts programmatically with the `AssumeRole` STS API endpoint. STS tokens default to expire in 1 hour, but you set expiration for up to 7 days from creation.
+You can also create [security token service](/developers/security-token-service/#minio-security-token-service) accounts programmatically with the `AssumeRole` STS API endpoint. For `AssumeRole`, the default is one hour and explicit durations range from 15 minutes to 365 days; `MINIO_STS_DURATION` can override that duration. Other STS endpoints have their own duration rules.
 
 > [!DETAILS]- Access Keys are for Programmatic Access
 > Access Keys support programmatic access by applications. You cannot use an access key to log into the MinIO Console.

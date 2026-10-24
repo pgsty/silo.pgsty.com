@@ -3,7 +3,7 @@ title: "mc admin trace"
 url: "/reference/minio-mc-admin/mc-admin-trace/"
 weight: 170
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-trace.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-trace"></a>
@@ -15,9 +15,9 @@ upstream_modified: false
 The [`mc admin trace`](#command-mc.admin.trace) command displays API operations occurring on the target MinIO deployment.
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO. Compatibility with unmodified upstream MinIO is best effort; general S3 compatibility alone does not provide these administrative APIs.
 
 ## Examples {#examples}
 
@@ -68,7 +68,7 @@ mc admin trace --filter-response --filter-size 1Mb ALIAS
 Use [`mc admin trace`](#command-mc.admin.trace) to monitor long operations:
 
 ```shell
-mc admin trace --filter-duration --filter-size 5ms ALIAS
+mc admin trace --response-duration 5ms ALIAS
 ```
 
 - Replace [`ALIAS`](#mc.admin.trace.TARGET) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment.
@@ -209,13 +209,9 @@ Returns calls matching the supplied request query parameter. This debug option s
 
 Trace calls with response duration greater than the specified value.
 
-#### `--response-threshold` {#mc.admin.trace.-response-threshold}
+<a id="mc.admin.trace.-response-threshold"></a>
 
-*mc-cmd*
-
-Takes a time string as a value, such as `5ms`. Returns only calls with a response time greater than the supplied threshold.
-
-If not specified, MinIO returns calls with a response time greater than 5ms.
+`--response-threshold` is not a current mcli flag. Use `--response-duration 5ms` to select calls slower than 5 milliseconds. Without that flag, no response-duration threshold is applied.
 
 #### `--status-code` {#mc.admin.trace.-status-code}
 

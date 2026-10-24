@@ -3,7 +3,7 @@ title: "mc sql"
 url: "/zh/reference/minio-mc/mc-sql/"
 weight: 360
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-sql.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-sql"></a>
@@ -12,24 +12,24 @@ upstream_modified: false
 
 ## 语法 {#id2}
 
-[`mc sql`](#command-mc.sql) 命令提供 S3 Select 接口，用于对指定 MinIO 部署中的对象执行 SQL 查询。
+[`mc sql`](#command-mc.sql) 通过 S3 Select 查询对象内容。本文使用 `mc`；若安装的命令名为 `mcli`，请替换命令名。
 
 有关 S3 Select 的行为和限制，请参阅 [Selecting content from objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/selecting-content-from-objects)。
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="示例" value="tab1" >}}
-以下命令会查询 `myminio` MinIO 部署中 `mydata` 存储桶内的所有对象：
+查询 `mysilo` 别名下 `mydata` 桶中的所有对象：
 
 ```shell
-mc sql --recursive --query "select * from S3Object" myminio/mydata
+mc sql --recursive --query "select * from S3Object" mysilo/mydata
 ```
 {{< /tab >}}
 {{< tab label="语法" value="tab2" >}}
 该命令的语法如下：
 
 ```shell
-mc [GLOBALFLAGS] mc sql                          \
-                 --query "string"                \
+mc [GLOBALFLAGS] sql                             \
+                 [--query "string"]              \
                  [--csv-input "string"]          \
                  [--compression "string"]        \
                  [--csv-output "string"]         \
@@ -60,14 +60,14 @@ mc [GLOBALFLAGS] mc sql                          \
 要执行 SQL 查询的存储桶或对象的完整路径。 指定已配置 S3 服务的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias) 作为 `ALIAS` 路径前缀。 例如：
 
 ```shell
-mc sql [FLAGS] play/mybucket
+mc sql [FLAGS] mysilo/mybucket
 ```
 
-##### `--query, e` {#mc.sql.-query}
+##### `--query, -e` {#mc.sql.-query}
 
 *mc-cmd*
 
-*Required*
+*Optional*
 
 在指定 [`ALIAS`](#mc.sql.ALIAS) 目录或对象上执行的 SQL 语句。 将完整 SQL 查询用双引号 `"` 包裹。
 
@@ -152,7 +152,7 @@ mc sql [FLAGS] play/mybucket
 
 ```shell
 # RawBase64-Encoded string "mybucket32byteencryptionkeyssec"
---enc-c "myminio/mybucket/prefix/object.obj=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
+--enc-c "mysilo/mybucket/prefix/object.obj=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
 你可以通过重复该参数来指定多个加密密钥。
@@ -160,7 +160,7 @@ mc sql [FLAGS] play/mybucket
 也可以指定某个前缀路径，对该路径下所有匹配对象应用加密：
 
 ```shell
---enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
+--enc-c "mysilo/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
 > [!NOTE]
@@ -307,6 +307,4 @@ mc sql --query "select count(s.power) from S3Object" ALIAS/PATH
 
 ### S3 兼容性 {#s3}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+Silo 是正式支持和发布验收的服务端；对上游 MinIO 与其他 S3 兼容服务的支持属于尽最大努力。使用 SQL 命令前，确认目标服务支持 S3 Select。详见[兼容说明](/zh/compatibility/mcli/)。

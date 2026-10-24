@@ -44,14 +44,14 @@ The next step includes instructions for running the executable. Launch the serve
 
 ### 2. Launch the MinIO Server {#launch-the-minio-server}
 
-In PowerShell or the Command Prompt, navigate to the location of the executable or add the path of the `silo.exe` file to the system `$PATH`. computer.
+In PowerShell or the Command Prompt, navigate to the location of the executable or add the path of the `silo.exe` file to the system `PATH` environment variable. In PowerShell, prefix a local executable with `.\`.
 
 {{< tabs group="multi-drive-single-drive" >}}
 {{< tab label="Multi-Drive" value="multi-drive" >}}
 For Windows hosts with multiple drives, you can specify a sequential set of drives to use for configuring MinIO in the Single-Node Multi-Drive (SNMD) topology:
 
 ```text
-.\silo.exe server {D...G}:\minio --console-address :9001
+.\silo.exe server "{D...G}:\minio" --console-address :9001
 ```
 
 The [`silo server`](/reference/minio-server/#command-minio.server) process prints its output to the system console, similar to the following:
@@ -76,7 +76,7 @@ WARNING: Detected default credentials 'minioadmin:minioadmin', we recommend that
 The process is tied to the current PowerShell or Command Prompt window. Closing the window stops the server and ends the process.
 {{< /tab >}}
 {{< tab label="Single-Drive" value="single-drive" >}}
-Use this command to start a local MinIO instance in the `C:\minio` folder. You can replace `C:\minio` with another drive or folder path on the local
+Use this command to start a local MinIO instance in the `C:\minio` folder. You can replace `C:\minio` with another drive or folder path on the local machine.
 
 ```text
 .\silo.exe server C:\minio --console-address :9001

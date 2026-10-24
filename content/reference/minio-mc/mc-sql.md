@@ -3,7 +3,7 @@ title: "mc sql"
 url: "/reference/minio-mc/mc-sql/"
 weight: 360
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-sql.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-sql"></a>
@@ -12,24 +12,24 @@ upstream_modified: false
 
 ## Syntax {#syntax}
 
-The [`mc sql`](#command-mc.sql) command provides an S3 Select interface for performing sql queries on objects in the specified MinIO deployment.
+The [`mc sql`](#command-mc.sql) command queries object contents through S3 Select. Use `mcli` in place of `mc` if that is the installed executable name.
 
 See [Selecting content from objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/selecting-content-from-objects) for more information on S3 Select behavior and limitations.
 
 {{< tabs group="example-syntax" >}}
 {{< tab label="EXAMPLE" value="example" >}}
-The following command queries all objects in the `mydata` bucket on the `myminio` MinIO deployment:
+Query all objects in the `mydata` bucket under the `mysilo` alias:
 
 ```shell
-mc sql --recursive --query "select * from S3Object" myminio/mydata
+mc sql --recursive --query "select * from S3Object" mysilo/mydata
 ```
 {{< /tab >}}
 {{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
-mc [GLOBALFLAGS] mc sql                          \
-                 --query "string"                \
+mc [GLOBALFLAGS] sql                             \
+                 [--query "string"]              \
                  [--csv-input "string"]          \
                  [--compression "string"]        \
                  [--csv-output "string"]         \
@@ -60,14 +60,14 @@ Copy the example to a text editor and modify as-needed before running the comman
 The full path to the bucket or object to run the SQL query against. Specify the [alias](/reference/minio-mc/mc-alias-set/#alias) of a configured S3 service as the prefix to the `ALIAS` path. For example:
 
 ```shell
-mc sql [FLAGS] play/mybucket
+mc sql [FLAGS] mysilo/mybucket
 ```
 
-##### `--query, e` {#mc.sql.-query}
+##### `--query, -e` {#mc.sql.-query}
 
 *mc-cmd*
 
-*Required*
+*Optional*
 
 The SQL statement to execute on the specified [`ALIAS`](#mc.sql.ALIAS) directory or object. Wrap the entire SQL query in double quotes `"`.
 
@@ -151,7 +151,7 @@ For example:
 
 ```shell
 # RawBase64-Encoded string "mybucket32byteencryptionkeyssec"
---enc-c "myminio/mybucket/prefix/object.obj=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
+--enc-c "mysilo/mybucket/prefix/object.obj=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
 You can specify multiple encryption keys by repeating the parameter.
@@ -159,7 +159,7 @@ You can specify multiple encryption keys by repeating the parameter.
 Specify the path to a prefix to apply encryption to all matching objects at that path:
 
 ```shell
---enc-c "myminio/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
+--enc-c "mysilo/mybucket/prefix/=bXlidWNrZXQzMmJ5dGVlbmNyeXB0aW9ua2V5c3NlYwo"
 ```
 
 > [!NOTE]
@@ -306,6 +306,4 @@ The character <em>must</em> appear at the beginning of the record.</p><p>Corresp
 
 ### S3 Compatibility {#s3-compatibility}
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
-
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+Silo is the supported and release-tested server. Compatibility with upstream MinIO and other S3 services is best effort. Confirm that the target service supports S3 Select before using this command. See the [compatibility notes](/compatibility/mcli/).

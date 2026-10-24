@@ -15,9 +15,7 @@ This page provides an overview of MinIO’s availability and resiliency design a
 > [!NOTE]
 > **Note**
 >
-> The contents of this page are intended as a best-effort guide to understanding MinIO’s intended design and philosophy behind availability and resiliency. It cannot replace the functionality of [MinIO SUBNET](https://min.io/pricing?jmp=docs), which allows for coordinating with MinIO Engineering when planning your MinIO deployments.
->
-> Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
+> This page describes SILO availability and resiliency mechanisms inherited from MinIO. Validate quorum, failure recovery, and workload performance for your deployment; these design properties are not an availability SLA.
 
 ## Distributed MinIO Deployments {#distributed-minio-deployments}
 

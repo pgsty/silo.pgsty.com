@@ -3,7 +3,7 @@ title: "Data Compression"
 url: "/administration/object-management/data-compression/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/data-compression.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="data-compression"></a>
@@ -15,7 +15,7 @@ MinIO Server supports compressing objects to reduce disk usage. Objects are comp
 
 Depending on the type of data, compression may also increase overall throughput. Write throughput for a production deployment is generally 500MB per second or greater per available CPU core in the system. Decompression is approximately 1 GB per second or greater for each CPU core.
 
-For best results, review MinIO’s [recommended hardware configuration](/operations/checklists/hardware/#deploy-minio-distributed-recommendations) or use [MinIO SUBNET](https://min.io/pricing?jmp=docs) to work directly with engineers for analyzing compression performance.
+Review the [hardware checklist](/operations/checklists/hardware/#deploy-minio-distributed-recommendations) and benchmark compression with representative objects and workloads.
 
 <a id="minio-data-compression-default-types"></a>
 
@@ -119,7 +119,7 @@ Objects of these types are never compressed:
 
 MinIO supports encrypting compressed objects but recommends against combining compression and encryption without a prior risk assessment. Before enabling encryption for compressed objects, carefully consider the security needs of your environment.
 
-See [Transparent Data Compression on MinIO](https://blog.min.io/transparent-data-compression/) for more about combining compression and encryption. [MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/?ref=docs) and engage with our engineering and security teams to review encryption options.
+See [Transparent Data Compression on MinIO](https://blog.min.io/transparent-data-compression/) for more about combining compression and encryption. Validate encryption and compression behavior with your selected SILO release.
 
 ## Tutorials {#tutorials}
 

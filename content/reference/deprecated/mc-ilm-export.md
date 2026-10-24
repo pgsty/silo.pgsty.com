@@ -3,7 +3,7 @@ title: "mc ilm export"
 url: "/reference/deprecated/mc-ilm-export/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-ilm-export.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-ilm-export"></a>
@@ -89,6 +89,4 @@ mc ilm export ALIAS > file.json
 
 ### S3 Compatibility {#s3-compatibility}
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
-
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+This page preserves historical syntax. See the [current mcli reference](/reference/minio-mc/) for supported commands and compatibility scope.

@@ -53,7 +53,7 @@ MinIO SSE-C requires the client to perform all key creation and storage operatio
 
 This procedure uses [`mc`](/reference/minio-mc/#command-mc) for performing operations on the source MinIO deployment. Install [`mc`](/reference/minio-mc/#command-mc) on a machine with network access to the source deployment. See the `mc` [Installation Quickstart](/reference/minio-mc/#mc-install) for instructions on downloading and installing `mc`.
 
-The SSE-C key *must* be a 256-bit raw encoded string or a hex encoded string. The client application is responsible for generation and storage of the encryption key. MinIO does *not* store SSE-C encryption keys and cannot decrypt SSE-C encrypted objects without the client-managed key.
+The SSE-C key must contain 32 random bytes. For `mcli --enc-c`, encode it as unpadded base64 or 64 hexadecimal characters. The client application is responsible for generation and storage of the encryption key. MinIO does *not* store SSE-C encryption keys and cannot decrypt SSE-C encrypted objects without the client-managed key.
 
 > [!NOTE]
 > **Note**
@@ -62,17 +62,17 @@ The SSE-C key *must* be a 256-bit raw encoded string or a hex encoded string. Th
 
 ### 1) Generate the Encryption Key {#generate-the-encryption-key}
 
-Generate the 256-bit base64 raw encoded string or a hex encoded string for use as the encryption key.
+Generate a 256-bit key and encode it as hexadecimal for `mcli --enc-c`. Keep the key available for every subsequent read or copy of the encrypted object.
 
-The following example generates a string that meets the encryption key requirements. The resulting string is appropriate for non-production environments:
+For example, generate a fresh key with OpenSSL:
 
 ```shell
-cat /dev/urandom | head -c 32 | base64 -
+SSE_KEY_HEX="$(openssl rand -hex 32)"
 ```
 
 Defer to your organizations requirements for generating cryptographically secure encryption keys.
 
-Copy the encryption key for use in the next step.
+The next examples use `SSE_KEY_HEX` in the same shell. Store the key securely before closing that shell; SILO cannot recover a lost SSE-C key. Do not reuse a published example key.
 
 ### 2) Encrypt an Object using SSE-C {#encrypt-an-object-using-sse-c}
 
@@ -86,7 +86,7 @@ The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible
 
 ```shell
 mc cp ~/data/mydata.json ALIAS/BUCKET/mydata.json \
-   --encrypt-key "ALIAS/BUCKET/=c2VjcmV0ZW5jcnlwdGlvbmtleWNoYW5nZW1lMTIzNAo="
+   --enc-c "ALIAS/BUCKET/=${SSE_KEY_HEX}"
 ```
 
 - Replace [`ALIAS`](/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment on which you want to write the SSE-C encrypted object.
@@ -106,7 +106,7 @@ The MinIO [`mc`](/reference/minio-mc/#command-mc) commandline tool S3-compatible
 
 ```shell
 mc cp SOURCE/BUCKET/mydata.json TARGET/BUCKET/mydata.json  \
---encrypt-key "SOURCE/BUCKET/=c2VjcmV0ZW5jcnlwdGlvbmtleWNoYW5nZW1lMTIzNAo=,TARGET/BUCKET/=c2VjcmV0ZW5jcnlwdGlvbmtleWNoYW5nZW1lMTIzNAo="
+--enc-c "SOURCE/BUCKET/=${SSE_KEY_HEX},TARGET/BUCKET/=${SSE_KEY_HEX}"
 ```
 
 - Replace [`SOURCE/BUCKET`](/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment from which you are reading the encrypted object and the full path to the bucket or bucket prefix from which you want to read the SSE-C encrypted object.

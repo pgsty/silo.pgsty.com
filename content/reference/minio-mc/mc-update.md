@@ -12,7 +12,7 @@ upstream_modified: true
 
 ## Syntax {#syntax}
 
-The Pigsty-maintained client keeps [`mc update`](#command-mc.update) for command-line compatibility, but **self-update is intentionally disabled**. The command does not contact a release feed, download a binary, or replace the installed `mc`/`mcli` executable. It prints an error and exits with status `1`.
+The Silo client retains [`mc update`](#command-mc.update) for command-line compatibility, but **self-update is disabled**. The command makes no network requests and downloads or replaces no binaries. It prints an error and exits with status `1`.
 
 Upgrade through [Download & Install](/download/#client), the [Pigsty package repository](https://pigsty.io/docs/repo/infra/list/#object-storage), or [GitHub Releases](https://github.com/pgsty/mc/releases).
 
@@ -34,14 +34,13 @@ mc [GLOBALFLAGS] update [--json] [RELEASE-URL]
 - Brackets `[]` indicate optional parameters.
 - `RELEASE-URL` is accepted only for compatibility and is not contacted.
 
-Copy the example to a text editor and modify as-needed before running the command in the terminal/shell.
 {{< /tab >}}
 {{< /tabs >}}
 
 The non-JSON error text is:
 
 ```text
-Self-update is disabled in the Pigsty mc fork; upgrade only through the Pigsty package repository or https://github.com/pgsty/mc/releases.
+Self-update is disabled in this Silo build of mcli; upgrade only through your package repository or https://github.com/pgsty/mc/releases.
 ```
 
 ### Global Flags {#global-flags}

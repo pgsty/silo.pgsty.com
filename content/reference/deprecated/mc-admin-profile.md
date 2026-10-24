@@ -3,7 +3,7 @@ title: "mc admin profile"
 url: "/reference/deprecated/mc-admin-profile/"
 weight: 170
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-profile.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-profile"></a>
@@ -20,9 +20,9 @@ upstream_modified: false
 The [`mc admin profile`](#command-mc.admin.profile) command generates profiling data for debugging purposes.
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> This page preserves historical syntax. See the [current administration reference](/reference/minio-mc-admin/) for supported commands and server compatibility.
 
 ### Profile Data Format {#profile-data-format}
 

@@ -92,7 +92,7 @@ Consider the following points as general guidance for client applications worklo
 - Deployments with modest or budget-focused hardware should architect their workloads to target 10,000 objects per prefix as a baseline. Increase this target based on benchmarking and monitoring of real world workloads up to what the hardware can meaningfully handle.
 - Deployments with high-performance or enterprise-grade [hardware](/operations/checklists/hardware/#deploy-minio-distributed-recommendations) can typically handle prefixes with millions of objects or more.
 
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) Enterprise accounts can utilize yearly architecture reviews as part of the deployment and maintenance strategy to ensure long-term performance and success of your MinIO-dependent projects.
+Plan deployment and architecture reviews around your workload, recovery objectives, and measured capacity. For assistance, see [SILO troubleshooting](/operations/troubleshooting/).
 
 For a deeper discussion on the benefits of limiting prefix contents, see the article on [optimizing S3 performance](https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html).
 

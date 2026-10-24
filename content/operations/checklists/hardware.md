@@ -27,7 +27,7 @@ When selecting hardware for your MinIO implementation, take into account the fol
 
 ## Production Hardware Recommendations {#production-hardware-recommendations}
 
-The following checklist follows MinIO’s [Recommended Configuration](https://min.io/product/reference-hardware?ref-docs) for production deployments. The provided guidance is intended as a baseline and cannot replace [MinIO SUBNET](https://min.io/pricing?jmp=docs) Performance Diagnostics, Architecture Reviews, and direct-to-engineering support.
+This checklist retains upstream hardware guidance as a starting point for SILO. Validate capacity, performance, failure handling, and recovery against your hardware and workload; it is not a vendor certification or support entitlement.
 
 MinIO, like any distributed system, benefits from selecting identical configurations for all nodes in a given [server pool](/glossary/#term-server-pool). Ensure a consistent selection of hardware (CPU, memory, motherboard, storage adapters) and software (operating system, kernel settings, system services) across pool nodes.
 
@@ -537,7 +537,7 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
 
 1. Health diagnostic tool
 
-   Generate a summary of the health status of your deployment. If you have access to SUBNET, you can upload the results there.
+   Generate a local health summary for your deployment. PGSTY mcli does not upload diagnostics to SUBNET; review the files before sharing them.
 
    ```shell
    mc support diag ALIAS --airgap

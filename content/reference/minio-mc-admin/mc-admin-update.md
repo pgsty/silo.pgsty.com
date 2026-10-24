@@ -12,47 +12,26 @@ upstream_modified: true
 
 ## Description {#description}
 
-The [`mc admin update`](#command-mc.admin.update) command invokes the MinIO-compatible server-side in-place update API. The client can pass an optional release mirror URL, and the server distributes the selected binary to all nodes.
+`mcli admin update` invokes the retained server-side update API. **Current SILO permanently disables this API.** Neither `MINIO_UPDATE=on`, a mirror URL, nor `--yes` enables in-place updates. Install a verified package, binary, or container image using the [SILO upgrade procedure](/operations/deployments/baremetal-upgrade-minio-deployment/).
 
-After running the command, a prompt displays to confirm the update. Type `y` and `[ENTER]` to confirm and proceed with the update.
-
-The user **must** have `write` permissions for the target location where the binary installs.
+The client retains this command for other servers implementing the inherited API. Compatibility with unmodified upstream MinIO is best effort. Do not treat that retained client syntax as a SILO update mechanism.
 
 > [!CAUTION]
-> **Do not use the default update path on Silo**
->
-> Since `RELEASE.2026-08-06T00-00-00Z` the Silo server disables the in-place updater: `mc admin update ALIAS` cannot replace the binary and no longer contacts the upstream `dl.min.io` feed. Servers still on `RELEASE.2026-08-04T00-00-00Z` or older resolve an omitted `MIRROR_URL` through that feed and retain the upstream MinIO signing key, so running `mc admin update` against them can replace Silo with an upstream MinIO binary. Roll out new versions through packages, images, or your orchestrator.
->
-> Set `MINIO_UPDATE=off` on Silo servers and upgrade through [Download & Install](/download/#server), a trusted package repository, or a manually verified Silo artifact. This page retains the command contract for compatibility; it is not the recommended Silo upgrade procedure.
-
-> [!NOTE]
-> **Use `mc admin` on Silo or compatible MinIO deployments only**
->
-> [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) uses MinIO-specific administration APIs. General S3 API compatibility alone does not imply that another object store supports these commands.
+> SILO releases from 20260804 or earlier still had an upstream updater. On those old servers, an omitted mirror URL could select the upstream MinIO feed and replace the server. Disable updates on those legacy deployments with `MINIO_UPDATE=off` and migrate through verified SILO artifacts.
 
 ## Considerations {#considerations}
 
 ### Coordinated Restart {#updates-are-non-disruptive}
 
-[`mc admin update`](#command-mc.admin.update) updates the binary and restarts all servers in the deployment simultaneously. Applications should expect a temporary loss of availability and retry failed or interrupted requests; atomic object operations do not make a full-cluster restart invisible.
-
-Use a coordinated upgrade-and-restart procedure. Do not perform a rolling (one node at a time) binary replacement unless the release documentation explicitly states that mixed versions are supported.
+Install the same release across the deployment and perform a coordinated restart through the service manager. Applications should retry requests interrupted during the restart. Do not assume mixed-version rolling upgrades are supported.
 
 ### Permissions {#permissions}
 
-The user running the command **must** have `write` permissions to the target path where the MinIO Server binary installs.
+Package or manual binary replacement requires operating-system permission to replace the executable. Administrative API permission does not override SILO's disabled updater.
 
 ## Examples {#examples}
 
-The inherited default form below is shown only to identify the command contract. **Do not run it against Silo**, because omitting `MIRROR_URL` selects the upstream MinIO update feed:
-
-```shell
-mc admin update ALIAS
-```
-
-Replace [`ALIAS`](#mc.admin.update.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the target deployment.
-
-After running the command, answer yes to the prompt to confirm and process the update.
+Use [Download & Install](/download/#server) to obtain a verified SILO artifact, then follow the [upgrade procedure](/operations/deployments/baremetal-upgrade-minio-deployment/). The syntax below is retained for reference, not as an executable SILO upgrade example.
 
 ## Syntax {#syntax}
 
@@ -72,7 +51,7 @@ mc admin update ALIAS         \
 
 The [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment to update.
 
-If the specified `ALIAS` corresponds to a distributed MinIO deployment, [`mc admin update`](#command-mc.admin.update) updates *all* MinIO servers in the deployment at the same time.
+On a server that implements the inherited updater, the request targets the whole deployment. Current SILO rejects the update.
 
 Use [`mc alias list`](/reference/minio-mc/mc-alias-list/#command-mc.alias.list) to review the configured aliases and their corresponding MinIO deployment endpoints.
 
@@ -88,15 +67,10 @@ The release-manifest URL used by the target server to locate the `minio` binary.
 
 *Optional*
 
-Pass this flag to confirm the update and bypass the confirmation prompt.
+On a server with an enabled updater, bypass the client confirmation prompt. This flag does not enable updates on SILO.
 
 ## Behavior {#behavior}
 
 ### Binary Compression {#binary-compression}
 
-> [!NOTE]
-> **Changed: RELEASE.2024-01-28T22-35-53Z**
->
-> [`mc admin update`](#command-mc.admin.update) compresses the binary before sending to all nodes in the deployment.
-
-This feature does not apply to [systemctl managed deployments](/operations/deployments/baremetal/#minio-baremetal).
+The inherited update protocol can compress binaries for distribution between nodes. This does not apply to current SILO, which rejects in-place updates before replacing its binary.

@@ -3,7 +3,7 @@ title: "mc watch"
 url: "/reference/minio-mc/mc-watch/"
 weight: 440
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-watch.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-watch"></a>
@@ -29,7 +29,7 @@ The command has the following syntax:
 
 ```shell
 mc [GLOBALFLAGS] watch                \
-                 [--event "string"]   \
+                 [--events "string"]   \
                  [--prefix "string"]  \
                  [--recursive]        \
                  [--suffix "string"]  \
@@ -56,7 +56,7 @@ Copy the example to a text editor and modify as-needed before running the comman
 mc watch myminio/mybucket
 ```
 
-##### `--event` {#mc.watch.-event}
+##### `--events` {#mc.watch.-event}
 
 *mc-cmd*
 
@@ -68,7 +68,7 @@ Defaults to `put,delete, get`.
 
 *mc-cmd*
 
-The bucket prefix in which to watch for the specified [`--event`](#mc.watch.-event).
+The bucket prefix in which to watch for the specified [`--events`](#mc.watch.-event).
 
 For example, given a [`ALIAS`](#mc.watch.ALIAS) of `play/mybucket` and a [`--prefix`](#mc.watch.-prefix) of `photos`, only events in `play/mybucket/photos` trigger bucket notifications.
 
@@ -82,7 +82,7 @@ Recursively watch for events in the specified [`ALIAS`](#mc.watch.ALIAS) bucket 
 
 *mc-cmd*
 
-The bucket suffix in which to watch for the specified [`--event`](#mc.watch.-event).
+The bucket suffix in which to watch for the specified [`--events`](#mc.watch.-event).
 
 For example, given a [`ALIAS`](#mc.watch.ALIAS) of `play/mybucket` and a [`--suffix`](#mc.watch.-suffix) of `.jpg`, only events in `play/mybucket/*.jpg` trigger bucket notifications.
 
@@ -117,6 +117,4 @@ mc watch --recursive ALIAS/PATH
 
 ### S3 Compatibility {#s3-compatibility}
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
-
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).

@@ -9,7 +9,7 @@ upstream_modified: true
 <a id="key-encryption-service-settings"></a>
 <a id="minio-server-envvar-kes"></a>
 
-MinIO Server includes three groups of environment variables to manage how the MinIO Server interacts with the Key Encryption Service (KES), Key Management Service (KMS), or static key files. You may only define one of the three sets. If more than one type of environment variable sets is defined, MinIO returns an error.
+SILO includes three groups of environment variables to manage how the MinIO Server interacts with the Key Encryption Service (KES), Key Management Service (KMS), or static key files. You may only define one of the three sets. If more than one type of environment variable sets is defined, MinIO returns an error.
 
 > [!NOTE]
 > **Note**
@@ -25,7 +25,7 @@ Define any one set of these environment variables in the host system prior to st
 
 ## Key Encryption Service {#key-encryption-service}
 
-Define the following variables to use the Key Encryption Service (KES) to connect to a [supported 3rd party Key Management Service provider](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md#supported-kms-targets).
+Use these variables to connect SILO to [PGSTY KES](/operations/server-side-encryption/configure-minio-kes/). The maintained integration uses OpenBao KV v2 behind KES; KES runs as a separate service. The `MINIO_KMS_KES_*` names are retained for configuration compatibility.
 
 #### `MINIO_KMS_KES_ENDPOINT` {#envvar.MINIO_KMS_KES_ENDPOINT}
 
@@ -48,7 +48,7 @@ The name of an external key on the Key Management system (KMS) configured on the
 >
 > Enabling <abbr title="Server-Side Encryption">SSE</abbr> on a MinIO deployment automatically encrypts the backend data for that deployment using the default encryption key.
 >
-> MinIO *requires* access to KES and the external KMS to decrypt the backend and start normally. The KMS **must** maintain and provide access to the [`MINIO_KMS_KES_KEY_NAME`](#envvar.MINIO_KMS_KES_KEY_NAME). You cannot disable KES later or “undo” the <abbr title="Server-Side Encryption">SSE</abbr> configuration at a later point.
+> MinIO *requires* access to KES and the external KMS to decrypt the backend and start normally. The KMS **must** maintain and provide access to the [`MINIO_KMS_KES_KEY_NAME`](#envvar.MINIO_KMS_KES_KEY_NAME). Keep a working decryption path for all existing encrypted data. Clearing a bucket default does not decrypt existing objects or backend data, and does not make removing KES safe.
 
 #### `MINIO_KMS_KES_API_KEY` {#envvar.MINIO_KMS_KES_API_KEY}
 
@@ -100,7 +100,7 @@ The password used to encrypt and decrypt the TLS private key, if used.
 
 ## MinIO Key Management Server (KMS) {#minio-key-management-server-kms}
 
-Define the following variables to use [MinIO KMS](https://min.io/product/enterprise/key-management-server?ref=docs) to manage keys.
+These retained variables select the separate MinIO KMS protocol. They are not the PGSTY KES configuration and do not connect SILO directly to OpenBao or Vault. Use the KES variables above for the maintained OpenBao integration.
 
 #### `MINIO_KMS_SERVER` {#envvar.MINIO_KMS_SERVER}
 
@@ -145,4 +145,4 @@ The base64 form of the static KMS key in the form `<key-name>:<base64-32byte-key
 
 *envvar*
 
-Path to the file to read the static KMS key from.
+Path to a file containing the same `<key-name>:<base64-32byte-key>` value as `MINIO_KMS_SECRET_KEY`. Set only one of these two variables.

@@ -3,7 +3,7 @@ title: "mc admin tier"
 url: "/reference/deprecated/mc-admin-tier/"
 weight: 190
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-tier.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-tier"></a>
@@ -20,9 +20,9 @@ upstream_modified: false
 The [`mc admin tier`](#command-mc.admin.tier) command configures a remote supported S3-compatible service for supporting MinIO [Lifecycle Management: Object Transition (“Tiering”)](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration).
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> This page preserves historical syntax. See the [current administration reference](/reference/minio-mc-admin/) for supported commands and server compatibility.
 
 ### Supported S3 Services {#supported-s3-services}
 

@@ -12,7 +12,7 @@ The [`mc checksum verify`](#command-mc.checksum.verify) command compares the add
 
 This is a **read-only audit command** introduced by [mcli 20260903](/blog/release/mcli-20260903/). It uses only S3 LIST, HEAD, and GET operations. It never repairs metadata, rewrites an object, or identifies which historical writer produced a mismatch.
 
-The command supports stored `FULL_OBJECT` CRC32, CRC32C, CRC64NVME, SHA1, and SHA256 checksums. `COMPOSITE` checksums are reported as unsupported rather than guessed.
+The command supports `FULL_OBJECT` CRC32, CRC32C, CRC64NVME, SHA1, and SHA256 checksums. It reports `COMPOSITE` checksums as unsupported and a missing `x-amz-checksum-type` as `UNKNOWN_CHECKSUM_TYPE`.
 
 When this reference shows `mc`, use `mcli` if that is the installed executable name.
 
@@ -24,7 +24,7 @@ mc checksum verify --recursive [FLAGS] ALIAS/BUCKET[/PREFIX]
 mc checksum verify --manifest FILE [FLAGS] ALIAS
 ```
 
-Use exactly one selection mode:
+Select an object or recursive prefix, optionally with version flags. Use `--manifest` as a separate selection mode:
 
 - an object path verifies one object;
 - `--recursive` verifies objects under a bucket or prefix;
@@ -32,7 +32,11 @@ Use exactly one selection mode:
 - `--versions` includes every version selected by an object or recursive scan;
 - `--manifest` reads exact bucket, key, and optional version identities from a JSON Lines file.
 
-For an unversioned object, the command reads with `If-Match` and performs a second HEAD after the body is consumed. If the object changes during verification, the result is `UNKNOWN_OBJECT_CHANGED`, not a false mismatch.
+For unversioned and `null`-version objects, the command reads with `If-Match` and performs a second HEAD after reading. Concurrent changes produce `UNKNOWN_OBJECT_CHANGED`.
+
+Recursive scans omit directory markers (keys ending in `/`) from both result records and the `objects` count. List a marker explicitly in a manifest to include it.
+
+Selecting all versions of one object enumerates its key prefix, then filters exact key matches. Prefer a manifest when VersionIDs are already known to reduce listing overhead.
 
 ## Result and exit-status contract {#results}
 
@@ -52,10 +56,12 @@ Normal completion exits `0`; a command or selected audit failure exits `1`. The 
 `--fail-on` accepts:
 
 - `mismatch` — fail only on a checksum mismatch;
-- `unknown` — fail on a mismatch or any `UNKNOWN_*` result;
-- `no-checksum` — also fail when a checksum is absent or the run verified zero objects;
+- `unknown` — fail only on `UNKNOWN_*` results;
+- `no-checksum` — include all `any` failures, absent checksums, and zero verified objects;
 - `any` — the default, including incomplete size-capped audits;
 - `none` — report findings without turning them into an audit failure.
+
+`--dry-run` does not evaluate `--fail-on`. Under the default policy, a run with only `NO_CHECKSUM` results can succeed; use `no-checksum` or check `verified` when actual verification is required.
 
 The final summary contains `objects`, `verified`, per-status counts, and `incomplete`. `verified` is `MATCH + MISMATCH`: use it when automation requires proof that at least one checksum was actually recomputed.
 
@@ -75,7 +81,9 @@ The final summary contains `objects`, `verified`, per-status counts, and `incomp
 | `--report FILE` | Write object records and the summary to a new JSON Lines file. On POSIX systems it is created with mode `0600`. |
 | `--json` | Emit compact JSON Lines when stdout is not a terminal. |
 
-`--limit-download` remains available as a global rate limit. Object bodies are streamed through bounded hashers and are neither buffered in full nor written to disk.
+Use the global `--limit-download` flag to cap download speed. Object bodies are streamed through bounded hashers, without full buffering or disk writes. Time filters still require HEAD to obtain current object metadata.
+
+Only explicit `--quiet`, `-q`, or `MC_QUIET=true` suppresses stdout records and the summary; redirecting stdout to a file or pipe preserves them. `--report` writes JSON Lines independently of stdout. See the [output contract](/blog/design/checksum-verify/#output-contract).
 
 ## Manifest format {#manifest}
 
@@ -85,7 +93,7 @@ Each non-empty line identifies one candidate. `bucket` and `key` are required; `
 {"bucket":"archive","key":"2025/report.json","versionId":"optional"}
 ```
 
-The alias appears once on the command line. The manifest contains neither checksums nor encryption keys.
+The alias appears once on the command line. The manifest contains only candidate identities, with no checksums or encryption keys. It is not a result or resume file.
 
 ## Examples {#examples}
 

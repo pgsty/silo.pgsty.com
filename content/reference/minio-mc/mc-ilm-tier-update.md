@@ -3,7 +3,7 @@ title: "mc ilm tier update"
 url: "/reference/minio-mc/mc-ilm-tier-update/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-tier-update.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-ilm-tier-update"></a>
@@ -21,9 +21,9 @@ upstream_modified: false
 The [`mc ilm tier update`](#command-mc.ilm.tier.update) command modifies an existing configured remote tier.
 
 > [!NOTE]
-> **Use `mc admin` on MinIO Deployments Only**
+> **Server compatibility**
 >
-> MinIO does not support using [`mc admin`](/reference/minio-mc-admin/#command-mc.admin) commands with other S3-compatible services, regardless of their claimed compatibility with MinIO deployments.
+> The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO. Compatibility with unmodified upstream MinIO is best effort; general S3 compatibility alone does not provide these administrative APIs.
 
 ### Supported S3 Services {#supported-s3-services}
 
@@ -323,9 +323,7 @@ The following example updates the credentials for a Google Cloud Storage remote 
 
 ### S3 Compatibility {#s3-compatibility}
 
-The **`mc`** commandline tool is built for compatibility with the AWS S3 API and is tested with MinIO and AWS S3 for expected functionality and behavior.
-
-MinIO provides no guarantees for other S3-compatible services, as their S3 API implementation is unknown and therefore unsupported. While **`mc`** commands *may* work as documented, any such usage is at your own risk.
+SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).
 
 ## Required Permissions {#id1}
 

@@ -24,7 +24,7 @@ Diagnostic output stays local; SUBNET online services are disabled. Compatibilit
 > [!NOTE]
 > **Changed: RELEASE.2023-01-11T03-14-16Z**
 >
-> The file uploads to MinIO for use by the engineering team in support efforts. If the upload fails, such as in an air-gapped environment, the command saves the file to the current working directory.
+> Upstream versions could upload inspection files. PGSTY mcli always saves them locally and does not upload them to MinIO.
 
 > [!NOTE]
 > **Changed: RELEASE.2022-12-12T19-27-27Z**
@@ -46,7 +46,7 @@ Diagnostic output stays local; SUBNET online services are disabled. Compatibilit
 The command supports wildcard `*` pattern matching for prefixes or objects when using the Bash shell. For non-Bash shells, a message displays indicating that wildcard patterns are only supported in Bash.
 
 ```shell
-mc support inspect ALIAS/bucket/path/**/xl.meta
+mc support inspect 'ALIAS/bucket/path/**/xl.meta'
 ```
 
 This command collects all `xl.meta` associated to objects at `ALIAS/bucket/path/`.
@@ -77,7 +77,7 @@ The following command downloads all objects recursively found at a prefix.
 > This can be an expensive operation. Proceed with caution.
 
 ```shell
-mc support inspect minio1/mybucket/myobject/**
+mc support inspect 'minio1/mybucket/myobject/**'
 ```
 
 ## Syntax {#syntax}
@@ -98,7 +98,7 @@ mc [GLOBALFLAGS] support inspect       \
 
 *Optional*
 
-Use the older method of exporting inspection data, which does not encrypt data by default.
+Skip a configured `support_public.pem` and request the older inspect format. Current SILO still encrypts this output and returns a generated decryption key. This flag does not enable uploads.
 
 ##### `TARGET` {#mc.support.inspect.TARGET}
 

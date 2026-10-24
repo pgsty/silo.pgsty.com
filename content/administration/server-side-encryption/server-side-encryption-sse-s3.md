@@ -11,7 +11,7 @@ upstream_modified: true
 
 MinIO Server-Side Encryption (SSE) protects objects as part of write operations, allowing clients to take advantage of server processing power to secure objects at the storage layer (encryption-at-rest). SSE also provides key functionality to regulatory and compliance requirements around secure locking and erasure.
 
-MinIO SSE uses the [MinIO Key Encryption Service (KES)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) and an external Key Management Service (KMS) for performing secured cryptographic operations at scale. MinIO also supports client-managed key management, where the application takes full responsibility for creating and managing encryption keys for use with MinIO SSE.
+MinIO SSE uses the [PGSTY KES](https://github.com/pgsty/kes) and an external Key Management Service (KMS) for performing secured cryptographic operations at scale. MinIO also supports client-managed key management, where the application takes full responsibility for creating and managing encryption keys for use with MinIO SSE.
 
 MinIO SSE-S3 en/decrypts objects using an External Key (EK) managed by a Key Management System (KMS). You must specify the <abbr title="External Key">EK</abbr> using the [`MINIO_KMS_KES_KEY_NAME`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) environment variable when starting up the MinIO server. MinIO uses the same EK for *all* SSE-S3 cryptographic operations.
 
@@ -21,9 +21,9 @@ You can enable bucket-default SSE-S3 encryption using the [`mc encrypt set`](/re
 mc encrypt set sse-s3 play/mybucket
 ```
 
-- Replace `play/mybucket` with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) and bucket on which you want to enable automatic SSE-KMS encryption.
+- Replace `play/mybucket` with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) and bucket on which you want to enable automatic SSE-S3 encryption.
 
-MinIO SSE-S3 is functionally compatible with AWS S3 [Server-Side Encryption with Amazon S3-Managed Keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingServerSideEncryption.html) while expanding support to include the following KMS providers:
+MinIO SSE-S3 is functionally compatible with AWS S3 [Server-Side Encryption with Amazon S3-Managed Keys](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingServerSideEncryption.html) using KES as the key service. The following archived upstream integration guides describe inherited backends; the maintained integration is [SILO + PGSTY KES + OpenBao KV v2](/operations/server-side-encryption/configure-minio-kes/):
 
 - [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
 - [Azure KeyVault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
@@ -37,168 +37,53 @@ MinIO SSE-S3 is functionally compatible with AWS S3 [Server-Side Encryption with
 
 ## Quickstart {#quickstart}
 
-> [!WARNING]
-> **Important**
->
-> Enabling <abbr title="Server-Side Encryption">SSE</abbr> on a MinIO deployment automatically encrypts the backend data for that deployment using the default encryption key.
->
-> MinIO *requires* access to KES and the external KMS to decrypt the backend and start normally. The KMS **must** maintain and provide access to the [`MINIO_KMS_KES_KEY_NAME`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME). You cannot disable KES later or “undo” the <abbr title="Server-Side Encryption">SSE</abbr> configuration at a later point.
+Use a PGSTY KES deployment you control. Complete [Configure SILO with KES](/operations/server-side-encryption/configure-minio-kes/) first, including persistent key storage, TLS trust, a SILO application policy, and a working `mysilo` client alias. Do not use public demonstration keys for stored data.
 
-The following procedure uses the `play` MinIO <abbr title="Key Encryption Service">KES</abbr> sandbox for supporting <abbr title="Server-Side Encryption">SSE</abbr> with SSE-S3 in evaluation and early development environments.
+### 1) Create an Encryption Key for SSE-S3 {#create-an-encryption-key-for-sse-s3-encryption}
 
-For extended development or production environments, use one of the following supported external Key Management Services (KMS):
+The KES procedure creates `silo-default` for backend data and SSE-S3, and `silo-bucket` for the SSE-KMS example. Ensure `silo-default` exists and that SILO's KES identity may generate and decrypt data keys with it. An administrator can provision additional permitted keys with `mcli admin kms key create mysilo KEYNAME`.
 
-- [AWS Secrets Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/aws-secrets-manager.md)
-- [Azure KeyVault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/azure-keyvault.md)
-- [Entrust KeyControl](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/entrust-keycontrol.md)
-- [Fortanix SDKMS](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/fortanix-sdkms.md)
-- [Google Cloud Secret Manager](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/google-cloud-secret-manager.md)
-- [HashiCorp Vault](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/hashicorp-vault-keystore.md)
-- [Thales CipherTrust Manager (formerly Gemalto KeySecure)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/integrations/thales-ciphertrust.md)
+### 2) Configure SILO for SSE-S3 {#configure-minio-for-sse-s3-object-encryption}
 
-> [!WARNING]
-> **Important**
->
-> The MinIO KES `Play` sandbox is public and grants root access to all created External Keys (EK). Any <abbr title="External Key">EK</abbr> stored on the `Play` sandbox may be accessed or destroyed at any time, rendering protected data vulnerable or permanently unreadable.
->
-> - **Never** use the `Play` sandbox to protect data you cannot afford to lose or reveal.
-> - **Never** generate <abbr title="External Key">EK</abbr> using names that reveal private, confidential, or internal naming conventions for your organization.
-> - **Never** use the `Play` sandbox for production environments.
-
-This procedure requires the following components:
-
-- Install [`mc`](/reference/minio-mc/#command-mc) on a machine with network access to the source deployment. See the `mc` [Installation Quickstart](/reference/minio-mc/#mc-install) for instructions on downloading and installing `mc`.
-- Install [MinIO Key Encryption Service (KES)](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) on a machine with internet access. See the KES [Getting Started](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/tutorials/getting-started.md) guide for instructions on downloading, installing, and configuring KES.
-
-### 1) Create an Encryption Key for SSE-S3 Encryption {#create-an-encryption-key-for-sse-s3-encryption}
-
-Use the [kes](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/_index.md) command line tool to create a new External Key (EK) for use with SSE-S3 Encryption.
-
-The following command retrieves the root [identity](https://github.com/minio/kes/wiki/Configuration#policy-configuration) for the KES server connected to the KES `play` sandbox:
+Every server needs the same KES configuration. For the example from the KES procedure:
 
 ```shell
-curl -sSL --tlsv1.2 \
-  -O 'https://raw.githubusercontent.com/minio/kes/master/root.key' \
-  -O 'https://raw.githubusercontent.com/minio/kes/master/root.cert'
+MINIO_KMS_KES_ENDPOINT=https://kes.example.net:7373
+MINIO_KMS_KES_API_KEY='REPLACE_WITH_SILO_API_KEY'
+MINIO_KMS_KES_CAPATH=/etc/silo/certs/kes-ca.crt
+MINIO_KMS_KES_KEY_NAME=silo-default
 ```
 
-Set the following environment variables in the terminal or shell:
+Keep the API key secret and use the actual CA path on each SILO host. The API key and explicit client key/certificate settings are mutually exclusive. For an existing encrypted deployment, preserve the original default key and all keys needed by existing objects.
 
-```shell
-export KES_CLIENT_KEY=root.key
-export KES_CLIENT_CERT=root.cert
-```
+### 3) Apply the Server Configuration {#restart-the-minio-deployment-to-enable-sse-s3}
 
-<table>
-  <tbody>
-    <tr>
-      <td><p><code>KES_CLIENT_KEY</code></p></td>
-      <td><p>The private key for an <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/_index.md#authorization">identity</a> on the KES server.
-The identity must grant access to at minimum the <code>/v1/create</code>, <code>/v1/generate</code>, and <code>/v1/list</code> <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/server-api.md">API endpoints</a>.
-This step uses the <code>root</code> identity for the MinIO <code>play</code> KES sandbox, which provides access to all operations on the KES server.</p></td>
-    </tr>
-    <tr>
-      <td><p><code>KES_CLIENT_CERT</code></p></td>
-      <td><p>The corresponding certificate for the <a href="https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/concepts/_index.md#authorization">identity</a> on the KES server.
-This step uses the <code>root</code> identity for the MinIO <code>play</code> KES sandbox, which provides access to all operations on the KES server.</p></td>
-    </tr>
-  </tbody>
-</table>
-
-The following command creates a new <abbr title="External Key">EK</abbr> through the [KES CLI](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/cli/kes-key/create.md):
-
-```shell
-kes key create my-minio-sse-s3-key
-```
-
-This tutorial uses the example `my-minio-sse-s3-key` name for ease of reference. Specify a unique key name to prevent collision with existing keys.
-
-### 2) Configure MinIO for SSE-S3 Object Encryption {#configure-minio-for-sse-s3-object-encryption}
-
-Specify the following environment variables in the shell or terminal on each MinIO server host in the deployment:
-
-```shell
-export MINIO_KMS_KES_ENDPOINT=https://play.min.io:7373
-export MINIO_KMS_KES_API_KEY=<API-key-identity-string-from-KES> # Replace with the key string for your credentials
-export MINIO_KMS_KES_KEY_NAME=my-minio-sse-s3-key
-```
-
-> [!NOTE]
-> **Note**
->
-> - An API key is the preferred way to authenticate with the KES server, as it provides a streamlined and secure authentication process to the KES server.
-> - Alternatively, specify the [`MINIO_KMS_KES_KEY_FILE`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_FILE) and [`MINIO_KMS_KES_CERT_FILE`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_CERT_FILE) instead of [`MINIO_KMS_KES_API_KEY`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_API_KEY).
->
->   API keys are mutually exclusive with certificate-based authentication. Specify *either* the API key variable *or* the Key File and Cert File variables.
-> - The documentation on this site uses API keys.
-
-<table>
-  <tbody>
-    <tr>
-      <td><p><a href="/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_ENDPOINT"><code>MINIO_KMS_KES_ENDPOINT</code></a></p></td>
-      <td><p>The endpoint for the MinIO <code>Play</code> KES service.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_FILE"><code>MINIO_KMS_KES_KEY_FILE</code></a></p></td>
-      <td><p>The private key file corresponding to an
-<a href="https://github.com/minio/kes/wiki/Configuration#policy-configuration">identity</a>
-on the KES service. The identity must grant permission to
-create, generate, and decrypt keys. Specify the same
-identity key file as the <code>KES_KEY_FILE</code> environment variable
-in the previous step.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_CERT_FILE"><code>MINIO_KMS_KES_CERT_FILE</code></a></p></td>
-      <td><p>The public certificate file corresponding to an
-<a href="https://github.com/minio/kes/wiki/Configuration#policy-configuration">identity</a>
-on the KES service. The identity must grant permission to
-create, generate, and decrypt keys. Specify the same
-identity certificate as the <code>KES_CERT_FILE</code> environment
-variable in the previous step.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME"><code>MINIO_KMS_KES_KEY_NAME</code></a></p></td>
-      <td><p>The name of the External Key (EK) to use for
-performing SSE encryption operations. KES retrieves the EK from
-the configured Key Management System (KMS). Specify the name of the
-key created in the previous step.</p></td>
-    </tr>
-  </tbody>
-</table>
-
-### 3) Restart the MinIO Deployment to Enable SSE-S3 {#restart-the-minio-deployment-to-enable-sse-s3}
-
-You must restart the MinIO deployment to apply the configuration changes. Use the [`mc admin service restart`](/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) command to restart the deployment.
-
-```shell
-mc admin service restart ALIAS
-```
-
-Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
+If you changed the environment, restart the deployment through the service manager that owns it. For systemd `EnvironmentFile` changes, restart `silo.service`; an administrative restart alone does not reload that file unless SILO separately loads it through `MINIO_CONFIG_ENV_FILE`. If the KES procedure is already complete and the configuration is unchanged, no additional restart is needed.
 
 ### 4) Configure Automatic Bucket Encryption {#configure-automatic-bucket-encryption}
 
-*Optional*
-
-You can skip this step if you intend to use only client-driven SSE-S3.
-
-Use the [`mc encrypt set`](/reference/minio-mc/mc-encrypt-set/#command-mc.encrypt.set) command to enable automatic SSE-S3 protection of all objects written to a specific bucket.
+Create the example bucket if it does not exist, then set its default encryption:
 
 ```shell
-mc encrypt set sse-s3 ALIAS/BUCKET
+mcli mb mysilo/encryptedbucket
+mcli encrypt set sse-s3 mysilo/encryptedbucket
+mcli encrypt info mysilo/encryptedbucket
 ```
 
-- Replace [`ALIAS`](/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment on which you enabled SSE-S3.
-- Replace [`BUCKET`](/reference/minio-mc/mc-encrypt-set/#mc.encrypt.set.ALIAS) with the full path to the bucket or bucket prefix on which you want to enable automatic SSE-S3.
+This setting applies to a **bucket**, not a prefix. Verify a new object with `mcli cp`, `mcli stat`, and a read as shown in the KES procedure. Existing objects are not rewritten by changing the default.
+
+You can remove the bucket default with `mcli encrypt clear mysilo/encryptedbucket`. This does not decrypt existing objects or backend data, and does not remove the need to retain their keys. A server-wide automatic encryption setting or an explicit encryption request may still encrypt new writes.
 
 <a id="minio-encryption-sse-s3-erasure-locking"></a>
 
 ## Secure Erasure and Locking {#secure-erasure-and-locking}
 
+KES and SILO can cache key material. Sealing a key store or revoking access is not guaranteed to invalidate cached keys immediately; account for cache expiry and active processes when testing revocation.
+
 SSE-S3 protects objects using an <abbr title="External Key">EK</abbr> specified at server startup using the [`MINIO_KMS_KES_KEY_NAME`](/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) environment variable. MinIO therefore *requires* access to that <abbr title="External Key">EK</abbr> for decrypting that object.
 
-- Disabling the <abbr title="External Key">EK</abbr> temporarily locks SSE-S3-encrypted objects in the deployment by rendering them unreadable. You can later enable the <abbr title="External Key">EK</abbr> to resume normal read operations.
-- Deleting the <abbr title="External Key">EK</abbr> renders all SSE-S3-encrypted objects in the deployment *permanently* unreadable. If the KMS does not have or support backups of the <abbr title="External Key">EK</abbr>, this process is *irreversible*.
+- Disabling access to the <abbr title="External Key">EK</abbr> prevents decryption of dependent objects once usable cached key material is also unavailable. Restoring access to the original key permits decryption again.
+- Permanently losing every usable copy of the <abbr title="External Key">EK</abbr>, including cached copies and backups, makes objects that still depend on it unrecoverable.
 
 The scope of the <abbr title="External Key">EK</abbr> depends on:
 

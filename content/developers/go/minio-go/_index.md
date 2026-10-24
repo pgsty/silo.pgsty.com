@@ -8,7 +8,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SDK selected for 20261018:** the Server candidate, Console v2.4.2, mcli 20261018 and pkg v3.14.3 select upstream `github.com/minio/minio-go/v7 v7.4.1`. It retains CopyObject HTTP 200 embedded-error handling and adds failed-upload cleanup after cancellation, UTC retention timestamps and STS duration fixes. Parallel GET/Compose remain opt-in. Independent component releases do not publish Server; see the [component matrix](/compatibility/versions/) and [release notes](/blog/release/silo-20261018/#components).
+> **SDK selected for 20261018:** the published Server 20261018, Console v2.4.2, mcli 20261018 and pkg v3.14.3 select upstream `github.com/minio/minio-go/v7 v7.4.1`. It retains CopyObject HTTP 200 embedded-error handling and adds failed-upload cleanup after cancellation, UTC retention timestamps and STS duration fixes. Parallel GET/Compose remain opt-in. Independent component releases do not publish Server; see the [component matrix](/compatibility/versions/) and [release notes](/blog/release/silo-20261018/#components).
 
 ## MinIO Go SDK {#go-sdk}
 
