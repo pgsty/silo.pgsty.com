@@ -1,181 +1,150 @@
 ---
-title: "Internode Path Containment Audit: Paying Off What CVE-2026-42600 Left Owing"
-linkTitle: "Internode Path Containment Audit"
+title: "SN-2026-002: Internode Path Containment Audit — Paying Off What CVE-2026-42600 Left Owing"
+linkTitle: "SN-2026-002 · Internode Path Containment"
 date: 2026-08-02
 author: "Ruohang Feng"
-description: "The previous entry said plainly that deleting an endpoint is not the same as closing a defect class. This is that audit: four protocol surfaces, twelve defects, and four regressions we caused ourselves while fixing them."
+description: "SN-2026-002 audits all four internode protocol surfaces after CVE-2026-42600, closing twelve inherited path-traversal, volume-root alias, divide-by-zero, and unbounded allocation defects while documenting four regressions caught before release."
 tags: [Security, Path Containment]
 weight: 90
 draft: false
 url: "/blog/security/internode-path-containment/"
 ---
 
-**Release status (verified 2026-09-13):** the primary fix in this article is included in [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) and later releases. The investigation below retains its original test boundaries; see the [component matrix](/compatibility/versions/) for current unreleased work.
-**Affected scope:** Distributed erasure only; cluster-root / internode JWT required
+**Status:** Released in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) ([release notes](/blog/release/silo-20260804/#sn-2026-002))\
+**Identifier:** `SN-2026-002` ([Security Advisories](/about/security-advisories/#sn-2026-002))\
+**Fix commits:** [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670), [`b6f70ab08`](https://github.com/pgsty/silo/commit/b6f70ab08), [`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42), [`1af351a70`](https://github.com/pgsty/silo/commit/1af351a70), [`a36fd8fff`](https://github.com/pgsty/silo/commit/a36fd8fff)\
+**Affected scope:** Distributed erasure deployments only; cluster-root / internode JWT required\
 **Prerequisite reading:** [CVE-2026-42600 · ReadMultiple](/blog/security/cve-2026-42600/)
 
-> This article is now public. The primary fix shipped as recorded above; residual findings below are the investigation-time record, not a claim that publishing one fix closed the entire defect class.
-
-[The previous entry](/blog/security/cve-2026-42600/) closed with this sentence:
-
-> Deleting the endpoint proves only that `ReadMultiple` no longer exists. It cannot be extrapolated into a completed containment audit of every internode body path.
-
-That was an IOU, written down in plain sight. This is the record of paying it — and a not-very-flattering construction log.
+Following the removal of `/rmpl` (`ReadMultiple`) in [CVE-2026-42600](/blog/security/cve-2026-42600/), **SN-2026-002** audits every remaining internode endpoint carrying filesystem paths inside msgpack request bodies or Grid RPC frames. This advisory records that audit across all four internode protocol surfaces, the twelve inherited defects it uncovered, and the four regressions we introduced and caught while building the fix.
 
 ## Conclusions first {#summary}
 
-- Twelve defects, **all inherited from upstream**. Verified by per-function md5 comparison: the fork's diff against upstream on the affected files is pure deletion, zero added lines.
-- This is not a new vulnerability. It is **the remainder of CVE-2026-42600** — three more protocol surfaces under the same root cause.
-- Our failure is not in the code. It is in the **record**: a point fix was written up as a closure.
-- While fixing it we introduced **four regressions of our own**, every one of them in a rule we invented rather than reused.
+- **Twelve defects across three unprotected protocol surfaces**, all inherited unchanged from upstream (verified by per-function checksum comparison across the affected storage files).
+- **Same architectural root cause as CVE-2026-42600**: `ReadMultiple` was one endpoint on one surface; three protocol surfaces remained exposed to the same gap.
+- **Four regressions introduced and caught during development**: every regression occurred in a rule we invented from scratch (`isVolumeRootAlias` and `guardErasureParams`), while reusing the object layer's existing `hasBadPathComponent` rule produced zero regressions.
 
-## "N endpoints" was the wrong frame {#four-surfaces}
+## Why counting endpoints was the wrong frame {#four-surfaces}
 
-Earlier audits kept counting endpoints, arriving at 19, then 21, then 22 — and missing an entire protocol surface each time. The real structure is four surfaces:
+Earlier spot checks kept counting individual handlers—arriving at 19, then 21, then 22—while missing an entire protocol surface each time. Grouping internode calls by how their arguments reach `xlStorage` reveals four distinct surfaces:
 
-| Protocol surface | Entries | Covered by the global HTTP middleware |
+| Protocol surface | Entries | Covered by global HTTP query middleware |
 | :-- | :-- | :-- |
-| storage-REST HTTP **query arguments** | 9 | **Yes** — previously misreported as unprotected |
-| storage-REST HTTP **msgpack body** | 4 | No; `r.Form` never comes from a body |
-| **storage Grid RPC** | 18 | No; after one upgrade, frames never re-enter the HTTP chain |
-| **peer-S3 Grid RPC** | 5 | No, and it bypasses `getStorage()` to reach drives directly |
+| Storage-REST HTTP **query arguments** | 9 | **Yes** — previously misclassified as unprotected |
+| Storage-REST HTTP **msgpack body** | 4 | No; `r.Form` is never populated from a msgpack body |
+| **Storage Grid RPC** (`/minio/grid/v1`) | 18 | No; after the initial WebSocket upgrade, frames never re-enter the HTTP middleware chain |
+| **Peer-S3 Grid RPC** | 5 | No; and it bypasses `getStorage()` to call `xlStorage` drives directly |
 
-The first row matters as much as the rest: it overturns the earlier "all 21 endpoints escapable" claim. Those audits grepped for the validation helper inside handler bodies, found nothing, and concluded there was no protection — **missing that the protection lives in the middleware layer.**
+The first row corrects an earlier misconception: audits that grepped exclusively inside handler functions missed that the 9 query-parameter endpoints are already guarded by the global HTTP middleware (`url.ParseQuery(RawQuery)` in `r.Form`). Conversely, the fourth row (`peer-S3 Grid RPC`) bypasses `storageRESTServer.getStorage()` completely, meaning no amount of hardening limited to `storage-rest-server.go` could protect `DeleteBucket` or peer bucket metadata calls.
 
-The fourth row is the one no amount of hardening in storage-REST handlers can reach.
+## Three stacked layers in the storage path {#root-cause}
 
-## The root cause is three layers, not one bug {#root-cause}
+Three independent design choices combined to create the vulnerability class:
 
-Three design facts, none wrong on its own:
+1. **Path validation ran only on HTTP query strings**: The HTTP middleware inspects `r.Form`, which is populated from `url.ParseQuery(RawQuery)` and never from a request body (introduced in 2017).
+2. **Grid RPC bypassed the HTTP middleware chain**: `/minio/grid/v1` performs a single HTTP upgrade; all subsequent msgpack RPC frames dispatch directly to registered handlers without re-entering HTTP middleware (introduced in 2023).
+3. **`xlStorage` assumed callers had already validated paths**: `getVolDir` rejected a volume only when it equaled exact `""`, `.`, or `..`, and `pathJoin` ran `path.Clean` against the joined path (settled in 2018).
 
-1. **Validation happens only at the HTTP surface.** `r.Form` is populated from `url.ParseQuery(RawQuery)` and **never from a body** (introduced 2017).
-2. **Grid RPC bypasses the middleware.** `/minio/grid/v1` upgrades once; subsequent msgpack frames never re-enter the HTTP chain (introduced 2023).
-3. **The storage layer performs no containment.** `getVolDir` rejects a volume only when it is exactly `""`/`.`/`..`, and `pathJoin` runs `Clean` (settled 2018).
+Each layer relied on another layer to validate paths, and none of them inspected the msgpack or Grid RPC channels in between.
 
-In one sentence: **the upper layer assumes the lower one validates, the lower assumes the upper already did, and neither can see the channel in between.**
+One timeline interaction escalated a DoS bug from a failed request into a full process crash: `ShardFileSize` has contained an unguarded division by `DataBlocks` since 2020, but when `CheckParts` was wrapped inside `xioutil.WithDeadline` in October 2024 to bound slow disk operations, that division moved onto a bare goroutine where the HTTP server's `recover()` middleware could no longer catch a divide-by-zero panic.
 
-`ReadMultiple` was merely one endpoint that exercised that structure. Removing it left the structure intact.
+## Vectors confirmed by execution {#vectors}
 
-One line of the timeline deserves singling out. The divide-by-zero in `ShardFileSize` has been present since 2020, but only when it moved inside `xioutil.WithDeadline` in 2024-10 — a change meant to fix large-object timeouts — did it escalate from "one failed request" to "the whole process exits", because `WithDeadline` runs its work function on a bare goroutine that no `recover()` can reach. That escalation was not visible at the time.
+Every vector below was reproduced against a live `xlStorage` instance through the storage-REST and Grid RPC clients using planted sentinel files:
 
-## Vectors, confirmed by execution {#vectors}
-
-Every one reproduced against a real `xlStorage` through the real REST/grid client, with planted sentinel files. None of this is static inference.
-
-| Vector | Surface | Observed |
+| Vector | Surface | Observed effect |
 | :-- | :-- | :-- |
-| `WriteAll("vol","../../x")` | storage grid | **arbitrary file write** outside the drive root |
-| `RenameFile(".minio.sys","","bucket","x")` | storage grid | **the entire system volume** (IAM, config) relocated into a readable bucket, **with no `..` anywhere** |
-| `DeleteBucket("../victim", force)` | peer-S3 grid | **recursive deletion of a tree** outside the drive root |
-| `DeleteBulk("vol","")` | HTTP body | whole volume moved to trash |
-| `ReadAll(volume:"../")` | any | `getVolDir`'s check **defeated by a trailing slash** |
-| `CheckParts` with a zero `Erasure` | storage grid | **process terminates** |
-| `AppendFile` declaring `Content-Length: 64 GiB` | HTTP | **68,719,574,840 bytes allocated for an empty body** |
-| `DeleteVersions` declaring 100M entries | HTTP | a ten-byte parameter **reserved 10.4 GB** |
-| part `Size = -2` | storage grid | **a truncated shard reported healthy**; heal silently skipped |
+| `WriteAll("vol", "../../x")` | Storage Grid RPC | **Arbitrary file write** outside the drive root |
+| `RenameFile(".minio.sys", "", "bucket", "x")` | Storage Grid RPC | **Relocates the entire `.minio.sys` system volume** (IAM, cluster config) into a readable S3 bucket **with no `..` sequence** |
+| `DeleteBucket("../victim", force)` | Peer-S3 Grid RPC | **Recursive deletion of a directory tree** outside the drive root |
+| `DeleteBulk("vol", "")` | Storage-REST body | Moves an entire volume into the drive trash directory |
+| `ReadAll(volume: "../")` | Any surface | Trailing slash bypasses `getVolDir`'s exact `".."` check |
+| `CheckParts` with zero `Erasure` (`DataBlocks = 0`) | Storage Grid RPC | Divide-by-zero panic in `WithDeadline` **terminates the server process** |
+| `AppendFile` declaring `Content-Length: 64 GiB` | Storage-REST HTTP | **Allocates 68,719,574,840 bytes** for an empty request body |
+| `DeleteVersions` declaring `100,000,000` entries | Storage-REST body | A 10-byte msgpack header **allocates a 10.4 GB slice** |
+| Part metadata with `Size = -2` | Storage Grid / `AddVersion` | **Truncated shard is reported healthy**; healing silently skips repair |
 
-Two of these had never been found before and are worth calling out.
+Two vectors deserve specific attention:
 
-**`RenameFile` with an empty source path** hits the volume-root alias and relocates the whole volume. Aimed at `.minio.sys`, one ordinary S3 GET afterwards yields the cluster's IAM and configuration. It requires **no traversal sequence at all** — so any audit that greps for `..` misses it by construction.
+- **`RenameFile` with an empty source path (`""`)**: An empty `srcPath` resolves to the volume directory itself. When pointed at `.minio.sys`, `RenameFile(".minio.sys", "", "bucket", "x")` moves the entire system metadata volume into a normal bucket, where an ordinary `GetObject` can read cluster IAM and configuration files—without using `..` anywhere in the payload.
+- **Negative part size (`Size = -2`)**: A negative part size causes `ShardFileSize` to floor both terms to `0`. Because `checkPart` checks only `st.Size() < expectedSize`, any existing shard file (even a 0-byte truncated file) satisfies `0 < 0 == false` and is reported intact. Because `FileInfo.IsValid()` did not reject negative part sizes, poisoned `xl.meta` metadata caused background healing to skip corrupted shards silently.
 
-**A negative part size** floors both terms of `ShardFileSize` to zero. `checkPart`'s only integrity test is `st.Size() < expectedSize`, so **every file that exists is reported intact, including a truncated shard.** Worse, this holds whether or not the erasure parameters are valid: metadata that passes `FileInfo.IsValid()` — the very check healing trusts — is affected. That is not an input-validation problem but a **data-integrity** one: a legitimate heal reading poisoned metadata concludes the shard is fine and skips the repair.
+## The fix: two chokepoints across 36 endpoints {#fix}
 
-## The fix: two chokepoints, not twenty patches {#fix}
+The security invariant has two parts: **every file path in an internode payload must resolve strictly inside its target volume, and every volume must resolve strictly inside the drive root.**
 
-The invariant to restore is one sentence: **a path from an internode payload must resolve inside the volume it names, and a volume must resolve inside the drive root.**
-
-Only `..` can break the first half (absolute and backslash-prefixed paths are folded under `volumeDir` by `pathJoin`'s `Clean`), and the second half has one independent break: paths that **alias the volume root**. Two rules, therefore — not a policy matrix.
+Because `pathJoin` folds leading slashes and backslashes under `volumeDir` via `path.Clean`, only `..` segments can escape a volume directory, and only volume-root aliases (`""`, `"/"`, `"."`, and Windows trailing-space/period components) can target the volume directory itself. Commit [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) enforces those two rules at two chokepoints:
 
 | Chokepoint | Location | Coverage |
 | :-- | :-- | :-- |
-| **Volume axis** | `getVolDir` (4 lines) | every caller, **including peer-S3** |
-| **Path axis** | decorator at `getStorage()` | 31 remote entries plus nested fields |
+| **Volume axis** | `getVolDir` + explicit guard in `NSScanner` | Every `xlStorage` caller, **including peer-S3 Grid RPC** |
+| **Path axis** | `getStorage()` decorator (`guardPaths`, `isVolumeRootAlias`) | All 31 remote storage-REST and Storage Grid RPC methods plus nested struct slices |
 
-Under 40 lines of core logic. **No handler is modified, no call site in `xl-storage.go` is touched, and the local erasure path is left alone.**
+Two implementation details are critical to preserve during future refactors:
 
-Two details worth recording:
+- **Checks must run on the raw argument before `pathJoin`**: `pathJoin` calls `path.Clean` on the concatenated absolute path (`/drive` + `volume` + `filePath`), which silently collapses `/drive/../../etc` into `/etc`. A check placed after `pathJoin` sees a clean path with no `..` and allows the escape.
+- **`NSScanner` requires its own volume guard**: `NSScanner` is the only `xlStorage` method that constructs a volume path without calling `getVolDir`, making its explicit `checkPath` guard load-bearing.
 
-- The check **must** run before the join, on the raw argument. `pathJoin` runs `Clean` against an absolute `drivePath`, which **erases** a leading `..` entirely — `/drive/../../etc` becomes `/etc`, so a check placed after the join reads clean and passes everything. This is the most likely way a future refactor silently undoes the fix.
-- `NSScanner` is the one method that reaches the filesystem without `getVolDir`. Its guard line is **load-bearing**, not decorative.
-
-Among the rejected alternatives, the notable one is adding containment at all 33 `pathJoin(volumeDir, …)` sinks. That would be genuine defence in depth, but it means 33 edits in the most performance-sensitive file in the tree, each needing its own judgement about whether the volume root is a legitimate target. The guard rails buy most of the same resistance to drift for a fraction of the risk. **This is an explicitly recorded IOU: if a code path is ever added that reaches the filesystem without `getVolDir`, the decision must be revisited.**
+We evaluated placing containment checks inside all 33 `pathJoin(volumeDir, ...)` call sites in `xl-storage.go`, which would require deciding at each of the 33 sinks whether the volume root itself is a valid target. Enforcing the invariant at `getVolDir` and the `getStorage()` decorator—backed by reflection guardrail tests on `StorageAPI`—covers all remote entry points without touching local erasure hot paths.
 
 ## Construction log: four regressions we caused ourselves {#regressions}
 
-This section is unflattering and more informative than the fix.
+During development and review, our own drafts introduced four regressions before shipping:
 
-**First: whitespace.** The initial rule treated whitespace as a separator, refusing `" "` and `"  "` — **legal S3 object keys**. `PutObject` commits through `RenameData`, so such a key would fail on every remote drive simultaneously and **break write quorum**. The irony: the vulnerability needs root credentials; this bug needs a user to send a space.
+1. **Rejecting whitespace object keys (`" "` and `"  "`)**: Our first draft of the path guard treated whitespace as an invalid path character, rejecting `" "` and `"  "`—which are valid S3 object keys. Because `PutObject` commits writes across drives via `RenameData`, uploading an object named `" "` failed on every remote drive and broke write quorum.
+2. **Rejecting backslash-only keys (`"\\"`) on Unix**: The same draft rejected `"\\"`. On Unix, `path.Clean` treats `\` as an ordinary filename character rather than a directory separator. Rejecting `"\\"` in the internode decorator caused distributed clusters to reject a valid S3 key that single-node deployments accepted.
+3. **Windows trailing spaces and periods (`" "` and `"..."`)**: The Win32 path normalizer strips trailing spaces and periods from path components, meaning a component composed solely of spaces or periods disappears and resolves to its parent directory. On Windows, both `" "` and `"..."` alias the volume root—and `"..."` was sitting inside our own positive test list of "valid object names" until review caught it.
+4. **Negative part sizes (`Size < 0`)**: Our initial `guardErasureParams` check rejected zero `DataBlocks` only when `part.Size > 0`, equating "non-zero" with "positive" and missing that negative sizes floor `ShardFileSize` to zero even when `DataBlocks` is valid.
 
-**Second: backslash-only keys.** Same function, same root cause. `path.Clean` never treats `\` as a separator, so on Unix `"\\"` is an ordinary filename. Refusing it made **a distributed cluster reject a write a single-node server accepts** — the same S3 API behaving differently by deployment topology.
+## Two false-green tests and a fuzzer blind spot {#false-greens}
 
-**Third: spaces and periods on Windows.** The Win32 normalisation layer strips trailing spaces and periods from a path component, so a component made only of those vanishes and the path resolves to its parent. That makes both `" "` and `"..."` volume-root aliases on Windows — and `"..."` **was sitting in our own list of legal object names at the time.** We had not merely missed the vector; we had asserted it was safe.
+Writing the reproduction and regression tests exposed three testing pitfalls:
 
-**Fourth: negative part sizes.** The new guard rejected only "positive size with unusable parameters", equating "non-zero" with "positive". Negative values take a different route to the same zero.
+1. **`storageRESTClient` silently overrode `Content-Length`**: When testing `AppendFile` with a forged `Content-Length: 64 GiB` over an empty `*bytes.Reader`, the client library inspected the `*bytes.Reader` type and overwrote `Content-Length` with `0`.
+2. **Go's `http.Client` refused mismatched body lengths**: Switching to an opaque `io.Reader` caused Go's standard HTTP client transport to abort the request locally before sending it because the body closed before 64 GiB. Reproducing the server-side 64 GiB allocation required driving the handler directly via `httptest` (or a raw socket).
+3. **An early return in the fuzzer hid the backslash bug**: Our first fuzz property test skipped strings composed solely of `/` and `\` via an early `return`. That early return blinded the fuzzer to `"\\"` across millions of executions until we rewrote the property test to assert strict inclusion against `IsValidObjectName`.
 
-## Two false greens {#false-greens}
+## Reused semantics vs. invented rules {#pattern}
 
-Writing the `AppendFile` acceptance test produced two meaningless green runs in a row:
-
-1. Driving it through the REST client — which **special-cases `*bytes.Reader` and derives Content-Length from it**, silently overriding the forged value.
-2. Switching to an opaque reader — at which point **Go's own HTTP client refuses** to send a request whose body is shorter than the declared length.
-
-Only driving the handler directly through `httptest` reproduced it. The lesson: **a client's self-protection is not a server's defence**, and an attacker with a raw socket has no such scruples.
-
-A third was a design failure. We built a per-field reflection poisoner, **then discarded it**: it cannot distinguish "should have rejected but delegated" from "correctly allowed a non-path field" (`ETag`, `Algorithm`, …), so it reports correct behaviour as failure.
-
-The subtlest lived in the fuzzer. The first property test treated separator-only strings as an **exception with an early return**. That is not an exception, it is a **blind spot** — the fuzzer had been shut out of the entire category by hand and could never have found the backslash key in a million executions. **A wrong exception is more dangerous than no fuzzer at all, because it creates the impression the space has been searched.**
-
-## A very concentrated pattern {#pattern}
-
-| Component | Where its semantics came from | Regressions |
+| Guard component | Source of semantics | Regressions introduced during development |
 | :-- | :-- | :-- |
-| `guardPaths` | reused existing `hasBadPathComponent` | **0** |
-| `getVolDir` guard | reused existing `hasBadPathComponent` | **0** |
-| `isVolumeRootAlias` | **invented** | **3** |
-| `guardErasureParams` | **invented** | **1** |
+| `guardPaths` | Reused existing `hasBadPathComponent` (`IsValidObjectPrefix`) | **0** |
+| `getVolDir` guard | Reused existing `hasBadPathComponent` | **0** |
+| `isVolumeRootAlias` | Newly written predicate | **3** |
+| `guardErasureParams` | Newly written predicate | **1** |
 
-**The reused semantics produced zero regressions; the invented rules produced all of them.**
+`hasBadPathComponent` had already been exercised by production S3 traffic via `IsValidObjectPrefix` for years and structurally cannot reject any object key creatable through the S3 API. Every regression came from newly invented predicates where edge cases (`" "`, `"\\"`, `"..."`, `Size = -2`) diverged from S3 or OS semantics.
 
-This is not coincidence. `hasBadPathComponent` is already the object layer's own rule via `IsValidObjectPrefix`, validated by real S3 traffic for years, and structurally cannot reject anything creatable through the S3 API. An invented rule has nothing behind it but the author's imagination.
+## Guardrail tests {#guardrails}
 
-The actionable form: **reuse rather than invent; and when you must invent, write the property test by exclusion rather than enumeration, express exceptions with a predicate independent of the implementation, and keep them as few as possible.**
+To ensure future changes to `StorageAPI` cannot silently reintroduce unguarded paths (avoiding the point-fix regression pattern previously seen with `CVE-2026-39414`), the test suite enforces three guardrails:
 
-## The guard rails matter more than the patch {#guardrails}
+- **Falsifiability (mutation verification)**: Temporarily removing the path and volume guards causes 191 subtests to fail; removing the allocation guards reproduces the 64 GiB and 10.4 GB allocations.
+- **Legal-traffic fuzz equivalence**: Fuzz tests verify that every object key accepted by `IsValidObjectName` passes `guardPaths` (1.96M executions) and every valid bucket name passes `getVolDir` (810K executions).
+- **`StorageAPI` reflection guardrail**: A reflection test inspects every method on `StorageAPI` and fails CI by method name if a new method accepting path or volume arguments is added without an explicit entry in the decorator guard table.
 
-The final test suite pulls in two directions, and neither alone is enough:
+```bash
+go test ./cmd -run 'Test.*Containment.*|Test.*Guard.*|Fuzz.*' -count=1
+```
 
-- **Falsifiability** — remove each guard in turn and confirm the tests actually go red (191 failing subtests with the traversal guards removed; 64 GiB and 10.4 GB reappearing with the allocation guards removed). This is precisely what the rejected community PR lacked: its test asserted `err != nil` against a target that did not exist, so it **passes with the vulnerability fully intact**.
-- **Legal-traffic fuzzing** — asserting that any key `IsValidObjectName` accepts, the guards accept (1.96M executions, no violations), and that any legal bucket name survives `getVolDir` (810K). This is what our own first two attempts lacked.
+## Independent review rounds {#adversarial}
 
-Plus a method-level reflection rail that **fails by name** when a path-taking method is added to `StorageAPI` unguarded.
+Five successive rounds of independent code review each uncovered one real flaw before release: whitespace keys -> backslash keys -> the `AppendFile` 64 GiB allocation -> Windows trailing spaces/periods -> negative part sizes. Separating implementation from review caught all four S3 compatibility and integrity regressions before release.
 
-History states the case for these rails bluntly: `CVE-2026-39414` was also point-fixed on 2026-04-15 and only received a `fix: complete ...` **two months later**. Counting this one, "point fix → recorded as closure → completed months later" has now happened twice in this fork. **The problem is not that someone was careless. It is that nothing in the tree could tell you a class was still open.** Guard rails turn "someone must remember" into "CI fails".
+## Follow-up fixes in Server 20260804 {#open}
 
-## On adversarial review {#adversarial}
+Five companion commits shipped alongside [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) in [Server 20260804](/blog/release/silo-20260804/#sn-2026-002):
 
-This fix went through five rounds of independent adversarial review. **Each round found one missed defect, and all five stood**: whitespace keys → backslash keys → the `AppendFile` allocation → Windows spaces and periods → negative part sizes.
+- **`ReadFileHandler` read-length cap (`b6f70ab08`)**: Commit [`b6f70ab08`](https://github.com/pgsty/silo/commit/b6f70ab08) rejects declared read lengths above 5 GiB (the maximum size of a single S3 part on this legacy whole-file bitrot path), preventing arbitrary caller-declared multi-tens-of-GiB allocations.
+- **Negative part size rejection (`80e8eaa42`)**: Commit [`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42) rejects negative part sizes at the `AddVersion` write funnel and again in `CheckParts`, `VerifyFile`, and internode `guardErasureParams`, protecting both new writes and already-stored metadata.
+- **Non-positive erasure block size rejection (`80e8eaa42`)**: Commit [`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42) validates `blockSize > 0` in `NewErasure` and guards rebalance division boundaries.
+- **`ReadParts` storage error propagation (`1af351a70`)**: Commit [`1af351a70`](https://github.com/pgsty/silo/commit/1af351a70) fixes a pre-existing bug where `ReadPartsHandler` called `done(nil)` before the storage call completed, which had caused storage errors (`errFileNotFound` as well as new guard rejections) to be written as plain text into a msgpack keep-alive stream (`msgp: attempted to decode type "int" with method for "map"`).
+- **Panic recovery in `xioutil.WithDeadline` (`a36fd8fff`)**: Commit [`a36fd8fff`](https://github.com/pgsty/silo/commit/a36fd8fff) recovers panics inside `WithDeadline`, logs `panic in deadline-bounded work: ...` with a stack trace to `stderr` (rate-limited to 10 stack dumps per process lifetime), and fails only the in-flight request. Operators who monitor node health should add a log alert for `panic in deadline-bounded work:`.
 
-Our own review did find two in the same period (the `WithDeadline` log amplification and `ReadParts` using the wrong rule), but only after being pushed to that standard.
+## Known limitations {#closing}
 
-The hit rate says something plain: **the last gate before merge should be independent acceptance, not the author's own conclusion.** During this work the author judged the change ready to ship four times and was overturned three.
+Two platform boundaries remain:
 
-## Follow-up status {#open}
-
-The following five follow-ups were not published at the original August 3 review point. They subsequently shipped in Server 20260804:
-
-- **`ReadFileHandler` is bounded.** Commit `b6f70ab08` rejects a declared read length above 5 GiB, the maximum size of the S3 part represented by this legacy whole-file bitrot path. Legitimate GiB-scale reads can still allocate on that scale; the change removes caller-controlled allocation above the format's real ceiling rather than pretending large reads are cheap.
-- **Negative part sizes cannot be persisted or trusted.** Commit `80e8eaa42` rejects them at the `AddVersion` write funnel and again in `CheckParts` and `VerifyFile`, so both new poison and already-written metadata are covered. The internode boundary check uses the same predicate.
-- **Non-positive erasure block sizes are rejected at construction.** Commit `80e8eaa42` validates `blockSize` in `NewErasure`, covering the other offset and decode divisions that a single downstream `ShardFileSize` guard could not. Rebalance's separate division is guarded at its own boundary.
-- **`ReadParts` errors finally reach the caller (`1af351a70`).** A pre-existing bug, fixed in passing: the handler declared success (`done(nil)`) before the storage call finished, so every `ReadParts` failure — not only the new guards, but `errFileNotFound` and friends too — was never returned; the client received a keep-alive stream and decoded the error text as msgpack, surfacing as `msgp: attempted to decode type "int" with method for "map"`. After the fix, real storage errors reach quorum reduction; success paths are untouched, and that msgpack decode noise in multipart-related logs is replaced by actual storage errors.
-- **A recovered panic is not a healthy node (`a36fd8fff`).** The `WithDeadline` recovery turns what used to be an instant process death into a stderr line (`panic in deadline-bounded work: ...` with a stack) plus one failed request. Stack dumps are capped at ten per process lifetime, but the error returns every time. **If your alerting only watches process liveness, add a log alert for that string** — otherwise a real bug that previously announced itself as a crash now only whispers in the logs.
-
-Two limitations remain and should not be folded into a stronger claim:
-
-- **No Windows CI.** Windows builds are published; tests run on Ubuntu only. The Windows rule is reasoned from documented Win32 behaviour and has not been verified on the platform.
-- **Symlinks.** The containment check is lexical, as upstream's is.
-
-## Closing {#closing}
-
-The previous entry said that closing an endpoint and closing a defect class are two different conclusions. This time the known sinks are closed on the local branch, at the cost of four self-inflicted regressions and three overturned declarations that it was ready to ship. At the investigation date publication remained a separate gate; these fixes subsequently shipped in 20260804.
-
-If only one sentence survives: **the vulnerability was upstream's; our mistake was treating a point fix as a closure.** And what prevents a third occurrence is not a more careful person — it is a test that fails.
+- **Windows test environment**: SILO publishes Windows binaries while automated CI runs on Linux; the Windows volume-root alias rule (`" "` and `"..."`) is derived from documented Win32 path normalization behavior.
+- **Lexical symlink handling**: Path containment is lexical (`hasBadPathComponent` and `isVolumeRootAlias`), matching upstream `xlStorage` semantics, and does not resolve OS symlinks placed inside a drive root.

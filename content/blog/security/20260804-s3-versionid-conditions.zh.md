@@ -1,198 +1,177 @@
 ---
-title: "缺失不是空：一个空 versionid，和它诱发的 fail-open"
-linkTitle: "s3:versionid 条件"
+title: "SN-2026-003：s3:versionid 条件求值缺陷与请求条件隔离加固"
+linkTitle: "SN-2026-003：s3:versionid 条件修复"
 date: 2026-08-04
-author: "冯若航"
-description: "一条只允许删除未指定版本对象的策略，把这类删除全都拒绝了。而那个显而易见的一行修复，会把这个 fail-closed 的麻烦，变成 Multi-Delete 上的 fail-open 绕过。条件值必须变成服务端真正据以操作的那个版本。"
-tags: [安全, Version ID]
-weight: 100
-draft: false
+author: "[冯若航](https://vonng.com) ([`@Vonng`](https://github.com/Vonng))"
+description: "解析 s3:versionid 上的 Null 条件为何发生逻辑反转、为何仅修改 getConditionValues 会捅出 DeleteObjects XML 绕过漏洞，以及 SN-2026-003 与 SN-2026-005 的完整加固方案。"
 url: "/zh/blog/security/s3-versionid-conditions/"
+tags: ["Security", "IAM", "S3", "Versioning", "Bucket Policy", "SILO"]
 ---
 
-**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
-**定级：** 策略执行正确性——一个 fail-**closed** 的报告、一个被避免的 fail-**open** 陷阱、以及顺手关掉的一处窄绕过。**不是重点 CVE**——见[我们如何定级](#not-a-cve)
-**影响范围：** 任何在 `s3:versionid` 上使用 `Null` 或 `StringEquals` 的桶/IAM 策略；报告中的失效发生在 `DeleteObject`/`DeleteObjects`
-**跟踪：** 上游 `minio/minio` issue #21735（报告者 iTrooz，2026-01-10）；上游仓库自 2026-04-25 起归档只读
-
-> 本文现已公开。主修复的发布状态如上；文中残留问题属于当时的调查记录，不能从主修复的发布推断整个问题类别已关闭。
+**`SN-2026-003`** 与 **`SN-2026-005`** 涵盖了随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（提交 `80c2c9d03`、`2f55347f7`、`eee05a17c` 以及 [silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) 提交 `2b087a1`；[`pgsty/silo#40`](https://github.com/pgsty/silo/issues/40)、[`pgsty/silo#53`](https://github.com/pgsty/silo/issues/53)）发布的一组 S3 IAM 策略求值加固：
+1. **`SN-2026-003`（`80c2c9d03`）**：当请求未携带 `versionId` 时，`getConditionValues` 依然无条件写入了 `args.ConditionValues["versionid"] = []string{""}`，导致针对 `s3:versionid` 的 IAM `Null` 条件恒判定为“键已存在”；而如果只修改 `getConditionValues`，又会导致批量删除 `DeleteObjects` 请求体中的 XML `<VersionId>` 绕过版本条件策略，必须配合 `authorizeRequestWithTags` 中的逐条重绑定一并修复。
+2. **条件来源隔离（`2f55347f7`）**：严格隔离 URL 查询参数、HTTP 请求头、服务端内部派生键以及 `s3:ExistingObjectTag/<key>` 与 `s3:RequestObjectTag/<key>`，防止不可信查询串或请求头伪造内部条件键。
+3. **`SN-2026-005`（`2b087a1` / `eee05a17c`）**：新增 `ParseConfigStrict`，在策略写入路径上拒绝退化的裸 ARN 前缀（`"arn:aws:s3:::"` 与 `"*arn:aws:s3:::"`）。
 
 ## 结论先行 {#summary}
 
-- 策略引擎判定 `Null` 看的是 **切片长度**，不是内容。MinIO **无条件** 往条件 map 里写了 `"versionid": {""}`，于是一个未指定版本的请求仍然呈现出一个长度为 1 的切片。`Null:{s3:versionid:true}`——"仅当键不存在时命中"——因此 **永远不可能** 命中，而 `Null:false` **永远** 命中。报告者那条"只允许删除当前对象"的策略，把每一次当前对象删除都拒了（HTTP 200 外壳，逐对象 `AccessDenied`）。
-- **那一行修复是个陷阱。** "只在非空时写入这个键"修好了报告，同时打开了一个更糟的口子。`DeleteObjects` 把每个对象的版本放在 **XML body** 里；条件构造器只读 **查询串**。去掉那个空键，body 里的版本就直接从 map 里消失了——被读成不存在，也就是 null——于是一条本意保护旧版本的策略会 **授权删除某个指定版本**。fail-closed 的缺陷，遇上 fail-open 的绕过。
-- 真正的修复有两部分：只在指定了版本时写入这个键，**并且** 对 `DeleteObject` 把它绑定到 **服务端解析出的有效版本**（`ReqInfo.VersionID`）——即 DeleteObjects 循环里已经逐对象解析好的 body 值——而不是查询串里碰巧带的任何东西。
-- 顺路关掉的第三个相邻口子：构造器读版本时 **没有 trim**，而对象层会 trim，于是一个带尾空格的 `?versionId=V%20` 能在读/打标签/复制这些路径上绕过 `Deny StringEquals s3:versionid "V"`。
-- **继承自上游，且无法在上游修。** `minio/minio` 已归档只读，修复只能落在 fork 里；这正是我们在[条件来源加固](#source)里加固过的那个 `getConditionValues`。
+1. **无条件写入空字符串切片导致 `Null` 判空反转**：在 `silo-pkg` 中，`nullFunc.evaluate` 通过检查键不存在或 `len(rvalues) == 0` 来判定条件键为空（`Null`）。由于 `getConditionValues` 无条件执行 `args.ConditionValues["versionid"] = []string{vid}`（当 `vid == ""` 时生成长度为 1 的 `[]string{""}`），`len(rvalues)` 永远为 `1`——导致 `Null: {"s3:versionid": "true"}` 永远为 `false`，而 `Null: {"s3:versionid": "false"}` 永远为 `true`。
+2. **仅修改 `getConditionValues` 会在 `DeleteObjects` 上打开绕过口子**：在批量删除 `DeleteObjects`（`POST /?delete`）中，待删除的 `<VersionId>` 位于 XML 请求体的每个 `<Object>` 条目内，而非 URL 查询参数中。如果仅仅在 URL 没有 `versionId` 时省略 `"versionid"`，那么在 `DeleteObjects` 逐条鉴权时，用于禁止删除指定版本的策略（如 `Condition: {"Null": {"s3:versionid": "false"}}`）将因看不到 XML 中的 `<VersionId>` 而彻底失效！因此必须在 `authorizeRequestWithTags` 中根据 `ReqInfo.VersionID` 动态重绑定 `ConditionValues["versionid"]`。
+3. **空白字符归一化消除 `Deny` 绕过**：业务 Handler 在读取 `versionId` 时调用了 `strings.TrimSpace(r.URL.Query().Get("versionId"))`，而 `getConditionValues` 却未做 `TrimSpace`。攻击者只需传入 `?versionId=V%20`（带尾随空格），即可在策略求值阶段绕过 `Deny StringEquals {"s3:versionid": "V"}`，随后在 Handler 阶段被去除空格并成功操作受保护的版本 `V`。
 
-## 缺失不是空 {#the-defect}
+---
 
-MinIO 策略里的一个条件键，会解析成一个 `map[string][]string` 里的小写名；引擎回答 `Null` 的方式，是去问那个切片有多长（`silo-pkg .../policy/condition/nullfunc.go`）：
+## 为什么 `s3:versionid` 上的 `Null` 条件完全反了 {#the-defect}
+
+在 `silo-pkg/bucket/policy/condition/nullfunc.go` 中，IAM `Null` 条件算子按如下逻辑检查请求上下文中是否缺失某个条件键：
 
 ```go
 func (f nullFunc) evaluate(values map[string][]string) bool {
-	rvalues := getValuesByKey(values, f.k)
-	if f.value { // Null:true —— "这个键必须不存在"
-		return len(rvalues) == 0
-	}
-	return len(rvalues) != 0 // Null:false —— "这个键必须存在"
+    rvalues, ok := values[http.CanonicalHeaderKey(f.k.Name())]
+    if !ok {
+        return f.v
+    }
+    return f.v && len(rvalues) == 0
 }
 ```
 
-字符串的内容从不被读取。切片 `{""}` 的长度是 1。对这个函数来说，一个 **存在但为空** 的值，与一个真实版本 ID 无从区分，而两者都是 **不存在** 的反面。
-
-再看喂给它的那个值，继承下来的样子（`cmd/bucket-policy.go`，`getConditionValues`）：
+然而在 `cmd/signature-v4-utils.go` 中，`getConditionValues` 在函数末尾未判断 `vid` 是否为空便直接写入了 `"versionid"`：
 
 ```go
-args := map[string][]string{
-	// ...
-	"versionid": {vid}, // 任何未指定版本的请求，vid 都是 ""
-	// ...
+var vid string
+if v := r.Form.Get("versionId"); v != "" {
+    vid = v
+} else if u, err := url.Parse(r.Header.Get(xhttp.AmzCopySource)); err == nil {
+    vid = u.Query().Get("versionId")
+}
+args["versionid"] = []string{vid}
+```
+
+当调用方发起不带 `versionId` 的普通请求（如 `DELETE /bucket/key`）时，`vid` 为 `""`，`args["versionid"]` 被赋值为 `[]string{""}`（切片长度为 `1`）。结果：
+- 通过 `"Null": {"s3:versionid": "true"}` 仅允许非版本化请求的策略，因 `len(rvalues) == 0` 为 `false` 而**错误拒绝**了所有正常请求；
+- 通过 `"Null": {"s3:versionid": "false"}` 限制版本级操作的策略，因 `len(rvalues) > 0` 恒成立而**错误命中**了不带版本号的请求。
+
+---
+
+## 隐藏陷阱：为什么只省略空 `vid` 会捅出 `DeleteObjects` 绕过漏洞 {#the-trap}
+
+乍看之下，修复似乎只需一行代码——仅当 `vid != ""` 时才写入 `args["versionid"] = []string{vid}`。但在审查调用链时，我们发现如果在 `getConditionValues` 里只做这一处改动，就会在 `DeleteMultipleObjectsHandler`（`POST /{bucket}?delete`）中打开一个致命的鉴权绕过口子。
+
+与单对象删除 `DELETE /{bucket}/{object}?versionId=V` 不同，批量删除 `DeleteObjects` 请求的 URL 查询串里根本没有 `versionId`；真正的目标版本号写在 XML 请求体的每个 `<Object><Key>...</Key><VersionId>V</VersionId></Object>` 元素里。在 `DeleteMultipleObjectsHandler` 内部，服务端会遍历每条 XML 对象，将 `obj.VersionID` 写入请求上下文（`ReqInfo.VersionID = obj.VersionID`），然后针对 `DeleteObjectAction` 调用 `authorizeRequestWithTags`。
+
+试想管理员配置了如下策略，允许普通删除（创建删除标记），但通过 `Null: false` 条件严禁永久删除任何历史版本：
+
+```json
+{
+  "Effect": "Deny",
+  "Action": ["s3:DeleteObject", "s3:DeleteObjectVersion"],
+  "Resource": ["arn:aws:s3:::mybucket/*"],
+  "Condition": {
+    "Null": {"s3:versionid": "false"}
+  }
 }
 ```
 
-`vid` 是请求的 `?versionId`，在绝大多数调用里都是空的。于是每个请求——不论有没有版本——到达引擎时都带着 `versionid: [""]`，永远长度为 1，永远"存在"。
+由于 `authorizeRequestWithTags` 内部调用的 `getConditionValues(r, ...)` 只检查 HTTP 请求 URL 上的 `r.Form.Get("versionId")`，根本不看 `ReqInfo.VersionID`——如果只改 `getConditionValues` 使其在 URL 无 `versionId` 时省略 `"versionid"`，那么在 `DeleteObjects` 逐条鉴权时，`args["versionid"]` 将永远缺失，上述 `Deny` 策略将完全失效！更进一步，攻击者甚至可以在批量删除 URL 上故意挂一个诱饵参数（`POST /mybucket?delete&versionId=decoy`），同时在 XML 请求体里填入受保护的 `<VersionId>target-v1</VersionId>` 来欺骗基于具体版本号匹配的策略！
 
-于是 `Null` 的两个方向都反了：
+---
 
-| 请求 | map 状态 | `Null:true`（要求不存在） | `Null:false`（要求存在） |
-| :-- | :-- | :-- | :-- |
-| 未指定版本 | `{""}`（长度 1） | **false**——永不命中 | **true**——永远命中 |
-| `?versionId=abc` | `{"abc"}`（长度 1） | false | true |
-| *（正确行为）* 未指定版本 | *不存在*（长度 0） | **true** | **false** |
+## 完整的双边修复（`80c2c9d03`） {#the-fix}
 
-报告者写的是那条经典的"允许客户端删除当前对象、但不能回滚版本"策略——`Allow s3:DeleteObject` 配 `Condition {"Null": {"s3:versionid": "true"}}`——然后看着每一次未指定版本的删除都返回 `AccessDenied`。那条 `Allow` 从未生效，因为它的条件测的是"没有指定版本"，而 map 坚称永远指定了版本。`StringEquals` 同样看不出区别（`{""}` 和不存在都无法与一个非空策略值相交）；只有 `Null` 和 `ForAllValues:*` 对它敏感，这就是它为什么在 `Null` 上浮现。
+提交 `80c2c9d03` 将两端协同闭环：
 
-## 隔壁的 fail-open {#the-trap}
+1. **在 `getConditionValues` 中仅当 `vid != ""` 时写入 `"versionid"`**：
+   ```go
+   if vid != "" {
+       args["versionid"] = []string{vid}
+   }
+   ```
+2. **在 `authorizeRequestWithTags`（`cmd/auth-handler.go`）中针对 `DeleteObjectAction` 从 `ReqInfo.VersionID` 重绑定 `"versionid"`**：
+   ```go
+   if action == iampolicy.DeleteObjectAction {
+       reqInfo := logger.GetReqInfo(ctx)
+       if vid := strings.TrimSpace(reqInfo.VersionID); vid != "" {
+           conditionValues["versionid"] = []string{vid}
+       } else {
+           delete(conditionValues, "versionid")
+       }
+   }
+   ```
 
-显而易见的修复是只在非空时写入这个键，对单个 `DeleteObject` 这完全正确：没有版本 → 不存在 → `Null:true` 命中。但只发这一条，Multi-Delete 就会把它变成一个授权绕过。
+为什么只在 `action == iampolicy.DeleteObjectAction` 时用 `ReqInfo.VersionID` 覆盖 `conditionValues["versionid"]`，而不是对所有动作一刀切覆盖？因为在 `CopyObjectHandler` 中，`ReqInfo.VersionID` 存放的是目标对象的查询参数，而针对复制源执行的 `GetObjectAction` 鉴权必须校验来自请求头 `x-amz-copy-source` 的源版本号（`?versionId=...`）。将 `ReqInfo.VersionID` 重绑定限定在 `DeleteObjectAction`，既保证了单对象 `DeleteObjectHandler` 与批量 `DeleteMultipleObjectsHandler` 始终校验当前真正要删除的版本号，又在 `reqInfo.VersionID` 为空时显式执行 `delete(conditionValues, "versionid")`，彻底废掉了在批量删除 URL 上挂载 `?versionId=query-level-decoy` 诱饵参数的混淆手段。
 
-`DeleteObjects`（`POST /{bucket}?delete`）不把版本放在查询串里。每个对象各自把它可选的版本放在 **请求体** 里：
+---
 
-```xml
-<Delete>
-  <Object><Key>photo.jpg</Key><VersionId>a1b2…</VersionId></Object>
-  <Object><Key>notes.txt</Key></Object>
-</Delete>
-```
+## 消除空白字符归一化差异 {#trim}
 
-条件构造器读的是 `r.Form`——**查询串**——而没有任何地方把 XML body 并进去。于是在那个天真的修复下，一个在 body 里指定了版本 `a1b2…` 的条目，产出的是 **空的** 查询版本，键被省略，引擎看到的是 **不存在**——null。一条本意只允许删除 null 版本的策略现在命中了，运维本想保护的那个特定旧版本被删掉。报告里那个 fail-closed 的小麻烦，变成了 fail-open——而且恰好发生在最需要逐对象限定的那个操作上。
-
-这正是报告者那个简单例子掩盖的关键：条件值必须是 **服务端将要为这个对象实际操作的那个版本**，而对 Multi-Delete 来说，那个值待在一条构造器从没看过的通道上。
-
-## 修复：有效版本，而非顺手的版本 {#the-fix}
-
-两个机制，因为单独任何一个都是错的。
-
-**其一——诚实地表达"不存在"**（`cmd/bucket-policy.go`）。只在请求指定了版本时写入这个键，让"没有版本"成为一次长度为 0 的读取：
-
-```go
-if vid != "" {
-	args["versionid"] = []string{vid}
-}
-```
-
-**其二——把 DeleteObject 绑定到有效版本**（`cmd/auth-handler.go`，`authorizeRequestWithTags`）。DeleteObjects 循环已经把每个条目的 body 版本解析进了 `ReqInfo.VersionID`（经 `checkRequestAuthTypeWithVID`，`cmd/bucket-handlers.go:502`，一个顺序循环——不存在共享状态竞争）。授权把条件值重新绑定到那个服务端解析出的字符串，并在它为空时删除该键：
+在排查所有读取 `versionId` 的入口时，我们注意到各对象 Handler（`GetObjectHandler`、`HeadObjectHandler`、`DeleteObjectHandler`、`PutObjectRetentionHandler` 等）均通过以下方式提取版本号：
 
 ```go
-conditionValuesForAuth := func(lc string, cred auth.Credentials) map[string][]string {
-	values := getConditionValuesWithTags(r, lc, cred, existingTags, requestTags)
-	if action == policy.DeleteObjectAction {
-		// DeleteObjects 把有效版本放在每个 XML object 里，
-		// 而不是请求查询串里。把授权限定到该条目。
-		if versionID == "" {
-			delete(values, "versionid")
-		} else {
-			values["versionid"] = []string{versionID}
-		}
-	}
-	return values
-}
+versionID := strings.TrimSpace(r.URL.Query().Get(xhttp.VersionID))
 ```
 
-一个端到端测试在 DeleteObjects 的 URL 上挂了一个 **`&versionId=query-level-decoy`**，并断言它绝不进入任何条目的判定——逐对象的 body 值胜出，诱饵被剥掉。
+然而 `getConditionValues` 在读取 `r.Form.Get("versionId")` 及 `x-amz-copy-source` 中的 `u.Query().Get("versionId")` 时却**没有**调用 `strings.TrimSpace`。
 
-**为什么只对 `DeleteObjectAction`，而不是无差别地用 `ReqInfo` 重绑。** 那个诱人的简化——"永远用 `ReqInfo.VersionID`"——会弄坏复制。对 `CopyObject`，源读取是以 `GetObject` 针对源的版本来授权的，而那个版本走在 `x-amz-copy-source` 头里，`getConditionValues` 已经从那里提取；复制时的 `ReqInfo.VersionID` 装的是 *目标* 查询串（通常为空）。无差别重绑会用错误的版本覆盖掉正确的源版本。每一个非删除的版本相关操作（Get、Head、打标签、保留、复制源读取）都把版本放在查询串或复制源头里，两者构造器都读，而对单个对象来说两者 *就是* 有效版本。只有 Multi-Delete 会分叉。所以这个覆盖恰好和分叉一样宽，不多一分。
+这意味着，如果策略通过 `"StringEquals": {"s3:versionid": "v1"}` 拒绝访问特定版本 `v1`，调用方只需请求 `?versionId=v1%20`（末尾带一个空格），策略求值时看到的条件值就是 `"v1 "`——从而绕过 `StringEquals` 拒绝规则——随后业务 Handler 将 `"v1 "` 去除空格还原为 `"v1"` 并成功读取或删除该受保护版本。在 `getConditionValues` 中对查询串 `versionId` 与 `x-amz-copy-source` 的 `versionId` 统一调用 `strings.TrimSpace` 彻底消除了这一解析偏差。
 
-## 服务端据以操作的，是 trim 过的那个版本 {#trim}
+---
 
-删除路径正确之后，还剩一个口子。构造器读版本时是原样读的：
+## 调用链影响与请求条件来源隔离（`2f55347f7`） {#impact}
 
-```go
-vid := r.Form.Get(xhttp.VersionID) // 未 trim
-```
+| 操作类型 | `s3:versionid` 来源 | `20260804` 之前行为 | Server `20260804` 行为 |
+|---|---|---|---|
+| `GetObject` / `DeleteObject`（未传 `versionId`） | 无 | `["versionid"] = [""]`（`Null:true` 失败） | 省略该键（`Null:true` 正常命中） |
+| `GetObject` / `DeleteObject`（`?versionId=v1%20`） | URL 查询参数 `versionId` | 策略看到 `"v1 "`，Handler 实际操作 `"v1"` | 策略与 Handler 均归一化为 `"v1"` |
+| `CopyObject`（`x-amz-copy-source: /b/k?versionId=v1`） | `x-amz-copy-source` 查询参数 | 未去除首尾空白 | 统一去除首尾空白 |
+| `DeleteObjects`（`POST /?delete` 含 `<VersionId>`） | 逐条 `ReqInfo.VersionID` | 忽略 XML `<VersionId>`，误读 URL 查询串 | 按 XML 条目逐条重绑定，忽略 URL 诱饵参数 |
 
-而每一条真正 *使用* 版本的路径都会先 trim——`newContext`（`cmd/utils.go:806`）和 `getOpts`（`cmd/object-api-options.go:101`）都 `strings.TrimSpace`。于是在非删除的版本相关操作上，一个带尾空格的 `?versionId=V%20` 把 `"V "` 呈给策略引擎，而对象层读取/打标签/保留的是版本 `"V"`。一条以 `StringEquals s3:versionid "V"` 为键的 `Deny`——"保护这个确切版本"——看到的是 `"V "`，匹配不上，不生效；对 `"V"` 的操作照常进行。窄绕过（攻击者必须知道版本、且知道一个空格在下游不改变任何东西），但确实存在。
+在配套提交 `2f55347f7`（[`pgsty/silo#53`](https://github.com/pgsty/silo/issues/53)）中，我们还对 `getConditionValues` 中的其余请求条件键实施了来源隔离加固：
+- **保护内部保留键**：客户端传入的 URL 查询参数与 HTTP 请求头不再被允许覆盖服务端内部派生的条件键（`username`、`userid`、`principaltype`、`authtype`、`signatureversion`、`tlsVersion`、`cipherSuite`）。
+- **`s3:signatureAge`**：直接基于已验签的 SigV4 时间戳计算，不再信任客户端传入的同名参数。
+- **对象标签条件隔离**：`s3:ExistingObjectTag/<key>` 严格只从已存储的对象元数据标签填充，而 `s3:RequestObjectTag/<key>` 严格只从当前请求的 `x-amz-tagging` 请求头填充。
 
-修复对两处读取都 trim，让条件值与有效版本对齐：
+---
 
-```go
-vid := strings.TrimSpace(r.Form.Get(xhttp.VersionID))
-// …… 复制源回退同理
-```
+## SN-2026-005：拒绝退化的裸 ARN 前缀 {#sn-2026-005}
 
-`DeleteObjectAction` 本就免疫，因为它用的是已经 trim 过的 `ReqInfo.VersionID`。trim 不引入任何新的放行：它只能让条件值等于实际操作的那个版本，从而在同一个方向上收紧 `Deny`、修正 `Allow`。我们通过只去掉 trim、看着 padded 用例转红，证明了它是承重的。
+在同一轮 IAM 策略审计中，我们还排查了 **`SN-2026-005`**（[silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) 提交 `2b087a1`，并在 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 提交 `eee05a17c` 中接入）：当策略中的资源字符串写成了既无桶名也无对象后缀的退化前缀（如 `"arn:aws:s3:::"` 或 `"*arn:aws:s3:::"`）时会发生什么？
 
-## 它影响了什么 {#impact}
+由于旧解析器在剥离 `arn:aws:s3:::` 前缀后直接接受了空资源模式 `""`，该模式无法匹配任何实际的桶或对象。在普通 `Allow` 语句中它只是一条无效死规则；但在**使用 `Resource` 的 `Deny` 语句**或**使用 `NotResource` 的 `Allow` 语句**中，退化的 `arn:aws:s3:::` 会导致拒绝规则或排除集合完全轮空（Fail-Open）！
 
-报告里的失效在删除上，但底层这个键被许多动作读取。修复之后，每一条版本相关的调用链都以服务端为该操作解析出的版本来评估 `s3:versionid`：
+为了防止管理员误写入会导致策略静默失效的裸前缀，同时绝不让存量集群因历史数据在升级启动时崩溃：
+- `silo-pkg v3.12.0` 新增了 `policy.ParseConfigStrict`，明确拒绝退化的裸 ARN 前缀（`arn:aws:s3:::` 与 `*arn:aws:s3:::`）。
+- Server `20260804`（`eee05a17c`）在所有策略**写入**路径（桶策略、具名 IAM 策略、服务账号及 STS 内联策略）上调用 `ParseConfigStrict`；而持久化策略的加载路径继续使用宽容模式的 `ParseConfig`，确保存量集群平滑启动。
 
-| 调用链 | `s3:versionid` 来源 | 有效 |
-| :-- | :-- | :-- |
-| 单个 `DeleteObject` | `ReqInfo.VersionID` = trim 后的查询串，经覆盖 | ✓ |
-| `DeleteObjects`，逐条目 | `ReqInfo.VersionID` = XML body 版本，经覆盖 | ✓——fail-open 已关 |
-| `GetObject` / `HeadObject` / Select | 查询串，现已 trim | ✓ |
-| 对象打标签 / 保留 / legal-hold | 查询串，现已 trim | ✓ |
-| `CopyObject` / `CopyObjectPart` 源读取 | `x-amz-copy-source` 版本，现已 trim | ✓ |
-| 匿名 404-vs-403 探测 | 查询串（只读） | ✓ |
-| Admin / KMS / metrics / STS | 无版本概念 | ✓ |
+---
 
-有一条伪造路径此前已被条件来源那次工作关掉，值得重述：`versionid` 是一个保留的内部键（`versionid` 与规范化的 `Versionid` 两种拼写都保留），所以客户端无法通过头/查询串合并循环注入第二份。线上参数拼作 `versionId`（大写 I），会落进一个引擎从不读取的惰性 `args["versionId"]`。
+## 为什么 `SN-2026-003` 作为安全公告而非 CVE 跟踪 {#not-a-cve}
 
-两个方向的影响，因严重程度不同而分开陈述：
+触发 `s3:versionid` 条件求值缺陷的前提是调用方已通过认证，且目标策略显式依赖了 `s3:versionid` 条件算子（`Null`、`StringEquals` 或 `StringNotEquals`）。不带该条件的标准 `s3:DeleteObjectVersion` 动作权限检查不受影响。我们将条件求值与 `DeleteObjects` 重绑定修复归入 `SN-2026-003`，将裸 ARN 前缀写入拦截归入 `SN-2026-005`。
 
-- **功能性（报告本身）：** 未指定版本的删除被错误地 *拒绝*。fail-closed——一个可用性与易用性缺陷，不是放行。
-- **安全性（陷阱与 trim）：** 那个天真的修复会在 Multi-Delete 上 *放行* 对受保护版本的删除（fail-open）；而未 trim 的值在读/标签/复制上放过了一处窄的 `Deny` 绕过。修复在第一个能存在之前就关掉了它，在第二个已存在的地方关掉了它。
+---
 
-## 我们如何定级 {#not-a-cve}
+## 边界说明与关联修复 {#boundary}
 
-我们不为此签发 CVE，诚实的理由值得写出来。
+1. **`DeleteObjects` 的 Object Lock 治理模式绕过检查（`75a6734e4` / `#104`）**：在审查 `DeleteMultipleObjectsHandler` 的过程中，我们同步梳理了批量删除中请求头与逐条保留锁的交互；随后在 [Server 20260903](/zh/blog/security/20260903-server-hardening/)（`75a6734e4`，`SN-2026-008`）中收紧了 `x-amz-bypass-governance-retention` 的逐条鉴权边界。
+2. **Snowball `PutObjectExtract` 的 `minio.versionId` PAX 扩展头**：在本次 `versionId` 审计中记录归档，并已在 [Server 20261018](/zh/blog/security/20260926-governance-retention-bypass/)（`SN-2026-016`，`14042b5aa`）中彻底封堵。
+3. **其余身份条件键（`username`、`userid`、`signatureversion`、`authType`）**：`80c2c9d03` 有意将空切片省略限定在 `s3:versionid`，而不改变已认证请求上恒有定义的身份类条件键语义。
 
-报告者提交的行为是 fail-**closed**：MinIO 拒绝了策略本意允许的操作。一个过于严格的系统不泄露任何东西，也不放行任何东西；它是正确性与易用性缺陷，把一次误拒膨胀成漏洞，会让[这个编年史](/zh/blog/security/)里每一条真实条目贬值——它左右两边是认证绕过和路径穿越。
+---
 
-真正带安全分量的不是报告，而是它的邻近区域。Multi-Delete 上的 fail-open 是真实的，但那是我们 **本会引入** 的隐患，不是已发布的——两段式设计的价值，正在于那个危险版本从未存在于任何构建中。trim 绕过 *确实* 存在过，但很窄：它要求一条以确切 `s3:versionid` 为键的 `Deny`、一个知道版本的攻击者，且只影响非删除路径。我们关掉它，是因为它触手可及，而不是因为它是头条。
+## 回归验证 {#verification}
 
-所以：策略执行正确性，归档在这里，因为我们把静默的执行失效记在这里；安全意义如实记录，而非包装。
+`cmd/signature-v4-utils_test.go`、`cmd/auth-handler_test.go` 与 `cmd/bucket-policy_test.go` 中的回归测试覆盖并锁定了以下场景：
+- 在带版本号与不带版本号的 `GetObject`、`DeleteObject`、`CopyObject` 及 `DeleteObjects` 请求下，验证 `Null: {"s3:versionid": "true"}` 与 `Null: {"s3:versionid": "false"}` 的求值结果；
+- 验证 `?versionId=v1%20` 尾随空格在 `Deny StringEquals {"s3:versionid": "v1"}` 下被正确拦截；
+- 验证携带 `POST /bucket?delete&versionId=query-level-decoy` 诱饵参数时，XML 请求体内的版本化与非版本化 `<Object>` 条目均严格按条目自身重绑定；
+- 验证 `ParseConfigStrict` 对 `arn:aws:s3:::` 与 `*arn:aws:s3:::` 的拦截。
 
-## 我们没有越过的边界 {#boundary}
+## 源码参考 {#source}
 
-两个同类残留仍在，记录下来而非静默留置：
+- [`80c2c9d03`](https://github.com/pgsty/silo/commit/80c2c9d03) — `s3:versionid` 空值省略、空白字符归一化与 `DeleteObjects` 逐条重绑定（`SN-2026-003`）
+- [`2f55347f7`](https://github.com/pgsty/silo/commit/2f55347f7) — 请求条件键来源隔离（`#53`）
+- [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c) / [`silo-pkg@2b087a1`](https://github.com/pgsty/silo-pkg/commit/2b087a1) — `ParseConfigStrict` 拒绝退化裸 ARN 前缀（`SN-2026-005`）
 
-- **Multi-Delete governance bypass 后续：** 原相邻缺口已由 `75a6734e4` / #104 修复并随 Server 20260903 发布，按每个 XML 条目的实际版本重新授权。下方 Snowball 观察是独立范围。
-- **Snowball tar 解包。** `PutObjectExtract` 在逐文件授权 **之后** 才从 tar PAX 记录 `minio.versionId` 取每个成员的版本，于是一个从未出现在任何条件值里的指定版本可能被写入。
+## 总结 {#closing}
 
-两者都窄、都是既有行为，且都会把改动从"修好报告里的那个键"扩大成"把每个动作的版本都重新接进 `ReqInfo`"。我们限定在报告的这个面上，把欠条写在这里，理由和[上一篇](/zh/blog/security/duplicate-part-numbers/)记录它对象层省略时一样：**一个没有记录的刻意省略，半年后与疏忽无法区分。**
-
-一个相关的、被否决的决定：`username`、`userid`、`signatureversion`、`authType` 这几个同类键仍然被 **无条件写空**，带着 `versionid` 刚摆脱的那个存在但为空的缺陷——`Null:{aws:username:true}` 永远为 false，包括对它本该命中的匿名调用者。修它们每个都是一行，却是四十个调用方的影响面，而且有些（`principaltype` 从不为空）根本不带这个 bug。我们没有把一次广泛的存在性清理塞进一个 versionid 修复里；它作为下一根要拉的线头，记在这里。
-
-## 证伪 {#verification}
-
-三个实验，遵循那条纪律：一个你从没看它失败过的测试，还不算测试。
-
-- **把两个源文件回退到 `HEAD`。** 端到端 DeleteObjects 测试转红，每一个未指定版本的条目都返回 `AccessDenied`——对 issue #21735 的忠实复现——而单测直接抓住了 `{""}` 键（"一个不存在的 versionId 被暴露给了策略评估"）。打回，转绿。
-- **只去掉 `TrimSpace`。** padded 用例在那条确切断言上转红——`got [7f4b6b5f-…dd8 ]`——证明这个 trim 不是装饰。恢复，转绿。
-- **那个诱饵。** Multi-Delete 测试在 URL 上挂 `&versionId=query-level-decoy`，并断言它抵达不了任何条目的判定，这正是"读查询串"与"读逐条目有效版本"之间的分水岭。
-
-改动只碰了五个文件（`cmd/bucket-policy.go`、`cmd/auth-handler.go`、两个测试、一处文档示例），在一个同时存在无关并发工作的工作树里用显式路径提交，所以邻近那些工作的任何改动都没有被卷进来。
-
-## 起因与来源 {#source}
-
-报告是上游 `minio/minio#21735`，2026-01-10 针对 `RELEASE.2025-09-07T16-13-09Z` 提出：一条 `Null:{s3:versionid:true}` 策略拒绝了未指定版本的 `DeleteObjects`。上游仓库于 2026-04-25 归档只读，所以没有上游修复可等，也没有维护者可协调——fork 是唯一的去处，这里的记录就是结案。
-
-这个缺陷很老，且是继承来的。只要这个键存在，`getConditionValues` 就一直无条件写 `versionid`；基于长度的 `Null` 语义是上游的，在 fork 经由 `silo-pkg` 消费的那个 policy 包里。这与此前那次"阻止客户端输入影子化服务端派生条件值"的条件来源加固，是同一个函数、同一条脉络——一次关于"一条策略条件被允许相信关于请求的什么"的相关阅读，在这里延续为"它必须相信服务端将要实际操作的那个版本"。
-
-## 结语 {#closing}
-
-缺失不是空。一个无法通过"不放这个键"来表达"没有版本"的 map，会用"把值留空"来表达它；而一个数长度的 `Null`，会在每一个没有指定版本的请求上相信有版本被指定了。
-
-如果只留下一句：**fail-closed 的 bug 才是危险的那种，因为显而易见的修复会把它翻成 fail-open**——所以把条件绑定到服务端实际操作的那个值，从操作实际读取的那条通道取，而不是那条顺手的通道；而当你止步于报告的这个面时，把你留在错误通道上的那些版本写下来，别指望下一个人自己找到它们。
+随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 发布的 `80c2c9d03` 与 `eee05a17c`（配合 `silo-pkg v3.12.0`）修复了单对象与批量 `DeleteObjects` 路径上的 `s3:versionid` 条件求值语义，并在策略写入入口拦截了退化的裸 S3 ARN 前缀。

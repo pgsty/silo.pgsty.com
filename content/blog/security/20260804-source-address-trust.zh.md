@@ -1,293 +1,169 @@
 ---
-title: "让客户端源地址真正可信"
-linkTitle: "客户端源地址信任问题"
+title: "SN-2026-018：客户端源地址信任边界、转发头欺骗与 aws:SourceIp 加固"
+linkTitle: "SN-2026-018：源地址信任边界"
 date: 2026-08-04
-author: "冯若航"
-description: "一个以单个请求头命名的开关，被当成了防住三个头的手段。关掉 X-Forwarded-For 之后，X-Real-IP 和 Forwarded 接着回答，于是 aws:SourceIp 和每一条审计客户端地址，对任何能连到 API 端口的人来说仍然可伪造。修法是一个可选的可信代理边界——而更值得记录的决定，是我们拒绝去修那个旧开关。"
-tags: [安全, Source Address]
-weight: 100
-draft: false
+author: "[冯若航](https://vonng.com) ([`@Vonng`](https://github.com/Vonng))"
+description: "解析为何设置 _MINIO_API_XFF_HEADER=off 后仍会无条件信任 X-Real-IP 与 Forwarded、为何单纯部署反向代理不足以防御伪造，以及 MINIO_API_TRUSTED_PROXIES 如何闭环源 IP 归属（SN-2026-018）。"
 url: "/zh/blog/security/source-address-trust/"
+tags: ["Security", "IAM", "Network", "Reverse Proxy", "aws:SourceIp", "Audit", "SILO"]
 ---
 
-**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
-**定级：** 可选加固 + 文档缺陷，**不是漏洞，也不是回归**；未申请 CVE。底层弱点继承自上游，本次未改变其默认行为
-**影响范围：** `aws:SourceIp` 策略条件、审计日志 `remotehost` 字段、S3 事件通知的 `Host`、`mc admin trace` 显示的客户端——凡是 S3 API 端口无需经过清洗请求头的代理即可抵达的部署
-**上游：** 无处可报——`minio/minio` 已归档。上游既有记录：[PR #4736](https://github.com/minio/minio/pull/4736)（2017，疑虑被提出并被半途解决）、[discussion #17878](https://github.com/minio/minio/discussions/17878)（2023，维护者标记为符合预期）、[PR #20977](https://github.com/minio/minio/pull/20977)（2025，那个只管一半的开关）
-
-> 本文明确指出：在可直连的 MinIO 部署上，`IpAddress` 策略条件不可执行，而且本次改动之后默认情况下依然如此。这是上游 MinIO 出厂即有的性质，不是本 fork 引入的缺陷，而且从来没有在任何地方被写下来过。把它写出来正是本文的目的。
+**`SN-2026-018`** 修复了 [silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0)（提交 `62f326d`）与 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`00a8171cb`，[`pgsty/silo#41`](https://github.com/pgsty/silo/issues/41)）中影响 `aws:SourceIp` IAM 条件求值、审计日志、桶事件通知及管理端 HTTP 追踪的客户端源 IP 欺骗问题：`handlers.GetSourceIP` 此前默认无条件信任任意 TCP 对端发来的 `X-Forwarded-For`、`X-Real-IP` 与 RFC 7239 `Forwarded` 请求头；即便管理员显式设置了 `_MINIO_API_XFF_HEADER=off`，该函数也只是跳过了 `X-Forwarded-For`，随后立刻落入并无条件采信客户端伪造的 `X-Real-IP` 与 `Forwarded`。
 
 ## 结论先行 {#summary}
 
-- MinIO 从三个可互相替代的请求头里读取客户端地址——`X-Forwarded-For`、`X-Real-IP`、RFC 7239 `Forwarded`——只有三个都不存在时才回落到 TCP 连接。这个地址会成为 `aws:SourceIp` 和审计日志的客户端字段，所以谁控制它，谁就同时控制了基于 IP 的访问控制和每一条操作记录的归属。
-- 唯一存在的开关 `_MINIO_API_XFF_HEADER=off` 只压制了三者中的 **一个**。攻击者的应对是改发 `X-Real-IP`。而我们自己的代码注释当时正把它写作缓解手段。
-- **"把 MinIO 放到反向代理后面"并不足够**，有两个彼此独立的原因：K8s 上 Ingress 与 ClusterIP Service 惯常并存，代理并非唯一入口；以及通行的 nginx 配方对 `X-Forwarded-For` 是 **追加**，会把客户端提供的条目留在最左侧——而那正是 MinIO 读取的位置。
-- 修法是新增一个可选设置 `MINIO_API_TRUSTED_PROXIES`，把本 fork 早先为 LDAP STS 限流建立的可信代理机制推广到全局。设为列表时，只采信名单内 peer 送来的转发头，并从右向左走链；设为 `none` 时，什么都不信。
-- **最有分量的一个决定，是我们推翻了自己。** 第一版实现把 `_MINIO_API_XFF_HEADER=off` 的语义扩大到压制全部三个头。那是整个改动里唯一可能改变现存部署行为的部分，已经被回退。该开关保持上游的确切语义，上游的 `TestXFFDisabled` 原封不动保留下来作为凭证。
-- 净兼容性影响：**对任何未主动启用新设置的部署为零。**
-- 对抗式审查在第一版实现中找出四个缺陷，其中一个会让新设置对所有通过环境变量文件配置的部署 **静默失效**。
+1. **`_MINIO_API_XFF_HEADER=off` 漏掉了另外两个转发头**：设置 `_MINIO_API_XFF_HEADER=off` 仅跳过了 `X-Forwarded-For`，但 `handlers.GetSourceIP` 紧接着就会读取 `X-Real-IP` 和 `Forwarded`。任何直连客户端只需伪造 `X-Real-IP: 10.0.0.1` 即可绕过 `aws:SourceIp` 策略限制。
+2. **“在前面挡一层反向代理”往往并不够**：即便部署了反向代理，如果代理采用追加模式（如 nginx 默认的 `proxy_add_x_forwarded_for`）而服务端固定取 `X-Forwarded-For` 最左侧的第一个 IP，或者集群内 Pod 可以绕过 Ingress 直连 `ClusterIP`，攻击者依然可以伪造 `aws:SourceIp`。
+3. **`MINIO_API_TRUSTED_PROXIES` 提供显式的从右向左信任链校验**：[Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 引入了 `MINIO_API_TRUSTED_PROXIES`（支持 `off` / `none`、授信代理 IP/CIDR 列表、以及兼容旧行为的 `all` / `*`），并从右向左逆序回溯 `X-Forwarded-For` / `Forwarded`，在遇到第一个不属于授信代理集合的跳点时立即停下并将其作为真实客户端地址。
 
-## 这个地址究竟被用在哪 {#consumers}
+---
 
-值来自同一个函数 `handlers.GetSourceIPFromHeaders`。把它的下游追一遍，问题的性质就从"日志细节"变成了"安全问题"：
+## `handlers.GetSourceIP` 的四个核心消费方 {#consumers}
 
-| 消费方                                    | 为什么要紧                                |
-|:---------------------------------------|:-------------------------------------|
-| `aws:SourceIp`（`cmd/bucket-policy.go`） | 决定 `IpAddress` / `NotIpAddress` 策略条件 |
-| 审计 `remotehost`                        | 调查其它一切事故时所依据的那条记录                    |
-| 事件通知 `Host`                            | 作为事实流向下游消费者                          |
-| `mc admin trace` 客户端                   | 运维实时观察"谁在做什么"的视图                     |
+在 SILO 中，`handlers.GetSourceIP(r)`（位于 `silo-pkg/handlers/proxy.go`）是从入站 `*http.Request` 提取客户端 IP 地址的唯一入口。四个与安全及可观测性密切相关的子系统直接依赖其返回值：
 
-其中两项在不同意义上与安全相关。伪造 `aws:SourceIp` 是活的访问控制绕过：本意把某个主体限制在办公网段的 `IpAddress` 条件，只要声称一个该网段内的地址就满足了；`NotIpAddress` 的拒绝规则，只要声称一个范围外的地址就规避了。伪造审计地址更安静，也可以说更糟——它是回溯性地污染记录，即使不存在任何基于 IP 的策略也照样成立，而且直到需要查日志的那天才会有人发现。
+| 消费方 | 代码位置 | 安全与运维职责 |
+|---|---|---|
+| `aws:SourceIp` IAM 条件键 | `cmd/signature-v4-utils.go` (`getConditionValues`) | 评估桶策略与 IAM 策略中的 `IpAddress` 与 `NotIpAddress` 网段条件。 |
+| 审计日志 (`remotehost`) | `cmd/logger/audit.go` | 在合规审计日志中记录发起请求的客户端源 IP。 |
+| 桶事件通知 (`Host`) | `cmd/notification.go` | 填充 S3 事件通知载荷中的 `requestParameters.sourceIPAddress`。 |
+| 管理端 HTTP 追踪 (`mc admin trace`) | `cmd/http-tracer.go` | 在实时诊断追踪输出中展示客户端源 IP。 |
 
-另外值得一提：默认路径上这个值从不被校验为 IP 地址。`Forwarded: for="_gazonk"` 会被原样接受并返回，上游自己的测试就断言了这一点。
+值得一提的是，旧版 `handlers.GetSourceIPRaw` 在提取出第一个匹配的请求头字段后，甚至不会校验它是不是一个语法合法的 IP 地址（上游 `silo-pkg` 的单元测试里 literally 有一条断言验证传入 `X-Forwarded-For: _gazonk` 会原样返回 `"_gazonk"`！）。虽然 `IpAddress` 条件算子内部会用 `net.ParseIP` 解析，但审计日志和事件通知都会被直接注入未校验的原始字符串。
 
-## 那个看起来像缓解手段的开关 {#the-switch}
+---
 
-`internal/handlers/proxy.go` 只拦住了一个头：
+## 为什么 `_MINIO_API_XFF_HEADER=off` 防不住源 IP 伪造 {#the-switch}
+
+在 `silo-pkg/handlers/proxy.go` 中，`GetSourceIPRaw` 原本按顺序依次检查三组请求头：
 
 ```go
-if enableXFFHeader {
-    if fwd := r.Header.Get(xForwardedFor); fwd != "" {
-        // ... 取最左侧条目
-    }
-}
-if addr == "" {
-    if fwd := r.Header.Get(xRealIP); fwd != "" {
-        addr = fwd                       // 没有拦
-    } else if fwd := r.Header.Get(forwarded); fwd != "" {
-        // ... 取第一个 for= 元素      // 没有拦
-    }
-}
+var xffHeaders = []string{"X-Forwarded-For", "x-forwarded-for"}
+var realIPHeaders = []string{"X-Real-IP", "x-real-ip"}
+var forwardedHeaders = []string{"Forwarded", "forwarded"}
 ```
 
-设置 `_MINIO_API_XFF_HEADER=off` 给攻击者带来的成本是一行：把 `X-Forwarded-For` 换成 `X-Real-IP`。更糟的是，关掉 `X-Forwarded-For` 会把信任 **转移** 到一个运维根本没考虑过的头上，于是这个开关可能让部署落到一个它的拥有者从未建模过的状态里。
+2025 年 2 月上游 PR [`minio/minio#20977`](https://github.com/minio/minio/pull/20977)（及 `minio/pkg#306`）引入 `_MINIO_API_XFF_HEADER=off` 开关时，**仅仅**用它包住了第一组 `xffHeaders` 循环：
+- 当 `_MINIO_API_XFF_HEADER=off` 时，`GetSourceIPRaw` 跳过 `X-Forwarded-For`；
+- 紧接着下一行，它便毫无条件地继续读取 `X-Real-IP`（`realIPHeaders`）和 `Forwarded`（`forwardedHeaders`）！
 
-它是怎么来的？上游 PR [minio/minio#20977](https://github.com/minio/minio/pull/20977)，全部动机就是一句：
+结果，为了防止直连端点上 `aws:SourceIp` 被伪造而特意配置了 `_MINIO_API_XFF_HEADER=off` 的管理员，面对一条简单的 `curl -H "X-Real-IP: 192.0.2.10"` 或 `curl -H "Forwarded: for=192.0.2.10"` 依然毫无防备。
 
-> Customer request to disable all XFF header handling, ping me in Slack for more details.
+### 自 2017 年以来的上游演进历史 {#upstream-history}
 
-没有安全论证，没有提到 `X-Real-IP` 或 `Forwarded`，也没有任何公开讨论说明为什么拦一个而放两个。这个窄不是深思熟虑的作用域，是疏漏。这一点影响了设计，因为它意味着 **没有人** 决定过另外两个应该继续被信任——但正如后文所述，它最终并没有构成修改那个开关的理由。
+回顾 Git 历史可以看到，这一位置在过去八年里经历过多次反复：
+- **2017-07（[`minio/minio#4736`](https://github.com/minio/minio/pull/4736)）**：上游曾意识到客户端可伪造 `X-Forwarded-For` 绕过 `aws:SourceIp`，一度从 `GetSourceIP` 中移除了转发头。
+- **随后的重构**：由于反向代理后面的部署抱怨 `aws:SourceIp` 和审计日志只能看到负载均衡器 IP，后续重构又把 `X-Forwarded-For`、`X-Real-IP` 与 `Forwarded` 加了回来，并且直接取 `X-Forwarded-For` 逗号分隔列表中的**第一个**（最左侧）地址。
+- **2023-08（[`minio/minio#17878`](https://github.com/minio/minio/discussions/17878)）与 2025-02（[`minio/minio#20977`](https://github.com/minio/minio/pull/20977)）**：社区多次反馈直连场景下的伪造风险后，上游加入了 `_MINIO_API_XFF_HEADER`，却遗漏了同函数的 `X-Real-IP` 与 `Forwarded`。
 
-### 上游早就知道，2017 年就知道 {#upstream-history}
+---
 
-写这篇复盘时发现的最有意思的一件事是：这一切对上游都不是新闻。这段历史本身是一堂关于"安全决策如何腐化"的小课。
+## 为什么“前面挡一层反向代理”依然不够安全 {#proxy-is-not-enough}
 
-**2017 年 8 月。** `IpAddress` / `NotIpAddress` 条件支持在 [PR #4736](https://github.com/minio/minio/pull/4736) 中加入。评审过程中，维护者 @harshavardhana 提出的正是本文讨论的这件事：`X-Forwarded-For` 极易伪造，最左侧那个条目是客户端自己写的，拿它做安全判断会让恶意客户端拿到对象。贡献者接受了意见，**把 `X-Forwarded-For` 支持整个删掉**，只留 `X-Real-IP`，理由是"这个头由代理设置，客户端改不了"。五天后合并。
+一种常见的误解是：“只要我的对象存储前面挡了 nginx 或 Ingress 反向代理，客户端就没法伪造源 IP 了。”事实上，在以下两种极其普遍的生产拓扑中，即便有反向代理，旧逻辑依然会被轻易击穿：
 
-这个理由对了一半，而没说出来的那一半正是全部问题所在：`X-Real-IP` 不可篡改，**前提是前面的代理会覆盖它**。没有任何机制保证这一点，也没有任何地方告诉运维这是一个承重假设。
+1. **取最左侧 `X-Forwarded-For` 与代理追加模式（`proxy_add_x_forwarded_for`）的冲突**：nginx 等反向代理的标准配置通常是 `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`，它的语义是在客户端发来的 `X-Forwarded-For` 末尾**追加**真实客户端 IP。如果攻击者发送 `X-Forwarded-For: 10.0.0.5`，nginx 转发给后端的请求头就是 `X-Forwarded-For: 10.0.0.5, 203.0.113.99`。由于旧版 `GetSourceIP` 无条件取**最左侧**的第一个地址（`10.0.0.5`），攻击者伪造的内网 IP 依然直接胜出！
+2. **Ingress 入口与集群内直连并存（Kubernetes ClusterIP）**：在 Kubernetes 环境中，外部流量经过 Ingress 控制器进入，但集群内的业务 Pod 往往直接访问 `silo` 的 `ClusterIP` Service。如果服务端无条件信任任何对端发来的转发头，集群内任意一个普通 Pod 只要直连 `ClusterIP` 并附上 `X-Forwarded-For` 或 `X-Real-IP`，就能冒充受信任子网调用管理或受限接口。
 
-**今天。** `X-Forwarded-For` 被最先读取，排在 `X-Real-IP` 前面。2017 年的那个决定没有活下来——它不是被有意推翻的，而是在后续对条件值管道的若干次重构中溶解掉的。没有任何一次提交说"我们要把这个可伪造的头重新放回策略判断里"——而这恰恰是这类腐化发生的方式。
+---
 
-**2023 年 8 月。** 在 [discussion #17878](https://github.com/minio/minio/discussions/17878) 中，一位运维报告负载均衡后面的源 IP 不可靠。维护者的回答毫不含糊：在源 IP 不可靠可见的前提下，基于 IP 的限制不切实际，建议改用按标签或按命名空间做隔离。议题被标记为"符合预期"。
+## `MINIO_API_TRUSTED_PROXIES` 的设计方案 {#design}
 
-也就是说，上游自己的立场——由维护者公开陈述过——是 **不要依赖 `aws:SourceIp`**。这是一个站得住的工程判断。缺的是：运维在任何地方都遇不到这句话。它不在策略文档里，不在条件键参考里，也不在那个看起来能让它变安全的开关旁边。写一条 `IpAddress` 条件不会收到任何抱怨，它表现得就像生效了一样。
+为了同时解决上述两类问题，`silo-pkg v3.12.0`（`62f326d`）与 Server `20260804`（`00a8171cb`）引入了 `MINIO_API_TRUSTED_PROXIES` 环境变量：
 
-这个落差才是本次真正修复的缺陷，它也重新定义了这次改动的性质：白名单并不是在推翻上游的判断，而是把 2017 年那个疑虑变得 **可以回答**，提供给需要它的部署。而承担更重分量的其实是文档——把一份从 2017 年起就只存在于评审记录里、并且从 2025 年起被自家开关反向暗示的契约，正式写下来。
+| 配置值 | 对端信任策略 | 转发头解析行为 |
+|---|---|---|
+| `MINIO_API_TRUSTED_PROXIES=off`（或 `none`） | **不信任**任何外部代理跳点 | 对所有外部连接一律采用 TCP 对端地址（`r.RemoteAddr`），完全忽略 `X-Forwarded-For`、`X-Real-IP` 与 `Forwarded`。 |
+| `MINIO_API_TRUSTED_PROXIES=10.0.1.0/24,192.168.1.10` | 仅信任显式列出的 IP/CIDR | 若 `r.RemoteAddr` 不在授信集合内，直接返回 `r.RemoteAddr`。若 `r.RemoteAddr` 受信任，则**从右向左**逆序扫描 `X-Forwarded-For`（或 `Forwarded`），返回第一个不在授信集合内的合法 IP。 |
+| 未设置、`all` 或 `*` | 历史兼容模式 | 保持 `20260804` 之前的行为（除非额外设置了 `_MINIO_API_XFF_HEADER=off`）。 |
 
-## 为什么"放到代理后面"不是答案 {#proxy-is-not-enough}
+注意：`handlers.GetSourceScheme`（读取 `X-Forwarded-Proto`）被有意保持不变，以确保在反向代理卸载 TLS 的场景下，HTTPS 重定向与预签名 URL 协议检测不受 `MINIO_API_TRUSTED_PROXIES` 影响。
 
-这是标准建议，而它以两种常见且彼此独立的方式失效。
+---
 
-### 代理不是唯一入口
+## 七项关键工程权衡 {#tradeoffs}
 
-K8s 上 Ingress 和 ClusterIP Service 惯常并存。Ingress 会清洗请求头，Service 不会，而集群里任何一个 Pod 都能连到它。大家以为安全边界是 Ingress，实际上是整个 Pod 网络。Pigsty 部署里也是同一个形状：负载均衡挡在 MinIO 前面，而服务端口在内网依然可达。
+### 1. 默认向后兼容 vs. 显式安全加固 {#tradeoff-default}
 
-### 那条通行的 nginx 配方会保留攻击者输入
+如果在小版本更新中直接将未设置时的默认值改为 `off`，所有部署在反向代理之后、正在使用 `aws:SourceIp` 策略但尚未配置 `MINIO_API_TRUSTED_PROXIES` 的存量集群都会在升级瞬间因看到负载均衡器 IP 而全量拒绝合法业务请求。因此我们保持未设置时的默认兼容性，同时提供 `MINIO_API_TRUSTED_PROXIES=off` 与 CIDR 列表作为明确的一等安全控制项。
 
-几乎人人复制的那一行是：
+### 2. 为什么我们撤回了“直接扩大 `_MINIO_API_XFF_HEADER=off` 拦截范围”的初版改法 {#tradeoff-widen}
 
-```nginx
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-```
+在第一版草稿中，我们曾直接让 `_MINIO_API_XFF_HEADER=off` 同时禁用 `X-Real-IP` 和 `Forwarded`。然而运行服务端测试集时，`cmd/generic-handlers_test.go` 中的 `TestXFFDisabled` 立刻报错失败！
 
-`$proxy_add_x_forwarded_for` 展开为 `$http_x_forwarded_for, $remote_addr`——它对客户端发来的内容是 **追加**。客户端发 `X-Forwarded-For: 1.2.3.4`，nginx 转发出去的就是 `1.2.3.4, <真实客户端>`。而 MinIO 取的是 **最左侧** 元素，也就是攻击者的那个。
+仔细检查 `TestXFFDisabled` 揭示了原因：该测试专门模拟了这样一种 nginx 部署——nginx 用 `X-Real-IP: $remote_addr` **覆盖**写入真实客户端 IP（单跳可信），同时用 `X-Forwarded-For: $proxy_add_x_forwarded_for` **追加**列表（最左侧不可信）。在这种拓扑下设置 `_MINIO_API_XFF_HEADER=off` 的用户，恰恰指望服务端忽略 `X-Forwarded-For` **以便落入被 nginx 覆盖写死的 `X-Real-IP`**！因此，当 `MINIO_API_TRUSTED_PROXIES` 未设置时，我们完整保留了 `_MINIO_API_XFF_HEADER=off` 的既有行为以兼容 `TestXFFDisabled`，而由 `MINIO_API_TRUSTED_PROXIES=off` 负责彻底关闭全部三类转发头（`X-Forwarded-For`、`X-Real-IP` 与 `Forwarded`）。
 
-所以一个配置正确、加固过、完全不可直连的部署，**照样** 可以被伪造，因为"取最左"和"追加式代理"这两个约定天然不兼容。默认模式下只有 `proxy_set_header X-Forwarded-For $remote_addr;`（覆盖）是安全的，而那不是运维从文档里抄走的那一行。
+### 3. 为什么只支持环境变量而不提供 `mc admin config` 动态配置键 {#tradeoff-config}
 
-正是这条排除了"只改文档"的方案。部署纪律关不掉它；必须从链的另一端读，而那需要代码。
+在 SILO 的启动时序中，HTTP 监听器与初始路由在分布式纠删码存储加载 `api` 子系统配置之前就已经就绪。如果将授信代理做成 `mc admin config set api` 配置项，节点启动早期在加载完持久化配置之前就会出现一段信任策略未定义的空窗期（要么短暂 Fail-Open，要么短暂拒绝请求），且运行时热修改还涉及跨包并发状态同步。将其固定为进程启动环境变量，可以从根本上消除启动空窗期。
 
-## 设计 {#design}
+### 4. 本地环回地址（Loopback）豁免：区分 TCP 对端与转发链中间跳点 {#tradeoff-loopback}
 
-我们没有另起炉灶，而是推广了本 fork 已有的机制。`MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES`——在 [LDAP STS 限流那次工作](/zh/blog/security/cve-2026-33419/)中加入——已经实现了 CIDR 白名单解析、catch-all 拒绝，以及从右向左的走链，只是作用域限于限流分桶。解析器移到了 `internal/config`，现在两条路径共用它。
+SILO 内置的 FTP 与 SFTP 服务端（`cmd/ftp-server.go`、`cmd/sftp-server.go`）以及本机内部转发会通过本地环回地址（`127.0.0.1` / `::1`）连接 S3 层，并通过 `X-Forwarded-For` 传递外部 FTP/SFTP 客户端的真实 IP。因此，当**直接 TCP 对端**（`r.RemoteAddr`）是本地环回地址时，SILO 会信任该本地对端跳点，以确保 FTP/SFTP 的审计日志和 `aws:SourceIp` 能拿到真实客户端 IP。
 
-一个设置选定模式：
+但至关重要的一点是：**本地环回地址绝不能在 `X-Forwarded-For` 请求头链条内部被无条件当成授信跳点！** 否则，处于一层授信反向代理之后的外部攻击者只需发送 `X-Forwarded-For: 10.0.0.1, 127.0.0.1`，从右向左扫描器就会先跳过反向代理（`r.RemoteAddr`），再跳过请求头里的 `127.0.0.1`，最终采信攻击者伪造的 `10.0.0.1`！
 
-| 模式      | `MINIO_API_TRUSTED_PROXIES` | 源地址               |
-|:--------|:----------------------------|:------------------|
-| 不设防（默认） | 未设置                         | 与今天完全一致           |
-| 谁都不信    | `none`                      | 一律为 TCP peer      |
-| 白名单     | 地址与 CIDR 块列表                | 采信转发头，但仅限名单内 peer |
+### 5. 请求头优先级：为什么 `X-Forwarded-For` 优先于 `X-Real-IP` {#tradeoff-precedence}
 
-白名单模式下，`X-Forwarded-For` 与 `Forwarded` 从右向左读，跨过名单内代理的条目，第一个剩下的地址胜出。每一跳代理都会追加它实际看到的 peer，所以客户端注入的条目一定位于其代理写入的条目 **左侧**，走链在到达它之前就停住了。追加式代理由此变得安全。
+当 `MINIO_API_TRUSTED_PROXIES` 配置为 CIDR/IP 列表时，`GetSourceIP` 先从右向左评估 `X-Forwarded-For`，再检查 `X-Real-IP`（经 `parseIP` 校验），最后从右向左评估 `Forwarded`。这里有意与 `getSTSLDAPTrustedProxySourceIP`（`cmd/sts-handlers.go` 中专用于单跳 LDAP STS 代理、优先读 `X-Real-IP` 的辅助函数）保持区分：在通用多跳 S3 代理链中，只有 `X-Forwarded-For` 完整记录了每一跳的追加轨迹以供从右向左验链，而 `X-Real-IP` 可能停留在外层或内层某一跳。
 
-`GetSourceScheme` 特意未动。它喂的是 S3 响应里 `Location` URL 的 scheme，不是策略判断；一并压制会让所有在代理上终结 TLS 的部署收到 `http://` 的 URL。
+### 6. 避免配置过宽的内网 CIDR {#tradeoff-breadth}
 
-## 利弊权衡 {#tradeoffs}
+如果管理员将 `MINIO_API_TRUSTED_PROXIES` 设为过宽的网段（例如 `10.0.0.0/8`），而普通业务容器也运行在 `10.0.0.0/8` 内，那么网段内的任意业务容器都会被视为授信代理并能伪造 `X-Forwarded-For`。在生产环境中应仅填入专用的负载均衡器/Ingress IP 或独立子网。
 
-### 要不要改默认值 {#tradeoff-default}
+### 7. 多节点分布式集群的对等节点配置 {#tradeoff-multinode}
 
-把默认改成不信任转发头，会让所有现存反向代理部署的 `aws:SourceIp` 和审计地址在一夜之间变成代理的地址。策略可能变成拒绝，审计连续性会断。
+在多节点分布式 SILO 集群（如 `silo server http://node{1..4}/data`）中，负载均衡器可能将请求打到节点 1，再由节点 1 在集群内部转发给节点 2～4：
 
-不改，则可直连的部署继续暴露。
+| 部署拓扑 | `MINIO_API_TRUSTED_PROXIES` 应包含的地址 |
+|---|---|
+| 单节点 + 反向代理 | 仅反向代理的 IP/CIDR |
+| 多节点分布式集群 + 反向代理 | 反向代理的 IP/CIDR **以及**所有 SILO 集群节点的 IP/CIDR |
+| 客户端直连多节点集群（无外部反向代理） | 所有 SILO 集群节点的 IP/CIDR（若无跨节点转发需求则可设为 `off`） |
 
-**决定：不改。** 但"不改"不等于"不说"。这个代价现在被明明白白写进了代码注释和运维文档：默认模式下，`IpAddress` 条件不是访问控制，审计地址不是证据。把代价摆到台面上让运维自己选，好过替他们做一个会在发布窗口引爆的决定。
+---
 
-### 要不要扩大既有开关的语义 {#tradeoff-widen}
+## 兼容性细节 {#compatibility}
 
-这是我们第一次做错、随后推翻的决定，也是整个故事里最值得记录的一段。
+- **启用授信代理控制后拒绝非 IP 脏字符串**：只要启用了 `MINIO_API_TRUSTED_PROXIES`（设为 `off` 或 CIDR 列表），所有候选请求头字段都必须通过合法 IP 地址解析；像 `_gazonk` 这样的畸形字符串会被直接丢弃而不会返回给下游。
+- **清理失效的 IPv4-mapped 字符串前缀拼接逻辑**：旧版 `proxy.go` 中有一处针对 `"::ffff:"` 的字符串截取判断，无法正确处理十六进制形式的 IPv4-mapped IPv6 地址；新代码统一使用标准库 `netip.Addr.Unmap()` 将 `::ffff:192.0.2.1` 规范化为 `192.0.2.1`。
 
-最初的需求是：当运维显式关闭转发头信任时，客户端不能再通过等价的头来伪造。最直白的读法是"把 `_MINIO_API_XFF_HEADER=off` 修成覆盖三个头"，第一版实现也确实是这么做的。
+---
 
-支持扩大的理由并不弱。上游 PR 标题写的就是 "disable **all** X-Forwarded-For header handling"；其描述的作用域是审计日志与基于 IP 的访问控制，两者都关乎"不要相信客户端声称的地址"；这个开关没有文档，受众很小；而且失败方向是安全的，回退到真实的 TCP peer 而不是攻击者可控的值。
+## 多轮代码审查抓出的 9 个边界缺陷 {#review}
 
-反对的理由最终占了上风。扩大它会改变一类真实人群的行为：那些代理对 `X-Forwarded-For` 是追加（脏）、对 `X-Real-IP` 是覆盖（干净）的运维，可能已经把 `off` 当作拿到正确地址的办法。上游的 `TestXFFDisabled` 恰恰断言了这个行为——开关关闭且两个头都在时，`X-Real-IP` 胜出——所以这个行为不只是顺带发生的，它被一个测试钉住了。这些运维会看到审计地址悄无声息地从真实客户端翻成他们的代理，`IpAddress` 条件也可能开始拒绝。
+在补丁合入前，我们跨 `silo-pkg` 与 `silo` 进行了三轮代码审查，先后抓出并修复了 9 个隐蔽的边界问题：
 
-推翻的关键在于把 **目标** 和 **机制** 分开。目标是"存在一种完整、可执行的关闭方式"，从来没有任何东西要求这个能力必须由那个已有变量来提供。用 `MINIO_API_TRUSTED_PROXIES=none` 表达，能得到完全相同的保证，而对任何没有主动启用的人影响为 **零**。
+### 第二轮审查发现 {#review-round-two}
 
-**决定：`_MINIO_API_XFF_HEADER` 保持上游定义，一字不动。** 它只拦 `X-Forwarded-For`，且在任何一种信任模式内部生效。上游的 `TestXFFDisabled` 原样保留并继续通过。文档现在明确写出这个开关 **不是** 什么：它是一个解析开关，不是信任边界；被拒绝一个头的客户端，换一个发就是了。
+1. **`init()` 与 `MINIO_CONFIG_ENV_FILE` 的启动加载时序倒置**：初版代码仅在包级 `init()` 函数中读取环境变量；如果管理员将 `MINIO_API_TRUSTED_PROXIES` 或 `_MINIO_API_XFF_HEADER` 写在由 `MINIO_CONFIG_ENV_FILE` 指定的配置文件中，由于该文件在 `serverHandleEnvVars` 阶段才被解析注入进程环境，`init()` 早已执行完毕！我们在 `serverHandleEnvVars` 中显式补齐了这两个开关的二次解析与生效。
+2. **转发链内部的 `127.0.0.1` 跳板欺骗（`X-Forwarded-For: spoofed, 127.0.0.1`）**：区分了“TCP 对端 `r.RemoteAddr` 是环回地址”与“请求头字符串里出现 `127.0.0.1`”（详见[权衡 4](#tradeoff-loopback)）。
+3. **带作用域标识的 IPv6 地址（`fe80::1%eth0`）**：链路本地（Link-Local）IPv6 对端的 `r.RemoteAddr` 包含 `%zone` 后缀；在匹配 CIDR 前先剥离 Zone 标识再调用 `netip.ParseAddr`，避免了合法 IPv6 链路本地地址解析失败。
+4. **多行同名 `X-Forwarded-For` 请求头（`r.Header.Values`）**：HAProxy 或 Envoy 等代理在追加转发信息时，可能直接追加第二行 `X-Forwarded-For` 请求头，而非用逗号拼到第一行末尾。若调用 `r.Header.Get("X-Forwarded-For")` 只会读到第一行（恰恰是客户端伪造的那一行！）。我们改为通过 `r.Header.Values("X-Forwarded-For")` 从最后一行向第一行逆序遍历。
+5. **内部 `forwarder.go` 请求头清理**：当不可信对端发来的 `X-Real-IP` 或 `Forwarded` 被拒绝后，内部节点间转发不应将其原样透传给下游受信任节点。
+6. **`::ffff:0:0/96` 网段前缀的 `Unmap` 陷阱**：若对 CIDR 的网络前缀地址无条件调用 `Unmap()`，会把 `/96` 的 IPv6 映射网段变成 `0.0.0.0` 并错误匹配所有 IPv4 地址；我们在 CIDR 解析中专门保护了映射网段的前缀长度语义。
 
-还有一个附带好处：这把两个互相影响的变量收敛成了一个策略设置，于是不再存在"`off` 优先级高于白名单"这样一条需要运维去学、也需要我们去写对的规则。
+### 第三轮审查发现 {#review-round-three}
 
-### 环境变量还是配置子系统 {#tradeoff-config}
+7. **空列表必须默认安全关闭（`MINIO_API_TRUSTED_PROXIES=","`）**：如果管理员误配了 `MINIO_API_TRUSTED_PROXIES=","`（或纯空格），解析出的 CIDR 切片为空；若将空切片当作“未设置（信任所有）”就会导致严重 Fail-Open！现在只要显式设置了该环境变量但解析不出任何有效规则（且不为 `off`/`none`/`all`/`*`），服务端启动会直接报错退出。
+8. **区分“未设置”与“设为空串”**：使用 `env.Get(EnvAPITrustedProxies, "")` 无法区分环境变量未设置与被显式设为 `MINIO_API_TRUSTED_PROXIES=""`；我们改为显式检查环境变量是否存在。
+9. **零分配逆序扫描与 100 跳上限**：如果在每个请求上直接调用 `strings.Split(header, ",")`，攻击者只需发送一个包含上百万个逗号的 1 MB `X-Forwarded-For` 请求头，单次请求就会在堆上分配约 33 MB 的字符串切片。我们将 `strings.Split` 替换为原地从右向左扫描器，并将最大扫描跳数限制为 100 跳。
 
-把 `trusted_proxies` 注册为 `api` 子系统的键，能获得 `mc admin config` 可见性、帮助文本和热加载，与 `sts_trusted_proxies` 的做法一致。
+---
 
-但它也会引入一个窗口。配置子系统在对象层初始化之后才加载，于是从进程启动到配置生效之间，信任策略是空的——按照"列表为空即信任所有人"的读法，这就是 **fail-open**。安全边界不能有 fail-open 窗口。另外，一个能在运行时改变的信任边界，本身也谈不上是好事。
+## 运维配置建议 {#recommendations}
 
-**决定：用环境变量。** 代价是可发现性，以及下文描述的一个 bug。
+- **客户端直连 SILO（无反向代理）**：强烈建议设置 `MINIO_API_TRUSTED_PROXIES=off`。
+- **部署在 nginx / HAProxy / Envoy / Ingress 之后**：将 `MINIO_API_TRUSTED_PROXIES` 设置为反向代理的 IP/CIDR 列表（多节点集群需一并包含各 SILO 节点 IP/CIDR）。
 
-### loopback 作为 peer 永远可信 {#tradeoff-loopback}
+---
 
-FTP 与 SFTP 前端通过 `127.0.0.1` 连到 S3 层，并用 `X-Forwarded-For` 声明其会话的客户端（`cmd/sftp-server-driver.go`）。不豁免 loopback 的白名单，会把每一个 FTP/SFTP 请求都记成服务器自己。
+## 明确不做项 {#not-done}
 
-代价是同主机上的任何进程都能伪造。这可以接受：能从 localhost 发起连接的攻击者已经在该主机上取得了代码执行能力，威胁模型早在此之前就已经输了。而 FTP/SFTP 的退化则是必然发生的，影响所有使用这些前端的人。
+- **TCP 层 PROXY Protocol v1/v2**：监听器层面的二进制 PROXY Protocol 与 HTTP 层的 `X-Forwarded-For` / `Forwarded` 解析属于不同层级，不在本补丁范围内。
+- **`GetSourceScheme`**：保持现有 `X-Forwarded-Proto` 识别行为不变，避免影响反向代理卸载 TLS 后的协议判断。
+- **`ExistingObjectTag/*` 条件来源隔离**：在关联提交 `2f55347f7`（同样随 `20260804` 发布）中独立修复，确保仅从已存储的对象标签填充该条件键，绝不采信客户端请求头。
 
-**决定：把 loopback 豁免为可信 peer。** 随后对抗式审查发现，第一版实现同时也把 loopback 当成了可跳过的 **链条目**——这对 FTP/SFTP 场景毫无必要，而且有害，详见下文。现在这是两个分开的判断。
+## 严重度定级 {#severity}
 
-### `X-Forwarded-For` 与 `X-Real-IP` 的优先级：真正无解 {#tradeoff-precedence}
-
-白名单模式下，两个头同时存在时谁赢？
-
-- 代理只写 `X-Real-IP`、透传客户端的 `X-Forwarded-For`（某些 nginx 配置）→ 优先 `X-Forwarded-For` 就取到伪造值。
-- 代理只写 `X-Forwarded-For`、透传客户端的 `X-Real-IP`（**AWS ALB**）→ 优先 `X-Real-IP` 就取到伪造值。
-
-两者都很常见，而服务端 **无法从请求本身判断** 自己处于哪一种。这不是"还没决定"，而是在运维不告知其代理写哪个头的前提下 **不可判定**。
-
-**决定：优先 `X-Forwarded-For`。** 两者之中只有它携带可以对着白名单校验的链，而这条路径判的是访问控制而非限流分桶，所以应当让可验证的那个赢。同时它让请求头优先级与默认模式保持一致，切换模式时不会额外再变一次优先级。
-
-这与 `getSTSLDAPTrustedProxySourceIP` **有意相反**，后者优先 `X-Real-IP`。同一个代码库里存在两套互相矛盾的实现，本身就是隐患，所以两处现在都带上了注释，点名这个分歧及其理由，以免后人在没有重新决策的情况下把它们"统一"掉。运维文档给出了两个方向各自的缓解办法：把你的代理 **不** 负责写的那个头，在边缘删掉。
-
-### 白名单写宽了，比不写还糟 {#tradeoff-breadth}
-
-这是最反直觉、也最容易咬人的一条性质。
-
-名单内的条目在走链时会被跳过。于是因为负载均衡是 `10.0.0.1` 而配置的 `MINIO_API_TRUSTED_PROXIES=10.0.0.0/8`，会让 `10/8` 内的所有客户端也变得可跳过。位于 `10.5.5.5` 的客户端发送 `X-Forwarded-For: 8.8.8.8`，形成的链是 `8.8.8.8, 10.5.5.5`；走链把 `10.5.5.5` 当作"可信跳"跨了过去，返回 `8.8.8.8`。
-
-所以一份过宽的名单不只是多信任了一些 peer——**它让这些 peer 具备了伪造能力**。nginx 的 `set_real_ip_from` 在开启 `real_ip_recursive` 时有完全相同的性质。
-
-这没有算法解：这份名单同时承担了"谁可以转发"和"谁的地址可以被丢弃"两个职责，把它们拆开就意味着两份需要保持同步的名单。**决定：保留单一名单，把约束写得足够显眼**——运维文档里的醒目提示块，以及走链处代码注释里的明文规则。catch-all 只拒绝 `/0`，文档也明说了这是护栏而非证明，因为 `0.0.0.0/1,128.0.0.0/1` 覆盖同样的范围。
-
-### 多节点内部转发 {#tradeoff-multinode}
-
-MinIO 会在节点之间转发请求，用于 bucket-DNS 路由、列举续传、heal-by-token、批量作业与存储池下线。接收节点的 TCP peer 是转发节点，不是客户端。
-
-| 模式 | 接收节点解析出 |
-| :-- | :-- |
-| 默认 | 客户端 |
-| `none` | **转发节点** |
-| 白名单但未含节点地址 | **转发节点** |
-| 白名单且含节点地址 | 客户端 |
-
-这不是冷僻路径：`ListObjectsV2` 的 continuation token 里带着节点索引，任何客户端都能让自己的请求被转发。在 `none` 之下，该请求随后会以一个内网节点地址作为 `aws:SourceIp` 参与判定——而一条允许内网段的 `IpAddress` 条件会把它当作通过。
-
-**决定：写进文档，并引导多节点集群使用白名单。** `none` 无法为此情形修正，因为它按定义什么都不信。自动把集群自身地址注入名单的方案经过考虑后被否决：它需要启动时做 DNS 解析、并在节点地址变化时重新解析，机制和失败模式都比它所替代的显式配置更多。
-
-## 兼容性 {#compatibility}
-
-改动被刻意组织成"风险不均匀分布"的形态。在默认配置下，每一块要么是 opt-in，要么是死代码。
-
-| 改动 | 谁会受影响 | 风险 |
-| :-- | :-- | :-- |
-| `MINIO_API_TRUSTED_PROXIES` 白名单 | 只有主动设置的人 | 无 |
-| 转发器清洗 `X-Real-IP` / `Forwarded` | 默认模式下该代码路径不执行 | 无 |
-| 值非法时启动失败 | 只有主动设置且写错的人 | 无 |
-| 环境文件加载后重读策略 | 什么都没设时结果相同 | 无 |
-| LDAP 解析器抽取共用 | 无人——纯代码搬家，已验证行为一致 | 无 |
-| `_MINIO_API_XFF_HEADER` 语义 | **无人——已回退** | 无 |
-| `_MINIO_API_XFF_HEADER` 读取时机 | **无人——有意保留上游时机** | 无 |
-
-**默认路径的凭证。** `unverifiedSourceIP` 是原函数体的逐字拷贝，连同它的怪癖一起：`", "` 分隔符、最左元素为空时的向下穿透、以及对 `_gazonk` 这类非 IP 值的接受。独立审查针对 `HEAD` 在 21 个用例上验证了行为一致性——空 `X-Forwarded-For`、单个逗号、开头的 `", "`、`","` 与 `", "` 分隔符的差异、`" , "`、IPv4-mapped 地址、带括号的 IPv6、非 IP 垃圾，以及三种 `Forwarded` 形式。上游的 `TestGetSourceIP` 与 `TestXFFDisabled` 均原样保留并通过。
-
-**自审时抓到的一处微妙之处。** 新设置是在 `MINIO_CONFIG_ENV_FILE` 加载之后读取的，这正是它能在打包部署中生效的原因。顺手把 `_MINIO_API_XFF_HEADER` 也挪到同一处读取看起来很整洁——而那会构成行为变更，因为上游是在包初始化时读它的，那时环境文件 **还不存在**。今天，把它写进环境文件的运维实际上是被静默忽略的；一旦顺手接管，这个早已部署的设置会突然开始生效，把他们的源地址从 `X-Forwarded-For` 最左条目翻成 `X-Real-IP`。所以那个旧开关不仅保留上游的语义，也保留上游的读取时机，并且有一个测试钉住它，免得后人来"整理"。这个怪癖改为写进文档：想让它生效，就设在进程环境里。
-
-**那段并没有在防御任何东西的防御性代码。** 共用解析器最初还附带了两样东西：把以 IPv4-mapped 形式书写的白名单条目还原成它所指代的 IPv4 前缀，以及在匹配时对地址做 unmap 和去 zone。两者看上去都像修正——写成 `::ffff:192.168.1.10` 的条目否则会被接受却什么都匹配不上，这种静默失效确实值得消除。
-
-但它们最终还是被删掉了，理由值得记下来。**两条调用路径在匹配之前都会先做 `net.ParseIP(...).String()`**，而这一步本身就把 `::ffff:10.0.0.1` 收敛成了 `10.0.0.1`；双栈监听器给 IPv4 对端报的本来也是点分形式。所以这两样东西在任何真实请求上都执行不到。它们唯一可观察的效果，是改变了这个 **共享** 函数对更早使用它的 LDAP STS 白名单意味着什么——那 18 处差异，只有直接调用函数的测试能看见，没有任何部署能碰到。
-
-更糟的是，其中一样还亲手制造了下文那个 fail-open：把 `::ffff:0:0/96` 还原之后，一个 `/96` 变成了 `0.0.0.0/0`。删掉这个还原，是在移除 bug 的 **成因**，而不是靠调整检查顺序去绕开它。剩下的部分是纯代码搬家，已在 37 个白名单取值 × 21 个 peer 地址的全部组合上验证与原实现完全一致——零解析差异，零匹配差异。它选择不修的那个瑕疵（mapped 形式的条目匹配不上任何东西）是既有行为、方向 fail-closed，现在写进了函数自己的注释里，免得下一个人重新推导出同一个诱人的"修复"。
-
-**唯一值得点名的残余风险。** 默认模式的 **代码路径** 确实变了：原函数体前面多了一层 switch 和一次函数调用。如果这段管道本身有错，影响的是所有人而不只是启用者。上面的一致性测试是我们认为它没错的依据，但"在 21 个用例上验证等价"与"可证明完全相同"是两个不同的论断，诚实的说法是前者。
-
-## 对抗式审查发现了什么 {#review}
-
-我们指派了一个独立 agent，任务是攻破第一版实现。它找出四个真实缺陷，现已全部修复并有回归测试覆盖。
-
-**一个静默的 fail-open，也是四者中最严重的。** 信任策略是在包的 `init()` 里读取的。但 `loadEnvVarsFromFiles()` 会在很久之后才为 `MINIO_CONFIG_ENV_FILE` 里的每个键调用 `os.Setenv`——而那几乎是所有打包部署配置 MinIO 的方式。把 `MINIO_API_TRUSTED_PROXIES` 放进 `/etc/default/minio` 的运维，得到的会是历史上的"信任任意 peer"模式，而且 **不报任何错**；非法值也会被静默忽略而非致命。策略现在在 `serverHandleEnvVars` 中应用，它运行于文件加载之后、任何监听器启动之前。
-
-**loopback 被当成链条目跳过。** 如前所述：peer 豁免被复用成了跳数豁免，这是"名单过宽"问题的一个不必要实例。现已拆成两个判断。
-
-**两个 fail-closed 的正确性 bug。** 带 zone 的 IPv6 peer（`fe80::1%eth0`）会被规范化成空串，因为 `net.ParseIP` 直接拒绝 zone——于是这样的 peer 永远不可能成为可信代理。以及，用 IPv4-mapped 形式书写的名单条目（`::ffff:192.168.1.10`）在启动时被接受，随后却什么都匹配不上，因为 `netip.Prefix.Contains` 在位宽不同时恒为 false。
-
-另外两个缺陷是在写文档而非写代码时发现的，这本身也是个小教训：
-
-**重复的请求头行。** `Header.Get` 只返回 **第一行**。HAProxy 的 `option forwardfor` 是 **新增一行 `X-Forwarded-For`** 而不是扩展已有那行，于是 `Get` 会把客户端那行交回来，正好把伪造值放回到"从右向左走链"本要避开的位置。现已改用 `Header.Values`，把所有行展平成一条链处理。
-
-**内部转发器转发了客户端的声称。** `internal/handlers/forwarder.go` 仅在 `X-Real-IP` 缺失时才设置它，于是客户端的值会原封不动地在节点之间传递。在包含集群自身节点的白名单下——也就是我们推荐的配置——客户端由此可以借用一个 peer 节点的权威。转发器现在会在入站 peer 无权设置这些头时，丢弃 `X-Real-IP` 与 `Forwarded`。`X-Forwarded-For` 无需如此处理，因为 Go 的 `ReverseProxy` 会追加真实 peer，接收节点的走链会先到达那个条目。
-
-### 重构之后的第二轮 {#review-round-two}
-
-把设置改形之后，值得再跑一轮对抗式审查，而这一轮确实有收获：差分测试在 4,745,520 个源地址解析用例与 345,600 个转发器改写用例上，与 `HEAD` 相比 **零差异**；但它同时又找出三条 fail-open 路径——其中一条是第一轮的修复自己引入的。
-
-**用 IPv4-mapped 前缀夹带进来的 catch-all。** `MINIO_API_TRUSTED_PROXIES=::ffff:0:0/96` 按字面是 `/96`，因此通过了 catch-all 检查；而那个"把 IPv4-mapped 条目还原"的改写随后把它变成了 `0.0.0.0/0`，于是信任所有 peer。第一次修复把宽度检查挪到了改写之后。最终的修复是 **把改写整个删掉**——在弄清楚它对任何真实请求都不可达之后——这是移除成因，而不是给它的输出加一道岗。
-
-这一条最值得多说几句。这个 fail-open 是由一个针对无关的 fail-**closed** bug 的修复亲手制造的；而针对这个 fail-open 的修复，又只是调整顺序、把制造它的那一步原封不动地留在了原地。两轮修正，各自都说得通，却都没有触及"这段代码本就不该在那里"。加固性改动需要接受与它所加固的代码同等的对抗式检验，而"这东西到底可达吗"这个问题，应该排在那份检验的前面。
-
-**一个有意写下、却谁也没点名的值。** `MINIO_API_TRUSTED_PROXIES=","` 会解析成空列表，然后回落到宽松默认。**未设置** 的空变量必须意味着"默认"，但运维实际敲下的、却没有点名任何代理的值是一个错误，用"信任所有人"去回应它，恰恰是他们最不可能想要的那个行为。现在它是启动错误。纯空白仍然等同于未设置，因为那正是空 shell 变量展开后的样子。
-
-**一个读不出来的远端值。** MinIO 支持 `env://` 间接寻址，即变量的值从远端 webhook 拉取。`env.Get` 会 **丢弃** 该拉取的错误并返回空串——而这段代码会把它读作"未设置"，于是恰好在无法确定运维意图的那一刻重新启用"信任任意 peer"。该设置现在改为经由 `env.LookupEnv` 读取，错误得以暴露出来并终止启动。这是任何经由 `env.Get` 读取的安全相关设置都存在的通用隐患，值得记在本次改动之外。
-
-### 第三轮：从前两轮共有的盲区进攻 {#review-round-three}
-
-前两轮都是把解析器当作一个单元来攻击。有两件事它们都看不见：
-
-**从来没有测试验证过信任策略真的抵达了决策。** 到那时为止的所有测试检查的都是解析器返回什么，而策略层唯一那个测试只断言 `aws:SourceIp` **等于** 解析器的输出——而且是在默认模式下。也就是说，一个"解析器正确、但策略引擎读的是别的东西"的版本，可以通过全部测试。现在有一个测试把伪造的 `X-Forwarded-For` 一路推过 `getConditionValues`，进入真实的 `IpAddress` 判定，覆盖每一种模式：默认模式采信、`none` 忽略、来自未列名 peer 时忽略、来自列名代理时依然采信。它通过了——但它本该在这次改动被称为"完成"之前就存在。
-
-**白名单模式带有一处默认模式没有的资源放大。** 走链之前会先把整条链拍平成切片，于是一个位于可信代理之后的客户端，可以把 1 MiB 的请求头额度变成每个请求约 33 MB 的切片头开销——大约三十倍——外加一次百万次迭代的遍历。默认路径从来没有这个问题，因为它在原始头上用 `strings.Index`。现在走链改为在头文本上就地反向扫描，零分配，并在 100 跳后停止；真实的链只有几跳，答案就在最右端，而预算耗尽则得不到地址，于是回落到 peer。有一个测试钉住零分配这一性质，因为这正是一次看起来人畜无害的重构会顺手破坏掉的东西。
-
-本轮还纠正了一处：部署契约此前写得太窄。"代理必须覆盖它所设置的那些头"漏掉了真正会咬人的情形——一个只正确书写 `X-Real-IP` 或只书写 `Forwarded` 的代理，仍然会转发客户端的 `X-Forwarded-For`，而那恰恰是最先被读取的头。现在明确写成通则：把代理不负责书写的每一个源地址头都在边缘删掉。
-
-有一条上报的发现经复核后 **未** 按缺陷处理：catch-all 守卫只拒绝 `/0`，所以 `0.0.0.0/1,128.0.0.0/1` 覆盖同样的范围却会被接受。收紧它意味着要在现已与 LDAP 白名单共用的解析器里拒绝"宽但非 `/0`"的前缀，从而让今天合法的配置开始启动失败，换来的只是防住一个现实中没有任何部署会持有的值。文档已明确写出这个检查是护栏而非证明，而真正的防线在那条"写代理本身、不要写它所在网段"的提示里。
-
-## 推荐做法 {#recommendations}
-
-按拓扑：
-
-- **代理可控，且 API 端口确实无从旁路。** 什么都不用设。但要确认你的代理是覆盖还是追加：如果配置里写的是 `$proxy_add_x_forwarded_for`，那你今天就是可伪造的。改成 `$remote_addr`，或者启用白名单。
-- **直连暴露，没有代理。** `MINIO_API_TRUSTED_PROXIES=none`。
-- **Kubernetes 或 Pigsty，Ingress 加上可达的 Service。** 用白名单，内含代理地址 **和** MinIO 节点地址。这是唯一能让 `IpAddress` 条件具备意义的配置。
-- **任何多节点集群。** 用含节点地址的白名单，而不是 `none`。
-
-所有启用白名单的部署还有两条通则。第一，写代理本身，不要写它所在的网段。第二，**把你的代理不负责写的每一个源地址头，在边缘删掉**——把一个 peer 列入名单，意味着相信它送来的全部三个头，而它们是按固定顺序被读取的，你的代理没碰过的那个头完全由客户端说了算。一个只正确书写 `X-Real-IP`、或只书写 `Forwarded` 的代理，仍然会把客户端的 `X-Forwarded-For` 原样转发过来，而它是被最先读取的那一个。
-
-## 没有做的事 {#not-done}
-
-- **自动注入集群节点地址。** 通过 `EndpointServerPools` 技术上可行，但需要 DNS 解析以及地址变化时的重解析。相比它所替代的显式配置，判断认为显式配置风险更小。
-- **注册为 `api` 配置键。** 见上文的 fail-open 窗口。若日后可观测性的价值超过启动期保证，可以重新讨论。
-- **`ExistingObjectTag/*`。** 这一相邻条件来源缺陷后来由 `2f55347f7` 修复并随 20260804 发布：只从已加载的存储标签构造该条件，不再接受请求标签冒充。它并未为所有 S3 操作增加标签读取。
-
-## 关于定级的判断 {#severity}
-
-默认行为与上游一致，且 MinIO 从未把 `aws:SourceIp` 在可直连部署上宣称为可信，因此"默认不安全"更接近文档缺陷而非漏洞。但有一件事确实是缺陷：**运维设置了一个明确的安全开关，而它没有做到其名称与唯一公开描述所暗示的事情**，并且是静默失效。这值得一条记录，作用域应限定为上游 `_MINIO_API_XFF_HEADER` 的不完整，而不是 fork 引入的任何东西。
-
-`minio/minio` 已归档，没有可协调的上游——与 [CVE-2026-42600](/zh/blog/security/cve-2026-42600/) 处境相同。
+本问题作为 **`SN-2026-018`** 记录于 SILO 安全台账（与 [CVE-2026-42600](/zh/blog/security/cve-2026-42600/) 相同，上游 `minio/minio` 已归档；对于依赖 `aws:SourceIp` 实施访问控制的环境属于中至高危）。升级至 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 并按拓扑配置 `MINIO_API_TRUSTED_PROXIES` 即可在 IAM、审计日志、事件通知与管理追踪中全面闭环源地址归属。

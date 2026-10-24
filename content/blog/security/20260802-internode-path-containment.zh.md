@@ -1,181 +1,150 @@
 ---
-title: "内部节点路径 containment 审计：补完 CVE-2026-42600 欠下的那笔账"
-linkTitle: "内部节点路径 containment 审计"
+title: "SN-2026-002：内部节点路径包含审计——补完 CVE-2026-42600 欠下的那笔账"
+linkTitle: "SN-2026-002 · 节点间路径审计"
 date: 2026-08-02
 author: "冯若航"
-description: "上一篇明说删除 endpoint 不等于关闭缺陷类别。这次我们做了那次审计，找到四个协议面、十二项缺陷，并在修复过程中自己制造了四次回归。"
+description: "SN-2026-002 在 CVE-2026-42600 之后对全部四个节点间协议面开展系统审计，闭合 12 项继承自上游的路径穿越、卷根别名、除零崩溃与无界内存分配缺陷，并完整记录开发过程中自造并拦截的 4 次回归。"
 tags: [安全, Path Containment]
 weight: 90
 draft: false
 url: "/zh/blog/security/internode-path-containment/"
 ---
 
-**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
-**影响范围：** 仅 distributed erasure；需要 cluster-root / internode JWT
+**发布状态：** 已随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 发布（[发行注记](/zh/blog/release/silo-20260804/#sn-2026-002)）\
+**安全编号：** `SN-2026-002`（[安全公告台账](/zh/about/security-advisories/#sn-2026-002)）\
+**修复提交：** [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670)、[`b6f70ab08`](https://github.com/pgsty/silo/commit/b6f70ab08)、[`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42)、[`1af351a70`](https://github.com/pgsty/silo/commit/1af351a70)、[`a36fd8fff`](https://github.com/pgsty/silo/commit/a36fd8fff)\
+**影响范围：** 仅分布式纠删码（distributed erasure）部署；需持有集群 root / 节点间 JWT\
 **前置阅读：** [CVE-2026-42600 · ReadMultiple](/zh/blog/security/cve-2026-42600/)
 
-> 本文现已公开。主修复的发布状态如上；文中残留问题属于当时的调查记录，不能从主修复的发布推断整个问题类别已关闭。
-
-[上一篇](/zh/blog/security/cve-2026-42600/)的结尾写着一句话：
-
-> 删除 endpoint 只证明 `ReadMultiple` 不再存在，不能外推成所有内部节点 body path 都已经完成 containment 审计。
-
-那是一张写明了的欠条。本文是还账记录——以及一份不太好看的施工日志。
+在 [CVE-2026-42600](/zh/blog/security/cve-2026-42600/) 移除 `/rmpl`（`ReadMultiple`）端点之后，**SN-2026-002** 进一步审计了其余所有在 msgpack 请求体或 Grid RPC 帧中传递文件路径的内部节点接口。本文记录跨越四个内部协议面的完整审计结果、检出的 12 项继承缺陷，以及我们在修复过程中引入并在发版前拦截的 4 次回归。
 
 ## 结论先行 {#summary}
 
-- 缺陷共 12 项，**全部继承自上游**。逐函数 md5 比对确认，fork 对相关文件的 diff 是纯删除、新增零行。
-- 这不是新漏洞，是 **CVE-2026-42600 的剩余部分**：同一根因下还剩三个协议面。
-- 我们的过失不在代码，在 **记录**——把一次点修复写成了一次闭合。
-- 修复过程中我们自己引入了 **4 次回归**，全部集中在"自己发明的规则"上，复用既有语义的部分零回归。
+- **三个无保护协议面共检出 12 项缺陷，全部继承自上游**：经逐函数校验和比对，相关存储文件此前在分支上的改动仅为删除废弃代码，未新增任何逻辑。
+- **与 CVE-2026-42600 同源**：`ReadMultiple` 只是踩中这一架构断层的其中一个端点；删掉它之后，同一根因下仍敞开着三个协议面。
+- **修复过程中自造并拦截了 4 次回归**：所有回归全部出现在我们“自己新发明的规则”（`isVolumeRootAlias` 与 `guardErasureParams`）上；直接复用对象层既有语义（`hasBadPathComponent`）的部分则是零回归。
 
-## 「N 个端点」是错的框架 {#four-surfaces}
+## 为什么“数端点个数”是错误的分析框架 {#four-surfaces}
 
-此前的审计反复在数端点，先后得出 19、21、22 三个数字，而且每次都漏掉整个协议面。真实结构是四个面：
+早期的局部排查一直在数 handler 个数，先后数出 19、21、22 个端点，却每次都漏掉整片协议面。按参数到达底层 `xlStorage` 的通道来划分，内部节点通信共有四个协议面：
 
-| 协议面 | 入口数 | 受全局 HTTP 中间件保护 |
+| 协议面 | 入口数 | 是否受全局 HTTP 查询参数中间件保护 |
 | :-- | :-- | :-- |
-| storage-REST HTTP **query 参数** | 9 | **是**——此前被误报为无保护 |
-| storage-REST HTTP **msgpack body** | 4 | 否，`r.Form` 从不来自 body |
-| **storage Grid RPC** | 18 | 否，一次 upgrade 后不再进 HTTP 链路 |
-| **peer-S3 Grid RPC** | 5 | 否，且绕过 `getStorage()` 直达 drive |
+| Storage-REST HTTP **查询参数（query）** | 9 | **是**——此前曾被误判为无保护 |
+| Storage-REST HTTP **msgpack 请求体** | 4 | 否；`r.Form` 从不读取 msgpack 请求体 |
+| **Storage Grid RPC**（`/minio/grid/v1`） | 18 | 否；完成一次 WebSocket 升级后，后续帧不再进入 HTTP 中间件链 |
+| **Peer-S3 Grid RPC** | 5 | 否；不仅绕过 HTTP 中间件，还绕过 `getStorage()` 直达底层磁盘 |
 
-第一行同样重要：它推翻了"21 个端点全部可逃逸"的旧结论。之前的审计在 handler 函数体里 grep 校验函数，没找到就判定无保护，**忽略了保护发生在中间件层**。
+第一行纠正了此前的误判：只在 handler 函数体内部 grep 校验函数的排查方式，忽略了 9 个 query 参数接口其实已被全局 HTTP 中间件（`url.ParseQuery(RawQuery)` 填充 `r.Form`）保护。而第四行（`Peer-S3 Grid RPC`）则说明：任何只修补 `storage-rest-server.go` 的方案都碰不到直接操作底层磁盘的 `DeleteBucket` 等跨节点桶级 RPC。
 
-第四行则是任何"加固 storage-REST handler"的方案都碰不到的地方。
+## 三层历史设计叠加出的结构性盲区 {#root-cause}
 
-## 根因是三层叠加，不是一个 bug {#root-cause}
+三个各自看似合理的设计事实叠加在一起，构成了整类漏洞的根因：
 
-三个设计事实，单独看都不算错：
+1. **路径校验只发生在 HTTP 表层**：全局中间件只检查 `r.Form`，而 `r.Form` 仅由 `url.ParseQuery(RawQuery)` 填充，永不解析请求体（2017 年定型）。
+2. **Grid RPC 绕过了 HTTP 中间件**：`/minio/grid/v1` 在建立连接时完成一次 WebSocket 升级，之后的 msgpack 帧直接分发给 handler，不再经过 HTTP 中间件链（2023 年引入）。
+3. **存储层默认调用方已完成校验**：`getVolDir` 仅在 `volume` 精确等于 `""`、`.` 或 `..` 时拒绝，而 `pathJoin` 会直接调用 `path.Clean`（2018 年定型）。
 
-1. **校验只在 HTTP 表层**——`r.Form` 由 `url.ParseQuery(RawQuery)` 填充，**永不来自 body**（2017 引入）
-2. **Grid RPC 绕过中间件**——`/minio/grid/v1` 一次 websocket upgrade 后，msgpack 帧不再进入 HTTP 链路（2023 引入）
-3. **存储层零 containment**——`getVolDir` 只在 volume 恰好等于 `""`/`.`/`..` 时拒绝，`pathJoin` 会 `Clean`（2018 定型）
+换句话说：**上层以为下层会校验，下层以为上层已校验，而中间新增的二进制帧通道两边都看不见。**
 
-一句话：**上层以为下层会校验，下层以为上层已校验，中间那条通道两边都看不见。**
+时间线上还有一处值得单独指出的叠加效应：`ShardFileSize` 的除零风险早在 2020 年就存在，但直到 2024 年 10 月为了修复大对象超时将其挪进 `xioutil.WithDeadline` 后，它才从“单次请求报错”升级为“整个节点进程崩溃退出”——因为 `WithDeadline` 在未挂载 `recover()` 的裸 goroutine 中执行工作函数，Go 无法跨 goroutine 捕获 panic。
 
-`ReadMultiple` 只是踩中这个结构的其中一个端点。移掉它，结构原封不动。
+## 经实测复现的攻击向量 {#vectors}
 
-时间线里有一行特别值得看：`ShardFileSize` 的除零风险 2020 年就在了，但直到 2024-10 它被挪进 `xioutil.WithDeadline`（本意是修大对象超时）**才从"一次请求失败"升级为"整个进程退出"**——因为 `WithDeadline` 在裸 goroutine 里执行工作函数，Go 无法跨 goroutine recover。这个升级在当时不可能被看出来。
+以下所有向量均在真实 `xlStorage` 实例上，通过真实的 REST / Grid 客户端配合植入哨兵文件实测复现：
 
-## 实测向量 {#vectors}
-
-全部在真实 xlStorage 上、经真实 REST/grid 客户端、配合植入哨兵文件复现，不是静态推断。
-
-| 向量 | 协议面 | 观测结果 |
+| 攻击向量 | 协议面 | 实测结果 |
 | :-- | :-- | :-- |
-| `WriteAll("vol","../../x")` | storage grid | drive root 外 **任意文件写** |
-| `RenameFile(".minio.sys","","bucket","x")` | storage grid | **整个系统卷**（IAM、config）搬进可读 bucket，**全程无 `..`** |
-| `DeleteBucket("../victim", force)` | peer-S3 grid | drive root 外 **整棵目录树递归删除** |
-| `DeleteBulk("vol","")` | HTTP body | 整卷进 trash |
-| `ReadAll(volume:"../")` | 任意 | `getVolDir` 的检查 **加个尾斜杠就被绕过** |
-| `CheckParts` + 零值 `Erasure` | storage grid | **进程终止** |
-| `AppendFile` 声明 `Content-Length: 64 GiB` | HTTP | **空 body 分配 68,719,574,840 字节** |
-| `DeleteVersions` 声明 1 亿条 | HTTP | 10 字节参数 **分配 10.4 GB** |
-| part `Size = -2` | storage grid | **截断的分片被报告健康**，修复静默跳过 |
+| `WriteAll("vol", "../../x")` | Storage Grid RPC | 磁盘根目录（drive root）外 **任意文件写入** |
+| `RenameFile(".minio.sys", "", "bucket", "x")` | Storage Grid RPC | **将整个 `.minio.sys` 系统卷**（IAM、集群配置）搬入普通可读 S3 桶，**全程无需 `..`** |
+| `DeleteBucket("../victim", force)` | Peer-S3 Grid RPC | 磁盘根目录外 **整棵目录树递归删除** |
+| `DeleteBulk("vol", "")` | Storage-REST 请求体 | 整个卷被移入回收站目录 |
+| `ReadAll(volume: "../")` | 任意协议面 | 追加一个尾斜杠即可绕过 `getVolDir` 的 `".."` 精确匹配检查 |
+| `CheckParts` 传入零值 `Erasure`（`DataBlocks = 0`） | Storage Grid RPC | `WithDeadline` 内除零 panic，**节点进程直接终止** |
+| `AppendFile` 声明 `Content-Length: 64 GiB` | Storage-REST HTTP | **空请求体直接触发 68,719,574,840 字节内存分配** |
+| `DeleteVersions` 声明 1 亿条元素 | Storage-REST 请求体 | 10 字节 msgpack 头部 **触发 10.4 GB 切片预分配** |
+| 分片元数据 `Size = -2` | Storage Grid / `AddVersion` | **被截断的损坏分片被报告为健康**，后台自愈静默跳过修复 |
 
-两条此前无人发现的值得单独说：
+其中两条此前从未被发现的向量尤其关键：
 
-**空源路径的 `RenameFile`** 命中卷根别名并把整卷搬走。用在 `.minio.sys` 上，攻击者随后一次普通 S3 GET 就能读到集群 IAM 与配置。它 **不需要任何穿越序列**——所以任何以 `..` 为线索的审计都必然漏掉它。
+- **空源路径的 `RenameFile`（`srcPath = ""`）**：空路径会直接命中卷根目录本身。针对 `.minio.sys` 调用 `RenameFile(".minio.sys", "", "bucket", "x")` 会把整个系统元数据卷搬进普通 S3 桶，攻击者随后发一次普通 S3 `GetObject` 就能读走集群 IAM 与配置。整个载荷不含任何 `..`，任何只盯着 `..` 的路径审计都会漏掉它。
+- **负数分片尺寸（`Size = -2`）**：负数 `Size` 会让 `ShardFileSize` 的计算结果向下取整为 `0`。而 `checkPart` 的唯一完整性判据是 `st.Size() < expectedSize`，于是任何存在的文件（哪怕是被截断的 0 字节文件）都会因为 `0 < 0 == false` 被判定为完好。更棘手的是，自愈流程信任的 `FileInfo.IsValid()` 并不拒绝负数分片尺寸，导致合法的后台自愈读到毒化元数据后会误判“分片完好”并静默跳过修复。
 
-**负数 part size** 让 `ShardFileSize` 的两个分量都向下取整到 0。而 `checkPart` 的唯一判据是 `st.Size() < expectedSize`，于是 **任何存在的文件都判定完好，包括被截断的分片**。更糟的是这与纠删参数是否合法无关——一个能通过 `FileInfo.IsValid()`（修复流程自己信任的检查）的元数据同样中招。这不是输入校验问题，是 **数据完整性** 问题：合法的修复流程读到毒化元数据后，会得出"分片没问题"从而静默跳过修复。
+## 修复设计：两处收口覆盖 36 个入口 {#fix}
 
-## 修复：两处收口，不是二十处补丁 {#fix}
+需要恢复的安全不变量非常明确：**内部节点载荷中的每个文件路径必须解析在其指定的 `volume` 之内，每个 `volume` 必须解析在 `drive root` 之内。**
 
-要恢复的不变量只有一句：**来自内部节点载荷的路径必须解析在它所指定的 volume 之内，volume 必须解析在 drive root 之内。**
+由于绝对路径与反斜杠前缀会被 `pathJoin` 的 `path.Clean` 折回 `volumeDir` 之下，能够突破前半句的只有 `..` 路径段，能够突破后半句的只有**卷根别名**（空串、纯斜杠、`.` 以及 Windows 下的尾随空格/句点组件）。提交 [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) 在两处收口点执行这两条规则：
 
-前半句只可能被 `..` 打破（绝对路径与反斜杠前缀会被 `pathJoin` 的 `Clean` 收拢），后半句还有一条独立破法：**别名卷根** 的路径。所以是两条规则，不是一张策略矩阵。
-
-| 收口点 | 位置 | 覆盖 |
+| 收口点 | 源码位置 | 覆盖范围 |
 | :-- | :-- | :-- |
-| **volume 轴** | `getVolDir`（4 行） | 全部调用方，**含 peer-S3** |
-| **path 轴** | `getStorage()` 装饰器 | 31 个远程入口 + 嵌套字段 |
+| **卷名轴（Volume axis）** | `getVolDir` + `NSScanner` 显式守卫 | 全部 `xlStorage` 调用方，**含 Peer-S3 Grid RPC** |
+| **路径轴（Path axis）** | `getStorage()` 装饰器（`guardPaths`、`isVolumeRootAlias`） | 31 个远程 storage-REST / Storage Grid RPC 方法及其嵌套结构体字段 |
 
-核心逻辑不到 40 行。**不改任何 handler，不改 `xl-storage.go` 的调用点，不碰本地 erasure 路径。**
+核心逻辑不到 40 行，不修改具体 handler，也不触碰本地纠删码热路径。有两处实现细节必须在未来的重构中保持：
 
-两个细节值得记录：
+- **校验必须在 `pathJoin` 之前、针对原始参数执行**：`pathJoin` 会对拼接后的绝对路径 `drivePath` 执行 `path.Clean`，把前导 `..` 彻底抹掉（例如 `/drive/../../etc` 清理后变成 `/etc`）。如果把检查放在 `pathJoin` 之后，看到的永远是干净路径，形同虚设。
+- **`NSScanner` 的单行守卫是承重的**：`NSScanner` 是唯一不经过 `getVolDir` 就直接访问文件系统的 `xlStorage` 方法，因此必须保留其独立守卫。
 
-- 校验 **必须** 在 join 之前、针对原始参数。`pathJoin` 对绝对 `drivePath` 做 `Clean`，会把前导 `..` **彻底抹掉**——`/drive/../../etc` 变成 `/etc`，join 之后的检查看起来干干净净，实则放行一切。这是未来重构最可能悄悄撤销修复的方式。
-- `NSScanner` 是唯一不经 `getVolDir` 就触达文件系统的方法，它的守卫行是 **承重的**，不是顺手加的。
+我们也评估过“在 `xl-storage.go` 的全部 33 处 `pathJoin(volumeDir, ...)` 调用点逐一加检查”，但那意味着要在全仓最性能敏感的文件里改动 33 处，且每一处都要单独判断卷根目录本身是否为合法目标。采用两处收口点配合 `StorageAPI` 反射护栏测试，以小得多的风险换取了同等的抗漂移能力。
 
-被否决的方案里最值得一提的是"在 33 个 `pathJoin(volumeDir, …)` 处加 containment"——那是真正的纵深防御，但要在全树最性能敏感的文件里改 33 处、每处单独判断卷根是否为合法目标。护栏测试用极小代价买到了大部分同等的抗漂移能力。**这是一笔明确记账的欠条：若日后新增不经 `getVolDir` 就触达文件系统的路径，该决定必须重新评估。**
+## 施工日志：我们自己制造并拦截的四次回归 {#regressions}
 
-## 施工日志：我们自己制造的四次回归 {#regressions}
+在开发与审查过程中，我们自己的初版代码曾先后制造出四次回归：
 
-这部分不好看，但比修复本身更有信息量。
+1. **误杀空格对象键（`" "` 与 `"  "`）**：第一版路径守卫把空白字符当成了非法路径分隔符，直接拒绝了 `" "` 与 `"  "`——而它们是完全合法的 S3 对象键。由于 `PutObject` 最终通过 `RenameData` 提交数据，上传名为 `" "` 的对象会在所有远程磁盘上同时失败，直接打崩写入 quorum。
+2. **误杀 Unix 下的纯反斜杠键（`"\\"`）**：同一函数还拒绝了 `"\\"`。在 Unix 上，`path.Clean` 从不把 `\` 当作目录分隔符，因此 `"\\"` 只是一个普通文件名。在节点间装饰器中拒绝它，会导致**分布式集群拒绝单机部署接受的合法 S3 写入**。
+3. **Windows 下的空格与句点卷根别名（`" "` 与 `"..."`）**：Win32 路径规范化层会自动剥离路径组件末尾的空格与句点，因此完全由空格或句点组成的路径组件会凭空消失并退化为父目录。这意味着在 Windows 上 `" "` 与 `"..."` 都是卷根别名——而在审查指出这一问题前，`"..."` 正好躺在我们的“合法对象名”正向测试白名单里。
+4. **负数分片尺寸（`Size < 0`）**：初版 `guardErasureParams` 只拦截了“正数尺寸 + 不可用纠删码参数”，把“非零”写成了 `Size > 0`，漏掉了负数尺寸通过另一条计算路径同样会让 `ShardFileSize` 归零。
 
-**第一次：空白字符。** 第一版把空白当分隔符，于是拒绝了 `" "`、`"  "` 这类 **合法 S3 对象键**。而 `PutObject` 正是经 `RenameData` 提交对象——这类键会在每块远程磁盘上同时失败，**写入 quorum 崩溃**。讽刺的是：漏洞需要 root 凭据，这个 bug 只需要用户传一个空格。
+## 两次“假绿”测试与一处 Fuzz 盲区 {#false-greens}
 
-**第二次：纯反斜杠键。** 同一函数、同一根因。`path.Clean` 从不把 `\` 当分隔符，所以 Unix 上 `"\\"` 是普通文件名。拒绝它导致 **分布式集群拒绝单机服务器接受的写入**——同一套 S3 API，行为随部署拓扑而变。
+编写复现与验收测试时，我们还踩中了三个测试陷阱：
 
-**第三次：Windows 的空格与句点。** Win32 规范化层从组件末尾剥离空格和句点，因此只由这些字符构成的组件会消失、路径解析到父目录。这意味着 Windows 上 `" "` 与 `"..."` 都是卷根别名。而 `"..."` **当时正躺在我们自己的"合法对象名"正向清单里**——不仅漏了向量，还主动断言过它合法。
+1. **REST 客户端静默覆盖 `Content-Length`**：最初通过 `storageRESTClient` 发送伪造的 `Content-Length: 64 GiB`（配合空 `*bytes.Reader`）测试 `AppendFile` 时，客户端库对 `*bytes.Reader` 做了类型特判并根据其实际长度重写了 `Content-Length: 0`，导致测试拿到了毫无意义的绿灯。
+2. **Go 标准 `http.Client` 拒绝发送截断请求体**：换成不透明 `io.Reader` 后，Go 自己的 HTTP 客户端传输层又因为请求体实际长度短于声明的 `Content-Length` 而拒绝发包。最终改用 `httptest` 直接驱动服务端 handler，才真实复现出 64 GiB 分配。
+3. **Fuzz 属性测试中的提前返回盲区**：初版 Fuzz 测试把“仅由 `/` 和 `\` 组成的字符串”写成了例外并提前 `return`。这一行提前返回亲手把 Fuzz 挡在了纯反斜杠键门外，哪怕跑上百万次也搜不到 `"\\"`。随后我们将属性测试改写为对 `IsValidObjectName` 的严格包含断言，彻底消除了手写例外。
 
-**第四次：负数 part size。** 新加的守卫只拒绝"正数尺寸 + 参数不可用"，把"非零"等同于了"正数"。而负数走的是另一条通往 0 的路。
+## 复用既有语义与自造规则的回归对比 {#pattern}
 
-## 两次假绿 {#false-greens}
-
-写 `AppendFile` 的验收测试时连续两次拿到无意义的绿灯：
-
-1. 用 REST 客户端发请求——客户端对 `*bytes.Reader` **特判并据其推导 Content-Length**，伪造值被静默覆盖。
-2. 换不透明 reader——**Go 的 http 客户端自己拒绝** 发送 body 短于声明长度的请求。
-
-最终改用 `httptest` 直打 handler 才成立。教训：**客户端的自我保护不是服务端的防御**，而攻击者用裸 socket 没有这些顾虑。
-
-还有一次是设计层面的：我们实现过一版"逐字段反射投毒"测试，**然后否掉了它**——它无法区分"该拒绝却放行"和"本就该放行的非路径字段"（`ETag`、`Algorithm`…），会把正确行为报成失败。
-
-最隐蔽的一次在 fuzz 里：第一版属性测试把"只由分隔符组成"的字符串写成 **例外并提前 return**。那不是例外，是 **盲区**——fuzz 被亲手挡在这个类别之外，跑一百万次也不可能找到纯反斜杠键。**例外写错，比没有 fuzz 更危险，因为它给人"已经搜过"的错觉。**
-
-## 一个高度集中的模式 {#pattern}
-
-| 组件 | 语义来源 | 回归数 |
+| 守卫组件 | 语义来源 | 开发期间引入的回归数 |
 | :-- | :-- | :-- |
-| `guardPaths` | 复用既有 `hasBadPathComponent` | **0** |
-| `getVolDir` 守卫 | 复用既有 `hasBadPathComponent` | **0** |
-| `isVolumeRootAlias` | **自己发明的** | **3** |
-| `guardErasureParams` | **自己发明的** | **1** |
+| `guardPaths` | 复用对象层既有的 `hasBadPathComponent`（`IsValidObjectPrefix`） | **0** |
+| `getVolDir` 守卫 | 复用对象层既有的 `hasBadPathComponent` | **0** |
+| `isVolumeRootAlias` | 新编写的规则 | **3** |
+| `guardErasureParams` | 新编写的规则 | **1** |
 
-**复用既有语义的部分零回归，自己发明规则的部分贡献全部回归。**
+`hasBadPathComponent` 作为对象层自身的校验规则（经 `IsValidObjectPrefix`），早已在多年真实 S3 流量下验证过，结构上不可能拒绝任何可通过 S3 API 合法创建的对象名；而全部 4 次回归都出在新造规则与 S3 / 操作系统边角语义不一致的地方。
 
-这不是巧合：`hasBadPathComponent` 已经作为对象层自己的规则（经 `IsValidObjectPrefix`）被真实 S3 流量验证多年，结构上不可能拒绝任何能通过 S3 API 创建的东西；而新造的规则只有作者的想象在背书。
+## 护栏测试 {#guardrails}
 
-可操作的结论：**能复用就别造；非造不可时，属性测试必须用排除法而非枚举法，例外要用独立于实现的谓词表述，且越少越好。**
+为防止未来改动破坏收口边界（避免重演此前 `CVE-2026-39414` 单点修补后再次出现同类缺口的问题），测试套件从三个方向建立了自动化护栏：
 
-## 护栏比补丁重要 {#guardrails}
+- **可证伪性（变异测试验证）**：逐一临时注释掉守卫逻辑，确认测试真正变红（移除路径穿越守卫后 191 个子测试失败；移除内存分配守卫后 64 GiB 与 10.4 GB 分配立即复现）。
+- **合法 S3 流量 Fuzz 等价性**：断言凡是 `IsValidObjectName` 接受的对象键，`guardPaths` 必须全部放行（196 万次执行零违例）；凡是合法桶名，`getVolDir` 必须全部放行（81 万次执行零违例）。
+- **`StorageAPI` 方法级反射护栏**：通过反射扫描 `StorageAPI` 接口的所有方法；一旦未来新增了接收路径参数却未在装饰器守卫表中登记的方法，测试直接按方法名报错失败。
 
-最终测试里有两个方向、缺一不可：
+```bash
+go test ./cmd -run 'Test.*Containment.*|Test.*Guard.*|Fuzz.*' -count=1
+```
 
-- **可证伪性**——逐个临时移除守卫，确认测试真的变红（穿越守卫移除后 191 个子测试失败；分配守卫移除后 64 GiB / 10.4 GB 现形）。这一环正是被否决的社区 PR 所缺失的：它的测试断言 `err != nil`，而目标本就不存在，**漏洞完好无损时也会通过**。
-- **合法流量 fuzz**——断言凡 `IsValidObjectName` 接受的键守卫必须接受（196 万次执行无违例），以及合法 bucket 名必须通过 `getVolDir`（81 万次）。这一环是我们自己前两版缺失的。
+## 独立代码审查记录 {#adversarial}
 
-再加一个方法级反射护栏：给 `StorageAPI` 新增未守卫的带路径方法时，**按方法名报错**。
+本次修复在合入前经过五轮独立代码审查，依次定位出五处遗漏缺陷：空白键误杀 -> 纯反斜杠键误杀 -> `AppendFile` 64 GiB 内存分配 -> Windows 空格与句点卷根别名 -> 负数分片尺寸毒化。将实现与独立验收分离，使这 4 处兼容性或完整性回归在发版前被全部拦截。
 
-这些护栏存在的理由，历史给得很直白：`CVE-2026-39414` 也是 2026-04-15 点修复、**两个月后** 才来一个 `fix: complete ...`。加上本次，"点修复 → 记录成闭合 → 数月后补完"在这个 fork 里已经出现两次。**问题不是谁不小心，而是树里没有任何东西能告诉你一个类别仍然敞着。** 护栏就是把"必须有人记得"变成"CI 会失败"。
+## Server 20260804 同步发版的五项后续加固 {#open}
 
-## 关于对抗审查 {#adversarial}
+除主提交 [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) 外，以下五项配套修复已随 [Server 20260804](/zh/blog/release/silo-20260804/#sn-2026-002) 一并发布：
 
-本次修复经历了五轮独立对抗审查，**五轮各命中一条被漏掉的问题，五次全部成立**：空白键 → 反斜杠键 → `AppendFile` 分配 → Windows 空格/句点 → 负数 part size。
+- **`ReadFileHandler` 读取长度上限（`b6f70ab08`）**：提交 [`b6f70ab08`](https://github.com/pgsty/silo/commit/b6f70ab08) 拒绝超过 5 GiB（单 S3 分片最大尺寸）的声明读取长度，消除由调用方任意声明数十 GiB 触发的预分配。
+- **拒绝负数分片尺寸（`80e8eaa42`）**：提交 [`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42) 在 `AddVersion` 写入收口点以及 `CheckParts`、`VerifyFile`、节点间 `guardErasureParams` 中统一拒绝负数分片尺寸，同时覆盖新写入与历史落盘元数据。
+- **拒绝非正数纠删码块大小（`80e8eaa42`）**：提交 [`80e8eaa42`](https://github.com/pgsty/silo/commit/80e8eaa42) 在 `NewErasure` 构造时校验 `blockSize > 0`，并在 rebalance 的独立除法边界补充校验。
+- **`ReadParts` 存储错误正常透传（`1af351a70`）**：提交 [`1af351a70`](https://github.com/pgsty/silo/commit/1af351a70) 修复了 `ReadPartsHandler` 在存储调用结束前就过早调用 `done(nil)` 的历史 bug；此前 `ReadParts` 的任何错误（包括 `errFileNotFound`）都会被塞进保活流并被客户端当作 msgpack 解析，报出 `msgp: attempted to decode type "int" with method for "map"`。修复后真实存储错误正常进入 quorum 归约。
+- **`WithDeadline` 协程 panic 恢复与日志告警（`a36fd8fff`）**：提交 [`a36fd8fff`](https://github.com/pgsty/silo/commit/a36fd8fff) 在 `xioutil.WithDeadline` 内捕获 panic，将原本会导致进程退出的异常转化为一行 `stderr` 日志（`panic in deadline-bounded work: ...`，单进程生命周期内最多输出 10 次完整调用栈）并仅使当前请求失败。建议运维人员为日志关键字 `panic in deadline-bounded work:` 配置监控告警。
 
-同期我们的自查也确实找出两条（`WithDeadline` 的日志放大、`ReadParts` 用错规则），但那是在被逼到那个严谨度之后。
+## 已知限制 {#closing}
 
-这个命中率说明的事情很直白：**合并前的最后一道关应当是独立验收，而不是作者的自我结论。** 在这次修复中，作者四次判断"可以发版"，三次被推翻。
+以下两项边界需在运维评估时知悉：
 
-## 后续状态 {#open}
-
-以下五项后续在 8 月 3 日原评审时尚未发布，随后均进入 Server 20260804：
-
-- **`ReadFileHandler` 已有上界。** 提交 `b6f70ab08` 会拒绝超过 5 GiB 的声明读取长度；这是该旧式整文件 bitrot 路径所代表 S3 part 的最大尺寸。合法的 GiB 级读取仍可能按相同量级分配内存；这里消除的是超过格式真实上限、由调用方任意指定的分配，并没有假装大读取毫无成本。
-- **负数 part size 既不能写入，也不能被信任。** 提交 `80e8eaa42` 在 `AddVersion` 写入收口点拒绝该值，并在 `CheckParts` 与 `VerifyFile` 再次校验，因此既覆盖新写入的毒化元数据，也覆盖已经落盘的历史元数据。内部节点边界使用同一个谓词。
-- **非正数 erasure block size 在构造时即被拒绝。** 提交 `80e8eaa42` 在 `NewErasure` 校验 `blockSize`，覆盖单独给 `ShardFileSize` 加守卫无法覆盖的其他 offset 与 decode 除法；rebalance 中独立的除法在自身边界另行校验。
-- **`ReadParts` 的错误终于能传回调用方（`1af351a70`）。** 顺带修好的既有 bug：原 handler 在存储调用结束前就宣告成功（`done(nil)`），因此 `ReadParts` 的任何失败——不只是新守卫，也包括 `errFileNotFound` 等——都从未被返回；客户端拿到保活流，把错误文本当 msgpack 解析，表现为 `msgp: attempted to decode type "int" with method for "map"`。修复后真实存储错误进入 quorum 归约；成功路径未变，multipart 相关日志里的这类 msgpack 解码噪声会被真实存储错误取代。
-- **被 recover 的 panic 不等于健康节点（`a36fd8fff`）。** `WithDeadline` 的 recover 把原本的进程立即死亡变成一行 stderr（`panic in deadline-bounded work: ...` 带完整栈）加一次失败请求。栈转储在每个进程生命周期内最多 10 次，但错误每次都会返回。**若你的告警只盯进程存活，请为该字符串补一条日志告警**——否则一个过去以崩溃自我暴露的真 bug，现在只在日志里低语。
-
-仍有两项限制，不能被打包进更强的结论：
-
-- **Windows 无 CI**——发布 Windows 构建，测试只跑 Ubuntu。Windows 规则是从文档化的 Win32 行为推理而来，未经实机验证。
-- **符号链接**——containment 校验是词法防御，与上游一致。
-
-## 尾声 {#closing}
-
-上一篇说"关闭一个 endpoint，与关闭一个缺陷类别，是两种不同结论"。这次已知 sink 已在本地分支关闭，代价是四次自制回归和三次被推翻的"可以发版"。在当时的调查节点，发布仍是独立的一道门；以上修复后来已进入 20260804 公开构建。
-
-如果只留一句：**漏洞是上游的，我们的错在于把点修复当成了闭合。** 而防止它第三次发生的，不是更仔细的人，是会失败的测试。
+- **Windows 平台验证边界**：SILO 发布 Windows 二进制构建，但自动化 CI 运行在 Ubuntu 环境；Windows 卷根别名规则（`" "` 与 `"..."`）系根据 Win32 路径规范化文档语义实现。
+- **符号链接词法校验**：路径包含校验采用词法级（lexical）分析，与上游 `xlStorage` 一致，不解析磁盘根目录内部指向外部的操作系统符号链接。

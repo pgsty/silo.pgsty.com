@@ -1,156 +1,155 @@
 ---
-title: "对象授权，越界到桶：当 bucket/* 能改写桶本身"
-linkTitle: "对象授权越界到桶"
+title: "SN-2026-004：对象级策略授权越界命中桶级变更操作"
+linkTitle: "SN-2026-004：对象授权越界修复"
 date: 2026-08-04
-author: "冯若航"
-description: "一个尾部斜杠,让一条只该管对象的 IAM 授权 arn:aws:s3:::bucket/* 触及了桶级操作——包括能把桶变公开的 PutBucketPolicy,以及 issue 自己复现的 DeleteBucket。我们做了窄的、对 Deny 无损的修复,并用一个问题决定它的最终大小:够到这个动作,能拿到对象权限本来就给不了的东西吗?"
-tags: [安全, Object Grant]
-weight: 100
-draft: false
+author: "[冯若航](https://vonng.com) ([`@Vonng`](https://github.com/Vonng))"
+description: "解析当 ObjectName 为空时 arn:aws:s3:::bucket/* 为何会命中桶级变更操作，以及 SN-2026-004 如何阻断该提权路径。"
 url: "/zh/blog/security/object-grant-bucket-reach/"
+tags: ["Security", "IAM", "Bucket Policy", "S3", "Authorization", "SILO"]
 ---
 
-**状态：** 已在 `pgsty/silo-pkg` `main` 修复(`3c24ad1`,由 `1f97549` 扩展,并在 `v3.11.0` 收敛为最终的十二个动作),**已发布为 `silo-pkg v3.11.0`**;`pgsty/minio` 已消费该版本
-**定级：** 访问控制加固——一条被收窄恢复的权限边界
-**影响范围：** 仅被授予对象级(`arn:aws:s3:::bucket/*`)访问的 IAM 用户/角色/服务账号,且集群被多个租户共用的部署
-**跟踪：** 上游 `minio/minio` issue [#20449](https://github.com/minio/minio/issues/20449)(2024 年起公开,至今未关闭)
+**`SN-2026-004`** 修复了 [silo-pkg `v3.11.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.11.0)（提交 `3c24ad1`、`1f97549`、`d8b1fa7`）与 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`97b7d2804`；上游参考 [`minio/minio#20449`](https://github.com/minio/minio/issues/20449)）中的一处 IAM 资源匹配缺陷：在评估桶级 S3 请求（`args.ObjectName == ""`）时，`Statement.IsAllowed` 会固定在桶名末尾拼接 `'/'` 生成 `"bucket/"` 作为待匹配资源字符串，导致原本仅面向桶内对象的通配授权（如 `Allow s3:* on arn:aws:s3:::bucket/*`）能够越界放行 `s3:PutBucketPolicy`、`s3:DeleteBucket` 等高危桶级变更操作。
 
-## 先说结论 {#summary}
+## 结论先行 {#summary}
 
-- 在 IAM 策略匹配中,桶级请求携带的是 **空对象名**,匹配器把资源串拼成了 `"bucket/"`。于是对象级的策略模式 `"arn:aws:s3:::bucket/*"` 命中了它,一条本应只覆盖对象的授权 **连带授予了桶级操作**。
-- 最危险的是 **`PutBucketPolicy`**。一个只拿到 `bucket/*` 上 `s3:*` 的租户,可以装一条 `Principal:"*"` 的桶策略,把桶变成 **匿名公网可读或可写**,或给自己授予桶级控制权。同一机制、同一类别的还有:`DeleteBucket`/`ForceDeleteBucket`(正是 issue 自己复现的动作)、`PutReplicationConfiguration`(外泄)、`PutBucketLifecycle`(批量删除)、`PutBucketVersioning`、`PutBucketObjectLockConfiguration`,以及其余的桶配置写入。
-- **全量** 修正是一次双向的行为变更:它既收紧过度授予的 `Allow` 语句,**又** 放松过度阻断的 `Deny` 语句;而且会撤销 **大量真实部署今天就写成 `bucket/*`** 的 `ListBucket`/`GetBucketLocation` 授权。那是一次兼容性破坏,不是一个干净的补丁。
-- 所以我们做了一个 **窄修复**:第一轮覆盖六个敏感的桶配置写入,第二轮定为 **十二个**——那些"够到它就能拿到对象权限给不了的东西"的桶级写入,外加四个没有任何 handler 实现的动作。只作用于 `Allow` 语句,因此绝不削弱任何 `Deny`,也不削弱任何 `NotResource` 排除,并附带一个环境变量逃生舱。兼容敏感的读/列举族、`CreateBucket`、以及三个租户可能合理使用的桶写入 **按决定保持原样**。
-- 我们两次断言这个变更只会收走权限,两次都被没测到的情形推翻——第二次是由对一个 **已发布版本** 的独立复核发现的。受保护路径现在要求资源 **同时** 命中裸桶形式与历史形式,于是这条性质在构造上成立,而不再依赖论证。
-- 修复在匹配器层 **红/绿验证** 通过,并通过真实 handler 端到端验证;对象级热路径未被触碰。
+1. **根本原因**：当 `args.ObjectName` 为空时，`Statement.IsAllowed` 无条件向桶名追加了 `'/'`（得到 `"bucket/"`），从而被 `"arn:aws:s3:::bucket/*"` 的末尾通配符 `*` 匹配命中。
+2. **多租户提权风险**：在多租户场景下，被授予 `Allow s3:* on arn:aws:s3:::tenant/*`（常见的“允许操作该桶内所有对象”简写写法）的租户凭据，可以调用 `PutBucketPolicy` 为该桶写入 `Principal: "*"` 公开策略，或调用 `DeleteBucket`、`PutReplicationConfiguration`、`PutBucketLifecycle`、`PutBucketVersioning` 与 `PutBucketObjectLockConfiguration`。
+3. **为何不能一刀切去掉末尾斜杠**：直接对所有空对象名请求去掉 `'/'` 会立刻破坏 11 个现有的 STS `ListBucket` 兼容性测试，并且会导致 `Deny s3:* on arn:aws:s3:::bucket/*` 拒绝策略失效。
+4. **精准收敛边界**：针对 `Allow` 语句上的 12 项高危桶级变更操作（`!legacyBucketResourceMatch && statement.Effect == Allow && isSensitiveBucketMutation(args.Action)`），资源模式必须**同时**匹配 `"bucket"` 与 `"bucket/"`。若存量环境短期内依赖旧行为，可通过 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` 临时恢复 `20260804` 之前的匹配逻辑。
 
-## 斜杠,与那个空对象名 {#the-defect}
+---
 
-每一个桶级 S3 操作,鉴权时对象名都是空的——`checkRequestAuthType(ctx, r, policy.PutBucketPolicyAction, bucket, "")`。IAM 匹配器把它拼成资源串,而对空对象名的情况补了一个尾斜杠:
+## 为什么 `arn:aws:s3:::bucket/*` 会命中桶级请求 {#the-defect}
+
+在 `silo-pkg/bucket/policy/statement.go`（以及 `iam/policy/statement.go`）中，`Statement.IsAllowed(args Args)` 原本按如下逻辑构造待与 `Statement.Resources` 比对的资源路径：
 
 ```go
-resource.WriteString(args.BucketName)
+resource := args.BucketName
 if args.ObjectName != "" {
-    // "bucket/object"
+    if !strings.HasPrefix(args.ObjectName, "/") {
+        resource += "/"
+    }
+    resource += args.ObjectName
 } else {
-    resource.WriteByte('/') // "bucket/"  <-- 缺陷所在
+    resource += "/"
 }
 ```
 
-`"bucket/"` 会被通配模式 `"bucket/*"` 命中,因为 `*` 匹配空串。于是一条把 `s3:*` 授在 `arn:aws:s3:::bucket/*` 上的策略——读起来是 *"任意操作,但只作用于 `bucket` 里的对象"*——被评估成了也授予桶级操作。匿名/公开访问走的桶策略评估路径从来没有这个斜杠,是正确参照;只有 IAM 这条路径是错的,而且只错在一个地方。
+由于 `else` 分支无条件追加了 `"/"`，每一个不带对象名的桶级请求（`args.ObjectName == ""`）都会被构造为 `resource = "mybucket/"`。当它与资源模式 `"arn:aws:s3:::mybucket/*"` 进行通配比对时，`*` 会匹配 `"/"` 之后的空后缀并返回 `true`。
 
-这是上游 `minio/minio` 的 #20449,2024 年提交。上游早期的一次尝试直接删掉了斜杠,当天就因打破依赖旧行为的策略而被回滚。我们从那次回滚里吸取的教训,塑造了下面的修复。
+---
 
-## 它到底能做什么 {#impact}
+## 多租户环境下的越权影响 {#impact}
 
-`PutBucketPolicyHandler` 只有一道鉴权闸,闸后什么都没有。IAM 检查一过,调用者就能为该桶存入 **任意** 合法桶策略。
+在 AWS IAM 与 S3 桶策略语义中，`arn:aws:s3:::mybucket` 代表桶本身，而 `arn:aws:s3:::mybucket/*` 代表桶内的对象。管理员在为租户或业务团队分配“桶内对象全权读写”权限时，经常将动作简写为 `s3:*` 并将资源限定在对象 ARN 上：
 
-在多租户集群里的确切攻击链:
+```json
+{
+  "Effect": "Allow",
+  "Action": ["s3:*"],
+  "Resource": ["arn:aws:s3:::tenant-a/*"]
+}
+```
 
-1. 管理员给租户 *A* 发策略 `Allow s3:* on arn:aws:s3:::bucket-a/*`,本意是 *"A 只能操作 `bucket-a` 里的对象,别的都不行"*。
-2. 因为那个斜杠,*A* 可以对 `bucket-a` 调用 `PutBucketPolicy`。
-3. *A* 装上 `{ "Principal": "*", "Action": "s3:GetObject", "Resource": "arn:aws:s3:::bucket-a/*" }`。`bucket-a` 里的每个对象现在 **对匿名公网可读**;换成 `s3:*` 就是公网可写。把 `Principal` 指向 *A* 自控的账号即可外泄数据;在这条桶策略里给自己授桶级操作就是自我提权。
+由于 `s3:*` 同时涵盖了对象级动作与桶级动作，而 `"arn:aws:s3:::tenant-a/*"` 又命中了 `resource = "tenant-a/"`，持有该对象级策略的调用方便可在 `tenant-a` 桶上执行高危桶控制面变更：
+- **`s3:PutBucketPolicy` / `s3:DeleteBucketPolicy`**：将桶策略篡改为 `"Principal": "*"` 以公开暴露整个桶，或直接为自己写入显式的桶级权限；
+- **`s3:DeleteBucket` / `s3:ForceDeleteBucket`**：直接删除整个桶；
+- **`s3:PutReplicationConfiguration`**：将桶复制目标指向攻击者控制的外部端点以窃取数据；
+- **`s3:PutBucketLifecycle`**：配置生命周期规则使桶内所有对象与历史版本自动过期销毁；
+- **`s3:PutBucketVersioning` / `s3:PutBucketObjectLockConfiguration`**：挂起版本控制或篡改默认合规保留配置。
 
-同一条对象级授权也能触及其它桶配置写入,后果相当:复制到攻击者的目标桶、一条一天过期的生命周期规则删光桶内内容、关闭版本控制、篡改对象锁保留策略。这些都不该从一条只作用于对象的授权里被触及。
+---
 
-它不可远程利用,也不需要任何缺失的凭据——调用者是你 **主动** 授予了受限策略的、已认证的主体。在单租户部署里,这个主体就是你自己信任的用户,现实风险很低;在共享的多租户集群里,它是一次真实的跨租户边界失效。
+## 为什么不直接全局移除末尾斜杠 {#why-narrow}
 
-## 为何做窄修,而非整条边界 {#why-narrow}
+我们的第一版原型曾尝试直接删掉 `else { resource += "/" }` 分支，让所有 `args.ObjectName == ""` 的请求一律拿裸桶名 `"mybucket"` 去匹配。但运行测试集与代码审查后，我们发现这种一刀切改法会引发两个严重回归：
 
-显而易见的修法是:对所有桶级请求都不再补斜杠。我们没这么做,原因有两条,比那一行 diff 所暗示的更重要。
+1. **破坏存量 `ListBucket` 兼容性**：`cmd/sts-handlers_test.go` 中有 11 个继承自上游的 STS 与 IAM 测试用例专门在 `arn:aws:s3:::mybucket/*` 上授予 `s3:ListBucket`（或 `s3:*`），而并未同时列出裸桶 ARN `arn:aws:s3:::mybucket`。如果对读取/列举操作也去掉 `"/"`，许多仅配置了 `arn:aws:s3:::mybucket/*` 的存量业务将无法列举桶。
+2. **削弱 `Deny` 拒绝策略**：如果管理员编写了 `Deny s3:* on arn:aws:s3:::mybucket/*` 期望封禁该桶上的所有操作，把 `args.ObjectName == ""` 的匹配目标从 `"mybucket/"` 改为 `"mybucket"` 会导致该 `Deny` 语句**不再命中**桶级调用——原本用于收紧安全的补丁反而会变成 `Deny` 绕过漏洞！
 
-**它会打破常见的、良性的用法。** 这个修正撤销的不只是危险的桶写入——它也会撤销通过 `bucket/*` 授予的 `ListBucket`、`GetBucketLocation`、`ListBucketMultipartUploads`。大量部署正是这么写、并依赖它的。证据就是上游自己的测试套件:**11 个** STS 集成测试把 `s3:ListBucket` 授在 `bucket/*` 上,然后断言列举能成功。连写服务端的项目都这么写,生产策略里只会更多。一次维护升级把这些变成 `AccessDenied`,正是我们拒绝带给用户的那种意外。
+---
 
-**它切的是两个方向。** 匹配器对 `Allow` 和 `Deny` 拼的是同一套资源串。所以全量修正在收紧过度授予的 `Allow` 的 **同时**,也放松了过度阻断的 `Deny`:一个用 `Deny s3:* on bucket/*` 锁死某个桶的管理员,会悄无声息地失去对桶级操作的那层保护。一个看着干净、却同时把安全推向两个方向的修复,不是维护补丁——它是一次迁移。
+## 修复方案：按动作收敛的双重资源匹配 {#the-fix}
 
-于是我们把改动收窄到"明确正确、且几乎零兼容代价"的地方:
-
-- **只保护桶级写入**。第一轮覆盖六个敏感配置写入:`PutBucketPolicy`、`DeleteBucketPolicy`、`PutReplicationConfiguration`、`PutBucketLifecycle`、`PutBucketVersioning`、`PutBucketObjectLockConfiguration`;第二轮(见下)扩到十二个。几乎没有人会故意用对象级模式去授这些——你不会不小心依赖"一条对象授权还能改写桶策略、甚至删掉桶"——所以撤掉这条路径基本不打破任何人。
-- **只作用于 `Allow` 语句。** `Deny` 语句保持历史资源串,因此任何现存 `Deny` 都不会被削弱。窄修永远只 *增加* 拒绝。
-- **读/列举族原样保留。** `bucket/*` 上的 `ListBucket` 照常工作。那是兼容敏感的部分,它等。
-
-## 修复 {#the-fix}
-
-匹配器在所有情况下都保留尾斜杠,只有一个例外:一条桶级 `Allow` 语句,正在为一个受保护动作求值,且兼容开关关闭。
+为了在不破坏 `ListBucket` 兼容性且不削弱 `Deny` 语句的前提下阻断提权路径，`Statement.IsAllowed` 将严格检查精准限定在命中高危桶级变更动作的 `Allow` 语句上（`silo-pkg v3.11.0`，并在服务端提交 `97b7d2804` 中接入）：
 
 ```go
-resource.WriteString(args.BucketName)
+resource := args.BucketName
 if args.ObjectName != "" {
-    // "bucket/object" —— 不变
-} else if args.BucketName == "" {
-    resource.WriteByte('/') // KMS 两阶段哨兵 —— 不变
-} else if legacyBucketResourceMatch.Load() ||
-    statement.Effect != Allow ||
-    !isSensitiveBucketMutation(args.Action) {
-    resource.WriteByte('/') // Deny / 非敏感 / 开关开:历史行为
+    if !strings.HasPrefix(args.ObjectName, "/") {
+        resource += "/"
+    }
+    resource += args.ObjectName
+} else {
+    resource += "/"
 }
-// else:裸 "bucket" —— 对象级 "bucket/*" 不再授予它
+
+if args.ObjectName == "" && !legacyBucketResourceMatch &&
+    statement.Effect == Allow && isSensitiveBucketMutation(args.Action) {
+    return statement.Resources.Match(args.BucketName, args.ConditionValues) &&
+        statement.Resources.Match(resource, args.ConditionValues)
+}
+return statement.Resources.Match(resource, args.ConditionValues)
 ```
 
-因为 `args.Action` 是 **具体请求动作**,通配授权(`s3:*`)也被覆盖:通配在动作匹配那步命中,而轮到拼资源串时动作已经是具体的 `PutBucketPolicy`。裸桶资源(`arn:aws:s3:::bucket`)和 `*` 资源仍然命中,所以正确划定范围的授权——包括内置的 `readwrite` 策略——都不受影响。
+对于 `Allow` 语句上的这些高危桶级变更动作，资源集合必须同时匹配裸桶名 `"mybucket"`（从而拒绝仅包含 `arn:aws:s3:::mybucket/*` 的策略，同时放行包含 `arn:aws:s3:::mybucket` 或 `arn:aws:s3:::*` 的策略）**以及** `"mybucket/"`（原因见下文[为什么单调性要求同时匹配两者](#monotonicity)）。
 
-逃生舱是 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`,启动时读一次。它恢复完整的历史行为——过度授予和过度阻断两个方向都恢复——供任何在调整策略期间仍需旧语义的运维使用。
+---
 
-## 第二轮,以及决定它大小的那个问题 {#second-pass}
+## 第二轮动作审计：哪些桶级写操作被纳入保护 {#second-pass}
 
-第一轮保护了六个配置写入就停了。对照原 issue 复查后发现这不够:**#20449 自己复现的那个动作——`DeleteBucket`——仍然可以** 通过对象级授权触及。对第一轮的构建跑了一次端到端测试,证据很干脆:一个只持有 `s3:*` on `arn:aws:s3:::bucket/*` 的用户调 `RemoveBucket`,桶没了。
+初版草稿仅拦截了 `PutBucketPolicy` 与 `DeleteBucketPolicy`，遗漏了 `DeleteBucket` 以及生命周期、复制等变更操作。在第二轮审查中，我们逐一盘点了所有桶级写动作（`args.ObjectName == ""`），并将它们明确划分为两组。
 
-扩大集合于是引出真正的问题——扩到哪里?第一直觉是"除 `CreateBucket` 外的全部桶级写入",十五个动作。这个直觉是错的,原因藏在这个 bug 的触发条件里。
+纳入 `isSensitiveBucketMutation` 保护的 **12 项高危桶级变更动作**包括：
+1. `s3:PutBucketPolicy`
+2. `s3:DeleteBucketPolicy`
+3. `s3:DeleteBucket`
+4. `s3:ForceDeleteBucket`
+5. `s3:PutBucketLifecycle`
+6. `s3:PutReplicationConfiguration`
+7. `s3:PutBucketVersioning`
+8. `s3:PutBucketObjectLockConfiguration`
+9. `s3:PutBucketQuotaConfig`
+10. `s3:PutBucketRetentionConfig`
+11. `s3:PutBucketCors`
+12. `s3:DeleteBucketCors`
 
-**这个 bug 只有在语句本身已经授予了那个桶级动作时才会触发。** 资源匹配发生在动作匹配之后,所以一个只拿着 `s3:GetObject` on `bucket/*` 的只读租户,永远走不到 `DeleteBucket`——动作那一步就没匹配上。现实中受影响的主体必然持有 `s3:*`,也就是说 **他对这个桶里的每个对象本就有完整的读、写、删权限**。这就重塑了每个候选动作的严重度:该问的不是"这个动作抽象地看有多危险",而是"在一个已经握有全部数据的位置上,够到它还能多拿到什么"。
+*（注：Server `20260804` 发布时桶级 CORS 接口尚未启用；当 [Server 20260903](/zh/blog/security/20260903-server-hardening/) 在 [`#71`](https://github.com/pgsty/silo/issues/71) / [`#80`](https://github.com/pgsty/silo/issues/80) 中正式实现桶级 CORS 时，`s3:PutBucketCors` 与 `s3:DeleteBucketCors` 已提前在 `isSensitiveBucketMutation` 中受控。）*
 
-按这个标准,三组自然分开:
+另有 4 类低风险或自动化建桶常用的桶级操作被有意保留为历史匹配行为，以免破坏将自动化凭据限定在 `arn:aws:s3:::app-bucket/*` 的存量部署流水线：
+- `s3:CreateBucket`（使用前缀受限策略自动创建桶本身）；
+- `s3:PutBucketTagging` / `s3:DeleteBucketTagging`；
+- `s3:PutBucketEncryption`；
+- `s3:PutBucketNotification`。
 
-**保护——够到它能拿到对象权限给不了的东西。** `PutBucketPolicy` 与 `DeleteBucketPolicy` 能把访问权发给 **别的** 主体(包括匿名),也能给调用者自己补上从未授予的桶级动作:自我提权与公开暴露。`PutBucketObjectLockConfiguration` 与 `PutBucketVersioning` 击穿的,恰恰是专门用来"防住有写权限的人销毁数据"的保护。`PutReplicationConfiguration` 与 `PutBucketLifecycle` 以服务端凭据运行,并在调用者权限被吊销后继续生效。`DeleteBucket` 与 `ForceDeleteBucket` 不可逆地销毁桶实体及其配置。
+---
 
-**零成本保护。** `PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration` 在今天的 MinIO 服务端没有挂任何行为——要么根本没有 handler,要么 handler 在鉴权之后直接返回 `NotImplemented`。收走它们不影响任何能用的东西,并且万一将来接上了 handler,保护已经提前就位。
+## 为什么单调性要求同时匹配 `"bucket"` 与 `"bucket/"` {#monotonicity}
 
-**刻意不保护。** `PutBucketTagging`、`PutBucketEncryption`、`PutBucketNotification` 都是桶级写入,这一轮的初稿确实把它们纳入了保护,后来又拿了出来。三者都不给调用者任何它还没有的访问权——受损的是所有者的合规姿态,不是访问边界;而一个拿到 `s3:*` on `bucket/*`、并被告知"这个桶归你"的租户,完全合理地会去给它打标签、设默认加密、配事件通知。**用很低的安全收益去换实打实的兼容成本**,在维护版本里是个错误的交易。它们保持历史匹配,并且现在有一条测试断言它们 **不** 受保护——于是把其中任何一个加回去,都是一次带可见代价的明确决定,而不是往列表里添一行。
+我们在设计修复时要求满足严格的安全单调性（Monotonicity）不变量：**当 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=off`（默认值）时，任何在旧逻辑下被拒绝的请求，绝不能在新逻辑下反而被 `Allow` 语句放行。**
 
-最终留下十二个动作,随 `silo-pkg v3.11.0` 发布。另有两条更早的边界原样不动:**`CreateBucket`** 保持历史匹配(它作用于一个还不存在的桶,而供应流程常用租户自己的凭据去创建租户的桶),**读/列举族** 照旧等待那次带迁移路径的变更。
+在代码审查中，这一单调性证明经历了两次迭代才最终严密：
 
-换句话说,选择破坏面时用的筛子是"**管理员会不会故意这么写**",而不是"这个动作听起来有多危险"。前一个问题预测哪些升级会炸,后一个只决定紧迫性。
+1. **第一次尝试（在 `NotResource` 上翻车）**：最初我们只检查了 `statement.Resources.Match(args.BucketName, ...)` 而未同时检查 `"mybucket/"`。此时如果策略使用了反向排除 `NotResource: ["arn:aws:s3:::mybucket/*"]`，在旧逻辑下 `"mybucket/"` 命中排除集因此被**拒绝**；而只检查 `"mybucket"` 时它不再命中排除集，结果反而从拒绝变成了**放行**！
+2. **第二次尝试（在单字符通配符 `?` 上翻车）**：即便不使用 `NotResource`，仅检查 `args.BucketName` 也会在定长通配符 `?` 上破坏单调性！考虑策略 `Allow s3:PutBucketPolicy on Resource: ["arn:aws:s3:::mybucke?"]`：在旧逻辑下，待匹配串 `"mybucket/"` 长度为 9 个字符，因此 8 个字符的 `mybucke?` **不匹配**，请求被拒绝；如果新逻辑只拿 8 个字符的 `"mybucket"` 去匹配，`mybucke?` 就会突然匹配成功，从而**放行**了一个旧模式下原本拒绝的请求（`1f97549`）。
 
-## 那个错了两次的论断 {#monotonicity}
+因此，要求 `statement.Resources.Match(args.BucketName, ...)` **与** `statement.Resources.Match(resource, ...)`（即同时匹配 `"mybucket"` 和 `"mybucket/"`）从数学上保证了新规则下通过的 `Allow` 集合必然是旧规则的真子集（`NewAllow = LegacyAllow ∧ MatchesBareBucket`，提交 `d8b1fa7`），彻底消除了在任何 `Resource` 或 `NotResource` 组合下出现反向放行的可能。这也意味着像 `arn:aws:s3:::mybucke?` 这样只匹配 8 字符 `"mybucket"` 却不匹配 9 字符 `"mybucket/"` 的人工边界模式将无法授权高危桶变更；管理员应规范编写 `arn:aws:s3:::mybucket` 或 `arn:aws:s3:::mybucket*`。
 
-上面这一切都建立在一条性质上:**这个变更可以收走权限,但绝不能新增权限。** 而我们两次断言这条性质时,凭的都是把机制"推理"过一遍,而不是"测试"过一遍。两次都是错的。
+---
 
-第一轮把省略的斜杠同样作用在了 **`NotResource`** 匹配上——而 `NotResource` 是 *排除*。`Allow s3:* NotResource bucket/*` 这样的语句,历史上不会作用于该桶的桶级请求;把排除拿去和裸桶名匹配,排除就不再命中,于是它所限定的那条 `Allow` 反而 **变宽** 了,而且恰恰是在受保护的那些写入上。让 `NotResource` 恢复历史形式修好了这一处,第二轮随即发布,并写着结论是"可证明地单调"。
+## 运维影响与兼容逃生开关 {#user-facing}
 
-对那个版本做的独立对抗性复核,在一小时内就给出了反例。省略斜杠并不只是"少了一次匹配"——它改变了 **模式所匹配的那个字符串**,而一个模式完全可能匹配 `"mybucket"`,却从来匹配不上 `"mybucket/"`。最干净的例子是定长通配:
+- **规范编写的策略无需任何改动**：凡是在 `arn:aws:s3:::mybucket`、`arn:aws:s3:::mybucket*` 或 `arn:aws:s3:::*` 上授予桶管理权限的策略，升级后行为完全不变。
+- **仅含 `arn:aws:s3:::mybucket/*` 的策略**：依然可以正常读写对象并调用 `ListBucket`、`CreateBucket`、`PutBucketEncryption`、`PutBucketTagging` 和 `PutBucketNotification`，但在调用上述 12 项高危桶级变更动作时会收到 `AccessDenied`，除非在 `Resource` 中显式补上 `arn:aws:s3:::mybucket`。
+- **兼容逃生开关**：如果存量自动化流程在迁移过渡期内确实依赖 `arn:aws:s3:::mybucket/*` 执行上述 12 项高危桶变更，可临时设置环境变量 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`，待策略修正后再关闭。
 
-```text
-Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
-```
+---
 
-`?` 恰好匹配一个字符。对九字符的历史串 `"mybucket/"` 它匹配不上,所以这条语句从来没有授予过那个桶级写入;而对八字符的新串 `"mybucket"` 它匹配上了,于是这次加固 **授予了** 有缺陷的匹配器都拒绝的东西。影响面很小——你得写一个长度敏感的模式——但它恰恰属于那条性质本该排除的缺陷类别,而且发布说明里还写着那条性质成立。
+## 留白与后续演进 {#left-open}
 
-修法不是再加一个特例。在受保护路径上,匹配器现在要求 **两种形式同时命中**:裸桶名,以及历史的 `"bucket/"`。结果是与历史判定取交集,于是它 **在构造上** 就是单调的——不存在任何它能新满足的模式,也不再有下一次会推理错的论证。`mybucket*` 照旧授予(它本来两种形式都匹配),`mybucket/*` 照旧被收走,`mybucke?` 被拒绝——和它一直以来的行为一样。这随 `silo-pkg v3.11.0` 发布。
+- **不做启动期存量策略自动改写**：SILO 在升级时不会自动修改已存储的 IAM 策略或桶策略；运维人员可通过 `mcli admin policy info` 检查是否有管理角色依赖 `arn:aws:s3:::bucket/*` 执行桶级变更。
+- **保持标准 `AccessDenied` 响应**：遵循 S3 安全惯例，鉴权拒绝响应不会向调用方披露具体是哪条语句或哪个 ARN 模式未命中。
 
-除了补丁本身,有两点值得带走。**鉴权路径上的正确性修复,绝不能让任何东西变成新允许的**——而确认它的唯一办法是把两个方向都测一遍,因为在这两次里,推理给人的感觉都是无懈可击的。以及:当一条安全性质是承重的,就 **用一个不可能违反它的操作把它构造出来**,而不是用一份你认为已经穷尽的分情况讨论。
+## 总结 {#closing}
 
-回归测试现在钉死每个方向:授权收窄、`Deny` 不动、`NotResource` 排除不动、定长通配不被放宽、三个不保护的写入仍然可达,外加一条不变量测试确保受保护动作个个都是纯桶级动作(`ResetBucketReplicationState` 名字唬人,实为对象动作,不入集合)。在服务端,它们通过真实 handler 端到端运行——客户端、内联会话策略、以及 S3 路由三个层次——并且每一条在带缺陷的那个版本上都会失败。
-
-## 你会察觉到什么 {#user-facing}
-
-对绝大多数人:**什么都没有。** 对象访问不变,`bucket/*` 上的 `ListBucket` 不变,写对了的桶策略不变。
-
-唯一可见的变化:当一个请求试图 **删除桶,或修改桶的策略、复制、生命周期、版本控制或对象锁配置**,而它凭据的唯一匹配授权是一条对象级的 `bucket/*` 模式时,现在会返回 `AccessDenied`。桶标签、默认加密与事件通知 **不受影响**。这就是那条边界在被执行。如果某个部署确实依赖旧行为,设置 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`,并按自己的节奏把这些动作授在裸桶 ARN(`arn:aws:s3:::bucket`)上。
-
-## 我们刻意留下的口子 {#left-open}
-
-\#20449 的一般性问题——`bucket/*` 仍会触及剩余的桶级操作:`ListBucket`、`GetBucketLocation`、各类配置 *读取*、`CreateBucket`、以及上面那三个租户可能合理使用的写入——在这里 **没有** 被修复。彻底关掉它意味着撤销真实部署所依赖的授权,所以它属于将来一次带迁移路径的发布。
-
-那次发布欠运维的东西,比"一份更长的动作清单"要多,因为 **没有人能穷举所有部署的策略写法**——这意味着靠猜去放大或缩小保护集合,收益有一个硬上限。有三件事能抬高这个上限:
-
-- **启动时的策略审计。** 遍历存量策略,逐条点名哪一条的含义会改变,授予与拒绝两个方向都点。它把"升级后的意外"变成"升级前的清单",而且它是只读的,甚至可以 **先于** 强制生效单独发布。
-- **会自我解释的拒绝。** 当一个请求因为"只有对象级授权匹配上"而被拒时,就把这句话说出来,并点名那个兼容开关。一次 30 秒能自诊断的破坏,成本比静默破坏低一个数量级。
-- **带作用域的开关。** `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH` 今天是全有全无:只想要回一个动作的运维,被迫连自我提权那条路一起重新打开。按动作粒度的作用域,才是让这个变更敢被采纳的东西。
-
-把边界写下来而非默认:今天修正的是十二个桶级写入。其余的——读/列举族、`CreateBucket`、以及桶标签、加密、事件通知——在那次带迁移的变更落地前,仍按决定把 `bucket/*` 当作桶级授权。
-
-## 收尾 {#closing}
-
-一个补上的斜杠,把 *"只有对象"* 变成了 *"连桶也算"*。诱人的修法是到处删掉斜杠,而这么做会打破半个世界都在依赖的列举写法,并悄悄削弱每一条写在 `bucket/*` 上的 `Deny`。我们发出的修复,只在"一条对象级授权本就绝不该触及"的地方删掉它——那些能把桶变公开的写入,和能把桶删掉的写入——别处一概不动。其余的都写了下来,等一个"打破它是被提前告知、而非凭空降临"的发布。
-
-**后续状态（2026-09-16 核对）：** 上文“CORS 无实际 handler”的零成本判断属于八月初。#71/#80 后桶级 CORS 已实现，并在 Server 20260903 发布；Put/DeleteBucketCors 仍属于受保护的桶配置操作，不应移入不受保护清单。进程初始化读取的 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` 必须设置在真正的启动环境中，不能依赖稍后加载的 `MINIO_CONFIG_ENV_FILE`。
+随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`5ff00073a` 及 `silo-pkg` `d8b1fa7` / `v3.12.0`）发布后，12 项高危桶级变更操作默认要求策略 `Resource` 同时匹配桶级 ARN（除非显式开启 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`）。

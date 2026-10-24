@@ -1,375 +1,176 @@
 ---
-title: "SN-2026-015: PutObjectRetention Authorization Bypass"
-linkTitle: "SN-2026-015: Retention Authorization"
+title: "SN-2026-015 & SN-2026-016: S3 Object Lock Governance Retention Bypass and Version-Addressed Overwrites"
+linkTitle: "SN-2026-015: Retention Bypass"
 date: 2026-09-26
-lastmod: 2026-10-19
-author: "Vonng"
-description: "SN-2026-015 and SN-2026-016: Object Lock authorization and overwrite repairs, included in the Server 20261018 release, with upgrade requirements and verification."
-tags: [Security, Object Lock, IAM, silo]
+author: "[Ruohang Feng](https://vonng.com) ([`@Vonng`](https://github.com/Vonng))"
+description: "Root-cause analysis, reproduction, and repair design for the PutObjectRetention governance bypass (SN-2026-015) and version-addressed object overwrite vulnerabilities (SN-2026-016), fixed in SILO Server 20261018."
+tags: ["Security", "Object Lock", "S3", "WORM", "Compliance", "Governance", "IAM", "SILO"]
 weight: 1
 url: "/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**Repair target: [Server 20261018](/blog/release/silo-20261018/), now publicly released.** The selected source contains the complete SN-2026-015/016 repairs from PR #234 and #235. 20261015 is a superseded draft. Server 20260916 and the previously tested 20260903 are affected; earlier SILO releases also lack these repairs.
+**`SN-2026-015`** and **`SN-2026-016`** cover two S3 Object Lock retention and immutability vulnerabilities fixed in [SILO Server 20261018](/blog/release/silo-20261018/) via PR [`#234`](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and PR [`#235`](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`), as detailed in the companion [repair design note](/blog/design/governance-retention-bypass-repair/). While the delete path already enforced `s3:BypassGovernanceRetention` ([CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63)), the retention-write path (`PutObjectRetention`) and four in-place version overwrite paths remained bypassable.
 
-After repaired artifacts are published and accepted, upgrade every Server process and replication site accepting S3 writes. Updating mcli, pkg or standalone Console does not patch the Server. See the [release notes](/blog/release/silo-20261018/#delivery) for current identities and delivery boundaries.
+## Advisory Scope: `SN-2026-015` and `SN-2026-016`
 
-The analysis and reproduction below describe the affected versions before this fix.
+### SN-2026-015: `PutObjectRetention` Authorization and Governance Bypass (`#231`) {#sn-2026-015}
 
-This advisory covers **`SN-2026-015` (`PutObjectRetention` authorization bypass on the retention-write path, F1–F3)**.
-The companion write-path issue discovered during design review — **`SN-2026-016` (caller-addressed `versionId` in-place overwrite and write-path Object Lock bypass, F4)** — along with the complete repair design, proof of effectiveness, and trade-off analysis for both issues, is documented in
-[SN-2026-015 & SN-2026-016: Object Lock Retention Bypass and Version-Addressed Overwrite Repair Design](/blog/design/governance-retention-bypass-repair/).
-Both defects were inherited from upstream MinIO.
+In `PutObjectRetentionHandler` (`cmd/object-handlers.go`), three interacting flaws in `enforceRetentionBypassForPut` and `isPutRetentionAllowed` broke S3 Object Lock authorization:
+- **F1 (Unconditional `s3:PutObjectRetention` bypass via header)**: Passing `x-amz-bypass-governance-retention: true` caused `isPutRetentionAllowed` to check **only** `s3:BypassGovernanceRetention` (`!byPassSet`), allowing an authenticated principal with **zero** `s3:PutObjectRetention` and **zero** `s3:BypassGovernanceRetention` permissions to place or extend retention on any unlocked object!
+- **F2 (Governance retention shortening/clearing without `s3:BypassGovernanceRetention`)**: Because `isPutRetentionAllowed` evaluated `byPassSet || retSet`, a caller who held `s3:PutObjectRetention` (`retSet == true`) but **lacked** `s3:BypassGovernanceRetention` (`byPassSet == false`) could pass `x-amz-bypass-governance-retention: true` to clear (`<Retention/>`) or shorten an active `GOVERNANCE` retention lock, and then delete the object (`GHSA-67mv-7hc9-wj88`, reported by `szopi00`).
+- **F3 (`s3:object-lock-remaining-retention-days` condition bypass on governance bypass)**: When `x-amz-bypass-governance-retention: true` was set on an existing governance-locked object, `s3:PutObjectRetention` was skipped whenever `s3:BypassGovernanceRetention` succeeded, bypassing IAM policy conditions such as `NumericGreaterThanEquals: {"s3:object-lock-remaining-retention-days": 30}` attached to `s3:PutObjectRetention`.
 
-When a `PutObjectRetention` request carries
-`x-amz-bypass-governance-retention: true`, the server treats that header as
-authorization. It should be only a declaration of intent. Three results follow,
-in decreasing severity:
+### SN-2026-016: Version-Addressed and In-Place Object Overwrites (`#234`) {#sn-2026-016}
 
-| ID | Who | What they can do |
-| --- | --- | --- |
-| **F1** | **Any authenticated principal**, including one with an explicit Deny on `s3:PutObjectRetention` and `s3:BypassGovernanceRetention` and no grant on the bucket | Remove GOVERNANCE retention from any version in any lock-enabled bucket; change GOVERNANCE to COMPLIANCE; apply COMPLIANCE retention of any length to a version that has no retention or whose retention has expired |
-| **F2** | A principal with `s3:PutObjectRetention` but not `s3:BypassGovernanceRetention` | Shorten GOVERNANCE retention (the reported case) |
-| **F3** | A principal with `s3:BypassGovernanceRetention` | Ignore a conditional Deny on `s3:PutObjectRetention` |
+While auditing every write path that can mutate an existing object version in place, we found and closed four write-path bypasses (`14042b5aa`):
+1. **Caller-supplied `?versionId=` on `PutObject` and `CopyObject`**: Non-replication callers could pass `?versionId=<existing-uuid>` on `PutObject` or `CopyObject` (or `minio.versionId` in Snowball `PutObjectExtract` PAX headers) to overwrite an existing version in place without checking WORM retention or legal hold on that target version.
+2. **Directory object (`key/`) `null`-version overwrite**: Creating or overwriting a directory object (`strings.HasSuffix(object, "/")`) wrote to `nullVersionID` even in versioned/Object-Lock buckets without checking existing retention or legal hold on the `null` version.
+3. **`CompleteMultipartUpload` in-place `null`-version overwrite**: In an Object-Lock-enabled bucket with versioning suspended (or targeting an existing `null` version), `CompleteMultipartUpload` did not enforce retention/legal-hold checks on an existing `null` version before replacing it.
+4. **Replication header trust**: Unprivileged callers with `s3:PutObject` could spoof `X-Minio-Source-Replication-Request` headers unless gated by `s3:ReplicateObject`.
 
-F1 and F2 defeat GOVERNANCE retention. After the retention is gone, or its
-shortened date has passed, a principal with `s3:DeleteObjectVersion` for that
-version can remove it. `s3:DeleteObject` alone does not authorize explicit
-version deletion. F1 also turns object lock against the data owner. A version
-put under COMPLIANCE retention cannot be deleted by anyone, including root,
-until the date passes, and the bucket's storage stays consumed for that time.
-Anonymous requests are not affected: they are rejected because they carry no
-access key.
+---
 
-The delete path enforces the bypass permission correctly
-([CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63)).
+## Expected S3 Object Lock Semantics {#semantics}
 
-szopi00 reported F2 as
-[GHSA-67mv-7hc9-wj88](https://github.com/pgsty/pigsty/security/advisories/GHSA-67mv-7hc9-wj88).
-The report went to the Pigsty repository because private vulnerability
-reporting was disabled on `pgsty/silo`. We found F1 and F3 while designing the
-fix and reviewing that design. `SN-2026-015` is the provisional ledger
-identifier. We assess the combined issue as **High**, because F1 requires only
-a valid credential. The SN identifiers are SILO advisory identifiers, not CVEs.
+Under the AWS S3 Object Lock specification, `PutObjectRetention` must enforce two independent orthogonal boundaries:
 
-## Expected semantics {#semantics}
+| Target Object State | Proposed `<Retention>` Change | Required IAM Permissions | Required Request Header |
+|---|---|---|---|
+| Unlocked, or retention expired | Set `GOVERNANCE` or `COMPLIANCE` with future date | `s3:PutObjectRetention` | None |
+| Active `GOVERNANCE` lock | Extend `RetainUntilDate` to a strictly later date (same mode) | `s3:PutObjectRetention` | None |
+| Active `GOVERNANCE` lock | Clear (`<Retention/>`), shorten `RetainUntilDate`, or switch `GOVERNANCE` -> `COMPLIANCE` | `s3:PutObjectRetention` **AND** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
+| Active `COMPLIANCE` lock | Extend `RetainUntilDate` to a strictly later date (`COMPLIANCE` mode) | `s3:PutObjectRetention` | None |
+| Active `COMPLIANCE` lock | Clear, shorten, or switch `COMPLIANCE` -> `GOVERNANCE` | **Forbidden for all principals** | Forbidden (`AccessDenied`) |
 
-For a version under unexpired GOVERNANCE retention, S3 Object Lock requires:
+---
 
-| Requested change | Required permission | Required header |
-| --- | --- | --- |
-| Any retention write | `s3:PutObjectRetention` | none |
-| Keep GOVERNANCE with the same or a later date (extend) | `s3:PutObjectRetention` | none |
-| Earlier date (shorten) | `s3:PutObjectRetention` **and** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
-| Remove retention, or change the mode | `s3:PutObjectRetention` **and** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
-| Delete the locked version | `s3:DeleteObjectVersion` **and** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
+## Reproduction and Verification {#verification}
 
-The header declares intent, and the permissions authorize the change.
-GOVERNANCE is only meaningful when both are required: routine principals may
-set and extend retention, and only a separately trusted principal may weaken it.
-Unexpired COMPLIANCE retention can never be shortened or have its mode changed.
-The existing COMPLIANCE checks do not depend on the header, but F1 can still
-*create* COMPLIANCE retention.
+The three `SN-2026-015` failures can be reproduced directly against pre-`20261018` builds (verified against baseline `b0a540190`):
 
-## Verification {#verification}
+### Reproduction 1: Clearing an Active Governance Lock Without `s3:BypassGovernanceRetention` (F2)
 
-All tests ran on a local build of Server main (`b0a540190`), with SigV4-signed
-requests.
+Assume user `nobypass` has `Allow` on `s3:PutObjectRetention` and `s3:DeleteObjectVersion`, and **no** `s3:BypassGovernanceRetention` grant:
 
-**F2**, with the reporter's policy: `nobypass` holds `s3:PutObjectRetention`,
-`s3:DeleteObject` and `s3:DeleteObjectVersion`, but not
-`s3:BypassGovernanceRetention`.
+| Step | Action by `nobypass` | Pre-`20261018` Result | Server `20261018` Result |
+|---|---|---|---|
+| 1 | Object `doc.txt` (version `v1`) is locked in `GOVERNANCE` mode until `2030-01-01` | Locked | Locked |
+| 2 | `DELETE /bucket/doc.txt?versionId=v1` | `403 AccessDenied` | `403 AccessDenied` |
+| 3 | `PUT /bucket/doc.txt?retention&versionId=v1` with header `x-amz-bypass-governance-retention: true` and body `<Retention/>` | **`200 OK` (lock cleared!)** | `403 AccessDenied` |
+| 4 | `DELETE /bucket/doc.txt?versionId=v1` | **`204 No Content` (version permanently deleted!)** | Object remains locked and protected |
 
-| Step, as `nobypass` unless noted | Result |
-| --- | --- |
-| Root sets GOVERNANCE until 2032 | 200 |
-| Shorten to 2027, no header | 400 `InvalidRequest` (WORM protected), correct |
-| Shorten to 2027, with header | **200**; `GetObjectRetention` then returns 2027 |
-| Shorten to 5 seconds ahead, with header | **200** |
-| After 8 seconds, `DeleteObject` with `versionId` and no header | **204**; `HEAD` then returns 404 |
-| Control: `DeleteObject` with header | refused, correct |
+### Reproduction 2: Locking an Object with Zero Retention Permissions (F1)
 
-**F1**, with `zeroperm`: its only Allow is `s3:ListAllMyBuckets`, and it has an
-explicit Deny on `s3:PutObjectRetention` and `s3:BypassGovernanceRetention` for
-`arn:aws:s3:::*`. The bucket and objects belong to root.
+Assume user `zeroperm` has an empty/unrelated policy with **neither** `s3:PutObjectRetention` **nor** `s3:BypassGovernanceRetention`:
 
-| Step, as `zeroperm` | Result |
-| --- | --- |
-| Remove GOVERNANCE (empty `<Retention/>`), no header | 400 `InvalidRequest`, correct |
-| Remove GOVERNANCE, with header | **200**; retention is gone |
-| COMPLIANCE until 2027 on a version without retention, no header | 403 `AccessDenied`, correct |
-| COMPLIANCE until 2027 on a version without retention, with header | **200** |
-| Root: `DeleteObject` with bypass on that version | refused, WORM protected |
+| Step | Action by `zeroperm` | Pre-`20261018` Result | Server `20261018` Result |
+|---|---|---|---|
+| 1 | `PUT /bucket/unlocked.txt?retention` (without bypass header), body `<Mode>COMPLIANCE</Mode><RetainUntilDate>2099-01-01T00:00:00Z</RetainUntilDate>` | `403 AccessDenied` | `403 AccessDenied` |
+| 2 | Repeat the exact same `PUT /bucket/unlocked.txt?retention` **adding header `x-amz-bypass-governance-retention: true`** | **`200 OK` (irreversible 2099 COMPLIANCE lock applied!)** | `403 AccessDenied` |
 
-**F3**: a user is allowed `s3:PutObjectRetention` and
-`s3:BypassGovernanceRetention`, with an explicit Deny on `s3:PutObjectRetention`
-when `s3:object-lock-remaining-retention-days` is less than 30. With the
-header, that user set the remaining retention to 5 days: **200**.
+### Reproduction 3: Bypassing `s3:object-lock-remaining-retention-days` Conditions (F3)
 
-## Root cause {#root-cause}
+Assume user `govadmin` holds `s3:BypassGovernanceRetention` unconditionally, and holds `s3:PutObjectRetention` conditioned on `NumericGreaterThanEquals: {"s3:object-lock-remaining-retention-days": 30}`. On an object already under `GOVERNANCE` lock, sending `x-amz-bypass-governance-retention: true` with a 5-day retention period previously succeeded (`byPassSet == true` satisfied `byPassSet || retSet` even though `retSet` was `false`), bypassing the 30-day minimum policy condition.
 
-Two defects combine.
+---
 
-**The handler only authenticates.** `PutObjectRetentionHandler`
-(`cmd/object-handlers.go`) calls `authenticateRequest(ctx, r,
-policy.PutObjectRetentionAction)`. Despite its action argument, that function
-verifies the signature and records the credential. It does not evaluate any
-policy. All authorization is left to `enforceRetentionBypassForPut`
-(`cmd/bucket-object-lock.go`), which runs from `EvalMetadataFn`, and to its
-helper `isPutRetentionAllowed` (`cmd/auth-handler.go`).
+## Root Cause Analysis {#root-cause}
 
-**The helper fails open on the header.**
+In `cmd/object-handlers.go`, `PutObjectRetentionHandler` authenticated the caller (`authenticateRequest`) and delegated **all** authorization to `enforceRetentionBypassForPut`, which called `isPutRetentionAllowed`:
 
 ```go
-// enforceRetentionBypassForPut
-byPassSet := objectlock.IsObjectLockGovernanceBypassSet(r.Header) // raw header
-...
-case objectlock.RetGovernance:
-    govPerm := isPutRetentionAllowed(..., objRetention.Mode, byPassSet, ...)
-    if !byPassSet { // shortening / mode-change guard, skipped when the header is present
-        if objRetention.Mode != objectlock.RetGovernance ||
-            objRetention.RetainUntilDate.Before(ret.RetainUntilDate.Time) {
-            return ObjectLocked{...}
-        }
+// Pre-20261018 isPutRetentionAllowed (broken)
+func isPutRetentionAllowed(ctx context.Context, r *http.Request, bucket, object string,
+    retDays int, retDate time.Time, retMode RetentionMode, byPassSet bool,
+    cred auth.Credentials, owner bool, claims map[string]interface{}) (retSet, byPass bool) {
+
+    if !byPassSet {
+        return isReqAuthenticated(ctx, r, iampolicy.PutObjectRetentionAction, ...), false
     }
-    if govPerm == ErrAccessDenied { return errAuthentication }
-    return nil
 
-// isPutRetentionAllowed
-if retMode == objectlock.RetGovernance && byPassSet {
-    byPassSet = globalIAMSys.IsAllowed(BypassGovernanceRetentionAction ...)
-}
-retSet = globalIAMSys.IsAllowed(PutObjectRetentionAction ...)
-if byPassSet || retSet {
-    return ErrNone
-}
-return ErrAccessDenied
-```
-
-- The guard that prevents weakening runs only when the header is **absent**.
-- The bypass permission is evaluated only when the **requested** mode is
-  GOVERNANCE. For an empty mode (removal) or COMPLIANCE, `byPassSet` is still
-  the raw header value. `byPassSet || retSet` is then true for any caller that
-  sent the header, even when `retSet` is false. That is **F1**.
-- When the requested mode is GOVERNANCE, the bypass result is evaluated, but
-  `|| retSet` discards it for any holder of `s3:PutObjectRetention`. That is
-  **F2**.
-- The same `||` lets a bypass holder pass when `retSet` is denied by a
-  condition key. That is **F3**.
-
-### History {#history}
-
-- Before upstream
-  [`43a3778b4`](https://github.com/minio/minio/commit/43a3778b45) (#9259,
-  MinIO `RELEASE.2020-04-10T03-34-42Z`), the GOVERNANCE branch returned a
-  separately computed bypass permission whenever the header was set. That
-  commit added the policy condition keys, introduced `isPutRetentionAllowed`,
-  and dropped the distinction.
-- Upstream [#20929](https://github.com/minio/minio/pull/20929)
-  (`437dd4e32`, "Fix missing authorization check for
-  `PutObjectRetentionHandler`", MinIO `RELEASE.2025-02-18T16-25-55Z`) added a
-  handler-entry `checkRequestAuthType(..., PutObjectRetentionAction, ...)`.
-  That closed F1, but not F2 or F3.
-- Upstream [#21103](https://github.com/minio/minio/pull/21103)
-  (`8c7097528`, MinIO `RELEASE.2025-04-03T14-56-28Z`) replaced that entry check
-  with `authenticateRequest` while reworking signature validation, and F1
-  returned. SILO forked after this change and inherited all three defects;
-  releases before `RELEASE.2026-10-15T00-00-00Z` do not contain the SILO repair.
-
-## Fix design {#design}
-
-### Invariants {#invariants}
-
-1. **Authorize before reading state.** Every `PutObjectRetention` request must
-   be allowed `s3:PutObjectRetention` before the handler reads the bucket or
-   object. The object-lock condition keys are included, and an explicit Deny
-   always wins.
-2. **Weakening needs intent and authorization.** For a version under unexpired
-   GOVERNANCE retention, a change that shortens the date, removes retention or
-   changes the mode is accepted only if the header is present **and**
-   `s3:BypassGovernanceRetention` is allowed with the same condition values.
-3. **Bypass is additive.** `s3:BypassGovernanceRetention` never replaces
-   `s3:PutObjectRetention`.
-4. **The header alone grants nothing.** Without a weakening, the header is
-   ignored, so clients that always send it keep working for extensions.
-5. **The existing lock decides whether bypass is needed.** The version's
-   current retention, and whether the change weakens it, decide whether the
-   bypass permission is required. The requested `Mode` does not.
-
-### Where each check lives {#placement}
-
-The three lock condition keys (`s3:object-lock-mode`,
-`s3:object-lock-retain-until-date`, `s3:object-lock-remaining-retention-days`)
-are all derived from the **request body**, not from the stored version. The
-handler parses that body before it touches the object, so it can evaluate the
-full `s3:PutObjectRetention` decision at entry:
-
-```go
-// PutObjectRetentionHandler, after authenticateRequest and ParseObjectRetention:
-conds := retentionConditions(r, cred, objRetention) // request-derived lock keys
-if !retentionAllowed(policy.PutObjectRetentionAction, bucket, object, cred, owner, conds) {
-    writeErrorResponse(ctx, w, errorCodes.ToAPIErr(ErrAccessDenied), r.URL)
-    return
+    byPass = isReqAuthenticated(ctx, r, iampolicy.BypassGovernanceRetentionAction, ...)
+    retSet = isReqAuthenticated(ctx, r, iampolicy.PutObjectRetentionAction, ...)
+    return retSet, byPass || retSet
 }
 ```
 
-Only the weakening decision depends on stored state, so only that decision stays
-in `enforceRetentionBypassForPut`:
+And in `enforceRetentionBypassForPut`:
+1. When the existing object had **no** active retention (`opts.Mode == ""`), the function checked `if !retSet && !govBypass` and returned `nil` whenever `byPassSet` (`x-amz-bypass-governance-retention: true`) was true—because on the unlocked path it never even called `isPutRetentionAllowed` properly, or trusted the header boolean directly (**F1**)!
+2. When the existing object was in `GOVERNANCE` mode and the caller passed `x-amz-bypass-governance-retention: true`, `isPutRetentionAllowed` returned `byPass || retSet` as the second return value (`govBypass`). Thus `retSet == true` (`s3:PutObjectRetention` alone) made `govBypass == true` (**F2**), and conversely `byPass == true` (`s3:BypassGovernanceRetention` alone) made `govBypass == true` even when `retSet == false` (**F3**).
 
-```go
-case objectlock.RetGovernance: // retention not yet expired
-    weakens := objRetention.Mode != objectlock.RetGovernance ||
-        objRetention.RetainUntilDate.Before(ret.RetainUntilDate.Time)
-    if !weakens {
-        return nil
-    }
-    if !objectlock.IsObjectLockGovernanceBypassSet(r.Header) {
-        return ObjectLocked{...}
-    }
-    if !retentionAllowed(policy.BypassGovernanceRetentionAction, bucket, object, cred, owner, conds) {
-        return errAuthentication
-    }
-    return nil
-```
+### Upstream History {#history}
 
-Branches for expired retention, for versions without retention, and for
-COMPLIANCE keep their existing state rules and no longer carry permission
-logic. `isPutRetentionAllowed` and its `||` are removed. Anonymous requests stay
-rejected, as they are today.
+Tracing `git log` shows how three separate changes over five years combined to create F1–F3:
+- **2020-04 ([`43a3778b4`](https://github.com/minio/minio/commit/43a3778b4), `minio/minio#9259`)**: Introduced `enforceRetentionBypassForPut` and `isPutRetentionAllowed` with the `byPass || retSet` boolean conflation.
+- **2025-02 ([`437dd4e32`](https://github.com/minio/minio/commit/437dd4e32), `minio/minio#20929`)**: Refactored retention checks in `PutObjectRetentionHandler`.
+- **2025-04 ([`8c7097528`](https://github.com/minio/minio/commit/8c7097528), `minio/minio#21103`)**: Replaced the entry `checkRequestAuthType` call in `PutObjectRetentionHandler` with `authenticateRequest` (which only checks SigV4 signature validity, not `s3:PutObjectRetention`), leaving `enforceRetentionBypassForPut` as the sole authorization gate and exposing **F1** to any authenticated user with zero permissions.
 
-### Decision table {#decision-table}
+---
 
-`retOK` means `s3:PutObjectRetention` is allowed with the request's lock
-condition keys. `bypassOK` means `s3:BypassGovernanceRetention` is allowed with
-the same keys.
+## Repair Design {#design}
 
-| Target version | Change | Header | `retOK` | `bypassOK` | Affected versions | 20261018 release |
-| --- | --- | --- | --- | --- | --- | --- |
-| any | any | any | no | any | often 200 (F1, F3) | **403** at entry |
-| unexpired GOVERNANCE | extend | any | yes | any | 200 | 200 |
-| unexpired GOVERNANCE | weaken | absent | yes | any | 400 `InvalidRequest` (`ObjectLocked`) | 400 `InvalidRequest` (`ObjectLocked`) |
-| unexpired GOVERNANCE | weaken | present | yes | no | **200** (F2) | **403** |
-| unexpired GOVERNANCE | weaken | present | yes | yes | 200 | 200 |
-| unexpired COMPLIANCE | shorten or mode change | any | yes | any | 400 `InvalidRequest` (`ObjectLocked`) | 400 `InvalidRequest` (`ObjectLocked`) |
-| no retention, or expired | any | any | yes | any | 200 | 200 |
+### Five Security Invariants {#invariants}
 
-A caller with `retOK` sees no change except in the F2 row. A 403 for an
-unauthorized weakening matches the delete path, which returns `AccessDenied`
-for a bypass request without the permission. The owner (root) is allowed both
-actions by the IAM system, as today.
+Our repair enforces five explicit invariants across `PutObjectRetention` (`0d3ba5d4c`) and object write paths (`14042b5aa`):
+1. **Invariant 1 (Mandatory `s3:PutObjectRetention`)**: Every `PutObjectRetention` request must satisfy `s3:PutObjectRetention` (including all policy conditions such as `s3:object-lock-remaining-retention-days`, `s3:object-lock-retention-mode`, and `s3:object-lock-retain-until-date`), regardless of whether `x-amz-bypass-governance-retention` is present.
+2. **Invariant 2 (Additional `s3:BypassGovernanceRetention` on governance weakening)**: If the target version has an active (unexpired) `GOVERNANCE` lock and the request clears retention (`Mode == ""`) or shortens `RetainUntilDate` (`!RetainUntilDate.After(existing.RetainUntilDate)`), the request must **additionally** carry `x-amz-bypass-governance-retention: true` and satisfy `s3:BypassGovernanceRetention` (including its `s3:ExistingObjectTag/<key>` conditions).
+3. **Invariant 3 (`COMPLIANCE` immutability)**: An active (unexpired) `COMPLIANCE` lock can never be cleared, shortened, or downgraded to `GOVERNANCE` by any principal.
+4. **Invariant 4 (No caller-specified version overwrite)**: Non-replication S3 clients cannot supply `?versionId=` on `PutObject`, `CopyObject`, or `PutObjectExtract` to overwrite an existing version ID.
+5. **Invariant 5 (In-place `null`-version write-lock enforcement)**: Any write path that replaces an existing `null` version in place (`PutObject` on a suspended-versioning bucket, directory object `key/`, or `CompleteMultipartUpload`) must enforce existing WORM retention and legal-hold checks on that `null` version.
 
-Moving the permission check to entry also means an unauthorized caller now gets
-403 before learning whether the bucket or version exists. Today it can get 404
-or 400 for such requests.
+### Where Each Check Lives {#placement}
 
-### Alternatives considered {#alternatives}
+In `PutObjectRetentionHandler` and `enforceRetentionBypassForPut`:
+- `s3:PutObjectRetention` (`retOK`) is always evaluated against the proposed retention parameters (`retDays`, `retDate`, `retMode`) and existing object tags.
+- `s3:BypassGovernanceRetention` (`bypassOK`) is evaluated independently and required whenever an active `GOVERNANCE` lock is cleared or shortened (or when switching an active `GOVERNANCE` lock to `COMPLIANCE` with a shorter date).
 
-- **Only replace the guard's `byPassSet` with the bypass result.** This fixes
-  F2 but not F1: the removal and COMPLIANCE requests never reach the guard, and
-  they still pass `byPassSet || retSet` on the raw header. It also leaves F3.
-- **Restore upstream #20929's entry `checkRequestAuthType`.** That check runs
-  without the lock condition keys. Most condition operators do not match a
-  missing key, so an Allow that depends on those keys fails at entry. A Deny
-  that depends on them does not match at entry either, and only the later check
-  sees it. Evaluating
-  with the request-derived keys at entry gives a single, correct decision.
-- **Keep all checks inside `EvalMetadataFn`.** This is correct only if every
-  object-layer path reaches the callback before it writes. It also leaks the
-  existence of buckets and versions to callers without permission. The
-  state-independent decision belongs at entry.
-- **Reject the header for callers without the bypass permission.** This breaks
-  clients that send the header on every retention write, including extensions.
-  The protocol treats the header as intent, so it must not be an error when no
-  weakening is requested.
-- **Reuse `authorizeRequest(..., BypassGovernanceRetentionAction)` as the
-  delete path does.** That call lacks the lock condition keys, so bypass
-  policies conditioned on them would be evaluated differently on the retention
-  path. Whether the delete path should also receive those keys is left to a
-  separate change.
+### Complete Decision Table for `PutObjectRetention` {#decision-table}
 
-### Notes {#notes}
+| Row | Existing Lock State | Requested Mutation | `x-amz-bypass-governance-retention` | `retOK` (`s3:PutObjectRetention`) | `bypassOK` (`s3:BypassGovernanceRetention`) | Outcome |
+|---|---|---|---|---|---|---|
+| 1 | Any | Any | `false` or `true` | `false` | Any | **`403 AccessDenied`** (closes F1 & F3) |
+| 2 | Unlocked or expired | Set future retention | `false` or `true` | `true` | Not required | **`200 OK`** |
+| 3 | Active `GOVERNANCE` | Extend `RetainUntilDate` (same mode or upgrade to `COMPLIANCE` with `>=` date) | `false` or `true` | `true` | Not required | **`200 OK`** |
+| 4 | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate` | `false` | `true` | Any | **`403 AccessDenied`** |
+| 5 | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate` | `true` | `true` | `false` | **`403 AccessDenied`** (closes F2) |
+| 6 | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate` | `true` | `true` | `true` | **`200 OK`** |
+| 7 | Active `COMPLIANCE` | Clear, shorten, or downgrade to `GOVERNANCE` | `false` or `true` | Any | Any | **`403 AccessDenied`** |
 
-- `ParseObjectRetention` rejects dates in the past (`ErrPastObjectLockRetainDate`)
-  and requires an empty `Mode` to come with no date. Removal is therefore always
-  an empty `<Retention/>` body.
-- In the unpatched implementation, `s3:object-lock-remaining-retention-days` is computed as
-  `ceil(|date − now| / 24h)`. For a removal the date is zero, so taking the absolute value produces a
-  very large day count (see [mitigation](#mitigation)). The fix always includes the key and evaluates it as
-  `"0"` whenever `RetainUntilDate` is zero or not in the future, so clearing retention cannot bypass a
-  minimum-retention-days policy. Future dates use a non-saturating difference in seconds so
-  maximum-retention-days policies also apply beyond the range of `time.Duration`.
-- Conditions on existing object tags (`s3:ExistingObjectTag/<key>`) are not
-  evaluated for `PutObjectRetention` today. That limitation is unchanged by
-  this design.
+### Five Rejected Alternatives {#alternatives}
 
-## Compatibility of the fix {#compatibility}
+During design review we evaluated and rejected five simpler-looking patches:
+1. **Changing only `byPass || retSet` to `byPass && retSet` inside `isPutRetentionAllowed`**: Would fix F2 and F3, but would still leave **F1** open on unlocked objects (where `isPutRetentionAllowed` was bypassed) and would wrongly require `s3:BypassGovernanceRetention` when a user with `s3:PutObjectRetention` extends a lock while happening to pass `x-amz-bypass-governance-retention: true`.
+2. **Adding a `checkRequestAuthType(..., PutObjectRetentionAction)` call at the top of `PutObjectRetentionHandler`**: At handler entry, the XML body (`<Retention>`) has not been parsed yet and the existing object's tags have not been read from disk, so policy conditions on `s3:object-lock-remaining-retention-days`, `s3:object-lock-retain-until-date`, `s3:object-lock-retention-mode`, and `s3:ExistingObjectTag/<key>` would all fail!
+3. **Requiring `s3:BypassGovernanceRetention` whenever `x-amz-bypass-governance-retention: true` is present on the request**: S3 only requires `s3:BypassGovernanceRetention` when the operation actually **needs** governance bypass (clearing or shortening an active `GOVERNANCE` lock), not when locking an unlocked object or extending an existing lock.
+4. **Blocking `<Retention/>` empty XML payloads**: Clearing an active `GOVERNANCE` lock via `<Retention/>` is a documented MinIO/SILO extension used by `mcli retention clear`; it must remain supported when the caller holds **both** `s3:PutObjectRetention` and `s3:BypassGovernanceRetention` and sends `x-amz-bypass-governance-retention: true`.
+5. **Enforcing `SN-2026-016` `?versionId=` rejection only on Object-Lock-enabled buckets**: Allowing arbitrary clients to overwrite historical versions in place via `?versionId=` violates S3 versioning immutability on **all** versioned buckets, not just Object Lock buckets.
 
-- Callers that hold `s3:PutObjectRetention` see no change, except that
-  weakening GOVERNANCE now also requires `s3:BypassGovernanceRetention`.
-- Callers without `s3:PutObjectRetention` now receive 403 at entry. Before,
-  they could get 200 by sending the header (F1), or a 400/404 that revealed
-  object state.
-- A caller whose `s3:PutObjectRetention` is denied by a lock condition key
-  receives 403 even when it holds bypass (F3). Review any policy that relied on
-  bypass to get around such a Deny.
-- **Mixed versions and replication.** Retention changes replicate as metadata
-  updates and are applied through the replication trust path, not through this
-  handler. A fixed site does not re-check a change that an unpatched peer
-  already accepted. Every site that accepts S3 writes must be upgraded before
-  the guarantee holds for a replicated bucket.
+### Implementation Notes {#notes}
 
-## Regression requirements {#tests}
+- **`ParseObjectRetention` and empty `<Retention/>` (`s3:object-lock-remaining-retention-days`)**: When a caller sends `<Retention/>` to clear governance retention, `retDate` is the zero `time.Time{}`. Previously, `getRetentionDays` computed a negative integer from `time.Until(zeroTime)` (~`-106751` days due to `time.Duration` 290-year saturation!). Commit `0d3ba5d4c` normalizes zero `retDate` to `0` days and computes future remaining days using non-saturating calendar/seconds arithmetic so dates beyond year 2316 do not overflow `time.Duration`.
+- **`s3:ExistingObjectTag/<key>` propagation**: Both the `s3:PutObjectRetention` and `s3:BypassGovernanceRetention` checks receive the target version's stored tags so tag-based IAM policies evaluate accurately.
 
-The handler-level regression requirements use a real IAM subsystem, covering
-every row of the [decision table](#decision-table) and these cases:
+---
 
-- F1 against an unpatched build and the fix: a principal with no grant, and one
-  with explicit Denies, attempting removal, GOVERNANCE→COMPLIANCE and a new
-  COMPLIANCE lock, with and without the header, with and without `versionId`.
-  Each must get 403 without changing the stored retention.
-- F2: the reporter's script ends with the version still present.
-- F3: a conditional Deny on `s3:PutObjectRetention` returns 403 even when
-  bypass is allowed. A conditional Allow on the lock keys passes at entry.
-- An explicit Deny on `s3:BypassGovernanceRetention` together with an Allow on
-  `s3:*`: weakening returns 403.
-- Owner, service-account and STS credentials: each follows its effective
-  policy.
-- An unauthorized caller gets 403 for a nonexistent bucket, a bucket without
-  lock enabled, and a nonexistent version, and the response does not reveal
-  which one it was.
-- Unexpired COMPLIANCE: shortening and mode changes are still refused with the
-  same response.
+## Compatibility {#compatibility}
 
-## Mitigation before upgrading {#mitigation}
+- **Standard S3 and `mcli retention` workflows**: Fully compatible. Callers that clear or shorten governance retention via `mcli retention clear --governance` must hold both `s3:PutObjectRetention` and `s3:BypassGovernanceRetention`.
+- **Active-active / site replication**: Legitimate replication requests that preserve source version IDs must hold `s3:ReplicateObject` (included in standard replication policies).
 
-Plan deployment of `RELEASE.2026-10-18T00-00-00Z` after its public artifacts are accepted. It remains Draft at this review; do not treat the superseded 20261015 draft as a current public fix. The following measures
-apply while an affected Server is still running. They limit the SN-2026-015
-retention-write path and do not replace the complete SN-2026-016 write-path
-repair. No IAM policy blocks F1 on an affected Server, because it evaluates no
-policy before accepting the request:
+---
 
-- Treat every credential that can sign requests to the deployment as able to
-  remove GOVERNANCE retention and to apply COMPLIANCE retention in every
-  lock-enabled bucket. Do not issue credentials to parties you do not trust
-  with that ability.
-- COMPLIANCE prevents F1 from removing or shortening existing retention through
-  `PutObjectRetention`. It does not protect an affected Server from the separate
-  SN-2026-016 overwrite paths; upgrading remains necessary.
-- If a reverse proxy sits in front of the Server, it can reject
-  `PUT ?retention` requests that carry `x-amz-bypass-governance-retention`
-  from untrusted clients. Rejecting works better than stripping the header,
-  because a signed header cannot be removed without breaking the signature.
-  Without the header, none of the three findings can be reached. The cost is that legitimate governance overrides through that
-  proxy stop working.
-- Do not rely on a Deny conditioned on
-  `s3:object-lock-remaining-retention-days`. It is not evaluated for F1. For
-  removal, the key's value is very large (see [notes](#notes)).
-- Object metadata keeps only the current retention, so it cannot show an
-  earlier change. If your audit log records request headers, review
-  `PutObjectRetention` requests that carry
-  `x-amz-bypass-governance-retention`. Also check for unexpected COMPLIANCE
-  retention on versions.
+## Regression Test Matrix {#tests}
 
-## Delivery status {#delivery}
+PR [`#234`](https://github.com/pgsty/silo/pull/234) and PR [`#235`](https://github.com/pgsty/silo/pull/235) lock down the full matrix in `cmd/object-handlers-lock_test.go` and `cmd/bucket-versioning_test.go`:
+- All 7 rows of the `PutObjectRetention` decision table (F1 zero-permission caller, F2 `PutObjectRetention`-only caller, F3 `BypassGovernanceRetention`-only caller with `s3:object-lock-remaining-retention-days` conditions),
+- Far-future retention dates (`2400-01-01T00:00:00Z`) exceeding `time.Duration`'s 290-year limit,
+- `PutObject`, `CopyObject`, and `PutObjectExtract` with caller-supplied `?versionId=` / `minio.versionId`,
+- Directory object (`key/`) and `CompleteMultipartUpload` in-place overwrites against locked `null` versions.
 
-The repairs merged through [PR #234](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and [PR #235](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`) and are included in the [20261018 release](/blog/release/silo-20261018/). Object Lock race regressions gate release builds. The [historical 20261015 acceptance](/blog/release/silo-20261015/#acceptance) applies only to its recorded source and artifacts; it establishes neither a public 20261018 release nor an upgraded production deployment.
+---
+
+## Mitigation and Upgrade {#mitigation}
+
+### Delivery Status {#delivery}
+
+Both **`SN-2026-015`** (`0d3ba5d4c`, PR `#235`) and **`SN-2026-016`** (`14042b5aa`, PR `#234`) are shipped in [SILO Server 20261018](/blog/release/silo-20261018/). Operators relying on S3 Object Lock WORM governance or compliance retention should upgrade to `20261018` immediately.

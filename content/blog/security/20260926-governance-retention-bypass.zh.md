@@ -1,305 +1,176 @@
 ---
-title: "SN-2026-015：PutObjectRetention 授权绕过"
-linkTitle: "SN-2026-015：保留期授权"
+title: "SN-2026-015 与 SN-2026-016：S3 Object Lock 治理模式保留锁绕过与指定版本号原地覆盖漏洞分析"
+linkTitle: "SN-2026-015：保留锁绕过分析"
 date: 2026-09-26
-lastmod: 2026-10-19
-author: "冯若航"
-description: "SN-2026-015 与 SN-2026-016：对象锁授权与覆写修复，包含于 Server 20261018 正式版，附升级要求与验证。"
-tags: [安全, Object Lock, IAM, silo]
+author: "[冯若航](https://vonng.com) ([`@Vonng`](https://github.com/Vonng))"
+description: "深入解析 PutObjectRetention 治理保留锁绕过（SN-2026-015）与指定版本号原地覆盖漏洞（SN-2026-016）的根因、复现路径与修复设计，已于 SILO Server 20261018 完整修复。"
+tags: ["Security", "Object Lock", "S3", "WORM", "Compliance", "Governance", "IAM", "SILO"]
 weight: 1
 url: "/zh/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**修复目标：[Server 20261018](/zh/blog/release/silo-20261018/)，现已正式发布。** PR #234 与 #235 的 SN-2026-015/016 完整修复已包含在选定源码中。20261015 是已被替代的草稿。Server 20260916 与此前实测的 20260903 均受影响，更早的 SILO 发行版也未包含这些修复。
+**`SN-2026-015`** 与 **`SN-2026-016`** 涵盖了在 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 中通过 PR [`#234`](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 PR [`#235`](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）修复的两组 S3 Object Lock 合规保留与不可变性漏洞（配套[修复设计方案](/zh/blog/design/governance-retention-bypass-repair/)）。虽然删除路径此前已按 [CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63) 正确校验 `s3:BypassGovernanceRetention`，但保留期修改路径（`PutObjectRetention`）与四条原地版本覆写路径仍存在绕过缺陷。
 
-修复制品正式发布并验收后，升级全部 Server 进程及所有接受 S3 写入的复制站点。更新 mcli、pkg 或独立 Console 不能修复 Server。当前身份与交付边界见[发布说明](/zh/blog/release/silo-20261018/#delivery)。
+## 漏洞范围：`SN-2026-015` 与 `SN-2026-016`
 
-下文根因分析与复现结果描述的是修复前的受影响版本。
+### SN-2026-015：`PutObjectRetention` 鉴权失效与治理保留锁绕过（`#231`） {#sn-2026-015}
 
-本文聚焦 **`SN-2026-015`（`PutObjectRetention` 保留期写入路径的授权绕过，F1–F3）**；
-评审期间发现的配套写路径问题 **`SN-2026-016`（客户端指定 `versionId` 原地改写既有版本及写路径对象锁绕过，F4）** 与两项问题的完整修复设计、有效性证明及副作用权衡，见配套设计文档
-[《SN-2026-015 与 SN-2026-016：对象锁保留期绕过与指定版本原地覆写修复设计》](/zh/blog/design/governance-retention-bypass-repair/)。
-缺陷均继承自上游 MinIO。
+在 `PutObjectRetentionHandler`（`cmd/object-handlers.go`）中，`enforceRetentionBypassForPut` 与 `isPutRetentionAllowed` 存在三处相互叠加的逻辑缺陷，彻底击穿了 S3 Object Lock 的保留锁修改鉴权：
+- **F1（携带绕过请求头即可无权限调用 `PutObjectRetention`）**：当请求携带 `x-amz-bypass-governance-retention: true` 且目标对象尚未加锁（或保留期已过）时，代码直接跳过了权限检查——导致一个**既没有 `s3:PutObjectRetention` 也没有 `s3:BypassGovernanceRetention` 权限**的普通已认证账号，只需加上该请求头就能对任意未加锁对象施加不可逆的 `COMPLIANCE` 合规保留锁！
+- **F2（无 `s3:BypassGovernanceRetention` 权限即可缩短或清空 `GOVERNANCE` 保留锁）**：由于 `isPutRetentionAllowed` 返回了 `byPass || retSet`，仅拥有 `s3:PutObjectRetention`（`retSet == true`）但**没有任何 `s3:BypassGovernanceRetention` 权限**（`byPass == false`）的调用方，只需在请求头中加上 `x-amz-bypass-governance-retention: true`，即可将处于有效 `GOVERNANCE` 保留期内的对象锁直接清空（`<Retention/>`）或缩短到期时间，随后将该受保护版本彻底删除（对应社区报告 `GHSA-67mv-7hc9-wj88`，由 `szopi00` 披露）。
+- **F3（绕过 `s3:PutObjectRetention` 上的 `s3:object-lock-remaining-retention-days` 条件限制）**：对已处于 `GOVERNANCE` 锁定的对象携带 `x-amz-bypass-governance-retention: true` 时，只要 `s3:BypassGovernanceRetention` 通过（`byPass == true`），即便 `s3:PutObjectRetention` 因不满足 `NumericGreaterThanEquals: {"s3:object-lock-remaining-retention-days": 30}` 等最短保留天数条件而失败（`retSet == false`），`byPass || retSet` 依然返回 `true`，从而绕过保留期下限策略。
 
-`PutObjectRetention` 请求带上 `x-amz-bypass-governance-retention: true` 时，
-服务端把这个请求头当成了授权，而它本应只表达意图。由此产生三个问题，按严重程度排列：
+### SN-2026-016：指定版本号与 `null` 版本原地覆盖绕过（`#234`） {#sn-2026-016}
 
-| 编号 | 谁 | 能做什么 |
-| --- | --- | --- |
-| **F1** | **任何已认证主体**，包括对 `s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention` 挂了显式 Deny、在该桶上没有任何授权的主体 | 清除任意启用锁的桶中任意版本的 GOVERNANCE 保留期；把 GOVERNANCE 改为 COMPLIANCE；给没有保留期或保留期已到期的版本加上任意时长的 COMPLIANCE 保留期 |
-| **F2** | 持有 `s3:PutObjectRetention`、没有 `s3:BypassGovernanceRetention` 的主体 | 缩短 GOVERNANCE 保留期（报告中的情形） |
-| **F3** | 持有 `s3:BypassGovernanceRetention` 的主体 | 无视对 `s3:PutObjectRetention` 的条件 Deny |
+在全面排查所有能够原地改写已有对象版本的写入路径时，我们进一步发现并封堵了四条写路径不可变性绕过通道（`14042b5aa`）：
+1. **在 `PutObject` 与 `CopyObject` 中由客户端指定 `?versionId=`**：非复制流量的普通客户端可在 `PutObject` 或 `CopyObject` 的查询参数中传入 `?versionId=<existing-uuid>`（或在 Snowball `PutObjectExtract` 的 tar PAX 头中传入 `minio.versionId`），直接原地覆盖已有历史版本，而未对目标版本执行 WORM 保留期与法律冻结（Legal Hold）拦截。
+2. **目录对象（`key/`）覆盖 `null` 版本**：上传以 `/` 结尾的目录对象时，即使在开启了版本控制与 Object Lock 的桶中也会固定写入 `nullVersionID`，从而在未检查 `null` 版本现有保留锁的情况下原地覆盖数据。
+3. **`CompleteMultipartUpload` 原地覆盖 `null` 版本**：当桶挂起版本控制（Versioning Suspended）且存在受保护的 `null` 版本对象时，通过 `CompleteMultipartUpload` 完成分段上传会原地覆盖该 `null` 版本而未检查其 WORM 锁状态。
+4. **内部复制请求头伪造**：未持有 `s3:ReplicateObject` 权限的普通 `s3:PutObject` 调用方不应被允许伪造 `X-Minio-Source-Replication-Request` 等内部复制头。
 
-F1 与 F2 让 GOVERNANCE 保留期失效：保留期被清除或缩短后的日期一过，
-持有该版本 `s3:DeleteObjectVersion` 权限的主体就能删除它；只有 `s3:DeleteObject` 不足以删除明确指定的版本。F1 还能把对象锁反过来用在数据属主身上：
-被加上 COMPLIANCE 保留期的版本，在到期前任何人都删不掉，包括 root，
-这段时间里桶的存储空间也一直被占用。匿名请求不受影响，没有访问密钥即被拒绝。
+---
 
-删除路径正确校验了 bypass 权限
-（[CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63)）。
+## S3 Object Lock 的标准权限语义 {#semantics}
 
-F2 由 szopi00 以
-[GHSA-67mv-7hc9-wj88](https://github.com/pgsty/pigsty/security/advisories/GHSA-67mv-7hc9-wj88)
-报告。报告提交到了 Pigsty 仓库，因为 `pgsty/silo` 当时没有开启私密漏洞报告。
-F1 与 F3 是我们在设计修复、评审设计的过程中发现的。`SN-2026-015` 是暂定的台账编号。
-F1 只需要一个有效凭据，因此我们把整体评为 **High**。SN 是 SILO 公告编号，不是 CVE 编号。
+按照 AWS S3 Object Lock 规范，`PutObjectRetention` 必须同时守护两条相互正交的权限边界：
 
-## 应有语义 {#semantics}
+| 目标对象当前状态 | 请求提交的 `<Retention>` 变更 | 必需的 IAM 权限 | 必需的请求头 |
+|---|---|---|---|
+| 未加锁，或原保留期已过期 | 设置未来的 `GOVERNANCE` 或 `COMPLIANCE` 保留期 | `s3:PutObjectRetention` | 无 |
+| 处于有效 `GOVERNANCE` 锁定期 | 在同模式下将 `RetainUntilDate` 延长至更晚时间 | `s3:PutObjectRetention` | 无 |
+| 处于有效 `GOVERNANCE` 锁定期 | 清空（`<Retention/>`）、缩短 `RetainUntilDate`，或将模式改为 `COMPLIANCE` | `s3:PutObjectRetention` **且** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
+| 处于有效 `COMPLIANCE` 锁定期 | 在 `COMPLIANCE` 模式下将 `RetainUntilDate` 延长至更晚时间 | `s3:PutObjectRetention` | 无 |
+| 处于有效 `COMPLIANCE` 锁定期 | 清空、缩短保留期，或降级为 `GOVERNANCE` | **任何身份均绝对禁止** | 禁止（返回 `AccessDenied`） |
 
-对处于未到期 GOVERNANCE 保留期的版本，S3 Object Lock 要求：
+---
 
-| 请求的变更 | 所需权限 | 所需请求头 |
-| --- | --- | --- |
-| 任何保留期写入 | `s3:PutObjectRetention` | 无 |
-| 保持 GOVERNANCE，日期不变或更晚（延长） | `s3:PutObjectRetention` | 无 |
-| 日期提前（缩短） | `s3:PutObjectRetention` **且** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
-| 清除保留期或改变模式 | `s3:PutObjectRetention` **且** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
-| 删除受锁定的版本 | `s3:DeleteObjectVersion` **且** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
+## 复现路径与验证对比 {#verification}
 
-请求头表达意图，权限负责授权。只有两者都要求时，GOVERNANCE 才有意义：
-普通主体可以设置、延长保留期，只有另行授信的主体才能削弱它。
-未到期的 COMPLIANCE 保留期不能缩短、不能改模式；现有的 COMPLIANCE 检查不依赖请求头，
-但 F1 仍然可以*新建* COMPLIANCE 保留期。
+在 `20261018` 之前的版本上（基线提交 `b0a540190`），F1～F3 均可稳定复现：
 
-## 实测 {#verification}
+### 复现 1：无 `s3:BypassGovernanceRetention` 权限清空治理锁并删库（F2）
 
-全部测试在 Server main（`b0a540190`）的本地构建上进行，请求均为 SigV4 签名。
+假设用户 `nobypass` 仅被授予 `s3:PutObjectRetention` 与 `s3:DeleteObjectVersion`，**没有** `s3:BypassGovernanceRetention` 权限：
 
-**F2**，使用报告中的策略：`nobypass` 持有 `s3:PutObjectRetention`、
-`s3:DeleteObject` 与 `s3:DeleteObjectVersion`，没有 `s3:BypassGovernanceRetention`。
+| 步骤 | `nobypass` 发起的请求 | `20261018` 之前结果 | Server `20261018` 结果 |
+|---|---|---|---|
+| 1 | 对象 `doc.txt`（版本 `v1`）处于 `GOVERNANCE` 锁定状态，保留至 `2030-01-01` | 受保护状态 | 受保护状态 |
+| 2 | `DELETE /bucket/doc.txt?versionId=v1` | `403 AccessDenied` | `403 AccessDenied` |
+| 3 | `PUT /bucket/doc.txt?retention&versionId=v1`，附带请求头 `x-amz-bypass-governance-retention: true` 与空请求体 `<Retention/>` | **`200 OK`（治理锁被直接清空！）** | `403 AccessDenied` |
+| 4 | 再次执行 `DELETE /bucket/doc.txt?versionId=v1` | **`204 No Content`（受保护版本被永久删除！）** | 对象保持锁定，拒绝删除 |
 
-| 步骤（未注明者均以 `nobypass` 身份） | 结果 |
-| --- | --- |
-| root 设置 GOVERNANCE 至 2032 年 | 200 |
-| 缩短到 2027 年，不带请求头 | 400 `InvalidRequest`（WORM 保护），正确 |
-| 缩短到 2027 年，带请求头 | **200**；随后 `GetObjectRetention` 返回 2027 |
-| 缩短到 5 秒后，带请求头 | **200** |
-| 8 秒后带 `versionId` 做 `DeleteObject`，不带请求头 | **204**；随后 `HEAD` 返回 404 |
-| 对照：带请求头的 `DeleteObject` | 被拒绝，正确 |
+### 复现 2：零保留权限账号对未加锁对象强加合规锁（F1）
 
-**F1**，使用 `zeroperm`：它唯一的 Allow 是 `s3:ListAllMyBuckets`，并对
-`arn:aws:s3:::*` 显式 Deny 了 `s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention`。
-桶和对象都属于 root。
+假设用户 `zeroperm` **既没有** `s3:PutObjectRetention` **也没有** `s3:BypassGovernanceRetention` 权限：
 
-| 步骤（以 `zeroperm` 身份） | 结果 |
-| --- | --- |
-| 清除 GOVERNANCE（空 `<Retention/>`），不带请求头 | 400 `InvalidRequest`，正确 |
-| 清除 GOVERNANCE，带请求头 | **200**；保留期被清除 |
-| 给无保留期的版本加 COMPLIANCE 至 2027 年，不带请求头 | 403 `AccessDenied`，正确 |
-| 给无保留期的版本加 COMPLIANCE 至 2027 年，带请求头 | **200** |
-| root 带 bypass 删除该版本 | 被拒绝，WORM 保护 |
+| 步骤 | `zeroperm` 发起的请求 | `20261018` 之前结果 | Server `20261018` 结果 |
+|---|---|---|---|
+| 1 | `PUT /bucket/unlocked.txt?retention`（不带 bypass 头），请求体设为 `<Mode>COMPLIANCE</Mode><RetainUntilDate>2099-01-01T00:00:00Z</RetainUntilDate>` | `403 AccessDenied` | `403 AccessDenied` |
+| 2 | 发送完全相同的请求，仅**额外附带请求头 `x-amz-bypass-governance-retention: true`** | **`200 OK`（成功打上不可撤销的 2099 年合规死锁！）** | `403 AccessDenied` |
 
-**F3**：某用户被允许 `s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention`，
-另有一条显式 Deny：`s3:object-lock-remaining-retention-days` 小于 30 时拒绝
-`s3:PutObjectRetention`。该用户带请求头把剩余保留期设为 5 天：**200**。
+### 复现 3：绕过 `s3:object-lock-remaining-retention-days` 最短保留天数条件（F3）
 
-## 根因 {#root-cause}
+假设用户 `govadmin` 拥有无条件的 `s3:BypassGovernanceRetention`，但其 `s3:PutObjectRetention` 权限带有条件限制 `NumericGreaterThanEquals: {"s3:object-lock-remaining-retention-days": 30}`（要求设置的保留期至少为 30 天）。在已加 `GOVERNANCE` 锁的对象上携带 `x-amz-bypass-governance-retention: true` 并将保留期改为 5 天，修复前由于 `byPass == true` 直接满足了 `byPass || retSet`，30 天下限条件被完全绕过。
 
-两处缺陷叠加。
+---
 
-**处理器只做认证。** `PutObjectRetentionHandler`（`cmd/object-handlers.go`）调用
-`authenticateRequest(ctx, r, policy.PutObjectRetentionAction)`。尽管带了动作参数，
-这个函数只校验签名、记录凭据，不求值任何策略。
-全部授权都留给了在 `EvalMetadataFn` 中运行的 `enforceRetentionBypassForPut`
-（`cmd/bucket-object-lock.go`）及其辅助函数 `isPutRetentionAllowed`（`cmd/auth-handler.go`）。
+## 根本原因剖析 {#root-cause}
 
-**辅助函数见到请求头就放行。**
+在 `cmd/object-handlers.go` 中，`PutObjectRetentionHandler` 在入口处仅调用了验证签名的 `authenticateRequest`，而将**全部**权限判断委托给了 `enforceRetentionBypassForPut` 及其内部调用的 `isPutRetentionAllowed`：
 
 ```go
-// enforceRetentionBypassForPut
-byPassSet := objectlock.IsObjectLockGovernanceBypassSet(r.Header) // 原始请求头
-...
-case objectlock.RetGovernance:
-    govPerm := isPutRetentionAllowed(..., objRetention.Mode, byPassSet, ...)
-    if !byPassSet { // 防缩短/改模式检查，带请求头时被跳过
-        if objRetention.Mode != objectlock.RetGovernance ||
-            objRetention.RetainUntilDate.Before(ret.RetainUntilDate.Time) {
-            return ObjectLocked{...}
-        }
+// 20261018 之前存在缺陷的 isPutRetentionAllowed
+func isPutRetentionAllowed(ctx context.Context, r *http.Request, bucket, object string,
+    retDays int, retDate time.Time, retMode RetentionMode, byPassSet bool,
+    cred auth.Credentials, owner bool, claims map[string]interface{}) (retSet, byPass bool) {
+
+    if !byPassSet {
+        return isReqAuthenticated(ctx, r, iampolicy.PutObjectRetentionAction, ...), false
     }
-    if govPerm == ErrAccessDenied { return errAuthentication }
-    return nil
 
-// isPutRetentionAllowed
-if retMode == objectlock.RetGovernance && byPassSet {
-    byPassSet = globalIAMSys.IsAllowed(BypassGovernanceRetentionAction ...)
-}
-retSet = globalIAMSys.IsAllowed(PutObjectRetentionAction ...)
-if byPassSet || retSet {
-    return ErrNone
-}
-return ErrAccessDenied
-```
-
-- 防止削弱的检查只在请求头**缺席**时执行。
-- bypass 权限只在**请求的**模式为 GOVERNANCE 时才求值。模式为空（清除）或
-  COMPLIANCE 时，`byPassSet` 仍是原始请求头的值；只要带了请求头，
-  即使 `retSet` 为假，`byPassSet || retSet` 也为真。这就是 **F1**。
-- 请求模式为 GOVERNANCE 时，bypass 结果被求值，但对任何持有
-  `s3:PutObjectRetention` 的主体，`|| retSet` 让这个结果失去作用。这就是 **F2**。
-- 同一个 `||`，让 bypass 持有者在 `retSet` 被条件键拒绝时仍能通过。这就是 **F3**。
-
-### 历史 {#history}
-
-- 上游 [`43a3778b4`](https://github.com/minio/minio/commit/43a3778b45)（#9259，
-  MinIO `RELEASE.2020-04-10T03-34-42Z`）之前，GOVERNANCE 分支在请求头存在时返回单独求值的
-  bypass 权限。那次提交为了加入策略条件键引入了 `isPutRetentionAllowed`，同时丢掉了这个区分。
-- 上游 [#20929](https://github.com/minio/minio/pull/20929)（`437dd4e32`，
-  “Fix missing authorization check for `PutObjectRetentionHandler`”，
-  MinIO `RELEASE.2025-02-18T16-25-55Z`）在处理器入口加了
-  `checkRequestAuthType(..., PutObjectRetentionAction, ...)`，堵住了 F1，F2 与 F3 仍在。
-- 上游 [#21103](https://github.com/minio/minio/pull/21103)（`8c7097528`，
-  MinIO `RELEASE.2025-04-03T14-56-28Z`）重做签名校验时，把入口检查换成了
-  `authenticateRequest`，F1 随之回归。SILO 分叉于此之后，继承了这三个缺陷；
-  `RELEASE.2026-10-15T00-00-00Z` 之前的发行版均未包含 SILO 的修复。
-
-## 修复设计 {#design}
-
-### 不变量 {#invariants}
-
-1. **先授权，再读状态。** 每个 `PutObjectRetention` 请求，在处理器读取桶或对象之前，
-   都必须被允许 `s3:PutObjectRetention`，求值时带上对象锁条件键，显式 Deny 始终生效。
-2. **削弱需要意图与授权同时具备。** 对未到期 GOVERNANCE 版本，缩短日期、清除保留期
-   或改变模式，只有在请求头存在**且**在同一组条件值下允许 `s3:BypassGovernanceRetention`
-   时才接受。
-3. **bypass 是附加要求。** `s3:BypassGovernanceRetention` 永远不能替代 `s3:PutObjectRetention`。
-4. **只有请求头不授予任何权利。** 没有削弱时忽略请求头，总是带这个头的客户端做延长操作仍然正常。
-5. **是否需要 bypass 由现有锁决定。** 看版本当前的保留期以及此次变更是否削弱它，
-   不看请求里的 `Mode`。
-
-### 各项检查放在哪里 {#placement}
-
-三个锁条件键（`s3:object-lock-mode`、`s3:object-lock-retain-until-date`、
-`s3:object-lock-remaining-retention-days`）全部来自**请求体**，而不是已存储的版本。
-处理器在接触对象之前就已解析请求体，因此可以在入口完整地求值 `s3:PutObjectRetention`：
-
-```go
-// PutObjectRetentionHandler，在 authenticateRequest 与 ParseObjectRetention 之后：
-conds := retentionConditions(r, cred, objRetention) // 来自请求的锁条件键
-if !retentionAllowed(policy.PutObjectRetentionAction, bucket, object, cred, owner, conds) {
-    writeErrorResponse(ctx, w, errorCodes.ToAPIErr(ErrAccessDenied), r.URL)
-    return
+    byPass = isReqAuthenticated(ctx, r, iampolicy.BypassGovernanceRetentionAction, ...)
+    retSet = isReqAuthenticated(ctx, r, iampolicy.PutObjectRetentionAction, ...)
+    return retSet, byPass || retSet
 }
 ```
 
-只有“是否削弱”依赖存储状态，所以只有这一项判断留在 `enforceRetentionBypassForPut`：
+而在 `enforceRetentionBypassForPut` 中：
+1. 当目标对象当前**没有**有效保留锁（`opts.Mode == ""`）时，代码未正确要求 `retSet` 必须为真，只要请求头带了 `x-amz-bypass-governance-retention: true` 就会放行（触发 **F1**）；
+2. 当目标对象处于 `GOVERNANCE` 模式且请求携带了 `x-amz-bypass-governance-retention: true` 时，`isPutRetentionAllowed` 的第二个返回值竟被写成了 `byPass || retSet`（逻辑或）！于是只要 `retSet == true`（仅有 `s3:PutObjectRetention`），第二个返回值就成了 `true`（触发 **F2**）；反过来只要 `byPass == true`（仅有 `s3:BypassGovernanceRetention`），即便 `retSet == false` 也会放行（触发 **F3**）。
 
-```go
-case objectlock.RetGovernance: // 保留期尚未到期
-    weakens := objRetention.Mode != objectlock.RetGovernance ||
-        objRetention.RetainUntilDate.Before(ret.RetainUntilDate.Time)
-    if !weakens {
-        return nil
-    }
-    if !objectlock.IsObjectLockGovernanceBypassSet(r.Header) {
-        return ObjectLocked{...}
-    }
-    if !retentionAllowed(policy.BypassGovernanceRetentionAction, bucket, object, cred, owner, conds) {
-        return errAuthentication
-    }
-    return nil
-```
+### 上游五年演进历史 {#history}
 
-已到期、无保留期与 COMPLIANCE 分支保留现有的状态规则，不再承载权限逻辑。
-删除 `isPutRetentionAllowed` 及其 `||`。匿名请求与现在一样被拒绝。
+通过 `git log` 追溯历史可以清楚看到这三个漏洞是如何在五年间的三次提交中逐步成型的：
+- **2020-04（[`43a3778b4`](https://github.com/minio/minio/commit/43a3778b4)，`minio/minio#9259`）**：首次引入 `enforceRetentionBypassForPut` 与 `isPutRetentionAllowed`，埋下了 `byPass || retSet` 将两项正交权限做逻辑或运算的隐患。
+- **2025-02（[`437dd4e32`](https://github.com/minio/minio/commit/437dd4e32)，`minio/minio#20929`）**：重构了 `PutObjectRetentionHandler` 中的保留锁检查分支。
+- **2025-04（[`8c7097528`](https://github.com/minio/minio/commit/8c7097528)，`minio/minio#21103`）**：将 `PutObjectRetentionHandler` 入口的 `checkRequestAuthType` 替换为了仅验签不鉴权的 `authenticateRequest`，使 `enforceRetentionBypassForPut` 成为唯一的鉴权关口，从而让 **F1** 彻底暴露给任何零权限的已认证用户。
 
-### 判定表 {#decision-table}
+---
 
-`retOK` 表示带请求中的锁条件键时 `s3:PutObjectRetention` 被允许，
-`bypassOK` 表示同一组条件键下 `s3:BypassGovernanceRetention` 被允许。
+## 修复方案设计 {#design}
 
-| 目标版本 | 变更 | 请求头 | `retOK` | `bypassOK` | 现状 | 修复后 |
-| --- | --- | --- | --- | --- | --- | --- |
-| 任意 | 任意 | 任意 | 否 | 任意 | 常为 200（F1、F3） | 入口 **403** |
-| 未到期 GOVERNANCE | 延长 | 任意 | 是 | 任意 | 200 | 200 |
-| 未到期 GOVERNANCE | 削弱 | 无 | 是 | 任意 | 400 `InvalidRequest`（`ObjectLocked`） | 400 `InvalidRequest`（`ObjectLocked`） |
-| 未到期 GOVERNANCE | 削弱 | 有 | 是 | 否 | **200**（F2） | **403** |
-| 未到期 GOVERNANCE | 削弱 | 有 | 是 | 是 | 200 | 200 |
-| 未到期 COMPLIANCE | 缩短或改模式 | 任意 | 是 | 任意 | 400 `InvalidRequest`（`ObjectLocked`） | 400 `InvalidRequest`（`ObjectLocked`） |
-| 无保留期或已到期 | 任意 | 任意 | 是 | 任意 | 200 | 200 |
+### 五条核心安全不变量 {#invariants}
 
-持有 `retOK` 的调用者，除 F2 那一行外看不到变化。未授权削弱返回 403，
-与删除路径对无权限 bypass 请求返回 `AccessDenied` 一致。属主（root）与现在一样，
-由 IAM 系统放行两个动作。
+我们的修复方案在 `PutObjectRetention`（`0d3ba5d4c`）与全部对象写入路径（`14042b5aa`）上严格建立并锁死了五条安全不变量：
+1. **不变量 1（`s3:PutObjectRetention` 必检）**：任何 `PutObjectRetention` 请求，无论是否携带 `x-amz-bypass-governance-retention` 请求头，都必须通过 `s3:PutObjectRetention` 权限校验（包含 `s3:object-lock-remaining-retention-days`、`s3:object-lock-retention-mode`、`s3:object-lock-retain-until-date` 与 `s3:ExistingObjectTag/<key>` 条件）。
+2. **不变量 2（削弱有效 `GOVERNANCE` 锁必须叠加 `s3:BypassGovernanceRetention`）**：若目标版本当前处于未过期的 `GOVERNANCE` 锁定期，且请求试图清空保留锁（`Mode == ""`）、缩短保留截止时间（`!RetainUntilDate.After(existing.RetainUntilDate)`）或跨模式变更，则请求必须**同时**携带 `x-amz-bypass-governance-retention: true` 并通过 `s3:BypassGovernanceRetention` 权限校验。
+3. **不变量 3（`COMPLIANCE` 绝对不可削弱）**：处于未过期 `COMPLIANCE` 锁定期的对象版本，任何身份均不可清空、缩短保留期或降级为 `GOVERNANCE`。
+4. **不变量 4（禁止非复制请求指定 `?versionId=` 覆盖写）**：非复制 S3 客户端不得在 `PutObject`、`CopyObject` 或 `PutObjectExtract` 中指定已有或自定义的 `versionId` 原地覆写对象。
+5. **不变量 5（原地覆盖 `null` 版本必须执行写锁检查）**：任何会原地替换已有 `null` 版本的写入路径（挂起版本控制桶上的 `PutObject`、目录对象 `key/`、以及 `CompleteMultipartUpload`），在覆写前必须对已有 `null` 版本执行完整的 WORM 保留期与法律冻结检查。
 
-把权限检查移到入口后，未授权调用者会先得到 403，无从得知桶或版本是否存在；
-现在这类请求可能返回 404 或 400。
+### 鉴权检查的位置与职责划分 {#placement}
 
-### 考虑过的替代方案 {#alternatives}
+在 `PutObjectRetentionHandler` 与 `enforceRetentionBypassForPut` 中：
+- `s3:PutObjectRetention`（`retOK`）始终基于解析后的目标保留参数（`retDays`、`retDate`、`retMode`）与对象现有标签求值，若为 `false` 立即返回 `ErrAccessDenied`；
+- `s3:BypassGovernanceRetention`（`bypassOK`）独立求值，且仅在修改动作确实需要突破现有 `GOVERNANCE` 锁时作为附加必要条件强制要求。
 
-- **只把检查里的 `byPassSet` 换成 bypass 求值结果。** 能修 F2，修不了 F1：
-  清除与 COMPLIANCE 请求根本走不到那个检查，而且仍凭原始请求头通过
-  `byPassSet || retSet`。F3 也仍在。
-- **恢复上游 #20929 的入口 `checkRequestAuthType`。** 那次检查不带锁条件键。
-  多数条件运算符在键缺失时不匹配，于是依赖这些键的 Allow 会在入口失败；
-  依赖这些键的 Deny 在入口同样不匹配，只有后面的检查才看得到。
-  在入口用来自请求的条件键求值，只需一次判断，而且判断正确。
-- **所有检查都留在 `EvalMetadataFn` 里。** 只有对象层每条路径都在写入前调用回调时才正确，
-  而且会向无权限的调用者泄露桶和版本是否存在。与状态无关的判断应该放在入口。
-- **对没有 bypass 权限的调用者，一律拒绝该请求头。** 会打断每次写保留期都带这个头的客户端，
-  包括延长操作。协议把请求头视作意图，没有削弱时不能把它当错误。
-- **像删除路径一样复用 `authorizeRequest(..., BypassGovernanceRetentionAction)`。**
-  这个调用不带锁条件键，依赖这些键的 bypass 策略在保留期路径上会得到不同结果。
-  删除路径是否也应带上这些键，留给另一项改动。
+### `PutObjectRetention` 完整判定真值表 {#decision-table}
 
-### 附注 {#notes}
+| 行号 | 现有锁状态 | 请求的变更动作 | `x-amz-bypass-governance-retention` | `retOK` (`s3:PutObjectRetention`) | `bypassOK` (`s3:BypassGovernanceRetention`) | 最终结果 |
+|---|---|---|---|---|---|---|
+| 1 | 任意状态 | 任意变更 | `false` 或 `true` | `false` | 任意 | **`403 AccessDenied`**（封堵 F1 与 F3） |
+| 2 | 未加锁或已过期 | 设置未来保留期 | `false` 或 `true` | `true` | 不要求 | **`200 OK`** |
+| 3 | 有效 `GOVERNANCE` | 延长 `RetainUntilDate` | `false` 或 `true` | `true` | 不要求 | **`200 OK`** |
+| 4 | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `false` | `true` | 任意 | **`403 AccessDenied`** |
+| 5 | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `true` | `true` | `false` | **`403 AccessDenied`**（封堵 F2） |
+| 6 | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `true` | `true` | `true` | **`200 OK`** |
+| 7 | 有效 `COMPLIANCE` | 清空、缩短或降级为 `GOVERNANCE` | `false` 或 `true` | 任意 | 任意 | **`403 AccessDenied`** |
 
-- `ParseObjectRetention` 拒绝过去的日期（`ErrPastObjectLockRetainDate`），
-  并要求空 `Mode` 不带日期，所以清除保留期总是空的 `<Retention/>`。
-- 未修复实现中，`s3:object-lock-remaining-retention-days` 按 `ceil(|date − now| / 24h)` 计算，
-  清除保留期（空 `<Retention/>`）时日期为零值，取绝对值会算出极大的天数（见[缓解措施](#mitigation)）。
-  修复后非未来日期的该条件键始终存在且值为 `"0"`，防止通过清除保留期绕过最短保留天数策略。未来日期使用不会饱和的秒数差计算，确保超过 `time.Duration` 范围的日期仍受最长保留天数策略约束。
-- 目前 `PutObjectRetention` 不求值基于现有对象标签的条件（`s3:ExistingObjectTag/<key>`），
-  本设计不改变这一点。
+### 五个被否决的替代方案 {#alternatives}
 
-## 修复的兼容性 {#compatibility}
+在设计复核阶段，我们评估并否决了五个看似更简单的改法：
+1. **仅把 `isPutRetentionAllowed` 中的 `byPass || retSet` 改成 `byPass && retSet`**：这样虽能修掉 F2 与 F3，但未加锁分支上的 **F1** 依然存在；而且如果一个仅有 `s3:PutObjectRetention` 的用户在正常**延长**保留期时顺手带上了 `x-amz-bypass-governance-retention: true`，`byPass && retSet` 会错误地拒绝该合法延长请求。
+2. **直接在 `PutObjectRetentionHandler` 最顶部加一行 `checkRequestAuthType(..., PutObjectRetentionAction)`**：在 Handler 入口处，请求体 XML（`<Retention>`）尚未解析，磁盘上的对象现有标签也尚未读取，此时求值会导致所有依赖 `s3:object-lock-remaining-retention-days`、`s3:object-lock-retain-until-date`、`s3:object-lock-retention-mode` 与 `s3:ExistingObjectTag/<key>` 的 IAM 策略条件全部失效！
+3. **只要请求头带了 `x-amz-bypass-governance-retention: true` 就一律要求 `s3:BypassGovernanceRetention`**：不符合 S3 规范——只有当操作确实需要突破有效 `GOVERNANCE` 锁时才需要检查 `s3:BypassGovernanceRetention`。
+4. **直接禁止传入空 `<Retention/>` 请求体**：通过 `<Retention/>` 清空治理锁是 `mcli retention clear` 长期依赖的公开扩展能力；只要调用方同时具备 `s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention` 且显式传入 `x-amz-bypass-governance-retention: true`，就应当继续支持。
+5. **仅在开启了 Object Lock 的桶上拦截 `?versionId=` 写入（`SN-2026-016`）**：允许普通客户端通过 `?versionId=` 原地篡改已有历史版本违背了所有版本化桶的不可变语义，因此在所有桶上统一拦截非复制流量的 `?versionId=` 写入。
 
-- 持有 `s3:PutObjectRetention` 的调用者没有变化，只有削弱 GOVERNANCE 时现在还需要
-  `s3:BypassGovernanceRetention`。
-- 没有 `s3:PutObjectRetention` 的调用者现在在入口收到 403。此前带请求头可以得到 200（F1），
-  或者得到暴露对象状态的 400/404。
-- `s3:PutObjectRetention` 被锁条件键拒绝的调用者，即使持有 bypass 也收到 403（F3）。
-  请检查是否有策略依赖 bypass 绕开此类 Deny。
-- **混合版本与复制。** 保留期变更作为元数据更新复制，经复制信任路径应用，
-  不经过这个处理器。已修复站点不会复查未修复对端已经接受的变更。
-  对复制桶而言，所有接受 S3 写入的站点都升级之后，这一保证才成立。
+### 实现细节补充 {#notes}
 
-## 回归要求 {#tests}
+- **空 `<Retention/>` 与超长年份下的 `s3:object-lock-remaining-retention-days` 计算**：当调用方发送 `<Retention/>` 清空治理锁时，`retDate` 为零值 `time.Time{}`。旧代码直接对零值时间调用耗时差计算，由于 `time.Duration` 最多只能表示约 290 年，算出了约 `-106751` 天的荒谬负数！提交 `0d3ba5d4c` 将零值 `retDate` 的剩余天数明确归零，并使用不溢出的日历秒差计算未来保留天数，使 `2400` 年等远期保留时间也不会因 `time.Duration` 290 年上限而发生饱和截断。
+- **`s3:ExistingObjectTag/<key>` 完整透传**：`s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention` 两次鉴权均完整传入目标版本的现有对象标签。
 
-处理器层的回归要求使用真实 IAM 子系统，覆盖[判定表](#decision-table)每一行，另加：
+---
 
-- F1，分别在未修复构建与修复后构建上：无任何授权的主体、挂显式 Deny 的主体，
-  尝试清除、GOVERNANCE→COMPLIANCE、新建 COMPLIANCE，分别带与不带请求头、
-  带与不带 `versionId`。修复后每一项都应得到 403，已存储的保留期保持不变。
-- F2：报告者的脚本运行结束时版本仍在。
-- F3：即使允许 bypass，对 `s3:PutObjectRetention` 的条件 Deny 仍返回 403；
-  基于锁条件键的条件 Allow 能通过入口检查。
-- 对 `s3:*` Allow，同时显式 Deny `s3:BypassGovernanceRetention`：削弱返回 403。
-- 属主、服务账号、STS 凭据：各自按有效策略判定。
-- 未授权调用者对不存在的桶、未启用锁的桶、不存在的版本都得到 403，
-  从响应上无法区分是哪一种。
-- 未到期 COMPLIANCE：缩短与改模式仍被拒绝，响应不变。
+## 兼容性影响 {#compatibility}
 
-## 升级前的缓解措施 {#mitigation}
+- **标准 S3 客户端与 `mcli retention` 工作流**：完全兼容。使用 `mcli retention clear --governance` 清空或缩短治理模式保留锁的账号，必须按规范同时具备 `s3:PutObjectRetention` 与 `s3:BypassGovernanceRetention` 权限。
+- **跨站点/双向桶复制（Replication）**：需要保留源端 `versionId` 的合法复制流量必须持有 `s3:ReplicateObject` 权限（标准复制策略已默认包含）。
 
-应在公开制品验收后部署 `RELEASE.2026-10-18T00-00-00Z`。本次核对时仍为 Draft，不要将已被替代的 20261015 草稿视为当前正式修复版。以下措施仅适用于仍在运行受影响 Server 的阶段，
-只能限制 SN-2026-015 保留期写入路径，不能替代 SN-2026-016 写路径的完整修复。
-受影响 Server 上的 F1 无法用 IAM 策略挡住，因为服务端在接受请求前不求值任何策略：
+---
 
-- 视所有能向该部署签名请求的凭据，都能在所有启用锁的桶中清除 GOVERNANCE 保留期、
-  加上 COMPLIANCE 保留期。不要把凭据发给你不愿赋予这种能力的一方。
-- COMPLIANCE 能阻止 F1 通过 `PutObjectRetention` 清除或缩短已有保留期，
-  但无法挡住受影响 Server 上独立的 SN-2026-016 覆写路径，仍须升级。
-- 如果 Server 前面有反向代理，可以拒绝来自不受信客户端、带
-  `x-amz-bypass-governance-retention` 的 `PUT ?retention` 请求。
-  拒绝比剥掉请求头更好，因为已签名的请求头删掉后签名就会失效。
-  没有这个请求头，三个问题都无法触发；代价是经由该代理的正当 governance 覆盖也无法进行。
-- 不要依赖以 `s3:object-lock-remaining-retention-days` 为条件的 Deny：
-  F1 根本不求值它，清除时该键的值也非常大（见[附注](#notes)）。
-- 对象元数据只保存当前保留期，无法反映此前的变更。如果审计日志记录请求头，
-  请排查带 `x-amz-bypass-governance-retention` 的 `PutObjectRetention` 请求，
-  并检查版本上是否出现了意料之外的 COMPLIANCE 保留期。
+## 回归测试矩阵 {#tests}
 
-## 交付状态 {#delivery}
+PR [`#234`](https://github.com/pgsty/silo/pull/234) 与 PR [`#235`](https://github.com/pgsty/silo/pull/235) 在 `cmd/object-handlers-lock_test.go` 与 `cmd/bucket-versioning_test.go` 中固化了完整回归测试矩阵：
+- 覆盖 `PutObjectRetention` 判定真值表的全部 7 行组合（含 F1 零权限调用方、F2 仅 `PutObjectRetention` 调用方、F3 仅 `BypassGovernanceRetention` 且带最短保留天数条件的调用方）；
+- 覆盖超过 `time.Duration` 290 年上限的远期保留时间（如 `2400-01-01T00:00:00Z`）；
+- 覆盖 `PutObject`、`CopyObject` 与 `PutObjectExtract` 携带 `?versionId=` / `minio.versionId` 的拦截；
+- 覆盖目录对象（`key/`）与 `CompleteMultipartUpload` 针对受锁 `null` 版本的原地覆盖拦截。
 
-修复通过 [PR #234](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 [PR #235](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）合入，包含于 [20261018 正式版](/zh/blog/release/silo-20261018/)。Object Lock race 回归是发行工作流前置检查。20261015 的[历史验收](/zh/blog/release/silo-20261015/#acceptance)只证明其记录的源码与制品，不证明新版公开或生产环境已升级。
+---
+
+## 缓解措施与版本升级 {#mitigation}
+
+### 交付状态 {#delivery}
+
+**`SN-2026-015`**（`0d3ba5d4c`，PR `#235`）与 **`SN-2026-016`**（`14042b5aa`，PR `#234`）均已随 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 正式发布。所有依赖 S3 Object Lock WORM 治理模式或合规模式保护数据的生产环境应尽快升级至 `20261018`。

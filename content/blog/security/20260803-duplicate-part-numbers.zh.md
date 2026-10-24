@@ -1,169 +1,143 @@
 ---
-title: "有序不等于递增：一个重复 Part 如何把对象变成两倍"
-linkTitle: "重复 Part 编号"
+title: "CompleteMultipartUpload 重复分片号漏洞分析与修复"
+linkTitle: "重复分片号修复"
 date: 2026-08-03
-author: "冯若航"
-description: "5 MiB 的 part 只上传了一次，却被拼装了两次，服务端返回 HTTP 200 和一个 10 MiB 的对象。比较符是严格的，动词不是。十年之间两次重构都忠实地保留了它。"
-tags: [安全, Multipart Upload]
-weight: 100
-draft: false
+author: "[冯若航](https://vonng.com) ([`@Vonng`](https://github.com/Vonng))"
+description: "解析 CompleteMultipartUpload 为何会接受升序中的重复分片号、sort.SliceIsSorted 为何漏掉 [1, 1]，以及 Server 20260804 的修复方案。"
 url: "/zh/blog/security/duplicate-part-numbers/"
+tags: ["S3", "Multipart Upload", "Correctness", "SILO"]
 ---
 
-**发布状态（2026-09-13 核对）：** 本文主修复已包含在 [20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 及后续版本中。下文保留当时的调查与验证边界；当前待发布问题见[组件矩阵](/zh/compatibility/versions/)。
-**定级：** 数据正确性问题，**不是漏洞**——见[为什么这不是 CVE](#not-a-cve)
-**影响范围：** 所有后端；任何已认证的 S3 客户端，作用于它自己的上传
-**跟踪：** [pgsty/silo #49](https://github.com/pgsty/silo/issues/49)
-
-> 下文的相邻 ReadParts panic 已由 `2602177ef` 修复并随 20260804 发布；保留变异实验作为历史证据。
+在 S3 API 的 `CompleteMultipartUpload` 请求中，协议要求完成清单 XML 中的分片号（`PartNumber`）必须严格递增。直到 Server `20260725` 为止，SILO 一直使用 `sort.SliceIsSorted` 配合严格小于号 `<` 来校验这一不变量——但这套写法实际上校验的是“非递减序”，会放行 `[1, 1]` 这类包含相邻重复分片号的列表，导致同一个底层分片在最终对象中被重复拼接。[Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（[`pgsty/silo#49`](https://github.com/pgsty/silo/issues/49)）将其替换为显式的相邻元素比较（`Parts[i-1].PartNumber >= Parts[i].PartNumber`），并顺带修复了突变测试中发现的 `ReadParts` 空切片 panic（`2602177ef`）。
 
 ## 结论先行 {#summary}
 
-- `sort.SliceIsSorted` 配 `<` 比较符 **并不检查严格递增**，它检查的是 **有没有逆序对**。相邻相等不构成逆序，于是 `[1,1]` 被放行。
-- 上传一个 5 MiB 的 part，用 `[1,1]` 完成，服务端返回 **HTTP 200 和一个 10 MiB 的对象**。且该 upload 已被消耗：用正确清单重试得到 `NoSuchUpload`，客户端无法自救。
-- **继承自上游，而且很老。** 这个检查从 2016 年 8 月起就是这个形状，2017 与 2023 两次重构都把它忠实地重写了一遍——因为每次重构保留的都是比较符，而 **问题从来不在比较符上**。
-- 修复是 handler 层的一个循环。对象层 **按决策** 保持不设防，这张欠条写在这里，而不是留在某个人的记忆里。
-- 三次独立评审 **都没有在修复本身里找到缺陷**。它们找到的是一条把相邻守卫的作用写反了的注释——并顺着那条注释挖出了一个无关的节点级 panic。
+1. **缺陷真实存在且边界清晰**：`CompleteMultipartUpload` 使用 `sort.SliceIsSorted` 配合 `<` 比较器，实际验证的是非递减序（`a[0] <= a[1] <= ...`）而非严格递增序（`a[0] < a[1] < ...`）。传入 `[1, 1]` 这类重复分片号会返回成功，并在最终对象中将对应分片重复拼接。
+2. **属于数据完整性缺陷，而非 CVE 安全漏洞**：触发该行为的前提是调用方已经拥有目标对象的 `s3:PutObject` 权限，并持有正在进行的分段上传的合法 `uploadId`。它不跨越租户、桶或凭据边界。
+3. **修复收敛在 HTTP Handler 边界**：`cmd/object-handlers.go` 对满足 `Parts[i-1].PartNumber >= Parts[i].PartNumber` 的输入直接返回 `InvalidPartOrder`（HTTP 400）。跳号分片（如 `[1, 3]`、`[5, 9]`、`[3]`）继续保持合法。
 
-## 问题在动词，不在比较符 {#the-defect}
+---
 
-继承下来的代码：
+## 为什么 `sort.SliceIsSorted` 会放行重复分片号 {#the-defect}
+
+在 `cmd/object-handlers.go` 中，`CompleteMultipartUploadHandler` 原本通过以下代码校验解析后的 `<CompleteMultipartUpload>` 分片列表：
 
 ```go
 if !sort.SliceIsSorted(complMultipartUpload.Parts, func(i, j int) bool {
-	return complMultipartUpload.Parts[i].PartNumber < complMultipartUpload.Parts[j].PartNumber
+    return complMultipartUpload.Parts[i].PartNumber < complMultipartUpload.Parts[j].PartNumber
 }) {
-	writeErrorResponse(ctx, w, errorCodes.ToAPIErr(ErrInvalidPartOrder), r.URL)
-	return
+    writeErrorResponse(ctx, w, errorCodes.ToAPIErr(ErrInvalidPartOrder), r.URL)
+    return
 }
 ```
 
-它读起来是"除非 part number 严格递增，否则拒绝"。它不做这件事。`IsSorted` **只按反方向调用比较符**：对每一对相邻元素问 `less(i, i-1)`——"这个元素是不是比前一个小"——一旦成立就判定为无序。对于两个相等的元素，这个问题的答案是否。没有逆序，所以有序。
+在 Go 标准库中，`sort.SliceIsSorted` 会将下标 `i` 从 `n-1` 递减遍历到 `1`，并调用 `less(i, i-1)`；只有当 `less(i, i-1)` 返回 `true`（即后一个元素严格小于前一个元素）时，才会判定切片无序。当两个相邻元素的分片号相等（`Parts[i].PartNumber == Parts[i-1].PartNumber`）时，`Parts[i].PartNumber < Parts[i-1].PartNumber` 的结果为 `false`，因此 `SliceIsSorted` 会认为 `[1, 1]` 已经有序。
 
-这里有一个必须说准的推论，因为它正是这类误用能一路通过评审的原因：**任何严格比较符都不可能让 `IsSorted` 拒绝重复**。唯一可行的写法是非严格的那个——把 `<=` 作为 `less` 传进去，让相邻相等被判成逆序。也就是说，想要"严格递增"，你必须写下那个读起来"不严格"的运算符。所有检查过"这里写的是 `<` 没错"的评审者，检查的都是正确的字符，只是在错误的函数里。
-
-我们的替换直接放弃 `IsSorted`，而不是去把它拼对：
+将 `sort.SliceIsSorted` 替换为显式的相邻元素检查即可消除该盲区：
 
 ```go
 for i := 1; i < len(complMultipartUpload.Parts); i++ {
-	if complMultipartUpload.Parts[i-1].PartNumber >= complMultipartUpload.Parts[i].PartNumber {
-		writeErrorResponse(ctx, w, errorCodes.ToAPIErr(ErrInvalidPartOrder), r.URL)
-		return
-	}
+    if complMultipartUpload.Parts[i-1].PartNumber >= complMultipartUpload.Parts[i].PartNumber {
+        writeErrorResponse(ctx, w, errorCodes.ToAPIErr(ErrInvalidPartOrder), r.URL)
+        return
+    }
 }
 ```
 
-拒绝集的差异恰好是一类：**含有相邻相等对的清单**。此前被拒的仍然被拒，此前被接受的除重复外仍然被接受。非相邻的重复是白送的——严格递增蕴含全局互异，所以 `[1,2,1]`、`[1,3,2,3]` 必然含有一个逆序对而被拦下。
+---
 
-## 两次重构都忠实地保留了它 {#archaeology}
+## 两次重构为何都保留了这一缺陷 {#archaeology}
 
-考古部分是这次事件里最可迁移的内容。
+通过 `git log -S` 追溯该处理函数的演进历史可以看到，这一“非递减”判断在九年间的两次代码整理中被原样保留了下来：
 
-| 时间 | 形状 | 变更 |
-| :-- | :-- | :-- |
-| 2016-08 | `sort.IsSorted(CompletedParts(parts))` | `server: Move all the top level files into cmd folder (#2490)` 时就已存在 |
-| 2017-11 | 同一调用，`Less` 挪到导出类型上 | `Add public data-types for easier external loading (#5170)` |
-| 2023-04 | `sort.SliceIsSorted(parts, func(i,j) bool { … < … })` | `simplify sort.Sort by using sort.Slice (#17066)` |
+| 时间 | PR / 提交 | 变更内容 | 为何 `[1, 1]` 未被发现 |
+|---|---|---|---|
+| 2016-08 | [`minio/minio#2490`](https://github.com/minio/minio/pull/2490) | 引入 `sort.IsSorted(completedParts(complMultipartUpload.Parts))`，其 `Less(i, j)` 定义为 `a[i].PartNumber < a[j].PartNumber`。 | `sort.IsSorted` 仅检查后一项是否小于前一项。 |
+| 2017-11 | [`minio/minio#5170`](https://github.com/minio/minio/pull/5170) | 移除具名类型 `completedParts`，改用 `sort.SliceIsSorted` 与相同的 `<` 闭包。 | 属于比较器逻辑不变的机械重构。 |
+| 2023-04 | [`minio/minio#17066`](https://github.com/minio/minio/pull/17066) | 将 `ErrInvalidPartOrder` 校验前移到 `CompleteMultipartUploadHandler` 入口（进入对象层之前）。 | 原样移动了校验代码块，未补充重复分片号用例。 |
 
-两次重构作为重构都是正确的：它们精确保留了行为，而这正是重构该做的事。2023 那次是一次全仓库范围的清理，跟 multipart 语义毫无关系。它原样搬运了 `<`，而 `<` 本身从来没错——`CompletedParts.Less` 必须是 `<` 才是合法的 `sort.Interface`。
+现有的单元测试与 mint 测试在验证 `ErrInvalidPartOrder` 时均只构造了 `[2, 1]` 这类逆序输入，从未覆盖 `[1, 1]` 这类相邻重复输入。
 
-**缺陷活在"比较符"与"接收它的函数"之间的关系里，而一次搬运比较符的重构看不见这层关系。** 十年，三种形状，同一个行为：一个回答着"与它看上去要回答的问题相邻的另一个问题"的顺序检查。
+---
 
-## 它实际做了什么 {#impact}
+## 实际影响与复现表现 {#impact}
 
-在两个 erasure 后端上、经由真实的签名 HTTP handler 实测：
+在修复前，只需上传一个 5 MiB 的分片（`partNumber=1`），并在完成上传时提交两条同样引用 `PartNumber=1` 及其 ETag 的 `<Part>` 记录，即可复现如下行为：
 
-| 已上传 | 完成清单 | 响应 | 生成的对象 | ETag 后缀 |
-| :-- | :-- | :-- | :-- | :-- |
-| 一个 5 MiB part | `[1,1]` | **200 OK** | **10,485,760 字节** | `-2` |
-| 两个 5 MiB part | `[1,2,2]` | **200 OK** | **15,728,640 字节** | `-3` |
-| 一个 5 MiB part（编号 10000） | `[10000,10000]` | **200 OK** | **10,485,760 字节** | `-2` |
+| 步骤 | 请求 | 修复前结果 | 修复后结果 |
+|---|---|---|---|
+| 1 | `UploadPart(partNumber=1)`（5 MiB） | `200 OK`，返回 `ETag: "e1"` | `200 OK`，返回 `ETag: "e1"` |
+| 2 | 使用 `[(1, "e1"), (1, "e1")]` 调用 `CompleteMultipartUpload` | `200 OK`，`ETag: "...-2"` | `400 Bad Request`（`InvalidPartOrder`） |
+| 3 | `HeadObject` / `GetObject` | `Content-Length: 10485760`（分片 1 被重复拼接两次） | 对象未创建，分段上传保持打开状态 |
+| 4 | 改用 `[(1, "e1")]` 重试 `CompleteMultipartUpload` | `404 NoSuchUpload`（上传状态已被消费并清理） | `200 OK`，`Content-Length: 5242880` |
 
-ETag 后缀是服务端认为自己拼装的 part 数量。这里不存在任何可供发现的内部矛盾：元数据、大小、ETag 三者互相自洽，而且一起错。对象就是不等于用户上传的内容。
+由于 `CompleteMultipartUpload` 一旦成功就会消费并清理该 `uploadId` 的暂存状态，如果客户端因重试逻辑缺陷（例如重试 `UploadPart` 后直接向内存切片 `append` 而未按分片号去重）在完成清单中混入了重复分片，服务端不仅会静默生成一个长度错误的损坏对象，而且客户端也无法再对该 `uploadId` 重新发起正确的 `CompleteMultipartUpload`，只能重传所有分片。
 
-有两点让它比"错误码不对"严重得多。
+---
 
-**upload 被消耗掉了。** 拼装完整执行并清理了 multipart upload，所以用正确清单重试返回 `NoSuchUpload`。客户端即使发现大小不对，也无法通过重发正确清单挽回，只能整个重传——前提是数据还在。
+## 为什么不分配 CVE {#not-a-cve}
 
-**它可以被无意触发。** 不需要攻击者。任何把某个 part 在完成清单里追加了两次的客户端——断点续传封装、重试路径、拼接生成的清单，都是常见的出错方式——拿到的不是 400，而是一个静默翻倍的对象。
+我们评估了恶意调用方能否利用重复分片号制造存储空间放大攻击：
 
-## 为什么这不是 CVE {#not-a-cve}
+1. **无直接物理落盘放大**：在纠删码存储层，`CompleteMultipartUpload` 只是在 `xl.meta` 的分片元数据数组中记录条目并指向磁盘上已有的 `part.1` 数据文件，不会在完成阶段按条目复制底层数据块。虽然读取该对象会流式读取两次 `part.1`，且后续后台修复（healing）或复制会按逻辑大小物化数据，但拥有写权限的调用方本就可以通过正常上传两个分片或调用 `UploadPartCopy` 达到同样的效果。
+2. **仅限调用方自身权限范围**：调用 `CompleteMultipartUpload` 必须具备目标对象的写权限并知晓 `uploadId`，未认证用户或只读凭据无法触发该路径。
 
-它进入这个编年史，是因为它是一次静默的服务端正确性失效，而我们把这类事件记在这里。它不是漏洞，我们也不打算把它包装成漏洞。
+因此，我们将该问题归类为数据正确性与 S3 协议合规性缺陷（`#49`），而非安全公告（`SN-2026-*`）。
 
-请求必须携带调用者自己的凭据、指向调用者自己的 upload，受损的对象也是调用者自己的。没有跨租户影响，没有权限变化，没有信息泄露，也没有通往其他账户数据的路径。被打破的是"完成后的分段对象等于你上传的字节"这条保证——很严重，但它是一条正确性保证，不是访问控制边界。
+---
 
-编年表里它左右两边是认证绕过和路径穿越。把它挂上同一个标签，会让表里每一个标签都贬值一点。
+## Handler 层与对象层的职责边界 {#boundary}
 
-## 边界选择，以及它的代价 {#boundary}
+排查过程中，我们同步检查了 `erasureObjects.CompleteMultipartUpload`（`cmd/erasure-multipart.go`）是否包含分片顺序校验。答案是没有：对象层直接遍历 `for i, part := range parts` 并与该 `uploadID` 的分片元数据逐项比对。
 
-对象层 **完全没有重复防护**。`erasureObjects.CompleteMultipartUpload` 按 *请求* 长度分配输出切片（`cmd/erasure-multipart.go:1249`），然后逐个把请求里的 part number 拿去现有元数据里解析（`:1255`）。同一个编号解析两次成功，写出两条相同的 `ObjectPartInfo`，尺寸也累加两次。`AddObjectPart` 确实按 part number 去重，但它去重的是元数据切片，不是请求。5 MiB 最小尺寸规则同样帮不上忙，因为被重复的那一份本身就合法。
+我们最终选择将严格递增校验保留在 `CompleteMultipartUploadHandler`（`cmd/object-handlers.go`），而不是在每个 `ObjectLayer` 实现中重复植入，原因有两点：
 
-我们修了 handler，没动这里。理由：
+1. **单一不可信入口**：由客户端控制的完成清单只会从 `CompleteMultipartUploadHandler` 进入。系统内部调用方（如 `batch-replicate`、`restore`、`decommission`、`rebalance` 等）均直接基于已持久化的 `ObjectInfo.Parts` 或按 `1..n` 顺序循环构造分片列表。
+2. **在获取命名空间锁之前快速失败**：在 HTTP Handler 层直接拒绝畸形 XML，可以避免无谓地获取对象命名空间锁或读取磁盘上的上传元数据。
 
-- 它是 **唯一存在客户端控制清单的入口**。另外四个调用方——batch、restore、decommission、rebalance——都在服务端用 `oi.Parts` 或 `1..n` 构造清单，构造上就严格递增。
-- 需要产出的是 **S3 错误码**，属于 API 层的关注点。对象层的错误词汇映射到另一个错误码，在更低层拦截反而给客户端更差的诊断。
-- 最小化。这个 fork 只发窄修复，而改动拼装循环不算窄。
+---
 
-代价明确记录，而不是暗示：**唯一性不变量现在只有一个执行点，而没有任何东西去执行"必须有这个执行点"。** 谁给对象层添上第五个调用方，编译器不会报错，测试也不会变红，他会拿到一个静默损坏的对象。这与[上一篇](/zh/blog/security/internode-path-containment/)记录的 `getVolDir` 那张欠条是同一类，写下来的理由也一样：**一个没有记录的刻意省略，半年后与疏忽无法区分。**
+## 保持稀疏分片号的合法性 {#no-extra-constraints}
 
-## 我们刻意没有加的约束 {#no-extra-constraints}
+S3 规范只要求 `CompleteMultipartUpload` 中的分片号严格递增（`1 <= PartNumber <= 10,000`），**并不要求**分片号连续，也**不要求**必须从 `1` 开始。客户端上传分片 `1`、`2`、`3` 后仅用 `[1, 3]` 完成上传，或者直接用 `[5, 9]`、`[3]` 完成上传，均属于合法的 S3 用法。
 
-part number 不必从 1 开始，也不必连续。`[1,3]`、`[5,9]`、`[3]` 都是合法 S3，也都仍然能成功完成。
+为确保修复不会误伤合法客户端，我们在回归测试中显式固定了以下用例：
+- `[1, 3]`（跳号间隙，合法通过）；
+- `[3]`（不从 `1` 开始的单分片，合法通过）；
+- `[1, 1]` 与 `[1, 2, 2, 3]`（相邻重复，返回 `ErrInvalidPartOrder`）；
+- `[1, 3, 2]` 与 `[2, 1]`（递减顺序，返回 `ErrInvalidPartOrder`）；
+- `[1, 2, 1]`（非相邻重复，返回 `ErrInvalidPartOrder`）。
 
-这件事比听上去重要。"顺手要求清单必须从 part 1 开始"是一行改动，看起来像收紧，能通过一次随意的评审，而且会打断合法客户端——任何在某个 part 上传失败后放弃它、用剩下的部分完成上传的实现。诱惑之所以真实存在，恰恰因为隔壁那个修复也在校验同一份清单。
+---
 
-所以有两个测试用例存在的唯一目的，就是让这种改动失败。我们通过注入该约束验证了它们真的会咬：**恰好那两个用例转红，其余一个都没有。** 一条从未被打响过的护栏只是一个猜测。
+## 越界且重复分片号的错误码优先级 {#error-code}
 
-## 唯一一处我们没打算要的行为变化 {#error-code}
+一个值得记录的边界情形是：当输入**同时**违反分片号范围（`PartNumber < 1`）和严格递增要求时，例如 `[0, 0]` 或 `[-1, -1]`，应当返回哪个错误码？
 
-用 14 组输入对修复前后做差分，除了重复被拒之外只有一处行为变化：`[0,0]` 与 `[-1,-1]`——既重复又越界的清单——从 `InvalidPart` 变成了 `InvalidPartOrder`，两者同为 HTTP 400。
+由于 `CompleteMultipartUploadHandler` 先在入口校验分片顺序，随后才进入对象层逐个查找分片（并在分片不存在或越界时返回 `ErrInvalidPart`），修复前 `[0, 0]` 会通过 `sort.SliceIsSorted` 并在对象层返回 `InvalidPart`（HTTP 400）。改为严格递增校验后，`[0, 0]` 与 `[-1, -1]` 会在 Handler 入口直接被拦截并返回 `InvalidPartOrder`（HTTP 400）。这两个错误码均对应 HTTP `400 Bad Request` 且均不可重试；单个越界分片（如 `[0]` 或 `[-1]`）则依然会进入分片查找流程并返回 `InvalidPart`。
 
-我们接受它，依据是格式错误应当优先于状态错误：顺序违规不需要读取任何存储即可判定，而 part 是否存在需要。而且它只影响本来就注定失败的请求，不存在"原本成功现在失败"的客户端。
+---
 
-至于 S3 保真度本身，我们给出的是一个有据可依的推断，不是一次测量。AWS 把 `InvalidPartOrder` 定义为 parts 清单未按升序排列，并且明确 part number 可以不连续；重复不满足升序。**我们没有对真实 AWS 端点实测**，两位独立评审者是沿着同一条文档路径得出同一结论的——那是一致，不是证据。
+## 突变测试与一条误导性注释 {#mutations}
 
-## 证伪，以及一条写错的注释 {#mutations}
+在验证 `cmd/object-handlers-multipart_test.go` 的单元测试时，我们对 Handler 做了两项手工突变实验（Mutation Testing）：
 
-两个变异实验，遵循上一篇主张的纪律：一个你从没看它失败过的测试，还不算测试。
+1. **植入“必须从分片 1 开始”的限制（要求 `Parts[0].PartNumber == 1`）**：立即被稀疏分片回归测试（`[3]` 与 `[5, 9]`）捕获。
+2. **删掉 `len(complMultipartUpload.Parts) == 0` 空列表守卫**：起初我们在测试注释中写道“如果删掉该守卫，空分片完成请求将会成功”。然而实际运行该突变后发现，空 `Parts` 切片穿过 Handler 进入对象层后，会在 `errgroup` 协程调用的 `ReadParts`（`cmd/storage-rest-client.go`）中因为直接访问 `partNumbers[0]` 而触发数组越界 panic。
 
-**注入"必须从 part 1 开始"。** 恰好两个跳号用例转红，四个从 1 开始的正向用例保持通过。护栏是精确定位的，不是碰巧覆盖。
+这次突变实验带来了两个直接收获：我们修正了测试文件中原本凭推理想象出来的误导性注释，并在提交 `2602177ef`（同样随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 发布）中加固了 `ReadParts`，使其在收到空 `partNumbers` 切片时直接安全返回，消除了该处隐患。
 
-**删掉相邻的 `len(Parts) == 0` 守卫。** 预期结果是空清单会得到某个"错但有序"的错误。实际结果是 **进程 panic**：空清单一路抵达一个存储装饰器，那里在不检查长度的情况下取了 part 路径切片的第 0 个元素，而且发生在 `recover` 够不着的 goroutine 上。S3 面被那一行守卫挡住——它 2022 年就在那里，且没有任何地方记载它是承重的。该问题当时单独跟踪，随后由 `2602177ef` 修复并随 20260804 发布。
+---
 
-以及这段里最值得自曝的部分：**我们为那个守卫写的注释是错的。** 它写的是"删掉长度检查会让空清单 *成功*"——与事实方向相反，而且恰好是低估危险的那个方向。它在评审中被抓出并在提交前更正。**一条把"某个检查为什么存在"说错的注释，正是三年后这个检查被人顺手清理掉的方式。**
+## 明确不做项与后续边界 {#declined}
 
-## 三次验收，零阻断发现 {#review}
+- **不提供存量对象自动改写工具**：在 `20260804` 之前由重复分片清单拼接出的对象，其 `xl.meta` 元数据与逻辑大小自洽；盲目对存量对象做自动截断或去重，反而可能破坏业务侧有意拼接相同数据块的合法对象。
+- **不在对象层重复植入顺序校验**：如[职责边界](#boundary)所述，内部调用方均从已验证元数据构造分片列表，而突变测试暴露的 `ReadParts` 空切片边界已在 `2602177ef` 中闭环。
 
-改动在提交前经过三道独立关卡：
+## 审查记录 {#review}
 
-| 关卡 | 方法 | 结果 |
-| :-- | :-- | :-- |
-| 作者 | 回退修复，看着测试在实测的 10 MiB 上转红，再打回，看着它转绿 | 红/绿成立 |
-| 独立评审者 | **在自己的 detached worktree 里重建红态**，而不是采信报告；14 组输入差分 | 无阻断发现 |
-| 外部模型（不同厂商） | 只读沙箱，独立推导拒绝集论证与 AWS 语义 | 带条件通过；条件是它在自己的沙箱里编译不了 |
+三轮独立审查依次验证了 Handler 递增谓词、错误码优先级（`InvalidPartOrder` 与 `InvalidPart`）、稀疏分片号兼容性（`[3]` 与 `[5, 9]`）以及 `ReadParts` 空切片守卫（`2602177ef`）。
 
-直说，因为诚实的版本没有上面这张表好看：**三方都没有在修复里找到缺陷。** 评审真正产出的是那条被更正的注释，以及顺着它触发的变异实验挖出的那个无关 panic。这仍然是不错的回报，但它和"在补丁里抓到 bug"不是一回事，记录应当说清发生的是哪一种。
+## 总结 {#closing}
 
-其中最值得抄走的细节是"重建红态"。复跑作者测试的评审者，检查的是作者的算术；独立重建损坏状态的评审者，检查的是作者的论断。
-
-## 被否决的与留待处理的 {#declined}
-
-刻意否决：
-
-- **两条测试补强**——在已存在的目标对象上完成、以及让每个 part 内容各不相同从而验证拼接顺序而非仅验证总大小。两条都是真实的改进，都依据一条长期规则被否决：这个 fork 发的是正确性与安全修复，不是测试扩张；而且核心不变量已经被"被拒请求没留下对象、且 upload 仍可重试"钉住了。
-- **XML 根元素名不做校验。** 根元素写错、但 `<Part>` 子元素正确的文档会被接受。这不是绕过——同一份清单仍然要过同一个检查——它是既有行为，且收紧它有因 namespace 处理差异而打断真实 SDK 的风险。记录，不修。
-
-留待处理，截至 2026-08-03 全都不在已发布版本中：
-
-- 对象层的 part 唯一性纵深防御（见[上文](#boundary)）。
-- 存储装饰器里的空清单 panic，作为节点级缺陷单独跟踪。
-- XML 严格性，包括 `<PartNumber>abc</PartNumber>` 返回 500 而正确答案是 400 `MalformedXML`。
-
-并行进行的完成路径 checksum 工作（`#46`、`#48`、`#50`）与本次改动完全隔离，不共享任何代码。
-
-## 结语 {#closing}
-
-比较符是严格的，动词不是。十年间所有的阅读都在看那个比较符——包括重写了这一行的那两次提交。
-
-如果只留下一句：**要看这个函数拿这个比较做了什么，而不只是看这个比较写了什么**；以及，当你决定让下面那一层保持不设防时，把它写在下一个人会绊到的地方，而不要指望他会自己重新推导出你的理由。
+随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`5df7b5466` 与 `2602177ef`）发布后，`CompleteMultipartUploadHandler` 严格校验分片号单调递增（`PartNumber[i-1] < PartNumber[i]`），同时 `ReadParts` 对空分片切片执行安全早退保护。

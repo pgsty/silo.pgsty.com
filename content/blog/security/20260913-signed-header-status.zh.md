@@ -3,31 +3,20 @@ title: "SN-2026-011：修复与发布状态"
 linkTitle: "SN-2026-011：修复与发布状态"
 date: 2026-09-13
 author: "Vonng"
-description: "签名头修复已合入 Server；最新公开 Server 仍受影响。"
+description: "SN-2026-011 签名头校验修复（123325430），已随 Server 20260916 正式发布。"
 tags: [Security, silo]
 weight: 1
 url: "/zh/blog/security/20260913-signed-header-status/"
 ---
 
-> **2026-09-17 发布更新：** 本文记录的九月源码修复已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布；协调升级、可选功能启用条件和剩余限制仍按各节执行。下方带日期的源码状态与验证记录保留当时的范围。
+`SN-2026-011` 于 2026-09-13 在 Server 主分支修复（起始提交 [`123325430`](https://github.com/pgsty/silo/commit/1233254309b15571f101b2b26d531951ceaeef1e)），并已随 [Server 20260916](/zh/blog/release/silo-20260916/) 正式发布。Server `RELEASE.2026-09-03T13-18-01Z` 及更早版本均受影响（同期发布的 `silo-pkg v3.14.0` 与 `mcli 20260913` 属于依赖库与客户端版本，不包含服务端二进制修复）。
 
+在未修复版本中，持有合法签名 `PUT` 请求的调用方可以追加未签名的 `x-amz-copy-source` 请求头，将该写入操作转化为复制签名密钥有权读取的其他对象。若目标位置允许匿名读取，被复制对象的私有内容便会对外暴露。预签名 URL 与 `Authorization` 请求头签名均受影响，攻击者无需获知签名密钥本身。
 
-**截至 2026-09-13：** SN-2026-011 已在 Server 主分支修复，起始提交为
-[`123325430`](https://github.com/pgsty/silo/commit/1233254309b15571f101b2b26d531951ceaeef1e)。
-最新公开 Server `RELEASE.2026-09-03T13-18-01Z` 及此前公开版本仍受影响。
-pkg v3.14.0、mcli 20260913 发布不代表已经发布修复版 Server。
+修复方案在分发请求前校验实际收到的 `x-amz-*` 请求头是否均已包含在签名头集合中（仅保留协议规范明确允许的例外项）。后续的签名与校验和边界补强详见[签名头评审笔记](/zh/blog/design/signed-header-coverage/)。
 
-持有签名 PUT 请求的一方可以添加未签名的 `x-amz-copy-source`，将获准写入变成对签名密钥有权读取的其他对象的复制。
-如果目标允许匿名读取，被复制的私有内容可能因此泄露。预签名和 Authorization 头请求均受影响，持有者不需要知道签名凭据。
+## 修复建议
 
-修复在执行请求前检查实际收到的 `x-amz-*` 是否属于签名头集合，仅保留协议明确允许的例外。
-后续签名、校验和回归覆盖见[签名头评审](/zh/blog/design/signed-header-coverage/)。
+请将 **SILO Server** 升级至 [Server 20260916](/zh/blog/release/silo-20260916/) 或更高版本。在完成升级前，应将签发上传请求的凭据限制在必要的最小对象前缀范围内，避免为签发公开桶上传链接的凭据授予过宽的读取权限。
 
-管理员需要更新 **Server** 至包含修复的源码，或未来明确包含该修复的发行版。
-安排更新期间，应把写入签名凭据限制到必要对象，避免不必要的读取授权与可匿名读取的上传目标。
-只升级客户端或 Console 不会消除 Server 缺陷。
-
-问题由 Oren Yomtov 报告。[安全公告台账](/zh/about/security-advisories/#sn-2026-011)
-记录 SN-2026-011 与修复提交，并记载已申请 CVE。不能用依赖扫描的可达性通过结果替代此应用层漏洞状态。
-[组件版本矩阵](/zh/compatibility/versions/)区分已发布与 main 源码，
-[Server changelog](https://github.com/pgsty/silo/blob/main/CHANGELOG.md)列出待发布内容。
+感谢 Oren Yomtov 报告此问题。更多详情请参阅[安全公告台账](/zh/about/security-advisories/#sn-2026-011)、[9 月 16 日版本加固公告](/zh/blog/security/20260916-release-hardening/)及[组件版本矩阵](/zh/compatibility/versions/)。

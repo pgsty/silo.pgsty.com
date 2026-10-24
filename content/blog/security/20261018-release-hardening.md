@@ -10,58 +10,49 @@ weight: 1
 url: "/blog/security/20261018-release-hardening/"
 ---
 
-**Release boundary:** the [Server 20261018 release](/blog/release/silo-20261018/) contains these repairs; its GitHub release and Docker Hub images were verified public on 2026-10-19. Server 20260916 does not contain them. Server 20261015 is a superseded draft, not the upgrade recommendation. Installing standalone Console v2.4.2 or mcli 20261018 does not patch a Server process.
+[SILO Server 20261018](/blog/release/silo-20261018/) delivers the fixes for **`SN-2026-015`**, **`SN-2026-016`**, and **`SN-2026-017`**, scoped STS token revocation, and Go toolchain and dependency updates across `silo`, `mcli`, and `silo-console`. Server `20260916` and `20260903` are affected (and `20261015` was a superseded pre-release draft).
 
 ## Object Lock: SN-2026-015 and SN-2026-016 {#object-lock}
 
-The [existing advisory](/blog/security/20260926-governance-retention-bypass/) records the affected retention-write and overwrite paths, reproduction and mitigations. [#234](https://github.com/pgsty/silo/pull/234) and [#235](https://github.com/pgsty/silo/pull/235) require the base retention permission before object lookup, require both bypass intent and permission for weakening active GOVERNANCE, and protect caller-addressed or implicit in-place writes under the object lock. Unreadable lock state fails closed. Their [design](/blog/design/governance-retention-bypass-repair/) explains the trusted replication exception and why every write-accepting site must be upgraded.
+The [SN-2026-015 & SN-2026-016 advisory](/blog/security/20260926-governance-retention-bypass/) and [repair design note](/blog/design/governance-retention-bypass-repair/) document the affected `PutObjectRetention` and in-place version overwrite paths, reproductions, and mitigations. [PR #234](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and [PR #235](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`) enforce `s3:PutObjectRetention` before object lookup, require both `x-amz-bypass-governance-retention: true` and `s3:BypassGovernanceRetention` when weakening active `GOVERNANCE` retention, and reject caller-addressed `?versionId=` overwrites while enforcing WORM checks under the object write lock for `null`-version overwrites.
 
-Server 20260916 and the tested 20260903 are affected. The candidate prevents the repaired paths from changing protected state; it does not restore an overwritten version or reconstruct an earlier retention date. Review retention changes and unexpected COMPLIANCE locks in your audit records independently.
+Every cluster and replication site that accepts S3 writes must be upgraded to `20261018`.
 
 ## SN-2026-017: Admin credential authorization boundaries {#sn-2026-017}
 
-`SN-2026-017` is a SILO-local identifier, not a CVE. It groups the related Admin-handler defects repaired in [#242](https://github.com/pgsty/silo/pull/242), source [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6). The affected behavior is present in Server 20260916. These operations require authenticated credentials; this is not an anonymous Admin API exposure.
+`SN-2026-017` groups the authenticated Admin API handler authorization defects fixed in [PR #242](https://github.com/pgsty/silo/pull/242) (commit [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6)) and its bulk access-key listing follow-up [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8).
 
-| Boundary | Before the repair | Candidate behavior |
+| Boundary | Before `20261018` | `20261018` Behavior |
 | --- | --- | --- |
-| Self inspection and cleanup | Ownership could override a policy or plugin denial; self service-account listing could skip authorization | Existing self rights remain, but explicit user/group denies, restricted session policies and plugin denials are enforced |
-| Restricted credential delegation | A derived caller allowed the create/update action could obtain broader parent permissions or remove a target service account's restriction | Built-in authorization rejects creation and update by callers with active session policies, including LDAP creation and metadata-only updates |
-| Root-derived credentials | A non-root administrator with broad Admin actions could manage root's derived keys | A separate guard requires an authorized root key or unrestricted root-derived identity; the internal site-replication account is not a root administrator |
+| Self inspection and cleanup | Ownership could override an explicit policy or plugin denial; self service-account listing could skip authorization | Preserves self-service access for ordinary users (`DenyOnly`), while enforcing explicit user/group `Deny` rules, inline session policies, and external plugin denials |
+| Restricted credential delegation | A derived credential allowed the create/update action could mint a key inheriting broader parent permissions or strip a target service account's session policy | Under built-in authorization, callers constrained by an active inline session policy cannot create or update service accounts (including LDAP creation and metadata-only updates) |
+| Root-derived credentials | A non-root administrator with broad `admin:*` grants could inspect, modify, or delete root's derived service accounts | Only an authorized root credential or an unrestricted root-derived identity can manage root-owned credentials (the internal site-replication account is excluded) |
 
-The actor passed to policy evaluation remains the authenticated key, not its parent. Parent resolution is used for ownership only. Under built-in authorization, ordinary users retain self inspection and cleanup even after their last policy attachment is removed; absence of an Allow is not turned into a new denial for these established self operations. Derived credentials still undergo their session-policy checks. Cross-user operations keep their action requirements.
-
-The root and delegation guards apply under built-in authorization, including LDAP/OIDC identities using local policy evaluation. With an external authorization plugin, that plugin remains the authority; its denial can no longer be overridden by self ownership. Review its rules rather than assuming the built-in guards replace them.
+The actor passed to IAM policy evaluation is always the authenticated access key (`cred.AccessKey`), while parent resolution (`ParentUser`) is used only for comparing ownership. Full handler contracts and benchmark measurements are recorded in [IAM Admin API Authorization Boundaries](/blog/design/iam-admin-authorization/).
 
 ### Compatibility repairs retained alongside the security fix {#compatibility}
 
-- New service-account issuance filters reserved parent policy/expiration claims and normalizes semantic empty policies (`null`, `{}`, `{"Statement":null}`) to inheritance. A versioned or explicitly empty statement-list policy is not normalized merely because it has no statements. This prevents newly issued expiring keys from carrying an unusable empty policy.
-- Authorized cleanup uses stored identity metadata for damaged non-root service accounts, including disabled or expired targets. A damaged token cannot conceal a root parent. Missing identity metadata is not reconstructed.
-- [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8) extends the established self-service helper to bulk access-key listing. Omitted users, the caller's own key, or its parent resolve to the same parent inventory. Explicit denies and cross-user restrictions remain.
-- A denied self operation returns 403. Service-account deletion of an unauthorized other-user/root target retains its 404 behavior; the repair does not make all Admin errors uniform.
-
-Routes, action names, request/response formats and IAM storage formats are unchanged. No global policy-engine change, migration, background task or new setting is required. The [design record](/blog/design/iam-admin-authorization/) documents the local checks and their cost. Existing historical credentials are not rewritten.
+- **Semantic empty policy normalization on issuance**: Creating a service account filters reserved parent policy/expiration claims and normalizes semantic empty policy documents (`null`, `{}`, `{"Statement":null}`) to parent inheritance, while preserving explicit empty statement arrays (`{"Version":"2012-10-17","Statement":[]}`).
+- **Damaged non-root key cleanup**: Deleting or inspecting a damaged non-root service account falls back to stored identity metadata so operators can clean up corrupted or expired keys without allowing a damaged token to mask a root parent.
+- **Bulk access-key listing ([`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8))**: Applies the same self-service authorization helper to bulk key listing (`ListAccessKeysBulk`), resolving omitted users, the caller's own key, or its parent to the caller's parent inventory while enforcing explicit denies and cross-user restrictions.
+- **Error codes**: Denied self-service operations return `403 AccessDenied`; unauthorized attempts to delete another user's or root's service account retain their `404` response.
 
 ### Operator action {#operations}
 
-Test administration using the actual ordinary, service-account, STS and external-plugin identities used in production. Replace automation that relied on denied self access, restricted-key delegation or non-root mutation of root credentials with an appropriately authorized identity. Do not broaden all policies to recover the old bypass.
-
-Review child credentials and service-account policy changes from the affected period. Revoke unexpected keys, and reissue previously unusable expiring keys through an authorized parent after verifying their intended policy. An upgrade does not identify or revoke every credential created before the fix. Preserve full IAM backups and revocation history; follow the [IAM recovery guide](/operations/replication/iam-upgrade/). Rolling back to 20260916 restores the defective handler behavior.
+1. Verify administrative automation using your production user, service-account, STS, and external-plugin identities. Any script that relied on a session-restricted credential to create further child service accounts, or a non-root admin to manage root service accounts, must switch to an unrestricted parent or root identity.
+2. Audit child service accounts and policy updates created prior to upgrading, revoke unexpected keys, and follow the [IAM upgrade and recovery guide](/operations/replication/iam-upgrade/).
 
 ## Follow-up: scoped STS revocation {#sts-revocation}
 
-Final candidate `0cd388c66` also repairs cache-only `RevokeTokens` enumeration and incomplete propagation to sibling nodes and sites. It retains tombstones for tokens durably known to the request cluster, selected by parent/type and operation cutoff, and propagates them through existing notification and deletion healing. Tokens not yet replicated from an isolated site are outside this snapshot; a partition does not provide instantaneous global revocation. Keep participating servers on the same coordinated version, retain complete IAM history and verify old-token rejection at each endpoint. See the [design and cost](/blog/design/iam-revocations/#scoped-sts-20261018) and [final artifact acceptance](/blog/release/silo-20261018/#delivery).
-
+Release commit [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce) fixes cache-only `RevokeTokens` enumeration and incomplete propagation across peer nodes and sites. It persists deletion tombstones for tokens durably known to the cluster—scoped by parent identity, token type, and operation cutoff timestamp—and propagates them through peer notification and deletion healing. See [Scoped STS Revocation](/blog/design/iam-revocations/#scoped-sts-20261018) and the [Server 20261018 release notes](/blog/release/silo-20261018/#delivery).
 
 ## Dependency security and login compatibility {#dependencies}
 
-Server selects Go **1.27.2**, `golang.org/x/net` **v0.61.0**, `x/crypto` **v0.58.0**, `x/text` **v0.43.0** and go-jose **v4.1.6** in the [frozen module file](https://github.com/pgsty/silo/blob/0cd388c666f8211f552604ae73448a066e9c25ce/go.mod). A dependency selection or a clean scan is not proof that every possible deployment is free from vulnerabilities.
+Server `20261018` builds with Go **1.27.2**, `golang.org/x/net` **v0.61.0**, `golang.org/x/crypto` **v0.58.0**, `golang.org/x/text` **v0.43.0**, `silo-pkg` **v3.14.3**, and `go-jose` **v4.1.6** in [`go.mod`](https://github.com/pgsty/silo/blob/0cd388c666f8211f552604ae73448a066e9c25ce/go.mod):
 
-go-jose v4.1.6 addresses excessive CPU consumption while parsing crafted RSA JWKs, documented in the [upstream advisory GHSA-mgcc-cww5-fp2q](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q). Server's OIDC path uses this library. Its RSA JWK size limit rejects keys above **4096 bits**: check identity-provider discovery, JWKS and login before upgrading, and rotate incompatible keys at the provider. This dependency advisory alone does not establish an unauthenticated S3 exploit in SILO.
+- **`go-jose` v4.1.6 ([GHSA-mgcc-cww5-fp2q](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q))**: Bounds CPU consumption when parsing crafted RSA JWKs on the OIDC path and rejects RSA JWKs larger than **4096 bits**. Verify OIDC discovery, JWKS endpoints, and login flows before upgrading if your identity provider uses oversized RSA keys.
+- **Standalone Console**: See [Console v2.4.2](/blog/release/console-2.4.2/) for standalone Console dependency updates.
 
-Standalone Console's module graph declares related dependencies through pkg, but go-jose and go-ldap are not linked into that standalone binary; see the [Console release scope](/blog/release/console-2.4.2/). Server's pkg **v3.14.3** adds a policy-performance improvement over v3.14.2 without changing authorization semantics. Neither the optimization nor a client upgrade substitutes for the Server handler repair above.
+## Verification and scope {#evidence}
 
-## Evidence and scope {#evidence}
-
-The candidate contains handler regressions for explicit self denials, session-limited delegation, root targets, empty-policy issuance, damaged-key cleanup and decrypted bulk-list identity contents. Object Lock regressions gate Server release builds. Source and test references are recorded in the [IAM design](/blog/design/iam-admin-authorization/) and [Object Lock design](/blog/design/governance-retention-bypass-repair/).
-
-These source records do not establish public artifact availability or a completed production rollout. Use the [release notes](/blog/release/silo-20261018/#delivery) and [component matrix](/compatibility/versions/) for delivery status. STS revocation still converges asynchronously across sites. The Admin authorization repairs do not promise atomic authorization across concurrent mutations, and the separate #79 / #217 storage limitations remain.
+Handler regressions in `cmd/` cover explicit self denials, session-restricted delegation, root-credential protection, empty-policy issuance, damaged-key cleanup, decrypted bulk-list identity contents, and Object Lock WORM invariants. See the [IAM authorization design note](/blog/design/iam-admin-authorization/), [Object Lock repair design note](/blog/design/governance-retention-bypass-repair/), and [component version matrix](/compatibility/versions/).

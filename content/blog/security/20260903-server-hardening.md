@@ -10,13 +10,7 @@ draft: false
 url: "/blog/security/20260903-server-hardening/"
 ---
 
-> **Released in SILO 20260903.** These fixes are part of [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z). See the [complete release notes](/blog/release/silo-20260903/) for the 20260806-to-20260903 upgrade boundary, components, verification evidence, and known deferrals.
-
-This bulletin collects five related security findings from the final SILO Server review. They cover customer-provided encryption keys, client-controlled replication headers, administrative status changes, and explicit object-version deletion.
-
-The identifiers `SN-2026-006` through `SN-2026-010` are fork-local security-note IDs. They are **not CVEs**, are not registered in a vulnerability database, and should not be represented as such. The individual CVE chronicle remains one article per CVE; this release bulletin groups findings without CVEs so operators can evaluate one upgrade boundary.
-
-All five defects were inherited from the archived `minio/minio` lineage and affect every earlier SILO release. “Inherited” describes provenance, not severity.
+This bulletin covers five security findings fixed in [SILO Server 20260903](/blog/release/silo-20260903/) ([`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z)), spanning customer-provided encryption keys (SSE-C), client-supplied replication headers, administrative status transitions, and explicit object-version deletion. `SN-2026-006` through `SN-2026-010` are SILO security-note identifiers grouping the pre-release audit findings inherited from the upstream `minio/minio` codebase.
 
 ## Summary {#summary}
 
@@ -28,19 +22,17 @@ All five defects were inherited from the archived `minio/minio` lineage and affe
 | `SN-2026-009` | Authenticated admin API principal holding only one status action | The enable action authorized disable, and vice versa | The requested target state selects the required admin action |
 | `SN-2026-010` | Authenticated S3 principal with `s3:DeleteObject` but not `s3:DeleteObjectVersion` | A caller could permanently delete an explicit version without the AWS-required action | Explicit version deletion requires `s3:DeleteObjectVersion` |
 
-No finding in this bulletin is an unauthenticated remote-code-execution claim. Each requires an authenticated identity or existing object permission, but each crosses a privilege or cryptographic boundary beyond that identity's intended grant.
-
 ## SN-2026-006: zero-byte SSE-C key authentication {#sn-2026-006}
 
 **Affected operations:** `GetObject`, `HeadObject`, `CopyObject` source processing, and `GetObjectAttributes` for zero-byte objects encrypted with SSE-C.<br>
 **Tracking:** [issue #82](https://github.com/pgsty/silo/issues/82).<br>
 **Fixes:** `b73581b05` and `c4fd97d0b`.
 
-SSE-C stores a sealed object key and requires the caller to provide the customer key again on reads. Normal reads authenticate that key while preparing the encrypted stream. A zero-byte object has no payload block, and the old fast path returned before unsealing the stored object key.
+SSE-C stores a sealed object key and requires the caller to supply the matching customer key on reads. Normal reads authenticate that key while preparing the encrypted payload stream. Because a zero-byte object has no payload block, the legacy fast path returned before unsealing the stored object key.
 
-Consequently, an incorrect customer key could receive a successful response. A copy or new version could also be created under a key chosen by the caller without proving knowledge of the current key. The caller still needed read access to the object; the failure was that object permission replaced the separate cryptographic proof.
+As a result, an authenticated caller with read access to a zero-byte SSE-C object could receive a successful response while supplying an incorrect customer key, or copy the object under a newly chosen key without proving knowledge of the original key.
 
-The fix authenticates the key independent of payload length. Correct keys behave as before. Wrong keys fail with `403 AccessDenied`, including null-version and key-rotation cases.
+The fix authenticates the stored SSE-C key regardless of payload length. Valid keys succeed as before; wrong keys fail with `403 AccessDenied`, including null-version and key-rotation paths.
 
 ## SN-2026-007: SSE-C GetObjectAttributes {#sn-2026-007}
 
@@ -48,14 +40,12 @@ The fix authenticates the key independent of payload length. Correct keys behave
 **Tracking:** [issue #84](https://github.com/pgsty/silo/issues/84).<br>
 **Fixes:** `474cd5801`, `74c97d005`, and `21870fa2e`.
 
-`GetObjectAttributes` exposes object size, ETag, checksums, storage class, and multipart part metadata. The inherited handler returned those attributes without authenticating the supplied SSE-C key. It also treated the presence of `X-Minio-Source-Replication-Request` as permission to skip key handling.
+`GetObjectAttributes` exposes object size, ETag, checksums, storage class, and multipart part metadata. The inherited handler returned those attributes without authenticating the supplied SSE-C key, and also treated the raw `X-Minio-Source-Replication-Request` header as permission to skip key verification.
 
-The repair separates two cases:
+The fix enforces two distinct rules:
 
-- an ordinary S3 caller must supply the correct SSE-C key;
-- a real replication peer may use the replica path only after authentication and `s3:ReplicateObject` authorization.
-
-A wrong key now returns `403`. A bare marker without the required key and permission cannot create the replica exception. Existing replication identities that already hold the required action keep working.
+- an ordinary S3 caller must supply the valid SSE-C customer key (wrong or missing keys return `403 AccessDenied`);
+- a replication peer may use the replica metadata path only after passing authentication and `s3:ReplicateObject` authorization.
 
 ## SN-2026-008: replication headers are not authority {#sn-2026-008}
 
@@ -63,29 +53,27 @@ A wrong key now returns `403`. A bare marker without the required key and permis
 **Tracking:** [PR #101](https://github.com/pgsty/silo/pull/101).<br>
 **Primary fix range:** `938603458` through `04b097fd9`, followed by Snowball and rule-prefix hardening.
 
-[CVE-2026-34204](/blog/security/cve-2026-34204/) stopped ordinary PUT and COPY requests from importing a subset of replication SSE metadata. The wider audit found that many other consumers still treated header presence as proof that a request was internal replication.
+While [CVE-2026-34204](/blog/security/cve-2026-34204/) blocked ordinary `PUT` and `COPY` requests from importing a subset of replication SSE metadata, a wider audit showed that several downstream handlers still treated the presence of internal replication headers as proof of a trusted replication request.
 
-Depending on the operation, a client holding ordinary read or write permission could:
+Depending on the operation, a caller holding ordinary read or write permissions could:
 
-- request an SSE-C ciphertext/no-decryption path without the customer key;
-- preserve a supplied source ETag or modification time;
-- inject source checksum, actual-size, retention, legal-hold, or replica-state metadata;
-- choose replication-only delete semantics;
-- suppress successful object events;
-- carry trust from one Snowball archive entry into another.
+- trigger an SSE-C no-decryption read path without supplying the customer key;
+- preserve a client-supplied source ETag or `MTime`;
+- inject source checksum, actual-size, retention, legal-hold, or `REPLICA` status metadata;
+- invoke replication-only delete semantics;
+- suppress bucket notification events;
+- carry replication trust across Snowball archive entries.
 
-The repair defines one receiver-wide authority:
+The fix establishes a single receiver-wide trust calculation:
 
-1. authenticate the original request in its signed form;
-2. require exactly one marker with the exact lowercase value `true`;
-3. authorize `s3:ReplicateObject` or `s3:ReplicateDelete` on the addressed resource;
-4. derive a narrower replica-trusted state only where replica status also proves it;
-5. store the decision in private request context;
-6. strip untrusted internal headers from a clone after authentication.
+1. authenticate the incoming request in its original signed form;
+2. require a single `X-Minio-Source-Replication-Request` header with the exact lowercase value `true`;
+3. authorize `s3:ReplicateObject` or `s3:ReplicateDelete` on the target resource;
+4. grant `replicaTrusted` only when the authenticated replication status also equals `REPLICA`;
+5. bind the trust decision to a private `req.Context()` key;
+6. strip untrusted internal replication headers on a post-authentication request clone while preserving the trailer map for streaming checksum verification.
 
-The context decision is authoritative. Stripping protects older consumers but cannot itself grant trust. The clone preserves the original trailer map so streaming checksum authentication remains correct.
-
-The detailed protocol matrix, CORS interaction, black-box replication test, and rejected alternatives are in [No I/O Before Auth, No Privilege From Headers](/blog/design/cors-replication-trust/).
+See [No I/O Before Auth, No Privilege From Headers](/blog/design/cors-replication-trust/) for the full protocol matrix, CORS interaction, black-box two-site replication verification, and rejected alternatives.
 
 ## SN-2026-009: user and group status authorization {#sn-2026-009}
 
@@ -93,9 +81,9 @@ The detailed protocol matrix, CORS interaction, black-box replication test, and 
 **Tracking:** [PR #73](https://github.com/pgsty/silo/pull/73) / [PR #85](https://github.com/pgsty/silo/pull/85).<br>
 **Fixes:** `58735ee38` and `229fe2b3c`.
 
-The inherited handlers checked `admin:EnableUser` or `admin:EnableGroup` regardless of the target state. A narrowly delegated administrator permitted to enable an identity could therefore disable it too; an identity intended to hold only the disable action could fail or be evaluated against the wrong grant.
+The inherited handlers checked `admin:EnableUser` or `admin:EnableGroup` before inspecting the requested `status` parameter. A delegated administrator permitted only to enable accounts could therefore disable them as well, while an administrator granted only `admin:DisableUser` or `admin:DisableGroup` was rejected.
 
-The requested state now determines the required action:
+The requested target state now selects the required admin action:
 
 | Target | Required action |
 | :-- | :-- |
@@ -104,7 +92,7 @@ The requested state now determines the required action:
 | Enable group | `admin:EnableGroup` |
 | Disable group | `admin:DisableGroup` |
 
-`admin:*` and the built-in `consoleAdmin` policy remain sufficient. Only custom least-privilege policies that accidentally relied on one action for both directions need adjustment.
+`admin:*` and the built-in `consoleAdmin` policy remain unchanged; only custom least-privilege policies that relied on `EnableUser`/`EnableGroup` to perform both transitions require updating.
 
 ## SN-2026-010: explicit object-version deletion {#sn-2026-010}
 
@@ -112,45 +100,30 @@ The requested state now determines the required action:
 **Tracking:** [issue #58](https://github.com/pgsty/silo/issues/58) and [PR #104](https://github.com/pgsty/silo/pull/104).<br>
 **Fix range:** `75a6734e4` through `d2d47a41f`.
 
-The inherited S3 path authorized explicit version deletion as ordinary `s3:DeleteObject` and used `s3:DeleteObjectVersion` only as a secondary deny check. This diverged from AWS and let a principal with ordinary delete permission permanently remove a selected historical version.
+Previously, the S3 delete handlers authorized explicit-version deletion under `s3:DeleteObject` and checked `s3:DeleteObjectVersion` only as a secondary deny filter, allowing callers with `s3:DeleteObject` alone to permanently delete historical versions.
 
-The release requires `s3:DeleteObjectVersion` for explicit versions. A delete without `versionId` continues to use `s3:DeleteObject`. Replication targets keep their `s3:ReplicateDelete` contract.
-
-There are two policy effects:
-
-1. a principal granted only `s3:DeleteObject` can no longer delete explicit versions;
-2. a policy using `Allow s3:*` together with `Deny s3:DeleteObject` to block permanent deletion must also deny `s3:DeleteObjectVersion`.
-
-The multi-delete repair preserves authentication and audit context for every entry and has least-privilege tests for ordinary and replication deletes.
+Server `20260903` requires `s3:DeleteObjectVersion` whenever a `versionId` is specified. Unversioned `DELETE` requests continue to check `s3:DeleteObject`, and replication targets continue to check `s3:ReplicateDelete`. Callers granted only `s3:DeleteObject` can no longer delete explicit versions, and policies that pair `Allow s3:*` with `Deny s3:DeleteObject` to prevent permanent deletion must also deny `s3:DeleteObjectVersion`.
 
 ## Operator actions {#operator-actions}
 
 Before upgrading:
 
-1. identify policies and applications that delete explicit versions; grant or deny `s3:DeleteObjectVersion` intentionally;
-2. inspect custom admin policies for enable/disable user and group operations;
-3. confirm that replication service accounts have only the required `s3:ReplicateObject` / `s3:ReplicateDelete` actions and that ordinary application identities do not;
-4. verify SSE-C integrations send the same customer key for GET, HEAD, attributes, and copy-source operations, including zero-byte objects;
-5. if an application was relying on a wrong SSE-C key returning success, treat that as a latent client defect and correct it before rollout.
+1. identify policies and applications that delete explicit object versions and grant or deny `s3:DeleteObjectVersion` explicitly;
+2. inspect custom admin policies for user and group enable/disable operations;
+3. confirm that replication service accounts hold `s3:ReplicateObject` / `s3:ReplicateDelete` and that ordinary application identities do not;
+4. verify that SSE-C clients send the matching customer key on `GET`, `HEAD`, `GetObjectAttributes`, and `CopyObject` source reads, including zero-byte objects.
 
 After upgrading:
 
-- exercise a wrong-key negative test and a correct-key positive test on a disposable SSE-C object;
-- test one normal replication and one delete replication operation;
-- test each delegated admin direction independently;
-- test version deletion with a principal that has only `s3:DeleteObject` and with one that also has `s3:DeleteObjectVersion`;
-- review audit logs for unexpected denied operations instead of widening policies immediately.
+- verify both wrong-key (`403 AccessDenied`) and valid-key responses on a test SSE-C object;
+- test object and delete replication across paired sites;
+- test delegated user/group enable and disable permissions independently;
+- verify explicit-version deletion with principals holding `s3:DeleteObject` alone vs. `s3:DeleteObjectVersion`.
 
 ## Verification boundary {#verification}
 
-The fixes have focused unit, handler, authorization, streaming-trailer, Snowball, and site-replication tests. Full local acceptance on `ebac0ca73` included the complete `cmd` race suite and six deployment shapes with 174 PASS / 0 FAIL. The final line adds one CORS state-clear fix after that run and passes targeted race, compatibility, generation, diff, and lint gates.
-
-The final [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) publication completed the gates recorded in the [pre-release review](/blog/design/server-release-readiness/#decision): exact-SHA CI and Test Release, signed packages, checksums, SBOMs, provenance, and public classic/distroless container images. This bulletin still scopes its claims to the five fixes above and the residual risks below.
+All five fixes are covered by unit, handler, authorization, streaming-trailer, Snowball, and site-replication regression tests. Full local acceptance on `ebac0ca73` passed the `cmd` race suite and 174 test cases across six deployment topologies (174 PASS / 0 FAIL), followed by the [`RELEASE.2026-09-03T13-18-01Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-09-03T13-18-01Z) release gates documented in the [pre-release review](/blog/design/server-release-readiness/#decision).
 
 ## Residual risks outside this bulletin {#residual-risks}
 
-- Conditional deletion is still unsupported: `DeleteObject` ignores `If-Match` and `DeleteObjects` ignores per-object ETag ([#10](https://github.com/pgsty/silo/issues/10)).
-- Non-CORS policy/SSE/tag/quota deletions may not converge across site-replication peers ([#77](https://github.com/pgsty/silo/issues/77)).
-- The trust audit focused on known replication and SSE-C fields. New internal headers must still answer the same provenance-and-authorization question during review.
-
-The release notes contain the full [known-issue and deployment boundary](/blog/release/silo-20260903/#known-issues).
+- Conditional deletion (`If-Match` on `DeleteObject` and per-object ETag on `DeleteObjects`, [#10](https://github.com/pgsty/silo/issues/10)) and bucket-metadata deletion convergence across site-replication peers ([#77](https://github.com/pgsty/silo/issues/77)) are tracked separately; see the [Server 20260903 release notes](/blog/release/silo-20260903/#known-issues) and [Server 20260916 release notes](/blog/release/silo-20260916/).
