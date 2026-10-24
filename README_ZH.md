@@ -25,7 +25,7 @@ Server 选用 Console v2.4.2、mcli 20261018、pkg v3.14.3、上游 minio-go v7.
 
 ## 本地开发与校验
 
-使用 Hugo Extended 0.168.0、Go 1.27.2、Git 与支持 venv 的 Python 3.10+。使用 Hugo 内置 LibSass，不需要另装 Sass 编译器或 Node.js。保留可见的构建诊断；当前接受上游 LibSass 弃用警告，不启用 `--panicOnWarning`。
+使用 Hugo Extended 0.168.0、Go 1.27.3、Git 与支持 venv 的 Python 3.10+。使用 Hugo 内置 LibSass，不需要另装 Sass 编译器或 Node.js。保留可见的构建诊断；当前接受上游 LibSass 弃用警告，不启用 `--panicOnWarning`。
 
 ```bash
 make dev     # 内存预览

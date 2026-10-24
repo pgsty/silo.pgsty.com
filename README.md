@@ -34,9 +34,9 @@ its commit check and the live English/Chinese pages after publication.
 
 ## Local development
 
-Use Hugo Extended 0.168.0, Go 1.27.2, Git, and Python 3.10 or newer with `venv` support. Hugo's built-in LibSass compiles the styles, and OINK vendors the browser and styling assets. No separate Sass compiler or Node.js toolchain is needed.
+Use Hugo Extended 0.168.0, Go 1.27.3, Git, and Python 3.10 or newer with `venv` support. Hugo's built-in LibSass compiles the styles, and OINK vendors the browser and styling assets. No separate Sass compiler or Node.js toolchain is needed.
 
-CI uses Go 1.27.2 and Hugo Extended 0.168.0; use the same versions on Cloudflare Pages. Keep this build combination until a theme upgrade preserves the build without a separate Sass compiler. Keep diagnostics visible and review them; Hugo 0.168's upstream LibSass deprecation warning is accepted.
+CI uses Go 1.27.3 and Hugo Extended 0.168.0; use the same versions on Cloudflare Pages. Keep this build combination until a theme upgrade preserves the build without a separate Sass compiler. Keep diagnostics visible and review them; Hugo 0.168's upstream LibSass deprecation warning is accepted.
 
 The Make targets use the published OINK version in `go.mod`, with local module replacements and workspaces disabled.
 
