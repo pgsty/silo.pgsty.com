@@ -8,6 +8,4 @@ type: docs
 icon: fa-solid fa-flask
 ---
 
-The component pages in this section record where Silo matches MinIO. This subsection records the places where Silo deliberately goes beyond it: each page is a design note, written before the implementation lands, and kept afterwards as the authoritative record of what was decided and why.
-
-A note here describes intent, not necessarily shipped behavior — every page carries a status line saying which it is.
+The component pages in this section record where Silo matches MinIO. This subsection records where Silo extends beyond upstream: each page is a design note written before implementation and kept afterwards as the record of what was decided and why. Each page notes its implementation and release status at the top.

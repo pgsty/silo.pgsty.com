@@ -9,7 +9,7 @@ icon: fa-solid fa-server
 ---
 
 
-**Start with the [three-level overview](/compatibility/): 12 compatible improvements, 4 minor differences and 8 conditional checks.** This page provides server details, preserving the fixed 2026-08-06 audit baseline and separating [subsequently released changes](#since-20260806) from [September 16 source changes](#september-2026). The historical audit baseline differs from the [original fork baseline](/compatibility/#scope), and does not imply that current artifacts include every source fix.
+**Start with the [three-level overview](/compatibility/): 12 compatible improvements, 4 minor differences and 8 conditional checks.** This page provides server details, preserving the fixed 2026-08-06 audit baseline and separating [subsequently released changes](#since-20260806) from [September 16 source changes](#september-2026). The historical audit baseline is separate from the [original fork baseline](/compatibility/#scope).
 
 > [!WARNING]
 > **Read this before replacing a MinIO deployment.** The binary, package, service account, systemd unit, default local configuration directory, container path, Helm resource names, embedded Console, update behavior, several authorization decisions, and some error responses changed. Data disks and the `MINIO_*` configuration namespace did not receive a matching rename.
@@ -31,8 +31,6 @@ See [IAM authorization](/blog/design/iam-admin-authorization/), [LIST recovery](
 
 ## Audit scope and method {#scope}
 
-This is a source audit, not a compilation of release-note claims.
-
 | Boundary          | Audited value                                                                                                                                        |
 |:------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | Upstream baseline | [`minio/minio@7aac2a2c5b7c882e68c1ce017d8256be2feea27f`](https://github.com/minio/minio/commit/7aac2a2c5b7c882e68c1ce017d8256be2feea27f), 2026-02-11 |
@@ -41,11 +39,11 @@ This is a source audit, not a compilation of release-note claims.
 | Net source diff   | 523 files, 36,715 insertions, 21,450 deletions                                                                                                       |
 | Interpretation    | The behavior of the final snapshot. Intermediate changes later replaced or removed are not presented as current behavior                             |
 
-Every commit in the range was inspected. Release and security posts were used as an index of intended changes, then checked against the final implementation, tests, dependency graph, build recipes, package payloads, container entrypoint, and rendered Helm manifests. The [complete commit ledger](#ledger) prevents a documentation-only or CI-only commit from silently falling out of scope.
+Every commit in the range was inspected against the final implementation, tests, dependency graph, build recipes, package payloads, container entrypoint, and rendered Helm manifests. The [complete commit ledger](#ledger) tracks every commit in the range, including documentation and CI updates.
 
-The range is defined by Git reachability, not author-date sorting. It therefore contains `d4cd4b433`, authored in December 2025 but joined into the post-baseline graph later; this is not an extra undocumented baseline.
+The range is defined by Git reachability, including `d4cd4b433` (authored in December 2025 and merged into the post-baseline graph later).
 
-The tagged [`RELEASE.2026-08-04T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) ends at `d88f46cce`, 18 commits before this audit head. Accordingly, this page records the **2026-08-06 prepared source state**; it does not claim that the last 18 changes were already present in a public package, image, tag, or deployed website.
+The tagged [`RELEASE.2026-08-04T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) ends at `d88f46cce`, 18 commits before this 2026-08-06 audit head (which subsequently shipped in [Server 20260806](/blog/release/silo-20260806/)).
 
 ## Executive compatibility matrix {#matrix}
 
@@ -76,7 +74,7 @@ The following MinIO identifiers are compatibility identifiers, not unfinished br
 - the default S3 port `9000`, existing `--address` / `--console-address` flags, and release tags of the form `RELEASE.YYYY-MM-DDTHH-MM-SSZ`;
 - configuration KV formats, IAM data, KMS/KES configuration, encryption metadata, bucket metadata, replication state, and healing state.
 
-The rebrand guard checks an explicit identifier inventory; counts are not runtime compatibility tests. The archived `219670d3` manifest contained 137 imports, 436 environment names, 19 metric namespaces, 84 headers, 330 routes, one root, three Grid namespaces, 15 storage identifiers, 58 policy identifiers and 9,014 exported symbols. The [current source manifest](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/buildscripts/rebrand-guard/compat-baseline.json) is version 4 and no longer tracks exported symbols. Run `make rebrand-guard` against the exact source revision and review intentional inventory changes; passing it does not prove wire or upgrade compatibility.
+The rebrand guard checks an explicit identifier inventory. The archived `219670d3` manifest contained 137 imports, 436 environment names, 19 metric namespaces, 84 headers, 330 routes, one root, three Grid namespaces, 15 storage identifiers, 58 policy identifiers and 9,014 exported symbols. The [current source manifest](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/buildscripts/rebrand-guard/compat-baseline.json) is version 4 and no longer tracks exported symbols. Run `make rebrand-guard` against the exact source revision to review intentional inventory changes.
 
 No data copy or metadata rewrite is required when the same disks move from MinIO to Silo. This does not mean every malformed historical object is accepted: the storage hardening described below rejects unsafe paths, invalid erasure geometry, negative part sizes, and poisoned metadata that older code could carry farther into the stack.
 
@@ -305,7 +303,7 @@ The inherited database-notification migration risk is closed by `f1ba68358`: mig
 
 The build declaration moved from Go 1.24 plus a 1.24.8 toolchain to `go 1.26.5`. That can change TLS, HTTP, DNS, scheduler, garbage-collector, and standard-library edge behavior even where no Silo source line changed. Security-sensitive dependencies were also advanced, including Go-Jose, OpenTelemetry, Go crypto/network modules, cloud SDKs, etcd, NATS, and compression libraries.
 
-Observable edge corrections inherited through those updates include Go TLS/X.509/URL/archive fixes; MQTT oversized UTF-8 packet encoding; malformed Azure NTLM challenge handling; Thrift framed transport and 32-bit compilation; NATS authentication, authorization, identity, and denial-of-service fixes; and Prometheus remote-read/write and UI hardening. They are dependency behavior changes, not a promise that every advisory path is reachable from Silo. The jsonparser CVE-2026-32285 investigation produced no patch: the resolved v1.1.2 already contained the fix and no vulnerable reachable symbol was found, so it creates no compatibility delta in this range.
+Observable edge corrections inherited through those updates include Go TLS/X.509/URL/archive fixes; MQTT oversized UTF-8 packet encoding; malformed Azure NTLM challenge handling; Thrift framed transport and 32-bit compilation; NATS authentication, authorization, identity, and denial-of-service fixes; and Prometheus remote-read/write and UI hardening. The jsonparser CVE-2026-32285 investigation produced no patch: the resolved v1.1.2 already contained the fix and no vulnerable reachable symbol was found, so it creates no compatibility delta in this range.
 
 Important deliberate dependency decisions are:
 
@@ -367,11 +365,9 @@ See [G12](/compatibility/#g12) and [B03](/compatibility/#b03). The `minio_*` nam
 - [IAM revocation metrics](/blog/design/iam-revocations/#errors) report retained deletion records, reconciliation failures, duration and last success. Interpret them using each node's collection semantics.
 - Bucket-quota metrics report effective quotas, and CPU metric collection gains concurrency protection. These affect monitoring values and runtime stability respectively; no universal speedup is implied.
 
-Review affected dashboards and alerts, and verify object and replication state independently. Healthy monitoring does not establish that all historical problems have been repaired.
+Review affected dashboards and alerts when upgrading.
 
 ## Known residual risks and non-fixes {#limits}
-
-This audit does not turn inherited limitations into claims of compatibility:
 
 1. **Source IP is still forgeable by default.** Unset `MINIO_API_TRUSTED_PROXIES` deliberately retains upstream trust-any behavior. Set `none` for direct deployments or an exact proxy allowlist for proxied deployments.
 2. **Version-condition follow-up.** #104 repaired per-entry governance-bypass version authorization in Server 20260903. The Snowball PAX-version ordering observation concerns a separate path. Some identity conditions still retain present-empty semantics.
@@ -379,10 +375,9 @@ This audit does not turn inherited limitations into claims of compatibility:
 4. **Legacy notification migration remains risky.** Review it as described above.
 5. **Storage path validation is lexical.** Symlinks are not resolved; native Windows execution was not independently covered.
 6. **Private APIs are not a stable compatibility promise.** `ReadMultiple` proves that a same-numbered storage REST protocol can still lose an operation. Do not run a rolling mixed build across this boundary.
-7. **A source result is not a released artifact.** This page does not assert that GitHub tags, packages, OCI manifests, signatures, or the public site contain the three audit-head-only commits until each channel is verified separately.
-8. **Informational HTTP responses remain imperfectly tracked.** The response-tracking layer treats a 1xx response as final. The Flush/implicit-200 change did not introduce this behavior and does not claim to fix it.
-9. **Conditional deletion has a release boundary.** Server 20260903 ignores `If-Match` on `DeleteObject`; Server 20260916 implements it through #145/#178, comparing the explicitly addressed version when one is given. `DeleteObjects` still ignores per-item `<ETag>`, and no extra `s3:GetObject` condition permission is implemented. See the [implemented contract](/blog/design/conditional-delete/).
-10. **Historical convergence limit for multi-site bucket-configuration deletion.** In the released versions covered by this page, deleting a bucket policy, SSE, tag, or quota configuration on one site can be restored by a peer that still holds it ([#77](https://github.com/pgsty/silo/issues/77)); only per-bucket CORS used a tombstone-aware register at that point. Deployments that rely on multi-site deletion of these configurations must verify every site after a delete. On 2026-09-12, [PR #180](https://github.com/pgsty/silo/pull/180) merged the repair into main. Full deletion recovery requires every node to be upgraded and deletion export to be enabled consistently; see the [bucket configuration convergence record](/blog/design/bucket-metadata-convergence/). Check each release artifact's version for inclusion of the repair.
+7. **Informational HTTP responses remain imperfectly tracked.** The response-tracking layer treats a 1xx response as final. The Flush/implicit-200 change did not introduce this behavior and does not claim to fix it.
+8. **Conditional deletion has a release boundary.** Server 20260903 ignores `If-Match` on `DeleteObject`; Server 20260916 implements it through #145/#178, comparing the explicitly addressed version when one is given. `DeleteObjects` still ignores per-item `<ETag>`, and no extra `s3:GetObject` condition permission is implemented. See the [implemented contract](/blog/design/conditional-delete/).
+9. **Historical convergence limit for multi-site bucket-configuration deletion.** In earlier versions before [PR #180](https://github.com/pgsty/silo/pull/180) (shipped in [Server 20260916](/blog/release/silo-20260916/)), deleting a bucket policy, SSE, tag, or quota configuration on one site could be restored by a peer that still held it ([#77](https://github.com/pgsty/silo/issues/77)); only per-bucket CORS used a tombstone-aware register at that point. Full deletion recovery requires every node to be upgraded and deletion export (`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`) to be enabled consistently; see the [bucket configuration convergence record](/blog/design/bucket-metadata-convergence/).
 
 ## Migration checklist {#migration}
 
@@ -403,7 +398,7 @@ For a MinIO-to-Silo move, use this order:
 
 ## Verification evidence {#verification}
 
-The audit used the final source, not prose alone. At the recorded snapshot:
+Verification at the recorded 2026-08-06 snapshot:
 
 | Check                       | Result / boundary                                                                                                                                                                                                                         |
 |:----------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

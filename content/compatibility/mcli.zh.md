@@ -24,7 +24,7 @@ icon: fa-solid fa-terminal
 ## 继承自 20260916 的变化 {#release-20260916}
 
 20260916 使用 pkg v3.14.1、上游 SDK `32e1f32cb176`、JWX v3.3.0 和 Go 1.27.1。
-SDK 会重试并报告 CopyObject HTTP 200 响应内嵌的 S3 错误，避免复制失败后授权 `mv` 删除源对象。
+SDK 会重试并报告单次 `CopyObject` HTTP 200 响应内嵌的 S3 错误（适用于小于 64 MiB 的对象或显式 `--disable-multipart`，更大对象默认走 `ComposeObject`），避免复制失败后触发 `mv` 删除源对象。
 JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语义保持不变。
 
 - `mirror` 逐对象权限错误会报告并累计失败，继续处理后续对象；有限任务最终返回 1。本地目标删除失败不再被吞掉。无需 `--skip-errors` 即可继续处理这些权限错误；watch 的列举/监听错误仍保留原有取消重试。
@@ -32,7 +32,7 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 - legalhold set/clear、递归 retention 部分失败，以及 `mv` 复制成功但源删除失败都会返回非零；成功对象不回滚。retention 每个失败对象只输出一次诊断。
 - 空 retention 时长和非法 find regex 正常报错，不再 panic；极短传输的 JSON 速度统计不再产生 Inf。
 
-**脚本升级注意：** 上述失败曾返回 0 的路径现在返回 1。检查最终退出码与错误记录；逐对象 success 开始消息和进度字节不代表完成。配置格式、别名和 `MC_*` 变量不变。详见[本次发布说明](/zh/blog/release/mcli-20260916/)。
+**脚本升级注意：** 上述失败曾返回 0 的路径现在返回 1，请检查最终退出码与错误记录。配置格式、别名和 `MC_*` 变量不变。详见[本次发布说明](/zh/blog/release/mcli-20260916/)。
 
 ## 继承自 20260913 的变化 {#release-20260913}
 
@@ -142,5 +142,3 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 [20260313]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-13T08-57-32Z
 [20260321]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-21T00-00-00Z
 [20260417]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-04-17T00-00-00Z
-
-这项 HTTP-200 CopyObject 修复适用于 mcli 选择单次 CopyObject 的路径：对象小于 64 MiB，或显式 `--disable-multipart`。更大复制默认走 ComposeObject，不能用该修复替代对此路径的单独验证。

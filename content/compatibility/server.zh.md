@@ -8,9 +8,7 @@ type: docs
 icon: fa-solid fa-server
 ---
 
-> **正式 Server 20260916 内嵌控制台：** [Console v2.4.1](/zh/blog/release/console-2.4.1/)，配套 mcli 20260916 与 pkg v3.14.1。独立 [Console v2.4.2](/zh/blog/release/console-2.4.2/) 已另行发布，引用 mcli 20261018 与 pkg v3.14.2。查看[组件版本矩阵](/zh/compatibility/versions/)与[密码权限迁移](/zh/compatibility/password-permissions/)。
-
-**先看[三档兼容性总览](/zh/compatibility/)：12 类兼容或改进、4 类轻微差异、8 类按条件检查。** 本页提供服务端细节，保留 2026-08-06 审计的固定基线，并分别记录[后续已发布变化](#since-20260806)与[9 月 16 日源码变化](#september-2026)。历史审计基线不等于[最初分叉基线](/zh/compatibility/#scope)，也不代表最新制品已经包含全部源码修复。
+**先看[三档兼容性总览](/zh/compatibility/)：12 类兼容或改进、4 类轻微差异、8 类按条件检查。** 本页提供服务端细节，保留 2026-08-06 审计的固定基线，并分别记录[后续已发布变化](#since-20260806)与[9 月 16 日源码变化](#september-2026)。历史审计基线与[最初分叉基线](/zh/compatibility/#scope)分开记录。
 
 > [!WARNING]
 > **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
@@ -32,8 +30,6 @@ icon: fa-solid fa-server
 
 ## 审计范围与方法 {#scope}
 
-这是一份源码审计，而不是对 release note 的简单汇编。
-
 | 边界      | 审计值                                                                                                                                                 |
 |:--------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
 | 上游基线    | [`minio/minio@7aac2a2c5b7c882e68c1ce017d8256be2feea27f`](https://github.com/minio/minio/commit/7aac2a2c5b7c882e68c1ce017d8256be2feea27f)，2026-02-11 |
@@ -42,11 +38,11 @@ icon: fa-solid fa-server
 | 源码净差异   | 523 个文件，新增 36,715 行，删除 21,450 行                                                                                                                     |
 | 解释口径    | 记录最终快照的行为；后来被替换或删除的中间状态，不会被写成当前行为                                                                                                                   |
 
-范围内每个提交都经过检查。Release 与 Security 文章只用来索引“预期变化”，随后仍以最终实现、测试、依赖图、构建配方、软件包载荷、容器入口和渲染后的 Helm 清单逐项核实。[完整提交覆盖账本](#ledger)确保文档、CI 或被后续替代的提交也不会静默漏出范围。
+范围内每个提交都对照最终实现、测试、依赖图、构建配方、软件包载荷、容器入口和渲染后的 Helm 清单逐项核实。[完整提交覆盖账本](#ledger)跟踪范围内的全部提交（含文档与 CI 更新）。
 
-该范围按 Git 可达性定义，而不是按 author date 排序。因此它包含 `d4cd4b433`：该提交的作者日期是 2025 年 12 月，但后来才接入基线后的提交图；它不是一条未记录的额外基线。
+该范围按 Git 可达性定义，包含 `d4cd4b433`（作者日期为 2025 年 12 月，后续合入基线后的提交图）。
 
-已打标签的 [`RELEASE.2026-08-04T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 停在 `d88f46cce`，比本次审计 HEAD 少 18 个提交。因此本页记录的是 **2026-08-06 准备中的源码状态**，并不声称最后 18 个变化已经进入公开软件包、镜像、标签或线上网站。
+已打标签的 [`RELEASE.2026-08-04T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 停在 `d88f46cce`，比本次 2026-08-06 审计 HEAD 少 18 个提交（这 18 个提交随后随 [Server 20260806](/zh/blog/release/silo-20260806/) 发布）。
 
 ## 兼容性总览 {#matrix}
 
@@ -77,7 +73,7 @@ icon: fa-solid fa-server
 - 默认 S3 端口 `9000`、既有 `--address` / `--console-address` 参数，以及 `RELEASE.YYYY-MM-DDTHH-MM-SSZ` 标签格式；
 - 配置 KV 格式、IAM 数据、KMS/KES 配置、加密元数据、桶元数据、复制状态与修复状态。
 
-rebrand guard 检查显式标识清单，数量并不是运行时兼容性测试。归档的 `219670d3` 清单包含 137 个 import、436 个环境变量名、19 个指标命名空间、84 个头、330 条路由、1 个根目录、3 个 Grid 命名空间、15 个存储标识、58 个策略标识和 9,014 个导出符号。[当前源码清单](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/buildscripts/rebrand-guard/compat-baseline.json) 为版本 4，已不再跟踪导出符号。应在实际源码版本运行 `make rebrand-guard` 并评审有意的清单变化；检查通过不等于证明协议或升级兼容。
+rebrand guard 检查显式标识清单。归档的 `219670d3` 清单包含 137 个 import、436 个环境变量名、19 个指标命名空间、84 个头、330 条路由、1 个根目录、3 个 Grid 命名空间、15 个存储标识、58 个策略标识和 9,014 个导出符号。[当前源码清单](https://github.com/pgsty/silo/blob/f99ed829b5eba549160725f035156c9e020b6a07/buildscripts/rebrand-guard/compat-baseline.json)为版本 4，已不再跟踪导出符号。可在实际源码版本运行 `make rebrand-guard` 以核对有意的清单变化。
 
 同一组数据盘从 MinIO 切到 Silo 时不需要复制数据或重写元数据。但这并不意味着一切畸形历史对象都会继续被接受：下文的存储加固会拒绝不安全路径、非法纠删码几何、负 part size 以及过去可能继续向下传播的污染元数据。
 
@@ -306,7 +302,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 
 构建声明从 Go 1.24 + 1.24.8 toolchain 迁移到 `go 1.26.5`。即便没有修改 Silo 源码，这也可能改变 TLS、HTTP、DNS、调度器、GC 及标准库边缘行为。Go-Jose、OpenTelemetry、Go crypto/network 模块、云 SDK、etcd、NATS 与压缩库等安全敏感依赖也已升级。
 
-这些升级带来的可观察边缘修正包括：Go TLS/X.509/URL/archive、MQTT 超长 UTF-8 packet 编码、畸形 Azure NTLM challenge、Thrift framed transport 与 32 位编译、NATS 认证/授权/身份/拒绝服务，以及 Prometheus remote-read/write 与 UI 加固。它们属于依赖行为变化，但不表示每条 advisory 路径都能从 Silo 到达。jsonparser 的 CVE-2026-32285 调查没有产生补丁：解析到的 v1.1.2 已包含修复，也没有发现可达的脆弱符号，所以本范围内没有相应兼容性差异。
+这些升级带来的可观察边缘修正包括：Go TLS/X.509/URL/archive、MQTT 超长 UTF-8 packet 编码、畸形 Azure NTLM challenge、Thrift framed transport 与 32 位编译、NATS 认证/授权/身份/拒绝服务，以及 Prometheus remote-read/write 与 UI 加固。jsonparser 的 CVE-2026-32285 调查没有产生补丁：解析到的 v1.1.2 已包含修复，也没有发现可达的脆弱符号，所以本范围内没有相应兼容性差异。
 
 重要的有意依赖决策如下：
 
@@ -368,11 +364,9 @@ API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占
 - [IAM 撤销指标](/zh/blog/design/iam-revocations/#errors)反映删除记录、协调失败、耗时与最近成功时间，需按各节点的采集语义解释。
 - 桶配额指标改为报告实际有效配额；CPU 指标采集增加并发保护。它们分别影响监控数值与运行稳定性，不代表统一性能提升。
 
-核对受影响的仪表盘和告警，并独立验证对象及复制状态；监控正常不代表所有历史问题已经修复。
+升级时请同步核对受影响的仪表盘和告警规则。
 
 ## 已知残余风险与未修复项 {#limits}
-
-本次审计不会把继承的限制包装成兼容性承诺：
 
 1. **默认来源 IP 仍可伪造。** 未设置 `MINIO_API_TRUSTED_PROXIES` 时刻意保留上游 trust-any 行为。直连部署设为 `none`，代理部署使用精确 allowlist。
 2. **版本条件的后续修复。** #104 已在 Server 20260903 中修复 governance bypass 的逐条目版本授权。Snowball PAX 版本的授权时序是另一条路径；部分身份条件仍保留“存在但为空”的语义。
@@ -380,10 +374,9 @@ API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占
 4. **旧通知迁移仍有风险。** 按上文说明审核。
 5. **存储路径校验为词法层面。** 不解析符号链接；未独立覆盖原生 Windows 执行。
 6. **私有 API 不是稳定兼容承诺。** `ReadMultiple` 表明即便 storage REST 协议号不变，操作仍可能消失。不要跨越该边界滚动运行混合构建。
-7. **源码结果不等于已发布制品。** 在逐渠道验证前，本页不声称 GitHub 标签、软件包、OCI manifest、签名或线上站点已经包含仅存在于审计 HEAD 的最后三个提交。
-8. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
-9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
-10. **多站点删除桶配置的历史收敛限制。** 本页所述已发布版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。依赖多站点同步删除这些配置的部署，删除后必须逐站核对。2026-09-12，[PR #180](https://github.com/pgsty/silo/pull/180) 已将修复合入主干；完整删除自愈要求全部节点升级并统一开启删除导出，详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。发行制品是否包含修复仍需按版本核对。
+7. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
+8. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
+9. **多站点删除桶配置的历史收敛限制。** 在 [PR #180](https://github.com/pgsty/silo/pull/180)（随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布）之前的版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。完整删除收敛要求全部节点升级并统一开启删除导出（`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`），详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。
 
 ## 迁移检查清单 {#migration}
 
@@ -404,7 +397,7 @@ API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占
 
 ## 验证证据 {#verification}
 
-本次审计以最终源码为准，而不是只相信文字。在记录的快照上：
+在 2026-08-06 审计快照上完成的验证：
 
 | 检查               | 结果/边界                                                                                                                                     |
 |:-----------------|:------------------------------------------------------------------------------------------------------------------------------------------|

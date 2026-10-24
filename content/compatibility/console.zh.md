@@ -50,11 +50,11 @@ SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地�
 
 **排序、名称筛选和全选只作用于当前页。** 只有首页已包含整个目录时，它们才覆盖整个目录。翻页保留筛选文本、清空选择；更换页大小回到首页，更换目录清空筛选。失败的页面保留上一页供重试。
 
-Rewind 与“显示已删除对象”没有游标，最多返回 1,000 个版本，并有时间预算；触及限制会提示结果不完整。它们限制浏览器收到的结果，不保证服务端只扫描这么多版本。详见[对象浏览器契约](https://github.com/pgsty/silo-console/blob/v2.4.2/docs/ObjectBrowser.md#paging)。
+Rewind 与“显示已删除对象”没有游标，最多返回 1,000 个版本，并有时间预算；触及限制会提示结果不完整。详见[对象浏览器契约](https://github.com/pgsty/silo-console/blob/v2.4.2/docs/ObjectBrowser.md#paging)。
 
 ### 6. API 返回与自动化 {#api-output}
 
-对应 [B04](/zh/compatibility/#b04)、[O05](/zh/compatibility/#o05)。会话响应增加 `accountAccessKey`，对象列表显式返回零字节对象的 `size: 0`；会话能力字段还会随有效权限变化，按钮可见不替代服务端授权。自制解析器应容忍新增字段，Console 自动化应处理分页、会话失效和 WebSocket 错误。
+对应 [B04](/zh/compatibility/#b04)、[O05](/zh/compatibility/#o05)。会话响应增加 `accountAccessKey`，对象列表显式返回零字节对象的 `size: 0`；会话能力字段还会随有效权限变化。自制解析器应容忍新增字段，Console 自动化应处理分页、会话失效和 WebSocket 错误。
 
 用户启用/禁用新增独立的 `PUT /api/v1/user/{name}/status`，旧 `PUT /api/v1/user/{name}` 保留但已弃用；批量下载沿用原入口，同时接受受限表单以支持原生流式 ZIP。改密权限另见[密码权限迁移](/zh/compatibility/password-permissions/)，分享下载边界见 [v2.4.1 说明](/zh/blog/release/console-2.4.1/)；定制调用以[当前 API 定义](https://github.com/pgsty/silo-console/blob/v2.4.2/swagger.yml)为准。
 

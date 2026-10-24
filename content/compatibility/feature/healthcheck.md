@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-heart-pulse
 ---
 
-> **Status**: P1 (subcommand, `2ff594f4b`) and P2 (distroless image + CI gate, `4c34d2309`) implemented in `pgsty/silo`; P3 (Helm probes) and P4 (docs) pending · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)
+> **Status**: P1 (`silo healthcheck` subcommand, `2ff594f4b`) and P2 (distroless image + CI gate, `4c34d2309`) shipped in [Server 20260806](/blog/release/silo-20260806/); P3 (Helm probes) and P4 (docs) pending · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)
 
 Silo is getting a native `silo healthcheck` subcommand and, alongside the existing container image, a new **distroless** image variant that contains exactly one file that matters: the `silo` binary. This note records the reasoning and the design decisions before implementation, so the code has a specification to be checked against — and so that "why is it built this way?" has a permanent answer.
 
@@ -82,12 +82,12 @@ The design principles behind that shape:
 5. **Exit codes are 0 and 1, nothing else.** The Dockerfile reference explicitly reserves exit code 2 (`vault status`, which uses 2 for "sealed", is the cautionary tale). Rich diagnostics belong in the single output line instead — Docker stores the first 4096 bytes of probe output in `docker inspect`, and the command decodes the server's diagnostic headers (`x-minio-server-status`, `x-minio-write-quorum`, `x-minio-healing-drives`) into it, which is exactly the detail a bare `curl -f` throws away.
 6. **Skip TLS certificate verification, with no opt-out in v1.** This is a loopback self-probe of an anonymous endpoint carrying no data — and the kubelet's documented behavior for HTTPS `httpGet` probes is precisely the same. Matching it means one TLS deployment produces one verdict across Docker and Kubernetes; verifying by default would only manufacture false negatives, since self-signed server certs rarely carry a `127.0.0.1` SAN.
 
-Two implementation constraints, discovered in the source, that are load-bearing rather than stylistic:
+Two key implementation constraints from the server source:
 
 - **The request must be strictly anonymous.** The health routes are exempted from the reserved-path guard only for requests the server classifies as anonymous; attaching an `Authorization` header reclassifies the request and gets it *rejected* (`ErrAllAccessDisabled`) instead of answered.
 - **The HTTP transport must set `Proxy: nil`.** Containers routinely inherit `HTTP_PROXY` without a `NO_PROXY` entry for `127.0.0.1`; a loopback probe must never route through a corporate proxy. (Traefik's healthcheck does this deliberately, for the same reason.)
 
-And one number that looks arbitrary but is not: the 15-second default timeout for cluster checks exists because the server evaluates cluster health under its own 10-second `cluster_deadline` — a client that gives up at 5s abandons the request before the server delivers its considered 503, losing every diagnostic header with it. Two details were added after adversarial review: `--url` is environment-backed (`MINIO_HEALTHCHECK_URL`) because a probe process cannot see the server's command line — it is the documented way to point a baked-in `HEALTHCHECK` at a server whose address or TLS setup comes from CLI arguments; and any outer (Docker) timeout must exceed the probe's own deadline, or the probe is SIGKILLed before it can print its diagnostic line.
+The 15-second default timeout for cluster checks accounts for the server's own 10-second `cluster_deadline` when evaluating cluster health — a client that gives up at 5s abandons the request before the server delivers its 503 response and diagnostic headers. Two additional details complete the contract: `--url` is environment-backed (`MINIO_HEALTHCHECK_URL`) because a probe process cannot see the server's command line — it is the documented way to point a baked-in `HEALTHCHECK` at a server whose address or TLS setup comes from CLI arguments; and any outer (Docker) timeout must exceed the probe's own deadline, or the probe is SIGKILLed before it can print its diagnostic line.
 
 ## What the endpoints really do {#endpoints}
 

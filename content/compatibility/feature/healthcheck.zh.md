@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-heart-pulse
 ---
 
-> **状态**：P1（子命令，`2ff594f4b`）与 P2（distroless 镜像 + CI 门禁，`4c34d2309`）已在 `pgsty/silo` 落地；P3（Helm 探针）与 P4（文档）待办 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）
+> **状态**：P1（`silo healthcheck` 子命令，`2ff594f4b`）与 P2（distroless 镜像 + CI 门禁，`4c34d2309`）已随 [Server 20260806](/zh/blog/release/silo-20260806/) 发布；P3（Helm 探针）与 P4（文档）待办 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）
 
 Silo 将新增一个原生的 `silo healthcheck` 子命令，并在现有容器镜像之外发布一个新的 **Distroless** 镜像变体——里面真正要紧的文件只有一个：`silo` 二进制。本文在动手实现之前把推理过程和设计决策记录下来，让代码有一份可以对照检验的规格，也让"为什么要做成这样"永远有出处可查。
 
@@ -82,12 +82,12 @@ FLAGS：
 5. **退出码只有 0 和 1。** Dockerfile 参考手册明文保留退出码 2（`vault status` 用 2 表示 sealed，是现成的反面教材）。丰富的诊断信息放进那一行输出里——Docker 会把探测输出的前 4096 字节存进 `docker inspect`，而命令会把服务端的诊断响应头（`x-minio-server-status`、`x-minio-write-quorum`、`x-minio-healing-drives`）解码进去；这些正是裸 `curl -f` 会丢掉的细节。
 6. **跳过 TLS 证书校验，v1 不提供开关。** 这是对匿名端点的环回自探，不传输任何数据——而 kubelet 对 HTTPS `httpGet` 探针的文档行为恰好也是跳过校验。与之对齐意味着同一套 TLS 部署在 Docker 和 Kubernetes 下得到同一个结论；默认校验只会制造假阴性，因为自签服务器证书极少包含 `127.0.0.1` 的 SAN。
 
-两条从源码里挖出来的实现约束——它们是承重墙，不是风格偏好：
+两条来自服务端源码的关键实现约束：
 
-- **请求必须严格匿名。** 健康路由之所以能豁免保留路径守卫，仅限于被服务器判定为匿名的请求；带上 `Authorization` 头会改变请求的分类，结果不是得到应答而是被 *拒绝*（`ErrAllAccessDisabled`）。
+- **请求必须严格匿名。** 健康路由之所以能豁免保留路径守卫，仅限于被服务器判定为匿名的请求；带上 `Authorization` 头会改变请求的分类，结果会被直接*拒绝*（`ErrAllAccessDisabled`）。
 - **HTTP 传输层必须设置 `Proxy: nil`。** 容器经常继承 `HTTP_PROXY` 却没有把 `127.0.0.1` 写进 `NO_PROXY`；环回探测绝不能被路由进公司代理。（Traefik 的 healthcheck 出于同样的原因特意这样做了。）
 
-还有一个看似随意、实则不然的数字：cluster 检查的默认超时是 15 秒，因为服务端评估集群健康时自身受 10 秒 `cluster_deadline` 约束——客户端若在 5 秒就放弃，等不到服务器深思熟虑后给出的 503，连同所有诊断头一起丢失。对抗性评审后补充了两个细节：`--url` 支持环境变量（`MINIO_HEALTHCHECK_URL`），因为探针进程看不到服务端的命令行——当服务端的地址或 TLS 配置来自 CLI 参数时，这是矫正内置 `HEALTHCHECK` 的正式途径；另外任何外层（Docker）超时都必须大于探针自身的截止时间，否则探针会在打印诊断行之前先被 SIGKILL。
+此外，cluster 检查的默认超时设为 15 秒，是因为服务端评估集群健康时自身受 10 秒 `cluster_deadline` 约束——客户端若在 5 秒就放弃，会先于服务端返回的 503 响应断开，连同所有诊断头一起丢失。另外补充两个细节：`--url` 支持环境变量（`MINIO_HEALTHCHECK_URL`），因为探针进程看不到服务端的命令行——当服务端的地址或 TLS 配置来自 CLI 参数时，这是配置内置 `HEALTHCHECK` 的正式途径；同时外层（Docker）超时必须大于探针自身的截止时间，否则探针会在打印诊断行之前先被 SIGKILL。
 
 ## 这些端点到底在做什么 {#endpoints}
 

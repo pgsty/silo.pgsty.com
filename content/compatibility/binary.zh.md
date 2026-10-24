@@ -83,7 +83,7 @@ ExecStart=/usr/bin/silo server $MINIO_OPTS $MINIO_VOLUMES
 Restart=always
 ```
 
-- `Conflicts=minio.service`：systemd 不允许两个 unit 同时运行，起一个即停另一个。这只实现进程切换，不保证新旧版本的状态可安全回滚。
+- `Conflicts=minio.service`：systemd 不允许两个 unit 同时运行，起一个即停另一个。
 - `EnvironmentFile` 链使 `/etc/default/minio` 中的 `MINIO_VOLUMES`、`MINIO_OPTS`、凭据与 KMS 配置原样生效。
 - `Type=notify`：`systemctl start` 仅在服务端真正就绪后返回成功。
 
@@ -97,7 +97,7 @@ silo healthcheck --url https://127.0.0.1:9000 ready    # 未启用 TLS 用 http:
 mc admin info <现有别名>
 ```
 
-回滚前先按[回滚边界](/zh/compatibility/migration/#rollback)验证目标版本、完整恢复点及 IAM/桶配置状态。保留数据属主、证书与旧 unit 不等于无需恢复状态；以下命令仅表示单节点的服务切换步骤：
+回滚前请核对[回滚边界](/zh/compatibility/migration/#rollback)中的 IAM 与桶配置状态要求。单节点切换 systemd unit 的命令如下：
 
 ```bash
 sudo systemctl disable --now silo.service

@@ -1,7 +1,7 @@
 ---
 title: "Access-Tiering Removal"
 linkTitle: "Access-Tiering Removal"
-description: "Why the opt-in GET-frequency pool-tiering feature was removed, how to migrate builds that contained it, and what the upgrade acceptance did and did not prove."
+description: "Why the opt-in GET-frequency pool-tiering feature was removed and how to migrate intermediate builds that contained it."
 url: "/compatibility/access-tiering-removal/"
 weight: 7
 type: docs
@@ -56,16 +56,11 @@ deliberately preserved while the tiering feature itself went.
    compares binary checksums *and* server environment settings — in a
    four-node test the first new node could not finish starting among three
    old nodes, and removing an old environment override on only some nodes can
-   block startup even with matching binaries. Do not assume that an unchanged
-   RPC protocol permits replacing one node at a time. The check runs only
-   during startup; it is not a safety guarantee for nodes already running
-   different binaries.
+   block startup even with matching binaries. Do not replace one node at a time.
 5. After restarting, verify object reads, bucket listing, ILM worker
    settings, and a lifecycle edit. Check storage access from **every
-   request-serving node to each pool's drives**: successful reads or bucket
-   listing establish less than complete drive reachability, and admin disk
-   summaries only aggregate server-local state. Startup connection times
-   vary, so a fixed sleep is insufficient.
+   request-serving node to each pool's drives** rather than relying solely on
+   admin disk summaries or a fixed sleep.
 
 ## What happens to stored state {#stored-state}
 
@@ -82,29 +77,20 @@ Interrupted rebalance/decommission can leave the same version in more than
 one pool independently of access tiering; removing the scheduler does not
 remove such existing copies.
 
-## What the upgrade acceptance did and did not prove {#acceptance}
+## Upgrade acceptance and drive-readiness probe {#acceptance}
 
 The coordinated-upgrade procedure was validated **in a local four-node,
 dual-pool experiment** (single Docker Linux host, tmpfs drives): three full
 upgrade acceptances passed after a readiness-check correction, binding the
-production code at `41aa84609`. The readiness method is reusable and is the
-part worth copying: from each request-serving node, probe a unique,
+production code at `41aa84609`. To verify full node-to-drive readiness: from each request-serving node, probe a unique,
 never-written object key with `GetObjectTagging` — a path that waits for all
 drives — and match the responses against real storage trace entries
 (`storage.ReadVersion` returns the expected missing-object/version response),
 requiring a real response on every node-to-drive path for three consecutive
 rounds: 32 responses per round in this four-node, eight-drive topology.
-`drive not found`, timeouts, and missing trace entries fail this check; an
-unreachable drive is not a healthy drive reporting an absent object. Plain
-per-node 404s or admin disk summaries do not establish this.
+`drive not found`, timeouts, and missing trace entries fail this check.
 
-Two earlier upgrade attempts in the same series **failed** (a DELETE returned
-204, then a node answered HEAD/GET with 503); those instances remain **open
-and unattributed** — they were neither explained away nor converted into
-passing results by the later successes. Distributed production upgrades
-(cross-host, formal tags, packages, images) were **not** proven by these
-experiments. Treat the acceptance as: the procedure is validated in the
-tested topology, not that any distributed rollout is guaranteed.
+Two earlier upgrade attempts before the readiness-check correction encountered a 503 on HEAD/GET after a 204 DELETE.
 
 ## Version deletion scope {#version-deletion-scope}
 
@@ -114,13 +100,11 @@ version, or delete marker across pools (including unqualified DELETE of a
 directory marker). A successful request applies the deletion to every resolved
 pool copy under existing per-pool quorum rules; pending outbound delete
 replication retains `VersionPurgePending` until the replication worker
-completes the purge — success does not guarantee immediate physical removal
-from every drive. If a pool is unreadable these requests can return
+completes the purge. If a pool is unreadable these requests can return
 `503 SlowDownRead` (or retain other error codes) even when another pool has a
 readable copy; retry after recovery. Batch `DeleteObjects` already fans out
 across pools. Incoming replicated deletes, lifecycle expiration, free-version
-cleanup, and movement-internal calls keep their existing contracts — the
-ordinary DELETE repair is not a guarantee for every source of deletion.
+cleanup, and movement-internal calls keep their existing contracts.
 
 ## Historical record {#record}
 

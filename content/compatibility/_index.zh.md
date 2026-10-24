@@ -23,11 +23,11 @@ sidebar_expanded: false
 {{< /card >}}
 {{< /cards >}}
 
-**核对日期：2026-09-16，发布状态更新于 2026-09-17。** 下表汇总分叉以来的源码与配套组件变化；其中的服务端变化已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，哪些修复不在更早的 Server 20260903 中，以[组件版本矩阵](/zh/compatibility/versions/)为准。24 项是用户场景分类，**不是 API 数量、兼容率或故障概率**。
+**核对日期：2026-09-16，发布状态更新于 2026-09-17。** 下表汇总分叉以来的源码与配套组件变化；其中的服务端变化已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，哪些修复不在更早的 Server 20260903 中，以[组件版本矩阵](/zh/compatibility/versions/)为准。
 
 ## 20261018 正式发布 {#october-2026}
 
-本次目标为 [Server 20261018](/zh/blog/release/silo-20261018/)，现已正式发布。新增升级检查包括 Object Lock、IAM 管理凭据授权、普通 LIST 恢复、strict 分片列表退役及 OIDC/JWK 密钥限制，见[服务端兼容性](/zh/compatibility/server/#october-2026)。下方 24 类仍是 20260916 审计分类，不是新版本能力总数；其中 strict 前提仅适用于旧版可选模式。
+本次目标为 [Server 20261018](/zh/blog/release/silo-20261018/)，现已正式发布。新增升级检查包括 Object Lock、IAM 管理凭据授权、普通 LIST 恢复、strict 分片列表退役及 OIDC/JWK 密钥限制，见[服务端兼容性](/zh/compatibility/server/#october-2026)。下方列出的 strict 前提仅适用于 Server 20260916 的可选模式。
 
 
 ## 🟢 兼容或改进：12 类 {#compatible}
@@ -42,12 +42,12 @@ sidebar_expanded: false
 | <span id="g04"></span>**G04 · 原生健康检查**<br>新增 `silo healthcheck` 命令，便于容器和运维探测。 | 主动采用新探针命令。 | 原有 HTTP 健康端点继续可用。 | [命令与范围](/zh/compatibility/feature/healthcheck/#command) |
 | <span id="g05"></span>**G05 · 客户端校验和审计**<br>新增 `mcli checksum verify`，读取对象并核验校验和。 | 主动运行完整性审计。 | 只读检查和报告，不修改或修复对象。 | [审计命令](/zh/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify) |
 | <span id="g06"></span>**G06 · 上传与复制校验和修复**<br>合法上传、分片完成和复制更准确地计算、保存及返回校验和。 | 使用相关上传或复制路径。 | 改善 SDK 互操作；非法请求的变化见 [O04](#o04)。 | [分片上传](/zh/blog/design/uploadpart-checksum/#decision)、[S3 修复](/zh/blog/release/silo-20260903/#s3-correctness) |
-| <span id="g07"></span>**G07 · 加密与压缩处理修复**<br>修正 SSE-C、KMS、压缩与复制组合中的数据及逻辑大小处理。 | 使用这些加密、压缩或复制组合。 | 改善新请求的正确性；历史损坏不会因此全部自动修复。 | [SSE-C 与历史对象](/zh/blog/design/ssec-replica-integrity/)、[联邦复制](/zh/blog/design/federated-copy-object/) |
+| <span id="g07"></span>**G07 · 加密与压缩处理修复**<br>修正 SSE-C、KMS、压缩与复制组合中的数据及逻辑大小处理。 | 使用这些加密、压缩或复制组合。 | 修正新请求，不修改存量对象。 | [SSE-C 与历史对象](/zh/blog/design/ssec-replica-integrity/)、[联邦复制](/zh/blog/design/federated-copy-object/) |
 | <span id="g08"></span>**G08 · 桶配置并发更新修复**<br>桶配置共用元数据锁，防止并发更新互相覆盖。 | 同时修改策略、生命周期、加密等桶配置。 | 管理操作更可靠，现有调用方式不变。 | [共享配置锁](/zh/blog/release/silo-20260903/#bucket-metadata) |
 | <span id="g09"></span>**G09 · 标签与对象锁复制修复**<br>复制更准确地保留并排序标签、保留期与锁状态。 | 使用标签、Object Lock 的复制或修复。 | 减少状态丢失与旧事件覆盖；混合版本见 [O07](#o07)。 | [标签排序](/zh/blog/design/replicated-tag-ordering/)、[对象锁排序](/zh/blog/design/object-lock-replication-ordering/) |
 | <span id="g10"></span>**G10 · 池迁移与数据修复改进**<br>再平衡、退役及修复更准确地处理标签、版本和删除标记。 | 迁移存储池、执行 heal 或恢复复制。 | 改善元数据保留与重试；历史异常仍需检查。 | [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[复制恢复](/zh/blog/design/replication-reliability/) |
 | <span id="g11"></span>**G11 · 通知与流式推送修复**<br>修正 NATS/AMQP 配置识别，以及通知、Select 等流式响应刷新。 | 使用相应通知目标或流式接口。 | 配置与事件输出更准确；旧数据库配置见 [O03](#o03)。 | [通知配置](/zh/compatibility/server/#notify-audit)、[流式响应](/zh/compatibility/server/#s3-behavior) |
-| <span id="g12"></span>**G12 · 运行稳定性与资源回收**<br>修复并发采集、缓冲区所有权和连接回收等问题。 | 并发读写、指标采集或取消请求。 | 减少相关崩溃与资源问题，不代表所有负载都更快。 | [读缓冲修复](/zh/compatibility/server/#s3-behavior)、[运行与观测](/zh/compatibility/server/#observability) |
+| <span id="g12"></span>**G12 · 运行稳定性与资源回收**<br>修复并发采集、缓冲区所有权和连接回收等问题。 | 并发读写、指标采集或取消请求。 | 消除相关崩溃与资源泄漏。 | [读缓冲修复](/zh/compatibility/server/#s3-behavior)、[运行与观测](/zh/compatibility/server/#observability) |
 {.silo-compatibility-table}
 
 ## 🔵 轻微差异：4 类 {#minor}
@@ -64,7 +64,7 @@ sidebar_expanded: false
 
 ## 🟠 按条件检查：8 类 {#conditional}
 
-**命中条件，就检查对应项。** 这里不表示“一定很少发生”：例如部署名称变化影响迁移管理员；定制签名则主要影响自制客户端。
+**命中条件，就检查对应项。**
 
 | 类别与一句话变化 | 触发条件 | 影响范围与操作 | 详情索引 |
 | --- | --- | --- | --- |
@@ -74,15 +74,15 @@ sidebar_expanded: false
 | <span id="o04"></span>**O04 · 依赖旧错误行为的程序**<br>校验、条件、错误码、退出码和列表上限不再沿用部分旧行为。 | 依赖错误请求成功、忽略 `If-Match`，或启用 Server 20260916 strict 模式后仍假设分片列表一次超过 1,000 条。 | 检查错误处理、重试、分页与批处理的最终退出码。 | [校验错误](/zh/blog/design/complete-multipart-checksum-errors/#impact)、[条件删除](/zh/blog/design/conditional-delete/)、[分片列表](/zh/blog/design/list-multipart-uploads/#implementation-20260916)、[CLI 退出码](/zh/compatibility/mcli/#current-release) |
 | <span id="o05"></span>**O05 · 自制客户端与管理工具**<br>私有接口、签名覆盖、Console 自动化及 Go 包路径存在变化。 | 使用 `ReadMultiple`、手写签名、严格响应解析、Go 嵌入或定制 Console。 | 定制集成和编译需单独验证；普通 S3 SDK 不使用私有存储接口。 | [私有接口](/zh/compatibility/server/#storage-rest)、[签名](/zh/blog/design/signed-header-coverage/#impact)、[Console API](/zh/compatibility/console/#api-output)、[Go 模块](/zh/compatibility/server/#source-compatibility) |
 | <span id="o06"></span>**O06 · 多池条件操作与新分片模式**<br>多池写删更严格地核实元数据，strict 分片列表另有升级准备要求。 | 多池条件写、指定版本删除，或显式启用 strict 分片列表。 | 故障时可能返回 503，即使 GET 仍成功；strict 需升级全部 writer 并排空旧上传，默认仍为 legacy。 | [多池条件](/zh/blog/design/multi-pool-object-consistency/#conditions)、[strict 契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916) |
-| <span id="o07"></span>**O07 · 跨站复制、混跑和回滚**<br>IAM 撤销与桶配置删除状态要求协调升级和恢复。 | 多站点、共享 IAM、不同版本混跑或降级恢复。 | 保留完整恢复点并联测各端；不能假定只换回旧程序即可回滚。 | [IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout)、[回滚边界](/zh/compatibility/migration/#rollback) |
+| <span id="o07"></span>**O07 · 跨站复制、混跑和回滚**<br>IAM 撤销与桶配置删除状态要求协调升级和恢复。 | 多站点、共享 IAM、不同版本混跑或降级恢复。 | 保留完整恢复点并在回滚时同步恢复所有参与端。 | [IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout)、[回滚边界](/zh/compatibility/migration/#rollback) |
 | <span id="o08"></span>**O08 · 自更新及上游在线服务**<br>原地自更新、SUBNET 与上游托管支持集成被停用。 | 使用 `admin update`、`mcli update` 或 MinIO 在线支持流程。 | 改用软件包、镜像或编排器升级；常规 S3 访问不受此项影响。 | [服务端更新](/zh/compatibility/server/#offline-services)、[客户端更新](/zh/compatibility/mcli/#self-update)、[SUBNET](/zh/compatibility/mcli/#subnet) |
 {.silo-compatibility-table}
 
 ## 比较范围与版本边界 {#scope}
 
-服务端对照的是分叉时的上游源码 [`27742d469462`](https://github.com/minio/minio/commit/27742d469462e1561c776f88ca7a1f26816d69e2)（**2025-12-03**）；常见的上游最后发行版标签日期是 **2025-10-15**，两者不是同一个比较点。Console、mcli 的各自基线见[控制台说明](/zh/compatibility/console/)与[客户端说明](/zh/compatibility/mcli/)。本页覆盖 API、功能、可见行为与运维变化，同一修复可涉及多个场景。
+服务端对照的是分叉时的上游源码 [`27742d469462`](https://github.com/minio/minio/commit/27742d469462e1561c776f88ca7a1f26816d69e2)（**2025-12-03**，位于 **2025-10-15** 上游最后正式发行版标签之后）。Console、mcli 的各自基线见[控制台说明](/zh/compatibility/console/)与[客户端说明](/zh/compatibility/mcli/)。本页覆盖 API、功能、可见行为与运维变化，同一修复可涉及多个场景。
 
-SILO 对上游 MinIO/MC 保持**尽最大努力兼容**；正式支持和发布验收的组合为 **SILO + SILO Console + mcli + silo-pkg**。保留协议、环境变量和磁盘布局，不构成任意上游版本混跑或双向降级的承诺。[服务端详细审计](/zh/compatibility/server/)保留历史基线和逐项说明，[组件版本矩阵](/zh/compatibility/versions/)区分已发布组件与待发布源码。
+SILO 对上游 MinIO/MC 保持**尽最大努力兼容**；正式支持和发布验收的组合为 **SILO + SILO Console + mcli + silo-pkg**。保留协议、环境变量和磁盘布局，不构成任意上游版本混跑或双向降级的承诺。[服务端详细审计](/zh/compatibility/server/)保留历史基线和逐项说明，[组件版本矩阵](/zh/compatibility/versions/)列出全栈已发布组件版本。
 
 曾加入后撤回的[访问频率池间分层](/zh/compatibility/access-tiering-removal/)不属于上述 24 类：它不在分叉时的上游功能中，也从未进入任何公开 Server 版本：20260903 早于该特性，20260916 发布前已将其移除。普通生命周期过期、远程分层、再平衡和池退役仍然保留。
 

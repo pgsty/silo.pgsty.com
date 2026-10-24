@@ -9,13 +9,13 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-**状态核验于 2026-10-19。** 维护栈的四个组件与可选 KES 分别发布；下表列出正式版本与实际依赖图，具体生产环境升级仍需独立验收。
+维护栈的四个组件与可选 KES 分别发布。下表记录各正式版本及其组件依赖关系。
 
 ## Server 20261018 正式发布 {#october-release}
 
 目标标签为 `RELEASE.2026-10-18T00-00-00Z`，包版本为 `20261018000000.0.0`，选定源码为 [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce)。GitHub Release 已**正式发布**，匿名下载与 Docker Hub 镜像于 2026-10-19 完成核验。完整功能、安全、兼容性与剩余限制见 [20261018 发布说明](/zh/blog/release/silo-20261018/)。
 
-20261015 保留为历史 Draft，其[制品记录](/zh/blog/release/silo-20261015/)不能替代 20261018 的[交付证据](/zh/blog/release/silo-20261018/#delivery)。Server 20260916 不包含本轮 Object Lock、IAM 和 LIST 修复；安装新版独立 Console 或 mcli 不会更新已经安装的 Server。
+[20261015](/zh/blog/release/silo-20261015/) 保留为历史未发布草稿，由 [20261018 正式版](/zh/blog/release/silo-20261018/#delivery)取代并交付 10 月的 Object Lock、IAM 与 LIST 修复（Server 20260916 不含这些修复）。
 
 ## 10 月组件依赖图 {#october-components}
 
@@ -89,7 +89,7 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 - 清除操作的审计状态由 `COMPLETE` 规范为 `COMPLETED`。历史异常标签修订可能失败并重试，本次修复不会重建其历史。较短的请求头超时也会限制 TLS 握手读取窗口；它不会给 HTTP/1 上传、下载新增总时长限制。
 - 带已记录标签修订的对象在显式 resync 或 heal 时**每对象多一次元数据 COPY**；当目的端按桶默认做 KMS 加密时，该复制会重写对象数据。带标签过滤的复制规则仍按删除后的（空）标签状态评估目标资格；任意站点时钟偏差不在修复后的顺序保证之内。复制双方必须都运行修复后的构建，墓碑才会被尊重——旧对端仍会丢弃空值修订。见[复制标签排序](/zh/blog/design/replicated-tag-ordering/)。
 
-[R4–R8 集成记录](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)保留了源码哈希、本地测试及验收边界。PR #196 合并前的 11 项检查全部通过；这些结果证明源码验收，不代表新版本发布或生产集群升级。
+[R4–R8 集成记录](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)保留了源码哈希、本地测试及验收边界。PR #196 合并前的 11 项检查全部通过。
 
 ### Console 分享下载 {#console-sharing}
 
@@ -123,12 +123,12 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 
 ### 仍待完成的工作 {#pending}
 
-- **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。源码修复不会自动修复旧状态。
-- **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 单独验收最终制品与多进程栈，发布制品和实际生产升级分别验收。
-- **多站删除标记收敛：** `254b19ac0` 的源端复核覆盖不了已经在网络上在途、或由另一站点重放的创建；多数确认的清除之后崩溃留下的少数标记副本，也没有证明持久的清理责任人。[#217](https://github.com/pgsty/silo/issues/217) 跟踪接收端方案。清除修复的三站证据来自组合构建，不是最终 main；见[设计记录](/zh/blog/design/replication-reliability/#third-round-limits)。
-- **滚动重启期间的列举：** [#239](https://github.com/pgsty/silo/pull/239) 承接 [#218](https://github.com/pgsty/silo/issues/218)，对符合条件的最新对象分歧进行确认，区分真实删除与读取故障，并把最终错误传递到分页响应。不增加磁盘格式、客户端参数或迁移开关；[最新设计与验收边界](/zh/blog/design/listing-recovery-lock-cost/)已覆盖早期调查中的方案说明。在运行包含此修复的正式版本之前，仍应避免在滚动重启期间使用会删除目标端对象的同步方式。源码合并不会自动更新已安装的二进制。
-- **跨池迁移与历史标签：**最终 20261018 制品通过四组本地 2/3 池 rebalance/decommission，覆盖标签、版本、删除标记和中断恢复，见[十月迁移修复](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)。这些是共享宿主机证据，多主机迁移和生产性能仍须按部署验证；修复前已丢失的标签须单独审计。
-- **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 保留开放。Server 20261018 撤回默认持久扫描，并退役可选 strict 模式；公开列表重新使用节点本地缓存或精确 key 查询，完整发现、前缀／分页语义和迟到创建写入仍未解决。#198 的持久发现与严格取消能力属于旧版可选实现，不属于本次候选，见[当前契约与容量证据](/zh/blog/design/list-multipart-uploads/#implementation)。
+- **升级与存量准备：** [#200](https://github.com/pgsty/silo/issues/200) 跟踪 [IAM 升级及恢复演练](/zh/operations/replication/iam-upgrade/)；[#201](https://github.com/pgsty/silo/issues/201) 跟踪[历史复制状态检查及修复验证](/zh/operations/replication/replica-metadata-audit/)。
+- **发布交付：** [#202](https://github.com/pgsty/silo/issues/202) 汇总说明和组件身份；[#203](https://github.com/pgsty/silo/issues/203) 跟踪最终制品与多进程栈验证。
+- **多站删除标记收敛：** `254b19ac0` 的源端复核覆盖不了已经在网络上在途、或由另一站点重放的创建；多数确认的清除之后崩溃留下的少数标记副本，也没有证明持久的清理责任人。[#217](https://github.com/pgsty/silo/issues/217) 跟踪接收端方案；见[设计记录](/zh/blog/design/replication-reliability/#third-round-limits)。
+- **滚动重启期间的列举：** [#239](https://github.com/pgsty/silo/pull/239)（已随 [Server 20261018](/zh/blog/release/silo-20261018/) 发布）承接 [#218](https://github.com/pgsty/silo/issues/218)，对符合条件的最新对象分歧进行确认，区分真实删除与读取故障，并把最终错误传递到分页响应。不增加磁盘格式、客户端参数或迁移开关；详见[最新设计与验收边界](/zh/blog/design/listing-recovery-lock-cost/)。
+- **跨池迁移与历史标签：**最终 20261018 制品通过四组本地 2/3 池 rebalance/decommission，覆盖标签、版本、删除标记和中断恢复，见[十月迁移修复](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)。修复前已丢失的标签须单独审计。
+- **分片上传列表：** [#79](https://github.com/pgsty/silo/issues/79) 保留开放。Server 20261018 撤回默认持久扫描，并退役可选 strict 模式；公开列表重新使用节点本地缓存或精确 key 查询，完整发现、前缀／分页语义和迟到创建写入仍未解决。详见[当前契约与容量证据](/zh/blog/design/list-multipart-uploads/#implementation)。
 
 ## 依赖与发布顺序 {#order}
 
@@ -142,13 +142,12 @@ Go 不继承依赖模块的 `replace`。即使 Console 已选择 MC，Server 仍
 Console 和 MC 保留历史 MinIO 模块路径，pkg 直接使用自己的路径。
 `colorjson`/`dperf` 带入的旧 `minio/pkg/v3` 传递依赖与维护中的策略实现相互独立。
 
-Console v2.4.2、mcli 20261018 与 Server 20261018 草稿使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg 保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。
+Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg 保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。
 Go x/* 依赖已刷新。go-systemd 实际仍选 **v22.6.0**，因为 v22.7.0 在 NetBSD 编译失败；
-Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。这些是有原因的兼容性固定版本。
+Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。
 
-其他依赖按具体 CVE/BUG 更新，不机械追逐新主版本。
-9 月 13 日 Go 扫描没有发现可达或已导入的易受攻击包，但未使用的 OpenPGP 代码仍有模块级 **GO-2026-5932** 告警。
-可达性扫描通过，不等于整个依赖图没有任何漏洞通告。
+其他依赖按具体 CVE 与缺陷修复更新。
+9 月 13 日 Go 扫描没有发现可达或已导入的易受攻击包，未使用的 OpenPGP 代码保留模块级 **GO-2026-5932** 记录。
 
 正式支持的集成对象是协调后的 PGSTY 栈；与原版上游 MinIO/MC 和其他 S3 实现的兼容属于尽力保留。
 
@@ -175,7 +174,7 @@ Server 20260916 源码 [`2a4d51406b7e`](https://github.com/pgsty/silo/commit/2a4
 合入，修复旧版 `xl.meta` 头部复用时的缺失字段残留，并使扫描更新与最终缓存保持互斥。
 存储格式、RPC 字段与依赖版本均未变化。[问题与修复说明](/zh/blog/design/stale-metadata-reuse/)
 记录了确定性回归测试、双进程扫描验证、合并后 CI 和运维核验方法。
-该源码修复已包含在 [Server 20261015](/zh/blog/release/silo-20261015/) 中；草稿制品验收不代表正式发布或生产集群已经升级。
+该源码修复已纳入 [Server 20261015](/zh/blog/release/silo-20261015/) 草稿，并随 [Server 20261018](/zh/blog/release/silo-20261018/) 正式发布。
 
 ## 20261015 之后纳入 20261018 的修复 {#post-20261015}
 

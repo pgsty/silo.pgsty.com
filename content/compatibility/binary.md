@@ -86,7 +86,7 @@ ExecStart=/usr/bin/silo server $MINIO_OPTS $MINIO_VOLUMES
 Restart=always
 ```
 
-- `Conflicts=minio.service`: systemd never runs both units; starting one stops the other. This switches processes, but does not establish that state can safely be rolled back between versions.
+- `Conflicts=minio.service`: systemd never runs both units; starting one stops the other.
 - The `EnvironmentFile` chain means `MINIO_VOLUMES`, `MINIO_OPTS`, credentials, and KMS settings from `/etc/default/minio` apply unchanged.
 - `Type=notify`: `systemctl start` returns success only after the server is actually ready.
 
@@ -100,7 +100,7 @@ silo healthcheck --url https://127.0.0.1:9000 ready    # http:// without TLS
 mc admin info <existing-alias>
 ```
 
-Before rollback, validate the target version, complete recovery point and IAM/bucket-configuration state under [rollback scope](/compatibility/migration/#rollback). Retaining ownership, certificates and the old unit does not mean state needs no restoration; the following commands only illustrate service switching on one node:
+Before rolling back, review the state and IAM requirements in [rollback scope](/compatibility/migration/#rollback). To switch systemd units on a node:
 
 ```bash
 sudo systemctl disable --now silo.service

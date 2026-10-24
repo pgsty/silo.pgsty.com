@@ -16,11 +16,8 @@ icon: fa-solid fa-code-branch
 
 **Breaking change: the password-permission split changes the meaning of
 existing IAM policies.** The same stored policy can authorize a request after
-this update that it denied before, or deny a request it previously authorized.
-This is a deliberate authorization change from adopting
-[minio/pkg #262](https://github.com/minio/pkg/pull/262), independent of the
-minio-go SDK update. It must be called out as a breaking change in the release
-that first includes it; it is not a transparent dependency refresh.
+this update that it denied before, or deny a request it previously authorized,
+following the adoption of [minio/pkg #262](https://github.com/minio/pkg/pull/262).
 
 SILO separates a user's own password change from creating users or resetting
 another user's password. The same `add-user` administration endpoint and mcli
@@ -43,10 +40,9 @@ provider passwords remain outside this endpoint.
 Previously, both operations checked `admin:CreateUser`. Changing one's own
 password used an implicit grant unless that action was explicitly denied;
 managing other users required an explicit Allow. The split retains these two
-evaluation rules but checks `admin:ChangeMyPassword` for the caller's password.
-It lets an operator independently control password changes and user
-administration. This is a policy-design choice, not a required mitigation for
-the SDK signing or region-compatibility fixes.
+evaluation rules but checks `admin:ChangeMyPassword` for the caller's password,
+allowing operators to control self-service password changes and user
+administration independently.
 
 The following cases assume an internal user with an attached policy, matching
 statement conditions, and no other applicable grants or denies:
@@ -66,9 +62,9 @@ compatibility change as the explicit CreateUser deny. An Allow never overrides
 a matching Deny. Granting only `admin:ChangeMyPassword` does not grant user
 administration.
 
-The policy JSON format, stored documents and endpoint are retained, but that
-does not preserve their authorization semantics. This update does not rewrite
-saved policies or provide a switch that restores the old action mapping.
+The policy JSON format, stored documents, and endpoint remain unchanged; saved
+policies are not rewritten automatically and there is no legacy action-mapping
+toggle.
 
 ## Preserve the behavior of existing policies
 
@@ -85,9 +81,8 @@ For example, change that statement's action list to:
 }
 ```
 
-This is a statement fragment, not a replacement for the entire policy.
-Preserve its other actions, resource scope and conditions, and all other
-statements. Check policies attached through groups as well as directly to users.
+Preserve the statement's other actions, resource scope, conditions, and all other
+statements in the policy. Check policies attached through groups as well as directly to users.
 The preceding SILO package version already recognizes both action names, so
 this dual deny can be prepared before the Server upgrade. Saved policy files
 are not migrated automatically; the operator must apply this change where the

@@ -24,18 +24,19 @@ Command syntax, configuration, aliases and existing failure exit codes remain un
 ## Changes inherited from 20260916 {#release-20260916}
 
 20260916 uses pkg v3.14.1, upstream SDK `32e1f32cb176`, JWX v3.3.0 and Go 1.27.1.
-The SDK retries and reports S3 errors embedded in CopyObject HTTP 200 responses,
-so a failed copy cannot authorize `mv` to remove its source. JWX fixes JSON
-field-name escaping; pkg v3.14.0 password-policy semantics are unchanged.
+The SDK retries and reports S3 errors embedded in single-request `CopyObject`
+HTTP 200 responses (objects smaller than 64 MiB or explicit `--disable-multipart`;
+larger copies use `ComposeObject`), so a failed copy cannot authorize `mv` to
+remove its source. JWX fixes JSON field-name escaping; pkg v3.14.0
+password-policy semantics are unchanged.
 
 - Per-object `mirror` permission errors are reported and accumulated while later objects continue; finite jobs exit 1. Failed local destination removals are no longer swallowed. These permission failures do not require `--skip-errors` to continue; watch listing/watcher errors retain their existing cancellation/retry behavior.
 - Failed mirrors suppress normal final success statistics. Explicit `--summary` still reports statistics, with JSON `status: failure`; text errors go to stderr and statistics to stdout.
 - Failed legalhold set/clear, partial recursive retention failures, and `mv` source-deletion failures now return nonzero. Successful objects are not rolled back. Retention reports each failed object once.
 - Empty retention durations and invalid find regexes produce normal errors instead of panics. Very short transfers no longer produce infinite speeds in JSON statistics.
 
-**Automation migration:** affected failure paths that returned 0 now return 1.
-Check the final exit code and error records; per-object success start messages
-and progress bytes are not completion proof. Configuration, aliases and `MC_*`
+**Automation migration:** affected failure paths that returned 0 now return 1;
+check the final exit code and error records. Configuration, aliases and `MC_*`
 variables are unchanged. See the [release notes](/blog/release/mcli-20260916/).
 
 ## Changes inherited from 20260913 {#release-20260913}
@@ -151,5 +152,3 @@ Moving from an official `mc` binary to `mcli`:
 [20260313]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-13T08-57-32Z
 [20260321]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-03-21T00-00-00Z
 [20260417]: https://github.com/pgsty/mc/releases/tag/RELEASE.2026-04-17T00-00-00Z
-
-The HTTP-200 CopyObject repair applies when mcli selects a single CopyObject: objects smaller than 64 MiB or explicit `--disable-multipart`. Larger copies normally use ComposeObject; this fix does not substitute for separate evidence for that path.

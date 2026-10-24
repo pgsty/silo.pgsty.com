@@ -50,11 +50,11 @@ See [B02](/compatibility/#b02). Console v2.4.0 introduced cursor pagination, ret
 
 **Sorting, name filtering and select-all apply to the current page.** They cover the whole directory only when the first page already contains it. Paging retains filter text and clears selection; changing page size returns to the first page, and changing directories clears the filter. A failed page leaves the previous page available for retry.
 
-Rewind and deleted-object listings have no cursor. They return at most 1,000 versions within a time budget and disclose incomplete results when either limit is reached. These limits bound browser results, not how many versions the server scans. See the [object-browser contract](https://github.com/pgsty/silo-console/blob/v2.4.2/docs/ObjectBrowser.md#paging).
+Rewind and deleted-object listings have no cursor. They return at most 1,000 versions within a time budget and disclose incomplete results when either limit is reached. See the [object-browser contract](https://github.com/pgsty/silo-console/blob/v2.4.2/docs/ObjectBrowser.md#paging).
 
 ### 6. API responses and automation {#api-output}
 
-See [B04](/compatibility/#b04) and [O05](/compatibility/#o05). Session responses add `accountAccessKey`, and object listings explicitly return `size: 0` for empty objects. Session capabilities also reflect effective permissions; a visible button does not replace server authorization. Custom parsers should tolerate added fields, and Console automation should handle pagination, expired sessions and WebSocket errors.
+See [B04](/compatibility/#b04) and [O05](/compatibility/#o05). Session responses add `accountAccessKey`, and object listings explicitly return `size: 0` for empty objects. Session capabilities also reflect effective permissions. Custom parsers should tolerate added fields, and Console automation should handle pagination, expired sessions and WebSocket errors.
 
 User enable/disable gains a separate `PUT /api/v1/user/{name}/status`; the old `PUT /api/v1/user/{name}` remains but is deprecated. Multi-object downloads retain the existing endpoint and also accept a bounded form request for native streaming ZIP downloads. See [password-permission migration](/compatibility/password-permissions/) and the [v2.4.1 sharing changes](/blog/release/console-2.4.1/); use the current [API definition](https://github.com/pgsty/silo-console/blob/v2.4.2/swagger.yml) for custom integrations.
 

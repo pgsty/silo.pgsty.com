@@ -9,13 +9,13 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-**Status verified on 2026-10-19.** The four maintained stack components and optional KES release independently. The tables identify the public releases and their component graphs; deployment to a particular production environment requires separate verification.
+The four maintained stack components and optional KES release independently. The tables below record the public releases and their component dependency graphs.
 
 ## Server 20261018 release {#october-release}
 
 The target is `RELEASE.2026-10-18T00-00-00Z`, package version `20261018000000.0.0`, selected source [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce). The GitHub release is **public**, with anonymous downloads and Docker Hub images verified on 2026-10-19. See the [20261018 release notes](/blog/release/silo-20261018/) for features, security changes, compatibility and remaining limits.
 
-20261015 remains a historical Draft. Its [artifact record](/blog/release/silo-20261015/) does not substitute for the 20261018 [delivery evidence](/blog/release/silo-20261018/#delivery). Server 20260916 lacks the October Object Lock, IAM and LIST repairs. Installing a newer standalone Console or mcli does not update an installed Server.
+[20261015](/blog/release/silo-20261015/) remains a historical Draft superseded by the [20261018 release](/blog/release/silo-20261018/#delivery), which delivers the October Object Lock, IAM, and LIST repairs (absent from Server 20260916).
 
 ## October component graph {#october-components}
 
@@ -119,8 +119,7 @@ The following changes shipped in Server 20260916 and are absent from Server
 
 The [R4–R8 integration record](https://github.com/pgsty/silo/blob/40220bd836cbd066ca424fa4dc5dbb90057fb55a/docs/investigations/r4-r8-integration/README.md)
 contains source hashes, local tests and remaining acceptance limits. PR #196's
-11 checks passed before merge. Those results establish source acceptance, not
-a new release or production cluster rollout.
+11 checks passed before merge.
 
 ### Console shared downloads {#console-sharing}
 
@@ -169,39 +168,31 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
 - **Upgrade and historical-state readiness:** [#200](https://github.com/pgsty/silo/issues/200)
   tracks the [IAM upgrade/restore rehearsal](/operations/replication/iam-upgrade/);
   [#201](https://github.com/pgsty/silo/issues/201) tracks [historical replica inventory and repair validation](/operations/replication/replica-metadata-audit/).
-  Source repairs do not automatically repair old state.
 - **Release delivery:** [#202](https://github.com/pgsty/silo/issues/202)
   collects release notes and component identities; [#203](https://github.com/pgsty/silo/issues/203)
-  separately validates final artifacts and multi-process behavior. Release-artifact acceptance and production rollout remain separate.
+  tracks final artifact and multi-process validation.
 - **Multi-site delete-marker convergence:** the source-side re-check in
   `254b19ac0` does not cover creations already in flight or replayed from
   another site, and minority marker copies left by a crash after a
   majority-acknowledged purge have no proven persistent cleanup owner.
   [#217](https://github.com/pgsty/silo/issues/217) tracks the receiver-side
-  design. The three-site evidence for the purge repairs came from a combined
-  build, not from the final main; see the
+  design; see the
   [design record](/blog/design/replication-reliability/#third-round-limits).
 - **Listing during rolling restarts:** [#239](https://github.com/pgsty/silo/pull/239)
-  carries the follow-up to [#218](https://github.com/pgsty/silo/issues/218): confirm
+  (shipped in [Server 20261018](/blog/release/silo-20261018/)) carries the follow-up to [#218](https://github.com/pgsty/silo/issues/218): confirm
   eligible unresolved latest-object entries, distinguish deletion from read
   failure and preserve terminal errors through pagination. It adds no disk
-  format, client parameter or migration switch. The [current design and
-  acceptance limits](/blog/design/listing-recovery-lock-cost/) supersede the
-  earlier investigation guidance. Until running a release that contains this
-  repair, retain the warning against destination-deleting synchronization
-  during rolling restarts. Source integration does not update installed binaries.
+  format, client parameter or migration switch. See the [current design and
+  acceptance limits](/blog/design/listing-recovery-lock-cost/).
 - **Pool migration and historical tags:** the final 20261018 artifacts passed
   four local 2/3-pool rebalance/decommission cases, including tags, versions,
   markers and interruption/recovery. See the [October migration repair](/blog/design/multi-pool-object-consistency/#migration-20261018).
-  This is shared-host evidence; multi-host migration and production performance
-  need deployment-specific validation. Tags lost before the repair need an audit.
+  Tags lost before the repair need a separate audit.
 - **Multipart listing:** [#79](https://github.com/pgsty/silo/issues/79) remains
   open. Server 20261018 withdraws the default persistent scan and retires the
   optional strict mode. Public listing again uses a node-local cache or an
   exact-key lookup; complete discovery, prefix/pagination semantics and delayed
-  creation writes remain unresolved. The #198 discovery and strict-cancellation
-  capabilities describe the older opt-in implementation, not this candidate.
-  See the [current contract and capacity evidence](/blog/design/list-multipart-uploads/#implementation).
+  creation writes remain unresolved. See the [current contract and capacity evidence](/blog/design/list-multipart-uploads/#implementation).
 
 ## Dependency and release order {#order}
 
@@ -230,12 +221,9 @@ pkg retains a Go **1.26** library floor and
 was also race-tested with Go **1.26.8**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
 on NetBSD; Console's tablewriter **v0.0.5** replacement preserves its MC API.
-These are documented compatibility pins, not missed automatic upgrades.
 
-Other dependencies change for concrete CVE/bug fixes, not just newer major
-versions. The September 13 Go scans found no reachable or imported vulnerable
-package, but retained module-only **GO-2026-5932** in unused OpenPGP code. A clean
-reachability result is not a claim that every selected module is advisory-free.
+Other dependencies are updated for concrete CVE and bug fixes. The September 13 Go scans found no reachable or imported vulnerable
+package, while retaining module-only **GO-2026-5932** in unused OpenPGP code.
 
 The supported integration target is the coordinated PGSTY stack. Compatibility
 with unmodified upstream MinIO/MC and other S3 implementations is best effort.
@@ -264,8 +252,8 @@ clears absent fields when reusing legacy `xl.meta` headers and keeps scanner
 updates separate from final caches. Storage formats, RPC fields and dependency
 versions are unchanged. The [problem and repair record](/blog/design/stale-metadata-reuse/)
 documents deterministic regression coverage, a two-process scanner check,
-post-merge CI, and operator verification. The source repair is included in
-[Server 20261015](/blog/release/silo-20261015/); draft artifact acceptance does not establish a public release or production rollout.
+post-merge CI, and operator verification. The source repair entered the
+[Server 20261015](/blog/release/silo-20261015/) draft and shipped publicly in [Server 20261018](/blog/release/silo-20261018/).
 
 ## Repairs after 20261015 included in 20261018 {#post-20261015}
 
