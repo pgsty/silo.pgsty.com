@@ -3,7 +3,7 @@ title: "Silo Console 2.1.0 Released"
 linkTitle: "silo/console 2.1.0"
 date: 2026-08-06
 author: "Ruohang Feng"
-description: "A bilingual console: a zero-dependency English/Chinese interface across every screen, the dashboard migrated to MinIO Metrics V3 with explicit zero-state semantics, and a batch of correctness fixes including escape-proof placeholders and a select-all that cannot lie."
+description: "A bilingual console: a zero-dependency English/Chinese interface across every screen, the dashboard migrated to MinIO Metrics V3 with explicit zero-state semantics, and a batch of correctness fixes including escape-proof placeholders and filter-aware select-all."
 tags: [Release, console]
 weight: 3
 url: "/blog/release/console-2.1.0/"
@@ -12,11 +12,11 @@ aliases:
 ---
 **Published:** 2026-08-06 · **Version:** [v2.1.0](https://github.com/pgsty/silo-console/releases/tag/v2.1.0) · **Repository:** [pgsty/silo-console](https://github.com/pgsty/silo-console)
 
-SILO Console 2.1.0 is the first feature release after the independent 2.0.0. It does three things:
+SILO Console 2.1.0 is the first feature release after the independent 2.0.0. It delivers three main changes:
 
-1. **Speaks two languages** — every console screen, help topic, and documentation link now renders in English or Chinese, behind a toggle on every page, with zero new runtime dependencies;
-2. **Reads the right metrics** — the dashboard moves off the MinIO Metrics V2 names onto V3, with explicit handling for the semantics V3 changed underneath it;
-3. **Stops lying in edge cases** — a select-all that matched what a bulk action would delete, placeholders that survive object names containing `$&`, timestamps that carry a timezone, and empty metrics that read "no data" instead of a fabricated `0`.
+1. **Bilingual interface** — every console screen, help topic, and documentation link now renders in English or Chinese behind a toggle on every page, with zero new runtime dependencies;
+2. **Metrics V3 dashboard** — the dashboard moves from MinIO Metrics V2 names onto V3, with explicit handling for the semantics V3 changed underneath it;
+3. **Edge-case correctness fixes** — a select-all that matches what a bulk action will delete, placeholders that handle object names containing `$&`, timestamps with an explicit timezone, and empty metrics that display "no data" rather than a fabricated `0`.
 
 This is a **minor release**. No environment variable, module path, API contract, binary name, or data layout changes. Upgrading is a binary or image swap.
 
@@ -82,10 +82,10 @@ Three properties of V3 break a naive name-for-name rewrite, and each needed a de
 
 ### Zero-state semantics {#zero-state-semantics}
 
-An adversarial review of the migration produced eight findings, all fixed before release. They share one theme — the difference between *zero*, *no data*, and *not yet scanned*:
+The migration distinguishes *zero*, *no data*, and *not yet scanned* across eight edge cases:
 
 - **Capacity** free/used baselines on the always-present total, so a full cluster reads `0 free` instead of vanishing.
-- **Online Drives** is guarded against the all-offline case, where the zero-skip would erase the panel exactly when it matters most.
+- **Online Drives** is guarded against the all-offline case, where the zero-skip would erase the panel when all drives are down.
 - **Bucket and object counts** guard on the usage group's own freshness gauge, so a cluster that has not completed its first scan reads *no data* rather than a fabricated `0`.
 - **Empty single-value results** render as `—`, not `0`.
 - **An empty size distribution** no longer fabricates seven zero-height bins.
@@ -107,9 +107,9 @@ Two **server-side** bugs were identified during this work and are tracked upstre
 
 ### Placeholders that survive real object names {#escape-proofing}
 
-`String.prototype.replace` interprets `$&`, `$'`, `` $` ``, and `$1` **in the replacement value** as directives. S3 keys legally contain `$`. So an object named `report$&.csv` did not render as itself — it re-injected the matched placeholder text into the output and corrupted the message. All **37** dictionary placeholder substitutions now pass the value through a function replacement, where no such interpretation happens. This was a latent bug in the original English UI, not something i18n introduced; the i18n audit is simply what found it.
+`String.prototype.replace` interprets `$&`, `$'`, `` $` ``, and `$1` **in the replacement value** as directives. S3 keys legally contain `$`. So an object named `report$&.csv` did not render as itself — it re-injected the matched placeholder text into the output and corrupted the message. All **37** dictionary placeholder substitutions now pass the value through a function replacement, where no such interpretation happens. This bug existed in the original English UI and surfaced during the localization audit.
 
-### A select-all that means what it shows {#select-all}
+### A select-all that matches bulk actions {#select-all}
 
 The vendored data table renders a plain untranslatable "Select" header whenever `onSelectAll` is absent — which was the case on all seven selectable tables. Worse, the naive fix is wrong: a select-all that replaces the whole selection **drops rows hidden by an active filter**, so the header checkbox and a subsequent bulk action can target different sets. The implementation toggles only the currently visible rows and preserves filter-hidden selections, so the header state can no longer imply a different set than the action would touch.
 
@@ -158,11 +158,9 @@ Two things are worth knowing:
 
 ## Verification Scope {#verification-scope}
 
-Before tagging, the full change set was reviewed and the following gates were run against the final tree: `go build`, `go vet`, `golangci-lint` (0 issues), the Go unit suite across all packages, `gofmt`, TypeScript type checking, the frontend production build, Prettier across all sources, dictionary duplicate-key checks, and a debug-leftover scan of the complete diff.
+Before tagging, the following verification checks ran against the final tree: `go build`, `go vet`, `golangci-lint` (0 issues), the Go unit suite across all packages, `gofmt`, TypeScript type checking, the frontend production build, Prettier across all sources, dictionary duplicate-key checks, and a debug-leftover scan of the complete diff.
 
-The 29 intermediate commits were restructured into 20 logical ones by pure tree operations, and the rebuilt tip was verified **byte-identical** to the pre-rewrite tree. The embedded payload was rebuilt twice from a clean directory and confirmed byte-identical, which is the property the release pipeline's zero-diff gate depends on. The pre-rewrite history is retained in a backup ref.
-
-The Metrics V3 migration was additionally reviewed adversarially by an independent model, and all eight findings were fixed (see [Zero-state semantics](#zero-state-semantics)); its queries were validated against a live metrics store with real cluster data.
+The embedded payload was rebuilt twice from a clean directory and confirmed byte-identical for the release pipeline's zero-diff gate. Metrics V3 queries were validated against a live metrics store with real cluster data.
 
 ## Known Limitations {#known-limitations}
 

@@ -10,12 +10,7 @@ draft: false
 url: "/zh/blog/release/delete-object-version-authorization/"
 ---
 
-> **发布状态：** 此变更已在
-> [pgsty/silo#104](https://github.com/pgsty/silo/pull/104) 中实现，对应
-> [Issue #58](https://github.com/pgsty/silo/issues/58)。本文发布本身不代表
-> 某个服务器版本、软件包、镜像或部署已经包含该变更。
-
-SILO 现在按照请求实际执行的删除类型选择权限：
+自 [Server 20260903](/zh/blog/release/silo-20260903/) 起（[pgsty/silo#104](https://github.com/pgsty/silo/pull/104)，对应 [Issue #58](https://github.com/pgsty/silo/issues/58)），SILO 按照删除请求实际执行的操作类型选择所需权限：
 
 | 请求 | 所需权限 |
 | --- | --- |
@@ -24,36 +19,21 @@ SILO 现在按照请求实际执行的删除类型选择权限：
 | 显式 `versionId=null` | `s3:DeleteObjectVersion` |
 | `DeleteObjects` | 对每个 XML 条目独立应用映射 |
 
-此前所有情况都要求 `s3:DeleteObject`，`s3:DeleteObjectVersion` 只用于检查显式 Deny。
-因此只有 `DeleteObject` 的主体可以永久移除一个指定的历史版本；反过来，只有
-`DeleteObjectVersion` 的最小权限清理主体却无法执行它原本负责的操作。
+此前所有情况均要求 `s3:DeleteObject`，而 `s3:DeleteObjectVersion` 仅用于检查显式 Deny。这导致仅持有 `DeleteObject` 的主体可以永久移除指定的历史版本，而仅持有 `DeleteObjectVersion` 的最小权限清理主体却无法执行版本清理。
 
-变更后，只有 `DeleteObject` 的主体仍可执行未指定版本的删除或创建 delete marker，
-但删除 UUID 或 `null` 版本会收到 `AccessDenied`。只有 `DeleteObjectVersion` 的主体
-可以移除指定版本，但不能创建 delete marker。显式 Deny 与 `s3:versionid` 条件继续遵循
-正常策略优先级。多删读取每个条目自己的 `VersionId`；外层查询参数不能污染其他条目的
-condition value。
+修复后，仅持有 `DeleteObject` 的主体仍可执行不带版本号的删除或创建删除标记（Delete Marker），但在尝试删除指定 UUID 或 `null` 版本时会收到 `AccessDenied`。仅持有 `DeleteObjectVersion` 的主体可以永久删除指定版本，但不能创建删除标记。显式 Deny 与 `s3:versionid` 策略条件保持原有求值优先级。批量删除（`DeleteObjects`）按每个条目自身的 `VersionId` 求值，外层 URL 查询参数不会污染其他条目的条件值。
 
 ## 复制兼容性 {#replication-compatibility}
 
-存储桶与站点复制的目标策略**不需要**新增 `s3:DeleteObjectVersion`。通过认证的请求凭借
-精确内部 marker 与 `s3:ReplicateDelete` 获得复制删除信任；receiver 继续保留已经部署的
-`s3:DeleteObject + s3:ReplicateDelete` 契约。显式 Deny
-`s3:DeleteObjectVersion` 仍会阻止复制版本清理。
+存储桶与站点复制的目标策略**无需**新增 `s3:DeleteObjectVersion`。已认证请求通过精确的内部复制标记与 `s3:ReplicateDelete` 获得复制删除信任，接收端继续沿用已部署的 `s3:DeleteObject + s3:ReplicateDelete` 策略契约；而针对 `s3:DeleteObjectVersion` 的显式 Deny 仍会阻止复制版本清理。
 
-这种区分既避免升级后的目标端静默拒绝永久删除复制，也不会给只有
-`ReplicateDelete` 的凭据新增删除能力。真实两站回归使用了不含
-`DeleteObjectVersion` 的文档最小策略目标用户；永久版本删除与 delete marker 均成功收敛。
+这种区分既避免了升级后的目标站点静默拒绝永久删除复制，也不会给仅持有 `ReplicateDelete` 的凭据赋予额外的普通删除能力。双站点回归测试验证了使用最小权限策略（不含 `DeleteObjectVersion`）的目标端用户：永久版本删除与删除标记均能正常收敛。
 
 ## 升级影响 {#upgrade-impact}
 
-- 检查当前只授予 `s3:DeleteObject`、但会执行 `mc rm --version-id`、
-  `mc rm --versions`、Console 删除全部版本或 SDK `versionId` 删除的用户、服务账户、
-  OPA 与外部授权策略。
-- 对普通的指定版本删除，外部授权插件现在只会看到一次
-  `s3:DeleteObjectVersion` 判定，而不再看到旧的 deny-only 检查再加
-  `s3:DeleteObject` 两次调用。
-- `X-Minio-Force-Delete` 前缀清理仍由 `s3:DeleteObject` 控制；它不是显式版本 S3 请求。
-- 不涉及 wire 或存储格式迁移。回滚会恢复旧授权映射，但不会修改已有对象或 metadata。
+- 请检查当前仅授予 `s3:DeleteObject`，但需要执行 `mc rm --version-id`、`mc rm --versions`、Console“删除全部版本”或 SDK 指定 `versionId` 删除的用户、服务账号、OPA 及外部授权策略，为其补充 `s3:DeleteObjectVersion`。
+- 对于普通的指定版本删除，外部授权插件现在只会收到一次 `s3:DeleteObjectVersion` 判定请求，不再像修复前那样先收到一次仅检查 Deny 的 `s3:DeleteObjectVersion` 调用、再收到一次 `s3:DeleteObject` 调用。
+- `X-Minio-Force-Delete` 前缀强制删除仍由 `s3:DeleteObject` 控制。
+- 本次变更不涉及传输协议或磁盘存储格式迁移。
 
-完整操作权限矩阵参见[对象删除](/zh/administration/object-management/object-delete/)。
+完整的操作权限矩阵参见[对象删除](/zh/administration/object-management/object-delete/)。

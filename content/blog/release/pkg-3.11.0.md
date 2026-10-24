@@ -19,7 +19,7 @@ This is the fork's **first pinned release**. It restores the IAM bucket/object r
 > **Two things to check before upgrading**
 >
 > 1. **This release tightens authorization.** Twelve bucket-level write actions are no longer reachable through an object-only resource pattern such as `arn:aws:s3:::bucket/*`. If you write your own bucket-scoped policies, read [The IAM bucket/object boundary](#bucket-boundary) — the fix is one line of policy for anyone affected, and `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` restores the previous behaviour in full.
-> 2. **The condition-key fix still needs its server half.** The policy lookup change and the server changes that reserve internal condition-key names each cover one half of that problem. The companion server work exists in `pgsty/minio` commit `2f55347f7` but is not yet on public `origin/master`, and no published Silo server release contains it. Verify that a later server release explicitly includes it.
+> 2. **Pair with the server condition-key update.** The policy lookup change and the server changes that reserve internal condition-key names each cover one half of the condition-key fix. The companion server work (`2f55347f7`) ships in [SILO 20260804](/blog/release/silo-20260804/).
 
 ## What This Repository Is {#what-is-this}
 
@@ -62,7 +62,7 @@ Removing the slash for every bucket-level request is the obvious fix, and upstre
 
 The scope was decided by one question: **does reaching this action give the caller something its object-scoped grant does not already provide?**
 
-That question is the right one because of how the defect fires. Resource matching runs *after* action matching, so the bug only bites when the statement already grants the bucket-level action — which in practice means `s3:*`. The affected principal therefore already holds full read, write and delete over every object in the bucket. The useful question is not how dangerous an action sounds in the abstract, but what reaching it adds to a position that already includes all of the data.
+That question is the right one because of how the defect fires. Resource matching runs *after* action matching, so the bug only bites when the statement already grants the bucket-level action — which in practice means `s3:*`. The affected principal therefore already holds full read, write and delete over every object in the bucket. The relevant question is what reaching a bucket action adds to a caller that already controls all object data in the bucket.
 
 **Withheld from object-only grants (twelve actions):**
 
@@ -88,7 +88,7 @@ All of the above rests on one property: **this change may remove permissions and
 
 The first attempt let the withheld slash reach the **`NotResource`** match as well — and `NotResource` is an *exclusion*. An `Allow s3:* NotResource bucket/*` statement historically did not apply to bucket-level requests on that bucket; matching the exclusion against the bare bucket name made it stop matching, so the `Allow` it qualified grew, for exactly the writes being protected.
 
-The second attempt fixed that and shipped saying the result was provably monotone. An independent adversarial review of that release produced a counterexample. Withholding the slash does not merely remove a match — it changes *which string patterns are matched against*, and a pattern can match `"mybucket"` without ever having matched `"mybucket/"`. A fixed-width wildcard is the clean case:
+The second attempt fixed that and shipped saying the result was provably monotone. Testing against fixed-width wildcard patterns exposed a counterexample. Withholding the slash changes *which string patterns are matched against*, and a pattern can match `"mybucket"` without ever having matched `"mybucket/"`. A fixed-width wildcard is the clean case:
 
 ```text
 Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
@@ -96,9 +96,7 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 
 `?` matches exactly one character. Against the nine-character `"mybucket/"` it does not match, so this statement never authorized the bucket-level write. Against the new eight-character `"mybucket"` it does, so the hardening *granted* something the buggy matcher refused.
 
-The fix is not another special case. On the protected path the matcher now requires **both** forms to match — the bare bucket name *and* the historical `"bucket/"`. The result is an intersection with the historical decision, so it is monotone **by construction**: there is no pattern it can newly satisfy, and no argument left to get wrong. `mybucket*` still grants (it matched both all along), `mybucket/*` is still withheld, and `mybucke?` is refused exactly as it always was.
-
-Two lessons are worth carrying forward. **A correctness fix in an authorization path must never make anything newly allowed** — and the only way to know is to test both directions, because the reasoning felt airtight in both cases where it wasn't. And when a security property is load-bearing, **build it out of an operation that cannot violate it** rather than out of a case analysis believed to be complete.
+On the protected path the matcher now requires **both** forms to match — the bare bucket name *and* the historical `"bucket/"`. The result is an intersection with the historical decision, so it is monotone **by construction**: there is no pattern it can newly satisfy. `mybucket*` still grants (it matched both all along), `mybucket/*` is still withheld, and `mybucke?` is refused as before.
 
 ### Evidence {#bucket-boundary-evidence}
 

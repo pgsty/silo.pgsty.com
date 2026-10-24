@@ -4,7 +4,7 @@ linkTitle: "silo/console 2.2.0"
 date: 2026-08-26
 lastmod: 2026-08-26
 author: "冯若航"
-description: "SILO Console 2.2.0 发布说明：安全文本预览、不会说谎的下载路径、真正生效的权限门控、拆分后的用户 API、加固的通知与 IAM 策略写入，以及基于 Go 1.27 和 SILO 维护分支的依赖栈。"
+description: "SILO Console 2.2.0 发布说明：有界文本预览、严格的下载完整性、修复后的权限门控、拆分的用户状态与用户组 API、加固的通知与 IAM 策略写入，以及基于 Go 1.27 和 SILO 维护组件的依赖栈。"
 tags: [发布, console]
 weight: 1
 draft: false
@@ -13,18 +13,15 @@ aliases:
   - /releases/console-2.2.0/
 ---
 
-> [!NOTE]
-> **已于 2026-08-26 正式发布。** [`v2.2.0`](https://github.com/pgsty/silo-console/releases/tag/v2.2.0) 指向最终提交 [`7dc4258a6`](https://github.com/pgsty/silo-console/commit/7dc4258a6a33b6e01b5b3bae8a0fd63f02b3bad8)。这棵精确标签树通过了完整 CI 矩阵、漏洞检查与发布流水线。公开 Release 包含六个独立二进制、九个 Linux 软件包和一份 SHA-256 校验和清单。
+**发布日期：** 2026-08-26 · **版本：** [`v2.2.0`](https://github.com/pgsty/silo-console/releases/tag/v2.2.0)（[`7dc4258a6`](https://github.com/pgsty/silo-console/commit/7dc4258a6a33b6e01b5b3bae8a0fd63f02b3bad8)）· **仓库：** [pgsty/silo-console](https://github.com/pgsty/silo-console)
 
-**版本：** [`v2.2.0`](https://github.com/pgsty/silo-console/releases/tag/v2.2.0) · **发布提交：** `7dc4258a6` · **状态：** 已发布 · **仓库：** [pgsty/silo-console](https://github.com/pgsty/silo-console)
+SILO Console 2.2.0 新增面向日志与结构化文本的有界预览，收紧下载错误处理以防止截断的压缩包被当作完整文件交付，修复数据表格行操作的权限门控，将用户启停状态与用户组变更拆分为独立 API，并在写入前校验数据库通知 DSN 与 IAM 策略文档。
 
-SILO Console 2.2.0 是一个以正确性与加固为主题的版本。它新增一项功能——对日志与结构化文本的严格受限预览——其余精力全部用于让既有界面「说真话」：下载不再可能静默交付缺文件的压缩包，进度条不再可能编造百分比，权限门控真正禁用它声称禁用的按钮，用户 API 不再把状态变更与用户组变更捆绑在一起，数据库通知表单发出的连接串与服务器实际存储的完全一致。
-
-在底层，依赖栈迁移到 Go 1.27.0，并切换到 SILO 维护的分支：[`pgsty/silo-pkg` 3.12.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.1) 取代上游 `minio/pkg`，`pgsty/mc` 分支取代上游 `mc` 库依赖，`minio-go` 升级到 7.3.0，etcd client 系列升级到 3.7.1，关闭 [CVE-2026-73500](https://pkg.go.dev/vuln/GO-2026-6107)。
+在底层，依赖栈迁移到 Go 1.27.0，并切换到 SILO 维护的组件：[`pgsty/silo-pkg` 3.12.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.1) 取代上游 `minio/pkg`，`pgsty/mc` 取代上游 `mc` 库依赖，`minio-go` 升级到 7.3.0，etcd client 系列升级到 3.7.1，修复 [CVE-2026-73500](https://pkg.go.dev/vuln/GO-2026-6107)。
 
 自 [v2.1.1](https://github.com/pgsty/silo-console/releases/tag/v2.1.1) 以来的最终变更集共 33 个提交，涉及 176 个源文件（+8,794/−2,057 行，不含重新生成的嵌入式前端资产）。
 
-**为什么是 2.2.0 而不是 2.1.2：** 单看用户可见的修复，补丁版本号就够了；但这个周期更换了共享策略/证书实现的提供方、跨越了 etcd client 的 minor 边界、拆分了一条 REST 路由、并刻意改变了下载失败语义。这几件事中的每一件都值得在 minor 版本线上配一份明确的兼容性说明，而不是藏在一个补丁号里。
+**为什么版本号是 2.2.0：** 本周期切换了共享策略与证书实现的依赖提供方、跨越了 etcd client 的 minor 版本边界、拆分了一条 REST 路由，并调整了文件夹下载的失败语义。
 
 ## 日志与结构化文本预览 {#text-preview}
 
@@ -38,11 +35,11 @@ SILO Console 2.2.0 是一个以正确性与加固为主题的版本。它新增�
 
 围绕新预览类型，既有预览管线也一并修正：空对象预览为空而不是报错，追加写入的日志按新长度重新预览而不是按过期的列表尺寸截断，快速切换对象时的元数据竞态已消除。预览与分享对话框现在拿到对象的真实大小（[`92e8f4e65`](https://github.com/pgsty/silo-console/commit/92e8f4e65fefad32581cfc86bd2a36f4305b7bd2)）。
 
-## 不会说谎的下载 {#downloads}
+## 下载完整性与进度计算 {#downloads}
 
-整条下载路径——进度报告、单对象、文件夹、归档、字节范围——围绕一条原则重建：**下载要么正确完成，要么可见地失败。**
+下载路径（进度上报、单对象、文件夹、归档与字节范围）统一改为严格校验完成状态与错误返回。
 
-### 诚实的进度 {#download-progress}
+### 未知总大小时的进度显示 {#download-progress}
 
 缺失、非法或自相矛盾的总大小不再变成编造的百分比：进度指示器保持**不确定态**，直到真实总量已知。零字节对象被显式归一化而不是落进未知总量路径；中止与取消是终态——迟到的进度事件不可能复活一个已取消的下载。下载请求恰好结算一次，JSON 错误体被安全解析，生成的对象 URL 会被回收。
 
@@ -112,7 +109,7 @@ PostgreSQL 与 MySQL 事件目标表单围绕一个共享的 DSN 解析器/序�
 - 服务器现在**拒绝其配置语法会破坏的 DSN**——内嵌换行、会被解析成兄弟配置键的值（比如密码里含 `table=`）、不平衡的引号——在存储之前返回 400，且不把提交的机密回显在错误里。
 - 各通知目标（Kafka、Redis、MQTT、NATS、Webhook）的通用密码与令牌字段渲染为密码输入框，包括被环境变量覆盖的值。
 
-### 诚实的重启标记 {#restart}
+### 准确的待重启状态 {#restart}
 
 配置的新增、更新、删除、重置现在尊重**服务器实际返回的是否需要重启**，而不是硬编码「需要重启」（或者更糟——弄丢它）。待重启标记是单调的：一旦有操作要求重启，后续不要求重启的操作不能清除它——只有真正的服务重启才能。
 
@@ -161,7 +158,7 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd
 
 最终版本在独立兼容性审查后把 `minio-go` 升级到 v7.3.0，迁移其 INI 导入路径，并增加 lifecycle-filter XML 兼容覆盖。控制台侧的兼容解码器可以接受旧服务器返回的 legacy AccountInfo tag payload。其他已接受的维护变更包括 `jwx` v2→v3 与 `httprc` v3、`go-openapi/swag/conv`+`typeutils` 0.28.0、`grpc-gateway` 2.29.0、`cheggaaa/pb` 1.0.30 和 `go.yaml.in/yaml/v3` 3.0.5；无关的更大规模 go-openapi、`pb/v3`、压缩库与测试库升级仍然推迟。
 
-前端方面，漏洞检查工作流扩展到 push、手动触发与开发依赖，使用不可变安装；刷新了有漏洞的传递依赖解析（`fast-xml-parser` 5.11、`nanoid` 3.3.18、`@babel/core` 7.29.7），移除了死导出与未使用的 `http-status-codes` 依赖。`fast-xml-parser` 5.x 新的传递依赖树（`@nodable/entities`、`is-unsafe`、`anynum`、`fast-xml-builder`、`path-expression-matcher`、`xml-naming`）在本次评审中做过供应链核查：六个包全部由 fast-xml-parser 作者本人的账号与组织发布，安装代码不含执行/网络/外传模式，且整棵树仅用于开发——不进入浏览器产物。
+前端方面，漏洞检查工作流扩展到 push、手动触发与开发依赖，使用不可变安装；刷新了有漏洞的传递依赖解析（`fast-xml-parser` 5.11、`nanoid` 3.3.18、`@babel/core` 7.29.7），移除了死导出与未使用的 `http-status-codes` 依赖。`fast-xml-parser` 5.x 的传递依赖树仅用于开发阶段，不进入浏览器构建产物。
 
 ## 安全评审 {#security}
 
@@ -200,16 +197,14 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd
 5. 待重启指示会持续到真正重启为止，不再会被后来一次无关的配置变更清除。
 6. 如果控制台前面的反向代理压缩了 `/api/v1/…/download` 响应，文本预览的严格 `Content-Length` 校验会把所有预览判为错误。控制台自身只压缩静态资产——请让代理对 API 响应保持不压缩。
 
-## 回归评审 {#regression-review}
+## 已知限制与后续跟进 {#regression-review}
 
-由于本版本重写了下载路径并更换了共享策略库的提供方，v2.1.1 至今的完整 diff 经过了五路并行的对抗式复审（Go API；对象浏览器预览/下载；权限门控与服务账号；表单/i18n/会话；依赖/构建/CI），每一路都专门猎捕「2.1.1 里正常、现在被悄悄改变」的行为。
+修复表格操作按钮禁用属性后，暴露出两处既有谓词把行对象与字符串直接比较的 UI 缺陷：
 
-**结论：未发现任何非刻意的回归。** 所有确认的行为差异都属于上文记录的刻意变更。评审确实揪出了两个此前就存在的小型 UI 守卫缺陷——死属性被修复激活后，谓词参数类型一直就不对的问题显形了：
+- 「不能删除 Default IDP 配置」的行守卫将行对象与字符串 `"Default"` 比较，导致按钮未禁用（`IDPConfigurations.tsx`）；
+- 「不能删除环境变量覆盖的 Webhook 端点」的行守卫存在同样的对象与字符串类型不匹配（`WebhookSettings.tsx`）。
 
-- 「不能删除 Default IDP 配置」的行守卫拿行对象与字符串 `"Default"` 比较，因此永远不生效（`IDPConfigurations.tsx`）；
-- 「不能删除环境变量覆盖的 Webhook 端点」的行守卫存在同样的对象-字符串错配，同样失效（`WebhookSettings.tsx`）。
-
-两者都不是 2.2.0 的回归——这两个谓词在 2.1.1 里整体就是死代码——且两处服务端仍然执行真实规则。它们作为发布后的后续项继续记录。另有两处锋利边缘记为已知限制而非缺陷：新的 PostgreSQL DSN 解析器在填充结构化字段时只接受规范的 `key=value` 语法（不常见但 libpq 合法的 DSN 会显示为空结构化字段，此时编辑结构化字段会用这些字段重建 DSN）；TestCafe/Playwright 覆盖断言的是 UI 门控，真实服务器的拒绝路径覆盖仍由集成套件承担。
+两处操作在提交时仍由服务端拦截。此外，新的 PostgreSQL DSN 解析器在填充结构化字段时仅解析规范的 `key=value` 语法（非常规但 libpq 合法的 DSN 会显示为空结构化字段，编辑结构化字段时会用这些字段重建 DSN）；TestCafe/Playwright 断言覆盖 UI 门控，服务端拒绝路径由集成测试套件覆盖。
 
 ## 验证 {#verification}
 
@@ -234,8 +229,6 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd
 1. 六个独立二进制：Linux amd64/arm64/armv6、macOS amd64/arm64、Windows amd64；
 2. 九个 Linux 软件包：amd64、arm64、armv6 各自的 DEB、RPM 与 APK；
 3. `silo-console_2.2.0_checksums.txt`，以及 GitHub 为每个制品记录的 SHA-256 digest。
-
-本文核实的是这些制品、标签与 Release 页面；不声称另有独立分发的容器镜像或 detached signature。
 
 ## 相关提交 {#related-commits}
 

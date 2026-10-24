@@ -10,64 +10,30 @@ draft: false
 url: "/blog/release/delete-object-version-authorization/"
 ---
 
-> **Release status:** this change is implemented in
-> [pgsty/silo#104](https://github.com/pgsty/silo/pull/104), tracking
-> [issue #58](https://github.com/pgsty/silo/issues/58). Publishing this note
-> does not by itself mean that a server release, package, image, or deployment
-> contains the change.
-
-SILO now maps object-delete authorization to the operation the request will
-actually perform:
+Starting in [Server 20260903](/blog/release/silo-20260903/) ([pgsty/silo#104](https://github.com/pgsty/silo/pull/104), tracking [issue #58](https://github.com/pgsty/silo/issues/58)), SILO maps object-delete authorization to the operation the request actually performs:
 
 | Request | Required action |
 | --- | --- |
 | No `versionId` | `s3:DeleteObject` |
 | Version UUID | `s3:DeleteObjectVersion` |
 | Explicit `versionId=null` | `s3:DeleteObjectVersion` |
-| `DeleteObjects` | The mapping is applied independently to every XML entry |
+| `DeleteObjects` | Applied independently to each XML entry |
 
-Previously, SILO required `s3:DeleteObject` for every case and used
-`s3:DeleteObjectVersion` only as an explicit-deny check. A principal holding
-only `DeleteObject` could therefore permanently remove a named historical
-version. Conversely, a least-privilege purge principal holding only
-`DeleteObjectVersion` could not perform the operation it was intended for.
+Previously, SILO required `s3:DeleteObject` for every delete operation and evaluated `s3:DeleteObjectVersion` only as an explicit-deny check. A principal holding only `DeleteObject` could permanently remove a specific historical version, whereas a least-privilege purge principal holding only `DeleteObjectVersion` was denied.
 
-After this change, a `DeleteObject`-only principal can still perform an
-unversioned delete or create a delete marker, but receives `AccessDenied` for a
-named UUID or `null` version. A `DeleteObjectVersion`-only principal can remove
-the named version but cannot create a delete marker. Explicit denies and
-`s3:versionid` conditions retain normal policy precedence. Multi-delete uses
-each entry's `VersionId`; a query-level decoy cannot change another entry's
-condition value.
+With this change, a `DeleteObject`-only principal can perform an unversioned delete or create a delete marker, but receives `AccessDenied` when targeting a version UUID or `null` version. A `DeleteObjectVersion`-only principal can permanently remove a named version, but cannot create a delete marker. Explicit denies and `s3:versionid` conditions retain normal policy precedence. Multi-object delete (`DeleteObjects`) evaluates each entry's own `VersionId` so a query-string parameter cannot alter another entry's condition value.
 
 ## Replication compatibility {#replication-compatibility}
 
-Bucket and site replication target policies do **not** need to add
-`s3:DeleteObjectVersion`. An authenticated request earns replication delete
-trust through an exact internal marker and `s3:ReplicateDelete`; the receiver
-then preserves the deployed `s3:DeleteObject + s3:ReplicateDelete` contract.
-An explicit deny on `s3:DeleteObjectVersion` continues to block a replicated
-version purge.
+Bucket and site replication target policies do **not** need to add `s3:DeleteObjectVersion`. Authenticated replication requests establish delete trust through the exact internal replication marker and `s3:ReplicateDelete`, preserving the deployed `s3:DeleteObject + s3:ReplicateDelete` receiver contract. An explicit deny on `s3:DeleteObjectVersion` continues to block replicated version purges.
 
-This distinction prevents an upgraded target from silently rejecting permanent
-delete replication and also avoids granting new delete capability to a
-`ReplicateDelete`-only credential. A real two-site regression used a target
-user with the documented minimal policy and no `DeleteObjectVersion`; both a
-permanent version delete and a delete marker converged successfully.
+This separation keeps upgraded replication targets compatible with existing least-privilege policies without granting new standalone delete capabilities to `ReplicateDelete`-only credentials. Two-site regression tests verified that a target user holding the documented minimal policy (without `DeleteObjectVersion`) converges both permanent version deletes and delete markers.
 
 ## Upgrade impact {#upgrade-impact}
 
-- Review user, service-account, OPA, and external authorization policies that
-  currently grant only `s3:DeleteObject` but perform `mc rm --version-id`,
-  `mc rm --versions`, Console delete-all-versions, or SDK deletes with
-  `versionId`.
-- External authorization plugins now see one `s3:DeleteObjectVersion` decision
-  for an ordinary named-version delete instead of the former deny-only check
-  followed by `s3:DeleteObject`.
-- `X-Minio-Force-Delete` prefix cleanup remains gated by `s3:DeleteObject`; it
-  is not an explicit-version S3 request.
-- There is no wire or storage-format migration. Rolling back restores the old
-  authorization mapping but does not alter stored objects or metadata.
+- Review user, service-account, OPA, and external authorization policies that currently grant only `s3:DeleteObject` for principals that run `mc rm --version-id`, `mc rm --versions`, Console delete-all-versions, or SDK deletes with an explicit `versionId`, and grant `s3:DeleteObjectVersion` where needed.
+- External authorization plugins now receive a single `s3:DeleteObjectVersion` check for ordinary named-version deletes instead of the former deny-only check followed by `s3:DeleteObject`.
+- `X-Minio-Force-Delete` prefix cleanup remains gated by `s3:DeleteObject`.
+- Wire and storage formats are unchanged.
 
-See [Object Deletion](/administration/object-management/object-delete/) for the
-operator-facing permission matrix.
+See [Object Deletion](/administration/object-management/object-delete/) for the full permission matrix.

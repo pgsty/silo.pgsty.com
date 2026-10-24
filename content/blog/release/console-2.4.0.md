@@ -11,8 +11,6 @@ url: "/blog/release/console-2.4.0/"
 
 [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0) was published
 on 2026-09-08 from [`c103d08e`](https://github.com/pgsty/silo-console/commit/c103d08ec36aab8e08ba091d77b639158ce9f18f).
-**September 16 follow-up:** [Console v2.4.1](/blog/release/console-2.4.1/) is the
-current release. This article records the v2.4.0 behavior and dependencies.
 
 ## Released behavior {#changes}
 
@@ -44,8 +42,7 @@ and verifiable release artifacts. It selects pkg v3.14.1 and mcli 20260916.
 v2.4.0 uses the earlier browser-memory ZIP path. Read the
 [password migration](/compatibility/password-permissions/) before upgrading.
 
-The exact v2.4.0 source passed the complete Console CI matrix. The authoritative
-historical record is its [tagged changelog](https://github.com/pgsty/silo-console/blob/v2.4.0/CHANGELOG.md),
+The exact v2.4.0 source passed the complete Console CI matrix. See the
+[tagged changelog](https://github.com/pgsty/silo-console/blob/v2.4.0/CHANGELOG.md),
 [object-browser guide](https://github.com/pgsty/silo-console/blob/v2.4.0/docs/ObjectBrowser.md),
 and [release assets](https://github.com/pgsty/silo-console/releases/tag/v2.4.0).
-Later signature/provenance requirements do not retroactively apply to old assets.

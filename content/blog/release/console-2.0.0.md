@@ -16,14 +16,12 @@ SILO Console 2.0.0 is the first major release of this object-storage administrat
 
 1. **An independent identity** — product name, visual system, documentation entry points, source attribution, and the release pipeline all move into the SILO project, while the Go module path, environment variables, and other compatibility contracts are deliberately retained;
 2. **A redesigned interface** — the login page, theme system, dashboard, and console details are reworked under one design language, backed by a regenerated brand icon set;
-3. **Hardened engineering** — the embedded frontend payload shrinks from roughly 10MB to 3.5MB, known dependency vulnerabilities drop to zero, and a batch of inherited defects — including a real runtime data race — is fixed.
-
-Before publication this release went through two independent review passes: a full code review with commit-history restructuring, followed by an adversarial re-verification (exhaustive asset validation, HTTP semantics probing, full routing regression, and smoke tests against the published artifacts themselves).
+3. **Hardened engineering** — the embedded frontend payload shrinks from roughly 10MB to 3.5MB, known dependency vulnerabilities drop to zero, and a batch of inherited defects — including a runtime data race — is fixed.
 
 > [!WARNING]
 > **Read the compatibility boundary before upgrading**
 >
-> The major-version change in 2.0.0 is about **public identity and delivery contracts**, not the object data format or the S3 protocol. Installation scripts that reference the old repository, binary name, or container image must be updated; existing integrations that use `CONSOLE_MINIO_SERVER`, `CONSOLE_MINIO_REGION`, `github.com/minio/console`, or the MinIO-compatible Admin API must **not** be search-and-replaced.
+> Version 2.0.0 updates **public identity and delivery contracts** while keeping the object data format and S3 protocol unchanged. Installation scripts that reference the old repository, binary name, or container image must be updated; existing integrations that use `CONSOLE_MINIO_SERVER`, `CONSOLE_MINIO_REGION`, `github.com/minio/console`, or the MinIO-compatible Admin API remain unchanged and must **not** be search-and-replaced.
 
 ## Why 2.0.0 {#why-2-0-0}
 
@@ -55,7 +53,7 @@ CLI authorship, usage text, and project descriptions now identify Pigsty and SIL
 
 ## Deliberately Retained Compatibility Identifiers {#retained-compatibility-contracts}
 
-The following names still contain `minio` or the old `console`, but they are interface, protocol, or installation compatibility layers — not leftover branding:
+The following names retain `minio` or `console` as part of interface, protocol, or installation compatibility:
 
 | Surface                 | State in 2.0.0                              | Reason                                      |
 |:------------------------|:--------------------------------------------|:--------------------------------------------|
@@ -68,11 +66,11 @@ The following names still contain `minio` or the old `console`, but they are int
 | Package systemd unit    | `minio-console.service` retained            | avoids duplicate services on upgrade        |
 | systemd user and config | `console-user` and `/etc/default/console`   | avoids unnecessary account/config migration |
 
-Upgrade scripts therefore must not run repository-wide `minio → silo` or `console → silo-console` replacements. Migrating these compatibility interfaces in the future will require aliases, deprecation windows, and an explicit dual-read strategy; 2.0.0 does none of that.
+Upgrade scripts therefore must not run repository-wide `minio → silo` or `console → silo-console` replacements. Migrating these compatibility interfaces in the future will require aliases, deprecation windows, and an explicit dual-read strategy.
 
 ## A Redesigned Interface {#redesigned-interface}
 
-2.0.0 is not a logo swap — the interface was redesigned end to end.
+Version 2.0.0 redesigns the console interface end to end.
 
 ### Login page {#login-page}
 
@@ -168,9 +166,9 @@ Packages continue to install `/etc/systemd/system/minio-console.service`, whose 
 
 This release does not change the object data layout and requires no bucket or object migration.
 
-## Dual Review and Validation Scope {#review-and-validation}
+## Validation Scope {#review-and-validation}
 
-2.0.0 went through two independent review passes before publication. The first pass performed a full code review, fixed the defects described above, restructured 13 intermediate commits into 8 logical ones, and ran Go `-race` across supported packages, `go vet`, `golangci-lint`, `govulncheck`, frontend type checks, production builds, Prettier, dead-code checks, and the full dependency audit. The second, adversarial pass independently re-ran the core gates and added:
+Release verification covered Go `-race` across supported packages, `go vet`, `golangci-lint`, `govulncheck`, frontend type checks, production builds, Prettier, dead-code checks, full dependency audits, and the following integration checks:
 
 - all 184 embedded files fetched three ways each (gzip client, identity client, HEAD) with per-file hash comparison against the embedded sources;
 - RFC semantics probes (including combined q-values such as `gzip;q=0, *;q=0.5`), method restrictions, the OIDC callback, and SPA deep links;
@@ -178,8 +176,6 @@ This release does not change the object data layout and requires no bucket or ob
 - mobile first-load sidebar behavior, login-page external-request monitoring, and light/dark full-site tours;
 - downloaded release assets verified byte-for-byte against checksums, binary self-reported version confirmed, and a smoke test of the published binary against a live server;
 - zero-diff asset rebuilds confirmed on both macOS and Linux.
-
-The complete pre-rewrite history is preserved in backup refs for rollback.
 
 ## Known Limitations {#known-limitations}
 

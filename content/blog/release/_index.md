@@ -1,7 +1,7 @@
 ---
 title: Release Notes
 linkTitle: Release
-description: Detailed notes for every published SILO release, ordered from newest to oldest.
+description: SILO release notes and clearly marked upcoming release placeholders, ordered from newest to oldest.
 weight: 20
 icon: fa-solid fa-tag
 sidebar_expanded: true
@@ -15,4 +15,6 @@ aliases:
   - /releases/
 ---
 
-Each published SILO version has its own page with the release date, major changes, security fixes, dependency updates, and related commits.
+Release notes record major changes, security fixes, dependency updates, and related commits. Upcoming releases are explicitly marked as placeholders.
+
+[20261024](/blog/release/silo-20261024/) is a shared Go and dependency maintenance announcement for SILO, mcli, SILO Console, silo-pkg and KES. It is not yet released.

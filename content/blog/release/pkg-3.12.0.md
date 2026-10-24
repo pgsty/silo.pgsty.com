@@ -13,18 +13,14 @@ aliases:
 
 **Release date:** 2026-08-24 · **Version:** [v3.12.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) · **Commit:** [`2b087a1`](https://github.com/pgsty/silo-pkg/commit/2b087a11cf3547313a2e79275f52a0654c212e58) · **Repository:** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
-Version 3.12.0 is a main-line minor release with two themes: a policy-write guard for ARN prefixes that name no resource, and the maintained Go 1.27 / etcd 3.7 dependency baseline. It adds two exported inspection/validation methods, raises the verified consumer floor to Go 1.26, and is the first `silo-pkg` release whose strict validation path is enabled by the SILO server for named-policy and service-account policy writes.
-
-> [!WARNING]
-> **This package release and a SILO server release are different gates.** The package tag and GitHub Release are public. SILO `main` consumes it in [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07cebb27220d12697be74c8bd617), with the operator note recorded as [`SN-2026-005`](https://github.com/pgsty/silo/commit/56c67dacf13cb3c5c1c59e64afec77ab145fb7f4). No date-style SILO server tag, container image, package set, deployment, or production rollout is established by this article.
+Version 3.12.0 is a main-line minor release with two themes: a policy-write guard for ARN prefixes that name no resource, and the maintained Go 1.27 / etcd 3.7 dependency baseline. It adds two exported inspection/validation methods, raises the verified consumer floor to Go 1.26, and is the first `silo-pkg` release whose strict validation path is enabled by the SILO server (`eee05a17c`, [`SN-2026-005`](/about/security-advisories/#sn-2026-005), shipped in [SILO 20260903](/blog/release/silo-20260903/)) for named-policy and service-account policy writes.
 
 ## Release at a Glance {#glance}
 
 - **Published:** the `silo-pkg v3.12.0` tag, GitHub Release, and strict library validation for bare ARN prefixes.
-- **On SILO remote `main`:** named-policy and service-account policy write integration.
+- **Server integration:** named-policy and service-account policy write validation in [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07cebb27220d12697be74c8bd617) ([SILO 20260903](/blog/release/silo-20260903/)).
 - **Deliberately permissive:** existing IAM policy loading, IAM import, and site-replication receive paths.
 - **Deferred:** STS inline-policy strict validation and Console-side early validation; the server remains authoritative.
-- **Not part of this release:** a SILO server binary, image, package, deployment, or production rollout.
 
 ## Bare ARN Prefixes Were Policy No-ops {#bare-arn}
 
@@ -176,16 +172,15 @@ replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.0
 The tagged package passed:
 
 - the repository's complete `make test` gate: pinned lint plus `go test -race -tags kqueue ./...`;
-- targeted bare-ARN tests repeated to disturb Go map iteration order;
-- `go mod verify`, `go vet`, `git diff --check`, and `govulncheck` with zero reachable vulnerabilities; and
-- an implementation-level Claude Opus Max review with a **GO** verdict and no P0/P1 findings.
+- targeted bare-ARN tests repeated to disturb Go map iteration order; and
+- `go mod verify`, `go vet`, `git diff --check`, and `govulncheck` with zero reachable vulnerabilities.
 
 The SILO integration passed:
 
 - the complete IAM server suite, including exact/historical named-policy rejection and service-account create/update rejection;
 - `go test ./cmd -count=1`, `go vet ./cmd`, and `go test ./...`;
 - golangci-lint 2.13.1 with zero findings, `go mod verify`, and `make check-gen`; and
-- a second Claude Opus Max review with a **GO** verdict; mutation tests proved all three strict call sites and their integration assertions are load-bearing.
+- mutation tests proving all three strict call sites and their integration assertions are load-bearing.
 
 Direct VCS module resolution verified `v3.12.0` at commit `2b087a1` with module checksum:
 
@@ -193,7 +188,7 @@ Direct VCS module resolution verified `v3.12.0` at commit `2b087a1` with module 
 h1:1Bjqjb3KCt0oYhBLpH7W/e/5khTUoIgXWA12An1fbUc=
 ```
 
-The release environment could not reach `proxy.golang.org` or `sum.golang.org` because those connections timed out, so public-proxy observation is not claimed as release evidence. The Git tag, GitHub Release, direct module archive, origin commit, and checksum were verified.
+The Git tag, GitHub Release, direct module archive, origin commit, and checksum were verified.
 
 ## Related Changes {#related-changes}
 
@@ -204,6 +199,6 @@ The release environment could not reach `proxy.golang.org` or `sum.golang.org` b
 - [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07cebb27220d12697be74c8bd617): enable strict named-policy and service-account writes in SILO
 - [`56c67dacf`](https://github.com/pgsty/silo/commit/56c67dacf13cb3c5c1c59e64afec77ab145fb7f4): record `SN-2026-005`
 
-## What Is Not Released Here {#not-released}
+## Server Release Scope {#not-released}
 
-This article does not claim a new SILO server version, binary, package, container image, deployment, production rollout, Console release, or strict STS rollout. Those remain separate release gates and must be reported separately when completed.
+The server-side strict policy-write integration (`eee05a17c`) shipped in [SILO 20260903](/blog/release/silo-20260903/). STS inline-policy strict validation remains deferred so machine clients and session-policy templates can be audited separately.

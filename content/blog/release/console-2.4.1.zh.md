@@ -62,7 +62,7 @@ Go 不继承依赖模块的 replacement，需同时复制[标签 README](https:/
 
 本次 [GitHub Release](https://github.com/pgsty/silo-console/releases/tag/v2.4.1) 有 **44 个附件**：二进制及归档、DEB/RPM/APK 软件包、源码、法律声明、SPDX SBOM、校验清单及 Sigstore 签名包。校验清单使用 Cosign 签名，构建溯源记录对应标签和工作流。
 
-**2026-09-17 镜像分发更正：** 官方镜像名称是 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)，但匿名 token 请求返回 HTTP 401，尚不能确认公开拉取 v2.4.1 或 `latest`。请使用 GitHub 二进制/软件包，不把源码和二进制的发布视为镜像交付证明。Server 内嵌 Console 不受此独立镜像分发状态影响。
+独立部署 v2.4.1 请使用 GitHub Release 二进制或 Linux 软件包；[`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console) 的多架构容器镜像自 [Console v2.4.2](/zh/blog/release/console-2.4.2/#delivery) 起恢复公开拉取。Server 内嵌 Console 不受影响。
 
 Linux 软件包保留 `minio-console.service`、`console-user` 和 `/etc/default/console`。
 服务状态目录为 `/var/lib/silo-console`，证书目录改为 `/etc/silo-console/certs`，停止服务最多等待 90 秒。

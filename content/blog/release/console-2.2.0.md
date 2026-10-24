@@ -4,7 +4,7 @@ linkTitle: "silo/console 2.2.0"
 date: 2026-08-26
 lastmod: 2026-08-26
 author: "Ruohang Feng"
-description: "SILO Console 2.2.0 release notes: safe text previews, downloads that cannot lie, repaired permission gating, an untangled user API, hardened notification and IAM policy writes, and a Go 1.27 dependency stack on maintained SILO forks."
+description: "SILO Console 2.2.0 release notes: bounded text previews, strict download integrity, repaired permission gating, split user status and group APIs, hardened notification and IAM policy writes, and a Go 1.27 dependency stack on maintained SILO packages."
 tags: [Release, console]
 weight: 1
 draft: false
@@ -13,18 +13,15 @@ aliases:
   - /releases/console-2.2.0/
 ---
 
-> [!NOTE]
-> **Released on 2026-08-26.** [`v2.2.0`](https://github.com/pgsty/silo-console/releases/tag/v2.2.0) points to final commit [`7dc4258a6`](https://github.com/pgsty/silo-console/commit/7dc4258a6a33b6e01b5b3bae8a0fd63f02b3bad8). The exact tagged tree passed the full CI matrix, vulnerability checks, and release pipeline. The public release contains six standalone binaries, nine Linux packages, and a SHA-256 checksum manifest.
+**Published:** 2026-08-26 · **Version:** [`v2.2.0`](https://github.com/pgsty/silo-console/releases/tag/v2.2.0) ([`7dc4258a6`](https://github.com/pgsty/silo-console/commit/7dc4258a6a33b6e01b5b3bae8a0fd63f02b3bad8)) · **Repository:** [pgsty/silo-console](https://github.com/pgsty/silo-console)
 
-**Version:** [`v2.2.0`](https://github.com/pgsty/silo-console/releases/tag/v2.2.0) · **Release commit:** `7dc4258a6` · **Status:** released · **Repository:** [pgsty/silo-console](https://github.com/pgsty/silo-console)
+SILO Console 2.2.0 adds a bounded text preview for logs and structured text, tightens download error handling so truncated archives cannot pass as complete, fixes table-action permission gating, splits user status updates from group membership edits, and validates database notification DSNs and IAM policy documents before writing them to the server.
 
-SILO Console 2.2.0 is a correctness-and-hardening release. It adds one new feature — a strictly bounded text preview for logs and structured text — and spends the rest of its budget making existing surfaces tell the truth: downloads that cannot silently ship a truncated archive, progress bars that cannot fabricate a percentage, permission gates that actually disable what they claim to disable, a user API that no longer entangles status changes with group membership, and database notification forms that emit exactly the connection string the server will store.
+Underneath, the dependency stack moves to Go 1.27.0 and onto the maintained SILO packages: [`pgsty/silo-pkg` 3.12.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.1) replaces upstream `minio/pkg`, `pgsty/mc` replaces upstream `mc` as a library, `minio-go` moves to 7.3.0, and the etcd client line moves to 3.7.1, closing [CVE-2026-73500](https://pkg.go.dev/vuln/GO-2026-6107).
 
-Underneath, the dependency stack moves to Go 1.27.0 and onto the maintained SILO forks: [`pgsty/silo-pkg` 3.12.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.1) replaces upstream `minio/pkg`, `pgsty/mc` replaces upstream `mc` as a library, `minio-go` moves to 7.3.0, and the etcd client line moves to 3.7.1, closing [CVE-2026-73500](https://pkg.go.dev/vuln/GO-2026-6107).
+The final change set since [v2.1.1](https://github.com/pgsty/silo-console/releases/tag/v2.1.1) spans 33 commits touching 176 source files (+8,794/−2,057 lines, excluding regenerated embedded frontend assets).
 
-The final change set since [v2.1.1](https://github.com/pgsty/silo-console/releases/tag/v2.1.1) is 33 commits touching 176 source files (+8,794/−2,057 lines, not counting the regenerated embedded frontend assets).
-
-**Why 2.2.0 and not 2.1.2:** the user-visible fixes alone would justify a patch release, but this cycle changes the provider of the shared policy/certificate implementation, crosses an etcd client minor boundary, splits a REST route, and deliberately changes download-failure semantics. Each of those deserves a minor-version line in the compatibility notes below rather than a silent patch.
+**Why 2.2.0 instead of 2.1.2:** this release switches the shared policy/certificate package provider, crosses an etcd client minor version boundary, splits a REST route, and changes folder-download failure semantics.
 
 ## Text Preview for Logs and Structured Text {#text-preview}
 
@@ -38,11 +35,11 @@ The object browser can now preview `.log`, `.txt`, `.json`, and `.xml` objects a
 
 Alongside the new preview type, the existing preview plumbing was corrected: empty objects preview as empty instead of erroring, appended logs re-preview at their new length instead of the stale listed size, and metadata races when flipping between objects are gone. The preview and share dialogs now receive the object's real size ([`92e8f4e65`](https://github.com/pgsty/silo-console/commit/92e8f4e65fefad32581cfc86bd2a36f4305b7bd2)).
 
-## Downloads That Cannot Lie {#downloads}
+## Download Integrity and Progress {#downloads}
 
-The whole download path — progress reporting, single objects, folders, archives, byte ranges — was rebuilt around one principle: **a download either completes correctly or fails visibly.**
+The download pipeline — progress reporting, single objects, folders, archives, and byte ranges — enforces strict completion and error reporting.
 
-### Honest progress {#download-progress}
+### Indeterminate progress when size is unknown {#download-progress}
 
 A missing, invalid, or contradictory total no longer becomes a fabricated percentage: the progress indicator stays **indeterminate** until the real total is known. Zero-byte objects are normalized deliberately instead of falling into the unknown-total path, and abort/cancel are terminal states — a late progress event cannot resurrect a cancelled download. Download requests settle exactly once, JSON error blobs are parsed safely, and generated object URLs are revoked.
 
@@ -112,7 +109,7 @@ The PostgreSQL and MySQL event-destination forms were rewritten around a shared 
 - The server now **rejects DSNs its own configuration grammar would corrupt** — embedded newlines, values that would parse as sibling config keys (`table=…` inside a password), unbalanced quoting — with a 400 *before* anything is stored, and without echoing the submitted secret back.
 - Generic password and token fields across notification targets (Kafka, Redis, MQTT, NATS, webhooks) render as password inputs, including environment-overridden values.
 
-### Restart honesty {#restart}
+### Accurate restart-required status {#restart}
 
 Configuration add, update, delete, and reset now honor the **server's actual restart-required answer** instead of hardcoding "restart needed" (or worse, dropping it). The pending-restart flag is monotonic: once any operation requires a restart, later operations that don't cannot clear it — only an actual service restart does.
 
@@ -161,7 +158,7 @@ All three etcd Go modules move together from 3.6.8 to 3.7.1, closing the TLS-lis
 
 The final release updates `minio-go` to v7.3.0 after a separate compatibility review, migrates its INI import path, and adds lifecycle-filter XML coverage. A console-side compatibility decoder accepts legacy AccountInfo tag payloads returned by older servers. Other accepted maintenance moves include `jwx` v2→v3 with `httprc` v3, `go-openapi/swag/conv`+`typeutils` 0.28.0, `grpc-gateway` 2.29.0, `cheggaaa/pb` 1.0.30, and `go.yaml.in/yaml/v3` 3.0.5. Larger unrelated go-openapi, `pb/v3`, compression, and test-library updates remain deferred.
 
-On the frontend, the vulnerability workflow now covers pushes, manual runs, and development dependencies with immutable installs; vulnerable transitive resolutions were refreshed (`fast-xml-parser` 5.11, `nanoid` 3.3.18, `@babel/core` 7.29.7), dead exports and the unused `http-status-codes` dependency were removed. The new `fast-xml-parser` 5.x transitive tree (`@nodable/entities`, `is-unsafe`, `anynum`, `fast-xml-builder`, `path-expression-matcher`, `xml-naming`) was supply-chain-checked during this review: all six packages are published by the fast-xml-parser author's own account and organization, their installed code is free of execution/network/exfiltration patterns, and the whole tree is development-only — nothing ships in the browser bundle.
+On the frontend, the vulnerability workflow now covers pushes, manual runs, and development dependencies with immutable installs; vulnerable transitive resolutions were refreshed (`fast-xml-parser` 5.11, `nanoid` 3.3.18, `@babel/core` 7.29.7), and dead exports along with the unused `http-status-codes` dependency were removed. The `fast-xml-parser` 5.x transitive packages are development-only and are not bundled into the browser build.
 
 ## Security Review {#security}
 
@@ -200,16 +197,14 @@ On the frontend, the vulnerability workflow now covers pushes, manual runs, and 
 5. A pending restart-required indicator persists until an actual restart, instead of being clearable by a later unrelated config change.
 6. If a reverse proxy in front of the console compresses `/api/v1/…/download` responses, the text preview's strict `Content-Length` verification will reject every preview as an error. The console itself only compresses static assets — leave API responses uncompressed at the proxy.
 
-## Regression Review {#regression-review}
+## Known Limitations and Follow-up Items {#regression-review}
 
-Because this release rewrites the download path and re-platforms the shared policy library, the full diff against v2.1.1 was re-reviewed adversarially in five parallel passes (Go API; object browser preview/download; permission gating and service accounts; forms/i18n/session; dependencies/build/CI), each hunting specifically for behavior that worked in 2.1.1 and silently changed.
+Wiring the table disable prop exposed two pre-existing UI-guard defects where predicates compare a row object against a string:
 
-**Verdict: no unintentional regressions found.** Every confirmed behavioral difference is one of the deliberate changes documented above. The review did surface two small pre-existing UI-guard defects, now visible because the dead disable-prop was brought back to life with predicates whose argument type was never right:
+- the "cannot delete the Default IDP configuration" row guard compares the row object against `"Default"` and therefore does not disable the button (`IDPConfigurations.tsx`);
+- the "cannot delete an env-override webhook endpoint" row guard has the same object-vs-string mismatch (`WebhookSettings.tsx`).
 
-- the "cannot delete the Default IDP configuration" row guard compares the row object against the string `"Default"` and therefore never engages (`IDPConfigurations.tsx`);
-- the "cannot delete an env-override webhook endpoint" row guard has the same object-vs-string mismatch and is inert (`WebhookSettings.tsx`).
-
-Neither is a 2.2.0 regression — both predicates were entirely dead in 2.1.1 — and in both cases the server still enforces the real rules. They remain documented follow-up items after the release. Two sharp edges are recorded as known limitations rather than defects: the new PostgreSQL DSN parser accepts only canonical `key=value` syntax when populating structured fields (an unusual-but-libpq-valid DSN shows empty structured fields, and editing a structured field then rebuilds the DSN from those fields), and TestCafe/Playwright coverage asserts UI gating while live-server deny-path coverage remains the integration suites' job.
+In both cases the server still enforces the restriction when the action is submitted. Additionally, the PostgreSQL DSN parser populates structured fields only from canonical `key=value` syntax (non-standard libpq DSNs display empty structured fields and rebuild from those fields if edited), and TestCafe/Playwright suites cover UI gating while live-server deny paths are covered by the integration suites.
 
 ## Verification {#verification}
 
@@ -234,8 +229,6 @@ The [v2.2.0 GitHub release](https://github.com/pgsty/silo-console/releases/tag/v
 1. six standalone binaries: Linux amd64/arm64/armv6, macOS amd64/arm64, and Windows amd64;
 2. nine Linux packages: DEB, RPM, and APK for amd64, arm64, and armv6;
 3. `silo-console_2.2.0_checksums.txt`, plus the SHA-256 digest GitHub records for every asset.
-
-Those assets, the tag, and the release page are verified here. This page does not claim a separately distributed container image or detached signatures.
 
 ## Related Commits {#related-commits}
 

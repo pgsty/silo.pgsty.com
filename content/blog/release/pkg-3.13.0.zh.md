@@ -11,14 +11,9 @@ aliases:
   - /releases/pkg-3.13.0/
 ---
 
-> **2026-09-13 后续状态：** 本文保留 3.13.0 发布时的迁移记录。四个维护组件现已完成独立模块路径迁移；当前 pkg 为 [v3.14.0](/zh/blog/release/pkg-3.14.0/)。文中的“尚未迁移”描述仅适用于当时，见[现有组件矩阵](/zh/compatibility/versions/)。
-
 **发布日期：** 2026-08-30 · **版本：** [v3.13.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.13.0) · **提交：** [`215f116`](https://github.com/pgsty/silo-pkg/commit/215f116ec25120ce365c79bce4096cd7665b2c1e) · **仓库：** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
-3.13.0 是一个破坏性版本，只有一条主线：本模块不再冒用上游的导入路径，改用自己的。同时废弃 `pgsty/silo-go` 分支——它已经不再包含任何上游没有的东西。
-
-> [!WARNING]
-> **本包发布与 SILO 服务器发布是两道不同的闸门。** 包标签与 GitHub Release 已公开，但 `silo`、`silo-console`、`mcli` **尚未**切换到新导入路径，它们仍通过旧的 `replace` 安排构建于 v3.12.2 之上。本文不建立任何 SILO 服务器标签、容器镜像、软件包、部署或生产上线。
+3.13.0 是一个破坏性版本：本模块正式启用独立导入路径 `github.com/pgsty/silo-pkg/v3`，同时退役 `pgsty/silo-go` 分支，直接依赖上游 `minio-go`。维护栈各组件（`silo`、`silo-console` 与 `mcli`）均已在 2026-09-03 / v2.4.0 版本波次完成新路径迁移，详见[组件版本矩阵](/zh/compatibility/versions/)。
 
 ## 版本速览 {#glance}
 
@@ -26,7 +21,7 @@ aliases:
 - **已终结：** `github.com/minio/pkg/v3` 模块身份，以及每个消费者都必须重复一遍的 `replace` 指令。
 - **已终结：** `github.com/pgsty/silo-go/v7` 分支，本版本直接依赖上游 `minio-go`。
 - **未变：** 所有包、符号与行为。移动的只是它们被导入的路径。
-- **不属于本次发布：** `silo`、`silo-console`、`mcli` 三方的配套迁移。
+- **下游接入：** 已在 [SILO 20260903](/zh/blog/release/silo-20260903/)、[Console v2.4.0](/zh/blog/release/console-2.4.0/) 与 [mcli 20260903](/zh/blog/release/mcli-20260903/) 完成同步迁移。
 
 ## 为什么要迁移路径 {#why}
 

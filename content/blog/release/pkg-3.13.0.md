@@ -11,14 +11,9 @@ aliases:
   - /releases/pkg-3.13.0/
 ---
 
-> **Follow-up, 2026-09-13:** this article preserves the v3.13.0 release-time migration record. All four maintained components have since adopted the own-module path; current pkg is [v3.14.0](/blog/release/pkg-3.14.0/). The “not yet migrated” statements below describe that earlier date; see the [current component matrix](/compatibility/versions/).
-
 **Release date:** 2026-08-30 · **Version:** [v3.13.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.13.0) · **Commit:** [`215f116`](https://github.com/pgsty/silo-pkg/commit/215f116ec25120ce365c79bce4096cd7665b2c1e) · **Repository:** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
-Version 3.13.0 is a breaking release with one theme: the module stops claiming upstream's import path and takes its own. It also retires the `pgsty/silo-go` fork, which no longer carried anything upstream lacks.
-
-> [!WARNING]
-> **This package release and a SILO server release are different gates.** The package tag and GitHub Release are public. `silo`, `silo-console`, and `mcli` have **not** yet moved to the new import path; they continue to build against v3.12.2 through the old `replace` arrangement. No SILO server tag, container image, package set, deployment, or production rollout is established by this article.
+Version 3.13.0 is a breaking release: the module adopts `github.com/pgsty/silo-pkg/v3` as its own import path and retires the `pgsty/silo-go` fork in favour of upstream `minio-go`. All maintained SILO components (`silo`, `silo-console`, and `mcli`) migrated to this module path in the 2026-09-03 / v2.4.0 release wave; see the [component matrix](/compatibility/versions/).
 
 ## Release at a Glance {#glance}
 
@@ -26,7 +21,7 @@ Version 3.13.0 is a breaking release with one theme: the module stops claiming u
 - **Retired:** the `github.com/minio/pkg/v3` module identity and the `replace` directive every consumer had to repeat.
 - **Retired:** the `github.com/pgsty/silo-go/v7` fork; this release requires upstream `minio-go` directly.
 - **Unchanged:** every package, symbol, and behaviour. Only the path they are imported from moved.
-- **Not part of this release:** the matching `silo`, `silo-console`, and `mcli` migrations.
+- **Downstream adoption:** completed across [SILO 20260903](/blog/release/silo-20260903/), [Console v2.4.0](/blog/release/console-2.4.0/), and [mcli 20260903](/blog/release/mcli-20260903/).
 
 ## Why the Path Moved {#why}
 

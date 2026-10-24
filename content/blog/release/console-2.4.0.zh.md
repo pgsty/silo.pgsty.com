@@ -11,7 +11,6 @@ url: "/zh/blog/release/console-2.4.0/"
 
 [v2.4.0](https://github.com/pgsty/silo-console/releases/tag/v2.4.0) 于 2026-09-08 发布，
 源码为 [`c103d08e`](https://github.com/pgsty/silo-console/commit/c103d08ec36aab8e08ba091d77b639158ce9f18f)。
-**9 月 16 日更新：** 当前版本为 [Console v2.4.1](/zh/blog/release/console-2.4.1/)。本篇保留 v2.4.0 的行为与依赖记录。
 
 ## 已发布行为 {#changes}
 
@@ -30,7 +29,7 @@ url: "/zh/blog/release/console-2.4.0/"
 多对象流式 ZIP、浏览器恢复与可验证发布制品，使用 pkg v3.14.1 和 mcli 20260916。
 v2.4.0 使用较早的浏览器内存 ZIP 路径。升级前请阅读[密码权限迁移](/zh/compatibility/password-permissions/)。
 
-v2.4.0 精确发布源码通过完整 Console CI。历史依据见
+v2.4.0 精确发布源码通过完整 Console CI。变更详情见
 [标签 changelog](https://github.com/pgsty/silo-console/blob/v2.4.0/CHANGELOG.md)、
 [对象浏览器指南](https://github.com/pgsty/silo-console/blob/v2.4.0/docs/ObjectBrowser.md)与
-[发布附件](https://github.com/pgsty/silo-console/releases/tag/v2.4.0)。后续新增的签名/溯源门槛不会追溯应用到旧制品。
+[发布附件](https://github.com/pgsty/silo-console/releases/tag/v2.4.0)。

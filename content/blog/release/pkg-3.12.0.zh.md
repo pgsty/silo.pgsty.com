@@ -13,18 +13,14 @@ aliases:
 
 **发布日期：** 2026-08-24 · **版本：** [v3.12.0](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) · **提交：** [`2b087a1`](https://github.com/pgsty/silo-pkg/commit/2b087a11cf3547313a2e79275f52a0654c212e58) · **仓库：** [pgsty/silo-pkg](https://github.com/pgsty/silo-pkg)
 
-3.12.0 是直接从主线发布的中版本，包含两条主线：第一，为“只有 ARN 命名空间前缀、却没有指定任何资源”的策略增加严格写入保护；第二，把维护基线推进到 Go 1.27 与 etcd 3.7。它新增两个导出的检查/校验方法，将验证过的消费者下限提高到 Go 1.26；同时也是第一个由 SILO 服务端在具名策略与服务账号策略写入路径上真正启用严格校验的 `silo-pkg` 版本。
-
-> [!WARNING]
-> **共享包发布与 SILO 服务端发布是两个不同的门。** `silo-pkg` 标签与 GitHub Release 已公开；SILO `main` 已在 [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07cebb27220d12697be74c8bd617) 接入，并以 [`SN-2026-005`](https://github.com/pgsty/silo/commit/56c67dacf13cb3c5c1c59e64afec77ab145fb7f4) 记录运维影响。本文并不证明已有新的日期式 SILO 服务端标签、容器镜像、软件包、部署或生产发布。
+3.12.0 是直接从主线发布的中版本，包含两条主线：第一，为“只有 ARN 命名空间前缀、却没有指定任何资源”的策略增加严格写入保护；第二，把维护基线推进到 Go 1.27 与 etcd 3.7。它新增两个导出的检查/校验方法，将验证过的消费者下限提高到 Go 1.26；同时也是第一个由 SILO 服务端（`eee05a17c`，[`SN-2026-005`](/zh/about/security-advisories/#sn-2026-005)，随 [SILO 20260903](/zh/blog/release/silo-20260903/) 发布）在具名策略与服务账号策略写入路径上启用严格校验的 `silo-pkg` 版本。
 
 ## 发布状态一览 {#glance}
 
 - **已经发布：** `silo-pkg v3.12.0` 标签、GitHub Release，以及裸 ARN 前缀的严格库级校验。
-- **已进入 SILO 远端 `main`：** 具名策略与服务账号策略写入接入。
+- **服务端接入：** [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07cebb27220d12697be74c8bd617)（[SILO 20260903](/zh/blog/release/silo-20260903/)）在具名策略与服务账号策略写入路径启用严格校验。
 - **刻意保持宽松：** 既有 IAM 策略加载、IAM 导入与站点复制接收路径。
 - **延后：** STS 内联策略严格校验与 Console 客户端侧提前校验；服务端仍是权威边界。
-- **不属于本次发布：** SILO 服务端二进制、镜像、软件包、部署或生产发布。
 
 ## 裸 ARN 前缀为何会成为策略哑弹 {#bare-arn}
 
@@ -177,15 +173,14 @@ replace github.com/minio/pkg/v3 => github.com/pgsty/silo-pkg/v3 v3.12.0
 
 - 仓库完整 `make test` 门禁：固定版本 lint 加 `go test -race -tags kqueue ./...`；
 - 重复运行裸 ARN 测试，以扰动 Go map 遍历顺序；
-- `go mod verify`、`go vet`、`git diff --check` 与 `govulncheck`，可达漏洞为零；
-- 实现级 Claude Opus Max 审查，结论为 **GO**，没有 P0/P1。
+- `go mod verify`、`go vet`、`git diff --check` 与 `govulncheck`，可达漏洞为零。
 
 SILO 接入通过：
 
 - 完整 IAM 服务端套件，包括具名策略精确/历史形式拒绝，以及服务账号创建/更新拒绝；
 - `go test ./cmd -count=1`、`go vet ./cmd` 与 `go test ./...`；
 - golangci-lint 2.13.1 零问题、`go mod verify` 与 `make check-gen`；
-- 第二轮 Claude Opus Max 审查，结论为 **GO**；变异测试证明三个严格调用点与其集成断言都是承重的。
+- 变异测试证明三个严格调用点与其集成断言都是承重的。
 
 通过 VCS 直接解析模块，确认 `v3.12.0` 指向提交 `2b087a1`，模块校验和为：
 
@@ -193,7 +188,7 @@ SILO 接入通过：
 h1:1Bjqjb3KCt0oYhBLpH7W/e/5khTUoIgXWA12An1fbUc=
 ```
 
-发布环境访问 `proxy.golang.org` 与 `sum.golang.org` 时持续超时，因此本文不把“公共代理已观察到”列为发布证据；Git 标签、GitHub Release、直接模块归档、来源提交与校验和均已验证。
+Git 标签、GitHub Release、直接模块归档、来源提交与校验和均已验证。
 
 ## 相关变更 {#related-changes}
 
@@ -204,6 +199,6 @@ h1:1Bjqjb3KCt0oYhBLpH7W/e/5khTUoIgXWA12An1fbUc=
 - [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07cebb27220d12697be74c8bd617)：SILO 启用具名策略与服务账号策略的严格写入
 - [`56c67dacf`](https://github.com/pgsty/silo/commit/56c67dacf13cb3c5c1c59e64afec77ab145fb7f4)：登记 `SN-2026-005`
 
-## 本文没有宣称什么 {#not-released}
+## 服务端发布范围 {#not-released}
 
-本文不宣称已有新的 SILO 服务端版本、二进制、软件包、容器镜像、部署、生产发布、Console 发布或 STS 严格校验发布。这些仍是彼此独立的发布门，完成后必须分别报告。
+服务端严格策略写入集成（`eee05a17c`）已随 [SILO 20260903](/zh/blog/release/silo-20260903/) 发布。STS 内联策略的严格校验仍保持延后，以便单独审计机器客户端与会话策略模板。
