@@ -1,50 +1,40 @@
 ---
 title: "Security Policy"
 linkTitle: "Security"
-description: "How to report a vulnerability in PGSTY SILO, and where fixed issues are published."
+description: "How to report vulnerabilities in PGSTY SILO and where security advisories and fixes are published."
 url: "/about/security/"
 weight: 40
 type: docs
 icon: fa-solid fa-shield-halved
 ---
 
-> **20261018 release:** the [release](/blog/release/silo-20261018/) contains Object Lock (SN-2026-015/016), IAM Admin credential (SN-2026-017) and dependency security repairs. Server 20261018 is publicly released. Server 20260916 includes SN-2026-011 through SN-2026-014 and still lacks these October repairs. See the [October security note](/blog/security/20261018-release-hardening/), [component matrix](/compatibility/versions/) and [security ledger](/about/security-advisories/) for upgrade requirements.
+PGSTY SILO maintains active security tracking and patching for the S3-compatible object storage stack after upstream `minio/minio` entered archive mode. Current production deployments should run [Server 20261018](/blog/release/silo-20261018/) (which fixes Object Lock advisories `SN-2026-015` / `SN-2026-016` and IAM Admin boundary `SN-2026-017`, building on `SN-2026-011` through `SN-2026-014` from Server 20260916), [Console v2.4.2](/blog/release/console-2.4.2/), and [mcli 20261018](/blog/release/mcli-20261018/); see the [October Security Note](/blog/security/20261018-release-hardening/), [Advisory Ledger](/about/security-advisories/), and [Component Matrix](/compatibility/versions/).
 
-Security maintenance is the reason this fork exists. Upstream `minio/minio` is archived; Silo tracks CVEs against the codebase, backports or writes the fixes, and publishes what it found.
+## Reporting a Vulnerability {#reporting}
 
-## Reporting a vulnerability {#reporting}
+Report undisclosed vulnerabilities through a private channel rather than a public issue:
 
-Report undisclosed high-severity vulnerabilities through a private channel, not in a public issue.
+- **SILO Server, Console, `mcli`, and `silo-pkg`**: Submit a private report via [GitHub Security Advisories on `pgsty/silo`](https://github.com/pgsty/silo/security/advisories/new).
+- **Documentation (`silo.pgsty.com`)**: Open an issue on [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/issues), or use the private advisory channel above if the report discloses an exploitable weakness.
 
-- **Silo server and `mcli` client** — preferably as a private report through [GitHub Security Advisories on `pgsty/silo`](https://github.com/pgsty/silo/security/advisories/new).
-- **This documentation** — open an issue on [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/issues); if the content itself discloses a weakness, use a private channel instead.
+Include the affected component version, reproduction steps, and impact scope. SILO is maintained as an open-source project on a best-effort basis without commercial response-time SLAs.
 
-Include the affected release, a description of the impact, and reproduction steps if you have them — this helps us confirm the issue faster.
+## Upstream MinIO Vulnerabilities {#upstream}
 
-We will do our best to respond within a reasonable time, but note that Silo is a community project: we promise no fix SLA and no guaranteed response time.
+Because SILO shares lineage with `minio/minio`, most vulnerabilities in inherited code affect both codebases. Report findings in inherited code directly to SILO; when a vulnerability affects other active distributions of the same lineage, we coordinate disclosure as appropriate.
 
-## Vulnerabilities in upstream MinIO {#upstream}
+## Where Fixes Are Published {#published}
 
-Silo is a fork, so the vast majority of findings apply to `minio/minio` as well. The upstream repository is archived and no longer accepts reports — precisely the gap this project fills. Report to Silo; where an issue affects other distributions of the same code, the project coordinates disclosure with them.
+- **[Advisory Ledger](/about/security-advisories/)**: The canonical index of all `CVE-*` and `SN-2026-*` identifiers, fix commits, affected versions, and dependency security updates.
+- **[Security Advisories](/blog/security/)**: Technical advisories detailing root causes, exploit conditions, code fixes, and upgrade requirements.
+- **[Release Notes](/blog/release/)**: Versioned release announcements for Server, Console, `mcli`, and `silo-pkg`.
 
-## Where fixes are published {#published}
+## Deployment Hardening {#hardening}
 
-- [Advisory Ledger](/about/security-advisories/) —
-  the stable index of every CVE and fork-local `SN-` identifier: the fix
-  commit, affected area, exploitability, release boundary, and dependency
-  security updates.
+- [Security Checklist](/operations/checklists/security/) — production access control, network isolation, and key management.
+- [Network Encryption (TLS)](/operations/network-encryption/) — certificate configuration for S3, Console, and internode traffic.
 
-- [Security Chronicle](/blog/security/) —
-  one article per investigated CVE: the original threat model, the back-and-forth of the review, the rejected alternatives, the invariant finally settled on, the verifying evidence, and the compatibility cost.
+## See Also {#see-also}
 
-- [Release Notes](/blog/release/) —
-  the release each fix first shipped in and became publicly available.
-
-## Hardening your own deployment {#hardening}
-
-Reporting is one half; configuration is the other. See the [security checklist](/operations/checklists/security/) for deployment hardening, and [network encryption](/operations/network-encryption/) for TLS setup.
-
-## See also {#see-also}
-
-- [License](/about/license/) — the software is provided as-is, without warranty of any kind
-- [Attribution](/about/attribution/) — copyright and derivation of this documentation
+- [License](/about/license/)
+- [Attribution](/about/attribution/)

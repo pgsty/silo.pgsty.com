@@ -15,7 +15,7 @@ icon: fa-solid fa-users
 
 只要提交过 issue 或 PR，无论开启、关闭、草稿或未合并，均予以认可。同一账号只计一次。排序先列已合并 PR 的作者，再列其他 PR 作者和问题报告者；每组优先展示重要修复、已采纳方案和推动修复的报告，其余按首次参与时间排列。金色圆环突出显著贡献。
 
-原 PR 未合并但工作被后续修复吸收时，会单独列出采纳记录；关闭 issue 不等于问题已修复，代码合入也不等于已发布。自动化账号不计入人数。上游作者的署名继续保留在 Git 历史与版权声明中。
+原 PR 未直接合并但成果被后续修复采纳时，会单独列出采纳记录。自动化账号不计入人数。上游作者的署名继续保留在 Git 历史与版权声明中。
 
 <div class="community-avatars">
 <a href="https://github.com/Vonng"><img src="/images/contributors/Vonng.svg" width="60" height="60" alt="@Vonng" title="@Vonng — 维护 SILO、Console、mcli、公共包、发行与文档"></a>
@@ -101,9 +101,9 @@ icon: fa-solid fa-users
 | [@julienlau](https://github.com/julienlau) | 修复提交元数据缺失的错误处理与旧元数据复用，贡献复制问题报告和方案 | 已合并 PR: [pgsty/silo#232](https://github.com/pgsty/silo/pull/232), [pgsty/silo#233](https://github.com/pgsty/silo/pull/233)<br>待合并 PR: [pgsty/silo#240](https://github.com/pgsty/silo/pull/240), [pgsty/silo#241](https://github.com/pgsty/silo/pull/241)<br>未直接合并的已关闭 PR: [pgsty/silo#184](https://github.com/pgsty/silo/pull/184)<br>已关闭 issue: [pgsty/silo#152](https://github.com/pgsty/silo/issues/152), [pgsty/silo#153](https://github.com/pgsty/silo/issues/153)<br>原 PR 未直接合并；其中的清理状态与恢复分析、修复方案、测试和文档帮助完善了 [#196](https://github.com/pgsty/silo/pull/196)，见[维护者致谢](https://github.com/pgsty/silo/pull/184#issuecomment-5689295222)。 |
 | [@Aeirx](https://github.com/Aeirx) | 修复联邦 CopyObject 丢失 Object Lock 合法保留请求头的问题 | 已合并 PR: [pgsty/silo#172](https://github.com/pgsty/silo/pull/172) |
 | [@AleksaMCode](https://github.com/AleksaMCode) | 修复 Lambda 目标集合的空值判断，并补充回归测试 | 已合并 PR: [pgsty/silo#220](https://github.com/pgsty/silo/pull/220) |
-| [@yupoet](https://github.com/yupoet) | 改进校验和不匹配错误，核验纠删码文档，并贡献单节点迁移案例 | 已合并 PR: [pgsty/silo#228](https://github.com/pgsty/silo/pull/228), [pgsty/silo#229](https://github.com/pgsty/silo/pull/229)<br>待合并 PR: [pgsty/silo#230](https://github.com/pgsty/silo/pull/230)<br>还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。#228 单节点迁移报告于 2026-10-23 合并，记录的是贡献者报告的正向升级，不构成降级保证；镜像仓库提案仍未合并。 |
+| [@yupoet](https://github.com/yupoet) | 改进校验和不匹配错误，核验纠删码文档，并贡献单节点迁移案例 | 已合并 PR: [pgsty/silo#228](https://github.com/pgsty/silo/pull/228), [pgsty/silo#229](https://github.com/pgsty/silo/pull/229)<br>待合并 PR: [pgsty/silo#230](https://github.com/pgsty/silo/pull/230)<br>还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。#228 单节点迁移报告于 2026-10-23 合并；#230 镜像仓库提案仍保持开放。 |
 | [@clown15](https://github.com/clown15) | 修复过期分片上传清理中的原生时间戳解析 | 已合并 PR: [pgsty/silo#236](https://github.com/pgsty/silo/pull/236) |
-| [@botdeniska](https://github.com/botdeniska) | 贡献多池迁移安全修复与 silo-pkg 策略求值性能优化 | 待合并 PR: [pgsty/silo#245](https://github.com/pgsty/silo/pull/245), [pgsty/silo#248](https://github.com/pgsty/silo/pull/248)<br>已合并 PR: [pgsty/silo-pkg#11](https://github.com/pgsty/silo-pkg/pull/11)<br>[#248](https://github.com/pgsty/silo/pull/248) 的迁移修复已纳入 [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)，保留原作者与 DCO。原 PR 仍开启；这不表示 #245 已发布。 |
+| [@botdeniska](https://github.com/botdeniska) | 贡献多池迁移安全修复与 silo-pkg 策略求值性能优化 | 待合并 PR: [pgsty/silo#245](https://github.com/pgsty/silo/pull/245), [pgsty/silo#248](https://github.com/pgsty/silo/pull/248)<br>已合并 PR: [pgsty/silo-pkg#11](https://github.com/pgsty/silo-pkg/pull/11)<br>[#248](https://github.com/pgsty/silo/pull/248) 的迁移修复已纳入 [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)，保留原作者与 DCO。 |
 
 ## 其他 PR 贡献
 
@@ -125,7 +125,7 @@ icon: fa-solid fa-users
 | [@jiri-pejchal](https://github.com/jiri-pejchal) | 报告 RabbitMQ 客户端漏洞，以及 Console 分享代理暴露内部指标的问题 | 已关闭 issue: [pgsty/silo#176](https://github.com/pgsty/silo/issues/176)<br>已关闭 issue: [pgsty/silo-console#52](https://github.com/pgsty/silo-console/issues/52) |
 | [@AEGEGE](https://github.com/AEGEGE) | 报告慢速 HTTP 拒绝服务漏洞 | 已关闭 issue: [pgsty/silo#183](https://github.com/pgsty/silo/issues/183)<br>已复现的慢速请求头缺陷通过 [#196](https://github.com/pgsty/silo/pull/196) 在 main 修复。 |
 | [@naiveHobo](https://github.com/naiveHobo) | 报告 IAM 管理 API 访问控制问题及私密报告通道不可用 | 已关闭 issue: [pgsty/silo#222](https://github.com/pgsty/silo/issues/222) |
-| [@orenyomtov](https://github.com/orenyomtov) | 报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011） | 安全披露署名见 [SN-2026-011](/zh/about/security-advisories/#sn-2026-011)，源码修复见 [#173](https://github.com/pgsty/silo/pull/173)。此项署名单独保留，不计作公开 issue/PR 作者。 |
+| [@orenyomtov](https://github.com/orenyomtov) | 报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011） | 安全披露署名见 [SN-2026-011](/zh/about/security-advisories/#sn-2026-011)，修复见 [#173](https://github.com/pgsty/silo/pull/173)。 |
 | [@nik0xFF](https://github.com/nik0xFF) | 通过邮件私下报告安全问题 | 经 Dominik Klug 本人同意，以真实姓名署名。 |
 | [@szopi00](https://github.com/szopi00) | 报告 Object Lock GOVERNANCE 保留期鉴权绕过问题 | 该报告推动了 [#234](https://github.com/pgsty/silo/pull/234) 与 [#235](https://github.com/pgsty/silo/pull/235) 的 Object Lock 修复。 |
 | [@mosesdd](https://github.com/mosesdd) | 提出维护 Helm Chart 的需求 | 已关闭 issue: [pgsty/silo#1](https://github.com/pgsty/silo/issues/1) |

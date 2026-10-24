@@ -17,4 +17,4 @@ Silo 与 MinIO, Inc. 无关联，未获其认可或赞助。MinIO® 是 MinIO, I
 了解参与 SILO、Console、mcli、共享包及文档建设的[**社区贡献者**](/zh/about/contributors/)。
 问题报告、未合并的 PR、已合并的工作与安全披露，都予以认可。
 
-[安全公告台账](/zh/about/security-advisories/)记录已确认发现、修复证据与升级边界；[组件矩阵](/zh/compatibility/versions/)区分各组件公开版本和尚未发布的源码变化。
+[安全公告台账](/zh/about/security-advisories/)汇总安全修复、提交记录与升级边界；[组件矩阵](/zh/compatibility/versions/)列出 SILO 各组件的已发布版本与依赖关系。

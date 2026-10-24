@@ -17,4 +17,4 @@ Meet the [**community contributors**](/about/contributors/) behind SILO, Console
 mcli, shared packages, and this documentation. Issue reports and unmerged pull
 requests are recognized alongside merged work and security disclosures.
 
-The [security advisory ledger](/about/security-advisories/) records confirmed findings, repair evidence and upgrade boundaries. The [component matrix](/compatibility/versions/) distinguishes each public component release from unreleased source changes.
+The [security advisory ledger](/about/security-advisories/) indexes security findings, fix commits, and upgrade boundaries. The [component matrix](/compatibility/versions/) lists published component versions and dependencies across the SILO stack.

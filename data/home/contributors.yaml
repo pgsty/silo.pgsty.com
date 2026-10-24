@@ -221,8 +221,8 @@ code:
     whatZh: "改进校验和不匹配错误，核验纠删码文档，并贡献单节点迁移案例"
     featured: true
     name: "Paris Y."
-    note: "Also [cross-checked the two-drive EC:1 documentation](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939). The single-node migration report in #228 was merged on 2026-10-23; it records a contributor-reported forward upgrade, not a downgrade guarantee. The registry-mirror proposal remains open."
-    noteZh: "还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。#228 单节点迁移报告于 2026-10-23 合并，记录的是贡献者报告的正向升级，不构成降级保证；镜像仓库提案仍未合并。"
+    note: "Also [cross-checked the two-drive EC:1 documentation](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939). The single-node migration report in #228 was merged on 2026-10-23; the registry-mirror proposal in #230 remains open."
+    noteZh: "还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。#228 单节点迁移报告于 2026-10-23 合并；#230 镜像仓库提案仍保持开放。"
   - handle: "clown15"
     activity:
       - repo: "pgsty/silo"
@@ -247,9 +247,9 @@ code:
     featured: true
     name: "Denis Babchuk"
     note: "The migration repair from [#248](https://github.com/pgsty/silo/pull/248) was incorporated in [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020),\
-      \ retaining the original authorship and DCO. The original PR remains open; this does not imply that #245 shipped."
+      \ retaining the original authorship and DCO."
     noteZh: "[#248](https://github.com/pgsty/silo/pull/248) 的迁移修复已纳入 [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)，保留原作者与\
-      \ DCO。原 PR 仍开启；这不表示 #245 已发布。"
+      \ DCO。"
 proposed:
   - handle: "magicxor"
     name: "Ilia Burakov"
@@ -375,10 +375,8 @@ reports:
     what: "Reported the unsigned-header CopyObject cross-object read (SN-2026-011)"
     whatZh: "报告未签名头导致的 CopyObject 跨对象读取（SN-2026-011）"
     note: "Security disclosure credited in [SN-2026-011](https://silo.pgsty.com/about/security-advisories/#sn-2026-011),\
-      \ with the source fix in [#173](https://github.com/pgsty/silo/pull/173). This credit is retained separately\
-      \ from public issue/PR authorship."
-    noteZh: "安全披露署名见 [SN-2026-011](https://silo.pgsty.com/zh/about/security-advisories/#sn-2026-011)，源码修复见 [#173](https://github.com/pgsty/silo/pull/173)。此项署名单独保留，不计作公开\
-      \ issue/PR 作者。"
+      \ fixed in [#173](https://github.com/pgsty/silo/pull/173)."
+    noteZh: "安全披露署名见 [SN-2026-011](https://silo.pgsty.com/zh/about/security-advisories/#sn-2026-011)，修复见 [#173](https://github.com/pgsty/silo/pull/173)。"
     activity: []
   - handle: "nik0xFF"
     name: "Dominik Klug"

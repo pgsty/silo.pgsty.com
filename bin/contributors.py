@@ -119,14 +119,14 @@ def record(data, zh=False, repo=None, website=False):
     if zh:
         intro = f'截至 **{date}**，SILO 及相关项目共有 **{count} 位社区贡献者**，包括维护者、公开 issue / PR 作者，以及已公开致谢的安全披露者。'
         policy = '只要提交过 issue 或 PR，无论开启、关闭、草稿或未合并，均予以认可。同一账号只计一次。排序先列已合并 PR 的作者，再列其他 PR 作者和问题报告者；每组优先展示重要修复、已采纳方案和推动修复的报告，其余按首次参与时间排列。金色圆环突出显著贡献。'
-        caveat = '原 PR 未合并但工作被后续修复吸收时，会单独列出采纳记录；关闭 issue 不等于问题已修复，代码合入也不等于已发布。自动化账号不计入人数。上游作者的署名继续保留在 Git 历史与版权声明中。'
+        caveat = '原 PR 未直接合并但成果被后续修复采纳时，会单独列出采纳记录。自动化账号不计入人数。上游作者的署名继续保留在 Git 历史与版权声明中。'
     else:
         subject = 'SILO and related projects' if repo is None else f'`{repo}`'
         noun = 'contributor' if count == 1 else 'contributors'
         verb = 'is' if count == 1 else 'are'
         intro = f'As of **{date}**, **{count} community {noun}** {verb} credited in {subject}. The roll includes maintainers and every human issue / PR author' + (', along with security reporters who have agreed to be acknowledged.' if repo is None else '.')
         policy = 'Opening an issue or PR counts, whether open, closed, draft, or unmerged. Each account appears once. Merged PR authors come first, followed by other PR authors and reporters. Within each group, significant fixes, adopted proposals, and reports that led to fixes take priority, followed by first participation. Gold rings highlight significant contributions.'
-        caveat = 'When a proposal was incorporated through a later repair, its adoption is credited separately from the original PR status. A closed issue does not necessarily mean a fix, and merged source does not imply a published release. Automated accounts are excluded. Upstream authorship remains in Git history and copyright notices.'
+        caveat = 'When a proposal was incorporated through a later repair, its adoption is credited alongside the original PR status. Automated accounts are excluded. Upstream authorship remains in Git history and copyright notices.'
     sections = [intro, policy, caveat, wall(entries, zh, repo, website), tables(data, zh, repo)]
     audit_title = '统计范围' if zh else 'Audit scope'
     note = ('以下统计来自全部分页的 GitHub issue / PR 记录，包含所有状态和自动化账号。' if zh else 'Counts below come from every page of the GitHub issue / PR records, across all states, including automated accounts.')

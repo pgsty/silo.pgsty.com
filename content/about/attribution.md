@@ -30,7 +30,7 @@ All documentation content on this site is licensed under the
 
 Portions of this documentation are derived from the [MinIO Object Storage Documentation](https://github.com/minio/docs). The work has been modified from the original: rebranding to PGSTY SILO, restoration of documentation for features removed upstream, conversion of the frozen RST/MyST source to bilingual Markdown, replacement of the Sphinx presentation layer with Hugo and Docsy, link and build fixes, ongoing maintenance, and translation into Chinese. The [commit history](https://github.com/pgsty/silo.pgsty.com/commits/main/) is the complete record of changes.
 
-Not every page is derived from MinIO. The blog, download and release pages, this section, and PGSTY SILO-specific content are original works of the PGSTY SILO project. Pages that do carry upstream material say so in a notice at the bottom of the page, and pages that PGSTY SILO has changed beyond the format conversion link to their own change history.
+The blog, download and release pages, this section, and PGSTY SILO-specific content are original works of the PGSTY SILO project. Pages that carry upstream material include a notice at the bottom of the page, and pages that PGSTY SILO has modified beyond format conversion link to their change history.
 
 ## Translation {#translation}
 
