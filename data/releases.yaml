@@ -1,4 +1,4 @@
-# Client release assets and Docker Hub images verified on 2026-10-25;
+# Client and Console release assets and Docker Hub images verified on 2026-10-25;
 # other component verification dates remain in their release notes.
 # Keep the Windows format tied to each published version. Switch a component
 # to zip only when its new Windows assets have been published and verified.
@@ -20,10 +20,11 @@ client:
   date: "2026-10-25"
   source: dcc78d506f94e7c2323b642d48fbb600664f0586
 console:
-  tag: v2.4.2
-  build: 2.4.2
+  tag: v2.5.0
+  build: 2.5.0
   windows_archive_format: zip
-  source: ef2dd2c41d212ed6405c90fa8e5ab671899a7365
+  source: 989fa7150792ffe62fe8d045353ed69bd2ec9ad8
+  notes: "blog/release/silo-20261025/#console-250"
 pkg:
   tag: v3.15.1
   source: 8893479a348a46ca82bc7a6dc86bd86a1dc71973

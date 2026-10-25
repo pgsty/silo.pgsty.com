@@ -27,23 +27,23 @@ The target is `RELEASE.2026-10-18T00-00-00Z`, package version `20261018000000.0.
 | Upstream S3 SDK | `github.com/minio/minio-go/v7 v7.4.1` |
 | Build toolchain | Go 1.27.2; Console frontend uses Node 24.22.0 LTS |
 
-Standalone Console v2.4.2 and mcli 20261018 still declare pkg v3.14.2; Server's module graph selects v3.14.3. The [v3.14.2 dependency baseline](/blog/release/pkg-3.14.2/) and v3.14.3 [admin-action classification optimization](/blog/release/pkg-3.14.3/) preserve APIs, policy formats and authorization behavior. Server must select Console and MC replacements explicitly; Go does not inherit dependency replacements. The supported integration target is the PGSTY stack, with best-effort upstream MinIO/MC compatibility.
+The historical Console v2.4.2 and mcli 20261018 releases declare pkg v3.14.2; Server's module graph selects v3.14.3. The [v3.14.2 dependency baseline](/blog/release/pkg-3.14.2/) and v3.14.3 [admin-action classification optimization](/blog/release/pkg-3.14.3/) preserve APIs, policy formats and authorization behavior. Server must select Console and MC replacements explicitly; Go does not inherit dependency replacements. The supported integration target is the PGSTY stack, with best-effort upstream MinIO/MC compatibility.
 
 ## Published components {#published}
 
 | Component | Current public version | Contents |
 | --- | --- | --- |
 | Server | [20261018](/blog/release/silo-20261018/) | Go 1.27.2; pkg v3.14.3; SDK v7.4.1; mcli 20261018; Console v2.4.2 (`ef2dd2c41d21`) |
-| Standalone Console | [v2.4.2](/blog/release/console-2.4.2/) | Go 1.27.2; pkg v3.14.2; SDK v7.4.1; mcli 20261018; correct bucket-versioning errors |
+| Standalone Console | [v2.5.0](/blog/release/silo-20261025/#console-250) | Go 1.27.3; pkg v3.15.1; SDK `ab93db7ba435`; mcli 20261025; updated GUI and complete diagnostic health reports |
 | mcli | [20261025](/blog/release/mcli-20261025/) | Go 1.27.3; pkg v3.15.1; SDK `ab93db7ba435`; package version `20261025000000.0.0`; Windows ZIP archives |
 | Shared pkg | [v3.15.1](/blog/release/silo-20261025/) | Go 1.27.3 library floor; refreshed shared dependencies; minio-go `ab93db7ba435`; existing policy and output compatibility retained |
 | Optional KES | [20261018](/blog/release/kes-20261018/) | Separate key service; Go 1.27.2; AWS SDK v2; OpenBao KV v2 and Moto acceptance |
 
-**Console v2.5.0 is in local preparation, unpublished:** source selects Go 1.27.3, pkg v3.15.1, mcli 20261025 (`dcc78d506f94`) and minio-go `v7.4.2-0.20261020194015-ab93db7ba435`, with GUI updates and the diagnostic WebSocket closing-handshake repair for #63. See the [maintenance announcement](/blog/release/silo-20261025/#console-250) for dependencies, upgrade boundaries and status.
+**Console v2.5.0 is published:** source [`989fa7150792`](https://github.com/pgsty/silo-console/commit/989fa7150792ffe62fe8d045353ed69bd2ec9ad8), Go module version `v0.0.0-20261025145732-989fa7150792`. See the [maintenance announcement](/blog/release/silo-20261025/#console-250) for dependencies, verification and upgrade boundaries.
 
-**Server candidate integration:** Go 1.27.3, pkg v3.15.1, mcli 20261025 and the unreleased Console 2.5.0 source are integrated locally. IAM Reset and fresh bucket inventory fixes require this coordinated Server update; the published Server row above is unchanged.
+**Server source integration:** Go 1.27.3, pkg v3.15.1, mcli 20261025 and Console 2.5.0 application code are integrated on Server main. IAM Reset and fresh bucket inventory fixes require a new Server build; the published Server 20261018 does not contain these repairs.
 
-Official images use Docker Hub: `docker.io/pgsty/silo`, `docker.io/pgsty/silo-console` and `docker.io/pgsty/mc`, `docker.io/pgsty/kes`. Console v2.4.2 image acceptance is recorded in its [release notes](/blog/release/console-2.4.2/#delivery). Package-repository mirrors may lag GitHub. The [download page](/download/) provides public Server 20261018 artifacts and pinned installation commands.
+Official images use Docker Hub: `docker.io/pgsty/silo`, `docker.io/pgsty/silo-console` and `docker.io/pgsty/mc`, `docker.io/pgsty/kes`. Console v2.5.0 image acceptance is recorded in the [maintenance announcement](/blog/release/silo-20261025/#console-250-delivery). Package-repository mirrors may lag GitHub. The [download page](/download/) provides public Server 20261018 artifacts and pinned installation commands.
 
 ## September 16 dependency graph {#source}
 
@@ -222,7 +222,7 @@ is separate from the maintained policy implementation.
 
 Console v2.4.2, mcli 20261018 and the Server 20261018 release use Go **1.27.2**; the September stack used Go **1.27.1**.
 The pkg v3.14.x line retains a Go **1.26** library floor and was race-tested with Go **1.26.8**.
-The standalone mcli 20261025 release and its pkg v3.15.1 dependency require Go **1.27.3**. The Go x/* dependencies were refreshed.
+Standalone Console v2.5.0, mcli 20261025 and their pkg v3.15.1 dependency require Go **1.27.3**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
 on NetBSD; Console's tablewriter **v0.0.5** replacement preserves its MC API.
 

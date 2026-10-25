@@ -8,7 +8,9 @@ type: docs
 icon: fa-solid fa-shield-halved
 ---
 
-在上游 `minio/minio` 归档停更后，PGSTY SILO 持续维护对象存储栈的漏洞跟踪与安全补丁。生产环境建议运行 [Server 20261018](/zh/blog/release/silo-20261018/)（修复对象锁 `SN-2026-015` / `SN-2026-016` 与 IAM 管理边界 `SN-2026-017`，并包含 Server 20260916 已合入的 `SN-2026-011` 至 `SN-2026-014`）、[Console v2.4.2](/zh/blog/release/console-2.4.2/) 与 [mcli 20261018](/zh/blog/release/mcli-20261018/)；完整升级要求见[十月安全公告](/zh/blog/security/20261018-release-hardening/)、[安全公告台账](/zh/about/security-advisories/)与[组件版本矩阵](/zh/compatibility/versions/)。
+在上游 `minio/minio` 归档停更后，PGSTY SILO 持续维护对象存储栈的漏洞跟踪与安全补丁。生产环境建议运行 [Server 20261018](/zh/blog/release/silo-20261018/)（修复对象锁 `SN-2026-015` / `SN-2026-016` 与 IAM 管理边界 `SN-2026-017`，并包含 Server 20260916 已合入的 `SN-2026-011` 至 `SN-2026-014`）、[Console v2.5.0](/zh/blog/release/silo-20261025/#console-250) 与 [mcli 20261025](/zh/blog/release/mcli-20261025/)；完整升级要求见[十月安全公告](/zh/blog/security/20261018-release-hardening/)、[安全公告台账](/zh/about/security-advisories/)与[组件版本矩阵](/zh/compatibility/versions/)。
+
+独立 Console 不会替换 Server 内嵌控制台。策略 Reset 与实时存储桶列表需要 Server main 上的配套修复；Server 20261018 不包含这些修复。见 [Console 升级边界](/zh/blog/release/silo-20261025/#console-250)。
 
 ## 报告安全漏洞 {#reporting}
 

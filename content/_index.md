@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-This site targets [SILO Server 20261018](/blog/release/silo-20261018/), released with Console v2.4.2, mcli 20261018 and Server pkg v3.14.3. Optional KES 20261018 is published separately for external key management. The standalone [mcli 20261025](/blog/release/mcli-20261025/) client is now available with Go 1.27.3 and silo-pkg v3.15.1. Components release independently; see the [component matrix](/compatibility/versions/).
+This site targets [SILO Server 20261018](/blog/release/silo-20261018/), released with Console v2.4.2, mcli 20261018 and Server pkg v3.14.3. Optional KES 20261018 is published separately for external key management. Standalone [mcli 20261025](/blog/release/mcli-20261025/) and [Console v2.5.0](/blog/release/silo-20261025/#console-250) are now available with Go 1.27.3 and silo-pkg v3.15.1. Components release independently; see the [component matrix](/compatibility/versions/).
 
 > [!WARNING]
 > **SILO is a MinIO fork maintained by the Pigsty community.** It is not affiliated with, endorsed by, or sponsored by MinIO, Inc. “MinIO” is a trademark of MinIO, Inc., used here only to identify the upstream project. See [Attribution](/about/attribution/) for source and licensing details.

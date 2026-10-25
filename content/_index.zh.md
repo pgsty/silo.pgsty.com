@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-本站以 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，已正式发布；配套 Console v2.4.2、mcli 20261018 与 Server pkg v3.14.3，可选外部密钥服务 KES 20261018 已独立发布。独立客户端 [mcli 20261025](/zh/blog/release/mcli-20261025/) 现已提供，采用 Go 1.27.3 与 silo-pkg v3.15.1。各组件独立发布，见[组件矩阵](/zh/compatibility/versions/)。
+本站以 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，已正式发布；配套 Console v2.4.2、mcli 20261018 与 Server pkg v3.14.3，可选外部密钥服务 KES 20261018 已独立发布。独立客户端 [mcli 20261025](/zh/blog/release/mcli-20261025/) 与 [Console v2.5.0](/zh/blog/release/silo-20261025/#console-250) 现已提供，采用 Go 1.27.3 与 silo-pkg v3.15.1。各组件独立发布，见[组件矩阵](/zh/compatibility/versions/)。
 
 > [!WARNING]
 > **SILO 是由 Pigsty 社区维护的 MinIO 分支。** 本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。“MinIO” 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。源码与许可信息详见[归属与署名](/zh/about/attribution/)。
