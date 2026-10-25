@@ -36,7 +36,7 @@ Standalone Console v2.4.2 and mcli 20261018 still declare pkg v3.14.2; Server's 
 | Server | [20261018](/blog/release/silo-20261018/) | Go 1.27.2; pkg v3.14.3; SDK v7.4.1; mcli 20261018; Console v2.4.2 (`ef2dd2c41d21`) |
 | Standalone Console | [v2.4.2](/blog/release/console-2.4.2/) | Go 1.27.2; pkg v3.14.2; SDK v7.4.1; mcli 20261018; correct bucket-versioning errors |
 | mcli | [20261018](/blog/release/mcli-20261018/) | Go 1.27.2; pkg v3.14.2; SDK v7.4.1; package version `20261018000000.0.0` |
-| Shared pkg | [v3.15.1](/blog/release/silo-20261024/) | Go 1.27.3 library floor; refreshed shared dependencies; minio-go `ab93db7ba435`; existing policy and output compatibility retained |
+| Shared pkg | [v3.15.1](/blog/release/silo-20261025/) | Go 1.27.3 library floor; refreshed shared dependencies; minio-go `ab93db7ba435`; existing policy and output compatibility retained |
 | Optional KES | [20261018](/blog/release/kes-20261018/) | Separate key service; Go 1.27.2; AWS SDK v2; OpenBao KV v2 and Moto acceptance |
 
 Official images use Docker Hub: `docker.io/pgsty/silo`, `docker.io/pgsty/silo-console` and `docker.io/pgsty/mc`, `docker.io/pgsty/kes`. Console v2.4.2 image acceptance is recorded in its [release notes](/blog/release/console-2.4.2/#delivery). Package-repository mirrors may lag GitHub. The [download page](/download/) provides public Server 20261018 artifacts and pinned installation commands.

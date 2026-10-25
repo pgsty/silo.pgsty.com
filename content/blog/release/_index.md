@@ -17,4 +17,4 @@ aliases:
 
 Release notes record major changes, security fixes, dependency updates, and related commits. Upcoming releases are explicitly marked as placeholders.
 
-[20261024](/blog/release/silo-20261024/) is a shared Go and dependency maintenance announcement for SILO, mcli, SILO Console, silo-pkg and KES. It is not yet released.
+[20261025](/blog/release/silo-20261025/) is a shared Go and dependency maintenance announcement for SILO, mcli, SILO Console, silo-pkg and KES. silo-pkg v3.15.1 is released; [mcli 20261025](/blog/release/mcli-20261025/) is prepared but not published. The other component releases remain pending.
