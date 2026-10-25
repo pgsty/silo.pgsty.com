@@ -6,12 +6,12 @@
 # firstContribution is the first public issue / PR date; omitted for private disclosures.
 # Sync repository records, README sections, and bilingual pages: python3 bin/contributors.py
 # Refresh avatars: python3 bin/contributor_avatars.py
-updated: "2026-10-25T14:55:34+00:00"
+updated: "2026-10-25T16:00:37+00:00"
 repositories:
   - repo: "pgsty/silo"
-    updated: "2026-10-18T23:46:04+00:00"
-    issues: 119
-    pullRequests: 126
+    updated: "2026-10-25T16:00:37+00:00"
+    issues: 123
+    pullRequests: 130
   - repo: "pgsty/silo-console"
     updated: "2026-10-25T14:55:34+00:00"
     issues: 36
@@ -52,16 +52,10 @@ code:
     firstContribution: "2026-04-14"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [22, 23, 24, 25, 26, 27, 28, 46, 47, 48, 49, 50, 52, 53, 55, 63, 64, 65, 67, 68, 75, 76,
-          77, 78, 82, 83, 84, 99, 100, 102, 105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 133,
-          136, 137, 139, 141, 144, 147, 148, 158, 165, 166, 167, 168, 169, 170, 171, 199, 200, 201, 202, 204, 218]
-        merged: [44, 45, 56, 66, 69, 70, 72, 73, 74, 80, 81, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97,
-          98, 101, 103, 104, 121, 122, 123, 124, 126, 127, 128, 129, 130, 131, 134, 135, 138, 140, 142, 143, 145,
-          146, 149, 156, 157, 159, 161, 162, 163, 164, 173, 174, 175, 177, 178, 179, 180, 181, 182, 188, 189, 190,
-          191, 192, 193, 194, 196, 205, 206, 207, 208, 209, 211, 212, 213, 214, 216, 234, 235, 237, 238, 239, 242,
-          243, 244]
+        merged: [44, 45, 56, 66, 69, 70, 72, 73, 74, 80, 81, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 101, 103, 104, 121, 122, 123, 124, 126, 127, 128, 129, 130, 131, 134, 135, 138, 140, 142, 143, 145, 146, 149, 156, 157, 159, 161, 162, 163, 164, 173, 174, 175, 177, 178, 179, 180, 181, 182, 188, 189, 190, 191, 192, 193, 194, 196, 205, 206, 207, 208, 209, 211, 212, 213, 214, 216, 234, 235, 237, 238, 239, 242, 243, 244]
         closed: [155, 195]
-        issuesOpen: [203, 217, 246]
+        issuesClosed: [22, 23, 24, 25, 26, 27, 28, 46, 47, 48, 49, 50, 52, 53, 55, 63, 64, 65, 67, 68, 75, 76, 77, 78, 82, 83, 84, 99, 100, 102, 105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 133, 136, 137, 139, 141, 144, 147, 148, 158, 165, 166, 167, 168, 169, 170, 171, 199, 200, 201, 202, 203, 204, 218, 246]
+        issuesOpen: [217]
       - repo: "pgsty/silo-console"
         what: "Maintains SILO Console, including fixes, tests, releases, and documentation"
         whatZh: "维护 SILO Console 的修复、测试、发行与文档"
@@ -110,8 +104,8 @@ code:
     firstContribution: "2026-04-24"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [31, 32, 107, 226]
         merged: [225]
+        issuesClosed: [31, 32, 107, 226]
   - handle: "pinginfo"
     name: "ping"
     featured: true
@@ -162,8 +156,8 @@ code:
     activity:
       - repo: "pgsty/silo"
         merged: [60, 132, 198, 221]
-        closed: [215]
         open: [249]
+        closed: [215]
       - repo: "pgsty/mc"
         open: [44]
   - handle: "h5vx"
@@ -182,8 +176,8 @@ code:
     firstContribution: "2026-09-07"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [150]
         merged: [151]
+        issuesClosed: [150]
   - handle: "julienlau"
     name: "Julien Laurenceau"
     featured: true
@@ -196,10 +190,10 @@ code:
     firstContribution: "2026-09-07"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [152, 153]
-        closed: [184]
         merged: [232, 233]
         open: [240, 241]
+        closed: [184]
+        issuesClosed: [152, 153]
   - handle: "Aeirx"
     name: "Ayush Sharma"
     featured: true
@@ -221,8 +215,8 @@ code:
   - handle: "yupoet"
     activity:
       - repo: "pgsty/silo"
-        open: [230]
         merged: [228, 229]
+        closed: [230]
     firstContribution: "2026-09-26"
     what: "Improved checksum mismatch messages, verified erasure-coding documentation, and contributed a single-node migration case"
     whatZh: "改进校验和不匹配错误，核验纠删码文档，并贡献单节点迁移案例"
@@ -242,21 +236,31 @@ code:
   - handle: "botdeniska"
     activity:
       - repo: "pgsty/silo"
-        open: [245, 248]
+        merged: [253, 255, 257]
+        closed: [245, 248]
+        issuesClosed: [252, 254, 256]
       - repo: "pgsty/silo-pkg"
         merged: [11]
         what: "Added policy-evaluation fast paths and regression coverage, adapting the original work by Klaus\
           \ Post"
         whatZh: "基于 Klaus Post 的原始工作，贡献策略求值快速路径与回归覆盖"
     firstContribution: "2026-10-17"
-    what: "Contributed multi-pool migration safety repairs and faster policy evaluation in silo-pkg"
-    whatZh: "贡献多池迁移安全修复与 silo-pkg 策略求值性能优化"
+    what: "Contributed multi-pool migration and deletion safety, tiered expiry and replication checksum repairs, and faster policy evaluation in silo-pkg"
+    whatZh: "贡献多池迁移与删除安全、分层过期和复制校验和修复，以及 silo-pkg 策略求值性能优化"
     featured: true
     name: "Denis Babchuk"
     note: "The migration repair from [#248](https://github.com/pgsty/silo/pull/248) was incorporated in [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020),\
       \ retaining the original authorship and DCO."
     noteZh: "[#248](https://github.com/pgsty/silo/pull/248) 的迁移修复已纳入 [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)，保留原作者与\
       \ DCO。"
+  - handle: "910patin"
+    activity:
+      - repo: "pgsty/silo"
+        merged: [250]
+    firstContribution: "2026-10-19"
+    what: "Fixed long-DN LDAP login while preserving IAM revocation-record errors"
+    whatZh: "修复长 DN 的 LDAP 登录，并保留 IAM 撤销记录读取错误"
+    featured: true
 proposed:
   - handle: "magicxor"
     name: "Ilia Burakov"
@@ -268,8 +272,8 @@ proposed:
     firstContribution: "2026-03-21"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [10]
         closed: [12]
+        issuesClosed: [10]
   - handle: "davinkevin"
     name: "Davin Kevin"
     featured: true
@@ -281,8 +285,8 @@ proposed:
     firstContribution: "2026-04-10"
     activity:
       - repo: "pgsty/silo"
-        issuesOpen: [20]
         closed: [21]
+        issuesOpen: [20]
   - handle: "metaneutrons"
     name: "Fabian Schmieder"
     featured: true
@@ -293,8 +297,8 @@ proposed:
     firstContribution: "2026-08-15"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [58]
         closed: [59]
+        issuesClosed: [58]
   - handle: "mikemikimike"
     featured: true
     what: "Contributed the replicated SSE-C plaintext part-size fix"
@@ -318,8 +322,8 @@ proposed:
     firstContribution: "2026-09-14"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [185]
         closed: [187]
+        issuesClosed: [185]
   - handle: "sulin37392"
     what: "Proposed dependency updates"
     whatZh: "提交依赖更新"
@@ -543,7 +547,7 @@ reports:
     firstContribution: "2026-08-17"
     activity:
       - repo: "pgsty/silo"
-        issuesOpen: [61]
+        issuesClosed: [61]
   - handle: "liuhaodongliu990-cmyk"
     what: "Reported indeterminate progress for prefix downloads"
     whatZh: "报告前缀下载进度显示异常"
@@ -618,7 +622,7 @@ reports:
   - handle: "zmstone"
     activity:
       - repo: "pgsty/silo"
-        issuesOpen: [224]
+        issuesClosed: [224]
     firstContribution: "2026-09-24"
     what: "Requested a GitHub Container Registry mirror"
     whatZh: "提出增加 GitHub Container Registry 镜像的建议"
@@ -645,7 +649,7 @@ reports:
   - handle: "devTeam-AiReg"
     activity:
       - repo: "pgsty/silo"
-        issuesOpen: [247]
+        issuesClosed: [247]
     firstContribution: "2026-10-18"
     what: "Asked about availability of the release containing IAM security fixes"
     whatZh: "反馈包含 IAM 安全修复的版本发布需求"
@@ -659,3 +663,13 @@ reports:
     activity:
       - repo: "pgsty/silo-console"
         issuesClosed: [63]
+  - handle: "GhaziTriki"
+    activity:
+      - repo: "pgsty/silo"
+        issuesOpen: [251]
+    firstContribution: "2026-10-20"
+    what: "Reported policy-query and Console performance degradation"
+    whatZh: "报告策略查询与 Console 性能退化问题"
+    note: "IAM policy reload and KMS cancellation repairs have landed; #251 remains open for the broader performance symptoms."
+    noteZh: "IAM 策略重载与 KMS 请求取消修复已合入；#251 的更广泛性能症状仍保持开放。"
+    featured: true
