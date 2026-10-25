@@ -14,7 +14,7 @@ Entries with a public CVE use that identifier. Because upstream `minio/minio` is
 
 ## Current Release Boundary {#boundary}
 
-The current production baseline is **[Server 20261018](/blog/release/silo-20261018/)**, **[Console v2.4.2](/blog/release/console-2.4.2/)**, **[mcli 20261018](/blog/release/mcli-20261018/)**, and **[silo-pkg v3.14.3](/blog/release/pkg-3.14.3/)** (with unified Go 1.27.3 and dependency maintenance tracked in [20261025](/blog/release/silo-20261025/)):
+The current production baseline is **[Server 20261018](/blog/release/silo-20261018/)**, **[Console v2.4.2](/blog/release/console-2.4.2/)**, **[mcli 20261025](/blog/release/mcli-20261025/)**, with **[silo-pkg v3.14.3](/blog/release/pkg-3.14.3/)** in Server and **[v3.15.1](/blog/release/silo-20261025/)** in mcli (with unified Go 1.27.3 and dependency maintenance tracked in [20261025](/blog/release/silo-20261025/)):
 
 - **Server 20261018** fixes [SN-2026-015](#sn-2026-015) (`PutObjectRetention` governance bypass), [SN-2026-016](#sn-2026-016) (version-addressed and in-place Object Lock overwrites), and [SN-2026-017](#sn-2026-017) (Admin credential authorization boundaries), and adds scoped STS token revocation (`0cd388c66`). Server 20260916 and earlier remain affected by `SN-2026-015` through `SN-2026-017`; deploy the upgrade to every Server node and replication peer accepting writes. See the [October security note](/blog/security/20261018-release-hardening/) and [Component Version Matrix](/compatibility/versions/).
 - **Server 20260916** and **Console v2.4.1** include [SN-2026-011](#sn-2026-011) through [SN-2026-014](#sn-2026-014), which are absent from Server 20260903.

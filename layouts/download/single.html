@@ -598,7 +598,7 @@ make build
           <div>
             <p class="section-eyebrow"><span class="silkscreen">05 / GO LIBRARY</span></p>
             <h2 id="pkg-title">silo-pkg {{ hugo.Data.releases.pkg.tag }}</h2>
-            <p>{{ if $zh }}纯源码 Go 模块，没有独立可执行程序或容器。Server 20261018 选用 v3.14.3；已发布的 mcli 20261018 与 Console v2.4.2 仍使用 v3.14.2。采用新版需要重新构建应用。{{ else }}A source-only Go module, with no standalone executable or container. Server 20261018 selects v3.14.3; published mcli 20261018 and Console v2.4.2 still use v3.14.2. Rebuild the application to adopt it.{{ end }}</p>
+            <p>{{ if $zh }}纯源码 Go 模块，没有独立可执行程序或容器。Server 20261018 选用 v3.14.3；mcli 20261025 使用 v3.15.1，Console v2.4.2 仍使用 v3.14.2。采用新版需要重新构建应用。{{ else }}A source-only Go module, with no standalone executable or container. Server 20261018 selects v3.14.3; mcli 20261025 uses v3.15.1, while Console v2.4.2 still uses v3.14.2. Rebuild the application to adopt it.{{ end }}</p>
           </div>
           <a class="version-card" href="{{ relLangURL hugo.Data.releases.pkg.notes }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.pkg.tag }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
         </div>

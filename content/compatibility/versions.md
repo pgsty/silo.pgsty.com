@@ -35,7 +35,7 @@ Standalone Console v2.4.2 and mcli 20261018 still declare pkg v3.14.2; Server's 
 | --- | --- | --- |
 | Server | [20261018](/blog/release/silo-20261018/) | Go 1.27.2; pkg v3.14.3; SDK v7.4.1; mcli 20261018; Console v2.4.2 (`ef2dd2c41d21`) |
 | Standalone Console | [v2.4.2](/blog/release/console-2.4.2/) | Go 1.27.2; pkg v3.14.2; SDK v7.4.1; mcli 20261018; correct bucket-versioning errors |
-| mcli | [20261018](/blog/release/mcli-20261018/) | Go 1.27.2; pkg v3.14.2; SDK v7.4.1; package version `20261018000000.0.0` |
+| mcli | [20261025](/blog/release/mcli-20261025/) | Go 1.27.3; pkg v3.15.1; SDK `ab93db7ba435`; package version `20261025000000.0.0`; Windows ZIP archives |
 | Shared pkg | [v3.15.1](/blog/release/silo-20261025/) | Go 1.27.3 library floor; refreshed shared dependencies; minio-go `ab93db7ba435`; existing policy and output compatibility retained |
 | Optional KES | [20261018](/blog/release/kes-20261018/) | Separate key service; Go 1.27.2; AWS SDK v2; OpenBao KV v2 and Moto acceptance |
 
@@ -217,8 +217,8 @@ its own path directly. Legacy transitive `minio/pkg/v3` from `colorjson`/`dperf`
 is separate from the maintained policy implementation.
 
 Console v2.4.2, mcli 20261018 and the Server 20261018 release use Go **1.27.2**; the September stack used Go **1.27.1**.
-pkg retains a Go **1.26** library floor and
-was also race-tested with Go **1.26.8**. The Go x/* dependencies were refreshed.
+The pkg v3.14.x line retains a Go **1.26** library floor and was race-tested with Go **1.26.8**.
+The standalone mcli 20261025 release and its pkg v3.15.1 dependency require Go **1.27.3**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
 on NetBSD; Console's tablewriter **v0.0.5** replacement preserves its MC API.
 

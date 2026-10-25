@@ -12,16 +12,16 @@
 | --- | --- |
 | Server 20261018 | [英文](content/blog/release/silo-20261018.md) · [中文](content/blog/release/silo-20261018.zh.md) |
 | Console v2.4.2 | [英文](content/blog/release/console-2.4.2.md) · [中文](content/blog/release/console-2.4.2.zh.md) |
-| mcli 20261018 | [英文](content/blog/release/mcli-20261018.md) · [中文](content/blog/release/mcli-20261018.zh.md) |
+| mcli 20261025 | [英文](content/blog/release/mcli-20261025.md) · [中文](content/blog/release/mcli-20261025.zh.md) |
 | pkg v3.14.2 | [英文](content/blog/release/pkg-3.14.2.md) · [中文](content/blog/release/pkg-3.14.2.zh.md) |
 | pkg v3.14.3 | [英文](content/blog/release/pkg-3.14.3.md) · [中文](content/blog/release/pkg-3.14.3.zh.md) |
 | 可选 KES 20261018 | [英文](content/blog/release/kes-20261018.md) · [中文](content/blog/release/kes-20261018.zh.md) |
 
-Server 选用 Console v2.4.2、mcli 20261018、pkg v3.14.3、上游 minio-go v7.4.1；已发布的独立 Console 与 mcli 仍声明 pkg v3.14.2。KES 为独立部署的外部密钥服务，不嵌入 Server。精确源码、发布状态和升级顺序见[组件矩阵](content/compatibility/versions.zh.md)。
+Server 选用 Console v2.4.2、mcli 20261018、pkg v3.14.3、上游 minio-go v7.4.1；独立 Console v2.4.2 仍声明 pkg v3.14.2。独立发布的 mcli 20261025 使用 Go 1.27.3、silo-pkg v3.15.1 与 minio-go `ab93db7ba435`。KES 为独立部署的外部密钥服务，不嵌入 Server。精确源码、发布状态和升级顺序见[组件矩阵](content/compatibility/versions.zh.md)。
 
 `data/releases.yaml` 驱动首页与下载页。`server.published: true` 启用公开制品下载链接，`published_server` 记录当前公开版本。准备后续版本时应保持 false，直到匹配的 Server 制品与 Docker 镜像公开并完成核验，同时更新两种语言的交付说明。
 
-`windows_archive_format` 记录各组件已发布的 Windows 归档格式：Server、mcli、KES 20261018 保持 `tar.gz`，Console v2.4.2 使用 `zip`。后续发布 ZIP 版本时，核验制品后同时更新对应组件的版本与格式，不改写旧版本下载链接。Linux 与 macOS 归档继续使用 `tar.gz`。
+`windows_archive_format` 记录各组件已发布的 Windows 归档格式：Server 与 KES 20261018 保持 `tar.gz`，mcli 20261025 与 Console v2.4.2 使用 `zip`。后续发布 ZIP 版本时，核验制品后同时更新对应组件的版本与格式，不改写旧版本下载链接。Linux 与 macOS 归档继续使用 `tar.gz`。
 
 ## 本地开发与校验
 

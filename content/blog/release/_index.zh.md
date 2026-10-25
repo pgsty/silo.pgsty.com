@@ -17,4 +17,4 @@ aliases:
 
 每个 SILO 正式版本均有独立页面，记录发布日期、主要变更、安全修复、依赖更新与相关提交。
 
-[20261025](/zh/blog/release/silo-20261025/) 是 SILO、mcli、SILO Console、silo-pkg 与 KES 共用的 Go 与依赖维护公告。silo-pkg v3.15.1 已发布；[mcli 20261025](/zh/blog/release/mcli-20261025/) 正在准备发布；其余组件尚待各自完成发布。
+[20261025](/zh/blog/release/silo-20261025/) 是 SILO、mcli、SILO Console、silo-pkg 与 KES 共用的 Go 与依赖维护公告。silo-pkg v3.15.1 已发布；[mcli 20261025](/zh/blog/release/mcli-20261025/) 已正式发布；其余组件尚待各自完成发布。
