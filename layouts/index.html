@@ -100,10 +100,9 @@
         </div>
 
         <div class="stats-grid" data-reveal>
-          {{/* 拉取量的绝大部分沉淀在改名前的 pgsty/minio 仓库上（Docker Hub 改名不迁移
-               计数），所以这张卡片固定指向 pgsty/minio —— 不要改成 pgsty/silo。
-               数字本身是两个仓库的合计，见 bin/metrics.py。 */}}
-          <a href="https://hub.docker.com/r/pgsty/minio" target="_blank" rel="noopener" class="stat-item" title="{{ if $zh }}镜像拉取总量，含改名后的 pgsty/silo 镜像{{ else }}Total image pulls, including the renamed pgsty/silo image{{ end }}">
+          {{/* 链接指向当前维护的 pgsty/silo 镜像仓库；拉取量仍合计改名前后的
+               两个仓库，见 bin/metrics.py。 */}}
+          <a href="https://hub.docker.com/r/pgsty/silo" target="_blank" rel="noopener" class="stat-item" title="{{ if $zh }}镜像拉取总量，含历史 pgsty/minio 与当前 pgsty/silo 镜像{{ else }}Total image pulls across the historical pgsty/minio and current pgsty/silo images{{ end }}">
             <span class="stat-value" data-count="{{ $metrics.docker_pulls }}">{{ lang.FormatNumber 0 $metrics.docker_pulls }}</span>
             <span class="stat-label">Docker Pulls</span>
           </a>

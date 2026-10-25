@@ -18,7 +18,9 @@ End of an era — but open source doesn't die that easily.
 
 I created a MinIO fork, restored the admin console, rebuilt the binary distribution pipeline, and brought it back to life.
 
-If you're running MinIO, swap `minio/minio` for `pgsty/minio`.
+> **2026-10-25 update:** The maintained Docker image is now `pgsty/silo`. The Docker links and examples below use the current name; see the [migration guide](/compatibility/migration/).
+
+If you're running MinIO, swap `minio/minio` for `pgsty/silo`.
 Everything else stays the same. ([CVE fixed](https://nvd.nist.gov/vuln/detail/CVE-2025-62506), and the console GUI is back)
 
 ------
@@ -143,7 +145,7 @@ You need a stable artifact you can put in a Dockerfile, an Ansible playbook, or 
 **We rebuilt the distribution:**
 
 **Docker Images**
-: [`pgsty/minio`](https://hub.docker.com/r/pgsty/minio) is live on Docker Hub. `docker pull pgsty/minio` and you're good.
+: [`pgsty/silo`](https://hub.docker.com/r/pgsty/silo) is live on Docker Hub. `docker pull pgsty/silo` and you're good.
 
 **RPM / DEB Packages**
 : Built for major Linux distributions, matching the original package specs.
@@ -151,7 +153,7 @@ You need a stable artifact you can put in a Dockerfile, an Ansible playbook, or 
 **CI/CD Pipeline**
 : Fully automated build workflows on GitHub, ensuring ongoing supply chain stability.
 
-If you're using Docker, just swap `minio/minio` for `pgsty/minio`.
+If you're using Docker, just swap `minio/minio` for `pgsty/silo`.
 
 For native Linux installs, grab RPM/DEB packages from the [GitHub Release](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-02-14T12-00-00Z) page.
 You can also use [pig](https://github.com/pgsty/pig) (the PG extension package manager) for easy installation,

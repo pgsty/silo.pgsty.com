@@ -135,9 +135,11 @@ MinIO 是 Pigsty 的生产依赖。我需要可用的二进制、完整的控制
 
 ![credit.webp](credit.webp)
 
+> **2026-10-25 更新：** 当前维护的 Docker 镜像已更名为 `pgsty/silo`。下文 Docker 示例已更新为当前名称，详见[迁移指南](/zh/compatibility/migration/)。
+
 对已经在用 MinIO 开源版的人来说，迁移到这个分支的成本其实很低：
 
-- **Docker 镜像**：把 `minio/minio` 换成 `pgsty/minio`，一行的事。
+- **Docker 镜像**：把 `minio/minio` 换成 `pgsty/silo`，一行的事。
 - **RPM / DEB**：[GitHub Release](https://github.com/pgsty/silo/releases) 里都有，或者用 `pig` 一键装。
 - **源代码仓库**：[pgsty/minio](https://github.com/pgsty/minio)
 - **中文文档**：[silo.pgsty.com/zh/](https://silo.pgsty.com/zh/)
