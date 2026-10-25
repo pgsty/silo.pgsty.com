@@ -600,9 +600,9 @@ make build
             <h2 id="pkg-title">silo-pkg {{ hugo.Data.releases.pkg.tag }}</h2>
             <p>{{ if $zh }}纯源码 Go 模块，没有独立可执行程序或容器。Server 20261018 选用 v3.14.3；已发布的 mcli 20261018 与 Console v2.4.2 仍使用 v3.14.2。采用新版需要重新构建应用。{{ else }}A source-only Go module, with no standalone executable or container. Server 20261018 selects v3.14.3; published mcli 20261018 and Console v2.4.2 still use v3.14.2. Rebuild the application to adopt it.{{ end }}</p>
           </div>
-          <a class="version-card" href="{{ relLangURL (printf "blog/release/pkg-%s/" (strings.TrimPrefix "v" hugo.Data.releases.pkg.tag)) }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.pkg.tag }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
+          <a class="version-card" href="{{ relLangURL hugo.Data.releases.pkg.notes }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.pkg.tag }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
         </div>
-        <div class="download-code"><div class="download-code-head"><span>go.mod · Go 1.26+</span></div><pre><code>require github.com/pgsty/silo-pkg/v3 {{ hugo.Data.releases.pkg.tag }}</code></pre></div>
+        <div class="download-code"><div class="download-code-head"><span>go.mod · Go {{ hugo.Data.releases.pkg.go_version }}+</span></div><pre><code>require github.com/pgsty/silo-pkg/v3 {{ hugo.Data.releases.pkg.tag }}</code></pre></div>
         <div class="method-actions"><a class="btn btn-line" href="https://github.com/pgsty/silo-pkg/releases/tag/{{ hugo.Data.releases.pkg.tag }}">GitHub Release</a><a class="btn btn-line" href="{{ relLangURL "blog/release/pkg-3.14.2/" }}">{{ if $zh }}v3.14.2 依赖基线{{ else }}v3.14.2 dependency baseline{{ end }}</a></div>
       </div>
     </section>

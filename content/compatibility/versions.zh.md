@@ -36,7 +36,7 @@ icon: fa-solid fa-code-branch
 | Server | [20261018](/zh/blog/release/silo-20261018/) | Go 1.27.2；pkg v3.14.3；SDK v7.4.1；mcli 20261018；Console v2.4.2（`ef2dd2c41d21`） |
 | 独立 Console | [v2.4.2](/zh/blog/release/console-2.4.2/) | Go 1.27.2；pkg v3.14.2；SDK v7.4.1；mcli 20261018；正确返回桶版本控制错误 |
 | mcli | [20261018](/zh/blog/release/mcli-20261018/) | Go 1.27.2；pkg v3.14.2；SDK v7.4.1；包版本 `20261018000000.0.0` |
-| 共享 pkg | [v3.14.3](/zh/blog/release/pkg-3.14.3/) | 策略性能优化；依赖与 v3.14.2 相同；Go 1.26 库最低要求 |
+| 共享 pkg | [v3.15.1](/zh/blog/release/silo-20261024/) | 最低要求 Go 1.27.3；共享依赖更新；minio-go `ab93db7ba435`；保留策略与输出兼容性 |
 | 可选 KES | [20261018](/zh/blog/release/kes-20261018/) | 独立密钥服务；Go 1.27.2；AWS SDK v2；OpenBao KV v2 与 Moto 验收 |
 
 官方镜像使用 Docker Hub：`docker.io/pgsty/silo`、`docker.io/pgsty/silo-console`、`docker.io/pgsty/mc`、`docker.io/pgsty/kes`。Console v2.4.2 的历史镜像验收见[发布记录](/zh/blog/release/console-2.4.2/#delivery)。软件包仓库镜像可能晚于 GitHub 更新。[下载页](/zh/download/)提供 Server 20261018 的公开制品与固定版本安装命令。

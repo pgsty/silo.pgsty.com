@@ -24,8 +24,10 @@ console:
   windows_archive_format: zip
   source: ef2dd2c41d212ed6405c90fa8e5ab671899a7365
 pkg:
-  tag: v3.14.3
-  source: e9d585ba1e7a30ee5eb85b992d883820b83768f5
+  tag: v3.15.1
+  source: 8893479a348a46ca82bc7a6dc86bd86a1dc71973
+  go_version: "1.27.3"
+  notes: blog/release/silo-20261024/
 kes:
   tag: RELEASE.2026-10-18T00-00-00Z
   build: 20261018000000.0.0
