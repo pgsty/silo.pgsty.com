@@ -8,9 +8,9 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
-> **Latest release:** [Console v2.5.0](/blog/release/silo-20261025/#console-250) (2026-10-25), with an updated interface, Go 1.27.3, pkg v3.15.1, mcli 20261025 and complete diagnostic health reports on high-latency connections. See the [component matrix](/compatibility/versions/).
+> **Latest release:** [Console v2.5.0](/blog/release/silo-20261025/#console-250) (2026-10-25), updating the interface, building with Go 1.27.3, pkg v3.15.1, and mcli 20261025, and fixing diagnostic health-report streams over high-latency connections. See the [component matrix](/compatibility/versions/).
 
-> A standalone Console upgrade does not replace Server's embedded Console. Policy Reset and immediately fresh bucket inventory need the Server repairs already on main; published Server 20261018 does not include them.
+> Upgrading standalone Console does not replace Server's embedded Console. Built-in policy Reset and live bucket inventory reads require the Server 20261025 fixes on `main` (absent from published Server 20261018).
 
 SILO Console is Silo's build of the MinIO Console. This page records where the two are interchangeable and where they differ. Start with the [three-level overview](/compatibility/), then use the details below to check UI and automation behavior.
 
