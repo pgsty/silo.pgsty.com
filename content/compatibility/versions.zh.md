@@ -35,9 +35,13 @@ icon: fa-solid fa-code-branch
 | --- | --- | --- |
 | Server | [20261018](/zh/blog/release/silo-20261018/) | Go 1.27.2；pkg v3.14.3；SDK v7.4.1；mcli 20261018；Console v2.4.2（`ef2dd2c41d21`） |
 | 独立 Console | [v2.4.2](/zh/blog/release/console-2.4.2/) | Go 1.27.2；pkg v3.14.2；SDK v7.4.1；mcli 20261018；正确返回桶版本控制错误 |
-| mcli | [20261018](/zh/blog/release/mcli-20261018/) | Go 1.27.2；pkg v3.14.2；SDK v7.4.1；包版本 `20261018000000.0.0` |
+| mcli | [20261025](/zh/blog/release/mcli-20261025/) | Go 1.27.3；pkg v3.15.1；SDK `ab93db7ba435`；包版本 `20261025000000.0.0`；Windows ZIP |
 | 共享 pkg | [v3.15.1](/zh/blog/release/silo-20261025/) | 最低要求 Go 1.27.3；共享依赖更新；minio-go `ab93db7ba435`；保留策略与输出兼容性 |
 | 可选 KES | [20261018](/zh/blog/release/kes-20261018/) | 独立密钥服务；Go 1.27.2；AWS SDK v2；OpenBao KV v2 与 Moto 验收 |
+
+**Console v2.5.0 本地准备中，尚未发布：** 源码采用 Go 1.27.3、pkg v3.15.1、mcli 20261025（`dcc78d506f94`）与 minio-go `v7.4.2-0.20261020194015-ab93db7ba435`，并包含 GUI 更新和 #63 诊断 WebSocket 关闭握手修复。依赖、升级边界与状态见[统一维护公告](/zh/blog/release/silo-20261025/#console-250)。
+
+**Server 候选联调：** 本地已集成 Go 1.27.3、pkg v3.15.1、mcli 20261025 及未发布的 Console 2.5.0 源码。IAM Reset 与存储桶列表新鲜度修复需要配套 Server 更新；上表仍列出当前正式 Server 版本。
 
 官方镜像使用 Docker Hub：`docker.io/pgsty/silo`、`docker.io/pgsty/silo-console`、`docker.io/pgsty/mc`、`docker.io/pgsty/kes`。Console v2.4.2 的历史镜像验收见[发布记录](/zh/blog/release/console-2.4.2/#delivery)。软件包仓库镜像可能晚于 GitHub 更新。[下载页](/zh/download/)提供 Server 20261018 的公开制品与固定版本安装命令。
 
@@ -142,7 +146,7 @@ Go 不继承依赖模块的 `replace`。即使 Console 已选择 MC，Server 仍
 Console 和 MC 保留历史 MinIO 模块路径，pkg 直接使用自己的路径。
 `colorjson`/`dperf` 带入的旧 `minio/pkg/v3` 传递依赖与维护中的策略实现相互独立。
 
-Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg 保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。
+Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**。pkg v3.14.3 保留 Go **1.26** 库兼容下限；已发布的 pkg v3.15.1 和 mcli 20261025，以及准备中的 Console v2.5.0，均要求 Go **1.27.3**。
 Go x/* 依赖已刷新。go-systemd 实际仍选 **v22.6.0**，因为 v22.7.0 在 NetBSD 编译失败；
 Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。
 

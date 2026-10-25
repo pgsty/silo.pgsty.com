@@ -10,6 +10,8 @@ icon: fa-solid fa-window-maximize
 
 > **最新版本：** [Console v2.4.2](/zh/blog/release/console-2.4.2/)（2026-10-17），引用 mcli 20261018、minio-go v7.4.1，更新构建依赖，并正确返回桶版本控制错误。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
+> **2.5.0 准备中：** 当前源码包含 GUI 更新、Go 1.27.3、pkg v3.15.1、mcli 20261025 和 #63 的诊断 WebSocket 修复，尚未发布。见[统一维护公告](/zh/blog/release/silo-20261025/#console-250)；下文 v2.4.2 的制品和嵌入示例仍描述已发布版本。
+
 SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
 
 [`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。较早版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]。

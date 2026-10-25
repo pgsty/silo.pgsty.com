@@ -1,4 +1,5 @@
 # Public release assets and Docker Hub image sources verified on 2026-10-19.
+# Client release and image index refreshed on 2026-10-25; Console remains v2.4.2.
 # Keep the Windows format tied to each published version. Switch a component
 # to zip only when its new Windows assets have been published and verified.
 server:
@@ -13,11 +14,11 @@ published_server:
   build: 20261018000000.0.0
   date: "2026-10-18"
 client:
-  tag: RELEASE.2026-10-18T00-00-00Z
-  build: 20261018000000.0.0
-  windows_archive_format: tar.gz
-  date: "2026-10-18"
-  source: fa3b8bf72458b9b5480c4da0ce63a4f224e058c8
+  tag: RELEASE.2026-10-25T00-00-00Z
+  build: 20261025000000.0.0
+  windows_archive_format: zip
+  date: "2026-10-25"
+  source: dcc78d506f94e7c2323b642d48fbb600664f0586
 console:
   tag: v2.4.2
   build: 2.4.2

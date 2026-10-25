@@ -10,6 +10,8 @@ icon: fa-solid fa-window-maximize
 
 > **Latest release:** [Console v2.4.2](/blog/release/console-2.4.2/) (2026-10-17), with mcli 20261018, minio-go v7.4.1, updated build dependencies and correct bucket-versioning error responses. See the [component matrix](/compatibility/versions/).
 
+> **2.5.0 in preparation:** current source includes GUI updates, Go 1.27.3, pkg v3.15.1, mcli 20261025 and the diagnostic WebSocket repair for #63; it is unpublished. See the [maintenance announcement](/blog/release/silo-20261025/#console-250). The v2.4.2 artifacts and embedding examples below still describe the published release.
+
 SILO Console is Silo's build of the MinIO Console. This page records where the two are interchangeable and where they differ. Start with the [three-level overview](/compatibility/), then use the details below to check UI and automation behavior.
 
 [`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Earlier release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), and [v2.2.1].
