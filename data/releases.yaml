@@ -1,5 +1,5 @@
-# Public release assets and Docker Hub image sources verified on 2026-10-19.
-# Client release and image index refreshed on 2026-10-25; Console remains v2.4.2.
+# Client release assets and Docker Hub images verified on 2026-10-25;
+# other component verification dates remain in their release notes.
 # Keep the Windows format tied to each published version. Switch a component
 # to zip only when its new Windows assets have been published and verified.
 server:

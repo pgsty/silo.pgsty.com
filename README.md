@@ -6,7 +6,7 @@ This repository contains the bilingual documentation for **Silo**, a community f
 
 ## Release state and publication
 
-The current public release is **SILO Server 20261018** (`RELEASE.2026-10-18T00-00-00Z`, package `20261018000000.0.0`), source `0cd388c666f8211f552604ae73448a066e9c25ce`. Its GitHub assets and Docker Hub images were verified on 2026-10-19. The selected graph is Console v2.4.2, mcli 20261018, Server pkg v3.14.3 and upstream minio-go v7.4.1; standalone Console/mcli still declare pkg v3.14.2.
+The current public release is **SILO Server 20261018** (`RELEASE.2026-10-18T00-00-00Z`, package `20261018000000.0.0`), source `0cd388c666f8211f552604ae73448a066e9c25ce`. Its GitHub assets and Docker Hub images were verified on 2026-10-19. The selected graph is Console v2.4.2, mcli 20261018, Server pkg v3.14.3 and upstream minio-go v7.4.1; standalone Console v2.4.2 still declares pkg v3.14.2. The independently released [mcli 20261025](content/blog/release/mcli-20261025.md) uses Go 1.27.3, silo-pkg v3.15.1 and minio-go `ab93db7ba435`.
 
 Optional PGSTY KES 20261018 is published separately. The October batch includes
 paired release notes for Server, Console, mcli, pkg v3.14.2/v3.14.3 and KES,
@@ -23,8 +23,8 @@ live in `data/releases.yaml`; historical articles retain their original version
 numbers and receive a dated follow-up when status changes.
 
 `windows_archive_format` records each component's published Windows archive
-format. Keep `tar.gz` for Server, mcli and KES 20261018, and `zip` for Console
-v2.4.2. When publishing a subsequent ZIP release, update that component's
+format. Keep `tar.gz` for Server and KES 20261018, and `zip` for mcli
+20261025 and Console v2.4.2. When publishing a subsequent ZIP release, update that component's
 version and format together after verifying its assets; do not rewrite old
 release links. Linux and macOS archives continue to use `tar.gz`.
 
