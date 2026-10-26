@@ -39,9 +39,9 @@ The historical Console v2.4.2 and mcli 20261018 releases declare pkg v3.14.2; Se
 | Shared pkg | [v3.15.1](/blog/release/silo-20261025/) | Go 1.27.3 library floor; refreshed shared dependencies; minio-go `ab93db7ba435`; existing policy and output compatibility retained |
 | Optional KES | [20261018](/blog/release/kes-20261018/) | Separate key service; Go 1.27.2; AWS SDK v2; OpenBao KV v2 and Moto acceptance |
 
-**Console v2.5.0 is published:** source [`989fa7150792`](https://github.com/pgsty/silo-console/commit/989fa7150792ffe62fe8d045353ed69bd2ec9ad8), Go module version `v0.0.0-20261025145732-989fa7150792`. See the [maintenance announcement](/blog/release/silo-20261025/#console-250) for dependencies, verification and upgrade boundaries.
+**Console v2.5.0 is released:** source [`989fa7150792`](https://github.com/pgsty/silo-console/commit/989fa7150792ffe62fe8d045353ed69bd2ec9ad8), public Go module version `v0.0.0-20261025145732-989fa7150792`. See the [maintenance announcement](/blog/release/silo-20261025/#console-250) for dependencies, verification, and upgrade boundaries.
 
-**Server source integration:** Go 1.27.3, pkg v3.15.1, mcli 20261025 and Console 2.5.0 application code are integrated on Server main. IAM Reset and fresh bucket inventory fixes require a new Server build; the published Server 20261018 does not contain these repairs.
+**Server 20261025 draft integration:** Server `main` (and the `RELEASE.2026-10-25T00-00-00Z` draft) integrates Go 1.27.3, pkg v3.15.1, mcli 20261025, and Console v2.5.0 source. Built-in policy Reset and live bucket-inventory reads require the new Server build (absent from published Server 20261018).
 
 Official images use Docker Hub: `docker.io/pgsty/silo`, `docker.io/pgsty/silo-console` and `docker.io/pgsty/mc`, `docker.io/pgsty/kes`. Console v2.5.0 image acceptance is recorded in the [maintenance announcement](/blog/release/silo-20261025/#console-250-delivery). Package-repository mirrors may lag GitHub. The [download page](/download/) provides public Server 20261018 artifacts and pinned installation commands.
 

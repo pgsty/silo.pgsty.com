@@ -15,7 +15,9 @@ aliases:
 MinIO 开源仓库正式归档，不再维护。一个时代落幕，但开源的精神不死。
 老冯 Fork 了 MinIO，复活了管理控制台，重建了二进制分发渠道，让 MinIO 浴火重生。
 
-如果你正在用 MinIO，把 `minio/minio` 换成 `pgsty/minio` ，其他一切照旧。
+> **2026-10-25 更新：** 当前维护的 Docker 镜像已更名为 `pgsty/silo`。下文 Docker 链接与示例已更新为当前名称，详见[迁移指南](/zh/compatibility/migration/)。
+
+如果你正在用 MinIO，把 `minio/minio` 换成 `pgsty/silo` ，其他一切照旧。
 
 ------
 
@@ -133,7 +135,7 @@ MinIO 公司可以归档一个仓库，但它归档不了 [AGPL](https://github.
 **我们重建了完整的分发渠道：**
 
 **Docker 镜像**
-: [`pgsty/minio`](https://hub.docker.com/r/pgsty/minio) 已上线 Docker Hub，`docker pull pgsty/minio` 即可使用
+: [`pgsty/silo`](https://hub.docker.com/r/pgsty/silo) 已上线 Docker Hub，`docker pull pgsty/silo` 即可使用
 
 **RPM / DEB 包**
 : 为主流 Linux 发行版构建了与原版规格一致的安装包。
@@ -141,7 +143,7 @@ MinIO 公司可以归档一个仓库，但它归档不了 [AGPL](https://github.
 **CI/CD Pipeline**
 : GitHub 上全自动化构建流程已经搭建完毕，确保供应链持续稳定。
 
-如果你在用 Docker 镜像，把 `minio/minio` 简单换成 `pgsty/minio` 就好了
+如果你在用 Docker 镜像，把 `minio/minio` 简单换成 `pgsty/silo` 就好了
 
 喜欢原生 Linux 安装的朋友，可以直接从 [GitHub Release](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-02-14T12-00-00Z) 页面下载 RPM/DEB 包。
 老冯的 pig （PG扩展包管理器）也可以简单的免翻墙安装。你也可以自己配置启用 [**pigsty-infra**](https://pigsty.cc/docs/repo/infra) APT/DNF 软件仓库来安装。

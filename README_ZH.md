@@ -41,7 +41,7 @@ Makefile 禁用本地 Go/Hugo workspace 与主题替换，验证 `go.mod` 固定
 - 产品、运维、迁移、安全、设计与发布文档归本站；源码仓库保留入口和贡献说明。调查日志、私有安全材料和临时验收文件放在仓库外。
 - 实质修改继承页面时设置 `upstream_modified: true`，保留 `upstream_link`。原创页面不冒用上游来源。
 - 历史版本文章保留原始版本与证据范围，以带日期的补充链接说明后续变化。优先引用固定提交，避免将源码合入、制品验收和生产部署混为一谈。
-- 首页 Docker Pulls 指标卡固定指向 `pgsty/minio`，其数值包含改名前后两个仓库的累计拉取量。不要把这个历史来源链接改成 `pgsty/silo`。
+- 首页 Docker Pulls 指标卡统一指向 [`pgsty/silo`](https://hub.docker.com/r/pgsty/silo)，其数值包含历史 `pgsty/minio` 与当前 `pgsty/silo` 两个仓库的累计拉取量。
 - 指标由 `python3 bin/metrics.py` 生成，不手工修改。发布站点前刷新指标并检查差异，再运行 `make check`。
 - Cloudflare Pages 发布 `main` 分支。新 URL 先随网站发布，再发布依赖这些路径的源码仓库改动；上线后核对精确提交和中英文页面。
 

@@ -8,9 +8,9 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
-> **最新版本：** [Console v2.5.0](/zh/blog/release/silo-20261025/#console-250)（2026-10-25），更新界面，采用 Go 1.27.3、pkg v3.15.1、mcli 20261025，并修复高延迟连接下的诊断健康报告。配套版本见[组件矩阵](/zh/compatibility/versions/)。
+> **最新版本：** [Console v2.5.0](/zh/blog/release/silo-20261025/#console-250)（2026-10-25），更新界面并采用 Go 1.27.3、pkg v3.15.1、mcli 20261025，修复高延迟连接下的诊断与健康报告流。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
-> 独立 Console 升级不会替换 Server 内嵌控制台。策略 Reset 与实时存储桶列表需要 Server main 上的配套修复；已发布的 Server 20261018 不包含这些修复。
+> 独立 Console 升级不会替换 Server 内嵌控制台。内置策略 Reset 与实时存储桶列表需配合 Server 20261025（已合入 `main`）生效；已发布的 Server 20261018 不包含这两项服务端缓存修复。
 
 SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
 

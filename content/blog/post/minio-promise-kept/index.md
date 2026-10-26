@@ -104,9 +104,11 @@ Not remarkable numbers, but enough to tell me I'm not the only one who needed th
 
 ![credit.webp](credit.webp)
 
+> **2026-10-25 update:** The maintained Docker image is now `pgsty/silo`. The Docker example below uses the current name; see the [migration guide](/compatibility/migration/).
+
 If you're already running OSS MinIO, migration is cheap:
 
-- **Docker**: swap `minio/minio` for `pgsty/minio`.
+- **Docker**: swap `minio/minio` for `pgsty/silo`.
 - **RPM / DEB**: on [GitHub Releases](https://github.com/pgsty/silo/releases), or via `pig`.
 - **Source**: [pgsty/minio](https://github.com/pgsty/minio)
 - **Docs**: [silo.pgsty.com](https://silo.pgsty.com/)

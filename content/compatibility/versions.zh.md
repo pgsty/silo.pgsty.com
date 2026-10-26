@@ -39,9 +39,9 @@ icon: fa-solid fa-code-branch
 | 共享 pkg | [v3.15.1](/zh/blog/release/silo-20261025/) | 最低要求 Go 1.27.3；共享依赖更新；minio-go `ab93db7ba435`；保留策略与输出兼容性 |
 | 可选 KES | [20261018](/zh/blog/release/kes-20261018/) | 独立密钥服务；Go 1.27.2；AWS SDK v2；OpenBao KV v2 与 Moto 验收 |
 
-**Console v2.5.0 已发布：** 源码为 [`989fa7150792`](https://github.com/pgsty/silo-console/commit/989fa7150792ffe62fe8d045353ed69bd2ec9ad8)，Go 模块版本为 `v0.0.0-20261025145732-989fa7150792`。依赖、验收与升级边界见[统一维护公告](/zh/blog/release/silo-20261025/#console-250)。
+**Console v2.5.0 已正式发布：** 源码为 [`989fa7150792`](https://github.com/pgsty/silo-console/commit/989fa7150792ffe62fe8d045353ed69bd2ec9ad8)，公开 Go 模块版本为 `v0.0.0-20261025145732-989fa7150792`。依赖、验收与升级边界见[统一维护公告](/zh/blog/release/silo-20261025/#console-250)。
 
-**Server 源码集成：** Server main 已集成 Go 1.27.3、pkg v3.15.1、mcli 20261025 与 Console 2.5.0 应用代码。IAM Reset 与存储桶列表新鲜度修复需要新构建的 Server；已发布的 Server 20261018 不含这些修复。
+**Server 20261025 草稿集成：** Server `main`（及 `RELEASE.2026-10-25T00-00-00Z` 草稿）已集成 Go 1.27.3、pkg v3.15.1、mcli 20261025 与 Console v2.5.0 源码。内置策略 Reset 与实时存储桶列表修复需配合新 Server 生效；已发布的 Server 20261018 不包含这两项修复。
 
 官方镜像使用 Docker Hub：`docker.io/pgsty/silo`、`docker.io/pgsty/silo-console`、`docker.io/pgsty/mc`、`docker.io/pgsty/kes`。Console v2.5.0 的镜像验收见[统一维护公告](/zh/blog/release/silo-20261025/#console-250-delivery)。软件包仓库镜像可能晚于 GitHub 更新。[下载页](/zh/download/)提供 Server 20261018 的公开制品与固定版本安装命令。
 

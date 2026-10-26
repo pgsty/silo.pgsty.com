@@ -31,8 +31,9 @@ pkg:
   go_version: "1.27.3"
   notes: blog/release/silo-20261025/
 kes:
-  tag: RELEASE.2026-10-18T00-00-00Z
-  build: 20261018000000.0.0
-  windows_archive_format: tar.gz
-  date: "2026-10-18"
-  source: 2f7e741db905d7ea755967b29666657d819d7ad0
+  tag: RELEASE.2026-10-25T00-00-00Z
+  build: 20261025000000.0.0
+  windows_archive_format: zip
+  date: "2026-10-25"
+  source: b0a98d87f6564c1a6d9584c0a5260910a731f66d
+  docker_tag: RELEASE.2026-10-18T00-00-00Z

@@ -28,6 +28,7 @@
 {{- $consoleWindowsFormat := hugo.Data.releases.console.windows_archive_format | default "zip" -}}
 {{- $consoleBase := printf "https://github.com/pgsty/silo-console/releases/download/%s" $consoleTag -}}
 {{- $kesTag := hugo.Data.releases.kes.tag -}}
+{{- $kesDockerTag := hugo.Data.releases.kes.docker_tag | default $kesTag -}}
 {{- $kesBuild := hugo.Data.releases.kes.build -}}
 {{- $kesWindowsFormat := hugo.Data.releases.kes.windows_archive_format | default "tar.gz" -}}
 {{- $kesBase := printf "https://github.com/pgsty/kes/releases/download/%s" $kesTag -}}
@@ -587,7 +588,8 @@ make build
         </div>
         <div class="download-code">
           <div class="download-code-head"><span>Docker · {{ if $zh }}检查版本{{ else }}Check version{{ end }}</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 KES 版本检查命令{{ else }}Copy KES version command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-          <pre><code>docker run --rm docker.io/pgsty/kes:{{ $kesTag }} --version</code></pre>
+          <pre><code>docker run --rm docker.io/pgsty/kes:{{ $kesDockerTag }} --version</code></pre>
+          {{ if ne $kesDockerTag $kesTag }}<p>{{ if $zh }}Docker Hub 镜像尚未更新到上方归档与软件包的版本；请使用此命令中的已发布镜像标签。{{ else }}The Docker Hub image is still on an earlier version than the archives and packages above; use the published image tag shown in this command.{{ end }}</p>{{ end }}
         </div>
         <p>{{ if $zh }}容器以 <code>1000:1000</code> 运行；Linux 包安装 <code>/usr/local/bin/kes</code>。开发模式不持久保存密钥。请保留原密钥并验证重启后仍可解密；配置示例见{{ else }}Containers run as <code>1000:1000</code>; Linux packages install <code>/usr/local/bin/kes</code>. Development mode does not persist keys. Preserve existing keys and verify decryption after restart; see the{{ end }} <a href="https://github.com/pgsty/kes/blob/{{ $kesTag }}/{{ if $zh }}README_ZH.md{{ else }}README.md{{ end }}">README</a>{{ if $zh }}。{{ else }}.{{ end }}</p>
       </div>
