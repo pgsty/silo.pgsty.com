@@ -43,7 +43,7 @@ url: "/zh/blog/post/silo-one-year/"
 本次对比的精确基线是上游 MinIO 最后一次公开发布与 SILO 2026 年 10 月统一维护批次：
 
 - **上游基线**：`minio/minio` [`RELEASE.2025-10-15T17-29-55Z`](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z)（提交 `9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a`，2025-10-15）。注：上游在停发 Release 到 2026-02-02 归档前还合入过 9 个未发版提交（如 `fa18589d1c` 的 POST Policy 标签约束、`18f97e70b1` 的条件写读仲裁调整），这些提交不在 `2025-10-15` 正式版内，SILO 也通过独立路径完成了对应修复。
-- **SILO 目标版本**：`pgsty/silo` [`RELEASE.2026-10-25T00-00-00Z`](https://github.com/pgsty/silo/commit/263ee0510da51c555b7257bbe504b22355cac4b0)（提交 `263ee0510da51c555b7257bbe504b22355cac4b0`，截至 10 月 26 日 Server Release 处于 Draft 验收阶段，当前公开下载指向 [Server 20261018](/zh/blog/release/silo-20261018/)，而同批次的 [silo-pkg v3.15.1](/zh/blog/release/silo-20261025/)、[mcli 20261025](/zh/blog/release/mcli-20261025/) 与 [SILO Console v2.5.0](/zh/blog/release/silo-20261025/#console-250) 已正式发布）。
+- **SILO 目标版本**：`pgsty/silo` [`RELEASE.2026-10-25T00-00-00Z`](https://github.com/pgsty/silo/commit/263ee0510da51c555b7257bbe504b22355cac4b0)（提交 `263ee0510da51c555b7257bbe504b22355cac4b0`，截至 10 月 26 日 Server Release 处于 Draft 验收阶段，当前公开下载指向 [Server 20261018](/zh/blog/release/silo-20261018/)，而同批次的 [silo-pkg v3.15.1](/zh/blog/release/silo-20261025/)、[mcli 20261025](/zh/blog/release/mcli-20261025/)、[SILO Console v2.5.0](/zh/blog/release/silo-20261025/#console-250) 与 [KES 20261025](/zh/blog/release/kes-20261025/) 已正式发布）。
 
 在 `9e49d5e7a648..263ee0510da5` 区间内，`pgsty/silo` 共有 **599 个可达提交**，涉及 **930 个变更文件**。剔除纯文档、测试夹具、CI 脚本与重命名后，真正改变服务端运行时行为的核心源码文件为 **167 个**。
 
@@ -58,7 +58,7 @@ url: "/zh/blog/post/silo-one-year/"
 | **Client (`pgsty/mc`)** | `mc` `cf909e1063a9` | **[mcli 20261025](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-25T00-00-00Z)**（[`dcc78d506f94`](https://github.com/pgsty/mc/commit/dcc78d506f94e7c2323b642d48fbb600664f0586)） | 产物命名为 `mcli`（避免与 Midnight Commander `mc` 冲突），新增 `checksum verify` 并修复退出码 |
 | **Shared Pkg (`pgsty/silo-pkg`)** | `minio/pkg/v3 v3.1.3` | **[v3.15.1](https://github.com/pgsty/silo-pkg/releases/tag/v3.15.1)**（[`8893479a348a`](https://github.com/pgsty/silo-pkg/commit/8893479a348a46ca82bc7a6dc86bd86a1dc71973)） | 独立模块路径 `github.com/pgsty/silo-pkg/v3`，承载 IAM 策略判定、条件键隔离、证书与 KMS 客户端 |
 | **S3 SDK (`minio/minio-go/v7`)** | `v7.0.91` | **`v7.4.2-0.20261020194015-ab93db7ba435`** | 唯一直接沿用上游的模块，固定在经验证的提交（含分片截短流、负偏移与批量删除修复） |
-| **KMS (`pgsty/kes`)** | 外部可选依赖 | **[KES 20261018](/zh/blog/release/kes-20261018/)**（Go 1.27.2/1.27.3） | 验证 OpenBao KV v2 与 AWS Secrets Manager / GCP Secret Manager 集成 |
+| **KMS (`pgsty/kes`)** | 外部可选依赖 | **[KES 20261025](/zh/blog/release/kes-20261025/)**（[`b0a98d87f656`](https://github.com/pgsty/kes/commit/b0a98d87f6564c1a6d9584c0a5260910a731f66d)） | Go 1.27.3，验证 OpenBao KV v2 与 AWS Secrets Manager / GCP Secret Manager 集成 |
 
 ### 刻意保持不变的底层基石
 
