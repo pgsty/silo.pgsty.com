@@ -1,5 +1,6 @@
 # Client and Console release assets and Docker Hub images verified on 2026-10-25;
-# other component verification dates remain in their release notes.
+# KES release assets and Docker Hub images verified on 2026-10-26.
+# Other component verification dates remain in their release notes.
 # Keep the Windows format tied to each published version. Switch a component
 # to zip only when its new Windows assets have been published and verified.
 server:
@@ -36,4 +37,4 @@ kes:
   windows_archive_format: zip
   date: "2026-10-25"
   source: b0a98d87f6564c1a6d9584c0a5260910a731f66d
-  docker_tag: RELEASE.2026-10-18T00-00-00Z
+  docker_tag: RELEASE.2026-10-25T00-00-00Z
