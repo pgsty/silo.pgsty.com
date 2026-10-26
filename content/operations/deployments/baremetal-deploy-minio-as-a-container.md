@@ -76,7 +76,7 @@ The command binds ports `9000` and `9001` to the S3 API and Web Console respecti
 
 The local drive `~/silo/data` is mounted to the `/data` folder on the container. You can modify the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) variables to change the root login as needed.
 
-For multi-drive deployments, bind each local drive or folder it’s on sequentially-numbered path on the remote. You can then modify the [`minio server`](/reference/minio-server/#command-minio.server) startup to specify those paths:
+For multi-drive deployments, bind each local drive or folder it’s on sequentially-numbered path on the remote. You can then modify the [`silo server`](/reference/minio-server/#command-minio.server) startup to specify those paths:
 
 ```shell
 mkdir -p ~/minio/data-{1..4}
@@ -118,7 +118,7 @@ The command binds ports `9000` and `9001` to the S3 API and Web Console respecti
 
 The local drive `~/silo/data` is mounted to the `/data` folder on the container. You can modify the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) variables to change the root login as needed.
 
-For multi-drive deployments, bind each local drive or folder it’s on sequentially-numbered path on the remote. You can then modify the [`minio server`](/reference/minio-server/#command-minio.server) startup to specify those paths:
+For multi-drive deployments, bind each local drive or folder it’s on sequentially-numbered path on the remote. You can then modify the [`silo server`](/reference/minio-server/#command-minio.server) startup to specify those paths:
 
 ```shell
 mkdir -p ~/minio/data-{1..4}

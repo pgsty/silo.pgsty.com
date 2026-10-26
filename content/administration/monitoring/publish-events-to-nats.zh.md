@@ -3,7 +3,7 @@ title: "将事件发布到 NATS"
 url: "/zh/administration/monitoring/publish-events-to-nats/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-nats.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="nats"></a>
@@ -34,7 +34,7 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/nats/#minio-server-envvar-bucket-notification-nats) 指定 NATS 服务端点及其相关配置设置。 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用这些指定设置。
+MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/nats/#minio-server-envvar-bucket-notification-nats) 指定 NATS 服务端点及其相关配置设置。 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用这些指定设置。
 
 以下示例代码设置了与配置 NATS 服务端点相关的 *全部* 环境变量。 最低 *必需* 的变量是 [`MINIO_NOTIFY_NATS_ADDRESS`](/zh/reference/minio-server/settings/notifications/nats/#envvar.MINIO_NOTIFY_NATS_ADDRESS) 和 [`MINIO_NOTIFY_NATS_SUBJECT`](/zh/reference/minio-server/settings/notifications/nats/#envvar.MINIO_NOTIFY_NATS_SUBJECT)：
 
@@ -90,7 +90,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 有关每个环境变量的完整文档，请参见 [用于存储桶通知的 NATS 服务](/zh/reference/minio-server/settings/notifications/nats/#minio-server-envvar-bucket-notification-nats)。
 {{< /tab >}}
 {{< tab label="配置设置" value="tab2" >}}
-MinIO 支持在正在运行的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_nats`](/zh/reference/minio-server/settings/notifications/nats/#mc-conf.notify_nats) 配置键来添加或更新 NATS 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置 设置。
+MinIO 支持在正在运行的 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_nats`](/zh/reference/minio-server/settings/notifications/nats/#mc-conf.notify_nats) 配置键来添加或更新 NATS 端点。你必须重启 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置 设置。
 
 以下示例代码设置了与配置 NATS 服务端点相关的 *全部* 设置。 最低 *必需* 的设置是 [`notify_nats address`](/zh/reference/minio-server/settings/notifications/nats/#mc-conf.notify_nats.address) 和 [`notify_nats subject`](/zh/reference/minio-server/settings/notifications/nats/#mc-conf.notify_nats.subject)：
 
@@ -132,7 +132,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 NATS 目标输出一行内容，类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 NATS 目标输出一行内容，类似如下：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:nats
@@ -265,7 +265,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 NATS 目标输出一行内容，类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 NATS 目标输出一行内容，类似如下：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:nats

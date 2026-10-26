@@ -19,6 +19,8 @@ You can use the MinIO Console to perform several of the bucket and object manage
 
 ## Object Browser {#object-browser}
 
+In the [Server 20261025 source](/blog/release/silo-20261025/#server-20261025), Console's `account-info` request reads the live bucket inventory so refreshing after creating or deleting a bucket immediately reflects the updated list (bucket usage totals remain scanner-derived). Published Server 20261018 still serves a cached bucket inventory.
+
 The Object Browser lists the buckets and objects the authenticated user has access to on the deployment.
 
 After logging in or navigating to the tab, the object browser displays a list of the user’s buckets, which the user can filter. Select a bucket to show a list of objects in the bucket.

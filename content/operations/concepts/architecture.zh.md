@@ -53,7 +53,7 @@ upstream_modified: true
 
 **MinIO 使用基于对象名称和路径的确定性哈希算法，为给定对象选择纠删码集合。**
 
-> 对于每个唯一对象命名空间 `BUCKET/PREFIX/[PREFIX/...]/OBJECT.EXTENSION`，MinIO 在读写操作中始终会选择相同的纠删码集合。 MinIO 会处理 服务器池和纠删码集合内部的所有路由，使选择、读取和写入过程对应用完全透明。
+> 在给定池内，对象名确定其纠删集合。这不表示同一 key 的所有写入或版本都固定在同一个池：覆盖写入与迁移可能在多个池中留下副本，由 SILO 按请求操作解析。见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/)。
 >
 > <figure>
 >   <img src="/images/architecture/architecture-erasure-set-retrieve-object.svg" alt="仅从数据分片恢复对象的示意图" />

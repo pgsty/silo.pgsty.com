@@ -35,7 +35,7 @@ Some of these factors include:
 
 For example, by default, MinIO pauses the scanner to make I/O operations available for read and write requests. This can lengthen the time it takes for a scan to complete.
 
-MinIO waits between each scan by a factor multiplication of the time it takes each scan operation to complete. By default, the value of this factor is `10.0`, meaning MinIO waits 10x the length of an operation after one scan completes before starting the next scan. The value of this factor changes depending on the configured [scanner speed setting](/reference/minio-server/settings/core/#minio-scanner-speed-options).
+The scanner controls pacing through speed presets. The current `default` preset sets a delay multiplier of `2`, a maximum wait of `1s`, and a cycle parameter of `1m`; this does not guarantee a full namespace scan every minute. Actual progress depends on object count, I/O load, and the selected [scanner speed](/reference/minio-server/settings/core/#minio-scanner-speed-options).
 
 ## Scanner Performance {#scanner-performance}
 

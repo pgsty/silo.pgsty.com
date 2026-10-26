@@ -28,7 +28,7 @@ upstream_modified: true
 
 ### 可用 Worker Nodes {#worker-nodes}
 
-MinIO 会为新的 Tenant pool 部署额外的 [`minio server`](/zh/reference/minio-server/#command-minio.server) pod。 Kubernetes 集群 *必须* 具备足够的可用 worker node 来调度这些新 pod。
+MinIO 会为新的 Tenant pool 部署额外的 [`silo server`](/zh/reference/minio-server/#command-minio.server) pod。 Kubernetes 集群 *必须* 具备足够的可用 worker node 来调度这些新 pod。
 
 MinIO Operator 提供了用于控制 pod affinity 和 anti-affinity 的配置，以便将调度定向到特定 worker。
 

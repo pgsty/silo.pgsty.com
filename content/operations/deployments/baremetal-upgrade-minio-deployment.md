@@ -20,6 +20,8 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 
 ## Before You Upgrade {#prerequisites}
 
+**Preparing for 20261025:** As of 2026-10-26, Server 20261025 remains a Draft Release. When upgrading to a published build containing these fixes, upgrade all writer nodes together and verify built-in policy Reset, LDAP long-DN login, remote-tier historical version reads, and multipart replication where applicable. Waiting for admitted storage I/O can lengthen same-object write waits on stalled drives; existing read-quorum and healing rules remain unchanged (upgrading does not add distributed fencing or repair pre-existing inconsistent objects). Review the [20261025 compatibility checks](/compatibility/server/#maintenance-20261025).
+
 1. **Back up cluster settings.** Export bucket metadata and IAM configuration with [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) and [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export). For versions with durable IAM revocation, also back up complete backend storage and encryption material: live exports omit deletion history. Follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/).
 2. **Choose a published Silo release.** Use [Download & Install](/download/#server), [Silo release notes](/blog/release/), and [GitHub Releases](https://github.com/pgsty/silo/releases). A local tag, branch commit, draft release, or uploaded draft asset is not a published release.
 3. **Verify the artifact.** Check its SHA-256 digest against the checksum published with that exact release. Pin one release across all nodes.

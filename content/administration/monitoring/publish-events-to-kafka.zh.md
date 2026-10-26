@@ -3,7 +3,7 @@ title: "将事件发布到 Kafka"
 url: "/zh/administration/monitoring/publish-events-to-kafka/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-kafka.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="kafka"></a>
@@ -33,7 +33,7 @@ MinIO 依赖 [https://github.com/Shopify/sarama](https://github.com/Shopify/sara
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/notifications/kafka/#minio-server-envvar-bucket-notification-kafka) 指定 Kafka 服务端点及其相关配置项。 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用这些配置。
+MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/notifications/kafka/#minio-server-envvar-bucket-notification-kafka) 指定 Kafka 服务端点及其相关配置项。 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用这些配置。
 
 以下示例代码设置了配置 Kafka 服务端点相关的 *全部* 环境变量。 最低 *必需* 的变量是 [`MINIO_NOTIFY_KAFKA_ENABLE`](/zh/reference/minio-server/settings/notifications/kafka/#envvar.MINIO_NOTIFY_KAFKA_ENABLE) 和 [`MINIO_NOTIFY_KAFKA_BROKERS`](/zh/reference/minio-server/settings/notifications/kafka/#envvar.MINIO_NOTIFY_KAFKA_BROKERS)：
 
@@ -91,7 +91,7 @@ MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/n
 有关每个环境变量的完整说明，请参见 [用于存储桶通知的 Kafka 服务](/zh/reference/minio-server/settings/notifications/kafka/#minio-server-envvar-bucket-notification-kafka)。
 {{< /tab >}}
 {{< tab label="配置设置" value="tab2" >}}
-MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上， 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_kafka`](/zh/reference/minio-server/settings/notifications/kafka/#mc-conf.notify_kafka) 配置键来新增或更新 Kafka 端点。 你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用新增或更新后的配置项。
+MinIO 支持在运行中的 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程上， 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_kafka`](/zh/reference/minio-server/settings/notifications/kafka/#mc-conf.notify_kafka) 配置键来新增或更新 Kafka 端点。 你必须重启 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用新增或更新后的配置项。
 
 以下示例代码设置了配置 Kafka 服务端点相关的 *全部* 配置项。 最低 *必需* 的配置项是 [`notify_kafka brokers`](/zh/reference/minio-server/settings/notifications/kafka/#mc-conf.notify_kafka.brokers)：
 
@@ -134,7 +134,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 Kafka 目标打印一行输出， 类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 Kafka 目标打印一行输出， 类似如下：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:kafka
@@ -270,7 +270,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 Kafka 目标打印一行输出， 类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 Kafka 目标打印一行输出， 类似如下：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:kafka

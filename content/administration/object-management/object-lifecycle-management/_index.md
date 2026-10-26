@@ -4,7 +4,7 @@ url: "/administration/object-management/object-lifecycle-management/"
 weight: 40
 icon: fa-solid fa-clock-rotate-left
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-lifecycle-management.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="object-lifecycle-management"></a>
@@ -14,7 +14,7 @@ upstream_modified: false
 - [MinIO Object Lifecycle Management Part II](https://youtu.be/5fz3rE3wjGg?ref=docs)
 - [MinIO Object Lifecycle Management Lab](https://youtu.be/5fz3rE3wjGg?ref=docs)
 
-Use MinIO Object Lifecycle Management to create rules for time or date based automatic transition or expiry of objects. For object transition, MinIO automatically moves the object to a configured remote storage tier. For object expiry, MinIO automatically deletes the object.
+Use MinIO Object Lifecycle Management to create rules for time or date based automatic transition or expiry of objects. For object transition, MinIO automatically moves the object to a configured remote storage tier. For expiration, SILO applies the configured deletion action: this can create a delete marker or permanently remove a version, depending on bucket versioning and the rule.
 
 MinIO derives it’s behavior and syntax from [S3 lifecycle](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html) for compatibility in migrating workloads and lifecycle rules from S3 to MinIO. For example, you can export S3 lifecycle management rules and import them into MinIO or vice-versa. MinIO uses JSON to describe lifecycle management rules and may require conversion to or from XML as part of importing S3 lifecycle rules.
 
@@ -88,6 +88,8 @@ To transition noncurrent object versions, specify the [`--noncurrent-transition-
 <a id="minio-lifecycle-management-expiration"></a>
 
 ## Object Expiration {#object-expiration}
+
+**20261025 source change:** In the [Server 20261025 source](/blog/release/silo-20261025/#server-20261025), when lifecycle expiration only writes a delete marker (including on non-null versions in versioning-suspended buckets), SILO preserves the prior version's remote-tier payload until that specific version is permanently deleted and no longer held by retention or surviving references. Published Server 20261018 does not yet include this fix; remote payloads deleted on earlier releases must be restored from backups.
 
 MinIO lifecycle management supports expiring objects on a bucket. Object “expiration” involves performing a `DELETE` operation on the object. For example, you can create a lifecycle management rule to expire any object older than 365 days.
 

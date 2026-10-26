@@ -3,7 +3,7 @@ title: "Publish Events to Webhook"
 url: "/administration/monitoring/publish-events-to-webhook/"
 weight: 100
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-webhook.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="publish-events-to-webhook"></a>
@@ -27,7 +27,7 @@ You can configure a new Webhook service endpoint using either environment variab
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
-MinIO supports specifying the Webhook service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/webhook-service/#minio-server-envvar-bucket-notification-webhook). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
+MinIO supports specifying the Webhook service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/webhook-service/#minio-server-envvar-bucket-notification-webhook). The [`silo server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring an Webhook service endpoint. The minimum *required* variables are [`MINIO_NOTIFY_WEBHOOK_ENABLE`](/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENABLE) and [`MINIO_NOTIFY_WEBHOOK_ENDPOINT`](/reference/minio-server/settings/notifications/webhook-service/#envvar.MINIO_NOTIFY_WEBHOOK_ENDPOINT):
 
@@ -67,7 +67,7 @@ The following example code sets *all* environment variables related to configuri
 See [Webhook Service for Bucket Notifications](/reference/minio-server/settings/notifications/webhook-service/#minio-server-envvar-bucket-notification-webhook) for complete documentation on each environment variable.
 {{< /tab >}}
 {{< tab label="Configuration Settings" value="configuration-settings" >}}
-MinIO supports adding or updating Webhook endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_webhook`](/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
+MinIO supports adding or updating Webhook endpoints on a running [`silo server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_webhook`](/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook) configuration key. You must restart the [`silo server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an Webhook service endpoint. The minimum *required* setting is [`notify_webhook endpoint`](/reference/minio-server/settings/notifications/webhook-service/#mc-conf.notify_webhook.endpoint):
 
@@ -102,7 +102,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Webhook target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Webhook target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:webhook
@@ -226,7 +226,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Webhook target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Webhook target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:webhook

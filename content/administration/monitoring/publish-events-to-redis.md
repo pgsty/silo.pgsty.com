@@ -3,7 +3,7 @@ title: "Publish Events to Redis"
 url: "/administration/monitoring/publish-events-to-redis/"
 weight: 90
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-redis.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="publish-events-to-redis"></a>
@@ -27,7 +27,7 @@ You can configure a new Redis service endpoint using either environment variable
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
-MinIO supports specifying the Redis service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/redis/#minio-server-envvar-bucket-notification-redis). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
+MinIO supports specifying the Redis service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/redis/#minio-server-envvar-bucket-notification-redis). The [`silo server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring an Redis service endpoint. The minimum *required* variables are:
 
@@ -72,7 +72,7 @@ The following example code sets *all* environment variables related to configuri
 See [Redis Service for Bucket Notifications](/reference/minio-server/settings/notifications/redis/#minio-server-envvar-bucket-notification-redis) for complete documentation on each environment variable.
 {{< /tab >}}
 {{< tab label="Configuration Settings" value="configuration-settings" >}}
-MinIO supports adding or updating Redis endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_redis`](/reference/minio-server/settings/notifications/redis/#mc-conf.notify_redis) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
+MinIO supports adding or updating Redis endpoints on a running [`silo server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_redis`](/reference/minio-server/settings/notifications/redis/#mc-conf.notify_redis) configuration key. You must restart the [`silo server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an Redis service endpoint. The minimum *required* settings are:
 
@@ -110,7 +110,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Redis target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Redis target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:redis
@@ -235,7 +235,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Redis target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Redis target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:redis

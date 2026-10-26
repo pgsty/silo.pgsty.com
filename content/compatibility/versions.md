@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "Server 20261018 release, exact component identities and upgrade boundaries."
+description: "Server 20261025 source, public releases, exact component identities and upgrade boundaries."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -10,6 +10,21 @@ icon: fa-solid fa-code-branch
 ---
 
 The four maintained stack components and optional KES release independently. The tables below record the public releases and their component dependency graphs.
+
+## Server 20261025 source {#server-20261025}
+
+As of **2026-10-26**, Server 20261025 is a **Draft Release** built from source [`263ee0510da5`](https://github.com/pgsty/silo/commit/263ee0510da51c555b7257bbe504b22355cac4b0) (package version `20261025000000.0.0`); public Server downloads continue to point to Server 20261018 below.
+
+| Component | Selected by Server 20261025 source |
+| --- | --- |
+| Embedded Console | v2.5.0, `v0.0.0-20261025145732-989fa7150792` |
+| MC module / image-bundled mcli | 20261025, `v0.0.0-20261025104502-dcc78d506f94` |
+| Shared package | `github.com/pgsty/silo-pkg/v3 v3.15.1` |
+| Upstream S3 SDK | `github.com/minio/minio-go/v7 v7.4.2-0.20261020194015-ab93db7ba435` |
+| Go toolchain | 1.27.3 |
+| Platform archives | Windows ZIP; Linux and macOS tar.gz |
+
+LDAP long-DN login, built-in policy Reset, live bucket inventory, versioned lifecycle expiration, multipart replication, and write/rollback safety are server-side fixes (installing standalone Console v2.5.0 or mcli 20261025 does not replace an older Server's embedded components or runtime behavior). See the [20261025 upgrade checks](/compatibility/server/#maintenance-20261025) and [release notes](/blog/release/silo-20261025/#server-20261025).
 
 ## Server 20261018 release {#october-release}
 

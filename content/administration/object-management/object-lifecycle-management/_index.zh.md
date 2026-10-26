@@ -4,7 +4,7 @@ url: "/zh/administration/object-management/object-lifecycle-management/"
 weight: 40
 icon: fa-solid fa-clock-rotate-left
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-lifecycle-management.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-lifecycle-management"></a>
@@ -14,7 +14,7 @@ upstream_modified: false
 - [MinIO Object Lifecycle Management Part II](https://youtu.be/5fz3rE3wjGg?ref=docs)
 - [MinIO Object Lifecycle Management Lab](https://youtu.be/5fz3rE3wjGg?ref=docs)
 
-使用 MinIO 对象生命周期管理，可以创建基于时间或日期的规则，自动迁移或过期对象。 对于对象迁移，MinIO 会自动将对象移动到已配置的远程存储层。 对于对象过期，MinIO 会自动删除该对象。
+使用 MinIO 对象生命周期管理，可以创建基于时间或日期的规则，自动迁移或过期对象。 对于对象迁移，MinIO 会自动将对象移动到已配置的远程存储层。 对于对象过期，SILO 按桶的版本控制状态与规则执行相应删除动作，可能创建删除标记，也可能永久删除某个版本。
 
 为了兼容将工作负载和生命周期规则从 S3 迁移到 MinIO 的场景，MinIO 的行为和语法遵循 [S3 lifecycle](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html)。 例如，您可以导出 S3 生命周期管理规则并将其导入 MinIO，反之亦然。 MinIO 使用 JSON 描述生命周期管理规则，因此在导入 S3 生命周期规则时，可能需要在 XML 与 JSON 之间进行转换。
 
@@ -88,6 +88,8 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 <a id="id6" data-td-print-local></a>
 
 ## 对象过期 {#minio-lifecycle-management-expiration}
+
+**20261025 源码变化：** 在 [Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)中，当生命周期过期仅写入删除标记时（包括已暂停版本控制桶中的非 `null` 版本），SILO 会保留上一版本的远端分层对象数据，直至该特定版本被永久删除且不再受保留期或共享引用保护。公开的 Server 20261018 尚未包含此修复；升级前已被误删的历史远端数据需从备份恢复。
 
 MinIO 生命周期管理支持对存储桶中的对象执行过期操作。 对象“过期”是指对该对象执行 `DELETE` 操作。 例如，您可以创建生命周期管理规则，使所有超过 365 天的对象过期。
 

@@ -122,7 +122,7 @@ MinIO 需要一组只读访问凭证，以便通过 [bind](/zh/operations/extern
    > [`identity_ldap`](/zh/reference/minio-server/settings/iam/ldap/#mc-conf.identity_ldap) 配置键仍可用于现有脚本和工具。
    {{< /tab >}}
    {{< tab label="环境变量" value="tab2" >}}
-   MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 指定 AD/LDAP 提供方设置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时应用这些设置。 对于分布式部署，请在部署中的所有节点上使用 *相同* 的值设置这些变量。 节点之间的配置不一致会导致启动或配置失败。
+   MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/iam/ldap/#minio-server-envvar-external-identity-management-ad-ldap) 指定 AD/LDAP 提供方设置。[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时应用这些设置。 对于分布式部署，请在部署中的所有节点上使用 *相同* 的值设置这些变量。 节点之间的配置不一致会导致启动或配置失败。
 
    以下示例代码设置了外部身份管理所需的全部 AD/LDAP 相关环境变量。 至少需要以下变量：
 

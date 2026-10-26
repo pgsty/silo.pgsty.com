@@ -35,7 +35,7 @@ MinIO 使用内置扫描器检查对象是否需要自愈，并执行任何已�
 
 例如，默认情况下，MinIO 会暂停扫描器，以便将 I/O 资源让给读写请求。 这会拉长扫描完成所需的时间。
 
-MinIO 在每次扫描之间的等待时间，会按本次扫描操作耗时乘以一个系数来计算。 默认情况下，该系数为 `10.0`，表示 MinIO 会在一次扫描完成后等待相当于该操作耗时 10 倍的时间，再开始下一次扫描。 这个系数会根据配置的 [扫描器速度设置](/zh/reference/minio-server/settings/core/#minio-scanner-speed-options) 发生变化。
+扫描器通过速度预设控制等待时间。当前 `default` 预设的延迟乘数为 `2`，单次最长等待为 `1s`，扫描周期参数为 `1m`；这不代表每分钟能够扫描完整个命名空间。实际进度取决于对象数量、I/O 负载和所选[扫描速度](/zh/reference/minio-server/settings/core/#minio-scanner-speed-options)。
 
 ## 扫描器性能 {#id5}
 

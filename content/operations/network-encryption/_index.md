@@ -4,7 +4,7 @@ url: "/operations/network-encryption/"
 weight: 70
 icon: fa-solid fa-shield-halved
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/network-encryption.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="network-encryption-tls"></a>
@@ -41,7 +41,7 @@ The MinIO Kubernetes Operator provides three approaches for configuring TLS on M
 >
 > The Kubernetes TLS API uses the Kubernetes cluster Certificate Authority (CA) signature algorithm when generating new TLS certificates. See [Supported TLS Cipher Suites](#minio-tls-supported-cipher-suites) for a complete list of MinIO’s supported TLS Cipher Suites and recommended signature algorithms.
 >
-> By default, Kubernetes places a certificate bundle on each pod at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`. This CA bundle should include the cluster or root CA used to sign the MinIO Tenant TLS certificates. Other applications deployed within the Kubernetes cluster can trust this cluster certificate to connect to a MinIO Tenant using the [MinIO service DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) (e.g. `https://minio.minio-tenant-1.svc.cluster-domain.example:443`).
+> Before using the CA bundle at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` to connect to a Tenant, verify that it contains the actual issuer of the Tenant TLS certificate; do not assume the issuers always match. If they differ, supply the correct CA certificate to clients separately, and ensure the certificate covers the [Service DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) used by the client.
 >
 > > [!NOTE]
 > > **Subject Alternative Name Certificates**
@@ -54,11 +54,7 @@ The MinIO Kubernetes Operator provides three approaches for configuring TLS on M
 
 **Manual Certificate Management**
 
-> **The Tenant CRD spec `spec.externalCertsSecret` supp .. include:: /includes/common/common-configure-keycloak-identity-management.rst**
->
-> > > - **start-after:** start-configure-keycloak-minio-cli
-> >
-> > orts specifying either `opaque` or `kubernetes.io/tls` type [secrets](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types) containing the `private.key` and `public.crt` to use for TLS.
+> The Tenant CRD field `spec.externalCertsSecret` references the TLS certificate [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types). Use the Secret type and certificate/key filenames required by your Operator version.
 >
 > You can specify multiple certificates to support Tenants which have multiple assigned hostnames.
 
@@ -109,20 +105,20 @@ The MinIO Server searches for TLS keys and certificates for each node and uses t
 By default, the MinIO server looks for the TLS keys and certificates for each node in the following directory:
 
 ```shell
-${HOME}/.minio/certs
+${HOME}/.silo/certs
 ```
 
-Where `${HOME}` is the home directory of the user running the MinIO Server process. You may need to create the `${HOME}/.minio/certs` directory if it does not exist.
+Here `${HOME}` is the home directory of the user running SILO. New installations use `.silo/certs`; the legacy `.minio/certs` is used only when `.minio` exists and `.silo` does not. If both exist, SILO selects `.silo` and logs a warning. Service accounts should set `--certs-dir` explicitly. See the [certificate directory rules](/reference/minio-server/#minio.server.-certs-dir).
 
 For `systemd` managed deployments this must correspond to the `USER` running the MinIO process. If that user has no home directory, use the **Custom Path** option instead.
 {{< /tab >}}
 {{< tab label="Custom Path" value="custom-path" >}}
-You can specify a path for the MinIO server to search for certificates using the [`minio server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S` parameter.
+You can specify a path for the MinIO server to search for certificates using the [`silo server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S` parameter.
 
 For example, the following command fragment directs the MinIO process to use the `/opt/minio/certs` directory for TLS certificates.
 
 ```shell
-minio server --certs-dir /opt/minio/certs ...
+silo server --certs-dir /opt/minio/certs ...
 ```
 
 The user running the MinIO service *must* have read and write permissions to this directory.
@@ -137,16 +133,16 @@ For distributed MinIO deployments, each node in the deployment must have matchin
 
 If using Certificates signed by a non-global or non-public Certificate Authority, *or* if using a global CA that requires the use of intermediate certificates, you must provide those CAs to the MinIO Server. If the MinIO server does not have the necessary CAs, it may return warnings or errors related to TLS validation when connecting to other services.
 
-Place the CA certificates in the `/certs/CAs` folder. The root path for this folder depends on whether you use the default certificate path *or* a custom certificate path ([`minio server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S`)
+Place the CA certificates in the `/certs/CAs` folder. The root path for this folder depends on whether you use the default certificate path *or* a custom certificate path ([`silo server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S`)
 
 {{< tabs group="default-certificate-path-custom-certificate-path" >}}
 {{< tab label="Default Certificate Path" value="default-certificate-path" >}}
 ```shell
-mv myCA.crt ${HOME}/.minio/certs/CAs
+mv myCA.crt ${HOME}/.silo/certs/CAs
 ```
 {{< /tab >}}
 {{< tab label="Custom Certificate Path" value="custom-certificate-path" >}}
-The following example assumes the MinIO Server was started with `--certs dir /opt/minio/certs`:
+The following example assumes the MinIO Server was started with `--certs-dir /opt/minio/certs`:
 
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
@@ -154,7 +150,7 @@ mv myCA.crt /opt/minio/certs/CAs/
 {{< /tab >}}
 {{< /tabs >}}
 
-For a self-signed certificate, the Certificate Authority is typically the private key used to sign the cert.
+To trust a self-signed certificate, install its **public X.509 certificate**; for an internal CA, install the public CA certificate. Never place a signing private key in `CAs` or distribute it to clients.
 
 For certificates signed by an internal, private, or other non-global Certificate Authority, use the same CA that signed the cert. A non-global CA must include the full chain of trust from the intermediate certificate to the root.
 
@@ -162,18 +158,18 @@ If the provided file is not an X.509 certificate, MinIO ignores it and may retur
 
 ### Third-Party Certificate Authorities {#id2}
 
-The MinIO Server validates the TLS certificate presented by each connecting client against the host system’s trusted root certificate store.
+SILO uses the host system’s trusted roots and the certificates in `CAs` to validate TLS server certificates presented by peer nodes and external services it connects to. Adding a CA certificate does not itself enable S3 client-certificate authentication.
 
-Place the CA certificates in the `/certs/CAs` folder. The root path for this folder depends on whether you use the default certificate path *or* a custom certificate path ([`minio server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S`)
+Place the CA certificates in the `/certs/CAs` folder. The root path for this folder depends on whether you use the default certificate path *or* a custom certificate path ([`silo server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S`)
 
 {{< tabs group="default-certificate-path-custom-certificate-path" >}}
 {{< tab label="Default Certificate Path" value="default-certificate-path" >}}
 ```shell
-mv myCA.crt ${HOME}/certs/CAs
+mv myCA.crt ${HOME}/.silo/certs/CAs
 ```
 {{< /tab >}}
 {{< tab label="Custom Certificate Path" value="custom-certificate-path" >}}
-The following example assumes the MinIO Server was started with `--certs dir /opt/minio/certs`:
+The following example assumes the MinIO Server was started with `--certs-dir /opt/minio/certs`:
 
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/

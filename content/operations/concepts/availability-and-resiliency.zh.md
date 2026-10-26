@@ -34,7 +34,7 @@ upstream_modified: true
 
 **MinIO 使用确定性算法为给定对象选择纠删码集合。**
 
-> 对于每个唯一对象命名空间 `BUCKET/PREFIX/[PREFIX/...]/OBJECT.EXTENSION`，MinIO 在读写操作中始终会选择相同的纠删码集合。 这也包括同一对象的所有 [版本](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。
+> 在给定池内，对象名确定其纠删集合。这不表示同一 key 的所有写入或版本都固定在同一个池：覆盖写入与迁移可能在多个池中留下副本，由 SILO 按请求操作解析。见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/)。
 >
 > <figure>
 >   <img src="/images/availability/availability-erasure-set-selection.svg" alt="基于对象命名空间选择纠删码集合的示意图" />

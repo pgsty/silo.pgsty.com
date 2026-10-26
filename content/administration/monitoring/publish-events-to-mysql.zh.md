@@ -3,7 +3,7 @@ title: "将事件发布到 MySQL"
 url: "/zh/administration/monitoring/publish-events-to-mysql/"
 weight: 70
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-mysql.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mysql"></a>
@@ -31,7 +31,7 @@ MinIO 依赖于 MySQL 5.7.8 中引入的功能。
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/mysql/#minio-server-envvar-bucket-notification-mysql) 指定 MySQL 服务端点及其相关 配置设置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用指定的设置。
+MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/mysql/#minio-server-envvar-bucket-notification-mysql) 指定 MySQL 服务端点及其相关 配置设置。[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次启动时应用指定的设置。
 
 以下示例代码设置了与配置 MySQL 服务端点相关的 *所有* 环境变量。最少的 *必需* 变量为：
 
@@ -82,7 +82,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 有关每个环境变量的完整文档，请参阅 [用于存储桶通知的 MySQL 服务](/zh/reference/minio-server/settings/notifications/mysql/#minio-server-envvar-bucket-notification-mysql)。
 {{< /tab >}}
 {{< tab label="配置设置" value="tab2" >}}
-MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令 和 [`notify_mysql`](/zh/reference/minio-server/settings/notifications/mysql/#mc-conf.notify_mysql) 配置键添加或更新 MySQL 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置设置。
+MinIO 支持在运行中的 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程上使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令 和 [`notify_mysql`](/zh/reference/minio-server/settings/notifications/mysql/#mc-conf.notify_mysql) 配置键添加或更新 MySQL 端点。你必须重启 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置设置。
 
 以下示例代码设置了与配置 MySQL 服务端点相关的 *所有* 设置。最少的 *必需* 设置为：
 
@@ -126,7 +126,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 MySQL 目标输出一行，类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 MySQL 目标输出一行，类似如下：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:mysql
@@ -261,7 +261,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 MySQL 目标输出一行，类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 MySQL 目标输出一行，类似如下：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:mysql

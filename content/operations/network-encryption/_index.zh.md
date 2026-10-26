@@ -41,7 +41,7 @@ MinIO Kubernetes Operator 为 MinIO 租户提供三种 TLS 配置方式：
 >
 > Kubernetes TLS API 在生成新的 TLS 证书时，会使用 Kubernetes 集群 Certificate Authority (CA) 的签名算法。 MinIO 支持的 TLS Cipher Suite 和推荐签名算法完整列表，请参见 [支持的 TLS Cipher Suite](#minio-tls-supported-cipher-suites)。
 >
-> 默认情况下，Kubernetes 会在每个 pod 的 `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` 放置一份证书 bundle。 该 CA bundle 应包含用于签发 MinIO 租户 TLS 证书的集群 CA 或根 CA。 部署在同一 Kubernetes 集群中的其他应用，可以信任这份集群证书，并通过 [MinIO service DNS 名称](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) 连接到 MinIO 租户（例如 `https://minio.minio-tenant-1.svc.cluster-domain.example:443`）。
+> 使用 `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` 中的 CA bundle 连接租户前，先确认它确实包含租户 TLS 证书的签发 CA；不要假定两者始终相同。如果签发 CA 不同，应向客户端单独提供正确的 CA 证书，并确保证书覆盖客户端使用的 [Service DNS 名称](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)。
 >
 > > [!NOTE]
 > > **Subject Alternative Name 证书**
@@ -54,7 +54,7 @@ MinIO Kubernetes Operator 为 MinIO 租户提供三种 TLS 配置方式：
 
 **手动证书管理**
 
-> Tenant CRD 规范中的 `spec.externalCertsSecret` 支持引用类型为 `opaque` 或 `kubernetes.io/tls` 的 [secret](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types)，其中包含用于 TLS 的 `private.key` 和 `public.crt`。
+> Tenant CRD 字段 `spec.externalCertsSecret` 引用 TLS 证书 [Secret](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types)。请按所用 Operator 版本的要求选择 Secret 类型和证书、私钥文件名。
 >
 > 你可以指定多张证书，以支持分配了多个主机名的租户。
 
@@ -107,20 +107,20 @@ MinIO Server 会为每个节点搜索 TLS 私钥和证书，并使用这些凭�
 默认情况下，MinIO server 会在以下目录中查找每个节点的 TLS 私钥和证书：
 
 ```shell
-${HOME}/.minio/certs
+${HOME}/.silo/certs
 ```
 
-其中 `${HOME}` 是运行 MinIO 服务端进程的用户主目录。 如果 `${HOME}/.minio/certs` 目录不存在，你可能需要手动创建它。
+其中 `${HOME}` 是运行 SILO 服务端进程的用户主目录。新安装使用 `.silo/certs`；只有旧 `.minio` 目录存在时才沿用 `.minio/certs`，两者都存在时优先使用 `.silo` 并输出警告。服务账户建议显式设置 `--certs-dir`。详见[证书目录规则](/zh/reference/minio-server/#minio.server.-certs-dir)。
 
 对于由 `systemd` 管理的部署，该路径必须对应运行 MinIO 进程的 `USER`。 如果该用户没有主目录，请改用 **自定义路径** 选项。
 {{< /tab >}}
 {{< tab label="自定义路径" value="tab2" >}}
-你可以通过 [`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S` 参数指定 MinIO server 搜索证书的路径。
+你可以通过 [`silo server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S` 参数指定 MinIO server 搜索证书的路径。
 
 例如，以下命令片段指示 MinIO 进程使用 `/opt/minio/certs` 目录存放 TLS 证书。
 
 ```shell
-minio server --certs-dir /opt/minio/certs ...
+silo server --certs-dir /opt/minio/certs ...
 ```
 
 运行 MinIO service 的用户 *必须* 对该目录拥有读写权限。
@@ -135,16 +135,16 @@ minio server --certs-dir /opt/minio/certs ...
 
 如果你使用的是由非全球或非公共 Certificate Authority 签发的证书，*或者* 使用了需要中间证书的公共 CA，则必须将这些 CA 提供给 MinIO Server。 如果 MinIO server 不具备这些必要 CA，在连接其他服务时可能会返回与 TLS 校验相关的警告或错误。
 
-请将 CA 证书放入 `/certs/CAs` 目录。 该目录的根路径取决于你使用的是默认证书路径，还是自定义证书路径（[`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S`）。
+请将 CA 证书放入 `/certs/CAs` 目录。 该目录的根路径取决于你使用的是默认证书路径，还是自定义证书路径（[`silo server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S`）。
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="默认证书路径" value="tab1" >}}
 ```shell
-mv myCA.crt ${HOME}/.minio/certs/CAs
+mv myCA.crt ${HOME}/.silo/certs/CAs
 ```
 {{< /tab >}}
 {{< tab label="自定义证书路径" value="tab2" >}}
-以下示例假设 MinIO Server 以 `--certs dir /opt/minio/certs` 启动：
+以下示例假设 MinIO Server 以 `--certs-dir /opt/minio/certs` 启动：
 
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/
@@ -152,7 +152,7 @@ mv myCA.crt /opt/minio/certs/CAs/
 {{< /tab >}}
 {{< /tabs >}}
 
-对于自签名证书，Certificate Authority 通常就是用于签署该证书的私钥。
+信任自签名证书时，应安装对应的 **X.509 公共证书**；内部 CA 则安装其 CA 公共证书。不要将签名私钥放入 `CAs` 目录或分发给客户端。
 
 对于由内部、私有或其他非全球 Certificate Authority 签发的证书，请使用签发该证书的同一 CA。 非全球 CA 必须包含从中间证书到根证书的完整信任链。
 
@@ -160,18 +160,18 @@ mv myCA.crt /opt/minio/certs/CAs/
 
 ### 第三方 Certificate Authority {#id5}
 
-MinIO Server 会使用主机系统中的受信任根证书存储来校验每个连接客户端提交的 TLS 证书。
+SILO 使用主机系统的受信任根证书和 `CAs` 目录中的证书，校验其连接的对等节点及外部服务的 TLS 服务端证书。添加 CA 证书本身不会启用 S3 客户端证书认证。
 
-请将 CA 证书放入 `/certs/CAs` 目录。 该目录的根路径取决于你使用的是默认证书路径，还是自定义证书路径（[`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S`）。
+请将 CA 证书放入 `/certs/CAs` 目录。 该目录的根路径取决于你使用的是默认证书路径，还是自定义证书路径（[`silo server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S`）。
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="默认证书路径" value="tab1" >}}
 ```shell
-mv myCA.crt ${HOME}/certs/CAs
+mv myCA.crt ${HOME}/.silo/certs/CAs
 ```
 {{< /tab >}}
 {{< tab label="自定义证书路径" value="tab2" >}}
-以下示例假设 MinIO Server 以 `--certs dir /opt/minio/certs` 启动：
+以下示例假设 MinIO Server 以 `--certs-dir /opt/minio/certs` 启动：
 
 ```shell
 mv myCA.crt /opt/minio/certs/CAs/

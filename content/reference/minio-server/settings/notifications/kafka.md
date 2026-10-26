@@ -3,7 +3,7 @@ title: "Kafka Notification Settings"
 url: "/reference/minio-server/settings/notifications/kafka/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/kafka.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="kafka-notification-settings"></a>
@@ -347,7 +347,7 @@ Specify the path to the client private key to use for performing mTLS authentica
 {{< /tab >}}
 {{< /tabs >}}
 
-Specify the version of the Kafka cluster to assume when performing operations against that cluster. See the [sarama reference documentation](https://github.com/shopify/sarama/blob/v1.20.1/config.go#L327) for more information on this field’s behavior.
+Specify the Kafka broker protocol version used for requests. When unset, SILO uses **Kafka 2.1**; the 20261025 source explicitly retains this default despite the Sarama dependency upgrade. Set a version supported by your brokers if a different protocol is needed. See the [selected Sarama configuration](https://github.com/IBM/sarama/blob/v1.61.1/config.go).
 
 ### Batch Size {#batch-size}
 

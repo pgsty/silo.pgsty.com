@@ -3,8 +3,12 @@ title: "退役 服务器池"
 url: "/zh/operations/deployments/baremetal-decommission-server-pool/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/deployments/baremetal-decommission-server-pool.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+自 Server 20261018 起，退役迁移会保留 null 与 UUID 删除标记，即使它是源池中唯一的版本，因为其他池可能仍有旧数据版本。远端分层对象通过元数据／引用迁移路径处理；保持远端层可用，并在移除池前核对版本、标签、删除状态与实际读取。见[迁移契约](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)。
+
+下方桶／IAM 导出只覆盖配置，不是完整恢复快照。使用持久 IAM 撤销时，还须保留后端删除历史与必要加密材料，见 [IAM 恢复](/zh/operations/replication/iam-upgrade/)。
 
 <a id="minio-decommissioning"></a>
 <a id="id1" data-td-print-local></a>
@@ -108,23 +112,23 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 无论中断原因为何，该 pool 都会持续保持在退役状态。 退役一旦开始，该 pool *永远* 无法恢复为 active 状态。
 
-### 退役是无中断的 {#id10}
+### 迁移与最终重启 {#id10}
 
 移除已退役的 服务器池 需要在大致同一时间重启部署中的 *所有* MinIO 节点。
 
-MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 MinIO 操作具有原子性并保持严格一致。 因此，该重启过程不会中断应用或正在进行的操作。
+完成退役并移除池配置后，全部 SILO 节点需要协调重启，使用一致的剩余池列表。全量重启会暂时中断服务，正在进行的请求可能失败；请安排维护窗口，并让客户端按操作语义重试和核验结果。
 
 **不要** 执行“滚动”重启（例如一次只重启一个节点）。
 
-### 退役会忽略已过期对象和尾部 `DeleteMarker` {#deletemarker}
+### 删除标记、过期对象与迁移验证 {#deletemarker}
 
-从 [RELEASE.2023-05-27T05-56-19Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-05-27T05-56-19Z) 起，退役过程会忽略那些仅剩 `DeleteMarker` 版本的对象。 这样可以避免为实际上已被完全删除的对象，在剩余 服务器池 上生成空元数据。
+SILO Server 20261018 及 20261025 源码会迁移 `null` 和 UUID 删除标记，包括源池中唯一剩下的删除标记。其他池可能仍保留同名对象的旧数据版本，因此不能仅因本池没有其他版本就丢弃标记。这替代了旧版上游跳过孤立删除标记的行为。
 
-从 [RELEASE.2023-06-23T20-26-00Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-23T20-26-00Z) 起，退役还会忽略那些已根据父存储桶配置的 [生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 过期的对象版本。 从 [RELEASE.2023-06-29T05-12-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-29T05-12-28Z) 起，你可以使用 [`mc admin trace --call decommission`](/zh/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) 在退役过程中监控被忽略的 delete marker 和已过期对象。
+退役过程仍会评估[生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)，将符合条件的过期对象或版本送入过期处理，并跳过其迁移。可使用 [`mc admin trace --call decommission`](/zh/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) 查看迁移与跳过原因。
 
-包含 [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) 的 Silo 构建（main，晚于 Server 20260903）会在退役与 rebalance 期间把对象标签及其修订字段带到目标池。更早的构建会丢掉被迁移对象的标签。如果依赖标签的生命周期或策略规则有影响，请审计已迁移的对象，不要默认标签仍在；见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/#migration-tags)。
+当前版本保留对象标签及其修订字段，并在清理源副本前重新核对已迁移的版本。升级不会恢复早期迁移已经丢失的标签。详见[跨池迁移契约](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)。
 
-退役过程完成后，你就可以安全关闭该 pool。 由于剩余数据要么已计划删除，要么仅为 `DeleteMarker`，因此你可以按照内部流程安全清空或销毁这些驱动器。
+仅在退役状态为 `Complete`，且通过 S3 核验目标版本、标签、数据及删除状态后，才移除池配置并按流程下线旧池。销毁旧盘前保留所需备份，不能把“只剩删除标记”当作可直接清盘的依据。
 
 ## 行为说明 {#id11}
 
@@ -227,18 +231,18 @@ Started: 30 minutes ago
 
 [`mc admin decommission status`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.status) 会在退役完成后将 **Status** 标记为 **Complete**。 一旦退役完成，你就可以继续下一步。
 
-如果 **Status** 显示为 failed，你可以重新运行 [`mc admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 命令以恢复该过程。 如果失败持续存在，请使用 [`mc admin logs`](/zh/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) 或查看 `systemd` 日志（例如 `journalctl -u minio`），以定位更具体的错误。
+如果 **Status** 显示为 failed，你可以重新运行 [`mc admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 命令以恢复该过程。 如果失败持续存在，请使用 [`mc admin logs`](/zh/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) 或查看 `systemd` 日志（例如 `journalctl -u silo`），以定位更具体的错误。
 
 ### 4) 从部署配置中移除已退役的 Pool {#pool}
 
 每当一个 pool 完成退役后，你都可以安全地将其从部署配置中移除。 请修改部署中每个剩余 MinIO server 的启动命令，并移除已退役 pool。
 
-`.deb` 或 `.rpm` 软件包会将 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件安装到 `/lib/systemd/system/minio.service`。 对于二进制安装，本步骤默认该文件已按照 [安装与管理](/zh/operations/deployments/installation/#deploy-minio-distributed) 流程手动创建。
+`.deb` 或 `.rpm` 软件包会将 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件安装到 `/lib/systemd/system/silo.service`。 对于二进制安装，本步骤默认该文件已按照 [安装与管理](/zh/operations/deployments/installation/#deploy-minio-distributed) 流程手动创建。
 
-`minio.service` 文件使用位于 `/etc/default/minio` 的环境文件读取配置设置，其中也包括启动配置。 具体来说，`MINIO_VOLUMES` 变量定义了启动命令：
+`silo.service` 文件使用位于 `/etc/default/silo` 的环境文件读取配置设置，其中也包括启动配置。 具体来说，`MINIO_VOLUMES` 变量定义了启动命令：
 
 ```shell
-cat /etc/default/minio | grep "MINIO_VOLUMES"
+cat /etc/default/silo | grep "MINIO_VOLUMES"
 ```
 
 命令返回的输出类似如下：
@@ -260,19 +264,19 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 
 ```shell
-sudo systemctl restart minio.service
+sudo systemctl restart silo.service
 ```
 
 Use the following commands to confirm the service is online and functional:
 
 ```shell
-sudo systemctl status minio.service
-journalctl -f -u minio.service
+sudo systemctl status silo.service
+journalctl -f -u silo.service
 ```
 
 MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
 
-MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 MinIO 操作具有原子性并保持严格一致。 因此，该重启过程不会中断应用或正在进行的操作。
+完成退役并移除池配置后，全部 SILO 节点需要协调重启，使用一致的剩余池列表。全量重启会暂时中断服务，正在进行的请求可能失败；请安排维护窗口，并让客户端按操作语义重试和核验结果。
 
 **不要** 执行“滚动”重启（例如一次只重启一个节点）。
 
@@ -396,18 +400,18 @@ Started: 30 minutes ago
 
 [`mc admin decommission status`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.status) 会在退役完成后将 **Status** 标记为 **Complete**。 当 MinIO 完成所有 pool 的退役后，你就可以继续下一步。
 
-如果 **Status** 显示为 failed，你可以重新运行 [`mc admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 命令以恢复该过程。 如果失败持续存在，请使用 [`mc admin logs`](/zh/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) 或查看 `systemd` 日志（例如 `journalctl -u minio`），以定位更具体的错误。
+如果 **Status** 显示为 failed，你可以重新运行 [`mc admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 命令以恢复该过程。 如果失败持续存在，请使用 [`mc admin logs`](/zh/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) 或查看 `systemd` 日志（例如 `journalctl -u silo`），以定位更具体的错误。
 
 ### 4) 从部署配置中移除已退役的 Pool {#id22}
 
 退役完成后，你就可以安全地将这些 pool 从部署配置中移除。 请修改部署中每个剩余 MinIO server 的启动命令，并移除已退役 pool。
 
-`.deb` 或 `.rpm` 软件包会将 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件安装到 `/lib/systemd/system/minio.service`。 对于二进制安装，本步骤默认该文件已按照 [安装与管理](/zh/operations/deployments/installation/#deploy-minio-distributed) 流程手动创建。
+`.deb` 或 `.rpm` 软件包会将 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件安装到 `/lib/systemd/system/silo.service`。 对于二进制安装，本步骤默认该文件已按照 [安装与管理](/zh/operations/deployments/installation/#deploy-minio-distributed) 流程手动创建。
 
-`minio.service` 文件使用位于 `/etc/default/minio` 的环境文件读取配置设置，其中也包括启动配置。 具体来说，`MINIO_VOLUMES` 变量定义了启动命令：
+`silo.service` 文件使用位于 `/etc/default/silo` 的环境文件读取配置设置，其中也包括启动配置。 具体来说，`MINIO_VOLUMES` 变量定义了启动命令：
 
 ```shell
-cat /etc/default/minio | grep "MINIO_VOLUMES"
+cat /etc/default/silo | grep "MINIO_VOLUMES"
 ```
 
 命令返回的输出类似如下：
@@ -429,19 +433,19 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 
 ```shell
-sudo systemctl restart minio.service
+sudo systemctl restart silo.service
 ```
 
 Use the following commands to confirm the service is online and functional:
 
 ```shell
-sudo systemctl status minio.service
-journalctl -f -u minio.service
+sudo systemctl status silo.service
+journalctl -f -u silo.service
 ```
 
 MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
 
-MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 MinIO 操作具有原子性并保持严格一致。 因此，该重启过程不会中断应用或正在进行的操作。
+完成退役并移除池配置后，全部 SILO 节点需要协调重启，使用一致的剩余池列表。全量重启会暂时中断服务，正在进行的请求可能失败；请安排维护窗口，并让客户端按操作语义重试和核验结果。
 
 **不要** 执行“滚动”重启（例如一次只重启一个节点）。
 

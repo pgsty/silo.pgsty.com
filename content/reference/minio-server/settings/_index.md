@@ -4,7 +4,7 @@ url: "/reference/minio-server/settings/"
 weight: 10
 icon: fa-solid fa-gears
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="settings-overview"></a>
@@ -12,7 +12,7 @@ upstream_modified: false
 <a id="minio-server-environment-variables"></a>
 <a id="minio-environment-variables"></a>
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process stores its configuration in the storage backend [`directory`](/reference/minio-server/#minio.server.DIRECTORIES).
+The [`silo server`](/reference/minio-server/#command-minio.server) process stores its configuration in the storage backend [`directory`](/reference/minio-server/#minio.server.DIRECTORIES).
 
 <a id="minio-server-configuration-options"></a>
 

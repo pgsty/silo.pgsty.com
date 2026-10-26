@@ -28,7 +28,7 @@ See [Deploy MinIO on Kubernetes](/operations/deployments/kubernetes/#deploy-oper
 
 ### Available Worker Nodes {#available-worker-nodes}
 
-MinIO deploys additional [`minio server`](/reference/minio-server/#command-minio.server) pods as part of the new Tenant pool. The Kubernetes cluster *must* have sufficient available worker nodes on which to schedule the new pods.
+MinIO deploys additional [`silo server`](/reference/minio-server/#command-minio.server) pods as part of the new Tenant pool. The Kubernetes cluster *must* have sufficient available worker nodes on which to schedule the new pods.
 
 The MinIO Operator provides configurations for controlling pod affinity and anti-affinity to direct scheduling to specific workers.
 

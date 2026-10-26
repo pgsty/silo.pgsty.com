@@ -14,6 +14,23 @@ icon: fa-solid fa-server
 > [!WARNING]
 > **Read this before replacing a MinIO deployment.** The binary, package, service account, systemd unit, default local configuration directory, container path, Helm resource names, embedded Console, update behavior, several authorization decisions, and some error responses changed. Data disks and the `MINIO_*` configuration namespace did not receive a matching rename.
 
+## Server 20261025 upgrade checks {#maintenance-20261025}
+
+This section covers source [`263ee0510da5`](https://github.com/pgsty/silo/commit/263ee0510da51c555b7257bbe504b22355cac4b0) for the [20261025 Draft Release](/blog/release/silo-20261025/#server-20261025) (not yet included in the public Server 20261018 downloads as of 2026-10-26).
+
+| Scenario | Behavior change and upgrade action |
+| --- | --- |
+| LDAP users with long normalized DNs | Group-based login continues past missing optional IAM records whose ASCII filename component exceeds 255 bytes; unreadable revocation records and storage errors still fail closed, and writing overlong path records remains unsupported on the object backend. See the [LDAP guide](/administration/identity-access-management/ad-ldap-access-management/). |
+| Built-in policy overrides | Reset removes an override and immediately restores the native policy while retaining in-use checks; delayed peer/etcd notifications reload committed state, and custom-policy deletion still deletes the policy. See [Console policies](/administration/console/security-and-access/#minio-console-admin-policies). |
+| Console bucket creation/deletion | `account-info` reads the live bucket inventory (older Servers can return a stale cached list after refresh); usage statistics remain scanner-derived. |
+| Canceled writes, rollback, and cleanup | Admitted storage mutations drain before local locks and staging are released; rollback verifies ownership and preserves subsequent writes. Upgrade all writer nodes; slow or stalled drives can lengthen lock waits, and interrupted cleanup can leave `xl.meta.bkp` files behind. |
+| Multi-pool deletion | Ordinary and bulk deletion clean up non-authoritative copies before removing the authoritative copy and protect shared remote tier references; retry failed deletes after drive recovery. |
+| Versioned remote-tier expiration | Lifecycle expiration that only writes a delete marker preserves the prior version's remote tier data (including non-null versions in suspended buckets); data deleted on earlier releases must be restored from backups. |
+| Multipart replication | Forwards the `FULL_OBJECT` checksum type for composite CRC algorithms; upgrade the sending Server and verify pending replication queues. |
+| Build and packaging | Built with Go 1.27.3, Console v2.5.0, mcli 20261025, pkg v3.15.1, and pinned upstream `minio-go`; Windows archives use ZIP. See the [component matrix](/compatibility/versions/#server-20261025). |
+
+**Read and failure boundaries:** Lease expiration or network partitions can still allow late commits, and partial metadata updates can still expose stale values or tags. Existing read-quorum and healing rules remain unchanged (stricter read refusal and cross-pool recovery diagnostics remain gated under the `consistency_strict` build tag); upgrading does not add distributed fencing or automatically repair pre-existing inconsistent objects. The 20261018 Object Lock, IAM, and retired multipart-mode upgrade requirements below continue to apply.
+
 ## Server 20261018 upgrade checks {#october-2026}
 
 This section targets the [20261018 release](/blog/release/silo-20261018/), now publicly released. Older audits and the 20260916 sections below retain their historical scope.

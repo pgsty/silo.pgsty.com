@@ -1,7 +1,7 @@
 ---
 title: "组件版本"
 linkTitle: "组件版本"
-description: "Server 20261018 正式发布、准确组件身份与升级边界。"
+description: "Server 20261025 源码、正式版状态、准确组件身份与升级边界。"
 url: "/zh/compatibility/versions/"
 weight: 5
 type: docs
@@ -10,6 +10,21 @@ icon: fa-solid fa-code-branch
 ---
 
 维护栈的四个组件与可选 KES 分别发布。下表记录各正式版本及其组件依赖关系。
+
+## Server 20261025 源码 {#server-20261025}
+
+截至 **2026-10-26**，Server 20261025 为 **Draft Release**，对应源码为 [`263ee0510da5`](https://github.com/pgsty/silo/commit/263ee0510da51c555b7257bbe504b22355cac4b0)（包版本 `20261025000000.0.0`），当前公开下载仍指向下方的 Server 20261018。
+
+| 组件 | Server 20261025 源码选用版本 |
+| --- | --- |
+| 嵌入式 Console | v2.5.0，`v0.0.0-20261025145732-989fa7150792` |
+| MC 模块／镜像内置 mcli | 20261025，`v0.0.0-20261025104502-dcc78d506f94` |
+| 共享包 | `github.com/pgsty/silo-pkg/v3 v3.15.1` |
+| 上游 S3 SDK | `github.com/minio/minio-go/v7 v7.4.2-0.20261020194015-ab93db7ba435` |
+| Go 工具链 | 1.27.3 |
+| 平台压缩包 | Windows 使用 ZIP；Linux 与 macOS 保持 tar.gz |
+
+LDAP 长 DN 登录、内置策略 Reset、实时存储桶清单、版本桶生命周期过期、分片上传复制及写入/回滚保护均属于服务端修复（单独安装独立 Console v2.5.0 或 mcli 20261025 不会替换旧版 Server 的内嵌组件或服务端逻辑）。详情参见 [20261025 升级检查](/zh/compatibility/server/#maintenance-20261025)与[发布记录](/zh/blog/release/silo-20261025/#server-20261025)。
 
 ## Server 20261018 正式发布 {#october-release}
 

@@ -3,7 +3,7 @@ title: "mc admin policy rm"
 url: "/zh/reference/minio-mc-admin/mc-admin-policy-remove/"
 weight: 70
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-policy-remove.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-policy-rm"></a>
@@ -14,16 +14,16 @@ upstream_modified: false
 
 ## 语法 {#id1}
 
-从目标 MinIO 部署中移除 IAM 策略。
+从 SILO 部署中移除自定义 IAM 策略（若策略仍被引用则拒绝移除；未修改的内置策略不可删除）。在 [Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)中，移除对内置策略的显式覆盖内容会立即将其重置为原生内置定义，并保留删除版本以拒绝旧覆盖（公开的 Server 20261018 尚未包含此服务端修复；详情见 [Console 策略管理](/zh/administration/console/security-and-access/#minio-console-admin-policies)）。
 
 [`mc admin policy remove`](#command-mc.admin.policy.remove) 命令与 [`mc admin policy rm`](#command-mc.admin.policy.rm) 具有等效功能。
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="示例" value="tab1" >}}
-以下命令从 `myminio` MinIO 部署中移除名为 `writeonly` 的策略：
+以下命令从 `myminio` MinIO 部署中移除名为 `project-readonly` 的策略：
 
 ```shell
-mc admin policy rm myminio writeonly
+mc admin policy rm myminio project-readonly
 ```
 {{< /tab >}}
 {{< tab label="语法" value="tab2" >}}

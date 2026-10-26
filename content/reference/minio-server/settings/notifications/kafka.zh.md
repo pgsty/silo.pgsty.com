@@ -3,7 +3,7 @@ title: "Kafka 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/kafka/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/kafka.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="kafka"></a>
@@ -347,7 +347,7 @@ mc admin config set notify_kafka \
 {{< /tab >}}
 {{< /tabs >}}
 
-指定在对 Kafka 集群执行操作时假定的 Kafka 集群版本。 有关此字段行为的更多信息，请参见 [sarama reference documentation](https://github.com/shopify/sarama/blob/v1.20.1/config.go#L327)。
+指定请求使用的 Kafka broker 协议版本。未设置时，SILO 使用 **Kafka 2.1**；20261025 源码在升级 Sarama 依赖后仍显式保留此默认值。需要不同协议时，设置 broker 支持的版本。见[所选 Sarama 配置](https://github.com/IBM/sarama/blob/v1.61.1/config.go)。
 
 ### Batch Size {#batch-size}
 

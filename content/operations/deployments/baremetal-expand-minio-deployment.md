@@ -12,7 +12,7 @@ math: true
 
 Silo supports expanding an existing distributed deployment by adding a new [Server Pool](/operations/concepts/#minio-intro-server-pool). Each pool expands the total available storage capacity of the cluster.
 
-Expansion does not provide Business Continuity/Disaster Recovery (BC/DR)-grade protections. While each pool is an independent set of servers with distinct [erasure sets](/operations/concepts/erasure-coding/#minio-ec-erasure-set) for availability, the complete loss of one pool results in MinIO stopping I/O for all pools in the deployment. Similarly, an erasure set which loses quorum in one pool represents data loss of objects stored in that set, regardless of the number of other erasure sets or pools.
+Expansion does not provide Business Continuity/Disaster Recovery (BC/DR)-grade protection. Each pool has independent [erasure sets](/operations/concepts/erasure-coding/#minio-ec-erasure-set); adding a pool does not replicate objects from existing pools. An unavailable pool can prevent access to its objects and fail writes, deletes, or other operations that must check every pool. Objects with sufficient data and metadata in other pools may remain readable. Losing quorum means unavailability first; permanent data loss requires unrecoverable loss of the necessary shards without another usable copy.
 
 The new server pool does **not** need to use the same type or size of hardware and software configuration as any existing server pool, though doing so may allow for simplified cluster management and more predictable performance across pools. All drives in the new pool **should** be of the same type and size within the new pool. Review MinIO’s [hardware recommendations](/operations/checklists/hardware/#minio-hardware-checklist) for more complete guidance on selecting an appropriate configuration.
 
@@ -53,7 +53,7 @@ Configuring firewalls or load balancers to support MinIO is out of scope for thi
 
 ### Sequential Hostnames {#sequential-hostnames}
 
-MinIO *requires* using expansion notation `{x...y}` to denote a sequential series of MinIO hosts when creating a server pool. MinIO therefore *requires* using sequentially-numbered hostnames to represent each [`minio server`](/reference/minio-server/#command-minio.server) process in the pool.
+MinIO *requires* using expansion notation `{x...y}` to denote a sequential series of MinIO hosts when creating a server pool. MinIO therefore *requires* using sequentially-numbered hostnames to represent each [`silo server`](/reference/minio-server/#command-minio.server) process in the pool.
 
 Create the necessary DNS hostname mappings *prior* to starting this procedure. For example, the following hostnames would support a 4-node distributed server pool:
 
@@ -131,7 +131,7 @@ Use the [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cl
 
 ### Writing Files {#writing-files}
 
-MinIO does not automatically rebalance objects across the new server pools. Instead, MinIO performs new write operations to the pool with the most free storage weighted by the amount of free space on the pool divided by the free space across all available pools.
+SILO does not automatically rebalance existing objects when a pool is added. When selecting a pool for a new object, it chooses randomly with weights based on available capacity. A pool with more free capacity is more likely to be selected; it is not selected on every write.
 
 The formula to determine the probability of a write operation on a particular pool is
 
@@ -155,11 +155,11 @@ If desired, you can manually initiate a rebalance procedure with [`mc admin reba
 
 Likewise, MinIO does not write to pools in a decommissioning process.
 
-### Expansion is Non-Disruptive {#expansion-is-non-disruptive}
+### Expansion Requires a Coordinated Restart {#expansion-is-non-disruptive}
 
 Adding a new server pool requires restarting *all* MinIO server processes in the deployment at around same time.
 
-MinIO strongly recommends restarting all MinIO Server processes in a deployment simultaneously. MinIO operations are atomic and strictly consistent. As such the restart procedure is non-disruptive to applications and ongoing operations.
+Expansion requires a coordinated restart of all SILO server processes with the same pool configuration. A full restart temporarily interrupts service and can fail in-flight requests. Schedule a maintenance window, and have clients retry and verify results according to each operation’s semantics. Restarting does not guarantee uninterrupted service.
 
 Do **not** perform “rolling” (e.g. one node at a time) restarts.
 
@@ -196,116 +196,63 @@ Install the **same published Silo release** used by the existing pool. Download 
 {{< tabs group="tabs-0082ddfa" >}}
 {{< tab label="RPM (RHEL family)" value="rpm-rhel-family" >}}
 ```shell
-sudo dnf install ./minio-*.rpm
+sudo dnf install ./silo-*.rpm
 ```
 {{< /tab >}}
 {{< tab label="DEB (Debian/Ubuntu)" value="deb-debianubuntu" >}}
 ```shell
-sudo dpkg -i ./minio_*_amd64.deb
+sudo dpkg -i ./silo_*_amd64.deb
 ```
 
 Use the `arm64` package name on ARM64 hosts.
 {{< /tab >}}
 {{< tab label="Standalone archive" value="standalone-archive" >}}
 ```shell
-tar -xzf minio_*_linux_*.tar.gz
-sudo install -m 0755 ./minio /usr/local/bin/minio
-minio --version
+tar -xzf silo_*_linux_*.tar.gz
+sudo install -m 0755 ./silo /usr/local/bin/silo
+silo --version
 ```
 {{< /tab >}}
 {{< /tabs >}}
 
-Run `minio --version` on every new node and compare it with the existing pool. Do not join a node running a different release. For upgrades, follow the [`systemctl`-managed Silo procedure](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl).
+Run `silo --version` on every new node and compare it with the existing pool. Do not join a node running a different release. For upgrades, follow the [`systemctl`-managed Silo procedure](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl).
 
 ### 2) Add TLS/SSL Certificates {#add-tls-ssl-certificates}
 
-MinIO enables [Transport Layer Security (TLS)](/operations/network-encryption/#minio-tls) 1.2+ automatically upon detecting a valid x.509 certificate (`.crt`) and private key (`.key`) in the MinIO `${HOME}/.minio/certs` directory.
+For a `systemd`-managed SILO deployment, configure an explicit certificate directory such as `/etc/silo/certs` rather than depending on a service account's home directory. Place `public.crt` and `private.key` on each node. When an internal CA must be trusted, place its **public CA certificate** in `/etc/silo/certs/CAs`. Restrict private-key access to the accounts that need it.
 
-For `systemd`-managed deployments, use the `$HOME` directory for the user which runs the MinIO server process. The provided `minio.service` file runs the process as `minio-user`. The previous step includes instructions for creating this user with a home directory `/home/minio-user`.
+Set the following in `/etc/default/silo`:
 
-- Place TLS certificates into `/home/minio-user/.minio/certs` on each host.
-- If *any* MinIO server or client uses certificates signed by an unknown Certificate Authority (self-signed or internal CA), you *must* place the CA certs in the `/home/minio-user/.minio/certs/CAs` on all MinIO hosts in the deployment. MinIO rejects invalid certificates (untrusted, expired, or malformed).
+```shell
+MINIO_OPTS="--certs-dir /etc/silo/certs --console-address :9001"
+```
 
-If the `minio.service` file specifies a different user account, use the `$HOME` directory for that account. Alternatively, specify a custom certificate directory using the [`minio server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) commandline argument. Modify the `MINIO_OPTS` variable in `/etc/default/minio` to set this option. The `systemd` user which runs the MinIO server process *must* have read and listing permissions for the specified directory.
-
-For more specific guidance on configuring MinIO for TLS, including multi-domain support via Server Name Indication (SNI), see [Network Encryption (TLS)](/operations/network-encryption/#minio-tls). You can optionally skip this step to deploy without TLS enabled. MinIO strongly recommends *against* non-TLS deployments outside of early development.
+SILO packages use the `silo` user and group, which do not necessarily have a usable home directory. Ensure that this account can traverse the certificate directory and read the required files. For a manual archive installation, create the service account as described in the next step first. See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) and [`--certs-dir`](/reference/minio-server/#minio.server.-certs-dir) for default-directory compatibility and multiple-domain certificates.
 
 ### 3) Create the `systemd` Service File {#create-the-systemd-service-file}
 
-The `.deb` or `.rpm` packages install the following [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/usr/lib/systemd/system/minio.service`. For binary installations, create this file manually on all MinIO hosts.
+SILO RPM/DEB packages install the following files and create the `silo` system user and group:
 
-> [!NOTE]
-> **Note**
->
-> `systemd` checks the `/etc/systemd/...` path before checking the `/usr/lib/systemd/...` path and uses the first file it finds. To avoid conflicting or unexpected configuration options, check that the file only exists at the `/usr/lib/systemd/system/minio.service` path.
->
-> Refer to the [man page for systemd.unit](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html) for details on the file path search order.
+- Executable: `/usr/bin/silo`
+- Service unit: `/usr/lib/systemd/system/silo.service`
+- Environment file: `/etc/default/silo`
 
-```shell
-[Unit]
-Description=MinIO
-Documentation=https://silo.pgsty.com/docs/
-Wants=network-online.target
-After=network-online.target
-AssertFileIsExecutable=/usr/local/bin/minio
+The service runs as `silo:silo`. For existing deployments, the unit reads `/etc/default/minio` first, then `/etc/default/silo`; values in the latter override matching keys in the former. It also declares a conflict with `minio.service` so the two services do not access the same data concurrently. See the [installation layout](/compatibility/binary/#layout).
 
-[Service]
-Type=notify
+For a manual archive installation, create a dedicated `silo` user and group and grant the required access to data and certificate directories. Use the [current SILO unit](https://github.com/pgsty/silo/blob/263ee0510da51c555b7257bbe504b22355cac4b0/silo.service) as a template and install the local unit at `/etc/systemd/system/silo.service`. If the executable is installed at `/usr/local/bin/silo`, adjust both `AssertFileIsExecutable` and `ExecStart` instead of retaining the package's `/usr/bin/silo` path.
 
-WorkingDirectory=/usr/local
-
-User=minio-user
-Group=minio-user
-ProtectProc=invisible
-
-EnvironmentFile=-/etc/default/minio
-ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
-
-# Let systemd restart this service always
-Restart=always
-
-# Specifies the maximum file descriptor number that can be opened by this process
-LimitNOFILE=1048576
-
-# Turn-off memory accounting by systemd, which is buggy.
-MemoryAccounting=no
-
-# Specifies the maximum number of threads this process can create
-TasksMax=infinity
-
-# Disable timeout logic and wait until process is stopped
-TimeoutSec=infinity
-
-# Disable killing of MinIO by the kernel's OOM killer
-OOMScoreAdjust=-1000
-
-SendSIGKILL=no
-
-[Install]
-WantedBy=multi-user.target
-
-# Built for ${project.name}-${project.version} (${project.name})
-```
-
-The `minio.service` file runs as the `minio-user` User and Group by default. You can create the user and group using the `groupadd` and `useradd` commands. The following example creates the user, group, and sets permissions to access the folder paths intended for use by MinIO. These commands typically require root (`sudo`) permissions.
+Inspect the effective unit and any overrides, then reload after changes:
 
 ```shell
-groupadd -r minio-user
-useradd -M -r -g minio-user minio-user
-chown minio-user:minio-user /mnt/disk1 /mnt/disk2 /mnt/disk3 /mnt/disk4
+systemctl cat silo.service
+sudo systemctl daemon-reload
 ```
 
-The specified drive paths are provided as an example. Change them to match the path to those drives intended for use by MinIO.
-
-Alternatively, change the `User` and `Group` values to another user and group on the system host with the necessary access and permissions.
-
-MinIO publishes additional startup script examples on [github.com/minio/minio-service](https://github.com/minio/minio-service).
-
-To update deployments managed using `systemctl`, see [Update systemctl-Managed MinIO Deployments](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl).
+Keep existing data paths. Renaming the executable or service does not require renaming object data directories. For version upgrades, see the [`systemctl`-managed upgrade procedure](/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl).
 
 ### 4) Create the Service Environment File {#create-the-service-environment-file}
 
-Create an environment file at `/etc/default/minio`. The MinIO service uses this file as the source of all [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) used by MinIO *and* the `minio.service` file.
+Create an environment file at `/etc/default/silo`. The MinIO service uses this file as the source of all [environment variables](/reference/minio-server/settings/#minio-server-environment-variables) used by MinIO *and* the `silo.service` file.
 
 The following examples assumes that:
 
@@ -369,7 +316,7 @@ MINIO_VOLUMES="https://minio{1...4}.example.net:9000/mnt/disk{1...4}/minio https
 # port 9001 on all network interfaces. The default behavior is dynamic
 # port selection.
 
-MINIO_OPTS="--console-address :9001"
+MINIO_OPTS="--certs-dir /etc/silo/certs --console-address :9001"
 
 # Set the root username. This user has unrestricted permissions to
 # perform S3 and administrative API operations on any resource in the
@@ -394,19 +341,19 @@ You may specify other [environment variables](/reference/minio-server/settings/#
 Issue the following commands on each node **simultaneously** in the deployment to restart the MinIO service:
 
 ```shell
-sudo systemctl restart minio.service
+sudo systemctl restart silo.service
 ```
 
 Use the following commands to confirm the service is online and functional:
 
 ```shell
-sudo systemctl status minio.service
-journalctl -f -u minio.service
+sudo systemctl status silo.service
+journalctl -f -u silo.service
 ```
 
 MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
 
-MinIO strongly recommends restarting all MinIO Server processes in a deployment simultaneously. MinIO operations are atomic and strictly consistent. As such the restart procedure is non-disruptive to applications and ongoing operations.
+Expansion requires a coordinated restart of all SILO server processes with the same pool configuration. A full restart temporarily interrupts service and can fail in-flight requests. Schedule a maintenance window, and have clients retry and verify results according to each operation’s semantics. Restarting does not guarantee uninterrupted service.
 
 Do **not** perform “rolling” (e.g. one node at a time) restarts.
 

@@ -3,7 +3,7 @@ title: "Publish Events to NSQ"
 url: "/administration/monitoring/publish-events-to-nsq/"
 weight: 40
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-nsq.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="publish-events-to-nsq"></a>
@@ -27,7 +27,7 @@ You can configure a new NSQ service endpoint using either environment variables 
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
-MinIO supports specifying the NSQ service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/nsq/#minio-server-envvar-bucket-notification-nsq). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
+MinIO supports specifying the NSQ service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/nsq/#minio-server-envvar-bucket-notification-nsq). The [`silo server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring an NSQ service endpoint. The minimum *required* variables are [`MINIO_NOTIFY_NSQ_NSQD_ADDRESS`](/reference/minio-server/settings/notifications/nsq/#envvar.MINIO_NOTIFY_NSQ_NSQD_ADDRESS) and [`MINIO_NOTIFY_NSQ_TOPIC`](/reference/minio-server/settings/notifications/nsq/#envvar.MINIO_NOTIFY_NSQ_TOPIC):
 
@@ -67,7 +67,7 @@ The following example code sets *all* environment variables related to configuri
 See [NSQ Service for Bucket Notifications](/reference/minio-server/settings/notifications/nsq/#minio-server-envvar-bucket-notification-nsq) for complete documentation on each environment variable.
 {{< /tab >}}
 {{< tab label="Configuration Settings" value="configuration-settings" >}}
-MinIO supports adding or updating NSQ endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_nsq`](/reference/minio-server/settings/notifications/nsq/#mc-conf.notify_nsq) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
+MinIO supports adding or updating NSQ endpoints on a running [`silo server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_nsq`](/reference/minio-server/settings/notifications/nsq/#mc-conf.notify_nsq) configuration key. You must restart the [`silo server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an NSQ service endpoint. The minimum *required* setting is [`notify_nsq nsqd_address`](/reference/minio-server/settings/notifications/nsq/#mc-conf.notify_nsq.nsqd_address) and [`notify_nsq topic`](/reference/minio-server/settings/notifications/nsq/#mc-conf.notify_nsq.topic):
 
@@ -103,7 +103,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured NSQ target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured NSQ target similar to the following:
 
 ```shell
 SQS ARNs: |ARN|
@@ -228,7 +228,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured NSQ target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured NSQ target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:NSQ

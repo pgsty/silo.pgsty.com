@@ -2,7 +2,7 @@
 title: "Durable IAM Revocations"
 linkTitle: "Durable IAM Revocations"
 date: 2026-09-16
-lastmod: 2026-10-23
+lastmod: 2026-10-26
 author: "Ruohang Feng"
 summary: "Persistent deletion revisions, signed parent boundaries, safe replay, coordinated upgrades and the limits of IAM recovery."
 tags: [Design, S3, Operations]
@@ -92,7 +92,7 @@ All participating nodes—including nodes that share an IAM storage backend with
 
 Child credentials issued by pre-upgrade binaries for a recreated parent lack the signed `siloParentRevocation` claim and must be reissued after upgrading; parent identities that have never undergone deletion and same-name recreation keep their existing credential behavior unchanged.
 
-Unmodified built-in policies remain protected against local deletion. If an administrator explicitly overrides a built-in policy and later deletes that override, the durable deletion tombstone prevents reload from automatically recreating the default built-in policy; to restore it, run an explicit policy-create operation. Deleting a non-existent policy locally remains idempotent without creating a tombstone, whereas a replicated deletion for an unknown policy retains its revision record.
+**20261025 built-in policy Reset update:** Unmodified built-in policies remain protected against local deletion. Starting with [Server 20261025](/blog/release/silo-20261025/#server-20261025) (in draft as of 2026-10-26), deleting an explicit built-in policy override immediately restores the native built-in definition while retaining the deletion revision to reject stale overrides (replacing the suppression behavior in Server 20260916/20261018). Peer and etcd notifications reload committed state so edits made after a delayed deletion event are preserved; in-use checks and custom-policy deletion remain unchanged. Deleting a non-existent policy locally remains idempotent without creating a tombstone, whereas a replicated deletion for an unknown policy retains its revision record.
 
 To roll back, stop and isolate the affected sites and audit permission changes since the backup before restoring compatible state. Restoring an older backup discards revocations committed after the backup point and requires permission reconciliation and key rotation before reopening traffic. Never manually delete tombstone files online or convert only live records to force an older binary to start.
 

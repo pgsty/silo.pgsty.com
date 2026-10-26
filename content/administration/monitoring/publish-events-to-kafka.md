@@ -3,7 +3,7 @@ title: "Publish Events to Kafka"
 url: "/administration/monitoring/publish-events-to-kafka/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-kafka.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="publish-events-to-kafka"></a>
@@ -33,7 +33,7 @@ You can configure a new Kafka service endpoint using either environment variable
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
-MinIO supports specifying the Kafka service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/kafka/#minio-server-envvar-bucket-notification-kafka). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
+MinIO supports specifying the Kafka service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/kafka/#minio-server-envvar-bucket-notification-kafka). The [`silo server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring a Kafka service endpoint. The minimum *required* variables are [`MINIO_NOTIFY_KAFKA_ENABLE`](/reference/minio-server/settings/notifications/kafka/#envvar.MINIO_NOTIFY_KAFKA_ENABLE) and [`MINIO_NOTIFY_KAFKA_BROKERS`](/reference/minio-server/settings/notifications/kafka/#envvar.MINIO_NOTIFY_KAFKA_BROKERS):
 
@@ -91,7 +91,7 @@ The following example code sets *all* environment variables related to configuri
 See [Kafka Service for Bucket Notifications](/reference/minio-server/settings/notifications/kafka/#minio-server-envvar-bucket-notification-kafka) for complete documentation on each environment variable.
 {{< /tab >}}
 {{< tab label="Configuration Settings" value="configuration-settings" >}}
-MinIO supports adding or updating Kafka endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_kafka`](/reference/minio-server/settings/notifications/kafka/#mc-conf.notify_kafka) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
+MinIO supports adding or updating Kafka endpoints on a running [`silo server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_kafka`](/reference/minio-server/settings/notifications/kafka/#mc-conf.notify_kafka) configuration key. You must restart the [`silo server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an Kafka service endpoint. The minimum *required* setting is [`notify_kafka brokers`](/reference/minio-server/settings/notifications/kafka/#mc-conf.notify_kafka.brokers):
 
@@ -134,7 +134,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Kafka target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Kafka target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:kafka
@@ -270,7 +270,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Kafka target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured Kafka target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:kafka

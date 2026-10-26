@@ -3,7 +3,7 @@ title: "将事件发布到 Elasticsearch"
 url: "/zh/administration/monitoring/publish-events-to-elasticsearch/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-elasticsearch.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="elasticsearch"></a>
@@ -33,7 +33,7 @@ MinIO 依赖 [https://github.com/olivere/elastic](https://github.com/olivere/ela
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/notifications/elasticsearch/#minio-server-envvar-bucket-notification-elasticsearch) 指定 Elasticsearch 服务端点及其相关配置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次 启动时应用这些设置。
+MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/notifications/elasticsearch/#minio-server-envvar-bucket-notification-elasticsearch) 指定 Elasticsearch 服务端点及其相关配置。[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在下次 启动时应用这些设置。
 
 以下示例代码设置了配置 Elasticsearch 服务端点所需的 *全部* 环境变量。 最少 *必须* 设置的变量包括：
 
@@ -80,7 +80,7 @@ MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/n
 有关各环境变量的完整说明，请参见 [Elasticsearch Service for 存储桶通知](/zh/reference/minio-server/settings/notifications/elasticsearch/#minio-server-envvar-bucket-notification-elasticsearch)。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
-MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_elasticsearch`](/zh/reference/minio-server/settings/notifications/elasticsearch/#mc-conf.notify_elasticsearch) 配置键来添加或更新 Elasticsearch 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用新增或更新后的配置项。
+MinIO 支持在运行中的 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_elasticsearch`](/zh/reference/minio-server/settings/notifications/elasticsearch/#mc-conf.notify_elasticsearch) 配置键来添加或更新 Elasticsearch 端点。你必须重启 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用新增或更新后的配置项。
 
 以下示例代码设置了配置 Elasticsearch 服务端点相关的 *全部* 配置项。 最少 *必须* 设置的配置项包括：
 
@@ -121,7 +121,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为需要重启的部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 Elasticsearch 目标输出一行， 类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 Elasticsearch 目标输出一行， 类似如下：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:elasticsearch
@@ -251,7 +251,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为需要重启的部署 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 Elasticsearch 目标输出一行， 类似如下：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 Elasticsearch 目标输出一行， 类似如下：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:elasticsearch

@@ -3,7 +3,7 @@ title: "Active Directory / LDAP 访问管理"
 url: "/zh/administration/identity-access-management/ad-ldap-access-management/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/ad-ldap-access-management.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="active-directory-ldap"></a>
@@ -11,13 +11,13 @@ upstream_modified: false
 
 MinIO 支持配置单个 Active Directory 或 LDAP (AD/LDAP) 服务，用于对用户身份进行外部管理。 启用 AD/LDAP 外部身份管理会禁用 [MinIO 内部 IDP](/zh/administration/identity-access-management/minio-identity-management/#minio-internal-idp)。
 
-对于由外部 AD/LDAP 提供方管理的身份，MinIO 会使用用户的 Distinguished Name，并尝试将其映射到现有的 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
+对于由外部 AD/LDAP 提供方管理的身份，SILO 加载显式关联到用户 Distinguished Name（DN）的现有[策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。策略名称不需要与 DN 相同。
 
-如果 AD/LDAP 配置中包含查询用户 AD/LDAP 组成员关系所需的设置，MinIO *还会* 使用这些组的 Distinguished Name，并尝试将每一个映射到现有的 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
+如果 AD/LDAP 配置包含查询组成员关系所需的设置，SILO 还会加载显式关联到返回的组 DN 的策略。
 
-默认情况下，MinIO 会拒绝访问所有未被用户已分配或继承的 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 明确允许的操作或资源。 由 AD/LDAP 提供方管理的用户，必须在用户配置文件数据中指定所需策略。 如果没有任何策略与用户 DN 或组 DN 匹配，MinIO 会阻止该部署上对所有操作和资源的访问。
+默认情况下，MinIO 会拒绝访问所有未被用户已分配或继承的 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 明确允许的操作或资源。 管理员通过 `mcli idp ldap policy attach` 将现有策略关联到 LDAP 用户或组。 如果没有任何策略与用户 DN 或组 DN 匹配，MinIO 会阻止该部署上对所有操作和资源的访问。
 
-MinIO 用于认证用户并获取其组成员关系的具体 AD/LDAP 查询，是在 [使用 Active Directory / LDAP 身份管理部署集群](/zh/operations/external-iam/#minio-external-iam-ad-ldap) 时配置的。 本页介绍如何创建与可能返回的 Distinguished Name 相匹配的 MinIO 策略。
+MinIO 用于认证用户并获取其组成员关系的具体 AD/LDAP 查询，是在 [使用 Active Directory / LDAP 身份管理部署集群](/zh/operations/external-iam/#minio-external-iam-ad-ldap) 时配置的。 本页介绍如何创建 SILO 策略，并将它们显式关联到返回的 Distinguished Name。
 
 ## 认证与授权流程 {#id2}
 
@@ -25,12 +25,12 @@ MinIO 用于认证用户并获取其组成员关系的具体 AD/LDAP 查询，�
 
 1. 将 AD/LDAP 凭证提供给 MinIO Security Token Service (STS) [AssumeRoleWithLDAPIdentity](/zh/developers/security-token-service/AssumeRoleWithLDAPIdentity/#minio-sts-assumerolewithldapidentity) API 端点。
 2. MinIO 针对 AD/LDAP 服务器校验所提供的凭证。
-3. MinIO 检查是否存在名称与用户 Distinguished Name (DN) 匹配的 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)，并将该策略分配给已认证用户。
+3. SILO 加载显式关联到用户 DN 的[策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
 
-   如果配置为执行组查询，MinIO 还会查询该用户所属的 AD/LDAP 组列表。 MinIO 会检查是否存在名称与返回的组 DN 匹配的策略，并将该策略分配给 已认证用户。
-4. MinIO 会在 STS API 响应中返回临时凭证，其形式为 access key、 secret key 和 session token。这些凭证的权限与名称匹配已认证用户 DN *或* 某个组 DN 的那些策略一致。
+   如果配置为执行组查询，MinIO 还会查询该用户所属的 AD/LDAP 组列表。 SILO 加入显式关联到各个返回的组 DN 的策略。
+4. MinIO 会在 STS API 响应中返回临时凭证，其形式为 access key、 secret key 和 session token。这些凭证的权限来自显式关联到已认证用户 DN *或* 组 DN 的策略。
 
-MinIO 提供了一个示例 Go 应用程序 [ldap.go](https://github.com/minio/minio/blob/master/docs/sts/ldap.go)，用于处理完整的 登录流程。
+MinIO 提供了一个示例 Go 应用程序 [ldap.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-18T00-00-00Z/docs/sts/ldap.go)，用于处理完整的 登录流程。
 
 AD/LDAP 用户也可以创建与其 AD/LDAP 用户 Distinguished Name 关联的 [访问密钥](/zh/administration/identity-access-management/minio-user-management/#minio-idp-service-account)。 访问密钥是长期有效的凭证，会继承父用户的权限。 父用户在创建访问密钥时还可以进一步限制这些权限。 使用以下方法之一创建新的访问密钥：
 
@@ -44,7 +44,7 @@ AD/LDAP 用户也可以创建与其 AD/LDAP 用户 Distinguished Name 关联的 
 mc idp ldap policy attach myminio consoleAdmin \
   --user='cn=sisko,cn=users,dc=example,dc=com'
 
-mc idp ldap policy attach myminio readwrite,diagnostics \
+mc idp ldap policy attach myminio readwrite diagnostics \
   --user='cn=dax,cn=users,dc=example,dc=com'
 ```
 
@@ -66,3 +66,7 @@ mc idp ldap policy attach myminio diagnostics \
 
 - MinIO 会将 [`consoleAdmin`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.consoleAdmin) 策略分配给任何属于 `cn=ops,cn=groups,dc=example,dc=com` AD/LDAP 组的认证用户，从而授予其对 MinIO 服务器的完全访问权限。
 - MinIO 会将 [`diagnostics`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.diagnostics) 策略分配给任何属于 `cn=engineering,cn=groups,dc=example,dc=com` AD/LDAP 组的认证用户，从而授予其对 诊断性管理操作的访问权限。
+
+## 规范化长 DN
+
+[Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)合入了 [LDAP 长 DN 修复](/zh/blog/design/ldap-long-dn/)（公开的 Server 20261018 尚未包含）。当用户仅依赖组策略登录、但其规范化 DN 长度超过对象存储后端的文件名上限时，服务端会将纯 ASCII 路径分量超过 255 字节所触发的文件名超长错误视为“无个人策略映射记录”并继续加载组策略；完整路径超限（`PATH_MAX`）、不可读撤销记录及其他存储错误仍按 Fail-Closed 报错，对象后端也仍不支持写入超长路径记录。

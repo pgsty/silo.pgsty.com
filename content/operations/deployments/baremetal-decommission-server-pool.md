@@ -6,6 +6,16 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+Since Server 20261018, decommission preserves null and UUID delete markers even
+when a marker is the only version in its source pool; an older live version can
+still exist elsewhere. Remote-tier objects migrate through their metadata/reference
+path. Keep the tier available and verify versions, tags, deletion state and reads
+before retiring the pool. See the [migration contract](/blog/design/multi-pool-object-consistency/#migration-20261018).
+
+Bucket/IAM exports below are configuration exports, not complete recovery snapshots.
+For durable IAM revocations, also retain the backend deletion history and required
+encryption material as described in [IAM recovery](/operations/replication/iam-upgrade/).
+
 <a id="decommission-server-pools"></a>
 <a id="minio-decommissioning"></a>
 
@@ -106,23 +116,23 @@ For manually cancelled or failed decommissioning attempts, MinIO resumes only af
 
 The pool remains in the decommissioning state *regardless* of the interruption. A pool can *never* return to active status after decommissioning begins.
 
-### Decommissioning is Non-Disruptive {#decommissioning-is-non-disruptive}
+### Migration and the Final Restart {#decommissioning-is-non-disruptive}
 
 Removing a decommissioned server pool requires restarting *all* MinIO nodes in the deployment at around the same time.
 
-MinIO strongly recommends restarting all MinIO Server processes in a deployment simultaneously. MinIO operations are atomic and strictly consistent. As such the restart procedure is non-disruptive to applications and ongoing operations.
+After decommissioning completes and the pool is removed from configuration, coordinate a restart of every SILO node with the same remaining pool list. A full restart temporarily interrupts service and can fail in-flight requests. Schedule a maintenance window, and have clients retry and verify results according to each operation’s semantics.
 
 Do **not** perform “rolling” (e.g. one node at a time) restarts.
 
-### Decommissioning Ignores Expired Objects and Trailing `DeleteMarker` {#decommissioning-ignores-expired-objects-and-trailing-deletemarker}
+### Delete Markers, Expiration, and Migration Verification {#decommissioning-ignores-expired-objects-and-trailing-deletemarker}
 
-Starting with [RELEASE.2023-05-27T05-56-19Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-05-27T05-56-19Z), decommissioning ignores objects where the only remaining version is a `DeleteMarker`. This avoids creating empty metadata on the remaining server pool(s) for objects that are effectively fully deleted.
+SILO Server 20261018 and the 20261025 source migrate both null and UUID delete markers, including a marker that is the only remaining version in the source pool. Another pool may still contain older data for that key, so a marker cannot be discarded merely because no other version remains in its own pool. This replaces the older upstream behavior that skipped isolated markers.
 
-Starting with [RELEASE.2023-06-23T20-26-00Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-23T20-26-00Z), decommissioning also ignores object versions which have expired based on the configured [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) for the parent bucket. Starting with [RELEASE.2023-06-29T05-12-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-29T05-12-28Z), you can monitor ignored delete markers and expired objects during the decommission process with [`mc admin trace --call decommission`](/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call).
+Decommissioning still evaluates [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration), queues eligible expired objects or versions for expiration, and skips their migration. Use [`mc admin trace --call decommission`](/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) to inspect migration and skip reasons.
 
-Silo builds that include [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) (main after Server 20260903) carry object tags and their revision fields to the destination pool during decommission and rebalance. Earlier builds dropped the tags of migrated objects. If tag-dependent lifecycle or policy rules matter, audit the migrated objects instead of assuming the tags survived; see [multi-pool object consistency](/blog/design/multi-pool-object-consistency/#migration-tags).
+Current versions preserve tags and their revision fields and recheck migrated versions before source cleanup. Upgrading does not recover tags lost during earlier migrations. See the [pool migration contract](/blog/design/multi-pool-object-consistency/#migration-20261018).
 
-Once the decommissioning process completes, you can safely shut down that pool. Since the only remaining data was scheduled for deletion *or* was only a `DeleteMarker`, you can safely clear or destroy those drives as per your internal procedures.
+Remove the pool from configuration and retire it only after its status is `Complete` and S3 checks confirm destination versions, tags, payloads, and deletion state. Retain the backups you need before destroying old drives; a pool containing only delete markers is not by itself safe to erase.
 
 ## Behavior {#behavior}
 
@@ -225,18 +235,18 @@ Started: 30 minutes ago
 
 [`mc admin decommission status`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.status) marks the **Status** as **Complete** once decommissioning is completed. You can move on to the next step once decommissioning is completed.
 
-If **Status** reads as failed, you can re-run the [`mc admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) command to resume the process. For persistent failures, use [`mc admin logs`](/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) or review the `systemd` logs (e.g. `journalctl -u minio`) to identify more specific errors.
+If **Status** reads as failed, you can re-run the [`mc admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) command to resume the process. For persistent failures, use [`mc admin logs`](/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) or review the `systemd` logs (e.g. `journalctl -u silo`) to identify more specific errors.
 
 ### 4) Remove the Decommissioned Pool from the Deployment Configuration {#remove-the-decommissioned-pool-from-the-deployment-configuration}
 
 As each pool completes decommissioning, you can safely remove it from the deployment configuration. Modify the startup command for each remaining MinIO server in the deployment and remove the decommissioned pool.
 
-The `.deb` or `.rpm` packages install a [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/lib/systemd/system/minio.service`. For binary installations, this procedure assumes the file was created manually as per the [Installation and Management](/operations/deployments/installation/#deploy-minio-distributed) procedure.
+The `.deb` or `.rpm` packages install a [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/lib/systemd/system/silo.service`. For binary installations, this procedure assumes the file was created manually as per the [Installation and Management](/operations/deployments/installation/#deploy-minio-distributed) procedure.
 
-The `minio.service` file uses an environment file located at `/etc/default/minio` for sourcing configuration settings, including the startup. Specifically, the `MINIO_VOLUMES` variable sets the startup command:
+The `silo.service` file uses an environment file located at `/etc/default/silo` for sourcing configuration settings, including the startup. Specifically, the `MINIO_VOLUMES` variable sets the startup command:
 
 ```shell
-cat /etc/default/minio | grep "MINIO_VOLUMES"
+cat /etc/default/silo | grep "MINIO_VOLUMES"
 ```
 
 The command returns output similar to the following:
@@ -258,19 +268,19 @@ Specific instructions for configuring network control plane components is out of
 Issue the following commands on each node **simultaneously** in the deployment to restart the MinIO service:
 
 ```shell
-sudo systemctl restart minio.service
+sudo systemctl restart silo.service
 ```
 
 Use the following commands to confirm the service is online and functional:
 
 ```shell
-sudo systemctl status minio.service
-journalctl -f -u minio.service
+sudo systemctl status silo.service
+journalctl -f -u silo.service
 ```
 
 MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
 
-MinIO strongly recommends restarting all MinIO Server processes in a deployment simultaneously. MinIO operations are atomic and strictly consistent. As such the restart procedure is non-disruptive to applications and ongoing operations.
+After decommissioning completes and the pool is removed from configuration, coordinate a restart of every SILO node with the same remaining pool list. A full restart temporarily interrupts service and can fail in-flight requests. Schedule a maintenance window, and have clients retry and verify results according to each operation’s semantics.
 
 Do **not** perform “rolling” (e.g. one node at a time) restarts.
 
@@ -394,18 +404,18 @@ Started: 30 minutes ago
 
 [`mc admin decommission status`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.status) marks the **Status** as **Complete** once decommissioning is completed. You can move on to the next step once MinIO completes decommissioning for all pools.
 
-If **Status** reads as failed, you can re-run the [`mc admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) command to resume the process. For persistent failures, use [`mc admin logs`](/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) or review the `systemd` logs (e.g. `journalctl -u minio`) to identify more specific errors.
+If **Status** reads as failed, you can re-run the [`mc admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) command to resume the process. For persistent failures, use [`mc admin logs`](/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) or review the `systemd` logs (e.g. `journalctl -u silo`) to identify more specific errors.
 
 ### 4) Remove the Decommissioned Pools from the Deployment Configuration {#remove-the-decommissioned-pools-from-the-deployment-configuration}
 
 Once decommissioning completes, you can safely remove the pools from the deployment configuration. Modify the startup command for each remaining MinIO server in the deployment and remove the decommissioned pool.
 
-The `.deb` or `.rpm` packages install a [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/lib/systemd/system/minio.service`. For binary installations, this procedure assumes the file was created manually as per the [Installation and Management](/operations/deployments/installation/#deploy-minio-distributed) procedure.
+The `.deb` or `.rpm` packages install a [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/lib/systemd/system/silo.service`. For binary installations, this procedure assumes the file was created manually as per the [Installation and Management](/operations/deployments/installation/#deploy-minio-distributed) procedure.
 
-The `minio.service` file uses an environment file located at `/etc/default/minio` for sourcing configuration settings, including the startup. Specifically, the `MINIO_VOLUMES` variable sets the startup command:
+The `silo.service` file uses an environment file located at `/etc/default/silo` for sourcing configuration settings, including the startup. Specifically, the `MINIO_VOLUMES` variable sets the startup command:
 
 ```shell
-cat /etc/default/minio | grep "MINIO_VOLUMES"
+cat /etc/default/silo | grep "MINIO_VOLUMES"
 ```
 
 The command returns output similar to the following:
@@ -427,19 +437,19 @@ Specific instructions for configuring network control plane components is out of
 Issue the following commands on each node **simultaneously** in the deployment to restart the MinIO service:
 
 ```shell
-sudo systemctl restart minio.service
+sudo systemctl restart silo.service
 ```
 
 Use the following commands to confirm the service is online and functional:
 
 ```shell
-sudo systemctl status minio.service
-journalctl -f -u minio.service
+sudo systemctl status silo.service
+journalctl -f -u silo.service
 ```
 
 MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
 
-MinIO strongly recommends restarting all MinIO Server processes in a deployment simultaneously. MinIO operations are atomic and strictly consistent. As such the restart procedure is non-disruptive to applications and ongoing operations.
+After decommissioning completes and the pool is removed from configuration, coordinate a restart of every SILO node with the same remaining pool list. A full restart temporarily interrupts service and can fail in-flight requests. Schedule a maintenance window, and have clients retry and verify results according to each operation’s semantics.
 
 Do **not** perform “rolling” (e.g. one node at a time) restarts.
 

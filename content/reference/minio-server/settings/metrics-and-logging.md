@@ -3,7 +3,7 @@ title: "Metrics and Logging Settings"
 url: "/reference/minio-server/settings/metrics-and-logging/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/metrics-and-logging.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="metrics-and-logging-settings"></a>
@@ -11,7 +11,7 @@ upstream_modified: false
 
 This page covers settings that control behavior related to MinIO metrics and logging. See [Metrics and alerts](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) for more information.
 
-These settings configure publishing regular [`minio server`](/reference/minio-server/#command-minio.server) logs and audit logs to an HTTP webhook. See [Publish Server or Audit Logs to an External Service](/operations/monitoring/minio-logging/#minio-logging) for more complete documentation.
+These settings configure publishing regular [`silo server`](/reference/minio-server/#command-minio.server) logs and audit logs to an HTTP webhook. See [Publish Server or Audit Logs to an External Service](/operations/monitoring/minio-logging/#minio-logging) for more complete documentation.
 
 You can establish or modify settings by defining:
 
@@ -58,7 +58,7 @@ Specifies the authentication mode for the Prometheus [scraping endpoints](/opera
 
 ## Server Logs {#server-logs}
 
-The following section documents settings for configuring MinIO to publish [`minio server`](/reference/minio-server/#command-minio.server) logs to an HTTP webhook endpoint. See [Publish Server Logs to HTTP Webhook](/operations/monitoring/minio-logging/#minio-logging-publish-server-logs) for more complete documentation and tutorials on using these settings.
+The following section documents settings for configuring MinIO to publish [`silo server`](/reference/minio-server/#command-minio.server) logs to an HTTP webhook endpoint. See [Publish Server Logs to HTTP Webhook](/operations/monitoring/minio-logging/#minio-logging-publish-server-logs) for more complete documentation and tutorials on using these settings.
 
 ### Defining Multiple Endpoints {#defining-multiple-endpoints}
 
@@ -92,7 +92,7 @@ mc admin config set logger_webhook:secondary \
 
 *envvar*
 
-Specify `"on"` to enable publishing [`minio server`](/reference/minio-server/#command-minio.server) logs to the HTTP webhook endpoint.
+Specify `"on"` to enable publishing [`silo server`](/reference/minio-server/#command-minio.server) logs to the HTTP webhook endpoint.
 
 Requires specifying [`MINIO_LOGGER_WEBHOOK_ENDPOINT`](#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT).
 {{< /tab >}}

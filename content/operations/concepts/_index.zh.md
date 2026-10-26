@@ -12,9 +12,9 @@ math: true
 
 ## MinIO 部署由哪些组件构成？ {#minio}
 
-一个 MinIO 部署由一组存储和计算资源构成，这些资源运行一个或多个 [`minio server`](/zh/reference/minio-server/#command-minio.server) 节点，并共同作为单一对象存储库。
+一个 MinIO 部署由一组存储和计算资源构成，这些资源运行一个或多个 [`silo server`](/zh/reference/minio-server/#command-minio.server) 节点，并共同作为单一对象存储库。
 
-一个单机 MinIO 实例由单个 服务器池 和单个 [`minio server`](/zh/reference/minio-server/#command-minio.server) 节点组成。 单机实例最适合初期开发和评估。
+一个单机 MinIO 实例由单个 服务器池 和单个 [`silo server`](/zh/reference/minio-server/#command-minio.server) 节点组成。 单机实例最适合初期开发和评估。
 
 MinIO 部署既可以直接运行在 裸金属 或非虚拟化基础设施中的物理设备上。 MinIO 也可以运行在云服务中的虚拟机上，例如使用 Docker、Podman 或 Kubernetes。 MinIO 可以运行在本地、私有云或市场上的众多公有云中。
 
@@ -44,25 +44,25 @@ MinIO 可以部署到以下三种拓扑：
 
 ### MinIO 如何管理多个虚拟或物理服务器？ {#minio-intro-server-pool}
 
-虽然测试 MinIO 可能只涉及一台计算机上的单个驱动器，但大多数生产级 MinIO 部署都会使用多个计算和存储设备来构建高可用环境。 服务器池 是一组 [`minio server`](/zh/reference/minio-server/#command-minio.server) 节点，它们汇聚各自的驱动器和资源，以支持对象存储写入和读取请求。
+虽然测试 MinIO 可能只涉及一台计算机上的单个驱动器，但大多数生产级 MinIO 部署都会使用多个计算和存储设备来构建高可用环境。 服务器池 是一组 [`silo server`](/zh/reference/minio-server/#command-minio.server) 节点，它们汇聚各自的驱动器和资源，以支持对象存储写入和读取请求。
 
-MinIO 支持向现有部署中添加一个或多个 服务器池，以实现横向扩容。 当 MinIO 拥有多个可用 服务器池 时，单个对象始终会写入同一个 服务器池 中的同一个纠删码集合。
+SILO 支持通过添加服务器池实现横向扩容。在每个池内，对象名通过确定性哈希映射到纠删集合；而跨池写入则按各池可用容量加权选择目标池，因此覆盖写入与跨池迁移可能使同一对象键在多个池中留有副本（详见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/)）。
 
-如果某个 服务器池 发生故障，MinIO 会停止所有服务器池的 I/O，直到集群恢复正常运行。 你必须将该服务器池恢复到可工作状态，部署的 I/O 才能恢复。 在执行修复操作期间，写入其他服务器池的对象仍会安全保留在磁盘上。
+单个服务器池不可用并不会无差别中断所有请求：若其他可用池中存有可读副本，读取仍可能成功；但条件写入、指定版本删除等必须核验全部存储池状态的操作则会失败（含返回 `503 SlowDownRead`），需在恢复故障池后重试。
 
-传递给 [`minio server`](/zh/reference/minio-server/#command-minio.server) 命令的 [`HOSTNAME`](/zh/reference/minio-server/#minio.server.HOSTNAME) 参数表示一个 服务器池：
+传递给 [`silo server`](/zh/reference/minio-server/#command-minio.server) 命令的 [`HOSTNAME`](/zh/reference/minio-server/#minio.server.HOSTNAME) 参数表示一个 服务器池：
 
-请看下面的启动命令示例。该命令会创建一个单独的 服务器池，其中包含 4 个 [`minio server`](/zh/reference/minio-server/#command-minio.server) 节点，每个节点有 4 块驱动器，总计 16 块驱动器。
+请看下面的启动命令示例。该命令会创建一个单独的 服务器池，其中包含 4 个 [`silo server`](/zh/reference/minio-server/#command-minio.server) 节点，每个节点有 4 块驱动器，总计 16 块驱动器。
 
 ```shell
-minio server https://minio{1...4}.example.net/mnt/disk{1...4}
+silo server https://minio{1...4}.example.net/mnt/disk{1...4}
 
              |                    服务器池                |
 ```
 
-在同一条 [`minio server`](/zh/reference/minio-server/#command-minio.server) 启动命令中启动多个 服务器池，可使各个 服务器池 对等节点彼此可感知。
+在同一条 [`silo server`](/zh/reference/minio-server/#command-minio.server) 启动命令中启动多个 服务器池，可使各个 服务器池 对等节点彼此可感知。
 
-有关完整语法和用法，请参阅 [`minio server`](/zh/reference/minio-server/#command-minio.server)。
+有关完整语法和用法，请参阅 [`silo server`](/zh/reference/minio-server/#command-minio.server)。
 
 <a id="minio-intro-cluster"></a>
 
@@ -70,10 +70,10 @@ minio server https://minio{1...4}.example.net/mnt/disk{1...4}
 
 cluster 指由一个或多个 服务器池 组成的完整 MinIO 部署。
 
-请看下面的命令。它创建了一个由两个 服务器池 组成的 cluster，每个服务器池都包含 4 个 [`minio server`](/zh/reference/minio-server/#command-minio.server) 节点，且每个节点有 4 块驱动器，总计 32 块驱动器。
+请看下面的命令。它创建了一个由两个 服务器池 组成的 cluster，每个服务器池都包含 4 个 [`silo server`](/zh/reference/minio-server/#command-minio.server) 节点，且每个节点有 4 块驱动器，总计 32 块驱动器。
 
 ```shell
-minio server https://minio{1...4}.example.net/mnt/disk{1...4} \
+silo server https://minio{1...4}.example.net/mnt/disk{1...4} \
              https://minio{5...8}.example.net/mnt/disk{1...4}
 
              |                    服务器池                |
@@ -81,7 +81,7 @@ minio server https://minio{1...4}.example.net/mnt/disk{1...4} \
 
 每个 服务器池 根据其中的驱动器和节点数量，包含一个或多个 [纠删码集合](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set)。
 
-MinIO 强烈建议生产集群中的每个 服务器池 至少包含 4 个 [`minio server`](/zh/reference/minio-server/#command-minio.server) 节点，以获得恰当的高可用性和持久性保障。
+MinIO 强烈建议生产集群中的每个 服务器池 至少包含 4 个 [`silo server`](/zh/reference/minio-server/#command-minio.server) 节点，以获得恰当的高可用性和持久性保障。
 
 ### 我可以更改现有 MinIO 部署的大小吗？ {#id6}
 

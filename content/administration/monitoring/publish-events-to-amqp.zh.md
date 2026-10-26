@@ -3,7 +3,7 @@ title: "将事件发布到 AMQP (RabbitMQ)"
 url: "/zh/administration/monitoring/publish-events-to-amqp/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-amqp.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="amqp-rabbitmq"></a>
@@ -35,7 +35,7 @@ MinIO 依赖 [https://github.com/streadway/amqp](https://github.com/streadway/am
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/notifications/amqp/#minio-server-envvar-bucket-notification-amqp) 指定 AMQP 服务端点及其关联配置设置。 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时应用这些设置。
+MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/notifications/amqp/#minio-server-envvar-bucket-notification-amqp) 指定 AMQP 服务端点及其关联配置设置。 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时应用这些设置。
 
 以下示例代码设置了配置 AMQP 服务端点相关的全部环境变量。 必需的最小变量为 [`MINIO_NOTIFY_AMQP_ENABLE`](/zh/reference/minio-server/settings/notifications/amqp/#envvar.MINIO_NOTIFY_AMQP_ENABLE) 和 [`MINIO_NOTIFY_AMQP_URL`](/zh/reference/minio-server/settings/notifications/amqp/#envvar.MINIO_NOTIFY_AMQP_URL)：
 
@@ -89,7 +89,7 @@ MinIO 支持使用 [environment variables](/zh/reference/minio-server/settings/n
 参见 [AMQP Service for 存储桶通知](/zh/reference/minio-server/settings/notifications/amqp/#minio-server-envvar-bucket-notification-amqp)，获取每个环境变量的完整文档。
 {{< /tab >}}
 {{< tab label="配置设置" value="tab2" >}}
-MinIO 支持在运行中的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_amqp`](/zh/reference/minio-server/settings/notifications/amqp/#mc-conf.notify_amqp) 配置键来添加或更新 AMQP 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置设置。
+MinIO 支持在运行中的 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_amqp`](/zh/reference/minio-server/settings/notifications/amqp/#mc-conf.notify_amqp) 配置键来添加或更新 AMQP 端点。你必须重启 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新增或更新的配置设置。
 
 以下示例代码设置了配置 AMQP 服务端点相关的全部设置。 必需的最小设置为 [`notify_amqp url`](/zh/reference/minio-server/settings/notifications/amqp/#mc-conf.notify_amqp.url)：
 
@@ -131,7 +131,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 AMQP 目标打印一行类似如下的内容：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 AMQP 目标打印一行类似如下的内容：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:amqp
@@ -268,7 +268,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 AMQP 目标打印一行类似如下的内容：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在启动时为每个已配置的 AMQP 目标打印一行类似如下的内容：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:amqp

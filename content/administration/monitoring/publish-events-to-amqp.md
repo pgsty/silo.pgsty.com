@@ -3,7 +3,7 @@ title: "Publish Events to AMQP (RabbitMQ)"
 url: "/administration/monitoring/publish-events-to-amqp/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-amqp.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="publish-events-to-amqp-rabbitmq"></a>
@@ -35,7 +35,7 @@ You can configure a new AMQP service endpoint using either environment variables
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
-MinIO supports specifying the AMQP service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/amqp/#minio-server-envvar-bucket-notification-amqp). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
+MinIO supports specifying the AMQP service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/amqp/#minio-server-envvar-bucket-notification-amqp). The [`silo server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring an AMQP service endpoint. The minimum *required* variables are [`MINIO_NOTIFY_AMQP_ENABLE`](/reference/minio-server/settings/notifications/amqp/#envvar.MINIO_NOTIFY_AMQP_ENABLE) and [`MINIO_NOTIFY_AMQP_URL`](/reference/minio-server/settings/notifications/amqp/#envvar.MINIO_NOTIFY_AMQP_URL):
 
@@ -89,7 +89,7 @@ The following example code sets *all* environment variables related to configuri
 See [AMQP Service for Bucket Notifications](/reference/minio-server/settings/notifications/amqp/#minio-server-envvar-bucket-notification-amqp) for complete documentation on each environment variable.
 {{< /tab >}}
 {{< tab label="Configuration Settings" value="configuration-settings" >}}
-MinIO supports adding or updating AMQP endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_amqp`](/reference/minio-server/settings/notifications/amqp/#mc-conf.notify_amqp) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
+MinIO supports adding or updating AMQP endpoints on a running [`silo server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_amqp`](/reference/minio-server/settings/notifications/amqp/#mc-conf.notify_amqp) configuration key. You must restart the [`silo server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an AMQP service endpoint. The minimum *required* setting is [`notify_amqp url`](/reference/minio-server/settings/notifications/amqp/#mc-conf.notify_amqp.url):
 
@@ -131,7 +131,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured AMQP target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured AMQP target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:amqp
@@ -268,7 +268,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured AMQP target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured AMQP target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:amqp

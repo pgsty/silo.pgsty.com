@@ -12,7 +12,7 @@ math: true
 
 Silo 支持通过添加新的[服务器池](/zh/operations/concepts/#minio-intro-server-pool)扩展现有分布式部署。每个 pool 都会增加集群的总可用存储容量。
 
-扩容并不能提供 Business Continuity/Disaster Recovery (BC/DR) 级别的保护。 虽然每个 pool 都是一组相互独立的服务器，并通过各自的 [纠删码集合](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set) 提供可用性，但只要其中一个 pool 完全丢失，MinIO 就会停止该部署中所有 pool 的 I/O。 同样地，只要某个 pool 中的某个纠删码集合失去 quorum，该集合中存储的对象就会发生数据丢失，而不受其他纠删码集合或 pool 数量的影响。
+扩容不提供业务连续性或灾难恢复（BC/DR）级别的保护。各池有独立的[纠删码集合](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set)，增加新池不会复制旧池中的对象。一个池不可用时，依赖它的对象及需要检查全部池的写入、删除等操作可能失败；其他池中仍有足够数据和元数据的对象可能继续可读。失去仲裁首先意味着不可用，只有必要分片永久丢失且无可用副本时才构成永久数据丢失。
 
 新的 服务器池 **不必** 与现有任一 服务器池 使用相同类型或规格的硬件和软件配置，不过保持一致通常有助于简化集群管理，并让各 pool 间的性能表现更可预测。 新 pool 内的所有驱动器 **应当** 保持相同类型和容量。 有关如何选择合适配置的完整建议，请参阅 MinIO 的 [硬件建议](/zh/operations/checklists/hardware/#minio-hardware-checklist)。
 
@@ -53,7 +53,7 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 ### 连续主机名 {#id4}
 
-MinIO 在创建 服务器池 时，*要求* 使用扩展表示法 `{x...y}` 来表示一组连续的 MinIO 主机。 因此，MinIO *要求* 使用连续编号的主机名来表示 pool 中的每个 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程。
+MinIO 在创建 服务器池 时，*要求* 使用扩展表示法 `{x...y}` 来表示一组连续的 MinIO 主机。 因此，MinIO *要求* 使用连续编号的主机名来表示 pool 中的每个 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程。
 
 在开始本步骤之前，请先创建所需的 DNS 主机名映射。 例如，以下主机名可用于一个 4 节点分布式 服务器池：
 
@@ -131,7 +131,7 @@ MinIO 要求每个 pool 都满足部署的 [纠删码](/zh/operations/concepts/e
 
 ### 写入文件 {#minio-writing-files}
 
-MinIO 不会自动在新的 服务器池 之间重新平衡对象。 相反，MinIO 会根据某个 pool 的空闲空间占所有可用 pool 总空闲空间的比例，将新的写入操作分配到空闲空间最多的 pool。
+SILO 不会因增加新池而自动重平衡已有对象。需要为新对象选择池时，按各可用池的剩余容量加权随机选择；剩余容量越多，被选中的概率越高，并非每次都写入空闲空间最多的池。
 
 用于计算某个 pool 被选中执行写操作概率的公式如下：
 
@@ -155,11 +155,11 @@ MinIO 计算各 pool 被用于写入操作的概率如下：
 
 同样地，MinIO 不会向正在退役中的 pool 执行写入。
 
-### 扩容是无中断的 {#id11}
+### 扩容需要协调重启 {#id11}
 
 新增 服务器池 需要在大致同一时间重启部署中的 *所有* MinIO server 进程。
 
-MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 MinIO 操作具有原子性并保持严格一致。 因此，该重启过程不会中断应用或正在进行的操作。
+扩容需要协调重启全部 SILO 服务端，使它们使用一致的池配置。全量重启期间服务会暂时不可用，正在进行的请求可能失败；请安排维护窗口，并让客户端按操作语义重试和核验结果。重启不构成“无中断”保证。
 
 **不要** 执行“滚动”重启（例如一次只重启一个节点）。
 
@@ -196,116 +196,63 @@ MinIO 建议预先规划足以存放 **至少** 2 年数据的存储容量，并
 {{< tabs group="rpmrhel-debdebianubuntu-tab3" >}}
 {{< tab label="RPM（RHEL 系）" value="rpmrhel" >}}
 ```shell
-sudo dnf install ./minio-*.rpm
+sudo dnf install ./silo-*.rpm
 ```
 {{< /tab >}}
 {{< tab label="DEB（Debian/Ubuntu）" value="debdebianubuntu" >}}
 ```shell
-sudo dpkg -i ./minio_*_amd64.deb
+sudo dpkg -i ./silo_*_amd64.deb
 ```
 
 ARM64 主机请使用名称中带 `arm64` 的软件包。
 {{< /tab >}}
 {{< tab label="独立归档" value="tab3" >}}
 ```shell
-tar -xzf minio_*_linux_*.tar.gz
-sudo install -m 0755 ./minio /usr/local/bin/minio
-minio --version
+tar -xzf silo_*_linux_*.tar.gz
+sudo install -m 0755 ./silo /usr/local/bin/silo
+silo --version
 ```
 {{< /tab >}}
 {{< /tabs >}}
 
-在每个新节点运行 `minio --version` 并与现有 pool 比对；不要把版本不同的节点加入集群。需要升级时，请遵循[`systemctl` 管理的 Silo 升级流程](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl)。
+在每个新节点运行 `silo --version` 并与现有 pool 比对；不要把版本不同的节点加入集群。需要升级时，请遵循[`systemctl` 管理的 Silo 升级流程](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl)。
 
 ### 2) 添加 TLS/SSL 证书 {#tls-ssl}
 
-当 MinIO 检测到 `${HOME}/.minio/certs` 目录中存在有效的 x.509 证书 （`.crt`）和私钥（`.key`）时，会自动启用 [传输层安全（TLS）](/zh/operations/network-encryption/#minio-tls) 1.2+。
+对于由 `systemd` 管理的 SILO 部署，建议显式配置证书目录，例如 `/etc/silo/certs`，避免依赖服务账户的主目录。在每个节点放置 `public.crt` 和 `private.key`；需要信任内部 CA 时，将 **CA 公共证书** 放入 `/etc/silo/certs/CAs`。私钥只应允许所需的服务账户读取。
 
-对于由 `systemd` 管理的部署，请使用运行 MinIO server 进程的用户对应的 `$HOME` 目录。提供的 `minio.service` 文件会以 `minio-user` 身份运行 该进程。前一步已经包含了如何创建该用户及其主目录 `/home/minio-user` 的说明。
+在 `/etc/default/silo` 中设置：
 
-- 在每个主机上将 TLS 证书放置到 `/home/minio-user/.minio/certs` 中。
-- 如果 *任何* MinIO server 或客户端使用了由未知证书颁发机构签名的证书 （自签或内部 CA），你 *必须* 将 CA 证书放到该部署中所有 MinIO 主机的 `/home/minio-user/.minio/certs/CAs` 下。MinIO 会拒绝无效证书 （不受信任、已过期或格式错误）。
+```shell
+MINIO_OPTS="--certs-dir /etc/silo/certs --console-address :9001"
+```
 
-如果 `minio.service` 文件指定了其他用户账户，请改用该账户对应的 `$HOME` 目录。或者，也可以通过 [`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 命令行参数指定 自定义证书目录。修改 `/etc/default/minio` 中的 `MINIO_OPTS` 变量即可设置 此选项。运行 MinIO server 进程的 `systemd` 用户 *必须* 对指定目录具有读取和 列目录权限。
-
-有关为 MinIO 配置 TLS 的更具体指导，包括通过 Server Name Indication (SNI) 支持多域名，请参见 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。你也可以跳过这一步，以不启用 TLS 的方式 部署。除了早期开发阶段以外，MinIO 强烈 *不建议* 使用非 TLS 部署。
+SILO 软件包使用 `silo` 用户和组，该账户不保证有可用的主目录。确保该账户能够遍历证书目录并读取所需文件。手工安装归档时，先按下一步创建服务账户。有关默认目录的兼容规则和多域名证书，请参阅[网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)与[`--certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir)。
 
 ### 3) 创建 `systemd` 服务文件 {#systemd}
 
-`.deb` 或 `.rpm` 软件包会将以下 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件 安装到 `/usr/lib/systemd/system/minio.service`。 对于二进制安装方式，请在所有 MinIO 主机上手动创建该文件。
+SILO 的 RPM/DEB 软件包安装以下文件，并创建 `silo` 系统用户和组：
 
-> [!NOTE]
-> **说明**
->
-> `systemd` 会先检查 `/etc/systemd/...` 路径，再检查 `/usr/lib/systemd/...` 路径， 并使用它找到的第一个文件。 为避免配置冲突或意外选项，请确认该文件仅存在于 `/usr/lib/systemd/system/minio.service` 路径下。
->
-> 关于文件路径搜索顺序的详细信息，请参阅 [systemd.unit 的 man page](https://www.man7.org/linux/man-pages/man5/systemd.unit.5.html)。
+- 可执行文件：`/usr/bin/silo`
+- 服务单元：`/usr/lib/systemd/system/silo.service`
+- 环境文件：`/etc/default/silo`
 
-```shell
-[Unit]
-Description=MinIO
-Documentation=https://silo.pgsty.com/zh/docs/
-Wants=network-online.target
-After=network-online.target
-AssertFileIsExecutable=/usr/local/bin/minio
+服务以 `silo:silo` 身份运行。为兼容已有部署，服务单元先读取 `/etc/default/minio`，再读取 `/etc/default/silo`，后者的同名配置覆盖前者；单元还声明与 `minio.service` 冲突，避免两个服务同时访问同一份数据。详见[安装布局](/zh/compatibility/binary/#layout)。
 
-[Service]
-Type=notify
+手工安装归档时，创建专用的 `silo` 用户和组，并授予其数据目录和证书目录所需权限。以[当前 SILO 服务单元](https://github.com/pgsty/silo/blob/263ee0510da51c555b7257bbe504b22355cac4b0/silo.service)为模板，将本地单元安装到 `/etc/systemd/system/silo.service`。如果可执行文件安装在 `/usr/local/bin/silo`，同时调整 `AssertFileIsExecutable` 和 `ExecStart`，不要照搬软件包的 `/usr/bin/silo` 路径。
 
-WorkingDirectory=/usr/local
-
-User=minio-user
-Group=minio-user
-ProtectProc=invisible
-
-EnvironmentFile=-/etc/default/minio
-ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
-
-# Let systemd restart this service always
-Restart=always
-
-# Specifies the maximum file descriptor number that can be opened by this process
-LimitNOFILE=1048576
-
-# Turn-off memory accounting by systemd, which is buggy.
-MemoryAccounting=no
-
-# Specifies the maximum number of threads this process can create
-TasksMax=infinity
-
-# Disable timeout logic and wait until process is stopped
-TimeoutSec=infinity
-
-# Disable killing of MinIO by the kernel's OOM killer
-OOMScoreAdjust=-1000
-
-SendSIGKILL=no
-
-[Install]
-WantedBy=multi-user.target
-
-# Built for ${project.name}-${project.version} (${project.name})
-```
-
-The `minio.service` file runs as the `minio-user` User and Group by default. You can create the user and group using the `groupadd` and `useradd` commands. The following example creates the user, group, and sets permissions to access the folder paths intended for use by MinIO. These commands typically require root (`sudo`) permissions.
+检查实际生效的单元及覆盖配置，修改后重新加载：
 
 ```shell
-groupadd -r minio-user
-useradd -M -r -g minio-user minio-user
-chown minio-user:minio-user /mnt/disk1 /mnt/disk2 /mnt/disk3 /mnt/disk4
+systemctl cat silo.service
+sudo systemctl daemon-reload
 ```
 
-The specified drive paths are provided as an example. Change them to match the path to those drives intended for use by MinIO.
-
-Alternatively, change the `User` and `Group` values to another user and group on the system host with the necessary access and permissions.
-
-MinIO publishes additional startup script examples on [github.com/minio/minio-service](https://github.com/minio/minio-service).
-
-To update deployments managed using `systemctl`, see [升级由 systemctl 管理的 MinIO 部署](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl).
+保留既有数据路径；不要因可执行文件或服务改名而重命名对象数据目录。有关版本升级，请参阅[由 systemctl 管理的升级流程](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl)。
 
 ### 4) 创建服务环境文件 {#id16}
 
-在 `/etc/default/minio` 创建环境文件。 MinIO 服务会将该文件作为 MinIO *以及* `minio.service` 文件所用全部 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 的来源。
+在 `/etc/default/silo` 创建环境文件。 MinIO 服务会将该文件作为 MinIO *以及* `silo.service` 文件所用全部 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 的来源。
 
 以下示例假设：
 
@@ -369,7 +316,7 @@ MINIO_VOLUMES="https://minio{1...4}.example.net:9000/mnt/disk{1...4}/minio https
 # port 9001 on all network interfaces. The default behavior is dynamic
 # port selection.
 
-MINIO_OPTS="--console-address :9001"
+MINIO_OPTS="--certs-dir /etc/silo/certs --console-address :9001"
 
 # Set the root username. This user has unrestricted permissions to
 # perform S3 and administrative API operations on any resource in the
@@ -394,19 +341,19 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 
 ```shell
-sudo systemctl restart minio.service
+sudo systemctl restart silo.service
 ```
 
 Use the following commands to confirm the service is online and functional:
 
 ```shell
-sudo systemctl status minio.service
-journalctl -f -u minio.service
+sudo systemctl status silo.service
+journalctl -f -u silo.service
 ```
 
 MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
 
-MinIO 强烈建议同时重启一个部署中的所有 MinIO 服务端进程。 MinIO 操作具有原子性并保持严格一致。 因此，该重启过程不会中断应用或正在进行的操作。
+扩容需要协调重启全部 SILO 服务端，使它们使用一致的池配置。全量重启期间服务会暂时不可用，正在进行的请求可能失败；请安排维护窗口，并让客户端按操作语义重试和核验结果。重启不构成“无中断”保证。
 
 **不要** 执行“滚动”重启（例如一次只重启一个节点）。
 

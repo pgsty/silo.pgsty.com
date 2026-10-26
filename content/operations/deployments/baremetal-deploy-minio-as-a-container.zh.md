@@ -76,7 +76,7 @@ podman run \
 
 本地驱动器 `~/silo/data` 会挂载到容器内的 `/data` 目录。你可以按需修改 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 和 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 变量，以变更 root 登录信息。
 
-对于多驱动器部署，请将每个本地驱动器或其所在文件夹绑定到容器中按顺序编号的路径。 然后修改 [`minio server`](/zh/reference/minio-server/#command-minio.server) 启动命令以指定这些路径：
+对于多驱动器部署，请将每个本地驱动器或其所在文件夹绑定到容器中按顺序编号的路径。 然后修改 [`silo server`](/zh/reference/minio-server/#command-minio.server) 启动命令以指定这些路径：
 
 ```shell
 mkdir -p ~/minio/data-{1..4}
@@ -118,7 +118,7 @@ docker run \
 
 本地驱动器 `~/silo/data` 会挂载到容器内的 `/data` 目录。你可以按需修改 [`MINIO_ROOT_USER`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) 和 [`MINIO_ROOT_PASSWORD`](/zh/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) 变量，以变更 root 登录信息。
 
-对于多驱动器部署，请将每个本地驱动器或其所在文件夹绑定到容器中按顺序编号的路径。 然后修改 [`minio server`](/zh/reference/minio-server/#command-minio.server) 启动命令以指定这些路径：
+对于多驱动器部署，请将每个本地驱动器或其所在文件夹绑定到容器中按顺序编号的路径。 然后修改 [`silo server`](/zh/reference/minio-server/#command-minio.server) 启动命令以指定这些路径：
 
 ```shell
 mkdir -p ~/minio/data-{1..4}

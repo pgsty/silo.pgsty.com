@@ -53,7 +53,7 @@ This page provides an overview of MinIO deployment architectures from a producti
 
 **MinIO uses a deterministic hashing algorithm based on object name and path to select the erasure set for a given object.**
 
-> For each unique object namespace `BUCKET/PREFIX/[PREFIX/...]/OBJECT.EXTENSION`, MinIO always selects the same erasure set for read/write operations. MinIO handles all routing within pools and erasure sets, making the select/read/write process entirely transparent to applications.
+> Within a given pool, an object name maps deterministically to an erasure set. This does not pin all writes or versions of a key to one pool: overwrites and migration can leave copies in several pools, which SILO resolves for the requested operation. See [multi-pool object consistency](/blog/design/multi-pool-object-consistency/).
 >
 > <figure>
 >   <img src="/images/architecture/architecture-erasure-set-retrieve-object.svg" alt="Diagram of object retrieval from only data shards" />

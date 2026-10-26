@@ -4,7 +4,7 @@ url: "/zh/reference/minio-server/settings/"
 weight: 10
 icon: fa-solid fa-gears
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-server-configuration-settings"></a>
@@ -12,7 +12,7 @@ upstream_modified: false
 <a id="minio-environment-variables"></a>
 <a id="id1" data-td-print-local></a>
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程将其配置存储在存储后端 [`directory`](/zh/reference/minio-server/#minio.server.DIRECTORIES) 中。
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程将其配置存储在存储后端 [`directory`](/zh/reference/minio-server/#minio.server.DIRECTORIES) 中。
 
 <a id="minio-server-configuration-options"></a>
 

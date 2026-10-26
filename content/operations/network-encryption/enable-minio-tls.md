@@ -173,20 +173,20 @@ The MinIO Server searches for TLS keys and certificates for each node and uses t
 By default, the MinIO server looks for the TLS keys and certificates for each node in the following directory:
 
 ```shell
-${HOME}/.minio/certs
+${HOME}/.silo/certs
 ```
 
-Where `${HOME}` is the home directory of the user running the MinIO Server process. You may need to create the `${HOME}/.minio/certs` directory if it does not exist.
+Here `${HOME}` is the home directory of the user running SILO. New installations use `.silo/certs`; the legacy `.minio/certs` is used only when `.minio` exists and `.silo` does not. If both exist, SILO selects `.silo` and logs a warning. Service accounts should set `--certs-dir` explicitly. See the [certificate directory rules](/reference/minio-server/#minio.server.-certs-dir).
 
 For `systemd` managed deployments this must correspond to the `USER` running the MinIO process. If that user has no home directory, use the **Custom Path** option instead.
 {{< /tab >}}
 {{< tab label="Custom Path" value="custom-path" >}}
-You can specify a path for the MinIO server to search for certificates using the [`minio server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S` parameter.
+You can specify a path for the MinIO server to search for certificates using the [`silo server --certs-dir`](/reference/minio-server/#minio.server.-certs-dir) or `-S` parameter.
 
 For example, the following command fragment directs the MinIO process to use the `/opt/minio/certs` directory for TLS certificates.
 
 ```shell
-minio server --certs-dir /opt/minio/certs ...
+silo server --certs-dir /opt/minio/certs ...
 ```
 
 The user running the MinIO service *must* have read and write permissions to this directory.

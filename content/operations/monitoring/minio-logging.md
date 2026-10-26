@@ -3,17 +3,17 @@ title: "Publish Server or Audit Logs to an External Service"
 url: "/operations/monitoring/minio-logging/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/minio-logging.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="publish-server-or-audit-logs-to-an-external-service"></a>
 <a id="minio-logging"></a>
 
-MinIO publishes all [`minio server`](/reference/minio-server/#command-minio.server) operations to the system console. Reading these logs depends on how the server process is managed. For example, if the server is managed through a `systemd` script, you can read the logs using `journalctl -u SERVICENAME.service`. Replace `SERVICENAME` with the name of the MinIO service.
+MinIO publishes all [`silo server`](/reference/minio-server/#command-minio.server) operations to the system console. Reading these logs depends on how the server process is managed. For example, if the server is managed through a `systemd` script, you can read the logs using `journalctl -u SERVICENAME.service`. Replace `SERVICENAME` with the name of the MinIO service.
 
 MinIO also supports publishing server logs and audit logs to an HTTP webhook.
 
-- [Server logs](#minio-logging-publish-server-logs) contain the same [`minio server`](/reference/minio-server/#command-minio.server) operations logged to the system console. Server logs support general monitoring and troubleshooting of operations.
+- [Server logs](#minio-logging-publish-server-logs) contain the same [`silo server`](/reference/minio-server/#command-minio.server) operations logged to the system console. Server logs support general monitoring and troubleshooting of operations.
 - [Audit logs](#minio-logging-publish-audit-logs) are more granular descriptions of each operation on the MinIO deployment. Audit logging supports security standards and regulations which require detailed tracking of operations.
 
 MinIO publishes logs as a JSON document as a `PUT` request to each configured endpoint. The endpoint server is responsible for processing each JSON document. MinIO requires explicit configuration of each webhook endpoint and does *not* publish logs to a webhook by default.
@@ -22,11 +22,11 @@ MinIO publishes logs as a JSON document as a `PUT` request to each configured en
 
 ## Publish Server Logs to HTTP Webhook {#publish-server-logs-to-http-webhook}
 
-You can configure a new HTTP webhook endpoint to which MinIO publishes [`minio server`](/reference/minio-server/#command-minio.server) logs using either environment variables *or* by setting runtime configuration settings.
+You can configure a new HTTP webhook endpoint to which MinIO publishes [`silo server`](/reference/minio-server/#command-minio.server) logs using either environment variables *or* by setting runtime configuration settings.
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
-MinIO supports specifying the [`minio server`](/reference/minio-server/#command-minio.server) log HTTP webhook endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-regular).
+MinIO supports specifying the [`silo server`](/reference/minio-server/#command-minio.server) log HTTP webhook endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-regular).
 
 The following example code sets *all* environment variables related to configuring a log HTTP webhook endpoint. The minimum *required* variables are:
 

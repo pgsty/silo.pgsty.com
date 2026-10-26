@@ -173,20 +173,20 @@ MinIO Server 会为每个节点搜索 TLS 私钥和证书，并使用这些凭�
 默认情况下，MinIO server 会在以下目录中查找每个节点的 TLS 私钥和证书：
 
 ```shell
-${HOME}/.minio/certs
+${HOME}/.silo/certs
 ```
 
-其中 `${HOME}` 是运行 MinIO 服务端进程的用户主目录。 如果 `${HOME}/.minio/certs` 目录不存在，你可能需要手动创建它。
+其中 `${HOME}` 是运行 SILO 服务端进程的用户主目录。新安装使用 `.silo/certs`；只有旧 `.minio` 目录存在时才沿用 `.minio/certs`，两者都存在时优先使用 `.silo` 并输出警告。服务账户建议显式设置 `--certs-dir`。详见[证书目录规则](/zh/reference/minio-server/#minio.server.-certs-dir)。
 
 对于由 `systemd` 管理的部署，该路径必须对应运行 MinIO 进程的 `USER`。 如果该用户没有主目录，请改用 **Custom Path** 选项。
 {{< /tab >}}
 {{< tab label="Custom Path" value="custom-path" >}}
-你可以通过 [`minio server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S` 参数指定 MinIO server 搜索证书的路径。
+你可以通过 [`silo server --certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir) 或 `-S` 参数指定 MinIO server 搜索证书的路径。
 
 例如，以下命令片段指示 MinIO 进程使用 `/opt/minio/certs` 目录存放 TLS 证书。
 
 ```shell
-minio server --certs-dir /opt/minio/certs ...
+silo server --certs-dir /opt/minio/certs ...
 ```
 
 运行 MinIO service 的用户 *必须* 对该目录拥有读写权限。

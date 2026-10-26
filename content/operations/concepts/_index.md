@@ -12,9 +12,9 @@ math: true
 
 ## What are the components of a MinIO Deployment? {#what-are-the-components-of-a-minio-deployment}
 
-A MinIO deployment consists of a set of storage and compute resources running one or more [`minio server`](/reference/minio-server/#command-minio.server) nodes that together act as a single object storage repository.
+A MinIO deployment consists of a set of storage and compute resources running one or more [`silo server`](/reference/minio-server/#command-minio.server) nodes that together act as a single object storage repository.
 
-A standalone instance of MinIO consists of a single Server Pool with a single [`minio server`](/reference/minio-server/#command-minio.server) node. Standalone instances are best suited for initial development and evaluation.
+A standalone instance of MinIO consists of a single Server Pool with a single [`silo server`](/reference/minio-server/#command-minio.server) node. Standalone instances are best suited for initial development and evaluation.
 
 A MinIO deployment can run directly on a physical device in a `bare metal` or non-virtualized infrastructure. Or, MinIO might run within a virtual machine on a cloud service, such as using Docker, Podman, or Kubernetes. MinIO can run locally, on a private cloud, or in any of the many public clouds available on the market.
 
@@ -44,25 +44,25 @@ A distributed deployment makes use of the resources of more than one physical or
 
 ### How does MinIO manage multiple virtual or physical servers? {#how-does-minio-manage-multiple-virtual-or-physical-servers}
 
-While testing MinIO may only involve a single drive on a single computer, most production MinIO deployments use multiple compute and storage devices to create a high availability environment. A server pool is a set of [`minio server`](/reference/minio-server/#command-minio.server) nodes that pool their drives and resources to support object storage write and retrieval requests.
+While testing MinIO may only involve a single drive on a single computer, most production MinIO deployments use multiple compute and storage devices to create a high availability environment. A server pool is a set of [`silo server`](/reference/minio-server/#command-minio.server) nodes that pool their drives and resources to support object storage write and retrieval requests.
 
-MinIO supports adding one or more server pools to existing MinIO deployments for horizontal expansion. When MinIO has multiple server pools available, an individual object always writes to the same erasure set in the same server pool.
+SILO supports horizontal expansion by adding server pools. Within each pool, an object name maps deterministically to an erasure set, whereas pool selection is capacity-weighted; as a result, overwrites and pool migrations can leave copies of the same key in multiple pools (see [multi-pool object consistency](/blog/design/multi-pool-object-consistency/)).
 
-If one server pool goes down, MinIO halts I/O to all pools until the cluster resumes normal operations. You must restore the pool to working operation to resume I/O to the deployment. Objects written to other pools remain safe on disk while you perform repair operations.
+An unavailable pool does not halt every request uniformly: reads may still succeed if another healthy pool holds a readable copy, whereas conditional writes, explicit-version deletes, and other operations that must inspect all pools will fail (including with `503 SlowDownRead`) until the failed pool is restored.
 
-The [`HOSTNAME`](/reference/minio-server/#minio.server.HOSTNAME) argument passed to the [`minio server`](/reference/minio-server/#command-minio.server) command represents a Server Pool:
+The [`HOSTNAME`](/reference/minio-server/#minio.server.HOSTNAME) argument passed to the [`silo server`](/reference/minio-server/#command-minio.server) command represents a Server Pool:
 
-Consider the following example startup command, which creates a single Server Pool with 4 [`minio server`](/reference/minio-server/#command-minio.server) nodes of 4 drives each for a total of 16 drives.
+Consider the following example startup command, which creates a single Server Pool with 4 [`silo server`](/reference/minio-server/#command-minio.server) nodes of 4 drives each for a total of 16 drives.
 
 ```shell
-minio server https://minio{1...4}.example.net/mnt/disk{1...4}
+silo server https://minio{1...4}.example.net/mnt/disk{1...4}
 
              |                    Server Pool                |
 ```
 
-Starting server pools in the same [`minio server`](/reference/minio-server/#command-minio.server) startup command enables awareness of all server pool peers.
+Starting server pools in the same [`silo server`](/reference/minio-server/#command-minio.server) startup command enables awareness of all server pool peers.
 
-See [`minio server`](/reference/minio-server/#command-minio.server) for complete syntax and usage.
+See [`silo server`](/reference/minio-server/#command-minio.server) for complete syntax and usage.
 
 <a id="minio-intro-cluster"></a>
 
@@ -70,10 +70,10 @@ See [`minio server`](/reference/minio-server/#command-minio.server) for complete
 
 A cluster refers to an entire MinIO deployment consisting of one or more Server Pools.
 
-Consider the command below that creates a cluster consisting of two Server Pools, each with 4 [`minio server`](/reference/minio-server/#command-minio.server) nodes and 4 drives per node for a total of 32 drives.
+Consider the command below that creates a cluster consisting of two Server Pools, each with 4 [`silo server`](/reference/minio-server/#command-minio.server) nodes and 4 drives per node for a total of 32 drives.
 
 ```shell
-minio server https://minio{1...4}.example.net/mnt/disk{1...4} \
+silo server https://minio{1...4}.example.net/mnt/disk{1...4} \
              https://minio{5...8}.example.net/mnt/disk{1...4}
 
              |                    Server Pool                |
@@ -81,7 +81,7 @@ minio server https://minio{1...4}.example.net/mnt/disk{1...4} \
 
 Each server pool has one or more [erasure sets](/operations/concepts/erasure-coding/#minio-ec-erasure-set) depending on the number of drives and nodes in the pool.
 
-MinIO strongly recommends production clusters consist of a *minimum* of 4 [`minio server`](/reference/minio-server/#command-minio.server) nodes in a Server Pool for proper high availability and durability guarantees.
+MinIO strongly recommends production clusters consist of a *minimum* of 4 [`silo server`](/reference/minio-server/#command-minio.server) nodes in a Server Pool for proper high availability and durability guarantees.
 
 ### Can I change the size of an existing MinIO deployment? {#can-i-change-the-size-of-an-existing-minio-deployment}
 

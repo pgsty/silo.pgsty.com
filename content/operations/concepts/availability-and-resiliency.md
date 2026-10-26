@@ -32,7 +32,7 @@ This page provides an overview of MinIO’s availability and resiliency design a
 
 **MinIO uses a deterministic algorithm to select the erasure set for a given object.**
 
-> For each unique object namespace `BUCKET/PREFIX/[PREFIX/...]/OBJECT.EXTENSION`, MinIO always selects the same erasure set for read/write operations. This includes all [versions](/administration/object-management/object-versioning/#minio-bucket-versioning) of that same object.
+> Within a given pool, an object name maps deterministically to an erasure set. This does not pin all writes or versions of a key to one pool: overwrites and migration can leave copies in several pools, which SILO resolves for the requested operation. See [multi-pool object consistency](/blog/design/multi-pool-object-consistency/).
 >
 > <figure>
 >   <img src="/images/availability/availability-erasure-set-selection.svg" alt="Diagram of erasure set selection based on object namespace" />

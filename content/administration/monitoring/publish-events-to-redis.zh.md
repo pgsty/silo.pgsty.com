@@ -3,7 +3,7 @@ title: "将事件发布到 Redis"
 url: "/zh/administration/monitoring/publish-events-to-redis/"
 weight: 90
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-redis.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="redis"></a>
@@ -27,7 +27,7 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/redis/#minio-server-envvar-bucket-notification-redis) 指定 Redis 服务端点及其相关 配置设置。[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时应用这些设置。
+MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notifications/redis/#minio-server-envvar-bucket-notification-redis) 指定 Redis 服务端点及其相关 配置设置。[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程会在下一次启动时应用这些设置。
 
 以下示例代码设置了与配置 Redis 服务端点相关的 *全部* 环境变量。 最少的 *必需* 变量包括：
 
@@ -72,7 +72,7 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 有关每个环境变量的完整文档，请参见 [存储桶通知的 Redis 服务](/zh/reference/minio-server/settings/notifications/redis/#minio-server-envvar-bucket-notification-redis)。
 {{< /tab >}}
 {{< tab label="配置设置" value="tab2" >}}
-MinIO 支持在正在运行的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_redis`](/zh/reference/minio-server/settings/notifications/redis/#mc-conf.notify_redis) 配置键 添加或更新 Redis 端点。你必须重启 [`minio server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新的 或更新后的配置设置。
+MinIO 支持在正在运行的 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程上，使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令和 [`notify_redis`](/zh/reference/minio-server/settings/notifications/redis/#mc-conf.notify_redis) 配置键 添加或更新 Redis 端点。你必须重启 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程，才能应用任何新的 或更新后的配置设置。
 
 以下示例代码设置了与配置 Redis 服务端点相关的 *全部* 设置。 最少的 *必需* 设置包括：
 
@@ -110,7 +110,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 Redis 目标打印一行类似如下的内容：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 Redis 目标打印一行类似如下的内容：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:redis
@@ -235,7 +235,7 @@ mc admin service restart ALIAS
 
 将 `ALIAS` 替换为要重启的部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-[`minio server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 Redis 目标打印一行类似如下的内容：
+[`silo server`](/zh/reference/minio-server/#command-minio.server) 进程在启动时会为每个已配置的 Redis 目标打印一行类似如下的内容：
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:redis

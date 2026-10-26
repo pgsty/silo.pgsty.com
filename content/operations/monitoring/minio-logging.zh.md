@@ -3,17 +3,17 @@ title: "将服务日志或审计日志发布到外部服务"
 url: "/zh/operations/monitoring/minio-logging/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/minio-logging.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-logging"></a>
 <a id="id1" data-td-print-local></a>
 
-MinIO 会将所有 [`minio server`](/zh/reference/minio-server/#command-minio.server) 操作输出到系统控制台。 如何读取这些日志取决于 server 进程的管理方式。 例如，如果 server 通过 `systemd` 脚本进行管理， 你可以使用 `journalctl -u SERVICENAME.service` 读取日志。 请将 `SERVICENAME` 替换为 MinIO 服务名称。
+MinIO 会将所有 [`silo server`](/zh/reference/minio-server/#command-minio.server) 操作输出到系统控制台。 如何读取这些日志取决于 server 进程的管理方式。 例如，如果 server 通过 `systemd` 脚本进行管理， 你可以使用 `journalctl -u SERVICENAME.service` 读取日志。 请将 `SERVICENAME` 替换为 MinIO 服务名称。
 
 MinIO 还支持将服务日志和审计日志发布到 HTTP Webhook。
 
-- [服务日志](#minio-logging-publish-server-logs) 包含与系统控制台中相同的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 操作日志。服务日志适用于常规监控与运维排障。
+- [服务日志](#minio-logging-publish-server-logs) 包含与系统控制台中相同的 [`silo server`](/zh/reference/minio-server/#command-minio.server) 操作日志。服务日志适用于常规监控与运维排障。
 - [审计日志](#minio-logging-publish-audit-logs) 会以更细粒度描述 MinIO 部署上的每一次操作。审计日志适用于要求对操作进行详细追踪的 安全标准与合规规范。
 
 MinIO 会将日志作为 JSON 文档，通过 `PUT` 请求发送到每个已配置端点。 端点服务器负责处理这些 JSON 文档。 MinIO 要求显式配置每个 Webhook 端点，默认情况下 *不会* 向 Webhook 发布日志。
@@ -22,11 +22,11 @@ MinIO 会将日志作为 JSON 文档，通过 `PUT` 请求发送到每个已配�
 
 ## 将服务日志发布到 HTTP Webhook {#http-webhook}
 
-你可以通过环境变量 *或* 运行时配置项，配置一个新的 HTTP Webhook 端点， 让 MinIO 将 [`minio server`](/zh/reference/minio-server/#command-minio.server) 日志发布到该端点。
+你可以通过环境变量 *或* 运行时配置项，配置一个新的 HTTP Webhook 端点， 让 MinIO 将 [`silo server`](/zh/reference/minio-server/#command-minio.server) 日志发布到该端点。
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
-MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-regular) 指定 [`minio server`](/zh/reference/minio-server/#command-minio.server) 日志 HTTP Webhook 端点及其相关配置项。
+MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-regular) 指定 [`silo server`](/zh/reference/minio-server/#command-minio.server) 日志 HTTP Webhook 端点及其相关配置项。
 
 下面的示例代码设置了配置日志 HTTP Webhook 端点所需的 *全部* 环境变量。 其中最少 *必须* 配置的变量为：
 

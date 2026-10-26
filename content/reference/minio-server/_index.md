@@ -1,5 +1,5 @@
 ---
-title: "Silo Server (minio)"
+title: "Silo Server (silo)"
 url: "/reference/minio-server/"
 weight: 30
 aliases:
@@ -15,27 +15,27 @@ upstream_modified: true
 
 ## Silo Server {#id1}
 
-The [`minio server`](#command-minio.server) command starts the Silo server process. The executable and subcommand names remain `minio server` as a compatibility contract:
+The [`silo server`](#command-minio.server) command starts the SILO server process. The official executable is named `silo`; this page retains its historical URL and anchors so existing documentation links remain valid:
 
 ```shell
-minio server /mnt/disk{1...4}
+silo server /mnt/disk{1...4}
 ```
 
-For examples of deploying [`minio server`](#command-minio.server) on a bare metal environment, see [Installation and Management](/operations/deployments/installation/#minio-installation).
+For examples of deploying [`silo server`](#command-minio.server) on a bare metal environment, see [Installation and Management](/operations/deployments/installation/#minio-installation).
 
-For examples of deploying [`minio server`](#command-minio.server) on Kubernetes, see [Deploying a Silo Tenant](/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant).
+For examples of deploying [`silo server`](#command-minio.server) on Kubernetes, see [Deploying a Silo Tenant](/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant).
 
 <a id="syntax"></a>
 <a id="minio-server-parameters"></a>
 
 ### Syntax {#command-minio.server}
 
-Starts the `minio` server process.
+Starts the `silo` server process.
 
 The command has the following syntax:
 
 ```shell
-minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
+silo server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 ```
 
 The command accepts the following arguments:
@@ -44,13 +44,13 @@ The command accepts the following arguments:
 
 *mc-cmd*
 
-The hostname of a [`minio server`](#command-minio.server) process.
+The hostname of a [`silo server`](#command-minio.server) process.
 
 For standalone deployments, this field is *optional*. You can start a standalone [`server`](#command-minio.server) process with only the [`DIRECTORIES`](#minio.server.DIRECTORIES) argument.
 
-For distributed deployments, specify the hostname of each [`minio server`](#command-minio.server) in the deployment. The group of [`minio server`](#command-minio.server) processes represent a single [Server Pool](/operations/concepts/#minio-intro-server-pool).
+For distributed deployments, specify the hostname of each [`silo server`](#command-minio.server) in the deployment. The group of [`silo server`](#command-minio.server) processes represent a single [Server Pool](/operations/concepts/#minio-intro-server-pool).
 
-[`HOSTNAME`](#minio.server.HOSTNAME) supports expansion notation `{x...y}` to denote a sequential series of hostnames. Silo *requires* sequential hostnames to identify each [`minio server`](#command-minio.server) process in the set.
+[`HOSTNAME`](#minio.server.HOSTNAME) supports expansion notation `{x...y}` to denote a sequential series of hostnames. A single pool can also use explicitly listed endpoints; adding multiple pools through command-line arguments requires expansion notation in each pool argument.
 
 For example, `https://minio{1...4}.example.net` expands to:
 
@@ -59,9 +59,9 @@ For example, `https://minio{1...4}.example.net` expands to:
 - `https://minio3.example.net`
 - `https://minio4.example.net`
 
-You must run the [`minio server`](#command-minio.server) command with the *same* combination of [`HOSTNAME`](#minio.server.HOSTNAME) and [`DIRECTORIES`](#minio.server.DIRECTORIES) on each host in the Server Pool.
+You must run the [`silo server`](#command-minio.server) command with the *same* combination of [`HOSTNAME`](#minio.server.HOSTNAME) and [`DIRECTORIES`](#minio.server.DIRECTORIES) on each host in the Server Pool.
 
-Each additional `HOSTNAME/DIRECTORIES` pair denotes an additional Server Set for horizontal expansion of the Silo deployment. For more information on Server Pools, see [Server Pool](/operations/concepts/#minio-intro-server-pool).
+With expansion notation, each space-separated `HOSTNAME/DIRECTORIES` argument defines a server pool, which is divided into erasure sets. For more information on Server Pools, see [Server Pool](/operations/concepts/#minio-intro-server-pool).
 
 ##### `DIRECTORIES` {#minio.server.DIRECTORIES}
 
@@ -69,7 +69,7 @@ Each additional `HOSTNAME/DIRECTORIES` pair denotes an additional Server Set for
 
 *Required*
 
-The directories or drives the [`minio server`](#command-minio.server) process uses as the storage backend.
+The directories or drives the [`silo server`](#command-minio.server) process uses as the storage backend.
 
 [`DIRECTORIES`](#minio.server.DIRECTORIES) supports expansion notation `{x...y}` to denote a sequential series of folders or drives. For example, `/mnt/disk{1...4}` expands to:
 
@@ -78,7 +78,7 @@ The directories or drives the [`minio server`](#command-minio.server) process us
 - `/mnt/disk3`
 - `/mnt/disk4`
 
-The [`DIRECTORIES`](#minio.server.DIRECTORIES) path(s) *must* be empty when first starting the [`minio`](#command-minio.server) process.
+The [`DIRECTORIES`](#minio.server.DIRECTORIES) path(s) *must* be empty when first starting the [`silo`](#command-minio.server) process.
 
 SILO supports [erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding) with a minimum of 2 drives or directory endpoints. A two-drive set defaults to `EC:1`: one data shard and one parity shard, with a read quorum of 1 and a write quorum of 2. If one drive becomes unavailable while the service is running, existing objects can still be read when their data and metadata on the remaining drive are intact, but writes cannot continue. A single-drive deployment uses `EC:0` and provides no erasure-code redundancy.
 
@@ -97,7 +97,7 @@ SILO supports [erasure coding](/operations/concepts/erasure-coding/#minio-erasur
 
 *Optional*
 
-Binds the [`minio`](#command-minio.server) server process to a specific network address and port number. Specify the address and port as `ADDRESS:PORT`, where `ADDRESS` is an IP address or hostname and `PORT` is a valid and open port on the host system. MinIO supports both IPv4 and IPv6 addressing, provided that the specified addresses are routable and resolveable.
+Binds the [`silo`](#command-minio.server) server process to a specific network address and port number. Specify the address and port as `ADDRESS:PORT`, where `ADDRESS` is an IP address or hostname and `PORT` is a valid and open port on the host system. MinIO supports both IPv4 and IPv6 addressing, provided that the specified addresses are routable and resolveable.
 
 To change the port number for all IP addresses or hostnames configured on the host machine, specify only `:PORT` where `PORT` is a valid and open port on the host.
 
@@ -114,10 +114,10 @@ To change the port number for all IP addresses or hostnames configured on the ho
 > A command like the following would listen for API calls on port `9000` on both configured IP addresses.
 >
 > ```shell
-> minio server --address "minioip:9000" ~/miniodirectory
+> silo server --address "minioip:9000" ~/miniodirectory
 > ```
 
-If omitted, [`minio`](#command-minio.server) binds to port `9000` on all configured IPv4 addresses, IPv6 addresses, and hostnames on the host machine.
+If omitted, [`silo`](#command-minio.server) binds to port `9000` on all configured IPv4 addresses, IPv6 addresses, and hostnames on the host machine.
 
 ##### `--console-address` {#minio.server.-console-address}
 
@@ -153,7 +153,7 @@ For MinIO deployments with TLS enabled, omit `tls-private-key` and `tls-public-k
 For example:
 
 ```shell
-minio server http://server{1...4}/disk{1...4} \
+silo server http://server{1...4}/disk{1...4} \
 --ftp="address=:8021"                         \
 --ftp="passive-port-range=30000-40000"        \
 --ftp="tls-private-key=path/to/private.key"   \
@@ -260,7 +260,7 @@ hmac-sha1-96</code></pre></td>
 For example:
 
 ```shell
-minio server http://server{1...4}/disk{1...4}                                 \
+silo server http://server{1...4}/disk{1...4}                                 \
 --sftp="address=:8022" --sftp="ssh-private-key=/home/miniouser/.ssh/id_rsa"   \
 --sftp="kex-algos=diffie-hellman-group14-sha256,curve25519-sha256@libssh.org" \
 ...
@@ -272,12 +272,12 @@ minio server http://server{1...4}/disk{1...4}                                 \
 
 *Optional*
 
-Specifies the path to the folder containing certificates the [`minio`](#command-minio) process uses for configuring TLS/SSL connectivity.
+Specifies the path to the folder containing certificates the [`silo`](#command-minio) process uses for configuring TLS/SSL connectivity.
 
-The contents of the specified folder must follow that of the [default path structure](/operations/network-encryption/#minio-tls-user-generated). For example, the path contents of `--certs-dir /etc/minio` should resemble the following:
+The contents of the specified folder must follow that of the [default path structure](/operations/network-encryption/#minio-tls-user-generated). For example, the path contents of `--certs-dir /etc/silo/certs` should resemble the following:
 
 ```shell
-/etc/minio
+/etc/silo/certs
   private.key
   public.crt
   domain.tld/
@@ -287,17 +287,16 @@ The contents of the specified folder must follow that of the [default path struc
     full-chain-ca.crt
 ```
 
-Omit to use the default directory paths:
+When no directory is explicitly configured, a new installation uses:
 
-- Linux/macOS: `${HOME}/.minio/certs`
-- Windows: `%%USERPROFILE%%\.minio\certs`.
+- Linux/macOS: `${HOME}/.silo/certs`
+- Windows: `%USERPROFILE%\.silo\certs`
 
-See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more information on TLS/SSL connectivity.
+If the user's home contains only the legacy `.minio` directory and no `.silo`, SILO continues to use `.minio/certs`. When both exist, it uses `.silo/certs` and logs a warning. For service accounts, configure `--certs-dir` explicitly instead of relying on an interactive user's home directory.
 
-> [!WARNING]
-> **Important**
->
-> [MinIO Server RELEASE.2023-12-09T18-17-51Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-12-09T18-17-51Z) removes the deprecated `--config-dir | -C` parameter. Deployments using this flag may start without TLS enabled. Replace those parameters with `--certs-dir | -S` and restart to re-enable TLS.
+SILO 20261025 still accepts the deprecated `--config-dir` / `-C` parameter. When it is set without `--certs-dir`, certificates are loaded from `<config-dir>/certs`; an explicit `--certs-dir` takes precedence. Upstream MinIO release notes about removing this parameter do not describe SILO's current behavior.
+
+See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more information.
 
 ##### `--quiet` {#minio.server.-quiet}
 

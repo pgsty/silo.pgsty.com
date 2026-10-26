@@ -3,7 +3,7 @@ title: "指标与日志设置"
 url: "/zh/reference/minio-server/settings/metrics-and-logging/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/metrics-and-logging.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-server-envvar-metrics-logging"></a>
@@ -11,7 +11,7 @@ upstream_modified: false
 
 本页面介绍用于控制 MinIO 指标与日志相关行为的设置。 更多信息请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
 
-这些设置用于将常规 [`minio server`](/zh/reference/minio-server/#command-minio.server) 日志和审计日志发布到 HTTP webhook。 更完整的文档请参见 [将服务日志或审计日志发布到外部服务](/zh/operations/monitoring/minio-logging/#minio-logging)。
+这些设置用于将常规 [`silo server`](/zh/reference/minio-server/#command-minio.server) 日志和审计日志发布到 HTTP webhook。 更完整的文档请参见 [将服务日志或审计日志发布到外部服务](/zh/operations/monitoring/minio-logging/#minio-logging)。
 
 你可以通过以下方式建立或修改设置：
 
@@ -58,7 +58,7 @@ upstream_modified: false
 
 ## 服务器日志 {#minio-server-config-logging-regular}
 
-以下部分介绍将 [`minio server`](/zh/reference/minio-server/#command-minio.server) 日志发布到 HTTP webhook 端点的 MinIO 配置设置。 有关这些设置的更完整文档和使用教程，请参见 [将服务日志发布到 HTTP Webhook](/zh/operations/monitoring/minio-logging/#minio-logging-publish-server-logs)。
+以下部分介绍将 [`silo server`](/zh/reference/minio-server/#command-minio.server) 日志发布到 HTTP webhook 端点的 MinIO 配置设置。 有关这些设置的更完整文档和使用教程，请参见 [将服务日志发布到 HTTP Webhook](/zh/operations/monitoring/minio-logging/#minio-logging-publish-server-logs)。
 
 ### 定义多个端点 {#id4}
 
@@ -92,7 +92,7 @@ mc admin config set logger_webhook:secondary \
 
 *envvar*
 
-指定 `"on"` 以启用将 [`minio server`](/zh/reference/minio-server/#command-minio.server) 日志发布到 HTTP webhook 端点。
+指定 `"on"` 以启用将 [`silo server`](/zh/reference/minio-server/#command-minio.server) 日志发布到 HTTP webhook 端点。
 
 需要同时指定 [`MINIO_LOGGER_WEBHOOK_ENDPOINT`](#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT)。
 {{< /tab >}}

@@ -3,7 +3,7 @@ title: "Publish Events to MQTT"
 url: "/administration/monitoring/publish-events-to-mqtt/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/monitoring/publish-events-to-mqtt.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="publish-events-to-mqtt"></a>
@@ -33,7 +33,7 @@ You can configure a new MQTT service endpoint using either environment variables
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
-MinIO supports specifying the MQTT service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/mqtt/#minio-server-envvar-bucket-notification-mqtt). The [`minio server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
+MinIO supports specifying the MQTT service endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/notifications/mqtt/#minio-server-envvar-bucket-notification-mqtt). The [`silo server`](/reference/minio-server/#command-minio.server) process applies the specified settings on its next startup.
 
 The following example code sets *all* environment variables related to configuring an MQTT service endpoint. The minimum *required* variables are:
 
@@ -88,7 +88,7 @@ The following example code sets *all* environment variables related to configuri
 See [MQTT Service for Bucket Notifications](/reference/minio-server/settings/notifications/mqtt/#minio-server-envvar-bucket-notification-mqtt) for complete documentation on each environment variable.
 {{< /tab >}}
 {{< tab label="Configuration Settings" value="configuration-settings" >}}
-MinIO supports adding or updating MQTT endpoints on a running [`minio server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_mqtt`](/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt) configuration key. You must restart the [`minio server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
+MinIO supports adding or updating MQTT endpoints on a running [`silo server`](/reference/minio-server/#command-minio.server) process using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`notify_mqtt`](/reference/minio-server/settings/notifications/mqtt/#mc-conf.notify_mqtt) configuration key. You must restart the [`silo server`](/reference/minio-server/#command-minio.server) process to apply any new or updated configuration settings.
 
 The following example code sets *all* settings related to configuring an MQTT service endpoint. The following configuration settings are the *minimum* required for an MQTT server/broker endpoint:
 
@@ -133,7 +133,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured MQTT target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured MQTT target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:mqtt
@@ -277,7 +277,7 @@ mc admin service restart ALIAS
 
 Replace `ALIAS` with the [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment to restart.
 
-The [`minio server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured MQTT target similar to the following:
+The [`silo server`](/reference/minio-server/#command-minio.server) process prints a line on startup for each configured MQTT target similar to the following:
 
 ```shell
 SQS ARNs: arn:minio:sqs::primary:mqtt

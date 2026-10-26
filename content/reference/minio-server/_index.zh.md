@@ -1,5 +1,5 @@
 ---
-title: "Silo 服务端（minio）"
+title: "Silo 服务端（silo）"
 url: "/zh/reference/minio-server/"
 weight: 30
 aliases:
@@ -15,27 +15,27 @@ upstream_modified: true
 
 ## Silo 服务端 {#minio-server}
 
-[`minio server`](#command-minio.server) 命令用于启动 Silo 服务端进程。可执行文件与子命令名称 `minio server` 属于兼容契约：
+[`silo server`](#command-minio.server) 命令用于启动 SILO 服务端进程。官方可执行文件名为 `silo`；本页保留历史 URL 和锚点，以保持已有文档链接有效：
 
 ```shell
-minio server /mnt/disk{1...4}
+silo server /mnt/disk{1...4}
 ```
 
-有关在裸金属环境中部署 [`minio server`](#command-minio.server) 的示例，请参阅 [安装与管理](/zh/operations/deployments/installation/#minio-installation)。
+有关在裸金属环境中部署 [`silo server`](#command-minio.server) 的示例，请参阅 [安装与管理](/zh/operations/deployments/installation/#minio-installation)。
 
-有关在 Kubernetes 环境中部署 [`minio server`](#command-minio.server) 的示例，请参阅 [部署 Silo Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant)。
+有关在 Kubernetes 环境中部署 [`silo server`](#command-minio.server) 的示例，请参阅 [部署 Silo Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant)。
 
 <a id="id2" data-td-print-local></a>
 <a id="minio-server-parameters"></a>
 
 ### 语法 {#command-minio.server}
 
-启动 `minio` server 进程。
+启动 `silo` 服务端进程。
 
 该命令语法如下：
 
 ```shell
-minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
+silo server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 ```
 
 该命令接受以下参数：
@@ -44,13 +44,13 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 
 *mc-cmd*
 
-[`minio server`](#command-minio.server) 进程的主机名。
+[`silo server`](#command-minio.server) 进程的主机名。
 
 对于单机部署，此字段为 *可选*。 仅使用 [`DIRECTORIES`](#minio.server.DIRECTORIES) 参数即可启动一个单机 [`server`](#command-minio.server) 进程。
 
-对于分布式部署，请指定部署中每个 [`minio server`](#command-minio.server) 的主机名。 这一组 [`minio server`](#command-minio.server) 进程共同表示一个 [服务器池](/zh/operations/concepts/#minio-intro-server-pool)。
+对于分布式部署，请指定部署中每个 [`silo server`](#command-minio.server) 的主机名。 这一组 [`silo server`](#command-minio.server) 进程共同表示一个 [服务器池](/zh/operations/concepts/#minio-intro-server-pool)。
 
-[`HOSTNAME`](#minio.server.HOSTNAME) 支持扩展记法 `{x...y}`，用于表示按顺序排列的一组主机名。Silo *要求* 使用连续主机名，以识别该集合中的每个 [`minio server`](#command-minio.server) 进程。
+[`HOSTNAME`](#minio.server.HOSTNAME) 支持扩展记法 `{x...y}`，用于表示按顺序排列的一组主机名。单个池也可以显式列出端点；通过命令行添加多个池时，每个池参数都需要使用扩展记法。
 
 例如，`https://minio{1...4}.example.net` 会扩展为：
 
@@ -59,9 +59,9 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 - `https://minio3.example.net`
 - `https://minio4.example.net`
 
-你必须在 服务器池 中每台主机上，使用 *相同* 的 [`HOSTNAME`](#minio.server.HOSTNAME) 和 [`DIRECTORIES`](#minio.server.DIRECTORIES) 组合来运行 [`minio server`](#command-minio.server) 命令。
+你必须在 服务器池 中每台主机上，使用 *相同* 的 [`HOSTNAME`](#minio.server.HOSTNAME) 和 [`DIRECTORIES`](#minio.server.DIRECTORIES) 组合来运行 [`silo server`](#command-minio.server) 命令。
 
-每增加一个 `HOSTNAME/DIRECTORIES` 对，就表示增加一个 Server Set，用于 Silo 部署的水平扩展。有关服务器池的更多信息，请参阅 [服务器池](/zh/operations/concepts/#minio-intro-server-pool)。
+使用扩展记法时，每个以空格分隔的 `HOSTNAME/DIRECTORIES` 参数定义一个服务器池，池内再划分纠删码集合。有关服务器池的更多信息，请参阅 [服务器池](/zh/operations/concepts/#minio-intro-server-pool)。
 
 ##### `DIRECTORIES` {#minio.server.DIRECTORIES}
 
@@ -69,7 +69,7 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 
 *Required*
 
-[`minio server`](#command-minio.server) 进程用作存储后端的目录或驱动器。
+[`silo server`](#command-minio.server) 进程用作存储后端的目录或驱动器。
 
 [`DIRECTORIES`](#minio.server.DIRECTORIES) 支持扩展记法 `{x...y}`，用于表示按顺序排列的一组文件夹或驱动器。例如，`/mnt/disk{1...4}` 会扩展为：
 
@@ -78,7 +78,7 @@ minio server [FLAGS] HOSTNAME/DIRECTORIES [HOSTNAME/DIRECTORIES..]
 - `/mnt/disk3`
 - `/mnt/disk4`
 
-首次启动 [`minio`](#command-minio.server) 进程时，[`DIRECTORIES`](#minio.server.DIRECTORIES) 路径 *必须* 为空。
+首次启动 [`silo`](#command-minio.server) 进程时，[`DIRECTORIES`](#minio.server.DIRECTORIES) 路径 *必须* 为空。
 
 SILO 至少使用 2 个驱动器或目录端点即可启用 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding)。双盘集合默认采用 `EC:1`，即 1 个数据分片和 1 个校验分片，读仲裁为 1，写仲裁为 2。运行中失去一盘后，只要剩余盘上的对象数据和元数据完好，仍可读取既有对象，但无法继续写入。单盘部署使用 `EC:0`，不提供纠删码冗余。
 
@@ -97,7 +97,7 @@ SILO 至少使用 2 个驱动器或目录端点即可启用 [纠删码](/zh/oper
 
 *Optional*
 
-将 [`minio`](#command-minio.server) server 进程绑定到特定网络地址和端口号。 将地址和端口指定为 `ADDRESS:PORT`，其中 `ADDRESS` 是 IP 地址或主机名，`PORT` 是主机系统上有效且开放的端口。 MinIO 同时支持 IPv4 和 IPv6 寻址，前提是指定地址可路由且可解析。
+将 [`silo`](#command-minio.server) server 进程绑定到特定网络地址和端口号。 将地址和端口指定为 `ADDRESS:PORT`，其中 `ADDRESS` 是 IP 地址或主机名，`PORT` 是主机系统上有效且开放的端口。 MinIO 同时支持 IPv4 和 IPv6 寻址，前提是指定地址可路由且可解析。
 
 若要为主机上配置的所有 IP 地址或主机名修改端口号，仅指定 `:PORT` 即可，其中 `PORT` 是主机上有效且开放的端口。
 
@@ -114,10 +114,10 @@ SILO 至少使用 2 个驱动器或目录端点即可启用 [纠删码](/zh/oper
 > 类似下面的命令会在两个已配置 IP 地址的 `9000` 端口上监听 API 调用。
 >
 > ```shell
-> minio server --address "minioip:9000" ~/miniodirectory
+> silo server --address "minioip:9000" ~/miniodirectory
 > ```
 
-若省略该参数，[`minio`](#command-minio.server) 会绑定到主机上所有已配置 IPv4 地址、IPv6 地址和主机名的 `9000` 端口。
+若省略该参数，[`silo`](#command-minio.server) 会绑定到主机上所有已配置 IPv4 地址、IPv6 地址和主机名的 `9000` 端口。
 
 ##### `--console-address` {#minio.server.-console-address}
 
@@ -153,7 +153,7 @@ SILO 至少使用 2 个驱动器或目录端点即可启用 [纠删码](/zh/oper
 例如：
 
 ```shell
-minio server http://server{1...4}/disk{1...4} \
+silo server http://server{1...4}/disk{1...4} \
 --ftp="address=:8021"                         \
 --ftp="passive-port-range=30000-40000"        \
 --ftp="tls-private-key=path/to/private.key"   \
@@ -260,7 +260,7 @@ hmac-sha1-96</code></pre></td>
 例如：
 
 ```shell
-minio server http://server{1...4}/disk{1...4}                                 \
+silo server http://server{1...4}/disk{1...4}                                 \
 --sftp="address=:8022" --sftp="ssh-private-key=/home/miniouser/.ssh/id_rsa"   \
 --sftp="kex-algos=diffie-hellman-group14-sha256,curve25519-sha256@libssh.org" \
 ...
@@ -272,12 +272,12 @@ minio server http://server{1...4}/disk{1...4}                                 \
 
 *Optional*
 
-指定包含证书的文件夹路径，[`minio`](#command-minio) 进程使用该路径中的证书配置 TLS/SSL 连接。
+指定包含证书的文件夹路径，[`silo`](#command-minio) 进程使用该路径中的证书配置 TLS/SSL 连接。
 
-指定文件夹的内容必须符合 [default path structure](/zh/operations/network-encryption/#minio-tls-user-generated)。 例如，`--certs-dir /etc/minio` 的路径内容应类似如下：
+指定文件夹的内容必须符合 [default path structure](/zh/operations/network-encryption/#minio-tls-user-generated)。 例如，`--certs-dir /etc/silo/certs` 的路径内容应类似如下：
 
 ```shell
-/etc/minio
+/etc/silo/certs
   private.key
   public.crt
   domain.tld/
@@ -287,17 +287,16 @@ minio server http://server{1...4}/disk{1...4}                                 \
     full-chain-ca.crt
 ```
 
-省略时使用默认目录路径：
+未显式指定目录时，新安装使用：
 
-- Linux/macOS: `${HOME}/.minio/certs`
-- Windows: `%%USERPROFILE%%\.minio\certs`.
+- Linux/macOS：`${HOME}/.silo/certs`
+- Windows：`%USERPROFILE%\.silo\certs`
 
-有关 TLS/SSL 连接的更多信息，请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
+如果用户主目录中只有旧的 `.minio` 目录而没有 `.silo`，SILO 会继续使用 `.minio/certs`。两者都存在时使用 `.silo/certs`，并输出警告。对于服务账户，建议显式配置 `--certs-dir`，避免依赖交互用户的主目录。
 
-> [!WARNING]
-> **重要**
->
-> [MinIO Server RELEASE.2023-12-09T18-17-51Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-12-09T18-17-51Z) 移除了已弃用参数 `--config-dir | -C`。 使用该 flag 的部署可能会在未启用 TLS 的情况下启动。 请将这些参数替换为 `--certs-dir | -S` 并重启，以重新启用 TLS。
+SILO 20261025 仍接受已弃用的 `--config-dir` / `-C` 参数。使用该参数且未设置 `--certs-dir` 时，证书目录为 `<config-dir>/certs`；显式 `--certs-dir` 优先。上游 MinIO 某些版本移除此参数的说明不能直接套用于 SILO。
+
+有关 TLS 配置的更多信息，请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
 
 ##### `--quiet` {#minio.server.-quiet}
 

@@ -3,7 +3,7 @@ title: "Security and Access"
 url: "/administration/console/security-and-access/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/console/security-and-access.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="security-and-access"></a>
@@ -41,6 +41,8 @@ For deployments using an external identity manager such as Active Directory or a
 <a id="minio-console-admin-policies"></a>
 
 ## Policies {#policies}
+
+Console v2.5.0 provides **Reset** for built-in policies and **Delete** for custom policies. **Reset** removes a stored built-in policy override and restores SILO's native definition. The [Server 20261025 source](/blog/release/silo-20261025/#server-20261025) makes the restored definition immediately readable and reloads committed state on peer/etcd notifications so delayed notifications cannot overwrite a later edit (in-use checks still apply; published Server 20261018 does not yet include this server-side cache refresh fix).
 
 The **Policies** section displays all [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) on the MinIO deployment. The Policies section allows you to create, modify, or delete policies.
 

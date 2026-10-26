@@ -77,12 +77,12 @@ MinIO Console 使用该服务器填充指标仪表板。</p><p>有关如何配�
 
 默认情况下，MinIO 会在每次服务器启动时为 MinIO Console 随机选择一个端口。 访问 MinIO Server 的浏览器客户端会被自动重定向到动态选定端口上的 MinIO Console。此行为模拟了旧版 Web 浏览器访问方式，同时降低了在 嵌入式 Console 更新前已运行 MinIO 的系统上发生端口冲突的风险。
 
-您可以在启动部署中的每个 MinIO Server 时，通过传递 [`minio server --console-address`](/zh/reference/minio-server/#minio.server.-console-address) 命令行选项来显式指定静态端口。
+您可以在启动部署中的每个 MinIO Server 时，通过传递 [`silo server --console-address`](/zh/reference/minio-server/#minio.server.-console-address) 命令行选项来显式指定静态端口。
 
 例如，以下命令启动一个分布式 MinIO 部署，并为 MinIO Console 静态分配 `9001` 端口。该部署将在默认 MinIO 服务器端口 `:9000` 上响应 S3 API 操作，并在 MinIO Console 端口 `:9001` 上响应浏览器访问。
 
 ```shell
-minio server https://minio-{1...4}.example.net/mnt/drive-{1...4} \
+silo server https://minio-{1...4}.example.net/mnt/drive-{1...4} \
       --console-address ":9001"
 ```
 

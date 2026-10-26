@@ -143,10 +143,7 @@ restore separately.
    records. Rebuild stale offline peers from approved state before reconnecting
    them. Repeat the credential checks after restart and peer catch-up.
 
-Deleting an explicit override of a built-in policy now leaves a durable deletion;
-reload does not recreate that policy. Restore an intended policy through an
-explicit policy-create operation. Ordinary legacy group-member removal during
-an outage remains outside the durable parent-deletion guarantee.
+In the [Server 20261025 source](/blog/release/silo-20261025/#server-20261025), deleting an explicit built-in policy override immediately restores the native definition while retaining the deletion revision to reject stale overrides (not yet in published Server 20261018). Verify built-in policy Reset on each node and again after restart and peer catch-up, and confirm that in-use rejection and custom-policy deletion behave as expected. Ordinary legacy group-member removal during an outage remains outside the durable parent-deletion guarantee.
 
 Reopen access only after version identity, backend recovery, IAM loading,
 replication and both credential checks pass. If a stale credential succeeds,

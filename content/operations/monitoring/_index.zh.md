@@ -4,7 +4,7 @@ url: "/zh/operations/monitoring/"
 weight: 40
 icon: fa-solid fa-chart-line
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="id1" data-td-print-local></a>
@@ -35,9 +35,9 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 ## 日志 {#id4}
 
-MinIO 会将所有 [`minio server`](/zh/reference/minio-server/#command-minio.server) 操作输出到系统控制台。 MinIO 还支持将服务日志和审计日志发布到 HTTP Webhook。
+MinIO 会将所有 [`silo server`](/zh/reference/minio-server/#command-minio.server) 操作输出到系统控制台。 MinIO 还支持将服务日志和审计日志发布到 HTTP Webhook。
 
-- [服务日志](/zh/operations/monitoring/minio-logging/#minio-logging-publish-server-logs) 包含与系统控制台中相同的 [`minio server`](/zh/reference/minio-server/#command-minio.server) 操作日志。 服务日志适用于常规监控与运维排障。
+- [服务日志](/zh/operations/monitoring/minio-logging/#minio-logging-publish-server-logs) 包含与系统控制台中相同的 [`silo server`](/zh/reference/minio-server/#command-minio.server) 操作日志。 服务日志适用于常规监控与运维排障。
 - [审计日志](/zh/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs) 会以更细粒度描述 MinIO 部署上的每一次操作。 审计日志适用于需要对操作进行详细追踪的安全标准与合规要求。
 
 MinIO 会将日志作为 JSON 文档，通过 `PUT` 请求发送到每个已配置的端点。 端点服务器负责处理这些 JSON 文档。 MinIO 要求显式配置每个 Webhook 端点，默认情况下 *不会* 向 Webhook 发布日志。

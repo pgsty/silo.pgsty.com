@@ -80,12 +80,12 @@ to the MinIO Console.</p></td>
 
 MinIO by default selects a random port for the MinIO Console on each server startup. Browser clients accessing the MinIO Server are automatically redirected to the MinIO Console on its dynamically selected port. This behavior emulates the legacy web browser behavior while reducing the risk of a port collision on systems which were running MinIO *before* the embedded Console update.
 
-You can select an explicit static port by passing the [`minio server --console-address`](/reference/minio-server/#minio.server.-console-address) commandline option when starting each MinIO Server in the deployment.
+You can select an explicit static port by passing the [`silo server --console-address`](/reference/minio-server/#minio.server.-console-address) commandline option when starting each MinIO Server in the deployment.
 
 For example, the following command starts a distributed MinIO deployment using a static port assignment of `9001` for the MinIO Console. This deployment would respond to S3 API operations on the default MinIO server port `:9000` and browser access on the MinIO Console port `:9001`.
 
 ```shell
-minio server https://minio-{1...4}.example.net/mnt/drive-{1...4} \
+silo server https://minio-{1...4}.example.net/mnt/drive-{1...4} \
       --console-address ":9001"
 ```
 
