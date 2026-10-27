@@ -2,7 +2,7 @@
 title: "SILO, KES and OpenBao: Key Ownership and Recovery"
 linkTitle: "KES and OpenBao"
 date: 2026-10-18
-lastmod: 2026-10-18
+lastmod: 2026-10-26
 author: "SILO"
 description: "Separate object encryption, key-service authorization and persistent root-key storage, with explicit upgrade and recovery checks."
 tags: [Design, KES, Security, Operations]
@@ -10,6 +10,8 @@ weight: 1
 draft: false
 url: "/blog/design/kes-openbao/"
 ---
+
+**Current release:** [KES 20261026](/blog/release/silo-20261026/#kes) is available with Go 1.27.3 and updated cloud dependencies, retaining the API, configuration and key formats described here. The AWS SDK v2 migration and validation below remain labeled with their original 20261018 scope.
 
 SILO integrates with external key-management systems through [PGSTY KES](https://github.com/pgsty/kes) (`MINIO_KMS_KES_ENDPOINT`). [PGSTY KES 20261018](/blog/release/kes-20261018/) (source [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)) is deployed independently of the four-component SILO build graph and migrates the KES AWS Secrets Manager backend to AWS SDK for Go v2 while preserving existing SILO/KES key formats and OpenBao KV v2 compatibility.
 
@@ -110,7 +112,7 @@ The compatibility test matrix ([`testing/kms-compat.sh`](https://github.com/pgst
 ## Upgrade and recovery checks {#verification}
 
 1. Record the SILO and KES versions, key names, backend endpoint, and client certificate identities. Retain existing keys and backend backups until recovery has been verified.
-2. Read an existing encrypted object before upgrading and record its SHA-256 digest. Upgrade KES to the target [PGSTY KES 20261018](/blog/release/kes-20261018/#delivery) binary against the same persistent backend.
+2. Read an existing encrypted object before upgrading and record its SHA-256 digest. Upgrade KES to the target [PGSTY KES 20261026](/blog/release/silo-20261026/#kes) binary against the same persistent backend.
 3. Restart KES and SILO (clearing warm key caches), read the existing encrypted object, write a new encrypted object, and verify both digests using the deployment's production TLS identities and access policies.
 4. In an isolated rehearsal, test restoring the prior KES binary against the same key store, restart both services, and repeat encrypted object readback.
 

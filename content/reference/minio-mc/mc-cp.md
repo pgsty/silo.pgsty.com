@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** The selected SDK retries and reports S3 errors embedded in CopyObject HTTP 200 responses. An HTTP 200 status or a copy-start message alone does not establish success; inspect the command exit status and error records. [Release behavior](/compatibility/mcli/#current-release).
+> **Since mcli 20260916:** The selected SDK retries and reports S3 errors embedded in CopyObject HTTP 200 responses. An HTTP 200 status or a copy-start message alone does not establish success; inspect the command exit status and error records. [Release behavior](/compatibility/mcli/#current-release).
 
 
 <a id="mc-cp"></a>

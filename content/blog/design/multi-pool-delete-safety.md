@@ -2,7 +2,7 @@
 title: "Multi-Pool Deletion: Preserve the Latest Copy on Failure"
 linkTitle: "Multi-Pool Delete Safety"
 date: 2026-10-24
-lastmod: 2026-10-24
+lastmod: 2026-10-26
 author: "Ruohang Feng"
 summary: "Why error reporting and online-drive checks were insufficient for multi-pool deletion, how staged cleanup protects the authoritative copy, and the measured performance and compatibility costs of PR #257."
 tags: [Design, S3, Storage, Performance]
@@ -10,6 +10,8 @@ weight: 11
 draft: false
 url: "/blog/design/multi-pool-delete-safety/"
 ---
+
+**Release status:** This fix shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026). The design and validation below retain their original source scope.
 
 **Decision, October 24, 2026: merge the corrected [PR #257](https://github.com/pgsty/silo/pull/257).** Commit [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) fixes the multi-pool deletion failures reported in [issue #256](https://github.com/pgsty/silo/issues/256) and closes the in-flight failure window after preflight checks. The core invariant is direct: **finish cleaning up non-authoritative copies in other pools before deleting the authoritative copy that determines current reads.**
 

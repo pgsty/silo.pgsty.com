@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** A partial recursive retention failure returns exit status 1 and reports each failed object once; successful objects are not rolled back. Empty duration arguments produce a normal CLI error instead of a panic. [Release behavior](/compatibility/mcli/#current-release).
+> **Since mcli 20260916:** A partial recursive retention failure returns exit status 1 and reports each failed object once; successful objects are not rolled back. Empty duration arguments produce a normal CLI error instead of a panic. [Release behavior](/compatibility/mcli/#current-release).
 
 
 <a id="mc-retention-set"></a>

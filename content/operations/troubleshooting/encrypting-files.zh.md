@@ -3,54 +3,56 @@ title: "加密文件"
 url: "/zh/operations/troubleshooting/encrypting-files/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/troubleshooting/encrypting-files.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
+<a id="encrypting-files"></a>
 <a id="minio-support-encryption"></a>
-<a id="id1" data-td-print-local></a>
+<span id="id1" data-td-print-local></span><span id="id3" data-td-print-local></span>
 
-## 说明 {#id3}
+## 说明 {#description}
 
-你可以对 [`mc support inspect`](/zh/reference/minio-mc/mc-support-inspect/#command-mc.support.inspect) 命令的输出进行加密，以便在将文件传输到 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 时提升安全性。
+[`mcli support inspect`](/zh/reference/minio-mc/mc-support-inspect/)从服务端磁盘下载对象数据与元数据。PGSTY mcli 将诊断资料保存在本地，无须注册 SUBNET，也不会自动上传。诊断归档及其解密材料都应按敏感资料保管。
 
-## 加密 {#id4}
+<span id="id4" data-td-print-local></span>
+## 加密 {#encryption}
 
-你可以使用 `--encrypt` 标志对输出的 zip 文件进行加密，以提升安全性。 MinIO 提供了一个二进制工具用于解密该文件。
-
-使用加密标志后，输出中会提供一个解密密钥。 输出类似如下：
-
-```shell
-$ mc support inspect --encrypt play/test123/test*/*/part.*
-mc: Encrypted file data successfully downloaded as inspect.ad2b43d8.enc
-mc: Decryption key: ad2b43d847fdb14e54c5836200177f7158b3f745433525f5d23c0e0208e50c9948540b54
-
-mc: The decryption key will ONLY be shown here. It cannot be recovered.
-mc: The encrypted file can safely be shared without the decryption key.
-mc: Even with the decryption key, data stored with encryption cannot be accessed.
-```
-
-如输出所示，MinIO 只会显示这一次加密密钥，之后将无法再次显示或恢复。
-
-<a id="id5" data-td-print-local></a>
-
-## 解密 {#minio-support-decryption}
-
-MinIO 提供了解密工具，用于处理由 [`mc support inspect`](/zh/reference/minio-mc/mc-support-inspect/#command-mc.support.inspect) 生成的文件。
-
-要安装解密工具，请先安装 [Go](https://golang.org/dl/)<a id="go"></a>，然后运行
+当前 SILO/mcli 会加密 inspect 输出，`support inspect` 命令没有 `--encrypt` 标志。例如：
 
 ```shell
-go install github.com/minio/minio/docs/debugging/inspect@latest
+mcli support inspect 'mysilo/mybucket/myobject/xl.meta'
 ```
 
-安装 inspect 解密二进制文件后，使用以下命令解密文件：
+如果客户端配置目录中没有用户提供的 `support_public.pem`，SILO 会生成随机密钥，mcli 会随下载文件名打印解密密钥。请妥善保存，之后无法恢复。PGSTY 不添加厂商解密密钥。
+
+如果提供了 `support_public.pem`，请保留对应的私钥。包含通配符的路径应加引号，让 shell 将原模式传给 mcli。只采集诊断所需的文件；递归 inspect 可能下载多个磁盘上的对象内容。
+
+<span id="id5" data-td-print-local></span>
+<a id="minio-support-decryption"></a>
+## 解密 {#decryption}
+
+<a id="go"></a>
+
+从维护中的 SILO 源码构建 inspect 工具，使用该源码要求的 Go 版本：
 
 ```shell
-inspect -key=<decryptionKeyFromOutput> <file.enc>
+git clone --branch RELEASE.2026-10-26T00-00-00Z --depth 1 https://github.com/pgsty/silo.git
+cd silo/docs/debugging/inspect
+go build -o inspect .
 ```
 
-将 `<decryptionKeyFromOutput>` 替换为生成诊断文件时提供的解密密钥。 将 `<file.enc>` 替换为下载后的文件名，可以包含相对路径或绝对路径。
+对于下载时打印了对称密钥的归档：
 
-`-key` 标志是可选的。如果未提供，程序会通过交互式提示要求输入密钥。 文件名中包含了解密密钥的一部分。 这有助于确认该文件应使用哪个密钥。
+```shell
+./inspect -key=DECRYPTION_KEY /path/to/inspect.enc
+```
 
-解密过程会输出一个未加密的 `.zip` 文件。
+如果省略 `-key` 且未找到私钥文件，工具会交互式请求解密密钥。
+
+对于使用 `support_public.pem` 加密的输出，请使用相应私钥：
+
+```shell
+./inspect -private-key=/secure/path/support_private.pem /path/to/inspect.enc
+```
+
+使用 `-key` 时，工具在输入文件旁生成解密后的 ZIP。使用 `-private-key` 时，会将包括 `inspect.zip` 在内的已解密数据流提取到输出目录。保护这些输出，在检查内容后仅分享给预期接收者。解开诊断归档的外层加密，不会移除采集对象数据自身独立的 SSE 加密。

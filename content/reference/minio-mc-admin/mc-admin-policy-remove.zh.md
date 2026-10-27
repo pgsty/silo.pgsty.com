@@ -14,7 +14,7 @@ upstream_modified: true
 
 ## 语法 {#id1}
 
-从 SILO 部署中移除自定义 IAM 策略（若策略仍被引用则拒绝移除；未修改的内置策略不可删除）。在 [Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)中，移除对内置策略的显式覆盖内容会立即将其重置为原生内置定义，并保留删除版本以拒绝旧覆盖（公开的 Server 20261018 尚未包含此服务端修复；详情见 [Console 策略管理](/zh/administration/console/security-and-access/#minio-console-admin-policies)）。
+从 SILO 部署中移除自定义 IAM 策略（若策略仍被引用则拒绝移除；未修改的内置策略不可删除）。在 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)中，移除对内置策略的显式覆盖内容会立即将其重置为原生内置定义，并保留删除版本以拒绝旧覆盖（详情见 [Console 策略管理](/zh/administration/console/security-and-access/#minio-console-admin-policies)）。
 
 [`mc admin policy remove`](#command-mc.admin.policy.remove) 命令与 [`mc admin policy rm`](#command-mc.admin.policy.rm) 具有等效功能。
 

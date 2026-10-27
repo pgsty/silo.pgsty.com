@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261018 契约：** 本页继承 S3 API 目录；本次目标为[已发布的 20261018](/zh/blog/release/silo-20261018/)。[普通 LIST](/zh/blog/design/listing-recovery-lock-cost/)、[Object Lock](/zh/blog/security/20260926-governance-retention-bypass/)和[分片列表](/zh/blog/design/list-multipart-uploads/#implementation)的限定与错误行为以这些记录为准。校验和消息可能改变，错误码契约见[校验和说明](/zh/blog/design/complete-multipart-checksum-errors/#october-errors)。
+**SILO 20261026 契约：** 本页继承 S3 API 目录，当前目标为 [20261026 正式版](/zh/blog/release/silo-20261026/)。[普通 LIST](/zh/blog/design/listing-recovery-lock-cost/)、[Object Lock](/zh/blog/security/20260926-governance-retention-bypass/)和[分片列表](/zh/blog/design/list-multipart-uploads/#implementation)的限定与错误行为以这些记录为准。校验和消息可能改变，错误码契约见[校验和说明](/zh/blog/design/complete-multipart-checksum-errors/#october-errors)。
 
 <a id="s3-api"></a>
 

@@ -16,6 +16,12 @@ upstream_modified: true
 >
 > RELEASE.2022-10-09T21-10-59Z or later
 
+## mcli 20261026 status and exit codes {#silo-20261026}
+
+`mcli batch status TARGET JOBID` observes a job until completion or failure. Missing live metrics produce `pending` (also `status: "pending"` in JSON), rather than treating a queued job or missing sample as complete. After 30 seconds without job metrics, or when the stream ends early, the client queries persisted status; each status request has a 10-second timeout. Without an available terminal result it returns an error. Run the command again to resume observation.
+
+Retrieving either a `complete` or `failed` terminal result exits 0; inspect the returned status for the job outcome. Unavailable status, missing jobs and request failures exit nonzero. Large object counts no longer overflow the IOPs calculation. See the [release changes](/blog/release/silo-20261026/#mcli).
+
 ## Syntax {#syntax}
 
 The [`mc batch status`](#command-mc.batch.status) command outputs summaries of job events on a MinIO server.
@@ -32,15 +38,14 @@ The [`mc batch status`](#command-mc.batch.status) command outputs summaries of j
 The following command outputs the status of the specified job with JobID `KwSysDpxcBU9FNhGkn2dCf` currently in progress on the `myminio` alias.
 
 ```shell
-mc batch status myminio "KwSysDpxcBU9FNhGkn2dCf"
+mcli batch status myminio "KwSysDpxcBU9FNhGkn2dCf"
 ```
 {{< /tab >}}
 {{< tab label="SYNTAX" value="syntax" >}}
 The command has the following syntax:
 
 ```shell
-mc [GLOBALFLAGS] batch list TARGET           \
-                            ["JOBID"]
+mcli [GLOBALFLAGS] batch status TARGET JOBID
 ```
 
 - Brackets `[]` indicate optional parameters.
@@ -65,11 +70,11 @@ The [alias](/reference/minio-mc/mc-alias-set/#alias) for which to display batch 
 
 *mc-cmd*
 
-*Optional*
+*Required*
 
 The unique identifier of a job to summarize. To find the ID of a job, use [`mc batch list`](/reference/minio-mc/mc-batch-list/#command-mc.batch.list).
 
-If not specified, the command returns a summary for the current active batch job.
+Both TARGET and JOBID are required.
 
 ### Global Flags {#global-flags}
 
@@ -82,7 +87,7 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 The following command provides the real-time summary of an active job on the deployment at [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) `myminio`:
 
 ```shell
-mc batch status myminio "KwSysDpxcBU9FNhGkn2dCf"
+mcli batch status myminio "KwSysDpxcBU9FNhGkn2dCf"
 ```
 
 - Replace `myminio` with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment that should run the job.

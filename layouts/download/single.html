@@ -564,7 +564,7 @@ make build
             <h2 id="kes-title">PGSTY KES {{ replace hugo.Data.releases.kes.date "-" "" }}</h2>
             <p>{{ if $zh }}按需独立部署的外部密钥服务。先配置 TLS、应用身份、策略与持久密钥存储；SILO 连接 KES，KES 再连接 OpenBao。{{ else }}An optional, separate key service. Configure TLS, application identities, policies and a persistent key store first. SILO connects to KES; KES connects to OpenBao.{{ end }}</p>
           </div>
-          <a class="version-card" href="{{ relLangURL (printf "blog/release/kes-%s/" (replace hugo.Data.releases.kes.date "-" "")) }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.kes.date }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
+          <a class="version-card" href="{{ relLangURL (hugo.Data.releases.kes.notes | default (printf "blog/release/kes-%s/" (replace hugo.Data.releases.kes.date "-" ""))) }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.kes.date }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
         </div>
         <div class="asset-family-grid">
           {{ range slice "linux" "darwin" "windows" }}
@@ -601,7 +601,7 @@ make build
           <div>
             <p class="section-eyebrow"><span class="silkscreen">05 / GO LIBRARY</span></p>
             <h2 id="pkg-title">silo-pkg {{ hugo.Data.releases.pkg.tag }}</h2>
-            <p>{{ if $zh }}纯源码 Go 模块，没有独立可执行程序或容器。Server 20261018 选用 v3.14.3；mcli 20261025 与 Console v2.5.0 使用 v3.15.1。采用新版需要重新构建应用。{{ else }}A source-only Go module, with no standalone executable or container. Server 20261018 selects v3.14.3; mcli 20261025 and Console v2.5.0 use v3.15.1. Rebuild the application to adopt it.{{ end }}</p>
+            <p>{{ if $zh }}纯源码 Go 模块，没有独立可执行程序或容器。Server {{ $serverVer }}、mcli {{ replace hugo.Data.releases.client.date "-" "" }} 与 Console {{ $consoleTag }} 均选用 {{ hugo.Data.releases.pkg.tag }}。采用新版需要重新构建应用。{{ else }}A source-only Go module, with no standalone executable or container. Server {{ $serverVer }}, mcli {{ replace hugo.Data.releases.client.date "-" "" }} and Console {{ $consoleTag }} all select {{ hugo.Data.releases.pkg.tag }}. Rebuild the application to adopt it.{{ end }}</p>
           </div>
           <a class="version-card" href="{{ relLangURL hugo.Data.releases.pkg.notes }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.pkg.tag }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
         </div>

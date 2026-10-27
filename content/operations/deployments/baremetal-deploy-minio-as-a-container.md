@@ -22,7 +22,7 @@ The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and
 >
 > These examples cover Single-Node Single-Drive and Single-Node Multi-Drive development or evaluation deployments. They do not define a production Multi-Node Multi-Drive topology or an upgrade contract for Docker Compose, Docker Swarm, or another container orchestrator. For a production distributed deployment, use a tested [Kubernetes tenant workflow](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and validate persistence, networking, failure domains, and upgrades for your environment.
 >
-> The examples target [Server 20261018](/blog/release/silo-20261018/), now publicly available. Validate the version with your workload and record the image digest for rollback.
+> The examples target [Server 20261026](/blog/release/silo-20261026/), now publicly available. Validate the version with your workload and record the image digest for rollback.
 >
 > SILO disables in-place self-update; `MINIO_UPDATE=off` does not re-enable it. Upgrade containers by replacing the image with a verified SILO tag or digest, not with `mc admin update`.
 
@@ -69,7 +69,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /data --console-address ":9001"
 ```
 
 The command binds ports `9000` and `9001` to the S3 API and Web Console respectively.
@@ -92,7 +92,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.
@@ -111,7 +111,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /data --console-address ":9001"
 ```
 
 The command binds ports `9000` and `9001` to the S3 API and Web Console respectively.
@@ -134,7 +134,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.

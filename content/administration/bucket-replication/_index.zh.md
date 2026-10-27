@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**20261025 源码变化：** 分片上传复制现已为可合并的 CRC 校验和算法保留 `FULL_OBJECT` 校验和类型（旧版未传递该头部，导致目标端默认创建 `COMPOSITE` 分片上传并在完成阶段拒绝整对象 CRC）。该修复位于 [Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)中，升级发送端 Server 后请核对待处理/失败副本及目标端校验和。
+**20261026 正式版变化：** 分片上传复制现已为可合并的 CRC 校验和算法保留 `FULL_OBJECT` 校验和类型（旧版未传递该头部，导致目标端默认创建 `COMPOSITE` 分片上传并在完成阶段拒绝整对象 CRC）。该修复位于 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)中，升级发送端 Server 后请核对待处理/失败副本及目标端校验和。
 
 <a id="minio-bucket-replication"></a>
 <a id="id1" data-td-print-local></a>

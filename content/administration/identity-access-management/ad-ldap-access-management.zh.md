@@ -30,7 +30,7 @@ MinIO 用于认证用户并获取其组成员关系的具体 AD/LDAP 查询，�
    如果配置为执行组查询，MinIO 还会查询该用户所属的 AD/LDAP 组列表。 SILO 加入显式关联到各个返回的组 DN 的策略。
 4. MinIO 会在 STS API 响应中返回临时凭证，其形式为 access key、 secret key 和 session token。这些凭证的权限来自显式关联到已认证用户 DN *或* 组 DN 的策略。
 
-MinIO 提供了一个示例 Go 应用程序 [ldap.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-18T00-00-00Z/docs/sts/ldap.go)，用于处理完整的 登录流程。
+MinIO 提供了一个示例 Go 应用程序 [ldap.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-26T00-00-00Z/docs/sts/ldap.go)，用于处理完整的 登录流程。
 
 AD/LDAP 用户也可以创建与其 AD/LDAP 用户 Distinguished Name 关联的 [访问密钥](/zh/administration/identity-access-management/minio-user-management/#minio-idp-service-account)。 访问密钥是长期有效的凭证，会继承父用户的权限。 父用户在创建访问密钥时还可以进一步限制这些权限。 使用以下方法之一创建新的访问密钥：
 
@@ -69,4 +69,4 @@ mc idp ldap policy attach myminio diagnostics \
 
 ## 规范化长 DN
 
-[Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)合入了 [LDAP 长 DN 修复](/zh/blog/design/ldap-long-dn/)（公开的 Server 20261018 尚未包含）。当用户仅依赖组策略登录、但其规范化 DN 长度超过对象存储后端的文件名上限时，服务端会将纯 ASCII 路径分量超过 255 字节所触发的文件名超长错误视为“无个人策略映射记录”并继续加载组策略；完整路径超限（`PATH_MAX`）、不可读撤销记录及其他存储错误仍按 Fail-Closed 报错，对象后端也仍不支持写入超长路径记录。
+[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)合入了 [LDAP 长 DN 修复](/zh/blog/design/ldap-long-dn/)（Server 20261018 不包含此修复）。当用户仅依赖组策略登录、但其规范化 DN 长度超过对象存储后端的文件名上限时，服务端会将纯 ASCII 路径分量超过 255 字节所触发的文件名超长错误视为“无个人策略映射记录”并继续加载组策略；完整路径超限（`PATH_MAX`）、不可读撤销记录及其他存储错误仍按 Fail-Closed 报错，对象后端也仍不支持写入超长路径记录。

@@ -2,7 +2,7 @@
 title: "FULL_OBJECT 校验和复制：在初始化上传时保留类型"
 linkTitle: "FULL_OBJECT 复制"
 date: 2026-10-24
-lastmod: 2026-10-24
+lastmod: 2026-10-26
 author: "冯若航"
 summary: >
   PR #255 为分片 CRC 对象的复制恢复 FULL_OBJECT 校验和类型。本文记录 BadDigest 故障链路、上游回归来源、三行条件为何同时修复 CopyObject 复制，以及验证与升级要点。
@@ -11,6 +11,8 @@ weight: 8
 draft: false
 url: "/zh/blog/design/replication-full-object-checksum/"
 ---
+
+**发布状态：** 本文修复已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 正式发布；以下保留设计与验证时的源码范围。
 
 [Issue #254](https://github.com/pgsty/silo/issues/254) 报告了一类复制故障：使用 `FULL_OBJECT` CRC32 或 CRC32C 校验和的分片上传对象在源端可正常上传和读取，但复制到目标端并在最后调用 `CompleteMultipartUpload` 时会因 `400 BadDigest` 失败。Denis Babchuk（`@botdeniska`）提交的 [PR #255](https://github.com/pgsty/silo/pull/255) 补回了出站复制请求遗漏的校验和类型头。
 

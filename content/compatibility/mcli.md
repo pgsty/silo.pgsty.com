@@ -10,16 +10,20 @@ icon: fa-solid fa-terminal
 
 `mcli` is Silo's build of the MinIO Client (`mc`). This page records where the two are interchangeable and where they differ.
 
-[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/) and [20260913](/blog/release/mcli-20260913/). The latest is [20261018](/blog/release/mcli-20261018/); historical notes retain their own comparison baselines.
+[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/) and [20260913](/blog/release/mcli-20260913/). The latest is [20261026](/blog/release/silo-20261026/#mcli); historical notes retain their own comparison baselines.
 
 > [!TIP]
-> **Current release:** [RELEASE.2026-10-18T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z), package `20261018000000.0.0`, source `fa3b8bf72458`. Six OS/architecture archives, RPM/DEB/APK and multi-architecture images are published. See the [release notes](/blog/release/mcli-20261018/) and [component matrix](/compatibility/versions/).
+> **Current release:** [mcli 20261026](/blog/release/silo-20261026/#mcli), package `20261026000000.0.0`, source `0ceb298cdcd0`. Windows uses ZIP; Linux/macOS use tar.gz, with Linux RPM/DEB/APK and Docker Hub images.
 
-## Current release changes {#current-release}
+<span id="current-release"></span>
 
-20261018 uses **Go 1.27.2**, **silo-pkg v3.14.2** and upstream **minio-go v7.4.1**, with current Go x/* modules and targeted dependency fixes. The SDK cleans up failed multipart uploads after cancellation, sends retention timestamps in UTC and preserves requested STS durations. Parallel GET and ComposeObject remain opt-in; default transfers are unchanged.
+## Current release changes {#release-20261026}
 
-Command syntax, configuration, aliases and existing failure exit codes remain unchanged. Anonymous access to the release image and `latest` is verified for Linux amd64/arm64. Go embedders select `github.com/pgsty/mc v0.0.0-20261017101407-fa3b8bf72458`; see the [20261018 release notes](/blog/release/mcli-20261018/) for the dependency and artifact details.
+<span id="release-20261018"></span>
+
+Built with Go 1.27.3, silo-pkg 3.15.2 and pinned upstream SDK `320af050c445`. Changes since 20261018 cover identity/connection cache isolation, resync JSON and terminal states, throughput and batch IOPs overflow, observation without live metrics, partial-failure exit codes, alias regions and SDK multipart/read/delete repairs. Scripts must handle the additive `pending` state and nonzero partial resync mutation exits; querying an already failed job still exits zero. Alias region support adds no CLI flag, and existing configuration remains usable.
+
+Embedders select `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`. No Server protocol upgrade is required; SILO remains the maintained target. See the [complete changes](/blog/release/silo-20261026/#mcli) and [component matrix](/compatibility/versions/).
 
 ## Changes inherited from 20260916 {#release-20260916}
 

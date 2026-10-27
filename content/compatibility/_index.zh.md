@@ -23,15 +23,15 @@ sidebar_expanded: false
 {{< /card >}}
 {{< /cards >}}
 
-**核对日期：2026-09-16，发布状态更新于 2026-09-17。** 下表汇总分叉以来的源码与配套组件变化；其中的服务端变化已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，哪些修复不在更早的 Server 20260903 中，以[组件版本矩阵](/zh/compatibility/versions/)为准。
+**当前发布基线为 20261026。** 本页汇总分叉以来的源码与配套组件变化，标明各项修复首次发布的版本。当前组件组合与旧版缺失的修复见[组件版本矩阵](/zh/compatibility/versions/)。
 
-## 20261025 源码变化 {#maintenance-20261025}
+## 20261026 正式版变化 {#maintenance-20261026}
 
-[Server 20261025 源码](/zh/compatibility/server/#maintenance-20261025)（截至 2026-10-26 为 Draft Release）合入了 LDAP 长 DN 登录、内置策略 Reset、实时桶清单、版本桶生命周期过期、分片复制及写入/回滚保护修复。读仲裁与自愈策略保持不变；租约失效、部分元数据更新与存量不一致对象的边界详见[组件版本矩阵](/zh/compatibility/versions/#server-20261025)。
+[Server 20261026](/zh/compatibility/server/#maintenance-20261026)合入了 LDAP 长 DN 登录、内置策略 Reset、实时桶清单、版本桶生命周期过期、分片复制及多池删除修复。读仲裁与自愈策略保持不变；租约失效、部分元数据更新与存量不一致对象的边界详见[组件版本矩阵](/zh/compatibility/versions/#server-20261026)。
 
 ## 20261018 正式发布 {#october-2026}
 
-本次目标为 [Server 20261018](/zh/blog/release/silo-20261018/)，现已正式发布。新增升级检查包括 Object Lock、IAM 管理凭据授权、普通 LIST 恢复、strict 分片列表退役及 OIDC/JWK 密钥限制，见[服务端兼容性](/zh/compatibility/server/#october-2026)。下方列出的 strict 前提仅适用于 Server 20260916 的可选模式。
+[Server 20261026](/zh/blog/release/silo-20261026/)保留 [20261018](/zh/blog/release/silo-20261018/) 已交付的修复。升级检查包括 Object Lock、IAM 管理凭据授权、普通 LIST 恢复、strict 分片列表退役及 OIDC/JWK 密钥限制，见[服务端兼容性](/zh/compatibility/server/#october-2026)。下方列出的 strict 前提仅适用于 Server 20260916 的可选模式。
 
 
 ## 🟢 兼容或改进：12 类 {#compatible}
@@ -77,7 +77,7 @@ sidebar_expanded: false
 | <span id="o03"></span>**O03 · 旧认证及通知配置**<br>旧式认证、数据库通知及部分 TLS、环境文件用法需调整或验证。 | OIDC HMAC token、旧数据库分散参数、老代理/TLS 或特殊环境文件写法。 | 可能影响登录、通知或启动；按对应配置迁移。 | [OIDC 算法](/zh/compatibility/server/#auth-iam)、[通知连接串](/zh/blog/design/notify-url/#operator-remediation)、[TLS](/zh/blog/design/go127-tls-oidc-discovery/)、[环境文件](/zh/blog/design/config-env-file/#compatibility) |
 | <span id="o04"></span>**O04 · 依赖旧错误行为的程序**<br>校验、条件、错误码、退出码和列表上限不再沿用部分旧行为。 | 依赖错误请求成功、忽略 `If-Match`，或启用 Server 20260916 strict 模式后仍假设分片列表一次超过 1,000 条。 | 检查错误处理、重试、分页与批处理的最终退出码。 | [校验错误](/zh/blog/design/complete-multipart-checksum-errors/#impact)、[条件删除](/zh/blog/design/conditional-delete/)、[分片列表](/zh/blog/design/list-multipart-uploads/#implementation-20260916)、[CLI 退出码](/zh/compatibility/mcli/#current-release) |
 | <span id="o05"></span>**O05 · 自制客户端与管理工具**<br>私有接口、签名覆盖、Console 自动化及 Go 包路径存在变化。 | 使用 `ReadMultiple`、手写签名、严格响应解析、Go 嵌入或定制 Console。 | 定制集成和编译需单独验证；普通 S3 SDK 不使用私有存储接口。 | [私有接口](/zh/compatibility/server/#storage-rest)、[签名](/zh/blog/design/signed-header-coverage/#impact)、[Console API](/zh/compatibility/console/#api-output)、[Go 模块](/zh/compatibility/server/#source-compatibility) |
-| <span id="o06"></span>**O06 · 多池操作与 strict 分片模式退役**<br>多池写删核实元数据；20260916 的可选 strict 列表模式已退役。 | 多池条件写／删除，或升级曾启用 strict 列表的部署。 | 故障时可能返回 503，即使 GET 仍成功；Server 20261018 与 20261025 忽略 strict 开关并警告，不提供持久列表与严格取消。 | [多池条件](/zh/blog/design/multi-pool-object-consistency/#conditions)、[当前分片契约](/zh/blog/design/list-multipart-uploads/#decision-20261018) |
+| <span id="o06"></span>**O06 · 多池操作与 strict 分片模式退役**<br>多池写删核实元数据；20260916 的可选 strict 列表模式已退役。 | 多池条件写／删除，或升级曾启用 strict 列表的部署。 | 故障时可能返回 503，即使 GET 仍成功；Server 20261018 与 20261026 忽略 strict 开关并警告，不提供持久列表与严格取消。 | [多池条件](/zh/blog/design/multi-pool-object-consistency/#conditions)、[当前分片契约](/zh/blog/design/list-multipart-uploads/#decision-20261018) |
 | <span id="o07"></span>**O07 · 跨站复制、混跑和回滚**<br>IAM 撤销与桶配置删除状态要求协调升级和恢复。 | 多站点、共享 IAM、不同版本混跑或降级恢复。 | 保留完整恢复点并在回滚时同步恢复所有参与端。 | [IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout)、[回滚边界](/zh/compatibility/migration/#rollback) |
 | <span id="o08"></span>**O08 · 自更新及上游在线服务**<br>原地自更新、SUBNET 与上游托管支持集成被停用。 | 使用 `admin update`、`mcli update` 或 MinIO 在线支持流程。 | 改用软件包、镜像或编排器升级；常规 S3 访问不受此项影响。 | [服务端更新](/zh/compatibility/server/#offline-services)、[客户端更新](/zh/compatibility/mcli/#self-update)、[SUBNET](/zh/compatibility/mcli/#subnet) |
 {.silo-compatibility-table}

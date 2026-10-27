@@ -2,26 +2,23 @@
 
 [English](README.md) · [简体中文](README_ZH.md)
 
-本仓库维护 [silo.pgsty.com](https://silo.pgsty.com/)：英文位于 `/`，简体中文位于 `/zh/`。网站使用 Hugo Extended 0.168.0 与固定在 `go.mod` 中的 OINK v1.3.2。
+本仓库维护 [silo.pgsty.com](https://silo.pgsty.com/)：英文位于 `/`，简体中文位于 `/zh/`。网站使用 Hugo Extended 0.168.0 与固定在 `go.mod` 中的 OINK v1.4.0。
 
-## 20261018 正式发布
+## 20261026 正式发布
 
-当前正式 Server 为 `RELEASE.2026-10-18T00-00-00Z`，包版本 `20261018000000.0.0`，发行源码 `0cd388c666f8211f552604ae73448a066e9c25ce`。GitHub Release 已公开发布，公开下载与 Docker Hub 镜像于 2026-10-19 完成核验；本机制品验收的环境边界见发布说明，具体生产环境升级仍需独立验收。
+当前协调版本为 **SILO Server、mcli 与 KES 20261026**（`RELEASE.2026-10-26T00-00-00Z`，包版本 `20261026000000.0.0`）、**SILO Console v2.5.1** 和 **silo-pkg v3.15.2**，统一使用 Go 1.27.3。
 
-| 组件 | 本批次文档 |
-| --- | --- |
-| Server 20261018 | [英文](content/blog/release/silo-20261018.md) · [中文](content/blog/release/silo-20261018.zh.md) |
-| Console v2.4.2 | [英文](content/blog/release/console-2.4.2.md) · [中文](content/blog/release/console-2.4.2.zh.md) |
-| mcli 20261025 | [英文](content/blog/release/mcli-20261025.md) · [中文](content/blog/release/mcli-20261025.zh.md) |
-| pkg v3.14.2 | [英文](content/blog/release/pkg-3.14.2.md) · [中文](content/blog/release/pkg-3.14.2.zh.md) |
-| pkg v3.14.3 | [英文](content/blog/release/pkg-3.14.3.md) · [中文](content/blog/release/pkg-3.14.3.zh.md) |
-| 可选 KES 20261018 | [英文](content/blog/release/kes-20261018.md) · [中文](content/blog/release/kes-20261018.zh.md) |
+| 发布说明 | English | 简体中文 |
+| --- | --- | --- |
+| Server / mcli / KES 20261026 | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
+| Console 2.5 系列，含 2.5.1 | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
+| silo-pkg 3.15 系列，含 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md) | [发布说明](content/blog/release/pkg-3.15.2.zh.md) |
 
-Server 选用 Console v2.4.2、mcli 20261018、pkg v3.14.3、上游 minio-go v7.4.1；独立 Console v2.4.2 仍声明 pkg v3.14.2。独立发布的 mcli 20261025 使用 Go 1.27.3、silo-pkg v3.15.1 与 minio-go `ab93db7ba435`。KES 为独立部署的外部密钥服务，不嵌入 Server。精确源码、发布状态和升级顺序见[组件矩阵](content/compatibility/versions.zh.md)。
+双语日志合并 10 月 24–25 日占位记录，覆盖 20261018 以来全部修改。Server 发行源码为 `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`，选用已发布的 Console 与 mcli 源码、pkg v3.15.2 和上游 minio-go `v7.4.2-0.20261025165926-320af050c445`。KES 是可选的外部密钥服务。精确版本与升级顺序见[组件矩阵](content/compatibility/versions.zh.md)。
 
-`data/releases.yaml` 驱动首页与下载页。`server.published: true` 启用公开制品下载链接，`published_server` 记录当前公开版本。准备后续版本时应保持 false，直到匹配的 Server 制品与 Docker 镜像公开并完成核验，同时更新两种语言的交付说明。
+磁盘超时不证明底层 I/O 已停止；正式版保留既有超时语义，不包含草稿中的 mutation guard 与所有权回滚方案。
 
-`windows_archive_format` 记录各组件已发布的 Windows 归档格式：Server 与 KES 20261018 保持 `tar.gz`，mcli 20261025 与 Console v2.4.2 使用 `zip`。后续发布 ZIP 版本时，核验制品后同时更新对应组件的版本与格式，不改写旧版本下载链接。Linux 与 macOS 归档继续使用 `tar.gz`。
+`data/releases.yaml` 驱动首页与下载页。`server.published: true` 启用公开制品下载链接，`published_server` 记录当前公开版本。准备后续候选版本时保持 false，直到相应 Server 制品与 Docker 镜像公开且完成核验。`windows_archive_format` 跟随各组件实际发布制品：当前 Windows 归档统一为 ZIP，Linux/macOS 保持 tar.gz；历史下载链接保留原格式。制品发布与具体生产集群部署分别验收。
 
 ## 本地开发与校验
 

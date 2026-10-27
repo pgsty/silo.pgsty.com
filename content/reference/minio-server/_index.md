@@ -294,7 +294,7 @@ When no directory is explicitly configured, a new installation uses:
 
 If the user's home contains only the legacy `.minio` directory and no `.silo`, SILO continues to use `.minio/certs`. When both exist, it uses `.silo/certs` and logs a warning. For service accounts, configure `--certs-dir` explicitly instead of relying on an interactive user's home directory.
 
-SILO 20261025 still accepts the deprecated `--config-dir` / `-C` parameter. When it is set without `--certs-dir`, certificates are loaded from `<config-dir>/certs`; an explicit `--certs-dir` takes precedence. Upstream MinIO release notes about removing this parameter do not describe SILO's current behavior.
+SILO 20261026 still accepts the deprecated `--config-dir` / `-C` parameter. When it is set without `--certs-dir`, certificates are loaded from `<config-dir>/certs`; an explicit `--certs-dir` takes precedence. Upstream MinIO release notes about removing this parameter do not describe SILO's current behavior.
 
 See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more information.
 

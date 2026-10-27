@@ -239,7 +239,7 @@ SILO 的 RPM/DEB 软件包安装以下文件，并创建 `silo` 系统用户和�
 
 服务以 `silo:silo` 身份运行。为兼容已有部署，服务单元先读取 `/etc/default/minio`，再读取 `/etc/default/silo`，后者的同名配置覆盖前者；单元还声明与 `minio.service` 冲突，避免两个服务同时访问同一份数据。详见[安装布局](/zh/compatibility/binary/#layout)。
 
-手工安装归档时，创建专用的 `silo` 用户和组，并授予其数据目录和证书目录所需权限。以[当前 SILO 服务单元](https://github.com/pgsty/silo/blob/263ee0510da51c555b7257bbe504b22355cac4b0/silo.service)为模板，将本地单元安装到 `/etc/systemd/system/silo.service`。如果可执行文件安装在 `/usr/local/bin/silo`，同时调整 `AssertFileIsExecutable` 和 `ExecStart`，不要照搬软件包的 `/usr/bin/silo` 路径。
+手工安装归档时，创建专用的 `silo` 用户和组，并授予其数据目录和证书目录所需权限。以[当前 SILO 服务单元](https://github.com/pgsty/silo/blob/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3/silo.service)为模板，将本地单元安装到 `/etc/systemd/system/silo.service`。如果可执行文件安装在 `/usr/local/bin/silo`，同时调整 `AssertFileIsExecutable` 和 `ExecStart`，不要照搬软件包的 `/usr/bin/silo` 路径。
 
 检查实际生效的单元及覆盖配置，修改后重新加载：
 

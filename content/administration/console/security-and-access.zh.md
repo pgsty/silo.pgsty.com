@@ -6,6 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**Console 2.5.1：** 仅切换组状态保留成员，显式成员数组仍替换成员。OIDC 字符串数组组声明保留权限；配置 HTTPS 或可信 TLS 代理后保留安全会话 Cookie。凭据导出为准确的 UTF-8 JSON。内置策略 Reset 需要配套 Server 20261026。见 [2.5 发布说明](/zh/blog/release/console-2.5.1/)。
+
 <a id="minio-console-security-access"></a>
 <a id="id1" data-td-print-local></a>
 
@@ -42,7 +44,7 @@ upstream_modified: true
 
 ## 策略 {#minio-console-admin-policies}
 
-Console v2.5.0 对内置策略提供 **Reset**（重置），对自定义策略提供 **Delete**（删除）。**Reset** 会移除管理员对内置策略的自定义覆盖并恢复 SILO 原生定义。[Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)使恢复后的内置定义立即可读，并在收到对端/etcd 通知时重新加载已提交状态以防延迟通知抹去后续编辑（仍会执行策略在用检查；公开的 Server 20261018 尚未合入此服务端缓存刷新修复）。
+Console v2.5.1 对内置策略提供 **Reset**（重置），对自定义策略提供 **Delete**（删除）。**Reset** 会移除管理员对内置策略的自定义覆盖并恢复 SILO 原生定义。[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)使恢复后的内置定义立即可读，并在收到对端/etcd 通知时重新加载已提交状态以防延迟通知抹去后续编辑（仍会执行策略在用检查）。
 
 **Policies** 部分会显示 MinIO 部署上的所有 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。 *Policies* 部分允许你创建、修改或删除策略。
 

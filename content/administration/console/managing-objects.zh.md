@@ -6,6 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**Console 2.5.1：** Tasks 跟踪有界传输与批量操作，取消不撤销已完成修改；文本/Markdown/CSV 预览明确提示 1 MiB 截断；ZIP 在响应首字节之前失败时保留 S3 错误状态。当前页排序、筛选和全选不代表枚举整个桶。见[对象工作区变化](/zh/blog/release/console-2.5.1/#objects)。
+
 <a id="minio-console-managing-objects"></a>
 <a id="id1" data-td-print-local></a>
 
@@ -19,7 +21,7 @@ upstream_modified: true
 
 ## 对象浏览器 {#minio-console-object-browser}
 
-在 [Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)中，Console 的 `account-info` 请求改为读取实时存储桶清单，创建或删除存储桶后刷新即可获取最新列表（存储桶容量统计仍由后台扫描器更新）。公开的 Server 20261018 仍返回缓存的存储桶列表。
+在 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)中，Console 的 `account-info` 请求改为读取实时存储桶清单，创建或删除存储桶后刷新即可获取最新列表（存储桶容量统计仍由后台扫描器更新）。此前的 Server 20261018 返回缓存的存储桶列表。
 
 对象浏览器会列出已认证用户在该部署上有权访问的存储桶和对象。
 

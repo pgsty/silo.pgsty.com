@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "Server 20261025 source, public releases, exact component identities and upgrade boundaries."
+description: "Released SILO 20261026, Console 2.5.1, mcli, KES and silo-pkg 3.15.2 identities and upgrade boundaries."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,22 +9,28 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-The four maintained stack components and optional KES release independently. The tables below record the public releases and their component dependency graphs.
+SILO 20261026 is the current Server release, with Console 2.5.1, mcli 20261026 and silo-pkg 3.15.2. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
 
-## Server 20261025 source {#server-20261025}
+## Released 20261026 components {#server-20261026}
 
-As of **2026-10-26**, Server 20261025 is a **Draft Release** built from source [`263ee0510da5`](https://github.com/pgsty/silo/commit/263ee0510da51c555b7257bbe504b22355cac4b0) (package version `20261025000000.0.0`); public Server downloads continue to point to Server 20261018 below.
+<span id="server-20261025"></span><span id="published"></span>
 
-| Component | Selected by Server 20261025 source |
-| --- | --- |
-| Embedded Console | v2.5.0, `v0.0.0-20261025145732-989fa7150792` |
-| MC module / image-bundled mcli | 20261025, `v0.0.0-20261025104502-dcc78d506f94` |
-| Shared package | `github.com/pgsty/silo-pkg/v3 v3.15.1` |
-| Upstream S3 SDK | `github.com/minio/minio-go/v7 v7.4.2-0.20261020194015-ab93db7ba435` |
-| Go toolchain | 1.27.3 |
-| Platform archives | Windows ZIP; Linux and macOS tar.gz |
+| Component | Released version | Fixed source / module |
+| --- | --- | --- |
+| Server | `RELEASE.2026-10-26T00-00-00Z` | `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3` |
+| Embedded and standalone Console | `v2.5.1` | `v0.0.0-20261026153924-fff1618d9abb` |
+| mcli / MC module | `RELEASE.2026-10-26T00-00-00Z` | `v0.0.0-20261026120214-0ceb298cdcd0` |
+| Shared package | `github.com/pgsty/silo-pkg/v3 v3.15.2` | `0416eb1f450536ca2cc3592c2c2a06a3df88d4e0` |
+| Upstream S3 SDK | `github.com/minio/minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
+| Optional KES | `RELEASE.2026-10-26T00-00-00Z` | `e9b4f1acebc11d61b42f876da8df48f548750cc9` |
+| Go / platform archives | **Go 1.27.3** | Windows ZIP; Linux/macOS tar.gz |
+{.wide .expand}
 
-LDAP long-DN login, built-in policy Reset, live bucket inventory, versioned lifecycle expiration, multipart replication, and write/rollback safety are server-side fixes (installing standalone Console v2.5.0 or mcli 20261025 does not replace an older Server's embedded components or runtime behavior). See the [20261025 upgrade checks](/compatibility/server/#maintenance-20261025) and [release notes](/blog/release/silo-20261025/#server-20261025).
+Server, mcli and KES share package version `20261026000000.0.0`. Updating standalone Console does not replace an older Server's embedded UI or runtime behavior; policy Reset, live bucket inventory, lifecycle and replication repairs require Server 20261026.
+
+[Combined release notes](/blog/release/silo-20261026/) · [Console 2.5](/blog/release/console-2.5.1/) · [pkg 3.15](/blog/release/pkg-3.15.2/) · [Upgrade checks](/compatibility/server/#maintenance-20261026) · [Downloads](/download/)
+
+Official images use Docker Hub: `pgsty/silo`, `pgsty/mc`, `pgsty/silo-console` and `pgsty/kes`. Package-repository mirrors may lag GitHub artifacts. Historical graphs below support upgrade and rollback analysis.
 
 ## Server 20261018 release {#october-release}
 
@@ -41,24 +47,9 @@ The target is `RELEASE.2026-10-18T00-00-00Z`, package version `20261018000000.0.
 | Server shared package | `github.com/pgsty/silo-pkg/v3 v3.14.3` |
 | Upstream S3 SDK | `github.com/minio/minio-go/v7 v7.4.1` |
 | Build toolchain | Go 1.27.2; Console frontend uses Node 24.22.0 LTS |
+{.wide .expand}
 
 The historical Console v2.4.2 and mcli 20261018 releases declare pkg v3.14.2; Server's module graph selects v3.14.3. The [v3.14.2 dependency baseline](/blog/release/pkg-3.14.2/) and v3.14.3 [admin-action classification optimization](/blog/release/pkg-3.14.3/) preserve APIs, policy formats and authorization behavior. Server must select Console and MC replacements explicitly; Go does not inherit dependency replacements. The supported integration target is the PGSTY stack, with best-effort upstream MinIO/MC compatibility.
-
-## Published components {#published}
-
-| Component | Current public version | Contents |
-| --- | --- | --- |
-| Server | [20261018](/blog/release/silo-20261018/) | Go 1.27.2; pkg v3.14.3; SDK v7.4.1; mcli 20261018; Console v2.4.2 (`ef2dd2c41d21`) |
-| Standalone Console | [v2.5.0](/blog/release/silo-20261025/#console-250) | Go 1.27.3; pkg v3.15.1; SDK `ab93db7ba435`; mcli 20261025; updated GUI and complete diagnostic health reports |
-| mcli | [20261025](/blog/release/mcli-20261025/) | Go 1.27.3; pkg v3.15.1; SDK `ab93db7ba435`; package version `20261025000000.0.0`; Windows ZIP archives |
-| Shared pkg | [v3.15.1](/blog/release/silo-20261025/) | Go 1.27.3 library floor; refreshed shared dependencies; minio-go `ab93db7ba435`; existing policy and output compatibility retained |
-| Optional KES | [20261018](/blog/release/kes-20261018/) | Separate key service; Go 1.27.2; AWS SDK v2; OpenBao KV v2 and Moto acceptance |
-
-**Console v2.5.0 is released:** source [`989fa7150792`](https://github.com/pgsty/silo-console/commit/989fa7150792ffe62fe8d045353ed69bd2ec9ad8), public Go module version `v0.0.0-20261025145732-989fa7150792`. See the [maintenance announcement](/blog/release/silo-20261025/#console-250) for dependencies, verification, and upgrade boundaries.
-
-**Server 20261025 draft integration:** Server `main` (and the `RELEASE.2026-10-25T00-00-00Z` draft) integrates Go 1.27.3, pkg v3.15.1, mcli 20261025, and Console v2.5.0 source. Built-in policy Reset and live bucket-inventory reads require the new Server build (absent from published Server 20261018).
-
-Official images use Docker Hub: `docker.io/pgsty/silo`, `docker.io/pgsty/silo-console` and `docker.io/pgsty/mc`, `docker.io/pgsty/kes`. Console v2.5.0 image acceptance is recorded in the [maintenance announcement](/blog/release/silo-20261025/#console-250-delivery). Package-repository mirrors may lag GitHub. The [download page](/download/) provides public Server 20261018 artifacts and pinned installation commands.
 
 ## September 16 dependency graph {#source}
 
@@ -103,6 +94,7 @@ The following changes shipped in Server 20260916 and are absent from Server
 | Pool migration tags | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) | Rebalance and decommission carry object tags and their revision fields to the destination pool for ordinary and multipart writes. Tags lost by earlier migrations are not recovered; see [multi-pool object consistency](/blog/design/multi-pool-object-consistency/#migration-tags). |
 | Replica metadata | [#194](https://github.com/pgsty/silo/pull/194) | Restoring replication metadata no longer reintroduces the transport-only `aws-chunked` encoding into stored object metadata. |
 | Request-header timeout | [#196](https://github.com/pgsty/silo/pull/196) | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` reaches the HTTP server and imposes an absolute HTTP/1 header-reading deadline, even while bytes keep arriving. HTTP/1 bodies retain the existing rolling idle timeout. |
+{.wide .expand}
 
 **Upgrade and compatibility requirements:**
 
@@ -237,7 +229,7 @@ is separate from the maintained policy implementation.
 
 Console v2.4.2, mcli 20261018 and the Server 20261018 release use Go **1.27.2**; the September stack used Go **1.27.1**.
 The pkg v3.14.x line retains a Go **1.26** library floor and was race-tested with Go **1.26.8**.
-Standalone Console v2.5.0, mcli 20261025 and their pkg v3.15.1 dependency require Go **1.27.3**. The Go x/* dependencies were refreshed.
+Standalone Console v2.5.1, mcli 20261026 and their pkg v3.15.2 dependency require Go **1.27.3**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
 on NetBSD; Console's tablewriter **v0.0.5** replacement preserves its MC API.
 

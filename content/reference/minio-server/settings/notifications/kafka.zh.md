@@ -347,7 +347,7 @@ mc admin config set notify_kafka \
 {{< /tab >}}
 {{< /tabs >}}
 
-指定请求使用的 Kafka broker 协议版本。未设置时，SILO 使用 **Kafka 2.1**；20261025 源码在升级 Sarama 依赖后仍显式保留此默认值。需要不同协议时，设置 broker 支持的版本。见[所选 Sarama 配置](https://github.com/IBM/sarama/blob/v1.61.1/config.go)。
+指定请求使用的 Kafka broker 协议版本。未设置时，SILO 使用 **Kafka 2.1**；20261026 正式版在升级 Sarama 依赖后仍显式保留此默认值。需要不同协议时，设置 broker 支持的版本。见[所选 Sarama 配置](https://github.com/IBM/sarama/blob/v1.61.1/config.go)。
 
 ### Batch Size {#batch-size}
 

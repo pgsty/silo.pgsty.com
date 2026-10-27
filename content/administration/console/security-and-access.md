@@ -6,6 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**Console 2.5.1:** Changing only group status preserves its members; an explicit member array replaces them. OIDC string-array group claims retain permissions, and configured HTTPS or trusted TLS proxies preserve secure session cookies. Credential exports contain exact UTF-8 JSON. Built-in policy Reset requires the matching Server 20261026 fix. See the [2.5 release notes](/blog/release/console-2.5.1/).
+
 <a id="security-and-access"></a>
 <a id="minio-console-security-access"></a>
 
@@ -42,7 +44,7 @@ For deployments using an external identity manager such as Active Directory or a
 
 ## Policies {#policies}
 
-Console v2.5.0 provides **Reset** for built-in policies and **Delete** for custom policies. **Reset** removes a stored built-in policy override and restores SILO's native definition. The [Server 20261025 source](/blog/release/silo-20261025/#server-20261025) makes the restored definition immediately readable and reloads committed state on peer/etcd notifications so delayed notifications cannot overwrite a later edit (in-use checks still apply; published Server 20261018 does not yet include this server-side cache refresh fix).
+Console v2.5.1 provides **Reset** for built-in policies and **Delete** for custom policies. **Reset** removes a stored built-in policy override and restores SILO's native definition. The [Server 20261026](/blog/release/silo-20261026/#server-20261026) makes the restored definition immediately readable and reloads committed state on peer/etcd notifications so delayed notifications cannot overwrite a later edit (in-use checks still apply).
 
 The **Policies** section displays all [policies](/administration/identity-access-management/policy-based-access-control/#minio-policy) on the MinIO deployment. The Policies section allows you to create, modify, or delete policies.
 

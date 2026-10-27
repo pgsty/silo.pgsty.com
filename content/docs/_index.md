@@ -1,7 +1,7 @@
 ---
 title: "PGSTY SILO Documentation"
 linkTitle: "Docs"
-description: "SILO 20261025 source changes and published-release documentation"
+description: "SILO 20261026 release documentation"
 url: "/docs/"
 weight: 1
 type: docs
@@ -11,8 +11,8 @@ upstream_link: ""
 upstream_modified: true
 ---
 
-**This manual incorporates the [SILO Server 20261025 source changes](/compatibility/server/#maintenance-20261025) (in Draft Release as of 2026-10-26; the current public download remains [Server 20261018](/blog/release/silo-20261018/)).** Installation examples use published release artifacts, and sections covering 20261025 changes explicitly note their version scope.
+This manual targets **[SILO 20261026](/blog/release/silo-20261026/)** with Console 2.5.1, mcli 20261026, silo-pkg 3.15.2 and optional KES 20261026, built with Go 1.27.3.
 
-The Server 20261025 source is built with Go 1.27.3 and integrates Console v2.5.0, mcli 20261025, pkg v3.15.1, and upstream `minio-go` commit `ab93db7ba435`, whereas published Server 20261018 embeds Console v2.4.2 and uses mcli 20261018, pkg v3.14.3, and `minio-go` v7.4.1 (updating standalone Console or mcli does not replace an older Server's embedded components or server-side behavior). Before upgrading, review the [component matrix](/compatibility/versions/), [20261025 release notes](/blog/release/silo-20261025/#server-20261025), and [20261018 upgrade requirements](/blog/release/silo-20261018/#upgrade).
+Review the [component matrix](/compatibility/versions/), [upgrade checks](/compatibility/server/#maintenance-20261026) and [installation guide](/download/). Updating a standalone client or Console does not replace an older Server's embedded components. Historical security fixes and known limits retain their original release boundaries.
 
 {{< home-docs >}}

@@ -1,7 +1,7 @@
 ---
 title: 发布注记
 linkTitle: 发布注记
-description: SILO 各个正式版本的详细发布说明，按时间从新到旧排列。
+description: SILO 正式发布日志与历史版本记录。
 weight: 20
 icon: fa-solid fa-tag
 sidebar_expanded: true
@@ -15,6 +15,6 @@ aliases:
   - /releases/
 ---
 
-每个 SILO 正式版本均有独立页面，记录发布日期、主要变更、安全修复、依赖更新与相关提交。
+发布日志记录功能、安全、依赖、兼容性和交付变化。
 
-[20261025](/zh/blog/release/silo-20261025/) 是 SILO、mcli、SILO Console、silo-pkg 与 KES 共用的 Go 与依赖维护公告。silo-pkg v3.15.1 已发布；[mcli 20261025](/zh/blog/release/mcli-20261025/) 已正式发布；其余组件尚待各自完成发布。
+**[20261026 联合发布](/zh/blog/release/silo-20261026/)** 合并 SILO Server、mcli 与 KES 自 20261018 以来的修改，配套 **[Console 2.5.1](/zh/blog/release/console-2.5.1/)** 和 **[silo-pkg 3.15.2](/zh/blog/release/pkg-3.15.2/)**。10 月 24—25 日的准备记录已并入正式日志，旧链接继续重定向到新页面。

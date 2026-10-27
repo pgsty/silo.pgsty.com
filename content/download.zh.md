@@ -1,6 +1,6 @@
 ---
 title: "下载与安装 SILO"
-description: "SILO Server 20261018 正式发布，以及已发布的 mcli 20261025、Console v2.5.0、KES 20261018、pkg v3.15.1：Docker、Linux 软件包、二进制与源码安装。"
+description: "SILO、mcli、KES 20261026，Console 2.5.1 与 silo-pkg 3.15.2：镜像、软件包、二进制及源码安装。"
 url: "/zh/download/"
 type: download
 layout: single

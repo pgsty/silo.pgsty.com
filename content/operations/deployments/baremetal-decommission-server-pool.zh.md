@@ -122,7 +122,7 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 ### 删除标记、过期对象与迁移验证 {#deletemarker}
 
-SILO Server 20261018 及 20261025 源码会迁移 `null` 和 UUID 删除标记，包括源池中唯一剩下的删除标记。其他池可能仍保留同名对象的旧数据版本，因此不能仅因本池没有其他版本就丢弃标记。这替代了旧版上游跳过孤立删除标记的行为。
+SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标记，包括源池中唯一剩下的删除标记。其他池可能仍保留同名对象的旧数据版本，因此不能仅因本池没有其他版本就丢弃标记。这替代了旧版上游跳过孤立删除标记的行为。
 
 退役过程仍会评估[生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)，将符合条件的过期对象或版本送入过期处理，并跳过其迁移。可使用 [`mc admin trace --call decommission`](/zh/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) 查看迁移与跳过原因。
 

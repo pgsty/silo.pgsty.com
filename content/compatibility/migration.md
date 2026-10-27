@@ -10,7 +10,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 Migrating from MinIO to Silo reuses existing object data volumes in place without an object-by-object export and import. **Ordinary S3 applications require no code changes; administrators only need to verify deployment settings, authorization rules, and state compatibility.**
 
-The current published target is **Server 20261018** (review its [upgrade requirements](/blog/release/silo-20261018/#upgrade) and [October compatibility delta](/compatibility/server/#october-2026), especially if your deployment used `strict` multipart listing). Check the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level compatibility overview](/compatibility/) before following this guide. RPM/DEB installations are covered in [Native Package Migration](/compatibility/binary/), and component pairings are listed in the [version matrix](/compatibility/versions/).
+The current published target is **Server 20261026** (review its [upgrade requirements](/blog/release/silo-20261026/#upgrade) and [October compatibility delta](/compatibility/server/#october-2026), especially if your deployment used `strict` multipart listing). Check the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level compatibility overview](/compatibility/) before following this guide. RPM/DEB installations are covered in [Native Package Migration](/compatibility/binary/), and component pairings are listed in the [version matrix](/compatibility/versions/).
 
 ## What changes {#scope}
 
@@ -26,7 +26,7 @@ In order of operational impact:
 ## What stays {#unchanged}
 
 - **Object layouts, erasure formats, and the `.minio.sys` metadata directory remain unchanged**, allowing data drives from compatible baselines to be reused directly (see [rollback scope](#rollback) for downgrade constraints).
-- **Existing buckets, object versions, users, access keys, IAM policies, lifecycle rules, and encryption configurations remain active.** Specific authorization, replication, and metadata tightening rules are documented in [O02](/compatibility/#o02), [O07](/compatibility/#o07), and the target [release notes](/blog/release/silo-20261018/).
+- **Existing buckets, object versions, users, access keys, IAM policies, lifecycle rules, and encryption configurations remain active.** Specific authorization, replication, and metadata tightening rules are documented in [O02](/compatibility/#o02), [O07](/compatibility/#o07), and the target [release notes](/blog/release/silo-20261026/).
 - **Common S3 APIs, SigV4 signing, SDKs, `mc`/`mcli`, and presigned URLs work as before**; checksum validation, conditional requests, and error-code refinements are listed under [O04](/compatibility/#o04).
 - **Network and mounts**: endpoint hostnames, API port `9000`, Console ports, and volume mount paths remain unchanged.
 - **Runtime configuration**: `MINIO_*` environment variables and existing server CLI flags remain unchanged.
@@ -80,7 +80,7 @@ The snippet below shows the standard image and native health probe. **Do not bli
 ```yaml
 services:
   minio:                              # service name may stay "minio"
-    image: docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z
+    image: docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z
     command: server /data --console-address ":9001"
     environment:                      # retain existing credential sources
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -158,7 +158,7 @@ On-disk object layout compatibility does not mean an older binary understands ne
 | Conditional deletion | Since 20260916, single-object `DeleteObject` enforces nonempty `If-Match` headers and returns `412 PreconditionFailed` on ETag mismatch (batch `DeleteObjects` is unchanged). See [conditional DELETE](/blog/design/conditional-delete/). |
 | Multipart listing | 20260916 offered an optional `MINIO_API_MULTIPART_LISTING=strict` disk-scan mode; 20261018 removes it and restores legacy in-memory cache behavior (omitting `max-uploads` defaults to 1,000, though the legacy cache path does not enforce strict pagination). See [20260916 behavior](/blog/release/silo-20260916/#multipart) and [20261018 upgrade requirements](/blog/release/silo-20261018/#upgrade). |
 | Reverse-proxy source-address trust | When `MINIO_API_TRUSTED_PROXIES` is unset, the S3 listener preserves historical trust of forwarded client-IP headers. Set `none` for direct client connections, or explicitly list proxy IPs/CIDRs and ensure proxies overwrite client-supplied headers. Console and LDAP STS follow their own trust rules. See [source-address trust](/compatibility/server/#trusted-proxies). |
-| Identity and object state | If your deployment uses IAM sub-user password policies, service accounts, STS, OIDC, Object Lock, or replication, review the [target release notes](/blog/release/silo-20261018/#upgrade), [password permission migration](/compatibility/password-permissions/), and [IAM recovery](/operations/replication/iam-upgrade/). |
+| Identity and object state | If your deployment uses IAM sub-user password policies, service accounts, STS, OIDC, Object Lock, or replication, review the [target release notes](/blog/release/silo-20261026/#upgrade), [password permission migration](/compatibility/password-permissions/), and [IAM recovery](/operations/replication/iam-upgrade/). |
 
 ## Upgrading from RELEASE.2026-08-06 {#since-20260806}
 

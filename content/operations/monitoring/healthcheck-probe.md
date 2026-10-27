@@ -3,7 +3,7 @@ title: "Healthcheck API"
 url: "/operations/monitoring/healthcheck-probe/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/healthcheck-probe.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="healthcheck-api"></a>
@@ -73,6 +73,8 @@ A response code of `200 OK` indicates that the MinIO cluster has sufficient MinI
 The healthcheck probe alone cannot determine if a MinIO server is offline - only whether enough MinIO servers will be online after taking the node down for maintenance to meet read and write quorum requirements based on the configured [erasure code parity](/operations/concepts/erasure-coding/#minio-ec-parity). Consider configuring a Prometheus [alert](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) using the `minio_cluster_nodes_offline_total` metric to detect whether one or more MinIO nodes are offline.
 
 ## Startup Readiness Window {#startup-readiness-window}
+
+SILO 20261026 retains this distinction: the [cluster health implementation](https://github.com/pgsty/silo/blob/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3/cmd/erasure-server-pool.go#L3054) evaluates reported drive quorum. Check both cluster endpoints, then validate actual reads and writes before resuming an upgrade workload.
 
 None of the endpoints above proves that the node which received the request can already serve the data path after a restart. Each node connects its erasure drives to its peers in a monitor loop: a remote drive that could not be connected during startup stays uninstalled on that node until a later pass, and the monitor waits 15 seconds after each completed pass, so that interval is a floor between attempts, not a bound on recovery. While a drive is uninstalled, the node's liveness endpoint answers `200 OK`, both cluster endpoints, `mc admin info` and `mcli ready` can report healthy as well, because the cluster endpoints aggregate every peer's report of its own local drives rather than the drives this node has installed. Yet a PUT through that node can fail with `503 SlowDownWrite` for lack of write quorum, and a GET through it of an object another node just wrote can answer `404 NoSuchKey`. In the review runs that established this, sampled I/O began succeeding roughly 13 to 15 seconds after the administrative views became healthy on a four-node loopback cluster, consistent with the reconnect interval, and every object acknowledged by other nodes during the window was readable afterwards; these are observations, not guarantees, since reconnection can keep failing.
 

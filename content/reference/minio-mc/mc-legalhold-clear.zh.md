@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** 单对象与递归清除 legal hold 失败都会返回退出码 1；成功对象不会回滚。 [版本说明](/zh/compatibility/mcli/#current-release).
+> **自 mcli 20260916 起：** 单对象与递归清除 legal hold 失败都会返回退出码 1；成功对象不会回滚。 [版本说明](/zh/compatibility/mcli/#current-release).
 
 
 <a id="mc-legalhold-clear"></a>

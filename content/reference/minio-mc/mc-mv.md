@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** A failed copy never authorizes source deletion. A successful copy followed by a failed source deletion exits 1 after waiting for deletion results; successfully copied objects are not rolled back. The selected SDK also reports S3 errors embedded in CopyObject HTTP 200 responses. [Release behavior](/compatibility/mcli/#current-release).
+> **Since mcli 20260916:** A failed copy never authorizes source deletion. A successful copy followed by a failed source deletion exits 1 after waiting for deletion results; successfully copied objects are not rolled back. The selected SDK also reports S3 errors embedded in CopyObject HTTP 200 responses. [Release behavior](/compatibility/mcli/#current-release).
 
 
 <a id="mc-mv"></a>

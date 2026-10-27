@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261018/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
 
 <a id="macos-minio"></a>
 <a id="deploy-minio-macos"></a>
@@ -185,7 +185,7 @@ Silo 对象存储服务端
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-10-18T00-00-00Z (go1.27.2 darwin/arm64)
+Version: RELEASE.2026-10-26T00-00-00Z (go1.27.3 darwin/arm64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin

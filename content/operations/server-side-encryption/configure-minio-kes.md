@@ -9,7 +9,7 @@ upstream_modified: true
 
 <a id="server-side-object-encryption-with-kes"></a>
 
-Use **PGSTY KES** as a separate key encryption service for SILO. Upstream MinIO KES is deprecated, but the maintained [`pgsty/kes`](https://github.com/pgsty/kes) fork has a published [20261018 release](/blog/release/kes-20261018/). KES is optional, independently released, and not embedded in the SILO binary.
+Use **PGSTY KES** as a separate key encryption service for SILO. Upstream MinIO KES is deprecated, but the maintained [`pgsty/kes`](https://github.com/pgsty/kes) fork has a published [20261026 release](/blog/release/silo-20261026/#kes). KES is optional, independently released, and not embedded in the SILO binary.
 
 The maintained integration is **SILO → PGSTY KES → OpenBao KV v2**. SILO encrypts object data; KES authenticates SILO and generates or decrypts data keys; OpenBao persists KES root keys. OpenBao uses KES's `keystore.vault` configuration. See the [integration design](/blog/design/kes-openbao/) for the tested scope and upgrade boundaries.
 
@@ -41,7 +41,7 @@ keystore:
       secret: "REPLACE_WITH_APPROLE_SECRET"
 ```
 
-Use the [PGSTY KES configuration reference](https://github.com/pgsty/kes/blob/RELEASE.2026-10-18T00-00-00Z/server-config.yaml) for the complete configuration, including TLS trust for the key store. Protect the configuration file and provision real credentials outside source control. Keep OpenBao unsealed and test its backup and recovery procedure.
+Use the [PGSTY KES configuration reference](https://github.com/pgsty/kes/blob/RELEASE.2026-10-26T00-00-00Z/server-config.yaml) for the complete configuration, including TLS trust for the key store. Protect the configuration file and provision real credentials outside source control. Keep OpenBao unsealed and test its backup and recovery procedure.
 
 <a id="minio-sse-aws"></a>
 <a id="minio-sse-azure"></a>

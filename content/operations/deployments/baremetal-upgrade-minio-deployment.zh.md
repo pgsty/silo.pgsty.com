@@ -20,7 +20,7 @@ upstream_modified: true
 
 ## 升级前准备 {#id2}
 
-**20261025 升级准备：** 截至 2026-10-26，Server 20261025 仍为 Draft Release。升级到包含这些修复的正式版本时，需统一升级全部写入节点，并按实际业务场景验证内置策略 Reset、LDAP 长 DN 登录、远端分层历史版本读取与分片上传复制。等待已接纳存储 I/O 会延长慢盘或卡盘上的单对象写入等待；既有读仲裁与自愈规则保持不变（升级不新增分布式 fencing，也不会自动修复存量不一致对象）。详见 [20261025 兼容性检查](/zh/compatibility/server/#maintenance-20261025)。
+**升级到 20261026：** 统一升级全部写入节点，并验证内置策略 Reset、LDAP 长 DN 登录、远端分层历史版本读取与分片复制。存储超时和取消保留既有行为；超时不证明底层 I/O 停止，也不保证写入未提交。读仲裁与自愈策略不变，升级不新增分布式 fencing、不修复存量不一致对象。见 [20261026 升级检查](/zh/compatibility/server/#maintenance-20261026)。
 
 1. **备份集群设置。** 使用 [`mc admin cluster bucket export`](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) 与 [`mc admin cluster iam export`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) 导出存储桶元数据和 IAM 配置。对于带持久 IAM 撤销的版本，还需备份完整后端和加密材料；live export 不含删除历史，详见 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)。
 2. **选择已经公开发布的 Silo 版本。** 以[下载与安装](/zh/download/#server)、[Silo 发布说明](/zh/blog/release/)和 [GitHub Releases](https://github.com/pgsty/silo/releases)为准。本地标签、分支提交、草稿 Release 或上传到草稿中的制品都不等于公开发布。

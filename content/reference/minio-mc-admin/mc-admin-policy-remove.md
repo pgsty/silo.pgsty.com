@@ -14,7 +14,7 @@ upstream_modified: true
 
 ## Syntax {#syntax}
 
-Removes a custom IAM policy from a SILO deployment (rejected if the policy is still in use; unmodified built-in policies cannot be removed). In the [Server 20261025 source](/blog/release/silo-20261025/#server-20261025), removing an explicit built-in policy override immediately resets it to its native definition while retaining the deletion revision against stale overrides (not yet in published Server 20261018; see [Console policy management](/administration/console/security-and-access/#minio-console-admin-policies)).
+Removes a custom IAM policy from a SILO deployment (rejected if the policy is still in use; unmodified built-in policies cannot be removed). In the [Server 20261026](/blog/release/silo-20261026/#server-20261026), removing an explicit built-in policy override immediately resets it to its native definition while retaining the deletion revision against stale overrides (see [Console policy management](/administration/console/security-and-access/#minio-console-admin-policies)).
 
 The [`mc admin policy remove`](#command-mc.admin.policy.remove) command has equivalent functionality to [`mc admin policy rm`](#command-mc.admin.policy.rm).
 

@@ -6,6 +6,8 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
+**The current upgrade target is [Server 20261026](/blog/release/silo-20261026/).** The 20260916/20261018 revocation-history and authorization requirements below still apply. This release also repairs long-DN LDAP login, policy reloads and built-in policy Reset. Coordinate all participating nodes using the [component matrix](/compatibility/versions/).
+
 **STS revocation verification:** 20261018 also adds [durable enumeration and propagation](/blog/design/iam-revocations/#scoped-sts-20261018). After revoking the actual parent/token type, check old-token rejection and fresh-token validity at every node and site, including a reconnecting peer. Tokens never received from an isolated site are outside the requesting cluster snapshot; one successful response does not establish instantaneous global invalidation during a partition.
 
 
@@ -143,7 +145,7 @@ restore separately.
    records. Rebuild stale offline peers from approved state before reconnecting
    them. Repeat the credential checks after restart and peer catch-up.
 
-In the [Server 20261025 source](/blog/release/silo-20261025/#server-20261025), deleting an explicit built-in policy override immediately restores the native definition while retaining the deletion revision to reject stale overrides (not yet in published Server 20261018). Verify built-in policy Reset on each node and again after restart and peer catch-up, and confirm that in-use rejection and custom-policy deletion behave as expected. Ordinary legacy group-member removal during an outage remains outside the durable parent-deletion guarantee.
+In the [Server 20261026](/blog/release/silo-20261026/#server-20261026), deleting an explicit built-in policy override immediately restores the native definition while retaining the deletion revision to reject stale overrides (absent from Server 20261018). Verify built-in policy Reset on each node and again after restart and peer catch-up, and confirm that in-use rejection and custom-policy deletion behave as expected. Ordinary legacy group-member removal during an outage remains outside the durable parent-deletion guarantee.
 
 Reopen access only after version identity, backend recovery, IAM loading,
 replication and both credential checks pass. If a stale credential succeeds,

@@ -1,7 +1,7 @@
 ---
 title: Release Notes
 linkTitle: Release
-description: SILO release notes and clearly marked upcoming release placeholders, ordered from newest to oldest.
+description: SILO release notes and historical version records.
 weight: 20
 icon: fa-solid fa-tag
 sidebar_expanded: true
@@ -15,6 +15,6 @@ aliases:
   - /releases/
 ---
 
-Release notes record major changes, security fixes, dependency updates, and related commits. Upcoming releases are explicitly marked as placeholders.
+Release notes record features, security fixes, dependency updates, compatibility and delivery changes.
 
-[20261025](/blog/release/silo-20261025/) is a shared Go and dependency maintenance announcement for SILO, mcli, SILO Console, silo-pkg and KES. silo-pkg v3.15.1 is released; [mcli 20261025](/blog/release/mcli-20261025/) is released. The other component releases remain pending.
+The **[20261026 coordinated release](/blog/release/silo-20261026/)** combines SILO Server, mcli and KES changes since 20261018, with **[Console 2.5.1](/blog/release/console-2.5.1/)** and **[silo-pkg 3.15.2](/blog/release/pkg-3.15.2/)**. The October 24–25 preparation records are consolidated here; their old URLs redirect to the final notes.

@@ -10,16 +10,20 @@ icon: fa-solid fa-terminal
 
 `mcli` 是 Silo 构建的 MinIO 客户端（`mc`）。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
-[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/) 与 [20260913](/zh/blog/release/mcli-20260913/)。最新版本为 [20261018](/zh/blog/release/mcli-20261018/)；历史说明保留各自比较基线。
+[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/) 与 [20260913](/zh/blog/release/mcli-20260913/)。最新版本为 [20261026](/zh/blog/release/silo-20261026/#mcli)；历史说明保留各自比较基线。
 
 > [!TIP]
-> **当前版本：** [RELEASE.2026-10-18T00-00-00Z](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-18T00-00-00Z)，软件包 `20261018000000.0.0`，源码 `fa3b8bf72458`。已提供六个系统/架构归档、RPM/DEB/APK 与多架构镜像。见[发布说明](/zh/blog/release/mcli-20261018/)和[组件矩阵](/zh/compatibility/versions/)。
+> **当前正式版：** [mcli 20261026](/zh/blog/release/silo-20261026/#mcli)，包版本 `20261026000000.0.0`，源码 `0ceb298cdcd0`。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK 与 Docker Hub 镜像。
 
-## 当前版本变化 {#current-release}
+<span id="current-release"></span>
 
-20261018 使用 **Go 1.27.2**、**silo-pkg v3.14.2** 和上游 **minio-go v7.4.1**，更新 Go x/* 与针对性的依赖修复。SDK 修复取消操作后的失败分片上传清理，按 UTC 发送保留时间，并保留请求指定的 STS 时长；并行 GET 与 ComposeObject 仍需显式选择，不改变默认传输方式。
+## 当前版本变化 {#release-20261026}
 
-命令语法、配置、别名和已有失败退出码保持不变。版本镜像与 `latest` 已通过匿名访问验证，均提供 Linux amd64/arm64。Go 嵌入方选择 `github.com/pgsty/mc v0.0.0-20261017101407-fa3b8bf72458`，完整依赖与制品说明见 [20261018 发布说明](/zh/blog/release/mcli-20261018/)。
+<span id="release-20261018"></span>
+
+使用 Go 1.27.3、silo-pkg 3.15.2 和固定上游 SDK `320af050c445`。自 20261018 起，修复身份/连接配置缓存隔离、resync JSON 与终态、吞吐量及 batch IOPs 溢出、缺少实时指标时的状态观察、部分操作失败退出码、别名区域与 SDK 分片/读取/删除行为。脚本需处理新增 `pending` 状态与部分 resync 修改失败的非零退出码；查询已有失败任务仍退出零。别名 region 不增加新 CLI 参数，已有配置继续可用。
+
+内嵌应用选择 `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`。客户端无需更改 Server 协议，SILO 为正式维护目标。见[完整变更](/zh/blog/release/silo-20261026/#mcli)与[组件矩阵](/zh/compatibility/versions/)。
 
 ## 继承自 20260916 的变化 {#release-20260916}
 

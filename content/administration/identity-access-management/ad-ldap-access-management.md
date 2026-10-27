@@ -30,7 +30,7 @@ The login flow for an application using Active Directory / LDAP credentials is a
    If configured to perform group queries, MinIO also queries for a list of AD/LDAP groups in which the user has membership. SILO includes policies explicitly attached to each returned group DN.
 4. MinIO returns temporary credentials in the STS API response in the form of an access key, secret key, and session token. The credentials have permissions matching those policies attached to either the authenticated user DN *or* a group DN.
 
-MinIO provides an example Go application [ldap.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-18T00-00-00Z/docs/sts/ldap.go) that handles the full login flow.
+MinIO provides an example Go application [ldap.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-26T00-00-00Z/docs/sts/ldap.go) that handles the full login flow.
 
 AD/LDAP users can alternatively create [access keys](/administration/identity-access-management/minio-user-management/#minio-idp-service-account) associated to their AD/LDAP user Distinguished Name. Access Keys are long-lived credentials which inherit their privileges from the parent user. The parent user can further restrict those privileges while creating the access keys. Use either of the following methods to create a new access key:
 
@@ -69,4 +69,4 @@ mc idp ldap policy attach myminio diagnostics \
 
 ## Long Distinguished Names
 
-The [Server 20261025 source](/blog/release/silo-20261025/#server-20261025) includes the [LDAP long-DN fix](/blog/design/ldap-long-dn/) (not yet in published Server 20261018). When a user relies on group policies and has a normalized DN whose pure-ASCII filename component exceeds 255 bytes on the object IAM backend, the server treats the resulting filename-length error as an absent user-policy mapping and proceeds to evaluate group policies; full-path length limits (`PATH_MAX`), unreadable revocation records, and storage failures still fail closed, and writing overlong path records remains unsupported on the object backend.
+The [Server 20261026](/blog/release/silo-20261026/#server-20261026) includes the [LDAP long-DN fix](/blog/design/ldap-long-dn/) (absent from Server 20261018). When a user relies on group policies and has a normalized DN whose pure-ASCII filename component exceeds 255 bytes on the object IAM backend, the server treats the resulting filename-length error as an absent user-policy mapping and proceeds to evaluate group policies; full-path length limits (`PATH_MAX`), unreadable revocation records, and storage failures still fail closed, and writing overlong path records remains unsupported on the object backend.

@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-box
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261018](/blog/release/silo-20261018/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261018/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
 
 Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [GitHub Releases](https://github.com/pgsty/silo/releases), with SHA-256 sums and build-provenance attestations. This page records what changes relative to a `minio` package installation: the file layout, the service account, and the caveats. General migration scope is in the [migration guide](/compatibility/migration/).
 
@@ -17,8 +17,8 @@ Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [Git
 Download the package that matches your platform from the release assets, then verify its checksum before installing:
 
 ```bash
-SILO_TAG=RELEASE.2026-10-18T00-00-00Z
-SILO_RPM=silo-20261018000000.0.0-1PGSTY.x86_64.rpm
+SILO_TAG=RELEASE.2026-10-26T00-00-00Z
+SILO_RPM=silo-20261026000000.0.0-1PGSTY.x86_64.rpm
 SILO_URL="https://github.com/pgsty/silo/releases/download/$SILO_TAG"
 curl -fLO "$SILO_URL/$SILO_RPM"
 curl -fLO "$SILO_URL/$SILO_RPM.sha256sum"

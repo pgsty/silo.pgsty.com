@@ -126,7 +126,7 @@ Do **not** perform “rolling” (e.g. one node at a time) restarts.
 
 ### Delete Markers, Expiration, and Migration Verification {#decommissioning-ignores-expired-objects-and-trailing-deletemarker}
 
-SILO Server 20261018 and the 20261025 source migrate both null and UUID delete markers, including a marker that is the only remaining version in the source pool. Another pool may still contain older data for that key, so a marker cannot be discarded merely because no other version remains in its own pool. This replaces the older upstream behavior that skipped isolated markers.
+SILO Server 20261018 and 20261026 migrate both null and UUID delete markers, including a marker that is the only remaining version in the source pool. Another pool may still contain older data for that key, so a marker cannot be discarded merely because no other version remains in its own pool. This replaces the older upstream behavior that skipped isolated markers.
 
 Decommissioning still evaluates [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration), queues eligible expired objects or versions for expiration, and skips their migration. Use [`mc admin trace --call decommission`](/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) to inspect migration and skip reasons.
 

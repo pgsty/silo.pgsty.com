@@ -13,22 +13,24 @@ icon: fa-solid fa-server
 > [!WARNING]
 > **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
 
-## Server 20261025 升级检查 {#maintenance-20261025}
+<span id="maintenance-20261025"></span>
 
-本节对应 [20261025 Draft Release](/zh/blog/release/silo-20261025/#server-20261025) 源码 [`263ee0510da5`](https://github.com/pgsty/silo/commit/263ee0510da51c555b7257bbe504b22355cac4b0)（截至 2026-10-26 尚未合入公开 Server 20261018 下载制品）。
+## Server 20261026 升级检查 {#maintenance-20261026}
+
+本节对应 [Server 20261026 正式版](/zh/blog/release/silo-20261026/#server-20261026)，源码为 [`c3ad836aed0d`](https://github.com/pgsty/silo/commit/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3)。
 
 | 使用场景 | 行为变化与升级要求 |
 | --- | --- |
 | LDAP 规范化长 DN | ASCII 文件名分量超过 255 字节的缺失可选 IAM 记录不再阻断组策略登录；不可读撤销记录与真实存储故障继续按 Fail-Closed 报错，对象后端仍不支持写入超长路径记录。见 [LDAP 指南](/zh/administration/identity-access-management/ad-ldap-access-management/)。 |
 | 内置策略覆盖 | Reset 删除覆盖内容后立即恢复原生内置定义，并继续执行策略在用检查；延迟到达的对端/etcd 通知重新加载已提交状态，自定义策略仍执行真正删除。见 [Console 策略管理](/zh/administration/console/security-and-access/#minio-console-admin-policies)。 |
 | Console 创建/删除存储桶 | `account-info` 接口改为读取实时存储桶清单（旧版 Server 刷新后可能返回旧缓存）；用量统计仍由后台扫描器更新。 |
-| 取消写入、回滚与清理 | 等待已接纳的底层存储修改完成后再释放本地锁与暂存目录；回滚先校验所有权并保留后续并发写入。需统一升级全部写入节点；慢盘或卡盘会延长锁等待，清理中断可能残留 `xl.meta.bkp` 备份文件。 |
+| 存储超时与回滚 | 保留磁盘/RPC 超时与取消行为，转发覆盖回滚的删除选项。超时不证明 I/O 已停止，迟到提交与延迟回滚仍可能发生；草稿的 mutation guard 和无界完成等待未纳入本版。 |
 | 多池删除 | 普通与批量删除先清理非权威旧副本再删除权威副本，并保护共享远端分层引用；若中途遇到存储故障，恢复后重试即可。 |
 | 版本化远端分层过期 | 生命周期过期仅生成删除标记时保留上一版本的远端分层对象（含已暂停版本控制桶中的非 `null` 版本）；升级前已误删的历史远端数据需从备份恢复。 |
 | 分片上传复制 | 为可合并的 CRC 校验和算法透传 `FULL_OBJECT` 校验和类型；需升级发送端 Server 并核对待复制队列。 |
-| 构建与制品 | 基于 Go 1.27.3 构建，集成 Console v2.5.0、mcli 20261025、pkg v3.15.1 与固定提交的上游 `minio-go`；Windows 归档改用 ZIP。见[组件版本矩阵](/zh/compatibility/versions/#server-20261025)。 |
+| 构建与制品 | 基于 Go 1.27.3 构建，集成 Console v2.5.1、mcli 20261026、pkg v3.15.2 与固定提交的上游 `minio-go`；Windows 归档改用 ZIP。见[组件版本矩阵](/zh/compatibility/versions/#server-20261026)。 |
 
-**读取与故障边界：** 租约失效或网络分区仍可能产生迟到提交，部分元数据更新仍可能暴露旧值或旧标签。既有读仲裁与自愈规则保持不变（更严格的拒读与跨池恢复诊断保留在 `consistency_strict` 构建标签下），升级不提供分布式 fencing，也不会自动修复存量不一致对象。下方 20261018 的 Object Lock、IAM 与 strict 分片模式退役要求继续适用。
+**读取与故障边界：** 租约失效或网络分区仍可能产生迟到提交，部分元数据更新仍可能暴露旧值或旧标签。既有读仲裁与自愈规则保持不变（更严格的 fencing、回滚与读取恢复诊断保留在 `consistency_strict` 构建标签下），升级不提供分布式 fencing，也不会自动修复存量不一致对象。下方 20261018 的 Object Lock、IAM 与 strict 分片模式退役要求继续适用。
 
 ## Server 20261018 升级检查 {#october-2026}
 

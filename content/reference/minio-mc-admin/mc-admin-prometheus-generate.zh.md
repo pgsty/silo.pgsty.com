@@ -3,7 +3,7 @@ title: "mc admin prometheus generate"
 url: "/zh/reference/minio-mc-admin/mc-admin-prometheus-generate/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-prometheus-generate.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-prometheus-generate"></a>
@@ -16,7 +16,7 @@ upstream_modified: false
 
 有关 MinIO 与 Prometheus 配合使用的完整文档，请参见 [How to monitor MinIO server with Prometheus](/zh/operations/monitoring/collect-minio-metrics-using-prometheus/#minio-metrics-collect-using-prometheus)
 
-从 MinIO 服务端 [RELEASE.2024-07-15T19-02-30Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-15T19-02-30Z) 和 MinIO 客户端 [RELEASE.2024-07-11T18-01-28Z](https://github.com/minio/mc/releases/tag/RELEASE.2024-07-11T18-01-28Z) 开始，[metrics version 3 (v3)](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) 提供了额外的端点和指标。 要生成 v3 抓取配置，请使用 `--api_version v3` 选项。
+从 MinIO 服务端 [RELEASE.2024-07-15T19-02-30Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-15T19-02-30Z) 和 MinIO 客户端 [RELEASE.2024-07-11T18-01-28Z](https://github.com/minio/mc/releases/tag/RELEASE.2024-07-11T18-01-28Z) 开始，[metrics version 3 (v3)](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) 提供了额外的端点和指标。 要生成 v3 抓取配置，请使用 `--api-version v3` 选项。
 
 MinIO 建议新部署使用 [version 3 (v3)](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。 现有部署可以继续使用 [metrics version 2](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2)
 
@@ -40,7 +40,7 @@ mc admin prometheus generate myminio bucket
 mc [GLOBALFLAGS] admin prometheus generate                                        \
                                   ALIAS                                           \
                                   [TYPE]                                          \
-                                  [--api_version v3]                              \
+                                  [--api-version v3]                              \
                                   [--bucket <bucket name>]
 ```
 
@@ -68,7 +68,7 @@ mc [GLOBALFLAGS] admin prometheus generate                                      
 
 *Optional*
 
-要为 [v3 metrics](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) 生成抓取配置，请添加 `--api-version v3` 参数。 `v3` 是唯一接受的值。
+要为 [v3 metrics](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) 生成抓取配置，请添加 `--api-version v3` 参数。 SILO mcli 20261026 接受 `v2`（默认值）与 `v3`。
 
 省略 `--api-version` 可生成 [v2 metrics](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2) 配置。
 

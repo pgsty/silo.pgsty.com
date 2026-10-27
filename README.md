@@ -2,31 +2,38 @@
 
 [English](README.md) · [简体中文](README_ZH.md)
 
-This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.3.2](https://github.com/pgsty/oink/tree/v1.3.2), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
+This repository contains the bilingual documentation for **Silo**, a community fork of MinIO. It uses [Hugo](https://gohugo.io/) and [OINK 1.4.0](https://github.com/pgsty/oink/tree/v1.4.0), pinned to the exact release in `go.mod`, with English at `/` and Simplified Chinese at `/zh/`.
 
 ## Release state and publication
 
-The current public release is **SILO Server 20261018** (`RELEASE.2026-10-18T00-00-00Z`, package `20261018000000.0.0`), source `0cd388c666f8211f552604ae73448a066e9c25ce`. Its GitHub assets and Docker Hub images were verified on 2026-10-19. The selected graph is Console v2.4.2, mcli 20261018, Server pkg v3.14.3 and upstream minio-go v7.4.1; standalone Console v2.4.2 still declares pkg v3.14.2. The independently released [mcli 20261025](content/blog/release/mcli-20261025.md) uses Go 1.27.3, silo-pkg v3.15.1 and minio-go `ab93db7ba435`.
+The current coordinated release is **SILO Server, mcli and KES 20261026**
+(`RELEASE.2026-10-26T00-00-00Z`, package `20261026000000.0.0`), with
+**SILO Console v2.5.1** and **silo-pkg v3.15.2**, built with Go 1.27.3.
+Server source is `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`; its selected graph
+uses the released Console and mcli sources, pkg v3.15.2 and upstream minio-go
+`v7.4.2-0.20261025165926-320af050c445`. KES is an optional external key service.
 
-Optional PGSTY KES 20261018 is published separately. The October batch includes
-paired release notes for Server, Console, mcli, pkg v3.14.2/v3.14.3 and KES,
-with deployment and recovery design records linked from each relevant note.
-The Server's exact-source local artifact acceptance is recorded in its release
-note. Public release and deployment to a particular production environment remain separate steps.
+| Release notes | English | 简体中文 |
+| --- | --- | --- |
+| Server / mcli / KES 20261026 | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
+| Console 2.5 series, through 2.5.1 | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
+| silo-pkg 3.15 series, through 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md) | [发布说明](content/blog/release/pkg-3.15.2.zh.md) |
 
-Review the paired [English](content/blog/release/silo-20261018.md) / [Chinese](content/blog/release/silo-20261018.zh.md) release notes and security notes before upgrading. `data/releases.yaml` drives the homepage and download templates: `server.published: true` enables public asset links; `published_server` records the current public release. For future releases, keep the flag false until the matching Server assets and Docker images are publicly verified, and update both languages together.
+These bilingual notes consolidate the October 24–25 placeholders and cover all
+changes since 20261018. See the [component matrix](content/compatibility/versions.md)
+for exact sources, upgrade order and compatibility boundaries. A storage timeout
+does not prove that underlying I/O stopped; the final Server release retains
+existing timeout behavior and does not ship the draft's mutation guards or
+ownership-checked rollback scheme.
 
-The [component matrix](https://silo.pgsty.com/compatibility/versions/) separates
-published artifacts from accepted main-branch source. Update both languages,
-component changelogs and GitHub release notes together. Download artifact inputs
-live in `data/releases.yaml`; historical articles retain their original version
-numbers and receive a dated follow-up when status changes.
-
-`windows_archive_format` records each component's published Windows archive
-format. Keep `tar.gz` for Server and KES 20261018, and `zip` for mcli
-20261025 and Console v2.4.2. When publishing a subsequent ZIP release, update that component's
-version and format together after verifying its assets; do not rewrite old
-release links. Linux and macOS archives continue to use `tar.gz`.
+`data/releases.yaml` drives the homepage and download templates.
+`server.published: true` enables public asset links; `published_server` records
+the current public release. For a future candidate, keep the flag false until
+its Server artifacts and Docker images are public and verified.
+`windows_archive_format` follows each released component: all current Windows
+archives use ZIP; Linux and macOS use tar.gz. Historical links retain their
+original archive formats. Publishing an artifact and deploying it to a production
+cluster are separate steps.
 
 The homepage Docker Pulls card links to [`pgsty/silo`](https://hub.docker.com/r/pgsty/silo).
 Its counter combines the historical `pgsty/minio` and current `pgsty/silo` repositories.
@@ -73,8 +80,8 @@ The appearance menu offers Paper (default), Slate, Ink, and Terminal in both lan
 ### Contributor records
 
 The reviewed roster in `data/home/contributors.yaml` drives the homepage and
-generates both contributor pages, all four software repositories' `CONTRIBUTORS.md`
-files, and their README sections. Include every human issue / PR author, in any
+generates both contributor pages, the five software repositories' `CONTRIBUTORS.md`
+files (Server, Console, mcli, silo-pkg and KES), and their README sections. Include every human issue / PR author, in any
 state; retain acknowledged security disclosures and distinguish incorporated
 work from the original PR's merge status. Preserve historical release credits.
 
@@ -140,7 +147,7 @@ Pages carried over from the MinIO documentation declare their source in front ma
 
 ```yaml
 upstream_link: https://github.com/minio/docs # material this page is derived from
-upstream_modified: false # set true when Silo changes substance beyond the format conversion
+upstream_modified: true # set true when Silo changes substance beyond the format conversion
 ```
 
 `upstream_link` identifies the source and `upstream_modified` records whether its substance has changed. Shared attribution metadata — the work's name, the copyright notice, the license, and the attribution page — is declared once in `hugo.yaml` (`upstream_name`, `upstream_copyright`, `upstream_license`, `upstream_notice`); the theme fails the build if a page names a source without that metadata.

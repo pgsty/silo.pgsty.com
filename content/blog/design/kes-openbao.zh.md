@@ -2,7 +2,7 @@
 title: "SILO、KES 与 OpenBao：密钥归属和恢复"
 linkTitle: "KES 与 OpenBao"
 date: 2026-10-18
-lastmod: 2026-10-18
+lastmod: 2026-10-26
 author: "SILO"
 description: "区分对象加密、密钥服务授权与根密钥持久存储，并明确升级和恢复的验证方法。"
 tags: [设计, KES, 安全, 运维]
@@ -10,6 +10,8 @@ weight: 1
 draft: false
 url: "/zh/blog/design/kes-openbao/"
 ---
+
+**当前版本：** [KES 20261026](/zh/blog/release/silo-20261026/#kes) 已正式发布，使用 Go 1.27.3 并更新云服务依赖，保留本文的 API、配置与密钥格式。下文 20261018 的 AWS SDK v2 迁移和验证记录仍按原始版本标注。
 
 SILO 通过 [PGSTY KES](https://github.com/pgsty/kes)（`MINIO_KMS_KES_ENDPOINT`）接入外部密钥管理系统。[PGSTY KES 20261018](/zh/blog/release/kes-20261018/)（源码 [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)）独立于 SILO 四组件构建图按需部署，在保持既有密钥存储格式与 OpenBao KV v2 兼容性的同时，将 KES 的 AWS Secrets Manager 后端迁移至 AWS SDK for Go v2。
 
@@ -111,7 +113,7 @@ path "secret/metadata/kes/*" {
 ## 升级与恢复检查 {#verification}
 
 1. 记录当前 SILO 与 KES 版本、主密钥名称、后端端点及客户端证书 Identity，并在确认恢复成功前保留既有密钥与后端备份。
-2. 变更前读取一个既有加密对象并记录其预期摘要（Digest）；基于同一持久化后端将 KES 升级为 [PGSTY KES 20261018](/zh/blog/release/kes-20261018/#delivery) 二进制。
+2. 变更前读取一个既有加密对象并记录其预期摘要（Digest）；基于同一持久化后端将 KES 升级为 [PGSTY KES 20261026](/zh/blog/release/silo-20261026/#kes) 二进制。
 3. 重启 KES 与 SILO（清空热缓存），读取旧加密对象、写入新加密对象并校验两者摘要，验证生产环境实际使用的 TLS 身份与访问策略。
 4. 在隔离演练环境中，基于同一密钥存储恢复旧版 KES 二进制，重启两项服务并重复验证加密对象回读。
 

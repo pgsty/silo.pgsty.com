@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261018](/blog/release/silo-20261018/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261018/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
 
 <a id="upgrade-a-minio-tenant"></a>
 <a id="minio-k8s-upgrade-minio-tenant"></a>
@@ -98,7 +98,7 @@ metadata:
   namespace: my-tenant-ns
 
 spec:
-  image: docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z
+  image: docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z
   env:
     - name: MINIO_UPDATE
       value: "off"

@@ -1,7 +1,7 @@
 ---
 title: "组件版本"
 linkTitle: "组件版本"
-description: "Server 20261025 源码、正式版状态、准确组件身份与升级边界。"
+description: "SILO 20261026、Console 2.5.1、mcli、KES 与 silo-pkg 3.15.2 的正式版本和依赖关系。"
 url: "/zh/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,22 +9,28 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-维护栈的四个组件与可选 KES 分别发布。下表记录各正式版本及其组件依赖关系。
+SILO 20261026 是当前正式服务端版本，配套 Console 2.5.1、mcli 20261026 与 silo-pkg 3.15.2。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
 
-## Server 20261025 源码 {#server-20261025}
+## 20261026 正式组件 {#server-20261026}
 
-截至 **2026-10-26**，Server 20261025 为 **Draft Release**，对应源码为 [`263ee0510da5`](https://github.com/pgsty/silo/commit/263ee0510da51c555b7257bbe504b22355cac4b0)（包版本 `20261025000000.0.0`），当前公开下载仍指向下方的 Server 20261018。
+<span id="server-20261025"></span><span id="published"></span>
 
-| 组件 | Server 20261025 源码选用版本 |
-| --- | --- |
-| 嵌入式 Console | v2.5.0，`v0.0.0-20261025145732-989fa7150792` |
-| MC 模块／镜像内置 mcli | 20261025，`v0.0.0-20261025104502-dcc78d506f94` |
-| 共享包 | `github.com/pgsty/silo-pkg/v3 v3.15.1` |
-| 上游 S3 SDK | `github.com/minio/minio-go/v7 v7.4.2-0.20261020194015-ab93db7ba435` |
-| Go 工具链 | 1.27.3 |
-| 平台压缩包 | Windows 使用 ZIP；Linux 与 macOS 保持 tar.gz |
+| 组件 | 正式版本 | 固定源码 / 模块 |
+| --- | --- | --- |
+| Server | `RELEASE.2026-10-26T00-00-00Z` | `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3` |
+| 内嵌与独立 Console | `v2.5.1` | `v0.0.0-20261026153924-fff1618d9abb` |
+| mcli / MC 模块 | `RELEASE.2026-10-26T00-00-00Z` | `v0.0.0-20261026120214-0ceb298cdcd0` |
+| 公共包 | `github.com/pgsty/silo-pkg/v3 v3.15.2` | `0416eb1f450536ca2cc3592c2c2a06a3df88d4e0` |
+| 上游 S3 SDK | `github.com/minio/minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
+| 可选 KES | `RELEASE.2026-10-26T00-00-00Z` | `e9b4f1acebc11d61b42f876da8df48f548750cc9` |
+| Go / 平台归档 | **Go 1.27.3** | Windows ZIP；Linux/macOS tar.gz |
+{.wide .expand}
 
-LDAP 长 DN 登录、内置策略 Reset、实时存储桶清单、版本桶生命周期过期、分片上传复制及写入/回滚保护均属于服务端修复（单独安装独立 Console v2.5.0 或 mcli 20261025 不会替换旧版 Server 的内嵌组件或服务端逻辑）。详情参见 [20261025 升级检查](/zh/compatibility/server/#maintenance-20261025)与[发布记录](/zh/blog/release/silo-20261025/#server-20261025)。
+Server、mcli、KES 的包版本均为 `20261026000000.0.0`。独立 Console 更新不会替换旧 Server 的内嵌控制台或服务端行为；内置策略 Reset、实时桶清单、生命周期与复制修复需要 Server 20261026。
+
+[三合一发布日志](/zh/blog/release/silo-20261026/) · [Console 2.5](/zh/blog/release/console-2.5.1/) · [pkg 3.15](/zh/blog/release/pkg-3.15.2/) · [升级检查](/zh/compatibility/server/#maintenance-20261026) · [下载](/zh/download/)
+
+官方镜像分别位于 Docker Hub 的 `pgsty/silo`、`pgsty/mc`、`pgsty/silo-console`、`pgsty/kes`。包仓库镜像可能晚于 GitHub 制品更新。下面保留历史版本依赖，用于升级和回退分析。
 
 ## Server 20261018 正式发布 {#october-release}
 
@@ -41,24 +47,9 @@ LDAP 长 DN 登录、内置策略 Reset、实时存储桶清单、版本桶生�
 | Server 共享包 | `github.com/pgsty/silo-pkg/v3 v3.14.3` |
 | 上游 S3 SDK | `github.com/minio/minio-go/v7 v7.4.1` |
 | 构建工具链 | Go 1.27.2；Console 前端使用 Node 24.22.0 LTS |
+{.wide .expand}
 
 历史版本 Console v2.4.2 与 mcli 20261018 声明 pkg v3.14.2；Server 的模块图选用 v3.14.3。v3.14.2 的[依赖更新](/zh/blog/release/pkg-3.14.2/)与 v3.14.3 的 [admin action 分类优化](/zh/blog/release/pkg-3.14.3/)保持 API、策略格式和授权语义。Server 必须显式选择 Console 与 MC 的 replacement，Go 不会继承依赖的替换配置。正式支持 PGSTY 四组件组合，对原厂 MinIO/MC 兼容尽最大努力。
-
-## 已发布组件 {#published}
-
-| 组件 | 当前正式版本 | 实际内容 |
-| --- | --- | --- |
-| Server | [20261018](/zh/blog/release/silo-20261018/) | Go 1.27.2；pkg v3.14.3；SDK v7.4.1；mcli 20261018；Console v2.4.2（`ef2dd2c41d21`） |
-| 独立 Console | [v2.5.0](/zh/blog/release/silo-20261025/#console-250) | Go 1.27.3；pkg v3.15.1；SDK `ab93db7ba435`；mcli 20261025；GUI 更新与完整诊断健康报告 |
-| mcli | [20261025](/zh/blog/release/mcli-20261025/) | Go 1.27.3；pkg v3.15.1；SDK `ab93db7ba435`；包版本 `20261025000000.0.0`；Windows ZIP 归档 |
-| 共享 pkg | [v3.15.1](/zh/blog/release/silo-20261025/) | 最低要求 Go 1.27.3；共享依赖更新；minio-go `ab93db7ba435`；保留策略与输出兼容性 |
-| 可选 KES | [20261018](/zh/blog/release/kes-20261018/) | 独立密钥服务；Go 1.27.2；AWS SDK v2；OpenBao KV v2 与 Moto 验收 |
-
-**Console v2.5.0 已正式发布：** 源码为 [`989fa7150792`](https://github.com/pgsty/silo-console/commit/989fa7150792ffe62fe8d045353ed69bd2ec9ad8)，公开 Go 模块版本为 `v0.0.0-20261025145732-989fa7150792`。依赖、验收与升级边界见[统一维护公告](/zh/blog/release/silo-20261025/#console-250)。
-
-**Server 20261025 草稿集成：** Server `main`（及 `RELEASE.2026-10-25T00-00-00Z` 草稿）已集成 Go 1.27.3、pkg v3.15.1、mcli 20261025 与 Console v2.5.0 源码。内置策略 Reset 与实时存储桶列表修复需配合新 Server 生效；已发布的 Server 20261018 不包含这两项修复。
-
-官方镜像使用 Docker Hub：`docker.io/pgsty/silo`、`docker.io/pgsty/silo-console`、`docker.io/pgsty/mc`、`docker.io/pgsty/kes`。Console v2.5.0 的镜像验收见[统一维护公告](/zh/blog/release/silo-20261025/#console-250-delivery)。软件包仓库镜像可能晚于 GitHub 更新。[下载页](/zh/download/)提供 Server 20261018 的公开制品与固定版本安装命令。
 
 ## 9 月 16 日依赖图 {#source}
 
@@ -99,6 +90,7 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 | <span style="white-space:nowrap">标签与删除标记</span> | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS 复制保留标签修订时间；删除标签推进修订并抵御延迟事件；删除标记清除在 MRF 恢复时保留标记身份和重试状态。 |
 | <span style="white-space:nowrap">复制元数据</span> | [#194](https://github.com/pgsty/silo/pull/194) | 恢复复制元数据时，不再把传输用的 `aws-chunked` 编码重新写入对象元数据。 |
 | <span style="white-space:nowrap">请求头超时</span> | [#196](https://github.com/pgsty/silo/pull/196) | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` 正确传入 HTTP 服务，对 HTTP/1 请求头设置绝对读取期限，持续少量发送字节也无法延长；正文保留既有滚动空闲超时。 |
+{.wide .expand}
 
 **升级与兼容性要求：**
 
@@ -161,7 +153,7 @@ Go 不继承依赖模块的 `replace`。即使 Console 已选择 MC，Server 仍
 Console 和 MC 保留历史 MinIO 模块路径，pkg 直接使用自己的路径。
 `colorjson`/`dperf` 带入的旧 `minio/pkg/v3` 传递依赖与维护中的策略实现相互独立。
 
-Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg v3.14.x 系列保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。独立发布的 Console v2.5.0、mcli 20261025 及其 pkg v3.15.1 依赖要求 Go **1.27.3**。
+Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg v3.14.x 系列保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。独立发布的 Console v2.5.1、mcli 20261026 及其 pkg v3.15.2 依赖要求 Go **1.27.3**。
 Go x/* 依赖已刷新。go-systemd 实际仍选 **v22.6.0**，因为 v22.7.0 在 NetBSD 编译失败；
 Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。
 

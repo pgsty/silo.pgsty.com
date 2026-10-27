@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261018 contract:** This page retains the inherited S3 API catalog. The target is the [20261018 release](/blog/release/silo-20261018/). Apply the documented limits and error behavior for [ordinary LIST](/blog/design/listing-recovery-lock-cost/), [Object Lock](/blog/security/20260926-governance-retention-bypass/) and [multipart listing](/blog/design/list-multipart-uploads/#implementation). Checksum message text can change; see the [checksum contract](/blog/design/complete-multipart-checksum-errors/#october-errors).
+**SILO 20261026 contract:** This page retains the inherited S3 API catalog. The target is the [20261026 release](/blog/release/silo-20261026/). Apply the documented limits and error behavior for [ordinary LIST](/blog/design/listing-recovery-lock-cost/), [Object Lock](/blog/security/20260926-governance-retention-bypass/) and [multipart listing](/blog/design/list-multipart-uploads/#implementation). Checksum message text can change; see the [checksum contract](/blog/design/complete-multipart-checksum-errors/#october-errors).
 
 <a id="s3-api-compatibility"></a>
 

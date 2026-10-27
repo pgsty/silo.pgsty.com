@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261018/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
 
 <a id="object-lambda"></a>
 <a id="developers-object-lambda"></a>
@@ -210,7 +210,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl-3.0.html>
-Version: RELEASE.2026-10-18T00-00-00Z (go1.27.2 linux/arm64)
+Version: RELEASE.2026-10-26T00-00-00Z (go1.27.3 linux/arm64)
 
 Status:         1 Online, 0 Offline.
 API: http://192.168.64.21:9000  http://127.0.0.1:9000

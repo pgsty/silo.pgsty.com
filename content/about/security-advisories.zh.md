@@ -14,7 +14,7 @@ icon: fa-solid fa-shield-halved
 
 ## 当前发布边界 {#boundary}
 
-当前生产推荐基线为 **[Server 20261018](/zh/blog/release/silo-20261018/)**、**[Console v2.5.0](/zh/blog/release/silo-20261025/#console-250)**、**[mcli 20261025](/zh/blog/release/mcli-20261025/)**；Server 选用 **[silo-pkg v3.14.3](/zh/blog/release/pkg-3.14.3/)**，独立 Console 与 mcli 选用 **[v3.15.1](/zh/blog/release/silo-20261025/)**（Go 1.27.3 及全栈依赖维护见 [20261025 公告](/zh/blog/release/silo-20261025/)）：
+当前生产推荐基线为 **[Server 20261026](/zh/blog/release/silo-20261026/)**、**[Console v2.5.1](/zh/blog/release/console-2.5.1/)** 与 **[mcli 20261026](/zh/blog/release/silo-20261026/#mcli)**，统一选用 **[silo-pkg v3.15.2](/zh/blog/release/pkg-3.15.2/)** 和 Go 1.27.3；可选的外部密钥服务为 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**。本版保留以下历史安全修复，并纳入[依赖安全更新](/zh/blog/release/silo-20261026/#runtime-fixes)。各问题首次修复的版本如下：
 
 - **Server 20261018** 修复了 [SN-2026-015](#sn-2026-015)（`PutObjectRetention` 治理保留期授权绕过）、[SN-2026-016](#sn-2026-016)（指定版本与原地写入覆写对象锁）以及 [SN-2026-017](#sn-2026-017)（委派 IAM Admin 凭据授权边界），并新增按主体/按令牌范围吊销 STS 会话的能力（`0cd388c66`）。Server 20260916 及更早版本仍受 `SN-2026-015` 至 `SN-2026-017` 影响；请将修复部署至每一个接受写入的 Server 节点与复制站点。详见[十月安全公告](/zh/blog/security/20261018-release-hardening/)与[组件版本矩阵](/zh/compatibility/versions/)。
 - **Server 20260916** 与 **Console v2.4.1** 包含 [SN-2026-011](#sn-2026-011) 至 [SN-2026-014](#sn-2026-014) 的修复（Server 20260903 不包含）。
@@ -176,7 +176,7 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 
 ## 依赖安全更新 {#dependencies}
 
-[Server 20261018](/zh/blog/release/silo-20261018/) 使用 Go 1.27.2 构建，并升级至 `golang.org/x/net v0.61.0`、`golang.org/x/crypto v0.58.0`、`golang.org/x/text v0.43.0` 与 `github.com/go-jose/go-jose/v4 v4.1.6`（注意 [`go-jose` RSA JWK 解析修复](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q)同时拒绝大于 4096 位的 RSA 密钥，升级前请核验 OIDC/JWKS 身份提供方密钥长度）。全栈 Go 1.27.3 与静态 `curl 8.23.0` 维护记录见 [SILO 20261025](/zh/blog/release/silo-20261025/)。
+[Server 20261018](/zh/blog/release/silo-20261018/) 使用 Go 1.27.2 构建，并升级至 `golang.org/x/net v0.61.0`、`golang.org/x/crypto v0.58.0`、`golang.org/x/text v0.43.0` 与 `github.com/go-jose/go-jose/v4 v4.1.6`（注意 [`go-jose` RSA JWK 解析修复](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q)同时拒绝大于 4096 位的 RSA 密钥，升级前请核验 OIDC/JWKS 身份提供方密钥长度）。全栈 Go 1.27.3 与静态 `curl 8.23.0` 维护记录见 [SILO 20261026](/zh/blog/release/silo-20261026/)。
 
 | 公告 / 范围 | 修复提交 | 摘要 |
 | :-- | :-- | :-- |

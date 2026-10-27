@@ -26,7 +26,7 @@ This procedure is generic for OIDC compatible providers. Defer to the documentat
 
 ### OpenID-Connect (OIDC) Compatible IDentity Provider {#openid-connect-oidc-compatible-identity-provider}
 
-**SILO 20261018 compatibility:** the [release](/blog/release/silo-20261018/) uses go-jose v4.1.6, which rejects RSA JWKs larger than **4096 bits** while repairing excessive CPU consumption from crafted keys. Check the provider's signing keys, discovery, JWKS refresh and a complete login before upgrading; rotate incompatible keys at the provider. See the [dependency security note](/blog/security/20261018-release-hardening/#dependencies). Server 20261018 is publicly available.
+**SILO 20261026 compatibility:** the [release](/blog/release/silo-20261026/) retains go-jose v4.1.6. Since SILO 20261018, this dependency rejects RSA JWKs larger than **4096 bits** while repairing excessive CPU consumption from crafted keys. Check the provider's signing keys, discovery, JWKS refresh and a complete login before upgrading; rotate incompatible keys at the provider. See the [dependency security note](/blog/security/20261018-release-hardening/#dependencies).
 
 This procedure assumes an existing OIDC provider such as Okta, KeyCloak, Dex, Google, or Facebook. Instructions on configuring these services are out of scope for this procedure.
 

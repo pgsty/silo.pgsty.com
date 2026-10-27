@@ -6,6 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**Console 2.5.1:** Tasks track bounded transfers and bulk operations; cancellation does not undo completed mutations. Text/Markdown/CSV previews show a 1 MiB truncation notice. ZIP failures before the first response byte preserve the S3 error status. Current-page sorting, filtering and Select All do not enumerate the entire bucket. See the [object workspace changes](/blog/release/console-2.5.1/#objects).
+
 <a id="managing-objects"></a>
 <a id="minio-console-managing-objects"></a>
 
@@ -19,7 +21,7 @@ You can use the MinIO Console to perform several of the bucket and object manage
 
 ## Object Browser {#object-browser}
 
-In the [Server 20261025 source](/blog/release/silo-20261025/#server-20261025), Console's `account-info` request reads the live bucket inventory so refreshing after creating or deleting a bucket immediately reflects the updated list (bucket usage totals remain scanner-derived). Published Server 20261018 still serves a cached bucket inventory.
+In the [Server 20261026](/blog/release/silo-20261026/#server-20261026), Console's `account-info` request reads the live bucket inventory so refreshing after creating or deleting a bucket immediately reflects the updated list (bucket usage totals remain scanner-derived). Server 20261018 serves a cached bucket inventory.
 
 The Object Browser lists the buckets and objects the authenticated user has access to on the deployment.
 

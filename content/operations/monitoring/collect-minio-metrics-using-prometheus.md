@@ -3,8 +3,10 @@ title: "Monitoring and Alerting using Prometheus"
 url: "/operations/monitoring/collect-minio-metrics-using-prometheus/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/collect-minio-metrics-using-prometheus.rst
-upstream_modified: false
+upstream_modified: true
 ---
+
+**SILO 20261026 / Console 2.5.1:** The Console Metrics page uses Metrics V3, with per-node aggregation and explicit missing-data handling. Overview capacity is the Server-reported raw capacity, not an EC usable-capacity estimate. Bucket inventory is live; object counts and usage are scanner-derived, so inspect freshness before interpreting changes. See the [Console release notes](/blog/release/console-2.5.1/#interface) and [metric mapping](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md).
 
 <a id="monitoring-and-alerting-using-prometheus"></a>
 <a id="minio-metrics-collect-using-prometheus"></a>
@@ -17,7 +19,21 @@ MinIO publishes cluster, node, bucket, and resource metrics using the [Prometheu
 - Configuring a Prometheus service to scrape and display metrics from a MinIO deployment
 - Configuring an Alert Rule on a MinIO Metric to trigger an AlertManager action
 
-These instructions use [version 2 metrics.](/operations/monitoring/metrics-v2/#minio-metrics-v2) For more about metrics API versions, see [Metrics and alerts.](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)
+## Recommended Metrics V3 scraping for 20261026 {#metrics-v3}
+
+New deployments and the Console 2.5 Metrics page should scrape V3. Select the API version explicitly with mcli 20261026:
+
+```shell
+mcli admin prometheus generate mysilo --api-version v3
+```
+
+The generated configuration uses `/minio/metrics/v3` and includes the required bearer token. Merge it into Prometheus and set targets to the SILO nodes being monitored. Protect the token and confirm successful scrapes before enabling the corresponding alerts. Categories such as `cluster` and `system` limit collection; the full Console dashboard needs its corresponding metric families. See the [command reference](/reference/minio-mc-admin/mc-admin-prometheus-generate/).
+
+- Multiple nodes export duplicate cluster metrics. Deduplicate within each cluster with `max` / `min`, retaining cluster identity labels; do not sum these copies across nodes.
+- Some legitimate zero values are omitted. Fill zero only when a companion metric with the same lifecycle exists; failed scrapes and usage data not yet produced by the scanner must remain no-data.
+- V3 API metrics use the `name` label; node metrics carry `server`, drive metrics carry pool/set/drive indexes, and durations use seconds. Adjust queries and alert thresholds when migrating a V2 dashboard.
+
+The [V2 metric](/operations/monitoring/metrics-v2/#minio-metrics-v2) scraping and alerting procedure below remains for existing dashboards. Omitting `--api-version` still generates V2 configuration.
 
 > [!NOTE]
 > **Prerequisites**

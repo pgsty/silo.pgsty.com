@@ -34,7 +34,7 @@ If you supply `support_public.pem`, retain its matching private key. Quote wildc
 Build the inspect utility from the maintained SILO source checkout using the Go version required by that checkout:
 
 ```shell
-git clone --branch RELEASE.2026-10-18T00-00-00Z --depth 1 https://github.com/pgsty/silo.git
+git clone --branch RELEASE.2026-10-26T00-00-00Z --depth 1 https://github.com/pgsty/silo.git
 cd silo/docs/debugging/inspect
 go build -o inspect .
 ```

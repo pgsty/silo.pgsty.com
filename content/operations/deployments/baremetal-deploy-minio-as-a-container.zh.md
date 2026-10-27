@@ -22,7 +22,7 @@ Silo 容器的功能和性能可能会受到基础操作系统的限制。
 >
 > 下面的示例仅覆盖用于开发或评估的单机单盘和单机多盘部署；它们不构成 Docker Compose、Docker Swarm 或其他容器编排器上的生产级多机多盘拓扑或升级契约。生产环境的分布式部署应使用经过验证的 [Kubernetes Tenant 流程](/zh/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/)，并针对实际环境验证持久化、网络、故障域与升级。
 >
-> 示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为目标，现已公开发布。生产部署还需验证实际负载，并记录镜像摘要以便回滚。
+> 示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为目标，现已公开发布。生产部署还需验证实际负载，并记录镜像摘要以便回滚。
 >
 > SILO 禁止原地自更新，`MINIO_UPDATE=off` 不会重新启用它。容器升级应替换为经过验证的 SILO 标签或摘要，不应调用 `mc admin update`。
 
@@ -69,7 +69,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /data --console-address ":9001"
 ```
 
 该命令分别将端口 `9000` 和 `9001` 绑定到 S3 API 和 Web Console。
@@ -92,7 +92,7 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 对于 Windows 主机，请使用 Windows 文件系统语义指定本地文件夹路径，例如 `C:\minio\:/data`。
@@ -111,7 +111,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /data --console-address ":9001"
 ```
 
 该命令分别将端口 `9000` 和 `9001` 绑定到 S3 API 和 Web Console。
@@ -134,7 +134,7 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
 对于 Windows 主机，请使用 Windows 文件系统语义指定本地文件夹路径，例如 `C:\minio\:/data`。

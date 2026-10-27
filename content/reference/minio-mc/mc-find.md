@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** Invalid `--regex` expressions produce a normal CLI error instead of a panic. Target validation still runs first, so an invalid target retains its original error. [Release behavior](/compatibility/mcli/#current-release).
+> **Since mcli 20260916:** Invalid `--regex` expressions produce a normal CLI error instead of a panic. Target validation still runs first, so an invalid target retains its original error. [Release behavior](/compatibility/mcli/#current-release).
 
 
 <a id="mc-find"></a>

@@ -2,7 +2,7 @@
 title: "多池删除：失败时保住最新副本"
 linkTitle: "多池删除安全性"
 date: 2026-10-24
-lastmod: 2026-10-24
+lastmod: 2026-10-26
 author: "冯若航"
 summary: "记录 PR #257 的问题成因、预检查之后的故障窗口、分阶段删除与重试修复，以及最终合并版本的性能代价、兼容性和验证边界。"
 tags: [Design, S3, Storage, Performance]
@@ -10,6 +10,8 @@ weight: 11
 draft: false
 url: "/zh/blog/design/multi-pool-delete-safety/"
 ---
+
+**发布状态：** 本文修复已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 正式发布；以下保留设计与验证时的源码范围。
 
 **2026 年 10 月 24 日决定：合并修正后的 [PR #257](https://github.com/pgsty/silo/pull/257)。** 提交 [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) 修复了 [issue #256](https://github.com/pgsty/silo/issues/256) 报告的多池删除缺陷，并补齐请求开始之后的执行期故障保护。核心不变量是：**先完成其他池的旧副本清理，再删除决定当前读取结果的权威副本。**
 

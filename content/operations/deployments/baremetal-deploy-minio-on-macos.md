@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261018](/blog/release/silo-20261018/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261018/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
 
 <a id="deploy-minio-on-macos"></a>
 <a id="deploy-minio-macos"></a>
@@ -185,7 +185,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-10-18T00-00-00Z (go1.27.2 darwin/arm64)
+Version: RELEASE.2026-10-26T00-00-00Z (go1.27.3 darwin/arm64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin

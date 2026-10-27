@@ -2,7 +2,7 @@
 title: "FULL_OBJECT Checksum Replication: Preserve the Type at Upload Initiation"
 linkTitle: "FULL_OBJECT Replication"
 date: 2026-10-24
-lastmod: 2026-10-24
+lastmod: 2026-10-26
 author: "Ruohang Feng"
 summary: >
   PR #255 restores the FULL_OBJECT checksum type when replicating multipart CRC objects. This note documents the BadDigest failure chain, the upstream regression, why a three-line guard also repairs CopyObject replication, and the verification and upgrade guidance.
@@ -11,6 +11,8 @@ weight: 8
 draft: false
 url: "/blog/design/replication-full-object-checksum/"
 ---
+
+**Release status:** This fix shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026). The design and validation below retain their original source scope.
 
 [Issue #254](https://github.com/pgsty/silo/issues/254) reported a replication failure affecting multipart objects uploaded with a `FULL_OBJECT` CRC32 or CRC32C checksum: the object uploads and reads normally on the source, but the replication target rejects `CompleteMultipartUpload` with `400 BadDigest`. [PR #255](https://github.com/pgsty/silo/pull/255), contributed by Denis Babchuk (`@botdeniska`), restores the omitted checksum-type header in outgoing replication requests.
 

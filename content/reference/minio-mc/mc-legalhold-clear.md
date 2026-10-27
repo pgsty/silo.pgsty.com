@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** Single-object and recursive legal-hold failures return exit status 1. Successful objects are not rolled back. [Release behavior](/compatibility/mcli/#current-release).
+> **Since mcli 20260916:** Single-object and recursive legal-hold failures return exit status 1. Successful objects are not rolled back. [Release behavior](/compatibility/mcli/#current-release).
 
 
 <a id="mc-legalhold-clear"></a>

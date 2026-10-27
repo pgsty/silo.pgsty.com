@@ -14,7 +14,7 @@ Entries with a public CVE use that identifier. Because upstream `minio/minio` is
 
 ## Current Release Boundary {#boundary}
 
-The current production baseline is **[Server 20261018](/blog/release/silo-20261018/)**, **[Console v2.5.0](/blog/release/silo-20261025/#console-250)**, **[mcli 20261025](/blog/release/mcli-20261025/)**, with **[silo-pkg v3.14.3](/blog/release/pkg-3.14.3/)** in Server and **[v3.15.1](/blog/release/silo-20261025/)** in standalone Console and mcli (with unified Go 1.27.3 and dependency maintenance tracked in [20261025](/blog/release/silo-20261025/)):
+The current production baseline is **[Server 20261026](/blog/release/silo-20261026/)**, **[Console v2.5.1](/blog/release/console-2.5.1/)** and **[mcli 20261026](/blog/release/silo-20261026/#mcli)**, all selecting **[silo-pkg v3.15.2](/blog/release/pkg-3.15.2/)** and Go 1.27.3. **[KES 20261026](/blog/release/silo-20261026/#kes)** is the optional external key service. This release retains the earlier security fixes below and adds the [dependency security updates](/blog/release/silo-20261026/#runtime-fixes). The first fixed versions remain:
 
 - **Server 20261018** fixes [SN-2026-015](#sn-2026-015) (`PutObjectRetention` governance bypass), [SN-2026-016](#sn-2026-016) (version-addressed and in-place Object Lock overwrites), and [SN-2026-017](#sn-2026-017) (Admin credential authorization boundaries), and adds scoped STS token revocation (`0cd388c66`). Server 20260916 and earlier remain affected by `SN-2026-015` through `SN-2026-017`; deploy the upgrade to every Server node and replication peer accepting writes. See the [October security note](/blog/security/20261018-release-hardening/) and [Component Version Matrix](/compatibility/versions/).
 - **Server 20260916** and **Console v2.4.1** include [SN-2026-011](#sn-2026-011) through [SN-2026-014](#sn-2026-014), which are absent from Server 20260903.
@@ -176,7 +176,7 @@ Config-subsystem hardening (`672c07a0f` in [Server 20260804](/blog/release/silo-
 
 ## Dependency Security Updates {#dependencies}
 
-[Server 20261018](/blog/release/silo-20261018/) builds with Go 1.27.2 and selects `golang.org/x/net v0.61.0`, `golang.org/x/crypto v0.58.0`, `golang.org/x/text v0.43.0`, and `github.com/go-jose/go-jose/v4 v4.1.6` (note that the [`go-jose` RSA JWK parsing fix](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q) rejects RSA keys larger than 4096 bits; verify OIDC/JWKS identity providers before upgrading). Unified Go 1.27.3 and static `curl 8.23.0` updates are tracked in [SILO 20261025](/blog/release/silo-20261025/).
+[Server 20261018](/blog/release/silo-20261018/) builds with Go 1.27.2 and selects `golang.org/x/net v0.61.0`, `golang.org/x/crypto v0.58.0`, `golang.org/x/text v0.43.0`, and `github.com/go-jose/go-jose/v4 v4.1.6` (note that the [`go-jose` RSA JWK parsing fix](https://github.com/go-jose/go-jose/security/advisories/GHSA-mgcc-cww5-fp2q) rejects RSA keys larger than 4096 bits; verify OIDC/JWKS identity providers before upgrading). Unified Go 1.27.3 and static `curl 8.23.0` updates are tracked in [SILO 20261026](/blog/release/silo-20261026/).
 
 | Advisory / Scope | Fixed By | Summary |
 | :-- | :-- | :-- |

@@ -239,7 +239,7 @@ SILO RPM/DEB packages install the following files and create the `silo` system u
 
 The service runs as `silo:silo`. For existing deployments, the unit reads `/etc/default/minio` first, then `/etc/default/silo`; values in the latter override matching keys in the former. It also declares a conflict with `minio.service` so the two services do not access the same data concurrently. See the [installation layout](/compatibility/binary/#layout).
 
-For a manual archive installation, create a dedicated `silo` user and group and grant the required access to data and certificate directories. Use the [current SILO unit](https://github.com/pgsty/silo/blob/263ee0510da51c555b7257bbe504b22355cac4b0/silo.service) as a template and install the local unit at `/etc/systemd/system/silo.service`. If the executable is installed at `/usr/local/bin/silo`, adjust both `AssertFileIsExecutable` and `ExecStart` instead of retaining the package's `/usr/bin/silo` path.
+For a manual archive installation, create a dedicated `silo` user and group and grant the required access to data and certificate directories. Use the [current SILO unit](https://github.com/pgsty/silo/blob/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3/silo.service) as a template and install the local unit at `/etc/systemd/system/silo.service`. If the executable is installed at `/usr/local/bin/silo`, adjust both `AssertFileIsExecutable` and `ExecStart` instead of retaining the package's `/usr/bin/silo` path.
 
 Inspect the effective unit and any overrides, then reload after changes:
 

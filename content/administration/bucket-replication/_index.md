@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**20261025 source change:** Multipart replication now preserves the `FULL_OBJECT` checksum type for composite CRC algorithms (earlier versions omitted the header, causing the destination to initialize a `COMPOSITE` multipart upload and reject the full-object CRC at completion). This fix is in the [Server 20261025 source](/blog/release/silo-20261025/#server-20261025); after upgrading the sending Server, verify pending/failed replicas and destination checksums.
+**20261026 release change:** Multipart replication now preserves the `FULL_OBJECT` checksum type for composite CRC algorithms (earlier versions omitted the header, causing the destination to initialize a `COMPOSITE` multipart upload and reject the full-object CRC at completion). This fix is in the [Server 20261026](/blog/release/silo-20261026/#server-20261026); after upgrading the sending Server, verify pending/failed replicas and destination checksums.
 
 <a id="bucket-replication"></a>
 <a id="minio-bucket-replication"></a>

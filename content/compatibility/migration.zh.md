@@ -10,7 +10,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 从 MinIO 迁移到 Silo 可直接复用现有对象数据卷，无需逐对象导出与重新导入。**普通 S3 应用无需修改代码，管理员只需核对部署配置、权限规则与状态兼容性。**
 
-当前最新发布目标为 **Server 20261018**（升级前请一并核对其[升级要求](/zh/blog/release/silo-20261018/#upgrade)与[十月兼容性增量](/zh/compatibility/server/#october-2026)，尤其是曾启用 `strict` 分片列举的部署）。建议先对照[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 软件包升级见[原生软件包迁移](/zh/compatibility/binary/)，版本配套关系见[组件矩阵](/zh/compatibility/versions/)。
+当前最新发布目标为 **Server 20261026**（升级前请一并核对其[升级要求](/zh/blog/release/silo-20261026/#upgrade)与[十月兼容性增量](/zh/compatibility/server/#october-2026)，尤其是曾启用 `strict` 分片列举的部署）。建议先对照[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 软件包升级见[原生软件包迁移](/zh/compatibility/binary/)，版本配套关系见[组件矩阵](/zh/compatibility/versions/)。
 
 ## 哪些改变 {#scope}
 
@@ -26,7 +26,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 ## 哪些不变 {#unchanged}
 
 - **对象布局、纠删码格式和 `.minio.sys` 元数据目录完全保留**，可直接挂载兼容基线的数据盘（跨版本降级要求见[回滚边界](#rollback)）。
-- **既有桶、对象版本、用户、Access Key、IAM 策略、生命周期与加密配置继续生效**。授权判定、复制状态和新增元数据的行为收敛见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) 及目标版本的[发布说明](/zh/blog/release/silo-20261018/)。
+- **既有桶、对象版本、用户、Access Key、IAM 策略、生命周期与加密配置继续生效**。授权判定、复制状态和新增元数据的行为收敛见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) 及目标版本的[发布说明](/zh/blog/release/silo-20261026/)。
 - **常用 S3 API、SigV4 签名、SDK、`mc`/`mcli` 与预签名 URL 接入方式保持不变**；校验和、条件请求和错误码收敛见 [O04](/zh/compatibility/#o04)。
 - **网络与挂载**：端点主机名、API 端口 `9000`、Console 端口与卷挂载路径不变。
 - **运行参数**：`MINIO_*` 环境变量与既有服务端启动参数不变。
@@ -80,7 +80,7 @@ docker.io/pgsty/silo:<RELEASE-tag>
 ```yaml
 services:
   minio:                              # 服务名可保持为 "minio"
-    image: docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z
+    image: docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z
     command: server /data --console-address ":9001"
     environment:                      # 保留既有凭据来源
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -158,7 +158,7 @@ Kubernetes kubelet 直接通过 Pod spec 中的 `httpGet` 探针检查容器，�
 | 条件删除 | 自 20260916 起，单对象 `DeleteObject` 严格执行非空 `If-Match`，ETag 不匹配时返回 `412 PreconditionFailed`（批量 `DeleteObjects` 不包含此语义）。见[条件 DELETE](/zh/blog/design/conditional-delete/)。 |
 | 分片上传列举 | 20260916 曾提供可选的 `MINIO_API_MULTIPART_LISTING=strict` 磁盘扫描模式；20261018 已将其撤回并恢复 legacy 内存缓存行为（省略 `max-uploads` 默认 1,000，但默认缓存路径不执行严格分页）。见 [20260916 说明](/zh/blog/release/silo-20260916/#multipart)与 [20261018 升级要求](/zh/blog/release/silo-20261018/#upgrade)。 |
 | 反向代理来源地址信任 | 未设置 `MINIO_API_TRUSTED_PROXIES` 时，S3 监听器保留对转发头的历史信任行为。直连部署建议设为 `none`；经过反向代理时，显式配置代理 IP/CIDR 并确保代理覆盖客户端伪造的转发头。Console 与 LDAP STS 遵循各自的信任规则。见[来源地址信任](/zh/compatibility/server/#trusted-proxies)。 |
-| 身份与对象状态 | 若部署使用了 IAM 子用户密码策略、服务账号、STS、OIDC、Object Lock 或复制，请按[目标发行版说明](/zh/blog/release/silo-20261018/#upgrade)、[密码权限迁移](/zh/compatibility/password-permissions/)和 [IAM 恢复流程](/zh/operations/replication/iam-upgrade/)逐项核对。 |
+| 身份与对象状态 | 若部署使用了 IAM 子用户密码策略、服务账号、STS、OIDC、Object Lock 或复制，请按[目标发行版说明](/zh/blog/release/silo-20261026/#upgrade)、[密码权限迁移](/zh/compatibility/password-permissions/)和 [IAM 恢复流程](/zh/operations/replication/iam-upgrade/)逐项核对。 |
 
 ## 从 RELEASE.2026-08-06 升级 {#since-20260806}
 

@@ -294,7 +294,7 @@ silo server http://server{1...4}/disk{1...4}                                 \
 
 如果用户主目录中只有旧的 `.minio` 目录而没有 `.silo`，SILO 会继续使用 `.minio/certs`。两者都存在时使用 `.silo/certs`，并输出警告。对于服务账户，建议显式配置 `--certs-dir`，避免依赖交互用户的主目录。
 
-SILO 20261025 仍接受已弃用的 `--config-dir` / `-C` 参数。使用该参数且未设置 `--certs-dir` 时，证书目录为 `<config-dir>/certs`；显式 `--certs-dir` 优先。上游 MinIO 某些版本移除此参数的说明不能直接套用于 SILO。
+SILO 20261026 仍接受已弃用的 `--config-dir` / `-C` 参数。使用该参数且未设置 `--certs-dir` 时，证书目录为 `<config-dir>/certs`；显式 `--certs-dir` 优先。上游 MinIO 某些版本移除此参数的说明不能直接套用于 SILO。
 
 有关 TLS 配置的更多信息，请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
 

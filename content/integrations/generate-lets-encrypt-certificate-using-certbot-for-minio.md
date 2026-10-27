@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261018](/blog/release/silo-20261018/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261018/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
 
 <a id="generate-let-s-encrypt-certificate-using-certbot-for-minio"></a>
 
@@ -94,7 +94,7 @@ $ ./minio server --address ":443" /mnt/data
 If you are using dockerized version of MinIO then you would need to
 
 ```sh
-$ sudo docker run -p 443:443 -v /home/user/.minio:/root/.minio/ -v /home/user/data:/data docker.io/pgsty/silo:RELEASE.2026-10-18T00-00-00Z server --address ":443" /data
+$ sudo docker run -p 443:443 -v /home/user/.minio:/root/.minio/ -v /home/user/data:/data docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server --address ":443" /data
 
 ```
 

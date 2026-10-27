@@ -2,7 +2,7 @@
 title: "LDAP 长 DN：恢复登录可用性并守住 IAM 撤销安全边界"
 linkTitle: "LDAP 长 DN"
 date: 2026-10-23
-lastmod: 2026-10-23
+lastmod: 2026-10-26
 author: "冯若航"
 summary: "解析 LDAP DN 规范化为何触发 IAM 单文件名 255 字节上限、父身份版本读取如何放大登录回归，以及为何仅将确定无法落盘的纯 ASCII 超长路径分量归类为记录不存在。"
 tags: [Design, LDAP, IAM, Operations]
@@ -10,6 +10,8 @@ weight: 8
 draft: false
 url: "/zh/blog/design/ldap-long-dn/"
 ---
+
+**发布状态：** 本文修复已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 正式发布；以下保留设计与验证时的源码范围。
 
 [Server PR #250](https://github.com/pgsty/silo/pull/250)（合入提交 [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0)）修复了 LDAP 用户在规范化可分辨名称（Distinguished Name，DN）超过对象存储 IAM 后端单路径分量 255 字节上限时无法登录的问题，同时严格保留了对真实存储故障与[持久化 IAM 撤销记录](/zh/blog/design/iam-revocations/)的 Fail-Closed 错误传播。
 

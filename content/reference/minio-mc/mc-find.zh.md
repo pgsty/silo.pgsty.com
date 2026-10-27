@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** 非法 `--regex` 表达式正常报错，不再 panic；目标校验仍优先执行，因此无效目标保留原先的错误诊断。 [版本说明](/zh/compatibility/mcli/#current-release).
+> **自 mcli 20260916 起：** 非法 `--regex` 表达式正常报错，不再 panic；目标校验仍优先执行，因此无效目标保留原先的错误诊断。 [版本说明](/zh/compatibility/mcli/#current-release).
 
 
 <a id="mc-find"></a>

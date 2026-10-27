@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** 复制失败不会授权删除源对象。复制成功但源删除失败时，命令等待删除结果后返回 1，已成功复制的对象不会回滚。选定 SDK 也会报告 CopyObject HTTP 200 响应内嵌的 S3 错误。 [版本说明](/zh/compatibility/mcli/#current-release).
+> **自 mcli 20260916 起：** 复制失败不会授权删除源对象。复制成功但源删除失败时，命令等待删除结果后返回 1，已成功复制的对象不会回滚。选定 SDK 也会报告 CopyObject HTTP 200 响应内嵌的 S3 错误。 [版本说明](/zh/compatibility/mcli/#current-release).
 
 
 <a id="mc-mv"></a>

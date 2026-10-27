@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261018](/zh/blog/release/silo-20261018/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261018/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
 
 <a id="helm-charts-minio-tenant"></a>
 <a id="deploy-tenant-helm"></a>
@@ -92,7 +92,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
    tenant:
      image:
        repository: docker.io/pgsty/silo
-       tag: RELEASE.2026-10-18T00-00-00Z
+       tag: RELEASE.2026-10-26T00-00-00Z
        pullPolicy: IfNotPresent
      env:
        - name: MINIO_UPDATE

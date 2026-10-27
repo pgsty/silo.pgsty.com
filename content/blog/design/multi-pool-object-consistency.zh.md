@@ -13,9 +13,13 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 随 [SILO Server 20260916](/zh/blog/release/silo-20260916/) 发布的 [PR #178](https://github.com/pgsty/silo/pull/178) 修复了多存储池修改顺序问题，[PR #207](https://github.com/pgsty/silo/pull/207) 将当前逻辑对象选择扩展至条件 `PUT`（关闭 [#133](https://github.com/pgsty/silo/issues/133) 与 [#144](https://github.com/pgsty/silo/issues/144)），提交 [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) 则修复了跨池再平衡（rebalance）与退役（decommission）迁移丢失对象标签的缺陷。随后的 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 进一步合入 [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)（纳入 [PR #248](https://github.com/pgsty/silo/pull/248)）与 [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951)，修复了跨池迁移期间旧数据覆盖新副本以及删除标记（Delete Marker）丢失的问题。
 
-## 10 月 25 日更新：写入与回滚保护边界 {#maintenance-20261025}
+<span id="maintenance-20261025"></span>
 
-[Server 20261025 源码](/zh/blog/release/silo-20261025/#server-20261025)在保留下文多池删除保护的基础上，增加了已接纳底层修改排空等待、按所有权精确回滚，以及对提交/回滚所需 `xl.meta.bkp` 备份的保护。读仲裁与自愈策略保持不变。共享对象锁不提供租约过期或网络分区下的分布式 fencing，迟到提交与旧元数据暴露仍可能发生，升级也不会自动修复存量不一致对象。启用回滚所有权检查需统一升级全部写入节点；当底层磁盘阻塞时，等待已接纳 I/O 会延长同一对象的锁等待时间。
+## 10 月 26 日：存储超时与回滚边界 {#maintenance-20261026}
+
+[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)保留下文多池删除保护，并转发覆盖回滚需要的存储 RPC 删除选项。最终版撤回草稿中的已接纳 I/O 排空等待、mutation guard、回滚所有权校验和备份互斥方案，保留既有磁盘/RPC 超时、取消、对象锁、读仲裁与自愈行为。详见[最终源码调整](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038)。
+
+返回超时不证明底层 I/O 已停止或写入未提交。迟到提交、延迟回滚以及部分元数据修改后的旧值/标签仍可能发生；对象锁不提供租约失效或网络分区下的分布式 fencing，升级也不恢复存量不一致对象。更严格的诊断保留在 `consistency_strict` 构建标签下，不能算作已交付保证。
 
 ## 10 月 24 日更新：删除失败时保护最新副本 {#delete-20261024}
 

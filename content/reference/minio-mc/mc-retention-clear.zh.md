@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **mcli 20260916:** 递归清除 retention 部分失败时返回退出码 1，每个失败对象只输出一次诊断，成功对象不会回滚。 [版本说明](/zh/compatibility/mcli/#current-release).
+> **自 mcli 20260916 起：** 递归清除 retention 部分失败时返回退出码 1，每个失败对象只输出一次诊断，成功对象不会回滚。 [版本说明](/zh/compatibility/mcli/#current-release).
 
 
 <a id="mc-retention-clear"></a>

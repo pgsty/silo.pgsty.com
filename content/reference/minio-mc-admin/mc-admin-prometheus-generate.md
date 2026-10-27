@@ -16,7 +16,7 @@ The [`mc admin prometheus generate`](#command-mc.admin.prometheus.generate) comm
 
 For more complete documentation on using MinIO with Prometheus, see [How to monitor MinIO server with Prometheus](/operations/monitoring/collect-minio-metrics-using-prometheus/#minio-metrics-collect-using-prometheus)
 
-Starting with MinIO Server [RELEASE.2024-07-15T19-02-30Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-15T19-02-30Z) and MinIO Client [RELEASE.2024-07-11T18-01-28Z](https://github.com/minio/mc/releases/tag/RELEASE.2024-07-11T18-01-28Z), [metrics version 3 (v3)](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) provides additional endpoints and metrics. To generate a v3 scrape configuration use the `--api_version v3` option.
+Starting with MinIO Server [RELEASE.2024-07-15T19-02-30Z](https://github.com/minio/minio/releases/tag/RELEASE.2024-07-15T19-02-30Z) and MinIO Client [RELEASE.2024-07-11T18-01-28Z](https://github.com/minio/mc/releases/tag/RELEASE.2024-07-11T18-01-28Z), [metrics version 3 (v3)](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) provides additional endpoints and metrics. To generate a v3 scrape configuration use the `--api-version v3` option.
 
 MinIO recommends new deployments use [version 3 (v3)](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts). Existing deployments can continue to use [metrics version 2](/operations/monitoring/metrics-v2/#minio-metrics-v2)
 
@@ -40,7 +40,7 @@ The command has the following syntax:
 mc [GLOBALFLAGS] admin prometheus generate                                        \
                                   ALIAS                                           \
                                   [TYPE]                                          \
-                                  [--api_version v3]                              \
+                                  [--api-version v3]                              \
                                   [--bucket <bucket name>]
 ```
 
@@ -68,7 +68,7 @@ The [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured Mi
 
 *Optional*
 
-To generate a scrape configuration for [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts), include an `--api-version v3` parameter. `v3` is the only accepted value.
+To generate a scrape configuration for [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts), include an `--api-version v3` parameter. SILO mcli 20261026 accepts `v2` (the default) and `v3`.
 
 Omit `--api-version` to generate a [v2 metrics](/operations/monitoring/metrics-v2/#minio-metrics-v2) configuration.
 

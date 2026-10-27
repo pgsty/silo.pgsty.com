@@ -13,9 +13,13 @@ url: "/blog/design/multi-pool-object-consistency/"
 
 Shipped in [SILO Server 20260916](/blog/release/silo-20260916/), [PR #178](https://github.com/pgsty/silo/pull/178) repairs multi-pool mutation ordering, [PR #207](https://github.com/pgsty/silo/pull/207) extends current-object selection to conditional `PUT` (closing [#133](https://github.com/pgsty/silo/issues/133) and [#144](https://github.com/pgsty/silo/issues/144)), and commit [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) preserves object tags across pool rebalance and decommission. [SILO Server 20261018](/blog/release/silo-20261018/) further adds [`60c7179dd`](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020) (incorporating [PR #248](https://github.com/pgsty/silo/pull/248)) and [`1748f62c7`](https://github.com/pgsty/silo/commit/1748f62c7ec4f2e9afcdce276193ad401719b951) to guard pool migration against stale payload overwrites and delete-marker loss.
 
-## October 25: Write and Rollback Boundaries {#maintenance-20261025}
+<span id="maintenance-20261025"></span>
 
-The [Server 20261025 source](/blog/release/silo-20261025/#server-20261025) retains the multi-pool deletion protections below and adds admitted-mutation draining, ownership-verified rollback, and protection for `xl.meta.bkp` backups required by in-flight commits and rollbacks. Existing read-quorum and healing behavior is unchanged. Shared object locks do not provide distributed fencing across lease expiration or network partitions, so late commits and stale metadata reads remain possible, and upgrading does not repair pre-existing inconsistent objects. Upgrade all writer nodes to enforce rollback ownership checks; stalled drive I/O can lengthen same-object lock waits.
+## October 26: Storage Timeouts and Rollback Boundaries {#maintenance-20261026}
+
+[Server 20261026](/blog/release/silo-20261026/#server-20261026) retains the multi-pool deletion protections below and forwards the storage RPC deletion options needed by overwrite rollback. The final release withdraws the draft's admitted-I/O draining, mutation guards, rollback-ownership checks and backup-serialization scheme. It preserves the established drive/RPC timeouts, cancellation, object locking, read quorum and healing behavior. See the [final source adjustment](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038).
+
+A returned timeout does not prove that I/O stopped or that a write did not commit. Late commits, delayed rollback and stale values/tags after partial metadata updates remain possible. Object locks do not provide distributed fencing after lease loss or network partitions, and upgrading does not repair pre-existing inconsistent objects. Stricter diagnostics remain under `consistency_strict`; they are not delivered guarantees.
 
 ## October 24: Protecting the Latest Copy During Deletion {#delete-20261024}
 

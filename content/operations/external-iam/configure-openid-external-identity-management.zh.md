@@ -26,7 +26,7 @@ MinIO 支持使用兼容 OpenID Connect (OIDC) 的 Identity Provider (IDP) 来�
 
 ### 兼容 OpenID-Connect (OIDC) 的 Identity Provider {#openid-connect-oidc-identity-provider}
 
-**SILO 20261018 兼容性：** [正式版](/zh/blog/release/silo-20261018/)使用 go-jose v4.1.6，在修复特制密钥导致过量 CPU 消耗的同时，会拒绝超过 **4096 位**的 RSA JWK。升级前应检查提供方的签名密钥、discovery、JWKS 刷新和完整登录流程；不兼容的密钥需在身份提供方轮换。参见[依赖安全说明](/zh/blog/security/20261018-release-hardening/#dependencies)。Server 20261018 已正式发布。
+**SILO 20261026 兼容性：** [正式版](/zh/blog/release/silo-20261026/)继续使用 go-jose v4.1.6。该依赖自 SILO 20261018 起用于修复特制密钥导致的过量 CPU 消耗，并拒绝超过 **4096 位**的 RSA JWK。升级前应检查提供方的签名密钥、discovery、JWKS 刷新和完整登录流程；不兼容的密钥需在身份提供方轮换。参见[依赖安全说明](/zh/blog/security/20261018-release-hardening/#dependencies)。
 
 本流程假定你已经拥有一个现成的 OIDC 提供方，例如 Okta、KeyCloak、Dex、Google 或 Facebook。 这些服务本身的配置不在本流程范围内。
 
