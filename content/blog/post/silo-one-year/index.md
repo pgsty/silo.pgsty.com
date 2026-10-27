@@ -45,9 +45,9 @@ The sections below walk through each area in detail, with exact commit reference
 Our comparison uses two fixed points:
 
 - **Upstream baseline**: `minio/minio` [`RELEASE.2025-10-15T17-29-55Z`](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z) (commit `9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a`, October 15, 2025). Note: between that final release and archiving the repo in February 2026, upstream merged 9 unreleased commits (such as POST policy tag constraints in `fa18589d1c` and conditional PUT read-quorum adjustments in `18f97e70b1`), which never shipped in an upstream release and were addressed independently in SILO.
-- **SILO target**: `pgsty/silo` [`RELEASE.2026-10-26T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z), source `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`, released with mcli / KES 20261026, Console v2.5.1 and silo-pkg v3.15.2. See the [release notes](/blog/release/silo-20261026/) and [component matrix](/compatibility/versions/).
+- **SILO target**: `pgsty/silo` [`RELEASE.2026-10-26T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z) (commit `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`), released alongside mcli / KES 20261026, Console v2.5.1, and silo-pkg v3.15.2. See the [release notes](/blog/release/silo-20261026/) and [component matrix](/compatibility/versions/).
 
-Across `9e49d5e7a648..c3ad836aed0d`, `git rev-list --count` reports **604 reachable commits**. This includes features, fixes, tests, documentation and release engineering; the sections below describe delivered behavior rather than treating commit counts as feature counts.
+Across `9e49d5e7a648..c3ad836aed0d`, `pgsty/silo` contains **604 reachable commits** spanning feature and security repairs, regression suites, packaging, and documentation. The sections below organize those changes by delivered runtime behavior.
 
 ### The Four-Component Coordinated Stack
 
@@ -151,17 +151,12 @@ SILO also isolated per-job and per-target cancellation contexts and fixed `Repli
 
 ## 5. Storage Mutation, Rollback, and Multi-Pool Safety {#storage-and-multipool}
 
-Slow drives, failed writes, concurrent overwrites and multi-pool scaling need distinct safeguards. The 20261026 release retains the shipped multi-pool locking, deletion, migration and listing repairs, with explicit timeout and rollback limits.
+In an erasure-coded storage engine, the happy path is straightforward; edge-case bugs hide at the intersection of **slow drives, partial-write rollbacks, concurrent overwrites, and multi-pool scaling**. The 20261026 release ships three groups of storage-layer safeguards:
 
-### 1. Storage RPC and Timeout Boundaries
+### 1. Commit Error Classification and Overwrite Rollback RPC Forwarding
 
-This release forwards storage RPC deletion options, including the previous data directory needed for overwrite rollback. Drive/RPC deadlines, request cancellation, object locking, read quorum and healing retain their established behavior.
-
-**A returned timeout does not prove that underlying I/O stopped or that the write did not commit.** Late commits or delayed `UndoWrite` can still affect newer writes; partial failures, lease loss and network partitions can still expose stale values or tags. This release adds no distributed fencing and cannot repair previously inconsistent objects.
-
-The October maintenance candidates explored admitted-I/O waits, per-drive object mutation locks, rollback ownership checks, backup serialization and generating PUT timestamps inside the commit lock. These changes were withdrawn in [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038) and are not delivered capabilities. Their tests and microbenchmarks do not establish guarantees for the final source.
-
-The missing-staging-`xl.meta` classification shipped in 20261018 remains: HTTP 503 `SlowDownWrite` allows retry rather than falsely reporting an absent object. See the [error classification design](/blog/design/stale-metadata-reuse/) and [final maintenance boundaries](/blog/design/multi-pool-object-consistency/#maintenance-20261026).
+- **Missing staging `xl.meta` classified as `503 SlowDownWrite`**: When a slow drive or concurrent cleanup causes a staging `xl.meta` file in `.minio.sys/tmp` to go missing during commit, SILO classifies the condition as `errFileNotFound` and returns HTTP `503 SlowDownWrite` so clients can retry safely instead of receiving a false `404 ObjectNotFound` ([error classification design](/blog/design/stale-metadata-reuse/)).
+- **Overwrite rollback option forwarding and timeout boundaries**: SILO forwards storage RPC deletion options (including the previous data directory needed for overwrite rollback) while preserving existing drive/RPC deadlines, request cancellation, object locking, read quorum, and healing rules. Note that **a client-visible timeout does not mean underlying disk or RPC I/O has stopped or that the write failed to commit**—late commits or delayed `UndoWrite` calls can still occur after partial failures, lease loss, or network partitions (the admitted-I/O draining waits and per-drive mutation guards explored in the October maintenance draft were withdrawn in [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038); see the [final maintenance boundaries](/blog/design/multi-pool-object-consistency/#maintenance-20261026)).
 
 ### 2. Multi-Pool Locking, Two-Stage Bulk Deletion, and Migration Safety
 

@@ -17,9 +17,9 @@ Shipped in [SILO Server 20260916](/blog/release/silo-20260916/), [PR #178](https
 
 ## October 26: Storage Timeouts and Rollback Boundaries {#maintenance-20261026}
 
-[Server 20261026](/blog/release/silo-20261026/#server-20261026) retains the multi-pool deletion protections below and forwards the storage RPC deletion options needed by overwrite rollback. The final release withdraws the draft's admitted-I/O draining, mutation guards, rollback-ownership checks and backup-serialization scheme. It preserves the established drive/RPC timeouts, cancellation, object locking, read quorum and healing behavior. See the [final source adjustment](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038).
+[Server 20261026](/blog/release/silo-20261026/#server-20261026) retains the multi-pool deletion protections described below and forwards the storage RPC deletion options (including the previous data directory) needed for overwrite rollback. Prior to final release, commit [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038) withdrew the October draft's admitted-I/O draining waits, per-object mutation guards, rollback-ownership checks, and backup-serialization changes, keeping the established drive/RPC timeouts, cancellation, object locking, read quorum, and healing behavior.
 
-A returned timeout does not prove that I/O stopped or that a write did not commit. Late commits, delayed rollback and stale values/tags after partial metadata updates remain possible. Object locks do not provide distributed fencing after lease loss or network partitions, and upgrading does not repair pre-existing inconsistent objects. Stricter diagnostics remain under `consistency_strict`; they are not delivered guarantees.
+Note that **a client-visible timeout does not guarantee that underlying disk or RPC I/O has stopped or that the write failed to commit.** Late commits, delayed rollbacks, and stale values or tags after partial metadata updates remain possible; object locks do not provide distributed fencing across lease loss or network partitions, and upgrading does not automatically repair pre-existing inconsistent objects (stricter diagnostic checks remain gated behind the non-default `consistency_strict` build tag).
 
 ## October 24: Protecting the Latest Copy During Deletion {#delete-20261024}
 

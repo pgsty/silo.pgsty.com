@@ -15,6 +15,6 @@ aliases:
   - /releases/
 ---
 
-Release notes record features, security fixes, dependency updates, compatibility and delivery changes.
+Release notes track feature updates, security fixes, dependency upgrades, compatibility requirements, and artifact delivery across the SILO stack.
 
-The **[20261026 coordinated release](/blog/release/silo-20261026/)** combines SILO Server, mcli and KES changes since 20261018, with **[Console 2.5.1](/blog/release/console-2.5.1/)** and **[silo-pkg 3.15.2](/blog/release/pkg-3.15.2/)**. The October 24–25 preparation records are consolidated here; their old URLs redirect to the final notes.
+The **[20261026 coordinated release](/blog/release/silo-20261026/)** consolidates all SILO Server, mcli, and KES changes since 20261018 alongside **[Console 2.5.1](/blog/release/console-2.5.1/)** and **[silo-pkg 3.15.2](/blog/release/pkg-3.15.2/)** (the October 24–25 maintenance drafts have been folded into the final release notes, with their URLs redirecting automatically).

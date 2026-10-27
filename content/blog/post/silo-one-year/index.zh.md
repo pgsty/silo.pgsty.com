@@ -45,9 +45,9 @@ url: "/zh/blog/post/silo-one-year/"
 本次对比的精确基线是上游 MinIO 最后一次公开发布与 SILO 2026 年 10 月统一维护批次：
 
 - **上游基线**：`minio/minio` [`RELEASE.2025-10-15T17-29-55Z`](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z)（提交 `9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a`，2025-10-15）。注：上游在停发 Release 到 2026-02-02 归档前还合入过 9 个未发版提交（如 `fa18589d1c` 的 POST Policy 标签约束、`18f97e70b1` 的条件写读仲裁调整），这些提交不在 `2025-10-15` 正式版内，SILO 也通过独立路径完成了对应修复。
-- **SILO 目标版本**：`pgsty/silo` [`RELEASE.2026-10-26T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z)（源码 `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`），与 mcli / KES 20261026、Console v2.5.1、silo-pkg v3.15.2 协调发布。详见[本批次发布日志](/zh/blog/release/silo-20261026/)与[组件矩阵](/zh/compatibility/versions/)。
+- **SILO 目标版本**：`pgsty/silo` [`RELEASE.2026-10-26T00-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z)（源码 `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`），与 mcli / KES 20261026、Console v2.5.1、silo-pkg v3.15.2 联合发布。详见[本批次发布日志](/zh/blog/release/silo-20261026/)与[组件矩阵](/zh/compatibility/versions/)。
 
-在 `9e49d5e7a648..c3ad836aed0d` 区间内，`git rev-list --count` 统计到 **604 个可达提交**。这一数量包括功能、修复、测试、文档与发布工程；下文按实际交付行为归纳，不把提交数量等同于功能数量。
+在 `9e49d5e7a648..c3ad836aed0d` 区间内，`pgsty/silo` 共有 **604 个可达提交**（涵盖功能与安全修复、回归测试、构建打包与文档工程）。下文按实际交付的运行时行为逐一归纳。
 
 ### 四组件协调维护栈
 
@@ -151,17 +151,12 @@ url: "/zh/blog/post/silo-one-year/"
 
 ## 5. 存储写入、回滚与多池一致性 {#storage-and-multipool}
 
-在纠删码存储引擎中，慢盘、部分写失败、并发覆盖与多池扩缩容需要分别处理。20261026 正式版保留已经发布的多池锁、删除、迁移与 LIST 修复，并明确超时和回滚的限制。
+在纠删码存储引擎中，正常路径很容易写对，真正的坑全在**慢盘、部分写失败回滚、并发覆盖写与多存储池（Multi-Pool）扩缩容**的交叉地带。20261026 正式版收敛并交付了以下三组底层存储保护：
 
-### 1. 存储 RPC 与超时边界
+### 1. 存储提交错误分类与覆盖回滚 RPC 透传
 
-本版转发存储 RPC 删除选项，包括覆盖回滚需要的旧数据目录。磁盘/RPC 超时、请求取消、对象锁、读仲裁与自愈策略保持既有行为。
-
-**请求超时不代表底层 I/O 已停止，也不能据此断定写入没有提交。** 迟到提交或延迟 `UndoWrite` 仍可能影响更新的写入；部分故障、租约丢失和网络分区后仍可能读到陈旧值或标签。本版没有引入分布式 fencing，也不能修复此前已经不一致的对象。
-
-10 月维护候选中曾加入已接纳 I/O 等待、逐盘对象变更锁、回滚所有权检查、备份互斥和提交锁内生成 PUT 时间戳等方案，最终在 [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038) 撤回，不属于本版已交付能力。候选方案的测试和微基准也不作为最终版的安全保证。
-
-已经在 20261018 发布的暂存 `xl.meta` 缺失分类仍保留：返回 HTTP 503 `SlowDownWrite`，供客户端重试，而不是误报对象不存在。详见[错误分类设计](/zh/blog/design/stale-metadata-reuse/)与[最终维护边界](/zh/blog/design/multi-pool-object-consistency/#maintenance-20261026)。
+- **暂存 `xl.meta` 缺失归类为 `503 SlowDownWrite`**：在提交阶段，若个别慢盘因并发清理或时序竞争导致 `.minio.sys/tmp` 中的暂存 `xl.meta` 缺失，SILO 将其归类为 `errFileNotFound` 并向客户端返回 HTTP `503 SlowDownWrite` 触发安全重试，而不是像过去那样误报 `404 ObjectNotFound`（[错误分类设计记录](/zh/blog/design/stale-metadata-reuse/)）。
+- **覆盖写回滚选项透传与超时边界**：转发存储 RPC 的删除选项（包括覆盖写回滚所需的旧数据目录），同时保持既有的磁盘/RPC 超时、请求取消、对象锁、读仲裁与自愈规则。需要明确的是：**客户端收到请求超时并不代表底层磁盘或 RPC I/O 已经停止，也不代表写入一定未提交**——在部分磁盘故障、租约丢失或网络分区下，迟到提交或延迟 `UndoWrite` 仍可能发生（10 月维护候选中曾尝试的已接纳 I/O 排空等待与逐盘变更锁已在 [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038) 中撤回，详见[最终维护边界](/zh/blog/design/multi-pool-object-consistency/#maintenance-20261026)）。
 
 ### 2. 多池并发锁、两阶段批量删除与跨池迁移保护
 

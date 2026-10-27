@@ -17,9 +17,9 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 ## 10 月 26 日：存储超时与回滚边界 {#maintenance-20261026}
 
-[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)保留下文多池删除保护，并转发覆盖回滚需要的存储 RPC 删除选项。最终版撤回草稿中的已接纳 I/O 排空等待、mutation guard、回滚所有权校验和备份互斥方案，保留既有磁盘/RPC 超时、取消、对象锁、读仲裁与自愈行为。详见[最终源码调整](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038)。
+[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 完整保留了下文的多池删除保护，并转发覆盖写回滚所需的存储 RPC 删除选项（旧数据目录）。在最终发版前，提交 [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038) 撤回了 10 月维护草稿中的已接纳 I/O 排空等待、逐对象变更锁（mutation guard）、回滚所有权校验与备份互斥方案，维持既有的磁盘/RPC 超时、请求取消、对象锁、读仲裁与自愈行为。
 
-返回超时不证明底层 I/O 已停止或写入未提交。迟到提交、延迟回滚以及部分元数据修改后的旧值/标签仍可能发生；对象锁不提供租约失效或网络分区下的分布式 fencing，升级也不恢复存量不一致对象。更严格的诊断保留在 `consistency_strict` 构建标签下，不能算作已交付保证。
+需要注意：**客户端收到超时响应并不代表底层磁盘或 RPC I/O 已经停止，也不代表写入未提交。** 在部分磁盘故障、锁租约失效或网络分区后，仍可能出现迟到提交、延迟回滚，或在部分元数据更新后短暂读到旧值与旧标签；对象锁本身不提供跨节点分布式 fencing，升级也不会自动修复存量不一致对象（更严格的诊断检查仍保留在非默认的 `consistency_strict` 构建标签下）。
 
 ## 10 月 24 日更新：删除失败时保护最新副本 {#delete-20261024}
 

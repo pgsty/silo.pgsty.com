@@ -12,50 +12,46 @@ aliases:
   - /blog/release/console-2.5.0/
 ---
 
-**SILO Console v2.5.1 is released**, from [`fff1618d9abb`](https://github.com/pgsty/silo-console/commit/fff1618d9abbf1f6125f1914bd50818e2bc347ed). It is the Console version in the [SILO 20261026 release](/blog/release/silo-20261026/). This note covers the full 2.5 series since **v2.4.2**, including the 2.5.0 interface update and 2.5.1 repairs.
+**SILO Console v2.5.1 is now released** (commit [`fff1618d9abb`](https://github.com/pgsty/silo-console/commit/fff1618d9abbf1f6125f1914bd50818e2bc347ed)) and ships embedded inside **[SILO 20261026](/blog/release/silo-20261026/)**. This note summarizes the full 2.5 release series since **v2.4.2**, combining the `v2.5.0` interface overhaul and the `v2.5.1` patch fixes.
 
-[GitHub release](https://github.com/pgsty/silo-console/releases/tag/v2.5.1) · [Downloads](/download/#console) · [All source changes](https://github.com/pgsty/silo-console/compare/v2.4.2...v2.5.1)
+[GitHub release](https://github.com/pgsty/silo-console/releases/tag/v2.5.1) · [Downloads](/download/#console) · [Full commit comparison](https://github.com/pgsty/silo-console/compare/v2.4.2...v2.5.1)
 
-## Navigation, overview and metrics {#interface}
+## Navigation, overview, and metrics {#interface}
 
-The interface uses neutral light/dark surfaces, system fonts, consistent density, Lucide icons, visible focus states and reduced-motion support. A mobile drawer and tablet rail adapt navigation to narrower screens; saved preferences take precedence. Object details become a mobile sheet with focus restoration, and dialogs/forms fit small screens. English and Chinese labels, accessible controls and legal attributions remain included.
+The 2.5 interface adopts neutral light and dark themes, system typography, consistent information density, Lucide icons, clear keyboard focus states, and `prefers-reduced-motion` support. A mobile drawer and tablet rail adapt navigation to narrow viewports while respecting saved user preferences; object details open in a focus-restoring bottom sheet on mobile, and dialogs and forms scale cleanly to smaller screens. English and Chinese localization, accessible controls, and license attributions remain built in.
 
-Permission-aware navigation groups Identity, Monitoring, Settings and Tools, keeps one Buckets entry with recent buckets, and preserves remembered login destinations and existing object deep links. `/browser` redirects to `/buckets`; bare bucket administration links open Summary. Documentation, Video and Blog/RSS remain available through Help.
+Permission-aware navigation organizes Identity, Monitoring, Settings, and Tools around the active session's grants, consolidates bucket access under a single Buckets entry with recent-bucket shortcuts, and preserves post-login redirect targets and existing object deep links (`/browser` redirects to `/buckets`, and bare bucket-management URLs open the Summary tab). Help continues to link directly to Documentation, Video guides, and Blog/RSS feeds.
 
-Overview shows server/drive health, raw capacity, alerts, quick actions and data freshness. Capacity uses Server-reported values rather than an estimated usable EC capacity; missing statistics remain unknown. Metrics V3 stays under Monitoring. Its panels distinguish missing samples from zero and respect per-node exports; bucket/account usage is scanner-derived, even though Server 20261026 now returns a live bucket inventory.
+The Overview dashboard displays node and drive health, raw physical capacity, active alerts, quick actions, and data freshness. Capacity panels report the exact figures returned by Server rather than estimating usable erasure-coded capacity, marking uncollected statistics as unknown. Metrics V3 panels under Monitoring distinguish missing Prometheus samples from true zero values and handle per-node cluster metric exports accurately. Note that while Server 20261026 returns a live bucket inventory, bucket and account usage totals remain scanner-derived.
 
-## Buckets, objects and tasks {#objects}
+## Buckets, object browser, and tasks {#objects}
 
-- Sort and filter bucket tables with URL query persistence, table/card views, large-list virtualization and explicit unknown usage. Stable identities keep selection attached to the right bucket. Pending search updates are discarded after navigation.
-- Keep the object workspace accessible to write-only users, preserve wildcard bucket-root grants and prefix restrictions, and show server error details for rejected actions such as tag writes. Listing, reading and mutation permissions remain independent.
-- Preview bounded text, Markdown and CSV/TSV, with source views, safe HTML handling and a visible **1 MiB** truncation notice. Supported forms show mcli equivalents without secrets.
-- Track transfers, native ZIP downloads, bulk deletion, noncurrent-version cleanup and restoration in Tasks. Mutation concurrency is bounded and retries select failed targets. Canceling a task does not undo completed writes; browser handoff does not prove the download reached disk.
-- Add keyboard navigation, range selection, current-page Select All, shortcut help and permission-aware context menus. Existing cursor pagination remains: sorting/filtering/select-all apply to the current page, not the whole bucket.
+- **Bucket list:** Supports sorting, name filtering, URL query-parameter persistence, table/card view toggling, large-list virtualization, and explicit unknown-usage badges. Stable row keys keep selection attached to the right bucket across sorts, and in-flight search updates are discarded on navigation.
+- **Fine-grained permission handling:** Write-only users can enter the object workspace; wildcard bucket-root grants and prefix restrictions are preserved; and rejected actions (such as tag edits) surface the server's error message directly (listing, read, and mutation permissions remain evaluated independently).
+- **Bounded previews and CLI hints:** Adds bounded **1 MiB** previews for plain text, Markdown, and CSV/TSV files alongside source views, sanitized HTML rendering, and explicit truncation notices. Supported configuration forms also display secret-redacted `mcli` command equivalents.
+- **Tasks center:** Tracks uploads, downloads, native streaming ZIP downloads, bulk deletes, noncurrent-version cleanup, and object restores with bounded mutation concurrency and failed-item-only retries (canceling a task does not roll back already-completed writes; verify large object or streaming ZIP downloads on disk after browser transfer completes).
+- **Keyboard navigation and pagination:** Adds arrow-key navigation, Shift-range selection, current-page Select All, a keyboard-shortcut reference dialog, and permission-aware context menus. Cursor pagination remains unchanged—sorting, filtering, and Select All operate on the current page.
 
-## Identity and diagnostics {#identity}
+## Identity management and high-latency diagnostics {#identity}
 
-User pages show status, direct policies, group inheritance and access-key counts. Policy pages distinguish native, overridden and custom policies, display assignment counts and explain affected identities. Native policies are read-only until explicitly overridden; modified built-ins offer Reset. Failed reloads clear stale editor content, language changes preserve drafts, and forms associate labels correctly and mask remote secrets.
+User detail pages display account status, direct policies, group-inherited policies, and Access Key counts; policy pages distinguish native built-in, overridden built-in, and custom policies while showing assignment counts and affected identities. Native built-in policies remain read-only until explicitly overridden, and modified built-in policies offer a one-click **Reset**. Failed reloads clear stale editor contents, language switches preserve unsaved drafts, and forms bind labels properly while masking remote secrets.
 
-**Reset and live bucket inventory require Server 20261026.** Updating standalone Console alone does not patch an older Server's policy cache or replace its embedded UI.
+**Note: Built-in policy Reset and live bucket inventory require Server 20261026.** Upgrading standalone Console by itself does not update an older Server's policy cache or replace its embedded frontend.
 
-Health, Trace, Logs, Watch, Speedtest and Profile finish the WebSocket close handshake using the existing sole reader and a shared **five-second close budget**, without limiting active streams. This repairs high-RTT health-report truncation and code 1006 closures reported by [Azat / @azataiot in #63](https://github.com/pgsty/silo-console/issues/63). Wrapped timeout errors retain close code 1008 without exposing internal details. Health reports reuse one JSON decoder across the version probe and payload, preserving buffered frames; truncated, canceled or failed reports are rejected. The signed madmin v3 transport and retry behavior remain.
+Across all six live diagnostic streams (Health, Trace, Logs, Watch, Speedtest, and Profile), Console now completes the WebSocket close handshake through the single existing reader goroutine with a shared **five-second close budget** that never cuts off active streams. This fixes the high-RTT health-report truncation and abnormal `1006` closures reported by [Azat / @azataiot in #63](https://github.com/pgsty/silo-console/issues/63) (wrapped timeouts still return close code `1008` without leaking internal details). Health-report downloads also reuse a single JSON decoder across the version probe and payload so buffered bytes are never dropped, reject truncated or canceled streams, and retain signed `madmin v3` transport and retry behavior.
 
-## Repairs in 2.5.1 {#patch}
+## Fixes in 2.5.1 {#patch}
 
-- A status-only group update preserves membership; explicitly supplied member arrays retain replacement semantics.
-- OIDC string-array groups retain their permissions. Session cookies remain secure behind configured HTTPS or trusted TLS proxies; arbitrary forwarded headers are not trusted.
-- Credential exports preserve exact UTF-8 JSON bytes. ZIP failures before the first response byte preserve the S3 error status without exposing backend details.
-- Tables and controls restore focus, accessible names and progress values; the focused tab stays visible after resizing.
-- Upgrade to released mcli 20261026, silo-pkg v3.15.2 and the upstream SDK fix accepting HTTP 204 when removing replication configuration.
-
-These changes are recorded in [#67](https://github.com/pgsty/silo-console/pull/67), [#68](https://github.com/pgsty/silo-console/pull/68) and [#69](https://github.com/pgsty/silo-console/pull/69).
+- **Group status toggles ([#67](https://github.com/pgsty/silo-console/pull/67)):** Enabling or disabling a group now preserves its existing members, while an explicit `members` array continues to replace membership.
+- **OIDC groups and reverse-proxy cookies ([#66](https://github.com/pgsty/silo-console/pull/66)):** Preserves permissions for OIDC string-array group claims and sets `Secure` session cookies only when HTTPS or a trusted TLS proxy header is configured.
+- **Credential exports and streaming ZIP errors ([#68](https://github.com/pgsty/silo-console/pull/68)):** Preserves exact UTF-8 JSON bytes when exporting Access Keys, and propagates the S3 HTTP error status when a streaming ZIP download fails before writing its first response byte.
+- **Accessibility and focus restoration ([#68](https://github.com/pgsty/silo-console/pull/68)):** Restores keyboard focus across tables and dialogs, adds accessible names and progress-bar value attributes, and keeps the focused tab visible when resizing the viewport.
+- **Companion dependencies ([#69](https://github.com/pgsty/silo-console/pull/69)):** Updates to `mcli 20261026`, `silo-pkg v3.15.2`, and the upstream SDK fix accepting HTTP `204` when removing bucket replication.
 
 ## Dependencies and delivery {#delivery}
 
-Go **1.27.3**, Node **24.22.1**, Vite **8.3.5**, GoReleaser **2.19.0**, silo-pkg **3.15.2**, mcli **20261026**, and upstream minio-go **`320af050c445`** form the released baseline. The 2.5 series retains tablewriter 0.0.5, go-humanize 1.0.1, go-runewidth 0.0.29 and go-systemd 22.6.0 for output and platform compatibility. See the [shared dependency/security inventory](/blog/release/silo-20261026/#runtime-fixes).
+Console 2.5.1 builds with Go **1.27.3**, Node **24.22.1**, Vite **8.3.5**, GoReleaser **2.19.0**, silo-pkg **3.15.2**, mcli **20261026**, and upstream minio-go **`320af050c445`**, while keeping `tablewriter v0.0.5`, `go-humanize v1.0.1`, `go-runewidth v0.0.29`, and `go-systemd v22.6.0` pinned for output and platform compatibility (see the [shared dependency and security inventory](/blog/release/silo-20261026/#runtime-fixes)).
 
-The [release](https://github.com/pgsty/silo-console/releases/tag/v2.5.1) supplies platform binaries and archives, Linux packages, source, checksums, SPDX SBOMs and Sigstore/GitHub provenance. Windows archives use ZIP; Linux/macOS use tar.gz. Official images are `docker.io/pgsty/silo-console:v2.5.1` on Docker Hub. Verify with the [release contract](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/release-contract.md).
+The [GitHub release](https://github.com/pgsty/silo-console/releases/tag/v2.5.1) provides platform binaries and archives, Linux packages, source tarballs, SHA-256 checksums, SPDX SBOMs, and Sigstore/GitHub provenance attestations. Windows archives now use `.zip` (Linux and macOS retain `.tar.gz`), and multi-architecture container images are published at `docker.io/pgsty/silo-console:v2.5.1` (see the [release contract](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/release-contract.md) for verification commands).
 
-The delivery checks enforce Windows ZIP bundles and pull platform digests before multi-architecture image promotion. Reproducibility builds use isolated workspaces with bounded temporary disk usage; the Semgrep runner is pinned to Python 3.12.12. Generated API files and embedded frontend assets are rebuilt with the compatibility checks described in the shared inventory.
-
-The maintained administration target is **pgsty/silo**. Upstream MinIO compatibility remains best effort. Existing environment variables, API routes, service identities and module paths remain supported; use the [compatibility guide](/compatibility/console/) for the exact API and embedding graph.
+Frontend assets and embedded bundles build reproducibly in isolated workspaces. The supported administration target is **pgsty/silo** (with best-effort upstream MinIO compatibility), and all existing `CONSOLE_*` environment variables, API routes, service names, and Go module paths remain unchanged; see the [Console compatibility guide](/compatibility/console/) for API and embedding details.
