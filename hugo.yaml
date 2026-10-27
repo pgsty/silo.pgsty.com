@@ -53,6 +53,11 @@ languages:
           weight: 20
           url: /blog/
           pre: <i class='fa-solid fa-blog'></i>
+        - identifier: case
+          name: Case
+          weight: 22
+          url: /case/
+          pre: <i class='fa-solid fa-circle-nodes'></i>
         - identifier: download
           name: Download
           weight: 25
@@ -93,6 +98,11 @@ languages:
           weight: 20
           url: /zh/blog/
           pre: <i class='fa-solid fa-blog'></i>
+        - identifier: case
+          name: 案例
+          weight: 22
+          url: /zh/case/
+          pre: <i class='fa-solid fa-circle-nodes'></i>
         - identifier: download
           name: 下载
           weight: 25

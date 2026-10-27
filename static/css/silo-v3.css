@@ -516,6 +516,18 @@ html[data-theme="dark"] .adoption-logos a.evidence-logo-item:hover img {
 .dashboard-gallery-slide img { object-fit: cover; object-position: top left; }
 
 /* Adoption evidence note */
+.landing-page .metrics-proof-link {
+  color: var(--copper) !important;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  text-decoration: underline;
+  text-decoration-color: var(--copper-dim);
+  text-underline-offset: 0.18em;
+}
+.landing-page .metrics-proof-link:hover {
+  color: var(--pg-strong) !important;
+  text-decoration-color: var(--pg-strong);
+}
 
 /* Noto Sans SC draws U+2018–U+201D at CJK full width, which blows a hole through
    Latin quotes ("I’m" renders as "I’ m"). Borrow just those glyphs from a Latin
