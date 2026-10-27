@@ -24,7 +24,7 @@ icon: fa-solid fa-server
 | LDAP 规范化长 DN | ASCII 文件名分量超过 255 字节的缺失可选 IAM 记录不再阻断组策略登录；不可读撤销记录与真实存储故障继续按 Fail-Closed 报错，对象后端仍不支持写入超长路径记录。见 [LDAP 指南](/zh/administration/identity-access-management/ad-ldap-access-management/)。 |
 | 内置策略覆盖 | Reset 删除覆盖内容后立即恢复原生内置定义，并继续执行策略在用检查；延迟到达的对端/etcd 通知重新加载已提交状态，自定义策略仍执行真正删除。见 [Console 策略管理](/zh/administration/console/security-and-access/#minio-console-admin-policies)。 |
 | Console 创建/删除存储桶 | `account-info` 接口改为读取实时存储桶清单（旧版 Server 刷新后可能返回旧缓存）；用量统计仍由后台扫描器更新。 |
-| 存储超时与回滚 | 保留磁盘/RPC 超时与取消行为，转发覆盖回滚的删除选项。超时不证明 I/O 已停止，迟到提交与延迟回滚仍可能发生；草稿的 mutation guard 和无界完成等待未纳入本版。 |
+| 存储超时与回滚 | 保留磁盘与节点间 RPC 的超时及取消传播，并在覆盖写回滚时透传内部删除控制项（草稿阶段的 mutation guard 和无界完成等待未纳入本版）。 |
 | 多池删除 | 普通与批量删除先清理非权威旧副本再删除权威副本，并保护共享远端分层引用；若中途遇到存储故障，恢复后重试即可。 |
 | 版本化远端分层过期 | 生命周期过期仅生成删除标记时保留上一版本的远端分层对象（含已暂停版本控制桶中的非 `null` 版本）；升级前已误删的历史远端数据需从备份恢复。 |
 | 分片上传复制 | 为可合并的 CRC 校验和算法透传 `FULL_OBJECT` 校验和类型；需升级发送端 Server 并核对待复制队列。 |

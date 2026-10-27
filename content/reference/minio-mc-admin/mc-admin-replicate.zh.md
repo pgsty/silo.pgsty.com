@@ -599,9 +599,9 @@ mc [GLOBALFLAGS] admin replicate resync start|status|cancel ALIAS1 ALIAS2
 
 #### mcli 20261026 输出与错误处理 {#resync-20261026}
 
-`mcli --json admin replicate resync status ALIAS1 ALIAS2` 持续消费状态流直到 `Completed`、`Failed` 或 `Canceled`，保留最后一条终态；TTY 模式同样在这三种状态结束。复制未启用时输出该状态并正常退出。速率计算不再在约 8.6 GiB 之后溢出。
+`mcli --json admin replicate resync status ALIAS1 ALIAS2` 会持续消费状态流直至到达 `Completed`、`Failed` 或 `Canceled`，并保留最后一条终态记录；TTY 交互模式同样在这三种终态下正常结束。若目标站点未启用复制，命令会输出该状态并正常退出。此外，吞吐速率计算已修复超过约 8.6 GiB 后的整数溢出问题。
 
-`start` 与 `cancel` 的逐桶结果中只要存在失败，就保留错误详情并返回非零退出码。`status` 成功读到已有的 Failed/Canceled 任务仍退出 0；查询失败才返回非零。自动化应分别检查命令退出码与任务状态。详见[发布说明](/zh/blog/release/silo-20261026/#mcli)。
+执行 `start` 或 `cancel` 时，只要任一存储桶操作失败，命令都会保留具体错误详情并以非零退出码返回；而使用 `status` 查询已处于 `Failed` 或 `Canceled` 终态的任务时，只要状态查询本身成功仍返回退出码 `0`（仅在查询请求失败时返回非零）。自动化脚本应同时检查命令退出码与返回的任务状态字段，详见[发布说明](/zh/blog/release/silo-20261026/#mcli)。
 
 #### `start` {#mc.admin.replicate.resync.start}
 

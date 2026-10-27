@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261026 / Console 2.5.1:** The Console Metrics page uses Metrics V3, with per-node aggregation and explicit missing-data handling. Overview capacity is the Server-reported raw capacity, not an EC usable-capacity estimate. Bucket inventory is live; object counts and usage are scanner-derived, so inspect freshness before interpreting changes. See the [Console release notes](/blog/release/console-2.5.1/#interface) and [metric mapping](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md).
+**SILO 20261026 / Console 2.5.1:** The Console Metrics page queries Metrics V3, aggregating across nodes while distinguishing true zero values from missing data. Overview capacity shows the raw capacity reported by the Server (rather than an erasure-coded usable capacity estimate); the bucket list is read live, whereas object counts and usage statistics come from the background scanner. See the [Console release notes](/blog/release/console-2.5.1/#interface) and [metric mapping reference](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md).
 
 <a id="monitoring-and-alerting-using-prometheus"></a>
 <a id="minio-metrics-collect-using-prometheus"></a>
@@ -21,19 +21,19 @@ MinIO publishes cluster, node, bucket, and resource metrics using the [Prometheu
 
 ## Recommended Metrics V3 scraping for 20261026 {#metrics-v3}
 
-New deployments and the Console 2.5 Metrics page should scrape V3. Select the API version explicitly with mcli 20261026:
+New deployments and the Console 2.5 Metrics page should scrape Metrics V3. Pass `--api-version v3` explicitly with mcli 20261026:
 
 ```shell
 mcli admin prometheus generate mysilo --api-version v3
 ```
 
-The generated configuration uses `/minio/metrics/v3` and includes the required bearer token. Merge it into Prometheus and set targets to the SILO nodes being monitored. Protect the token and confirm successful scrapes before enabling the corresponding alerts. Categories such as `cluster` and `system` limit collection; the full Console dashboard needs its corresponding metric families. See the [command reference](/reference/minio-mc-admin/mc-admin-prometheus-generate/).
+The generated configuration scrapes `/minio/metrics/v3` and includes the required bearer token. Merge it into your Prometheus configuration, set `targets` to the SILO nodes being monitored, keep the bearer token secret, and verify that scrapes succeed before enabling alert rules. You can restrict collection to specific categories such as `cluster` or `system`, though the full Console dashboard requires its corresponding metric families; see the [command reference](/reference/minio-mc-admin/mc-admin-prometheus-generate/).
 
-- Multiple nodes export duplicate cluster metrics. Deduplicate within each cluster with `max` / `min`, retaining cluster identity labels; do not sum these copies across nodes.
-- Some legitimate zero values are omitted. Fill zero only when a companion metric with the same lifecycle exists; failed scrapes and usage data not yet produced by the scanner must remain no-data.
-- V3 API metrics use the `name` label; node metrics carry `server`, drive metrics carry pool/set/drive indexes, and durations use seconds. Adjust queries and alert thresholds when migrating a V2 dashboard.
+- **Cluster metric deduplication:** Multiple nodes export identical `cluster` metrics for the same cluster. Deduplicate within each cluster using `max` or `min` while preserving cluster identity labels—do not sum these series across nodes.
+- **Zero values vs. missing data:** Some legitimate zero values omit samples. Fill in zero only when a companion metric with the same lifecycle is present; failed scrapes or scanner usage metrics that have not yet been populated should remain no-data.
+- **Labels and units:** V3 API metrics use the `name` label, node metrics carry `server`, drive metrics carry `pool`/`set`/`drive` indexes, and durations are reported in seconds. Update PromQL queries and alert thresholds accordingly when migrating from V2 dashboards.
 
-The [V2 metric](/operations/monitoring/metrics-v2/#minio-metrics-v2) scraping and alerting procedure below remains for existing dashboards. Omitting `--api-version` still generates V2 configuration.
+The [V2 metric](/operations/monitoring/metrics-v2/#minio-metrics-v2) scraping and alerting procedure below is retained for existing dashboards (omitting `--api-version` still generates a V2 scrape configuration).
 
 > [!NOTE]
 > **Prerequisites**

@@ -11,19 +11,19 @@ upstream_modified: true
 
 ## Description {#description}
 
-[`mcli support inspect`](/reference/minio-mc/mc-support-inspect/) downloads object data and metadata from the server's drives. PGSTY mcli saves diagnostics locally without SUBNET registration or automatic uploads. Treat the archive and its decryption material as sensitive.
+[`mcli support inspect`](/reference/minio-mc/mc-support-inspect/) downloads raw object data and metadata from the server's underlying drives. PGSTY mcli saves diagnostic archives locally without requiring SUBNET registration or uploading anything automatically. Treat both the archive and its decryption key as sensitive material.
 
 ## Encryption {#encryption}
 
-Current SILO/mcli encrypts inspect output. There is no `--encrypt` flag on the current `support inspect` command. For example:
+Current SILO and mcli releases always encrypt `support inspect` output (there is no `--encrypt` flag on the command):
 
 ```shell
 mcli support inspect 'mysilo/mybucket/myobject/xl.meta'
 ```
 
-Without a user-supplied `support_public.pem` in the client configuration directory, SILO generates a random key and mcli prints the decryption key with the downloaded filename. Save that key securely: it cannot be recovered later. PGSTY does not add a vendor decryption key.
+If no user-supplied `support_public.pem` is present in the client configuration directory, SILO generates a random one-time key and mcli prints the decryption key alongside the downloaded filename. Save that key immediately—it cannot be recovered later, and PGSTY does not embed any vendor decryption key.
 
-If you supply `support_public.pem`, retain its matching private key. Quote wildcard paths so the shell passes the pattern to mcli. Limit collection to the files needed for diagnosis; recursive inspection can download object contents from many drives.
+If you provide `support_public.pem`, keep the matching private key safe. Quote paths containing wildcards so the shell passes the pattern directly to mcli. Because recursive inspection can pull object shards from multiple drives, collect only the specific files needed for troubleshooting.
 
 <a id="minio-support-decryption"></a>
 
@@ -31,7 +31,7 @@ If you supply `support_public.pem`, retain its matching private key. Quote wildc
 
 <a id="go"></a>
 
-Build the inspect utility from the maintained SILO source checkout using the Go version required by that checkout:
+Build the `inspect` decryption utility from the maintained SILO source repository using the Go toolchain version required by that release:
 
 ```shell
 git clone --branch RELEASE.2026-10-26T00-00-00Z --depth 1 https://github.com/pgsty/silo.git
@@ -39,18 +39,18 @@ cd silo/docs/debugging/inspect
 go build -o inspect .
 ```
 
-For an archive downloaded with a printed symmetric key:
+To decrypt an archive using the symmetric key printed during download:
 
 ```shell
 ./inspect -key=DECRYPTION_KEY /path/to/inspect.enc
 ```
 
-If you omit `-key` and no private key file is found, the utility prompts for the decryption key.
+If you omit `-key` and no private key file is specified, the utility prompts interactively for the decryption key.
 
-For output encrypted to your `support_public.pem`, use its corresponding private key:
+To decrypt output encrypted with `support_public.pem`, pass the matching private key:
 
 ```shell
 ./inspect -private-key=/secure/path/support_private.pem /path/to/inspect.enc
 ```
 
-With `-key`, the utility writes a decrypted ZIP beside the input file. With `-private-key`, it extracts the decrypted streams, including `inspect.zip`, into an output directory. Protect that output and share it only with an intended recipient after reviewing its contents. Decrypting the diagnostic wrapper does not remove any separate SSE encryption on collected object data.
+With `-key`, the utility writes a decrypted ZIP archive next to the input file; with `-private-key`, it extracts the decrypted streams (including `inspect.zip`) into an output directory. Review the extracted files before sharing them, and note that unwrapping the `inspect.enc` diagnostic archive does not decrypt objects that are themselves stored with server-side encryption (SSE).

@@ -26,11 +26,11 @@ SILO 20261026 是当前正式服务端版本，配套 Console 2.5.1、mcli 20261
 | Go / 平台归档 | **Go 1.27.3** | Windows ZIP；Linux/macOS tar.gz |
 {.wide .expand}
 
-Server、mcli、KES 的包版本均为 `20261026000000.0.0`。独立 Console 更新不会替换旧 Server 的内嵌控制台或服务端行为；内置策略 Reset、实时桶清单、生命周期与复制修复需要 Server 20261026。
+Server、mcli 与 KES 的软件包版本号均为 `20261026000000.0.0`。单独升级独立部署的 Console 不会替换旧版 Server 内嵌的控制台或服务端逻辑；内置策略 Reset、实时存储桶清单、生命周期过期与复制修复均需配合 Server 20261026 生效。
 
 [三合一发布日志](/zh/blog/release/silo-20261026/) · [Console 2.5](/zh/blog/release/console-2.5.1/) · [pkg 3.15](/zh/blog/release/pkg-3.15.2/) · [升级检查](/zh/compatibility/server/#maintenance-20261026) · [下载](/zh/download/)
 
-官方镜像分别位于 Docker Hub 的 `pgsty/silo`、`pgsty/mc`、`pgsty/silo-console`、`pgsty/kes`。包仓库镜像可能晚于 GitHub 制品更新。下面保留历史版本依赖，用于升级和回退分析。
+官方容器镜像发布于 Docker Hub：`pgsty/silo`、`pgsty/mc`、`pgsty/silo-console` 与 `pgsty/kes`（软件源镜像同步可能略晚于 GitHub Release）。下文保留各历史版本的依赖矩阵，供升级与回滚核对。
 
 ## Server 20261018 正式发布 {#october-release}
 

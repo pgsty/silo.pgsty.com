@@ -18,7 +18,7 @@ SILO Console is Silo's build of the MinIO Console. This page records where the t
 
 ## 2.5.1 administration repairs {#release-251}
 
-Status-only group updates preserve members; explicit member arrays still replace them. OIDC string-array groups preserve permissions, and configured HTTPS/trusted proxies preserve secure sessions. Credential exports retain exact UTF-8 JSON; ZIP failures before the first byte retain S3 error status. Keyboard focus, accessible names and tab scrolling are repaired. See the [complete 2.5 release notes](/blog/release/console-2.5.1/).
+Status-only group updates now preserve existing members, while explicit member arrays still replace the member list. OIDC string-array group claims preserve mapped permissions, and secure session cookies are set only when HTTPS or a trusted proxy is configured. Credential exports produce valid UTF-8 JSON, and streaming ZIP downloads preserve the underlying S3 error status if they fail before writing the first byte. Keyboard focus, accessible names, and tab scrolling are also fixed. See the [complete 2.5 release notes](/blog/release/console-2.5.1/).
 
 ## Principles {#principles}
 

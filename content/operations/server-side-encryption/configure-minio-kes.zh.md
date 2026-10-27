@@ -143,6 +143,6 @@ mcli cat mysilo/encryptedbucket/encryption-check.txt
 
 ## Kubernetes 部署
 
-将 PGSTY KES 作为独立服务管理，通过平台配置与 Secret 机制将端点、凭据和 CA 提供给 SILO Pod。分别固定 SILO 与 KES 镜像版本。
+在 Kubernetes 环境中，建议将 PGSTY KES 作为独立服务部署管理，通过平台的 ConfigMap 与 Secret 将 KES 端点、凭据与 CA 证书注入 SILO Pod，并分别为 SILO 与 KES 固定镜像版本标签。
 
-保留的 [MinIO Operator 指南](/zh/operations/deployments/kubernetes/)描述已归档上游 `v7.1.1` 的兼容快照。Operator Console 已在 `v6.0.0` 移除，不应继续依照旧 Console 加密页面操作。历史 `TenantSpec.kes` 示例本身不能验证 PGSTY KES 镜像权限、证书路径或你的 Kubernetes 部署。
+站点保留的 [MinIO Operator 指南](/zh/operations/deployments/kubernetes/)对应已归档的上游 `v7.1.1` 兼容快照（其中 Operator Console 已于 `v6.0.0` 移除，请勿参照旧版 Console 加密界面操作）。若沿用历史 `TenantSpec.kes` 示例，请根据 PGSTY KES 镜像的运行 UID/GID（`1000:1000`）与实际证书挂载路径核对配置。

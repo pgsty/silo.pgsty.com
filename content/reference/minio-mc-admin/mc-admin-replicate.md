@@ -599,9 +599,9 @@ mc [GLOBALFLAGS] admin replicate resync start|status|cancel ALIAS1 ALIAS2
 
 #### mcli 20261026 output and errors {#resync-20261026}
 
-`mcli --json admin replicate resync status ALIAS1 ALIAS2` consumes the stream through `Completed`, `Failed` or `Canceled`, retaining the terminal sample. TTY observation also ends at all three states. Disabled replication is reported as a successful query result. Throughput calculations no longer overflow after roughly 8.6 GiB.
+`mcli --json admin replicate resync status ALIAS1 ALIAS2` follows the status stream until the job reaches `Completed`, `Failed`, or `Canceled` and retains the final terminal record; interactive TTY output likewise exits at all three terminal states. If replication is not enabled, the command reports that state and exits normally. Throughput calculations no longer overflow after roughly 8.6 GiB transferred.
 
-Any per-bucket failure in `start` or `cancel` preserves the error details and returns a nonzero exit code. Successfully reading an already Failed/Canceled job with `status` still exits 0; a query failure exits nonzero. Automation should inspect both the command exit code and job state. See the [release notes](/blog/release/silo-20261026/#mcli).
+If any per-bucket operation fails during `start` or `cancel`, the command preserves the error details and exits non-zero. Querying an already `Failed` or `Canceled` job with `status` still exits `0` when the status query itself succeeds, and exits non-zero only if the query fails. Automation scripts should inspect both the process exit code and the returned job state; see the [release notes](/blog/release/silo-20261026/#mcli).
 
 #### `start` {#mc.admin.replicate.resync.start}
 

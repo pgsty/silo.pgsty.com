@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261026 / Console 2.5.1：** Console 的 Metrics 页面采用 Metrics V3，按节点聚合并区分缺失数据。Overview 容量是 Server 报告的原始容量，不是 EC 可用容量估计。桶清单实时读取，对象数量与用量来自扫描器，应结合新鲜度判断变化。见[Console 发布说明](/zh/blog/release/console-2.5.1/#interface)与[指标映射](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md)。
+**SILO 20261026 / Console 2.5.1：** Console 的 Metrics 页面使用 Metrics V3 指标，按节点聚合并明确区分“真实零值”与“缺失数据”。Overview 页面展示的是 Server 上报的裸盘总容量（而非扣除纠删码开销后的可用容量估算）；存储桶列表为实时读取，对象数量与空间占用则由后台扫描器统计，查看时请留意扫描时间。详见[Console 发布说明](/zh/blog/release/console-2.5.1/#interface)与[指标映射文档](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md)。
 
 <a id="prometheus"></a>
 <a id="minio-metrics-collect-using-prometheus"></a>
@@ -21,19 +21,19 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 
 ## 20261026 推荐的 Metrics V3 抓取 {#metrics-v3}
 
-新部署和 Console 2.5 的 Metrics 页面应抓取 V3。使用 mcli 20261026 显式指定 API 版本：
+新部署以及 Console 2.5 的 Metrics 页面建议抓取 V3 指标。使用 mcli 20261026 显式指定 API 版本即可生成配置：
 
 ```shell
 mcli admin prometheus generate mysilo --api-version v3
 ```
 
-生成配置使用 `/minio/metrics/v3`，包含所需的 bearer token。将配置合并到 Prometheus，并把 targets 设置为要监控的各个 SILO 节点；保护 token，确认抓取成功后再启用相应告警。可用 `cluster`、`system` 等类别限制采集范围；Console 的完整面板需要相应指标族，见[命令参考](/zh/reference/minio-mc-admin/mc-admin-prometheus-generate/)。
+生成的配置抓取 `/minio/metrics/v3` 路径并包含所需的 bearer token。将其合并到 Prometheus 配置中，把 `targets` 设为待监控的各个 SILO 节点，妥善保管 token，并在确认抓取正常后再启用告警规则。你可以按 `cluster`、`system` 等类别限制采集子集，但 Console 的完整监控面板依赖对应的指标族，详见[命令参考](/zh/reference/minio-mc-admin/mc-admin-prometheus-generate/)。
 
-- 同一集群的 cluster 指标由多个节点重复导出，使用保留集群标签的 `max` / `min` 去重，不能简单跨节点求和。
-- 部分合法零值不导出样本。仅在同生命周期的伴随指标存在时补零；抓取失败或扫描器尚未产生用量数据时保持“无数据”。
-- V3 API 标签使用 `name`；逐节点指标带 `server`，磁盘指标带 pool/set/drive 索引；时长单位为秒。迁移 V2 仪表盘时需同步调整查询和告警阈值。
+- **集群级指标去重：** 同一集群的 `cluster` 指标会由多个节点重复导出，查询时应保留集群标识标签并用 `max` 或 `min` 聚合去重，切勿直接跨节点 `sum` 求和。
+- **零值与缺失数据：** 部分合法零值默认不导出样本。仅在同生命周期的伴随指标存在时才应补零；抓取失败或后台扫描器尚未产出用量数据时，应保持为“无数据”（no-data）。
+- **标签与单位差异：** V3 API 指标使用 `name` 标签，节点指标带 `server` 标签，磁盘指标带 `pool`/`set`/`drive` 索引，耗时统一以秒为单位。从 V2 迁移仪表盘时需同步调整 PromQL 查询与告警阈值。
 
-下面保留 [V2 指标](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2) 的抓取与告警流程，供既有仪表盘使用。省略 `--api-version` 仍生成 V2 配置。
+下文保留 [V2 指标](/zh/operations/monitoring/metrics-v2/#minio-metrics-v2) 的抓取与告警配置步骤，供既有仪表盘参考（省略 `--api-version` 时仍默认生成 V2 配置）。
 
 > [!NOTE]
 > **前提条件**

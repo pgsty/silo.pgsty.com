@@ -26,11 +26,11 @@ SILO 20261026 is the current Server release, with Console 2.5.1, mcli 20261026 a
 | Go / platform archives | **Go 1.27.3** | Windows ZIP; Linux/macOS tar.gz |
 {.wide .expand}
 
-Server, mcli and KES share package version `20261026000000.0.0`. Updating standalone Console does not replace an older Server's embedded UI or runtime behavior; policy Reset, live bucket inventory, lifecycle and replication repairs require Server 20261026.
+Server, mcli, and KES all use package version `20261026000000.0.0`. Upgrading a standalone Console deployment does not replace an older Server's embedded UI or server-side behavior; built-in policy Reset, live bucket inventory reads, and the lifecycle and replication fixes require Server 20261026.
 
 [Combined release notes](/blog/release/silo-20261026/) · [Console 2.5](/blog/release/console-2.5.1/) · [pkg 3.15](/blog/release/pkg-3.15.2/) · [Upgrade checks](/compatibility/server/#maintenance-20261026) · [Downloads](/download/)
 
-Official images use Docker Hub: `pgsty/silo`, `pgsty/mc`, `pgsty/silo-console` and `pgsty/kes`. Package-repository mirrors may lag GitHub artifacts. Historical graphs below support upgrade and rollback analysis.
+Official container images are published on Docker Hub under `pgsty/silo`, `pgsty/mc`, `pgsty/silo-console`, and `pgsty/kes` (package-repository mirrors may update slightly after GitHub Releases). The historical dependency graphs below are retained for upgrade and rollback checks.
 
 ## Server 20261018 release {#october-release}
 

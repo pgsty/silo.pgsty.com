@@ -21,9 +21,9 @@ icon: fa-solid fa-terminal
 
 <span id="release-20261018"></span>
 
-Built with Go 1.27.3, silo-pkg 3.15.2 and pinned upstream SDK `320af050c445`. Changes since 20261018 cover identity/connection cache isolation, resync JSON and terminal states, throughput and batch IOPs overflow, observation without live metrics, partial-failure exit codes, alias regions and SDK multipart/read/delete repairs. Scripts must handle the additive `pending` state and nonzero partial resync mutation exits; querying an already failed job still exits zero. Alias region support adds no CLI flag, and existing configuration remains usable.
+Built with Go 1.27.3, silo-pkg 3.15.2, and pinned upstream SDK `320af050c445`. Since 20261018, this release fixes identity and connection-cache isolation, `admin replicate resync` JSON output and terminal states, throughput and batch IOPs counter overflow, job status polling when live metrics are absent, partial-failure exit codes, alias region configuration, and SDK multipart, read, and bulk-delete handling. Automation scripts should handle the added `pending` state and non-zero exit codes when resync mutations partially fail (querying an already failed job still exits `0`). Alias region support adds no new CLI flags, and existing configurations continue to work unchanged.
 
-Embedders select `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`. No Server protocol upgrade is required; SILO remains the maintained target. See the [complete changes](/blog/release/silo-20261026/#mcli) and [component matrix](/compatibility/versions/).
+Embedders should select `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`. Client upgrades require no Server protocol changes, with SILO as the maintained target. See the [complete changes](/blog/release/silo-20261026/#mcli) and [component matrix](/compatibility/versions/).
 
 ## Changes inherited from 20260916 {#release-20260916}
 

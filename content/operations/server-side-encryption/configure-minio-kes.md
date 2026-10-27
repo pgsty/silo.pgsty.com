@@ -139,6 +139,6 @@ Use `mcli encrypt set sse-s3 mysilo/encryptedbucket` to use the deployment's def
 
 ## Kubernetes Deployments
 
-Run PGSTY KES as a separately managed service and expose its endpoint, credentials, and CA to the SILO pods using your platform's configuration and Secret mechanisms. Pin the SILO and KES images independently.
+In Kubernetes environments, run PGSTY KES as a separately managed service, inject its endpoint, credentials, and CA certificate into the SILO pods via ConfigMaps and Secrets, and pin the SILO and KES image tags independently.
 
-The retained [MinIO Operator guides](/operations/deployments/kubernetes/) describe the archived upstream `v7.1.1` compatibility snapshot. Operator Console was removed in `v6.0.0`; do not follow old Console encryption screens. The historical `TenantSpec.kes` examples do not by themselves validate PGSTY KES image permissions, certificate paths, or your Kubernetes deployment.
+The retained [MinIO Operator guides](/operations/deployments/kubernetes/) document the archived upstream `v7.1.1` compatibility snapshot (Operator Console was removed in `v6.0.0`, so do not follow legacy Console encryption screens). If you adapt historical `TenantSpec.kes` examples, verify that container permissions (`1000:1000`) and certificate mount paths match the PGSTY KES image.

@@ -21,9 +21,9 @@ icon: fa-solid fa-terminal
 
 <span id="release-20261018"></span>
 
-使用 Go 1.27.3、silo-pkg 3.15.2 和固定上游 SDK `320af050c445`。自 20261018 起，修复身份/连接配置缓存隔离、resync JSON 与终态、吞吐量及 batch IOPs 溢出、缺少实时指标时的状态观察、部分操作失败退出码、别名区域与 SDK 分片/读取/删除行为。脚本需处理新增 `pending` 状态与部分 resync 修改失败的非零退出码；查询已有失败任务仍退出零。别名 region 不增加新 CLI 参数，已有配置继续可用。
+基于 Go 1.27.3、silo-pkg 3.15.2 与固定提交的上游 SDK（`320af050c445`）构建。相比 20261018，本版修复了身份与连接配置缓存隔离、`admin replicate resync` 的 JSON 输出与终态判定、吞吐量及 batch IOPs 计数溢出、无实时指标时的任务状态轮询、部分操作失败的退出码、别名区域配置以及 SDK 分片上传/读取/批量删除行为。自动化脚本需适配新增的 `pending` 状态，以及部分 resync 变更操作失败时的非零退出码（查询已处于失败状态的任务仍返回退出码 `0`）。别名 region 支持未引入新 CLI 参数，原有配置可直接沿用。
 
-内嵌应用选择 `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`。客户端无需更改 Server 协议，SILO 为正式维护目标。见[完整变更](/zh/blog/release/silo-20261026/#mcli)与[组件矩阵](/zh/compatibility/versions/)。
+作为库嵌入时，请选用 `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`。客户端升级不涉及服务端协议变更，以 SILO 作为正式维护目标。详见[完整变更](/zh/blog/release/silo-20261026/#mcli)与[组件矩阵](/zh/compatibility/versions/)。
 
 ## 继承自 20260916 的变化 {#release-20260916}
 
