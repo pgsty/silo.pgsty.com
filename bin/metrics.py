@@ -43,6 +43,7 @@ class Metrics:
 
     github_stars: int
     docker_pulls_by_repo: dict[str, int]
+    releases: int
 
     @property
     def docker_pulls(self) -> int:
@@ -52,7 +53,7 @@ class Metrics:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Fetch pgsty/silo GitHub stars and Docker Hub pulls "
+            "Fetch pgsty/silo GitHub stars, published releases and Docker Hub pulls "
             f"({', '.join(f'{DOCKER_NAMESPACE}/{repo}' for repo in DOCKER_REPOS)} "
             "combined), then refresh data/home/metrics.yaml."
         )
@@ -87,7 +88,8 @@ def fetch_json(
     opener: urllib.request.OpenerDirector,
     url: str,
     headers: dict[str, str],
-) -> dict[str, Any]:
+    payload_type: type = dict,
+) -> Any:
     request = urllib.request.Request(url, headers=headers)
 
     try:
@@ -100,8 +102,8 @@ def fetch_json(
     except (TimeoutError, json.JSONDecodeError) as exc:
         raise MetricsError(f"{url}: {exc}") from exc
 
-    if not isinstance(payload, dict):
-        raise MetricsError(f"{url}: expected a JSON object")
+    if not isinstance(payload, payload_type):
+        raise MetricsError(f"{url}: expected JSON {payload_type.__name__}")
     return payload
 
 
@@ -112,7 +114,7 @@ def read_counter(payload: dict[str, Any], key: str, source: str) -> int:
     return value
 
 
-def fetch_github_stars(opener: urllib.request.OpenerDirector) -> int:
+def github_headers() -> dict[str, str]:
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": USER_AGENT,
@@ -121,9 +123,31 @@ def fetch_github_stars(opener: urllib.request.OpenerDirector) -> int:
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     if token:
         headers["Authorization"] = f"Bearer {token}"
+    return headers
 
-    payload = fetch_json(opener, GITHUB_API, headers)
+
+def fetch_github_stars(opener: urllib.request.OpenerDirector) -> int:
+    payload = fetch_json(opener, GITHUB_API, github_headers())
     return read_counter(payload, "stargazers_count", GITHUB_API)
+
+
+def fetch_published_releases(opener: urllib.request.OpenerDirector) -> int:
+    """Count stable published Server releases across every API page."""
+    count = 0
+    page = 1
+    while True:
+        url = f"{GITHUB_API}/releases?per_page=100&page={page}"
+        releases = fetch_json(opener, url, github_headers(), list)
+        for release in releases:
+            if not isinstance(release, dict) or not all(
+                key in release for key in ("draft", "prerelease", "published_at")
+            ):
+                raise MetricsError(f"{url}: incomplete release record")
+            if not release["draft"] and not release["prerelease"] and release["published_at"]:
+                count += 1
+        if len(releases) < 100:
+            return count
+        page += 1
 
 
 def fetch_docker_pulls(opener: urllib.request.OpenerDirector) -> dict[str, int]:
@@ -144,6 +168,7 @@ def fetch_metrics() -> Metrics:
     return Metrics(
         github_stars=fetch_github_stars(opener),
         docker_pulls_by_repo=fetch_docker_pulls(opener),
+        releases=fetch_published_releases(opener),
     )
 
 
@@ -174,6 +199,7 @@ def update_metrics_file(metrics: Metrics) -> bool:
         content = METRICS_FILE.read_text(encoding="utf-8")
         updated = replace_yaml_counter(content, "github_stars", metrics.github_stars)
         updated = replace_yaml_counter(updated, "docker_pulls", metrics.docker_pulls)
+        updated = replace_yaml_counter(updated, "releases", metrics.releases)
         if updated == content:
             return False
 
@@ -209,6 +235,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     for repo, pulls in metrics.docker_pulls_by_repo.items():
         print(f"docker_pulls[{repo}]={pulls}")
     print(f"docker_pulls={metrics.docker_pulls}")
+    print(f"releases={metrics.releases}")
 
     if args.command == "update":
         changed = update_metrics_file(metrics)

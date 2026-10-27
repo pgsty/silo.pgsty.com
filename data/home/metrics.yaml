@@ -1,12 +1,12 @@
 # Remote counters; refresh with: bin/metrics.py
 # docker_pulls sums pgsty/minio (archived, pre-rename) and pgsty/silo.
-github_stars: 4299
-docker_pulls: 4781309
+github_stars: 4325
+docker_pulls: 4943428
 
-# Editorial counters verified on 2026-10-24.
+# Security inventory verified on 2026-10-24; release count is fetched by bin/metrics.py.
 # security_fixes: unique CVE/SN entries in /about/security-advisories/#advisories;
 # excludes inherited upstream fixes, dependency updates, and non-security notes.
 # releases: published pgsty/silo Server releases; excludes drafts and prereleases.
 # Homepage Security Notes / Release Notes cards count their section pages instead.
 security_fixes: 25
-releases: 12
+releases: 13

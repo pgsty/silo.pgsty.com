@@ -93,7 +93,7 @@ def activity(c, zh=False, repo=None, compact=True):
     return "<br>".join(lines)
 
 
-def tables(data, zh=False, repo=None):
+def tables(data, zh=False, repo=None, website=False):
     selected = {c["handle"] for c in people(data, repo)}
     sections = []
     for group, en, cn in GROUPS:
@@ -107,6 +107,8 @@ def tables(data, zh=False, repo=None):
             what = description(c, zh, repo).replace("|", "&#124;")
             record = activity(c, zh, repo).replace("|", "&#124;")
             lines.append(f'| [@{c["handle"]}](https://github.com/{c["handle"]}) | {what} | {record} |')
+        if website:
+            lines.append("{.wide .expand}")
         sections.append("\n".join(lines))
     return "\n\n".join(sections)
 
@@ -135,7 +137,7 @@ def record(data, zh=False, repo=None, website=False):
         intro = f'As of **{date}**, **{count} community {noun}** {verb} credited in {subject}. The roll includes maintainers and every human issue / PR author' + (', along with security reporters who have agreed to be acknowledged.' if repo is None else '.')
         policy = 'Opening an issue or PR counts, whether open, closed, draft, or unmerged. Each account appears once. Merged PR authors come first, followed by other PR authors and reporters. Within each group, significant fixes, adopted proposals, and reports that led to fixes take priority, followed by first participation. Gold rings highlight significant contributions.'
         caveat = 'When a proposal was incorporated through a later repair, its adoption is credited alongside the original PR status. Automated accounts are excluded. Upstream authorship remains in Git history and copyright notices.'
-    sections = [intro, policy, caveat, wall(entries, zh, repo, website), tables(data, zh, repo)]
+    sections = [intro, policy, caveat, wall(entries, zh, repo, website), tables(data, zh, repo, website)]
     audit_title = '统计范围' if zh else 'Audit scope'
     note = ('以下统计来自全部分页的 GitHub issue / PR 记录，包含所有状态和自动化账号。' if zh else 'Counts below come from every page of the GitHub issue / PR records, across all states, including automated accounts.')
     note += (' 各仓库的核对日期分别列出；未重新核对的记录保留原日期与状态。' if zh else ' Review dates are listed per repository; records not rechecked retain their earlier dates and states.')
@@ -218,7 +220,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--workspace', type=Path, default=SITE.parent)
     parser.add_argument('--check', action='store_true')
-    parser.add_argument('--repo', action='append', choices=('silo', 'silo-console', 'mc', 'silo-pkg'),
+    parser.add_argument('--repo', action='append', choices=('silo', 'silo-console', 'mc', 'silo-pkg', 'kes'),
                         help='Render only this repository and the bilingual site pages; repeat to select more.')
     args = parser.parse_args()
     data = yaml.safe_load((SITE / 'data/home/contributors.yaml').read_text())
@@ -232,6 +234,7 @@ def main():
         ('silo-console', ('README.md', 'README_ZH.md'), '## License, Attribution, and Trademarks'),
         ('mc', ('README.md', 'README_ZH.md'), '## Background'),
         ('silo-pkg', ('README.md', 'README_ZH.md'), '## License'),
+        ('kes', ('README.md', 'README_ZH.md'), '## Background'),
     ):
         if args.repo and repo not in args.repo:
             continue

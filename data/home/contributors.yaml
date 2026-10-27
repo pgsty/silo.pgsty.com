@@ -6,38 +6,38 @@
 # firstContribution is the first public issue / PR date; omitted for private disclosures.
 # Sync repository records, README sections, and bilingual pages: python3 bin/contributors.py
 # Refresh avatars: python3 bin/contributor_avatars.py
-updated: "2026-10-25T16:00:37+00:00"
+updated: "2026-10-26T16:35:06+00:00"
 repositories:
   - repo: "pgsty/silo"
-    updated: "2026-10-25T16:00:37+00:00"
+    updated: "2026-10-26T16:35:06+00:00"
     issues: 123
-    pullRequests: 130
+    pullRequests: 131
   - repo: "pgsty/silo-console"
-    updated: "2026-10-25T14:55:34+00:00"
+    updated: "2026-10-26T16:35:06+00:00"
     issues: 36
-    pullRequests: 29
+    pullRequests: 33
   - repo: "pgsty/mc"
-    updated: "2026-10-18T23:46:04+00:00"
-    issues: 19
-    pullRequests: 28
+    updated: "2026-10-26T16:35:06+00:00"
+    issues: 26
+    pullRequests: 29
   - repo: "pgsty/silo-pkg"
-    updated: "2026-10-18T23:46:04+00:00"
+    updated: "2026-10-26T16:35:06+00:00"
     issues: 0
     pullRequests: 12
   - repo: "pgsty/silo-go"
-    updated: "2026-10-18T23:46:04+00:00"
+    updated: "2026-10-26T16:35:06+00:00"
     issues: 0
     pullRequests: 0
   - repo: "pgsty/kes"
-    updated: "2026-10-18T23:46:04+00:00"
+    updated: "2026-10-26T16:35:06+00:00"
     issues: 0
     pullRequests: 1
   - repo: "pgsty/silo.pgsty.com"
-    updated: "2026-10-18T23:46:04+00:00"
+    updated: "2026-10-26T16:35:06+00:00"
     issues: 1
-    pullRequests: 43
+    pullRequests: 44
   - repo: "pgsty/minio-docs"
-    updated: "2026-10-18T23:46:04+00:00"
+    updated: "2026-10-26T16:35:06+00:00"
     issues: 0
     pullRequests: 0
 bots:
@@ -52,23 +52,20 @@ code:
     firstContribution: "2026-04-14"
     activity:
       - repo: "pgsty/silo"
-        merged: [44, 45, 56, 66, 69, 70, 72, 73, 74, 80, 81, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 101, 103, 104, 121, 122, 123, 124, 126, 127, 128, 129, 130, 131, 134, 135, 138, 140, 142, 143, 145, 146, 149, 156, 157, 159, 161, 162, 163, 164, 173, 174, 175, 177, 178, 179, 180, 181, 182, 188, 189, 190, 191, 192, 193, 194, 196, 205, 206, 207, 208, 209, 211, 212, 213, 214, 216, 234, 235, 237, 238, 239, 242, 243, 244]
-        closed: [155, 195]
+        merged: [44, 45, 56, 66, 69, 70, 72, 73, 74, 80, 81, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 101, 103, 104, 121, 122, 123, 124, 126, 127, 128, 129, 130, 131, 134, 135, 138, 140, 142, 143, 145, 146, 149, 156, 157, 159, 161, 162, 163, 164, 173, 174, 175, 177, 178, 179, 180, 181, 182, 188, 189, 190, 191, 192, 193, 194, 196, 205, 206, 207, 208, 209, 211, 212, 213, 214, 216, 234, 235, 237, 238, 239, 242, 243, 244, 258]
         issuesClosed: [22, 23, 24, 25, 26, 27, 28, 46, 47, 48, 49, 50, 52, 53, 55, 63, 64, 65, 67, 68, 75, 76, 77, 78, 82, 83, 84, 99, 100, 102, 105, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 133, 136, 137, 139, 141, 144, 147, 148, 158, 165, 166, 167, 168, 169, 170, 171, 199, 200, 201, 202, 203, 204, 218, 246]
         issuesOpen: [217]
+        closed: [155, 195]
       - repo: "pgsty/silo-console"
         what: "Maintains SILO Console, including fixes, tests, releases, and documentation"
         whatZh: "维护 SILO Console 的修复、测试、发行与文档"
-        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,
-          28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
-        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59,
-          60, 61, 62, 64, 65]
+        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 64, 65, 66, 67, 68, 69]
+        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
       - repo: "pgsty/mc"
         what: "Maintains mcli, including fixes, tests, packaging, and releases"
         whatZh: "维护 mcli 的修复、测试、打包与发行"
-        merged: [1, 2, 3, 4, 8, 9, 10, 11, 13, 22, 24, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 46,
-          47]
-        issuesClosed: [5, 6, 7, 12, 14, 15, 16, 17, 18, 19, 20, 21, 23, 25, 28, 29, 30, 31]
+        merged: [1, 2, 3, 4, 8, 9, 10, 11, 13, 22, 24, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 46, 47, 55]
+        issuesClosed: [5, 6, 7, 12, 14, 15, 16, 17, 18, 19, 20, 21, 23, 25, 28, 29, 30, 31, 50, 51, 52, 53, 54]
       - repo: "pgsty/silo-pkg"
         what: "Maintains shared packages, including policy fixes and component coordination"
         whatZh: "维护共享包、策略修复与组件协调"
@@ -76,8 +73,7 @@ code:
       - repo: "pgsty/kes"
         merged: [1]
       - repo: "pgsty/silo.pgsty.com"
-        merged: [2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-          30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46]
+        merged: [2, 3, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47]
         closed: [36]
   - handle: "ZouhairCharef"
     featured: true
@@ -104,8 +100,8 @@ code:
     firstContribution: "2026-04-24"
     activity:
       - repo: "pgsty/silo"
-        merged: [225]
         issuesClosed: [31, 32, 107, 226]
+        merged: [225]
   - handle: "pinginfo"
     name: "ping"
     featured: true
@@ -144,8 +140,8 @@ code:
   - handle: "mrjavadseydi"
     name: "mohammadjavad seydi"
     featured: true
-    what: "Fixed bucket quota metrics; contributed access-frequency ILM and S3-compatible multipart listing proposals"
-    whatZh: "修复桶配额指标，贡献按访问频率分层的 ILM 与 S3 兼容分片上传列表方案"
+    what: "Fixed bucket quota metrics and mcli alias regions; contributed access-frequency ILM and S3-compatible multipart listing proposals"
+    whatZh: "修复桶配额指标与 mcli 别名区域配置，贡献按访问频率分层的 ILM 与 S3 兼容分片上传列表方案"
     note: "The access-frequency feature in [#60](https://github.com/pgsty/silo/pull/60) was merged and later removed.\
       \ The multipart-listing contribution in [#198](https://github.com/pgsty/silo/pull/198) was merged after follow-up\
       \ durability and cancellation repairs; it shipped in Server 20260916 with legacy as the default and strict\
@@ -155,11 +151,11 @@ code:
     firstContribution: "2026-08-15"
     activity:
       - repo: "pgsty/silo"
-        merged: [60, 132, 198, 221]
         open: [249]
+        merged: [60, 132, 198, 221]
         closed: [215]
       - repo: "pgsty/mc"
-        open: [44]
+        merged: [44]
   - handle: "h5vx"
     featured: true
     what: "Implemented per-bucket CORS configuration and enforcement"
@@ -190,8 +186,8 @@ code:
     firstContribution: "2026-09-07"
     activity:
       - repo: "pgsty/silo"
-        merged: [232, 233]
         open: [240, 241]
+        merged: [232, 233]
         closed: [184]
         issuesClosed: [152, 153]
   - handle: "Aeirx"
@@ -215,15 +211,15 @@ code:
   - handle: "yupoet"
     activity:
       - repo: "pgsty/silo"
-        merged: [228, 229]
         closed: [230]
+        merged: [228, 229]
     firstContribution: "2026-09-26"
     what: "Improved checksum mismatch messages, verified erasure-coding documentation, and contributed a single-node migration case"
     whatZh: "改进校验和不匹配错误，核验纠删码文档，并贡献单节点迁移案例"
     featured: true
     name: "Paris Y."
-    note: "Also [cross-checked the two-drive EC:1 documentation](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939). The single-node migration report in #228 was merged on 2026-10-23; the registry-mirror proposal in #230 remains open."
-    noteZh: "还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。#228 单节点迁移报告于 2026-10-23 合并；#230 镜像仓库提案仍保持开放。"
+    note: "Also [cross-checked the two-drive EC:1 documentation](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939). The single-node migration report in #228 was merged on 2026-10-23; the registry-mirror proposal in #230 was closed without merging."
+    noteZh: "还[交叉核验了两盘 EC:1 文档](https://github.com/pgsty/silo/issues/197#issuecomment-5846341939)。#228 单节点迁移报告于 2026-10-23 合并；#230 镜像仓库提案已关闭，未合并。"
   - handle: "clown15"
     activity:
       - repo: "pgsty/silo"
@@ -237,13 +233,12 @@ code:
     activity:
       - repo: "pgsty/silo"
         merged: [253, 255, 257]
-        closed: [245, 248]
         issuesClosed: [252, 254, 256]
+        closed: [245, 248]
       - repo: "pgsty/silo-pkg"
-        merged: [11]
-        what: "Added policy-evaluation fast paths and regression coverage, adapting the original work by Klaus\
-          \ Post"
+        what: "Added policy-evaluation fast paths and regression coverage, adapting the original work by Klaus Post"
         whatZh: "基于 Klaus Post 的原始工作，贡献策略求值快速路径与回归覆盖"
+        merged: [11]
     firstContribution: "2026-10-17"
     what: "Contributed multi-pool migration and deletion safety, tiered expiry and replication checksum repairs, and faster policy evaluation in silo-pkg"
     whatZh: "贡献多池迁移与删除安全、分层过期和复制校验和修复，以及 silo-pkg 策略求值性能优化"
@@ -339,6 +334,14 @@ proposed:
       - repo: "pgsty/silo"
         closed: [36]
 reports:
+  - handle: "MikeVL"
+    featured: true
+    what: "Reported resync throughput overflow and missing JSON status, both fixed in mcli 20261026"
+    whatZh: "报告 resync 吞吐量溢出与 JSON 状态无输出，两项均在 mcli 20261026 修复"
+    firstContribution: "2026-10-25"
+    activity:
+      - repo: "pgsty/mc"
+        issuesClosed: [48, 49]
   - handle: "vampywiz17"
     name: "Vamp"
     featured: true
@@ -514,8 +517,8 @@ reports:
     firstContribution: "2026-07-08"
     activity:
       - repo: "pgsty/silo"
-        issuesClosed: [39]
         issuesOpen: [40]
+        issuesClosed: [39]
   - handle: "meesudzu"
     name: "Du"
     what: "Requested the migration guide from upstream MinIO"
@@ -640,10 +643,10 @@ reports:
   - handle: "geraldcombs"
     activity:
       - repo: "pgsty/mc"
-        issuesOpen: [45]
+        issuesClosed: [45]
     firstContribution: "2026-09-30"
-    what: "Suggested zip or 7z packaging for Windows artifacts"
-    whatZh: "建议使用 zip 或 7z 分发 Windows 制品"
+    what: "Suggested Windows ZIP packaging, adopted across the maintained release tools"
+    whatZh: "建议 Windows 使用 ZIP 归档，已在维护的发布工具中采纳"
     featured: false
     name: "Gerald Combs"
   - handle: "devTeam-AiReg"
