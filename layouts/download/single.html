@@ -32,14 +32,38 @@
 {{- $kesBuild := hugo.Data.releases.kes.build -}}
 {{- $kesWindowsFormat := hugo.Data.releases.kes.windows_archive_format | default "tar.gz" -}}
 {{- $kesBase := printf "https://github.com/pgsty/kes/releases/download/%s" $kesTag -}}
+{{- $serverDesktop := dict "zh" $zh "id" "server" "name" "SILO Server" "formula" "silo" "base" $serverBase "archive" (printf "silo_%s_%%s_%%s.%%s" $serverBuild) "checksums" (printf "silo_%s_checksums.txt" $serverBuild) "windowsArch" (slice "amd64" "arm64") "windowsFormat" $serverWindowsFormat "pending" (not $serverPublished) "notes" $serverNotes -}}
+{{- $clientDesktop := dict "zh" $zh "id" "client" "name" "mcli" "formula" "mcli" "base" $clientBase "archive" (printf "mcli_%s_%%s_%%s.%%s" $clientBuild) "checksums" (printf "mcli_%s_checksums.txt" $clientBuild) "windowsArch" (slice "amd64" "arm64") "windowsFormat" $clientWindowsFormat -}}
+{{- $console := dict "zh" $zh "id" "console" "name" "SILO Console" "formula" "silo-console" "repo" "silo-console" "base" $consoleBase "tag" $consoleTag "dockerTag" $consoleTag "version" $consoleTag "archive" "silo-console-%s-%s.%s" "checksums" (printf "silo-console_%s_checksums.txt" $consoleBuild) "windowsArch" (slice "amd64") "windowsFormat" $consoleWindowsFormat "notes" $consoleNotes "guide" (printf "https://github.com/pgsty/silo-console/blob/%s/%s#%s" $consoleTag (cond $zh "README_ZH.md" "README.md") (cond $zh "下载与运行" "quick-start")) -}}
+{{- $kes := dict "zh" $zh "id" "kes" "name" "PGSTY KES" "formula" "kes" "repo" "kes" "base" $kesBase "tag" $kesTag "dockerTag" $kesDockerTag "version" hugo.Data.releases.kes.date "archive" (printf "kes_%s_%%s_%%s.%%s" $kesBuild) "checksums" (printf "kes_%s_checksums.txt" $kesBuild) "windowsArch" (slice "amd64" "arm64") "windowsFormat" $kesWindowsFormat "notes" (relLangURL hugo.Data.releases.kes.notes) "guide" (relLangURL "operations/server-side-encryption/configure-minio-kes/") -}}
+{{- $consolePackages := slice -}}
+{{- $kesPackages := slice -}}
+{{- range slice (dict "format" "rpm" "label" "RPM" "systems" "RHEL · Rocky · Alma · Fedora") (dict "format" "deb" "label" "DEB" "systems" "Debian · Ubuntu") (dict "format" "apk" "label" "APK" "systems" "Alpine Linux") -}}
+  {{- $format := .format -}}
+  {{- $consoleFiles := slice -}}
+  {{- $kesFiles := slice -}}
+  {{- range slice "amd64" "arm64" -}}
+    {{- $label := cond (eq . "amd64") "x86_64" "ARM64" -}}
+    {{- $packageArch := . -}}
+    {{- if ne $format "deb" -}}{{- $packageArch = cond (eq . "amd64") "x86_64" "aarch64" -}}{{- end -}}
+    {{- $kesFile := printf "kes_%s_%s.%s" $kesBuild $packageArch $format -}}
+    {{- if eq $format "rpm" -}}{{- $kesFile = printf "kes-%s-1.%s.rpm" $kesBuild $packageArch -}}{{- end -}}
+    {{- $consoleFiles = $consoleFiles | append (dict "arch" $label "file" (printf "silo-console_%s_linux_%s.%s" $consoleBuild . $format)) -}}
+    {{- $kesFiles = $kesFiles | append (dict "arch" $label "file" $kesFile) -}}
+  {{- end -}}
+  {{- $consolePackages = $consolePackages | append (merge . (dict "files" $consoleFiles)) -}}
+  {{- $kesPackages = $kesPackages | append (merge . (dict "files" $kesFiles)) -}}
+{{- end -}}
+{{- $console = merge $console (dict "packages" $consolePackages) -}}
+{{- $kes = merge $kes (dict "packages" $kesPackages) -}}
     <section class="download-hero" aria-labelledby="download-title">
       <div class="download-grid-bg" aria-hidden="true"></div>
       <div class="landing-container">
         <div class="download-hero-copy" data-reveal>
           <p class="section-eyebrow download-eyebrow"><span class="silkscreen">DOWNLOAD MATRIX</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h1 id="download-title">{{ if $zh }}下载与安装 <span>SILO</span>{{ else }}Download &amp; Install <span>SILO</span>{{ end }}</h1>
-          <p>{{ if $zh }}选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Choose the server or admin client first, then use the install path that matches your operating system, architecture, and deployment model.{{ end }}</p>
-          <p>{{ if $zh }}已发布：<a href="#console">Console {{ $consoleTag }}</a>、<a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>、<a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a>、<a href="#pkg">pkg {{ hugo.Data.releases.pkg.tag }}</a>。见<a href="{{ relLangURL "compatibility/versions/" }}">组件版本与升级顺序</a>。{{ else }}Available now: <a href="#console">Console {{ $consoleTag }}</a>, <a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>, <a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a> and <a href="#pkg">pkg {{ hugo.Data.releases.pkg.tag }}</a>. See <a href="{{ relLangURL "compatibility/versions/" }}">component versions and upgrade order</a>.{{ end }}</p>
+          <p>{{ if $zh }}选择所需组件，再按操作系统、架构和部署方式安装。macOS 推荐 Homebrew，Windows 提供 ZIP 归档。{{ else }}Choose a component, then an install method for your operating system, architecture, and deployment. Use Homebrew on macOS or ZIP archives on Windows.{{ end }}</p>
+          <p>{{ if $zh }}已发布：<a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>、<a href="#console">Console {{ $consoleTag }}</a>、<a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a>。见<a href="{{ relLangURL "compatibility/versions/" }}">组件版本与升级顺序</a>。{{ else }}Available now: <a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>, <a href="#console">Console {{ $consoleTag }}</a> and <a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a>. See <a href="{{ relLangURL "compatibility/versions/" }}">component versions and upgrade order</a>.{{ end }}</p>
           <div class="download-release-line">
             <span class="release-live"><i aria-hidden="true"></i>{{ if $serverPublished }}{{ if $zh }}当前服务端发行版{{ else }}CURRENT SERVER RELEASE{{ end }}{{ else }}{{ if $zh }}服务端发布准备{{ else }}SERVER RELEASE PREPARATION{{ end }}{{ end }}</span>
             <a href="{{ $serverReleaseURL }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
@@ -77,6 +101,20 @@
             <div class="product-platforms"><span>Linux</span><span>macOS</span><span>Windows</span><span>Docker</span><span>Source</span></div>
             <strong>{{ if $zh }}选择安装方式{{ else }}Choose install method{{ end }} <i aria-hidden="true">↗</i></strong>
           </a>
+          {{ range slice $console $kes }}
+          <a class="product-choice-card" href="#{{ .id }}" data-reveal>
+            <div class="product-choice-top">
+              <div>
+                <p class="silkscreen">{{ if eq .id "console" }}{{ if $zh }}管理控制台{{ else }}WEB CONSOLE{{ end }}{{ else }}{{ if $zh }}密钥服务{{ else }}KEY SERVICE{{ end }}{{ end }}</p>
+                <h2>{{ .name }}</h2>
+              </div>
+              <span class="product-choice-icon"><i class="fas {{ if eq .id "console" }}fa-desktop{{ else }}fa-key{{ end }}" aria-hidden="true"></i></span>
+            </div>
+            <p>{{ if eq .id "console" }}{{ if $zh }}独立部署的 Web 管理控制台，用于管理 SILO 的存储桶、对象、用户与集群。{{ else }}A standalone web console for managing SILO buckets, objects, users, and clusters.{{ end }}{{ else }}{{ if $zh }}按需部署的外部密钥服务，为 SILO 服务端加密连接 OpenBao 等密钥存储。{{ else }}An optional external key service connecting SILO server-side encryption to key stores such as OpenBao.{{ end }}{{ end }}</p>
+            <div class="product-platforms"><span>Linux</span><span>macOS</span><span>Windows</span><span>Docker</span></div>
+            <strong>{{ if $zh }}选择安装方式{{ else }}Choose install method{{ end }} <i aria-hidden="true">↗</i></strong>
+          </a>
+          {{ end }}
         </div>
       </div>
     </section>
@@ -101,12 +139,14 @@
             <button type="button" role="tab" id="tab-server-docker" aria-controls="server-docker" aria-selected="true" data-download-tab="server-docker"><i class="fab fa-docker" aria-hidden="true"></i> Docker</button>
             <button type="button" role="tab" id="tab-server-kubernetes" aria-controls="server-kubernetes" aria-selected="false" tabindex="-1" data-download-tab="server-kubernetes"><i class="fas fa-dharmachakra" aria-hidden="true"></i> Kubernetes</button>
             <button type="button" role="tab" id="tab-server-packages" aria-controls="server-packages" aria-selected="false" tabindex="-1" data-download-tab="server-packages"><i class="fas fa-box" aria-hidden="true"></i> {{ if $zh }}Linux 软件包{{ else }}Linux Packages{{ end }}</button>
+            {{ partial "download/desktop-tabs.html" $serverDesktop }}
             <button type="button" role="tab" id="tab-server-binary" aria-controls="server-binary" aria-selected="false" tabindex="-1" data-download-tab="server-binary"><i class="fas fa-microchip" aria-hidden="true"></i> {{ if $zh }}二进制{{ else }}Binaries{{ end }}</button>
             <button type="button" role="tab" id="tab-server-ansible" aria-controls="server-ansible" aria-selected="false" tabindex="-1" data-download-tab="server-ansible"><i class="fas fa-diagram-project" aria-hidden="true"></i> Ansible</button>
             <button type="button" role="tab" id="tab-server-source" aria-controls="server-source" aria-selected="false" tabindex="-1" data-download-tab="server-source"><i class="fas fa-code" aria-hidden="true"></i> {{ if $zh }}源码{{ else }}Source{{ end }}</button>
           </div>
 
           <div class="download-tabpanels">
+            {{ partial "download/desktop-panels.html" $serverDesktop }}
             <section class="download-panel" id="server-docker" role="tabpanel" aria-labelledby="tab-server-docker">
               <div class="method-heading">
                 <div><span class="method-kicker">CONTAINER / MULTI-ARCH</span><h3>{{ if $zh }}几分钟内启动一个可持久化实例{{ else }}Run a persistent instance in minutes{{ end }}</h3></div>
@@ -395,11 +435,13 @@ make build
           <div class="download-tablist" role="tablist" aria-label="{{ if $zh }}MCLI Client 安装方式{{ else }}MCLI Client install methods{{ end }}">
             <button type="button" role="tab" id="tab-client-container" aria-controls="client-container" aria-selected="true" data-download-tab="client-container"><i class="fab fa-docker" aria-hidden="true"></i> Docker</button>
             <button type="button" role="tab" id="tab-client-packages" aria-controls="client-packages" aria-selected="false" tabindex="-1" data-download-tab="client-packages"><i class="fas fa-box" aria-hidden="true"></i> {{ if $zh }}Linux 软件包{{ else }}Linux Packages{{ end }}</button>
+            {{ partial "download/desktop-tabs.html" $clientDesktop }}
             <button type="button" role="tab" id="tab-client-binary" aria-controls="client-binary" aria-selected="false" tabindex="-1" data-download-tab="client-binary"><i class="fas fa-terminal" aria-hidden="true"></i> {{ if $zh }}二进制{{ else }}Binaries{{ end }}</button>
             <button type="button" role="tab" id="tab-client-source" aria-controls="client-source" aria-selected="false" tabindex="-1" data-download-tab="client-source"><i class="fas fa-code" aria-hidden="true"></i> {{ if $zh }}源码{{ else }}Source{{ end }}</button>
           </div>
 
           <div class="download-tabpanels">
+            {{ partial "download/desktop-panels.html" $clientDesktop }}
             <section class="download-panel" id="client-packages" role="tabpanel" aria-labelledby="tab-client-packages" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">MCLI / NATIVE PACKAGES</span><h3>{{ if $zh }}安装与你的 Linux 发行版匹配的软件包{{ else }}Install the package for your Linux distribution{{ end }}</h3></div>
@@ -519,96 +561,8 @@ make build
       </div>
     </section>
 
-    <section class="download-product-section" id="console" aria-labelledby="console-title">
-      <div class="landing-container">
-        <div class="download-section-head" data-reveal>
-          <div>
-            <p class="section-eyebrow"><span class="silkscreen">03 / WEB CONSOLE</span></p>
-            <h2 id="console-title">SILO Console {{ $consoleTag }}</h2>
-            <p>{{ if $zh }}独立部署的管理控制台。Server 已嵌入 Console；更新独立 Console 不会替换 Server 或修复其安全问题。{{ else }}The separately deployed administration console. Server already embeds Console; updating a standalone Console does not replace Server or apply its security repairs.{{ end }}</p>
-          </div>
-          <a class="version-card" href="{{ $consoleNotes }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ $consoleTag }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
-        </div>
-        <div class="asset-family-grid">
-          <article class="asset-family">
-            <div class="asset-family-head"><span>Linux</span><p>amd64 / arm64</p></div>
-            {{ range slice "amd64" "arm64" }}
-            <a href="{{ $consoleBase }}/silo-console-linux-{{ . }}.tar.gz"><b>{{ . }}</b><small>silo-console-linux-{{ . }}.tar.gz</small><i class="fas fa-download" aria-hidden="true"></i></a>
-            {{ end }}
-          </article>
-          <article class="asset-family">
-            <div class="asset-family-head"><span>macOS</span><p>Intel / Apple Silicon</p></div>
-            {{ range slice "amd64" "arm64" }}
-            <a href="{{ $consoleBase }}/silo-console-darwin-{{ . }}.tar.gz"><b>{{ . }}</b><small>silo-console-darwin-{{ . }}.tar.gz</small><i class="fas fa-download" aria-hidden="true"></i></a>
-            {{ end }}
-          </article>
-          <article class="asset-family">
-            <div class="asset-family-head"><span>Windows / Packages</span><p>RPM · DEB · APK</p></div>
-            <a href="{{ $consoleBase }}/silo-console-windows-amd64.{{ $consoleWindowsFormat }}"><b>Windows</b><small>silo-console-windows-amd64.{{ $consoleWindowsFormat }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-            <a href="https://github.com/pgsty/silo-console/releases/tag/{{ $consoleTag }}"><b>Linux</b><small>{{ if $zh }}全部软件包与 ARMv6 制品{{ else }}All packages and ARMv6 artifacts{{ end }}</small><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-          </article>
-        </div>
-        <div class="method-actions">
-          <a class="btn btn-line" href="{{ $consoleBase }}/silo-console_{{ $consoleBuild }}_checksums.txt">SHA-256</a>
-          <a class="btn btn-line" href="https://hub.docker.com/r/pgsty/silo-console">Docker Hub · {{ $consoleTag }}</a>
-          <a class="btn btn-line" href="https://github.com/pgsty/silo-console/blob/{{ $consoleTag }}/README.md">{{ if $zh }}配置与启动{{ else }}Configuration and startup{{ end }}</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="download-product-section" id="kes" aria-labelledby="kes-title">
-      <div class="landing-container">
-        <div class="download-section-head" data-reveal>
-          <div>
-            <p class="section-eyebrow"><span class="silkscreen">04 / KEY ENCRYPTION SERVICE</span></p>
-            <h2 id="kes-title">PGSTY KES {{ replace hugo.Data.releases.kes.date "-" "" }}</h2>
-            <p>{{ if $zh }}按需独立部署的外部密钥服务。先配置 TLS、应用身份、策略与持久密钥存储；SILO 连接 KES，KES 再连接 OpenBao。{{ else }}An optional, separate key service. Configure TLS, application identities, policies and a persistent key store first. SILO connects to KES; KES connects to OpenBao.{{ end }}</p>
-          </div>
-          <a class="version-card" href="{{ relLangURL (hugo.Data.releases.kes.notes | default (printf "blog/release/kes-%s/" (replace hugo.Data.releases.kes.date "-" ""))) }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.kes.date }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
-        </div>
-        <div class="asset-family-grid">
-          {{ range slice "linux" "darwin" "windows" }}
-          {{ $os := . }}
-          {{ $format := "tar.gz" }}
-          {{ if eq $os "windows" }}{{ $format = $kesWindowsFormat }}{{ end }}
-          <article class="asset-family">
-            <div class="asset-family-head"><span>{{ if eq $os "darwin" }}macOS{{ else }}{{ title $os }}{{ end }}</span><p>amd64 / arm64</p></div>
-            {{ range slice "amd64" "arm64" }}
-            {{ $archive := printf "kes_%s_%s_%s.%s" $kesBuild $os . $format }}
-            <a href="{{ $kesBase }}/{{ $archive }}"><b>{{ . }}</b><small>{{ $archive }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
-            {{ end }}
-          </article>
-          {{ end }}
-        </div>
-        <div class="method-actions">
-          <a class="btn btn-line" href="{{ $kesBase }}/kes_{{ $kesBuild }}_checksums.txt">SHA-256</a>
-          <a class="btn btn-line" href="https://github.com/pgsty/kes/releases/tag/{{ $kesTag }}">RPM · DEB · APK</a>
-          <a class="btn btn-line" href="https://hub.docker.com/r/pgsty/kes">Docker Hub</a>
-          <a class="btn btn-line" href="{{ relLangURL "blog/design/kes-openbao/" }}">{{ if $zh }}部署与恢复设计{{ else }}Deployment and recovery{{ end }}</a>
-        </div>
-        <div class="download-code">
-          <div class="download-code-head"><span>Docker · {{ if $zh }}检查版本{{ else }}Check version{{ end }}</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 KES 版本检查命令{{ else }}Copy KES version command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-          <pre><code>docker run --rm docker.io/pgsty/kes:{{ $kesDockerTag }} --version</code></pre>
-          {{ if ne $kesDockerTag $kesTag }}<p>{{ if $zh }}Docker Hub 镜像尚未更新到上方归档与软件包的版本；请使用此命令中的已发布镜像标签。{{ else }}The Docker Hub image is still on an earlier version than the archives and packages above; use the published image tag shown in this command.{{ end }}</p>{{ end }}
-        </div>
-        <p>{{ if $zh }}容器以 <code>1000:1000</code> 运行；Linux 包安装 <code>/usr/local/bin/kes</code>。开发模式不持久保存密钥。请保留原密钥并验证重启后仍可解密；配置示例见{{ else }}Containers run as <code>1000:1000</code>; Linux packages install <code>/usr/local/bin/kes</code>. Development mode does not persist keys. Preserve existing keys and verify decryption after restart; see the{{ end }} <a href="https://github.com/pgsty/kes/blob/{{ $kesTag }}/{{ if $zh }}README_ZH.md{{ else }}README.md{{ end }}">README</a>{{ if $zh }}。{{ else }}.{{ end }}</p>
-      </div>
-    </section>
-
-    <section class="download-product-section" id="pkg" aria-labelledby="pkg-title">
-      <div class="landing-container">
-        <div class="download-section-head" data-reveal>
-          <div>
-            <p class="section-eyebrow"><span class="silkscreen">05 / GO LIBRARY</span></p>
-            <h2 id="pkg-title">silo-pkg {{ hugo.Data.releases.pkg.tag }}</h2>
-            <p>{{ if $zh }}纯源码 Go 模块，没有独立可执行程序或容器。Server {{ $serverVer }}、mcli {{ replace hugo.Data.releases.client.date "-" "" }} 与 Console {{ $consoleTag }} 均选用 {{ hugo.Data.releases.pkg.tag }}。采用新版需要重新构建应用。{{ else }}A source-only Go module, with no standalone executable or container. Server {{ $serverVer }}, mcli {{ replace hugo.Data.releases.client.date "-" "" }} and Console {{ $consoleTag }} all select {{ hugo.Data.releases.pkg.tag }}. Rebuild the application to adopt it.{{ end }}</p>
-          </div>
-          <a class="version-card" href="{{ relLangURL hugo.Data.releases.pkg.notes }}"><span>{{ if $zh }}已发布{{ else }}PUBLISHED{{ end }}</span><strong>{{ hugo.Data.releases.pkg.tag }}</strong><small>{{ if $zh }}发布说明{{ else }}Release notes{{ end }} ↗</small></a>
-        </div>
-        <div class="download-code"><div class="download-code-head"><span>go.mod · Go {{ hugo.Data.releases.pkg.go_version }}+</span></div><pre><code>require github.com/pgsty/silo-pkg/v3 {{ hugo.Data.releases.pkg.tag }}</code></pre></div>
-        <div class="method-actions"><a class="btn btn-line" href="https://github.com/pgsty/silo-pkg/releases/tag/{{ hugo.Data.releases.pkg.tag }}">GitHub Release</a><a class="btn btn-line" href="{{ relLangURL "blog/release/pkg-3.14.2/" }}">{{ if $zh }}v3.14.2 依赖基线{{ else }}v3.14.2 dependency baseline{{ end }}</a></div>
-      </div>
-    </section>
+    {{ partial "download/component.html" $console }}
+    {{ partial "download/component.html" $kes }}
 
     <section class="topology-section" aria-labelledby="topology-title">
       <div class="landing-container">

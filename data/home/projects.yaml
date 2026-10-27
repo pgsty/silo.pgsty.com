@@ -1,7 +1,7 @@
 # Public usage and reference evidence shown in the homepage logo wall.
 # Keep every entry tied to a source URL; inclusion does not imply endorsement.
-# Five rows of twenty-one, scrolled alternately left / right / left / right / left.
-# New entries verified against public project sources on 2026-10-19. Within each row
+# Five rows of twenty-three, scrolled alternately left / right / left / right / left.
+# New entries verified against public project sources on 2026-10-27. Within each row
 # the first slot sits under the edge mask, so it holds a long-tail name and the
 # recognisable ones land in slots 2-5, where the first screenful lands.
 rows:
@@ -110,6 +110,16 @@ rows:
       kindZh: "S3 测试环境"
       logo: "images/projects/agentenv.webp"
       href: "https://github.com/kvcache-ai/AgentENV/blob/1f0c8a23caa6019b7f1a86da96c4b15990159012/crates/test-support/src/minio.rs"
+    - name: "CERT Polska Karton"
+      kind: "MALWARE ANALYSIS · SILO"
+      kindZh: "恶意软件分析 · SILO"
+      logo: "images/projects/cert-polska.webp"
+      href: "https://github.com/CERT-Polska/karton-playground/blob/7fc8eabca950da2cf4d969559e3b49f05a9ab348/docker-compose.yml"
+    - name: "Notesnook Sync Server"
+      kind: "SELF-HOSTED SYNC · SILO"
+      kindZh: "自托管同步服务 · SILO"
+      logo: "images/projects/notesnook.webp"
+      href: "https://github.com/streetwriters/notesnook-sync-server/blob/cc1e30b4bd60d3444ebd38d6c0d892d69d33d5e0/docker-compose.yml"
 
   - - name: "Ynfra"
       kind: "COMPOSE MODULE"
@@ -216,6 +226,16 @@ rows:
       kindZh: "Parquet 测试 · 衍生镜像"
       logo: "images/projects/altinity.webp"
       href: "https://github.com/Altinity/clickhouse-regression/blob/372532b2b80f28036235f78a68c58c642860dc01/parquet/parquet_env/Dockerfile.minio"
+    - name: "ClickHouse"
+      kind: "INTEGRATION TESTS · PGSTY/MINIO"
+      kindZh: "集成测试 · PGSTY/MINIO 镜像"
+      logo: "images/projects/clickhouse.webp"
+      href: "https://github.com/ClickHouse/ClickHouse/pull/120474"
+    - name: "Nisshi"
+      kind: "KAFKA / ICEBERG · DIGEST PIN"
+      kindZh: "Kafka / Iceberg · Digest 固定"
+      logo: "images/projects/nisshi.webp"
+      href: "https://github.com/nisshi-io/solace-nisshi/blob/35e48371e7a51d07b81ba6e4be68ce71d23acb16/compose.yaml"
 
   - - name: "AcePanel"
       kind: "PANEL APP TEMPLATE"
@@ -322,6 +342,16 @@ rows:
       kindZh: "自托管 · S3 编排示例"
       logo: "images/projects/lasuite-docs.webp"
       href: "https://github.com/suitenumerique/docs/blob/b00a968766ab41213ae19c402c936ba8b4a7012b/documentation/examples/compose/minio/compose.yaml"
+    - name: "Filigran XTM Suite"
+      kind: "XTM STACK · SILO STORAGE"
+      kindZh: "XTM 套件 · SILO 存储"
+      logo: "images/projects/filigran.webp"
+      href: "https://github.com/FiligranHQ/xtm-docker/issues/43"
+    - name: "Filigran OpenAEV"
+      kind: "SECURITY PLATFORM · SILO"
+      kindZh: "安全平台 · SILO"
+      logo: "images/projects/filigran.webp"
+      href: "https://github.com/OpenAEV-Platform/docker/blob/3185ab4f378a531e7bdebde39a77b3c06c3964a4/docker-compose.dev.yml"
 
   # Additional direct references found in the 2026-09-16 third-party adoption audit.
   - - name: "RudderStack"
@@ -429,6 +459,16 @@ rows:
       kindZh: "备份验证 · 旧版 PGSTY 镜像"
       logo: "images/projects/percona-pmm.webp"
       href: "https://github.com/percona/pmm-qa/blob/a037c958cd9bf636b4ce30d4e520a0ac83615836/k8s/install_pmm_ha.sh"
+    - name: "LINAGORA OpenRAG"
+      kind: "PRODUCTION STACK · DIGEST PIN"
+      kindZh: "生产栈 · Digest 固定"
+      logo: "images/projects/openrag.webp"
+      href: "https://linagora.github.io/openrag/documentation/minio_silo_upgrade/"
+    - name: "Swissgeol Boreholes"
+      kind: "GOVERNMENT DATA · PGSTY/MINIO"
+      kindZh: "政府地学数据 · PGSTY/MINIO"
+      logo: "images/projects/swisstopo.webp"
+      href: "https://github.com/swisstopo/swissgeol-boreholes-suite/blob/ca26d002c4e2a6452aadeaf6224772d6af56c302/docker-compose.yml"
 
   # Direct SILO image and binary references verified against upstream source files.
   - - name: "CapRover"
@@ -536,3 +576,13 @@ rows:
       kindZh: "集成测试 · 旧版 PGSTY 镜像"
       logo: "images/projects/banyandb.webp"
       href: "https://github.com/apache/skywalking-banyandb/blob/655f54e7ada8b3d9051dc4c9f573c78f37f11fbf/test/integration/dockertesthelper/minio_init.go"
+    - name: "Quackback"
+      kind: "PRODUCTION COMPOSE · DIGEST PIN"
+      kindZh: "生产 Compose · Digest 固定"
+      logo: "images/projects/quackback.webp"
+      href: "https://feedback.quackback.io/hc/en/articles/67-docker"
+    - name: "OCFL-Go"
+      kind: "DIGITAL PRESERVATION · S3 TESTS"
+      kindZh: "数字保存 · S3 测试"
+      logo: "images/projects/ocfl.webp"
+      href: "https://github.com/srerickson/ocfl-go/blob/db820c6f7fb7c3ba6d8d3aebf621eb413681fae3/docker-compose.yml"

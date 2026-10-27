@@ -1,6 +1,6 @@
 ---
 title: "Download & Install SILO"
-description: "SILO, mcli and KES 20261026, Console 2.5.1 and silo-pkg 3.15.2: images, packages, binaries and source installation."
+description: "Download SILO Server, mcli, Console and KES: Docker images, Linux packages, Windows ZIP archives and macOS installation with Homebrew."
 url: "/download/"
 type: download
 layout: single

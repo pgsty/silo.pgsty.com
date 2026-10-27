@@ -1,0 +1,59 @@
+{{- $zh := .zh -}}
+{{- $product := . -}}
+<section class="download-panel" id="{{ .id }}-macos" role="tabpanel" aria-labelledby="tab-{{ .id }}-macos" hidden>
+  <div class="method-heading">
+    <div><span class="method-kicker">MACOS / HOMEBREW</span><h3>{{ if $zh }}使用 Homebrew 安装 {{ .name }}{{ else }}Install {{ .name }} with Homebrew{{ end }}</h3></div>
+    <div class="method-tags"><span>macOS 13+</span><span>Apple Silicon</span><span>Intel</span></div>
+  </div>
+  <div class="method-grid">
+    <div class="method-main">
+      <p>{{ if $zh }}安装 <a href="https://brew.sh/" target="_blank" rel="noopener">Homebrew</a> 后，添加 PGSTY 软件源并安装 <code>{{ .formula }}</code>。Homebrew 会选择与你的 Mac 架构匹配的预编译二进制，无需自行编译。{{ else }}With <a href="https://brew.sh/" target="_blank" rel="noopener">Homebrew</a> installed, add the PGSTY tap and install <code>{{ .formula }}</code>. Homebrew selects the prebuilt binary for your Mac's architecture; no compilation is needed.{{ end }}</p>
+      <div class="download-code">
+        <div class="download-code-head"><span><i class="fab fa-apple" aria-hidden="true"></i> Homebrew</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 {{ .name }} Homebrew 安装命令{{ else }}Copy {{ .name }} Homebrew install command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+        <pre><code>brew tap pgsty/infra
+brew install pgsty/infra/{{ .formula }}
+{{ .formula }} --version</code></pre>
+      </div>
+      <p>{{ if $zh }}升级时执行 <code>brew update &amp;&amp; brew upgrade pgsty/infra/{{ .formula }}</code>。需要固定本页版本或离线安装时，可直接下载 macOS 归档。{{ else }}To upgrade, run <code>brew update &amp;&amp; brew upgrade pgsty/infra/{{ .formula }}</code>. Use the macOS archives to pin the version on this page or install offline.{{ end }}</p>
+      <div class="method-actions"><a class="btn btn-line" href="https://github.com/pgsty/homebrew-infra" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> PGSTY Homebrew</a></div>
+    </div>
+    <aside class="method-aside">
+      <article class="binary-platform" data-platform="macos">
+        <div><span class="platform-icon"><i class="fab fa-apple" aria-hidden="true"></i></span><h4>macOS</h4><small>{{ if $zh }}直接下载 · tar.gz{{ else }}Direct download · tar.gz{{ end }}</small></div>
+        {{ range slice "arm64" "amd64" }}
+        {{ $archive := printf $product.archive "darwin" . "tar.gz" }}
+        <a href="{{ if $product.pending }}{{ $product.notes }}{{ else }}{{ $product.base }}/{{ $archive }}{{ end }}" target="_blank" rel="noopener"><b>{{ if eq . "arm64" }}Apple Silicon{{ else }}Intel{{ end }}</b><small>{{ $archive }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+        {{ end }}
+      </article>
+    </aside>
+  </div>
+  <div class="package-footer"><a href="{{ if .pending }}{{ .notes }}{{ else }}{{ .base }}/{{ .checksums }}{{ end }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}归档校验和{{ else }}archive checksums{{ end }}</a></div>
+</section>
+
+<section class="download-panel" id="{{ .id }}-windows" role="tabpanel" aria-labelledby="tab-{{ .id }}-windows" hidden>
+  <div class="method-heading">
+    <div><span class="method-kicker">WINDOWS / ZIP</span><h3>{{ if $zh }}下载并解压 {{ .name }}{{ else }}Download and extract {{ .name }}{{ end }}</h3></div>
+    <div class="method-tags"><span>ZIP</span><span>x86_64</span>{{ if in .windowsArch "arm64" }}<span>ARM64</span>{{ end }}<span>PowerShell</span></div>
+  </div>
+  <div class="method-grid">
+    <div class="method-main">
+      <p>{{ if $zh }}选择与你的 Windows 架构匹配的 ZIP 归档。下载后，在文件所在目录打开 PowerShell，解压并检查版本。下方命令以 x86_64 为例。{{ else }}Choose the ZIP archive for your Windows architecture. Open PowerShell in the download directory, extract the archive, and check the version. The commands below use x86_64.{{ end }}</p>
+      <div class="download-code">
+        <div class="download-code-head"><span><i class="fab fa-windows" aria-hidden="true"></i> PowerShell · x86_64</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 {{ .name }} Windows 解压命令{{ else }}Copy {{ .name }} Windows extraction command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+        <pre><code>Expand-Archive -Path .\{{ printf .archive "windows" "amd64" .windowsFormat }} -DestinationPath .\{{ .formula }}
+.\{{ .formula }}\{{ .formula }}.exe --version</code></pre>
+      </div>
+      <p>{{ if $zh }}可将解压目录加入 <code>PATH</code>，之后即可在任意终端运行 <code>{{ .formula }}</code>。{{ else }}Add the extracted directory to <code>PATH</code> to run <code>{{ .formula }}</code> from any terminal.{{ end }}</p>
+    </div>
+    <aside class="method-aside">
+      <article class="binary-platform" data-platform="windows">
+        <div><span class="platform-icon"><i class="fab fa-windows" aria-hidden="true"></i></span><h4>Windows</h4><small>{{ if $zh }}直接下载 · ZIP{{ else }}Direct download · ZIP{{ end }}</small></div>
+        {{ range .windowsArch }}
+        {{ $archive := printf $product.archive "windows" . $product.windowsFormat }}
+        <a href="{{ if $product.pending }}{{ $product.notes }}{{ else }}{{ $product.base }}/{{ $archive }}{{ end }}" target="_blank" rel="noopener"><b>{{ if eq . "amd64" }}x86_64{{ else }}ARM64{{ end }}</b><small>{{ $archive }}</small><i class="fas fa-download" aria-hidden="true"></i></a>
+        {{ end }}
+      </article>
+    </aside>
+  </div>
+  <div class="package-footer"><a href="{{ if .pending }}{{ .notes }}{{ else }}{{ .base }}/{{ .checksums }}{{ end }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}归档校验和{{ else }}archive checksums{{ end }}</a></div>
+</section>

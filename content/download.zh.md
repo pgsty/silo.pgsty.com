@@ -1,6 +1,6 @@
 ---
 title: "下载与安装 SILO"
-description: "SILO、mcli、KES 20261026，Console 2.5.1 与 silo-pkg 3.15.2：镜像、软件包、二进制及源码安装。"
+description: "下载 SILO Server、mcli、Console 与 KES：Docker 镜像、Linux 软件包、Windows ZIP 归档，以及 macOS Homebrew 安装说明。"
 url: "/zh/download/"
 type: download
 layout: single
