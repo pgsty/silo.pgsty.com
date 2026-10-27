@@ -4,7 +4,6 @@
 {{- $zh := eq .Site.Language.Lang "zh" -}}
 {{- $projects := hugo.Data.home.projects -}}
 {{- $stories := hugo.Data.home.cases.stories -}}
-{{- $featured := slice "Grafana Loki" "RAGFlow" "Testcontainers Java" "Moby BuildKit" "PrestoDB" "Argo Workflows" "Apache OpenDAL" "nixpkgs" "Appwrite" "Dokploy" "ClickHouse" "Plane" "Wikibase Suite" "Feast" "Cardano Foundation" "Apache Paimon" "CrateDB" "Percona Backup for MongoDB" "the0" "ODK Central" -}}
 {{- $projectCount := 0 -}}
 {{- range $projects.rows -}}
   {{- range . -}}
@@ -28,7 +27,6 @@
                 <a class="btn btn-primary" href="#wall"><i class="fas fa-border-all" aria-hidden="true"></i>{{ if $zh }}浏览 Logo 墙{{ else }}Explore the logo wall{{ end }}</a>
                 <a class="btn btn-ghost" href="#stories"><i class="fas fa-route" aria-hidden="true"></i>{{ if $zh }}查看典型用例{{ else }}Read typical paths{{ end }}</a>
               </div>
-              <p class="case-hero-note"><i class="fas fa-link" aria-hidden="true"></i>{{ if $zh }}每个 Logo 都链接到对应的公开配置、代码或文档。{{ else }}Every logo links to the public configuration, code, or documentation behind it.{{ end }}</p>
             </div>
 
             <div class="case-scan-board" data-reveal aria-label="{{ if $zh }}公开案例统计{{ else }}Public case index statistics{{ end }}">
@@ -56,7 +54,7 @@
           <div class="section-head case-section-head" data-reveal>
             <p class="section-eyebrow"><span class="silkscreen">THE WALL / {{ $projectCount }} SIGNALS</span><span class="eyebrow-trace"></span></p>
             <h2 class="section-title" id="wall-title">{{ if $zh }}一面可以核对的 Logo 墙{{ else }}A wall you can check{{ end }}</h2>
-            <p class="section-subtitle">{{ if $zh }}静态排列，按公开引用的辨识度与出现顺序组织。鼠标悬停或键盘聚焦后，可以直接打开每个项目的来源。{{ else }}A static index arranged by recognisability and public reference order. Hover or focus a tile to open the source behind it.{{ end }}</p>
+            <p class="section-subtitle">{{ if $zh }}静态排列，按公开引用的辨识度与出现顺序组织。每张卡片都直达对应的公开配置、代码或文档。{{ else }}A static index arranged by recognisability and public reference order. Each tile opens the public configuration, code, or documentation behind it.{{ end }}</p>
           </div>
 
           <div class="case-wall-frame" data-reveal>
@@ -65,24 +63,14 @@
               <span class="case-wall-toolbar__count">{{ $projectCount }} / {{ if $zh }}全部记录{{ else }}ALL RECORDS{{ end }}</span>
             </div>
             <div class="case-wall-grid" role="list" aria-label="{{ if $zh }}公开使用与引用项目{{ else }}Public usage and reference projects{{ end }}">
-              {{- $wallIndex := 0 -}}
               {{- range $projects.rows -}}
                 {{- range $project := . -}}
-                {{- $wallIndex = add $wallIndex 1 -}}
-                {{- $isFeatured := in $featured $project.name -}}
-                <a class="case-wall-tile{{ if $isFeatured }} case-wall-tile--featured{{ end }}" href="{{ $project.href }}" target="_blank" rel="noopener" role="listitem" aria-label="{{ $project.name }} — {{ if $zh }}打开公开来源{{ else }}open public source{{ end }}">
-                  <span class="case-wall-tile__signal" aria-hidden="true"><i></i>{{ printf "%02d" $wallIndex }}</span>
+                <a class="case-wall-tile" href="{{ $project.href }}" target="_blank" rel="noopener" role="listitem" aria-label="{{ $project.name }} — {{ if $zh }}打开公开来源{{ else }}open public source{{ end }}">
                   <span class="case-wall-tile__logo"><img src="{{ $project.logo | relURL }}" alt="" loading="lazy"></span>
                   <strong>{{ $project.name }}</strong>
-                  <small>{{ if $zh }}{{ default "公开引用" $project.kindZh }}{{ else }}{{ default "PUBLIC REFERENCE" $project.kind }}{{ end }}</small>
-                  <span class="case-wall-tile__arrow" aria-hidden="true">↗</span>
                 </a>
                 {{- end -}}
               {{- end -}}
-            </div>
-            <div class="case-wall-foot">
-              <span><i></i>{{ if $zh }}来源链接保持在项目原始仓库或文档位置{{ else }}Sources stay at the original project repository or documentation{{ end }}</span>
-              <span>{{ if $zh }}静态展示 · 无自动轮播{{ else }}STATIC DISPLAY · NO AUTOPLAY{{ end }}</span>
             </div>
           </div>
         </div>
@@ -97,20 +85,16 @@
           </div>
 
           <div class="case-story-grid">
-            {{- range $i, $story := $stories -}}
-            <article class="case-story" data-reveal>
+            {{- range $story := $stories -}}
+            <a class="case-story" href="{{ $story.href }}" target="_blank" rel="noopener" aria-label="{{ $story.name }} — {{ if $zh }}打开公开来源{{ else }}open public source{{ end }}" data-reveal>
               <div class="case-story-visual">
-                <span class="case-story-index">{{ printf "%02d" (add $i 1) }}</span>
-                <span class="case-story-gridline" aria-hidden="true"></span>
                 <img src="{{ $story.logo | relURL }}" alt="{{ $story.name }}" loading="lazy">
-                <span class="case-story-signal">{{ if $zh }}{{ $story.eyebrowZh }}{{ else }}{{ $story.eyebrow }}{{ end }}</span>
               </div>
               <div class="case-story-body">
                 <h3>{{ if $zh }}{{ $story.titleZh }}{{ else }}{{ $story.title }}{{ end }}</h3>
                 <p>{{ if $zh }}{{ $story.bodyZh }}{{ else }}{{ $story.body }}{{ end }}</p>
-                <a class="case-story-link" href="{{ $story.href }}" target="_blank" rel="noopener">{{ if $zh }}打开公开来源{{ else }}Open the public source{{ end }} <span aria-hidden="true">↗</span></a>
               </div>
-            </article>
+            </a>
             {{- end -}}
           </div>
         </div>
