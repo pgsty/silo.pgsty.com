@@ -54,7 +54,7 @@
   {{- $consolePackages = $consolePackages | append (merge . (dict "files" $consoleFiles)) -}}
   {{- $kesPackages = $kesPackages | append (merge . (dict "files" $kesFiles)) -}}
 {{- end -}}
-{{- $console = merge $console (dict "packages" $consolePackages) -}}
+{{- $console = merge $console (dict "packages" $consolePackages "packageChecksums" $console.checksums) -}}
 {{- $kes = merge $kes (dict "packages" $kesPackages) -}}
     <section class="download-hero" aria-labelledby="download-title">
       <div class="download-grid-bg" aria-hidden="true"></div>
@@ -248,7 +248,7 @@
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}当前 MinIO Operator Tenant Chart 支持覆盖租户镜像仓库、标签或摘要。下载官方 <code>values.yaml</code> 后，将 <code>tenant.image</code> 指向 <code>docker.io/pgsty/silo</code>，再按故障域配置存储池与 PVC。{{ else }}The current MinIO Operator Tenant Chart supports overriding the tenant image repository, tag, or digest. Download the official <code>values.yaml</code>, point <code>tenant.image</code> at <code>docker.io/pgsty/silo</code>, then configure pools and PVCs for your failure domains.{{ end }}</p>
+                  <p>{{ if $zh }}已归档的 MinIO Operator <code>v7.1.1</code> Tenant Chart 支持覆盖租户镜像仓库、标签或摘要。下载该版本的 <code>values.yaml</code> 后，将 <code>tenant.image</code> 指向 <code>docker.io/pgsty/silo</code>，再按故障域配置存储池与 PVC。{{ else }}The archived MinIO Operator <code>v7.1.1</code> Tenant Chart supports overriding the tenant image repository, tag, or digest. Download that version's <code>values.yaml</code>, point <code>tenant.image</code> at <code>docker.io/pgsty/silo</code>, then configure pools and PVCs for your failure domains.{{ end }}</p>
                   <div class="download-code">
                     <div class="download-code-head"><span><i class="fas fa-file-code" aria-hidden="true"></i> values.yaml</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Kubernetes 镜像配置{{ else }}Copy Kubernetes image configuration{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
                     <pre><code>tenant:
@@ -271,7 +271,7 @@
                 <div><span class="method-kicker">NATIVE PACKAGES</span><h3>{{ if $zh }}使用系统软件包管理器安装{{ else }}Install with native system packages{{ end }}</h3></div>
                 <div class="method-tags"><span>RPM</span><span>DEB</span><span>APK</span><span>SHA-256</span></div>
               </div>
-              <p class="method-lead">{{ if $zh }}每个发行版都提供 x86_64 与 ARM64 软件包。下方列出目标版本文件名；公开后可直接下载，历史版本见 GitHub Releases。{{ else }}Every release includes x86_64 and ARM64 packages. Target filenames are listed below and become direct downloads after publication; use GitHub Releases for older versions.{{ end }}</p>
+              <p class="method-lead">{{ if $serverPublished }}{{ if $zh }}当前发行版已提供 x86_64 与 ARM64 软件包。选择对应发行版和 CPU 架构，下载后使用系统软件包管理器安装。历史版本见 GitHub Releases。{{ else }}The current release provides x86_64 and ARM64 packages. Choose your distribution and CPU architecture, then install the download with your system package manager. Use GitHub Releases for older versions.{{ end }}{{ else }}{{ if $zh }}下方列出目标版本的 x86_64 与 ARM64 软件包文件名；制品公开前，下载按钮指向发布准备说明。{{ else }}Target x86_64 and ARM64 package filenames are listed below; download buttons open the preparation notes until the artifacts are published.{{ end }}{{ end }}</p>
               <div class="asset-family-grid">
                 <article class="asset-family">
                   <div class="asset-family-head"><span>RPM</span><p>RHEL · Rocky · Alma · Fedora</p></div>
@@ -383,7 +383,7 @@ mcli ls sss/</code></pre>
             <section class="download-panel" id="server-source" role="tabpanel" aria-labelledby="tab-server-source" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}从发行标签构建{{ else }}Build from the release tag{{ end }}</h3></div>
-                <div class="method-tags"><span>Go 1.27.2+</span><span>AGPLv3</span><span>make</span></div>
+                <div class="method-tags"><span>Go {{ hugo.Data.releases.server.go_version }}+</span><span>AGPLv3</span><span>make</span></div>
               </div>
               <div class="method-grid">
                 <div class="method-main">
@@ -537,7 +537,7 @@ make build
             <section class="download-panel" id="client-source" role="tabpanel" aria-labelledby="tab-client-source" hidden>
               <div class="method-heading">
                 <div><span class="method-kicker">SOURCE BUILD</span><h3>{{ if $zh }}构建维护版客户端{{ else }}Build the maintained client{{ end }}</h3></div>
-                <div class="method-tags"><span>Go 1.27.2+</span><span>AGPLv3</span><span>make</span></div>
+                <div class="method-tags"><span>Go {{ hugo.Data.releases.client.go_version }}+</span><span>AGPLv3</span><span>make</span></div>
               </div>
               <div class="method-grid">
                 <div class="method-main">

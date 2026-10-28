@@ -6,6 +6,7 @@ server:
   build: 20261026000000.0.0
   date: "2026-10-26"
   published: true
+  go_version: "1.27.3"
   windows_archive_format: zip
   source: c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3
 published_server:
@@ -14,6 +15,7 @@ published_server:
   date: "2026-10-26"
 client:
   tag: RELEASE.2026-10-26T00-00-00Z
+  go_version: "1.27.3"
   build: 20261026000000.0.0
   windows_archive_format: zip
   date: "2026-10-26"

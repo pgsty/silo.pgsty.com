@@ -71,7 +71,17 @@ docker run --rm docker.io/pgsty/{{ .repo }}:{{ .dockerTag }} --version</code></p
             {{ end }}
           </div>
           <div class="package-footer">
-            <a href="{{ .base }}/{{ .checksums }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}软件包校验和{{ else }}package checksums{{ end }}</a>
+            {{ if .packageChecksums }}
+            <a href="{{ .base }}/{{ .packageChecksums }}" target="_blank" rel="noopener"><i class="fas fa-fingerprint" aria-hidden="true"></i> SHA-256 {{ if $zh }}软件包校验和{{ else }}package checksums{{ end }}</a>
+            {{ else }}
+            <span>SHA-256:</span>
+            {{ range .packages }}
+            {{ $family := .label }}
+            {{ range .files }}
+            <a href="{{ $product.base }}/{{ .file }}.sha256sum" target="_blank" rel="noopener">{{ $family }} {{ .arch }}</a>
+            {{ end }}
+            {{ end }}
+            {{ end }}
             <a href="https://github.com/pgsty/{{ .repo }}/releases/tag/{{ .tag }}" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}全部发行制品{{ else }}All release artifacts{{ end }}</a>
           </div>
         </section>
