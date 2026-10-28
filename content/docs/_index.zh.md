@@ -13,6 +13,6 @@ sidebar_expanded: true
 
 本手册以 **[SILO 20261026 正式版](/zh/blog/release/silo-20261026/)** 为基线，配套 Console 2.5.1、mcli 20261026、silo-pkg 3.15.2 和可选 KES 20261026，统一使用 Go 1.27.3。
 
-升级前阅读[组件矩阵](/zh/compatibility/versions/)、[升级检查](/zh/compatibility/server/#maintenance-20261026)与[安装指南](/zh/download/)。独立客户端或 Console 更新不替换旧 Server 的内嵌组件；历史安全修复与已知限制保留首次发布版本。
+升级前请查阅[组件版本矩阵](/zh/compatibility/versions/)、[升级检查](/zh/compatibility/server/#maintenance-20261026)与[安装指南](/zh/download/)（注意单独升级独立客户端或独立 Console 不会替换旧版 Server 内嵌的控制台组件）。
 
 {{< home-docs >}}

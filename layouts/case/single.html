@@ -21,11 +21,11 @@
 
           <div class="case-hero-layout">
             <div class="case-hero-copy" data-reveal>
-              <h1 id="case-title">{{ if $zh }}真实系统，真实存储。{{ else }}Real systems.<br>Real storage.{{ end }}</h1>
-              <p>{{ if $zh }}从 Helm Chart 到 CI 测试夹具，这些公开引用记录了 SILO 兼容存储路径如何进入真实软件。{{ else }}From Helm charts to CI fixtures, these public references show where the SILO-compatible storage path is wired into real software.{{ end }}</p>
+              <h1 id="case-title">{{ if $zh }}开源生态与社区采用{{ else }}Adopted across the<br>open-source stack.{{ end }}</h1>
+              <p>{{ if $zh }}从生产级 Helm Chart、默认 Compose 编排到各大基础设施的 CI 测试套件，了解开源社区如何在真实系统中接入并验证 SILO。{{ else }}From production Helm charts and default Compose stacks to CI integration suites, see how open-source projects deploy and verify SILO in the wild.{{ end }}</p>
               <div class="case-hero-actions">
-                <a class="btn btn-primary" href="#wall"><i class="fas fa-border-all" aria-hidden="true"></i>{{ if $zh }}浏览 Logo 墙{{ else }}Explore the logo wall{{ end }}</a>
-                <a class="btn btn-ghost" href="#stories"><i class="fas fa-route" aria-hidden="true"></i>{{ if $zh }}查看典型用例{{ else }}Read typical paths{{ end }}</a>
+                <a class="btn btn-primary" href="#wall"><i class="fas fa-border-all" aria-hidden="true"></i>{{ if $zh }}浏览采用项目{{ else }}Browse projects{{ end }}</a>
+                <a class="btn btn-ghost" href="#stories"><i class="fas fa-route" aria-hidden="true"></i>{{ if $zh }}查看接入案例{{ else }}Read integration stories{{ end }}</a>
               </div>
             </div>
 
@@ -39,11 +39,11 @@
                 <span class="case-scan-orbit__core"><b>SILO</b><small>S3 / OBJECTS</small></span>
               </div>
               <div class="case-scan-stats">
-                <div><strong>{{ $projectCount }}</strong><span>{{ if $zh }}公开引用{{ else }}PUBLIC REFERENCES{{ end }}</span></div>
-                <div><strong>{{ len $projects.rows }}</strong><span>{{ if $zh }}证据分组{{ else }}EVIDENCE ROWS{{ end }}</span></div>
-                <div><strong>{{ len $stories }}</strong><span>{{ if $zh }}典型路径{{ else }}TYPICAL PATHS{{ end }}</span></div>
+                <div><strong>{{ $projectCount }}</strong><span>{{ if $zh }}公开仓库引用{{ else }}PUBLIC REPOSITORIES{{ end }}</span></div>
+                <div><strong>{{ len $projects.rows }}</strong><span>{{ if $zh }}生态分组{{ else }}ECOSYSTEM GROUPS{{ end }}</span></div>
+                <div><strong>{{ len $stories }}</strong><span>{{ if $zh }}代表性案例{{ else }}FEATURED CASES{{ end }}</span></div>
               </div>
-              <div class="case-scan-foot"><i></i>{{ if $zh }}可公开核对 · 不代表背书{{ else }}PUBLICLY CHECKABLE · NO ENDORSEMENT IMPLIED{{ end }}</div>
+              <div class="case-scan-foot"><i></i>{{ if $zh }}均附公开代码或文档链接{{ else }}DIRECT LINKS TO PUBLIC CODE &amp; DOCS{{ end }}</div>
             </div>
           </div>
         </div>
@@ -53,8 +53,8 @@
         <div class="landing-container">
           <div class="section-head case-section-head" data-reveal>
             <p class="section-eyebrow"><span class="silkscreen">THE WALL / {{ $projectCount }} SIGNALS</span><span class="eyebrow-trace"></span></p>
-            <h2 class="section-title" id="wall-title">{{ if $zh }}一面可以核对的 Logo 墙{{ else }}A wall you can check{{ end }}</h2>
-            <p class="section-subtitle">{{ if $zh }}静态排列，按公开引用的辨识度与出现顺序组织。每张卡片都直达对应的公开配置、代码或文档。{{ else }}A static index arranged by recognisability and public reference order. Each tile opens the public configuration, code, or documentation behind it.{{ end }}</p>
+            <h2 class="section-title" id="wall-title">{{ if $zh }}公开引用项目索引{{ else }}Public Adoption Index{{ end }}</h2>
+            <p class="section-subtitle">{{ if $zh }}点击任意卡片即可直接跳转到对应项目中的公开配置文件、源码提交或官方文档。{{ else }}Click any card to jump directly to the public configuration file, commit, or documentation in that repository.{{ end }}</p>
           </div>
 
           <div class="case-wall-frame" data-reveal>
@@ -80,8 +80,8 @@
         <div class="landing-container">
           <div class="section-head case-section-head" data-reveal>
             <p class="section-eyebrow"><span class="silkscreen">TYPICAL PATHS / {{ printf "%02d" (len $stories) }}</span><span class="eyebrow-trace"></span></p>
-            <h2 class="section-title" id="stories-title">{{ if $zh }}典型用例，展开来看{{ else }}Typical paths, opened up{{ end }}</h2>
-            <p class="section-subtitle">{{ if $zh }}这些例子说明同一个兼容对象存储接口，如何进入不同的交付边界：随附服务、默认编排、测试环境与数据系统。{{ else }}The same compatible object-storage interface enters different delivery boundaries: bundled services, default orchestration, test environments, and data systems.{{ end }}</p>
+            <h2 class="section-title" id="stories-title">{{ if $zh }}代表性接入场景{{ else }}Representative Integration Patterns{{ end }}</h2>
+            <p class="section-subtitle">{{ if $zh }}从平台内置存储、Docker Compose 默认服务到大数据与数据库的自动化测试套件，涵盖四类最常见的接入方式。{{ else }}Covering the four most common adoption patterns: bundled platform storage, default Compose stacks, database/data-lake CI suites, and package distributions.{{ end }}</p>
           </div>
 
           <div class="case-story-grid">
@@ -105,8 +105,8 @@
           <div class="case-next" data-reveal>
             <div>
               <p class="section-eyebrow"><span class="silkscreen">NEXT STEP</span><span class="eyebrow-trace"></span></p>
-              <h2 id="case-next-title">{{ if $zh }}把你的对象存储路径接回来{{ else }}Bring your object-storage path back{{ end }}</h2>
-              <p>{{ if $zh }}查看兼容性边界，选择适合你的安装方式。{{ else }}Check the compatibility boundaries, then choose the delivery path that fits your stack.{{ end }}</p>
+              <h2 id="case-next-title">{{ if $zh }}在你的系统中接入 SILO{{ else }}Ready to switch to SILO?{{ end }}</h2>
+              <p>{{ if $zh }}查阅兼容性说明与迁移指南，选择适合你架构的部署方式。{{ else }}Review the compatibility matrix and migration guides, then pick the deployment method that fits your stack.{{ end }}</p>
             </div>
             <div class="case-next-actions">
               <a class="btn btn-primary" href="{{ relLangURL "docs/" }}"><i class="fas fa-book-open" aria-hidden="true"></i>{{ if $zh }}阅读文档{{ else }}Read the docs{{ end }}</a>

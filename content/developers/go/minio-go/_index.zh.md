@@ -8,7 +8,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **20261026 配套 SDK：** Server 20261026、Console v2.5.1、mcli 20261026 与 pkg v3.15.2 均选择上游 `github.com/minio/minio-go/v7 v7.4.2-0.20261025165926-320af050c445`。固定提交纳入分片短流校验、`ReadAt`／seek 边界修复、批量删除回退错误去重，以及移除桶复制配置时的 HTTP 204 处理。并行 GET/Compose 仍需显式启用。这是伪版本，不是 v7.4.2 发布标签；见[组件矩阵](/zh/compatibility/versions/)与 [SDK 变化](/zh/blog/release/pkg-3.15.2/#sdk)。
+> **20261026 配套 SDK：** Server 20261026、Console v2.5.1、mcli 20261026 与 pkg v3.15.2 统一锁定上游 `github.com/minio/minio-go/v7 v7.4.2-0.20261025165926-320af050c445`（基于上游提交 `320af050c445` 的 Go 伪版本）。该提交包含分片短流截断校验、`ReadAt`/seek 边界修复、批量删除回退错误去重，以及清空桶复制配置时的 HTTP 204 响应处理；并行 GET/Compose 仍默认关闭，需显式开启。详见[组件版本矩阵](/zh/compatibility/versions/)与 [silo-pkg 3.15.2 SDK 变更说明](/zh/blog/release/pkg-3.15.2/#sdk)。
 
 ## MinIO Go SDK {#go-sdk}
 

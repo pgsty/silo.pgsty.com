@@ -1,7 +1,7 @@
 ---
 title: "SILO Case Studies & Adoption"
 linkTitle: Case
-description: "Public projects and open-source systems that use, test, package, or document the SILO-compatible object-storage path."
+description: "Open-source projects and infrastructure systems adopting SILO across Helm charts, Docker Compose stacks, CI test suites, and package distributions."
 url: "/case/"
 type: case
 layout: single

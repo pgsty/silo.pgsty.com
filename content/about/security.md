@@ -10,7 +10,7 @@ icon: fa-solid fa-shield-halved
 
 PGSTY SILO maintains active security tracking and patching for the S3-compatible object storage stack after upstream `minio/minio` entered archive mode. Current production deployments should run [Server 20261026](/blog/release/silo-20261026/) (which retains the fixes first shipped in Server 20261018 for Object Lock advisories `SN-2026-015` / `SN-2026-016` and IAM Admin boundary `SN-2026-017`, building on `SN-2026-011` through `SN-2026-014` from Server 20260916), [Console v2.5.1](/blog/release/console-2.5.1/), and [mcli 20261026](/blog/release/silo-20261026/#mcli); see the [October Security Note](/blog/security/20261018-release-hardening/), [Advisory Ledger](/about/security-advisories/), and [Component Matrix](/compatibility/versions/).
 
-Standalone Console does not replace Server’s embedded Console. Policy Reset and immediate bucket-inventory freshness need the Server repairs released in Server 20261026; Server 20261018 does not include them. See the [Console upgrade boundary](/blog/release/console-2.5.1/).
+Note that deploying standalone Console does not replace an older Server's embedded Console, and built-in policy **Reset** and immediate bucket-list refresh require the server-side fixes in [Server 20261026](/blog/release/silo-20261026/#server-20261026) (not present in Server 20261018; see the [Console 2.5.1 release notes](/blog/release/console-2.5.1/)).
 
 ## Reporting a Vulnerability {#reporting}
 

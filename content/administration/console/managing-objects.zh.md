@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Console 2.5.1：** Tasks 跟踪有界传输与批量操作，取消不撤销已完成修改；文本/Markdown/CSV 预览明确提示 1 MiB 截断；ZIP 在响应首字节之前失败时保留 S3 错误状态。当前页排序、筛选和全选不代表枚举整个桶。见[对象工作区变化](/zh/blog/release/console-2.5.1/#objects)。
+> **Console 2.5.1 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页。详见 [Console 2.5.1 对象工作区更新](/zh/blog/release/console-2.5.1/#objects)。
 
 <a id="minio-console-managing-objects"></a>
 <a id="id1" data-td-print-local></a>

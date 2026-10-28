@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Console 2.5.1:** Changing only group status preserves its members; an explicit member array replaces them. OIDC string-array group claims retain permissions, and configured HTTPS or trusted TLS proxies preserve secure session cookies. Credential exports contain exact UTF-8 JSON. Built-in policy Reset requires the matching Server 20261026 fix. See the [2.5 release notes](/blog/release/console-2.5.1/).
+> **Console 2.5.1 updates:** Toggling a group's enabled/disabled status preserves its existing members (passing an explicit member array still replaces them); OIDC string-array group claims are properly parsed; session cookies retain the `Secure` attribute under configured HTTPS or a trusted TLS proxy; newly created access keys export clean UTF-8 JSON credentials; and the built-in policy **Reset** action requires [Server 20261026](/blog/release/silo-20261026/#server-20261026). See the [Console 2.5.1 release notes](/blog/release/console-2.5.1/).
 
 <a id="security-and-access"></a>
 <a id="minio-console-security-access"></a>

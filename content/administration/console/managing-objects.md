@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Console 2.5.1:** Tasks track bounded transfers and bulk operations; cancellation does not undo completed mutations. Text/Markdown/CSV previews show a 1 MiB truncation notice. ZIP failures before the first response byte preserve the S3 error status. Current-page sorting, filtering and Select All do not enumerate the entire bucket. See the [object workspace changes](/blog/release/console-2.5.1/#objects).
+> **Console 2.5.1 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page. See the [Console 2.5.1 object workspace notes](/blog/release/console-2.5.1/#objects).
 
 <a id="managing-objects"></a>
 <a id="minio-console-managing-objects"></a>
