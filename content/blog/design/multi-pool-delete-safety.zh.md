@@ -11,9 +11,7 @@ draft: false
 url: "/zh/blog/design/multi-pool-delete-safety/"
 ---
 
-**发布状态：** 本文修复已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 正式发布；以下保留设计与验证时的源码范围。
-
-**2026 年 10 月 24 日决定：合并修正后的 [PR #257](https://github.com/pgsty/silo/pull/257)。** 提交 [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) 修复了 [issue #256](https://github.com/pgsty/silo/issues/256) 报告的多池删除缺陷，并补齐请求开始之后的执行期故障保护。核心不变量是：**先完成其他池的旧副本清理，再删除决定当前读取结果的权威副本。**
+**2026 年 10 月 24 日决定：合并修正后的 [PR #257](https://github.com/pgsty/silo/pull/257)（已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 发布）。** 提交 [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) 修复了 [issue #256](https://github.com/pgsty/silo/issues/256) 报告的多池删除缺陷，并补齐请求开始之后的执行期故障保护。核心不变量是：**先完成其他池的旧副本清理，再删除决定当前读取结果的权威副本。**
 
 Denis Babchuk 报告了该问题并提交了初始补丁。代码评审复现了故障，发现批量删除在通过在线盘数预检查后仍存在执行期故障窗口，随后补充分阶段执行、逐项响应身份保持、部分删除重试以及共享分层对象保护。
 

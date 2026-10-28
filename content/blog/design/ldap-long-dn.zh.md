@@ -11,9 +11,7 @@ draft: false
 url: "/zh/blog/design/ldap-long-dn/"
 ---
 
-**发布状态：** 本文修复已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 正式发布；以下保留设计与验证时的源码范围。
-
-[Server PR #250](https://github.com/pgsty/silo/pull/250)（合入提交 [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0)）修复了 LDAP 用户在规范化可分辨名称（Distinguished Name，DN）超过对象存储 IAM 后端单路径分量 255 字节上限时无法登录的问题，同时严格保留了对真实存储故障与[持久化 IAM 撤销记录](/zh/blog/design/iam-revocations/)的 Fail-Closed 错误传播。
+[Server PR #250](https://github.com/pgsty/silo/pull/250)（合入提交 [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0)，已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 发布）修复了 LDAP 用户在规范化可分辨名称（Distinguished Name，DN）超过对象存储 IAM 后端单路径分量 255 字节上限时无法登录的问题，同时严格保留了对真实存储故障与[持久化 IAM 撤销记录](/zh/blog/design/iam-revocations/)的 Fail-Closed 错误传播。
 
 原始问题报告、初版补丁（[`9faeb7a11`](https://github.com/pgsty/silo/commit/9faeb7a1147435aa7ebc02bb997837ddfbdd2a81)）及长 DN 回归测试由社区贡献者 [`@910patin`](https://github.com/910patin) 提交。在合并前的设计复核中，维护者进一步收窄了错误分类守卫条件，确保完整路径超限（`PATH_MAX`）或多字节 Unicode 文件名读取失败绝不会掩盖磁盘上已有的撤销墓碑记录。
 

@@ -12,11 +12,9 @@ draft: false
 url: "/zh/blog/design/replication-full-object-checksum/"
 ---
 
-**发布状态：** 本文修复已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 正式发布；以下保留设计与验证时的源码范围。
-
 [Issue #254](https://github.com/pgsty/silo/issues/254) 报告了一类复制故障：使用 `FULL_OBJECT` CRC32 或 CRC32C 校验和的分片上传对象在源端可正常上传和读取，但复制到目标端并在最后调用 `CompleteMultipartUpload` 时会因 `400 BadDigest` 失败。Denis Babchuk（`@botdeniska`）提交的 [PR #255](https://github.com/pgsty/silo/pull/255) 补回了出站复制请求遗漏的校验和类型头。
 
-该补丁于 2026 年 10 月 24 日以 [`6d890fc86`](https://github.com/pgsty/silo/commit/6d890fc860c732cc0bd1925124c733362f803d2e) 直接合入主干并关闭 #254，共修改 **5 行生产代码（含 2 行注释）** 并新增 257 行回归测试。
+该补丁于 2026 年 10 月 24 日以 [`6d890fc86`](https://github.com/pgsty/silo/commit/6d890fc860c732cc0bd1925124c733362f803d2e) 合入主干并随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 发布，共修改 **5 行生产代码（含 2 行注释）** 并新增 257 行回归测试。
 
 ## 故障现象 {#problem}
 

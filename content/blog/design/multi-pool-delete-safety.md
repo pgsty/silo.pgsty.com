@@ -11,9 +11,7 @@ draft: false
 url: "/blog/design/multi-pool-delete-safety/"
 ---
 
-**Release status:** This fix shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026). The design and validation below retain their original source scope.
-
-**Decision, October 24, 2026: merge the corrected [PR #257](https://github.com/pgsty/silo/pull/257).** Commit [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) fixes the multi-pool deletion failures reported in [issue #256](https://github.com/pgsty/silo/issues/256) and closes the in-flight failure window after preflight checks. The core invariant is direct: **finish cleaning up non-authoritative copies in other pools before deleting the authoritative copy that determines current reads.**
+**Decision, October 24, 2026: merge the corrected [PR #257](https://github.com/pgsty/silo/pull/257) (shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026)).** Commit [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) fixes the multi-pool deletion failures reported in [issue #256](https://github.com/pgsty/silo/issues/256) and closes the in-flight failure window after preflight checks. The core invariant is direct: **finish cleaning up non-authoritative copies in other pools before deleting the authoritative copy that determines current reads.**
 
 Denis Babchuk reported the issue and contributed the initial patch. Code review reproduced the failures, identified a remaining execution-time failure window in bulk deletion, and extended the fix with two-stage execution, per-item response identity preservation, partial-deletion retry handling, and shared tier-object protection.
 

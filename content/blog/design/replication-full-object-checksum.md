@@ -12,11 +12,9 @@ draft: false
 url: "/blog/design/replication-full-object-checksum/"
 ---
 
-**Release status:** This fix shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026). The design and validation below retain their original source scope.
-
 [Issue #254](https://github.com/pgsty/silo/issues/254) reported a replication failure affecting multipart objects uploaded with a `FULL_OBJECT` CRC32 or CRC32C checksum: the object uploads and reads normally on the source, but the replication target rejects `CompleteMultipartUpload` with `400 BadDigest`. [PR #255](https://github.com/pgsty/silo/pull/255), contributed by Denis Babchuk (`@botdeniska`), restores the omitted checksum-type header in outgoing replication requests.
 
-The patch was merged on October 24, 2026 as [`6d890fc86`](https://github.com/pgsty/silo/commit/6d890fc860c732cc0bd1925124c733362f803d2e), closing #254. It changes **five production lines (including two comment lines)** and adds 257 lines of regression tests.
+The patch was merged on October 24, 2026 as [`6d890fc86`](https://github.com/pgsty/silo/commit/6d890fc860c732cc0bd1925124c733362f803d2e) and shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026), closing #254. It changes **five production lines (including two comment lines)** and adds 257 lines of regression tests.
 
 ## Observable Failure {#problem}
 

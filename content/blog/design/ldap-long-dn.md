@@ -11,9 +11,7 @@ draft: false
 url: "/blog/design/ldap-long-dn/"
 ---
 
-**Release status:** This fix shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026). The design and validation below retain their original source scope.
-
-[Server PR #250](https://github.com/pgsty/silo/pull/250) (merged at [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0)) fixes a login failure affecting LDAP users whose normalized Distinguished Name (DN) exceeds the 255-byte single-component filename limit of the object-storage IAM backend, while preserving read errors that protect the [durable IAM revocation boundary](/blog/design/iam-revocations/).
+[Server PR #250](https://github.com/pgsty/silo/pull/250) (merged at [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0) and shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026)) fixes a login failure affecting LDAP users whose normalized Distinguished Name (DN) exceeds the 255-byte single-component filename limit of the object-storage IAM backend, while preserving read errors that protect the [durable IAM revocation boundary](/blog/design/iam-revocations/).
 
 The initial bug report, patch ([`9faeb7a11`](https://github.com/pgsty/silo/commit/9faeb7a1147435aa7ebc02bb997837ddfbdd2a81)), and long-DN regression tests were contributed by [`@910patin`](https://github.com/910patin). During design review prior to merge, maintainers narrowed the error-classification guard to ensure that full-path length errors or unreadable multibyte records on disk can never mask an existing revocation record.
 

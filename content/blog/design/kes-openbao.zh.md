@@ -11,9 +11,7 @@ draft: false
 url: "/zh/blog/design/kes-openbao/"
 ---
 
-**当前版本：** [KES 20261026](/zh/blog/release/silo-20261026/#kes) 已正式发布，使用 Go 1.27.3 并更新云服务依赖，保留本文的 API、配置与密钥格式。下文 20261018 的 AWS SDK v2 迁移和验证记录仍按原始版本标注。
-
-SILO 通过 [PGSTY KES](https://github.com/pgsty/kes)（`MINIO_KMS_KES_ENDPOINT`）接入外部密钥管理系统。[PGSTY KES 20261018](/zh/blog/release/kes-20261018/)（源码 [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)）独立于 SILO 四组件构建图按需部署，在保持既有密钥存储格式与 OpenBao KV v2 兼容性的同时，将 KES 的 AWS Secrets Manager 后端迁移至 AWS SDK for Go v2。
+SILO 通过 [PGSTY KES](https://github.com/pgsty/kes)（`MINIO_KMS_KES_ENDPOINT`）接入外部密钥管理系统。当前最新版本为 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**（使用 Go 1.27.3 构建并更新云服务依赖，保持本文的 API、配置与密钥格式不变）；此前的 [PGSTY KES 20261018](/zh/blog/release/kes-20261018/)（源码 [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)）完成了将 AWS Secrets Manager 后端迁移至 AWS SDK for Go v2 的主体改造。
 
 ## 三个服务的职责边界 {#architecture}
 

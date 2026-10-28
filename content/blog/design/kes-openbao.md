@@ -11,9 +11,7 @@ draft: false
 url: "/blog/design/kes-openbao/"
 ---
 
-**Current release:** [KES 20261026](/blog/release/silo-20261026/#kes) is available with Go 1.27.3 and updated cloud dependencies, retaining the API, configuration and key formats described here. The AWS SDK v2 migration and validation below remain labeled with their original 20261018 scope.
-
-SILO integrates with external key-management systems through [PGSTY KES](https://github.com/pgsty/kes) (`MINIO_KMS_KES_ENDPOINT`). [PGSTY KES 20261018](/blog/release/kes-20261018/) (source [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)) is deployed independently of the four-component SILO build graph and migrates the KES AWS Secrets Manager backend to AWS SDK for Go v2 while preserving existing SILO/KES key formats and OpenBao KV v2 compatibility.
+SILO integrates with external key-management systems through [PGSTY KES](https://github.com/pgsty/kes) (`MINIO_KMS_KES_ENDPOINT`). The current release is **[KES 20261026](/blog/release/silo-20261026/#kes)** (built with Go 1.27.3 and updated cloud dependencies while retaining the API, configuration, and key formats described below); the earlier [PGSTY KES 20261018](/blog/release/kes-20261018/) release (source [`2f7e741db905`](https://github.com/pgsty/kes/commit/2f7e741db905d7ea755967b29666657d819d7ad0)) migrated the KES AWS Secrets Manager backend to AWS SDK for Go v2 while preserving existing SILO/KES key formats and OpenBao KV v2 compatibility.
 
 ## Three services, three responsibilities {#architecture}
 
