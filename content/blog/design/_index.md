@@ -13,6 +13,13 @@ cascade:
 
 Design records document the engineering decisions behind PGSTY SILO: root causes, S3 and IAM protocol invariants, trade-offs against rejected alternatives, operational limits, and regression coverage.
 
+## November 1: Pool Migration Integrity Review
+
+- [Pool Migration Integrity Review: #261, #263, and #265](/blog/design/pool-migration-integrity-review/): A maintainer review of three reports and their fixes, including the contributor merge of #266 and maintainer follow-up #276.
+- [Mixed EC Layouts and Migration Listing](/blog/design/mixed-ec-migration-listing/) ([#261](https://github.com/pgsty/silo/issues/261), [#262](https://github.com/pgsty/silo/pull/262)): Why a readable object can disappear from decommission and rebalance listings after an interrupted degraded overwrite, and why the narrow recount in #262 is sufficient.
+- [Tier Free Versions Are Internal Cleanup Records](/blog/design/tier-free-version-semantics/) ([#263](https://github.com/pgsty/silo/issues/263), [#264](https://github.com/pgsty/silo/pull/264)): Why a free version must stay visible to healing but must not become a user-visible delete marker or a migration version.
+- [ILM Expiry and Pool Migration Ordering](/blog/design/ilm-migration-ordering/) ([#265](https://github.com/pgsty/silo/issues/265), [#266](https://github.com/pgsty/silo/pull/266), [#276](https://github.com/pgsty/silo/pull/276)): Why a versioned Expiration marker must not cause the current version to be skipped, and how the maintainer follow-up preserves replication, tier cleanup, and completion semantics.
+
 ## October 24: FULL_OBJECT Checksum Replication
 
 - [FULL_OBJECT Checksum Replication: Preserve the Type at Upload Initiation](/blog/design/replication-full-object-checksum/) (`#254`, `#255`): Why dropping the checksum type makes valid multipart CRC objects fail replication, how one shared header fix also restores the existing CopyObject path, and the source-upgrade and acceptance boundaries.
