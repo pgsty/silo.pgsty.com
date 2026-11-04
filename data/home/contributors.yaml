@@ -6,16 +6,16 @@
 # firstContribution is the first public issue / PR date; omitted for private disclosures.
 # Sync repository records, README sections, and bilingual pages: python3 bin/contributors.py
 # Refresh avatars: python3 bin/contributor_avatars.py
-updated: "2026-10-26T16:35:06+00:00"
+updated: "2026-11-04T11:20:24+00:00"
 repositories:
   - repo: "pgsty/silo"
     updated: "2026-10-26T16:35:06+00:00"
     issues: 123
     pullRequests: 131
   - repo: "pgsty/silo-console"
-    updated: "2026-10-26T16:35:06+00:00"
-    issues: 36
-    pullRequests: 33
+    updated: "2026-11-04T11:20:24+00:00"
+    issues: 42
+    pullRequests: 37
   - repo: "pgsty/mc"
     updated: "2026-10-26T16:35:06+00:00"
     issues: 26
@@ -59,8 +59,10 @@ code:
       - repo: "pgsty/silo-console"
         what: "Maintains SILO Console, including fixes, tests, releases, and documentation"
         whatZh: "维护 SILO Console 的修复、测试、发行与文档"
-        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 64, 65, 66, 67, 68, 69]
-        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 64, 65, 66, 67, 68, 69, 71, 74]
+        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 73]
+        draft: [79]
+        issuesOpen: [75, 76, 77, 78]
       - repo: "pgsty/mc"
         what: "Maintains mcli, including fixes, tests, packaging, and releases"
         whatZh: "维护 mcli 的修复、测试、打包与发行"
@@ -333,7 +335,30 @@ proposed:
     activity:
       - repo: "pgsty/silo"
         closed: [36]
+  - handle: "cyberbret"
+    featured: true
+    what: "Contributed on-demand folder and bucket usage scans and the optional persistent usage worker"
+    whatZh: "贡献按需目录与存储桶用量扫描，以及可选的持久化用量后台任务"
+    note: "PR [#70](https://github.com/pgsty/silo-console/pull/70) is being integrated with follow-up reliability fixes in [#79](https://github.com/pgsty/silo-console/pull/79). The feature is not yet released."
+    noteZh: "PR [#70](https://github.com/pgsty/silo-console/pull/70) 正通过 [#79](https://github.com/pgsty/silo-console/pull/79) 纳入，并补充可靠性修复；该功能尚未发布。"
+    firstContribution: "2026-10-26"
+    activity:
+      - repo: "pgsty/silo-console"
+        open: [70]
 reports:
+  - handle: "kh0mka"
+    name: "khomenokk"
+    featured: true
+    what: "Reported inter-node I/O timeouts, OIDC configuration-fetch failures, and lost Console bucket quotas"
+    whatZh: "报告节点间 I/O 超时、OIDC 配置拉取失败，以及 Console 建桶配额丢失问题"
+    firstContribution: "2026-08-03"
+    activity:
+      - repo: "pgsty/silo"
+        issuesClosed: [51, 154]
+      - repo: "pgsty/silo-console"
+        what: "Reported lost bucket quotas during Console bucket creation, fixed through PR #74"
+        whatZh: "报告 Console 建桶配额丢失问题，通过 PR #74 修复"
+        issuesClosed: [72]
   - handle: "MikeVL"
     featured: true
     what: "Reported resync throughput overflow and missing JSON status, both fixed in mcli 20261026"
@@ -535,14 +560,6 @@ reports:
     activity:
       - repo: "pgsty/silo"
         issuesClosed: [43]
-  - handle: "kh0mka"
-    name: "khomenokk"
-    what: "Reported inter-node I/O timeouts and OIDC configuration-fetch failures"
-    whatZh: "报告节点间 I/O 超时与 OIDC 配置拉取失败"
-    firstContribution: "2026-08-03"
-    activity:
-      - repo: "pgsty/silo"
-        issuesClosed: [51, 154]
   - handle: "bagutzu"
     name: "Bag Raul Cristian"
     what: "Requested KES-compatible external KMS and OpenBao support"
