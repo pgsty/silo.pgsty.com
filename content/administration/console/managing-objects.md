@@ -312,8 +312,12 @@ Invalid, missing required or incompatible settings fail closed.
 
 Entry counts, scan duration, concurrency and request budgets have validated
 finite ranges; see `pkg/usage/config.go`. Scan limits preserve the last successful
-observation and expose `limited`; operators can raise the configured budget or
-use a smaller foreground prefix. An error, outage or scan limit is never a zero.
+observation and expose `limited`. Automatic retries, change events and
+reconciliation do not restart a limited scan, because it would only reach the
+same limit again. After raising the configured budget, or to retry at any time,
+use **Refresh**: an explicit refresh discards the limited scan's checkpoint and
+starts a new scan with a new time and entry budget. A smaller foreground prefix
+also works. An error, outage or scan limit is never a zero.
 
 `POST /api/v1/bucket-usage/status` returns saved observations and coverage.
 `POST /api/v1/bucket-usage/refresh` queues priority work and returns HTTP 202.
@@ -344,7 +348,10 @@ notifications trigger idempotent work, while reconciliation repairs delivery gap
 
 The unreleased creation handler rejects invalid quota and retention values before
 creating a bucket. Retention alone enables object locking and versioning; an
-explicit versioning object is optional. If a requested post-create setting fails,
+explicit versioning object is optional. Object locking cannot exclude prefixes
+or folders from versioning, so a request that combines locking or retention with
+versioning exclusions is rejected before any bucket is created. If a requested
+post-create setting fails,
 the API reports failure and attempts to remove the empty bucket. It never deletes
 objects as part of this rollback. If the caller cannot remove the bucket, or the
 bucket has become nonempty, the error explicitly says it may still exist. Inspect
