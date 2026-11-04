@@ -41,6 +41,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 | 处于有效 `GOVERNANCE` 锁定期 | 清空（`<Retention/>`）、缩短 `RetainUntilDate`，或将模式改为 `COMPLIANCE` | `s3:PutObjectRetention` **且** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
 | 处于有效 `COMPLIANCE` 锁定期 | 在 `COMPLIANCE` 模式下将 `RetainUntilDate` 延长至更晚时间 | `s3:PutObjectRetention` | 无 |
 | 处于有效 `COMPLIANCE` 锁定期 | 清空、缩短保留期，或降级为 `GOVERNANCE` | **任何身份均绝对禁止** | 禁止（返回 `AccessDenied`） |
+{.wide .expand}
 
 ---
 
@@ -58,6 +59,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 | 2 | `DELETE /bucket/doc.txt?versionId=v1` | `403 AccessDenied` | `403 AccessDenied` |
 | 3 | `PUT /bucket/doc.txt?retention&versionId=v1`，附带请求头 `x-amz-bypass-governance-retention: true` 与空请求体 `<Retention/>` | **`200 OK`（治理锁被直接清空！）** | `403 AccessDenied` |
 | 4 | 再次执行 `DELETE /bucket/doc.txt?versionId=v1` | **`204 No Content`（受保护版本被永久删除！）** | 对象保持锁定，拒绝删除 |
+{.wide .expand}
 
 ### 复现 2：零保留权限账号对未加锁对象强加合规锁（F1）
 
@@ -67,6 +69,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 |---|---|---|---|
 | 1 | `PUT /bucket/unlocked.txt?retention`（不带 bypass 头），请求体设为 `<Mode>COMPLIANCE</Mode><RetainUntilDate>2099-01-01T00:00:00Z</RetainUntilDate>` | `403 AccessDenied` | `403 AccessDenied` |
 | 2 | 发送完全相同的请求，仅**额外附带请求头 `x-amz-bypass-governance-retention: true`** | **`200 OK`（成功打上不可撤销的 2099 年合规死锁！）** | `403 AccessDenied` |
+{.wide .expand}
 
 ### 复现 3：绕过 `s3:object-lock-remaining-retention-days` 最短保留天数条件（F3）
 
@@ -135,6 +138,7 @@ func isPutRetentionAllowed(ctx context.Context, r *http.Request, bucket, object 
 | 5 | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `true` | `true` | `false` | **`403 AccessDenied`**（封堵 F2） |
 | 6 | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `true` | `true` | `true` | **`200 OK`** |
 | 7 | 有效 `COMPLIANCE` | 清空、缩短或降级为 `GOVERNANCE` | `false` 或 `true` | 任意 | 任意 | **`403 AccessDenied`** |
+{.wide .expand}
 
 ### 五个被否决的替代方案 {#alternatives}
 

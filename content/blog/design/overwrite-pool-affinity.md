@@ -105,6 +105,7 @@ Eligibility checked both the bucket's versioning configuration and the request o
 | Full implementation through mcli | `mcli` `20261018` verified ordinary overwrite/readback, 4 distinct retained versions with historical reads, and multipart overwrite/checksum | Single-host local-directory deployment |
 | Narrowed implementation | Linux targeted suite: 37 top-level tests (209 with subtests) passed across placement, parity, health/capacity fallback, version-state exclusions, `PUT`/MPU, and conditional writes | Targeted placement and overwrite suite |
 | Build and static checks | Linux `amd64` build, `make verifiers`, lint (0 issues), and whitespace checks passed | Repository static verification |
+{.wide .expand}
 
 The targeted regression filter was:
 
@@ -138,6 +139,7 @@ Round one compared the full candidate (`0aa870115d7d`) against the baseline (`78
 | Single pool, 4 KiB overwrite; concurrency 16 | 166.2 → 159.2 | −4.2% | 83.9 → 89.4 | 296.8 → 293.2 | 3 × 15 s |
 | Two pools, one 4 KiB key, 4,000 new versions | 76.6 → 53.0 | **−30.8%** | 11.4 → 17.8 | 47.7 → 59.5 | 3 fixed-count runs |
 | Existing dual-copy data, binary-switch ABBA | 198.6 → 202.0 | +1.7% | — | 291.2 → 290.9 | 2 × 20 s |
+{.wide .expand}
 
 For ordinary 4 KiB overwrites, both 60-second pairs were slower (−30.7% and −21.8%), as were all three 15-second pairs, even though CPU per operation fell from 5.85 to 5.33 ms and block writes stayed near 128 KiB per operation.
 
@@ -163,6 +165,7 @@ Four workloads ran 5 pairs each in alternating AB/BA order (5-second warmup and 
 | Fresh 1 MiB overwrite; 64 keys, concurrency 8 | 79.45 → 79.58 | +0.2% | 94.0 → 95.6 | 521.5 → 483.2 |
 | One 4 KiB key, 4,000 new versions; control | 48.5 → 59.6 | +22.8% | 12.7 → 12.4 | 180.9 → 135.4 |
 | New 4 KiB keys; concurrency 16; control | 289.8 → 243.1 | −16.1% | 40.4 → 49.2 | 314.9 → 170.0 |
+{.wide .expand}
 
 On the primary 4 KiB overwrite workload, pairwise throughput changes across the five pairs were **+11.9%, −14.9%, −1.4%, −10.3%, and −12.8%** (median paired change −10.3%; ratio of variant medians −5.7%; P50 +14.4%). Baseline throughput ranged from 141.4 to 202.6 ops/s (CV 13.0%) and narrowed throughput from 146.3 to 176.6 ops/s.
 
@@ -176,6 +179,7 @@ Because fresh runs let the two placement policies build different on-disk layout
 | --- | --- | --- | --- | --- | --- |
 | One copy per key | 188.0 → 160.1 | **−14.9%** | 51.9 → 68.0 | 521.0 → 466.4 | 512 → 256 |
 | Two copies per key | 185.7 → 140.1 | **−24.5%** | 37.6 → 79.7 | 460.0 → 629.9 | 512 → 512 |
+{.wide .expand}
 
 The single-copy pairs changed by −0.9% and −23.5%. The dual-copy pairs declined by **−22.6% and −26.5%**, with P50 rising **+111.9%** and P99 rising **+36.9%**, while leaving all 512 existing records on disk. On clusters that already have cross-pool duplicates, the narrowed policy paid a steep write penalty without reclaiming any existing space.
 
@@ -202,6 +206,7 @@ At the cluster level, if a fraction $f$ of logical data would otherwise accumula
 | Availability and correctness | Request-aware quorum and fault checks avoid unsafe pool preference | Preflight state can change before write completion |
 | Maintenance | Narrow scope avoids versioned `xl.meta` amplification | Parity, bucket state, internal writes, reserve rules, `PUT`, and multipart routing must stay synchronized |
 | Rollback | Returning to baseline requires no format conversion | Stale copies created before or during rollout remain on disk |
+{.wide .expand}
 
 ## Final decision and conditions for revisiting it {#decision}
 

@@ -276,6 +276,7 @@ worker 在受限时间片之间让出执行权，只在完整对象键及其所�
 | `API_MAX_REQUESTS` | 8 | 每个 Console 进程的并发用量 API 请求数 |
 | `REQUEST_TIMEOUT` | `15s` | 用量 API 截止时间 |
 | `UI_POLL_INTERVAL` | `2s` | 有待处理任务时的轮询间隔；空闲视图使用十倍间隔，最多一分钟 |
+{.wide .expand}
 
 条目数、扫描时长、并发数和请求预算均有明确上限，详见 `pkg/usage/config.go`。
 达到扫描限制时保留上次成功结果，并暴露 `limited` 状态。自动重试、变更事件和校准不会重新启动受限扫描，

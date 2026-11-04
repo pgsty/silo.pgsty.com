@@ -129,6 +129,7 @@ Replace `HOSTNAME:PORT` with the hostname of your MinIO deployment. For deployme
 | `minio_cluster_usage_version_total` | Total number of versions (includes delete marker) in a cluster |
 | `minio_cluster_usage_deletemarker_total` | Total number of delete markers in a cluster |
 | `minio_cluster_bucket_total` | Total number of buckets in the cluster |
+{.wide .expand}
 
 #### Cluster Drive Metrics {#cluster-drive-metrics}
 
@@ -197,6 +198,7 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_cluster_replication_proxied_delete_tagging_requests_failures` | (*Site Replication Only*)Number of failures proxying DELETE tagging requests to replication target |
 | `minio_cluster_replication_proxied_get_tagging_requests_failures` | (*Site Replication Only*)Number of failures proxying GET tagging requests to replication target |
 | `minio_cluster_replication_proxied_put_tagging_requests_failures` | (*Site Replication Only*)Number of failures proxying PUT tagging requests to replication target |
+{.wide .expand}
 
 #### Node Replication Metrics {#node-replication-metrics}
 
@@ -223,6 +225,7 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_node_replication_max_queued_bytes` | Maximum number of bytes queued for replication seen since server start |
 | `minio_node_replication_max_queued_count` | Maximum number of objects queued for replication seen since server start |
 | `minio_node_replication_recent_backlog_count` | Total number of objects seen in replication backlog in the last 5 minutes |
+{.wide .expand}
 
 #### Healing Metrics {#healing-metrics}
 
@@ -274,6 +277,7 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_s3_requests_ttfb_seconds_distribution` | Distribution of the time to first byte across API calls. |
 | `minio_s3_traffic_received_bytes` | Total number of s3 bytes received. |
 | `minio_s3_traffic_sent_bytes` | Total number of s3 bytes sent. |
+{.wide .expand}
 
 #### Software Metrics {#software-metrics}
 
@@ -298,6 +302,7 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_node_drive_errors_ioerror` | Total number of drive I/O errors since server start |
 | `minio_node_drive_errors_availability` | Total number of drive I/O errors, timeouts since server start |
 | `minio_node_drive_io_waiting` | Total number I/O operations waiting on drive |
+{.wide .expand}
 
 #### Identity and Access Management (IAM) Metrics {#identity-and-access-management-iam-metrics}
 
@@ -324,6 +329,7 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_node_ilm_action_count_delete_restored_action` | Total action outcome of lifecycle checks since server start for deletion of temporarily restored object |
 | `minio_node_ilm_action_count_delete_restored_version_action` | Total action outcome of lifecycle checks since server start for deletion of a temporarily restored version |
 | `minio_node_ilm_action_count_delete_all_versions_action` | Total action outcome of lifecycle checks since server start for deletion of all versions |
+{.wide .expand}
 
 #### Tier Metrics {#tier-metrics}
 
@@ -349,6 +355,7 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_node_process_virtual_memory_bytes` | Virtual memory size in bytes. |
 | `minio_node_process_starttime_seconds` | Start time for MinIO process per node, time in seconds since Unix epoc. |
 | `minio_node_process_uptime_seconds` | Uptime for MinIO process per node in seconds. |
+{.wide .expand}
 
 #### Scanner Metrics {#scanner-metrics}
 
@@ -418,6 +425,7 @@ These metrics only populate on deployments with [Bucket Replication](/administra
 | `minio_bucket_replication_proxied_delete_tagging_requests_failures` | Number of failures in DELETE tagging proxy requests to replication target |
 | `minio_bucket_replication_proxied_get_tagging_requests_failures` | Number of failures in GET tagging proxy requests to replication target |
 | `minio_bucket_replication_proxied_put_tagging_requests_failures` | Number of failures in PUT tagging proxy requests to replication target |
+{.wide .expand}
 
 #### Traffic Metrics {#traffic-metrics}
 
@@ -477,6 +485,7 @@ Replace `HOSTNAME:PORT` with the hostname of your MinIO deployment. For deployme
 | `minio_node_drive_writes_kb_per_sec` | Kilobytes written per second on a drive. |
 | `minio_node_drive_writes_await` | Average time for write requests to be served on a drive. |
 | `minio_node_drive_perc_util` | Percentage of time the disk was busy since uptime. |
+{.wide .expand}
 
 #### Network Interface Metrics {#network-interface-metrics}
 
@@ -494,6 +503,7 @@ Replace `HOSTNAME:PORT` with the hostname of your MinIO deployment. For deployme
 | `minio_node_if_tx_errors` | Transmit errors in 60s. |
 | `minio_node_if_tx_errors_avg` | Transmit errors in 60s (avg). |
 | `minio_node_if_tx_errors_max` | Transmit errors in 60s (max). |
+{.wide .expand}
 
 #### CPU Metrics {#cpu-metrics}
 
@@ -535,6 +545,7 @@ Replace `HOSTNAME:PORT` with the hostname of your MinIO deployment. For deployme
 | `minio_node_cpu_avg_load15_perc` | CPU load average 15min (percentage). |
 | `minio_node_cpu_avg_load15_perc_avg` | CPU load average 15min (percentage) (avg). |
 | `minio_node_cpu_avg_load15_perc_max` | CPU load average 15min (percentage) (max). |
+{.wide .expand}
 
 #### Memory Metrics {#memory-metrics}
 
@@ -564,3 +575,4 @@ Replace `HOSTNAME:PORT` with the hostname of your MinIO deployment. For deployme
 | `minio_node_mem_used_perc` | Used memory percentage on the node. |
 | `minio_node_mem_used_perc_avg` | Used memory percentage on the node (avg). |
 | `minio_node_mem_used_perc_max` | Used memory percentage on the node (max). |
+{.wide .expand}

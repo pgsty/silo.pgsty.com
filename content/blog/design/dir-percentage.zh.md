@@ -190,6 +190,7 @@ Go 后端的文件夹下载处理器继续通过 `io.Pipe` 流式生成 Deflate 
 | 已完成（Completed） | `false` | `100` | `done = true` | 成功（`100%`） |
 | 已失败（Failed） | `false` | 上次有效值 | `failed = true, done = true` | 错误状态 |
 | 已取消（Cancelled） | `false` | `0` | `cancelled = true, done = true` | 已取消状态 |
+{.wide .expand}
 
 ## 完备性证明 {#proof}
 
@@ -274,6 +275,7 @@ Console 2.2.0 时期的旧版 `BrowserDownload` 辅助函数会在点击隐藏 `
 | 省略的对象大小 `undefined` | `10` | `undefined` | `false` | `0` | `null` |
 | 非有限响应总量 `Infinity` | `10` | `0` | `true` | `Infinity` | `null` |
 | 负数 `loaded` | `-1` | `100` | `true` | `100` | `null` |
+{.wide .expand}
 
 ### 状态转换测试 {#state-tests}
 

@@ -52,7 +52,7 @@ Normal usage needs no migration work for these capabilities. Dependencies on old
 | <span id="g10"></span>**G10 · Pool migration and healing**<br>Rebalance, decommission and recovery handle tags, versions and delete markers more accurately. | Moving pools, healing or recovering replication. | Better metadata preservation and retries; historical anomalies still need inspection. | [Multi-pool consistency](/blog/design/multi-pool-object-consistency/), [replication recovery](/blog/design/replication-reliability/) |
 | <span id="g11"></span>**G11 · Notifications and streaming**<br>Fixes NATS/AMQP setting recognition and flushing of notification and Select streams. | Using those notification targets or streaming APIs. | More accurate configuration and event output; see [O03](#o03) for old database settings. | [Notification settings](/compatibility/server/#notify-audit), [stream flushing](/compatibility/server/#s3-behavior) |
 | <span id="g12"></span>**G12 · Stability and resource cleanup**<br>Fixes concurrent collection, buffer ownership and connection cleanup. | Concurrent I/O, metric collection or request cancellation. | Prevents related crashes and resource leaks. | [Read buffers](/compatibility/server/#s3-behavior), [runtime and metrics](/compatibility/server/#observability) |
-{.silo-compatibility-table}
+{.silo-compatibility-table .wide .expand}
 
 ## 🔵 Minor differences: 4 categories {#minor}
 
@@ -64,7 +64,7 @@ Ordinary applications usually need no changes. Tools that hard-code product stri
 | <span id="b02"></span>**B02 · Paginated Console listings**<br>Object listings use cursors, with sorting, filtering and selection limited to the current page. | Browsing, filtering or selecting objects in Console. | UI habits change; direct S3 application access does not. | [Pagination boundaries](/compatibility/console/#pagination) |
 | <span id="b03"></span>**B03 · Richer monitoring and diagnostics**<br>Adds diagnostic metrics and corrects quota, replication counters and status meanings. | Using affected metrics, dashboards or alerts. | Metric namespaces remain; review the affected displays and alert rules. | [Metric changes](/compatibility/server/#observability), [Console metrics](/compatibility/console/#metrics) |
 | <span id="b04"></span>**B04 · Additional response fields**<br>Some copy, multipart and Console responses include checksum or session fields. | Reading those API responses. | Standard clients usually handle them; parsers rejecting unknown fields belong in [O05](#o05). | [Multipart responses](/blog/design/complete-multipart-checksum-type/), [copy responses](/blog/design/copyobject-ssec-checksum-response/#impact), [Console API](/compatibility/console/#api-output) |
-{.silo-compatibility-table}
+{.silo-compatibility-table .wide .expand}
 
 ## 🟠 Conditional checks: 8 categories {#conditional}
 
@@ -80,7 +80,7 @@ Ordinary applications usually need no changes. Tools that hard-code product stri
 | <span id="o06"></span>**O06 · Multi-pool operations and retired strict multipart mode**<br>Multi-pool writes/deletes verify metadata; the optional 20260916 strict listing mode is retired. | Multi-pool conditional writes or deletion, or upgrading a deployment that enabled strict listing. | Failures can return 503 while GET works. Server 20261018 and 20261026 ignore the strict switch with a warning; durable listing and strict cancellation are unavailable. | [Multi-pool conditions](/blog/design/multi-pool-object-consistency/#conditions), [current multipart contract](/blog/design/list-multipart-uploads/#decision-20261018) |
 | <span id="o07"></span>**O07 · Replication, mixed versions and rollback**<br>IAM revocations and bucket-configuration deletion state require coordinated upgrades and recovery. | Multiple sites, shared IAM, mixed versions or downgrades. | Preserve a complete recovery point and verify all peers before rolling back. | [IAM upgrades](/operations/replication/iam-upgrade/), [configuration convergence](/blog/design/bucket-metadata-convergence/#rollout), [rollback scope](/compatibility/migration/#rollback) |
 | <span id="o08"></span>**O08 · Self-update and upstream online services**<br>In-place updates, SUBNET and upstream hosted-support integrations are disabled. | Using `admin update`, `mcli update` or MinIO online support workflows. | Upgrade through packages, images or orchestration; ordinary S3 access is unaffected by this change. | [Server updates](/compatibility/server/#offline-services), [client updates](/compatibility/mcli/#self-update), [SUBNET](/compatibility/mcli/#subnet) |
-{.silo-compatibility-table}
+{.silo-compatibility-table .wide .expand}
 
 ## Comparison scope and release boundaries {#scope}
 

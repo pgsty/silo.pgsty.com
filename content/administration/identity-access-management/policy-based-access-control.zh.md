@@ -934,6 +934,7 @@ Silo 按请求字段的实际语义来源构造条件值映射，而不是把所
 | `s3:RequestObjectTag/<key>` 与 `s3:RequestObjectTagKeys` | 默认来自 `X-Amz-Tagging` Header；标签感知处理器可显式传入实际标签集 | `PutObject` 与 `CreateMultipartUpload` 从 Header 或兼容查询形式取值，Header 存在时优先；`PutObjectTagging` 使用解析后的 XML 请求正文。无关操作会忽略 query 标签。对于策略映射允许这些键的 action，历史 Header 回退仍为兼容性保留，因此在上述三个处理器之外，请求标签条件本身不能证明该操作会消费或持久化这些标签。 |
 | `s3:ExistingObjectTag/<key>` | 从目标对象存储状态加载的标签 | 请求头与查询参数永远不能提供已有对象标签。只有在授权前加载这些标签的 API 路径上才有该值，包括对象 GET/HEAD 与对象标签处理器。 |
 | 对象锁条件键 | 对象锁请求头，或处理器计算出的保留值 | 查询字符串中的同名字段会被忽略。 |
+{.wide .expand}
 
 如果某条 API 路径没有加载或计算上述来源，相应条件键就是缺失的，其结果由所用策略操作符的语义决定。不要因为某个动作列出了条件键，就假定服务端一定会为它合成一个值。
 
@@ -1578,6 +1579,7 @@ MinIO 会将 `Resource` 字段中的 `${aws:username}` 变量替换为用户名�
 | `jwt:address` | 返回用户的 `address` claim。 |
 | `jwt:scope` | 返回用户的 `scope` claim。 |
 | `jwt:client_id` | 返回用户的 `client_id` claim。 |
+{.wide .expand}
 
 关于这些 scope 的更多信息，请参阅 [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) 文档。 你所选的 OIDC 提供方也可能有更具体的补充文档。
 

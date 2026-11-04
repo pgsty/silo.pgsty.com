@@ -69,6 +69,7 @@ Across NATS and AMQP, four keys had drifted across those four surfaces:
 | `notify_nats` | `nkey_seed` | [`#21231`](https://github.com/minio/minio/pull/21231) (2025-05) | Missing | Missing | Read `nkey_seed` | Wrote `nkey_seed` | Stored config fails `CheckValidKeys` |
 | `notify_nats` | `tls_handshake_first` | [`#21008`](https://github.com/minio/minio/pull/21008) (2025-02) | Missing | Present | Read `tls_handshake_first` | Wrote `tls_handshake_first` | Stored config fails `CheckValidKeys` |
 | `notify_amqp` | `immediate` | Initial KVS migration | Missing | Missing | Read `immediate` | Wrote `cfg.Immediate` into `AmqpInternal`! | `immediate` rejected; `SetNotifyAMQP` overwrote `internal` with `cfg.Immediate` |
+{.wide .expand}
 
 Notice the AMQP bug in the last row: `SetNotifyAMQP` in `cmd/config/notify/legacy.go` had a copy-paste typo that wrote `strconv.FormatBool(cfg.Immediate)` under the key `target.AmqpInternal` and never serialized `cfg.Internal` at all.
 

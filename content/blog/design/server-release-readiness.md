@@ -49,6 +49,7 @@ That pass uncovered real defects after the first pass and tied every conclusion 
 | Admin authorization | User/group status changes always checked the enable action | Check the action that matches the target state | Closed in candidate |
 | Checksums | Multipart and copy paths omitted fields, accepted invalid combinations, or computed over the wrong representation | Complete algorithm/type validation, server-side part calculation, federated propagation, AWS errors, and CopyObject transform ordering | Closed in candidate |
 | Release evidence | Full acceptance initially described a tree that changed afterward | Record full acceptance at `ebac0ca73` and current-tree targeted gates separately | Closed as an evidence defect |
+{.wide .expand}
 
 ## The Invariants That Define the Candidate {#invariants}
 
@@ -147,6 +148,7 @@ The pre-release pass audited the diff for over-design, duplication, defensive co
 | `ListMultipartUploads` [#79](https://github.com/pgsty/silo/issues/79) | Inherited listing-conformance gap | Known issue; not a data-integrity blocker for ordinary multipart workflows |
 | Federated `CopyObject` [#99](https://github.com/pgsty/silo/issues/99), [#100](https://github.com/pgsty/silo/issues/100) | Legacy-backend checksum/inline-object gaps | Scoped to affected federated features in 0903; later repaired in 20260916 |
 | ILM relocation PR #60 and broad SSE issue #61 | New capability requests | Outside the release safety boundary |
+{.wide .expand}
 
 ## Evidence {#evidence}
 

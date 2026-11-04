@@ -36,6 +36,7 @@ Console 的修改密码按钮使用 ChangeMyPassword，用户管理继续使用 
 | `Allow admin:CreateUser` | 允许 | 允许 | 允许 |
 | `Allow admin:CreateUser` 加 `Deny admin:ChangeMyPassword` | 允许 | **拒绝** | 允许 |
 | 同时 Deny 两个动作，或 `Deny admin:*` | 拒绝 | 拒绝 | 拒绝 |
+{.wide .expand}
 
 只匹配 CreateUser 的通配 Deny（如 `admin:Create*`）也存在相同变化。
 Allow 不能覆盖匹配的 Deny；只授予 ChangeMyPassword 不会授予用户管理权限。

@@ -21,6 +21,7 @@ This bulletin covers five security findings fixed in [SILO Server 20260903](/blo
 | `SN-2026-008` | Any authenticated principal able to invoke the affected read/write/delete operation | Internal-looking headers granted replication-only effects without replication authorization | Exact marker plus `s3:ReplicateObject` or `s3:ReplicateDelete` is required |
 | `SN-2026-009` | Authenticated admin API principal holding only one status action | The enable action authorized disable, and vice versa | The requested target state selects the required admin action |
 | `SN-2026-010` | Authenticated S3 principal with `s3:DeleteObject` but not `s3:DeleteObjectVersion` | A caller could permanently delete an explicit version without the AWS-required action | Explicit version deletion requires `s3:DeleteObjectVersion` |
+{.wide .expand}
 
 ## SN-2026-006: zero-byte SSE-C key authentication {#sn-2026-006}
 

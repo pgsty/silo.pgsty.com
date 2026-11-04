@@ -107,6 +107,7 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 | `mcli support upload` | 提示后退出码 `1` | 通过自有渠道传递文件 |
 | `mcli support proxy set` | 提示后退出码 `1` | `proxy remove` 仍可清除遗留配置 |
 | `mcli support callhome enable` | 提示后退出码 `1` | `disable` / `status` 照常工作 |
+{.wide .expand}
 
 诊断能力本身全部保留：`mcli support diag` / `perf` / `profile` / `inspect` 恒定以本地（airgap）模式运行 —— 结果写入本地文件，不上传任何数据，SUBNET 注册也不再是前置条件。两项相关加固：`inspect` 不再回退到用内置的 MinIO 公钥加密输出（你的归档始终由你自己解密）；自 20260804 起 `--debug` 输出对 SUBNET 凭证脱敏 —— 如果你分享过旧版本的调试日志，请轮换其中的密钥。`mcli license info` 与 `unregister` 在本地照常工作。
 

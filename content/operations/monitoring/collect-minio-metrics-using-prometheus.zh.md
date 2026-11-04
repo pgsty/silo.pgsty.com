@@ -279,6 +279,7 @@ MinIO 建议将以下指标作为基础监控项。
 | `minio_node_drive_errors_timeout` | 自 server 启动以来驱动器超时错误的总数。 |
 | `minio_node_drive_errors_availability` | 自 server 启动以来驱动器 I/O 错误、权限拒绝和超时的总数。 |
 | `minio_node_drive_io_waiting` | 驱动器上等待中的 I/O 操作总数。 |
+{.wide .expand}
 {{< /tab >}}
 {{< /tabs >}}
 

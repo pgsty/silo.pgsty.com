@@ -80,6 +80,7 @@ mc checksum verify --manifest FILE [FLAGS] ALIAS
 | `--enc-c KEY` | 提供一个或多个 SSE-C 前缀到密钥映射，使用原始 Base64 或十六进制格式。 |
 | `--report FILE` | 把对象记录与汇总写入新的 JSON Lines 文件；POSIX 系统上以 `0600` 创建。 |
 | `--json` | stdout 不是终端时输出紧凑 JSON Lines。 |
+{.wide .expand}
 
 全局 `--limit-download` 可限制下载速度。对象正文以流式方式校验，不完整缓冲或写入磁盘。时间过滤仍需 HEAD，以对象当前返回的元数据为准。
 

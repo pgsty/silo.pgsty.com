@@ -28,6 +28,7 @@ During incident investigation of [`pgsty/silo#251`](https://github.com/pgsty/sil
 | Ordinary S3 `GET`, `HEAD`, or `PUT` requests stall behind a slow policy list | `ListPolicies` / `ListPolicyDocs` hold the in-memory authentication-cache write lock while reading and decrypting every stored policy document | **A**: Move slow backend loading and decryption outside the authentication-cache lock |
 | KMS/KES decryption continues after the HTTP client cancels the request | Intermediate helpers substitute `context.Background()`, severing cancellation propagation before the outbound KES request | **B**: Thread the caller's `context.Context` through the entire decryption call chain |
 | A legitimate slow policy query (> 30 s) fails with HTTP 503 in the first repair candidate | Reusing `withIAMStorage` and reusing etcd's 30-second `Get` child context inadvertently imposed a 30-second ceiling on total decryption work | **R1**: Scope each timeout strictly to the storage operation it originally bounded |
+{.wide .expand}
 
 Shrinkage of the lock scope (**A**) and cancellation propagation (**B**) solve complementary problems: releasing the cache lock keeps healthy S3 traffic flowing during a slow admin query, while context propagation stops wasted KMS calls after a client disconnects.
 
@@ -137,6 +138,7 @@ Process-level benchmarks against baseline [`a07d655dc`](https://github.com/pgsty
 | Object-backed policy query taking > 30 s (61 policies) | Baseline: `200 OK` in 32.74 s; First candidate: `503` at 31.22 s | `200 OK` in **32.75 s** with all 61 policies returned |
 | Fast `etcd` read + 32 s KES decryption (60 s caller budget) | First candidate fails during post-read decryption | Both policy-list entry points and policy-mapping loader succeed |
 | 51 normal and denied HTTP control cases | Baseline status codes, error codes, and item counts | All 51 controls match (including pagination, KMS denial, and SigV4 checks) |
+{.wide .expand}
 
 During test construction, two subtleties in the KES client surfaced:
 

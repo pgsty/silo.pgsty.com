@@ -80,6 +80,7 @@ The final summary contains `objects`, `verified`, per-status counts, and `incomp
 | `--enc-c KEY` | Supply one or more SSE-C prefix-to-key mappings in raw Base64 or hexadecimal form. |
 | `--report FILE` | Write object records and the summary to a new JSON Lines file. On POSIX systems it is created with mode `0600`. |
 | `--json` | Emit compact JSON Lines when stdout is not a terminal. |
+{.wide .expand}
 
 Use the global `--limit-download` flag to cap download speed. Object bodies are streamed through bounded hashers, without full buffering or disk writes. Time filters still require HEAD to obtain current object metadata.
 

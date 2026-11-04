@@ -59,6 +59,7 @@ shortcut input
 | `marker` does not begin with `prefix` | The listing engine does not scan a disjoint range | Returns `io.EOF` without confirming bucket existence |
 | `max-keys=0` | The caller explicitly requests zero keys | Equates "zero keys requested" with "valid bucket resource" |
 | `prefix` begins with `/` | SILO's flat key space never produces keys with a leading `/` | Short-circuits on the filter before checking bucket identity |
+{.wide .expand}
 
 For an existing bucket, returning an empty listing from these branches is a valid fast path. For a missing bucket, returning bare `io.EOF` masks the resource error that must take precedence.
 
@@ -233,6 +234,7 @@ Adding a TTL cache for bucket existence reduces shortcut latency, but requires i
 | Shortcut runtime cost | Higher on shortcuts only | Replaces a local branch with `GetBucketInfo` when a shortcut triggers |
 | Compatibility value | High | Restores HTTP 404 `NoSuchBucket`, pre-regression upgrade compatibility, and S3 test fidelity |
 | Operational complexity | None | No migration, configuration knob, feature flag, or cache invalidation |
+{.wide .expand}
 
 ## Acceptance Decision {#decision}
 

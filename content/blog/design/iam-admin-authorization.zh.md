@@ -41,6 +41,7 @@ url: "/zh/blog/design/iam-admin-authorization/"
 | `RevokeTokens` | `admin:RemoveServiceAccount` | 省略用户参数或解析后等于调用者父账号时视为自身；先执行授权并保护 root 目标。 |
 | `AddServiceAccount`、`AddServiceAccountLDAP` | `admin:CreateServiceAccount` | 完成既有自身或跨用户 IAM 授权后，拒绝受有效会话策略限制的调用者及无权管理 root 的调用者。 |
 | `UpdateServiceAccount` | `admin:UpdateServiceAccount` | 完成既有 Action 授权后，拒绝受有效会话策略限制的调用者及无权管理 root 的调用者；不引入自更新特权。 |
+{.wide .expand}
 
 即使会话策略允许创建或更新 Action，受该策略限制的调用者也不能执行这些操作。更新守卫同样拦截仅修改名称等元数据的请求，因为现有更新实现会在请求未提供新策略时清除原有内联策略。
 

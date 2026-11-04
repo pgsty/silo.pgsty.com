@@ -29,6 +29,7 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 | :-- | :-- | :-- | :-- |
 | [`CVE-2025-62506`](https://github.com/advisories/GHSA-jjjj-jwhf-8rgr) | [minio/minio#21642](https://github.com/minio/minio/pull/21642)，合入提交 [`c1a49490`](https://github.com/minio/minio/commit/c1a49490c78e9c3ebcad86ba0662319138ace190) | [`pgsty/silo@c1a49490`](https://github.com/pgsty/silo/commit/c1a49490c78e9c3ebcad86ba0662319138ace190) | 在评估受限会话策略（sub-policy）前重置 `DenyOnly` 标志，防止受限服务账号或 STS 会话派生出继承父级全量权限的不受限子服务账号。上游最早于 [`RELEASE.2025-10-15T17-29-55Z`](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z) 修复；SILO 自 [`RELEASE.2025-12-03T12-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2025-12-03T12-00-00Z) 起的所有版本均已包含。从更早期上游版本迁移的管理员在升级后应审计由受限服务账号或 STS 身份创建的子服务账号。见[编年史文章](/zh/blog/security/cve-2025-62506/)。 |
 | `CVE-2026-32285` | 同一上游提交 [`c1a49490`](https://github.com/minio/minio/commit/c1a49490c78e9c3ebcad86ba0662319138ace190)（[pgsty/silo#26](https://github.com/pgsty/silo/issues/26)） | 已包含（`buger/jsonparser v1.1.2`） | 外部漏洞源将 `CVE-2025-62506` 的会话策略修复提交（`c1a49490`）误标为 `buger/jsonparser` 漏洞；SILO `go.mod` 已选用包含修复的 `v1.1.2`，且 `govulncheck` 确认不存在可达漏洞符号，无需修改代码。见[研判记录](/zh/blog/security/cve-2026-32285/)。 |
+{.wide .expand}
 
 ## 自 `RELEASE.2026-03-21T00-00-00Z` 以来的安全公告 {#advisories}
 
@@ -59,6 +60,7 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 | [`SN-2026-017`](#sn-2026-017) | [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fb29fa0e97b875948f6e595163a72f56b)、[`995439260`](https://github.com/pgsty/silo/commit/995439260)、[#242](https://github.com/pgsty/silo/pull/242) | 委派 IAM Admin 凭据与策略包含性授权边界 | [编年史](/zh/blog/security/20261018-release-hardening/#sn-2026-017) · [设计](/zh/blog/design/iam-admin-authorization/) |
 | [`SN-2026-018`](#sn-2026-018) | [`fe6dc4780`](https://github.com/pgsty/silo/commit/fe6dc4780) | 转发客户端源地址信任边界（`MINIO_API_TRUSTED_PROXIES`） | [编年史](/zh/blog/security/source-address-trust/) |
 | [`SN-2026-019`](#sn-2026-019) | [`672c07a0f`](https://github.com/pgsty/silo/commit/672c07a0f)、[`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) | 通知配置键注册与 `config.HasSensitiveKeys` 敏感凭据脱敏 | [编年史](/zh/blog/security/notify-keyspace-registration/) · [设计](/zh/blog/design/notify-url/) |
+{.wide .expand}
 
 ## 暴露条件与升级指引 {#exposure}
 
@@ -193,6 +195,7 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 | [CVE-2026-84304](https://github.com/advisories/GHSA-vp52-pcj8-j9qc) | gRPC `v1.83.1` | 修复 gRPC-Go 在高分片 HTTP/2 `DATA` 帧下的未认证堆内存耗尽问题。 |
 | [CVE-2026-79921 / GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) | [`d63c92e39`](https://github.com/pgsty/silo/commit/d63c92e39)（[Server 20260916](/zh/blog/release/silo-20260916/)） | 升级 `amqp091-go` 至 `v1.14.0`，防止恶意 AMQP broker 发送超大帧耗尽客户端内存。 |
 | Go 1.27.2 与十月依赖刷新 | [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce)（[Server 20261018](/zh/blog/security/20261018-release-hardening/#dependencies)） | 升级至 Go 1.27.2、`x/net v0.61.0`、`x/crypto v0.58.0`、`x/text v0.43.0` 与 `go-jose/v4 v4.1.6`（`GHSA-mgcc-cww5-fp2q`）。 |
+{.wide .expand}
 
 ## 运维相关的安全修复 {#operational}
 
@@ -202,6 +205,7 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 | `ldaps://` TLS 配置传递回归 | [`ce1c537eb`](https://github.com/pgsty/silo/commit/ce1c537eb1dd6c4efa1cf75cf5df0e2c489c947a)（`RELEASE.2026-03-25`） | 恢复 `ldaps://` `DialURL()` 连接的 TLS 配置传递，使 `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` 与自定义根 CA 重新生效。 |
 | 签名字段与策略输入对齐 | [#177](https://github.com/pgsty/silo/pull/177)、[`87d8b5967`](https://github.com/pgsty/silo/commit/87d8b5967)（[Server 20260916](/zh/blog/release/silo-20260916/)） | 拒绝有歧义的重复 `x-amz-copy-source` 值，从已签名 `X-Amz-Date` 无状态推导 `s3:signatureAge`，并将 `s3:x-amz-content-sha256` 策略条件绑定至经验证的载荷哈希。 |
 | 跨存储池条件 `PUT` 与 `DELETE` | [#207](https://github.com/pgsty/silo/pull/207)、[`5e7d60308`](https://github.com/pgsty/silo/commit/5e7d60308)（[Server 20260916](/zh/blog/release/silo-20260916/)） | 在共享跨池锁下针对当前权威逻辑对象评估写入与删除前置条件（`If-Match`、`If-None-Match`），防止旧存储池中的陈旧副本越权放行覆盖写入。见[多存储池对象一致性设计](/zh/blog/design/multi-pool-object-consistency/)。 |
+{.wide .expand}
 
 ## 台账归属 {#attribution}
 

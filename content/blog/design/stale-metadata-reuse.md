@@ -24,6 +24,7 @@ Two independent code paths reused a Go struct without resetting all of its logic
 | Legacy V1 version header | Reuse a struct containing a signature or EC fields | Fields absent from V1 retain their old values | `Signature`, `EcN`, and `EcM` are zeroed |
 | Scanner update response | Reuse an envelope that previously carried a final cache | Both `Update` and the old `Final` are serialized | Only `Update` is present |
 | Scanner final response | Reuse an envelope that previously carried a progress update | Both the old `Update` and `Final` are serialized | Only `Final` is present |
+{.wide .expand}
 
 ## Legacy `xl.meta` Headers {#legacy-headers}
 
@@ -95,6 +96,7 @@ End-to-end verification ran the merged binary as **two server processes managing
 | Initial writes | 24 | 64,740 | Bucket and cluster totals matched across three consecutive usage updates |
 | Delete, overwrite, and add | 24 | 111,960 | Bucket and cluster totals matched across three subsequent usage updates |
 | Readback verification | 24 | 111,960 | All 24 object lengths and SHA-256 digests matched |
+{.wide .expand}
 
 Both processes logged active bucket scans, with the non-coordinator node executing 119 `ScanBucketDrive` operations over the remote grid RPC stream.
 

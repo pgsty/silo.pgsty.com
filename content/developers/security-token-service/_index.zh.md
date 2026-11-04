@@ -23,3 +23,4 @@ MinIO 支持以下 STS API 端点：
 | [AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) | OpenID Connect | 使用 OIDC 提供方返回的 JWT token 生成 access key 和 secret key |
 | [AssumeRoleWithLDAPIdentity](/zh/developers/security-token-service/AssumeRoleWithLDAPIdentity/#minio-sts-assumerolewithldapidentity) | Active Directory / LDAP | 使用为该 API 端点指定的 AD/LDAP 凭证生成 access key 和 secret key。 |
 | [AssumeRoleWithCustomToken](/zh/developers/security-token-service/AssumeRoleWithCustomToken/#minio-sts-assumerolewithcustomtoken) | MinIO Identity Plugin | 生成一个 token，用于外部身份提供方和 [MinIO Identity Plugin](/zh/administration/identity-access-management/pluggable-authentication/#minio-external-identity-management-plugin)。 |
+{.wide .expand}

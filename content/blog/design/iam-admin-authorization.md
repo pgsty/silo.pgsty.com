@@ -67,6 +67,7 @@ caller.
 | `RevokeTokens` | `admin:RemoveServiceAccount` | Omitted user or the resolved caller parent is self. Authorize before revocation and protect root targets. |
 | `AddServiceAccount`, `AddServiceAccountLDAP` | `admin:CreateServiceAccount` | Retain existing self/other-user IAM authorization; then reject active session policies and unauthorized effective root targets. |
 | `UpdateServiceAccount` | `admin:UpdateServiceAccount` | Retain the existing action requirement; then reject active session policies and unauthorized root targets. No new self-update privilege. |
+{.wide .expand}
 
 Creation and update are denied to session-limited callers even when their
 session policy grants the named action. The update restriction also covers

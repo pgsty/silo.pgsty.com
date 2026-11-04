@@ -27,6 +27,7 @@ Earlier multi-pool consistency fixes relate to this change as follows:
 | [#199](https://github.com/pgsty/silo/issues/199), fixed by [#207](https://github.com/pgsty/silo/pull/207) | Conditional `PUT` evaluates the current logical object across pools | Retains capacity-weighted placement |
 | [#248](https://github.com/pgsty/silo/pull/248), shipped in Server 20261018 | Pool migration cannot overwrite a newer payload or drop a delete marker | Protects rebalance and decommission paths |
 | [#245](https://github.com/pgsty/silo/pull/245), closed without merging | Proposed keeping overwrites in their existing pool | Neither experiment met its performance target; deletion safety does not depend on overwrite affinity |
+{.wide .expand}
 
 Those earlier changes did not cover ordinary unconditional deletion or bulk `DeleteObjects`. See [Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/) for the shared locking and migration design, and [Overwrite Pool Affinity](/blog/design/overwrite-pool-affinity/) for the evaluation that retained the existing allocator.
 
@@ -206,6 +207,7 @@ Throughput is measured in logical objects per second, showing the three-run medi
 | 3 / 1; bulk 64 | 1,338 [1,269–1,383] | 1,120 [1,055–1,163] | −16.9% |
 | 3 / 3; `DELETE` | 364 [323–371] | 354 [335–364] | −2.0% |
 | 3 / 3; bulk 64 | 404 [367–450] | 365 [313–378] | −14.5% |
+{.wide .expand}
 
 Per-request latency in milliseconds (covering the full 64-object batch for bulk calls, shown as baseline→fixed):
 
@@ -221,6 +223,7 @@ Per-request latency in milliseconds (covering the full 64-object batch for bulk 
 | 3 / 1; bulk 64 | 361.73 → 444.34 | 669.84 → 732.27 |
 | 3 / 3; `DELETE` | 20.35 → 21.00 | 50.75 → 48.92 |
 | 3 / 3; bulk 64 | 1,236.42 → 1,392.63 | 1,697.38 → 2,079.27 |
+{.wide .expand}
 
 P99 uses the nearest-rank method (with 64 requests per bulk run, P99 is close to the per-run maximum). Single-pool controls retained their scheduling path and showed no regression. Three-pool bulk throughput decreased by **15–17%**, with a **22.5%** P99 increase on the 3-pool / 3-copy layout; two-pool / two-copy single deletion decreased by **16.3%** while bulk deletion in that layout stayed within run-to-run variation.
 

@@ -21,6 +21,7 @@ url: "/zh/blog/security/20260903-server-hardening/"
 | `SN-2026-008` | 可调用相关读/写/删接口的任意已认证身份 | 伪造内部复制请求头即可在无复制权限时触发复制专用语义 | 必须携带精确标记且通过 `s3:ReplicateObject` 或 `s3:ReplicateDelete` 鉴权 |
 | `SN-2026-009` | 仅持有单向状态管理权限的已认证管理 API 主体 | 仅持启用权限即可禁用账户/组，仅持禁用权限反而被拒 | 根据请求的目标状态分别校验对应的启用或禁用权限 |
 | `SN-2026-010` | 持有 `s3:DeleteObject` 但无 `s3:DeleteObjectVersion` 的已认证主体 | 缺少 `s3:DeleteObjectVersion` 权限仍可永久删除指定历史版本 | 带显式 `versionId` 的删除必须具备 `s3:DeleteObjectVersion` 权限 |
+{.wide .expand}
 
 ## SN-2026-006：零字节 SSE-C 密钥认证 {#sn-2026-006}
 

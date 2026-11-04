@@ -143,6 +143,7 @@ SILO 提交 [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07ceb
 | `github.com/lestrrat-go/httprc/v3` | `3.0.1` | `3.0.6` |
 | `github.com/grpc-ecosystem/grpc-gateway/v2` | `2.27.3` | `2.29.0` |
 | `go.uber.org/zap` | `1.27.1` | `1.28.0` |
+{.wide .expand}
 
 其它小型更新包括 `uax29` 2.3.1、`fastjson` 1.6.10、`secp256k1` 4.4.1 与 `goccy/go-json` 0.10.6。旧 `lestrrat-go/option` v1、`gogo/protobuf` 与陈旧的测试专用依赖退出选中依赖图。
 

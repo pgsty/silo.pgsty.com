@@ -91,6 +91,7 @@ systemctl is-active "$SILO_UNIT" # expected: inactive; nonzero exit is normal
 | Object storage | A consistent, restorable backup of the complete IAM store, including revisions, deletion records and retained parent boundaries. Use the deployment's tested full-storage snapshot/backup procedure with all required pool/set/drive mappings. | Restore to an isolated clone with the matching topology and confirm IAM loads. Copying a visible user directory or one erasure-coded drive is insufficient. |
 | etcd | A complete etcd snapshot, member/topology configuration, certificates and authentication material, plus SILO's endpoint/prefix and encryption configuration. | Check the snapshot, then restore to an isolated etcd cluster using the documented procedure for that etcd version. Do not restore a shared etcd cluster over unrelated workloads. |
 | Both | Exact binaries/images, deployment configuration, root-secret references, KMS/key recovery material and the revocation/change ledger since the backup. | Verify access to the required keys independently of the cluster being replaced. Store secret material separately from review logs. |
+{.wide .expand}
 
 For etcd, use the deployment's authenticated TLS configuration and a supported
 `etcdctl`/`etcdutl` version; see the [etcd recovery guide](https://etcd.io/docs/v3.6/op-guide/recovery/).

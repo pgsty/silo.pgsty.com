@@ -27,6 +27,7 @@ Every cluster and replication site that accepts S3 writes must be upgraded to `2
 | Self inspection and cleanup | Ownership could override an explicit policy or plugin denial; self service-account listing could skip authorization | Preserves self-service access for ordinary users (`DenyOnly`), while enforcing explicit user/group `Deny` rules, inline session policies, and external plugin denials |
 | Restricted credential delegation | A derived credential allowed the create/update action could mint a key inheriting broader parent permissions or strip a target service account's session policy | Under built-in authorization, callers constrained by an active inline session policy cannot create or update service accounts (including LDAP creation and metadata-only updates) |
 | Root-derived credentials | A non-root administrator with broad `admin:*` grants could inspect, modify, or delete root's derived service accounts | Only an authorized root credential or an unrestricted root-derived identity can manage root-owned credentials (the internal site-replication account is excluded) |
+{.wide .expand}
 
 The actor passed to IAM policy evaluation is always the authenticated access key (`cred.AccessKey`), while parent resolution (`ParentUser`) is used only for comparing ownership. Full handler contracts and benchmark measurements are recorded in [IAM Admin API Authorization Boundaries](/blog/design/iam-admin-authorization/).
 

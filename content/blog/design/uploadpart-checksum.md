@@ -106,6 +106,7 @@ Removing the upload check without populating part metadata would let `UploadPart
 | Always return the server value from normal `UploadPart` | Simplifies federation forwarding | Violates the AWS `UploadPart` response contract | Rejected |
 | Copy the AIStor implementation directly | Commercial precedent | Supports only mergeable CRCs and attaches the hasher where streams may already be compressed or encrypted | Rejected |
 | Compute and persist in one pass over logical plaintext | Full protocol compliance, no second I/O, supports both CRC and SHA | Requires an explicit plaintext checksum reader separate from the storage reader | Accepted |
+{.wide .expand}
 
 ### What Commercial AIStor Revealed {#aistor}
 

@@ -77,6 +77,7 @@ icon: fa-solid fa-server
 | 授权与安全         | 有意收紧                  | OIDC HMAC token、不安全 LDAP 失败、伪造复制元数据、对象资源对受保护桶写操作的越权、策略输入遮蔽、歧义版本 ID 以及若干畸形节点间请求均改变行为    |
 | 内嵌 UI 与 Go 依赖 | Console 与 MCLI 走兼容 import path，pkg 走自有路径 | Silo Console 与 MCLI 由 `replace` 选中，同时保留 `github.com/minio/console` / `github.com/minio/mc` 路径；Silo Pkg 以 `github.com/pgsty/silo-pkg/v3` 直接消费 |
 | 混合版本集群        | 此迁移边界不支持              | 私有 `ReadMultiple` storage-REST 操作已删除，却没有提升 storage REST v63；所有节点应作为同一构建整体升级            |
+{.wide .expand}
 
 ## 明确保留的兼容契约 {#same}
 
@@ -134,6 +135,7 @@ require github.com/pgsty/silo-pkg/v3 v3.14.1   // 不再使用 replace 安排
 | OCI 内置客户端       | 没有维护分叉契约                          | `/usr/bin/mcli` 与 `/usr/bin/mc -> mcli`                                               | 这里的 `mc` 只是客户端兼容别名，从来不是服务端别名                     |
 | 温层探针            | 临时对象内容为 `MinIO`                   | 同长度探针内容为 `Silo!`                                                                      | 只可能通过后端检查或清理失败残留观察到；协议语义不变                       |
 | 日志轮转默认名         | `minio-*.log`                     | `silo-*.log`                                                                          | 按文件名匹配的采集器需要修改                                   |
+{.wide .expand}
 
 被删除的 `/api/health/upload` 引用是一个 **出站 SUBNET URL 路径**，并不是 Silo 本地 HTTP 路由。正确的兼容性描述是“Silo 不再发起该 POST”，不能写成“删除了服务端 API”。
 
@@ -157,6 +159,7 @@ require github.com/pgsty/silo-pkg/v3 v3.14.1   // 不再使用 replace 安排
 | `MINIO_API_TRUSTED_PROXIES`                                                | 通用来源地址信任边界          | 未设置：精确保留历史 trust-any 行为 |
 | `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES` / LDAP key `sts_trusted_proxies` | LDAP STS 失败限流的来源分桶  | 不信任代理；使用 socket peer    |
 | `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`                                   | 受保护桶/对象 IAM 边界的临时回滚 | off                     |
+{.wide .expand}
 
 通知 KV 注册修复不会重命名既有环境变量。`MINIO_UPDATE`、SUBNET 与 callhome 输入仅作为被忽略/迁移兼容的输入保留，详见下一节。`SILO_OPTS` 只出现在自动生成的 inspect helper 内，不是 `MINIO_OPTS` 的通用替代品。
 
@@ -262,6 +265,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 | `s3:signatureAge`                                            | 只在已经验证的 presigned SigV4 请求中出现                                                                                                                             | 注入原始 `x-amz-signature-age` 不再产生该条件                                                              |
 | `s3:versionid`（`744a9dcd7`）                                  | 缺失就真正缺失；空白被归一；DeleteObject/MultiDelete 使用每个对象的有效版本。URL version 不能诱骗不同 XML version                                                                         | 重测基于版本的删除策略及依赖 Null 的策略                                                                         |
 | 复制元数据（`56fa63bfd`）                                           | 普通 PUT/COPY 不能注入内部复制状态/时间元数据；经认证的 replica 请求必须拥有 `ReplicateObjectAction`；multipart 与 Snowball 的合法复制流程保留                                                   | 自定义复制调用方必须走受授权的复制路径                                                                             |
+{.wide .expand}
 
 桶边界逃生开关在启动时全局生效，而且是全有或全无；它用于迁移，不是长期混合策略模式。空或无法解析的 LDAP 来源不会被放入一个共享限流桶；在能派生出可用来源前不对它限流。
 
@@ -335,6 +339,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 | 压缩         | klauspost/compress 1.18.7                                    | 显式安全/正确性升级                                                               |
 | Thrift     | 0.24.0                                                       | 修复 32 位构建                                                                |
 | systemd 库  | require 22.7，replace 为 22.6                                  | 在上游修复单调时钟回归前保留 NetBSD 编译能力                                               |
+{.wide .expand}
 
 LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_insecure`，StartTLS 仍保持启用；还修复了 nil TLS panic、StartTLS deadline 以及失败后连接关闭。证书 watcher 停止时不再泄漏；Windows 上轮询可能让 reload 最多延迟约十秒。RNG subkey 熵/reset 行为也已修正，不过服务端不会走 reset 路径。
 
@@ -358,6 +363,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 站点复制 | Object Lock 配置以独立字段复制（仍接受旧的 `Tags` 载体）；按站点统计状态；有效性探针在规则前缀下校验权限 | `3861f33cb`、`fb406fdc9`、`c9ad74673`、`5db7be4ee` |
 | 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
 | 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
+{.wide .expand}
 
 公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，Server 20260916 则要求 v3.14.1；两者都不是 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
 
@@ -372,6 +378,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 权限与持久状态 | 自助改密与创建用户使用独立权限；IAM 持久撤销和桶配置删除状态影响协调升级与恢复，通用桶配置墓碑导出默认关闭。 | [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) / [密码迁移](/zh/compatibility/password-permissions/)、[IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout) |
 | 数据与复制 | 继续修复多池副本、标签与 Object Lock 排序、删除标记恢复、SSE-C 与联邦复制；不自动重建已丢失的历史状态。 | [G07–G10](/zh/compatibility/#g07) / [复制状态检查](/zh/operations/replication/replica-metadata-audit/)、[版本说明](/zh/compatibility/versions/#source-review) |
 | HTTP 与 TLS | 请求头使用绝对读取期限；TLS 默认选择与旧代理、IdP 的互操作需要核对，正文仍使用既有滚动空闲超时。 | [O03](/zh/compatibility/#o03) / [请求头超时](/zh/blog/design/request-header-timeouts/)、[TLS/OIDC](/zh/blog/design/go127-tls-oidc-discovery/) |
+{.wide .expand}
 
 API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占位接口的实质启用](#since-20260806)，`ReadMultiple` 是[私有存储接口删除](#storage-rest)，在线更新是[保留入口但停用功能](#offline-services)。`silo healthcheck` 与 `mcli checksum verify` 是新增命令，分别调用既有健康端点、读取对象做本地审计。
 
@@ -444,6 +451,7 @@ Security 文章提供更深入的威胁模型和测试向量，但其中历史�
 | Chart 加固与审计文档                | `dfe669862`、`5f4513fd4`、`b42ee4e8a`、`8eae745ab`                                                                                                                                                                                                 | 安全的 Chart 用户默认值、门户/文档路由、维护者 ignore 规则与 advisory；只有 Chart 默认值直接改变运行时分发行为                                                                                         |
 | 到 20260804 标签的发布工程           | `9c799f42d`、`10c7670b8`、`cf7df097b`、`32863c852`、`632ade111`、`1814ae52f`、`475236c79`、`11d79fddc`、`3b8a55dee`、`ca674a696`、`4c185d5a6`、`2ca4971d9`、`e064b5555`、`aa5139369`、`021110b45`、`d88f46cce`                                                 | RPM/DEB/APK、provenance、OCI 发布 gate、固定 lint/generation、修复 S3 Select 测试竞态、广泛 CI、PID 1 信号、已发布目标交叉构建、安全 release dispatch、可复现性、删除陈旧配置、systemd 路径、真实失败 gate 与运行镜像关停断言 |
 | Silo 切换与 2026-08-06 准备态 HEAD | `15def34dc`、`77bdc4c0c`、`15ab10833`、`30749911b`、`e071bb77e`、`bd8df5166`、`6613c2a3c`、`fd2ca1c6d`、`c46b16ec6`、`c47733abc`、`f1c77d5a2`、`62717d7bf`、`6740e6978`、`b57275be3`、`05be686b8`、`a6d6d9b02`、`6bd9cf77e`、`219670d31`                         | 清理未发布 MinIO 分发残留；Silo 运行身份/离线边界；改名软件包、OCI、Helm 与迁移 guard；固定 fixture；文档/仓库切换；Console 2.1.0→2.1.1；Node 24 action；DCO/法律/文档完善；重生成 CREDITS；交付 LICENSE/NOTICE        |
+{.wide .expand}
 
 账本共 96 个唯一提交。范围内被替换的变化——例如 Console 2.0 → 2.1.0 → 2.1.1、历史 `pgsty/minio` 镜像/Chart 状态，以及更新器禁用后的下载 buffer 代码——只在留下最终兼容性影响时描述。
 

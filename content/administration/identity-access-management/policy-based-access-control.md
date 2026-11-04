@@ -936,6 +936,7 @@ Silo constructs the condition-value map from semantic request sources instead of
 | `s3:RequestObjectTag/<key>` and `s3:RequestObjectTagKeys` | The `X-Amz-Tagging` Header by default; an explicitly supplied effective tag set on tag-aware handlers | `PutObject` and `CreateMultipartUpload` accept the Header or their compatible query fallback, with Header presence winning. `PutObjectTagging` uses the parsed XML request body. Query tagging is ignored on unrelated operations. The historical Header fallback remains for compatibility on actions whose policy map admits these keys, so outside the three handlers above a request-tag condition does not by itself prove that the operation consumes or stores those tags. |
 | `s3:ExistingObjectTag/<key>` | Tags loaded from the stored target object | Request headers and query parameters never provide existing-object tags. The value is available only on API paths that load those tags before authorization, including object GET/HEAD and object-tagging handlers. |
 | Object-lock condition keys | Object-lock request headers or retention values calculated by the handler | Query-string fields with the same names are ignored. |
+{.wide .expand}
 
 If an API path does not load or calculate a listed source, that condition key is absent. Its result then follows the semantics of the policy operator in use; do not assume that merely listing a key for an action causes the server to synthesize a value.
 
@@ -1584,6 +1585,7 @@ Each variable corresponds to a claim returned as part of the authenticated userâ
 | `jwt:address` | Returns the `address` claim for the user. |
 | `jwt:scope` | Returns the `scope` claim for the user. |
 | `jwt:client_id` | Returns the `client_id` claim for the user. |
+{.wide .expand}
 
 See the [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) document for more information on these scopes. Your OIDC provider of choice may have more specific documentation.
 

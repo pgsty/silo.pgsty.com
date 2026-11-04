@@ -28,6 +28,7 @@ determine which permission is checked.
 | --- | --- | --- |
 | Change the caller's own password | `admin:ChangeMyPassword` | Allowed for an internal user with an attached policy unless explicitly denied. |
 | Create another user or reset another user's password | `admin:CreateUser` | Requires an explicit Allow; an explicit Deny wins. |
+{.wide .expand}
 
 The Console's Change Password button uses `admin:ChangeMyPassword`.
 `admin:CreateUser` continues to control user administration. The password change
@@ -55,6 +56,7 @@ statement conditions, and no other applicable grants or denies:
 | `Allow admin:CreateUser` | Allowed | Allowed | Allowed |
 | `Allow admin:CreateUser` plus `Deny admin:ChangeMyPassword` | Allowed | **Denied** | Allowed |
 | Deny both actions, or `Deny admin:*` | Denied | Denied | Denied |
+{.wide .expand}
 
 Wildcard denies that match `admin:CreateUser` but do not match
 `admin:ChangeMyPassword`, such as `admin:Create*`, have the same password

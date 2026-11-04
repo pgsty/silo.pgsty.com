@@ -27,6 +27,7 @@ url: "/zh/blog/design/replication-reliability/"
 | #153：删除标记 purge | 单对象 DELETE 将永久删除误判为删除标记复制，导致远端已删除而源端 purge 状态长期停留在 `PENDING` | 按 purge 状态分类，与批量删除、scanner/heal、resync 保持一致 |
 | #152：MRF 丢弃不可见 | 队列已设容量上限，但内部丢弃计数未输出到管理接口与监控指标；对象与删除的 worker 路由参数顺序不一致 | 暴露现有丢弃计数、在实际丢弃点输出去重告警、统一 worker 路由键 |
 | #137：resync 取消不可靠 | 单个共享 token 无法取消并发的多桶任务；阻塞阶段不响应取消；旧任务收尾可能覆盖新状态 | 为每次运行分配专属 context，按 resync ID 取消，并串行化注册、收尾与状态写回 |
+{.wide .expand}
 
 这一系列此前已分别闭合另外两项复制不变量：
 

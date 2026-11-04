@@ -124,6 +124,7 @@ If a policy denied access to a specific version via `"StringEquals": {"s3:versio
 | `GetObject` / `DeleteObject` (`?versionId=v1%20`) | URL query `versionId` | Policy sees `"v1 "`, handler uses `"v1"` | Both policy and handler see `"v1"` |
 | `CopyObject` (`x-amz-copy-source: /b/k?versionId=v1`) | `x-amz-copy-source` query | Untrimmed `vid` | Trimmed `vid` |
 | `DeleteObjects` (`POST /?delete` with `<VersionId>`) | Per-entry `ReqInfo.VersionID` | Ignored XML `<VersionId>`; read URL query | Rebound per XML entry; URL decoy ignored |
+{.wide .expand}
 
 In companion commit `2f55347f7` ([`pgsty/silo#53`](https://github.com/pgsty/silo/issues/53)), we also hardened `getConditionValues` across all other request condition keys:
 - **Reserved internal keys**: Client query parameters and HTTP headers can no longer overwrite server-derived condition keys (`username`, `userid`, `principaltype`, `authtype`, `signatureversion`, `tlsVersion`, `cipherSuite`).

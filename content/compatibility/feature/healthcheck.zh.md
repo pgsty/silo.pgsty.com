@@ -99,6 +99,7 @@ FLAGS：
 | `/minio/health/ready` | 同 `live`，**外加** KMS 能生成密钥、etcd 能应答读取——各自仅在配置了的情况下 | KMS/etcd 故障；队列饱和 | **没有 KMS 与 etcd 时，`ready` 与 `live` 是同一条代码路径** |
 | `/minio/health/cluster` | 对象层、桶元数据、IAM 均已初始化，**且每一个纠删集** 都有写 quorum | 503 附带 quorum 诊断头；带 `?maintenance=true` 时失败为 **412** | 每次评估失败都会在服务端写一条日志——不要高频轮询它 |
 | `/minio/health/cluster/read` | 上一行的读 quorum 版本 | 同上 | |
+{.wide .expand}
 
 值得点破的推论：`live` 和 `ready` 是 *存活* 级别的信号——它们不能告诉你节点能否服务对象，只有 `cluster` 这一对能。这正是 cluster 端点必须远离单容器探针的原因（尺度错位、日志噪音、级联重启），也正是它适合回答运维问题的原因——"我现在可以把这个节点下线吗？"（`--maintenance`：200 表示安全，412 表示会失去高可用）。
 
@@ -164,6 +165,7 @@ Silo 的 Helm chart 目前 **一个探针都没有**（上游的 chart 也一样
 | **P2** | `Dockerfile.distroless` + CI 构建与健康门禁 + 以试点身份发布 `-distroless` 标签 | `pgsty/silo` |
 | **P3** | Helm chart：补三探针；刷新过期的默认镜像标签 | `pgsty/silo` |
 | **P4** | 文档：命令参考、探针指南、Distroless 迁移说明；试点反馈 → 决定是否将 Distroless 晋升为推荐默认 | 本站 |
+{.wide .expand}
 
 贯穿所有阶段的兼容性承诺：经典镜像的内容物与示例不变；`mc ready local` 在今天能用的地方继续能用；健康 HTTP API 不动（子命令纯属增量）；`/minio/health/*` 路径与本分支的其他所有 `/minio/*` 路由一样，作为兼容性表面继续冻结。
 

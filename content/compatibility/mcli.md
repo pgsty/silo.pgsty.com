@@ -117,6 +117,7 @@ Everything that reached MinIO SUBNET is disabled at build time. Affected command
 | `mcli support upload`                        | notice, exit `1` | share files through your own channels                          |
 | `mcli support proxy set`                     | notice, exit `1` | `proxy remove` still clears a legacy setting                   |
 | `mcli support callhome enable`               | notice, exit `1` | `disable` / `status` still work                                |
+{.wide .expand}
 
 The diagnostics themselves stay: `mcli support diag` / `perf` / `profile` / `inspect` always run in local (airgap) mode — results are written to local files, nothing is uploaded, and SUBNET registration is no longer a prerequisite. Two related hardening changes: `inspect` no longer falls back to encrypting output with an embedded MinIO public key (your archives stay decryptable by you), and since 20260804 `--debug` output redacts SUBNET credentials — if you ever shared debug logs from older builds, rotate the keys in them. `mcli license info` and `unregister` work locally.
 

@@ -100,6 +100,7 @@ func (c *Config) supportsCurve(version uint16, x CurveID) bool {
 | 20260916，Go 1.27.1 —— 已修复 | 1509 B | 有（默认） | 有 | `Silo (…)` |
 | 20260804 + `tlsmlkem=0` | 275 B | 无 | 无 | `MinIO (…)` |
 | 20260903 + `tlsmlkem=0` | 1509 B | **仍然有** | 有 | `Silo (…)` |
+{.wide .expand}
 
 有两点容易被忽略，但至关重要：
 
@@ -119,6 +120,7 @@ func (c *Config) supportsCurve(version uint16, x CurveID) bool {
 | S3 分层 / 云后端 | 转冷失败，远端对象读不回 | 容易漏 |
 | etcd、节点间 grid | 集群内部流量，一般不经过这类设备 | 低 |
 | 入站 S3/Console 监听器 | 客户端连不上；由**对端**的握手决定 | 取决于客户端 |
+{.wide .expand}
 
 只有身份路径会阻塞启动，因此它最先被报告。其余几条会安静降级，所以一个部署完全可能已经受影响而无人提单。
 
@@ -157,6 +159,7 @@ func (c *Config) supportsCurve(version uint16, x CurveID) bool {
 | A | 入口拒绝 ML-KEM，且运维在升级前就设过 `tlsmlkem=0` | **是**——修复恢复的正是这条 |
 | B | 入口拒绝 ML-DSA 签名编号 | 否。只有 TLS 1.2 上限能抑制该 offer，而产品没有暴露这个设置 |
 | C | HTTP 层规则在握手成功之后拒绝变更后的 `Silo` User-Agent | 否，任何 TLS 改动都与之无关 |
+{.wide .expand}
 
 还有第四项观察解释了 `curl` 对照为什么具有误导性：discovery transport 禁用 HTTP/2 且不发 ALPN，而 `curl` 协商了 h2。这个差异在正常版本和故障版本里都存在。
 
@@ -190,6 +193,7 @@ CVE-2020-1967 当年正是通过畸形的 `signature_algorithms_cert` 触发的�
 | 绕开它：把 `MINIO_IDENTITY_OPENID_CONFIG_URL` 指向不经过该设备的端点，或使用 split-horizon DNS。discovery 文档中的 `issuer` 必须保持不变 | A、B、C | 证书主机名与 issuer 一致性必须成立 |
 | 用 sidecar（stunnel、Envoy）自行终止 TLS 并连接 IdP | A、B、C | 多一个组件及其信任链 |
 | 走 `HTTPS_PROXY` | 无 | CONNECT 隧道原样转发同一个 ClientHello；只有自行终止 TLS 的代理才有意义 |
+{.wide .expand}
 
 **部署侧——今天就能用。**
 
@@ -200,6 +204,7 @@ CVE-2020-1967 当年正是通过畸形的 `signature_algorithms_cert` 触发的�
 | `GODEBUG=fips140=on` | A 与 B | **不推荐。** FIPS 白名单里没有 ML-KEM 与 ML-DSA，但它同时替换密码套件与曲线，并对整个进程排除 Ed25519/X25519 |
 | 停留在 20260804 | A、B、C | 放弃后续全部安全修复；仅作应急 |
 | 在入口放行 `Silo` User-Agent | C | 一条规则改动 |
+{.wide .expand}
 
 **目前无法通过 GODEBUG 关掉 ML-DSA。** Go 没有为签名算法提供 GODEBUG——`internal/godebugs/table.go` 中 `crypto/tls` 的条目只有 `fips140ems`、`tlsmaxrsasize`、`tlsmlkem`、`tlssecpmlkem`、`tlssha1`——`tls.Config` 也没有签名算法字段。唯一的杠杆是版本门：这些编号只在 TLS 1.3 下定义，把 `MaxVersion` 压到 TLS 1.2 即可抑制。
 

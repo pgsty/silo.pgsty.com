@@ -22,6 +22,7 @@ url: "/zh/blog/design/copyobject-ssec-checksum-response/"
 | --- | --- | --- |
 | 源对象 | `X-Amz-Copy-Source-Server-Side-Encryption-Customer-*` | 解密源对象及其已存储的元数据 |
 | 目标对象 | `X-Amz-Server-Side-Encryption-Customer-*` | 加密并在提交后解释目标对象及其元数据 |
+{.wide .expand}
 
 SILO 在写入阶段能够使用目标密钥正确加密目标对象并密封其校验和元数据。但在目标对象提交完成后，`CopyObjectResult` XML 生成器与通用的 PUT 成功响应头辅助函数都直接收到了完整的原始 `CopyObject` 请求头。由于校验和元数据解密函数 `decryptChecksums` 在检测到 `X-Amz-Copy-Source-Server-Side-Encryption-Customer-*` 请求头存在时会优先使用该请求头——这一优先级在读取源对象阶段是完全正确的——导致它在解释已提交的目标对象元数据时误用了源密钥。
 

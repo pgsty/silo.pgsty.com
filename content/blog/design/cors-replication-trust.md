@@ -88,6 +88,7 @@ After authenticating the caller, the handler derives two distinct trust flags:
 | --- | --- | --- |
 | `trusted` | Authenticated non-anonymous principal + exact marker + `s3:ReplicateObject` (or `s3:ReplicateDelete`) on the target resource | Source ETag/MTime and timestamps; multipart actual size and encrypted checksum transfer; notification and re-replication suppression; delete version/pool pinning |
 | `replicaTrusted` | `trusted` + raw request status `REPLICA` (or a multipart upload whose stored initiation status is `REPLICA`) | `REPLICA` status persistence; replication SSE sealed-key import; SSE-C raw ciphertext (`NoDecryption`) path; replica Object Lock exceptions |
+{.wide .expand}
 
 Separating `trusted` from `replicaTrusted` is required by the wire protocol because legitimate multipart part uploads, multipart completions, and batch replication writes send `X-Minio-Source-Replication-Request: true` without repeating `X-Amz-Replication-Status: REPLICA` on every request.
 
@@ -140,6 +141,7 @@ The Object Lock parser no longer inspects `X-Minio-Source-Replication-Request` d
 | Replicated `DeleteObject` | Yes | Yes | `replicaTrusted` (requires `s3:ReplicateDelete` plus `s3:DeleteObject`, with no explicit deny on `s3:DeleteObjectVersion`) |
 | Batch replication `PUT` / `Complete` | Yes | No | `trusted` (target credentials must hold `s3:ReplicateObject`) |
 | Proxy / readiness / validity probes | Probe headers | No | Probe headers are preserved; validity probes verify replication permissions under the rule prefix (`c9ad74673`, `5db7be4ee`) |
+{.wide .expand}
 
 ## CORS Resident-Only State Machine {#cors-state-machine}
 
@@ -153,6 +155,7 @@ The outer CORS middleware calls a dedicated resident-only accessor that acquires
 | Non-resident while initial startup load is still running | Fail closed | None |
 | Non-resident after startup: known disk bucket whose metadata failed to load | Fail closed | None |
 | Non-resident after startup: nonexistent, reserved, invalid, or `.minio.sys` name | Use global CORS fallback | None |
+{.wide .expand}
 
 Both startup-in-progress and known load-failure states fail closed: because a presigned URL carries its own credentials in the query string, the bucket's custom CORS policy is the only browser origin boundary protecting it, and falling back to the permissive global CORS policy during a metadata load failure would expose the presigned URL to arbitrary origins.
 

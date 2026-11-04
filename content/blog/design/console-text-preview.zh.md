@@ -165,6 +165,7 @@ iframe / innerHTML / DOMParser / XML parser / 可执行文档
 | `page.txt` + `text/html` | `text` | 扩展名准入；HTML 源码仅作为惰性纯文本展示 |
 | `notes.md` + `text/plain` | `text` | 精确 MIME 准入原始纯文本 |
 | `image.svg` + `image/svg+xml` | `image` | 走既有图片预览路径 |
+{.wide .expand}
 
 ## 资源上限契约 {#resource-contract}
 

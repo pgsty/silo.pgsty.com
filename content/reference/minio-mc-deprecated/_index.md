@@ -30,6 +30,7 @@ The following table lists the commands deprecated by MinIO. The table includes:
 | `mc quota info` | None | mc RELEASE.2024-07-31T15-58-33Z |
 | `mc quota set` | None | mc RELEASE.2024-07-31T15-58-33Z |
 | `mc replicate diff` | [`mc replicate backlog`](/reference/minio-mc/mc-replicate-backlog/#command-mc.replicate.backlog) | mc RELEASE.2023-07-18T21-05-38Z |
+{.wide .expand}
 
 ## Table of Deprecated Admin Commands {#table-of-deprecated-admin-commands}
 
@@ -69,3 +70,4 @@ The following table lists the commands deprecated by MinIO. The table includes:
 | `mc admin tier edit` | [`mc ilm tier update`](/reference/minio-mc/mc-ilm-tier-update/#command-mc.ilm.tier.update) | mc RELEASE.2022-12-24T15-21-38Z |
 | `mc admin tier ls` | [`mc ilm tier ls`](/reference/minio-mc/mc-ilm-tier-ls/#command-mc.ilm.tier.ls) | mc RELEASE.2022-12-24T15-21-38Z |
 | `mc admin top` | [`mc support top`](/reference/minio-mc/mc-support-top/#command-mc.support.top) | mc RELEASE.2022-08-11T00-30-48Z |
+{.wide .expand}

@@ -66,6 +66,7 @@ url: "/zh/blog/design/replication-full-object-checksum/"
 | [`c8590413f`](https://github.com/pgsty/silo/commit/c8590413fd321a315f3779cd9b2a6f1cb72064da)（#31） | 允许 `FULL_OBJECT` 完成请求省略逐分片校验和并完成整对象校验 | 前提是接收端在初始化时已知该上传为 `FULL_OBJECT` |
 | [`7e079ff05`](https://github.com/pgsty/silo/commit/7e079ff05c842afabb73c4572885cfb74604df17) | 校验完成请求显式携带的类型是否与初始化类型一致 | 复制发送端在初始化和完成两个阶段均未发送类型 |
 | [CompleteMultipartUpload 响应补齐 ChecksumType](/zh/blog/design/complete-multipart-checksum-type/) | 向客户端 SDK 的完成响应返回 `ChecksumType` | 仅作用于上传完成后的响应编码，不影响复制发送端构造的出站请求头 |
+{.wide .expand}
 
 ## 最小修复实现 {#implementation}
 

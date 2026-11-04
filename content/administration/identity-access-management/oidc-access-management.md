@@ -114,6 +114,7 @@ Each variable corresponds to a claim returned as part of the authenticated userâ
 | `jwt:address` | Returns the `address` claim for the user. |
 | `jwt:scope` | Returns the `scope` claim for the user. |
 | `jwt:client_id` | Returns the `client_id` claim for the user. |
+{.wide .expand}
 
 See the [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) document for more information on these scopes. Your OIDC provider of choice may have more specific documentation.
 

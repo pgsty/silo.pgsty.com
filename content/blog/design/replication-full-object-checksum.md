@@ -52,6 +52,7 @@ The failure chain in the [replication sender](https://github.com/pgsty/silo/blob
 | Target persisted upload type | `COMPOSITE` | `FULL_OBJECT` |
 | Completion checksum | Source whole-object CRC | Source whole-object CRC + explicit `FULL_OBJECT` type |
 | Target validation result | `400 BadDigest` | Valid completion |
+{.wide .expand}
 
 The core invariant is that **replication must preserve the checksum algorithm, digest value, and type interpretation across both upload initiation and completion** so the target validates the transferred data under the same contract as the source.
 
@@ -66,6 +67,7 @@ Three earlier SILO checksum fixes addressed separate parts of the lifecycle:
 | [`c8590413f`](https://github.com/pgsty/silo/commit/c8590413fd321a315f3779cd9b2a6f1cb72064da) (#31) | Allowed `FULL_OBJECT` completion requests to omit per-part checksums while validating the whole-object CRC | Requires the target upload to be initialized as `FULL_OBJECT` first |
 | [`7e079ff05`](https://github.com/pgsty/silo/commit/7e079ff05c842afabb73c4572885cfb74604df17) | Verified that an explicitly supplied completion checksum type matches the type persisted at initiation | The replication sender omitted the type at both initiation and completion |
 | [CompleteMultipartUpload ChecksumType response fix](/blog/design/complete-multipart-checksum-type/) | Returned `ChecksumType` in `CompleteMultipartUploadResult` XML to client SDKs | Governs client response serialization after completion, not outgoing replication headers |
+{.wide .expand}
 
 ## The Minimal Fix {#implementation}
 

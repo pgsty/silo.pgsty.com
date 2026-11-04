@@ -133,6 +133,7 @@ The following table lists the outcome of varying erasure code parity levels on a
 | `EC: 4` (Default) | 12 Tebibytes | 0.750 | 12 | 12 |
 | `EC: 6` | 10 Tebibytes | 0.625 | 10 | 10 |
 | `EC: 8` | 8 Tebibytes | 0.500 | 8 | 9 |
+{.wide .expand}
 
 <a id="minio-ec-bitrot"></a>
 

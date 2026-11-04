@@ -46,6 +46,7 @@ The migration strategy is "clear external identity, restrained internal compatib
 | Binary assets    | `console-<os>-<arch>`             | `silo-console-<os>-<arch>`                  |
 | Checksums        | `console_<version>_checksums.txt` | `silo-console_<version>_checksums.txt`      |
 | Website and docs | upstream / previous maintainer    | `silo.pgsty.com` and `silo.pgsty.com/docs/` |
+{.wide .expand}
 
 For container deployments, use [`pgsty/silo-console` on Docker Hub](https://hub.docker.com/r/pgsty/silo-console). See the [Console v2.4.1 release notes](/blog/release/console-2.4.1/#delivery) for the current version and pull command.
 
@@ -65,6 +66,7 @@ The following names retain `minio` or `console` as part of interface, protocol, 
 | Development build       | `make console` still produces `./console`   | keeps developer workflows working           |
 | Package systemd unit    | `minio-console.service` retained            | avoids duplicate services on upgrade        |
 | systemd user and config | `console-user` and `/etc/default/console`   | avoids unnecessary account/config migration |
+{.wide .expand}
 
 Upgrade scripts therefore must not run repository-wide `minio → silo` or `console → silo-console` replacements. Migrating these compatibility interfaces in the future will require aliases, deprecation windows, and an explicit dual-read strategy.
 
@@ -112,6 +114,7 @@ Release binaries (all frontend assets included, stripped) weigh roughly 35–40M
 | `google.golang.org/grpc`           | v1.82.1       | GO-2026-6061                                                 |
 | `github.com/prometheus/prometheus` | v0.311.3      | GO-2026-5710 / -5662 / -5381 / -5264 (incl. remote-read DoS) |
 | `github.com/klauspost/compress`    | v1.18.7       | GO-2026-5841                                                 |
+{.wide .expand}
 
 The single remaining advisory sits in `golang.org/x/crypto`, has no upstream fix yet, and is unreachable from this codebase; it is tracked as a known item.
 

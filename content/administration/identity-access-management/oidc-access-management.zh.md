@@ -114,6 +114,7 @@ MinIO 使用 OIDC 认证流程返回的 JWT token，识别要分配给已认证�
 | `jwt:address` | 返回用户的 `address` claim。 |
 | `jwt:scope` | 返回用户的 `scope` claim。 |
 | `jwt:client_id` | 返回用户的 `client_id` claim。 |
+{.wide .expand}
 
 关于这些 scope 的更多信息，请参阅 [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) 文档。 你所选的 OIDC 提供方也可能有更具体的补充文档。
 

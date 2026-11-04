@@ -23,6 +23,7 @@ Embedded Console uses `MINIO_API_TRUSTED_PROXIES`; `CONSOLE_TRUSTED_PROXIES` rem
 | IP/CIDR list | Loopback plus listed peers | Explicit list entries only |
 | `none` / `off` | None | None |
 | Invalid or unreadable | Startup error | None |
+{.wide .expand}
 
 Separate list entries with commas, semicolons or whitespace. Specify the actual peer addresses of proxies on other hosts or containers. Local proxies need no setting, but must sanitize forwarded source headers: this behavior trusts local processes. A loopback address inside a header does not automatically become a trusted hop. Standalone Console still requires explicit proxy trust.
 

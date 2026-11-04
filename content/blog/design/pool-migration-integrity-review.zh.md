@@ -21,6 +21,7 @@ url: "/zh/blog/design/pool-migration-integrity-review/"
 | [#261](https://github.com/pgsty/silo/issues/261) | 成立。可读的混合 EC 对象可能从迁移列表消失，旧池删除后丢失。 | 窄范围修复已通过维护者 PR [#267](https://github.com/pgsty/silo/pull/267) 合入；[#262](https://github.com/pgsty/silo/pull/262) 已被取代。 | 已由 #267 合入，issue 已完成关闭。 |
 | [#263](https://github.com/pgsty/silo/issues/263) | 成立。内部 tier 清理记录被生命周期、列表和迁移路径当成真实版本。 | [#264](https://github.com/pgsty/silo/pull/264) 处理了完整边界，同时保留 healing 所需的可见性。 | 已合入，issue 已完成关闭。 |
 | [#265](https://github.com/pgsty/silo/issues/265) | 成立。ILM 与迁移对“版本是否还存在、谁负责删除”的判断不一致。 | [#266](https://github.com/pgsty/silo/pull/266) 修复了贡献者报告的本地顺序问题；维护者后续 PR [#276](https://github.com/pgsty/silo/pull/276) 补齐复制、tier 清理、生命周期代数和整对象完成合同。 | 为承认贡献先合入 #266，再立即合入维护者的完整性修复 #276。 |
+{.wide .expand}
 
 实际顺序是：先合入 mixed-EC 修复，再合并 #264，合并 #266 以保留贡献，然后立即合入 #276。前三步和维护者后续修复现在都已进入 main；#276 补齐了原始 PR 无法单独安全承担的外部清理合同。
 
@@ -65,6 +66,7 @@ url: "/zh/blog/design/pool-migration-integrity-review/"
 | free version 在清理前被生命周期或普通列表看到 | 可能错误判断 noncurrent、隐藏 key 或显示误导性的 delete marker。 | #264 会修正后续扫描；已经误删的真实版本需要备份或其他权威副本。 |
 | 旧版 decommission/rebalance 搬运了 free version | 可能生成普通 delete marker，并丢失远端引用。 | 无法自动识别该 marker；需要比较源端副本、复制目标、备份和审计记录。 |
 | 旧版 decommission/rebalance 扫描到混合 EC 元数据 | 可读对象可能被漏掉；旧池删除后对象可能丢失。 | 源池仍在时用修复版重新迁移并执行 heal；源池已删除时只能从副本或备份恢复。 |
+{.wide .expand}
 
 应该立即发布操作公告。公告应告诉使用受影响版本的操作员暂停 pool decommission 和 rebalance，尤其是在磁盘降级、tier 清理未完成或生命周期规则生效时；保留旧池和备份；升级到包含相关修复的版本；迁移后核对 GET、ListObjectsV2、ListObjectVersions 和对象数量。公告要明确这是复合条件触发的潜在问题，并单独说明 rebalance 对 transitioned version 的限制。除非项目把存储完整性问题统一归入安全漏洞，否则不需要 CVE 风格的安全标签；高优先级存储完整性 release note 和运维公告已经足够。
 

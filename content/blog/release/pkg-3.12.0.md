@@ -143,6 +143,7 @@ Key selected versions change as follows:
 | `github.com/lestrrat-go/httprc/v3` | `3.0.1` | `3.0.6` |
 | `github.com/grpc-ecosystem/grpc-gateway/v2` | `2.27.3` | `2.29.0` |
 | `go.uber.org/zap` | `1.27.1` | `1.28.0` |
+{.wide .expand}
 
 Smaller selected updates include `uax29` 2.3.1, `fastjson` 1.6.10, `secp256k1` 4.4.1, and `goccy/go-json` 0.10.6. The old `lestrrat-go/option` v1, `gogo/protobuf`, and stale test-only requirements leave the selected graph.
 

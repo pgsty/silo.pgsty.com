@@ -51,6 +51,7 @@ $$\text{entries} = N \times (H + U)$$
 | 引入可选 `strict` 模式（`#198`） | `2026-09-16` / [`4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074cc) | 在 `MINIO_API_MULTIPART_LISTING=strict` 后提供磁盘扫描列表，默认保持 `legacy` | 提供了安全的按需启用边界，但最初缺少目录遍历硬上限 |
 | 安全加固（`SN-2026-009`..`012`） | `2026-09-16` / [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d) | 增加 `checkUploadID`、`maxMultipartWalkEntries = 100000`、`503 SlowDown` 映射及 `readQuorum` 过滤 | 为磁盘扫描补齐了必要的 DoS 保护，但按全部 $N$ 块盘的原始目录项总数计费 |
 | 无条件统一为磁盘扫描（`#243`） | `2026-10-17` / [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe6) | 移除 `legacy` 分支，将所有公共 `ListMultipartUploads` 强制路由到磁盘扫描 | **步子迈得过大**：仅凭 4 盘单键基准测试就将无索引磁盘扫描设为必经路径，在 16 盘纠删集上于 3,126 个上传处触发 `503 SlowDown` |
+{.wide .expand}
 
 ### 部分回滚方案权衡对比
 
@@ -61,6 +62,7 @@ $$\text{entries} = N \times (H + U)$$
 | 构建持久化按桶分片索引 | 无需全盘扫描 `sha256(bucket/object)` 即可支持完整 S3 列表 | 开销仅与匹配前缀的上传数成正比 | 需要全新的分布式元数据索引、自愈协议与崩溃恢复契约 | **延后**（需独立立项设计索引） |
 | 对 `#198`、`143f6970d` 与 `#243` 执行完整 `git revert` | 恢复 MinIO 兼容列表行为 | 无 `100,000` 目录项悬崖 | 会连带丢弃 `checkUploadID` 路径穿越防护、Abort 缓存/节点通知清理以及 `xl.meta` 身份元数据 | **淘汰** |
 | **外科手术式部分回滚（`4733e1423` + `0f9199e0c`）** | 恢复 MinIO 兼容公共列表（空前缀走缓存、非空前缀走精确键查盘） | 消除跨桶 `100,000` 目录项悬崖；精确键查盘每块盘仅访问 `1` 个哈希目录 | 完整保留 `xl.meta` 身份字段、`checkUploadID`、Abort 清理与空哈希父目录回收 | **采纳** |
+{.wide .expand}
 
 ### 回滚内容与保留的修复项
 
@@ -87,6 +89,7 @@ $$\text{entries} = N \times (H + U)$$
 | `16_drives_3126_distinct_keys/empty_prefix_cached` | **`503 SlowDown`**（100,032 项 > 100,000 上限） | `200 OK`（从内存缓存返回 1,000 条上传） | `0.36 ms` | `90,208 B` / `14` allocs |
 | `16_drives_3126_distinct_keys/exact_key_after_cache_clear` | **`503 SlowDown`**（遍历全部 3,126 个哈希目录） | `200 OK`（清空缓存后从磁盘返回 1 条上传） | `0.78 ms` | `30,024 B` / `389` allocs |
 | `16_drives_10000_uploads_one_key/exact_key_lookup` | **`503 SlowDown`**（单键在 6,250 个上传处超限） | `200 OK`（从磁盘返回 1,000 条上传） | `383.85 ms` | `13,721,672 B` / `236,704` allocs |
+{.wide .expand}
 
 ### 关联文档记录 {#related-records}
 
@@ -121,6 +124,7 @@ $$\text{entries} = N \times (H + U)$$
 | `GET /photos?uploads`（服务进程重启后） | 返回空列表（重启清空了 `multipartUploadsCache`） | 仍能从 `.minio.sys/multipart` 返回未完成的活跃上传 |
 | `GET /photos?uploads&prefix=2026/`（目录前缀） | 除非存在字面名为 `2026/` 的对象（`sha256("photos/2026/")`），否则返回空列表 | 返回对象键以 `2026/` 开头的所有活跃上传 |
 | `GET /photos?uploads&prefix=2026/trip.mov`（精确对象键） | 直接查磁盘 `.minio.sys/multipart/<sha256("photos/2026/trip.mov")>`（跨重启可见） | 返回对象键以 `2026/trip.mov` 开头的活跃上传 |
+{.wide .expand}
 
 Issue `#198`（`2026-09-16`）与 `#213` 最初通过 `MINIO_API_MULTIPART_LISTING=legacy|strict` 同时保留两种模式，避免升级前遗留的旧上传静默不可见。PR `#243`（`2026-10-17`）在补充惰性回填逻辑后，尝试收敛这一配置分叉。
 
@@ -134,6 +138,7 @@ Issue `#198`（`2026-09-16`）与 `#213` 最初通过 `MINIO_API_MULTIPART_LISTI
 | 4. 每个上传附加旁路 JSON 文件 | 支持 | 支持 | 每次创建/中止多一次文件读写 | 淘汰：元数据文件 I/O 翻倍 |
 | 5. 按桶维护磁盘分片索引树 | 支持 | 支持（仅与匹配前缀成正比） | 需配套分布式索引自愈与清理协议 | 延后：大规模纠删集唯一可行的长期路径，但需独立设计崩溃恢复与自愈 |
 | 6. 外部 KV / SQLite 索引 | 支持 | 支持 | 在纠删码体系外引入外部状态 | 淘汰：违背纠删集自包含架构原则 |
+{.wide .expand}
 
 ### 磁盘存储布局与 `xl.meta` 身份字段 {#decision-storage}
 
@@ -174,6 +179,7 @@ Issue `#198`（`2026-09-16`）与 `#213` 最初通过 `MINIO_API_MULTIPART_LISTI
 | 4 盘测试夹具（`4ed86dfe6` 上的 `BenchmarkMultipartListingCapacity`） | 活跃上传数 | 耗时 | 内存分配量 | 分配次数 |
 | :--- | ---: | ---: | ---: | ---: |
 | 单对象键（$H = 1, U = 10{,}000, N = 4$） | `10,000` | `101.6 ms` | `3.58 MB` | `61,210` |
+{.wide .expand}
 
 这一 4 盘单键基准测试掩盖了次日在 16 盘纠删集上暴露的两个乘数因子：$N = 16$ 块磁盘（$4\times$ 倍率）与不同对象键 $H = U$（目录项 $2\times$ 倍率、`ListDir` 次数 $U\times$ 倍率），两者叠加使 `3,126` 个上传即突破 `maxMultipartWalkEntries = 100000`。
 
@@ -284,6 +290,7 @@ Issue `#198` 报告：带目录前缀（如 `prefix=dir/`）调用 `ListMultipar
 | S3 HTTP API（`ListMultipartUploadsHandler`） | `prefix` 是对象键前缀；`delimiter` 折叠公共前缀；游标在有序键集合上分页 | 要求底层按桶提供有序的 `(Key, Initiated, UploadID)` 候选集 |
 | 磁盘布局（`.minio.sys/multipart/<sha256(bucket/object)>`） | 调用方总是提供精确的 `bucket` 与 `object`（如 `PutObjectPart`、`Complete`、`Abort`） | 精确键查找为 $O(1)$，但既无按桶分区，也无字典序索引 |
 | 内存缓存（`multipartUploadsCache`） | 仅跟踪本次进程启动以来观察到的分片上传 | 空 `prefix` 按桶列出速度快，但进程重启即清空 |
+{.wide .expand}
 
 ### 运维与兼容性影响 {#impact}
 

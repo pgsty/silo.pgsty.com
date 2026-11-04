@@ -133,6 +133,7 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 | `EC: 4` (默认) | 12 Tebibytes | 0.750 | 12 | 12 |
 | `EC: 6` | 10 Tebibytes | 0.625 | 10 | 10 |
 | `EC: 8` | 8 Tebibytes | 0.500 | 8 | 9 |
+{.wide .expand}
 
 <a id="id5" data-td-print-local></a>
 

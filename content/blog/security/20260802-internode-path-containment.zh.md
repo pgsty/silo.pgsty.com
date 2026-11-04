@@ -34,6 +34,7 @@ url: "/zh/blog/security/internode-path-containment/"
 | Storage-REST HTTP **msgpack 请求体** | 4 | 否；`r.Form` 从不读取 msgpack 请求体 |
 | **Storage Grid RPC**（`/minio/grid/v1`） | 18 | 否；完成一次 WebSocket 升级后，后续帧不再进入 HTTP 中间件链 |
 | **Peer-S3 Grid RPC** | 5 | 否；不仅绕过 HTTP 中间件，还绕过 `getStorage()` 直达底层磁盘 |
+{.wide .expand}
 
 第一行纠正了此前的误判：只在 handler 函数体内部 grep 校验函数的排查方式，忽略了 9 个 query 参数接口其实已被全局 HTTP 中间件（`url.ParseQuery(RawQuery)` 填充 `r.Form`）保护。而第四行（`Peer-S3 Grid RPC`）则说明：任何只修补 `storage-rest-server.go` 的方案都碰不到直接操作底层磁盘的 `DeleteBucket` 等跨节点桶级 RPC。
 
@@ -64,6 +65,7 @@ url: "/zh/blog/security/internode-path-containment/"
 | `AppendFile` 声明 `Content-Length: 64 GiB` | Storage-REST HTTP | **空请求体直接触发 68,719,574,840 字节内存分配** |
 | `DeleteVersions` 声明 1 亿条元素 | Storage-REST 请求体 | 10 字节 msgpack 头部 **触发 10.4 GB 切片预分配** |
 | 分片元数据 `Size = -2` | Storage Grid / `AddVersion` | **被截断的损坏分片被报告为健康**，后台自愈静默跳过修复 |
+{.wide .expand}
 
 其中两条此前从未被发现的向量尤其关键：
 
@@ -80,6 +82,7 @@ url: "/zh/blog/security/internode-path-containment/"
 | :-- | :-- | :-- |
 | **卷名轴（Volume axis）** | `getVolDir` + `NSScanner` 显式守卫 | 全部 `xlStorage` 调用方，**含 Peer-S3 Grid RPC** |
 | **路径轴（Path axis）** | `getStorage()` 装饰器（`guardPaths`、`isVolumeRootAlias`） | 31 个远程 storage-REST / Storage Grid RPC 方法及其嵌套结构体字段 |
+{.wide .expand}
 
 核心逻辑不到 40 行，不修改具体 handler，也不触碰本地纠删码热路径。有两处实现细节必须在未来的重构中保持：
 

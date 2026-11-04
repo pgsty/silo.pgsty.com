@@ -215,6 +215,7 @@ The following table lists the maximum concurrent requests on a node based on the
 | 4 Drives | 1,074 | 2,149 | 4,297 | 8,595 | 17,190 |
 | 8 Drives | 840 | 1,680 | 3,361 | 6,722 | 13,443 |
 | 16 Drives | 585 | 1,170 | 2.341 | 4,681 | 9,362 |
+{.wide .expand}
 
 The following table provides general guidelines for allocating memory for use by MinIO based on the total amount of local storage on the node:
 

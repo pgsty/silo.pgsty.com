@@ -34,6 +34,7 @@ The following findings and line numbers refer to the pre-fix [`bcb5fc956`](https
 | **Blast-radius difference between SILO and upstream MinIO on `DeleteObjectVersion`**: SILO requires explicit `s3:DeleteObjectVersion` to delete a specific version; upstream MinIO checks `s3:DeleteObjectVersion` with `DenyOnly: true` | **Confirmed** | SILO commit [`75a6734e4`](https://github.com/pgsty/silo/commit/75a6734e4) (2026-09-02) introduced `deleteObjectAction` requiring `s3:DeleteObjectVersion`, whereas upstream MinIO's `cmd/auth-handler.go` still uses `DenyOnly: true` |
 | **Affected versions and locations**: Bug is in server `cmd/`, not `silo-pkg`; affects SILO `RELEASE.2026-09-03T13-18-01Z` ([`9b11dc94`](https://github.com/pgsty/silo/commit/9b11dc94)), `RELEASE.2026-09-16T00-00-00Z`, pre-fix SILO `main` (`bcb5fc956`), and the upstream `minio/minio` snapshot checked at that time | **Confirmed** | `silo-pkg` evaluates policy `Deny` rules accurately; the flaw is in `cmd/object-handlers.go`, `cmd/bucket-object-lock.go`, and `cmd/auth-handler.go` |
 | **Why unconditional `Deny s3:PutObjectRetention` cannot be used as a workaround**: Unconditionally denying `s3:PutObjectRetention` breaks uploads using retention headers or default-retention workflows | **Confirmed** | Application credentials often require `s3:PutObjectRetention` with condition keys (`s3:object-lock-mode`, `s3:object-lock-remaining-retention-days`) rather than an unconditional `Deny` |
+{.wide .expand}
 
 ---
 
@@ -53,6 +54,7 @@ This produced three distinct authorization failures (F1–F3) plus a day-count a
 | **F2** | Principal with `s3:PutObjectRetention` but **without** `s3:BypassGovernanceRetention` (covered by both external reports) | Sending `x-amz-bypass-governance-retention: true` shortens unexpired `GOVERNANCE` retention or converts it to `COMPLIANCE` |
 | **F3** | Principal with `s3:PutObjectRetention` (subject to conditional `Deny`) or with `s3:BypassGovernanceRetention` | (1) When the requested mode is `COMPLIANCE` or empty `<Retention/>`, the raw bypass header skips IAM evaluation in `isPutRetentionAllowed`, **bypassing any conditional `Deny` on `s3:PutObjectRetention`**; (2) when holding `s3:BypassGovernanceRetention`, `byPassSet \|\| retSet` bypasses conditional `Deny` rules on `s3:PutObjectRetention` even for `GOVERNANCE` mode |
 | **Day-Count Arithmetic Bug** | Principal subject to `s3:object-lock-remaining-retention-days` conditions | Sending an empty `<Retention/>` body sets `RetainUntilDate` to zero time (`0001-01-01`). `math.Abs(objRetention.RetainUntilDate.Sub(t).Hours())` clamped at Go's 292-year `time.Duration` limit and evaluated to **`106,752` days**, bypassing `NumericLessThan` minimum-retention policies |
+{.wide .expand}
 
 #### Exact Git Commit Provenance
 
@@ -80,6 +82,7 @@ In standard S3 semantics, public write APIs (`PutObject`, `CopyObject`, `CreateM
 | **F4 (Explicit target `versionId` on write)** | A caller with `s3:PutObject` passes an existing version's `versionId` (UUID or `null`) to `PutObject`, `CopyObject`, `CreateMultipartUpload`, `PostPolicy`, or Snowball archive extraction (PAX `minio.versionId`) | The storage layer **overwrites that version's payload and metadata in place**. For an unexpired `GOVERNANCE`-locked version, its payload and retention metadata are replaced or cleared |
 | **Companion Gap A (Implicit `null` version on directory keys `dir/` and slow-body TOCTOU race)** | A caller sends a normal `PUT /{bucket}/dir/` (without `?versionId=`) to an Object Lock bucket | (1) `putOpts` maps `isDirObject(object)` to `opts.VersionID = "null"`, while `checkPutObjectLockAllowed` sees `opts.VersionID == ""` via `getOpts`, skipping the existing-lock check and allowing a normal `PUT dir/` to overwrite and erase unexpired `GOVERNANCE`, **`COMPLIANCE`, and `LegalHoldOn`** locks on the directory object; (2) even with HTTP preflight fixed, preflight runs before reading `r.Body`, so a writer can pass preflight, pause streaming the HTTP body while an admin sets `COMPLIANCE` on `dir/`, and then finish streaming to overwrite the locked `null` version; (3) `checkPutObjectLockAllowed` only inspects locks when `getObjectInfoFn` returns `err == nil`, failing open on storage read errors |
 | **Companion Gap B (Persisted target version in `CompleteMultipartUpload`)** | `NewMultipartUpload` persists `fi.VersionID` in `.minio.sys/multipart/.../uploadID/xl.meta`, and `CompleteMultipartUpload` uses `completeMultipartOpts` rather than `putOpts` | A multipart upload initiated before the upgrade, initiated by a replication credential, or recovered from an older staging snapshot after a surviving replica has already committed and `COMPLIANCE`-locked that same UUID version has its target `fi.VersionID` persisted on disk; without an unconditional write-lock existence check during `CompleteMultipartUpload`, an ordinary `s3:PutObject` caller can complete that upload and overwrite the `COMPLIANCE`-locked version |
+{.wide .expand}
 
 #### Exact Git Commit Provenance
 
@@ -106,6 +109,7 @@ The final repair combines **Core Plan A (`SN-2026-015`)** with **Entry + Storage
 | | `cmd/erasure-object.go` | Under the destination object write lock (`NewNSLock`) in `erasureObjects.putObject` and `erasureObjects.CopyObject`, call `checkObjectLockedForOverwrite` when writing to `""` or `nullVersionID` |
 | | `cmd/erasure-multipart.go` | In `CompleteMultipartUpload` under the destination write lock, run `checkObjectLockedForOverwrite` for `null` versions and check whether any non-empty `fi.VersionID` already exists via `getObjectInfo` (or `replicaObjectInfo` across pools) |
 | | `cmd/erasure-server-pool.go`<br>`cmd/erasure-sets.go` | Supply cross-pool `z.replicaObjectInfo` for public writes and multipart completions in multi-pool deployments, and forward versioning/replication flags in `CopyObject` |
+{.wide .expand}
 
 ---
 
@@ -424,6 +428,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | Unexpired `GOVERNANCE` | Shorten / clear / change mode | Yes | Yes | **Yes** | 200 | **200 OK** |
 | Unexpired `COMPLIANCE` | Shorten / clear / change mode | Any | Yes | Any | 400 `InvalidRequest` (`ObjectLocked`) | **400 `InvalidRequest` (`ObjectLocked`)** |
 | Unlocked or expired | Any | Any | Yes | Any | 200 | **200 OK** |
+{.wide .expand}
 
 #### Write-Path Invariant Coverage
 
@@ -436,6 +441,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | `NewMultipartUpload` / `UploadPart` / `UploadPartCopy` | Initiation passes through `putOpts`; `UploadPartCopy` clears replication trust | Untrusted callers cannot initiate multipart uploads with `?versionId=` (`403`) |
 | `CompleteMultipartUpload` | `completeMultipartOpts` + write-lock check keyed on `fi.VersionID` | In-flight uploads from before versioning was enabled complete normally; non-replication completions targeting any existing UUID version (including legacy, replication-initiated, or recovered uploads) receive `403`; `null` versions run `checkObjectLockedForOverwrite` |
 | Directory object `PUT` / `Copy` (`/{bucket}/dir/`) | Fail-closed preflight `checkPutObjectLockAllowed` + write-lock `checkObjectLockedForOverwrite` | Overwriting a directory `null` version with unexpired `GOVERNANCE`, `COMPLIANCE`, or `LegalHoldOn` (including locks applied during slow body transfer) returns `400 InvalidRequest` (`ObjectLocked`); read errors abort the write at both preflight and commit |
+{.wide .expand}
 
 ---
 
@@ -478,6 +484,7 @@ During design review, four candidate write-path designs were evaluated against c
 | **Recovered multipart upload colliding with replicated `COMPLIANCE` UUID (`TestRecoveredMultipartUploadAfterReplica`)** | **Fails (P1)** | **Fails (P1)**: origin marker only proves how the UUID was generated at initiation, not that the version is still absent at completion | Passes (unconditional `fi.VersionID` existence check under write lock) | **Passes (unconditional `fi.VersionID` existence check under write lock)** |
 | **Preflight read quorum failure behavior (`TestPlanReviewPreflightReadFailure`)** | **Fails (P1)**: preflight ignores read error and overwrites object | Passes | Write lock blocks overwrite, but preflight ignores read error and streams body | **Passes (preflight immediately fails closed before streaming body)** |
 | **`CompleteMultipartUpload` lookup behavior** | No extra lookup | Skips lookup on generated marker (introduces recovery collision flaw) | Runs `getObjectInfo` under write lock | **Retains strict `getObjectInfo` check under write lock; any future performance optimization is deferred for separate validation** |
+{.wide .expand}
 
 ### Conclusion
 

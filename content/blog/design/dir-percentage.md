@@ -190,6 +190,7 @@ The Go folder-download handler continues streaming Deflate-compressed ZIP archiv
 | Completed | `false` | `100` | `done = true` | Completed (`100%`) |
 | Failed | `false` | Last valid | `failed = true, done = true` | Error state |
 | Cancelled | `false` | `0` | `cancelled = true, done = true` | Cancelled state |
+{.wide .expand}
 
 ## Why This Design Is Sufficient {#proof}
 
@@ -274,6 +275,7 @@ Adding `null` alongside existing `waitingForFile`, `done`, `failed`, and `cancel
 | Omitted `undefined` size | `10` | `undefined` | `false` | `0` | `null` |
 | Non-finite `Infinity` total | `10` | `0` | `true` | `Infinity` | `null` |
 | Negative `loaded` | `-1` | `100` | `true` | `100` | `null` |
+{.wide .expand}
 
 ### Reducer State Transitions {#state-tests}
 

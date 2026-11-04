@@ -55,6 +55,7 @@ Tracing `git log -S` across the handler history shows that the non-decreasing ch
 | 2016-08 | [`minio/minio#2490`](https://github.com/minio/minio/pull/2490) | Introduced `sort.IsSorted(completedParts(complMultipartUpload.Parts))` with `Less(i, j) { return a[i].PartNumber < a[j].PartNumber }`. | `sort.IsSorted` only checks that no element is smaller than its predecessor. |
 | 2017-11 | [`minio/minio#5170`](https://github.com/minio/minio/pull/5170) | Replaced the named `completedParts` type with `sort.SliceIsSorted` using the same `<` closure. | Mechanical refactor of the same comparator. |
 | 2023-04 | [`minio/minio#17066`](https://github.com/minio/minio/pull/17066) | Moved `ErrInvalidPartOrder` validation earlier in `CompleteMultipartUploadHandler` before hitting the object layer. | Moved the check block verbatim without testing duplicate part numbers. |
+{.wide .expand}
 
 Every unit and mint test for `ErrInvalidPartOrder` tested inversions such as `[2, 1]`, never adjacent duplicates such as `[1, 1]`.
 
@@ -70,6 +71,7 @@ Before the fix, uploading a single 5 MiB part (`partNumber=1`) and completing th
 | 2 | `CompleteMultipartUpload` with `[(1, "e1"), (1, "e1")]` | `200 OK`, `ETag: "...-2"` | `400 Bad Request` (`InvalidPartOrder`) |
 | 3 | `HeadObject` / `GetObject` | `Content-Length: 10485760` (part 1 repeated twice) | Object not created; upload remains open |
 | 4 | Retry `CompleteMultipartUpload` with `[(1, "e1")]` | `404 NoSuchUpload` (upload already consumed) | `200 OK`, `Content-Length: 5242880` |
+{.wide .expand}
 
 Because `CompleteMultipartUpload` consumes the upload state on success, a buggy client that accidentally duplicated an entry in its completion XML (for example, when retrying an `UploadPart` call and appending to an in-memory slice instead of deduplicating by part number) silently wrote a corrupted object of the wrong size and could not retry completion without re-uploading every part.
 

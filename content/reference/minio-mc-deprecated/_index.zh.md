@@ -30,6 +30,7 @@ upstream_modified: false
 | `mc quota info` | 无 | mc RELEASE.2024-07-31T15-58-33Z |
 | `mc quota set` | 无 | mc RELEASE.2024-07-31T15-58-33Z |
 | `mc replicate diff` | [`mc replicate backlog`](/zh/reference/minio-mc/mc-replicate-backlog/#command-mc.replicate.backlog) | mc RELEASE.2023-07-18T21-05-38Z |
+{.wide .expand}
 
 ## 弃用管理命令表 {#id4}
 
@@ -69,3 +70,4 @@ upstream_modified: false
 | `mc admin tier edit` | [`mc ilm tier update`](/zh/reference/minio-mc/mc-ilm-tier-update/#command-mc.ilm.tier.update) | mc RELEASE.2022-12-24T15-21-38Z |
 | `mc admin tier ls` | [`mc ilm tier ls`](/zh/reference/minio-mc/mc-ilm-tier-ls/#command-mc.ilm.tier.ls) | mc RELEASE.2022-12-24T15-21-38Z |
 | `mc admin top` | [`mc support top`](/zh/reference/minio-mc/mc-support-top/#command-mc.support.top) | mc RELEASE.2022-08-11T00-30-48Z |
+{.wide .expand}

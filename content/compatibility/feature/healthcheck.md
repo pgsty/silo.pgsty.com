@@ -99,6 +99,7 @@ The table below is verified against the handler source, not quoted from document
 | `/minio/health/ready` | as `live`, **plus** KMS can generate a key and etcd answers a read — each only if configured | KMS/etcd failure; queue saturation | **without KMS or etcd, `ready` and `live` are the same code path** |
 | `/minio/health/cluster` | object layer, bucket metadata and IAM are initialized, **and every erasure set** has write quorum | 503 with quorum diagnostic headers; with `?maintenance=true`, failure is **412** | each failed evaluation writes a server-side log line — do not poll it tightly |
 | `/minio/health/cluster/read` | the read-quorum version of the above | as above | |
+{.wide .expand}
 
 Consequences worth spelling out: `live` and `ready` are *liveness*-grade signals — they do not tell you the node can serve objects; only the `cluster` pair does. That is exactly why the cluster pair must stay out of per-container probes (scope, log noise, cascading restarts) and why it is the right tool for operational questions like "may I take this node down?" (`--maintenance`, where 200 means safe and 412 means you would lose HA).
 
@@ -165,6 +166,7 @@ The Silo Helm chart currently ships **no probes at all** (neither does upstream'
 | **P2** | `Dockerfile.distroless` + CI build/health gate + publish `-distroless` tags as a pilot | `pgsty/silo` |
 | **P3** | Helm chart: add the three probes; refresh the stale default image tag | `pgsty/silo` |
 | **P4** | Docs: command reference, probe guide, distroless migration notes; pilot feedback → decide on promoting distroless to the recommended default | this site |
+{.wide .expand}
 
 Compatibility promises across all phases: the classic image's contents and examples do not change; `mc ready local` keeps working everywhere it works today; the health HTTP API is untouched (the subcommand is purely additive); and the `/minio/health/*` paths remain frozen as compatibility surface, same as every other `/minio/*` route in the fork.
 

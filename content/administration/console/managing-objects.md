@@ -309,6 +309,7 @@ Invalid, missing required or incompatible settings fail closed.
 | `API_MAX_REQUESTS` | 8 | Concurrent usage API requests per Console process |
 | `REQUEST_TIMEOUT` | `15s` | Usage API deadline |
 | `UI_POLL_INTERVAL` | `2s` | Pending-work status polling; idle views poll at ten times this interval, capped at one minute |
+{.wide .expand}
 
 Entry counts, scan duration, concurrency and request budgets have validated
 finite ranges; see `pkg/usage/config.go`. Scan limits preserve the last successful

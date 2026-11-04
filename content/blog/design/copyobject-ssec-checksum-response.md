@@ -22,6 +22,7 @@ An SSE-C `CopyObject` request can supply two independent customer-provided encry
 | --- | --- | --- |
 | Source | `X-Amz-Copy-Source-Server-Side-Encryption-Customer-*` | Decrypt the source object and its stored metadata |
 | Destination | `X-Amz-Server-Side-Encryption-Customer-*` | Encrypt and later interpret the committed destination object |
+{.wide .expand}
 
 SILO encrypted the destination object and sealed its checksum metadata under the destination key. However, after the write committed, both the `CopyObjectResult` XML builder and the generic PUT-response header helper received the original `CopyObject` request headers. Because `decryptChecksums` prioritizes `X-Amz-Copy-Source-Server-Side-Encryption-Customer-*` headers whenever they are present—which is right while reading the source object—it attempted to unseal the committed destination's checksum metadata using the source key.
 

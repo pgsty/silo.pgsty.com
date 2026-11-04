@@ -149,6 +149,7 @@ Metrics about requests served by the current node.
 | `minio_api_requests_ttfb_seconds_distribution` | Distribution of time to first byte across API calls. <br><br>Type: counter | `name`, `type`, `le`, `pool_index`, `server` |
 | `minio_api_requests_traffic_sent_bytes` | Total number of bytes sent. <br><br>Type: counter | `type`, `pool_index`, `server` |
 | `minio_api_requests_traffic_received_bytes` | Total number of bytes received. <br><br>Type: counter | `type`, `pool_index`, `server` |
+{.wide .expand}
 
 #### `/bucket/api` {#bucket-api}
 
@@ -162,6 +163,7 @@ Metrics about requests served by the current node.
 | `minio_bucket_api_4xx_errors_total` | Total number of requests with 4xx errors for a bucket. <br><br>Type: counter | `bucket`, `name`, `type`, `server`, `pool_index` |
 | `minio_bucket_api_5xx_errors_total` | Total number of requests with 5xx errors for a bucket. <br><br>Type: counter | `bucket`, `name`, `type`, `server`, `pool_index` |
 | `minio_bucket_api_ttfb_seconds_distribution` | Distribution of time to first byte across API calls for a bucket. <br><br>Type: counter | `bucket`, `name`, `le`, `type`, `server`, `pool_index` |
+{.wide .expand}
 
 <a id="minio-available-v3-audit-metrics"></a>
 
@@ -180,6 +182,7 @@ Metrics about the MinIO audit functionality.
 | `minio_audit_failed_messages` | Total number of messages that failed to send since start. <br><br>Type: counter | `target_id`, `server` |
 | `minio_audit_target_queue_length` | Number of unsent messages in queue for target. <br><br>Type: gauge | `target_id`, `server` |
 | `minio_audit_total_messages` | Total number of messages sent since start. <br><br>Type: counter | `target_id`, `server` |
+{.wide .expand}
 
 <a id="minio-available-v3-cluster-metrics"></a>
 
@@ -202,6 +205,7 @@ Metrics about an entire MinIO cluster.
 | --- | --- | --- |
 | `minio_cluster_config_rrs_parity` | Reduced redundancy storage class parity. <br><br>Type: gauge | |
 | `minio_cluster_config_standard_parity` | Standard storage class parity. <br><br>Type: gauge | |
+{.wide .expand}
 
 #### `/cluster/erasure-set` {#cluster-erasure-set}
 
@@ -218,6 +222,7 @@ Metrics about an entire MinIO cluster.
 | `minio_cluster_erasure_set_write_tolerance` | Number of drive failures that can be tolerated without disrupting write operations. <br><br>Type: gauge | `pool_id`, `set_id` |
 | `minio_cluster_erasure_set_read_health` | Health of the erasure set in a pool for read operations (1=healthy, 0=unhealthy). <br><br>Type: gauge | `pool_id`, `set_id` |
 | `minio_cluster_erasure_set_write_health` | Health of the erasure set in a pool for write operations (1=healthy, 0=unhealthy). <br><br>Type: gauge | `pool_id`, `set_id` |
+{.wide .expand}
 
 #### `/cluster/health` {#cluster-health}
 
@@ -232,6 +237,7 @@ Metrics about an entire MinIO cluster.
 | `minio_cluster_health_capacity_raw_free_bytes` | Total cluster raw storage free in bytes. <br><br>Type: gauge | |
 | `minio_cluster_health_capacity_usable_total_bytes` | Total cluster usable storage capacity in bytes. <br><br>Type: gauge | |
 | `minio_cluster_health_capacity_usable_free_bytes` | Total cluster usable storage free in bytes. <br><br>Type: gauge | |
+{.wide .expand}
 
 #### `/cluster/iam` {#cluster-iam}
 
@@ -247,6 +253,7 @@ Metrics about an entire MinIO cluster.
 | `minio_cluster_iam_since_last_sync_millis` | Time (in milliseconds) since last successful IAM data sync. <br><br>Type: counter | |
 | `minio_cluster_iam_sync_failures` | Number of failed IAM data syncs since server start. <br><br>Type: counter | |
 | `minio_cluster_iam_sync_successes` | Number of successful IAM data syncs since server start. <br><br>Type: counter | |
+{.wide .expand}
 
 #### `/cluster/usage/buckets` {#cluster-usage-buckets}
 
@@ -260,6 +267,7 @@ Metrics about an entire MinIO cluster.
 | `minio_cluster_usage_buckets_quota_total_bytes` | Total bucket quota in bytes. <br><br>Type: gauge | `bucket` |
 | `minio_cluster_usage_buckets_object_size_distribution` | Bucket object size distribution. <br><br>Type: gauge | `range`, `bucket` |
 | `minio_cluster_usage_buckets_object_version_count_distribution` | Bucket object version count distribution. <br><br>Type: gauge | `range`, `bucket` |
+{.wide .expand}
 
 #### `/cluster/usage/objects` {#cluster-usage-objects}
 
@@ -273,6 +281,7 @@ Metrics about an entire MinIO cluster.
 | `minio_cluster_usage_objects_buckets_count` | Total cluster buckets count. <br><br>Type: gauge | |
 | `minio_cluster_usage_objects_size_distribution` | Cluster object size distribution. <br><br>Type: gauge | `range` |
 | `minio_cluster_usage_objects_version_count_distribution` | Cluster object version count distribution. <br><br>Type: gauge | `range` |
+{.wide .expand}
 
 <a id="minio-available-v3-debug-metrics"></a>
 
@@ -303,6 +312,7 @@ Metrics about the MinIO ILM functionality.
 | `minio_cluster_ilm_transition_pending_tasks` | Number of pending ILM transition tasks in the queue. <br><br>Type: gauge | `server` |
 | `minio_cluster_ilm_transition_missed_immediate_tasks` | Number of missed immediate ILM transition tasks. <br><br>Type: counter | `server` |
 | `minio_cluster_ilm_versions_scanned` | Total number of object versions checked for ILM actions since server start. <br><br>Type: counter | `server` |
+{.wide .expand}
 
 <a id="minio-available-v3-logger-webhook-metrics"></a>
 
@@ -321,6 +331,7 @@ Metrics about MinIO logger webhooks.
 | `minio_logger_webhook_failed_messages` | Number of messages that failed to send. <br><br>Type: counter | `server`, `name`, `endpoint` |
 | `minio_logger_webhook_queue_length` | Webhook queue length. <br><br>Type: gauge | `server`, `name`, `endpoint` |
 | `minio_logger_webhook_total_message` | Total number of messages sent to this target. <br><br>Type: counter | `server`, `name`, `endpoint` |
+{.wide .expand}
 
 <a id="minio-available-v3-notification-metrics"></a>
 
@@ -340,6 +351,7 @@ Metrics about the MinIO notification functionality.
 | `minio_notification_events_errors_total` | Total number of events that failed to send to the targets. <br><br>Type: counter | `server` |
 | `minio_notification_events_sent_total` | Total number of events sent to the targets. <br><br>Type: counter | `server` |
 | `minio_notification_events_skipped_total` | Number of events not sent to the targets due to the in-memory queue being full. <br><br>Type: counter | `server` |
+{.wide .expand}
 
 <a id="minio-available-v3-replication-metrics"></a>
 
@@ -369,6 +381,7 @@ Metrics about MinIO site and bucket replication.
 | `minio_replication_max_queued_count` | Maximum number of objects queued for replication since server start. <br><br>Type: gauge | `server` |
 | `minio_replication_max_data_transfer_rate` | Maximum replication data transfer rate in bytes/sec since server start. <br><br>Type: gauge | `server` |
 | `minio_replication_recent_backlog_count` | Total number of objects seen in replication backlog in the last 5 minutes <br><br>Type: gauge | `server` |
+{.wide .expand}
 
 #### `/bucket/replication` {#bucket-replication}
 
@@ -393,6 +406,7 @@ Metrics about MinIO site and bucket replication.
 | `minio_bucket_replication_total_failed_bytes` | Total number of bytes failed to replicate at least once since server start. <br><br>Type: counter | `bucket`, `server` |
 | `minio_bucket_replication_total_failed_count` | Total number of objects that failed to replicate since server start. <br><br>Type: counter | `bucket`, `server` |
 | `minio_bucket_replication_proxied_delete_tagging_requests_failures` | Number of failures in DELETE tagging requests proxied to replication target. <br><br>Type: counter | `bucket`, `server` |
+{.wide .expand}
 
 <a id="minio-available-v3-scanner-metrics"></a>
 
@@ -414,6 +428,7 @@ Metrics about the MinIO scanner.
 | `minio_scanner_last_activity_seconds` | Time elapsed (in seconds) since last scan activity. <br><br>Type: gauge | `server` |
 | `minio_scanner_objects_scanned` | Total number of unique objects scanned since server start. <br><br>Type: counter | `server` |
 | `minio_scanner_versions_scanned` | Total number of object versions scanned since server start. <br><br>Type: counter | `server` |
+{.wide .expand}
 
 <a id="minio-available-v3-system-metrics"></a>
 
@@ -455,6 +470,7 @@ Metrics about the MinIO process and the node.
 | `minio_system_drive_writes_kb_per_sec` | Kilobytes written per second on a drive. <br><br>Type: gauge | `drive`, `set_index`, `drive_index`, `pool_index`, `server` |
 | `minio_system_drive_writes_await` | Average time for write requests served on a drive. <br><br>Type: gauge | `drive`, `set_index`, `drive_index`, `pool_index`, `server` |
 | `minio_system_drive_perc_util` | Percentage of time the disk was busy. <br><br>Type: gauge | `drive`, `set_index`, `drive_index`, `pool_index`, `server` |
+{.wide .expand}
 
 #### `/system/memory` {#system-memory}
 
@@ -468,6 +484,7 @@ Metrics about the MinIO process and the node.
 | `minio_system_memory_cache` | Cache memory on the node. <br><br>Type: gauge | `server` |
 | `minio_system_memory_shared` | Shared memory on the node. <br><br>Type: gauge | `server` |
 | `minio_system_memory_available` | Available memory on the node. <br><br>Type: gauge | `server` |
+{.wide .expand}
 
 #### `/system/cpu` {#system-cpu}
 
@@ -491,6 +508,7 @@ Metrics about the MinIO process and the node.
 | `minio_system_network_internode_dial_avg_time_nanos` | Average dial time of internodes TCP calls in nanoseconds. <br><br>Type: gauge | `server`, `pool_index` |
 | `minio_system_network_internode_sent_bytes_total` | Total number of bytes sent to other peer nodes. <br><br>Type: counter | `server`, `pool_index` |
 | `minio_system_network_internode_recv_bytes_total` | Total number of bytes received from other peer nodes. <br><br>Type: counter | `server`, `pool_index` |
+{.wide .expand}
 
 #### `/system/process` {#system-process}
 
@@ -513,3 +531,4 @@ Metrics about the MinIO process and the node.
 | `minio_system_process_resident_memory_bytes` | Resident memory size in bytes. <br><br>Type: gauge | `server` |
 | `minio_system_process_virtual_memory_bytes` | Virtual memory size in bytes. <br><br>Type: gauge | `server` |
 | `minio_system_process_virtual_memory_max_bytes` | Maximum virtual memory size in bytes. <br><br>Type: gauge | `server` |
+{.wide .expand}

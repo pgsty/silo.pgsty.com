@@ -279,6 +279,7 @@ See [Metrics and alerts](/operations/monitoring/metrics-and-alerts/#minio-metric
 | `minio_node_drive_errors_timeout` | Total number of drive timeout errors since server start. |
 | `minio_node_drive_errors_availability` | Total number of drive I/O errors, permission denied and timeouts since server start. |
 | `minio_node_drive_io_waiting` | Total number of I/O operations waiting on drive. |
+{.wide .expand}
 {{< /tab >}}
 {{< /tabs >}}
 

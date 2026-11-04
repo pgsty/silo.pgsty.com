@@ -29,6 +29,7 @@ SILO cut its first community release (`RELEASE.2025-12-03T12-00-00Z`) from upstr
 | :-- | :-- | :-- | :-- |
 | [`CVE-2025-62506`](https://github.com/advisories/GHSA-jjjj-jwhf-8rgr) | [minio/minio#21642](https://github.com/minio/minio/pull/21642), merged as [`c1a49490`](https://github.com/minio/minio/commit/c1a49490c78e9c3ebcad86ba0662319138ace190) | [`pgsty/silo@c1a49490`](https://github.com/pgsty/silo/commit/c1a49490c78e9c3ebcad86ba0662319138ace190) | Resets `DenyOnly` while evaluating a restricted session policy so a service account or STS session cannot mint an unrestricted child service account. Upstream first fixed this in [`RELEASE.2025-10-15T17-29-55Z`](https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z); every SILO release starting with [`RELEASE.2025-12-03T12-00-00Z`](https://github.com/pgsty/silo/releases/tag/RELEASE.2025-12-03T12-00-00Z) contains it. Operators migrating from an older upstream build should upgrade and audit service accounts created by restricted service or STS identities. See the [chronicle](/blog/security/cve-2025-62506/). |
 | `CVE-2026-32285` | Same upstream commit [`c1a49490`](https://github.com/minio/minio/commit/c1a49490c78e9c3ebcad86ba0662319138ace190) ([pgsty/silo#26](https://github.com/pgsty/silo/issues/26)) | Already present (`v1.1.2` `buger/jsonparser`) | External vulnerability feeds mislabeled the `CVE-2025-62506` session-policy commit (`c1a49490`) as a `buger/jsonparser` vulnerability; `go.mod` already selects `v1.1.2` and `govulncheck` confirms no reachable vulnerable symbols. No code change required. See the [chronicle](/blog/security/cve-2026-32285/). |
+{.wide .expand}
 
 ## Advisories Since `RELEASE.2026-03-21T00-00-00Z` {#advisories}
 
@@ -59,6 +60,7 @@ SILO cut its first community release (`RELEASE.2025-12-03T12-00-00Z`) from upstr
 | [`SN-2026-017`](#sn-2026-017) | [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fb29fa0e97b875948f6e595163a72f56b), [`995439260`](https://github.com/pgsty/silo/commit/995439260), [#242](https://github.com/pgsty/silo/pull/242) | Delegated IAM Admin credential and policy containment boundaries | [Chronicle](/blog/security/20261018-release-hardening/#sn-2026-017) · [Design](/blog/design/iam-admin-authorization/) |
 | [`SN-2026-018`](#sn-2026-018) | [`fe6dc4780`](https://github.com/pgsty/silo/commit/fe6dc4780) | Forwarded client IP trust boundary (`MINIO_API_TRUSTED_PROXIES`) | [Chronicle](/blog/security/source-address-trust/) |
 | [`SN-2026-019`](#sn-2026-019) | [`672c07a0f`](https://github.com/pgsty/silo/commit/672c07a0f), [`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358) | Notification key registration & `config.HasSensitiveKeys` credential redaction | [Chronicle](/blog/security/notify-keyspace-registration/) · [Design](/blog/design/notify-url/) |
+{.wide .expand}
 
 ## Exposure and Upgrade Guidance {#exposure}
 
@@ -193,6 +195,7 @@ Config-subsystem hardening (`672c07a0f` in [Server 20260804](/blog/release/silo-
 | [CVE-2026-84304](https://github.com/advisories/GHSA-vp52-pcj8-j9qc) | gRPC `v1.83.1` | Fixes unauthenticated heap exhaustion on fragmented HTTP/2 `DATA` frames in gRPC-Go. |
 | [CVE-2026-79921 / GHSA-6c5v-hqjr-5xxp](https://github.com/advisories/GHSA-6c5v-hqjr-5xxp) | [`d63c92e39`](https://github.com/pgsty/silo/commit/d63c92e39) ([Server 20260916](/blog/release/silo-20260916/)) | Updates `amqp091-go` to `v1.14.0`, preventing a malicious AMQP broker from exhausting memory via oversized frames. |
 | Go 1.27.2 & October dependency refresh | [`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce) ([Server 20261018](/blog/security/20261018-release-hardening/#dependencies)) | Upgrades to Go 1.27.2, `x/net v0.61.0`, `x/crypto v0.58.0`, `x/text v0.43.0`, and `go-jose/v4 v4.1.6` (`GHSA-mgcc-cww5-fp2q`). |
+{.wide .expand}
 
 ## Operationally Significant Security-Related Fixes {#operational}
 
@@ -202,6 +205,7 @@ Config-subsystem hardening (`672c07a0f` in [Server 20260804](/blog/release/silo-
 | `ldaps://` TLS configuration propagation | [`ce1c537eb`](https://github.com/pgsty/silo/commit/ce1c537eb1dd6c4efa1cf75cf5df0e2c489c947a) (`RELEASE.2026-03-25`) | Restores TLS configuration propagation for `ldaps://` `DialURL()` connections so `MINIO_IDENTITY_LDAP_TLS_SKIP_VERIFY` and custom root CAs take effect. |
 | Signed-field and policy-input alignment | [#177](https://github.com/pgsty/silo/pull/177), [`87d8b5967`](https://github.com/pgsty/silo/commit/87d8b5967) ([Server 20260916](/blog/release/silo-20260916/)) | Rejects ambiguous repeated `x-amz-copy-source` headers, derives `s3:signatureAge` statelessly from the signed `X-Amz-Date`, and binds `s3:x-amz-content-sha256` policy evaluation to the verified payload digest. |
 | Cross-pool conditional `PUT` and `DELETE` | [#207](https://github.com/pgsty/silo/pull/207), [`5e7d60308`](https://github.com/pgsty/silo/commit/5e7d60308) ([Server 20260916](/blog/release/silo-20260916/)) | Evaluates conditional write and delete preconditions (`If-Match`, `If-None-Match`) against the authoritative logical object under a shared cross-pool lock so a stale copy in an older pool cannot authorize an overwrite. See [Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/). |
+{.wide .expand}
 
 ## Ledger Provenance {#attribution}
 

@@ -101,6 +101,7 @@ Measured against the same synthetic IdP fixture, with default settings:
 | 20260916, Go 1.27.1 — repaired | 1509 B | present (default) | present | `Silo (…)` |
 | 20260804 with `tlsmlkem=0` | 275 B | absent | absent | `MinIO (…)` |
 | 20260903 with `tlsmlkem=0` | 1509 B | **still present** | present | `Silo (…)` |
+{.wide .expand}
 
 Two readings matter and are easy to miss:
 
@@ -120,6 +121,7 @@ The pinned list covered both directions of every TLS path, but the consequences 
 | S3 tiers / cloud backends | Transition failures, remote objects unreadable | Easy to miss |
 | etcd, internode grid | Internal traffic, rarely crosses such a device | Low |
 | Inbound S3/Console listener | Clients cannot connect; determined by the *peer's* hello | Depends on client |
+{.wide .expand}
 
 Only the identity path blocks startup, which is why it was reported first. The others degrade quietly, so a deployment can be affected without anyone filing an issue.
 
@@ -158,6 +160,7 @@ The investigation reproduced three mechanisms that each produce the reported err
 | A | The ingress rejects ML-KEM, and the operator had `tlsmlkem=0` set before the upgrade | **Yes** — this is what the repair restores |
 | B | The ingress rejects the ML-DSA signature identifiers | No. Only a TLS 1.2 cap suppresses the offer, and no such setting is exposed |
 | C | An HTTP-layer rule rejects the changed `Silo` User-Agent after a successful handshake | No, and no TLS change is relevant to it |
+{.wide .expand}
 
 A fourth observation explains why the `curl` control test misleads: the discovery transport disables HTTP/2 and sends no ALPN, while `curl` negotiated h2. That difference exists in both the working and failing releases.
 
@@ -191,6 +194,7 @@ Grouped by who has to act. Each row solves specific branches:
 | Route around it: point `MINIO_IDENTITY_OPENID_CONFIG_URL` at an endpoint that does not traverse the device, or use split-horizon DNS. The discovery document's `issuer` must not change | A, B, C | Certificate hostname and issuer consistency must hold |
 | Terminate TLS in a sidecar (stunnel, Envoy) that connects to the IdP itself | A, B, C | An extra component and its own trust chain |
 | Send the request through `HTTPS_PROXY` | none | A CONNECT tunnel forwards the same ClientHello; only a proxy that terminates TLS changes anything |
+{.wide .expand}
 
 **Deployment side — available today.**
 
@@ -201,6 +205,7 @@ Grouped by who has to act. Each row solves specific branches:
 | `GODEBUG=fips140=on` | A and B | **Not recommended.** The FIPS allow-lists exclude ML-KEM and ML-DSA, but also replace cipher suites and curves and exclude Ed25519/X25519 for the entire process |
 | Remain on 20260804 | A, B, C | Forfeits every subsequent security fix; emergency measure only |
 | Allow the `Silo` User-Agent at the ingress | C | One rule change |
+{.wide .expand}
 
 **There is no way to disable ML-DSA via GODEBUG.** Go provides no GODEBUG for signature algorithms — the `crypto/tls` entries in `internal/godebugs/table.go` are `fips140ems`, `tlsmaxrsasize`, `tlsmlkem`, `tlssecpmlkem`, and `tlssha1` — and `tls.Config` has no signature-algorithm field. The only lever is the version gate: the identifiers are TLS 1.3-only, so capping `MaxVersion` at TLS 1.2 suppresses them.
 

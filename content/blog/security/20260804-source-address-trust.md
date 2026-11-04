@@ -28,6 +28,7 @@ In SILO, `handlers.GetSourceIP(r)` (`silo-pkg/handlers/proxy.go`) is the single 
 | Audit logging (`remotehost`) | `cmd/logger/audit.go` | Records the client IP in structured compliance audit logs. |
 | Bucket notification events (`Host`) | `cmd/notification.go` | Populates `requestParameters.sourceIPAddress` in S3 event notifications. |
 | Admin HTTP trace (`mc admin trace`) | `cmd/http-tracer.go` | Displays the client IP in live diagnostic traces. |
+{.wide .expand}
 
  Note that `handlers.GetSourceIPRaw` returned the first matched header token without validating whether it was even a syntactically valid IP address (a unit test in upstream `silo-pkg` literally asserted that `X-Forwarded-For: _gazonk` returned `"_gazonk"`!). While `IpAddress` condition evaluation parses the string with `net.ParseIP`, audit logs and notification payloads received the raw string.
 
@@ -76,6 +77,7 @@ To solve both problems cleanly, `silo-pkg v3.12.0` (`62f326d`) and Server `20260
 | `MINIO_API_TRUSTED_PROXIES=off` (or `none`) | Trust **no** proxy hops | Always uses the direct TCP peer (`r.RemoteAddr`) for external peers; ignores `X-Forwarded-For`, `X-Real-IP`, and `Forwarded`. |
 | `MINIO_API_TRUSTED_PROXIES=10.0.1.0/24,192.168.1.10` | Trust only listed IPs/CIDRs | If `r.RemoteAddr` is not in the trusted set, returns `r.RemoteAddr` immediately. If `r.RemoteAddr` is trusted, walks `X-Forwarded-For` (or `Forwarded`) **from right to left** and returns the first IP not in the trusted set. |
 | Unset, `all`, or `*` | Legacy compatibility mode | Preserves pre-`20260804` behavior (unless `_MINIO_API_XFF_HEADER=off` is set). |
+{.wide .expand}
 
 Note that `handlers.GetSourceScheme` (`X-Forwarded-Proto`) is intentionally left untouched so TLS redirect and presigned URL scheme detection behind reverse proxies continue to work regardless of `MINIO_API_TRUSTED_PROXIES`.
 

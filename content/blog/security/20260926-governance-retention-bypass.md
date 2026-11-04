@@ -41,6 +41,7 @@ Under the AWS S3 Object Lock specification, `PutObjectRetention` must enforce tw
 | Active `GOVERNANCE` lock | Clear (`<Retention/>`), shorten `RetainUntilDate`, or switch `GOVERNANCE` -> `COMPLIANCE` | `s3:PutObjectRetention` **AND** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
 | Active `COMPLIANCE` lock | Extend `RetainUntilDate` to a strictly later date (`COMPLIANCE` mode) | `s3:PutObjectRetention` | None |
 | Active `COMPLIANCE` lock | Clear, shorten, or switch `COMPLIANCE` -> `GOVERNANCE` | **Forbidden for all principals** | Forbidden (`AccessDenied`) |
+{.wide .expand}
 
 ---
 
@@ -58,6 +59,7 @@ Assume user `nobypass` has `Allow` on `s3:PutObjectRetention` and `s3:DeleteObje
 | 2 | `DELETE /bucket/doc.txt?versionId=v1` | `403 AccessDenied` | `403 AccessDenied` |
 | 3 | `PUT /bucket/doc.txt?retention&versionId=v1` with header `x-amz-bypass-governance-retention: true` and body `<Retention/>` | **`200 OK` (lock cleared!)** | `403 AccessDenied` |
 | 4 | `DELETE /bucket/doc.txt?versionId=v1` | **`204 No Content` (version permanently deleted!)** | Object remains locked and protected |
+{.wide .expand}
 
 ### Reproduction 2: Locking an Object with Zero Retention Permissions (F1)
 
@@ -67,6 +69,7 @@ Assume user `zeroperm` has an empty/unrelated policy with **neither** `s3:PutObj
 |---|---|---|---|
 | 1 | `PUT /bucket/unlocked.txt?retention` (without bypass header), body `<Mode>COMPLIANCE</Mode><RetainUntilDate>2099-01-01T00:00:00Z</RetainUntilDate>` | `403 AccessDenied` | `403 AccessDenied` |
 | 2 | Repeat the exact same `PUT /bucket/unlocked.txt?retention` **adding header `x-amz-bypass-governance-retention: true`** | **`200 OK` (irreversible 2099 COMPLIANCE lock applied!)** | `403 AccessDenied` |
+{.wide .expand}
 
 ### Reproduction 3: Bypassing `s3:object-lock-remaining-retention-days` Conditions (F3)
 
@@ -135,6 +138,7 @@ In `PutObjectRetentionHandler` and `enforceRetentionBypassForPut`:
 | 5 | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate` | `true` | `true` | `false` | **`403 AccessDenied`** (closes F2) |
 | 6 | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate` | `true` | `true` | `true` | **`200 OK`** |
 | 7 | Active `COMPLIANCE` | Clear, shorten, or downgrade to `GOVERNANCE` | `false` or `true` | Any | Any | **`403 AccessDenied`** |
+{.wide .expand}
 
 ### Five Rejected Alternatives {#alternatives}
 

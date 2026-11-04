@@ -34,6 +34,7 @@ tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 | **SILO 与上游 MinIO 在 `DeleteObjectVersion` 上的爆炸半径差异**：SILO 限制了无 `s3:DeleteObjectVersion` 时的历史版本删除；上游 MinIO 将 `s3:DeleteObjectVersion` 设为 `DenyOnly: true`，仅凭 `s3:DeleteObject` 即可等锁到期后删空历史版本 | **完全属实** | SILO 在提交 [`75a6734e4`](https://github.com/pgsty/silo/commit/75a6734e4)（2026-09-02）引入 `deleteObjectAction` 显式要求 `s3:DeleteObjectVersion`；而上游 MinIO `cmd/auth-handler.go` 至今对指定 `versionId` 的删除使用 `DenyOnly: true` |
 | **受影响范围与代码行号**：缺陷位于服务端 `cmd/` 而非 `silo-pkg`；SILO `RELEASE.2026-09-03T13-18-01Z`（[`9b11dc94`](https://github.com/pgsty/silo/commit/9b11dc94)）、`RELEASE.2026-09-16T00-00-00Z`、修复前的 SILO `main`（`bcb5fc956`）及当时核验的上游 `minio/minio` 快照均受影响 | **完全属实** | `silo-pkg` 的 IAM 策略引擎对 `Deny` 求值完全正确；问题纯粹出在 `cmd/object-handlers.go`、`cmd/bucket-object-lock.go` 与 `cmd/auth-handler.go` 的调用编排与布尔短路逻辑 |
 | **复现脚本中无法用无条件 `Deny s3:PutObjectRetention` 规避**：若对应用账号无条件 `Deny s3:PutObjectRetention`，则连向配置了默认保留期（Default Retention）的桶执行普通 `PutObject` 也会失败 | **完全属实** | 普通 `PutObject` 在相关对象锁检查路径中依赖 `s3:PutObjectRetention`，无条件 `Deny` 会阻断正常业务写入，因此生产策略只能使用带条件键的 `Deny`——而这正是被 F3 绕过的场景 |
+{.wide .expand}
 
 ---
 
@@ -53,6 +54,7 @@ tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 | **F2** | 持有 `s3:PutObjectRetention`、但**没有** `s3:BypassGovernanceRetention`（两份报告均覆盖） | 携带 `x-amz-bypass-governance-retention: true` 将未到期的 `GOVERNANCE` 保留期缩短至几秒后，或原地改为 `COMPLIANCE` |
 | **F3** | 持有 `s3:PutObjectRetention`（受条件 `Deny` 限制）或持有 `s3:BypassGovernanceRetention` | ① 目标模式为 `COMPLIANCE` 或空 `<Retention/>` 时，携带 bypass 请求头直接跳过 `isPutRetentionAllowed` 中的策略求值，**完全绕过挂在 `s3:PutObjectRetention` 上的条件 `Deny`**（独立报告症状 2）；② 持有 `s3:BypassGovernanceRetention` 时，在 `GOVERNANCE` 模式下同样因 `byPassSet \|\| retSet` 绕过 `s3:PutObjectRetention` 条件 `Deny` |
 | **附带算术缺陷** | 持有受 `s3:object-lock-remaining-retention-days` 条件限制的 `s3:PutObjectRetention` | 发送空 `<Retention/>` 清除保留期时，`RetainUntilDate` 为零值 `0001-01-01`，旧代码 `math.Abs(objRetention.RetainUntilDate.Sub(t).Hours())` 因 `time.Duration` 292 年上限截断后取绝对值算出 **`106,752` 天**，导致“禁止剩余保留期小于 N 天”的 `NumericLessThan` 策略被清除操作直接绕过 |
+{.wide .expand}
 
 #### 精确 Git 提交溯源
 
@@ -80,6 +82,7 @@ tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 | **F4（显式目标 `versionId` 写入）** | 普通 `s3:PutObject` 主体在 `PutObject`、`CopyObject`、`CreateMultipartUpload`、`PostPolicy` 或 Snowball 归档解压（PAX `minio.versionId`）中传入既有版本的 `versionId`（UUID 或 `null`） | 存储层按指定 `versionId` **原地覆盖该版本的数据载荷与元数据**。对于处于未到期 `GOVERNANCE` 保留期的版本，其数据与保留期被直接替换或抹除 |
 | **同源缺口 A（目录键 `dir/` 隐式 `null` 版本覆写与慢速请求体竞态）** | 对启用了对象锁的桶中任意以 `/` 结尾的目录键发起普通 `PUT /{bucket}/dir/`（不带 `?versionId=`） | ① `putOpts` 将目录键隐式映射为 `opts.VersionID = "null"` 原地覆写，而 `checkPutObjectLockAllowed` 通过 `getOpts` 读到的 `opts.VersionID` 为空，跳过存量锁检查，导致普通 `PUT dir/` 可原地覆盖并抹除目录 `null` 版本的 `GOVERNANCE`、**`COMPLIANCE` 保留期与 `LegalHoldOn`**；② 即便修补了 HTTP 预检，由于预检发生在读取 HTTP 请求体之前，写入者仍可通过预检后暂停发送请求体字节流，待管理员对 `dir/` 加上 `COMPLIANCE` 锁后再发完请求体，在存储层覆盖已加锁的 `null` 版本；③ 预检阶段 `checkPutObjectLockAllowed` 仅在 `getObjectInfoFn` 返回 `err == nil` 时检查锁状态，遇到读仲裁失败等错误时直接跳过检查放行写入 |
 | **同源缺口 B（已持久化目标版本的分段上传完成）** | 分段上传在 `NewMultipartUpload` 时将目标 `fi.VersionID` 持久化到 `.minio.sys/multipart/.../uploadID/xl.meta`，`CompleteMultipartUpload` 通过独立的 `completeMultipartOpts` 提交该版本 | 升级前已创建的遗留分段上传任务、由复制主体发起的任务、或旧上传状态恢复后与已复制落盘的同 UUID 版本发生碰撞的任务，其目标版本号保存在 `uploadID/xl.meta` 中且不经过 `putOpts`；若完成阶段不在对象写锁下对 `fi.VersionID` 执行存量版本查重，仅有 `s3:PutObject` 的调用者即可在目标版本被加上 `COMPLIANCE` 锁后完成上传并覆写该版本 |
+{.wide .expand}
 
 #### 精确 Git 提交溯源
 
@@ -106,6 +109,7 @@ tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 | | `cmd/erasure-object.go` | 在 `erasureObjects.putObject` 与 `erasureObjects.CopyObject` 持有目标对象命名空间写锁（`NewNSLock`）期间，对目标版本为 `""` 或 `nullVersionID` 的非复制写入调用 `checkObjectLockedForOverwrite` |
 | | `cmd/erasure-multipart.go` | 在 `CompleteMultipartUpload` 持有目标对象写锁期间，对 `null` 版本调用 `checkObjectLockedForOverwrite`，对非空 UUID 版本执行 `getObjectInfo`（多池下为 `replicaObjectInfo`）存量版本查重 |
 | | `cmd/erasure-server-pool.go`<br>`cmd/erasure-sets.go` | 在多池模式下为公开写入与分段上传完成注入跨池 `z.replicaObjectInfo`，并在 `CopyObject` 中透传版本与复制协调选项 |
+{.wide .expand}
 
 ---
 
@@ -425,6 +429,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | 未到期 `GOVERNANCE` | 缩短 / 清除 / 改模式 | 有 | 是 | **是** | 200 | **200 OK** |
 | 未到期 `COMPLIANCE` | 缩短 / 清除 / 改模式 | 任意 | 是 | 任意 | 400 `InvalidRequest`（`ObjectLocked`） | **400 `InvalidRequest`（`ObjectLocked`）** |
 | 无保留期或已到期 | 任意 | 任意 | 是 | 任意 | 200 | **200 OK** |
+{.wide .expand}
 
 #### 写路径不变量覆盖表
 
@@ -437,6 +442,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | `NewMultipartUpload` / `UploadPart` / `UploadPartCopy` | 初始化与加密分片走 `putOptsFromReq` -> `putOpts`；`UploadPartCopy` 强制清除复制信任 | 非可信复制初始化分段上传无法指定目标 `versionId`（返回 `403`） |
 | `CompleteMultipartUpload` | 走 `completeMultipartOpts`，并在对象写锁下按 `fi.VersionID` 执行 `null` 版本锁检查或 UUID 存量版本查重 | 版本控制开启前发起的正常在途上传可正常完成；针对既有 UUID 版本（含升级遗留任务、指定版本任务与恢复重放任务）的非复制完成请求一律返回 `403` |
 | 目录对象 `PUT` / `Copy`（`/{bucket}/dir/`） | 预检 `checkPutObjectLockAllowed` 与写锁内 `checkObjectLockedForOverwrite` 双重 Fail-Closed 校验 | 一旦目录 `null` 版本存在未到期的 `GOVERNANCE`、`COMPLIANCE` 或 `LegalHoldOn`（含预检后慢速传输期间并发提交的锁），非复制覆写返回 `400 InvalidRequest`（`ObjectLocked`）；读取失败时在预检与写锁均拒绝写入 |
+{.wide .expand}
 
 ---
 
@@ -479,6 +485,7 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | **旧上传状态恢复后与已复制落盘的同 UUID `COMPLIANCE` 版本碰撞（`TestRecoveredMultipartUploadAfterReplica`）** | **失败（P1）** | **失败（P1）**：生成标记只能证明初始化时的来源，不能证明完成时该版本仍不存在 | 通过（写锁内无条件按 `fi.VersionID` 查重） | **通过（写锁内无条件按 `fi.VersionID` 查重）** |
 | **预检阶段读仲裁失败时的行为（`TestPlanReviewPreflightReadFailure`）** | **失败（P1）**：预检忽略读错误并覆写对象 | 通过 | 写锁内拦截，但预检忽略读错误并继续接收请求体 | **通过（预检即刻 Fail-Closed 拒绝，不进入存储写入）** |
 | **分段上传完成阶段查询开销** | 无额外查询 | 新上传跳过查询（但引入恢复重放漏洞） | 每次完成在写锁内执行一次 `getObjectInfo` | **保持写锁内 `getObjectInfo` 严格查重；性能优化留待后续单独设计验证** |
+{.wide .expand}
 
 ### 最终结论
 

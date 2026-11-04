@@ -88,6 +88,7 @@ X-Minio-Source-Replication-Request: true
 | --- | --- | --- |
 | `trusted` | 原始请求已通过非匿名身份认证 + 精确标记头 + 对目标资源具备 `s3:ReplicateObject`（或 `s3:ReplicateDelete`）权限 | 保留源端 ETag/MTime 及子系统时间戳；传递分片实际大小与加密校验和；抑制重复事件通知与二次复制；固定复制删除的目标版本与存储池 |
 | `replicaTrusted` | 满足 `trusted`，且当前请求携带原始状态 `REPLICA`（或分片上传初始化时已持久化 `REPLICA` 状态） | 持久化 `REPLICA` 状态；导入复制 SSE 密封密钥；启用 SSE-C 免解密原始密文读取路径（`NoDecryption`）；启用副本专用的对象锁豁免规则 |
+{.wide .expand}
 
 之所以必须区分 `trusted` 与 `replicaTrusted`，是由真实线缆协议决定的：合法的分片上传（`UploadPart`）、分片完成（`CompleteMultipartUpload`）以及批量复制（Batch Replication）请求只会携带 `X-Minio-Source-Replication-Request: true`，而不会在每个子请求上重复附带 `X-Amz-Replication-Status: REPLICA`。
 
@@ -140,6 +141,7 @@ X-Minio-Source-Replication-Request: true
 | 复制 `DeleteObject` | 是 | 是 | `replicaTrusted`（需具备 `s3:ReplicateDelete` 与 `s3:DeleteObject`，且 `s3:DeleteObjectVersion` 未被显式拒绝） |
 | 批量复制 `PUT` / `Complete` | 是 | 否 | `trusted`（目标端凭据必须包含 `s3:ReplicateObject`） |
 | 代理转发 / 就绪检查 / 有效性探针 | 独立探针头 | 否 | 保留探针头；有效性探针在规则前缀下校验复制权限（`c9ad74673`、`5db7be4ee`） |
+{.wide .expand}
 
 ## CORS 纯内存驻留状态机 {#cors-state-machine}
 
@@ -153,6 +155,7 @@ X-Minio-Source-Replication-Request: true
 | 未驻留，且启动期初始加载尚未完成 | 失败关闭（Fail closed） | 无 |
 | 启动完成后未驻留：磁盘上真实存在但元数据加载失败的桶 | 失败关闭（Fail closed） | 无 |
 | 启动完成后未驻留：不存在、保留名、非法名或 `.minio.sys` 命名空间 | 回退使用全局 CORS 配置 | 无 |
+{.wide .expand}
 
 启动加载期与已知加载失败状态均采用失败关闭（fail closed）策略：由于预签名 URL（Presigned URL）本身已在查询字符串中携带认证签名，存储桶自定义的 CORS 配置是浏览器端唯一能够约束其调用源（Origin）的边界；若在桶元数据加载失败时回退到宽松的全局 CORS 策略，泄露的预签名 URL 就可能被任意网页源跨域调用。
 

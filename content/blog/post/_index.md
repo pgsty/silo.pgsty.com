@@ -6,7 +6,7 @@ weight: 10
 icon: fa-solid fa-newspaper
 sidebar_expanded: true
 module: [BLOG]
-# 沉浸式文章：cascade 里的四个键是 OINK 0.6.0 的配方 —— 文章自带的 featured
+# 沉浸式文章：cascade 里的四个键是 OINK 1.5.0 的配方 —— 文章自带的 featured
 # 图铺成整幅 hero，右栏换成随正文起始的流式目录并去掉分类云，左侧文档树与面
 # 包屑一并让位。没有配图的文章会自动退回普通排版，不会出错。
 #

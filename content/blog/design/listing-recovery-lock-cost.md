@@ -83,6 +83,7 @@ When single-pool recovery spans two distinct lock domains, holding the first rea
 | Confirm only the source pool or skip locking | Fewer reads and lock acquisitions | Concurrent overwrites, deletions, and cross-pool migrations still produce silent omissions. |
 | Shorten retry intervals for all writers globally | Reduces some contention tails | Alters global write scheduling and increases cluster-wide lock RPC traffic. |
 | **Confirm eligible disagreements with a bounded short wait (selected)** | Keeps normal scans on the fast path; returns confirmed state or an explicit error | Adds targeted re-read I/O and lock handling on contended entries. |
+{.wide .expand}
 
 ## Runtime Cost Profile {#cost}
 

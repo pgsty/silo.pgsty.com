@@ -46,6 +46,7 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 | 二进制资产          | `console-<os>-<arch>`             | `silo-console-<os>-<arch>`                |
 | 校验和文件          | `console_<version>_checksums.txt` | `silo-console_<version>_checksums.txt`    |
 | 网站与文档          | 上游或前维护者入口                         | `silo.pgsty.com` 与 `silo.pgsty.com/docs/` |
+{.wide .expand}
 
 容器部署使用 [Docker Hub 的 `pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)，当前版本及拉取命令见 [Console v2.4.1 发布说明](/zh/blog/release/console-2.4.1/#delivery)。
 
@@ -65,6 +66,7 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 | 源码开发产物          | `make console` 仍生成 `./console`             | 保持开发工作流和脚本兼容            |
 | 软件包 systemd 单元  | 保持 `minio-console.service`                 | 避免升级时出现两个服务或丢失原服务状态     |
 | systemd 用户与配置   | 保持 `console-user` 与 `/etc/default/console` | 避免不必要的账户和配置文件迁移         |
+{.wide .expand}
 
 因此，升级脚本不能执行全仓库或全配置的 `minio → silo`、`console → silo-console` 替换。未来若要迁移这些兼容接口，需要提供别名、弃用周期和明确的双读策略。
 
@@ -112,6 +114,7 @@ favicon、PWA 与 Apple Touch 图标此前仍是上一代手绘徽标的 PNG 导
 | `google.golang.org/grpc`          | v1.82.1   | GO-2026-6061                                  |
 | `github.com/prometheus/prometheus`| v0.311.3  | GO-2026-5710 / -5662 / -5381 / -5264（含远程读 DoS）|
 | `github.com/klauspost/compress`   | v1.18.7   | GO-2026-5841                                  |
+{.wide .expand}
 
 唯一剩余公告位于 `golang.org/x/crypto`，官方尚未发布修复且代码路径不可达，作为已知事项记录。
 

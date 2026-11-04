@@ -24,6 +24,7 @@ Earlier [release notes](/blog/release/silo-20260903/), the [20260903 hardening r
 | [PR #103](https://github.com/pgsty/silo/pull/103) | Serialized writes to the whole `.metadata.bin` record | A write lock cannot validate an ordering decision made before acquiring the lock |
 | [#76](https://github.com/pgsty/silo/issues/76), [#78](https://github.com/pgsty/silo/issues/78) | Object Lock replication payload and existing-bucket adoption protection | Does not provide a unified source-state comparison across all six configuration types |
 | [CORS replication repair](/blog/design/cors-replication-trust/) | Dedicated per-bucket CORS deletion register and replication trust boundary | Specific to CORS; its semantics cannot be applied blindly to every metadata type |
+{.wide .expand}
 
 This repair covers Policy, Tags, SSE, Quota, Versioning, and Object Lock. Lifecycle/expiry has its own merged-payload time semantics, and CORS retains its separate mechanism. Notification, IAM, [object replication reliability](/blog/design/replication-reliability/), MRF, resync, and public counters are separate subsystems.
 
@@ -39,6 +40,7 @@ The original regression reproduced on both `ErasureSD` and 16-disk `Erasure` Obj
 | Quota | No | Delete; zero-value JSON has separate semantics | No |
 | Versioning | No | No operation | Not used as deletion |
 | Object Lock | No | No operation | Not used as deletion |
+{.wide .expand}
 
 Three further entry-point defects surfaced during investigation:
 
@@ -59,6 +61,7 @@ The state model reuses the existing payload, field `UpdatedAt`, and bucket `Crea
 | Live baseline | Valid nonempty payload at zero time or `Created` | Yes, for historical configuration initialization |
 | Real update | Valid nonempty payload later than `Created` | Yes |
 | Real deletion | Empty payload for a deletable field, later than `Created` | Yes; this timestamped empty value is a tombstone |
+{.wide .expand}
 
 Empty Versioning and Object Lock events remain no-ops; sharing an ordering helper must not give those two types deletion semantics. Zero field times use `Created` as their comparison baseline without turning historical emptiness into a deletion.
 

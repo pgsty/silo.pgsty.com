@@ -42,6 +42,7 @@ PR #262 的修复方向正确。它只放宽已有 mixed-EC recount 的一个过
 | --- | --- | --- |
 | GET 与 ListObjectsV2 | latest-only | 对符合条件的混合 EC 组重新计数，选出可读 quorum。 |
 | ListObjectVersions、decommission、rebalance 及部分 Walk 调用 | all versions | 普通合并失败后停止，可读多数被少数旧布局遮住。 |
+{.wide .expand}
 
 所以这个缺陷来自 2026-10-16 修复的范围没有覆盖完整调用链。底层降级元数据状态可以更早存在；真正暴露数据丢失路径的是只有一类调用方学会了恢复。
 

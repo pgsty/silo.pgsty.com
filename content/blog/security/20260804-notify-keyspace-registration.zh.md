@@ -69,6 +69,7 @@ const (
 | `notify_nats` | `nkey_seed` | [`#21231`](https://github.com/minio/minio/pull/21231) (2025-05) | 缺失 | 缺失 | 读取 `nkey_seed` | 写入 `nkey_seed` | 持久化配置无法通过 `CheckValidKeys` |
 | `notify_nats` | `tls_handshake_first` | [`#21008`](https://github.com/minio/minio/pull/21008) (2025-02) | 缺失 | 已包含 | 读取 `tls_handshake_first` | 写入 `tls_handshake_first` | 持久化配置无法通过 `CheckValidKeys` |
 | `notify_amqp` | `immediate` | 初始 KVS 迁移 | 缺失 | 缺失 | 读取 `immediate` | 将 `cfg.Immediate` 误写入 `AmqpInternal`！ | `immediate` 被拒；且 `SetNotifyAMQP` 用 `cfg.Immediate` 覆盖了 `internal` |
+{.wide .expand}
 
 特别注意表格最后一行的 AMQP 缺陷：`cmd/config/notify/legacy.go` 中的 `SetNotifyAMQP` 存在一处复制粘贴笔误，把 `strconv.FormatBool(cfg.Immediate)` 写到了 `target.AmqpInternal` 键下，而真正的 `cfg.Internal` 字段则完全丢失。
 

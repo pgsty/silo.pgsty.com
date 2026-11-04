@@ -42,6 +42,7 @@ The result was a split contract:
 | --- | --- | --- |
 | GET and ListObjectsV2 | latest-only | Recount eligible mixed EC groups and select a readable quorum. |
 | ListObjectVersions, decommission, rebalance, and some Walk callers | all versions | Stop after the ordinary merge fails; a minority layout can hide the readable majority. |
+{.wide .expand}
 
 The defect was therefore introduced by an incomplete scope boundary in the 2026-10-16 repair. The underlying degraded metadata state can be older; the data-loss path became visible when only one family of callers learned how to recover from it.
 

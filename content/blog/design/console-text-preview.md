@@ -165,6 +165,7 @@ Matching either an allowed extension (when not excluded by rule 1) or an allowed
 | `page.txt` + `text/html` | `text` | Extension admits it; HTML source renders as inert text |
 | `notes.md` + `text/plain` | `text` | Exact MIME admits raw text |
 | `image.svg` + `image/svg+xml` | `image` | Handled by existing image path |
+{.wide .expand}
 
 ## Resource Contract {#resource-contract}
 

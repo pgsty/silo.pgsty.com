@@ -52,7 +52,7 @@ sidebar_expanded: false
 | <span id="g10"></span>**G10 · 池迁移与数据修复改进**<br>再平衡、退役及修复更准确地处理标签、版本和删除标记。 | 迁移存储池、执行 heal 或恢复复制。 | 改善元数据保留与重试；历史异常仍需检查。 | [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[复制恢复](/zh/blog/design/replication-reliability/) |
 | <span id="g11"></span>**G11 · 通知与流式推送修复**<br>修正 NATS/AMQP 配置识别，以及通知、Select 等流式响应刷新。 | 使用相应通知目标或流式接口。 | 配置与事件输出更准确；旧数据库配置见 [O03](#o03)。 | [通知配置](/zh/compatibility/server/#notify-audit)、[流式响应](/zh/compatibility/server/#s3-behavior) |
 | <span id="g12"></span>**G12 · 运行稳定性与资源回收**<br>修复并发采集、缓冲区所有权和连接回收等问题。 | 并发读写、指标采集或取消请求。 | 消除相关崩溃与资源泄漏。 | [读缓冲修复](/zh/compatibility/server/#s3-behavior)、[运行与观测](/zh/compatibility/server/#observability) |
-{.silo-compatibility-table}
+{.silo-compatibility-table .wide .expand}
 
 ## 🔵 轻微差异：4 类 {#minor}
 
@@ -64,7 +64,7 @@ sidebar_expanded: false
 | <span id="b02"></span>**B02 · 控制台列表改为分页**<br>对象列表按游标加载，排序、筛选和选择作用于当前页。 | 在 Console 浏览、筛选或批量选择对象。 | 操作习惯有变化，应用直接调用 S3 的方式不变。 | [分页边界](/zh/compatibility/console/#pagination) |
 | <span id="b03"></span>**B03 · 监控与诊断信息更完整**<br>新增诊断指标，并修正配额、复制等计数或状态含义。 | 使用对应指标、仪表盘或告警。 | 原指标命名空间保留；核对相关展示和告警规则。 | [指标变化](/zh/compatibility/server/#observability)、[Console 指标](/zh/compatibility/console/#metrics) |
 | <span id="b04"></span>**B04 · API 返回字段更丰富**<br>部分复制、分片和 Console 响应增加校验和或会话字段。 | 读取这些 API 的返回结果。 | 标准客户端通常可处理；拒绝未知字段的解析器见 [O05](#o05)。 | [分片响应](/zh/blog/design/complete-multipart-checksum-type/)、[复制响应](/zh/blog/design/copyobject-ssec-checksum-response/#impact)、[Console API](/zh/compatibility/console/#api-output) |
-{.silo-compatibility-table}
+{.silo-compatibility-table .wide .expand}
 
 ## 🟠 按条件检查：8 类 {#conditional}
 
@@ -80,7 +80,7 @@ sidebar_expanded: false
 | <span id="o06"></span>**O06 · 多池操作与 strict 分片模式退役**<br>多池写删核实元数据；20260916 的可选 strict 列表模式已退役。 | 多池条件写／删除，或升级曾启用 strict 列表的部署。 | 故障时可能返回 503，即使 GET 仍成功；Server 20261018 与 20261026 忽略 strict 开关并警告，不提供持久列表与严格取消。 | [多池条件](/zh/blog/design/multi-pool-object-consistency/#conditions)、[当前分片契约](/zh/blog/design/list-multipart-uploads/#decision-20261018) |
 | <span id="o07"></span>**O07 · 跨站复制、混跑和回滚**<br>IAM 撤销与桶配置删除状态要求协调升级和恢复。 | 多站点、共享 IAM、不同版本混跑或降级恢复。 | 保留完整恢复点并在回滚时同步恢复所有参与端。 | [IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout)、[回滚边界](/zh/compatibility/migration/#rollback) |
 | <span id="o08"></span>**O08 · 自更新及上游在线服务**<br>原地自更新、SUBNET 与上游托管支持集成被停用。 | 使用 `admin update`、`mcli update` 或 MinIO 在线支持流程。 | 改用软件包、镜像或编排器升级；常规 S3 访问不受此项影响。 | [服务端更新](/zh/compatibility/server/#offline-services)、[客户端更新](/zh/compatibility/mcli/#self-update)、[SUBNET](/zh/compatibility/mcli/#subnet) |
-{.silo-compatibility-table}
+{.silo-compatibility-table .wide .expand}
 
 ## 比较范围与版本边界 {#scope}
 

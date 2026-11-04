@@ -47,6 +47,7 @@ url: "/zh/blog/design/server-release-readiness/"
 | 管理授权 | 用户与组状态变更始终检查启用权限 | 按请求的目标状态检查对应的启用或禁用权限 | 候选已关闭 |
 | Checksum | 分片上传与复制路径遗漏校验和字段、接受非法组合，或在压缩/加密后的字节流上计算校验和 | 补齐算法与类型校验、服务端分片校验和计算、联邦透传、AWS 错误码及 `CopyObject` 流变换顺序 | 候选已关闭 |
 | 发布证据 | 全量验收记录最初对应的是后续仍有改动的中间提交 | 分别记录 `ebac0ca73` 的全量验收结果与最终候选提交的定向门禁 | 证据缺陷已关闭 |
+{.wide .expand}
 
 ## 定义候选的四条不变量 {#invariants}
 
@@ -145,6 +146,7 @@ CORS 热路径必须明确区分以下四种状态：
 | `ListMultipartUploads` [#79](https://github.com/pgsty/silo/issues/79) | 继承的列表格式一致性缺口 | 作为已知问题记录，不影响常规分片上传的数据完整性 |
 | 联邦 `CopyObject` [#99](https://github.com/pgsty/silo/issues/99)、[#100](https://github.com/pgsty/silo/issues/100) | 旧版联邦后端的校验和与内联小对象兼容缺口 | 0903 仅影响特定联邦特性；已随 20260916 修复 |
 | ILM 迁移 PR #60 与通用 SSE 议题 #61 | 新功能需求 | 不属于本次发布的安全与稳定性范围 |
+{.wide .expand}
 
 ## 证据 {#evidence}
 

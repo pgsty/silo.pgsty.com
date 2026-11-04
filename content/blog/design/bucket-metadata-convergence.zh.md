@@ -25,6 +25,7 @@ translation_notice: false
 | [PR #103](https://github.com/pgsty/silo/pull/103) | 整个 `.metadata.bin` 记录的写入串行化 | 仅在写盘阶段加锁，无法保证锁外作出的新旧判断在拿到锁时仍然有效 |
 | [#76](https://github.com/pgsty/silo/issues/76)、[#78](https://github.com/pgsty/silo/issues/78) | Object Lock 复制载荷与已有桶接管保护 | 未建立覆盖六类配置的统一来源状态比较规则 |
 | [CORS 复制修复](/zh/blog/design/cors-replication-trust/) | 桶级 CORS 的独立删除记录与复制信任边界 | 仅针对 CORS 设计，其语义不能直接套用到全部元数据类型 |
+{.wide .expand}
 
 本修复处理 Policy、Tags、SSE、Quota、Versioning 与 Object Lock 六类配置。Lifecycle/expiry 保持其合并载荷时间语义；CORS 保留独立机制；notification、IAM、[对象复制可靠性](/zh/blog/design/replication-reliability/)、MRF、resync 与公开统计各自独立维护。
 

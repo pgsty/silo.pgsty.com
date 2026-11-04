@@ -27,6 +27,7 @@ Each fix repairs the reproduced invariant at the smallest boundary that owns it,
 | #153: delete-marker purge | Single-object DELETE classified a permanent deletion as marker replication; the remote marker disappeared while source purge remained `PENDING` | Classify by purge status, matching bulk delete, scanner/heal, and resync |
 | #152: invisible MRF drops | The queue was already bounded, but internal drop counters did not reach administration or monitoring; object and delete worker arguments were reversed | Expose existing counters, warn at actual drop sites with deduplication, and align worker routing |
 | #137: unreliable resync cancellation | One shared token could not stop multiple runs; blocking phases missed cancellation; stale runs could overwrite terminal state | Give each run an owned context, cancel by resync ID, and constrain registration, finalization, and state updates |
+{.wide .expand}
 
 Two earlier fixes in the same series addressed adjacent invariants:
 
@@ -50,6 +51,7 @@ Starting from baseline [`450dcb848`](https://github.com/pgsty/silo/commit/450dcb
 | Purge state for that version in source `xl.meta` | Still `PENDING`, although ordinary replication status was complete | Cleanup completed on the first replication attempt |
 | Original data version | Retained | Retained |
 | Scanner needed to finish this cleanup | Required later recovery | No scanner assistance needed |
+{.wide .expand}
 
 Checking only that the remote version disappeared would miss the lingering `PENDING` state in source `xl.meta`. The reproduction confirmed the misclassified initial purge, the wrong completion state, and an unnecessary `HEAD` probe, without triggering a sustained 405 storm because the scanner/heal and resync paths already selected the purge branch.
 

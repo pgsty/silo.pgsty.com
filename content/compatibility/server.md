@@ -78,6 +78,7 @@ The tagged [`RELEASE.2026-08-04T00-00-00Z`](https://github.com/pgsty/silo/releas
 | Authorization/security          | Intentionally stricter                | OIDC HMAC tokens, unsafe LDAP failures, forged replication metadata, object-only grants for protected bucket writes, shadowed policy inputs, ambiguous version IDs, and several malformed internode requests change behavior |
 | Embedded UI and Go dependencies | Console and MCLI forked behind compatible import paths; pkg on its own path | Silo Console and MCLI are selected with `replace` directives while `github.com/minio/console` / `github.com/minio/mc` paths remain; Silo Pkg is consumed directly under `github.com/pgsty/silo-pkg/v3` |
 | Mixed-version cluster           | Not supported for this transition     | The private `ReadMultiple` storage-REST operation was removed without bumping storage REST v63. Upgrade all nodes as one build                                                                                               |
+{.wide .expand}
 
 ## What deliberately stays compatible {#same}
 
@@ -135,6 +136,7 @@ The maintained source remote is `github.com/pgsty/silo` on branch `main`; the fo
 | Bundled client in OCI      | No maintained fork contract                                         | `/usr/bin/mcli` plus `/usr/bin/mc -> mcli`                                                                        | This `mc` is the client compatibility alias, never a server alias                                                     |
 | Warm-tier probe            | Temporary object contains `MinIO`                                   | Same-length probe contains `Silo!`                                                                                | Only observable through backend inspection or a failed cleanup; protocol semantics do not change                      |
 | Log rotation default       | `minio-*.log`                                                       | `silo-*.log`                                                                                                      | Log collectors matching filenames must change                                                                         |
+{.wide .expand}
 
 The deleted `/api/health/upload` reference was an **outbound SUBNET URL path**, not a local Silo HTTP endpoint. The compatibility change is that Silo no longer issues that POST; it is incorrect to describe this as removal of a server route.
 
@@ -158,6 +160,7 @@ The fork adds only three server configuration controls that materially change co
 | `MINIO_API_TRUSTED_PROXIES`                                                | General source-address trust boundary                           | unset: exact historical trust-any behavior |
 | `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES` / LDAP key `sts_trusted_proxies` | Source buckets used by LDAP STS failure limiting                | no trusted proxy; use the socket peer      |
 | `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`                                   | Temporary rollback for the protected bucket/object IAM boundary | off                                        |
+{.wide .expand}
 
 Notification KV registration fixes do not rename their existing environment variables. `MINIO_UPDATE`, SUBNET, and callhome inputs are retained only as ignored/migration-compatible inputs as described next. `SILO_OPTS` appears only inside the generated inspect helper, not as a general replacement for `MINIO_OPTS`.
 
@@ -263,6 +266,7 @@ These are user-visible changes even when they close a vulnerability. “Stricter
 | `s3:signatureAge`                                                           | Present only for verified presigned SigV4 requests                                                                                                                                                                                                                                                    | Raw `x-amz-signature-age` injection no longer creates the condition                                                                                                                  |
 | `s3:versionid` (`744a9dcd7`)                                                | Absent means absent, whitespace is normalized, and DeleteObject/MultiDelete uses the effective per-object version. A URL version cannot decoy a different XML version                                                                                                                                 | Re-test version-conditioned delete policies and any policy relying on Null                                                                                                           |
 | Replication metadata (`56fa63bfd`)                                          | Ordinary PUT/COPY cannot inject internal replication status/time metadata. An authenticated replica request must have `ReplicateObjectAction`; multipart and Snowball replication flows retain their legitimate metadata                                                                              | Custom replication callers must use the authorized replication path                                                                                                                  |
+{.wide .expand}
 
 The bucket-boundary escape hatch is startup-global and all-or-nothing. It exists for migration, not as a permanent mixed-policy mode. An empty or unparseable LDAP source is deliberately not placed into one shared limiter bucket; it is not throttled until a usable source can be derived.
 
@@ -336,6 +340,7 @@ Important deliberate dependency decisions are:
 | Compression     | klauspost/compress 1.18.7                                     | Explicit security/correctness upgrade                                                                                                            |
 | Thrift          | 0.24.0                                                        | Fixes 32-bit builds                                                                                                                              |
 | systemd library | require 22.7, replace with 22.6                               | Retains NetBSD compilation until the monotonic-clock regression is fixed upstream                                                                |
+{.wide .expand}
 
 The LDAP package now honors TLS fields for `ldaps://`, keeps StartTLS active even with `server_insecure`, avoids a nil-TLS panic, applies a StartTLS deadline, and closes a connection after failed StartTLS. Certificate-watcher shutdown no longer leaks; on Windows, polling can delay reload by up to about ten seconds. RNG subkey entropy/reset behavior is corrected, although the server does not exercise the reset path.
 
@@ -359,6 +364,7 @@ The sections above describe the `219670d3` snapshot. The table below records the
 | Site replication | Object Lock configuration replicates in its own field (the legacy `Tags` carrier is still accepted); status is accounted per site; validity probes verify permissions under the rule prefix | `3861f33cb`, `fb406fdc9`, `c9ad74673`, `5db7be4ee` |
 | Configuration | Legacy database notification targets require a DSN; `MINIO_CONFIG_ENV_FILE` uses a dedicated parser that keeps named targets | `f1ba68358`, `6b0998157`, `2aea7fe9c` |
 | Toolchain and components | Go 1.27.1; upstream `minio-go` at `0e78d3f18efe` (`silo-go` retired); `silo-pkg` v3.13.2; Console v2.3.0 (see the [Console page](/compatibility/console/)); bundled [mcli 20260903](/blog/release/mcli-20260903/) | `43f4bb7ed`, `4d6e1ea8e`, final dependency refresh |
+{.wide .expand}
 
 The shared package's own-module move ([v3.13.0](/blog/release/pkg-3.13.0/), a **breaking** change for Go consumers) was already adopted by published Server 20260903: that tag directly requires `github.com/pgsty/silo-pkg/v3 v3.13.2`. The September 13 refresh moved the maintained stack to v3.14.0 and Server 20260916 requires v3.14.1; neither is the first Server adoption of the new path. See the [component matrix](/compatibility/versions/) for each build.
 
@@ -373,6 +379,7 @@ These changes shipped in [Server 20260916](/blog/release/silo-20260916/) and are
 | Authorization and persistent state | Self-service password changes and user creation use separate permissions. Persistent IAM revocations and bucket-configuration deletion state affect coordinated upgrades and recovery; general bucket-configuration tombstone export is off by default. | [O02](/compatibility/#o02), [O07](/compatibility/#o07) / [password migration](/compatibility/password-permissions/), [IAM upgrades](/operations/replication/iam-upgrade/), [configuration convergence](/blog/design/bucket-metadata-convergence/#rollout) |
 | Data and replication | Further fixes cover multi-pool replicas, tag and Object Lock ordering, delete-marker recovery, SSE-C and federated copies; they do not reconstruct lost historical state automatically. | [G07–G10](/compatibility/#g07) / [replica audit](/operations/replication/replica-metadata-audit/), [version notes](/compatibility/versions/#source-review) |
 | HTTP and TLS | Request headers use an absolute read deadline. TLS defaults need checking with older proxies and identity providers; bodies retain the existing rolling idle timeout. | [O03](/compatibility/#o03) / [header timeouts](/blog/design/request-header-timeouts/), [TLS/OIDC](/blog/design/go127-tls-oidc-discovery/) |
+{.wide .expand}
 
 Distinguish API additions, removals and behavioral changes: per-bucket CORS [implements existing placeholder APIs](#since-20260806); `ReadMultiple` is a [removed private storage operation](#storage-rest); online updates [retain an entry point with the function disabled](#offline-services). `silo healthcheck` and `mcli checksum verify` are new commands that call existing health endpoints and read objects for local auditing, respectively.
 
@@ -445,6 +452,7 @@ The hashes are in graph order. Merge, documentation, test, and CI commits are in
 | Chart hardening and audit documentation      | `dfe669862`, `5f4513fd4`, `b42ee4e8a`, `8eae745ab`                                                                                                                                                                                                                 | Secure chart user default, portal/doc routing, maintainer ignore rules, and advisories; only the chart default changes runtime delivery behavior                                                                                                                                                   |
 | Release engineering through the 20260804 tag | `9c799f42d`, `10c7670b8`, `cf7df097b`, `32863c852`, `632ade111`, `1814ae52f`, `475236c79`, `11d79fddc`, `3b8a55dee`, `ca674a696`, `4c185d5a6`, `2ca4971d9`, `e064b5555`, `aa5139369`, `021110b45`, `d88f46cce`                                                     | RPM/DEB/APK, provenance, OCI publishing gates, pinned lint/generation, S3 Select test-race fix, broad CI, PID-1 signal fix, published-target cross-builds, safe release dispatch, reproducibility, stale-config removal, systemd location, honest gates, and runtime-image shutdown assertion      |
 | Silo cutover and 2026-08-06 prepared head    | `15def34dc`, `77bdc4c0c`, `15ab10833`, `30749911b`, `e071bb77e`, `bd8df5166`, `6613c2a3c`, `fd2ca1c6d`, `c46b16ec6`, `c47733abc`, `f1c77d5a2`, `62717d7bf`, `6740e6978`, `b57275be3`, `05be686b8`, `a6d6d9b02`, `6bd9cf77e`, `219670d31`                           | Removes unpublished MinIO delivery residue; Silo runtime identity/offline boundary; renamed packages, OCI and Helm with migration guards; pinned fixtures; docs/repository cutover; Console 2.1.0 then 2.1.1; Node 24 actions; DCO/legal/docs polish; regenerated CREDITS; LICENSE/NOTICE delivery |
+{.wide .expand}
 
 The ledger totals 96 unique commits. Changes replaced inside the range—such as Console 2.0 → 2.1.0 → 2.1.1, the historical `pgsty/minio` image/chart state, and updater-buffer code after the updater was disabled—are described only where they leave a final compatibility consequence.
 

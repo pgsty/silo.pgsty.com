@@ -24,6 +24,7 @@ url: "/zh/blog/design/stale-metadata-reuse/"
 | 旧版 V1 版本头部 | 复用带有签名或 EC 字段的结构体 | V1 布局中不存在的字段继续残留 | `Signature`、`EcN`、`EcM` 均归零 |
 | 扫描进度响应 | 复用上一轮携带最终缓存的响应信封 | 同时包含新 `Update` 与旧 `Final` | 仅包含 `Update` |
 | 扫描最终响应 | 复用上一轮携带进度更新的响应信封 | 同时包含旧 `Update` 与新 `Final` | 仅包含 `Final` |
+{.wide .expand}
 
 ## 旧版 `xl.meta` 版本头部 {#legacy-headers}
 
