@@ -20,6 +20,7 @@ cascade:
 - [Peer 重载后的审计 Webhook](/zh/blog/design/audit-webhook-peer-reload/)（[#259](https://github.com/pgsty/silo/issues/259)）：解释运行时修改 audit_webhook 为何会让除处理请求的服务器外其他所有服务器上的目标停止工作，哪些日志子系统存在同样问题，以及为什么用服务器上下文构建日志目标、并先打开队列存储是最小而完整的修复。
 - [失败写入与幽灵空前缀](/zh/blog/design/failed-rename-empty-prefix/)（[#285](https://github.com/pgsty/silo/issues/285)、[#286](https://github.com/pgsty/silo/pull/286)）：解释暂存数据在远端 rename 之前消失的写入，为何会留下空对象目录并在之后被列为空前缀，以及为什么在两条 rename 失败路径上清理它就足够。
 - [Heal 演练不能删除数据](/zh/blog/design/heal-dry-run-safety/)（源自 [#280](https://github.com/pgsty/silo/pull/280)）：解释 heal 演练为何会删掉 dangling 对象最后的元数据副本，并在远端节点上执行真实的桶 heal，以及为什么提前返回加上把演练标志传给 peer 能同时关闭这两条路径。
+- [生命周期"删除全部版本"只能作用于一个 key](/zh/blog/design/ilm-delete-all-exact-key/)（在审查 [#278](https://github.com/pgsty/silo/issues/278) 修复时发现）：解释 ExpiredObjectAllVersions、DelMarkerExpiration 和批量过期的默认 purge 为何会删除过期 key 名下的所有其他 key，以及为什么在复核后按版本 ID 只清理该 key 自身的版本，是最小而安全的修复。
 - [Console 的桶配额：列表显示与数值校验](/zh/blog/design/console-quota-numeric-validation/)（[silo-console#72](https://github.com/pgsty/silo-console/issues/72)、[silo-console#73](https://github.com/pgsty/silo-console/issues/73)）：解释 Console 设置的配额为何在桶列表中显示为"-"、创建桶时为何会把超大配额变成 1 字节、两者的来源，以及已合并的 Console 修复覆盖了什么。
 - [大型单池集群的锁域](/zh/blog/design/single-pool-lock-domains/)：解释在 18 台及以上主机的单池集群中，DELETE 与 CopyObject 为何无法与同一 key 上的 PUT 互斥，哪些布局受影响，以及关闭它的路由改动。
 
