@@ -13,6 +13,16 @@ cascade:
 
 Design records document the engineering decisions behind PGSTY SILO: root causes, S3 and IAM protocol invariants, trade-offs against rejected alternatives, operational limits, and regression coverage.
 
+## November 4: Release-Blocking Lifecycle Fixes
+
+- [Multi-Pool Lifecycle Expiry: Decide on the Whole Object](/blog/design/multi-pool-lifecycle-expiry/) ([#278](https://github.com/pgsty/silo/issues/278), [#279](https://github.com/pgsty/silo/pull/279)): Why an expiry decided on the versions of one pool hides, deletes, or resurrects versions in another pool, and why a recheck on the merged version list under the object lock is the minimum complete repair.
+- [Restored Copies: Expire the Copy, Not the Object](/blog/design/restored-copy-expiry/) ([#281](https://github.com/pgsty/silo/issues/281), [#282](https://github.com/pgsty/silo/pull/282)): Why the expiry of a restored current version hid the object or stripped an older null version, and which storage and native-restore safeguards ship with the exact-version fix.
+- [Audit Webhooks After a Peer Reload](/blog/design/audit-webhook-peer-reload/) ([#259](https://github.com/pgsty/silo/issues/259)): Why a runtime audit_webhook change leaves every server but the serving one with a stopped target, which logger subsystems share it, and why building logger targets on the server context plus opening the queue store first is the minimum complete repair.
+- [Failed Writes and Phantom Empty Prefixes](/blog/design/failed-rename-empty-prefix/) ([#285](https://github.com/pgsty/silo/issues/285), [#286](https://github.com/pgsty/silo/pull/286)): Why a write whose staged data vanished before the remote rename leaves an empty object directory that later lists as an empty prefix, and why removing it on both rename failure paths is sufficient.
+- [Heal Dry Run Must Not Delete Data](/blog/design/heal-dry-run-safety/) (from [#280](https://github.com/pgsty/silo/pull/280)): Why a dry-run heal could delete the last metadata copies of a dangling object and run a real bucket heal on remote nodes, and why an early return plus forwarding the dry-run flag to peers closes both paths.
+- [Bucket Quota in the Console: List Display and Numeric Validation](/blog/design/console-quota-numeric-validation/) ([silo-console#72](https://github.com/pgsty/silo-console/issues/72), [silo-console#73](https://github.com/pgsty/silo-console/issues/73)): Why a Console-set quota showed as "-" in the bucket list, why bucket creation could turn a huge quota into one byte, where both came from, and what the merged Console fix covers.
+- [Lock Domains of Large Single-Pool Clusters](/blog/design/single-pool-lock-domains/): Why DELETE and CopyObject fail to exclude PUT on the same key in single-pool clusters of 18 or more hosts, which layouts that covers, and the routing change that closes it.
+
 ## November 1: Pool Migration Integrity Review
 
 - [Pool Migration Integrity Review: #261, #263, and #265](/blog/design/pool-migration-integrity-review/): A maintainer review of three reports and their fixes, including the contributor merge of #266 and maintainer follow-up #276.

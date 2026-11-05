@@ -1,0 +1,291 @@
+---
+title: "恢复副本：过期的是副本，不是对象"
+linkTitle: "恢复副本过期"
+date: 2026-11-04
+lastmod: 2026-11-05
+author: "PGSTY SILO 维护团队"
+summary: >
+  解释当前版本的恢复副本过期时，为何会隐藏对象或抹掉更早的 null 版本；为什么按精确版本定位是核心修复；以及哪些存储层和原生恢复防护必须与它一起交付。
+tags: [设计, 生命周期, 分层存储, 数据安全]
+weight: 10
+draft: false
+url: "/zh/blog/design/restored-copy-expiry/"
+---
+
+本文覆盖 [issue #281](https://github.com/pgsty/silo/issues/281) 和 Denis Babchuk 提交的 [PR #282](https://github.com/pgsty/silo/pull/282)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。修复与多池生命周期修复（[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/)，[#278](https://github.com/pgsty/silo/issues/278)）在同一个维护者集成 PR 中交付：贡献者提交原样保留，并附加下文所述的防护。本修复还依赖[单池锁域修复](/zh/blog/design/single-pool-lock-domains/)，必须与它一起或在它之后合并。
+
+**状态：** 修复已通过审查，已在本地提交。它已和下个版本的其他修复放在同一个集成分支上一起测试：完整测试套件、CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。尚未合并或发布。
+
+## 简短结论 {#tldr}
+
+报告属实。执行 `POST ?restore` 后，已分层的版本会在本地获得一份临时副本，保留到 `x-amz-restore` 中的到期日期。到期后，生命周期应当只删除这份副本：版本本身保持分层状态，之后重新从 tier 读取。
+
+对非当前版本，这一点原本就正确。对当前版本，清理却因为没有传版本 ID，被当成了对整个对象的删除：
+
+- 开启版本控制的桶会在对象上方多出一个新的删除标记，GET 和 HEAD 返回 `NoSuchKey`；
+- 暂停版本控制的桶会把删除作用到下面的 `null` 版本上，删掉这个版本的数据；
+- 没有 `null` 版本时，删除静默失败，恢复副本永远留在磁盘上。
+
+到期后一次普通的 GET 或 HEAD 就足以触发。
+
+核心修复就是 PR #282 提出的做法：清理始终指向恢复副本所属的精确版本。审查又发现，清理和恢复还有其他途径会碰到错误的版本，因此修复还附带四组改动：
+
+- 一处版本控制状态的修正；
+- 一道存储层防护：只有已完成分层的版本才能交出恢复缓存；
+- 一组原生恢复修复：让恢复本身不会新建、覆盖它正在回迁的版本，也不会在这个版本上死锁；
+- 一套原生恢复的归属协议，来自对抗性审查。每次恢复尝试拥有它正在回迁的版本；它的 upload 是私有的，其他调用方无法触及；所有恢复决策都基于多数磁盘一致认可的元数据。
+
+## 定性 {#assessment}
+
+| 维度 | 判断 |
+| --- | --- |
+| 性质 | 恢复副本过期中的数据正确性缺陷；继承自上游（MinIO `RELEASE.2025-07-23T15-54-02Z` 与 master 中代码相同），不是已发布 SILO 版本引入的回归。 |
+| 受影响 | 开启版本控制的桶中被恢复的当前版本（包括开启版本控制前写入的 `null` 当前版本）；暂停版本控制的桶中，带版本 ID 且被恢复的当前版本。 |
+| 不受影响 | 被恢复的非当前版本；暂停版本控制时被恢复的 `null` 当前版本；未开启版本控制的桶。 |
+| 严重程度 | 致命。对象被删除标记隐藏；如果桶还配置了 `NoncurrentVersionExpiration` 规则，这条规则之后会把被隐藏的版本连同 tier 对象一起永久删除。暂停版本控制的桶中，更早的 `null` 版本的数据会被直接删除。 |
+| 可达性 | 任何分层对象的恢复，在恢复到期后都会经由 scanner、GET、HEAD、列表、decommission 或磁盘 heal 触发。 |
+| 发布紧急度 | 阻塞下一个版本。核心修复改动小；原生恢复的防护改动较大，已实现并通过审查。 |
+| 剩余工作量 | 约 1–2 个维护者工作日，与 #278 集成共享：与锁域修复的集成、完整 CI、一次针对真实远端 tier 的恢复验证。 |
+
+## 触发条件 {#trigger}
+
+恢复会把到期日期设为至少 `Days`（最少一天）之后的 UTC 零点，因此缺陷会在恢复一天或更久之后出现。报告者的测试把日期挪到过去，然后在一个池和两个池上分别运行每一条生命周期路径：
+
+| 布局 | main 上的结果 |
+| --- | --- |
+| 开启版本控制，被恢复的当前版本 | 删除标记隐藏了对象；恢复副本一直留着，直到后续某一轮把该版本当作非当前版本处理。 |
+| 开启版本控制，被恢复的 `null` 当前版本 | 同样多出删除标记。 |
+| 暂停版本控制，被恢复的当前版本下面有 `null` 版本 | 删除作用到 `null` 版本并删掉其数据；恢复副本和已过期的 `x-amz-restore` 都还在。 |
+| 暂停版本控制，被恢复的当前版本下面没有 `null` 版本 | `DeleteObject` 返回 `VersionNotFound`，被静默丢弃且不打日志；副本一直留着，每一轮都重试。 |
+
+在 main 上，贡献者测试的 56 个用例中有 32 个失败，所有路径、两种池数量都是如此。
+
+## 根因 {#root-cause}
+
+对最新版本的恢复到期，`Lifecycle.Eval` 返回 `DeleteRestoredAction`；对其他版本，返回 `DeleteRestoredVersionAction`。`expireTransitionedObject` 只在 `DeleteVersioned()` 接受的动作上设置版本 ID，而这个集合包含 `DeleteRestoredVersionAction`，不包含 `DeleteRestoredAction`。
+
+因此，对当前版本，`DeleteObject` 收不到版本 ID，把请求当成了对整个对象的删除。本该把删除限制在恢复副本上的 `ExpireRestored` 标志，也就没有可作用的版本：
+
+- 开启版本控制时，普通路径会写入一个新的删除标记；
+- 暂停版本控制时，请求指向 `null` 版本，`xlMetaV2.DeleteVersion` 找到它，并返回它的数据目录供删除。
+
+## 行为的来源 {#history}
+
+### 溯源 {#provenance}
+
+**来自上游，是一次回归；不是 SILO 引入的。** 这个缺陷由 [ee158e1](https://github.com/pgsty/silo/commit/ee158e161)（[minio/minio#19093](https://github.com/minio/minio/pull/19093)，Krishnan Parthasarathi，2024-02-22）引入，首次发布于 `RELEASE.2024-02-24T17-11-14Z`。恢复副本分支并不是一直缺少版本 ID。SILO 在分叉时继承了这段代码，从 `RELEASE.2025-12-03T12-00-00Z` 到 `RELEASE.2026-10-26T00-00-00Z` 的全部 18 个 SILO 版本都包含它。没有任何 SILO 提交改动过这个分支。
+
+| 步骤 | 提交 | PR | 日期 | 首个上游版本 |
+| --- | --- | --- | --- | --- |
+| 两个动作类型 `DeleteRestoredAction` 和 `DeleteRestoredVersionAction`，随 ILM 转储和恢复一同出现 | [1ebf6f1](https://github.com/pgsty/silo/commit/1ebf6f146)（Poorna Krishnamoorthy） | [#10565](https://github.com/minio/minio/pull/10565) | 2020-11-12 | `RELEASE.2020-11-25T22-36-25Z` |
+| `expireTransitionedObject` 对每个动作都传入 `lcOpts.VersionID`，包括恢复副本 | [2ff655a](https://github.com/pgsty/silo/commit/2ff655a74)（Poorna Krishnamoorthy） | [#10945](https://github.com/minio/minio/pull/10945) | 2020-11-25 | `RELEASE.2020-11-25T22-36-25Z` |
+| `DeleteRestored()` 与 `DeleteVersioned()` 辅助方法；`DeleteVersioned()` 只包含 `DeleteRestoredVersionAction` | [b984bf8](https://github.com/pgsty/silo/commit/b984bf8d1)（Harshavardhana） | [#16757](https://github.com/minio/minio/pull/16757) | 2023-03-09 | `RELEASE.2023-03-09T23-16-13Z` |
+| **回归点：** 只有 `if lcEvent.Action.DeleteVersioned()` 时才设置版本 ID | [ee158e1](https://github.com/pgsty/silo/commit/ee158e161) | [#19093](https://github.com/minio/minio/pull/19093) | 2024-02-22 | `RELEASE.2024-02-24T17-11-14Z` |
+
+在 #19093 之前，每个恢复副本都用它所属对象的版本 ID 定位，所以带版本 ID 的恢复当前版本能被正确清理。#19093 的提交说明称，它修复的是已转储对象的当前版本被直接删除、而不是加删除标记的问题。为此它用 `DeleteVersioned()` 这一判断取代了版本 ID 的传递，而非转储对象的过期路径已经在使用这个判断，其中不含 `DeleteRestoredAction`。恢复副本分支与它在同一个函数里，作为副作用丢掉了版本 ID。恢复的 `null` 当前版本到达过期逻辑时 ID 为空，而空 ID 无论在 #19093 之前还是之后，都从未被正确定位。
+
+**SILO 在该分支周围改了什么。**
+
+| SILO 改动 | 日期 | 是否发布 | 对缺陷的影响 |
+| --- | --- | --- | --- |
+| [8ed5c90](https://github.com/pgsty/silo/commit/8ed5c90dc) 过期只加删除标记时保留分层数据（[#253](https://github.com/pgsty/silo/pull/253)） | 2026-10-23 | 自 `RELEASE.2026-10-25T00-00-00Z` 起 | 无。它在恢复副本分支之后设置暂停状态和保留远端的判断。上游从未在这个函数中设置暂停状态，所以该分支的这个缺口是继承来的，这次改动也没有补上。 |
+| [0a546c7](https://github.com/pgsty/silo/commit/0a546c7a7) 迁移期间的 ILM 清理（[#276](https://github.com/pgsty/silo/pull/276)） | 2026-11-02 | 仅在 main | 无。分支之后的“Recheck the lifecycle decision and create the hot-tier tombstone before touching the remote tier”就是这个提交加入的。恢复副本分支在到达这段代码之前就已返回，这段代码只对其他动作执行。 |
+| [7a060ca](https://github.com/pgsty/silo/commit/7a060cab1) 及其回退 [9b76a21](https://github.com/pgsty/silo/commit/9b76a2167) | 2026-08-15、2026-09-15 | 仅同时出现在 `RELEASE.2026-09-16T00-00-00Z` | 无。它们没有改动该分支。 |
+
+从 `DeleteRestored()` 起的九行代码在全部 18 个 SILO 版本和上游 master 中完全一致，`DeleteVersioned()` 也是。因此本修复改动的是 SILO 从未修改过的代码。
+
+**一并修复的原生恢复缺陷。** 恢复相关代码同样是继承来的。池层和集合层的 `RestoreTransitionedObject` 以及 `updateRestoreMetadata`，在全部 18 个 SILO 版本中都与上游 master 一致，没有任何 SILO 提交触及它们。
+
+| 缺陷 | 来源 | 提交 | 日期 | 首个上游版本 |
+| --- | --- | --- | --- | --- |
+| 多池恢复等待自己持有的锁 | 上游。池层先取对象锁并设置 `NoLock`，而恢复为自己的写入新建了选项，没有带上它。在此之前，池层对恢复不持有任何锁。 | [6186d11](https://github.com/pgsty/silo/commit/6186d1176)（[#20495](https://github.com/minio/minio/pull/20495)，Harshavardhana） | 2024-09-29 | `RELEASE.2024-10-02T17-50-41Z` |
+| 首次读取失败时写出新的空 `null` 版本 | 上游。失败路径把零值 `ObjectInfo` 传给元数据更新，后者用空版本 ID 重写最新版本。 | [c829e3a](https://github.com/pgsty/silo/commit/c829e3a13)（[#12090](https://github.com/minio/minio/pull/12090)，Krishnan Parthasarathi）及 [cbfdf97](https://github.com/pgsty/silo/commit/cbfdf97ab)（Harshavardhana） | 2021-04-19、2021-04-23 | `RELEASE.2021-05-11T23-27-41Z` |
+| 按最新写入位置路由版本 | 上游。恢复的池查找从来没有带上请求的版本。#12090 就是这样写的；[76b21de](https://github.com/pgsty/silo/commit/76b21de0c)（[#14012](https://github.com/minio/minio/pull/14012)，2022-01-10，`RELEASE.2022-01-25T19-56-04Z`）的池查找把它变成显式行为；[c4d0c49](https://github.com/pgsty/silo/commit/c4d0c49a5)（[#17451](https://github.com/minio/minio/pull/17451)）只给标签和元数据写入开了例外，恢复不在其中。 | [c829e3a](https://github.com/pgsty/silo/commit/c829e3a13)（#12090） | 2021-04-19 | `RELEASE.2021-05-11T23-27-41Z` |
+| 单池恢复不持有对象锁 | 上游。单池快捷路径在取任何锁之前就返回。恢复的初稿只在最后的元数据更新处加锁，[cbfdf97](https://github.com/pgsty/silo/commit/cbfdf97ab) 把它去掉了，因此没有任何版本从第一次读取起就持锁。#20495 只给多池部署加了锁。 | [c829e3a](https://github.com/pgsty/silo/commit/c829e3a13)、[cbfdf97](https://github.com/pgsty/silo/commit/cbfdf97ab) | 2021-04-23 | `RELEASE.2021-05-11T23-27-41Z` |
+
+多池死锁出现在 2024 年 9 月，比过期回归晚七个月。另外三个缺陷从 2021 年 5 月恢复功能的首个版本起就存在。本修复中其余的恢复修复（POST 处理器的版本身份、编码对象、排队的恢复，以及分片完成的锁顺序）依赖同样未被改动的函数和分片完成路径，没有逐一追溯到具体提交。对抗性审查发现的较早的恢复缺陷也是如此；[审查记录](#review)把它们与修复本身引入的问题区分开。
+
+日期、PR 编号和发布归属来自 git 历史。原生恢复缺陷的影响以“验证”一节所述测试的结果为准。关于空版本 ID，以及各个原生恢复缺陷来源的说法，来自阅读代码。
+
+## 方案比较 {#options}
+
+### 方案 1：传入精确版本（PR #282）
+
+在恢复副本分支中总是传入版本 ID，空 ID 映射为 `null`。这样当前版本就和非当前版本走同一条已经正确的路径。这是触及根因的最小改动，予以采纳。
+
+### 方案 2：把两个生命周期动作合并为一个
+
+让求值器对所有版本都返回 `DeleteRestoredVersionAction`，在调用点效果相同，但会改变审计、追踪和生命周期包其他调用方看到的动作名称，却没有带来额外的安全性。不采纳。
+
+### 方案 3：专用的"删除恢复缓存"存储调用
+
+单独的存储操作能从根本上避免把清理缓存和删除混为一谈，但需要新增存储 RPC，滚动升级时还要处理不认识它的节点。这是合理的长期方向，不适合作为发布修复。
+
+### 方案 4：只在存储层加防护
+
+存储层防护可以拒绝删除不属于恢复缓存的数据，却拦不住对象删除路径：删除标记在任何缓存逻辑之前就已写入。存储层防护作为第二道防线是必要的，但单独使用并不充分。
+
+## 修复方案 {#fix}
+
+修复分五组。第一组是 PR #282 的原始内容；第 2 到 4 组是前两轮维护者审查后补充的修正；第 5 组来自对抗性审查。
+
+1. **指向精确版本（PR #282）。** `expireTransitionedObject` 在恢复副本分支中总是传入版本 ID，空 ID 以 `null` 发送。原因是 ListObjects 的 `max-keys=1` 捷径读取最新版本时不带桶的版本控制状态，所以即使在开启版本控制的桶中，`null` 版本也可能带着空 ID 到达这里。
+2. **保留版本控制状态。** 桶的暂停状态现在在恢复副本分支返回之前设置，而不是之后。缺少这一改动时，暂停版本控制的桶中被恢复的非当前 `null` 版本，其清理到达存储层时不带这个状态。这种布局给贡献者测试增加了 8 个用例，没有这处改动时它们全部失败。
+3. **只清理被证明是恢复缓存的东西。**
+   - 清理需要新鲜的元数据。集合无法建立读 quorum 时，不会退回到普通未版本化 DELETE 可能使用的盲删路径。
+   - 排队中的 `null` 版本清理，如果现在找到的是一个替代它的删除标记，就返回 `VersionNotFound`，而不会对它动手。
+   - 恢复或清理过程中的读取失败，不再触发对正在回迁的版本做 dangling 对象删除。
+   - 在 `xlMetaV2.DeleteVersion` 中，恢复副本清理会在任何其他修改之前先检查存储的版本：只有分层已完成的对象版本才拥有恢复缓存，其他情况下这次调用不做任何事。检查依据的是存储的状态，而不是请求声称的状态。旧格式 `xl.json` 对象不可能处于已完成分层的状态，因此原样保留。
+4. **让原生恢复可以放心依赖。** 过期修正之后，恢复本身就成了剩下的损坏途径。审查针对 main 发现了以下每一项并在测试中复现，现已全部修复：
+   - *版本身份。* 后台恢复保留桶的版本控制上下文。此前恢复一个 `null` 版本，可能会创建一个指向同一远端对象的新版本 ID；此后任一版本的过期都可能删掉共享的远端对象（这一后果由代码路径推导得出，未做端到端复现）。
+   - *首次读取失败。* 首次读取目标版本失败时，恢复直接返回，不写入任何东西。此前请求一个不存在的版本，会创建一个新的、内容为空的 `null` 版本。
+   - *多池死锁。* 池层已持有的锁，会传递给回迁写入、分段完成和元数据更新。此前多池恢复会等待自己持有的锁，直到超时。
+   - *版本路由。* 按请求的版本选择池，而不是按最新版本的写入位置。此前恢复池 0 中的旧版本、而最新版本在池 1 时，会返回 `VersionNotFound`。
+   - *编码对象。* 回迁会保留 ETag、加密分段对象用来派生密钥的原始分段编号、压缩分段的逻辑大小以及分段索引；也能处理旧版本写入的、使用旧分段大小的对象。
+   - *Object Lock 完整性。* 单池恢复现在从首次读取元数据起一直持有对象写锁，直到恢复副本提交。多池恢复自上游 [minio/minio#20495](https://github.com/minio/minio/pull/20495) 起本来就是这样。不持锁时，下载期间已确认生效的 legal hold 或 COMPLIANCE 保留期延长，会被开始时读取的快照覆盖掉。
+   - *排队中的恢复。* 同一个 key 另一个版本的恢复会持续等待这把锁，而不是超时一次就放弃。放弃会让该版本永久停留在 `ongoing-request="true"`，之后每次 POST 都返回 `RestoreAlreadyInProgress`。
+   - *锁顺序。* 单池分段完成现在先取对象锁、再取 upload 锁。各路径统一按"对象 → 分段 → upload"的顺序取锁。分段完成不取分段锁，因为 `PutObjectPart` 持有分段锁时还要等待 upload 锁。空 upload ID 不再与对象锁重名而死锁。
+5. **给每次原生恢复确定归属（对抗性审查）。** 第 1 到 4 组到位后，对抗性审查仍发现三类缺口：恢复可被其他调用方触及；恢复可能依据版本元数据的少数派视图行事；旧的尝试可能作用于更新的尝试。下面每一项都关闭了审查在测试中复现的问题。
+   - *尝试身份。* 每个启动回迁的 POST 都会在版本的内部元数据中写入一个尝试 ID，并同时记录 POST 解析出的身份：版本 ID、ETag、大小和修改时间。后台 worker、它的 upload、分段写入和完成都带着这个尝试。尝试不再拥有该版本时，worker 停止，不写入、不完成、也不重置任何东西。之后的 POST 发现有恢复在进行时，只有在没有尝试正在运行时才会接管；否则在几秒内返回 `409 RestoreAlreadyInProgress`，而不是等待下载结束。
+   - *捕获的身份。* worker 使用 POST 解析出的版本控制状态和显式版本 ID 写入，`null` 目标始终是 `null`。此前，在恢复排队期间开启版本控制，会让恢复副本获得一个指向同一远端对象的新版本 ID。同一 ID 下替换进来的 `null` 对象被视为不同的目标。
+   - *恢复失败的处理。* worker 在取得快照之前失败时，会以有限次数的重试，把自己的尝试重置为可重试状态。失败的恢复会中止它的 upload。upload 记录真实的创建时间，只要它的尝试仍拥有该版本，过期 upload 清理就会保留它。此前，清理把被恢复对象的时间当作 upload 的时间，会删掉旧对象上新启动的恢复。
+   - *私有 upload。* 回迁用的 upload 带有一个内部标记。对这个 upload，所有公开分段操作都返回 `NoSuchUpload`，列表也会隐藏它。标记由全部磁盘共同判定：
+     - 多数磁盘显示标记时，upload 才算私有；
+     - 只有在没有任何磁盘显示标记、且无法读取的磁盘不构成多数时，才算没有标记；
+     - 其他情况一律按失败关闭处理：upload 既不暴露，也不删除。
+
+     作为用户元数据传入的标记会在创建 upload 时丢弃；提交前标记会被剥离。
+   - *权威修订。* POST、worker 和重置都会从每块磁盘读取精确版本，并使用至少 `max(n/2+1, 读 quorum)` 块磁盘持有的元数据修订。修订的识别方式与[多池修复](/zh/blog/design/multi-pool-lifecycle-expiry/)相同：版本头加上规范化元数据的摘要。
+     - 它们只修改该修订中的恢复字段，并且只写回持有该修订的磁盘。此前，一次状态写入可能把某块过期磁盘的元数据复制到所有磁盘上，已确认的 legal hold 因此丢失。
+     - 写入失败时，各磁盘会恢复为原来的修订。
+     - 当磁盘之间只有恢复字段不同时，去掉这些字段后的修订仍能识别该版本。之后的 POST 或该尝试自己的重置可以让磁盘重新一致。只有当某个尝试是唯一进行中的尝试时，它的重置才会生效。
+     - 没有这样的修订时，请求失败，不写入任何东西。
+   - *过期和 heal 使用同一视图。* 恢复副本过期的新鲜复核需要自己的理由：一个恢复副本过期动作、一个有效且已过的恢复期限、已完成的分层，以及没有进行中的恢复。此前，另一个到期的生命周期动作可能删掉已续期的缓存。复核依据上述权威修订做决定，磁盘对恢复状态有分歧时拒绝。heal 只有在多数磁盘持有相同的恢复字段时，才会把它们复制到落后的磁盘上；否则等待。
+   - *提交暂存。* 分段完成会先把对象元数据暂存在 upload 中，再重命名到最终位置。处于这种状态的 upload 视为正在提交：它被隐藏、不能被中止，过期 upload 清理也会保留它。
+     - 分段完成从暂存开始直到提交结束，一直持有一把提交锁。
+     - 过期清理在对任何超过过期时限的 upload（无论是否普通 upload）做决定之前，都先取这把锁，并一直持有到它的重命名结束，即使重命名超过了磁盘期限；中止在 upload 正在提交时取这把锁。提交持有它时，中止会拒绝，清理会跳过该 upload。
+     - 只有当每份副本都已暂存且早于一小时时，中止才会删除失败提交留下的内容；过期清理只在某块磁盘上的副本已暂存且早于一小时时，删除这一份。
+   - *有界等待。* POST 的首次读取不取锁，唯一的锁等待是有界的。
+   - *滚动升级。* 旧节点不认识标记，会暴露私有 upload。处理 POST 的节点现在通过新的内部能力 RPC 询问每个对等节点。在每个对等节点都回答支持原生恢复之前，POST 返回 `503 ServiceUnavailable`，不写入任何东西。排队中的 worker 在创建 upload 前会再问一次。
+   - *锁域。* 对抗性审查复现了：在各纠删集合不共享主机的分布式单池部署中，`DELETE` 和 `CopyObject` 会与恢复竞争。这个继承来的锁域分裂由[单池锁域修复](/zh/blog/design/single-pool-lock-domains/)关闭，本组依赖它，这里不再重复。
+
+## 为什么方案充分且必要 {#sufficiency}
+
+**充分性。** 所有让恢复副本过期的路径都汇入 `expireTransitionedObject`，现在都带着精确版本。这些路径包括 scanner、GET 和 HEAD、列表、decommission 和磁盘 heal；集合层和存储层随后只对这个版本操作。三层防护互为补充：
+
+- 版本 ID 选定目标；
+- 新鲜的元数据确认目标及其到期时间；
+- 存储的分层状态证明这份数据是缓存。
+
+即使目标选错，只要它不是已完成分层的版本，就不会丢失数据。原生恢复的修复保证：被清理的版本正是当初被恢复的那个版本，并且它的保护元数据完好。
+
+第 5 组让这些修复在并发和部分失败下依然成立：
+
+- 同一时间只有一个尝试拥有一个版本，只有这个所有者能回迁该版本、完成恢复或重置它。
+- 在运行本版本的任何节点上，公开调用方都无法触及该尝试的 upload；只要还有节点不支持，开关就让恢复保持关闭。
+- POST、worker、过期和 heal 都依据同一个权威修订做决定；没有权威修订时，它们都按失败关闭处理。
+- 只要提交仍可能在进行，任何路径都不会删除正在提交的 upload。
+
+**必要性：**
+
+- 没有精确版本，报告的缺陷依然存在。
+- 没有版本控制状态的修正，暂停版本控制的桶仍有一种布局会失败。
+- 没有元数据和存储层防护，过期或路由错误的清理仍可能删掉一个未分层版本的唯一数据。
+- 没有原生恢复的修复，修好过期之后，恢复会成为造成同类损坏的路径：新的版本别名、空版本、丢失的 legal hold，或永远"进行中"的版本。
+- 没有第 5 组，对抗性审查复现了以下问题：
+  - 客户端完成私有 upload，或向其中写入分段；
+  - 一块过期磁盘的元数据在所有磁盘上覆盖已确认的 legal hold；
+  - 旧的尝试重置了更新的尝试；
+  - 过期或 heal 依据少数派的恢复状态行事；
+  - 过期清理删掉了正在进行的提交。
+
+这些改动必须一起交付：在清理正确之前先解除多池恢复死锁，会让有害的清理在更多部署上变得可达。
+
+**防护不承诺的范围。** 存储层防护只保证未分层的版本不会交出自己的数据。如果选错的目标本身也是已完成分层的版本，防护会放行，最坏结果是丢失该版本的恢复缓存，而不是它的数据。正确选定目标仍由版本 ID 和元数据复核负责。
+
+## 代价与兼容性 {#cost}
+
+- 不改变公开 API、配置、指标或依赖。新增两个内部元数据键：版本上的尝试，以及其 upload 上的标记；新增一个内部对等 RPC，回答节点是否支持原生恢复。旧版本会忽略这些键。
+- 当前版本的恢复副本现在只会单独被删除。此前因清理失败而残留的恢复副本，会在下一轮被删除。
+- **恢复期间的行为变化。** 恢复从 tier 下载期间，需要该对象写锁的请求都会等待，单池和多池部署都一样。这包括 GET、HEAD、PUT、DELETE、标签、legal hold 和 retention。等待超过操作超时（约十分钟）的请求会返回 `503 RequestTimeout`。此前单池部署在恢复期间仍可读，代价是上文所述的 Object Lock 竞争。发布说明会写明这一点；[#284](https://github.com/pgsty/silo/issues/284) 跟踪一种只在取快照和提交时持锁的两阶段恢复方案。
+- **`POST ?restore` 的行为变化。**
+  - 只要有对等节点运行旧版本或无法连接，它就返回 `503 ServiceUnavailable`，不写入任何东西。
+  - 磁盘对版本元数据没有一致意见时，它失败且不写入。
+  - 该版本的恢复正在进行时，它在几秒内返回 `409 RestoreAlreadyInProgress`。
+  - 除对象状态无效之外的错误，按常规 S3 映射返回，而不再全部变成 `InvalidObjectState`。
+- 每次分段完成多取一把锁：最后取的提交锁。过期 upload 清理对每个超过过期时限的 upload 尝试取一次同一把锁。
+- 磁盘对恢复字段有分歧、且没有多数磁盘持有相同字段时，该版本的 heal 会等待。
+- 回滚即恢复旧行为，也包括这个缺陷。不要在恢复进行中回滚：旧版本不会保持恢复 upload 私有。
+
+## 剩余限制 {#limits}
+
+- **已经造成的损坏不会被修复。** 旧清理创建的删除标记会保留。它们是普通的删除标记，在通过 ILM 审计日志或桶通知确认它来自恢复副本过期后，可以用 `DELETE ?versionId=` 移除。已从 `null` 版本删掉的数据，以及已被非当前版本规则删除的隐藏版本，本修复无法找回。
+- **长时间恢复期间的可用性**，即上文所述的取舍，等待 #284 处理。
+- **大规模单池部署中的锁域。** 在分布式单池部署中，如果各纠删集合不在同一组主机上，DELETE 和 CopyObject 使用的锁域与 PUT、元数据更新和恢复不同，恢复期间的 DELETE 或复制因此可能与它竞争。这个继承来的分裂影响范围不止恢复，由[单池锁域修复](/zh/blog/design/single-pool-lock-domains/)关闭；本修复不能脱离它单独发布。
+- **滚动升级。** 升级必须单调进行：存在恢复 upload 时，旧二进制不得重新加入集群。开关只能阻止已升级节点上的新恢复；由旧节点处理的 POST 仍走旧路径。旧节点加入之前创建的 upload，在它结束之前对该节点都是暴露的。
+- **重启。** 重置失败尝试的重试在内存中进行。重启后，版本保持进行中状态，直到之后的 POST 接管。
+- **磁盘分歧。** 磁盘对恢复字段有分歧、且没有多数磁盘持有相同字段时，该版本的 heal 和过期会等待。足够多的磁盘响应后，之后的 POST 或该尝试自己的重置会让磁盘重新一致。如果磁盘在其他元数据上也有分歧，以至于去掉恢复字段后仍没有修订达到 quorum，恢复和 heal 都不会改动该版本；它需要之后一次在所有磁盘上重写元数据的写入，例如标签更新。这种双重故障情形由代码推导得出，未经测试。
+- **失败的提交。** 失败提交在 upload 中留下的内容会保留一小时。只要有磁盘无法读取，对它的中止就会被拒绝；过期 upload 清理会逐块磁盘删除它。
+- **挂起的清理重命名。** 过期 upload 的重命名如果挂起并超过磁盘期限，会一直持有该 upload 的提交锁直到结束。同一 upload 的分段完成会持着对象锁在它之后等待，于是该 key 上的其他操作会被推迟，直到这次完成被取消或达到操作超时。其他 key 不受影响。
+- **继承且未改变的行为。** 临时文件清理可能删除任何 upload 中传输时间超过过期 upload 时限的进行中分段。磁盘在修改时间和 ETag 上一致、但其他字段不一致时，普通 GET 和 HEAD 仍可能返回某块过期磁盘的元数据。恢复决策不再依赖这次读取。
+
+## 验证 {#verification}
+
+**第 1 到 4 组，在集成分支 head 上。**
+
+- `TestExpireRestoredCopy` 覆盖 8 种布局 × 4 条生命周期路径（scanner、HEAD、列表，以及 decommission 和磁盘 heal 的同步调用）× 一个池和两个池，共 64 个用例：贡献者的 56 个，加上暂停版本控制下非当前 `null` 布局的 8 个。它们在 main 上失败，修复后通过。
+- `TestExpireRestoredRequiresFreshMetadata`、`TestExpireRestoredRenewedOrMissing`、`TestExpireRestoredStorageBoundary`、`TestExpireRestoredKeepsReplacementDeleteMarker`、`TestExpireRestoredMetadataReadKeepsMinorityVersion` 和 `TestExpireRestoredStorageRejectsOtherTypes` 覆盖各项防护。
+- `TestNativeRestore*` 系列与 `TestMultipartCompletionLockAlias` 覆盖原生恢复修复：多池、版本路由、首次失败、POST 版本身份、Object Lock 串行化、排队恢复、并发完成、读取安全，以及编码对象和旧格式对象。
+- 在维护者审查轮次所审的 head 上，完整的 `./cmd` 测试和定向 race 选择均通过。
+
+**第 5 组。** 补丁新增 36 个测试，布局相关时分别在一个池和两个池上运行：
+
+- *私有 upload：* `TestRestoreUploadIsolatedFromPublicParts`、`TestRestoreUploadHiddenFromPublicEntryPoints`、`TestRestoreUploadMarkerSpoofing`、`TestRestoreUploadMarkerQuorum`、`TestRestoreUploadUnreadableFailsClosed`、`TestRestoreUploadOutlivesStaleAge`、`TestRestoreFailureAbortsUpload` 和 `TestRestoreSplitKeepsRunningUpload`。
+- *提交暂存：* `TestRestoreUploadStagingFailsClosed`、`TestRestoreAbandonedCommitAbort`、`TestRestoreFailedCommitStaleCleanup`、`TestCleanupStaleUploadsSkipsRunningCommit` 和 `TestCleanupStaleUploadsHoldsLockThroughRename`，包括停滞超过宽限期的提交、含有无法读取或未暂存副本的残留、一个清理恰好在其提交暂存之前读取过的普通 upload，以及一次超过磁盘期限的清理重命名。
+- *状态写入与尝试：*
+  - `TestRestoreStatusUsesQuorumGeneration` 和 `TestRestoreAttemptGenerationFencing`；
+  - `TestRestoreGenerationSplitNeedsQuorum`、`TestRestorePOSTStatusWriteSplit` 和 `TestRestorePOSTStatusWritePartialFailure`；
+  - `TestRestorePOSTKeepsConcurrentProtection` 和 `TestRestorePOSTRacesCacheExpiry`；
+  - `TestRestorePOSTRejectsReplacedTarget`、`TestRestoreKeepsCapturedNullIdentity` 和 `TestRestoreReplacementNullObject`；
+  - `TestRestoreSupersededAttempt`、`TestRestoreRecoversStrandedMarker` 和 `TestRestoreRestartTakeover`；
+  - `TestRestorePOSTOngoingBound`、`TestRestoreDuplicatePoolCacheStates` 和 `TestRestorePOSTControls`。
+- *过期与 heal：* `TestExpireRestoredNeedsOwnReason`、`TestExpireRestoredUsesQuorumGeneration` 和 `TestRestoreHealNeedsRestoreQuorum`。
+- *滚动升级：* `TestNativeRestoreCapabilityGrid` 在真实的测试 grid 上运行，并包含一个旧式对等节点。`TestNativeRestoreCapabilityCache`、`TestNativeRestoreRollingUpgradeGate` 和 `TestNativeRestoreCapabilityRevalidates` 覆盖缓存、重连和取消。
+
+设计轮次产生的回归测试在之前的集成 head 上失败，在补丁上通过。补丁审查产生的每个回归测试，在只禁用它对应的修复时失败，启用时通过；对照用例在两种情况下都通过。
+
+恢复、生命周期、分段上传、分层、过期、过期 upload 和 heal 的测试选择通过：`./cmd` 中共 260 个测试。lifecycle 和 grid 包通过。开启 race 检测的 63 个恢复与清理测试没有报告数据竞争。`gofmt` 和 `go vet` 均干净。
+
+对抗性审查自己的探针在最终补丁上运行，46 个中 33 个通过。其余 13 个都有解释：
+
+- 3 个需要锁域修复。在集成分支上，它们表明这些竞争已经不会发生：COPY 不再覆盖恢复的版本，DELETE 会等待恢复结束，公开的 abort 也找不到被隐藏的 upload；
+- 1 个命中继承来的临时分段清理；
+- 9 个断言的结果被商定的设计有意改变，例如把 heal 的推迟当作致命错误、一个已经无法发生的竞争、现在需要等锁的清理，以及一块留给 heal 处理而不是被重写的过期磁盘。
+
+**合并前仍需完成：**
+
+- 在最终 head 上运行远端 CI；
+- 一次针对带 SSE 的真实远端 tier 的恢复与过期验证；
+- 一次从上一个版本开始的滚动升级。
+
+多节点锁域、真实的混合版本集群、长达一小时的存储停顿以及节点间时钟偏差尚未验证。
+
+**集成验证。** 这个修复在下个版本的集成分支上紧接 #278，锁域、删除全部版本、Heal 演练、#259、#285 和 Console 的修复叠在它上面。所有摘取都没有冲突。在该 head 上，完整的 `go test ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+
+## 审查记录 {#review}
+
+| 轮次 | 结果 |
+| --- | --- |
+| 维护者第 1、2 轮 | 发现版本控制状态缺口、缺失的存储层防护和原生恢复缺陷；作为第 2 到 4 组修复。 |
+| 对抗性审查，设计第 1、2 轮 | 要求修改，发现七个问题。一个由第 4 组引入：客户端可以在 upload 的某个分段通过校验后替换它，恢复随后把这些字节提交到受 COMPLIANCE 保护的版本上。六个是较早就存在的：<br>- POST 覆盖较新的保护元数据；<br>- 恢复排队期间开启版本控制，会给 `null` 版本造出别名；<br>- 失败的恢复永久停留在进行中；<br>- 过期 upload 清理删掉旧对象上新启动的恢复；<br>- 另一个生命周期动作可能让已续期的缓存过期；<br>- 失败的分段恢复泄漏其 upload。<br>第 2 轮商定了第 5 组的设计。 |
+| 补丁审查，第 3 轮 | 要求修改。由补丁引入的：旧节点忽略私有标记、标记检查不是失败关闭、尝试之间没有隔离。较早就存在的：状态写入可能扩散一块过期磁盘的元数据、POST 可能作用于替换进来的 `null` 版本、POST 等待上限不起作用。锁域分裂交由单独的修复处理。 |
+| 补丁审查，第 4 到 10 轮 | 第 4 轮发现四个问题：POST 写入失败使恢复处理无法继续、提交暂存暴露了 upload、能力检查存在竞争、过期的首次读取绕过了等待上限。第 5 轮又发现五个：旧的重置可能清除更新的尝试、分歧视图让清理删掉运行中的 upload、暂存宽限期删掉未暂存的副本、活动读取失败时恢复了长时间等待、缓存的能力回答忽略取消。第 6 轮发现过期可能跟随少数派的已过期头部。第 7 轮发现 heal 可能把少数派的恢复状态提升为多数，以及正在提交的 upload 可能永远留存。第 8 轮发现中止会删除年龄未知的残留，以及过期清理可能删掉运行中的提交。第 9 轮发现，过期清理如果恰好在提交暂存之前读取了一个普通 upload，仍可能把它删掉（既有问题）。第 10 轮发现，清理的重命名在磁盘期限到达后可能比它持有的锁活得更久。全部已修复并配有回归测试。 |
+| 补丁审查，第 11 轮 | 批准，附一条文档意见：在挂起的清理重命名之后等待的分段完成会持有对象锁。已记入[剩余限制](#limits)。 |
+
+## 参考 {#references}
+
+- Issue：[#281](https://github.com/pgsty/silo/issues/281)
+- 贡献者 PR：[#282](https://github.com/pgsty/silo/pull/282)
+- 配套修复：[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/)（[#278](https://github.com/pgsty/silo/issues/278)）
+- 恢复锁跟进：[#284](https://github.com/pgsty/silo/issues/284)
+- 上游多池恢复锁：[minio/minio#20495](https://github.com/minio/minio/pull/20495)
