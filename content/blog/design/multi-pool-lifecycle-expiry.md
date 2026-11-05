@@ -32,7 +32,7 @@ The repair keeps every existing lifecycle decision point and adds one check wher
 | Severity | Critical. Versions are deleted or hidden without an error. The only traces are the ILM audit entry and the bucket notification. |
 | Reachability | Ordinary S3 writes. In the reporter's reproduction, SILO's own placement put the versions of a third to a half of the keys into both pools. |
 | Release urgency | Blocks the next release. Main already carries [#276](https://github.com/pgsty/silo/pull/276), which runs the migration expiry immediately during the decommission or rebalance walk. |
-| Remaining effort | About 4 to 5 maintainer days: implement and review parts 6 to 9, then full CI and multi-pool acceptance runs. Parts 1 to 5 exist. |
+| Remaining effort | Code, review and the multi-pool acceptance runs are done. Remote CI remains. |
 
 ## When it happens {#trigger}
 
@@ -278,11 +278,9 @@ Both are handled in a separate design record, published with its fix. Approving 
 
 **Patch review.** The approved patch adds 26 tests. They fail on the previous head and pass with the patch, with the race detector clean. The lifecycle, migration, restore and expiry selection passes, 88 tests with no failures. The reviewer's own probes, 11 in total, pass on the final patch.
 
-**Still to run before merge.**
+**End-to-end runs.** On 2026-11-05 the reporter's `repro.sh` ran on a native server with two pools of four drives, against `69fcf50cd` and against the fix. On `69fcf50cd` the scanner step hid 9 current versions, lost 8 versions and resurrected 8 deleted keys. The decommission step reported Complete after losing 6 versions and resurrecting 3 keys. With the fix, every key in both steps was either unchanged or fully expired where its rule was due, and the scanner still removed all 32 due keys. `docs/distributed/decom.sh` passes with the fix: it expands a cluster, decommissions a pool that holds versioned and tiered objects, removes the pool, and `s3-check-md5` then reports every remaining object version intact.
 
-- remote CI on the final head;
-- the reporter's `repro.sh` (scan and decommission);
-- `docs/distributed/decom.sh`.
+**Still to run before merge:** remote CI on the final head.
 
 Multi-node lock domains and long-running scanner and migration behavior have not been exercised.
 

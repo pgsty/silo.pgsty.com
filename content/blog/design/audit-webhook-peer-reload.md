@@ -38,7 +38,7 @@ The repair has three parts:
 | Severity | High. Audit records are dropped on all servers but one, until those servers restart or serve a later change themselves. The admin command reports success and S3 requests succeed; the drops show only in the server log and the logger metrics, so the gap tends to surface in an audit review rather than in operations. Where the audit webhook is part of a compliance control, the trail for that period is incomplete and cannot be rebuilt. |
 | Reachability | One routine admin command. A change to one target rebuilds every enabled target of that subsystem, so all of them stop on the other servers, not only the one that was named. |
 | Release urgency | Blocks the next release. Audit loss is not reported to the admin or S3 client and lasts until the affected servers restart or serve a later change themselves, while the change is small and stays off the S3 data path. |
-| Remaining effort | Code and review are done. Remote CI and a three-server acceptance run remain. |
+| Remaining effort | Code, review and a cluster acceptance run are done. Remote CI remains. |
 
 ## When it happens {#trigger}
 
@@ -224,7 +224,9 @@ Established by reading the code, not executed:
 
 - The Kafka metrics behavior with `queue_dir`, the subsystem sweep, and the history.
 
-Still to run before merge: remote CI and a three-server acceptance run. That run should change `audit_webhook` through one server, send S3 traffic to the others, confirm that the receiver gets their records and that `minio_audit_target_queue_length` stays near zero everywhere, and repeat for `audit_kafka` with `queue_dir` if a broker is available.
+**Cluster acceptance.** On 2026-11-05 four server processes ran on one host, with two drives each and a memory queue. `audit_webhook` was set twice at runtime through the first server, and then every server received three `HEAD` requests. On `69fcf50cd` only the first server's three records arrived, and `minio_audit_target_queue_length` stayed at 3 on each of the other three servers. With the fix all twelve records arrived, and the queue length was 0 on every server. The disk queue and `audit_kafka` were not part of this run: servers on one host cannot keep separate `queue_dir` paths under one cluster-wide setting, and no broker was available. The tests above cover both.
+
+Still to run before merge: remote CI.
 
 **Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, delete-all, heal dry-run, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
 

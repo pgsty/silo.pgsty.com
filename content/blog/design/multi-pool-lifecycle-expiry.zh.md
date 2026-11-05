@@ -37,7 +37,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 | 严重程度 | 致命。版本被删除或隐藏而没有任何错误，唯一的痕迹是 ILM 审计条目和桶通知。 |
 | 可达性 | 普通 S3 写入即可触发。在报告者的复现中，SILO 自身的放置策略让三分之一到一半的 key 的版本分布在两个池中。 |
 | 发布紧急度 | 阻塞下一个版本。main 上已经合入 [#276](https://github.com/pgsty/silo/pull/276)，它让迁移过期在 decommission 或 rebalance 遍历中立即执行。 |
-| 剩余工作量 | 约 4–5 个维护者工作日：实现并审查第 6–9 部分，然后运行完整 CI 和多池验收。第 1–5 部分已经实现。 |
+| 剩余工作量 | 代码、审查和多池验收运行都已完成，还需要远端 CI。 |
 
 ## 触发条件 {#trigger}
 
@@ -289,11 +289,9 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 **补丁审查。** 获批的补丁新增 26 个测试，它们在之前的 head 上失败、加上补丁后通过，race 检测无问题。生命周期、迁移、恢复和过期相关的测试选集共 88 个测试，全部通过，无失败。审查者自己写的 11 个探针在最终补丁上全部通过。
 
-**合并前仍需完成：**
+**端到端运行。** 2026-11-05，在一台带两个池（每池四块盘）的原生服务器上，分别对 `69fcf50cd` 和修复运行了报告者的 `repro.sh`。在 `69fcf50cd` 上，scanner 步骤隐藏了 9 个当前版本，丢失了 8 个版本，并使 8 个已删除的 key 复活；decommission 步骤报告 Complete，同时丢失了 6 个版本、复活了 3 个 key。使用修复后，两个步骤中的每个 key 要么保持不变，要么在其规则到期时被完整过期，scanner 仍然删除了全部 32 个到期的 key。`docs/distributed/decom.sh` 在修复上通过：它扩容集群，对存有多版本和分层对象的池执行 decommission，再移除该池，之后 `s3-check-md5` 报告剩余的每个对象版本都完好。
 
-- 在最终 head 上运行远端 CI；
-- 运行报告者的 `repro.sh`（scan 与 decommission）；
-- 运行 `docs/distributed/decom.sh`。
+**合并前仍需完成：** 在最终 head 上运行远端 CI。
 
 多节点锁域，以及长时间运行的 scanner 和迁移行为，尚未验证。
 

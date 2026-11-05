@@ -45,7 +45,7 @@ The core repair is the one PR #282 proposes: the cleanup always addresses the ex
 | Severity | Critical. The object is hidden under a delete marker. If the bucket also has a `NoncurrentVersionExpiration` rule, that rule later deletes the hidden version for good, tier object included. In suspended buckets, the data of an older `null` version is removed directly. |
 | Reachability | Any restore of a tiered object, once its restore expires: the scanner, GET, HEAD, listings, decommission, or drive heal. |
 | Release urgency | Blocks the next release. The core fix is small. The native-restore safeguards are larger, and they are implemented and reviewed. |
-| Remaining effort | About 1 to 2 maintainer days, shared with the #278 integration. That covers integration with the lock-domain fix, full CI, and a restore run against a real remote tier. |
+| Remaining effort | Code, review, integration with the lock-domain fix, a restore run against a real remote tier and an upgrade run are done. Remote CI remains. |
 
 ## When it happens {#trigger}
 
@@ -262,13 +262,13 @@ The adversarial review's own probes ran on the final patch, and 33 of 46 pass. T
 - one hits the inherited temporary-part sweep;
 - nine assert outcomes that the agreed design changes on purpose. Examples are a heal deferral treated as fatal, a race that can no longer start, cleanups that now wait for the lock, and a stale drive left for heal rather than rewritten.
 
-**Still to run before merge.**
+**Real-tier restore.** On 2026-11-05 a second SILO server served as the remote tier of a versioned bucket with SSE-S3 (a static KMS key) and compression. A current version, a noncurrent version, a 74 MB multipart object and an incompressible object were transitioned and then restored with `POST ?restore`. With the fix all four restores completed, and with the tier stopped every restored version still read back byte for byte, so the data came from the restored copy. On `69fcf50cd` the restore of the encrypted, compressed multipart object failed with `Part size for 1 should be at least 5MB`, and that object could not be read with the tier stopped; the other three restored. The expiry of a restored copy was not part of this run, because the shortest restore lasts one day; the tests above cover it.
 
-- remote CI on the final head;
-- a restore and expiry run against a real remote tier with SSE;
-- a rolling upgrade from the previous release.
+**Upgrade from the previous release.** On the same day a four-server cluster on one host ran `RELEASE.2026-10-26T00-00-00Z` with a remote tier and transitioned objects. The servers were replaced with the fix two at a time, because a starting server waits until another server runs the same binary. While two old and two new servers served requests, `PUT`, `GET`, listing and `DELETE` through every server succeeded, and `POST ?restore` through each new server answered `503 ServiceUnavailable`. After the last server was replaced, the restore completed, the restored object read back with the tier stopped, and all 20 objects written before the upgrade matched.
 
-Multi-node lock domains, real mixed-binary clusters, hour-long storage stalls and clock skew between nodes have not been exercised.
+**Still to run before merge:** remote CI on the final head.
+
+Lock domains across hosts, mixed-binary clusters across hosts, hour-long storage stalls and clock skew between nodes have not been exercised.
 
 **Integration.** The fix sits on #278 in one integration branch for the next release, with the lock-domain, delete-all, heal dry-run, #259, #285 and Console fixes stacked on it. Every pick applied without conflicts. On that head the full `go test ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
 
