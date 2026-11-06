@@ -14,7 +14,7 @@ url: "/blog/design/multi-pool-lifecycle-expiry/"
 
 This record covers [issue #278](https://github.com/pgsty/silo/issues/278) and [PR #279](https://github.com/pgsty/silo/pull/279) by Denis Babchuk, evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). The fix will ship through a maintainer integration PR that keeps the contributor commits unchanged and adds the maintainer follow-ups described below. The restored-copy expiry fix ([#281](https://github.com/pgsty/silo/issues/281)) travels in the same integration PR and has its own record.
 
-**Status:** the first version of the fix passed two maintainer review rounds. An adversarial review then requested changes: parts 6 to 9 under [Proposed fix](#fix). The patch that implements them was approved after four review rounds. Tested together with the other fixes for the next release on one integration branch: the full test suite, the CI race selections and an adversarial review of how the fixes interact all pass. Remote CI and multi-pool acceptance are still pending. Not merged, not released.
+**Status:** the first version of the fix passed two maintainer review rounds. An adversarial review then requested changes: parts 6 to 9 under [Proposed fix](#fix). The patch that implements them was approved after four review rounds. Tested together with the other fixes for the next release on one integration branch: the full local suite with the `kqueue,dev` tags, the CI race selections run locally and an adversarial review of how the fixes interact all pass. Remote CI and multi-pool acceptance are still pending. Not merged, not released.
 
 ## Short answer {#tldr}
 
@@ -299,7 +299,9 @@ On these paths, a wrong local decision is refused rather than executed. Migratio
 
 Multi-node lock domains and long-running scanner and migration behavior have not been exercised.
 
-**Integration.** The fix is the base of one integration branch for the next release. #281 and the lock-domain, heal dry-run, #259, #285 and Console fixes are stacked on it, and every pick applied without conflicts. On that head the full `go test ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix is the base of one integration branch for the next release. #281 and the lock-domain, heal dry-run, #259, #285 and Console fixes are stacked on it, and every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+
+The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
 ## Review history {#review}
 

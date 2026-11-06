@@ -14,7 +14,7 @@ url: "/zh/blog/design/restored-copy-expiry/"
 
 本文覆盖 [issue #281](https://github.com/pgsty/silo/issues/281) 和 Denis Babchuk 提交的 [PR #282](https://github.com/pgsty/silo/pull/282)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。修复与多池生命周期修复（[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/)，[#278](https://github.com/pgsty/silo/issues/278)）在同一个维护者集成 PR 中交付：贡献者提交原样保留，并附加下文所述的防护。本修复还依赖[单池锁域修复](/zh/blog/design/single-pool-lock-domains/)，必须与它一起或在它之后合并。
 
-**状态：** 修复已通过审查，已在本地提交。它已和下个版本的其他修复放在同一个集成分支上一起测试：完整测试套件、CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。尚未合并或发布。
+**状态：** 修复已通过审查，已在本地提交。它已和下个版本的其他修复放在同一个集成分支上一起测试：带 `kqueue,dev` 标签的本地完整测试套件、本地执行的 CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。尚未合并或发布。
 
 ## 简短结论 {#tldr}
 
@@ -253,7 +253,9 @@ url: "/zh/blog/design/restored-copy-expiry/"
 
 跨主机的锁域、跨主机的混合版本集群、长达一小时的存储停顿以及节点间时钟偏差尚未验证。
 
-**集成验证。** 这个修复在下个版本的集成分支上紧接 #278，锁域、Heal 演练、#259、#285 和 Console 的修复叠在它上面。所有摘取都没有冲突。在该 head 上，完整的 `go test ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+**集成验证。** 这个修复在下个版本的集成分支上紧接 #278，锁域、Heal 演练、#259、#285 和 Console 的修复叠在它上面。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+
+本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
 
 ## 审查记录 {#review}
 

@@ -39,7 +39,7 @@ A per-version restore lock tells whether a restore runs, instead of the object l
 | Not affected | Reads of transitioned objects that do not restore; deployments without a remote tier. |
 | Severity | High for availability: one restore of an old version could stall every access to its key for the length of a tier download. |
 | Release urgency | Part of the next release. It replaces the private-upload design before that design ships. |
-| Remaining effort | Code, two implementation reviews and the full test suite are done. Remote CI and an acceptance run on a distributed deployment remain. |
+| Remaining effort | Code, two implementation reviews and the full local suite with the `kqueue,dev` tags are done. Remote CI and an acceptance run on a distributed deployment remain. |
 
 ## Root cause {#root-cause}
 
@@ -176,7 +176,9 @@ Fault-injection tests cover the protocol:
 - `TestCheckAbandonedPartsTakesPoolsLock` plants an unreferenced data directory, checks that it survives while the object lock is held and is removed afterwards, and fails without the pools-level lock;
 - `TestRestorePartialCommitQueuesNullVersionHeal`: a commit that misses one drive of a noncurrent `null` version queues its heal under `null` and heals it back.
 
-The thirteen tests of the private-upload marker and `TestNativeRestoreConcurrentCompletion`, which completed the restore's upload from a client, were dropped with that design. Four tests were reframed for the new semantics, among them the lock-domain restore test, which now holds the commit instead of the download. The full `./cmd/... ./internal/...` suite, a race selection of the restore, multipart, lock-domain and abandoned-data tests, `go vet` and `golangci-lint` pass.
+The thirteen tests of the private-upload marker and `TestNativeRestoreConcurrentCompletion`, which completed the restore's upload from a client, were dropped with that design. Four tests were reframed for the new semantics, among them the lock-domain restore test, which now holds the commit instead of the download. The full local `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite, a race selection of the restore, multipart, lock-domain and abandoned-data tests, `go vet` and `golangci-lint` pass.
+
+The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
 ## Review history {#review}
 

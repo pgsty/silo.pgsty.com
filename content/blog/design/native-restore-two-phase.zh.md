@@ -39,7 +39,7 @@ url: "/zh/blog/design/native-restore-two-phase/"
 | 不受影响 | 不触发恢复的已转储对象读取；没有远端 tier 的部署。 |
 | 严重程度 | 对可用性影响高：恢复一个旧版本，就可能在一次 tier 下载的时长内卡住对该 key 的所有访问。 |
 | 发布紧急程度 | 随下个版本发布。它在私有 upload 设计发布之前取代该设计。 |
-| 剩余工作 | 代码、两轮实现审查和完整测试套件均已完成。还需要远端 CI，以及在分布式部署上的验收运行。 |
+| 剩余工作 | 代码、两轮实现审查和带 `kqueue,dev` 标签的本地完整测试套件均已完成。还需要远端 CI，以及在分布式部署上的验收运行。 |
 
 ## 根因 {#root-cause}
 
@@ -176,7 +176,9 @@ worker 在持有该尝试所指版本的池、以及对象哈希到的纠删集�
 - `TestCheckAbandonedPartsTakesPoolsLock` 放置一个未被引用的数据目录，确认它在持有对象锁期间保留、之后被删除；没有池层锁时该测试失败；
 - `TestRestorePartialCommitQueuesNullVersionHeal`：提交漏掉非当前 `null` 版本的一块盘时，以 `null` 排入 heal，并把它修回。
 
-私有 upload 标记的 13 个测试，以及从客户端完成恢复 upload 的 `TestNativeRestoreConcurrentCompletion`，随那个设计一起删除。4 个测试按新语义改写，其中锁域的恢复测试现在卡住的是提交，而不是下载。完整的 `./cmd/... ./internal/...` 套件、恢复、分段上传、锁域和废弃数据测试的竞态选集、`go vet` 和 `golangci-lint` 都通过。
+私有 upload 标记的 13 个测试，以及从客户端完成恢复 upload 的 `TestNativeRestoreConcurrentCompletion`，随那个设计一起删除。4 个测试按新语义改写，其中锁域的恢复测试现在卡住的是提交，而不是下载。本地完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件、恢复、分段上传、锁域和废弃数据测试的竞态选集、`go vet` 和 `golangci-lint` 都通过。
+
+本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
 
 ## 审查记录 {#review}
 
