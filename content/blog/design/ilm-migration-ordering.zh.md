@@ -2,10 +2,10 @@
 title: "ILM 过期与存储池迁移顺序"
 linkTitle: "ILM 迁移顺序"
 date: 2026-10-27
-lastmod: 2026-11-02
+lastmod: 2026-11-06
 author: "PGSTY SILO 维护团队"
 summary: >
-  解释生命周期过期与存储池迁移为何对版本桶当前对象产生不同判断、#266 修复了什么，以及 #276 如何补齐复制、tier 和生命周期安全边界。
+  解释生命周期过期与存储池迁移为何对版本桶当前对象产生不同判断、#266 修复了什么，以及 #276 如何补齐 tier 和生命周期安全边界。
 tags: [设计, 生命周期, 存储池, 复制]
 weight: 13
 draft: false
@@ -13,6 +13,8 @@ url: "/zh/blog/design/ilm-migration-ordering/"
 ---
 
 本文记录 [issue #265](https://github.com/pgsty/silo/issues/265)、贡献者修复 [PR #266](https://github.com/pgsty/silo/pull/266) 与维护者后续修复 [#276](https://github.com/pgsty/silo/pull/276)，并说明已经合入的 [#264](https://github.com/pgsty/silo/pull/264) 与 [#267](https://github.com/pgsty/silo/pull/267) 是相关前置修复。本文已于 2026-11-02 按 #276 合入后的 main 更新。#266 的 decommission 提交是 [19910230a](https://github.com/pgsty/silo/commit/19910230a)，rebalance 提交是 [a995921e5](https://github.com/pgsty/silo/commit/a995921e5)。
+
+**更新（2026-11-06）。** 生命周期删除不复制，S3 如此，SILO 的每个发布版本也是如此。#276 曾在 `main` 上短暂地让它们复制：scanner、transitioned version 的 expiry 和批量 noncurrent purge 会评估删除复制决策，并为目标端排队删除标记或 version purge。这正是仍未合入的 [PR #240](https://github.com/pgsty/silo/pull/240) 的内容。下一个版本在发布前移除这一部分。#276 的其余部分保留：先删 hot-tier 再删远端、free-version 重试记录、生命周期变化栅栏，以及迁移完成检查。通过 S3 API 发出的删除仍按配置复制。decommission 在退役已过期版本之前，不再等待复制目标。下文已据此更正。
 
 ## 先说结论 {#tldr}
 
@@ -25,9 +27,8 @@ url: "/zh/blog/design/ilm-migration-ordering/"
 
 PR #266 让迁移代码区分这些 action。为了保留贡献者正确的本地修复，我们先合入了它；维护者后续 PR [#276](https://github.com/pgsty/silo/pull/276) 再让 ILM 选中的删除复用既有 expiry 合同，并补上必要的安全栅栏。两者合在一起已经覆盖 decommission 与普通 hot-tier 生命周期迁移。rebalance 仍有意跳过 transitioned version，这是独立的范围边界。
 
-#276 之前，本地算法对普通 hot-tier 版本的搬迁是正确的，但还缺少四条安全边界：
+#276 之前，本地算法对普通 hot-tier 版本的搬迁是正确的，但还缺少三条安全边界：
 
-- 直接删除源版本可能绕过桶复制；
 - transitioned version 可能失去唯一的远端清理记录；
 - 必须明确迁移扫描与清理之间生命周期配置发生变化时的规则；
 - 删除整个对象的 action 可能在 decommission 报告 Complete 后仍把当前版本留在源池。
@@ -82,11 +83,11 @@ expiry queue 越慢，风险越明显。当前版本可能被跳过，而且目�
 
 #266 中加入的 direct purge 本质上是本地存储清理。单独看，它不会自动执行复制决策、写入 `VersionPurgePending`，也不会删除远端 tier 对象。#276 保留 #266 的 action 区分，同时让迁移遵守普通 ILM expiry 已经拥有的合同。
 
-### 复制仍然是第二项义务
+### 复制不是生命周期删除的义务
 
-如果删除复制规则适用，删除源端过期版本并不等于操作完成，目标端还必须收到 version purge。#276 让 ILM 选中的版本删除在源端清理前先走普通 expiry 路径，因此复制状态和 purge 队列会先建立，源端副本之后才会退役。回归测试使用双池、延迟 expiry，并验证目标端最终收敛。
+生命周期删除不复制：删除复制规则作用于通过 S3 API 发出的删除，每个目标端各自执行自己的生命周期配置。#276 合入时还会为 ILM 选中的删除排队复制；这一部分在下一个版本发布前移除（见上文更新）。配置了复制时，迁移期间的生命周期删除现在不会为目标端排队任何任务，源端副本也不必等待目标端即可退役。
 
-这是最小的安全边界，因为它复用了已有复制路径，只在迁移与 expiry 之间补了一次必要的交接，不需要把复制决策复制到 `removeMovedVersions` 中，也不会让延迟的 expiry task 因为源端已经消失而得到 `VersionNotFound`。
+#276 仍让 ILM 选中的版本删除在源端清理前先走普通 expiry 路径，是为了下面两项合同：transitioned version 保留远端 tier 清理及其重试记录，完成栅栏能看到 expiry 删除了什么。这是最小的安全边界，因为它复用了已有 expiry 路径，只在迁移与 expiry 之间补了一次必要的交接，不需要把这些规则复制到 `removeMovedVersions` 中，也不会让延迟的 expiry task 因为源端已经消失而得到 `VersionNotFound`。
 
 ### transitioned version 必须保留清理义务
 
@@ -114,7 +115,6 @@ transitioned version 同时需要清理 hot-tier 元数据和远端 tier 对象�
 - decommission 报 PreConditionFailed，需要第二次运行；
 - rebalance 报告有进展，却把源副本留下；
 - object lock 保护的版本或 tier 中的版本从源端迁移路径丢失；
-- 源端 purge 后，复制目标仍保留旧版本；
 - transitioned version 被直接 purge 后，远端 tier 数据变成孤儿；
 - 已经进入迁移的源端清理忽略生命周期规则变化；
 - 后续 scanner 也不会删除这些重复副本。
@@ -148,7 +148,7 @@ PR #266 实现了这个设计。
 
 ### 当删除带有外部副作用时先搬迁版本
 
-复制和 tier 清理让直接源端 purge 不再只是本地元数据操作。先搬迁版本，再让普通 ILM worker 执行删除，可以复用已有的复制和 tier 合同。它可能会短时间保留一份额外副本，但不需要在迁移清理中重新实现这些合同。
+tier 清理让直接源端 purge 不再只是本地元数据操作。先搬迁版本，再让普通 ILM worker 执行删除，可以复用已有的 tier 合同。它可能会短时间保留一份额外副本，但不需要在迁移清理中重新实现这项合同。
 
 ## PR 判断 {#pr}
 
@@ -161,24 +161,24 @@ PR #266 实现了这个设计。
 
 我们先合入 #266 以承认这项贡献。维护者后续 PR [#276](https://github.com/pgsty/silo/pull/276) 再补上必要的组合边界：
 
-- 源端清理前先建立复制状态并排队 purge；
+- ILM 选中的版本删除在源端清理前先走普通 expiry 路径；
 - 远端 tier 删除失败时保留可重试的 transitioned-version 清理记录；
 - 生命周期配置变化会使旧遍历结果失效；
 - 整对象 action 在 decommission 报告成功前完成并验证；
 - decommission 与 rebalance 使用独立的生命周期审计来源；
-- 回归测试覆盖延迟 expiry、复制、tier 清理、配置变化、整对象过期和可恢复 decommission。
+- 回归测试覆盖延迟 expiry、tier 清理、配置变化、整对象过期和可恢复 decommission。
 
-合并后的结果对报告的 decommission 问题充分且必要，也是合理的最小改动：action 语义留在迁移 worker 中，复制和 tier 清理复用已有路径，完成判断使用系统已有的持久化元数据检查。没有引入新的元数据格式，也没有重写存储池迁移。
+合并后的结果对报告的 decommission 问题充分且必要，也是合理的最小改动：action 语义留在迁移 worker 中，tier 清理复用已有路径，完成判断使用系统已有的持久化元数据检查。没有引入新的元数据格式，也没有重写存储池迁移。
 
-代价主要是少量额外元数据操作，以及某些情况下多一次迁移重试或短时间保留额外副本。相比静默丢版本、让复制目标停留在旧状态或产生远端 tier 孤儿，这些代价是必要且可接受的。
+代价主要是少量额外元数据操作，以及某些情况下多一次迁移重试或短时间保留额外副本。相比静默丢版本或产生远端 tier 孤儿，这些代价是必要且可接受的。
 
 这个修复有意不扩展 rebalance 对 transitioned version 的支持。该问题需要单独的 tier 所有权测试和范围决策，不应在 #276 中顺手扩大。
 
 ## 合并顺序与冲突 {#merge}
 
-最终顺序是有意安排的：#264 先建立真实版本视图，#266 保留贡献者的 action 区分，#276 再在两者之上补齐维护者负责的复制、tier、生命周期代数和完成检查。#266 的原始提交仍保留在合并历史中。
+最终顺序是有意安排的：#264 先建立真实版本视图，#266 保留贡献者的 action 区分，#276 再在两者之上补齐维护者负责的 tier、生命周期代数和完成检查。#266 的原始提交仍保留在合并历史中。
 
-组合测试覆盖 free version 位于生命周期过期版本上方、被选中删除的 transitioned version、启用复制的 version purge、生命周期配置变化、整对象过期，以及复制完成后的可恢复 decommission。
+组合测试覆盖 free version 位于生命周期过期版本上方、被选中删除的 transitioned version、生命周期配置变化、整对象过期，以及可恢复 decommission。配置了复制时，测试确认生命周期删除不会为目标端排队任何任务。
 
 ## 剩余边界 {#limits}
 
@@ -193,7 +193,7 @@ rebalance 仍会有意跳过 transitioned version。这个修复也不会自动�
 - 已合入的 mixed-EC 迁移修复：[#267](https://github.com/pgsty/silo/pull/267)
 - decommission 修复：[19910230a](https://github.com/pgsty/silo/commit/19910230a)
 - rebalance 修复：[a995921e5](https://github.com/pgsty/silo/commit/a995921e5)
-- 相关 ILM 复制提案：[#240](https://github.com/pgsty/silo/pull/240)
+- 相关 ILM 复制提案（未合入；若采纳，会让生命周期删除复制，并作为可选项）：[#240](https://github.com/pgsty/silo/pull/240)
 - 原始 decommission 跳过：[236ef03db](https://github.com/pgsty/silo/commit/236ef03db)
 - 池级 rebalance 引入：[4523da654](https://github.com/pgsty/silo/commit/4523da654)
 - SILO 逐版本清理改动：[1748f62c7](https://github.com/pgsty/silo/commit/1748f62c7)

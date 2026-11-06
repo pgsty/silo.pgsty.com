@@ -147,6 +147,13 @@ SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标�
 
 在旧版本 MinIO 中，tiering 配置会阻止退役操作。
 
+> [!WARNING]
+> **退役完成前，保留所有远端 tier 的配置**
+>
+> tier free version 是某个仍需删除的远端对象的内部记录。退役会先删除远端对象再删除该记录，因此需要记录所指向的 tier。如果该 tier 已从配置中删除，退役会失败，该记录仍留在 pool 中。Server 20261026 之后的版本会先搬迁其他所有桶，错误信息会指出该 free version、它的远端对象和 tier。
+>
+> 使用 [`mcli ilm tier add`](/zh/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add) 以相同名称重新添加该 tier，然后重新运行 [`mcli admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start)，从剩下的桶继续。参见 [Tier free version 是内部清理记录](/zh/blog/design/tier-free-version-semantics/#operations)。
+
 <a id="id13"></a>
 
 ## 退役单个 服务器池 {#minio-decommissioning-server-pool}

@@ -151,6 +151,13 @@ For deployments with tiering enabled and active, decommissioning moves the objec
 
 In older MinIO versions, tiering configurations prevent decommissioning.
 
+> [!WARNING]
+> **Keep every remote tier configured until the decommission completes**
+>
+> A tier free version is the internal record of a remote object that still has to be deleted. Decommission removes the remote object before it removes the record, so it needs the tier the record names. If that tier was removed from the configuration, the decommission fails and the record stays in the pool. Releases after Server 20261026 first move every other bucket, and the error names the free version, its remote object, and the tier.
+>
+> Re-add the tier under the same name with [`mcli ilm tier add`](/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add), then re-run [`mcli admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) to resume with the buckets that are left. See [Tier Free Versions Are Internal Cleanup Records](/blog/design/tier-free-version-semantics/#operations).
+
 <a id="minio-decommissioning-server-pool"></a>
 
 ## Decommission a Server Pool {#decommission-a-server-pool}

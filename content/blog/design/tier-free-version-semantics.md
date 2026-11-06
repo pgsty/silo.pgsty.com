@@ -2,7 +2,7 @@
 title: "Tier Free Versions Are Internal Cleanup Records"
 linkTitle: "Tier Free Version Semantics"
 date: 2026-10-27
-lastmod: 2026-11-02
+lastmod: 2026-11-06
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a tier free version is an internal cleanup record, how treating it as a normal version breaks lifecycle and pool migration, and why PR #264 is the minimum complete repair.
@@ -126,6 +126,8 @@ The recommendation was to accept #264, and that decision is now implemented in m
 ## Operational boundary {#operations}
 
 When a decommission finds free entries, it may contact the tier. A missing remote object is safe to ignore because the local record is already stale. A tier outage is different: the free record remains and decommission must fail so that a retry can finish cleanup. This is more visible operationally than main, but it avoids silently losing a cleanup obligation.
+
+A tier that was **removed from the configuration** while free versions still name it is not an outage either. The free version is the only record of its remote object, so it is kept, and the decommission of its pool cannot complete until the tier is configured again under the same name (`mcli ilm tier add`). Starting with the next release, the decommission still moves every other bucket first. It then fails with an error that names the free version, its remote object, and the tier, and a retry resumes with the buckets that are left. Before this, it stopped at the first such bucket and left every later bucket in the pool.
 
 This repair cannot identify or restore plain delete markers created by an older buggy decommission. Those markers have lost the free-version flag. Affected objects must be recovered from backups or another authoritative copy.
 

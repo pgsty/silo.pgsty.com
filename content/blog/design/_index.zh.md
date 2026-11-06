@@ -18,7 +18,7 @@ cascade:
 - [存储池迁移完整性审查：#261、#263 与 #265](/zh/blog/design/pool-migration-integrity-review/)：维护者对三个问题及其修复的审查，记录 #266 的贡献合并、#276 的维护者后续修复、验证证据与合并顺序。
 - [混合 EC 布局与迁移列表](/zh/blog/design/mixed-ec-migration-listing/)（[#261](https://github.com/pgsty/silo/issues/261)、[#262](https://github.com/pgsty/silo/pull/262)）：解释一次未完成的降级覆写为何会让可读对象从 decommission/rebalance 列表中消失，以及 #262 为何以最小范围解决问题。
 - [Tier free version 是内部清理记录](/zh/blog/design/tier-free-version-semantics/)（[#263](https://github.com/pgsty/silo/issues/263)、[#264](https://github.com/pgsty/silo/pull/264)）：解释 free version 为何必须继续供 healing 使用，但不能作为用户可见的删除标记或迁移版本。
-- [ILM 过期与存储池迁移顺序](/zh/blog/design/ilm-migration-ordering/)（[#265](https://github.com/pgsty/silo/issues/265)、[#266](https://github.com/pgsty/silo/pull/266)、[#276](https://github.com/pgsty/silo/pull/276)）：解释版本桶的 Expiration 删除标记为何不能让当前版本被跳过，以及维护者后续修复如何保留复制、tier 清理和完成语义。
+- [ILM 过期与存储池迁移顺序](/zh/blog/design/ilm-migration-ordering/)（[#265](https://github.com/pgsty/silo/issues/265)、[#266](https://github.com/pgsty/silo/pull/266)、[#276](https://github.com/pgsty/silo/pull/276)）：解释版本桶的 Expiration 删除标记为何不能让当前版本被跳过，以及维护者后续修复如何保留 tier 清理和完成语义。
 
 ## 2026-10-24 FULL_OBJECT 校验和复制
 
