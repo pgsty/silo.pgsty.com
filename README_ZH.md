@@ -2,7 +2,7 @@
 
 [English](README.md) · [简体中文](README_ZH.md)
 
-本仓库维护 [silo.pgsty.com](https://silo.pgsty.com/)：英文位于 `/`，简体中文位于 `/zh/`。网站使用 Hugo Extended 0.168.0 与固定在 `go.mod` 中的 OINK v1.5.0。
+本仓库维护 [silo.pgsty.com](https://silo.pgsty.com/)：英文位于 `/`，简体中文位于 `/zh/`。网站使用 Hugo Extended 0.168.0 与固定在 `go.mod` 中的 OINK v1.5.1。
 
 ## 20261026 正式发布
 
