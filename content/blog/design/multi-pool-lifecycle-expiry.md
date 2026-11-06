@@ -61,7 +61,7 @@ Lifecycle evaluation needs three facts about each version: whether it is the lat
 - GET and HEAD of a `versionId` read the pool that holds that version;
 - decommission and rebalance walk one pool.
 
-The consumer is different. `applyExpiryOnNonTransitionedObjects` and `expireTransitionedObject` delete through the pools layer. A whole-object action deletes the prefix in every pool, and a new delete marker hides the key in every pool. For a single version or a new delete marker, the set-level recheck under the lock does not help, because it evaluates the versions of the set that takes the delete. When that set made the wrong decision, the recheck confirms it. For an all-versions expiry there is no recheck at all: the pools layer forwards it to `deletePrefix` with fresh options, so the set never sees `Expiration.Expire`. That path, and the way it also deletes keys nested under the expired key, is covered in a separate design record, published with its fix.
+The consumer is different. `applyExpiryOnNonTransitionedObjects` and `expireTransitionedObject` delete through the pools layer. A whole-object action deletes the prefix in every pool, and a new delete marker hides the key in every pool. For a single version or a new delete marker, the set-level recheck under the lock does not help, because it evaluates the versions of the set that takes the delete. When that set made the wrong decision, the recheck confirms it. For an all-versions expiry there is no recheck at all: the pools layer forwards it to `deletePrefix` with fresh options, so the set never sees `Expiration.Expire`. That path, and the way it also deletes keys nested under the expired key, is covered in [Lifecycle Delete-All Must Stay on One Key](/blog/design/ilm-delete-all-exact-key/).
 
 In short, the decision is local and the action is global.
 
@@ -196,7 +196,7 @@ On these paths, a wrong local decision is refused rather than executed. Migratio
 - **All-versions expiry.** It does not get the same protection. On every deployment it goes through a recursive prefix delete that skips the set recheck and also deletes keys nested under the expired key. On a single pool it has no recheck at all.
 - **Tiered latest version.** A delete-all of a tiered latest version writes a delete marker instead of purging the key.
 
-Both are handled in a separate design record, published with its fix. Approving this fix does not approve the release on its own.
+Both are handled in [Lifecycle Delete-All Must Stay on One Key](/blog/design/ilm-delete-all-exact-key/). Approving this fix does not approve the release on its own.
 
 **Necessary.** Each part closes a path that otherwise stays open:
 

@@ -72,7 +72,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 - 带 `versionId` 的 GET 和 HEAD 读取持有该版本的池；
 - decommission 和 rebalance 遍历一个池。
 
-执行过期的地方却不一样。`applyExpiryOnNonTransitionedObjects` 和 `expireTransitionedObject` 通过池层删除：整对象动作会在每个池中删除该前缀，新的删除标记会在每个池中隐藏该 key。对单个版本或新建删除标记，锁内的集合级复核也帮不上忙，因为它求值的是承接这次删除的那个集合里的版本；如果正是这个集合做了错误判断，复核只会确认它。对"删除全部版本"则根本没有复核：池层以全新的选项把它转给 `deletePrefix`，集合层从未看到 `Expiration.Expire`。这条路径，以及它为何还会删除嵌套在过期 key 名下的其他 key，见单独的设计记录，它与对应的修复一起发布。
+执行过期的地方却不一样。`applyExpiryOnNonTransitionedObjects` 和 `expireTransitionedObject` 通过池层删除：整对象动作会在每个池中删除该前缀，新的删除标记会在每个池中隐藏该 key。对单个版本或新建删除标记，锁内的集合级复核也帮不上忙，因为它求值的是承接这次删除的那个集合里的版本；如果正是这个集合做了错误判断，复核只会确认它。对"删除全部版本"则根本没有复核：池层以全新的选项把它转给 `deletePrefix`，集合层从未看到 `Expiration.Expire`。这条路径，以及它为何还会删除嵌套在过期 key 名下的其他 key，见 [生命周期"删除全部版本"只能作用于一个 key](/zh/blog/design/ilm-delete-all-exact-key/)。
 
 一句话：判断是局部的，动作却是全局的。
 
@@ -207,7 +207,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 - **删除全部版本。** 它得不到同样的保护：在任何部署上，它都走递归前缀删除，跳过了集合复核，还会连带删除嵌套在过期 key 名下的其他 key；在单池上它根本没有复核。
 - **分层的最新版本。** 对分层的最新版本执行"删除全部"，只会写一个删除标记，而不会清掉整个 key。
 
-这两点都在单独的设计记录中处理，它与对应的修复一起发布。批准本修复，本身并不等于批准发布。
+这两点都在 [生命周期"删除全部版本"只能作用于一个 key](/zh/blog/design/ilm-delete-all-exact-key/) 中处理。批准本修复，本身并不等于批准发布。
 
 **必要性。** 每一部分都关闭一条否则会继续存在的路径：
 
