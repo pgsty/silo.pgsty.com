@@ -13,6 +13,11 @@ cascade:
 
 设计归档记录 PGSTY SILO 的核心工程决策：缺陷根因、S3 与 IAM 协议不变量、备选方案取舍、运维边界与回归测试索引。
 
+## 2026-11-06 发布验收中发现
+
+- [局部视图不能把存在的对象报成不存在](/zh/blog/design/partial-view-read-404/)：只能连上部分盘的节点，为什么会对存在的对象返回 404，以及为什么判定“不存在”必须要求每块盘都应答。
+- [Multipart 提交失败可能让上传卡死](/zh/blog/design/multipart-complete-retry/)：未达到写 quorum 的提交为什么会让上传一直卡到过期清理，以及为什么修复要等到存储操作能够加 fencing 之后再做。
+
 ## 2026-11-04 发布阻塞的生命周期修复
 
 - [多池生命周期过期：按整个对象决策](/zh/blog/design/multi-pool-lifecycle-expiry/)（[#278](https://github.com/pgsty/silo/issues/278)、[#279](https://github.com/pgsty/silo/pull/279)）：解释只按单个池内版本做出的过期判断，为何会隐藏、删除或复活另一个池中的版本，以及为什么在对象锁内按合并版本列表复核是最小而完整的修复。

@@ -13,6 +13,11 @@ cascade:
 
 Design records document the engineering decisions behind PGSTY SILO: root causes, S3 and IAM protocol invariants, trade-offs against rejected alternatives, operational limits, and regression coverage.
 
+## November 6: Found in Release Acceptance
+
+- [A Partial View Must Not Report an Existing Object as Missing](/blog/design/partial-view-read-404/): Why a node that reaches only some drives can answer 404 for an object that exists, and why "not found" must require an answer from every drive.
+- [A Failed Multipart Completion Can Strand the Upload](/blog/design/multipart-complete-retry/): Why a completion that misses write quorum can strand the upload until stale-upload cleanup, and why the repair waits for fencing of storage operations.
+
 ## November 4: Release-Blocking Lifecycle Fixes
 
 - [Multi-Pool Lifecycle Expiry: Decide on the Whole Object](/blog/design/multi-pool-lifecycle-expiry/) ([#278](https://github.com/pgsty/silo/issues/278), [#279](https://github.com/pgsty/silo/pull/279)): Why an expiry decided on the versions of one pool hides, deletes, or resurrects versions in another pool, and why a recheck on the merged version list under the object lock is the minimum complete repair.
