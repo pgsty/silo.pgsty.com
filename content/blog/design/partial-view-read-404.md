@@ -2,6 +2,7 @@
 title: "A Partial View Must Not Report an Existing Object as Missing"
 linkTitle: "Partial-View 404"
 date: 2026-11-06
+lastmod: 2026-11-06
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a node that reaches only some drives of an erasure set can answer 404 NoSuchKey for an object that exists, and why mapping inconsistent metadata to "not found" only when every drive answered is the minimum complete repair.
@@ -118,6 +119,12 @@ Options A and B together, in `cmd/erasure-object.go`:
 ## Residual limits {#limits}
 
 - A versioned overwrite committed on a write quorum can still be served from the older revision through such a partial view. That is existing upstream behavior and out of scope.
+- **A permanently failed drive.** `errDiskNotFound` counts as a drive that did not answer. In a set with a permanently failed drive, an object whose metadata is split with no revision in quorum therefore no longer answers 404:
+  - GET and HEAD stay at 503;
+  - its DELETE in a versioned or versioning-suspended bucket answers `InsufficientWriteQuorum`, and the dangling-object cleanup refuses because a drive is missing;
+  - its DELETE in an unversioned bucket can still take the blind delete.
+
+  Replacing the drive makes every drive of the set answer again. It does not by itself recover the object: heal can rebuild it only from enough surviving drives that agree on its metadata and hold its data. Without that, once every drive answers, the inconsistent read can turn into not found. To recover, replace the drive, let drive healing run, and then verify the object with a read and a listing of its versions; do not assume that it was recovered.
 - `/minio/health/cluster` can report a node healthy before it reaches all of its peers' drives. Acceptance scripts should probe a write and a read through each node instead.
 
 ## Verification {#verification}

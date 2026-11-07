@@ -22,6 +22,7 @@ cascade:
 
 - [多池生命周期过期：按整个对象决策](/zh/blog/design/multi-pool-lifecycle-expiry/)（[#278](https://github.com/pgsty/silo/issues/278)、[#279](https://github.com/pgsty/silo/pull/279)）：解释只按单个池内版本做出的过期判断，为何会隐藏、删除或复活另一个池中的版本，以及为什么在对象锁内按合并版本列表复核是最小而完整的修复。
 - [恢复副本：过期的是副本，不是对象](/zh/blog/design/restored-copy-expiry/)（[#281](https://github.com/pgsty/silo/issues/281)、[#282](https://github.com/pgsty/silo/pull/282)）：解释当前版本的恢复副本过期为何会隐藏对象或抹掉更早的 null 版本，以及哪些存储层与原生恢复防护要与精确版本修复一起交付。
+- [两阶段原生恢复](/zh/blog/design/native-restore-two-phase/)（[#284](https://github.com/pgsty/silo/issues/284)）：解释原生恢复为何在整个 tier 下载期间持有对象锁，#281 的第一版防护为何还会让失败的普通上传卡住，以及在锁外暂存、再做一次短暂且经过核验的提交，如何取代私有 upload。
 - [Peer 重载后的审计 Webhook](/zh/blog/design/audit-webhook-peer-reload/)（[#259](https://github.com/pgsty/silo/issues/259)）：解释运行时修改 audit_webhook 为何会让除处理请求的服务器外其他所有服务器上的目标停止工作，哪些日志子系统存在同样问题，以及为什么用服务器上下文构建日志目标、并先打开队列存储是最小而完整的修复。
 - [失败写入与幽灵空前缀](/zh/blog/design/failed-rename-empty-prefix/)（[#285](https://github.com/pgsty/silo/issues/285)、[#286](https://github.com/pgsty/silo/pull/286)）：解释暂存数据在远端 rename 之前消失的写入，为何会留下空对象目录并在之后被列为空前缀，以及为什么在两条 rename 失败路径上清理它就足够。
 - [Heal 演练不能删除数据](/zh/blog/design/heal-dry-run-safety/)（源自 [#280](https://github.com/pgsty/silo/pull/280)）：解释 heal 演练为何会删掉 dangling 对象最后的元数据副本，并在远端节点上执行真实的桶 heal，以及为什么提前返回加上把演练标志传给 peer 能同时关闭这两条路径。
@@ -34,7 +35,7 @@ cascade:
 - [存储池迁移完整性审查：#261、#263 与 #265](/zh/blog/design/pool-migration-integrity-review/)：维护者对三个问题及其修复的审查，记录 #266 的贡献合并、#276 的维护者后续修复、验证证据与合并顺序。
 - [混合 EC 布局与迁移列表](/zh/blog/design/mixed-ec-migration-listing/)（[#261](https://github.com/pgsty/silo/issues/261)、[#262](https://github.com/pgsty/silo/pull/262)）：解释一次未完成的降级覆写为何会让可读对象从 decommission/rebalance 列表中消失，以及 #262 为何以最小范围解决问题。
 - [Tier free version 是内部清理记录](/zh/blog/design/tier-free-version-semantics/)（[#263](https://github.com/pgsty/silo/issues/263)、[#264](https://github.com/pgsty/silo/pull/264)）：解释 free version 为何必须继续供 healing 使用，但不能作为用户可见的删除标记或迁移版本。
-- [ILM 过期与存储池迁移顺序](/zh/blog/design/ilm-migration-ordering/)（[#265](https://github.com/pgsty/silo/issues/265)、[#266](https://github.com/pgsty/silo/pull/266)、[#276](https://github.com/pgsty/silo/pull/276)）：解释版本桶的 Expiration 删除标记为何不能让当前版本被跳过，以及维护者后续修复如何保留复制、tier 清理和完成语义。
+- [ILM 过期与存储池迁移顺序](/zh/blog/design/ilm-migration-ordering/)（[#265](https://github.com/pgsty/silo/issues/265)、[#266](https://github.com/pgsty/silo/pull/266)、[#276](https://github.com/pgsty/silo/pull/276)）：解释版本桶的 Expiration 删除标记为何不能让当前版本被跳过，以及维护者后续修复如何保留 tier 清理和完成语义。
 
 ## 2026-10-24 FULL_OBJECT 校验和复制
 

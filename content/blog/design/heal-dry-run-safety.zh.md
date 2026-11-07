@@ -2,7 +2,7 @@
 title: "Heal 演练不能删除数据"
 linkTitle: "Heal 演练安全"
 date: 2026-11-04
-lastmod: 2026-11-05
+lastmod: 2026-11-06
 author: "PGSTY SILO 维护团队"
 summary: >
   解释以演练（dry run）方式运行的管理 heal，为何在对象版本的元数据没有读 quorum 时仍可能删除悬空版本；为什么五行的提前返回是本次发布的正确修复；以及为什么同一修复还必须在桶 heal 中把演练标志传给远端节点。
@@ -14,7 +14,7 @@ url: "/zh/blog/design/heal-dry-run-safety/"
 
 本文覆盖 Jasper Bernhardt（[`@dihmandrake`](https://github.com/dihmandrake)）提交的 [PR #280](https://github.com/pgsty/silo/pull/280) 中与演练（dry run）相关的部分，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。同一个 PR 还让深度扫描并发校验一个对象的各块盘。这项优化另行评审，不在本文范围内。该 PR 尚未运行 CI。
 
-**状态：** 修复已通过审查，已在本地提交。它已和下个版本的其他修复放在同一个集成分支上一起测试：完整测试套件、CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。尚未合并或发布。
+**状态：** 修复已通过审查，已在本地提交。它已和下个版本的其他修复放在同一个集成分支上一起测试：带 `kqueue,dev` 标签的本地完整测试套件、本地执行的 CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。尚未合并或发布。
 
 ## 简短结论 {#tldr}
 
@@ -33,7 +33,7 @@ PR 中第二处与演练相关的改动，是在分片校验没有成功时，�
 | 性质 | 演练标志既没有传到 `erasureObjects.healObject` 中的悬空对象清理，也没有传到远端节点执行的桶 heal，两者都破坏了管理 heal 的安全承诺。继承自上游 MinIO；没有任何 SILO 提交引入或改动它们。 |
 | 谁能触发 | 只有具备 heal 权限的管理员，通过设置了 `DryRun` 的管理 heal API 触发。例如对桶、前缀或对象，或带 `--recursive` 运行 `mc admin heal --dry-run`（隐藏参数）。全站演练还会遍历 `.minio.sys/config`，IAM 和服务器配置对象就在那里。 |
 | 不受影响 | scanner、MRF、后台 heal 和磁盘 heal 从不设置 `DryRun`。SILO Console 没有调用 heal 的路径。真实 heal 的行为不变。 |
-| 删除的内容 | 正在被 heal 的对象版本或删除标记。只要元数据 quorum 失败、且 `isObjectDangling` 判定该版本悬空，就会在每块可用的盘上尝试删除，每次成功的删除都会移除该版本（连同数据目录）。删除过程中的盘错误会写入审计，但不会返回。如果该版本已经转储到分层存储，删除还会记录一个 [tier free version](/zh/blog/design/tier-free-version-semantics/)；scanner 的 free version 处理随后运行并成功时，远端分层对象也会被删除。 |
+| 删除的内容 | 正在被 heal 的对象版本或删除标记。只要元数据 quorum 失败、且 `isObjectDangling` 判定该版本悬空，就会在每块可用的盘上尝试删除，每次成功的删除都会移除该版本（连同数据目录）。删除过程中的盘错误会写入审计，但不会返回。 |
 | 其他改动 | 在多节点部署中，演练桶 heal 会让每个远端节点在自己的盘上创建缺失的桶目录；当所有池中都找不到该桶时，则删除空的桶目录。有内容的目录永远不会被删除。 |
 | 严重程度 | 高。受影响的版本已经无法通过 S3 读取，真实 heal（以及用户桶中的 GET 或 HEAD）也会按同一规则清理它们。危害在于：运维人员的检查工具，做出了运维人员明确要求它不要做的不可逆删除。在任何人能决定如何恢复之前，最后几份元数据就已经没了。 |
 | 发布紧急度 | 阻塞下一个版本。修复约十行代码，只改变演练行为，并且附带回归测试。 |
@@ -216,7 +216,7 @@ res, err := healBucketLocal(context.Background(), bucket, madmin.HealOpts{
 
 | 路径 | 可能的写操作 | main 上 `DryRun` 时 | 修复后 |
 | --- | --- | --- | --- |
-| `healObject`，元数据 quorum 失败 | `deleteIfDangling`（对所有盘调用 `DeleteVersion`；转储版本还会生成 tier free version） | **会执行** | 不再执行 |
+| `healObject`，元数据 quorum 失败 | `deleteIfDangling`（对所有盘调用 `DeleteVersion`） | **会执行** | 不再执行 |
 | `healObject`，无法修复的对象 | `deleteIfDangling` | 位于演练返回之后 | 不变 |
 | `healObject`，修复 | 向临时区写分片、`RenameData`、删除远端数据目录、清理临时区 | 位于演练返回之后 | 不变 |
 | `HealObject`，发现 bitrot 后的深度扫描重试 | 以相同选项再次运行 `healObject` | 同上 | 同样受修复保护 |
@@ -310,7 +310,6 @@ heal 路径本身不会向 MRF 入队；只有上面的桶元数据加载可能�
 - 只有管理 heal API 会设置 `DryRun`；
 - main 的远端客户端只发送这两个字段；
 - 没有其他对端 heal 调用会丢掉这个标志；
-- 清理已转储的版本会导致其分层对象被删除；
 - `mc admin heal` 如何使用盘状态；
 - 上游历史。
 
@@ -322,7 +321,9 @@ heal 路径本身不会向 MRF 入队；只有上面的桶元数据加载可能�
 - 端到端的 `mc admin heal --dry-run`；
 - 并行校验相关的测试。
 
-**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、删除全部版本、#259、#285 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、#259、#285 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+
+本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
 
 ## 审查记录 {#review}
 
@@ -336,4 +337,4 @@ heal 路径本身不会向 MRF 入队；只有上面的桶元数据加载可能�
 - 贡献者 PR：[#280](https://github.com/pgsty/silo/pull/280)
 - 评估基线：[69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)
 - 上游历史：[minio/minio#14053](https://github.com/minio/minio/pull/14053)、[minio/minio#14273](https://github.com/minio/minio/pull/14273)、[minio/minio#15954](https://github.com/minio/minio/pull/15954)、[minio/minio#18612](https://github.com/minio/minio/pull/18612)
-- 相关：[Tier free version 是内部清理记录](/zh/blog/design/tier-free-version-semantics/)、[对象自愈](/zh/operations/concepts/healing/)、[`mc admin heal`](/zh/reference/minio-mc-admin/mc-admin-heal/)
+- 相关：[对象自愈](/zh/operations/concepts/healing/)、[`mc admin heal`](/zh/reference/minio-mc-admin/mc-admin-heal/)

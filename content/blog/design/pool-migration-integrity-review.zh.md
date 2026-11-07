@@ -2,7 +2,7 @@
 title: "存储池迁移完整性审查：#261、#263 与 #265"
 linkTitle: "存储池迁移完整性审查"
 date: 2026-10-27
-lastmod: 2026-11-02
+lastmod: 2026-11-06
 author: "PGSTY SILO 维护团队"
 summary: >
   对三个存储池迁移问题的维护者审查：混合纠删码布局、tier free version，以及生命周期过期顺序。本文记录根因、最小安全修复、验证证据与合并顺序。
@@ -20,7 +20,7 @@ url: "/zh/blog/design/pool-migration-integrity-review/"
 | --- | --- | --- | --- |
 | [#261](https://github.com/pgsty/silo/issues/261) | 成立。可读的混合 EC 对象可能从迁移列表消失，旧池删除后丢失。 | 窄范围修复已通过维护者 PR [#267](https://github.com/pgsty/silo/pull/267) 合入；[#262](https://github.com/pgsty/silo/pull/262) 已被取代。 | 已由 #267 合入，issue 已完成关闭。 |
 | [#263](https://github.com/pgsty/silo/issues/263) | 成立。内部 tier 清理记录被生命周期、列表和迁移路径当成真实版本。 | [#264](https://github.com/pgsty/silo/pull/264) 处理了完整边界，同时保留 healing 所需的可见性。 | 已合入，issue 已完成关闭。 |
-| [#265](https://github.com/pgsty/silo/issues/265) | 成立。ILM 与迁移对“版本是否还存在、谁负责删除”的判断不一致。 | [#266](https://github.com/pgsty/silo/pull/266) 修复了贡献者报告的本地顺序问题；维护者后续 PR [#276](https://github.com/pgsty/silo/pull/276) 补齐复制、tier 清理、生命周期代数和整对象完成合同。 | 为承认贡献先合入 #266，再立即合入维护者的完整性修复 #276。 |
+| [#265](https://github.com/pgsty/silo/issues/265) | 成立。ILM 与迁移对“版本是否还存在、谁负责删除”的判断不一致。 | [#266](https://github.com/pgsty/silo/pull/266) 修复了贡献者报告的本地顺序问题；维护者后续 PR [#276](https://github.com/pgsty/silo/pull/276) 补齐 tier 清理、生命周期代数和整对象完成合同。#276 同时加入的生命周期删除复制在下一个版本发布前移除，见 [2026-11-06 更新](/zh/blog/design/ilm-migration-ordering/)。 | 为承认贡献先合入 #266，再立即合入维护者的完整性修复 #276。 |
 {.wide .expand}
 
 实际顺序是：先合入 mixed-EC 修复，再合并 #264，合并 #266 以保留贡献，然后立即合入 #276。前三步和维护者后续修复现在都已进入 main；#276 补齐了原始 PR 无法单独安全承担的外部清理合同。
@@ -76,7 +76,7 @@ url: "/zh/blog/design/pool-migration-integrity-review/"
 
 1. 让已经合入的 #264、#267、#266 和 #276 一起进入下一个 patch release，覆盖普通对象视图、mixed-EC 迁移列表、生命周期 action 语义和外部清理合同。
 2. 保留“版本桶当前 Expiration”“只删除一个版本的 purge”“删除整个对象”三类 action 的区分，不能退化成“一律跳过所有 ILM action”。
-3. 保留复制 purge、transitioned version 清理、生命周期配置变化、整对象过期和可恢复 decommission 的回归测试。
+3. 保留以下回归测试：配置了复制时生命周期删除不得排队任何复制，以及 transitioned version 清理、生命周期配置变化、整对象过期和可恢复 decommission。
 4. 随 patch release 发布存储完整性公告，并为受影响版本上执行过池迁移的安装提供历史数据审计 runbook。
 5. 单独跟踪 rebalance 对 transitioned version 的支持；#276 有意没有扩大这个范围。
 

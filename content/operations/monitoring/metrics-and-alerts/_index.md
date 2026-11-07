@@ -4,7 +4,7 @@ url: "/operations/monitoring/metrics-and-alerts/"
 weight: 10
 icon: fa-solid fa-gauge-high
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/monitoring/metrics-and-alerts.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="metrics-and-alerts"></a>
@@ -312,6 +312,7 @@ Metrics about the MinIO ILM functionality.
 | `minio_cluster_ilm_transition_pending_tasks` | Number of pending ILM transition tasks in the queue. <br><br>Type: gauge | `server` |
 | `minio_cluster_ilm_transition_missed_immediate_tasks` | Number of missed immediate ILM transition tasks. <br><br>Type: counter | `server` |
 | `minio_cluster_ilm_versions_scanned` | Total number of object versions checked for ILM actions since server start. <br><br>Type: counter | `server` |
+| `minio_ilm_expiry_incomplete_total` | Total number of ILM expiry attempts since server start that ended without removing what they addressed, by `reason`: `not_applicable` (the rule no longer applies when it is checked again under the object lock), `locked` (Object Lock protects the version), `history_unavailable` (the version history could not be read with authority), `error` (any other failure). See [Multi-Pool Lifecycle Expiry](/blog/design/multi-pool-lifecycle-expiry/#fix). <br><br>Type: counter | `reason`, `server` |
 {.wide .expand}
 
 <a id="minio-available-v3-logger-webhook-metrics"></a>

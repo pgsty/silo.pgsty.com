@@ -2,7 +2,7 @@
 title: "Tier free version 是内部清理记录"
 linkTitle: "Tier free version 语义"
 date: 2026-10-27
-lastmod: 2026-11-02
+lastmod: 2026-11-06
 author: "PGSTY SILO 维护团队"
 summary: >
   解释 tier free version 是什么、为何把它当作普通版本会破坏生命周期与存储池迁移，以及 PR #264 为何是最小完整修复。
@@ -126,6 +126,8 @@ PR #264 实现了这个方案。
 ## 运维边界 {#operations}
 
 decommission 遇到 free entry 时可能需要访问 tier。远端对象已经不存在时可以忽略，因为本地记录已经过时；tier 故障则不同：free record 必须保留，decommission 应失败，等待重试完成清理。这个行为比 main 更容易显露故障，但避免了悄悄丢失清理义务。
+
+如果 free version 仍指向某个 tier，而该 tier 已经**从配置中删除**，这同样不是 tier 故障。free version 是其远端对象的唯一记录，因此会被保留；在以相同名称重新配置该 tier（`mcli ilm tier add`）之前，它所在存储池的 decommission 无法完成。从下一个版本开始，decommission 会先搬迁其他所有桶，然后以失败结束，错误信息会指出该 free version、它的远端对象和 tier；重试时从剩下的桶继续。在此之前，decommission 会停在第一个这样的桶上，之后的所有桶都留在该池中。
 
 这个修复无法识别或恢复旧版本错误 decommission 已经产生的普通删除标记，因为这些标记已经没有 free-version 标志。受影响对象需要从备份或其他权威副本恢复。
 

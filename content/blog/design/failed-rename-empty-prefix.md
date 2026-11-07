@@ -2,7 +2,7 @@
 title: "Failed Writes and Phantom Empty Prefixes"
 linkTitle: "Phantom Empty Prefixes"
 date: 2026-11-04
-lastmod: 2026-11-05
+lastmod: 2026-11-06
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a write whose staged data is already gone can leave an empty object directory that later appears as a common prefix with nothing under it, and why removing empty directories on the rename failure path is the minimum complete repair.
@@ -14,7 +14,7 @@ url: "/blog/design/failed-rename-empty-prefix/"
 
 This record covers [issue #285](https://github.com/pgsty/silo/issues/285) and [PR #286](https://github.com/pgsty/silo/pull/286) by Denis Babchuk, evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and the PR head [ed05d982a](https://github.com/pgsty/silo/commit/ed05d982a1d26502e3ed2c7c5605bcf422f5d228).
 
-**Status:** fix approved by review and committed locally. Tested together with the other fixes for the next release on one integration branch: the full test suite, the CI race selections and an adversarial review of how the fixes interact all pass. Not merged or released. The fix keeps the PR #286 commit unchanged and adds one maintainer commit.
+**Status:** fix approved by review and committed locally. Tested together with the other fixes for the next release on one integration branch: the full local suite with the `kqueue,dev` tags, the CI race selections run locally and an adversarial review of how the fixes interact all pass. Not merged or released. The fix keeps the PR #286 commit unchanged and adds one maintainer commit.
 
 ## Short answer {#tldr}
 
@@ -244,7 +244,9 @@ Reasoned from code, not executed:
 
 The full `./cmd` suite was not run for this record.
 
-**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, delete-all, heal dry-run, #259 and Console fixes. Every pick applied without conflicts. On that head the full `go test ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, heal dry-run, #259 and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+
+The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
 ## Review history {#review}
 

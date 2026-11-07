@@ -2,7 +2,7 @@
 title: "Pool Migration Integrity Review: #261, #263, and #265"
 linkTitle: "Pool Migration Integrity Review"
 date: 2026-10-27
-lastmod: 2026-11-02
+lastmod: 2026-11-06
 author: "PGSTY SILO Maintainers"
 summary: >
   A maintainer review of three storage-pool migration reports: mixed erasure-code layouts, tier free versions, and lifecycle expiry ordering. It records root causes, minimum safe fixes, evidence, and merge order.
@@ -20,7 +20,7 @@ This record reviews [#261](https://github.com/pgsty/silo/issues/261), [#263](htt
 | --- | --- | --- | --- |
 | [#261](https://github.com/pgsty/silo/issues/261) | Yes. A readable mixed-EC object can be omitted from migration and lost when its old pool is removed. | The narrow fix was merged through maintainer PR [#267](https://github.com/pgsty/silo/pull/267); [#262](https://github.com/pgsty/silo/pull/262) was superseded. | Merged in #267; issue closed as completed. |
 | [#263](https://github.com/pgsty/silo/issues/263) | Yes. An internal tier cleanup entry is treated as a real version by lifecycle, listing, and migration paths. | [#264](https://github.com/pgsty/silo/pull/264) fixes the whole boundary while keeping healing visibility. | Merged; issue closed as completed. |
-| [#265](https://github.com/pgsty/silo/issues/265) | Yes. ILM and migration disagree about whether a version still exists and who removes it. | [#266](https://github.com/pgsty/silo/pull/266) fixes the contributor-reported local ordering bug. Maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276) preserves replication, tier cleanup, lifecycle-generation, and whole-object completion contracts. | Merged #266 to recognize the contribution, then merged #276 as the required completeness patch. |
+| [#265](https://github.com/pgsty/silo/issues/265) | Yes. ILM and migration disagree about whether a version still exists and who removes it. | [#266](https://github.com/pgsty/silo/pull/266) fixes the contributor-reported local ordering bug. Maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276) preserves tier cleanup, lifecycle-generation, and whole-object completion contracts. The replication of lifecycle deletes that #276 also added is removed before the next release; see the [2026-11-06 update](/blog/design/ilm-migration-ordering/). | Merged #266 to recognize the contribution, then merged #276 as the required completeness patch. |
 {.wide .expand}
 
 The practical order was: merge the mixed-EC fix, merge #264, merge #266 to preserve the contributor's change, and immediately follow it with #276. The first three changes are now in main, and #276 supplies the maintainer-owned safety boundaries that the original PR could not safely implement in isolation.
@@ -76,7 +76,7 @@ Before publishing an “all clear,” we still need a patch release and a histor
 
 1. Keep the merged #264, #267, #266, and #276 changes together in the next patch release. They establish the logical object view, mixed-EC migration listing, lifecycle action semantics, and external cleanup contracts.
 2. Preserve the distinction between a versioned current Expiration, a version-only purge, and a whole-object deletion. Do not replace it with a generic “skip every ILM action” rule.
-3. Retain the new regression coverage for replication-enabled purge, transitioned-version cleanup, lifecycle configuration changes, whole-object expiry, and resumable decommission.
+3. Retain the new regression coverage for lifecycle deletes with replication configured, which must queue no replication, and for transitioned-version cleanup, lifecycle configuration changes, whole-object expiry, and resumable decommission.
 4. Publish the storage-integrity advisory with the patch release and provide a historical-audit runbook for installations that migrated pools on affected builds.
 5. Track rebalance support for transitioned versions separately; #276 deliberately does not broaden that scope.
 

@@ -2,7 +2,7 @@
 title: "Heal Dry Run Must Not Delete Data"
 linkTitle: "Heal Dry Run Safety"
 date: 2026-11-04
-lastmod: 2026-11-05
+lastmod: 2026-11-06
 author: "PGSTY SILO Maintainers"
 summary: >
   Why an admin heal run as a dry run can still delete a dangling object version when its metadata has no read quorum, why a five-line early return is the right fix for this release, and why the same fix must also carry the dry-run flag to remote nodes during bucket heal.
@@ -14,7 +14,7 @@ url: "/blog/design/heal-dry-run-safety/"
 
 This record covers the dry-run part of [PR #280](https://github.com/pgsty/silo/pull/280) by Jasper Bernhardt ([`@dihmandrake`](https://github.com/dihmandrake)), evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). The same PR also verifies an object's drives concurrently during deep scans. That optimization is reviewed separately and is outside the scope of this record. CI has not yet run on the PR.
 
-**Status:** fix approved by review and committed locally. Tested together with the other fixes for the next release on one integration branch: the full test suite, the CI race selections and an adversarial review of how the fixes interact all pass. Not merged or released.
+**Status:** fix approved by review and committed locally. Tested together with the other fixes for the next release on one integration branch: the full local suite with the `kqueue,dev` tags, the CI race selections run locally and an adversarial review of how the fixes interact all pass. Not merged or released.
 
 ## Short answer {#tldr}
 
@@ -33,7 +33,7 @@ The PR's second dry-run change reports a drive as `unknown` instead of `ok` when
 | Nature | The dry-run flag does not reach the dangling-object purge in `erasureObjects.healObject`, or the bucket heal that remote nodes run. Both break the safety promise of admin heal. Inherited from upstream MinIO; no SILO commit introduced or changed either. |
 | Who can trigger it | Only an administrator with heal permission, through the admin heal API with `DryRun` set. One example is `mc admin heal --dry-run` (a hidden flag) on a bucket, a prefix, an object, or with `--recursive`. A site-wide dry run also walks `.minio.sys/config`, where the IAM and server configuration objects live. |
 | Not affected | The scanner, MRF, background heal, and drive heal never set `DryRun`. SILO Console has no heal call path. Real heals behave as before. |
-| What is deleted | The object version or delete marker being healed. Whenever metadata quorum fails and `isObjectDangling` judges the version dangling, a delete is attempted on every available drive, and each successful delete removes the version, data directory included. Drive errors during that delete are audited but not returned. If the version was transitioned to a tier, the delete also records a [tier free version](/blog/design/tier-free-version-semantics/), and the remote tier object is deleted as well once the scanner's free-version processing runs and succeeds. |
+| What is deleted | The object version or delete marker being healed. Whenever metadata quorum fails and `isObjectDangling` judges the version dangling, a delete is attempted on every available drive, and each successful delete removes the version, data directory included. Drive errors during that delete are audited but not returned. |
 | What else changes | In a multi-node deployment, a dry-run bucket heal makes every remote node create missing bucket directories on its drives, or remove empty ones when the bucket is missing from every pool. Directories with contents are never removed. |
 | Severity | High. The affected versions are already unreadable through S3, and a real heal (and, in user buckets, a GET or HEAD) purges them by the same rule. The harm is that the operator's inspection tool makes an irreversible deletion that the operator explicitly asked it not to make. The last metadata copies are gone before anyone can decide on a recovery. |
 | Release urgency | Blocks the next release. The fix is about ten lines of code, changes only dry runs, and comes with regression tests. |
@@ -216,7 +216,7 @@ We audited every place where an admin dry-run heal can change data:
 
 | Path | Possible mutation | Under `DryRun` on main | With the fix |
 | --- | --- | --- | --- |
-| `healObject`, metadata quorum failure | `deleteIfDangling` (`DeleteVersion` on all drives; a tier free version for transitioned versions) | **Reached** | Not reached |
+| `healObject`, metadata quorum failure | `deleteIfDangling` (`DeleteVersion` on all drives) | **Reached** | Not reached |
 | `healObject`, objects that cannot be healed | `deleteIfDangling` | After the dry-run return | Unchanged |
 | `healObject`, repair | Shard writes to the temporary area, `RenameData`, deletion of remote data directories, temporary cleanup | After the dry-run return | Unchanged |
 | `HealObject`, deep-scan retry after bitrot | Runs `healObject` again with the same options | Inherits the above | Inherits the fix |
@@ -310,7 +310,6 @@ All runs used focused `go test -run` selections with `-p 2` and the `kqueue,dev`
 - that only the admin heal API sets `DryRun`;
 - that main's remote client sends only those two fields;
 - that no other peer heal call drops the flag;
-- that a purged transitioned version leads to deletion of its tier object;
 - how `mc admin heal` uses drive states;
 - the upstream history.
 
@@ -322,7 +321,9 @@ All runs used focused `go test -run` selections with `-p 2` and the `kqueue,dev`
 - an end-to-end `mc admin heal --dry-run`;
 - the parallel verification tests.
 
-**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, delete-all, #259, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, #259, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+
+The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
 ## Review history {#review}
 
@@ -336,4 +337,4 @@ All runs used focused `go test -run` selections with `-p 2` and the `kqueue,dev`
 - Contributor PR: [#280](https://github.com/pgsty/silo/pull/280)
 - Evaluated base: [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)
 - Upstream history: [minio/minio#14053](https://github.com/minio/minio/pull/14053), [minio/minio#14273](https://github.com/minio/minio/pull/14273), [minio/minio#15954](https://github.com/minio/minio/pull/15954), [minio/minio#18612](https://github.com/minio/minio/pull/18612)
-- Related: [Tier Free Versions Are Internal Cleanup Records](/blog/design/tier-free-version-semantics/), [Object Healing](/operations/concepts/healing/), [`mc admin heal`](/reference/minio-mc-admin/mc-admin-heal/)
+- Related: [Object Healing](/operations/concepts/healing/), [`mc admin heal`](/reference/minio-mc-admin/mc-admin-heal/)

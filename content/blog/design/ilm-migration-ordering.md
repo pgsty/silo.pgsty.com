@@ -2,10 +2,10 @@
 title: "ILM Expiry and Pool Migration Ordering"
 linkTitle: "ILM Migration Ordering"
 date: 2026-10-27
-lastmod: 2026-11-02
+lastmod: 2026-11-06
 author: "PGSTY SILO Maintainers"
 summary: >
-  Why lifecycle expiry and pool migration disagree about a versioned current object, what #266 fixes, and how #276 completes the replication, tier, and lifecycle safety boundaries.
+  Why lifecycle expiry and pool migration disagree about a versioned current object, what #266 fixes, and how #276 completes the tier and lifecycle safety boundaries.
 tags: [Design, Lifecycle, Storage Pools, Replication]
 weight: 13
 draft: false
@@ -13,6 +13,8 @@ url: "/blog/design/ilm-migration-ordering/"
 ---
 
 This record covers [issue #265](https://github.com/pgsty/silo/issues/265), the contributor change [PR #266](https://github.com/pgsty/silo/pull/266), and maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276). The merged [#264](https://github.com/pgsty/silo/pull/264) and [#267](https://github.com/pgsty/silo/pull/267) are relevant predecessors. The review was updated against main after #276 on 2026-11-02. #266's decommission commit is [19910230a](https://github.com/pgsty/silo/commit/19910230a), and its rebalance commit is [a995921e5](https://github.com/pgsty/silo/commit/a995921e5).
+
+**Update (2026-11-06).** Lifecycle deletes are not replicated, as in S3 and in every SILO release. #276 briefly made them replicate on `main`: the scanner, the expiry of a transitioned version, and the bulk noncurrent purge evaluated the delete replication decision and queued a delete marker or a version purge for the targets. That is the content of the still-open [PR #240](https://github.com/pgsty/silo/pull/240). The next release removes that part before it ships. The rest of #276 stays: the hot-tier delete before the remote one, the free-version retry record, the lifecycle-change fence, and the migration completion checks. Deletes made through the S3 API still replicate as configured. A decommission no longer waits for a replication target before it retires an expired version. The sections below are corrected accordingly.
 
 ## Short answer {#tldr}
 
@@ -25,9 +27,8 @@ That creates two outcomes:
 
 PR #266 makes the migration code distinguish these actions. We merged it to preserve the contributor's correct local fix. Maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276) then routed ILM-selected deletion through the existing expiry contracts and added the missing safety fences. Together they are complete for decommission and ordinary hot-tier lifecycle migration. Rebalance still deliberately skips transitioned versions; that is a separate scope boundary.
 
-Before #276, the local algorithm was correct for moving ordinary hot-tier versions, but four safety boundaries remained:
+Before #276, the local algorithm was correct for moving ordinary hot-tier versions, but three safety boundaries remained:
 
-- a direct source purge can bypass bucket replication;
 - a transitioned version can lose the only record that would lead to remote-tier cleanup;
 - the code needs an explicit rule for a lifecycle configuration change between the walk and cleanup;
 - a whole-object expiry can leave the current version in the source pool after decommission reports Complete.
@@ -82,11 +83,11 @@ The direct purge added for that case has its own boundary. It calls the source p
 
 The original #266 direct source purge was a local storage cleanup operation. On its own, it did not automatically run the replication decision, create `VersionPurgePending` state, or remove a remote tier object. #276 keeps the action distinction from #266 but makes migration respect the contracts already owned by ordinary ILM expiry.
 
-### Replication remains a second obligation
+### Replication is not an obligation of lifecycle deletes
 
-When a delete-replication rule applies, removing an expired source version is not complete until the target receives the version purge. #276 sends ILM-selected version deletes through the normal expiry path before source cleanup, so the replication state and queued purge exist before the source copy is retired. The regression test uses two pools, delays expiry, and verifies convergence on the target.
+Lifecycle deletes are not replicated: a delete-replication rule applies to deletes made through the S3 API, and each target applies its own lifecycle configuration. As merged, #276 also queued replication for ILM-selected deletes; that part is removed before the next release (see the update above). With replication configured, a lifecycle delete during migration now queues nothing for the targets, and the source copy is retired without waiting for one.
 
-This is the smallest safe boundary because it reuses the existing replication path. It avoids duplicating replication decisions inside `removeMovedVersions`, while adding only the migration hand-off needed to prevent a delayed expiry task from finding `VersionNotFound` after the source has already disappeared.
+#276 still sends ILM-selected version deletes through the normal expiry path before source cleanup, for the two contracts below: a transitioned version keeps its remote-tier cleanup and retry record, and the completion fence sees what the expiry removed. This is the smallest safe boundary because it reuses the existing expiry path. It avoids duplicating those rules inside `removeMovedVersions`, while adding only the migration hand-off needed to prevent a delayed expiry task from finding `VersionNotFound` after the source has already disappeared.
 
 ### Tiered versions retain a cleanup obligation
 
@@ -114,7 +115,6 @@ The operator can see:
 - a decommission that fails with PreConditionFailed and needs a second run;
 - a rebalance that reports progress but leaves duplicates in the source pool;
 - versions under object lock or in a tier being lost from the source migration path;
-- a replicated target retaining a version after the source purge;
 - remote tier data orphaned after a transitioned version is directly purged;
 - a lifecycle rule change being ignored by an already admitted source cleanup;
 - duplicate copies that a later scanner pass does not remove.
@@ -148,7 +148,7 @@ PR #266 implements this design.
 
 ### Move versions when deletion has external side effects
 
-Replication and tier cleanup make a direct source purge more than a local metadata operation. Moving the version first and letting the ordinary ILM worker perform the deletion preserves the existing replication and tier contracts. It may keep one extra copy for a short time, but it avoids duplicating those contracts inside migration cleanup.
+Tier cleanup makes a direct source purge more than a local metadata operation. Moving the version first and letting the ordinary ILM worker perform the deletion preserves the existing tier contract. It may keep one extra copy for a short time, but it avoids duplicating that contract inside migration cleanup.
 
 ## PR assessment {#pr}
 
@@ -161,24 +161,24 @@ PR #266 is the correct contributor fix for the original local bug:
 
 We merged #266 to recognize that contribution. The maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276) then added the necessary integration boundaries:
 
-- replication state and queued purges are created before source cleanup;
+- ILM-selected version deletes go through the normal expiry path before source cleanup;
 - transitioned versions retain a retryable tier-cleanup record when remote deletion fails;
 - lifecycle configuration changes invalidate a stale walk;
 - whole-object actions are completed and verified before decommission reports success;
 - decommission and rebalance use separate lifecycle audit sources;
-- regression tests cover delayed expiry, replication, tier cleanup, configuration changes, whole-object expiry, and resumable decommission.
+- regression tests cover delayed expiry, tier cleanup, configuration changes, whole-object expiry, and resumable decommission.
 
-The combined result is sufficient and necessary for the reported decommission problem. It is also the smallest reasonable change: action semantics stay in the migration worker, replication and tier cleanup stay in their existing paths, and completion uses durable metadata checks already present in the system. A broader rewrite or a new metadata format would add complexity without closing a new correctness gap.
+The combined result is sufficient and necessary for the reported decommission problem. It is also the smallest reasonable change: action semantics stay in the migration worker, tier cleanup stays in its existing path, and completion uses durable metadata checks already present in the system. A broader rewrite or a new metadata format would add complexity without closing a new correctness gap.
 
-The cost is limited to a small amount of additional metadata work and, in some cases, one extra migration attempt or a short period with an extra copy. Those costs are preferable to silently losing a version, leaving a replicated target stale, or orphaning a remote tier object.
+The cost is limited to a small amount of additional metadata work and, in some cases, one extra migration attempt or a short period with an extra copy. Those costs are preferable to silently losing a version or orphaning a remote tier object.
 
 The implementation deliberately leaves rebalance support for transitioned versions outside this fix. That boundary should be handled as a separate change with its own tier-ownership tests rather than expanding #276 after the fact.
 
 ## Merge order and conflict {#merge}
 
-The final order was intentional: #264 established the real-version view, #266 preserved the contributor's action distinction, and #276 added the maintainer-owned replication, tier, lifecycle-generation, and completion checks on top of both. The original #266 commits remain in the merged history.
+The final order was intentional: #264 established the real-version view, #266 preserved the contributor's action distinction, and #276 added the maintainer-owned tier, lifecycle-generation, and completion checks on top of both. The original #266 commits remain in the merged history.
 
-The combined tests cover a free version above a lifecycle-expiring version, a transitioned version selected for deletion, replication-enabled version purge, lifecycle configuration changes, whole-object expiry, and a decommission retry after replication completes.
+The combined tests cover a free version above a lifecycle-expiring version, a transitioned version selected for deletion, lifecycle configuration changes, whole-object expiry, and resumable decommission. With replication configured, they check that lifecycle deletes queue nothing for the targets.
 
 ## Residual limits {#limits}
 
@@ -193,7 +193,7 @@ Rebalance still skips transitioned versions by design. This fix also does not he
 - Mixed-EC migration fix merged in [#267](https://github.com/pgsty/silo/pull/267)
 - Decommission fix commit: [19910230a](https://github.com/pgsty/silo/commit/19910230a)
 - Rebalance fix commit: [a995921e5](https://github.com/pgsty/silo/commit/a995921e5)
-- Related ILM replication proposal: [#240](https://github.com/pgsty/silo/pull/240)
+- Related ILM replication proposal (open; would make lifecycle deletes replicate, opt-in if adopted): [#240](https://github.com/pgsty/silo/pull/240)
 - Original decommission skip: [236ef03db](https://github.com/pgsty/silo/commit/236ef03db)
 - Pool rebalance introduction: [4523da654](https://github.com/pgsty/silo/commit/4523da654)
 - SILO per-version cleanup change: [1748f62c7](https://github.com/pgsty/silo/commit/1748f62c7)
