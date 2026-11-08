@@ -119,7 +119,7 @@ If running [`mc mv`](#command-mc.mv) with the [`--recursive`](#mc.mv.-recursive)
 
 *Optional*
 
-Add custom metadata for the object. Specify key-value pairs as `KEY=VALUE\;`. For example, `--attr key1=value1\;key2=value2\;key3=value3`.
+Add custom metadata for the object. Separate pairs with semicolons and quote the argument, for example `--attr 'key1=value1;key2=value2;key3=value3'`. Do not append a trailing semicolon. Builds with the [next-release fixes](/compatibility/mcli/#next-release) reject malformed attributes before copying or deleting any source.
 
 ##### `--disable-multipart` {#mc.mv.-disable-multipart}
 
@@ -400,6 +400,12 @@ mc mv --storage-class CLASS FILEPATH ALIAS/PATH
   > mc mv –storage-class REDUCED_REDUNDANCY myobject.txt play/mybucket
 
 ## Behavior {#behavior}
+
+### Partial failures and endpoint identity {#partial-failures}
+
+With the [next-release fixes](/compatibility/mcli/#next-release), a source preparation error makes the command exit nonzero while independent sources, including later arguments, continue. Successfully moved sources are deleted; there is no rollback. JSON start-record `totalCount` and `totalSize` values are cumulative prepared counts and bytes, not final totals or proof of completion. Check the final exit status and error records.
+
+The move guard rejects identical resolved objects and ambiguous same-bucket/key moves through endpoints sharing a scheme, port and IP, including `--resolve` mappings. Shared-IP virtual hosts can therefore be rejected. Establish that their stores are independent before copying, verifying and removing explicitly; reading matching bytes through two aliases does not prove independence. Different addresses, ports, proxy routing, virtual-host addressing or changing DNS can hide a shared backend. Use a consistent endpoint URL for aliases to the same store.
 
 ### Object Names on Move {#object-names-on-move}
 

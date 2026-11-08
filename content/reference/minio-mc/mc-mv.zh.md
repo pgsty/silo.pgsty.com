@@ -119,7 +119,7 @@ mc mv ~/mydata/object.txt play/mybucket/object.txt
 
 *Optional*
 
-为对象添加自定义元数据。将键值对指定为 `KEY=VALUE\;`。 例如，`--attr key1=value1\;key2=value2\;key3=value3`。
+为对象添加自定义元数据。键值对之间用分号分隔，并引用整个参数，例如 `--attr 'key1=value1;key2=value2;key3=value3'`，末尾不要添加分号。包含[下一版本修复](/zh/compatibility/mcli/#next-release)的构建会在复制或删除任何源之前拒绝非法属性。
 
 ##### `--disable-multipart` {#mc.mv.-disable-multipart}
 
@@ -402,6 +402,12 @@ mc mv --storage-class CLASS FILEPATH ALIAS/PATH
 
 ## 行为 {#id12}
 
+### 部分失败与端点身份 {#partial-failures}
+
+包含[下一版本修复](/zh/compatibility/mcli/#next-release)的构建在源准备失败后整体返回非零，同时继续处理其他独立源，包括参数列表中后面的源。成功移动的源会被删除，不会回滚。JSON 开始记录中的 `totalCount` 和 `totalSize` 是累计准备好的对象数与字节数，不是最终总量或完成证明。请检查最终退出码与错误记录。
+
+搬移保护会拒绝相同的已解析对象，也会拒绝桶和对象路径相同、协议和端口相同且 IP 重叠的端点间搬移，包括 `--resolve` 映射。因此，共享 IP 的虚拟主机也可能被拒绝。先确认它们的存储实际独立，才能分步复制、核验、显式删除；通过两个别名读到相同字节不能证明存储独立。不同地址、端口、代理路由、虚拟主机寻址或 DNS 变化可能隐藏共享后端；同一存储的别名应使用一致的端点 URL。
+
 ### 移动时的对象名称 {#id13}
 
 如果未显式指定目标对象名，在将对象移动到 [`TARGET`](#mc.mv.TARGET) 时，MinIO 会使用 [`SOURCE`](#mc.mv.SOURCE) 的对象名。
@@ -436,8 +442,6 @@ mc mv play/mybucket/object.txt play/mybucket/myobject.txt
 
 ### S3 兼容性 {#s3}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+PGSTY mcli 正式支持的服务端是 SILO；对上游 MinIO 和其他 S3 服务的兼容属于[尽最大努力](/zh/reference/minio-mc/#command-mc)。
 
 这项 HTTP-200 CopyObject 修复适用于 mcli 选择单次 CopyObject 的路径：对象小于 64 MiB，或显式 `--disable-multipart`。更大复制默认走 ComposeObject，不能用该修复替代对此路径的单独验证。
