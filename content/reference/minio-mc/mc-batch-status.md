@@ -22,6 +22,14 @@ upstream_modified: true
 
 Successfully retrieving either a `complete` or `failed` terminal state exits `0`—automation scripts should inspect the returned `status` field to determine whether the job succeeded. Unavailable status, missing jobs, and request errors exit non-zero. IOPs calculations also no longer overflow at large object counts; see the [release changes](/blog/release/silo-20261026/#mcli).
 
+## Changes after 20261026 (unreleased) {#silo-status-details}
+
+The coordinated SILO and mcli versions expose `versionsSkippedLocked`, `keysRefused`, `failureReason`, and `pausedReason` in both live metrics and saved status. Terminal output shows these details; JSON output keeps the existing `metric` and adds a `details` object when there are counts or reasons to report.
+
+A completed job with skipped versions or refused keys is labeled `complete-with-skips`. A paused job is labeled `paused` and remains under observation while the server waits to retry. Retrieving `complete-with-skips`, like retrieving `complete` or `failed`, exits `0`; scripts must check the status and counters.
+
+The client uses a complete live snapshot when available, including explicit zero counts to clear a previous pause or skip count. For servers or peers without the live extension, it continues to refresh saved details every five seconds and at completion. If terminal details cannot be confirmed, it reports `detailsUnavailable` instead of implying that the skip counts are zero. Use the matching maintained mcli build with the new server; the released 20261026 client does not display these details.
+
 ## Syntax {#syntax}
 
 The [`mc batch status`](#command-mc.batch.status) command outputs summaries of job events on a MinIO server.

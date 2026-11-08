@@ -23,7 +23,7 @@ The `replicate` batch job replicates objects from one MinIO deployment (the `sou
 Batch Replication between MinIO deployments have the following advantages over using [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror):
 
 - Removes the client to cluster network as a potential bottleneck
-- A user only needs access to starting a batch job with no other permissions, as the job runs entirely server side on the cluster
+- On SILO, the submitter needs permission to start the job and to perform its data operations; the server rechecks those permissions while the job runs
 - The job provides for retry attempts in event that objects do not replicate
 - Batch jobs are one-time, curated processes allowing for fine control replication
 - (MinIO to MinIO only) The replication process copies object versions from source to target
@@ -31,6 +31,12 @@ Batch Replication between MinIO deployments have the following advantages over u
 Starting with the MinIO Server `RELEASE.2023-05-04T21-44-30Z`, the other deployment can be either another MinIO deployment or any S3-compatible location using a realtime storage class. Use filtering options in the replication `YAML` file to exclude objects stored in locations that require rehydration or other restoration methods before serving the requested object. Batch replication to these types of remotes uses `mc mirror` behavior.
 
 ## Behavior {#behavior}
+
+### SILO changes after 20261026 (unreleased) {#silo-retry}
+
+Push, pull, and Snowball replication pause when a required authorization dependency is temporarily unavailable, including an outage that begins during object processing. The server saves `pausedReason` and retains ownership of the job for automatic retry. An explicit authorization denial remains a terminal failure with `failureReason`; retry does not bypass authorization.
+
+An interrupted replication attempt restarts its source scan from the beginning and recomputes its progress counters. The last object completed by concurrent workers is only a progress display, not a safe resume cursor. This also protects recovery when the final paused report could not be saved. Replaying completed work costs additional reads and writes. Replication that preserves source version IDs reuses those IDs; generic S3 transfers can create additional destination versions on replay. Batch replication does not promise exactly-once delivery.
 
 ### Access Control and Requirements {#access-control-and-requirements}
 

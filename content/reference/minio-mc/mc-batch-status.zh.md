@@ -22,6 +22,14 @@ upstream_modified: true
 
 只要成功获取到 `complete` 或 `failed` 终态，命令均以退出码 `0` 结束，自动化脚本应根据返回的 `status` 字段判断作业成败；当状态无法获取、任务不存在或请求出错时则返回非零退出码。此外，本版修复了海量对象下 IOPs 中间计算整数溢出的问题，详见[本版变更](/zh/blog/release/silo-20261026/#mcli)。
 
+## 20261026 之后的变更（尚未发布） {#silo-status-details}
+
+配套的 SILO 与 mcli 版本通过实时指标和持久化状态同时提供 `versionsSkippedLocked`、`keysRefused`、`failureReason` 和 `pausedReason`。终端输出会展示这些详情；JSON 输出保留原有 `metric`，并在存在计数或原因时附加 `details` 对象。
+
+已完成但存在跳过版本或拒绝键的作业显示为 `complete-with-skips`。暂停作业显示为 `paused`，客户端会在服务端等待重试期间继续观察。成功获取 `complete-with-skips` 与获取 `complete` 或 `failed` 一样，退出码均为 `0`；脚本必须检查状态和计数。
+
+实时指标包含完整详情时，客户端直接使用该快照，其中显式的零计数可清除此前的暂停或跳过状态。服务端或 peer 不支持实时扩展时，客户端仍每五秒及在任务结束时刷新持久化详情。如果无法确认终态详情，会输出 `detailsUnavailable`，不会将未知的跳过计数当作零。新服务端应配套使用维护版 mcli 构建；已发布的 20261026 客户端不会展示这些详情。
+
 ## 语法 {#id2}
 
 [`mc batch status`](#command-mc.batch.status) 命令会输出 MinIO 服务器上作业事件的汇总信息。
