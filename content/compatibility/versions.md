@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "Released SILO 20261026, Console 2.5.1, mcli, KES and silo-pkg 3.15.2 identities and upgrade boundaries."
+description: "Released SILO component identities, the separate silo-pkg 3.16.0 library release, and upgrade boundaries."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -10,6 +10,15 @@ icon: fa-solid fa-code-branch
 ---
 
 SILO 20261026 is the current Server release, with Console 2.5.1, mcli 20261026 and silo-pkg 3.15.2. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
+
+## Shared package v3.16.0 {#pkg-3-16-0}
+
+[silo-pkg v3.16.0](/blog/release/pkg-3.16.0/) is a separate source-only release
+requiring Go 1.27.3. It updates JOSE, networking, CPU detection and YAML
+dependencies while preserving public APIs and policy semantics. Applications
+must select `github.com/pgsty/silo-pkg/v3 v3.16.0` and rebuild to adopt it.
+The historical application artifacts below still contain their original
+dependency versions; publishing this library does not update those artifacts.
 
 ## Released 20261026 components {#server-20261026}
 
