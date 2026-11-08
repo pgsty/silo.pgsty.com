@@ -1,7 +1,7 @@
 ---
 title: "组件版本"
 linkTitle: "组件版本"
-description: "SILO 20261026、Console 2.5.1、mcli、KES 与 silo-pkg 3.15.2 的正式版本和依赖关系。"
+description: "SILO 各组件的正式版本、独立发布的 silo-pkg 3.16.0 源码库与升级边界。"
 url: "/zh/compatibility/versions/"
 weight: 5
 type: docs
@@ -10,6 +10,13 @@ icon: fa-solid fa-code-branch
 ---
 
 SILO 20261026 是当前正式服务端版本，配套 Console 2.5.1、mcli 20261026 与 silo-pkg 3.15.2。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
+
+## 共享包 v3.16.0 {#pkg-3-16-0}
+
+[silo-pkg v3.16.0](/zh/blog/release/pkg-3.16.0/) 是独立的源码库发布，要求
+Go 1.27.3。该版本更新 JOSE、网络、CPU 检测与 YAML 依赖，保持公开 API
+和策略语义兼容。应用需选择 `github.com/pgsty/silo-pkg/v3 v3.16.0` 并重新构建。
+下列历史应用制品仍包含各自原有的依赖版本；库发布不会更新这些制品。
 
 ## 20261026 正式组件 {#server-20261026}
 

@@ -1,4 +1,4 @@
-# Server, mcli, Console, silo-pkg and KES 20261026 assets are published and verified on 2026-10-26 UTC.
+# Application releases retain their independently verified versions below.
 # Keep the Windows format tied to each published version. Switch a component
 # to zip only when its new Windows assets have been published and verified.
 server:
@@ -27,10 +27,10 @@ console:
   source: fff1618d9abbf1f6125f1914bd50818e2bc347ed
   notes: "blog/release/console-2.5.1/"
 pkg:
-  tag: v3.15.2
-  source: 0416eb1f450536ca2cc3592c2c2a06a3df88d4e0
+  tag: v3.16.0
+  source: b7aeea85e84e8888d6ab424c7123a1297711bc3f
   go_version: "1.27.3"
-  notes: blog/release/pkg-3.15.2/
+  notes: blog/release/pkg-3.16.0/
 kes:
   tag: RELEASE.2026-10-26T00-00-00Z
   build: 20261026000000.0.0
