@@ -8,13 +8,16 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
-> **最新正式版：** [Console v2.6.0](/zh/blog/release/console-2.6.0/) 提供用量扫描与存储桶管理修复。[2.7.0 候选版](/zh/blog/release/console-2.7.0/) 加入十种语言、阿拉伯语 RTL、容器修复、silo-pkg v3.16.0、正式 mcli 20261109 及 Swagger 文档更新。配套版本见[组件矩阵](/zh/compatibility/versions/)。
-
-> 独立 Console 升级不会替换 Server 内嵌控制台。内置策略 Reset 与实时存储桶列表需配合 Server 20261026 正式版生效；Server 20261018 不包含这两项服务端缓存修复。
+> [!NOTE]
+> **最新正式版：** [Console v2.6.0](/zh/blog/release/console-2.6.0/)（2026-11-05，UTC+8）新增用量扫描、保留版本统计与存储桶管理修复。[Console 2.7.0 候选版](/zh/blog/release/console-2.7.0/)加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复、`silo-pkg v3.16.0`、正式版 `mcli 20261109` 及 Swagger 文档更新。升级独立 Console 不会替换 Server 内嵌控制台；内置策略 Reset 与实时存储桶列表需配合 Server 20261026 正式版生效（Server 20261018 不包含这两项服务端缓存修复）。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
 SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
 
-[`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。较早版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]。
+[`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。较早版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]、[v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0)、[v2.4.0](/zh/blog/release/console-2.4.0/)、[v2.4.1](/zh/blog/release/console-2.4.1/) 与 [v2.4.2](/zh/blog/release/console-2.4.2/)。
+
+## 2.6.0 用量扫描与存储桶管理 {#release-260}
+
+[Console 2.6.0](/zh/blog/release/console-2.6.0/) 新增可取消的目录与存储桶用量扫描（分别显示当前字节与保留版本字节）、可选的 PostgreSQL 持久化用量后台任务、保留期/配额/复制带宽输入的精确整数范围校验、创建启用对象锁存储桶时的版本排除拦截、路由切换期间隐藏并禁用旧对象详情与版本控件（[#81](https://github.com/pgsty/silo-console/pull/81)），以及内嵌 Console 服务的三分钟 keep-alive 默认值。
 
 ## 2.5.1 管理修复 {#release-251}
 
@@ -46,9 +49,12 @@ SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地�
 
 内嵌前端从约 10 MB 降到 3 MB 以内，可逐字节复现构建，并由发布门禁强制校验。没有任何形式的遥测，页面本身也没有外部网络依赖。
 
-### 4. 双语界面 {#i18n}
+### 4. 界面语言 {#i18n}
 
-界面、帮助内容与文档链接提供英文与中文，通过页面级切换使用，且未引入额外的运行时依赖。
+已发布的 Console 2.6.0 提供中英文界面。2.7.0 源码通过统一菜单新增法语、德语、俄语、
+西班牙语、巴西葡萄牙语、日语、阿拉伯语和土耳其语，词典全部内置，并支持阿拉伯语 RTL。
+英语仍是默认与回退语言；文档保持中英双语，服务器消息和日志正文原样保留。
+覆盖范围与维护分层见[语言设计](/zh/blog/design/console-languages/)。
 
 ### 5. 对象列表按页操作 {#pagination}
 
@@ -111,4 +117,3 @@ Linux 软件包使用 `/etc/silo-console/certs` 作为证书目录；重启前�
 
 [v2.1.1]: https://github.com/pgsty/silo-console/releases/tag/v2.1.1
 [v2.2.1]: https://github.com/pgsty/silo-console/releases/tag/v2.2.1
-[v2.3.0]: https://github.com/pgsty/silo-console/releases/tag/v2.3.0

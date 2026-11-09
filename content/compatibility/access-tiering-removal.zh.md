@@ -8,6 +8,7 @@ type: docs
 icon: fa-solid fa-code-compare
 ---
 
+> [!NOTE]
 > **发布边界：** 可选的 GET 频率池分层特性（社区 [PR #60](https://github.com/pgsty/silo/pull/60)）只存在于 main/快照构建中。Server 20260903 早于该特性，Server 20260916 则在移除之后打标签，因此从任一已发布版本升级都**无需**访问分层配置清理。移除经 [PR #188](https://github.com/pgsty/silo/pull/188) 合入；只有运行过包含该特性的构建的部署需要本页。
 
 ## 为何移除 {#why}
@@ -27,6 +28,7 @@ icon: fa-solid fa-code-compare
 3. 删除顶层 `AccessTierQuota` 与规则级 `AccessTransition` 元素。**只含 `AccessTransition` 动作的规则整条删除。** 混合规则保留其 filter、status、ID 与普通过期/transition 动作。纯访问规则在升级后可以无害加载，但会变成无动作规则，在下一次 lifecycle 编辑时校验失败。若无规则剩余，通过 S3 API 删除 lifecycle 配置。
 4. 使用**协调维护窗口**：停掉整个部署，在每个节点安装相同的新二进制，再全部重启。bootstrap 检查会比对二进制校验和**与**服务器环境设置——四节点实验中，第一个新节点在三个旧节点之间无法完成启动；只在部分节点上移除旧环境覆盖也会在二进制一致时阻止启动。请勿逐台替换节点。
 5. 重启后验证对象读取、桶列表、ILM worker 设置与一次 lifecycle 编辑。请检查**每个服务请求节点到每池每块盘**的存储访问，不要仅依赖 admin 磁盘摘要或固定 sleep。
+{.steps}
 
 ## 存储状态的去向 {#stored-state}
 
@@ -38,6 +40,7 @@ icon: fa-solid fa-code-compare
 | 数据用量缓存 | v8 与 v9 缓存都可读取，保留普通计数、大小、直方图与远端层统计。退役的热层字节计数丢弃；后续写入使用 v8。无需因特性做全量统计重建。 |
 | 已搬移的对象 | 留在当前池中，版本与时间戳不变。没有批量搬回，也没有对象元数据改写。 |
 | 内部残留 | `x-minio-internal-ilm-atier` 与 `.minio.sys/config/ilm/access/` 计数对象可能残留。它们不需要清理服务或对象扫描。 |
+{.wide .expand}
 
 被中断的 rebalance/decommission 本就可能让同一版本存在于多个池，与访问分层无关；移除调度器不会移除这些既有副本。
 

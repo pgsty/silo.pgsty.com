@@ -72,6 +72,7 @@ The algorithm and checksum-type support matrix is:
 | CRC64NVME | Supported | Unsupported |
 | CRC32 / CRC32C | Supported | Supported |
 | SHA1 / SHA256 | Unsupported | Supported |
+{.wide .expand}
 
 `FULL_OBJECT` applies only to linearizable CRCs, whereas SHA1 and SHA256 require per-part digests to compute the `COMPOSITE`checksum at completion.
 

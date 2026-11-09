@@ -103,11 +103,8 @@ MinIO 不支持由客户端管理版本 ID 的分配。 所有版本 ID 的生�
 
 MinIO 可以利用 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 自动永久移除对象的旧版本。 否则，可使用手动 `DELETE` 操作永久删除非当前版本对象或 `DeleteMarker` 对象。
 
-> [!NOTE]
-> **MinIO 实现幂等 Delete Marker**
->
-> > [!NOTE]
-> > **变更: RELEASE.2022-08-22T23-53-06Z**
+> [!NOTE] MinIO 实现幂等 Delete Marker
+> *变更: RELEASE.2022-08-22T23-53-06Z*
 >
 > 标准 S3 实现处理未指定版本标识符的简单 `DeleteObject` 请求时，可能会为同一对象连续创建多个删除标记。 关于更多细节，请参见 S3 文档中的 [管理删除标记](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManagingDelMarkers.html#RemDelMarker)。
 >

@@ -184,6 +184,7 @@ The embedded payload was rebuilt twice from a clean directory and confirmed byte
 | [#6](https://github.com/pgsty/silo-console/issues/6) — English/Chinese localization | Hand-rolled bilingual layer, zero new dependencies, English-as-key fallback |
 | [#7](https://github.com/pgsty/silo-console/issues/7) — migrate monitoring queries to Metrics V3 | V3-only; 26 widgets, 31 queries, 29 metric names, guard taxonomy, regression suite |
 | [#8](https://github.com/pgsty/silo-console/issues/8) — replace N/A Info metrics | Erasure Health and Usage Data Age, sharing the advanced dashboard's widget results |
+{.wide .expand}
 
 Three acceptance criteria are recorded as unmet rather than quietly ticked: `web-app` has no unit-test runner, so the i18n test suite (#6) and the focused `constructLabelNames` test (#2) would require introducing test tooling first, and #6's contributor documentation for adding translation keys is not yet written.
 

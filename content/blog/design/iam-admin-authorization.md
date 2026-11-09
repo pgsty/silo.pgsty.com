@@ -137,6 +137,7 @@ issuance boundary:
 | Omitted, `null`, `{}`, `{"Statement":null}` | Inherit parent permissions, including when the new key has an expiration. |
 | A policy allowing only selected actions | Retain the requested restriction; unrelated actions remain denied. |
 | `{"Version":"2012-10-17"}` or `{"Statement":[]}` | Do not normalize to inheritance; the expiring-key regression cases remain denied. |
+{.wide .expand}
 
 Normalization checks `Statements == nil` rather than `len(Statements) == 0` so
 that only the Console empty-policy placeholder forms are normalized to
@@ -233,6 +234,7 @@ Commit `2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6` and follow-up `9954392605827b2
 | Authentication, identity configuration, and policy configuration packages | Passed. |
 | `make verifiers` and `make build` | Passed lint, generated-file checks, rebrand/compatibility checks, and binary build. |
 | Hosted CI checks on PR `#242` | All 8 checks passed (DCO, vulnerability analysis, format/build/vet, lint/generated files, race, cross compilation, internal tests, and cmd tests). |
+{.wide .expand}
 
 `cmd/admin-handlers-users-authz_test.go` covers root empty
 policies, policyless self operations, parent/group/session/plugin denials,

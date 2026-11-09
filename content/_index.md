@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-This site targets **[SILO 20261026](/blog/release/silo-20261026/)**, which embeds Console 2.5.1. Current standalone releases include **[Console 2.6.0](/blog/release/console-2.6.0/)**, **[mcli 20261109](/blog/release/mcli-20261109/)** and **[silo-pkg 3.16.0](/blog/release/pkg-3.16.0/)**, with optional KES 20261026 and Go 1.27.3. See the [component matrix](/compatibility/versions/) and [Console 2.7.0 candidate notes](/blog/release/console-2.7.0/).
+This site targets **[SILO 20261026](/blog/release/silo-20261026/)** (with embedded Console 2.5.1), standalone **[Console 2.6.0](/blog/release/console-2.6.0/)**, **[mcli 20261109](/blog/release/mcli-20261109/)**, **[silo-pkg 3.16.0](/blog/release/pkg-3.16.0/)**, and optional external key service **[KES 20261026](/blog/release/silo-20261026/#kes)**, all built with Go 1.27.3. See the [component matrix](/compatibility/versions/) and [Console 2.7.0 candidate notes](/blog/release/console-2.7.0/).
 
 > [!WARNING]
 > **SILO is a MinIO fork maintained by the Pigsty community.** It is not affiliated with, endorsed by, or sponsored by MinIO, Inc. “MinIO” is a trademark of MinIO, Inc., used here only to identify the upstream project. See [Attribution](/about/attribution/) for source and licensing details.
@@ -20,7 +20,7 @@ SILO gives existing MinIO deployments an open release and security-maintenance p
 
 ## Quickstart {#quickstart}
 
-{{< tabs group="docker-linux-packages-existing-minio-kubernetes" >}}
+{{< tabs group="quickstart" >}}
 {{< tab label="Docker" value="docker" >}}
 The commands below pin Server 20261026, now publicly available; see [release status](/blog/release/silo-20261026/#delivery). Example credentials are suitable only for a local evaluation.
 
@@ -54,12 +54,12 @@ Visit [http://127.0.0.1:9001](http://127.0.0.1:9001) and sign in with the creden
 
 See the [container deployment guide](/operations/deployments/baremetal-deploy-minio-as-a-container/) for persistent host paths, service management, and production considerations.
 {{< /tab >}}
-{{< tab label="Linux packages" value="linux-packages" >}}
+{{< tab label="Linux packages" value="linux" >}}
 Use [Download & Install](/download/#server) to select the RPM, DEB, APK, or standalone archive for your architecture. Published release assets include SHA-256 checksums and build-provenance attestations.
 
 Native packages install the server as `/usr/bin/silo`; the service keeps the established `MINIO_*` environment-variable contract. Review the [binary and package compatibility notes](/compatibility/binary/) before replacing an existing `minio` package.
 {{< /tab >}}
-{{< tab label="Existing MinIO" value="existing-minio" >}}
+{{< tab label="Existing MinIO" value="minio" >}}
 Read the [migration guide](/compatibility/migration/) before changing images or binaries. Preserve the data volumes and configuration, stop every node running the old binary, and then start every node on the same pinned SILO release. Do not perform a mixed-binary rolling migration, and never use `docker compose down -v` on data you intend to keep.
 {{< /tab >}}
 {{< tab label="Kubernetes" value="kubernetes" >}}

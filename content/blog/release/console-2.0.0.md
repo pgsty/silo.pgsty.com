@@ -141,6 +141,7 @@ The release ships 16 assets:
 | Standalone binary | Linux `amd64/arm64/arm`, macOS `amd64/arm64`, Windows `amd64`   |
 | System packages   | DEB / RPM / APK × `amd64/arm64/armv6`                           |
 | Checksums         | `silo-console_2.0.0_checksums.txt` (SHA-256)                    |
+{.wide .expand}
 
 The pipeline triggers on tag pushes, pins third-party Actions to commit SHAs, and enforces the clean-checkout and zero-diff asset-rebuild gates before GoReleaser runs.
 

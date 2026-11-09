@@ -101,6 +101,7 @@ X-Minio-Source-Replication-Request: true
 | 携带 `X-Amz-Replication-Status: REPLICA`，但缺少复制权限 | 直接返回 `403 AccessDenied` |
 | 精确标记头 + 具备复制权限，无 `REPLICA` 状态头 | 仅授予 `trusted` |
 | 精确标记头 + 具备复制权限 + `REPLICA` 状态头 | 同时授予 `trusted` 与 `replicaTrusted` |
+{.wide .expand}
 
 对未获授权却声称 `REPLICA` 的请求显式返回 `403 AccessDenied`，可以防止配置错误的副本写入被静默降级为普通新对象写入并触发反向复制循环。
 
@@ -170,6 +171,7 @@ X-Minio-Source-Replication-Request: true
 | 拒绝所有携带内部复制标记头的请求 | 会使原本应被忽略的多余请求头引发大面积客户端报错，并打断合法的仅标记（marker-only）复制调用 |
 | 要求所有受信任复制请求都携带 `REPLICA` | 破坏复制 `UploadPart`、`CompleteMultipartUpload` 与批量复制的真实线缆兼容性 |
 | 在 `ObjectOptions` 中保存布尔值，但让事件与对象锁继续读请求头 | 留下两个可能互相矛盾的信任源 |
+{.wide .expand}
 
 ## 实现分层与验证矩阵 {#implementation}
 

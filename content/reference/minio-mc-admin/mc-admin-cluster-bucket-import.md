@@ -3,7 +3,7 @@ title: "mc admin cluster bucket import"
 url: "/reference/minio-mc-admin/mc-admin-cluster-bucket-import/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-bucket-import.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="command-mc.admin.cluster.bucket.import"></a>
@@ -77,3 +77,9 @@ The bucket to apply the imported metadata to.
 ### Global Flags {#global-flags}
 
 This command supports any of the [global flags](/reference/minio-mc/#minio-mc-global-options).
+
+## Behavior {#behavior}
+
+### Exit Status on Per-Item Import Failures (`mcli 20261109`) {#exit-status}
+
+In [`mcli 20261109`](/blog/release/mcli-20261109/), `mc admin cluster bucket import` returns exit code `1` when the server reports per-bucket or per-feature metadata import failures in the import response (`#234`).

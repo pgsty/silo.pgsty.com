@@ -48,6 +48,7 @@ url: "/zh/blog/release/console-2.4.1/"
 | JWX / strfmt | v3.3.0 / v0.27.2 |
 | React Router | v7.18.4 |
 | 构建工具 | Go 1.27.1、Node 24.21.0、Yarn 4.13.0 |
+{.wide .expand}
 
 SDK 正确处理 CopyObject HTTP 200 响应内嵌的 S3 错误；JWX 修复自定义 JSON 字段名转义，
 strfmt 更新 Go 1.27 主机名校验。嵌入前端和第三方署名已按最终依赖重新生成。

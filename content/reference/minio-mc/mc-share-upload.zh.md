@@ -170,7 +170,7 @@ done
 
 ### 生成命令与 shell 兼容性 {#shell-compatibility}
 
-[下一 mcli 版本](/zh/compatibility/mcli/#next-release) 生成的命令会按 POSIX shell 语法引用完整参数，文本字段使用 `--form-string`。替换 `<FILE>` 和 `<NAME>` 时保留这些引号；替换值自身含引号时也需要正确转义。若编辑后的命令保存在 `upload` 变量中，使用 `sh -c "$upload"` 执行。直接执行 `$upload` 只会分词，不会解释其中的引号，可能导致失败。Windows 上应在 Git Bash 或 WSL 中执行；输出不是 `cmd.exe` 语法。
+自 [mcli 20261109](/zh/blog/release/mcli-20261109/)（见[兼容性说明](/zh/compatibility/mcli/#current-release)）起，生成的命令会按 POSIX shell 语法引用完整参数，文本字段使用 `--form-string`。替换 `<FILE>` 和 `<NAME>` 时保留这些引号；替换值自身含引号时也需要正确转义。若编辑后的命令保存在 `upload` 变量中，使用 `sh -c "$upload"` 执行。直接执行 `$upload` 只会分词，不会解释其中的引号，可能导致失败。Windows 上应在 Git Bash 或 WSL 中执行；输出不是 `cmd.exe` 语法。
 
 上面的循环直接向 curl 传递各个参数。使用时将端点和示例策略字段替换成当前生成命令中的值；示例凭证与签名只是占位内容。
 

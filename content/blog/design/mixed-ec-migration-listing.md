@@ -71,19 +71,19 @@ The issue is serious because the migration status is falsely successful. A retry
 
 ## Options {#options}
 
-### Option 1: require a successful heal before migration
+### Option 1: require a successful heal before migration {#option-1-require-a-successful}
 
 This is a useful operational mitigation, but it is not a complete fix. The drives may remain unavailable, MRF may give up, and GET does not necessarily enqueue a heal when the old metadata is valid. Blocking every migration until the layout is uniform would also make pool retirement depend on unrelated drive recovery.
 
-### Option 2: force migration callers to use latest-only listing
+### Option 2: force migration callers to use latest-only listing {#option-2-force-migration-callers}
 
 This duplicates listing policy in decommission and rebalance and risks changing their version-history behavior. It also leaves ListObjectVersions and Walk callers inconsistent.
 
-### Option 3: merge all EC groups or lower the quorum
+### Option 3: merge all EC groups or lower the quorum {#option-3-merge-all-ec}
 
 This is unsafe. Two groups below quorum must not be added together merely because they describe the same key. Lowering the quorum can select data that cannot be reconstructed.
 
-### Option 4: broaden the existing narrow recount
+### Option 4: broaden the existing narrow recount {#option-4-broaden-the-existing}
 
 This is the smallest safe change. The recount runs only after the normal selection fails, only for non-strict reads, and only for a single ordinary null version per stream. PR #262 applies exactly this option.
 

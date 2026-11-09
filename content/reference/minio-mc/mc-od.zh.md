@@ -3,7 +3,7 @@ title: "mc od"
 url: "/zh/reference/minio-mc/mc-od/"
 weight: 260
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-od.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-od"></a>
@@ -151,8 +151,15 @@ mc od if=file.zip of=myminio/mybucket/file.zip parts=5
 
 上述命令会将源文件均分为五个分片，然后上传这些分片。
 
-### S3 兼容性 {#s3}
+## 行为 {#behavior}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
+### 分片顺序读取与参数校验（`mcli 20261109`） {#multipart-validation}
 
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中：
+
+- 分片 `mc od` 上传会从源文件按顺序读取互不重叠的分片数据，并在传输结束时关闭源读取器（`#173`）。
+- `mc od` 会在创建目标文件或发起分片上传前拒绝零值、负值或溢出的 `parts=`、`size=` 或 `skip=` 参数（`#191`、`#205`）。
+
+### S3 兼容性 {#s3-compatibility}
+
+SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。

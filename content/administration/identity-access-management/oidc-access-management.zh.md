@@ -3,7 +3,7 @@ title: "OpenID Connect 访问管理"
 url: "/zh/administration/identity-access-management/oidc-access-management/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/oidc-access-management.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="openid-connect"></a>
@@ -68,7 +68,12 @@ MinIO 支持多个 OIDC 提供方配置。 但是，每个部署只能配置 **�
 3. MinIO 在 STS API 响应中返回临时凭证，形式为 access key、secret key 和 session token。这些凭证的权限与 JWT claim 中指定的策略一致。
 4. 应用程序使用 STS 端点返回的临时凭证，在 MinIO 上执行已认证的 S3 操作。
 
-MinIO 提供了一个示例 Go 应用 [web-identity.go](https://github.com/minio/minio/blob/master/docs/sts/web-identity.go)，用于处理完整登录流程。
+SILO 提供了一个示例 Go 应用 [web-identity.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-26T00-00-00Z/docs/sts/web-identity.go)，用于处理完整登录流程。
+
+> [!NOTE]
+> **OIDC JWK 密钥长度与组 Claim 解析**
+>
+> 自 `silo-pkg v3.14.2` 及 [Server 20261018](/zh/blog/release/silo-20261018/) 起，OIDC JWKS 校验会拒绝超过 4096 位的 RSA 公钥并强制限制 JWK 密钥参数范围。自 [Console v2.5.1](/zh/blog/release/silo-20261026/) 起，内嵌 Console OIDC 登录除逗号分隔字符串外，也支持解析字符串数组形式的组 claim。参见 [TLS 与 OIDC 发现](/zh/blog/design/go127-tls-oidc-discovery/)。
 
 #### 识别 JWT Claim 值 {#jwt-claim}
 

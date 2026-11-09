@@ -47,7 +47,7 @@ Simply deleting the condition that reselects existing objects would lose the cap
 
 ## Correctness review and implementation improvements {#correctness}
 
-### Write quorum must match the request
+### Write quorum must match the request {#write-quorum-must-match-the}
 
 The original helper inferred quorum from the `STANDARD` storage class for every write. A controlled two-pool test exposed a regression when overwriting an object with `REDUCED_REDUNDANCY` (RRS):
 
@@ -58,12 +58,13 @@ The original helper inferred quorum from the `STANDARD` storage class for every 
 | Existing object's set | 13 of 16 drives online; reported usage 90% |
 | Other pool | 16 drives online, ample space; an actual RRS probe write succeeded |
 | New request | Overwrite using RRS, through `PUT` or new multipart initialization |
+{.wide .expand}
 
 The helper required 12 writers for `EC:4` and selected the original pool, whereas the actual `EC:2` write required 14 online drives and failed with `InsufficientWriteQuorum` (HTTP 503). Because lower parity leaves more data shards, RRS requires **more** online drives for a write. The baseline's reserve filter skipped the 90%-full pool, selected the healthy second pool, and succeeded across all four pool/entry-point combinations (12/12 attempts failed on the unpatched PR).
 
 The inverse mismatch occurred with `PUT`'s internal `MaxParity` option: a write eligible for `EC:8` was evaluated against `EC:4` and unnecessarily moved to another pool.
 
-### A healthy preference, with explicit fallback
+### A healthy preference, with explicit fallback {#a-healthy-preference-with-explicit}
 
 The updated implementation passed the request's storage class and `PUT` `MaxParity` into placement, matching the writer's availability/capacity parity rules (including the extra drive required when data and parity shard counts are equal) while preserving multipart initialization parity semantics:
 
@@ -74,6 +75,7 @@ The updated implementation passed the request's storage class and `PUT` `MaxPari
 | Known to be unwritable or lacking space | Exclude it before reserve filtering, then select another pool |
 | No alternative has space, but the original set has space and lacks write quorum | Let the original set report `InsufficientWriteQuorum` rather than misreporting `StorageFull` |
 | No usable space | Preserve the `StorageFull` result |
+{.wide .expand}
 
 Health and capacity checks shared a single set-level `DiskInfo` snapshot. A drive counted as a usable writer only if it was online and returned a positive capacity result; drives with a failed `DiskInfo` call were treated as unhealthy.
 
@@ -93,6 +95,7 @@ After the first performance round showed high version-history rewrite costs, a s
 | Internal metadata buckets | Exclude from affinity |
 | New keys or a single pool | Retain the original path and capacity behavior |
 | Existing multipart sessions, ordinary COPY routing, latest delete markers, or read-quorum-error routing | Preserve their existing paths |
+{.wide .expand}
 
 Eligibility checked both the bucket's versioning configuration and the request options. A version-enabled bucket with prefix-excluded unversioned writes, or a version-suspended bucket with mixed history, remained on the baseline allocator.
 
@@ -171,7 +174,7 @@ On the primary 4 KiB overwrite workload, pairwise throughput changes across the 
 
 Excluding versioned buckets eliminated the round-one `xl.meta` write amplification: block writes per version were **12.272 → 12.268 MiB**, block reads **12.201 → 12.197 MiB**, and CPU **26.98 → 27.26 ms** (in the versioned control, the second run of each pair was faster regardless of binary order, and new-key control pairs varied from −44.3% to +15.3% due to shared-SSD order effects).
 
-### Restore the same starting data before each run
+### Restore the same starting data before each run {#restore-the-same-starting-data}
 
 Because fresh runs let the two placement policies build different on-disk layouts over time, an additional 8-run fixture test restored an identical snapshot before each run—either one pool-local copy per key (256 records) or copies in both pools (512 records)—followed by a 30-second settle period, 5-second warmup, and 60-second measurement:
 
@@ -229,3 +232,4 @@ Public references: [PR #245](https://github.com/pgsty/silo/pull/245), upstream [
 | Narrowed benchmark's production semantics | `bb4b987825985481e5047f94c60f560be85b9c19` |
 | Round-two `results/analysis.json` SHA-256 | `68eec465749b625c691abcace90fc71f103b5826ccab4c40a120f39e29ded368` |
 | Complete candidate patch SHA-256 | `af833ec4b7bbbc22fca8539a6da40f4fe5fa93d61febabbd5b08a63ae1ecbe1c` |
+{.wide .expand}

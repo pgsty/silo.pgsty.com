@@ -2,7 +2,7 @@
 title: "失败写入与幽灵空前缀"
 linkTitle: "幽灵空前缀"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO 维护团队"
 summary: >
   解释暂存数据已经消失的写入，为何会留下一个空的对象目录，并在之后表现为一个下面什么都没有的公共前缀；以及为什么在重命名失败路径上清理空目录，是最小而完整的修复。
@@ -32,7 +32,7 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
 
 - 同一函数的提交步骤，也就是 `xl.meta` 的重命名，有自己的失败分支。对于没有数据目录的写入（例如内联对象和零字节对象），这个分支会留下同样的空目录，因此加上同样的一行清理。
 - 向上逐级删除父目录时，只删除空目录。原来它会删除每个父路径上的任何东西，而并发写入可能把这个路径换成一个已提交对象的 `xl.meta`。对抗性审查表明，新的清理使这种情况在每块磁盘上都可能发生。
-- 如果某次写入的重命名失败，是因为并发清理删除了其目标路径上的某级目录，而它自己的源仍然存在，它会重新创建这些目录并重试，最多每级路径一次。
+- 如果某次写入的重命名失败，是因为并发清理删除了其目标路径上的某级目录，而它自己的源仍然存在，它会重新创建这些目录并重试，最多每级路径一次。直接元数据写入（`WriteMetadata` 与 `UpdateMetadata`）在首次版本或删除标记元数据写入期间如果遇到并发 `RenameData` 空目录清理删除了父目录，同样会对 `openFileAll` 与 `renameAll` 最多按每级路径重试一次（[`479a49b28`](https://github.com/pgsty/silo/commit/479a49b28)）。
 
 修复不会主动清扫已经留在磁盘上的目录。之后对同一个 key 写入再删除，就会移除其中一个；如何发现和移除它们，见[剩余限制](#limits)。
 
@@ -48,11 +48,13 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
 | 可达性 | 依赖时序。报告者在一个注入了网络延迟的 4 节点集群上，用约 5000 次被客户端中断的写入也没能现场复现，但在 12 盘和 16 盘集合的生产环境中发现了它。测试可以确定性地构造这个状态。 |
 | 发布紧急度 | 不属于数据安全层面的发布阻塞项，但计划随下一个版本发布：生产用户已经遇到（Iceberg 孤儿文件清理）。清理和重试只在重命名失败时执行；只删除目录的向上清理也作用于普通删除，删除的目录与之前相同，只有仅含 macOS `.DS_Store` 文件的父目录除外。 |
 | 剩余工作量 | 修复及其测试已在本地完成并通过审查。剩下远端 CI、合并和发布。 |
+{.wide .expand}
 
 ## 触发条件 {#trigger}
 
 在一块磁盘上的顺序如下：
 
+{.steps}
 1. 一次超过内联阈值的 `PutObject`，或一次 `CompleteMultipartUpload`，进入提交阶段，在纠删集合的每块磁盘上调用 `RenameData`。
 2. 调用节点不再等待某块远端磁盘：客户端断开、请求被取消，或磁盘调用超时。远端磁盘并不知情。`RenameDataHandler` 用 `context.Background()` 执行 `RenameData`，grid 单请求 handler 也完全没有 context。远端的磁盘包装层 `xlStorageDiskIDCheck.RenameData` 用磁盘超时（默认 30 秒）约束这次调用，但到期时只是返回，正在进行的文件系统调用仍会继续。
 3. 没有写仲裁，调用方判定写入失败。`renameData` 撤销已经报告成功的磁盘；`PutObject` 中延迟执行的 `deleteAll` 会在每块磁盘上删除 `.minio.sys/tmp` 下的暂存对象。对分段上传而言，完成失败后的 `AbortMultipartUpload` 会删除上传目录。
@@ -67,6 +69,7 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
 | `ListObjectsV2`，`delimiter=/`，前缀 `day=1/` | 前缀 `day=1/b=9/` |
 | `ListObjectsV2`，`delimiter=/`，前缀 `day=1/b=9/` | 无结果 |
 | 递归 `ListObjectsV2`、`ListObjectVersions`、`HEAD day=1/b=9/put` | 无结果、无结果、不存在 |
+{.wide .expand}
 
 只要集合中至少一半的磁盘上有这个目录，前缀就会出现，这就是默认的 `strict` 列举仲裁。在 16 盘集合中，目录留在 8 块盘上时会被列出，留在 7 块盘上时不会。
 
@@ -82,7 +85,7 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
 
 ## 行为的来源 {#history}
 
-### 溯源
+### 溯源 {#provenance}
 
 **由上游 MinIO 引入，不是 SILO 引入的。** 残留目录比本想防止它的那段清理更早出现。下面每个成因都是上游提交，并且都是 SILO 分叉点（[`27742d469`](https://github.com/pgsty/silo/commit/27742d469)，2025-12-03）的祖先。这段清理代码在报告者看到问题的 MinIO `RELEASE.2025-07-23T15-54-02Z`、上游最后一个发布 `RELEASE.2025-10-15T17-29-55Z`、已归档的上游 `master`、`main`，以及从 `RELEASE.2025-12-03T12-00-00Z` 到 `RELEASE.2026-10-26T00-00-00Z` 的每一个 SILO 发布中完全一致，我们逐个 tag 比对了相关行。SILO 曾在一个发布中改变过迟到写入的时间窗口，没有任何 SILO 提交改动过这段清理。
 
@@ -94,6 +97,7 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
 | 提交分支的清理目标从 `xl.meta` 路径改为数据目录路径；原先直接写 `xl.meta`、没有数据目录 ID 的写入，现在也走暂存文件的重命名。 | [`c7f7c4738`](https://github.com/pgsty/silo/commit/c7f7c4738)（[#18801](https://github.com/minio/minio/pull/18801)） | 2024-02-20 | `RELEASE.2024-02-24T17-11-14Z` |
 | 存储 RPC handler 用 `context.Background()` 执行磁盘变更（grid）。此前 handler 传入的是请求上下文。 | [`51aa59a73`](https://github.com/pgsty/silo/commit/51aa59a73)（[#18461](https://github.com/minio/minio/pull/18461)） | 2023-11-20 | `RELEASE.2023-12-02T10-51-33Z` |
 | 磁盘包装层用截止时间限制 `RenameData`，到期即返回，工作继续：先是 deadline worker，后来是 `WithDeadline`，直到现在的形态。 | [`e7b60c4d6`](https://github.com/pgsty/silo/commit/e7b60c4d6)（[#17701](https://github.com/minio/minio/pull/17701)）、[`4a6c97463`](https://github.com/pgsty/silo/commit/4a6c97463)（[#18861](https://github.com/minio/minio/pull/18861)）、[`9693c382a`](https://github.com/pgsty/silo/commit/9693c382a)（[#19548](https://github.com/minio/minio/pull/19548)） | 2023-07-25、2024-01-24、2024-04-23 | `RELEASE.2023-08-04T17-40-21Z`、`RELEASE.2024-01-28T22-35-53Z`、`RELEASE.2024-04-28T17-53-50Z` |
+{.wide .expand}
 
 这些部分如何组合：
 
@@ -111,6 +115,7 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
 | [`ea7c794a9`](https://github.com/pgsty/silo/commit/ea7c794a9)、[`8a4097309`](https://github.com/pgsty/silo/commit/8a4097309)、[`652a1c09d`](https://github.com/pgsty/silo/commit/652a1c09d) | 2026-10-25 | 仅 `RELEASE.2026-10-25T00-00-00Z` | **没有影响。** 按路径的变更锁、独立的回滚备份目录，以及保护未完成提交不被废弃数据清理删除。 |
 | [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba) | 2026-10-26 | `RELEASE.2026-10-26T00-00-00Z` 与 `main` | **恢复了继承来的窗口。** 它撤回了上述等待在途操作的改动，以保持既有的超时行为，见[存储超时与回滚边界](/zh/blog/design/multi-pool-object-consistency/#maintenance-20261026)。 |
 | [`a36fd8fff`](https://github.com/pgsty/silo/commit/a36fd8fff)、[`0f9199e0c`](https://github.com/pgsty/silo/commit/0f9199e0c) | 2026-08-02、2026-10-18 | `RELEASE.2026-08-04T00-00-00Z`、`RELEASE.2026-10-18T00-00-00Z` | **没有影响。** 前者在 deadline worker 内部恢复 panic，后者及时删除系统桶下为空的分片上传父目录。两者都不涉及目标对象目录。 |
+{.wide .expand}
 
 没有任何 SILO 提交引入或扩大了这个残留。唯一降低暴露的 SILO 改动只发布了一次，一天后就被撤回，因此 `RELEASE.2026-10-26T00-00-00Z` 的暴露程度与上游相同。迟到的磁盘操作仍是一条有文档记录的边界，本问题就是它的一种可见后果。
 
@@ -118,27 +123,27 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
 
 ## 方案比较 {#options}
 
-### 方案 1：在重命名失败路径上删除空目录
+### 方案 1：在重命名失败路径上删除空目录 {#option-1}
 
 这是 PR #286 的思路，也是选定的方案。创建这些目录的函数在同一次调用中、在同一块磁盘上删除它们，而且只删除空目录。成功路径上没有任何代价，也不需要新增状态。
 
-### 方案 2：让远端 `RenameData` 响应调用方的取消
+### 方案 2：让远端 `RenameData` 响应调用方的取消 {#option-2}
 
 这能缩小窗口但无法关闭它，代价却大得多。grid 单请求 handler 拿不到 context；grid 服务端知道请求的截止时间，但只用它来丢弃迟到的响应。要传播取消，需要修改 grid 请求协议，或为这个调用换用另一种 handler 类型。取消也无法中止正在进行的文件系统调用：如果取消恰好在创建目录和重命名之间到达，目录仍会留下，方案 1 依然必要。SILO 之前等待已受理存储 I/O 的工作，已为保持既有超时行为而撤回（见[行为的来源](#history)）。
 
-### 方案 3：让 heal 或 scanner 删除空的对象目录
+### 方案 3：让 heal 或 scanner 删除空的对象目录 {#option-3}
 
 这是唯一无需用户操作、就能清扫旧版本遗留目录或崩溃遗留目录的方案，但本次不采用。heal 有意只删除少数磁盘持有的目录。在后台删除多数磁盘都持有的空目录，会与每一次首次写入在“创建目录到重命名”之间发生竞争，而不只是与迟到的写入竞争，除非它持有对象锁并设置时间阈值。这是一种新的、具有破坏性的后台行为，需要单独设计。它仍可作为清理存量遗留的后续工作。
 
-### 方案 4：让列举忽略下面没有任何对象的目录
+### 方案 4：让列举忽略下面没有任何对象的目录 {#option-4}
 
 遍历只知道一个目录是否为空。要证明一棵子树里没有对象，就得在带分隔符的列举中，为每个目录条目读取整棵子树。这些目录也仍然留在磁盘上，父目录仍然删不掉。不采用。
 
-### 方案 5：在创建目标之前检查暂存数据
+### 方案 5：在创建目标之前检查暂存数据 {#option-5}
 
 这会给每次写入增加一次系统调用，而且仍有竞争：暂存数据可能在检查之后、重命名之前消失。不采用。
 
-### 方案 6：让 `reliableRename` 在重试时重建父目录
+### 方案 6：让 `reliableRename` 在重试时重建父目录 {#option-6}
 
 这能让并发写入者在其目录被清理删除后仍然成功（见[下文的竞争分析](#sufficiency)）。`reliableRename` 本身不做这项改动：`renameAll` 有许多调用方，这一改动恰好会在源路径不存在的情况下重新创建目标父目录，其中包括那些没有任何清理的调用方。
 
@@ -146,6 +151,7 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
 
 ## 修复方案 {#fix}
 
+{.steps}
 1. **数据重命名失败分支（PR #286）。** 在现有的数据目录清理之后，`RenameData` 调用
 
    ```go
@@ -157,7 +163,7 @@ PR #286 是正确的修复。数据目录重命名失败时，它会在对象目
    PR 增加了两个测试。`TestRenameDataStagedDataGoneLeavesNoPrefix` 在 16 盘集合上，用 8 MiB 对象的 `PutObject` 和 `CompleteMultipartUpload` 构造出报告中的状态，然后检查列举结果和磁盘内容。`TestRenameDataStagedDataGoneKeepsExistingObject` 检查覆盖写失败后旧对象仍然可读。
 2. **提交失败分支（维护者补充）。** `RenameData` 末尾对 `xl.meta` 的重命名以同样的方式创建对象目录，它的失败分支也有同样的清理缺口。对于没有数据目录的写入，如果暂存的 `xl.meta` 在写入之后、提交之前消失，就会留下一个空的对象目录，无论是否应用 PR #286。这个分支也加上了同样的调用。`TestXLStorageRenameDataCommitMetaMissingRemovesEmptyDirs` 复用现有 `TestXLStorageRenameDataCommitMetaMissing` 中的 `missingCommitMetaContext` 钩子，它恰好在这一点删除暂存的 `xl.meta`。测试检查零字节写入和内联写入既不留下对象目录，也不留下空父目录；持有其他对象的父目录保留；在提交失败之前已经移入的数据目录保持原位。
 3. **只删除目录的向上清理（维护者补充，由对抗性审查发现）。** 删除成功后，`deleteFile` 会向上逐级删除父目录。原来这一步调用删除时不带末尾斜杠，因此也会删除文件。在一次向上清理的两步之间，另一次清理可能删掉这条链上剩下的目录，随后某个写入者可能提交一个对象，其 `xl.meta` 恰好位于第一次清理下一步要删除的路径上：对 key `parent/xl.meta/child` 来说，这个对象就是 `parent`。于是清理会在发生这种交错的每块磁盘上删掉已提交的元数据。现在向上清理传入的父路径带末尾斜杠，只删除空目录，遇到其他任何东西都会停下。另一次清理既可能是新加的清理（这使得普通的失败写入就能触发这种交错），也可能是普通删除，所以这个隐患在修复之前就已存在。`TestXLStorageWalkUpKeepsCommittedObject` 分别通过 `DeleteVersion` 和两个清理分支复现了它。
-4. **并发清理之后重试（维护者补充，由对抗性审查发现）。** 新的清理可能在另一个写入创建目标目录之后、重命名之前删除这个目录。原来那次写入即使源完好也会失败，发生在哪些磁盘上就在哪些磁盘上失败，按分支和操作不同，报 `IncompleteBody`（400）、`NoSuchKey`（404）或写仲裁错误。现在 `RenameData` 的两次重命名在某次尝试的目录创建或重命名报告“不存在”、而源仍然存在时重试。判断依据是这次尝试本身的错误，在它被映射为存储错误之前，因为另一个写入（例如嵌套 key 的写入）可能在判断之前重建这些目录。每次重试都会重新执行基准目录以下的目录创建；缓存基准目录的限制见[剩余限制](#limits)。一次清理向上逐级删除，路径上的每个目录最多删除一次，而每次失败的尝试至少需要多一次删除，所以写入最多按其基准目录以下的路径层数重试，任何单次清理都无法把重试耗尽。`TestRenameDataSurvivesConcurrentEmptyDirCleanup` 在 `PutObject`（8 MiB 和内联）或 `CompleteMultipartUpload` 刚创建目录之后，在全部 16 块磁盘上运行一次同一 key 的迟到失败 `RenameData`，检查迟到调用删除了目录，而写入仍然成功。`TestXLStorageRenameDataRetriesWhileCleanupWalksUp` 对 `a/b/object` 逐个删除 `object/`、`b/` 和 `a/`，每一步都紧跟在写入的下一次目录创建到达该目录之后，使这次清理先后挫败第一次重命名和下一次尝试中的两次目录创建；写入仍必须成功。第三个用例让 `a/b/object/child` 的写入在一次失败的目录创建之后立即重建这些目录。
+4. **并发清理之后重试（维护者补充，由对抗性审查发现）。** 新的清理可能在另一个写入创建目标目录之后、重命名之前删除这个目录。原来那次写入即使源完好也会失败，发生在哪些磁盘上就在哪些磁盘上失败，按分支和操作不同，报 `IncompleteBody`（400）、`NoSuchKey`（404）或写仲裁错误。现在 `RenameData` 的两次重命名在某次尝试的目录创建或重命名报告“不存在”、而源仍然存在时重试。直接元数据写入（`WriteMetadata` 与 `UpdateMetadata`）在首次版本或删除标记元数据写入期间如果遇到并发 `RenameData` 空目录清理删除了父目录，同样会对 `openFileAll` 与 `renameAll` 最多按每级路径重试一次（[`479a49b28`](https://github.com/pgsty/silo/commit/479a49b28)，`TestXLStorageMetadataWriteSurvivesRenameDataCleanup`）。判断依据是这次尝试本身的错误，在它被映射为存储错误之前，因为另一个写入（例如嵌套 key 的写入）可能在判断之前重建这些目录。每次重试都会重新执行基准目录以下的目录创建；缓存基准目录的限制见[剩余限制](#limits)。一次清理向上逐级删除，路径上的每个目录最多删除一次，而每次失败的尝试至少需要多一次删除，所以写入最多按其基准目录以下的路径层数重试，任何单次清理都无法把重试耗尽。`TestRenameDataSurvivesConcurrentEmptyDirCleanup` 在 `PutObject`（8 MiB 和内联）或 `CompleteMultipartUpload` 刚创建目录之后，在全部 16 块磁盘上运行一次同一 key 的迟到失败 `RenameData`，检查迟到调用删除了目录，而写入仍然成功。`TestXLStorageRenameDataRetriesWhileCleanupWalksUp` 对 `a/b/object` 逐个删除 `object/`、`b/` 和 `a/`，每一步都紧跟在写入的下一次目录创建到达该目录之后，使这次清理先后挫败第一次重命名和下一次尝试中的两次目录创建；写入仍必须成功。第三个用例让 `a/b/object/child` 的写入在一次失败的目录创建之后立即重建这些目录。
 
 PR #286 的测试辅助函数 `stagedDataGoneDisks` 现在在集合磁盘列表所用的锁下替换列表背后的磁盘，而不是替换那个后台任务不加锁读取的回调。
 
@@ -203,6 +209,7 @@ PR #286 的测试辅助函数 `stagedDataGoneDisks` 现在在集合磁盘列表�
 
 ### 清理已有的空前缀 {#cleanup}
 
+{.steps}
 1. 确认前缀为空：`mcli ls --recursive --versions ALIAS/BUCKET/PREFIX/` 和 `mcli ls --recursive --incomplete ALIAS/BUCKET/PREFIX/` 都没有输出。
 2. 确认已经没有客户端向该前缀写入。对 Iceberg 这类表格式来说，就是已经不再写入的分区。
 3. 用 `mcli rm --force --purge ALIAS/BUCKET/PREFIX/` 删除列出的最深一级空前缀。服务端会在每个池、每个纠删集合的每块磁盘上递归删除该前缀，然后删除变空的父目录。在测试中，清除 `day=1/b=9/` 时，`day=1/` 也在全部 16 块磁盘上被删除。
@@ -244,7 +251,7 @@ PR #286 的测试辅助函数 `stagedDataGoneDisks` 现在在集合磁盘列表�
 
 本记录没有运行完整的 `./cmd` 测试。
 
-**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、Heal 演练、#259 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、Heal 演练、#259、`delete-all` 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
 
 本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
 
@@ -256,6 +263,7 @@ PR #286 的测试辅助函数 `stagedDataGoneDisks` 现在在集合磁盘列表�
 | 第 2 轮 | 要求修改。每块磁盘一次迟到调用，在写入重试期间依次删除各级父目录，就耗尽了唯一的一次重试并返回 403。现在重试最多每级路径一次。没有把耗尽后的失败改判为 503，剩余问题记录在[剩余限制](#limits)中。记录做了七处更正。 |
 | 第 3 轮 | 要求修改。嵌套 key 的写入在一次失败的尝试之后重建目录，使重试判断看不到这次失败；现在判断依据是这次尝试本身的错误。两个调度目录创建的测试在 Windows 上跳过。概述与清理指引保持一致。 |
 | 第 4 轮 | 附带小修改批准：关于缓存基准目录和清理过程的三处措辞更正，已应用。 |
+{.wide .expand}
 
 ## 参考 {#references}
 

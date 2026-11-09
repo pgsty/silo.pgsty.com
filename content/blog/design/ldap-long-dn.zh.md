@@ -33,6 +33,7 @@ SILO 的 `NormalizeDN` 先解析 LDAP 服务端返回的 DN，再调用 `DN.Stri
 | 经 `DN.String()` 序列化后的 `\e5\bc\a0` | 9 个 ASCII 字节 |
 | `cn=` + 40 个 `张` + `,dc=example,dc=com`（原始 UTF-8） | 141 字节 |
 | 同一完整 DN 经 `NormalizeDN` 序列化后 | 381 个 ASCII 字节 |
+{.wide .expand}
 
 由于每个 3 字节汉字都会展开为 9 个 ASCII 字节，原本仅 141 字节的 UTF-8 DN 在序列化后膨胀到了 381 字节。
 
@@ -60,6 +61,7 @@ config/iam/policydb/sts-users/<normalized-DN>.json
 | MinIO [`280526ca`](https://github.com/minio/minio/commit/280526caf7e41881f7cd9a3c97028e1f56df41ef)（2024-03） | 策略缓存未命中时不再忽略磁盘回读错误，而是将读取错误向上传播。 |
 | MinIO [`efb73fa5`](https://github.com/minio/pkg/commit/efb73fa5d52fc1f217c58d51544f448e3862ab61) 与 [`7e45d84a`](https://github.com/minio/minio/commit/7e45d84acebf9eac5391ec7676c4a7f92e52fd75)（2024-03） | 将身份与策略映射统一改为规范化 DN，导致非 ASCII 字符按 `\xx` 展开。 |
 | SILO [`709d50a9`](https://github.com/pgsty/silo/commit/709d50a916bf3311eda2b3882ac5f2a0251f4223)（Server 20260916） | 为支持持久化撤销与防重放，在登录流程中新增父身份版本读取（`config/iam/users/<DN>/identity.json`），使每次 LDAP 登录都会必经该读取路径。 |
+{.wide .expand}
 
 ## 修复方案：仅将确定无法落盘的纯 ASCII 超长分量归类为不存在 {#decision}
 
@@ -93,6 +95,7 @@ config/iam/policydb/sts-users/<normalized-DN>.json
 | **修改 `NormalizeDN` 保留原始 UTF-8，不再做 `\xx` 转义** | **暂不采用。** 会改变存量集群已落盘的身份与策略映射键名，引发兼容性断裂，且依然无法解决更长 DN 的分量超限。 |
 | **对 LDAP 跳过父身份版本检查或回退 `709d50a9`** | **否决。** 会丧失持久化撤销与防重放能力，且依然会在更早的 `sts-users/<DN>.json` 策略映射读取处失败。 |
 | **使用固定长度哈希键存储，将完整 DN 存入文件内容** | **属独立特性范围。** 若需支持超长 DN 的持久化写入，需统一设计查找、列举、导入导出、跨站点复制与滚动升级方案。 |
+{.wide .expand}
 
 ## 测试验证矩阵 {#verification}
 
@@ -102,6 +105,7 @@ config/iam/policydb/sts-users/<normalized-DN>.json
 | **端到端 LDAP STS 登录测试**（[`cmd/sts-handlers_test.go`](https://github.com/pgsty/silo/blob/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0/cmd/sts-handlers_test.go#L3300)） | 验证规范化后长达 384 字节、通过组策略授权的 LDAP 用户在对象后端与 `etcd` 后端共 8 种配置下的 STS 登录、S3 签名访问与服务账号操作。 |
 | **跨平台物理文件系统边界探针** | 在 macOS（可创建 49 组）与 Linux `tmpfs`（可创建 32 组）上实测 72 组物理文件名：所有能落盘的名称均未被误判为“不可能存在”；并在每个平台上验证了 105 项错误传播断言（5 类父身份名称 $\times$ 7 类存储错误 $\times$ 3 个调用入口）。 |
 | **CI 与工具链漏洞检查** | PR 提交 [`3df51549bbbd6e57a6a5f11ac77535390517db65`](https://github.com/pgsty/silo/commit/3df51549bbbd6e57a6a5f11ac77535390517db65)（合并为 [`a07d655dc69cf04b130c2634d9fa5301078af546`](https://github.com/pgsty/silo/commit/a07d655dc69cf04b130c2634d9fa5301078af546)）及合并提交 [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0) 通过全部 [Go CI](https://github.com/pgsty/silo/actions/runs/39894613094) 与 [VulnCheck](https://github.com/pgsty/silo/actions/runs/39894613091) 任务（同时将最低 Go 工具链提升至 Go 1.27.3 以修复标准库证书校验漏洞 `GO-2026-6809`）。 |
+{.wide .expand}
 
 ## 运维边界与配置建议 {#limits}
 

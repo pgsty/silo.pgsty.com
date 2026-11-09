@@ -39,6 +39,7 @@ If you use the Pigsty package repository, `dnf install silo` / `apt install silo
 | `/etc/default/minio` | Still read, first; `/etc/default/silo` overrides per variable (`noreplace`/conffile — upgrades never overwrite edits) |
 | service account `minio-user` (upstream) / `minio` (Pigsty) | `silo:silo`, declared in `/usr/lib/sysusers.d/silo.conf`, created on install |
 | — | `/usr/share/doc/silo/LICENSE`, `NOTICE` (AGPL-3.0-or-later) |
+{.wide .expand}
 
 Two package properties:
 

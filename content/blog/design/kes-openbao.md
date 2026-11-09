@@ -3,7 +3,8 @@ title: "SILO, KES and OpenBao: Key Ownership and Recovery"
 linkTitle: "KES and OpenBao"
 date: 2026-10-18
 lastmod: 2026-10-26
-author: "SILO"
+author: "PGSTY SILO Maintainers"
+summary: "Separate object encryption, key-service authorization and persistent root-key storage, with explicit upgrade and recovery checks."
 description: "Separate object encryption, key-service authorization and persistent root-key storage, with explicit upgrade and recovery checks."
 tags: [Design, KES, Security, Operations]
 weight: 1

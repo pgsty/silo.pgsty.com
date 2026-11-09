@@ -73,6 +73,7 @@ if args.ObjectName != "" {
 | `PutReplicationConfiguration`、`PutLifecycleConfiguration`                     | 以服务端凭据运行，并在调用者权限被吊销后继续生效。                                                                   |
 | `DeleteBucket`、`ForceDeleteBucket`                                            | 不可逆地销毁桶实体及其配置。上游 issue 的原始复现动作。                                                             |
 | `PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration` | 在今天的服务端没有挂任何行为——要么根本没有 handler，要么 handler 在鉴权之后直接返回 `NotImplemented`。收走它们不影响任何能用的东西，并且提前覆盖。 |
+{.wide .expand}
 
 **刻意不予保护**，并且有测试对此做出断言——于是把其中任何一个加回去，都是一次带可见代价的明确决定，而不是往列表里添一行：
 
@@ -107,6 +108,7 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 | `false → true`（变宽） | **0** |
 | `true → false`（收窄） |   144 |
 | 不变                 | 26856 |
+{.wide .expand}
 
 那 144 条收窄全部落在设计意图之内，没有一条溢出：动作恰好是受保护的十二个；语句形式只有三种 `Allow`，`Deny`、`NotResource` 排除与 deny-`NotResource` 三种形式 **零变化**；资源模式只有四种对象级模式；请求只有桶级请求，对象级请求完全未被触碰。12 × 4 × 3 = 144，严丝合缝。
 
@@ -174,6 +176,7 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 |:-----------------------|----:|
 | 上游 `minio/pkg` v3.11.0 | 291 |
 | `silo-pkg` v3.11.0     | 270 |
+{.wide .expand}
 
 **有 24 个动作只存在于上游：** 6 个 `s3:*ObjectAnnotation*`、5 个 `admin:` 动作（`DistJobStatus`、`Get`/`SetBucketCompression`、两个 `TablesReplication*`），以及 13 个覆盖函数 CRUD 与打标签的 `s3tables:` 动作。它们属于本分支刻意不采纳的 AIStor 词表，因为社区版服务端并不实现这些功能。
 
@@ -184,6 +187,7 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 | `s3tables:TagResource`         | `s3tables:TagTable`、`s3tables:TagWarehouse`                 |
 | `s3tables:UntagResource`       | `s3tables:UntagTable`、`s3tables:UntagWarehouse`             |
 | `s3tables:ListTagsForResource` | `s3tables:ListTagsForTable`、`s3tables:ListTagsForWarehouse` |
+{.wide .expand}
 
 因此，一条写了这六个动作名之一的策略，在两者之间 **只有一个** 能通过校验。Silo 服务端、`mc` 与 Console 都没有引用它们，所以在本生态内没有影响；但从上游 v3.11.0 切换过来的消费者应当知道，动作词表并不可互换。
 

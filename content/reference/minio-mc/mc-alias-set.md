@@ -163,6 +163,8 @@ mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 
 SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).
 
+`mcli 20261109` supports an optional `"region"` string in each alias entry in `~/.mc/config.json`. The S3 client uses `MC_REGION`, then `AWS_REGION`, then the alias region, with SDK discovery when none is configured. `alias set` has no `--region` flag and recreating an alias clears its saved region; import a complete alias object to preserve it. `mb --region` separately controls bucket creation. See [alias-region configuration](/blog/design/alias-region/#usage).
+
 ### Required Credentials and Access Control {#required-credentials-and-access-control}
 
 [`mc alias set`](#command-mc.alias.set) requires specifying an access key and corresponding secret key for the S3-compatible host. **`mc`** functionality is limited based on the policies associated to the specified credentials. For example, if the specified credentials do not have read/write access to a specific bucket, **`mc`** cannot perform read or write operations on that bucket.

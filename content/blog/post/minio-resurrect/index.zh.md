@@ -21,7 +21,7 @@ MinIO 开源仓库正式归档，不再维护。一个时代落幕，但开源�
 
 ------
 
-## MinIO 的死亡证明
+## MinIO 的死亡证明 {#the-death-certificate}
 
 2025年12月3日，MinIO 在 GitHub 上宣布进入"维护模式"。我写了一篇《[MinIO 已死](/zh/blog/post/minio-is-dead/)》。
 
@@ -53,6 +53,7 @@ Percona 创始人 Peter Zaitsev 也在 LinkedIn 上表达了对开源基础设�
 | 2025-10 | 停止分发二进制/Docker       | 断供     |
 | 2025-12 | 宣布维护模式               | 临终关怀   |
 | 2026-02 | 仓库归档，不再维护            | 死亡     |
+{.wide .expand}
 
 一家融了1.26亿美元、估值十亿美金的公司，花了五年时间，亲手把自己建立的开源生态一砖一瓦地拆干净。
 
@@ -60,7 +61,7 @@ Percona 创始人 Peter Zaitsev 也在 LinkedIn 上表达了对开源基础设�
 
 ------
 
-## 但开源不死
+## 但开源不死 {#but-open-source-endures}
 
 故事到这里，按照正常剧本应该是一声叹息，然后大家各回各家。
 
@@ -80,6 +81,8 @@ MinIO 公司可以归档一个仓库，但它归档不了 [AGPL](https://github.
 真正关键的问题不是 “能不能 Fork”，而是 有没有人真的能把它当成生产组件来维护。
 
 ------
+
+## 为什么是我来接这个摊子 {#why-would-i-do-that}
 
 我本来并不想接这个摊子 —— 但我在 MinIO 进入维护模式后等了一两周，社区里没有人站出来说 “我来”，我就只能自己上了。
 
@@ -103,11 +106,11 @@ MinIO 公司可以归档一个仓库，但它归档不了 [AGPL](https://github.
 
 ------
 
-## 我们做了什么
+## 我们做了什么 {#what-we-ve-done}
 
 截至今天，我们做了三件事。
 
-### 1. 复活管理控制台
+### 1. 复活管理控制台 {#1-restored-the-admin-console}
 
 这是社区最愤怒的一刀。
 
@@ -125,7 +128,7 @@ MinIO 公司可以归档一个仓库，但它归档不了 [AGPL](https://github.
 
 他们拆了门窗，我们给装回去了。
 
-### 2. 重建二进制分发
+### 2. 重建二进制分发 {#2-rebuilt-binary-distribution}
 
 2025年10月，MinIO 停止分发预编译的二进制文件和 Docker 镜像，只留源码。“请用 `go install` 自己编译” —— 这是他们给用户的交代。
 
@@ -155,7 +158,7 @@ pig repo set; pig install minio
 
 一切照旧。
 
-### 3. 复活社区版本文档
+### 3. 复活社区版本文档 {#3-restored-community-edition-docs}
 
 MinIO 的官方文档同样面临风险 —— 原本的链接已指向它们的商业产品 AIStor。
 
@@ -167,11 +170,11 @@ MinIO 的官方文档同样面临风险 —— 原本的链接已指向它们的
 
 ------
 
-## 我们的承诺与原则
+## 我们的承诺与原则 {#commitments}
 
 一些话需要提前说清楚，免得产生误解。
 
-### 我们不做新特性，只保障供应链
+### 我们不做新特性，只保障供应链 {#no-new-features-just-supply}
 
 MinIO 作为一个 S3 兼容的对象存储，功能已经足够完善。
 它是一个 **已经完成的软件**，它不需要更多花里胡哨的新特性，它需要的是一个稳定可靠、持续可用的版本。
@@ -182,14 +185,14 @@ RPM、DEB、Docker 镜像 —— CI/CD Pipeline 自动构建，与你现有的�
 
 > 前提是 MinIO 别用商标武器来搞我，搞我那我就只能重命名了。
 
-### 这是真实使用的版本，不是归档备份
+### 这是真实使用的版本，不是归档备份 {#this-is-a-production-build}
 
 可能有人会想：这只是又一个 Fork 备份而已吧？不是。
 **MinIO 在 Pigsty 中是真实使用的组件**，很多用户将它作为备份仓库跑在生产环境里。
 我们使用的就是自己构建的版本 —— 如果出了问题，我们会第一时间发现，第一时间修复。
 我们自己构建的版本，已经在自己的生产环境中用了三个月。吃自己的狗粮，是最好的质量保证。
 
-### 我们会修 Bug 并跟进安全更新
+### 我们会修 Bug 并跟进安全更新 {#i-m-willing-to-track}
 
 如果你在使用中遇到问题，欢迎在 [pgsty/minio](https://github.com/orgs/pgsty/discussions) 提交反馈。
 如果是我们构建的版本中可复现的问题，以及安全漏洞（CVE），我们都会积极跟进和修补
@@ -197,7 +200,7 @@ RPM、DEB、Docker 镜像 —— CI/CD Pipeline 自动构建，与你现有的�
 
 在 AI 编码能力突飞猛进，以及决定不做新特性的前提下，我认为只是修复 BUG/漏洞的工作量是完全可控且可以接受的。
 
-### 商标问题很难搞，但走一步算一步
+### 商标问题很难搞，但走一步算一步 {#trademark-is-tricky-but-we}
 
 > 商标声明：MinIO® 是 MinIO, Inc. 的注册商标。
 > 本项目（pgsty/minio）为社区独立维护的 AGPL 开源 Fork，
@@ -212,7 +215,7 @@ AGPLv3 虽然允许我们合法 Fork 和分发，但商标法是另一个领域�
 但在此之前，我们认为在 AGPL Fork 中描述性使用原项目名称是合理的，
 毕竟我们也不想把所有的 `minio` 给重命名了 —— 这对用户没有任何帮助。
 
-### AI 改变了游戏规则
+### AI 改变了游戏规则 {#ai-changed-the-game}
 
 可能有人会问：一个人能维护得了吗？
 
@@ -228,7 +231,7 @@ AGPLv3 虽然允许我们合法 Fork 和分发，但商标法是另一个领域�
 
 ------
 
-## Just Fork it!
+## Just Fork it! {#just-fork-it}
 
 MinIO 公司可以归档一个 GitHub 仓库，但它归档不了六万颗 Star 背后的需求，
 归档不了十亿次 Docker Pull 背后的依赖。这些需求不会消失，它们只会寻找新的出口。
@@ -243,7 +246,7 @@ MinIO 的情况其实更有利 —— AGPL 比 BSL 更友好，社区 Fork 没�
 
 ------
 
-## 参考阅读
+## 参考阅读 {#reference}
 
 - [**MinIO 已死**](/zh/blog/post/minio-is-dead/)
 - [**MinIO 已死，谁来接盘**](/zh/blog/post/minio-alternative/)

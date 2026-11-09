@@ -112,6 +112,7 @@ Under the existing adoption lock, the server rebases only those six fields whose
 | Initial synchronization | Recover missing `Created` from physical disk probe; preserve live baselines; include real deletions when tombstones are enabled |
 | Local/remote heal | Filter valid candidates before selecting the maximum; compare canonical keys; isolate failed peers |
 | Status export | Pair value and `UpdatedAt` from one snapshot; gate newly exposed deletion timestamps behind the rollout switch |
+{.wide .expand}
 
 Initial synchronization retains its existing five-type send path, while Versioning is initialized through `MakeBucketHook` and aligned through heal. When a bucket has no recorded `Created` time in `.metadata.bin`, `GetBucketInfo` returns the physical directory probe (matching `ListBuckets`), and initial synchronization passes that recovered timestamp to the bucket creation hook so configuration writes do not fail on metadata-free buckets.
 
@@ -128,10 +129,11 @@ The startup environment variable `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES` de
 | Existing Policy deletion-time export | Preserved | Preserved |
 | Real deletion-time export for absent Tags/SSE/Quota | Hidden | Exported |
 | Real deletions included in initial synchronization | Policy only | Policy, Tags, SSE, and Quota |
+{.wide .expand}
 
 Unupgraded peers cannot safely consume all newly exposed deletion timestamps. For example, legacy Quota heal clears the raw payload while retaining an already parsed in-memory cache value. Keeping the switch `off` by default isolates rolling upgrades from that legacy behavior.
 
-### Coordinated Upgrade and Rollback
+### Coordinated Upgrade and Rollback {#coordinated-upgrade-and-rollback}
 
 1. Upgrade every node at every participating site to [Server 20260916](/blog/release/silo-20260916/) or later, verify consistent settings within each site, and drain in-flight requests.
 2. Set `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES=on` across all sites and restart.
@@ -150,6 +152,7 @@ While the switch is `off`, hidden Tags, SSE, and Quota tombstones can cause peer
 | Do not use deployment ID as a tie-breaker or add an HLC/schema | Existing timestamps and canonical content keys suffice for deterministic convergence without changing on-disk schemas |
 | Do not reject all zero-time typed events | Legacy Tag heal omits `UpdatedAt`; accepting zero-time events with local monotonic time preserves backward wire compatibility |
 | Do not impose one deletion rule across all bucket metadata | Versioning and Object Lock cannot be deleted, while Lifecycle and CORS have distinct merge and deletion structures |
+{.wide .expand}
 
 The production change adds 729 lines and removes 692 lines of Go (+37 net lines), replacing duplicated per-type apply and heal branches with the shared state comparator. Every retained mechanism maps to a reproduced failure mode: removing whole-record locking reopens read-modify-write races, removing canonical Policy keys reintroduces permanent status/heal mismatches on negative-set policies, and removing the rollout switch exposes unupgraded Quota caches during rolling upgrades.
 
@@ -165,6 +168,7 @@ Regression suites in `cmd/site-replication-metadata_test.go`, `cmd/site-replicat
 | Two-site process experiments (four drives per site) | Initial sync preserves `Created` across all six types; dropping an outbound `PUT` RPC and injecting reordered events converges on the next 30-second heal cycle |
 | Missed deletions across source restart | Tombstones for Policy, Tags, SSE, and Quota survive source process restart and converge after reconnection |
 | Steady-state quiescence and diagnostic deduplication | Two consecutive 65-second windows emit zero metadata RPCs after convergence; exceptional warnings deduplicate by bucket, field, and reason |
+{.wide .expand}
 
 During test review, an early creation-time recovery test that used a stubbed ObjectLayer probe was replaced with a real-drive test that stamps bucket directories on disk—ensuring the test fails against unfixed `GetBucketInfo` code and passes only with the production repair.
 

@@ -20,6 +20,7 @@ url: "/blog/release/pkg-3.16.0/"
 | `golang.org/x/crypto` | `v0.58.0` | `v0.58.1-0.20261009181718-2f1f834330b2` |
 | `github.com/klauspost/cpuid/v2` | `v2.4.1` | `v2.4.2` |
 | `go.yaml.in/yaml/v3` | `v3.0.5` | `v3.0.6` |
+{.wide .expand}
 
 The JOSE update includes the five security fixes in [go-jose v4.1.7](https://github.com/go-jose/go-jose/releases/tag/v4.1.7): invalid RSA thumbprints, JSON decoding of embedded unexported fields, JWE protected/unprotected header handling, RSA certificate-verification limits, and limits on JWS signatures/JWE recipients. Version 4.1.9 also restores OpaqueSigner support for unrecognized public-key types and improves unsupported-key errors. These are dependency advisories; their applicability depends on which operations a consuming application exposes.
 

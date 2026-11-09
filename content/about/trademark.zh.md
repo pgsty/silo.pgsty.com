@@ -9,7 +9,7 @@ icon: fa-solid fa-registered
 ---
 
 > [!WARNING]
-> 本文文档中出现的 MinIO 名称，均为描述性使用，未暗示任何商业合作关系。
+> 本文档中出现的 MinIO 名称，均为描述性使用，未暗示任何商业合作关系。
 >
 > Silo 是由 PIGSTY 社区独立维护的分支，与 MinIO, Inc. **无** 关联，未获其认可或赞助。
 
@@ -23,7 +23,7 @@ icon: fa-solid fa-registered
 ## 为什么这个名字仍然出现在文档中？ {#why}
 
 许可协议授予的是著作权层面的权利，它不涉及名称。
-[AGPLv3](/zh/about/license) 赋予任何人分支与再分发 MinIO 代码库的权利，
+[AGPLv3](/zh/about/license/) 赋予任何人分支与再分发 MinIO 代码库的权利，
 但商标法属于另一个领域，商标使用并不因许可协议而自动解决。
 
 本文档内出现 MinIO 名称，用于标识本作品所衍生自的上游项目，以及那些在现实中仍沿用上游名称的对象：
@@ -35,7 +35,7 @@ icon: fa-solid fa-registered
 
 ## 其他商标 {#other}
 
-“Pigsty” 与 “PGSTY” 指 [Pigsty](https://pgsty.com) 项目及其维护者，PGSTY SILO 由其发布。
+“Pigsty” 与 “PGSTY” 指 [Pigsty](https://pgsty.com/zh/) 项目及其维护者，PGSTY SILO 由其发布。
 Amazon S3 是 Amazon.com, Inc. 或其关联公司的商标，文中提及 S3 仅用于说明协议兼容性。
 其余商标均归各自所有者所有。
 

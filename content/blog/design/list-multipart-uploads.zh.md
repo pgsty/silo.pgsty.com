@@ -2,7 +2,10 @@
 title: "ListMultipartUploads 行为契约与设计权衡"
 linkTitle: "ListMultipartUploads"
 date: 2026-08-30
+lastmod: 2026-10-18
+author: "PGSTY SILO 维护团队"
 weight: 20
+summary: "说明为什么 Server 20261018 将公共 ListMultipartUploads 恢复为 MinIO 兼容行为、16 盘纠删集上的磁盘扫描开销，以及保留下来的分片上传修复。"
 description: "说明为什么 Server 20261018 将公共 ListMultipartUploads 恢复为 MinIO 兼容行为、16 盘纠删集上的磁盘扫描开销，以及保留下来的分片上传修复。"
 url: "/zh/blog/design/list-multipart-uploads/"
 ---
@@ -24,13 +27,13 @@ Server `20261018` 在 `main` 分支上恢复了传统的 MinIO 兼容公共 `Lis
 
 在 `2026-10-17`（`#243`，提交 [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe6)）至 `2026-10-18`（提交 [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423)）之间，`main` 曾短暂将所有公共 `ListMultipartUploads` 请求统一切换为对 `.minio.sys/multipart` 的无索引磁盘扫描。针对 16 盘纠删集的容量分析与基准测试表明：将该磁盘扫描设为无条件默认路径，会引入比原有列表限制严重得多的可用性故障模式。
 
-### 为什么进程重启不会删除未完成的分片上传
+### 为什么进程重启不会删除未完成的分片上传 {#why-restart-never-deleted-multipart}
 
 未完成的分片上传持久化在磁盘路径 `.minio.sys/multipart/<sha256(bucket/object)>/<uploadID>/xl.meta` 与 `part.*` 下。服务进程重启只会清空内存中的 `multipartUploadsCache`，**不会**删除磁盘上的未完成上传。因此，客户端持有的 `UploadID` 在重启后依然有效，直至完成合并、显式中止（Abort），或被后台过期清理任务回收（默认过期时间 7 天，巡检周期 12 小时）。
 
 由于未完成上传会跨重启和客户端重试不断累积，任何遍历磁盘 `.minio.sys/multipart` 的操作，其开销都取决于纠删集当前存留的未完成上传总数，而非仅取决于本次进程启动后新建的上传数。
 
-### 100,000 目录项保护阈值在 16 盘纠删集上的失效机制
+### 100,000 目录项保护阈值在 16 盘纠删集上的失效机制 {#how-the-100-000-entry}
 
 10 月 17 日的磁盘扫描实现在整个纠删集**所有磁盘合计**的粒度上施加了 `maxMultipartWalkEntries = 100000` 上限，将每块磁盘上的 `<sha256(bucket/object)>` 目录项与 `<uploadID>` 目录项一并计入预算。
 
@@ -44,7 +47,7 @@ $$\text{entries} = N \times (H + U)$$
 - 在 **16 盘**纠删集上，$16 \times (3{,}126 + 3{,}126) = 100{,}032$ 个目录项——整个纠删集（所有桶合计）只要累积到 **3,126 个活跃上传**，就会突破 `100,000` 上限，导致所有公共列表请求直接返回 HTTP `503 SlowDown`。
 - 即便所有上传都集中在**同一个对象键**（$H = 1$）下，16 盘纠删集在单键累积到 **6,250 个上传**时也会达到 $16 \times (1 + 6{,}250) = 100{,}016$ 个目录项，使精确对象键查询（`prefix=<exact-object-key>`）同样因 `503 SlowDown` 失败。
 
-### 演进脉络与问题定责
+### 演进脉络与问题定责 {#provenance-and-responsibility}
 
 | 变更阶段 | 日期 / 提交 | 具体改动 | 工程评估 |
 | :--- | :--- | :--- | :--- |
@@ -53,7 +56,7 @@ $$\text{entries} = N \times (H + U)$$
 | 无条件统一为磁盘扫描（`#243`） | `2026-10-17` / [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe6) | 移除 `legacy` 分支，将所有公共 `ListMultipartUploads` 强制路由到磁盘扫描 | **步子迈得过大**：仅凭 4 盘单键基准测试就将无索引磁盘扫描设为必经路径，在 16 盘纠删集上于 3,126 个上传处触发 `503 SlowDown` |
 {.wide .expand}
 
-### 部分回滚方案权衡对比
+### 部分回滚方案权衡对比 {#partial-rollback-trade-off-analysis}
 
 | 备选方案 | 公共 S3 列表语义完整度 | 16 盘纠删集容量表现 | 存储格式与后台 I/O 影响 | 决策 |
 | :--- | :--- | :--- | :--- | :--- |
@@ -64,7 +67,7 @@ $$\text{entries} = N \times (H + U)$$
 | **外科手术式部分回滚（`4733e1423` + `0f9199e0c`）** | 恢复 MinIO 兼容公共列表（空前缀走缓存、非空前缀走精确键查盘） | 消除跨桶 `100,000` 目录项悬崖；精确键查盘每块盘仅访问 `1` 个哈希目录 | 完整保留 `xl.meta` 身份字段、`checkUploadID`、Abort 清理与空哈希父目录回收 | **采纳** |
 {.wide .expand}
 
-### 回滚内容与保留的修复项
+### 回滚内容与保留的修复项 {#what-was-retained-vs-rolled}
 
 1. **在公共列表路径上回滚的部分（`4733e1423`）**：
    - 公共 `ListMultipartUploads` 不再遍历 `.minio.sys/multipart` 下的全部 `<sha256(bucket/object)>` 目录。
@@ -75,7 +78,7 @@ $$\text{entries} = N \times (H + U)$$
    - `AbortMultipartUpload` 继续同步驱逐本地缓存并通知集群对端节点。
    - `cleanupStaleUploads` 继续在后台清理磁盘上的过期上传，且提交 [`0f9199e0c`](https://github.com/pgsty/silo/commit/0f9199e0c) 确保当 `.minio.sys/multipart/<sha256(bucket/object)>` 下最后一个 `<uploadID>` 因过期清理、合并完成或显式中止而被删除时，空的 `<sha256(bucket/object)>` 父目录也会一并删除，防止空哈希目录长期堆积。
 
-### 排序成本与发现成本的本质冲突
+### 排序成本与发现成本的本质冲突 {#cost-of-ordering-vs-discovery}
 
 在 `.minio.sys/multipart/<sha256(bucket/object)>/<uploadID>` 布局中，目录名是 `bucket/object` 的 SHA-256 摘要，既打散了对象键的字典序，也抹去了桶边界。在没有二级索引的前提下，要按 S3 字典序回答任意前缀查询（如 `prefix=trips/`），存储引擎必须先打开纠删集内所有桶、所有活跃上传下的 `xl.meta` 才能还原 `(Bucket, Object)` 并排序分页。相比之下，精确对象键查询（`prefix=trips/2026/a.mp4`）只需计算一次 SHA-256 并读取每块盘上的单个目录（将 `ListDir` 次数从 $O(N \times H)$ 降为 $O(N)$）。
 
@@ -97,6 +100,7 @@ $$\text{entries} = N \times (H + U)$$
 | :--- | :--- |
 | [S3 API 兼容性 — 分片上传 API 差异说明](/zh/reference/s3-api-compatibility/#id5) | Server `20261018` 中 `ListMultipartUploads` 的权威用户侧兼容性说明 |
 | [SILO 20260916 发布注记](/zh/blog/release/silo-20260916/) | 记录已发布的 legacy 默认、strict 可选、UploadID 校验和取消边界 |
+{.wide .expand}
 
 ---
 

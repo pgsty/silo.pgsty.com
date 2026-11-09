@@ -16,7 +16,9 @@ Silo 涉及两套彼此独立的许可协议：软件与文档的分发条款不
 | SILO Console | AGPL-3.0-or-later | [`pgsty/silo-console`](https://github.com/pgsty/silo-console/blob/main/LICENSE) |
 | `mcli` 客户端 | AGPL-3.0-or-later | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE) |
 | SILO 共享包 | AGPL-3.0-or-later | [`pgsty/silo-pkg`](https://github.com/pgsty/silo-pkg/blob/main/LICENSE) |
+| `kes` 密钥管理服务（可选） | AGPL-3.0-or-later | [`pgsty/kes`](https://github.com/pgsty/kes/blob/main/LICENSE) |
 | 本文档 | CC BY 4.0 | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
+{.wide .expand}
 
 ## 软件：AGPLv3 {#software}
 
@@ -32,7 +34,7 @@ PGSTY SILO 沿用同一许可：不重新授权、不附加限制、不做开源
 
 ## 向 PGSTY SILO 贡献 {#contributions}
 
-四个维护中的软件仓库均按 **AGPL-3.0-or-later** 接收代码贡献，与各仓库自身的许可证一致。
+五个维护中的软件仓库均按 **AGPL-3.0-or-later** 接收代码贡献，与各仓库自身的许可证一致。
 贡献者保留原创内容的版权。SILO 不要求签署 CLA、转让版权，也不要求向 SILO 维护者或上游 MinIO
 额外授予 Apache-2.0 许可。
 

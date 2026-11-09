@@ -8,6 +8,7 @@ type: docs
 icon: fa-solid fa-code-compare
 ---
 
+> [!NOTE]
 > **Release boundary:** the opt-in GET-frequency pool-tiering feature (community
 > [PR #60](https://github.com/pgsty/silo/pull/60)) existed only in main/snapshot
 > builds. Server 20260903 predates it and Server 20260916 was tagged after its
@@ -61,6 +62,7 @@ deliberately preserved while the tiering feature itself went.
    settings, and a lifecycle edit. Check storage access from **every
    request-serving node to each pool's drives** rather than relying solely on
    admin disk summaries or a fixed sleep.
+{.steps}
 
 ## What happens to stored state {#stored-state}
 
@@ -72,6 +74,7 @@ deliberately preserved while the tiering feature itself went.
 | Data-usage cache | Both v8 and v9 caches are read, preserving ordinary counts, sizes, histograms, and remote-tier statistics. The retired hot-tier byte count is discarded; subsequent writes use v8. No feature-driven full statistics rebuild is required. |
 | Objects already moved | Remain in their current pools with the same versions and timestamps. There is no bulk move-back or object metadata rewrite. |
 | Internal leftovers | `x-minio-internal-ilm-atier` and `.minio.sys/config/ilm/access/` counter objects may remain unused. They need no cleanup service or object scan. |
+{.wide .expand}
 
 Interrupted rebalance/decommission can leave the same version in more than
 one pool independently of access tiering; removing the scheduler does not

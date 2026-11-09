@@ -25,6 +25,7 @@ The fix selects a single required action from the requested target state before 
 | `enabled` | `admin:EnableUser` |
 | `disabled` | `admin:DisableUser` |
 | invalid or unknown | `admin:EnableUser`, preserving the previous authorization-before-validation default |
+{.wide .expand}
 
 The handler then calls `validateAdminReq` once. A four-way IAM integration test verifies both allowed operations and both denied cross-action operations. Enable-only policies can no longer disable accounts.
 
@@ -35,6 +36,7 @@ The same rule applies to group status:
 | `enabled` | `admin:EnableGroup` |
 | `disabled` | `admin:DisableGroup` |
 | invalid or unknown | `admin:EnableGroup`, preserving the previous authorization-before-validation default |
+{.wide .expand}
 
 Before the follow-up, an EnableGroup-only principal could disable a group, while a DisableGroup-only principal received `AccessDenied` for that operation. The group repair uses the same single-selector, single-authorization structure.
 
@@ -78,6 +80,7 @@ The authorization contract therefore enforces strict separation:
 | `admin:EnableUser` only | deny | allow |
 | both actions | allow | allow |
 | neither action | deny | deny |
+{.wide .expand}
 
 The built-in `consoleAdmin` policy grants `admin:*`, so full administrators retain both operations. Only custom restricted policies that relied on `admin:EnableUser` to disable accounts are affected. The public PBAC reference documents the same contract for [`admin:EnableUser`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-EnableUser) and [`admin:DisableUser`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-DisableUser).
 
@@ -182,6 +185,7 @@ The unit test covers all three selector outcomes:
 | `enabled` | `EnableUser` |
 | `disabled` | `DisableUser` |
 | invalid | legacy `EnableUser` default |
+{.wide .expand}
 
 ### Four-Way IAM Authorization Matrix {#iam-test}
 
@@ -307,6 +311,7 @@ Upstream issue #21478 and PR #21482 remain on the archived `minio/minio` reposit
 | --- | --- | --- |
 | Signed-off commit | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) (merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)) | `229fe2b3c` |
 | Shipped release | [Server 20260903](/blog/release/silo-20260903/) | [Server 20260903](/blog/release/silo-20260903/) |
+{.wide .expand}
 
 ## Conclusion {#conclusion}
 

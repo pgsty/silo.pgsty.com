@@ -22,13 +22,19 @@ upstream_modified: true
 
 Successfully retrieving either a `complete` or `failed` terminal state exits `0`—automation scripts should inspect the returned `status` field to determine whether the job succeeded. Unavailable status, missing jobs, and request errors exit non-zero. IOPs calculations also no longer overflow at large object counts; see the [release changes](/blog/release/silo-20261026/#mcli).
 
-## Changes after 20261026 (unreleased) {#silo-status-details}
+<a id="silo-status-details"></a>
 
-The coordinated SILO and mcli versions expose `versionsSkippedLocked`, `keysRefused`, `failureReason`, and `pausedReason` in both live metrics and saved status. Terminal output shows these details; JSON output keeps the existing `metric` and adds a `details` object when there are counts or reasons to report.
+## mcli 20261109 and next SILO release: pauses and skipped work {#silo-job-outcomes}
 
-A completed job with skipped versions or refused keys is labeled `complete-with-skips`. A paused job is labeled `paused` and remains under observation while the server waits to retry. Retrieving `complete-with-skips`, like retrieving `complete` or `failed`, exits `0`; scripts must check the status and counters.
+[mcli 20261109](/blog/release/mcli-20261109/) and the next coordinated SILO release add `paused` and `complete-with-skips`. `paused` is nonterminal: the server is waiting to retry, and the client keeps observing while live metrics remain available. `complete-with-skips` means the run finished but left protected versions or refused keys in place. It does not mean every selected object was removed. Like `complete` and `failed`, retrieving it exits `0`; scripts must inspect the status and counters.
 
-The client uses a complete live snapshot when available, including explicit zero counts to clear a previous pause or skip count. For servers or peers without the live extension, it continues to refresh saved details every five seconds and at completion. If terminal details cannot be confirmed, it reports `detailsUnavailable` instead of implying that the skip counts are zero. Use the matching maintained mcli build with the new server; the released 20261026 client does not display these details.
+The text display includes `VersionsSkippedLocked`, `KeysRefused`, `FailureReason`, and `PausedReason` when present. JSON preserves the existing `metric` object and adds those fields under `details` as `versionsSkippedLocked`, `keysRefused`, `failureReason`, and `pausedReason`. The counters have different units: skipped versions and refused whole keys. They must not be added to get a count of deleted objects.
+
+The client uses a complete live snapshot when available, including explicit zero counts to clear a previous pause or skip count. For servers or peers without the live extension, it refreshes saved details every five seconds during observation and once when live metrics report a terminal result (with a ten-second timeout per request). A saved snapshot older than live progress cannot restore a stale pause or attach old counters to a newer outcome. If terminal details cannot be confirmed, the live outcome remains visible with `detailsUnavailable` in JSON and an explanation in text; absent details must not be read as zero skips. Older servers without the added fields retain their existing output.
+
+If the live stream ends while the saved state is still paused, the command prints the pause reason and exits nonzero because it has no terminal result. Re-run the command to continue observation; this does not cancel or resubmit the job.
+
+The same freshness check applies after the stream ends: a saved terminal result older than the progress already observed is rejected with a nonzero exit status. Delayed live samples cannot move progress backward, and a report that claims both complete and failed is rejected.
 
 ## Syntax {#syntax}
 

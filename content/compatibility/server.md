@@ -16,6 +16,18 @@ icon: fa-solid fa-server
 
 <span id="maintenance-20261025"></span>
 
+## Candidate work after Server 20261026 {#post-20261026}
+
+Server 20261026 remains the published Server release. These links collect design and upgrade records for subsequent candidate work. Each record's status, source commit and validation scope apply separately; inclusion in this index does not establish release acceptance. Independently released Console and mcli versions do not add these changes to older Server artifacts.
+
+| Area | Design and upgrade references |
+| --- | --- |
+| Lifecycle, whole-key deletion and restore | [Multi-pool lifecycle](/blog/design/multi-pool-lifecycle-expiry/), [exact-key deletion](/blog/design/ilm-delete-all-exact-key/), [restored-copy expiry](/blog/design/restored-copy-expiry/), [two-phase restore](/blog/design/native-restore-two-phase/) |
+| Locking, reads and healing | [Single-pool lock domains](/blog/design/single-pool-lock-domains/), [partial-view reads](/blog/design/partial-view-read-404/), [heal dry runs](/blog/design/heal-dry-run-safety/), [failed-write cleanup](/blog/design/failed-rename-empty-prefix/) |
+| Batch and configuration reload | [Batch authorization and retries](/administration/batch-framework/#silo-lifecycle), [webhook peer reload](/blog/design/audit-webhook-peer-reload/), [IAM revocations](/blog/design/iam-revocations/) |
+| Containers | [Healthchecks and distroless images](/compatibility/feature/healthcheck/#distroless) |
+{.wide .expand}
+
 ## Server 20261026 upgrade checks {#maintenance-20261026}
 
 This section covers the [Server 20261026 release](/blog/release/silo-20261026/#server-20261026), source [`c3ad836aed0d`](https://github.com/pgsty/silo/commit/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3).
@@ -30,6 +42,7 @@ This section covers the [Server 20261026 release](/blog/release/silo-20261026/#s
 | Versioned remote-tier expiration | Lifecycle expiration that only writes a delete marker preserves the prior version's remote tier data (including non-null versions in suspended buckets); data deleted on earlier releases must be restored from backups. |
 | Multipart replication | Forwards the `FULL_OBJECT` checksum type for composite CRC algorithms; upgrade the sending Server and verify pending replication queues. |
 | Build and packaging | Built with Go 1.27.3, Console v2.5.1, mcli 20261026, pkg v3.15.2, and pinned upstream `minio-go`; Windows archives use ZIP. See the [component matrix](/compatibility/versions/#server-20261026). |
+{.wide .expand}
 
 **Read and failure boundaries:** Lease expiration or network partitions can still allow late commits, and partial metadata updates can still expose stale values or tags. Existing read-quorum and healing rules remain unchanged (stricter fencing, rollback and read-recovery diagnostics remain under the `consistency_strict` build tag); upgrading does not add distributed fencing or automatically repair pre-existing inconsistent objects. The 20261018 Object Lock, IAM, and retired multipart-mode upgrade requirements below continue to apply.
 
@@ -44,6 +57,7 @@ This section targets the [20261018 release](/blog/release/silo-20261018/), now p
 | Object inventories and backup synchronization | Eligible uncertain LIST entries are confirmed or cause an error. Read every page and never turn an error into an empty inventory; no cross-page snapshot is promised. |
 | Multipart listing and cancellation | The default remains cache/exact-key lookup. The strict switch is ignored with a warning; former strict users lose durable enumeration and strict cancellation. Restart omissions, prefix/pagination limits and delayed creation remain. |
 | Errors / OIDC | Lost staged commit metadata returns `503 SlowDownWrite`; checksum message text can change. JOSE rejects RSA JWKs above 4096 bits, so verify login before upgrading. |
+{.wide .expand}
 
 See [IAM authorization](/blog/design/iam-admin-authorization/), [LIST recovery](/blog/design/listing-recovery-lock-cost/), the [multipart decision](/blog/design/list-multipart-uploads/#implementation) and [security update](/blog/security/20261018-release-hardening/). #79 and #217 remain unresolved; disk formats and established configuration names are unchanged. The PGSTY stack is supported, with best-effort upstream compatibility.
 
@@ -57,6 +71,7 @@ See [IAM authorization](/blog/design/iam-admin-authorization/), [LIST recovery](
 | Commit set        | `7aac2a2c..219670d3`: 96 reachable commits; 93 were on `origin/main` and the final three were committed locally at audit time                        |
 | Net source diff   | 523 files, 36,715 insertions, 21,450 deletions                                                                                                       |
 | Interpretation    | The behavior of the final snapshot. Intermediate changes later replaced or removed are not presented as current behavior                             |
+{.wide .expand}
 
 Every commit in the range was inspected against the final implementation, tests, dependency graph, build recipes, package payloads, container entrypoint, and rendered Helm manifests. The [complete commit ledger](#ledger) tracks every commit in the range, including documentation and CI updates.
 
@@ -150,6 +165,7 @@ Unless `--config-dir` is explicit, Silo makes one decision at startup:
 | Only `~/.silo` exists    | `~/.silo`          | none                                            |
 | Only `~/.minio` exists   | `~/.minio`         | informational legacy notice; no files are moved |
 | Both exist               | `~/.silo`          | ambiguity warning                               |
+{.wide .expand}
 
 `--config-dir` always wins. Unless `--certs-dir` is also supplied, the certificate directory follows the selected configuration directory. For deterministic automation, set `--config-dir` instead of depending on filesystem discovery.
 
@@ -279,6 +295,7 @@ The bucket-boundary escape hatch is startup-global and all-or-nothing. It exists
 | unset           | Exact inherited behavior: trust source headers from any peer; left-most XFF, then X-Real-IP, then `Forwarded`                                                                 |
 | `none` or `off` | Ignore all three source-address headers and use the TCP peer                                                                                                                  |
 | IP/CIDR list    | Trust headers only when the TCP peer is listed; walk XFF right-to-left past trusted hops (maximum 100), then use the last X-Real-IP line, then walk `Forwarded` right-to-left |
+{.wide .expand}
 
 Malformed entries, a non-empty list naming no proxy, or a remote `env://` read failure fail closed and stop startup rather than reverting to trust-any. Invalid values inside a received chain are skipped; no usable address falls back to the peer. Loopback is implicitly trusted only for the FTP/SFTP peer bridge, not skipped as an arbitrary hop inside a client chain.
 
@@ -297,6 +314,7 @@ The inherited `_MINIO_API_XFF_HEADER=off` retains its exact old semantics and in
 | Multipart part ordering        | Duplicate or non-increasing part numbers fail with `InvalidPartOrder` before assembly. Gaps and a first part other than 1 remain legal; the upload stays available for retry                                                                                                             |
 | Erasure read pooling           | Correct shard-buffer ownership is restored, avoiding loss of pooling and a wrong-buffer association that could cause hangs, corruption, or severe performance loss                                                                                                                       |
 | Update buffers                 | Returned download buffers are owned correctly; the public updater was subsequently disabled, so no current supported upgrade path exercises this code                                                                                                                                    |
+{.wide .expand}
 
 ### Distributed storage and private APIs {#storage-rest}
 
@@ -403,7 +421,8 @@ Review affected dashboards and alerts when upgrading.
 6. **Private APIs are not a stable compatibility promise.** `ReadMultiple` proves that a same-numbered storage REST protocol can still lose an operation. Do not run a rolling mixed build across this boundary.
 7. **Informational HTTP responses remain imperfectly tracked.** The response-tracking layer treats a 1xx response as final. The Flush/implicit-200 change did not introduce this behavior and does not claim to fix it.
 8. **Conditional deletion has a release boundary.** Server 20260903 ignores `If-Match` on `DeleteObject`; Server 20260916 implements it through #145/#178, comparing the explicitly addressed version when one is given. `DeleteObjects` still ignores per-item `<ETag>`, and no extra `s3:GetObject` condition permission is implemented. See the [implemented contract](/blog/design/conditional-delete/).
-9. **Historical convergence limit for multi-site bucket-configuration deletion.** In earlier versions before [PR #180](https://github.com/pgsty/silo/pull/180) (shipped in [Server 20260916](/blog/release/silo-20260916/)), deleting a bucket policy, SSE, tag, or quota configuration on one site could be restored by a peer that still held it ([#77](https://github.com/pgsty/silo/issues/77)); only per-bucket CORS used a tombstone-aware register at that point. Full deletion recovery requires every node to be upgraded and deletion export (`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`) to be enabled consistently; see the [bucket configuration convergence record](/blog/design/bucket-metadata-convergence/).
+9. **Conditional deletion has a release boundary.** Server 20260903 ignores `If-Match` on `DeleteObject`; Server 20260916 implements it through #145/#178, comparing the explicitly addressed version when one is given. `DeleteObjects` still ignores per-item `<ETag>`, and no extra `s3:GetObject` condition permission is implemented. See the [implemented contract](/blog/design/conditional-delete/).
+10. **Historical convergence limit for multi-site bucket-configuration deletion.** In earlier versions before [PR #180](https://github.com/pgsty/silo/pull/180) (shipped in [Server 20260916](/blog/release/silo-20260916/)), deleting a bucket policy, SSE, tag, or quota configuration on one site could be restored by a peer that still held it ([#77](https://github.com/pgsty/silo/issues/77)); only per-bucket CORS used a tombstone-aware register at that point. Full deletion recovery requires every node to be upgraded and deletion export (`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`) to be enabled consistently; see the [bucket configuration convergence record](/blog/design/bucket-metadata-convergence/).
 
 ## Migration checklist {#migration}
 
@@ -417,10 +436,11 @@ For a MinIO-to-Silo move, use this order:
 6. For Helm, render the old and new charts with the complete old values, preserve names with `nameOverride` / `fullnameOverride` / `serviceAccount.name` where required, and change chart plus image atomically.
 7. Remove updater, callhome, SUBNET-registration, and support-upload automation. Replace it with package/image/orchestrator rollout and your own diagnostic transfer path.
 8. Change HMAC-signed OIDC tokens to asymmetric JWKS. Exercise success, bad-password, unknown-user, backend-failure, and rate-limit LDAP paths.
-9. **Conditional deletion has a release boundary.** Server 20260903 ignores `If-Match` on `DeleteObject`; Server 20260916 implements it through #145/#178, comparing the explicitly addressed version when one is given. `DeleteObjects` still ignores per-item `<ETag>`, and no extra `s3:GetObject` condition permission is implemented. See the [implemented contract](/blog/design/conditional-delete/).
-10. Set `MINIO_API_TRUSTED_PROXIES=none` or an exact allowlist, sanitize all three source-address headers, and include cluster peers that forward authenticated requests.
-11. Test oversized S3 Select records, streaming notifications, unsigned-trailer rejection, multipart full-object checksums, duplicate parts, replication, healing, KMS, every notification target, audit ingestion, and graceful container shutdown.
-12. Upgrade all distributed nodes as one build. Keep the old chart and image paired for rollback; never roll back only one of them.
+10. Audit custom IAM policies for protected bucket writes (requiring bare bucket ARNs unless `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`), `s3:DeleteObjectVersion` on versioned deletes, split user/group enable/disable actions, and the [password-permission split](/compatibility/password-permissions/#migration).
+11. Set `MINIO_API_TRUSTED_PROXIES=none` or an exact allowlist, sanitize all three source-address headers, and include cluster peers that forward authenticated requests.
+12. Test oversized S3 Select records, streaming notifications, unsigned-trailer rejection, multipart full-object checksums, duplicate parts, replication, healing, KMS, every notification target, audit ingestion, and graceful container shutdown.
+13. Upgrade all distributed nodes as one build. Keep the old chart and image paired for rollback; never roll back only one of them.
+{.steps}
 
 ## Verification evidence {#verification}
 
@@ -435,6 +455,7 @@ Verification at the recorded 2026-08-06 snapshot:
 | Helm migration              | `buildscripts/verify-helm-migration.sh` passed: lint, render, legacy upgrade, archive, and identity comparison across seven rendered resources                                                                                            |
 | Package lifecycle           | `buildscripts/package/lifecycle_test.sh` passed; package payload/provenance assertions cover empty DEB conflict metadata, unit/default paths, and legal files                                                                             |
 | Site                        | Strict `make check` passed: module verification, warning-fatal Hugo render (617 EN / 615 ZH pages), and 388,962 internal references across 1,084 HTML files; `git diff --check`, bilingual anchors, and 96/96 commit coverage also passed |
+{.wide .expand}
 
 Security articles contain deeper threat models and test vectors, but their historical “released/unreleased” labels describe their publication date. Where they conflict with the final snapshot, this page's audited boundary is authoritative.
 

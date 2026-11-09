@@ -4,7 +4,7 @@ url: "/administration/batch-framework/"
 weight: 170
 icon: fa-solid fa-layer-group
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="batch-framework"></a>
@@ -18,7 +18,7 @@ A batch file defines one job task.
 
 Once started, MinIO starts processing the job. Time to completion depends on the resources available to the deployment.
 
-If any portion of the job fails, MinIO retries the job up to the number of times defined in the job definition.
+Ordinary job failures use the retry limits in the definition. The next SILO release distinguishes authorization refusal from temporary pauses as described below.
 
 The MinIO Batch Framework supports the following job types:
 
@@ -27,6 +27,21 @@ The MinIO Batch Framework supports the following job types:
 | [replicate](/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job) | Perform a one-time replication procedure from one MinIO location to another MinIO location. |
 | [keyrotate](/administration/batch-framework-job-keyrotate/#minio-batch-framework-keyrotate-job) | Perform a one-time process to cycle the [sse-s3 or sse-kms](/operations/server-side-encryption/#minio-sse-data-encryption) cryptographic keys on objects. |
 | [expire](/administration/batch-framework-job-expire/#minio-batch-framework-expire-job) | Perform a one-time immediate expiration of objects in a bucket. |
+{.wide .expand}
+
+## Next SILO release: authorization and retries {#silo-lifecycle}
+
+SILO binds local batch operations to the authenticated submitter at job creation. The credentials in a definition are used for its remote connections; they do not grant local server authority. IAM changes are checked again when actions are taken. An explicit denial, expired or revoked credential, or changed submitter binding ends the job with `failureReason`. Statements that need request context unavailable to a background job refuse the action.
+
+IAM startup, unavailable policy material, and an authorization plugin that cannot return a valid decision are temporary failures. Submission returns `503` when authorization cannot be decided. Expiration and key rotation pause with `pausedReason`, preserve completed progress, and retry in the same process with bounded exponential backoff and jitter. Immediate or streamed listing failures also pause these jobs. Rotation pauses when its selected source is in a moving pool and resumes after the conflict clears. Every retry resolves current identity and policies again. A pending or paused job is not a completed or failed report and is not removed by terminal-report cleanup. Administrator cancellation takes precedence over queued work and retries.
+
+Push, pull, and Snowball replication also pause with `pausedReason` when a required authorization dependency or report read is temporarily unavailable, including an outage that begins during object processing, and restart their source scan from the beginning on retry; see [Batch Replication](/administration/batch-framework-job-replicate/#silo-retry). Other mid-run replication failures follow the existing finite object retry behavior and can end the run as failed.
+
+Startup discovery also retries failed manifest listings and storage reads with bounded backoff. It remembers manifests already admitted during that discovery, so a later scan cannot rerun a job that finished while waiting. Cancellation fences stale discovery results. Missing, malformed, or unsupported manifests are not queued; malformed and unsupported definitions remain on disk for inspection. A storage outage during discovery does not require a restart once storage recovers.
+
+Completed jobs remain completed after restart, including legacy jobs and jobs whose credentials later expire or change. Unfinished jobs from releases without submitter binding require resubmission. New bound definitions and authorized progress reports use formats rejected by older executors. This fences those records on rollback, but does not make a mixed cluster safe: an old node can still accept and execute its own old-format jobs. Stop submissions and drain or cancel old jobs before changing versions, and do not downgrade with pending authorized jobs.
+
+Use [mcli batch status](/reference/minio-mc/mc-batch-status/#silo-job-outcomes) (`20261109`) to distinguish pauses, terminal failures, and completion with protected work left in place. `infraAdmin` still has other infrastructure administration capabilities; these job checks do not turn that role into a strict data-isolation boundary.
 
 ## MinIO Batch CLI {#minio-batch-cli}
 
@@ -68,7 +83,7 @@ The [`mc batch`](/reference/minio-mc/mc-batch/#command-mc.batch) commands includ
 
 ## Access to `mc batch` {#access-to-mc-batch}
 
-Each batch job executes using the credentials specified in the batch definition. The success of a given batch job depends on those credentials having the appropriate [permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy) to perform all requested actions.
+The submitting identity needs the relevant administration action and the local [data permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy) for the job. Credentials in the definition must separately permit its remote operations. See the next-release rules above.
 
 The user executing the batch job must have the following permissions. You can alternatively restrict users from accessing these functions by blocking or limiting access to these actions:
 

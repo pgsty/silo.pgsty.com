@@ -66,6 +66,7 @@ the [migration and rollback guide](/compatibility/password-permissions/).
 | JWX / strfmt | v3.3.0 / v0.27.2 |
 | React Router | v7.18.4 |
 | Build tools | Go 1.27.1, Node 24.21.0, Yarn 4.13.0 |
+{.wide .expand}
 
 The SDK handles S3 errors embedded in HTTP 200 CopyObject responses; JWX fixes
 custom JSON field-name escaping and strfmt updates hostname validation for Go

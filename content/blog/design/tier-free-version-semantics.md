@@ -2,7 +2,7 @@
 title: "Tier Free Versions Are Internal Cleanup Records"
 linkTitle: "Tier Free Version Semantics"
 date: 2026-10-27
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a tier free version is an internal cleanup record, how treating it as a normal version breaks lifecycle and pool migration, and why PR #264 is the minimum complete repair.
@@ -83,23 +83,23 @@ The issue affects a normal versioned-tier workflow, not just corrupted metadata.
 
 ## Options {#options}
 
-### Fix only the scanner
+### Fix only the scanner {#option-scanner}
 
 Recomputing IsLatest and successor times after removing free entries would stop the most dangerous over-expiry. It would not fix S3 listings or migration. A decommission could still create a delete marker.
 
-### Fix only listings and migration
+### Fix only listings and migration {#option-listings}
 
 This would make the API and pool move look correct while lifecycle rules still delete the wrong version during the scanner pass. It is incomplete.
 
-### Keep free entries visible everywhere
+### Keep free entries visible everywhere {#option-visible}
 
 This preserves the upstream supportability behavior from #19878, but it exposes an internal cleanup record as a public delete marker and makes GET, lifecycle, listing, and movement disagree. SILO supports its maintained stack on logical object behavior; internal tier bookkeeping should not define the S3 history.
 
-### Remove free entries immediately at delete time
+### Remove free entries immediately at delete time {#option-delete-time}
 
 This fails when the tier is temporarily unavailable. The free record is the durable reminder that remote cleanup is still pending. Removing it early risks orphaning the remote data.
 
-### Use two explicit views
+### Use two explicit views {#option-two-views}
 
 This is the smallest complete design:
 
@@ -116,6 +116,7 @@ The three commits in #264 have a coherent order:
 1. getFileInfoVersions recomputes IsLatest, SuccessorModTime, and LatestModTime after free entries are partitioned out.
 2. latest-delete-marker checks look past free entries.
 3. ordinary FileInfoVersions excludes free entries, while healing calls an explicit all-entries helper; pagination skips keys that contain only free entries; decommission performs tier cleanup and makes failure retryable.
+{.steps}
 
 The focused tests fail on main for every new behavior except the intentional healing guard and pass on the PR. They cover lifecycle selection, ListObjectsV2, ListObjectVersions pagination, Walk, healing, decommission, rebalance, and an unavailable tier.
 
@@ -129,6 +130,10 @@ When a decommission finds free entries, it may contact the tier. A missing remot
 
 A tier that was **removed from the configuration** while free versions still name it is not an outage either. The free version is the only record of its remote object, so it is kept, and the decommission of its pool cannot complete until the tier is configured again under the same name (`mcli ilm tier add`). Starting with the next release, the decommission still moves every other bucket first. It then fails with an error that names the free version, its remote object, and the tier, and a retry resumes with the buckets that are left. Before this, it stopped at the first such bucket and left every later bucket in the pool.
 
+Starting with the next release, remote cleanup and removal of the local free record also share the object's writer lock with the scanner, and the local delete removes a free record only when the drive handle, local version ID, tier, remote object and remote version all match the record whose remote object was deleted. A remote delete runs in a context that is independent of the caller's and has its own timeout, so a canceled decommission still removes the local record when the remote delete succeeded. Likewise, when a decommission encounters a tiered version whose expired restored-copy removal is refused (for example because the object is locked or the rule no longer holds), it moves the version together with its tier metadata and restore deadline instead of failing or dropping the tier link ([5cb91e7d7](https://github.com/pgsty/silo/commit/5cb91e7d7)).
+
+Starting with the next release, `mcli admin decommission cancel` is also recorded durably before it answers, so a decommission that is still saving the cluster configuration after moving the buckets ends as `Canceled`, not `Complete`.
+
 This repair cannot identify or restore plain delete markers created by an older buggy decommission. Those markers have lost the free-version flag. Affected objects must be recovered from backups or another authoritative copy.
 
 ## Verification references {#verification}
@@ -139,3 +144,4 @@ This repair cannot identify or restore plain delete markers created by an older 
 - Free-version introduction: [a1df23051](https://github.com/pgsty/silo/commit/a1df23051)
 - Upstream listing change: [29a25a538](https://github.com/pgsty/silo/commit/29a25a538)
 - PR head: [7ce7fc8d1](https://github.com/pgsty/silo/commit/7ce7fc8d1)
+- Free-version cleanup ownership and decommission cancel: [ade15ea5d](https://github.com/pgsty/silo/commit/ade15ea5d), [96b3a19d0](https://github.com/pgsty/silo/commit/96b3a19d0), [5cb91e7d7](https://github.com/pgsty/silo/commit/5cb91e7d7)

@@ -88,11 +88,9 @@ ID                      TYPE            USER            STARTED
 E24HH4nNMcgY5taynaPfxu  replicate       minioadmin      1 minute ago
 ```
 
-### S3 兼容性 {#s3}
+### S3 兼容性 {#s3-compatibility}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。
 
 ## 权限 {#id6}
 

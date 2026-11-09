@@ -13,16 +13,16 @@ cascade:
 
 设计归档记录 PGSTY SILO 的核心工程决策：缺陷根因、S3 与 IAM 协议不变量、备选方案取舍、运维边界与回归测试索引。
 
-## 2026-11-09 Console 多语言
+## 2026-11-09 Console 多语言 {#november-9-console-languages}
 
-- [为 SILO 提供多语言支持](/zh/blog/design/console-languages/)：从 [#83](https://github.com/pgsty/silo-console/pull/83) 葡语贡献与 [silo#277](https://github.com/pgsty/silo/issues/277) 土耳其语需求扩展到十语言界面，记录维护分级、英文回退与阿拉伯语 RTL，以及支持逐语言分包、全量加载决策的 gzip 和缓存实测。
+- [为 SILO 提供多语言支持](/zh/blog/design/console-languages/)：横跨 [Console 2.6.0](/zh/blog/release/console-2.6.0/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 的十语言界面（涵盖 [#83](https://github.com/pgsty/silo-console/pull/83) 葡语贡献、[silo#277](https://github.com/pgsty/silo/issues/277) 土耳其语需求，以及 [#87](https://github.com/pgsty/silo-console/pull/87) 与 [#90](https://github.com/pgsty/silo-console/pull/90) 的全量译文补齐），记录维护分级、英文回退与阿拉伯语 RTL，以及支持逐语言分包、全量加载决策的 gzip 和缓存实测。
 
-## 2026-11-06 发布验收中发现
+## 2026-11-06 发布验收中发现 {#november-6-found-in-release}
 
 - [局部视图不能把存在的对象报成不存在](/zh/blog/design/partial-view-read-404/)：只能连上部分盘的节点，为什么会对存在的对象返回 404，以及为什么判定“不存在”必须要求每块盘都应答。
 - [Multipart 提交失败可能让上传卡死](/zh/blog/design/multipart-complete-retry/)：未达到写 quorum 的提交为什么会让上传一直卡到过期清理，以及为什么修复要等到存储操作能够加 fencing 之后再做。
 
-## 2026-11-04 发布阻塞的生命周期修复
+## 2026-11-04 发布阻塞的生命周期修复 {#november-4-release-blocking-lifecycle}
 
 - [多池生命周期过期：按整个对象决策](/zh/blog/design/multi-pool-lifecycle-expiry/)（[#278](https://github.com/pgsty/silo/issues/278)、[#279](https://github.com/pgsty/silo/pull/279)）：解释只按单个池内版本做出的过期判断，为何会隐藏、删除或复活另一个池中的版本，以及为什么在对象锁内按合并版本列表复核是最小而完整的修复。
 - [恢复副本：过期的是副本，不是对象](/zh/blog/design/restored-copy-expiry/)（[#281](https://github.com/pgsty/silo/issues/281)、[#282](https://github.com/pgsty/silo/pull/282)）：解释当前版本的恢复副本过期为何会隐藏对象或抹掉更早的 null 版本，以及哪些存储层与原生恢复防护要与精确版本修复一起交付。
@@ -34,33 +34,33 @@ cascade:
 - [Console 的桶配额：列表显示与数值校验](/zh/blog/design/console-quota-numeric-validation/)（[silo-console#72](https://github.com/pgsty/silo-console/issues/72)、[silo-console#73](https://github.com/pgsty/silo-console/issues/73)）：解释 Console 设置的配额为何在桶列表中显示为"-"、创建桶时为何会把超大配额变成 1 字节、两者的来源，以及已合并的 Console 修复覆盖了什么。
 - [大型单池集群的锁域](/zh/blog/design/single-pool-lock-domains/)：解释在 18 台及以上主机的单池集群中，DELETE 与 CopyObject 为何无法与同一 key 上的 PUT 互斥，哪些布局受影响，以及关闭它的路由改动。
 
-## 2026-11-01 存储池迁移完整性审查
+## 2026-11-01 存储池迁移完整性审查 {#november-1-pool-migration-integrity}
 
 - [存储池迁移完整性审查：#261、#263 与 #265](/zh/blog/design/pool-migration-integrity-review/)：维护者对三个问题及其修复的审查，记录 #266 的贡献合并、#276 的维护者后续修复、验证证据与合并顺序。
 - [混合 EC 布局与迁移列表](/zh/blog/design/mixed-ec-migration-listing/)（[#261](https://github.com/pgsty/silo/issues/261)、[#262](https://github.com/pgsty/silo/pull/262)）：解释一次未完成的降级覆写为何会让可读对象从 decommission/rebalance 列表中消失，以及 #262 为何以最小范围解决问题。
 - [Tier free version 是内部清理记录](/zh/blog/design/tier-free-version-semantics/)（[#263](https://github.com/pgsty/silo/issues/263)、[#264](https://github.com/pgsty/silo/pull/264)）：解释 free version 为何必须继续供 healing 使用，但不能作为用户可见的删除标记或迁移版本。
 - [ILM 过期与存储池迁移顺序](/zh/blog/design/ilm-migration-ordering/)（[#265](https://github.com/pgsty/silo/issues/265)、[#266](https://github.com/pgsty/silo/pull/266)、[#276](https://github.com/pgsty/silo/pull/276)）：解释版本桶的 Expiration 删除标记为何不能让当前版本被跳过，以及维护者后续修复如何保留 tier 清理和完成语义。
 
-## 2026-10-24 FULL_OBJECT 校验和复制
+## 2026-10-24 FULL_OBJECT 校验和复制 {#october-24-full-object-checksum}
 
 - [FULL_OBJECT 校验和复制：在初始化上传时保留类型](/zh/blog/design/replication-full-object-checksum/)（`#254`、`#255`）：解释遗漏类型为何让有效的分片 CRC 对象复制失败，共享请求头的一处修复如何同时恢复已有 CopyObject 路径，以及发送端升级与验收边界。
 
-## 2026-10-24 多池删除与放置决策
+## 2026-10-24 多池删除与放置决策 {#october-24-multi-pool-deletion}
 
 - [多池删除：失败时保住最新副本](/zh/blog/design/multi-pool-delete-safety/)（`#256`、`#257`）：解释在线磁盘预检查为何挡不住执行中的 I/O 故障，分阶段清理如何保住每项的权威副本，以及已合并修复的重试、分层引用、性能和兼容性边界。
 
 - [多池覆盖亲和：为何最终没有采纳 #245](/zh/blog/design/overwrite-pool-affinity/)（`#245`）：记录原始放置问题、请求级 quorum 与健康判断改进、仅限普通无版本覆盖的收窄设计、两轮 m3 性能实测，以及小对象覆盖仍未达标后的停止决定。实验修改没有合并。
 
-## 2026-10-23 Alias 区域
+## 2026-10-23 Alias 区域 {#october-23-alias-regions}
 
 - [Alias 区域：小配置改动的兼容性边界](/zh/blog/design/alias-region/)：按 alias 保存区域、客户端缓存隔离，以及升级、降级和凭据轮换的边界；已按 mcli 20261109 复核。
 
-## 2026-10-23 IAM 与 KMS 设计记录
+## 2026-10-23 IAM 与 KMS 设计记录 {#october-23-iam-kms-design}
 
 - [LDAP 长 DN：恢复登录可用性并守住 IAM 撤销安全边界](/zh/blog/design/ldap-long-dn/)（`#250`）：解析 `NormalizeDN` 的 `\xx` 十六进制转义为何触发对象 IAM 后端的单路径分量 255 字节上限，以及为何仅将物理上无法落盘的纯 ASCII 超长分量归类为 `errConfigNotFound`。
 - [IAM 策略重载：锁粒度、请求取消与超时预算隔离](/zh/blog/design/iam-policy-cancellation/)（`#251`）：在保留 `writeMu` 写串行锁的前提下将慢速策略加载与 KMS 解密移出内存鉴权缓存锁，将取消信号贯通至 `KES.Decrypt`，并将 `etcd` 单步读取超时与整批解密预算解耦。
 
-## Server 20261018 核心设计记录
+## Server 20261018 核心设计记录 {#server-20261018-key-design-notes}
 
 围绕 [Server 20261018 正式版](/zh/blog/release/silo-20261018/)的核心架构改动，请参阅：
 

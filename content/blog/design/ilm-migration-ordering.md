@@ -2,7 +2,7 @@
 title: "ILM Expiry and Pool Migration Ordering"
 linkTitle: "ILM Migration Ordering"
 date: 2026-10-27
-lastmod: 2026-11-06
+lastmod: 2026-11-08
 author: "PGSTY SILO Maintainers"
 summary: >
   Why lifecycle expiry and pool migration disagree about a versioned current object, what #266 fixes, and how #276 completes the tier and lifecycle safety boundaries.
@@ -83,25 +83,25 @@ The direct purge added for that case has its own boundary. It calls the source p
 
 The original #266 direct source purge was a local storage cleanup operation. On its own, it did not automatically run the replication decision, create `VersionPurgePending` state, or remove a remote tier object. #276 keeps the action distinction from #266 but makes migration respect the contracts already owned by ordinary ILM expiry.
 
-### Replication is not an obligation of lifecycle deletes
+### Replication is not an obligation of lifecycle deletes {#replication-contract}
 
 Lifecycle deletes are not replicated: a delete-replication rule applies to deletes made through the S3 API, and each target applies its own lifecycle configuration. As merged, #276 also queued replication for ILM-selected deletes; that part is removed before the next release (see the update above). With replication configured, a lifecycle delete during migration now queues nothing for the targets, and the source copy is retired without waiting for one.
 
 #276 still sends ILM-selected version deletes through the normal expiry path before source cleanup, for the two contracts below: a transitioned version keeps its remote-tier cleanup and retry record, and the completion fence sees what the expiry removed. This is the smallest safe boundary because it reuses the existing expiry path. It avoids duplicating those rules inside `removeMovedVersions`, while adding only the migration hand-off needed to prevent a delayed expiry task from finding `VersionNotFound` after the source has already disappeared.
 
-### Tiered versions retain a cleanup obligation
+### Tiered versions retain a cleanup obligation {#tiered-cleanup}
 
-A transitioned version needs remote-tier cleanup as well as hot-tier metadata cleanup. If remote deletion fails, the hot-tier metadata must retain a durable free-version record so a later scanner can retry. #276 performs the hot-tier transition and preserves that retry record when remote deletion cannot complete. The decommission path also checks the remaining ordinary and free versions before reporting completion.
+A transitioned version needs remote-tier cleanup as well as hot-tier metadata cleanup. If remote deletion fails, the hot-tier metadata must retain a durable free-version record so a later scanner can retry. #276 performs the hot-tier transition and preserves that retry record when remote deletion cannot complete. The decommission path also checks the remaining ordinary and free versions before reporting completion. When a tiered version has an expired restored copy whose local removal is refused (for example because the drive is temporarily unavailable or a restored-copy delete returns an error), decommission moves the version to the destination pool ([5cb91e7d7](https://github.com/pgsty/silo/commit/5cb91e7d7)) rather than stranding it in the source pool or losing it on retirement.
 
 This keeps the #264 two-view model intact: free versions remain internal cleanup records, while ordinary lifecycle and migration views exclude them. Rebalance still skips transitioned versions in #266; extending rebalance to move them is a separate scope decision.
 
-### Lifecycle configuration changes fail closed
+### Lifecycle configuration changes fail closed {#lifecycle-fence}
 
 The migration walk records the lifecycle configuration update time. Cleanup compares that value before applying an irreversible source-side decision. If the configuration changed, migration stops and leaves the source data for a retry under the new rules.
 
 Failing closed is the smallest safe semantic choice. It avoids silently applying a stale deletion decision and costs one extra migration attempt when an operator changes lifecycle policy during the walk.
 
-### Whole-object expiry has an observable completion fence
+### Whole-object expiry has an observable completion fence {#whole-object-fence}
 
 `DeleteAllVersionsAction` and `DelMarkerDeleteAllVersionsAction` must remove the whole history before the old pool can be retired. #276 applies whole-object expiry before source cleanup and verifies that ordinary and free versions are gone before decommission reports completion. This prevents a current version from remaining only in the old pool while older versions have already moved.
 
@@ -123,19 +123,19 @@ This is a real migration correctness problem even when GET works before migratio
 
 ## Options {#options}
 
-### Block migration whenever lifecycle is due
+### Block migration whenever lifecycle is due {#option-block}
 
 This is safe but impractical. It turns a normal scanner delay into a migration outage, and it still needs a correct rescan after the rule changes.
 
-### Run lifecycle synchronously before migration
+### Run lifecycle synchronously before migration {#option-sync}
 
 This reduces the race but does not define what to do when the expiry queue, tier, or destination is unavailable. It also adds latency and still needs the migration walker to interpret the resulting metadata correctly.
 
-### Skip every ILM action and delete the whole source prefix
+### Skip every ILM action and delete the whole source prefix {#option-broad-prefix}
 
 This matches the old broad cleanup style but can remove a versioned current object before its delete marker is created in the destination. It also bypasses the per-version concurrency protections that SILO intentionally added.
 
-### Distinguish action semantics and clean only what is safe
+### Distinguish action semantics and clean only what is safe {#option-action-semantics}
 
 This is the minimum necessary design:
 
@@ -146,7 +146,7 @@ This is the minimum necessary design:
 
 PR #266 implements this design.
 
-### Move versions when deletion has external side effects
+### Move versions when deletion has external side effects {#option-move-first}
 
 Tier cleanup makes a direct source purge more than a local metadata operation. Moving the version first and letting the ordinary ILM worker perform the deletion preserves the existing tier contract. It may keep one extra copy for a short time, but it avoids duplicating that contract inside migration cleanup.
 

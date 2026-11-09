@@ -8,7 +8,8 @@ type: docs
 icon: fa-solid fa-heart-pulse
 ---
 
-> **状态**：P1（`silo healthcheck` 子命令，`2ff594f4b`）与 P2（distroless 镜像 + CI 门禁，`4c34d2309`）已随 [Server 20260806](/zh/blog/release/silo-20260806/) 发布；P3（Helm 探针）与 P4（文档）待办 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）
+> [!NOTE]
+> **状态**：P1（`silo healthcheck` 子命令，`2ff594f4b`）、P2（distroless 镜像 + CI 门禁，`4c34d2309`，并在 [#295](https://github.com/pgsty/silo/pull/295) 中对齐 UBI CA 信任库）与 P4（[健康检查探针指南](/zh/operations/monitoring/healthcheck-probe/)）已发布；P3（Helm 探针）待办 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）
 
 Silo 将新增一个原生的 `silo healthcheck` 子命令，并在现有容器镜像之外发布一个新的 **Distroless** 镜像变体——里面真正要紧的文件只有一个：`silo` 二进制。本文在动手实现之前把推理过程和设计决策记录下来，让代码有一份可以对照检验的规格，也让"为什么要做成这样"永远有出处可查。
 
@@ -43,6 +44,7 @@ Distroless 镜像把这个问题逼到了台面上。没有 shell、没有 `curl
 | **D1** | `silo` 二进制新增 `healthcheck` 子命令——服务端现有 `/minio/health/*` 端点的匿名 HTTP 薄客户端。它随每一个构建发布，所有镜像和裸机安装同时获得这项能力。 |
 | **D2** | **现有镜像不动**。`mcli`、`curl`、shell 入口脚本、`mc ready local` 示例全部保留。当前镜像的用户若想用新探针，覆盖自己的 `healthcheck.test` 即可选择加入——不拿走任何东西，不移动任何默认行为。 |
 | **D3** | 并行发布一个新的 **Distroless 变体** 作为试点：单二进制、无 shell、原生 `HEALTHCHECK` 内置。试点验证充分后，它将成为推荐默认并完成切换；无论如何，经典镜像都会为兼容性继续保留。 |
+{.wide .expand}
 
 D2 与 D3 回答了那个显而易见的问题——"为什么不直接给主镜像瘦身？"——因为主镜像的内容物本身就是兼容性表面。[#9](https://github.com/pgsty/silo/issues/9) 的存在，正是因为这个表面曾经在用户脚下被抽换过一次。Distroless 镜像用一个新名字承载一份新契约：在它接受检验期间，没有任何人现有的健康检查、`docker exec mc` 习惯或入口脚本假设会被破坏。
 
@@ -105,13 +107,14 @@ FLAGS：
 
 ## Distroless 变体 {#distroless}
 
-**基底**：`gcr.io/distroless/static-debian12`——够用，因为 `silo` 以 `CGO_ENABLED=0` 构建。这个基底恰好带着服务器真正需要 rootfs 提供的四样东西：CA 证书（KMS/webhook/STS 出站 TLS）、tzdata、`/tmp`，以及带 `root`/`nonroot` 条目的 `/etc/passwd`。没有 shell、没有包管理器、没有 libc。
+**基底**：`gcr.io/distroless/static-debian12`——够用，因为 `silo` 以 `CGO_ENABLED=0` 构建。这个基底自带 tzdata、`/tmp` 以及带 `root`/`nonroot` 条目的 `/etc/passwd`，而 [#295](https://github.com/pgsty/silo/pull/295) 从 `verify` 阶段复制源于 UBI 的 `/etc/ssl/certs/ca-certificates.crt` 证书包，使经典镜像与 distroless 镜像共享完全一致的根 CA 信任库（用于 KMS/webhook/STS 出站 TLS）。没有 shell、没有包管理器、没有 libc。
 
 契约草图：
 
 ```dockerfile
 FROM gcr.io/distroless/static-debian12:latest
-COPY silo /usr/bin/silo
+COPY --from=verify /usr/bin/silo /usr/bin/silo
+COPY --from=verify /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/ssl/certs/ca-certificates.crt
 COPY LICENSE NOTICE CREDITS /licenses/
 ENV HOME=/tmp
 # /data 在镜像层内创建、全员可写——见 issue #55：

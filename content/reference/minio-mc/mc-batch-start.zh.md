@@ -100,12 +100,12 @@ mc batch start myminio ./replication.yaml
 Successfully start 'replicate' job `E24HH4nNMcgY5taynaPfxu` on '2022-09-26 17:19:06.296974771 -0700 PDT'
 ```
 
-### S3 兼容性 {#s3}
+### S3 兼容性 {#s3-compatibility}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
+SILO 是 PGSTY mcli 正式支持的服务器；与上游 MinIO 和其他 S3 服务的兼容性遵循[尽最大努力原则](/zh/reference/minio-mc/#command-mc)。
 
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
-
-## 权限 {#id7}
+## 权限 {#permissions}
 
 要启动作业，必须在该部署上具有 [`admin:StartBatchJob`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-StartBatchJob) 权限。
+
+下一个 SILO 版本还会在作业操作对象时检查通过认证的提交者的本地数据权限。定义中的凭据另行授权远端操作，详见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">
+<defs><clipPath id="face"><circle cx="54" cy="54" r="48"/></clipPath><filter id="muted"><feColorMatrix type="saturate" values=".55"/></filter></defs>
+<image x="6" y="6" width="96" height="96" clip-path="url(#face)" filter="url(#muted)" opacity=".86" href="data:image/webp;base64,UklGRhoBAABXRUJQVlA4IA4BAACwDwCdASpgAGAAPkkaikUioaEer7wAKASEswBkaQs/APwA/f///7yhwD8AOEC7AZn6dvvEXtN+QCYqan7w0NnQpzIquPOrpnbbqA6F5jJIaCZlo7e/qhM5WMKrqGQyOttkkSs856x1BK6NA9meSNqJD4Q8czE8PJih9zjyr8dBj0ZI/5slYAD+/WuXP+zgKwO6qqWI/H/GwUyUHvLYTZ7Avz/8uoBxwVpYi2HKmcjJlrESqrYn1JRtAm5mY4am845bSjaAfmivAtgf9pWP42MHBsrKtFKEkgYjwIV8FuCdEAaZN/L3+9VzhkEX+J6BRvmnlRMZD/tzV1a+jsGblhk5q9RtAPt5PaxUHTagAAA="/>
+<circle cx="54" cy="54" r="47.5" fill="none" stroke="#94b0d2" stroke-opacity=".32"/>
+</svg>

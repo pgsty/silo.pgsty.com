@@ -47,6 +47,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 | 身份与集成 | 仅使用 root 凭据；无 IAM 子用户、OIDC、通知目标或反向代理 |
 | 数据规模 | 约 5,900 个对象（约 34,000 个底层存储块）；数据卷先后历经 2025-09、2025-10、2026-09 三个版本，累计运行约 15 个月 |
 | 验证结果 | 原地挂载既有数据卷启动无报错；业务侧分片上传、解析服务读取、列举与删除检查均通过 |
+{.wide .expand}
 
 ### 现代单盘存储与旧 FS 模式 {#single-node-storage}
 
@@ -159,6 +160,7 @@ Kubernetes kubelet 直接通过 Pod spec 中的 `httpGet` 探针检查容器，�
 | 分片上传列举 | 20260916 曾提供可选的 `MINIO_API_MULTIPART_LISTING=strict` 磁盘扫描模式；20261018 已将其撤回并恢复 legacy 内存缓存行为（省略 `max-uploads` 默认 1,000，但默认缓存路径不执行严格分页）。见 [20260916 说明](/zh/blog/release/silo-20260916/#multipart)与 [20261018 升级要求](/zh/blog/release/silo-20261018/#upgrade)。 |
 | 反向代理来源地址信任 | 未设置 `MINIO_API_TRUSTED_PROXIES` 时，S3 监听器保留对转发头的历史信任行为。直连部署建议设为 `none`；经过反向代理时，显式配置代理 IP/CIDR 并确保代理覆盖客户端伪造的转发头。Console 与 LDAP STS 遵循各自的信任规则。见[来源地址信任](/zh/compatibility/server/#trusted-proxies)。 |
 | 身份与对象状态 | 若部署使用了 IAM 子用户密码策略、服务账号、STS、OIDC、Object Lock 或复制，请按[目标发行版说明](/zh/blog/release/silo-20261026/#upgrade)、[密码权限迁移](/zh/compatibility/password-permissions/)和 [IAM 恢复流程](/zh/operations/replication/iam-upgrade/)逐项核对。 |
+{.wide .expand}
 
 ## 从 RELEASE.2026-08-06 升级 {#since-20260806}
 
@@ -203,5 +205,6 @@ Waiting for at least 1 remote servers with valid configuration to be online
 4. **测试写入与列举路径**：在专用测试桶或测试前缀上，使用真实客户端完成普通上传、分片上传合并、列举、回读与删除（切勿删除生产对象做冒烟测试，清理测试数据时注意桶的版本控制与保留期规则）。
 5. **验证权限与外部集成**：验证子用户、服务账号、STS/OIDC 以及预期应被拒绝的越权请求；共享 IAM 或跨站复制集群须按 [IAM 升级流程](/zh/operations/replication/iam-upgrade/)逐个检查参与站点。
 6. **重启持久性复核**：在流量仍暂停的情况下重启一次存储服务，确认重启后就绪状态、历史对象读取与签名请求均正常，再正式恢复上游业务流量。
+{.steps}
 
 若发现历史元数据或对象访问异常，请保留错误日志与对象标识并在隔离副本上排查；迁移观察窗口内建议暂缓写入非必需的新特性状态，以便随时按[回滚边界](#rollback)安全恢复。

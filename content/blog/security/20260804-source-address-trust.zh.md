@@ -122,6 +122,7 @@ SILO 内置的 FTP 与 SFTP 服务端（`cmd/ftp-server.go`、`cmd/sftp-server.g
 | 单节点 + 反向代理 | 仅反向代理的 IP/CIDR |
 | 多节点分布式集群 + 反向代理 | 反向代理的 IP/CIDR **以及**所有 SILO 集群节点的 IP/CIDR |
 | 客户端直连多节点集群（无外部反向代理） | 所有 SILO 集群节点的 IP/CIDR（若无跨节点转发需求则可设为 `off`） |
+{.wide .expand}
 
 ---
 

@@ -2,7 +2,7 @@
 title: "Tier free version 是内部清理记录"
 linkTitle: "Tier free version 语义"
 date: 2026-10-27
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO 维护团队"
 summary: >
   解释 tier free version 是什么、为何把它当作普通版本会破坏生命周期与存储池迁移，以及 PR #264 为何是最小完整修复。
@@ -83,23 +83,23 @@ free entry 带着 v3 的时间，所以排在 v2 之上。GET 跳过第一条并
 
 ## 备选方案 {#options}
 
-### 只修 scanner
+### 只修 scanner {#option-scanner}
 
 从非 free 版本重新计算 IsLatest 和 successor time，可以阻止最危险的误过期，但不能修复 S3 列表和迁移。decommission 仍可能产生删除标记。
 
-### 只修列表与迁移
+### 只修列表与迁移 {#option-listings}
 
 这会让 API 和迁移看起来正确，但 scanner 仍可能在 free entry 存在时删除错误版本，仍然不完整。
 
-### 到处都保留 free entry
+### 到处都保留 free entry {#option-visible}
 
 这能保留 #19878 的上游可观测性行为，但会把内部清理记录暴露为公共删除标记，让 GET、生命周期、列表和迁移互相矛盾。SILO 的维护目标是维护栈的逻辑对象行为，内部 tier 账本不应定义 S3 历史。
 
-### 删除时立即清理 free entry
+### 删除时立即清理 free entry {#option-delete-time}
 
 远端 tier 暂时不可用时会失败。free record 正是远端清理仍未完成的持久提醒，过早删除可能让远端数据永久失去引用。
 
-### 建立两个明确视图
+### 建立两个明确视图 {#option-two-views}
 
 这是最小的完整设计：
 
@@ -116,6 +116,7 @@ PR #264 实现了这个方案。
 1. getFileInfoVersions 在分离 free entry 后重新计算 IsLatest、SuccessorModTime 和 LatestModTime。
 2. latest-delete-marker 判断跳过 free entry。
 3. 普通 FileInfoVersions 排除 free entry；healing 使用显式的全量 helper；分页跳过只有 free entry 的 key；decommission 执行 tier cleanup 并使失败可重试。
+{.steps}
 
 新增测试在 main 上除有意保留的 healing guard 外都会失败，在 PR 上通过。覆盖了生命周期选择、ListObjectsV2、ListObjectVersions 分页、Walk、healing、decommission、rebalance 和 tier 不可用场景。
 
@@ -129,6 +130,10 @@ decommission 遇到 free entry 时可能需要访问 tier。远端对象已经�
 
 如果 free version 仍指向某个 tier，而该 tier 已经**从配置中删除**，这同样不是 tier 故障。free version 是其远端对象的唯一记录，因此会被保留；在以相同名称重新配置该 tier（`mcli ilm tier add`）之前，它所在存储池的 decommission 无法完成。从下一个版本开始，decommission 会先搬迁其他所有桶，然后以失败结束，错误信息会指出该 free version、它的远端对象和 tier；重试时从剩下的桶继续。在此之前，decommission 会停在第一个这样的桶上，之后的所有桶都留在该池中。
 
+从下一个版本开始，远端清理与本地 free 记录的删除还会和 scanner 共用该对象的写者锁；本地删除只有在磁盘句柄、本地版本 ID、tier、远端对象和远端版本都与已删除远端对象的那条记录完全一致时，才会移除这条 free 记录。远端删除在独立于调用方、带自身超时的上下文中执行，因此即使 decommission 被取消，只要远端删除已经成功，本地记录仍会被移除。同样，当 decommission 遇到一个恢复副本移除被拒绝的分层版本时（例如对象受锁保护或规则已不再适用），它会连同 tier 元数据和恢复截止时间一起迁移该版本，而不是报错或丢失 tier 链接（[5cb91e7d7](https://github.com/pgsty/silo/commit/5cb91e7d7)）。
+
+从下一个版本开始，`mcli admin decommission cancel` 在返回之前还会先把取消状态持久写入磁盘，因此正处在搬迁完桶、保存集群配置阶段的 decommission 会以 `Canceled` 结束，而不是 `Complete`。
+
 这个修复无法识别或恢复旧版本错误 decommission 已经产生的普通删除标记，因为这些标记已经没有 free-version 标志。受影响对象需要从备份或其他权威副本恢复。
 
 ## 验证参考 {#verification}
@@ -139,3 +144,4 @@ decommission 遇到 free entry 时可能需要访问 tier。远端对象已经�
 - free-version 引入：[a1df23051](https://github.com/pgsty/silo/commit/a1df23051)
 - 上游列表变更：[29a25a538](https://github.com/pgsty/silo/commit/29a25a538)
 - PR head：[7ce7fc8d1](https://github.com/pgsty/silo/commit/7ce7fc8d1)
+- free version 清理归属与 decommission 取消：[ade15ea5d](https://github.com/pgsty/silo/commit/ade15ea5d)、[96b3a19d0](https://github.com/pgsty/silo/commit/96b3a19d0)、[5cb91e7d7](https://github.com/pgsty/silo/commit/5cb91e7d7)

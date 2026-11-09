@@ -15,7 +15,7 @@ A holder of a signed `PUT` request could append an unsigned `x-amz-copy-source` 
 
 The fix verifies received `x-amz-*` headers against the request's signed-header set (retaining only explicit protocol exceptions) before dispatching the operation. Follow-up request-signing and checksum coverage is documented in the [signed-header design note](/blog/design/signed-header-coverage/).
 
-## Remediation
+## Remediation {#remediation}
 
 Upgrade **SILO Server** to [Server 20260916](/blog/release/silo-20260916/) or later. Until all Server nodes are upgraded, scope write-signing credentials to the minimum required object prefixes and avoid granting broad read permissions to principals that issue presigned uploads into publicly readable buckets.
 

@@ -47,6 +47,7 @@ Stored `Content-Encoding` values after the fix:
 | `aws-chunked` | *(none)* |
 | `aws-chunked,gzip` | `gzip` |
 | `gzip` | `gzip` |
+{.wide .expand}
 
 Note that `aws-chunked, gzip` (with a space after the comma) continues to store ` gzip` with a leading space, and `gzip, aws-chunked` continues to store the full string; both match pre-existing parser behavior on the ordinary `PUT` path and are pinned as status-quo test assertions.
 

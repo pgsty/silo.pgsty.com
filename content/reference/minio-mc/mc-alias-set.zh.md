@@ -3,7 +3,7 @@ title: "mc alias set"
 url: "/zh/reference/minio-mc/mc-alias-set/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-alias-set.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-alias-set"></a>
@@ -159,11 +159,11 @@ mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 
 ## 行为 {#id11}
 
-### S3 兼容性 {#s3}
+### S3 兼容性 {#s3-compatibility}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
+SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。
 
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+`mcli 20261109` 支持在 `~/.mc/config.json` 的别名条目中保存可选的 `"region"` 字符串。S3 客户端依次采用 `MC_REGION`、`AWS_REGION`、别名 `region`，未配置时交给 SDK 自动发现。`alias set` 不提供 `--region` 参数，重建别名会清除已有区域；可通过导入完整别名对象保存区域。`mb --region` 单独控制建桶位置。详见 [Alias 区域设计](/zh/blog/design/alias-region/#usage)。
 
 ### 所需凭据与访问控制 {#id12}
 

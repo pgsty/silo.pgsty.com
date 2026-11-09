@@ -22,6 +22,8 @@ You can use the MinIO Console for administration tasks like Identity and Access 
 
 SILO embeds the maintained Silo Console in the server. The [Silo Console repository](https://github.com/pgsty/silo-console) documents the downstream source, releases, and compatibility changes; standalone deployment is an advanced integration path and must use a Console version compatible with the target server release.
 
+In [Console v2.7.0](/blog/release/console-2.7.0/), the Console UI supports 10 locales (`en-US`, `zh-CN`, `zh-TW`, `ja-JP`, `ko-KR`, `fr-FR`, `de-DE`, `es-ES`, `pt-BR`, and `ru-RU`), selectable from the top bar or via `?lang=<locale>` ([design record](/blog/design/console-languages/)). Standalone container images (`v2.6.0+`) also include the root CA bundle (`/etc/ssl/certs/ca-certificates.crt`) and a writable `/tmp` directory (`1777`) for outbound HTTPS and temporary file operations.
+
 ### Supported Browsers {#supported-browsers}
 
 MinIO Console runs on a variety of current, stable release browsers.

@@ -92,6 +92,7 @@ The requested target state now selects the required admin action:
 | Disable user | `admin:DisableUser` |
 | Enable group | `admin:EnableGroup` |
 | Disable group | `admin:DisableGroup` |
+{.wide .expand}
 
 `admin:*` and the built-in `consoleAdmin` policy remain unchanged; only custom least-privilege policies that relied on `EnableUser`/`EnableGroup` to perform both transitions require updating.
 

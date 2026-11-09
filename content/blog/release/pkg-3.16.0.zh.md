@@ -20,6 +20,7 @@ url: "/zh/blog/release/pkg-3.16.0/"
 | `golang.org/x/crypto` | `v0.58.0` | `v0.58.1-0.20261009181718-2f1f834330b2` |
 | `github.com/klauspost/cpuid/v2` | `v2.4.1` | `v2.4.2` |
 | `go.yaml.in/yaml/v3` | `v3.0.5` | `v3.0.6` |
+{.wide .expand}
 
 JOSE 更新包含 [go-jose v4.1.7](https://github.com/go-jose/go-jose/releases/tag/v4.1.7) 的五项安全修复：无效 RSA 密钥指纹、嵌入未导出字段的 JSON 解码、JWE 受保护与未受保护头处理、RSA 证书验证限制，以及 JWS 签名数/JWE 接收者数限制。v4.1.9 还修复了 OpaqueSigner 对未识别公钥类型的兼容回归，并改进不支持密钥的错误返回。上述公告针对依赖库，是否影响某个应用取决于它实际暴露的操作。
 

@@ -141,6 +141,7 @@ favicon、PWA 与 Apple Touch 图标此前仍是上一代手绘徽标的 PNG 导
 | 独立二进制 | Linux `amd64/arm64/arm`、macOS `amd64/arm64`、Windows `amd64` |
 | 系统软件包 | DEB / RPM / APK × `amd64/arm64/armv6`                       |
 | 校验和   | `silo-console_2.0.0_checksums.txt`（SHA-256）                 |
+{.wide .expand}
 
 发布流水线在 tag 推送时触发，工作流的第三方 Action 已固定到具体提交，并在构建前强制执行"干净检出 + 资产重建零差异"门禁。
 

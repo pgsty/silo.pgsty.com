@@ -2,7 +2,7 @@
 title: "Failed Writes and Phantom Empty Prefixes"
 linkTitle: "Phantom Empty Prefixes"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a write whose staged data is already gone can leave an empty object directory that later appears as a common prefix with nothing under it, and why removing empty directories on the rename failure path is the minimum complete repair.
@@ -32,7 +32,7 @@ We adopt it with three additions:
 
 - The commit step of the same function, the rename of `xl.meta`, has its own failure branch. That branch leaves the same empty directory for writes without a data directory, such as inline and zero-byte objects, and gets the same one-line cleanup.
 - The walk up the parents removes only empty directories. Before, it removed whatever was at each parent path, which a concurrent write can replace with the `xl.meta` of a committed object. The adversarial review showed that the new cleanup makes this reachable on every drive.
-- A write whose rename fails because a concurrent cleanup removed a directory of its destination path, while its own source is still in place, creates the directories again and retries, up to once per path level.
+- A write whose rename fails because a concurrent cleanup removed a directory of its destination path, while its own source is still in place, creates the directories again and retries, up to once per path level. Direct metadata writes (`WriteMetadata` and `UpdateMetadata`) also retry `openFileAll` and `renameAll` up to once per path level when a concurrent `RenameData` empty-directory cleanup removes a parent directory during a first-version or delete-marker metadata write ([`479a49b28`](https://github.com/pgsty/silo/commit/479a49b28)).
 
 The fix does not sweep directories that are already on the drives. A later write and delete of the same key removes one; [Residual limits](#limits) describes how to find and remove them.
 
@@ -48,11 +48,13 @@ The fix does not sweep directories that are already on the drives. A later write
 | Reachability | Timing-dependent. The reporter could not reproduce it live with about 5000 client-cut writes on a 4-node cluster with injected latency, but found it in production on 12- and 16-drive sets. The tests build the state deterministically. |
 | Release urgency | Not a data-safety blocker, but planned for the next release: production users hit it (Iceberg orphan cleanup). The cleanup and the retry run only when a rename fails; the directory-only walk up also applies to ordinary deletes, where it removes the same directories as before, except a parent that holds only a macOS `.DS_Store` file. |
 | Remaining effort | The fix and its tests are done and reviewed locally. Remote CI, merge, and release remain. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
 The sequence on one drive:
 
+{.steps}
 1. A `PutObject` above the inline threshold, or a `CompleteMultipartUpload`, reaches the commit stage and calls `RenameData` on every drive of the erasure set.
 2. The calling node stops waiting for a remote drive: the client disconnects, the request is canceled, or the drive call times out. The remote drive is not told. `RenameDataHandler` runs `RenameData` with `context.Background()`, and the grid single-request handler has no context at all. The remote drive wrapper, `xlStorageDiskIDCheck.RenameData`, bounds the call with the drive timeout (30 seconds by default) but returns at that deadline while a filesystem call in progress continues.
 3. Without write quorum the caller fails the write. `renameData` undoes the drives that reported success. The deferred `deleteAll` in `PutObject` removes the staged object from `.minio.sys/tmp` on every drive. For multipart, an `AbortMultipartUpload` after the failed completion removes the upload directory.
@@ -67,6 +69,7 @@ With the empty directory left on enough drives, listings on main look like this 
 | `ListObjectsV2` with `delimiter=/` and prefix `day=1/` | prefix `day=1/b=9/` |
 | `ListObjectsV2` with `delimiter=/` and prefix `day=1/b=9/` | nothing |
 | Recursive `ListObjectsV2`, `ListObjectVersions`, `HEAD day=1/b=9/put` | nothing, nothing, not found |
+{.wide .expand}
 
 The prefix appears when the directory is on at least half of the set's drives, which is the default `strict` listing quorum. In a 16-drive set it is listed with the directory on 8 drives and not listed with it on 7.
 
@@ -82,7 +85,7 @@ Nothing else cleans it up. Heal, including heal started by the data scanner, rem
 
 ## Where the behavior came from {#history}
 
-### Provenance
+### Provenance {#provenance}
 
 **Introduced by upstream MinIO, not by SILO.** The leftover directory is older than the cleanup that was meant to prevent it. Every ingredient below is an upstream commit that is an ancestor of the SILO fork point ([`27742d469`](https://github.com/pgsty/silo/commit/27742d469), 2025-12-03). The cleanup block is byte-identical in MinIO `RELEASE.2025-07-23T15-54-02Z`, the release where the reporter saw it, in the last upstream release `RELEASE.2025-10-15T17-29-55Z`, in the archived upstream `master`, on `main`, and on every SILO release from `RELEASE.2025-12-03T12-00-00Z` through `RELEASE.2026-10-26T00-00-00Z`. We compared the lines on each tag. SILO changed the late-write window once, for one release, and no SILO commit changed the cleanup.
 
@@ -94,6 +97,7 @@ Nothing else cleans it up. Heal, including heal started by the data scanner, rem
 | The commit-branch cleanup is retargeted from the `xl.meta` path to the data directory path, and a write with no data directory ID, which used to write `xl.meta` directly, now also goes through the staged-file rename. | [`c7f7c4738`](https://github.com/pgsty/silo/commit/c7f7c4738) ([#18801](https://github.com/minio/minio/pull/18801)) | 2024-02-20 | `RELEASE.2024-02-24T17-11-14Z` |
 | Storage RPC handlers run drive mutations with `context.Background()` (grid). Before, the handler passed the request's context. | [`51aa59a73`](https://github.com/pgsty/silo/commit/51aa59a73) ([#18461](https://github.com/minio/minio/pull/18461)) | 2023-11-20 | `RELEASE.2023-12-02T10-51-33Z` |
 | The drive wrapper bounds `RenameData` with a deadline and returns at it while the work continues: deadline worker, then `WithDeadline`, in its current form. | [`e7b60c4d6`](https://github.com/pgsty/silo/commit/e7b60c4d6) ([#17701](https://github.com/minio/minio/pull/17701)), [`4a6c97463`](https://github.com/pgsty/silo/commit/4a6c97463) ([#18861](https://github.com/minio/minio/pull/18861)), [`9693c382a`](https://github.com/pgsty/silo/commit/9693c382a) ([#19548](https://github.com/minio/minio/pull/19548)) | 2023-07-25, 2024-01-24, 2024-04-23 | `RELEASE.2023-08-04T17-40-21Z`, `RELEASE.2024-01-28T22-35-53Z`, `RELEASE.2024-04-28T17-53-50Z` |
+{.wide .expand}
 
 How the pieces fit:
 
@@ -111,6 +115,7 @@ How the pieces fit:
 | [`ea7c794a9`](https://github.com/pgsty/silo/commit/ea7c794a9), [`8a4097309`](https://github.com/pgsty/silo/commit/8a4097309), [`652a1c09d`](https://github.com/pgsty/silo/commit/652a1c09d) | 2026-10-25 | `RELEASE.2026-10-25T00-00-00Z` only | **Did not affect.** Per-path mutation locks, a separate rollback backup directory, and protection of unfinished commits from abandoned-data cleanup. |
 | [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba) | 2026-10-26 | `RELEASE.2026-10-26T00-00-00Z` and `main` | **Restored the inherited window.** It withdrew the wait-for-inflight work above to keep the established timeout behavior; see [Storage Timeouts and Rollback Boundaries](/blog/design/multi-pool-object-consistency/#maintenance-20261026). |
 | [`a36fd8fff`](https://github.com/pgsty/silo/commit/a36fd8fff), [`0f9199e0c`](https://github.com/pgsty/silo/commit/0f9199e0c) | 2026-08-02, 2026-10-18 | `RELEASE.2026-08-04T00-00-00Z`, `RELEASE.2026-10-18T00-00-00Z` | **Did not affect.** Panic recovery inside the deadline worker, and prompt removal of empty multipart upload parents under the system bucket. Neither touches the destination object directory. |
+{.wide .expand}
 
 No SILO commit introduced or widened the leftover. The only SILO change that reduced the exposure was released once and withdrawn a day later, so `RELEASE.2026-10-26T00-00-00Z` carries the same exposure as upstream. Late drive operations remain a documented boundary, and this issue is one of their visible effects.
 
@@ -118,27 +123,27 @@ No SILO commit introduced or widened the leftover. The only SILO change that red
 
 ## Options {#options}
 
-### Option 1: remove empty directories on the rename failure path
+### Option 1: remove empty directories on the rename failure path {#option-1}
 
 This is the approach of PR #286 and the chosen option. The function that created the directories removes them in the same call, on the same drive, and only when they are empty. It costs nothing on the success path and needs no new state.
 
-### Option 2: make the remote `RenameData` honor the caller's cancellation
+### Option 2: make the remote `RenameData` honor the caller's cancellation {#option-2}
 
 This would narrow the window without closing it, at a much higher cost. The grid single-request handler receives no context; the grid server knows the request deadline but uses it only to drop a late reply. Propagating cancellation needs a change to the grid request protocol or a different handler type for this call. Cancellation also cannot stop a filesystem call in progress, so a cancel that arrives between the directory creation and the rename still leaves the directory, and Option 1 would still be needed. SILO's earlier work to wait for admitted storage I/O was withdrawn to keep the established timeout behavior (see [history](#history)).
 
-### Option 3: let heal or the scanner remove empty object directories
+### Option 3: let heal or the scanner remove empty object directories {#option-3}
 
 This is the only option that would sweep directories left by older releases or by a crash without any action by the user, but it is not adopted here. Heal deliberately removes only a directory that a minority of drives hold. Removing majority-present empty directories in the background would race with every first write between its directory creation and its rename, not only with late ones, unless it took the object lock and used an age threshold. That is a new destructive background behavior that needs its own design. It remains a possible follow-up for existing leftovers.
 
-### Option 4: make listing ignore directories with no object below them
+### Option 4: make listing ignore directories with no object below them {#option-4}
 
 The walk only knows whether a directory is empty. Proving that a subtree holds no object means reading the whole subtree for every directory entry of a delimiter listing. The directories would also stay on the drives, and their parents still could not be removed. Rejected.
 
-### Option 5: check the staged data before creating the destination
+### Option 5: check the staged data before creating the destination {#option-5}
 
 This adds a system call to every write and still races, because the staged data can disappear between the check and the rename. Rejected.
 
-### Option 6: let `reliableRename` recreate the parent when it retries
+### Option 6: let `reliableRename` recreate the parent when it retries {#option-6}
 
 This would let a concurrent writer survive a cleanup that removed its directory (see [the race below](#sufficiency)). It is not adopted in `reliableRename`. `renameAll` is shared by many callers, and the change would recreate destination parents in exactly the missing-source case, including for callers that have no cleanup.
 
@@ -146,6 +151,7 @@ A narrow form is adopted in `RenameData` instead: its two renames retry, recreat
 
 ## Proposed fix {#fix}
 
+{.steps}
 1. **Data rename failure branch (PR #286).** After the existing cleanup of the data directory, `RenameData` calls
 
    ```go
@@ -157,7 +163,7 @@ A narrow form is adopted in `RenameData` instead: its two renames retry, recreat
    The PR adds two tests. `TestRenameDataStagedDataGoneLeavesNoPrefix` builds the reported state on a 16-drive set with a `PutObject` and a `CompleteMultipartUpload` of 8 MiB objects, then checks the listings and the drives. `TestRenameDataStagedDataGoneKeepsExistingObject` checks that a failed overwrite keeps the old object readable.
 2. **Commit failure branch (maintainer addition).** The rename of `xl.meta` at the end of `RenameData` creates the object directory in the same way, and its failure branch has the same cleanup gap. For a write without a data directory, if the staged `xl.meta` disappears between its write and the commit, an empty object directory remains, with or without PR #286. The same call is added to that branch. `TestXLStorageRenameDataCommitMetaMissingRemovesEmptyDirs` reuses the `missingCommitMetaContext` hook of the existing `TestXLStorageRenameDataCommitMetaMissing`, which removes the staged `xl.meta` at exactly that point. It checks that a zero-byte and an inline write leave neither the object directory nor its empty parents, that a parent holding another object stays, and that a data directory moved before the failed commit stays in place.
 3. **Directory-only walk up (maintainer addition, found by the adversarial review).** After a successful removal, `deleteFile` walks up and removes each parent. It called the removal without a trailing slash, which also deletes a file. Between two steps of a walk, another walk can remove the rest of the chain, and a writer can then commit an object whose `xl.meta` sits at the very path the first walk removes next: for the key `parent/xl.meta/child`, that is the object `parent`. The walk then deleted the committed metadata, on every drive where the interleaving happened. The walk now passes the parent with a trailing slash, so it removes only an empty directory and stops at anything else. The other walk can be the new cleanup, which makes the interleaving reachable with ordinary failed writes, or an ordinary delete, so the hazard also existed before the fix. `TestXLStorageWalkUpKeepsCommittedObject` reproduces it through `DeleteVersion` and through both cleanup branches.
-4. **Retry after a concurrent cleanup (maintainer addition, found by the adversarial review).** The new cleanup can remove another write's destination directory between its creation and the rename. That write's rename then failed even though its source was intact, on every drive where this happened, with `IncompleteBody` (400), `NoSuchKey` (404), or a write-quorum error depending on the branch and the operation. Both renames in `RenameData` now retry when the directory creation or the rename of an attempt reports "not found" and the source is still in place. The decision uses the error of the attempt itself, before it is mapped to a storage error, because another write, for example of a nested key, can recreate the directories before the decision is made. Each retry runs the directory creation below its base directory again; see the cached-base limit under [Residual limits](#limits). A cleanup removes each directory of the path at most once, walking up, and every failed attempt needs at least one more removal, so the write retries up to once per path level below its base directory and no single cleanup can exhaust it. `TestRenameDataSurvivesConcurrentEmptyDirCleanup` runs a late failed `RenameData` of the same key on all 16 drives right after a `PutObject` (8 MiB and inline) or a `CompleteMultipartUpload` created the directory, and checks that the late call removed the directory and that the write still succeeds. `TestXLStorageRenameDataRetriesWhileCleanupWalksUp` removes `object/`, `b/`, and `a/` of `a/b/object` one at a time, each right after the write's next directory creation reached it, so that the walk defeats the first rename and both directory creations of the next attempt; the write must still succeed. A third case lets a write of `a/b/object/child` recreate the directories right after a failed creation.
+4. **Retry after a concurrent cleanup (maintainer addition, found by the adversarial review).** The new cleanup can remove another write's destination directory between its creation and the rename. That write's rename then failed even though its source was intact, on every drive where this happened, with `IncompleteBody` (400), `NoSuchKey` (404), or a write-quorum error depending on the branch and the operation. Both renames in `RenameData` now retry when the directory creation or the rename of an attempt reports "not found" and the source is still in place. Direct metadata writes (`WriteMetadata` and `UpdateMetadata`) also retry `openFileAll` and `renameAll` up to once per path level when a concurrent `RenameData` empty-directory cleanup removes a parent directory during a first-version or delete-marker metadata write ([`479a49b28`](https://github.com/pgsty/silo/commit/479a49b28), `TestXLStorageMetadataWriteSurvivesRenameDataCleanup`). The decision uses the error of the attempt itself, before it is mapped to a storage error, because another write, for example of a nested key, can recreate the directories before the decision is made. Each retry runs the directory creation below its base directory again; see the cached-base limit under [Residual limits](#limits). A cleanup removes each directory of the path at most once, walking up, and every failed attempt needs at least one more removal, so the write retries up to once per path level below its base directory and no single cleanup can exhaust it. `TestRenameDataSurvivesConcurrentEmptyDirCleanup` runs a late failed `RenameData` of the same key on all 16 drives right after a `PutObject` (8 MiB and inline) or a `CompleteMultipartUpload` created the directory, and checks that the late call removed the directory and that the write still succeeds. `TestXLStorageRenameDataRetriesWhileCleanupWalksUp` removes `object/`, `b/`, and `a/` of `a/b/object` one at a time, each right after the write's next directory creation reached it, so that the walk defeats the first rename and both directory creations of the next attempt; the write must still succeed. A third case lets a write of `a/b/object/child` recreate the directories right after a failed creation.
 
 The test helper `stagedDataGoneDisks` from PR #286 now swaps the drives behind the set's disk list under the lock that the list takes, instead of replacing the callback that background tasks read without it.
 
@@ -203,6 +209,7 @@ Without the fix this interleaving does not fail, so the fix adds a new failure m
 
 ### Removing an existing empty prefix {#cleanup}
 
+{.steps}
 1. Confirm that the prefix is empty: `mcli ls --recursive --versions ALIAS/BUCKET/PREFIX/` and `mcli ls --recursive --incomplete ALIAS/BUCKET/PREFIX/` return nothing.
 2. Confirm that no client writes under that prefix any more. For a table format such as Iceberg, that means a partition that is no longer written.
 3. Remove the deepest listed empty prefix with `mcli rm --force --purge ALIAS/BUCKET/PREFIX/`. The server deletes the prefix recursively on every drive of every erasure set and pool, then removes the parents that become empty. In the tests, purging `day=1/b=9/` also removed `day=1/` on all 16 drives.
@@ -244,7 +251,7 @@ Reasoned from code, not executed:
 
 The full `./cmd` suite was not run for this record.
 
-**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, heal dry-run, #259 and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, heal dry-run, #259, `delete-all` and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
 
 The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
@@ -256,6 +263,7 @@ The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command
 | Round 2 | Requested changes. One late call per drive, removing successive parents while the write retried, exhausted a single retry and returned 403. The retry now repeats up to once per path level. Reclassifying an exhausted failure as 503 was not taken; the residual is documented under [Residual limits](#limits). Seven record corrections were applied. |
 | Round 3 | Requested changes. A write of a nested key that recreated the directories after a failed attempt hid the failure from the retry decision, which now uses the error of the attempt itself. The two tests that schedule directory creations skip on Windows. The overview now matches the cleanup guidance. |
 | Round 4 | Approved with nits: three wording corrections about the cached base directory and the cleanup walk, applied. |
+{.wide .expand}
 
 ## References {#references}
 

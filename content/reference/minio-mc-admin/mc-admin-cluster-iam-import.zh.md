@@ -3,7 +3,7 @@ title: "mc admin cluster iam import"
 url: "/zh/reference/minio-mc-admin/mc-admin-cluster-iam-import/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-iam-import.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="command-mc.admin.cluster.iam.import"></a>
@@ -80,3 +80,12 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 ### 全局标志 {#id3}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
+
+## 行为 {#behavior}
+
+### 失败报告与旧版回退（`mcli 20261109`） {#failure-reporting}
+
+在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中：
+
+- 若服务端在导入响应中报告了失败的 IAM 实体，`mc admin cluster iam import` 会返回退出码 `1`，以便自动化脚本检测部分导入失败（`#234`）。
+- 旧版客户端侧 IAM zip 解析器回退仅在服务端返回 `NotImplemented` 或 `XMinioAdminVersionMismatch` 时触发；来自 `ImportIAMv2` 的认证、授权、传输或归档错误会直接返回，不再回退（`#211`）。

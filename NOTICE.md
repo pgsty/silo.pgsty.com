@@ -46,7 +46,7 @@ on `zh`.
 The work has been modified from the original. Modifications include rebranding
 to Silo, restoration of documentation for features removed upstream, converting
 the frozen RST/MyST source to bilingual Markdown, replacing the Sphinx
-presentation layer with Hugo and Docsy, mapping navigation and semantic
+presentation layer with Hugo and OINK, mapping navigation and semantic
 components, preserving or aliasing public URLs and anchors, relocating content
 assets without re-encoding them, link and build fixes, ongoing maintenance, and
 translation into Chinese. The commit history is the complete record of changes.

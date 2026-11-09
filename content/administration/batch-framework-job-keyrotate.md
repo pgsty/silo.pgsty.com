@@ -3,7 +3,7 @@ title: "Batch Key Rotation"
 url: "/administration/batch-framework-job-keyrotate/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-keyrotate.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="batch-key-rotation"></a>
@@ -19,6 +19,9 @@ The MinIO Batch Framework allows you to create, manage, monitor, and execute job
 The `keyrotate` batch job type cycles the [sse-s3 or sse-kms keys](/operations/server-side-encryption/#minio-sse-data-encryption) for encrypted objects on a MinIO deployment.
 
 The YAML configuration supports filters to restrict key rotation to a specific set of objects by creation date, tags, metadata, or kms key. You can also define retry attempts or set a notification endpoint and token.
+
+> [!NOTE]
+> **Next-release SILO lifecycle (`pgsty/silo` `main`):** Batch `keyrotate` revalidates the submitting principal's credentials and permissions while running (`461a7df`), pauses and retries on temporary IAM errors, incomplete bucket listings, or pool rebalance/decommission conflicts (`5ce52c5`), and reports refused objects (`keysRefused`, `complete-with-skips`) separately from clean completions. See [SILO batch job lifecycle](/administration/batch-framework/#silo-lifecycle).
 
 <a id="minio-batch-framework-keyrotate-job-ref"></a>
 

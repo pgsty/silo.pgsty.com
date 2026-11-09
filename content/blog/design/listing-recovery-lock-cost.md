@@ -68,6 +68,7 @@ The recovery re-read uses a read-only metadata helper with standard version sele
 | Waiting for missing cache blocks | Check producer state promptly after a block read failure and rotate a single online-disk probe per retry before issuing the full quorum read. |
 | Cancellation and lock contention | Make lock-acquisition retry waits context-cancelable, and grant positively identified listing-recovery lock conflicts one short 2 ms wait-and-recheck window. |
 | Regression tests and CI | Cover confirmed deletion, cross-pool migration ordering, dual-set lock routing, pagination termination, failed RPCs, context cancellation, and late lock grants under `-race`. |
+{.wide .expand}
 
 The low-level directory-walk callback keeps its existing signature because recovery errors originate in the merger, leaving scanner, healing, rebalance, and decommission callers unchanged.
 
@@ -95,6 +96,7 @@ When single-pool recovery spans two distinct lock domains, holding the first rea
 | High fraction of unresolved names | The ordered merger confirms same-name groups serially, which slows the overall scan when many keys are simultaneously under mutation. |
 | Recovery reader vs. writer lock conflict | Each identified recovery lock RPC waits once for a nominal 2 ms before rechecking, capped at 64 concurrent waiters per local locker outside its internal mutex (~264 B and 4 allocs per waiting RPC). |
 | Ordinary backoff after failed lock acquisition | Replacing `time.Sleep` with a cancelable timer/select adds a small allocation only after a lock attempt has already failed. |
+{.wide .expand}
 
 For 1,000 simultaneously resident entries, the pointer field adds roughly 8 KiB of heap memory. Each name's recovery runs under a 5-second context budget, and any partial or late lock grants after cancellation are cleaned up immediately.
 
@@ -109,6 +111,7 @@ An independent 10-run paired benchmark against `main` (`7e9454456`)—two identi
 | Full `LIST` page | +0.82% | −3.53% to +5.36% |
 | Same-name `DELETE` | −0.38% | −1.80% to +1.05% |
 | Different-name `DELETE` | −0.55% | −4.74% to +3.84% |
+{.wide .expand}
 
 Secondary paired p95 deltas were +0.47% for complete paginated scans, +2.82% for `PUT`, −0.51% for `GET`, +12.60% for middle continuation pages (`max-keys=7`), and +18.95% for same-name `DELETE` p99 (with one isolated 327.248 ms same-name `DELETE` sample on the candidate vs. 148.186 ms in the A/A control). Aggregate 8-process CPU changed by −0.07% and summed RSS by +0.11%. Because the 95% confidence interval upper bound for full `LIST` page p95 reached +5.36% (above the strict 5.00% gate) and the two identical-`main` controls varied by ~12% on different-name `DELETE` p95, the statistical 5% gate is recorded as **inconclusive** rather than passed, while point estimates confirm minimal steady-state overhead.
 

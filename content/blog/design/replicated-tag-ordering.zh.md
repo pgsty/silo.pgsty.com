@@ -53,7 +53,7 @@ url: "/zh/blog/design/replicated-tag-ordering/"
 2. **发送端传输删除墓碑（tombstone）：** 空标签值同样携带其已记录的修订时间戳；对于从未设置过标签的对象（空值且无修订记录）绝不伪造时间戳；若磁盘上已记录的时间戳格式畸形，则按失败关闭（fail-closed）处理，不作静默修补。
 3. **接收端对账墓碑状态：** 复制 `COPY` 在重建元数据前先捕获存量标签与时间戳对，使带时间戳的空值作为可胜出的有效状态进入 `reconcileStoredObjectTags`。内部重复版本抑制（`412 PreconditionFailed`）仅对严格更新的可信来源标签修订放宽（客户端显式指定的 `If-Match` 与 `If-None-Match` 依然严格执行）。多段上传完成（`CompleteMultipartUpload`）从已持久化的 upload 元数据读取标签顺序；复制删除确认回调不再将快照标签写回本地；普通 SSE-C 密钥轮换则会从复制的加密元数据中剥离旧标签时间戳，防止其覆盖新生成的本地修订。
 
-### 运维可见变化与升级要求
+### 运维可见变化与升级要求 {#operator-visible-changes-and-upgrade}
 
 - **时间戳相等时统一判定存量胜出：** 在不带版本（unqualified）及显式 `null` 版本的 `COPY` 请求上，当入站时间戳与已存时间戳相等时统一保留存量状态（旧逻辑在未限定版本路径上曾让入站请求胜出平局）。
 - **携带 `X-Amz-Tagging-Directive: REPLACE` 且无标签的普通 `COPY`：** 现在会按 S3 规范真正清空目的端标签，而不再沿用旧默认路径将源对象标签复制过去。

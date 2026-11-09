@@ -28,7 +28,7 @@ All documentation content on this site is licensed under the
 
 ## Derivation {#derivation}
 
-Portions of this documentation are derived from the [MinIO Object Storage Documentation](https://github.com/minio/docs). The work has been modified from the original: rebranding to PGSTY SILO, restoration of documentation for features removed upstream, conversion of the frozen RST/MyST source to bilingual Markdown, replacement of the Sphinx presentation layer with Hugo and Docsy, link and build fixes, ongoing maintenance, and translation into Chinese. The [commit history](https://github.com/pgsty/silo.pgsty.com/commits/main/) is the complete record of changes.
+Portions of this documentation are derived from the [MinIO Object Storage Documentation](https://github.com/minio/docs). The work has been modified from the original: rebranding to PGSTY SILO, restoration of documentation for features removed upstream, conversion of the frozen RST/MyST source to bilingual Markdown, replacement of the Sphinx presentation layer with Hugo and OINK, link and build fixes, ongoing maintenance, and translation into Chinese. The [commit history](https://github.com/pgsty/silo.pgsty.com/commits/main/) is the complete record of changes.
 
 The blog, download and release pages, this section, and PGSTY SILO-specific content are original works of the PGSTY SILO project. Pages that carry upstream material include a notice at the bottom of the page, and pages that PGSTY SILO has modified beyond format conversion link to their change history.
 
@@ -41,13 +41,13 @@ Chinese translations are unofficial and are maintained by the PGSTY SILO project
 If you reuse content from this site, the following credit line satisfies CC BY 4.0:
 
 ```text
-[PGSTY SILO Documentation](https://silo.pgsty.com) by PGSTY and MinIO. Inc, licensed under CC BY 4.0.
+[PGSTY SILO Documentation](https://silo.pgsty.com) by PGSTY and MinIO, Inc., licensed under CC BY 4.0.
 ```
 
 For Chinese-language contexts:
 
 ```text
-[PGSTY SILO 文档](https://silo.pgsty.com/zh)，作者 PGSTY 与 MinIO. Inc，依据 CC BY 4.0 授权。
+[PGSTY SILO 文档](https://silo.pgsty.com/zh)，作者 PGSTY 与 MinIO, Inc.，依据 CC BY 4.0 授权。
 ```
 
 ## Disclaimer {#disclaimer}

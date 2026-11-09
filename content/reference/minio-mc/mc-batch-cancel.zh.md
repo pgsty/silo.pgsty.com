@@ -3,7 +3,7 @@ title: "mc batch cancel"
 url: "/zh/reference/minio-mc/mc-batch-cancel/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch-cancel.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-batch-cancel"></a>
@@ -77,8 +77,6 @@ mc [GLOBALFLAGS] batch cancel ALIAS JOBID
 mc batch cancel myminio KwSysDpxcBU9FNhGkn2dCf
 ```
 
-### S3 兼容性 {#s3}
+### S3 兼容性 {#s3-compatibility}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。

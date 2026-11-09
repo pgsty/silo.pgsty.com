@@ -2,7 +2,7 @@
 title: "Durable IAM Revocations"
 linkTitle: "Durable IAM Revocations"
 date: 2026-09-16
-lastmod: 2026-10-26
+lastmod: 2026-11-08
 author: "Ruohang Feng"
 summary: "Persistent deletion revisions, signed parent boundaries, safe replay, coordinated upgrades and the limits of IAM recovery."
 tags: [Design, S3, Operations]
@@ -43,6 +43,8 @@ Revision ordering follows five deterministic rules:
 Writing the user or group revision is the authoritative commit point of a deletion; cleanup of policy mappings and child credentials follows afterward. A failure during dependent cleanup never rolls back the committed parent revocation: the API returns the cleanup error to the caller while still notifying sibling nodes on the same backend to reload the committed revocation state. Consequently, an `HTTP 500` cleanup error on admin delete does **not** mean the old identity remains active. Administrators can safely retry the deletion while keeping IAM writes and same-name recreation paused. When dependent cleanup fails after commit, the admin handler skips the immediate cross-site push hook and lets the background deletion-healing loop propagate the tombstone across sites. Sibling nodes reload current shared state upon notification, so a delayed notification cannot delete a subsequently recreated identity; `etcd` siblings also receive persisted changes via watches.
 
 Operators must keep node clocks synchronized via NTP and monitor clock skew. Revision ordering relies on source wall-clock timestamps with monotonic advancement for consecutive local writes to the same path, without establishing cross-site causal ordering for concurrent writes.
+
+**November 2026 stored-record edit and cache-freshness hardening ([`a0de92fcb`](https://github.com/pgsty/silo/commit/a0de92fcb), [`70914759e`](https://github.com/pgsty/silo/commit/70914759e), [`7eed95bc8`](https://github.com/pgsty/silo/commit/7eed95bc8), [`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd), [`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6), [`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f), [`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)):** On multi-node clusters, administrative edits (`SetUserStatus`, `UpdateGroupMembers`, `SetGroupStatus`, `SetPolicy`, `UpdateServiceAccount`, and the hourly LDAP group-membership refresh) load and modify the authoritative stored record inside the cross-node revision lock rather than mutating the handling node's in-memory cache first. When a write or create is refused because storage already holds a newer revision or a deletion tombstone, the node immediately reloads or evicts its stale in-memory entry instead of serving it until the next periodic refresh. Single-item lazy loads coalesce concurrent cache misses per key via `singleflight` and record `loadedAt` before reading storage, preventing an older in-flight load from overwriting a newer cached revision or tombstone that arrived while the read was in flight.
 
 ## Users, Child Credentials, and Groups {#identities}
 
@@ -119,6 +121,7 @@ Scrape each process's authenticated `/minio/metrics/v3/cluster/iam` endpoint for
 | `minio_cluster_iam_revocation_heal_failures` | Failed healing convergence passes since process startup |
 | `minio_cluster_iam_revocation_heal_duration_millis` | Duration of the most recent healing pass in milliseconds |
 | `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | Unix timestamp (seconds) of the last successful healing pass |
+{.wide .expand}
 
 Index metrics are reported per process; summing across sibling nodes sharing a backend double-counts shared records. Healing metrics advance only when site replication is enabled and the node holds the leader lease; in shared-backend deployments without site replication, zero values on the last three metrics are expected.
 

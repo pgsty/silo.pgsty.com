@@ -2,7 +2,7 @@
 title: "Lock Domains of Large Single-Pool Clusters"
 linkTitle: "Single-Pool Lock Domains"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why DELETE and CopyObject can fail to exclude PUT on the same key in a distributed single-pool deployment whose erasure sets do not share the same hosts, which layouts that covers, what the race does to xl.meta, and the smallest routing change that closes it.
@@ -43,6 +43,7 @@ Routing the single-pool `DELETE` and `CopyObject` lock to the hashed set removes
 | Reachability | The race needs two writers on one key within the commit window of a few milliseconds. Ordinary S3 clients rarely do that, but ILM expiry against a fresh overwrite, replication, retry storms, and clients that overwrite and delete the same key (queues, locks, temp files) can. It is easily reproduced when forced and rare in normal traffic. In an 18-host cluster about half of all keys (those whose set uses a different host group from set 0) are exposed. |
 | Release urgency | Planned fix in the next release rather than a hotfix. The change is local to the pool layer and the COPY handler; affected pools upgrade with a drained restart ([Rolling upgrade](#upgrade)). |
 | Remaining effort | The fix and its tests are written. Remaining: remote CI and an acceptance run on a distributed pool. |
+{.wide .expand}
 
 ## How the groups are built {#groups}
 
@@ -60,6 +61,7 @@ The endpoints are expanded with the left-most ellipsis varying fastest, so in `h
 | N = 21 | 7 | Three disjoint thirds. |
 | N = 25 | 5 | Five disjoint groups. Four fifths of the keys are exposed. |
 | Single node, any D | any | One lock table for all sets. |
+{.wide .expand}
 
 The sweep covered N = 2 to 64 and D up to 32 for N up to 17, D in {1, 2, 3, 4, 6, 8, 12, 16} above. Every valid layout with N of 18 or more had differing groups, and in every one of them both quorums can be granted at the same time. The same holds for any smaller N when the set size is forced below N. Configuration-file layouts round-robin the disks across nodes in the same way.
 
@@ -83,11 +85,12 @@ Single pool, main at 69fcf50cd. "Set 0" is `erasureServerPools.NewNSLock` (`serv
 | Heal (`healObjectInPool` takes the pool lock only when `!SinglePool()`) | `er.NewNSLock` | hashed set |
 | Replication write on the target (`PutObject`, metadata, copy) | as the operation above; plus `/[replicate]/<key>` via `objectAPI.NewNSLock` | hashed set; set 0 for the serializer |
 | Replicated `DELETE` | `z.NewNSLock` | set 0 |
-| ILM expiry (`DeleteObject` with `Expiration`; the rule is re-evaluated under the lock) | `z.NewNSLock` | set 0 |
+| ILM expiry (including the exact-key delete-all; `DeleteObject` with `Expiration`; the rule is re-evaluated under the lock) | `z.NewNSLock` | set 0 |
 | Batch key rotation (`NewNSLock`, then `CopyObject` with `NoLock`) | `z.NewNSLock` | set 0 |
 | `SelectObjectContent` (read lock) | `z.NewNSLock` | set 0 |
 | `GetObject`, `HeadObject` | `er.NewNSLock` read | hashed set |
 | Listing recovery (`listingRLock`, SILO) | set 0, then the source set | both |
+{.wide .expand}
 
 In a multi-pool deployment `PutObject`, `CompleteMultipartUpload`, tag and metadata updates, transition, restore and heal also take the pool lock and pass `NoLock` down, so every write shares set 0 with `DELETE`. The split exists because the single-pool shortcut `if z.SinglePool() { return z.serverPools[0].X }` skips the pool lock for the writers but not for `DELETE` and `CopyObject`.
 
@@ -115,6 +118,7 @@ When both lock groups are the same host list, the two choices describe one domai
 | `DeleteObject` lock moved from the set to the pool layer | [d350b666f](https://github.com/pgsty/silo/commit/d350b666ff41df7369a530c177ab8c890474a619), [minio/minio#15521](https://github.com/minio/minio/pull/15521) | 2022-08-18 | `RELEASE.2022-08-22T23-53-06Z` |
 | Pool lock always on pool 0 | [6c746843a](https://github.com/pgsty/silo/commit/6c746843ac0c1b273329ae400ce823f491d71390), [minio/minio#20356](https://github.com/minio/minio/pull/20356) | 2024-08-30 | `RELEASE.2024-09-09T16-59-28Z` |
 | **Set lock always on set 0: creates the single-key split** | [afea40cc0](https://github.com/pgsty/silo/commit/afea40cc0fe1d823359ecbd229a0425021eb897b) | 2024-09-27 | `RELEASE.2024-10-02T17-50-41Z` |
+{.wide .expand}
 
 Until `RELEASE.2024-09-13T20-26-02Z`, `erasureSets.NewNSLock` with one name returned `getHashedSet(objects[0]).NewNSLock`. The pool lock of a single pool therefore landed in the hashed set, the same domain as `PutObject`, and the single-key `DELETE` and `CopyObject` were consistent. Only multi-name locks (bulk delete) used a different set, `getHashedSet("")`. [afea40cc0](https://github.com/pgsty/silo/commit/afea40cc0fe1d823359ecbd229a0425021eb897b) (Harshavardhana, 2024-09-27) replaced that with `sets[0]` so that multi-object deletion competes with locks granted to other callers. That is right when every writer takes a pool-layer lock, which holds for multi-pool, and wrong for a single pool where the writers lock at the set. The commit subject carries "(#93)", which is not a number in the public minio/minio repository, so there is no upstream pull request to link.
 
@@ -130,6 +134,7 @@ Until `RELEASE.2024-09-13T20-26-02Z`, `erasureSets.NewNSLock` with one name retu
 | [87c1c6b3d](https://github.com/pgsty/silo/commit/87c1c6b3dc189799912f748572364e319676a7fc) listing recovery (issue #218, PR #239) | 2026-10-17 | `RELEASE.2026-10-18T00-00-00Z` | Narrowed, for one reader only. Listing recovery takes the set 0 and source-set read locks in fixed order to cover both domains. |
 | `d2eb0ade9`, `cd1f6cec3`, `dcc2f20ba` | 2026-10-25 and 26 | `RELEASE.2026-10-25T00-00-00Z` (first two), `RELEASE.2026-10-26T00-00-00Z` | Moved where `PutObject` takes its set lock and back. No change of domain. |
 | `1748f62c7`, `60c7179dd`, `7ce7fc8d1`, `5e7d60308` | 2026-09 and 10 | `RELEASE.2026-10-18`, `RELEASE.2026-10-18`, unreleased (2026-10-29), `RELEASE.2026-09-16` | Multi-pool and data-movement paths only. No change for a single pool. |
+{.wide .expand}
 
 The public design record [Restored Copy Expiry](/blog/design/restored-copy-expiry/) already lists "Lock domains in large single-pool deployments" as inherited and out of scope, and [Listing Recovery Lock Cost](/blog/design/listing-recovery-lock-cost/) describes the listing workaround.
 
@@ -146,6 +151,7 @@ Window up to 2 ms, 300 iterations per row:
 | Versioned `PUT` against `DELETE` | 0 anomalies | 188 iterations with an acknowledged version or marker missing on some drive; 70 with the acknowledged `PUT` on fewer drives than the read quorum (8 of 16); 127 `DELETE` calls failed with "not found" for a key that existed |
 | Unversioned `PUT` against `DELETE` | 0 | 84 iterations ended with `xl.meta` on some but not all of the 16 drives (for example 1, 3, 4 or 5 drives) instead of all or none; 94 `DELETE` errors |
 | Unversioned `PUT` against metadata-only `CopyObject` | 0 | 30 iterations read back the old body after both calls succeeded; 155 read "not found"; 48 copy errors |
+{.wide .expand}
 
 Window up to 20 ms, 400 iterations per row: the split rows fall to 34 iterations with a missing item, 10 with a mixed drive state, and 3 stale bodies plus 24 unreadable objects, and the shared rows stay at zero. The race is real but sensitive to timing, as expected.
 
@@ -157,29 +163,29 @@ The probe does not use dsync, a network, or partially overlapping groups; it doe
 
 ## Options {#options}
 
-### Option 1: route single-pool object locks to the hashed set (chosen)
+### Option 1: route single-pool object locks to the hashed set (chosen) {#option-1}
 
 Lock every single-key object name that the pool layer locked in the first set in the set the object hashes to instead, where its writers lock it, and lock nowhere else. One helper on the pool layer returns that lock (`NewObjectNSLock`): for a single pool the lock of `serverPools[0].getHashedSet(object)`, otherwise `z.NewNSLock` unchanged. It is also on the `ObjectLayer` interface for `SelectObjectContent` and batch key rotation. Upload-ID guards pick the set by their object and keep their lock name `object/uploadID`, as `PutObjectPart` does. Bulk delete takes one lock per set and deletes the sets concurrently, up to 16 at a time; each set's group holds only its own lock. The COPY handler takes its source and destination locks together, before it opens the source. Generic `NewNSLock` keeps one stable domain for names that are not objects.
 
 The number of lock RPCs does not change for single-key operations; a lock asks the hosts of one set instead of the hosts of set 0, which also spreads the load. Multi-pool deployments keep their lock domains, and single pools whose sets share their hosts lock the same hosts as before.
 
-### Option 2: make `NewNSLock` route single names to the hashed set
+### Option 2: make `NewNSLock` route single names to the hashed set {#option-2}
 
 This restores the pre-afea40cc0 behavior in one place, and fixes every caller at once. Multi-name locks still need a decision (that was why upstream changed it), the multi-pool pool lock would move from set 0 of pool 0 to the hashed set of pool 0, which changes the domain of every multi-pool lock, and composite names such as `object/uploadID` would hash by the whole name instead of by their object. The risk reaches further than the defect. Rejected.
 
-### Option 3: one lock group for every object lock
+### Option 3: one lock group for every object lock {#option-3}
 
 Use all hosts of the pool, or set 0's hosts, for every object lock, including the set-layer ones. Exclusion would hold, but the group would grow to N hosts for each lock, or concentrate every lock on the hosts of set 0. It also changes the writers, so the mixed-version problem below applies to `PUT`. Rejected.
 
-### Option 4: lock at the set layer for single pool
+### Option 4: lock at the set layer for single pool {#option-4}
 
 Make `erasureObjects.DeleteObject` and `CopyObject` take their own lock, as before 2022. The pool layer's check-then-delete logic (marker versus purge, If-Match, ILM re-evaluation) would then run before the lock, so the atomicity those features rely on is lost. Rejected.
 
-### Option 5: document and advise
+### Option 5: document and advise {#option-5}
 
 State that single pools of 18 or more hosts have this limit, and recommend pools of at most 17 hosts with additional pools as the cluster grows. This costs nothing but leaves the defect for the operators who already run such a pool, and they cannot restructure a pool. Rejected as a substitute; the release notes still carry the upgrade procedure below.
 
-### Option 6: take both locks (dual locking)
+### Option 6: take both locks (dual locking) {#option-6}
 
 Keep the set-0 lock of `DELETE`, COPY and the upload guards and add the hashed-set lock, always in that order, so that old and new nodes exclude each other during a rolling upgrade. The adversarial review of the design rejected it, with probes, for two reasons:
 
@@ -191,7 +197,7 @@ Keep the set-0 lock of `DELETE`, COPY and the upload guards and add the hashed-s
 Adopt option 1 in the next release. This is what the fix implements.
 
 1. **Routing.** In a single pool, these locks move from set 0 to the object's own set:
-   - `DeleteObject`, every branch: plain, If-Match, ILM expiry, data movement, and the replicated delete;
+   - `DeleteObject`, every branch: plain, If-Match, ILM expiry (including the exact-key delete-all), data movement, and the replicated delete;
    - the destination lock of `CopyObject`;
    - the read lock of `SelectObjectContent`;
    - the lock of batch key rotation;
@@ -205,6 +211,7 @@ Adopt option 1 in the next release. This is what the fix implements.
 4. **`listingRLock`** keeps its two read locks, set 0 and then the source set, with their bounded waits and cleanup. After this change the source set is where every single-pool writer locks; the set-0 lock remains while nodes of earlier releases may run, and can be dropped only behind an enforced version boundary.
 5. **Comments.** The caveat that [e59a3d938](https://github.com/pgsty/silo/commit/e59a3d938ed25c1bcd51efbb4ad6955073d195f7) removed from `DeleteObject` is back, rewritten for the new routing and the mixed-version limit. The If-Match paragraph that claimed atomicity only within one erasure set is corrected.
 6. **Release notes.** Describe who is affected, the upgrade procedure below, and that adding pools changes the locking regime only for new writes.
+{.steps}
 
 ### Lock ordering {#ordering}
 
@@ -251,7 +258,7 @@ Executed in disposable worktrees on the base of the fix:
 
 Still to run before merge: remote CI, and an acceptance run on a distributed single pool whose sets use different hosts.
 
-**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the heal dry-run, #259, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the delete-all, heal dry-run, #259, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
 
 The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
@@ -259,7 +266,7 @@ The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command
 
 | Round | Outcome |
 | --- | --- |
-| Design review, round 1 | Agreed with changes. Upload guards select the set by their object and keep their lock name; normalization as storage; true prefix deletion (force delete) distinguished from deletes of one object; bulk failure semantics specified. Two blockers: the COPY handler held the source read lock in the hashed set while it took the destination lock in set 0, so moving only the destination created a cycle between copies in opposite directions (reproduced); and "never worse during a rolling upgrade" was false, since old DELETE and COPY had excluded each other in set 0 (reproduced). |
+| Design review, round 1 | Agreed with changes. Upload guards select the set by their object and keep their lock name; normalization as storage; true prefix deletion (force delete) distinguished from exact-key deletes of one object; bulk failure semantics specified. Two blockers: the COPY handler held the source read lock in the hashed set while it took the destination lock in set 0, so moving only the destination created a cycle between copies in opposite directions (reproduced); and "never worse during a rolling upgrade" was false, since old DELETE and COPY had excluded each other in set 0 (reproduced). |
 | Design review, round 2 | Dual locking (option 6) proposed to keep old and new nodes exclusive. Rejected with probes: overlapping lock groups block the second lock of the same name, and holding the set-0 bulk lock while taking hashed locks cycles with multipart completion through the `parent/uploadID` alias. COPY must take its locks before opening the source, pass `NoLock` to the source read, and sort its locks. |
 | Design review, round 3 | Dual locking dropped; single-domain routing with a drained upgrade agreed. Changes: the local lock backend acquires names one at a time, so a single node keeps its one bulk lock and other local tables use bounded attempts; resources of different sets can still share hosts; `NoLock` through every nested call of COPY, including the destination lookups; one deadline, fresh contexts and lease loss for COPY; a real drain procedure for upgrade and rollback; more tests. Premise corrected: `host{1...18}/disk{1...4}` chooses a set size of 9, and an explicit 12 gives overlapping windows. |
 | Adversarial review, patch round 1 | Request changes; four findings, all accepted. Retries reused one lock instance, which names its holder, so a background retry of an unlock whose reply was lost could release the next attempt's lock (reproduced); every attempt now takes new instances. The destination lookups ran in the request's context and outlived a lost lease; the work under the locks now runs in their context. One attempt at a local lock over several names waited up to its bound for each name and overran the deadline; the attempt is now bounded as a whole. A test assumed that a distributed unlock completes at once; it now waits for the release. |
@@ -267,6 +274,7 @@ The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command
 | Adversarial review, patch round 3 (record only) | Approved with nits. The three corrected statements and the history rows match the code. Nits applied: "one acquisition" became "one multi-name lock request", since the local backend takes several names one at a time; the Status line holds once the fix is committed, which followed this round. |
 | Adversarial review, patch round 4 (one existing test) | Approved with nits. Moving the injection point of the adapted retention test before the locks is sound, but it alone would not catch a COPY that released its lock between its check and its write. Applied: a regression in which a retention or legal-hold update must wait for a COPY held inside its write. |
 | Release review (2026-11-06) | Found three regressions of the fix: a copy whose source name aliases its destination, such as `a//x` onto `a/x`, locked one resource twice and waited on itself until the operation timeout; a copy waiting for a contended source held its destination write lock most of the time; and a bulk delete ran its set groups one after another. Fixed with the source-name check and the merge by resource, the wait that holds nothing, and concurrent groups. Two implementation-review rounds corrected test gaps: race-free timeouts and lock instances, aliases of another set in a shared lock table, and writers probed before readers. |
+{.wide .expand}
 
 ## References {#references}
 

@@ -40,6 +40,8 @@ Push、Pull 和 Snowball 复制在必要的授权依赖暂时不可用时进入�
 
 ### 访问控制与要求 {#id4}
 
+下一个 SILO 版本要求通过认证的提交者具备 `admin:StartBatchJob` 和作业所需的本地数据权限。定义中的凭据用于远端连接，不能代替提交者的本地权限。撤销、暂停与版本切换的行为见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。
+
 批量复制与 [bucket replication](/zh/administration/bucket-replication/bucket-replication-requirements/#minio-bucket-replication-requirements) 具有类似的访问和权限要求。
 
 “source” 部署所使用的凭据必须具有类似以下的策略：

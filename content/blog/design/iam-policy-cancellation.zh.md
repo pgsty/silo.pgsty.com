@@ -2,7 +2,7 @@
 title: "IAM 策略重载：锁粒度、请求取消与超时预算隔离"
 linkTitle: "IAM 重载与取消"
 date: 2026-10-23
-lastmod: 2026-10-23
+lastmod: 2026-11-08
 author: "冯若航"
 summary: "解析慢速策略列表为何阻塞普通 S3 鉴权、取消信号如何在到达 KES 前丢失，以及贯通 Context 时为何必须将 etcd 读取超时与后续解密预算解耦。"
 tags: [Design, IAM, KMS, S3, Review]
@@ -69,6 +69,8 @@ IAM 子系统中的两把锁承担着不同的职责：
 
 后台定期刷新同样遵循这一合并与撤销规则。回归测试直接驱动具体的 `IAMObjectStore` 刷新路径，与策略更新、策略删除以及[持久化 IAM 撤销](/zh/blog/design/iam-revocations/)并发执行验证。
 
+**2026 年 11 月单条目按需加载扩展（[`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd)、[`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6)、[`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f)、[`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)）：** 单个用户、组和策略的按需加载（Lazy Load）同样在存储读取期间释放鉴权缓存锁以保持已缓存 S3 鉴权可用，按 key 通过 `singleflight` 合并并发未命中，并在读取存储前记录 `loadedAt`，防止在途慢速读取覆盖更新的缓存版本或删除墓碑。
+
 ## B：将取消信号贯通至 KMS 与 KES {#cancellation}
 
 受影响的两条解密调用链现在全程保留调用方的 `context.Context`：
@@ -108,6 +110,7 @@ SSE-S3 列表请求
 | **既有的 `etcd` 读取预算（默认 30 秒）** | 仅约束 `etcd` 的 `Get` RPC；读取返回后，后续解密切回调用方的父级请求 Context |
 | **既有的版本写入、撤销、分布式锁与清理预算** | 保留 `withIAMStorage` 原有包装函数与超时行为 |
 | **第一版候选误加的整批策略列表 30 秒上限** | 从 `ListPolicies` 与 `ListPolicyDocs` 两个入口彻底移除 |
+{.wide .expand}
 
 由于 `etcd` 读取 Context 是调用方请求 Context 的子级，若调用方本身设置了更短的超时，读取依然会立即响应取消；而在 `etcd` 读取完成后，解密操作继续受调用方剩余预算约束——当调用方允许更长等待时间时，超过 30 秒的慢查询依然能够成功返回。
 
@@ -123,6 +126,7 @@ SSE-S3 列表请求
 | **删除全部后端存储超时** | 削弱单记录读写、分布式锁等待和清理操作的既有超时保护 |
 | **并行解密策略或新增第二层密文缓存** | 引入额外的 KES 并发洪峰与缓存一致性复杂度，修复锁与取消问题无需依赖这些机制 |
 | **顺带修改 KES SDK 内部的重试退避逻辑** | 超出服务端缺陷范围，侵入第三方 SDK 行为边界 |
+{.wide .expand}
 
 相对于受测基线 [`a07d655dc`](https://github.com/pgsty/silo/commit/a07d655dc69cf04b130c2634d9fa5301078af546)，最终生产代码改动涉及 8 个文件（新增 83 行、删除 29 行）及 5 个测试文件，不涉及线协议、密文格式或权限模型变更。
 

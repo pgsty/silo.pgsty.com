@@ -25,6 +25,7 @@ SILO 同时定义了 `admin:EnableUser` 与 `admin:DisableUser` 两项策略权�
 | `enabled` | `admin:EnableUser` |
 | `disabled` | `admin:DisableUser` |
 | 非法或未知值 | `admin:EnableUser`，保留原有的“先鉴权、后校验”默认边界 |
+{.wide .expand}
 
 随后处理函数仅调用一次 `validateAdminReq`。四向 IAM 集成测试同时验证了两条正向放行路径与两条交叉拒绝路径。这一设计不再允许“仅含 `admin:EnableUser` 的策略也能禁用用户”的历史行为，使两项权限各自严格对应单向操作。
 
@@ -35,6 +36,7 @@ SILO 同时定义了 `admin:EnableUser` 与 `admin:DisableUser` 两项策略权�
 | `enabled` | `admin:EnableGroup` |
 | `disabled` | `admin:DisableGroup` |
 | 非法或未知值 | `admin:EnableGroup`，保留原有的“先鉴权、后校验”默认边界 |
+{.wide .expand}
 
 修复前，仅持有 `admin:EnableGroup` 的调用方可以禁用组，而仅持有 `admin:DisableGroup` 的调用方在执行禁用时却会收到 `AccessDenied`。组状态修复同样采用“单一选择函数、单次鉴权调用”的结构。
 
@@ -78,6 +80,7 @@ objectAPI, creds := validateAdminReq(ctx, w, r, policy.EnableUserAdminAction)
 | 仅 `admin:EnableUser` | 拒绝 | 允许 |
 | 两者都有 | 允许 | 允许 |
 | 两者都没有 | 拒绝 | 拒绝 |
+{.wide .expand}
 
 内置的 `consoleAdmin` 策略授予 `admin:*`，完整管理员仍可执行双向操作；受影响的仅是曾依赖旧缺陷的自定义受限策略。公开的 PBAC 参考文档同样为 [`admin:EnableUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-EnableUser) 与 [`admin:DisableUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-DisableUser) 记录了这一契约。
 
@@ -182,6 +185,7 @@ if objectAPI == nil {
 | `enabled` | `EnableUser` |
 | `disabled` | `DisableUser` |
 | 非法值 | 保持默认的 `EnableUser` |
+{.wide .expand}
 
 ### 四向 IAM 鉴权矩阵 {#iam-test}
 
@@ -307,6 +311,7 @@ func setGroupStatusAdminAction(status string) policy.AdminAction {
 | --- | --- | --- |
 | 带 DCO 签名的提交 | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1)（合并为 [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)） | `229fe2b3c` |
 | 发布版本 | [Server 20260903](/zh/blog/release/silo-20260903/) | [Server 20260903](/zh/blog/release/silo-20260903/) |
+{.wide .expand}
 
 ## 结论 {#conclusion}
 

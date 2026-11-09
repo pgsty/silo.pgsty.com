@@ -7,13 +7,15 @@ This repository contains the bilingual documentation for **Silo**, a community f
 ## Release state and publication
 
 Current releases: **mcli 20261109**, **SILO Server and KES 20261026**,
-**SILO Console v2.5.1**, and **silo-pkg v3.16.0**. All use Go 1.27.3.
+**SILO Console v2.6.0**, and **silo-pkg v3.16.0**. All use Go 1.27.3.
 The standalone mcli release adopts pkg v3.16.0; existing Server and Console
 artifacts retain their embedded client and package versions. KES is an
 optional external key service.
 
 | Release notes | English | 简体中文 |
 | --- | --- | --- |
+| Console 2.7.0 (unreleased draft) | [Release draft](content/blog/release/console-2.7.0.md) | [发布草稿](content/blog/release/console-2.7.0.zh.md) |
+| Console 2.6.0 | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |
 | mcli 20261109 | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
 | silo-pkg 3.16.0 | [Release notes](content/blog/release/pkg-3.16.0.md) | [发布说明](content/blog/release/pkg-3.16.0.zh.md) |
 | Server / mcli / KES 20261026 | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
@@ -22,6 +24,11 @@ optional external key service.
 
 See the [component matrix](content/compatibility/versions.md) for exact sources,
 upgrade order and compatibility boundaries.
+
+Console 2.7.0 documents the merged ten-language UI, Arabic RTL and container
+fixes. Its candidate notes are publicly visible and explicitly distinguish the
+unpublished GitHub draft from a product release. Published Console downloads
+continue to use 2.6.0. Server 20261026 still embeds Console 2.5.1.
 
 `data/releases.yaml` drives the homepage and download templates.
 `server.published: true` enables public asset links; `published_server` records

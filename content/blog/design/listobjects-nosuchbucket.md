@@ -167,6 +167,7 @@ The HTTP handler test sends signed S3 requests across all three public listing A
 | `ListObjects` | `GET /missing-bucket?prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
 | `ListObjectsV2` | `GET /missing-bucket?list-type=2&prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
 | `ListObjectVersions` | `GET /missing-bucket?versions&prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
+{.wide .expand}
 
 ### Local and CI Quality Gates {#local-gates}
 
@@ -184,6 +185,7 @@ On an existing bucket, a shortcut request previously executed a purely local bra
 | Repaired single-drive shortcut | ~7.8–8.1 μs, 45–47 allocs |
 | Repaired 32-drive shortcut | ~70–81 μs, 977 allocs |
 | Normal 32-drive listing | ~0.95 ms |
+{.wide .expand}
 
 In multi-node deployments, `GetBucketInfo` includes peer network round-trips and quorum reduction. That cost is why the check is strictly confined to the three storage-bypassing shortcuts. If a misconfigured client polls `max-keys=0` or `Prefix="/"` at high frequency, S3 audit traces and metrics will surface the pattern.
 

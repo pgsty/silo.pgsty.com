@@ -89,10 +89,8 @@ http://HOSTNAME:PORT/minio/v2/metrics/resource
 - <a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-bucket-metrics">存储桶指标（英文详细表）</a>
 - <a href="https://silo.pgsty.com/operations/monitoring/metrics-v2/#minio-available-resource-metrics">资源指标（英文详细表）</a>
 
-> > [!NOTE]
-> > **变更: RELEASE.2025-03-12T17-29-24Z**
-> >
-> > 出于性能原因，v2 指标最多支持 100 个存储桶。 如果需要覆盖更多存储桶的指标，请改用 [v3 指标](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics)。
+> [!NOTE] 变更: RELEASE.2025-03-12T17-29-24Z
+> 出于性能原因，v2 指标最多支持 100 个存储桶。 如果需要覆盖更多存储桶的指标，请改用 [v3 指标](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics)。
 
 <a id="minio-available-resource-metrics"></a>
 

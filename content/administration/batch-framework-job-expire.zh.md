@@ -3,7 +3,7 @@ title: "批量过期"
 url: "/zh/administration/batch-framework-job-expire/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-expire.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-batch-framework-expire-job"></a>
@@ -33,6 +33,14 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
 ### 过期规则仅检查最新对象 {#id6}
 
 批量过期作业只会使用每个对象的最新版本或“current”版本来匹配各条批量过期规则。
+
+### SILO 下一版本生命周期与已分层版本 {#silo-lifecycle}
+
+在下一版本 SILO 构建（`20261026` 之后的 `pgsty/silo` `main`）中：
+
+- 批量 `expire` 会在运行期间持续重新校验提交主体的凭据与权限（`461a7df`）。禁用、删除或使提交者过期，或移除所需的 `admin:StartBatchJob`、`s3:ListBucket`、`s3:ListBucketVersions` 或 `s3:DeleteObject` 权限都会停止该作业。
+- 临时 IAM 错误、不完整的存储桶列举，以及存储池再平衡或退役冲突会暂停并重试，而不会把中断扫描记录为已完成（`5ce52c5`）。
+- 当 `purge` 规则遇到远端分层未配置或不可达的已迁移对象版本时（`07b89b98f`），SILO 会拒绝删除该版本，而不是仅删除本地存根而留下远端层孤儿数据（计入 `keysRefused`，终态为 `complete-with-skips`）。详见 [SILO 批处理作业生命周期](/zh/administration/batch-framework/#silo-lifecycle)与[无分层下的版本语义](/zh/blog/design/tier-free-version-semantics/)。
 
 <a id="minio-batch-framework-expire-job-ref"></a>
 

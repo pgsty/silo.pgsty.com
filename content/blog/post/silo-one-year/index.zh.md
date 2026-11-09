@@ -49,7 +49,7 @@ url: "/zh/blog/post/silo-one-year/"
 
 在 `9e49d5e7a648..c3ad836aed0d` 区间内，`pgsty/silo` 共有 **604 个可达提交**（涵盖功能与安全修复、回归测试、构建打包与文档工程）。下文按实际交付的运行时行为逐一归纳。
 
-### 四组件协调维护栈
+### 四组件协调维护栈 {#the-four-component-coordinated-stack}
 
 上游归档后，单靠一个服务端仓库无法交付完整的对象存储系统——因为服务端内嵌了 Console 前端与 `mc` 管理模块，又直接依赖共享策略与加密库。SILO 将维护范围收敛为四个协同演进的核心仓库（加可选外部密钥服务 KES）：
 
@@ -63,7 +63,7 @@ url: "/zh/blog/post/silo-one-year/"
 | **KMS (`pgsty/kes`)** | 外部可选依赖 | **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**（[`e9b4f1acebc1`](https://github.com/pgsty/kes/commit/e9b4f1acebc11d61b42f876da8df48f548750cc9)） | Go 1.27.3，验证 OpenBao KV v2 与本地 Moto Secrets Manager 协议；更新 AWS/GCP 客户端 |
 {.wide .expand}
 
-### 刻意保持不变的底层基石
+### 刻意保持不变的底层基石 {#foundations-intentionally-preserved}
 
 为了确保现有 MinIO 部署能够原地替换为 `pgsty/silo` 而不触发数据重算或客户端改造，以下核心架构与协议层保持不变：
 
@@ -91,7 +91,7 @@ url: "/zh/blog/post/silo-one-year/"
 | **[CVE-2026-42600](/zh/blog/security/cve-2026-42600/)** | High | 节点间内部存储接口 `/rmpl`（`ReadMultiple`）缺少磁盘根目录路径边界约束，存在路径穿越读取风险 | 直接从内部存储 REST 路由与协议中移除未使用的 `ReadMultiple` 接口，并对全部保留的内部磁盘 RPC 实施严格的盘内路径校验（`cmd/storage-rest-server.go`） |
 {.wide .expand}
 
-### 18 项 `SN-2026-*` 安全边界加固
+### 18 项 `SN-2026-*` 安全边界加固 {#18-sn-2026-security-boundary}
 
 除了公开披露的 CVE，我们在对抗性代码审查与真实多节点验收中，还系统性地挖掘并修复了 **18 项安全边界缺陷**（完整索引见[安全公告总表](/zh/about/security-advisories/)）：
 
@@ -153,12 +153,12 @@ url: "/zh/blog/post/silo-one-year/"
 
 在纠删码存储引擎中，正常路径很容易写对，真正的坑全在**慢盘、部分写失败回滚、并发覆盖写与多存储池（Multi-Pool）扩缩容**的交叉地带。20261026 正式版收敛并交付了以下三组底层存储保护：
 
-### 1. 存储提交错误分类与覆盖回滚 RPC 透传
+### 1. 存储提交错误分类与覆盖回滚 RPC 透传 {#1-commit-error-classification-and}
 
 - **暂存 `xl.meta` 缺失归类为 `503 SlowDownWrite`**：在提交阶段，若个别慢盘因并发清理或时序竞争导致 `.minio.sys/tmp` 中的暂存 `xl.meta` 缺失，SILO 将其归类为 `errFileNotFound` 并向客户端返回 HTTP `503 SlowDownWrite` 触发安全重试，而不是像过去那样误报 `404 ObjectNotFound`（[错误分类设计记录](/zh/blog/design/stale-metadata-reuse/)）。
 - **覆盖写回滚选项透传与超时边界**：转发存储 RPC 的删除选项（包括覆盖写回滚所需的旧数据目录），同时保持既有的磁盘/RPC 超时、请求取消、对象锁、读仲裁与自愈规则。需要明确的是：**客户端收到请求超时并不代表底层磁盘或 RPC I/O 已经停止，也不代表写入一定未提交**——在部分磁盘故障、租约丢失或网络分区下，迟到提交或延迟 `UndoWrite` 仍可能发生（10 月维护候选中曾尝试的已接纳 I/O 排空等待与逐盘变更锁已在 [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038) 中撤回，详见[最终维护边界](/zh/blog/design/multi-pool-object-consistency/#maintenance-20261026)）。
 
-### 2. 多池并发锁、两阶段批量删除与跨池迁移保护
+### 2. 多池并发锁、两阶段批量删除与跨池迁移保护 {#2-multi-pool-locking-two}
 
 在多存储池（Multi-Pool）集群中：
 
@@ -166,7 +166,7 @@ url: "/zh/blog/post/silo-one-year/"
 - **多池批量删除保住最新副本（`#257`）**：过去多池 `DeleteObjects` 对所有存储池并行下发删除，一旦保存最新版本的池删除成功、而保存旧副本的池因磁盘故障删除失败，旧池里的过期数据就会“复活”成当前可见对象。SILO 将多池删除改为两阶段执行：先定位每个对象的权威版本所在池，优先清理非权威池中的旧副本，待旧副本清理确认后再删除权威池副本，并在部分失败时保护仍被引用的远端分层对象（[多池删除设计记录](/zh/blog/design/multi-pool-delete-safety/)）。
 - **Rebalance 与 Decommission 迁移保护**：修复了跨池再平衡（Rebalance）与池退役（Decommission）过程中丢失对象标签、覆盖目标池更新版本或漏处理删除标记的问题（[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)）。
 
-### 3. 盘间分歧下的 `LIST` 恢复（`#239`）
+### 3. 盘间分歧下的 `LIST` 恢复（`#239`） {#3-list-recovery-under-drive}
 
 在滚动重启叠加并发覆盖写时，部分磁盘排在前面的少数派新状态或未决条目可能导致 `ListObjects` 漏掉实际上可读的对象。SILO 在保持无锁快路径的前提下，对盘间出现分歧的候选条目执行按需确认，严格区分“对象已删除”与“磁盘读取故障”，并将终端错误正确传递到分页响应中（[LIST 恢复设计记录](/zh/blog/design/listing-recovery-lock-cost/)）。
 
@@ -176,7 +176,7 @@ url: "/zh/blog/post/silo-one-year/"
 
 对日常运维人员来说，SILO 与上游 MinIO 最直观的差异体现在管理控制台（Console）和命令行客户端（`mcli`）上。
 
-### SILO Console v2.5.1：从被阉割的浏览器回到完整管理台
+### SILO Console v2.5.1：从被阉割的浏览器回到完整管理台 {#silo-console-v2-5-1}
 
 2025 年中，上游将社区版 MinIO 内嵌的 Console 裁剪到了 `v1.7.7`，砍掉了所有集群管理、IAM、策略、生命周期、复制、诊断与监控界面，只留下一层简陋的对象浏览器；随后更是直接删除了 `github.com/minio/console` 仓库。
 
@@ -194,7 +194,7 @@ SILO 在社区开发者 Georg Mangold（`@gmangold`）恢复的历史分支基�
 
 Console 2.5.1 进一步修复切换组状态时丢失成员、OIDC 组权限、TLS 代理会话 Cookie、凭据导出及键盘焦点问题，完整变化见 [Console 2.5 系列发布说明](/zh/blog/release/console-2.5.1/)。
 
-### mcli 20261026：说真话的退出码与只读校验和核验
+### mcli 20261026：说真话的退出码与只读校验和核验 {#mcli-20261026-honest-exit-codes}
 
 在客户端侧，`pgsty/mc` 以 `mcli` 作为二进制与包名称发布（同时保留 `MC_*` 环境变量与配置格式兼容），重点解决了自动化脚本最头疼的“表面成功、实际失败”问题：
 
@@ -243,7 +243,7 @@ Console 2.5.1 进一步修复切换组状态时丢失成员、OIDC 组权限、T
 4. **移除实验性的访问频率池间分层（`ilm access_*`）**：
    - 该实验特性从未达到生产可靠性标准，已在 Server 20260916 中彻底清理（详见[访问频率分层移除说明](/zh/compatibility/access-tiering-removal/)）。
 
-### 当前仍需注意的工程与升级边界
+### 当前仍需注意的工程与升级边界 {#remaining-operational-and-upgrade-boundaries}
 
 最后，把当前版本的客观边界再次汇总如下，供评估与升级时参考：
 

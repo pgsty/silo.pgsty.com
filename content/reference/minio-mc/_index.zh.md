@@ -18,7 +18,7 @@ Pigsty 维护的客户端在独立归档与 Linux 软件包中以 **`mcli`** 发
 
 Silo 项目无法保证它与每一种其他 S3 兼容服务的行为，因为各家实现存在差异。在将其他服务视为兼容对象前，请先测试工作负载依赖的操作。
 
-当前版本为 [mcli 20261026](/zh/blog/release/silo-20261026/#mcli)，使用 Go 1.27.3、pkg v3.15.2 与上游 SDK `v7.4.2-0.20261025165926-320af050c445`。完整行为变化见[兼容性注记](/zh/compatibility/mcli/#current-release)，Server/Console 版本边界见[组件矩阵](/zh/compatibility/versions/)。
+当前版本为 [mcli 20261109](/zh/blog/release/mcli-20261109/)，使用 Go 1.27.3、`silo-pkg` [v3.16.0](/zh/blog/release/pkg-3.16.0/) 与上游 SDK `v7.4.2-0.20261025165926-320af050c445`。完整行为变化见[兼容性注记](/zh/compatibility/mcli/#current-release)，Server/Console 版本边界见[组件矩阵](/zh/compatibility/versions/)。
 
 [`mc`](#command-mc) 的语法如下：
 
@@ -55,7 +55,7 @@ mc [GLOBALFLAGS] COMMAND --help
 从源码构建维护分支：
 
 ```shell
-git clone --branch RELEASE.2026-10-26T00-00-00Z --depth 1 https://github.com/pgsty/mc.git
+git clone --branch RELEASE.2026-11-09T00-00-00Z --depth 1 https://github.com/pgsty/mc.git
 cd mc
 make build
 ./mc --version
@@ -160,6 +160,10 @@ mc admin info silo
     <tr>
       <td><p><a href="/zh/reference/minio-mc/mc-checksum-verify/#command-mc.checksum.verify"><code>mc checksum verify</code></a></p></td>
       <td><p>Silo 客户端扩展会独立重算并比对存储的 S3 full-object 校验和。它是只读命令，支持单对象、递归前缀、版本、候选清单、dry run、JSON Lines 报告与显式失败策略。</p></td>
+    </tr>
+    <tr>
+      <td><p><a href="/zh/reference/minio-mc/mc-cors/#command-mc.cors"><code>mc cors get</code><br /><code>mc cors set</code><br /><code>mc cors remove</code></a></p></td>
+      <td><p>读取、替换或删除存储桶的 CORS 配置。使用 <code>mcli cors get ALIAS/BUCKET</code>、<code>mcli cors set ALIAS/BUCKET cors.xml</code> 或 <code>mcli cors remove ALIAS/BUCKET</code>。配置文件为 XML 格式。桶级 CORS 与服务端全局回退行为参见 <a href="/zh/reference/s3-api-compatibility/">S3 API 兼容性参考</a>。</p></td>
     </tr>
     <tr>
       <td><p><a href="/zh/reference/minio-mc/mc-cp/#command-mc.cp"><code>mc cp</code></a></p></td>
@@ -343,7 +347,7 @@ MinIO 会使用指定的 SSE 模式自动加密对象。</p></td>
 2. `USERPROFILE\.mc\config.json`
 3. `HOMEDRIVE+HOMEPATH\.mc\config.json`
 
-可使用 `--config-dir`
+可使用 [`--config-dir`](#cmdoption-mc-config-dir) 参数或 [`MC_CONFIG_DIR`](/zh/reference/minio-mc/minio-client-settings/#envvar.MC_CONFIG_DIR) 环境变量指定备用配置目录。在 `pgsty/mc` 容器镜像（`20261109+`）中，`/.mc` 目录预创建为 `1777` 权限，支持任意非 root UID 初始化配置。
 
 <a id="id9" data-td-print-local></a>
 

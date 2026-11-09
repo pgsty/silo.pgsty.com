@@ -27,6 +27,7 @@ Although this omission did not corrupt stored object data, it prevented callers 
 | Full-object checksum | `ChecksumType=FULL_OBJECT` with the algorithm digest element |
 | Composite multipart checksum | `ChecksumType=COMPOSITE` with the algorithm digest element |
 | No additional checksum | No `ChecksumType` element and no synthesized checksum |
+{.wide .expand}
 
 The [S3 `CompleteMultipartUpload` specification](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html) defines `FULL_OBJECT` and `COMPOSITE` as the two checksum types. The object `ETag` remains a separate response field and is not a substitute for additional S3 checksum metadata.
 

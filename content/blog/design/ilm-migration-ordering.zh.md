@@ -2,7 +2,7 @@
 title: "ILM 过期与存储池迁移顺序"
 linkTitle: "ILM 迁移顺序"
 date: 2026-10-27
-lastmod: 2026-11-06
+lastmod: 2026-11-08
 author: "PGSTY SILO 维护团队"
 summary: >
   解释生命周期过期与存储池迁移为何对版本桶当前对象产生不同判断、#266 修复了什么，以及 #276 如何补齐 tier 和生命周期安全边界。
@@ -83,25 +83,25 @@ expiry queue 越慢，风险越明显。当前版本可能被跳过，而且目�
 
 #266 中加入的 direct purge 本质上是本地存储清理。单独看，它不会自动执行复制决策、写入 `VersionPurgePending`，也不会删除远端 tier 对象。#276 保留 #266 的 action 区分，同时让迁移遵守普通 ILM expiry 已经拥有的合同。
 
-### 复制不是生命周期删除的义务
+### 复制不是生命周期删除的义务 {#replication-contract}
 
 生命周期删除不复制：删除复制规则作用于通过 S3 API 发出的删除，每个目标端各自执行自己的生命周期配置。#276 合入时还会为 ILM 选中的删除排队复制；这一部分在下一个版本发布前移除（见上文更新）。配置了复制时，迁移期间的生命周期删除现在不会为目标端排队任何任务，源端副本也不必等待目标端即可退役。
 
 #276 仍让 ILM 选中的版本删除在源端清理前先走普通 expiry 路径，是为了下面两项合同：transitioned version 保留远端 tier 清理及其重试记录，完成栅栏能看到 expiry 删除了什么。这是最小的安全边界，因为它复用了已有 expiry 路径，只在迁移与 expiry 之间补了一次必要的交接，不需要把这些规则复制到 `removeMovedVersions` 中，也不会让延迟的 expiry task 因为源端已经消失而得到 `VersionNotFound`。
 
-### transitioned version 必须保留清理义务
+### transitioned version 必须保留清理义务 {#tiered-cleanup}
 
-transitioned version 同时需要清理 hot-tier 元数据和远端 tier 对象。如果远端删除失败，hot-tier 中必须留下持久的 free version，让后续 scanner 可以重试。#276 先处理 hot-tier 状态，并在远端删除失败时保留可重试的 free-version 记录；decommission 只有在普通版本和 free version 都清理干净后才报告完成。
+transitioned version 同时需要清理 hot-tier 元数据和远端 tier 对象。如果远端删除失败，hot-tier 中必须留下持久的 free version，让后续 scanner 可以重试。#276 先处理 hot-tier 状态，并在远端删除失败时保留可重试的 free-version 记录；decommission 只有在普通版本和 free version 都清理干净后才报告完成。当 transitioned version 带有已过期的恢复副本、且本地恢复副本删除被拒绝时（例如磁盘暂时不可用或恢复副本删除报错），decommission 会将该版本搬迁到目的池（[5cb91e7d7](https://github.com/pgsty/silo/commit/5cb91e7d7)），而不是把它留在源池或在源池退役时丢失。
 
 这保持了 #264 的双视图模型：free version 继续是内部清理记录，普通生命周期和迁移视图仍然排除它。#266 中 rebalance 仍然跳过 transitioned version；让 rebalance 搬迁它们应作为单独的范围决策处理。
 
-### 生命周期配置变化采用 fail-closed 语义
+### 生命周期配置变化采用 fail-closed 语义 {#lifecycle-fence}
 
 迁移遍历开始时记录生命周期配置更新时间。源端清理执行不可逆决定前会重新比较这个值；如果配置发生变化，迁移停止并保留源端数据，等待按新规则重试。
 
 这是最小的安全语义：它不会静默执行过期的删除判断，代价只是操作员在迁移期间修改生命周期配置时多执行一次迁移。
 
-### 整对象过期需要可观察的完成栅栏
+### 整对象过期需要可观察的完成栅栏 {#whole-object-fence}
 
 `DeleteAllVersionsAction` 与 `DelMarkerDeleteAllVersionsAction` 必须在旧池退役前删除整个历史。#276 在源端清理前执行整对象 expiry，并确认普通版本与 free version 都已经消失，再让 decommission 报告完成。这样不会出现旧池仍独占当前版本、而旧版本已经搬到新池的状态。
 
@@ -123,19 +123,19 @@ transitioned version 同时需要清理 hot-tier 元数据和远端 tier 对象�
 
 ## 备选方案 {#options}
 
-### 只要 lifecycle 到期就阻塞迁移
+### 只要 lifecycle 到期就阻塞迁移 {#option-block}
 
 安全但不可用。scanner 的正常延迟会变成迁移故障，规则变更后还需要正确重扫。
 
-### 迁移前同步执行 lifecycle
+### 迁移前同步执行 lifecycle {#option-sync}
 
 可以降低竞争，但不能定义 expiry queue、tier 或目的地不可用时怎么办，还会增加迁移延迟，并且仍需让迁移 walker 正确解释生成的元数据。
 
-### 跳过所有 ILM action，再删除源端整个前缀
+### 跳过所有 ILM action，再删除源端整个前缀 {#option-broad-prefix}
 
 接近旧的宽泛清理逻辑，但可能在目的池尚未创建删除标记前就删除版本桶当前对象，也绕过 SILO 特意加入的逐版本并发保护。
 
-### 区分 action 语义，只清理安全的内容
+### 区分 action 语义，只清理安全的内容 {#option-action-semantics}
 
 这是最小的必要设计：
 
@@ -146,7 +146,7 @@ transitioned version 同时需要清理 hot-tier 元数据和远端 tier 对象�
 
 PR #266 实现了这个设计。
 
-### 当删除带有外部副作用时先搬迁版本
+### 当删除带有外部副作用时先搬迁版本 {#option-move-first}
 
 tier 清理让直接源端 purge 不再只是本地元数据操作。先搬迁版本，再让普通 ILM worker 执行删除，可以复用已有的 tier 合同。它可能会短时间保留一份额外副本，但不需要在迁移清理中重新实现这项合同。
 

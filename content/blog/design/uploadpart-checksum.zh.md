@@ -72,6 +72,7 @@ AWS S3 接口文档对三类相关操作的输入与输出有明确界定：
 | CRC64NVME | 支持 | 不支持 |
 | CRC32 / CRC32C | 支持 | 支持 |
 | SHA1 / SHA256 | 不支持 | 支持 |
+{.wide .expand}
 
 `FULL_OBJECT` 仅支持可线性合并的 CRC 算法；而 SHA1 与 SHA256 虽不支持线性合并，仍需在每个分片中记录正确的摘要（digest），才能在 `COMPOSITE` 模式下完成合并校验。
 

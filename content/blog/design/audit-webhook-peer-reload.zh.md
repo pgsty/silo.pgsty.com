@@ -2,7 +2,7 @@
 title: "Peer 重载后的审计 Webhook"
 linkTitle: "审计 Webhook 的 Peer 重载"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO 维护团队"
 summary: >
   解释运行时修改 audit_webhook 后，为什么除了处理该请求的服务器以外，其他每台服务器上的 Webhook 目标一创建，worker 就已经退出；哪些子系统有同样的缺陷；以及为什么用服务器进程上下文构建日志目标，是最小而完整的修复。
@@ -24,6 +24,7 @@ url: "/zh/blog/design/audit-webhook-peer-reload/"
 
 修复分三部分：
 
+{.steps}
 1. **用进程上下文构建目标。** `applyDynamicConfigForSubSys` 在其三处日志目标调用点使用进程上下文（`GlobalContext`）构建日志目标。启动、处理请求的服务器和 peer 节点都通过这一个函数应用配置。日志输出仍然使用重载上下文。
 2. **先打开队列存储，再启动磁盘队列 worker。** HTTP 磁盘队列 worker 只在队列存储成功打开之后才启动。现在的代码先启动 worker；如果存储打不开，worker 会在没有存储的情况下继续运行，并在收到第一条记录时让服务器崩溃。这在启动时和处理请求的服务器上已经会发生。没有这一部分，第一部分会把这个崩溃扩散到每一台服务器。
 3. **排队记录跟随替代目标。** 有了第 2 部分，队列无法打开的目标没有 worker，它的记录在内存中等待。之后的重载替换这个目标时，`Cancel` 现在会在共享交接缓冲区容量允许的范围内，把这些记录交给替代目标，而不是丢弃。
@@ -39,9 +40,11 @@ url: "/zh/blog/design/audit-webhook-peer-reload/"
 | 可达性 | 一条常规管理命令即可触发。修改其中一个目标会重建该子系统中所有启用的目标，因此在其他服务器上它们会全部停止，而不只是被修改的那一个。 |
 | 发布紧急度 | 阻塞下一个版本。审计丢失不会报告给管理端或 S3 客户端，并一直持续，直到受影响的服务器重启，或自己处理之后的一次修改；而改动很小，不触及 S3 数据路径。 |
 | 剩余工作量 | 代码、审查和一次集群验收都已完成，还需要远程 CI。 |
+{.wide .expand}
 
 ## 触发条件 {#trigger}
 
+{.steps}
 1. `mc admin config set ALIAS audit_webhook:NAME enable=on endpoint=…` 到达服务器 A。A 校验并保存配置，通过 `applyDynamic` 应用修改，后者以 `GlobalContext` 调用 `applyDynamicConfigForSubSys`。随后 A 通知每个 peer 重载该子系统（`SignalConfigReload`）。
 2. 在每个 peer 上，`SignalServiceHandler` 处理 `serviceReloadDynamic`：读取已保存的配置，在 `context.WithTimeout(context.Background(), 30*time.Second)` 下调用 `applyDynamicConfigForSubSys`，并延迟执行 `cancel`。
 3. `updateHTTPTargets` 为该子系统中每个启用的 Webhook 创建新目标，用这个上下文初始化每一个，然后替换目标列表，并取消旧目标。
@@ -55,6 +58,7 @@ url: "/zh/blog/design/audit-webhook-peer-reload/"
 | 0（处理该请求） | 0 | 4 | 2,097,356 |
 | 1 | 100000 | 674,917 | 774,917 |
 | 2 | 100000 | 712,215 | 812,215 |
+{.wide .expand}
 
 在这份报告中，服务器 1 和 2 上的 `total_messages` 减去 `failed_messages` 正好等于队列长度，这与这两台服务器没有发送出任何记录的情况一致。
 
@@ -86,6 +90,7 @@ url: "/zh/blog/design/audit-webhook-peer-reload/"
 | `scanner` | 原子写入、`scannerSleeper.Update` | 不受影响 |
 | `subnet` | `Update`、`ApplyEnv` | 本身不受影响；修改代理时可能连带重新应用 `logger_webhook` |
 | `compression`、`heal`、`batch`、`storage_class`、`drive`、`browser`、`callhome` | 在锁内替换一个配置值 | 不受影响 |
+{.wide .expand}
 
 在 main 上，通知目标和 Lambda 目标都不是动态子系统。
 
@@ -93,7 +98,7 @@ issue 中有两处描述比实际范围宽。peer 处理函数中针对整份配
 
 ## 行为的来源 {#history}
 
-### 溯源
+### 溯源 {#provenance}
 
 **由上游 MinIO 引入，不是 SILO 引入的。** 每一个成因都是上游提交，并且都是 SILO 分叉点（[`27742d469`](https://github.com/pgsty/silo/commit/27742d469)，2025-12-03）的祖先；SILO 没有任何提交改动过相关函数。同样的代码存在于分叉前最后一个上游发布 `RELEASE.2025-10-15T17-29-55Z`、已归档的上游 `master`，以及从 `RELEASE.2025-12-03T12-00-00Z` 到 `RELEASE.2026-10-26T00-00-00Z` 的每一个 SILO 发布中。我们逐个 tag 比对了代码：worker 先于存储启动的顺序、绑定上下文的重放、30 秒上下文，在所有 tag 上都相同。
 
@@ -107,6 +112,7 @@ issue 中有两处描述比实际范围宽。peer 处理函数中针对整份配
 | `Init` 开始接收上下文。HTTP 目标和 Kafka 的磁盘重放（`initQueueStore`）随它停止，HTTP worker 用它发送。 | [`57acacd5a`](https://github.com/pgsty/silo/commit/57acacd5a)（[#17121](https://github.com/minio/minio/pull/17121)） | 2023-05-09 | `RELEASE.2023-05-18T00-05-36Z` |
 | HTTP 队列 worker 在 `Init` 上下文结束时返回。 | [`1fc4203c1`](https://github.com/pgsty/silo/commit/1fc4203c1)（[#19275](https://github.com/minio/minio/pull/19275)） | 2024-03-25 | `RELEASE.2024-03-26T22-10-45Z` |
 | 磁盘队列 worker 在队列存储打开之前启动。 | [`ba54b39c0`](https://github.com/pgsty/silo/commit/ba54b39c0)（[#19854](https://github.com/minio/minio/pull/19854)） | 2024-06-01 | `RELEASE.2024-06-04T19-20-08Z` |
+{.wide .expand}
 
 每一步改变了什么：
 
@@ -129,29 +135,30 @@ issue 中有两处描述比实际范围宽。peer 处理函数中针对整份配
 
 ## 方案比较 {#options}
 
-### 方案 A：在日志调用点使用进程上下文
+### 方案 A：在日志调用点使用进程上下文 {#option-a}
 
 这是选定的方案。`applyDynamicConfigForSubSys` 向三处日志目标更新传入 `GlobalContext`，日志输出继续使用调用方的上下文。所有入口都通过这个函数应用配置，所以一处修改就覆盖了启动、处理请求的服务器和 peer。生命周期的决定放在创建长期对象的地方，与调用方传入什么无关。PR #249 对通知目标采用的也是这种做法。
 
-### 方案 B：在日志包内部解除绑定
+### 方案 B：在日志包内部解除绑定 {#option-b}
 
 `updateHTTPTargets` 或 `Init` 可以用 `context.WithoutCancel` 包装上下文，从而保护所有调用方。但这也会让目标脱离 `GlobalContext`：关闭服务器时取消 `GlobalContext`，目标将不再随之停止。这改变了启动时构建的目标的关闭行为，而这与本缺陷无关。它还会留下一个取消信号被悄悄忽略的 `ctx` 参数。如果要由日志包掌管生命周期，应当去掉这个参数（方案 D）。
 
-### 方案 C：在 peer 处理函数中使用进程上下文
+### 方案 C：在 peer 处理函数中使用进程上下文 {#option-c}
 
 `serviceReloadDynamic` 可以传入 `GlobalContext`，只为真正有界的工作保留 30 秒上限。目前并没有这样的工作（见[根因](#root-cause)），所以这样同样能修复缺陷。但它修的是调用方，而不是创建长期对象的那个函数。任何其他使用短上下文的调用方，例如测试或将来的处理函数，都会再次掉进同一个陷阱。这是可接受的备选，但不是首选。
 
-### 方案 D：由目标自己掌管生命周期
+### 方案 D：由目标自己掌管生命周期 {#option-d}
 
 把 `Init` 拆成两步：在调用方上下文中完成的初始化，以及一个生命周期归目标所有、只随 `Cancel` 结束的启动。这是长期正确的形态，但它会修改 `logger.Target` 接口和所有实现（HTTP、Kafka、console、测试 logger）。修复本缺陷并不需要它，因此留作后续候选。
 
-### 决策背后的问题
+### 决策背后的问题 {#questions}
 
 - **是否有某个 `Init` 依赖这 30 秒上限？** 没有。HTTP 的 `Init` 不做网络 I/O，Kafka 连接 broker 时不使用这个上下文。2024 年 3 月重构之前，HTTP 初始化会用这个上下文探测端点；现在已经不这样做了。
 - **反复重载会不会泄漏 goroutine？** 不会因为这次修改而泄漏。每次重载时，`updateHTTPTargets` 让每个旧目标指向它的替代者（`AssignMigrateTarget`），调整共享的遗留记录缓冲区大小（`CreateOrAdjustGlobalBuffer`），启动新目标，然后在后台对旧目标调用 `Cancel`。`Cancel` 把目标标记为已关闭，此后的 `Send` 会转给替代者（如果有的话）；它取消目标自己的上下文，请求 worker 和磁盘重放停止；等待 worker 把遗留记录交给共享缓冲区；把通道中仍有的记录交出去（修复的第 3 部分）；最后关闭通道。旧目标的关闭一直由 `Cancel` 掌管，而不是由调用方上下文掌管，所以改用 `GlobalContext` 不会让每次重载多出 goroutine。审查中的一个探测在两种队列模式下，对空闲目标各连续执行 100 次重载再禁用，goroutine 数量回到初始值；这不涵盖有积压或磁盘写入失败时的关闭。在 main 上，peer 上旧目标的 worker 早已退出，它退出后堆积的记录会在通道关闭时被丢弃，这就是通过同一台服务器再执行一次 `config set` 也救不回 peer 的原因。与本修复无关、早已存在的例外，见[剩余限制](#limits)。
 
 ## 修复方案 {#fix}
 
+{.steps}
 1. **用进程上下文构建日志目标。** 在 `applyDynamicConfigForSubSys` 中，向 `logger.UpdateHTTPWebhooks`、`logger.UpdateAuditWebhooks` 和 `logger.UpdateAuditKafkaTargets` 传入 `GlobalContext`，错误报告继续使用调用方的上下文。此前的候选修复覆盖了两处 HTTP 调用点；Kafka 调用点在配置 `queue_dir` 时有同样的缺陷，补上它之后修复才完整。
 2. **先打开队列存储，再启动磁盘队列 worker。** 现在的 `initDiskStore` 先启动主 worker，再打开队列存储。如果打开失败，例如 `queue_dir` 无法创建或不是目录，`Init` 会返回错误，但目标仍被注册，它的 worker 也仍在没有存储的情况下运行。收到第一条记录时，worker 对不存在的存储调用 `PutMultiple`，服务器随即 panic。目前这会发生在启动时和处理请求的服务器上，因为那里的上下文一直存活。在 peer 上，worker 通常先随重载上下文退出，崩溃因此大多被掩盖；但如果 worker 在重载上下文结束前取到了一条记录，仍然会崩溃。因此，单独应用第 1 部分，会把静默丢弃变成每一台服务器上的崩溃。修复先打开存储：失败时取消派生的上下文并返回，不启动 worker；成功时先设置存储，再启动 worker 和重放。这同时消除了一个数据竞争：当先前的目标在共享缓冲区中留有记录时，worker 可能在 `Init` 设置存储字段的同时读取它。失败的 `Init` 也不再遗留 worker。
 3. **把排队记录交给替代目标。** 有了第 2 部分，队列存储打开失败的目标没有 worker。发给它的记录在其通道中等待，最多 `queue_size` 条。没有任何机制会重试初始化：运维人员修复 `queue_dir` 后再次应用配置，这次重载会构建一个替代目标。只有 worker 会把记录交给替代目标，因此 `Cancel` 原本会关闭通道并丢弃这些记录。现在 `Cancel` 会把通道中仍有的记录移入替代目标读取的共享缓冲区：在等待 worker 的 `wg.Wait()` 调用返回之后、关闭通道之前进行，期间持有通道锁和缓冲区映射锁，发送时从不等待空位。如果共享缓冲区已满，其余记录被丢弃，与 worker 自身的交接一致。它也覆盖了在 worker 最后一次排空之后才到达的记录。单个失败目标被一个正常目标替换时，它的记录会全部交出；多个失败目标在短时间内相继被替换时，缓冲区仍可能装不下（见[剩余限制](#limits)）。
@@ -228,7 +235,7 @@ issue 中有两处描述比实际范围宽。peer 处理函数中针对整份配
 
 合并前仍需完成：远程 CI。
 
-**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、Heal 演练、#285 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、Heal 演练、#285、`delete-all` 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集（Ubuntu CI 竞态工作流现已包含 `TestDynamicWebhookOutlivesConfigContext`）和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
 
 本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
 
@@ -239,6 +246,7 @@ issue 中有两处描述比实际范围宽。peer 处理函数中针对整份配
 | 对抗性审查第 1 轮 | 带小问题通过；没有发现改动引入的生产缺陷。审查报告了六个早已存在的缺陷。修复了其中一个：从未启动的目标中排队的记录，会在重载替换该目标时被丢弃（第 3 部分；测试也改为通过第二次应用配置来恢复）。其余五个列在[剩余限制](#limits)中。测试子进程现在去掉了日志与审计环境变量。本文按审查意见做了更正：重启不是唯一的恢复方式；丢弃在日志和指标中可见；peer 上的崩溃大多被掩盖但并非总是如此；关于关闭和送达的说法加了限定。 |
 | 对抗性审查第 2 轮 | 带小问题通过，覆盖 `Cancel` 中的交接和改写后的测试。交接把单个被替换目标的每条记录恰好送达一次，在缓冲区并发调整大小时保住了记录，并经受住了重复和并发的 `Cancel` 调用；端点可用和宕机两种情况下的普通重载没有出现新的丢失或重复。记录了一处剩余丢失：失败目标在短时间内相继被替换时，共享缓冲区可能耗尽（见剩余限制）。测试现在只清理最后一个目标。另外做了进一步的措辞更正。 |
 | 对抗性审查第 3 轮 | 带小问题通过。确认了测试清理和更正后的措辞，另有两处表述改得更准确。 |
+{.wide .expand}
 
 ## 参考 {#references}
 

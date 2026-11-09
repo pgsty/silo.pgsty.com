@@ -135,7 +135,7 @@ This setting does not have a configuration setting option.
 
 ### Configuration Directory {#configuration-directory}
 
-Specify the path to the configuration folder the MinIO Client should use.
+Specify the path to the configuration folder the MinIO Client should use. In the `pgsty/mc` container image (`20261109+`), `/.mc` is pre-created with `1777` permissions so arbitrary non-root UIDs can initialize their configuration.
 
 {{< tabs group="environment-variable-configuration-setting" default="environment-variable" >}}
 {{< tab label="Environment Variable" value="environment-variable" >}}
@@ -145,6 +145,27 @@ Specify the path to the configuration folder the MinIO Client should use.
 {{< /tab >}}
 {{< tab label="Configuration Setting" value="configuration-setting" >}}
 This setting does not have a configuration setting option.
+{{< /tab >}}
+{{< /tabs >}}
+
+### S3 Region Override {#s3-region}
+
+Set a fixed S3 signing region through the environment to override the alias `region` in `config.json`. A fixed region bypasses SDK bucket-region discovery; see the [alias-region design](/blog/design/alias-region/).
+
+Precedence order: `MC_REGION` > `AWS_REGION` > alias `region` in `config.json` > SDK automatic region discovery. S3 client cache entries include the effective region so changing `MC_REGION` or `AWS_REGION` between operations never reuses a cached client signed for a different region.
+
+{{< tabs group="environment-variable-configuration-setting" default="environment-variable" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
+##### `MC_REGION` / `AWS_REGION` {#envvar.MC_REGION}
+
+*envvar*
+
+```shell
+export MC_REGION=ap-southeast-1
+```
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
+Set `"region": "<region-name>"` on the alias entry in `~/.mc/config.json`.
 {{< /tab >}}
 {{< /tabs >}}
 

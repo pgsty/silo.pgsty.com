@@ -8,13 +8,16 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
-> **Latest published release:** [Console v2.6.0](/blog/release/console-2.6.0/) adds usage scans and bucket-administration repairs. The [2.7.0 candidate](/blog/release/console-2.7.0/) adds ten languages, Arabic RTL, container fixes, silo-pkg v3.16.0, official mcli 20261109 and updated Swagger documentation. See the [component matrix](/compatibility/versions/).
-
-> Upgrading standalone Console does not replace Server's embedded Console. Built-in policy Reset and live bucket inventory reads require the Server 20261026 release (absent from published Server 20261018).
+> [!NOTE]
+> **Latest published release:** [Console v2.6.0](/blog/release/console-2.6.0/) (2026-11-05, UTC+8) adds usage scans, retained-version totals, and bucket-administration fixes. The [Console 2.7.0 candidate](/blog/release/console-2.7.0/) adds ten UI languages, Arabic RTL, container CA/temporary-directory fixes, `silo-pkg v3.16.0`, official `mcli 20261109`, and updated Swagger documentation. Upgrading standalone Console does not replace Server's embedded Console; built-in policy Reset and live bucket inventory reads require the Server 20261026 release (absent from published Server 20261018). See the [component matrix](/compatibility/versions/).
 
 SILO Console is Silo's build of the MinIO Console. This page records where the two are interchangeable and where they differ. Start with the [three-level overview](/compatibility/), then use the details below to check UI and automation behavior.
 
-[`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Earlier release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), and [v2.2.1].
+[`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Earlier release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), [v2.2.1], [v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0), [v2.4.0](/blog/release/console-2.4.0/), [v2.4.1](/blog/release/console-2.4.1/), and [v2.4.2](/blog/release/console-2.4.2/).
+
+## 2.6.0 usage scans and bucket administration {#release-260}
+
+[Console 2.6.0](/blog/release/console-2.6.0/) adds cancellable folder and bucket usage scans with separate current and retained-version totals, an optional PostgreSQL-backed durable usage worker, strict integer range validation for retention, quota, and replication bandwidth inputs, Object Lock versioning-exclusion guards during bucket creation, inert object-detail/version controls during route transitions ([#81](https://github.com/pgsty/silo-console/pull/81)), and a three-minute keep-alive default for embedded Console servers.
 
 ## 2.5.1 administration repairs {#release-251}
 
@@ -46,9 +49,14 @@ Dashboard widgets query the **MinIO Metrics V3** catalog, the metric set current
 
 The embedded frontend went from roughly 10 MB to under 3 MB, rebuilt reproducibly byte for byte and enforced by a release gate. There is no telemetry of any kind, and no external network dependency in the page itself.
 
-### 4. Bilingual interface {#i18n}
+### 4. Interface languages {#i18n}
 
-The interface, help content, and documentation links are available in English and Chinese behind a per-page toggle, with no added runtime dependencies.
+Released Console 2.6.0 offers English and Chinese. The 2.7.0 source line adds
+French, German, Russian, Spanish, Brazilian Portuguese, Japanese, Arabic and
+Turkish through a shared menu, with bundled dictionaries and Arabic RTL.
+English remains the default and fallback. Documentation stays bilingual;
+server messages and log contents remain intact. See the
+[language design](/blog/design/console-languages/) for scope and maintenance tiers.
 
 ### 5. Object listings operate one page at a time {#pagination}
 
@@ -116,4 +124,3 @@ setting. See the [v2.4.1 release notes](/blog/release/console-2.4.1/).
 
 [v2.1.1]: https://github.com/pgsty/silo-console/releases/tag/v2.1.1
 [v2.2.1]: https://github.com/pgsty/silo-console/releases/tag/v2.2.1
-[v2.3.0]: https://github.com/pgsty/silo-console/releases/tag/v2.3.0

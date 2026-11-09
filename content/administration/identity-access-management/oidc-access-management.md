@@ -3,7 +3,7 @@ title: "OpenID Connect Access Management"
 url: "/administration/identity-access-management/oidc-access-management/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management/oidc-access-management.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="openid-connect-access-management"></a>
@@ -68,7 +68,12 @@ The login flow for an application using <abbr title="OpenID Connect">OIDC</abbr>
 3. MinIO returns temporary credentials in the STS API response in the form of an access key, secret key, and session token. The credentials have permissions matching those policies specified in the JWT claim.
 4. Applications use the temporary credentials returned by the STS endpoint to perform authenticated S3 operations on MinIO.
 
-MinIO provides an example Go application [web-identity.go](https://github.com/minio/minio/blob/master/docs/sts/web-identity.go) that handles the full login flow.
+SILO provides an example Go application [web-identity.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-26T00-00-00Z/docs/sts/web-identity.go) that handles the full login flow.
+
+> [!NOTE]
+> **OIDC JWK Key Size and Group Claim Parsing**
+>
+> Starting with `silo-pkg v3.14.2` and [Server 20261018](/blog/release/silo-20261018/), OIDC JWKS validation rejects RSA public keys larger than 4096 bits and enforces bounded JWK key parameters. Starting with [Console v2.5.1](/blog/release/silo-20261026/), embedded Console OIDC login also parses string-array group claims alongside comma-separated strings. See [TLS and OIDC Discovery](/blog/design/go127-tls-oidc-discovery/).
 
 #### Identifying the JWT Claim Value {#identifying-the-jwt-claim-value}
 

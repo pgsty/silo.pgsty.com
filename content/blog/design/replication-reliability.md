@@ -98,6 +98,7 @@ The defect was that `TotalDroppedCount` and `TotalDroppedBytes` incremented inte
 | Prometheus v2 | `minio_node_replication_mrf_dropped_bytes_total` |
 | Prometheus v3 | `minio_replication_mrf_dropped_operations_total` |
 | Prometheus v3 | `minio_replication_mrf_dropped_bytes_total` |
+{.wide .expand}
 
 These counters accumulate since Server startup and reset on restart. **Operations count dropped queue entries**, so repeated failures on the same object increment the counter multiple times; bytes sum known object sizes, with delete entries contributing zero bytes. Operators should monitor the rate of increase alongside replication backlog and target health.
 
@@ -157,6 +158,7 @@ On the restart recovery path, `loadResync` previously spawned recovery goroutine
 | Give each run an owned context and cancelable blocking operations | Retained: full-queue deadlock and walker leaks have deterministic reproductions |
 | Protect `finish` with `sync.Once` | Narrowed: a single deferred call site makes `sync.Once` unnecessary |
 | Wait for resumed runs before releasing leader context | Retained: SILO's leader context cancel is active, so the `WaitGroup` is required and covered by leadership-loss tests |
+{.wide .expand}
 
 Two additional details were kept simple: the infrequent resync start operation reads and writes configuration under the status lock (matching terminal saves), and the active registry keys on `resyncOpts` (including `resyncBefore`).
 
@@ -174,6 +176,7 @@ Regression tests were written against the unmodified baseline and verified to fa
 | Tooling and contracts | Local build, vet, lint, generated-file checks, rebrand compatibility guard, and `git diff --check` passed |
 | Two native servers | Built from local source; direct single-object DELETE removed the target marker and source `xl.meta` entry while retaining the original data version |
 | Remote integration | All eight PR checks passed, followed by all six main Go CI jobs and VulnCheck |
+{.wide .expand}
 
 Regression test files at the merged commit: [delete markers](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-delete-marker_test.go), [MRF visibility](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-mrf-observability_test.go), and [cancellation lifecycle](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-resync-cancel_test.go). Reproducible test commands:
 
@@ -192,6 +195,7 @@ go test ./... -count=1 -timeout=30m
 | PR Go CI | [34320440012](https://github.com/pgsty/silo/actions/runs/34320440012) |
 | Main Go CI | [34321319278](https://github.com/pgsty/silo/actions/runs/34321319278) |
 | Main VulnCheck | [34321319274](https://github.com/pgsty/silo/actions/runs/34321319274) |
+{.wide .expand}
 
 ## Maintenance Principles {#follow-up}
 

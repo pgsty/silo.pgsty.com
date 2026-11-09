@@ -209,13 +209,9 @@ mc admin trace --call scanner TARGET
 
 跟踪响应时长大于指定值的调用。
 
-#### `--response-threshold` {#mc.admin.trace.-response-threshold}
+<a id="mc.admin.trace.-response-threshold"></a>
 
-*mc-cmd*
-
-接受时间字符串作为值，例如 `5ms`。 仅返回响应时间大于所提供阈值的调用。
-
-如果未指定，MinIO 返回响应时间大于 5ms 的调用。
+`--response-threshold` 不是当前 mcli 支持的标志。请改用 `--response-duration 5ms` 筛选慢于 5 毫秒的调用。未指定该标志时，不会应用响应时长阈值。
 
 #### `--status-code` {#mc.admin.trace.-status-code}
 

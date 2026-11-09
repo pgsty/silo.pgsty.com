@@ -48,6 +48,7 @@ arn:aws:s3:::
 | `Deny` + 裸 `Resource` | 本应生效的拒绝没有触发 |
 | `Allow` + 裸 `NotResource` | 没有排除任何东西，可能远比预期授权得更宽 |
 | `Deny` + 裸 `NotResource` | 可能远比预期拒绝得更宽 |
+{.wide .expand}
 
 危险的两格属于依赖错误策略配置的 fail-open，而不是未认证远程漏洞，也没有 CVE。管理员、策略模板或自动化必须先提交这种错误资源，问题才会出现。同一问题也适用于已经注册的 S3 Tables 与 KMS ARN 前缀。
 

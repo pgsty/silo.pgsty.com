@@ -126,7 +126,7 @@ mc cp play/mybucket/object.txt ~/mydata/object.txt
 
 *Optional*
 
-为对象添加自定义元数据。键值对之间用分号分隔，并引用整个参数，例如 `--attr 'key1=value1;key2=value2;key3=value3'`。包含下一版本修复的构建允许空条目，包括末尾和连续分号；不含任何键值条目的输入仍然报错。包含[下一版本修复](/zh/compatibility/mcli/#next-release)的构建会在开始传输前拒绝非法属性。
+为对象添加自定义元数据。键值对之间用分号分隔，并引用整个参数，例如 `--attr 'key1=value1;key2=value2;key3=value3'`。自 [mcli 20261109](/zh/blog/release/mcli-20261109/) 起，允许空条目（包括末尾和连续分号），不含任何键值条目的输入仍然报错，且 [mcli](/zh/compatibility/mcli/#current-release) 会在开始传输前拒绝非法属性。
 
 ##### `--checksum` {#mc.cp.-checksum}
 
@@ -567,7 +567,7 @@ mc cp --attr="content-type=CONTENT-TYPE" SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 
 ### 部分失败与 JSON 计数 {#partial-failures}
 
-包含[下一版本修复](/zh/compatibility/mcli/#next-release)的构建在源准备失败后整体返回非零，同时继续处理其他独立源，包括参数列表中后面的源。成功的复制不会回滚。逐对象 JSON 开始记录中的 `totalCount` 和 `totalSize` 是累计准备好的对象数与字节数，不是固定的最终总量或已完成计数。请结合最终退出码、错误记录与最终字节汇总判断结果。
+自 [mcli 20261109](/zh/blog/release/mcli-20261109/)（见[兼容性说明](/zh/compatibility/mcli/#current-release)）起，源准备失败后命令整体返回非零，同时继续处理其他独立源，包括参数列表中后面的源。多源复制按单个源条目（`URLs.SourceAlias`）判断传输路径，单次命令中混合不同别名或本地路径的源各自使用自身传输路径；显式 `--tags` 在服务端复制、流式复制和 `--preserve` 模式下均会生效。成功的复制不会回滚。逐对象 JSON 开始记录中的 `totalCount` 和 `totalSize` 是累计准备好的对象数与字节数，不是固定的最终总量或已完成计数。请结合最终退出码、错误记录与最终字节汇总判断结果。
 
 [`mc cp`](#command-mc.cp) 使用 MD5SUM 校验和验证所有到对象存储的复制操作。
 

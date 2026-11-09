@@ -27,7 +27,7 @@ aliases:
 
 ------
 
-## 上游发生了什么
+## 上游发生了什么 {#what-happened-upstream}
 
 2025 年 12 月，MinIO 把开源仓库改成 [**维护模式**](https://github.com/minio/minio/commit/27742d469462e1561c776f88ca7a1f26816d69e2)。README 里写着 “安全修复会逐例评估”。
 到 2026 年 2 月，仓库直接归档，首页变成了 “当前仓库已经不再维护”。但同一个仓库的 [`SECURITY.md`](https://github.com/minio/minio/security) 还留着：“我们总会为最新版本提供安全更新”。
@@ -47,7 +47,7 @@ aliases:
 
 ------
 
-## 这次修了什么
+## 这次修了什么 {#what-this-release-fixes}
 
 这篇文章我不想写成漏洞分析报告。具体每一条的 CVSS 分数、攻击链、PoC 代码，我在 [发布注记](/zh/blog/release/20260417/) 里都一一列了，感兴趣的朋友可以去看。这里只说一句话版本：
 
@@ -65,7 +65,7 @@ aliases:
 
 ------
 
-## 这次是怎么修的
+## 这次是怎么修的 {#how-it-got-fixed}
 
 在之前那篇文章里，我明确说过我会用 AI Coding Agent 来维护这个项目，事实上我也是这么做的。这一轮修复里，我扮演了一个 **Blind Manager** 的角色。
 
@@ -100,7 +100,7 @@ aliases:
 
 ------
 
-## 有些事还是要人来拍板
+## 有些事还是要人来拍板 {#maintainer-judgment}
 
 但也正因为这个模式运转得不错，**maintainer 唯一的不可替代性，就凸显在那些 AI 给不出最后答案的地方。**
 
@@ -123,7 +123,7 @@ aliases:
 
 ------
 
-## 不是情怀，是必需
+## 不是情怀，是必需 {#why-this-fork-exists}
 
 我一直说，这个 fork 不是情怀，也不是 cosplay。它存在，首先是因为这是我自己要用的东西。
 
@@ -152,7 +152,7 @@ MinIO 是 Pigsty 的生产依赖。我需要可用的二进制、完整的控制
 
 ------
 
-## 承诺是什么
+## 承诺是什么 {#what-the-promise-means}
 
 两个月前那篇文章发出去以后，有人私信我，说这事看着挺悲壮。其实不是。
 

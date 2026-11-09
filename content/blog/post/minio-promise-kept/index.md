@@ -25,7 +25,7 @@ This release is what it looks like when that promise gets tested.
 
 ------
 
-## What happened upstream
+## What happened upstream {#what-happened-upstream}
 
 In December 2025, MinIO moved the open-source repo to [maintenance mode](https://github.com/minio/minio/commit/27742d469462e1561c776f88ca7a1f26816d69e2). The README said security fixes would be "evaluated case by case." In February 2026, the repository was archived and the landing page became "this repository is no longer maintained."
 
@@ -45,7 +45,7 @@ Someone still has to patch the old one.
 
 ------
 
-## What this release fixes
+## What this release fixes {#what-this-release-fixes}
 
 Full write-ups, CVSS arithmetic, and PoCs are in the [release notes](/blog/release/20260417/). The short version:
 
@@ -61,7 +61,7 @@ Plus the usual dependency cleanup from `go-jose`, `go.opentelemetry.io`, and the
 
 ------
 
-## How it got fixed
+## How it got fixed {#how-it-got-fixed}
 
 I said in the earlier post that I'd rely on AI coding agents, and that's how this round went. My role was closer to "review and decide" than "write code."
 
@@ -86,9 +86,28 @@ A few things I noticed about how this runs in practice.
 
 **Real maintenance is patch-on-patch, not one-shot.** The LDAP STS fix is a good example. The first version landed, and then we realized: successful requests shouldn't count against the rate limit; `X-Forwarded-For` shouldn't be trusted by default; the limiter should key on source IP plus normalized username, not just one. Three follow-up commits before it settled. Iterating through that by hand would have cost a lot more time.
 
+![agent.webp](agent.webp)
+
 ------
 
-## Why this fork exists
+## Some calls still need a maintainer {#maintainer-judgment}
+
+Where the maintainer remains irreplaceable is where the agents cannot make the final call.
+
+The OIDC fix (`CVE-2026-33322`) is the clearest example. On the surface it is a JWT algorithm-confusion bug; underneath it is a trade-off between backward compatibility and a clean security boundary.
+
+JWT signing algorithms fall into two classes: **asymmetric** (`RS256`, `ES256` — the IdP signs with a private key and MinIO verifies with the public key from JWKS) and **symmetric** (`HS256` — the same shared secret signs and verifies the token). With `HS256`, that shared secret was the OIDC `ClientSecret` stored in MinIO itself. Anyone holding `ClientSecret` could mint a token for any identity and pass verification.
+
+Two fix directions were on the table:
+
+- **Keep tolerating the legacy symmetric path under narrower conditions**: preserves backward compatibility for ambiguous configurations, but leaves the trust boundary blurry.
+- **Enforce strict JWKS-only verification and reject symmetric `HS*` tokens outright**: draws a hard boundary, at the cost of breaking setups that relied on symmetric OIDC tokens.
+
+Two agents can lay out the trade-offs and write either patch, but they do not own the consequences. I chose strict JWKS-only verification. The machines enumerate the options; the maintainer picks the direction.
+
+------
+
+## Why this fork exists {#why-this-fork-exists}
 
 Because I use MinIO myself.
 
@@ -117,6 +136,8 @@ You don't need to replace anything around it or relearn the API. In most cases, 
 If you want a full HA production setup, [Pigsty](https://pigsty.io/docs/minio) ships one for free.
 
 ------
+
+## What the promise means {#what-the-promise-means}
 
 Something I use broke; I'm fixing it.
 

@@ -51,6 +51,7 @@ Issue #256 documented four symptoms:
 | Bulk `DeleteObjects` | A successful pool result masks another pool's deletion failure |
 | Bulk deletion with an explicit version ID | Reports success even though the addressed version remains in another pool |
 | Versioned single `DELETE` | Attempts to write the delete marker in an unwritable holding pool even when another readable holding pool can accept it |
+{.wide .expand}
 
 Running the author's 11 regression subtests showed 10 failures on baseline `main` and 11 passes on the initial PR. However, review found that bulk deletion could still lose the latest copy when a drive failed after the preflight check.
 
@@ -125,6 +126,7 @@ The batch entry point separates physical deletion from delete-marker creation us
 | No version ID, versioning enabled | Create a delete marker and retain historical versions |
 | No version ID, versioning suspended | Create or replace the `null` delete marker |
 | Prefix-specific versioning configuration | Evaluate `PrefixEnabledFn` for the key alongside the suspended state |
+{.wide .expand}
 
 Physical deletion runs before marker creation, preserving execution order when a single batch explicitly purges a `null` version and creates a new delete marker for the same key. Marker-only batches continue using their existing path (see [Compatibility, Retry, and Operational Boundaries](#limits) for degraded-mode marker edge cases).
 
@@ -153,6 +155,7 @@ The commits evaluated during review and verification are:
 | [`3c82748e14`](https://github.com/pgsty/silo/commit/3c82748e14495ed403739e60b7e669c977a488c1) | Added two-stage bulk cleanup, response identity preservation, and partial-deletion retry |
 | [`a2073d2514`](https://github.com/pgsty/silo/commit/a2073d25142ced87b9bde8afa38aef2d0383768e) | Final PR head, adding shared-tier protection |
 | [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) | Merged `main` (source tree identical to `a2073d2514`) |
+{.wide .expand}
 
 The committed fault tests start with all drives online, inject failures inside `DeleteVersions`, and assert both an accurate per-item error and **zero deletion attempts against that item's authoritative copy**, verifying `GET` during failure, `GET` and version listing after recovery, retry completion, and normal completion of unrelated items:
 
@@ -165,6 +168,7 @@ The committed fault tests start with all drives online, inject failures inside `
 | Physical-delete quorum versus marker/replication writes | [`TestBulkDeleteQuorumEvidence`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L552) |
 | Shared tier references and restored objects | [`TestPoolsRetiringCopyPreservesSharedTierObject`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-consistency_test.go#L1065) |
 | Original single-delete, bulk-error, known-quorum-loss, and marker-placement regressions | [Original contribution's tests](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-consistency_test.go#L1334) |
+{.wide .expand}
 
 The new regressions fail deterministically against the initial PR's production code. The combined deletion, tier, and quorum test suite passed three consecutive `-race` runs before merge and an additional `-race` run after merge. Supplemental checks covered single-pool controls, prefix versioning configurations, directory and duplicate keys, Object Lock, version purges, and migration regressions.
 
@@ -249,3 +253,4 @@ Single deletion serializes cleanup of older copies before the newest copy. Bulk 
 | Serial per-object deletion for all bulk items | Unnecessarily sacrifices erasure-set and disk-level batching for ordinary local objects; the sequential per-object path is reserved only for items with shared tier references |
 | Overwrite pool affinity (#245) | Regressed small-object writes and still left existing cross-pool duplicates, migrated copies, and interrupted cleanups to handle during deletion |
 | Cross-pool rollback transactions or config flags | Two-stage per-item cleanup protects the authoritative copy without introducing distributed rollback state or extra configuration switches |
+{.wide .expand}

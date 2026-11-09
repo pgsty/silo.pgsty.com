@@ -40,6 +40,7 @@ A small fix that moves the parts back and restores the upload metadata makes the
 | Data safety | This defect deletes no committed object. In-progress upload data is lost on the drives where the rename succeeded. A separate, older gap in the same undo (T4) can lose an overwritten null version that sits beside older versions. |
 | Severity | S2: an availability and retry defect. It needs a drive fault during Complete. |
 | Effort | A safe fix is medium: it depends on fencing storage operations. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
@@ -73,23 +74,23 @@ Afterwards the upload exists only on the drives where the rename failed, and the
 
 ## Options {#options}
 
-### Option A: the undo moves the parts back
+### Option A: the undo moves the parts back {#option-a-the-undo-moves}
 
 For a multipart source only, rename the data directory back into the upload before the existing `DeleteVersion(UndoWrite)`. Necessary, but not enough alone: the part metadata is already gone on every drive, and the upload metadata was moved or overwritten.
 
-### Option B: delete the upload directory only after the caller decides
+### Option B: delete the upload directory only after the caller decides {#option-b-delete-the-upload}
 
 By the time a drive's rename succeeds, the upload directory is already empty, so delaying its removal saves nothing. It would also need a storage RPC change and every node upgraded. Rejected.
 
-### Option C: rebuild the upload from the drives that still have it
+### Option C: rebuild the upload from the drives that still have it {#option-c-rebuild-the-upload}
 
 The data may already be gone, the part ETags are lost, and a minority leftover cannot be told apart from the remains of an earlier successful Complete or Abort, so this could commit a second version. Rejected.
 
-### Option D: keep `part.N.meta` until after the commit
+### Option D: keep `part.N.meta` until after the commit {#option-d-keep-part-n}
 
 This changes the success path and leaves part metadata in object directories after a crash. It still needs Option A and the metadata restore. Rejected.
 
-### Option E: answer NoSuchUpload or abort the upload
+### Option E: answer NoSuchUpload or abort the upload {#option-e-answer-nosuchupload-or}
 
 Not a fix. S3 clients read NoSuchUpload on a retried Complete as "it may have succeeded".
 
@@ -131,6 +132,7 @@ A deterministic unit test on a 4-drive EC 2+2 set uploads a 5 MiB and a 1 MiB pa
 | Rename applied with a lost answer, refused on another | 404 NoSuchUpload |
 | Unversioned overwrite, rename refused on 2 drives | stuck, old object kept |
 | Empty object | stuck |
+{.wide .expand}
 
 The process-level acceptance reproduces the bucket-directory and offline-drive cases identically on `69fcf50cd` and on the next release.
 

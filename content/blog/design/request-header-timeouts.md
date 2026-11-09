@@ -48,6 +48,7 @@ This went unnoticed because the flag's default (30 s) matches the idle timeout's
 | `header = 0` (explicit) | Falls back to Go's rule: the read timeout (= idle timeout) applies; the CLI default is 30 s |
 | `header < 0` | Disables the header-specific cap; positive read/write timeouts still bound TLS handshake reads, and positive `IdleTimeout` still bounds the keep-alive wait |
 | `idle` shortened, `header` unset | Header phase uses its own 30 s default — the one combination looser than a naive expectation, while still enforcing a fixed absolute cap |
+{.wide .expand}
 
 Setting a negative value reopens unbounded slow-header trickling and should not be used in production. An incomplete header cut off by the deadline closes the connection directly rather than guaranteeing an HTTP error response. The initial report came from @AEGEGE's scanner issue [#183](https://github.com/pgsty/silo/issues/183), and [PR #195](https://github.com/pgsty/silo/pull/195) was integrated through [PR #196](https://github.com/pgsty/silo/pull/196).
 

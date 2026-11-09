@@ -343,6 +343,12 @@ MinIO supports keeping multiple [versions](/administration/object-management/obj
 >
 > The output shows the modification time of versioned files. When used with `--dry-run`, this can help confirm that you selected the correct object(s) for removal.
 
+### PGSTY mcli Safety and Exit Status (`mcli 20261109`) {#mcli-safety}
+
+- `--purge` combined with [`--dry-run`](#mc.rm.-dry-run) (`--fake`) is strictly read-only and never sends `?purge=true` `DELETE` requests (`#208`).
+- Multi-argument and [`--stdin`](#mc.rm.-stdin) recursive deletes validate namespace-wide targets before deleting earlier arguments (`#163`, `#202`). If any target resolves to a bucket root, cluster root, or filesystem root without [`--dangerous`](#mc.rm.-dangerous), the command exits before removing earlier arguments.
+- Permission and WORM retention errors return exit code `1` after reporting per-object failures (`mcli 20260916`).
+
 ### S3 Compatibility {#s3-compatibility}
 
 SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).

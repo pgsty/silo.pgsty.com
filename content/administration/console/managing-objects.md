@@ -6,7 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **Console 2.5.1 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page. See the [Console 2.5.1 object workspace notes](/blog/release/console-2.5.1/#objects).
+> [!NOTE]
+> **Console 2.5.1 – 2.7.0 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page ([Console 2.5.1](/blog/release/console-2.5.1/#objects)). [Console 2.6.0](/blog/release/console-2.6.0/) adds on-demand folder size scans, bucket usage refresh with optional PostgreSQL worker persistence, pre-create bucket validation, and exact integer quota math; the [Console 2.7.0 candidate](/blog/release/console-2.7.0/) expands the interface to ten languages.
 
 <a id="managing-objects"></a>
 <a id="minio-console-managing-objects"></a>
@@ -135,19 +136,15 @@ The tiering tab allows users with the appropriate permissions to:
 - Cycle the access credentials for any of the configured tiers with the tier’s <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-pencil" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg> icon.
 
 
-## Usage scans (development) {#usage-scans}
+## Usage scans (Console v2.6.0+) {#usage-scans}
 
-> **Not yet released:** This section describes the Console work being integrated
-> from [PR #70](https://github.com/pgsty/silo-console/pull/70). It is not included
-> in Console 2.5.1 or Server 20261026. A Console release and the corresponding
-> embedded-Console dependency update in SILO Server are separate delivery steps.
-> The supported integration target is `pgsty/silo`; upstream MinIO compatibility
-> is best effort.
+> [!NOTE]
+> **Component availability:** This section describes the usage scan and bucket refresh functionality shipped in [Console v2.6.0](/blog/release/console-2.6.0/) ([PR #70](https://github.com/pgsty/silo-console/pull/70)) and retained in [Console v2.7.0](/blog/release/console-2.7.0/). Server `20261026` embeds Console `v2.5.1`; `pgsty/silo` `main` embeds Console `v2.6.0` for the next Server release. A Console release and the corresponding embedded-Console dependency update in SILO Server are separate delivery steps. The supported integration target is `pgsty/silo`; upstream MinIO compatibility is best effort.
 
 <!-- Adapted from pgsty/silo-console PR #70, docs/FolderSizes.md.
 Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
 
-### Folder sizes
+### Folder sizes {#folder-sizes}
 
 The object browser lists S3 prefixes as folders. S3 does not attach a size to a
 prefix. **Calculate folder sizes** performs one recursive metadata scan of the
@@ -174,7 +171,7 @@ never becomes a zero-sized folder. Scan a narrower prefix when limits are hit.
 Size sorting uses calculated bytes for folders already included in the scan and
 ordinary object metadata for files; as elsewhere, sorting covers loaded rows.
 
-### Permissions and limits
+### Permissions and limits {#permissions-and-limits}
 
 Scanning requires a signed-in Console session with `s3:ListBucket` access to the
 requested prefix. Version scans require `s3:ListBucketVersions`. The API always
@@ -196,7 +193,7 @@ active scan per browser view. A time, entry or child-folder limit returns a
 terminal partial result and cancels further listing requests. Invalid operator
 configuration refuses scans rather than removing their limits.
 
-### API
+### API {#api}
 
 `GET /api/v1/buckets/{bucket}/prefix-usage?prefix=&versions=false&folders=true`
 uses the normal authenticated Console API. Supply `prefix=` for the bucket root,
@@ -220,7 +217,7 @@ Use the existing `CONSOLE_TEST_ENDPOINT`, `CONSOLE_TEST_ACCESS_KEY` and
 Never point fixture tests at a bucket owned by an operator.
 
 
-### Bucket refresh and automatic updates
+### Bucket refresh and automatic updates {#bucket-refresh}
 
 On **Buckets**, **Refresh** requests a new metadata scan for every listed bucket,
 including those hidden by the search filter. The table and cards show **Current
@@ -234,7 +231,7 @@ current directory's immediate folder sizes. **Calculate size** in a folder's
 menu narrows that scan. These foreground scans are cancellable and end on
 navigation; no background folder scan starts merely by browsing.
 
-#### Optional persistent worker
+#### Optional persistent worker {#optional-persistent-worker}
 
 For durable bucket refresh and automatic updates, provide
 `CONSOLE_USAGE_DATABASE_URL` to the Console and run **the same build** as
@@ -281,7 +278,7 @@ Without the database, Refresh performs bounded foreground metadata scans and the
 UI explicitly says automatic updates are unconfigured. Navigating away stops
 those scans; completed totals are not shared across replicas in this mode.
 
-#### Worker and API settings
+#### Worker and API settings {#worker-and-api-settings}
 
 All names below start with `CONSOLE_USAGE_`. Durations use Go duration syntax.
 Invalid, missing required or incompatible settings fail closed.
@@ -345,26 +342,8 @@ The design follows [S3 event notification guidance](https://docs.aws.amazon.com/
 and [event ordering/duplicate handling](https://aws.amazon.com/blogs/storage/manage-event-ordering-and-duplicate-events-with-amazon-s3-event-notifications/):
 notifications trigger idempotent work, while reconciliation repairs delivery gaps.
 
-### Creation failures and quota precision (development) {#creation-and-quota}
+### Creation failures and quota precision (Console v2.6.0 and later) {#creation-and-quota}
 
-The unreleased creation handler rejects invalid quota and retention values before
-creating a bucket. Retention alone enables object locking and versioning; an
-explicit versioning object is optional. Object locking cannot exclude prefixes
-or folders from versioning, so a request that combines locking or retention with
-versioning exclusions is rejected before any bucket is created. If a requested
-post-create setting fails,
-the API reports failure and attempts to remove the empty bucket. It never deletes
-objects as part of this rollback. If the caller cannot remove the bucket, or the
-bucket has become nonempty, the error explicitly says it may still exist. Inspect
-its configuration before retrying; an HTTP error is not proof that no bucket was
-created.
+In [Console v2.6.0](/blog/release/console-2.6.0/) and later, the bucket creation handler rejects invalid quota and retention values before creating a bucket. Retention alone enables object locking and versioning; an explicit versioning object is optional. Object locking cannot exclude prefixes or folders from versioning, so a request that combines locking or retention with versioning exclusions is rejected before any bucket is created. If a requested post-create setting fails, the API reports failure and attempts to remove the empty bucket. It never deletes objects as part of this rollback. If the caller cannot remove the bucket, or the bucket has become nonempty, the error explicitly says it may still exist. Inspect its configuration before retrying; an HTTP error is not proof that no bucket was created.
 
-Console quota writes must be positive and below 8 PiB (at most
-9007199254740991 bytes), with at most two decimal places in the selected unit.
-Decimal scaling uses integer arithmetic and discards only fractional bytes.
-Larger quotas remain supported through mcli and the existing integer API. The
-browser does not populate an editable value from a quota outside its exact JSON
-integer range, so reopening and saving cannot silently rewrite a rounded value.
-The UI still permits clearing that quota or explicitly entering a smaller one.
-Display-only capacity totals may be rounded; use mcli when exact large byte
-values matter.
+Console quota writes must be positive and below 8 PiB (at most 9007199254740991 bytes), with at most two decimal places in the selected unit. Decimal scaling uses integer arithmetic and discards only fractional bytes. Form and request validation reject invalid numeric values; these checks shipped in Console 2.6.0 ([design record](/blog/design/console-quota-numeric-validation/)). Larger quotas remain supported through mcli and the existing integer API. The browser does not populate an editable value from a quota outside its exact JSON integer range, so reopening and saving cannot silently rewrite a rounded value. The UI still permits clearing that quota or explicitly entering a smaller one. Display-only capacity totals may be rounded; use mcli when exact large byte values matter.

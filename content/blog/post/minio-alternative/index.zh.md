@@ -22,7 +22,7 @@ aliases:
 
 各有各的问题 —— Ceph 功能全但太复杂；SeaweedFS 针对小文件优化但需要独立元数据库；Garage 小巧玲珑但功能简陋；RustFS 兼容 MinIO 但竟然还是 Alpha。
 
-## MinIO 替代品速览
+## MinIO 替代品速览 {#quick-scan-of-the-field}
 
 MinIO 是 AWS S3 的开源替代，所以从单纯的 **对象 CRUD 功能** 上来讲，任何兼容 S3 API 的对象存储系统都可以作为 MinIO 的替代品。
 但如果考虑到非功能类特性 —— 可靠性，可运维性，复杂度，工具链，生态成熟度，运维 SOP 这些，想要 “平替” 掉 MinIO 确实不容易。
@@ -40,7 +40,7 @@ Garage 是欧洲 Deuxfleurs 团队的作品，拿过欧盟 NGI 资助，适合�
 
 RustFS 是唯一一个瞄准"MinIO 替代"生态位的项目，但成熟度不足 —— 竟然还是 Alpha。
 
-## RustFS 是否可以替代 MinIO
+## RustFS 是否可以替代 MinIO {#rustfs-vs-minio}
 
 在所有号称"MinIO 开源替代"的项目中，老冯本来最看好 RustFS，所以特地花了些时间测试。
 我在 Pigsty 中尝试将 MinIO 换成 RustFS，大部分逻辑可以复用，但还是有些区别：
@@ -52,7 +52,7 @@ RustFS 是唯一一个瞄准"MinIO 替代"生态位的项目，但成熟度不�
 总的来说，跑起来了，但老冯思考再三，还是把这个分支给放弃掉了。因为把 Alpha 版的软件用在生产环境实在是太不像话了。
 我是比较期待 RustFS GA 版本出来之后，再来做一次评测。
 
-## RustFS 是否会重蹈 MinIO 覆辙
+## RustFS 是否会重蹈 MinIO 覆辙 {#will-rustfs-repeat-minio-s}
 
 当然，RustFS 这个项目虽然看上去很有潜力，但也存在一些问题。例如，RustFS 是否会重蹈 MinIO 覆辙？
 特别是，RustFS 在很多雷点上，跟 MinIO 十分相似。
@@ -66,7 +66,7 @@ RustFS 这些风险信号与当年的 MinIO 几乎一模一样：Apache 2.0 + �
 
 --------
 
-## 所以，应该怎么做？
+## 所以，应该怎么做？ {#so-what-now}
 
 老冯的 PostgreSQL 发行版 Pigsty 里面集成了 MinIO 作为对象存储的解决方案。
 这完全是一个可选的模块，主要作用是 —— 存储 PostgreSQL 备份，以及在其他业务软件需要对象存储的时候提供一个 —— 比如自建 Supabase 。
@@ -81,7 +81,7 @@ RustFS 这些风险信号与当年的 MinIO 几乎一模一样：Apache 2.0 + �
 
 --------
 
-## 继续使用 MinIO 的注意事项
+## 继续使用 MinIO 的注意事项 {#if-you-stick-with-minio}
 
 如果要继续使用 MinIO，有这么几个注意事项。第一是应该用什么版本。
 虽然说，MinIO 20250422 版本是最后一个功能完整（带有控制台 GUI）的版本，但老冯还是建议使用最新的版本。

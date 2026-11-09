@@ -60,6 +60,7 @@ S3 传输边界仅允许 `LIST`、`HEAD` 与 `GET`；若 mock endpoint 收到任
 | `WOULD_VERIFY` | `--dry-run` 发现可校验的 `FULL_OBJECT` 校验和 |
 | `UNKNOWN_*` | MCLI 无法给出可靠校验结论（如 `COMPOSITE` 或缺失 `ChecksumType`） |
 | `SKIPPED_*` | 过滤条件排除了该对象（`SKIPPED_TOO_LARGE`、时间过滤或删除标记） |
+{.wide .expand}
 
 最终汇总（summary）携带 `objects`、`verified` 计数、每种结果状态的计数以及 `incomplete` 标志。`verified` 等于 `MATCH` 加 `MISMATCH`——只有这两种结果真正把对象正文流过了哈希器。枚举了大量对象却实际核验为零的运行，会在汇总中清晰体现。
 

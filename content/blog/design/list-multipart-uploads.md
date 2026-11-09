@@ -2,7 +2,10 @@
 title: "ListMultipartUploads Behavior and Design Trade-Offs"
 linkTitle: "ListMultipartUploads"
 date: 2026-08-30
+lastmod: 2026-10-18
+author: "PGSTY SILO Maintainers"
 weight: 20
+summary: "Why public ListMultipartUploads returned to MinIO-compatible behavior in Server 20261018, what on-disk scanning cost on 16-drive erasure sets, and which multipart repairs were kept."
 description: "Why public ListMultipartUploads returned to MinIO-compatible behavior in Server 20261018, what on-disk scanning cost on 16-drive erasure sets, and which multipart repairs were kept."
 url: "/blog/design/list-multipart-uploads/"
 ---
@@ -24,13 +27,13 @@ Server `20261018` restores the traditional MinIO-compatible public `ListMultipar
 
 Between `2026-10-17` (`#243`, commit [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe6)) and `2026-10-18` (commit [`4733e1423`](https://github.com/pgsty/silo/commit/4733e1423)), `main` briefly used an unindexed `.minio.sys/multipart` disk scan for all public `ListMultipartUploads` calls. Capacity analysis and benchmarks on 16-drive erasure sets showed that making this scan the unconditional default created a worse operational failure mode than the listing limitation it replaced.
 
-### Why Restart Never Deleted Multipart Uploads
+### Why Restart Never Deleted Multipart Uploads {#why-restart-never-deleted-multipart}
 
 Active multipart uploads are stored on disk under `.minio.sys/multipart/<sha256(bucket/object)>/<uploadID>/xl.meta` and `part.*`. A server restart clears only the in-memory `multipartUploadsCache`; it does **not** remove unfinished uploads from disk. Retained `UploadID` values therefore remain usable across restarts until completed, explicitly aborted, or cleaned up by the background stale-upload sweep (default expiry: 7 days; check interval: 12 hours).
 
 Because unfinished uploads accumulate across restarts and client retries, any operation that walks `.minio.sys/multipart` on disk scales with the total number of unfinished uploads currently stored in the erasure set, not merely the uploads created since the last process start.
 
-### How the 100,000-Entry Guard Fails on a 16-Drive Erasure Set
+### How the 100,000-Entry Guard Fails on a 16-Drive Erasure Set {#how-the-100-000-entry}
 
 The October 17 disk scan enforced `maxMultipartWalkEntries = 100000` across **all drives in an erasure set combined**, counting both `<sha256(bucket/object)>` directories and `<uploadID>` directories on every drive.
 
@@ -44,7 +47,7 @@ When each upload uses a distinct object key ($H = U$):
 - On a **16-drive** set, $16 \times (3{,}126 + 3{,}126) = 100{,}032$ directory entries—exceeding the `100,000` budget at **3,126 active uploads** across the entire erasure set (all buckets combined) and failing every public scan with HTTP `503 SlowDown`.
 - Even when all uploads share a **single object key** ($H = 1$), a 16-drive set reaches $16 \times (1 + 6{,}250) = 100{,}016$ entries at **6,250 uploads** for that key, so even an exact-key lookup (`prefix=<exact-object-key>`) failed with `503 SlowDown`.
 
-### Provenance and Responsibility
+### Provenance and Responsibility {#provenance-and-responsibility}
 
 | Change | Date / Commit | What It Did | Assessment |
 | :--- | :--- | :--- | :--- |
@@ -53,7 +56,7 @@ When each upload uses a distinct object key ($H = U$):
 | Unconditional unification (`#243`) | `2026-10-17` / [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe6) | Removed `legacy` and made the disk scan unconditional for all public `ListMultipartUploads` calls | **Overreach**: turned a 4-drive benchmark result into a mandatory path that fails at 3,126 uploads on 16-drive sets |
 {.wide .expand}
 
-### Partial Rollback Trade-Off Analysis
+### Partial Rollback Trade-Off Analysis {#partial-rollback-trade-off-analysis}
 
 | Option | Public S3 Listing Fidelity | 16-Drive Capacity Behavior | Storage Format / Background I/O Impact | Decision |
 | :--- | :--- | :--- | :--- | :--- |
@@ -64,7 +67,7 @@ When each upload uses a distinct object key ($H = U$):
 | **Surgical partial rollback (`4733e1423` + `0f9199e0c`)** | Restores MinIO-compatible public listing (empty-prefix cache + non-empty exact-key lookup) | No cross-bucket `100,000`-entry cliff; exact-key lookup touches only `1` hash directory per drive | Preserves `xl.meta` identity fields, `checkUploadID`, abort cleanup, and empty-hash-parent removal | **Selected** |
 {.wide .expand}
 
-### What Was Retained vs Rolled Back
+### What Was Retained vs Rolled Back {#what-was-retained-vs-rolled}
 
 1. **Rolled back on the public listing path (`4733e1423`)**:
    - Public `ListMultipartUploads` no longer walks every `<sha256(bucket/object)>` directory in `.minio.sys/multipart`.
@@ -75,7 +78,7 @@ When each upload uses a distinct object key ($H = U$):
    - `AbortMultipartUpload` still evicts the local cache entry and notifies peer nodes.
    - `cleanupStaleUploads` continues to remove expired uploads on disk, and commit [`0f9199e0c`](https://github.com/pgsty/silo/commit/0f9199e0c) ensures that when the last `<uploadID>` under `.minio.sys/multipart/<sha256(bucket/object)>` is removed by expiry sweep, completion, or abort, the empty `<sha256(bucket/object)>` parent directory is also removed so empty hash directories do not accumulate indefinitely.
 
-### Cost of Ordering vs Discovery
+### Cost of Ordering vs Discovery {#cost-of-ordering-vs-discovery}
 
 In `.minio.sys/multipart/<sha256(bucket/object)>/<uploadID>`, directory names are SHA-256 hashes of `bucket/object`, which destroys lexicographical key order and bucket boundaries. Answering an arbitrary prefix query (`prefix=trips/`) in S3 key order without an index requires reading `xl.meta` inside every active upload across every bucket in the erasure set before sorting and paginating the first page. By contrast, exact-key lookup (`prefix=trips/2026/a.mp4`) computes a single SHA-256 hash and lists only that one directory per drive (`O(N)` `ListDir` calls instead of `O(N × H)`).
 
@@ -97,6 +100,7 @@ Measured with `go test -run=^$ -bench=BenchmarkMultipartPublicListingCapacity -b
 | :--- | :--- |
 | [S3 API Compatibility — Differences from S3 APIs for Multipart Uploads](/reference/s3-api-compatibility/#differences-from-s3-apis-for-multipart-uploads) | Canonical user-facing compatibility reference for `ListMultipartUploads` in Server `20261018` |
 | [SILO 20260916 Release Notes](/blog/release/silo-20260916/) | Published legacy default, opt-in strict behavior, UploadID validation, and cancellation boundaries |
+{.wide .expand}
 
 ---
 

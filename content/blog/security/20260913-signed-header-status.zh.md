@@ -15,7 +15,7 @@ url: "/zh/blog/security/20260913-signed-header-status/"
 
 修复方案在分发请求前校验实际收到的 `x-amz-*` 请求头是否均已包含在签名头集合中（仅保留协议规范明确允许的例外项）。后续的签名与校验和边界补强详见[签名头评审笔记](/zh/blog/design/signed-header-coverage/)。
 
-## 修复建议
+## 修复建议 {#remediation}
 
 请将 **SILO Server** 升级至 [Server 20260916](/zh/blog/release/silo-20260916/) 或更高版本。在完成升级前，应将签发上传请求的凭据限制在必要的最小对象前缀范围内，避免为签发公开桶上传链接的凭据授予过宽的读取权限。
 

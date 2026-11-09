@@ -2,7 +2,7 @@
 title: "Heal Dry Run Must Not Delete Data"
 linkTitle: "Heal Dry Run Safety"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why an admin heal run as a dry run can still delete a dangling object version when its metadata has no read quorum, why a five-line early return is the right fix for this release, and why the same fix must also carry the dry-run flag to remote nodes during bucket heal.
@@ -38,11 +38,13 @@ The PR's second dry-run change reports a drive as `unknown` instead of `ok` when
 | Severity | High. The affected versions are already unreadable through S3, and a real heal (and, in user buckets, a GET or HEAD) purges them by the same rule. The harm is that the operator's inspection tool makes an irreversible deletion that the operator explicitly asked it not to make. The last metadata copies are gone before anyone can decide on a recovery. |
 | Release urgency | Blocks the next release. The fix is about ten lines of code, changes only dry runs, and comes with regression tests. |
 | Remaining effort | The split and the review are done. Remaining: run CI, and check a dry-run bucket heal on a deployed multi-node cluster. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
 Three conditions must hold:
 
+{.steps}
 1. A heal with `DryRun` reaches `healObject` for an object version. A heal walk heals each version separately.
 2. `objectQuorumFromMeta` fails. Either the read errors do not leave half of the drives with a result, or no parity value is reported by enough readable copies: a parity needs as many agreeing copies as the read quorum it implies, which is the data-block count for an ordinary object. For example, an EC 3+1 version with only two readable copies fails although half of the drives answered.
 3. `isObjectDangling` judges the version dangling. At this point no part checks have run, so the verdict requires:
@@ -69,7 +71,7 @@ The other `deleteIfDangling` call in `healObject`, in the branch for objects tha
 
 ## Where the behavior came from {#history}
 
-### Provenance
+### Provenance {#provenance}
 
 **Introduced by upstream MinIO, not by SILO.** Both defects come from upstream commits that are ancestors of the SILO fork point ([`27742d469`](https://github.com/pgsty/silo/commit/27742d469), 2025-12-03). They are in the last upstream release before the fork, `RELEASE.2025-10-15T17-29-55Z`, in the archived upstream `master`, and in every SILO release from `RELEASE.2025-12-03T12-00-00Z` through `RELEASE.2026-10-26T00-00-00Z`. We checked each tag: in `healObject` the first `deleteIfDangling` call precedes the dry-run return, and the remote bucket heal message carries no dry-run flag. No SILO commit introduced, widened, or narrowed either defect.
 
@@ -81,6 +83,7 @@ The other `deleteIfDangling` call in `healObject`, in the branch for objects tha
 | The body is replaced by `deleteIfDangling`, which has no `Remove` gate. | [`f19a414e0`](https://github.com/pgsty/silo/commit/f19a414e0) ([#14273](https://github.com/minio/minio/pull/14273)) | 2022-02-08 | `RELEASE.2022-02-12T00-51-25Z` | **A plain dry run deletes.** This is the release where the reported behavior starts. |
 | The call is inlined into `healObject`, before the dry-run return. | [`136d41775`](https://github.com/pgsty/silo/commit/136d41775) ([#15954](https://github.com/minio/minio/pull/15954)) | 2022-10-27 | `RELEASE.2022-10-29T06-21-33Z` | None. The quorum-failure branch stays ahead of the dry-run return. |
 | The error returns of the branch are reshaped. | [`3549e583a`](https://github.com/pgsty/silo/commit/3549e583a) ([#19702](https://github.com/minio/minio/pull/19702)) | 2024-05-09 | `RELEASE.2024-05-10T01-41-38Z` | None on the gating. Most lines of the current branch date from this commit. |
+{.wide .expand}
 
 **Bucket heal.** Before January 2024 the set-level bucket heal honored `DryRun`. Node-level bucket heal replaced it in [`e31081d79`](https://github.com/pgsty/silo/commit/e31081d79) ([#18612](https://github.com/minio/minio/pull/18612), 2024-01-10, `RELEASE.2024-01-11T07-46-16Z`). Its remote call sends only the bucket name and the remove flag, and the remote handler builds the heal options from those two values. The local implementation of the same call checks `DryRun`, so only the local node honors it. [`ff80cfd83`](https://github.com/pgsty/silo/commit/ff80cfd83) ([#18951](https://github.com/minio/minio/pull/18951), 2024-02-02, `RELEASE.2024-02-04T22-36-13Z`) moved the call to the grid with the same two values. Upstream `master` still has the gap.
 
@@ -92,6 +95,7 @@ The other `deleteIfDangling` call in `healObject`, in the branch for objects tha
 | [`e59a3d938`](https://github.com/pgsty/silo/commit/e59a3d938) | 2026-09-11 | `RELEASE.2026-09-16T00-00-00Z` and later | **Did not affect.** When the caller already holds the namespace lock, `HealObject` keeps that lock's context. |
 | [`9b11dc946`](https://github.com/pgsty/silo/commit/9b11dc946) | 2026-09-03 | `RELEASE.2026-09-03T13-18-01Z` and later | **Did not affect.** Import path swap for the error-group helper. |
 | [`7ce7fc8d1`](https://github.com/pgsty/silo/commit/7ce7fc8d1) | 2026-10-29 | unreleased | **Did not affect.** The heal walk lists free versions as well. It has no dry-run logic. |
+{.wide .expand}
 
 SILO has not changed `deleteIfDangling`, `isObjectDangling`, `remotePeerS3Client.HealBucket`, or `HealBucketHandler`. It has not added a dry-run guard anywhere in this path. [PR #280](https://github.com/pgsty/silo/pull/280) is open and carries the object-heal guard, and the bucket-heal part is only proposed in this record.
 
@@ -99,21 +103,21 @@ SILO has not changed `deleteIfDangling`, `isObjectDangling`, `remotePeerS3Client
 
 ## Options {#options}
 
-### Option 1: return early in `healObject`
+### Option 1: return early in `healObject` {#option-1}
 
 This is PR #280's approach. When `objectQuorumFromMeta` fails and `dryRun` is set, `healObject` returns a `defaultHealResult` built from the errors it observed, together with the quorum error. The change is five lines in one function and affects dry runs only, so real heals behave exactly as today. Its limit is that it protects only this call site. A future dry-run path that calls `deleteIfDangling` somewhere else would need its own guard.
 
-### Option 2: pass the dry-run flag into `deleteIfDangling`
+### Option 2: pass the dry-run flag into `deleteIfDangling` {#option-2}
 
 `deleteIfDangling` would gain a parameter or an `ObjectOptions` field, so that it can reach a verdict without deleting. It could also return a "would purge" verdict for the report. The cost is that all six callers change, and four of them are object read and metadata-update paths that have no notion of a dry run. A future caller can also forget to pass the flag, just as it can forget the early return. That is a lot of churn for a small robustness gain. The "would purge" report belongs to a redesign of dry-run reporting.
 
-### Option 3: a central guard
+### Option 3: a central guard {#option-3}
 
 Dry-run heals would run against read-only wrappers of the drives, so that every write fails. This is the only option that catches future mistakes by construction. But `StorageAPI` has dozens of methods, `deleteIfDangling` fetches its drives from the erasure set rather than from its caller, and the bucket-heal gap is in the peer RPC layer, which such a wrapper would not cover. It is too large for a release fix.
 
 A cheap version of the same idea works in tests. The PR's synthetic test drives embed a nil `StorageAPI`, so any mutation the test does not expect panics. The regression tests keep that pattern.
 
-### Bucket heal on remote nodes
+### Bucket heal on remote nodes {#bucket-heal-remote}
 
 There are two ways to stop remote nodes from mutating during a dry run:
 
@@ -122,7 +126,7 @@ There are two ways to stop remote nodes from mutating during a dry run:
 
 We carry the flag. Before the fix, every node already behaved as if the flag were false. During an upgrade, a mixed cluster behaves no worse than today, and once every node runs the fix, the gap is closed.
 
-### The reporting change
+### The reporting change {#reporting-change}
 
 In a dry-run deep scan, the PR reports a drive as `unknown` when its metadata was read but part verification did not succeed for a reason other than missing or corrupt parts. Such reasons include a drive that went offline during the check, a missing volume, a deadline, a cancellation, or denied access. On main, that drive is reported as `ok` in both modes, and repair decisions ignore these results.
 
@@ -136,7 +140,7 @@ Reporting an unverified drive as `ok` is a real accuracy problem: an integrity a
 
 The fix has two parts. Part 1 is the contributor's change from PR #280. Part 2 comes from the maintainer audit.
 
-### Part 1: object heal returns before the dangling purge
+### Part 1: object heal returns before the dangling purge {#part-1}
 
 **Code.** Take PR #280's first hunk in `healObject` unchanged:
 
@@ -170,7 +174,7 @@ Three small adaptations:
 - it asserts the converted error for each quorum case, version not found or the corruption error, instead of a check against `errFileNotFound` that could not fail after `toObjectErr`;
 - the synthetic drive drops its `CheckParts` stub, which only the PR's parallel-verification and reporting tests use.
 
-### Part 2: remote nodes honor the dry-run flag in bucket heal
+### Part 2: remote nodes honor the dry-run flag in bucket heal {#part-2}
 
 **Code.** The fix adds a `peerS3BucketDryRun = "dry-run"` key next to `peerS3BucketDeleted`. `remotePeerS3Client.HealBucket` builds its message with a small encoder that adds the key, and `HealBucketHandler` reads it into `madmin.HealOpts.DryRun`:
 
@@ -202,7 +206,7 @@ res, err := healBucketLocal(context.Background(), bucket, madmin.HealOpts{
 - the background heal status call is read-only;
 - an admin heal request is proxied to another node only to poll an existing sequence by its token, never to start one.
 
-### Delivery
+### Delivery {#delivery}
 
 - Split the dry-run hunk and those tests into their own commit and PR, separate from the parallel verification change. That change needs its own review, of I/O concurrency on slow drives and of cancellation, and its own CI.
 - Preserve the contributor's credit. The production hunk is unchanged from the contributor's signed-off commit, but the tests are an adapted subset, so the split is a maintainer commit that carries a `Co-authored-by` trailer for Jasper Bernhardt and references PR #280.
@@ -228,6 +232,7 @@ We audited every place where an admin dry-run heal can change data:
 | `HealFormat` | Writes `format.json` and replaces drives; drive initialization can create internal directories or migrate an old `format.json` | Saves under `if !dryRun`, but initialization runs before that check. The admin heal sequence does not queue it; the only caller in this tree is the new-drive monitor, with `dryRun` false | Unchanged |
 | Site-wide heal, bucket listing | `ListBuckets` fills in creation times. For a bucket whose metadata is not cached, that loads bucket metadata through the ordinary object read path, which can migrate legacy bucket configuration files and queue MRF repair of `.metadata.bin` | Reached, through the same load the server attempts at startup and in its periodic metadata refresh | Unchanged; see [Residual limits](#limits) |
 | Heal metadata reads (`ReadVersion`), `CheckParts`, `VerifyFile`, heal walks | None | Read-only | Unchanged |
+{.wide .expand}
 
 The heal paths themselves queue no MRF entries; only the bucket-metadata load above can. The only side effect of the reached purge outside the drives is a `DeleteDanglingObject` audit entry, which is written when audit logging is configured.
 
@@ -321,7 +326,7 @@ All runs used focused `go test -run` selections with `-p 2` and the `kqueue,dev`
 - an end-to-end `mc admin heal --dry-run`;
 - the parallel verification tests.
 
-**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, #259, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, #259, #285, `delete-all` and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
 
 The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
@@ -331,6 +336,7 @@ The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command
 | --- | --- |
 | Adversarial review, round 1 | Requested changes. Five findings: a site-wide dry run's bucket listing loads uncached bucket metadata, which can migrate legacy bucket configuration and queue MRF repair (pre-existing); the real-drive test fixture leaves background workers and globals behind; a directly invoked format heal initializes drives before its dry-run check (pre-existing); pool aggregation drops the set-level drive states when every pool answers not found (pre-existing); one error assertion in the tests could not fail. Also eleven corrections to this record. Outcome: the listing effect was disputed as a blocker for this change, because the server attempts the same load at startup and in its periodic refresh, and it is documented with a named follow-up. The fixture finding was disputed: the tests follow the fixture convention of the existing heal tests, and a combined race run with those tests passed. The format and aggregation findings are documented. The assertion now checks the converted error for each case. All record corrections were applied. |
 | Adversarial review, round 2 | Approved with nits. The reviewer withdrew the listing and fixture findings as release findings for these two parts. Two wording nits, that some dangling versions report insufficient read quorum with drive states, and that the periodic refresh has no completion bound, plus three more record corrections. All applied. |
+{.wide .expand}
 
 ## References {#references}
 

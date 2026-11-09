@@ -40,6 +40,7 @@ url: "/zh/blog/design/multipart-complete-retry/"
 | 数据安全 | 这个缺陷不删除已提交的对象。rename 成功的那些盘上，进行中的上传数据会丢失。同一撤销步骤里还有一个更早就存在的缺口（T4），可能丢失与旧版本并存、被覆盖的 null 版本。 |
 | 严重度 | S2：可用性和重试缺陷，需要 Complete 期间出现盘故障。 |
 | 工作量 | 安全的修复属于中等：它依赖存储操作的 fencing。 |
+{.wide .expand}
 
 ## 何时发生 {#trigger}
 
@@ -73,23 +74,23 @@ Complete 原地把上传 rename 成对象。以 4 块盘、EC 2+2（写 quorum 3
 
 ## 方案 {#options}
 
-### 方案 A：撤销步骤把分片移回
+### 方案 A：撤销步骤把分片移回 {#option-a-the-undo-moves}
 
 只对 multipart 来源：在原有的 `DeleteVersion(UndoWrite)` 之前，先把数据目录 rename 回上传目录。这是必要的，但单靠它不够：分片元数据已经在所有盘上被删掉，上传元数据也已被移走或覆盖。
 
-### 方案 B：等调用方决定之后再删上传目录
+### 方案 B：等调用方决定之后再删上传目录 {#option-b-delete-the-upload}
 
 某块盘上 rename 成功时，上传目录已经空了，推迟删除省不下任何东西。而且这需要改存储 RPC，所有节点都要升级。不采用。
 
-### 方案 C：用仍保留上传的盘重建上传
+### 方案 C：用仍保留上传的盘重建上传 {#option-c-rebuild-the-upload}
 
 数据可能已经没了，分片 ETag 也丢了；而且少数盘上的残留，无法和一次已经成功的 Complete 或 Abort 留下的残余区分开，可能导致同一个上传被提交两次。不采用。
 
-### 方案 D：把 `part.N.meta` 保留到提交之后
+### 方案 D：把 `part.N.meta` 保留到提交之后 {#option-d-keep-part-n}
 
 这会改变成功路径，崩溃后还会在对象目录里留下分片元数据；而且仍然需要方案 A 和元数据恢复。不采用。
 
-### 方案 E：返回 NoSuchUpload，或者直接中止上传
+### 方案 E：返回 NoSuchUpload，或者直接中止上传 {#option-e-answer-nosuchupload-or}
 
 这不是修复。S3 客户端重试 Complete 时收到 NoSuchUpload，会理解为“可能已经成功”。
 
@@ -131,6 +132,7 @@ Complete 原地把上传 rename 成对象。以 4 块盘、EC 2+2（写 quorum 3
 | 一块盘执行了 rename 但应答丢失，另一块拒绝 | 404 NoSuchUpload |
 | 覆盖未开版本控制的对象，2 块盘拒绝 rename | 卡住，旧对象保留 |
 | 空对象 | 卡住 |
+{.wide .expand}
 
 进程级验收在 `69fcf50cd` 和下一版上，以同样的结果复现了桶目录只读和盘离线两种情况。
 

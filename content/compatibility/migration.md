@@ -47,6 +47,7 @@ Community contributor Paris Y. ([@yupoet](https://github.com/yupoet)) documented
 | Identity and integrations | Root credentials only; no IAM sub-users, OIDC, notification targets, or reverse proxy |
 | Data volume | ~5,900 objects (~34,000 underlying storage chunks); volume opened sequentially across 2025-09, 2025-10, and 2026-09 builds over ~15 months |
 | Observed result | Existing volume mounted cleanly without errors; application checks covering multipart uploads, parser-service reads, listing, and deletion passed |
+{.wide .expand}
 
 ### Modern single-drive storage vs. legacy FS mode {#single-node-storage}
 
@@ -147,7 +148,7 @@ Kubernetes kubelet executes `httpGet` probes defined in the Pod spec and ignores
 On-disk object layout compatibility does not mean an older binary understands new metadata written after an upgrade. **Before rolling back an image or binary, verify whether persistent state must be restored as well:**
 
 - **Durable IAM revocation history**: releases with persistent IAM revocations do not support rolling downgrades. Follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/) before upgrading to back up complete IAM storage and key material (standard `mc admin cluster iam export` archives omit deletion/revocation tombstones).
-- **Bucket metadata convergence and password permissions**: check [bucket-configuration deletion state](/blog/design/bucket-metadata-convergence/#rollout) and [password permission rollback rules](/compatibility/password-permissions/#coordinated-upgrade-and-rollback).
+- **Bucket metadata convergence and password permissions**: check [bucket-configuration deletion state](/blog/design/bucket-metadata-convergence/#rollout) and [password permission rollback rules](/compatibility/password-permissions/#rollback).
 - **Executing recovery**: if post-upgrade verification fails, keep clients blocked, stop the new server, and restore the pre-upgrade volume backup, configuration, and pinned image digest. Reconcile any writes, deletes, or credential revocations that occurred after the backup before reopening the endpoint.
 
 ## Behavior checks for a single-node migration {#single-node-behavior}
@@ -159,6 +160,7 @@ On-disk object layout compatibility does not mean an older binary understands ne
 | Multipart listing | 20260916 offered an optional `MINIO_API_MULTIPART_LISTING=strict` disk-scan mode; 20261018 removes it and restores legacy in-memory cache behavior (omitting `max-uploads` defaults to 1,000, though the legacy cache path does not enforce strict pagination). See [20260916 behavior](/blog/release/silo-20260916/#multipart) and [20261018 upgrade requirements](/blog/release/silo-20261018/#upgrade). |
 | Reverse-proxy source-address trust | When `MINIO_API_TRUSTED_PROXIES` is unset, the S3 listener preserves historical trust of forwarded client-IP headers. Set `none` for direct client connections, or explicitly list proxy IPs/CIDRs and ensure proxies overwrite client-supplied headers. Console and LDAP STS follow their own trust rules. See [source-address trust](/compatibility/server/#trusted-proxies). |
 | Identity and object state | If your deployment uses IAM sub-user password policies, service accounts, STS, OIDC, Object Lock, or replication, review the [target release notes](/blog/release/silo-20261026/#upgrade), [password permission migration](/compatibility/password-permissions/), and [IAM recovery](/operations/replication/iam-upgrade/). |
+{.wide .expand}
 
 ## Upgrading from RELEASE.2026-08-06 {#since-20260806}
 
@@ -203,5 +205,6 @@ Verify the upgraded service while application traffic is still paused:
 4. **Exercise write and listing paths**: using a dedicated test bucket or key prefix, test single-part uploads, multipart completion, listing, read-back, and deletion with your real client (do not delete production objects as a smoke test, and respect bucket versioning/retention when cleaning up test keys).
 5. **Verify identities and integrations**: test sub-users, service accounts, STS/OIDC flows, and expected `AccessDenied` responses. For shared IAM or replicated deployments, verify every participating endpoint following the [IAM upgrade procedure](/operations/replication/iam-upgrade/).
 6. **Confirm restart persistence**: restart the storage service once while traffic remains paused, re-verify readiness and signed historical-object reads, and then reopen application traffic.
+{.steps}
 
 If any historical metadata or object read fails verification, preserve the error logs and object identifiers for investigation on an isolated copy, and avoid introducing optional new state during the migration window so [rollback](#rollback) remains straightforward.

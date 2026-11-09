@@ -2,7 +2,7 @@
 title: "多池生命周期过期：按整个对象决策"
 linkTitle: "多池生命周期过期"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO 维护团队"
 summary: >
   解释生命周期规则只按单个池内的版本求值时，为何会隐藏、删除或复活另一个池中的版本，以及为什么在对象锁内按合并后的版本列表复核，是最小而完整的修复。
@@ -25,7 +25,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 结果是静默的数据损坏：新的删除标记盖住了当前版本，较新的版本随整个 key 一起被删，已删除的对象重新变得可读。decommission 和 rebalance 做的是同样的判断，并且仍然报告 Complete。
 
-修复保留现有的所有生命周期判断点，只在它们的汇合处加一道检查：多池部署中，ILM 过期真正删除任何东西之前，由池层在对象锁内，把该 key 在所有池中的版本合并成一个列表，重新求值一次规则。对整个对象不成立的过期会被拒绝；版本历史或锁保护无法权威确定的过期，同样会被拒绝。decommission 和 rebalance 会迁移这样的版本，而不是把它交给过期处理。在单池上，版本和删除标记的过期跳过合并读取。
+修复保留现有的所有生命周期判断点，只在它们的汇合处加一道检查：多池部署中，ILM 过期真正删除任何东西之前，由池层在对象锁内，把该 key 在所有池中的版本合并成一个列表，重新求值一次规则。对整个对象不成立的过期会被拒绝；版本历史或锁保护无法权威确定的过期，同样会被拒绝。decommission 和 rebalance 会迁移这样的版本，而不是把它交给过期处理。在单池上，版本和删除标记的过期跳过合并读取；整对象过期则在锁内检查每一个版本（见[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)）。
 
 ## 定性 {#assessment}
 
@@ -38,6 +38,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 | 可达性 | 普通 S3 写入即可触发。在报告者的复现中，SILO 自身的放置策略让三分之一到一半的 key 的版本分布在两个池中。 |
 | 发布紧急度 | 阻塞下一个版本。main 上已经合入 [#276](https://github.com/pgsty/silo/pull/276)，它让迁移过期在 decommission 或 rebalance 遍历中立即执行。 |
 | 剩余工作量 | 代码、审查和多池验收运行都已完成，还需要远端 CI。 |
+{.wide .expand}
 
 ## 触发条件 {#trigger}
 
@@ -55,6 +56,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 | `Expiration` 加 `ExpiredObjectAllVersions` | p1 `[v1]`，p2 `[v2]` | `v1` 被当作当前版本，整个 key（包括 `v2`）被删除。 |
 | `ExpiredObjectDeleteMarker` | p1 `[dm]`，p2 `[v1]` | 删除标记被移除，已删除的对象重新读出 `v1`。 |
 | `DelMarkerExpiration` | 一个池中是删除标记，另一个池中有更新的版本 | 标记过期时连同更新的版本一起删除（由 Go 测试覆盖；普通 S3 写入不会产生这种布局）。 |
+{.wide .expand}
 
 同一轮运行中，所有版本都在同一个池里的 key 表现正确。
 
@@ -72,7 +74,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 - 带 `versionId` 的 GET 和 HEAD 读取持有该版本的池；
 - decommission 和 rebalance 遍历一个池。
 
-执行过期的地方却不一样。`applyExpiryOnNonTransitionedObjects` 和 `expireTransitionedObject` 通过池层删除：整对象动作会在每个池中删除该对象，新的删除标记会在每个池中隐藏该 key。对单个版本或新建删除标记，锁内的集合级复核也帮不上忙，因为它求值的是承接这次删除的那个集合里的版本；如果正是这个集合做了错误判断，复核只会确认它。除跨池判断之外，整对象过期不在本文范围内。
+执行过期的地方却不一样。`applyExpiryOnNonTransitionedObjects` 和 `expireTransitionedObject` 通过池层删除：整对象动作会在每个池中删除该对象，新的删除标记会在每个池中隐藏该 key。对单个版本或新建删除标记，锁内的集合级复核也帮不上忙，因为它求值的是承接这次删除的那个集合里的版本；如果正是这个集合做了错误判断，复核只会确认它。除跨池判断之外，整对象过期另有单独记录（见[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)）。
 
 一句话：判断是局部的，动作却是全局的。
 
@@ -92,6 +94,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 | decommission 跳过并让 ILM 已过期的版本过期 | [236ef03](https://github.com/pgsty/silo/commit/236ef03db)（Harshavardhana） | [#15300](https://github.com/minio/minio/pull/15300) | 2022-07-14 | `RELEASE.2022-07-15T03-44-22Z` |
 | rebalance，同一过滤逻辑 | [4523da6](https://github.com/pgsty/silo/commit/4523da654)（Krishnan Parthasarathi） | [#15483](https://github.com/minio/minio/pull/15483) | 2022-10-25 | `RELEASE.2022-10-29T06-21-33Z` |
 | 驱动器 heal 跳过已过期的版本（直到下一个版本，见第 12 部分） | [109a9e3](https://github.com/pgsty/silo/commit/109a9e3f3)（Harshavardhana） | [#18569](https://github.com/minio/minio/pull/18569) | 2023-12-01 | `RELEASE.2023-12-02T10-51-33Z` |
+{.wide .expand}
 
 动作是消费方。对象锁内的集合级复查，即 `erasureObjects.DeleteObject` 中的 `opts.Expiration.Expire`，来自 [35f2552](https://github.com/pgsty/silo/commit/35f2552fc)（[#13091](https://github.com/minio/minio/pull/13091)，Harshavardhana，2021-08-27，`RELEASE.2021-08-31T05-46-54Z`），它读取的是执行删除的那一个集合的版本。上游 master 的代码相同。
 
@@ -108,6 +111,8 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 | [#266](https://github.com/pgsty/silo/pull/266) decommission 和 rebalance 期间迁移 ILM 已过期的当前版本（[19910230](https://github.com/pgsty/silo/commit/19910230a)、[a995921](https://github.com/pgsty/silo/commit/a995921e5)） | 2026-10-29 | 仅在 main，位于 `RELEASE.2026-10-26T00-00-00Z` 之后 | 收窄。版本控制开启的桶里，当前版本过期只会加一个删除标记，所以遍历现在迁移该版本，而不是跳过它。 |
 | [#276](https://github.com/pgsty/silo/pull/276) 迁移期间的 ILM 清理（[0a546c7](https://github.com/pgsty/silo/commit/0a546c7a7)） | 2026-11-02 | 仅在 main | 在时机上放大。它判断的仍是同一份按池的副本，但在源被淘汰之前，在遍历内立即执行过期，包括整对象动作。在已发布版本中，遍历跳过该版本，并把同样的判断交给过期工作线程排队。 |
 | [a803027](https://github.com/pgsty/silo/commit/a803027b0) 把 `DelMarkerExpiration` 计为活动规则 | 2026-11-03 | 仅在 main | 暴露面放大。扫描器原先跳过只有 `DelMarkerExpiration` 规则的桶；在 main 上它会对这类桶求值，从而触发上面的第四种失败形态。 |
+| 整对象精确 key 修复（[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)） | 2026-11-05 | 仅在集成分支 | 整对象过期的配套修复：按精确 key 而不是前缀删除，在单池和多池上都在锁内检查每个版本，并清理分层版本的远端对象。 |
+{.wide .expand}
 
 所以，已发布的 SILO 版本所包含的缺陷就是上游的缺陷，没有变化。#266 和 #276 不在任何发布标签中。#276 没有产生新的错误判断，它让已有的错误判断立即执行，这就是本修复成为下一个版本发布门槛的原因。
 
@@ -117,23 +122,23 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 ## 方案比较 {#options}
 
-### 方案 1：当 key 跨池时禁用生命周期或跳过过期
+### 方案 1：当 key 跨池时禁用生命周期或跳过过期 {#option-1}
 
 这样做安全，但错在另一个方向：合法的规则会无限期失效，而运维人员得不到任何"保留策略已经不再执行"的信号。
 
-### 方案 2：让一个 key 的所有版本都留在同一个池
+### 方案 2：让一个 key 的所有版本都留在同一个池 {#option-2}
 
 池亲和可以减少新产生的跨池 key，但修复不了已有的跨池 key、中断的迁移和并发的首次写入。SILO 已经评估过覆盖写的池亲和方案，因为小对象覆盖写性能回退而没有采用（见 [多池覆盖亲和](/zh/blog/design/overwrite-pool-affinity/)）。池亲和可以作为未来的缓解手段，但不是正确性修复。
 
-### 方案 3：让每个发起方都按合并后的版本求值
+### 方案 3：让每个发起方都按合并后的版本求值 {#option-3}
 
 每次 scanner 访问、heal、读取和迁移步骤，都要从每个池读取该 key。这个代价会落在"对象没有任何东西需要过期"这一最常见的情况上，而且每个发起方在判断与删除之间仍然会和写入发生竞争。
 
-### 方案 4：在执行端、对象锁内复核
+### 方案 4：在执行端、对象锁内复核 {#option-4}
 
 这是选定的方案，也是 PR #279 的思路。发起方保留廉价的本地判断；只有即将真正执行的删除才需要付出一次合并读取，而且这次读取和删除在同一把对象写锁内进行，检查与执行之间版本列表不会变化。
 
-### 不采纳的扩展
+### 不采纳的扩展 {#rejected-additions}
 
 全局版本索引、跨请求缓存或新的生命周期状态机，都会引入持久状态和新的故障模式，而修复这个缺陷并不需要它们。
 
@@ -164,7 +169,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 3. **分层非当前版本批量清理中的全池核准传递。** 新增的集合级 `Expire` 标志导致分层的 `NewerNoncurrentVersions` 批量清理在集合内被拒绝，而批量适配层又把这个拒绝当成成功上报。现在 `deleteObjectsReconciled` 只对带显式版本 ID 的 ILM 条目传递 `CheckedAllPools`，这正好是池层已经检查过的那些条目。
 4. **读路径触发的过期，按实际读到的版本复核。** 本地求值认为版本到期时，GET 和 HEAD 会返回 `NoSuchKey` 并把过期入队。在多池部署中，对本地的删除候选，读路径现在会按合并列表再求值一次，并按实际读到的版本身份匹配事件：
    - 别处一个更新的版本到期，不能成为隐藏一个仍然有效的旧版本的理由；
-   - 复核失败或未确认过期时，读取照常成功，也不入队；
+   - 复核失败或未确认过期时，读取照常成功，也不入队；`recheckReadExpiry` 会在 `expiry_incomplete_total` 中按原因（`history_unavailable` 或 `not_applicable`）统计被跳过的过期，并写入 `result=skipped` 的 ILM trace（[04d7d9197](https://github.com/pgsty/silo/commit/04d7d9197)）；
    - 本地结果为"无动作"时，不产生任何额外读取。
 5. **被拒绝的过期不再发送删除通知。** 以 `errLifecycleNotApplicable` 被拒绝的批量条目，不再发送 `s3:ObjectRemoved:Delete` 通知，也不再写 ILM 过期审计。第 9 部分把这一点扩展到所有未生效的结果。
 6. **要么得到权威的版本历史，要么不做决定。**
@@ -197,6 +202,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 10. **被拒绝和失败的过期会被计数。** `expiry_incomplete_total` 按 `reason` 统计每一次没有删掉所针对对象的 ILM 过期尝试：`not_applicable`（规则已不适用）、`locked`（Object Lock）、`history_unavailable`（无法权威读取历史）和 `error`。指标 v2 导出为 `minio_node_ilm_expiry_incomplete_total`，指标 v3 在 `/ilm` 下导出为 `minio_ilm_expiry_incomplete_total`。桶和对象都不是标签，已经不存在的版本不计数。
 11. **获批的版本过期会删除所有副本。** 一个版本可能在两个池中都有副本，例如 decommission 或 rebalance 中断之后。池层用所有池的版本核准的 ILM 版本过期，现在会删除每一份副本，先删次要副本、最后删主副本，遇到第一个失败就停止，所以分层版本的远端对象只会在所有副本都删掉之后才删除。每个集合仍守护池层核准的那些保护。此前只删除按最新 key 路由选中的那一份副本：另一份副本仍可读，分层版本的远端对象在那份副本仍引用它时就被删除，持有它的池在 decommission 时完成检查失败。批量非当前版本清理本来就会删除所有副本。
 12. **驱动器 heal 会修复它排入过期的版本。** 驱动器 heal 按单个池里的版本求值生命周期。对它认为已到期的版本，它排入过期并跳过 heal。而过期会在对象锁内重新判断，可能被拒绝，于是这样的版本在被更换的盘上一直保持降低的冗余，直到拒绝结束为止；scanner 只 heal 没有到期动作的版本，也不会修复它。现在驱动器 heal 排入过期，同时修复该版本；随后被过期删除的版本只多花一次 heal。heal 与过期通过写者锁域中的对象锁互斥，这由[单池锁域修复](/zh/blog/design/single-pool-lock-domains/)提供。
+{.steps}
 
 同一版本在两个池中的副本合并时，各自独立排序的 retention、legal hold 和标签修订都会保留，并遵循第 7 部分的严格排序。
 
@@ -210,9 +216,9 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 在这些路径上，错误的本地判断会被拒绝，而不会被执行。迁移在决定"不迁移某个版本"之前，也会调用同一检查。
 
-**不在本修复范围内。**
+**由配套修复覆盖。**
 
-- **整对象过期**，除第 1 部分的跨池判断之外，不在本文范围内。
+- **整对象过期**（`ExpiredObjectAllVersions` 和 `DelMarkerExpiration`），除第 1 部分的跨池判断之外，由[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)覆盖。
 
 **必要性。** 每一部分都关闭一条否则会继续存在的路径：
 
@@ -310,7 +316,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 多节点锁域，以及长时间运行的 scanner 和迁移行为，尚未验证。
 
-**集成验证。** 这个修复是下个版本集成分支的基础。#281 以及锁域、Heal 演练、#259、#285 和 Console 的修复都叠在它上面，所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+**集成验证。** 这个修复是下个版本集成分支的基础。#281 以及锁域、整对象删除、Heal 演练、#259、#285 和 Console 的修复都叠在它上面，所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
 
 本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
 
@@ -319,16 +325,18 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 | 轮次 | 结果 |
 | --- | --- |
 | 维护者第 1、2 轮 | 发现批量清理中全池核准的传递缺口、读路径隐藏有效版本、被拒绝的过期被当作删除发布，作为第 3–5 部分修复。 |
-| 对抗性审查 | 要求修改。两个问题由第 1–5 部分引入：过时修订导致的 legal hold 绕过、重复副本上丢失的待处理 purge，作为第 6–8 部分修复。两个问题更早就存在：不完整历史下的整对象删除、其他拒绝也被发布，分别作为第 6、9 部分修复。单池错误码的变化已在上文说明。 |
+| 对抗性审查 | 要求修改。两个问题由第 1–5 部分引入：过时修订导致的 legal hold 绕过、重复副本上丢失的待处理 purge，作为第 6–8 部分修复。两个问题更早就存在：不完整历史下的整对象删除、其他拒绝也被发布，分别作为第 6、9 部分修复。整对象过期在[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)中修复。单池错误码的变化已在上文说明。 |
 | 设计第 2、3 轮 | 有条件同意。修订需要严格多数加上该版本自身的读 quorum；认定过时需要严格更新的有效时间戳；待处理的 purge 一票否决；跨池保护冲突在批准前就拒绝。 |
 | 补丁审查第 4–7 轮 | 第 4 轮：发现 4 字节的元数据头签名不能用来标识修订。第 5 轮：发现另外三个问题，即只读小写的锁键（原本就有）、摘要缺少表边界、旧格式的分片校验和在不同盘上永远不一致。第 6 轮：发现旧格式的嵌套表哈希时没有排序。以上问题都已修复并补了回归测试。第 7 轮：在约定范围内没有剩余问题，批准。 |
 | 发布审查（2026-11-06） | 发现被拒绝和失败的过期几乎不留痕迹，scanner 把拒绝记成删除（第 9、10 部分）；获批的版本过期只删掉两个池中副本的一份（第 11 部分）；驱动器 heal 跳过它排入过期的版本，过期一旦被拒绝，这些版本就保持降低的冗余（第 12 部分）；遍历在预检查时对每个到期版本都读一次 key 的历史；无法给出历史的池会停止它并不持有的 key 的过期；非版本化的分裂 key 可能一直不过期。最后两点作为限制写明。 |
+{.wide .expand}
 
 ## 参考 {#references}
 
 
 - Issue：[#278](https://github.com/pgsty/silo/issues/278)
 - 贡献者 PR：[#279](https://github.com/pgsty/silo/pull/279)
+- 配套整对象过期修复：[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)
 - 相关的恢复副本过期：[#281](https://github.com/pgsty/silo/issues/281)、[#282](https://github.com/pgsty/silo/pull/282)
 - 迁移过期改动：[#276](https://github.com/pgsty/silo/pull/276)，以及 [ILM 过期与存储池迁移顺序](/zh/blog/design/ilm-migration-ordering/)
 - 上游放置策略改动：[minio/minio#21115](https://github.com/minio/minio/pull/21115)

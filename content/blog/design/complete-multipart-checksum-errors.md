@@ -41,6 +41,7 @@ All validation failures below return HTTP 400 and do not commit a completed obje
 | `CRC64NVME` value with `COMPOSITE` rejected by checksum parsing at completion | `InvalidArgument` |
 | Bare `COMPOSITE` type at completion of a `CRC64NVME` `FULL_OBJECT` upload | `BadDigest` |
 | Incorrect client checksum during `UploadPart` | `XAmzContentChecksumMismatch` |
+{.wide .expand}
 
 For `FULL_OBJECT` uploads, per-part checksums in the completion XML may be omitted, while any supplied part checksums are still validated against stored part metadata. Matching type-only assertions are accepted. Omitting the optional checksum type header does not assert `COMPOSITE`. Combining `SHA1` or `SHA256` with `FULL_OBJECT` is rejected by the algorithm-and-type parser before reaching the stored-type comparison.
 

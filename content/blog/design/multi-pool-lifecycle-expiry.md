@@ -2,7 +2,7 @@
 title: "Multi-Pool Lifecycle Expiry: Decide on the Whole Object"
 linkTitle: "Multi-Pool Lifecycle Expiry"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why lifecycle rules evaluated on the versions of one pool hide, delete, or resurrect versions stored in another pool, and why a recheck on the merged version list under the object lock is the minimum complete repair.
@@ -20,7 +20,7 @@ This record covers [issue #278](https://github.com/pgsty/silo/issues/278) and [P
 
 The report is real, and it is the most serious open defect for the next release. On a deployment with more than one pool, the versions of one key are often spread across pools. Lifecycle decides on the versions that one pool holds, but the expiry it starts deletes or hides the key in every pool. A version that is the latest in its own pool, but not the latest of the object, is treated as current. A delete marker that is alone in its pool is treated as a marker without older versions. The result is silent data loss: current versions hidden under a new delete marker, newer versions deleted together with the whole key, and deleted objects becoming readable again. Decommission and rebalance make the same decision and still report Complete.
 
-The repair keeps every existing lifecycle decision point and adds one check where all of them converge. Before an ILM expiry deletes anything in a multi-pool deployment, the pools layer evaluates the rule again under the object lock, with the versions of the key in all pools merged into one list. An expiry that does not hold for the whole object is refused. So is one whose version history or lock protection cannot be established with authority. Decommission and rebalance move such a version instead of leaving it to the expiry. On a single pool, version and marker expiries skip the merged read.
+The repair keeps every existing lifecycle decision point and adds one check where all of them converge. Before an ILM expiry deletes anything in a multi-pool deployment, the pools layer evaluates the rule again under the object lock, with the versions of the key in all pools merged into one list. An expiry that does not hold for the whole object is refused. So is one whose version history or lock protection cannot be established with authority. Decommission and rebalance move such a version instead of leaving it to the expiry. On a single pool, version and marker expiries skip the merged read; a whole-object expiry checks every version under the lock ([Whole-Object ILM Expiry](/blog/design/ilm-delete-all-exact-key/)).
 
 ## Classification {#assessment}
 
@@ -33,6 +33,7 @@ The repair keeps every existing lifecycle decision point and adds one check wher
 | Reachability | Ordinary S3 writes. In the reporter's reproduction, SILO's own placement put the versions of a third to a half of the keys into both pools. |
 | Release urgency | Blocks the next release. Main already carries [#276](https://github.com/pgsty/silo/pull/276), which runs the migration expiry immediately during the decommission or rebalance walk. |
 | Remaining effort | Code, review and the multi-pool acceptance runs are done. Remote CI remains. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
@@ -50,6 +51,7 @@ The lifecycle rule then has to depend on the other versions of the key. The repo
 | `Expiration` with `ExpiredObjectAllVersions` | p1 `[v1]`, p2 `[v2]` | `v1` is taken as current and the whole key, including `v2`, is deleted. |
 | `ExpiredObjectDeleteMarker` | p1 `[dm]`, p2 `[v1]` | The marker is removed and the deleted object reads as `v1` again. |
 | `DelMarkerExpiration` | marker in one pool, newer version in the other | The marker expiry deletes the newer version with it (covered by Go tests; plain S3 writes do not produce this layout). |
+{.wide .expand}
 
 Keys whose versions all live in one pool behave correctly in the same runs.
 
@@ -61,7 +63,7 @@ Lifecycle evaluation needs three facts about each version: whether it is the lat
 - GET and HEAD of a `versionId` read the pool that holds that version;
 - decommission and rebalance walk one pool.
 
-The consumer is different. `applyExpiryOnNonTransitionedObjects` and `expireTransitionedObject` delete through the pools layer. A whole-object action removes the object in every pool, and a new delete marker hides the key in every pool. For a single version or a new delete marker, the set-level recheck under the lock does not help, because it evaluates the versions of the set that takes the delete. When that set made the wrong decision, the recheck confirms it. Apart from its cross-pool decision, a whole-object expiry is outside the scope of this record.
+The consumer is different. `applyExpiryOnNonTransitionedObjects` and `expireTransitionedObject` delete through the pools layer. A whole-object action removes the object in every pool, and a new delete marker hides the key in every pool. For a single version or a new delete marker, the set-level recheck under the lock does not help, because it evaluates the versions of the set that takes the delete. When that set made the wrong decision, the recheck confirms it. Apart from its cross-pool decision, a whole-object expiry has its own record ([Whole-Object ILM Expiry](/blog/design/ilm-delete-all-exact-key/)).
 
 In short, the decision is local and the action is global.
 
@@ -81,6 +83,7 @@ In short, the decision is local and the action is global.
 | Decommission skips and expires ILM-expired versions | [236ef03](https://github.com/pgsty/silo/commit/236ef03db) (Harshavardhana) | [#15300](https://github.com/minio/minio/pull/15300) | 2022-07-14 | `RELEASE.2022-07-15T03-44-22Z` |
 | Rebalance, same filter | [4523da6](https://github.com/pgsty/silo/commit/4523da654) (Krishnan Parthasarathi) | [#15483](https://github.com/minio/minio/pull/15483) | 2022-10-25 | `RELEASE.2022-10-29T06-21-33Z` |
 | Drive heal skips expired versions (until the next release, see part 12) | [109a9e3](https://github.com/pgsty/silo/commit/109a9e3f3) (Harshavardhana) | [#18569](https://github.com/minio/minio/pull/18569) | 2023-12-01 | `RELEASE.2023-12-02T10-51-33Z` |
+{.wide .expand}
 
 The consumers are the actions. The set-level recheck under the lock, `opts.Expiration.Expire` in `erasureObjects.DeleteObject`, comes from [35f2552](https://github.com/pgsty/silo/commit/35f2552fc) ([#13091](https://github.com/minio/minio/pull/13091), Harshavardhana, 2021-08-27, `RELEASE.2021-08-31T05-46-54Z`). It reads the versions of the one set that takes the delete. The code is the same in upstream master.
 
@@ -97,6 +100,8 @@ The consumers are the actions. The set-level recheck under the lock, `opts.Expir
 | [#266](https://github.com/pgsty/silo/pull/266) move ILM-expired current versions during decommission and rebalance ([19910230](https://github.com/pgsty/silo/commit/19910230a), [a995921](https://github.com/pgsty/silo/commit/a995921e5)) | 2026-10-29 | main only, after `RELEASE.2026-10-26T00-00-00Z` | Narrowed. On a versioned bucket the expiry of a current version only adds a delete marker, so the walk now moves the version instead of skipping it. |
 | [#276](https://github.com/pgsty/silo/pull/276) ILM cleanup during migration ([0a546c7](https://github.com/pgsty/silo/commit/0a546c7a7)) | 2026-11-02 | main only | Widened, in timing. It judges the same pool-local copy as before, but runs the expiry, whole-object actions included, inside the walk before the source is retired. In the releases the walk skips the version and queues the same decision for the expiry workers. |
 | [a803027](https://github.com/pgsty/silo/commit/a803027b0) count `DelMarkerExpiration` as an active rule | 2026-11-03 | main only | Widened exposure. The scanner skipped buckets whose only rule is `DelMarkerExpiration`; on main it evaluates them, which reaches the fourth failure shape above. |
+| Delete-all exact-key fix ([Whole-Object ILM Expiry](/blog/design/ilm-delete-all-exact-key/)) | 2026-11-05 | integration branch only | Companion fix for whole-object expiries: deletes the exact key rather than a prefix, checks every version under the lock on single and multi-pool deployments, and removes the remote objects of tiered versions. |
+{.wide .expand}
 
 So the defect that the released SILO builds contain is the upstream one, unchanged. #266 and #276 are not in any release tag. #276 does not create a new wrong decision. It makes an existing one execute immediately, which is why this fix gates the next release.
 
@@ -106,23 +111,23 @@ Dates, PR numbers, and release membership come from the git history. The stateme
 
 ## Options {#options}
 
-### Option 1: disable lifecycle, or skip expiry, when a key spans pools
+### Option 1: disable lifecycle, or skip expiry, when a key spans pools {#option-1}
 
 This is safe but wrong in the other direction. Valid rules would stop applying for an unbounded time, and operators would have no signal that their retention policy no longer runs.
 
-### Option 2: keep every version of a key in one pool
+### Option 2: keep every version of a key in one pool {#option-2}
 
 Pool affinity reduces how many new split keys are created. It cannot repair existing split keys, interrupted migrations, or concurrent first writes. SILO already evaluated an overwrite-affinity change and did not adopt it because of small-object overwrite regressions ([Overwrite Pool Affinity](/blog/design/overwrite-pool-affinity/)). Affinity is a possible future mitigation, not a correctness fix.
 
-### Option 3: make every producer evaluate the merged versions
+### Option 3: make every producer evaluate the merged versions {#option-3}
 
 Every scanner visit, heal, read, and migration step would read the key from every pool. The cost would apply to the common case of an object with nothing to expire, and every producer would still race with writes between its decision and the delete.
 
-### Option 4: recheck at the consumer, under the object lock
+### Option 4: recheck at the consumer, under the object lock {#option-4}
 
 This is the chosen option and the approach of PR #279. Producers keep their cheap local decision. Only a delete that is about to happen pays for a merged read, and that read happens under the same object write lock as the delete, so the version list cannot change between the check and the action.
 
-### Rejected additions
+### Rejected additions {#rejected-additions}
 
 A global version index, a cross-request cache, or a new lifecycle state machine would add persistent state and new failure modes. None of them is needed to close the defect.
 
@@ -153,7 +158,7 @@ The fix has twelve parts:
 3. **All-pools approval in batched tiered noncurrent purges.** The new set-level `Expire` flag caused tiered `NewerNoncurrentVersions` batch purges to be rejected inside the set, and the batch adapter reported that rejection as success. `deleteObjectsReconciled` now forwards `CheckedAllPools` only for ILM entries with an explicit version ID, which are exactly the entries the pools layer has already checked.
 4. **Read-triggered expiry checks the version that was read.** GET and HEAD return `NoSuchKey` and queue an expiry when the local evaluation says the version is due. For local delete candidates in a multi-pool deployment, the read path now repeats the evaluation on the merged list and matches the event by the identity of the version that was actually read.
    - A newer version elsewhere expiring does not justify hiding an older version that is still valid.
-   - If the recheck fails or does not confirm the expiry, the read succeeds and nothing is queued.
+   - If the recheck fails or does not confirm the expiry, the read succeeds and nothing is queued; `recheckReadExpiry` counts the skipped expiry in `expiry_incomplete_total` (`history_unavailable` or `not_applicable`) and emits an ILM trace with `result=skipped` ([04d7d9197](https://github.com/pgsty/silo/commit/04d7d9197)).
    - Local "no action" results do not trigger any extra read.
 5. **No removal notification for a refused expiry.** A batch entry refused with `errLifecycleNotApplicable` no longer emits an `s3:ObjectRemoved:Delete` notification or an ILM expiry audit entry. Part 9 extends this to every other uncommitted result.
 6. **An authoritative version history, or no decision.**
@@ -186,6 +191,7 @@ The fix has twelve parts:
 10. **Refused and failed expiries are counted.** `expiry_incomplete_total` counts every ILM expiry attempt that ended without removing what it addressed, by `reason`: `not_applicable` (the rule no longer applies), `locked` (Object Lock), `history_unavailable` (the history could not be read with authority), and `error`. Metrics v2 export it as `minio_node_ilm_expiry_incomplete_total`, metrics v3 as `minio_ilm_expiry_incomplete_total` under `/ilm`. No bucket or object is a label, and a version that is already gone is not counted.
 11. **An approved version expiry deletes every copy.** A version can have copies in two pools, for example after an interrupted decommission or rebalance. An ILM version expiry that the pools layer approved with the versions of all pools now deletes every copy, the secondary copies before the primary, and stops at the first failure, so the remote object of a tiered version is deleted only after every copy is gone. Each set still guards the protection that the pools layer approved. Before this, only the copy that latest-key routing chose was deleted: the other copy stayed readable, the remote object of a tiered version was deleted while that copy still referenced it, and a decommission of the pool that held it failed its completion check. The bulk noncurrent purge already deleted every copy.
 12. **Drive heal heals a version whose expiry it queues.** Drive heal evaluates lifecycle on the versions of one pool. For a version it found due, it queued the expiry and skipped the heal. The expiry is decided again under the object lock and can be refused, so such a version kept reduced redundancy on the replaced drive for as long as the refusal lasted, and the scanner, which heals only versions with no due action, did not repair it either. Drive heal now queues the expiry and heals the version; a version that the expiry then removes costs one heal. Heal and expiry exclude each other through the object lock in the writers' lock domain, which the [single-pool lock-domain fix](/blog/design/single-pool-lock-domains/) provides.
+{.steps}
 
 When copies of one version in two pools are merged, their independently ordered retention, legal hold, and tag revisions are kept, under the strict ordering of part 7.
 
@@ -199,9 +205,9 @@ When copies of one version in two pools are merged, their independently ordered 
 
 On these paths, a wrong local decision is refused rather than executed. Migration consults the same check before it decides not to move a version.
 
-**Not covered here.**
+**Covered in a companion fix.**
 
-- **Whole-object expiries**, beyond the cross-pool decision of part 1, are outside the scope of this record.
+- **Whole-object expiries** (`ExpiredObjectAllVersions` and `DelMarkerExpiration`), beyond the cross-pool decision of part 1, are covered in [Whole-Object ILM Expiry](/blog/design/ilm-delete-all-exact-key/).
 
 **Necessary.** Each part closes a path that otherwise stays open:
 
@@ -299,7 +305,7 @@ On these paths, a wrong local decision is refused rather than executed. Migratio
 
 Multi-node lock domains and long-running scanner and migration behavior have not been exercised.
 
-**Integration.** The fix is the base of one integration branch for the next release. #281 and the lock-domain, heal dry-run, #259, #285 and Console fixes are stacked on it, and every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix is the base of one integration branch for the next release. #281 and the lock-domain, delete-all, heal dry-run, #259, #285 and Console fixes are stacked on it, and every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
 
 The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
@@ -308,16 +314,18 @@ The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command
 | Round | Outcome |
 | --- | --- |
 | Maintainer rounds 1 and 2 | Found the gap in forwarding the all-pools approval in batches, the read-path hiding of valid versions, and refused expiries announced as removals; fixed as parts 3 to 5. |
-| Adversarial review | Requested changes. Two findings were introduced by parts 1 to 5: the stale-revision legal-hold bypass, and the lost pending purge on duplicate copies. Fixed as parts 6 to 8. Two findings were older: the incomplete-history whole-object delete and the announcement of other refusals. Fixed as parts 6 and 9. The single-pool error change is documented above. |
+| Adversarial review | Requested changes. Two findings were introduced by parts 1 to 5: the stale-revision legal-hold bypass, and the lost pending purge on duplicate copies. Fixed as parts 6 to 8. Two findings were older: the incomplete-history whole-object delete and the announcement of other refusals. Fixed as parts 6 and 9. Whole-object expiry is fixed in [Whole-Object ILM Expiry](/blog/design/ilm-delete-all-exact-key/). The single-pool error change is documented above. |
 | Design rounds 2 and 3 | Agreed with changes. A revision needs a strict majority and the version's own read quorum. Supersession needs strictly newer, valid timestamps. A pending purge is an unconditional veto. Conflicting cross-pool protection is refused before approval. |
 | Patch review, rounds 4 to 7 | Round 4 found that the 4-byte header signature cannot identify a revision. Round 5 found three more problems: lock keys read only in lowercase (pre-existing), a digest without map boundaries, and legacy per-shard checksums that never agree across drives. Round 6 found that nested legacy maps were hashed in an unsorted order. All were fixed with regressions. Round 7 approved the patch with no remaining findings in scope. |
 | Release review (2026-11-06) | Found that refused and failed expiries left almost no trace and that the scanner traced a refusal like a removal (parts 9 and 10); that an approved version expiry deleted only one of its copies in two pools (part 11); that drive heal skipped versions whose expiry it queued, which a refusal then left with reduced redundancy (part 12); that the walks read a key's history once per due version in their prechecks; that a pool unable to report the history stops expiry of keys it does not hold; and that an unversioned split key can stay unexpired. The last two are documented as limits. |
+{.wide .expand}
 
 ## References {#references}
 
 
 - Issue: [#278](https://github.com/pgsty/silo/issues/278)
 - Contributor PR: [#279](https://github.com/pgsty/silo/pull/279)
+- Companion whole-object expiry fix: [Whole-Object ILM Expiry](/blog/design/ilm-delete-all-exact-key/)
 - Related restored-copy expiry: [#281](https://github.com/pgsty/silo/issues/281), [#282](https://github.com/pgsty/silo/pull/282)
 - Migration expiry change: [#276](https://github.com/pgsty/silo/pull/276) and [ILM Expiry and Pool Migration Ordering](/blog/design/ilm-migration-ordering/)
 - Upstream placement change: [minio/minio#21115](https://github.com/minio/minio/pull/21115)

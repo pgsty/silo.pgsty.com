@@ -35,6 +35,7 @@ url: "/zh/blog/design/replication-full-object-checksum/"
 | :-- | :-- |
 | `FULL_OBJECT` | 对完整拼接内容 `P1 || ... || Pn` 计算 CRC，编码为 Base64 |
 | `COMPOSITE` | 拼接各分片 CRC 的**原始摘要字节**，再对其计算 CRC、编码为 Base64，并在输出时附加 `-n` 分片数后缀 |
+{.wide .expand}
 
 即便分片上传只有一个分片，这两种方式算出的摘要也通常不同。仅转发算法名称与摘要值，不足以还原校验和语义。
 
@@ -52,6 +53,7 @@ url: "/zh/blog/design/replication-full-object-checksum/"
 | 目标端持久化的上传类型 | `COMPOSITE` | `FULL_OBJECT` |
 | 完成请求的校验和 | 源端整对象 CRC | 源端整对象 CRC + 显式 `FULL_OBJECT` 类型 |
 | 目标端校验结果 | `400 BadDigest` | 校验通过，完成复制 |
+{.wide .expand}
 
 核心不变量：**复制必须在初始化与完成两个阶段同时保留校验和的算法、摘要值与类型解释方式**，使目标端按与源端一致的规则执行完整性校验。
 
@@ -117,6 +119,7 @@ if !objInfo.isMultipart() && cs[xhttp.AmzChecksumType] == xhttp.AmzChecksumTypeF
 | 在发送端重新计算 `COMPOSITE` 摘要以迎合目标端 | 不采纳：篡改了源端对象的校验和类型与摘要值，且引入额外计算开销 |
 | 单独编写 `CopyObject` 复制分支或排除 CRC64NVME | 不需要：`putReplicationOpts()` 既有路由分支与 `CanMerge()` 已自然覆盖 |
 | 调整复制重试预算、队列或 resync 调度 | 无效：不修复请求头缺失，重试多少次都会发送相同的错误请求 |
+{.wide .expand}
 
 ## 验证与实机验收 {#validation}
 
@@ -134,6 +137,7 @@ if !objInfo.isMultipart() && cs[xhttp.AmzChecksumType] == xhttp.AmzChecksumTypeF
 | 默认 `FULL_OBJECT` 的分片上传 | CRC64NVME | 1 |
 | 对分片 `FULL_OBJECT` 对象执行 `CopyObject` | CRC32、CRC32C | 2 |
 | 仅含 1 个分片的 `FULL_OBJECT` 上传 | CRC32 | 1 |
+{.wide .expand}
 
 全部 12 个用例均达到源端 `COMPLETED`、目标端 `REPLICA`；独立计算的校验和摘要与类型、版本 ID、ETag、对象大小及目标端下载字节均与源端完全一致。
 

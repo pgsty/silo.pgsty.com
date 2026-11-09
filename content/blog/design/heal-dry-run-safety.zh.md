@@ -2,7 +2,7 @@
 title: "Heal 演练不能删除数据"
 linkTitle: "Heal 演练安全"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO 维护团队"
 summary: >
   解释以演练（dry run）方式运行的管理 heal，为何在对象版本的元数据没有读 quorum 时仍可能删除悬空版本；为什么五行的提前返回是本次发布的正确修复；以及为什么同一修复还必须在桶 heal 中把演练标志传给远端节点。
@@ -38,11 +38,13 @@ PR 中第二处与演练相关的改动，是在分片校验没有成功时，�
 | 严重程度 | 高。受影响的版本已经无法通过 S3 读取，真实 heal（以及用户桶中的 GET 或 HEAD）也会按同一规则清理它们。危害在于：运维人员的检查工具，做出了运维人员明确要求它不要做的不可逆删除。在任何人能决定如何恢复之前，最后几份元数据就已经没了。 |
 | 发布紧急度 | 阻塞下一个版本。修复约十行代码，只改变演练行为，并且附带回归测试。 |
 | 剩余工作量 | 拆分和审查已完成。剩下的是运行 CI，并在实际部署的多节点集群上验证一次演练桶 heal。 |
+{.wide .expand}
 
 ## 触发条件 {#trigger}
 
 需要同时满足三个条件：
 
+{.steps}
 1. 带 `DryRun` 的 heal 对某个对象版本进入 `healObject`。heal 遍历会逐个版本分别 heal。
 2. `objectQuorumFromMeta` 失败：读错误归约后，有结果的盘不足一半；或者没有哪个校验块数（parity）得到足够多可读副本的一致报告。一个 parity 需要的一致副本数，等于它所对应的读 quorum，对普通对象就是数据块数。例如，一个 EC 3+1 的版本只有两份可读副本时，虽然有一半的盘作答，仍然会失败。
 3. `isObjectDangling` 判定该版本悬空。此时还没有做任何分片检查，因此判定要求：
@@ -69,7 +71,7 @@ PR 中第二处与演练相关的改动，是在分片校验没有成功时，�
 
 ## 行为的来源 {#history}
 
-### 溯源
+### 溯源 {#provenance}
 
 **由上游 MinIO 引入，不是 SILO 引入的。** 两个缺陷都来自上游提交，这些提交都是 SILO 分叉点（[`27742d469`](https://github.com/pgsty/silo/commit/27742d469)，2025-12-03）的祖先。它们存在于分叉前最后一个上游发布 `RELEASE.2025-10-15T17-29-55Z`、已归档的上游 `master`，以及从 `RELEASE.2025-12-03T12-00-00Z` 到 `RELEASE.2026-10-26T00-00-00Z` 的每一个 SILO 发布中。我们检查了每个 tag：`healObject` 中第一次 `deleteIfDangling` 调用位于演练返回之前，远端桶 heal 的消息不带演练标志。没有任何 SILO 提交引入、扩大或缩小这两个缺陷。
 
@@ -81,6 +83,7 @@ PR 中第二处与演练相关的改动，是在分片校验没有成功时，�
 | 函数体改为调用没有 `Remove` 限制的 `deleteIfDangling`。 | [`f19a414e0`](https://github.com/pgsty/silo/commit/f19a414e0)（[#14273](https://github.com/minio/minio/pull/14273)） | 2022-02-08 | `RELEASE.2022-02-12T00-51-25Z` | **单独的演练就会删除。** 报告的行为从这个发布开始。 |
 | 调用被内联进 `healObject`，位于演练返回之前。 | [`136d41775`](https://github.com/pgsty/silo/commit/136d41775)（[#15954](https://github.com/minio/minio/pull/15954)） | 2022-10-27 | `RELEASE.2022-10-29T06-21-33Z` | 无。元数据仲裁失败的分支仍在演练返回之前。 |
 | 该分支的错误返回被重新整理。 | [`3549e583a`](https://github.com/pgsty/silo/commit/3549e583a)（[#19702](https://github.com/minio/minio/pull/19702)） | 2024-05-09 | `RELEASE.2024-05-10T01-41-38Z` | 对判断条件无影响。当前这个分支的大部分行来自该提交。 |
+{.wide .expand}
 
 **桶 heal。** 2024 年 1 月之前，按纠删集的桶 heal 会遵守 `DryRun`。节点级桶 heal 在 [`e31081d79`](https://github.com/pgsty/silo/commit/e31081d79)（[#18612](https://github.com/minio/minio/pull/18612)，2024-01-10，`RELEASE.2024-01-11T07-46-16Z`）中取代了它。它的远端调用只发送桶名和 remove 标志，远端 handler 用这两个值构造 heal 选项。同一调用的本地实现会检查 `DryRun`，所以只有本地节点遵守。[`ff80cfd83`](https://github.com/pgsty/silo/commit/ff80cfd83)（[#18951](https://github.com/minio/minio/pull/18951)，2024-02-02，`RELEASE.2024-02-04T22-36-13Z`）把调用迁到 grid，仍只带这两个值。上游 `master` 上这个缺口依然存在。
 
@@ -92,6 +95,7 @@ PR 中第二处与演练相关的改动，是在分片校验没有成功时，�
 | [`e59a3d938`](https://github.com/pgsty/silo/commit/e59a3d938) | 2026-09-11 | `RELEASE.2026-09-16T00-00-00Z` 及之后 | **没有影响。** 调用方已持有命名空间锁时，`HealObject` 沿用该锁的上下文。 |
 | [`9b11dc946`](https://github.com/pgsty/silo/commit/9b11dc946) | 2026-09-03 | `RELEASE.2026-09-03T13-18-01Z` 及之后 | **没有影响。** 只是替换了 errgroup 辅助包的导入路径。 |
 | [`7ce7fc8d1`](https://github.com/pgsty/silo/commit/7ce7fc8d1) | 2026-10-29 | 尚未发布 | **没有影响。** heal 遍历同时列出 free version，不含演练逻辑。 |
+{.wide .expand}
 
 SILO 没有改动 `deleteIfDangling`、`isObjectDangling`、`remotePeerS3Client.HealBucket` 或 `HealBucketHandler`，也没有在这条路径上增加任何演练保护。[PR #280](https://github.com/pgsty/silo/pull/280) 仍处于开放状态，带有对象 heal 的保护；桶 heal 的部分只是本记录提出的方案。
 
@@ -99,21 +103,21 @@ SILO 没有改动 `deleteIfDangling`、`isObjectDangling`、`remotePeerS3Client.
 
 ## 方案比较 {#options}
 
-### 方案 1：在 `healObject` 中提前返回
+### 方案 1：在 `healObject` 中提前返回 {#option-1}
 
 这是 PR #280 的做法。当 `objectQuorumFromMeta` 失败且设置了 `dryRun` 时，`healObject` 用观察到的错误构造 `defaultHealResult`，连同 quorum 错误一起返回。改动只有一个函数中的五行，只影响演练，真实 heal 的行为与现在完全一致。它的局限是只保护这一个调用点：将来如果别处有演练路径调用 `deleteIfDangling`，需要自己的保护。
 
-### 方案 2：把演练标志传入 `deleteIfDangling`
+### 方案 2：把演练标志传入 `deleteIfDangling` {#option-2}
 
 给 `deleteIfDangling` 增加一个参数或一个 `ObjectOptions` 字段，让它在演练中只做判定、不做删除。它还可以向报告返回"将会清理"的判定。代价是六个调用方都要改动，其中四个是对象读取和元数据更新路径，根本没有演练的概念。而且将来的调用方同样可能忘记传这个标志，就像可能忘记提前返回一样。为这点稳健性付出这么多改动并不划算；"将会清理"的报告应该归入演练报告的重新设计。
 
-### 方案 3：集中式保护
+### 方案 3：集中式保护 {#option-3}
 
 让演练 heal 使用只读包装的盘，这样任何写入都会失败。这是唯一能从结构上防住将来失误的方案。但 `StorageAPI` 有几十个方法，`deleteIfDangling` 从纠删集合而不是从调用方获取盘，而桶 heal 的缺口位于对端 RPC 层，这样的包装也覆盖不到。作为发布修复，它的范围太大。
 
 同一思路的廉价版本适用于测试。PR 的合成测试盘内嵌一个 nil 的 `StorageAPI`，任何测试未预期的写操作都会 panic。回归测试保留这种写法。
 
-### 远端节点上的桶 heal
+### 远端节点上的桶 heal {#bucket-heal-remote}
 
 要阻止远端节点在演练中写入，有两种办法：
 
@@ -122,7 +126,7 @@ SILO 没有改动 `deleteIfDangling`、`isObjectDangling`、`remotePeerS3Client.
 
 我们选择传递标志。修复之前，每个节点的行为本来就等同于标志为 false。升级期间，混合版本的集群不会比现在更差；所有节点都运行修复后，缺口即被关闭。
 
-### 关于报告改动
+### 关于报告改动 {#reporting-change}
 
 在演练的深度扫描中，如果一块盘的元数据读取成功，但分片校验因为缺失或损坏以外的原因没有成功，PR 会把它报告为 `unknown`。这些原因包括：检查过程中盘离线、卷缺失、超过截止时间、被取消、访问被拒绝。在 main 上，两种模式都把这块盘报告为 `ok`，修复决策也会忽略这些结果。
 
@@ -136,7 +140,7 @@ PR 只改了演练模式。它自己的测试对同一状态，期望演练给�
 
 修复分两部分。第 1 部分是 PR #280 中贡献者的改动，第 2 部分来自维护者的审计。
 
-### 第 1 部分：对象 heal 在悬空清理之前返回
+### 第 1 部分：对象 heal 在悬空清理之前返回 {#part-1}
 
 **代码。** 原样采用 PR #280 在 `healObject` 中的第一处改动：
 
@@ -170,7 +174,7 @@ if err != nil {
 - 对每种 quorum 情形，它断言转换后的错误（版本不存在，或损坏错误），取代原来针对 `errFileNotFound` 的检查——经过 `toObjectErr` 之后，那个检查不可能失败；
 - 合成盘去掉了 `CheckParts` 桩，它只被 PR 中并行校验和报告相关的测试使用。
 
-### 第 2 部分：远端节点在桶 heal 中遵守演练标志
+### 第 2 部分：远端节点在桶 heal 中遵守演练标志 {#part-2}
 
 **代码。** 在 `peerS3BucketDeleted` 旁边新增键 `peerS3BucketDryRun = "dry-run"`。`remotePeerS3Client.HealBucket` 通过一个小编码函数构造消息并加入这个键，`HealBucketHandler` 把它读入 `madmin.HealOpts.DryRun`：
 
@@ -202,7 +206,7 @@ res, err := healBucketLocal(context.Background(), bucket, madmin.HealOpts{
 - 后台 heal 状态调用是只读的；
 - 管理 heal 请求只有在凭 token 轮询已有序列时才会被代理到其他节点，从不用于启动序列。
 
-### 交付
+### 交付 {#delivery}
 
 - 把演练改动和上述测试拆成独立的提交和 PR，与并行校验改动分开。后者需要单独评审（慢盘上的 I/O 并发和取消处理），也需要单独的 CI。
 - 保留贡献者署名。生产代码改动与贡献者已签署 DCO 的提交完全一致，但测试是经过调整的子集，所以拆分后的提交是维护者提交，附带 Jasper Bernhardt 的 `Co-authored-by` 标注，并引用 PR #280。
@@ -228,6 +232,7 @@ res, err := healBucketLocal(context.Background(), bucket, madmin.HealOpts{
 | `HealFormat` | 写入 `format.json` 并替换盘；盘初始化可能创建内部目录，或迁移旧的 `format.json` | 保存位于 `if !dryRun` 之内，但初始化发生在这个检查之前。管理 heal 序列不会把它入队；当前代码中唯一的调用方是新盘监视器，且 `dryRun` 为 false | 不变 |
 | 全站 heal，桶列举 | `ListBuckets` 会填入创建时间。对于元数据不在缓存中的桶，这会经由普通的对象读路径加载桶元数据，可能迁移旧版桶配置文件，并为 `.metadata.bin` 入队 MRF 修复 | 会执行，走的是服务器在启动时和定期元数据刷新时尝试的同一次加载 | 不变；见[剩余限制](#limits) |
 | heal 的元数据读取（`ReadVersion`）、`CheckParts`、`VerifyFile`、heal 遍历 | 无 | 只读 | 不变 |
+{.wide .expand}
 
 heal 路径本身不会向 MRF 入队；只有上面的桶元数据加载可能入队。被执行的清理在盘以外唯一的副作用，是一条 `DeleteDanglingObject` 审计记录，只在配置了审计日志时写入。
 
@@ -321,7 +326,7 @@ heal 路径本身不会向 MRF 入队；只有上面的桶元数据加载可能�
 - 端到端的 `mc admin heal --dry-run`；
 - 并行校验相关的测试。
 
-**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、#259、#285 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
+**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、#259、#285、`delete-all` 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
 
 本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
 
@@ -331,6 +336,7 @@ heal 路径本身不会向 MRF 入队；只有上面的桶元数据加载可能�
 | --- | --- |
 | 对抗性审查第 1 轮 | 要求修改。五个问题：全站演练的桶列举会加载未缓存的桶元数据，可能迁移旧版桶配置并入队 MRF 修复（原本就有）；真实盘测试夹具会遗留后台 worker 和全局状态；直接调用的 format heal 在演练检查之前初始化各块盘（原本就有）；每个池都回答"不存在"时，池聚合会丢弃集合级的盘状态（原本就有）；测试中有一个错误断言不可能失败。另外对本文提出十一处更正。结果：列举的影响被认定不阻塞本修复，因为服务器在启动时和定期刷新时会尝试同一次加载；已在文中说明，并列出后续工作。夹具问题有异议：测试沿用了已有 heal 测试的夹具惯例，并且与这些测试一起进行的 race 运行全部通过。format 和聚合两个问题已在文中说明。该断言现在对每种情形检查转换后的错误。所有更正均已采纳。 |
 | 对抗性审查第 2 轮 | 批准，附带小问题。审查方撤回了列举和夹具两个问题，不再作为这两部分的发布问题。两处措辞问题：部分悬空版本会报告带盘状态的读 quorum 不足；定期刷新没有完成时间上的保证。另有三处更正。均已采纳。 |
+{.wide .expand}
 
 ## 参考 {#references}
 

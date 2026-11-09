@@ -2,11 +2,11 @@
 title: "Console 的桶配额：列表显示与数值校验"
 linkTitle: "Console 配额校验"
 date: 2026-11-04
-lastmod: 2026-11-04
+lastmod: 2026-11-09
 author: "PGSTY SILO 维护团队"
 summary: >
   解释为什么在 Web Console 里设置的配额在桶列表中显示为短横线，为什么创建桶的表单会把 1000 Ei 变成 1 字节配额、又拒绝 0.5 Gi，两个缺陷分别出现在哪些发布中，以及为什么共用一个配额读取规则和一套换算与边界检查，是最小而完整的修复。
-tags: [设计, Console, 配额, 保留]
+tags: [Design, Console, Quota, Retention]
 weight: 10
 draft: false
 url: "/zh/blog/design/console-quota-numeric-validation/"
@@ -14,7 +14,7 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 
 本文覆盖 [silo-console#72](https://github.com/pgsty/silo-console/issues/72)（在 Web Console 中设置的配额在桶列表里显示为短横线）和 [silo-console#73](https://github.com/pgsty/silo-console/issues/73)（创建桶表单的数值校验）。评估基于修复之前的 Console 源码 [3d264aea9](https://github.com/pgsty/silo-console/commit/3d264aea9b67aa40baf706f3e13c8d4145671ea1)，以及修复提交 [a85665814](https://github.com/pgsty/silo-console/commit/a85665814ff74d8a9d0cbd42a51f518c79c9a227) 至 [5a34232e7](https://github.com/pgsty/silo-console/commit/5a34232e72162274d621c57342c75c06fc35befd)。
 
-**状态：** 已在 Console 修复。修复提交已合入 Console `main`（[PR #74](https://github.com/pgsty/silo-console/pull/74)，合并提交 [3d1dd56eb](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838)，2026-11-04），之后又有数值相关的后续修复（[PR #79](https://github.com/pgsty/silo-console/pull/79)）。Console `v2.6.0` 的标签打在 [`f8ab14669`](https://github.com/pgsty/silo-console/commit/f8ab146695fd1df74e4b84128a286d552921bf00) 上，GitHub 发布仍是草稿。嵌入 2.6.0 的 SILO Server 提交已在本地准备好，尚未合并，也还没有进入任何 SILO Server 发布。
+**状态：** 已随 [Console 2.6.0](/zh/blog/release/console-2.6.0/) 发布。修复提交已合入 Console `main`（[PR #74](https://github.com/pgsty/silo-console/pull/74)，合并提交 [3d1dd56eb](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838)，2026-11-04），之后又有数值相关的后续修复（[PR #79](https://github.com/pgsty/silo-console/pull/79)）。Console `v2.6.0` 已在 [`f8ab14669`](https://github.com/pgsty/silo-console/commit/f8ab146695fd1df74e4b84128a286d552921bf00) 发布，SILO `main` 已内嵌 `v2.6.0`（[`e24831f53`](https://github.com/pgsty/silo/commit/e24831f53)）；尚无已打标的 SILO Server 发布包含该内嵌更新。
 
 ## 简短结论 {#tldr}
 
@@ -37,8 +37,9 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 | #73 影响 | 一种影响写入的情形：868 Ei 及以上会变成 1 字节硬配额，阻止任何非空对象的写入。8 Ei 至 867 Ei 超出有符号 64 位范围，会被 API 拒绝。其余情形是误拒绝或缺少检查。 |
 | 严重度 | #72 低。#73 低到中：触发损害需要刻意输入至少 868 Ei，但后果是桶悄悄拒绝写入。无数据丢失，无安全影响。 |
 | 受影响发布 | 见[行为的来源](#history)。#72：社区 v1.9.0 起的 Console；SILO Server 20260314 至 20261026。#73：所有发布。 |
-| 发布紧迫度 | 下一个 Console 版本。不是数据安全的阻断项。 |
-| 剩余工作量 | Console 发布与打标签，然后更新 Server 的 `go.mod` 并做发布验证。 |
+| 发布紧迫度 | 已随 Console 2.6.0 发布。不是数据安全的阻断项。 |
+| 剩余工作量 | 内嵌 Console 的下一个 SILO Server 发布验证。 |
+{.wide .expand}
 
 ## 何时发生 {#trigger}
 
@@ -72,7 +73,7 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 
 溯源依据 Console 的提交历史。上游项目 `minio/console` 如今已无法公开访问。SILO Console 所派生的社区延续项目 [georgmangold/console](https://github.com/georgmangold/console) 仍然可以访问。`pgsty/silo-console` 的 `main` 派生自它的提交 [feff71e48](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），这就是派生点。下列提交都在 `pgsty/silo-console` 的 `main` 上；PR 编号指提交原本所在的仓库。派生点之前的 Console 发布标签中，只能取得社区的 v1.7.7 及之后的标签，所以更早的提交不给出 minio/console 的首个发布标签。
 
-### #72：写入端改变后被遗留的读取端
+### #72：写入端改变后被遗留的读取端 {#reader-left-behind}
 
 | 要素 | 提交 | 来源 | 日期 | 首个发布 |
 | --- | --- | --- | --- | --- |
@@ -80,6 +81,7 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 | 列表界面只读 `details.quota.quota` | [10539929e](https://github.com/pgsty/silo-console/commit/10539929e1) “Added quota metric to buckets list & objects list”（minio/console #1595），`BucketListItem.tsx` | 上游 | 2022-02-16 | 标签无法取得；此后每个发布都有 |
 | **Console 写入端改为 `Size`；Summary 读取端同步更新，列表读取端没有** | [6c54a55d5](https://github.com/pgsty/silo-console/commit/6c54a55d5285986eeeb4df00544f1aaa8c8db05d) “use Quota Size field instead of the deprecated Quota field”（[georgmangold/console#28](https://github.com/georgmangold/console/pull/28)，Georg Mangold） | 派生点之前的社区 Console 分支 | 2025-09-16 | georgmangold/console v1.9.0（2025-11-16） |
 | 列表改为表格；配额列沿用过时的读取方式，为零时显示短横线 | [2611a4d11](https://github.com/pgsty/silo-console/commit/2611a4d11a9e22282847bfa5b8b239a84b4b5d77) “modernize buckets, object browser, safe previews, and task center”（Feng Ruohang） | SILO | 2026-10-25 | Console v2.5.0（2026-10-25） |
+{.wide .expand}
 
 缺陷需要倒数第二行：2025-09-16 之前 Console 写的是旧字段，列表能读到。[6c54a55d5](https://github.com/pgsty/silo-console/commit/6c54a55d5285986eeeb4df00544f1aaa8c8db05d) 就是表示方式的改变，它只更新了两个读取端中的一个。这不是服务器或 `madmin-go` 的改动：`madmin-go` 自 2023 年 8 月起就同时带有两个字段，服务器对它们的存储与执行也没有因此改变。SILO 没有引入这个缺陷。
 
@@ -98,16 +100,18 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 | 20260916、20261015 | Console v2.4.1 | 是（不显示） |
 | 20261018 | Console v2.4.2 | 是（不显示） |
 | 20261025、20261026 | Console v2.5.0、v2.5.1 | 是（短横线） |
+{.wide .expand}
 
-Server 的 `go.mod` 仍指向 v2.5.1 这一线（2026-10-27 的固定），所以没有任何 Server 发布包含修复。Server 标签 20260304、20260323 和 20260330 内嵌的是写入端改变之前的 Console 构建，不受影响。
+Server `main` 分支的 `go.mod` 现已指向 Console `v2.6.0`（[`e24831f53`](https://github.com/pgsty/silo/commit/e24831f53)），但尚无已打标的 Server 发布包含该修复。Server 标签 20260304、20260323 和 20260330 内嵌的是写入端改变之前的 Console 构建，不受影响。
 
-### #73：minio/console 的原有代码
+### #73：minio/console 的原有代码 {#original-code}
 
 | 要素 | 提交 | 来源 | 日期 | 说明 |
 | --- | --- | --- | --- | --- |
 | 创建请求中的 `parseInt(getBytes(...))` | [28eb8784a](https://github.com/pgsty/silo-console/commit/28eb8784a) “Set Bucket Quota on Creation”（minio/console #308） | 上游 | 2020-10-01 | `getBytes` 返回 `Number.toString(10)`；从 1e21 起出现指数形式 |
 | 字段检查 `parseInt(quotaSize) === 0`、切换单位不重新校验、保留期 `NaN`/`< 1` 检查 | [41e1b4a5d](https://github.com/pgsty/silo-console/commit/41e1b4a5d) “Add Bucket slice refactor to reduce re-renders”（minio/console #2087） | 上游 | 2022-06-03 | 把表单逻辑移入 `addBucketsSlice.ts`；这些检查此前已存在于 `AddBucket.tsx` |
 | 输入模式加入小数，`parseInt` 检查保留 | [7ecc1022b](https://github.com/pgsty/silo-console/commit/7ecc1022b) “Added decimal support to bucket quota selectors”（minio/console #2126） | 上游 | 2022-06-15 | 使 `0.5` 通过输入模式、却被 `parseInt` 检查拒绝；上游 “Release v0.19.0” 提交紧随其后 |
+{.wide .expand}
 
 这些都在社区分支和 `feff71e48` 中。修复之前触及相同文件的 SILO 提交（[23ae6e8e6](https://github.com/pgsty/silo-console/commit/23ae6e8e6)、[14b1c2de2](https://github.com/pgsty/silo-console/commit/14b1c2de2)、[2611a4d11](https://github.com/pgsty/silo-console/commit/2611a4d11a9e22282847bfa5b8b239a84b4b5d77)）改的是链接目标、翻译和命令预览，没有改动校验或换算。SILO 既没有引入也没有放大 #73。它存在于每个 Console 发布，因而存在于每个内嵌 Console 的 SILO Server 发布。
 
@@ -115,23 +119,23 @@ Server 的 `go.mod` 仍指向 v2.5.1 这一线（2026-10-27 的固定），所�
 
 ## 方案选项 {#options}
 
-### 选项 1：列表和详情共用一个配额读取函数
+### 选项 1：列表和详情共用一个配额读取函数 {#option-1}
 
 把“先 `Size` 后 `Quota`”的规则放进一个函数，列表处理程序和 `getBucketQuota` 都调用它。两个读取方始终一致，API 模式不变。
 
-### 选项 2：让写入端同时发送两个字段
+### 选项 2：让写入端同时发送两个字段 {#option-2}
 
 同时写 `Quota` 和 `Size` 能让旧读取端重新工作，但会为一个使用方重新引入已弃用字段，而其他工具写入的配额仍会让列表出错。否决。
 
-### 选项 3：让界面也读取 `size`
+### 选项 3：让界面也读取 `size` {#option-3}
 
 列表响应模型只有 `quota`。让浏览器再读一个字段，会把规则复制到第三处。否决。
 
-### 选项 4：用一个函数校验数量，到处使用
+### 选项 4：用一个函数校验数量，到处使用 {#option-4}
 
 一个函数把文本数量和单位换算成字节数，并拒绝 `1` 到 `2^63 - 1` 之外的值。创建表单、配额编辑器和 thunk 都调用它，切换单位时重新校验。保留期增加整数和 `1..2147483647` 的检查。
 
-### 选项 5：交给服务器拒绝
+### 选项 5：交给服务器拒绝 {#option-5}
 
 服务器接受任何非负的 `Size`，包括 1。这个错误值本身是合法配置，服务器无法区分它与有意设置。不能只靠它，保留作为负数的后备防线。
 
@@ -144,6 +148,7 @@ Server 的 `go.mod` 仍指向 v2.5.1 这一线（2026-10-27 的固定），所�
 3. [fb2c9e71c](https://github.com/pgsty/silo-console/commit/fb2c9e71c) 完整解析字节值并限制显示单位，大数字在显示时不再出现指数形式。
 4. [d878dbf88](https://github.com/pgsty/silo-console/commit/d878dbf88) 新增 `addBucketValidation.ts`，包含 `getQuotaBytes` 和 `isValidQuota`。数量必须符合两位小数的模式，换算为大于零且小于 `2^63` 的有限整数，切换单位时重新校验。创建 thunk 在发送前再检查一次。
 5. [9fb0b0627](https://github.com/pgsty/silo-console/commit/9fb0b0627) 与 [5a34232e7](https://github.com/pgsty/silo-console/commit/5a34232e72162274d621c57342c75c06fc35befd) 要求保留期有效值在创建表单、其 thunk 和保留期编辑器中都是 1 到 2147483647 的整数。前者还让 API 拒绝小于等于零的保留期有效值。
+{.steps}
 
 分支上还有两个无关的显示提交（API 请求图表与 syscall 速率标签），不属于这两个问题。
 
@@ -179,7 +184,7 @@ Server 的 `go.mod` 仍指向 v2.5.1 这一线（2026-10-27 的固定），所�
 ## 剩余限制 {#limits}
 
 - **已被设成 1 字节配额的桶仍然被阻止写入。** 用 `mcli quota info ALIAS/BUCKET` 查找（大小为 1 字节即是迹象），然后设置期望的配额，或用 `mcli quota clear ALIAS/BUCKET` 清除。
-- **尚未发布。** 修复仅在 Console `main` 上。在打出 Console 发布标签、并把 Server 的 `go.mod` 固定到它之前，直到 20261026 的每个 SILO Server 发布内嵌的 Console 界面仍有这两个缺陷。
+- **尚未进入已打标的 Server 发布。** 独立版 [Console 2.6.0](/zh/blog/release/console-2.6.0/) 已包含该修复，且 SILO `main` 已内嵌 `v2.6.0`（[`e24831f53`](https://github.com/pgsty/silo/commit/e24831f53)）。在下一个 SILO Server 发布推出之前，直到 20261026 的已打标 SILO Server 发布内嵌的 Console 界面仍有这两个缺陷。
 - **大配额仍用 `mcli`。** 在 `main` 上，浏览器拒绝写入 8 PiB（2^53 字节）及以上的配额，因为 JSON 数字只在此范围内是精确的（[#75](https://github.com/pgsty/silo-console/issues/75)，由 [2b18ff854](https://github.com/pgsty/silo-console/commit/2b18ff854f81b08080094f0f3231f6b249c64d49) 关闭）。分支顶端允许到 2^63，但经由 JavaScript 数字换算。
 - **窄屏。** 现有的响应式布局在 1200 px 以下隐藏桶列表的配额列；Summary 仍显示配额。
 
@@ -205,4 +210,4 @@ Server 的 `go.mod` 仍指向 v2.5.1 这一线（2026-10-27 的固定），所�
 - 修复：[PR #74](https://github.com/pgsty/silo-console/pull/74)，合并提交 [3d1dd56eb](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838)
 - 写入端改动：[georgmangold/console#28](https://github.com/georgmangold/console/pull/28)
 - `main` 上的后续修复：[silo-console#75](https://github.com/pgsty/silo-console/issues/75)（64 位精度，[2b18ff854](https://github.com/pgsty/silo-console/commit/2b18ff854f81b08080094f0f3231f6b249c64d49)）、[silo-console#76](https://github.com/pgsty/silo-console/issues/76)（`calculateBytes`，[4da296098](https://github.com/pgsty/silo-console/commit/4da296098)）、[PR #79](https://github.com/pgsty/silo-console/pull/79)（创建时校验）
-- 发布页面：[Console 2.5.1](/zh/blog/release/console-2.5.1/)、[SILO 20261026](/zh/blog/release/silo-20261026/)
+- 发布页面：[Console 2.6.0](/zh/blog/release/console-2.6.0/)、[Console 2.5.1](/zh/blog/release/console-2.5.1/)、[SILO 20261026](/zh/blog/release/silo-20261026/)

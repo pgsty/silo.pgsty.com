@@ -3,7 +3,7 @@ title: "批量密钥轮换"
 url: "/zh/administration/batch-framework-job-keyrotate/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-keyrotate.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-batch-framework-keyrotate-job"></a>
@@ -19,6 +19,9 @@ MinIO Batch Framework 允许你使用 YAML 格式的作业定义文件（“批�
 `keyrotate` 批处理作业类型会为 MinIO 部署上的加密对象轮换 [sse-s3 or sse-kms keys](/zh/operations/server-side-encryption/#minio-sse-data-encryption)。
 
 YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，将密钥轮换限制在特定对象集合上。 你还可以定义重试次数，或设置通知 endpoint 和 token。
+
+> [!NOTE]
+> **下一版本 SILO 生命周期（`pgsty/silo` `main`）：** 批量 `keyrotate` 会在运行期间持续重新校验提交主体的凭据与权限（`461a7df`），在遇到临时 IAM 错误、不完整存储桶列举或存储池再平衡/退役冲突时暂停并重试（`5ce52c5`），并将被拒绝的对象（`keysRefused`、`complete-with-skips`）与完全成功的作业区分报告。详见 [SILO 批处理作业生命周期](/zh/administration/batch-framework/#silo-lifecycle)。
 
 <a id="id3" data-td-print-local></a>
 

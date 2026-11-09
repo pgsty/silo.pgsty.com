@@ -35,6 +35,7 @@ For multipart CRC32 and CRC32C, the same algorithm supports two distinct object-
 | :-- | :-- |
 | `FULL_OBJECT` | CRC computed across the concatenated bytes `P1 || ... || Pn`, encoded as Base64 |
 | `COMPOSITE` | CRC computed across the concatenated **raw per-part CRC digests**, encoded as Base64 with the `-n` part-count suffix |
+{.wide .expand}
 
 These two calculations produce different digests even for a single-part multipart upload. Forwarding only the algorithm name and digest value leaves the checksum semantics ambiguous.
 
@@ -118,6 +119,7 @@ When `getCRCMeta()` dropped `x-amz-checksum-type`, that condition never matched,
 | Recalculate a `COMPOSITE` digest on the sender to match the target | Rejected: alters the replica's checksum type and digest value and adds unnecessary work |
 | Add a separate `CopyObject` replication branch or CRC64NVME special case | Unnecessary: the existing `!objInfo.isMultipart()` branch and `CanMerge()` already cover both |
 | Adjust replication retry budgets, queues, or resync scheduling | Ineffective: retrying an unchanged malformed request repeats the same `BadDigest` failure |
+{.wide .expand}
 
 ## Validation and Live Acceptance {#validation}
 
@@ -135,6 +137,7 @@ Live acceptance testing ran **two single-drive SILO server instances** configure
 | Multipart default `FULL_OBJECT` | CRC64NVME | 1 |
 | `CopyObject` of multipart `FULL_OBJECT` | CRC32, CRC32C | 2 |
 | Single-part multipart `FULL_OBJECT` | CRC32 | 1 |
+{.wide .expand}
 
 All 12 cases reached `COMPLETED` on the source and `REPLICA` on the target, with independently computed checksum digests and types, version IDs, ETags, object sizes, and downloaded payload bytes matching across both endpoints.
 

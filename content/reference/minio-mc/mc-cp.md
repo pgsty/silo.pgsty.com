@@ -126,7 +126,7 @@ mc cp play/mybucket/object.txt ~/mydata/object.txt
 
 *Optional*
 
-Add custom metadata for the object. Separate pairs with semicolons and quote the argument, for example `--attr 'key1=value1;key2=value2;key3=value3'`. Empty entries, including trailing or repeated semicolons, are accepted by builds with the next-release fixes; inputs containing no key/value entry still fail. Builds with the [next-release fixes](/compatibility/mcli/#next-release) reject malformed attributes before starting any transfer.
+Add custom metadata for the object. Separate pairs with semicolons and quote the argument, for example `--attr 'key1=value1;key2=value2;key3=value3'`. Starting with [mcli 20261109](/blog/release/mcli-20261109/), empty entries (including trailing or repeated semicolons) are accepted while inputs containing no key/value entry still fail, and [mcli](/compatibility/mcli/#current-release) rejects malformed attributes before starting any transfer.
 
 ##### `--checksum` {#mc.cp.-checksum}
 
@@ -566,7 +566,7 @@ The following example sets a `content-type` of `application/json`:
 
 ### Partial failures and JSON counters {#partial-failures}
 
-With the [next-release fixes](/compatibility/mcli/#next-release), a source preparation error makes the command exit nonzero while independent sources, including later arguments, continue. Successful copies are not rolled back. Per-object JSON start records report cumulative prepared objects and bytes in `totalCount` and `totalSize`; these are not fixed final totals or completed-transfer counters. Use the final exit status, error records and final byte summary to determine the outcome.
+Starting with [mcli 20261109](/blog/release/mcli-20261109/) ([compatibility notes](/compatibility/mcli/#current-release)), a source preparation error makes the command exit nonzero while independent sources, including later arguments, continue. Multi-source copies evaluate source-to-target routing per source item (`URLs.SourceAlias`), so sources from different aliases or local paths in one invocation each use their own transfer path, and explicit `--tags` apply across server-side copies, streaming copies, and `--preserve` runs. Successful copies are not rolled back. Per-object JSON start records report cumulative prepared objects and bytes in `totalCount` and `totalSize`; these are not fixed final totals or completed-transfer counters. Use the final exit status, error records and final byte summary to determine the outcome.
 
 [`mc cp`](#command-mc.cp) verifies all copy operations to object storage using MD5SUM checksums.
 

@@ -2,7 +2,7 @@
 title: "Multi-Pool Object Consistency"
 linkTitle: "Multi-Pool Object Consistency"
 date: 2026-09-16
-lastmod: 2026-10-26
+lastmod: 2026-11-09
 author: "Ruohang Feng"
 summary: "Select one logical object under a shared lock before evaluating conditions or merging tags and Object Lock state."
 tags: [Design, S3, Operations]
@@ -61,7 +61,7 @@ Metadata updates, object writes, and background healing share this coordinating 
 
 For conditional `DELETE`, the coordinator evaluates the precondition once against the resolved logical object before starting multi-pool cleanup, and clears the precondition callback before invoking individual pool deletes. When an explicit `versionId` is supplied, the condition is evaluated against that specific version.
 
-For conditional `PUT`, [PR #207](https://github.com/pgsty/silo/pull/207) selects the latest logical representation across all eligible pools—including delete-marker state—while holding the outer namespace lock before writing the new version. This prevents a stale copy in the destination pool from causing `If-Match` or `If-None-Match` to disagree with the cluster's current logical object.
+For conditional `PUT`, [PR #207](https://github.com/pgsty/silo/pull/207) selects the latest logical representation across all eligible pools—including delete-marker state—while holding the outer namespace lock before writing the new version. This prevents a stale copy in the destination pool from causing `If-Match` or `If-None-Match` to disagree with the cluster's current logical object. In next-release SILO builds ([PR #292](https://github.com/pgsty/silo/pull/292), commits [`1f3377862`](https://github.com/pgsty/silo/commit/1f3377862b3157b8a4f07815cbf4e453d4b6f1a6) and [`af3064f2b`](https://github.com/pgsty/silo/commit/af3064f2b54fe90c4b0f14a0c54c2507bf7b29d4)), `PutObject`, `NewMultipartUpload`, and `CompleteMultipartUpload` share `checkCurrentPreconditions`: conditional multipart initiation also evaluates preconditions against the logical current object across pools while holding the pools-layer write lock through upload placement, and failed completion preconditions preserve uploaded parts for retry.
 
 If a storage failure occurs partway through multi-pool cleanup or metadata propagation, operators should re-verify object state and retry after drive recovery. Batch `DeleteObjects` XML ETag conditions remain unsupported (see [Conditional DELETE](/blog/design/conditional-delete/)).
 

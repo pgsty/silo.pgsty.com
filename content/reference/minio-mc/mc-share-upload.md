@@ -170,7 +170,7 @@ This example will upload each file in the directory `~/Documents/photos/` to the
 
 ### Generated commands and shells {#shell-compatibility}
 
-In the [next mcli release](/compatibility/mcli/#next-release), generated commands quote complete arguments for a POSIX shell and use `--form-string` for text fields. Keep these quotes when replacing `<FILE>` and `<NAME>`; replacement values containing quotes also need shell escaping. To execute an edited command stored in `upload`, use `sh -c "$upload"`. Direct `$upload` execution splits words without interpreting the embedded quotes and can fail. Windows users should run the command in Git Bash or WSL; this output is not `cmd.exe` syntax.
+Starting with [mcli 20261109](/blog/release/mcli-20261109/) ([compatibility notes](/compatibility/mcli/#current-release)), generated commands quote complete arguments for a POSIX shell and use `--form-string` for text fields. Keep these quotes when replacing `<FILE>` and `<NAME>`; replacement values containing quotes also need shell escaping. To execute an edited command stored in `upload`, use `sh -c "$upload"`. Direct `$upload` execution splits words without interpreting the embedded quotes and can fail. Windows users should run the command in Git Bash or WSL; this output is not `cmd.exe` syntax.
 
 The loop above passes each argument directly to curl. Replace its endpoint and sample policy fields with the values from a current generated command; the illustrated credentials and signature are placeholders.
 

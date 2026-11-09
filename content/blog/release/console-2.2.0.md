@@ -135,6 +135,7 @@ Browser uploads larger than 5 GiB get a non-blocking warning: the console upload
 | `golang.org/x/text` | v0.40.0 | v0.41.0 |
 | `golang.org/x/mod` | v0.37.0 | v0.40.0 (closes [CVE-2026-56864/-56865](https://pkg.go.dev/vuln/GO-2026-6180)) |
 | `golang.org/x/tools` | v0.47.0 | v0.49.0 |
+{.wide .expand}
 
 ### The SILO forks {#silo-forks}
 
@@ -184,6 +185,7 @@ On the frontend, the vulnerability workflow now covers pushes, manual runs, and 
 | `PUT /configs` | New 400 class for database DSNs the server's config grammar would corrupt. |
 | Config reset/delete | `restart` in the response now reflects the server's real answer instead of always `true`. |
 | `GET /session` | 401 for empty-credential principals; the advertised Create-Access-Key capability is computed more strictly (see [service accounts](#service-accounts)). |
+{.wide .expand}
 
 > [!NOTE]
 > **If you generate client SDKs from `swagger.yml`:** the `UpdateUserInfo` operation now points at `/user/{name}/status` with a status-only body. Code calling the generated `UpdateUserInfo` symbol keeps compiling but targets the new route; the old combined call is `UpdateUserInfoLegacy`. Audit call sites when you regenerate.

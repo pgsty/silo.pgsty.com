@@ -71,6 +71,7 @@ url: "/zh/blog/design/iam-admin-authorization/"
 | 省略、`null`、`{}`、`{"Statement":null}` | 继承父账号权限（含设置过期时间的密钥）。 |
 | 仅允许特定 Action 的策略 | 保留所请求的限制，未授权操作继续拒绝。 |
 | `{"Version":"2012-10-17"}` 或 `{"Statement":[]}` | 不归一化为继承策略；带过期时间的回归用例继续拒绝访问。 |
+{.wide .expand}
 
 归一化判断条件使用 `Statements == nil` 而非 `len(Statements) == 0`，以区分 Console 特有的空策略占位形态与显式传入空语句列表的策略。
 
@@ -129,6 +130,7 @@ Admin 创建与更新检查可能需要额外解析一次调用者的内联策�
 | 认证、身份配置与策略配置相关包测试 | 通过。 |
 | `make verifiers` 与 `make build` | lint、生成文件、品牌与兼容性检查通过，成功构建 `silo` 二进制文件。 |
 | PR `#242` 云端 CI 检查 | DCO、漏洞扫描、格式/构建/Vet、lint/生成文件、race、交叉编译、internal 与 cmd 测试共 8 项全部通过。 |
+{.wide .expand}
 
 `cmd/admin-handlers-users-authz_test.go` 覆盖了 root 空策略、无绑定策略用户自管理、父用户/组/会话/插件拒绝、带过期时间的历史 inherited 凭据、非 root 操作 root 目标、禁用或过期的损坏密钥清理、删除复制、自身别名，以及空策略子密钥签发的正反向访问验证。LDAP 测试套件额外通过 `AddServiceAccountLDAP` 签发带过期时间的子密钥并验证 S3 访问。补充边界测试验证了损坏 root 密钥的清理拦截，以及五个自管理 Handler 对 STS 显式与隐式拒绝的处理。
 

@@ -22,13 +22,19 @@ upstream_modified: true
 
 只要成功获取到 `complete` 或 `failed` 终态，命令均以退出码 `0` 结束，自动化脚本应根据返回的 `status` 字段判断作业成败；当状态无法获取、任务不存在或请求出错时则返回非零退出码。此外，本版修复了海量对象下 IOPs 中间计算整数溢出的问题，详见[本版变更](/zh/blog/release/silo-20261026/#mcli)。
 
-## 20261026 之后的变更（尚未发布） {#silo-status-details}
+<a id="silo-status-details"></a>
 
-配套的 SILO 与 mcli 版本通过实时指标和持久化状态同时提供 `versionsSkippedLocked`、`keysRefused`、`failureReason` 和 `pausedReason`。终端输出会展示这些详情；JSON 输出保留原有 `metric`，并在存在计数或原因时附加 `details` 对象。
+## mcli 20261109 与下一个 SILO 版本：暂停与跳过结果 {#silo-job-outcomes}
 
-已完成但存在跳过版本或拒绝键的作业显示为 `complete-with-skips`。暂停作业显示为 `paused`，客户端会在服务端等待重试期间继续观察。成功获取 `complete-with-skips` 与获取 `complete` 或 `failed` 一样，退出码均为 `0`；脚本必须检查状态和计数。
+[mcli 20261109](/zh/blog/release/mcli-20261109/) 与下一个配套的 SILO 版本增加 `paused` 和 `complete-with-skips`。`paused` 是非终态：服务器正在等待重试，实时指标仍可用时客户端继续观察。`complete-with-skips` 表示本轮已经结束，但仍保留了受保护版本或整 key 被拒绝的对象，不代表所有选中对象都已删除。与 `complete`、`failed` 一样，成功取得它时退出码为 `0`；脚本必须检查状态与计数。
 
-实时指标包含完整详情时，客户端直接使用该快照，其中显式的零计数可清除此前的暂停或跳过状态。服务端或 peer 不支持实时扩展时，客户端仍每五秒及在任务结束时刷新持久化详情。如果无法确认终态详情，会输出 `detailsUnavailable`，不会将未知的跳过计数当作零。新服务端应配套使用维护版 mcli 构建；已发布的 20261026 客户端不会展示这些详情。
+文本输出按需显示 `VersionsSkippedLocked`、`KeysRefused`、`FailureReason` 和 `PausedReason`。JSON 保留原有 `metric` 对象，在新增的 `details` 下提供 `versionsSkippedLocked`、`keysRefused`、`failureReason`、`pausedReason`。两个计数的单位不同，分别是跳过的版本数和整 key 拒绝数，不能相加当作已删除对象数。
+
+实时指标包含完整详情时，客户端直接使用该快照，其中显式的零计数可清除此前的暂停或跳过状态。服务端或 peer 不支持实时扩展时，客户端在观察期间每五秒刷新持久化详情，实时指标到达终态时再查询一次（单次请求以十秒为超时）。早于实时进度的快照不能把旧暂停状态带回来，也不能把旧计数拼接到更新的结果上。无法确认终态详情时，保留实时结果，JSON 增加 `detailsUnavailable`，文本给出说明；详情缺失不能理解为跳过数为零。未提供新增字段的旧服务器保留原有输出。
+
+若实时流结束时持久状态仍为暂停，命令会输出暂停原因并以非零退出码结束，因为还没有终态。重新运行命令即可继续观察，不会取消或重新提交作业。
+
+实时流结束后同样检查状态的新旧：保存的终态如果早于已经观察到的进度，命令会拒绝采用并以非零退出码结束。延迟到达的实时采样不能使进度倒退，同时声称完成和失败的报告也会被拒绝。
 
 ## 语法 {#id2}
 

@@ -3,7 +3,7 @@ title: "mc admin cluster bucket import"
 url: "/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-import/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-bucket-import.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="command-mc.admin.cluster.bucket.import"></a>
@@ -77,3 +77,9 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 ### 全局标志 {#id3}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
+
+## 行为 {#behavior}
+
+### 逐项导入失败时的退出码（`mcli 20261109`） {#exit-status}
+
+在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中，当服务端在导入响应中报告逐存储桶或逐功能项元数据导入失败时，`mc admin cluster bucket import` 会返回退出码 `1`（`#234`）。

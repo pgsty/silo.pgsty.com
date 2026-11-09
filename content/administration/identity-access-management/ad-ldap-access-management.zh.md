@@ -67,6 +67,10 @@ mc idp ldap policy attach myminio diagnostics \
 - MinIO 会将 [`consoleAdmin`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.consoleAdmin) 策略分配给任何属于 `cn=ops,cn=groups,dc=example,dc=com` AD/LDAP 组的认证用户，从而授予其对 MinIO 服务器的完全访问权限。
 - MinIO 会将 [`diagnostics`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.diagnostics) 策略分配给任何属于 `cn=engineering,cn=groups,dc=example,dc=com` AD/LDAP 组的认证用户，从而授予其对 诊断性管理操作的访问权限。
 
-## 规范化长 DN
+## 规范化长 DN {#long-distinguished-names}
 
 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)合入了 [LDAP 长 DN 修复](/zh/blog/design/ldap-long-dn/)（Server 20261018 不包含此修复）。当用户仅依赖组策略登录、但其规范化 DN 长度超过对象存储后端的文件名上限时，服务端会将纯 ASCII 路径分量超过 255 字节所触发的文件名超长错误视为“无个人策略映射记录”并继续加载组策略；完整路径超限（`PATH_MAX`）、不可读撤销记录及其他存储错误仍按 Fail-Closed 报错，对象后端也仍不支持写入超长路径记录。
+
+### 存储身份记录的组关系刷新 {#stored-record-group-refresh}
+
+在下一版本 SILO 构建（`a0de92fcb`）中，当 LDAP 用户通过存储的身份记录（`fromStored`）进行认证或刷新时，只要缓存的组列表超过 1 小时（`ldapStoredGroupRefreshInterval = 1h`），服务端就会重新向 LDAP 查询组成员关系，并在刷新失败时按 Fail-Closed 拒绝访问。参见 [LDAP 规范化长 DN](/zh/blog/design/ldap-long-dn/)。

@@ -16,7 +16,9 @@ Silo carries two separate licenses. The software and the documentation are distr
 | SILO Console | AGPL-3.0-or-later | [`pgsty/silo-console`](https://github.com/pgsty/silo-console/blob/main/LICENSE) |
 | `mcli` client | AGPL-3.0-or-later | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE) |
 | SILO Shared Packages | AGPL-3.0-or-later | [`pgsty/silo-pkg`](https://github.com/pgsty/silo-pkg/blob/main/LICENSE) |
+| `kes` key management server (optional) | AGPL-3.0-or-later | [`pgsty/kes`](https://github.com/pgsty/kes/blob/main/LICENSE) |
 | This documentation | CC BY 4.0 | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
+{.wide .expand}
 
 ## Software: AGPLv3 {#software}
 
@@ -29,7 +31,7 @@ Read the [full license text](https://www.gnu.org/licenses/agpl-3.0.html) before 
 
 ## Contributions to PGSTY SILO {#contributions}
 
-Code contributions to all four maintained software repositories use
+Code contributions to all five maintained software repositories use
 **AGPL-3.0-or-later**, the same license as each repository. Contributors retain
 copyright in their original work. SILO requires no CLA, copyright assignment,
 or separate Apache-2.0 license grant to its maintainers or to upstream MinIO.

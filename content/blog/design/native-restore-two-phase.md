@@ -2,7 +2,7 @@
 title: "Native Restore in Two Phases"
 linkTitle: "Two-Phase Native Restore"
 date: 2026-11-06
-lastmod: 2026-11-06
+lastmod: 2026-11-08
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a native restore held the object lock for its whole tier download, why the first fix of #281 also stranded failed ordinary uploads, and how staging outside the lock and a short, checked commit replace the private upload.
@@ -40,6 +40,7 @@ A per-version restore lock tells whether a restore runs, instead of the object l
 | Severity | High for availability: one restore of an old version could stall every access to its key for the length of a tier download. |
 | Release urgency | Part of the next release. It replaces the private-upload design before that design ships. |
 | Remaining effort | Code, two implementation reviews and the full local suite with the `kqueue,dev` tags are done. Remote CI and an acceptance run on a distributed deployment remain. |
+{.wide .expand}
 
 ## Root cause {#root-cause}
 
@@ -81,6 +82,7 @@ The worker then takes O, with the bounded wait of an ordinary operation. If it c
 | Tier copy | Transition complete, same tier, remote name and remote version. | Stop. |
 | Parts | Part numbers and sizes. | Stop. |
 | Erasure layout | Algorithm, data and parity blocks, block size, distribution. | Stop. |
+{.wide .expand}
 
 Tags, retention, legal hold and replication state may change during the download. The commit takes them from the revision it read under O, so protection acknowledged during the download is kept. A newer delete marker above a version addressed by its ID does not stop the restore; only the disappearance of the version itself does.
 
@@ -117,7 +119,7 @@ Older servers do not take the restore lock, do not check the attempt under the o
 
 - the server that handles a POST asks every peer, caches a positive answer for up to ten seconds, and answers `503 ServiceUnavailable` without writing anything while any peer does not confirm;
 - a queued worker asks again before it starts, because a server may have been replaced by an older binary while the restore waited, and clears its marker when the gate is closed;
-- a peer that cannot be reached blocks native restore. It is not proven stopped and may still run an older restore of the same version.
+- a peer that cannot be reached blocks native restore (`errNativeRestorePeerUnreachable`, [b8ebaffd2](https://github.com/pgsty/silo/commit/b8ebaffd2)). The `503 ServiceUnavailable` response names the unreachable server separately from a rolling-upgrade protocol mismatch (`errNativeRestoreUnsupported`), because an unreachable peer is not proven stopped and may still run an older restore of the same version.
 
 The design document of the two-phase restore said that only POST checks the gate. The code also checks it in the worker, and this record follows the code.
 
@@ -193,6 +195,8 @@ The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command
 | Design round 6 | Approved with a nit, adopted: a retry before publication clears the marker, a retry after it only converges. |
 | Implementation rounds 1 and 2 | Round 1 found three problems, each fixed with a test: the published revision depended on the clock across the copy's expiry; a tier 404 stranded the marker; the abandoned-data test passed without its fix. Round 2 approved; a 12-drive 8+4 test was added for the write-quorum threshold. |
 | Release review (2026-11-06) | Found that a partial commit queued the MRF heal of a `null` version under its raw, empty version ID, while the convergence used `null`; heal already read the empty ID as `null`, and both paths now queue `null`. Also found that the capability comment still described the private upload, and that the design said only POST checks the gate. The comment now describes the restore lock, the attempt fence and the staged commit, and this record follows the code for the gate. |
+| Post-review follow-up (2026-11-07) | Separated `errNativeRestorePeerUnreachable` from `errNativeRestoreUnsupported` ([b8ebaffd2](https://github.com/pgsty/silo/commit/b8ebaffd2)) so that `503 ServiceUnavailable` names the unreachable peer instead of reporting a rolling upgrade when a peer cannot be reached. |
+{.wide .expand}
 
 ## References {#references}
 

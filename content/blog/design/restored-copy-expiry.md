@@ -2,7 +2,7 @@
 title: "Restored Copies: Expire the Copy, Not the Object"
 linkTitle: "Restored-Copy Expiry"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why the expiry of a restored copy of a current version hid the object or stripped an older null version, why addressing the exact version is the core repair, and which storage and native-restore safeguards have to ship with it.
@@ -46,6 +46,7 @@ The core repair is the one PR #282 proposes: the cleanup always addresses the ex
 | Reachability | Any restore of a tiered object, once its restore expires: the scanner, GET, HEAD, listings, decommission, or drive heal. |
 | Release urgency | Blocks the next release. The core fix is small. The native-restore safeguards are larger, and they are implemented and reviewed. |
 | Remaining effort | Code, review, integration with the lock-domain fix, a restore run against a real remote tier and an upgrade run are done. Remote CI remains. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
@@ -57,6 +58,7 @@ The restore sets its expiry date to UTC midnight at least `Days` (minimum one da
 | Versioned bucket, restored `null` current version | The same delete marker. |
 | Suspended bucket, restored current version with a `null` version under it | The delete goes to the `null` version and removes its data; the restored copy and its expired `x-amz-restore` stay. |
 | Suspended bucket, restored current version without a `null` version | `DeleteObject` fails with `VersionNotFound`, which is dropped without a log line; the copy stays and every pass retries. |
+{.wide .expand}
 
 On main, 32 of the 56 cases in the contributor's test fail, for every path and both pool counts.
 
@@ -81,6 +83,7 @@ For the current version, `DeleteObject` therefore received no version ID and tre
 | `expireTransitionedObject` passes `lcOpts.VersionID` for every action, restored copies included | [2ff655a](https://github.com/pgsty/silo/commit/2ff655a74) (Poorna Krishnamoorthy) | [#10945](https://github.com/minio/minio/pull/10945) | 2020-11-25 | `RELEASE.2020-11-25T22-36-25Z` |
 | `DeleteRestored()` and `DeleteVersioned()` helpers; `DeleteVersioned()` covers `DeleteRestoredVersionAction` only | [b984bf8](https://github.com/pgsty/silo/commit/b984bf8d1) (Harshavardhana) | [#16757](https://github.com/minio/minio/pull/16757) | 2023-03-09 | `RELEASE.2023-03-09T23-16-13Z` |
 | **The regression:** the version ID is set only `if lcEvent.Action.DeleteVersioned()` | [ee158e1](https://github.com/pgsty/silo/commit/ee158e161) | [#19093](https://github.com/minio/minio/pull/19093) | 2024-02-22 | `RELEASE.2024-02-24T17-11-14Z` |
+{.wide .expand}
 
 Before #19093, every restored copy was addressed by the version ID of the object it belongs to, so a restored current version with a version ID was cleaned up correctly. The commit message of #19093 says that it fixes tiered objects whose current version was deleted instead of getting a delete marker. For that it replaced the version ID with the `DeleteVersioned()` gate, which the non-transitioned expiry path already used, and the gate leaves out `DeleteRestoredAction`. The restored-copy branch sits in the same function and lost its version ID as a side effect. A restored `null` current version reaches the expiry with an empty ID, and an empty ID was never addressed correctly, before or after #19093.
 
@@ -91,6 +94,7 @@ Before #19093, every restored copy was addressed by the version ID of the object
 | [8ed5c90](https://github.com/pgsty/silo/commit/8ed5c90dc) keep tier data when expiry only adds a delete marker ([#253](https://github.com/pgsty/silo/pull/253)) | 2026-10-23 | from `RELEASE.2026-10-25T00-00-00Z` | None. It sets the suspended state and a keep-remote decision below the restored-copy branch. Upstream never set the suspended state in this function, so the gap in the branch is inherited, and this change did not close it. |
 | [0a546c7](https://github.com/pgsty/silo/commit/0a546c7a7) ILM cleanup during migration ([#276](https://github.com/pgsty/silo/pull/276)) | 2026-11-02 | main only | None. This is the commit that added "Recheck the lifecycle decision and create the hot-tier tombstone before touching the remote tier" below the branch. The restored-copy branch returns before that code, which only runs for the other actions. |
 | [7a060ca](https://github.com/pgsty/silo/commit/7a060cab1) and its revert [9b76a21](https://github.com/pgsty/silo/commit/9b76a2167) | 2026-08-15, 2026-09-15 | only together, in `RELEASE.2026-09-16T00-00-00Z` | None. They did not change the branch. |
+{.wide .expand}
 
 The nine lines from `DeleteRestored()` on are identical in all 18 SILO releases and in upstream master, and so is `DeleteVersioned()`. The fix therefore touches code that SILO has never modified.
 
@@ -102,6 +106,7 @@ The nine lines from `DeleteRestored()` on are identical in all 18 SILO releases 
 | First read failure writes a new empty `null` version | Upstream. The failure path passes a zero `ObjectInfo` to the metadata update, which rewrites the latest version with an empty version ID. | [c829e3a](https://github.com/pgsty/silo/commit/c829e3a13) ([#12090](https://github.com/minio/minio/pull/12090), Krishnan Parthasarathi) with [cbfdf97](https://github.com/pgsty/silo/commit/cbfdf97ab) (Harshavardhana) | 2021-04-19, 2021-04-23 | `RELEASE.2021-05-11T23-27-41Z` |
 | Version routing by the latest write location | Upstream. The pool lookup of a restore never carried the requested version. It was built that way in #12090, was made explicit by the pool lookup in [76b21de](https://github.com/pgsty/silo/commit/76b21de0c) ([#14012](https://github.com/minio/minio/pull/14012), 2022-01-10, `RELEASE.2022-01-25T19-56-04Z`), and was exempted for tag and metadata writes only in [c4d0c49](https://github.com/pgsty/silo/commit/c4d0c49a5) ([#17451](https://github.com/minio/minio/pull/17451)), not for restore. | [c829e3a](https://github.com/pgsty/silo/commit/c829e3a13) (#12090) | 2021-04-19 | `RELEASE.2021-05-11T23-27-41Z` |
 | Single-pool restore without the object lock | Upstream. The single-pool shortcut returns before any lock. The first draft of the restore locked only its final metadata update, and [cbfdf97](https://github.com/pgsty/silo/commit/cbfdf97ab) removed that, so no release held the lock from the first read. #20495 added a lock for multi-pool deployments only. | [c829e3a](https://github.com/pgsty/silo/commit/c829e3a13), [cbfdf97](https://github.com/pgsty/silo/commit/cbfdf97ab) | 2021-04-23 | `RELEASE.2021-05-11T23-27-41Z` |
+{.wide .expand}
 
 The multi-pool deadlock came in September 2024, seven months after the expiry regression. The other three have been in restore since its first release in May 2021. The remaining restore repairs in this fix (version identity of the POST handler, encoded objects, and queued restores) depend on the same unchanged functions. They have not been traced to individual commits. The same holds for the older restore defects that the adversarial review found. The [review history](#review) separates them from those the fix itself introduced.
 
@@ -109,19 +114,19 @@ Dates, PR numbers, and release membership come from the git history. The effects
 
 ## Options {#options}
 
-### Option 1: pass the exact version (PR #282)
+### Option 1: pass the exact version (PR #282) {#option-1}
 
 Always pass the version ID in the restored-copy branch, and map an empty ID to `null`. Then the current-version case takes the same path the noncurrent case already takes. This is the smallest change that reaches the root cause, and it is adopted.
 
-### Option 2: collapse the two lifecycle actions into one
+### Option 2: collapse the two lifecycle actions into one {#option-2}
 
 Making the evaluator return `DeleteRestoredVersionAction` for every version would have the same effect at the call site. It would also change the action names seen by audit, tracing, and other callers of the lifecycle package, for no added safety. Rejected.
 
-### Option 3: a dedicated "drop restore cache" storage call
+### Option 3: a dedicated "drop restore cache" storage call {#option-3}
 
 A separate storage operation would make it impossible to confuse cache cleanup with deletion. It would also add a new storage RPC, and rolling upgrades would have to handle nodes that do not know it. This is a reasonable long-term direction, not a release fix.
 
-### Option 4: guard only in the storage layer
+### Option 4: guard only in the storage layer {#option-4}
 
 A guard can refuse to remove data that is not a restore cache. It cannot stop the object-delete path, which writes a delete marker before any cache logic runs. The storage guard is necessary as a second line of defense but is not sufficient alone.
 
@@ -129,6 +134,7 @@ A guard can refuse to remove data that is not a restore cache. It cannot stop th
 
 The fix has five groups. The first is PR #282 as submitted. Groups 2 to 4 are maintainer follow-ups from the first two review rounds, and group 5 comes from the adversarial review.
 
+{.steps}
 1. **Address the exact version (PR #282).** `expireTransitionedObject` always passes the version ID in its restored-copy branch. An empty ID is sent as `null`, because the ListObjects `max-keys=1` shortcut reads the latest version without the bucket's versioning, so a `null` version can arrive with an empty ID even in a versioned bucket.
 2. **Keep the versioning state.** The bucket's suspended state is now set before the restored-copy branch returns, not after it. Without this, the cleanup of a restored noncurrent `null` version in a suspended bucket reached storage without that state; this layout adds eight cases to the contributor's test, and all of them failed without the change.
 3. **Clean up only what is proven to be a restore cache.**
@@ -154,9 +160,9 @@ The fix has five groups. The first is PR #282 as submitted. Groups 2 to 4 are ma
      - If a write fails, the drives get back the revision they had.
      - When drives differ only in restore fields, the revision without those fields still identifies the version. A later POST, or the attempt's own reset, can then bring the drives back into agreement. A reset applies only when its attempt is the only one in progress.
      - Without such a revision, the request fails and writes nothing.
-   - *Expiry and heal use the same view.* The fresh recheck of restored-copy expiry needs its own reason: a restored-copy expiry action, a valid restore deadline that has passed, a completed transition, and no restore in progress. Before this, another lifecycle action that was due could remove a renewed cache. The recheck decides on that authoritative revision. It refuses when the drives disagree on the restore state. Heal copies restore fields to an outdated drive only when a quorum holds the same fields; otherwise it waits.
+   - *Expiry and heal use the same view.* The fresh recheck of restored-copy expiry needs its own reason: a restored-copy expiry action, a valid restore deadline that has passed, a completed transition, and no restore in progress. Before this, another lifecycle action that was due could remove a renewed cache. The recheck decides on that authoritative revision. It refuses when the drives disagree on the restore state. When decommission hits `errLifecycleRecheckRefused` for an expired restored copy, it still moves the tiered version, its tier metadata, and its restore deadline to the target pool ([`5cb91e7d7`](https://github.com/pgsty/silo/commit/5cb91e7d7)). Heal copies restore fields to an outdated drive only when a quorum holds the same fields; otherwise it waits.
    - *Bounded waits.* POST's first read takes no lock. Its lock waits are bounded.
-   - *Rolling upgrades.* Older nodes do not follow the restore lock, the attempt fence, or the staged commit. The node that serves a POST now asks every peer through an internal capability RPC, which names native restore protocol 2. Until every peer answers that it speaks it, POST answers `503 ServiceUnavailable` and writes nothing. A queued worker asks again before it starts, and clears its marker when a peer does not answer.
+   - *Rolling upgrades.* Older nodes do not follow the restore lock, the attempt fence, or the staged commit. The node that serves a POST now asks every peer through an internal capability RPC, which names native restore protocol 2. Until every peer answers that it speaks it, POST answers `503 ServiceUnavailable` and writes nothing, naming the unreachable peer separately from a peer running an older release ([`b8ebaffd2`](https://github.com/pgsty/silo/commit/b8ebaffd2)). A queued worker asks again before it starts, and clears its marker when a peer does not answer.
    - *Lock domains.* The adversarial review reproduced `DELETE` and `CopyObject` racing a restore in a distributed single-pool deployment whose erasure sets do not share hosts. That inherited split is closed by the [single-pool lock-domain fix](/blog/design/single-pool-lock-domains/), which this group depends on, and is not repeated here.
 
 ## Why it is sufficient and necessary {#sufficiency}
@@ -253,7 +259,7 @@ The adversarial review's own probes ran on the final patch, and 33 of 46 pass. T
 
 Lock domains across hosts, mixed-binary clusters across hosts, hour-long storage stalls and clock skew between nodes have not been exercised.
 
-**Integration.** The fix sits on #278 in one integration branch for the next release, with the lock-domain, heal dry-run, #259, #285 and Console fixes stacked on it. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix sits on #278 in one integration branch for the next release, with the lock-domain, heal dry-run, #259, #285, `delete-all` and Console fixes stacked on it. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
 
 The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
@@ -267,6 +273,7 @@ The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command
 | Patch review, rounds 4 to 10 | Round 4 found four problems: a failed POST write stranded recovery, commit staging exposed the upload, the capability check raced, and a stale first read bypassed the wait bound. Round 5 found five more: an old reset could clear a newer attempt, a split view let cleanup delete a running upload, the staging grace removed unstaged copies, a failed activity read restored the long wait, and a cached capability answer ignored cancellation. Round 6 found that expiry could follow a minority expired header. Round 7 found that heal could promote a minority restore state and that a committing upload could stay forever. Round 8 found that abort removed a leftover with an unknown age and that stale cleanup could remove a running commit. Round 9 found that stale cleanup could still remove an ordinary upload it had read just before the commit staged (pre-existing). Round 10 found that the cleanup's rename could outlive its lock at the drive deadline. All were fixed with regressions. |
 | Patch review, round 11 | Approved with one documentation nit: a completion that waits behind a hung cleanup rename holds the object lock. Recorded under the residual limits of that design. |
 | Replaced (2026-11-06) | The private upload and commit staging were replaced by the two-phase restore, which also fixes #284; see [Native Restore in Two Phases](/blog/design/native-restore-two-phase/). The limits that belonged to them (failed ordinary commits, hung cleanup renames, availability during long restores) are gone with them. |
+{.wide .expand}
 
 ## References {#references}
 

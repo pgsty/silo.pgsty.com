@@ -135,7 +135,7 @@ export MC_WEB_IDENTITY_TOKEN_FILE_myalias=/var/run/secrets/kubernetes.io/service
 
 ### 配置目录 {#id5}
 
-指定 MinIO Client 应使用的配置目录路径。
+指定 MinIO Client 应使用的配置目录路径。在 `pgsty/mc` 容器镜像（`20261109+`）中，`/.mc` 目录预创建为 `1777` 权限，支持任意非 root UID 初始化配置。
 
 {{< tabs group="tab1-tab2" default="tab1" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -145,6 +145,27 @@ export MC_WEB_IDENTITY_TOKEN_FILE_myalias=/var/run/secrets/kubernetes.io/service
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
+{{< /tab >}}
+{{< /tabs >}}
+
+### S3 区域（Region）覆盖 {#s3-region}
+
+可通过环境变量固定 S3 签名区域，并覆盖 `config.json` 中别名的 `region`。固定区域会跳过 SDK 的桶区域发现；详见 [Alias 区域设计](/zh/blog/design/alias-region/)。
+
+生效优先级：`MC_REGION` > `AWS_REGION` > `config.json` 中别名的 `region` 字段 > SDK 自动发现区域。S3 客户端缓存键包含实际生效的 `region`，切换 `MC_REGION` 或 `AWS_REGION` 时不会复用旧区域的签名客户端。
+
+{{< tabs group="tab1-tab2" default="tab1" >}}
+{{< tab label="环境变量" value="tab1" >}}
+##### `MC_REGION` / `AWS_REGION` {#envvar.MC_REGION}
+
+*envvar*
+
+```shell
+export MC_REGION=ap-southeast-1
+```
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
+在 `~/.mc/config.json` 的对应别名条目中设置 `"region": "<region-name>"`。
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -315,7 +336,7 @@ export MC_LIMIT_UPLOAD=1G
 
 ### SSE-KMS 加密 {#sse-kms}
 
-使用服务端管理密钥通过 [SSE-KMS](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 对选项进行加密和解密。
+使用服务端管理密钥通过 [SSE-KMS](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 对对象进行加密和解密。
 
 {{< tabs group="tab1-tab2" default="tab1" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -323,7 +344,7 @@ export MC_LIMIT_UPLOAD=1G
 
 *envvar*
 
-使用 [`MC_ENC_KMS`](#envvar.MC_ENC_KMS) 环境变量指定密钥。
+使用 `ALIAS/BUCKET/PREFIX=KEY_NAME` 映射格式，例如 `MC_ENC_KMS=mysilo/encryptedbucket/=silo-bucket`。多个映射之间以逗号分隔。密钥名称标识由服务端 KMS 管理的密钥，而非密钥材料本身。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
@@ -332,7 +353,7 @@ export MC_LIMIT_UPLOAD=1G
 
 ### SSE-S3 加密 {#sse-s3}
 
-使用服务端管理密钥通过 [SSE-KMS](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 对选项进行加密和解密。
+请求使用服务端管理密钥的 [SSE-S3](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 加密。
 
 {{< tabs group="tab1-tab2" default="tab1" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -340,7 +361,7 @@ export MC_LIMIT_UPLOAD=1G
 
 *envvar*
 
-指定执行 SSE-S3 加密时使用的密钥。 指定值必须与 [`MINIO_KMS_KES_KEY_NAME`](/zh/reference/minio-server/settings/kes/#envvar.MINIO_KMS_KES_KEY_NAME) 中设置的加密密钥匹配。
+指定目标别名、存储桶或对象前缀，例如 `MC_ENC_S3=mysilo/encryptedbucket/`。多个前缀之间以逗号分隔。该变量仅选择请求 SSE-S3 的路径，请勿传入 KMS 密钥名称或密钥材料；SILO 会自动选用其配置的默认密钥（例如 KES 部署中的 `MINIO_KMS_KES_KEY_NAME`）。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。

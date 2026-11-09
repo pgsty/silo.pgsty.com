@@ -11,7 +11,7 @@ url: "/blog/security/20260926-governance-retention-bypass/"
 
 **`SN-2026-015`** and **`SN-2026-016`** cover two S3 Object Lock retention and immutability vulnerabilities fixed in [SILO Server 20261018](/blog/release/silo-20261018/) via PR [`#234`](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and PR [`#235`](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`), as detailed in the companion [repair design note](/blog/design/governance-retention-bypass-repair/). While the delete path already enforced `s3:BypassGovernanceRetention` ([CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63)), the retention-write path (`PutObjectRetention`) and four in-place version overwrite paths remained bypassable.
 
-## Advisory Scope: `SN-2026-015` and `SN-2026-016`
+## Advisory Scope: `SN-2026-015` and `SN-2026-016` {#advisory-scope-sn-2026-015}
 
 ### SN-2026-015: `PutObjectRetention` Authorization and Governance Bypass (`#231`) {#sn-2026-015}
 
@@ -49,7 +49,7 @@ Under the AWS S3 Object Lock specification, `PutObjectRetention` must enforce tw
 
 The three `SN-2026-015` failures can be reproduced directly against pre-`20261018` builds (verified against baseline `b0a540190`):
 
-### Reproduction 1: Clearing an Active Governance Lock Without `s3:BypassGovernanceRetention` (F2)
+### Reproduction 1: Clearing an Active Governance Lock Without `s3:BypassGovernanceRetention` (F2) {#reproduction-1-clearing-an-active}
 
 Assume user `nobypass` has `Allow` on `s3:PutObjectRetention` and `s3:DeleteObjectVersion`, and **no** `s3:BypassGovernanceRetention` grant:
 
@@ -61,7 +61,7 @@ Assume user `nobypass` has `Allow` on `s3:PutObjectRetention` and `s3:DeleteObje
 | 4 | `DELETE /bucket/doc.txt?versionId=v1` | **`204 No Content` (version permanently deleted!)** | Object remains locked and protected |
 {.wide .expand}
 
-### Reproduction 2: Locking an Object with Zero Retention Permissions (F1)
+### Reproduction 2: Locking an Object with Zero Retention Permissions (F1) {#reproduction-2-locking-an-object}
 
 Assume user `zeroperm` has an empty/unrelated policy with **neither** `s3:PutObjectRetention` **nor** `s3:BypassGovernanceRetention`:
 
@@ -71,7 +71,7 @@ Assume user `zeroperm` has an empty/unrelated policy with **neither** `s3:PutObj
 | 2 | Repeat the exact same `PUT /bucket/unlocked.txt?retention` **adding header `x-amz-bypass-governance-retention: true`** | **`200 OK` (irreversible 2099 COMPLIANCE lock applied!)** | `403 AccessDenied` |
 {.wide .expand}
 
-### Reproduction 3: Bypassing `s3:object-lock-remaining-retention-days` Conditions (F3)
+### Reproduction 3: Bypassing `s3:object-lock-remaining-retention-days` Conditions (F3) {#reproduction-3-bypassing-s3-object}
 
 Assume user `govadmin` holds `s3:BypassGovernanceRetention` unconditionally, and holds `s3:PutObjectRetention` conditioned on `NumericGreaterThanEquals: {"s3:object-lock-remaining-retention-days": 30}`. On an object already under `GOVERNANCE` lock, sending `x-amz-bypass-governance-retention: true` with a 5-day retention period previously succeeded (`byPassSet == true` satisfied `byPassSet || retSet` even though `retSet` was `false`), bypassing the 30-day minimum policy condition.
 

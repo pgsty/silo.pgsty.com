@@ -4,8 +4,6 @@ linkTitle: "Console Languages"
 date: 2026-11-09
 lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
-description: >
-  The scope, maintenance policy and measured packaging tradeoffs behind ten Console languages: English fallback, complete first-party Chinese, per-language gzip assets and eager loading.
 summary: >
   Why SILO adds ten UI languages, how the registry and maintenance tiers work, and why per-language compression with eager loading balances size, caching and implementation cost.
 tags: [Design, Console, Internationalization]
@@ -16,7 +14,7 @@ url: "/blog/design/console-languages/"
 
 [Console PR #83](https://github.com/pgsty/silo-console/pull/83), contributed by Eduardo Andrade Machado, supplies Brazilian Portuguese. [silo#277](https://github.com/pgsty/silo/issues/277), opened by siyahkut, requests Turkish. These contributions led to a configurable ten-language UI.
 
-**Status as of 2026-11-09:** the ten-language UI, reviewed translations, per-language compression, eager loading and long-lived asset caching are integrated into Console `main`. Final review preserves compact labels and verifies the affected controls at phone, tablet and desktop widths. Source integration and a product release are separate milestones.
+**Status as of 2026-11-09:** the ten-language UI, reviewed translations, per-language compression, eager loading and long-lived asset caching are integrated into Console `main` for the [Console 2.7.0 candidate](/blog/release/console-2.7.0/). Final review preserves compact labels and verifies the affected controls at phone, tablet and desktop widths. Source integration, tag creation and public release publication remain separate milestones.
 
 ## Decision {#tldr}
 
@@ -43,6 +41,7 @@ The design therefore keeps the scope narrow, distinguishes maintenance commitmen
 5. Keep Chinese coverage release-gating and report coverage for other languages.
 6. Keep all dictionaries eagerly loaded. Split the generated assets by language and precompress them at build time; use content hashes and long-lived caching.
 7. Ship Arabic with RTL layout and LTR isolation for protocol data.
+{.steps}
 
 ## Previous design {#current-design}
 
@@ -77,6 +76,7 @@ The comparison keeps the production source, minifier and static imports unchange
 | All languages combined | 549,712 | 562,448 | 1 |
 | One asset per language, total | 555,105 | 568,470 | 9 |
 | Additional bytes from splitting | 5,393 (0.98%) | 6,022 (1.07%) | 8 |
+{.wide .expand}
 
 Compression level is not a guarantee of identical output across implementations. The system command is useful for comparison; the pinned production compressor provides reproducible output across build hosts. The packaging conclusion is the same with both, so changing compressor implementations is not required.
 
@@ -91,6 +91,7 @@ Compression level is not a guarantee of identical output across implementations.
 | Japanese | 63,159 |
 | Arabic | 64,095 |
 | Turkish | 60,831 |
+{.wide .expand}
 
 Combining files does not eliminate every repeated English key across catalogs. DEFLATE references previous text within a 32 KiB window, while each complete language catalog is much larger. This helps explain why a large cross-language compression gain should not be assumed; the table above measures the actual result. See [RFC 1951, section 2](https://www.rfc-editor.org/rfc/rfc1951#section-2).
 
@@ -142,6 +143,7 @@ tr: { label: "Türkçe", tag: "tr", dir: "ltr", tier: "maintained" },
 | ja | 日本語 | LTR | maintained |
 | ar | العربية | RTL | maintained |
 | tr | Türkçe | LTR | maintained |
+{.wide .expand}
 
 The stored `zh` preference remains valid. The experimental `pt` value maps to `pt-BR`; unknown or disabled values fall back to English. An unfinished language can be excluded from the menu with `enabled: false`; hiding it does not itself remove its static import from the build.
 
@@ -208,6 +210,7 @@ Development-only `en-XA` expands labels by roughly 40%; `ar-XB` exercises RTL. N
 | One asset per language, eager loading | Independent cache reuse with the existing synchronous runtime | Eight extra cold requests and the same initial dictionary workload; selected. |
 | One asset per language, lazy loading | English can avoid all catalogs; other users fetch only what they need | Adds partial-load, failure, retry and state coordination paths; defer until measurements justify it. |
 | Add a full translation framework | More advanced message tooling and ecosystem integrations | Adds a dependency and migration work; current source-key lookup, `Intl` and React/Redux cover the required behavior. |
+{.wide .expand}
 
 Per-language lazy loading was evaluated and removed after the maintainer selected the static tradeoff. Separate gzip files retain a natural boundary for revisiting loading later, without introducing those states now.
 

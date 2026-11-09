@@ -13,12 +13,16 @@ SILO 20261026 是当前正式服务端版本，内嵌 Console 2.5.1、mcli 20261
 
 ## 独立 Console {#console}
 
-最新正式独立版是 [Console 2.6.0](/zh/blog/release/console-2.6.0/)，
-源码 `f8ab146695fd1df74e4b84128a286d552921bf00`，依赖 silo-pkg v3.15.2 和 mcli 20261026。
-[2.7.0 候选版](/zh/blog/release/console-2.7.0/) 采用 silo-pkg v3.16.0 与正式 mcli 20261109，
-后者在 Go 中对应伪版本 `v0.0.0-20261109021353-e1d4cc5abfe0`。
-前端与软件包版本统一为 2.7.0；草稿制品不改变公开稳定下载。
-Server 20261026 仍内嵌 Console 2.5.1，采用新版源码需要单独发布 Server。
+<span id="console-2-6-0"></span>
+
+最新正式发布的独立 Console 为 [2.6.0](/zh/blog/release/console-2.6.0/)，
+源码提交为 `f8ab146695fd1df74e4b84128a286d552921bf00`。
+该版本加入用量扫描、保留版本统计与存储桶管理修复，使用 Go 1.27.3、
+silo-pkg 3.15.2 和 mcli 20261026。
+[2.7.0 候选版](/zh/blog/release/console-2.7.0/)加入十种界面语言、阿拉伯语 RTL
+及容器 CA／临时目录修复，采用 silo-pkg v3.16.0 与正式 mcli 20261109
+（Go 伪版本 `v0.0.0-20261109021353-e1d4cc5abfe0`）。前端与软件包版本统一为 2.7.0；
+草稿制品不改变公开稳定下载。Server 20261026 仍内嵌 Console 2.5.1，采用新版源码需要单独发布 Server。
 
 ## mcli 20261109 {#mcli-20261109}
 
@@ -108,10 +112,10 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 | <span style="white-space:nowrap">分片发现与取消</span> | [#198](https://github.com/pgsty/silo/pull/198)<br>[#213](https://github.com/pgsty/silo/pull/213) | Server 20260916 默认使用 legacy 列举与取消。显式启用严格模式后，跨 pool/set 发现持久上传、在原生 marker 对应上传消失后继续分页，并要求多数盘确认取消。严格模式要求所有 writer 升级并排空旧上传，见[升级契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。 |
 | <span style="white-space:nowrap">普通条件 PUT</span> | [#207](https://github.com/pgsty/silo/pull/207) | 公开写入条件使用所有池中的逻辑当前对象，包括正在退役或再平衡的池；可读性及目标版本行为变化见[下文](#conditional-put)。 |
 | <span style="white-space:nowrap">IAM 撤销</span> | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | 节点间删除通知重新加载已提交状态；持久化删除版本与撤销边界，防止旧站点事件重放恢复已撤销身份或旧授权。 |
+| <span style="white-space:nowrap">标签与删除标记</span> | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS 复制保留标签修订时间；删除标签推进修订并抵御延迟事件；删除标记清除在 MRF 恢复时保留标记身份和重试状态。 |
 | <span style="white-space:nowrap">删除标记清除</span> | [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)<br>[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0)<br>[`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) | 指定版本的清除不再在缺少该标记的盘上创建标记；对已缺失版本的重试须有写仲裁多数的缺失票才确认；heal 后的标记保留复制与清除元数据；排队中的标记创建任务在发送前先在复制锁内复核源端。剩余边界见[下文](#pending)、[#217](https://github.com/pgsty/silo/issues/217) 与[复制可靠性记录第三轮](/zh/blog/design/replication-reliability/#third-round)。 |
 | <span style="white-space:nowrap">盘间分歧下的列举</span> | [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) | 当更新的少数盘排在前面时，仍保留达到列举仲裁的 null 对象版本。滚动重启叠加并发覆盖写时，成功的 LIST 仍可能漏掉可读的 key；见[下文](#pending)、[#218](https://github.com/pgsty/silo/issues/218) 与[设计记录](/zh/blog/design/list-null-version-quorum/)。 |
 | <span style="white-space:nowrap">跨池迁移标签</span> | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) | rebalance 与 decommission 对普通和分片写入都把对象标签及其修订字段带到目标池。此前迁移已丢失的标签不会恢复；见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/#migration-tags)。 |
-| <span style="white-space:nowrap">标签与删除标记</span> | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS 复制保留标签修订时间；删除标签推进修订并抵御延迟事件；删除标记清除在 MRF 恢复时保留标记身份和重试状态。 |
 | <span style="white-space:nowrap">复制元数据</span> | [#194](https://github.com/pgsty/silo/pull/194) | 恢复复制元数据时，不再把传输用的 `aws-chunked` 编码重新写入对象元数据。 |
 | <span style="white-space:nowrap">请求头超时</span> | [#196](https://github.com/pgsty/silo/pull/196) | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` 正确传入 HTTP 服务，对 HTTP/1 请求头设置绝对读取期限，持续少量发送字节也无法延长；正文保留既有滚动空闲超时。 |
 {.wide .expand}
@@ -172,12 +176,13 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 3. MC 更新到该 pkg/SDK，验证后发布日历标签的 mcli。Go 消费者引用其规范伪版本。
 4. Console 更新直接 pkg 依赖与 MC replacement，验证嵌入前端和集成；需要正式发布时单独发布 Console，也可明确选择已合入的不可变源码提交。
 5. Server 更新直接 pkg/SDK 依赖、两个 PGSTY replacement、客户端归档哈希、镜像和 Helm 客户端版本。验证完整依赖图后，再分别完成 Server 发布、镜像发布与集群升级。
+{.steps}
 
 Go 不继承依赖模块的 `replace`。即使 Console 已选择 MC，Server 仍必须显式选择受维护的 Console 与 MC。
 Console 和 MC 保留历史 MinIO 模块路径，pkg 直接使用自己的路径。
 `colorjson`/`dperf` 带入的旧 `minio/pkg/v3` 传递依赖与维护中的策略实现相互独立。
 
-Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg v3.14.x 系列保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。独立发布的 Console v2.5.1、mcli 20261026 及其 pkg v3.15.2 依赖要求 Go **1.27.3**。
+Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg v3.14.x 系列保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。Server 20261026、独立发布的 Console v2.5.1 与 v2.6.0、mcli 20261026 与 20261109，以及 pkg v3.15.2 与 v3.16.0 均要求 Go **1.27.3**。
 Go x/* 依赖已刷新。go-systemd 实际仍选 **v22.6.0**，因为 v22.7.0 在 NetBSD 编译失败；
 Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。
 

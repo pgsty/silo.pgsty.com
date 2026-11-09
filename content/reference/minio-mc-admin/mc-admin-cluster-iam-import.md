@@ -3,7 +3,7 @@ title: "mc admin cluster iam import"
 url: "/reference/minio-mc-admin/mc-admin-cluster-iam-import/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-cluster-iam-import.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="command-mc.admin.cluster.iam.import"></a>
@@ -80,3 +80,12 @@ Use the [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-clust
 ### Global Flags {#global-flags}
 
 This command supports any of the [global flags](/reference/minio-mc/#minio-mc-global-options).
+
+## Behavior {#behavior}
+
+### Failure Reporting and Legacy Fallback (`mcli 20261109`) {#failure-reporting}
+
+In [`mcli 20261109`](/blog/release/mcli-20261109/):
+
+- If the server reports failed IAM entities in the import response, `mc admin cluster iam import` returns exit code `1` so automation can detect partial import failures (`#234`).
+- The legacy client-side IAM zip parser fallback runs only when the server returns `NotImplemented` or `XMinioAdminVersionMismatch`. Authentication, authorization, transport, or archive errors from `ImportIAMv2` return directly without falling back (`#211`).

@@ -155,10 +155,10 @@ This setting does not have a configuration variable setting. Use the Environment
 
 *envvar*
 
-> > [!NOTE]
-> > **Added: MinIO**
-> >
-> > Server RELEASE.2023-09-16T01-01-47Z
+> [!NOTE]
+> **Added: MinIO**
+>
+> Server RELEASE.2023-09-16T01-01-47Z
 
 Specify whether requests from a web browser automatically redirect to the Console address. Defaults to `true`.
 {{< /tab >}}

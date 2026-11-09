@@ -37,10 +37,14 @@ sha256sum --check "$SILO_RPM.sha256sum" && \
 | `/usr/bin/minio`     | `/usr/bin/silo`（同时提供 `silo healthcheck`）                     |
 | `minio.service`      | `/usr/lib/systemd/system/silo.service`                       |
 | `/etc/default/minio` | 仍然优先读取；`/etc/default/silo` 按变量覆盖（`noreplace/conffile`，升级不覆盖） |
-| OS User `minio-user` | `silo:silo`，声明于 `/usr/lib/sysusers.d/silo.conf`，安装时创建        |
-| -                    | `/usr/share/doc/silo/LICENSE`、`NOTICE`（AGPL-3.0-or-later）    |
+| 服务账号 `minio-user`（上游）/ `minio`（Pigsty） | `silo:silo`，声明于 `/usr/lib/sysusers.d/silo.conf`，安装时创建        |
+| —                    | `/usr/share/doc/silo/LICENSE`、`NOTICE`（AGPL-3.0-or-later）    |
+{.wide .expand}
 
-Silo 提供的 RPM DEB 包可以与 minio 包并存安装，且不会覆盖原有文件。DEB 包不提供安装自动启动。
+两项软件包特性：
+
+- 安装过程不会自动启动或 enable 服务；`postinstall` 仅创建 `silo` 账号并执行 systemd reload。
+- 软件包可与 `minio` 软件包并存安装，无文件冲突，保留旧软件包以便随时回滚。
 
 ## 服务账号 {#user}
 

@@ -38,6 +38,7 @@ A key that is absent from every drive that answered still gets 404 when enough d
 | Data safety | No data is deleted. The dangling-object check already refuses to act when a drive did not answer. |
 | Severity | S1: a client-visible false absence. Low probability: it needs a partial write and a partial view at the same time. |
 | Effort | Small: one file, no storage RPC, no on-disk format, no configuration. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
@@ -70,23 +71,23 @@ The tier is not involved. A refused tier connection maps to `XMinioBackendDown` 
 
 ## Options {#options}
 
-### Option A: convert inconsistent metadata to "not found" only when every drive answered
+### Option A: convert inconsistent metadata to "not found" only when every drive answered {#option-a-convert-inconsistent-metadata}
 
 Add the missing precondition. Every slot must hold metadata or a definitive "no such file, version, volume, or corrupt metadata". This fixes the restore and transition splits. 15 added and 2 changed lines.
 
-### Option B: keep a read-quorum error when a failed merge had a partial view
+### Option B: keep a read-quorum error when a failed merge had a partial view {#option-b-keep-a-read}
 
 When the merge finds no version and some drive did not answer, a drive that holds a version reports `errErasureReadQuorum` instead of `errFileNotFound`. This fixes the unversioned-overwrite path. 20 added lines.
 
-### Option C: hash the transition fields for every transitioned version
+### Option C: hash the transition fields for every transitioned version {#option-c-hash-the-transition}
 
 This merges restored and unrestored copies into one group, and then the index order chooses which copy is served. It does not cover the unversioned overwrite, and it changes heal decisions from #19165. Rejected.
 
-### Option D: make `/minio/health/cluster` reflect this node's own view
+### Option D: make `/minio/health/cluster` reflect this node's own view {#option-d-make-minio-health}
 
 The cluster check counts drives as each owner node reports them, so it can say "healthy" while this node still cannot reach some peers. Changing that does not remove the 404, which any partial view can trigger, and changes semantics that orchestrators rely on. Rejected for this defect.
 
-### Option E: reconnect drives faster after boot
+### Option E: reconnect drives faster after boot {#option-e-reconnect-drives-faster}
 
 This only narrows the window. It could be a separate change.
 
@@ -138,6 +139,7 @@ A deterministic unit test builds an 8-drive EC 4+4 set with an in-memory tier, c
 | Unversioned overwrite committed on 6 of 8 drives | 404 | 503 |
 | Absent key, same view | 404 | 404 |
 | Inconsistent copies, every drive answered | 404 | 404 |
+{.wide .expand}
 
 The restore, transition and unversioned-overwrite cases assert a read-quorum error with HTTP 503. A versioned overwrite may serve the older version but must not be reported missing. Without the fix, the three cases fail; with Option A alone, the unversioned overwrite still fails.
 

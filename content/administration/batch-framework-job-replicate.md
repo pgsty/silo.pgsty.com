@@ -40,6 +40,8 @@ An interrupted replication attempt restarts its source scan from the beginning a
 
 ### Access Control and Requirements {#access-control-and-requirements}
 
+For the next SILO release, the authenticated submitter needs `admin:StartBatchJob` and the local data permissions required by the job. Credentials in the definition authorize remote connections; they do not replace the submitter's local permissions. See [authorization and retries](/administration/batch-framework/#silo-lifecycle) for revocation, pause, and version-transition behavior.
+
 Batch replication shares similar access and permission requirements as [bucket replication](/administration/bucket-replication/bucket-replication-requirements/#minio-bucket-replication-requirements).
 
 The credentials for the “source” deployment must have a policy similar to the following:

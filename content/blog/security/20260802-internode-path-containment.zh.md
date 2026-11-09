@@ -116,6 +116,7 @@ url: "/zh/blog/security/internode-path-containment/"
 | `getVolDir` 守卫 | 复用对象层既有的 `hasBadPathComponent` | **0** |
 | `isVolumeRootAlias` | 新编写的规则 | **3** |
 | `guardErasureParams` | 新编写的规则 | **1** |
+{.wide .expand}
 
 `hasBadPathComponent` 作为对象层自身的校验规则（经 `IsValidObjectPrefix`），早已在多年真实 S3 流量下验证过，结构上不可能拒绝任何可通过 S3 API 合法创建的对象名；而全部 4 次回归都出在新造规则与 S3 / 操作系统边角语义不一致的地方。
 

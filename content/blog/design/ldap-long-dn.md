@@ -33,6 +33,7 @@ SILO's `NormalizeDN` parses the DN returned by the LDAP server and formats it vi
 | Serialized by `DN.String()` as `\e5\bc\a0` | 9 ASCII bytes |
 | `cn=` + 40 copies of `张` + `,dc=example,dc=com` (raw UTF-8) | 141 bytes |
 | The same complete DN after `NormalizeDN` | 381 ASCII bytes |
+{.wide .expand}
 
 Because each 3-byte UTF-8 character expands into 9 ASCII characters (`\xx\xx\xx`), a 141-byte UTF-8 DN expands to 381 ASCII bytes on disk.
 
@@ -60,6 +61,7 @@ Two historical behaviors shaped how this failure surfaced:
 | MinIO [`280526ca`](https://github.com/minio/minio/commit/280526caf7e41881f7cd9a3c97028e1f56df41ef) (Mar 2024) | Propagated policy lookup read errors after a cache miss instead of swallowing them. |
 | MinIO [`efb73fa5`](https://github.com/minio/pkg/commit/efb73fa5d52fc1f217c58d51544f448e3862ab61) & [`7e45d84a`](https://github.com/minio/minio/commit/7e45d84acebf9eac5391ec7676c4a7f92e52fd75) (Mar 2024) | Adopted `NormalizeDN` (with `\xx` hex expansion) for LDAP identity and policy-mapping keys. |
 | SILO [`709d50a9`](https://github.com/pgsty/silo/commit/709d50a916bf3311eda2b3882ac5f2a0251f4223) (Server 20260916) | Added persistent parent-revision reads (`config/iam/users/<DN>/identity.json`) during login for revocation and replay protection, triggering the read on every LDAP login even when the policy cache hit. |
+{.wide .expand}
 
 ## The Fix: Narrowly Classify Impossible ASCII Components as Absent {#decision}
 
@@ -93,6 +95,7 @@ The resulting safety invariant is exact: **only a path component that is provabl
 | **Change `NormalizeDN` to preserve raw UTF-8 instead of `\xx` hex escapes** | **Deferred.** Would incompatibly alter existing persisted LDAP identity and policy-mapping keys on disk, and still would not eliminate component limits for genuinely long DNs. |
 | **Skip parent-revision checks for LDAP or revert `709d50a9`** | **Rejected.** Would sacrifice durable revocation and replay protection while leaving the older March 2024 policy-mapping read failure (`sts-users/<DN>.json`) unfixed. |
 | **Hash overlong DNs into fixed-length storage keys** | **Separate feature scope.** Full write support for arbitrary-length DNs requires a new storage schema across lookup, listing, import/export, site replication, and mixed-version upgrades. |
+{.wide .expand}
 
 ## Verification Matrix {#verification}
 
@@ -102,6 +105,7 @@ The resulting safety invariant is exact: **only a path component that is provabl
 | **End-to-end LDAP STS login** ([`cmd/sts-handlers_test.go`](https://github.com/pgsty/silo/blob/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0/cmd/sts-handlers_test.go#L3300)) | Verifies STS login, signed S3 access, and service-account operations for a group-authorized user with a 384-byte normalized DN across 8 object/etcd configurations. |
 | **Cross-platform filesystem probes** | Tested 72 physical filename shapes on macOS (49 creatable) and Linux `tmpfs` (32 creatable): zero storable filenames were classified as impossible. Verified 105 error-propagation assertions (5 parent-name classes $\times$ 7 storage errors $\times$ 3 entry points) per platform. |
 | **CI & Toolchain VulnCheck** | All 11 PR CI jobs on [`3df51549bbbd6e57a6a5f11ac77535390517db65`](https://github.com/pgsty/silo/commit/3df51549bbbd6e57a6a5f11ac77535390517db65) (merged as [`a07d655dc69cf04b130c2634d9fa5301078af546`](https://github.com/pgsty/silo/commit/a07d655dc69cf04b130c2634d9fa5301078af546)) and 7 post-merge `main` jobs passed on [`d43adc0f2`](https://github.com/pgsty/silo/commit/d43adc0f2bf1c2cfd174fbcb63bfa3ed443680b0) ([Go CI](https://github.com/pgsty/silo/actions/runs/39894613094), [VulnCheck](https://github.com/pgsty/silo/actions/runs/39894613091)), alongside raising the minimum toolchain to Go 1.27.3 for `GO-2026-6809`. |
+{.wide .expand}
 
 ## Operational Boundaries and Guidance {#limits}
 

@@ -15,6 +15,18 @@ icon: fa-solid fa-server
 
 <span id="maintenance-20261025"></span>
 
+## Server 20261026 之后的候选工作 {#post-20261026}
+
+Server 20261026 仍是正式服务端版本。以下索引汇总后续候选工作的设计与升级说明；每篇记录中的状态、源码提交和验收范围分别生效，不能将整个列表理解为已通过发版验收。Console 与 mcli 独立发布，不会使旧 Server 制品获得这些改动。
+
+| 范围 | 设计与升级说明 |
+| --- | --- |
+| 生命周期、整键删除与恢复 | [多池生命周期](/zh/blog/design/multi-pool-lifecycle-expiry/)、[精确 key 删除](/zh/blog/design/ilm-delete-all-exact-key/)、[恢复副本过期](/zh/blog/design/restored-copy-expiry/)、[两阶段恢复](/zh/blog/design/native-restore-two-phase/) |
+| 锁、读取与修复 | [单池锁域](/zh/blog/design/single-pool-lock-domains/)、[局部视图读取](/zh/blog/design/partial-view-read-404/)、[Heal 演练](/zh/blog/design/heal-dry-run-safety/)、[失败写入清理](/zh/blog/design/failed-rename-empty-prefix/) |
+| Batch 与配置重载 | [Batch 授权及重试](/zh/administration/batch-framework/#silo-lifecycle)、[Webhook peer 重载](/zh/blog/design/audit-webhook-peer-reload/)、[IAM 撤销](/zh/blog/design/iam-revocations/) |
+| 容器 | [健康检查与 distroless 镜像](/zh/compatibility/feature/healthcheck/#distroless) |
+{.wide .expand}
+
 ## Server 20261026 升级检查 {#maintenance-20261026}
 
 本节对应 [Server 20261026 正式版](/zh/blog/release/silo-20261026/#server-20261026)，源码为 [`c3ad836aed0d`](https://github.com/pgsty/silo/commit/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3)。
@@ -29,6 +41,7 @@ icon: fa-solid fa-server
 | 版本化远端分层过期 | 生命周期过期仅生成删除标记时保留上一版本的远端分层对象（含已暂停版本控制桶中的非 `null` 版本）；升级前已误删的历史远端数据需从备份恢复。 |
 | 分片上传复制 | 为可合并的 CRC 校验和算法透传 `FULL_OBJECT` 校验和类型；需升级发送端 Server 并核对待复制队列。 |
 | 构建与制品 | 基于 Go 1.27.3 构建，集成 Console v2.5.1、mcli 20261026、pkg v3.15.2 与固定提交的上游 `minio-go`；Windows 归档改用 ZIP。见[组件版本矩阵](/zh/compatibility/versions/#server-20261026)。 |
+{.wide .expand}
 
 **读取与故障边界：** 租约失效或网络分区仍可能产生迟到提交，部分元数据更新仍可能暴露旧值或旧标签。既有读仲裁与自愈规则保持不变（更严格的 fencing、回滚与读取恢复诊断保留在 `consistency_strict` 构建标签下），升级不提供分布式 fencing，也不会自动修复存量不一致对象。下方 20261018 的 Object Lock、IAM 与 strict 分片模式退役要求继续适用。
 
@@ -43,6 +56,7 @@ icon: fa-solid fa-server
 | 对象清单与备份同步 | 符合条件的不确定 LIST 条目被重新确认，无法确认则返回错误。读取完整分页，不将错误当成空清单；不保证跨页快照。 |
 | 分片列表与取消 | 默认仍为缓存／精确 key；strict 开关忽略并警告。原 strict 用户失去持久枚举与严格取消；重启遗漏、前缀／分页边界和延迟创建仍存在。 |
 | 错误处理 / OIDC | 暂存提交元数据丢失返回 `503 SlowDownWrite`；校验和消息可能变化。JOSE 拒绝超过 4096 位的 RSA JWK，升级前验证登录。 |
+{.wide .expand}
 
 详细契约见 [IAM 设计](/zh/blog/design/iam-admin-authorization/)、[LIST 恢复](/zh/blog/design/listing-recovery-lock-cost/)、[分片决策](/zh/blog/design/list-multipart-uploads/#implementation)与[安全更新](/zh/blog/security/20261018-release-hardening/)。#79 和 #217 仍未解决；磁盘格式与既有配置命名不变。正式支持 PGSTY 四组件组合，上游兼容尽最大努力。
 
@@ -56,6 +70,7 @@ icon: fa-solid fa-server
 | 提交集合    | `7aac2a2c..219670d3`：共 96 个可达提交；审计时其中 93 个位于 `origin/main`，最后 3 个已在本地提交                                                                             |
 | 源码净差异   | 523 个文件，新增 36,715 行，删除 21,450 行                                                                                                                     |
 | 解释口径    | 记录最终快照的行为；后来被替换或删除的中间状态，不会被写成当前行为                                                                                                                   |
+{.wide .expand}
 
 范围内每个提交都对照最终实现、测试、依赖图、构建配方、软件包载荷、容器入口和渲染后的 Helm 清单逐项核实。[完整提交覆盖账本](#ledger)跟踪范围内的全部提交（含文档与 CI 更新）。
 
@@ -149,6 +164,7 @@ require github.com/pgsty/silo-pkg/v3 v3.14.1   // 不再使用 replace 安排
 | 只有 `~/.silo`  | `~/.silo`  | 无              |
 | 只有 `~/.minio` | `~/.minio` | 旧目录提示；不会移动任何文件 |
 | 两者都存在         | `~/.silo`  | 歧义警告           |
+{.wide .expand}
 
 `--config-dir` 始终优先。除非同时指定 `--certs-dir`，证书目录跟随所选配置目录。自动化应明确传入 `--config-dir`，不要依赖文件系统探测。
 
@@ -278,6 +294,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 | 未设置            | 精确保留历史行为：相信任何 peer 提供的来源头；依次选择最左 XFF、X-Real-IP、`Forwarded`                             |
 | `none` 或 `off` | 忽略三种来源地址头，使用 TCP peer                                                                  |
 | IP/CIDR 列表     | 只有 TCP peer 在列表中时才相信头；XFF 从右向左越过可信 hop（最多 100 个），随后取最后一行 X-Real-IP，再从右向左遍历 `Forwarded` |
+{.wide .expand}
 
 畸形配置、非空但没有任何代理的列表，或远程 `env://` 读取失败都会 fail closed 并阻止启动，而不是回退到 trust-any。收到的链中无效值会跳过；没有可用地址时回退 peer。只在 FTP/SFTP peer bridge 中隐式信任 loopback，不会把链内任意 loopback 当成可跳过 hop。
 
@@ -296,6 +313,7 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 | Multipart part 顺序      | 重复或非递增 part number 在组装前以 `InvalidPartOrder` 失败；允许空洞及不从 1 开始；upload 保留供重试                                                                                 |
 | 纠删码读缓冲池                | 恢复正确 shard buffer 所有权，避免池失效以及可能造成卡死、损坏或严重性能下降的错误缓冲关联                                                                                                     |
 | 更新缓冲                   | 返回的下载 buffer 具有正确所有权；公开更新器随后已禁用，所以当前受支持升级路径不会运行该代码                                                                                                       |
+{.wide .expand}
 
 ### 分布式存储与私有 API {#storage-rest}
 
@@ -362,7 +380,7 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 | 桶元数据 | `metadata.lock` 串行化所有桶配置写入；`ForceCreate` 与站点 adoption 保留既有配置；启用 lock 的桶始终使用纯 Enabled 版本控制 | [#103](https://github.com/pgsty/silo/pull/103)、`dd3bdb808` |
 | 站点复制 | Object Lock 配置以独立字段复制（仍接受旧的 `Tags` 载体）；按站点统计状态；有效性探针在规则前缀下校验权限 | `3861f33cb`、`fb406fdc9`、`c9ad74673`、`5db7be4ee` |
 | 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
-| 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
+| 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/zh/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
 {.wide .expand}
 
 公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，Server 20260916 则要求 v3.14.1；两者都不是 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
@@ -402,7 +420,8 @@ API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占
 6. **私有 API 不是稳定兼容承诺。** `ReadMultiple` 表明即便 storage REST 协议号不变，操作仍可能消失。不要跨越该边界滚动运行混合构建。
 7. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
 8. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
-9. **多站点删除桶配置的历史收敛限制。** 在 [PR #180](https://github.com/pgsty/silo/pull/180)（随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布）之前的版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。完整删除收敛要求全部节点升级并统一开启删除导出（`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`），详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。
+9. **条件删除有明确版本边界。** Server 20260903 忽略 `DeleteObject` 的 `If-Match`；Server 20260916 通过 #145/#178 实现该条件，并在显式指定版本时比较该版本。`DeleteObjects` 仍忽略每项的 `<ETag>`，也没有额外引入 `s3:GetObject` 条件权限。见[已实现契约](/zh/blog/design/conditional-delete/)。
+10. **多站点删除桶配置的历史收敛限制。** 在 [PR #180](https://github.com/pgsty/silo/pull/180)（随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布）之前的版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。完整删除收敛要求全部节点升级并统一开启删除导出（`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`），详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。
 
 ## 迁移检查清单 {#migration}
 
@@ -416,10 +435,11 @@ API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占
 6. 使用 Helm 时，以完整旧 values 分别渲染新旧 Chart；需要时用 `nameOverride` / `fullnameOverride` / `serviceAccount.name` 保留名称；Chart 与镜像原子切换。
 7. 删除 updater、callhome、SUBNET 注册和支持上传自动化，改用软件包/镜像/编排器滚动及自己的诊断传输渠道。
 8. 把 HMAC OIDC token 改为非对称 JWKS。分别测试 LDAP 成功、错密码、未知用户、后端故障和限流路径。
-9. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
-10. 设置 `MINIO_API_TRUSTED_PROXIES=none` 或精确列表，清洗三种来源地址头，并加入会转发认证请求的集群 peer。
-11. 测试超大 S3 Select 记录、流式通知、unsigned trailer 拒绝、multipart 整对象 checksum、重复 part、复制、修复、KMS、每个通知 target、审计摄取及容器优雅关停。
-12. 把分布式集群所有节点作为同一构建升级。回滚时旧 Chart 与旧镜像成对使用，绝不能只回滚一个。
+10. 审核自定义 IAM 策略：受保护桶写操作需具备裸桶 ARN（除非启用 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`），显式版本删除需 `s3:DeleteObjectVersion`，用户/组启停动作已拆分，并核对[密码权限拆分](/zh/compatibility/password-permissions/#migration)。
+11. 设置 `MINIO_API_TRUSTED_PROXIES=none` 或精确列表，清洗三种来源地址头，并加入会转发认证请求的集群 peer。
+12. 测试超大 S3 Select 记录、流式通知、unsigned trailer 拒绝、multipart 整对象 checksum、重复 part、复制、修复、KMS、每个通知 target、审计摄取及容器优雅关停。
+13. 把分布式集群所有节点作为同一构建升级。回滚时旧 Chart 与旧镜像成对使用，绝不能只回滚一个。
+{.steps}
 
 ## 验证证据 {#verification}
 
@@ -434,6 +454,7 @@ API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占
 | Helm 迁移          | `buildscripts/verify-helm-migration.sh` 通过：lint、render、旧版升级、归档及 7 个渲染资源的身份比较                                                              |
 | 软件包生命周期          | `buildscripts/package/lifecycle_test.sh` 通过；包载荷/provenance 断言覆盖空 DEB conflict 元数据、unit/default 路径与法律文件                                    |
 | 站点               | 严格 `make check` 通过：模块校验、warning-fatal Hugo 渲染（617 EN / 615 ZH 页）以及 1,084 个 HTML 文件中的 388,962 个内部引用；`git diff --check`、双语锚点及 96/96 提交覆盖也通过 |
+{.wide .expand}
 
 Security 文章提供更深入的威胁模型和测试向量，但其中历史性的“已发布/未发布”状态只描述写作当日。与最终快照冲突时，以本页审计边界为准。
 

@@ -322,7 +322,7 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_node_ilm_transition_pending_tasks` | Number of pending ILM transition tasks in the queue. |
 | `minio_node_ilm_transition_missed_immediate_tasks` | Number of missed immediate ILM transition tasks. |
 | `minio_node_ilm_versions_scanned` | Total number of object versions checked for ilm actions since server start. |
-| `minio_node_ilm_expiry_incomplete_total` | Total number of ILM expiry attempts since server start that ended without removing what they addressed, labeled by `reason`: `not_applicable` (the rule no longer applies when it is checked again under the object lock), `locked` (Object Lock protects the version), `history_unavailable` (the version history could not be read with authority), `error` (any other failure). See [Multi-Pool Lifecycle Expiry](/blog/design/multi-pool-lifecycle-expiry/#fix). |
+| `minio_node_ilm_expiry_incomplete_total` | Total number of ILM expiry attempts since server start that ended without removing what they addressed, labeled by `reason`: `not_applicable` (the rule no longer applies when it is checked again under the object lock), `locked` (Object Lock protects the version), `history_unavailable` (the version history could not be read with authority), `error` (any other failure). A purge of all versions of a key adds `tier_unsupported` (a version is in a remote tier), `budget` (stopped at its budget after it removed some versions; the next expiry continues), and `changed` (the latest version that a batch matched has changed); see [Lifecycle Delete-All Must Stay on One Key](/blog/design/ilm-delete-all-exact-key/). `tier_unsupported_skipped` is not an expiry attempt: it counts the scanner's observations of a key whose purge it did not queue because the pool holds a version in a remote tier, once per drive scanner and cycle, so one key counts once per drive of its set. It counts neither keys nor purges. See [Multi-Pool Lifecycle Expiry](/blog/design/multi-pool-lifecycle-expiry/#fix). |
 | `minio_node_ilm_action_count_delete_action` | Total action outcome of lifecycle checks since server start for deleting object |
 | `minio_node_ilm_action_count_delete_version_action` | Total action outcome of lifecycle checks since server start for deleting a version |
 | `minio_node_ilm_action_count_transition_action` | Total action outcome of lifecycle checks since server start for transition of an object |
@@ -371,10 +371,8 @@ Metrics marked as `Site Replication Only` only populate on deployments with [Sit
 | `minio_node_syscall_write_total` | Total write SysCalls to the kernel. /proc/\[pid\]/io syscw. |
 | `minio_usage_last_activity_nano_seconds` | Time elapsed (in nano seconds) since last scan activity. |
 
-> > [!NOTE]
-> > **Changed: RELEASE.2025-03-12T17-29-24Z**
-> >
-> > v2 metrics have a limit of 100 buckets for performance reasons. For metrics across a higher number of buckets, use [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics) instead.
+> [!NOTE] Changed: RELEASE.2025-03-12T17-29-24Z
+> v2 metrics have a limit of 100 buckets for performance reasons. For metrics across a higher number of buckets, use [v3 metrics](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts-available-metrics) instead.
 
 <a id="minio-available-bucket-metrics"></a>
 

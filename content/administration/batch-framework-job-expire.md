@@ -3,7 +3,7 @@ title: "Batch Expiration"
 url: "/administration/batch-framework-job-expire/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/batch-framework-job-expire.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="batch-expiration"></a>
@@ -33,6 +33,14 @@ To capture any new objects eligible for expiration, re-run the batch job.
 ### Expiry Rules Check Latest Object Only {#expiry-rules-check-latest-object-only}
 
 The batch expiration job only checks the latest or “current” version of each object against each batch expiration rule.
+
+### SILO Next-Release Lifecycle and Transitioned Versions {#silo-lifecycle}
+
+In next-release SILO builds (`pgsty/silo` `main` after `20261026`):
+
+- Batch `expire` revalidates the submitting principal's credentials and permissions while running (`461a7df`). Disabling, deleting, or expiring the submitter, or removing required `admin:StartBatchJob`, `s3:ListBucket`, `s3:ListBucketVersions`, or `s3:DeleteObject` permissions stops the job.
+- Temporary IAM errors, incomplete bucket listings, and pool rebalance or decommission conflicts pause and retry instead of recording a completed pass (`5ce52c5`).
+- When a `purge` rule hits a transitioned object version whose remote tier is unconfigured or unreachable (`07b89b98f`), SILO refuses that version instead of deleting only the local stub (`keysRefused`, terminal state `complete-with-skips`). See [SILO batch job lifecycle](/administration/batch-framework/#silo-lifecycle) and [Tier-free version semantics](/blog/design/tier-free-version-semantics/).
 
 <a id="minio-batch-framework-expire-job-ref"></a>
 

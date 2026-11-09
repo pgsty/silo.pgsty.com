@@ -51,6 +51,7 @@ Issue #256 报告了四类具体表现：
 | 批量 `DeleteObjects` | 某池删除成功掩盖了另一池的删除失败 |
 | 批量显式版本删除 | 指定版本仍残留在另一池，却向客户端返回成功 |
 | 版本化单个 `DELETE` | 在不满足写 quorum 的持有池尝试创建删除标记，未切换到另一可读可写的持有池 |
+{.wide .expand}
 
 运行作者提交的 11 个回归子测试：基线 `main` 有 10 项失败，初始 PR 全部通过。不过，代码评审进一步发现批量删除在通过事前检查后仍存在执行期故障窗口。
 
@@ -124,6 +125,7 @@ Issue #256 报告了四类具体表现：
 | 无版本 ID，已启用版本控制 | 创建删除标记，保留历史版本 |
 | 无版本 ID，已暂停版本控制 | 创建或替换 `null` 删除标记 |
 | 配置了前缀级版本规则 | 对当前 key 计算 `PrefixEnabledFn`，并结合暂停状态判断 |
+{.wide .expand}
 
 物理删除先于删除标记创建执行，从而保证同一批次内先显式清除 `null` 版本、再为同一 key 创建新标记时的先后顺序。纯标记批次继续走既有路径（降级场景下的已知边界见下文[兼容性、重试与运行边界](#limits)）。
 
@@ -152,6 +154,7 @@ Issue #256 报告了四类具体表现：
 | [`3c82748e14`](https://github.com/pgsty/silo/commit/3c82748e14495ed403739e60b7e669c977a488c1) | 补充分阶段批量清理、结果身份保持与部分删除重试 |
 | [`a2073d2514`](https://github.com/pgsty/silo/commit/a2073d25142ced87b9bde8afa38aef2d0383768e) | 最终 PR head，补齐共享分层对象保护 |
 | [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) | 合并后的 `main`（源码树与 `a2073d2514` 一致） |
+{.wide .expand}
 
 入库的故障测试在全盘在线状态下进入 `DeleteVersions` 并注入错误，同时断言返回正确的逐项错误且**权威副本的删除尝试次数为零**，并逐一验证故障期间的 `GET`、恢复后的 `GET` 与版本列表、重试成功及无关项正常删除：
 
@@ -164,6 +167,7 @@ Issue #256 报告了四类具体表现：
 | 物理删除 quorum 与标记／复制写入的区别 | [`TestBulkDeleteQuorumEvidence`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L552) |
 | 共享分层引用和已恢复对象 | [`TestPoolsRetiringCopyPreservesSharedTierObject`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-consistency_test.go#L1065) |
 | 原始单删、批量错误、已知 quorum 缺失与标记选池回归 | [原贡献的回归测试](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-consistency_test.go#L1334) |
+{.wide .expand}
 
 新增回归测试在初始 PR 代码上可稳定复现失败；最终合入的删除、分层与 quorum 套件连续通过三轮 `-race` 测试，合并提交后再次通过复测。补充检查覆盖了单池对照组、前缀版本配置、目录与重复 key、Object Lock、版本清除及迁移回归。
 
@@ -248,3 +252,4 @@ P99 采用 nearest-rank 算法（每轮批量请求共 64 次，P99 接近单轮
 | 所有批量删除全部改为逐对象串行 | 不必要地放弃了普通本地对象的纠删集与磁盘层批处理吞吐；当前仅对含分层引用的对象走逐对象协调路径 |
 | 依赖覆盖亲和（#245） | 覆盖亲和会带来常规小对象写入回退，且仍需处理存量跨池副本、迁移副本与中断清理，无法替代删除阶段的顺序保护 |
 | 引入跨池回滚事务或配置开关 | 逐项两阶段清理已能保住权威副本，无需引入复杂的分布式回滚状态机或额外开关 |
+{.wide .expand}

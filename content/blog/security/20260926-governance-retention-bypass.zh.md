@@ -11,7 +11,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 
 **`SN-2026-015`** 与 **`SN-2026-016`** 涵盖了在 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 中通过 PR [`#234`](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 PR [`#235`](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）修复的两组 S3 Object Lock 合规保留与不可变性漏洞（配套[修复设计方案](/zh/blog/design/governance-retention-bypass-repair/)）。虽然删除路径此前已按 [CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63) 正确校验 `s3:BypassGovernanceRetention`，但保留期修改路径（`PutObjectRetention`）与四条原地版本覆写路径仍存在绕过缺陷。
 
-## 漏洞范围：`SN-2026-015` 与 `SN-2026-016`
+## 漏洞范围：`SN-2026-015` 与 `SN-2026-016` {#advisory-scope-sn-2026-015}
 
 ### SN-2026-015：`PutObjectRetention` 鉴权失效与治理保留锁绕过（`#231`） {#sn-2026-015}
 
@@ -49,7 +49,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 
 在 `20261018` 之前的版本上（基线提交 `b0a540190`），F1～F3 均可稳定复现：
 
-### 复现 1：无 `s3:BypassGovernanceRetention` 权限清空治理锁并删库（F2）
+### 复现 1：无 `s3:BypassGovernanceRetention` 权限清空治理锁并删库（F2） {#reproduction-1-clearing-an-active}
 
 假设用户 `nobypass` 仅被授予 `s3:PutObjectRetention` 与 `s3:DeleteObjectVersion`，**没有** `s3:BypassGovernanceRetention` 权限：
 
@@ -61,7 +61,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 | 4 | 再次执行 `DELETE /bucket/doc.txt?versionId=v1` | **`204 No Content`（受保护版本被永久删除！）** | 对象保持锁定，拒绝删除 |
 {.wide .expand}
 
-### 复现 2：零保留权限账号对未加锁对象强加合规锁（F1）
+### 复现 2：零保留权限账号对未加锁对象强加合规锁（F1） {#reproduction-2-locking-an-object}
 
 假设用户 `zeroperm` **既没有** `s3:PutObjectRetention` **也没有** `s3:BypassGovernanceRetention` 权限：
 
@@ -71,7 +71,7 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 | 2 | 发送完全相同的请求，仅**额外附带请求头 `x-amz-bypass-governance-retention: true`** | **`200 OK`（成功打上不可撤销的 2099 年合规死锁！）** | `403 AccessDenied` |
 {.wide .expand}
 
-### 复现 3：绕过 `s3:object-lock-remaining-retention-days` 最短保留天数条件（F3）
+### 复现 3：绕过 `s3:object-lock-remaining-retention-days` 最短保留天数条件（F3） {#reproduction-3-bypassing-s3-object}
 
 假设用户 `govadmin` 拥有无条件的 `s3:BypassGovernanceRetention`，但其 `s3:PutObjectRetention` 权限带有条件限制 `NumericGreaterThanEquals: {"s3:object-lock-remaining-retention-days": 30}`（要求设置的保留期至少为 30 天）。在已加 `GOVERNANCE` 锁的对象上携带 `x-amz-bypass-governance-retention: true` 并将保留期改为 5 天，修复前由于 `byPass == true` 直接满足了 `byPass || retSet`，30 天下限条件被完全绕过。
 

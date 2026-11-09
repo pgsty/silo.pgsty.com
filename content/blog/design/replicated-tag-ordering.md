@@ -53,7 +53,7 @@ Both defects broke that invariant by dropping the revision timestamp rather than
 2. **Sender transmits tombstones:** Empty tag sets with a recorded revision timestamp transmit `X-Minio-Source-Tagging-Timestamp` as a deletion tombstone. Objects that never had tags (empty value and no recorded revision) do not fabricate a tombstone. If a stored timestamp is malformed on disk, the sender fails closed and retries via MRF until an explicit tag write replaces it.
 3. **Receiver reconciles tombstones:** Replication `COPY` captures the existing `(tags, timestamp)` pair before rebuilding metadata so a timestamped empty value participates in `reconcileStoredObjectTags` and clears older stored tags. Internal duplicate-version suppression (`412 PreconditionFailed`) is relaxed when the incoming trusted tag revision is strictly newer than the stored revision (while client `If-Match` and `If-None-Match` headers remain strictly enforced). Multipart completion orders tags using the persisted upload metadata, the replication completion callback no longer writes snapshot tags back over local state, and ordinary SSE-C key rotation strips old tag timestamps from copied encryption metadata so a rotation mints a clean local revision.
 
-### Operator-Visible Changes and Upgrade Requirements
+### Operator-Visible Changes and Upgrade Requirements {#operator-visible-changes-and-upgrade}
 
 - **Equal-timestamp ties resolve to stored-wins:** Both unversioned and explicit `null`-version `COPY` requests now keep the stored destination state when incoming and stored tag timestamps are identical.
 - **Ordinary `COPY` with `X-Amz-Tagging-Directive: REPLACE` and empty tags:** Now clears destination tags as required by S3, instead of falling back to copying source tags.

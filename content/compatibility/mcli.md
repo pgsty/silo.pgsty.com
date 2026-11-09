@@ -10,7 +10,7 @@ icon: fa-solid fa-terminal
 
 `mcli` is Silo's build of the MinIO Client (`mc`). This page records where the two are interchangeable and where they differ.
 
-[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/) and [20260913](/blog/release/mcli-20260913/). The latest is [20261109](/blog/release/mcli-20261109/); historical notes retain their own comparison baselines.
+[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/), [20260913](/blog/release/mcli-20260913/), [20260916](/blog/release/mcli-20260916/), [20261018](/blog/release/mcli-20261018/), and [20261026](/blog/release/silo-20261026/#mcli). The latest is [20261109](/blog/release/mcli-20261109/); historical notes retain their own comparison baselines.
 
 > [!TIP]
 > **Current release:** [mcli 20261109](/blog/release/mcli-20261109/), package `20261109000000.0.0`, source `e1d4cc5abfe0`. Windows uses ZIP; Linux/macOS use tar.gz, with Linux RPM/DEB/APK and Docker Hub images.
@@ -27,6 +27,7 @@ The [20261109 release notes](/blog/release/mcli-20261109/) cover the fixes in [p
 - Invalid `--attr` fails `cp` and `mv` before any transfer. Separate pairs with semicolons: `--attr 'key=value;other=value'`. Empty entries, including trailing or repeated semicolons, are ignored by `cp`, `mv`, `mirror` and `pipe`; an input with no key/value entry still fails.
 - Removal permission and WORM protection errors, and per-item IAM or bucket metadata import failures, return nonzero while preserving reports. Legacy IAM fallback is restricted to `NotImplemented` and `XMinioAdminVersionMismatch`.
 - `mv` rejects resolved self-moves and ambiguous same-bucket/key moves between endpoints that share a scheme, port and IP address, including `--resolve` mappings. Shared-IP virtual hosts may be rejected. Establish that their stores are independent before copying, verifying and removing explicitly; matching bytes through two aliases alone do not establish independence. Different addresses, ports, proxy routing, virtual-host addressing or changing DNS can still hide a shared backend. Configure aliases to one store with a consistent endpoint URL; DNS is not a general storage-identity service. A local DNS failure does not reject an endpoint that the transport reaches through an HTTP proxy; unresolved direct endpoints still fail. Proxy selection honors `NO_PROXY`.
+- Container images pre-create `/.mc` with mode `1777` for non-root UIDs without a passwd entry (`HOME=/`) and install legal files under `/licenses/` ([#77](https://github.com/pgsty/mc/pull/77)); `--config-dir` and `MC_CONFIG_DIR` still take precedence.
 
 ## Changes inherited from 20261026 {#release-20261026}
 
@@ -106,6 +107,7 @@ Neither name is hardcoded anywhere. Since 2016 the upstream client has derived i
 | Program name shown in help and usage text                                                 | `config.json` format — identical and interchangeable in both directions |
 | Shell-completion registration                                                             | All commands, flags, JSON output, exit codes                            |
 | User-Agent application suffix (`mc/…` vs `mcli/…`)                                        | `--config-dir` and `MC_CONFIG_DIR` overrides                            |
+{.wide .expand}
 
 The one real trap: **run `mcli` for the first time and your existing `mc` aliases are not there** — it starts from an empty `~/.mcli`. Either keep invoking it as `mc` (a symlink suffices — argv[0] is what counts), or copy the state once with `cp -a ~/.mc ~/.mcli`. For automation and configuration templates, set `MC_CONFIG_DIR` explicitly: the environment prefix does not follow the name, so one template serves both. Details in [Migration](#migration).
 
@@ -166,6 +168,7 @@ Moving from an official `mc` binary to `mcli`:
 4. **Re-check `play` usage** in tutorials and smoke scripts ([§4](#aliases)).
 5. **Verify**: `mcli --version`, `mcli alias ls`, then `mcli ls <alias>` and `mcli ping <alias>` against your servers.
 6. **Rollback** stays trivial: the configuration format is identical in both directions, so keeping the old `mc` binary around lets you switch back at any time.
+{.steps}
 
 ## See also {#see-also}
 

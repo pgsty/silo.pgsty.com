@@ -10,7 +10,7 @@ icon: fa-solid fa-terminal
 
 `mcli` 是 Silo 构建的 MinIO 客户端（`mc`）。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。
 
-[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/) 与 [20260913](/zh/blog/release/mcli-20260913/)。最新版本为 [20261109](/zh/blog/release/mcli-20261109/)；历史说明保留各自比较基线。
+[`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/)、[20260913](/zh/blog/release/mcli-20260913/)、[20260916](/zh/blog/release/mcli-20260916/)、[20261018](/zh/blog/release/mcli-20261018/) 与 [20261026](/zh/blog/release/silo-20261026/#mcli)。最新版本为 [20261109](/zh/blog/release/mcli-20261109/)；历史说明保留各自比较基线。
 
 > [!TIP]
 > **当前正式版：** [mcli 20261109](/zh/blog/release/mcli-20261109/)，包版本 `20261109000000.0.0`，源码 `e1d4cc5abfe0`。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK 与 Docker Hub 镜像。
@@ -27,6 +27,7 @@ icon: fa-solid fa-terminal
 - 非法 `--attr` 会使 `cp`、`mv` 在传输前失败。键值对之间用分号分隔，例如 `--attr 'key=value;other=value'`。`cp`、`mv`、`mirror`、`pipe` 会忽略空条目，包括末尾和连续分号；不含任何键值条目的输入仍然报错。
 - 删除权限或 WORM 保护错误、IAM 或桶元数据导入的逐项失败都会返回非零，并保留详细报告。IAM 只有收到 `NotImplemented` 或 `XMinioAdminVersionMismatch` 才会回退旧 API。
 - `mv` 拒绝已识别的自身搬移，也拒绝桶和对象路径相同、协议和端口相同且 IP 重叠的端点间搬移，包括 `--resolve` 映射。同 IP 上的虚拟主机也可能被拒绝；先确认它们的存储实际独立，才能分步复制、核验、显式删除，仅通过两个别名读到相同字节不能证明存储独立。不同地址、端口、代理路由、虚拟主机寻址或 DNS 变化仍可能隐藏同一后端；同一存储的别名应使用一致的端点 URL，不能仅靠 DNS 推断任意后端的身份。经传输层规则选定的 HTTP 代理访问的端点，不会仅因本地 DNS 失败而被拒绝；无法解析的直连端点仍然失败。代理选择遵循 `NO_PROXY`。
+- 容器镜像预先创建权限为 `1777` 的 `/.mc` 目录（供无 passwd 条目且 `HOME=/` 的非 root UID 使用），并在 `/licenses/` 下包含法律声明文件（[#77](https://github.com/pgsty/mc/pull/77)）；`--config-dir` 与 `MC_CONFIG_DIR` 仍优先生效。
 
 ## 继承自 20261026 的变化 {#release-20261026}
 
@@ -96,6 +97,7 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 | 帮助与用法文本中显示的程序名 | `config.json` 格式 —— 双向完全一致、可互换 |
 | shell 自动补全的注册名 | 全部命令、参数、JSON 输出、退出码 |
 | User-Agent 应用后缀（`mc/…` vs `mcli/…`） | `--config-dir` 与 `MC_CONFIG_DIR` 覆盖 |
+{.wide .expand}
 
 唯一真正的坑：**第一次运行 `mcli` 时，你已有的 `mc` 别名不会出现** —— 它从空的 `~/.mcli` 开始。两种解法：继续以 `mc` 名调用它（一个符号链接即可 —— 起作用的是 argv[0]），或用 `cp -a ~/.mc ~/.mcli` 一次性搬运状态。自动化与配置模板则应显式设置 `MC_CONFIG_DIR`：环境变量前缀不跟随名字，一套模板即可通吃两个名字。详见[迁移指南](#migration)。
 
@@ -156,6 +158,7 @@ docker run --rm --user "$(id -u):$(id -g)" -e MC_CONFIG_DIR=/config -v "$HOME/.m
 4. **复查 `play` 依赖**（见 [§4](#aliases)）。
 5. **验证**：`mcli --version`、`mcli alias ls`，然后对你的服务器执行 `mcli ls <alias>` 与 `mcli ping <alias>`。
 6. **回退** 始终是平凡操作：配置格式双向一致，保留旧的 `mc` 二进制即可随时切回。
+{.steps}
 
 ## 参考阅读 {#see-also}
 

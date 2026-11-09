@@ -135,6 +135,7 @@ PostgreSQL 与 MySQL 事件目标表单围绕一个共享的 DSN 解析器/序�
 | `golang.org/x/text` | v0.40.0 | v0.41.0 |
 | `golang.org/x/mod` | v0.37.0 | v0.40.0（关闭 [CVE-2026-56864/-56865](https://pkg.go.dev/vuln/GO-2026-6180)）|
 | `golang.org/x/tools` | v0.47.0 | v0.49.0 |
+{.wide .expand}
 
 ### SILO 分支 {#silo-forks}
 
@@ -184,6 +185,7 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd
 | `PUT /configs` | 新增一类 400：拒绝服务器配置语法会破坏的数据库 DSN。 |
 | 配置重置/删除 | 响应中的 `restart` 反映服务器的真实答案，不再恒为 `true`。 |
 | `GET /session` | 空凭据主体返回 401；通告的 Create-Access-Key 能力计算更严格（见[服务账号](#service-accounts)）。 |
+{.wide .expand}
 
 > [!NOTE]
 > **如果你从 `swagger.yml` 生成客户端 SDK：** `UpdateUserInfo` 操作现在指向 `/user/{name}/status` 且请求体仅含状态。调用生成的 `UpdateUserInfo` 符号的代码依旧能编译，但目标已是新路由；旧的合并调用是 `UpdateUserInfoLegacy`。重新生成时请审计调用点。

@@ -8,7 +8,8 @@ type: docs
 icon: fa-solid fa-heart-pulse
 ---
 
-> **Status**: P1 (`silo healthcheck` subcommand, `2ff594f4b`) and P2 (distroless image + CI gate, `4c34d2309`) shipped in [Server 20260806](/blog/release/silo-20260806/); P3 (Helm probes) and P4 (docs) pending · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)
+> [!NOTE]
+> **Status**: P1 (`silo healthcheck` subcommand, `2ff594f4b`), P2 (distroless image + CI gate, `4c34d2309`, with UBI CA bundle parity in [#295](https://github.com/pgsty/silo/pull/295)), and P4 ([healthcheck probe guide](/operations/monitoring/healthcheck-probe/)) are shipped; P3 (Helm probes) remains pending · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)
 
 Silo is getting a native `silo healthcheck` subcommand and, alongside the existing container image, a new **distroless** image variant that contains exactly one file that matters: the `silo` binary. This note records the reasoning and the design decisions before implementation, so the code has a specification to be checked against — and so that "why is it built this way?" has a permanent answer.
 
@@ -43,6 +44,7 @@ Three tracks, deliberately decoupled:
 | **D1** | The `silo` binary gains a `healthcheck` subcommand — a thin, anonymous HTTP client for the server's existing `/minio/health/*` endpoints. It ships in every build, so every image and bare-metal install gains the capability. |
 | **D2** | The **existing image does not change**. It keeps `mcli`, `curl`, the shell entrypoint, and the `mc ready local` examples. Users of the current image who want the new probe can opt in by overriding their `healthcheck.test` — nothing is taken away and no default behavior moves. |
 | **D3** | A **new distroless variant** is published alongside it, as a pilot: single binary, no shell, native `HEALTHCHECK` baked in. If the pilot proves out, it becomes the recommended default later and the switch completes; the classic image remains for compatibility either way. |
+{.wide .expand}
 
 D2 and D3 answer the obvious "why not just slim the main image?" — because the main image's contents are a compatibility surface. [#9](https://github.com/pgsty/silo/issues/9) exists because that surface was changed underneath people once before. The distroless image is a new name with a new contract, so nobody's existing healthcheck, `docker exec mc` habit, or entrypoint assumption breaks while it is evaluated.
 
@@ -105,13 +107,14 @@ Consequences worth spelling out: `live` and `ready` are *liveness*-grade signals
 
 ## The distroless variant {#distroless}
 
-**Base**: `gcr.io/distroless/static-debian12` — which is sufficient because `silo` builds with `CGO_ENABLED=0`. The base ships the four things the server actually needs from a rootfs: CA certificates (for KMS/webhook/STS egress), tzdata, `/tmp`, and an `/etc/passwd` with `root`/`nonroot` entries. It ships no shell, no package manager, no libc.
+**Base**: `gcr.io/distroless/static-debian12` — which is sufficient because `silo` builds with `CGO_ENABLED=0`. The base ships tzdata, `/tmp`, and an `/etc/passwd` with `root`/`nonroot` entries, and [#295](https://github.com/pgsty/silo/pull/295) copies the UBI-derived `/etc/ssl/certs/ca-certificates.crt` trust bundle from the `verify` stage so the classic and distroless images share the exact same root CA trust store (for KMS/webhook/STS egress). It ships no shell, no package manager, no libc.
 
 Sketch of the contract:
 
 ```dockerfile
 FROM gcr.io/distroless/static-debian12:latest
-COPY silo /usr/bin/silo
+COPY --from=verify /usr/bin/silo /usr/bin/silo
+COPY --from=verify /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/ssl/certs/ca-certificates.crt
 COPY LICENSE NOTICE CREDITS /licenses/
 ENV HOME=/tmp
 # /data is created in the image layer, world-writable — see issue #55:
@@ -130,8 +133,7 @@ The decisions folded into that sketch:
 - **The health check is baked in, exec-form.** Shell-form `HEALTHCHECK` strings need `/bin/sh` and are impossible here; the JSON-array form is mandatory. Compose inherits an image's `HEALTHCHECK` automatically (with `disable: true` as the escape hatch), so compose users of this variant get working `depends_on: condition: service_healthy` with zero configuration. `ready` rather than `live` because Docker's health status feeds *gating* (start ordering), which is readiness semantics — and the two are identical anyway unless KMS/etcd are configured.
 - **One release-blocking verification**: `HEALTHCHECK` is a Docker extension, absent from the OCI image spec (opencontainers/image-spec#749 is still open), and OCI-media-type builds drop it silently. The publish pipeline must assert `docker inspect` shows the `Health` config on the pushed manifest, or adjust the build's media types until it does.
 - **Naming**: `docker.io/pgsty/silo:<RELEASE>-distroless`, plus a rolling `distroless` tag. A new `Dockerfile.distroless` in the server repo — which, having no download stages, is fully offline and can therefore be built and asserted in CI on every release, closing the "the gate tests a synthetic image, not the shipped one" coverage gap that #55 documented for the classic Dockerfile.
-
-What a user gives up in the variant, stated honestly in its docs: no `docker exec <container> sh` debugging (use `docker debug` / `kubectl debug` ephemeral containers), no in-image `mc` (use the `pgsty/mc` image or a host-installed `mcli`), no `MINIO_USERNAME` path (use `--user`).
+- **What a user gives up in the variant, stated honestly in its docs**: no `docker exec <container> sh` debugging (use `docker debug` / `kubectl debug` ephemeral containers), no in-image `mc` (use the `pgsty/mc` image or a host-installed `mcli`), no `MINIO_USERNAME` path (use `--user`).
 
 ## Kubernetes needs no image support at all {#kubernetes}
 

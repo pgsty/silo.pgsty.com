@@ -167,6 +167,7 @@ Handler 测试使用真实签名请求验证三个公开列表 API：
 | `ListObjects` | `GET /missing-bucket?prefix=/` | HTTP 404，XML 错误码为 `NoSuchBucket` |
 | `ListObjectsV2` | `GET /missing-bucket?list-type=2&prefix=/` | HTTP 404，XML 错误码为 `NoSuchBucket` |
 | `ListObjectVersions` | `GET /missing-bucket?versions&prefix=/` | HTTP 404，XML 错误码为 `NoSuchBucket` |
+{.wide .expand}
 
 ### 本地与 CI 质量门禁 {#local-gates}
 
@@ -184,6 +185,7 @@ Handler 测试使用真实签名请求验证三个公开列表 API：
 | 修复后单盘快捷路径 | 约 7.8–8.1 μs，45–47 allocs |
 | 修复后 32 盘快捷路径 | 约 70–81 μs，977 allocs |
 | 32 盘正常列表请求 | 约 0.95 ms |
+{.wide .expand}
 
 在真实多节点部署中，`GetBucketInfo` 还包含跨节点网络往返与法定人数聚合延迟。这也正是为何绝不能将该检查扩展到正常列表热路径。若存在配置错误的客户端高频轮询 `max-keys=0`、`/` 前缀或不相交 `marker`，可通过 S3 追踪或监控指标识别并按需限流。
 

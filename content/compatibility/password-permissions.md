@@ -9,6 +9,7 @@ icon: fa-solid fa-code-branch
 ---
 
 
+> [!IMPORTANT]
 > **Applies to Console v2.4.1 with pkg v3.14.1 and the matching SILO Server.**
 > The Console button, session capability and Server authorization must use the
 > same action mapping. Follow the coordinated upgrade steps below and the
@@ -36,7 +37,7 @@ still requires the current password. STS and service-account credentials cannot
 change their parent user's password; root credentials and external identity
 provider passwords remain outside this endpoint.
 
-## What changes and why
+## What changes and why {#behavior}
 
 Previously, both operations checked `admin:CreateUser`. Changing one's own
 password used an implicit grant unless that action was explicitly denied;
@@ -68,7 +69,9 @@ The policy JSON format, stored documents, and endpoint remain unchanged; saved
 policies are not rewritten automatically and there is no legacy action-mapping
 toggle.
 
-## Preserve the behavior of existing policies
+<span id="preserve-the-behavior-of-existing-policies"></span>
+
+## Preserve the behavior of existing policies {#migration}
 
 A saved `Deny admin:CreateUser` still prevents user creation and password resets
 for other users. It no longer prevents the caller from changing their own
@@ -94,7 +97,7 @@ To adopt the new split and lock only the caller's password while allowing
 separately granted user administration, deny only `admin:ChangeMyPassword`.
 That finer distinction is enforced only by Servers containing this change.
 
-## Built-in read-only policies
+## Built-in read-only policies {#readonly}
 
 The built-in `readonly` policy now grants its original S3 read operations
 without its previous CreateUser deny. This has two compatibility effects:
@@ -119,7 +122,7 @@ every policy named `readonly` has the same contents. To retain both old
 restrictions, attach a policy denying both actions or retain the saved readonly
 override and add ChangeMyPassword to its existing deny.
 
-## Console and package callers
+## Console and package callers {#callers}
 
 `silo-pkg`'s `Policy.IsAllowedActions` now reports `admin:ChangeMyPassword` as
 implicit unless denied, and reports `admin:CreateUser` only when explicitly
@@ -127,7 +130,9 @@ allowed. Its Go signature and the Go compatibility floor are unchanged, but
 its returned capabilities change. Console and other consumers must stop using
 the CreateUser capability as a proxy for permission to change one's own password.
 
-## Coordinated upgrade and rollback
+<span id="coordinated-upgrade-and-rollback"></span>
+
+## Coordinated upgrade and rollback {#rollback}
 
 Upgrade SILO Server, silo-pkg and Console together, including the Console
 embedded in Server. Update mcli's shared package and SDK pins as part of the

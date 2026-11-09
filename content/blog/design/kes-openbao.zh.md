@@ -3,7 +3,8 @@ title: "SILO、KES 与 OpenBao：密钥归属和恢复"
 linkTitle: "KES 与 OpenBao"
 date: 2026-10-18
 lastmod: 2026-10-26
-author: "SILO"
+author: "PGSTY SILO 维护团队"
+summary: "区分对象加密、密钥服务授权与根密钥持久存储，并明确升级和恢复的验证方法。"
 description: "区分对象加密、密钥服务授权与根密钥持久存储，并明确升级和恢复的验证方法。"
 tags: [设计, KES, 安全, 运维]
 weight: 1

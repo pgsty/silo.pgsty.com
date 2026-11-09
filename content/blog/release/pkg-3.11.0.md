@@ -73,6 +73,7 @@ That question is the right one because of how the defect fires. Resource matchin
 | `PutReplicationConfiguration`, `PutLifecycleConfiguration`                       | Act under server credentials and keep acting after the caller's access is revoked.                                                                                                                       |
 | `DeleteBucket`, `ForceDeleteBucket`                                              | Destroy the bucket entity and its configuration irreversibly. The reproduction in the upstream issue.                                                                                                    |
 | `PutBucketCors`, `DeleteBucketCors`, `PutBucketQOS`, `PutInventoryConfiguration` | No server behaviour is attached to these today — no handler at all, or a handler that returns `NotImplemented` after the authorization check. Withholding them costs nothing and covers them in advance. |
+{.wide .expand}
 
 **Deliberately not withheld**, and asserted by a test so that adding one is a deliberate act with a visible cost rather than an edit to a list:
 
@@ -107,6 +108,7 @@ The property is verified rather than argued. A decision corpus of **27,000 autho
 | `false → true` (broadening) |  **0** |
 | `true → false` (narrowing)  |    144 |
 | unchanged                   | 26,856 |
+{.wide .expand}
 
 Every one of the 144 narrowed outcomes falls inside the design intent, with nothing outside it: exactly the twelve protected actions; only the three `Allow` statement forms, with zero transitions for `Deny`, `NotResource`-excluded or deny-`NotResource` forms; only four object-only resource patterns; and only bucket-level requests, with object-level requests entirely untouched. 12 × 4 × 3 = 144, fully accounted for.
 
@@ -174,6 +176,7 @@ The version number follows upstream's line and makes no claim of identical conte
 |:-----------------------------|------:|
 | Upstream `minio/pkg` v3.11.0 |   291 |
 | `silo-pkg` v3.11.0           |   270 |
+{.wide .expand}
 
 **24 actions exist only upstream:** six `s3:*ObjectAnnotation*` actions, five `admin:` actions (`DistJobStatus`, `Get`/`SetBucketCompression`, two `TablesReplication*`), and thirteen `s3tables:` actions covering function CRUD and tagging. These belong to the AIStor vocabulary this fork deliberately does not carry, because the community server does not implement them.
 
@@ -184,6 +187,7 @@ The version number follows upstream's line and makes no claim of identical conte
 | `s3tables:TagResource`         | `s3tables:TagTable`, `s3tables:TagWarehouse`                 |
 | `s3tables:UntagResource`       | `s3tables:UntagTable`, `s3tables:UntagWarehouse`             |
 | `s3tables:ListTagsForResource` | `s3tables:ListTagsForTable`, `s3tables:ListTagsForWarehouse` |
+{.wide .expand}
 
 A policy naming any of these six action strings therefore validates on exactly one of the two. Nothing in the Silo server, `mc` or Console references them, so there is no impact inside this ecosystem — but a consumer swapping upstream v3.11.0 for this release should know the vocabulary is not interchangeable.
 

@@ -2,7 +2,7 @@
 title: "Bucket Quota in the Console: List Display and Numeric Validation"
 linkTitle: "Console Quota Validation"
 date: 2026-11-04
-lastmod: 2026-11-04
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a quota set in the web Console showed as a dash in the bucket list, why the bucket-creation form turned 1000 Ei into a one-byte quota and rejected 0.5 Gi, which releases carried each defect, and why one shared conversion and one shared quota reader are the minimum complete repair.
@@ -14,7 +14,7 @@ url: "/blog/design/console-quota-numeric-validation/"
 
 This record covers [silo-console#72](https://github.com/pgsty/silo-console/issues/72) (a quota set in the web Console shows as a dash in the bucket list) and [silo-console#73](https://github.com/pgsty/silo-console/issues/73) (numeric validation in the bucket-creation form). It is evaluated against the Console source before the fix, [3d264aea9](https://github.com/pgsty/silo-console/commit/3d264aea9b67aa40baf706f3e13c8d4145671ea1), and the fix commits [a85665814](https://github.com/pgsty/silo-console/commit/a85665814ff74d8a9d0cbd42a51f518c79c9a227) through [5a34232e7](https://github.com/pgsty/silo-console/commit/5a34232e72162274d621c57342c75c06fc35befd).
 
-**Status:** fixed in Console. The fix commits were merged into Console `main` ([PR #74](https://github.com/pgsty/silo-console/pull/74), merge commit [3d1dd56eb](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838), 2026-11-04), followed by numeric follow-ups ([PR #79](https://github.com/pgsty/silo-console/pull/79)). Console `v2.6.0` is tagged at [`f8ab14669`](https://github.com/pgsty/silo-console/commit/f8ab146695fd1df74e4b84128a286d552921bf00), and its GitHub release is still a draft. A SILO Server commit that embeds 2.6.0 is prepared locally. It is not merged, and no SILO Server release contains it yet.
+**Status:** shipped in [Console 2.6.0](/blog/release/console-2.6.0/). The fix commits were merged into Console `main` ([PR #74](https://github.com/pgsty/silo-console/pull/74), merge commit [3d1dd56eb](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838), 2026-11-04), followed by numeric follow-ups ([PR #79](https://github.com/pgsty/silo-console/pull/79)). Console `v2.6.0` is published at [`f8ab14669`](https://github.com/pgsty/silo-console/commit/f8ab146695fd1df74e4b84128a286d552921bf00), and SILO `main` embeds `v2.6.0` ([`e24831f53`](https://github.com/pgsty/silo/commit/e24831f53)); no tagged SILO Server release contains the embedded update yet.
 
 ## Short answer {#tldr}
 
@@ -37,8 +37,9 @@ The repair is small. The bucket list uses the same quota reader as the Summary, 
 | #73 impact | One write-affecting case: amounts of 868 Ei and more become a 1-byte hard quota that blocks writes of any non-empty object. Amounts from 8 Ei to 867 Ei exceed the signed 64-bit range and are refused by the API. The remaining cases are false rejections or missing checks. |
 | Severity | Low for #72. Low to moderate for #73: reaching the damaging case needs a deliberate amount of at least 868 Ei, but the result is a bucket that silently refuses writes. No data loss, no security impact. |
 | Affected releases | See [Where the behavior came from](#history). #72: Console from the community v1.9.0 onward; SILO Server 20260314 through 20261026. #73: every release. |
-| Release urgency | Next Console release. Not a data-safety blocker. |
-| Remaining effort | Console release and tag, then the Server `go.mod` bump and release validation. |
+| Release urgency | Shipped in Console 2.6.0. Not a data-safety blocker. |
+| Remaining effort | Next SILO Server release validation for embedded Console deployments. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
@@ -72,7 +73,7 @@ At the server, the quota request accepts any non-negative amount and stores it a
 
 Provenance was established from the Console history. The upstream project `minio/console` is no longer publicly reachable. The community continuation [georgmangold/console](https://github.com/georgmangold/console), which the SILO Console forked, still is. `pgsty/silo-console` `main` descends from its commit [feff71e48](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16), the fork point. Commits below are on `main` of `pgsty/silo-console`; PR numbers refer to the repository the commit came from. Of the pre-fork Console release tags only the community tags v1.7.7 and later are retrievable, so the first minio/console release tag is not given for older commits.
 
-### #72: a reader the writer change left behind
+### #72: a reader the writer change left behind {#reader-left-behind}
 
 | Ingredient | Commit | Origin | Date | First release |
 | --- | --- | --- | --- | --- |
@@ -80,6 +81,7 @@ Provenance was established from the Console history. The upstream project `minio
 | List UI reads only `details.quota.quota` | [10539929e](https://github.com/pgsty/silo-console/commit/10539929e1) "Added quota metric to buckets list & objects list" (minio/console #1595), `BucketListItem.tsx` | Upstream | 2022-02-16 | Tag not retrievable; present in every later release |
 | **Console writer switches to `Size`; Summary reader updated, list reader not** | [6c54a55d5](https://github.com/pgsty/silo-console/commit/6c54a55d5285986eeeb4df00544f1aaa8c8db05d) "use Quota Size field instead of the deprecated Quota field" ([georgmangold/console#28](https://github.com/georgmangold/console/pull/28), Georg Mangold) | Community Console line, before the fork | 2025-09-16 | georgmangold/console v1.9.0 (2025-11-16) |
 | List redesigned as a table; the quota column keeps the stale reader and prints a dash for zero | [2611a4d11](https://github.com/pgsty/silo-console/commit/2611a4d11a9e22282847bfa5b8b239a84b4b5d77) "modernize buckets, object browser, safe previews, and task center" (Feng Ruohang) | SILO | 2026-10-25 | Console v2.5.0 (2026-10-25) |
+{.wide .expand}
 
 The defect needs the last-but-one row: before 2025-09-16 the Console wrote the legacy field, which the list could read. The change in [6c54a55d5](https://github.com/pgsty/silo-console/commit/6c54a55d5285986eeeb4df00544f1aaa8c8db05d) is the representation change, and it updated one of the two readers. It is not a server or `madmin-go` change: `madmin-go` has carried both fields since August 2023, and the server's storage and enforcement of them is unchanged by it. SILO did not introduce the defect.
 
@@ -98,16 +100,18 @@ The defect needs the last-but-one row: before 2025-09-16 the Console wrote the l
 | 20260916, 20261015 | Console v2.4.1 | Yes (omits) |
 | 20261018 | Console v2.4.2 | Yes (omits) |
 | 20261025, 20261026 | Console v2.5.0, v2.5.1 | Yes (dash) |
+{.wide .expand}
 
-The Server `go.mod` still points at the v2.5.1 line (pin of 2026-10-27), so no Server release contains the fix. The Server tags 20260304, 20260323, and 20260330 embed a Console build from before the writer change and are not affected.
+The Server `go.mod` on `main` now pins Console `v2.6.0` ([`e24831f53`](https://github.com/pgsty/silo/commit/e24831f53)), while no tagged Server release contains the fix yet. The Server tags 20260304, 20260323, and 20260330 embed a Console build from before the writer change and are not affected.
 
-### #73: original minio/console code
+### #73: original minio/console code {#original-code}
 
 | Ingredient | Commit | Origin | Date | Notes |
 | --- | --- | --- | --- | --- |
 | `parseInt(getBytes(...))` in the creation request | [28eb8784a](https://github.com/pgsty/silo-console/commit/28eb8784a) "Set Bucket Quota on Creation" (minio/console #308) | Upstream | 2020-10-01 | `getBytes` returns `Number.toString(10)`; the exponent form exists from 1e21 up |
 | Field check `parseInt(quotaSize) === 0`, no unit revalidation, retention `NaN`/`< 1` check | [41e1b4a5d](https://github.com/pgsty/silo-console/commit/41e1b4a5d) "Add Bucket slice refactor to reduce re-renders" (minio/console #2087) | Upstream | 2022-06-03 | Moved the form logic into `addBucketsSlice.ts`; the checks already existed in `AddBucket.tsx` |
 | Decimal quotas added to the pattern, `parseInt` test kept | [7ecc1022b](https://github.com/pgsty/silo-console/commit/7ecc1022b) "Added decimal support to bucket quota selectors" (minio/console #2126) | Upstream | 2022-06-15 | This made `0.5` pass the pattern and fail the `parseInt` test; the upstream "Release v0.19.0" commit follows it |
+{.wide .expand}
 
 All of this is in the community line and in `feff71e48`. SILO commits that touched the same files before the fix ([23ae6e8e6](https://github.com/pgsty/silo-console/commit/23ae6e8e6), [14b1c2de2](https://github.com/pgsty/silo-console/commit/14b1c2de2), [2611a4d11](https://github.com/pgsty/silo-console/commit/2611a4d11a9e22282847bfa5b8b239a84b4b5d77)) changed link targets, translations, and a command preview; none changed the validation or the conversion. SILO neither introduced nor widened #73. It is present in every Console release and so in every SILO Server release that embeds one.
 
@@ -115,23 +119,23 @@ Reasoned, not executed: the `main`-line history. The first minio/console release
 
 ## Options {#options}
 
-### Option 1: one shared quota reader for list and detail
+### Option 1: one shared quota reader for list and detail {#option-1}
 
 Move the `Size`-then-`Quota` rule into one helper and use it in the list handler and in `getBucketQuota`. Both readers always agree, and the API schema does not change.
 
-### Option 2: change the writer to send both fields
+### Option 2: change the writer to send both fields {#option-2}
 
 Writing `Quota` as well as `Size` would make the old reader work again, but it reintroduces a deprecated field for one consumer, and quotas written by other tools would still break the list. Rejected.
 
-### Option 3: change the UI to also read `size`
+### Option 3: change the UI to also read `size` {#option-3}
 
 The list response model has only `quota`. Reading a second field in the browser duplicates the rule in a third place. Rejected.
 
-### Option 4: validate the amount in one function and use it everywhere
+### Option 4: validate the amount in one function and use it everywhere {#option-4}
 
 One function converts a text amount and a unit to a byte count and rejects anything outside `1` to `2^63 - 1`. The creation form, the quota editor, and the thunk all call it, and a unit change revalidates. Retention gets an integer and `1..2147483647` check.
 
-### Option 5: leave the server to reject
+### Option 5: leave the server to reject {#option-5}
 
 The server accepts any non-negative `Size`, including 1. The bad value is a valid configuration, so the server cannot tell it from intent. Rejected as the only defense, kept as a backstop for negative amounts.
 
@@ -144,6 +148,7 @@ Option 1 and Option 4, in six commits of the branch (all in PR #74):
 3. [fb2c9e71c](https://github.com/pgsty/silo-console/commit/fb2c9e71c) parses complete byte values and bounds the display units, so large numbers no longer print in exponent form for display.
 4. [d878dbf88](https://github.com/pgsty/silo-console/commit/d878dbf88) adds `addBucketValidation.ts` with `getQuotaBytes` and `isValidQuota`. The amount must match the two-decimal pattern, convert to a finite whole number above zero and below `2^63`, and be revalidated when the unit changes. The creation thunk repeats the check before sending.
 5. [9fb0b0627](https://github.com/pgsty/silo-console/commit/9fb0b0627) and [5a34232e7](https://github.com/pgsty/silo-console/commit/5a34232e72162274d621c57342c75c06fc35befd) require retention validity to be an integer between 1 and 2147483647 in the creation form, its thunk, and the retention editor. The first also makes the API refuse a retention validity of zero or less.
+{.steps}
 
 The branch also carries two unrelated display commits (API request widgets and syscall rate labels). They are not part of these issues.
 
@@ -179,7 +184,7 @@ The branch also carries two unrelated display commits (API request widgets and s
 ## Residual limits {#limits}
 
 - **A bucket already given a 1-byte quota stays blocked.** Find it with `mcli quota info ALIAS/BUCKET` (a size of 1 byte is the sign) and set the intended quota or clear it with `mcli quota clear ALIAS/BUCKET`.
-- **Not released.** The fix is in Console `main` only. Embedded Console UI in every SILO Server release through 20261026 still has both defects until a Console release is tagged and the Server `go.mod` pin is moved to it.
+- **Not yet in a tagged Server release.** Standalone [Console 2.6.0](/blog/release/console-2.6.0/) includes the fix, and SILO `main` embeds `v2.6.0` ([`e24831f53`](https://github.com/pgsty/silo/commit/e24831f53)). Embedded Console UI in tagged SILO Server releases through 20261026 still has both defects until the next SILO Server release is published.
 - **Large quotas stay with `mcli`.** On `main`, the browser refuses quota writes of 8 PiB (2^53 bytes) and more, because a JSON number is exact only up to that point ([#75](https://github.com/pgsty/silo-console/issues/75), closed by [2b18ff854](https://github.com/pgsty/silo-console/commit/2b18ff854f81b08080094f0f3231f6b249c64d49)). The branch tip allows up to 2^63 but converts through a JavaScript number.
 - **Narrow screens.** The existing responsive layout hides the quota column of the bucket list below 1200 px; the Summary still shows the quota.
 
@@ -205,4 +210,4 @@ Reasoned from code, not executed here:
 - Fix: [PR #74](https://github.com/pgsty/silo-console/pull/74), merge commit [3d1dd56eb](https://github.com/pgsty/silo-console/commit/3d1dd56ebaacf219191ed92d351a27bddd653838)
 - Writer change: [georgmangold/console#28](https://github.com/georgmangold/console/pull/28)
 - Follow-ups on `main`: [silo-console#75](https://github.com/pgsty/silo-console/issues/75) (64-bit precision, [2b18ff854](https://github.com/pgsty/silo-console/commit/2b18ff854f81b08080094f0f3231f6b249c64d49)), [silo-console#76](https://github.com/pgsty/silo-console/issues/76) (`calculateBytes`, [4da296098](https://github.com/pgsty/silo-console/commit/4da296098)), [PR #79](https://github.com/pgsty/silo-console/pull/79) (creation-time validation)
-- Release pages: [Console 2.5.1](/blog/release/console-2.5.1/), [SILO 20261026](/blog/release/silo-20261026/)
+- Release pages: [Console 2.6.0](/blog/release/console-2.6.0/), [Console 2.5.1](/blog/release/console-2.5.1/), [SILO 20261026](/blog/release/silo-20261026/)

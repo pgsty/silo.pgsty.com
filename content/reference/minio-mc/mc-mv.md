@@ -119,7 +119,7 @@ If running [`mc mv`](#command-mc.mv) with the [`--recursive`](#mc.mv.-recursive)
 
 *Optional*
 
-Add custom metadata for the object. Separate pairs with semicolons and quote the argument, for example `--attr 'key1=value1;key2=value2;key3=value3'`. Empty entries, including trailing or repeated semicolons, are accepted by builds with the next-release fixes; inputs containing no key/value entry still fail. Builds with the [next-release fixes](/compatibility/mcli/#next-release) reject malformed attributes before copying or deleting any source.
+Add custom metadata for the object. Separate pairs with semicolons and quote the argument, for example `--attr 'key1=value1;key2=value2;key3=value3'`. Starting with [mcli 20261109](/blog/release/mcli-20261109/), empty entries (including trailing or repeated semicolons) are accepted while inputs containing no key/value entry still fail, and [mcli](/compatibility/mcli/#current-release) rejects malformed attributes before copying or deleting any source.
 
 ##### `--disable-multipart` {#mc.mv.-disable-multipart}
 
@@ -403,7 +403,7 @@ mc mv --storage-class CLASS FILEPATH ALIAS/PATH
 
 ### Partial failures and endpoint identity {#partial-failures}
 
-With the [next-release fixes](/compatibility/mcli/#next-release), a source preparation error makes the command exit nonzero while independent sources, including later arguments, continue. Successfully moved sources are deleted; there is no rollback. JSON start-record `totalCount` and `totalSize` values are cumulative prepared counts and bytes, not final totals or proof of completion. Check the final exit status and error records.
+Starting with [mcli 20261109](/blog/release/mcli-20261109/) ([compatibility notes](/compatibility/mcli/#current-release)), a source preparation error makes the command exit nonzero while independent sources, including later arguments, continue. Multi-source moves evaluate source-to-target routing per source item (`URLs.SourceAlias`), and explicit `--tags` apply across server-side copies, streaming copies, and `--preserve` runs. Successfully moved sources are deleted; there is no rollback. JSON start-record `totalCount` and `totalSize` values are cumulative prepared counts and bytes, not final totals or proof of completion. Check the final exit status and error records.
 
 The move guard rejects identical resolved objects and ambiguous same-bucket/key moves through endpoints sharing a scheme, port and IP, including `--resolve` mappings. Shared-IP virtual hosts can therefore be rejected. Establish that their stores are independent before copying, verifying and removing explicitly; reading matching bytes through two aliases does not prove independence. Different addresses, ports, proxy routing, virtual-host addressing or changing DNS can hide a shared backend. Use a consistent endpoint URL for aliases to the same store. For a proxied endpoint, local DNS failure leaves its address unknown rather than rejecting the move. Proxy selection follows the transport rules, including `NO_PROXY`; an unresolved direct endpoint still fails.
 

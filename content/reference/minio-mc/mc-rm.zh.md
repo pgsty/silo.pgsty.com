@@ -343,8 +343,12 @@ MinIO 支持在单个存储桶中保留对象的多个 [版本](/zh/administrati
 >
 > 输出会显示版本化文件的修改时间。 与 `--dry-run` 搭配使用时，这有助于确认你选择了正确的删除对象。
 
-### S3 兼容性 {#s3}
+### PGSTY mcli 安全与退出码（`mcli 20261109`） {#mcli-safety}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
+- `--purge` 与 [`--dry-run`](#mc.rm.-dry-run)（`--fake`）同时使用时严格保持只读，不会发送任何 `?purge=true` `DELETE` 请求（`#208`）。
+- 多参数与 [`--stdin`](#mc.rm.-stdin) 递归删除会在删除前面参数之前校验全命名空间目标（`#163`、`#202`）。若任一目标指向存储桶根、集群根或文件系统根且未指定 [`--dangerous`](#mc.rm.-dangerous)，命令会在删除较早参数之前中止。
+- 权限与 WORM 保留期错误在报告逐对象失败后以退出码 `1` 退出（`mcli 20260916`）。
 
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+### S3 兼容性 {#s3-compatibility}
+
+SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。

@@ -22,6 +22,8 @@ MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/
 
 SILO 在服务端内嵌持续维护的 Silo Console。[Silo Console 仓库](https://github.com/pgsty/silo-console)记录下游源码、版本发布与兼容性变化；独立部署属于高级集成路径，必须选择与目标服务端版本兼容的 Console 版本。
 
+在 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 中，Console 界面支持 10 种语言（`en-US`、`zh-CN`、`zh-TW`、`ja-JP`、`ko-KR`、`fr-FR`、`de-DE`、`es-ES`、`pt-BR` 与 `ru-RU`），可通过顶栏语言选择器或 `?lang=<locale>` 切换（详见[设计记录](/zh/blog/design/console-languages/)）。独立容器镜像（`v2.6.0+`）还内置系统根证书包（`/etc/ssl/certs/ca-certificates.crt`）与可写 `/tmp` 目录（权限 `1777`），用于外部 HTTPS 连接与临时文件操作。
+
 ### 支持的浏览器 {#id3}
 
 MinIO Console 可运行于多种当前稳定版本的浏览器。

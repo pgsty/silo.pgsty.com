@@ -150,7 +150,7 @@ mc mirror --active-active siteB siteA
 
 *Optional*
 
-Add custom metadata for mirrored objects. Specify key-value pairs as `KEY=VALUE\;`. For example, `--attr key1=value1\;key2=value2\;key3=value3`.
+Add custom metadata for mirrored objects. Specify key-value pairs as `KEY=VALUE\;`. For example, `--attr key1=value1\;key2=value2\;key3=value3`. In `mcli 20261109`, empty metadata entries created by trailing or repeated `;` separators are ignored instead of failing the mirror operation (`#166`).
 
 ##### `--checksum` {#mc.mirror.-checksum}
 

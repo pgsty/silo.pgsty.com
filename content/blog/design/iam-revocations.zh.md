@@ -2,7 +2,7 @@
 title: "持久化 IAM 撤销"
 linkTitle: "持久化 IAM 撤销"
 date: 2026-09-16
-lastmod: 2026-10-26
+lastmod: 2026-11-08
 author: "冯若航"
 summary: "持久删除版本、签名父边界、安全重放、协调升级以及 IAM 恢复限制。"
 tags: [Design, S3, Operations]
@@ -43,6 +43,8 @@ SILO 保留已删除 IAM 记录的版本（Revision），使离线站点在重�
 用户或组的版本写入是删除操作的权威提交点，策略映射与子凭证清理在其后执行。即使后续附属清理失败，也不会回滚已提交的父身份撤销；API 会向调用方返回清理错误，但仍会通知同后端兄弟节点重载已提交的撤销状态。因此，管理接口返回 HTTP 500 清理错误**并不代表**旧身份仍然有效。管理员可在暂停同名重建与其他 IAM 变更的前提下安全重试该删除操作。当发生“撤销已提交但附属清理失败”时，Admin Handler 不会触发即时跨站点推送钩子，而是交由常规后台删除自愈循环（Deletion Healing）重试跨站点传播。同后端兄弟节点收到删除通知后会重读当前共享状态，因此延迟到达的通知不会误删随后合法重建的同名身份；etcd 部署下兄弟节点还会通过 watch 机制接收持久化变更。
 
 运维上必须保持各节点时钟同步并监控时钟偏移。版本排序基于源端墙钟时间戳，并对同一路径的本地连续写入保证单调递增，但不跨站点建立并发写入的因果偏序。
+
+**2026 年 11 月持久化记录编辑与缓存新鲜度加固（[`a0de92fcb`](https://github.com/pgsty/silo/commit/a0de92fcb)、[`70914759e`](https://github.com/pgsty/silo/commit/70914759e)、[`7eed95bc8`](https://github.com/pgsty/silo/commit/7eed95bc8)、[`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd)、[`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6)、[`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f)、[`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)）：** 在多节点集群中，管理端增量修改（`SetUserStatus`、`UpdateGroupMembers`、`SetGroupStatus`、`SetPolicy`、`UpdateServiceAccount` 以及每小时一次的 LDAP 组成员刷新）均在跨节点版本锁内读取并修改底层持久化记录，而不再先就地修改当前节点的内存缓存。当写入或创建因底层已存在更新版本或删除墓碑而被拒绝时，当前节点会立即重载或驱逐本地陈旧缓存条目，不再继续提供旧缓存直至下一轮定时刷新。单条目按需加载（Lazy Load）按 key 通过 `singleflight` 合并并发未命中，并在读取存储前记录 `loadedAt`，防止跨通知或本地新写入之前启动的慢速读取在返回时覆盖更新的缓存版本或墓碑。
 
 ## 用户、子凭证与组 {#identities}
 
@@ -119,6 +121,7 @@ SILO 保留已删除 IAM 记录的版本（Revision），使离线站点在重�
 | `minio_cluster_iam_revocation_heal_failures` | 进程启动以来失败的自愈收敛轮数 |
 | `minio_cluster_iam_revocation_heal_duration_millis` | 最近一轮自愈收敛耗时（毫秒） |
 | `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | 最近一轮自愈成功的 Unix 时间戳（秒） |
+{.wide .expand}
 
 上述索引指标按单进程统计，对共享同一后端的多个节点直接求和会重复计数。自愈指标仅在启用了跨站点复制且当前节点持有 Leader 租约时推进；仅共享后端而未启用站点复制的部署不运行跨站点自愈循环，后三项指标为零属于正常现象。
 

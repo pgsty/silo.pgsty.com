@@ -41,6 +41,7 @@ url: "/zh/blog/design/complete-multipart-checksum-errors/"
 | 完成时同时提供 `CRC64NVME` 摘要与 `COMPOSITE` 类型（在解析阶段被拒绝） | `InvalidArgument` |
 | 对 `CRC64NVME` `FULL_OBJECT` 上传在完成时仅断言 `COMPOSITE` 类型 | `BadDigest` |
 | `UploadPart` 期间客户端提供的分片校验和错误 | `XAmzContentChecksumMismatch` |
+{.wide .expand}
 
 对于 `FULL_OBJECT` 上传，完成请求 XML 中可以省略分片级校验和，但凡是显式提供的分片校验和仍会与已存储的分片元数据逐一比对。与初始化类型一致的纯类型断言允许通过；省略可选的校验和类型请求头不会隐式断言 `COMPOSITE`。将 `SHA1` 或 `SHA256` 与 `FULL_OBJECT` 组合的请求会在算法与类型解析阶段直接被拒绝，不会进入已存储类型比对阶段。
 

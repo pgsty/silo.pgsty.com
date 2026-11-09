@@ -27,6 +27,7 @@ Shooks（`@Dansyuqri`）贡献的 [PR #57](https://github.com/pgsty/silo/pull/57
 | 整对象校验和 | `ChecksumType=FULL_OBJECT` 及对应算法摘要元素 |
 | 分片组合校验和 | `ChecksumType=COMPOSITE` 及对应算法摘要元素 |
 | 无附加校验和 | 不输出 `ChecksumType` 元素，也不伪造校验和 |
+{.wide .expand}
 
 [S3 `CompleteMultipartUpload` API 规范](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html)定义了 `FULL_OBJECT` 与 `COMPOSITE` 两种校验和类型。对象 `ETag` 是独立的响应字段，不能替代附加 S3 校验和元数据。
 

@@ -48,6 +48,7 @@ For statements that actually perform resource matching, the impact depends on `E
 | `Deny` + bare `Resource` | The intended denial does not fire |
 | `Allow` + bare `NotResource` | Excludes nothing and can grant far more than intended |
 | `Deny` + bare `NotResource` | Can deny far more than intended |
+{.wide .expand}
 
 The dangerous cases are policy-dependent fail-open behavior, not an unauthenticated remote exploit and not a CVE. A policy author, template, or automation must first submit the malformed resource. The same issue applies to registered S3 Tables and KMS ARN prefixes.
 

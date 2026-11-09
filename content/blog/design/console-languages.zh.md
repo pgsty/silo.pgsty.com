@@ -4,11 +4,9 @@ linkTitle: "Console 多语言"
 date: 2026-11-09
 lastmod: 2026-11-09
 author: "PGSTY SILO 维护团队"
-description: >
-  SILO Console 十语言支持的范围、维护策略与打包实测：默认英文、完整的第一方中文、逐语言 gzip 分包与启动时全量加载。
 summary: >
   解释 SILO 为什么增加十种 UI 语言、如何组织注册表和维护分级，以及逐语言压缩、静态全量加载在体积、缓存与实现成本之间的取舍。
-tags: [设计, Console, 国际化]
+tags: [Design, Console, Internationalization]
 weight: 10
 draft: false
 url: "/zh/blog/design/console-languages/"
@@ -16,7 +14,7 @@ url: "/zh/blog/design/console-languages/"
 
 Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-console/pull/83) 提供了巴西葡萄牙语翻译。siyahkut 在 [silo#277](https://github.com/pgsty/silo/issues/277) 中请求土耳其语。这两项贡献推动 Console 扩展为可配置的十语言界面。
 
-**截至 2026-11-09 的状态：**十语言界面、审校后的译文、逐语言压缩、静态全量加载和长期缓存已合入 Console `main`。最终复核保留了紧凑标签要求，并检查了相关控件在手机、平板和桌面宽度下的显示。源码合入与产品发布是不同阶段。
+**截至 2026-11-09 的状态：**十语言界面、审校后的译文、逐语言压缩、静态全量加载和长期缓存已合入 Console `main`，并纳入 [Console 2.7.0 候选版](/zh/blog/release/console-2.7.0/)。最终复核保留了紧凑标签要求，并检查了相关控件在手机、平板和桌面宽度下的显示。源码合入、打标与正式产品发布仍是不同阶段。
 
 ## 决定 {#tldr}
 
@@ -43,6 +41,7 @@ Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-conso
 5. 中文覆盖率阻断 CI，其他语言报告覆盖率。
 6. 全部词典启动时加载，构建产物按语言分包并预压缩，通过内容哈希与长期缓存独立复用。
 7. 阿拉伯语同时实现 RTL 布局，协议数据仍从左到右展示。
+{.steps}
 
 ## 原有设计 {#current-design}
 
@@ -77,6 +76,7 @@ Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-conso
 | 所有语言合并 | 549,712 | 562,448 | 1 |
 | 每种语言独立，合计 | 555,105 | 568,470 | 9 |
 | 分包额外成本 | 5,393（0.98%） | 6,022（1.07%） | 8 |
+{.wide .expand}
 
 相同压缩级别不保证不同实现输出相同字节。系统命令用于对比，固定生产压缩器用于保证不同构建主机上的结果可复现。两种实现得到相同的打包结论，因此不需要为此更换压缩器。
 
@@ -91,6 +91,7 @@ Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-conso
 | 日语 | 63,159 |
 | 阿拉伯语 | 64,095 |
 | 土耳其语 | 60,831 |
+{.wide .expand}
 
 合并文件并不会自动消除跨词典重复的所有英文 key。DEFLATE 只能引用前面 32 KiB 窗口内的文本，而单种语言的完整词典远大于这个窗口。这解释了为什么不能预设跨语言合并会带来巨大压缩收益；上表给出了实际构建的结果。参见 [RFC 1951 第 2 节](https://www.rfc-editor.org/rfc/rfc1951#section-2)。
 
@@ -142,6 +143,7 @@ tr: { label: "Türkçe", tag: "tr", dir: "ltr", tier: "maintained" },
 | ja | 日本語 | LTR | maintained |
 | ar | العربية | RTL | maintained |
 | tr | Türkçe | LTR | maintained |
+{.wide .expand}
 
 已有 `zh` 偏好不变。早期测试版的 `pt` 映射为 `pt-BR`；未知或未启用的值回退英文。未完成的语言可以通过 `enabled: false` 从菜单排除，但隐藏菜单项本身不会从构建中移除静态导入。
 
@@ -208,6 +210,7 @@ tr: { label: "Türkçe", tag: "tr", dir: "ltr", tier: "maintained" },
 | 按语言分包，全量加载 | 独立复用缓存，保留现有同步运行方式 | 冷启动多八个请求，首次词典工作量不减少；采用。 |
 | 按语言分包，懒加载 | 英文可以不加载词典，其他用户只取需要的语言 | 增加部分加载、失败、重试与状态协调路径，暂缓，等实测证明有必要再引入。 |
 | 引入完整翻译框架 | 更丰富的消息工具和生态集成 | 增加依赖与迁移工作，现有原文 key 查找、`Intl`、React/Redux 已满足需求。 |
+{.wide .expand}
 
 按语言懒加载曾在评估中实现，维护者选择静态方案后将其移除。独立 gzip 文件仍然保留了以后调整加载方式的自然边界，不必现在就引入相关状态。
 

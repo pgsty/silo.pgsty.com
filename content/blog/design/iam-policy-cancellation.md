@@ -2,7 +2,7 @@
 title: "IAM Policy Reloads: Lock Scope, Cancellation, and Time Budgets"
 linkTitle: "IAM Reloads & Cancellation"
 date: 2026-10-23
-lastmod: 2026-10-23
+lastmod: 2026-11-08
 author: "Ruohang Feng"
 summary: "Why a slow policy list blocked ordinary S3 authentication, how request cancellation was lost before reaching KES, and why fixing context propagation required separating etcd read timeouts from decryption budgets."
 tags: [Design, IAM, KMS, S3, Review]
@@ -69,6 +69,8 @@ The new policy map is published only if the backend load succeeds and `ctx.Err()
 
 Background IAM refresh follows the same merge and revocation invariants. Regression tests exercise the concrete `IAMObjectStore` refresh path directly alongside concurrent policy updates, deletions, and [durable IAM revocations](/blog/design/iam-revocations/).
 
+**November 2026 single-item lazy-load extension ([`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd), [`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6), [`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f), [`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)):** Single-item user, group, and policy lazy loads also release the cache lock during storage I/O so cached S3 authentication remains available, coalesce concurrent cache misses per key via `singleflight`, and stamp `loadedAt` before reading storage so a slow in-flight load cannot overwrite a newer cached revision or tombstone.
+
 ## B: Propagate Cancellation to KMS and KES {#cancellation}
 
 Both affected decryption chains now thread the caller's `context.Context` end-to-end into the KMS and KES layers:
@@ -108,6 +110,7 @@ Correction **R1** separates the caller's request budget from individual `etcd` R
 | **Existing `etcd` read budget (30 s)** | Bounds only the `etcd` `Get` RPC; post-read decryption switches back to the caller's parent request context |
 | **Existing revision-write, revocation, lock, and cleanup budgets** | Retain `withIAMStorage` and their existing bounded timeouts |
 | **Whole-policy-list 30 s timeout (from first candidate)** | Removed from both `ListPolicies` and `ListPolicyDocs` |
+{.wide .expand}
 
 Because the `etcd` read context is derived as a child of the caller's request context, a shorter caller deadline still preempts `etcd` reads immediately. Once the `etcd` read succeeds, decryption proceeds under the caller's remaining time budget—allowing legitimate slow queries beyond 30 seconds to succeed when the caller permits.
 
@@ -123,6 +126,7 @@ Because the `etcd` read context is derived as a child of the caller's request co
 | **Remove all backend storage timeouts** | Weakens existing bounds on single-record reads, writes, distributed lock acquisition, and cleanup |
 | **Parallelize policy decryptions or add a second ciphertext cache** | Introduces new KES concurrency spikes and cache invalidation complexity not required to fix the lock and cancellation bugs |
 | **Rewrite KES SDK internal retry behavior** | Expands the blast radius into third-party SDK semantics |
+{.wide .expand}
 
 Relative to baseline [`a07d655dc`](https://github.com/pgsty/silo/commit/a07d655dc69cf04b130c2634d9fa5301078af546), the final implementation touches 8 production files (`+83 / -29` lines) and 5 test files, with no wire-protocol, ciphertext-format, or permission-model changes.
 

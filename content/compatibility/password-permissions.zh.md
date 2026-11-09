@@ -8,6 +8,7 @@ type: docs
 icon: fa-solid fa-code-branch
 ---
 
+> [!IMPORTANT]
 > **适用于 Console v2.4.1、pkg v3.14.1 与配套 SILO Server。**
 > Console 按钮、会话能力与 Server 授权必须使用一致的动作映射。
 > 请按下文协调升级，并核对[组件版本矩阵](/zh/compatibility/versions/)。
@@ -22,6 +23,7 @@ icon: fa-solid fa-code-branch
 | --- | --- | --- |
 | 修改调用者自己的密码 | `admin:ChangeMyPassword` | 已附加策略的内部用户隐式允许，显式 Deny 优先 |
 | 创建其他用户或重置其密码 | `admin:CreateUser` | 必须显式 Allow，显式 Deny 优先 |
+{.wide .expand}
 
 Console 的修改密码按钮使用 ChangeMyPassword，用户管理继续使用 CreateUser。
 修改自己的密码仍需当前密码。STS、服务账号不能借此修改父用户密码；root 与外部身份提供商密码不属于此端点。

@@ -3,7 +3,7 @@ title: "AssumeRoleWithLDAPIdentity"
 url: "/zh/developers/security-token-service/AssumeRoleWithLDAPIdentity/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/developers/security-token-service/AssumeRoleWithLDAPIdentity.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="assumerolewithldapidentity"></a>
@@ -13,7 +13,9 @@ MinIO Security Token Service (STS) `AssumeRoleWithLDAPIdentity` API 端点使用
 
 MinIO STS `AssumeRoleWithLDAPIdentity` API 端点以 AWS [AssumeRoleWithWebIdentity](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRoleWithWebIdentity.html) 端点为模型，并共享部分请求/响应元素。本文档介绍 MinIO 特有的语法，并为 所有共享元素提供指向 AWS 参考文档的链接。
 
-## 请求端点 {#id2}
+<a id="id2"></a>
+
+## 请求端点 {#request-endpoint}
 
 `AssumeRoleWithLDAPIdentity` 端点格式如下：
 
@@ -21,17 +23,19 @@ MinIO STS `AssumeRoleWithLDAPIdentity` API 端点以 AWS [AssumeRoleWithWebIdent
 POST https://minio.example.net?Action=AssumeRoleWithLDAPIdentity[&ARGS]
 ```
 
-以下示例使用了所有受支持参数。请将 `minio.example.net` 主机名替换为你的 MinIO 集群对应的 URL：
+以下示例展示了必需参数与可选的会话时长参数。请将 `minio.example.net` 主机名替换为你的 MinIO 集群对应的 URL：
 
 ```shell
 POST https://minio.example.net?Action=AssumeRoleWithLDAPIdentity
 &LDAPUsername=USERNAME
 &LDAPPassword=PASSWORD
 &Version=2011-06-15
-&Policy={}
+&DurationSeconds=3600
 ```
 
-### 请求查询参数 {#id3}
+<a id="id3"></a>
+
+### 请求查询参数 {#request-query-parameters}
 
 该端点支持以下查询参数：
 
@@ -62,9 +66,7 @@ POST https://minio.example.net?Action=AssumeRoleWithLDAPIdentity
     <tr>
       <td><p><code>DurationSeconds</code></p></td>
       <td><p>integer</p></td>
-      <td><p><em>可选</em></p><p>指定临时凭据在多少秒后过期。默认值为 <code>3600</code>。</p><ul><li><p>最小值为 <code>900</code>（15 分钟）。</p></li><li><p>最大值为 <code>604800</code>（7 天）。</p></li></ul><p>如果省略 <code>DurationSeconds</code>，MinIO 在使用默认时长前会先检查 JWT token
-中是否包含 <code>exp</code> claim。有关 JSON web token 过期时间的更多信息，请参见
-<a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4">RFC 7519 4.1.4: Expiration Time Claim</a>。</p></td>
+      <td><p><em>可选</em></p><p>指定临时凭据在多少秒后过期。默认值为 <code>3600</code>（1 小时）。</p><ul><li><p>最小值为 <code>900</code>（15 分钟）。</p></li><li><p>最大值为 <code>31536000</code>（365 天）。</p></li></ul><p>该端点认证的是 LDAP 凭据而非 JWT，因此不会从传入的 JWT <code>exp</code> claim 中获取会话时长。</p></td>
     </tr>
     <tr>
       <td><p><code>Policy</code></p></td>
@@ -77,14 +79,16 @@ Name (DN) 匹配的 <a href="/zh/operations/external-iam/#minio-external-identit
   </tbody>
 </table>
 
-## 响应元素 {#id8}
+<a id="id8"></a>
 
-此 API 端点的 XML 响应与 AWS 的 [AssumeRoleWithLDAPIdentity response](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRoleWithLDAPIdentity.html#API_AssumeRoleWithLDAPIdentity_ResponseElements). 类似。具体而言，MinIO 返回 `AssumeRoleWithLDAPIdentityResult` 对象，其中 `AssumedRoleUser.Credentials` 对象包含 MinIO 生成的临时凭据：
+## 响应元素 {#response-elements}
+
+`AssumeRoleWithLDAPIdentity` 是 SILO/MinIO 扩展，并非 AWS STS 原生动作。SILO 返回包含 `Credentials` 元素的 `AssumeRoleWithLDAPIdentityResult`：
 
 - `AccessKeyId` - 应用用于认证的访问密钥。
-- `SecretKeyId` - 应用用于认证的密钥。
+- `SecretAccessKey` - 应用用于认证的私有密钥。
 - `Expiration` - 凭据过期时间，采用 <a id="index-0" data-td-print-local></a>[**RFC3339**](https://datatracker.ietf.org/doc/html/rfc3339.html) 日期时间格式。
-- `SessionToken` - 应用用于认证的会话令牌。某些 SDK 在使用临时凭据时可能需要此字段。
+- `SessionToken` - 使用该临时凭据对 S3 请求签名时，必须与访问密钥和私有密钥一并提供的会话令牌。
 
 以下示例与 MinIO STS `AssumeRoleWithLDAPIdentity` 端点返回的响应类似：
 
@@ -92,10 +96,6 @@ Name (DN) 匹配的 <a href="/zh/operations/external-iam/#minio-external-identit
 <?xml version="1.0" encoding="UTF-8"?>
 <AssumeRoleWithLDAPIdentityResponse xmlns="https://sts.amazonaws.com/doc/2011-06-15/">
 <AssumeRoleWithLDAPIdentityResult>
-   <AssumedRoleUser>
-      <Arn/>
-      <AssumeRoleId/>
-   </AssumedRoleUser>
    <Credentials>
       <AccessKeyId>Y4RJU1RNFGK48LGO9I2S</AccessKeyId>
       <SecretAccessKey>sYLRKS1Z7hSjluf6gEbb9066hnx315wHTiACPAjg</SecretAccessKey>
@@ -107,6 +107,8 @@ Name (DN) 匹配的 <a href="/zh/operations/external-iam/#minio-external-identit
 </AssumeRoleWithLDAPIdentityResponse>
 ```
 
-## 错误元素 {#id9}
+<a id="id9"></a>
 
-此 API 端点的 XML 错误响应与 AWS 的 [AssumeRoleWithLDAPIdentity response](https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRoleWithLDAPIdentity.html#API_AssumeRoleWithLDAPIdentity_Errors).
+## 错误元素 {#error-elements}
+
+此 API 端点的 XML 错误响应与 AWS 的 [STS 错误响应](https://docs.aws.amazon.com/STS/latest/APIReference/CommonErrors.html) 类似。

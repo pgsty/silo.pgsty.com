@@ -53,6 +53,7 @@ Its extension table listed media formats but omitted `.log`, `.txt`, `.json`, an
 | `.txt` / `text/plain` | `none` | `inline`, `X-Frame-Options: SAMEORIGIN` |
 | `.json` / `application/json` | "Preview unavailable" | `inline`, `X-Frame-Options: SAMEORIGIN` |
 | `.xml` / `application/xml` | `none` | `attachment`, `X-Frame-Options: DENY` |
+{.wide .expand}
 
 In addition, the object-detail view used the wrong boolean conjunction when deciding whether **Preview** should be disabled: an authorized user could click **Preview** on an unsupported object only to receive an unavailable dialog, or see an enabled action that the server would reject.
 

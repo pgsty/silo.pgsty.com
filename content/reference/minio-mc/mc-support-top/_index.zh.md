@@ -11,12 +11,7 @@ upstream_modified: false
 
 <a id="command-mc.support.top"></a>
 
-> [!NOTE]
-> **说明**
->
-> > [!NOTE]
-> > **变更: RELEASE.2022-08-11T00-30-48Z**
->
+> [!NOTE] 变更: RELEASE.2022-08-11T00-30-48Z
 > `mc support top` 替代 `mc admin top` 命令。
 
 > [!NOTE]

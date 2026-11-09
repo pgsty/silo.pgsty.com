@@ -18,7 +18,7 @@ The **`mc`** command-line tool is built for compatibility with the AWS S3 API. I
 
 The Silo project cannot guarantee behavior against every other S3-compatible service because implementations differ. Test the operations your workload relies on before treating another service as compatible.
 
-The current release is [mcli 20261026](/blog/release/silo-20261026/#mcli), using Go 1.27.3, pkg v3.15.2 and upstream SDK `v7.4.2-0.20261025165926-320af050c445`. See the [compatibility notes](/compatibility/mcli/#current-release) for behavior changes and the [component matrix](/compatibility/versions/) for Server/Console release boundaries.
+The current release is [mcli 20261109](/blog/release/mcli-20261109/), using Go 1.27.3, `silo-pkg` [v3.16.0](/blog/release/pkg-3.16.0/), and upstream SDK `v7.4.2-0.20261025165926-320af050c445`. See the [compatibility notes](/compatibility/mcli/#current-release) for behavior changes and the [component matrix](/compatibility/versions/) for Server/Console release boundaries.
 
 [`mc`](#command-mc) has the following syntax:
 
@@ -51,7 +51,7 @@ Standalone archives and Linux packages install the command as **`mcli`**. The co
 To build the maintained fork from source:
 
 ```shell
-git clone --branch RELEASE.2026-10-26T00-00-00Z --depth 1 https://github.com/pgsty/mc.git
+git clone --branch RELEASE.2026-11-09T00-00-00Z --depth 1 https://github.com/pgsty/mc.git
 cd mc
 make build
 ./mc --version
@@ -157,7 +157,7 @@ display the contents of the specified file or object to <code>STDOUT</code>.
       <td><p>The Silo client extension independently recomputes and compares stored S3 full-object checksums. It is read-only and supports individual objects, recursive prefixes, versions, candidate manifests, dry runs, JSON Lines reports, and explicit failure policies.</p></td>
     </tr>
     <tr>
-      <td><p><a href="/reference/minio-mc/mc-cors/"><code>mc cors get</code><br /><code>mc cors set</code><br /><code>mc cors remove</code></a></p></td>
+      <td><p><a href="/reference/minio-mc/mc-cors/#command-mc.cors"><code>mc cors get</code><br /><code>mc cors set</code><br /><code>mc cors remove</code></a></p></td>
       <td><p>Read, replace, or remove a bucket's CORS configuration. Use <code>mcli cors get ALIAS/BUCKET</code>, <code>mcli cors set ALIAS/BUCKET cors.xml</code>, or <code>mcli cors remove ALIAS/BUCKET</code>. The configuration file is XML. See the <a href="/reference/s3-api-compatibility/">S3 API reference</a> for bucket CORS and server-wide fallback behavior.</p></td>
     </tr>
     <tr>
@@ -349,7 +349,7 @@ For Windows, [`mc`](#command-mc) attempts to construct a default file path by tr
 2. `USERPROFILE\.mc\config.json`
 3. `HOMEDRIVE+HOMEPATH\.mc\config.json`
 
-You can use the `--config-dir`
+You can use the [`--config-dir`](#cmdoption-mc-config-dir) flag or the [`MC_CONFIG_DIR`](/reference/minio-mc/minio-client-settings/#envvar.MC_CONFIG_DIR) environment variable to specify an alternate configuration directory. In the `pgsty/mc` container image (`20261109+`), `/.mc` is pre-created with `1777` permissions so arbitrary non-root UIDs can initialize their configuration.
 
 <a id="minio-mc-certificates"></a>
 

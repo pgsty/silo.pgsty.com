@@ -74,7 +74,7 @@ curl -I https://minio.example.net:9000/minio/health/cluster?maintenance=true
 
 ## 重启后的就绪窗口 {#startup-readiness-window}
 
-SILO 20261026 保留这一差异：[集群健康检查](https://github.com/pgsty/silo/blob/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3/cmd/erasure-server-pool.go#L3054) 判断的是上报磁盘的仲裁状态。升级后恢复工作负载前，检查两个集群端点，并继续验证实际读写。
+SILO 20261026 保留这一差异：[集群健康检查](https://github.com/pgsty/silo/blob/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3/cmd/erasure-server-pool.go#L3054) 判断的是上报磁盘的仲裁状态。升级后恢复工作负载前，检查两个集群端点，并继续验证实际读写。关于完整的 SILO 探针契约，请参见[健康检查探针语义](/zh/compatibility/feature/healthcheck/)。
 
 上述任何一个端点都不能证明收到请求的节点在重启后已经能够服务数据面。每个节点通过一个监控循环把自己的纠删码磁盘连接到各个对端：启动时没能连上的远端磁盘会在该节点上保持"未安装"状态直到之后的某一轮重连，而监控循环在每轮完成后等待 15 秒，因此这个间隔只是两次尝试之间的下限，不是恢复时间的上限。在磁盘未安装期间，该节点的存活端点返回 `200 OK`，两个集群端点、`mc admin info` 以及 `mcli ready` 也可能报告健康，因为集群端点汇总的是每个对端对自身本地磁盘的报告，而不是本节点实际已安装的磁盘。然而，经由该节点的 PUT 可能因缺少写入仲裁而返回 `503 SlowDownWrite`，经由该节点读取其他节点刚写入的对象可能返回 `404 NoSuchKey`。在确认这一现象的评审运行中，四节点回环集群上，抽样 I/O 大约在管理视图变健康后 13 到 15 秒开始成功，与重连间隔相符；窗口期间由其他节点确认写入的对象事后都能读到。这些都是观察结果而非保证，因为重连可能持续失败。
 

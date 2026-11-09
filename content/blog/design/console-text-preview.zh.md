@@ -53,6 +53,7 @@ image | pdf | audio | video | none
 | `.txt` / `text/plain` | `none` | `inline`，`X-Frame-Options: SAMEORIGIN` |
 | `.json` / `application/json` | “Preview unavailable” | `inline`，`X-Frame-Options: SAMEORIGIN` |
 | `.xml` / `application/xml` | `none` | `attachment`，`X-Frame-Options: DENY` |
+{.wide .expand}
 
 此外，对象详情抽屉在判断 **Preview** 按钮是否禁用时使用了错误的布尔逻辑连接词：有读取权限的用户可以对不支持预览的对象点击 **Preview** 并看到不可用提示，而在另一些权限组合下界面会放行实际上会被服务端拒绝的操作。
 

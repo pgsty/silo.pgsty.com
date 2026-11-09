@@ -26,6 +26,7 @@ An earlier August proposal around [PR #12](https://github.com/pgsty/silo/pull/12
 | No `If-Match`, or an empty header value | Installs no conditional callback; ordinary deletion applies |
 | Batch `DeleteObjects` with per-item `<ETag>` | `ObjectToDelete` has no ETag field; the XML element supplies **no deletion protection** |
 | Internal recursive `x-minio-force-delete` | Prefix deletion returns before the object-condition path; do not use it as conditional deletion |
+{.wide .expand}
 
 These preconditions do not add an `s3:GetObject` authorization check. Ordinary deletion authorization applies—including `s3:DeleteObjectVersion` for an explicitly addressed version, Object Lock checks, and the separate trusted-replication path.
 

@@ -6,7 +6,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **Console 2.5.1 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页。详见 [Console 2.5.1 对象工作区更新](/zh/blog/release/console-2.5.1/#objects)。
+> [!NOTE]
+> **Console 2.5.1 – 2.7.0 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页（[Console 2.5.1](/zh/blog/release/console-2.5.1/#objects)）。[Console 2.6.0](/zh/blog/release/console-2.6.0/) 新增按需文件夹大小扫描、带可选 PostgreSQL worker 持久化的存储桶用量刷新、创建前存储桶校验以及精确整数配额换算；[Console 2.7.0 候选版](/zh/blog/release/console-2.7.0/) 将界面扩展为十种语言。
 
 <a id="minio-console-managing-objects"></a>
 <a id="id1" data-td-print-local></a>
@@ -129,17 +130,15 @@ MinIO 不限制单个部署允许创建的存储桶总数。 不过，作为通�
 - 为新的远程目标存储创建层，目标可以是另一个 MinIO 部署、Google Cloud Storage、Amazon 的 AWS S3 或 Azure。
 - 使用层上的 <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-pencil" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg> 图标轮换任意已配置层的访问凭证。
 
-## 用量扫描（开发中） {#usage-scans}
+## 用量扫描（Console v2.6.0+） {#usage-scans}
 
-> **尚未发布：** 本节介绍正在从 [PR #70](https://github.com/pgsty/silo-console/pull/70)
-> 整合的 Console 功能，不包含在已发布的 Console 2.5.1 或 Server 20261026 中。
-> Console 发布与 SILO Server 更新内嵌 Console 依赖是两个独立的交付步骤。
-> 正式支持的集成目标是 `pgsty/silo`；与上游 MinIO 的兼容性属于尽最大努力支持。
+> [!NOTE]
+> **组件可用性：** 本节介绍随 [Console v2.6.0](/zh/blog/release/console-2.6.0/)（[PR #70](https://github.com/pgsty/silo-console/pull/70)）发布并在 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 中继续保留的用量扫描与存储桶刷新功能。Server `20261026` 内嵌 Console `v2.5.1`；`pgsty/silo` `main` 已内嵌 Console `v2.6.0` 供下一版 Server 发布使用。Console 发布与 SILO Server 更新内嵌 Console 依赖是两个独立的交付步骤。正式支持的集成目标是 `pgsty/silo`；与上游 MinIO 的兼容性属于尽力而为。
 
 <!-- 改编自 pgsty/silo-console PR #70 的 docs/FolderSizes.md。
 Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
 
-### 文件夹大小
+### 文件夹大小 {#folder-sizes}
 
 对象浏览器将 S3 前缀显示为文件夹，但 S3 本身并不记录前缀大小。
 **计算文件夹大小**会递归扫描当前目录的对象元数据，将当前对象的大小填入直接下级文件夹的列表行，
@@ -161,7 +160,7 @@ Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
 达到限制时应扫描更小的前缀。大小排序对已扫描文件夹使用计算值，对普通对象使用元数据；
 排序范围仍是当前已加载的列表行。
 
-### 权限与限制
+### 权限与限制 {#permissions-and-limits}
 
 扫描需要已登录的 Console 会话，并具备目标前缀的 `s3:ListBucket` 权限；
 版本扫描还需要 `s3:ListBucketVersions`。
@@ -182,7 +181,7 @@ API 始终使用当前会话的 S3 凭据，包括 STS 会话令牌，不借用�
 达到时间、条目数或下级文件夹数量限制时，会返回表示部分结果的终止帧，并取消后续列表请求。
 配置无效时拒绝扫描，不会移除限制后继续运行。
 
-### API
+### API {#api}
 
 `GET /api/v1/buckets/{bucket}/prefix-usage?prefix=&versions=false&folders=true`
 使用普通的已认证 Console API。桶根目录使用 `prefix=`，其他前缀必须以 `/` 结尾；
@@ -201,7 +200,7 @@ API 始终使用当前会话的 S3 凭据，包括 STS 会话令牌，不借用�
 最后移除所有测试版本与删除标记。使用 `CONSOLE_TEST_ENDPOINT`、`CONSOLE_TEST_ACCESS_KEY`、
 `CONSOLE_TEST_SECRET_KEY`，并通过 `SILO_TEST_ENDPOINT` 指定 S3 端点。不要对业务桶运行这些夹具测试。
 
-### 存储桶刷新与自动更新
+### 存储桶刷新与自动更新 {#bucket-refresh}
 
 在 **存储桶** 页面点击 **刷新**，会为当前清单中的每个桶请求新一次元数据扫描，
 也包括被搜索条件暂时隐藏的桶。表格和卡片显示当前大小、保留版本字节数、每个桶的完成时间、
@@ -212,7 +211,7 @@ API 始终使用当前会话的 S3 凭据，包括 STS 会话令牌，不借用�
 文件夹菜单中的 **计算大小** 可缩小范围。这些前台扫描可以取消，导航后结束；
 仅浏览目录不会自动启动后台文件夹扫描。
 
-#### 可选的持久化 worker
+#### 可选的持久化 worker {#optional-persistent-worker}
 
 如需持久化刷新任务和自动更新，为 Console 配置 `CONSOLE_USAGE_DATABASE_URL`，
 并使用**同一个构建版本**运行 `console usage-worker`。只有这个可选模式需要 PostgreSQL。
@@ -248,7 +247,7 @@ worker 在受限时间片之间让出执行权，只在完整对象键及其所�
 没有配置数据库时，刷新使用有边界的前台元数据扫描，界面明确提示自动更新未配置。
 导航后停止扫描，这种模式下的已完成统计不在不同 Console 副本间共享。
 
-#### worker 与 API 配置
+#### worker 与 API 配置 {#worker-and-api-settings}
 
 以下名称均以 `CONSOLE_USAGE_` 为前缀。时长采用 Go duration 语法。
 缺少必需配置、配置无效或互不兼容时，拒绝启用相应功能。
@@ -306,19 +305,8 @@ worker 内部接口包括进程存活检查 `/health`、租约观察者及连接
 和[事件乱序、重复处理建议](https://aws.amazon.com/blogs/storage/manage-event-ordering-and-duplicate-events-with-amazon-s3-event-notifications/)：
 通知触发幂等任务，校准补偿投递缺口。
 
-### 创建失败与配额精度（开发中） {#creation-and-quota}
+### 创建失败与配额精度（Console v2.6.0 及后续版本） {#creation-and-quota}
 
-尚未发布的创建处理链会在创建桶之前拒绝无效的配额与保留期。
-仅指定保留期也会启用对象锁定和版本控制，`versioning` 对象可以省略。
-对象锁定不能将前缀或文件夹排除在版本控制之外，因此同时指定锁定或保留期与版本控制排除项的请求，
-会在创建任何桶之前被拒绝。
-若创建后应用某项配置失败，API 会返回错误并尝试删除空桶；回滚不会删除对象。
-若调用者没有删除权限，或桶已不再为空，错误信息会明确提示桶可能仍然存在。
-重试前应检查实际配置；收到 HTTP 错误并不证明桶没有被创建。
+自 [Console v2.6.0](/zh/blog/release/console-2.6.0/) 起，存储桶创建处理链会在创建桶之前拒绝无效的配额与保留期。仅指定保留期也会启用对象锁定和版本控制，`versioning` 对象可以省略。对象锁定不能将前缀或文件夹排除在版本控制之外，因此同时指定锁定或保留期与版本控制排除项的请求，会在创建任何桶之前被拒绝。若创建后应用某项配置失败，API 会返回错误并尝试删除空桶；回滚不会删除对象。若调用者没有删除权限，或桶已不再为空，错误信息会明确提示桶可能仍然存在。重试前应检查实际配置；收到 HTTP 错误并不证明桶没有被创建。
 
-Console 写入的配额必须大于零且小于 8 PiB（最多 9007199254740991 字节），
-选定单位下最多支持两位小数。换算使用整数运算，仅舍去不足一个字节的部分。
-更大的配额仍可通过 mcli 和现有整数 API 管理。
-浏览器遇到超出 JSON 安全整数范围的已有配额时，不会填入可编辑的近似值，
-因此不会因打开后直接保存而悄悄改写配额。仍可清除该配额，或显式输入一个更小的新值。
-仅用于展示的容量统计可能经过舍入，需要精确的大整数值时请使用 mcli。
+Console 写入的配额必须大于零且小于 8 PiB（最多 9007199254740991 字节），选定单位下最多支持两位小数。换算使用整数运算，仅舍去不足一个字节的部分。无效数值由表单与请求校验拒绝；这些校验已在 Console 2.6.0 交付，详见[设计记录](/zh/blog/design/console-quota-numeric-validation/)。更大的配额仍可通过 mcli 和现有整数 API 管理。浏览器遇到超出 JSON 安全整数范围的已有配额时，不会填入可编辑的近似值，因此不会因打开后直接保存而悄悄改写配额。仍可清除该配额，或显式输入一个更小的新值。仅用于展示的容量统计可能经过舍入，需要精确的大整数值时请使用 mcli。

@@ -184,6 +184,7 @@ install -m 0755 silo-console-linux-amd64 /usr/local/bin/silo-console
 | [#6](https://github.com/pgsty/silo-console/issues/6) — 中英文本地化 | 手写双语层，零新增依赖，以英文原文为 key 兜底 |
 | [#7](https://github.com/pgsty/silo-console/issues/7) — 监控查询迁移到 Metrics V3 | 仅 V3；26 个部件、31 条查询、29 个指标名，配套守卫分类与回归测试 |
 | [#8](https://github.com/pgsty/silo-console/issues/8) — 用可用的 V3 健康信号替换 N/A | Erasure Health 与 Usage Data Age，与高级仪表盘共用同一份部件数据 |
+{.wide .expand}
 
 有三项验收标准如实记为未达成，而不是含糊勾掉：`web-app` 目前没有单元测试运行器，因此 #6 的 i18n 测试套件与 #2 中针对 `constructLabelNames` 的专项测试都需要先引入测试工具链；另外 #6 要求的"如何新增翻译 key"的贡献者文档尚未编写。
 

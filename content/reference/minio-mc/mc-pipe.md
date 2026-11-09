@@ -3,7 +3,7 @@ title: "mc pipe"
 url: "/reference/minio-mc/mc-pipe/"
 weight: 280
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-pipe.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-pipe"></a>
@@ -68,7 +68,7 @@ The full path to the [alias](/reference/minio-mc/mc-alias-set/#minio-mc-alias) o
 
 Add custom metadata for the object.
 
-Specify key-value pairs as `KEY=VALUE\;`, separating each pair with a back slash and semicolon (`\;`). For example, `--attr key1=value1\;key2=value2\;key3=value3`.
+Specify key-value pairs as `KEY=VALUE\;`, separating each pair with a back slash and semicolon (`\;`). For example, `--attr key1=value1\;key2=value2\;key3=value3`. In `mcli 20261109`, empty metadata entries created by trailing or repeated `;` separators are ignored (`#166`).
 
 ##### `--checksum` {#mc.pipe.-checksum}
 

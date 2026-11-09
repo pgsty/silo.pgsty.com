@@ -122,6 +122,7 @@ In a multi-node SILO cluster (`silo server http://node{1..4}/data`), a load bala
 | Single node behind reverse proxy | Reverse proxy IPs/CIDRs only |
 | Multi-node cluster behind reverse proxy | Reverse proxy IPs/CIDRs **and** all SILO cluster node IPs/CIDRs |
 | Direct client access to multi-node cluster (no external proxy) | All SILO cluster node IPs/CIDRs (or `off` if clients always hit nodes directly without peer forwarding) |
+{.wide .expand}
 
 ---
 

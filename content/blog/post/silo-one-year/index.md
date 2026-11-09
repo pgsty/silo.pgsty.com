@@ -49,7 +49,7 @@ Our comparison uses two fixed points:
 
 Across `9e49d5e7a648..c3ad836aed0d`, `pgsty/silo` contains **604 reachable commits** spanning feature and security repairs, regression suites, packaging, and documentation. The sections below organize those changes by delivered runtime behavior.
 
-### The Four-Component Coordinated Stack
+### The Four-Component Coordinated Stack {#the-four-component-coordinated-stack}
 
 Because the server embeds the Console frontend and imports `mc` administration packages alongside shared policy and encryption libraries, maintaining the server alone is not enough. SILO maintains a coordinated four-component product graph (plus optional external KES):
 
@@ -63,7 +63,7 @@ Because the server embeds the Console frontend and imports `mc` administration p
 | **KMS (`pgsty/kes`)** | External optional service | **[KES 20261026](/blog/release/silo-20261026/#kes)** ([`e9b4f1acebc1`](https://github.com/pgsty/kes/commit/e9b4f1acebc11d61b42f876da8df48f548750cc9)) | Go 1.27.3; OpenBao KV v2 and local Moto Secrets Manager compatibility checks; updated AWS and GCP clients |
 {.wide .expand}
 
-### Foundations Intentionally Preserved
+### Foundations Intentionally Preserved {#foundations-intentionally-preserved}
 
 So existing MinIO deployments can switch to `pgsty/silo` in place without data migration or client changes, SILO keeps the core storage and wire contracts unchanged:
 
@@ -91,7 +91,7 @@ To separate fact from scanner noise: vulnerabilities such as `CVE-2025-62506` (s
 | **[CVE-2026-42600](/blog/security/cve-2026-42600/)** | High | Internode storage endpoint `/rmpl` (`ReadMultiple`) lacked drive-root path containment, allowing path traversal outside the drive root | Remove the unused `ReadMultiple` endpoint from the internode storage REST protocol and enforce strict drive-root path containment across all storage RPC handlers (`cmd/storage-rest-server.go`) |
 {.wide .expand}
 
-### 18 `SN-2026-*` Security Boundary Hardenings
+### 18 `SN-2026-*` Security Boundary Hardenings {#18-sn-2026-security-boundary}
 
 Beyond public CVEs, adversarial code review and multi-node testing uncovered **18 additional security boundary defects** tracked in our [Security Advisories ledger](/about/security-advisories/):
 
@@ -153,12 +153,12 @@ SILO also isolated per-job and per-target cancellation contexts and fixed `Repli
 
 In an erasure-coded storage engine, the happy path is straightforward; edge-case bugs hide at the intersection of **slow drives, partial-write rollbacks, concurrent overwrites, and multi-pool scaling**. The 20261026 release ships three groups of storage-layer safeguards:
 
-### 1. Commit Error Classification and Overwrite Rollback RPC Forwarding
+### 1. Commit Error Classification and Overwrite Rollback RPC Forwarding {#1-commit-error-classification-and}
 
 - **Missing staging `xl.meta` classified as `503 SlowDownWrite`**: When a slow drive or concurrent cleanup causes a staging `xl.meta` file in `.minio.sys/tmp` to go missing during commit, SILO classifies the condition as `errFileNotFound` and returns HTTP `503 SlowDownWrite` so clients can retry safely instead of receiving a false `404 ObjectNotFound` ([error classification design](/blog/design/stale-metadata-reuse/)).
 - **Overwrite rollback option forwarding and timeout boundaries**: SILO forwards storage RPC deletion options (including the previous data directory needed for overwrite rollback) while preserving existing drive/RPC deadlines, request cancellation, object locking, read quorum, and healing rules. Note that **a client-visible timeout does not mean underlying disk or RPC I/O has stopped or that the write failed to commit**—late commits or delayed `UndoWrite` calls can still occur after partial failures, lease loss, or network partitions (the admitted-I/O draining waits and per-drive mutation guards explored in the October maintenance draft were withdrawn in [`dcc2f20ba`](https://github.com/pgsty/silo/commit/dcc2f20ba81c51a11dab047bb65c86e0dc6a6038); see the [final maintenance boundaries](/blog/design/multi-pool-object-consistency/#maintenance-20261026)).
 
-### 2. Multi-Pool Locking, Two-Stage Bulk Deletion, and Migration Safety
+### 2. Multi-Pool Locking, Two-Stage Bulk Deletion, and Migration Safety {#2-multi-pool-locking-two}
 
 For multi-pool deployments:
 
@@ -166,7 +166,7 @@ For multi-pool deployments:
 - **Two-stage multi-pool deletion (`#257`)**: Previously, multi-pool `DeleteObjects` issued parallel deletes across all pools; if the pool holding the newest version succeeded while a pool holding an older copy failed due to a drive error, the stale copy resurfaced as the current object. SILO now deletes in two stages—cleaning non-authoritative duplicate pools first and removing the authoritative copy only after stale copies are gone, while protecting referenced remote tier objects on partial failure ([Multi-Pool Delete Safety](/blog/design/multi-pool-delete-safety/)).
 - **Rebalance and decommission safeguards**: Preserved object tags and revision timestamps across pool migration and prevented decommission from overwriting newer versions or dropping delete markers on the destination pool ([Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/#migration-20261018)).
 
-### 3. `LIST` Recovery Under Drive Disagreement (`#239`)
+### 3. `LIST` Recovery Under Drive Disagreement (`#239`) {#3-list-recovery-under-drive}
 
 During rolling restarts with concurrent overwrites, minority drive disagreements or unresolved entries could cause `ListObjects` to omit readable keys. While keeping the lock-free fast path intact, SILO now confirms eligible unresolved latest-object entries on demand, distinguishes real deletions from drive read errors, and propagates terminal errors through pagination ([LIST Recovery Design Record](/blog/design/listing-recovery-lock-cost/)).
 
@@ -176,7 +176,7 @@ During rolling restarts with concurrent overwrites, minority drive disagreements
 
 For day-to-day operators, the most visible difference between SILO and upstream MinIO is the administration control plane.
 
-### SILO Console v2.5.1: From a Stripped Browser Back to a Full Admin Console
+### SILO Console v2.5.1: From a Stripped Browser Back to a Full Admin Console {#silo-console-v2-5-1}
 
 In mid-2025, upstream stripped the embedded community Console down to `v1.7.7`—removing cluster administration, IAM, policies, lifecycle, replication, diagnostics, and monitoring panels to leave only a bare object browser—and subsequently deleted `github.com/minio/console`.
 
@@ -194,7 +194,7 @@ Building on the community restoration initiated by Georg Mangold (`@gmangold`), 
 
 Console 2.5.1 also fixes group membership during status changes, OIDC group permissions, TLS-proxy session cookies, credential exports and keyboard focus. See the [Console 2.5 series notes](/blog/release/console-2.5.1/).
 
-### mcli 20261026: Honest Exit Codes and Read-Only Checksum Verification
+### mcli 20261026: Honest Exit Codes and Read-Only Checksum Verification {#mcli-20261026-honest-exit-codes}
 
 On the client side, `pgsty/mc` ships as `mcli` (while preserving `MC_*` environment variables and `~/.mc` / `~/.silo` configuration compatibility) and fixes long-standing CLI reliability gaps:
 
@@ -243,7 +243,7 @@ Maintaining storage software in production requires knowing **what to roll back 
 4. **Removed experimental access-frequency intra-cluster tiering (`ilm access_*`)**:
    - The experimental feature never met production reliability requirements and was removed in Server 20260916 (see [Access-Frequency Tiering Removal](/compatibility/access-tiering-removal/)).
 
-### Remaining Operational and Upgrade Boundaries
+### Remaining Operational and Upgrade Boundaries {#remaining-operational-and-upgrade-boundaries}
 
 When evaluating or upgrading to SILO, keep these boundaries in mind:
 

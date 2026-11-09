@@ -71,19 +71,19 @@ PR #262 的修复方向正确。它只放宽已有 mixed-EC recount 的一个过
 
 ## 备选方案 {#options}
 
-### 方案一：迁移前必须先成功 heal
+### 方案一：迁移前必须先成功 heal {#option-1-require-a-successful}
 
 这可以作为运维缓解，但不是完整修复。磁盘可能一直不可用，MRF 可能放弃；旧元数据虽然有效，GET 也不一定会排队 heal。如果把所有迁移都阻塞到布局统一，池退役就会依赖无关的磁盘恢复。
 
-### 方案二：让迁移调用方统一使用 latest-only 列表
+### 方案二：让迁移调用方统一使用 latest-only 列表 {#option-2-force-migration-callers}
 
 这会把列表策略复制到 decommission 和 rebalance 中，并可能改变它们处理版本历史的方式，还会留下 ListObjectVersions 与 Walk 的不一致。
 
-### 方案三：合并所有 EC 组或降低 quorum
+### 方案三：合并所有 EC 组或降低 quorum {#option-3-merge-all-ec}
 
 不安全。两个都低于 quorum 的组不能因为对象名相同就合票；降低 quorum 可能选出无法重建的数据。
 
-### 方案四：扩展现有的窄范围 recount
+### 方案四：扩展现有的窄范围 recount {#option-4-broaden-the-existing}
 
 这是最小的安全改动。recount 只在普通选择失败后运行，只对非 strict 读取生效，并且只处理每个流一个普通 null version。PR #262 正是这个方案。
 

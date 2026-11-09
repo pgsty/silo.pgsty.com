@@ -15,7 +15,7 @@ icon: fa-solid fa-copyright
 **Copyright © 2020–至今 MinIO, Inc.**
 MinIO 对象存储文档原作。
 
-**Copyright © 2026–至今 [PIGSTY SILO Contributors](/zh/about/contributors/)**
+**Copyright © 2026–至今 [PIGSTY & SILO Contributors](/zh/about/contributors/)**
 分支维护、格式转换、内容修改、恢复与新增的文档，以及中文翻译。
 
 两层版权同时存在。经过翻译或修改的页面，底层表达的版权属于 MinIO，翻译与修改部分的版权属于 PGSTY SILO 项目，二者互不取代。
@@ -32,7 +32,7 @@ PGSTY SILO 软件本身另行授权，参见[许可协议](/zh/about/license/)�
 
 本文档的部分内容衍生自 [MinIO 对象存储文档](https://github.com/minio/docs)，相对原作已进行若干修改：
 更名为 Silo、恢复上游已移除功能的文档、将冻结的 RST/MyST 源码转换为双语 Markdown、
-以 Hugo 与 Docsy 替换 Sphinx 呈现层、修复链接与构建问题、持续维护，以及翻译为中文。完整的变更记录见[提交历史](https://github.com/pgsty/silo.pgsty.com/commits/main/)。
+以 Hugo 与 OINK 替换 Sphinx 呈现层、修复链接与构建问题、持续维护，以及翻译为中文。完整的变更记录见[提交历史](https://github.com/pgsty/silo.pgsty.com/commits/main/)。
 
 博客、下载与发行页面、本节内容，以及 Silo 专属内容，
 均为 PGSTY SILO 项目的原创作品。凡包含上游素材的页面，都会在页面底部标注来源；
@@ -48,13 +48,13 @@ PGSTY SILO 软件本身另行授权，参见[许可协议](/zh/about/license/)�
 如果你复用本站内容，按下面这样署名即可满足 CC BY 4.0 的要求：
 
 ```text
-[PGSTY SILO 文档](https://silo.pgsty.com/zh)，作者 PGSTY 与 MinIO. Inc，依据 CC BY 4.0 授权。
+[PGSTY SILO 文档](https://silo.pgsty.com/zh)，作者 PGSTY 与 MinIO, Inc.，依据 CC BY 4.0 授权。
 ```
 
 英文场景可使用：
 
 ```text
-[PGSTY SILO Documentation](https://silo.pgsty.com) by PGSTY and MinIO. Inc, licensed under CC BY 4.0.
+[PGSTY SILO Documentation](https://silo.pgsty.com) by PGSTY and MinIO, Inc., licensed under CC BY 4.0.
 ```
 
 ## 声明 {#disclaimer}

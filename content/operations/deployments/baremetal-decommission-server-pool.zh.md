@@ -30,9 +30,7 @@ MinIO 支持从包含两个或更多 pool 的部署中退役并移除 [服务器
 >
 > 退役是一项重大的管理操作，规划与执行都需要谨慎对待，并不是轻量或“日常型”的任务。
 >
-> [MinIO SUBNET](https://min.io/pricing?jmp=docs) 用户可以 [登录](https://subnet.min.io/) 并创建与退役相关的新工单。 通过 SUBNET 与 MinIO Engineering 协作，可提高退役成功率，包括性能测试和健康诊断。
->
-> 社区用户可以在 [MinIO Community Slack](https://slack.min.io) 寻求支持。 社区支持仅为 best-effort，不对响应速度提供任何 SLA。
+> 如需协助，请参见 [SILO 故障排查](/zh/operations/troubleshooting/)。
 
 <a id="id3" data-td-print-local></a>
 
@@ -124,7 +122,7 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标记，包括源池中唯一剩下的删除标记。其他池可能仍保留同名对象的旧数据版本，因此不能仅因本池没有其他版本就丢弃标记。这替代了旧版上游跳过孤立删除标记的行为。
 
-退役过程仍会评估[生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)，将符合条件的过期对象或版本送入过期处理，并跳过其迁移。可使用 [`mc admin trace --call decommission`](/zh/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) 查看迁移与跳过原因。
+退役过程仍会评估[生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)，将符合条件的过期对象或版本送入过期处理，并跳过其迁移。在下一版本 SILO 构建（`04d7d9197`）中，池退役与再平衡仅在 `MINIO_SCANNER_SUBSYSTEMS` 启用 `scanner` 时才评估 ILM 规则，并会先执行生命周期动作评估（`evalActionFromLifecycle`）再评估分层转移（`evalScannerTransition`）；详见 [ILM 迁移顺序](/zh/blog/design/ilm-migration-ordering/)。可使用 [`mc admin trace --call decommission`](/zh/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) 查看迁移与跳过原因。
 
 当前版本保留对象标签及其修订字段，并在清理源副本前重新核对已迁移的版本。升级不会恢复早期迁移已经丢失的标签。详见[跨池迁移契约](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)。
 
@@ -136,7 +134,7 @@ SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标�
 
 在退役过程结束时，MinIO 会检查该 pool 上是否还有对象列表。 如果列表为空，MinIO 会将退役标记为成功完成。 如果仍返回任何对象，MinIO 会报错，指出退役过程失败。
 
-如果退役失败，客户应在重新尝试退役前先提交 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 工单以获取进一步协助。 没有 SUBNET 订阅的社区用户可以重试退役流程，或通过 [MinIO Community Slack](https://slack.min.io/) 寻求额外支持。 MinIO 的社区支持仅为 best-effort，不提供任何响应速度方面的 <abbr title="Service Level Agreement">SLA</abbr>。
+如果退役失败，请保留日志，检查池健康状态与可用容量，并在查明原因后再重试。如需协助，请参见 [SILO 故障排查](/zh/operations/troubleshooting/)。
 
 ### 对已启用 Tiering 的 Server 执行退役 {#tiering-server}
 
@@ -274,14 +272,14 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 sudo systemctl restart silo.service
 ```
 
-Use the following commands to confirm the service is online and functional:
+使用以下命令确认服务已上线并正常运行：
 
 ```shell
 sudo systemctl status silo.service
 journalctl -f -u silo.service
 ```
 
-MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
+在服务端进程连接与同步期间，SILO 可能会记录较多非致命告警。这些告警通常是暂时性的，待部署完全上线后即会消失。
 
 完成退役并移除池配置后，全部 SILO 节点需要协调重启，使用一致的剩余池列表。全量重启会暂时中断服务，正在进行的请求可能失败；请安排维护窗口，并让客户端按操作语义重试和核验结果。
 
@@ -443,14 +441,14 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 sudo systemctl restart silo.service
 ```
 
-Use the following commands to confirm the service is online and functional:
+使用以下命令确认服务已上线并正常运行：
 
 ```shell
 sudo systemctl status silo.service
 journalctl -f -u silo.service
 ```
 
-MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
+在服务端进程连接与同步期间，SILO 可能会记录较多非致命告警。这些告警通常是暂时性的，待部署完全上线后即会消失。
 
 完成退役并移除池配置后，全部 SILO 节点需要协调重启，使用一致的剩余池列表。全量重启会暂时中断服务，正在进行的请求可能失败；请安排维护窗口，并让客户端按操作语义重试和核验结果。
 

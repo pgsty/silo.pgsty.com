@@ -135,6 +135,7 @@ Which deployments are exposed at all:
 | An old TLS terminator or load balancer in front of the endpoint | Intolerant of unknown extensions, or mishandles a hello split across segments |
 | **Migrating from an upstream MinIO release built with Go ≤ 1.22** | That handshake carried neither post-quantum key exchange nor ML-DSA — roughly 275 bytes against roughly 1509. This cohort makes the largest single jump and is the most exposed |
 | Regulated environments that disallow post-quantum algorithms | They need the classical profile for policy reasons, not interoperability ones |
+{.wide .expand}
 
 Deployments whose outbound paths carry no inspection device are unaffected and should not set any of the compatibility options below.
 
@@ -148,6 +149,7 @@ Removing a pinned list does not restore the previous wire format; it adopts the 
 | --- | --- |
 | 20260903 and earlier (pinned) | `X25519MLKEM768, X25519, P256, P384, P521` |
 | 20260916 (Go defaults) | `X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024, X25519, P256, P384, P521` |
+{.wide .expand}
 
 For an operator who sets nothing, 20260916 therefore offers two additional post-quantum identifiers at every TLS endpoint, inbound and outbound. This is harmless for almost every deployment, but an ingress that allow-lists group identifiers could in principle be broken by 20260916 where 20260903 worked. `GODEBUG=tlssecpmlkem=0` disables those two while retaining `X25519MLKEM768`. For an operator who does set `tlsmlkem=0`, 20260916 produces a smaller, more conservative handshake than any prior release — which is the point of the repair.
 

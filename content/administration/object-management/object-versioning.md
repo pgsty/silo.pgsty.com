@@ -103,11 +103,8 @@ Performing a `DELETE` operation on a versioned object creates a 0-byte `DeleteMa
 
 MinIO can utilize [Lifecycle Management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) to automatically remove versioned objects permanently. Otherwise, use manual `DELETE` operations to permanently remove non-current versioned objects or `DeleteMarker` objects.
 
-> [!NOTE]
-> **MinIO Implements Idempotent Delete Markers**
->
-> > [!NOTE]
-> > **Changed: RELEASE.2022-08-22T23-53-06Z**
+> [!NOTE] MinIO Implements Idempotent Delete Markers
+> *Changed: RELEASE.2022-08-22T23-53-06Z*
 >
 > Standard S3 implementations can create multiple sequential delete markers for the same object when processing simple `DeleteObject` requests with no version identifier. See the S3 docs for details on [managing delete markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManagingDelMarkers.html#RemDelMarker).
 >

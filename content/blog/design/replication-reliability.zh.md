@@ -51,6 +51,7 @@ url: "/zh/blog/design/replication-reliability/"
 | 源端 `xl.meta` 中同一版本的 purge 状态 | 仍为 `PENDING`，普通复制状态却被标为完成 | 首次复制后即完成清理 |
 | 原始数据版本 | 保留 | 保留 |
 | 是否需要等待 scanner 补做清理 | 依赖后续后台恢复 | 无需 scanner 介入 |
+{.wide .expand}
 
 如果只检查远端版本是否消失，就会漏掉源端 `xl.meta` 残留的 `PENDING` 状态。本地实验复现了首次 purge 的分类错误、完成状态误写以及一次多余的 `HEAD` 探测；但由于现有的 scanner/heal 与 resync 已经按 purge 状态走正确分支，并不会产生持续的 405 风暴。
 
@@ -97,6 +98,7 @@ MRF（Most Recent Failures）队列用于暂存近期失败的复制任务，以
 | Prometheus v2 | `minio_node_replication_mrf_dropped_bytes_total` |
 | Prometheus v3 | `minio_replication_mrf_dropped_operations_total` |
 | Prometheus v3 | `minio_replication_mrf_dropped_bytes_total` |
+{.wide .expand}
 
 这组指标统计服务端启动以来的累计丢弃量，重启后归零。**操作数按队列条目计数**，同一对象的多次失败会重复累加；字节数统计已知的对象大小，删除条目记为零字节。运维监控应关注其增长速率，并结合复制积压量与目标站点健康状态综合判断。
 
@@ -160,6 +162,7 @@ MRF（Most Recent Failures）队列用于暂存近期失败的复制任务，以
 | 为每次运行分配专属 context 并改造阻塞点 | 采用：满队列死锁与遍历器泄漏均有确定性复现用例 |
 | 用 `sync.Once` 保护 `finish` | 收窄：合并为单一 `defer` 调用点后，无需额外引入 `sync.Once` |
 | 等待恢复任务结束后再释放 leader context | 采用：SILO 的 leader context 取消会立即生效，需通过 `WaitGroup` 延长生命周期并补齐失主测试 |
+{.wide .expand}
 
 此外，低频的 resync 启动操作在状态锁内完成配置读写，与终态落盘保持同一锁边界；活跃任务注册表直接复用包含 `resyncBefore` 的 `resyncOpts` 作为键。
 
@@ -177,6 +180,7 @@ MRF（Most Recent Failures）队列用于暂存近期失败的复制任务，以
 | 工具与契约守卫 | 本地编译、`go vet`、静态检查、生成文件检查、`rebrand-guard` 与 `git diff --check` 全部通过 |
 | 双实例联调 | 基于本地源码构建两个服务端实例，直接发送单对象 DELETE：目标端删除标记消失，源端 `xl.meta` 完成清理，原始数据版本完整保留 |
 | 远端 CI | PR 八项检查通过；合入主干后 Go CI 六项任务与 VulnCheck 全部通过 |
+{.wide .expand}
 
 固定提交上的回归测试文件：[删除标记](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-delete-marker_test.go)、[MRF 可见性](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-mrf-observability_test.go)、[取消生命周期](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-resync-cancel_test.go)。复现与验证命令：
 
@@ -195,6 +199,7 @@ go test ./... -count=1 -timeout=30m
 | PR Go CI | [34320440012](https://github.com/pgsty/silo/actions/runs/34320440012) |
 | 主干 Go CI | [34321319278](https://github.com/pgsty/silo/actions/runs/34321319278) |
 | 主干 VulnCheck | [34321319274](https://github.com/pgsty/silo/actions/runs/34321319274) |
+{.wide .expand}
 
 ## 后续维护原则 {#follow-up}
 

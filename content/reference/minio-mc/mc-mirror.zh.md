@@ -150,7 +150,7 @@ mc mirror --active-active siteB siteA
 
 *Optional*
 
-为镜像对象添加自定义元数据。将键值对指定为 `KEY=VALUE\;`。 例如：`--attr key1=value1\;key2=value2\;key3=value3`。
+为镜像对象添加自定义元数据。将键值对指定为 `KEY=VALUE\;`。例如：`--attr key1=value1\;key2=value2\;key3=value3`。在 `mcli 20261109` 中，尾部或重复 `;` 分隔符产生的空元数据项会被忽略，而不会使镜像操作失败（`#166`）。
 
 ##### `--checksum` {#mc.mirror.-checksum}
 
@@ -608,8 +608,6 @@ mc mirror --exclude-storageclass GLACIER  \
 
 如果将 [`mc mirror --watch`](#mc.mirror.-watch) 用于文件系统操作，[`mc`](/zh/reference/minio-mc/#command-mc) 也会采用相同行为，递归裁剪直到 根目录的所有空目录。不过，[`mc`](/zh/reference/minio-mc/#command-mc) 的删除 API 无法区分某个目录路径是显式 创建的，还是隐式创建的。如果 [`mc mirror --watch`](#mc.mirror.-watch) 删除了某个文件系统路径上的最后一个对象， [`mc`](/zh/reference/minio-mc/#command-mc) 会在删除过程中递归删除从该路径向上直到根目录的所有空目录。
 
-### S3 兼容性 {#id13}
+### S3 兼容性 {#s3-compatibility}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。

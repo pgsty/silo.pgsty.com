@@ -25,7 +25,7 @@ Everything else stays the same. ([CVE fixed](https://nvd.nist.gov/vuln/detail/CV
 
 ------
 
-## The Death Certificate
+## The Death Certificate {#the-death-certificate}
 
 On December 3, 2025, MinIO announced "maintenance mode" on GitHub. I wrote about it in [MinIO Is Dead](/blog/post/minio-is-dead/).
 
@@ -56,12 +56,13 @@ Looking back at the timeline over the past years, this wasn't a sudden death. It
 | 2025-10 | Binary/Docker distribution stopped  | Supply chain cut    |
 | 2025-12 | Maintenance mode announced          | End-of-life signal  |
 | 2026-02 | Repo archived, no longer maintained | End of project      |
+{.wide .expand}
 
 A company that raised $126M at a billion-dollar valuation spent five years methodically dismantling the open-source ecosystem it built.
 
 ------
 
-## But Open Source Endures
+## But Open Source Endures {#but-open-source-endures}
 
 Normally this is where the story ends — a collective sigh, and everyone moves on.
 
@@ -82,7 +83,7 @@ The real question isn't "can we fork it" but **"can someone actually maintain it
 
 ------
 
-## Why would I do that?
+## Why would I do that? {#why-would-i-do-that}
 
 I didn't set out to take this on. But after MinIO entered maintenance mode,
 I waited a couple of weeks for someone in the community to step up.
@@ -111,11 +112,11 @@ As early as December 2025, when MinIO announced maintenance mode, I had already 
 
 ------
 
-## What We've Done
+## What We've Done {#what-we-ve-done}
 
 As of today, three things.
 
-### 1. Restored the Admin Console
+### 1. Restored the Admin Console {#1-restored-the-admin-console}
 
 This was the change that frustrated the community the most.
 
@@ -134,7 +135,7 @@ They swapped a dependency version to replace the full console with a stripped-do
 
 We put it back.
 
-### 2. Rebuilt Binary Distribution
+### 2. Rebuilt Binary Distribution {#2-rebuilt-binary-distribution}
 
 In October 2025, MinIO stopped distributing pre-built binaries and Docker images,
 leaving only source code. "Use `go install` to build it yourself" — that was their answer.
@@ -166,7 +167,7 @@ pig repo add infra -u; pig install minio
 
 Just works as usual.
 
-### 3. Restored Community Edition Docs
+### 3. Restored Community Edition Docs {#3-restored-community-edition-docs}
 
 MinIO's official documentation was also at risk — links had started redirecting to their commercial product, [AIStor](https://docs.min.io/).
 
@@ -178,11 +179,11 @@ The docs use the same CC Attribution 4.0 license as the original, with necessary
 
 ------
 
-## Commitments
+## Commitments {#commitments}
 
 Some things worth stating up front to set expectations.
 
-### No New Features — Just Supply Chain Continuity
+### No New Features — Just Supply Chain Continuity {#no-new-features-just-supply}
 
 MinIO as an S3-compatible object store is already feature-complete. It's a **finished software**.
 It doesn't need more bells and whistles — it needs a stable, reliable, continuously available build.
@@ -192,14 +193,14 @@ What we're doing: **making sure you can get a working, complete MinIO binary**, 
 RPM, DEB, Docker images — built automatically via CI/CD, drop-in compatible with your existing minio.
 We keep the existing minio naming and behavior where legally and technically feasible.
 
-### This Is a Production Build, Not an Archive
+### This Is a Production Build, Not an Archive {#this-is-a-production-build}
 
 We run these builds ourselves and have been dogfooding them in production for three months.
 If something breaks, we detect it early and patch it quickly.
 
 I build this primarily for Pigsty and our own usage, but I hope it helps others too.
 
-### I'm willing to Track CVEs and Fix Bugs
+### I'm willing to Track CVEs and Fix Bugs {#i-m-willing-to-track}
 
 If you run into issues, feel free to report them at [`pgsty/minio`](https://github.com/orgs/pgsty/discussions).
 I'll do my best to fix these — but please don't treat this as a commercial SLA.
@@ -209,7 +210,7 @@ and that we're explicitly **not adding any new features**,
 I believe the maintenance workload is manageable.
 (how often do you see one?)
 
-### Trademark Is Tricky, But We'll Cross That Bridge When We Come to It
+### Trademark Is Tricky, But We'll Cross That Bridge When We Come to It {#trademark-is-tricky-but-we}
 
 > #### Disclaimer
 >
@@ -224,7 +225,7 @@ We've marked this clearly everywhere as an independent community-maintained buil
 If MinIO Inc. raises trademark concerns, we'll cooperate and rename (probably something like `silo` or `stow`).
 Until then, we think descriptive use of the original name in an AGPL fork is reasonable — and renaming all the `minio` references doesn't serve users.
 
-### AI Changed the Game
+### AI Changed the Game {#ai-changed-the-game}
 
 You might ask: can one person really maintain this?
 
@@ -244,7 +245,7 @@ Maintaining a MinIO fork without new features is considerably less daunting
 
 ------
 
-## Just Fork It
+## Just Fork It {#just-fork-it}
 
 MinIO Inc. can archive a GitHub repo, but they can't archive the demand behind 60k stars,
 or the dependency graph behind a billion Docker pulls. That demand doesn't disappear — it just finds its way out.
@@ -259,7 +260,7 @@ Fork is the most powerful spell in open source. When a company decides to shut t
 
 ------
 
-## Reference
+## Reference {#reference}
 
 - [**MinIO Is Dead**](/blog/post/minio-is-dead/)
 - [**MinIO Is Dead, Are There Alternatives?**](/blog/post/minio-alternative/)

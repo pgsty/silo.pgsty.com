@@ -2,7 +2,7 @@
 title: "Lifecycle Delete-All Must Stay on One Key"
 linkTitle: "Delete-All on One Key"
 date: 2026-11-04
-lastmod: 2026-11-05
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a lifecycle or batch "delete all versions" of one key also deletes every object stored under that key's name, and why purging the key's own versions by ID, under the object lock and after a recheck, is the minimum complete repair.
@@ -14,7 +14,7 @@ url: "/blog/design/ilm-delete-all-exact-key/"
 
 This record covers a defect found during review of the [#278](https://github.com/pgsty/silo/issues/278) fix ([Multi-Pool Lifecycle Expiry](/blog/design/multi-pool-lifecycle-expiry/)). It was evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and against the maintainer integration branch for #278 and #281, which is not yet published.
 
-**Status:** fix approved by review and committed locally. Tested together with the other fixes for the next release on one integration branch: the full test suite, the CI race selections and an adversarial review of how the fixes interact all pass. Not merged or released.
+**Status:** fix approved by review and committed on `main`. Tested together with the other fixes for the next release on one integration branch: the full local suite with the `kqueue,dev` tags, the CI race selections run locally and an adversarial review of how the fixes interact all pass. Not yet in a tagged SILO release.
 
 ## Short answer {#tldr}
 
@@ -43,6 +43,7 @@ The fix replaces the recursive delete with a purge of the key's own versions by 
 | Reachability | Ordinary configuration and ordinary key layouts: a key that is also the "folder" of other keys, such as `report` and `report/page-1`. A batch expiration job written with default settings reaches it. |
 | Release urgency | Blocks the next release. |
 | Remaining effort | Implemented and approved by the adversarial review; integration after the single-pool lock-domain fix, remote CI, and release. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
@@ -64,6 +65,7 @@ We probed each one on main. In every layout, the old key is due and every other 
 | Directory object | `ea/dir/`, `ea/dir/kid` | `ea/dir/` deleted; `ea/dir/kid` kept |
 | Batch expiration, rule `name: bx/parent`, default purge | `bx/parent`, `bx/parent/child`, `bx/parentx` | parent and child deleted; `bx/parentx` kept |
 | Decommission and rebalance with `ExpiredObjectAllVersions` | `obj-01`, `obj-01/child`, `obj-01x` | `obj-01` and `obj-01/child` gone from both pools; `obj-01x` moved |
+{.wide .expand}
 
 The probes give the same results on the #278 integration branch. That change does not mitigate this defect.
 
@@ -101,6 +103,7 @@ The defect is the combination of four upstream ingredients. The first release in
 | The first lifecycle caller: `ExpiredObjectAllVersions` sets `DeletePrefix`. The same commit moved the object lock ahead of the prefix branch. | [aae684641](https://github.com/pgsty/silo/commit/aae684641325e1c37375d455c790e58d902bd7b6), [minio/minio#17521](https://github.com/minio/minio/pull/17521) | 2023-06-28, Harshavardhana | `RELEASE.2023-06-29T05-12-28Z` |
 | Batch expiration: a purge that keeps no versions deletes with `DeletePrefix`. At first it set no `DeletePrefixObject`, so it fanned out to every set. | [a50f26b7f](https://github.com/pgsty/silo/commit/a50f26b7f56e5e6b1df8a648423736319ecdabd6), [minio/minio#17946](https://github.com/minio/minio/pull/17946) | 2023-12-02, Krishnan Parthasarathi | `RELEASE.2023-12-02T10-51-33Z` |
 | `DelMarkerExpiration`, which takes the same path. | [7926401cb](https://github.com/pgsty/silo/commit/7926401cbd5cceaacd9509f2e50e1f7d636c2eb8), [minio/minio#19481](https://github.com/minio/minio/pull/19481) | 2024-04-30, Krishnan Parthasarathi | `RELEASE.2024-05-01T01-11-10Z` |
+{.wide .expand}
 
 Upstream changes that touched the same functions and left the effect alone:
 
@@ -126,6 +129,7 @@ Upstream changes that touched the same functions and left the effect alone:
 | [1748f62c7](https://github.com/pgsty/silo/commit/1748f62c7) | 2026-10-18, Feng Ruohang | `RELEASE.2026-10-18T00-00-00Z` | Narrowed one caller. Decommission and rebalance used to remove a moved key from the source pool with the prefix delete, as upstream does. They now remove the moved versions by ID. The commit's stated aim was concurrency safety. |
 | [7a060cab1](https://github.com/pgsty/silo/commit/7a060cab1), [374de0fa3](https://github.com/pgsty/silo/commit/374de0fa3), [9b76a2167](https://github.com/pgsty/silo/commit/9b76a2167) | 2026-08-15, 2026-09-08, 2026-09-15 | not released | An access-frequency relocation feature added a caller of the prefix delete on an exact key. It moved to version-addressed deletes and was then reverted. The `RELEASE.2026-09-16T00-00-00Z` tag contains none of it. |
 | [0a546c7a7](https://github.com/pgsty/silo/commit/0a546c7a7), merged with [#276](https://github.com/pgsty/silo/pull/276) in [0fc5a0b52](https://github.com/pgsty/silo/commit/0fc5a0b52) | 2026-11-02, Feng Ruohang | not released (main after `RELEASE.2026-10-26T00-00-00Z`) | Widened. Decommission and rebalance now send delete-all actions through `applyExpiryOnNonTransitionedObjects`, which adds a caller of the defective path. The same commit left the delete-all options as they were. [19910230a](https://github.com/pgsty/silo/commit/19910230a) and [a995921e5](https://github.com/pgsty/silo/commit/a995921e5), which came before it, run version-only actions during migration and do not widen it. |
+{.wide .expand}
 
 So the defect is not a regression in any release. The only SILO change that makes it easier to reach is on main and not released yet.
 
@@ -135,7 +139,7 @@ So the defect is not a regression in any release. The only SILO change that make
 
 ## Options {#options}
 
-### Option A: an exact-object delete on the drive
+### Option A: an exact-object delete on the drive {#option-a}
 
 A new drive operation would remove `xl.meta` and the data directories it references, then remove the object directory only if it is empty.
 
@@ -146,13 +150,13 @@ A new drive operation would remove `xl.meta` and the data directories it referen
 
 Rejected: more storage code, an upgrade hazard, and it still needs Option B's logic.
 
-### Option B: purge the key's own versions by ID
+### Option B: purge the key's own versions by ID {#option-b}
 
 This is the recommended option.
 
 - **Children.** The version-delete path (`xlStorage.deleteVersions`) rewrites or removes `xl.meta` and moves the data directory of each removed version to the trash. It removes the object directory only when that directory is empty, so other keys stay. A prototype through the existing bulk path deleted all four versions of a key, a delete marker and a tiered version among them, and left the children in both erasure sets intact.
 - **Tiered versions.** `xlMetaV2.DeleteVersion` adds a free version for each transitioned version. The prototype left one, and the scanner's free-version cleanup removes the remote object later ([Tier Free Versions](/blog/design/tier-free-version-semantics/)).
-- **Object Lock.** Lifecycle rejects both rule types on lock-enabled buckets at configuration and skips them at evaluation; the purge does not change that. Because the purge deletes by version ID, it can enforce retention and legal hold per version in this one place, so the primitive defends itself whatever its caller.
+- **Object Lock.** Lifecycle rejects both rule types on lock-enabled buckets at configuration and skips them at evaluation; the purge does not change that. Because the purge deletes by version ID, it can enforce retention and legal hold per version in this one place, where the primitive checks each physical revision it would remove. Authorization of a batch submitter is a separate check at the caller.
 - **Replication.** Delete-all stays a local purge. Versions are removed without replication state, no delete marker is created, and nothing is queued, as today.
 - **Quorum and partial history.**
   - The purge deletes only the versions it decided on. A version missing from the quorum view stays, and heal reconciles it.
@@ -165,7 +169,7 @@ This is the recommended option.
 
 The design review changed three points of this option; [Proposed fix](#fix) describes the result. The bulk path reorders the versions of a key and has no barrier between pools: in a two-pool probe it removed the latest delete marker while the delete of an older version failed, and a read then returned that older version. The purge therefore deletes one version at a time. A free version alone does not make tiered keys safe here: it hands the remote object to the tier cleanup, and the review showed cases where a copy in another pool, or a delete that missed its quorum, still referenced that object. Keys with transitioned versions are therefore refused. And because duplicate copies and `null` writes repeat a version ID, the purge records every copy in every pool before it deletes anything.
 
-### Option C: refuse when other keys exist under `K/`
+### Option C: refuse when other keys exist under `K/` {#option-c}
 
 A one-entry listing of `K/` before the purge would skip such keys.
 
@@ -176,7 +180,7 @@ A one-entry listing of `K/` before the purge would skip such keys.
 
 Rejected.
 
-### Option D: keep the prefix delete, but pass `Expire` and `DeletePrefixObject` through
+### Option D: keep the prefix delete, but pass `Expire` and `DeletePrefixObject` through {#option-d}
 
 This restores the recheck. With those options, the set-level delete refused a version written after the decision. It does not protect the children: a child in the key's own erasure set is still deleted, while a child in another set survives. The loss would then depend on hashing, and the tier leak would remain.
 
@@ -192,7 +196,7 @@ This is the design agreed in two design review rounds and implemented in the rev
    - Batch expiration has no rule to evaluate. The latest version must still be the one the walk matched, by version ID (an empty ID counts as `null`) and modification time. Otherwise the key is reported as not expired and is not retried.
    - A second read of the authoritative history of each pool records where each approved version lives: every copy, including older writes of the same ID such as `null` versions written in several pools. This read may only confirm the approval; it never adds a version. Any difference, or a history that the drives cannot tell, returns `InsufficientWriteQuorum` and deletes nothing. A key without versions is a success that removes nothing.
 3. **Check every write before deleting any.**
-   - The purge reads `xl.meta` on every drive of each set that holds a copy. A minority of drives can hold another revision of a version than the one the history accepted, so every revision of an approved version on every drive is checked. A drive that cannot be read could hide such a revision, and heal would later remove what a purge left on it, so an unreadable drive refuses the whole key. The purge then deletes on exactly the drive handles it read; a handle that a reconnect installs later is never used.
+   - The purge reads `xl.meta` on every drive of the key's set in every pool, including pools whose quorum view has no copy. A minority of drives can hold another revision of a version than the one the history accepted, so every revision of an approved version on every drive is checked. A drive that cannot be read could hide such a revision, and heal would later remove what a purge left on it, so an unreadable drive refuses the whole key. The purge then deletes on exactly the drive handles it read; a handle that a reconnect installs later is never used.
    - If any revision of any version is transitioned, the whole key is refused. See [Tiered keys](#tiered).
    - The purge enforces retention and legal hold on every write it would delete. A protected revision refuses the whole key.
 4. **Delete in order, by version ID.**
@@ -201,14 +205,14 @@ This is the design agreed in two design review rounds and implemented in the rev
    - The latest version goes last and alone, only after every older version is gone from every pool. A purge that stops therefore never changes what a read returns, and never exposes an older version.
    - The purge stops at the first error. A delete that reached its write quorum but failed on some drives is repeated on those drives a bounded number of times while the lock is still held; what remains is left to heal.
    - Each call has a budget of 1000 versions and one minute, its reads and checks included, checked before each version. A longer history stops before the latest version and continues on the next expiry, with a fresh history and a fresh decision.
-5. **Report what was removed.** The purge counts the logical versions it removed, delete markers included, duplicate copies and free versions not, and returns the approved latest version. The ILM audit entry carries the count in the tag `ilm-versions-removed`. A purge that fails or stops after it began to delete is audited as partial (tag `ilm-partial`) with the count and the error, also when it removed copies but no whole version, and it sends no removal notification. A purge that removed nothing sends nothing. Batch expiration counts objects and delete markers from the purge's results, and a job that failed to remove a delete marker is reported as failed.
+5. **Report what was removed.** The purge counts the logical versions it removed, delete markers included, duplicate copies and free versions not, and returns the approved latest version. The ILM audit entry carries the count in the tag `ilm-versions-removed`. A purge that fails or stops after it began to delete is audited as partial (tag `ilm-partial`) with the count, the error and, since the next release, the tag `ilm-incomplete-reason`, also when it removed copies but no whole version; it is traced with `result=partial` and sends no removal notification. A purge that removed nothing because the key had nothing to remove sends no removal notification and only a plain trace. A lifecycle purge refused before it deleted anything (a tiered version, the rule no longer applying, Object Lock) is counted and traced with `result=refused`, its reason and its error, and is not audited. One that failed before it deleted anything (an unreadable history or another error) is also audited and logged. The reasons in `expiry_incomplete_total` are `tier_unsupported`, `budget` (stopped at its budget after progress), `changed` (the latest version that a batch matched has changed) and `history_unavailable`, plus the `not_applicable`, `locked` and `error` that other expiries share; see [Multi-Pool Lifecycle Expiry](/blog/design/multi-pool-lifecycle-expiry/#fix). Batch expiration counts objects and delete markers from the purge's results, and a job that failed to remove a delete marker is reported as failed.
 
 ### Tiered keys {#tiered}
 
 Delete-all of a key with transitioned versions does not change in this release.
 
 - The expiry worker still sends a delete-all of a transitioned latest version to `expireTransitionedObject`. That writes a delete marker and keeps every version and remote object under it, and no later scan removes them.
-- A key whose latest version is hot but whose older versions are tiered is refused. Nothing is deleted, and the scanner tries again on each pass. Batch expiration reports the key as failed and does not retry it within the run. During a decommission or rebalance the key stays in its source pool, and the decommission reports it as left behind, as it already does for a transitioned latest version (executed).
+- A key whose latest version is hot but whose older versions are tiered is refused, and nothing is deleted. Since the next release, the scanner of a pool that holds such a tiered version no longer queues the purge: each drive scanner counts the skip once per cycle as `tier_unsupported_skipped`. A tiered version that only another pool holds is unknown to that scanner, so the purge still decides and refuses the key with `tier_unsupported`, which is also logged; repeated identical refusals of a key are suppressed by the duplicate-suppression logger until its hourly reset. Batch expiration counts the key as refused in `keysRefused` (`complete-with-skips`, [`07b89b98f`](https://github.com/pgsty/silo/commit/07b89b98f)) and does not retry it within the run. During decommission or rebalance, the next release instead migrates the live versions and their tier metadata normally when tier evidence rules out whole-key expiry. It captures that evidence across all pools and drives before moving the first version, so a hot winning copy cannot hide a tiered duplicate or a minority revision. Physical completion checks still prevent a pool with residual data from being declared finished.
 
 A tier-safe purge must not hand a remote object to the tier cleanup while any copy still references it, including after a delete that failed its quorum. That needs durable cleanup records and proof under the lock, and it is a separate change.
 
@@ -235,7 +239,7 @@ A tier-safe purge must not hand a remote object to the tier cleanup while any co
 - Without the order and the barrier before the latest version, a failed delete in one pool exposes an older version.
 - Without the tier refusal, remote objects leak, or the tier cleanup removes one that a copy still uses.
 - Without the batch and migration routing, those callers keep the prefix path.
-- Without a dedicated option, any caller that sets the old flags reaches the prefix path again. `DeletePrefixObject` has had no effect on this path for years without anyone noticing.
+- Without a dedicated option, a caller that sets the old flags would reach the prefix path again. `DeletePrefixObject` has had no effect on this path for years without anyone noticing. Since the next release, the pools layer also refuses `DeletePrefix` together with `Expiration.Expire` as `InvalidArgument`, so a lifecycle expiry never deletes a prefix. A force delete (`DeletePrefix` without an expiry) is unchanged.
 
 **Deliberately excluded.**
 
@@ -249,6 +253,7 @@ A tier-safe purge must not hand a remote object to the tier cleanup while any co
 - Trash is purged in the background instead of immediately, so space comes back slightly later.
 - A delete-all whose decision no longer holds now does nothing, single pool included; the scanner retries it on a later pass.
 - Rolling upgrade is safe, because only existing storage calls are used. Protection is complete only once every node that executes expiries runs the fix: the node that runs an expiry decides how it deletes, so an old node in a mixed cluster still runs the recursive delete. Keep the interim mitigation until every node runs the fix.
+- **Usage and quota.** The scanner accounts every version of a key under a delete-all at its size, queued or not, instead of as already removed. Usage, and so hard quota, drops after a fresh scan of the key's subtree once the purge succeeded; that can take up to the scanner's directory interval, not one cycle. The alerts on many versions and on large versions count the versions of a key that the scanner does not queue.
 - Rollback restores the old behavior, and neither direction needs a migration.
 
 ## Residual limits {#limits}
@@ -256,7 +261,8 @@ A tier-safe purge must not hand a remote object to the tier cleanup while any co
 - **Past losses are not repaired.** The recursive delete purges the trash immediately, so there is no practical on-drive undo.
 - **Orphaned remote objects stay.** Remote objects already orphaned in a tier remain there. Their mapping to keys was in the deleted metadata, so cleaning them up is manual.
 - **Tiered keys are not purged.** See [Tiered keys](#tiered).
-- **A delete-all waits for every drive.** While a drive of the key's erasure set is offline or cannot read the key, the purge refuses the key and the scanner tries again on a later pass. This is the price of checking every revision before deleting any.
+- **A delete-all waits for every drive.** While a drive of the key's erasure set is offline, cannot read the key, or holds an `xl.meta` of the key that does not decode, the purge refuses the key with `history_unavailable` and the scanner tries again on a later pass. Callers still see a write quorum error (`503`). This is the price of checking every revision before deleting any.
+- **CRC damage requires successful heal before purge.** The next release classifies an `xl.meta` checksum failure as storage corruption, including across the storage RPC error conversion. When an undecodable drive refuses the drive check or when half of the drives cannot be decoded during the history read ([`7a13780d8`](https://github.com/pgsty/silo/commit/7a13780d8)), the refused purge queues MRF heal for each version observed on the decodable drives, using the explicit `null` ID for the null version. Normal and deep object heal can rebuild the corrupt metadata from sufficient surviving copies; a later purge then retries. Dry run leaves the metadata untouched. Without metadata quorum, heal keeps the existing files and the purge remains refused. Other undecodable metadata errors are not promised the same repair path.
 - **A drive handle names a drive, not a backend.** The purge deletes on the drive handles it checked, but each storage call resolves the backend again on the node that serves the drive. A backend that replaces a drive while a purge runs starts empty, and it receives the key only from a write or a heal of the key, which take the object lock the purge holds. An admin heal started with `nolock` skips that lock; that option is a separate issue.
 - **Keys under an object key are not listed.** A listing does not descend into the directory of an object key, so while `K` exists, `K/child` is missing from listings, from batch expiration walks, and from the walks of decommission and rebalance. This is older than the fix. With the fix, `K/child` survives a delete-all of `K` that a decommission or rebalance runs, but the walk has already passed it. The first pass reports it as left behind, as it does without any lifecycle rule (executed); a later pass moves it.
 - **Data directories are removed recursively.** Every version delete, not only delete-all, moves the version's data directory to the trash with its contents. A key named `K/<data-dir>/...`, where `<data-dir>` is the internal data-directory ID of a version of `K`, is removed with that version. The ID is not returned by the S3 API, so such a name needs internal metadata to construct. It is a separate storage-layer follow-up.
@@ -312,7 +318,7 @@ A tier-safe purge must not hand a remote object to the tier cleanup while any co
 - A batch purge that removes the older version but fails on the latest delete marker counts the marker as failed, and the job as failed.
 - Two pools, three versions: when the delete of the middle version fails, the oldest is removed, the latest stays and is still what reads return, the audit trace is marked partial with one version removed, and no removal notification is sent. Once the fault is gone, the next expiry completes and sends one notification for two versions.
 - A budget of two versions stops a four-version purge before the latest version, reports partial progress, and the next expiry completes it.
-- Keys with a tiered older version under a hot latest version, and keys with a tiered latest version in a batch purge, are refused with every version and remote object kept; batch expiration counts them as failed.
+- Keys with a tiered older version under a hot latest version, and keys with a tiered latest version in a batch purge, are refused with every version and remote object kept; batch expiration counts them as refused in `keysRefused` (`complete-with-skips`).
 - A write protected by retention or legal hold refuses the whole key, including a protected older `null` write in another pool.
 - A transitioned revision, or a revision under legal hold, on one drive of sixteen refuses the whole key, although the accepted revision is neither. So does a legal-hold revision on a drive that cannot be read, and one unreadable drive with no protection.
 - A drive handle that replaces a checked one after the check receives no delete.
@@ -363,7 +369,9 @@ A tier-safe purge must not hand a remote object to the tier cleanup while any co
 - the full `./cmd` suite and remote CI;
 - the fix together with the single-pool lock-domain fix.
 
-**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, heal dry-run, #259, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, heal dry-run, #259, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+
+The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
 ## Review history {#review}
 
@@ -374,6 +382,7 @@ A tier-safe purge must not hand a remote object to the tier cleanup while any co
 | Patch review, round 2 | Requested changes. Three findings: an unreadable drive could hide a protected revision that heal later removes; the drive selection was applied to a fresh set of handles; a purge could start although it already knew it lacked a write quorum. All accepted: an unreadable drive now refuses the key, and the purge deletes on exactly the handles it checked. |
 | Patch review, round 3 | Requested changes. One finding: a retained handle does not pin the backend on the node that serves the drive. Disputed: a replacement backend starts empty and receives the key only from a write or a heal under the object lock the purge holds, and binding a backend incarnation would need a wire change. |
 | Patch review, round 4 | Approved with nits. The reviewer withdrew the round-3 finding. Two nits: describe the selection as drive handles, with the replacement and locking assumptions, and name the admin heal `nolock` option as the exception. Both applied, in the code comment and under [Residual limits](#limits). |
+{.wide .expand}
 ## References {#references}
 
 - Evaluated base: [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)

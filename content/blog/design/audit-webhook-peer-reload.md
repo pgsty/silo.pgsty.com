@@ -2,7 +2,7 @@
 title: "Audit Webhooks After a Peer Reload"
 linkTitle: "Audit Webhook Peer Reload"
 date: 2026-11-04
-lastmod: 2026-11-06
+lastmod: 2026-11-09
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a runtime change to audit_webhook leaves every server except the one that served it with a webhook target whose worker has already exited, which other subsystems share the defect, and why building logger targets on the server context is the minimum complete repair.
@@ -24,6 +24,7 @@ The same defect affects `logger_webhook`, with or without `queue_dir`, and `audi
 
 The repair has three parts:
 
+{.steps}
 1. **Process context for the targets.** `applyDynamicConfigForSubSys` builds logger targets with the process context (`GlobalContext`) at its three logger call sites. Startup, the serving node, and the peers all apply configuration through this one function. The reload context is still used for logging.
 2. **Queue store before the disk-queue worker.** The HTTP disk-queue worker starts only after its queue store has opened. Today the worker starts first. If the store cannot be opened, the worker stays alive without a store and crashes the server on the first record. This already happens at startup and on the serving node. Without this part, the first part would spread the crash to every server.
 3. **Queued records follow the replacement.** With part 2, a target whose queue cannot be opened has no worker, and its records wait in memory. When a later reload replaces it, `Cancel` now hands those records to the replacement instead of discarding them, as far as the shared handoff buffer has room.
@@ -39,9 +40,11 @@ The repair has three parts:
 | Reachability | One routine admin command. A change to one target rebuilds every enabled target of that subsystem, so all of them stop on the other servers, not only the one that was named. |
 | Release urgency | Blocks the next release. Audit loss is not reported to the admin or S3 client and lasts until the affected servers restart or serve a later change themselves, while the change is small and stays off the S3 data path. |
 | Remaining effort | Code, review and a cluster acceptance run are done. Remote CI remains. |
+{.wide .expand}
 
 ## When it happens {#trigger}
 
+{.steps}
 1. `mc admin config set ALIAS audit_webhook:NAME enable=on endpoint=…` reaches server A. A validates and saves the configuration. It applies the change through `applyDynamic`, which calls `applyDynamicConfigForSubSys` with `GlobalContext`. It then asks every peer to reload the subsystem (`SignalConfigReload`).
 2. On each peer, `SignalServiceHandler` handles `serviceReloadDynamic`. It reads the saved configuration and calls `applyDynamicConfigForSubSys` under `context.WithTimeout(context.Background(), 30*time.Second)` with a deferred `cancel`.
 3. `updateHTTPTargets` creates a new target for every enabled webhook of the subsystem and initializes each one with that context. It then swaps the target list and cancels the old targets.
@@ -55,6 +58,7 @@ The reporter's node metrics show the pattern, 7.5 hours after a `config set` tha
 | 0 (served the request) | 0 | 4 | 2,097,356 |
 | 1 | 100000 | 674,917 | 774,917 |
 | 2 | 100000 | 712,215 | 812,215 |
+{.wide .expand}
 
 In this report, `total_messages` minus `failed_messages` equals the queue length on servers 1 and 2, which is consistent with nothing having been sent from them.
 
@@ -86,6 +90,7 @@ The same reload path handles every subsystem in `config.SubSystemsDynamic`. The 
 | `scanner` | atomic stores, `scannerSleeper.Update` | Not affected |
 | `subnet` | `Update`, `ApplyEnv` | Not affected itself; a proxy change can also re-apply `logger_webhook` |
 | `compression`, `heal`, `batch`, `storage_class`, `drive`, `browser`, `callhome` | swap a configuration value under a lock | Not affected |
+{.wide .expand}
 
 Notification and Lambda targets are not dynamic subsystems on main.
 
@@ -93,7 +98,7 @@ Two parts of the issue text are narrower than written. The peer handler's whole-
 
 ## Where the behavior came from {#history}
 
-### Provenance
+### Provenance {#provenance}
 
 **Introduced by upstream MinIO, not by SILO.** Every ingredient is an upstream commit that is an ancestor of the SILO fork point ([`27742d469`](https://github.com/pgsty/silo/commit/27742d469), 2025-12-03), and no SILO commit has changed the functions involved. The same code is in the last upstream release before the fork, `RELEASE.2025-10-15T17-29-55Z`, in the archived upstream `master`, and in every SILO release from `RELEASE.2025-12-03T12-00-00Z` through `RELEASE.2026-10-26T00-00-00Z`. We compared the code on each tag; the worker-before-store order, the context-bound replay, and the 30-second context are identical on all of them.
 
@@ -107,6 +112,7 @@ The defect needs a reload context that ends with the handler, and logger targets
 | `Init` takes a context. The disk replay of the HTTP target and of Kafka (`initQueueStore`) stops with it, and the HTTP worker sends with it. | [`57acacd5a`](https://github.com/pgsty/silo/commit/57acacd5a) ([#17121](https://github.com/minio/minio/pull/17121)) | 2023-05-09 | `RELEASE.2023-05-18T00-05-36Z` |
 | The HTTP queue worker returns when the `Init` context ends. | [`1fc4203c1`](https://github.com/pgsty/silo/commit/1fc4203c1) ([#19275](https://github.com/minio/minio/pull/19275)) | 2024-03-25 | `RELEASE.2024-03-26T22-10-45Z` |
 | The disk-queue worker starts before the queue store opens. | [`ba54b39c0`](https://github.com/pgsty/silo/commit/ba54b39c0) ([#19854](https://github.com/minio/minio/pull/19854)) | 2024-06-01 | `RELEASE.2024-06-04T19-20-08Z` |
+{.wide .expand}
 
 What each step changed:
 
@@ -129,29 +135,30 @@ Related: [PR #249](https://github.com/pgsty/silo/pull/249), which adds live relo
 
 ## Options {#options}
 
-### Option A: process context at the logger call sites
+### Option A: process context at the logger call sites {#option-a}
 
 This is the chosen option. `applyDynamicConfigForSubSys` passes `GlobalContext` to the three logger target updates and keeps the caller's context for logging. Every entry point applies configuration through this function, so one change covers startup, the serving node, and the peers. The lifetime decision sits where the long-lived objects are created, whatever the caller passes. PR #249 follows the same pattern for notification targets.
 
-### Option B: detach inside the logger package
+### Option B: detach inside the logger package {#option-b}
 
 `updateHTTPTargets`, or `Init`, could wrap the context with `context.WithoutCancel`, which protects every caller. It would also detach targets from `GlobalContext`, so they would no longer stop when shutdown cancels it. That changes shutdown behavior for targets built at startup, which is unrelated to this defect. It also leaves a `ctx` parameter whose cancellation is silently ignored. If the package is to own the lifetime, the parameter should go away instead (Option D).
 
-### Option C: process context in the peer handler
+### Option C: process context in the peer handler {#option-c}
 
 `serviceReloadDynamic` could pass `GlobalContext` and keep the 30-second limit only for work that is actually bounded. Today that work does not exist ([root cause](#root-cause)), so this would also fix the defect. But it repairs the caller rather than the function that creates the long-lived objects. Any other caller with a short context, such as a test or a future handler, would fall into the same trap. It is an acceptable alternative, but not the preferred one.
 
-### Option D: targets own their lifetime
+### Option D: targets own their lifetime {#option-d}
 
 Split `Init` into initialization under the caller's context and a start whose lifetime belongs to the target and ends only with `Cancel`. This is the right long-term shape. It changes the `logger.Target` interface and every implementation (HTTP, Kafka, console, the test logger). Closing this defect does not need it, so it remains a follow-up candidate.
 
-### Questions behind the choice
+### Questions behind the choice {#questions}
 
 - **Did any `Init` rely on the 30-second limit?** No. HTTP `Init` does no network I/O, and Kafka's broker connection does not take the context. Before the March 2024 refactor, HTTP initialization pinged the endpoint with the context; it no longer does.
 - **Do repeated reloads leak goroutines?** Not because of this change. On every reload, `updateHTTPTargets` points each old target at its replacement (`AssignMigrateTarget`), sizes the shared leftover buffer (`CreateOrAdjustGlobalBuffer`), starts the new targets, and then calls `Cancel` on the old ones in the background. `Cancel` marks the target closed, so later `Send` calls go to the replacement, if there is one. It cancels the target's own context, which asks the worker and the disk replay to stop, waits for the workers to hand their leftover records to the shared buffer, hands over any records still in the channel (part 3 of the fix), and closes the channel. The shutdown of old targets has always been owned by `Cancel`, not by the caller's context, so using `GlobalContext` adds no goroutine per reload. A review probe ran 100 consecutive reloads of idle targets followed by a disable, for both queue modes, and the goroutine count returned to its starting value; this does not cover shutdown under a backlog or failing disk writes. On main, the old target's worker on a peer is already gone, and the records that piled up after it stopped are discarded when the channel closes. That is why a second `config set` through the same server does not recover the peers. Pre-existing exceptions, unchanged by this fix, are described under [Residual limits](#limits).
 
 ## Proposed fix {#fix}
 
+{.steps}
 1. **Process context for logger targets.** In `applyDynamicConfigForSubSys`, pass `GlobalContext` to `logger.UpdateHTTPWebhooks`, `logger.UpdateAuditWebhooks`, and `logger.UpdateAuditKafkaTargets`. Error reporting keeps using the caller's context. The earlier candidate fix covered the two HTTP call sites; the Kafka call site, which has the same defect when `queue_dir` is set, completes it.
 2. **Open the queue store before starting the disk-queue worker.** `initDiskStore` currently starts the main worker, then opens the queue store. If opening fails, for example because `queue_dir` cannot be created or is not a directory, `Init` returns an error. The target stays registered, though, and its worker keeps running with no store. On the first record, the worker calls `PutMultiple` on the missing store, and the server panics. Today this happens at startup and on the serving node, where the context stays alive. On peers, the worker usually exited with the reload context first, which mostly hid the crash; it could still happen when the worker took a record before the reload context ended. Part 1 on its own would therefore turn the silent drop into a crash on every server. The fix opens the store first. On failure, it cancels the derived context and returns without starting a worker. On success, it assigns the store and then starts the worker and the replay. This also removes a data race, in which a worker could read the store field while `Init` was still setting it when an earlier target had left records in the shared buffer. A failed `Init` no longer leaves a worker behind.
 3. **Hand queued records to the replacement.** With part 2, a target whose queue store failed to open has no worker. Records sent to it wait in its channel, up to `queue_size`. Nothing retries the initialization: the operator repairs `queue_dir` and applies the configuration again, and that reload builds a replacement target. Only a worker hands records over to the replacement, so `Cancel` would close the channel and discard them. `Cancel` now moves the records still in the channel to the shared buffer that the replacement reads. It does this after its `wg.Wait()` call for the workers returns and before it closes the channel, holding the channel lock and the buffer-map lock, with sends that never wait for room. If the shared buffer is full, the rest is dropped, as in the worker's own handoff. It also covers records that arrive after a worker's final drain. A single failed target replaced by a working one hands over all of its records; when several failed targets are replaced in quick succession, the buffer can still run out of room (see [Residual limits](#limits)).
@@ -228,7 +235,7 @@ Established by reading the code, not executed:
 
 Still to run before merge: remote CI.
 
-**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, heal dry-run, #285 and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
+**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, heal dry-run, #285, `delete-all` and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections (which now include `TestDynamicWebhookOutlivesConfigContext` in the Ubuntu CI race workflow) and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
 
 The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
 
@@ -239,6 +246,7 @@ The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command
 | Adversarial review, round 1 | Approved with nits; no production defect introduced by the change was found. Six pre-existing defects were reported. One was fixed: records queued in a target that never started were discarded when a reload replaced it (part 3, with the test changed to recover through a second configuration application). The other five are listed under [Residual limits](#limits). The test children now run without the logger and audit environment variables. Corrections to this record were applied: restart is not the only recovery, the drops are visible in logs and metrics, the peer crash was mostly but not always hidden, and the shutdown and delivery claims were qualified. |
 | Adversarial review, round 2 | Approved with nits, covering the handoff in `Cancel` and the reworked test. The handoff delivered every record of a single replaced target exactly once, kept records across concurrent buffer resizes, and survived repeated and concurrent `Cancel` calls; ordinary reloads with the endpoint up and down showed no new loss or duplication. One remaining loss was documented: rapid successive replacements of failed targets can exhaust the shared buffer (Residual limits). The test now cleans up only the last target. Further wording corrections were applied. |
 | Adversarial review, round 3 | Approved with nits. The test cleanup and the corrected wording were confirmed; two remaining phrases were made precise. |
+{.wide .expand}
 
 ## References {#references}
 

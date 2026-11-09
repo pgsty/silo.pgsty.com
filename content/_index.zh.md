@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-本站以 **[SILO 20261026](/zh/blog/release/silo-20261026/)** 正式版（内嵌 Console 2.5.1）为基线。当前独立正式版包括 **[Console 2.6.0](/zh/blog/release/console-2.6.0/)**、**[mcli 20261109](/zh/blog/release/mcli-20261109/)** 和 **[silo-pkg 3.16.0](/zh/blog/release/pkg-3.16.0/)**，配合可选 KES 20261026 与 Go 1.27.3。见[组件矩阵](/zh/compatibility/versions/)与 [Console 2.7.0 候选版本说明](/zh/blog/release/console-2.7.0/)。
+本站以 **[SILO 20261026](/zh/blog/release/silo-20261026/)** 正式版（内嵌 Console 2.5.1）为基线，配套独立版 **[Console 2.6.0](/zh/blog/release/console-2.6.0/)**、**[mcli 20261109](/zh/blog/release/mcli-20261109/)**、**[silo-pkg 3.16.0](/zh/blog/release/pkg-3.16.0/)** 和可选外部密钥服务 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**，统一使用 Go 1.27.3。见[组件矩阵](/zh/compatibility/versions/)与 [Console 2.7.0 候选版本说明](/zh/blog/release/console-2.7.0/)。
 
 > [!WARNING]
 > **SILO 是由 Pigsty 社区维护的 MinIO 分支。** 本项目并非 MinIO, Inc. 的关联项目，也未获得其认可、赞助或背书。“MinIO” 是 MinIO, Inc. 的商标，此处仅用于标识上游项目。源码与许可信息详见[归属与署名](/zh/about/attribution/)。
@@ -20,7 +20,7 @@ SILO 在保留 S3 API、配置与运维契约的同时，为现有 MinIO 部署�
 
 ## 快速开始 {#quickstart}
 
-{{< tabs group="docker-linux-minio-kubernetes" >}}
+{{< tabs group="quickstart" >}}
 {{< tab label="Docker" value="docker" >}}
 下面的命令固定使用 Server 20261026，现已公开提供，见[交付状态](/zh/blog/release/silo-20261026/#delivery)。示例凭据只适合本地评估。
 

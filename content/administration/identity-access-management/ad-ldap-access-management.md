@@ -67,6 +67,10 @@ mc idp ldap policy attach myminio diagnostics \
 - MinIO would assign any authenticating user with membership in the `cn=ops,cn=groups,dc=example,dc=com` AD/LDAP group the [`consoleAdmin`](/administration/identity-access-management/policy-based-access-control/#userpolicy.consoleAdmin) policy, granting complete access to the MinIO server.
 - MinIO would assign any authenticating user with membership in the `cn=engineering,cn=groups,dc=example,dc=com` AD/LDAP group the [`diagnostics`](/administration/identity-access-management/policy-based-access-control/#userpolicy.diagnostics) policy, granting access to diagnostic administrative operations.
 
-## Long Distinguished Names
+## Long Distinguished Names {#long-distinguished-names}
 
 The [Server 20261026](/blog/release/silo-20261026/#server-20261026) includes the [LDAP long-DN fix](/blog/design/ldap-long-dn/) (absent from Server 20261018). When a user relies on group policies and has a normalized DN whose pure-ASCII filename component exceeds 255 bytes on the object IAM backend, the server treats the resulting filename-length error as an absent user-policy mapping and proceeds to evaluate group policies; full-path length limits (`PATH_MAX`), unreadable revocation records, and storage failures still fail closed, and writing overlong path records remains unsupported on the object backend.
+
+### Stored Identity Record Group Refresh {#stored-record-group-refresh}
+
+In next-release SILO builds (`a0de92fcb`), when an LDAP user authenticates or refreshes via a stored identity record (`fromStored`), the server re-queries LDAP group membership once the cached group list is older than 1 hour (`ldapStoredGroupRefreshInterval = 1h`) and fails closed if the refresh fails. See [LDAP Long Distinguished Names](/blog/design/ldap-long-dn/).

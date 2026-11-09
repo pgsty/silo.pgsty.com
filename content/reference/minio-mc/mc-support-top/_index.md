@@ -11,12 +11,7 @@ upstream_modified: true
 
 <a id="command-mc.support.top"></a>
 
-> [!NOTE]
-> **Note**
->
-> > [!NOTE]
-> > **Changed: RELEASE.2022-08-11T00-30-48Z**
->
+> [!NOTE] Changed: RELEASE.2022-08-11T00-30-48Z
 > `mc support top` replaces the `mc admin top` command.
 
 > [!NOTE]

@@ -15,7 +15,7 @@ tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 
 ## 1. 问题确认与外部报告核验 {#problem}
 
-### 1.1 两条独立外部报告来源
+### 1.1 两条独立外部报告来源 {#1-1-two-independent-external}
 
 本次修复覆盖两条独立报告链及一次内部同源排查：
 
@@ -23,7 +23,7 @@ tags: ["Silo", "Security", "Object Lock", "WORM", "S3", "IAM"]
 2. **独立外部报告（F1 / F2 / F3）**：另一份外部报告独立复现了三类攻击向量：未经授权将 `GOVERNANCE` 改为多年 `COMPLIANCE`、绕过基于请求体条件键的 `s3:PutObjectRetention` Deny 策略，以及无 bypass 授权缩短未到期的 `GOVERNANCE` 保留期。
 3. **内部同源关联排查（`SN-2026-016` / F4 与目录对象 `null` 版本覆写）**：在收到上述报告后，我们对“拥有写权限但无 bypass 权限的调用者还能通过哪些入口破坏受锁版本”进行了全量写路径审计，定位到非可信复制请求携带 `?versionId=` 原地覆写历史版本、目录键 `dir/` 隐式 `null` 版本覆写以及已持久化目标版本的分段上传完成三条同源缺口。
 
-### 1.2 独立报告逐项核验结论
+### 1.2 独立报告逐项核验结论 {#1-2-claim-by-claim}
 
 以下核验与代码行号针对修复前的 [`bcb5fc956`](https://github.com/pgsty/silo/commit/bcb5fc956) 快照：
 
@@ -400,12 +400,13 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | **对象锁桶中的目录对象写入（`PUT dir/`）或暂停版本控制下的 `null` 版本覆写** | 在预检与对象写锁内读取 `null` 版本元数据进行锁校验，并在读取失败时立即拒绝写入，防止慢速请求体竞态与读仲裁故障下的锁覆写 |
 | **版本化桶中的分段上传完成（`CompleteMultipartUpload`）** | 在 `CompleteMultipartUpload` 最终提交写锁内执行一次 `getObjectInfo`（多池下为 `replicaObjectInfo`）核验 `fi.VersionID` 是否已存在。该检查仅在分段上传最终合并提交时发生一次（`NewMultipartUpload` 与各 `UploadPart` 均不受影响）；针对常规新建上传跳过该查询的优化需另行设计能抵御快照恢复重放的机制并独立验证，不在本次安全修复中强行并入 |
 | **`PutObjectRetention` 合法延长保留期与未授权请求** | 基础权限 `s3:PutObjectRetention` 前移至读取桶/对象状态之前：未授权请求在入口即被内存态 IAM 求值拒绝（消除原有的磁盘读取与写锁争用）；合法延长保留期请求在对象写锁内判定 `!weakens` 后立即返回，无需在写锁内重复执行 IAM 求值 |
+{.wide .expand}
 
 ---
 
 ## 5. 核心安全不变量与升级兼容性说明 {#why-it-works}
 
-### 5.1 三条核心安全不变量
+### 5.1 三条核心安全不变量 {#5-1-three-core-security}
 
 1. **不变量一：基础权限与锁条件键在读取任何状态前无条件成立（消除 F1、F3、清锁天数绕过与存在性探测）**
    - `PutObjectRetention` 支持的三个对象锁条件键全部派生自请求体 XML 与当前时间，不依赖桶或对象的任何存量元数据。因此在 `ParseObjectRetention` 之后立即调用 `isRetentionActionAllowed(policy.PutObjectRetentionAction, ...)`，既是最早可求值点，也是完全求值点。
@@ -487,6 +488,6 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | **分段上传完成阶段查询开销** | 无额外查询 | 新上传跳过查询（但引入恢复重放漏洞） | 每次完成在写锁内执行一次 `getObjectInfo` | **保持写锁内 `getObjectInfo` 严格查重；性能优化留待后续单独设计验证** |
 {.wide .expand}
 
-### 最终结论
+### 最终结论 {#conclusion}
 
 采用**`fe3935476` 完整写锁防线 + 预检 Fail-Closed 加固**作为最终落地实现，并将慢速目录写入（`TestPlanReviewSlowDirectoryPut`）、预检读故障（`TestPlanReviewPreflightReadFailure`）、遗留分段上传（`TestPlanReviewLegacyMPUCompliance`）及恢复后分段上传碰撞（`TestRecoveredMultipartUploadAfterReplica`）四组复现用例全部纳入 `cmd/object-retention-overwrite_test.go` 回归测试集。

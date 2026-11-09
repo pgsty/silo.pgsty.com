@@ -13,13 +13,18 @@ SILO 20261026 is the current Server release, with embedded Console 2.5.1, mcli 2
 
 ## Standalone Console {#console}
 
-The latest published standalone version is [Console 2.6.0](/blog/release/console-2.6.0/),
-source `f8ab146695fd1df74e4b84128a286d552921bf00`, with silo-pkg v3.15.2 and mcli 20261026.
-The [2.7.0 candidate](/blog/release/console-2.7.0/) uses silo-pkg v3.16.0 and
-the official mcli 20261109 release, represented in Go by
-`v0.0.0-20261109021353-e1d4cc5abfe0`. Its frontend and package metadata use 2.7.0;
-draft artifacts do not change the public stable download. Server 20261026
-continues to embed Console 2.5.1 until a separate Server release adopts newer source.
+<span id="console-2-6-0"></span>
+
+The latest published standalone Console is [2.6.0](/blog/release/console-2.6.0/),
+from source `f8ab146695fd1df74e4b84128a286d552921bf00`. It adds usage scans,
+retained-version totals and bucket-administration fixes, using Go 1.27.3,
+silo-pkg 3.15.2 and mcli 20261026.
+The [2.7.0 candidate](/blog/release/console-2.7.0/) adds ten UI languages, Arabic
+RTL, and container CA/temporary-directory fixes, using silo-pkg v3.16.0 and the
+official mcli 20261109 release (`v0.0.0-20261109021353-e1d4cc5abfe0`). Its
+frontend and package metadata use 2.7.0; draft artifacts do not change the
+public stable download. Server 20261026 continues to embed Console 2.5.1 until a
+separate Server release adopts newer source.
 
 ## mcli 20261109 {#mcli-20261109}
 
@@ -248,6 +253,7 @@ defect. Final packaged-candidate and rollout acceptance remain tracked in
 5. Update Server's direct pkg/SDK requirements and both PGSTY replacements,
    client archive hashes, image and Helm client pins. Validate the complete graph
    before a separate Server release, image publication and cluster rollout.
+{.steps}
 
 Go does not inherit a dependency module's `replace` directives. Server must
 explicitly select both maintained Console and MC even when Console already
@@ -257,7 +263,7 @@ is separate from the maintained policy implementation.
 
 Console v2.4.2, mcli 20261018 and the Server 20261018 release use Go **1.27.2**; the September stack used Go **1.27.1**.
 The pkg v3.14.x line retains a Go **1.26** library floor and was race-tested with Go **1.26.8**.
-Standalone Console v2.5.1, mcli 20261026 and their pkg v3.15.2 dependency require Go **1.27.3**. The Go x/* dependencies were refreshed.
+Server 20261026, standalone Console v2.5.1 and v2.6.0, mcli 20261026 and 20261109, and pkg v3.15.2 and v3.16.0 require Go **1.27.3**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
 on NetBSD; Console's tablewriter **v0.0.5** replacement preserves its MC API.
 

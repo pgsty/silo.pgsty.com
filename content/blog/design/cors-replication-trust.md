@@ -101,6 +101,7 @@ Incoming requests are classified as follows:
 | `X-Amz-Replication-Status: REPLICA` without replication permission | Rejected with `403 AccessDenied` |
 | Exact marker + replication permission, no `REPLICA` | `trusted` only |
 | Exact marker + replication permission + `REPLICA` | Both `trusted` and `replicaTrusted` |
+{.wide .expand}
 
 Explicitly rejecting unauthorized `REPLICA` claims with `403 AccessDenied` prevents a misconfigured replica write from silently downgrading into a new `PENDING` source object that would trigger a reverse replication loop.
 
@@ -170,6 +171,7 @@ Both startup-in-progress and known load-failure states fail closed: because a pr
 | Reject every request carrying `X-Minio-Source-Replication-Request` | Breaks legitimate marker-only batch replication and multipart replication calls |
 | Require `REPLICA` on every trusted replication call | Breaks replicated `UploadPart`, `CompleteMultipartUpload`, and batch replication wire compatibility |
 | Store a boolean in `ObjectOptions` while leaving events and Object Lock on raw headers | Leaves two authorities that can disagree |
+{.wide .expand}
 
 ## Implementation and Verification {#implementation}
 

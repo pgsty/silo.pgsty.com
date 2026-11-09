@@ -60,6 +60,7 @@ Every candidate produces one stable classification:
 | `WOULD_VERIFY` | `--dry-run` found a supported `FULL_OBJECT` checksum |
 | `UNKNOWN_*` | MCLI cannot make a reliable verification statement (for example, `COMPOSITE` or missing `ChecksumType`) |
 | `SKIPPED_*` | A filter intentionally excluded the object (`SKIPPED_TOO_LARGE`, time filter, or delete marker) |
+{.wide .expand}
 
 The final summary carries `objects`, a `verified` count, the count of every result status, and `incomplete`. `verified` equals `MATCH` plus `MISMATCH`—the only classifications that actually streamed an object body through a hasher. A run that enumerated many objects and verified none is therefore explicitly visible.
 

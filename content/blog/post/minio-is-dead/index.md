@@ -24,7 +24,7 @@ MinIO the company has finally completed its transformation from a dragon-slaying
 
 ------
 
-## From Dragon-Slayer to Dragon
+## From Dragon-Slayer to Dragon {#from-dragon-slayer-to-dragon}
 
 #### Democratization Era (2014–2019): The Apache of Object Storage
 
@@ -77,7 +77,7 @@ No more RPM/DEB packages or Docker images will be released. Essentially, anyone 
 
 ------
 
-## Technical Impact: Damage to the Open-Source Ecosystem
+## Technical Impact: Damage to the Open-Source Ecosystem {#technical-impact-damage-to-the}
 
 MinIO's move to maintenance mode dealt an immediate and far-reaching blow to many tech stacks.
 
@@ -104,7 +104,7 @@ This raises the skill floor and makes MinIO far less friendly as a lightweight i
 
 ------
 
-## Underlying Reasons: Pressure from Capital and Commercialization
+## Underlying Reasons: Pressure from Capital and Commercialization {#underlying-reasons-pressure-from-capital}
 
 The driving force behind MinIO's decisions is the logic of venture capital. By 2025, MinIO had raised a total of **$126 million** in funding.
 The most significant was a $103 million Series B in January 2022 led by Intel Capital, SoftBank Vision Fund II, and General Catalyst, which crowned MinIO a unicorn (valued over $1 billion).
@@ -138,7 +138,7 @@ But from the perspective of open source, it's simply **betrayal**.
 
 ------
 
-## Personal Reflections
+## Personal Reflections {#personal-reflections}
 
 I started using MinIO around 2018 (back when it was Apache-licensed).
 We built a few multi-petabyte object storage clusters for videos, images, backups —

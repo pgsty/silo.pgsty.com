@@ -13,16 +13,16 @@ cascade:
 
 Design records document the engineering decisions behind PGSTY SILO: root causes, S3 and IAM protocol invariants, trade-offs against rejected alternatives, operational limits, and regression coverage.
 
-## November 9: Console Languages
+## November 9: Console Languages {#november-9-console-languages}
 
-- [Adding Multilingual Support to SILO](/blog/design/console-languages/): Ten UI languages including Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83) and Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277), maintenance tiers, English fallback and Arabic RTL, with measured gzip and cache tradeoffs behind per-language assets and eager loading.
+- [Adding Multilingual Support to SILO](/blog/design/console-languages/): Ten UI languages across [Console 2.6.0](/blog/release/console-2.6.0/) and [Console 2.7.0](/blog/release/console-2.7.0/) (including Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83), Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277), and full translation completion in [#87](https://github.com/pgsty/silo-console/pull/87) and [#90](https://github.com/pgsty/silo-console/pull/90)), maintenance tiers, English fallback and Arabic RTL, with measured gzip and cache tradeoffs behind per-language assets and eager loading.
 
-## November 6: Found in Release Acceptance
+## November 6: Found in Release Acceptance {#november-6-found-in-release}
 
 - [A Partial View Must Not Report an Existing Object as Missing](/blog/design/partial-view-read-404/): Why a node that reaches only some drives can answer 404 for an object that exists, and why "not found" must require an answer from every drive.
 - [A Failed Multipart Completion Can Strand the Upload](/blog/design/multipart-complete-retry/): Why a completion that misses write quorum can strand the upload until stale-upload cleanup, and why the repair waits for fencing of storage operations.
 
-## November 4: Release-Blocking Lifecycle Fixes
+## November 4: Release-Blocking Lifecycle Fixes {#november-4-release-blocking-lifecycle}
 
 - [Multi-Pool Lifecycle Expiry: Decide on the Whole Object](/blog/design/multi-pool-lifecycle-expiry/) ([#278](https://github.com/pgsty/silo/issues/278), [#279](https://github.com/pgsty/silo/pull/279)): Why an expiry decided on the versions of one pool hides, deletes, or resurrects versions in another pool, and why a recheck on the merged version list under the object lock is the minimum complete repair.
 - [Restored Copies: Expire the Copy, Not the Object](/blog/design/restored-copy-expiry/) ([#281](https://github.com/pgsty/silo/issues/281), [#282](https://github.com/pgsty/silo/pull/282)): Why the expiry of a restored current version hid the object or stripped an older null version, and which storage and native-restore safeguards ship with the exact-version fix.
@@ -34,33 +34,33 @@ Design records document the engineering decisions behind PGSTY SILO: root causes
 - [Bucket Quota in the Console: List Display and Numeric Validation](/blog/design/console-quota-numeric-validation/) ([silo-console#72](https://github.com/pgsty/silo-console/issues/72), [silo-console#73](https://github.com/pgsty/silo-console/issues/73)): Why a Console-set quota showed as "-" in the bucket list, why bucket creation could turn a huge quota into one byte, where both came from, and what the merged Console fix covers.
 - [Lock Domains of Large Single-Pool Clusters](/blog/design/single-pool-lock-domains/): Why DELETE and CopyObject fail to exclude PUT on the same key in single-pool clusters of 18 or more hosts, which layouts that covers, and the routing change that closes it.
 
-## November 1: Pool Migration Integrity Review
+## November 1: Pool Migration Integrity Review {#november-1-pool-migration-integrity}
 
 - [Pool Migration Integrity Review: #261, #263, and #265](/blog/design/pool-migration-integrity-review/): A maintainer review of three reports and their fixes, including the contributor merge of #266 and maintainer follow-up #276.
 - [Mixed EC Layouts and Migration Listing](/blog/design/mixed-ec-migration-listing/) ([#261](https://github.com/pgsty/silo/issues/261), [#262](https://github.com/pgsty/silo/pull/262)): Why a readable object can disappear from decommission and rebalance listings after an interrupted degraded overwrite, and why the narrow recount in #262 is sufficient.
 - [Tier Free Versions Are Internal Cleanup Records](/blog/design/tier-free-version-semantics/) ([#263](https://github.com/pgsty/silo/issues/263), [#264](https://github.com/pgsty/silo/pull/264)): Why a free version must stay visible to healing but must not become a user-visible delete marker or a migration version.
 - [ILM Expiry and Pool Migration Ordering](/blog/design/ilm-migration-ordering/) ([#265](https://github.com/pgsty/silo/issues/265), [#266](https://github.com/pgsty/silo/pull/266), [#276](https://github.com/pgsty/silo/pull/276)): Why a versioned Expiration marker must not cause the current version to be skipped, and how the maintainer follow-up preserves tier cleanup and completion semantics.
 
-## October 24: FULL_OBJECT Checksum Replication
+## October 24: FULL_OBJECT Checksum Replication {#october-24-full-object-checksum}
 
 - [FULL_OBJECT Checksum Replication: Preserve the Type at Upload Initiation](/blog/design/replication-full-object-checksum/) (`#254`, `#255`): Why dropping the checksum type makes valid multipart CRC objects fail replication, how one shared header fix also restores the existing CopyObject path, and the source-upgrade and acceptance boundaries.
 
-## October 24: Multi-Pool Deletion and Placement
+## October 24: Multi-Pool Deletion and Placement {#october-24-multi-pool-deletion}
 
 - [Multi-Pool Deletion: Preserve the Latest Copy on Failure](/blog/design/multi-pool-delete-safety/) (`#256`, `#257`): Why an online-drive preflight cannot protect against later I/O failures, how staged cleanup preserves each item's authoritative copy, and the retry, tier-reference, performance, and compatibility boundaries of the merged fix.
 
 - [Overwrite Pool Affinity: Why #245 Was Not Adopted](/blog/design/overwrite-pool-affinity/) (`#245`): The original placement problem, request-aware quorum and health improvements, unversioned-only scope, two rounds of m3 performance measurements, and the decision to stop after small-object overwrite regressions remained. The experimental changes were not merged.
 
-## October 23: Alias Regions
+## October 23: Alias Regions {#october-23-alias-regions}
 
 - [Alias regions](/blog/design/alias-region/): Persistent per-alias regions, client-cache isolation, and upgrade, downgrade and credential-rotation boundaries, reconciled with mcli 20261109.
 
-## October 23 IAM & KMS Design Notes
+## October 23 IAM & KMS Design Notes {#october-23-iam-kms-design}
 
 - [LDAP Long DNs: Restoring Login Without Hiding Revocation Errors](/blog/design/ldap-long-dn/) (`#250`): How `\xx` hex escaping in `NormalizeDN` triggers the 255-byte single-component filename limit on the object IAM backend, and why `loadIAMConfigBytesWithMetadata` classifies only impossible pure-ASCII path components (`> 255` bytes) as `errConfigNotFound`.
 - [IAM Policy Reloads: Lock Scope, Cancellation, and Time Budgets](/blog/design/iam-policy-cancellation/) (`#251`): Moving policy reload and KMS decryption outside the authentication-cache lock while retaining `writeMu`, threading request cancellation end-to-end to `KES.Decrypt`, and keeping `etcd` 30-second RPC deadlines separate from total decryption budgets.
 
-## Server 20261018 Key Design Notes
+## Server 20261018 Key Design Notes {#server-20261018-key-design-notes}
 
 For the [Server 20261018 release](/blog/release/silo-20261018/), see these core architecture notes:
 

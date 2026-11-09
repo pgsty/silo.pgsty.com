@@ -15,7 +15,7 @@ Companion public security advisory:
 
 ## 1. Problem Verification and External Report Cross-Check {#problem}
 
-### 1.1 Two Independent External Reports and Internal Audit
+### 1.1 Two Independent External Reports and Internal Audit {#1-1-two-independent-external}
 
 This repair addresses two independent external vulnerability reports alongside an internal audit of adjacent write paths:
 
@@ -23,7 +23,7 @@ This repair addresses two independent external vulnerability reports alongside a
 2. **Independent External Report (F1 / F2 / F3)**: A separate external report independently reproduced three attack paths: unauthorized changes from `GOVERNANCE` to multi-year `COMPLIANCE`, bypasses of request-body condition-key `Deny` policies on `s3:PutObjectRetention`, and shortening unexpired `GOVERNANCE` retention without bypass authorization.
 3. **Internal Companion Audit (`SN-2026-016` / F4 and directory `null`-version overwrites)**: Auditing all write paths for callers holding `s3:PutObject` without bypass permission uncovered three related gaps: in-place overwrites via `?versionId=` without replication trust (`putOpts`), implicit `null`-version overwrites on directory keys (`dir/`), and completion of persisted multipart uploads (`CompleteMultipartUpload`).
 
-### 1.2 Claim-by-Claim Verification of the Independent Report
+### 1.2 Claim-by-Claim Verification of the Independent Report {#1-2-claim-by-claim}
 
 The following findings and line numbers refer to the pre-fix [`bcb5fc956`](https://github.com/pgsty/silo/commit/bcb5fc956) snapshot:
 
@@ -400,12 +400,13 @@ if !opts.ReplicationRequest && !opts.ReplicaLockReconcile && !opts.DataMovement 
 | **Directory object writes (`PUT dir/`) or `null`-version overwrites in Object Lock buckets** | Both preflight and the storage write lock read the `null` version's metadata and fail closed on read errors, preventing slow-body TOCTOU overwrites and read-failure bypasses |
 | **Multipart upload completions (`CompleteMultipartUpload`) in versioned buckets** | Performs one fail-closed `getObjectInfo` (or `replicaObjectInfo` across pools) lookup under the destination write lock during final multipart commit (`NewMultipartUpload` and `UploadPart` are unaffected). Any future optimization to skip this lookup for newly generated uploads must account for snapshot-recovery collisions and be validated separately |
 | **`PutObjectRetention` (valid extensions and unauthorized requests)** | Base `s3:PutObjectRetention` authorization runs before reading bucket/object state, rejecting unauthorized requests in memory without disk I/O or lock contention; valid retention extensions return immediately at `!weakens` inside the write lock without repeating IAM evaluation |
+{.wide .expand}
 
 ---
 
 ## 5. Core Security Invariants and Upgrade Compatibility {#why-it-works}
 
-### 5.1 Three Core Security Invariants
+### 5.1 Three Core Security Invariants {#5-1-three-core-security}
 
 1. **Invariant 1: Base permission and lock condition keys must hold before any state is read (closes F1, F3, zero-date clear bypass, and existence probing)**
    - All three Object Lock condition keys on `PutObjectRetention` derive solely from the XML request body and current time. Evaluating `isRetentionActionAllowed(policy.PutObjectRetentionAction, ...)` immediately after `ParseObjectRetention` rejects unauthorized or policy-denied requests with `403 AccessDenied` before any bucket or object lookup.
@@ -486,6 +487,6 @@ During design review, four candidate write-path designs were evaluated against c
 | **`CompleteMultipartUpload` lookup behavior** | No extra lookup | Skips lookup on generated marker (introduces recovery collision flaw) | Runs `getObjectInfo` under write lock | **Retains strict `getObjectInfo` check under write lock; any future performance optimization is deferred for separate validation** |
 {.wide .expand}
 
-### Conclusion
+### Conclusion {#conclusion}
 
 We adopt the **`fe3935476` full write-lock defense + fail-closed preflight hardening** as the final implementation, and incorporate all four regression reproducers (`TestPlanReviewSlowDirectoryPut`, `TestPlanReviewPreflightReadFailure`, `TestPlanReviewLegacyMPUCompliance`, and `TestRecoveredMultipartUploadAfterReplica`) into `cmd/object-retention-overwrite_test.go`.

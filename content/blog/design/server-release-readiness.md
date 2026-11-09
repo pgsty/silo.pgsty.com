@@ -96,6 +96,7 @@ The CORS hot path must distinguish four states:
 | Known real bucket whose metadata load failed | No CORS headers |
 | Resident bucket with a bucket CORS document | Evaluate that document |
 | No resident metadata and no known failure | Use the server-wide fallback |
+{.wide .expand}
 
 The second row is why the failed-bucket set is required. A pre-signed URL is already authorized by its signature and may access a private object without bucket-policy evaluation. In that case the bucket CORS document is the browser-origin boundary. Losing the failure bit and using a permissive global fallback would weaken that boundary.
 

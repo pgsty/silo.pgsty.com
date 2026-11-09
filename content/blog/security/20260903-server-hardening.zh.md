@@ -91,6 +91,7 @@ SSE-C 在元数据中保存密封的对象密钥（sealed object key），并要
 | 禁用用户 | `admin:DisableUser` |
 | 启用组 | `admin:EnableGroup` |
 | 禁用组 | `admin:DisableGroup` |
+{.wide .expand}
 
 `admin:*` 与内置 `consoleAdmin` 策略不受影响；仅依赖单一启用权限执行双向操作的自定义最小权限策略需要补齐对应权限。
 

@@ -151,6 +151,15 @@ mc od if=file.zip of=myminio/mybucket/file.zip parts=5
 
 The above command divides the source file into five equal parts, then uploads those parts.
 
+## Behavior {#behavior}
+
+### Multipart Part Reads and Parameter Validation (`mcli 20261109`) {#multipart-validation}
+
+In [`mcli 20261109`](/blog/release/mcli-20261109/):
+
+- Multipart `mc od` uploads read sequential, non-overlapping part slices from the source file and close the source reader when the transfer finishes (`#173`).
+- `mc od` rejects zero, negative, or overflowing `parts=`, `size=`, or `skip=` operands before creating target files or initiating multipart uploads (`#191`, `#205`).
+
 ### S3 Compatibility {#s3-compatibility}
 
 SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO and other S3 services is [best effort](/reference/minio-mc/#command-mc).
