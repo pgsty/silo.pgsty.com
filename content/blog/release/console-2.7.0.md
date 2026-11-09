@@ -245,3 +245,32 @@ history and copyright notices.
 
 See the [community contribution record](/about/contributors/) for actual PR
 states and historical credits.
+
+## Verified release and source {#verification}
+
+Tag [`v2.7.0`](https://github.com/pgsty/silo-console/tree/v2.7.0) resolves to
+[`4e91ae506e706ccdecb512b1d8b5ab4d9871d505`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505).
+The release workflow accepted this exact commit:
+
+- [Required matrix](https://github.com/pgsty/silo-console/actions/runs/42612682270), including maintained SILO integration, the permission matrix, SSO, replication, shared downloads, PostgreSQL usage, Swagger regeneration, platform builds, package lifecycle and independent artifact reproduction.
+- [Required vulnerability checks](https://github.com/pgsty/silo-console/actions/runs/42612682615).
+- [Tag release pipeline](https://github.com/pgsty/silo-console/actions/runs/42616923335): checksum and image signatures, SPDX attestations and GitHub provenance verified.
+
+The release contains **44 assets**: six platform executables, six
+bundles, nine Linux packages, a source archive, SPDX SBOMs, legal files, the
+SHA-256 manifest and its Sigstore bundle. Verification commands are in the
+[tagged release contract](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/release-contract.md).
+
+The multi-platform image is `docker.io/pgsty/silo-console:v2.7.0` for Linux
+amd64 and arm64, with immutable digest:
+
+```text
+sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892
+```
+
+After publication, `promote-image.yaml` ([run 42618891230](https://github.com/pgsty/silo-console/actions/runs/42618891230)) verified the published release, signatures, SBOM attestation, provenance and anonymous access, then promoted this digest to `latest`.
+
+An earlier `v2.7.0` tag on `26ce922` produced only an unpublished draft and
+candidate image; it was replaced by this tag before publication, after the final
+review found the fixes listed above.
+

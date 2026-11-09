@@ -11,7 +11,7 @@ upstream_modified: true
 body_class: landing-page
 ---
 
-This site targets **[SILO 20261026](/blog/release/silo-20261026/)** (with embedded Console 2.5.1), standalone **[Console 2.6.0](/blog/release/console-2.6.0/)**, **[mcli 20261109](/blog/release/mcli-20261109/)**, **[silo-pkg 3.16.0](/blog/release/pkg-3.16.0/)**, and optional external key service **[KES 20261026](/blog/release/silo-20261026/#kes)**, all built with Go 1.27.3. See the [component matrix](/compatibility/versions/) and [Console 2.7.0 release notes](/blog/release/console-2.7.0/).
+This site targets **[SILO 20261026](/blog/release/silo-20261026/)** (with embedded Console 2.5.1), standalone **[Console 2.7.0](/blog/release/console-2.7.0/)**, **[mcli 20261109](/blog/release/mcli-20261109/)**, **[silo-pkg 3.16.0](/blog/release/pkg-3.16.0/)**, and optional external key service **[KES 20261026](/blog/release/silo-20261026/#kes)**, all built with Go 1.27.3. See the [component matrix](/compatibility/versions/).
 
 > [!WARNING]
 > **SILO is a MinIO fork maintained by the Pigsty community.** It is not affiliated with, endorsed by, or sponsored by MinIO, Inc. “MinIO” is a trademark of MinIO, Inc., used here only to identify the upstream project. See [Attribution](/about/attribution/) for source and licensing details.

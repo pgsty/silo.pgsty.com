@@ -175,3 +175,29 @@ CI 使用明确的权限和平台矩阵，从项目版本文件读取工具链�
   [#63](https://github.com/pgsty/silo-console/issues/63) 中报告并分析高延迟下健康报告截断，已在 2.5.0 修复。
 
 实际 PR 状态与历史贡献见[社区贡献记录](/zh/about/contributors/)。
+
+## 发布验收与准确源码 {#verification}
+
+标签 [`v2.7.0`](https://github.com/pgsty/silo-console/tree/v2.7.0) 指向
+[`4e91ae506e706ccdecb512b1d8b5ab4d9871d505`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)。
+发布流水线接受的正是这一提交：
+
+- [Required matrix](https://github.com/pgsty/silo-console/actions/runs/42612682270)：维护中的 SILO 集成、权限矩阵、SSO、复制、共享下载、PostgreSQL 用量、Swagger 重新生成、各平台构建、软件包生命周期与独立制品复现。
+- [Required vulnerability checks](https://github.com/pgsty/silo-console/actions/runs/42612682615)。
+- [标签发布流水线](https://github.com/pgsty/silo-console/actions/runs/42616923335)：校验和与镜像签名、SPDX 声明和 GitHub 来源证明均已验证。
+
+发布包含 **44 个制品**：六个平台的独立可执行文件、六个压缩包、九个 Linux 软件包、源码归档、SPDX SBOM、
+法律文件、SHA-256 校验和清单及其 Sigstore bundle。验证命令见
+[该标签的发布契约](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/release-contract.md)。
+
+多平台镜像为 `docker.io/pgsty/silo-console:v2.7.0`，支持 Linux amd64 与 arm64，不可变摘要为：
+
+```text
+sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892
+```
+
+发布后，`promote-image.yaml`（[run 42618891230](https://github.com/pgsty/silo-console/actions/runs/42618891230)）验证了已发布版本、签名、SBOM 声明、来源证明与匿名访问，然后将该摘要推进为 `latest`。
+
+此前指向 `26ce922` 的 `v2.7.0` 标签只生成过未公开发布的草稿和候选镜像；最终审查发现上文所列问题后，
+在正式发布前由本标签替换。
+
