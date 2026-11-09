@@ -30,6 +30,8 @@ mc [GLOBALFLAGS] COMMAND --help
 
 <a id="id2" data-td-print-local></a>
 
+[CORS 命令参考](/zh/reference/minio-mc/mc-cors/)说明桶级规则、权限与全局回退边界。
+
 ## 与 Silo 服务端的版本对齐 {#mc-client-versioning}
 
 客户端与 Silo 服务端独立发布。

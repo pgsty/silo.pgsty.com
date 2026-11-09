@@ -157,7 +157,7 @@ display the contents of the specified file or object to <code>STDOUT</code>.
       <td><p>The Silo client extension independently recomputes and compares stored S3 full-object checksums. It is read-only and supports individual objects, recursive prefixes, versions, candidate manifests, dry runs, JSON Lines reports, and explicit failure policies.</p></td>
     </tr>
     <tr>
-      <td><p><code>mc cors get</code><br /><code>mc cors set</code><br /><code>mc cors remove</code></p></td>
+      <td><p><a href="/reference/minio-mc/mc-cors/"><code>mc cors get</code><br /><code>mc cors set</code><br /><code>mc cors remove</code></a></p></td>
       <td><p>Read, replace, or remove a bucket's CORS configuration. Use <code>mcli cors get ALIAS/BUCKET</code>, <code>mcli cors set ALIAS/BUCKET cors.xml</code>, or <code>mcli cors remove ALIAS/BUCKET</code>. The configuration file is XML. See the <a href="/reference/s3-api-compatibility/">S3 API reference</a> for bucket CORS and server-wide fallback behavior.</p></td>
     </tr>
     <tr>

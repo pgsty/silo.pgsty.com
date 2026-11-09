@@ -51,6 +51,10 @@ Design records document the engineering decisions behind PGSTY SILO: root causes
 
 - [Overwrite Pool Affinity: Why #245 Was Not Adopted](/blog/design/overwrite-pool-affinity/) (`#245`): The original placement problem, request-aware quorum and health improvements, unversioned-only scope, two rounds of m3 performance measurements, and the decision to stop after small-object overwrite regressions remained. The experimental changes were not merged.
 
+## October 23: Alias Regions
+
+- [Alias regions](/blog/design/alias-region/): Persistent per-alias regions, client-cache isolation, and upgrade, downgrade and credential-rotation boundaries, reconciled with mcli 20261109.
+
 ## October 23 IAM & KMS Design Notes
 
 - [LDAP Long DNs: Restoring Login Without Hiding Revocation Errors](/blog/design/ldap-long-dn/) (`#250`): How `\xx` hex escaping in `NormalizeDN` triggers the 255-byte single-component filename limit on the object IAM backend, and why `loadIAMConfigBytesWithMetadata` classifies only impossible pure-ASCII path components (`> 255` bytes) as `errConfigNotFound`.

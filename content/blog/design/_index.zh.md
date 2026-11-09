@@ -51,6 +51,10 @@ cascade:
 
 - [多池覆盖亲和：为何最终没有采纳 #245](/zh/blog/design/overwrite-pool-affinity/)（`#245`）：记录原始放置问题、请求级 quorum 与健康判断改进、仅限普通无版本覆盖的收窄设计、两轮 m3 性能实测，以及小对象覆盖仍未达标后的停止决定。实验修改没有合并。
 
+## 2026-10-23 Alias 区域
+
+- [Alias 区域：小配置改动的兼容性边界](/zh/blog/design/alias-region/)：按 alias 保存区域、客户端缓存隔离，以及升级、降级和凭据轮换的边界；已按 mcli 20261109 复核。
+
 ## 2026-10-23 IAM 与 KMS 设计记录
 
 - [LDAP 长 DN：恢复登录可用性并守住 IAM 撤销安全边界](/zh/blog/design/ldap-long-dn/)（`#250`）：解析 `NormalizeDN` 的 `\xx` 十六进制转义为何触发对象 IAM 后端的单路径分量 255 字节上限，以及为何仅将物理上无法落盘的纯 ASCII 超长分量归类为 `errConfigNotFound`。
