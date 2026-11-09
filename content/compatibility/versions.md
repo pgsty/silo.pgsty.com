@@ -15,14 +15,14 @@ SILO 20261026 is the current Server release, with embedded Console 2.5.1, mcli 2
 
 <span id="console-2-6-0"></span>
 
-The latest published standalone Console is [2.6.0](/blog/release/console-2.6.0/),
-from source `f8ab146695fd1df74e4b84128a286d552921bf00`. It adds usage scans,
-retained-version totals and bucket-administration fixes, using Go 1.27.3,
-silo-pkg 3.15.2 and mcli 20261026.
-[Console 2.7.0](/blog/release/console-2.7.0/) adds ten UI languages, Arabic
+The latest published standalone Console is [2.7.0](/blog/release/console-2.7.0/),
+from source `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`. It adds ten UI languages, Arabic
 RTL, container CA/temporary-directory fixes, and usage-worker, plain-HTTP and
-upload fixes, using silo-pkg v3.16.0 and the official mcli 20261109 release
-(`v0.0.0-20261109021353-e1d4cc5abfe0`).
+upload fixes, using Go 1.27.3, silo-pkg v3.16.0 and the official mcli 20261109
+release (`v0.0.0-20261109021353-e1d4cc5abfe0`).
+[2.6.0](/blog/release/console-2.6.0/) (source
+`f8ab146695fd1df74e4b84128a286d552921bf00`) added usage scans,
+retained-version totals and bucket-administration fixes.
 Server 20261026 continues to embed Console 2.5.1 until a
 separate Server release adopts newer source.
 

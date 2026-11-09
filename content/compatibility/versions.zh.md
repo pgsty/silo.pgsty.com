@@ -15,13 +15,11 @@ SILO 20261026 是当前正式服务端版本，内嵌 Console 2.5.1、mcli 20261
 
 <span id="console-2-6-0"></span>
 
-最新正式发布的独立 Console 为 [2.6.0](/zh/blog/release/console-2.6.0/)，
-源码提交为 `f8ab146695fd1df74e4b84128a286d552921bf00`。
-该版本加入用量扫描、保留版本统计与存储桶管理修复，使用 Go 1.27.3、
-silo-pkg 3.15.2 和 mcli 20261026。
-[Console 2.7.0](/zh/blog/release/console-2.7.0/) 加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复，
-以及用量后台任务、普通 HTTP 与上传修复，采用 silo-pkg v3.16.0 与正式 mcli 20261109
-（Go 伪版本 `v0.0.0-20261109021353-e1d4cc5abfe0`）。
+最新正式发布的独立 Console 为 [2.7.0](/zh/blog/release/console-2.7.0/)，
+源码提交为 `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`。
+该版本加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复，以及用量后台任务、普通 HTTP 与上传修复，
+使用 Go 1.27.3、silo-pkg v3.16.0 与正式 mcli 20261109（Go 伪版本 `v0.0.0-20261109021353-e1d4cc5abfe0`）。
+[2.6.0](/zh/blog/release/console-2.6.0/)（源码 `f8ab146695fd1df74e4b84128a286d552921bf00`）加入了用量扫描、保留版本统计与存储桶管理修复。
 Server 20261026 仍内嵌 Console 2.5.1，采用新版源码需要单独发布 Server。
 
 ## mcli 20261109 {#mcli-20261109}

@@ -21,11 +21,11 @@ client:
   date: "2026-11-09"
   source: e1d4cc5abfe00b674eb36347399e7398990be467
 console:
-  tag: v2.6.0
-  build: 2.6.0
+  tag: v2.7.0
+  build: 2.7.0
   windows_archive_format: zip
-  source: f8ab146695fd1df74e4b84128a286d552921bf00
-  notes: "blog/release/console-2.6.0/"
+  source: 4e91ae506e706ccdecb512b1d8b5ab4d9871d505
+  notes: "blog/release/console-2.7.0/"
 pkg:
   tag: v3.16.0
   source: b7aeea85e84e8888d6ab424c7123a1297711bc3f

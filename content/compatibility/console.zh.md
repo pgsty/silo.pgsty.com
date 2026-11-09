@@ -9,7 +9,7 @@ icon: fa-solid fa-window-maximize
 ---
 
 > [!NOTE]
-> **最新正式版：** [Console v2.6.0](/zh/blog/release/console-2.6.0/)（2026-11-05，UTC+8）新增用量扫描、保留版本统计与存储桶管理修复。[Console 2.7.0](/zh/blog/release/console-2.7.0/) 加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复、用量后台任务的 TLS 与调度修复、普通 HTTP 下的目录大小计算、`silo-pkg v3.16.0`、正式版 `mcli 20261109` 及 Swagger 文档更新。升级独立 Console 不会替换 Server 内嵌控制台；内置策略 Reset 与实时存储桶列表需配合 Server 20261026 正式版生效（Server 20261018 不包含这两项服务端缓存修复）。配套版本见[组件矩阵](/zh/compatibility/versions/)。
+> **最新正式版：** [Console v2.7.0](/zh/blog/release/console-2.7.0/)（2026-11-09，UTC+8）加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复、用量后台任务的 TLS 与调度修复、普通 HTTP 下的目录大小计算、`silo-pkg v3.16.0`、正式版 `mcli 20261109` 及 Swagger 文档更新。[Console v2.6.0](/zh/blog/release/console-2.6.0/) 新增了用量扫描、保留版本统计与存储桶管理修复。升级独立 Console 不会替换 Server 内嵌控制台；内置策略 Reset 与实时存储桶列表需配合 Server 20261026 正式版生效（Server 20261018 不包含这两项服务端缓存修复）。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
 SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
 
