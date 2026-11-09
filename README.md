@@ -26,8 +26,9 @@ See the [component matrix](content/compatibility/versions.md) for exact sources,
 upgrade order and compatibility boundaries.
 
 Console 2.7.0 documents the merged ten-language UI, Arabic RTL and container
-fixes. Its candidate notes are publicly visible and explicitly distinguish the
-unpublished GitHub draft from a product release. Published Console downloads
+fixes. Its tag and Draft Release have passed validation. The public release notes
+record the exact source, CI and image digest, and distinguish the unpublished
+GitHub draft from a product release. Published Console downloads
 continue to use 2.6.0. Server 20261026 still embeds Console 2.5.1.
 
 `data/releases.yaml` drives the homepage and download templates.

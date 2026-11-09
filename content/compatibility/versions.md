@@ -22,8 +22,9 @@ silo-pkg 3.15.2 and mcli 20261026.
 The [2.7.0 candidate](/blog/release/console-2.7.0/) adds ten UI languages, Arabic
 RTL, and container CA/temporary-directory fixes, using silo-pkg v3.16.0 and the
 official mcli 20261109 release (`v0.0.0-20261109021353-e1d4cc5abfe0`). Its
-frontend and package metadata use 2.7.0; draft artifacts do not change the
-public stable download. Server 20261026 continues to embed Console 2.5.1 until a
+frontend and package metadata use 2.7.0. Tag `v2.7.0` and the Draft Release have
+passed validation; draft artifacts do not change the public stable download.
+Server 20261026 continues to embed Console 2.5.1 until a
 separate Server release adopts newer source.
 
 ## mcli 20261109 {#mcli-20261109}

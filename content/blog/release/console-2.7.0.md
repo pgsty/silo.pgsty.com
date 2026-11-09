@@ -1,6 +1,6 @@
 ---
 title: "SILO Console 2.7.0: Ten Languages and Container Reliability"
-linkTitle: "Console 2.7.0 (candidate)"
+linkTitle: "Console 2.7.0 (Draft Release)"
 date: 2026-11-09
 author: "SILO"
 description: "Console 2.7.0 release candidate: ten UI languages, Arabic RTL, container fixes, released mcli and silo-pkg dependencies, and updated API documentation."
@@ -10,17 +10,18 @@ weight: 1
 url: "/blog/release/console-2.7.0/"
 ---
 
-**Release candidate, not yet publicly released.** Console 2.7.0 expands the
-administration interface to ten languages, fixes container HTTPS and temporary
-files, adopts the released mcli 20261109 and silo-pkg 3.16.0, and updates API
-documentation. As of **2026-11-09**,
-[2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0) is the latest
-published release. The 2.7.0 tag pipeline prepares a GitHub Draft Release and
-versioned candidate image; publishing that draft and promoting `latest` are
-separate steps. This page records the candidate while those steps are pending.
+**Verified Draft Release, not yet publicly released.** Console 2.7.0 expands
+the administration interface to ten languages, fixes container HTTPS and
+temporary files, adopts the released mcli 20261109 and silo-pkg 3.16.0, and
+updates API documentation. The `v2.7.0` tag and its complete validation and
+release pipelines have passed. GitHub assets remain in a Draft Release;
+the versioned candidate image is available on Docker Hub. As of **2026-11-09**,
+[2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0) remains the
+latest published release and `latest` still identifies its verified image.
+Publishing the draft and promoting `latest` are separate steps.
 
 [GitHub releases](https://github.com/pgsty/silo-console/releases) ·
-[Changes since 2.6.0](https://github.com/pgsty/silo-console/compare/v2.6.0...c537082a8516add1f8d6119fe354b5f288d87b8b) ·
+[Changes since 2.6.0](https://github.com/pgsty/silo-console/compare/v2.6.0...v2.7.0) ·
 [Console compatibility](/compatibility/console/)
 
 ## Ten languages in one menu {#languages}
@@ -110,7 +111,8 @@ build paths:
 Public certificates can use system trust without disabling TLS verification.
 Private CAs still need explicit configuration. An existing mount over the
 system bundle continues to override it. Official images remain on Docker Hub
-as **`docker.io/pgsty/silo-console`**; a 2.7.0 image is pending release.
+as **`docker.io/pgsty/silo-console`**. The verified candidate image uses
+`v2.7.0`; the `latest` tag remains unchanged.
 
 ## Upgrade and dependency boundaries {#upgrade}
 
@@ -158,8 +160,8 @@ best effort.
 The obsolete upstream-MinIO build job was removed in
 [PR #85](https://github.com/pgsty/silo-console/pull/85). The maintained SILO
 acceptance matrix, advisory upstream-MC compatibility probe and frontend/container
-asset-consistency check remain. Those source checks do not establish that a
-2.7.0 release has passed final artifact verification.
+asset-consistency check remain. The exact tagged commit and its separate
+release-artifact verification are recorded below.
 
 ## API documentation and validation {#api-docs}
 
@@ -205,6 +207,36 @@ history and copyright notices.
   fixed in 2.5.0.
 
 See the [community contribution record](/about/contributors/) for actual PR
-states and historical credits. The 2.7.0 tag, checksums, SBOMs, signatures,
-provenance and image verification will be linked after release; this draft
-does not claim those artifacts are available.
+states and historical credits.
+
+## Verified draft and source {#verification}
+
+Tag [`v2.7.0`](https://github.com/pgsty/silo-console/tree/v2.7.0) resolves to
+[`26ce922424f18424ca64389632b74685b8c82752`](https://github.com/pgsty/silo-console/commit/26ce922424f18424ca64389632b74685b8c82752).
+The checks accepted this exact commit:
+
+- [Required matrix: 38/38 jobs](https://github.com/pgsty/silo-console/actions/runs/42571555305), including maintained SILO integration, the permission matrix, SSO, replication, shared downloads, PostgreSQL usage, Swagger regeneration, platform builds, package lifecycle and independent artifact reproduction. Playwright passed 886 regression tests and eight additional grouped checks.
+- [Required vulnerability checks: 3/3 jobs](https://github.com/pgsty/silo-console/actions/runs/42571555292).
+- [Tag release pipeline](https://github.com/pgsty/silo-console/actions/runs/42574599791): draft assets, checksum and image signatures, SPDX attestations and GitHub provenance verified.
+
+The artifact job was rerun after GitHub returned HTTP 504 while downloading
+Syft's checksum file; the validation requirements and source stayed unchanged.
+
+The draft contains **44 assets**: six platform executables, six bundles, nine
+Linux packages, a source archive, 17 SPDX SBOMs, legal files, the SHA-256 manifest
+and its Sigstore bundle. The manifest covers 38 payloads. Draft GitHub assets
+are visible to maintainers until publication; public download links continue
+to use 2.6.0. Verification commands are in the
+[tagged release contract](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/release-contract.md).
+
+The multi-platform candidate image is `docker.io/pgsty/silo-console:v2.7.0`
+for Linux amd64 and arm64, with immutable digest:
+
+```text
+sha256:a7f3e3f326fa992895cba23a216e44689592666dfb070306e2ab058c0b27acc5
+```
+
+The `latest` digest remains
+`sha256:49b297b1ecc6252e2fe95ee641f96b165eaf92db8394872462562d3e90e67608`.
+The draft is ready for maintainer publication; it has not been published or
+promoted to `latest`.

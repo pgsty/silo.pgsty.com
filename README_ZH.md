@@ -20,7 +20,7 @@
 
 精确源码版本、升级顺序与兼容性边界见[组件矩阵](content/compatibility/versions.zh.md)。
 
-Console 2.7.0 记录已合入主线的十语言界面、阿拉伯语 RTL 和容器修复。候选版本说明公开可见，并明确区分尚未公开发布的 GitHub 草稿与产品正式版；正式下载继续指向 2.6.0。Server 20261026 仍内嵌 Console 2.5.1。
+Console 2.7.0 记录已合入主线的十语言界面、阿拉伯语 RTL 和容器修复。标签与 Draft Release 已通过验证，公开版本说明记录准确源码、CI 和镜像摘要，并区分尚未公开发布的 GitHub 草稿与产品正式版；正式下载继续指向 2.6.0。Server 20261026 仍内嵌 Console 2.5.1。
 
 `data/releases.yaml` 驱动首页与下载页。`server.published: true` 启用公开制品下载链接，`published_server` 记录当前公开版本。准备后续候选版本时保持 false，直到相应 Server 制品与 Docker 镜像公开且完成核验。`windows_archive_format` 跟随各组件实际发布制品：当前 Windows 归档统一为 ZIP，Linux/macOS 保持 tar.gz；历史下载链接保留原格式。制品发布与具体生产集群部署分别验收。
 

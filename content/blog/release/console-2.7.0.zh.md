@@ -1,6 +1,6 @@
 ---
 title: "SILO Console 2.7.0：十种语言与容器可靠性修复"
-linkTitle: "Console 2.7.0（候选版）"
+linkTitle: "Console 2.7.0（发布草稿）"
 date: 2026-11-09
 author: "SILO"
 description: "Console 2.7.0 候选版本说明：十种语言、阿拉伯语 RTL、容器修复、正式 mcli 与 silo-pkg 依赖，以及 API 文档更新。"
@@ -10,14 +10,15 @@ weight: 1
 url: "/zh/blog/release/console-2.7.0/"
 ---
 
-**候选版本，尚未公开发布。** Console 2.7.0 将管理界面扩展到十种语言，修复容器 HTTPS 与临时文件问题，
-采用已正式发布的 mcli 20261109、silo-pkg 3.16.0，并更新 API 文档。截至 **2026-11-09**，最新正式版仍为
-[2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)。
-2.7.0 标签流水线准备 GitHub Draft Release 和带版本号的候选镜像；公开发布草稿与推进 `latest` 是后续独立步骤。
-本页记录候选版本，不将源码合入或草稿制品等同于正式发布。
+**已验证的 Draft Release，尚未公开发布。** Console 2.7.0 将管理界面扩展到十种语言，修复容器 HTTPS 与临时文件问题，
+采用已正式发布的 mcli 20261109、silo-pkg 3.16.0，并更新 API 文档。
+`v2.7.0` 标签对应的完整验证与发布流水线均已通过；GitHub 制品保留在 Draft Release 中，
+带版本号的候选镜像已在 Docker Hub 就绪。截至 **2026-11-09**，最新正式版仍为
+[2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)，`latest` 仍指向其已验证镜像。
+公开发布草稿与推进 `latest` 是后续独立步骤。
 
 [GitHub Releases](https://github.com/pgsty/silo-console/releases) ·
-[2.6.0 之后的变化](https://github.com/pgsty/silo-console/compare/v2.6.0...c537082a8516add1f8d6119fe354b5f288d87b8b) ·
+[2.6.0 之后的变化](https://github.com/pgsty/silo-console/compare/v2.6.0...v2.7.0) ·
 [Console 兼容性](/zh/compatibility/console/)
 
 ## 一个菜单，十种语言 {#languages}
@@ -83,7 +84,7 @@ url: "/zh/blog/release/console-2.7.0/"
 
 公开证书可直接使用系统信任，无需关闭 TLS 校验。私有 CA 仍需显式配置；
 已有的系统证书包挂载继续覆盖镜像中的证书包。
-官方镜像仍位于 Docker Hub 的 **`docker.io/pgsty/silo-console`**，2.7.0 镜像尚待发布。
+官方镜像仍位于 Docker Hub 的 **`docker.io/pgsty/silo-console`**；已验证的候选镜像使用 `v2.7.0` 标签，`latest` 保持不变。
 
 ## 升级与依赖边界 {#upgrade}
 
@@ -122,7 +123,7 @@ SILO Server 20261026 内嵌 Console 2.5.1。升级独立 Console 不会替换内
 
 [PR #85](https://github.com/pgsty/silo-console/pull/85) 移除了过时的上游 MinIO 构建任务，
 保留维护的 SILO 验收矩阵、作为参考的上游 MC 兼容性探针，以及前端与容器资源一致性检查。
-这些源码检查不代表 2.7.0 已完成最终制品验收。
+准确标签提交及其独立发布制品验收结果见下文。
 
 ## API 文档与校验 {#api-docs}
 
@@ -155,4 +156,31 @@ CI 使用明确的权限和平台矩阵，从项目版本文件读取工具链�
   [#63](https://github.com/pgsty/silo-console/issues/63) 中报告并分析高延迟下健康报告截断，已在 2.5.0 修复。
 
 实际 PR 状态与历史贡献见[社区贡献记录](/zh/about/contributors/)。
-2.7.0 的标签、校验和、SBOM、签名、来源证明和镜像验收将在发布后补充；本草稿不表示这些制品已经可用。
+
+## 草稿验收与准确源码 {#verification}
+
+标签 [`v2.7.0`](https://github.com/pgsty/silo-console/tree/v2.7.0) 指向
+[`26ce922424f18424ca64389632b74685b8c82752`](https://github.com/pgsty/silo-console/commit/26ce922424f18424ca64389632b74685b8c82752)。
+以下检查均验收这一准确提交：
+
+- [Required matrix：38/38 项](https://github.com/pgsty/silo-console/actions/runs/42571555305)，覆盖维护中的 SILO 集成、权限矩阵、SSO、复制、分享下载、PostgreSQL 用量、Swagger 生成、跨平台构建、软件包生命周期与独立制品复现。Playwright 通过 886 项回归测试及另 8 项分组检查。
+- [Required vulnerability checks：3/3 项](https://github.com/pgsty/silo-console/actions/runs/42571555292)。
+- [标签发布流水线](https://github.com/pgsty/silo-console/actions/runs/42574599791)：草稿制品、校验和与镜像签名、SPDX 声明和 GitHub 来源证明均已验证。
+
+制品任务曾因 GitHub 下载 Syft 校验文件时返回 HTTP 504 而重跑；源码与验证要求保持不变。
+
+草稿包含 **44 个制品**：六个平台的独立可执行文件、六个压缩包、九个 Linux 软件包、
+源码包、17 份 SPDX SBOM、法律文件、SHA-256 清单及其 Sigstore 签名包。
+校验和清单覆盖 38 个载荷文件。GitHub 草稿制品在公开发布前仅对维护者可见，
+公开下载链接继续使用 2.6.0。验证命令见
+[该标签的发布契约](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/release-contract.md)。
+
+多平台候选镜像为 `docker.io/pgsty/silo-console:v2.7.0`，支持 Linux amd64 与 arm64，不可变摘要为：
+
+```text
+sha256:a7f3e3f326fa992895cba23a216e44689592666dfb070306e2ab058c0b27acc5
+```
+
+`latest` 摘要仍为
+`sha256:49b297b1ecc6252e2fe95ee641f96b165eaf92db8394872462562d3e90e67608`。
+草稿已具备供维护者公开发布的条件，本次尚未公开发布，也未推进 `latest`。
