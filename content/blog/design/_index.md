@@ -15,7 +15,7 @@ Design records document the engineering decisions behind PGSTY SILO: root causes
 
 ## November 9: Console Languages
 
-- [Console Languages: A Static Registry and Two Maintenance Tiers](/blog/design/console-languages/): Ten UI languages including Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83) and Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277), the measured static-bundle tradeoff, a shared menu, English fallback and Arabic RTL.
+- [Adding Multilingual Support to SILO](/blog/design/console-languages/): Ten UI languages including Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83) and Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277), maintenance tiers, English fallback and Arabic RTL, with measured gzip and cache tradeoffs behind per-language assets and eager loading.
 
 ## November 6: Found in Release Acceptance
 
