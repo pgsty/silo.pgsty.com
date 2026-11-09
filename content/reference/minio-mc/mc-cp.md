@@ -126,7 +126,7 @@ mc cp play/mybucket/object.txt ~/mydata/object.txt
 
 *Optional*
 
-Add custom metadata for the object. Separate pairs with semicolons and quote the argument, for example `--attr 'key1=value1;key2=value2;key3=value3'`. Do not append a trailing semicolon. Builds with the [next-release fixes](/compatibility/mcli/#next-release) reject malformed attributes before starting any transfer.
+Add custom metadata for the object. Separate pairs with semicolons and quote the argument, for example `--attr 'key1=value1;key2=value2;key3=value3'`. Empty entries, including trailing or repeated semicolons, are accepted by builds with the next-release fixes; inputs containing no key/value entry still fail. Builds with the [next-release fixes](/compatibility/mcli/#next-release) reject malformed attributes before starting any transfer.
 
 ##### `--checksum` {#mc.cp.-checksum}
 

@@ -15,16 +15,16 @@ icon: fa-solid fa-terminal
 > [!TIP]
 > **当前正式版：** [mcli 20261026](/zh/blog/release/silo-20261026/#mcli)，包版本 `20261026000000.0.0`，源码 `0ceb298cdcd0`。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK 与 Docker Hub 镜像。
 
-## 20261026 之后待发布的变化 {#next-release}
+## 20261109 发布草稿 {#next-release}
 
-[pgsty/mc#74](https://github.com/pgsty/mc/pull/74) 的修复正在准备进入下一版本，已发布的 20261026 制品不包含这些变化。完整变更见源码的[更新日志](https://github.com/pgsty/mc/blob/main/CHANGELOG.md)。
+[20261109 发布草稿说明](/zh/blog/release/mcli-20261109/) 覆盖 [pgsty/mc#74](https://github.com/pgsty/mc/pull/74)、[#76](https://github.com/pgsty/mc/pull/76) 和 [#77](https://github.com/pgsty/mc/pull/77) 的修复。已发布的 20261026 制品不包含这些变化。完整变更见源码的[更新日志](https://github.com/pgsty/mc/blob/main/CHANGELOG.md)。
 
 - `cp` 和 `mv` 在准备某个源失败后继续处理其他独立源，整体返回非零。参数列表中后面的源仍可能被复制或移动；成功移动的源会被删除。成功操作不会回滚。
 - 逐对象 JSON 开始记录中的 `totalCount`、`totalSize` 分别是累计准备好的对象数与字节数，会随源列举继续增长。它们不是最终任务总量，也不能用作完成百分比的分母。请检查最终退出码、错误记录与最终字节汇总。
 - `share upload` 生成 POSIX shell 命令，完整参数使用单引号引用，文本字段使用 `--form-string`。正确引用并替换占位符后，在 POSIX shell 中执行；若命令保存在 `upload` 变量中，使用 `sh -c "$upload"`，直接执行 `$upload` 不会解释其中的引号。Windows 上使用 Git Bash 或 WSL，而不是 `cmd.exe`。
-- 非法 `--attr` 会在传输前失败。键值对之间用分号分隔，末尾不加分号，例如 `--attr 'key=value;other=value'`。
+- 非法 `--attr` 会使 `cp`、`mv` 在传输前失败。键值对之间用分号分隔，例如 `--attr 'key=value;other=value'`。`cp`、`mv`、`mirror`、`pipe` 会忽略空条目，包括末尾和连续分号；不含任何键值条目的输入仍然报错。
 - 删除权限或 WORM 保护错误、IAM 或桶元数据导入的逐项失败都会返回非零，并保留详细报告。IAM 只有收到 `NotImplemented` 或 `XMinioAdminVersionMismatch` 才会回退旧 API。
-- `mv` 拒绝已识别的自身搬移，也拒绝桶和对象路径相同、协议和端口相同且 IP 重叠的端点间搬移，包括 `--resolve` 映射。同 IP 上的虚拟主机也可能被拒绝；先确认它们的存储实际独立，才能分步复制、核验、显式删除，仅通过两个别名读到相同字节不能证明存储独立。不同地址、端口、代理路由、虚拟主机寻址或 DNS 变化仍可能隐藏同一后端；同一存储的别名应使用一致的端点 URL，不能仅靠 DNS 推断任意后端的身份。
+- `mv` 拒绝已识别的自身搬移，也拒绝桶和对象路径相同、协议和端口相同且 IP 重叠的端点间搬移，包括 `--resolve` 映射。同 IP 上的虚拟主机也可能被拒绝；先确认它们的存储实际独立，才能分步复制、核验、显式删除，仅通过两个别名读到相同字节不能证明存储独立。不同地址、端口、代理路由、虚拟主机寻址或 DNS 变化仍可能隐藏同一后端；同一存储的别名应使用一致的端点 URL，不能仅靠 DNS 推断任意后端的身份。经传输层规则选定的 HTTP 代理访问的端点，不会仅因本地 DNS 失败而被拒绝；无法解析的直连端点仍然失败。代理选择遵循 `NO_PROXY`。
 
 <span id="current-release"></span>
 

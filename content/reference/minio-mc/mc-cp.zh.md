@@ -126,7 +126,7 @@ mc cp play/mybucket/object.txt ~/mydata/object.txt
 
 *Optional*
 
-为对象添加自定义元数据。键值对之间用分号分隔，并引用整个参数，例如 `--attr 'key1=value1;key2=value2;key3=value3'`，末尾不要添加分号。包含[下一版本修复](/zh/compatibility/mcli/#next-release)的构建会在开始传输前拒绝非法属性。
+为对象添加自定义元数据。键值对之间用分号分隔，并引用整个参数，例如 `--attr 'key1=value1;key2=value2;key3=value3'`。包含下一版本修复的构建允许空条目，包括末尾和连续分号；不含任何键值条目的输入仍然报错。包含[下一版本修复](/zh/compatibility/mcli/#next-release)的构建会在开始传输前拒绝非法属性。
 
 ##### `--checksum` {#mc.cp.-checksum}
 

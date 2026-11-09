@@ -19,6 +19,7 @@ their original v3.15.2 dependency.
 
 | Release notes | English | 简体中文 |
 | --- | --- | --- |
+| mcli 20261109 (draft) | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
 | silo-pkg 3.16.0 | [Release notes](content/blog/release/pkg-3.16.0.md) | [发布说明](content/blog/release/pkg-3.16.0.zh.md) |
 | Server / mcli / KES 20261026 | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
 | Console 2.5 series, through 2.5.1 | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |

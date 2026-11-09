@@ -15,16 +15,16 @@ icon: fa-solid fa-terminal
 > [!TIP]
 > **Current release:** [mcli 20261026](/blog/release/silo-20261026/#mcli), package `20261026000000.0.0`, source `0ceb298cdcd0`. Windows uses ZIP; Linux/macOS use tar.gz, with Linux RPM/DEB/APK and Docker Hub images.
 
-## Prepared changes after 20261026 {#next-release}
+## Draft release 20261109 {#next-release}
 
-The fixes in [pgsty/mc#74](https://github.com/pgsty/mc/pull/74) are prepared for the next release; the published 20261026 artifacts do not include them. The source [changelog](https://github.com/pgsty/mc/blob/main/CHANGELOG.md) records the complete changes.
+The [20261109 draft release notes](/blog/release/mcli-20261109/) cover the fixes in [pgsty/mc#74](https://github.com/pgsty/mc/pull/74), [#76](https://github.com/pgsty/mc/pull/76) and [#77](https://github.com/pgsty/mc/pull/77). The published 20261026 artifacts do not include them. The source [changelog](https://github.com/pgsty/mc/blob/main/CHANGELOG.md) records the complete changes.
 
 - `cp` and `mv` continue processing independent sources after a preparation error and return nonzero overall. Later arguments can still be copied or moved; successful moves delete their sources. There is no rollback.
 - Per-object JSON start records contain cumulative prepared object counts and bytes in `totalCount` and `totalSize`. These values grow while sources are listed; they are not the final workload or a denominator for completion percentage. Check the final exit status, error records and final byte summary.
 - `share upload` generates POSIX-shell commands with single-quoted arguments and `--form-string` for literal fields. After substituting correctly quoted placeholder values, execute the command in a POSIX shell. If it is stored in `upload`, use `sh -c "$upload"`; executing `$upload` directly does not interpret its embedded quotes. On Windows, use Git Bash or WSL instead of `cmd.exe`.
-- Invalid `--attr` fails before any transfer. Separate pairs with semicolons, without a trailing separator: `--attr 'key=value;other=value'`.
+- Invalid `--attr` fails `cp` and `mv` before any transfer. Separate pairs with semicolons: `--attr 'key=value;other=value'`. Empty entries, including trailing or repeated semicolons, are ignored by `cp`, `mv`, `mirror` and `pipe`; an input with no key/value entry still fails.
 - Removal permission and WORM protection errors, and per-item IAM or bucket metadata import failures, return nonzero while preserving reports. Legacy IAM fallback is restricted to `NotImplemented` and `XMinioAdminVersionMismatch`.
-- `mv` rejects resolved self-moves and ambiguous same-bucket/key moves between endpoints that share a scheme, port and IP address, including `--resolve` mappings. Shared-IP virtual hosts may be rejected. Establish that their stores are independent before copying, verifying and removing explicitly; matching bytes through two aliases alone do not establish independence. Different addresses, ports, proxy routing, virtual-host addressing or changing DNS can still hide a shared backend. Configure aliases to one store with a consistent endpoint URL; DNS is not a general storage-identity service.
+- `mv` rejects resolved self-moves and ambiguous same-bucket/key moves between endpoints that share a scheme, port and IP address, including `--resolve` mappings. Shared-IP virtual hosts may be rejected. Establish that their stores are independent before copying, verifying and removing explicitly; matching bytes through two aliases alone do not establish independence. Different addresses, ports, proxy routing, virtual-host addressing or changing DNS can still hide a shared backend. Configure aliases to one store with a consistent endpoint URL; DNS is not a general storage-identity service. A local DNS failure does not reject an endpoint that the transport reaches through an HTTP proxy; unresolved direct endpoints still fail. Proxy selection honors `NO_PROXY`.
 
 <span id="current-release"></span>
 
