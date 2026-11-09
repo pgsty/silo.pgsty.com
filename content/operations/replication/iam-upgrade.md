@@ -6,7 +6,7 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
-**The current upgrade target is [Server 20261026](/blog/release/silo-20261026/).** The 20260916/20261018 revocation-history and authorization requirements below still apply. This release also repairs long-DN LDAP login, policy reloads and built-in policy Reset. Coordinate all participating nodes using the [component matrix](/compatibility/versions/).
+**The current upgrade target is [Server 20261109](/blog/release/silo-20261109/).** The 20260916/20261018 revocation-history and authorization requirements below still apply. Server 20261109 edits persisted IAM records and adds batch submitter authorization; drain or cancel unfinished batch jobs before upgrading, following the [batch checklist](/administration/batch-framework/#upgrade-20261109). Coordinate every participating node using the [component matrix](/compatibility/versions/).
 
 **STS revocation verification:** 20261018 also adds [durable enumeration and propagation](/blog/design/iam-revocations/#scoped-sts-20261018). After revoking the actual parent/token type, check old-token rejection and fresh-token validity at every node and site, including a reconnecting peer. Tokens never received from an isolated site are outside the requesting cluster snapshot; one successful response does not establish instantaneous global invalidation during a partition.
 

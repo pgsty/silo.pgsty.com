@@ -2,17 +2,17 @@
 # Keep the Windows format tied to each published version. Switch a component
 # to zip only when its new Windows assets have been published and verified.
 server:
-  tag: RELEASE.2026-10-26T00-00-00Z
-  build: 20261026000000.0.0
-  date: "2026-10-26"
+  tag: RELEASE.2026-11-09T00-00-00Z
+  build: 20261109000000.0.0
+  date: "2026-11-09"
   published: true
   go_version: "1.27.3"
   windows_archive_format: zip
-  source: c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3
+  source: d998292387ccf1d2907749e0fb1575ef5fb93fda
 published_server:
-  tag: RELEASE.2026-10-26T00-00-00Z
-  build: 20261026000000.0.0
-  date: "2026-10-26"
+  tag: RELEASE.2026-11-09T00-00-00Z
+  build: 20261109000000.0.0
+  date: "2026-11-09"
 client:
   tag: RELEASE.2026-11-09T00-00-00Z
   go_version: "1.27.3"

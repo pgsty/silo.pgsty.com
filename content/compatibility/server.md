@@ -16,9 +16,9 @@ icon: fa-solid fa-server
 
 <span id="maintenance-20261025"></span>
 
-## Candidate work after Server 20261026 {#post-20261026}
+## Server 20261109 {#post-20261026}
 
-Server 20261026 remains the published Server release. These links collect design and upgrade records for subsequent candidate work. Each record's status, source commit and validation scope apply separately; inclusion in this index does not establish release acceptance. Independently released Console and mcli versions do not add these changes to older Server artifacts.
+The [Server 20261109 release](/blog/release/silo-20261109/), source `d998292387ccf1d2907749e0fb1575ef5fb93fda`, delivers these maintenance changes. Read the release's batch, lock-domain, restore and readiness upgrade requirements first. The design records below retain their own historical source and validation scope. Independently released Console and mcli versions do not add Server changes to older binaries.
 
 | Area | Design and upgrade references |
 | --- | --- |

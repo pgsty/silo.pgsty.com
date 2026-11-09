@@ -9,7 +9,19 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO 20261026 is the current Server release, with embedded Console 2.5.1, mcli 20261026 and silo-pkg 3.15.2. The latest standalone client is **mcli 20261109**. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
+SILO **20261109** is the current Server release, with embedded Console 2.7.0, mcli 20261109 and silo-pkg 3.16.0. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
+
+## Server 20261109 {#server-20261109}
+
+| Component | Released version | Fixed source |
+| --- | --- | --- |
+| Server | `RELEASE.2026-11-09T00-00-00Z` | `d998292387ccf1d2907749e0fb1575ef5fb93fda` |
+| Embedded Console | `v2.7.0` | `4e91ae506e706ccdecb512b1d8b5ab4d9871d505` |
+| mcli / MC module | `RELEASE.2026-11-09T00-00-00Z` | `e1d4cc5abfe00b674eb36347399e7398990be467` |
+| Shared package | `github.com/pgsty/silo-pkg/v3 v3.16.0` | `b7aeea85e84e8888d6ab424c7123a1297711bc3f` |
+{.wide .expand}
+
+The Server package version is `20261109000000.0.0`. Go 1.27.3 and upstream minio-go `v7.4.2-0.20261025165926-320af050c445` remain unchanged. [Release and upgrade notes](/blog/release/silo-20261109/) cover batch format boundaries, mixed-version restore, lock-domain rollout and per-node S3 readiness checks. Ordinary object/IAM rollback checks do not imply that old workers can resume new batch records.
 
 ## Standalone Console {#console}
 
@@ -23,8 +35,7 @@ release (`v0.0.0-20261109021353-e1d4cc5abfe0`).
 [2.6.0](/blog/release/console-2.6.0/) (source
 `f8ab146695fd1df74e4b84128a286d552921bf00`) added usage scans,
 retained-version totals and bucket-administration fixes.
-Server 20261026 continues to embed Console 2.5.1 until a
-separate Server release adopts newer source.
+Server 20261109 embeds Console 2.7.0; historical Server 20261026 retains Console 2.5.1.
 
 ## mcli 20261109 {#mcli-20261109}
 
@@ -263,7 +274,7 @@ is separate from the maintained policy implementation.
 
 Console v2.4.2, mcli 20261018 and the Server 20261018 release use Go **1.27.2**; the September stack used Go **1.27.1**.
 The pkg v3.14.x line retains a Go **1.26** library floor and was race-tested with Go **1.26.8**.
-Server 20261026, standalone Console v2.5.1 and v2.6.0, mcli 20261026 and 20261109, and pkg v3.15.2 and v3.16.0 require Go **1.27.3**. The Go x/* dependencies were refreshed.
+Server 20261026 and 20261109, standalone Console v2.5.1 through v2.7.0, mcli 20261026 and 20261109, and pkg v3.15.2 and v3.16.0 require Go **1.27.3**. The Go x/* dependencies were refreshed.
 The effective go-systemd version stays **v22.6.0** because v22.7.0 fails to compile
 on NetBSD; Console's tablewriter **v0.0.5** replacement preserves its MC API.
 

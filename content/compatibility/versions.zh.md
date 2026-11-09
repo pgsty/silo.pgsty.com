@@ -9,7 +9,19 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO 20261026 是当前正式服务端版本，内嵌 Console 2.5.1、mcli 20261026 与 silo-pkg 3.15.2。最新独立客户端为 **mcli 20261109**。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
+SILO **20261109** 是当前正式服务端版本，内嵌 Console 2.7.0、mcli 20261109 与 silo-pkg 3.16.0。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
+
+## Server 20261109 {#server-20261109}
+
+| 组件 | 正式版本 | 固定源码 |
+| --- | --- | --- |
+| Server | `RELEASE.2026-11-09T00-00-00Z` | `d998292387ccf1d2907749e0fb1575ef5fb93fda` |
+| 内嵌 Console | `v2.7.0` | `4e91ae506e706ccdecb512b1d8b5ab4d9871d505` |
+| mcli / MC 模块 | `RELEASE.2026-11-09T00-00-00Z` | `e1d4cc5abfe00b674eb36347399e7398990be467` |
+| 公共包 | `github.com/pgsty/silo-pkg/v3 v3.16.0` | `b7aeea85e84e8888d6ab424c7123a1297711bc3f` |
+{.wide .expand}
+
+Server 包版本为 `20261109000000.0.0`，Go 1.27.3 与上游 minio-go `v7.4.2-0.20261025165926-320af050c445` 保持不变。[发布与升级说明](/zh/blog/release/silo-20261109/)记录 batch 格式边界、混合版本恢复、锁域升级与逐节点 S3 就绪检查。普通对象／IAM 回退验证不代表旧 worker 能续跑新格式 batch 记录。
 
 ## 独立 Console {#console}
 
@@ -20,7 +32,7 @@ SILO 20261026 是当前正式服务端版本，内嵌 Console 2.5.1、mcli 20261
 该版本加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复，以及用量后台任务、普通 HTTP 与上传修复，
 使用 Go 1.27.3、silo-pkg v3.16.0 与正式 mcli 20261109（Go 伪版本 `v0.0.0-20261109021353-e1d4cc5abfe0`）。
 [2.6.0](/zh/blog/release/console-2.6.0/)（源码 `f8ab146695fd1df74e4b84128a286d552921bf00`）加入了用量扫描、保留版本统计与存储桶管理修复。
-Server 20261026 仍内嵌 Console 2.5.1，采用新版源码需要单独发布 Server。
+Server 20261109 内嵌 Console 2.7.0；历史 Server 20261026 保留 Console 2.5.1。
 
 ## mcli 20261109 {#mcli-20261109}
 
@@ -180,7 +192,7 @@ Go 不继承依赖模块的 `replace`。即使 Console 已选择 MC，Server 仍
 Console 和 MC 保留历史 MinIO 模块路径，pkg 直接使用自己的路径。
 `colorjson`/`dperf` 带入的旧 `minio/pkg/v3` 传递依赖与维护中的策略实现相互独立。
 
-Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg v3.14.x 系列保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。Server 20261026、独立发布的 Console v2.5.1 与 v2.6.0、mcli 20261026 与 20261109，以及 pkg v3.15.2 与 v3.16.0 均要求 Go **1.27.3**。
+Console v2.4.2、mcli 20261018 与 Server 20261018 使用 Go **1.27.2**，9 月版栈使用 Go **1.27.1**；pkg v3.14.x 系列保留 Go **1.26** 库兼容下限，并通过 Go **1.26.8** race 测试。Server 20261026 与 20261109、独立发布的 Console v2.5.1 至 v2.7.0、mcli 20261026 与 20261109，以及 pkg v3.15.2 与 v3.16.0 均要求 Go **1.27.3**。
 Go x/* 依赖已刷新。go-systemd 实际仍选 **v22.6.0**，因为 v22.7.0 在 NetBSD 编译失败；
 Console 保留 tablewriter **v0.0.5** replacement 以兼容所用 MC API。
 
