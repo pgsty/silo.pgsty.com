@@ -100,6 +100,12 @@ The one real trap: **run `mcli` for the first time and your existing `mc` aliase
 
 Get it from [GitHub Releases](https://github.com/pgsty/mc/releases) (SHA-256 `mcli_<version>_checksums.txt`), the [Pigsty repository](https://pigsty.io/docs/repo/infra/list/#object-storage) (RPMs GPG-signed, key fingerprint `9592A7BC7A682E7333376E09E7935D8DB9BD8B20`), or `docker.io/pgsty/mc`. Upstream's minisign key does not sign these artifacts, and `dl.min.io` is never contacted. Release tags (`RELEASE.YYYY-MM-DDTHH-MM-SSZ`) and package versions (`YYYYMMDDHHMMSS.0.0`) keep their upstream schemes.
 
+The container image keeps aliases in `/root/.mc` when it runs as root. To run it as another UID (`--user`, Kubernetes `runAsNonRoot`), with a read-only root filesystem, or with aliases that outlive the container, point `MC_CONFIG_DIR` at a directory that UID can write — a bind mount it owns (create it first), an `emptyDir`, or a volume:
+
+```bash
+docker run --rm --user "$(id -u):$(id -g)" -e MC_CONFIG_DIR=/config -v "$HOME/.mcli:/config" pgsty/mc alias list
+```
+
 ### 2. `mcli update` always fails — on purpose {#self-update}
 
 Self-update is removed. `mcli update` never contacts the network and never replaces its binary; it prints an explicit notice and **always exits `1`**. Upstream `mc update` exited `0` when already current, so **any cron job or script that calls it and treats a non-zero exit as failure will start failing** — drop the call and upgrade through your package manager or GitHub Releases instead. The per-invocation version probe against upstream release feeds is also gone, and `MC_UPDATE` / `MINIO_UPDATE` are no longer consulted.

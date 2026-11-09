@@ -90,6 +90,12 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 
 获取渠道：[GitHub Releases](https://github.com/pgsty/mc/releases)（SHA-256 校验文件 `mcli_<version>_checksums.txt`）、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)（RPM 经 GPG 签名，密钥指纹 `9592A7BC7A682E7333376E09E7935D8DB9BD8B20`），或 `docker.io/pgsty/mc`。上游的 minisign 公钥不为这些制品签名，`dl.min.io` 永远不会被访问。发布标签（`RELEASE.YYYY-MM-DDTHH-MM-SSZ`）与软件包版本（`YYYYMMDDHHMMSS.0.0`）沿用上游方案。
 
+容器镜像以 root 运行时，别名保存在 `/root/.mc`。若要以其他 UID 运行（`--user`、Kubernetes 的 `runAsNonRoot`）、使用只读根文件系统，或让别名在容器结束后保留，请把 `MC_CONFIG_DIR` 指向该 UID 可写的目录 —— 它拥有的绑定挂载目录（需事先创建）、`emptyDir` 或数据卷：
+
+```bash
+docker run --rm --user "$(id -u):$(id -g)" -e MC_CONFIG_DIR=/config -v "$HOME/.mcli:/config" pgsty/mc alias list
+```
+
 ### 2. `mcli update` 恒定失败 —— 这是有意的 {#self-update}
 
 自更新已移除。`mcli update` 不联网、不替换自身二进制，打印明确提示并 **恒定以退出码 `1` 结束**。上游 `mc update` 在已是最新版时返回 `0`，因此 **任何调用它并把非零退出码视为失败的 cron 任务或脚本都会开始报错** —— 请删除该调用，改用软件包管理器或 GitHub Releases 升级。每次执行时向上游发布源的版本探测也已移除，`MC_UPDATE` / `MINIO_UPDATE` 不再被读取。

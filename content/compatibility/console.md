@@ -93,6 +93,8 @@ require pkg downgrades or duplicate APIs.
 
 The official image is [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console). **Linux amd64/arm64 images are provided.** See release details in the [maintenance announcement](/blog/release/console-2.5.1/#delivery). Published [GitHub binaries and packages](https://github.com/pgsty/silo-console/releases/tag/v2.5.1) are also available.
 
+The image runs as UID 1000 with no home directory, so its default certificate directory is `/.console/certs`: mount private CA certificates into `/.console/certs/CAs/`, or choose another path with `--certs-dir`. Images up to v2.6.0 also ship without the system CA bundle; to reach HTTPS endpoints with public certificates (SILO, OIDC providers) from them, mount the host bundle read-only at `/etc/ssl/certs/ca-certificates.crt`.
+
 An existing MinIO Console deployment upgrades in place. The service unit, service account, and configuration file keep their names, and every `CONSOLE_*` variable is read unchanged, so the usual path is to install the `silo-console` package over the old one and restart.
 
 Two behaviors change on first start and are worth expecting:

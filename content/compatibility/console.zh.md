@@ -89,6 +89,8 @@ colorjson 带入的历史 minio/pkg 传递依赖与维护中的 silo-pkg 策略�
 
 官方镜像为 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)。**已核验 v2.5.1 的 Linux amd64/arm64 匿名拉取**，签名镜像摘要见[统一维护公告](/zh/blog/release/console-2.5.1/#delivery)。也可使用已发布的 [GitHub 二进制或软件包](https://github.com/pgsty/silo-console/releases/tag/v2.5.1)。
 
+镜像以 UID 1000 运行且没有主目录，默认证书目录因此是 `/.console/certs`：私有 CA 证书挂载到 `/.console/certs/CAs/`，或用 `--certs-dir` 指定其他路径。v2.6.0 及更早的镜像还缺少系统 CA 证书库；用这些镜像访问使用公共证书的 HTTPS 端点（SILO、OIDC 提供方）时，请把宿主机证书库以只读方式挂载到 `/etc/ssl/certs/ca-certificates.crt`。
+
 已有的 MinIO Console 部署可以原地升级。服务单元、服务账号与配置文件名称都不变，全部 `CONSOLE_*` 变量按原样读取，因此通常的做法是用 `silo-console` 软件包覆盖安装后重启。
 
 有两处行为会在首次启动后改变，值得提前预期：
