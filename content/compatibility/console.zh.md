@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
-> **最新版本：** [Console v2.5.1](/zh/blog/release/console-2.5.1/)（2026-10-26），更新界面并采用 Go 1.27.3、pkg v3.15.2、mcli 20261026，修复高延迟连接下的诊断与健康报告流。配套版本见[组件矩阵](/zh/compatibility/versions/)。
+> **最新正式版：** [Console v2.6.0](/zh/blog/release/console-2.6.0/) 提供用量扫描与存储桶管理修复。[2.7.0 候选版](/zh/blog/release/console-2.7.0/) 加入十种语言、阿拉伯语 RTL、容器修复、silo-pkg v3.16.0、正式 mcli 20261109 及 Swagger 文档更新。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
 > 独立 Console 升级不会替换 Server 内嵌控制台。内置策略 Reset 与实时存储桶列表需配合 Server 20261026 正式版生效；Server 20261018 不包含这两项服务端缓存修复。
 

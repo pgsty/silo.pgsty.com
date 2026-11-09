@@ -1,20 +1,21 @@
 ---
 title: "SILO Console 2.6.0: Usage Scans and Safer Bucket Administration"
-linkTitle: "Console 2.6.0 (draft)"
+linkTitle: "Console 2.6.0"
 date: 2026-11-05
 author: "SILO"
-description: "Draft release notes for Console 2.6.0: folder and bucket usage, an optional durable worker, numeric validation, navigation fixes and security dependencies."
+description: "Console 2.6.0 adds folder and bucket usage, an optional durable worker, numeric validation, navigation fixes and security dependency updates."
 tags: [Release, Console]
-draft: true
+draft: false
 weight: 1
 url: "/blog/release/console-2.6.0/"
 ---
 
-**Release draft — formal publication is pending maintainer approval.** Console
-2.6.0 is the next candidate after [2.5.1](/blog/release/console-2.5.1/).
-The published stable release and Docker Hub `latest` remain unchanged during
-preparation. A Git tag, a candidate image, and a GitHub draft are separate from
-an approved product release.
+**Console 2.6.0 was published on 2026-11-05 (UTC+8)**, following
+[2.5.1](/blog/release/console-2.5.1/). The
+[GitHub release](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)
+records source commit `f8ab146695fd1df74e4b84128a286d552921bf00`, release assets
+and verification evidence. This is a standalone Console release; Server's
+embedded Console has its own release cycle.
 
 [GitHub releases](https://github.com/pgsty/silo-console/releases) ·
 [Release preparation PR #82](https://github.com/pgsty/silo-console/pull/82) ·
@@ -67,7 +68,7 @@ folder-size feature and guide were contributed by **Urbanize** in
 
 ## Runtime and security selections {#dependencies}
 
-| Component | Candidate selection |
+| Component | Released selection |
 | --- | --- |
 | Go | 1.27.3 |
 | Node / Yarn | 24.22.1 / 4.13.0 |
@@ -76,6 +77,7 @@ folder-size feature and guide were contributed by **Urbanize** in
 | Upstream `minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
 | `golang.org/x/net` | v0.62.0 |
 | `golang.org/x/crypto` | `v0.58.1-0.20261009181718-2f1f834330b2` |
+{.wide .expand}
 
 The `x/net` update includes the HTML parser/rendering fixes for
 [GO-2026-6860](https://pkg.go.dev/vuln/GO-2026-6860) and
@@ -105,7 +107,7 @@ not replace that embedded frontend or add newer server APIs. Usage-worker
 integration and embedding must use a corresponding maintained SILO revision;
 Console 2.6.0 alone is not a coordinated Server release. Existing module paths
 and the required MC replacement are described in the
-[embedding guide](https://github.com/pgsty/silo-console/blob/main/docs/Embedding.md).
+[embedding guide](https://github.com/pgsty/silo-console/blob/v2.6.0/docs/Embedding.md).
 
 The tag workflow prepares binaries, archives, Linux packages, source, SHA-256
 checksums, SPDX SBOMs, Sigstore signatures, GitHub provenance, and a versioned
@@ -113,4 +115,4 @@ Docker Hub candidate image. It requires successful validation of the exact
 commit and verifies signatures and provenance before declaring the draft ready.
 It does not advance `latest`. Publishing the verified GitHub draft is a separate
 maintainer action that enables the promotion workflow; see the
-[release contract](https://github.com/pgsty/silo-console/blob/main/docs/release-contract.md).
+[release contract](https://github.com/pgsty/silo-console/blob/v2.6.0/docs/release-contract.md).

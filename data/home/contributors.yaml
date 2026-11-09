@@ -6,16 +6,16 @@
 # firstContribution is the first public issue / PR date; omitted for private disclosures.
 # Sync repository records, README sections, and bilingual pages: python3 bin/contributors.py
 # Refresh avatars: python3 bin/contributor_avatars.py
-updated: "2026-11-09T03:47:15+00:00"
+updated: "2026-11-09T05:15:00+00:00"
 repositories:
   - repo: "pgsty/silo"
     updated: "2026-10-26T16:35:06+00:00"
     issues: 123
     pullRequests: 131
   - repo: "pgsty/silo-console"
-    updated: "2026-11-04T11:20:24+00:00"
+    updated: "2026-11-09T05:15:00+00:00"
     issues: 42
-    pullRequests: 37
+    pullRequests: 44
   - repo: "pgsty/mc"
     updated: "2026-11-09T03:47:15+00:00"
     issues: 45
@@ -59,10 +59,8 @@ code:
       - repo: "pgsty/silo-console"
         what: "Maintains SILO Console, including fixes, tests, releases, and documentation"
         whatZh: "维护 SILO Console 的修复、测试、发行与文档"
-        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 64, 65, 66, 67, 68, 69, 71, 74]
-        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 73]
-        draft: [79]
-        issuesOpen: [75, 76, 77, 78]
+        merged: [9, 10, 11, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 64, 65, 66, 67, 68, 69, 71, 74, 79, 80, 81, 82, 84, 85, 86]
+        issuesClosed: [1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 73, 75, 76, 77, 78]
       - repo: "pgsty/mc"
         what: "Maintains mcli, including fixes, tests, packaging, and releases"
         whatZh: "维护 mcli 的修复、测试、打包与发行"
@@ -258,6 +256,26 @@ code:
     what: "Fixed long-DN LDAP login while preserving IAM revocation-record errors"
     whatZh: "修复长 DN 的 LDAP 登录，并保留 IAM 撤销记录读取错误"
     featured: true
+  - handle: "cyberbret"
+    featured: true
+    what: "Contributed on-demand folder and bucket usage scans and the optional persistent usage worker"
+    whatZh: "贡献按需目录与存储桶用量扫描，以及可选的持久化用量后台任务"
+    note: "PR [#70](https://github.com/pgsty/silo-console/pull/70) was merged with follow-up reliability fixes in [#79](https://github.com/pgsty/silo-console/pull/79) and shipped in [Console 2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)."
+    noteZh: "PR [#70](https://github.com/pgsty/silo-console/pull/70) 已与 [#79](https://github.com/pgsty/silo-console/pull/79) 的可靠性修复一起合入，并随 [Console 2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0) 发布。"
+    firstContribution: "2026-10-26"
+    activity:
+      - repo: "pgsty/silo-console"
+        merged: [70]
+  - handle: "EduardoAndradeMachado"
+    featured: true
+    what: "Contributed Brazilian Portuguese translations and locale-aware formatting for SILO Console"
+    whatZh: "贡献 SILO Console 巴西葡萄牙语翻译与本地化格式处理"
+    note: "PR [#83](https://github.com/pgsty/silo-console/pull/83) was merged with its original authored commits. The later ten-language implementation replaced its Portuguese-only asynchronous loader with shared static dictionaries; Console 2.7.0 is not yet released."
+    noteZh: "PR [#83](https://github.com/pgsty/silo-console/pull/83) 已合并，保留原始作者提交；后续十语言实现将葡萄牙语专用的异步加载器替换为统一静态词典。Console 2.7.0 尚未发布。"
+    firstContribution: "2026-11-06"
+    activity:
+      - repo: "pgsty/silo-console"
+        merged: [83]
 proposed:
   - handle: "magicxor"
     name: "Ilia Burakov"
@@ -335,16 +353,6 @@ proposed:
     activity:
       - repo: "pgsty/silo"
         closed: [36]
-  - handle: "cyberbret"
-    featured: true
-    what: "Contributed on-demand folder and bucket usage scans and the optional persistent usage worker"
-    whatZh: "贡献按需目录与存储桶用量扫描，以及可选的持久化用量后台任务"
-    note: "PR [#70](https://github.com/pgsty/silo-console/pull/70) is being integrated with follow-up reliability fixes in [#79](https://github.com/pgsty/silo-console/pull/79). The feature is not yet released."
-    noteZh: "PR [#70](https://github.com/pgsty/silo-console/pull/70) 正通过 [#79](https://github.com/pgsty/silo-console/pull/79) 纳入，并补充可靠性修复；该功能尚未发布。"
-    firstContribution: "2026-10-26"
-    activity:
-      - repo: "pgsty/silo-console"
-        open: [70]
 reports:
   - handle: "kh0mka"
     name: "khomenokk"

@@ -1,19 +1,20 @@
 ---
 title: "SILO Console 2.6.0：用量扫描与存储桶管理改进"
-linkTitle: "Console 2.6.0（草稿）"
+linkTitle: "Console 2.6.0"
 date: 2026-11-05
 author: "SILO"
-description: "Console 2.6.0 发布说明草稿：目录与存储桶用量、可选持久化后台任务、数值校验、导航修复与安全依赖更新。"
+description: "Console 2.6.0：目录与存储桶用量、可选持久化后台任务、数值校验、导航修复与安全依赖更新。"
 tags: [Release, Console]
-draft: true
+draft: false
 weight: 1
 url: "/zh/blog/release/console-2.6.0/"
 ---
 
-**发布草稿：正式发布仍待维护者授权。** Console 2.6.0 是
-[2.5.1](/zh/blog/release/console-2.5.1/) 之后的候选版本。
-准备期间，已发布的稳定版与 Docker Hub `latest` 保持原有版本。
-Git 标签、候选镜像、GitHub draft 与正式产品发布分别交付。
+**Console 2.6.0 已于 2026-11-05（UTC+8）正式发布**，接续
+[2.5.1](/zh/blog/release/console-2.5.1/)。
+[GitHub Release](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)
+记录了源码提交 `f8ab146695fd1df74e4b84128a286d552921bf00`、发布制品与验收证据。
+这是独立 Console 发布，Server 内嵌控制台按服务端的发布周期交付。
 
 [GitHub Releases](https://github.com/pgsty/silo-console/releases) ·
 [发布准备 PR #82](https://github.com/pgsty/silo-console/pull/82) ·
@@ -48,7 +49,7 @@ Git 标签、候选镜像、GitHub draft 与正式产品发布分别交付。
 
 ## 运行时与安全依赖 {#dependencies}
 
-| 组件 | 候选版本选择 |
+| 组件 | 正式版本选择 |
 | --- | --- |
 | Go | 1.27.3 |
 | Node / Yarn | 24.22.1 / 4.13.0 |
@@ -57,6 +58,7 @@ Git 标签、候选镜像、GitHub draft 与正式产品发布分别交付。
 | 上游 `minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
 | `golang.org/x/net` | v0.62.0 |
 | `golang.org/x/crypto` | `v0.58.1-0.20261009181718-2f1f834330b2` |
+{.wide .expand}
 
 `x/net` 更新包含 HTML 解析与渲染相关的
 [GO-2026-6860](https://pkg.go.dev/vuln/GO-2026-6860) 和
@@ -79,9 +81,9 @@ Git 标签、候选镜像、GitHub draft 与正式产品发布分别交付。
 Server 20261026 内嵌 Console 2.5.1。安装独立 Console 2.6.0 不会替换其内嵌前端，也不会增加新版服务端 API。
 用量后台任务集成与内嵌部署需要对应的受维护 SILO 修订；Console 2.6.0 本身不等于一次联合 Server 发布。
 既有 Go 模块路径与所需 MC replacement 见
-[内嵌指南](https://github.com/pgsty/silo-console/blob/main/docs/Embedding.md)。
+[内嵌指南](https://github.com/pgsty/silo-console/blob/v2.6.0/docs/Embedding.md)。
 
 标签工作流准备二进制、压缩包、Linux 软件包、源码、SHA-256 清单、SPDX SBOM、Sigstore 签名、GitHub provenance 和 Docker Hub 版本候选镜像。
 它要求精确提交通过验收，并在 draft 就绪前验证签名与 provenance；不会推进 `latest`。
 发布已验证的 GitHub draft 是另一次维护者操作，会启用后续镜像推进流程，具体见
-[发布契约](https://github.com/pgsty/silo-console/blob/main/docs/release-contract.md)。
+[发布契约](https://github.com/pgsty/silo-console/blob/v2.6.0/docs/release-contract.md)。

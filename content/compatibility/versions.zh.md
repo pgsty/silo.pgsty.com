@@ -11,6 +11,15 @@ icon: fa-solid fa-code-branch
 
 SILO 20261026 是当前正式服务端版本，内嵌 Console 2.5.1、mcli 20261026 与 silo-pkg 3.15.2。最新独立客户端为 **mcli 20261109**。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
 
+## 独立 Console {#console}
+
+最新正式独立版是 [Console 2.6.0](/zh/blog/release/console-2.6.0/)，
+源码 `f8ab146695fd1df74e4b84128a286d552921bf00`，依赖 silo-pkg v3.15.2 和 mcli 20261026。
+[2.7.0 候选版](/zh/blog/release/console-2.7.0/) 采用 silo-pkg v3.16.0 与正式 mcli 20261109，
+后者在 Go 中对应伪版本 `v0.0.0-20261109021353-e1d4cc5abfe0`。
+前端与软件包版本统一为 2.7.0；草稿制品不改变公开稳定下载。
+Server 20261026 仍内嵌 Console 2.5.1，采用新版源码需要单独发布 Server。
+
 ## mcli 20261109 {#mcli-20261109}
 
 [独立客户端发布](/zh/blog/release/mcli-20261109/)使用 tag

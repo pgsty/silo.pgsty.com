@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-window-maximize
 ---
 
-> **Latest release:** [Console v2.5.1](/blog/release/console-2.5.1/) (2026-10-26), updating the interface, building with Go 1.27.3, pkg v3.15.2, and mcli 20261026, and fixing diagnostic health-report streams over high-latency connections. See the [component matrix](/compatibility/versions/).
+> **Latest published release:** [Console v2.6.0](/blog/release/console-2.6.0/) adds usage scans and bucket-administration repairs. The [2.7.0 candidate](/blog/release/console-2.7.0/) adds ten languages, Arabic RTL, container fixes, silo-pkg v3.16.0, official mcli 20261109 and updated Swagger documentation. See the [component matrix](/compatibility/versions/).
 
 > Upgrading standalone Console does not replace Server's embedded Console. Built-in policy Reset and live bucket inventory reads require the Server 20261026 release (absent from published Server 20261018).
 

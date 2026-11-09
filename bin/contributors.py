@@ -95,12 +95,14 @@ def activity(c, zh=False, repo=None, compact=True):
 
 def tables(data, zh=False, repo=None, website=False):
     selected = {c["handle"] for c in people(data, repo)}
+    anchors = {"code": "merged-prs", "proposed": "other-prs", "reports": "issue-reports"}
     sections = []
     for group, en, cn in GROUPS:
         entries = [c for c in data[group] if c["handle"] in selected]
         if not entries:
             continue
-        lines = [f'## {cn if zh else en}', '',
+        heading = f'## {cn if zh else en} {{#{anchors[group]}}}' if website else f'## {cn if zh else en}'
+        lines = [heading, '',
                  '| 贡献者 | 贡献 | 记录 |' if zh else '| Contributor | Contribution | Record |',
                  '| :-- | :-- | :-- |']
         for c in entries:
@@ -113,12 +115,14 @@ def tables(data, zh=False, repo=None, website=False):
     return "\n\n".join(sections)
 
 
-def scope_table(data, zh=False, repo=None):
+def scope_table(data, zh=False, repo=None, website=False):
     rows = ['| 仓库 | Issue | PR | 核对日期 |' if zh else '| Repository | Issues | Pull requests | Reviewed |', '| :-- | --: | --: | :-- |']
     selected = [r for r in data["repositories"] if repo is None or r["repo"] == repo]
     for r in selected:
         rows.append(f'| [{r["repo"]}](https://github.com/{r["repo"]}) | {r["issues"]} | {r["pullRequests"]} | {reviewed_date(data, r["repo"])} |')
     rows.append(f'| **{"合计" if zh else "Total"}** | **{sum(r["issues"] for r in selected)}** | **{sum(r["pullRequests"] for r in selected)}** | |')
+    if website:
+        rows.append("{.wide .expand}")
     return "\n".join(rows)
 
 
@@ -139,6 +143,7 @@ def record(data, zh=False, repo=None, website=False):
         caveat = 'When a proposal was incorporated through a later repair, its adoption is credited alongside the original PR status. Automated accounts are excluded. Upstream authorship remains in Git history and copyright notices.'
     sections = [intro, policy, caveat, wall(entries, zh, repo, website), tables(data, zh, repo, website)]
     audit_title = '统计范围' if zh else 'Audit scope'
+    audit_heading = f'## {audit_title} {{#audit-scope}}' if website else f'## {audit_title}'
     note = ('以下统计来自全部分页的 GitHub issue / PR 记录，包含所有状态和自动化账号。' if zh else 'Counts below come from every page of the GitHub issue / PR records, across all states, including automated accounts.')
     note += (' 各仓库的核对日期分别列出；未重新核对的记录保留原日期与状态。' if zh else ' Review dates are listed per repository; records not rechecked retain their earlier dates and states.')
     if repo is None:
@@ -146,12 +151,17 @@ def record(data, zh=False, repo=None, website=False):
         supplemental = count - public
         security_noun = 'reporter' if supplemental == 1 else 'reporters'
         note += (f' 去重后有 {public} 位公开 issue / PR 作者，另保留 {supplemental} 位安全披露者。排除的自动化账号：' if zh else f' There are {public} distinct human public issue / PR authors, plus {supplemental} credited security {security_noun}. Excluded automated accounts: ') + ', '.join(f'`{b}`' for b in data['bots']) + ('。' if zh else '.')
-    sections.extend([f'## {audit_title}', note, scope_table(data, zh, repo)])
+    sections.extend([audit_heading, note, scope_table(data, zh, repo, website)])
     maintainers = [c for c in entries if any(sum(len(a.get(k, [])) for k, *_ in STATES) > 12 for a in c['activity'] if repo is None or a['repo'] == repo)]
     if maintainers:
-        sections.append('## 维护者记录 {#maintainer-record}' if zh else '## Maintainer record')
+        sections.append('## 维护者记录 {#maintainer-record}' if zh else ('## Maintainer record {#maintainer-record}' if website else '## Maintainer record'))
         for c in maintainers:
-            sections.append(f'<details>\n<summary>@{c["handle"]} — {"完整 issue / PR 记录" if zh else "complete issue / PR record"}</summary>\n\n' + activity(c, zh, repo, compact=False).replace('<br>', '\n\n') + '\n\n</details>')
+            summary = f'@{c["handle"]} — {"完整 issue / PR 记录" if zh else "complete issue / PR record"}'
+            if website:
+                body = activity(c, zh, repo, compact=False).replace('<br>', '\n>\n> ')
+                sections.append(f'> [!DETAILS] {summary}\n>\n> {body}')
+            else:
+                sections.append(f'<details>\n<summary>{summary}</summary>\n\n' + activity(c, zh, repo, compact=False).replace('<br>', '\n\n') + '\n\n</details>')
     if repo is not None:
         sections.append(f'The [full SILO community roll]({ROLL}) recognizes contributions across the maintained server, Console, mcli, shared packages, and related repositories. Code contributions follow [CONTRIBUTING.md](CONTRIBUTING.md).')
     elif website:

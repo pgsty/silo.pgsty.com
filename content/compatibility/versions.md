@@ -11,6 +11,16 @@ icon: fa-solid fa-code-branch
 
 SILO 20261026 is the current Server release, with embedded Console 2.5.1, mcli 20261026 and silo-pkg 3.15.2. The latest standalone client is **mcli 20261109**. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
 
+## Standalone Console {#console}
+
+The latest published standalone version is [Console 2.6.0](/blog/release/console-2.6.0/),
+source `f8ab146695fd1df74e4b84128a286d552921bf00`, with silo-pkg v3.15.2 and mcli 20261026.
+The [2.7.0 candidate](/blog/release/console-2.7.0/) uses silo-pkg v3.16.0 and
+the official mcli 20261109 release, represented in Go by
+`v0.0.0-20261109021353-e1d4cc5abfe0`. Its frontend and package metadata use 2.7.0;
+draft artifacts do not change the public stable download. Server 20261026
+continues to embed Console 2.5.1 until a separate Server release adopts newer source.
+
 ## mcli 20261109 {#mcli-20261109}
 
 The [standalone client release](/blog/release/mcli-20261109/) uses tag
