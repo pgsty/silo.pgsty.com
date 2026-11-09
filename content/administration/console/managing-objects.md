@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **Console 2.5.1 – 2.7.0 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page ([Console 2.5.1](/blog/release/console-2.5.1/#objects)). [Console 2.6.0](/blog/release/console-2.6.0/) adds on-demand folder size scans, bucket usage refresh with optional PostgreSQL worker persistence, pre-create bucket validation, and exact integer quota math; the [Console 2.7.0 candidate](/blog/release/console-2.7.0/) expands the interface to ten languages.
+> **Console 2.5.1 – 2.7.0 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page ([Console 2.5.1](/blog/release/console-2.5.1/#objects)). [Console 2.6.0](/blog/release/console-2.6.0/) adds on-demand folder size scans, bucket usage refresh with optional PostgreSQL worker persistence, pre-create bucket validation, and exact integer quota math; [Console 2.7.0](/blog/release/console-2.7.0/) expands the interface to ten languages and fixes usage-worker TLS, scheduling and folder sizes over plain HTTP.
 
 <a id="managing-objects"></a>
 <a id="minio-console-managing-objects"></a>
@@ -139,7 +139,7 @@ The tiering tab allows users with the appropriate permissions to:
 ## Usage scans (Console v2.6.0+) {#usage-scans}
 
 > [!NOTE]
-> **Component availability:** This section describes the usage scan and bucket refresh functionality shipped in [Console v2.6.0](/blog/release/console-2.6.0/) ([PR #70](https://github.com/pgsty/silo-console/pull/70)) and retained in [Console v2.7.0](/blog/release/console-2.7.0/). Server `20261026` embeds Console `v2.5.1`; `pgsty/silo` `main` embeds Console `v2.6.0` for the next Server release. A Console release and the corresponding embedded-Console dependency update in SILO Server are separate delivery steps. The supported integration target is `pgsty/silo`; upstream MinIO compatibility is best effort.
+> **Component availability:** This section describes the usage scan and bucket refresh functionality shipped in [Console v2.6.0](/blog/release/console-2.6.0/) ([PR #70](https://github.com/pgsty/silo-console/pull/70)) and retained in [Console v2.7.0](/blog/release/console-2.7.0/), which also fixes the worker issues noted below. Server `20261026` embeds Console `v2.5.1`; `pgsty/silo` `main` embeds Console `v2.6.0` for the next Server release. A Console release and the corresponding embedded-Console dependency update in SILO Server are separate delivery steps. The supported integration target is `pgsty/silo`; upstream MinIO compatibility is best effort.
 
 <!-- Adapted from pgsty/silo-console PR #70, docs/FolderSizes.md.
 Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
@@ -241,6 +241,13 @@ public schema. Browser processes never migrate in response to a request. Use a
 verified TLS database URI and a bounded connection pool. Keep worker credentials
 out of browser processes.
 
+The worker verifies the storage endpoint like `console server`: it trusts the
+system roots, every certificate under `certs/CAs` in `--certs-dir` and Console's
+`public.crt`, and honors `CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY` for the
+`CONSOLE_MINIO_SERVER` origin only. It only reads that directory; it neither
+creates it nor loads `private.key`. Workers before Console 2.7.0 trusted only
+the system roots and failed against a private CA.
+
 Both processes use the identical `CONSOLE_MINIO_SERVER` endpoint and database.
 Set `CONSOLE_USAGE_S3_ACCESS_KEY`, `CONSOLE_USAGE_S3_SECRET_KEY` and optionally
 `CONSOLE_USAGE_S3_SESSION_TOKEN` only on the worker. Its dedicated S3 policy is:
@@ -260,12 +267,18 @@ on every status request. API responses are `Cache-Control: no-store`.
 
 The worker subscribes to authenticated storage mutation notifications. Creates,
 overwrites, completed multipart uploads and removals invalidate the affected
-bucket. Repeated or reordered events coalesce into one queued scan, rather than
+bucket. Since Console 2.7.0, deleting a bucket, including a force delete that
+emits no object events, also discards its saved totals at once, so a bucket
+re-created under the same name never shows them. Repeated or reordered events coalesce into one queued scan, rather than
 adding or subtracting potentially duplicated byte deltas. Changes during a scan
 request a follow-up generation. Requests are durable in PostgreSQL, prioritized
 for explicit refreshes and claimed with expiring, fenced leases. Workers yield
 between bounded time slices; pagination resumes only after a whole object key
 and all its versions, so a key spanning multiple version pages is not skipped.
+Stopping a worker returns its in-progress scans to the queue with their
+checkpoints; another worker resumes them at once. When upgrading, stop all
+older workers before starting new ones: since 2.7.0 the scan budget is saved
+in the checkpoint, and older workers discard it.
 
 The live notification subscription has **no durable replay guarantee**. Startup
 and reconnect invalidate existing totals for reconciliation. Frequent bucket
@@ -277,6 +290,8 @@ recover. A completed scan is a live listing, not an atomic filesystem snapshot.
 Without the database, Refresh performs bounded foreground metadata scans and the
 UI explicitly says automatic updates are unconfigured. Navigating away stops
 those scans; completed totals are not shared across replicas in this mode.
+When the server's concurrent scan slots are busy (HTTP 429), Refresh waits and
+retries for about 30 seconds before reporting a bucket as failed.
 
 #### Worker and API settings {#worker-and-api-settings}
 
@@ -291,7 +306,7 @@ Invalid, missing required or incompatible settings fail closed.
 | `POOL_MAX_CONNECTIONS` | 4 | Connections per process |
 | `CONCURRENT_SCANS` | 1 | Concurrent worker scan slices |
 | `MAX_ENTRIES` | 100000000 | Maximum entries per full bucket scan |
-| `SCAN_TIMEOUT` | `30m` | Maximum full-scan elapsed time across slices |
+| `SCAN_TIMEOUT` | `30m` | Maximum listing time per full bucket scan, summed across slices; time queued behind other buckets is not counted (before 2.7.0: elapsed wall-clock time) |
 | `SCAN_SLICE` | `5s` | Fair scheduling slice, completed at a whole-key boundary |
 | `LEASE` | `2m` | Scan and observer lease lifetime |
 | `HEARTBEAT` | `15s` | Lease/coverage heartbeat and operation budget |

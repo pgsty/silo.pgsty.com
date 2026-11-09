@@ -15,7 +15,7 @@ cascade:
 
 ## 2026-11-09 Console 多语言 {#november-9-console-languages}
 
-- [为 SILO 提供多语言支持](/zh/blog/design/console-languages/)：横跨 [Console 2.6.0](/zh/blog/release/console-2.6.0/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 的十语言界面（涵盖 [#83](https://github.com/pgsty/silo-console/pull/83) 葡语贡献、[silo#277](https://github.com/pgsty/silo/issues/277) 土耳其语需求，以及 [#87](https://github.com/pgsty/silo-console/pull/87) 与 [#90](https://github.com/pgsty/silo-console/pull/90) 的全量译文补齐），记录维护分级、英文回退与阿拉伯语 RTL，以及支持逐语言分包、全量加载决策的 gzip 和缓存实测。
+- [为 SILO 提供多语言支持](/zh/blog/design/console-languages/)：横跨 [Console 2.6.0](/zh/blog/release/console-2.6.0/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 的十语言界面（涵盖 [#83](https://github.com/pgsty/silo-console/pull/83) 葡语贡献与 [silo#277](https://github.com/pgsty/silo/issues/277) 土耳其语需求），记录维护分级、英文回退与阿拉伯语 RTL，以及支持逐语言分包、全量加载决策的 gzip 和缓存实测。
 
 ## 2026-11-06 发布验收中发现 {#november-6-found-in-release}
 

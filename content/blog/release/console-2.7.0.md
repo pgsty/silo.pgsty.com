@@ -1,28 +1,66 @@
 ---
-title: "SILO Console 2.7.0: Ten Languages and Container Reliability"
-linkTitle: "Console 2.7.0 (Draft Release)"
+title: "SILO Console 2.7.0: Ten Languages, Usage Worker and Container Fixes"
+linkTitle: "Console 2.7.0"
 date: 2026-11-09
 author: "SILO"
-description: "Console 2.7.0 release candidate: ten UI languages, Arabic RTL, container fixes, released mcli and silo-pkg dependencies, and updated API documentation."
+description: "Console 2.7.0: ten UI languages and Arabic RTL, usage-worker TLS and scheduling fixes, folder sizes over plain HTTP, container fixes, released mcli and silo-pkg dependencies, and updated API documentation."
 tags: [Release, Console]
 draft: false
 weight: 1
 url: "/blog/release/console-2.7.0/"
 ---
 
-**Verified Draft Release, not yet publicly released.** Console 2.7.0 expands
-the administration interface to ten languages, fixes container HTTPS and
-temporary files, adopts the released mcli 20261109 and silo-pkg 3.16.0, and
-updates API documentation. The `v2.7.0` tag and its complete validation and
-release pipelines have passed. GitHub assets remain in a Draft Release;
-the versioned candidate image is available on Docker Hub. As of **2026-11-09**,
-[2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0) remains the
-latest published release and `latest` still identifies its verified image.
-Publishing the draft and promoting `latest` are separate steps.
+Console 2.7.0 expands the administration interface to ten languages, fixes
+container HTTPS and temporary files, adopts the released mcli 20261109 and
+silo-pkg 3.16.0 and updates API documentation. It also fixes usage-worker TLS
+and scheduling, folder sizes over plain HTTP and malformed uploads, all found
+in the final pre-release review. Publication status and assets are on
+[GitHub releases](https://github.com/pgsty/silo-console/releases).
 
 [GitHub releases](https://github.com/pgsty/silo-console/releases) ·
 [Changes since 2.6.0](https://github.com/pgsty/silo-console/compare/v2.6.0...v2.7.0) ·
 [Console compatibility](/compatibility/console/)
+
+## Fixes found before release {#fixes}
+
+The final review before release found defects that 2.6.0 already shipped
+with. 2.7.0 fixes them:
+
+- **Folder sizes over plain HTTP.** Embedded Console is usually opened at
+  `http://<ip>:9001`, which browsers do not treat as a secure context. There
+  **Calculate folder sizes** and the decryption-key copy button silently did
+  nothing. Both now work over HTTP.
+- **Usage worker TLS.** `console usage-worker` accepts `--certs-dir` and trusts
+  the same roots as `console server`: the system roots, `certs/CAs` and
+  Console's `public.crt`. It applies `CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY` to
+  the SILO endpoint only. Earlier workers trusted only the system roots and
+  failed against a private CA. The worker only reads the directory: it neither
+  creates it nor loads `private.key`.
+- **Scan budget.** `CONSOLE_USAGE_SCAN_TIMEOUT` now limits listing time summed
+  across scan slices. Time a bucket spends queued behind other buckets no
+  longer counts, so many large buckets no longer end `limited` together.
+  Buckets left limited by the earlier accounting resume with a full budget on
+  their next retry.
+- **Worker restarts.** A scan interrupted by stopping the worker returns to the
+  queue with its checkpoint and resumes at once, instead of showing
+  "Update failed" for at least 30 seconds. Bucket changes the worker received
+  before stopping are saved rather than dropped.
+- **Deleted buckets.** The worker handles bucket creation and deletion events.
+  Deleting a bucket, including a force delete that emits no object events,
+  discards its saved totals, so a bucket re-created under the same name never
+  shows them.
+- **Busy scanner.** Without the usage database, **Refresh** waits and retries
+  for about 30 seconds when the server's scan slots are busy (HTTP 429),
+  instead of marking buckets as failed.
+- **Uploads.** Malformed or truncated multipart uploads return an error instead
+  of panicking the request handler.
+- **Arabic field layout.** The reveal button and unit selectors of password,
+  URL, e-mail and number fields stay beside the text instead of covering it,
+  and the task-count badge is back in its corner.
+
+Before upgrading the optional usage worker, stop all older workers, then start
+2.7.0 workers. Mixed versions do not accumulate the new scan budget
+consistently.
 
 ## Ten languages in one menu {#languages}
 
@@ -111,17 +149,17 @@ build paths:
 Public certificates can use system trust without disabling TLS verification.
 Private CAs still need explicit configuration. An existing mount over the
 system bundle continues to override it. Official images remain on Docker Hub
-as **`docker.io/pgsty/silo-console`**. The verified candidate image uses
-`v2.7.0`; the `latest` tag remains unchanged.
+as **`docker.io/pgsty/silo-console`**, tagged `v2.7.0` for this release.
 
 ## Upgrade and dependency boundaries {#upgrade}
 
 Folder and bucket usage scans, retained-version totals, freshness indicators
 and the optional PostgreSQL usage worker already shipped in
-[2.6.0](/blog/release/console-2.6.0/). They are retained in 2.7.0. PostgreSQL is
+[2.6.0](/blog/release/console-2.6.0/). They are retained in 2.7.0, with the
+worker fixes [above](#fixes). PostgreSQL is
 needed only for that optional worker, not for the language or container changes.
 
-The candidate adopts the released components verified in
+2.7.0 adopts the released components verified in
 [PR #86](https://github.com/pgsty/silo-console/pull/86):
 
 | Component | Reviewed source selection |
@@ -160,8 +198,7 @@ best effort.
 The obsolete upstream-MinIO build job was removed in
 [PR #85](https://github.com/pgsty/silo-console/pull/85). The maintained SILO
 acceptance matrix, advisory upstream-MC compatibility probe and frontend/container
-asset-consistency check remain. The exact tagged commit and its separate
-release-artifact verification are recorded below.
+asset-consistency check remain.
 
 ## API documentation and validation {#api-docs}
 
@@ -208,35 +245,3 @@ history and copyright notices.
 
 See the [community contribution record](/about/contributors/) for actual PR
 states and historical credits.
-
-## Verified draft and source {#verification}
-
-Tag [`v2.7.0`](https://github.com/pgsty/silo-console/tree/v2.7.0) resolves to
-[`26ce922424f18424ca64389632b74685b8c82752`](https://github.com/pgsty/silo-console/commit/26ce922424f18424ca64389632b74685b8c82752).
-The checks accepted this exact commit:
-
-- [Required matrix: 38/38 jobs](https://github.com/pgsty/silo-console/actions/runs/42571555305), including maintained SILO integration, the permission matrix, SSO, replication, shared downloads, PostgreSQL usage, Swagger regeneration, platform builds, package lifecycle and independent artifact reproduction. Playwright passed 886 regression tests and eight additional grouped checks.
-- [Required vulnerability checks: 3/3 jobs](https://github.com/pgsty/silo-console/actions/runs/42571555292).
-- [Tag release pipeline](https://github.com/pgsty/silo-console/actions/runs/42574599791): draft assets, checksum and image signatures, SPDX attestations and GitHub provenance verified.
-
-The artifact job was rerun after GitHub returned HTTP 504 while downloading
-Syft's checksum file; the validation requirements and source stayed unchanged.
-
-The draft contains **44 assets**: six platform executables, six bundles, nine
-Linux packages, a source archive, 17 SPDX SBOMs, legal files, the SHA-256 manifest
-and its Sigstore bundle. The manifest covers 38 payloads. Draft GitHub assets
-are visible to maintainers until publication; public download links continue
-to use 2.6.0. Verification commands are in the
-[tagged release contract](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/release-contract.md).
-
-The multi-platform candidate image is `docker.io/pgsty/silo-console:v2.7.0`
-for Linux amd64 and arm64, with immutable digest:
-
-```text
-sha256:a7f3e3f326fa992895cba23a216e44689592666dfb070306e2ab058c0b27acc5
-```
-
-The `latest` digest remains
-`sha256:49b297b1ecc6252e2fe95ee641f96b165eaf92db8394872462562d3e90e67608`.
-The draft is ready for maintainer publication; it has not been published or
-promoted to `latest`.

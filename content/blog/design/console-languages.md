@@ -14,7 +14,7 @@ url: "/blog/design/console-languages/"
 
 [Console PR #83](https://github.com/pgsty/silo-console/pull/83), contributed by Eduardo Andrade Machado, supplies Brazilian Portuguese. [silo#277](https://github.com/pgsty/silo/issues/277), opened by siyahkut, requests Turkish. These contributions led to a configurable ten-language UI.
 
-**Status as of 2026-11-09:** the ten-language UI, reviewed translations, per-language compression, eager loading and long-lived asset caching are integrated into Console `main` for the [Console 2.7.0 candidate](/blog/release/console-2.7.0/). Final review preserves compact labels and verifies the affected controls at phone, tablet and desktop widths. Source integration, tag creation and public release publication remain separate milestones.
+**Status as of 2026-11-09:** the ten-language UI, reviewed translations, per-language compression, eager loading and long-lived asset caching are integrated into Console `main` and ship in [Console 2.7.0](/blog/release/console-2.7.0/). Final review preserves compact labels and verifies the affected controls at phone, tablet and desktop widths. Source integration, tag creation and public release publication remain separate milestones.
 
 ## Decision {#tldr}
 

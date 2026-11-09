@@ -1,25 +1,45 @@
 ---
-title: "SILO Console 2.7.0：十种语言与容器可靠性修复"
-linkTitle: "Console 2.7.0（发布草稿）"
+title: "SILO Console 2.7.0：十种语言、用量后台任务与容器修复"
+linkTitle: "Console 2.7.0"
 date: 2026-11-09
 author: "SILO"
-description: "Console 2.7.0 候选版本说明：十种语言、阿拉伯语 RTL、容器修复、正式 mcli 与 silo-pkg 依赖，以及 API 文档更新。"
+description: "Console 2.7.0：十种语言与阿拉伯语 RTL、用量后台任务的 TLS 与调度修复、普通 HTTP 下的目录大小计算、容器修复、正式 mcli 与 silo-pkg 依赖，以及 API 文档更新。"
 tags: [Release, Console]
 draft: false
 weight: 1
 url: "/zh/blog/release/console-2.7.0/"
 ---
 
-**已验证的 Draft Release，尚未公开发布。** Console 2.7.0 将管理界面扩展到十种语言，修复容器 HTTPS 与临时文件问题，
-采用已正式发布的 mcli 20261109、silo-pkg 3.16.0，并更新 API 文档。
-`v2.7.0` 标签对应的完整验证与发布流水线均已通过；GitHub 制品保留在 Draft Release 中，
-带版本号的候选镜像已在 Docker Hub 就绪。截至 **2026-11-09**，最新正式版仍为
-[2.6.0](https://github.com/pgsty/silo-console/releases/tag/v2.6.0)，`latest` 仍指向其已验证镜像。
-公开发布草稿与推进 `latest` 是后续独立步骤。
+Console 2.7.0 将管理界面扩展到十种语言，修复容器 HTTPS 与临时文件问题，
+采用已正式发布的 mcli 20261109、silo-pkg 3.16.0，并更新 API 文档；
+同时修复发布前最终审查发现的问题：用量后台任务的 TLS 与调度、普通 HTTP 下的目录大小计算，以及畸形上传请求。
+发布状态与制品见 [GitHub Releases](https://github.com/pgsty/silo-console/releases)。
 
 [GitHub Releases](https://github.com/pgsty/silo-console/releases) ·
 [2.6.0 之后的变化](https://github.com/pgsty/silo-console/compare/v2.6.0...v2.7.0) ·
 [Console 兼容性](/zh/compatibility/console/)
+
+## 发布前修复的问题 {#fixes}
+
+发布前的最终审查发现了一些 2.6.0 起就存在的缺陷，2.7.0 一并修复：
+
+- **普通 HTTP 下的目录大小。** 内嵌 Console 通常通过 `http://<ip>:9001` 访问，浏览器不把它视为安全上下文。
+  此时 **Calculate folder sizes** 和解密密钥的复制按钮点击后没有任何反应。现在两者在 HTTP 下都能正常使用。
+- **用量后台任务的 TLS。** `console usage-worker` 支持 `--certs-dir`，与 `console server` 信任相同的根证书：
+  系统根证书、`certs/CAs` 和 Console 的 `public.crt`；`CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY` 只对 SILO 端点生效。
+  此前的后台任务只信任系统根证书，遇到私有 CA 会连接失败。后台任务只读取该目录，不会创建它，也不会加载 `private.key`。
+- **扫描预算。** `CONSOLE_USAGE_SCAN_TIMEOUT` 现在限制跨时间片累计的列举时间，桶排队等待其他桶的时间不再计入，
+  因此大量大桶不会再一起以 `limited` 结束。按旧方式计时而停在 limited 的桶，下次重试时会获得完整预算。
+- **后台任务重启。** 停止后台任务时，正在进行的扫描带着检查点回到队列并立即续扫，
+  不再至少 30 秒显示“更新失败”；停止前已收到的桶变更也会保存，不会丢失。
+- **已删除的桶。** 后台任务处理桶创建与删除事件。删除桶（包括不产生对象事件的强制删除）会丢弃其已保存的统计，
+  同名重建的桶不会再显示旧桶的数据。
+- **扫描繁忙。** 未配置用量数据库时，服务器扫描槽位已满（HTTP 429）的情况下，**刷新**会等待并重试约 30 秒，
+  不再直接把桶标为失败。
+- **上传。** 畸形或被截断的 multipart 上传返回错误，不再导致请求处理 panic。
+- **阿拉伯语字段布局。** 密码、URL、邮箱和数字字段的显示按钮与单位选择器位于文字旁边，不再遮挡文字；任务数角标恢复到右上角位置。
+
+升级可选用量后台任务时，先停止所有旧版本后台任务，再启动 2.7.0。新旧版本混跑时，新的扫描预算无法一致累计。
 
 ## 一个菜单，十种语言 {#languages}
 
@@ -84,15 +104,15 @@ url: "/zh/blog/release/console-2.7.0/"
 
 公开证书可直接使用系统信任，无需关闭 TLS 校验。私有 CA 仍需显式配置；
 已有的系统证书包挂载继续覆盖镜像中的证书包。
-官方镜像仍位于 Docker Hub 的 **`docker.io/pgsty/silo-console`**；已验证的候选镜像使用 `v2.7.0` 标签，`latest` 保持不变。
+官方镜像仍位于 Docker Hub 的 **`docker.io/pgsty/silo-console`**，本版本标签为 `v2.7.0`。
 
 ## 升级与依赖边界 {#upgrade}
 
 目录和存储桶用量扫描、保留版本统计、新鲜度提示，以及可选的 PostgreSQL 用量后台任务，
-已随 [2.6.0](/zh/blog/release/console-2.6.0/) 发布，2.7.0 继续保留。
+已随 [2.6.0](/zh/blog/release/console-2.6.0/) 发布，2.7.0 继续保留，并包含[上文](#fixes)的后台任务修复。
 只有可选用量后台任务需要 PostgreSQL；语言和容器变化不引入这一要求。
 
-候选版本采用 [PR #86](https://github.com/pgsty/silo-console/pull/86) 已验证的正式组件：
+2.7.0 采用 [PR #86](https://github.com/pgsty/silo-console/pull/86) 已验证的正式组件：
 
 | 组件 | 已核对的源码选择 |
 | --- | --- |
@@ -123,7 +143,6 @@ SILO Server 20261026 内嵌 Console 2.5.1。升级独立 Console 不会替换内
 
 [PR #85](https://github.com/pgsty/silo-console/pull/85) 移除了过时的上游 MinIO 构建任务，
 保留维护的 SILO 验收矩阵、作为参考的上游 MC 兼容性探针，以及前端与容器资源一致性检查。
-准确标签提交及其独立发布制品验收结果见下文。
 
 ## API 文档与校验 {#api-docs}
 
@@ -156,31 +175,3 @@ CI 使用明确的权限和平台矩阵，从项目版本文件读取工具链�
   [#63](https://github.com/pgsty/silo-console/issues/63) 中报告并分析高延迟下健康报告截断，已在 2.5.0 修复。
 
 实际 PR 状态与历史贡献见[社区贡献记录](/zh/about/contributors/)。
-
-## 草稿验收与准确源码 {#verification}
-
-标签 [`v2.7.0`](https://github.com/pgsty/silo-console/tree/v2.7.0) 指向
-[`26ce922424f18424ca64389632b74685b8c82752`](https://github.com/pgsty/silo-console/commit/26ce922424f18424ca64389632b74685b8c82752)。
-以下检查均验收这一准确提交：
-
-- [Required matrix：38/38 项](https://github.com/pgsty/silo-console/actions/runs/42571555305)，覆盖维护中的 SILO 集成、权限矩阵、SSO、复制、分享下载、PostgreSQL 用量、Swagger 生成、跨平台构建、软件包生命周期与独立制品复现。Playwright 通过 886 项回归测试及另 8 项分组检查。
-- [Required vulnerability checks：3/3 项](https://github.com/pgsty/silo-console/actions/runs/42571555292)。
-- [标签发布流水线](https://github.com/pgsty/silo-console/actions/runs/42574599791)：草稿制品、校验和与镜像签名、SPDX 声明和 GitHub 来源证明均已验证。
-
-制品任务曾因 GitHub 下载 Syft 校验文件时返回 HTTP 504 而重跑；源码与验证要求保持不变。
-
-草稿包含 **44 个制品**：六个平台的独立可执行文件、六个压缩包、九个 Linux 软件包、
-源码包、17 份 SPDX SBOM、法律文件、SHA-256 清单及其 Sigstore 签名包。
-校验和清单覆盖 38 个载荷文件。GitHub 草稿制品在公开发布前仅对维护者可见，
-公开下载链接继续使用 2.6.0。验证命令见
-[该标签的发布契约](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/release-contract.md)。
-
-多平台候选镜像为 `docker.io/pgsty/silo-console:v2.7.0`，支持 Linux amd64 与 arm64，不可变摘要为：
-
-```text
-sha256:a7f3e3f326fa992895cba23a216e44689592666dfb070306e2ab058c0b27acc5
-```
-
-`latest` 摘要仍为
-`sha256:49b297b1ecc6252e2fe95ee641f96b165eaf92db8394872462562d3e90e67608`。
-草稿已具备供维护者公开发布的条件，本次尚未公开发布，也未推进 `latest`。

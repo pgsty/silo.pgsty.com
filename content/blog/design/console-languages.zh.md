@@ -14,7 +14,7 @@ url: "/zh/blog/design/console-languages/"
 
 Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-console/pull/83) 提供了巴西葡萄牙语翻译。siyahkut 在 [silo#277](https://github.com/pgsty/silo/issues/277) 中请求土耳其语。这两项贡献推动 Console 扩展为可配置的十语言界面。
 
-**截至 2026-11-09 的状态：**十语言界面、审校后的译文、逐语言压缩、静态全量加载和长期缓存已合入 Console `main`，并纳入 [Console 2.7.0 候选版](/zh/blog/release/console-2.7.0/)。最终复核保留了紧凑标签要求，并检查了相关控件在手机、平板和桌面宽度下的显示。源码合入、打标与正式产品发布仍是不同阶段。
+**截至 2026-11-09 的状态：**十语言界面、审校后的译文、逐语言压缩、静态全量加载和长期缓存已合入 Console `main`，并随 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 发布。最终复核保留了紧凑标签要求，并检查了相关控件在手机、平板和桌面宽度下的显示。源码合入、打标与正式产品发布仍是不同阶段。
 
 ## 决定 {#tldr}
 

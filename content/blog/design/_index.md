@@ -15,7 +15,7 @@ Design records document the engineering decisions behind PGSTY SILO: root causes
 
 ## November 9: Console Languages {#november-9-console-languages}
 
-- [Adding Multilingual Support to SILO](/blog/design/console-languages/): Ten UI languages across [Console 2.6.0](/blog/release/console-2.6.0/) and [Console 2.7.0](/blog/release/console-2.7.0/) (including Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83), Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277), and full translation completion in [#87](https://github.com/pgsty/silo-console/pull/87) and [#90](https://github.com/pgsty/silo-console/pull/90)), maintenance tiers, English fallback and Arabic RTL, with measured gzip and cache tradeoffs behind per-language assets and eager loading.
+- [Adding Multilingual Support to SILO](/blog/design/console-languages/): Ten UI languages across [Console 2.6.0](/blog/release/console-2.6.0/) and [Console 2.7.0](/blog/release/console-2.7.0/) (including Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83) and Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277)), maintenance tiers, English fallback and Arabic RTL, with measured gzip and cache tradeoffs behind per-language assets and eager loading.
 
 ## November 6: Found in Release Acceptance {#november-6-found-in-release}
 

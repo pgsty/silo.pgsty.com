@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **Console 2.5.1 – 2.7.0 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页（[Console 2.5.1](/zh/blog/release/console-2.5.1/#objects)）。[Console 2.6.0](/zh/blog/release/console-2.6.0/) 新增按需文件夹大小扫描、带可选 PostgreSQL worker 持久化的存储桶用量刷新、创建前存储桶校验以及精确整数配额换算；[Console 2.7.0 候选版](/zh/blog/release/console-2.7.0/) 将界面扩展为十种语言。
+> **Console 2.5.1 – 2.7.0 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页（[Console 2.5.1](/zh/blog/release/console-2.5.1/#objects)）。[Console 2.6.0](/zh/blog/release/console-2.6.0/) 新增按需文件夹大小扫描、带可选 PostgreSQL worker 持久化的存储桶用量刷新、创建前存储桶校验以及精确整数配额换算；[Console 2.7.0](/zh/blog/release/console-2.7.0/) 将界面扩展为十种语言，并修复用量后台任务的 TLS、调度以及普通 HTTP 下的目录大小计算。
 
 <a id="minio-console-managing-objects"></a>
 <a id="id1" data-td-print-local></a>
@@ -143,7 +143,7 @@ MinIO 不限制单个部署允许创建的存储桶总数。 不过，作为通�
 ## 用量扫描（Console v2.6.0+） {#usage-scans}
 
 > [!NOTE]
-> **组件可用性：** 本节介绍随 [Console v2.6.0](/zh/blog/release/console-2.6.0/)（[PR #70](https://github.com/pgsty/silo-console/pull/70)）发布并在 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 中继续保留的用量扫描与存储桶刷新功能。Server `20261026` 内嵌 Console `v2.5.1`；`pgsty/silo` `main` 已内嵌 Console `v2.6.0` 供下一版 Server 发布使用。Console 发布与 SILO Server 更新内嵌 Console 依赖是两个独立的交付步骤。正式支持的集成目标是 `pgsty/silo`；与上游 MinIO 的兼容性属于尽力而为。
+> **组件可用性：** 本节介绍随 [Console v2.6.0](/zh/blog/release/console-2.6.0/)（[PR #70](https://github.com/pgsty/silo-console/pull/70)）发布并在 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 中继续保留的用量扫描与存储桶刷新功能；2.7.0 同时修复了下文提到的后台任务问题。Server `20261026` 内嵌 Console `v2.5.1`；`pgsty/silo` `main` 已内嵌 Console `v2.6.0` 供下一版 Server 发布使用。Console 发布与 SILO Server 更新内嵌 Console 依赖是两个独立的交付步骤。正式支持的集成目标是 `pgsty/silo`；与上游 MinIO 的兼容性属于尽力而为。
 
 <!-- 改编自 pgsty/silo-console PR #70 的 docs/FolderSizes.md。
 Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
@@ -229,6 +229,10 @@ worker 负责数据库模式迁移，需要其专用数据库 `public` schema �
 Web 进程不会在处理浏览器请求时执行迁移。使用经过验证的 TLS 数据库连接和有上限的连接池，
 不要把 worker 的 S3 凭据交给 Web 进程。
 
+worker 与 `console server` 以相同方式校验存储端点：信任系统根证书、`--certs-dir` 下 `certs/CAs` 中的全部证书
+以及 Console 的 `public.crt`，并且只对 `CONSOLE_MINIO_SERVER` 这一个源遵守 `CONSOLE_MINIO_SERVER_TLS_SKIP_VERIFY`。
+worker 只读取该目录，既不创建目录，也不加载 `private.key`。Console 2.7.0 之前的 worker 只信任系统根证书，遇到私有 CA 会连接失败。
+
 两个进程应使用相同的 `CONSOLE_MINIO_SERVER` 端点和数据库。
 仅在 worker 上设置 `CONSOLE_USAGE_S3_ACCESS_KEY`、`CONSOLE_USAGE_S3_SECRET_KEY`，
 需要时再设置 `CONSOLE_USAGE_S3_SESSION_TOKEN`。专用身份的 S3 策略如下：
@@ -245,10 +249,13 @@ SILO 当前允许将 ListBucket 作为 ListBucketVersions 的兼容性回退，A
 API 响应使用 `Cache-Control: no-store`。
 
 worker 订阅经过认证的存储变更通知。创建、覆盖、完成分段上传和删除操作会使相关桶的统计失效。
+自 Console 2.7.0 起，删除桶（包括不产生对象事件的强制删除）也会立即丢弃其已保存的统计，同名重建的桶不会显示旧数据。
 重复或乱序事件合并为一个待扫描任务，不直接加减可能重复的字节差值；扫描期间发生变更则安排下一代任务。
 任务持久化在 PostgreSQL 中，显式刷新优先处理，通过带过期时间和归属校验的租约领取。
 worker 在受限时间片之间让出执行权，只在完整对象键及其所有版本处理完毕后保存恢复位置，
 因此同一个键跨越多个版本分页时不会漏计。
+停止 worker 时，进行中的扫描带着检查点回到队列，由其他 worker 立即续扫。
+升级时先停止所有旧版本 worker 再启动新版本：自 2.7.0 起扫描预算保存在检查点中，旧版本 worker 会丢弃这一信息。
 
 实时通知订阅**不保证持久化重放**。启动或重新连接后，会将已有统计标为需要校准。
 较频繁的桶清单检查仅发现新桶，不重扫未变化的桶；独立的完整校准负责补偿事件流缺口和未通知的变化。
@@ -256,6 +263,7 @@ worker 在受限时间片之间让出执行权，只在完整对象键及其所�
 
 没有配置数据库时，刷新使用有边界的前台元数据扫描，界面明确提示自动更新未配置。
 导航后停止扫描，这种模式下的已完成统计不在不同 Console 副本间共享。
+服务器的并发扫描槽位已满（HTTP 429）时，刷新会等待并重试约 30 秒，之后才将桶标为失败。
 
 #### worker 与 API 配置 {#worker-and-api-settings}
 
@@ -270,7 +278,7 @@ worker 在受限时间片之间让出执行权，只在完整对象键及其所�
 | `POOL_MAX_CONNECTIONS` | 4 | 每进程最大连接数 |
 | `CONCURRENT_SCANS` | 1 | 并发扫描时间片数量 |
 | `MAX_ENTRIES` | 100000000 | 每次完整桶扫描最多处理的条目数 |
-| `SCAN_TIMEOUT` | `30m` | 跨时间片的完整扫描总耗时上限 |
+| `SCAN_TIMEOUT` | `30m` | 单个桶完整扫描的列举时间上限，跨时间片累计；排队等待其他桶的时间不计入（2.7.0 之前按墙钟时间计算） |
 | `SCAN_SLICE` | `5s` | 公平调度时间片，在完整键边界让出执行权 |
 | `LEASE` | `2m` | 扫描与事件观察者的租约期限 |
 | `HEARTBEAT` | `15s` | 租约/覆盖状态心跳间隔与单次操作时间预算 |
