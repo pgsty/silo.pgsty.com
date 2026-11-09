@@ -10,7 +10,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 从 MinIO 迁移到 Silo 可直接复用现有对象数据卷，无需逐对象导出与重新导入。**普通 S3 应用无需修改代码，管理员只需核对部署配置、权限规则与状态兼容性。**
 
-当前最新发布目标为 **Server 20261026**（升级前请一并核对其[升级要求](/zh/blog/release/silo-20261026/#upgrade)与[十月兼容性增量](/zh/compatibility/server/#october-2026)，尤其是曾启用 `strict` 分片列举的部署）。建议先对照[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 软件包升级见[原生软件包迁移](/zh/compatibility/binary/)，版本配套关系见[组件矩阵](/zh/compatibility/versions/)。
+当前最新发布目标为 **Server 20261109**。升级前请核对其[升级要求](/zh/blog/release/silo-20261109/#upgrade)，包括 batch 作业、锁域、混合版本恢复与逐节点 S3 就绪检查。[十月兼容性增量](/zh/compatibility/server/#october-2026)仍然适用，尤其是曾启用 `strict` 分片列举的部署。建议先对照[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 软件包升级见[原生软件包迁移](/zh/compatibility/binary/)，版本配套关系见[组件矩阵](/zh/compatibility/versions/)。
 
 ## 哪些改变 {#scope}
 

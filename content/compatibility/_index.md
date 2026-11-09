@@ -23,7 +23,7 @@ When a condition applies, verify or adjust deployment, policies, tools or upgrad
 {{< /card >}}
 {{< /cards >}}
 
-**The current release baseline is 20261026.** This index covers source and companion-component changes since the fork and identifies when each repair first shipped. The [component matrix](/compatibility/versions/) records the current stack and fixes absent from older versions.
+**The current release baseline is 20261109.** Read the [20261109 upgrade requirements](/blog/release/silo-20261109/#upgrade) for batch-record boundaries, lock-domain rollout, mixed-version restore and S3 readiness checks. This index covers changes since the fork and identifies when each repair first shipped. The [component matrix](/compatibility/versions/) records the current stack and fixes absent from older versions.
 
 ## 20261026 release changes {#maintenance-20261026}
 

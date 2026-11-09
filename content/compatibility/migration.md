@@ -10,7 +10,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 Migrating from MinIO to Silo reuses existing object data volumes in place without an object-by-object export and import. **Ordinary S3 applications require no code changes; administrators only need to verify deployment settings, authorization rules, and state compatibility.**
 
-The current published target is **Server 20261026** (review its [upgrade requirements](/blog/release/silo-20261026/#upgrade) and [October compatibility delta](/compatibility/server/#october-2026), especially if your deployment used `strict` multipart listing). Check the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level compatibility overview](/compatibility/) before following this guide. RPM/DEB installations are covered in [Native Package Migration](/compatibility/binary/), and component pairings are listed in the [version matrix](/compatibility/versions/).
+The current published target is **Server 20261109**. Review its [upgrade requirements](/blog/release/silo-20261109/#upgrade), including batch jobs, lock domains, mixed-version restore and per-node S3 readiness. The [October compatibility delta](/compatibility/server/#october-2026) still applies, especially if your deployment used `strict` multipart listing. Check the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level compatibility overview](/compatibility/) before following this guide. RPM/DEB installations are covered in [Native Package Migration](/compatibility/binary/), and component pairings are listed in the [version matrix](/compatibility/versions/).
 
 ## What changes {#scope}
 

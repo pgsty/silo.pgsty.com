@@ -6,11 +6,12 @@
 
 ## 当前版本
 
-当前版本为 **mcli 20261109**、**SILO Server 与 KES 20261026**、**SILO Console v2.6.0** 和 **silo-pkg v3.16.0**，均使用 Go 1.27.3。独立 mcli 已采用 pkg v3.16.0；既有 Server 与 Console 制品保留各自内嵌的客户端及包版本。KES 是可选的外部密钥服务。
+当前版本为 **SILO Server 与 mcli 20261109**、**SILO Console v2.7.0**、**silo-pkg v3.16.0** 与 **KES 20261026**，均使用 Go 1.27.3。Server 20261109 内嵌 Console 2.7.0、mcli 20261109 与 pkg v3.16.0；KES 保持独立、可选的外部密钥服务。
 
 | 发布说明 | English | 简体中文 |
 | --- | --- | --- |
-| Console 2.7.0（未发布草稿） | [Release draft](content/blog/release/console-2.7.0.md) | [发布草稿](content/blog/release/console-2.7.0.zh.md) |
+| Server 20261109 | [Release notes](content/blog/release/silo-20261109.md) | [发布说明](content/blog/release/silo-20261109.zh.md) |
+| Console 2.7.0 | [Release notes](content/blog/release/console-2.7.0.md) | [发布说明](content/blog/release/console-2.7.0.zh.md) |
 | Console 2.6.0 | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |
 | mcli 20261109 | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
 | silo-pkg 3.16.0 | [Release notes](content/blog/release/pkg-3.16.0.md) | [发布说明](content/blog/release/pkg-3.16.0.zh.md) |
@@ -20,7 +21,7 @@
 
 精确源码版本、升级顺序与兼容性边界见[组件矩阵](content/compatibility/versions.zh.md)。
 
-Console 2.7.0 记录已合入主线的十语言界面、阿拉伯语 RTL 和容器修复。标签与 Draft Release 已通过验证，公开版本说明记录准确源码、CI 和镜像摘要，并区分尚未公开发布的 GitHub 草稿与产品正式版；正式下载继续指向 2.6.0。Server 20261026 仍内嵌 Console 2.5.1。
+Server 20261109 交付生命周期、恢复、Object Lock 与批处理授权修复。混合版本或回退 batch 作业前，请先阅读升级说明。Console 2.7.0 已独立发布，也内嵌于本次 Server；旧 Server 二进制仍保留各自原有的界面与依赖。
 
 `data/releases.yaml` 驱动首页与下载页。`server.published: true` 启用公开制品下载链接，`published_server` 记录当前公开版本。准备后续候选版本时保持 false，直到相应 Server 制品与 Docker 镜像公开且完成核验。`windows_archive_format` 跟随各组件实际发布制品：当前 Windows 归档统一为 ZIP，Linux/macOS 保持 tar.gz；历史下载链接保留原格式。制品发布与具体生产集群部署分别验收。
 

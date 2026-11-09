@@ -6,7 +6,7 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
-**当前升级目标为 [Server 20261026](/zh/blog/release/silo-20261026/)。** 下述 20260916／20261018 的撤销历史与授权要求继续适用；本版另包含长 DN LDAP 登录、策略重载及内置策略 Reset 修复。按[组件矩阵](/zh/compatibility/versions/)协调升级所有参与节点。
+**当前升级目标为 [Server 20261109](/zh/blog/release/silo-20261109/)。** 下述 20260916／20261018 撤销历史与授权要求继续适用。Server 20261109 基于持久 IAM 记录编辑，并加入 batch 提交者授权；升级前按[批处理清单](/zh/administration/batch-framework/#upgrade-20261109)排空或取消未完成作业。按[组件矩阵](/zh/compatibility/versions/)协调所有参与节点。
 
 **STS 撤销验证：**20261018 同时补齐[持久枚举与撤销传播](/zh/blog/design/iam-revocations/#scoped-sts-20261018)。用实际父身份／令牌类型撤销后，逐个节点与站点确认旧令牌被拒绝、新令牌仍可用，并覆盖离线节点重连。请求集群未曾收到的孤立站点令牌不在撤销快照中；不要据一次成功响应推断分区中的全局瞬时失效。
 
