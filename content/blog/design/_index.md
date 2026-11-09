@@ -13,6 +13,10 @@ cascade:
 
 Design records document the engineering decisions behind PGSTY SILO: root causes, S3 and IAM protocol invariants, trade-offs against rejected alternatives, operational limits, and regression coverage.
 
+## November 9: Console Languages
+
+- [Console Languages: A Static Registry and Two Maintenance Tiers](/blog/design/console-languages/): Ten UI languages including Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83) and Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277), the measured static-bundle tradeoff, a shared menu, English fallback and Arabic RTL.
+
 ## November 6: Found in Release Acceptance
 
 - [A Partial View Must Not Report an Existing Object as Missing](/blog/design/partial-view-read-404/): Why a node that reaches only some drives can answer 404 for an object that exists, and why "not found" must require an answer from every drive.

@@ -13,6 +13,10 @@ cascade:
 
 设计归档记录 PGSTY SILO 的核心工程决策：缺陷根因、S3 与 IAM 协议不变量、备选方案取舍、运维边界与回归测试索引。
 
+## 2026-11-09 Console 多语言
+
+- [Console 多语言：静态词典注册表与两级维护](/zh/blog/design/console-languages/)：支持包括 [#83](https://github.com/pgsty/silo-console/pull/83) 葡语贡献与 [silo#277](https://github.com/pgsty/silo/issues/277) 请求的土耳其语在内的十种语言，说明静态打包的实测取舍、统一菜单、英文回退和阿拉伯语 RTL。
+
 ## 2026-11-06 发布验收中发现
 
 - [局部视图不能把存在的对象报成不存在](/zh/blog/design/partial-view-read-404/)：只能连上部分盘的节点，为什么会对存在的对象返回 404，以及为什么判定“不存在”必须要求每块盘都应答。
