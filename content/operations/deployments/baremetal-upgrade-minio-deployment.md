@@ -20,6 +20,14 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 
 ## Before You Upgrade {#prerequisites}
 
+**Upgrading to 20261109:**
+
+- Stop batch submissions and drain or cancel every unfinished job, including paused jobs. New manifests and progress reports use formats unsupported by 20261026; unfinished legacy jobs need resubmission after every node upgrades, while completed jobs remain completed. Do not roll back with new jobs pending. Reconcile completed work using the [batch upgrade and rollback checklist](/administration/batch-framework/#upgrade-20261109).
+- A single pool whose erasure sets do not all share the same hosts (typically 18 or more hosts with automatic layout) requires draining and stopping every old process before starting new ones. Rolling upgrades are unsafe because old and new nodes use different lock domains for deletes and copies.
+- During a rolling upgrade, new nodes return `503` for `POST ?restore` while any peer is old or unreachable. Pause new restores until all nodes upgrade. Full multi-pool lifecycle and S3 bulk-delete protection also require all serving nodes to run the fixed version.
+- Preserve peer discovery during bootstrap; Kubernetes headless services must retain `publishNotReadyAddresses: true`. `ready` does not wait for storage and IAM, and `cluster` can succeed before a restarted node mounts its remote drives. Before resuming applications, write a small object through each node, then read every acknowledged object through every node and verify bytes and versions, using an overall deadline and per-request timeouts. See the [startup window and data-path checks](/operations/monitoring/healthcheck-probe/#startup-readiness-window).
+- With `helm upgrade --reuse-values`, explicitly set `image.tag=RELEASE.2026-11-09T00-00-00Z`; otherwise the saved old image tag remains in use.
+
 **Upgrading to 20261026:** Upgrade all writer nodes and verify built-in policy Reset, LDAP long-DN login, remote-tier historical reads and multipart replication. Storage timeout and cancellation behavior is retained; a timeout does not prove that underlying I/O stopped or that the write did not commit. Read-quorum and healing rules are unchanged; this release does not add distributed fencing or repair pre-existing inconsistent objects. See the [20261026 upgrade checks](/compatibility/server/#maintenance-20261026).
 
 1. **Back up cluster settings.** Export bucket metadata and IAM configuration with [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) and [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export). For versions with durable IAM revocation, also back up complete backend storage and encryption material: live exports omit deletion history. Follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/).

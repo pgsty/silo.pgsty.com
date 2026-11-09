@@ -11,6 +11,12 @@ upstream_modified: true
 
 MinIO exposes unauthenticated endpoints for probing node uptime and cluster [high availability](/operations/concepts/erasure-coding/#minio-ec-parity) for simple healthchecks. These endpoints return an HTTP status code indicating whether the underlying resource is healthy or satisfies read/write quorum. MinIO exposes no other data through these endpoints.
 
+## Native probes and application startup {#native-probe}
+
+`silo healthcheck ready` calls `/minio/health/ready`: it checks the process and configured KMS/etcd, and can succeed before storage and IAM finish loading. This behavior preserves distributed peer bootstrap; Kubernetes headless services must retain `publishNotReadyAddresses: true`. Do not make `cluster` a container liveness probe or a prerequisite for peer connectivity.
+
+The distroless image's built-in `HEALTHCHECK` uses `ready`. Compose `depends_on: condition: service_healthy` therefore confirms that probe, not S3 availability. Switching to `cluster` still leaves the remote-drive reconnection window described below. A dependent application that immediately accesses objects should run a separate signed S3 write/read check with a fixed deadline, stopping startup or rollout on failure. Use a dedicated bucket and unique probe keys, and remove them after verification.
+
 ## Node Liveness {#node-liveness}
 
 Use the following endpoint to test if a MinIO server is online:

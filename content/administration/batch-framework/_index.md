@@ -18,7 +18,7 @@ A batch file defines one job task.
 
 Once started, MinIO starts processing the job. Time to completion depends on the resources available to the deployment.
 
-Ordinary job failures use the retry limits in the definition. The next SILO release distinguishes authorization refusal from temporary pauses as described below.
+Ordinary job failures use the retry limits in the definition. SILO 20261109 distinguishes authorization refusal from temporary pauses as described below.
 
 The MinIO Batch Framework supports the following job types:
 
@@ -29,7 +29,7 @@ The MinIO Batch Framework supports the following job types:
 | [expire](/administration/batch-framework-job-expire/#minio-batch-framework-expire-job) | Perform a one-time immediate expiration of objects in a bucket. |
 {.wide .expand}
 
-## Next SILO release: authorization and retries {#silo-lifecycle}
+## SILO 20261109: authorization and retries {#silo-lifecycle}
 
 SILO binds local batch operations to the authenticated submitter at job creation. The credentials in a definition are used for its remote connections; they do not grant local server authority. IAM changes are checked again when actions are taken. An explicit denial, expired or revoked credential, or changed submitter binding ends the job with `failureReason`. Statements that need request context unavailable to a background job refuse the action.
 
@@ -40,6 +40,15 @@ Push, pull, and Snowball replication also pause with `pausedReason` when a requi
 Startup discovery also retries failed manifest listings and storage reads with bounded backoff. It remembers manifests already admitted during that discovery, so a later scan cannot rerun a job that finished while waiting. Cancellation fences stale discovery results. Missing, malformed, or unsupported manifests are not queued; malformed and unsupported definitions remain on disk for inspection. A storage outage during discovery does not require a restart once storage recovers.
 
 Completed jobs remain completed after restart, including legacy jobs and jobs whose credentials later expire or change. Unfinished jobs from releases without submitter binding require resubmission. New bound definitions and authorized progress reports use formats rejected by older executors. This fences those records on rollback, but does not make a mixed cluster safe: an old node can still accept and execute its own old-format jobs. Stop submissions and drain or cancel old jobs before changing versions, and do not downgrade with pending authorized jobs.
+
+### Upgrading and rolling back 20261109 {#upgrade-20261109}
+
+This release deliberately introduces a batch-record format boundary: new job manifests use the `SILO-BATCH` v2 envelope and authorized progress reports also use v2. The 20261026 executor cannot execute or resume these records. Ordinary S3 object formats are unaffected, but batch jobs cannot follow a binary downgrade transparently.
+
+1. Stop submissions to every node before upgrading. Inventory jobs with `mcli batch list ALIAS` and `mcli batch status ALIAS JOBID`. Drain running, pending and paused jobs, or cancel them with `mcli batch cancel ALIAS JOBID`; preserve their original YAML definitions and records of completed work.
+2. Resume submissions only after every node is upgraded. Unfinished legacy jobs do not acquire an authorization binding automatically: resubmit with an identity that has the required data permissions. Reconcile completed work before resubmission to avoid unwanted repeated work. Completed legacy jobs need no resubmission.
+3. Do not run batch jobs during a mixed-version upgrade: old nodes can still accept and execute their own old-format jobs without the new submitter authorization checks.
+4. Before rollback, stop submissions again and drain or cancel all new jobs, including paused jobs. Do not expect 20261026 to resume their progress, strip the format envelope, or edit authorization records. Preserve the records and reconcile results on a compatible release before deciding whether to resubmit.
 
 Use [mcli batch status](/reference/minio-mc/mc-batch-status/#silo-job-outcomes) (`20261109`) to distinguish pauses, terminal failures, and completion with protected work left in place. `infraAdmin` still has other infrastructure administration capabilities; these job checks do not turn that role into a strict data-isolation boundary.
 
@@ -83,7 +92,7 @@ The [`mc batch`](/reference/minio-mc/mc-batch/#command-mc.batch) commands includ
 
 ## Access to `mc batch` {#access-to-mc-batch}
 
-The submitting identity needs the relevant administration action and the local [data permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy) for the job. Credentials in the definition must separately permit its remote operations. See the next-release rules above.
+The submitting identity needs the relevant administration action and the local [data permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy) for the job. Credentials in the definition must separately permit its remote operations. See the 20261109 rules above.
 
 The user executing the batch job must have the following permissions. You can alternatively restrict users from accessing these functions by blocking or limiting access to these actions:
 

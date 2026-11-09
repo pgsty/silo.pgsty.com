@@ -13,6 +13,12 @@ MinIO 提供无需身份验证的端点，用于探测节点在线状态以及�
 
 <a id="id2" data-td-print-local></a>
 
+## 原生探针与应用启动 {#native-probe}
+
+`silo healthcheck ready` 对应 `/minio/health/ready`：它检查进程以及已配置的 KMS/etcd，存储和 IAM 未完成加载时也可能返回成功。这个语义保留了分布式节点的启动互联；Kubernetes 无头服务必须保留 `publishNotReadyAddresses: true`。不要把 `cluster` 换成容器存活检查或节点互联的前置门槛。
+
+Distroless 的内置 `HEALTHCHECK` 使用 `ready`。Compose `depends_on: condition: service_healthy` 因而只确认该探针成功，不保证 S3 可用。即使改查 `cluster`，仍可能碰到下文的远端磁盘重连窗口。需要立即读写对象的依赖应用应执行独立的、有截止时间的签名 S3 写入/回读检查，并在失败时停止启动或升级；不要只凭 HTTP 健康状态放行。探测对象使用专用桶和唯一名称，校验后清理。
+
 ## 节点存活 {#node-liveness}
 
 使用以下端点测试某个 MinIO server 是否在线：

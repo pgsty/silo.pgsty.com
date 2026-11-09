@@ -20,6 +20,14 @@ upstream_modified: true
 
 ## 升级前准备 {#id2}
 
+**升级到 20261109：**
+
+- 先停止 batch 提交，排空或取消全部未完成作业（包括暂停的作业）。新作业清单和进度报告采用 20261026 不支持的格式；旧格式未完成作业在全部节点升级后需要重新提交，已完成作业保持完成。仍有新作业待执行时不要回退。按[批处理升级与回退清单](/zh/administration/batch-framework/#upgrade-20261109)核对已完成工作。
+- 单池的各纠删集不全在同一组主机上时（自动布局通常为 18 台及以上），必须排空并停止所有旧进程后再启动新版本，不能滚动升级。旧、新节点的删除和复制锁域不同。
+- 滚动升级时，只要还有旧节点或不可达节点，新节点对 `POST ?restore` 返回 `503`；暂停新恢复任务，直到全部节点升级。多池生命周期与 S3 批量删除的完整保护也需要所有服务节点都运行修复版本。
+- 保持节点间的启动发现机制；Kubernetes 无头服务保留 `publishNotReadyAddresses: true`。`ready` 不等待存储和 IAM，`cluster` 成功也可能早于该节点挂载远端磁盘。恢复应用前，通过每个节点写小对象，再通过每个节点读取并核对全部已确认对象的字节和版本；设置整体截止时间及单次请求超时。详见[启动窗口与数据面检查](/zh/operations/monitoring/healthcheck-probe/#startup-readiness-window)。
+- 使用 `helm upgrade --reuse-values` 时显式设置 `image.tag=RELEASE.2026-11-09T00-00-00Z`，否则仍使用保存的旧镜像标签。
+
 **升级到 20261026：** 统一升级全部写入节点，并验证内置策略 Reset、LDAP 长 DN 登录、远端分层历史版本读取与分片复制。存储超时和取消保留既有行为；超时不证明底层 I/O 停止，也不保证写入未提交。读仲裁与自愈策略不变，升级不新增分布式 fencing、不修复存量不一致对象。见 [20261026 升级检查](/zh/compatibility/server/#maintenance-20261026)。
 
 1. **备份集群设置。** 使用 [`mc admin cluster bucket export`](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) 与 [`mc admin cluster iam export`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) 导出存储桶元数据和 IAM 配置。对于带持久 IAM 撤销的版本，还需备份完整后端和加密材料；live export 不含删除历史，详见 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)。

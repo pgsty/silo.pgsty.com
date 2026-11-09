@@ -103,7 +103,7 @@ FLAGS：
 | `/minio/health/cluster/read` | 上一行的读 quorum 版本 | 同上 | |
 {.wide .expand}
 
-值得点破的推论：`live` 和 `ready` 是 *存活* 级别的信号——它们不能告诉你节点能否服务对象，只有 `cluster` 这一对能。这正是 cluster 端点必须远离单容器探针的原因（尺度错位、日志噪音、级联重启），也正是它适合回答运维问题的原因——"我现在可以把这个节点下线吗？"（`--maintenance`：200 表示安全，412 表示会失去高可用）。
+`live` 和 `ready` 是进程级信号，不证明对象可读写。`cluster` 这一对检查初始化和各纠删集上报的仲裁，但也不保证收到请求的节点已挂载全部远端磁盘；详见[重启窗口与数据面检查](/zh/operations/monitoring/healthcheck-probe/#startup-readiness-window)。它们适合运维仲裁与维护检查，不应作为单容器存活探针或节点发现的前置条件。应用恢复还需有界的签名 S3 写入与回读校验。
 
 ## Distroless 变体 {#distroless}
 
@@ -130,7 +130,7 @@ ENTRYPOINT ["/usr/bin/silo"]
 
 - **`ENTRYPOINT` 就是二进制本身。**`docker run pgsty/silo:distroless server /data`——没有 argv 翻译脚本，因为没有 shell 来跑脚本。经典镜像的 `MINIO_USERNAME`/`MINIO_GROUPNAME` 降权路径（依赖 GNU `chroot` 和可写的 `/etc/passwd`）在此变体中 **不受支持**；受支持的机制是 `--user` / Kubernetes `runAsUser`。
 - **`/data` 在镜像层内创建、mode 0777，试点期默认用户保持 root。** Issue [#55](https://github.com/pgsty/silo/issues/55) 证明了：只声明 `VOLUME ["/data"]` 而不创建它，会让 *所有* 非 root 运行方式失败，而且事后没有任何入口脚本能修补——Distroless 里更是压根没有入口脚本。在层内以全员可写方式创建它，是唯一让全部权限模式（包括 `--user`）都能工作的选项，同时与经典镜像保持即插即用的对等；其暴露面被"镜像只运行一个进程"这一事实所限定。nonroot 默认（uid 65532）的姿态经过考虑后推迟：它会在 UID 不匹配时破坏文档记载的 bind-mount 工作流，而试点的任务是测量摩擦，不是制造摩擦。晋升为默认推荐时再议，可能以 `-nonroot` 标签的形式出现。
-- **健康检查内置、exec 形式。** Shell 形式的 `HEALTHCHECK` 字符串需要 `/bin/sh`，在这里不可能存在；JSON 数组形式是唯一选择。Compose 会自动继承镜像的 `HEALTHCHECK`（逃生门是 `disable: true`），所以这个变体的 compose 用户零配置就能得到可用的 `depends_on: condition: service_healthy`。选 `ready` 而不是 `live`，是因为 Docker 健康状态的主要用途是 *门控*（启动顺序），那是就绪语义——况且在没有 KMS/etcd 时两者本就相同。
+- **健康检查内置、exec 形式。** Distroless 没有 shell，所以使用 JSON 数组调用 `silo healthcheck ready`。Compose 会继承该检查，但 `depends_on: condition: service_healthy` 只证明进程及已配置依赖的探针成功。它不证明存储、IAM 或 S3 路径已就绪；依赖应用须按[操作说明](/zh/operations/monitoring/healthcheck-probe/#native-probe)做独立数据面检查。保留 `ready` 的启动语义，避免节点发现依赖尚未完成的集群初始化。
 - **一项发布前必须完成的验证**：`HEALTHCHECK` 是 Docker 扩展，不在 OCI 镜像规范里（opencontainers/image-spec#749 至今开放），OCI 媒体类型的构建会静默丢弃它。发布流水线必须断言推送后的 manifest 上 `docker inspect` 能看到 `Health` 配置，否则就调整构建的媒体类型直到能看到为止。
 - **命名**：`docker.io/pgsty/silo:<RELEASE>-distroless`，外加滚动的 `distroless` 标签。服务端仓库新增 `Dockerfile.distroless`——它没有任何下载阶段，完全离线，因此可以在每次发布的 CI 里真实构建并断言，顺带堵上 #55 记录的那个"门禁测的是合成镜像而非发布镜像"的覆盖缺口。
 - **变体文档里要诚实写明用户失去了什么**：没有 `docker exec <container> sh` 式调试（改用 `docker debug` / `kubectl debug` 临时容器）；镜像内没有 `mc`（改用 `pgsty/mc` 镜像或宿主机安装的 `mcli`）；没有 `MINIO_USERNAME` 路径（改用 `--user`）。
