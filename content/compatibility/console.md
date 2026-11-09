@@ -9,7 +9,7 @@ icon: fa-solid fa-window-maximize
 ---
 
 > [!NOTE]
-> **Latest published release:** [Console v2.6.0](/blog/release/console-2.6.0/) (2026-11-05, UTC+8) adds usage scans, retained-version totals, and bucket-administration fixes. The [Console 2.7.0 candidate](/blog/release/console-2.7.0/) adds ten UI languages, Arabic RTL, container CA/temporary-directory fixes, `silo-pkg v3.16.0`, official `mcli 20261109`, and updated Swagger documentation. Upgrading standalone Console does not replace Server's embedded Console; built-in policy Reset and live bucket inventory reads require the Server 20261026 release (absent from published Server 20261018). See the [component matrix](/compatibility/versions/).
+> **Latest published release:** [Console v2.6.0](/blog/release/console-2.6.0/) (2026-11-05, UTC+8) adds usage scans, retained-version totals, and bucket-administration fixes. [Console 2.7.0](/blog/release/console-2.7.0/) adds ten UI languages, Arabic RTL, container CA/temporary-directory fixes, usage-worker TLS and scheduling fixes, folder sizes over plain HTTP, `silo-pkg v3.16.0`, official `mcli 20261109`, and updated Swagger documentation. Upgrading standalone Console does not replace Server's embedded Console; built-in policy Reset and live bucket inventory reads require the Server 20261026 release (absent from published Server 20261018). See the [component matrix](/compatibility/versions/).
 
 SILO Console is Silo's build of the MinIO Console. This page records where the two are interchangeable and where they differ. Start with the [three-level overview](/compatibility/), then use the details below to check UI and automation behavior.
 
