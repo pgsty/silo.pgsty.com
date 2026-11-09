@@ -6,31 +6,22 @@ This repository contains the bilingual documentation for **Silo**, a community f
 
 ## Release state and publication
 
-The current coordinated release is **SILO Server, mcli and KES 20261026**
-(`RELEASE.2026-10-26T00-00-00Z`, package `20261026000000.0.0`), with
-**SILO Console v2.5.1** and **silo-pkg v3.15.2**, built with Go 1.27.3.
-Server source is `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`; its selected graph
-uses the released Console and mcli sources, pkg v3.15.2 and upstream minio-go
-`v7.4.2-0.20261025165926-320af050c445`. KES is an optional external key service.
-
-**silo-pkg v3.16.0** is a separate source-only library release. Applications
-must adopt it and rebuild; the coordinated 20261026 artifacts above retain
-their original v3.15.2 dependency.
+Current releases: **mcli 20261109**, **SILO Server and KES 20261026**,
+**SILO Console v2.5.1**, and **silo-pkg v3.16.0**. All use Go 1.27.3.
+The standalone mcli release adopts pkg v3.16.0; existing Server and Console
+artifacts retain their embedded client and package versions. KES is an
+optional external key service.
 
 | Release notes | English | 简体中文 |
 | --- | --- | --- |
-| mcli 20261109 (draft) | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
+| mcli 20261109 | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
 | silo-pkg 3.16.0 | [Release notes](content/blog/release/pkg-3.16.0.md) | [发布说明](content/blog/release/pkg-3.16.0.zh.md) |
 | Server / mcli / KES 20261026 | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
 | Console 2.5 series, through 2.5.1 | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
 | silo-pkg 3.15 series, through 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md) | [发布说明](content/blog/release/pkg-3.15.2.zh.md) |
 
-These bilingual notes consolidate the October 24–25 placeholders and cover all
-changes since 20261018. See the [component matrix](content/compatibility/versions.md)
-for exact sources, upgrade order and compatibility boundaries. A storage timeout
-does not prove that underlying I/O stopped; the final Server release retains
-existing timeout behavior and does not ship the draft's mutation guards or
-ownership-checked rollback scheme.
+See the [component matrix](content/compatibility/versions.md) for exact sources,
+upgrade order and compatibility boundaries.
 
 `data/releases.yaml` drives the homepage and download templates.
 `server.published: true` enables public asset links; `published_server` records

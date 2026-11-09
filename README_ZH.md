@@ -4,23 +4,19 @@
 
 本仓库维护 [silo.pgsty.com](https://silo.pgsty.com/)：英文位于 `/`，简体中文位于 `/zh/`。网站使用 Hugo Extended 0.168.0 与固定在 `go.mod` 中的 OINK v1.5.1。
 
-## 20261026 正式发布
+## 当前版本
 
-当前协调版本为 **SILO Server、mcli 与 KES 20261026**（`RELEASE.2026-10-26T00-00-00Z`，包版本 `20261026000000.0.0`）、**SILO Console v2.5.1** 和 **silo-pkg v3.15.2**，统一使用 Go 1.27.3。
-
-**silo-pkg v3.16.0** 是独立的源码库发布。各应用需分别采用并重新构建；上述 20261026 协调发布制品仍保留原来的 v3.15.2 依赖。
+当前版本为 **mcli 20261109**、**SILO Server 与 KES 20261026**、**SILO Console v2.5.1** 和 **silo-pkg v3.16.0**，均使用 Go 1.27.3。独立 mcli 已采用 pkg v3.16.0；既有 Server 与 Console 制品保留各自内嵌的客户端及包版本。KES 是可选的外部密钥服务。
 
 | 发布说明 | English | 简体中文 |
 | --- | --- | --- |
-| mcli 20261109（草稿） | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
+| mcli 20261109 | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
 | silo-pkg 3.16.0 | [Release notes](content/blog/release/pkg-3.16.0.md) | [发布说明](content/blog/release/pkg-3.16.0.zh.md) |
 | Server / mcli / KES 20261026 | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
 | Console 2.5 系列，含 2.5.1 | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
 | silo-pkg 3.15 系列，含 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md) | [发布说明](content/blog/release/pkg-3.15.2.zh.md) |
 
-双语日志合并 10 月 24–25 日占位记录，覆盖 20261018 以来全部修改。Server 发行源码为 `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3`，选用已发布的 Console 与 mcli 源码、pkg v3.15.2 和上游 minio-go `v7.4.2-0.20261025165926-320af050c445`。KES 是可选的外部密钥服务。精确版本与升级顺序见[组件矩阵](content/compatibility/versions.zh.md)。
-
-磁盘超时不证明底层 I/O 已停止；正式版保留既有超时语义，不包含草稿中的 mutation guard 与所有权回滚方案。
+精确源码版本、升级顺序与兼容性边界见[组件矩阵](content/compatibility/versions.zh.md)。
 
 `data/releases.yaml` 驱动首页与下载页。`server.published: true` 启用公开制品下载链接，`published_server` 记录当前公开版本。准备后续候选版本时保持 false，直到相应 Server 制品与 Docker 镜像公开且完成核验。`windows_archive_format` 跟随各组件实际发布制品：当前 Windows 归档统一为 ZIP，Linux/macOS 保持 tar.gz；历史下载链接保留原格式。制品发布与具体生产集群部署分别验收。
 

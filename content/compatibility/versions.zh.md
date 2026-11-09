@@ -1,7 +1,7 @@
 ---
 title: "组件版本"
 linkTitle: "组件版本"
-description: "SILO 各组件的正式版本、独立发布的 silo-pkg 3.16.0 源码库与升级边界。"
+description: "SILO 各组件的正式版本、独立发布的 mcli 20261109、silo-pkg 3.16.0 与升级边界。"
 url: "/zh/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,7 +9,15 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO 20261026 是当前正式服务端版本，配套 Console 2.5.1、mcli 20261026 与 silo-pkg 3.15.2。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
+SILO 20261026 是当前正式服务端版本，内嵌 Console 2.5.1、mcli 20261026 与 silo-pkg 3.15.2。最新独立客户端为 **mcli 20261109**。KES 20261026 是独立、可选的外部密钥服务。正式支持维护的 PGSTY 组件组合，对原厂 MinIO/MC 尽最大努力兼容。
+
+## mcli 20261109 {#mcli-20261109}
+
+[独立客户端发布](/zh/blog/release/mcli-20261109/)使用 tag
+`RELEASE.2026-11-09T00-00-00Z`，包版本为 `20261109000000.0.0`，源码为
+[`e1d4cc5abfe00b674eb36347399e7398990be467`](https://github.com/pgsty/mc/commit/e1d4cc5abfe00b674eb36347399e7398990be467)。
+该版本使用 Go 1.27.3、silo-pkg v3.16.0 与上游 minio-go
+`v7.4.2-0.20261025165926-320af050c445` 构建。既有 Server 与 Console 制品保留各自内嵌的客户端版本，需重新构建才能采用新客户端。
 
 ## 共享包 v3.16.0 {#pkg-3-16-0}
 
@@ -33,7 +41,7 @@ Go 1.27.3。该版本更新 JOSE、网络、CPU 检测与 YAML 依赖，保持�
 | Go / 平台归档 | **Go 1.27.3** | Windows ZIP；Linux/macOS tar.gz |
 {.wide .expand}
 
-Server、mcli 与 KES 的软件包版本号均为 `20261026000000.0.0`。单独升级独立部署的 Console 不会替换旧版 Server 内嵌的控制台或服务端逻辑；内置策略 Reset、实时存储桶清单、生命周期过期与复制修复均需配合 Server 20261026 生效。
+20261026 的 Server、mcli 与 KES 制品使用软件包版本号 `20261026000000.0.0`。单独升级独立部署的 Console 不会替换旧版 Server 内嵌的控制台或服务端逻辑；内置策略 Reset、实时存储桶清单、生命周期过期与复制修复均需配合 Server 20261026 生效。
 
 [三合一发布日志](/zh/blog/release/silo-20261026/) · [Console 2.5](/zh/blog/release/console-2.5.1/) · [pkg 3.15](/zh/blog/release/pkg-3.15.2/) · [升级检查](/zh/compatibility/server/#maintenance-20261026) · [下载](/zh/download/)
 

@@ -14,12 +14,12 @@ published_server:
   build: 20261026000000.0.0
   date: "2026-10-26"
 client:
-  tag: RELEASE.2026-10-26T00-00-00Z
+  tag: RELEASE.2026-11-09T00-00-00Z
   go_version: "1.27.3"
-  build: 20261026000000.0.0
+  build: 20261109000000.0.0
   windows_archive_format: zip
-  date: "2026-10-26"
-  source: 0ceb298cdcd05f2ffdc4ea62d7d01a3666c3e8cc
+  date: "2026-11-09"
+  source: e1d4cc5abfe00b674eb36347399e7398990be467
 console:
   tag: v2.5.1
   build: 2.5.1
