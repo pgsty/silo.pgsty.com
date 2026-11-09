@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "Released SILO component identities, the separate silo-pkg 3.16.0 library release, and upgrade boundaries."
+description: "Released SILO component identities, standalone mcli 20261109, silo-pkg 3.16.0, and upgrade boundaries."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,7 +9,16 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO 20261026 is the current Server release, with Console 2.5.1, mcli 20261026 and silo-pkg 3.15.2. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
+SILO 20261026 is the current Server release, with embedded Console 2.5.1, mcli 20261026 and silo-pkg 3.15.2. The latest standalone client is **mcli 20261109**. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
+
+## mcli 20261109 {#mcli-20261109}
+
+The [standalone client release](/blog/release/mcli-20261109/) uses tag
+`RELEASE.2026-11-09T00-00-00Z`, package `20261109000000.0.0`, and source
+[`e1d4cc5abfe00b674eb36347399e7398990be467`](https://github.com/pgsty/mc/commit/e1d4cc5abfe00b674eb36347399e7398990be467).
+It is built with Go 1.27.3, silo-pkg v3.16.0 and upstream minio-go
+`v7.4.2-0.20261025165926-320af050c445`. Existing Server and Console artifacts
+retain their embedded client versions; adopting the new client requires a rebuild.
 
 ## Shared package v3.16.0 {#pkg-3-16-0}
 
@@ -35,7 +44,7 @@ dependency versions; publishing this library does not update those artifacts.
 | Go / platform archives | **Go 1.27.3** | Windows ZIP; Linux/macOS tar.gz |
 {.wide .expand}
 
-Server, mcli, and KES all use package version `20261026000000.0.0`. Upgrading a standalone Console deployment does not replace an older Server's embedded UI or server-side behavior; built-in policy Reset, live bucket inventory reads, and the lifecycle and replication fixes require Server 20261026.
+The 20261026 Server, mcli and KES artifacts use package version `20261026000000.0.0`. Upgrading a standalone Console deployment does not replace an older Server's embedded UI or server-side behavior; built-in policy Reset, live bucket inventory reads, and the lifecycle and replication fixes require Server 20261026.
 
 [Combined release notes](/blog/release/silo-20261026/) · [Console 2.5](/blog/release/console-2.5.1/) · [pkg 3.15](/blog/release/pkg-3.15.2/) · [Upgrade checks](/compatibility/server/#maintenance-20261026) · [Downloads](/download/)
 

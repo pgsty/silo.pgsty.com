@@ -3,7 +3,7 @@ title: "mc share upload"
 url: "/zh/reference/minio-mc/mc-share-upload/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-share-upload.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-share-upload"></a>
@@ -14,7 +14,7 @@ upstream_modified: false
 
 [`mc share upload`](#command-mc.share.upload) 命令会生成一个临时的预签名 URL，并集成用于将对象上传到 MinIO 存储桶的访问凭证。该临时 URL 会在可配置的时间限制后过期。
 
-应用程序可以通过该 URL 执行 `PUT` 以上传对象。
+应用程序使用生成的策略字段，通过 multipart 表单 `POST` 上传对象。
 
 有关可共享对象 URL 的更多信息，请参阅 Amazon S3 文档中的 [Pre-Signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html)。
 
@@ -100,7 +100,7 @@ Content types 也称为 [media types](https://www.iana.org/assignments/media-typ
 *Optional* 修改 CURL URL 以支持将对象上传到存储桶或存储桶前缀。 如果任意 `ALIAS` 指定的是存储桶路径或存储桶前缀路径，则该选项为必需。修改后的 CURL 输出如下所示：
 
 ```shell
-curl ... -F key=<NAME> -F file=@<FILE>
+curl 'https://silo.example.com/mybucket/' ... --form-string 'key=<NAME>' --form 'file=@<FILE>'
 ```
 
 将 `<FILE>` 替换为要上传的文件路径。
@@ -148,15 +148,17 @@ mc share upload --recursive --expire DURATION ALIAS/PATH
 ```shell
 #!/bin/sh
 
-for file in ~/Documents/photos/
+for file in "$HOME"/Documents/photos/*
 do
-   curl https://play.min.io/mybucket/ \
-   -F policy=AAAAA -F x-amz-algorithm=AWS4-HMAC-SHA256 \
-   -F x-amz-credential=AAAA/us-east-1/s3/aws4_request \
-   -F x-amz-date=20200812T202556Z \
-   -F x-amz-signature=AAAA \
-   -F bucket=mybucket -F key=photos/${file} -F file=@${file}
-
+   [ -f "$file" ] || continue
+   curl 'https://silo.example.com/mybucket/' \
+   --form-string 'policy=AAAAA' \
+   --form-string 'x-amz-algorithm=AWS4-HMAC-SHA256' \
+   --form-string 'x-amz-credential=AAAA/us-east-1/s3/aws4_request' \
+   --form-string 'x-amz-date=20200812T202556Z' \
+   --form-string 'x-amz-signature=AAAA' \
+   --form-string 'bucket=mybucket' \
+   --form-string "key=photos/${file##*/}" --form "file=@${file}"
 done
 ```
 
@@ -166,8 +168,12 @@ done
 
 ## 行为 {#id6}
 
+### 生成命令与 shell 兼容性 {#shell-compatibility}
+
+[下一 mcli 版本](/zh/compatibility/mcli/#next-release) 生成的命令会按 POSIX shell 语法引用完整参数，文本字段使用 `--form-string`。替换 `<FILE>` 和 `<NAME>` 时保留这些引号；替换值自身含引号时也需要正确转义。若编辑后的命令保存在 `upload` 变量中，使用 `sh -c "$upload"` 执行。直接执行 `$upload` 只会分词，不会解释其中的引号，可能导致失败。Windows 上应在 Git Bash 或 WSL 中执行；输出不是 `cmd.exe` 语法。
+
+上面的循环直接向 curl 传递各个参数。使用时将端点和示例策略字段替换成当前生成命令中的值；示例凭证与签名只是占位内容。
+
 ### S3 兼容性 {#s3}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+PGSTY mcli 正式支持的服务端是 SILO；对上游 MinIO 和其他 S3 服务的兼容属于[尽最大努力](/zh/reference/minio-mc/#command-mc)。

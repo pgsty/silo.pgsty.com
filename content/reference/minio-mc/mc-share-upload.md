@@ -14,7 +14,7 @@ upstream_modified: true
 
 The [`mc share upload`](#command-mc.share.upload) command generates a temporary presigned URL with integrated access credentials for uploading objects to a MinIO bucket. The temporary URL expires after a configurable time limit.
 
-Applications can perform a `PUT` to upload an object using the URL.
+Applications upload the object with a multipart form `POST` using the generated policy fields.
 
 For more information on shareable object URLs, see the Amazon S3 documentation on [Pre-Signed URLs](https://docs.aws.amazon.com/AmazonS3/latest/dev/ShareObjectPreSignedURL.html).
 
@@ -100,7 +100,7 @@ Defaults to `168h` or 168 hours (7 days).
 *Optional* Modifies the CURL URL to support uploading objects to a bucket or bucket prefix. Required if any `ALIAS` specifies a path to a bucket or bucket prefix. The modified CURL output resembles the following:
 
 ```shell
-curl ... -F key=<NAME> -F file=@<FILE>
+curl 'https://silo.example.com/mybucket/' ... --form-string 'key=<NAME>' --form 'file=@<FILE>'
 ```
 
 Replace `<FILE>` with the path to the file to upload.
@@ -148,15 +148,17 @@ You can use a shell script loop to recursively upload the contents of a filesyst
 ```shell
 #!/bin/sh
 
-for file in ~/Documents/photos/
+for file in "$HOME"/Documents/photos/*
 do
-   curl https://play.min.io/mybucket/ \
-   -F policy=AAAAA -F x-amz-algorithm=AWS4-HMAC-SHA256 \
-   -F x-amz-credential=AAAA/us-east-1/s3/aws4_request \
-   -F x-amz-date=20200812T202556Z \
-   -F x-amz-signature=AAAA \
-   -F bucket=mybucket -F key=photos/${file} -F file=@${file}
-
+   [ -f "$file" ] || continue
+   curl 'https://silo.example.com/mybucket/' \
+   --form-string 'policy=AAAAA' \
+   --form-string 'x-amz-algorithm=AWS4-HMAC-SHA256' \
+   --form-string 'x-amz-credential=AAAA/us-east-1/s3/aws4_request' \
+   --form-string 'x-amz-date=20200812T202556Z' \
+   --form-string 'x-amz-signature=AAAA' \
+   --form-string 'bucket=mybucket' \
+   --form-string "key=photos/${file##*/}" --form "file=@${file}"
 done
 ```
 
@@ -165,6 +167,12 @@ This example will upload each file in the directory `~/Documents/photos/` to the
 {{< /tabs >}}
 
 ## Behavior {#behavior}
+
+### Generated commands and shells {#shell-compatibility}
+
+In the [next mcli release](/compatibility/mcli/#next-release), generated commands quote complete arguments for a POSIX shell and use `--form-string` for text fields. Keep these quotes when replacing `<FILE>` and `<NAME>`; replacement values containing quotes also need shell escaping. To execute an edited command stored in `upload`, use `sh -c "$upload"`. Direct `$upload` execution splits words without interpreting the embedded quotes and can fail. Windows users should run the command in Git Bash or WSL; this output is not `cmd.exe` syntax.
+
+The loop above passes each argument directly to curl. Replace its endpoint and sample policy fields with the values from a current generated command; the illustrated credentials and signature are placeholders.
 
 ### S3 Compatibility {#s3-compatibility}
 

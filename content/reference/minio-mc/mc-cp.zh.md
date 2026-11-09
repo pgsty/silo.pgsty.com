@@ -126,7 +126,7 @@ mc cp play/mybucket/object.txt ~/mydata/object.txt
 
 *Optional*
 
-为对象添加自定义元数据。 以 `KEY=VALUE\;` 格式指定键值对。 例如，`--attr key1=value1\;key2=value2\;key3=value3`。
+为对象添加自定义元数据。键值对之间用分号分隔，并引用整个参数，例如 `--attr 'key1=value1;key2=value2;key3=value3'`。包含下一版本修复的构建允许空条目，包括末尾和连续分号；不含任何键值条目的输入仍然报错。包含[下一版本修复](/zh/compatibility/mcli/#next-release)的构建会在开始传输前拒绝非法属性。
 
 ##### `--checksum` {#mc.cp.-checksum}
 
@@ -565,12 +565,14 @@ mc cp --attr="content-type=CONTENT-TYPE" SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 
 ## 行为 {#id13}
 
+### 部分失败与 JSON 计数 {#partial-failures}
+
+包含[下一版本修复](/zh/compatibility/mcli/#next-release)的构建在源准备失败后整体返回非零，同时继续处理其他独立源，包括参数列表中后面的源。成功的复制不会回滚。逐对象 JSON 开始记录中的 `totalCount` 和 `totalSize` 是累计准备好的对象数与字节数，不是固定的最终总量或已完成计数。请结合最终退出码、错误记录与最终字节汇总判断结果。
+
 [`mc cp`](#command-mc.cp) 使用 MD5SUM 校验和验证所有到对象存储的复制操作。
 
 ### S3 兼容性 {#id14}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+PGSTY mcli 正式支持的服务端是 SILO；对上游 MinIO 和其他 S3 服务的兼容属于[尽最大努力](/zh/reference/minio-mc/#command-mc)。
 
 这项 HTTP-200 CopyObject 修复适用于 mcli 选择单次 CopyObject 的路径：对象小于 64 MiB，或显式 `--disable-multipart`。更大复制默认走 ComposeObject，不能用该修复替代对此路径的单独验证。

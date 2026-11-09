@@ -10,20 +10,31 @@ icon: fa-solid fa-terminal
 
 `mcli` is Silo's build of the MinIO Client (`mc`). This page records where the two are interchangeable and where they differ.
 
-[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/) and [20260913](/blog/release/mcli-20260913/). The latest is [20261026](/blog/release/silo-20261026/#mcli); historical notes retain their own comparison baselines.
+[`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/) and [20260913](/blog/release/mcli-20260913/). The latest is [20261109](/blog/release/mcli-20261109/); historical notes retain their own comparison baselines.
 
 > [!TIP]
-> **Current release:** [mcli 20261026](/blog/release/silo-20261026/#mcli), package `20261026000000.0.0`, source `0ceb298cdcd0`. Windows uses ZIP; Linux/macOS use tar.gz, with Linux RPM/DEB/APK and Docker Hub images.
+> **Current release:** [mcli 20261109](/blog/release/mcli-20261109/), package `20261109000000.0.0`, source `e1d4cc5abfe0`. Windows uses ZIP; Linux/macOS use tar.gz, with Linux RPM/DEB/APK and Docker Hub images.
 
-<span id="current-release"></span>
+<span id="next-release"></span><span id="current-release"></span>
 
-## Current release changes {#release-20261026}
+## Current release changes {#release-20261109}
+
+The [20261109 release notes](/blog/release/mcli-20261109/) cover the fixes in [pgsty/mc#74](https://github.com/pgsty/mc/pull/74), [#76](https://github.com/pgsty/mc/pull/76) and [#77](https://github.com/pgsty/mc/pull/77). The source [changelog](https://github.com/pgsty/mc/blob/RELEASE.2026-11-09T00-00-00Z/CHANGELOG.md) records the complete changes.
+
+- `cp` and `mv` continue processing independent sources after a preparation error and return nonzero overall. Later arguments can still be copied or moved; successful moves delete their sources. There is no rollback.
+- Per-object JSON start records contain cumulative prepared object counts and bytes in `totalCount` and `totalSize`. These values grow while sources are listed; they are not the final workload or a denominator for completion percentage. Check the final exit status, error records and final byte summary.
+- `share upload` generates POSIX-shell commands with single-quoted arguments and `--form-string` for literal fields. After substituting correctly quoted placeholder values, execute the command in a POSIX shell. If it is stored in `upload`, use `sh -c "$upload"`; executing `$upload` directly does not interpret its embedded quotes. On Windows, use Git Bash or WSL instead of `cmd.exe`.
+- Invalid `--attr` fails `cp` and `mv` before any transfer. Separate pairs with semicolons: `--attr 'key=value;other=value'`. Empty entries, including trailing or repeated semicolons, are ignored by `cp`, `mv`, `mirror` and `pipe`; an input with no key/value entry still fails.
+- Removal permission and WORM protection errors, and per-item IAM or bucket metadata import failures, return nonzero while preserving reports. Legacy IAM fallback is restricted to `NotImplemented` and `XMinioAdminVersionMismatch`.
+- `mv` rejects resolved self-moves and ambiguous same-bucket/key moves between endpoints that share a scheme, port and IP address, including `--resolve` mappings. Shared-IP virtual hosts may be rejected. Establish that their stores are independent before copying, verifying and removing explicitly; matching bytes through two aliases alone do not establish independence. Different addresses, ports, proxy routing, virtual-host addressing or changing DNS can still hide a shared backend. Configure aliases to one store with a consistent endpoint URL; DNS is not a general storage-identity service. A local DNS failure does not reject an endpoint that the transport reaches through an HTTP proxy; unresolved direct endpoints still fail. Proxy selection honors `NO_PROXY`.
+
+## Changes inherited from 20261026 {#release-20261026}
 
 <span id="release-20261018"></span>
 
 Built with Go 1.27.3, silo-pkg 3.15.2, and pinned upstream SDK `320af050c445`. Since 20261018, this release fixes identity and connection-cache isolation, `admin replicate resync` JSON output and terminal states, throughput and batch IOPs counter overflow, job status polling when live metrics are absent, partial-failure exit codes, alias region configuration, and SDK multipart, read, and bulk-delete handling. Automation scripts should handle the added `pending` state and non-zero exit codes when resync mutations partially fail (querying an already failed job still exits `0`). Alias region support adds no new CLI flags, and existing configurations continue to work unchanged.
 
-Embedders should select `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`. Client upgrades require no Server protocol changes, with SILO as the maintained target. See the [complete changes](/blog/release/silo-20261026/#mcli) and [component matrix](/compatibility/versions/).
+The 20261026 module version is `github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0`. Client upgrades require no Server protocol changes, with SILO as the maintained target. See the [complete changes](/blog/release/silo-20261026/#mcli) and [component matrix](/compatibility/versions/).
 
 ## Changes inherited from 20260916 {#release-20260916}
 

@@ -6,7 +6,7 @@
 # firstContribution is the first public issue / PR date; omitted for private disclosures.
 # Sync repository records, README sections, and bilingual pages: python3 bin/contributors.py
 # Refresh avatars: python3 bin/contributor_avatars.py
-updated: "2026-11-04T11:20:24+00:00"
+updated: "2026-11-09T03:47:15+00:00"
 repositories:
   - repo: "pgsty/silo"
     updated: "2026-10-26T16:35:06+00:00"
@@ -17,9 +17,9 @@ repositories:
     issues: 42
     pullRequests: 37
   - repo: "pgsty/mc"
-    updated: "2026-10-26T16:35:06+00:00"
-    issues: 26
-    pullRequests: 29
+    updated: "2026-11-09T03:47:15+00:00"
+    issues: 45
+    pullRequests: 32
   - repo: "pgsty/silo-pkg"
     updated: "2026-10-26T16:35:06+00:00"
     issues: 0
@@ -66,8 +66,8 @@ code:
       - repo: "pgsty/mc"
         what: "Maintains mcli, including fixes, tests, packaging, and releases"
         whatZh: "维护 mcli 的修复、测试、打包与发行"
-        merged: [1, 2, 3, 4, 8, 9, 10, 11, 13, 22, 24, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 46, 47, 55]
-        issuesClosed: [5, 6, 7, 12, 14, 15, 16, 17, 18, 19, 20, 21, 23, 25, 28, 29, 30, 31, 50, 51, 52, 53, 54]
+        merged: [1, 2, 3, 4, 8, 9, 10, 11, 13, 22, 24, 27, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 46, 47, 55, 74, 76, 77]
+        issuesClosed: [5, 6, 7, 12, 14, 15, 16, 17, 18, 19, 20, 21, 23, 25, 28, 29, 30, 31, 50, 51, 52, 53, 54, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 75]
       - repo: "pgsty/silo-pkg"
         what: "Maintains shared packages, including policy fixes and component coordination"
         whatZh: "维护共享包、策略修复与组件协调"
