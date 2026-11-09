@@ -16,7 +16,9 @@ upstream_modified: true
 >
 > RELEASE.2022-10-09T21-10-59Z or later
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc batch list`](#command-mc.batch.list) 命令会输出部署中当前正在进行的批处理作业列表。
 
@@ -44,7 +46,9 @@ mc [GLOBALFLAGS] batch list TARGET           \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `TARGET` {#mc.batch.list.TARGET}
 
@@ -62,13 +66,19 @@ mc [GLOBALFLAGS] batch list TARGET           \
 
 仅列出指定类型的批处理作业。
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 列出所有 `replicate` 类型的批处理作业 {#replicate}
+## 示例 {#example}
+
+<a id="replicate" data-td-print-local></a>
+
+### 列出所有 `replicate` 类型的批处理作业 {#list-all-replicate-type-batch-jobs}
 
 以下命令列出 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) `myminio` 所对应部署上的 `replicate` 类型作业：
 
@@ -92,6 +102,8 @@ E24HH4nNMcgY5taynaPfxu  replicate       minioadmin      1 minute ago
 
 SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。
 
-## 权限 {#id6}
+<a id="id6" data-td-print-local></a>
+
+## 权限 {#permissions}
 
 你必须具有 [`admin:ListBatchJobs`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-ListBatchJobs) 权限，才能列出该部署上的作业。

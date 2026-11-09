@@ -9,12 +9,13 @@ upstream_modified: true
 > [!NOTE]
 > **自 mcli 20260916 起：** 逐对象权限错误会报告并继续处理后续对象；有限 mirror 任务只要有失败就返回 1。包括源不可读、目标写入拒绝及本地目标删除失败；这些权限错误不要求 `--skip-errors`。watch 模式的列举/监听失败保留原有重试行为。失败任务不再输出普通成功结束统计，显式 `--summary` JSON 的 `status` 为 `failure`。文本错误位于 stderr；检查退出码，不要把进度计数当作完成证明。 [版本说明](/zh/compatibility/mcli/#current-release).
 
-
 <a id="mc-mirror"></a>
 
 <a id="command-mc.mirror"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc mirror`](#command-mc.mirror) 命令用于将内容同步到 MinIO 部署，类似于 `rsync` 工具。 [`mc mirror`](#command-mc.mirror) 支持以文件系统、MinIO 部署和其他 S3 兼容主机作为同步源。
 
@@ -78,7 +79,9 @@ mc [GLOBALFLAGS] mirror                            \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `SOURCE` {#mc.mirror.SOURCE}
 
@@ -525,13 +528,19 @@ mc mirror --active-active siteB siteA
 
 操作后，Source 上存在对象 A 和 D。 Target 上存在对象 A、C、D。
 
-### 全局标志 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id9}
+<a id="id9" data-td-print-local></a>
 
-### 将本地目录镜像到 S3 兼容主机 {#s3}
+## 示例 {#examples}
+
+<a id="s3" data-td-print-local></a>
+
+### 将本地目录镜像到 S3 兼容主机 {#mirror-a-local-directory-to-an-s3-compatible-host}
 
 使用 [`mc mirror`](#command-mc.mirror) 将文件从文件系统镜像到 S3 主机：
 
@@ -543,7 +552,9 @@ mc mirror FILEPATH ALIAS/PATH
 - 将 [`ALIAS`](#mc.mirror.TARGET) 替换为已配置 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.mirror.TARGET) 替换为目标存储桶。
 
-### 持续将本地目录镜像到 S3 兼容主机 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 持续将本地目录镜像到 S3 兼容主机 {#continuously-mirror-a-local-directory-to-an-s3-compatible-host}
 
 将 [`mc mirror`](#command-mc.mirror) 与 [`--watch`](#mc.mirror.-watch) 一起使用，可持续将文件从文件系统镜像到 S3 兼容主机；文件系统中新增或删除的对象会在主机端同步新增或删除：
 
@@ -555,7 +566,9 @@ mc mirror --watch FILEPATH ALIAS/PATH
 - 将 [`ALIAS`](#mc.mirror.TARGET) 替换为已配置 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.mirror.TARGET) 替换为目标存储桶。
 
-### 持续将 S3 存储桶镜像到 S3 兼容主机 {#s3-s3}
+<a id="s3-s3" data-td-print-local></a>
+
+### 持续将 S3 存储桶镜像到 S3 兼容主机 {#continuously-mirror-s3-bucket-to-an-s3-compatible-host}
 
 将 [`mc mirror`](#command-mc.mirror) 与 [`--watch`](#mc.mirror.-watch) 一起使用，可持续将一个 S3 兼容主机上某个存储桶中的对象镜像到另一个 S3 兼容主机；存储桶中新增或删除的对象会同步到目标主机。
 
@@ -568,7 +581,9 @@ mc mirror --watch SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 - 将 [`TGTALIAS`](#mc.mirror.TARGET) 替换为已配置 S3 兼容主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`TGTPATH`](#mc.mirror.TARGET) 替换为目标存储桶。
 
-### 将对象从 AWS S3 镜像到 MinIO，并跳过 GLACIER 中的对象 {#aws-s3-minio-glacier}
+<a id="aws-s3-minio-glacier" data-td-print-local></a>
+
+### 将对象从 AWS S3 镜像到 MinIO，并跳过 GLACIER 中的对象 {#mirror-objects-from-aws-s3-to-minio-skipping-objects-in-glacier}
 
 将 [`mc mirror`](#command-mc.mirror) 与 [`--exclude-storageclass`](#mc.mirror.-exclude-storageclass) 一起使用，可将对象从 AWS S3 镜像到 MinIO，同时不镜像 GLACIER 或 DEEP_ARCHIVE 存储中的对象。
 
@@ -582,13 +597,19 @@ mc mirror --exclude-storageclass GLACIER  \
 - 将 [`TGTALIAS`](#mc.mirror.TARGET) 替换为已配置 S3 主机的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`TGTPATH`](#mc.mirror.TARGET) 替换为目标存储桶。
 
-## 行为 {#id11}
+<a id="id11" data-td-print-local></a>
 
-### 对象失败时镜像继续执行 {#id12}
+## 行为 {#behavior}
+
+<a id="id12" data-td-print-local></a>
+
+### 对象失败时镜像继续执行 {#mirror-continues-on-failed-object}
 
 如果目标上存在同名对象，MinIO 会为重复对象输出错误。 发生错误后，`mc mirror` 会继续将其他对象从源端镜像到目标端。
 
-### 对象删除时 MinIO 会裁剪空前缀 {#minio}
+<a id="minio" data-td-print-local></a>
+
+### 对象删除时 MinIO 会裁剪空前缀 {#minio-trims-empty-prefixes-on-object-removal}
 
 [`mc mirror --watch`](#mc.mirror.-watch) 命令会持续同步源端和目标端中新增与删除的对象。 这也包括在源端删除对象时，自动删除目标端对应对象。
 

@@ -43,7 +43,9 @@ Push、Pull 和 Snowball 复制作业在必要的授权依赖或报告读取暂�
 
 使用 [mcli batch status](/zh/reference/minio-mc/mc-batch-status/#silo-job-outcomes)（`20261109`）区分暂停、终态失败和仍有受保护工作未处理的完成结果。`infraAdmin` 仍有其他基础设施管理能力，这些作业检查不把该角色变成严格的数据隔离边界。
 
-## MinIO 批处理 CLI {#minio-cli}
+<a id="minio-cli" data-td-print-local></a>
+
+## MinIO 批处理 CLI {#minio-batch-cli}
 
 - 安装 [MinIO Client](/zh/reference/minio-mc/#minio-client)
 - 为 MinIO 部署定义一个 [`alias`](/zh/reference/minio-mc/mc-alias-set/#command-mc.alias.set)
@@ -109,6 +111,8 @@ Push、Pull 和 Snowball 复制作业在必要的授权依赖或报告读取暂�
 
 <a id="minio-batch-local"></a>
 
-## `Local` 部署 {#local}
+<a id="local" data-td-print-local></a>
+
+## `Local` 部署 {#local-deployment}
 
 可通过向 [`mc batch`](/zh/reference/minio-mc/mc-batch/#command-mc.batch) 命令传递一个 `alias`，对特定部署运行批处理作业。 命令中指定的部署会在该批处理作业的上下文中成为 `local` 部署。

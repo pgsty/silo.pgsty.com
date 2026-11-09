@@ -36,7 +36,9 @@ upstream_modified: true
 
 实时流结束后同样检查状态的新旧：保存的终态如果早于已经观察到的进度，命令会拒绝采用并以非零退出码结束。延迟到达的实时采样不能使进度倒退，同时声称完成和失败的报告也会被拒绝。
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc batch status`](#command-mc.batch.status) 命令会输出 MinIO 服务器上作业事件的汇总信息。
 
@@ -70,7 +72,9 @@ mcli [GLOBALFLAGS] batch status TARGET JOBID
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `TARGET` {#mc.batch.status.TARGET}
 
@@ -90,13 +94,19 @@ mcli [GLOBALFLAGS] batch status TARGET JOBID
 
 TARGET 与 JOBID 都是必填参数。
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 汇总活动复制作业的事件 {#id6}
+## 示例 {#example}
+
+<a id="id6" data-td-print-local></a>
+
+### 汇总活动复制作业的事件 {#summarize-the-events-of-an-active-replicate-job}
 
 以下命令会为 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) `myminio` 对应部署上的活动作业提供实时汇总：
 
@@ -119,7 +129,9 @@ Elapsed:        2m14.227222868s
 CurrObjName:    share/doc/xml-core/examples/foo.xmlcatalogs
 ```
 
-### S3 兼容性 {#s3}
+<a id="s3" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 **`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
 

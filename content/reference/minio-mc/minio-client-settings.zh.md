@@ -20,9 +20,13 @@ upstream_modified: true
 
 有些设置只有环境变量或配置项中的一种，而不是两者同时存在。
 
-## 设置 {#id2}
+<a id="id2" data-td-print-local></a>
 
-### 主机凭证 {#id3}
+## 设置 {#settings}
+
+<a id="id3" data-td-print-local></a>
+
+### 主机凭证 {#host-credentials}
 
 使用此设置可为 *mc* 命令添加一个临时别名。 例如，可用于脚本场景。
 
@@ -45,7 +49,9 @@ upstream_modified: true
 {{< /tab >}}
 {{< /tabs >}}
 
-#### 示例 {#id4}
+<a id="id4" data-td-print-local></a>
+
+#### 示例 {#examples}
 
 **静态凭证**
 
@@ -67,7 +73,9 @@ export MC_HOST_<alias>=https://<Access Key>:<Secret Key>:<Session Token>@<YOUR-S
 export MC_HOST_myalias=https://Q3AM3UQ867SPQQA43P2F:zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG:eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NLZXkiOiJOVUlCT1JaWVRWMkhHMkJNUlNYUiIsImF1ZCI6IlBvRWdYUDZ1Vk80NUlzRU5SbmdEWGo1QXU1WWEiLCJhenAiOiJQb0VnWFA2dVZPNDVJc0VOUm5nRFhqNUF1NVlhIiwiZXhwIjoxNTM0ODk2NjI5LCJpYXQiOjE1MzQ4OTMwMjksImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0Ojk0NDMvb2F1dGgyL3Rva2VuIiwianRpIjoiNjY2OTZjZTctN2U1Ny00ZjU5LWI0MWQtM2E1YTMzZGZiNjA4In0.eJONnVaSVHypiXKEARSMnSKgr-2mlC2Sr4fEGJitLcJF_at3LeNdTHv0_oHsv6ZZA3zueVGgFlVXMlREgr9LXA@play.min.io
 ```
 
-### STS 服务 {#sts}
+<a id="sts" data-td-print-local></a>
+
+### STS 服务 {#sts-service}
 
 > [!NOTE]
 > **新增: mc**
@@ -133,7 +141,9 @@ export MC_WEB_IDENTITY_TOKEN_FILE_myalias=/var/run/secrets/kubernetes.io/service
 {{< /tab >}}
 {{< /tabs >}}
 
-### 配置目录 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 配置目录 {#configuration-directory}
 
 指定 MinIO Client 应使用的配置目录路径。在 `pgsty/mc` 容器镜像（`20261109+`）中，`/.mc` 目录预创建为 `1777` 权限，支持任意非 root UID 初始化配置。
 
@@ -169,7 +179,9 @@ export MC_REGION=ap-southeast-1
 {{< /tab >}}
 {{< /tabs >}}
 
-### 进度条 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 进度条 {#progress-bar}
 
 禁用 MinIO Client 进度条。
 
@@ -204,7 +216,9 @@ export MC_REGION=ap-southeast-1
 {{< /tab >}}
 {{< /tabs >}}
 
-### 颜色主题 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 颜色主题 {#color-theme}
 
 禁用 MinIO Client 输出使用的颜色主题。
 
@@ -234,7 +248,9 @@ export MC_REGION=ap-southeast-1
 {{< /tab >}}
 {{< /tabs >}}
 
-### 调试 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 调试 {#debug}
 
 启用调试输出。
 
@@ -249,7 +265,9 @@ export MC_REGION=ap-southeast-1
 {{< /tab >}}
 {{< /tabs >}}
 
-### 禁用 SSL {#ssl}
+<a id="ssl" data-td-print-local></a>
+
+### 禁用 SSL {#disable-ssl}
 
 禁用 SSL 证书校验。
 
@@ -264,7 +282,9 @@ export MC_REGION=ap-southeast-1
 {{< /tab >}}
 {{< /tabs >}}
 
-### 限制下载带宽 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 限制下载带宽 {#limit-download-bandwidth}
 
 限制 MinIO Client 在某些命令中使用的下载带宽。
 
@@ -299,7 +319,9 @@ export MC_LIMIT_DOWNLOAD=1G
 
 在非 Linux 系统上，请参考你的操作系统文档使用等效命令。
 
-### 限制上传带宽 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 限制上传带宽 {#limit-upload-bandwidth}
 
 限制 MinIO Client 在某些命令中使用的上传带宽。
 
@@ -334,7 +356,9 @@ export MC_LIMIT_UPLOAD=1G
 
 在非 Linux 系统上，请参考你的操作系统文档使用等效命令。
 
-### SSE-KMS 加密 {#sse-kms}
+<a id="sse-kms" data-td-print-local></a>
+
+### SSE-KMS 加密 {#sse-kms-encryption}
 
 使用服务端管理密钥通过 [SSE-KMS](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 对对象进行加密和解密。
 
@@ -351,7 +375,9 @@ export MC_LIMIT_UPLOAD=1G
 {{< /tab >}}
 {{< /tabs >}}
 
-### SSE-S3 加密 {#sse-s3}
+<a id="sse-s3" data-td-print-local></a>
+
+### SSE-S3 加密 {#sse-s3-encryption}
 
 请求使用服务端管理密钥的 [SSE-S3](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 加密。
 

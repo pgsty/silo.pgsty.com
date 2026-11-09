@@ -27,7 +27,9 @@ upstream_modified: true
 
 SILO 软件包安装的是 `silo.service`。服务单元为迁移兼容先读取 `/etc/default/minio`，再读取 `/etc/default/silo`，后者的同名变量覆盖前者。SILO 配置应写入后者；`MINIO_*` 变量名与既有参考锚点继续保留。
 
-## SILO Server CLI 选项 {#minio-server-cli}
+<a id="minio-server-cli" data-td-print-local></a>
+
+## SILO Server CLI 选项 {#minio-server-cli-options}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -70,7 +72,9 @@ silo server $MINIO_OPTS ...
 >
 > `silo server` 命令不会直接读取 `$MINIO_OPTS`。 该变量仅在按上述方式使用时才会生效。
 
-## 存储卷 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 存储卷 {#storage-volumes}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -87,7 +91,9 @@ silo server $MINIO_OPTS ...
 {{< /tab >}}
 {{< /tabs >}}
 
-## 环境变量文件路径 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 环境变量文件路径 {#environment-variable-file-path}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -104,7 +110,9 @@ silo server $MINIO_OPTS ...
 {{< /tab >}}
 {{< /tabs >}}
 
-## 过期处理工作线程 {#id5}
+<a id="id5" data-td-print-local></a>
+
+## 过期处理工作线程 {#workers-for-expiration}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -119,7 +127,9 @@ silo server $MINIO_OPTS ...
 {{< /tab >}}
 {{< /tabs >}}
 
-## 域名 {#id6}
+<a id="id6" data-td-print-local></a>
+
+## 域名 {#domain}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -150,7 +160,9 @@ silo server $MINIO_OPTS ...
 
 <a id="id7" data-td-print-local></a>
 
-## 扫描器速度 {#minio-scanner-speed-options}
+<a id="minio-scanner-speed-options" data-td-print-local></a>
+
+## 扫描器速度 {#scanner-speed}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -205,7 +217,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
   </tbody>
 </table>
 
-## 批量复制 {#id8}
+<a id="id8" data-td-print-local></a>
+
+## 批量复制 {#batch-replication}
 
 {{< tabs group="tab1" >}}
 {{< tab label="配置项" value="tab1" >}}
@@ -213,7 +227,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 {{< /tab >}}
 {{< /tabs >}}
 
-## 数据压缩 {#id9}
+<a id="id9" data-td-print-local></a>
+
+## 数据压缩 {#data-compression}
 
 以下部分记录用于为对象启用数据压缩的设置。 有关如何使用这些配置设置的教程，请参见 [数据压缩](/zh/administration/object-management/data-compression/#minio-data-compression)。
 
@@ -223,7 +239,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 
 *mc-conf*
 
-### 启用压缩 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 启用压缩 {#enable-compression}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -244,7 +262,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 
 启用或禁用数据压缩不会更改现有对象。
 
-### 允许加密 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 允许加密 {#allow-encryption}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -268,7 +288,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 >
 > MinIO 强烈不建议对压缩对象进行加密。 如果你需要加密，请仔细评估可能泄露加密对象内容信息的风险。
 
-### 压缩扩展名 {#id12}
+<a id="id12" data-td-print-local></a>
+
+### 压缩扩展名 {#compression-extensions}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -294,7 +316,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 
 即使在此参数中显式指定，MinIO 也不支持压缩 [Excluded File Types](/zh/administration/object-management/data-compression/#minio-data-compression-excluded-types) 列表中的文件类型。
 
-### 压缩 MIME 类型 {#mime}
+<a id="mime" data-td-print-local></a>
+
+### 压缩 MIME 类型 {#compression-mime-types}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -318,7 +342,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 >
 > 某些类型的文件无法显著减小体积。 MinIO *不会* 压缩这些文件，即使它们在 [`mime_types`](#mc-conf.compression.mime_types) 参数中被指定。 详见 [Excluded types](/zh/administration/object-management/data-compression/#minio-data-compression-excluded-types)。
 
-### 注释 {#id13}
+<a id="id13" data-td-print-local></a>
+
+### 注释 {#comments}
 
 {{< tabs group="tab1-tab2" default="tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -335,7 +361,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 
 指定一个与数据压缩配置关联的注释。
 
-## 纠删码条带大小 {#id14}
+<a id="id14" data-td-print-local></a>
+
+## 纠删码条带大小 {#erasure-stripe-size}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -363,7 +391,9 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 >
 > 条带大小变更会对部署功能、可用性、性能和行为产生重大影响。 MinIO 的条带选择算法已为大多数工作负载设置了适当默认值。 偏离该默认值来调整条带大小并不常见，通常也没有必要或不被建议。
 
-## 最大对象版本数 {#id15}
+<a id="id15" data-td-print-local></a>
+
+## 最大对象版本数 {#maximum-object-versions}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -452,7 +482,6 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 此设置没有对应的配置项。
 {{< /tab >}}
 {{< /tabs >}}
-
 
 <a id="multipart-listing"></a>
 

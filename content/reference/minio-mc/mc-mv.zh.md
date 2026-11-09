@@ -9,12 +9,13 @@ upstream_modified: true
 > [!NOTE]
 > **自 mcli 20260916 起：** 复制失败不会授权删除源对象。复制成功但源删除失败时，命令等待删除结果后返回 1，已成功复制的对象不会回滚。选定 SDK 也会报告 CopyObject HTTP 200 响应内嵌的 S3 错误。 [版本说明](/zh/compatibility/mcli/#current-release).
 
-
 <a id="mc-mv"></a>
 
 <a id="command-mc.mv"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc mv`](#command-mc.mv) 命令将对象从源移动到目标，例如在不同 MinIO 部署之间移动，*或* 在同一 MinIO 部署的不同存储桶之间移动。 [`mc mv`](#command-mc.mv) 还支持在本地文件系统与 MinIO 之间移动对象。
 
@@ -57,7 +58,9 @@ TARGET
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `SOURCE` {#mc.mv.SOURCE}
 
@@ -340,13 +343,19 @@ MinIO 建议对大于 100 MB 的对象使用 multipart upload。 有关 multipar
 
 有关 S3 storage class 的更多信息，请参阅 Amazon 文档 [Storage Classes](https://docs.aws.amazon.com/AmazonS3/latest/dev/storage-class-intro.html)。
 
-### 全局标志 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id9}
+<a id="id9" data-td-print-local></a>
 
-### 将文件从文件系统移动到 S3-Compatible Host {#s3-compatible-host}
+## 示例 {#examples}
+
+<a id="s3-compatible-host" data-td-print-local></a>
+
+### 将文件从文件系统移动到 S3-Compatible Host {#move-files-from-filesystem-to-s3-compatible-host}
 
 ```shell
 mc mv [--recursive] FILEPATH ALIAS/PATH
@@ -360,7 +369,9 @@ mc mv [--recursive] FILEPATH ALIAS/PATH
 - 将 [`ALIAS`](#mc.mv.TARGET) 替换为已配置 S3-compatible host 的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.mv.TARGET) 替换为目标存储桶。
 
-### 将文件从文件系统移动到 S3-Compatible Host 并附带自定义元数据 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 将文件从文件系统移动到 S3-Compatible Host 并附带自定义元数据 {#move-a-file-from-filesystem-to-s3-compatible-host-with-custom-metadata}
 
 使用带 [`--attr`](#mc.mv.-attr) 选项的 [`mc mv`](#command-mc.mv)， 可为文件设置自定义属性。
 
@@ -373,7 +384,9 @@ mc mv --attr "ATTRIBUTES" FILEPATH ALIAS/PATH
 - 将 [`PATH`](#mc.mv.TARGET) 替换为目标存储桶。
 - 将 [`ATTRIBUTES`](#mc.mv.-attr) 替换为一个或多个逗号分隔的 键值对 `KEY=VALUE`。每个键值对表示一个属性键及其值。
 
-### 在 S3-Compatible 服务之间移动存储桶 {#s3-compatible}
+<a id="s3-compatible" data-td-print-local></a>
+
+### 在 S3-Compatible 服务之间移动存储桶 {#move-bucket-between-s3-compatible-services}
 
 ```shell
  mc mv --recursive SRCALIAS/SRCPATH TGTALIAS/TGTPATH
@@ -384,7 +397,9 @@ mc mv --attr "ATTRIBUTES" FILEPATH ALIAS/PATH
 - 将 [`TGTALIAS`](#mc.mv.TARGET) 替换为已配置 S3-compatible host 的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`TGTPATH`](#mc.mv.TARGET) 替换为存储桶路径。
 
-### 将文件移动到 S3-Compatible Host 并指定存储类别 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 将文件移动到 S3-Compatible Host 并指定存储类别 {#move-file-to-s3-compatible-host-with-specific-storage-class}
 
 使用带 [`--storage-class`](#mc.mv.-storage-class) 选项的 [`mc mv`](#command-mc.mv)， 可在目标 S3-compatible host 上设置存储类别。
 
@@ -400,7 +415,9 @@ mc mv --storage-class CLASS FILEPATH ALIAS/PATH
 
   > mc mv –storage-class REDUCED_REDUNDANCY myobject.txt play/mybucket
 
-## 行为 {#id12}
+<a id="id12" data-td-print-local></a>
+
+## 行为 {#behavior}
 
 ### 部分失败与端点身份 {#partial-failures}
 
@@ -408,7 +425,9 @@ mc mv --storage-class CLASS FILEPATH ALIAS/PATH
 
 搬移保护会拒绝相同的已解析对象，也会拒绝桶和对象路径相同、协议和端口相同且 IP 重叠的端点间搬移，包括 `--resolve` 映射。因此，共享 IP 的虚拟主机也可能被拒绝。先确认它们的存储实际独立，才能分步复制、核验、显式删除；通过两个别名读到相同字节不能证明存储独立。不同地址、端口、代理路由、虚拟主机寻址或 DNS 变化可能隐藏共享后端；同一存储的别名应使用一致的端点 URL。经代理访问的端点发生本地 DNS 失败时，将其地址视为未知，不因此拒绝搬移。代理选择遵循传输层规则，包括 `NO_PROXY`；无法解析的直连端点仍然失败。
 
-### 移动时的对象名称 {#id13}
+<a id="id13" data-td-print-local></a>
+
+### 移动时的对象名称 {#object-names-on-move}
 
 如果未显式指定目标对象名，在将对象移动到 [`TARGET`](#mc.mv.TARGET) 时，MinIO 会使用 [`SOURCE`](#mc.mv.SOURCE) 的对象名。
 
@@ -420,11 +439,15 @@ mc mv play/mybucket/object.txt play/mybucket/myobject.txt
 
 对于递归移动操作（[`mc mv --recursive`](#mc.mv.-recursive)），MinIO 会将 `TARGET` 路径视为 `SOURCE` 上对象的前缀。
 
-### 校验和验证 {#id14}
+<a id="id14" data-td-print-local></a>
+
+### 校验和验证 {#checksum-verification}
 
 [`mc mv`](#command-mc.mv) 使用 MD5SUM 校验和验证所有到对象存储的移动操作。
 
-### MinIO 在对象删除时会裁剪空前缀 {#minio}
+<a id="minio" data-td-print-local></a>
+
+### MinIO 在对象删除时会裁剪空前缀 {#minio-trims-empty-prefixes-on-object-removal}
 
 [`mc mv`](#command-mc.mv) 依赖 [`mc`](/zh/reference/minio-mc/#command-mc) 的删除 API 来移除对象。在删除存储桶前缀中的最后一个对象时， [`mc`](/zh/reference/minio-mc/#command-mc) 还会递归删除直到存储桶根为止的每一个空前缀。[`mc`](/zh/reference/minio-mc/#command-mc) 只会对在对象写入 操作过程中 *隐式* 创建的前缀执行这种递归删除，也就是说，该前缀不是通过 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 这类显式目录创建命令创建的。
 
@@ -440,7 +463,9 @@ mc mv play/mybucket/object.txt play/mybucket/myobject.txt
 
 如果将 [`mc mv`](#command-mc.mv) 用于文件系统操作，[`mc`](/zh/reference/minio-mc/#command-mc) 也会采用相同行为，递归裁剪直到 根目录的所有空目录。不过，[`mc`](/zh/reference/minio-mc/#command-mc) 的删除 API 无法区分某个目录路径是显式 创建的，还是隐式创建的。如果 [`mc mv`](#command-mc.mv) 删除了某个文件系统路径上的最后一个对象， [`mc`](/zh/reference/minio-mc/#command-mc) 会在删除过程中递归删除从该路径向上直到根目录的所有空目录。
 
-### S3 兼容性 {#s3}
+<a id="s3" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 PGSTY mcli 正式支持的服务端是 SILO；对上游 MinIO 和其他 S3 服务的兼容属于[尽最大努力](/zh/reference/minio-mc/#command-mc)。
 

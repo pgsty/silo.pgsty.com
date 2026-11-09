@@ -16,7 +16,9 @@ MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/
 
 本页面概述了 MinIO Console，并说明其配置选项和登录方法。
 
-## 概述 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 概述 {#overview}
 
 您可以使用 MinIO Console 执行多种管理任务，例如身份与访问管理、指标与日志监控或服务器配置。
 
@@ -24,7 +26,9 @@ SILO 在服务端内嵌持续维护的 Silo Console。[Silo Console 仓库](http
 
 在 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 中，Console 界面支持 10 种语言（`en-US`、`zh-CN`、`zh-TW`、`ja-JP`、`ko-KR`、`fr-FR`、`de-DE`、`es-ES`、`pt-BR` 与 `ru-RU`），可通过顶栏语言选择器或 `?lang=<locale>` 切换（详见[设计记录](/zh/blog/design/console-languages/)）。独立容器镜像（`v2.6.0+`）还内置系统根证书包（`/etc/ssl/certs/ca-certificates.crt`）与可写 `/tmp` 目录（权限 `1777`），用于外部 HTTPS 连接与临时文件操作。
 
-### 支持的浏览器 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 支持的浏览器 {#supported-browsers}
 
 MinIO Console 可运行于多种当前稳定版本的浏览器。
 
@@ -45,7 +49,9 @@ MinIO Console 可运行于多种当前稳定版本的浏览器。
 >
 > MinIO Console *不支持* Opera Mini。
 
-## 配置 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 配置 {#configuration}
 
 MinIO Console 的大部分配置设置继承自 MinIO Server。以下环境变量用于启用 MinIO Console 中的特定行为：
 
@@ -75,7 +81,9 @@ MinIO Console 使用该服务器填充指标仪表板。</p><p>有关如何配�
 
 <a id="id5" data-td-print-local></a>
 
-### 静态端口分配与动态端口分配 {#minio-console-port-assignment}
+<a id="minio-console-port-assignment" data-td-print-local></a>
+
+### 静态端口分配与动态端口分配 {#static-vs-dynamic-port-assignment}
 
 默认情况下，MinIO 会在每次服务器启动时为 MinIO Console 随机选择一个端口。 访问 MinIO Server 的浏览器客户端会被自动重定向到动态选定端口上的 MinIO Console。此行为模拟了旧版 Web 浏览器访问方式，同时降低了在 嵌入式 Console 更新前已运行 MinIO 的系统上发生端口冲突的风险。
 
@@ -94,7 +102,9 @@ silo server https://minio-{1...4}.example.net/mnt/drive-{1...4} \
 
 <a id="id6" data-td-print-local></a>
 
-## 登录 {#minio-console-play-login}
+<a id="minio-console-play-login" data-td-print-local></a>
+
+## 登录 {#logging-in}
 
 > [!NOTE]
 > **变更: RELEASE.2023-03-09T23-16-13Z**
@@ -113,11 +123,15 @@ MinIO Console 会向未认证用户显示登录页面。 默认情况下，Conso
 >
 > Play Console 连接到位于 [https://play.min.io](https://play.min.io) 的 MinIO Play 部署。 您也可以通过 [`mc`](/zh/reference/minio-mc/#command-mc) 使用 `play` 别名访问该部署。
 
-## 文档 {#id7}
+<a id="id7" data-td-print-local></a>
+
+## 文档 {#documentation}
 
 **Documentation** 选项卡会在单独的浏览器窗口或标签页中打开此文档站点。
 
-## 可用任务 {#id8}
+<a id="id8" data-td-print-local></a>
+
+## 可用任务 {#available-tasks}
 
 登录 MinIO Console 后，用户可以执行多种任务。
 

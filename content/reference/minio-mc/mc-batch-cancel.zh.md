@@ -16,7 +16,9 @@ upstream_modified: true
 >
 > RELEASE.2023-03-20T17-17-53Z
 
-## 语法 {#id1}
+<a id="id1" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc batch cancel`](#command-mc.batch.cancel) 可停止正在进行的批处理作业。
 
@@ -45,7 +47,9 @@ mc [GLOBALFLAGS] batch cancel ALIAS JOBID
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id2}
+<a id="id2" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.batch.cancel.ALIAS}
 
@@ -63,13 +67,19 @@ mc [GLOBALFLAGS] batch cancel ALIAS JOBID
 
 要取消的批处理作业的唯一标识符。 要查找作业 ID，请使用 [`mc batch list`](/zh/reference/minio-mc/mc-batch-list/#command-mc.batch.list)。
 
-### 全局参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 全局参数 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 取消正在进行的批处理作业 {#id5}
+## 示例 {#example}
+
+<a id="id5" data-td-print-local></a>
+
+### 取消正在进行的批处理作业 {#cancel-an-ongoing-batch-job}
 
 以下命令会取消别名为 `myminio` 的部署上 ID 为 `KwSysDpxcBU9FNhGkn2dCf` 的作业：
 

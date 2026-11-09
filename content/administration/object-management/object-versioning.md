@@ -3,7 +3,7 @@ title: "Bucket Versioning"
 url: "/administration/object-management/object-versioning/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-versioning.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="bucket-versioning"></a>

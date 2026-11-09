@@ -20,7 +20,9 @@ upstream_modified: true
 
 <a id="id3" data-td-print-local></a>
 
-## 对象浏览器 {#minio-console-object-browser}
+<a id="minio-console-object-browser" data-td-print-local></a>
+
+## 对象浏览器 {#object-browser}
 
 在 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)中，Console 的 `account-info` 请求改为读取实时存储桶清单，创建或删除存储桶后刷新即可获取最新列表（存储桶容量统计仍由后台扫描器更新）。此前的 Server 20261018 返回缓存的存储桶列表。
 
@@ -75,11 +77,15 @@ Console 会明确提示原生下载交接，此后请在浏览器下载管理器
 <a id="minio-console-buckets"></a>
 <a id="id4" data-td-print-local></a>
 
-## 存储桶 {#minio-console-admin-buckets}
+<a id="minio-console-admin-buckets" data-td-print-local></a>
+
+## 存储桶 {#buckets}
 
 Console 的 **Bucket** 部分会显示已认证用户具有 [访问权限](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 的所有存储桶。 你可以根据该用户的访问权限，在此部分中创建或管理这些存储桶。
 
-### 创建存储桶 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 创建存储桶 {#creating-buckets}
 
 选择 **Create Bucket** 可在该部署上创建新的存储桶。 MinIO 会校验存储桶名称。 如需查看存储桶命名规则，请选择 **View Bucket Naming Rules**。
 
@@ -96,7 +102,9 @@ MinIO 不限制单个部署允许创建的存储桶总数。 不过，作为通�
 
 你 **必须** 在创建存储桶时配置复制、锁定和版本控制选项。 之后无法再更改该存储桶的这些设置。
 
-### 管理存储桶 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 管理存储桶 {#managing-buckets}
 
 使用 **Search** 栏筛选特定存储桶。 选择某个存储桶所在行可显示该存储桶的摘要信息。
 
@@ -120,7 +128,9 @@ MinIO 不限制单个部署允许创建的存储桶总数。 不过，作为通�
 
 <a id="id7" data-td-print-local></a>
 
-## 层 {#minio-console-tiers}
+<a id="minio-console-tiers" data-td-print-local></a>
+
+## 层 {#tiers}
 
 **Tiering** 部分提供了用于添加和管理 [远程层](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) 的界面，以支持生命周期管理转换规则。 MinIO 分层支持将对象从该部署迁移到远程存储，但不支持自动将其恢复到该部署。
 

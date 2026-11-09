@@ -3,7 +3,7 @@ title: "存储桶版本控制"
 url: "/zh/administration/object-management/object-versioning/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-versioning.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-bucket-versioning"></a>
@@ -12,7 +12,9 @@ upstream_modified: false
 - [Versioning overview](https://youtu.be/XGOiwV6Cbuk?ref=docs)
 - [Versioning lab](https://youtu.be/nFUI2N5zH34?ref=docs)
 
-## 概述 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 概述 {#overview}
 
 MinIO 支持在单个存储桶中保留对象的多个“版本”。
 
@@ -22,7 +24,9 @@ MinIO 支持在单个存储桶中保留对象的多个“版本”。
 
 可以定义 [对象过期](/zh/administration/object-management/create-lifecycle-management-expiration-rule/#minio-lifecycle-management-create-expiry-rule) 规则，按版本数量或版本日期等条件移除不再需要的对象版本。
 
-### 带版本对象的读取操作 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 带版本对象的读取操作 {#read-operations-on-versioned-objects}
 
 查看本组中的四张图片，了解 MinIO 如何在启用版本控制的存储桶中获取对象。 使用图片两侧的箭头可在各张图片之间切换。
 
@@ -50,7 +54,9 @@ MinIO 会保留对象的所有版本，并将最近的版本标记为“最新�
 
 MinIO 会根据对象路径隐式推断前缀。 显式创建前缀通常只会出现在 Spark 及类似工作负载中，这类工作负载会在 S3 场景下采用传统 POSIX/HDFS 的目录创建行为。
 
-### 版本控制按命名空间生效 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 版本控制按命名空间生效 {#versioning-is-per-namespace}
 
 MinIO 使用对象的完整命名空间（即存储桶和对象路径）来判断对象的唯一性。 例如，下列所有命名空间都对应“唯一”对象，对其中任一对象的变更，都会在 *该命名空间下* 创建新的对象版本：
 
@@ -63,7 +69,9 @@ blobbucket/blobs/object.blob
 
 尽管各个命名空间中的 `object.blob` 可能是相同的二进制数据， MinIO 仅在特定命名空间内实施版本控制，因此会将上面的每个 `object.blob` 视为彼此独立且唯一的对象。
 
-### 版本控制与存储容量 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 版本控制与存储容量 {#versioning-and-storage-capacity}
 
 MinIO 不执行增量式或差异式版本控制。 对于频繁变更的工作负载，较旧或老化的对象版本可能会占用大量磁盘空间。
 
@@ -85,7 +93,9 @@ MinIO 支持配置 [对象生命周期管理规则](/zh/administration/object-ma
 
 <a id="id"></a>
 
-### 版本 ID 生成 {#minio-bucket-versioning-id}
+<a id="minio-bucket-versioning-id" data-td-print-local></a>
+
+### 版本 ID 生成 {#version-id-generation}
 
 MinIO 会在写入操作中为每个对象版本生成唯一且不可变的标识符。 每个对象版本 ID 都由一个 128 位固定长度的 <a id="index-0" data-td-print-local></a>[**UUIDv4**](https://datatracker.ietf.org/doc/html/rfc4122.html#section-4.4) 组成。 UUID 的生成具有足够随机性，可在任何环境中以极高概率保证唯一性，计算上也难以猜测，并且无需依赖中心化注册流程或机构来保证唯一性。
 
@@ -97,7 +107,9 @@ MinIO 不支持由客户端管理版本 ID 的分配。 所有版本 ID 的生�
 
 <a id="id7" data-td-print-local></a>
 
-### 版本控制下的删除操作 {#minio-bucket-versioning-delete}
+<a id="minio-bucket-versioning-delete" data-td-print-local></a>
+
+### 版本控制下的删除操作 {#versioned-delete-operations}
 
 对带版本的对象执行 `DELETE` 操作时，会创建一个 0 字节的 `DeleteMarker` 作为该对象的最新版本。 如果对象的最新版本是 `DeleteMarker`，客户端必须指定版本控制相关标志或标识符，才能对该对象的先前版本执行 `GET/HEAD/LIST/DELETE` 操作。 在未显式指定版本的操作中，服务端默认会忽略 `DeleteMarker` 对象。
 
@@ -134,9 +146,13 @@ MinIO 可以利用 [生命周期管理过期规则](/zh/administration/object-ma
 - 使用 [`mc rm --version-id=UUID ...`](/zh/reference/minio-mc/mc-rm/#mc.rm.-version-id) 删除 `UUID` 匹配的对象版本。
 - 使用 [`mc rm --versions`](/zh/reference/minio-mc/mc-rm/#mc.rm.-versions) 删除对象的 *所有* 版本。
 
-## 教程 {#id8}
+<a id="id8" data-td-print-local></a>
 
-### 启用存储桶版本控制 {#id9}
+## 教程 {#tutorials}
+
+<a id="id9" data-td-print-local></a>
+
+### 启用存储桶版本控制 {#enable-bucket-versioning}
 
 你可以使用 MinIO Console、MinIO [`mc`](/zh/reference/minio-mc/#command-mc) CLI 或兼容 S3 的 SDK 启用版本控制。
 
@@ -151,7 +167,9 @@ mc version enable ALIAS/BUCKET
 
 在启用版本控制之前创建的对象，其 [版本 ID](#minio-bucket-versioning-id) 为 `null`。
 
-### 从版本控制中排除前缀 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 从版本控制中排除前缀 {#exclude-a-prefix-from-versioning}
 
 你可以使用 [MinIO Client](/zh/reference/minio-mc/#minio-client) 将某些 [前缀](/zh/administration/concepts/#minio-admin-concepts-organize-objects) 排除在版本控制之外。 这对于 Spark/Hadoop 等起初会使用临时前缀创建对象的工作负载尤其有用。
 
@@ -211,7 +229,9 @@ $ mc version info local/my-bucket --json
 > mc version enable ALIAS/BUCKET
 > ```
 
-### 从版本控制中排除文件夹 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 从版本控制中排除文件夹 {#exclude-folders-from-versioning}
 
 你可以使用 [MinIO Client](/zh/reference/minio-mc/#minio-client) 将文件夹排除在版本控制之外。
 
@@ -264,7 +284,9 @@ $ mc version info local/my-bucket --json
 > mc version enable ALIAS/BUCKET
 > ```
 
-### 挂起存储桶版本控制 {#id12}
+<a id="id12" data-td-print-local></a>
+
+### 挂起存储桶版本控制 {#suspend-bucket-versioning}
 
 你可以随时使用 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) CLI 或兼容 S3 的 SDK 挂起存储桶版本控制。
 

@@ -13,7 +13,7 @@ icon: fa-solid fa-window-maximize
 
 SILO Console is Silo's build of the MinIO Console. This page records where the two are interchangeable and where they differ. Start with the [three-level overview](/compatibility/), then use the details below to check UI and automation behavior.
 
-[`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Earlier release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), [v2.2.1], [v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0), [v2.4.0](/blog/release/console-2.4.0/), [v2.4.1](/blog/release/console-2.4.1/), and [v2.4.2](/blog/release/console-2.4.2/).
+[`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Earlier release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), [v2.2.1], [v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0), [v2.4.0](/blog/release/console-2.4.0/), [v2.4.1](/blog/release/console-2.4.1/), [v2.4.2](/blog/release/console-2.4.2/), and [v2.5.1](/blog/release/console-2.5.1/).
 
 ## 2.6.0 usage scans and bucket administration {#release-260}
 
@@ -124,3 +124,4 @@ setting. See the [v2.4.1 release notes](/blog/release/console-2.4.1/).
 
 [v2.1.1]: https://github.com/pgsty/silo-console/releases/tag/v2.1.1
 [v2.2.1]: https://github.com/pgsty/silo-console/releases/tag/v2.2.1
+[v2.3.0]: https://github.com/pgsty/silo-console/releases/tag/v2.3.0

@@ -19,7 +19,9 @@ MinIO 支持配置单个 Active Directory 或 LDAP (AD/LDAP) 服务，用于对�
 
 MinIO 用于认证用户并获取其组成员关系的具体 AD/LDAP 查询，是在 [使用 Active Directory / LDAP 身份管理部署集群](/zh/operations/external-iam/#minio-external-iam-ad-ldap) 时配置的。 本页介绍如何创建 SILO 策略，并将它们显式关联到返回的 Distinguished Name。
 
-## 认证与授权流程 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 认证与授权流程 {#authentication-and-authorization-flow}
 
 使用 Active Directory / LDAP 凭证的应用程序登录流程如下：
 
@@ -36,7 +38,9 @@ AD/LDAP 用户也可以创建与其 AD/LDAP 用户 Distinguished Name 关联的 
 
 使用 [`mc admin user svcacct add`](/zh/reference/minio-mc-admin/mc-admin-user-svcacct-add/#command-mc.admin.user.svcacct.add) 命令创建访问密钥。 将用户 Distinguished Name 指定为要关联访问密钥的用户名。
 
-## 将策略映射到用户 DN {#dn}
+<a id="dn" data-td-print-local></a>
+
+## 将策略映射到用户 DN {#mapping-policies-to-user-dn}
 
 以下命令使用 [`mc idp ldap policy attach`](/zh/reference/minio-mc/mc-idp-ldap-policy-attach/#command-mc.idp.ldap.policy.attach) 将现有 MinIO [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 关联到 AD/LDAP 用户 DN。
 
@@ -52,7 +56,9 @@ mc idp ldap policy attach myminio readwrite diagnostics \
 - MinIO 会将 [`readwrite`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.readwrite) 和 [`diagnostics`](/zh/administration/identity-access-management/policy-based-access-control/#userpolicy.diagnostics) 两个策略分配给 DN 匹配 `cn=dax,cn=users,dc=example,dc=com` 的已认证用户，从而授予其对 MinIO 服务器的一般读写访问权限，*以及* 诊断性管理操作的访问权限。
 - MinIO 不会为 DN 匹配 `cn=quark,cn=users,dc=example,dc=com` 的 已认证用户分配任何策略，并会拒绝其对所有 API 操作的访问。
 
-## 将策略映射到组 DN {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 将策略映射到组 DN {#mapping-policies-to-group-dn}
 
 以下命令使用 [`mc idp ldap policy attach`](/zh/reference/minio-mc/mc-idp-ldap-policy-attach/#command-mc.idp.ldap.policy.attach) 将现有 MinIO [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 关联到 AD/LDAP 组 DN。
 

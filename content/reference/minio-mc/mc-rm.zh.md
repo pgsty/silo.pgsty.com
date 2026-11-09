@@ -10,7 +10,9 @@ upstream_modified: false
 
 <a id="command-mc.rm"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc rm`](#command-mc.rm) 命令用于从 MinIO 部署的存储桶中 [删除对象](/zh/administration/object-management/object-delete/#minio-object-delete)。 如需彻底删除存储桶，请改用 [`mc rb`](/zh/reference/minio-mc/mc-rb/#command-mc.rb)。
 
@@ -62,7 +64,9 @@ mc [GLOBALFLAGS] rm  \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.rm.ALIAS}
 
@@ -248,13 +252,19 @@ mc rm ~/data/myoldobject.txt
 - [`--rewind`](#mc.rm.-rewind)
 - [`--recursive`](#mc.rm.-recursive)
 
-### 全局标志 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id9}
+<a id="id9" data-td-print-local></a>
 
-### 删除单个对象 {#id10}
+## 示例 {#examples}
+
+<a id="id10" data-td-print-local></a>
+
+### 删除单个对象 {#remove-a-single-object}
 
 ```shell
 mc rm ALIAS/PATH
@@ -263,7 +273,9 @@ mc rm ALIAS/PATH
 - 将 [`ALIAS`](#mc.rm.ALIAS) 替换为已配置的 S3 兼容服务的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.rm.ALIAS) 替换为对象路径。
 
-### 递归删除存储桶内容 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 递归删除存储桶内容 {#recursively-remove-a-bucket-s-contents}
 
 将 [`mc rm`](#command-mc.rm) 与 [`--recursive`](#mc.rm.-recursive) 和 [`--force`](#mc.rm.-force) 选项结合使用， 可递归删除存储桶内容。
 
@@ -276,7 +288,9 @@ mc rm --recursive --force ALIAS/PATH
 
 此操作 *不会* 删除存储桶本身。请使用 [`mc rb`](/zh/reference/minio-mc/mc-rb/#command-mc.rb) 删除存储桶 及其全部内容和关联配置。
 
-### 删除对象的所有不完整上传文件 {#id12}
+<a id="id12" data-td-print-local></a>
+
+### 删除对象的所有不完整上传文件 {#remove-all-incomplete-upload-files-for-an-object}
 
 将 [`mc rm`](#command-mc.rm) 与 [`--incomplete`](#mc.rm.-incomplete) 选项结合使用， 可删除某个对象的不完整上传文件。
 
@@ -287,7 +301,9 @@ mc rm --incomplete --recursive --force ALIAS/PATH
 - 将 [`ALIAS`](#mc.rm.ALIAS) 替换为已配置的 S3 兼容服务的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](#mc.rm.ALIAS) 替换为对象路径。
 
-### 将对象回滚到先前版本 {#id13}
+<a id="id13" data-td-print-local></a>
+
+### 将对象回滚到先前版本 {#roll-object-back-to-previous-version}
 
 将 [`mc rm`](#command-mc.rm) 与 [`--versions`](#mc.rm.-versions) 和 [`--newer-than`](#mc.rm.-newer-than) 结合使用，可删除新于指定时长的 所有对象版本。这会有效地将对象“回滚”到该时间点的状态。
 
@@ -304,15 +320,21 @@ mc rm ALIAS/PATH --versions --newer-than DURATION
 - 将 [`PATH`](#mc.rm.ALIAS) 替换为对象路径。 例如：`/mybucket/myobject`。
 - 将 [`DURATION`](#mc.rm.-newer-than) 替换为相对于当前主机时间的过去时长， 操作将从该时间点开始删除对象版本。例如，要删除过去 30 天内 创建的所有对象版本，请指定 `"30d"`。
 
-## 行为 {#id14}
+<a id="id14" data-td-print-local></a>
 
-### 删除存储桶内容 {#id15}
+## 行为 {#behavior}
+
+<a id="id15" data-td-print-local></a>
+
+### 删除存储桶内容 {#deleting-bucket-contents}
 
 使用 [`mc rm`](#command-mc.rm) 删除存储桶中的全部内容时，不会删除存储桶本身。 与该存储桶关联的配置会保留，例如 [`default object lock settings`](/zh/reference/minio-mc/mc-retention-set/#mc.retention.set.-default)。
 
 如需彻底删除存储桶，请使用 [`mc rb`](/zh/reference/minio-mc/mc-rb/#command-mc.rb)，而不是 [`mc rm`](#command-mc.rm)。
 
-### MinIO 在删除对象时会清理空前缀 {#minio}
+<a id="minio" data-td-print-local></a>
+
+### MinIO 在删除对象时会清理空前缀 {#minio-trims-empty-prefixes-on-object-removal}
 
 [`mc rm`](#command-mc.rm) 依赖 [`mc`](/zh/reference/minio-mc/#command-mc) 的删除 API 来移除对象。在删除存储桶前缀中的最后一个对象时， [`mc`](/zh/reference/minio-mc/#command-mc) 还会递归删除直到存储桶根为止的每一个空前缀。[`mc`](/zh/reference/minio-mc/#command-mc) 只会对在对象写入 操作过程中 *隐式* 创建的前缀执行这种递归删除，也就是说，该前缀不是通过 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 这类显式目录创建命令创建的。
 
@@ -328,7 +350,9 @@ mc rm ALIAS/PATH --versions --newer-than DURATION
 
 如果将 [`mc rm`](#command-mc.rm) 用于文件系统操作，[`mc`](/zh/reference/minio-mc/#command-mc) 也会采用相同行为，递归裁剪直到 根目录的所有空目录。不过，[`mc`](/zh/reference/minio-mc/#command-mc) 的删除 API 无法区分某个目录路径是显式 创建的，还是隐式创建的。如果 [`mc rm`](#command-mc.rm) 删除了某个文件系统路径上的最后一个对象， [`mc`](/zh/reference/minio-mc/#command-mc) 会在删除过程中递归删除从该路径向上直到根目录的所有空目录。
 
-### 版本化存储桶中的删除操作 {#id16}
+<a id="id16" data-td-print-local></a>
+
+### 版本化存储桶中的删除操作 {#delete-operations-in-versioned-buckets}
 
 MinIO 支持在单个存储桶中保留对象的多个 [版本](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 在版本化存储桶中 [删除](/zh/administration/object-management/object-versioning/#minio-bucket-versioning-delete) 对象时， 会生成一种特殊的 `DeleteMarker` 墓碑记录，将对象标记为已删除， 同时保留该对象的所有先前版本。
 

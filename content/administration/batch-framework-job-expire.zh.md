@@ -18,19 +18,27 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
 
 `expire` 批处理作业会将 [对象自动过期](/zh/administration/object-management/create-lifecycle-management-expiration-rule/#minio-lifecycle-management-create-expiry-rule) 的行为应用到单个存储桶。 该作业根据提供的配置判断对象是否符合过期条件，且独立于任何已配置的过期规则。
 
-## 行为 {#id3}
+<a id="id3" data-td-print-local></a>
 
-### 对象立即过期 {#id4}
+## 行为 {#behavior}
+
+<a id="id4" data-td-print-local></a>
+
+### 对象立即过期 {#immediate-expiration-of-objects}
 
 批量过期会作为批处理作业的一部分立即执行，这与 [passive scanner-based application of expiration rules](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-scanner) 不同。 具体来说，批量过期不会让位于应用 I/O，因此可能影响部署上常规读写操作的性能。
 
-### 过期资格在批处理运行时确定 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 过期资格在批处理运行时确定 {#expiration-eligibility-determined-at-batch-run}
 
 批量过期按存储桶工作，并且每次运行都会一次性执行直至完成。 该作业在运行时判断对象是否符合过期条件，并且 *不会* 定期重新扫描或重新检查新对象。
 
 如果要处理任何新近满足过期条件的对象，请重新运行该批处理作业。
 
-### 过期规则仅检查最新对象 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 过期规则仅检查最新对象 {#expiry-rules-check-latest-object-only}
 
 批量过期作业只会使用每个对象的最新版本或“current”版本来匹配各条批量过期规则。
 
@@ -44,7 +52,9 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
 
 <a id="minio-batch-framework-expire-job-ref"></a>
 
-## `expire` 批处理作业参考 {#expire}
+<a id="expire" data-td-print-local></a>
+
+## `expire` 批处理作业参考 {#expire-batch-job-reference}
 
 <table>
   <tbody>
@@ -130,7 +140,9 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
   </tbody>
 </table>
 
-## `expire` 作业类型的 YAML 示例 {#expire-yaml}
+<a id="expire-yaml" data-td-print-local></a>
+
+## `expire` 作业类型的 YAML 示例 {#sample-yaml-description-for-an-expire-job-type}
 
 使用 [`mc batch generate`](/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate) 创建基础 `expire` 批处理作业，再进行进一步定制。
 

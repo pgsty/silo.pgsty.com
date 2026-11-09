@@ -10,7 +10,9 @@ upstream_modified: true
 <a id="mc-admin-cluster-bucket-import"></a>
 <a id="minio-mc-admin-cluster-bucket-import"></a>
 
-## 描述 {#id1}
+<a id="id1" data-td-print-local></a>
+
+## 描述 {#description}
 
 > [!NOTE]
 > **新增: RELEASE.2022-06-17T02-52-50Z**
@@ -46,7 +48,9 @@ mc [GLOBALFLAGS] admin cluster bucket import  \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id2}
+<a id="id2" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.admin.cluster.bucket.import.ALIAS}
 
@@ -74,7 +78,9 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 应用导入元数据的存储桶。
 
-### 全局标志 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 

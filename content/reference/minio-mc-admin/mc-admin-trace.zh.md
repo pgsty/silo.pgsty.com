@@ -10,7 +10,9 @@ upstream_modified: false
 
 <a id="command-mc.admin.trace"></a>
 
-## 说明 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 说明 {#description}
 
 [`mc admin trace`](#command-mc.admin.trace) 命令显示目标 MinIO 部署上发生的 API 操作。
 
@@ -19,9 +21,13 @@ upstream_modified: false
 >
 > MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
 
-## 示例 {#id3}
+<a id="id3" data-td-print-local></a>
 
-### 监控所有 API 操作 {#api}
+## 示例 {#examples}
+
+<a id="api" data-td-print-local></a>
+
+### 监控所有 API 操作 {#monitor-all-api-operations}
 
 使用 [`mc admin trace`](#command-mc.admin.trace) 监控 MinIO 部署上的 API 操作：
 
@@ -31,7 +37,9 @@ mc admin trace -a ALIAS
 
 - 将 [`ALIAS`](#mc.admin.trace.TARGET) 替换为 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
-### 查看返回 503 错误的调用 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 查看返回 503 错误的调用 {#see-calls-that-return-503-errors}
 
 使用 [`mc admin trace`](#command-mc.admin.trace) 监控返回 503 Service Unavailable 错误的 API 操作：
 
@@ -41,7 +49,9 @@ mc admin trace -v --status-code 503 ALIAS
 
 - 将 [`ALIAS`](#mc.admin.trace.TARGET) 替换为 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
-### 查看指定路径的控制台跟踪 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 查看指定路径的控制台跟踪 {#see-console-trace-for-a-path}
 
 使用 [`mc admin trace`](#command-mc.admin.trace) 监控指定路径的活动：
 
@@ -52,7 +62,9 @@ mc admin trace --path my-bucket/my-prefix/* ALIAS
 - 将 [`ALIAS`](#mc.admin.trace.TARGET) 替换为 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 `my-bucket/my-prefix/*` 替换为你要跟踪的存储桶、前缀和对象名称或通配符。
 
-### 查看响应大小大于 1Mb 的控制台跟踪 {#mb}
+<a id="mb" data-td-print-local></a>
+
+### 查看响应大小大于 1Mb 的控制台跟踪 {#see-console-trace-for-a-response-size-greater-than-1mb}
 
 使用 [`mc admin trace`](#command-mc.admin.trace) 监控超过指定大小的响应：
 
@@ -63,7 +75,9 @@ mc admin trace --filter-response --filter-size 1Mb ALIAS
 - 将 [`ALIAS`](#mc.admin.trace.TARGET) 替换为 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 `1Mb` 替换为所需的响应大小。
 
-### 查看请求操作时长大于 5ms 的控制台跟踪 {#ms}
+<a id="ms" data-td-print-local></a>
+
+### 查看请求操作时长大于 5ms 的控制台跟踪 {#see-console-trace-for-a-request-operation-durations-greater-than-5ms}
 
 使用 [`mc admin trace`](#command-mc.admin.trace) 监控耗时较长的操作：
 
@@ -73,7 +87,9 @@ mc admin trace --filter-duration --filter-size 5ms ALIAS
 
 - 将 [`ALIAS`](#mc.admin.trace.TARGET) 替换为 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
-## 语法 {#id6}
+<a id="id6" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc admin trace`](#command-mc.admin.trace) 的语法如下：
 
@@ -290,6 +306,8 @@ mc admin trace --call scanner TARGET
 
 返回详细输出。
 
-### 全局标志 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。

@@ -10,7 +10,9 @@ upstream_modified: true
 
 <a id="command-mc.od"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc od`](#command-mc.od) 命令将本地文件按指定的分片数量与分片大小复制到远程位置。 该命令会输出上传该文件所耗费的时间。
 
@@ -57,7 +59,9 @@ mc [GLOBALFLAGS] od                                            \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `if` {#mc.od.if}
 
@@ -103,13 +107,19 @@ mc od if=file.zip of=myminio/mybucket/file.zip
 
 上传过程中要跳过的文件分片数量。 例如，可使用该选项仅上传对象的一部分分片，以测试一个大文件（分片较多）的上传速度。
 
-### 全局参数 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局参数 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 以 40MiB 分片上传完整文件 {#mib}
+## 示例 {#examples}
+
+<a id="mib" data-td-print-local></a>
+
+### 以 40MiB 分片上传完整文件 {#upload-a-full-file-with-40mib-parts}
 
 使用 [`mc od`](#command-mc.od) 可按指定大小的一组分片将文件上传到 MinIO。 [`size`](#mc.od.size) 选项用于指定期望的分片大小。
 
@@ -122,7 +132,9 @@ mc od if=file.zip of=myminio/mybucket/file.zip size=40MiB
 
 MinIO 会检查源文件并将其拆分为所需数量的分片，确保没有任何分片超过指定的 40MiB 分片大小。
 
-### 上传文件的前五个 40 MiB 分片 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 上传文件的前五个 40 MiB 分片 {#upload-a-first-five-40-mib-parts-of-a-file}
 
 使用 [`mc od`](#command-mc.od) 可按指定分片大小，将文件的部分分片上传到 MinIO。 [`size`](#mc.od.size) 选项用于指定期望的分片大小。 [`parts`](#mc.od.parts) 选项用于指定该对象要使用的总分片数。
 
@@ -141,7 +153,9 @@ mc od if=file.zip of=myminio/mybucket/file.zip size=40MiB parts=5
 >
 > 以这种方式使用该命令可能无法上传对象的全部内容。
 
-### 将完整文件分 5 个分片上传 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 将完整文件分 5 个分片上传 {#upload-a-full-file-in-5-parts}
 
 将源文件拆分为指定数量的分片，然后把文件的所有分片上传到 MinIO 目标位置。
 

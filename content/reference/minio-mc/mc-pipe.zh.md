@@ -10,7 +10,9 @@ upstream_modified: true
 
 <a id="command-mc.pipe"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc pipe`](#command-mc.pipe) 命令将内容从 [STDIN](https://www.gnu.org/software/libc/manual/html_node/Standard-Streams.html) 流式传输到目标对象。
 
@@ -50,7 +52,9 @@ mc [GLOBALFLAGS] pipe                              \
 >
 > `mc pipe` 现已支持并发上传，以提升大流式数据的吞吐量。
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `TARGET` {#mc.pipe.TARGET}
 
@@ -214,13 +218,19 @@ mc [GLOBALFLAGS] pipe                              \
 
 将键值对列表指定为 `KEY1=VALUE1&KEY2=VALUE2`，其中每一对表示分配给对象的一个标签。
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 将 `STDIN` 内容写入本地文件系统 {#stdin}
+## 示例 {#examples}
+
+<a id="stdin" data-td-print-local></a>
+
+### 将 `STDIN` 内容写入本地文件系统 {#write-contents-of-stdin-to-the-local-filesystem}
 
 以下命令将 STDIN 的内容写入本地文件系统中的 `/tmp` 文件夹。
 
@@ -228,7 +238,9 @@ mc [GLOBALFLAGS] pipe                              \
 mc pipe /tmp/hello-world.go
 ```
 
-### 将 ISO 镜像复制到 S3 存储 {#iso-s3}
+<a id="iso-s3" data-td-print-local></a>
+
+### 将 ISO 镜像复制到 S3 存储 {#copy-an-iso-image-to-s3-storage}
 
 以下命令先流式读取 Debian 的 ISO 镜像内容，然后使用该数据流在 S3 路径创建对象。
 
@@ -236,7 +248,9 @@ mc pipe /tmp/hello-world.go
 cat debian-live-11.5.0-amd64-mate.iso | mc pipe s3/opensource-isos/debian-11-5.iso
 ```
 
-### 将 MySQL 数据库转储流式传输到 S3 {#mysql-s3}
+<a id="mysql-s3" data-td-print-local></a>
+
+### 将 MySQL 数据库转储流式传输到 S3 {#stream-mysql-database-dump-to-s3}
 
 以下命令先流式传输 MySQL 数据库，再通过 [`mc pipe`](#command-mc.pipe) 使用该数据流在 S3 上创建备份：
 
@@ -244,7 +258,9 @@ cat debian-live-11.5.0-amd64-mate.iso | mc pipe s3/opensource-isos/debian-11-5.i
 mysqldump -u root -p ******* accountsdb | mc pipe s3/sql-backups/backups/accountsdb-sep-28-2022.sql
 ```
 
-### 将文件写入 Reduced Redundancy 存储类别 {#reduced-redundancy}
+<a id="reduced-redundancy" data-td-print-local></a>
+
+### 将文件写入 Reduced Redundancy 存储类别 {#write-a-file-to-a-reduced-redundancy-storage-class}
 
 以下命令读取 STDIN 数据流，并在 S3 的 Reduced Redundancy 存储类别中创建对象。
 
@@ -252,7 +268,9 @@ mysqldump -u root -p ******* accountsdb | mc pipe s3/sql-backups/backups/account
  mc pipe --storage-class REDUCED_REDUNDANCY s3/personalbuck/meeting-notes.txt
 ```
 
-### 将文件连同元数据复制到 MinIO 部署 {#minio}
+<a id="minio" data-td-print-local></a>
+
+### 将文件连同元数据复制到 MinIO 部署 {#copy-a-file-to-a-minio-deployment-with-metadata}
 
 以下命令将 MP3 文件上传到 ALIAS 为 `myminio`、存储桶为 `music` 的 MinIO 部署。 写入对象时附带 `Cache-Control` 和 `Artist` 元数据。
 
@@ -260,7 +278,9 @@ mysqldump -u root -p ******* accountsdb | mc pipe s3/sql-backups/backups/account
 cat music.mp3 | mc pipe --attr "Cache-Control=max-age=90000,min-fresh=9000;Artist=Unknown" myminio/music/guitar.mp3
 ```
 
-### 为上传对象设置标签 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 为上传对象设置标签 {#set-tags-on-uploaded-objects}
 
 以下命令在 ALIAS 为 `myminio` 的 MinIO 部署中，于 `mybucket` 存储桶创建一个带两个标签的对象。 MinIO 支持为对象最多添加 10 个自定义标签。
 

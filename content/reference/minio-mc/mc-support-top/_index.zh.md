@@ -19,7 +19,9 @@ upstream_modified: false
 >
 > `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
 
-## 描述 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 描述 {#description}
 
 [`mc support top`](#command-mc.support.top) 命令返回分布式 MinIO 部署的统计信息， 类似于 shell 中 `top` 命令的输出。
 
@@ -38,7 +40,9 @@ upstream_modified: false
 
 有关每个子命令的详细信息，请参阅上方链接的页面。
 
-## 语法 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 该命令的语法如下：
 

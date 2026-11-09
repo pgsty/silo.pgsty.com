@@ -32,7 +32,9 @@ mc [GLOBALFLAGS] COMMAND --help
 
 [CORS 命令参考](/zh/reference/minio-mc/mc-cors/)说明桶级规则、权限与全局回退边界。
 
-## 与 Silo 服务端的版本对齐 {#mc-client-versioning}
+<a id="mc-client-versioning" data-td-print-local></a>
+
+## 与 Silo 服务端的版本对齐 {#version-alignment-with-minio-server}
 
 客户端与 Silo 服务端独立发布。
 
@@ -42,11 +44,13 @@ mc [GLOBALFLAGS] COMMAND --help
 
 <a id="id3" data-td-print-local></a>
 
-<a id="quickstart"></a>
+<a id="mc-install" data-td-print-local></a>
 
-## 快速开始 {#mc-install}
+## 快速开始 {#quickstart}
 
-### 1) 安装客户端 {#mc}
+<a id="mc" data-td-print-local></a>
+
+### 1) 安装客户端 {#install-mc}
 
 请从[下载与安装](/zh/download/#client)页面选择 Linux 软件包、适用于 Linux/macOS/Windows 的归档文件或客户端容器。版本化制品与校验和也可从 [GitHub Releases](https://github.com/pgsty/mc/releases) 获取。
 
@@ -67,7 +71,9 @@ make build
 > [!NOTE]
 > 当前 `pgsty/mc` 为脚本兼容保留 `mc license` 与 `mc support` 命令树，但所有在线 MinIO SUBNET、许可、上传、call-home 与遥测路径都已禁用。会联系这些服务的命令以稳定消息失败并返回 `1`；`support diag`、`perf`、`profile`、`inspect` 等本地诊断无需注册即可使用，并写入私有权限的本地文件。参见 [MCLI 客户端兼容性注记](/zh/compatibility/mcli/#subnet)。
 
-### 2) 为兼容 S3 的服务创建别名 {#s3}
+<a id="s3" data-td-print-local></a>
+
+### 2) 为兼容 S3 的服务创建别名 {#create-an-alias-for-the-s3-compatible-service}
 
 > [!WARNING]
 > **重要**
@@ -102,7 +108,9 @@ mc alias set myS3 https://s3.{your-region-code}.amazonaws.com/endpoint ACCESS_KE
 mc alias set myGCS https://storage.googleapis.com/endpoint ACCESS_KEY SECRET_KEY
 ```
 
-### 3) 测试连接 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 3) 测试连接 {#test-the-connection}
 
 使用 [`mc admin info`](/zh/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) 命令测试与新添加 Silo 部署的连接：
 
@@ -119,7 +127,9 @@ mc admin info silo
 
 <a id="id5" data-td-print-local></a>
 
-## 命令速查 {#minio-mc-commands}
+<a id="minio-mc-commands" data-td-print-local></a>
+
+## 命令速查 {#command-quick-reference}
 
 下表列出了 [`mc`](#command-mc) 命令：
 
@@ -335,7 +345,9 @@ MinIO 会使用指定的 SSE 模式自动加密对象。</p></td>
 
 <a id="id8" data-td-print-local></a>
 
-## 配置文件 {#mc-configuration}
+<a id="mc-configuration" data-td-print-local></a>
+
+## 配置文件 {#configuration-file}
 
 [`mc`](#command-mc) 使用 `JSON` 格式的配置文件来存储 某些类型的信息，例如每个已配置兼容 S3 服务的 [`aliases`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
@@ -351,7 +363,9 @@ MinIO 会使用指定的 SSE 模式自动加密对象。</p></td>
 
 <a id="id9" data-td-print-local></a>
 
-## 证书 {#minio-mc-certificates}
+<a id="minio-mc-certificates" data-td-print-local></a>
+
+## 证书 {#certificates}
 
 MinIO 客户端将部署使用的证书和 CA 存储在以下路径：
 
@@ -378,7 +392,9 @@ C:\Users\[username]\mc\certs\CAs\ # Certificate Authorities
 
 <a id="id10" data-td-print-local></a>
 
-## 模式匹配 {#minio-wildcard-matching}
+<a id="minio-wildcard-matching" data-td-print-local></a>
+
+## 模式匹配 {#pattern-matching}
 
 某些命令和 flag 支持模式匹配。 启用后，模式可包含以下任一通配符用于字符替换：
 
@@ -400,7 +416,9 @@ C:\Users\[username]\mc\certs\CAs\ # Certificate Authorities
 
 <a id="id11" data-td-print-local></a>
 
-## 全局选项 {#minio-mc-global-options}
+<a id="minio-mc-global-options" data-td-print-local></a>
+
+## 全局选项 {#global-options}
 
 所有 [commands](#minio-mc-commands) 都支持以下全局选项。 你也可以使用 [Environment Variables](/zh/reference/minio-mc/minio-client-settings/#minio-server-envvar-mc) 来定义其中部分选项。
 

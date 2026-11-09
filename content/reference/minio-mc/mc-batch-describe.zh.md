@@ -16,7 +16,9 @@ upstream_modified: true
 >
 > RELEASE.2022-10-09T21-10-59Z or later
 
-## 语法 {#id1}
+<a id="id1" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc batch describe`](#command-mc.batch.describe) 命令会输出指定作业 ID 的作业定义。
 
@@ -46,7 +48,9 @@ mc [GLOBALFLAGS] batch describe TARGET           \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id2}
+<a id="id2" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `TARGET` {#mc.batch.describe.TARGET}
 
@@ -64,13 +68,19 @@ mc [GLOBALFLAGS] batch describe TARGET           \
 
 要描述的作业的唯一标识符。 要查找作业 ID，请使用 [`mc batch list`](/zh/reference/minio-mc/mc-batch-list/#command-mc.batch.list)。
 
-### 全局标志 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 显示进行中批处理作业的定义 {#id5}
+## 示例 {#example}
+
+<a id="id5" data-td-print-local></a>
+
+### 显示进行中批处理作业的定义 {#show-the-definition-of-an-in-progress-batch-job}
 
 以下命令会输出 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) `myminio` 上特定作业的完整作业定义：
 
@@ -96,6 +106,8 @@ replicate:
 
 SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。
 
-## 权限 {#id6}
+<a id="id6" data-td-print-local></a>
+
+## 权限 {#permissions}
 
 你必须具有 `admin:DescribeBatchJobs` 权限，才能描述该部署上的作业。

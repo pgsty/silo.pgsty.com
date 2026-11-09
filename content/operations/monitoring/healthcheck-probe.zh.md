@@ -11,7 +11,9 @@ upstream_modified: true
 
 MinIO 提供无需身份验证的端点，用于探测节点在线状态以及集群 [高可用性](/zh/operations/concepts/erasure-coding/#minio-ec-parity)，从而执行简单健康检查。这些 端点返回一个 HTTP 状态码，用于表示底层资源是否健康，或是否满足读写仲裁。 MinIO 不会通过这些端点暴露任何其他数据。
 
-## 节点存活 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 节点存活 {#node-liveness}
 
 使用以下端点测试某个 MinIO server 是否在线：
 
@@ -27,7 +29,9 @@ curl -I https://minio.example.net:9000/minio/health/live
 
 <a id="id3" data-td-print-local></a>
 
-## 集群写仲裁 {#minio-cluster-write-quorum}
+<a id="minio-cluster-write-quorum" data-td-print-local></a>
+
+## 集群写仲裁 {#cluster-write-quorum}
 
 使用以下端点测试 MinIO 集群是否具备 [写仲裁](/zh/operations/concepts/erasure-coding/#minio-ec-parity)：
 
@@ -44,7 +48,9 @@ curl -I https://minio.example.net:9000/minio/health/cluster
 - `minio_cluster_nodes_offline_total`：在一个或多个 MinIO 节点离线时触发告警。
 - `minio_node_drive_free_bytes`：在集群可用磁盘空间不足时触发告警。
 
-## 集群读仲裁 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 集群读仲裁 {#cluster-read-quorum}
 
 使用以下端点测试 MinIO 集群是否具备 [读仲裁](/zh/operations/concepts/erasure-coding/#minio-ec-parity)：
 
@@ -58,7 +64,9 @@ curl -I https://minio.example.net:9000/minio/health/cluster/read
 
 单靠 healthcheck probe 无法判断某个 MinIO server 是否离线，也无法判断其是否正在正常处理读操作。 它只能根据配置的 [纠删码校验值](/zh/operations/concepts/erasure-coding/#minio-ec-parity) 判断当前是否有足够的 MinIO server 在线，以满足读仲裁要求。 建议配置 Prometheus [告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)，使用 `minio_cluster_nodes_offline_total` 指标检测一个或多个 MinIO 节点是否离线。
 
-## 集群维护检查 {#id5}
+<a id="id5" data-td-print-local></a>
+
+## 集群维护检查 {#cluster-maintenance-check}
 
 使用以下端点测试在将指定 MinIO server 下线维护时， MinIO 集群是否仍能同时维持 [读](/zh/operations/concepts/erasure-coding/#minio-ec-parity) 和 [写](/zh/operations/concepts/erasure-coding/#minio-ec-parity)：
 

@@ -10,7 +10,9 @@ upstream_modified: true
 <a id="mc-admin-cluster-iam-import"></a>
 <a id="minio-mc-admin-cluster-iam-import"></a>
 
-## 描述 {#id1}
+<a id="id1" data-td-print-local></a>
+
+## 描述 {#description}
 
 > [!NOTE]
 > **新增: RELEASE.2022-06-17T02-52-50Z**
@@ -57,7 +59,9 @@ mc [GLOBALFLAGS] admin cluster iam import  \
 
 从 [RELEASE.2023-05-04T18-10-16Z](https://github.com/minio/mc/releases/tag/RELEASE.2023-05-04T18-10-16Z) 开始，[`mc admin cluster iam import`](#command-mc.admin.cluster.iam.import) 新增了对以尾随正斜杠结尾的别名 `ALIAS/` 的支持。 在此版本之前，如果提供尾随正斜杠，命令会执行失败。
 
-### 参数 {#id2}
+<a id="id2" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.admin.cluster.iam.import.ALIAS}
 
@@ -77,7 +81,9 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 使用 [`mc admin cluster iam export`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) 导出 IAM 元数据，以供此命令使用。
 
-### 全局标志 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 

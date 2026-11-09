@@ -16,7 +16,9 @@ upstream_modified: true
 >
 > RELEASE.2022-10-09T21-10-59Z or later
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc batch start`](#command-mc.batch.start) 命令根据批处理作业 YAML 文件启动一个批处理作业。
 
@@ -53,7 +55,9 @@ mc [GLOBALFLAGS] batch start    \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.batch.start.ALIAS}
 
@@ -77,13 +81,19 @@ mc batch start myminio replicate.yaml
 
 YAML 定义的批处理作业。 作业可按需包含任意数量的任务；没有预定义的限制。
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 启动批处理作业 {#id6}
+## 示例 {#example}
+
+<a id="id6" data-td-print-local></a>
+
+### 启动批处理作业 {#start-a-batch-job}
 
 以下命令会在 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) `myminio` 对应的部署上，启动 `replication.yaml` 文件中定义的一批作业：
 

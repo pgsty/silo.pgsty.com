@@ -13,7 +13,9 @@ upstream_modified: true
 
 <a id="command-mc.alias.set"></a>
 
-## 语法 {#id1}
+<a id="id1" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc alias set`](#command-mc.alias.set) 命令用于在本地 **`mc`** 配置中添加或更新别名。
 
@@ -48,7 +50,9 @@ mc [GLOBALFLAGS] alias set \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id2}
+<a id="id2" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.alias.set.ALIAS}
 
@@ -126,13 +130,19 @@ mc [GLOBALFLAGS] alias set \
 - `"on"`
 - `"off"`
 
-### 全局标志 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id10}
+<a id="id10" data-td-print-local></a>
 
-### 为 MinIO 部署添加或更新别名 {#minio}
+## 示例 {#examples}
+
+<a id="minio" data-td-print-local></a>
+
+### 为 MinIO 部署添加或更新别名 {#add-or-update-an-alias-for-a-minio-deployment}
 
 使用 [`mc alias set`](#command-mc.alias.set) 添加一个供 **`mc`** 使用的 S3 兼容服务：
 
@@ -157,7 +167,9 @@ mc alias set ALIAS HOSTNAME ACCESSKEY SECRETKEY
 {{< /tab >}}
 {{< /tabs >}}
 
-## 行为 {#id11}
+<a id="id11" data-td-print-local></a>
+
+## 行为 {#behavior}
 
 ### S3 兼容性 {#s3-compatibility}
 
@@ -165,7 +177,9 @@ SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的�
 
 `mcli 20261109` 支持在 `~/.mc/config.json` 的别名条目中保存可选的 `"region"` 字符串。S3 客户端依次采用 `MC_REGION`、`AWS_REGION`、别名 `region`，未配置时交给 SDK 自动发现。`alias set` 不提供 `--region` 参数，重建别名会清除已有区域；可通过导入完整别名对象保存区域。`mb --region` 单独控制建桶位置。详见 [Alias 区域设计](/zh/blog/design/alias-region/#usage)。
 
-### 所需凭据与访问控制 {#id12}
+<a id="id12" data-td-print-local></a>
+
+### 所需凭据与访问控制 {#required-credentials-and-access-control}
 
 [`mc alias set`](#command-mc.alias.set) 要求为 S3 兼容主机指定 access key 及对应的 secret key。**`mc`** 的功能受指定凭据关联策略的限制。例如，如果 指定凭据对某个存储桶没有读写权限，**`mc`** 就无法对该存储桶执行读写操作。
 
@@ -175,7 +189,9 @@ SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的�
 
 对于其他所有 S3 兼容服务，请参考对应服务的文档。
 
-### 证书 {#id13}
+<a id="id13" data-td-print-local></a>
+
+### 证书 {#certificates}
 
 MinIO Client 会获取对端证书、计算公钥指纹，并询问用户是否接受该部署的证书。
 

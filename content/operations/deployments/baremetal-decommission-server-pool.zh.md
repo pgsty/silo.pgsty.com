@@ -11,7 +11,6 @@ upstream_modified: true
 下方桶／IAM 导出只覆盖配置，不是完整恢复快照。使用持久 IAM 撤销时，还须保留后端删除历史与必要加密材料，见 [IAM 恢复](/zh/operations/replication/iam-upgrade/)。
 
 <a id="minio-decommissioning"></a>
-<a id="id1" data-td-print-local></a>
 
 MinIO 支持从包含两个或更多 pool 的部署中退役并移除 [服务器池s](/zh/operations/concepts/#minio-intro-server-pool)。 执行退役前，至少必须保留一个具有足够可用空间的 pool，以接收被退役 pool 中的对象。
 
@@ -32,15 +31,19 @@ MinIO 支持从包含两个或更多 pool 的部署中退役并移除 [服务器
 >
 > 如需协助，请参见 [SILO 故障排查](/zh/operations/troubleshooting/)。
 
-<a id="id3" data-td-print-local></a>
+<a id="minio-decommissioning-prereqs" data-td-print-local></a>
 
-## 前提条件 {#minio-decommissioning-prereqs}
+## 前提条件 {#prerequisites}
 
-### 先备份集群设置 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 先备份集群设置 {#back-up-cluster-settings-first}
 
 在开始退役前，使用 [`mc admin cluster bucket export`](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) 和 [`mc admin cluster iam export`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) 命令分别为存储桶元数据和 IAM 配置创建快照。 必要时，你可以使用这些快照恢复存储桶/IAM 设置，以从用户错误或流程错误中恢复。
 
-### 网络与防火墙 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 网络与防火墙 {#networking-and-firewalls}
 
 部署中的每个节点都应当与其他所有节点具备完整的双向网络访问能力。 对于容器化或编排式基础设施，这可能需要针对 Ingress、负载均衡器等网络和路由组件进行专门配置。 某些操作系统还可能需要设置防火墙规则。 例如，以下命令会在使用 `firewalld` 的服务器上显式开放 MinIO server 默认 API 端口 `9000`：
 
@@ -60,7 +63,9 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 如何配置防火墙或负载均衡器以支持 MinIO 不在本步骤范围内。
 
-### 部署必须具备足够的存储空间 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 部署必须具备足够的存储空间 {#deployment-must-have-sufficient-storage}
 
 退役过程会将目标 pool 中的对象迁移到部署中的其他 pool。 该部署的总可用存储空间 *必须* 大于被退役 pool 的总存储量。
 
@@ -92,9 +97,13 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 但如果 Pool 1 已满（例如已使用 200TB），退役会将剩余 pool 完全填满，并可能阻止任何后续写入操作。
 
-## 注意事项 {#id7}
+<a id="id7" data-td-print-local></a>
 
-### 替换 服务器池 {#id8}
+## 注意事项 {#considerations}
+
+<a id="id8" data-td-print-local></a>
+
+### 替换 服务器池 {#replacing-a-server-pool}
 
 对于通过新 pool 硬件替换旧 pool 硬件的升级周期，你应先通过 [扩容](/zh/operations/deployments/baremetal-expand-minio-deployment/#expand-minio-distributed) 添加新 pool，再开始退役旧 pool。 先添加新 pool，有助于退役过程在所有可用 pool（包括现有 pool 和新 pool）之间更均衡地迁移对象。
 
@@ -102,7 +111,9 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 退役要求集群拓扑在整个 pool 排空过程中保持稳定。 **不要** 试图在同一步骤中同时执行扩容和退役变更。
 
-### 退役可恢复继续执行 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 退役可恢复继续执行 {#decommissioning-is-resumable}
 
 如果退役因部署重启、网络故障等瞬时问题而中断，MinIO 会自动继续该过程。
 
@@ -110,7 +121,9 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 无论中断原因为何，该 pool 都会持续保持在退役状态。 退役一旦开始，该 pool *永远* 无法恢复为 active 状态。
 
-### 迁移与最终重启 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 迁移与最终重启 {#decommissioning-is-non-disruptive}
 
 移除已退役的 服务器池 需要在大致同一时间重启部署中的 *所有* MinIO 节点。
 
@@ -118,7 +131,9 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 **不要** 执行“滚动”重启（例如一次只重启一个节点）。
 
-### 删除标记、过期对象与迁移验证 {#deletemarker}
+<a id="deletemarker" data-td-print-local></a>
+
+### 删除标记、过期对象与迁移验证 {#decommissioning-ignores-expired-objects-and-trailing-deletemarker}
 
 SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标记，包括源池中唯一剩下的删除标记。其他池可能仍保留同名对象的旧数据版本，因此不能仅因本池没有其他版本就丢弃标记。这替代了旧版上游跳过孤立删除标记的行为。
 
@@ -128,15 +143,21 @@ SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标�
 
 仅在退役状态为 `Complete`，且通过 S3 核验目标版本、标签、数据及删除状态后，才移除池配置并按流程下线旧池。销毁旧盘前保留所需备份，不能把“只剩删除标记”当作可直接清盘的依据。
 
-## 行为说明 {#id11}
+<a id="id11" data-td-print-local></a>
 
-### 最终列表检查 {#id12}
+## 行为说明 {#behavior}
+
+<a id="id12" data-td-print-local></a>
+
+### 最终列表检查 {#final-listing-check}
 
 在退役过程结束时，MinIO 会检查该 pool 上是否还有对象列表。 如果列表为空，MinIO 会将退役标记为成功完成。 如果仍返回任何对象，MinIO 会报错，指出退役过程失败。
 
 如果退役失败，请保留日志，检查池健康状态与可用容量，并在查明原因后再重试。如需协助，请参见 [SILO 故障排查](/zh/operations/troubleshooting/)。
 
-### 对已启用 Tiering 的 Server 执行退役 {#tiering-server}
+<a id="tiering-server" data-td-print-local></a>
+
+### 对已启用 Tiering 的 Server 执行退役 {#decommissioning-a-server-with-tiering-enabled}
 
 > [!NOTE]
 > **变更: RELEASE.2023-03-20T20-16-18Z**
@@ -154,9 +175,13 @@ SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标�
 
 <a id="id13"></a>
 
-## 退役单个 服务器池 {#minio-decommissioning-server-pool}
+<a id="minio-decommissioning-server-pool" data-td-print-local></a>
 
-### 1) 查看 MinIO 部署拓扑 {#minio}
+## 退役单个 服务器池 {#decommission-a-server-pool}
+
+<a id="minio" data-td-print-local></a>
+
+### 1) 查看 MinIO 部署拓扑 {#review-the-minio-deployment-topology}
 
 [`mc admin decommission`](/zh/reference/minio-mc-admin/mc-admin-decommission/#command-mc.admin.decommission) 命令会返回 MinIO 部署中所有 pool 的列表：
 
@@ -181,7 +206,9 @@ mc admin decommission status myminio
 
 在上述示例中，该部署总存储为 210TiB，其中已使用 110TiB。 第一个 pool（`minio-{01...04}`）是退役目标，因为它是在 MinIO 部署创建时配置的，并且已经完全写满。 其余较新的 pool 可以吸收该 pool 中的所有对象，而不会显著影响总可用存储。
 
-### 2) 启动退役过程 {#id14}
+<a id="id14" data-td-print-local></a>
+
+### 2) 启动退役过程 {#start-the-decommissioning-process}
 
 > [!NOTE]
 > **退役是永久性的**
@@ -202,7 +229,9 @@ mc admin decommission start myminio/ https://minio-{01...04}.example.net:9000/mn
 
 此时，负责管理部署连接的负载均衡器、反向代理或其他网络控制组件无需修改其配置。
 
-### 3) 监控退役过程 {#id15}
+<a id="id15" data-td-print-local></a>
+
+### 3) 监控退役过程 {#monitor-the-decommissioning-process}
 
 使用 [`mc admin decommission status`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.status) 命令监控退役过程。
 
@@ -238,7 +267,9 @@ Started: 30 minutes ago
 
 如果 **Status** 显示为 failed，你可以重新运行 [`mc admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 命令以恢复该过程。 如果失败持续存在，请使用 [`mc admin logs`](/zh/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) 或查看 `systemd` 日志（例如 `journalctl -u silo`），以定位更具体的错误。
 
-### 4) 从部署配置中移除已退役的 Pool {#pool}
+<a id="pool" data-td-print-local></a>
+
+### 4) 从部署配置中移除已退役的 Pool {#remove-the-decommissioned-pool-from-the-deployment-configuration}
 
 每当一个 pool 完成退役后，你都可以安全地将其从部署配置中移除。 请修改部署中每个剩余 MinIO server 的启动命令，并移除已退役 pool。
 
@@ -258,13 +289,17 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 
 编辑该环境文件，并从 `MINIO_VOLUMES` 的值中移除已退役 pool。
 
-### 5) 更新网络控制平面 {#id16}
+<a id="id16" data-td-print-local></a>
+
+### 5) 更新网络控制平面 {#update-network-control-plane}
 
 更新所有负载均衡器、反向代理或其他网络控制平面，从 MinIO 部署的连接配置中移除已退役的 服务器池。
 
 网络控制平面组件的具体配置说明不在本步骤范围内。
 
-### 6) 重启 MinIO 部署 {#id17}
+<a id="id17" data-td-print-local></a>
+
+### 6) 重启 MinIO 部署 {#restart-the-minio-deployment}
 
 在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 
@@ -289,7 +324,9 @@ journalctl -f -u silo.service
 
 <a id="id18" data-td-print-local></a>
 
-## 退役多个 服务器池 {#minio-decommission-multiple-pools}
+<a id="minio-decommission-multiple-pools" data-td-print-local></a>
+
+## 退役多个 服务器池 {#decommission-multiple-server-pools}
 
 > [!NOTE]
 > **变更: RELEASE.2023-01-18T04-36-38Z**
@@ -310,7 +347,9 @@ journalctl -f -u silo.service
 - 一旦将这些 pool 标记为退役，你就 **无法** 恢复它们。
 - 请确认你选择的是预期的 pool。
 
-### 1) 查看 MinIO 部署拓扑 {#id19}
+<a id="id19" data-td-print-local></a>
+
+### 1) 查看 MinIO 部署拓扑 {#id1}
 
 [`mc admin decommission`](/zh/reference/minio-mc-admin/mc-admin-decommission/#command-mc.admin.decommission) 命令会返回 MinIO 部署中所有 pool 的列表：
 
@@ -347,7 +386,9 @@ mc admin decommission status myminio
 >
 > 在开始退役前，请先完成所有新增存储资源所需的 server 扩容。
 
-### 2) 启动退役过程 {#id20}
+<a id="id20" data-td-print-local></a>
+
+### 2) 启动退役过程 {#id2}
 
 > [!NOTE]
 > **退役是永久性的**
@@ -370,7 +411,9 @@ mc admin decommission start myminio/ https://minio-{01...04}.example.net:9000/mn
 
 此时，负责管理部署连接的负载均衡器、反向代理或其他网络控制组件无需修改其配置。
 
-### 3) 监控退役过程 {#id21}
+<a id="id21" data-td-print-local></a>
+
+### 3) 监控退役过程 {#id3}
 
 使用 [`mc admin decommission status`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.status) 命令监控退役过程。
 
@@ -407,7 +450,9 @@ Started: 30 minutes ago
 
 如果 **Status** 显示为 failed，你可以重新运行 [`mc admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 命令以恢复该过程。 如果失败持续存在，请使用 [`mc admin logs`](/zh/reference/minio-mc-admin/mc-admin-logs/#command-mc.admin.logs) 或查看 `systemd` 日志（例如 `journalctl -u silo`），以定位更具体的错误。
 
-### 4) 从部署配置中移除已退役的 Pool {#id22}
+<a id="id22" data-td-print-local></a>
+
+### 4) 从部署配置中移除已退役的 Pool {#remove-the-decommissioned-pools-from-the-deployment-configuration}
 
 退役完成后，你就可以安全地将这些 pool 从部署配置中移除。 请修改部署中每个剩余 MinIO server 的启动命令，并移除已退役 pool。
 

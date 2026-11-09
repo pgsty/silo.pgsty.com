@@ -10,7 +10,9 @@ upstream_modified: true
 
 <a id="command-mc.share.upload"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc share upload`](#command-mc.share.upload) 命令会生成一个临时的预签名 URL，并集成用于将对象上传到 MinIO 存储桶的访问凭证。该临时 URL 会在可配置的时间限制后过期。
 
@@ -45,7 +47,9 @@ mc [GLOBALFLAGS] share upload               \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.share.upload.ALIAS}
 
@@ -107,13 +111,19 @@ curl 'https://silo.example.com/mybucket/' ... --form-string 'key=<NAME>' --form 
 
 将 `<NAME>` 替换为上传后的对象名称。 该名称可以包含 [prefixes](/zh/glossary/#term-prefix)。
 
-### 全局参数 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局参数 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 生成用于上传对象的 URL {#url}
+## 示例 {#examples}
+
+<a id="url" data-td-print-local></a>
+
+### 生成用于上传对象的 URL {#generate-a-url-to-upload-object-s}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="上传单个对象" value="tab1" >}}
@@ -166,7 +176,9 @@ done
 {{< /tab >}}
 {{< /tabs >}}
 
-## 行为 {#id6}
+<a id="id6" data-td-print-local></a>
+
+## 行为 {#behavior}
 
 ### 生成命令与 shell 兼容性 {#shell-compatibility}
 
@@ -174,6 +186,8 @@ done
 
 上面的循环直接向 curl 传递各个参数。使用时将端点和示例策略字段替换成当前生成命令中的值；示例凭证与签名只是占位内容。
 
-### S3 兼容性 {#s3}
+<a id="s3" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 PGSTY mcli 正式支持的服务端是 SILO；对上游 MinIO 和其他 S3 服务的兼容属于[尽最大努力](/zh/reference/minio-mc/#command-mc)。

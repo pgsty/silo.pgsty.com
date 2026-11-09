@@ -16,7 +16,9 @@ upstream_modified: true
 >
 > RELEASE.2022-10-09T21-10-59Z or later
 
-## 语法 {#id1}
+<a id="id1" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc batch generate`](#command-mc.batch.generate) 命令会为指定作业类型创建一个基础的 YAML 格式模板文件。
 
@@ -49,7 +51,9 @@ mc [GLOBALFLAGS] batch generate \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id2}
+<a id="id2" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.batch.generate.ALIAS}
 
@@ -79,13 +83,19 @@ mc batch generate myminio replicate
 - [keyrotate](#minio-mc-batch-generate-keyrotate-job)
 - [expire](#minio-mc-batch-generate-expire-job) (Added `mc.RELEASE.2023-12-02T11-24-10Z`)
 
-### 全局标志 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 为 Replicate 作业类型生成 `yaml` 文件 {#replicate-yaml}
+## 示例 {#examples}
+
+<a id="replicate-yaml" data-td-print-local></a>
+
+### 为 Replicate 作业类型生成 `yaml` 文件 {#generate-a-yaml-file-for-a-replicate-job-type}
 
 以下命令会为 replicate 类型批处理作业生成 YAML 蓝图，并将文件命名为 `replicate`，扩展名为 `.yaml`：
 
@@ -104,7 +114,9 @@ SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的�
 
 <a id="id5" data-td-print-local></a>
 
-## 作业类型 {#minio-batch-job-types}
+<a id="minio-batch-job-types" data-td-print-local></a>
+
+## 作业类型 {#job-types}
 
 [`mc batch`](/zh/reference/minio-mc/mc-batch/#command-mc.batch) 当前支持以下作业任务类型：
 

@@ -21,7 +21,9 @@ MinIO 支持使用兼容 OpenID Connect (OIDC) 的 Identity Provider (IDP)，例
 
 MinIO 要检查的具体 claim 需要在 [使用 OIDC 身份管理部署集群](/zh/operations/external-iam/#minio-external-iam-oidc) 时进行配置。本页重点介绍如何创建与已配置 OIDC claims 匹配的 MinIO 策略。
 
-## 认证与授权流程 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 认证与授权流程 {#authentication-and-authorization-flow}
 
 MinIO 支持两种 OIDC 认证与授权流程：
 
@@ -32,7 +34,9 @@ MinIO 支持两种 OIDC 认证与授权流程：
 
 MinIO 支持多个 OIDC 提供方配置。 但是，每个部署只能配置 **一个** 基于 JWT claim 的 OIDC 提供方。 所有其他提供方都必须使用 RolePolicy。
 
-### RolePolicy 与 RoleArn {#rolepolicy-rolearn}
+<a id="rolepolicy-rolearn" data-td-print-local></a>
+
+### RolePolicy 与 RoleArn {#rolepolicy-and-rolearn}
 
 使用 RolePolicy 时，所有通过给定 RoleArn 生成 STS 凭证的客户端，都会获得与该 RoleArn 的 RolePolicy 配置关联的 [一个或多个策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
 
@@ -75,7 +79,9 @@ SILO 提供了一个示例 Go 应用 [web-identity.go](https://github.com/pgsty/
 >
 > 自 `silo-pkg v3.14.2` 及 [Server 20261018](/zh/blog/release/silo-20261018/) 起，OIDC JWKS 校验会拒绝超过 4096 位的 RSA 公钥并强制限制 JWK 密钥参数范围。自 [Console v2.5.1](/zh/blog/release/silo-20261026/) 起，内嵌 Console OIDC 登录除逗号分隔字符串外，也支持解析字符串数组形式的组 claim。参见 [TLS 与 OIDC 发现](/zh/blog/design/go127-tls-oidc-discovery/)。
 
-#### 识别 JWT Claim 值 {#jwt-claim}
+<a id="jwt-claim" data-td-print-local></a>
+
+#### 识别 JWT Claim 值 {#identifying-the-jwt-claim-value}
 
 MinIO 使用 OIDC 认证流程返回的 JWT token，识别要分配给已认证用户的具体策略。
 
@@ -85,11 +91,15 @@ MinIO 使用 OIDC 认证流程返回的 JWT token，识别要分配给已认证�
 
 关于如何配置用户 claims，请参见你所选 OIDC 提供方的文档。
 
-## 创建与 Claims 匹配的策略 {#claims}
+<a id="claims" data-td-print-local></a>
+
+## 创建与 Claims 匹配的策略 {#creating-policies-to-match-claims}
 
 使用 [`mc admin policy`](/zh/reference/minio-mc-admin/mc-admin-policy/#command-mc.admin.policy) 命令创建与一个或多个 claim 值匹配的策略。
 
-## OIDC 策略变量 {#oidc}
+<a id="oidc" data-td-print-local></a>
+
+## OIDC 策略变量 {#oidc-policy-variables}
 
 下表列出了用于授权 [OIDC 管理用户](#minio-external-identity-management-openid) 的受支持策略变量。
 

@@ -25,7 +25,9 @@ YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，
 
 <a id="id3" data-td-print-local></a>
 
-## 密钥轮换批处理作业参考 {#minio-batch-framework-keyrotate-job-ref}
+<a id="minio-batch-framework-keyrotate-job-ref" data-td-print-local></a>
+
+## 密钥轮换批处理作业参考 {#key-rotate-batch-job-reference}
 
 > [!NOTE]
 > **新增: MinIO**
@@ -34,7 +36,9 @@ YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，
 
 使用 `keyrotate` 作业类型创建批处理作业，以轮换加密对象的 [sse-s3 or sse-kms keys](/zh/operations/server-side-encryption/#minio-sse-data-encryption)。
 
-### 必填字段 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 必填字段 {#required-fields}
 
 > <table>
 >   <tbody>
@@ -50,7 +54,9 @@ YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，
 >   </tbody>
 > </table>
 
-### 可选字段 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 可选字段 {#optional-fields}
 
 对于 **基于标志的过滤条件**
 
@@ -126,7 +132,9 @@ YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，
   </tbody>
 </table>
 
-## `keyrotate` 作业类型的 YAML 描述文件示例 {#keyrotate-yaml}
+<a id="keyrotate-yaml" data-td-print-local></a>
+
+## `keyrotate` 作业类型的 YAML 描述文件示例 {#sample-yaml-description-file-for-a-keyrotate-job-type}
 
 使用 [`mc batch generate`](/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate) 创建一个基础的 `keyrotate` 批处理作业，以便进一步自定义：
 

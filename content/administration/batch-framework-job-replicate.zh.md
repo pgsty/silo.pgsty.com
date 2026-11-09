@@ -30,7 +30,9 @@ MinIO 批处理框架允许您使用 YAML 格式的作业定义文件（“批�
 
 从 MinIO Server `RELEASE.2023-05-04T21-44-30Z` 开始，另一端部署既可以是另一个 MinIO 部署，也可以是使用实时存储类的任意 S3 兼容位置。 使用复制 `YAML` 文件中的筛选选项，可排除存储在需要先重新水化或通过其他恢复方式处理后才能提供请求对象的位置中的对象。 复制到此类远端时，批量复制采用 `mc mirror` 的行为。
 
-## 行为 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 行为 {#behavior}
 
 ### SILO 在 20261026 之后的变更（尚未发布） {#silo-retry}
 
@@ -38,7 +40,9 @@ Push、Pull 和 Snowball 复制在必要的授权依赖暂时不可用时进入�
 
 复制尝试中断后，会从头重新扫描源端并重新统计进度。并发 worker 最后完成的对象仅用于展示进度，不能作为安全的恢复游标。这也覆盖最终暂停报告未能写入的恢复情形。重新执行已完成的工作会增加读取和写入成本；保留源版本 ID 的复制会复用这些 ID，通用 S3 传输重放时则可能在目标端新增版本。批量复制不承诺恰好一次交付。
 
-### 访问控制与要求 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 访问控制与要求 {#access-control-and-requirements}
 
 下一个 SILO 版本要求通过认证的提交者具备 `admin:StartBatchJob` 和作业所需的本地数据权限。定义中的凭据用于远端连接，不能代替提交者的本地权限。撤销、暂停与版本切换的行为见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。
 
@@ -136,7 +140,9 @@ Push、Pull 和 Snowball 复制在必要的授权依赖暂时不可用时进入�
 
 已配置 [Active Directory/LDAP](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) 或 [OpenID Connect](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) 用户管理的 MinIO 部署，也可以创建专用的 [access keys](/zh/administration/identity-access-management/minio-user-management/#minio-idp-service-account) 来支持批量复制。
 
-### 筛选复制目标 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 筛选复制目标 {#filter-replication-targets}
 
 批处理作业定义文件可按存储桶、前缀和/或筛选条件限制复制范围，从而只复制特定对象。 复制过程对对象和存储桶的访问，可能会受到您在 YAML 中为源端或目标端提供的凭据限制。
 
@@ -149,7 +155,9 @@ Push、Pull 和 Snowball 复制在必要的授权依赖暂时不可用时进入�
 
 例如，您可以使用批处理作业执行一次性复制同步，将对象从本地部署 `minio-local/invoices/` 上的某个存储桶推送到远程部署 `minio-remote/invoices` 上的某个存储桶。 您也可以将对象从远程部署 `minio-remote/invoices` 拉取到本地部署 `minio-local/invoices`。
 
-### 小文件优化 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 小文件优化 {#small-file-optimization}
 
 从 [RELEASE.2023-12-09T18-17-51Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-12-09T18-17-51Z) 开始，批量复制默认会自动对小于 5MiB 的对象进行批量打包和压缩，以高效地在源端与远端之间传输数据。 远程 MinIO 部署可以检查这些打包后的对象，并立即应用生命周期管理分层规则。 该功能类似于 S3 Snowball Edge 提供的小文件批处理能力。
 
@@ -157,7 +165,9 @@ Push、Pull 和 Snowball 复制在必要的授权依赖暂时不可用时进入�
 
 <a id="id7" data-td-print-local></a>
 
-## 复制批处理作业参考 {#minio-batch-framework-replicate-job-ref}
+<a id="minio-batch-framework-replicate-job-ref" data-td-print-local></a>
+
+## 复制批处理作业参考 {#replicate-batch-job-reference}
 
 YAML **必须** 定义源部署和目标部署。 如果 *source* 部署是远程部署，则 *target* 部署 **必须** 为 `local`。 此外，YAML 还可以定义标志，用于筛选要复制的对象、为作业发送通知或定义作业的重试次数。
 
@@ -345,7 +355,9 @@ YAML **必须** 定义源部署和目标部署。 如果 *source* 部署是远�
   </tbody>
 </table>
 
-## `replicate` 作业类型的 YAML 描述文件示例 {#replicate-yaml}
+<a id="replicate-yaml" data-td-print-local></a>
+
+## `replicate` 作业类型的 YAML 描述文件示例 {#sample-yaml-description-file-for-a-replicate-job-type}
 
 使用 [`mc batch generate`](/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate) 创建基础的 `replicate` 批处理作业，以便进一步自定义。
 

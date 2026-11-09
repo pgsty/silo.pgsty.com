@@ -9,13 +9,14 @@ upstream_modified: true
 > [!NOTE]
 > **自 mcli 20260916 起：** 选定 SDK 会重试并报告 CopyObject HTTP 200 响应内嵌的 S3 错误。HTTP 200 或复制开始消息本身不能证明成功，请检查命令退出码和错误记录。 [版本说明](/zh/compatibility/mcli/#current-release).
 
-
 <a id="mc-cp"></a>
 <a id="minio-mc-cp"></a>
 
 <a id="command-mc.cp"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc cp`](#command-mc.cp) 命令用于在 MinIO 部署与本地文件系统之间复制对象， 其中源端可以是 MinIO *或* 本地文件系统。
 
@@ -70,7 +71,9 @@ mc [GLOBALFLAGS] cp                                                        \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `SOURCE` {#mc.cp.SOURCE}
 
@@ -447,13 +450,19 @@ mc cp play/mybucket/object.txt ~/mydata/object.txt
 
 在复制期间，从 *.zip* 归档中提取文件。 仅当源归档文件位于 MinIO 部署中时生效。
 
-### 全局标志 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id9}
+<a id="id9" data-td-print-local></a>
 
-### 将对象复制到 S3 {#s3}
+## 示例 {#examples}
+
+<a id="s3" data-td-print-local></a>
+
+### 将对象复制到 S3 {#copy-object-to-s3}
 
 使用 [`mc cp`](#command-mc.cp) 将对象复制到 S3 兼容主机：
 
@@ -479,7 +488,9 @@ mc cp SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 {{< /tab >}}
 {{< /tabs >}}
 
-### 递归复制对象到 S3 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 递归复制对象到 S3 {#recursively-copy-objects-to-s3}
 
 使用 [`mc cp --recursive`](#mc.cp.-recursive) 将对象递归复制到 S3 兼容主机：
 
@@ -505,7 +516,9 @@ mc cp --recursive SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 {{< /tab >}}
 {{< /tabs >}}
 
-### 复制对象的时间点版本 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 复制对象的时间点版本 {#copy-point-in-time-version-of-object}
 
 使用 [`mc cp --rewind`](#mc.cp.-rewind) 复制对象在某个特定时间点的状态。 该命令仅适用于 S3 到 S3 复制。
 
@@ -524,7 +537,9 @@ mc cp --rewind DURATION SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 >
 > 要使用此功能，[`mc cp`](#command-mc.cp) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
 
-### 复制对象的特定版本 {#id12}
+<a id="id12" data-td-print-local></a>
+
+### 复制对象的特定版本 {#copy-specific-version-of-object}
 
 使用 [`mc cp --version-id`](#mc.cp.-version-id) 复制对象的特定版本。 该命令仅适用于 S3 到 S3 复制。
 
@@ -543,7 +558,9 @@ mc cp --version-id VERSION SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 >
 > 要使用此功能，[`mc cp`](#command-mc.cp) 需要启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。 请使用 [`mc version`](/zh/reference/minio-mc/mc-version/#command-mc.version) 在存储桶上启用版本控制。
 
-### 添加 `content-type` 值 {#content-type}
+<a id="content-type" data-td-print-local></a>
+
+### 添加 `content-type` 值 {#add-a-content-type-value}
 
 使用 [`mc cp --attr`](#mc.cp.-attr) 添加 `content-type` 值。 该命令仅适用于 S3 到 S3 复制。
 
@@ -563,7 +580,9 @@ mc cp --attr="content-type=CONTENT-TYPE" SRCALIAS/SRCPATH TGTALIAS/TGTPATH
  mc cp data.ndjson --attr="content-type=application/json" myminio/mybucket
 ```
 
-## 行为 {#id13}
+<a id="id13" data-td-print-local></a>
+
+## 行为 {#behavior}
 
 ### 部分失败与 JSON 计数 {#partial-failures}
 
@@ -571,7 +590,9 @@ mc cp --attr="content-type=CONTENT-TYPE" SRCALIAS/SRCPATH TGTALIAS/TGTPATH
 
 [`mc cp`](#command-mc.cp) 使用 MD5SUM 校验和验证所有到对象存储的复制操作。
 
-### S3 兼容性 {#id14}
+<a id="id14" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 PGSTY mcli 正式支持的服务端是 SILO；对上游 MinIO 和其他 S3 服务的兼容属于[尽最大努力](/zh/reference/minio-mc/#command-mc)。
 

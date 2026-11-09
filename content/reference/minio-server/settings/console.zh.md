@@ -6,7 +6,6 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio-console"></a>
 <a id="minio-server-envvar-console"></a>
 
 ## 0903 之后的内嵌 Console 修复 {#embedded-compatibility}
@@ -97,11 +96,15 @@ S3 继续执行授权检查：公共对象按策略允许匿名读取，私有�
 >
 > 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
-## 浏览器设置 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 浏览器设置 {#browser-settings}
 
 以下设置用于控制内嵌 MinIO Console 的行为。
 
-### MinIO Console {#id3}
+<a id="id3" data-td-print-local></a>
+
+### MinIO Console {#minio-console}
 
 *可选*
 
@@ -118,7 +121,9 @@ S3 继续执行授权检查：公共对象按策略允许匿名读取，私有�
 {{< /tab >}}
 {{< /tabs >}}
 
-### 动画 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 动画 {#animation}
 
 *可选*
 
@@ -140,7 +145,9 @@ S3 继续执行授权检查：公共对象按策略允许匿名读取，私有�
 {{< /tab >}}
 {{< /tabs >}}
 
-### 浏览器重定向 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 浏览器重定向 {#browser-redirect}
 
 *可选*
 
@@ -162,7 +169,9 @@ S3 继续执行授权检查：公共对象按策略允许匿名读取，私有�
 {{< /tab >}}
 {{< /tabs >}}
 
-### 浏览器重定向 URL {#url}
+<a id="url" data-td-print-local></a>
+
+### 浏览器重定向 URL {#browser-redirect-url}
 
 *可选*
 
@@ -185,7 +194,9 @@ S3 继续执行授权检查：公共对象按策略允许匿名读取，私有�
 {{< /tab >}}
 {{< /tabs >}}
 
-### 会话时长 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 会话时长 {#session-duration}
 
 *可选*
 
@@ -216,7 +227,9 @@ MinIO 支持以下时间单位：
 {{< /tab >}}
 {{< /tabs >}}
 
-### 日志查询 URL {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 日志查询 URL {#log-query-url}
 
 *可选*
 
@@ -233,7 +246,9 @@ MinIO 支持以下时间单位：
 {{< /tab >}}
 {{< /tabs >}}
 
-### 内容安全策略 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 内容安全策略 {#content-security-policy}
 
 *可选*
 
@@ -262,7 +277,9 @@ mc admin config set browser \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 严格传输安全 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 严格传输安全 {#strict-transport-security}
 
 *可选*
 
@@ -345,7 +362,9 @@ mc admin config set browser \
 {{< /tab >}}
 {{< /tabs >}}
 
-#### 示例 {#id10}
+<a id="id10" data-td-print-local></a>
+
+#### 示例 {#examples}
 
 以下示例展示了给定配置项对应的渲染后响应头。 等价的环境变量会生成相同结果。 所有示例均使用 `31536000`，即一个自然年（365 天）的秒数。
 
@@ -379,7 +398,9 @@ mc admin config set browser \
 > Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 > ```
 
-### 来源策略 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 来源策略 {#referrer-policy}
 
 *可选*
 
@@ -408,7 +429,9 @@ mc admin config set browser \
 {{< /tab >}}
 {{< /tabs >}}
 
-## Prometheus 设置 {#prometheus}
+<a id="prometheus" data-td-print-local></a>
+
+## Prometheus 设置 {#prometheus-settings}
 
 以下设置用于管理 MinIO 与你的 Prometheus 服务之间的交互方式。
 
