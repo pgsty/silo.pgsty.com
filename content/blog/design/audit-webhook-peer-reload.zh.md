@@ -2,7 +2,7 @@
 title: "Peer 重载后的审计 Webhook"
 linkTitle: "审计 Webhook 的 Peer 重载"
 date: 2026-11-04
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "PGSTY SILO 维护团队"
 summary: >
   解释运行时修改 audit_webhook 后，为什么除了处理该请求的服务器以外，其他每台服务器上的 Webhook 目标一创建，worker 就已经退出；哪些子系统有同样的缺陷；以及为什么用服务器进程上下文构建日志目标，是最小而完整的修复。
@@ -12,9 +12,9 @@ draft: false
 url: "/zh/blog/design/audit-webhook-peer-reload/"
 ---
 
-本文覆盖 Henrik Feldt 报告的 [issue #259](https://github.com/pgsty/silo/issues/259)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。本修复完成了维护者此前未提交的工作：补上 Kafka 调用点，在目标从未启动时把排队记录交给替代者，并增加 Kafka 测试覆盖。修复已在本地提交，尚未提交 pull request。
+本文覆盖 Henrik Feldt 报告的 [issue #259](https://github.com/pgsty/silo/issues/259)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。本修复完成了维护者此前未提交的工作：补上 Kafka 调用点，在目标从未启动时把排队记录交给替代者，并增加 Kafka 测试覆盖。
 
-**状态：** 修复已通过审查，已在本地提交。它已和下个版本的其他修复放在同一个集成分支上一起测试：带 `kqueue,dev` 标签的本地完整测试套件、本地执行的 CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。尚未合并或发布。
+**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 
@@ -31,15 +31,15 @@ url: "/zh/blog/design/audit-webhook-peer-reload/"
 
 ## 定性 {#assessment}
 
-| 维度 | 判断 |
-| --- | --- |
-| 性质 | peer 配置重载中的上下文生命周期缺陷：长期存在的日志目标被绑定在一个随请求结束的上下文上。继承自上游，不是已发布 SILO 版本引入的回归。 |
-| 受影响部署 | 多于一台服务器，并且在运行时通过 `mc admin config set` 或 `mc admin config reset` 修改了 `audit_webhook` 或 `logger_webhook`（无论是否配置 `queue_dir`），或修改了配置了 `queue_dir` 的 `audit_kafka`。同时更新 `logger_webhook` 的 `subnet` 代理修改也走同一条路径。 |
-| 不受影响 | 单服务器部署；启动时就已存在、运行时从未修改的目标；处理该管理请求的服务器；未配置 `queue_dir` 的 `audit_kafka`；其他所有动态子系统（见[逐项排查](#sweep)）。 |
-| 严重程度 | 高。除一台服务器外，其他所有服务器上的审计记录都会被丢弃，直到这些服务器重启，或者自己处理了之后的一次修改。管理命令报告成功，S3 请求也正常完成；丢弃只体现在服务器日志和日志目标指标中，因此这个缺口往往在审计复核中才被发现，而不是在日常运维中。审计 Webhook 若是合规控制的一部分，这段时间的审计记录就不完整，而且无法重建。 |
-| 可达性 | 一条常规管理命令即可触发。修改其中一个目标会重建该子系统中所有启用的目标，因此在其他服务器上它们会全部停止，而不只是被修改的那一个。 |
-| 发布紧急度 | 阻塞下一个版本。审计丢失不会报告给管理端或 S3 客户端，并一直持续，直到受影响的服务器重启，或自己处理之后的一次修改；而改动很小，不触及 S3 数据路径。 |
-| 剩余工作量 | 代码、审查和一次集群验收都已完成，还需要远程 CI。 |
+| 维度       | 判断                                                                                                                                                                                                                                                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 性质       | peer 配置重载中的上下文生命周期缺陷：长期存在的日志目标被绑定在一个随请求结束的上下文上。继承自上游，不是已发布 SILO 版本引入的回归。                                                                                                                                                                                            |
+| 受影响部署 | 多于一台服务器，并且在运行时通过 `mc admin config set` 或 `mc admin config reset` 修改了 `audit_webhook` 或 `logger_webhook`（无论是否配置 `queue_dir`），或修改了配置了 `queue_dir` 的 `audit_kafka`。同时更新 `logger_webhook` 的 `subnet` 代理修改也走同一条路径。                                                            |
+| 不受影响   | 单服务器部署；启动时就已存在、运行时从未修改的目标；处理该管理请求的服务器；未配置 `queue_dir` 的 `audit_kafka`；其他所有动态子系统（见[逐项排查](#sweep)）。                                                                                                                                                                    |
+| 严重程度   | 高。除一台服务器外，其他所有服务器上的审计记录都会被丢弃，直到这些服务器重启，或者自己处理了之后的一次修改。管理命令报告成功，S3 请求也正常完成；丢弃只体现在服务器日志和日志目标指标中，因此这个缺口往往在审计复核中才被发现，而不是在日常运维中。审计 Webhook 若是合规控制的一部分，这段时间的审计记录就不完整，而且无法重建。 |
+| 可达性     | 一条常规管理命令即可触发。修改其中一个目标会重建该子系统中所有启用的目标，因此在其他服务器上它们会全部停止，而不只是被修改的那一个。                                                                                                                                                                                             |
+| 发布紧急度 | `SILO Server 20261109` 发布阻塞项（已随 `RELEASE.2026-11-09T00-00-00Z` 发布）。审计丢失不会报告给管理端或 S3 客户端，并一直持续，直到受影响的服务器重启，或自己处理之后的一次修改；而改动很小，不触及 S3 数据路径。                                                                                                              |
+| 剩余工作量 | 已完成；已随 `SILO Server 20261109`（`d998292387cc`）发布。                                                                                                                                                                                                                                                                      |
 {.wide .expand}
 
 ## 触发条件 {#trigger}
@@ -53,11 +53,11 @@ url: "/zh/blog/design/audit-webhook-peer-reload/"
 
 报告者的节点指标展示了这一模式。三台服务器中，`config set` 在服务器 0 上执行，以下数据取自 7.5 小时之后：
 
-| 服务器 | `target_queue_length` | `failed_messages` | `total_messages` |
-| --- | --- | --- | --- |
-| 0（处理该请求） | 0 | 4 | 2,097,356 |
-| 1 | 100000 | 674,917 | 774,917 |
-| 2 | 100000 | 712,215 | 812,215 |
+| 服务器          | `target_queue_length` | `failed_messages` | `total_messages` |
+| --------------- | --------------------- | ----------------- | ---------------- |
+| 0（处理该请求） | 0                     | 4                 | 2,097,356        |
+| 1               | 100000                | 674,917           | 774,917          |
+| 2               | 100000                | 712,215           | 812,215          |
 {.wide .expand}
 
 在这份报告中，服务器 1 和 2 上的 `total_messages` 减去 `failed_messages` 正好等于队列长度，这与这两台服务器没有发送出任何记录的情况一致。
@@ -80,16 +80,16 @@ url: "/zh/blog/design/audit-webhook-peer-reload/"
 
 `config.SubSystemsDynamic` 中的每个子系统都走同一条重载路径。对每个子系统要问的是：`applyDynamicConfigForSubSys` 是否创建了在调用返回后仍持有这个上下文的 goroutine 或对象。
 
-| 子系统 | 重载时做什么 | 结论 |
-| --- | --- | --- |
-| `logger_webhook` | `logger.UpdateHTTPWebhooks(ctx, …)` → `Init(ctx)`：队列 worker，配置 `queue_dir` 时还有磁盘重放 | **受影响**，无论是否配置 `queue_dir` |
-| `audit_webhook` | `logger.UpdateAuditWebhooks(ctx, …)`，同一路径 | **受影响**，无论是否配置 `queue_dir` |
-| `audit_kafka` | `logger.UpdateAuditKafkaTargets(ctx, …)` → `Init(ctx)` → `initQueueStore`：以 `ctx.Done()` 启动磁盘重放 | **配置 `queue_dir` 时受影响**；未配置时发送循环不使用该上下文 |
-| `api` | `globalAPIConfig.init`、`setRemoteInstanceTransport` | 不受影响：只设置值和一个 transport，不涉及上下文 |
-| `ilm` | `UpdateWorkers`、`ResizeWorkers` | 不受影响：这些 worker 使用 transition 和 expiry 状态自身的上下文 |
-| `scanner` | 原子写入、`scannerSleeper.Update` | 不受影响 |
-| `subnet` | `Update`、`ApplyEnv` | 本身不受影响；修改代理时可能连带重新应用 `logger_webhook` |
-| `compression`、`heal`、`batch`、`storage_class`、`drive`、`browser`、`callhome` | 在锁内替换一个配置值 | 不受影响 |
+| 子系统                                                                          | 重载时做什么                                                                                            | 结论                                                             |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `logger_webhook`                                                                | `logger.UpdateHTTPWebhooks(ctx, …)` → `Init(ctx)`：队列 worker，配置 `queue_dir` 时还有磁盘重放         | **受影响**，无论是否配置 `queue_dir`                             |
+| `audit_webhook`                                                                 | `logger.UpdateAuditWebhooks(ctx, …)`，同一路径                                                          | **受影响**，无论是否配置 `queue_dir`                             |
+| `audit_kafka`                                                                   | `logger.UpdateAuditKafkaTargets(ctx, …)` → `Init(ctx)` → `initQueueStore`：以 `ctx.Done()` 启动磁盘重放 | **配置 `queue_dir` 时受影响**；未配置时发送循环不使用该上下文    |
+| `api`                                                                           | `globalAPIConfig.init`、`setRemoteInstanceTransport`                                                    | 不受影响：只设置值和一个 transport，不涉及上下文                 |
+| `ilm`                                                                           | `UpdateWorkers`、`ResizeWorkers`                                                                        | 不受影响：这些 worker 使用 transition 和 expiry 状态自身的上下文 |
+| `scanner`                                                                       | 原子写入、`scannerSleeper.Update`                                                                       | 不受影响                                                         |
+| `subnet`                                                                        | `Update`、`ApplyEnv`                                                                                    | 本身不受影响；修改代理时可能连带重新应用 `logger_webhook`        |
+| `compression`、`heal`、`batch`、`storage_class`、`drive`、`browser`、`callhome` | 在锁内替换一个配置值                                                                                    | 不受影响                                                         |
 {.wide .expand}
 
 在 main 上，通知目标和 Lambda 目标都不是动态子系统。
@@ -104,14 +104,14 @@ issue 中有两处描述比实际范围宽。peer 处理函数中针对整份配
 
 这个缺陷需要两个条件同时成立：随处理函数结束而结束的重载上下文，以及生命周期与 `Init` 所收上下文一致的日志目标 goroutine。它们来自不同的提交：
 
-| 成因 | 提交（PR） | 日期 | 首个上游发布 |
-| --- | --- | --- | --- |
-| peer 重载在请求上下文中应用子系统，该上下文随处理函数返回而结束。 | [`a89612549`](https://github.com/pgsty/silo/commit/a89612549)（[#11018](https://github.com/minio/minio/pull/11018)）；按子系统的形式 [`040ac5cad`](https://github.com/pgsty/silo/commit/040ac5cad)（[#14928](https://github.com/minio/minio/pull/14928)） | 2020-12-04；2022-05-16 | `RELEASE.2020-12-10T01-54-29Z`；`RELEASE.2022-05-19T18-20-59Z` |
-| grid 改造后生命周期不变：`serviceReloadDynamic` 创建 30 秒上下文并延迟 `cancel`。 | [`e06168596`](https://github.com/pgsty/silo/commit/e06168596)（[#19004](https://github.com/minio/minio/pull/19004)） | 2024-02-19 | `RELEASE.2024-02-24T17-11-14Z` |
-| 日志与审计 Webhook、审计 Kafka 变为可在运行时重载。 | [`28f188e3e`](https://github.com/pgsty/silo/commit/28f188e3e)（[#14289](https://github.com/minio/minio/pull/14289)）、[`3934700a0`](https://github.com/pgsty/silo/commit/3934700a0)（[#14390](https://github.com/minio/minio/pull/14390)） | 2022-02-17、2022-02-24 | `RELEASE.2022-02-17T23-22-26Z`、`RELEASE.2022-02-24T22-12-01Z` |
-| `Init` 开始接收上下文。HTTP 目标和 Kafka 的磁盘重放（`initQueueStore`）随它停止，HTTP worker 用它发送。 | [`57acacd5a`](https://github.com/pgsty/silo/commit/57acacd5a)（[#17121](https://github.com/minio/minio/pull/17121)） | 2023-05-09 | `RELEASE.2023-05-18T00-05-36Z` |
-| HTTP 队列 worker 在 `Init` 上下文结束时返回。 | [`1fc4203c1`](https://github.com/pgsty/silo/commit/1fc4203c1)（[#19275](https://github.com/minio/minio/pull/19275)） | 2024-03-25 | `RELEASE.2024-03-26T22-10-45Z` |
-| 磁盘队列 worker 在队列存储打开之前启动。 | [`ba54b39c0`](https://github.com/pgsty/silo/commit/ba54b39c0)（[#19854](https://github.com/minio/minio/pull/19854)） | 2024-06-01 | `RELEASE.2024-06-04T19-20-08Z` |
+| 成因                                                                                                    | 提交（PR）                                                                                                                                                                                                                                                | 日期                   | 首个上游发布                                                   |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------- |
+| peer 重载在请求上下文中应用子系统，该上下文随处理函数返回而结束。                                       | [`a89612549`](https://github.com/pgsty/silo/commit/a89612549)（[#11018](https://github.com/minio/minio/pull/11018)）；按子系统的形式 [`040ac5cad`](https://github.com/pgsty/silo/commit/040ac5cad)（[#14928](https://github.com/minio/minio/pull/14928)） | 2020-12-04；2022-05-16 | `RELEASE.2020-12-10T01-54-29Z`；`RELEASE.2022-05-19T18-20-59Z` |
+| grid 改造后生命周期不变：`serviceReloadDynamic` 创建 30 秒上下文并延迟 `cancel`。                       | [`e06168596`](https://github.com/pgsty/silo/commit/e06168596)（[#19004](https://github.com/minio/minio/pull/19004)）                                                                                                                                      | 2024-02-19             | `RELEASE.2024-02-24T17-11-14Z`                                 |
+| 日志与审计 Webhook、审计 Kafka 变为可在运行时重载。                                                     | [`28f188e3e`](https://github.com/pgsty/silo/commit/28f188e3e)（[#14289](https://github.com/minio/minio/pull/14289)）、[`3934700a0`](https://github.com/pgsty/silo/commit/3934700a0)（[#14390](https://github.com/minio/minio/pull/14390)）                | 2022-02-17、2022-02-24 | `RELEASE.2022-02-17T23-22-26Z`、`RELEASE.2022-02-24T22-12-01Z` |
+| `Init` 开始接收上下文。HTTP 目标和 Kafka 的磁盘重放（`initQueueStore`）随它停止，HTTP worker 用它发送。 | [`57acacd5a`](https://github.com/pgsty/silo/commit/57acacd5a)（[#17121](https://github.com/minio/minio/pull/17121)）                                                                                                                                      | 2023-05-09             | `RELEASE.2023-05-18T00-05-36Z`                                 |
+| HTTP 队列 worker 在 `Init` 上下文结束时返回。                                                           | [`1fc4203c1`](https://github.com/pgsty/silo/commit/1fc4203c1)（[#19275](https://github.com/minio/minio/pull/19275)）                                                                                                                                      | 2024-03-25             | `RELEASE.2024-03-26T22-10-45Z`                                 |
+| 磁盘队列 worker 在队列存储打开之前启动。                                                                | [`ba54b39c0`](https://github.com/pgsty/silo/commit/ba54b39c0)（[#19854](https://github.com/minio/minio/pull/19854)）                                                                                                                                      | 2024-06-01             | `RELEASE.2024-06-04T19-20-08Z`                                 |
 {.wide .expand}
 
 每一步改变了什么：
@@ -190,7 +190,7 @@ issue 中有两处描述比实际范围宽。peer 处理函数中针对整份配
 
 ## 运维指引 {#operators}
 
-在修复发布之前：
+在 `SILO Server 20261109` 之前的版本中：
 
 - **运行时修改后，重启其他服务器。** 执行任何涉及 `audit_webhook`、`logger_webhook` 或配置了 `queue_dir` 的 `audit_kafka` 的 `mc admin config set` 或 `mc admin config reset` 之后，重启除处理该命令的服务器以外的每一台服务器。配置了日志 Webhook 时，`subnet` 代理修改也算在内。如果负载均衡器让你无法确定是哪台服务器处理了命令，可以在修改配置时把 `mcli` 别名指向某一台服务器自己的地址，或者逐台重启所有服务器。
 - **未修改的目标不受影响。** 启动时就已存在的目标，无论来自环境变量还是已保存的配置，都用进程上下文构建，在下一次运行时修改之前不受影响。
@@ -233,19 +233,15 @@ issue 中有两处描述比实际范围宽。peer 处理函数中针对整份配
 
 **集群验收。** 2026-11-05，在一台主机上运行四个服务器进程，每个进程两块盘，使用内存队列。通过第一台服务器在运行时两次设置 `audit_webhook`，然后向每台服务器各发送三个 `HEAD` 请求。在 `69fcf50cd` 上，只有第一台服务器的三条记录到达，其他三台服务器上的 `minio_audit_target_queue_length` 都停在 3。使用修复后，全部十二条记录都到达，每台服务器上的队列长度都是 0。这次运行没有覆盖磁盘队列和 `audit_kafka`：同一台主机上的服务器在一个集群级设置下无法使用各自独立的 `queue_dir` 路径，也没有可用的 broker。上面的测试覆盖了这两种情况。
 
-合并前仍需完成：远程 CI。
-
-**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、Heal 演练、#285、`delete-all` 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集（Ubuntu CI 竞态工作流现已包含 `TestDynamicWebhookOutlivesConfigContext`）和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
-
-本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
+**集成与发布验证。** 该修复为 `SILO Server 20261109` 合入集成分支，位于 #278 和 #281 之后，与锁域、Heal 演练、#285、`delete-all` 和 Console 修复无冲突合并。本地运行通过了完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件与 CI 竞态检测选集（Ubuntu CI 竞态工作流现已包含 `TestDynamicWebhookOutlivesConfigContext`）。针对组合分支的对抗性审查通过实际执行的探针检查了锁域、清理路径以及清除与恢复之间的交互，未发现缺陷。发布提交 `d998292387cc`（`RELEASE.2026-11-09T00-00-00Z`）已通过 Go CI（含无标签 Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 门禁）、VulnCheck、发布流水线测试与发布构建校验。
 
 ## 审查记录 {#review}
 
-| 轮次 | 结果 |
-| --- | --- |
+| 轮次              | 结果                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 对抗性审查第 1 轮 | 带小问题通过；没有发现改动引入的生产缺陷。审查报告了六个早已存在的缺陷。修复了其中一个：从未启动的目标中排队的记录，会在重载替换该目标时被丢弃（第 3 部分；测试也改为通过第二次应用配置来恢复）。其余五个列在[剩余限制](#limits)中。测试子进程现在去掉了日志与审计环境变量。本文按审查意见做了更正：重启不是唯一的恢复方式；丢弃在日志和指标中可见；peer 上的崩溃大多被掩盖但并非总是如此；关于关闭和送达的说法加了限定。 |
-| 对抗性审查第 2 轮 | 带小问题通过，覆盖 `Cancel` 中的交接和改写后的测试。交接把单个被替换目标的每条记录恰好送达一次，在缓冲区并发调整大小时保住了记录，并经受住了重复和并发的 `Cancel` 调用；端点可用和宕机两种情况下的普通重载没有出现新的丢失或重复。记录了一处剩余丢失：失败目标在短时间内相继被替换时，共享缓冲区可能耗尽（见剩余限制）。测试现在只清理最后一个目标。另外做了进一步的措辞更正。 |
-| 对抗性审查第 3 轮 | 带小问题通过。确认了测试清理和更正后的措辞，另有两处表述改得更准确。 |
+| 对抗性审查第 2 轮 | 带小问题通过，覆盖 `Cancel` 中的交接和改写后的测试。交接把单个被替换目标的每条记录恰好送达一次，在缓冲区并发调整大小时保住了记录，并经受住了重复和并发的 `Cancel` 调用；端点可用和宕机两种情况下的普通重载没有出现新的丢失或重复。记录了一处剩余丢失：失败目标在短时间内相继被替换时，共享缓冲区可能耗尽（见剩余限制）。测试现在只清理最后一个目标。另外做了进一步的措辞更正。                                            |
+| 对抗性审查第 3 轮 | 带小问题通过。确认了测试清理和更正后的措辞，另有两处表述改得更准确。                                                                                                                                                                                                                                                                                                                                                      |
 {.wide .expand}
 
 ## 参考 {#references}

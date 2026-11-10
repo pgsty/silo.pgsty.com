@@ -2,7 +2,7 @@
 title: "为 SILO 提供多语言支持"
 linkTitle: "Console 多语言"
 date: 2026-11-09
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "PGSTY SILO 维护团队"
 summary: >
   解释 SILO 为什么增加十种 UI 语言、如何组织注册表和维护分级，以及逐语言压缩、静态全量加载在体积、缓存与实现成本之间的取舍。
@@ -14,7 +14,7 @@ url: "/zh/blog/design/console-languages/"
 
 Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-console/pull/83) 提供了巴西葡萄牙语翻译。siyahkut 在 [silo#277](https://github.com/pgsty/silo/issues/277) 中请求土耳其语。这两项贡献推动 Console 扩展为可配置的十语言界面。
 
-**截至 2026-11-09 的状态：**十语言界面、审校后的译文、逐语言压缩、静态全量加载和长期缓存已合入 Console `main`，并随 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 发布。最终复核保留了紧凑标签要求，并检查了相关控件在手机、平板和桌面宽度下的显示。源码合入、打标与正式产品发布仍是不同阶段。
+**状态：** 已随 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)，`pgsty/silo-console:v2.7.0`）正式发布，并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）。发布前复核验证了紧凑标签、RTL 输入控件，以及手机、平板和桌面宽度下的版面边界。
 
 ## 决定 {#tldr}
 
@@ -71,26 +71,26 @@ Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-conso
 
 对比保持生产源码、压缩混淆方式和静态导入不变，只调整构建分组：全部词典一个组，或者每个语言目录一个组。每个语言组都包含 chrome、help、screens 三部分。然后分别用本机 `gzip -n -9` 命令和现有固定版本压缩器处理生成的 JavaScript。
 
-| 打包方式 | `gzip -n -9`，字节 | `fflate` level 9，字节 | 冷启动语言资源请求数 |
-| --- | ---: | ---: | ---: |
-| 所有语言合并 | 549,712 | 562,448 | 1 |
-| 每种语言独立，合计 | 555,105 | 568,470 | 9 |
-| 分包额外成本 | 5,393（0.98%） | 6,022（1.07%） | 8 |
+| 打包方式           | `gzip -n -9`，字节 | `fflate` level 9，字节 | 冷启动语言资源请求数 |
+| ------------------ | -----------------: | ---------------------: | -------------------: |
+| 所有语言合并       |            549,712 |                562,448 |                    1 |
+| 每种语言独立，合计 |            555,105 |                568,470 |                    9 |
+| 分包额外成本       |     5,393（0.98%） |         6,022（1.07%） |                    8 |
 {.wide .expand}
 
 相同压缩级别不保证不同实现输出相同字节。系统命令用于对比，固定生产压缩器用于保证不同构建主机上的结果可复现。两种实现得到相同的打包结论，因此不需要为此更换压缩器。
 
-| 语言 | `gzip -n -9`，字节 |
-| --- | ---: |
-| 中文 | 58,319 |
-| 法语 | 60,684 |
-| 德语 | 60,717 |
-| 俄语 | 70,315 |
-| 西班牙语 | 59,296 |
-| 巴西葡萄牙语 | 57,689 |
-| 日语 | 63,159 |
-| 阿拉伯语 | 64,095 |
-| 土耳其语 | 60,831 |
+| 语言         | `gzip -n -9`，字节 |
+| ------------ | -----------------: |
+| 中文         |             58,319 |
+| 法语         |             60,684 |
+| 德语         |             60,717 |
+| 俄语         |             70,315 |
+| 西班牙语     |             59,296 |
+| 巴西葡萄牙语 |             57,689 |
+| 日语         |             63,159 |
+| 阿拉伯语     |             64,095 |
+| 土耳其语     |             60,831 |
 {.wide .expand}
 
 合并文件并不会自动消除跨词典重复的所有英文 key。DEFLATE 只能引用前面 32 KiB 窗口内的文本，而单种语言的完整词典远大于这个窗口。这解释了为什么不能预设跨语言合并会带来巨大压缩收益；上表给出了实际构建的结果。参见 [RFC 1951 第 2 节](https://www.rfc-editor.org/rfc/rfc1951#section-2)。
@@ -131,18 +131,18 @@ Eduardo Andrade Machado 的 [Console PR #83](https://github.com/pgsty/silo-conso
 tr: { label: "Türkçe", tag: "tr", dir: "ltr", tier: "maintained" },
 ```
 
-| ID | 菜单名称 | 方向 | 级别 |
-| --- | --- | --- | --- |
-| en | English | LTR | source |
-| zh | 简体中文 | LTR | core |
-| fr | Français | LTR | maintained |
-| de | Deutsch | LTR | maintained |
-| ru | Русский | LTR | maintained |
-| es | Español | LTR | maintained |
-| pt-BR | Português (Brasil) | LTR | maintained |
-| ja | 日本語 | LTR | maintained |
-| ar | العربية | RTL | maintained |
-| tr | Türkçe | LTR | maintained |
+| ID    | 菜单名称           | 方向 | 级别       |
+| ----- | ------------------ | ---- | ---------- |
+| en    | English            | LTR  | source     |
+| zh    | 简体中文           | LTR  | core       |
+| fr    | Français           | LTR  | maintained |
+| de    | Deutsch            | LTR  | maintained |
+| ru    | Русский            | LTR  | maintained |
+| es    | Español            | LTR  | maintained |
+| pt-BR | Português (Brasil) | LTR  | maintained |
+| ja    | 日本語             | LTR  | maintained |
+| ar    | العربية            | RTL  | maintained |
+| tr    | Türkçe             | LTR  | maintained |
 {.wide .expand}
 
 已有 `zh` 偏好不变。早期测试版的 `pt` 映射为 `pt-BR`；未知或未启用的值回退英文。未完成的语言可以通过 `enabled: false` 从菜单排除，但隐藏菜单项本身不会从构建中移除静态导入。
@@ -177,7 +177,7 @@ tr: { label: "Türkçe", tag: "tr", dir: "ltr", tier: "maintained" },
 
 ### 从右到左布局 {#rtl}
 
-间隔、对齐、边框和移动抽屉改用逻辑 CSS 属性。方向图标、标签页方向键和开关滑块随 RTL 改变。对象路径、桶名、ARN/JSON、策略编辑器和原始 Trace/日志数据保持 LTR。图表与物理视口坐标不做机械镜像。
+间隔、对齐、边框和移动抽屉改用逻辑 CSS 属性。方向图标、标签页方向键和开关滑块随 RTL 改变。对象路径、桶名、ARN/JSON、策略编辑器和原始 Trace/日志数据保持 LTR。协议字段操作按钮与单位选择器在 RTL 下固定在文本末尾，避免遮挡密码、URL、邮箱和数字输入（[`a9da731c5`](https://github.com/pgsty/silo-console/commit/a9da731c5)），任务计数角标也恢复到原本角落位置（[`bc17e124a`](https://github.com/pgsty/silo-console/commit/bc17e124a)）。图表与物理视口坐标不做机械镜像。
 
 ## 维护分级与检查 {#tiers}
 
@@ -203,21 +203,21 @@ tr: { label: "Türkçe", tag: "tr", dir: "ltr", tier: "maintained" },
 
 ## 考虑过的替代方案 {#alternatives}
 
-| 方案 | 收益 | 代价与决定 |
-| --- | --- | --- |
-| 只保留英文与中文 | 翻译维护负担最低 | 无法回应葡语贡献和土耳其语需求，不采用。 |
-| 合并一包，全量加载 | 只有一个语言请求，gzip 总量最小 | 任一语言修改都会使所有翻译数据的缓存失效；是合理的简单基线，但分包只多约 1%。 |
-| 按语言分包，全量加载 | 独立复用缓存，保留现有同步运行方式 | 冷启动多八个请求，首次词典工作量不减少；采用。 |
-| 按语言分包，懒加载 | 英文可以不加载词典，其他用户只取需要的语言 | 增加部分加载、失败、重试与状态协调路径，暂缓，等实测证明有必要再引入。 |
-| 引入完整翻译框架 | 更丰富的消息工具和生态集成 | 增加依赖与迁移工作，现有原文 key 查找、`Intl`、React/Redux 已满足需求。 |
+| 方案                 | 收益                                       | 代价与决定                                                                    |
+| -------------------- | ------------------------------------------ | ----------------------------------------------------------------------------- |
+| 只保留英文与中文     | 翻译维护负担最低                           | 无法回应葡语贡献和土耳其语需求，不采用。                                      |
+| 合并一包，全量加载   | 只有一个语言请求，gzip 总量最小            | 任一语言修改都会使所有翻译数据的缓存失效；是合理的简单基线，但分包只多约 1%。 |
+| 按语言分包，全量加载 | 独立复用缓存，保留现有同步运行方式         | 冷启动多八个请求，首次词典工作量不减少；采用。                                |
+| 按语言分包，懒加载   | 英文可以不加载词典，其他用户只取需要的语言 | 增加部分加载、失败、重试与状态协调路径，暂缓，等实测证明有必要再引入。        |
+| 引入完整翻译框架     | 更丰富的消息工具和生态集成                 | 增加依赖与迁移工作，现有原文 key 查找、`Intl`、React/Redux 已满足需求。       |
 {.wide .expand}
 
 按语言懒加载曾在评估中实现，维护者选择静态方案后将其移除。独立 gzip 文件仍然保留了以后调整加载方式的自然边界，不必现在就引入相关状态。
 
 ## 交付 {#delivery}
 
-PR #83 已保留原始历史合并，初版十语言[实现](https://github.com/pgsty/silo-console/commit/51a735992)与[嵌入 GUI](https://github.com/pgsty/silo-console/commit/0059ee2d9)分别提交。最终交付包含[审校译文与紧凑布局检查](https://github.com/pgsty/silo-console/commit/34de5907eb8d290ddb3e7f43c6bec68f1eb76daa)、[逐语言资源与缓存策略](https://github.com/pgsty/silo-console/commit/b0371b69cc1eae78eb30342afa8613dfbd78971b)，以及[重新生成的嵌入 GUI](https://github.com/pgsty/silo-console/commit/efe12ae972579972327b0d56e085fcfc8ba62923)。
+PR #83 已保留原始历史合并，初版十语言[实现](https://github.com/pgsty/silo-console/commit/51a735992)与[嵌入 GUI](https://github.com/pgsty/silo-console/commit/0059ee2d9)分别提交。随后提交包含[审校译文与紧凑布局检查](https://github.com/pgsty/silo-console/commit/34de5907eb8d290ddb3e7f43c6bec68f1eb76daa)、[逐语言资源与缓存策略](https://github.com/pgsty/silo-console/commit/b0371b69cc1eae78eb30342afa8613dfbd78971b)，以及[中间阶段重新生成的嵌入 GUI](https://github.com/pgsty/silo-console/commit/efe12ae972579972327b0d56e085fcfc8ba62923)。发布前收尾修复恢复了任务计数角标位置（[`bc17e124a`](https://github.com/pgsty/silo-console/commit/bc17e124a)）并在 RTL 下将协议字段操作按钮保持在文本末尾（[`a9da731c5`](https://github.com/pgsty/silo-console/commit/a9da731c5)），最终由 [Console 2.7.0 正式版资源构建 `4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505) 取代 `efe12ae97`。
 
-最终源码通过 **789 项前端单元测试**、Go API 测试、类型检查、格式检查、未使用代码检查和生产包预算。词典修订既要进入 TypeScript 文件，也必须进入实际发布的 GUI。
+正式发布的 `v2.7.0` 源码通过全部前端单元测试、Go API 测试、类型检查、格式检查、未使用代码检查和生产包预算，已随独立版 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（`pgsty/silo-console:v2.7.0`）交付，并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)。词典修订既要进入 TypeScript 文件，也必须进入实际发布的 GUI。
 
-验收覆盖缺词回退、占位符和复数、语言偏好持久化、首次加载后的离线切换、未保存表单、阿拉伯语布局、原始数据不变，以及只修改一种语言后的缓存复用。双语设计记录由伴生站点承载；源码合入、生成资源、文档发布和产品发布仍是不同交付事项。
+验收覆盖缺词回退、占位符和复数、语言偏好持久化、首次加载后的离线切换、未保存表单、阿拉伯语布局、原始数据不变，以及只修改一种语言后的缓存复用。

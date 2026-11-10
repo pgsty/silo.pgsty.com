@@ -15,14 +15,16 @@ cascade:
 
 ## 2026-11-09 Console 多语言 {#november-9-console-languages}
 
-- [为 SILO 提供多语言支持](/zh/blog/design/console-languages/)：横跨 [Console 2.6.0](/zh/blog/release/console-2.6.0/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 的十语言界面（涵盖 [#83](https://github.com/pgsty/silo-console/pull/83) 葡语贡献与 [silo#277](https://github.com/pgsty/silo/issues/277) 土耳其语需求），记录维护分级、英文回退与阿拉伯语 RTL，以及支持逐语言分包、全量加载决策的 gzip 和缓存实测。
+- [为 SILO 提供多语言支持](/zh/blog/design/console-languages/)：随 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 发布并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 的十语言界面（[Console 2.6.0](/zh/blog/release/console-2.6.0/) 仅含中英文；涵盖 [#83](https://github.com/pgsty/silo-console/pull/83) 葡语贡献与 [silo#277](https://github.com/pgsty/silo/issues/277) 土耳其语需求），记录维护分级、英文回退与阿拉伯语 RTL，以及支持逐语言分包、全量加载决策的 gzip 和缓存实测。
 
 ## 2026-11-06 发布验收中发现 {#november-6-found-in-release}
 
-- [局部视图不能把存在的对象报成不存在](/zh/blog/design/partial-view-read-404/)：只能连上部分盘的节点，为什么会对存在的对象返回 404，以及为什么判定“不存在”必须要求每块盘都应答。
-- [Multipart 提交失败可能让上传卡死](/zh/blog/design/multipart-complete-retry/)：未达到写 quorum 的提交为什么会让上传一直卡到过期清理，以及为什么修复要等到存储操作能够加 fencing 之后再做。
+- [局部视图不能把存在的对象报成不存在](/zh/blog/design/partial-view-read-404/)（已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布）：只能连上部分盘的节点，为什么会对存在的对象返回 404，以及为什么判定“不存在”必须要求每块盘都应答。
+- [Multipart 提交失败可能让上传卡死](/zh/blog/design/multipart-complete-retry/)（推迟至 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 之后）：未达到写 quorum 的提交为什么会让上传一直卡到过期清理，以及为什么修复推迟至 `SILO Server 20261109` 之后的版本与存储 RPC fencing 一并交付。
 
 ## 2026-11-04 发布阻塞的生命周期修复 {#november-4-release-blocking-lifecycle}
+
+本节所有服务端设计记录对应的修复已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布；Console 配额校验修复已随独立版 [Console 2.6.0](/zh/blog/release/console-2.6.0/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 发布，并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)。
 
 - [多池生命周期过期：按整个对象决策](/zh/blog/design/multi-pool-lifecycle-expiry/)（[#278](https://github.com/pgsty/silo/issues/278)、[#279](https://github.com/pgsty/silo/pull/279)）：解释只按单个池内版本做出的过期判断，为何会隐藏、删除或复活另一个池中的版本，以及为什么在对象锁内按合并版本列表复核是最小而完整的修复。
 - [恢复副本：过期的是副本，不是对象](/zh/blog/design/restored-copy-expiry/)（[#281](https://github.com/pgsty/silo/issues/281)、[#282](https://github.com/pgsty/silo/pull/282)）：解释当前版本的恢复副本过期为何会隐藏对象或抹掉更早的 null 版本，以及哪些存储层与原生恢复防护要与精确版本修复一起交付。
@@ -31,10 +33,12 @@ cascade:
 - [失败写入与幽灵空前缀](/zh/blog/design/failed-rename-empty-prefix/)（[#285](https://github.com/pgsty/silo/issues/285)、[#286](https://github.com/pgsty/silo/pull/286)）：解释暂存数据在远端 rename 之前消失的写入，为何会留下空对象目录并在之后被列为空前缀，以及为什么在两条 rename 失败路径上清理它就足够。
 - [Heal 演练不能删除数据](/zh/blog/design/heal-dry-run-safety/)（源自 [#280](https://github.com/pgsty/silo/pull/280)）：解释 heal 演练为何会删掉 dangling 对象最后的元数据副本，并在远端节点上执行真实的桶 heal，以及为什么提前返回加上把演练标志传给 peer 能同时关闭这两条路径。
 - [生命周期"删除全部版本"只能作用于一个 key](/zh/blog/design/ilm-delete-all-exact-key/)（在审查 [#278](https://github.com/pgsty/silo/issues/278) 修复时发现）：解释 ExpiredObjectAllVersions、DelMarkerExpiration 和批量过期的默认 purge 为何会删除过期 key 名下的所有其他 key，以及为什么在复核后按版本 ID 只清理该 key 自身的版本，是最小而安全的修复。
-- [Console 的桶配额：列表显示与数值校验](/zh/blog/design/console-quota-numeric-validation/)（[silo-console#72](https://github.com/pgsty/silo-console/issues/72)、[silo-console#73](https://github.com/pgsty/silo-console/issues/73)）：解释 Console 设置的配额为何在桶列表中显示为"-"、创建桶时为何会把超大配额变成 1 字节、两者的来源，以及已合并的 Console 修复覆盖了什么。
+- [Console 的桶配额：列表显示与数值校验](/zh/blog/design/console-quota-numeric-validation/)（[silo-console#72](https://github.com/pgsty/silo-console/issues/72)、[silo-console#73](https://github.com/pgsty/silo-console/issues/73)）：解释 Console 设置的配额为何在桶列表中显示为"-"、创建桶时为何会把超大配额变成 1 字节、两者的来源，以及随独立版 [Console 2.6.0](/zh/blog/release/console-2.6.0/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 发布并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 的修复范围。
 - [大型单池集群的锁域](/zh/blog/design/single-pool-lock-domains/)：解释在 18 台及以上主机的单池集群中，DELETE 与 CopyObject 为何无法与同一 key 上的 PUT 互斥，哪些布局受影响，以及关闭它的路由改动。
 
 ## 2026-11-01 存储池迁移完整性审查 {#november-1-pool-migration-integrity}
+
+本节所有存储池迁移与分层清理修复已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布。
 
 - [存储池迁移完整性审查：#261、#263 与 #265](/zh/blog/design/pool-migration-integrity-review/)：维护者对三个问题及其修复的审查，记录 #266 的贡献合并、#276 的维护者后续修复、验证证据与合并顺序。
 - [混合 EC 布局与迁移列表](/zh/blog/design/mixed-ec-migration-listing/)（[#261](https://github.com/pgsty/silo/issues/261)、[#262](https://github.com/pgsty/silo/pull/262)）：解释一次未完成的降级覆写为何会让可读对象从 decommission/rebalance 列表中消失，以及 #262 为何以最小范围解决问题。

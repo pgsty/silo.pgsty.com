@@ -2,7 +2,7 @@
 title: "多池对象一致性"
 linkTitle: "多池对象一致性"
 date: 2026-09-16
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "冯若航"
 summary: "先在共享锁下选择一个逻辑对象，再判断条件或合并标签和 Object Lock 状态。"
 tags: [Design, S3, Operations]
@@ -61,7 +61,7 @@ url: "/zh/blog/design/multi-pool-object-consistency/"
 
 对于条件 `DELETE`，协调层在执行跨池清理前针对选定的逻辑对象统一校验一次前置条件，并在调用下层各池删除接口前清除条件回调；若请求指定了显式 `versionId`，则针对该特定版本进行比对。
 
-对于条件 `PUT`，[PR #207](https://github.com/pgsty/silo/pull/207) 在外层命名空间锁保护下先跨所有可用池选出最新的逻辑对象表示（包括删除标记状态），再写入新内容。这修复了目标池中残留的陈旧副本导致 `If-Match` / `If-None-Match` 判断结果与集群当前逻辑对象不一致的缺陷。在下一版本 SILO 构建（[PR #292](https://github.com/pgsty/silo/pull/292)，提交 [`1f3377862`](https://github.com/pgsty/silo/commit/1f3377862b3157b8a4f07815cbf4e453d4b6f1a6) 与 [`af3064f2b`](https://github.com/pgsty/silo/commit/af3064f2b54fe90c4b0f14a0c54c2507bf7b29d4)）中，`PutObject`、`NewMultipartUpload` 与 `CompleteMultipartUpload` 共用 `checkCurrentPreconditions`：条件分片上传初始化同样在池协调层写锁保护下跨池评估当前逻辑对象的前置条件，并在放置上传记录期间持续持有写锁；分片完成前置条件失败时保留已上传分片以便重试。
+对于条件 `PUT`，[PR #207](https://github.com/pgsty/silo/pull/207) 在外层命名空间锁保护下先跨所有可用池选出最新的逻辑对象表示（包括删除标记状态），再写入新内容。这修复了目标池中残留的陈旧副本导致 `If-Match` / `If-None-Match` 判断结果与集群当前逻辑对象不一致的缺陷。在 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（[PR #292](https://github.com/pgsty/silo/pull/292)，提交 [`1f3377862`](https://github.com/pgsty/silo/commit/1f3377862b3157b8a4f07815cbf4e453d4b6f1a6) 与 [`af3064f2b`](https://github.com/pgsty/silo/commit/af3064f2b54fe90c4b0f14a0c54c2507bf7b29d4)）中，`PutObject`、`NewMultipartUpload` 与 `CompleteMultipartUpload` 共用 `checkCurrentPreconditions`：条件分片上传初始化同样在池协调层写锁保护下跨池评估当前逻辑对象的前置条件，并在放置上传记录期间持续持有写锁；分片完成前置条件失败时保留已上传分片以便重试。
 
 若跨池清理或元数据传播在修改了部分物理副本后遇到存储错误，恢复后应重新核对对象状态并重试。批量 XML `DeleteObjects` 的 ETag 条件仍不受支持，详见[条件 DELETE 设计说明](/zh/blog/design/conditional-delete/)。
 

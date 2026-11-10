@@ -2,7 +2,7 @@
 title: "ILM Expiry and Pool Migration Ordering"
 linkTitle: "ILM Migration Ordering"
 date: 2026-10-27
-lastmod: 2026-11-08
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
   Why lifecycle expiry and pool migration disagree about a versioned current object, what #266 fixes, and how #276 completes the tier and lifecycle safety boundaries.
@@ -12,9 +12,11 @@ draft: false
 url: "/blog/design/ilm-migration-ordering/"
 ---
 
-This record covers [issue #265](https://github.com/pgsty/silo/issues/265), the contributor change [PR #266](https://github.com/pgsty/silo/pull/266), and maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276). The merged [#264](https://github.com/pgsty/silo/pull/264) and [#267](https://github.com/pgsty/silo/pull/267) are relevant predecessors. The review was updated against main after #276 on 2026-11-02. #266's decommission commit is [19910230a](https://github.com/pgsty/silo/commit/19910230a), and its rebalance commit is [a995921e5](https://github.com/pgsty/silo/commit/a995921e5).
+This record covers [issue #265](https://github.com/pgsty/silo/issues/265), the contributor change [PR #266](https://github.com/pgsty/silo/pull/266), and maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276). The merged [#264](https://github.com/pgsty/silo/pull/264) and [#267](https://github.com/pgsty/silo/pull/267) are relevant predecessors. #266's decommission commit is [19910230a](https://github.com/pgsty/silo/commit/19910230a), and its rebalance commit is [a995921e5](https://github.com/pgsty/silo/commit/a995921e5).
 
-**Update (2026-11-06).** Lifecycle deletes are not replicated, as in S3 and in every SILO release. #276 briefly made them replicate on `main`: the scanner, the expiry of a transitioned version, and the bulk noncurrent purge evaluated the delete replication decision and queued a delete marker or a version purge for the targets. That is the content of the still-open [PR #240](https://github.com/pgsty/silo/pull/240). The next release removes that part before it ships. The rest of #276 stays: the hot-tier delete before the remote one, the free-version retry record, the lifecycle-change fence, and the migration completion checks. Deletes made through the S3 API still replicate as configured. A decommission no longer waits for a replication target before it retires an expired version. The sections below are corrected accordingly.
+**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
+
+**Update (2026-11-06).** Lifecycle deletes are not replicated, as in S3 and in every SILO release. #276 briefly made them replicate on `main`: the scanner, the expiry of a transitioned version, and the bulk noncurrent purge evaluated the delete replication decision and queued a delete marker or a version purge for the targets. That is the content of the still-open [PR #240](https://github.com/pgsty/silo/pull/240). `SILO Server 20261109` removed that part before shipping. The rest of #276 stays: the hot-tier delete before the remote one, the free-version retry record, the lifecycle-change fence, and the migration completion checks. Deletes made through the S3 API still replicate as configured. A decommission no longer waits for a replication target before it retires an expired version. The sections below are corrected accordingly.
 
 ## Short answer {#tldr}
 
@@ -85,7 +87,7 @@ The original #266 direct source purge was a local storage cleanup operation. On 
 
 ### Replication is not an obligation of lifecycle deletes {#replication-contract}
 
-Lifecycle deletes are not replicated: a delete-replication rule applies to deletes made through the S3 API, and each target applies its own lifecycle configuration. As merged, #276 also queued replication for ILM-selected deletes; that part is removed before the next release (see the update above). With replication configured, a lifecycle delete during migration now queues nothing for the targets, and the source copy is retired without waiting for one.
+Lifecycle deletes are not replicated: a delete-replication rule applies to deletes made through the S3 API, and each target applies its own lifecycle configuration. As merged, #276 also queued replication for ILM-selected deletes; that part was removed before `SILO Server 20261109` shipped (see the update above). With replication configured, a lifecycle delete during migration queues nothing for the targets, and the source copy is retired without waiting for one.
 
 #276 still sends ILM-selected version deletes through the normal expiry path before source cleanup, for the two contracts below: a transitioned version keeps its remote-tier cleanup and retry record, and the completion fence sees what the expiry removed. This is the smallest safe boundary because it reuses the existing expiry path. It avoids duplicating those rules inside `removeMovedVersions`, while adding only the migration hand-off needed to prevent a delayed expiry task from finding `VersionNotFound` after the source has already disappeared.
 

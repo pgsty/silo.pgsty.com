@@ -2,7 +2,7 @@
 title: '生命周期"删除全部版本"只能作用于一个 key'
 linkTitle: "删除全部版本只作用于一个 key"
 date: 2026-11-04
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "PGSTY SILO 维护团队"
 summary: >
   解释生命周期或批量过期对一个 key 执行"删除全部版本"时，为何会连带删除名字位于该 key 之下的所有对象，以及为什么在对象锁内复核后、按版本 ID 清除该 key 自身的版本，是最小而完整的修复。
@@ -12,13 +12,13 @@ draft: false
 url: "/zh/blog/design/ilm-delete-all-exact-key/"
 ---
 
-本文记录的缺陷是在审查 [#278](https://github.com/pgsty/silo/issues/278) 的修复（[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/)）时发现的。评估基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)，以及 #278 和 #281 的维护者集成分支；该分支尚未公开。
+本文记录的缺陷是在审查 [#278](https://github.com/pgsty/silo/issues/278) 的修复（[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/)）时发现的。评估基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)，以及 #278 和 #281 的维护者集成分支；保留当时的评估快照。
 
-**状态：** 修复已通过审查，并已合入 `main`。它已和下个版本的其他修复放在同一个集成分支上一起测试：带 `kqueue,dev` 标签的本地完整测试套件、本地执行的 CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。尚未进入已打标的 SILO 发布。
+**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 
-缺陷属实，并阻塞下一个版本。有三种操作会删除一个 key 的"全部版本"：
+缺陷属实，也是 `SILO Server 20261109` 的发布阻塞项。有三种操作会删除一个 key 的"全部版本"：
 
 - 生命周期扩展 `ExpiredObjectAllVersions`；
 - 生命周期动作 `DelMarkerExpiration`；
@@ -28,21 +28,21 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 
 同一条路径还有两个问题。第一，它跳过了本应在对象锁内确认过期是否仍然成立的复核，所以 scanner 做出判断之后才写入的版本也会被删掉。第二，它直接丢掉分层版本的元数据，却不留下分层 free version，这些版本的远端对象永远不会被清理。
 
-修复把递归删除替换为：按版本 ID 清除该 key 自身的版本。清除在删除操作已经持有的对象锁内进行，并在锁内读取的版本上重新做一次判断。随后逐个删除这些版本，最旧的先删，最新的最后删，使用磁盘的版本删除；这一操作只在对象目录为空时才删除目录。本版本中，带有已分层版本的 key 会被拒绝，所有内容保持不变。本修改建立在 #278 修复之上（两者修改同一个函数），也建立在[单池锁域修复](/zh/blog/design/single-pool-lock-domains/)之上。
+修复把递归删除替换为：按版本 ID 清除该 key 自身的版本。清除在删除操作已经持有的对象锁内进行，并在锁内读取的版本上重新做一次判断。随后逐个删除这些版本，最旧的先删，最新的最后删，使用磁盘的版本删除；这一操作只在对象目录为空时才删除目录。`SILO Server 20261109` 中，带有已分层版本的 key 会被拒绝，所有内容保持不变。本修改建立在 #278 修复之上（两者修改同一个函数），也建立在[单池锁域修复](/zh/blog/design/single-pool-lock-domains/)之上。
 
 ## 定性 {#assessment}
 
-| 维度 | 判断 |
-| --- | --- |
-| 性质 | "删除全部版本"实现中的数据丢失缺陷。继承自上游 MinIO，存在于每个 SILO 版本中，包括 RELEASE.2026-10-26T00-00-00Z。不是回归。 |
-| 受影响部署 | 所有纠删码部署：一个或多个池、一个或多个纠删集合。开启、暂停或未开启版本控制的桶都受影响。 |
-| 受影响操作 | 带 `ExpiredObjectAllVersions` 的 `Expiration`（`mc ilm rule add --expire-all-object-versions`）；`DelMarkerExpiration`；清除时不保留任何版本的批量过期规则；decommission 和 rebalance 在迁移中应用上述规则时。 |
-| 受影响布局 | 被该操作删除的 key `K`，同时存在其他以 `K/` 开头的 key。这些 key 不需要匹配规则，也不需要已经过期，可以位于其他纠删集合或池中。 |
-| 不受影响 | 目录对象（`K/`），它的元数据与其子对象分开存放。`Kx`、`K-1` 这类兄弟 key。启用了对象锁的桶上的生命周期：这两类规则在配置时被拒绝，在求值时被跳过。其他生命周期动作，它们每次只作用于一个版本。强制删除（`x-minio-force-delete`），它按约定就是前缀删除。 |
-| 严重程度 | 致命。没有被任何规则选中的在用对象被永久删除，而且没有任何审计记录、通知或 trace 提到它们。 |
-| 可达性 | 普通配置加普通的 key 布局即可触发：一个 key 同时是其他 key 的"文件夹"，例如 `report` 和 `report/page-1`。按默认设置编写的批量过期任务也会触发。 |
-| 发布紧急度 | 阻塞下一个版本。 |
-| 剩余工作量 | 已实现，并通过对抗性审查；尚需在单池锁域修复之后集成、远端 CI 与发布。 |
+| 维度       | 判断                                                                                                                                                                                                                                                     |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 性质       | "删除全部版本"实现中的数据丢失缺陷。继承自上游 MinIO，存在于每个 SILO 版本中，包括 RELEASE.2026-10-26T00-00-00Z。不是回归。                                                                                                                              |
+| 受影响部署 | 所有纠删码部署：一个或多个池、一个或多个纠删集合。开启、暂停或未开启版本控制的桶都受影响。                                                                                                                                                               |
+| 受影响操作 | 带 `ExpiredObjectAllVersions` 的 `Expiration`（`mc ilm rule add --expire-all-object-versions`）；`DelMarkerExpiration`；清除时不保留任何版本的批量过期规则；decommission 和 rebalance 在迁移中应用上述规则时。                                           |
+| 受影响布局 | 被该操作删除的 key `K`，同时存在其他以 `K/` 开头的 key。这些 key 不需要匹配规则，也不需要已经过期，可以位于其他纠删集合或池中。                                                                                                                          |
+| 不受影响   | 目录对象（`K/`），它的元数据与其子对象分开存放。`Kx`、`K-1` 这类兄弟 key。启用了对象锁的桶上的生命周期：这两类规则在配置时被拒绝，在求值时被跳过。其他生命周期动作，它们每次只作用于一个版本。强制删除（`x-minio-force-delete`），它按约定就是前缀删除。 |
+| 严重程度   | 致命。没有被任何规则选中的在用对象被永久删除，而且没有任何审计记录、通知或 trace 提到它们。                                                                                                                                                              |
+| 可达性     | 普通配置加普通的 key 布局即可触发：一个 key 同时是其他 key 的"文件夹"，例如 `report` 和 `report/page-1`。按默认设置编写的批量过期任务也会触发。                                                                                                          |
+| 发布紧急度 | `SILO Server 20261109` 发布阻塞项（已随 `RELEASE.2026-11-09T00-00-00Z` 发布）。                                                                                                                                                                          |
+| 剩余工作量 | 已完成；已随 `SILO Server 20261109`（`d998292387cc`）发布。                                                                                                                                                                                              |
 {.wide .expand}
 
 ## 触发条件 {#trigger}
@@ -55,16 +55,16 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 
 我们在 main 上逐一做了探测。每种布局中，旧 key 已到期，其他 key 都是新的：
 
-| 探测 | 布局 | main 上的结果 |
-| --- | --- | --- |
-| scanner 与过期 worker，`ExpiredObjectAllVersions`，一个池、两个纠删集合 | `ea/parent`（两个版本）；`ea/parent/child` 在同一集合；`ea/parent/deep/grandchild` 在另一集合；`ea/parentx` | parent、child、grandchild 被删；`ea/parentx` 保留 |
-| 磁盘 scanner 自身的目录遍历，再执行 worker | 同样的布局，位于一个集合 | 结果相同 |
-| 两个池 | `ea/parent` 在第一个池；`ea/parent/child` 和 `ea/parentx` 在第二个池 | parent 和 child 被删；`ea/parentx` 保留 |
-| `DelMarkerExpiration` | 最新版本为旧删除标记的 `dm/parent`；`dm/parent/child` | 两者都被删 |
-| 未开启版本控制的桶 | `ea/parent`、`ea/parent/child` | 两者都被删 |
-| 目录对象 | `ea/dir/`、`ea/dir/kid` | `ea/dir/` 被删；`ea/dir/kid` 保留 |
-| 批量过期，规则 `name: bx/parent`，默认清除 | `bx/parent`、`bx/parent/child`、`bx/parentx` | parent 和 child 被删；`bx/parentx` 保留 |
-| 带 `ExpiredObjectAllVersions` 的 decommission 和 rebalance | `obj-01`、`obj-01/child`、`obj-01x` | `obj-01` 和 `obj-01/child` 从两个池中消失；`obj-01x` 被迁移 |
+| 探测                                                                    | 布局                                                                                                        | main 上的结果                                               |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| scanner 与过期 worker，`ExpiredObjectAllVersions`，一个池、两个纠删集合 | `ea/parent`（两个版本）；`ea/parent/child` 在同一集合；`ea/parent/deep/grandchild` 在另一集合；`ea/parentx` | parent、child、grandchild 被删；`ea/parentx` 保留           |
+| 磁盘 scanner 自身的目录遍历，再执行 worker                              | 同样的布局，位于一个集合                                                                                    | 结果相同                                                    |
+| 两个池                                                                  | `ea/parent` 在第一个池；`ea/parent/child` 和 `ea/parentx` 在第二个池                                        | parent 和 child 被删；`ea/parentx` 保留                     |
+| `DelMarkerExpiration`                                                   | 最新版本为旧删除标记的 `dm/parent`；`dm/parent/child`                                                       | 两者都被删                                                  |
+| 未开启版本控制的桶                                                      | `ea/parent`、`ea/parent/child`                                                                              | 两者都被删                                                  |
+| 目录对象                                                                | `ea/dir/`、`ea/dir/kid`                                                                                     | `ea/dir/` 被删；`ea/dir/kid` 保留                           |
+| 批量过期，规则 `name: bx/parent`，默认清除                              | `bx/parent`、`bx/parent/child`、`bx/parentx`                                                                | parent 和 child 被删；`bx/parentx` 保留                     |
+| 带 `ExpiredObjectAllVersions` 的 decommission 和 rebalance              | `obj-01`、`obj-01/child`、`obj-01x`                                                                         | `obj-01` 和 `obj-01/child` 从两个池中消失；`obj-01x` 被迁移 |
 {.wide .expand}
 
 在 #278 的集成分支上，这些探测的结果相同。那个修改并不能缓解本缺陷。
@@ -97,12 +97,12 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 
 **上游要素。**
 
-| 要素 | 提交 | 日期和作者 | 首个上游版本 |
-| --- | --- | --- | --- |
-| 在每个纠删集合的每块盘上递归删除 key 的目录，经由一个自己重建选项的池层函数。为强制删除而加入，那里删除整个前缀正是目的。 | [7722b91e1](https://github.com/pgsty/silo/commit/7722b91e1dd465c957c014be4077f6d3039e5ee3)、[minio/minio#12504](https://github.com/minio/minio/pull/12504) | 2021-06-16，Anis Elleuch | `RELEASE.2021-06-17T00-10-46Z` |
-| 第一个生命周期调用方：`ExpiredObjectAllVersions` 设置 `DeletePrefix`。同一提交还把对象锁移到了前缀分支之前。 | [aae684641](https://github.com/pgsty/silo/commit/aae684641325e1c37375d455c790e58d902bd7b6)、[minio/minio#17521](https://github.com/minio/minio/pull/17521) | 2023-06-28，Harshavardhana | `RELEASE.2023-06-29T05-12-28Z` |
-| 批量过期：不保留任何版本的清除使用 `DeletePrefix` 删除。最初没有设置 `DeletePrefixObject`，因此会扇出到所有集合。 | [a50f26b7f](https://github.com/pgsty/silo/commit/a50f26b7f56e5e6b1df8a648423736319ecdabd6)、[minio/minio#17946](https://github.com/minio/minio/pull/17946) | 2023-12-02，Krishnan Parthasarathi | `RELEASE.2023-12-02T10-51-33Z` |
-| `DelMarkerExpiration`，走同一条路径。 | [7926401cb](https://github.com/pgsty/silo/commit/7926401cbd5cceaacd9509f2e50e1f7d636c2eb8)、[minio/minio#19481](https://github.com/minio/minio/pull/19481) | 2024-04-30，Krishnan Parthasarathi | `RELEASE.2024-05-01T01-11-10Z` |
+| 要素                                                                                                                      | 提交                                                                                                                                                       | 日期和作者                         | 首个上游版本                   |
+| ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------------ |
+| 在每个纠删集合的每块盘上递归删除 key 的目录，经由一个自己重建选项的池层函数。为强制删除而加入，那里删除整个前缀正是目的。 | [7722b91e1](https://github.com/pgsty/silo/commit/7722b91e1dd465c957c014be4077f6d3039e5ee3)、[minio/minio#12504](https://github.com/minio/minio/pull/12504) | 2021-06-16，Anis Elleuch           | `RELEASE.2021-06-17T00-10-46Z` |
+| 第一个生命周期调用方：`ExpiredObjectAllVersions` 设置 `DeletePrefix`。同一提交还把对象锁移到了前缀分支之前。              | [aae684641](https://github.com/pgsty/silo/commit/aae684641325e1c37375d455c790e58d902bd7b6)、[minio/minio#17521](https://github.com/minio/minio/pull/17521) | 2023-06-28，Harshavardhana         | `RELEASE.2023-06-29T05-12-28Z` |
+| 批量过期：不保留任何版本的清除使用 `DeletePrefix` 删除。最初没有设置 `DeletePrefixObject`，因此会扇出到所有集合。         | [a50f26b7f](https://github.com/pgsty/silo/commit/a50f26b7f56e5e6b1df8a648423736319ecdabd6)、[minio/minio#17946](https://github.com/minio/minio/pull/17946) | 2023-12-02，Krishnan Parthasarathi | `RELEASE.2023-12-02T10-51-33Z` |
+| `DelMarkerExpiration`，走同一条路径。                                                                                     | [7926401cb](https://github.com/pgsty/silo/commit/7926401cbd5cceaacd9509f2e50e1f7d636c2eb8)、[minio/minio#19481](https://github.com/minio/minio/pull/19481) | 2024-04-30，Krishnan Parthasarathi | `RELEASE.2024-05-01T01-11-10Z` |
 {.wide .expand}
 
 上游中碰过同一批函数、但没有改变其效果的修改：
@@ -122,16 +122,16 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 
 **碰过这条路径的 SILO 提交。** 没有一个改变了前缀删除本身。它们对缺陷的影响：
 
-| 提交 | 日期和作者 | 发布于 | 影响 |
-| --- | --- | --- | --- |
-| [40bee4b7b](https://github.com/pgsty/silo/commit/40bee4b7b)、[e59a3d938](https://github.com/pgsty/silo/commit/e59a3d938) | 2026-09-06 和 2026-09-11，Feng Ruohang | `RELEASE.2026-09-16T00-00-00Z` | 无。在 `erasureServerPools.DeleteObject` 的 `DeletePrefix` 一带，它们只改了对象锁上方的注释。其余改动（条件删除、跨池串行化）都在该分支之后。 |
-| [1cf529ce8](https://github.com/pgsty/silo/commit/1cf529ce8)、[eb4f5e5b3](https://github.com/pgsty/silo/commit/eb4f5e5b3)、[60c7179dd](https://github.com/pgsty/silo/commit/60c7179dd)、[a30270d9b](https://github.com/pgsty/silo/commit/a30270d9b)、[3c82748e1](https://github.com/pgsty/silo/commit/3c82748e1)、[a2073d251](https://github.com/pgsty/silo/commit/a2073d251) | 2026-09-15 至 2026-10-24，Feng Ruohang 和 Denis Babchuk | `RELEASE.2026-09-16T00-00-00Z` 至 `RELEASE.2026-10-25T00-00-00Z` | 无。它们改的是 `erasureServerPools.DeleteObject` 和批量删除的其他部分（跨池版本删除的协调、数据迁移、删除标记的放置、分层引用）。`DeletePrefix` 分支在这些代码之前就已返回。 |
-| [1748f62c7](https://github.com/pgsty/silo/commit/1748f62c7) | 2026-10-18，Feng Ruohang | `RELEASE.2026-10-18T00-00-00Z` | 收窄了一个调用方。下线和再平衡原先像上游一样，用前缀删除把已搬走的 key 从源池移除；现在改为按版本 ID 移除已搬走的版本。该提交声明的目的是并发安全。 |
-| [7a060cab1](https://github.com/pgsty/silo/commit/7a060cab1)、[374de0fa3](https://github.com/pgsty/silo/commit/374de0fa3)、[9b76a2167](https://github.com/pgsty/silo/commit/9b76a2167) | 2026-08-15、2026-09-08、2026-09-15 | 未发布 | 一个按访问频率搬迁对象的功能曾加入一个对精确 key 使用前缀删除的调用方，随后改为按版本寻址的删除，最后被回退。`RELEASE.2026-09-16T00-00-00Z` 标签不含其中任何内容。 |
-| [0a546c7a7](https://github.com/pgsty/silo/commit/0a546c7a7)，随 [#276](https://github.com/pgsty/silo/pull/276) 合并于 [0fc5a0b52](https://github.com/pgsty/silo/commit/0fc5a0b52) | 2026-11-02，Feng Ruohang | 未发布（`RELEASE.2026-10-26T00-00-00Z` 之后的 main） | 扩大了暴露面。下线和再平衡现在把"删除全部版本"的动作交给 `applyExpiryOnNonTransitionedObjects`，等于给缺陷路径增加了一个调用方。同一提交没有改动删除全部版本的选项。在它之前的 [19910230a](https://github.com/pgsty/silo/commit/19910230a) 和 [a995921e5](https://github.com/pgsty/silo/commit/a995921e5) 在迁移期间只执行针对单个版本的动作，没有扩大。 |
+| 提交                                                                                                                                                                                                                                                                                                                                                                         | 日期和作者                                              | 发布于                                                           | 影响                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [40bee4b7b](https://github.com/pgsty/silo/commit/40bee4b7b)、[e59a3d938](https://github.com/pgsty/silo/commit/e59a3d938)                                                                                                                                                                                                                                                     | 2026-09-06 和 2026-09-11，Feng Ruohang                  | `RELEASE.2026-09-16T00-00-00Z`                                   | 无。在 `erasureServerPools.DeleteObject` 的 `DeletePrefix` 一带，它们只改了对象锁上方的注释。其余改动（条件删除、跨池串行化）都在该分支之后。                                                                                                                                                                                                                      |
+| [1cf529ce8](https://github.com/pgsty/silo/commit/1cf529ce8)、[eb4f5e5b3](https://github.com/pgsty/silo/commit/eb4f5e5b3)、[60c7179dd](https://github.com/pgsty/silo/commit/60c7179dd)、[a30270d9b](https://github.com/pgsty/silo/commit/a30270d9b)、[3c82748e1](https://github.com/pgsty/silo/commit/3c82748e1)、[a2073d251](https://github.com/pgsty/silo/commit/a2073d251) | 2026-09-15 至 2026-10-24，Feng Ruohang 和 Denis Babchuk | `RELEASE.2026-09-16T00-00-00Z` 至 `RELEASE.2026-10-25T00-00-00Z` | 无。它们改的是 `erasureServerPools.DeleteObject` 和批量删除的其他部分（跨池版本删除的协调、数据迁移、删除标记的放置、分层引用）。`DeletePrefix` 分支在这些代码之前就已返回。                                                                                                                                                                                       |
+| [1748f62c7](https://github.com/pgsty/silo/commit/1748f62c7)                                                                                                                                                                                                                                                                                                                  | 2026-10-18，Feng Ruohang                                | `RELEASE.2026-10-18T00-00-00Z`                                   | 收窄了一个调用方。下线和再平衡原先像上游一样，用前缀删除把已搬走的 key 从源池移除；现在改为按版本 ID 移除已搬走的版本。该提交声明的目的是并发安全。                                                                                                                                                                                                                |
+| [7a060cab1](https://github.com/pgsty/silo/commit/7a060cab1)、[374de0fa3](https://github.com/pgsty/silo/commit/374de0fa3)、[9b76a2167](https://github.com/pgsty/silo/commit/9b76a2167)                                                                                                                                                                                        | 2026-08-15、2026-09-08、2026-09-15                      | 未发布                                                           | 一个按访问频率搬迁对象的功能曾加入一个对精确 key 使用前缀删除的调用方，随后改为按版本寻址的删除，最后被回退。`RELEASE.2026-09-16T00-00-00Z` 标签不含其中任何内容。                                                                                                                                                                                                 |
+| [0a546c7a7](https://github.com/pgsty/silo/commit/0a546c7a7)，随 [#276](https://github.com/pgsty/silo/pull/276) 合并于 [0fc5a0b52](https://github.com/pgsty/silo/commit/0fc5a0b52)                                                                                                                                                                                            | 2026-11-02，Feng Ruohang                                | `RELEASE.2026-11-09T00-00-00Z`（与本精确 key 修复一并发布）      | 本修复前曾在 `main` 上扩大暴露面。下线和再平衡把"删除全部版本"的动作交给 `applyExpiryOnNonTransitionedObjects`，等于给缺陷路径增加了一个调用方，同时未改动删除全部版本的选项。在它之前的 [19910230a](https://github.com/pgsty/silo/commit/19910230a) 和 [a995921e5](https://github.com/pgsty/silo/commit/a995921e5) 在迁移期间只执行针对单个版本的动作，没有扩大。 |
 {.wide .expand}
 
-因此，这个缺陷不是任何版本中的回归。唯一让它更容易被触发的 SILO 改动在 main 上，尚未发布。
+因此，这个缺陷不是任何已发布 SILO 版本中的回归。唯一扩大其触发面的 SILO 改动（#276）已与本精确 key 清除修复一并随 `SILO Server 20261109` 发布。
 
 **由 git 历史确认、未实际运行：** 引入提交、它们的日期和各自首个上游版本，上面所列函数与上游 master 逐字节相同，以及每个 SILO 版本的内容。没有把每个要素提交对应的版本重新构建并运行。
 
@@ -205,14 +205,14 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
    - 最新版本最后、单独删除，并且只在每个较旧版本都已从每个池中删除之后。所以中途停止的清除既不会改变读取结果，也不会暴露更旧的版本。
    - 遇到第一个错误就停止。一次删除如果达到了写 quorum、但在部分磁盘上失败，会在仍持有锁时对这些磁盘重试有限次数；剩下的交给 heal。
    - 每次调用的预算是 1000 个版本和一分钟，包括其中的读取和检查，在每个版本之前检查。更长的历史会在最新版本之前停下，由下一次过期继续，届时重新读取历史、重新做判断。
-5. **报告删除了什么。** 清除统计它删除的逻辑版本数：包括删除标记，不包括重复副本和 free version；并返回认可的最新版本。ILM 审计记录在标签 `ilm-versions-removed` 中带上这个数。开始删除之后失败或停止的清除记为部分完成（标签 `ilm-partial`），带上已删除的数量和错误，从下一个版本起还带上标签 `ilm-incomplete-reason`；即使只删除了副本、没有删完任何一个版本也是如此；它以 `result=partial` 写入 trace，不发送删除通知。因为该 key 没有可删除的内容而什么都没删除的清除，不发送删除通知，只写一条普通 trace。在删除任何东西之前就被拒绝的生命周期清除（有分层版本、规则已不适用、Object Lock）会计数，并以 `result=refused`、原因和错误写入 trace，不写审计。在删除任何东西之前就失败的（历史无法读取或其他错误）还会写审计并记录日志。`expiry_incomplete_total` 中的原因有 `tier_unsupported`、`budget`（取得进展后在预算处停止）、`changed`（批量作业匹配到的最新版本已改变）和 `history_unavailable`，以及与其他过期共用的 `not_applicable`、`locked` 和 `error`；见[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/#fix)。批量过期按清除的结果统计对象和删除标记；未能删除某个删除标记的作业报告为失败。
+5. **报告删除了什么。** 清除统计它删除的逻辑版本数：包括删除标记，不包括重复副本和 free version；并返回认可的最新版本。ILM 审计记录在标签 `ilm-versions-removed` 中带上这个数。开始删除之后失败或停止的清除记为部分完成（标签 `ilm-partial`），带上已删除的数量和错误，自 `SILO Server 20261109` 起还带上标签 `ilm-incomplete-reason`；即使只删除了副本、没有删完任何一个版本也是如此；它以 `result=partial` 写入 trace，不发送删除通知。因为该 key 没有可删除的内容而什么都没删除的清除，不发送删除通知，只写一条普通 trace。在删除任何东西之前就被拒绝的生命周期清除（有分层版本、规则已不适用、Object Lock）会计数，并以 `result=refused`、原因和错误写入 trace，不写审计。在删除任何东西之前就失败的（历史无法读取或其他错误）还会写审计并记录日志。`expiry_incomplete_total` 中的原因有 `tier_unsupported`、`budget`（取得进展后在预算处停止）、`changed`（批量作业匹配到的最新版本已改变）和 `history_unavailable`，以及与其他过期共用的 `not_applicable`、`locked` 和 `error`；见[多池生命周期过期](/zh/blog/design/multi-pool-lifecycle-expiry/#fix)。批量过期按清除的结果统计对象和删除标记；未能删除某个删除标记的作业报告为失败。
 
 ### 分层 key {#tiered}
 
-本版本不改变带有已分层版本的 key 的"删除全部"行为。
+`SILO Server 20261109` 不对带有已分层版本的 key 执行整 key 物理清除。
 
 - 过期 worker 仍把最新版本已分层的"删除全部"交给 `expireTransitionedObject`。它写一个删除标记，把所有版本和远端对象都留在标记下面，之后的扫描也不会再删除它们。
-- 最新版本在本地、但较旧版本已分层的 key 会被拒绝，不删除任何东西。从下一个版本起，持有这种分层版本的池，其 scanner 不再把清除排入队列：每个盘的 scanner 每一轮把这次跳过计为一次 `tier_unsupported_skipped`。只有其他池持有的分层版本，这个 scanner 并不知道，所以仍由清除来判断，并以 `tier_unsupported` 拒绝该 key，同时写入日志；同一 key 重复出现的相同拒绝由去重日志抑制，直到它每小时重置。批量过期把该 key 计入 `keysRefused`（状态 `complete-with-skips`，[`07b89b98f`](https://github.com/pgsty/silo/commit/07b89b98f)），本次运行内不再重试。从下一个版本起，下线或再平衡在 tier 证据排除整 key 过期时，会正常迁移存活版本及其 tier 元数据。迁移第一个版本之前，先收集所有池和磁盘上的 tier 证据，防止获胜的本地副本隐藏已分层的重复副本或少数盘修订。最终仍检查物理残留，不能把仍有数据的池报告为完成。
+- 最新版本在本地、但较旧版本已分层的 key 会被拒绝，不删除任何东西。自 `SILO Server 20261109` 起，持有这种分层版本的池，其 scanner 不再把清除排入队列：每个盘的 scanner 每一轮把这次跳过计为一次 `tier_unsupported_skipped`。只有其他池持有的分层版本，这个 scanner 并不知道，所以仍由清除来判断，并以 `tier_unsupported` 拒绝该 key，同时写入日志；同一 key 重复出现的相同拒绝由去重日志抑制，直到它每小时重置。批量过期把该 key 计入 `keysRefused`（状态 `complete-with-skips`，[`07b89b98f`](https://github.com/pgsty/silo/commit/07b89b98f)），本次运行内不再重试。自 `SILO Server 20261109` 起，下线或再平衡在 tier 证据排除整 key 过期时，会正常迁移存活版本及其 tier 元数据。迁移第一个版本之前，先收集所有池和磁盘上的 tier 证据，防止获胜的本地副本隐藏已分层的重复副本或少数盘修订。最终仍检查物理残留，不能把仍有数据的池报告为完成。
 
 分层安全的清除，不能在任何副本仍引用某个远端对象时（包括一次删除没有达到 quorum 之后）把它交给分层清理。这需要持久的清理记录和锁内的证明，属于单独的修改。
 
@@ -239,7 +239,7 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 - 没有删除顺序和最新版本之前的屏障，一个池中的删除失败会暴露更旧的版本。
 - 没有分层拒绝，远端对象会泄漏，或者分层清理会删除仍被某个副本使用的远端对象。
 - 没有批量过期和迁移的改道，这些调用方仍走前缀路径。
-- 没有专用选项，设置旧标志的调用方就会再次走到前缀路径。`DeletePrefixObject` 在这条路径上多年来一直没有生效，却没有人注意到。从下一个版本起，池层还会把同时带 `DeletePrefix` 和 `Expiration.Expire` 的请求以 `InvalidArgument` 拒绝，所以生命周期过期绝不会删除前缀。强制删除（不带过期的 `DeletePrefix`）不变。
+- 没有专用选项，设置旧标志的调用方就会再次走到前缀路径。`DeletePrefixObject` 在这条路径上多年来一直没有生效，却没有人注意到。自 `SILO Server 20261109` 起，池层还会把同时带 `DeletePrefix` 和 `Expiration.Expire` 的请求以 `InvalidArgument` 拒绝，所以生命周期过期绝不会删除前缀。强制删除（不带过期的 `DeletePrefix`）不变。
 
 **有意排除的范围：**
 
@@ -262,7 +262,7 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 - **已成孤儿的远端对象会保留。** 分层存储中已经成为孤儿的远端对象仍然留在那里。它们与 key 的对应关系记录在已被删除的元数据中，所以只能手工清理。
 - **分层 key 不会被清除。** 见[分层 key](#tiered)。
 - **"删除全部"要等每块盘都可用。** 只要该 key 所在纠删集合中有一块盘离线、无法读取该 key，或其上该 key 的 `xl.meta` 无法解码，清除就以 `history_unavailable` 拒绝该 key，由 scanner 在之后的轮次重试。调用方看到的仍是写 quorum 错误（`503`）。这是在删除任何东西之前检查每一个修订的代价。
-- **CRC 损坏必须先成功 heal，再执行清除。** 下一个版本把 `xl.meta` 校验和失败归类为存储损坏，存储 RPC 的错误转换也保留这一类别。当某块盘无法解码导致磁盘检查被拒绝，或在历史读取阶段有一半磁盘无法解码（[`7a13780d8`](https://github.com/pgsty/silo/commit/7a13780d8)）时，被拒绝的清除会为可解码磁盘上观察到的每个版本排入 MRF heal；null 版本使用明确的 `null` ID。普通和深度对象 heal 可以从足够的存活副本重建损坏元数据，后续清除再重试。dry-run 不改写元数据；没有元数据 quorum 时，heal 保留原文件，清除继续拒绝。其他无法解码的元数据错误不保证能通过同一路径修复。
+- **CRC 损坏必须先成功 heal，再执行清除。** `SILO Server 20261109` 把 `xl.meta` 校验和失败归类为存储损坏，存储 RPC 的错误转换也保留这一类别。当某块盘无法解码导致磁盘检查被拒绝，或在历史读取阶段有一半磁盘无法解码（[`7a13780d8`](https://github.com/pgsty/silo/commit/7a13780d8)）时，被拒绝的清除会为可解码磁盘上观察到的每个版本排入 MRF heal；null 版本使用明确的 `null` ID。普通和深度对象 heal 可以从足够的存活副本重建损坏元数据，后续清除再重试。dry-run 不改写元数据；没有元数据 quorum 时，heal 保留原文件，清除继续拒绝。其他无法解码的元数据错误不保证能通过同一路径修复。
 - **磁盘句柄指向一块盘，而不是一个后端。** 清除在它检查过的磁盘句柄上删除，但每次存储调用都会在承载该盘的节点上重新解析后端。清除运行期间替换某块盘的后端一开始是空的，只会通过该 key 的写入或 heal 得到它，而两者都要先拿到清除持有的对象锁。以 `nolock` 启动的管理端 heal 会跳过这把锁；那个选项是单独的问题。
 - **对象 key 之下的 key 不会被列出。** 列举不会进入一个对象 key 的目录，所以只要 `K` 存在，`K/child` 就不出现在列举结果、批量过期的遍历，以及下线和再平衡的遍历中。这比本修复更早就存在。修复之后，下线或再平衡执行的 `K` 的"删除全部"会保留 `K/child`，但遍历已经越过了它。第一轮会把它报告为遗留对象，这与没有任何生命周期规则时相同（已执行）；之后的一轮会迁移它。
 - **数据目录被递归删除。** 每一次版本删除（不只是"删除全部"）都会把该版本的数据目录连同其内容一起移入回收区。一个名为 `K/<data-dir>/...` 的 key，若 `<data-dir>` 恰是 `K` 某个版本的内部数据目录 ID，就会随该版本一起被删除。S3 API 不返回这个 ID，构造这样的名字需要内部元数据。这属于存储层的后续工作。
@@ -270,7 +270,7 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 - **批量过期的复核很有限。** 批量过期只能确认最新版本仍是它匹配到的那个版本。
 - **混合版本。** 见[代价与兼容性](#cost)：执行过期的旧节点仍会递归删除。
 
-## 修复发布前的运维指引 {#operators}
+## 20261109 之前版本的运维指引 {#operators}
 
 **确认是否暴露。**
 
@@ -287,14 +287,14 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 
   输出 `a -> a/b` 表示对 `a` 执行"删除全部"时也会删除 `a/b`。右侧以 `/` 结尾的是目录对象，它不受影响。
 
-**在所有节点都运行修复版本之前的缓解措施。**
+**在所有节点升级到 `SILO Server 20261109` 或更高版本之前的缓解措施。**
 
 - 用 `mc ilm rule edit --id RULE-ID --disable ALIAS/BUCKET` 停用受影响的规则，或从规则中删除对应元素。
 - 仍然需要这类策略时，改用按版本执行的规则：
   - 开启版本控制的桶，用 `Expiration` `Days`，加上 `NoncurrentVersionExpiration` `NoncurrentDays` 和 `ExpiredObjectDeleteMarker`；
   - 未开启版本控制的桶，只用 `Expiration` `Days`。
 
-  这些规则按版本删除，不走递归路径（代码推理），只是全部删完所需的时间更长。在多池部署上，它们在 [#278](/zh/blog/design/multi-pool-lifecycle-expiry/) 的修复发布前仍受那个缺陷影响。
+  这些规则按版本删除，不走递归路径（代码推理），只是全部删完所需的时间更长。在 `SILO Server 20261109` 之前的多池部署上，在所有节点升级到 `20261109` 之前它们仍受 [#278](/zh/blog/design/multi-pool-lifecycle-expiry/) 影响。
 - 前缀或标签过滤只有在排除父 key 时才有用。只要过滤仍然选中 `a`，就仍会删除 `a/b`，因为子对象不需要匹配规则。
 - 不要在存在这类 key 的桶上运行默认清除的批量过期任务，正在运行的用 `mc batch cancel` 取消。`retainVersions` 为 1 或更多时按版本删除（推理），但会保留相应数量的版本。
 
@@ -362,26 +362,21 @@ url: "/zh/blog/design/ilm-delete-all-exact-key/"
 - 旧格式 `xl.json` 的行为；
 - 回收区的立即清除。
 
-**未运行：**
+**初始工作树阶段未单独运行：**
 
-- 针对运行中服务器的 S3 级复现；
-- 多节点集群或混合版本升级；
-- 完整的 `./cmd` 测试集和远端 CI；
-- 本修复与单池锁域修复合在一起的运行。
+- 跨独立主机的混合版本滚动升级验证。
 
-**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与锁域、Heal 演练、#259、#285 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
-
-本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
+**集成与发布验证。** 该修复为 `SILO Server 20261109` 合入集成分支，位于 #278 和 #281 之后，与单池锁域、Heal 演练、#259、#285 和 Console 修复无冲突合并。本地集成运行通过了完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件与 CI 竞态检测选集，针对组合分支的对抗性审查通过实际执行的探针检查了锁域、清理路径以及清除与恢复之间的交互，未发现缺陷。发布提交 `d998292387cc`（`RELEASE.2026-11-09T00-00-00Z`）已通过 Go CI（含无标签 Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 门禁）、VulnCheck、发布流水线测试与发布构建校验。
 
 ## 审查记录 {#review}
 
-| 轮次 | 结果 |
-| --- | --- |
-| 设计第 1、2 轮 | 同意并要求修改。批量路径会重排版本，池与池之间也没有屏障，所以清除改为一次删除一个版本，最旧的先删，最新的最后且单独删除。仅靠 free version 不能保证分层 key 的安全，所以带有已分层版本的 key 一律拒绝，分层对象的"删除全部"推迟处理。为每个副本记录位置，对每次写入执行保留期和 legal hold 检查，在锁内有限次重试，每次调用有预算，报告只统计确认的删除。单池上的写入互斥交给先合入的锁域修复。每次版本删除都会递归删除数据目录，这一点留给存储层的后续工作。 |
-| 补丁审查第 1 轮 | 要求修改。五个问题：少数磁盘上已分层或带 legal hold 的修订没有被检查；删除了副本却没有删完任何一个版本的清除没有记为部分完成；时间预算没有包括读取和检查；批量作业的完成状态忽略了删除失败的删除标记（这是更早就存在的判断，被新的计数暴露出来）；一个测试夹具缺少删除标记计数。全部采纳，并加了回归测试。 |
-| 补丁审查第 2 轮 | 要求修改。三个问题：无法读取的磁盘可能藏着受保护的修订，之后会被 heal 删除；磁盘选择被应用到一组新取得的句柄上；清除在已经知道达不到写 quorum 时仍会开始删除。全部采纳：无法读取的磁盘现在会使 key 被拒绝，清除只在它检查过的那些句柄上删除。 |
-| 补丁审查第 3 轮 | 要求修改。一个问题：保留下来的句柄并不能锁定承载该盘的节点上的后端。有异议：替换后的后端一开始是空的，只会通过在清除持有的对象锁下进行的写入或 heal 得到该 key；而要绑定后端的具体实例，需要改变传输格式。 |
-| 补丁审查第 4 轮 | 批准，附带小问题。审查方撤回了第 3 轮的问题。两处小问题：把磁盘选择描述为磁盘句柄，并写明替换与加锁的前提；点名管理端 heal 的 `nolock` 选项是例外。均已采纳，分别写入代码注释和[剩余限制](#limits)。 |
+| 轮次            | 结果                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 设计第 1、2 轮  | 同意并要求修改。批量路径会重排版本，池与池之间也没有屏障，所以清除改为一次删除一个版本，最旧的先删，最新的最后且单独删除。仅靠 free version 不能保证分层 key 的安全，所以带有已分层版本的 key 一律拒绝，分层对象的"删除全部"推迟处理。为每个副本记录位置，对每次写入执行保留期和 legal hold 检查，在锁内有限次重试，每次调用有预算，报告只统计确认的删除。单池上的写入互斥交给先合入的锁域修复。每次版本删除都会递归删除数据目录，这一点留给存储层的后续工作。 |
+| 补丁审查第 1 轮 | 要求修改。五个问题：少数磁盘上已分层或带 legal hold 的修订没有被检查；删除了副本却没有删完任何一个版本的清除没有记为部分完成；时间预算没有包括读取和检查；批量作业的完成状态忽略了删除失败的删除标记（这是更早就存在的判断，被新的计数暴露出来）；一个测试夹具缺少删除标记计数。全部采纳，并加了回归测试。                                                                                                                                                     |
+| 补丁审查第 2 轮 | 要求修改。三个问题：无法读取的磁盘可能藏着受保护的修订，之后会被 heal 删除；磁盘选择被应用到一组新取得的句柄上；清除在已经知道达不到写 quorum 时仍会开始删除。全部采纳：无法读取的磁盘现在会使 key 被拒绝，清除只在它检查过的那些句柄上删除。                                                                                                                                                                                                                  |
+| 补丁审查第 3 轮 | 要求修改。一个问题：保留下来的句柄并不能锁定承载该盘的节点上的后端。有异议：替换后的后端一开始是空的，只会通过在清除持有的对象锁下进行的写入或 heal 得到该 key；而要绑定后端的具体实例，需要改变传输格式。                                                                                                                                                                                                                                                     |
+| 补丁审查第 4 轮 | 批准，附带小问题。审查方撤回了第 3 轮的问题。两处小问题：把磁盘选择描述为磁盘句柄，并写明替换与加锁的前提；点名管理端 heal 的 `nolock` 选项是例外。均已采纳，分别写入代码注释和[剩余限制](#limits)。                                                                                                                                                                                                                                                           |
 {.wide .expand}
 ## 参考 {#references}
 

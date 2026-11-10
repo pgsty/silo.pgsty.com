@@ -31,10 +31,10 @@ url: "/zh/blog/design/replication-full-object-checksum/"
 
 对于分片 CRC32 和 CRC32C，同一算法支持两种截然不同的对象级校验和计算方式。设 `P1 ... Pn` 为各分片的字节内容，`||` 表示字节拼接：
 
-| 类型 | 对象校验和的计算方式 |
-| :-- | :-- |
-| `FULL_OBJECT` | 对完整拼接内容 `P1 || ... || Pn` 计算 CRC，编码为 Base64 |
-| `COMPOSITE` | 拼接各分片 CRC 的**原始摘要字节**，再对其计算 CRC、编码为 Base64，并在输出时附加 `-n` 分片数后缀 |
+| 类型          | 对象校验和的计算方式                                                                             |
+| :------------ | :----------------------------------------------------------------------------------------------- |
+| `FULL_OBJECT` | 对完整拼接内容 `P1 \|\| ... \|\| Pn` 计算 CRC，编码为 Base64                                     |
+| `COMPOSITE`   | 拼接各分片 CRC 的**原始摘要字节**，再对其计算 CRC、编码为 Base64，并在输出时附加 `-n` 分片数后缀 |
 {.wide .expand}
 
 即便分片上传只有一个分片，这两种方式算出的摘要也通常不同。仅转发算法名称与摘要值，不足以还原校验和语义。
@@ -46,13 +46,13 @@ url: "/zh/blog/design/replication-full-object-checksum/"
 3. 发送端传完各分片后，再次通过 `getCRCMeta()` 构造完成阶段的对象级校验和头，其中携带的摘要仍是源端的整对象（`FULL_OBJECT`）CRC。
 4. 目标端的[`CompleteMultipartUpload` 校验逻辑](https://github.com/pgsty/silo/blob/6d890fc860c732cc0bd1925124c733362f803d2e/cmd/erasure-multipart.go#L1378)读取初始化时持久化的 `COMPOSITE` 类型，将收到的整对象 CRC 与“分片 CRC 的复合 CRC”进行比对，因摘要不匹配返回 `BadDigest`。
 
-| 阶段 | 修复前 | 修复后 |
-| :-- | :-- | :-- |
-| 源端校验和元数据 | CRC32/CRC32C + `FULL_OBJECT` | 不变 |
-| 目标端初始化请求头 | 仅含算法，缺失类型 | 算法 + `FULL_OBJECT` |
-| 目标端持久化的上传类型 | `COMPOSITE` | `FULL_OBJECT` |
-| 完成请求的校验和 | 源端整对象 CRC | 源端整对象 CRC + 显式 `FULL_OBJECT` 类型 |
-| 目标端校验结果 | `400 BadDigest` | 校验通过，完成复制 |
+| 阶段                   | 修复前                       | 修复后                                   |
+| :--------------------- | :--------------------------- | :--------------------------------------- |
+| 源端校验和元数据       | CRC32/CRC32C + `FULL_OBJECT` | 不变                                     |
+| 目标端初始化请求头     | 仅含算法，缺失类型           | 算法 + `FULL_OBJECT`                     |
+| 目标端持久化的上传类型 | `COMPOSITE`                  | `FULL_OBJECT`                            |
+| 完成请求的校验和       | 源端整对象 CRC               | 源端整对象 CRC + 显式 `FULL_OBJECT` 类型 |
+| 目标端校验结果         | `400 BadDigest`              | 校验通过，完成复制                       |
 {.wide .expand}
 
 核心不变量：**复制必须在初始化与完成两个阶段同时保留校验和的算法、摘要值与类型解释方式**，使目标端按与源端一致的规则执行完整性校验。
@@ -63,11 +63,11 @@ url: "/zh/blog/design/replication-full-object-checksum/"
 
 此前 SILO 针对分片完成阶段做过三项相关修复，均处于不同链路环节：
 
-| 此前修复 | 解决的问题 | 为何未覆盖本次复制故障 |
-| :-- | :-- | :-- |
-| [`c8590413f`](https://github.com/pgsty/silo/commit/c8590413fd321a315f3779cd9b2a6f1cb72064da)（#31） | 允许 `FULL_OBJECT` 完成请求省略逐分片校验和并完成整对象校验 | 前提是接收端在初始化时已知该上传为 `FULL_OBJECT` |
-| [`7e079ff05`](https://github.com/pgsty/silo/commit/7e079ff05c842afabb73c4572885cfb74604df17) | 校验完成请求显式携带的类型是否与初始化类型一致 | 复制发送端在初始化和完成两个阶段均未发送类型 |
-| [CompleteMultipartUpload 响应补齐 ChecksumType](/zh/blog/design/complete-multipart-checksum-type/) | 向客户端 SDK 的完成响应返回 `ChecksumType` | 仅作用于上传完成后的响应编码，不影响复制发送端构造的出站请求头 |
+| 此前修复                                                                                            | 解决的问题                                                  | 为何未覆盖本次复制故障                                         |
+| :-------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- | :------------------------------------------------------------- |
+| [`c8590413f`](https://github.com/pgsty/silo/commit/c8590413fd321a315f3779cd9b2a6f1cb72064da)（#31） | 允许 `FULL_OBJECT` 完成请求省略逐分片校验和并完成整对象校验 | 前提是接收端在初始化时已知该上传为 `FULL_OBJECT`               |
+| [`7e079ff05`](https://github.com/pgsty/silo/commit/7e079ff05c842afabb73c4572885cfb74604df17)        | 校验完成请求显式携带的类型是否与初始化类型一致              | 复制发送端在初始化和完成两个阶段均未发送类型                   |
+| [CompleteMultipartUpload 响应补齐 ChecksumType](/zh/blog/design/complete-multipart-checksum-type/)  | 向客户端 SDK 的完成响应返回 `ChecksumType`                  | 仅作用于上传完成后的响应编码，不影响复制发送端构造的出站请求头 |
 {.wide .expand}
 
 ## 最小修复实现 {#implementation}
@@ -110,15 +110,15 @@ if !objInfo.isMultipart() && cs[xhttp.AmzChecksumType] == xhttp.AmzChecksumTypeF
 
 ## 备选方案取舍 {#alternatives}
 
-| 备选方案 | 结论与原因 |
-| :-- | :-- |
-| 恢复上游变更前的无条件类型转发 | 不采纳：显式携带 `FULL_OBJECT` 的 SHA1/SHA256 请求会被 `getContentChecksum()` 拒绝 |
-| 仅在 `CompleteMultipartUpload` 阶段补类型 | 不采纳：目标端在初始化时已持久化为 `COMPOSITE`，完成阶段传入不匹配的类型同样会被拒绝 |
-| 将所有 CRC32/CRC32C 分片上传默认改为 `FULL_OBJECT` | 不采纳：破坏合法的 S3 默认 `COMPOSITE` 语义 |
-| 忽略对象级校验和或跳过 `BadDigest` 检查 | 不采纳：牺牲复制过程的数据完整性验证 |
-| 在发送端重新计算 `COMPOSITE` 摘要以迎合目标端 | 不采纳：篡改了源端对象的校验和类型与摘要值，且引入额外计算开销 |
-| 单独编写 `CopyObject` 复制分支或排除 CRC64NVME | 不需要：`putReplicationOpts()` 既有路由分支与 `CanMerge()` 已自然覆盖 |
-| 调整复制重试预算、队列或 resync 调度 | 无效：不修复请求头缺失，重试多少次都会发送相同的错误请求 |
+| 备选方案                                           | 结论与原因                                                                           |
+| :------------------------------------------------- | :----------------------------------------------------------------------------------- |
+| 恢复上游变更前的无条件类型转发                     | 不采纳：显式携带 `FULL_OBJECT` 的 SHA1/SHA256 请求会被 `getContentChecksum()` 拒绝   |
+| 仅在 `CompleteMultipartUpload` 阶段补类型          | 不采纳：目标端在初始化时已持久化为 `COMPOSITE`，完成阶段传入不匹配的类型同样会被拒绝 |
+| 将所有 CRC32/CRC32C 分片上传默认改为 `FULL_OBJECT` | 不采纳：破坏合法的 S3 默认 `COMPOSITE` 语义                                          |
+| 忽略对象级校验和或跳过 `BadDigest` 检查            | 不采纳：牺牲复制过程的数据完整性验证                                                 |
+| 在发送端重新计算 `COMPOSITE` 摘要以迎合目标端      | 不采纳：篡改了源端对象的校验和类型与摘要值，且引入额外计算开销                       |
+| 单独编写 `CopyObject` 复制分支或排除 CRC64NVME     | 不需要：`putReplicationOpts()` 既有路由分支与 `CanMerge()` 已自然覆盖                |
+| 调整复制重试预算、队列或 resync 调度               | 无效：不修复请求头缺失，重试多少次都会发送相同的错误请求                             |
 {.wide .expand}
 
 ## 验证与实机验收 {#validation}
@@ -129,14 +129,14 @@ if !objInfo.isMultipart() && cs[xhttp.AmzChecksumType] == xhttp.AmzChecksumTypeF
 
 独立实机验收启动**两个单盘 SILO 服务端实例**，通过 `mcli` 配置站点复制，实测 12 个端到端用例：
 
-| 用例类别 | 算法或变体 | 数量 |
-| :-- | :-- | --: |
-| 单次 `PUT` | SHA256、SHA1、CRC32 | 3 |
-| 分片 `COMPOSITE` | CRC32、CRC32C、SHA256 | 3 |
-| 分片 `FULL_OBJECT` | CRC32、CRC32C | 2 |
-| 默认 `FULL_OBJECT` 的分片上传 | CRC64NVME | 1 |
-| 对分片 `FULL_OBJECT` 对象执行 `CopyObject` | CRC32、CRC32C | 2 |
-| 仅含 1 个分片的 `FULL_OBJECT` 上传 | CRC32 | 1 |
+| 用例类别                                   | 算法或变体            | 数量 |
+| :----------------------------------------- | :-------------------- | ---: |
+| 单次 `PUT`                                 | SHA256、SHA1、CRC32   |    3 |
+| 分片 `COMPOSITE`                           | CRC32、CRC32C、SHA256 |    3 |
+| 分片 `FULL_OBJECT`                         | CRC32、CRC32C         |    2 |
+| 默认 `FULL_OBJECT` 的分片上传              | CRC64NVME             |    1 |
+| 对分片 `FULL_OBJECT` 对象执行 `CopyObject` | CRC32、CRC32C         |    2 |
+| 仅含 1 个分片的 `FULL_OBJECT` 上传         | CRC32                 |    1 |
 {.wide .expand}
 
 全部 12 个用例均达到源端 `COMPLETED`、目标端 `REPLICA`；独立计算的校验和摘要与类型、版本 ID、ETag、对象大小及目标端下载字节均与源端完全一致。

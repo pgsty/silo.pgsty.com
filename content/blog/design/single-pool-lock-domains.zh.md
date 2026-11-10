@@ -2,7 +2,7 @@
 title: "大型单池集群的锁域"
 linkTitle: "单池锁域"
 date: 2026-11-04
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "PGSTY SILO 维护团队"
 summary: >
   解释在纠删集不共享相同主机的分布式单池部署中，DELETE 与 CopyObject 为何可能无法与同一键上的 PUT 互斥；哪些布局受影响；竞争对 xl.meta 造成什么后果；以及关闭它的最小路由改动。
@@ -12,9 +12,9 @@ draft: false
 url: "/zh/blog/design/single-pool-lock-domains/"
 ---
 
-本文覆盖在审查恢复副本修复（[恢复副本：过期的是副本，不是对象](/zh/blog/design/restored-copy-expiry/)）时发现的锁域缺陷，评估基线为 main 上的 [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)。目前尚未提交 issue。
+本文覆盖在审查恢复副本修复（[恢复副本：过期的是副本，不是对象](/zh/blog/design/restored-copy-expiry/)）时发现的锁域缺陷，评估基线为 main 上的 [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc)。对应 [#298](https://github.com/pgsty/silo/issues/298)。
 
-**状态：** 修复已通过审查，已在本地提交。它已和下个版本的其他修复放在同一个集成分支上一起测试：带 `kqueue,dev` 标签的本地完整测试套件、本地执行的 CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。尚未合并或发布。
+**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 
@@ -33,16 +33,16 @@ url: "/zh/blog/design/single-pool-lock-domains/"
 
 ## 定性 {#assessment}
 
-| 方面 | 评估 |
-| --- | --- |
-| 性质 | 池层与集层之间的锁域不一致。自 `RELEASE.2024-10-02T17-50-41Z` 起继承自上游 MinIO，不是 SILO 的回归。SILO 增加了依赖该锁的功能（If-Match DELETE），并删除了一条警示注释，但从未改变过路由。 |
-| 受影响部署 | 分布式、单池，且某些集使用的主机组与 0 号集不同的自动或显式布局。对 `http://host{1...N}/disk{1...D}`，即 N 大于等于 18，与 D 无关。更小的集群只有在集大小小于主机数时才受影响（`MINIO_ERASURE_SET_DRIVE_COUNT`，或手工排序的参数列表）。 |
-| 不受影响 | 单节点部署（所有集共享一张进程内锁表）。多池部署（写路径同样获取池级锁）。自动布局下不超过 17 台主机的池。 |
-| 受影响操作 | `DELETE` 对 `PUT`、`CopyObject`、标签/保留/法定保留/元数据更新、restore、transition、heal、复制写入；ILM 过期对覆盖写；If-Match `DELETE` 对任何写者；批量删除；complete、abort、list-parts 的 upload ID 守卫对 `PutObjectPart`。 |
-| 严重程度 | 影响高，触及面窄。同一键上的并发竞争可能丢失已确认的写入或删除标记，使对象只留在少数磁盘上，或使成功的元数据复制把数据回滚。不影响其他键，也不存在跨租户暴露。 |
-| 可达性 | 竞争需要两个写者在几毫秒的提交窗口内操作同一个键。普通 S3 客户端很少这样做，但 ILM 过期遇到刚发生的覆盖写、复制、重试风暴，以及对同一个键反复覆盖又删除的客户端（队列、锁、临时文件）都可能触发。强制时很容易复现，正常流量中少见。在 18 台主机的集群中，大约一半的键（其集的主机组与 0 号集不同）暴露。 |
-| 发布紧迫度 | 计划在下一个版本修复，而非热修复。改动局限于池层和 COPY 处理器；受影响的池以排空后重启的方式升级（[滚动升级](#upgrade)）。 |
-| 剩余工作量 | 修复与测试已编写。剩余：远端 CI，以及在分布式池上的验收运行。 |
+| 方面       | 评估                                                                                                                                                                                                                                                                                                     |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 性质       | 池层与集层之间的锁域不一致。自 `RELEASE.2024-10-02T17-50-41Z` 起继承自上游 MinIO，不是 SILO 的回归。SILO 增加了依赖该锁的功能（If-Match DELETE），并删除了一条警示注释，但从未改变过路由。                                                                                                               |
+| 受影响部署 | 分布式、单池，且某些集使用的主机组与 0 号集不同的自动或显式布局。对 `http://host{1...N}/disk{1...D}`，即 N 大于等于 18，与 D 无关。更小的集群只有在集大小小于主机数时才受影响（`MINIO_ERASURE_SET_DRIVE_COUNT`，或手工排序的参数列表）。                                                                 |
+| 不受影响   | 单节点部署（所有集共享一张进程内锁表）。多池部署（写路径同样获取池级锁）。自动布局下不超过 17 台主机的池。                                                                                                                                                                                               |
+| 受影响操作 | `DELETE` 对 `PUT`、`CopyObject`、标签/保留/法定保留/元数据更新、restore、transition、heal、复制写入；ILM 过期对覆盖写；If-Match `DELETE` 对任何写者；批量删除；complete、abort、list-parts 的 upload ID 守卫对 `PutObjectPart`。                                                                         |
+| 严重程度   | 影响高，触及面窄。同一键上的并发竞争可能丢失已确认的写入或删除标记，使对象只留在少数磁盘上，或使成功的元数据复制把数据回滚。不影响其他键，也不存在跨租户暴露。                                                                                                                                           |
+| 可达性     | 竞争需要两个写者在几毫秒的提交窗口内操作同一个键。普通 S3 客户端很少这样做，但 ILM 过期遇到刚发生的覆盖写、复制、重试风暴，以及对同一个键反复覆盖又删除的客户端（队列、锁、临时文件）都可能触发。强制时很容易复现，正常流量中少见。在 18 台主机的集群中，大约一半的键（其集的主机组与 0 号集不同）暴露。 |
+| 发布紧迫度 | 已随 `SILO Server 20261109`（`RELEASE.2026-11-09T00-00-00Z`）正式修复，而非临时热修复。改动局限于池层和 COPY 处理器；受影响的池以排空后重启的方式升级（[滚动升级](#upgrade)）。                                                                                                                          |
+| 剩余工作量 | 已完成；已随 `SILO Server 20261109`（`d998292387cc`）发布。                                                                                                                                                                                                                                              |
 {.wide .expand}
 
 ## 锁组如何构建 {#groups}
@@ -51,16 +51,16 @@ url: "/zh/blog/design/single-pool-lock-domains/"
 
 端点展开时最左侧的省略号变化最快，所以在 `http://host{1...N}/disk{1...D}` 中，第 `i` 个端点的主机是 `i mod N`。集是 `S` 个连续端点的切片，`S` 是 `N*D` 的、不超过 16 且使集数最少的最大约数。用真实的 `GetAllSets` 检查得到：
 
-| 布局 | 集大小 S | 锁组 |
-| --- | --- | --- |
-| N = 2 到 17，D 为 1 到 32 的任意值 | S >= N | 每个集都含所有主机，锁组相同。 |
-| N = 18，任意 D | 9 | 0 号集：主机 1-9。1 号集：主机 10-18。互不相交。 |
-| N = 20 | 10 | 两个互不相交的一半，在各集之间交替。 |
-| N = 24 | 12 | 两个互不相交的一半。 |
-| N = 32 | 16 | 主机 1-16 与 17-32，交替。一半的键暴露。 |
-| N = 21 | 7 | 三个互不相交的三分之一。 |
-| N = 25 | 5 | 五个互不相交的组。五分之四的键暴露。 |
-| 单节点，任意 D | 任意 | 所有集共享一张锁表。 |
+| 布局                               | 集大小 S | 锁组                                             |
+| ---------------------------------- | -------- | ------------------------------------------------ |
+| N = 2 到 17，D 为 1 到 32 的任意值 | S >= N   | 每个集都含所有主机，锁组相同。                   |
+| N = 18，任意 D                     | 9        | 0 号集：主机 1-9。1 号集：主机 10-18。互不相交。 |
+| N = 20                             | 10       | 两个互不相交的一半，在各集之间交替。             |
+| N = 24                             | 12       | 两个互不相交的一半。                             |
+| N = 32                             | 16       | 主机 1-16 与 17-32，交替。一半的键暴露。         |
+| N = 21                             | 7        | 三个互不相交的三分之一。                         |
+| N = 25                             | 5        | 五个互不相交的组。五分之四的键暴露。             |
+| 单节点，任意 D                     | 任意     | 所有集共享一张锁表。                             |
 {.wide .expand}
 
 扫描覆盖了 N 从 2 到 64；N 不超过 17 时 D 取到 32，其上 D 取 {1, 2, 3, 4, 6, 8, 12, 16}。N 大于等于 18 的每个有效布局锁组都不同，且在每一个中两个仲裁都可以同时被授予。当集大小被强制设为小于 N 时，更小的 N 也是如此。配置文件布局以同样的方式把磁盘轮流分配到各节点。
@@ -69,27 +69,27 @@ url: "/zh/blog/design/single-pool-lock-domains/"
 
 单池，main 上 69fcf50cd。“0 号集”指 `erasureServerPools.NewNSLock`（`serverPools[0].sets[0]`）；“哈希集”指 `getHashedSet(object)` 的 `erasureObjects.NewNSLock`。
 
-| 操作 | 使用的锁 | 锁域 |
-| --- | --- | --- |
-| `PutObject`（池层在任何池锁之前直接返回 `serverPools[0].PutObject`；`putObject` 在集层加锁） | `er.NewNSLock` | 哈希集 |
-| 带条件或带副本调和的 `PutObject` | `er.NewNSLock` | 哈希集 |
-| `CompleteMultipartUpload`，对象提交 | `er.NewNSLock(object)` | 哈希集 |
-| `CompleteMultipartUpload`，upload ID 守卫 | `z.NewNSLock(object/uploadID)` | 0 号集 |
-| `AbortMultipartUpload`、`GetMultipartInfo`、`ListObjectParts` 守卫 | `z.NewNSLock(object/uploadID)` | 0 号集 |
-| `PutObjectPart`（分片锁、upload ID 读锁） | `er.NewNSLock` | 哈希集 |
-| `DeleteObject`（池层总是加锁；集层不加） | `z.NewNSLock` | 0 号集 |
-| `DeleteObjects` 批量（对所有名称一把锁） | `z.NewNSLock` | 0 号集 |
-| `CopyObject`，仅元数据与重写（池锁覆盖带 `NoLock` 的回退 `PutObject`） | `z.NewNSLock` | 0 号集 |
-| `PutObjectTags`、`PutObjectMetadata`（保留、法定保留）、`DeleteObjectTags` | `er.NewNSLock` | 哈希集 |
-| `RestoreTransitionedObject`、`TransitionObject` | `er.NewNSLock`（restore 复用带锁的 `PutObject`、分片、`CompleteMultipartUpload`、`CopyObject`） | 哈希集 |
-| Heal（`healObjectInPool` 仅在 `!SinglePool()` 时取池锁） | `er.NewNSLock` | 哈希集 |
-| 目标端的复制写入（`PutObject`、元数据、复制） | 同上述操作；另有经 `objectAPI.NewNSLock` 的 `/[replicate]/<key>` | 哈希集；串行器在 0 号集 |
-| 复制的 `DELETE` | `z.NewNSLock` | 0 号集 |
-| ILM 过期（包括精确 key 的整对象删除；带 `Expiration` 的 `DeleteObject`；规则在锁内重新评估） | `z.NewNSLock` | 0 号集 |
-| 批量密钥轮换（`NewNSLock`，然后带 `NoLock` 的 `CopyObject`） | `z.NewNSLock` | 0 号集 |
-| `SelectObjectContent`（读锁） | `z.NewNSLock` | 0 号集 |
-| `GetObject`、`HeadObject` | `er.NewNSLock` 读锁 | 哈希集 |
-| 列举恢复（`listingRLock`，SILO） | 0 号集，然后源集 | 两者 |
+| 操作                                                                                         | 使用的锁                                                                                        | 锁域                    |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----------------------- |
+| `PutObject`（池层在任何池锁之前直接返回 `serverPools[0].PutObject`；`putObject` 在集层加锁） | `er.NewNSLock`                                                                                  | 哈希集                  |
+| 带条件或带副本调和的 `PutObject`                                                             | `er.NewNSLock`                                                                                  | 哈希集                  |
+| `CompleteMultipartUpload`，对象提交                                                          | `er.NewNSLock(object)`                                                                          | 哈希集                  |
+| `CompleteMultipartUpload`，upload ID 守卫                                                    | `z.NewNSLock(object/uploadID)`                                                                  | 0 号集                  |
+| `AbortMultipartUpload`、`GetMultipartInfo`、`ListObjectParts` 守卫                           | `z.NewNSLock(object/uploadID)`                                                                  | 0 号集                  |
+| `PutObjectPart`（分片锁、upload ID 读锁）                                                    | `er.NewNSLock`                                                                                  | 哈希集                  |
+| `DeleteObject`（池层总是加锁；集层不加）                                                     | `z.NewNSLock`                                                                                   | 0 号集                  |
+| `DeleteObjects` 批量（对所有名称一把锁）                                                     | `z.NewNSLock`                                                                                   | 0 号集                  |
+| `CopyObject`，仅元数据与重写（池锁覆盖带 `NoLock` 的回退 `PutObject`）                       | `z.NewNSLock`                                                                                   | 0 号集                  |
+| `PutObjectTags`、`PutObjectMetadata`（保留、法定保留）、`DeleteObjectTags`                   | `er.NewNSLock`                                                                                  | 哈希集                  |
+| `RestoreTransitionedObject`、`TransitionObject`                                              | `er.NewNSLock`（restore 复用带锁的 `PutObject`、分片、`CompleteMultipartUpload`、`CopyObject`） | 哈希集                  |
+| Heal（`healObjectInPool` 仅在 `!SinglePool()` 时取池锁）                                     | `er.NewNSLock`                                                                                  | 哈希集                  |
+| 目标端的复制写入（`PutObject`、元数据、复制）                                                | 同上述操作；另有经 `objectAPI.NewNSLock` 的 `/[replicate]/<key>`                                | 哈希集；串行器在 0 号集 |
+| 复制的 `DELETE`                                                                              | `z.NewNSLock`                                                                                   | 0 号集                  |
+| ILM 过期（包括精确 key 的整对象删除；带 `Expiration` 的 `DeleteObject`；规则在锁内重新评估） | `z.NewNSLock`                                                                                   | 0 号集                  |
+| 批量密钥轮换（`NewNSLock`，然后带 `NoLock` 的 `CopyObject`）                                 | `z.NewNSLock`                                                                                   | 0 号集                  |
+| `SelectObjectContent`（读锁）                                                                | `z.NewNSLock`                                                                                   | 0 号集                  |
+| `GetObject`、`HeadObject`                                                                    | `er.NewNSLock` 读锁                                                                             | 哈希集                  |
+| 列举恢复（`listingRLock`，SILO）                                                             | 0 号集，然后源集                                                                                | 两者                    |
 {.wide .expand}
 
 在多池部署中，`PutObject`、`CompleteMultipartUpload`、标签与元数据更新、transition、restore、heal 也会取池锁并向下传递 `NoLock`，所以所有写入都与 `DELETE` 共用 0 号集。分裂的根源是单池捷径 `if z.SinglePool() { return z.serverPools[0].X }`：它让写者跳过池锁，但没有让 `DELETE` 与 `CopyObject` 跳过。
@@ -109,15 +109,15 @@ url: "/zh/blog/design/single-pool-lock-domains/"
 
 **上游起源，分几步形成。** 下列提交都是上游最后一个 master [7aac2a2c5](https://github.com/pgsty/silo/commit/7aac2a2c5) 的祖先，且上游 master 今天的代码与此相同。
 
-| 成分 | 提交 | 日期 | 首个上游版本 |
-| --- | --- | --- | --- |
-| 每个集独立的 locker 组 | [e9b2bf00a](https://github.com/pgsty/silo/commit/e9b2bf00ad0d538c8bff729473b6fea7b83a1b59)，[minio/minio#8492](https://github.com/minio/minio/pull/8492) | 2019-11-13 | `RELEASE.2019-12-17T23-16-33Z` |
-| 每个集内每台主机一个 locker | [4550ac6ff](https://github.com/pgsty/silo/commit/4550ac6fff35d2acbb1497c8b47ec450fc870ea7)，[minio/minio#11052](https://github.com/minio/minio/pull/11052) | 2020-12-10 | `RELEASE.2020-12-12T08-39-07Z` |
-| 批量删除通过 `getHashedSet("")` 加锁（批量与单键的分裂由此开始） | [ab7d3cd50](https://github.com/pgsty/silo/commit/ab7d3cd5083e82b0acdd66e277962970c07c8fe5)，[minio/minio#8974](https://github.com/minio/minio/pull/8974) | 2020-02-21 | `RELEASE.2020-02-27T00-23-05Z` |
-| `CopyObject` 取池锁 | [200caab82](https://github.com/pgsty/silo/commit/200caab82b622a0ec6c9776ee9b555aedbc9b320)，[minio/minio#13280](https://github.com/minio/minio/pull/13280) | 2021-09-22 | `RELEASE.2021-09-23T04-46-24Z` |
-| `DeleteObject` 的锁从集层移到池层 | [d350b666f](https://github.com/pgsty/silo/commit/d350b666ff41df7369a530c177ab8c890474a619)，[minio/minio#15521](https://github.com/minio/minio/pull/15521) | 2022-08-18 | `RELEASE.2022-08-22T23-53-06Z` |
-| 池锁总是落在 0 号池 | [6c746843a](https://github.com/pgsty/silo/commit/6c746843ac0c1b273329ae400ce823f491d71390)，[minio/minio#20356](https://github.com/minio/minio/pull/20356) | 2024-08-30 | `RELEASE.2024-09-09T16-59-28Z` |
-| **集锁总是落在 0 号集：造成单键分裂** | [afea40cc0](https://github.com/pgsty/silo/commit/afea40cc0fe1d823359ecbd229a0425021eb897b) | 2024-09-27 | `RELEASE.2024-10-02T17-50-41Z` |
+| 成分                                                             | 提交                                                                                                                                                       | 日期       | 首个上游版本                   |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------------ |
+| 每个集独立的 locker 组                                           | [e9b2bf00a](https://github.com/pgsty/silo/commit/e9b2bf00ad0d538c8bff729473b6fea7b83a1b59)，[minio/minio#8492](https://github.com/minio/minio/pull/8492)   | 2019-11-13 | `RELEASE.2019-12-17T23-16-33Z` |
+| 每个集内每台主机一个 locker                                      | [4550ac6ff](https://github.com/pgsty/silo/commit/4550ac6fff35d2acbb1497c8b47ec450fc870ea7)，[minio/minio#11052](https://github.com/minio/minio/pull/11052) | 2020-12-10 | `RELEASE.2020-12-12T08-39-07Z` |
+| 批量删除通过 `getHashedSet("")` 加锁（批量与单键的分裂由此开始） | [ab7d3cd50](https://github.com/pgsty/silo/commit/ab7d3cd5083e82b0acdd66e277962970c07c8fe5)，[minio/minio#8974](https://github.com/minio/minio/pull/8974)   | 2020-02-21 | `RELEASE.2020-02-27T00-23-05Z` |
+| `CopyObject` 取池锁                                              | [200caab82](https://github.com/pgsty/silo/commit/200caab82b622a0ec6c9776ee9b555aedbc9b320)，[minio/minio#13280](https://github.com/minio/minio/pull/13280) | 2021-09-22 | `RELEASE.2021-09-23T04-46-24Z` |
+| `DeleteObject` 的锁从集层移到池层                                | [d350b666f](https://github.com/pgsty/silo/commit/d350b666ff41df7369a530c177ab8c890474a619)，[minio/minio#15521](https://github.com/minio/minio/pull/15521) | 2022-08-18 | `RELEASE.2022-08-22T23-53-06Z` |
+| 池锁总是落在 0 号池                                              | [6c746843a](https://github.com/pgsty/silo/commit/6c746843ac0c1b273329ae400ce823f491d71390)，[minio/minio#20356](https://github.com/minio/minio/pull/20356) | 2024-08-30 | `RELEASE.2024-09-09T16-59-28Z` |
+| **集锁总是落在 0 号集：造成单键分裂**                            | [afea40cc0](https://github.com/pgsty/silo/commit/afea40cc0fe1d823359ecbd229a0425021eb897b)                                                                 | 2024-09-27 | `RELEASE.2024-10-02T17-50-41Z` |
 {.wide .expand}
 
 直到 `RELEASE.2024-09-13T20-26-02Z`，只给一个名称时 `erasureSets.NewNSLock` 返回 `getHashedSet(objects[0]).NewNSLock`。因此单池的池锁落在哈希集，与 `PutObject` 同域，单键 `DELETE` 与 `CopyObject` 是一致的。只有多名称锁（批量删除）使用另一个集 `getHashedSet("")`。[afea40cc0](https://github.com/pgsty/silo/commit/afea40cc0fe1d823359ecbd229a0425021eb897b)（Harshavardhana，2024-09-27）把它换成了 `sets[0]`，使多对象删除能与授予其他调用者的锁竞争。当每个写者都取池层锁时（多池如此），这是对的；对于写者在集层加锁的单池则是错的。该提交标题带有“(#93)”，这不是公开 minio/minio 仓库中的编号，所以没有可链接的上游 pull request。
@@ -126,17 +126,17 @@ url: "/zh/blog/design/single-pool-lock-domains/"
 
 **改变了风险的 SILO 提交。**
 
-| 提交 | 日期 | 首个 SILO 版本 | 影响 |
-| --- | --- | --- | --- |
-| [40bee4b7b](https://github.com/pgsty/silo/commit/40bee4b7ba756567b16117c70a4c28311e220d6c) If-Match `DELETE`（issue #10，PR #145） | 2026-09-06 | `RELEASE.2026-09-16T00-00-00Z` | 放大。条件检查与删除现在依赖池锁与写者之间的原子性。提交写明了限制（“单个纠删集（默认部署）”），但在分裂的集群中，写者可在检查与删除之间替换对象，过期的 If-Match 仍可能删掉较新的对象。 |
-| [7a060cab1](https://github.com/pgsty/silo/commit/7a060cab1edd5bbc17da7f703bbd1ab7415b6f7c) 基于访问的 ILM | 2026-08-15 | 与其回退 [9b76a2167](https://github.com/pgsty/silo/commit/9b76a2167)（2026-09-15）一起包含在 `RELEASE.2026-09-16T00-00-00Z` 中 | 对分裂无影响。它的回滚代码直接写明了这一分裂（“顶层命名空间锁取自 0 号池 / 0 号集……客户端 PutObject 锁哈希集……locker 按集划分”），说明维护者八月就已知晓。 |
-| [e59a3d938](https://github.com/pgsty/silo/commit/e59a3d938ed25c1bcd51efbb4ad6955073d195f7) 多池串行化（PR #178） | 2026-09-11 | `RELEASE.2026-09-16T00-00-00Z` | 没有改变单池锁域。它为多池写者加了池锁，并删除了 `DeleteObject` 中说该锁“仅在单个集内”与写路径共享命名空间的注释。警示没了，它所描述的行为没有变。 |
-| [87c1c6b3d](https://github.com/pgsty/silo/commit/87c1c6b3dc189799912f748572364e319676a7fc) 列举恢复（issue #218，PR #239） | 2026-10-17 | `RELEASE.2026-10-18T00-00-00Z` | 缩小，仅针对一种读者。列举恢复按固定顺序取 0 号集与源集的读锁，以同时覆盖两个锁域。 |
-| `d2eb0ade9`、`cd1f6cec3`、`dcc2f20ba` | 2026-10-25 与 26 | `RELEASE.2026-10-25T00-00-00Z`（前两个）、`RELEASE.2026-10-26T00-00-00Z` | 移动了 `PutObject` 取集锁的位置，又移回。锁域不变。 |
-| `1748f62c7`、`60c7179dd`、`7ce7fc8d1`、`5e7d60308` | 2026-09 与 10 | `RELEASE.2026-10-18`、`RELEASE.2026-10-18`、未发布（2026-10-29）、`RELEASE.2026-09-16` | 仅多池与数据迁移路径，对单池无变化。 |
+| 提交                                                                                                                               | 日期             | 首个 SILO 版本                                                                                                                 | 影响                                                                                                                                                                                     |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [40bee4b7b](https://github.com/pgsty/silo/commit/40bee4b7ba756567b16117c70a4c28311e220d6c) If-Match `DELETE`（issue #10，PR #145） | 2026-09-06       | `RELEASE.2026-09-16T00-00-00Z`                                                                                                 | 放大。条件检查与删除现在依赖池锁与写者之间的原子性。提交写明了限制（“单个纠删集（默认部署）”），但在分裂的集群中，写者可在检查与删除之间替换对象，过期的 If-Match 仍可能删掉较新的对象。 |
+| [7a060cab1](https://github.com/pgsty/silo/commit/7a060cab1edd5bbc17da7f703bbd1ab7415b6f7c) 基于访问的 ILM                          | 2026-08-15       | 与其回退 [9b76a2167](https://github.com/pgsty/silo/commit/9b76a2167)（2026-09-15）一起包含在 `RELEASE.2026-09-16T00-00-00Z` 中 | 对分裂无影响。它的回滚代码直接写明了这一分裂（“顶层命名空间锁取自 0 号池 / 0 号集……客户端 PutObject 锁哈希集……locker 按集划分”），说明维护者八月就已知晓。                               |
+| [e59a3d938](https://github.com/pgsty/silo/commit/e59a3d938ed25c1bcd51efbb4ad6955073d195f7) 多池串行化（PR #178）                   | 2026-09-11       | `RELEASE.2026-09-16T00-00-00Z`                                                                                                 | 没有改变单池锁域。它为多池写者加了池锁，并删除了 `DeleteObject` 中说该锁“仅在单个集内”与写路径共享命名空间的注释。警示没了，它所描述的行为没有变。                                       |
+| [87c1c6b3d](https://github.com/pgsty/silo/commit/87c1c6b3dc189799912f748572364e319676a7fc) 列举恢复（issue #218，PR #239）         | 2026-10-17       | `RELEASE.2026-10-18T00-00-00Z`                                                                                                 | 缩小，仅针对一种读者。列举恢复按固定顺序取 0 号集与源集的读锁，以同时覆盖两个锁域。                                                                                                      |
+| `d2eb0ade9`、`cd1f6cec3`、`dcc2f20ba`                                                                                              | 2026-10-25 与 26 | `RELEASE.2026-10-25T00-00-00Z`（前两个）、`RELEASE.2026-10-26T00-00-00Z`                                                       | 移动了 `PutObject` 取集锁的位置，又移回。锁域不变。                                                                                                                                      |
+| `1748f62c7`、`60c7179dd`、`7ce7fc8d1`、`5e7d60308`                                                                                 | 2026-09 与 10    | `RELEASE.2026-10-18`、`RELEASE.2026-10-18`、`RELEASE.2026-11-09T00-00-00Z`（2026-10-29）、`RELEASE.2026-09-16`                 | 仅多池与数据迁移路径，对单池无变化。                                                                                                                                                     |
 {.wide .expand}
 
-公开设计记录 [Restored Copy Expiry](/zh/blog/design/restored-copy-expiry/) 已把“大型单池部署中的锁域”列为继承的、范围之外的问题，[Listing Recovery Lock Cost](/zh/blog/design/listing-recovery-lock-cost/) 描述了列举的绕行方案。
+配套设计记录[恢复副本：过期的是副本，不是对象](/zh/blog/design/restored-copy-expiry/)说明了对该单池锁域修复的依赖，[LIST 恢复锁开销优化](/zh/blog/design/listing-recovery-lock-cost/)描述了列举路径的绕行方案。
 
 **简而言之。** 缺陷不是 SILO 引入的。造成单键分裂的提交是上游 2024-09-27 的 [afea40cc0](https://github.com/pgsty/silo/commit/afea40cc0fe1d823359ecbd229a0425021eb897b)，首发于 `RELEASE.2024-10-02T17-50-41Z`。SILO 在 `RELEASE.2025-12-03T12-00-00Z` 中继承了它，在其上建立了功能（[40bee4b7b](https://github.com/pgsty/silo/commit/40bee4b7ba756567b16117c70a4c28311e220d6c)），在注释里保留警示直到 [e59a3d938](https://github.com/pgsty/silo/commit/e59a3d938ed25c1bcd51efbb4ad6955073d195f7)，此后只在列举恢复中做了绕行。
 
@@ -146,11 +146,11 @@ url: "/zh/blog/design/single-pool-lock-domains/"
 
 窗口最多 2 毫秒，每行 300 次迭代：
 
-| 竞争 | 共享锁表 | 分裂锁表 |
-| --- | --- | --- |
-| 版本化 `PUT` 对 `DELETE` | 0 次异常 | 188 次迭代中已确认的版本或标记在部分磁盘上缺失；70 次中已确认的 `PUT` 落在少于读仲裁数（16 中的 8）的磁盘上；127 次 `DELETE` 对本来存在的键返回“未找到” |
-| 未版本化 `PUT` 对 `DELETE` | 0 | 84 次迭代结束时 `xl.meta` 只存在于 16 块盘中的一部分（例如 1、3、4 或 5 块），而不是全有或全无；94 次 `DELETE` 错误 |
-| 未版本化 `PUT` 对仅元数据 `CopyObject` | 0 | 30 次迭代在两个调用都成功后读回旧内容；155 次读到“未找到”；48 次复制错误 |
+| 竞争                                   | 共享锁表 | 分裂锁表                                                                                                                                                |
+| -------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 版本化 `PUT` 对 `DELETE`               | 0 次异常 | 188 次迭代中已确认的版本或标记在部分磁盘上缺失；70 次中已确认的 `PUT` 落在少于读仲裁数（16 中的 8）的磁盘上；127 次 `DELETE` 对本来存在的键返回“未找到” |
+| 未版本化 `PUT` 对 `DELETE`             | 0        | 84 次迭代结束时 `xl.meta` 只存在于 16 块盘中的一部分（例如 1、3、4 或 5 块），而不是全有或全无；94 次 `DELETE` 错误                                     |
+| 未版本化 `PUT` 对仅元数据 `CopyObject` | 0        | 30 次迭代在两个调用都成功后读回旧内容；155 次读到“未找到”；48 次复制错误                                                                                |
 {.wide .expand}
 
 窗口最多 20 毫秒，每行 400 次迭代：分裂行降到 34 次有缺失项、10 次磁盘状态混杂，以及 3 次旧内容加 24 次对象不可读；共享行保持为零。竞争是真实的，但对时序敏感，符合预期。
@@ -194,7 +194,7 @@ url: "/zh/blog/design/single-pool-lock-domains/"
 
 ## 建议 {#recommendation}
 
-在下一个版本采用方案 1。修复实现的就是它。
+在 `SILO Server 20261109` 采用方案 1。修复实现的就是它。
 
 1. **路由。** 单池中，下列锁从 0 号集移到对象自己的集：
    - `DeleteObject` 的每个分支：普通删除、If-Match、ILM 过期（包括精确 key 的整对象删除）、数据迁移，以及复制删除；
@@ -256,24 +256,22 @@ COPY 是唯一先后获取两个对象的锁的操作；批量删除对每个集
   - `TestDeleteObjectsInSetsRunsGroupsConcurrently` 与 `TestDeleteObjectsInSetsQueuedGroupsCancel`：两个集的磁盘调用相互重叠；取消之后，排队的组不做磁盘调用，已在执行的组保留自己的结果。
 - `gofmt` 与 `go vet ./cmd` 无问题。新测试在竞态检测器下通过；`./cmd` 中已有的锁、复制、删除、分片上传、select、列举、生命周期、退役与再平衡测试通过。
 
-合并前仍需运行：远端 CI，以及在各集使用不同主机的分布式单池上的验收运行。
+本地未运行 18 台及以上物理主机的真实单池验收集群；分布式锁组行为由上述互不相交和部分重叠的 dsync locker 套件覆盖。
 
-**集成验证。** 这个修复已摘取到下个版本的同一个集成分支上，位于 #278 和 #281 之后，与整对象删除、Heal 演练、#259、#285 和 Console 的修复放在一起。所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
-
-本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
+**集成与发布验证。** 该修复为 `SILO Server 20261109` 合入集成分支，位于 #278 和 #281 之后，与整对象删除、Heal 演练、#259、#285 和 Console 修复无冲突合并。本地集成运行通过了完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件与 CI 竞态检测选集，针对组合分支的对抗性审查通过实际执行的探针检查了锁域、清理路径以及清除与恢复之间的交互，未发现缺陷。发布提交 `d998292387cc`（`RELEASE.2026-11-09T00-00-00Z`）已通过 Go CI（含无标签 Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 门禁）、VulnCheck、发布流水线测试与发布构建校验。
 
 ## 审查记录 {#review}
 
-| 轮次 | 结论 |
-| --- | --- |
-| 设计审查，第 1 轮 | 同意但需修改。upload 守卫按其对象选集并保留锁名；按存储方式规范化名称；区分真正的前缀删除（强制删除）与针对单个对象的精确 key 删除；明确批量删除的失败语义。两个阻断问题：COPY 处理器在哈希集中持有源读锁的同时去取 0 号集的目标锁，只移动目标会在反向复制之间形成环（已复现）；“滚动升级期间不会更差”的说法不成立，因为旧的 DELETE 与 COPY 以前在 0 号集中互斥（已复现）。 |
-| 设计审查，第 2 轮 | 提出双重加锁（方案 6），以保持新旧节点互斥。审查用探针否决：重叠的锁组会阻塞同名的第二把锁；持有 0 号集批量锁时再取哈希集锁，会通过 `parent/uploadID` 别名与分片上传完成成环。COPY 必须在打开源对象之前取锁，对源读取传入 `NoLock`，并对锁排序。 |
-| 设计审查，第 3 轮 | 放弃双重加锁；同意单锁域路由加排空升级。修改：本地锁后端逐个获取名称，所以单节点保留其单把批量锁，其他本地锁表使用有界尝试；不同集的资源仍可能共享主机；COPY 的每个嵌套调用（包括目标查询）都传入 `NoLock`；COPY 使用单一截止时间、新的上下文并处理租约丢失；为升级与回滚给出真正的排空步骤；补充测试。前提更正：`host{1...18}/disk{1...4}` 自动选择集大小 9，显式指定 12 才得到重叠窗口。 |
-| 对抗性审查，补丁第 1 轮 | 要求修改；四项发现全部接受。重试复用了同一个锁实例，而实例标识其持有者，所以一次回复丢失的解锁在后台重试时，可能释放下一次尝试取得的锁（已复现）；现在每次尝试都使用新的实例。目标查询运行在请求的上下文中，在租约丢失后仍会继续；现在锁下的工作都运行在锁的上下文中。对覆盖多个名称的本地锁的一次尝试，会对每个名称各等待一次上限，从而超出截止时间；现在整次尝试共用一个上限。一个测试假定分布式解锁立即完成；现在它会等待锁被释放。 |
-| 对抗性审查，补丁第 2 轮 | 通过；没有新的发现。四项修复都得到验证，包括竞态检测器下的运行、补充探针以及 restore 集成测试。本轮中本文更正了三处表述：COPY 是唯一先后获取两个对象的锁的操作（批量删除对一个集的名称只发出一次多名称锁请求）；按不同顺序加锁的操作是早期版本节点上的复制，而不是分片复制；这样的复制只会让新的复制等到新节点的有界等待释放其第一把锁为止，而不是等到锁超时。 |
-| 对抗性审查，补丁第 3 轮（仅本文） | 通过，附小建议。更正后的三处表述和审查记录与代码一致。已采纳的小建议：“一次获取”改为“一次多名称锁请求”，因为本地后端逐个获取多个名称；状态行在修复提交之后成立，提交在本轮之后完成。 |
-| 对抗性审查，补丁第 4 轮（一个已有测试） | 通过，附小建议。把改写后的保留测试的注入点移到获取锁之前是合理的，但仅凭它无法发现 COPY 在检查与写入之间释放了锁的回归。已采纳：新增回归测试，要求保留或法定保留更新等待一个停在写入之中的 COPY。 |
-| 发布审查（2026-11-06） | 发现这个修复的三处回归：源名是目标别名的复制（例如把 `a//x` 复制到 `a/x`）对同一资源加了两次锁，自己等自己直到操作超时；等待被争用源对象的复制在大部分时间里持有目标的写锁；批量删除逐个执行各集的分组。分别用源名检查与按资源合并、不持有任何锁的等待，以及并发分组修复。两轮实现审查补齐了测试缺口：无竞态的超时与锁实例、共享锁表中其他集的别名，以及先探测写者再探测读者。 |
+| 轮次                                    | 结论                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 设计审查，第 1 轮                       | 同意但需修改。upload 守卫按其对象选集并保留锁名；按存储方式规范化名称；区分真正的前缀删除（强制删除）与针对单个对象的精确 key 删除；明确批量删除的失败语义。两个阻断问题：COPY 处理器在哈希集中持有源读锁的同时去取 0 号集的目标锁，只移动目标会在反向复制之间形成环（已复现）；“滚动升级期间不会更差”的说法不成立，因为旧的 DELETE 与 COPY 以前在 0 号集中互斥（已复现）。                                                            |
+| 设计审查，第 2 轮                       | 提出双重加锁（方案 6），以保持新旧节点互斥。审查用探针否决：重叠的锁组会阻塞同名的第二把锁；持有 0 号集批量锁时再取哈希集锁，会通过 `parent/uploadID` 别名与分片上传完成成环。COPY 必须在打开源对象之前取锁，对源读取传入 `NoLock`，并对锁排序。                                                                                                                                                                                       |
+| 设计审查，第 3 轮                       | 放弃双重加锁；同意单锁域路由加排空升级。修改：本地锁后端逐个获取名称，所以单节点保留其单把批量锁，其他本地锁表使用有界尝试；不同集的资源仍可能共享主机；COPY 的每个嵌套调用（包括目标查询）都传入 `NoLock`；COPY 使用单一截止时间、新的上下文并处理租约丢失；为升级与回滚给出真正的排空步骤；补充测试。前提更正：`host{1...18}/disk{1...4}` 自动选择集大小 9，显式指定 12 才得到重叠窗口。                                             |
+| 对抗性审查，补丁第 1 轮                 | 要求修改；四项发现全部接受。重试复用了同一个锁实例，而实例标识其持有者，所以一次回复丢失的解锁在后台重试时，可能释放下一次尝试取得的锁（已复现）；现在每次尝试都使用新的实例。目标查询运行在请求的上下文中，在租约丢失后仍会继续；现在锁下的工作都运行在锁的上下文中。对覆盖多个名称的本地锁的一次尝试，会对每个名称各等待一次上限，从而超出截止时间；现在整次尝试共用一个上限。一个测试假定分布式解锁立即完成；现在它会等待锁被释放。 |
+| 对抗性审查，补丁第 2 轮                 | 通过；没有新的发现。四项修复都得到验证，包括竞态检测器下的运行、补充探针以及 restore 集成测试。本轮中本文更正了三处表述：COPY 是唯一先后获取两个对象的锁的操作（批量删除对一个集的名称只发出一次多名称锁请求）；按不同顺序加锁的操作是早期版本节点上的复制，而不是分片复制；这样的复制只会让新的复制等到新节点的有界等待释放其第一把锁为止，而不是等到锁超时。                                                                         |
+| 对抗性审查，补丁第 3 轮（仅本文）       | 通过，附小建议。更正后的三处表述和审查记录与代码一致。已采纳的小建议：“一次获取”改为“一次多名称锁请求”，因为本地后端逐个获取多个名称；状态行在修复提交之后成立，提交在本轮之后完成。                                                                                                                                                                                                                                                   |
+| 对抗性审查，补丁第 4 轮（一个已有测试） | 通过，附小建议。把改写后的保留测试的注入点移到获取锁之前是合理的，但仅凭它无法发现 COPY 在检查与写入之间释放了锁的回归。已采纳：新增回归测试，要求保留或法定保留更新等待一个停在写入之中的 COPY。                                                                                                                                                                                                                                      |
+| 发布审查（2026-11-06）                  | 发现这个修复的三处回归：源名是目标别名的复制（例如把 `a//x` 复制到 `a/x`）对同一资源加了两次锁，自己等自己直到操作超时；等待被争用源对象的复制在大部分时间里持有目标的写锁；批量删除逐个执行各集的分组。分别用源名检查与按资源合并、不持有任何锁的等待，以及并发分组修复。两轮实现审查补齐了测试缺口：无竞态的超时与锁实例、共享锁表中其他集的别名，以及先探测写者再探测读者。                                                         |
 {.wide .expand}
 
 ## 参考 {#references}

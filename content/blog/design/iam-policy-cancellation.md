@@ -2,7 +2,7 @@
 title: "IAM Policy Reloads: Lock Scope, Cancellation, and Time Budgets"
 linkTitle: "IAM Reloads & Cancellation"
 date: 2026-10-23
-lastmod: 2026-11-08
+lastmod: 2026-11-10
 author: "Ruohang Feng"
 summary: "Why a slow policy list blocked ordinary S3 authentication, how request cancellation was lost before reaching KES, and why fixing context propagation required separating etcd read timeouts from decryption budgets."
 tags: [Design, IAM, KMS, S3, Review]
@@ -11,7 +11,7 @@ draft: false
 url: "/blog/design/iam-policy-cancellation/"
 ---
 
-Commit [`1b5477f3d`](https://github.com/pgsty/silo/commit/1b5477f3df87924712ad8dc580c8f8eac63eda2d) ([`pgsty/silo#251`](https://github.com/pgsty/silo/issues/251)) resolves two coupled failure modes under slow KMS/KES responses:
+Commit [`1b5477f3d`](https://github.com/pgsty/silo/commit/1b5477f3df87924712ad8dc580c8f8eac63eda2d) ([`pgsty/silo#251`](https://github.com/pgsty/silo/issues/251), shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026)) resolves two coupled failure modes under slow KMS/KES responses:
 
 1. **Authentication-cache lock contention**: `ListPolicies` and `ListPolicyDocs` now load and decrypt policy replacements outside the in-memory authentication-cache lock while retaining IAM write serialization (`writeMu`).
 2. **End-to-end request cancellation**: IAM configuration decryption and SSE-S3 list key unsealing now propagate the caller's request context all the way to outbound `KES.Decrypt` calls, while keeping backend RPC timeouts scoped strictly to their storage operations rather than truncating legitimate long-running queries at 30 seconds.
@@ -23,11 +23,11 @@ During incident investigation of [`pgsty/silo#251`](https://github.com/pgsty/sil
 1. When an administrator lists IAM policies while KES is slow, the policy listing takes several seconds, and ordinary users' unrelated `GET`, `HEAD`, and `PUT` object requests stall behind it.
 2. When a client abandons an SSE-S3 object listing (`ListObjects` with encrypted metadata), the server continues sending `Decrypt` requests to KES for subsequent objects that the disconnected client will never receive.
 
-| Observation | Root-Cause Mechanism | Fix Component |
-| :--- | :--- | :--- |
-| Ordinary S3 `GET`, `HEAD`, or `PUT` requests stall behind a slow policy list | `ListPolicies` / `ListPolicyDocs` hold the in-memory authentication-cache write lock while reading and decrypting every stored policy document | **A**: Move slow backend loading and decryption outside the authentication-cache lock |
-| KMS/KES decryption continues after the HTTP client cancels the request | Intermediate helpers substitute `context.Background()`, severing cancellation propagation before the outbound KES request | **B**: Thread the caller's `context.Context` through the entire decryption call chain |
-| A legitimate slow policy query (> 30 s) fails with HTTP 503 in the first repair candidate | Reusing `withIAMStorage` and reusing etcd's 30-second `Get` child context inadvertently imposed a 30-second ceiling on total decryption work | **R1**: Scope each timeout strictly to the storage operation it originally bounded |
+| Observation                                                                               | Root-Cause Mechanism                                                                                                                           | Fix Component                                                                         |
+| :---------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| Ordinary S3 `GET`, `HEAD`, or `PUT` requests stall behind a slow policy list              | `ListPolicies` / `ListPolicyDocs` hold the in-memory authentication-cache write lock while reading and decrypting every stored policy document | **A**: Move slow backend loading and decryption outside the authentication-cache lock |
+| KMS/KES decryption continues after the HTTP client cancels the request                    | Intermediate helpers substitute `context.Background()`, severing cancellation propagation before the outbound KES request                      | **B**: Thread the caller's `context.Context` through the entire decryption call chain |
+| A legitimate slow policy query (> 30 s) fails with HTTP 503 in the first repair candidate | Reusing `withIAMStorage` and reusing etcd's 30-second `Get` child context inadvertently imposed a 30-second ceiling on total decryption work   | **R1**: Scope each timeout strictly to the storage operation it originally bounded    |
 {.wide .expand}
 
 Shrinkage of the lock scope (**A**) and cancellation propagation (**B**) solve complementary problems: releasing the cache lock keeps healthy S3 traffic flowing during a slow admin query, while context propagation stops wasted KMS calls after a client disconnects.
@@ -69,7 +69,7 @@ The new policy map is published only if the backend load succeeds and `ctx.Err()
 
 Background IAM refresh follows the same merge and revocation invariants. Regression tests exercise the concrete `IAMObjectStore` refresh path directly alongside concurrent policy updates, deletions, and [durable IAM revocations](/blog/design/iam-revocations/).
 
-**November 2026 single-item lazy-load extension ([`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd), [`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6), [`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f), [`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)):** Single-item user, group, and policy lazy loads also release the cache lock during storage I/O so cached S3 authentication remains available, coalesce concurrent cache misses per key via `singleflight`, and stamp `loadedAt` before reading storage so a slow in-flight load cannot overwrite a newer cached revision or tombstone.
+**[SILO Server 20261109](/blog/release/silo-20261109/) lazy-load and fail-closed extension ([`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd), [`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6), [`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f), [`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)):** Authorization rejects incomplete policy loads fail-closed throughout request evaluation, while single-item user, group, and policy lazy loads release the cache lock during storage I/O so cached S3 authentication remains available, coalesce concurrent cache misses per key via `singleflight`, and stamp `loadedAt` before reading storage so a slow in-flight load cannot overwrite a newer cached revision or tombstone (alongside the stored-record IAM mutation fixes [`70914759e`](https://github.com/pgsty/silo/commit/70914759e), [`7eed95bc8`](https://github.com/pgsty/silo/commit/7eed95bc8), and [`a0de92fcb`](https://github.com/pgsty/silo/commit/a0de92fcb); see [Durable IAM Revocations](/blog/design/iam-revocations/)).
 
 ## B: Propagate Cancellation to KMS and KES {#cancellation}
 
@@ -104,28 +104,28 @@ Simply removing the outer `withIAMStorage` wrapper was still not sufficient for 
 
 Correction **R1** separates the caller's request budget from individual `etcd` RPC budgets across both policy documents and policy mappings:
 
-| Time Budget | Scope and Behavior |
-| :--- | :--- |
-| **Caller deadline or cancellation** | Governs the entire HTTP request and all associated KMS/KES decryption calls |
-| **Existing `etcd` read budget (30 s)** | Bounds only the `etcd` `Get` RPC; post-read decryption switches back to the caller's parent request context |
-| **Existing revision-write, revocation, lock, and cleanup budgets** | Retain `withIAMStorage` and their existing bounded timeouts |
-| **Whole-policy-list 30 s timeout (from first candidate)** | Removed from both `ListPolicies` and `ListPolicyDocs` |
+| Time Budget                                                        | Scope and Behavior                                                                                          |
+| :----------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| **Caller deadline or cancellation**                                | Governs the entire HTTP request and all associated KMS/KES decryption calls                                 |
+| **Existing `etcd` read budget (30 s)**                             | Bounds only the `etcd` `Get` RPC; post-read decryption switches back to the caller's parent request context |
+| **Existing revision-write, revocation, lock, and cleanup budgets** | Retain `withIAMStorage` and their existing bounded timeouts                                                 |
+| **Whole-policy-list 30 s timeout (from first candidate)**          | Removed from both `ListPolicies` and `ListPolicyDocs`                                                       |
 {.wide .expand}
 
 Because the `etcd` read context is derived as a child of the caller's request context, a shorter caller deadline still preempts `etcd` reads immediately. Once the `etcd` read succeeds, decryption proceeds under the caller's remaining time budget—allowing legitimate slow queries beyond 30 seconds to succeed when the caller permits.
 
 ## Alternatives Considered {#alternatives}
 
-| Candidate Approach | Why It Was Rejected |
-| :--- | :--- |
-| **Keep the cache lock held and shorten the list timeout** | Healthy S3 requests still stall until the timeout expires, and legitimate slow policy queries fail |
-| **Release both `writeMu` and the cache lock during loading** | A slow list can finish after a concurrent IAM write and overwrite newer state with a stale snapshot |
-| **Return cached policies without reloading from storage** | Breaks the freshness contract of administrative policy listing and masks backend issues |
-| **Raise the whole-list timeout to a larger fixed constant** | Merely shifts the regression threshold to a larger policy count or higher KES latency |
-| **Remove only the outer `withIAMStorage` timeout** | Leaves the `etcd` post-read decryption deadline regression intact |
-| **Remove all backend storage timeouts** | Weakens existing bounds on single-record reads, writes, distributed lock acquisition, and cleanup |
+| Candidate Approach                                                  | Why It Was Rejected                                                                                                        |
+| :------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------- |
+| **Keep the cache lock held and shorten the list timeout**           | Healthy S3 requests still stall until the timeout expires, and legitimate slow policy queries fail                         |
+| **Release both `writeMu` and the cache lock during loading**        | A slow list can finish after a concurrent IAM write and overwrite newer state with a stale snapshot                        |
+| **Return cached policies without reloading from storage**           | Breaks the freshness contract of administrative policy listing and masks backend issues                                    |
+| **Raise the whole-list timeout to a larger fixed constant**         | Merely shifts the regression threshold to a larger policy count or higher KES latency                                      |
+| **Remove only the outer `withIAMStorage` timeout**                  | Leaves the `etcd` post-read decryption deadline regression intact                                                          |
+| **Remove all backend storage timeouts**                             | Weakens existing bounds on single-record reads, writes, distributed lock acquisition, and cleanup                          |
 | **Parallelize policy decryptions or add a second ciphertext cache** | Introduces new KES concurrency spikes and cache invalidation complexity not required to fix the lock and cancellation bugs |
-| **Rewrite KES SDK internal retry behavior** | Expands the blast radius into third-party SDK semantics |
+| **Rewrite KES SDK internal retry behavior**                         | Expands the blast radius into third-party SDK semantics                                                                    |
 {.wide .expand}
 
 Relative to baseline [`a07d655dc`](https://github.com/pgsty/silo/commit/a07d655dc69cf04b130c2634d9fa5301078af546), the final implementation touches 8 production files (`+83 / -29` lines) and 5 test files, with no wire-protocol, ciphertext-format, or permission-model changes.
@@ -134,14 +134,14 @@ Relative to baseline [`a07d655dc`](https://github.com/pgsty/silo/commit/a07d655d
 
 Process-level benchmarks against baseline [`a07d655dc`](https://github.com/pgsty/silo/commit/a07d655dc69cf04b130c2634d9fa5301078af546) and final commit [`1b5477f3d`](https://github.com/pgsty/silo/commit/1b5477f3df87924712ad8dc580c8f8eac63eda2d) demonstrate the exact behavioral shift:
 
-| Scenario | Before / First Candidate | Final Implementation (`1b5477f3d`) |
-| :--- | :--- | :--- |
-| 4 ordinary S3 object requests during a 5.23 s policy list | Mean **5,284 ms** (blocked behind policy list) | Mean **2.25 ms** (policy list still takes 5.23 s in parallel) |
-| Same 4 ordinary S3 requests with a 200 ms client timeout | All 4 time out | All 4 return `200 OK` in **1.11–1.82 ms** |
-| SSE-S3 object list abandoned by client at 200 ms | **21** additional KES decryptions start after client exit | **0** additional decryptions start after exit (4 total before cancel) |
-| Object-backed policy query taking > 30 s (61 policies) | Baseline: `200 OK` in 32.74 s; First candidate: `503` at 31.22 s | `200 OK` in **32.75 s** with all 61 policies returned |
-| Fast `etcd` read + 32 s KES decryption (60 s caller budget) | First candidate fails during post-read decryption | Both policy-list entry points and policy-mapping loader succeed |
-| 51 normal and denied HTTP control cases | Baseline status codes, error codes, and item counts | All 51 controls match (including pagination, KMS denial, and SigV4 checks) |
+| Scenario                                                    | Before / First Candidate                                         | Final Implementation (`1b5477f3d`)                                         |
+| :---------------------------------------------------------- | :--------------------------------------------------------------- | :------------------------------------------------------------------------- |
+| 4 ordinary S3 object requests during a 5.23 s policy list   | Mean **5,284 ms** (blocked behind policy list)                   | Mean **2.25 ms** (policy list still takes 5.23 s in parallel)              |
+| Same 4 ordinary S3 requests with a 200 ms client timeout    | All 4 time out                                                   | All 4 return `200 OK` in **1.11–1.82 ms**                                  |
+| SSE-S3 object list abandoned by client at 200 ms            | **21** additional KES decryptions start after client exit        | **0** additional decryptions start after exit (4 total before cancel)      |
+| Object-backed policy query taking > 30 s (61 policies)      | Baseline: `200 OK` in 32.74 s; First candidate: `503` at 31.22 s | `200 OK` in **32.75 s** with all 61 policies returned                      |
+| Fast `etcd` read + 32 s KES decryption (60 s caller budget) | First candidate fails during post-read decryption                | Both policy-list entry points and policy-mapping loader succeed            |
+| 51 normal and denied HTTP control cases                     | Baseline status codes, error codes, and item counts              | All 51 controls match (including pagination, KMS denial, and SigV4 checks) |
 {.wide .expand}
 
 During test construction, two subtleties in the KES client surfaced:

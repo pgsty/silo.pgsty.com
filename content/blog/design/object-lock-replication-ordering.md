@@ -2,7 +2,7 @@
 title: "Object Lock Replication Ordering"
 linkTitle: "Object Lock Replication Ordering"
 date: 2026-09-16
-lastmod: 2026-09-16
+lastmod: 2026-11-10
 author: "Ruohang Feng"
 summary: "Retention, legal hold and their removals are independently ordered state across replica writes and pools."
 tags: [Design, S3, Operations]
@@ -40,6 +40,8 @@ When an object version has physical copies in multiple storage pools (for exampl
 ## Authorization and Operational Boundaries {#limits}
 
 Timestamp ordering governs conflict resolution on authorized replica writes; it does not grant permission to modify Object Lock settings. Standard replication trust checks and S3/admin permissions (`s3:ReplicateObject`, `s3:BypassGovernanceRetention`, `s3:PutObjectRetention`, `s3:PutObjectLegalHold`) remain enforced. Timestamp comparison establishes per-field ordering across replication hops; it does not compensate for unsynchronized wall clocks across sites or provide distributed rollback across partial drive failures.
+
+Companion delete-path Object Lock repairs shipped in [SILO Server 20261109](/blog/release/silo-20261109/): [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef) preserves destination retention and legal hold on replicated deletes (a source purge that bypassed `GOVERNANCE` retention is refused by a destination copy that still holds it, and delete-marker replication enforces `RefuseLockedOverwrite`), [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf) checks directory `null`-version locks before bulk deletion, and [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc) rechecks S3 `DeleteObjects` physical version purges under the mutation lock across pools.
 
 Upgrading prevents stale replication events from overwriting newer Object Lock state going forward, but does not automatically reconstruct retention or legal-hold values that were overwritten prior to the upgrade. Operators should verify exact-version retention and legal-hold state against authoritative records before declaring recovery.
 

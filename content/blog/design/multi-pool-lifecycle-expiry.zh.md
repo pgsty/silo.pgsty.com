@@ -2,7 +2,7 @@
 title: "多池生命周期过期：按整个对象决策"
 linkTitle: "多池生命周期过期"
 date: 2026-11-04
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "PGSTY SILO 维护团队"
 summary: >
   解释生命周期规则只按单个池内的版本求值时，为何会隐藏、删除或复活另一个池中的版本，以及为什么在对象锁内按合并后的版本列表复核，是最小而完整的修复。
@@ -12,13 +12,13 @@ draft: false
 url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 ---
 
-本文覆盖 [issue #278](https://github.com/pgsty/silo/issues/278) 和 Denis Babchuk 提交的 [PR #279](https://github.com/pgsty/silo/pull/279)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。修复将通过维护者集成 PR 合入：贡献者提交原样保留，并附加下文所述的维护者后续修正。恢复副本过期的修复（[#281](https://github.com/pgsty/silo/issues/281)）在同一个集成 PR 中交付，另有单独记录。
+本文覆盖 [issue #278](https://github.com/pgsty/silo/issues/278) 和 Denis Babchuk 提交的 [PR #279](https://github.com/pgsty/silo/pull/279)，基于 main [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) 评估。修复已通过维护者集成合入：贡献者提交原样保留，并附加下文所述的维护者后续修正。恢复副本过期的修复（[#281](https://github.com/pgsty/silo/issues/281)）在同一个集成 PR 中交付，另有单独记录。
 
-**状态：** 修复的第一版通过了两轮维护者审查。随后对抗性审查要求修改，即[修复方案](#fix)中的第 6–9 部分。实现这些修改的补丁经过四轮审查后获得批准。它已和下个版本的其他修复放在同一个集成分支上一起测试：带 `kqueue,dev` 标签的本地完整测试套件、本地执行的 CI 竞态检测选集，以及针对修复之间相互作用的对抗性审查，全部通过。远端 CI 和多池验收尚未完成。未合并，未发布。
+**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 简短结论 {#tldr}
 
-报告属实，也是下一个版本发布前最严重的开放缺陷。部署有多个池时，同一个 key 的版本经常分散在不同池中。生命周期按某一个池里的版本做判断，但由此发起的过期操作会在所有池中删除或隐藏这个 key。于是：
+报告属实，也是 `SILO Server 20261109` 修复的首要发布阻塞缺陷。部署有多个池时，同一个 key 的版本经常分散在不同池中。生命周期按某一个池里的版本做判断，但由此发起的过期操作会在所有池中删除或隐藏这个 key。于是：
 
 - 一个版本在本池是最新的、但不是整个对象的最新版本，会被当成当前版本；
 - 一个在本池里单独存在的删除标记，会被当成"没有更早版本"的标记。
@@ -29,15 +29,15 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 ## 定性 {#assessment}
 
-| 维度 | 判断 |
-| --- | --- |
-| 性质 | 生命周期求值中的数据正确性缺陷；继承自上游设计，不是已发布 SILO 版本引入的回归。 |
-| 受影响部署 | 多于一个池；桶开启或暂停了版本控制；并配置了 `Expiration`、`ExpiredObjectAllVersions`、`ExpiredObjectDeleteMarker` 或 `DelMarkerExpiration` 规则。 |
-| 不受影响 | 单池部署；所有版本都在同一个池中的 key；恢复副本过期（由 #281 跟踪）。 |
-| 严重程度 | 致命。版本被删除或隐藏而没有任何错误，唯一的痕迹是 ILM 审计条目和桶通知。 |
-| 可达性 | 普通 S3 写入即可触发。在报告者的复现中，SILO 自身的放置策略让三分之一到一半的 key 的版本分布在两个池中。 |
-| 发布紧急度 | 阻塞下一个版本。main 上已经合入 [#276](https://github.com/pgsty/silo/pull/276)，它让迁移过期在 decommission 或 rebalance 遍历中立即执行。 |
-| 剩余工作量 | 代码、审查和多池验收运行都已完成，还需要远端 CI。 |
+| 维度       | 判断                                                                                                                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 性质       | 生命周期求值中的数据正确性缺陷；继承自上游设计，不是已发布 SILO 版本引入的回归。                                                                                                          |
+| 受影响部署 | 多于一个池；桶开启或暂停了版本控制；并配置了 `Expiration`、`ExpiredObjectAllVersions`、`ExpiredObjectDeleteMarker` 或 `DelMarkerExpiration` 规则。                                        |
+| 不受影响   | 单池部署；所有版本都在同一个池中的 key；恢复副本过期（由 #281 跟踪）。                                                                                                                    |
+| 严重程度   | 致命。版本被删除或隐藏而没有任何错误，唯一的痕迹是 ILM 审计条目和桶通知。                                                                                                                 |
+| 可达性     | 普通 S3 写入即可触发。在报告者的复现中，SILO 自身的放置策略让三分之一到一半的 key 的版本分布在两个池中。                                                                                  |
+| 发布紧急度 | `SILO Server 20261109` 发布阻塞项（已随 `RELEASE.2026-11-09T00-00-00Z` 发布）。[#276](https://github.com/pgsty/silo/pull/276) 同时让迁移过期在 decommission 或 rebalance 遍历中立即执行。 |
+| 剩余工作量 | 已完成；已随 `SILO Server 20261109`（`d998292387cc`）发布。                                                                                                                               |
 {.wide .expand}
 
 ## 触发条件 {#trigger}
@@ -50,12 +50,12 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 此时，只要生命周期规则的判断依赖该 key 的其他版本，就会出错。报告者在 main 上的矩阵展示了每一种失败形态：
 
-| 规则 | 扫描前的布局（新的在前） | main 上的结果 |
-| --- | --- | --- |
-| `Expiration` `Days=1` | p1 `[v1]`，p2 `[v2]` | 新的删除标记盖住了当前版本 `v2`。 |
-| `Expiration` 加 `ExpiredObjectAllVersions` | p1 `[v1]`，p2 `[v2]` | `v1` 被当作当前版本，整个 key（包括 `v2`）被删除。 |
-| `ExpiredObjectDeleteMarker` | p1 `[dm]`，p2 `[v1]` | 删除标记被移除，已删除的对象重新读出 `v1`。 |
-| `DelMarkerExpiration` | 一个池中是删除标记，另一个池中有更新的版本 | 标记过期时连同更新的版本一起删除（由 Go 测试覆盖；普通 S3 写入不会产生这种布局）。 |
+| 规则                                       | 扫描前的布局（新的在前）                   | main 上的结果                                                                      |
+| ------------------------------------------ | ------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `Expiration` `Days=1`                      | p1 `[v1]`，p2 `[v2]`                       | 新的删除标记盖住了当前版本 `v2`。                                                  |
+| `Expiration` 加 `ExpiredObjectAllVersions` | p1 `[v1]`，p2 `[v2]`                       | `v1` 被当作当前版本，整个 key（包括 `v2`）被删除。                                 |
+| `ExpiredObjectDeleteMarker`                | p1 `[dm]`，p2 `[v1]`                       | 删除标记被移除，已删除的对象重新读出 `v1`。                                        |
+| `DelMarkerExpiration`                      | 一个池中是删除标记，另一个池中有更新的版本 | 标记过期时连同更新的版本一起删除（由 Go 测试覆盖；普通 S3 写入不会产生这种布局）。 |
 {.wide .expand}
 
 同一轮运行中，所有版本都在同一个池里的 key 表现正确。
@@ -82,18 +82,18 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 ### 溯源 {#provenance}
 
-**来自上游，不是 SILO 引入的。** 这个缺陷有两个上游成分：生命周期判断基于单个集合看得到的版本，动作却作用于整个 key；以及一次放置策略的改动，让 key 的版本分布在多个池中成为常态。从 `RELEASE.2025-12-03T12-00-00Z` 到 `RELEASE.2026-10-26T00-00-00Z` 的全部 18 个 SILO 版本都同时包含这两个成分。SILO 在这条路径上的改动，要么没有触及判断，要么尚未发布；有影响的几项列在下面。
+**来自上游，不是 SILO 引入的。** 这个缺陷有两个上游成分：生命周期判断基于单个集合看得到的版本，动作却作用于整个 key；以及一次放置策略的改动，让 key 的版本分布在多个池中成为常态。从 `RELEASE.2025-12-03T12-00-00Z` 到 `RELEASE.2026-10-26T00-00-00Z` 的全部 18 个 SILO 版本都同时包含这两个成分。此前 SILO 在这条路径上的改动，要么未触及该判断，要么与本修复一并随 `SILO Server 20261109` 发布；有影响的几项列在下面。
 
-**成分 1：本地判断，全局动作。** 每个发起方都用自己读到的版本求值。下表中的提交都在上游，也在每一个 SILO 版本中。
+**成分 1：本地判断，全局动作。** 每个发起方都用自己读到的版本求值。下表中的提交都在上游，也在截至 `20261026` 的每一个 SILO 版本中。
 
-| 发起方 | 提交 | PR | 日期 | 首个上游版本 |
-| --- | --- | --- | --- | --- |
-| 扫描器按对象求值生命周期（`scannerItem.applyActions`） | [43d6e3a](https://github.com/pgsty/silo/commit/43d6e3ae0)（Klaus Post） | [#9579](https://github.com/minio/minio/pull/9579) | 2020-06-12 | `RELEASE.2020-06-14T18-32-17Z` |
-| 扫描器改用完整求值器，输入是单个集合的版本列表 | [01447d2](https://github.com/pgsty/silo/commit/01447d243) | [#21096](https://github.com/minio/minio/pull/21096) | 2025-04-02 | `RELEASE.2025-04-03T14-56-28Z` |
-| GET 和 HEAD 让读到的版本过期 | [65aa2bc](https://github.com/pgsty/silo/commit/65aa2bc61)（Anis Elleuch） | [#11296](https://github.com/minio/minio/pull/11296) | 2021-02-01 | `RELEASE.2021-02-01T22-56-52Z` |
-| decommission 跳过并让 ILM 已过期的版本过期 | [236ef03](https://github.com/pgsty/silo/commit/236ef03db)（Harshavardhana） | [#15300](https://github.com/minio/minio/pull/15300) | 2022-07-14 | `RELEASE.2022-07-15T03-44-22Z` |
-| rebalance，同一过滤逻辑 | [4523da6](https://github.com/pgsty/silo/commit/4523da654)（Krishnan Parthasarathi） | [#15483](https://github.com/minio/minio/pull/15483) | 2022-10-25 | `RELEASE.2022-10-29T06-21-33Z` |
-| 驱动器 heal 跳过已过期的版本（直到下一个版本，见第 12 部分） | [109a9e3](https://github.com/pgsty/silo/commit/109a9e3f3)（Harshavardhana） | [#18569](https://github.com/minio/minio/pull/18569) | 2023-12-01 | `RELEASE.2023-12-02T10-51-33Z` |
+| 发起方                                                                    | 提交                                                                                | PR                                                  | 日期       | 首个上游版本                   |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------- | ---------- | ------------------------------ |
+| 扫描器按对象求值生命周期（`scannerItem.applyActions`）                    | [43d6e3a](https://github.com/pgsty/silo/commit/43d6e3ae0)（Klaus Post）             | [#9579](https://github.com/minio/minio/pull/9579)   | 2020-06-12 | `RELEASE.2020-06-14T18-32-17Z` |
+| 扫描器改用完整求值器，输入是单个集合的版本列表                            | [01447d2](https://github.com/pgsty/silo/commit/01447d243)                           | [#21096](https://github.com/minio/minio/pull/21096) | 2025-04-02 | `RELEASE.2025-04-03T14-56-28Z` |
+| GET 和 HEAD 让读到的版本过期                                              | [65aa2bc](https://github.com/pgsty/silo/commit/65aa2bc61)（Anis Elleuch）           | [#11296](https://github.com/minio/minio/pull/11296) | 2021-02-01 | `RELEASE.2021-02-01T22-56-52Z` |
+| decommission 跳过并让 ILM 已过期的版本过期                                | [236ef03](https://github.com/pgsty/silo/commit/236ef03db)（Harshavardhana）         | [#15300](https://github.com/minio/minio/pull/15300) | 2022-07-14 | `RELEASE.2022-07-15T03-44-22Z` |
+| rebalance，同一过滤逻辑                                                   | [4523da6](https://github.com/pgsty/silo/commit/4523da654)（Krishnan Parthasarathi） | [#15483](https://github.com/minio/minio/pull/15483) | 2022-10-25 | `RELEASE.2022-10-29T06-21-33Z` |
+| 驱动器 heal 跳过已过期的版本（直到 `SILO Server 20261109`，见第 12 部分） | [109a9e3](https://github.com/pgsty/silo/commit/109a9e3f3)（Harshavardhana）         | [#18569](https://github.com/minio/minio/pull/18569) | 2023-12-01 | `RELEASE.2023-12-02T10-51-33Z` |
 {.wide .expand}
 
 动作是消费方。对象锁内的集合级复查，即 `erasureObjects.DeleteObject` 中的 `opts.Expiration.Expire`，来自 [35f2552](https://github.com/pgsty/silo/commit/35f2552fc)（[#13091](https://github.com/minio/minio/pull/13091)，Harshavardhana，2021-08-27，`RELEASE.2021-08-31T05-46-54Z`），它读取的是执行删除的那一个集合的版本。上游 master 的代码相同。
@@ -102,19 +102,19 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 
 **SILO 在这条路径上改了什么。**
 
-| SILO 改动 | 日期 | 是否发布 | 对缺陷的影响 |
-| --- | --- | --- | --- |
-| [e59a3d9](https://github.com/pgsty/silo/commit/e59a3d938) 串行化并对账多池对象更新 | 2026-09-11 | 自 `RELEASE.2026-09-16T00-00-00Z` 起 | 收窄了一个触发条件：PUT 现在在同一把池层锁下查找并写入 key，两次首次写入不会再同时认为 key 不存在。放置策略和生命周期求值没有变化，因此分裂 key 仍会产生。 |
-| [f54c048](https://github.com/pgsty/silo/commit/f54c04846) 在 `getWritePoolIdx` 中加入写恢复标志，[2a04d5f](https://github.com/pgsty/silo/commit/2a04d5f48) 又把它去掉 | 2026-10-25 | 两者都在 `RELEASE.2026-10-25T00-00-00Z` | 无。已发布代码中的放置条件就是上游的条件。 |
-| [7a060ca](https://github.com/pgsty/silo/commit/7a060cab1) 按访问频率在池间迁移热对象，及其回退 [9b76a21](https://github.com/pgsty/silo/commit/9b76a2167) | 2026-08-15、2026-09-15 | 仅同时出现在 `RELEASE.2026-09-16T00-00-00Z` | 无。该功能从未在没有被移除的情况下发布。 |
-| [60c7179](https://github.com/pgsty/silo/commit/60c7179dd)、[1748f62](https://github.com/pgsty/silo/commit/1748f62c7) 及其他迁移安全修复 | 2026-10-18 | 自 `RELEASE.2026-10-18T00-00-00Z` 起 | 无。`RELEASE.2026-10-26T00-00-00Z` 中 decommission、rebalance、heal 的 `filterLifecycle` 闭包与上游 master 完全一致，扫描器的求值也一致。 |
-| [#266](https://github.com/pgsty/silo/pull/266) decommission 和 rebalance 期间迁移 ILM 已过期的当前版本（[19910230](https://github.com/pgsty/silo/commit/19910230a)、[a995921](https://github.com/pgsty/silo/commit/a995921e5)） | 2026-10-29 | 仅在 main，位于 `RELEASE.2026-10-26T00-00-00Z` 之后 | 收窄。版本控制开启的桶里，当前版本过期只会加一个删除标记，所以遍历现在迁移该版本，而不是跳过它。 |
-| [#276](https://github.com/pgsty/silo/pull/276) 迁移期间的 ILM 清理（[0a546c7](https://github.com/pgsty/silo/commit/0a546c7a7)） | 2026-11-02 | 仅在 main | 在时机上放大。它判断的仍是同一份按池的副本，但在源被淘汰之前，在遍历内立即执行过期，包括整对象动作。在已发布版本中，遍历跳过该版本，并把同样的判断交给过期工作线程排队。 |
-| [a803027](https://github.com/pgsty/silo/commit/a803027b0) 把 `DelMarkerExpiration` 计为活动规则 | 2026-11-03 | 仅在 main | 暴露面放大。扫描器原先跳过只有 `DelMarkerExpiration` 规则的桶；在 main 上它会对这类桶求值，从而触发上面的第四种失败形态。 |
-| 整对象精确 key 修复（[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)） | 2026-11-05 | 仅在集成分支 | 整对象过期的配套修复：按精确 key 而不是前缀删除，在单池和多池上都在锁内检查每个版本，并清理分层版本的远端对象。 |
+| SILO 改动                                                                                                                                                                                                                       | 日期                   | 是否发布                                           | 对缺陷的影响                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [e59a3d9](https://github.com/pgsty/silo/commit/e59a3d938) 串行化并对账多池对象更新                                                                                                                                              | 2026-09-11             | 自 `RELEASE.2026-09-16T00-00-00Z` 起               | 收窄了一个触发条件：PUT 现在在同一把池层锁下查找并写入 key，两次首次写入不会再同时认为 key 不存在。放置策略和生命周期求值没有变化，因此分裂 key 仍会产生。                       |
+| [f54c048](https://github.com/pgsty/silo/commit/f54c04846) 在 `getWritePoolIdx` 中加入写恢复标志，[2a04d5f](https://github.com/pgsty/silo/commit/2a04d5f48) 又把它去掉                                                           | 2026-10-25             | 两者都在 `RELEASE.2026-10-25T00-00-00Z`            | 无。已发布代码中的放置条件就是上游的条件。                                                                                                                                       |
+| [7a060ca](https://github.com/pgsty/silo/commit/7a060cab1) 按访问频率在池间迁移热对象，及其回退 [9b76a21](https://github.com/pgsty/silo/commit/9b76a2167)                                                                        | 2026-08-15、2026-09-15 | 仅同时出现在 `RELEASE.2026-09-16T00-00-00Z`        | 无。该功能从未在没有被移除的情况下发布。                                                                                                                                         |
+| [60c7179](https://github.com/pgsty/silo/commit/60c7179dd)、[1748f62](https://github.com/pgsty/silo/commit/1748f62c7) 及其他迁移安全修复                                                                                         | 2026-10-18             | 自 `RELEASE.2026-10-18T00-00-00Z` 起               | 无。`RELEASE.2026-10-26T00-00-00Z` 中 decommission、rebalance、heal 的 `filterLifecycle` 闭包与上游 master 完全一致，扫描器的求值也一致。                                        |
+| [#266](https://github.com/pgsty/silo/pull/266) decommission 和 rebalance 期间迁移 ILM 已过期的当前版本（[19910230](https://github.com/pgsty/silo/commit/19910230a)、[a995921](https://github.com/pgsty/silo/commit/a995921e5)） | 2026-10-29             | `RELEASE.2026-11-09T00-00-00Z`（与本修复一并发布） | 收窄。版本控制开启的桶里，当前版本过期只会加一个删除标记，所以遍历现在迁移该版本，而不是跳过它。                                                                                 |
+| [#276](https://github.com/pgsty/silo/pull/276) 迁移期间的 ILM 清理（[0a546c7](https://github.com/pgsty/silo/commit/0a546c7a7)）                                                                                                 | 2026-11-02             | `RELEASE.2026-11-09T00-00-00Z`（与本修复一并发布） | 本修复前在时机上放大。它判断的仍是同一份按池的副本，但在源被淘汰之前，在遍历内立即执行过期，包括整对象动作。此前发布版本中，遍历跳过该版本，并把同样的判断交给过期工作线程排队。 |
+| [a803027](https://github.com/pgsty/silo/commit/a803027b0) 把 `DelMarkerExpiration` 计为活动规则                                                                                                                                 | 2026-11-03             | `RELEASE.2026-11-09T00-00-00Z`（与本修复一并发布） | 本修复前放大暴露面。扫描器原先跳过只有 `DelMarkerExpiration` 规则的桶；对其求值若无本修复就会触发上面的第四种失败形态。                                                          |
+| 整对象精确 key 修复（[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)）                                                                                                                                             | 2026-11-05             | `RELEASE.2026-11-09T00-00-00Z`                     | 整对象过期的配套修复：按精确 key 而不是前缀删除，在单池和多池上都在锁内检查每个版本，并拒绝带已分层版本的 key。                                                                  |
 {.wide .expand}
 
-所以，已发布的 SILO 版本所包含的缺陷就是上游的缺陷，没有变化。#266 和 #276 不在任何发布标签中。#276 没有产生新的错误判断，它让已有的错误判断立即执行，这就是本修复成为下一个版本发布门槛的原因。
+所以，截至 `20261026` 的已发布 SILO 版本所包含的缺陷就是上游的缺陷，没有变化。#266、#276 和 `a803027` 未进入此前任何发布标签，已与本修复一并随 `SILO Server 20261109` 发布。
 
 针对本问题的维护者修复的第一版自身有两个缺陷：通过过时的少数派元数据修订绕过法律保留，以及重复副本的待清除状态丢失。评审在发布之前发现了它们，两者都从未合入或发布。
 
@@ -266,7 +266,7 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
   一半或更多的盘读不到的降级集合，也会让其中 key 的过期停下。
 - **每个池都必须给出历史。** 多池部署中，该 key 在每个池中所在的集合都必须给出 key 的历史。某个池离线，或者它为该 key 所在集合有一半或更多的盘读不到时，即使这个池并不持有该 key 的任何副本，该 key 的过期也会停下。生命周期复核失败不会让本来能成功的 GET 或 HEAD 失败，但它们仍须满足正常的读 quorum。这些拒绝按 `history_unavailable` 计数。这是有意为之：无法应答的池无法证明 key 不在那里。
 - **长历史仍然每个被删版本读一次。** 遍历在预检查时每个 key 只读取一次历史，但每次过期都会在锁内再读取并合并一次，因此有大量到期版本的 key，每删除一个版本都要读一次历史。
-- **在两个池中都有副本的非版本化 key 可能一直不过期。** 较旧的副本不满足规则的大小或标签过滤、而较新的副本满足时，过期会停在较旧的副本上，较新的副本不会过期。已发布版本中，较新的副本会被删除、较旧的副本暴露出来，这更糟。这种布局很少见。
+- **在两个池中都有副本的非版本化 key 可能一直不过期。** 较旧的副本不满足规则的大小或标签过滤、而较新的副本满足时，过期会停在较旧的副本上，较新的副本不会过期。`SILO Server 20261109` 之前，较新的副本会被删除、较旧的副本暴露出来，这更糟。这种布局很少见。
 - **不保证生命周期最终收敛。** 一个版本可能对整个对象是非当前版本，但在它自己的池里是最新的。按池运行的 scanner 可能一直不会提出它，因此在版本合并到同一个池之前（例如 decommission 或 rebalance 之后），一些已到期的版本可能一直保留。
 - **读取不会隐藏所有到期版本。** 最新版本的整对象规则已经到期时，对一个更早版本的 GET 或 HEAD 仍可能返回该版本。
 - **放置策略不变。** 已存在 key 的新版本仍按空闲空间选池，跨池 key 仍会继续出现。SILO 是否应优先选择 key 所在的池，是另一个关于放置和性能的问题。
@@ -312,22 +312,18 @@ url: "/zh/blog/design/multi-pool-lifecycle-expiry/"
 - `TestHealDriveHealsVersionWithRefusedExpiry`、`TestHealDriveThenExpiryRemoves` 和 `TestHealDriveThenExpiryAddsMarker`，`TestHealDriveDoesNotRestoreStaleMinority` 作为对照；
 - `TestPoolsMigrationExpiryPrecheckReadsHistoryOnce`：对一个有 63 个到期非当前版本的 key 执行 decommission 和 rebalance，只读取一次它的历史，结果不变。
 
-**合并前仍需完成：** 在最终 head 上运行远端 CI。
+跨独立物理主机的多节点锁域，以及数日级别的 scanner 和迁移长跑浸泡测试，不在本地验证范围内。
 
-多节点锁域，以及长时间运行的 scanner 和迁移行为，尚未验证。
-
-**集成验证。** 这个修复是下个版本集成分支的基础。#281 以及锁域、整对象删除、Heal 演练、#259、#285 和 Console 的修复都叠在它上面，所有摘取都没有冲突。在该 head 上，完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件通过，CI 的竞态检测选集和覆盖全部新测试的竞态选集也都通过。针对组合的对抗性审查没有发现缺陷，锁域、清理路径以及清除与恢复之间的交互都用实际执行的探针检查过。
-
-本地通过记录使用 `kqueue,dev` 标签。最终提交在 Ubuntu CI 上的无标签命令 `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 尚待验证；本地带标签的结果不能替代该项验收。
+**集成与发布验证。** 该修复作为 `SILO Server 20261109` 集成分支的基础，#281 以及锁域、整对象删除、Heal 演练、#259、#285 和 Console 修复无冲突叠合在其上。本地集成运行通过了完整的 `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` 套件与 CI 竞态检测选集，针对组合分支的对抗性审查通过实际执行的探针检查了锁域、清理路径以及清除与恢复之间的交互，未发现缺陷。发布提交 `d998292387cc`（`RELEASE.2026-11-09T00-00-00Z`）已通过 Go CI（含无标签 Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` 门禁）、VulnCheck、发布流水线测试与[发布构建校验](/zh/blog/release/silo-20261109/)。
 
 ## 审查记录 {#review}
 
-| 轮次 | 结果 |
-| --- | --- |
-| 维护者第 1、2 轮 | 发现批量清理中全池核准的传递缺口、读路径隐藏有效版本、被拒绝的过期被当作删除发布，作为第 3–5 部分修复。 |
-| 对抗性审查 | 要求修改。两个问题由第 1–5 部分引入：过时修订导致的 legal hold 绕过、重复副本上丢失的待处理 purge，作为第 6–8 部分修复。两个问题更早就存在：不完整历史下的整对象删除、其他拒绝也被发布，分别作为第 6、9 部分修复。整对象过期在[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)中修复。单池错误码的变化已在上文说明。 |
-| 设计第 2、3 轮 | 有条件同意。修订需要严格多数加上该版本自身的读 quorum；认定过时需要严格更新的有效时间戳；待处理的 purge 一票否决；跨池保护冲突在批准前就拒绝。 |
-| 补丁审查第 4–7 轮 | 第 4 轮：发现 4 字节的元数据头签名不能用来标识修订。第 5 轮：发现另外三个问题，即只读小写的锁键（原本就有）、摘要缺少表边界、旧格式的分片校验和在不同盘上永远不一致。第 6 轮：发现旧格式的嵌套表哈希时没有排序。以上问题都已修复并补了回归测试。第 7 轮：在约定范围内没有剩余问题，批准。 |
+| 轮次                   | 结果                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 维护者第 1、2 轮       | 发现批量清理中全池核准的传递缺口、读路径隐藏有效版本、被拒绝的过期被当作删除发布，作为第 3–5 部分修复。                                                                                                                                                                                                                                                                                |
+| 对抗性审查             | 要求修改。两个问题由第 1–5 部分引入：过时修订导致的 legal hold 绕过、重复副本上丢失的待处理 purge，作为第 6–8 部分修复。两个问题更早就存在：不完整历史下的整对象删除、其他拒绝也被发布，分别作为第 6、9 部分修复。整对象过期在[整对象 ILM 过期](/zh/blog/design/ilm-delete-all-exact-key/)中修复。单池错误码的变化已在上文说明。                                                       |
+| 设计第 2、3 轮         | 有条件同意。修订需要严格多数加上该版本自身的读 quorum；认定过时需要严格更新的有效时间戳；待处理的 purge 一票否决；跨池保护冲突在批准前就拒绝。                                                                                                                                                                                                                                         |
+| 补丁审查第 4–7 轮      | 第 4 轮：发现 4 字节的元数据头签名不能用来标识修订。第 5 轮：发现另外三个问题，即只读小写的锁键（原本就有）、摘要缺少表边界、旧格式的分片校验和在不同盘上永远不一致。第 6 轮：发现旧格式的嵌套表哈希时没有排序。以上问题都已修复并补了回归测试。第 7 轮：在约定范围内没有剩余问题，批准。                                                                                              |
 | 发布审查（2026-11-06） | 发现被拒绝和失败的过期几乎不留痕迹，scanner 把拒绝记成删除（第 9、10 部分）；获批的版本过期只删掉两个池中副本的一份（第 11 部分）；驱动器 heal 跳过它排入过期的版本，过期一旦被拒绝，这些版本就保持降低的冗余（第 12 部分）；遍历在预检查时对每个到期版本都读一次 key 的历史；无法给出历史的池会停止它并不持有的 key 的过期；非版本化的分裂 key 可能一直不过期。最后两点作为限制写明。 |
 {.wide .expand}
 

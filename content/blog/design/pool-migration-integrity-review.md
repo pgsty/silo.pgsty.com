@@ -2,7 +2,7 @@
 title: "Pool Migration Integrity Review: #261, #263, and #265"
 linkTitle: "Pool Migration Integrity Review"
 date: 2026-10-27
-lastmod: 2026-11-06
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
   A maintainer review of three storage-pool migration reports: mixed erasure-code layouts, tier free versions, and lifecycle expiry ordering. It records root causes, minimum safe fixes, evidence, and merge order.
@@ -12,15 +12,17 @@ draft: false
 url: "/blog/design/pool-migration-integrity-review/"
 ---
 
-This record reviews [#261](https://github.com/pgsty/silo/issues/261), [#263](https://github.com/pgsty/silo/issues/263), and [#265](https://github.com/pgsty/silo/issues/265), together with their fixes [#262](https://github.com/pgsty/silo/pull/262), [#264](https://github.com/pgsty/silo/pull/264), and [#266](https://github.com/pgsty/silo/pull/266). It also records the maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276). It is a design and review record, not a release note. The review was updated against the post-#276 main branch on 2026-11-02. #264, #266, and #276 are merged; #262 is closed as superseded.
+This record reviews [#261](https://github.com/pgsty/silo/issues/261), [#263](https://github.com/pgsty/silo/issues/263), and [#265](https://github.com/pgsty/silo/issues/265), together with their fixes [#262](https://github.com/pgsty/silo/pull/262), [#264](https://github.com/pgsty/silo/pull/264), and [#266](https://github.com/pgsty/silo/pull/266). It also records the maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276). It is a design and review record, not a release note.
+
+**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`). PRs [#267](https://github.com/pgsty/silo/pull/267) (superseding #262), [#264](https://github.com/pgsty/silo/pull/264), [#266](https://github.com/pgsty/silo/pull/266), and [#276](https://github.com/pgsty/silo/pull/276) (with lifecycle-delete replication removed before release) all shipped together in `RELEASE.2026-11-09T00-00-00Z`.
 
 ## Decision at a glance {#decision}
 
-| Report | Is the problem real? | PR assessment | Recommended action |
-| --- | --- | --- | --- |
-| [#261](https://github.com/pgsty/silo/issues/261) | Yes. A readable mixed-EC object can be omitted from migration and lost when its old pool is removed. | The narrow fix was merged through maintainer PR [#267](https://github.com/pgsty/silo/pull/267); [#262](https://github.com/pgsty/silo/pull/262) was superseded. | Merged in #267; issue closed as completed. |
-| [#263](https://github.com/pgsty/silo/issues/263) | Yes. An internal tier cleanup entry is treated as a real version by lifecycle, listing, and migration paths. | [#264](https://github.com/pgsty/silo/pull/264) fixes the whole boundary while keeping healing visibility. | Merged; issue closed as completed. |
-| [#265](https://github.com/pgsty/silo/issues/265) | Yes. ILM and migration disagree about whether a version still exists and who removes it. | [#266](https://github.com/pgsty/silo/pull/266) fixes the contributor-reported local ordering bug. Maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276) preserves tier cleanup, lifecycle-generation, and whole-object completion contracts. The replication of lifecycle deletes that #276 also added is removed before the next release; see the [2026-11-06 update](/blog/design/ilm-migration-ordering/). | Merged #266 to recognize the contribution, then merged #276 as the required completeness patch. |
+| Report                                           | Is the problem real?                                                                                         | PR assessment                                                                                                                                                                                                                                                                                                                                                                                                                              | Recommended action                                       |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| [#261](https://github.com/pgsty/silo/issues/261) | Yes. A readable mixed-EC object can be omitted from migration and lost when its old pool is removed.         | The narrow fix was merged through maintainer PR [#267](https://github.com/pgsty/silo/pull/267); [#262](https://github.com/pgsty/silo/pull/262) was superseded.                                                                                                                                                                                                                                                                             | Merged in #267; shipped in `SILO Server 20261109`.       |
+| [#263](https://github.com/pgsty/silo/issues/263) | Yes. An internal tier cleanup entry is treated as a real version by lifecycle, listing, and migration paths. | [#264](https://github.com/pgsty/silo/pull/264) fixes the whole boundary while keeping healing visibility.                                                                                                                                                                                                                                                                                                                                  | Merged in #264; shipped in `SILO Server 20261109`.       |
+| [#265](https://github.com/pgsty/silo/issues/265) | Yes. ILM and migration disagree about whether a version still exists and who removes it.                     | [#266](https://github.com/pgsty/silo/pull/266) fixes the contributor-reported local ordering bug. Maintainer follow-up [#276](https://github.com/pgsty/silo/pull/276) preserves tier cleanup, lifecycle-generation, and whole-object completion contracts. The replication of lifecycle deletes that #276 also added was removed before `SILO Server 20261109` shipped; see the [2026-11-06 update](/blog/design/ilm-migration-ordering/). | Merged #266 and #276; shipped in `SILO Server 20261109`. |
 {.wide .expand}
 
 The practical order was: merge the mixed-EC fix, merge #264, merge #266 to preserve the contributor's change, and immediately follow it with #276. The first three changes are now in main, and #276 supplies the maintainer-owned safety boundaries that the original PR could not safely implement in isolation.
@@ -51,7 +53,7 @@ The right repairs are local boundary repairs. They do not require a new metadata
 
 ## Affected release scope and advisory {#advisory}
 
-The three issue fixes should be treated as a storage-integrity advisory. The latest published tag, [RELEASE.2026-10-26](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z), predates the fixes. The repaired behavior is now in main through [#264](https://github.com/pgsty/silo/pull/264), [#267](https://github.com/pgsty/silo/pull/267), [#266](https://github.com/pgsty/silo/pull/266), and [#276](https://github.com/pgsty/silo/pull/276); operators need a release containing all applicable fixes.
+The three issue fixes are treated as a storage-integrity advisory for releases through [RELEASE.2026-10-26](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-10-26T00-00-00Z), which predate the repairs. All four PRs ([#264](https://github.com/pgsty/silo/pull/264), [#267](https://github.com/pgsty/silo/pull/267), [#266](https://github.com/pgsty/silo/pull/266), and [#276](https://github.com/pgsty/silo/pull/276) with lifecycle-delete replication removed) shipped together in [SILO Server 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`); operators on `20261026` or earlier should upgrade to `SILO Server 20261109` before running pool decommission or rebalance.
 
 The code-level windows are different:
 
@@ -60,24 +62,24 @@ The code-level windows are different:
 
 This is a compound-condition problem, not a statement that every installation or every object is damaged. A free version by itself is normal pending-cleanup state. Mixed EC metadata by itself is a recoverable result of an availability-optimized degraded write. The damaging outcomes require a second operation while that state exists:
 
-| State and operation | Result | Recovery position |
-| --- | --- | --- |
-| A free version exists briefly and the scanner completes | No user-visible corruption; the record and remote object are cleaned. | Normal after upgrade; do not edit metadata by hand. |
-| A tiered free version is seen by lifecycle or ordinary listing before cleanup | Wrong noncurrent decision, hidden key, or misleading delete marker. | Future scans are corrected by #264; already deleted real versions need backup or another authoritative copy. |
-| A free version is moved by old decommission/rebalance | A plain delete marker can be created and the remote reference can be lost. | The marker cannot be identified automatically; compare source copies, replication targets, backups, and audit history. |
-| Mixed EC metadata is scanned by old decommission/rebalance | The readable object can be omitted; removing the source pool can lose it. | If the source remains, run the fixed migration path and heal; if it was removed, recover from a copy or backup. |
+| State and operation                                                           | Result                                                                     | Recovery position                                                                                                      |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| A free version exists briefly and the scanner completes                       | No user-visible corruption; the record and remote object are cleaned.      | Normal after upgrade; do not edit metadata by hand.                                                                    |
+| A tiered free version is seen by lifecycle or ordinary listing before cleanup | Wrong noncurrent decision, hidden key, or misleading delete marker.        | Future scans are corrected by #264; already deleted real versions need backup or another authoritative copy.           |
+| A free version is moved by old decommission/rebalance                         | A plain delete marker can be created and the remote reference can be lost. | The marker cannot be identified automatically; compare source copies, replication targets, backups, and audit history. |
+| Mixed EC metadata is scanned by old decommission/rebalance                    | The readable object can be omitted; removing the source pool can lose it.  | If the source remains, run the fixed migration path and heal; if it was removed, recover from a copy or backup.        |
 {.wide .expand}
 
-An immediate operational advisory is appropriate. It should tell operators using an affected build to pause pool decommission and rebalance, especially while drives are degraded, tier cleanup is pending, or lifecycle rules are active. It should preserve the old pool and backups, upgrade to a release containing the relevant fixes, and verify GET, ListObjectsV2, ListObjectVersions, and object counts after migration. It should state that the advisory is conditional and identify the separate rebalance limitation for transitioned versions. A CVE-style security label is unnecessary unless the project classifies storage-integrity failures that way; a high-priority storage-integrity release note and operator advisory are sufficient.
+Operators still running `SILO Server 20261026` or earlier should pause pool decommission and rebalance—especially while drives are degraded, tier cleanup is pending, or lifecycle rules are active—preserve the old pool and backups, upgrade to [SILO Server 20261109](/blog/release/silo-20261109/), and verify GET, ListObjectsV2, ListObjectVersions, and object counts after migration. The advisory is conditional on the compound states above, and rebalance still skips transitioned versions by design. A CVE-style security label is unnecessary unless a project classifies storage-integrity failures that way; the `SILO Server 20261109` release notes and operational guidance cover the upgrade boundary.
 
-Before publishing an “all clear,” we still need a patch release and a historical audit runbook. Main now contains the complete decommission path for these three reports; a release containing only #264 and #267 would still be insufficient for lifecycle-aware migration.
+`SILO Server 20261109` delivers the complete migration repair set (#264, #267, #266, and #276, paired with the [multi-pool](/blog/design/multi-pool-lifecycle-expiry/) and [exact-key](/blog/design/ilm-delete-all-exact-key/) lifecycle fixes); a release containing only #264 and #267 would have been insufficient for lifecycle-aware migration. Installations that already completed pool migrations on `20261026` or earlier should audit source copies, replication targets, backups, and audit logs before assuming historical data was unaffected.
 
-## Merge and follow-up plan {#plan}
+## Merge and delivery summary {#plan}
 
-1. Keep the merged #264, #267, #266, and #276 changes together in the next patch release. They establish the logical object view, mixed-EC migration listing, lifecycle action semantics, and external cleanup contracts.
-2. Preserve the distinction between a versioned current Expiration, a version-only purge, and a whole-object deletion. Do not replace it with a generic “skip every ILM action” rule.
-3. Retain the new regression coverage for lifecycle deletes with replication configured, which must queue no replication, and for transitioned-version cleanup, lifecycle configuration changes, whole-object expiry, and resumable decommission.
-4. Publish the storage-integrity advisory with the patch release and provide a historical-audit runbook for installations that migrated pools on affected builds.
+1. Shipped #264, #267, #266, and #276 together in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`), establishing the logical object view, mixed-EC migration listing, lifecycle action semantics, and external cleanup contracts.
+2. Preserved the distinction between a versioned current Expiration, a version-only purge, and a whole-object deletion rather than replacing it with a generic "skip every ILM action" rule.
+3. Retained regression coverage for lifecycle deletes with replication configured (which must queue no replication), transitioned-version cleanup, lifecycle configuration changes, whole-object expiry, and resumable decommission.
+4. Published the migration-integrity guidance in [SILO Server 20261109](/blog/release/silo-20261109/); installations that migrated pools on earlier builds should still audit historical state against backups or replicas.
 5. Track rebalance support for transitioned versions separately; #276 deliberately does not broaden that scope.
 
 The detailed records are:

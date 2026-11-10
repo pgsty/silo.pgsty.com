@@ -2,7 +2,7 @@
 title: "持久化 IAM 撤销"
 linkTitle: "持久化 IAM 撤销"
 date: 2026-09-16
-lastmod: 2026-11-08
+lastmod: 2026-11-10
 author: "冯若航"
 summary: "持久删除版本、签名父边界、安全重放、协调升级以及 IAM 恢复限制。"
 tags: [Design, S3, Operations]
@@ -13,7 +13,7 @@ url: "/zh/blog/design/iam-revocations/"
 
 SILO 保留已删除 IAM 记录的版本（Revision），使离线站点在重新连接后无法将已删除的旧身份或旧授权恢复为有效状态。该机制覆盖内置用户、服务账号、组、策略文档，以及用户、STS 父身份和组各自命名空间中的策略映射。内置用户被删除后，即使管理员有意重建同名用户，此前签发的旧服务账号、STS 临时凭证与组授权也不会因此复活。
 
-持久化 IAM 撤销架构（PR [`#191`](https://github.com/pgsty/silo/pull/191)、[`#192`](https://github.com/pgsty/silo/pull/192)，提交 `f99ed829b5eba549160725f035156c9e020b6a07`）已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布并关闭 [SN-2026-013](/zh/blog/security/20260916-release-hardening/#sn-2026-013)；针对直接 `RevokeTokens` 的按范围 STS 撤销扩展（[`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce)）已随 [Server 20261018](/zh/blog/release/silo-20261018/#security) 发布。多站点协调升级步骤见 [IAM 升级与恢复手册](/zh/operations/replication/iam-upgrade/)。
+持久化 IAM 撤销架构（PR [`#191`](https://github.com/pgsty/silo/pull/191)、[`#192`](https://github.com/pgsty/silo/pull/192)，提交 `f99ed829b5eba549160725f035156c9e020b6a07`）已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布并关闭 [SN-2026-013](/zh/blog/security/20260916-release-hardening/#sn-2026-013)；针对直接 `RevokeTokens` 的按范围 STS 撤销扩展（[`0cd388c66`](https://github.com/pgsty/silo/commit/0cd388c666f8211f552604ae73448a066e9c25ce)）已随 [Server 20261018](/zh/blog/release/silo-20261018/#security) 发布；策略重载锁隔离（[`1b5477f3d`](https://github.com/pgsty/silo/commit/1b5477f3d)）与初版 LDAP 长 DN 处理（[#250](https://github.com/pgsty/silo/pull/250)）已随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 发布；持久化记录修改、按需加载与策略加载不完整时的 Fail-Closed 加固，以及纠删集长 DN 与嵌入式 Console `root` 登录修复（[#271](https://github.com/pgsty/silo/issues/271)、[#272](https://github.com/pgsty/silo/issues/272)）已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布。多站点协调升级步骤见 [IAM 升级与恢复手册](/zh/operations/replication/iam-upgrade/)。
 
 ## 十月十八日：按范围撤销 STS {#scoped-sts-20261018}
 
@@ -44,7 +44,7 @@ SILO 保留已删除 IAM 记录的版本（Revision），使离线站点在重�
 
 运维上必须保持各节点时钟同步并监控时钟偏移。版本排序基于源端墙钟时间戳，并对同一路径的本地连续写入保证单调递增，但不跨站点建立并发写入的因果偏序。
 
-**2026 年 11 月持久化记录编辑与缓存新鲜度加固（[`a0de92fcb`](https://github.com/pgsty/silo/commit/a0de92fcb)、[`70914759e`](https://github.com/pgsty/silo/commit/70914759e)、[`7eed95bc8`](https://github.com/pgsty/silo/commit/7eed95bc8)、[`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd)、[`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6)、[`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f)、[`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)）：** 在多节点集群中，管理端增量修改（`SetUserStatus`、`UpdateGroupMembers`、`SetGroupStatus`、`SetPolicy`、`UpdateServiceAccount` 以及每小时一次的 LDAP 组成员刷新）均在跨节点版本锁内读取并修改底层持久化记录，而不再先就地修改当前节点的内存缓存。当写入或创建因底层已存在更新版本或删除墓碑而被拒绝时，当前节点会立即重载或驱逐本地陈旧缓存条目，不再继续提供旧缓存直至下一轮定时刷新。单条目按需加载（Lazy Load）按 key 通过 `singleflight` 合并并发未命中，并在读取存储前记录 `loadedAt`，防止跨通知或本地新写入之前启动的慢速读取在返回时覆盖更新的缓存版本或墓碑。
+**[SILO Server 20261109](/zh/blog/release/silo-20261109/) 持久化记录编辑与缓存新鲜度加固（[`a0de92fcb`](https://github.com/pgsty/silo/commit/a0de92fcb)、[`70914759e`](https://github.com/pgsty/silo/commit/70914759e)、[`7eed95bc8`](https://github.com/pgsty/silo/commit/7eed95bc8)、[`07ce95dfd`](https://github.com/pgsty/silo/commit/07ce95dfd)、[`00270e9f6`](https://github.com/pgsty/silo/commit/00270e9f6)、[`c78ef6a6f`](https://github.com/pgsty/silo/commit/c78ef6a6f)、[`bb31c2618`](https://github.com/pgsty/silo/commit/bb31c2618)）：** 在多节点集群中，管理端增量修改（`SetUserStatus`、`UpdateGroupMembers`、`SetGroupStatus`、`SetPolicy`、`UpdateServiceAccount`、服务账号创建以及每小时一次的 LDAP 组成员刷新）均在跨节点版本锁内读取并修改底层持久化记录，而不再先就地修改当前节点的内存缓存。当写入或创建因底层已存在更新版本或删除墓碑而被拒绝时，当前节点会立即重载或驱逐本地陈旧缓存条目，不再继续提供旧缓存直至下一轮定时刷新。授权链路在策略加载不完整时全程按 Fail-Closed 拒绝放行；单条目按需加载（Lazy Load）在存储读取期间释放鉴权缓存锁，按 key 通过 `singleflight` 合并并发未命中，并在读取存储前记录 `loadedAt`，防止在途慢速读取在返回时覆盖更新的缓存版本或墓碑。
 
 ## 用户、子凭证与组 {#identities}
 
@@ -109,18 +109,18 @@ SILO 保留已删除 IAM 记录的版本（Revision），使离线站点在重�
 
 ## 错误语义与可观测性 {#errors}
 
-**十月二十三日补充（[`pgsty/silo#250`](https://github.com/pgsty/silo/pull/250)）：**[LDAP 长 DN：恢复登录可用性并守住 IAM 撤销安全边界](/zh/blog/design/ldap-long-dn/)区分了“单分量超过 255 字节、物理上无法存入对象后端的纯 ASCII 键”与“当前无法读取的已存在记录”。`loadIAMConfigBytesWithMetadata` 仅将前者按 `errConfigNotFound`（记录不存在）处理；完整路径超限（`PATH_MAX`）与真实存储故障继续按 Fail-Closed 向上报错，确保磁盘上已有的撤销墓碑绝不会被掩盖。对象存储后端仍不支持写入超长路径分量的个人策略映射或父身份版本记录。
+**Server 20261026 与 SILO Server 20261109 LDAP 更新（[`pgsty/silo#250`](https://github.com/pgsty/silo/pull/250)、[#271](https://github.com/pgsty/silo/issues/271)、[#272](https://github.com/pgsty/silo/issues/272)）：**[LDAP 长 DN：恢复登录可用性并守住 IAM 撤销安全边界](/zh/blog/design/ldap-long-dn/)（随 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 发布 `d43adc0f2`，并在 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 中经 [`dcad2ae3e`](https://github.com/pgsty/silo/commit/dcad2ae3e) 扩展至多盘纠删集）区分了“单分量超过 255 字节、物理上无法存入对象后端的纯 ASCII 键”与“当前无法读取的已存在记录”，并在访问底层磁盘前提前判定该谓词，避免多盘纠删集上各盘返回的 `ENAMETOOLONG` 路径错误因文本不一致被汇总为读/写 quorum 失败。`loadIAMConfigBytesWithMetadata` 仅将确定无法存储的纯 ASCII 键按 `errConfigNotFound`（记录不存在）处理；完整路径超限（`PATH_MAX`）与真实存储故障继续按 Fail-Closed 向上报错，确保磁盘上已有的撤销墓碑绝不会被掩盖。[SILO Server 20261109](/zh/blog/release/silo-20261109/)（[`a21f420de`](https://github.com/pgsty/silo/commit/a21f420de)，[#272](https://github.com/pgsty/silo/issues/272)）同时在 STS LDAP 认证未命中时保留 `"not found"` 错误语义，使启用 LDAP 时嵌入式 Console 仍能正常登录本地 `root` 管理员。对象存储后端仍不支持写入超长路径分量的个人策略映射或父身份版本记录（`saveIAMConfig` 直接返回 `ObjectNameInvalid`）。
 
 当权威撤销版本已成功落盘、但后续附属清理步骤失败时，Admin 删除请求可能返回 HTTP 500；这并不代表旧身份仍可使用。此时应在暂停 IAM 写入与同名重建的前提下重试删除，并在各站点验证旧凭证已被拒绝。当持久化父身份版本不可读或签发记录无法提交时，STS 会通过内部错误路径（含 `STSInternalError`）Fail-Closed 拒绝签发，绝不通过猜测缺失边界来放行新令牌。
 
 可通过每个进程需认证的 `/minio/metrics/v3/cluster/iam` 端点采集以下指标：
 
-| 指标名称 | 含义说明 |
-| --- | --- |
-| `minio_cluster_iam_revocation_records` | 当前进程内存索引中保留的删除墓碑记录与父撤销边界总数 |
-| `minio_cluster_iam_revocation_heal_failures` | 进程启动以来失败的自愈收敛轮数 |
-| `minio_cluster_iam_revocation_heal_duration_millis` | 最近一轮自愈收敛耗时（毫秒） |
-| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | 最近一轮自愈成功的 Unix 时间戳（秒） |
+| 指标名称                                                           | 含义说明                                             |
+| ------------------------------------------------------------------ | ---------------------------------------------------- |
+| `minio_cluster_iam_revocation_records`                             | 当前进程内存索引中保留的删除墓碑记录与父撤销边界总数 |
+| `minio_cluster_iam_revocation_heal_failures`                       | 进程启动以来失败的自愈收敛轮数                       |
+| `minio_cluster_iam_revocation_heal_duration_millis`                | 最近一轮自愈收敛耗时（毫秒）                         |
+| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | 最近一轮自愈成功的 Unix 时间戳（秒）                 |
 {.wide .expand}
 
 上述索引指标按单进程统计，对共享同一后端的多个节点直接求和会重复计数。自愈指标仅在启用了跨站点复制且当前节点持有 Leader 租约时推进；仅共享后端而未启用站点复制的部署不运行跨站点自愈循环，后三项指标为零属于正常现象。

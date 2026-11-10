@@ -2,7 +2,7 @@
 title: "Tier Free Versions Are Internal Cleanup Records"
 linkTitle: "Tier Free Version Semantics"
 date: 2026-10-27
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a tier free version is an internal cleanup record, how treating it as a normal version breaks lifecycle and pool migration, and why PR #264 is the minimum complete repair.
@@ -12,7 +12,9 @@ draft: false
 url: "/blog/design/tier-free-version-semantics/"
 ---
 
-This record covers [issue #263](https://github.com/pgsty/silo/issues/263) and [PR #264](https://github.com/pgsty/silo/pull/264), updated against main at [0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b), with the #264 merge recorded at [0cfca29c](https://github.com/pgsty/silo/commit/0cfca29cb2f16e43cb8266d9259f0dc5298c53b3). The PR is three linked repairs, not three unrelated workarounds.
+This record covers [issue #263](https://github.com/pgsty/silo/issues/263) and [PR #264](https://github.com/pgsty/silo/pull/264), updated after the #276 follow-up ([0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b)), with the #264 merge recorded at [0cfca29c](https://github.com/pgsty/silo/commit/0cfca29cb2f16e43cb8266d9259f0dc5298c53b3). The PR is three linked repairs, not three unrelated workarounds.
+
+**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`), together with the free-version cleanup ownership and decommission-cancellation follow-ups below.
 
 ## Short answer {#tldr}
 
@@ -25,7 +27,7 @@ That mismatch causes four failures:
 - ListObjectsV2 hides the key;
 - decommission and rebalance move the free record as a real delete marker, so removing the old pool can make the object unreadable.
 
-PR #264 fixes the lifecycle view, the latest-marker checks, ordinary listing, and pool cleanup as one semantic boundary. Healing retains a separate all-entries view. The PR is now merged and is the required base for reviewing #266.
+PR #264 fixes the lifecycle view, the latest-marker checks, ordinary listing, and pool cleanup as one semantic boundary. Healing retains a separate all-entries view. The PR merged as the required base for reviewing #266 and shipped in [SILO Server 20261109](/blog/release/silo-20261109/).
 
 ## What a free version means {#meaning}
 
@@ -128,11 +130,11 @@ The recommendation was to accept #264, and that decision is now implemented in m
 
 When a decommission finds free entries, it may contact the tier. A missing remote object is safe to ignore because the local record is already stale. A tier outage is different: the free record remains and decommission must fail so that a retry can finish cleanup. This is more visible operationally than main, but it avoids silently losing a cleanup obligation.
 
-A tier that was **removed from the configuration** while free versions still name it is not an outage either. The free version is the only record of its remote object, so it is kept, and the decommission of its pool cannot complete until the tier is configured again under the same name (`mcli ilm tier add`). Starting with the next release, the decommission still moves every other bucket first. It then fails with an error that names the free version, its remote object, and the tier, and a retry resumes with the buckets that are left. Before this, it stopped at the first such bucket and left every later bucket in the pool.
+A tier that was **removed from the configuration** while free versions still name it is not an outage either. The free version is the only record of its remote object, so it is kept, and the decommission of its pool cannot complete until the tier is configured again under the same name (`mcli ilm tier add`). Starting with `SILO Server 20261109`, the decommission still moves every other bucket first. It then fails with an error that names the free version, its remote object, and the tier, and a retry resumes with the buckets that are left. Before this, it stopped at the first such bucket and left every later bucket in the pool.
 
-Starting with the next release, remote cleanup and removal of the local free record also share the object's writer lock with the scanner, and the local delete removes a free record only when the drive handle, local version ID, tier, remote object and remote version all match the record whose remote object was deleted. A remote delete runs in a context that is independent of the caller's and has its own timeout, so a canceled decommission still removes the local record when the remote delete succeeded. Likewise, when a decommission encounters a tiered version whose expired restored-copy removal is refused (for example because the object is locked or the rule no longer holds), it moves the version together with its tier metadata and restore deadline instead of failing or dropping the tier link ([5cb91e7d7](https://github.com/pgsty/silo/commit/5cb91e7d7)).
+Starting with `SILO Server 20261109`, remote cleanup and removal of the local free record also share the object's writer lock with the scanner, and the local delete removes a free record only when the drive handle, local version ID, tier, remote object and remote version all match the record whose remote object was deleted. A remote delete runs in a context that is independent of the caller's and has its own timeout, so a canceled decommission still removes the local record when the remote delete succeeded. Likewise, when a decommission encounters a tiered version whose expired restored-copy removal is refused (for example because the object is locked or the rule no longer holds), it moves the version together with its tier metadata and restore deadline instead of failing or dropping the tier link ([5cb91e7d7](https://github.com/pgsty/silo/commit/5cb91e7d7)).
 
-Starting with the next release, `mcli admin decommission cancel` is also recorded durably before it answers, so a decommission that is still saving the cluster configuration after moving the buckets ends as `Canceled`, not `Complete`.
+Starting with `SILO Server 20261109`, `mcli admin decommission cancel` is also recorded durably before it answers, so a decommission that is still saving the cluster configuration after moving the buckets ends as `Canceled`, not `Complete`.
 
 This repair cannot identify or restore plain delete markers created by an older buggy decommission. Those markers have lost the free-version flag. Affected objects must be recovered from backups or another authoritative copy.
 

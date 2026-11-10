@@ -2,7 +2,7 @@
 title: "Multi-Pool Deletion: Preserve the Latest Copy on Failure"
 linkTitle: "Multi-Pool Delete Safety"
 date: 2026-10-24
-lastmod: 2026-10-26
+lastmod: 2026-11-10
 author: "Ruohang Feng"
 summary: "Why error reporting and online-drive checks were insufficient for multi-pool deletion, how staged cleanup protects the authoritative copy, and the measured performance and compatibility costs of PR #257."
 tags: [Design, S3, Storage, Performance]
@@ -21,12 +21,12 @@ SILO uses capacity-weighted pool allocation. Overwriting an unversioned key can 
 
 Earlier multi-pool consistency fixes relate to this change as follows:
 
-| Earlier work | What it protects | Relationship to this change |
-| --- | --- | --- |
-| [#178](https://github.com/pgsty/silo/pull/178) | Shared object locking and cross-pool reconciliation for conditional deletion and addressed versions | Provides the locking and reconciliation foundation reused here |
-| [#199](https://github.com/pgsty/silo/issues/199), fixed by [#207](https://github.com/pgsty/silo/pull/207) | Conditional `PUT` evaluates the current logical object across pools | Retains capacity-weighted placement |
-| [#248](https://github.com/pgsty/silo/pull/248), shipped in Server 20261018 | Pool migration cannot overwrite a newer payload or drop a delete marker | Protects rebalance and decommission paths |
-| [#245](https://github.com/pgsty/silo/pull/245), closed without merging | Proposed keeping overwrites in their existing pool | Neither experiment met its performance target; deletion safety does not depend on overwrite affinity |
+| Earlier work                                                                                              | What it protects                                                                                    | Relationship to this change                                                                          |
+| --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [#178](https://github.com/pgsty/silo/pull/178)                                                            | Shared object locking and cross-pool reconciliation for conditional deletion and addressed versions | Provides the locking and reconciliation foundation reused here                                       |
+| [#199](https://github.com/pgsty/silo/issues/199), fixed by [#207](https://github.com/pgsty/silo/pull/207) | Conditional `PUT` evaluates the current logical object across pools                                 | Retains capacity-weighted placement                                                                  |
+| [#248](https://github.com/pgsty/silo/pull/248), shipped in Server 20261018                                | Pool migration cannot overwrite a newer payload or drop a delete marker                             | Protects rebalance and decommission paths                                                            |
+| [#245](https://github.com/pgsty/silo/pull/245), closed without merging                                    | Proposed keeping overwrites in their existing pool                                                  | Neither experiment met its performance target; deletion safety does not depend on overwrite affinity |
 {.wide .expand}
 
 Those earlier changes did not cover ordinary unconditional deletion or bulk `DeleteObjects`. See [Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/) for the shared locking and migration design, and [Overwrite Pool Affinity](/blog/design/overwrite-pool-affinity/) for the evaluation that retained the existing allocator.
@@ -45,12 +45,12 @@ If both pools execute a delete in parallel, pool B can finish removing `"latest"
 
 Issue #256 documented four symptoms:
 
-| Operation | Original failure behavior |
-| --- | --- |
-| Ordinary unversioned `DELETE` | Returns an error after removing the latest copy, exposing an older overwritten value |
-| Bulk `DeleteObjects` | A successful pool result masks another pool's deletion failure |
-| Bulk deletion with an explicit version ID | Reports success even though the addressed version remains in another pool |
-| Versioned single `DELETE` | Attempts to write the delete marker in an unwritable holding pool even when another readable holding pool can accept it |
+| Operation                                 | Original failure behavior                                                                                               |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Ordinary unversioned `DELETE`             | Returns an error after removing the latest copy, exposing an older overwritten value                                    |
+| Bulk `DeleteObjects`                      | A successful pool result masks another pool's deletion failure                                                          |
+| Bulk deletion with an explicit version ID | Reports success even though the addressed version remains in another pool                                               |
+| Versioned single `DELETE`                 | Attempts to write the delete marker in an unwritable holding pool even when another readable holding pool can accept it |
 {.wide .expand}
 
 Running the author's 11 regression subtests showed 10 failures on baseline `main` and 11 passes on the initial PR. However, review found that bulk deletion could still lose the latest copy when a drive failed after the preflight check.
@@ -119,13 +119,13 @@ Every result entry initializes with the original key, version ID, and full `Repl
 
 The batch entry point separates physical deletion from delete-marker creation using the same versioning rules as the lower layer:
 
-| Request | Action |
-| --- | --- |
-| Explicit `versionId=null` or UUID | Physically remove the addressed version using two-stage cleanup in multi-pool batches |
-| No version ID, ordinary unversioned key | Physically remove data using two-stage cleanup |
-| No version ID, versioning enabled | Create a delete marker and retain historical versions |
-| No version ID, versioning suspended | Create or replace the `null` delete marker |
-| Prefix-specific versioning configuration | Evaluate `PrefixEnabledFn` for the key alongside the suspended state |
+| Request                                  | Action                                                                                |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| Explicit `versionId=null` or UUID        | Physically remove the addressed version using two-stage cleanup in multi-pool batches |
+| No version ID, ordinary unversioned key  | Physically remove data using two-stage cleanup                                        |
+| No version ID, versioning enabled        | Create a delete marker and retain historical versions                                 |
+| No version ID, versioning suspended      | Create or replace the `null` delete marker                                            |
+| Prefix-specific versioning configuration | Evaluate `PrefixEnabledFn` for the key alongside the suspended state                  |
 {.wide .expand}
 
 Physical deletion runs before marker creation, preserving execution order when a single batch explicitly purges a `null` version and creates a new delete marker for the same key. Marker-only batches continue using their existing path (see [Compatibility, Retry, and Operational Boundaries](#limits) for degraded-mode marker edge cases).
@@ -148,26 +148,26 @@ Bulk items with completed tier transitions therefore route through the existing 
 
 The commits evaluated during review and verification are:
 
-| Revision | Role |
-| --- | --- |
-| [`000e653038`](https://github.com/pgsty/silo/commit/000e6530386433ff3800f9e0b2d01754ce159c48) | Baseline `main` (without #245 overwrite affinity) |
-| [`a30270d9ba`](https://github.com/pgsty/silo/commit/a30270d9ba5bc6a5b9f47aa43850465a9b6a5e84) | Initial PR head; reproduced the post-preflight failure window |
+| Revision                                                                                      | Role                                                                                     |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [`000e653038`](https://github.com/pgsty/silo/commit/000e6530386433ff3800f9e0b2d01754ce159c48) | Baseline `main` (without #245 overwrite affinity)                                        |
+| [`a30270d9ba`](https://github.com/pgsty/silo/commit/a30270d9ba5bc6a5b9f47aa43850465a9b6a5e84) | Initial PR head; reproduced the post-preflight failure window                            |
 | [`3c82748e14`](https://github.com/pgsty/silo/commit/3c82748e14495ed403739e60b7e669c977a488c1) | Added two-stage bulk cleanup, response identity preservation, and partial-deletion retry |
-| [`a2073d2514`](https://github.com/pgsty/silo/commit/a2073d25142ced87b9bde8afa38aef2d0383768e) | Final PR head, adding shared-tier protection |
-| [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) | Merged `main` (source tree identical to `a2073d2514`) |
+| [`a2073d2514`](https://github.com/pgsty/silo/commit/a2073d25142ced87b9bde8afa38aef2d0383768e) | Final PR head, adding shared-tier protection                                             |
+| [`aafe4f8886`](https://github.com/pgsty/silo/commit/aafe4f8886a060ec698400043bee2f60e22140fd) | Merged `main` (source tree identical to `a2073d2514`)                                    |
 {.wide .expand}
 
 The committed fault tests start with all drives online, inject failures inside `DeleteVersions`, and assert both an accurate per-item error and **zero deletion attempts against that item's authoritative copy**, verifying `GET` during failure, `GET` and version listing after recovery, retry completion, and normal completion of unrelated items:
 
-| Coverage | Evidence in the merged tree |
-| --- | --- |
-| Post-preflight I/O failures, two/three pools, every authoritative position, unversioned/`null`/UUID | [`TestPoolsBulkDeleteKeepsLatestOnIOFailure`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L152) |
-| Signed HTTP response identity with replication state | [`TestPoolsBulkDeleteReplicationIdentity`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L236) |
-| Mixed null purge/marker, partial cleanup/retry, different authoritative pools | [Bulk ordering and retry tests](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L298) |
-| Equal timestamps, unreadable metadata, shared lock/concurrent `PUT`, object-layer cancellation | [Selection and concurrency tests](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L410) |
-| Physical-delete quorum versus marker/replication writes | [`TestBulkDeleteQuorumEvidence`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L552) |
-| Shared tier references and restored objects | [`TestPoolsRetiringCopyPreservesSharedTierObject`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-consistency_test.go#L1065) |
-| Original single-delete, bulk-error, known-quorum-loss, and marker-placement regressions | [Original contribution's tests](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-consistency_test.go#L1334) |
+| Coverage                                                                                            | Evidence in the merged tree                                                                                                                                                       |
+| --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Post-preflight I/O failures, two/three pools, every authoritative position, unversioned/`null`/UUID | [`TestPoolsBulkDeleteKeepsLatestOnIOFailure`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L152)            |
+| Signed HTTP response identity with replication state                                                | [`TestPoolsBulkDeleteReplicationIdentity`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L236)               |
+| Mixed null purge/marker, partial cleanup/retry, different authoritative pools                       | [Bulk ordering and retry tests](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L298)                          |
+| Equal timestamps, unreadable metadata, shared lock/concurrent `PUT`, object-layer cancellation      | [Selection and concurrency tests](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L410)                        |
+| Physical-delete quorum versus marker/replication writes                                             | [`TestBulkDeleteQuorumEvidence`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-delete_test.go#L552)                         |
+| Shared tier references and restored objects                                                         | [`TestPoolsRetiringCopyPreservesSharedTierObject`](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-consistency_test.go#L1065) |
+| Original single-delete, bulk-error, known-quorum-loss, and marker-placement regressions             | [Original contribution's tests](https://github.com/pgsty/silo/blob/aafe4f8886a060ec698400043bee2f60e22140fd/cmd/erasure-server-pool-consistency_test.go#L1334)                    |
 {.wide .expand}
 
 The new regressions fail deterministically against the initial PR's production code. The combined deletion, tier, and quorum test suite passed three consecutive `-race` runs before merge and an additional `-race` run after merge. Supplemental checks covered single-pool controls, prefix versioning configurations, directory and duplicate keys, Object Lock, version purges, and migration regressions.
@@ -200,33 +200,33 @@ Benchmarks compare baseline `000e653038` against final PR head `a2073d2514` (ide
 Throughput is measured in logical objects per second, showing the three-run median and observed range; **paired change is the median of the three paired percentage changes**.
 
 | Pools / copies; operation | Baseline median [range] | Fixed median [range] | Paired change |
-| --- | ---: | ---: | ---: |
-| 1 / 1; `DELETE` | 1,286 [1,193–1,292] | 1,347 [1,269–1,371] | +6.1% |
-| 1 / 1; bulk 64 | 1,786 [1,739–1,809] | 1,818 [1,680–1,982] | +4.5% |
-| 2 / 1; `DELETE` | 1,350 [1,272–1,363] | 1,304 [1,270–1,327] | −1.7% |
-| 2 / 1; bulk 64 | 1,477 [1,468–1,740] | 1,453 [1,149–1,604] | −7.8% |
-| 2 / 2; `DELETE` | 560 [546–641] | 534 [469–534] | −16.3% |
-| 2 / 2; bulk 64 | 606 [528–695] | 620 [546–707] | +2.2% |
-| 3 / 1; `DELETE` | 988 [722–994] | 1,053 [974–1,130] | +13.6% |
-| 3 / 1; bulk 64 | 1,338 [1,269–1,383] | 1,120 [1,055–1,163] | −16.9% |
-| 3 / 3; `DELETE` | 364 [323–371] | 354 [335–364] | −2.0% |
-| 3 / 3; bulk 64 | 404 [367–450] | 365 [313–378] | −14.5% |
+| ------------------------- | ----------------------: | -------------------: | ------------: |
+| 1 / 1; `DELETE`           |     1,286 [1,193–1,292] |  1,347 [1,269–1,371] |         +6.1% |
+| 1 / 1; bulk 64            |     1,786 [1,739–1,809] |  1,818 [1,680–1,982] |         +4.5% |
+| 2 / 1; `DELETE`           |     1,350 [1,272–1,363] |  1,304 [1,270–1,327] |         −1.7% |
+| 2 / 1; bulk 64            |     1,477 [1,468–1,740] |  1,453 [1,149–1,604] |         −7.8% |
+| 2 / 2; `DELETE`           |           560 [546–641] |        534 [469–534] |        −16.3% |
+| 2 / 2; bulk 64            |           606 [528–695] |        620 [546–707] |         +2.2% |
+| 3 / 1; `DELETE`           |           988 [722–994] |    1,053 [974–1,130] |        +13.6% |
+| 3 / 1; bulk 64            |     1,338 [1,269–1,383] |  1,120 [1,055–1,163] |        −16.9% |
+| 3 / 3; `DELETE`           |           364 [323–371] |        354 [335–364] |         −2.0% |
+| 3 / 3; bulk 64            |           404 [367–450] |        365 [313–378] |        −14.5% |
 {.wide .expand}
 
 Per-request latency in milliseconds (covering the full 64-object batch for bulk calls, shown as baseline→fixed):
 
-| Pools / copies; operation | P50, ms | P99, ms |
-| --- | ---: | ---: |
-| 1 / 1; `DELETE` | 5.69 → 5.50 | 15.06 → 14.37 |
-| 1 / 1; bulk 64 | 277.28 → 280.00 | 406.23 → 385.23 |
-| 2 / 1; `DELETE` | 5.46 → 5.47 | 14.09 → 14.88 |
-| 2 / 1; bulk 64 | 317.10 → 346.26 | 635.16 → 463.78 |
-| 2 / 2; `DELETE` | 12.91 → 13.76 | 35.86 → 45.54 |
-| 2 / 2; bulk 64 | 823.19 → 752.78 | 1,315.81 → 1,297.48 |
-| 3 / 1; `DELETE` | 7.23 → 6.42 | 22.09 → 20.20 |
-| 3 / 1; bulk 64 | 361.73 → 444.34 | 669.84 → 732.27 |
-| 3 / 3; `DELETE` | 20.35 → 21.00 | 50.75 → 48.92 |
-| 3 / 3; bulk 64 | 1,236.42 → 1,392.63 | 1,697.38 → 2,079.27 |
+| Pools / copies; operation |             P50, ms |             P99, ms |
+| ------------------------- | ------------------: | ------------------: |
+| 1 / 1; `DELETE`           |         5.69 → 5.50 |       15.06 → 14.37 |
+| 1 / 1; bulk 64            |     277.28 → 280.00 |     406.23 → 385.23 |
+| 2 / 1; `DELETE`           |         5.46 → 5.47 |       14.09 → 14.88 |
+| 2 / 1; bulk 64            |     317.10 → 346.26 |     635.16 → 463.78 |
+| 2 / 2; `DELETE`           |       12.91 → 13.76 |       35.86 → 45.54 |
+| 2 / 2; bulk 64            |     823.19 → 752.78 | 1,315.81 → 1,297.48 |
+| 3 / 1; `DELETE`           |         7.23 → 6.42 |       22.09 → 20.20 |
+| 3 / 1; bulk 64            |     361.73 → 444.34 |     669.84 → 732.27 |
+| 3 / 3; `DELETE`           |       20.35 → 21.00 |       50.75 → 48.92 |
+| 3 / 3; bulk 64            | 1,236.42 → 1,392.63 | 1,697.38 → 2,079.27 |
 {.wide .expand}
 
 P99 uses the nearest-rank method (with 64 requests per bulk run, P99 is close to the per-run maximum). Single-pool controls retained their scheduling path and showed no regression. Three-pool bulk throughput decreased by **15–17%**, with a **22.5%** P99 increase on the 3-pool / 3-copy layout; two-pool / two-copy single deletion decreased by **16.3%** while bulk deletion in that layout stayed within run-to-run variation.
@@ -240,17 +240,17 @@ Single deletion serializes cleanup of older copies before the newest copy. Bulk 
 - **Error codes and client retries**: A single-delete write-quorum failure typically returns HTTP 503, whereas bulk `DeleteObjects` can return HTTP 200 with per-item errors such as `SlowDownWrite` in the response XML. With `MaxRetries=4`, the tested S3 SDK did not automatically retry an HTTP 200 bulk response containing per-item `SlowDownWrite`, while `mcli rm` surfaces the per-item failure. Callers must inspect bulk response entries and retry failed items after storage recovery, preserving the target `versionId` where applicable.
 - **Concurrency and cancellation**: The shared object write locks serialize multi-pool deletion against participating pooled writes. Because the HTTP bulk-delete handler uses a detached background context, a client disconnect does not cancel an in-flight batch.
 - **Suspended-bucket degraded bulk markers**: Supplemental testing noted an existing edge case already present on baseline `main`: in two- and three-pool layouts, when a versioning-suspended bucket with UUID-only history receives a bulk delete marker during drive degradation, explicitly purging the `null` marker after drive recovery can still return a quorum error (one run exposed the retained UUID history and another kept the marker). The marker-only bulk path remains unchanged here.
-- **Object Lock and conditional delete**: Object Lock and retention authorization checks are unchanged. Batch XML ETag conditions remain unsupported; see [Conditional DELETE](/blog/design/conditional-delete/).
+- **Object Lock and conditional delete**: In Server 20261026, Object Lock and retention authorization checks were unchanged. [SILO Server 20261109](/blog/release/silo-20261109/) ([`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc), [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)) subsequently routes S3 `DeleteObjects` physical version purges in Object Lock buckets through sequential per-object deletes under the mutation lock—merging cross-pool protection and checking directory `null` versions—while non-locked bulk deletes run set groups concurrently across erasure sets ([#301](https://github.com/pgsty/silo/issues/301), [`d56b1063b`](https://github.com/pgsty/silo/commit/d56b1063b)). Batch XML ETag conditions remain unsupported; see [Conditional DELETE](/blog/design/conditional-delete/).
 - **Upgrade and rollback**: No S3 parameter, RPC wire format, on-disk format, dependency, allocator rule, or configuration flag changes. During a mixed-version rolling upgrade, an unupgraded coordinating node still applies the older deletion path; rolling back to an older release cannot reconstruct a latest copy that was already lost.
 
 ## Rejected Alternatives {#alternatives}
 
-| Alternative | Why it was rejected |
-| --- | --- |
-| Error aggregation alone | Prevents false-success replies, but cannot recover an authoritative copy that was already deleted |
-| Online-drive preflight alone | Cannot prevent an I/O failure that occurs between the preflight check and the actual disk mutation |
-| One fixed global pool order | Different objects in the same batch can have their authoritative copies in different pools |
-| Serial per-object deletion for all bulk items | Unnecessarily sacrifices erasure-set and disk-level batching for ordinary local objects; the sequential per-object path is reserved only for items with shared tier references |
-| Overwrite pool affinity (#245) | Regressed small-object writes and still left existing cross-pool duplicates, migrated copies, and interrupted cleanups to handle during deletion |
-| Cross-pool rollback transactions or config flags | Two-stage per-item cleanup protects the authoritative copy without introducing distributed rollback state or extra configuration switches |
+| Alternative                                      | Why it was rejected                                                                                                                                                            |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Error aggregation alone                          | Prevents false-success replies, but cannot recover an authoritative copy that was already deleted                                                                              |
+| Online-drive preflight alone                     | Cannot prevent an I/O failure that occurs between the preflight check and the actual disk mutation                                                                             |
+| One fixed global pool order                      | Different objects in the same batch can have their authoritative copies in different pools                                                                                     |
+| Serial per-object deletion for all bulk items    | Unnecessarily sacrifices erasure-set and disk-level batching for ordinary local objects; the sequential per-object path is reserved only for items with shared tier references |
+| Overwrite pool affinity (#245)                   | Regressed small-object writes and still left existing cross-pool duplicates, migrated copies, and interrupted cleanups to handle during deletion                               |
+| Cross-pool rollback transactions or config flags | Two-stage per-item cleanup protects the authoritative copy without introducing distributed rollback state or extra configuration switches                                      |
 {.wide .expand}

@@ -2,7 +2,7 @@
 title: "Native Restore in Two Phases"
 linkTitle: "Two-Phase Native Restore"
 date: 2026-11-06
-lastmod: 2026-11-08
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a native restore held the object lock for its whole tier download, why the first fix of #281 also stranded failed ordinary uploads, and how staging outside the lock and a short, checked commit replace the private upload.
@@ -12,9 +12,9 @@ draft: false
 url: "/blog/design/native-restore-two-phase/"
 ---
 
-This record covers [issue #284](https://github.com/pgsty/silo/issues/284) and two regressions of the first native-restore safeguards for [#281](https://github.com/pgsty/silo/issues/281), described in [Restored Copies: Expire the Copy, Not the Object](/blog/design/restored-copy-expiry/). It was evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and the integration branch for the next release. The design replaces the private-upload part of the #281 safeguards; the rest of them stays.
+This record covers [issue #284](https://github.com/pgsty/silo/issues/284) and two regressions of the first native-restore safeguards for [#281](https://github.com/pgsty/silo/issues/281), described in [Restored Copies: Expire the Copy, Not the Object](/blog/design/restored-copy-expiry/). It was evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and the pre-release `SILO Server 20261109` integration branch. The design replaces the private-upload part of the #281 safeguards; the rest of them stays.
 
-**Status:** design approved after six review rounds, implementation approved after two, and committed locally on the integration branch for the next release. Not merged or released.
+**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 
@@ -23,7 +23,7 @@ A native restore (`POST ?restore` of a transitioned version) downloads the versi
 - **Reads and writes waited for the download ([#284](https://github.com/pgsty/silo/issues/284)).** On a deployment with several pools, the released code held the object write lock for the whole download. The first #281 safeguards made a single pool do the same, so that a legal hold set during the download was not overwritten, and they treated a busy object lock as "a restore is running". While an old version restored, every GET, HEAD, and write of the same key, including reads of other versions, waited for the download.
 - **A failed ordinary upload got stuck.** The same safeguards kept the restored data in a multipart upload hidden by a private marker. Once an ordinary upload's completion failed after it had staged its metadata, the marker could no longer tell the two kinds apart. The ordinary upload then answered `InvalidUploadID` to every caller and could not be aborted for an hour.
 
-The next release restores in two phases:
+`SILO Server 20261109` restores in two phases:
 
 1. **Stage without the object lock.** The worker erasure-codes the tier copy into the tmp volume of the version's erasure set, as heal writes the shards it rebuilds. Other requests on the key do not wait.
 2. **Commit under a short object lock.** The worker reads the version again, checks that its attempt still owns it and that the content it staged is still the version's content, and publishes the copy drive by drive. A publication that misses the write quorum is first converged under the same lock hold; what that pass cannot settle is retried later under fresh lock holds, and can stay unresolved after the retries or a crash.
@@ -32,14 +32,14 @@ A per-version restore lock tells whether a restore runs, instead of the object l
 
 ## Classification {#assessment}
 
-| Aspect | Assessment |
-| --- | --- |
-| Nature | Availability defect in native restore, plus two regressions of the unreleased #281 safeguards. No data loss. |
-| Affected | Native restore on every deployment. In the released code, multi-pool restores already held the object lock for the download; the single-pool hold and the stuck ordinary upload exist only on the unreleased integration branch. |
-| Not affected | Reads of transitioned objects that do not restore; deployments without a remote tier. |
-| Severity | High for availability: one restore of an old version could stall every access to its key for the length of a tier download. |
-| Release urgency | Part of the next release. It replaces the private-upload design before that design ships. |
-| Remaining effort | Code, two implementation reviews and the full local suite with the `kqueue,dev` tags are done. Remote CI and an acceptance run on a distributed deployment remain. |
+| Aspect           | Assessment                                                                                                                                                                                                                                                                     |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Nature           | Availability defect in native restore, plus two regressions of the initial pre-release #281 safeguards. No data loss.                                                                                                                                                          |
+| Affected         | Native restore on every deployment. In releases through `20261026`, multi-pool restores already held the object lock for the download; the single-pool hold and the stuck ordinary upload existed only on the pre-release integration branch before this design replaced them. |
+| Not affected     | Reads of transitioned objects that do not restore; deployments without a remote tier.                                                                                                                                                                                          |
+| Severity         | High for availability: one restore of an old version could stall every access to its key for the length of a tier download.                                                                                                                                                    |
+| Release urgency  | Shipped in `SILO Server 20261109` (`RELEASE.2026-11-09T00-00-00Z`), replacing the private-upload design before shipment.                                                                                                                                                       |
+| Remaining effort | Complete; shipped in `SILO Server 20261109` (`d998292387cc`).                                                                                                                                                                                                                  |
 {.wide .expand}
 
 ## Root cause {#root-cause}
@@ -67,21 +67,21 @@ Each drive is tracked across every part:
 
 - a drive that fails to write, encode or close any part is excluded and gets no further writer;
 - before the commit, `CheckParts` runs on each remaining drive and every part must report success, so a drive whose tmp volume was moved away and then recreated by a later write is excluded too;
-- when fewer drives than the write quorum remain, staging fails, the attempt clears its own marker, and the client can send the POST again.
+- when fewer drives than the write quorum remain, staging fails, the attempt clears its own marker, and the client can send the POST again. When a native restore fails or is canceled before publication, synchronous marker cleanup tries for at most **100 ms** before handing remaining retries to the bounded background retry loop on both multi-pool and single-set paths ([`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)): each retry acquires the object lock afresh and clears only its own attempt's marker instead of blocking the caller up to 60 s behind a lock the failed restore may still hold.
 
 Nothing is inlined: a restored copy always gets a new data directory.
 
 ### The commit under the object lock {#commit}
 
-The worker then takes O, with the bounded wait of an ordinary operation. If it cannot, it clears its marker and deletes its staging. Under O it re-resolves the pool, which must still be the one it staged into, reads the version's authoritative revision, and checks:
+The worker then takes O, with the bounded wait of an ordinary operation. If it cannot, it deletes its staging and runs the same 100 ms bounded marker cleanup with background retry handoff. Under O it re-resolves the pool, which must still be the one it staged into, reads the version's authoritative revision, and checks:
 
-| Check | Required to equal what was staged for | On a mismatch |
-| --- | --- | --- |
-| Attempt | The attempt owns the version. When the drives disagree on restore fields, its attempt must be the only one in progress. | Stop without writing; a newer attempt is left alone. |
-| Version | Version ID, not a delete marker, modification time, ETag, size. | Stop; a deleted version is not revived and a new `null` version is not overwritten. |
-| Tier copy | Transition complete, same tier, remote name and remote version. | Stop. |
-| Parts | Part numbers and sizes. | Stop. |
-| Erasure layout | Algorithm, data and parity blocks, block size, distribution. | Stop. |
+| Check          | Required to equal what was staged for                                                                                   | On a mismatch                                                                       |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Attempt        | The attempt owns the version. When the drives disagree on restore fields, its attempt must be the only one in progress. | Stop without writing; a newer attempt is left alone.                                |
+| Version        | Version ID, not a delete marker, modification time, ETag, size.                                                         | Stop; a deleted version is not revived and a new `null` version is not overwritten. |
+| Tier copy      | Transition complete, same tier, remote name and remote version.                                                         | Stop.                                                                               |
+| Parts          | Part numbers and sizes.                                                                                                 | Stop.                                                                               |
+| Erasure layout | Algorithm, data and parity blocks, block size, distribution.                                                            | Stop.                                                                               |
 {.wide .expand}
 
 Tags, retention, legal hold and replication state may change during the download. The commit takes them from the revision it read under O, so protection acknowledged during the download is kept. A newer delete marker above a version addressed by its ID does not stop the restore; only the disappearance of the version itself does.
@@ -147,7 +147,7 @@ The design document of the two-phase restore said that only POST checks the gate
 
 ## Upgrade, rollback and downgrade {#upgrade}
 
-- **Upgrade.** Servers of an older release do not answer that they speak protocol 2, so POST answers `503` until every server runs this release. A marker left without an attempt ID by an older release is taken over by the next POST that gets the restore lock. The [lock-domain fix](/blog/design/single-pool-lock-domains/#upgrade) still requires a drained restart for single pools whose sets use different hosts.
+- **Upgrade.** Servers of an older release do not answer that they speak protocol 2, so POST answers `503` until every server runs `SILO Server 20261109` or later. A marker left without an attempt ID by an older release is taken over by the next POST that gets the restore lock. The [lock-domain fix](/blog/design/single-pool-lock-domains/#upgrade) still requires a drained restart for single pools whose sets use different hosts.
 - **Before a downgrade or rollback,** stop new restores and let running workers finish. An older binary does not know the restore lock, and the gate cannot stop a server that was already downgraded.
 - **Check the logs** of every server for `restore publication did not converge`, and repair each version they name before the downgrade. The log is positive evidence only: a process that exits during a retry leaves no entry.
 - **No existing tool proves that no publication split is left.** A heal dry run is not a certificate: it returns before it checks whether enough shards are available, so it misses a restored majority that cannot be rebuilt. A read-only inspection tool is part of the follow-up on coordinator crashes below.
@@ -180,22 +180,23 @@ Fault-injection tests cover the protocol:
 
 The thirteen tests of the private-upload marker and `TestNativeRestoreConcurrentCompletion`, which completed the restore's upload from a client, were dropped with that design. Four tests were reframed for the new semantics, among them the lock-domain restore test, which now holds the commit instead of the download. The full local `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite, a race selection of the restore, multipart, lock-domain and abandoned-data tests, `go vet` and `golangci-lint` pass.
 
-The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
+Release commit `d998292387cc` (`RELEASE.2026-11-09T00-00-00Z`) passed Go CI (including the untagged Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` gate and the CI restore race step), VulnCheck, Test Release Pipeline, and release build verification.
 
 ## Review history {#review}
 
-| Round | Outcome |
-| --- | --- |
-| Maintainer review of the first draft | Requested changes: stage in the existing tmp volume instead of a new namespace, and return multipart to main. |
-| Design round 1 | Requested changes. The erasure layer's undo could delete the new data of a replaced version; a recreated tmp volume could publish missing shards; the split and erasure-layout checks were underspecified; the restore lock is only a liveness hint; leftovers and the tier assumption needed stating. All adopted. |
-| Design round 2 | Requested changes. Abandoned-data cleanup did not share the object lock across pools; a rollback deleted directories a late write might reference; `WriteMetadata` truncates before it writes; `CheckParts` is a lower bound. Publication moved to per-drive `RenameData`, rollback stopped deleting directories, and cleanup took the pools-level lock. |
-| Design round 3 | Requested changes. An old data directory can be shared by a sibling version; success must be judged against the write quorum; an expired inline restore keeps its marker. Recovery after a coordinator crash and storage calls that complete late were excluded by decision and tracked separately. |
-| Design round 4 | Requested changes. A retry could overwrite a newer metadata write or a successor attempt; every convergence pass now compares each drive exactly with Sᵢ, Pᵢ and Vᵢ and stops on anything else. The late-RPC exclusion was widened to calls that land while the lock is held. |
-| Design round 5 | Requested changes. Once publication started, every failure writes Vᵢ; a heal dry run cannot certify a downgrade; a late minority copy heals back only with a restore-field quorum. |
-| Design round 6 | Approved with a nit, adopted: a retry before publication clears the marker, a retry after it only converges. |
-| Implementation rounds 1 and 2 | Round 1 found three problems, each fixed with a test: the published revision depended on the clock across the copy's expiry; a tier 404 stranded the marker; the abandoned-data test passed without its fix. Round 2 approved; a 12-drive 8+4 test was added for the write-quorum threshold. |
-| Release review (2026-11-06) | Found that a partial commit queued the MRF heal of a `null` version under its raw, empty version ID, while the convergence used `null`; heal already read the empty ID as `null`, and both paths now queue `null`. Also found that the capability comment still described the private upload, and that the design said only POST checks the gate. The comment now describes the restore lock, the attempt fence and the staged commit, and this record follows the code for the gate. |
-| Post-review follow-up (2026-11-07) | Separated `errNativeRestorePeerUnreachable` from `errNativeRestoreUnsupported` ([b8ebaffd2](https://github.com/pgsty/silo/commit/b8ebaffd2)) so that `503 ServiceUnavailable` names the unreachable peer instead of reporting a rolling upgrade when a peer cannot be reached. |
+| Round                                  | Outcome                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Maintainer review of the first draft   | Requested changes: stage in the existing tmp volume instead of a new namespace, and return multipart to main.                                                                                                                                                                                                                                                                                                                                                                         |
+| Design round 1                         | Requested changes. The erasure layer's undo could delete the new data of a replaced version; a recreated tmp volume could publish missing shards; the split and erasure-layout checks were underspecified; the restore lock is only a liveness hint; leftovers and the tier assumption needed stating. All adopted.                                                                                                                                                                   |
+| Design round 2                         | Requested changes. Abandoned-data cleanup did not share the object lock across pools; a rollback deleted directories a late write might reference; `WriteMetadata` truncates before it writes; `CheckParts` is a lower bound. Publication moved to per-drive `RenameData`, rollback stopped deleting directories, and cleanup took the pools-level lock.                                                                                                                              |
+| Design round 3                         | Requested changes. An old data directory can be shared by a sibling version; success must be judged against the write quorum; an expired inline restore keeps its marker. Recovery after a coordinator crash and storage calls that complete late were excluded by decision and tracked separately.                                                                                                                                                                                   |
+| Design round 4                         | Requested changes. A retry could overwrite a newer metadata write or a successor attempt; every convergence pass now compares each drive exactly with Sᵢ, Pᵢ and Vᵢ and stops on anything else. The late-RPC exclusion was widened to calls that land while the lock is held.                                                                                                                                                                                                         |
+| Design round 5                         | Requested changes. Once publication started, every failure writes Vᵢ; a heal dry run cannot certify a downgrade; a late minority copy heals back only with a restore-field quorum.                                                                                                                                                                                                                                                                                                    |
+| Design round 6                         | Approved with a nit, adopted: a retry before publication clears the marker, a retry after it only converges.                                                                                                                                                                                                                                                                                                                                                                          |
+| Implementation rounds 1 and 2          | Round 1 found three problems, each fixed with a test: the published revision depended on the clock across the copy's expiry; a tier 404 stranded the marker; the abandoned-data test passed without its fix. Round 2 approved; a 12-drive 8+4 test was added for the write-quorum threshold.                                                                                                                                                                                          |
+| Release review (2026-11-06)            | Found that a partial commit queued the MRF heal of a `null` version under its raw, empty version ID, while the convergence used `null`; heal already read the empty ID as `null`, and both paths now queue `null`. Also found that the capability comment still described the private upload, and that the design said only POST checks the gate. The comment now describes the restore lock, the attempt fence and the staged commit, and this record follows the code for the gate. |
+| Post-review follow-up (2026-11-07)     | Separated `errNativeRestorePeerUnreachable` from `errNativeRestoreUnsupported` ([b8ebaffd2](https://github.com/pgsty/silo/commit/b8ebaffd2)) so that `503 ServiceUnavailable` names the unreachable peer instead of reporting a rolling upgrade when a peer cannot be reached.                                                                                                                                                                                                        |
+| Pre-release cleanup bound (2026-11-09) | Bounded synchronous ongoing-marker cleanup on a failed or canceled restore to **100 ms** before handing off remaining retries to the bounded background retry loop on both multi-pool and single-set paths ([`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)), avoiding a 60 s lock stall while still clearing only the attempt's own marker under a fresh lock acquisition.                                                                                             |
 {.wide .expand}
 
 ## References {#references}

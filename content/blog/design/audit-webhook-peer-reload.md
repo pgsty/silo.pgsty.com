@@ -2,7 +2,7 @@
 title: "Audit Webhooks After a Peer Reload"
 linkTitle: "Audit Webhook Peer Reload"
 date: 2026-11-04
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a runtime change to audit_webhook leaves every server except the one that served it with a webhook target whose worker has already exited, which other subsystems share the defect, and why building logger targets on the server context is the minimum complete repair.
@@ -12,9 +12,9 @@ draft: false
 url: "/blog/design/audit-webhook-peer-reload/"
 ---
 
-This record covers [issue #259](https://github.com/pgsty/silo/issues/259), reported by Henrik Feldt, evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). The fix completes earlier, uncommitted maintainer work. It adds the Kafka call site, a handoff of records queued in a target that never started, and Kafka test coverage. It is committed locally; no pull request has been opened yet.
+This record covers [issue #259](https://github.com/pgsty/silo/issues/259), reported by Henrik Feldt, evaluated against main at [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). The fix completes earlier, uncommitted maintainer work. It adds the Kafka call site, a handoff of records queued in a target that never started, and Kafka test coverage.
 
-**Status:** fix approved by review and committed locally. Tested together with the other fixes for the next release on one integration branch: the full local suite with the `kqueue,dev` tags, the CI race selections run locally and an adversarial review of how the fixes interact all pass. Not merged or released.
+**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 
@@ -31,15 +31,15 @@ The repair has three parts:
 
 ## Classification {#assessment}
 
-| Aspect | Assessment |
-| --- | --- |
-| Nature | Context-lifetime defect in the peer configuration reload: long-lived logger targets are tied to a context that ends with the request. Inherited from upstream; not a regression in a published SILO release. |
-| Affected deployments | More than one server, and a runtime `mc admin config set` or `mc admin config reset` of `audit_webhook` or `logger_webhook` (with or without `queue_dir`), or of `audit_kafka` with `queue_dir`. A `subnet` proxy change that also updates `logger_webhook` goes through the same path. |
-| Not affected | Single-server deployments; targets that were present at startup and never changed at runtime; the server that served the admin request; `audit_kafka` without `queue_dir`; every other dynamic subsystem ([sweep](#sweep)). |
-| Severity | High. Audit records are dropped on all servers but one, until those servers restart or serve a later change themselves. The admin command reports success and S3 requests succeed; the drops show only in the server log and the logger metrics, so the gap tends to surface in an audit review rather than in operations. Where the audit webhook is part of a compliance control, the trail for that period is incomplete and cannot be rebuilt. |
-| Reachability | One routine admin command. A change to one target rebuilds every enabled target of that subsystem, so all of them stop on the other servers, not only the one that was named. |
-| Release urgency | Blocks the next release. Audit loss is not reported to the admin or S3 client and lasts until the affected servers restart or serve a later change themselves, while the change is small and stays off the S3 data path. |
-| Remaining effort | Code, review and a cluster acceptance run are done. Remote CI remains. |
+| Aspect               | Assessment                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nature               | Context-lifetime defect in the peer configuration reload: long-lived logger targets are tied to a context that ends with the request. Inherited from upstream; not a regression in a published SILO release.                                                                                                                                                                                                                                       |
+| Affected deployments | More than one server, and a runtime `mc admin config set` or `mc admin config reset` of `audit_webhook` or `logger_webhook` (with or without `queue_dir`), or of `audit_kafka` with `queue_dir`. A `subnet` proxy change that also updates `logger_webhook` goes through the same path.                                                                                                                                                            |
+| Not affected         | Single-server deployments; targets that were present at startup and never changed at runtime; the server that served the admin request; `audit_kafka` without `queue_dir`; every other dynamic subsystem ([sweep](#sweep)).                                                                                                                                                                                                                        |
+| Severity             | High. Audit records are dropped on all servers but one, until those servers restart or serve a later change themselves. The admin command reports success and S3 requests succeed; the drops show only in the server log and the logger metrics, so the gap tends to surface in an audit review rather than in operations. Where the audit webhook is part of a compliance control, the trail for that period is incomplete and cannot be rebuilt. |
+| Reachability         | One routine admin command. A change to one target rebuilds every enabled target of that subsystem, so all of them stop on the other servers, not only the one that was named.                                                                                                                                                                                                                                                                      |
+| Release urgency      | Release blocker for `SILO Server 20261109` (shipped in `RELEASE.2026-11-09T00-00-00Z`). Audit loss is not reported to the admin or S3 client and lasts until the affected servers restart or serve a later change themselves, while the change is small and stays off the S3 data path.                                                                                                                                                            |
+| Remaining effort     | Complete; shipped in `SILO Server 20261109` (`d998292387cc`).                                                                                                                                                                                                                                                                                                                                                                                      |
 {.wide .expand}
 
 ## When it happens {#trigger}
@@ -53,11 +53,11 @@ The repair has three parts:
 
 The reporter's node metrics show the pattern, 7.5 hours after a `config set` that ran on server 0 of three:
 
-| Server | `target_queue_length` | `failed_messages` | `total_messages` |
-| --- | --- | --- | --- |
-| 0 (served the request) | 0 | 4 | 2,097,356 |
-| 1 | 100000 | 674,917 | 774,917 |
-| 2 | 100000 | 712,215 | 812,215 |
+| Server                 | `target_queue_length` | `failed_messages` | `total_messages` |
+| ---------------------- | --------------------- | ----------------- | ---------------- |
+| 0 (served the request) | 0                     | 4                 | 2,097,356        |
+| 1                      | 100000                | 674,917           | 774,917          |
+| 2                      | 100000                | 712,215           | 812,215          |
 {.wide .expand}
 
 In this report, `total_messages` minus `failed_messages` equals the queue length on servers 1 and 2, which is consistent with nothing having been sent from them.
@@ -80,16 +80,16 @@ The 30-second limit does not protect anything here. Within `applyDynamicConfigFo
 
 The same reload path handles every subsystem in `config.SubSystemsDynamic`. The question for each one is whether `applyDynamicConfigForSubSys` creates a goroutine or object that keeps the context after the call returns.
 
-| Subsystem | What the reload does | Verdict |
-| --- | --- | --- |
-| `logger_webhook` | `logger.UpdateHTTPWebhooks(ctx, …)` → `Init(ctx)`: queue worker, and with `queue_dir` the disk replay | **Affected**, with and without `queue_dir` |
-| `audit_webhook` | `logger.UpdateAuditWebhooks(ctx, …)`, same path | **Affected**, with and without `queue_dir` |
-| `audit_kafka` | `logger.UpdateAuditKafkaTargets(ctx, …)` → `Init(ctx)` → `initQueueStore`: disk replay started with `ctx.Done()` | **Affected with `queue_dir`**; without it the sender loop does not use the context |
-| `api` | `globalAPIConfig.init`, `setRemoteInstanceTransport` | Not affected: values and a transport, no context |
-| `ilm` | `UpdateWorkers`, `ResizeWorkers` | Not affected: the workers use the transition and expiry states' own contexts |
-| `scanner` | atomic stores, `scannerSleeper.Update` | Not affected |
-| `subnet` | `Update`, `ApplyEnv` | Not affected itself; a proxy change can also re-apply `logger_webhook` |
-| `compression`, `heal`, `batch`, `storage_class`, `drive`, `browser`, `callhome` | swap a configuration value under a lock | Not affected |
+| Subsystem                                                                       | What the reload does                                                                                             | Verdict                                                                            |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `logger_webhook`                                                                | `logger.UpdateHTTPWebhooks(ctx, …)` → `Init(ctx)`: queue worker, and with `queue_dir` the disk replay            | **Affected**, with and without `queue_dir`                                         |
+| `audit_webhook`                                                                 | `logger.UpdateAuditWebhooks(ctx, …)`, same path                                                                  | **Affected**, with and without `queue_dir`                                         |
+| `audit_kafka`                                                                   | `logger.UpdateAuditKafkaTargets(ctx, …)` → `Init(ctx)` → `initQueueStore`: disk replay started with `ctx.Done()` | **Affected with `queue_dir`**; without it the sender loop does not use the context |
+| `api`                                                                           | `globalAPIConfig.init`, `setRemoteInstanceTransport`                                                             | Not affected: values and a transport, no context                                   |
+| `ilm`                                                                           | `UpdateWorkers`, `ResizeWorkers`                                                                                 | Not affected: the workers use the transition and expiry states' own contexts       |
+| `scanner`                                                                       | atomic stores, `scannerSleeper.Update`                                                                           | Not affected                                                                       |
+| `subnet`                                                                        | `Update`, `ApplyEnv`                                                                                             | Not affected itself; a proxy change can also re-apply `logger_webhook`             |
+| `compression`, `heal`, `batch`, `storage_class`, `drive`, `browser`, `callhome` | swap a configuration value under a lock                                                                          | Not affected                                                                       |
 {.wide .expand}
 
 Notification and Lambda targets are not dynamic subsystems on main.
@@ -104,14 +104,14 @@ Two parts of the issue text are narrower than written. The peer handler's whole-
 
 The defect needs a reload context that ends with the handler, and logger targets whose goroutines live as long as the context passed to `Init`. These come from different commits:
 
-| Ingredient | Commit (PR) | Date | First upstream release |
-| --- | --- | --- | --- |
-| The peer reload applies a subsystem under the request's context, which ends when the handler returns. | [`a89612549`](https://github.com/pgsty/silo/commit/a89612549) ([#11018](https://github.com/minio/minio/pull/11018)); per-subsystem form [`040ac5cad`](https://github.com/pgsty/silo/commit/040ac5cad) ([#14928](https://github.com/minio/minio/pull/14928)) | 2020-12-04; 2022-05-16 | `RELEASE.2020-12-10T01-54-29Z`; `RELEASE.2022-05-19T18-20-59Z` |
-| Same lifetime after the grid conversion: `serviceReloadDynamic` creates a 30-second context with a deferred `cancel`. | [`e06168596`](https://github.com/pgsty/silo/commit/e06168596) ([#19004](https://github.com/minio/minio/pull/19004)) | 2024-02-19 | `RELEASE.2024-02-24T17-11-14Z` |
-| Logger and audit webhooks, and audit Kafka, become reloadable at run time. | [`28f188e3e`](https://github.com/pgsty/silo/commit/28f188e3e) ([#14289](https://github.com/minio/minio/pull/14289)), [`3934700a0`](https://github.com/pgsty/silo/commit/3934700a0) ([#14390](https://github.com/minio/minio/pull/14390)) | 2022-02-17, 2022-02-24 | `RELEASE.2022-02-17T23-22-26Z`, `RELEASE.2022-02-24T22-12-01Z` |
-| `Init` takes a context. The disk replay of the HTTP target and of Kafka (`initQueueStore`) stops with it, and the HTTP worker sends with it. | [`57acacd5a`](https://github.com/pgsty/silo/commit/57acacd5a) ([#17121](https://github.com/minio/minio/pull/17121)) | 2023-05-09 | `RELEASE.2023-05-18T00-05-36Z` |
-| The HTTP queue worker returns when the `Init` context ends. | [`1fc4203c1`](https://github.com/pgsty/silo/commit/1fc4203c1) ([#19275](https://github.com/minio/minio/pull/19275)) | 2024-03-25 | `RELEASE.2024-03-26T22-10-45Z` |
-| The disk-queue worker starts before the queue store opens. | [`ba54b39c0`](https://github.com/pgsty/silo/commit/ba54b39c0) ([#19854](https://github.com/minio/minio/pull/19854)) | 2024-06-01 | `RELEASE.2024-06-04T19-20-08Z` |
+| Ingredient                                                                                                                                   | Commit (PR)                                                                                                                                                                                                                                                 | Date                   | First upstream release                                         |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------- |
+| The peer reload applies a subsystem under the request's context, which ends when the handler returns.                                        | [`a89612549`](https://github.com/pgsty/silo/commit/a89612549) ([#11018](https://github.com/minio/minio/pull/11018)); per-subsystem form [`040ac5cad`](https://github.com/pgsty/silo/commit/040ac5cad) ([#14928](https://github.com/minio/minio/pull/14928)) | 2020-12-04; 2022-05-16 | `RELEASE.2020-12-10T01-54-29Z`; `RELEASE.2022-05-19T18-20-59Z` |
+| Same lifetime after the grid conversion: `serviceReloadDynamic` creates a 30-second context with a deferred `cancel`.                        | [`e06168596`](https://github.com/pgsty/silo/commit/e06168596) ([#19004](https://github.com/minio/minio/pull/19004))                                                                                                                                         | 2024-02-19             | `RELEASE.2024-02-24T17-11-14Z`                                 |
+| Logger and audit webhooks, and audit Kafka, become reloadable at run time.                                                                   | [`28f188e3e`](https://github.com/pgsty/silo/commit/28f188e3e) ([#14289](https://github.com/minio/minio/pull/14289)), [`3934700a0`](https://github.com/pgsty/silo/commit/3934700a0) ([#14390](https://github.com/minio/minio/pull/14390))                    | 2022-02-17, 2022-02-24 | `RELEASE.2022-02-17T23-22-26Z`, `RELEASE.2022-02-24T22-12-01Z` |
+| `Init` takes a context. The disk replay of the HTTP target and of Kafka (`initQueueStore`) stops with it, and the HTTP worker sends with it. | [`57acacd5a`](https://github.com/pgsty/silo/commit/57acacd5a) ([#17121](https://github.com/minio/minio/pull/17121))                                                                                                                                         | 2023-05-09             | `RELEASE.2023-05-18T00-05-36Z`                                 |
+| The HTTP queue worker returns when the `Init` context ends.                                                                                  | [`1fc4203c1`](https://github.com/pgsty/silo/commit/1fc4203c1) ([#19275](https://github.com/minio/minio/pull/19275))                                                                                                                                         | 2024-03-25             | `RELEASE.2024-03-26T22-10-45Z`                                 |
+| The disk-queue worker starts before the queue store opens.                                                                                   | [`ba54b39c0`](https://github.com/pgsty/silo/commit/ba54b39c0) ([#19854](https://github.com/minio/minio/pull/19854))                                                                                                                                         | 2024-06-01             | `RELEASE.2024-06-04T19-20-08Z`                                 |
 {.wide .expand}
 
 What each step changed:
@@ -190,7 +190,7 @@ Split `Init` into initialization under the caller's context and a start whose li
 
 ## Operator guidance {#operators}
 
-Until the fix ships:
+On releases before `SILO Server 20261109`:
 
 - **After a runtime change, restart the other servers.** After any `mc admin config set` or `mc admin config reset` that touches `audit_webhook`, `logger_webhook`, or `audit_kafka` with `queue_dir`, restart every server except the one that served the command. A `subnet` proxy change counts too when logger webhooks are configured. If a load balancer hides which server served the command, point the `mcli` alias at one server's own address for configuration changes, or restart all servers one at a time.
 - **Unchanged targets are safe.** Targets that were present at startup, from environment variables or from the saved configuration, are built with the process context. They are not affected until the next runtime change.
@@ -233,19 +233,15 @@ Established by reading the code, not executed:
 
 **Cluster acceptance.** On 2026-11-05 four server processes ran on one host, with two drives each and a memory queue. `audit_webhook` was set twice at runtime through the first server, and then every server received three `HEAD` requests. On `69fcf50cd` only the first server's three records arrived, and `minio_audit_target_queue_length` stayed at 3 on each of the other three servers. With the fix all twelve records arrived, and the queue length was 0 on every server. The disk queue and `audit_kafka` were not part of this run: servers on one host cannot keep separate `queue_dir` paths under one cluster-wide setting, and no broker was available. The tests above cover both.
 
-Still to run before merge: remote CI.
-
-**Integration.** The fix was cherry-picked onto one integration branch for the next release, on top of #278 and #281 and together with the lock-domain, heal dry-run, #285, `delete-all` and Console fixes. Every pick applied without conflicts. On that head the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite passes, as do the CI race-detector selections (which now include `TestDynamicWebhookOutlivesConfigContext` in the Ubuntu CI race workflow) and a race selection that covers every new test. An adversarial review of the combination found no defects. It checked lock domains, cleanup paths and purge against restore with executed probes.
-
-The passing local runs use the `kqueue,dev` tags. The untagged Ubuntu CI command, `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m`, remains pending on the final commit; the local tagged result does not replace that gate.
+**Integration and release verification.** The fix was integrated for `SILO Server 20261109` on top of #278 and #281 together with the lock-domain, heal dry-run, #285, `delete-all`, and Console fixes without conflicts. Local runs passed the full `go test -tags kqueue,dev -p 4 ./cmd/... ./internal/...` suite and CI race-detector selections (including `TestDynamicWebhookOutlivesConfigContext` in the Ubuntu CI race workflow). An adversarial review of the combined branch checked lock domains, cleanup paths, and purge against restore with executed probes and found no defects. Release commit `d998292387cc` (`RELEASE.2026-11-09T00-00-00Z`) passed Go CI (including the untagged Ubuntu `CGO_ENABLED=0 MINIO_API_REQUESTS_MAX=10000 go test ./cmd/ -count=1 -timeout 30m` gate), VulnCheck, Test Release Pipeline, and release build verification.
 
 ## Review history {#review}
 
-| Round | Outcome |
-| --- | --- |
+| Round                       | Outcome                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Adversarial review, round 1 | Approved with nits; no production defect introduced by the change was found. Six pre-existing defects were reported. One was fixed: records queued in a target that never started were discarded when a reload replaced it (part 3, with the test changed to recover through a second configuration application). The other five are listed under [Residual limits](#limits). The test children now run without the logger and audit environment variables. Corrections to this record were applied: restart is not the only recovery, the drops are visible in logs and metrics, the peer crash was mostly but not always hidden, and the shutdown and delivery claims were qualified. |
-| Adversarial review, round 2 | Approved with nits, covering the handoff in `Cancel` and the reworked test. The handoff delivered every record of a single replaced target exactly once, kept records across concurrent buffer resizes, and survived repeated and concurrent `Cancel` calls; ordinary reloads with the endpoint up and down showed no new loss or duplication. One remaining loss was documented: rapid successive replacements of failed targets can exhaust the shared buffer (Residual limits). The test now cleans up only the last target. Further wording corrections were applied. |
-| Adversarial review, round 3 | Approved with nits. The test cleanup and the corrected wording were confirmed; two remaining phrases were made precise. |
+| Adversarial review, round 2 | Approved with nits, covering the handoff in `Cancel` and the reworked test. The handoff delivered every record of a single replaced target exactly once, kept records across concurrent buffer resizes, and survived repeated and concurrent `Cancel` calls; ordinary reloads with the endpoint up and down showed no new loss or duplication. One remaining loss was documented: rapid successive replacements of failed targets can exhaust the shared buffer (Residual limits). The test now cleans up only the last target. Further wording corrections were applied.                                                                                                               |
+| Adversarial review, round 3 | Approved with nits. The test cleanup and the corrected wording were confirmed; two remaining phrases were made precise.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 {.wide .expand}
 
 ## References {#references}

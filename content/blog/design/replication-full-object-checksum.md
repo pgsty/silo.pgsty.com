@@ -31,10 +31,10 @@ Multipart CRC64NVME objects replicate normally because the receiver defaults CRC
 
 For multipart CRC32 and CRC32C, the same algorithm supports two distinct object-level checksum calculations. Let `P1 ... Pn` be the part bodies and `||` denote byte concatenation:
 
-| Type | Object checksum calculation |
-| :-- | :-- |
-| `FULL_OBJECT` | CRC computed across the concatenated bytes `P1 || ... || Pn`, encoded as Base64 |
-| `COMPOSITE` | CRC computed across the concatenated **raw per-part CRC digests**, encoded as Base64 with the `-n` part-count suffix |
+| Type          | Object checksum calculation                                                                                          |
+| :------------ | :------------------------------------------------------------------------------------------------------------------- |
+| `FULL_OBJECT` | CRC computed across the concatenated bytes `P1 \|\| ... \|\| Pn`, encoded as Base64                                  |
+| `COMPOSITE`   | CRC computed across the concatenated **raw per-part CRC digests**, encoded as Base64 with the `-n` part-count suffix |
 {.wide .expand}
 
 These two calculations produce different digests even for a single-part multipart upload. Forwarding only the algorithm name and digest value leaves the checksum semantics ambiguous.
@@ -46,13 +46,13 @@ The failure chain in the [replication sender](https://github.com/pgsty/silo/blob
 3. After uploading all parts, the sender calls `getCRCMeta()` again for the completion request, sending the source's whole-object (`FULL_OBJECT`) CRC digest.
 4. The target's [completion validator](https://github.com/pgsty/silo/blob/6d890fc860c732cc0bd1925124c733362f803d2e/cmd/erasure-multipart.go#L1378) reads the `COMPOSITE` type persisted at initiation, compares the supplied whole-object CRC against the composite CRC of the part checksums, and rejects the mismatch with `BadDigest`.
 
-| Stage | Before the fix | After the fix |
-| :-- | :-- | :-- |
-| Source checksum metadata | CRC32/CRC32C + `FULL_OBJECT` | Unchanged |
-| Target initiation headers | Algorithm only; type omitted | Algorithm + `FULL_OBJECT` |
-| Target persisted upload type | `COMPOSITE` | `FULL_OBJECT` |
-| Completion checksum | Source whole-object CRC | Source whole-object CRC + explicit `FULL_OBJECT` type |
-| Target validation result | `400 BadDigest` | Valid completion |
+| Stage                        | Before the fix               | After the fix                                         |
+| :--------------------------- | :--------------------------- | :---------------------------------------------------- |
+| Source checksum metadata     | CRC32/CRC32C + `FULL_OBJECT` | Unchanged                                             |
+| Target initiation headers    | Algorithm only; type omitted | Algorithm + `FULL_OBJECT`                             |
+| Target persisted upload type | `COMPOSITE`                  | `FULL_OBJECT`                                         |
+| Completion checksum          | Source whole-object CRC      | Source whole-object CRC + explicit `FULL_OBJECT` type |
+| Target validation result     | `400 BadDigest`              | Valid completion                                      |
 {.wide .expand}
 
 The core invariant is that **replication must preserve the checksum algorithm, digest value, and type interpretation across both upload initiation and completion** so the target validates the transferred data under the same contract as the source.
@@ -63,11 +63,11 @@ Upstream MinIO commit [`4ea6f3b06`](https://github.com/minio/minio/commit/4ea6f3
 
 Three earlier SILO checksum fixes addressed separate parts of the lifecycle:
 
-| Earlier change | What it fixed | Why replication initiation still failed |
-| :-- | :-- | :-- |
-| [`c8590413f`](https://github.com/pgsty/silo/commit/c8590413fd321a315f3779cd9b2a6f1cb72064da) (#31) | Allowed `FULL_OBJECT` completion requests to omit per-part checksums while validating the whole-object CRC | Requires the target upload to be initialized as `FULL_OBJECT` first |
-| [`7e079ff05`](https://github.com/pgsty/silo/commit/7e079ff05c842afabb73c4572885cfb74604df17) | Verified that an explicitly supplied completion checksum type matches the type persisted at initiation | The replication sender omitted the type at both initiation and completion |
-| [CompleteMultipartUpload ChecksumType response fix](/blog/design/complete-multipart-checksum-type/) | Returned `ChecksumType` in `CompleteMultipartUploadResult` XML to client SDKs | Governs client response serialization after completion, not outgoing replication headers |
+| Earlier change                                                                                      | What it fixed                                                                                              | Why replication initiation still failed                                                  |
+| :-------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------- |
+| [`c8590413f`](https://github.com/pgsty/silo/commit/c8590413fd321a315f3779cd9b2a6f1cb72064da) (#31)  | Allowed `FULL_OBJECT` completion requests to omit per-part checksums while validating the whole-object CRC | Requires the target upload to be initialized as `FULL_OBJECT` first                      |
+| [`7e079ff05`](https://github.com/pgsty/silo/commit/7e079ff05c842afabb73c4572885cfb74604df17)        | Verified that an explicitly supplied completion checksum type matches the type persisted at initiation     | The replication sender omitted the type at both initiation and completion                |
+| [CompleteMultipartUpload ChecksumType response fix](/blog/design/complete-multipart-checksum-type/) | Returned `ChecksumType` in `CompleteMultipartUploadResult` XML to client SDKs                              | Governs client response serialization after completion, not outgoing replication headers |
 {.wide .expand}
 
 ## The Minimal Fix {#implementation}
@@ -110,15 +110,15 @@ When `getCRCMeta()` dropped `x-amz-checksum-type`, that condition never matched,
 
 ## Rejected Alternatives {#alternatives}
 
-| Alternative | Decision and rationale |
-| :-- | :-- |
-| Forward every checksum type unconditionally (pre-PR #21535 behavior) | Rejected: explicit `FULL_OBJECT` headers on SHA1/SHA256 requests are rejected by `getContentChecksum()` |
-| Send the checksum type only on `CompleteMultipartUpload` | Rejected: the target upload is already initialized as `COMPOSITE`, and completion rejects a mismatched type |
-| Default all CRC32/CRC32C multipart uploads to `FULL_OBJECT` | Rejected: breaks standard S3 `COMPOSITE` semantics |
-| Drop the object checksum or bypass `BadDigest` validation | Rejected: sacrifices end-to-end integrity verification |
-| Recalculate a `COMPOSITE` digest on the sender to match the target | Rejected: alters the replica's checksum type and digest value and adds unnecessary work |
-| Add a separate `CopyObject` replication branch or CRC64NVME special case | Unnecessary: the existing `!objInfo.isMultipart()` branch and `CanMerge()` already cover both |
-| Adjust replication retry budgets, queues, or resync scheduling | Ineffective: retrying an unchanged malformed request repeats the same `BadDigest` failure |
+| Alternative                                                              | Decision and rationale                                                                                      |
+| :----------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| Forward every checksum type unconditionally (pre-PR #21535 behavior)     | Rejected: explicit `FULL_OBJECT` headers on SHA1/SHA256 requests are rejected by `getContentChecksum()`     |
+| Send the checksum type only on `CompleteMultipartUpload`                 | Rejected: the target upload is already initialized as `COMPOSITE`, and completion rejects a mismatched type |
+| Default all CRC32/CRC32C multipart uploads to `FULL_OBJECT`              | Rejected: breaks standard S3 `COMPOSITE` semantics                                                          |
+| Drop the object checksum or bypass `BadDigest` validation                | Rejected: sacrifices end-to-end integrity verification                                                      |
+| Recalculate a `COMPOSITE` digest on the sender to match the target       | Rejected: alters the replica's checksum type and digest value and adds unnecessary work                     |
+| Add a separate `CopyObject` replication branch or CRC64NVME special case | Unnecessary: the existing `!objInfo.isMultipart()` branch and `CanMerge()` already cover both               |
+| Adjust replication retry budgets, queues, or resync scheduling           | Ineffective: retrying an unchanged malformed request repeats the same `BadDigest` failure                   |
 {.wide .expand}
 
 ## Validation and Live Acceptance {#validation}
@@ -129,14 +129,14 @@ The [committed regression suite](https://github.com/pgsty/silo/blob/6d890fc860c7
 
 Live acceptance testing ran **two single-drive SILO server instances** configured for site replication with `mcli` across 12 end-to-end cases:
 
-| Case family | Algorithms / variants | Cases |
-| :-- | :-- | --: |
-| Single `PUT` | SHA256, SHA1, CRC32 | 3 |
-| Multipart `COMPOSITE` | CRC32, CRC32C, SHA256 | 3 |
-| Multipart `FULL_OBJECT` | CRC32, CRC32C | 2 |
-| Multipart default `FULL_OBJECT` | CRC64NVME | 1 |
-| `CopyObject` of multipart `FULL_OBJECT` | CRC32, CRC32C | 2 |
-| Single-part multipart `FULL_OBJECT` | CRC32 | 1 |
+| Case family                             | Algorithms / variants | Cases |
+| :-------------------------------------- | :-------------------- | ----: |
+| Single `PUT`                            | SHA256, SHA1, CRC32   |     3 |
+| Multipart `COMPOSITE`                   | CRC32, CRC32C, SHA256 |     3 |
+| Multipart `FULL_OBJECT`                 | CRC32, CRC32C         |     2 |
+| Multipart default `FULL_OBJECT`         | CRC64NVME             |     1 |
+| `CopyObject` of multipart `FULL_OBJECT` | CRC32, CRC32C         |     2 |
+| Single-part multipart `FULL_OBJECT`     | CRC32                 |     1 |
 {.wide .expand}
 
 All 12 cases reached `COMPLETED` on the source and `REPLICA` on the target, with independently computed checksum digests and types, version IDs, ETags, object sizes, and downloaded payload bytes matching across both endpoints.

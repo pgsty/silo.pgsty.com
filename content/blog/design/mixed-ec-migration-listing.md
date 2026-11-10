@@ -2,7 +2,7 @@
 title: "Mixed EC Layouts and Migration Listing"
 linkTitle: "Mixed EC Migration Listing"
 date: 2026-10-27
-lastmod: 2026-11-02
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
   Why an object with two readable erasure-code layouts can disappear from decommission and rebalance listings, and why the narrow recount in PR #262 is the minimum safe repair.
@@ -12,13 +12,15 @@ draft: false
 url: "/blog/design/mixed-ec-migration-listing/"
 ---
 
-This record covers [issue #261](https://github.com/pgsty/silo/issues/261) and [PR #262](https://github.com/pgsty/silo/pull/262), updated against main at [0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b) after the #276 follow-up. The fix was merged through maintainer PR [#267](https://github.com/pgsty/silo/pull/267); #262 was the superseded duplicate.
+This record covers [issue #261](https://github.com/pgsty/silo/issues/261) and [PR #262](https://github.com/pgsty/silo/pull/262), updated after the #276 follow-up ([0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b)). The fix merged through maintainer PR [#267](https://github.com/pgsty/silo/pull/267) ([a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)); #262 was the superseded duplicate.
+
+**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 
 The report is real. A successful degraded overwrite can leave two EC layouts for one unversioned object: a newer copy on the drives that were online and an older copy on the drives that were offline. GET and ListObjectsV2 can choose the newer readable majority. Decommission and rebalance use an all-versions walk, where the metadata merge can choose the older layout as its reference and then count only that layout. If it is below quorum, the object disappears from the migration list. The migration reports success, and removing the old pool loses the object.
 
-PR #262 described the right repair. It removes one overly narrow condition from the existing mixed-EC recount, keeps the recount limited to ordinary single null versions, and adds tests for quorum, stream order, migration, and excluded metadata shapes. That fix is now merged through #267, which also added the end-to-end pool-removal regression coverage.
+PR #262 ([5eb6433f0](https://github.com/pgsty/silo/commit/5eb6433f0)) described the right repair. It removes one overly narrow condition from the existing mixed-EC recount, keeps the recount limited to ordinary single null versions, and adds tests for quorum, stream order, migration, and excluded metadata shapes. That fix merged through #267 ([a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)), which also added end-to-end pool-removal regression coverage, and shipped in [SILO Server 20261109](/blog/release/silo-20261109/).
 
 ## When it happens {#trigger}
 
@@ -38,9 +40,9 @@ The mixed-layout state is a normal consequence of availability-optimized degrade
 
 The result was a split contract:
 
-| Caller | Request mode | Main behavior |
-| --- | --- | --- |
-| GET and ListObjectsV2 | latest-only | Recount eligible mixed EC groups and select a readable quorum. |
+| Caller                                                             | Request mode | Main behavior                                                                          |
+| ------------------------------------------------------------------ | ------------ | -------------------------------------------------------------------------------------- |
+| GET and ListObjectsV2                                              | latest-only  | Recount eligible mixed EC groups and select a readable quorum.                         |
 | ListObjectVersions, decommission, rebalance, and some Walk callers | all versions | Stop after the ordinary merge fails; a minority layout can hide the readable majority. |
 {.wide .expand}
 

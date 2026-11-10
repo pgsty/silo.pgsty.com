@@ -2,18 +2,19 @@
 title: "A Failed Multipart Completion Can Strand the Upload"
 linkTitle: "Multipart Completion Retry"
 date: 2026-11-06
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
-  Why a CompleteMultipartUpload that misses write quorum can destroy the upload on the drives where its rename succeeded, leaving it stuck until stale-upload cleanup, and why the repair is deferred until storage operations can be fenced.
+  Why a CompleteMultipartUpload that misses write quorum can destroy the upload on the drives where its rename succeeded, leaving it stuck until stale-upload cleanup, and why the repair is deferred past SILO Server 20261109 until storage operations can be fenced.
 tags: [Design, Multipart, Erasure Coding, S3 Compatibility]
 weight: 10
 draft: false
 url: "/blog/design/multipart-complete-retry/"
 ---
 
-This record covers a defect found during local acceptance of the next release. It reproduces on [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and is inherited from upstream MinIO. It has no GitHub issue yet.
+This record covers a defect identified during release acceptance of [SILO Server 20261109](/blog/release/silo-20261109/). It reproduces on [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc) and on `SILO Server 20261109` (`d998292387cc`), and is inherited from upstream MinIO. It has no GitHub issue ID.
 
-**Status:** analyzed and reproduced. A fix was drafted, but an adversarial review rejected it as too risky for this release. The repair is deferred to the next release, together with completion fencing for storage operations. The next release lists the defect as a known issue.
+**Status:** Analyzed and reproduced during `SILO Server 20261109` release acceptance. A candidate fix was drafted, and an adversarial review rejected it as too risky for `SILO Server 20261109`. `SILO Server 20261109` documents the defect as a known limitation, and the repair is deferred to a post-`20261109` release alongside completion fencing for storage RPCs.
 
 ## Short answer {#tldr}
 
@@ -27,19 +28,19 @@ The upload stays like this until stale-upload cleanup removes it, so the client 
 
 The defect does not touch committed objects. The damage is to uploads in progress, at the moment a completion meets a drive fault.
 
-A small fix that moves the parts back and restores the upload metadata makes the reproduction pass, but it can race with late storage operations and with stale-upload cleanup. In those races it could publish an object without its data, or count a drive without shards as a successful write. That would turn an availability defect into a data defect, so it is not in this release.
+A small fix that moves the parts back and restores the upload metadata makes the reproduction pass, but it can race with late storage operations and with stale-upload cleanup. In those races it could publish an object without its data, or count a drive without shards as a successful write. That would turn an availability defect into a data defect, so it is deferred past `SILO Server 20261109`.
 
 **Workaround:** when a completion fails with 503 and keeps failing after the cluster is healthy, abort the upload and upload the object again.
 
 ## Classification {#assessment}
 
-| Aspect | Assessment |
-|---|---|
-| Nature | The failure path of multipart completion discards the upload. Inherited from upstream MinIO since 2020. |
-| Impact | An upload whose completion met a drive fault must be uploaded again from the start, or, in the lost-answer variant, may look completed when it is not. |
+| Aspect      | Assessment                                                                                                                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Nature      | The failure path of multipart completion discards the upload. Inherited from upstream MinIO since 2020.                                                                                                                              |
+| Impact      | An upload whose completion met a drive fault must be uploaded again from the start, or, in the lost-answer variant, may look completed when it is not.                                                                               |
 | Data safety | This defect deletes no committed object. In-progress upload data is lost on the drives where the rename succeeded. A separate, older gap in the same undo (T4) can lose an overwritten null version that sits beside older versions. |
-| Severity | S2: an availability and retry defect. It needs a drive fault during Complete. |
-| Effort | A safe fix is medium: it depends on fencing storage operations. |
+| Severity    | S2: an availability and retry defect. It needs a drive fault during Complete.                                                                                                                                                        |
+| Effort      | A safe fix is medium: it depends on fencing storage operations.                                                                                                                                                                      |
 {.wide .expand}
 
 ## When it happens {#trigger}
@@ -54,7 +55,7 @@ When the rename fails on only one drive, quorum is met and the commit succeeds. 
 
 ## Root cause {#root-cause}
 
-Line numbers are for the local integration of the next release; the code path is the same on `69fcf50cd`.
+Line numbers are for the `SILO Server 20261109` acceptance integration branch; the code path is the same on `69fcf50cd` and `d998292387cc`.
 
 1. Before the commit, Complete deletes the `part.N.meta` file of every completed part on every drive (`cmd/erasure-multipart.go:1663-1678`, `:1725`). This happens before anyone knows whether the commit will reach quorum.
 2. The commit calls erasure `renameData` from the upload directory into the object (`:1734`). On each drive, `xlStorage.RenameData`:
@@ -98,7 +99,7 @@ Not a fix. S3 clients read NoSuchUpload on a retried Complete as "it may have su
 
 The drafted fix combined Option A with a restore step in Complete. It kept a copy of each drive's upload metadata. When the commit failed, it checked on each drive with `CheckParts` that every part was present, rewrote each `part.N.meta`, and rewrote the upload `xl.meta` last. About 45 lines of code, failure path only, no storage RPC or format change. It made every case of the reproduction pass.
 
-The adversarial review rejected it for this release:
+The adversarial review rejected it for `SILO Server 20261109`:
 
 - **A late rename can publish an empty object.** A remote rename can stage the object metadata and pause before moving the data, while its caller has already seen an error. The restore then writes the upload metadata back, and when the late rename resumes it publishes that metadata as the object: size zero, no parts. A late undo can likewise delete a successful retry, because it matches the reused version ID.
 - **Stale-upload cleanup takes no lock.** It can remove an expired upload after `CheckParts` passed. The restore's writes then recreate a data directory that holds only part metadata, and a retry can count that drive as a successful write without shards.
@@ -122,30 +123,30 @@ The drafted approach needs no storage RPC or on-disk format change, and only the
 
 ## Verification {#verification}
 
-A deterministic unit test on a 4-drive EC 2+2 set uploads a 5 MiB and a 1 MiB part, breaks drives, runs Complete, restores the drives, and requires that ListParts shows both parts, that Complete succeeds by direct retry and after a re-upload, that the content matches, and that no drive holds object metadata without its parts. On `69fcf50cd` and on the local integration, every case fails:
+A deterministic unit test on a 4-drive EC 2+2 set uploads a 5 MiB and a 1 MiB part, breaks drives, runs Complete, restores the drives, and requires that ListParts shows both parts, that Complete succeeds by direct retry and after a re-upload, that the content matches, and that no drive holds object metadata without its parts. On `69fcf50cd` and on `SILO Server 20261109`, every case fails:
 
-| Scenario | Result today |
-|---|---|
-| Bucket directory read-only on 2 drives | stuck, 503 |
-| Rename refused on 2 drives | stuck, 503 |
-| One drive offline, rename refused on another | stuck, 503 |
-| Rename applied with a lost answer, refused on another | 404 NoSuchUpload |
-| Unversioned overwrite, rename refused on 2 drives | stuck, old object kept |
-| Empty object | stuck |
+| Scenario                                              | Result in `20261109` and earlier |
+| ----------------------------------------------------- | -------------------------------- |
+| Bucket directory read-only on 2 drives                | stuck, 503                       |
+| Rename refused on 2 drives                            | stuck, 503                       |
+| One drive offline, rename refused on another          | stuck, 503                       |
+| Rename applied with a lost answer, refused on another | 404 NoSuchUpload                 |
+| Unversioned overwrite, rename refused on 2 drives     | stuck, old object kept           |
+| Empty object                                          | stuck                            |
 {.wide .expand}
 
-The process-level acceptance reproduces the bucket-directory and offline-drive cases identically on `69fcf50cd` and on the next release.
+The process-level acceptance reproduces the bucket-directory and offline-drive cases identically on `69fcf50cd` and on `SILO Server 20261109`.
 
 ## Related defects found on the way {#related}
 
 - Parts that were uploaded but left out of the Complete list are moved into the object's data directory and stay there as orphaned files. Upstream since 2022.
 - When the commit fails with a permission error on enough drives, Complete answers 403 instead of 503, so a client may not retry.
 
-Both are tracked for the next release.
+Both are tracked for a post-`20261109` release.
 
 ## Review history {#review}
 
-- Adversarial review, round 1: rejected for this release, for the reasons in [The drafted fix, and why it is deferred](#deferred). The review also corrected this record: the drafted fix was not sufficient, the residual races were understated, and "no committed object is lost" was too broad because of the older undo gap.
+- Adversarial review, round 1: rejected for `SILO Server 20261109`, for the reasons in [The drafted fix, and why it is deferred](#deferred). The review also corrected this record: the drafted fix was not sufficient, the residual races were understated, and "no committed object is lost" was too broad because of the older undo gap.
 
 ## References {#references}
 

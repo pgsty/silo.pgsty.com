@@ -2,7 +2,7 @@
 title: "Adding Multilingual Support to SILO"
 linkTitle: "Console Languages"
 date: 2026-11-09
-lastmod: 2026-11-09
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
   Why SILO adds ten UI languages, how the registry and maintenance tiers work, and why per-language compression with eager loading balances size, caching and implementation cost.
@@ -14,7 +14,7 @@ url: "/blog/design/console-languages/"
 
 [Console PR #83](https://github.com/pgsty/silo-console/pull/83), contributed by Eduardo Andrade Machado, supplies Brazilian Portuguese. [silo#277](https://github.com/pgsty/silo/issues/277), opened by siyahkut, requests Turkish. These contributions led to a configurable ten-language UI.
 
-**Status as of 2026-11-09:** the ten-language UI, reviewed translations, per-language compression, eager loading and long-lived asset caching are integrated into Console `main` and ship in [Console 2.7.0](/blog/release/console-2.7.0/). Final review preserves compact labels and verifies the affected controls at phone, tablet and desktop widths. Source integration, tag creation and public release publication remain separate milestones.
+**Status:** Shipped in [Console 2.7.0](/blog/release/console-2.7.0/) ([`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505), `pgsty/silo-console:v2.7.0`) and embedded in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`). Final pre-release review verified compact labels, RTL input controls, and layout bounds across phone, tablet, and desktop widths.
 
 ## Decision {#tldr}
 
@@ -71,26 +71,26 @@ Initial login JavaScript totals **794.08 KB gzip**. Its limits are 850 KB for th
 
 The comparison keeps the production source, minifier and static imports unchanged. Only the bundler grouping changes: one group for all dictionaries, or one group for each language directory. Each language group includes its chrome, help and screens dictionaries. The resulting JavaScript is compressed separately with the local `gzip -n -9` command and with the existing pinned compressor.
 
-| Packaging | `gzip -n -9`, bytes | `fflate` level 9, bytes | Language asset requests on a cold load |
-| --- | ---: | ---: | ---: |
-| All languages combined | 549,712 | 562,448 | 1 |
-| One asset per language, total | 555,105 | 568,470 | 9 |
-| Additional bytes from splitting | 5,393 (0.98%) | 6,022 (1.07%) | 8 |
+| Packaging                       | `gzip -n -9`, bytes | `fflate` level 9, bytes | Language asset requests on a cold load |
+| ------------------------------- | ------------------: | ----------------------: | -------------------------------------: |
+| All languages combined          |             549,712 |                 562,448 |                                      1 |
+| One asset per language, total   |             555,105 |                 568,470 |                                      9 |
+| Additional bytes from splitting |       5,393 (0.98%) |           6,022 (1.07%) |                                      8 |
 {.wide .expand}
 
 Compression level is not a guarantee of identical output across implementations. The system command is useful for comparison; the pinned production compressor provides reproducible output across build hosts. The packaging conclusion is the same with both, so changing compressor implementations is not required.
 
-| Language | `gzip -n -9`, bytes |
-| --- | ---: |
-| Chinese | 58,319 |
-| French | 60,684 |
-| German | 60,717 |
-| Russian | 70,315 |
-| Spanish | 59,296 |
-| Brazilian Portuguese | 57,689 |
-| Japanese | 63,159 |
-| Arabic | 64,095 |
-| Turkish | 60,831 |
+| Language             | `gzip -n -9`, bytes |
+| -------------------- | ------------------: |
+| Chinese              |              58,319 |
+| French               |              60,684 |
+| German               |              60,717 |
+| Russian              |              70,315 |
+| Spanish              |              59,296 |
+| Brazilian Portuguese |              57,689 |
+| Japanese             |              63,159 |
+| Arabic               |              64,095 |
+| Turkish              |              60,831 |
 {.wide .expand}
 
 Combining files does not eliminate every repeated English key across catalogs. DEFLATE references previous text within a 32 KiB window, while each complete language catalog is much larger. This helps explain why a large cross-language compression gain should not be assumed; the table above measures the actual result. See [RFC 1951, section 2](https://www.rfc-editor.org/rfc/rfc1951#section-2).
@@ -131,18 +131,18 @@ This is a build-time configuration in source, not an administration setting or a
 tr: { label: "Türkçe", tag: "tr", dir: "ltr", tier: "maintained" },
 ```
 
-| ID | Menu label | Direction | Tier |
-| --- | --- | --- | --- |
-| en | English | LTR | source |
-| zh | 简体中文 | LTR | core |
-| fr | Français | LTR | maintained |
-| de | Deutsch | LTR | maintained |
-| ru | Русский | LTR | maintained |
-| es | Español | LTR | maintained |
-| pt-BR | Português (Brasil) | LTR | maintained |
-| ja | 日本語 | LTR | maintained |
-| ar | العربية | RTL | maintained |
-| tr | Türkçe | LTR | maintained |
+| ID    | Menu label         | Direction | Tier       |
+| ----- | ------------------ | --------- | ---------- |
+| en    | English            | LTR       | source     |
+| zh    | 简体中文           | LTR       | core       |
+| fr    | Français           | LTR       | maintained |
+| de    | Deutsch            | LTR       | maintained |
+| ru    | Русский            | LTR       | maintained |
+| es    | Español            | LTR       | maintained |
+| pt-BR | Português (Brasil) | LTR       | maintained |
+| ja    | 日本語             | LTR       | maintained |
+| ar    | العربية            | RTL       | maintained |
+| tr    | Türkçe             | LTR       | maintained |
 {.wide .expand}
 
 The stored `zh` preference remains valid. The experimental `pt` value maps to `pt-BR`; unknown or disabled values fall back to English. An unfinished language can be excluded from the menu with `enabled: false`; hiding it does not itself remove its static import from the build.
@@ -177,7 +177,7 @@ Compact wording is a UI requirement. Improving accuracy must not restore labels 
 
 ### Right-to-left layout {#rtl}
 
-Logical CSS properties govern spacing, alignment, borders and the mobile drawer. Directional icons, tab-arrow navigation and switch movement follow RTL. Object paths, bucket names, ARN/JSON, policy editors and raw Trace/log data stay LTR. Charts and physical viewport coordinates are not blindly mirrored.
+Logical CSS properties govern spacing, alignment, borders and the mobile drawer. Directional icons, tab-arrow navigation and switch movement follow RTL. Object paths, bucket names, ARN/JSON, policy editors and raw Trace/log data stay LTR. Protocol-field action buttons and unit selectors remain at the text's end in RTL so password, URL, email, and number inputs are not covered ([`a9da731c5`](https://github.com/pgsty/silo-console/commit/a9da731c5)), and the task-count badge stays anchored in its corner ([`bc17e124a`](https://github.com/pgsty/silo-console/commit/bc17e124a)). Charts and physical viewport coordinates are not blindly mirrored.
 
 ## Maintenance tiers and checks {#tiers}
 
@@ -203,21 +203,21 @@ Development-only `en-XA` expands labels by roughly 40%; `ar-XB` exercises RTL. N
 
 ## Alternatives considered {#alternatives}
 
-| Option | Benefit | Cost and decision |
-| --- | --- | --- |
-| Keep only English and Chinese | Lowest translation maintenance burden | Does not address the Portuguese contribution or Turkish request; reject. |
-| One combined asset, eager loading | One language request and the smallest gzip total | Any language edit invalidates all translation data; a valid simple baseline, but per-language assets cost only about 1% more. |
-| One asset per language, eager loading | Independent cache reuse with the existing synchronous runtime | Eight extra cold requests and the same initial dictionary workload; selected. |
-| One asset per language, lazy loading | English can avoid all catalogs; other users fetch only what they need | Adds partial-load, failure, retry and state coordination paths; defer until measurements justify it. |
-| Add a full translation framework | More advanced message tooling and ecosystem integrations | Adds a dependency and migration work; current source-key lookup, `Intl` and React/Redux cover the required behavior. |
+| Option                                | Benefit                                                               | Cost and decision                                                                                                             |
+| ------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Keep only English and Chinese         | Lowest translation maintenance burden                                 | Does not address the Portuguese contribution or Turkish request; reject.                                                      |
+| One combined asset, eager loading     | One language request and the smallest gzip total                      | Any language edit invalidates all translation data; a valid simple baseline, but per-language assets cost only about 1% more. |
+| One asset per language, eager loading | Independent cache reuse with the existing synchronous runtime         | Eight extra cold requests and the same initial dictionary workload; selected.                                                 |
+| One asset per language, lazy loading  | English can avoid all catalogs; other users fetch only what they need | Adds partial-load, failure, retry and state coordination paths; defer until measurements justify it.                          |
+| Add a full translation framework      | More advanced message tooling and ecosystem integrations              | Adds a dependency and migration work; current source-key lookup, `Intl` and React/Redux cover the required behavior.          |
 {.wide .expand}
 
 Per-language lazy loading was evaluated and removed after the maintainer selected the static tradeoff. Separate gzip files retain a natural boundary for revisiting loading later, without introducing those states now.
 
 ## Delivery {#delivery}
 
-PR #83 was merged with its original history. The initial ten-language [implementation](https://github.com/pgsty/silo-console/commit/51a735992) and [embedded GUI](https://github.com/pgsty/silo-console/commit/0059ee2d9) were committed separately. Final delivery includes the [reviewed translations and compact-layout checks](https://github.com/pgsty/silo-console/commit/34de5907eb8d290ddb3e7f43c6bec68f1eb76daa), [per-language assets and cache policy](https://github.com/pgsty/silo-console/commit/b0371b69cc1eae78eb30342afa8613dfbd78971b), and [regenerated embedded GUI](https://github.com/pgsty/silo-console/commit/efe12ae972579972327b0d56e085fcfc8ba62923).
+PR #83 was merged with its original history. The initial ten-language [implementation](https://github.com/pgsty/silo-console/commit/51a735992) and [embedded GUI](https://github.com/pgsty/silo-console/commit/0059ee2d9) were committed separately. Subsequent commits added [reviewed translations and compact-layout checks](https://github.com/pgsty/silo-console/commit/34de5907eb8d290ddb3e7f43c6bec68f1eb76daa), [per-language assets and cache policy](https://github.com/pgsty/silo-console/commit/b0371b69cc1eae78eb30342afa8613dfbd78971b), and the [intermediate GUI rebuild](https://github.com/pgsty/silo-console/commit/efe12ae972579972327b0d56e085fcfc8ba62923). Pre-release polish restored the task-count badge position ([`bc17e124a`](https://github.com/pgsty/silo-console/commit/bc17e124a)) and kept protocol-field action buttons at the text's end in RTL ([`a9da731c5`](https://github.com/pgsty/silo-console/commit/a9da731c5)), followed by the final [Console 2.7.0 release asset build `4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505) superseding `efe12ae97`.
 
-The final source passed all **789 frontend unit tests**, Go API tests, type checking, formatting, dead-code checks and production bundle budgets. A correction to a catalog must reach the embedded GUI as well as the TypeScript files.
+The released `v2.7.0` source passed all frontend unit tests, Go API tests, type checking, formatting, dead-code checks, and production bundle budgets, and shipped in standalone [Console 2.7.0](/blog/release/console-2.7.0/) (`pgsty/silo-console:v2.7.0`) and embedded in [SILO Server 20261109](/blog/release/silo-20261109/). A correction to a catalog must reach the embedded GUI as well as the TypeScript files.
 
-Acceptance covers missing-key fallback, placeholders and plurals, persisted language preferences, offline switching after initial load, unsaved form values, Arabic layout, unchanged raw data, and cache reuse after changing one language. The bilingual design record belongs to the companion site; source integration, generated assets, documentation publication and a product release remain distinct deliverables.
+Acceptance covers missing-key fallback, placeholders and plurals, persisted language preferences, offline switching after initial load, unsaved form values, Arabic layout, unchanged raw data, and cache reuse after changing one language.

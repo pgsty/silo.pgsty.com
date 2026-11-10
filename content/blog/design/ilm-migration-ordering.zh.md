@@ -2,7 +2,7 @@
 title: "ILM 过期与存储池迁移顺序"
 linkTitle: "ILM 迁移顺序"
 date: 2026-10-27
-lastmod: 2026-11-08
+lastmod: 2026-11-10
 author: "PGSTY SILO 维护团队"
 summary: >
   解释生命周期过期与存储池迁移为何对版本桶当前对象产生不同判断、#266 修复了什么，以及 #276 如何补齐 tier 和生命周期安全边界。
@@ -12,9 +12,11 @@ draft: false
 url: "/zh/blog/design/ilm-migration-ordering/"
 ---
 
-本文记录 [issue #265](https://github.com/pgsty/silo/issues/265)、贡献者修复 [PR #266](https://github.com/pgsty/silo/pull/266) 与维护者后续修复 [#276](https://github.com/pgsty/silo/pull/276)，并说明已经合入的 [#264](https://github.com/pgsty/silo/pull/264) 与 [#267](https://github.com/pgsty/silo/pull/267) 是相关前置修复。本文已于 2026-11-02 按 #276 合入后的 main 更新。#266 的 decommission 提交是 [19910230a](https://github.com/pgsty/silo/commit/19910230a)，rebalance 提交是 [a995921e5](https://github.com/pgsty/silo/commit/a995921e5)。
+本文记录 [issue #265](https://github.com/pgsty/silo/issues/265)、贡献者修复 [PR #266](https://github.com/pgsty/silo/pull/266) 与维护者后续修复 [#276](https://github.com/pgsty/silo/pull/276)，并说明已经合入的 [#264](https://github.com/pgsty/silo/pull/264) 与 [#267](https://github.com/pgsty/silo/pull/267) 是相关前置修复。#266 的 decommission 提交是 [19910230a](https://github.com/pgsty/silo/commit/19910230a)，rebalance 提交是 [a995921e5](https://github.com/pgsty/silo/commit/a995921e5)。
 
-**更新（2026-11-06）。** 生命周期删除不复制，S3 如此，SILO 的每个发布版本也是如此。#276 曾在 `main` 上短暂地让它们复制：scanner、transitioned version 的 expiry 和批量 noncurrent purge 会评估删除复制决策，并为目标端排队删除标记或 version purge。这正是仍未合入的 [PR #240](https://github.com/pgsty/silo/pull/240) 的内容。下一个版本在发布前移除这一部分。#276 的其余部分保留：先删 hot-tier 再删远端、free-version 重试记录、生命周期变化栅栏，以及迁移完成检查。通过 S3 API 发出的删除仍按配置复制。decommission 在退役已过期版本之前，不再等待复制目标。下文已据此更正。
+**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
+
+**更新（2026-11-06）。** 生命周期删除不复制，S3 如此，SILO 的每个发布版本也是如此。#276 曾在 `main` 上短暂地让它们复制：scanner、transitioned version 的 expiry 和批量 noncurrent purge 会评估删除复制决策，并为目标端排队删除标记或 version purge。这正是仍未合入的 [PR #240](https://github.com/pgsty/silo/pull/240) 的内容。`SILO Server 20261109` 已在发布前移除这一部分。#276 的其余部分保留：先删 hot-tier 再删远端、free-version 重试记录、生命周期变化栅栏，以及迁移完成检查。通过 S3 API 发出的删除仍按配置复制。decommission 在退役已过期版本之前，不再等待复制目标。下文已据此更正。
 
 ## 先说结论 {#tldr}
 
@@ -85,7 +87,7 @@ expiry queue 越慢，风险越明显。当前版本可能被跳过，而且目�
 
 ### 复制不是生命周期删除的义务 {#replication-contract}
 
-生命周期删除不复制：删除复制规则作用于通过 S3 API 发出的删除，每个目标端各自执行自己的生命周期配置。#276 合入时还会为 ILM 选中的删除排队复制；这一部分在下一个版本发布前移除（见上文更新）。配置了复制时，迁移期间的生命周期删除现在不会为目标端排队任何任务，源端副本也不必等待目标端即可退役。
+生命周期删除不复制：删除复制规则作用于通过 S3 API 发出的删除，每个目标端各自执行自己的生命周期配置。#276 合入时还会为 ILM 选中的删除排队复制；这一部分已在 `SILO Server 20261109` 发布前移除（见上文更新）。配置了复制时，迁移期间的生命周期删除不会为目标端排队任何任务，源端副本也不必等待目标端即可退役。
 
 #276 仍让 ILM 选中的版本删除在源端清理前先走普通 expiry 路径，是为了下面两项合同：transitioned version 保留远端 tier 清理及其重试记录，完成栅栏能看到 expiry 删除了什么。这是最小的安全边界，因为它复用了已有 expiry 路径，只在迁移与 expiry 之间补了一次必要的交接，不需要把这些规则复制到 `removeMovedVersions` 中，也不会让延迟的 expiry task 因为源端已经消失而得到 `VersionNotFound`。
 

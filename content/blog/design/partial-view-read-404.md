@@ -2,7 +2,7 @@
 title: "A Partial View Must Not Report an Existing Object as Missing"
 linkTitle: "Partial-View 404"
 date: 2026-11-06
-lastmod: 2026-11-06
+lastmod: 2026-11-10
 author: "PGSTY SILO Maintainers"
 summary: >
   Why a node that reaches only some drives of an erasure set can answer 404 NoSuchKey for an object that exists, and why mapping inconsistent metadata to "not found" only when every drive answered is the minimum complete repair.
@@ -12,9 +12,9 @@ draft: false
 url: "/blog/design/partial-view-read-404/"
 ---
 
-This record covers a defect found during local acceptance of the next release. It reproduces on the local integration of the next release and on [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). It has no GitHub issue yet.
+This record covers a defect found during local acceptance of `SILO Server 20261109`. It reproduced on the pre-release `SILO Server 20261109` integration branch and on [69fcf50cd](https://github.com/pgsty/silo/commit/69fcf50cd2e0854af0150413df5fd66a5d74becc). Tracked as [#302](https://github.com/pgsty/silo/issues/302).
 
-**Status:** fix approved by an adversarial review (with nits, all adopted) and implemented on a local branch. Not merged or released.
+**Status:** Shipped in [SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`).
 
 ## Short answer {#tldr}
 
@@ -31,13 +31,13 @@ A key that is absent from every drive that answered still gets 404 when enough d
 
 ## Classification {#assessment}
 
-| Aspect | Assessment |
-|---|---|
-| Nature | Wrong error mapping on a degraded read. Inherited from upstream MinIO. |
-| Impact | A false 404 for an existing object, until the node reconnects (up to about 16 s after boot) or heal makes the copies consistent. |
-| Data safety | No data is deleted. The dangling-object check already refuses to act when a drive did not answer. |
-| Severity | S1: a client-visible false absence. Low probability: it needs a partial write and a partial view at the same time. |
-| Effort | Small: one file, no storage RPC, no on-disk format, no configuration. |
+| Aspect      | Assessment                                                                                                                       |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Nature      | Wrong error mapping on a degraded read. Inherited from upstream MinIO.                                                           |
+| Impact      | A false 404 for an existing object, until the node reconnects (up to about 16 s after boot) or heal makes the copies consistent. |
+| Data safety | No data is deleted. The dangling-object check already refuses to act when a drive did not answer.                                |
+| Severity    | S1: a client-visible false absence. Low probability: it needs a partial write and a partial view at the same time.               |
+| Effort      | Small: one file, no storage RPC, no on-disk format, no configuration.                                                            |
 {.wide .expand}
 
 ## When it happens {#trigger}
@@ -51,7 +51,7 @@ The acceptance run that found it: 4 nodes with 2 drives each, EC 4+4. Nodes 1 an
 
 ## Root cause {#root-cause}
 
-Line numbers are for the local integration of the next release; the code is the same on `69fcf50cd`.
+Line numbers are for the pre-fix `SILO Server 20261109` integration branch; the code is the same on `69fcf50cd`.
 
 1. A drive that cannot be reached at boot stays empty in the node's erasure set (`cmd/erasure-sets.go:420`). It is reconnected after less than a second and then every 15 seconds (`:287-290`, `:349`).
 2. In `getObjectFileInfo`, a drive that does not answer keeps `errDiskOngoingReq` (`cmd/erasure-object.go:792, 820`), which quorum counting ignores (`:57`).
@@ -132,18 +132,18 @@ Options A and B together, in `cmd/erasure-object.go`:
 
 A deterministic unit test builds an 8-drive EC 4+4 set with an in-memory tier, commits a restore, a transition or an overwrite with two drives hidden, and reads through a view of four drives:
 
-| Case | Before | After |
-|---|---|---|
-| Restore committed on 6 of 8 drives, versioned and unversioned bucket | 404 | 503 |
-| Transition committed on 6 of 8 drives | 404 | 503 |
-| Unversioned overwrite committed on 6 of 8 drives | 404 | 503 |
-| Absent key, same view | 404 | 404 |
-| Inconsistent copies, every drive answered | 404 | 404 |
+| Case                                                                 | Before | After |
+| -------------------------------------------------------------------- | ------ | ----- |
+| Restore committed on 6 of 8 drives, versioned and unversioned bucket | 404    | 503   |
+| Transition committed on 6 of 8 drives                                | 404    | 503   |
+| Unversioned overwrite committed on 6 of 8 drives                     | 404    | 503   |
+| Absent key, same view                                                | 404    | 404   |
+| Inconsistent copies, every drive answered                            | 404    | 404   |
 {.wide .expand}
 
 The restore, transition and unversioned-overwrite cases assert a read-quorum error with HTTP 503. A versioned overwrite may serve the older version but must not be reported missing. Without the fix, the three cases fail; with Option A alone, the unversioned overwrite still fails.
 
-About 100 related tests pass with the fix, covering read quorum, dangling objects, restore, listing and delete-marker purge.
+About 100 related tests pass with the fix, covering read quorum, dangling objects, restore, listing and delete-marker purge. Release commit `d998292387cc` (`RELEASE.2026-11-09T00-00-00Z`) passed Go CI, VulnCheck, Test Release Pipeline, and release build verification.
 
 ## Review history {#review}
 

@@ -2,7 +2,7 @@
 title: "混合 EC 布局与迁移列表"
 linkTitle: "混合 EC 迁移列表"
 date: 2026-10-27
-lastmod: 2026-11-02
+lastmod: 2026-11-10
 author: "PGSTY SILO 维护团队"
 summary: >
   解释同一个对象存在两种可读纠删码布局时，为何会从 decommission 与 rebalance 列表中消失，以及 PR #262 为何是最小且安全的修复。
@@ -12,13 +12,15 @@ draft: false
 url: "/zh/blog/design/mixed-ec-migration-listing/"
 ---
 
-本文记录 [issue #261](https://github.com/pgsty/silo/issues/261) 与 [PR #262](https://github.com/pgsty/silo/pull/262) 的审查结论，本文已按 #276 后的 main [0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b) 更新。实际修复通过维护者 PR [#267](https://github.com/pgsty/silo/pull/267) 合入，#262 是后来被取代的重复 PR。
+本文记录 [issue #261](https://github.com/pgsty/silo/issues/261) 与 [PR #262](https://github.com/pgsty/silo/pull/262) 的审查结论（#276 后续更新基线 [0fc5a0b5](https://github.com/pgsty/silo/commit/0fc5a0b5278980b0960abf26566ce3272f85227b)）。实际修复通过维护者 PR [#267](https://github.com/pgsty/silo/pull/267)（[a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)）合入，#262 是被取代的重复 PR。
+
+**状态：** 已随 [SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）正式发布。
 
 ## 先说结论 {#tldr}
 
 问题成立。一次成功的降级覆写可能让一个无版本对象同时存在两种 EC 布局：在线磁盘上有更新的副本，离线磁盘上保留旧副本。GET 与 ListObjectsV2 能选出更新的可读多数；decommission 与 rebalance 使用 all-versions 遍历，此时元数据合并可能以旧布局为参考，只统计旧布局。旧布局低于 quorum 后，对象就从迁移列表中消失。迁移报告成功，旧池被移除后对象丢失。
 
-PR #262 的修复方向正确。它只放宽已有 mixed-EC recount 的一个过窄条件，仍把 recount 限制在“每个非空流都只有一个普通 null version”的安全范围，并增加 quorum、流顺序、迁移和排除场景测试。该修复已经通过 #267 合入，#267 还增加了完整的池移除回归测试。
+PR #262（[5eb6433f0](https://github.com/pgsty/silo/commit/5eb6433f0)）的修复方向正确。它只放宽已有 mixed-EC recount 的一个过窄条件，仍把 recount 限制在“每个非空流都只有一个普通 null version”的安全范围，并增加 quorum、流顺序、迁移和排除场景测试。该修复通过 #267（[a7310d59f](https://github.com/pgsty/silo/commit/a7310d59fe307ae7fc4b57dc190b5e0c3de1a56a)）合入，补充了完整的池移除端到端回归测试，并随 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 发布。
 
 ## 什么条件会触发 {#trigger}
 
@@ -38,10 +40,10 @@ PR #262 的修复方向正确。它只放宽已有 mixed-EC recount 的一个过
 
 于是出现了分裂契约：
 
-| 调用方 | 请求模式 | main 上的行为 |
-| --- | --- | --- |
-| GET 与 ListObjectsV2 | latest-only | 对符合条件的混合 EC 组重新计数，选出可读 quorum。 |
-| ListObjectVersions、decommission、rebalance 及部分 Walk 调用 | all versions | 普通合并失败后停止，可读多数被少数旧布局遮住。 |
+| 调用方                                                       | 请求模式     | main 上的行为                                     |
+| ------------------------------------------------------------ | ------------ | ------------------------------------------------- |
+| GET 与 ListObjectsV2                                         | latest-only  | 对符合条件的混合 EC 组重新计数，选出可读 quorum。 |
+| ListObjectVersions、decommission、rebalance 及部分 Walk 调用 | all versions | 普通合并失败后停止，可读多数被少数旧布局遮住。    |
 {.wide .expand}
 
 所以这个缺陷来自 2026-10-16 修复的范围没有覆盖完整调用链。底层降级元数据状态可以更早存在；真正暴露数据丢失路径的是只有一类调用方学会了恢复。
