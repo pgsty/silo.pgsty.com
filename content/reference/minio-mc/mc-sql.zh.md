@@ -10,7 +10,9 @@ upstream_modified: true
 
 <a id="command-mc.sql"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc sql`](#command-mc.sql) 通过 S3 Select 查询对象内容。本文使用 `mc`；若安装的命令名为 `mcli`，请替换命令名。
 
@@ -49,7 +51,9 @@ mc [GLOBALFLAGS] sql                             \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.sql.ALIAS}
 
@@ -201,13 +205,19 @@ mc sql [FLAGS] mysilo/mybucket
 
 使用 [`--query`](#mc.sql.-query) SQL 语句递归搜索指定的 [`ALIAS`](#mc.sql.ALIAS) 目录。
 
-### 全局标志 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id7}
+<a id="id7" data-td-print-local></a>
 
-### 选择存储桶内所有对象的所有列 {#id8}
+## 示例 {#examples}
+
+<a id="id8" data-td-print-local></a>
+
+### 选择存储桶内所有对象的所有列 {#select-all-columns-in-all-objects-in-a-bucket}
 
 将 [`mc sql`](#command-mc.sql) 与 [`--recursive`](#mc.sql.-recursive) 和 [`--query`](#mc.sql.-query) 选项结合使用，可将查询应用到存储桶中的所有对象：
 
@@ -218,7 +228,9 @@ mc sql --recursive --query "select * from S3Object" ALIAS/PATH
 - 将 [`ALIAS`](#mc.sql.ALIAS) 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 [`PATH`](#mc.sql.ALIAS) 替换为 MinIO 部署上存储桶的路径。
 
-### 在对象上运行聚合查询 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 在对象上运行聚合查询 {#run-an-aggregation-query-on-an-object}
 
 将 [`mc sql`](#command-mc.sql) 与 [`--query`](#mc.sql.-query) 选项结合使用，可查询 MinIO 部署上的对象：
 
@@ -229,17 +241,21 @@ mc sql --query "select count(s.power) from S3Object" ALIAS/PATH
 - 将 [`ALIAS`](#mc.sql.ALIAS) 替换为 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 - 将 [`PATH`](#mc.sql.ALIAS) 替换为 MinIO 部署上对象的路径。
 
-## 行为 {#id10}
+<a id="id10" data-td-print-local></a>
 
-### 输入格式 {#id11}
+## 行为 {#behavior}
+
+<a id="id11" data-td-print-local></a>
+
+### 输入格式 {#input-formats}
 
 [`mc sql`](#command-mc.sql) 支持以下输入格式：
 
-| 类型 | `content-type` 值 |
-| --- | --- |
-| `.csv` | `text/csv` |
-| `.json` | `application/json` |
-| `.parquet` | 无 |
+| 类型       | `content-type` 值  |
+| ---------- | ------------------ |
+| `.csv`     | `text/csv`         |
+| `.json`    | `application/json` |
+| `.parquet` | 无                 |
 
 对于 `.csv` 文件类型，使用 [`mc sql --csv-input`](#mc.sql.-csv-input) 指定 CSV 数据格式。 有关 CSV 格式字段的更多信息，请参阅 [CSV 格式字段](#mc-sql-csv-format)。
 
@@ -253,7 +269,9 @@ mc sql --query "select count(s.power) from S3Object" ALIAS/PATH
 
 <a id="mc-sql-csv-format"></a>
 
-### CSV 格式字段 {#csv}
+<a id="csv" data-td-print-local></a>
+
+### CSV 格式字段 {#csv-formatting-fields}
 
 下表列出了可用于 [`mc sql --csv-input`](#mc.sql.-csv-input) 和 [`mc sql --csv-output`](#mc.sql.-csv-output) 的有效键值对。 某些键值对仅适用于 [`--csv-input`](#mc.sql.-csv-input)。 有关 S3 CSV 格式的更多信息，请参阅 S3 API [CSVInput](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CSVInput.html) 文档。
 
@@ -305,6 +323,8 @@ mc sql --query "select count(s.power) from S3Object" ALIAS/PATH
   </tbody>
 </table>
 
-### S3 兼容性 {#s3}
+<a id="s3" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 Silo 是正式支持和发布验收的服务端；对上游 MinIO 与其他 S3 兼容服务的支持属于尽最大努力。使用 SQL 命令前，确认目标服务支持 S3 Select。详见[兼容说明](/zh/compatibility/mcli/)。

@@ -82,4 +82,4 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Exit Status on Per-Item Import Failures (`mcli 20261109`) {#exit-status}
 
-In [`mcli 20261109`](/blog/release/mcli-20261109/), `mc admin cluster bucket import` returns exit code `1` when the server reports per-bucket or per-feature metadata import failures in the import response (`#234`).
+In [`mcli 20261109`](/blog/release/mcli-20261109/), `mc admin cluster bucket import` returns exit status `1` on failed per-bucket or per-feature metadata imports while preserving detailed error reports.

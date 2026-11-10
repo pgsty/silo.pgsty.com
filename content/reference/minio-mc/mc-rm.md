@@ -345,9 +345,11 @@ MinIO supports keeping multiple [versions](/administration/object-management/obj
 
 ### PGSTY mcli Safety and Exit Status (`mcli 20261109`) {#mcli-safety}
 
-- `--purge` combined with [`--dry-run`](#mc.rm.-dry-run) (`--fake`) is strictly read-only and never sends `?purge=true` `DELETE` requests (`#208`).
-- Multi-argument and [`--stdin`](#mc.rm.-stdin) recursive deletes validate namespace-wide targets before deleting earlier arguments (`#163`, `#202`). If any target resolves to a bucket root, cluster root, or filesystem root without [`--dangerous`](#mc.rm.-dangerous), the command exits before removing earlier arguments.
-- Permission and WORM retention errors return exit code `1` after reporting per-object failures (`mcli 20260916`).
+In [`mcli 20261109`](/blog/release/mcli-20261109/):
+
+- `--purge` combined with [`--dry-run`](#mc.rm.-dry-run) (`--fake`) stays read-only and previews the requested prefix without sending `?purge=true` `DELETE` requests.
+- Namespace removal protection applies to every command-line target and every [`--stdin`](#mc.rm.-stdin) target. Multi-argument invocations validate all command-line targets up front so a preceding bucket or path cannot bypass [`--dangerous`](#mc.rm.-dangerous) on a later site-wide root target, and `--stdin` enforces `--dangerous` on each target before removing it.
+- Batch removals retain permission errors (`mcli 20260916+`) and WORM protection errors ([`mcli 20261109`](/blog/release/mcli-20261109/)) in the final exit status (returning exit status `1`) while continuing to remove independent, unprotected objects.
 
 ### S3 Compatibility {#s3-compatibility}
 

@@ -24,9 +24,9 @@ Successfully retrieving either a `complete` or `failed` terminal state exits `0`
 
 <a id="silo-status-details"></a>
 
-## mcli 20261109 and next SILO release: pauses and skipped work {#silo-job-outcomes}
+## mcli 20261109 and SILO 20261109: pauses and skipped work {#silo-job-outcomes}
 
-[mcli 20261109](/blog/release/mcli-20261109/) and the next coordinated SILO release add `paused` and `complete-with-skips`. `paused` is nonterminal: the server is waiting to retry, and the client keeps observing while live metrics remain available. `complete-with-skips` means the run finished but left protected versions or refused keys in place. It does not mean every selected object was removed. Like `complete` and `failed`, retrieving it exits `0`; scripts must inspect the status and counters.
+[mcli 20261109](/blog/release/mcli-20261109/) and [SILO 20261109](/blog/release/silo-20261109/) add `paused` and `complete-with-skips`. `paused` is nonterminal: the server is waiting to retry, and the client keeps observing while live metrics remain available. `complete-with-skips` means the run finished but left protected versions or refused keys in place. It does not mean every selected object was removed. Like `complete` and `failed`, retrieving it exits `0`; scripts must inspect the status and counters.
 
 The text display includes `VersionsSkippedLocked`, `KeysRefused`, `FailureReason`, and `PausedReason` when present. JSON preserves the existing `metric` object and adds those fields under `details` as `versionsSkippedLocked`, `keysRefused`, `failureReason`, and `pausedReason`. The counters have different units: skipped versions and refused whole keys. They must not be added to get a count of deleted objects.
 

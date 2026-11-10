@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO behavior:** diagnostics run locally without SUBNET registration or automatic uploads. License info/unregister operate on local state; license update retains the explicit-file path. Online registration/renewal and uploads are disabled. Retained upstream syntax below does not enable those services. See [mcli compatibility](/compatibility/mcli/#subnet).
+**SILO behavior:** `mc support` diagnostics run locally against SILO without SUBNET registration or automatic uploads. `mc license info` and `unregister` operate on local state, while `license update` retains the explicit-file path; online registration, renewal, and uploads are disabled. Retained upstream syntax below does not enable those online services. See [mcli compatibility](/compatibility/mcli/#subnet).
 
 
 <a id="mc-support-profile"></a>
@@ -68,7 +68,7 @@ mc [GLOBALFLAGS] support profile       \
 
 Run profiling for the specified duration in seconds.
 
-Use `--type <value>` where `<value>` is the number of seconds for the profile to run.
+Use `--duration <value>` where `<value>` is the number of seconds for the profile to run.
 
 If not specified, the command collects data for 10 seconds.
 
@@ -98,7 +98,7 @@ If not specified, the command collects data for CPU, memory, block, mutex, threa
 > [!WARNING]
 > **Important**
 >
-> Do not use the `cpuio` or `trace` data types unless directed to by MinIO Support. These profiles require significant resources and may degrade cluster performance if used without guidance.
+> Use the `cpuio` and `trace` profile types with caution on production deployments. Both profile types consume substantial CPU and I/O resources and can degrade cluster performance while profiling runs.
 
 ##### `--airgap` {#mc.support.profile.-airgap}
 

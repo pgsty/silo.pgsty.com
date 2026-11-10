@@ -67,3 +67,7 @@ If no entry is made, the command returns statistics for up to 10 drives.
 ### Global Flags {#global-flags}
 
 This command supports any of the [global flags](/reference/minio-mc/#minio-mc-global-options).
+
+## Behavior {#behavior}
+
+In [mcli 20261109](/blog/release/mcli-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), `mcli support top drive` (`top disk`) uses the first drive I/O sample as a baseline instead of reporting cumulative counters since boot as the first interval.

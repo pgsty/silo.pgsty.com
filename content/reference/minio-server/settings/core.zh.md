@@ -103,7 +103,26 @@ silo server $MINIO_OPTS ...
 
 指定 SILO server 进程用于加载环境变量的文件完整路径。
 
-对于由 `systemd` 管理的文件，将该值设置为环境文件路径（`/etc/default/silo`），以便在使用 [`mc admin service restart`](/zh/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) 重启部署时，指示 SILO 重新加载该文件中的变更。
+该文件在进程启动时解析（包括执行 `mcli admin service restart` 之后）。它不是 shell 脚本：请使用 `KEY=value` 条目（可选添加 `export` 前缀）；支持引号值与整行注释，但不执行 shell 变量展开或命令替换。文件中的条目会覆盖进程环境中已有的同名变量。
+
+软件包提供的 systemd 单元会单独先后读取 `/etc/default/minio` 与 `/etc/default/silo`。修改任一 `EnvironmentFile` 通常需要执行 systemd 服务重启；仅执行管理端重启不会使 systemd 重新读取这些文件。仅在需要让 SILO 自行额外解析指定文件时才显式设置 `MINIO_CONFIG_ENV_FILE`。优先级与解析细节请参阅[环境文件设计说明](/zh/blog/design/config-env-file/)。
+{{< /tab >}}
+{{< tab label="配置项" value="tab2" >}}
+此设置没有对应的配置项。
+{{< /tab >}}
+{{< /tabs >}}
+
+## YAML 配置文件 {#yaml-configuration-file}
+
+{{< tabs group="tab1-tab2" >}}
+{{< tab label="环境变量" value="tab1" >}}
+#### `MINIO_CONFIG` {#envvar.MINIO_CONFIG}
+
+*envvar*
+
+指定 YAML 服务端配置文件路径（`version: v1` 或 `version: v2`），功能等价于传入 [`silo server --config`](/zh/reference/minio-server/#minio.server.-config)。
+
+[SILO 20261109](/zh/blog/release/silo-20261109/) 集成 [`silo-pkg v3.16.0`](/zh/blog/release/pkg-3.16.0/)（`go.yaml.in/yaml/v3 v3.0.6`），在 YAML 编码时会对字面量键 `<<` 添加引号，避免在保存并重新加载配置时将 `<<` 误解析为 YAML 合并指令。
 {{< /tab >}}
 {{< tab label="配置项" value="tab2" >}}
 此设置没有对应的配置项。
@@ -382,12 +401,12 @@ MinIO 使用 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 
 
 如果设置此值，你 **必须** 在初始化集群 *之前* 完成设置。 集群初始化后，所选条带大小为 **不可变**，并会影响后续添加到集群中的所有 服务器池。
 
-[MinIO SUBNET](https://min.io/pricing?jmp=docs) 用户应先登录并提交 issue，讨论条带大小设置后再在任何环境中实施。
+初始化部署前，请校验纠删码集合布局、读写仲裁、可用容量与故障恢复行为。请参阅 [纠删码](/zh/operations/concepts/erasure-coding/)。
 
 > [!CAUTION]
 > **警告**
 >
-> 除非 MinIO 工程团队明确指导，否则 **不要** 更改条带大小设置。
+> 请在初始化对应服务器池之前选定显式条带大小；切勿直接修改既有存储元数据以强行变更布局。
 >
 > 条带大小变更会对部署功能、可用性、性能和行为产生重大影响。 MinIO 的条带选择算法已为大多数工作负载设置了适当默认值。 偏离该默认值来调整条带大小并不常见，通常也没有必要或不被建议。
 
@@ -487,7 +506,7 @@ LDAP STS 登录限流有自己独立的允许列表 `MINIO_IDENTITY_LDAP_STS_TRU
 
 ## 多段上传列举：退役模式开关 {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**Server 20261026（自 20261018 起）：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时说明公开列表恢复旧缓存／精确 key 行为，持久列举延期。不增加替代设置。旧共享配置键 `api multipart_listing` 继续被容忍，不因它拒绝启动或丢弃其他 API 设置，也不自动清理用户配置。此前启用 strict 的用户会失去可选持久列表和严格取消能力，需要评估升级影响。
+**[SILO 20261109](/zh/blog/release/silo-20261109/)（自 20261018 起）：** 忽略 `MINIO_API_MULTIPART_LISTING`，启动时说明公开列表恢复旧缓存／精确 key 行为，持久列举延期。不增加替代设置。旧共享配置键 `api multipart_listing` 继续被容忍，不因它拒绝启动或丢弃其他 API 设置，也不自动清理用户配置。此前启用 strict 的用户会失去可选持久列表和严格取消能力，需要评估升级影响。
 
 只读签名接口 `GET /minio/admin/v3/multipart-preflight` 仍要求 `admin:StorageInfo`，返回 `mode=legacy`。`complete` 和 `ready` 描述磁盘诊断覆盖与历史记录，不是启动或列表开关。仅诊断保留 100,000 目录项、30 秒和并发预算；公开列表不依赖这些预算。无 prefix 的旧缓存仍有重启漏项和分页缺陷；非空 prefix 仍按完整对象名查找。已知 ID 的操作及后台清理保留。见[最新决策与取舍](/zh/blog/design/list-multipart-uploads/#decision-20261018)。
 

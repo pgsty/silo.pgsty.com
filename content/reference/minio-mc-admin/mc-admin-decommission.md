@@ -3,7 +3,7 @@ title: "mc admin decommission"
 url: "/reference/minio-mc-admin/mc-admin-decommission/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-decommission.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-decommission"></a>
@@ -20,13 +20,9 @@ See [Decommission Server Pools](/operations/deployments/baremetal-decommission-s
 > [!NOTE]
 > **Decommissioning is Permanent**
 >
-> Once MinIO begins decommissioning a pool, it marks that pool as *permanently* inactive (“draining”). Cancelling or otherwise interrupting the decommissioning procedure does **not** restore the pool to an active state.
+> Once SILO begins decommissioning a pool, it marks that pool as *permanently* inactive ("draining"). Cancelling or interrupting the decommissioning procedure does **not** restore the pool to an active state.
 >
-> Decommissioning is a major administrative operation that requires care in planning and execution, and is not a trivial or ‘daily’ task.
->
-> [MinIO SUBNET](https://min.io/pricing?jmp=docs) users can [log in](https://subnet.min.io/) and create a new issue related to decommissioning. Coordination with MinIO Engineering via SUBNET can ensure successful decommissioning, including performance testing and health diagnostics.
->
-> Community users can seek support on the [MinIO Community Slack](https://slack.min.io). Community Support is best-effort only and has no SLAs around responsiveness.
+> Decommissioning is a major administrative operation that requires careful planning and capacity verification before execution. The supported server for [`mcli admin`](/reference/minio-mc-admin/#command-mc.admin) is SILO; compatibility with unmodified upstream MinIO is best effort.
 
 ```shell
 mc admin [GLOBALFLAGS] decommission start|status|cancel ALIAS TARGET
@@ -84,6 +80,14 @@ https://minio-{01...04}.example.net:9000/mnt/disk{1...4}
 ### Global Flags {#global-flags}
 
 This command supports any of the [global flags](/reference/minio-mc/#minio-mc-global-options).
+
+## Behavior {#behavior}
+
+In [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), pool decommissioning enforces the following migration guarantees:
+
+- Moves objects whose copies use differing erasure layouts across pools ([#261](https://github.com/pgsty/silo/issues/261)), ILM-expired current versions ([#265](https://github.com/pgsty/silo/issues/265)), and versions whose multi-pool lifecycle expiry cannot safely complete ([#278](https://github.com/pgsty/silo/issues/278)).
+- Retains remote-tier payloads while another pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)). Keep all configured remote tiers available until decommissioning completes.
+- Continues migrating remaining buckets when one bucket cannot finish, while preserving explicit cancellation ([#307](https://github.com/pgsty/silo/issues/307)).
 
 ## Examples {#examples}
 

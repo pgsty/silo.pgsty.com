@@ -93,5 +93,5 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中：
 
-- 若服务端在导入响应中报告了失败的 IAM 实体，`mc admin cluster iam import` 会返回退出码 `1`，以便自动化脚本检测部分导入失败（`#234`）。
-- 旧版客户端侧 IAM zip 解析器回退仅在服务端返回 `NotImplemented` 或 `XMinioAdminVersionMismatch` 时触发；来自 `ImportIAMv2` 的认证、授权、传输或归档错误会直接返回，不再回退（`#211`）。
+- 当服务端报告 IAM 实体导入失败时，`mc admin cluster iam import` 会在保留详细错误报告的同时返回退出码 `1`，以便自动化脚本检测部分导入失败。
+- `mc admin cluster iam import` 仅在服务端显式返回 `NotImplemented` 或 `XMinioAdminVersionMismatch` 时回退到旧版 API；来自 `ImportIAMv2` 的其他 HTTP、认证、授权、传输或解码错误会直接返回，不会触发二次导入。

@@ -38,14 +38,15 @@ Site replication enforces [bucket versioning](/administration/object-management/
 
 The [`mc admin replicate`](#command-mc.admin.replicate) command has the following subcommands:
 
-| Subcommand | Description |
-| --- | --- |
-| [`mc admin replicate add`](#mc.admin.replicate.add) | Create a new site replication configuration or expand an existing configuration. |
-| [`mc admin replicate info`](#mc.admin.replicate.info) | Returns information about site replication configuration. |
-| [`mc admin replicate resync`](#mc.admin.replicate.resync) | Resynchronizes content from one site to a second site if the second site has lost data. |
-| [`mc admin replicate rm`](#mc.admin.replicate.rm) | Removes an entire site replication configuration or one or more peer sites from participating in site replication. |
+| Subcommand                                                | Description                                                                                                                                                   |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`mc admin replicate add`](#mc.admin.replicate.add)       | Create a new site replication configuration or expand an existing configuration.                                                                              |
+| [`mc admin replicate info`](#mc.admin.replicate.info)     | Returns information about site replication configuration.                                                                                                     |
+| [`mc admin replicate resync`](#mc.admin.replicate.resync) | Resynchronizes content from one site to a second site if the second site has lost data.                                                                       |
+| [`mc admin replicate rm`](#mc.admin.replicate.rm)         | Removes an entire site replication configuration or one or more peer sites from participating in site replication.                                            |
 | [`mc admin replicate status`](#mc.admin.replicate.status) | Displays the status for [replicable data](/operations/replication/multi-site-replication/#minio-site-replication-what-replicates) across participating sites. |
-| [`mc admin replicate update`](#mc.admin.replicate.update) | Modify the endpoint of the specified peer site in the site replication configuration. |
+| [`mc admin replicate update`](#mc.admin.replicate.update) | Modify the endpoint of the specified peer site in the site replication configuration.                                                                         |
+{.wide .expand}
 
 ## Syntax {#syntax}
 

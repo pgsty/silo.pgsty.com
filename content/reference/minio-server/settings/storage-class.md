@@ -62,12 +62,12 @@ Specify the value using `EC:M` notation, where `M` refers to the number of parit
 The following table lists the default values based on the [erasure set size](/operations/concepts/erasure-coding/#minio-ec-erasure-set) of the initial server pool in the deployment:
 
 | Erasure Set Size | Default Parity (EC:M) |
-| --- | --- |
-| 1 | EC:0 |
-| 2-3 | EC:1 |
-| 4-5 | EC:2 |
-| 6 - 7 | EC:3 |
-| 8 - 16 | EC:4 |
+| ---------------- | --------------------- |
+| 1                | EC:0                  |
+| 2-3              | EC:1                  |
+| 4-5              | EC:2                  |
+| 6 - 7            | EC:3                  |
+| 8 - 16           | EC:4                  |
 
 The `2–3` row describes the same default parity, not the same write availability. With `EC:1`, a two-drive set has a read quorum of 1 and a write quorum of 2, while a three-drive set has both quorums equal to 2. Losing one drive therefore prevents writes to the two-drive set. A single-drive `EC:0` deployment has no erasure-code redundancy. See [Erasure Coding](/operations/concepts/erasure-coding/#minio-ec-basics).
 

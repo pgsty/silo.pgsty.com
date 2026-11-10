@@ -3,7 +3,7 @@ title: "mc ilm rule add"
 url: "/zh/reference/minio-mc/mc-ilm-rule-add/"
 weight: 10
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-ilm-rule-add.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-ilm-rule-add"></a>
@@ -16,7 +16,9 @@ upstream_modified: false
 >
 > `mc ilm rule rm` 替代 `mc ilm add`。
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc ilm rule add`](#command-mc.ilm.rule.add) 命令用于向存储桶添加对象生命周期管理规则。
 
@@ -73,7 +75,9 @@ mc [GLOBALFLAGS] ilm rule add                               \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.ilm.rule.add.ALIAS}
 
@@ -294,16 +298,16 @@ MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-s
 
 有效单位包括：
 
-| 后缀 | 单位大小 |
-| --- | --- |
-| `k` | KB（千字节，1000 字节） |
-| `m` | MB（兆字节，1000 KB） |
-| `g` | GB（吉字节，1000 MB） |
-| `t` | TB（太字节，1000 GB） |
+| 后缀 | 单位大小                   |
+| ---- | -------------------------- |
+| `k`  | KB（千字节，1000 字节）    |
+| `m`  | MB（兆字节，1000 KB）      |
+| `g`  | GB（吉字节，1000 MB）      |
+| `t`  | TB（太字节，1000 GB）      |
 | `ki` | KiB（kibibyte，1024 字节） |
-| `mi` | MiB（mebibyte，1024 KiB） |
-| `gi` | GiB（gibibyte，1024 MiB） |
-| `ti` | TiB（tebibyte，1024 GiB） |
+| `mi` | MiB（mebibyte，1024 KiB）  |
+| `gi` | GiB（gibibyte，1024 MiB）  |
+| `ti` | TiB（tebibyte，1024 GiB）  |
 
 ##### `--size-lt` {#mc.ilm.rule.add.-size-lt}
 
@@ -320,24 +324,30 @@ MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-s
 
 有效单位包括：
 
-| 后缀 | 单位大小 |
-| --- | --- |
-| `k` | KB（千字节，1000 字节） |
-| `m` | MB（兆字节，1000 KB） |
-| `g` | GB（吉字节，1000 MB） |
-| `t` | TB（太字节，1000 GB） |
+| 后缀 | 单位大小                   |
+| ---- | -------------------------- |
+| `k`  | KB（千字节，1000 字节）    |
+| `m`  | MB（兆字节，1000 KB）      |
+| `g`  | GB（吉字节，1000 MB）      |
+| `t`  | TB（太字节，1000 GB）      |
 | `ki` | KiB（kibibyte，1024 字节） |
-| `mi` | MiB（mebibyte，1024 KiB） |
-| `gi` | GiB（gibibyte，1024 MiB） |
-| `ti` | TiB（tebibyte，1024 GiB） |
+| `mi` | MiB（mebibyte，1024 KiB）  |
+| `gi` | GiB（gibibyte，1024 MiB）  |
+| `ti` | TiB（tebibyte，1024 GiB）  |
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 在指定天数后过期存储桶全部内容 {#id6}
+## 示例 {#examples}
+
+<a id="id6" data-td-print-local></a>
+
+### 在指定天数后过期存储桶全部内容 {#expire-all-bucket-contents-after-number-of-days}
 
 将 [`mc ilm rule add`](#command-mc.ilm.rule.add) 与 [`--expire-all-object-versions`](#mc.ilm.rule.add.-expire-all-object-versions) 和 [`--expire-days`](#mc.ilm.rule.add.-expire-days) 标志配合使用，可在对象创建后经过指定天数后，将存储桶中的所有当前版本和非当前版本内容标记为过期：
 
@@ -349,7 +359,9 @@ mc ilm rule add ALIAS/PATH --expire-all-object-versions --expire-days "DAYS"
 - 将 [`PATH`](#mc.ilm.rule.add.ALIAS) 替换为 S3 兼容主机上存储桶的路径。
 - 将 [`DAYS`](#mc.ilm.rule.add.-expire-days) 替换为每个对象过期前的天数。 例如，指定 `30` 表示对象在创建 30 天后过期。
 
-### 将某前缀下的非当前对象版本迁移到不同层 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 将某前缀下的非当前对象版本迁移到不同层 {#transition-non-current-object-versions-at-a-prefix-to-a-different-tier}
 
 将 [`mc ilm rule add`](#command-mc.ilm.rule.add) 与 [`--prefix`](#mc.ilm.rule.add.-prefix) 和 [`--transition-tier`](#mc.ilm.rule.add.-transition-tier) 配合使用，可将对象较旧的非当前版本迁移到不同存储层。
 
@@ -365,7 +377,9 @@ mc ilm rule add --prefix "doc/" --transition-days "90" --transition-tier "MINIOT
 - 前缀下超过 45 天的非当前对象会移动到 `MINIOTIER-2` 存储层。
 - `MINIOTIER-1` 和 `MINIOTIER-2` 均已通过 [`mc admin tier add`](/zh/reference/deprecated/mc-admin-tier/#mc.admin.tier.add) 创建。
 
-### 让某前缀下所有对象过期，并让当前版本比非当前版本保留更久 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 让某前缀下所有对象过期，并让当前版本比非当前版本保留更久 {#expire-all-objects-at-a-prefix-retain-current-object-versions-longer-than-non-current-object-versions}
 
 将 [`mc ilm rule add`](#command-mc.ilm.rule.add) 命令与 [`--prefix`](#mc.ilm.rule.add.-prefix)、[`--expire-days`](#mc.ilm.rule.add.-expire-days) 和 [`--noncurrent-expire-days`](#mc.ilm.rule.add.-noncurrent-expire-days) 配合使用，可让对象的当前版本与非当前版本在不同时间过期。
 
@@ -378,7 +392,9 @@ mc ilm rule add --prefix "doc/" --expire-days "300" --noncurrent-expire-days "10
 - 当前对象在 300 天后过期。
 - 非当前对象在 100 天后过期。
 
-### 迁移前缀 `/doc` 下大于 1MiB 的非当前版本 {#doc-1mib}
+<a id="doc-1mib" data-td-print-local></a>
+
+### 迁移前缀 `/doc` 下大于 1MiB 的非当前版本 {#transition-noncurrent-versions-in-the-prefix-doc-with-a-size-greater-the-1mib}
 
 将 [`mc ilm rule add`](#command-mc.ilm.rule.add) 命令与 [`--prefix`](#mc.ilm.rule.add.-prefix)、[`--size-gt`](#mc.ilm.rule.add.-size-gt) 和 [`--noncurrent-expire-days`](#mc.ilm.rule.add.-noncurrent-expire-days) 配合使用，可让对象的当前版本与非当前版本在不同时间过期。
 
@@ -397,7 +413,9 @@ mc ilm rule add --prefix "doc/" --size-gt 1MiB --transition-days "90" --transiti
 
 所选对象会迁移到 `MINIOTIER-1`。
 
-### 移除删除标记 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 移除删除标记 {#remove-delete-markers}
 
 以下命令会移除删除标记仅为对象唯一剩余版本的对象的删除标记。
 
@@ -413,21 +431,31 @@ mc ilm rule add ALIAS/PATH --expire-delete-marker
 >
 > 若要删除最新版本为删除标记的对象的所有版本，*包括删除标记本身*，可考虑使用 [batch expiration](/zh/reference/minio-mc/mc-batch-generate/#minio-mc-batch-generate-expire-job)。
 
-## 所需权限 {#id10}
+<a id="id10" data-td-print-local></a>
+
+## 所需权限 {#required-permissions}
 
 有关添加规则所需权限，请参见父命令中的 [required permissions](/zh/reference/minio-mc/mc-ilm-rule/#minio-mc-ilm-rule-permissions)。
 
-## 行为 {#id11}
+<a id="id11" data-td-print-local></a>
 
-### 生命周期管理对象扫描器 {#id12}
+## 行为 {#behavior}
+
+<a id="id12" data-td-print-local></a>
+
+### 生命周期管理对象扫描器 {#lifecycle-management-object-scanner}
 
 MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-scanner) 根据所有已配置的 生命周期管理规则检查对象。在高 IO 负载或 系统资源受限时，扫描变慢可能导致生命周期管理 规则应用延迟。更多信息请参见 [生命周期管理对象扫描器](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-scanner)。
 
-### 过期与迁移 {#id13}
+<a id="id13" data-td-print-local></a>
+
+### 过期与迁移 {#expiry-vs-transition}
 
 MinIO 支持在同一个存储桶或存储桶前缀中同时指定过期和迁移规则。 无论对象的迁移状态如何，MinIO 都可以对其执行过期规则。 使用 [`mc ilm rule ls`](/zh/reference/minio-mc/mc-ilm-rule-ls/#command-mc.ilm.rule.ls) 查看当前已配置的对象生命周期 管理规则，以评估过期与迁移规则之间可能的相互影响。
 
-### S3 兼容性 {#s3}
+<a id="s3" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 **`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
 

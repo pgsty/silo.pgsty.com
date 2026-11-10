@@ -7,7 +7,6 @@ upstream_modified: true
 ---
 
 <a id="minio-server-envvar-metrics-logging"></a>
-<a id="id1" data-td-print-local></a>
 
 本页面介绍用于控制 MinIO 指标与日志相关行为的设置。 更多信息请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
 
@@ -31,7 +30,9 @@ upstream_modified: true
 - [Webhook 审计日志](#minio-server-envvar-logging-audit)
 - [Kafka 审计日志](#minio-server-envvar-logging-audit-kafka)
 
-## Prometheus 认证 {#prometheus}
+<a id="prometheus" data-td-print-local></a>
+
+## Prometheus 认证 {#prometheus-authentication}
 
 此设置控制 MinIO 如何向 Prometheus 进行认证。
 
@@ -54,13 +55,16 @@ upstream_modified: true
 - `public` MinIO 不要求抓取客户端对其请求进行认证。
 
 <a id="minio-server-envvar-logging-regular"></a>
-<a id="id3" data-td-print-local></a>
 
-## 服务器日志 {#minio-server-config-logging-regular}
+<a id="minio-server-config-logging-regular" data-td-print-local></a>
+
+## 服务器日志 {#server-logs}
 
 以下部分介绍将 [`silo server`](/zh/reference/minio-server/#command-minio.server) 日志发布到 HTTP webhook 端点的 MinIO 配置设置。 有关这些设置的更完整文档和使用教程，请参见 [将服务日志发布到 HTTP Webhook](/zh/operations/monitoring/minio-logging/#minio-logging-publish-server-logs)。
 
-### 定义多个端点 {#id4}
+在 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，动态重新加载配置后，`logger_webhook` 与 `audit_webhook` 目标会在所有对端服务器节点上持续运行（[#259](https://github.com/pgsty/silo/issues/259)）。
+
+### 定义多个端点 {#defining-multiple-endpoints}
 
 你可以通过为每组相关日志环境变量追加唯一标识符 `_ID`，将多个 webhook 端点指定为日志目标。 例如，以下设置定义了两个不同的服务器日志 webhook 端点：
 
@@ -82,7 +86,7 @@ mc admin config set logger_webhook:secondary \
    endpoint="http://webhook-02.example.net" [ARGUMENTS=VALUE ...]
 ```
 
-### 设置 {#id5}
+### 设置 {#settings}
 
 #### Enable {#enable}
 
@@ -105,7 +109,7 @@ mc admin config set logger_webhook:secondary \
 {{< /tab >}}
 {{< /tabs >}}
 
-#### 端点 {#id6}
+#### 端点 {#endpoint}
 
 *必填*
 
@@ -124,7 +128,9 @@ mc admin config set logger_webhook:secondary \
 
 webhook 的 HTTP 端点。
 
-#### 认证 Token {#token}
+<a id="token" data-td-print-local></a>
+
+#### 认证 Token {#auth-token}
 
 *可选*
 
@@ -183,7 +189,7 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 {{< /tab >}}
 {{< /tabs >}}
 
-#### 批大小 {#id7}
+#### 批大小 {#batch-size}
 
 > [!NOTE]
 > **新增: MinIO**
@@ -207,7 +213,7 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 按批次收集并发送指定数量的事件到 webhook。 如果未设置，MinIO 每个请求发送一个事件。
 
-#### 客户端证书 {#id8}
+#### 客户端证书 {#client-certificate}
 
 *可选*
 
@@ -228,7 +234,7 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 用于向 webhook logger 认证的 mTLS 证书路径。
 
-#### 客户端密钥 {#id9}
+#### 客户端密钥 {#client-key}
 
 *可选*
 
@@ -249,7 +255,7 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 用于向 webhook logger 服务认证的 mTLS 证书密钥路径。
 
-#### 代理 {#id10}
+#### 代理 {#proxy}
 
 *可选*
 
@@ -273,7 +279,7 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 定义在 MinIO 与外部 webhook 通信时供 webhook logger 使用的代理。
 
-#### 队列目录 {#id11}
+#### 队列目录 {#queue-directory}
 
 *可选*
 
@@ -297,7 +303,7 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 
 当 webhook 服务离线时，MinIO 会将未投递事件存储到指定存储中，并在连接恢复后回放这些事件。
 
-#### 队列大小 {#id12}
+#### 队列大小 {#queue-size}
 
 *可选*
 
@@ -319,11 +325,15 @@ export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
 <a id="minio-server-config-logging-audit"></a>
 <a id="minio-server-envvar-logging-audit"></a>
 
-## Webhook 审计日志 {#webhook}
+<a id="webhook" data-td-print-local></a>
+
+## Webhook 审计日志 {#webhook-audit-logs}
 
 以下部分介绍用于将审计日志发布到 HTTP webhook 端点的 MinIO 环境变量。 有关这些环境变量的更完整文档和使用教程，请参见 [将审计日志发布到 HTTP Webhook](/zh/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs)。
 
-### 多个目标 {#id13}
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，动态重新加载配置后，`audit_webhook` 与 `logger_webhook` 目标会在每个对端服务器节点上保持激活（[#259](https://github.com/pgsty/silo/issues/259)）。
+
+### 多个目标 {#multiple-targets}
 
 你可以通过为每组相关日志设置追加唯一标识符 `_ID`，将多个 webhook 端点指定为审计日志目标。
 
@@ -365,16 +375,15 @@ mc admin config set audit_webhook \
 mc admin config set audit_webhook:primary \
    endpoint="http://webhook-01.example.net" [ARGUMENTS=VALUE ...]
 
-
 mc admin config set audit_webhook:secondary \
    endpoint="http://webhook-02.example.net" [ARGUMENTS=VALUE ...]
 ```
 {{< /tab >}}
 {{< /tabs >}}
 
-### 设置 {#id14}
+### 设置 {#id1}
 
-#### Enable {#id15}
+#### Enable {#id2}
 
 {{< tabs group="tab1-tab2" default="tab1" >}}
 {{< tab label="环境变量" value="tab1" >}}
@@ -391,7 +400,7 @@ mc admin config set audit_webhook:secondary \
 {{< /tab >}}
 {{< /tabs >}}
 
-#### 端点 {#id16}
+#### 端点 {#id3}
 
 *必填*
 
@@ -410,7 +419,7 @@ mc admin config set audit_webhook:secondary \
 
 webhook 的 HTTP 端点。
 
-#### 认证 Token {#id17}
+#### 认证 Token {#id4}
 
 *可选*
 
@@ -468,7 +477,7 @@ mc admin config set myminio audit_webhook       \
 
 详情请参阅目标服务的文档。
 
-#### 批大小 {#id18}
+#### 批大小 {#id5}
 
 > [!NOTE]
 > **新增: MinIO**
@@ -492,7 +501,7 @@ mc admin config set myminio audit_webhook       \
 
 按批次收集并发送指定数量的事件到 webhook。 如果未设置，MinIO 每个请求发送一个事件。
 
-#### 客户端证书 {#id19}
+#### 客户端证书 {#id6}
 
 *可选*
 
@@ -515,7 +524,7 @@ mc admin config set myminio audit_webhook       \
 
 提交给 HTTP webhook 的 x.509 客户端证书。 对于不要求客户端提供已知 TLS 证书的 webhook 可省略。
 
-#### 客户端密钥 {#id20}
+#### 客户端密钥 {#id7}
 
 *可选*
 
@@ -538,7 +547,7 @@ mc admin config set myminio audit_webhook       \
 
 提交给 HTTP webhook 的 x.509 私钥。 对于不要求客户端提供已知 TLS 证书的 webhook 可省略。
 
-#### 队列目录 {#id21}
+#### 队列目录 {#id8}
 
 *可选*
 
@@ -562,7 +571,7 @@ mc admin config set myminio audit_webhook       \
 
 当 webhook 服务离线时，MinIO 会将未投递事件存储到指定存储中，并在连接恢复后回放这些事件。
 
-#### 队列大小 {#id22}
+#### 队列大小 {#id9}
 
 *可选*
 
@@ -584,7 +593,9 @@ mc admin config set myminio audit_webhook       \
 <a id="minio-server-config-logging-kafka-audit"></a>
 <a id="minio-server-envvar-logging-audit-kafka"></a>
 
-## Kafka 审计日志 {#kafka}
+<a id="kafka" data-td-print-local></a>
+
+## Kafka 审计日志 {#kafka-audit-logs}
 
 以下部分介绍用于将审计日志发布到 Kafka broker 的 MinIO 环境变量。
 
@@ -601,9 +612,9 @@ mc admin config set audit_kafka \
    brokers="https://kafka-endpoint.example.net:9092" [ARGUMENTS=VALUE ...]
 ```
 
-### 设置 {#id23}
+### 设置 {#id10}
 
-#### Enable {#id24}
+#### Enable {#id11}
 
 *必填*
 
@@ -913,7 +924,7 @@ MinIO 在指定端点期望的 Kafka broker 版本。
 
 与该配置关联的注释。
 
-#### 队列目录 {#id25}
+#### 队列目录 {#id12}
 
 *可选*
 
@@ -934,7 +945,7 @@ MinIO 在指定端点期望的 Kafka broker 版本。
 
 当 Kafka 服务离线时，MinIO 会将未投递事件存储到指定存储中，并在连接恢复后回放这些事件。
 
-#### 队列大小 {#id26}
+#### 队列大小 {#id13}
 
 *可选*
 

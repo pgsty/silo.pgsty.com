@@ -3,14 +3,16 @@ title: "mc admin scanner trace"
 url: "/zh/reference/minio-mc-admin/mc-admin-scanner-trace/"
 weight: 20
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-scanner-trace.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-scanner-trace"></a>
 
 <a id="command-mc.admin.scanner.trace"></a>
 
-## 说明 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 说明 {#description}
 
 [`mc admin scanner trace`](#command-mc.admin.scanner.trace) 命令会显示目标 MinIO 部署上发生的 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 相关 API 操作。
 
@@ -50,7 +52,9 @@ mc admin scanner trace ALIAS
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.admin.scanner.trace.ALIAS}
 
@@ -92,13 +96,13 @@ mc admin scanner trace ALIAS
 
 有效单位包括：
 
-| 后缀 | 单位大小 |
-| --- | --- |
-| `k` | KB（Kilobyte，1000 Bytes） |
-| `m` | MB（Megabyte，1000 Kilobytes） |
-| `g` | GB（Gigabyte，1000 Megabytes） |
-| `t` | TB（Terabyte，1000 Gigabytes） |
-| `ki` | KiB（Kibibyte，1024 Bytes） |
+| 后缀 | 单位大小                        |
+| ---- | ------------------------------- |
+| `k`  | KB（Kilobyte，1000 Bytes）      |
+| `m`  | MB（Megabyte，1000 Kilobytes）  |
+| `g`  | GB（Gigabyte，1000 Megabytes）  |
+| `t`  | TB（Terabyte，1000 Gigabytes）  |
+| `ki` | KiB（Kibibyte，1024 Bytes）     |
 | `mi` | MiB（Mebibyte，1024 Kibibytes） |
 | `gi` | GiB（Gibibyte，1024 Mebibytes） |
 | `ti` | TiB（Tebibyte，1024 Gibibytes） |
@@ -143,13 +147,19 @@ mc admin scanner trace ALIAS
 
 返回详细输出。
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 监控所有 scanner API 操作 {#scanner-api}
+## 示例 {#examples}
+
+<a id="scanner-api" data-td-print-local></a>
+
+### 监控所有 scanner API 操作 {#monitor-all-scanner-api-operations}
 
 使用 [`mc admin scanner trace`](#command-mc.admin.scanner.trace) 监控别名为 `myminio` 的 MinIO 部署上的 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) API 操作：
 
@@ -157,7 +167,9 @@ mc admin scanner trace ALIAS
 mc admin scanner trace myminio
 ```
 
-### 显示特定路径的 scanner 跟踪 {#scanner}
+<a id="scanner" data-td-print-local></a>
+
+### 显示特定路径的 scanner 跟踪 {#show-scanner-trace-for-a-specific-path}
 
 使用 [`mc admin scanner trace`](#command-mc.admin.scanner.trace) 监控别名为 `myminio` 的部署上路径 `my-bucket/my-prefix/*` 的 API 操作：
 
@@ -165,7 +177,9 @@ mc admin scanner trace myminio
 mc admin scanner trace --path my-bucket/my-prefix/* myminio
 ```
 
-### 显示 `scanObject` 函数的 scanner API 操作 {#scanobject-scanner-api}
+<a id="scanobject-scanner-api" data-td-print-local></a>
+
+### 显示 `scanObject` 函数的 scanner API 操作 {#show-scanner-api-operations-for-the-scanobject-function}
 
 监控 `myminio` 部署上 `scanObject` 函数的 scanner 活动：
 
@@ -173,7 +187,9 @@ mc admin scanner trace --path my-bucket/my-prefix/* myminio
 mc admin scanner trace --funcname=scanner.ScanObject myminio
 ```
 
-### 显示大于 `1MB` 的 scanner 操作请求 {#mb-scanner}
+<a id="mb-scanner" data-td-print-local></a>
+
+### 显示大于 `1MB` 的 scanner 操作请求 {#show-scanner-operation-requests-greater-than-1mb-in-size}
 
 使用 [`mc admin scanner trace`](#command-mc.admin.scanner.trace) 监控 `myminio` 部署上大于 `1MB` 的请求：
 
@@ -181,7 +197,9 @@ mc admin scanner trace --funcname=scanner.ScanObject myminio
 mc admin scanner trace --filter-request --filter-size 1MB myminio
 ```
 
-### 显示大于 `1MB` 的 scanner 操作响应 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 显示大于 `1MB` 的 scanner 操作响应 {#show-scanner-operation-responses-greater-than-1mb-in-size}
 
 使用 [`mc admin scanner trace`](#command-mc.admin.scanner.trace) 监控较大的响应大小：
 
@@ -189,7 +207,9 @@ mc admin scanner trace --filter-request --filter-size 1MB myminio
 mc admin scanner trace --filter-response --filter-size 1MB myminio
 ```
 
-### 显示持续超过五毫秒的 scanner 操作 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 显示持续超过五毫秒的 scanner 操作 {#show-scanner-operations-that-last-longer-than-five-milliseconds}
 
 使用 [`mc admin scanner trace`](#command-mc.admin.scanner.trace) 监控耗时较长的操作：
 

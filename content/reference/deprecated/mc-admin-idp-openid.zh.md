@@ -3,7 +3,7 @@ title: "mc admin idp openid"
 url: "/zh/reference/deprecated/mc-admin-idp-openid/"
 weight: 160
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-idp-openid.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-idp-openid"></a>
@@ -16,7 +16,9 @@ upstream_modified: false
 >
 > `mc admin idp openid` 及其子命令已由 [`mc idp openid`](/zh/reference/minio-mc/mc-idp-openid/#command-mc.idp.openid) 替代。
 
-## 描述 {#id1}
+<a id="id1" data-td-print-local></a>
+
+## 描述 {#description}
 
 [`mc admin idp openid`](#command-mc.admin.idp.openid) 命令允许你为第三方 [OpenID 身份与访问管理（IAM）集成](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) 添加、修改、查看、列出、移除、启用和禁用服务器配置。
 
@@ -24,23 +26,28 @@ upstream_modified: false
 
 [`mc admin idp openid`](#command-mc.admin.idp.openid) 命令包含以下子命令：
 
-| 子命令 | 描述 |
-| --- | --- |
-| [`mc admin idp openid add`](#mc.admin.idp.openid.add) | 创建 OpenID IDP 服务器配置。 |
-| [`mc admin idp openid update`](#mc.admin.idp.openid.update) | 修改现有的 OpenID IDP 服务器配置。 |
-| [`mc admin idp openid rm`](#mc.admin.idp.openid.rm) | 从部署中移除 OpenID IDP 服务器配置。 |
-| [`mc admin idp openid ls`](#mc.admin.idp.openid.ls) | 输出部署中现有 OpenID 服务器配置列表。 |
-| [`mc admin idp openid info`](#mc.admin.idp.openid.info) | 显示特定 OpenID 服务器配置的详细信息。 |
-| [`mc admin idp openid enable`](#mc.admin.idp.openid.enable) | 启用 OpenID 服务器配置。 |
-| [`mc admin idp openid disable`](#mc.admin.idp.openid.disable) | 禁用 OpenID 服务器配置。 |
+| 子命令                                                        | 描述                                   |
+| ------------------------------------------------------------- | -------------------------------------- |
+| [`mc admin idp openid add`](#mc.admin.idp.openid.add)         | 创建 OpenID IDP 服务器配置。           |
+| [`mc admin idp openid update`](#mc.admin.idp.openid.update)   | 修改现有的 OpenID IDP 服务器配置。     |
+| [`mc admin idp openid rm`](#mc.admin.idp.openid.rm)           | 从部署中移除 OpenID IDP 服务器配置。   |
+| [`mc admin idp openid ls`](#mc.admin.idp.openid.ls)           | 输出部署中现有 OpenID 服务器配置列表。 |
+| [`mc admin idp openid info`](#mc.admin.idp.openid.info)       | 显示特定 OpenID 服务器配置的详细信息。 |
+| [`mc admin idp openid enable`](#mc.admin.idp.openid.enable)   | 启用 OpenID 服务器配置。               |
+| [`mc admin idp openid disable`](#mc.admin.idp.openid.disable) | 禁用 OpenID 服务器配置。               |
+{.wide .expand}
 
-## 配置参数 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 配置参数 {#configuration-parameters}
 
 [`mc admin idp openid`](#command-mc.admin.idp.openid) 子命令支持配置参数。 这些参数定义了服务器与 IAM 提供方的交互方式。
 
 有关配置参数的更详细说明，请参阅 [配置设置文档](/zh/reference/minio-server/settings/iam/openid/#minio-open-id-config-settings)。
 
-## 语法 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 #### `add` {#mc.admin.idp.openid.add}
 
@@ -259,6 +266,8 @@ mc [GLOBALFLAGS] admin idp openid disable       \
 {{< /tab >}}
 {{< /tabs >}}
 
-## 全局标志 {#id6}
+<a id="id6" data-td-print-local></a>
+
+## 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。

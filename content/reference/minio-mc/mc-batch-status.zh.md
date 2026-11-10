@@ -24,9 +24,9 @@ upstream_modified: true
 
 <a id="silo-status-details"></a>
 
-## mcli 20261109 与下一个 SILO 版本：暂停与跳过结果 {#silo-job-outcomes}
+## mcli 20261109 与 SILO 20261109：暂停与跳过结果 {#silo-job-outcomes}
 
-[mcli 20261109](/zh/blog/release/mcli-20261109/) 与下一个配套的 SILO 版本增加 `paused` 和 `complete-with-skips`。`paused` 是非终态：服务器正在等待重试，实时指标仍可用时客户端继续观察。`complete-with-skips` 表示本轮已经结束，但仍保留了受保护版本或整 key 被拒绝的对象，不代表所有选中对象都已删除。与 `complete`、`failed` 一样，成功取得它时退出码为 `0`；脚本必须检查状态与计数。
+[mcli 20261109](/zh/blog/release/mcli-20261109/) 与 [SILO 20261109](/zh/blog/release/silo-20261109/) 增加 `paused` 和 `complete-with-skips`。`paused` 是非终态：服务器正在等待重试，实时指标仍可用时客户端继续观察。`complete-with-skips` 表示本轮已经结束，但仍保留了受保护版本或整 key 被拒绝的对象，不代表所有选中对象都已删除。与 `complete`、`failed` 一样，成功取得它时退出码为 `0`；脚本必须检查状态与计数。
 
 文本输出按需显示 `VersionsSkippedLocked`、`KeysRefused`、`FailureReason` 和 `PausedReason`。JSON 保留原有 `metric` 对象，在新增的 `details` 下提供 `versionsSkippedLocked`、`keysRefused`、`failureReason`、`pausedReason`。两个计数的单位不同，分别是跳过的版本数和整 key 拒绝数，不能相加当作已删除对象数。
 
@@ -133,6 +133,4 @@ CurrObjName:    share/doc/xml-core/examples/foo.xmlcatalogs
 
 ### S3 兼容性 {#s3-compatibility}
 
-**`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
-
-对于其他 S3 兼容服务，MinIO 不提供任何保证，因为这些服务的 S3 API 实现未知， 因此不在支持范围内。虽然 **`mc`** 命令 *可能* 仍能按文档说明工作，但此类 用法需要你自行承担风险。
+SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的兼容性属于[尽力而为](/zh/reference/minio-mc/#command-mc)。

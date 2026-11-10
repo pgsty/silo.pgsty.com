@@ -36,6 +36,7 @@ Refer to [Object Healing](/operations/concepts/healing/#minio-concepts-healing) 
 ```shell
 mc admin heal [FLAGS] TARGET             \
                       [--all-drives, -a] \
+                      [--dry-run, -n]    \
                       [--force]          \
                       [--verbose, -v]
 ```
@@ -64,6 +65,14 @@ If the `TARGET` bucket or bucket prefix has an active healing scan, the command 
 
 Select all drives and show verbose information.
 
+#### `--dry-run, -n` {#mc.admin.heal.-dry-run}
+
+*mc-cmd*
+
+*Optional*
+
+Inspects objects and reports drive and shard health without modifying or deleting data on disk.
+
 #### `--force` {#mc.admin.heal.-force}
 
 *mc-cmd*
@@ -79,6 +88,15 @@ Disables warning prompts.
 *Optional*
 
 Show information about offline and faulty healing drives.
+
+## Behavior {#behavior}
+
+In [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) and [mcli 20261109](/blog/release/mcli-20261109/):
+
+- `mc admin heal --dry-run` (`-n`) remains strictly read-only and does not delete dangling or corrupted data on disk ([PR #280](https://github.com/pgsty/silo/pull/280)).
+- The server classifies `xl.meta` checksum failures for healing so damaged metadata shards are repaired ([#309](https://github.com/pgsty/silo/issues/309)).
+- Object versions whose queued lifecycle expiry is refused due to incomplete or damaged history are queued for healing ([#303](https://github.com/pgsty/silo/issues/303)).
+- `mcli` formats heal byte progress cleanly through `EiB`.
 
 <a id="minio-concepts-healing-colors"></a>
 

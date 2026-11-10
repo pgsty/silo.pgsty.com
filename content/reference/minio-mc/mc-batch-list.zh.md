@@ -35,7 +35,7 @@ mc batch list myminio
 
 ```shell
 mc [GLOBALFLAGS] batch list TARGET           \
-                            --type "string"
+                            [--type "string"]
 ```
 
 - 方括号 `[]` 表示可选参数。
@@ -64,7 +64,7 @@ mc [GLOBALFLAGS] batch list TARGET           \
 
 *Optional*
 
-仅列出指定类型的批处理作业。
+仅列出指定类型的批处理作业。有效值为 `replicate`、`keyrotate` 和 `expire`。
 
 <a id="id4" data-td-print-local></a>
 
@@ -87,9 +87,7 @@ mc batch list myminio --type "replicate"
 ```
 
 - 将 `myminio` 替换为应运行该作业的 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
-- 将 `replicate` 替换为要输出的作业类型。
-
-  当前，[`mc batch`](/zh/reference/minio-mc/mc-batch/#command-mc.batch) 仅支持 `replicate` 作业类型。
+- 将 `replicate` 替换为要输出的作业类型。[`mc batch`](/zh/reference/minio-mc/mc-batch/#command-mc.batch) 支持 `replicate`、`keyrotate` 和 `expire` 三种作业类型。
 
 上述命令的输出类似如下：
 

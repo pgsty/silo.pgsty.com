@@ -17,7 +17,7 @@ This command requires that the user performing it have the [`admin:Rebalance`](/
 
 ## Description {#description}
 
-The [`mc admin rebalance`](#command-mc.admin.rebalance) command allows starts, monitors, or stops a rebalancing operation on a MinIO deployment. Rebalancing redistributes objects across all pools in the deployment.
+The [`mc admin rebalance`](#command-mc.admin.rebalance) command starts, monitors, or stops a rebalancing operation on a MinIO deployment. Rebalancing redistributes objects across all pools in the deployment.
 
 MinIO does not automatically rebalance objects when adding a new server pool. Instead, MinIO [writes new objects](/operations/deployments/baremetal-expand-minio-deployment/#minio-writing-files) to the pool with relatively more free space compared to the other available pools on the deployment. Triggering a manual rebalancing procedure prompts MinIO to scan the entire deployment and move objects as necessary to achieve a similar available free space across all pools.
 
@@ -38,11 +38,12 @@ mc admin trace --call rebalance ALIAS
 
 The [`mc admin rebalance`](#command-mc.admin.rebalance) command has the following subcommands:
 
-| Subcommand | Description |
-| --- | --- |
-| [`mc admin rebalance start`](#mc.admin.rebalance.start) | Starts a rebalance operation on a MinIO deployment. |
+| Subcommand                                                | Description                                                       |
+| --------------------------------------------------------- | ----------------------------------------------------------------- |
+| [`mc admin rebalance start`](#mc.admin.rebalance.start)   | Starts a rebalance operation on a MinIO deployment.               |
 | [`mc admin rebalance status`](#mc.admin.rebalance.status) | Outputs the current status of an in-progress rebalance operation. |
-| [`mc admin rebalance stop`](#mc.admin.rebalance.stop) | Stops an in-progress rebalance operation. |
+| [`mc admin rebalance stop`](#mc.admin.rebalance.stop)     | Stops an in-progress rebalance operation.                         |
+{.wide .expand}
 
 ## Syntax {#syntax}
 
@@ -102,7 +103,7 @@ mc [GLOBALFLAGS] admin rebalance ALIAS
 
 *mc-cmd*
 
-Ends an in-progress rebalance job on the specified deployment.
+Ends an in-progress rebalance job on the specified deployment. In [SILO 20261109](/blog/release/silo-20261109/), `mc admin rebalance stop` returns cleanly instead of panicking when rebalance metadata is absent ([#270](https://github.com/pgsty/silo/issues/270)).
 
 {{< tabs group="examples-syntax" >}}
 {{< tab label="EXAMPLES" value="examples" >}}
@@ -129,12 +130,17 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Back Up Cluster Settings First {#back-up-cluster-settings-first}
 
-Use the [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) and [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) commands to take a snapshot of the bucket metadata and IAM configurations respectively prior to starting decommissioning. You can use these snapshots to restore bucket/IAM settings to recover from user or process errors as necessary.
+Use the [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) and [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) commands to take a snapshot of the bucket metadata and IAM configurations before starting a rebalance operation. You can use these snapshots to restore bucket or IAM settings to recover from user or process errors.
 
-### Rebalancing Ignores Expired Objects and Trailing `DeleteMarker` {#rebalancing-ignores-expired-objects-and-trailing-deletemarker}
+<a id="rebalancing-ignores-expired-objects-and-trailing-deletemarker"></a>
 
-Starting with [RELEASE.2023-06-23T20-26-00Z](https://github.com/minio/minio/releases/tag/RELEASE.2023-06-23T20-26-00Z), rebalancing ignores object versions which have expired based on the configured [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) for the parent bucket.
+### Delete Markers, Expired Versions, and Multi-Pool Migration {#rebalance-multi-pool-safety}
 
-Rebalancing also ignores objects where the only remaining version is a [delete marker](/administration/object-management/object-versioning/#minio-bucket-versioning-delete). This avoids inter-pool <abbr title="Input/Output">I/O</abbr> for objects already considered fully deleted.
+SILO rebalance does **not** drop delete markers or silently skip versions whose lifecycle state is uncertain across pools. Preserving delete markers and unconfirmed versions prevents older object versions in other pools from reappearing during or after migration.
 
-MinIO relies on the [scanner](/operations/concepts/scanner/#minio-concepts-scanner) to capture and remove those expired objects or trailing `DeleteMarker` objects.
+In [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), rebalancing enforces the following guarantees:
+
+- Preserves `null` and UUID [delete markers](/administration/object-management/object-versioning/#minio-bucket-versioning-delete) across pools instead of dropping them.
+- Moves objects whose copies use mixed erasure layouts across pools ([#261](https://github.com/pgsty/silo/issues/261)), ILM-expired current versions ([#265](https://github.com/pgsty/silo/issues/265)), and versions whose cross-pool [lifecycle](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) expiry is refused because authoritative quorum or lock state cannot be confirmed ([#278](https://github.com/pgsty/silo/issues/278)).
+- Continues rebalancing across remaining buckets when an individual bucket fails, while preserving cancellation ([#307](https://github.com/pgsty/silo/issues/307)).
+- Handles `mc admin rebalance stop` safely without panicking when no rebalance metadata exists ([#270](https://github.com/pgsty/silo/issues/270)).

@@ -8,7 +8,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SDK selected for 20261026:** Server 20261026, Console v2.5.1, mcli 20261026, and pkg v3.15.2 pin upstream `github.com/minio/minio-go/v7 v7.4.2-0.20261025165926-320af050c445` (a Go pseudo-version for upstream commit `320af050c445`). This commit includes short multipart stream validation, `ReadAt`/seek boundary fixes, deduplicated batch-delete fallback errors, and HTTP 204 handling when removing bucket replication; parallel GET/Compose remain opt-in. See the [component matrix](/compatibility/versions/) and [silo-pkg 3.15.2 SDK notes](/blog/release/pkg-3.15.2/#sdk).
+**SDK selected for SILO 20261109:** [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), [Console v2.7.0](/blog/release/console-2.7.0/), [mcli 20261109](/blog/release/mcli-20261109/), and [silo-pkg v3.16.0](/blog/release/pkg-3.16.0/) build with Go `1.27.3` and pin upstream `github.com/minio/minio-go/v7 v7.4.2-0.20261025165926-320af050c445` (a Go pseudo-version for upstream commit `320af050c445`). This commit includes short multipart stream validation, `ReadAt`/seek boundary fixes, deduplicated batch-delete fallback errors, and HTTP 204 handling when removing bucket replication; parallel GET/Compose remain opt-in. See the [component matrix](/compatibility/versions/) and [silo-pkg 3.16.0 release notes](/blog/release/pkg-3.16.0/).
 
 ## MinIO Go SDK {#go-sdk}
 

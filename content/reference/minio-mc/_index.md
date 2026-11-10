@@ -18,7 +18,7 @@ The **`mc`** command-line tool is built for compatibility with the AWS S3 API. I
 
 The Silo project cannot guarantee behavior against every other S3-compatible service because implementations differ. Test the operations your workload relies on before treating another service as compatible.
 
-The current release is [mcli 20261109](/blog/release/mcli-20261109/), using Go 1.27.3, `silo-pkg` [v3.16.0](/blog/release/pkg-3.16.0/), and upstream SDK `v7.4.2-0.20261025165926-320af050c445`. See the [compatibility notes](/compatibility/mcli/#current-release) for behavior changes and the [component matrix](/compatibility/versions/) for Server/Console release boundaries.
+The current release is [mcli 20261109](/blog/release/mcli-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), using Go 1.27.3, `silo-pkg` [v3.16.0](/blog/release/pkg-3.16.0/), and upstream SDK `v7.4.2-0.20261025165926-320af050c445`. See the [compatibility notes](/compatibility/mcli/#current-release) for behavior changes and the [component matrix](/compatibility/versions/) for Server/Console release boundaries.
 
 [`mc`](#command-mc) has the following syntax:
 
@@ -48,6 +48,13 @@ Use [Download & Install](/download/#client) to select a Linux package, an archiv
 
 Standalone archives and Linux packages install the command as **`mcli`**. The container and source build retain **`mc`**. The commands are aliases of the same client; when this reference shows `mc`, substitute `mcli` if that is the name installed on your host.
 
+To run the published multi-architecture container image ([mcli 20261109](/blog/release/mcli-20261109/), which pre-creates `/.mc` with sticky writable permissions for non-root UIDs):
+
+```shell
+docker pull pgsty/mc:RELEASE.2026-11-09T00-00-00Z
+docker run --rm pgsty/mc:RELEASE.2026-11-09T00-00-00Z --version
+```
+
 To build the maintained fork from source:
 
 ```shell
@@ -60,8 +67,7 @@ make build
 > [!WARNING]
 > [`mc update`](/reference/minio-mc/mc-update/#command-mc.update) is intentionally disabled in the Pigsty fork. Upgrade through the [Silo download page](/download/#client), the [Pigsty package repository](https://pigsty.io/docs/repo/infra/list/#object-storage), or [GitHub Releases](https://github.com/pgsty/mc/releases).
 
-> [!NOTE]
-> The current `pgsty/mc` source keeps the `mc license` and `mc support` command trees for script compatibility, but every online MinIO SUBNET, licensing, upload, call-home, and telemetry path is disabled. Commands that would contact those services fail with a stable message and exit `1`; local diagnostics such as `support diag`, `perf`, `profile`, and `inspect` still work without registration and write private local files. See [MCLI Client Compatibility Notes](/compatibility/mcli/#subnet).
+The current `pgsty/mc` source retains the `mc license` and `mc support` command trees for script compatibility, while disabling all online MinIO SUBNET, licensing, upload, call-home, and telemetry endpoints. Commands that contact external online services fail with a stable message and exit `1`. Local diagnostics such as `support diag`, `perf`, `profile`, `inspect`, and `top` run directly against SILO without registration and write private local files. See [MCLI Client Compatibility Notes](/compatibility/mcli/#subnet).
 
 ### 2) Create an Alias for the S3-Compatible Service {#create-an-alias-for-the-s3-compatible-service}
 
@@ -222,8 +228,7 @@ where <code>n</code> is an argument specified to the command.</p></td>
     </tr>
     <tr>
       <td><a href="/reference/minio-mc/mc-license-info/#command-mc.license.info"><code>mc license info</code></a><br /><a href="/reference/minio-mc/mc-license-register/#command-mc.license.register"><code>mc license register</code></a><br /><a href="/reference/minio-mc/mc-license-update/#command-mc.license.update"><code>mc license update</code></a><br /></td>
-      <td><p>The <a href="/reference/minio-mc/mc-license/#command-mc.license"><code>mc license</code></a> commands work with cluster registration for <a href="https://min.io/pricing?jmp=docs">MinIO SUBNET</a>.
-Use the commands to register a deployment, display information about the cluster’s current license, or update the license key for a cluster.</p></td>
+      <td><p>The <a href="/reference/minio-mc/mc-license/#command-mc.license"><code>mc license</code></a> commands are retained for script compatibility. Local inspection, unregister, and explicit license-file updates remain available; online registration and renewal are disabled.</p></td>
     </tr>
     <tr>
       <td><p><a href="/reference/minio-mc/mc-ls/#command-mc.ls"><code>mc ls</code></a></p></td>
@@ -301,8 +306,7 @@ You can also use it to retrieve bucket metadata.</p></td>
     </tr>
     <tr>
       <td><a href="/reference/minio-mc/mc-support-callhome/#command-mc.support.callhome"><code>mc support callhome</code></a><br /><a href="/reference/minio-mc/mc-support-diag/#command-mc.support.diag"><code>mc support diag</code></a><br /><a href="/reference/minio-mc/mc-support-inspect/#command-mc.support.inspect"><code>mc support inspect</code></a><br /><a href="/reference/minio-mc/mc-support-perf/#command-mc.support.perf"><code>mc support perf</code></a><br /><a href="/reference/minio-mc/mc-support-profile/#command-mc.support.profile"><code>mc support profile</code></a><br /><a href="/reference/minio-mc/mc-support-proxy/#command-mc.support.proxy"><code>mc support proxy</code></a><br /><a href="/reference/minio-mc/mc-support-top-api/#command-mc.support.top.api"><code>mc support top api</code></a><br /><a href="/reference/minio-mc/mc-support-top-disk/#command-mc.support.top.disk"><code>mc support top disk</code></a><br /><a href="/reference/minio-mc/mc-support-top-locks/#command-mc.support.top.locks"><code>mc support top locks</code></a><br /><a href="/reference/minio-mc/mc-support-upload/#command-mc.support.upload"><code>mc support upload</code></a><br /></td>
-      <td><p>The MinIO Client <a href="/reference/minio-mc/mc-support/#command-mc.support"><code>mc support</code></a> commands provides tools for analyzing deployment health or performance and for running diagnostics.
-You can also upload generated health reports for further analysis by MinIO engineering.</p></td>
+      <td><p>The <a href="/reference/minio-mc/mc-support/#command-mc.support"><code>mc support</code></a> commands provide local tools for analyzing deployment health, performance, and diagnostics against SILO without registration. Online report upload and call-home commands are disabled.</p></td>
     </tr>
     <tr>
       <td><a href="/reference/minio-mc/mc-tag-list/#command-mc.tag.list"><code>mc tag list</code></a><br /><a href="/reference/minio-mc/mc-tag-remove/#command-mc.tag.remove"><code>mc tag remove</code></a><br /><a href="/reference/minio-mc/mc-tag-set/#command-mc.tag.set"><code>mc tag set</code></a><br /></td>
@@ -389,16 +393,17 @@ Some commands and flags allow for pattern matching. When enabled, a pattern can 
 
 For example, refer to the following examples for wildcard uses and their results.
 
-| Pattern | Text | Match Result |
-| --- | --- | --- |
-| `abc*` | ab | Match |
-| `abc*` | abd | Not a match |
-| `abc*c` | abcd | Match |
-| `ab*??d` | abxxc | Match |
-| `ab*??d` | abxc | Match |
-| `ab??d` | abxc | Match |
-| `ab??d` | abc | Match |
-| `ab??d` | abcxdd | Not a match |
+| Pattern  | Text   | Match Result |
+| -------- | ------ | ------------ |
+| `abc*`   | ab     | Match        |
+| `abc*`   | abd    | Not a match  |
+| `abc*c`  | abcd   | Match        |
+| `ab*??d` | abxxc  | Match        |
+| `ab*??d` | abxc   | Match        |
+| `ab??d`  | abxc   | Match        |
+| `ab??d`  | abc    | Match        |
+| `ab??d`  | abcxdd | Not a match  |
+{.wide .expand}
 
 <a id="minio-mc-global-options"></a>
 

@@ -3,7 +3,7 @@ title: "mc admin idp openid"
 url: "/reference/deprecated/mc-admin-idp-openid/"
 weight: 160
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-idp-openid.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-idp-openid"></a>
@@ -24,15 +24,16 @@ Define configuration settings as an alternative to using environment variables w
 
 The [`mc admin idp openid`](#command-mc.admin.idp.openid) command has the following subcommands:
 
-| Subcommand | Description |
-| --- | --- |
-| [`mc admin idp openid add`](#mc.admin.idp.openid.add) | Create an OpenID IDP server configuration. |
-| [`mc admin idp openid update`](#mc.admin.idp.openid.update) | Modify an existing OpenID IDP server configuration. |
-| [`mc admin idp openid rm`](#mc.admin.idp.openid.rm) | Remove an OpenID IDP server configuration from a deployment. |
-| [`mc admin idp openid ls`](#mc.admin.idp.openid.ls) | Outputs a list of the existing OpenID server configurations for a deployment. |
-| [`mc admin idp openid info`](#mc.admin.idp.openid.info) | Displays details for a specific OpenID server configuration. |
-| [`mc admin idp openid enable`](#mc.admin.idp.openid.enable) | Enables an OpenID server configuration. |
-| [`mc admin idp openid disable`](#mc.admin.idp.openid.disable) | Disables an OpenID server configuration. |
+| Subcommand                                                    | Description                                                                   |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [`mc admin idp openid add`](#mc.admin.idp.openid.add)         | Create an OpenID IDP server configuration.                                    |
+| [`mc admin idp openid update`](#mc.admin.idp.openid.update)   | Modify an existing OpenID IDP server configuration.                           |
+| [`mc admin idp openid rm`](#mc.admin.idp.openid.rm)           | Remove an OpenID IDP server configuration from a deployment.                  |
+| [`mc admin idp openid ls`](#mc.admin.idp.openid.ls)           | Outputs a list of the existing OpenID server configurations for a deployment. |
+| [`mc admin idp openid info`](#mc.admin.idp.openid.info)       | Displays details for a specific OpenID server configuration.                  |
+| [`mc admin idp openid enable`](#mc.admin.idp.openid.enable)   | Enables an OpenID server configuration.                                       |
+| [`mc admin idp openid disable`](#mc.admin.idp.openid.disable) | Disables an OpenID server configuration.                                      |
+{.wide .expand}
 
 ## Configuration Parameters {#configuration-parameters}
 

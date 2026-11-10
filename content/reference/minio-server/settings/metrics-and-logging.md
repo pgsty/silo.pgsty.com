@@ -60,6 +60,8 @@ Specifies the authentication mode for the Prometheus [scraping endpoints](/opera
 
 The following section documents settings for configuring MinIO to publish [`silo server`](/reference/minio-server/#command-minio.server) logs to an HTTP webhook endpoint. See [Publish Server Logs to HTTP Webhook](/operations/monitoring/minio-logging/#minio-logging-publish-server-logs) for more complete documentation and tutorials on using these settings.
 
+In [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), dynamic configuration reloads keep `logger_webhook` and `audit_webhook` targets running across all peer servers ([#259](https://github.com/pgsty/silo/issues/259)).
+
 ### Defining Multiple Endpoints {#defining-multiple-endpoints}
 
 You can specify multiple webhook endpoints as log targets by appending a unique identifier `_ID` for each set of related logging environment variables. For example, the following settings define two distinct server logs webhook endpoints:
@@ -322,6 +324,8 @@ An integer value to use for the queue size for logger webhook targets.
 ## Webhook Audit Logs {#webhook-audit-logs}
 
 The following section documents environment variables for configuring MinIO to publish audit logs to an HTTP webhook endpoint. See [Publish Audit Logs to HTTP Webhook](/operations/monitoring/minio-logging/#minio-logging-publish-audit-logs) for more complete documentation and tutorials on using these environment variables.
+
+In [SILO 20261109](/blog/release/silo-20261109/), dynamic configuration reloads keep `audit_webhook` and `logger_webhook` targets running on every peer server ([#259](https://github.com/pgsty/silo/issues/259)).
 
 ### Multiple Targets {#multiple-targets}
 

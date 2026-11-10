@@ -93,10 +93,10 @@ Defaults to removing an event that triggers for all event types on the [`ALIAS`]
 Retrieve the event types used by running [`mc event ls`](/reference/minio-mc/mc-event-list/#command-mc.event.ls) on the bucket. Use the following table to convert event types in the command’s output to the entry required for the [`mc event rm`](#command-mc.event.rm) command:
 
 | Output of `mv event ls` | Event type to use |
-| --- | --- |
-| `s3:objectAccessed` | `get` |
-| `s3:objectCreated` | `put` |
-| `s3:objectRemoved` | `delete` |
+| ----------------------- | ----------------- |
+| `s3:objectAccessed`     | `get`             |
+| `s3:objectCreated`      | `put`             |
+| `s3:objectRemoved`      | `delete`          |
 
 For example, if the `mc event ls` returns the following:
 

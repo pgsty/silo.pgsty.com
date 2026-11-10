@@ -29,7 +29,9 @@ math: true
 
 <a id="id3" data-td-print-local></a>
 
-## 标准存储类 {#minio-ec-storage-class-standard}
+<a id="minio-ec-storage-class-standard" data-td-print-local></a>
+
+## 标准存储类 {#standard-storage-class}
 
 > [!NOTE]
 > **说明**
@@ -62,12 +64,12 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 下表列出了基于部署中初始服务器池 [erasure set size](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set) 的默认值：
 
 | 纠删集合大小 | 默认校验 (EC:M) |
-| --- | --- |
-| 1 | EC:0 |
-| 2-3 | EC:1 |
-| 4-5 | EC:2 |
-| 6 - 7 | EC:3 |
-| 8 - 16 | EC:4 |
+| ------------ | --------------- |
+| 1            | EC:0            |
+| 2-3          | EC:1            |
+| 4-5          | EC:2            |
+| 6 - 7        | EC:3            |
+| 8 - 16       | EC:4            |
 
 `2–3` 这一行表示默认校验值相同，不表示写入可用性相同。采用 `EC:1` 时，双盘集合的读仲裁为 1、写仲裁为 2；三盘集合的读写仲裁均为 2。因此，双盘集合失去一盘后无法继续写入。单盘 `EC:0` 不提供纠删码冗余。参见 [纠删码说明](/zh/operations/concepts/erasure-coding/#minio-ec-basics)。
 
@@ -77,7 +79,9 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 可在启动后将该值更改为 `0` 与该纠删集合大小上限之间的任意值。 MinIO 只会将变更后的校验值应用于新写入对象。 现有对象会保留其创建时的校验值。
 
-## 降低冗余存储类 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 降低冗余存储类 {#reduced-redundancy-storage-class}
 
 > [!NOTE]
 > **说明**
@@ -111,7 +115,9 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 对于纠删集合大小小于 2 的部署，不能设置此值。 纠删集合大小大于 1 的部署默认值为 `EC:1`。 纠删集合大小为 1 的部署默认值为 `EC:0`。
 
-## 校验保留优化 {#id5}
+<a id="id5" data-td-print-local></a>
+
+## 校验保留优化 {#parity-retention-optimization}
 
 {{< tabs group="environment-variable-configuration-setting" >}}
 {{< tab label="Environment Variable" value="environment-variable" >}}
@@ -130,7 +136,9 @@ MinIO 会参考请求元数据中的 `x-amz-storage-class` 头，以确定应为
 
 将该设置指定为 `capacity`，可指示 MinIO 不为对象创建任何额外校验。 这会优先保障集群总体容量，但代价是当该纠删集合中更多驱动器故障时，对象可用性可能降低。
 
-## 注释 {#id6}
+<a id="id6" data-td-print-local></a>
+
+## 注释 {#comment}
 
 {{< tabs group="environment-variable-configuration-setting" >}}
 {{< tab label="Environment Variable" value="environment-variable" >}}

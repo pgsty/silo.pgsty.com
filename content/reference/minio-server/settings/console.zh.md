@@ -6,22 +6,34 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="minio-console-settings"></a>
 <a id="minio-server-envvar-console"></a>
 
-## 0903 之后的内嵌 Console 修复 {#embedded-compatibility}
+## 内嵌与独立 Console（SILO 20261109 / Console v2.7.0） {#embedded-compatibility}
 
-正在修复的问题包括[本机代理来源地址识别（#147）](https://github.com/pgsty/silo/issues/147)与 [WebSocket 限额配置被忽略（#148）](https://github.com/pgsty/silo/issues/148)。以下行为要求所用构建包含这两项修复；0903 镜像尚不包含它们。
+[SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）内嵌 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）；独立部署使用镜像 `docker.io/pgsty/silo-console:v2.7.0`。单独更新独立部署的 Console 二进制或容器镜像**不会**替换旧版 `silo` 服务端二进制内嵌的 Console。
+
+Console `v2.7.0` 包含以下运行与运维能力：
+
+- **十种界面语言与文档路由：** 登录页菜单与命令面板提供十种界面语言（含阿拉伯语从右向左布局，详见[设计记录](/zh/blog/design/console-languages/)）；简体中文界面打开 `/zh/` 中文文档，其余界面语言打开英文文档。
+- **API 文档：** 在 `/api/v1/docs` 提供基于 Redoc 3 的 API 文档，并将 `/swagger.json` 直接路由至后端 API 而非前端 SPA 回退页。
+- **普通 HTTP 浏览器操作：** 在普通 HTTP（`http://<ip>:9001`）下无需浏览器安全上下文即可执行**计算文件夹大小**与复制 SSE-C 解密密钥，并对畸形或截断的分段上传返回 HTTP `400`。
+- **独立容器运行环境：** `docker.io/pgsty/silo-console:v2.7.0` 内置 UBI 系统根证书包（`/etc/ssl/certs/ca-certificates.crt`）与可写 `/tmp` 目录（权限 `1777`），支持出站 HTTPS 连接与分段上传临时文件。
+- **用量后台进程（`console usage-worker`）：** 支持 `--certs-dir`，统一信任系统根证书、`certs/CAs` 及 Console 的 `public.crt`；`CONSOLE_USAGE_SCAN_TIMEOUT` 仅跨时间片累计活跃列举耗时，不计入排队等待时间。完整 `CONSOLE_USAGE_*` 配置详见[用量扫描](/zh/administration/console/managing-objects/#usage-scans)。
+
+本机代理来源地址识别（[#147](https://github.com/pgsty/silo/issues/147)）与内嵌 WebSocket 连接限额（[#148](https://github.com/pgsty/silo/issues/148)）在当前 SILO 版本中按如下规则生效。
 
 ### 代理来源地址 {#trusted-proxies}
 
 内嵌 Console 使用 `MINIO_API_TRUSTED_PROXIES`；`CONSOLE_TRUSTED_PROXIES` 仍仅供独立 Console 使用。客户端地址会影响 `aws:SourceIp` 策略和 WebSocket 限额。
 
-| 配置 | 信任的 Console TCP 对端 | 转发链中跳过的地址 |
-| --- | --- | --- |
-| 未设置或空白 | 环回地址（`127.0.0.0/8`、`::1`，包括 IPv4 映射地址） | 无 |
-| IP/CIDR 列表 | 环回地址及列表中的对端 | 仅显式列出的地址 |
-| `none` / `off` | 无 | 无 |
-| 非法或无法读取 | 启动报错 | 无 |
+| 配置           | 信任的 Console TCP 对端                              | 转发链中跳过的地址 |
+| -------------- | ---------------------------------------------------- | ------------------ |
+| 未设置或空白   | 环回地址（`127.0.0.0/8`、`::1`，包括 IPv4 映射地址） | 无                 |
+| IP/CIDR 列表   | 环回地址及列表中的对端                               | 仅显式列出的地址   |
+| `none` / `off` | 无                                                   | 无                 |
+| 非法或无法读取 | 启动报错                                             | 无                 |
+{.wide .expand}
 
 列表用逗号、分号或空白分隔。其他主机或容器中的代理需要配置其实际对端地址。本机代理无需额外配置，但必须清理转发来源头：这一行为基于对本机进程的信任。头部中的环回地址不会自动成为可信转发节点。独立 Console 仍要求显式配置代理信任。
 
@@ -31,12 +43,13 @@ Server 的 S3 策略保持不变。设置 `none`/`off` 时，S3 也会忽略内�
 
 在 Server 环境变量或 `MINIO_CONFIG_ENV_FILE` 中设置：
 
-| 变量 | 默认值 |
-| --- | --- |
-| `CONSOLE_WS_MAX_CONNECTIONS` | 1024 |
-| `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT` | 256 |
-| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64 |
-| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8 |
+| 变量                                              | 默认值 |
+| ------------------------------------------------- | ------ |
+| `CONSOLE_WS_MAX_CONNECTIONS`                      | 1024   |
+| `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT`           | 256    |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS`            | 64     |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8      |
+{.wide .expand}
 
 公开浏览每个标签页使用一个 WebSocket。NAT 后的客户端共享一个地址；IPv6 客户端按 /64 共享限额。例如，设置 `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT=16` 可增加同一地址的匿名标签页容量。默认值和登录用户的预留容量保持不变。
 
@@ -49,12 +62,13 @@ Server 的 S3 策略保持不变。设置 `none`/`off` 时，S3 也会忽略内�
 
 该修复无需新增配置，请求限制始终执行，正常分享继续可用。`CONSOLE_SHARE_MINIO_URL` 仍只选择生成的链接格式。匿名代理仅允许下载对象内容的 GET 请求：
 
-| 允许 | 拒绝 |
-| --- | --- |
-| 已配置 S3 的协议、主机和有效端口 | 其他源地址，以及带用户信息、片段的 URL |
-| `/合法桶名/非空对象键` | 根路径、仅桶路径、`minio` 与 `.minio.sys*` 系统路径、点路径分量 |
+| 允许                                         | 拒绝                                                                                                                                    |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 已配置 S3 的协议、主机和有效端口             | 其他源地址，以及带用户信息、片段的 URL                                                                                                  |
+| `/合法桶名/非空对象键`                       | 根路径、仅桶路径、`minio` 与 `.minio.sys*` 系统路径、点路径分量                                                                         |
 | 签名、会话令牌、版本、对象分片和下载响应选项 | 通过查询参数选择的 `acl`、`tagging`、`retention`、`legal-hold`、`attributes`、`uploadId`、`lambdaArn`、`torrent` 操作，以及非法查询编码 |
-| 后端直接响应 | 所有 3xx 返回 502，不跟随跳转，也不转发 `Location` |
+| 后端直接响应                                 | 所有 3xx 返回 502，不跟随跳转，也不转发 `Location`                                                                                      |
+{.wide .expand}
 
 S3 继续执行授权检查：公共对象按策略允许匿名读取，私有对象需要有效授权。URL 的原始编码和签名参数保持不变。手工利用此接口代理桶列表、对象子资源或依赖重定向的下载将不再可用。
 

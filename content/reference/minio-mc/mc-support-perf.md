@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO behavior:** diagnostics run locally without SUBNET registration or automatic uploads. License info/unregister operate on local state; license update retains the explicit-file path. Online registration/renewal and uploads are disabled. Retained upstream syntax below does not enable those services. See [mcli compatibility](/compatibility/mcli/#subnet).
+**SILO behavior:** `mc support` diagnostics run locally against SILO without SUBNET registration or automatic uploads. `mc license info` and `unregister` operate on local state, while `license update` retains the explicit-file path; online registration, renewal, and uploads are disabled. Retained upstream syntax below does not enable those online services. See [mcli compatibility](/compatibility/mcli/#subnet).
 
 
 <a id="mc-support-perf"></a>
@@ -276,10 +276,14 @@ The [alias](/reference/minio-mc/mc-alias-set/#alias) of the MinIO deployment.
 
 *Required*
 
-Applies to the [`client`](#mc.support.perf.client) command.
+Applies to the [`client`](#mc.support.perf.client) and [`site-replication`](#mc.support.perf.site-replication) commands (and optionally [`object`](#mc.support.perf.object)).
 
-Length of time in seconds to perform the test. Time cannot be *0* or negative.
+Length of time to perform the test. Time cannot be *0* or negative.
 
 ### Global Flags {#global-flags}
 
 This command supports any of the [global flags](/reference/minio-mc/#minio-mc-global-options).
+
+## Behavior {#behavior}
+
+In [mcli 20261109](/blog/release/mcli-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), `mc support perf` retains fractional site-replication and network speed-test durations instead of truncating sub-second or fractional durations.

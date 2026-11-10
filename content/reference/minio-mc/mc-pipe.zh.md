@@ -72,7 +72,7 @@ mc [GLOBALFLAGS] pipe                              \
 
 为对象添加自定义元数据。
 
-将键值对指定为 `KEY=VALUE\;`，每对之间用反斜杠加分号（`\;`）分隔。例如：`--attr key1=value1\;key2=value2\;key3=value3`。在 `mcli 20261109` 中，尾部或重复 `;` 分隔符产生的空元数据项会被忽略（`#166`）。
+将键值对指定为 `KEY=VALUE\;`，每对之间用反斜杠加分号（`\;`）分隔。例如：`--attr key1=value1\;key2=value2\;key3=value3`。在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/)（[pgsty/mc#76](https://github.com/pgsty/mc/pull/76)）中，`mc pipe` 会忽略尾部或连续 `;` 分隔符产生的空元数据项。
 
 ##### `--checksum` {#mc.pipe.-checksum}
 

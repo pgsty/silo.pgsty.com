@@ -4,7 +4,7 @@ url: "/zh/reference/minio-mc/mc-batch/"
 weight: 40
 icon: fa-solid fa-layer-group
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-batch.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-batch"></a>
@@ -18,45 +18,29 @@ upstream_modified: false
 >
 > 新增了通过 [`mc batch cancel`](/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel) 命令取消作业的能力。
 
-## 描述 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 描述 {#description}
 
 [`mc batch`](#command-mc.batch) 命令允许您在 MinIO 部署上运行一个或多个作业任务。
 
-## 子命令 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 子命令 {#subcommands}
 
 [`mc batch`](#command-mc.batch) 包含以下子命令：
 
-<table>
-  <thead>
-    <tr>
-      <th><p>子命令</p></th>
-      <th><p>描述</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel"><code>cancel</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel"><code>mc batch cancel</code></a> 可停止正在进行的批处理作业。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe"><code>describe</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe"><code>mc batch describe</code></a> 命令会输出指定作业 ID 的作业定义。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate"><code>generate</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate"><code>mc batch generate</code></a> 命令会为指定作业类型创建一个基础的 YAML 格式模板文件。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-list/#command-mc.batch.list"><code>list</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-list/#command-mc.batch.list"><code>mc batch list</code></a> 命令会输出部署中当前正在进行的批处理作业列表。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-start/#command-mc.batch.start"><code>start</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-start/#command-mc.batch.start"><code>mc batch start</code></a> 命令根据批处理作业 YAML 文件启动一个批处理作业。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-status/#command-mc.batch.status"><code>status</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-status/#command-mc.batch.status"><code>mc batch status</code></a> 命令会输出 MinIO 服务器上作业事件的汇总信息。</p><aside class="alert alert-info"><p><strong>变更: mc</strong></p><p>RELEASE.2024-07-03T20-17-25Z</p><p>Batch status 会显示活动且正在进行的作业，或前 3（三）天内已完成的任意批处理作业的汇总信息。</p></aside></td>
-    </tr>
-  </tbody>
-</table>
+| 子命令                                                                            | 描述                                         |
+| --------------------------------------------------------------------------------- | -------------------------------------------- |
+| [`cancel`](/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel)       | 停止正在进行的批处理作业。                   |
+| [`describe`](/zh/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe) | 输出指定作业 ID 的作业定义。                 |
+| [`generate`](/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate) | 为指定作业类型创建基础 YAML 格式模板文件。   |
+| [`list`](/zh/reference/minio-mc/mc-batch-list/#command-mc.batch.list)             | 输出部署上当前正在进行的批处理作业列表。     |
+| [`start`](/zh/reference/minio-mc/mc-batch-start/#command-mc.batch.start)          | 根据批处理作业 YAML 定义文件启动批处理作业。 |
+| [`status`](/zh/reference/minio-mc/mc-batch-status/#command-mc.batch.status)       | 输出服务器上作业事件的汇总信息。             |
+{.wide .expand}
+
+> [!NOTE]
+> **变更: mc `RELEASE.2024-07-03T20-17-25Z`**
+>
+> [`mc batch status`](/zh/reference/minio-mc/mc-batch-status/#command-mc.batch.status) 会显示活动且正在进行的作业，以及过去三（3）天内完成的任意批处理作业的汇总信息。

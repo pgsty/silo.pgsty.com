@@ -554,16 +554,14 @@ upstream_modified: true
 
 **分片**
 
-> 对象经过 MinIO [erasure coded](#term-erasure-coding) 后形成的一部分。 每个分片都表示数据块或校验块，供 MinIO 在读请求时用于重建对象。
+> 对象经过 [纠删码编码](#term-erasure-coding) 后形成的一部分。每个分片表示数据块或校验块，供服务端在读请求时用于重建对象。
 >
-> > [!NOTE]
-> > **磁盘独占访问**
-> >
-> > MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
-> >
-> > 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
+> 更详细的信息参见[纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding)。
+
+> [!NOTE] 磁盘独占访问
+> SILO **要求**对用于对象存储的磁盘或卷拥有*独占*访问权限。任何其他进程、软件、脚本或人员都不应直接对提供给 SILO 的磁盘或卷，或其上存放的对象与文件执行*任何*操作。
 >
-> 更详细的信息参见 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding)。
+> 不要使用脚本或工具直接修改、删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件（包括在磁盘或节点之间迁移文件）。这类操作极易导致超出服务端自愈能力的损坏与数据丢失。
 
 <a id="term-single-node-multi-drive"></a>
 

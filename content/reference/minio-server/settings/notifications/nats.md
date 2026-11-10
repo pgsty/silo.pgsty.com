@@ -3,7 +3,7 @@ title: "NATS Notification Settings"
 url: "/reference/minio-server/settings/notifications/nats/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/nats.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="nats-notification-settings"></a>
@@ -230,6 +230,11 @@ Specify the token for connecting to the NATS service endpoint.
 {{< /tabs >}}
 
 Specify the [user credentials file](https://docs.nats.io/using-nats/developer/connecting/creds) to use to connect to the NATS service endpoint.
+
+> [!NOTE]
+> **[SILO 20261109](/blog/release/silo-20261109/) NATS Credentials Validation**
+>
+> SILO 20261109 updates `github.com/nats-io/jwt/v2` to `v2.8.3` and `github.com/nats-io/nkeys` to `v0.4.17` (validated against `nats-server v2.15.2`). Credential parsing rejects identity-point and small-order Ed25519 public keys in NATS JWT and NKey credentials.
 
 ### TLS {#tls}
 

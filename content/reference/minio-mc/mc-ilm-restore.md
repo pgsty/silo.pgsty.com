@@ -13,9 +13,9 @@ upstream_modified: true
 
 ## Syntax {#syntax}
 
-The [`mc ilm restore`](#command-mc.ilm.restore) command creates a temporary copy of an object archived on a remote tier. The copy automatically expires after 1 day by default.
+The [`mc ilm restore`](#command-mc.ilm.restore) command creates a temporary local copy of an object archived on a remote tier. The temporary copy expires after 1 day by default.
 
-Use this command to allow applications to access a tiered object through the MinIO deployment (e.g. “hot tier”). The archived object remains on the remote tier, while the temporary copy becomes `HEAD` for that object.
+Use this command to let applications read a transitioned object from local storage on the SILO deployment. The transitioned data remains on the remote tier while the temporary local copy serves read requests for the restored version until the restore period expires.
 
 > [!NOTE]
 > **Added: mc**
@@ -83,24 +83,13 @@ The number of days after which MinIO expires the restored copy of the archived o
 
 Encrypt or decrypt objects using server-side [SSE-C encryption](/administration/server-side-encryption/#minio-sse) with client-managed keys.
 
-The parameter accepts a key-value pair formatted as `KEY=VALUE`
+The parameter accepts a key-value pair formatted as `KEY=VALUE`:
 
-<table>
-  <tbody>
-    <tr>
-      <td><p><code>KEY</code></p></td>
-      <td><p>The full path to the object as <code>alias/bucket/path/object.ext</code>.</p><p>You can specify only the top-level path to use a single encryption key for all operations in that path.</p></td>
-    </tr>
-    <tr>
-      <td><p><code>VALUE</code></p></td>
-      <td><p>Specify either a 32-byte RawBase64-encoded key <em>or</em> a 64-byte hex-encoded key for use with SSE-C encryption.</p><p>Raw Base64 encoding <strong>rejects</strong> <code>=</code>-padded keys.
-Omit the padding or use a Base64 encoder that supports RAW formatting.</p></td>
-    </tr>
-  </tbody>
-</table>
-
-- `KEY` - the full path to the object as `alias/bucket/path/object`.
-- `VALUE` - the 32-byte RAW Base64-encoded data key to use for encrypting object(s).
+| Component | Description                                                                                                                                                                            |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `KEY`     | The full path to the object as `alias/bucket/path/object.ext`. Specify only the top-level path to use one encryption key for all operations under that path.                           |
+| `VALUE`   | Either a 32-byte RawBase64-encoded key *or* a 64-byte hex-encoded key for SSE-C encryption. Raw Base64 encoding **rejects** `=`-padded keys; omit padding or use a RAW Base64 encoder. |
+{.wide .expand}
 
 For example:
 
@@ -162,7 +151,7 @@ mc ilm restore myminio/mybucket/object.txt
 
 ### Restore a Specific Archived Object Version {#restore-a-specific-archived-object-version}
 
-The following command restore a specific object version archived to a remote tier:
+The following command restores a specific object version archived to a remote tier:
 
 ```shell
 mc ilm restore --vid "VERSIONID" myminio/mybucket/object.txt
@@ -180,11 +169,18 @@ mc ilm restore --recursive myminio/mybucket/data/
 
 ### Restored Objects Expire Automatically {#restored-objects-expire-automatically}
 
-MinIO automatically expires the restored object copy after the specified number of days (Default: 1 day).
+SILO automatically expires the restored local copy after the specified number of days (default: 1 day). In [SILO 20261109](/blog/release/silo-20261109/), expiring a restored copy removes only the temporary local cache while keeping the object version and its remote-tier data intact ([#281](https://github.com/pgsty/silo/issues/281)).
 
-### Restored Objects Become HEAD {#restored-objects-become-head}
+<a id="restored-objects-become-head"></a>
 
-The restored object copy becomes HEAD for that object namespace *regardless* of it’s versioning history. This can result in applications returning “stale” data while the local copy exists.
+### Two-Phase In-Place Version Restore {#two-phase-restore}
+
+Starting in [SILO 20261109](/blog/release/silo-20261109/), native restore (`POST ?restore`, commit [`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)) runs in two phases; see [Native Restore in Two Phases](/blog/design/native-restore-two-phase/) for design details:
+
+- **In-place version restoration:** SILO restores the exact addressed version in place without changing version ordering or creating a new `HEAD` version. Multi-pool restores no longer hang or remain stuck in progress ([#289](https://github.com/pgsty/silo/issues/289)).
+- **Two-phase locking:** Phase 1 downloads and stages the remote-tier data outside the object write lock so concurrent `GET`, `HEAD`, and `PUT` requests on the key do not wait for the download. Phase 2 acquires a short object lock and validates attempt ownership and version metadata before publishing the restored copy ([#284](https://github.com/pgsty/silo/issues/284)).
+- **Fast failure cleanup:** If a restore fails or is canceled, the server returns immediately and attempts marker cleanup for `100 ms` before switching to bounded background retries, instead of waiting up to one minute for the object lock.
+- **Rolling-upgrade gate:** During a mixed-version rolling upgrade, upgraded nodes return `503 Service Unavailable` to `POST ?restore` while any peer runs an older version or is unreachable. Pause new restores until all nodes run `SILO 20261109`.
 
 ### S3 Compatibility {#s3-compatibility}
 

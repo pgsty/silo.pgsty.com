@@ -3,7 +3,7 @@ title: "mc admin trace"
 url: "/zh/reference/minio-mc-admin/mc-admin-trace/"
 weight: 170
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc-admin/mc-admin-trace.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-trace"></a>
@@ -17,9 +17,9 @@ upstream_modified: false
 [`mc admin trace`](#command-mc.admin.trace) 命令显示目标 MinIO 部署上发生的 API 操作。
 
 > [!NOTE]
-> **仅在 MinIO 部署上使用 `mc admin`**
+> **服务端兼容性**
 >
-> MinIO 不支持将 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 命令用于其他 S3 兼容服务， 无论这些服务声称与 MinIO 部署具有何种兼容性。
+> [`mcli admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 正式支持的目标服务端为 SILO。与未修改的上游 MinIO 保持尽最大努力兼容；仅具备通用 S3 兼容性并不提供这些管理 API。
 
 <a id="id3" data-td-print-local></a>
 
@@ -82,7 +82,7 @@ mc admin trace --filter-response --filter-size 1Mb ALIAS
 使用 [`mc admin trace`](#command-mc.admin.trace) 监控耗时较长的操作：
 
 ```shell
-mc admin trace --filter-duration --filter-size 5ms ALIAS
+mc admin trace --response-duration 5ms ALIAS
 ```
 
 - 将 [`ALIAS`](#mc.admin.trace.TARGET) 替换为 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
@@ -172,16 +172,17 @@ mc admin trace --call scanner TARGET
 
 有效单位包括：
 
-| 后缀 | 单位大小 |
-| --- | --- |
-| `k` | KB（Kilobyte，1000 Bytes） |
-| `m` | MB（Megabyte，1000 Kilobytes） |
-| `g` | GB（Gigabyte，1000 Megabytes） |
-| `t` | TB（Terrabyte，1000 Gigabytes） |
-| `ki` | KiB（Kibibyte，1024 Bites） |
+| 后缀 | 单位大小                        |
+| ---- | ------------------------------- |
+| `k`  | KB（Kilobyte，1000 Bytes）      |
+| `m`  | MB（Megabyte，1000 Kilobytes）  |
+| `g`  | GB（Gigabyte，1000 Megabytes）  |
+| `t`  | TB（Terrabyte，1000 Gigabytes） |
+| `ki` | KiB（Kibibyte，1024 Bites）     |
 | `mi` | MiB（Mebibyte，1024 Kibibytes） |
 | `gi` | GiB（Gibibyte，1024 Mebibytes） |
 | `ti` | TiB（Tebibyte，1024 Gibibytes） |
+{.wide .expand}
 
 #### `--funcname` {#mc.admin.trace.-funcname}
 
@@ -217,7 +218,7 @@ mc admin trace --call scanner TARGET
 
 *mc-cmd*
 
-返回与提供的请求查询参数匹配的调用。 此调试选项只能在 MinIO Support 指导下使用。
+返回与提供的请求查询参数匹配的调用。
 
 #### `--response-duration` {#mc.admin.trace.-response-duration}
 
@@ -243,60 +244,26 @@ mc admin trace --call scanner TARGET
 
 输出表包含以下列。
 
-<table>
-  <tbody>
-    <tr>
-      <td><p>Call</p></td>
-      <td><p>捕获到的客户端操作或函数名称。</p></td>
-    </tr>
-    <tr>
-      <td><p>Count</p></td>
-      <td><p>客户端操作或调用发生的次数。</p></td>
-    </tr>
-    <tr>
-      <td><p>RPM</p></td>
-      <td><p>客户端操作或调用的每分钟速率（Rate Per Minute，RPM）。</p></td>
-    </tr>
-    <tr>
-      <td><p>Avg Time</p></td>
-      <td><p>客户端操作或调用完成所需的平均时间。</p></td>
-    </tr>
-    <tr>
-      <td><p>Min Time</p></td>
-      <td><p>客户端操作或调用完成所用的最短时间。</p></td>
-    </tr>
-    <tr>
-      <td><p>Max Time</p></td>
-      <td><p>客户端操作或调用完成所用的最长时间。</p></td>
-    </tr>
-    <tr>
-      <td><p>Avg TTFB</p></td>
-      <td><aside class="alert alert-info"><p><strong>新增: RELEASE.2023-11-15T22-45-58Z</strong></p></aside><p>客户端操作或调用响应的平均首字节时间（Time To First Byte，TTFB）。</p></td>
-    </tr>
-    <tr>
-      <td><p>Max TTFB</p></td>
-      <td><aside class="alert alert-info"><p><strong>新增: RELEASE.2023-11-15T22-45-58Z</strong></p></aside><p>客户端操作或调用响应的最大首字节时间。</p></td>
-    </tr>
-    <tr>
-      <td><p>Avg Size</p></td>
-      <td><p>客户端操作或调用响应的平均大小。</p></td>
-    </tr>
-    <tr>
-      <td><p>Errors</p></td>
-      <td><p>因错误失败的客户端操作或调用数量。</p></td>
-    </tr>
-    <tr>
-      <td><p>RX Avg</p></td>
-      <td><p>客户端操作或调用的平均接收字节数（Bytes Received，RX）。
-此统计仅在值不为零（0）时显示。</p></td>
-    </tr>
-    <tr>
-      <td><p>TX AVG</p></td>
-      <td><p>客户端操作或调用的平均发送字节数（Bytes Sent，TX）。
-此统计仅在值不为零（0）时显示。</p></td>
-    </tr>
-  </tbody>
-</table>
+| 列         | 说明                                                                                |
+| ---------- | ----------------------------------------------------------------------------------- |
+| `Call`     | 捕获到的客户端操作或函数名称。                                                      |
+| `Count`    | 客户端操作或调用发生的次数。                                                        |
+| `RPM`      | 客户端操作或调用的每分钟速率（Rate Per Minute，RPM）。                              |
+| `Avg Time` | 客户端操作或调用完成所需的平均时间。                                                |
+| `Min Time` | 客户端操作或调用完成所用的最短时间。                                                |
+| `Max Time` | 客户端操作或调用完成所用的最长时间。                                                |
+| `Avg TTFB` | 客户端操作或调用响应的平均首字节时间（Time To First Byte，TTFB）。                  |
+| `Max TTFB` | 客户端操作或调用响应的最大首字节时间。                                              |
+| `Avg Size` | 客户端操作或调用响应的平均大小。                                                    |
+| `Errors`   | 因错误失败的客户端操作或调用数量。                                                  |
+| `RX Avg`   | 客户端操作或调用的平均接收字节数（Bytes Received，RX）。仅在值不为零（`0`）时显示。 |
+| `TX AVG`   | 客户端操作或调用的平均发送字节数（Bytes Sent，TX）。仅在值不为零（`0`）时显示。     |
+{.wide .expand}
+
+> [!NOTE]
+> **新增: RELEASE.2023-11-15T22-45-58Z**
+>
+> `Avg TTFB` 与 `Max TTFB` 统计列新增于 `RELEASE.2023-11-15T22-45-58Z`。
 
 累积统计信息，例如名称、计数、持续时间、最短时间、最长时间、首字节时间或错误。 最多累积 15 条统计条目。
 

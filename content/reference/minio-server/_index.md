@@ -91,6 +91,16 @@ SILO supports [erasure coding](/operations/concepts/erasure-coding/#minio-erasur
 >
 > For production environments, do **not** treat multiple logical directories or partitions on one physical disk as independent failure domains. The apparent drive count does not provide physical-disk redundancy.
 
+##### `--config` {#minio.server.-config}
+
+*mc-cmd*
+
+*Optional*
+
+Specifies the path to a YAML server configuration file (`version: v1` or `version: v2`). You can also set this path with the `MINIO_CONFIG` environment variable.
+
+The YAML file can define storage pools, network bind addresses (`--address`, `--console-address`), the TLS certificates directory (`--certs-dir`), root credentials, and FTP or SFTP listener options. When the YAML file defines storage pools, you can omit `HOSTNAME/DIRECTORIES` on the command line.
+
 ##### `--address` {#minio.server.-address}
 
 *mc-cmd*
@@ -294,7 +304,7 @@ When no directory is explicitly configured, a new installation uses:
 
 If the user's home contains only the legacy `.minio` directory and no `.silo`, SILO continues to use `.minio/certs`. When both exist, it uses `.silo/certs` and logs a warning. For service accounts, configure `--certs-dir` explicitly instead of relying on an interactive user's home directory.
 
-SILO 20261026 still accepts the deprecated `--config-dir` / `-C` parameter. When it is set without `--certs-dir`, certificates are loaded from `<config-dir>/certs`; an explicit `--certs-dir` takes precedence. Upstream MinIO release notes about removing this parameter do not describe SILO's current behavior.
+[SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) still accepts the deprecated `--config-dir` / `-C` parameter. When it is set without `--certs-dir`, certificates are loaded from `<config-dir>/certs`; an explicit `--certs-dir` takes precedence. Upstream MinIO release notes about removing this parameter do not describe SILO's current behavior.
 
 See [Network Encryption (TLS)](/operations/network-encryption/#minio-tls) for more information.
 
@@ -326,6 +336,78 @@ Outputs server logs and startup information in `JSON` format.
 > **Note**
 >
 > You can define any of the `minio` parameters above by setting them in the [`MINIO_OPTS`](/reference/minio-server/settings/core/#envvar.MINIO_OPTS) environment variable. This variable takes as its value a single string that contains any of the above parameters and their values that you want to set when starting the MinIO Server.
+
+## Silo Healthcheck {#command-silo.healthcheck}
+
+The `silo healthcheck` subcommand probes a SILO server health endpoint and reports the result through its process exit code. Container images, orchestrators, and maintenance scripts can run `silo healthcheck` directly without `curl` or external HTTP tools.
+
+### Syntax {#silo.healthcheck.syntax}
+
+```shell
+silo healthcheck [FLAGS] [CHECK]
+```
+
+##### `CHECK` {#silo.healthcheck.CHECK}
+
+*Optional*
+
+Selects the health endpoint to probe. When omitted, `silo healthcheck` runs the `live` check.
+
+| Check          | Endpoint                     | Description                                                                               |
+| -------------- | ---------------------------- | ----------------------------------------------------------------------------------------- |
+| `live`         | `/minio/health/live`         | Default check. Confirms the HTTP listener serves requests and touches no external system. |
+| `ready`        | `/minio/health/ready`        | Checks liveness plus KMS and `etcd` reachability when configured.                         |
+| `cluster`      | `/minio/health/cluster`      | Checks cluster-wide write quorum across every erasure set.                                |
+| `cluster-read` | `/minio/health/cluster/read` | Checks cluster-wide read quorum across every erasure set.                                 |
+{.wide .expand}
+
+##### `--address` {#silo.healthcheck.-address}
+
+*Optional*
+
+Probes the server bound to `ADDRESS:PORT` (environment variable `MINIO_ADDRESS`, default `:9000`). An empty host probes `127.0.0.1` and selects `https` automatically when both `public.crt` and `private.key` exist in the certificates directory.
+
+##### `--url` {#silo.healthcheck.-url}
+
+*Optional*
+
+Probes an explicit `http://HOST:PORT` or `https://HOST:PORT` base URL (environment variable `MINIO_HEALTHCHECK_URL`) instead of deriving the target from `--address` and `--certs-dir`.
+
+##### `--maintenance` {#silo.healthcheck.-maintenance}
+
+*Optional*
+
+Valid with the `cluster` check only. Appends `?maintenance=true` to check whether taking the target node down preserves write quorum. Exits `1` when the server returns HTTP `412 Precondition Failed`.
+
+##### `--timeout` {#silo.healthcheck.-timeout}
+
+*Optional*
+
+Sets the overall probe deadline. Defaults to `5s` for `live` and `ready`, and `15s` for `cluster` and `cluster-read`.
+
+##### `--certs-dir, -S` {#silo.healthcheck.-certs-dir}
+
+*Optional*
+
+Specifies the path to the certificates directory (environment variable `MINIO_CERTS_DIR`) used to detect HTTPS when `--url` is not set. When `--certs-dir` is omitted and `--config-dir` is set, `silo healthcheck` checks `<config-dir>/certs`.
+
+##### `--json` {#silo.healthcheck.-json}
+
+*Optional*
+
+Emits a single JSON object containing `check`, `healthy`, `status`, `durationMs`, `serverStatus`, `writeQuorum`, `readQuorum`, `healingDrives`, and `error`.
+
+##### `--quiet, -q` {#silo.healthcheck.-quiet}
+
+*Optional*
+
+Suppresses standard output when the probe succeeds.
+
+### Behavior and Exit Codes {#silo.healthcheck.behavior}
+
+`silo healthcheck` sends an anonymous `GET` request, bypasses `HTTP_PROXY` and `HTTPS_PROXY`, and skips TLS certificate verification to match kubelet HTTPS probe behavior. It exits `0` when the target endpoint returns HTTP `200 OK` (including when `--maintenance` confirms that taking the node down preserves write quorum) and exits `1` otherwise.
+
+For startup readiness behavior and data-path verification guidance, see [Healthcheck API: Native probes and application startup](/operations/monitoring/healthcheck-probe/#native-probe).
 
 ## Settings {#settings}
 

@@ -3,7 +3,7 @@ title: "mc admin idp ldap"
 url: "/zh/reference/deprecated/mc-admin-idp-ldap/"
 weight: 140
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-idp-ldap.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-idp-ldap"></a>
@@ -16,7 +16,9 @@ upstream_modified: false
 >
 > `mc admin idp ldap` 及其子命令已由 [`mc idp ldap`](/zh/reference/minio-mc/mc-idp-ldap/#command-mc.idp.ldap) 替代。
 
-## 说明 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 说明 {#description}
 
 [`mc admin idp ldap`](#command-mc.admin.idp.ldap) 命令允许你为第三方 [Active Directory 或 LDAP 身份与访问管理（IAM）集成](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) 添加、修改、查看、列出、移除、启用和禁用服务器配置。
 
@@ -29,24 +31,29 @@ upstream_modified: false
 
 [`mc admin idp ldap`](#command-mc.admin.idp.ldap) 命令包含以下子命令：
 
-| 子命令 | 说明 |
-| --- | --- |
-| [`mc admin idp ldap add`](#mc.admin.idp.ldap.add) | 创建 AD/LDAP IDP 服务器配置。 |
-| [`mc admin idp ldap update`](#mc.admin.idp.ldap.update) | 修改现有的 AD/LDAP IDP 服务器配置。 |
-| [`mc admin idp ldap ls`](#mc.admin.idp.ldap.ls) | 列出 AD/LDAP 服务器配置。 |
-| [`mc admin idp ldap rm`](#mc.admin.idp.ldap.rm) | 从部署中移除 AD/LDAP IDP 服务器配置。 |
-| [`mc admin idp ldap info`](#mc.admin.idp.ldap.info) | 显示指定 AD/LDAP 服务器配置的详细信息。 |
-| [`mc admin idp ldap enable`](#mc.admin.idp.ldap.enable) | 启用 AD/LDAP 服务器配置。 |
-| [`mc admin idp ldap disable`](#mc.admin.idp.ldap.disable) | 禁用 AD/LDAP 服务器配置。 |
-| [`mc admin idp ldap policy entities`](/zh/reference/deprecated/mc-admin-idp-ldap-policy/#mc.admin.idp.ldap.policy.entities) | 列出策略关联实体。 |
+| 子命令                                                                                                                      | 说明                                    |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| [`mc admin idp ldap add`](#mc.admin.idp.ldap.add)                                                                           | 创建 AD/LDAP IDP 服务器配置。           |
+| [`mc admin idp ldap update`](#mc.admin.idp.ldap.update)                                                                     | 修改现有的 AD/LDAP IDP 服务器配置。     |
+| [`mc admin idp ldap ls`](#mc.admin.idp.ldap.ls)                                                                             | 列出 AD/LDAP 服务器配置。               |
+| [`mc admin idp ldap rm`](#mc.admin.idp.ldap.rm)                                                                             | 从部署中移除 AD/LDAP IDP 服务器配置。   |
+| [`mc admin idp ldap info`](#mc.admin.idp.ldap.info)                                                                         | 显示指定 AD/LDAP 服务器配置的详细信息。 |
+| [`mc admin idp ldap enable`](#mc.admin.idp.ldap.enable)                                                                     | 启用 AD/LDAP 服务器配置。               |
+| [`mc admin idp ldap disable`](#mc.admin.idp.ldap.disable)                                                                   | 禁用 AD/LDAP 服务器配置。               |
+| [`mc admin idp ldap policy entities`](/zh/reference/deprecated/mc-admin-idp-ldap-policy/#mc.admin.idp.ldap.policy.entities) | 列出策略关联实体。                      |
+{.wide .expand}
 
-## 配置参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 配置参数 {#configuration-parameters}
 
 [`mc admin idp ldap`](#command-mc.admin.idp.ldap) 子命令支持配置参数。 这些参数定义了服务器与 Active Directory 或 LDAP IAM 提供方的交互方式。
 
 有关配置参数的更详细说明，请参阅 [配置设置文档](/zh/reference/minio-server/settings/iam/ldap/#minio-ldap-config-settings)。
 
-## 语法 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 #### `add` {#mc.admin.idp.ldap.add}
 
@@ -248,6 +255,8 @@ mc [GLOBALFLAGS] admin idp ldap disable       \
 {{< /tab >}}
 {{< /tabs >}}
 
-## 全局标志 {#id5}
+<a id="id5" data-td-print-local></a>
+
+## 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。

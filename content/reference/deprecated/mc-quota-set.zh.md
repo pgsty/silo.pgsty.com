@@ -3,7 +3,7 @@ title: "mc quota set"
 url: "/zh/reference/deprecated/mc-quota-set/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-quota-set.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-quota-set"></a>
@@ -20,30 +20,38 @@ upstream_modified: false
 >
 > `mc quota set` 已弃用。
 
-## 说明 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 说明 {#description}
 
 [`mc quota set`](#command-mc.quota.set) 为存储桶分配硬配额限制，超过该限制后 MinIO 不再允许写入。
 
-### 计量单位 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 计量单位 {#units-of-measurement}
 
 [`mc quota set --size`](#mc.quota.set.-size) 标志接受以下 **不区分大小写** 的后缀，用于表示指定大小值的单位：
 
-| 后缀 | 单位大小 |
-| --- | --- |
-| `k` | KB（Kilobyte，1000 Bytes） |
-| `m` | MB（Megabyte，1000 Kilobytes） |
-| `g` | GB（Gigabyte，1000 Megabytes） |
-| `t` | TB（Terabyte，1000 Gigabytes） |
-| `ki` or `kib` | KiB（Kibibyte，1024 Bites） |
+| 后缀          | 单位大小                        |
+| ------------- | ------------------------------- |
+| `k`           | KB（Kilobyte，1000 Bytes）      |
+| `m`           | MB（Megabyte，1000 Kilobytes）  |
+| `g`           | GB（Gigabyte，1000 Megabytes）  |
+| `t`           | TB（Terabyte，1000 Gigabytes）  |
+| `ki` or `kib` | KiB（Kibibyte，1024 Bites）     |
 | `mi` or `mib` | MiB（Mebibyte，1024 Kibibytes） |
 | `gi` or `gib` | GiB（Gibibyte，1024 Mebibytes） |
 | `ti` or `tib` | TiB（Tebibyte，1024 Gibibytes） |
 
 如果省略后缀，则默认使用 `bytes`。
 
-## 示例 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 为存储桶配置硬配额 {#id5}
+## 示例 {#examples}
+
+<a id="id5" data-td-print-local></a>
+
+### 为存储桶配置硬配额 {#configure-a-hard-quota-on-a-bucket}
 
 将 [`mc quota set`](#command-mc.quota.set) 与 [`--size`](#mc.quota.set.-size) 标志配合使用，可为存储桶指定硬配额。 硬配额可防止存储桶大小增长到超出指定限制。
 
@@ -54,7 +62,9 @@ mc quota set TARGET/BUCKET --size LIMIT
 - 将 `TARGET` 替换为已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。 将 `BUCKET` 替换为要设置硬配额的存储桶名称。
 - 将 `LIMIT` 替换为存储桶可增长到的最大大小（整数），并可按需附加后缀。 例如，要设置 10 Terabytes 的硬限制，请指定 `10t`。
 
-## 语法 {#id6}
+<a id="id6" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc quota set`](#command-mc.quota.set) 的语法如下：
 
@@ -86,11 +96,15 @@ mc quota set play/mybucket --size 10Gi
 
 例如，若硬限制为 `10G`，当存储桶达到 10 gigabytes 时，将无法再添加任何对象。
 
-### 全局标志 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-### S3 兼容性 {#s3}
+<a id="s3" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 **`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
 

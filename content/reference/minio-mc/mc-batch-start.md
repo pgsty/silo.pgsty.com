@@ -24,7 +24,7 @@ The batch job runs to completion (or up to the number of retries specified in th
 
 {{< tabs group="example-syntax" >}}
 {{< tab label="EXAMPLE" value="example" >}}
-The following command creates a basic YAML file for a replicate job on the `mybucket` bucket of the `myminio` alias.
+The following command starts a batch job from `jobfile.yaml` on the `myminio` alias.
 
 ```shell
 mc batch start myminio jobfile.yaml
@@ -75,7 +75,7 @@ mc batch start myminio replicate.yaml
 
 *Required*
 
-A YAML-defined batch job. The job may have as many tasks as desired; there is no predefined limit.
+Path to the YAML file that defines one batch job (`replicate`, `keyrotate`, or `expire`).
 
 ### Global Flags {#global-flags}
 
@@ -85,7 +85,7 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 ### Start a Batch Job {#start-a-batch-job}
 
-The following command starts the batch of job(s) defined in the file `replication.yaml` on the deployment at [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) `myminio`:
+The following command starts the batch job defined in `replication.yaml` on the deployment at [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) `myminio`:
 
 ```shell
 mc batch start myminio ./replication.yaml
@@ -108,4 +108,4 @@ SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO a
 
 You must have the [`admin:StartBatchJob`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-StartBatchJob) permission on the deployment to start jobs.
 
-The next SILO release also checks the authenticated submitter's local data permissions when the job acts on objects. Definition credentials authorize remote operations separately. See [authorization and retries](/administration/batch-framework/#silo-lifecycle).
+[SILO 20261109](/blog/release/silo-20261109/) also enforces the authenticated submitter's local data permissions when the job lists or modifies objects. Credentials in the job definition authorize remote operations separately. See [authorization and retries](/administration/batch-framework/#silo-lifecycle).

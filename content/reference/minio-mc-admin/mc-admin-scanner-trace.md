@@ -92,16 +92,16 @@ Must be used with either [`--filter-request`](#mc.admin.scanner.trace.-filter-re
 
 Valid units include:
 
-| Suffix | Unit Size |
-| --- | --- |
-| `k` | KB (Kilobyte, 1000 Bytes) |
-| `m` | MB (Megabyte, 1000 Kilobytes) |
-| `g` | GB (Gigabyte, 1000 Megabytes) |
-| `t` | TB (Terrabyte, 1000 Gigabytes) |
-| `ki` | KiB (Kibibyte, 1024 Bites) |
-| `mi` | MiB (Mebibyte, 1024 Kibibytes) |
-| `gi` | GiB (Gibibyte, 1024 Mebibytes) |
-| `ti` | TiB (Tebibyte, 1024 Gibibytes) |
+| Suffix | Unit Size                      |
+| ------ | ------------------------------ |
+| `k`    | KB (Kilobyte, 1000 Bytes)      |
+| `m`    | MB (Megabyte, 1000 Kilobytes)  |
+| `g`    | GB (Gigabyte, 1000 Megabytes)  |
+| `t`    | TB (Terrabyte, 1000 Gigabytes) |
+| `ki`   | KiB (Kibibyte, 1024 Bites)     |
+| `mi`   | MiB (Mebibyte, 1024 Kibibytes) |
+| `gi`   | GiB (Gibibyte, 1024 Mebibytes) |
+| `ti`   | TiB (Tebibyte, 1024 Gibibytes) |
 
 ##### `--funcname` {#mc.admin.scanner.trace.-funcname}
 

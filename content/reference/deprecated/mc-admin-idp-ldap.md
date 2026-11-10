@@ -3,7 +3,7 @@ title: "mc admin idp ldap"
 url: "/reference/deprecated/mc-admin-idp-ldap/"
 weight: 140
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-idp-ldap.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-idp-ldap"></a>
@@ -29,16 +29,17 @@ Define configuration settings as an alternative to using environment variables w
 
 The [`mc admin idp ldap`](#command-mc.admin.idp.ldap) command has the following subcommands:
 
-| Subcommand | Description |
-| --- | --- |
-| [`mc admin idp ldap add`](#mc.admin.idp.ldap.add) | Create an AD/LDAP IDP server configuration. |
-| [`mc admin idp ldap update`](#mc.admin.idp.ldap.update) | Modify an existing AD/LDAP IDP server configuration. |
-| [`mc admin idp ldap ls`](#mc.admin.idp.ldap.ls) | Lists AD/LDAP server configurations. |
-| [`mc admin idp ldap rm`](#mc.admin.idp.ldap.rm) | Remove an AD/LDAP IDP server configuration from a deployment. |
-| [`mc admin idp ldap info`](#mc.admin.idp.ldap.info) | Displays details for a specific AD/LDAP server configuration. |
-| [`mc admin idp ldap enable`](#mc.admin.idp.ldap.enable) | Enables an AD/LDAP server configuration. |
-| [`mc admin idp ldap disable`](#mc.admin.idp.ldap.disable) | Disables an AD/LDAP server configuration. |
-| [`mc admin idp ldap policy entities`](/reference/deprecated/mc-admin-idp-ldap-policy/#mc.admin.idp.ldap.policy.entities) | List policy association entities |
+| Subcommand                                                                                                               | Description                                                   |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| [`mc admin idp ldap add`](#mc.admin.idp.ldap.add)                                                                        | Create an AD/LDAP IDP server configuration.                   |
+| [`mc admin idp ldap update`](#mc.admin.idp.ldap.update)                                                                  | Modify an existing AD/LDAP IDP server configuration.          |
+| [`mc admin idp ldap ls`](#mc.admin.idp.ldap.ls)                                                                          | Lists AD/LDAP server configurations.                          |
+| [`mc admin idp ldap rm`](#mc.admin.idp.ldap.rm)                                                                          | Remove an AD/LDAP IDP server configuration from a deployment. |
+| [`mc admin idp ldap info`](#mc.admin.idp.ldap.info)                                                                      | Displays details for a specific AD/LDAP server configuration. |
+| [`mc admin idp ldap enable`](#mc.admin.idp.ldap.enable)                                                                  | Enables an AD/LDAP server configuration.                      |
+| [`mc admin idp ldap disable`](#mc.admin.idp.ldap.disable)                                                                | Disables an AD/LDAP server configuration.                     |
+| [`mc admin idp ldap policy entities`](/reference/deprecated/mc-admin-idp-ldap-policy/#mc.admin.idp.ldap.policy.entities) | List policy association entities                              |
+{.wide .expand}
 
 ## Configuration Parameters {#configuration-parameters}
 

@@ -156,16 +156,17 @@ Must be used with either [`--filter-request`](#mc.admin.trace.-filter-request) o
 
 Valid units include:
 
-| Suffix | Unit Size |
-| --- | --- |
-| `k` | KB (Kilobyte, 1000 Bytes) |
-| `m` | MB (Megabyte, 1000 Kilobytes) |
-| `g` | GB (Gigabyte, 1000 Megabytes) |
-| `t` | TB (Terrabyte, 1000 Gigabytes) |
-| `ki` | KiB (Kibibyte, 1024 Bites) |
-| `mi` | MiB (Mebibyte, 1024 Kibibytes) |
-| `gi` | GiB (Gibibyte, 1024 Mebibytes) |
-| `ti` | TiB (Tebibyte, 1024 Gibibytes) |
+| Suffix | Unit Size                      |
+| ------ | ------------------------------ |
+| `k`    | KB (Kilobyte, 1000 Bytes)      |
+| `m`    | MB (Megabyte, 1000 Kilobytes)  |
+| `g`    | GB (Gigabyte, 1000 Megabytes)  |
+| `t`    | TB (Terrabyte, 1000 Gigabytes) |
+| `ki`   | KiB (Kibibyte, 1024 Bites)     |
+| `mi`   | MiB (Mebibyte, 1024 Kibibytes) |
+| `gi`   | GiB (Gibibyte, 1024 Mebibytes) |
+| `ti`   | TiB (Tebibyte, 1024 Gibibytes) |
+{.wide .expand}
 
 #### `--funcname` {#mc.admin.trace.-funcname}
 
@@ -201,7 +202,7 @@ Returns calls matching the supplied request header.
 
 *mc-cmd*
 
-Returns calls matching the supplied request query parameter. This debug option should only be used at the direction of MinIO Support.
+Returns calls matching the supplied request query parameter.
 
 #### `--response-duration` {#mc.admin.trace.-response-duration}
 
@@ -227,60 +228,26 @@ Accumulates aggregated statistics for each traced function call during the curre
 
 The output table includes the following columns.
 
-<table>
-  <tbody>
-    <tr>
-      <td><p>Call</p></td>
-      <td><p>The name of the captured client operation or function.</p></td>
-    </tr>
-    <tr>
-      <td><p>Count</p></td>
-      <td><p>The number of times the client operation or call occurred.</p></td>
-    </tr>
-    <tr>
-      <td><p>RPM</p></td>
-      <td><p>The Rate Per Minute (RPM) of the client operation or call.</p></td>
-    </tr>
-    <tr>
-      <td><p>Avg Time</p></td>
-      <td><p>The average time required for the client operation or call to complete.</p></td>
-    </tr>
-    <tr>
-      <td><p>Min Time</p></td>
-      <td><p>The minimum time spent for the client operation or call to complete.</p></td>
-    </tr>
-    <tr>
-      <td><p>Max Time</p></td>
-      <td><p>The maximum time spent for the client operation or call to complete.</p></td>
-    </tr>
-    <tr>
-      <td><p>Avg TTFB</p></td>
-      <td><aside class="alert alert-info"><p><strong>Added: RELEASE.2023-11-15T22-45-58Z</strong></p></aside><p>The average Time To First Byte (TTFB) for the client operation or call response.</p></td>
-    </tr>
-    <tr>
-      <td><p>Max TTFB</p></td>
-      <td><aside class="alert alert-info"><p><strong>Added: RELEASE.2023-11-15T22-45-58Z</strong></p></aside><p>The maximum Time To First Byte for the client operation or call response.</p></td>
-    </tr>
-    <tr>
-      <td><p>Avg Size</p></td>
-      <td><p>Average size of client operation or call responses.</p></td>
-    </tr>
-    <tr>
-      <td><p>Errors</p></td>
-      <td><p>The number of client operations or calls that failed with an error.</p></td>
-    </tr>
-    <tr>
-      <td><p>RX Avg</p></td>
-      <td><p>The average number of Bytes Received (RX) for the client operation or call.
-This stat only displays if not zero (0).</p></td>
-    </tr>
-    <tr>
-      <td><p>TX AVG</p></td>
-      <td><p>The average number of Bytes Sent (TX) for the client operation or call.
-This stat only displays if not zero (0).</p></td>
-    </tr>
-  </tbody>
-</table>
+| Column     | Description                                                                                                     |
+| ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `Call`     | The name of the captured client operation or function.                                                          |
+| `Count`    | The number of times the client operation or call occurred.                                                      |
+| `RPM`      | The Rate Per Minute (RPM) of the client operation or call.                                                      |
+| `Avg Time` | The average time required for the client operation or call to complete.                                         |
+| `Min Time` | The minimum time spent for the client operation or call to complete.                                            |
+| `Max Time` | The maximum time spent for the client operation or call to complete.                                            |
+| `Avg TTFB` | The average Time To First Byte (TTFB) for the client operation or call response.                                |
+| `Max TTFB` | The maximum Time To First Byte for the client operation or call response.                                       |
+| `Avg Size` | Average size of client operation or call responses.                                                             |
+| `Errors`   | The number of client operations or calls that failed with an error.                                             |
+| `RX Avg`   | The average number of Bytes Received (RX) for the client operation or call. Displayed only when non-zero (`0`). |
+| `TX AVG`   | The average number of Bytes Sent (TX) for the client operation or call. Displayed only when non-zero (`0`).     |
+{.wide .expand}
+
+> [!NOTE]
+> **Added: RELEASE.2023-11-15T22-45-58Z**
+>
+> The `Avg TTFB` and `Max TTFB` statistics columns were added in `RELEASE.2023-11-15T22-45-58Z`.
 
 Accumulate stats, such as name, count, duration, min time, max time, time to first byte, or errors. Accumulates up to 15 stat entries.
 

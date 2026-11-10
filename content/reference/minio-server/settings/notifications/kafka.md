@@ -241,13 +241,14 @@ Specify the SASL mechanism to use for authenticating to the Kafka broker(s). Min
 
 Specify the client authentication type of the Kafka broker(s). The following table lists the supported values and their mappings
 
-| Value | Authentication Type |
-| --- | --- |
-| 0 | `NoClientCert` |
-| 1 | `RequestClientCert` |
-| 2 | `RequireAnyClientCert` |
-| 3 | `VerifyClientCertIfGiven` |
-| 4 | `RequireAndVerifyClientCert` |
+| Value | Authentication Type          |
+| ----- | ---------------------------- |
+| 0     | `NoClientCert`               |
+| 1     | `RequestClientCert`          |
+| 2     | `RequireAnyClientCert`       |
+| 3     | `VerifyClientCertIfGiven`    |
+| 4     | `RequireAndVerifyClientCert` |
+{.wide .expand}
 
 See [ClientAuthType](https://golang.org/pkg/crypto/tls/#ClientAuthType) for more information on each client auth type.
 
@@ -347,7 +348,7 @@ Specify the path to the client private key to use for performing mTLS authentica
 {{< /tab >}}
 {{< /tabs >}}
 
-Specify the Kafka broker protocol version used for requests. When unset, SILO uses **Kafka 2.1**; the 20261026 release explicitly retains this default despite the Sarama dependency upgrade. Set a version supported by your brokers if a different protocol is needed. See the [selected Sarama configuration](https://github.com/IBM/sarama/blob/v1.61.1/config.go).
+Specify the Kafka broker protocol version used for requests. When unset, SILO uses **Kafka 2.1**; [SILO 20261109](/blog/release/silo-20261109/) explicitly retains this default across Sarama dependency updates. Set a version supported by your brokers if a different protocol is needed. See the [selected Sarama configuration](https://github.com/IBM/sarama/blob/v1.61.1/config.go).
 
 ### Batch Size {#batch-size}
 

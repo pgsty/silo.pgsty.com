@@ -9,20 +9,30 @@ upstream_modified: true
 <a id="minio-console-settings"></a>
 <a id="minio-server-envvar-console"></a>
 
-## Embedded Console fixes after 0903 {#embedded-compatibility}
+## Embedded and standalone Console (SILO 20261109 / Console v2.7.0) {#embedded-compatibility}
 
-Fixes are tracked for [local-proxy source attribution (#147)](https://github.com/pgsty/silo/issues/147) and [ignored WebSocket limits (#148)](https://github.com/pgsty/silo/issues/148). The behavior below requires a build containing both fixes; the 0903 image does not include them.
+[SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) embeds [Console v2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`). Standalone deployments use `docker.io/pgsty/silo-console:v2.7.0`. Updating a standalone Console binary or container does **not** replace the Console embedded inside an older `silo` server binary.
+
+Console `v2.7.0` includes the following runtime and operational capabilities:
+
+- **Ten UI languages and locale routing:** Offers ten languages (including Arabic right-to-left layout) in the login menu and command palette ([design record](/blog/design/console-languages/)). Simplified Chinese UI links open `/zh/` documentation; other UI languages open English documentation.
+- **API documentation:** Serves Redoc 3 documentation at `/api/v1/docs` and routes `/swagger.json` directly to the backend API instead of the frontend SPA fallback.
+- **Plain-HTTP browser actions:** Enables **Calculate folder sizes** and SSE-C decryption-key copy over plain HTTP (`http://<ip>:9001`) without requiring a browser secure context, and rejects malformed or truncated multipart uploads with HTTP `400`.
+- **Standalone container runtime:** Ships the UBI system CA bundle (`/etc/ssl/certs/ca-certificates.crt`) and a writable `/tmp` directory (`1777`) in `docker.io/pgsty/silo-console:v2.7.0` for outbound HTTPS and multipart temporary files.
+- **Usage worker (`console usage-worker`):** Accepts `--certs-dir` to trust system roots, `certs/CAs`, and Console's `public.crt`, and counts `CONSOLE_USAGE_SCAN_TIMEOUT` across active listing slices rather than queue wait time. See [Usage scans](/administration/console/managing-objects/#usage-scans) for full `CONSOLE_USAGE_*` settings.
+
+Local-proxy source attribution ([#147](https://github.com/pgsty/silo/issues/147)) and embedded WebSocket connection limits ([#148](https://github.com/pgsty/silo/issues/148)) apply in current SILO releases as described below.
 
 ### Proxy source addresses {#trusted-proxies}
 
 Embedded Console uses `MINIO_API_TRUSTED_PROXIES`; `CONSOLE_TRUSTED_PROXIES` remains standalone-only. Client attribution affects `aws:SourceIp` policies and WebSocket limits.
 
-| Setting | Trusted Console TCP peers | Forwarded-chain entries skipped |
-| --- | --- | --- |
-| Unset or blank | Loopback (`127.0.0.0/8`, `::1`, including IPv4-mapped addresses) | None |
-| IP/CIDR list | Loopback plus listed peers | Explicit list entries only |
-| `none` / `off` | None | None |
-| Invalid or unreadable | Startup error | None |
+| Setting               | Trusted Console TCP peers                                        | Forwarded-chain entries skipped |
+| --------------------- | ---------------------------------------------------------------- | ------------------------------- |
+| Unset or blank        | Loopback (`127.0.0.0/8`, `::1`, including IPv4-mapped addresses) | None                            |
+| IP/CIDR list          | Loopback plus listed peers                                       | Explicit list entries only      |
+| `none` / `off`        | None                                                             | None                            |
+| Invalid or unreadable | Startup error                                                    | None                            |
 {.wide .expand}
 
 Separate list entries with commas, semicolons or whitespace. Specify the actual peer addresses of proxies on other hosts or containers. Local proxies need no setting, but must sanitize forwarded source headers: this behavior trusts local processes. A loopback address inside a header does not automatically become a trusted hop. Standalone Console still requires explicit proxy trust.
@@ -33,12 +43,13 @@ The Server's S3 policy is unchanged. With `none`/`off`, S3 also ignores the brow
 
 Set these variables in the Server environment or `MINIO_CONFIG_ENV_FILE`:
 
-| Variable | Default |
-| --- | --- |
-| `CONSOLE_WS_MAX_CONNECTIONS` | 1024 |
-| `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT` | 256 |
-| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS` | 64 |
-| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8 |
+| Variable                                          | Default |
+| ------------------------------------------------- | ------- |
+| `CONSOLE_WS_MAX_CONNECTIONS`                      | 1024    |
+| `CONSOLE_WS_MAX_CONNECTIONS_PER_CLIENT`           | 256     |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS`            | 64      |
+| `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT` | 8       |
+{.wide .expand}
 
 Public browsing uses one WebSocket per tab. NAT clients share an address; IPv6 clients share a budget per /64. For example, set `CONSOLE_WS_MAX_ANONYMOUS_CONNECTIONS_PER_CLIENT=16` to allow more anonymous tabs from one address. Defaults and authenticated capacity reservations remain unchanged.
 
@@ -51,12 +62,13 @@ Values must be integers from 1 to 1048576. Each anonymous cap must be strictly b
 
 The fix requires no new setting. Its request restrictions always apply, and normal sharing remains available. `CONSOLE_SHARE_MINIO_URL` continues to select only the generated link format. The anonymous proxy is limited to object-content GET requests:
 
-| Allowed | Rejected |
-| --- | --- |
-| Configured S3 scheme, host and effective port | Other origins, URL user information and fragments |
-| `/valid-bucket/nonempty-object-key` | Root/bucket-only requests, `minio` and `.minio.sys*` system paths, dot path components |
+| Allowed                                                                          | Rejected                                                                                                                                           |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Configured S3 scheme, host and effective port                                    | Other origins, URL user information and fragments                                                                                                  |
+| `/valid-bucket/nonempty-object-key`                                              | Root/bucket-only requests, `minio` and `.minio.sys*` system paths, dot path components                                                             |
 | Signatures, session tokens, versions, object parts and download response options | Query-selected operations: `acl`, `tagging`, `retention`, `legal-hold`, `attributes`, `uploadId`, `lambdaArn`, `torrent`; malformed query encoding |
-| Direct backend responses | All 3xx return 502 without following the redirect or forwarding `Location` |
+| Direct backend responses                                                         | All 3xx return 502 without following the redirect or forwarding `Location`                                                                         |
+{.wide .expand}
 
 S3 continues to enforce authorization: unsigned public objects are allowed by their policies; private objects require valid authorization. Original URL encoding and signature parameters are preserved. Manual proxying of bucket listings, object subresources or downloads that depend on redirects no longer works through this endpoint.
 

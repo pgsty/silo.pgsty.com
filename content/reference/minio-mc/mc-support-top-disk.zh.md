@@ -1,9 +1,9 @@
 ---
-title: "mc support top disk"
+title: "mc support top drive（disk 别名）"
 url: "/zh/reference/minio-mc/mc-support-top-disk/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top-disk.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support-top-disk"></a>
@@ -11,17 +11,19 @@ upstream_modified: false
 <a id="command-mc.support.top.disk"></a>
 
 > [!NOTE]
-> **需要完成 SUBNET 注册**
+> **本地诊断**
 >
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
+> PGSTY `mcli` 无需完成 SUBNET 注册即可直接对 SILO 运行此类诊断命令。在线注册、上传与 call-home 路径均已禁用；详见[客户端兼容性](/zh/compatibility/mcli/#subnet)。
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
 
-[`mc support top disk`](#command-mc.support.top.disk) 命令显示当前驱动器统计信息。
+## 语法 {#syntax}
+
+当前命令名为 `mcli support top drive`；`disk` 保留为兼容别名。该命令用于显示当前驱动器统计信息。
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="示例" value="tab1" >}}
-以下命令显示 [alias](/zh/glossary/#term-alias) `myminio` 上当前正在进行的 S3 API 调用。
+以下命令显示 [alias](/zh/glossary/#term-alias) `myminio` 上的当前驱动器指标。
 
 ```shell
 mc support top disk myminio/
@@ -44,7 +46,9 @@ mc [GLOBALFLAGS] support top disk                     \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `TARGET` {#mc.support.top.disk.TARGET}
 
@@ -64,6 +68,12 @@ mc [GLOBALFLAGS] support top disk                     \
 
 如果未提供值，该命令最多返回 10 个驱动器的统计信息。
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
+
+## 行为说明 {#behavior}
+
+在 [mcli 20261109](/zh/blog/release/mcli-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，`mcli support top drive`（`top disk`）将首次驱动器 I/O 采样作为基线，不再将自系统启动以来的累计计数器直接展示为首个采样周期数据。

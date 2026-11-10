@@ -3,7 +3,7 @@ title: "mc idp openid"
 url: "/reference/minio-mc/mc-idp-openid/"
 weight: 180
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-idp-openid.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-idp-openid"></a>
@@ -29,15 +29,16 @@ Define configuration settings as an alternative to using environment variables w
 
 The [`mc idp openid`](#command-mc.idp.openid) command has the following subcommands:
 
-| Subcommand | Description |
-| --- | --- |
-| [`mc idp openid add`](#mc.idp.openid.add) | Create an OpenID IDP server configuration. |
-| [`mc idp openid update`](#mc.idp.openid.update) | Modify an existing OpenID IDP server configuration. |
-| [`mc idp openid rm`](#mc.idp.openid.rm) | Remove an OpenID IDP server configuration from a deployment. |
-| [`mc idp openid ls`](#mc.idp.openid.ls) | Outputs a list of the existing OpenID server configurations for a deployment. |
-| [`mc idp openid info`](#mc.idp.openid.info) | Displays details for a specific OpenID server configuration. |
-| [`mc idp openid enable`](#mc.idp.openid.enable) | Enables an OpenID server configuration. |
-| [`mc idp openid disable`](#mc.idp.openid.disable) | Disables an OpenID server configuration. |
+| Subcommand                                        | Description                                                                   |
+| ------------------------------------------------- | ----------------------------------------------------------------------------- |
+| [`mc idp openid add`](#mc.idp.openid.add)         | Create an OpenID IDP server configuration.                                    |
+| [`mc idp openid update`](#mc.idp.openid.update)   | Modify an existing OpenID IDP server configuration.                           |
+| [`mc idp openid rm`](#mc.idp.openid.rm)           | Remove an OpenID IDP server configuration from a deployment.                  |
+| [`mc idp openid ls`](#mc.idp.openid.ls)           | Outputs a list of the existing OpenID server configurations for a deployment. |
+| [`mc idp openid info`](#mc.idp.openid.info)       | Displays details for a specific OpenID server configuration.                  |
+| [`mc idp openid enable`](#mc.idp.openid.enable)   | Enables an OpenID server configuration.                                       |
+| [`mc idp openid disable`](#mc.idp.openid.disable) | Disables an OpenID server configuration.                                      |
+{.wide .expand}
 
 ## Configuration Parameters {#configuration-parameters}
 

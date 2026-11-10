@@ -6,22 +6,27 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO 行为：** 诊断在本地运行，不要求 SUBNET 订阅，也不会自动上传。license info/unregister 只操作本地状态，license update 保留显式文件方式；在线注册/续订与上传禁用。下文保留的上游语法不启用这些在线服务。见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。
-
+**SILO 行为：** `mc support` 诊断在本地直接对 SILO 运行，不要求 SUBNET 订阅，也不会自动上传。`mc license info` 与 `unregister` 仅操作本地状态，`license update` 保留显式文件方式；在线注册、续订与上传均已禁用。下文保留的上游语法不会启用这些在线服务。见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。
 
 <a id="mc-support-profile"></a>
 
 <a id="command-mc.support.profile"></a>
 
-## 描述 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 描述 {#description}
 
 [`mc support profile`](#command-mc.support.profile) 为你的部署运行系统性能剖析。 剖析结果可帮助了解给定节点上运行的 MinIO 服务端进程状态。
 
 诊断产物保存在本地；SUBNET 在线服务已禁用。兼容参数不会启用上传。
 
-## 示例 {#id3}
+<a id="id3" data-td-print-local></a>
 
-### 获取 CPU 剖析 {#cpu}
+## 示例 {#examples}
+
+<a id="cpu" data-td-print-local></a>
+
+### 获取 CPU 剖析 {#fetch-cpu-profiling}
 
 此命令从别名为 `minio1` 的 MinIO 部署中获取 CPU 剖析数据。 剖析按默认时长运行 10 秒。
 
@@ -29,7 +34,9 @@ upstream_modified: true
 mc support profile --type cpu minio1/
 ```
 
-### 并发获取 CPU、内存和 block 剖析 {#cpu-block}
+<a id="cpu-block" data-td-print-local></a>
+
+### 并发获取 CPU、内存和 block 剖析 {#fetch-cpu-memory-and-block-profiling-concurrently}
 
 此命令从别名 `minio2` 获取 CPU、内存和 block 使用情况的剖析数据。 剖析按默认时长运行 10 秒。
 
@@ -37,7 +44,9 @@ mc support profile --type cpu minio1/
 mc support profile --type cpu,mem,block minio2/
 ```
 
-### 并发获取 CPU、内存和 block 剖析（持续 10 分钟） {#cpu-block-10}
+<a id="cpu-block-10" data-td-print-local></a>
+
+### 并发获取 CPU、内存和 block 剖析（持续 10 分钟） {#fetch-cpu-memory-and-block-profiling-concurrently-for-10-minutes}
 
 此命令从别名 `minio3` 获取 CPU、内存和 block 的剖析数据。 剖析运行 10 分钟（600 秒）。
 
@@ -45,7 +54,9 @@ mc support profile --type cpu,mem,block minio2/
 mc support profile --type cpu,mem,block --duration 600 minio3/
 ```
 
-## 语法 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc support profile`](#command-mc.support.profile) 命令语法如下：
 
@@ -58,7 +69,9 @@ mc [GLOBALFLAGS] support profile       \
                          ALIAS
 ```
 
-### 参数 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `--duration` {#mc.support.profile.-duration}
 
@@ -68,7 +81,7 @@ mc [GLOBALFLAGS] support profile       \
 
 按指定时长运行剖析，单位为秒。
 
-使用 `--type <value>`，其中 `<value>` 为剖析运行的秒数。
+使用 `--duration <value>`，其中 `<value>` 为剖析运行的秒数。
 
 如果未指定，命令将收集 10 秒的数据。
 
@@ -98,7 +111,7 @@ mc [GLOBALFLAGS] support profile       \
 > [!WARNING]
 > **重要**
 >
-> 除非 MinIO Support 明确要求，否则不要使用 `cpuio` 或 `trace` 数据类型。 这些剖析会消耗大量资源，在缺乏指导时使用可能导致集群性能下降。
+> 在生产部署上请谨慎使用 `cpuio` 与 `trace` 剖析类型。这两种剖析会消耗大量 CPU 与 I/O 资源，运行期间可能导致集群性能下降。
 
 ##### `--airgap` {#mc.support.profile.-airgap}
 
@@ -118,6 +131,8 @@ mc [GLOBALFLAGS] support profile       \
 
 MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
-### 全局标志 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。

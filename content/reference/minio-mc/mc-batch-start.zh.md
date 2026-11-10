@@ -26,7 +26,7 @@ upstream_modified: true
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="示例" value="tab1" >}}
-以下命令会在 `myminio` 别名的 `mybucket` 存储桶上，为 replicate 作业创建一个基础 YAML 文件。
+以下命令在 `myminio` 别名对应的部署上从 `jobfile.yaml` 启动一个批处理作业。
 
 ```shell
 mc batch start myminio jobfile.yaml
@@ -79,7 +79,7 @@ mc batch start myminio replicate.yaml
 
 *Required*
 
-YAML 定义的批处理作业。 作业可按需包含任意数量的任务；没有预定义的限制。
+定义一个批处理作业（`replicate`、`keyrotate` 或 `expire`）的 YAML 文件路径。
 
 <a id="id4" data-td-print-local></a>
 
@@ -95,7 +95,7 @@ YAML 定义的批处理作业。 作业可按需包含任意数量的任务；�
 
 ### 启动批处理作业 {#start-a-batch-job}
 
-以下命令会在 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) `myminio` 对应的部署上，启动 `replication.yaml` 文件中定义的一批作业：
+以下命令会在 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias) `myminio` 对应的部署上，启动 `replication.yaml` 文件中定义的批处理作业：
 
 ```shell
 mc batch start myminio ./replication.yaml
@@ -118,4 +118,4 @@ SILO 是 PGSTY mcli 正式支持的服务器；与上游 MinIO 和其他 S3 服�
 
 要启动作业，必须在该部署上具有 [`admin:StartBatchJob`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-StartBatchJob) 权限。
 
-下一个 SILO 版本还会在作业操作对象时检查通过认证的提交者的本地数据权限。定义中的凭据另行授权远端操作，详见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。
+[SILO 20261109](/zh/blog/release/silo-20261109/) 还会在作业列举或修改对象时强制校验已认证提交者的本地数据权限。作业定义中的凭据仅另行授权远端操作，详见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。

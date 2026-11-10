@@ -3,7 +3,7 @@ title: "mc admin idp ldap policy"
 url: "/reference/deprecated/mc-admin-idp-ldap-policy/"
 weight: 150
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-idp-ldap-policy.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-idp-ldap-policy"></a>
@@ -22,11 +22,12 @@ The [`mc admin idp ldap policy`](#command-mc.admin.idp.ldap.policy) command allo
 
 The [`mc admin idp ldap policy`](#command-mc.admin.idp.ldap.policy) command has the following subcommands:
 
-| Subcommand | Description |
-| --- | --- |
-| [`mc admin idp ldap policy attach`](#mc.admin.idp.ldap.policy.attach) | Attach a policy to an entity |
-| [`mc admin idp ldap policy detach`](#mc.admin.idp.ldap.policy.detach) | Detach a policy from an entity |
-| [`mc admin idp ldap policy entities`](#mc.admin.idp.ldap.policy.entities) | List policy entity mappings |
+| Subcommand                                                                | Description                    |
+| ------------------------------------------------------------------------- | ------------------------------ |
+| [`mc admin idp ldap policy attach`](#mc.admin.idp.ldap.policy.attach)     | Attach a policy to an entity   |
+| [`mc admin idp ldap policy detach`](#mc.admin.idp.ldap.policy.detach)     | Detach a policy from an entity |
+| [`mc admin idp ldap policy entities`](#mc.admin.idp.ldap.policy.entities) | List policy entity mappings    |
+{.wide .expand}
 
 ## Syntax {#syntax}
 

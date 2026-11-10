@@ -33,7 +33,7 @@ The command has the following syntax:
 
 ```shell
 mc [GLOBALFLAGS] batch list TARGET           \
-                            --type "string"
+                            [--type "string"]
 ```
 
 - Brackets `[]` indicate optional parameters.
@@ -60,7 +60,7 @@ The [alias](/reference/minio-mc/mc-alias-set/#alias) of the deployment for which
 
 *Optional*
 
-List batch jobs only of a certain type.
+List batch jobs only of the specified job type. Valid values are `replicate`, `keyrotate`, and `expire`.
 
 ### Global Flags {#global-flags}
 
@@ -77,9 +77,7 @@ mc batch list myminio --type "replicate"
 ```
 
 - Replace `myminio` with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the MinIO deployment that should run the job.
-- Replace `replicate` with the job type to output.
-
-  Currently, [`mc batch`](/reference/minio-mc/mc-batch/#command-mc.batch) only supports the `replicate` job type.
+- Replace `replicate` with the job type to output. [`mc batch`](/reference/minio-mc/mc-batch/#command-mc.batch) supports the `replicate`, `keyrotate`, and `expire` job types.
 
 The output of the above command is similar to the following:
 

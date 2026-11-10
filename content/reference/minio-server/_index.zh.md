@@ -13,7 +13,9 @@ upstream_modified: true
 
 <a id="command-minio"></a>
 
-## Silo 服务端 {#minio-server}
+<a id="minio-server" data-td-print-local></a>
+
+## Silo 服务端 {#id1}
 
 [`silo server`](#command-minio.server) 命令用于启动 SILO 服务端进程。官方可执行文件名为 `silo`；本页保留历史 URL 和锚点，以保持已有文档链接有效：
 
@@ -90,6 +92,16 @@ SILO 至少使用 2 个驱动器或目录端点即可启用 [纠删码](/zh/oper
 > 在开发或评估场景中，你可以在单个物理卷上指定多个逻辑目录或分区，以便在部署中启用纠删码。
 >
 > 对于生产环境，**不要** 把同一物理磁盘上的多个逻辑目录或分区当作独立故障域。表面上的驱动器数量不能提供物理磁盘冗余。
+
+##### `--config` {#minio.server.-config}
+
+*mc-cmd*
+
+*Optional*
+
+指定 YAML 服务端配置文件路径（支持 `version: v1` 或 `version: v2`）。也可通过 `MINIO_CONFIG` 环境变量指定该路径。
+
+该 YAML 配置文件可定义存储池、网络监听地址（`--address`、`--console-address`）、TLS 证书目录（`--certs-dir`）、根凭据以及 FTP 或 SFTP 监听器选项。当 YAML 文件已定义存储池时，可在命令行中省略 `HOSTNAME/DIRECTORIES`。
 
 ##### `--address` {#minio.server.-address}
 
@@ -294,7 +306,7 @@ silo server http://server{1...4}/disk{1...4}                                 \
 
 如果用户主目录中只有旧的 `.minio` 目录而没有 `.silo`，SILO 会继续使用 `.minio/certs`。两者都存在时使用 `.silo/certs`，并输出警告。对于服务账户，建议显式配置 `--certs-dir`，避免依赖交互用户的主目录。
 
-SILO 20261026 仍接受已弃用的 `--config-dir` / `-C` 参数。使用该参数且未设置 `--certs-dir` 时，证书目录为 `<config-dir>/certs`；显式 `--certs-dir` 优先。上游 MinIO 某些版本移除此参数的说明不能直接套用于 SILO。
+[SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）仍接受已弃用的 `--config-dir` / `-C` 参数。使用该参数且未设置 `--certs-dir` 时，证书目录为 `<config-dir>/certs`；显式 `--certs-dir` 优先。上游 MinIO 某些版本移除此参数的说明不能直接套用于 SILO。
 
 有关 TLS 配置的更多信息，请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。
 
@@ -327,7 +339,81 @@ SILO 20261026 仍接受已弃用的 `--config-dir` / `-C` 参数。使用该参�
 >
 > 你可以通过在 [`MINIO_OPTS`](/zh/reference/minio-server/settings/core/#envvar.MINIO_OPTS) 环境变量中设置上述任意 `minio` 参数来定义它们。 该变量的值是一个字符串，包含你希望在启动 MinIO Server 时设置的上述参数及其对应取值。
 
-## 设置 {#id3}
+## Silo 健康检查 {#command-silo.healthcheck}
+
+`silo healthcheck` 子命令用于探测 SILO 服务端健康检查端点，并通过进程退出码报告探测结果。容器镜像、编排平台及维护脚本可直接运行 `silo healthcheck`，无需依赖 `curl` 等外部 HTTP 工具。
+
+### 语法 {#silo.healthcheck.syntax}
+
+```shell
+silo healthcheck [FLAGS] [CHECK]
+```
+
+##### `CHECK` {#silo.healthcheck.CHECK}
+
+*Optional*
+
+选择要探测的健康检查端点。省略时，`silo healthcheck` 默认执行 `live` 检查。
+
+| 检查项         | 端点                         | 说明                                                           |
+| -------------- | ---------------------------- | -------------------------------------------------------------- |
+| `live`         | `/minio/health/live`         | 默认检查项。确认 HTTP 监听器正在处理请求，不访问任何外部系统。 |
+| `ready`        | `/minio/health/ready`        | 检查存活状态，并在已配置 KMS 与 `etcd` 时检查其可达性。        |
+| `cluster`      | `/minio/health/cluster`      | 检查所有纠删码集合上的集群级写仲裁状态。                       |
+| `cluster-read` | `/minio/health/cluster/read` | 检查所有纠删码集合上的集群级读仲裁状态。                       |
+{.wide .expand}
+
+##### `--address` {#silo.healthcheck.-address}
+
+*Optional*
+
+探测绑定到 `ADDRESS:PORT` 的服务端（环境变量 `MINIO_ADDRESS`，默认值为 `:9000`）。主机部分为空时默认探测 `127.0.0.1`，并在证书目录中同时存在 `public.crt` 与 `private.key` 时自动选用 `https`。
+
+##### `--url` {#silo.healthcheck.-url}
+
+*Optional*
+
+探测显式指定的 `http://HOST:PORT` 或 `https://HOST:PORT` 基础 URL（环境变量 `MINIO_HEALTHCHECK_URL`），而不再根据 `--address` 与 `--certs-dir` 推导目标地址。
+
+##### `--maintenance` {#silo.healthcheck.-maintenance}
+
+*Optional*
+
+仅可与 `cluster` 检查配合使用。向请求追加 `?maintenance=true`，检查将当前目标节点下线是否仍能维持写仲裁。当服务端返回 HTTP `412 Precondition Failed` 时，进程以状态码 `1` 退出。
+
+##### `--timeout` {#silo.healthcheck.-timeout}
+
+*Optional*
+
+设置单次探测的总超时时间。`live` 与 `ready` 默认值为 `5s`；`cluster` 与 `cluster-read` 默认值为 `15s`。
+
+##### `--certs-dir, -S` {#silo.healthcheck.-certs-dir}
+
+*Optional*
+
+指定未设置 `--url` 时用于检测 HTTPS 的证书目录路径（环境变量 `MINIO_CERTS_DIR`）。未指定 `--certs-dir` 但设置了 `--config-dir` 时，`silo healthcheck` 会检查 `<config-dir>/certs`。
+
+##### `--json` {#silo.healthcheck.-json}
+
+*Optional*
+
+输出单个 JSON 对象，包含 `check`、`healthy`、`status`、`durationMs`、`serverStatus`、`writeQuorum`、`readQuorum`、`healingDrives` 和 `error` 字段。
+
+##### `--quiet, -q` {#silo.healthcheck.-quiet}
+
+*Optional*
+
+探测健康时抑制标准输出。
+
+### 行为与退出码 {#silo.healthcheck.behavior}
+
+`silo healthcheck` 发送匿名 `GET` 请求，绕过 `HTTP_PROXY` 与 `HTTPS_PROXY`，并跳过 TLS 证书校验，以与 kubelet 的 HTTPS 探针行为保持一致。当目标端点返回 HTTP `200 OK` 时（含 `--maintenance` 确认节点可安全下线的情形）退出码为 `0`，其余情况退出码均为 `1`。
+
+有关启动就绪语义及数据路径可用性校验说明，请参阅 [健康检查 API：原生探针与应用启动](/zh/operations/monitoring/healthcheck-probe/#native-probe)。
+
+<a id="id3" data-td-print-local></a>
+
+## 设置 {#settings}
 
 你可以通过定义额外的 [Configuration Values](/zh/reference/minio-server/settings/#minio-server-configuration-options) 或 [Environment Variables](/zh/reference/minio-server/settings/#minio-server-environment-variables)，对 MinIO 服务端进程执行其他自定义配置。
 

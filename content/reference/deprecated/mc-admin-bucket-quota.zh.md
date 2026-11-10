@@ -3,7 +3,7 @@ title: "mc admin bucket quota"
 url: "/zh/reference/deprecated/mc-admin-bucket-quota/"
 weight: 110
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-bucket-quota.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-bucket-quota"></a>
@@ -19,7 +19,9 @@ upstream_modified: false
 > - [`mc quota info`](/zh/reference/deprecated/mc-quota-info/#command-mc.quota.info)
 > - [`mc quota clear`](/zh/reference/deprecated/mc-quota-clear/#command-mc.quota.clear)
 
-## 说明 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 说明 {#description}
 
 [`mc admin bucket quota`](#command-mc.admin.bucket.quota) 命令用于管理按存储桶设置的存储配额。
 
@@ -30,26 +32,32 @@ upstream_modified: false
 
 <a id="id3" data-td-print-local></a>
 
-### 计量单位 {#mc-admin-bucket-quota-units}
+<a id="mc-admin-bucket-quota-units" data-td-print-local></a>
+
+### 计量单位 {#units-of-measurement}
 
 [`mc admin bucket quota --hard`](#mc.admin.bucket.quota.-hard) 标志 接受以下不区分大小写的后缀，用于表示所指定大小值的单位：
 
-| 后缀 | 单位大小 |
-| --- | --- |
-| `k` | KB（千字节，1000 字节） |
-| `m` | MB（兆字节，1000 千字节） |
-| `g` | GB（吉字节，1000 兆字节） |
-| `t` | TB（太字节，1000 吉字节） |
+| 后缀 | 单位大小                       |
+| ---- | ------------------------------ |
+| `k`  | KB（千字节，1000 字节）        |
+| `m`  | MB（兆字节，1000 千字节）      |
+| `g`  | GB（吉字节，1000 兆字节）      |
+| `t`  | TB（太字节，1000 吉字节）      |
 | `ki` | KiB（二进制千字节，1024 字节） |
-| `mi` | MiB（二进制兆字节，1024 KiB） |
-| `gi` | GiB（二进制吉字节，1024 MiB） |
-| `ti` | TiB（二进制太字节，1024 GiB） |
+| `mi` | MiB（二进制兆字节，1024 KiB）  |
+| `gi` | GiB（二进制吉字节，1024 MiB）  |
+| `ti` | TiB（二进制太字节，1024 GiB）  |
 
 省略后缀时，默认单位为 `bytes`。
 
-## 示例 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 为存储桶配置硬配额 {#id5}
+## 示例 {#examples}
+
+<a id="id5" data-td-print-local></a>
+
+### 为存储桶配置硬配额 {#configure-a-hard-quota-on-a-bucket}
 
 使用 [`mc admin bucket quota`](#command-mc.admin.bucket.quota) 搭配 [`--hard`](#mc.admin.bucket.quota.-hard) 标志，为存储桶指定硬配额。 硬配额可防止存储桶大小增长超过指定限制。
 
@@ -60,7 +68,9 @@ mc admin bucket quota TARGET/BUCKET --hard LIMIT
 - 将 `TARGET` 替换为已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。 将 `BUCKET` 替换为要设置硬配额的存储桶名称。
 - 将 `LIMIT` 替换为存储桶可增长到的最大大小。 例如，要将硬限制设置为 10 TB，请指定 `10t`。 支持的单位请参见 [计量单位](#mc-admin-bucket-quota-units)。
 
-### 获取存储桶配额配置 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 获取存储桶配额配置 {#retrieve-bucket-quota-configuration}
 
 使用 [`mc admin bucket quota`](#command-mc.admin.bucket.quota) 获取存储桶当前的配额配置：
 
@@ -70,7 +80,9 @@ mc admin bucket quota TARGET/BUCKET
 
 将 `TARGET` 替换为已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。 将 `BUCKET` 替换为要获取配额的存储桶名称。
 
-### 清除已配置的存储桶配额 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 清除已配置的存储桶配额 {#clear-configured-bucket-quota}
 
 使用 [`mc admin bucket quota`](#command-mc.admin.bucket.quota) 搭配 [`--clear`](#mc.admin.bucket.quota.-clear) 标志，清除存储桶上的所有配额。
 
@@ -80,7 +92,9 @@ mc admin bucket quota TARGET/BUCKET --clear
 
 - 将 `TARGET` 替换为已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。 将 `BUCKET` 替换为要清除配额的存储桶名称。
 
-## 语法 {#id8}
+<a id="id8" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc admin bucket quota`](#command-mc.admin.bucket.quota) 使用以下语法：
 

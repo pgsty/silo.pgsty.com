@@ -88,4 +88,4 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 ### 逐项导入失败时的退出码（`mcli 20261109`） {#exit-status}
 
-在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中，当服务端在导入响应中报告逐存储桶或逐功能项元数据导入失败时，`mc admin cluster bucket import` 会返回退出码 `1`（`#234`）。
+在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中，当逐存储桶或逐功能项元数据导入失败时，`mc admin cluster bucket import` 会在保留详细错误报告的同时返回退出码 `1`。

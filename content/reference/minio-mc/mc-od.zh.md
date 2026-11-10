@@ -167,12 +167,12 @@ mc od if=file.zip of=myminio/mybucket/file.zip parts=5
 
 ## 行为 {#behavior}
 
-### 分片顺序读取与参数校验（`mcli 20261109`） {#multipart-validation}
+### 分片下载与参数校验（`mcli 20261109`） {#multipart-validation}
 
 在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中：
 
-- 分片 `mc od` 上传会从源文件按顺序读取互不重叠的分片数据，并在传输结束时关闭源读取器（`#173`）。
-- `mc od` 会在创建目标文件或发起分片上传前拒绝零值、负值或溢出的 `parts=`、`size=` 或 `skip=` 参数（`#191`、`#205`）。
+- 分片 `mc od` 下载按顺序读取所请求的分片序列，不再重复最后一个分片，并在完成或失败时关闭已打开的分片读取器。
+- `mc od` 在修改目标前校验操作数、零分片大小、负值大小与算术溢出，并正确处理空复制而不输出无效速率。
 
 ### S3 兼容性 {#s3-compatibility}
 

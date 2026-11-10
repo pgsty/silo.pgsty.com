@@ -6,8 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO 行为：** 诊断在本地运行，不要求 SUBNET 订阅，也不会自动上传。license info/unregister 只操作本地状态，license update 保留显式文件方式；在线注册/续订与上传禁用。下文保留的上游语法不启用这些在线服务。见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。
-
+**SILO 行为：** `mc support` 诊断在本地直接对 SILO 运行，不要求 SUBNET 订阅，也不会自动上传。`mc license info` 与 `unregister` 仅操作本地状态，`license update` 保留显式文件方式；在线注册、续订与上传均已禁用。下文保留的上游语法不会启用这些在线服务。见 [mcli 兼容性](/zh/compatibility/mcli/#subnet)。
 
 <a id="mc-support-perf"></a>
 
@@ -18,7 +17,9 @@ upstream_modified: true
 >
 > `mc support perf` 替代 `mc admin speedtest` 命令。
 
-## 描述 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 描述 {#description}
 
 使用 [`mc support perf`](#command-mc.support.perf) 命令可检查 S3 API（读/写）、网络 IO 和存储（磁盘读/写）的性能。
 
@@ -46,9 +47,13 @@ upstream_modified: true
 
    测量站点复制操作的速度。
 
-## 示例 {#id3}
+<a id="id3" data-td-print-local></a>
 
-### 测量对象速度 {#id4}
+## 示例 {#examples}
+
+<a id="id4" data-td-print-local></a>
+
+### 测量对象速度 {#measure-speed-of-an-object}
 
 在别名 `minio1` 上，测量某个对象的 S3 读写性能。 MinIO 会自动调优并发度，以获得最大吞吐量和 IOPS（Input/Output Per Second）。
 
@@ -56,7 +61,9 @@ upstream_modified: true
 mc support perf object minio1
 ```
 
-### 在指定时长内测量指定大小对象的速度 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 在指定时长内测量指定大小对象的速度 {#measure-speed-of-an-object-of-a-specific-size-for-a-specific-duration}
 
 在别名 `minio1` 上，对大小为 128MiB 的对象运行 20 秒的 S3 读写性能测试。 MinIO 会自动调优并发度以获得最大吞吐量。
 
@@ -64,7 +71,9 @@ mc support perf object minio1
 mc support perf object minio1 --duration 20s --size 128MiB
 ```
 
-### 使用默认规格测试所有节点上的全部磁盘速度 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 使用默认规格测试所有节点上的全部磁盘速度 {#test-speed-of-all-drives-on-all-nodes-with-default-specifications}
 
 在别名为 `minio1` 的集群上，对所有节点上的所有磁盘执行读写性能测量。 该命令未指定 blocksize，因此使用默认值 4MiB。
 
@@ -72,7 +81,9 @@ mc support perf object minio1 --duration 20s --size 128MiB
 mc support perf drive minio1
 ```
 
-### 使用自定义规格测试磁盘速度 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 使用自定义规格测试磁盘速度 {#test-drive-speed-measurements-with-custom-specifications}
 
 在别名为 `minio1` 的集群上执行磁盘读写性能测量，指定 blocksize 为 64KiB，且每个磁盘读写数据量为 2GiB。
 
@@ -80,7 +91,9 @@ mc support perf drive minio1
 mc support perf drive minio1 --blocksize 64KiB --filesize 2GiB
 ```
 
-### 测试网络吞吐量 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 测试网络吞吐量 {#test-network-throughput}
 
 在别名为 `minio1` 的集群上运行网络吞吐量测试。
 
@@ -88,7 +101,9 @@ mc support perf drive minio1 --blocksize 64KiB --filesize 2GiB
 mc support perf net minio1
 ```
 
-### 测试站点复制速度 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 测试站点复制速度 {#test-site-replication-speed}
 
 测试站点 `minio1` 到其他已配置对等站点的站点复制操作速度。
 
@@ -96,7 +111,9 @@ mc support perf net minio1
 mc support perf site-replication minio1
 ```
 
-## 语法 {#id10}
+<a id="id10" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 #### `mc support perf drive` {#mc.support.perf.drive}
 
@@ -172,7 +189,9 @@ mc [GLOBAL FLAGS] support perf site-replication \
                   ALIAS
 ```
 
-### 参数 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `--airgap` {#mc.support.perf.-airgap}
 
@@ -276,10 +295,16 @@ MinIO 部署的 [alias](/zh/reference/minio-mc/mc-alias-set/#alias)。
 
 *Required*
 
-适用于 [`client`](#mc.support.perf.client) 命令。
+适用于 [`client`](#mc.support.perf.client) 和 [`site-replication`](#mc.support.perf.site-replication) 命令（亦可用于 [`object`](#mc.support.perf.object)）。
 
-执行测试的时长（秒）。 时间不能为 *0* 或负数。
+执行测试的持续时间。时长不能为 *0* 或负数。
 
-### 全局标志 {#id12}
+<a id="id12" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
+
+## 行为说明 {#behavior}
+
+在 [mcli 20261109](/zh/blog/release/mcli-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）中，`mc support perf` 完整保留站点复制与网络测速的小数秒持续时间，不再截断亚秒级或带小数部分的测速时长。

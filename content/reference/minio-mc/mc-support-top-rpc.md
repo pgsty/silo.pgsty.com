@@ -83,7 +83,7 @@ The full path to the [alias](/reference/minio-mc/mc-alias-set/#minio-mc-alias) o
 
 *Optional*
 
-Use in environments without network access to SUBNET.
+Retained for CLI compatibility. `mc support top rpc` runs directly against SILO deployments locally; online SUBNET services and uploads are disabled.
 
 ##### `--in` {#mc.support.top.rpc.-in}
 

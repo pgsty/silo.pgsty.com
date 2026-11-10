@@ -26,11 +26,15 @@ upstream_modified: true
 >
 > 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
-## 多个 Kafka 目标 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 多个 Kafka 目标 {#multiple-kafka-targets}
 
 你可以在顶层键后附加唯一标识符 `_ID`，为每组相关的 Kafka 设置指定多个 Kafka 服务端点。
 
-### 示例 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 示例 {#examples}
 
 例如，以下命令分别将两个不同的 Kafka 服务端点设置为 `PRIMARY` 和 `SECONDARY`：
 
@@ -59,9 +63,13 @@ mc admin config set notify_kafka:secondary \
 {{< /tab >}}
 {{< /tabs >}}
 
-## 设置 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 启用 {#id5}
+## 设置 {#settings}
+
+<a id="id5" data-td-print-local></a>
+
+### 启用 {#enable}
 
 *必需*
 
@@ -241,13 +249,14 @@ mc admin config set notify_kafka \
 
 指定 Kafka broker 的客户端身份验证类型。 下表列出了支持的取值及其映射关系
 
-| 值 | 身份验证类型 |
-| --- | --- |
-| 0 | `NoClientCert` |
-| 1 | `RequestClientCert` |
-| 2 | `RequireAnyClientCert` |
-| 3 | `VerifyClientCertIfGiven` |
-| 4 | `RequireAndVerifyClientCert` |
+| 值  | 身份验证类型                 |
+| --- | ---------------------------- |
+| 0   | `NoClientCert`               |
+| 1   | `RequestClientCert`          |
+| 2   | `RequireAnyClientCert`       |
+| 3   | `VerifyClientCertIfGiven`    |
+| 4   | `RequireAndVerifyClientCert` |
+{.wide .expand}
 
 有关各客户端身份验证类型的更多信息，请参见 [ClientAuthType](https://golang.org/pkg/crypto/tls/#ClientAuthType)。
 
@@ -347,7 +356,7 @@ mc admin config set notify_kafka \
 {{< /tab >}}
 {{< /tabs >}}
 
-指定请求使用的 Kafka broker 协议版本。未设置时，SILO 使用 **Kafka 2.1**；20261026 正式版在升级 Sarama 依赖后仍显式保留此默认值。需要不同协议时，设置 broker 支持的版本。见[所选 Sarama 配置](https://github.com/IBM/sarama/blob/v1.61.1/config.go)。
+指定请求使用的 Kafka broker 协议版本。未设置时，SILO 使用 **Kafka 2.1**；[SILO 20261109](/zh/blog/release/silo-20261109/) 在升级 Sarama 依赖后仍显式保留此默认值。需要不同协议时，设置 broker 支持的版本。见[所选 Sarama 配置](https://github.com/IBM/sarama/blob/v1.61.1/config.go)。
 
 ### Batch Size {#batch-size}
 

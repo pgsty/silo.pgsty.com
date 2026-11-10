@@ -18,7 +18,7 @@ Pigsty 维护的客户端在独立归档与 Linux 软件包中以 **`mcli`** 发
 
 Silo 项目无法保证它与每一种其他 S3 兼容服务的行为，因为各家实现存在差异。在将其他服务视为兼容对象前，请先测试工作负载依赖的操作。
 
-当前版本为 [mcli 20261109](/zh/blog/release/mcli-20261109/)，使用 Go 1.27.3、`silo-pkg` [v3.16.0](/zh/blog/release/pkg-3.16.0/) 与上游 SDK `v7.4.2-0.20261025165926-320af050c445`。完整行为变化见[兼容性注记](/zh/compatibility/mcli/#current-release)，Server/Console 版本边界见[组件矩阵](/zh/compatibility/versions/)。
+当前版本为 [mcli 20261109](/zh/blog/release/mcli-20261109/)（`RELEASE.2026-11-09T00-00-00Z`），使用 Go 1.27.3、`silo-pkg` [v3.16.0](/zh/blog/release/pkg-3.16.0/) 与上游 SDK `v7.4.2-0.20261025165926-320af050c445`。完整行为变化见[兼容性注记](/zh/compatibility/mcli/#current-release)，Server/Console 版本边界见[组件矩阵](/zh/compatibility/versions/)。
 
 [`mc`](#command-mc) 的语法如下：
 
@@ -56,6 +56,13 @@ mc [GLOBALFLAGS] COMMAND --help
 
 独立归档与 Linux 软件包安装的命令名是 **`mcli`**，容器与源码构建则保留 **`mc`**。两者是同一个客户端的别名；本文档示例使用 `mc`，若主机上安装的是 `mcli`，请直接替换命令名。
 
+直接运行已发布的多架构容器镜像（[mcli 20261109](/zh/blog/release/mcli-20261109/) 预先创建了带粘滞可写权限的 `/.mc` 目录，便于非 root UID 初始化配置）：
+
+```shell
+docker pull pgsty/mc:RELEASE.2026-11-09T00-00-00Z
+docker run --rm pgsty/mc:RELEASE.2026-11-09T00-00-00Z --version
+```
+
 从源码构建维护分支：
 
 ```shell
@@ -68,8 +75,7 @@ make build
 > [!WARNING]
 > Pigsty 分支刻意禁用了 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update)。请通过 [Silo 下载页](/zh/download/#client)、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)或 [GitHub Releases](https://github.com/pgsty/mc/releases)升级。
 
-> [!NOTE]
-> 当前 `pgsty/mc` 为脚本兼容保留 `mc license` 与 `mc support` 命令树，但所有在线 MinIO SUBNET、许可、上传、call-home 与遥测路径都已禁用。会联系这些服务的命令以稳定消息失败并返回 `1`；`support diag`、`perf`、`profile`、`inspect` 等本地诊断无需注册即可使用，并写入私有权限的本地文件。参见 [MCLI 客户端兼容性注记](/zh/compatibility/mcli/#subnet)。
+当前 `pgsty/mc` 为脚本兼容保留 `mc license` 与 `mc support` 命令树，但所有在线 MinIO SUBNET、许可、上传、call-home 与遥测路径均已禁用。尝试连接外部在线服务的命令会返回稳定错误消息并以状态码 `1` 退出；`support diag`、`perf`、`profile`、`inspect` 与 `top` 等本地诊断命令无需注册即可直接对 SILO 运行，并将产物写入私有权限的本地文件。参见 [MCLI 客户端兼容性注记](/zh/compatibility/mcli/#subnet)。
 
 <a id="s3" data-td-print-local></a>
 
@@ -236,8 +242,7 @@ MinIO 会使用指定的 SSE 模式自动加密对象。</p></td>
     </tr>
     <tr>
       <td><a href="/zh/reference/minio-mc/mc-license-info/#command-mc.license.info"><code>mc license info</code></a><br /><a href="/zh/reference/minio-mc/mc-license-register/#command-mc.license.register"><code>mc license register</code></a><br /><a href="/zh/reference/minio-mc/mc-license-update/#command-mc.license.update"><code>mc license update</code></a><br /></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-license/#command-mc.license"><code>mc license</code></a> 命令用于管理 <a href="https://min.io/pricing?jmp=docs">MinIO SUBNET</a> 的集群注册。
-可使用这些命令注册部署、显示集群当前许可证信息，或更新集群的许可证密钥。</p></td>
+      <td><p><a href="/zh/reference/minio-mc/mc-license/#command-mc.license"><code>mc license</code></a> 命令为脚本兼容性保留。本地查看、注销与显式许可证文件更新仍可使用；在线注册与续订已禁用。</p></td>
     </tr>
     <tr>
       <td><p><a href="/zh/reference/minio-mc/mc-ls/#command-mc.ls"><code>mc ls</code></a></p></td>
@@ -311,8 +316,7 @@ MinIO 会使用指定的 SSE 模式自动加密对象。</p></td>
     </tr>
     <tr>
       <td><a href="/zh/reference/minio-mc/mc-support-callhome/#command-mc.support.callhome"><code>mc support callhome</code></a><br /><a href="/zh/reference/minio-mc/mc-support-diag/#command-mc.support.diag"><code>mc support diag</code></a><br /><a href="/zh/reference/minio-mc/mc-support-inspect/#command-mc.support.inspect"><code>mc support inspect</code></a><br /><a href="/zh/reference/minio-mc/mc-support-perf/#command-mc.support.perf"><code>mc support perf</code></a><br /><a href="/zh/reference/minio-mc/mc-support-profile/#command-mc.support.profile"><code>mc support profile</code></a><br /><a href="/zh/reference/minio-mc/mc-support-proxy/#command-mc.support.proxy"><code>mc support proxy</code></a><br /><a href="/zh/reference/minio-mc/mc-support-top-api/#command-mc.support.top.api"><code>mc support top api</code></a><br /><a href="/zh/reference/minio-mc/mc-support-top-disk/#command-mc.support.top.disk"><code>mc support top disk</code></a><br /><a href="/zh/reference/minio-mc/mc-support-top-locks/#command-mc.support.top.locks"><code>mc support top locks</code></a><br /><a href="/zh/reference/minio-mc/mc-support-upload/#command-mc.support.upload"><code>mc support upload</code></a><br /></td>
-      <td><p>MinIO Client <a href="/zh/reference/minio-mc/mc-support/#command-mc.support"><code>mc support</code></a> 命令提供用于分析部署健康状况或性能、并运行诊断的工具。
-你还可以上传生成的健康报告，供 MinIO 工程团队进一步分析。</p></td>
+      <td><p><a href="/zh/reference/minio-mc/mc-support/#command-mc.support"><code>mc support</code></a> 命令提供本地工具，无需注册即可直接对 SILO 部署分析健康状况、性能与运行诊断；在线报告上传与 call-home 命令已禁用。</p></td>
     </tr>
     <tr>
       <td><a href="/zh/reference/minio-mc/mc-tag-list/#command-mc.tag.list"><code>mc tag list</code></a><br /><a href="/zh/reference/minio-mc/mc-tag-remove/#command-mc.tag.remove"><code>mc tag remove</code></a><br /><a href="/zh/reference/minio-mc/mc-tag-set/#command-mc.tag.set"><code>mc tag set</code></a><br /></td>
@@ -403,16 +407,17 @@ C:\Users\[username]\mc\certs\CAs\ # Certificate Authorities
 
 例如，可参考以下通配符使用示例及其结果。
 
-| 模式 | 文本 | 匹配结果 |
-| --- | --- | --- |
-| `abc*` | ab | 匹配 |
-| `abc*` | abd | 不匹配 |
-| `abc*c` | abcd | 匹配 |
-| `ab*??d` | abxxc | 匹配 |
-| `ab*??d` | abxc | 匹配 |
-| `ab??d` | abxc | 匹配 |
-| `ab??d` | abc | 匹配 |
-| `ab??d` | abcxdd | 不匹配 |
+| 模式     | 文本   | 匹配结果 |
+| -------- | ------ | -------- |
+| `abc*`   | ab     | 匹配     |
+| `abc*`   | abd    | 不匹配   |
+| `abc*c`  | abcd   | 匹配     |
+| `ab*??d` | abxxc  | 匹配     |
+| `ab*??d` | abxc   | 匹配     |
+| `ab??d`  | abxc   | 匹配     |
+| `ab??d`  | abc    | 匹配     |
+| `ab??d`  | abcxdd | 不匹配   |
+{.wide .expand}
 
 <a id="id11" data-td-print-local></a>
 

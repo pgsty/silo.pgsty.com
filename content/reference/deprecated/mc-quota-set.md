@@ -28,13 +28,13 @@ The [`mc quota set`](#command-mc.quota.set) assigns a hard quota limit to a buck
 
 The [`mc quota set --size`](#mc.quota.set.-size) flag accepts the following **case-insensitive** suffixes to represent the unit of the specified size value:
 
-| Suffix | Unit Size |
-| --- | --- |
-| `k` | KB (Kilobyte, 1000 Bytes) |
-| `m` | MB (Megabyte, 1000 Kilobytes) |
-| `g` | GB (Gigabyte, 1000 Megabytes) |
-| `t` | TB (Terabyte, 1000 Gigabytes) |
-| `ki` or `kib` | KiB (Kibibyte, 1024 Bites) |
+| Suffix        | Unit Size                      |
+| ------------- | ------------------------------ |
+| `k`           | KB (Kilobyte, 1000 Bytes)      |
+| `m`           | MB (Megabyte, 1000 Kilobytes)  |
+| `g`           | GB (Gigabyte, 1000 Megabytes)  |
+| `t`           | TB (Terabyte, 1000 Gigabytes)  |
+| `ki` or `kib` | KiB (Kibibyte, 1024 Bites)     |
 | `mi` or `mib` | MiB (Mebibyte, 1024 Kibibytes) |
 | `gi` or `gib` | GiB (Gibibyte, 1024 Mebibytes) |
 | `ti` or `tib` | TiB (Tebibyte, 1024 Gibibytes) |

@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
+**Version scope:** commands and illustrative output target [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261109/#upgrade).
 
 <a id="transforms-with-object-lambda"></a>
 <a id="developers-object-lambda"></a>
@@ -38,11 +38,12 @@ A handler function should perform the following steps:
 
    The `getObjectContext` property of the JSON request payload contains details about the original object. To construct the response, you need the following values:
 
-   | Value | Description |
-   | --- | --- |
-   | `inputS3Url` | A [presigned URL](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject) for the original object. The calling application generates the URL and sends it in the original request. This allows the handler to access the original object without the MinIO credentials usually required. The URL is valid for one hour. |
-   | `outputRoute` | A token that allows MinIO to validate the destination for the transformed object. Return this value with the response in an `x-amz-request-route` header. |
-   | `outputToken` | A token that allows MinIO to validate the response. Return this value in the response in an `x-amz-request-token` header. |
+   | Value         | Description                                                                                                                                                                                                                                                                                                                                |
+   | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+   | `inputS3Url`  | A [presigned URL](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject) for the original object. The calling application generates the URL and sends it in the original request. This allows the handler to access the original object without the MinIO credentials usually required. The URL is valid for one hour. |
+   | `outputRoute` | A token that allows MinIO to validate the destination for the transformed object. Return this value with the response in an `x-amz-request-route` header.                                                                                                                                                                                  |
+   | `outputToken` | A token that allows MinIO to validate the response. Return this value in the response in an `x-amz-request-token` header.                                                                                                                                                                                                                  |
+   {.wide .expand}
 
 2. Retrieve the original object from MinIO.
 
@@ -210,7 +211,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl-3.0.html>
-Version: RELEASE.2026-10-26T00-00-00Z (go1.27.3 linux/arm64)
+Version: RELEASE.2026-11-09T00-00-00Z (go1.27.3 linux/arm64)
 
 Status:         1 Online, 0 Offline.
 API: http://192.168.64.21:9000  http://127.0.0.1:9000

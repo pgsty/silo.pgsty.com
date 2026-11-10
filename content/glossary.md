@@ -382,16 +382,14 @@ upstream_modified: true
 
 **shards**
 
-> A portion of an object after being [erasure coded](#term-erasure-coding) by MinIO. Each “shard” represents either data or parity for MinIO to use for reconstructing objects on read requests.
->
-> > [!NOTE]
-> > **Exclusive access to drives**
-> >
-> > MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
-> >
-> > Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
+> A portion of an object after being [erasure coded](#term-erasure-coding). Each shard represents either data or parity used to reconstruct objects on read requests.
 >
 > For more detailed information, see [Erasure Coding](/operations/concepts/erasure-coding/#minio-erasure-coding).
+
+> [!NOTE] Exclusive access to drives
+> SILO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or operators should perform *any* actions directly on the drives or volumes provided to SILO or the objects or files placed on them.
+>
+> Do not use scripts or tools to directly modify, delete, or move data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations can cause corruption and data loss beyond the server's ability to heal.
 
 <a id="term-single-node-multi-drive"></a>
 

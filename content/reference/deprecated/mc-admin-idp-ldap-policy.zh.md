@@ -3,7 +3,7 @@ title: "mc admin idp ldap policy"
 url: "/zh/reference/deprecated/mc-admin-idp-ldap-policy/"
 weight: 150
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/deprecated/mc-admin-idp-ldap-policy.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-admin-idp-ldap-policy"></a>
@@ -16,19 +16,24 @@ upstream_modified: false
 >
 > `mc admin idp ldap policy` 及其子命令已由 [`mc idp ldap policy`](/zh/reference/minio-mc/mc-idp-ldap-policy/#command-mc.idp.ldap.policy) 替代。
 
-## 说明 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 说明 {#description}
 
 [`mc admin idp ldap policy`](#command-mc.admin.idp.ldap.policy) 命令用于查看策略与关联组或用户之间的映射关系。
 
 [`mc admin idp ldap policy`](#command-mc.admin.idp.ldap.policy) 命令包含以下子命令：
 
-| 子命令 | 说明 |
-| --- | --- |
-| [`mc admin idp ldap policy attach`](#mc.admin.idp.ldap.policy.attach) | 将策略附加到实体 |
-| [`mc admin idp ldap policy detach`](#mc.admin.idp.ldap.policy.detach) | 从实体分离策略 |
+| 子命令                                                                    | 说明                 |
+| ------------------------------------------------------------------------- | -------------------- |
+| [`mc admin idp ldap policy attach`](#mc.admin.idp.ldap.policy.attach)     | 将策略附加到实体     |
+| [`mc admin idp ldap policy detach`](#mc.admin.idp.ldap.policy.detach)     | 从实体分离策略       |
 | [`mc admin idp ldap policy entities`](#mc.admin.idp.ldap.policy.entities) | 列出策略与实体的映射 |
+{.wide .expand}
 
-## 语法 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 #### `attach` {#mc.admin.idp.ldap.policy.attach}
 
@@ -155,6 +160,8 @@ mc [GLOBALFLAGS] admin idp ldap policy entities                \
 {{< /tab >}}
 {{< /tabs >}}
 
-## 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。

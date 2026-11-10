@@ -68,7 +68,7 @@ The full path to the [alias](/reference/minio-mc/mc-alias-set/#minio-mc-alias) o
 
 Add custom metadata for the object.
 
-Specify key-value pairs as `KEY=VALUE\;`, separating each pair with a back slash and semicolon (`\;`). For example, `--attr key1=value1\;key2=value2\;key3=value3`. In `mcli 20261109`, empty metadata entries created by trailing or repeated `;` separators are ignored (`#166`).
+Specify key-value pairs as `KEY=VALUE\;`, separating each pair with a backslash and semicolon (`\;`). For example, `--attr key1=value1\;key2=value2\;key3=value3`. In [`mcli 20261109`](/blog/release/mcli-20261109/) ([pgsty/mc#76](https://github.com/pgsty/mc/pull/76)), `mc pipe` ignores empty metadata entries from trailing or repeated `;` separators.
 
 ##### `--checksum` {#mc.pipe.-checksum}
 

@@ -7,14 +7,16 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
 
 <a id="object-lambda"></a>
 <a id="developers-object-lambda"></a>
 
 MinIO 的 Object Lambda 使开发者能够按需以编程方式转换对象。 你可以根据具体用例按需转换对象，例如脱敏个人身份信息（PII）、使用其他来源的信息增强数据，或在不同格式之间进行转换。
 
-## 概述 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 概述 {#overview}
 
 [Object Lambda handler](#minio-object-lambda-handers) 是一个小型代码模块，用于转换对象内容并返回结果。 与 [Amazon S3 Object Lambda functions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/transforming-objects.html) 类似，你可以从应用程序发起 GET 请求来触发 MinIO Object Lambda handler 函数。 handler 从 MinIO 获取请求的对象，执行转换后将修改后的数据返回给 MinIO，再由 MinIO 发送回原始应用程序。 原始对象保持不变。
 
@@ -30,7 +32,9 @@ MinIO 的 Object Lambda 使开发者能够按需以编程方式转换对象。 �
 - 使用 URL 获取原始对象。
 - 返回转换后的内容和授权令牌。
 
-### 创建函数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 创建函数 {#create-a-function}
 
 handler 函数应执行以下步骤：
 
@@ -38,11 +42,12 @@ handler 函数应执行以下步骤：
 
    JSON 请求负载中的 `getObjectContext` 属性包含原始对象的详细信息。 要构造响应，你需要以下值：
 
-   | 值 | 说明 |
-   | --- | --- |
-   | `inputS3Url` | 原始对象的 [presigned URL](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject)。 调用应用程序会生成该 URL，并在原始请求中发送它。 这使 handler 无需通常所需的 MinIO 凭证即可访问原始对象。 该 URL 的有效期为一小时。 |
-   | `outputRoute` | 允许 MinIO 验证转换后对象目标位置的令牌。 在响应中的 `x-amz-request-route` header 返回该值。 |
-   | `outputToken` | 允许 MinIO 验证响应的令牌。 在响应中的 `x-amz-request-token` header 返回该值。 |
+   | 值            | 说明                                                                                                                                                                                                                                        |
+   | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `inputS3Url`  | 原始对象的 [presigned URL](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject)。 调用应用程序会生成该 URL，并在原始请求中发送它。 这使 handler 无需通常所需的 MinIO 凭证即可访问原始对象。 该 URL 的有效期为一小时。 |
+   | `outputRoute` | 允许 MinIO 验证转换后对象目标位置的令牌。 在响应中的 `x-amz-request-route` header 返回该值。                                                                                                                                                |
+   | `outputToken` | 允许 MinIO 验证响应的令牌。 在响应中的 `x-amz-request-token` header 返回该值。                                                                                                                                                              |
+   {.wide .expand}
 
 2. 从 MinIO 获取原始对象。
 
@@ -64,7 +69,9 @@ handler 函数应执行以下步骤：
 >
 > handler **必须** 在对应的响应头中包含 `outputRoute` 和 `outputToken` 值。 这使 MinIO 能够正确验证来自 handler 的响应。
 
-### 注册 Handler {#handler}
+<a id="handler" data-td-print-local></a>
+
+### 注册 Handler {#register-the-handler}
 
 要使 MinIO 能够调用 handler，请使用以下 [MinIO server Object Lambda environment variables](/zh/reference/minio-server/settings/object-lambda/#minio-server-envvar-object-lambda-webhook) 将 handler 函数注册为 webhook：
 
@@ -94,7 +101,9 @@ MinIO 还支持以下用于已认证 webhook endpoint 的环境变量：
 
 或者，也可以通过 [MinIO Client](/zh/reference/minio-mc/#minio-client) 命令行工具配置 Object Lambda。 更多信息请参见 [Object Lambda 函数设置](/zh/reference/minio-server/settings/object-lambda/#minio-server-envvar-object-lambda-webhook)。
 
-### 从应用程序触发 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 从应用程序触发 {#trigger-from-an-application}
 
 要从应用程序请求转换后的对象：
 
@@ -105,7 +114,9 @@ MinIO 还支持以下用于已认证 webhook endpoint 的环境变量：
 
    MinIO 将请求发送到目标 Object Lambda handler。 handler 将转换后的内容返回给 MinIO，MinIO 会验证该响应并将其返回给应用程序。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
+
+## 示例 {#example}
 
 使用 Python、Go 和 `curl` 转换对象内容：
 
@@ -119,7 +130,9 @@ MinIO 还支持以下用于已认证 webhook endpoint 的环境变量：
 - 可用的 Python（3.8+）和 Golang 开发环境
 - [The MinIO Go SDK](/zh/developers/go/minio-go/)
 
-### 创建 Handler {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 创建 Handler {#create-a-handler}
 
 示例 handler 使用 Python 编写，使用调用方生成的 [presigned URL](https://pkg.go.dev/github.com/minio/minio-go/v7#Client.PresignedGetObject) 获取目标对象。 随后，handler 转换对象内容并返回新文本。 它使用 [Flask web framework](https://flask.palletsprojects.com/en/2.2.x/) 和 Python 3.8+。
 
@@ -175,7 +188,9 @@ if __name__ == '__main__':
    app.run()
 ```
 
-#### 启动 Handler {#id7}
+<a id="id7" data-td-print-local></a>
+
+#### 启动 Handler {#start-the-handler}
 
 使用以下命令在本地开发环境中启动 handler：
 
@@ -193,7 +208,9 @@ WARNING: This is a development server. Do not use it in a production deployment.
 Press CTRL+C to quit
 ```
 
-#### 启动 MinIO {#minio}
+<a id="minio" data-td-print-local></a>
+
+#### 启动 MinIO {#start-minio}
 
 handler 运行后，使用 [`MINIO_LAMBDA_WEBHOOK_ENABLE`](/zh/reference/minio-server/settings/object-lambda/#envvar.MINIO_LAMBDA_WEBHOOK_ENABLE) 和 [`MINIO_LAMBDA_WEBHOOK_ENDPOINT`](/zh/reference/minio-server/settings/object-lambda/#envvar.MINIO_LAMBDA_WEBHOOK_ENDPOINT) 环境变量启动 MinIO，以将该函数注册到 MinIO。 要标识具体的 Object Lambda handler，请将函数名追加到环境变量名后。
 
@@ -210,7 +227,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 <https://www.gnu.org/licenses/agpl-3.0.html>
-Version: RELEASE.2026-10-26T00-00-00Z (go1.27.3 linux/arm64)
+Version: RELEASE.2026-11-09T00-00-00Z (go1.27.3 linux/arm64)
 
 Status:         1 Online, 0 Offline.
 API: http://192.168.64.21:9000  http://127.0.0.1:9000
@@ -219,7 +236,9 @@ RootPass: minioadmin
 Object Lambda ARNs: arn:minio:s3-object-lambda::myfunction:webhook
 ```
 
-### 测试 Handler {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 测试 Handler {#test-the-handler}
 
 要测试 Lambda handler 函数，请先创建一个待转换对象。 然后调用 handler，本例中使用 Go 函数生成的 presigned URL 配合 `curl` 调用。
 

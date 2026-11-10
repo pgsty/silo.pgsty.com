@@ -106,6 +106,23 @@ This setting does not have a configuration setting option.
 {{< /tab >}}
 {{< /tabs >}}
 
+## YAML Configuration File {#yaml-configuration-file}
+
+{{< tabs group="environment-variable-configuration-setting" >}}
+{{< tab label="Environment Variable" value="environment-variable" >}}
+#### `MINIO_CONFIG` {#envvar.MINIO_CONFIG}
+
+*envvar*
+
+Specifies the path to a YAML server configuration file (`version: v1` or `version: v2`), equivalent to passing [`silo server --config`](/reference/minio-server/#minio.server.-config).
+
+[SILO 20261109](/blog/release/silo-20261109/) adopts [`silo-pkg v3.16.0`](/blog/release/pkg-3.16.0/) (`go.yaml.in/yaml/v3 v3.0.6`), which quotes a literal `<<` key during YAML encoding so saving and reloading configuration data does not misinterpret `<<` as a YAML merge directive.
+{{< /tab >}}
+{{< tab label="Configuration Setting" value="configuration-setting" >}}
+This setting does not have a configuration setting option.
+{{< /tab >}}
+{{< /tabs >}}
+
 ## Workers for Expiration {#workers-for-expiration}
 
 {{< tabs group="environment-variable-configuration-setting" >}}
@@ -456,7 +473,7 @@ This setting does not have a configuration setting option.
 
 ## Multipart listing: retired mode switch {#envvar.MINIO_API_MULTIPART_LISTING}
 
-**Server 20261026 (since 20261018):** ignore `MINIO_API_MULTIPART_LISTING` with a startup warning explaining that public listing uses the legacy cache/exact-key behavior and durable listing is deferred. Add no replacement setting. Tolerate the obsolete shared `api multipart_listing` key without rejecting startup, discarding other API settings or automatically deleting user configuration. Existing strict users lose optional durable listing and strict cancellation and must assess that upgrade impact.
+**[SILO 20261109](/blog/release/silo-20261109/) (since 20261018):** ignore `MINIO_API_MULTIPART_LISTING` with a startup warning explaining that public listing uses the legacy cache/exact-key behavior and durable listing is deferred. Add no replacement setting. Tolerate the obsolete shared `api multipart_listing` key without rejecting startup, discarding other API settings or automatically deleting user configuration. Existing strict users lose optional durable listing and strict cancellation and must assess that upgrade impact.
 
 The signed, read-only `GET /minio/admin/v3/multipart-preflight` endpoint retains `admin:StorageInfo` authorization and reports `mode=legacy`. `complete` and `ready` describe diagnostic coverage and historical records, not startup or listing enablement. Only explicit diagnostics retain the 100,000-entry, 30-second and admission budgets; public listing does not depend on them. Empty-prefix cache listing still has restart omissions and incomplete pagination; nonempty prefixes remain exact keys. Known-ID operations and background cleanup remain available. See the [latest decision and tradeoffs](/blog/design/list-multipart-uploads/#decision-20261018).
 

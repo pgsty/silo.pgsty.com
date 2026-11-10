@@ -3,7 +3,7 @@ title: "mc support top rpc"
 url: "/zh/reference/minio-mc/mc-support-top-rpc/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-support-top-rpc.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-support-top-rpc"></a>
@@ -11,11 +11,13 @@ upstream_modified: false
 <a id="command-mc.support.top.rpc"></a>
 
 > [!NOTE]
-> **需要完成 SUBNET 注册**
+> **本地诊断**
 >
-> `mc support` 命令面向已在 [MinIO SUBNET](https://min.io/pricing?jmp=docs) 注册的 MinIO 部署设计，以确保诊断和 性能测试获得最佳结果。 未注册 SUBNET 的部署无法使用 `mc support` 命令。
+> PGSTY `mcli` 无需完成 SUBNET 注册即可直接对 SILO 运行此类诊断命令。在线注册、上传与 call-home 路径均已禁用；详见[客户端兼容性](/zh/compatibility/mcli/#subnet)。
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc support top rpc`](#command-mc.support.top.rpc) 命令显示远程过程调用（RPC）的指标。
 
@@ -67,7 +69,9 @@ mc [GLOBALFLAGS] support top rpc                 \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `TARGET` {#mc.support.top.rpc.TARGET}
 
@@ -83,7 +87,7 @@ mc [GLOBALFLAGS] support top rpc                 \
 
 *Optional*
 
-用于无法通过网络访问 SUBNET 的环境。
+为命令行兼容性保留。`mc support top rpc` 直接在本地对 SILO 部署运行；在线 SUBNET 服务与上传功能均已禁用。
 
 ##### `--in` {#mc.support.top.rpc.-in}
 
@@ -121,6 +125,8 @@ mc [GLOBALFLAGS] support top rpc                 \
 
 以逗号分隔的节点列表，用于指定从哪些节点收集指标。
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。

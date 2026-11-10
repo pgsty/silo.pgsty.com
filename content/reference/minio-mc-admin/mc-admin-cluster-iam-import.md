@@ -87,5 +87,5 @@ This command supports any of the [global flags](/reference/minio-mc/#minio-mc-gl
 
 In [`mcli 20261109`](/blog/release/mcli-20261109/):
 
-- If the server reports failed IAM entities in the import response, `mc admin cluster iam import` returns exit code `1` so automation can detect partial import failures (`#234`).
-- The legacy client-side IAM zip parser fallback runs only when the server returns `NotImplemented` or `XMinioAdminVersionMismatch`. Authentication, authorization, transport, or archive errors from `ImportIAMv2` return directly without falling back (`#211`).
+- When the server reports failed IAM entity imports, `mc admin cluster iam import` returns exit status `1` while preserving detailed error reports so automation can detect partial import failures.
+- `mc admin cluster iam import` falls back to the legacy API only when the server explicitly returns `NotImplemented` or `XMinioAdminVersionMismatch`. Other HTTP, authentication, authorization, transport, or decoding errors from `ImportIAMv2` return directly without triggering a second import.

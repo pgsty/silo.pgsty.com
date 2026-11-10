@@ -17,7 +17,9 @@ upstream_modified: true
 > - `mc admin replicate edit` renamed to [`mc admin replicate update`](#mc.admin.replicate.update)
 > - `mc admin replicate remove` renamed to [`mc admin replicate rm`](#mc.admin.replicate.rm)
 
-## 描述 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 描述 {#description}
 
 [`mc admin replicate`](#command-mc.admin.replicate) 命令用于为一组 MinIO 对等站点创建并管理 [站点复制](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview)。
 
@@ -38,16 +40,19 @@ upstream_modified: true
 
 [`mc admin replicate`](#command-mc.admin.replicate) 命令包含以下子命令：
 
-| 子命令 | 描述 |
-| --- | --- |
-| [`mc admin replicate add`](#mc.admin.replicate.add) | 创建新的站点复制配置，或扩展现有配置。 |
-| [`mc admin replicate info`](#mc.admin.replicate.info) | 返回站点复制配置信息。 |
-| [`mc admin replicate resync`](#mc.admin.replicate.resync) | 当第二个站点丢失数据时，将一个站点中的内容重新同步到第二个站点。 |
-| [`mc admin replicate rm`](#mc.admin.replicate.rm) | 删除整个站点复制配置，或将一个或多个对等站点从站点复制中移除。 |
+| 子命令                                                    | 描述                                                                                                                              |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| [`mc admin replicate add`](#mc.admin.replicate.add)       | 创建新的站点复制配置，或扩展现有配置。                                                                                            |
+| [`mc admin replicate info`](#mc.admin.replicate.info)     | 返回站点复制配置信息。                                                                                                            |
+| [`mc admin replicate resync`](#mc.admin.replicate.resync) | 当第二个站点丢失数据时，将一个站点中的内容重新同步到第二个站点。                                                                  |
+| [`mc admin replicate rm`](#mc.admin.replicate.rm)         | 删除整个站点复制配置，或将一个或多个对等站点从站点复制中移除。                                                                    |
 | [`mc admin replicate status`](#mc.admin.replicate.status) | 显示参与站点之间 [可复制数据](/zh/operations/replication/multi-site-replication/#minio-site-replication-what-replicates) 的状态。 |
-| [`mc admin replicate update`](#mc.admin.replicate.update) | 修改站点复制配置中指定对等站点的 endpoint。 |
+| [`mc admin replicate update`](#mc.admin.replicate.update) | 修改站点复制配置中指定对等站点的 endpoint。                                                                                       |
+{.wide .expand}
 
-## 语法 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 #### `mc admin replicate add` {#mc.admin.replicate.add}
 
@@ -633,6 +638,8 @@ mc [GLOBALFLAGS] admin replicate resync start|status|cancel ALIAS1 ALIAS2
 
 站点复制配置中活动 MinIO 部署的 [别名](/zh/reference/minio-mc/mc-alias-set/#alias)，其需要从另一个站点重新同步数据。
 
-## 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。

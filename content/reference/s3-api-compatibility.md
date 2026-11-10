@@ -7,7 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261109 contract:** This page retains the inherited S3 API catalog. The target is [Server 20261109](/blog/release/silo-20261109/), including locked bulk-version deletion and current-object multipart conditions. Apply the documented limits and error behavior for [ordinary LIST](/blog/design/listing-recovery-lock-cost/), [Object Lock](/blog/release/silo-20261109/#authorization) and [multipart listing](/blog/design/list-multipart-uploads/#implementation). Checksum message text can change; see the [checksum contract](/blog/design/complete-multipart-checksum-errors/#october-errors).
+**SILO 20261109 contract:** This page retains the inherited S3 API catalog. The target is [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`), including locked bulk-version deletion, two-phase restore, multi-pool lifecycle quorum checks, and current-object multipart conditions. Apply the documented limits and error behavior for [ordinary LIST](/blog/design/listing-recovery-lock-cost/), [Object Lock](/blog/release/silo-20261109/#authorization), and [multipart listing](/blog/design/list-multipart-uploads/#implementation). Checksum message text can change; see the [checksum contract](/blog/design/complete-multipart-checksum-errors/#october-errors).
 
 <a id="s3-api-compatibility"></a>
 
@@ -21,20 +21,25 @@ This page documents S3 APIs supported by MinIO Object Storage. For reference doc
 ## Object APIs {#object-apis}
 
 - [CopyObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html)
+  - **SILO 20261109:** aligns single-pool writes and deletes with the object's own erasure-set lock ([#298](https://github.com/pgsty/silo/issues/298)), fixes self-lock deadlocks on normalized path aliases ([#299](https://github.com/pgsty/silo/issues/299)), and prevents destination lock starvation while waiting on the source ([#300](https://github.com/pgsty/silo/issues/300)).
 - [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html)
 - [DeleteObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html)
   - **Conditional DELETE:** published Server 20260903 ignores `If-Match`. Server 20260916 supports nonempty `If-Match` on single `DeleteObject` (#145/#178), including addressed-version comparison. Batch `DeleteObjects` still ignores `<Object><ETag>` and provides no per-item conditional guard. See [scope and limitations](/blog/design/conditional-delete/).
+  - **SILO 20261109:** checks physical version removals sequentially under the mutation lock across all pools (`6ef3a52fc`) so concurrent legal-hold or retention updates cannot be bypassed, checks Object Lock on directory `null` versions (`aa2d79daf`), and runs ordinary bulk-delete erasure-set groups concurrently ([#301](https://github.com/pgsty/silo/issues/301)).
 - [DeleteObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjectTagging.html)
 - [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html)
+  - **SILO 20261109:** returns retryable `503 ServiceUnavailable` instead of `404 NoSuchKey` when a node sees only a partial drive view of an existing object ([#302](https://github.com/pgsty/silo/issues/302)). Known limitation ([#293](https://github.com/pgsty/silo/issues/293)): reads authorized solely by object tags still return `403 AccessDenied` when the object is unreadable.
 - [GetObjectAttributes](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectAttributes.html)
 - [GetObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObjectTagging.html)
 - [HeadObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_HeadObject.html)
+  - **SILO 20261109:** returns retryable `503 ServiceUnavailable` instead of `404 NoSuchKey` on known partial drive views ([#302](https://github.com/pgsty/silo/issues/302)); tag-only authorization on an unreadable object still returns `403` ([#293](https://github.com/pgsty/silo/issues/293)).
 - [ListObjects](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjects.html)
 - [ListObjectsV2](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html)
 - [ListObjectVersions](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectVersions.html)
 - [PutObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html)
 - [PutObjectTagging](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObjectTagging.html)
 - [RestoreObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_RestoreObject.html)
+  - **SILO 20261109 (`POST ?restore`):** executes two-phase in-place restores without holding the object write lock during remote-tier download ([#284](https://github.com/pgsty/silo/issues/284), [#289](https://github.com/pgsty/silo/issues/289)). Canceled or failed restores return immediately after a `100 ms` marker-cleanup attempt and finish cleanup in the background. During mixed-version rolling upgrades, upgraded nodes return `503 ServiceUnavailable` while any peer is on an older version or unreachable.
 - [SelectObjectContent](https://docs.aws.amazon.com/AmazonS3/latest/API/API_SelectObjectContent.html)
 
 ### Write commit errors {#write-commit-errors}
@@ -67,7 +72,9 @@ PutObjectAcl
 
 - [AbortMultipartUpload](https://docs.aws.amazon.com/AmazonS3/latest/API/API_AbortMultipartUpload.html)
 - [CompleteMultipartUpload](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html)
+  - **SILO 20261109:** a failed ordinary `CompleteMultipartUpload` attempt leaves the multipart upload usable for retry ([#327](https://github.com/pgsty/silo/issues/327)).
 - [CreateMultipartUpload](https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateMultipartUpload.html)
+  - **SILO 20261109:** evaluates `If-Match` and `If-None-Match` against the current object across multiple pools ([#291](https://github.com/pgsty/silo/issues/291), [PR #292](https://github.com/pgsty/silo/pull/292)).
 - [ListMultipartUploads](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListMultipartUploads.html)
 - [ListParts](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListParts.html)
 - [UploadPart](https://docs.aws.amazon.com/AmazonS3/latest/API/API_UploadPart.html)
@@ -77,7 +84,7 @@ PutObjectAcl
 
 - Published Server 20260903 treats a non-empty `ListMultipartUploads` prefix as an exact object name. An empty prefix uses node-local volatile state without complete pagination, marker or delimiter semantics.
 - Server 20260916 adds persistent scanning as an opt-in strict mode while retaining legacy exact-key/cache behavior by default. Its [historical upgrade contract](/blog/design/list-multipart-uploads/#implementation-20260916) still applies to those binaries.
-- **Server 20261018:** withdraw default persistent scanning and restore node-local cache listing for an empty prefix and exact-key lookup otherwise. Restart omissions, true-prefix and cache-pagination defects remain. Ignore the retired mode switch with a warning and tolerate its obsolete shared key; existing strict users lose optional durable listing and strict cancellation. Diagnostic scans retain resource limits without gating public operations. Preserve identity fields, safety checks, default best-effort Abort and cleanup repairs. See the [decision, capacity and limits](/blog/design/list-multipart-uploads/#decision-20261018).
+- **[SILO 20261109](/blog/release/silo-20261109/) (since Server 20261018):** withdraw default persistent scanning and restore node-local cache listing for an empty prefix and exact-key lookup otherwise ([#79](https://github.com/pgsty/silo/issues/79)). Restart omissions, true-prefix and cache-pagination defects remain. Ignore the retired mode switch with a warning and tolerate its obsolete shared key; existing strict users lose optional durable listing and strict cancellation. Diagnostic scans retain resource limits without gating public operations. Preserve identity fields, safety checks, default best-effort Abort and cleanup repairs. See the [decision, capacity and limits](/blog/design/list-multipart-uploads/#decision-20261018).
 - The `AbortIncompleteMultipartUpload` lifecycle action is not supported with `PutBucketLifecycle`.
 
 ## Bucket APIs {#bucket-apis}
@@ -101,6 +108,7 @@ PutObjectAcl
 
 - [GetBucketReplication](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketReplication.html)
 - [PutBucketReplication](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketReplication.html)
+  - **SILO 20261109:** replicated deletes preserve target Object Lock retention and legal hold (`7e9ee6bef`); a source version purge that bypassed `GOVERNANCE` retention is refused when the target copy still carries active retention, and replication retries until the target lock allows removal.
 - [DeleteBucketReplication](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketReplication.html)
 
 ### Bucket Lifecycle {#bucket-lifecycle}
@@ -108,6 +116,7 @@ PutObjectAcl
 - [GetBucketLifecycle](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketLifecycle.html)
 - [GetBucketLifecycleConfiguration](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketLifecycleConfiguration.html)
 - [PutBucketLifecycle](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketLifecycle.html)
+  - **SILO 20261109:** lifecycle expiration evaluates authoritative version history and Object Lock protection across all pools under the object lock ([#278](https://github.com/pgsty/silo/issues/278)), restricts `ExpiredObjectAllVersions` and `DelMarkerExpiration` to the exact expired key rather than child keys ([#297](https://github.com/pgsty/silo/issues/297)), executes rules whose only action is `DelMarkerExpiration` ([#268](https://github.com/pgsty/silo/issues/268)), expires only the cached restored copy of a tiered current version instead of the underlying object ([#281](https://github.com/pgsty/silo/issues/281)), and does not replicate lifecycle-generated delete markers or version purges (`1bd0b1b04`).
 - [PutBucketLifecycleConfiguration](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutBucketLifecycleConfiguration.html)
 - [DeleteBucketLifecycle](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketLifecycle.html)
 

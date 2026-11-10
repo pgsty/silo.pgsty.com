@@ -3,7 +3,7 @@ title: "NATS 通知设置"
 url: "/zh/reference/minio-server/settings/notifications/nats/"
 weight: 60
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-server/settings/notifications/nats.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="nats"></a>
@@ -33,11 +33,15 @@ upstream_modified: false
 >
 > 每个配置项都会控制 MinIO 的基础行为和功能。 MinIO **强烈建议** 先在 DEV 或 QA 等较低级别环境中测试配置变更，再应用到生产环境。
 
-## 多个 NATS 目标 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 多个 NATS 目标 {#multiple-nats-targets}
 
 你可以在顶层键后追加唯一标识符 `_ID`，为每组相关的 NATS 设置指定多个 NATS 服务端点。
 
-### 示例 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 示例 {#example}
 
 例如，以下命令分别将两个不同的 NATS 服务端点设置为 `PRIMARY` 和 `SECONDARY`：
 
@@ -68,9 +72,13 @@ mc admin config set notify_nats:secondary \
 {{< /tab >}}
 {{< /tabs >}}
 
-## 设置 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 启用 {#id5}
+## 设置 {#settings}
+
+<a id="id5" data-td-print-local></a>
+
+### 启用 {#enable}
 
 *必填*
 
@@ -102,7 +110,9 @@ mc admin config set notify_nats \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 地址 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 地址 {#address}
 
 *必填*
 
@@ -145,7 +155,9 @@ mc admin config set notify_nats \
 
 指定 MinIO 在 NATS 端点上关联已发布事件的订阅。
 
-### 用户名 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 用户名 {#username}
 
 *可选*
 
@@ -164,7 +176,9 @@ mc admin config set notify_nats \
 
 指定连接到 NATS 服务端点时使用的用户名。
 
-### 密码 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 密码 {#password}
 
 *可选*
 
@@ -212,7 +226,9 @@ mc admin config set notify_nats \
 >
 > MinIO 在作为 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 返回结果的一部分时会对该值进行脱敏。
 
-### 用户凭证文件 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 用户凭证文件 {#user-credentials-file}
 
 *可选*
 
@@ -230,6 +246,11 @@ mc admin config set notify_nats \
 {{< /tabs >}}
 
 指定用于连接 NATS 服务端点的 [user credentials file](https://docs.nats.io/using-nats/developer/connecting/creds)。
+
+> [!NOTE]
+> **[SILO 20261109](/zh/blog/release/silo-20261109/) NATS 凭据安全校验**
+>
+> SILO 20261109 将 `github.com/nats-io/jwt/v2` 升级至 `v2.8.3`、将 `github.com/nats-io/nkeys` 升级至 `v0.4.17`（并已针对 `nats-server v2.15.2` 完成集成验证），在解析 NATS 凭据时拒绝单位元点（identity-point）与小阶（small-order）Ed25519 公钥。
 
 ### TLS {#tls}
 

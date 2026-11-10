@@ -234,11 +234,11 @@ mc sql --query "select count(s.power) from S3Object" ALIAS/PATH
 
 [`mc sql`](#command-mc.sql) supports the following input formats:
 
-| Type | `content-type` Value |
-| --- | --- |
-| `.csv` | `text/csv` |
-| `.json` | `application/json` |
-| `.parquet` | none |
+| Type       | `content-type` Value |
+| ---------- | -------------------- |
+| `.csv`     | `text/csv`           |
+| `.json`    | `application/json`   |
+| `.parquet` | none                 |
 
 For `.csv` file types, use [`mc sql --csv-input`](#mc.sql.-csv-input) to specify the CSV data format. See [CSV Formatting Fields](#mc-sql-csv-format) for more information on CSV formatting fields.
 

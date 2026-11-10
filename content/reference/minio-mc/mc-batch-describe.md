@@ -98,4 +98,4 @@ SILO is the supported server for PGSTY mcli; compatibility with upstream MinIO a
 
 ## Permissions {#permissions}
 
-You must have the `admin:DescribeBatchJobs` permission to describe jobs on the deployment.
+You must have the `admin:DescribeBatchJob` permission to describe jobs on the deployment.

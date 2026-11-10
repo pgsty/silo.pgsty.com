@@ -9,13 +9,14 @@ upstream_modified: true
 > [!NOTE]
 > **自 mcli 20260916 起：** 非法 `--regex` 表达式正常报错，不再 panic；目标校验仍优先执行，因此无效目标保留原先的错误诊断。 [版本说明](/zh/compatibility/mcli/#current-release).
 
-
 <a id="mc-find"></a>
 <a id="minio-mc-find"></a>
 
 <a id="command-mc.find"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc find`](#command-mc.find) 命令支持在 MinIO 部署上搜索对象。 你也可以使用该命令在文件系统上搜索文件。
 
@@ -58,7 +59,9 @@ mc [GLOBALFLAGS] find                    \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.find.ALIAS}
 
@@ -234,13 +237,19 @@ mc find ~/mydata/
 
 持续监控 [`ALIAS`](#mc.find.ALIAS)，并返回任何 匹配指定条件的新对象。
 
-### 全局标志 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id7}
+<a id="id7" data-td-print-local></a>
 
-### 在存储桶中查找特定对象 {#id8}
+## 示例 {#examples}
+
+<a id="id8" data-td-print-local></a>
+
+### 在存储桶中查找特定对象 {#find-a-specific-object-in-a-bucket}
 
 ```shell
 mc find ALIAS/PATH --name NAME
@@ -250,7 +259,9 @@ mc find ALIAS/PATH --name NAME
 - 将 [`PATH`](#mc.find.ALIAS) 替换为 S3 兼容主机上的存储桶路径。 省略该路径可从 S3 主机根路径开始搜索。
 - 将 [`NAME`](#mc.find.-name) 替换为对象。
 
-### 在存储桶中按文件扩展名查找对象 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 在存储桶中按文件扩展名查找对象 {#find-objects-with-file-extension-in-bucket}
 
 ```shell
 mc find ALIAS/PATH --name *.EXTENSION
@@ -260,7 +271,9 @@ mc find ALIAS/PATH --name *.EXTENSION
 - 将 [`PATH`](#mc.find.ALIAS) 替换为 S3 兼容主机上的存储桶路径。
 - 将 [`EXTENSION`](#mc.find.-name) 替换为对象的文件扩展名。
 
-### 查找所有匹配文件并复制到 S3 服务 {#s3}
+<a id="s3" data-td-print-local></a>
+
+### 查找所有匹配文件并复制到 S3 服务 {#find-all-matching-files-and-copy-to-s3-service}
 
 将 [`mc find`](#command-mc.find) 与 [`--exec`](#mc.find.-exec) 选项结合使用，可在本地文件系统中查找 文件，并将其传递给 **`mc`** 命令进行进一步处理。以下示例使用 [`mc cp`](/zh/reference/minio-mc/mc-cp/#command-mc.cp) 将 [`mc find`](#command-mc.find) 的输出复制到 S3 兼容主机。
 
@@ -279,7 +292,9 @@ mc find FILEPATH --name "*.EXTENSION" --exec "mc cp {} ALIAS/PATH"
 mc find --watch FILEPATH --name "*.EXTENSION" --exec "mc cp {} ALIAS/PATH"
 ```
 
-### 查找具有匹配标签的对象 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 查找具有匹配标签的对象 {#find-objects-with-a-matching-tag}
 
 > [!NOTE]
 > **说明**
@@ -297,7 +312,9 @@ mc find --tags="key=v*" ALIAS/BUCKET/
 
 你可以添加更多 `--tags="key=RegExpression"` 标志进行匹配。 匹配对象必须满足所有包含的标签条件。
 
-### 查找具有匹配元数据的对象 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 查找具有匹配元数据的对象 {#find-objects-with-matching-metadata}
 
 > [!NOTE]
 > **说明**
@@ -314,21 +331,25 @@ mc find --json --metadata="content-type=text/csv" ALIAS/BUCKET/
 
 你可以添加更多 `--tags="metadata=value"` 标志进行匹配。 匹配对象必须满足所有包含的元数据字段条件。
 
-## 行为 {#id12}
+<a id="id12" data-td-print-local></a>
+
+## 行为 {#behavior}
 
 <a id="id13"></a>
 
-### 计量单位 {#mc-find-units}
+<a id="mc-find-units" data-td-print-local></a>
+
+### 计量单位 {#units-of-measurement}
 
 [`mc find --smaller`](#mc.find.-smaller) 和 [`mc find --larger`](#mc.find.-larger) 标志 接受以下不区分大小写的后缀，用于表示指定大小值的单位：
 
-| 后缀 | 单位大小 |
-| --- | --- |
-| `k` | KB（千字节，1000 字节） |
-| `m` | MB（兆字节，1000 千字节） |
-| `g` | GB（吉字节，1000 兆字节） |
-| `t` | TB（太字节，1000 吉字节） |
-| `ki` | KiB（Kibibyte，1024 字节） |
+| 后缀 | 单位大小                        |
+| ---- | ------------------------------- |
+| `k`  | KB（千字节，1000 字节）         |
+| `m`  | MB（兆字节，1000 千字节）       |
+| `g`  | GB（吉字节，1000 兆字节）       |
+| `t`  | TB（太字节，1000 吉字节）       |
+| `ki` | KiB（Kibibyte，1024 字节）      |
 | `mi` | MiB（Mebibyte，1024 Kibibytes） |
 | `gi` | GiB（Gibibyte，1024 Mebibytes） |
 | `ti` | TiB（Tebibyte，1024 Gibibytes） |
@@ -337,7 +358,9 @@ mc find --json --metadata="content-type=text/csv" ALIAS/BUCKET/
 
 <a id="id14"></a>
 
-### 替换格式 {#mc-find-substitution-format}
+<a id="mc-find-substitution-format" data-td-print-local></a>
+
+### 替换格式 {#substitution-format}
 
 [`mc find --exec`](#mc.find.-exec) 和 [`mc find --print`](#mc.find.-print) 命令 支持字符串替换，对以下关键字具有特殊解释。
 
@@ -353,7 +376,9 @@ mc find --json --metadata="content-type=text/csv" ALIAS/BUCKET/
 
 - `{url}` - 替换为路径的可共享 URL。
 
-### S3 兼容性 {#id15}
+<a id="id15" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 **`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
 

@@ -34,16 +34,16 @@ The [`mc admin bucket quota`](#command-mc.admin.bucket.quota) command manages pe
 
 The [`mc admin bucket quota --hard`](#mc.admin.bucket.quota.-hard) flag accepts the following case-insensitive suffixes to represent the unit of the specified size value:
 
-| Suffix | Unit Size |
-| --- | --- |
-| `k` | KB (Kilobyte, 1000 Bytes) |
-| `m` | MB (Megabyte, 1000 Kilobytes) |
-| `g` | GB (Gigabyte, 1000 Megabytes) |
-| `t` | TB (Terrabyte, 1000 Gigabytes) |
-| `ki` | KiB (Kibibyte, 1024 Bites) |
-| `mi` | MiB (Mebibyte, 1024 Kibibytes) |
-| `gi` | GiB (Gibibyte, 1024 Mebibytes) |
-| `ti` | TiB (Tebibyte, 1024 Gibibytes) |
+| Suffix | Unit Size                      |
+| ------ | ------------------------------ |
+| `k`    | KB (Kilobyte, 1000 Bytes)      |
+| `m`    | MB (Megabyte, 1000 Kilobytes)  |
+| `g`    | GB (Gigabyte, 1000 Megabytes)  |
+| `t`    | TB (Terrabyte, 1000 Gigabytes) |
+| `ki`   | KiB (Kibibyte, 1024 Bites)     |
+| `mi`   | MiB (Mebibyte, 1024 Kibibytes) |
+| `gi`   | GiB (Gibibyte, 1024 Mebibytes) |
+| `ti`   | TiB (Tebibyte, 1024 Gibibytes) |
 
 Omitting the suffix defaults to `bytes`.
 

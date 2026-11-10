@@ -3,7 +3,7 @@ title: "mc event rm"
 url: "/zh/reference/minio-mc/mc-event-remove/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-event-remove.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-event-rm"></a>
@@ -13,7 +13,9 @@ upstream_modified: false
 
 <a id="command-mc.event.rm"></a>
 
-## 语法 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 语法 {#syntax}
 
 [`mc event rm`](#command-mc.event.rm) 命令用于从存储桶中移除事件通知触发器。
 
@@ -52,7 +54,9 @@ mc [GLOBALFLAGS] event remove        \
 mc [GLOBALFLAGS] event remove [FLAGS] ALIAS ARN
 ```
 
-### 参数 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 参数 {#parameters}
 
 ##### `ALIAS` {#mc.event.rm.ALIAS}
 
@@ -93,10 +97,10 @@ MinIO 服务器在启动时会为每个已配置的通知目标输出一个 ARN�
 可通过在存储桶上运行 [`mc event ls`](/zh/reference/minio-mc/mc-event-list/#command-mc.event.ls) 获取所使用的事件类型。 使用下表将命令输出中的事件类型转换为 [`mc event rm`](#command-mc.event.rm) 命令所需的条目：
 
 | `mv event ls` 的输出 | 要使用的事件类型 |
-| --- | --- |
-| `s3:objectAccessed` | `get` |
-| `s3:objectCreated` | `put` |
-| `s3:objectRemoved` | `delete` |
+| -------------------- | ---------------- |
+| `s3:objectAccessed`  | `get`            |
+| `s3:objectCreated`   | `put`            |
+| `s3:objectRemoved`   | `delete`         |
 
 例如，如果 `mc event ls` 返回如下内容：
 
@@ -140,13 +144,19 @@ mc event rm alias/bucket arn:minio:sqs::mytest:webhook --event get,put
 
 例如，若 [`ALIAS`](#mc.event.rm.ALIAS) 为 `play/mybucket`，且 [`--suffix`](#mc.event.rm.-suffix) 为 `.jpg`，则命令仅移除 `play/mybucket/*.jpg`.
 
-### 全局标志 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 全局标志 {#global-flags}
 
 此命令支持 [全局标志](/zh/reference/minio-mc/#minio-mc-global-options) 中的任意选项。
 
-## 示例 {#id5}
+<a id="id5" data-td-print-local></a>
 
-### 从存储桶中移除事件通知 {#id6}
+## 示例 {#examples}
+
+<a id="id6" data-td-print-local></a>
+
+### 从存储桶中移除事件通知 {#remove-event-notifications-from-a-bucket}
 
 {{< tabs group="tab1-tab2" >}}
 {{< tab label="示例" value="tab1" >}}
@@ -168,9 +178,13 @@ mc event rm ALIAS ARN
 {{< /tab >}}
 {{< /tabs >}}
 
-## 行为 {#id7}
+<a id="id7" data-td-print-local></a>
 
-### S3 兼容性 {#s3}
+## 行为 {#behavior}
+
+<a id="s3" data-td-print-local></a>
+
+### S3 兼容性 {#s3-compatibility}
 
 **`mc`** 命令行工具以兼容 AWS S3 API 为目标构建，并针对 MinIO 和 AWS S3 进行了测试，以验证预期的功能与行为。
 

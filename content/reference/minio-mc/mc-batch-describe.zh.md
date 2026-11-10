@@ -110,4 +110,4 @@ SILO 是 PGSTY mcli 支持的服务端；与上游 MinIO 及其他 S3 服务的�
 
 ## 权限 {#permissions}
 
-你必须具有 `admin:DescribeBatchJobs` 权限，才能描述该部署上的作业。
+你必须具有 `admin:DescribeBatchJob` 权限，才能描述该部署上的作业。

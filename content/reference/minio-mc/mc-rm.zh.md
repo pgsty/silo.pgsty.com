@@ -3,7 +3,7 @@ title: "mc rm"
 url: "/zh/reference/minio-mc/mc-rm/"
 weight: 340
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/reference/minio-mc/mc-rm.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="mc-rm"></a>
@@ -369,9 +369,11 @@ MinIO 支持在单个存储桶中保留对象的多个 [版本](/zh/administrati
 
 ### PGSTY mcli 安全与退出码（`mcli 20261109`） {#mcli-safety}
 
-- `--purge` 与 [`--dry-run`](#mc.rm.-dry-run)（`--fake`）同时使用时严格保持只读，不会发送任何 `?purge=true` `DELETE` 请求（`#208`）。
-- 多参数与 [`--stdin`](#mc.rm.-stdin) 递归删除会在删除前面参数之前校验全命名空间目标（`#163`、`#202`）。若任一目标指向存储桶根、集群根或文件系统根且未指定 [`--dangerous`](#mc.rm.-dangerous)，命令会在删除较早参数之前中止。
-- 权限与 WORM 保留期错误在报告逐对象失败后以退出码 `1` 退出（`mcli 20260916`）。
+在 [`mcli 20261109`](/zh/blog/release/mcli-20261109/) 中：
+
+- `--purge` 与 [`--dry-run`](#mc.rm.-dry-run)（`--fake`）同时使用时保持只读，仅预览目标前缀而不发送 `?purge=true` `DELETE` 请求。
+- 命名空间删除保护适用于每个命令行目标与每个 [`--stdin`](#mc.rm.-stdin) 目标。多参数调用会在执行删除前预先校验全部命令行目标，避免前置存储桶或路径绕过后续站点根目标所需的 [`--dangerous`](#mc.rm.-dangerous)；`--stdin` 也会在删除每个输入目标前强制校验 `--dangerous`。
+- 批量删除会在继续删除其他独立、未受保护对象的同时，将权限错误（`mcli 20260916+`）与 WORM 保护错误（[`mcli 20261109`](/zh/blog/release/mcli-20261109/)）保留到最终退出状态（返回退出码 `1`）。
 
 ### S3 兼容性 {#s3-compatibility}
 
