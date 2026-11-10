@@ -13,6 +13,10 @@ cascade:
 
 Design records document the engineering decisions behind PGSTY SILO: root causes, S3 and IAM protocol invariants, trade-offs against rejected alternatives, operational limits, and regression coverage.
 
+## November 10: Found in Release Review {#november-10-found-in-release-review}
+
+- [Lifecycle History: One Version Under the Headers of Two Releases](/blog/design/lifecycle-history-old-headers/) ([#332](https://github.com/pgsty/silo/pull/332)): Why lifecycle expiry of data written by a MinIO release before 2024-04-28 is refused for good once some drives of its erasure set were replaced, and why taking two release-dependent header fields out of the revision key is the minimum complete repair.
+
 ## November 9: Console Languages {#november-9-console-languages}
 
 - [Adding Multilingual Support to SILO](/blog/design/console-languages/): Ten UI languages shipped in [Console 2.7.0](/blog/release/console-2.7.0/) and embedded in [SILO Server 20261109](/blog/release/silo-20261109/) ([Console 2.6.0](/blog/release/console-2.6.0/) shipped English and Chinese only; includes Portuguese from [#83](https://github.com/pgsty/silo-console/pull/83) and Turkish requested in [silo#277](https://github.com/pgsty/silo/issues/277)), maintenance tiers, English fallback, and Arabic RTL, with measured gzip and cache tradeoffs behind per-language assets and eager loading.
