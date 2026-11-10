@@ -53,7 +53,7 @@ This section covers the [Server 20261026 release](/blog/release/silo-20261026/#s
 | Build and packaging                 | Built with Go 1.27.3, Console v2.5.1, mcli 20261026, pkg v3.15.2, and pinned upstream `minio-go`; Windows archives use ZIP. See the [component matrix](/compatibility/versions/#server-20261026).                                                                                                                                                             |
 {.wide .expand}
 
-**Read and failure boundaries:** Lease expiration or network partitions can still allow late commits, and partial metadata updates can still expose stale values or tags. Existing read-quorum and healing rules remain unchanged (stricter fencing, rollback and read-recovery diagnostics remain under the `consistency_strict` build tag); upgrading does not add distributed fencing or automatically repair pre-existing inconsistent objects. The 20261018 Object Lock, IAM, and retired multipart-mode upgrade requirements below continue to apply.
+**Read and failure boundaries:** A timeout does not prove that I/O stopped, and delayed rollback remains possible. Lease expiration or network partitions can still allow late commits, and partial metadata updates can still expose stale values or tags. Existing read-quorum and healing rules remain unchanged (stricter fencing, rollback and read-recovery diagnostics remain under the `consistency_strict` build tag); upgrading does not add distributed fencing or automatically repair pre-existing inconsistent objects. The 20261018 Object Lock, IAM, and retired multipart-mode upgrade requirements below continue to apply.
 
 ## Server 20261018 upgrade checks {#october-2026}
 
