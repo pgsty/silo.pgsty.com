@@ -1,7 +1,7 @@
 ---
 title: "PGSTY SILO 文档"
 linkTitle: "文档"
-description: "SILO 20261026 正式版文档"
+description: "SILO 20261109、Console 2.7.0、mcli 20261109、silo-pkg 3.16.0 与 KES 20261026 双语文档总入口。"
 url: "/zh/docs/"
 weight: 1
 type: docs
@@ -11,8 +11,6 @@ upstream_modified: true
 sidebar_expanded: true
 ---
 
-本手册以 **[SILO 20261026 正式版](/zh/blog/release/silo-20261026/)**（内嵌 Console 2.5.1）为基线，配套独立版 **[Console 2.6.0](/zh/blog/release/console-2.6.0/)**、**[mcli 20261109](/zh/blog/release/mcli-20261109/)**、**[silo-pkg 3.16.0](/zh/blog/release/pkg-3.16.0/)** 和可选 **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**，统一使用 Go 1.27.3。
-
-升级前请查阅[组件版本矩阵](/zh/compatibility/versions/)、[升级检查](/zh/compatibility/server/#maintenance-20261026)与[安装指南](/zh/download/)（注意单独升级独立客户端或独立 Console 不会替换旧版 Server 内嵌的控制台组件）。
+通过左侧导航浏览[部署运维](/zh/operations/)、[日常管理](/zh/administration/)、[应用开发](/zh/developers/)、[命令与配置参考](/zh/reference/)、[兼容性审计](/zh/compatibility/)与[发布说明](/zh/blog/release/)，或前往[下载与安装](/zh/download/)获取各平台制品。
 
 {{< home-docs >}}

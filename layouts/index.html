@@ -13,6 +13,10 @@
 {{- $contributors := hugo.Data.home.contributors -}}
 {{- $socialImage := "images/silo-social-card.webp" | absURL -}}
 {{- $socialAlt := cond $zh "PGSTY SILO : MinIO/S3 兼容的对象存储" "SILO — S3/MinIO-Compatible Object Storage" -}}
+{{- $installServer := hugo.Data.releases.server -}}
+{{- if not $installServer.published -}}
+  {{- $installServer = hugo.Data.releases.published_server -}}
+{{- end -}}
     <section class="hero" id="hero">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="landing-container">
@@ -250,7 +254,7 @@
 <span class="k">services</span>:
   <span class="k">minio</span>:
 <span class="del">-   image: minio/minio:latest</span>
-<span class="add">+   image: docker.io/pgsty/silo:{{ hugo.Data.releases.server.tag }}</span>
+<span class="add">+   image: docker.io/pgsty/silo:{{ $installServer.tag }}</span>
     <span class="k">environment</span>:  <span class="c"># MINIO_* unchanged</span>
     <span class="k">volumes</span>:      <span class="c"># same volume, same data</span></pre>
             </a>
@@ -303,7 +307,7 @@
           <p class="section-eyebrow"><span class="silkscreen">OPERATIONS</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title">{{ if $zh }}熟悉的控制台回来了！{{ else }}Console is back, even better!{{ end }}</h2>
           <a href="{{ relLangURL "administration/minio-console/" }}" class="dashwall-link">{{ if $zh }}打开控制台文档{{ else }}Open Console Docs{{ end }} ↗</a>
-          <p class="section-subtitle">{{ if $zh }}我们把被阉掉的控制台搬了回来，补上双语界面，并重做了视觉呈现。{{ else }}We put the gutted console back, added a bilingual UI, and cleaned up the visuals.{{ end }}</p>
+          <p class="section-subtitle">{{ if $zh }}我们恢复了完整的管理控制台，提供十语言界面（含阿拉伯语 RTL），并重做了视觉呈现。{{ else }}We restored the full administration console, added a ten-language UI with Arabic RTL, and redesigned the visuals.{{ end }}</p>
         </div>
       </div>
       <div class="dashboard-gallery-marquee" data-reveal>
@@ -459,7 +463,7 @@
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">DOWNLOAD</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title">{{ if $zh }}获取 SILO{{ else }}Get PGSTY SILO{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}选择与你的操作系统、架构和部署方式匹配的安装路径。{{ else }}Pick the server or the admin client, then your platform and install method.{{ end }}</p>
+          <p class="section-subtitle">{{ if $zh }}选择所需组件，再按操作系统、架构与部署方式安装。{{ else }}Select a component, then choose your platform and installation method.{{ end }}</p>
         </div>
 
         <div class="product-choice-grid" aria-label="{{ if $zh }}选择下载产品{{ else }}Choose a product{{ end }}">

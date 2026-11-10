@@ -1,7 +1,7 @@
 ---
 title: "PGSTY SILO Documentation"
 linkTitle: "Docs"
-description: "SILO 20261026 release documentation"
+description: "Documentation entry point for SILO 20261109, Console 2.7.0, mcli 20261109, silo-pkg 3.16.0, and KES 20261026."
 url: "/docs/"
 weight: 1
 type: docs
@@ -11,8 +11,6 @@ upstream_link: ""
 upstream_modified: true
 ---
 
-This manual targets **[SILO 20261026](/blog/release/silo-20261026/)** (with embedded Console 2.5.1), standalone **[Console 2.6.0](/blog/release/console-2.6.0/)**, **[mcli 20261109](/blog/release/mcli-20261109/)**, **[silo-pkg 3.16.0](/blog/release/pkg-3.16.0/)**, and optional **[KES 20261026](/blog/release/silo-20261026/#kes)**, all built with Go 1.27.3.
-
-Before upgrading, review the [component matrix](/compatibility/versions/), [upgrade checks](/compatibility/server/#maintenance-20261026), and [installation guide](/download/) (note that updating a standalone client or standalone Console does not replace an older Server's embedded Console).
+Use the sidebar to browse [Operations](/operations/), [Administration](/administration/), [Developers](/developers/), [Command & Settings Reference](/reference/), [Compatibility](/compatibility/), and [Release Notes](/blog/release/), or start with the [Download & Install](/download/) matrix.
 
 {{< home-docs >}}

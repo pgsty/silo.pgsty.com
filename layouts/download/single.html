@@ -7,11 +7,16 @@
 {{- $locale := default .Site.Language.Lang .Site.Language.Locale -}}
 {{- $metrics := hugo.Data.home.metrics -}}
 {{- $socialImage := "images/silo-social-card.webp" | absURL -}}
-{{- $serverTag := hugo.Data.releases.server.tag -}}
-{{- $serverBuild := hugo.Data.releases.server.build -}}
-{{- $serverWindowsFormat := hugo.Data.releases.server.windows_archive_format | default "tar.gz" -}}
-{{- $serverPublished := hugo.Data.releases.server.published -}}
-{{- $serverVer := replace hugo.Data.releases.server.date "-" "" -}}
+{{- $targetServer := hugo.Data.releases.server -}}
+{{- $server := $targetServer -}}
+{{- if not $targetServer.published -}}
+  {{- $server = hugo.Data.releases.published_server -}}
+{{- end -}}
+{{- $serverTag := $server.tag -}}
+{{- $serverBuild := $server.build -}}
+{{- $serverWindowsFormat := $server.windows_archive_format | default "tar.gz" -}}
+{{- $serverPublished := $server.published -}}
+{{- $serverVer := replace $server.date "-" "" -}}
 {{- $serverNotes := relLangURL (printf "blog/release/silo-%s/" $serverVer) -}}
 {{- $serverReleaseURL := $serverNotes -}}
 {{- if $serverPublished -}}
@@ -63,16 +68,16 @@
           <p class="section-eyebrow download-eyebrow"><span class="silkscreen">DOWNLOAD MATRIX</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h1 id="download-title">{{ if $zh }}下载与安装 <span>SILO</span>{{ else }}Download &amp; Install <span>SILO</span>{{ end }}</h1>
           <p>{{ if $zh }}选择所需组件，再按操作系统、架构和部署方式安装。macOS 推荐 Homebrew，Windows 提供 ZIP 归档。{{ else }}Choose a component, then an install method for your operating system, architecture, and deployment. Use Homebrew on macOS or ZIP archives on Windows.{{ end }}</p>
-          <p>{{ if $zh }}已发布：<a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>、<a href="#console">Console {{ $consoleTag }}</a>、<a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a>。见<a href="{{ relLangURL "compatibility/versions/" }}">组件版本与升级顺序</a>。{{ else }}Available now: <a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>, <a href="#console">Console {{ $consoleTag }}</a> and <a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a>. See <a href="{{ relLangURL "compatibility/versions/" }}">component versions and upgrade order</a>.{{ end }}</p>
+          <p>{{ if $zh }}已发布：<a href="#server">SILO {{ $serverVer }}</a>、<a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>、<a href="#console">Console {{ $consoleTag }}</a>、<a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a>。见<a href="{{ relLangURL "compatibility/versions/" }}">组件版本与升级顺序</a>。{{ else }}Available now: <a href="#server">SILO {{ $serverVer }}</a>, <a href="#client">mcli {{ replace hugo.Data.releases.client.date "-" "" }}</a>, <a href="#console">Console {{ $consoleTag }}</a>, and <a href="#kes">KES {{ replace hugo.Data.releases.kes.date "-" "" }}</a>. See <a href="{{ relLangURL "compatibility/versions/" }}">component versions and upgrade order</a>.{{ end }}</p>
           <div class="download-release-line">
             <span class="release-live"><i aria-hidden="true"></i>{{ if $serverPublished }}{{ if $zh }}当前服务端发行版{{ else }}CURRENT SERVER RELEASE{{ end }}{{ else }}{{ if $zh }}服务端发布准备{{ else }}SERVER RELEASE PREPARATION{{ end }}{{ end }}</span>
             <a href="{{ $serverReleaseURL }}" target="_blank" rel="noopener">{{ $serverTag }} <span aria-hidden="true">↗</span></a>
-            <span>{{ hugo.Data.releases.server.date }} · amd64 / arm64</span>
+            <span>{{ $server.date }} · amd64 / arm64</span>
           </div>
         </div>
 
-        {{ if not $serverPublished }}
-        <div class="security-note" role="note"><i class="fas fa-clock" aria-hidden="true"></i><span>{{ if $zh }}Server {{ $serverVer }} 仍为 Draft。下方 Server 命令与文件名为新版安装模板，应在制品公开并验收后使用；待发布的制品按钮暂时指向版本说明。当前正式 Server 为 <a href="https://github.com/pgsty/silo/releases/tag/{{ hugo.Data.releases.published_server.tag }}">{{ replace hugo.Data.releases.published_server.date "-" "" }}</a>。mcli 与 Console 独立发布。{{ else }}Server {{ $serverVer }} remains a Draft. Server commands and filenames below are installation templates for use after public artifacts are accepted; pending artifact buttons open the release notes. The current public Server is <a href="https://github.com/pgsty/silo/releases/tag/{{ hugo.Data.releases.published_server.tag }}">{{ replace hugo.Data.releases.published_server.date "-" "" }}</a>. mcli and Console release independently.{{ end }}</span></div>
+        {{ if not $targetServer.published }}
+        <div class="security-note" role="note"><i class="fas fa-clock" aria-hidden="true"></i><span>{{ if $zh }}Server {{ replace $targetServer.date "-" "" }} 正在准备发布，内嵌 Console {{ $consoleTag }}，采用 mcli {{ replace hugo.Data.releases.client.date "-" "" }} 与 silo-pkg {{ hugo.Data.releases.pkg.tag }}。参阅<a href="{{ relLangURL (printf "blog/release/silo-%s/" (replace $targetServer.date "-" "")) }}">新版说明与升级要求</a>。下方 Server 下载和安装命令使用已发布的 {{ $serverVer }}；KES 仍独立使用 {{ replace hugo.Data.releases.kes.date "-" "" }}。{{ else }}Server {{ replace $targetServer.date "-" "" }} is being prepared with embedded Console {{ $consoleTag }}, mcli {{ replace hugo.Data.releases.client.date "-" "" }} and silo-pkg {{ hugo.Data.releases.pkg.tag }}. Read the <a href="{{ relLangURL (printf "blog/release/silo-%s/" (replace $targetServer.date "-" "")) }}">release notes and upgrade requirements</a>. Server downloads and installation commands below use the published {{ $serverVer }} release; KES remains independently versioned at {{ replace hugo.Data.releases.kes.date "-" "" }}.{{ end }}</span></div>
         {{ end }}
 
         <div class="product-choice-grid" aria-label="{{ if $zh }}选择下载产品{{ else }}Choose a product{{ end }}">
@@ -129,7 +134,7 @@
           </div>
           <a class="version-card" href="{{ $serverReleaseURL }}" target="_blank" rel="noopener">
             <span>{{ if $serverPublished }}{{ if $zh }}当前版本{{ else }}CURRENT VERSION{{ end }}{{ else }}{{ if $zh }}目标版本 · 待发布{{ else }}TARGET VERSION · PENDING{{ end }}{{ end }}</span>
-            <strong>{{ hugo.Data.releases.server.date }}</strong>
+            <strong>{{ $server.date }}</strong>
             <small>{{ if $serverPublished }}{{ if $zh }}发行说明与全部制品{{ else }}Release notes &amp; all artifacts{{ end }}{{ else }}{{ if $zh }}查看发布准备说明{{ else }}Read the preparation notes{{ end }}{{ end }} ↗</small>
           </a>
         </div>
@@ -154,8 +159,8 @@
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}适合本地评估、开发环境和已经以容器为交付边界的部署。标准镜像附带 <code>mcli</code>、<code>curl</code> 与 shell。{{ else }}Best for local evaluation, development, and deployments that already use containers as the delivery boundary. The standard image bundles <code>mcli</code>, <code>curl</code>, and a shell.{{ end }}</p>
-                  <p>{{ if $zh }}Distroless 变体只含 <code>silo</code> 二进制，内置 <code>silo healthcheck</code> 健康检查，支持任意 <code>--user</code> 运行。{{ else }}The distroless variant ships the <code>silo</code> binary only, with a built-in <code>silo healthcheck</code> and support for any <code>--user</code>.{{ end }}</p>
+                  <p>{{ if $zh }}适合本地评估、开发环境和已经以容器为交付边界的部署。标准镜像内嵌 Console <code>{{ $consoleTag }}</code>，并附带 <code>mcli</code>、<code>curl</code> 与 shell。{{ else }}Use containers for local evaluation, development, or container-managed deployments. The standard image embeds Console <code>{{ $consoleTag }}</code> and bundles <code>mcli</code>, <code>curl</code>, and a shell.{{ end }}</p>
+                  <p>{{ if $zh }}Distroless 变体仅含 <code>silo</code> 二进制，与标准镜像共享相同的 UBI CA 根证书束，内置 <code>silo healthcheck</code> 探针并支持任意 <code>--user</code> 运行。{{ else }}The distroless variant ships the <code>silo</code> binary with the same UBI CA trust bundle as the standard image, built-in <code>silo healthcheck</code> probes, and support for any <code>--user</code>.{{ end }}</p>
                   <div class="download-subtabs" data-download-tabs>
                     <div class="download-tablist download-tablist--sub" role="tablist" aria-label="{{ if $zh }}镜像变体{{ else }}Image variant{{ end }}">
                       <button type="button" role="tab" id="tab-server-docker-standard" aria-controls="server-docker-standard" aria-selected="true" data-download-tab="server-docker-standard">Standard</button>
@@ -204,6 +209,7 @@
     <span class="k">volumes</span>:
       - <span class="s">silo-data:/data</span>
     <span class="k">healthcheck</span>:
+      <span class="c"># {{ if $zh }}ready 检查 HTTP 监听与 KMS/etcd；依赖业务启动前请验证签名读写{{ else }}ready checks HTTP listener + KMS/etcd; verify signed S3 I/O before dependent workloads{{ end }}</span>
       <span class="k">test</span>: <span class="s">["CMD", "silo", "healthcheck", "ready"]</span>
       <span class="k">interval</span>: <span class="s">30s</span>
 <span class="k">volumes</span>:
@@ -243,25 +249,42 @@
 
             <section class="download-panel" id="server-kubernetes" role="tabpanel" aria-labelledby="tab-server-kubernetes" hidden>
               <div class="method-heading">
-                <div><span class="method-kicker">KUBERNETES / OPERATOR</span><h3>{{ if $zh }}使用 Tenant Helm Chart 运行 SILO{{ else }}Run SILO with the Tenant Helm Chart{{ end }}</h3></div>
-                <div class="method-tags"><span>Operator v7.1.1</span><span>Helm 3.8+</span><span>PVC</span><span>TLS</span></div>
+                <div><span class="method-kicker">KUBERNETES / HELM</span><h3>{{ if $zh }}使用维护版 Helm Chart 或 Operator Tenant 部署{{ else }}Deploy with the SILO Helm Chart or Operator Tenant{{ end }}</h3></div>
+                <div class="method-tags"><span>helm/silo 7.0.4</span><span>Operator v7.1.1</span><span>Helm 3.8+</span><span>PVC</span><span>TLS</span></div>
               </div>
               <div class="method-grid method-grid--single">
                 <div class="method-main">
-                  <p>{{ if $zh }}已归档的 MinIO Operator <code>v7.1.1</code> Tenant Chart 支持覆盖租户镜像仓库、标签或摘要。下载该版本的 <code>values.yaml</code> 后，将 <code>tenant.image</code> 指向 <code>docker.io/pgsty/silo</code>，再按故障域配置存储池与 PVC。{{ else }}The archived MinIO Operator <code>v7.1.1</code> Tenant Chart supports overriding the tenant image repository, tag, or digest. Download that version's <code>values.yaml</code>, point <code>tenant.image</code> at <code>docker.io/pgsty/silo</code>, then configure pools and PVCs for your failure domains.{{ end }}</p>
-                  <div class="download-code">
-                    <div class="download-code-head"><span><i class="fas fa-file-code" aria-hidden="true"></i> values.yaml</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Kubernetes 镜像配置{{ else }}Copy Kubernetes image configuration{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
-                    <pre><code>tenant:
+                  <p>{{ if $zh }}PGSTY 在 <code>pgsty/silo</code> 仓库中维护独立的 <code>helm/silo</code> Chart（<code>7.0.4</code>），默认部署 <code>pgsty/silo:{{ $serverTag }}</code> 与 <code>pgsty/mc:{{ $clientTag }}</code>。既有 MinIO Operator <code>v7.1.1</code> 用户也可通过覆盖 <code>tenant.image</code> 运行 SILO。{{ else }}PGSTY maintains the standalone <code>helm/silo</code> chart (<code>7.0.4</code>) in <code>pgsty/silo</code>, defaulting to <code>pgsty/silo:{{ $serverTag }}</code> and <code>pgsty/mc:{{ $clientTag }}</code>. Existing MinIO Operator <code>v7.1.1</code> deployments can also override <code>tenant.image</code>.{{ end }}</p>
+                  <div class="download-subtabs" data-download-tabs>
+                    <div class="download-tablist download-tablist--sub" role="tablist" aria-label="{{ if $zh }}Kubernetes 部署方式{{ else }}Kubernetes deployment method{{ end }}">
+                      <button type="button" role="tab" id="tab-server-k8s-helm" aria-controls="server-k8s-helm" aria-selected="true" data-download-tab="server-k8s-helm">SILO Helm Chart</button>
+                      <button type="button" role="tab" id="tab-server-k8s-tenant" aria-controls="server-k8s-tenant" aria-selected="false" tabindex="-1" data-download-tab="server-k8s-tenant">Operator Tenant (v7.1.1)</button>
+                    </div>
+                    <section role="tabpanel" id="server-k8s-helm" aria-labelledby="tab-server-k8s-helm">
+                      <div class="download-code">
+                        <div class="download-code-head"><span><i class="fas fa-terminal" aria-hidden="true"></i> helm</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 SILO Helm 安装命令{{ else }}Copy SILO Helm install command{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+                        <pre><code>git clone --branch {{ $serverTag }} --depth 1 https://github.com/pgsty/silo.git
+helm install silo ./silo/helm/silo -n silo --create-namespace
+# {{ if $zh }}使用 --reuse-values 升级既有 Release 时，请显式设置新版 image.tag：{{ else }}When upgrading with --reuse-values, set image.tag explicitly:{{ end }}
+# helm upgrade silo ./silo/helm/silo -n silo --reuse-values --set image.tag={{ $serverTag }}</code></pre>
+                      </div>
+                    </section>
+                    <section role="tabpanel" id="server-k8s-tenant" aria-labelledby="tab-server-k8s-tenant" hidden>
+                      <div class="download-code">
+                        <div class="download-code-head"><span><i class="fas fa-file-code" aria-hidden="true"></i> values.yaml</span><button type="button" data-copy-command aria-label="{{ if $zh }}复制 Kubernetes 镜像配置{{ else }}Copy Kubernetes image configuration{{ end }}"><i class="far fa-copy" aria-hidden="true"></i><b>{{ if $zh }}复制{{ else }}Copy{{ end }}</b></button></div>
+                        <pre><code>tenant:
   image:
     repository: docker.io/pgsty/silo
     tag: {{ $serverTag }}
     pullPolicy: IfNotPresent</code></pre>
+                      </div>
+                    </section>
                   </div>
                   <div class="method-actions">
-                    <a class="btn btn-primary" href="{{ relLangURL "operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/" }}"><i class="fas fa-book-open" aria-hidden="true"></i> {{ if $zh }}Tenant 部署文档{{ else }}Tenant deployment guide{{ end }}</a>
-                    <a class="btn btn-line" href="https://github.com/minio/operator/tree/v7.1.1/helm/tenant" target="_blank" rel="noopener">{{ if $zh }}查看 Helm Chart{{ else }}View Helm chart{{ end }} ↗</a>
+                    <a class="btn btn-primary" href="https://github.com/pgsty/silo/tree/{{ $serverTag }}/helm/silo" target="_blank" rel="noopener"><i class="fab fa-github" aria-hidden="true"></i> {{ if $zh }}浏览 helm/silo Chart{{ else }}View helm/silo chart{{ end }} ↗</a>
+                    <a class="btn btn-line" href="{{ relLangURL "operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/" }}">{{ if $zh }}Tenant 部署文档{{ else }}Tenant deployment guide{{ end }} →</a>
                   </div>
-                  <div class="security-note"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>{{ if $zh }}生产环境应固定已验证的标签或摘要，并在安装前检查存储池、StorageClass、反亲和、TLS 与租户凭据。原地自更新在 SILO 中已被禁用。上游 Operator 仓库已归档；请将 <code>v7.1.1</code> 视为冻结的兼容基线。{{ else }}In production, pin a tested tag or digest and review pools, StorageClass, anti-affinity, TLS, and tenant credentials before installation. In-place self-update is disabled in SILO. The upstream Operator repository is archived; treat <code>v7.1.1</code> as a frozen compatibility baseline.{{ end }}</span></div>
+                  <div class="security-note"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>{{ if $zh }}生产环境应固定已验证的标签或摘要，并在安装与升级前检查存储池、StorageClass、反亲和、TLS、<code>publishNotReadyAddresses: true</code> 与租户凭据。原地自更新在 SILO 中已禁用；上游 Operator <code>v7.1.1</code> 已归档，应视为冻结的兼容基线。{{ else }}In production, pin a verified tag or digest and review pools, StorageClass, anti-affinity, TLS, <code>publishNotReadyAddresses: true</code>, and credentials before installing or upgrading. In-place self-update is disabled in SILO; treat archived Operator <code>v7.1.1</code> as a frozen compatibility baseline.{{ end }}</span></div>
                 </div>
               </div>
             </section>
