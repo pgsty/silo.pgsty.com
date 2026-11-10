@@ -826,5 +826,5 @@ reports:
       - repo: "pgsty/silo"
         issuesClosed: [296]
     firstContribution: "2026-11-09"
-    note: "Resolved in Helm chart 7.0.4 ([47275042f](https://github.com/pgsty/silo/commit/47275042fda34066a97914bf97e2f80ef44c77ae))."
-    noteZh: "已在 Helm Chart 7.0.4（[47275042f](https://github.com/pgsty/silo/commit/47275042fda34066a97914bf97e2f80ef44c77ae)）中更新解决。"
+    note: "Resolved in Helm chart 7.0.4 ([47275042f](https://github.com/pgsty/silo/commit/47275042f62b7382e30e280550cae451bfa50aa1))."
+    noteZh: "已在 Helm Chart 7.0.4（[47275042f](https://github.com/pgsty/silo/commit/47275042f62b7382e30e280550cae451bfa50aa1)）中更新解决。"

@@ -210,4 +210,4 @@ X-Minio-Source-Replication-Request: true
 
 ## 结论 {#conclusion}
 
-该修复于 [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d38b59cc37781523915a60bcfa21c9706)（[PR #159](https://github.com/pgsty/silo/pull/159)）合入主分支并随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，通过纯内存驻留 CORS 查询与鉴权后统一计算的复制信任边界，彻底消除了未认证桶元数据磁盘探测与未受信任复制请求头注入。
+该修复于 [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d35d29a0134d81a7d8d502b1040cec64f)（[PR #159](https://github.com/pgsty/silo/pull/159)）合入主分支并随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，通过纯内存驻留 CORS 查询与鉴权后统一计算的复制信任边界，彻底消除了未认证桶元数据磁盘探测与未受信任复制请求头注入。

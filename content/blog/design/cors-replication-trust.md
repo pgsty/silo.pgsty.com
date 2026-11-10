@@ -210,4 +210,4 @@ Automated and black-box two-site TLS replication tests verify:
 
 ## Conclusion {#conclusion}
 
-Merged in [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d38b59cc37781523915a60bcfa21c9706) ([PR #159](https://github.com/pgsty/silo/pull/159)) and shipped in [Server 20260916](/blog/release/silo-20260916/), the resident-only CORS lookup and post-authentication replication trust boundary close both the unauthenticated bucket-metadata probe path and untrusted replication-header injection.
+Merged in [`0079723d3`](https://github.com/pgsty/silo/commit/0079723d35d29a0134d81a7d8d502b1040cec64f) ([PR #159](https://github.com/pgsty/silo/pull/159)) and shipped in [Server 20260916](/blog/release/silo-20260916/), the resident-only CORS lookup and post-authentication replication trust boundary close both the unauthenticated bucket-metadata probe path and untrusted replication-header injection.

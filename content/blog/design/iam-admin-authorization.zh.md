@@ -13,7 +13,7 @@ draft: false
 url: "/zh/blog/design/iam-admin-authorization/"
 ---
 
-[Server 20261018](/zh/blog/release/silo-20261018/) 包含了 [PR #242](https://github.com/pgsty/silo/pull/242)（基于基线 [`00a375c4e`](https://github.com/pgsty/silo/commit/00a375c4edbc7590290e53d1636211de64bc7d58) 的修复提交 [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6)，合并提交 [`4e55fc7db`](https://github.com/pgsty/silo/commit/4e55fc7db4bd0f21ae187517f7438a8625768f6a)）以及批量自查询后续修复 [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8)，用于修复 [SN-2026-017](/zh/blog/security/20261018-release-hardening/#sn-2026-017)。本文记录问题范围、Handler 级授权契约、空策略与 claims 归属处理、损坏密钥清理语义、性能开销、被否决的候选方案以及回归验证结果。
+[Server 20261018](/zh/blog/release/silo-20261018/) 包含了 [PR #242](https://github.com/pgsty/silo/pull/242)（基于基线 [`00a375c4e`](https://github.com/pgsty/silo/commit/00a375c4e22bfb1e9e684b0bd01ecd972f4448d0) 的修复提交 [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6)，合并提交 [`4e55fc7db`](https://github.com/pgsty/silo/commit/4e55fc7db4bd0f21ae187517f7438a8625768f6a)）以及批量自查询后续修复 [`995439260`](https://github.com/pgsty/silo/commit/9954392605827b213877c45262c741e638598dd8)，用于修复 [SN-2026-017](/zh/blog/security/20261018-release-hardening/#sn-2026-017)。本文记录问题范围、Handler 级授权契约、空策略与 claims 归属处理、损坏密钥清理语义、性能开销、被否决的候选方案以及回归验证结果。
 
 ## 问题与范围 {#problem}
 
