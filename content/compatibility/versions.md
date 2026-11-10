@@ -1,7 +1,7 @@
 ---
 title: "Component Versions"
 linkTitle: "Component Versions"
-description: "Released SILO component identities, standalone mcli 20261109, silo-pkg 3.16.0, and upgrade boundaries."
+description: "SILO 20261109 released components, Console 2.7.0, mcli 20261109, silo-pkg 3.16.0, KES 20261026, and upgrade boundaries."
 url: "/compatibility/versions/"
 weight: 5
 type: docs
@@ -9,19 +9,34 @@ page_width: wide
 icon: fa-solid fa-code-branch
 ---
 
-SILO **20261109** is the current Server release, with embedded Console 2.7.0, mcli 20261109 and silo-pkg 3.16.0. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
+SILO **20261109** is the current Server release, with embedded Console 2.7.0, mcli 20261109, and silo-pkg 3.16.0. KES 20261026 is a separate, optional external key service. The maintained PGSTY stack is supported; upstream MinIO/MC compatibility is best effort.
 
 ## Server 20261109 {#server-20261109}
 
-| Component | Released version | Fixed source |
-| --- | --- | --- |
-| Server | `RELEASE.2026-11-09T00-00-00Z` | `d998292387ccf1d2907749e0fb1575ef5fb93fda` |
-| Embedded Console | `v2.7.0` | `4e91ae506e706ccdecb512b1d8b5ab4d9871d505` |
-| mcli / MC module | `RELEASE.2026-11-09T00-00-00Z` | `e1d4cc5abfe00b674eb36347399e7398990be467` |
-| Shared package | `github.com/pgsty/silo-pkg/v3 v3.16.0` | `b7aeea85e84e8888d6ab424c7123a1297711bc3f` |
+<span id="published"></span>
+
+| Component                       | Released version / Go module                                                                        | Fixed source                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Server                          | `RELEASE.2026-11-09T00-00-00Z` (package `20261109000000.0.0`, published `2026-11-09T17:01:27Z`)     | `d998292387ccf1d2907749e0fb1575ef5fb93fda`                      |
+| Embedded and standalone Console | `v2.7.0` (`v0.0.0-20261109114619-4e91ae506e70`)                                                     | `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`                      |
+| mcli / MC module                | `RELEASE.2026-11-09T00-00-00Z` (`v0.0.0-20261109021353-e1d4cc5abfe0`, package `20261109000000.0.0`) | `e1d4cc5abfe00b674eb36347399e7398990be467`                      |
+| Shared package                  | `github.com/pgsty/silo-pkg/v3 v3.16.0`                                                              | `b7aeea85e84e8888d6ab424c7123a1297711bc3f`                      |
+| Upstream S3 SDK                 | `github.com/minio/minio-go/v7 v7.4.2-0.20261025165926-320af050c445`                                 | `320af050c445` (verified upstream commit)                       |
+| Optional KES                    | `RELEASE.2026-10-26T00-00-00Z` (package `20261026000000.0.0`)                                       | `e9b4f1acebc11d61b42f876da8df48f548750cc9`                      |
+| Helm chart                      | `helm/silo 7.0.4`                                                                                   | `d998292387ccf1d2907749e0fb1575ef5fb93fda`                      |
+| Go / platform archives          | **Go 1.27.3**                                                                                       | Windows ZIP; Linux/macOS tar.gz (Console Windows is amd64 only) |
 {.wide .expand}
 
-The Server package version is `20261109000000.0.0`. Go 1.27.3 and upstream minio-go `v7.4.2-0.20261025165926-320af050c445` remain unchanged. [Release and upgrade notes](/blog/release/silo-20261109/) cover batch format boundaries, mixed-version restore, lock-domain rollout and per-node S3 readiness checks. Ordinary object/IAM rollback checks do not imply that old workers can resume new batch records.
+| Docker Hub image                    | Published tags                                          | Multi-platform manifest digest                                            |
+| ----------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `docker.io/pgsty/silo`              | `RELEASE.2026-11-09T00-00-00Z`, `latest`                | `sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d` |
+| `docker.io/pgsty/silo` (distroless) | `RELEASE.2026-11-09T00-00-00Z-distroless`, `distroless` | `sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00` |
+| `docker.io/pgsty/silo-console`      | `v2.7.0`, `latest`                                      | `sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892` |
+| `docker.io/pgsty/mc`                | `RELEASE.2026-11-09T00-00-00Z`, `latest`                | `sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf` |
+| `docker.io/pgsty/kes`               | `RELEASE.2026-10-26T00-00-00Z`, `latest`                | `sha256:ea36fcdd260c606eb89e693b0949aea73b149359605273a98fcf13c8433049cd` |
+{.wide .expand}
+
+KES is not embedded in Server and maintains an independent release cycle. [Release and upgrade notes](/blog/release/silo-20261109/) cover batch format boundaries, mixed-version restore, lock-domain rollout, and per-node S3 readiness checks; see [Server 20261109 upgrade checks](/compatibility/server/#maintenance-20261109) and [Downloads](/download/). Ordinary object/IAM rollback checks do not allow 20261026 workers to resume submitter-bound v2 batch records.
 
 ## Standalone Console {#console}
 
@@ -43,31 +58,33 @@ The [standalone client release](/blog/release/mcli-20261109/) uses tag
 `RELEASE.2026-11-09T00-00-00Z`, package `20261109000000.0.0`, and source
 [`e1d4cc5abfe00b674eb36347399e7398990be467`](https://github.com/pgsty/mc/commit/e1d4cc5abfe00b674eb36347399e7398990be467).
 It is built with Go 1.27.3, silo-pkg v3.16.0 and upstream minio-go
-`v7.4.2-0.20261025165926-320af050c445`. Existing Server and Console artifacts
-retain their embedded client versions; adopting the new client requires a rebuild.
+`v7.4.2-0.20261025165926-320af050c445`. Server 20261109 and Console 2.7.0
+already adopt mcli 20261109; Server 20261026, Console v2.6.0, and older binaries
+retain their original embedded client builds.
 
 ## Shared package v3.16.0 {#pkg-3-16-0}
 
 [silo-pkg v3.16.0](/blog/release/pkg-3.16.0/) is a separate source-only release
 requiring Go 1.27.3. It updates JOSE, networking, CPU detection and YAML
-dependencies while preserving public APIs and policy semantics. Applications
-must select `github.com/pgsty/silo-pkg/v3 v3.16.0` and rebuild to adopt it.
-The historical application artifacts below still contain their original
-dependency versions; publishing this library does not update those artifacts.
+dependencies while preserving public APIs and policy semantics. Server 20261109,
+Console 2.7.0, and mcli 20261109 already build with
+`github.com/pgsty/silo-pkg/v3 v3.16.0`. External Go consumers must select
+`v3.16.0` and rebuild; Server 20261026, Console v2.6.0, and the historical
+application artifacts below retain their original dependency versions.
 
 ## Released 20261026 components {#server-20261026}
 
-<span id="server-20261025"></span><span id="published"></span>
+<span id="server-20261025"></span>
 
-| Component | Released version | Fixed source / module |
-| --- | --- | --- |
-| Server | `RELEASE.2026-10-26T00-00-00Z` | `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3` |
-| Embedded and standalone Console | `v2.5.1` | `v0.0.0-20261026153924-fff1618d9abb` |
-| mcli / MC module | `RELEASE.2026-10-26T00-00-00Z` | `v0.0.0-20261026120214-0ceb298cdcd0` |
-| Shared package | `github.com/pgsty/silo-pkg/v3 v3.15.2` | `0416eb1f450536ca2cc3592c2c2a06a3df88d4e0` |
-| Upstream S3 SDK | `github.com/minio/minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
-| Optional KES | `RELEASE.2026-10-26T00-00-00Z` | `e9b4f1acebc11d61b42f876da8df48f548750cc9` |
-| Go / platform archives | **Go 1.27.3** | Windows ZIP; Linux/macOS tar.gz |
+| Component                       | Released version                       | Fixed source / module                      |
+| ------------------------------- | -------------------------------------- | ------------------------------------------ |
+| Server                          | `RELEASE.2026-10-26T00-00-00Z`         | `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3` |
+| Embedded and standalone Console | `v2.5.1`                               | `v0.0.0-20261026153924-fff1618d9abb`       |
+| mcli / MC module                | `RELEASE.2026-10-26T00-00-00Z`         | `v0.0.0-20261026120214-0ceb298cdcd0`       |
+| Shared package                  | `github.com/pgsty/silo-pkg/v3 v3.15.2` | `0416eb1f450536ca2cc3592c2c2a06a3df88d4e0` |
+| Upstream S3 SDK                 | `github.com/minio/minio-go/v7`         | `v7.4.2-0.20261025165926-320af050c445`     |
+| Optional KES                    | `RELEASE.2026-10-26T00-00-00Z`         | `e9b4f1acebc11d61b42f876da8df48f548750cc9` |
+| Go / platform archives          | **Go 1.27.3**                          | Windows ZIP; Linux/macOS tar.gz            |
 {.wide .expand}
 
 The 20261026 Server, mcli and KES artifacts use package version `20261026000000.0.0`. Upgrading a standalone Console deployment does not replace an older Server's embedded UI or server-side behavior; built-in policy Reset, live bucket inventory reads, and the lifecycle and replication fixes require Server 20261026.
@@ -84,13 +101,13 @@ The target is `RELEASE.2026-10-18T00-00-00Z`, package version `20261018000000.0.
 
 ## October component graph {#october-components}
 
-| Component | Selected by Server 20261018 |
-| --- | --- |
-| Embedded Console | v2.4.2, `v0.0.0-20261017112417-ef2dd2c41d21` |
-| MC module / image-bundled mcli | 20261018, `v0.0.0-20261017101407-fa3b8bf72458` |
-| Server shared package | `github.com/pgsty/silo-pkg/v3 v3.14.3` |
-| Upstream S3 SDK | `github.com/minio/minio-go/v7 v7.4.1` |
-| Build toolchain | Go 1.27.2; Console frontend uses Node 24.22.0 LTS |
+| Component                      | Selected by Server 20261018                       |
+| ------------------------------ | ------------------------------------------------- |
+| Embedded Console               | v2.4.2, `v0.0.0-20261017112417-ef2dd2c41d21`      |
+| MC module / image-bundled mcli | 20261018, `v0.0.0-20261017101407-fa3b8bf72458`    |
+| Server shared package          | `github.com/pgsty/silo-pkg/v3 v3.14.3`            |
+| Upstream S3 SDK                | `github.com/minio/minio-go/v7 v7.4.1`             |
+| Build toolchain                | Go 1.27.2; Console frontend uses Node 24.22.0 LTS |
 {.wide .expand}
 
 The historical Console v2.4.2 and mcli 20261018 releases declare pkg v3.14.2; Server's module graph selects v3.14.3. The [v3.14.2 dependency baseline](/blog/release/pkg-3.14.2/) and v3.14.3 [admin-action classification optimization](/blog/release/pkg-3.14.3/) preserve APIs, policy formats and authorization behavior. Server must select Console and MC replacements explicitly; Go does not inherit dependency replacements. The supported integration target is the PGSTY stack, with best-effort upstream MinIO/MC compatibility.
@@ -125,19 +142,19 @@ coordinated Server upgrades.
 The following changes shipped in Server 20260916 and are absent from Server
 20260903. Use the linked PRs and source records to check each repair's scope.
 
-| <span style="display:inline-block;min-width:10rem">Area</span> | <span style="white-space:nowrap">Merged PRs</span> | Operator-visible behavior |
-| --- | --- | --- |
-| Multi-pool storage | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189) | Ordinary single-object version DELETE reconciles copies across pools; reconciliation preserves tag state. The opt-in GET-frequency pool-tiering feature was removed. |
-| Conditional multipart completion | [#190](https://github.com/pgsty/silo/pull/190) | Preconditions use the logical current object across all pools, preventing an older pool copy from accepting a stale ETag or rejecting the current one. |
-| Multipart discovery and cancellation | [#198](https://github.com/pgsty/silo/pull/198)<br>[#213](https://github.com/pgsty/silo/pull/213) | Server 20260916 defaults to legacy listing and cancellation. Explicit strict mode discovers persistent uploads across pools and sets, continues after native marker uploads disappear, and requires majority cancellation confirmations. Strict mode requires a coordinated writer upgrade and legacy drain; see the [upgrade contract](/blog/design/list-multipart-uploads/#implementation-20260916). |
-| Ordinary conditional PUT | [#207](https://github.com/pgsty/silo/pull/207) | Public write conditions use the logical current object across all pools, including draining pools. Readability and destination-version changes are detailed [below](#conditional-put). |
-| IAM revocations | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | Peer deletion notifications reload committed state. Durable deletion versions and retained revocation boundaries prevent stale site replay from restoring revoked identities or their older grants. |
-| Replicated tags and delete markers | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS copies preserve tag revision times; tag deletion advances its revision and resists delayed events. Delete-marker purges retain their identity and retry state through MRF recovery. |
-| Delete-marker purges | [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)<br>[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0)<br>[`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) | An exact-version purge never creates the marker on drives that lack it, a retried purge of a missing version needs a write-quorum majority of absent drives, healed markers keep their replication and purge metadata, and a queued marker creation is re-checked against the source under the replication lock before it is sent. Remaining gaps are listed [below](#pending) and in [#217](https://github.com/pgsty/silo/issues/217); see the [third round of the replication record](/blog/design/replication-reliability/#third-round). |
-| Listing under drive disagreement | [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) | A null object version that has listing quorum is kept when a newer minority of drives would otherwise hide it. Rolling restarts with concurrent overwrites can still omit readable keys from a successful LIST; see [below](#pending), [#218](https://github.com/pgsty/silo/issues/218) and the [design record](/blog/design/list-null-version-quorum/). |
-| Pool migration tags | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) | Rebalance and decommission carry object tags and their revision fields to the destination pool for ordinary and multipart writes. Tags lost by earlier migrations are not recovered; see [multi-pool object consistency](/blog/design/multi-pool-object-consistency/#migration-tags). |
-| Replica metadata | [#194](https://github.com/pgsty/silo/pull/194) | Restoring replication metadata no longer reintroduces the transport-only `aws-chunked` encoding into stored object metadata. |
-| Request-header timeout | [#196](https://github.com/pgsty/silo/pull/196) | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` reaches the HTTP server and imposes an absolute HTTP/1 header-reading deadline, even while bytes keep arriving. HTTP/1 bodies retain the existing rolling idle timeout. |
+| <span style="display:inline-block;min-width:10rem">Area</span> | <span style="white-space:nowrap">Merged PRs</span>                                                                                                                                              | Operator-visible behavior                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Multi-pool storage                                             | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189)                                                                                                | Ordinary single-object version DELETE reconciles copies across pools; reconciliation preserves tag state. The opt-in GET-frequency pool-tiering feature was removed.                                                                                                                                                                                                                                                                                                                                                                        |
+| Conditional multipart completion                               | [#190](https://github.com/pgsty/silo/pull/190)                                                                                                                                                  | Preconditions use the logical current object across all pools, preventing an older pool copy from accepting a stale ETag or rejecting the current one.                                                                                                                                                                                                                                                                                                                                                                                      |
+| Multipart discovery and cancellation                           | [#198](https://github.com/pgsty/silo/pull/198)<br>[#213](https://github.com/pgsty/silo/pull/213)                                                                                                | Server 20260916 defaults to legacy listing and cancellation. Explicit strict mode discovers persistent uploads across pools and sets, continues after native marker uploads disappear, and requires majority cancellation confirmations. Strict mode requires a coordinated writer upgrade and legacy drain; see the [upgrade contract](/blog/design/list-multipart-uploads/#implementation-20260916).                                                                                                                                      |
+| Ordinary conditional PUT                                       | [#207](https://github.com/pgsty/silo/pull/207)                                                                                                                                                  | Public write conditions use the logical current object across all pools, including draining pools. Readability and destination-version changes are detailed [below](#conditional-put).                                                                                                                                                                                                                                                                                                                                                      |
+| IAM revocations                                                | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192)                                                                                                | Peer deletion notifications reload committed state. Durable deletion versions and retained revocation boundaries prevent stale site replay from restoring revoked identities or their older grants.                                                                                                                                                                                                                                                                                                                                         |
+| Replicated tags and delete markers                             | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196)                                                                                                | SSE-KMS copies preserve tag revision times; tag deletion advances its revision and resists delayed events. Delete-marker purges retain their identity and retry state through MRF recovery.                                                                                                                                                                                                                                                                                                                                                 |
+| Delete-marker purges                                           | [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)<br>[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0)<br>[`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) | An exact-version purge never creates the marker on drives that lack it, a retried purge of a missing version needs a write-quorum majority of absent drives, healed markers keep their replication and purge metadata, and a queued marker creation is re-checked against the source under the replication lock before it is sent. Remaining gaps are listed [below](#pending) and in [#217](https://github.com/pgsty/silo/issues/217); see the [third round of the replication record](/blog/design/replication-reliability/#third-round). |
+| Listing under drive disagreement                               | [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1)                                                                                                                                   | A null object version that has listing quorum is kept when a newer minority of drives would otherwise hide it. Rolling restarts with concurrent overwrites can still omit readable keys from a successful LIST; see [below](#pending), [#218](https://github.com/pgsty/silo/issues/218) and the [design record](/blog/design/list-null-version-quorum/).                                                                                                                                                                                    |
+| Pool migration tags                                            | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303)                                                                                                                                   | Rebalance and decommission carry object tags and their revision fields to the destination pool for ordinary and multipart writes. Tags lost by earlier migrations are not recovered; see [multi-pool object consistency](/blog/design/multi-pool-object-consistency/#migration-tags).                                                                                                                                                                                                                                                       |
+| Replica metadata                                               | [#194](https://github.com/pgsty/silo/pull/194)                                                                                                                                                  | Restoring replication metadata no longer reintroduces the transport-only `aws-chunked` encoding into stored object metadata.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Request-header timeout                                         | [#196](https://github.com/pgsty/silo/pull/196)                                                                                                                                                  | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` reaches the HTTP server and imposes an absolute HTTP/1 header-reading deadline, even while bytes keep arriving. HTTP/1 bodies retain the existing rolling idle timeout.                                                                                                                                                                                                                                                                                                               |
 {.wide .expand}
 
 **Upgrade and compatibility requirements:**

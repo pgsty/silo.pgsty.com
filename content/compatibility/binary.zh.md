@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-box
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/blog/release/silo-20261109/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
 
 Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub Releases](https://github.com/pgsty/silo/releases)，附 SHA-256 校验和与构建溯源 attestation。本页记录相对 `minio` 软件包安装的变化：文件布局、服务账号与注意事项。迁移的总体范围见[迁移指南](/zh/compatibility/migration/)。
 
@@ -17,8 +17,8 @@ Silo 为 `amd64`/`arm64` 发布 RPM、DEB 与 APK 软件包，托管于 [GitHub 
 从 release 资产中选取与平台匹配的软件包，安装前先校验：
 
 ```bash
-SILO_TAG=RELEASE.2026-10-26T00-00-00Z
-SILO_RPM=silo-20261026000000.0.0-1PGSTY.x86_64.rpm
+SILO_TAG=RELEASE.2026-11-09T00-00-00Z
+SILO_RPM=silo-20261109000000.0.0-1PGSTY.x86_64.rpm
 SILO_URL="https://github.com/pgsty/silo/releases/download/$SILO_TAG"
 curl -fLO "$SILO_URL/$SILO_RPM"
 curl -fLO "$SILO_URL/$SILO_RPM.sha256sum"
@@ -32,13 +32,13 @@ sha256sum --check "$SILO_RPM.sha256sum" && \
 
 ## 文件布局 {#layout}
 
-| MinIO 安装             | Silo 软件包                                                     |
-|:---------------------|:-------------------------------------------------------------|
-| `/usr/bin/minio`     | `/usr/bin/silo`（同时提供 `silo healthcheck`）                     |
-| `minio.service`      | `/usr/lib/systemd/system/silo.service`                       |
-| `/etc/default/minio` | 仍然优先读取；`/etc/default/silo` 按变量覆盖（`noreplace/conffile`，升级不覆盖） |
-| 服务账号 `minio-user`（上游）/ `minio`（Pigsty） | `silo:silo`，声明于 `/usr/lib/sysusers.d/silo.conf`，安装时创建        |
-| —                    | `/usr/share/doc/silo/LICENSE`、`NOTICE`（AGPL-3.0-or-later）    |
+| MinIO 安装                                       | Silo 软件包                                                                      |
+| :----------------------------------------------- | :------------------------------------------------------------------------------- |
+| `/usr/bin/minio`                                 | `/usr/bin/silo`（同时提供 `silo healthcheck`）                                   |
+| `minio.service`                                  | `/usr/lib/systemd/system/silo.service`                                           |
+| `/etc/default/minio`                             | 仍然优先读取；`/etc/default/silo` 按变量覆盖（`noreplace/conffile`，升级不覆盖） |
+| 服务账号 `minio-user`（上游）/ `minio`（Pigsty） | `silo:silo`，声明于 `/usr/lib/sysusers.d/silo.conf`，安装时创建                  |
+| —                                                | `/usr/share/doc/silo/LICENSE`、`NOTICE`（AGPL-3.0-or-later）                     |
 {.wide .expand}
 
 两项软件包特性：
@@ -97,9 +97,12 @@ Restart=always
 sudo cp -a /etc/default/minio /etc/default/minio.migration-backup   # 廉价的保险
 sudo systemctl disable --now minio.service
 sudo systemctl enable  --now silo.service
-silo healthcheck --url https://127.0.0.1:9000 ready    # 未启用 TLS 用 http://
-mc admin info <现有别名>
+silo healthcheck --url https://127.0.0.1:9000 ready     # HTTP 监听器 + 已配置 KMS/etcd（未启用 TLS 用 http://）
+silo healthcheck --url https://127.0.0.1:9000 cluster   # 存储/IAM 加载完成 + 写仲裁
+mcli admin info <现有别名>                              # 兼容 mc admin info
 ```
+
+`silo healthcheck ready` 仅校验 HTTP 监听器及已配置的 KMS 或 etcd，不等待存储层与 IAM 加载完成（`e21b1c3a7`）；恢复业务流量前，请继续执行 `silo healthcheck cluster`、`mcli admin info`（兼容 `mc`）以及有界签名 S3 写读检查。
 
 回滚前请核对[回滚边界](/zh/compatibility/migration/#rollback)中的 IAM 与桶配置状态要求。单节点切换 systemd unit 的命令如下：
 

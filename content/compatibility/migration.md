@@ -10,7 +10,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 Migrating from MinIO to Silo reuses existing object data volumes in place without an object-by-object export and import. **Ordinary S3 applications require no code changes; administrators only need to verify deployment settings, authorization rules, and state compatibility.**
 
-The current published target is **Server 20261109**. Review its [upgrade requirements](/blog/release/silo-20261109/#upgrade), including batch jobs, lock domains, mixed-version restore and per-node S3 readiness. The [October compatibility delta](/compatibility/server/#october-2026) still applies, especially if your deployment used `strict` multipart listing. Check the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level compatibility overview](/compatibility/) before following this guide. RPM/DEB installations are covered in [Native Package Migration](/compatibility/binary/), and component pairings are listed in the [version matrix](/compatibility/versions/).
+The current published target is **Server 20261109** (`RELEASE.2026-11-09T00-00-00Z`, with embedded **Console v2.7.0** and **mcli 20261109**). Review its [upgrade requirements](/blog/release/silo-20261109/#upgrade), including batch jobs, lock domains, mixed-version restore and per-node S3 readiness. The [October compatibility delta](/compatibility/server/#october-2026) still applies, especially if your deployment used `strict` multipart listing. Check the applicable [O01–O08 conditions](/compatibility/#conditional) in the [three-level compatibility overview](/compatibility/) before following this guide. RPM/DEB installations are covered in [Native Package Migration](/compatibility/binary/), and component pairings are listed in the [version matrix](/compatibility/versions/).
 
 ## What changes {#scope}
 
@@ -26,7 +26,7 @@ In order of operational impact:
 ## What stays {#unchanged}
 
 - **Object layouts, erasure formats, and the `.minio.sys` metadata directory remain unchanged**, allowing data drives from compatible baselines to be reused directly (see [rollback scope](#rollback) for downgrade constraints).
-- **Existing buckets, object versions, users, access keys, IAM policies, lifecycle rules, and encryption configurations remain active.** Specific authorization, replication, and metadata tightening rules are documented in [O02](/compatibility/#o02), [O07](/compatibility/#o07), and the target [release notes](/blog/release/silo-20261026/).
+- **Existing buckets, object versions, users, access keys, IAM policies, lifecycle rules, and encryption configurations remain active.** Specific authorization, replication, and metadata tightening rules are documented in [O02](/compatibility/#o02), [O07](/compatibility/#o07), and the target [release notes](/blog/release/silo-20261109/).
 - **Common S3 APIs, SigV4 signing, SDKs, `mc`/`mcli`, and presigned URLs work as before**; checksum validation, conditional requests, and error-code refinements are listed under [O04](/compatibility/#o04).
 - **Network and mounts**: endpoint hostnames, API port `9000`, Console ports, and volume mount paths remain unchanged.
 - **Runtime configuration**: `MINIO_*` environment variables and existing server CLI flags remain unchanged.
@@ -39,14 +39,14 @@ These guarantees apply to the [comparison baseline](/compatibility/#scope) and c
 
 Community contributor Paris Y. ([@yupoet](https://github.com/yupoet)) documented a single-node production upgrade on **2026-09-26** in [SILO #228](https://github.com/pgsty/silo/pull/228) ([archived report](https://github.com/pgsty/silo/blob/fec1e0804a7493f68ba409345da8e90f0f4d5fbb/docs/upgrade/single-node-from-archived-minio.md)):
 
-| Item | Reported scope |
-| --- | --- |
-| Source version | MinIO `RELEASE.2025-10-15T17-29-55Z` |
-| Target version | SILO `RELEASE.2026-09-16T00-00-00Z` |
-| Deployment topology | Docker Compose, single node, single drive, `server /data` |
-| Identity and integrations | Root credentials only; no IAM sub-users, OIDC, notification targets, or reverse proxy |
-| Data volume | ~5,900 objects (~34,000 underlying storage chunks); volume opened sequentially across 2025-09, 2025-10, and 2026-09 builds over ~15 months |
-| Observed result | Existing volume mounted cleanly without errors; application checks covering multipart uploads, parser-service reads, listing, and deletion passed |
+| Item                      | Reported scope                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Source version            | MinIO `RELEASE.2025-10-15T17-29-55Z`                                                                                                              |
+| Target version            | SILO `RELEASE.2026-09-16T00-00-00Z`                                                                                                               |
+| Deployment topology       | Docker Compose, single node, single drive, `server /data`                                                                                         |
+| Identity and integrations | Root credentials only; no IAM sub-users, OIDC, notification targets, or reverse proxy                                                             |
+| Data volume               | ~5,900 objects (~34,000 underlying storage chunks); volume opened sequentially across 2025-09, 2025-10, and 2026-09 builds over ~15 months        |
+| Observed result           | Existing volume mounted cleanly without errors; application checks covering multipart uploads, parser-service reads, listing, and deletion passed |
 {.wide .expand}
 
 ### Modern single-drive storage vs. legacy FS mode {#single-node-storage}
@@ -81,7 +81,7 @@ The snippet below shows the standard image and native health probe. **Do not bli
 ```yaml
 services:
   minio:                              # service name may stay "minio"
-    image: docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z
+    image: docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z
     command: server /data --console-address ":9001"
     environment:                      # retain existing credential sources
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -137,29 +137,30 @@ Never run old and new containers against the same volume simultaneously. Complet
 
 `pgsty/silo:<RELEASE-tag>-distroless` ships only `/usr/bin/silo` — no shell, `mc`, `curl`, or wrapper entrypoint script. Its `ENTRYPOINT` is `/usr/bin/silo`, so pass server arguments directly (`command: server /data --console-address ":9001"`) without a leading `minio` or `silo` token.
 
-The image includes a built-in native `HEALTHCHECK`. Because an existing Compose `healthcheck` block overrides the image default, remove any inherited `curl` or `CMD-SHELL` probe or replace it with the exec-form `["CMD", "silo", "healthcheck", "ready"]` probe shown above. The default certificate directory is `/tmp/.silo/certs`; set `MINIO_HEALTHCHECK_URL` if the listener requires a custom probe URL. Standard and distroless variants of the same release share the exact same on-disk format and can be swapped freely.
+The image includes a built-in native `HEALTHCHECK`. Because an existing Compose `healthcheck` block overrides the image default, remove any inherited `curl` or `CMD-SHELL` probe or replace it with the exec-form `["CMD", "silo", "healthcheck", "ready"]` probe shown above. The default certificate directory is `/tmp/.silo/certs`; set `MINIO_HEALTHCHECK_URL` if the listener requires a custom probe URL. Starting in `20261109` ([#295](https://github.com/pgsty/silo/pull/295)), `-distroless` copies the exact same UBI-derived `/etc/ssl/certs/ca-certificates.crt` root trust store as the classic image. Standard and distroless variants of the same release share the exact same on-disk format and can be swapped freely.
 
 ### Kubernetes {#kubernetes}
 
-Kubernetes kubelet executes `httpGet` probes defined in the Pod spec and ignores the Docker `HEALTHCHECK` instruction, so standard and distroless images behave identically under existing Kubernetes probe configurations. For Helm deployments, preserve the release identity and PVC bindings with `nameOverride` / `fullnameOverride`, and diff `helm template` output before applying ([details](/compatibility/server/#helm)).
+Kubernetes kubelet executes `httpGet` probes defined in the Pod spec and ignores the Docker `HEALTHCHECK` instruction, so standard and distroless images behave identically under existing Kubernetes probe configurations. For Helm deployments (`helm/silo` chart `7.0.4` defaults to `RELEASE.2026-11-09T00-00-00Z`), preserve the release identity and PVC bindings with `nameOverride` / `fullnameOverride`, explicitly pass `--set image.tag=RELEASE.2026-11-09T00-00-00Z` when running `helm upgrade --reuse-values` (which otherwise retains the saved `image.tag`), and diff `helm template` output before applying ([details](/compatibility/server/#helm)).
 
 ### Rollback {#rollback}
 
 On-disk object layout compatibility does not mean an older binary understands new metadata written after an upgrade. **Before rolling back an image or binary, verify whether persistent state must be restored as well:**
 
-- **Durable IAM revocation history**: releases with persistent IAM revocations do not support rolling downgrades. Follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/) before upgrading to back up complete IAM storage and key material (standard `mc admin cluster iam export` archives omit deletion/revocation tombstones).
+- **Submitter-bound batch jobs and active restores (20261109)**: drain or cancel running, pending, and paused batch jobs before rolling back to `20261026`, because `20261026` rejects submitter-bound v2 manifests and status reports ([batch upgrade and rollback](/administration/batch-framework/#upgrade-20261109)); let any in-progress native two-phase restores complete before stopping `20261109`.
+- **Durable IAM revocation history**: releases with persistent IAM revocations do not support rolling downgrades. Follow [IAM upgrade and recovery](/operations/replication/iam-upgrade/) before upgrading to back up complete IAM storage and key material (standard `mcli admin cluster iam export` archives omit deletion/revocation tombstones).
 - **Bucket metadata convergence and password permissions**: check [bucket-configuration deletion state](/blog/design/bucket-metadata-convergence/#rollout) and [password permission rollback rules](/compatibility/password-permissions/#rollback).
 - **Executing recovery**: if post-upgrade verification fails, keep clients blocked, stop the new server, and restore the pre-upgrade volume backup, configuration, and pinned image digest. Reconcile any writes, deletes, or credential revocations that occurred after the backup before reopening the endpoint.
 
 ## Behavior checks for a single-node migration {#single-node-behavior}
 
-| Area | What to verify |
-| --- | --- |
-| TLS handshakes and CA trust | 20260903 and 20260916 updated TLS behavior; 20260916 removes explicit curve overrides in favor of Go defaults (enabling hybrid post-quantum key exchange) and changes macOS custom CA loading under Go 1.27. Check inbound clients and outbound OIDC, notification, replication, and tiering connections, including TLS-inspecting middleboxes. See [Go 1.27 TLS and OIDC discovery](/blog/design/go127-tls-oidc-discovery/). |
-| Conditional deletion | Since 20260916, single-object `DeleteObject` enforces nonempty `If-Match` headers and returns `412 PreconditionFailed` on ETag mismatch (batch `DeleteObjects` is unchanged). See [conditional DELETE](/blog/design/conditional-delete/). |
-| Multipart listing | 20260916 offered an optional `MINIO_API_MULTIPART_LISTING=strict` disk-scan mode; 20261018 removes it and restores legacy in-memory cache behavior (omitting `max-uploads` defaults to 1,000, though the legacy cache path does not enforce strict pagination). See [20260916 behavior](/blog/release/silo-20260916/#multipart) and [20261018 upgrade requirements](/blog/release/silo-20261018/#upgrade). |
-| Reverse-proxy source-address trust | When `MINIO_API_TRUSTED_PROXIES` is unset, the S3 listener preserves historical trust of forwarded client-IP headers. Set `none` for direct client connections, or explicitly list proxy IPs/CIDRs and ensure proxies overwrite client-supplied headers. Console and LDAP STS follow their own trust rules. See [source-address trust](/compatibility/server/#trusted-proxies). |
-| Identity and object state | If your deployment uses IAM sub-user password policies, service accounts, STS, OIDC, Object Lock, or replication, review the [target release notes](/blog/release/silo-20261026/#upgrade), [password permission migration](/compatibility/password-permissions/), and [IAM recovery](/operations/replication/iam-upgrade/). |
+| Area                               | What to verify                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TLS handshakes and CA trust        | 20260903 and 20260916 updated TLS behavior; 20260916 removes explicit curve overrides in favor of Go defaults (enabling hybrid post-quantum key exchange) and changes macOS custom CA loading under Go 1.27. Check inbound clients and outbound OIDC, notification, replication, and tiering connections, including TLS-inspecting middleboxes. See [Go 1.27 TLS and OIDC discovery](/blog/design/go127-tls-oidc-discovery/). |
+| Conditional deletion               | Since 20260916, single-object `DeleteObject` enforces nonempty `If-Match` headers and returns `412 PreconditionFailed` on ETag mismatch (batch `DeleteObjects` is unchanged). See [conditional DELETE](/blog/design/conditional-delete/).                                                                                                                                                                                     |
+| Multipart listing                  | 20260916 offered an optional `MINIO_API_MULTIPART_LISTING=strict` disk-scan mode; 20261018 removes it and restores legacy in-memory cache behavior (omitting `max-uploads` defaults to 1,000, though the legacy cache path does not enforce strict pagination). See [20260916 behavior](/blog/release/silo-20260916/#multipart) and [20261018 upgrade requirements](/blog/release/silo-20261018/#upgrade).                    |
+| Reverse-proxy source-address trust | When `MINIO_API_TRUSTED_PROXIES` is unset, the S3 listener preserves historical trust of forwarded client-IP headers. Set `none` for direct client connections, or explicitly list proxy IPs/CIDRs and ensure proxies overwrite client-supplied headers. Console and LDAP STS follow their own trust rules. See [source-address trust](/compatibility/server/#trusted-proxies).                                               |
+| Identity and object state          | If your deployment uses IAM sub-user password policies, service accounts, STS, OIDC, Object Lock, batch jobs, or replication, review the [target release notes](/blog/release/silo-20261109/#upgrade), [password permission migration](/compatibility/password-permissions/), and [IAM recovery](/operations/replication/iam-upgrade/).                                                                                       |
 {.wide .expand}
 
 ## Upgrading from RELEASE.2026-08-06 {#since-20260806}
@@ -200,7 +201,7 @@ Single-node deployments are unaffected. Routine rolling restarts of the *same* b
 Verify the upgraded service while application traffic is still paused:
 
 1. **Confirm instance and volume identity**: check the running version/image digest, attached volume identity, expected bucket list, and startup logs to ensure the container did not mount a fresh empty volume.
-2. **Run readiness probes**: execute `silo healthcheck ready` inside the container, or probe the HTTP endpoint from the host (`curl --fail --silent --show-error http://127.0.0.1:9000/minio/health/ready` for a default local HTTP listener; supply the proper hostname and CA bundle for TLS).
+2. **Run readiness and quorum probes**: execute `silo healthcheck ready` and `silo healthcheck cluster` inside the container, or probe `/minio/health/ready` and `/minio/health/cluster` from the host (`curl --fail --silent --show-error http://127.0.0.1:9000/minio/health/ready` for a default local HTTP listener; supply the proper hostname and CA bundle for TLS). Because `silo healthcheck ready` checks the HTTP listener plus configured KMS and etcd without waiting for storage or IAM initialization (`e21b1c3a7`), `cluster` and the signed S3 write/read checks below remain mandatory.
 3. **Verify baseline historical objects**: read back the pre-recorded historical objects through your application or SDK and compare byte contents, sizes, and independent checksums. Verify object versions, tags, encryption, retention, and legal holds where used.
 4. **Exercise write and listing paths**: using a dedicated test bucket or key prefix, test single-part uploads, multipart completion, listing, read-back, and deletion with your real client (do not delete production objects as a smoke test, and respect bucket versioning/retention when cleaning up test keys).
 5. **Verify identities and integrations**: test sub-users, service accounts, STS/OIDC flows, and expected `AccessDenied` responses. For shared IAM or replicated deployments, verify every participating endpoint following the [IAM upgrade procedure](/operations/replication/iam-upgrade/).

@@ -8,7 +8,7 @@ type: docs
 icon: fa-solid fa-box
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261109](/blog/release/silo-20261109/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261109/#upgrade).
 
 Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [GitHub Releases](https://github.com/pgsty/silo/releases), with SHA-256 sums and build-provenance attestations. This page records what changes relative to a `minio` package installation: the file layout, the service account, and the caveats. General migration scope is in the [migration guide](/compatibility/migration/).
 
@@ -17,8 +17,8 @@ Silo publishes `silo` packages for RPM, DEB, and APK on `amd64`/`arm64` via [Git
 Download the package that matches your platform from the release assets, then verify its checksum before installing:
 
 ```bash
-SILO_TAG=RELEASE.2026-10-26T00-00-00Z
-SILO_RPM=silo-20261026000000.0.0-1PGSTY.x86_64.rpm
+SILO_TAG=RELEASE.2026-11-09T00-00-00Z
+SILO_RPM=silo-20261109000000.0.0-1PGSTY.x86_64.rpm
 SILO_URL="https://github.com/pgsty/silo/releases/download/$SILO_TAG"
 curl -fLO "$SILO_URL/$SILO_RPM"
 curl -fLO "$SILO_URL/$SILO_RPM.sha256sum"
@@ -32,13 +32,13 @@ If you use the Pigsty package repository, `dnf install silo` / `apt install silo
 
 ## File layout {#layout}
 
-| MinIO installation | Silo package |
-| :-- | :-- |
-| `/usr/bin/minio` | `/usr/bin/silo` (also provides `silo healthcheck`) |
-| `minio.service` | `/usr/lib/systemd/system/silo.service` |
-| `/etc/default/minio` | Still read, first; `/etc/default/silo` overrides per variable (`noreplace`/conffile — upgrades never overwrite edits) |
-| service account `minio-user` (upstream) / `minio` (Pigsty) | `silo:silo`, declared in `/usr/lib/sysusers.d/silo.conf`, created on install |
-| — | `/usr/share/doc/silo/LICENSE`, `NOTICE` (AGPL-3.0-or-later) |
+| MinIO installation                                         | Silo package                                                                                                          |
+| :--------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| `/usr/bin/minio`                                           | `/usr/bin/silo` (also provides `silo healthcheck`)                                                                    |
+| `minio.service`                                            | `/usr/lib/systemd/system/silo.service`                                                                                |
+| `/etc/default/minio`                                       | Still read, first; `/etc/default/silo` overrides per variable (`noreplace`/conffile — upgrades never overwrite edits) |
+| service account `minio-user` (upstream) / `minio` (Pigsty) | `silo:silo`, declared in `/usr/lib/sysusers.d/silo.conf`, created on install                                          |
+| —                                                          | `/usr/share/doc/silo/LICENSE`, `NOTICE` (AGPL-3.0-or-later)                                                           |
 {.wide .expand}
 
 Two package properties:
@@ -97,9 +97,12 @@ Switch over:
 sudo cp -a /etc/default/minio /etc/default/minio.migration-backup   # cheap insurance
 sudo systemctl disable --now minio.service
 sudo systemctl enable  --now silo.service
-silo healthcheck --url https://127.0.0.1:9000 ready    # http:// without TLS
-mc admin info <existing-alias>
+silo healthcheck --url https://127.0.0.1:9000 ready     # HTTP listener + configured KMS/etcd (http:// without TLS)
+silo healthcheck --url https://127.0.0.1:9000 cluster   # storage/IAM loaded + write quorum
+mcli admin info <existing-alias>                        # mc admin info remains compatible
 ```
+
+`silo healthcheck ready` checks only the HTTP listener and configured KMS or etcd without waiting for storage or IAM initialization (`e21b1c3a7`); run `silo healthcheck cluster`, `mcli admin info` (`mc` compatible), and a bounded signed S3 write/read check before reopening application traffic.
 
 Before rolling back, review the state and IAM requirements in [rollback scope](/compatibility/migration/#rollback). To switch systemd units on a node:
 

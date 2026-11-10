@@ -9,11 +9,21 @@ icon: fa-solid fa-window-maximize
 ---
 
 > [!NOTE]
-> **Latest published release:** [Console v2.7.0](/blog/release/console-2.7.0/) (2026-11-09, UTC+8) adds ten UI languages, Arabic RTL, container CA/temporary-directory fixes, usage-worker TLS and scheduling fixes, folder sizes over plain HTTP, `silo-pkg v3.16.0`, official `mcli 20261109`, and updated Swagger documentation. [Console v2.6.0](/blog/release/console-2.6.0/) added usage scans, retained-version totals, and bucket-administration fixes. Upgrading standalone Console does not replace Server's embedded Console; built-in policy Reset and live bucket inventory reads require the Server 20261026 release (absent from published Server 20261018). See the [component matrix](/compatibility/versions/).
+> **Latest published release:** [Console v2.7.0](/blog/release/console-2.7.0/) (2026-11-09, UTC+8) adds ten UI languages, Arabic RTL, container CA/temporary-directory fixes, usage-worker TLS and scheduling fixes, folder sizes over plain HTTP, `silo-pkg v3.16.0`, official `mcli 20261109`, and updated Swagger documentation. **SILO Server 20261109 embeds Console v2.7.0** (while Server 20261026 embeds v2.5.1). Upgrading standalone Console does not replace an older Server's embedded Console; built-in policy Reset and live bucket inventory reads require Server 20261026 or later (absent from published Server 20261018). See the [component matrix](/compatibility/versions/).
 
-SILO Console is Silo's build of the MinIO Console. This page records where the two are interchangeable and where they differ. Start with the [three-level overview](/compatibility/), then use the details below to check UI and automation behavior.
+SILO Console is Silo's build of the MinIO Console; **SILO Server 20261109 embeds Console v2.7.0** (Server 20261026 embeds v2.5.1), and standalone builds are published independently. This page records where SILO Console and the upstream MinIO Console are interchangeable and where they differ. Start with the [three-level overview](/compatibility/), then use the details below to check UI and automation behavior.
 
-[`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Earlier release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), [v2.2.1], [v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0), [v2.4.0](/blog/release/console-2.4.0/), [v2.4.1](/blog/release/console-2.4.1/), [v2.4.2](/blog/release/console-2.4.2/), and [v2.5.1](/blog/release/console-2.5.1/).
+[`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), [v2.2.1], [v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0), [v2.4.0](/blog/release/console-2.4.0/), [v2.4.1](/blog/release/console-2.4.1/), [v2.4.2](/blog/release/console-2.4.2/), [v2.5.1](/blog/release/console-2.5.1/), [v2.6.0](/blog/release/console-2.6.0/), and [v2.7.0](/blog/release/console-2.7.0/).
+
+## 2.7.0 ten-language UI, container CA trust and usage-worker repairs {#release-270}
+
+[Console 2.7.0](/blog/release/console-2.7.0/) (embedded in [SILO Server 20261109](/blog/release/silo-20261109/)) delivers:
+
+- **Ten UI languages and Arabic RTL:** expands the shared language menu and command palette to ten bundled languages with Arabic right-to-left layout and field-control alignment (`a9da731c5`, `bc17e124a`).
+- **Container CA bundle and `/tmp`:** scratch container images include `/etc/ssl/certs/ca-certificates.crt` and a writable `/tmp` (`1777`), enabling public HTTPS endpoints and large multipart request buffering out of the box.
+- **Plain-HTTP browser actions:** **Calculate folder sizes** and the decryption-key copy action work over plain HTTP (`http://<ip>:9001`) without requiring a browser secure context.
+- **Usage-worker TLS, scan budget and lifecycle:** `console usage-worker` honors `--certs-dir` (`certs/CAs` and `public.crt`) alongside system roots (`ec897252f`), counts only active S3 listing slice time against `CONSOLE_USAGE_SCAN_TIMEOUT` (`543d3d2af`), persists received events and checkpoints across graceful shutdowns, and purges saved totals when buckets are deleted (`49ad0dff8`..`082b23700`). Stop all older workers before starting 2.7.0 workers.
+- **Upload validation and API docs:** malformed or truncated multipart uploads return HTTP `400` instead of panicking (`f1edc61fe`), and `/api/v1/docs` serves Redoc 3 with `/swagger.json` routed to the API rather than the SPA fallback (`77a45554a`).
 
 ## 2.6.0 usage scans and bucket administration {#release-260}
 
@@ -43,7 +53,7 @@ This is the largest functional difference, and it runs opposite to the usual dir
 
 ### 2. The dashboard targets Metrics V3 {#metrics}
 
-Dashboard widgets query the **MinIO Metrics V3** catalog, the metric set current deployments actually scrape, with guards for its zero-value and per-node export semantics so a panel distinguishes a real zero from missing data. The mapping is recorded in [`docs/metrics-v3.md`](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md).
+Dashboard widgets query the **MinIO Metrics V3** catalog, the metric set current deployments actually scrape, with guards for its zero-value and per-node export semantics so a panel distinguishes a real zero from missing data. The mapping is recorded in [`docs/metrics-v3.md`](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md).
 
 ### 3. A smaller, quieter payload {#payload}
 
@@ -51,38 +61,39 @@ The embedded frontend went from roughly 10 MB to under 3 MB, rebuilt reproducibl
 
 ### 4. Interface languages {#i18n}
 
-Released Console 2.6.0 offers English and Chinese. The 2.7.0 source line adds
-French, German, Russian, Spanish, Brazilian Portuguese, Japanese, Arabic and
-Turkish through a shared menu, with bundled dictionaries and Arabic RTL.
-English remains the default and fallback. Documentation stays bilingual;
-server messages and log contents remain intact. See the
-[language design](/blog/design/console-languages/) for scope and maintenance tiers.
+Console 2.7.0 offers ten UI languages — English, Simplified Chinese, French,
+German, Russian, Spanish, Brazilian Portuguese, Japanese, Arabic, and Turkish —
+through a shared menu and command palette, with bundled dictionaries and Arabic
+RTL (Console 2.6.0 and earlier offered English and Chinese). English remains the
+default and fallback. Documentation stays bilingual; server messages and log
+contents remain intact. See the [language design](/blog/design/console-languages/)
+for scope and maintenance tiers.
 
 ### 5. Object listings operate one page at a time {#pagination}
 
-See [B02](/compatibility/#b02). Console v2.4.0 introduced cursor pagination, retained in v2.5.1. Pages default to 100 entries, with 50, 100, 250, 500 and 1,000 available. Navigation offers first, previous and next; there is no load-all mode or arbitrary page jump.
+See [B02](/compatibility/#b02). Console v2.4.0 introduced cursor pagination, retained through v2.7.0. Pages default to 100 entries, with 50, 100, 250, 500 and 1,000 available. Navigation offers first, previous and next; there is no load-all mode or arbitrary page jump.
 
 **Sorting, name filtering and select-all apply to the current page.** They cover the whole directory only when the first page already contains it. Paging retains filter text and clears selection; changing page size returns to the first page, and changing directories clears the filter. A failed page leaves the previous page available for retry.
 
-Rewind and deleted-object listings have no cursor. They return at most 1,000 versions within a time budget and disclose incomplete results when either limit is reached. See the [object-browser contract](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/ObjectBrowser.md#paging).
+Rewind and deleted-object listings have no cursor. They return at most 1,000 versions within a time budget and disclose incomplete results when either limit is reached. See the [object-browser contract](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/ObjectBrowser.md#paging).
 
 ### 6. API responses and automation {#api-output}
 
 See [B04](/compatibility/#b04) and [O05](/compatibility/#o05). Session responses add `accountAccessKey`, and object listings explicitly return `size: 0` for empty objects. Session capabilities also reflect effective permissions. Custom parsers should tolerate added fields, and Console automation should handle pagination, expired sessions and WebSocket errors.
 
-User enable/disable gains a separate `PUT /api/v1/user/{name}/status`; the old `PUT /api/v1/user/{name}` remains but is deprecated. Multi-object downloads retain the existing endpoint and also accept a bounded form request for native streaming ZIP downloads. See [password-permission migration](/compatibility/password-permissions/) and the [v2.4.1 sharing changes](/blog/release/console-2.4.1/); use the current [API definition](https://github.com/pgsty/silo-console/blob/v2.5.1/swagger.yml) for custom integrations.
+User enable/disable gains a separate `PUT /api/v1/user/{name}/status`; the old `PUT /api/v1/user/{name}` remains but is deprecated. Multi-object downloads retain the existing endpoint and also accept a bounded form request for native streaming ZIP downloads. See [password-permission migration](/compatibility/password-permissions/) and the [v2.4.1 sharing changes](/blog/release/console-2.4.1/); use the current [API definition](https://github.com/pgsty/silo-console/blob/v2.7.0/swagger.yml) for custom integrations.
 
 Console v2.4.2 preserves wrapped S3 errors from bucket-versioning operations and returns `InvalidBucketState` explicitly when Object Lock prevents suspension. This makes the existing Server restriction visible to the caller.
 
 ### 7. For developers: the module graph {#source}
 
-Console v2.5.1 requires Go 1.27.3, directly selects `github.com/pgsty/silo-pkg/v3` v3.15.2 and
+Console v2.7.0 requires Go 1.27.3, directly selects `github.com/pgsty/silo-pkg/v3` v3.16.0 and
 upstream SDK `v7.4.2-0.20261025165926-320af050c445`, and retains the historical
 `github.com/minio/console` module path. Embedders explicitly select these released sources:
 
 ```go
-replace github.com/minio/console => github.com/pgsty/silo-console v0.0.0-20261026153924-fff1618d9abb
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0
+replace github.com/minio/console => github.com/pgsty/silo-console v0.0.0-20261109114619-4e91ae506e70
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261109021353-e1d4cc5abfe0
 ```
 
 Go does not inherit dependency replacements. Server must select both PGSTY
@@ -91,7 +102,7 @@ v0.0.5 preserves the MC API. Legacy transitive minio/pkg from colorjson remains
 separate from the maintained silo-pkg policy implementation. The old
 `minio/pkg => silo-pkg` and `minio-go => silo-go` replacements are unsupported.
 See the [component matrix](/compatibility/versions/) and
-[embedding guide](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/Embedding.md).
+[embedding guide](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/Embedding.md).
 
 The release-gating target is the coordinated SILO, Console, mcli and pkg stack.
 Upstream MinIO/MC probes remain non-blocking compatibility signals and do not
@@ -99,9 +110,9 @@ require pkg downgrades or duplicate APIs.
 
 ## Migration {#migration}
 
-The official image is [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console). **Linux amd64/arm64 images are provided.** See release details in the [maintenance announcement](/blog/release/console-2.5.1/#delivery). Published [GitHub binaries and packages](https://github.com/pgsty/silo-console/releases/tag/v2.5.1) are also available.
+The official image is [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console). **Linux amd64/arm64 images are published** for `v2.7.0` and `latest` (`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`); see [release verification](/blog/release/console-2.7.0/#verification). Published [GitHub binaries and packages](https://github.com/pgsty/silo-console/releases/tag/v2.7.0) are also available.
 
-The image runs as UID 1000 with no home directory, so its default certificate directory is `/.console/certs`: mount private CA certificates into `/.console/certs/CAs/`, or choose another path with `--certs-dir`. Images up to v2.6.0 also ship without the system CA bundle; to reach HTTPS endpoints with public certificates (SILO, OIDC providers) from them, mount the host bundle read-only at `/etc/ssl/certs/ca-certificates.crt`.
+The image runs as UID 1000 with no home directory, so its default certificate directory is `/.console/certs`: mount private CA certificates into `/.console/certs/CAs/`, or choose another path with `--certs-dir`. Starting in `v2.7.0`, the scratch container image includes the system CA bundle at `/etc/ssl/certs/ca-certificates.crt` and a writable `/tmp` (`1777`) out of the box (images on `v2.6.0` and earlier omitted both, requiring a read-only host CA mount at `/etc/ssl/certs/ca-certificates.crt` to reach public HTTPS endpoints).
 
 An existing MinIO Console deployment upgrades in place. The service unit, service account, and configuration file keep their names, and every `CONSOLE_*` variable is read unchanged, so the usual path is to install the `silo-console` package over the old one and restart.
 

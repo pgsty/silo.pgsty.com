@@ -9,7 +9,7 @@ icon: fa-solid fa-heart-pulse
 ---
 
 > [!NOTE]
-> **状态**：P1（`silo healthcheck` 子命令，`2ff594f4b`）、P2（distroless 镜像 + CI 门禁，`4c34d2309`，并在 [#295](https://github.com/pgsty/silo/pull/295) 中对齐 UBI CA 信任库）与 P4（[健康检查探针指南](/zh/operations/monitoring/healthcheck-probe/)）已发布；P3（Helm 探针）待办 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）
+> **状态**：P1（`silo healthcheck` 子命令，`2ff594f4b`）、P2（distroless 镜像 + CI 门禁，`4c34d2309`，并在 **SILO Server 20261109** 的 [#295](https://github.com/pgsty/silo/pull/295) 中对齐 UBI CA 信任库）与 P4（[健康检查探针指南](/zh/operations/monitoring/healthcheck-probe/)及 [`e21b1c3a7`](https://github.com/pgsty/silo/commit/e21b1c3a7) 中的 `ready` 探针说明）已发布；P3 中，`helm/silo` chart `7.0.4`（**SILO Server 20261109** 的 [`47275042f`](https://github.com/pgsty/silo/commit/47275042f)）已将默认 Server 与 `mcli` 镜像标签刷新为 `RELEASE.2026-11-09T00-00-00Z`，可选启用的 Kubernetes liveness/readiness Pod 探针模板仍由 [#288](https://github.com/pgsty/silo/issues/288) 跟踪 · **决策日期**：2026-08-06 · **归属**：[`pgsty/silo`](https://github.com/pgsty/silo)（命令、镜像、Helm chart）与本站（文档）
 
 Silo 将新增一个原生的 `silo healthcheck` 子命令，并在现有容器镜像之外发布一个新的 **Distroless** 镜像变体——里面真正要紧的文件只有一个：`silo` 二进制。本文在动手实现之前把推理过程和设计决策记录下来，让代码有一份可以对照检验的规格，也让"为什么要做成这样"永远有出处可查。
 
@@ -33,17 +33,17 @@ Distroless 镜像把这个问题逼到了台面上。没有 shell、没有 `curl
 1. **它自己永远不报告失败。**`mc ready` 是一个"等到就绪为止"的循环：每 5 秒重试一次，只在成功时以零退出码结束，连接被拒也不会跳出循环。作为 Docker healthcheck 使用时，"unhealthy" 的判定完全来自 Docker 的 `timeout` 把进程杀掉——探测语义是 SIGKILL 的副作用。
 2. **它检查的尺度是错的。**`mc ready` 请求的是 `/minio/health/cluster`——全集群写 quorum。于是每个容器的"健康"反映的都是整个集群的状态，这恰好是 Kubernetes 文档明确警告的级联失败反模式：quorum 一丢，所有节点同时被判不健康。
 3. **它有隐藏故障模式。** 它需要可写的 `~/.mc` 配置目录（只读 rootfs 或 OpenShift 任意 UID 下，服务器明明健康、探测却先失败了）；首次运行会向 stdout 打印配置创建噪音；内置的 `local` 别名硬编码为 `http://localhost:9000`——一旦启用 TLS 或改了端口就立即失效，上游用户对此公开抱怨过。
-4. **它是镜像里捆绑第二个二进制的最后一个功能性理由。**`mcli` 和钉版本的静态 `curl` 都有持续的供应链与维护成本（curl 被钉死在 v8.11.0，因为后续版本砍掉了 aarch64 构建），而这些事一个现有二进制的子命令用约 150 行代码就能做完。
+4. **它是镜像里捆绑第二个二进制的最后一个功能性理由。**`mcli` 和钉版本的静态 `curl` 都有持续的供应链与维护成本（由于中间版本一度移除 aarch64 构建，curl 在 SILO 20261026 升级到 8.23.0 前一直停留在 v8.11.0），而这些事一个现有二进制的子命令用约 150 行代码就能做完。
 
 ## 决策 {#decisions}
 
 三条轨道，刻意解耦：
 
-| # | 决策 |
-| --- | ---------- |
-| **D1** | `silo` 二进制新增 `healthcheck` 子命令——服务端现有 `/minio/health/*` 端点的匿名 HTTP 薄客户端。它随每一个构建发布，所有镜像和裸机安装同时获得这项能力。 |
+| #      | 决策                                                                                                                                                                                          |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **D1** | `silo` 二进制新增 `healthcheck` 子命令——服务端现有 `/minio/health/*` 端点的匿名 HTTP 薄客户端。它随每一个构建发布，所有镜像和裸机安装同时获得这项能力。                                       |
 | **D2** | **现有镜像不动**。`mcli`、`curl`、shell 入口脚本、`mc ready local` 示例全部保留。当前镜像的用户若想用新探针，覆盖自己的 `healthcheck.test` 即可选择加入——不拿走任何东西，不移动任何默认行为。 |
-| **D3** | 并行发布一个新的 **Distroless 变体** 作为试点：单二进制、无 shell、原生 `HEALTHCHECK` 内置。试点验证充分后，它将成为推荐默认并完成切换；无论如何，经典镜像都会为兼容性继续保留。 |
+| **D3** | 并行发布一个新的 **Distroless 变体** 作为试点：单二进制、无 shell、原生 `HEALTHCHECK` 内置。试点验证充分后，它将成为推荐默认并完成切换；无论如何，经典镜像都会为兼容性继续保留。              |
 {.wide .expand}
 
 D2 与 D3 回答了那个显而易见的问题——"为什么不直接给主镜像瘦身？"——因为主镜像的内容物本身就是兼容性表面。[#9](https://github.com/pgsty/silo/issues/9) 的存在，正是因为这个表面曾经在用户脚下被抽换过一次。Distroless 镜像用一个新名字承载一份新契约：在它接受检验期间，没有任何人现有的健康检查、`docker exec mc` 习惯或入口脚本假设会被破坏。
@@ -95,19 +95,19 @@ FLAGS：
 
 下表对照的是处理器源码，不是文档转述——并且修正了一个常见的误读：
 
-| 端点 | 返回 200 的条件 | 失败形态 | 备注 |
-| --- | --- | --- | --- |
-| `/minio/health/live` | 几乎总是——**对象层尚未初始化时也返回 200**（该状态只通过 `x-minio-server-status: offline` 响应头传递） | 请求队列饱和时 503 | 不触碰外部系统；唯一安静到适合高频探测的端点 |
-| `/minio/health/ready` | 同 `live`，**外加** KMS 能生成密钥、etcd 能应答读取——各自仅在配置了的情况下 | KMS/etcd 故障；队列饱和 | **没有 KMS 与 etcd 时，`ready` 与 `live` 是同一条代码路径** |
-| `/minio/health/cluster` | 对象层、桶元数据、IAM 均已初始化，**且每一个纠删集** 都有写 quorum | 503 附带 quorum 诊断头；带 `?maintenance=true` 时失败为 **412** | 每次评估失败都会在服务端写一条日志——不要高频轮询它 |
-| `/minio/health/cluster/read` | 上一行的读 quorum 版本 | 同上 | |
+| 端点                         | 返回 200 的条件                                                                                        | 失败形态                                                        | 备注                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------- |
+| `/minio/health/live`         | 几乎总是——**对象层尚未初始化时也返回 200**（该状态只通过 `x-minio-server-status: offline` 响应头传递） | 请求队列饱和时 503                                              | 不触碰外部系统；唯一安静到适合高频探测的端点                |
+| `/minio/health/ready`        | 同 `live`，**外加** KMS 能生成密钥、etcd 能应答读取——各自仅在配置了的情况下                            | KMS/etcd 故障；队列饱和                                         | **没有 KMS 与 etcd 时，`ready` 与 `live` 是同一条代码路径** |
+| `/minio/health/cluster`      | 对象层、桶元数据、IAM 均已初始化，**且每一个纠删集** 都有写 quorum                                     | 503 附带 quorum 诊断头；带 `?maintenance=true` 时失败为 **412** | 每次评估失败都会在服务端写一条日志——不要高频轮询它          |
+| `/minio/health/cluster/read` | 上一行的读 quorum 版本                                                                                 | 同上                                                            |                                                             |
 {.wide .expand}
 
 `live` 和 `ready` 是进程级信号，不证明对象可读写。`cluster` 这一对检查初始化和各纠删集上报的仲裁，但也不保证收到请求的节点已挂载全部远端磁盘；详见[重启窗口与数据面检查](/zh/operations/monitoring/healthcheck-probe/#startup-readiness-window)。它们适合运维仲裁与维护检查，不应作为单容器存活探针或节点发现的前置条件。应用恢复还需有界的签名 S3 写入与回读校验。
 
 ## Distroless 变体 {#distroless}
 
-**基底**：`gcr.io/distroless/static-debian12`——够用，因为 `silo` 以 `CGO_ENABLED=0` 构建。这个基底自带 tzdata、`/tmp` 以及带 `root`/`nonroot` 条目的 `/etc/passwd`，而 [#295](https://github.com/pgsty/silo/pull/295) 从 `verify` 阶段复制源于 UBI 的 `/etc/ssl/certs/ca-certificates.crt` 证书包，使经典镜像与 distroless 镜像共享完全一致的根 CA 信任库（用于 KMS/webhook/STS 出站 TLS）。没有 shell、没有包管理器、没有 libc。
+**基底**：`gcr.io/distroless/static-debian12`——够用，因为 `silo` 以 `CGO_ENABLED=0` 构建。这个基底自带 tzdata、`/tmp` 以及带 `root`/`nonroot` 条目的 `/etc/passwd`，而 **SILO Server 20261109**（[#295](https://github.com/pgsty/silo/pull/295)）复制源于 UBI 的 `/etc/ssl/certs/ca-certificates.crt` 证书包，使经典镜像与 distroless 镜像共享完全一致的根 CA 信任库（用于 KMS/webhook/STS 出站 TLS）。没有 shell、没有包管理器、没有 libc。
 
 契约草图：
 
@@ -158,16 +158,16 @@ readinessProbe:          # 何时摘除流量：可以包含硬依赖（KMS/etcd
 
 任何这类配置旁边都应放上三条警示：`cluster` 端点永远不进探针（放进 liveness 意味着 quorum 一丢整个集群同时重启；放进 readiness 会与分布式引导互相纠缠——chart 的 headless service 设置 `publishNotReadyAddresses: true` 正是为此）；`live` 在请求队列持续饱和时会有意返回 503，所以饱和节点约 90 秒后被重启是设计使然；`scheme: HTTPS` 下 kubelet 跳过证书校验，自签部署无需任何额外配置。
 
-Silo 的 Helm chart 目前 **一个探针都没有**（上游的 chart 也一样，尽管其文档写了探针示例）。把上面三个探针补进 chart 是计划中的独立后续项——它不依赖任何一条镜像轨道，而且相对上游这是差异化优势，不是兼容性风险。
+Silo 的 Helm chart 目前 **尚未内置 Pod 探针**（上游的 chart 也一样，尽管其文档写了探针示例）。向 `helm/silo` 增加可选启用的 Kubernetes liveness/readiness Pod 探针模板作为独立后续项由 [#288](https://github.com/pgsty/silo/issues/288) 跟踪——它不依赖任何一条镜像轨道，而且相对上游这是差异化优势，不是兼容性风险。
 
 ## 落地路线 {#rollout}
 
-| 阶段 | 范围 | 仓库 |
-| --- | --- | --- |
-| **P1** | `silo healthcheck` 子命令 + 测试；随下一个发布版二进制交付（所有镜像同时继承该能力，镜像行为零变化） | `pgsty/silo` |
-| **P2** | `Dockerfile.distroless` + CI 构建与健康门禁 + 以试点身份发布 `-distroless` 标签 | `pgsty/silo` |
-| **P3** | Helm chart：补三探针；刷新过期的默认镜像标签 | `pgsty/silo` |
-| **P4** | 文档：命令参考、探针指南、Distroless 迁移说明；试点反馈 → 决定是否将 Distroless 晋升为推荐默认 | 本站 |
+| 阶段   | 范围                                                                                                                                                                                                                                                                                                               | 仓库         |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------ |
+| **P1** | `silo healthcheck` 子命令 + 测试；随发布版二进制交付（所有镜像同时继承该能力，镜像行为零变化）                                                                                                                                                                                                                     | `pgsty/silo` |
+| **P2** | `Dockerfile.distroless` + CI 构建与健康门禁 + 发布 `-distroless` 标签（**SILO Server 20261109** 在 [#295](https://github.com/pgsty/silo/pull/295) 对齐 UBI CA 信任库）                                                                                                                                             | `pgsty/silo` |
+| **P3** | Helm chart：`helm/silo` `7.0.4`（**SILO Server 20261109** 的 [`47275042f`](https://github.com/pgsty/silo/commit/47275042f)）已将默认 Server 与 `mcli` 镜像标签刷新为 `RELEASE.2026-11-09T00-00-00Z`；可选启用的 Kubernetes liveness/readiness Pod 探针模板待办（[#288](https://github.com/pgsty/silo/issues/288)） | `pgsty/silo` |
+| **P4** | 文档：命令参考、探针指南、`ready` 探针范围说明（[`e21b1c3a7`](https://github.com/pgsty/silo/commit/e21b1c3a7)）、Distroless 迁移说明；试点反馈 → 决定是否将 Distroless 晋升为推荐默认                                                                                                                              | 本站         |
 {.wide .expand}
 
 贯穿所有阶段的兼容性承诺：经典镜像的内容物与示例不变；`mc ready local` 在今天能用的地方继续能用；健康 HTTP API 不动（子命令纯属增量）；`/minio/health/*` 路径与本分支的其他所有 `/minio/*` 路由一样，作为兼容性表面继续冻结。

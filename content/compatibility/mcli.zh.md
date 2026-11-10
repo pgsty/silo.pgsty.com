@@ -13,13 +13,13 @@ icon: fa-solid fa-terminal
 [`pgsty/mc`](https://github.com/pgsty/mc) 从上游项目 [`minio/mc`](https://github.com/minio/mc) 的最终提交 [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88)（2025-11-06）分叉而来。上游仓库已于 2026 年 7 月归档，且从未发布过包含该提交的版本 —— 因此每一个 `mcli` 版本都比历史上任何官方 `mc` 二进制更新。本站记录的分支版本包括：[20260313]、[20260321]、[20260417]、[20260804](/zh/blog/release/mcli-20260804/)、[20260806](/zh/blog/release/mcli-20260806/)、[20260903](/zh/blog/release/mcli-20260903/)、[20260913](/zh/blog/release/mcli-20260913/)、[20260916](/zh/blog/release/mcli-20260916/)、[20261018](/zh/blog/release/mcli-20261018/) 与 [20261026](/zh/blog/release/silo-20261026/#mcli)。最新版本为 [20261109](/zh/blog/release/mcli-20261109/)；历史说明保留各自比较基线。
 
 > [!TIP]
-> **当前正式版：** [mcli 20261109](/zh/blog/release/mcli-20261109/)，包版本 `20261109000000.0.0`，源码 `e1d4cc5abfe0`。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK 与 Docker Hub 镜像。
+> **当前正式版：** [mcli 20261109](/zh/blog/release/mcli-20261109/)，标签 `RELEASE.2026-11-09T00-00-00Z`，包版本 `20261109000000.0.0`，源码 `e1d4cc5abfe0`，Docker Hub `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` 与 `latest`（`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`）。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK。
 
 <span id="next-release"></span><span id="current-release"></span>
 
 ## 当前版本变化 {#release-20261109}
 
-[20261109 发布说明](/zh/blog/release/mcli-20261109/) 覆盖 [pgsty/mc#74](https://github.com/pgsty/mc/pull/74)、[#76](https://github.com/pgsty/mc/pull/76) 和 [#77](https://github.com/pgsty/mc/pull/77) 的修复。完整变更见源码的[更新日志](https://github.com/pgsty/mc/blob/RELEASE.2026-11-09T00-00-00Z/CHANGELOG.md)。
+[20261109 发布说明](/zh/blog/release/mcli-20261109/) 覆盖 [pgsty/mc#74](https://github.com/pgsty/mc/pull/74)、[#76](https://github.com/pgsty/mc/pull/76) 和 [#77](https://github.com/pgsty/mc/pull/77) 的修复。完整变更见源码的[更新日志](https://github.com/pgsty/mc/blob/RELEASE.2026-11-09T00-00-00Z/CHANGELOG.md)。[SILO Server 20261109](/zh/blog/release/silo-20261109/) 与 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 均直接链接该正式版本（`v0.0.0-20261109021353-e1d4cc5abfe0`）；经典 `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` 镜像内置 `mcli 20261109` 并在 `/licenses/mcli` 下包含其法律声明（经典与 `-distroless` 服务端镜像均在 `/licenses/` 下附带服务端法律声明）。
 
 - `cp` 和 `mv` 在准备某个源失败后继续处理其他独立源，整体返回非零。参数列表中后面的源仍可能被复制或移动；成功移动的源会被删除。成功操作不会回滚。
 - 逐对象 JSON 开始记录中的 `totalCount`、`totalSize` 分别是累计准备好的对象数与字节数，会随源列举继续增长。它们不是最终任务总量，也不能用作完成百分比的分母。请检查最终退出码、错误记录与最终字节汇总。
@@ -91,19 +91,21 @@ JWX 更新修复输出 JSON 字段名的转义，pkg v3.14.0 的密码权限语�
 
 两个名字都没有被硬编码在任何地方。上游客户端自 2016 年起就根据被调用的名字派生运行时身份，而 `mcli` 正是上游自己的 `CONFLICT.md` 为解决与 Midnight Commander 的冲突所推荐的改名方案（[issue #873](https://github.com/minio/mc/issues/873#issuecomment-267583013)）—— 本分支只是把这个建议扶正为官方发行名，**代码零改动**。这套机制的实际含义如下：
 
-| 跟随调用名 | 与名字无关、恒定不变 |
-| :-- | :-- |
+| 跟随调用名                                                                  | 与名字无关、恒定不变                                  |
+| :-------------------------------------------------------------------------- | :---------------------------------------------------- |
 | 配置目录：`~/.mc` vs `~/.mcli`（Windows：`%USERPROFILE%\mc\` vs `…\mcli\`） | 环境变量：恒为 `MC_*` —— **不存在** `MCLI_CONFIG_DIR` |
-| 帮助与用法文本中显示的程序名 | `config.json` 格式 —— 双向完全一致、可互换 |
-| shell 自动补全的注册名 | 全部命令、参数、JSON 输出、退出码 |
-| User-Agent 应用后缀（`mc/…` vs `mcli/…`） | `--config-dir` 与 `MC_CONFIG_DIR` 覆盖 |
+| 帮助与用法文本中显示的程序名                                                | `config.json` 格式 —— 双向完全一致、可互换            |
+| shell 自动补全的注册名                                                      | 全部命令、参数、JSON 输出、退出码                     |
+| User-Agent 应用后缀（`mc/…` vs `mcli/…`）                                   | `--config-dir` 与 `MC_CONFIG_DIR` 覆盖                |
 {.wide .expand}
 
 唯一真正的坑：**第一次运行 `mcli` 时，你已有的 `mc` 别名不会出现** —— 它从空的 `~/.mcli` 开始。两种解法：继续以 `mc` 名调用它（一个符号链接即可 —— 起作用的是 argv[0]），或用 `cp -a ~/.mc ~/.mcli` 一次性搬运状态。自动化与配置模板则应显式设置 `MC_CONFIG_DIR`：环境变量前缀不跟随名字，一套模板即可通吃两个名字。详见[迁移指南](#migration)。
 
 获取渠道：[GitHub Releases](https://github.com/pgsty/mc/releases)（SHA-256 校验文件 `mcli_<version>_checksums.txt`）、[Pigsty 软件仓库](https://pigsty.cc/docs/repo/infra/list/#object-storage)（RPM 经 GPG 签名，密钥指纹 `9592A7BC7A682E7333376E09E7935D8DB9BD8B20`），或 `docker.io/pgsty/mc`。上游的 minisign 公钥不为这些制品签名，`dl.min.io` 永远不会被访问。发布标签（`RELEASE.YYYY-MM-DDTHH-MM-SSZ`）与软件包版本（`YYYYMMDDHHMMSS.0.0`）沿用上游方案。
 
-容器镜像以 root 运行时，别名保存在 `/root/.mc`。若要以其他 UID 运行（`--user`、Kubernetes 的 `runAsNonRoot`）、使用只读根文件系统，或让别名在容器结束后保留，请把 `MC_CONFIG_DIR` 指向该 UID 可写的目录 —— 它拥有的绑定挂载目录（需事先创建）、`emptyDir` 或数据卷：
+<span id="docker-nonroot"></span>
+
+容器镜像以 root 运行时，别名保存在 `/root/.mc`。自 `20261109` 起，`pgsty/mc` 预先创建权限为 `1777` 的 `/.mc` 目录（[#77](https://github.com/pgsty/mc/pull/77)），因此在可写容器文件系统上，任意非 root UID（`--user`、Kubernetes `runAsNonRoot`）均可开箱即用。若使用只读根文件系统（`--read-only`，可配合可写 `/tmp` 设置 `-e MC_CONFIG_DIR=/tmp/.mc`）或需要让别名在容器退出后持久保留，请将 `MC_CONFIG_DIR` 指向 `emptyDir` 或挂载数据卷：
 
 ```bash
 docker run --rm --user "$(id -u):$(id -g)" -e MC_CONFIG_DIR=/config -v "$HOME/.mcli:/config" pgsty/mc alias list
@@ -119,13 +121,13 @@ docker run --rm --user "$(id -u):$(id -g)" -e MC_CONFIG_DIR=/config -v "$HOME/.m
 
 所有连向 MinIO SUBNET 的路径均在构建期关闭。受影响的命令保留名称与参数，打印稳定提示 —— *"MinIO SUBNET services (registration, licensing, uploads) are disabled in this Silo build of mc; diagnostics remain available locally."* —— 并以退出码 `1` 结束：
 
-| 命令 | 现在的行为 | 替代方式 |
-| :-- | :-- | :-- |
-| `mcli license register` | 提示后退出码 `1` | —— |
+| 命令                                    | 现在的行为       | 替代方式                                                |
+| :-------------------------------------- | :--------------- | :------------------------------------------------------ |
+| `mcli license register`                 | 提示后退出码 `1` | ——                                                      |
 | `mcli license update ALIAS`（在线续期） | 提示后退出码 `1` | `mcli license update ALIAS license.key`（离线，仍可用） |
-| `mcli support upload` | 提示后退出码 `1` | 通过自有渠道传递文件 |
-| `mcli support proxy set` | 提示后退出码 `1` | `proxy remove` 仍可清除遗留配置 |
-| `mcli support callhome enable` | 提示后退出码 `1` | `disable` / `status` 照常工作 |
+| `mcli support upload`                   | 提示后退出码 `1` | 通过自有渠道传递文件                                    |
+| `mcli support proxy set`                | 提示后退出码 `1` | `proxy remove` 仍可清除遗留配置                         |
+| `mcli support callhome enable`          | 提示后退出码 `1` | `disable` / `status` 照常工作                           |
 {.wide .expand}
 
 诊断能力本身全部保留：`mcli support diag` / `perf` / `profile` / `inspect` 恒定以本地（airgap）模式运行 —— 结果写入本地文件，不上传任何数据，SUBNET 注册也不再是前置条件。两项相关加固：`inspect` 不再回退到用内置的 MinIO 公钥加密输出（你的归档始终由你自己解密）；自 20260804 起 `--debug` 输出对 SUBNET 凭证脱敏 —— 如果你分享过旧版本的调试日志，请轮换其中的密钥。`mcli license info` 与 `unregister` 在本地照常工作。

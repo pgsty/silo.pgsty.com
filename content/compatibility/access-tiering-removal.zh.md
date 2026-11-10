@@ -32,14 +32,14 @@ icon: fa-solid fa-code-compare
 
 ## 存储状态的去向 {#stored-state}
 
-| 状态 | 移除后的行为 |
-| --- | --- |
+| 状态          | 移除后的行为                                                                                                                                                                                                                                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 十个旧 ILM 键 | `access_tiering`、`access_pools`、`access_max_size`、`access_promote_watermark`、`access_bin_width`、`access_bins`、`access_flush`、`access_min_residency`、`access_workers`、`access_max_tracked` 被接受但忽略。既有的 transition/expiration worker 设置保留。 |
-| Admin 配置 | 已弃用键仍可能出现在 `mcli admin config get ilm`；设置它们可能成功但无任何效果，即使 `access_tiering=on`。请从部署清单中移除过时环境设置。 |
-| Lifecycle XML | `AccessTierQuota` 与 `AccessTransition` 读取时忽略、重新编码时省略。同一解析器处理新的 PUT 请求，因此这些扩展在那里也被静默丢弃；纯访问规则仍会动作校验失败。 |
-| 数据用量缓存 | v8 与 v9 缓存都可读取，保留普通计数、大小、直方图与远端层统计。退役的热层字节计数丢弃；后续写入使用 v8。无需因特性做全量统计重建。 |
-| 已搬移的对象 | 留在当前池中，版本与时间戳不变。没有批量搬回，也没有对象元数据改写。 |
-| 内部残留 | `x-minio-internal-ilm-atier` 与 `.minio.sys/config/ilm/access/` 计数对象可能残留。它们不需要清理服务或对象扫描。 |
+| Admin 配置    | 已弃用键仍可能出现在 `mcli admin config get ilm`；设置它们可能成功但无任何效果，即使 `access_tiering=on`。请从部署清单中移除过时环境设置。                                                                                                                      |
+| Lifecycle XML | `AccessTierQuota` 与 `AccessTransition` 读取时忽略、重新编码时省略。同一解析器处理新的 PUT 请求，因此这些扩展在那里也被静默丢弃；纯访问规则仍会动作校验失败。                                                                                                   |
+| 数据用量缓存  | v8 与 v9 缓存都可读取，保留普通计数、大小、直方图与远端层统计。退役的热层字节计数丢弃；后续写入使用 v8。无需因特性做全量统计重建。                                                                                                                              |
+| 已搬移的对象  | 留在当前池中，版本与时间戳不变。没有批量搬回，也没有对象元数据改写。                                                                                                                                                                                            |
+| 内部残留      | `x-minio-internal-ilm-atier` 与 `.minio.sys/config/ilm/access/` 计数对象可能残留。它们不需要清理服务或对象扫描。                                                                                                                                                |
 {.wide .expand}
 
 被中断的 rebalance/decommission 本就可能让同一版本存在于多个池，与访问分层无关；移除调度器不会移除这些既有副本。

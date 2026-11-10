@@ -13,13 +13,13 @@ icon: fa-solid fa-terminal
 [`pgsty/mc`](https://github.com/pgsty/mc) forked from the upstream [`minio/mc`](https://github.com/minio/mc) at its final commit, [`77f82e18`](https://github.com/minio/mc/commit/77f82e18b5401a65958f1619df6ebb994634bd88) (2025-11-06). The upstream repository was archived in July 2026 without ever cutting a release that contains that commit — so every `mcli` release is strictly newer than any official `mc` binary ever published. Documented fork releases: [20260313], [20260321], [20260417], [20260804](/blog/release/mcli-20260804/), [20260806](/blog/release/mcli-20260806/), [20260903](/blog/release/mcli-20260903/), [20260913](/blog/release/mcli-20260913/), [20260916](/blog/release/mcli-20260916/), [20261018](/blog/release/mcli-20261018/), and [20261026](/blog/release/silo-20261026/#mcli). The latest is [20261109](/blog/release/mcli-20261109/); historical notes retain their own comparison baselines.
 
 > [!TIP]
-> **Current release:** [mcli 20261109](/blog/release/mcli-20261109/), package `20261109000000.0.0`, source `e1d4cc5abfe0`. Windows uses ZIP; Linux/macOS use tar.gz, with Linux RPM/DEB/APK and Docker Hub images.
+> **Current release:** [mcli 20261109](/blog/release/mcli-20261109/), tag `RELEASE.2026-11-09T00-00-00Z`, package `20261109000000.0.0`, source `e1d4cc5abfe0`, Docker Hub `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` & `latest` (`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`). Windows uses ZIP; Linux/macOS use tar.gz, with Linux RPM/DEB/APK.
 
 <span id="next-release"></span><span id="current-release"></span>
 
 ## Current release changes {#release-20261109}
 
-The [20261109 release notes](/blog/release/mcli-20261109/) cover the fixes in [pgsty/mc#74](https://github.com/pgsty/mc/pull/74), [#76](https://github.com/pgsty/mc/pull/76) and [#77](https://github.com/pgsty/mc/pull/77). The source [changelog](https://github.com/pgsty/mc/blob/RELEASE.2026-11-09T00-00-00Z/CHANGELOG.md) records the complete changes.
+The [20261109 release notes](/blog/release/mcli-20261109/) cover the fixes in [pgsty/mc#74](https://github.com/pgsty/mc/pull/74), [#76](https://github.com/pgsty/mc/pull/76) and [#77](https://github.com/pgsty/mc/pull/77). The source [changelog](https://github.com/pgsty/mc/blob/RELEASE.2026-11-09T00-00-00Z/CHANGELOG.md) records the complete changes. [SILO Server 20261109](/blog/release/silo-20261109/) and [Console 2.7.0](/blog/release/console-2.7.0/) link this release (`v0.0.0-20261109021353-e1d4cc5abfe0`), and the classic `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` image bundles `mcli 20261109` with client legal notices at `/licenses/mcli` (while both classic and `-distroless` server images ship server legal notices under `/licenses/`).
 
 - `cp` and `mv` continue processing independent sources after a preparation error and return nonzero overall. Later arguments can still be copied or moved; successful moves delete their sources. There is no rollback.
 - Per-object JSON start records contain cumulative prepared object counts and bytes in `totalCount` and `totalSize`. These values grow while sources are listed; they are not the final workload or a denominator for completion percentage. Check the final exit status, error records and final byte summary.
@@ -102,7 +102,7 @@ For many users nothing changes here: the container image keeps `mc` as its entry
 Neither name is hardcoded anywhere. Since 2016 the upstream client has derived its runtime identity from the name it is invoked as, and `mcli` is the exact rename upstream's own `CONFLICT.md` recommended ([issue #873](https://github.com/minio/mc/issues/873#issuecomment-267583013)) for the Midnight Commander clash — this fork merely promoted that suggestion to the official shipping name, with zero code changes. What that mechanism means in practice:
 
 | Follows the invoked name                                                                  | Fixed, regardless of the name                                           |
-|:------------------------------------------------------------------------------------------|:------------------------------------------------------------------------|
+| :---------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
 | Configuration directory: `~/.mc` vs `~/.mcli` (Windows: `%USERPROFILE%\mc\` vs `…\mcli\`) | Environment variables: always `MC_*` — there is no `MCLI_CONFIG_DIR`    |
 | Program name shown in help and usage text                                                 | `config.json` format — identical and interchangeable in both directions |
 | Shell-completion registration                                                             | All commands, flags, JSON output, exit codes                            |
@@ -113,7 +113,9 @@ The one real trap: **run `mcli` for the first time and your existing `mc` aliase
 
 Get it from [GitHub Releases](https://github.com/pgsty/mc/releases) (SHA-256 `mcli_<version>_checksums.txt`), the [Pigsty repository](https://pigsty.io/docs/repo/infra/list/#object-storage) (RPMs GPG-signed, key fingerprint `9592A7BC7A682E7333376E09E7935D8DB9BD8B20`), or `docker.io/pgsty/mc`. Upstream's minisign key does not sign these artifacts, and `dl.min.io` is never contacted. Release tags (`RELEASE.YYYY-MM-DDTHH-MM-SSZ`) and package versions (`YYYYMMDDHHMMSS.0.0`) keep their upstream schemes.
 
-The container image keeps aliases in `/root/.mc` when it runs as root. To run it as another UID (`--user`, Kubernetes `runAsNonRoot`), with a read-only root filesystem, or with aliases that outlive the container, point `MC_CONFIG_DIR` at a directory that UID can write — a bind mount it owns (create it first), an `emptyDir`, or a volume:
+<span id="docker-nonroot"></span>
+
+The container image keeps aliases in `/root/.mc` when it runs as root. Starting in `20261109`, `pgsty/mc` pre-creates `/.mc` with mode `1777` ([#77](https://github.com/pgsty/mc/pull/77)), so arbitrary non-root UIDs (`--user`, Kubernetes `runAsNonRoot`) work out of the box on writable container filesystems. For a `--read-only` root filesystem (`-e MC_CONFIG_DIR=/tmp/.mc` with a writable `/tmp`) or aliases that must persist beyond the container, point `MC_CONFIG_DIR` at an `emptyDir` or mounted volume:
 
 ```bash
 docker run --rm --user "$(id -u):$(id -g)" -e MC_CONFIG_DIR=/config -v "$HOME/.mcli:/config" pgsty/mc alias list
@@ -130,7 +132,7 @@ Self-update is removed. `mcli update` never contacts the network and never repla
 Everything that reached MinIO SUBNET is disabled at build time. Affected commands keep their names and flags, print a stable notice — *"MinIO SUBNET services (registration, licensing, uploads) are disabled in this Silo build of mc; diagnostics remain available locally."* — and exit `1`:
 
 | Command                                      | Behavior now     | Use instead                                                    |
-|:---------------------------------------------|:-----------------|:---------------------------------------------------------------|
+| :------------------------------------------- | :--------------- | :------------------------------------------------------------- |
 | `mcli license register`                      | notice, exit `1` | —                                                              |
 | `mcli license update ALIAS` (online renewal) | notice, exit `1` | `mcli license update ALIAS license.key` (offline, still works) |
 | `mcli support upload`                        | notice, exit `1` | share files through your own channels                          |

@@ -10,7 +10,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 从 MinIO 迁移到 Silo 可直接复用现有对象数据卷，无需逐对象导出与重新导入。**普通 S3 应用无需修改代码，管理员只需核对部署配置、权限规则与状态兼容性。**
 
-当前最新发布目标为 **Server 20261109**。升级前请核对其[升级要求](/zh/blog/release/silo-20261109/#upgrade)，包括 batch 作业、锁域、混合版本恢复与逐节点 S3 就绪检查。[十月兼容性增量](/zh/compatibility/server/#october-2026)仍然适用，尤其是曾启用 `strict` 分片列举的部署。建议先对照[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 软件包升级见[原生软件包迁移](/zh/compatibility/binary/)，版本配套关系见[组件矩阵](/zh/compatibility/versions/)。
+当前最新发布目标为 **Server 20261109**（`RELEASE.2026-11-09T00-00-00Z`，内嵌 **Console v2.7.0** 并配套 **mcli 20261109**）。升级前请核对其[升级要求](/zh/blog/release/silo-20261109/#upgrade)，包括 batch 作业、锁域、混合版本恢复与逐节点 S3 就绪检查。[十月兼容性增量](/zh/compatibility/server/#october-2026)仍然适用，尤其是曾启用 `strict` 分片列举的部署。建议先对照[三档兼容性总览](/zh/compatibility/)中的 [O01–O08](/zh/compatibility/#conditional) 筛选适用条件，再执行本页步骤。RPM/DEB 软件包升级见[原生软件包迁移](/zh/compatibility/binary/)，版本配套关系见[组件矩阵](/zh/compatibility/versions/)。
 
 ## 哪些改变 {#scope}
 
@@ -26,7 +26,7 @@ icon: fa-solid fa-arrow-right-arrow-left
 ## 哪些不变 {#unchanged}
 
 - **对象布局、纠删码格式和 `.minio.sys` 元数据目录完全保留**，可直接挂载兼容基线的数据盘（跨版本降级要求见[回滚边界](#rollback)）。
-- **既有桶、对象版本、用户、Access Key、IAM 策略、生命周期与加密配置继续生效**。授权判定、复制状态和新增元数据的行为收敛见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) 及目标版本的[发布说明](/zh/blog/release/silo-20261026/)。
+- **既有桶、对象版本、用户、Access Key、IAM 策略、生命周期与加密配置继续生效**。授权判定、复制状态和新增元数据的行为收敛见 [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) 及目标版本的[发布说明](/zh/blog/release/silo-20261109/)。
 - **常用 S3 API、SigV4 签名、SDK、`mc`/`mcli` 与预签名 URL 接入方式保持不变**；校验和、条件请求和错误码收敛见 [O04](/zh/compatibility/#o04)。
 - **网络与挂载**：端点主机名、API 端口 `9000`、Console 端口与卷挂载路径不变。
 - **运行参数**：`MINIO_*` 环境变量与既有服务端启动参数不变。
@@ -39,14 +39,14 @@ icon: fa-solid fa-arrow-right-arrow-left
 
 社区贡献者 Paris Y.（[@yupoet](https://github.com/yupoet)）在 [SILO #228](https://github.com/pgsty/silo/pull/228) 中记录了 **2026-09-26** 的一次单节点生产升级（[原始报告归档](https://github.com/pgsty/silo/blob/fec1e0804a7493f68ba409345da8e90f0f4d5fbb/docs/upgrade/single-node-from-archived-minio.md)）：
 
-| 项目 | 报告范围 |
-| --- | --- |
-| 源版本 | MinIO `RELEASE.2025-10-15T17-29-55Z` |
-| 目标版本 | SILO `RELEASE.2026-09-16T00-00-00Z` |
-| 部署拓扑 | Docker Compose，单节点、单盘，`server /data` |
-| 身份与集成 | 仅使用 root 凭据；无 IAM 子用户、OIDC、通知目标或反向代理 |
-| 数据规模 | 约 5,900 个对象（约 34,000 个底层存储块）；数据卷先后历经 2025-09、2025-10、2026-09 三个版本，累计运行约 15 个月 |
-| 验证结果 | 原地挂载既有数据卷启动无报错；业务侧分片上传、解析服务读取、列举与删除检查均通过 |
+| 项目       | 报告范围                                                                                                         |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| 源版本     | MinIO `RELEASE.2025-10-15T17-29-55Z`                                                                             |
+| 目标版本   | SILO `RELEASE.2026-09-16T00-00-00Z`                                                                              |
+| 部署拓扑   | Docker Compose，单节点、单盘，`server /data`                                                                     |
+| 身份与集成 | 仅使用 root 凭据；无 IAM 子用户、OIDC、通知目标或反向代理                                                        |
+| 数据规模   | 约 5,900 个对象（约 34,000 个底层存储块）；数据卷先后历经 2025-09、2025-10、2026-09 三个版本，累计运行约 15 个月 |
+| 验证结果   | 原地挂载既有数据卷启动无报错；业务侧分片上传、解析服务读取、列举与删除检查均通过                                 |
 {.wide .expand}
 
 ### 现代单盘存储与旧 FS 模式 {#single-node-storage}
@@ -81,7 +81,7 @@ docker.io/pgsty/silo:<RELEASE-tag>
 ```yaml
 services:
   minio:                              # 服务名可保持为 "minio"
-    image: docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z
+    image: docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z
     command: server /data --console-address ":9001"
     environment:                      # 保留既有凭据来源
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -137,29 +137,30 @@ docker compose exec -T minio silo healthcheck ready
 
 `pgsty/silo:<RELEASE-tag>-distroless` 仅包含 `/usr/bin/silo` 二进制，不含 shell、`mc`、`curl` 或兼容转换脚本。其默认 `ENTRYPOINT` 为 `/usr/bin/silo`，因此 `command` 应直接写参数（如 `command: server /data --console-address ":9001"`），前面不要加 `minio` 或 `silo`。
 
-该变体已内置原生 `HEALTHCHECK`。若 Compose 文件中保留了旧的 `curl` 或 `CMD-SHELL` 健康检查，会覆盖镜像默认配置并因缺少 shell/curl 而失败，请将其移除或替换为上文的 `["CMD", "silo", "healthcheck", "ready"]`。默认证书搜索路径为 `/tmp/.silo/certs`；若使用了非默认监听地址或端口，可通过 `MINIO_HEALTHCHECK_URL` 指定探针目标。同一版本的标准镜像与 distroless 镜像共享完全相同的存储格式，可随时切换。
+该变体已内置原生 `HEALTHCHECK`。若 Compose 文件中保留了旧的 `curl` 或 `CMD-SHELL` 健康检查，会覆盖镜像默认配置并因缺少 shell/curl 而失败，请将其移除或替换为上文的 `["CMD", "silo", "healthcheck", "ready"]`。默认证书搜索路径为 `/tmp/.silo/certs`；若使用了非默认监听地址或端口，可通过 `MINIO_HEALTHCHECK_URL` 指定探针目标。自 `20261109`（[#295](https://github.com/pgsty/silo/pull/295)）起，`-distroless` 与经典镜像共用完全一致的 UBI 根 CA 证书包 `/etc/ssl/certs/ca-certificates.crt`。同一版本的标准镜像与 distroless 镜像共享完全相同的存储格式，可随时切换。
 
 ### Kubernetes {#kubernetes}
 
-Kubernetes kubelet 直接通过 Pod spec 中的 `httpGet` 探针检查容器，忽略 Docker 镜像内置的 `HEALTHCHECK`，因此标准镜像与 distroless 镜像在 Kubernetes 下的探针配置完全一致，既有探针无需修改。使用 Helm 升级时，通过 `nameOverride` / `fullnameOverride` 保持 release 名称与 PVC 绑定不变，并在应用前对比 `helm template` 的渲染输出（详见[服务端兼容性 — Helm](/zh/compatibility/server/#helm)）。
+Kubernetes kubelet 直接通过 Pod spec 中的 `httpGet` 探针检查容器，忽略 Docker 镜像内置的 `HEALTHCHECK`，因此标准镜像与 distroless 镜像在 Kubernetes 下的探针配置完全一致，既有探针无需修改。使用 Helm 升级（`helm/silo` chart `7.0.4` 默认使用 `RELEASE.2026-11-09T00-00-00Z`）时，通过 `nameOverride` / `fullnameOverride` 保持 release 名称与 PVC 绑定不变；执行 `helm upgrade --reuse-values` 时须显式传入 `--set image.tag=RELEASE.2026-11-09T00-00-00Z`（否则 `--reuse-values` 会保留上次保存的 `image.tag`），并在应用前对比 `helm template` 的渲染输出（详见[服务端兼容性 — Helm](/zh/compatibility/server/#helm)）。
 
 ### 回滚边界 {#rollback}
 
 对象目录布局兼容并不代表高版本写入的新元数据都能被旧版本识别。**在回滚镜像或二进制之前，必须先确认持久状态是否需要一并恢复：**
 
-- **持久化 IAM 撤销历史**：启用新 IAM 撤销机制的版本不支持滚动降级。升级前须按 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)完整备份 IAM 存储与密钥材料（常规 `mc admin cluster iam export` 不包含删除/撤销墓碑记录）。
+- **绑定提交者的 Batch 作业与原生恢复（20261109）**：回滚到 `20261026` 前必须排空或取消运行中、待执行和已暂停的 batch 作业，因为 `20261026` 拒绝绑定提交者的 v2 清单与状态报告（见 [Batch 升级与回退](/zh/administration/batch-framework/#upgrade-20261109)）；同时等待在途的原生两阶段归档恢复执行完毕后再停止 `20261109`。
+- **持久化 IAM 撤销历史**：启用新 IAM 撤销机制的版本不支持滚动降级。升级前须按 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)完整备份 IAM 存储与密钥材料（常规 `mcli admin cluster iam export` 不包含删除/撤销墓碑记录）。
 - **桶配置收敛与密码策略权限**：核对[桶配置删除状态](/zh/blog/design/bucket-metadata-convergence/#rollout)与[密码权限回滚要求](/zh/compatibility/password-permissions/#rollback)。
 - **恢复操作**：若升级验收未通过，保持客户端流量阻断，停止新进程，并使用升级前的一致性卷备份、配置文件与镜像 digest 恢复。如果在备份后已产生新的写入、删除或凭据撤销，需在重新开放端点前完成差异核对与补救。
 
 ## 单节点迁移的行为检查 {#single-node-behavior}
 
-| 检查域 | 核对要点 |
-| --- | --- |
-| TLS 握手与证书 | 20260903 与 20260916 更新了 TLS 行为；20260916 移除硬编码椭圆曲线覆盖，恢复 Go 默认后量子混合密钥交换，并在 macOS 上影响自定义 CA 信任方式。请检查入站客户端及出站 OIDC、通知、复制、分层链路（含中间 TLS 解密设备）。见 [Go 1.27 TLS 与 OIDC 发现](/zh/blog/design/go127-tls-oidc-discovery/)。 |
-| 条件删除 | 自 20260916 起，单对象 `DeleteObject` 严格执行非空 `If-Match`，ETag 不匹配时返回 `412 PreconditionFailed`（批量 `DeleteObjects` 不包含此语义）。见[条件 DELETE](/zh/blog/design/conditional-delete/)。 |
-| 分片上传列举 | 20260916 曾提供可选的 `MINIO_API_MULTIPART_LISTING=strict` 磁盘扫描模式；20261018 已将其撤回并恢复 legacy 内存缓存行为（省略 `max-uploads` 默认 1,000，但默认缓存路径不执行严格分页）。见 [20260916 说明](/zh/blog/release/silo-20260916/#multipart)与 [20261018 升级要求](/zh/blog/release/silo-20261018/#upgrade)。 |
-| 反向代理来源地址信任 | 未设置 `MINIO_API_TRUSTED_PROXIES` 时，S3 监听器保留对转发头的历史信任行为。直连部署建议设为 `none`；经过反向代理时，显式配置代理 IP/CIDR 并确保代理覆盖客户端伪造的转发头。Console 与 LDAP STS 遵循各自的信任规则。见[来源地址信任](/zh/compatibility/server/#trusted-proxies)。 |
-| 身份与对象状态 | 若部署使用了 IAM 子用户密码策略、服务账号、STS、OIDC、Object Lock 或复制，请按[目标发行版说明](/zh/blog/release/silo-20261026/#upgrade)、[密码权限迁移](/zh/compatibility/password-permissions/)和 [IAM 恢复流程](/zh/operations/replication/iam-upgrade/)逐项核对。 |
+| 检查域               | 核对要点                                                                                                                                                                                                                                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TLS 握手与证书       | 20260903 与 20260916 更新了 TLS 行为；20260916 移除硬编码椭圆曲线覆盖，恢复 Go 默认后量子混合密钥交换，并在 macOS 上影响自定义 CA 信任方式。请检查入站客户端及出站 OIDC、通知、复制、分层链路（含中间 TLS 解密设备）。见 [Go 1.27 TLS 与 OIDC 发现](/zh/blog/design/go127-tls-oidc-discovery/)。                      |
+| 条件删除             | 自 20260916 起，单对象 `DeleteObject` 严格执行非空 `If-Match`，ETag 不匹配时返回 `412 PreconditionFailed`（批量 `DeleteObjects` 不包含此语义）。见[条件 DELETE](/zh/blog/design/conditional-delete/)。                                                                                                                |
+| 分片上传列举         | 20260916 曾提供可选的 `MINIO_API_MULTIPART_LISTING=strict` 磁盘扫描模式；20261018 已将其撤回并恢复 legacy 内存缓存行为（省略 `max-uploads` 默认 1,000，但默认缓存路径不执行严格分页）。见 [20260916 说明](/zh/blog/release/silo-20260916/#multipart)与 [20261018 升级要求](/zh/blog/release/silo-20261018/#upgrade)。 |
+| 反向代理来源地址信任 | 未设置 `MINIO_API_TRUSTED_PROXIES` 时，S3 监听器保留对转发头的历史信任行为。直连部署建议设为 `none`；经过反向代理时，显式配置代理 IP/CIDR 并确保代理覆盖客户端伪造的转发头。Console 与 LDAP STS 遵循各自的信任规则。见[来源地址信任](/zh/compatibility/server/#trusted-proxies)。                                     |
+| 身份与对象状态       | 若部署使用了 IAM 子用户密码策略、服务账号、STS、OIDC、Object Lock、batch 作业或复制，请按[目标发行版说明](/zh/blog/release/silo-20261109/#upgrade)、[密码权限迁移](/zh/compatibility/password-permissions/)和 [IAM 恢复流程](/zh/operations/replication/iam-upgrade/)逐项核对。                                       |
 {.wide .expand}
 
 ## 从 RELEASE.2026-08-06 升级 {#since-20260806}
@@ -200,7 +201,7 @@ Waiting for at least 1 remote servers with valid configuration to be online
 在恢复业务流量前，按以下顺序完成验收：
 
 1. **核对实例与卷身份**：确认运行中的版本/镜像 digest、挂载的原数据卷标识、预期桶列表及启动日志（防止误挂载到新建的空卷）。
-2. **执行就绪探针**：在容器内运行 `silo healthcheck ready`，或从宿主机探测 HTTP 端点（默认本机 HTTP 监听器可执行 `curl --fail --silent --show-error http://127.0.0.1:9000/minio/health/ready`；TLS 环境请指定正确的主机名与受信任 CA）。
+2. **执行就绪与仲裁探针**：在容器内运行 `silo healthcheck ready` 与 `silo healthcheck cluster`，或从宿主机探测 `/minio/health/ready` 与 `/minio/health/cluster`（默认本机 HTTP 监听器可执行 `curl --fail --silent --show-error http://127.0.0.1:9000/minio/health/ready`；TLS 环境请指定正确的主机名与受信任 CA）。由于 `silo healthcheck ready` 仅校验 HTTP 监听器及已配置的 KMS／etcd，不等待存储层与 IAM 加载完成（`e21b1c3a7`），因此必须同时完成 `cluster` 探测与下方的签名 S3 写读验证。
 3. **抽样校验存量数据**：通过业务 SDK 或客户端读取升级前记录的代表性历史对象，核对字节内容、大小与独立校验和；按实际启用的功能检查多版本、标签、SSE 加密、Object Lock 保留期与 Legal Hold。
 4. **测试写入与列举路径**：在专用测试桶或测试前缀上，使用真实客户端完成普通上传、分片上传合并、列举、回读与删除（切勿删除生产对象做冒烟测试，清理测试数据时注意桶的版本控制与保留期规则）。
 5. **验证权限与外部集成**：验证子用户、服务账号、STS/OIDC 以及预期应被拒绝的越权请求；共享 IAM 或跨站复制集群须按 [IAM 升级流程](/zh/operations/replication/iam-upgrade/)逐个检查参与站点。

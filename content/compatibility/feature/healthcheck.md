@@ -9,7 +9,7 @@ icon: fa-solid fa-heart-pulse
 ---
 
 > [!NOTE]
-> **Status**: P1 (`silo healthcheck` subcommand, `2ff594f4b`), P2 (distroless image + CI gate, `4c34d2309`, with UBI CA bundle parity in [#295](https://github.com/pgsty/silo/pull/295)), and P4 ([healthcheck probe guide](/operations/monitoring/healthcheck-probe/)) are shipped; P3 (Helm probes) remains pending · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)
+> **Status**: P1 (`silo healthcheck` subcommand, `2ff594f4b`), P2 (distroless image + CI gate, `4c34d2309`, with UBI CA bundle parity in [#295](https://github.com/pgsty/silo/pull/295) shipped in **SILO Server 20261109**), and P4 ([healthcheck probe guide](/operations/monitoring/healthcheck-probe/) and `ready` probe documentation in [`e21b1c3a7`](https://github.com/pgsty/silo/commit/e21b1c3a7)) are shipped. In P3, `helm/silo` chart `7.0.4` ([`47275042f`](https://github.com/pgsty/silo/commit/47275042f) in **SILO Server 20261109**) refreshes the default Server and `mcli` image tags to `RELEASE.2026-11-09T00-00-00Z`; opt-in Kubernetes liveness/readiness Pod probe templates remain tracked in [#288](https://github.com/pgsty/silo/issues/288) · **Decided**: 2026-08-06 · **Owner**: [`pgsty/silo`](https://github.com/pgsty/silo) (command, images, Helm chart), this site (docs)
 
 Silo is getting a native `silo healthcheck` subcommand and, alongside the existing container image, a new **distroless** image variant that contains exactly one file that matters: the `silo` binary. This note records the reasoning and the design decisions before implementation, so the code has a specification to be checked against — and so that "why is it built this way?" has a permanent answer.
 
@@ -33,17 +33,17 @@ Reading the actual `mc` implementation (`cmd/ready-main.go`) shows the current h
 1. **It never fails on its own.** `mc ready` is a wait-until-ready loop: it retries every 5 seconds forever and only ever exits zero, on success. Connection refused does not break the loop. As a Docker healthcheck, the "unhealthy" verdict is produced entirely by Docker's `timeout` killing the process — the probe semantics are a side effect of SIGKILL.
 2. **It checks the wrong scope.** `mc ready` requests `/minio/health/cluster` — cluster-wide write quorum. Every container's "health" therefore reflects the state of the whole cluster, which is precisely the cascading-failure anti-pattern the Kubernetes documentation warns about: lose quorum, and every node is marked unhealthy simultaneously.
 3. **It has hidden failure modes.** It requires a writable `~/.mc` config directory (on a read-only rootfs or an arbitrary OpenShift UID, the probe fails while the server is perfectly healthy), it prints config-creation noise on first run, and its built-in `local` alias is hardcoded to `http://localhost:9000` — wrong the moment TLS is enabled or the port changes, a limitation users complained about upstream.
-4. **It is the last functional reason to bundle a second binary.** Both `mcli` and the pinned static `curl` carry ongoing supply-chain and maintenance cost (the curl pin is stuck on v8.11.0 because a later release dropped the aarch64 build) for what a subcommand of the existing binary can do in ~150 lines.
+4. **It is the last functional reason to bundle a second binary.** Both `mcli` and the pinned static `curl` carry ongoing supply-chain and maintenance cost (the curl pin remained at v8.11.0 until SILO 20261026 updated it to 8.23.0 because an intermediate release dropped the aarch64 build) for what a subcommand of the existing binary can do in ~150 lines.
 
 ## The decisions {#decisions}
 
 Three tracks, deliberately decoupled:
 
-| # | Decision |
-| --- | ---------- |
-| **D1** | The `silo` binary gains a `healthcheck` subcommand — a thin, anonymous HTTP client for the server's existing `/minio/health/*` endpoints. It ships in every build, so every image and bare-metal install gains the capability. |
+| #      | Decision                                                                                                                                                                                                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **D1** | The `silo` binary gains a `healthcheck` subcommand — a thin, anonymous HTTP client for the server's existing `/minio/health/*` endpoints. It ships in every build, so every image and bare-metal install gains the capability.                                                       |
 | **D2** | The **existing image does not change**. It keeps `mcli`, `curl`, the shell entrypoint, and the `mc ready local` examples. Users of the current image who want the new probe can opt in by overriding their `healthcheck.test` — nothing is taken away and no default behavior moves. |
-| **D3** | A **new distroless variant** is published alongside it, as a pilot: single binary, no shell, native `HEALTHCHECK` baked in. If the pilot proves out, it becomes the recommended default later and the switch completes; the classic image remains for compatibility either way. |
+| **D3** | A **new distroless variant** is published alongside it, as a pilot: single binary, no shell, native `HEALTHCHECK` baked in. If the pilot proves out, it becomes the recommended default later and the switch completes; the classic image remains for compatibility either way.      |
 {.wide .expand}
 
 D2 and D3 answer the obvious "why not just slim the main image?" — because the main image's contents are a compatibility surface. [#9](https://github.com/pgsty/silo/issues/9) exists because that surface was changed underneath people once before. The distroless image is a new name with a new contract, so nobody's existing healthcheck, `docker exec mc` habit, or entrypoint assumption breaks while it is evaluated.
@@ -95,19 +95,19 @@ The 15-second default timeout for cluster checks accounts for the server's own 1
 
 The table below is verified against the handler source, not quoted from documentation — and it corrects a common misreading:
 
-| Endpoint | Returns 200 when… | Fails with… | Notes |
-| --- | --- | --- | --- |
-| `/minio/health/live` | almost always — **even before the object layer is initialized** (that state is only signaled via the `x-minio-server-status: offline` header) | 503 when the request queue is saturated | touches no external system; the only endpoint quiet enough for high-frequency probing |
-| `/minio/health/ready` | as `live`, **plus** KMS can generate a key and etcd answers a read — each only if configured | KMS/etcd failure; queue saturation | **without KMS or etcd, `ready` and `live` are the same code path** |
-| `/minio/health/cluster` | object layer, bucket metadata and IAM are initialized, **and every erasure set** has write quorum | 503 with quorum diagnostic headers; with `?maintenance=true`, failure is **412** | each failed evaluation writes a server-side log line — do not poll it tightly |
-| `/minio/health/cluster/read` | the read-quorum version of the above | as above | |
+| Endpoint                     | Returns 200 when…                                                                                                                             | Fails with…                                                                      | Notes                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `/minio/health/live`         | almost always — **even before the object layer is initialized** (that state is only signaled via the `x-minio-server-status: offline` header) | 503 when the request queue is saturated                                          | touches no external system; the only endpoint quiet enough for high-frequency probing |
+| `/minio/health/ready`        | as `live`, **plus** KMS can generate a key and etcd answers a read — each only if configured                                                  | KMS/etcd failure; queue saturation                                               | **without KMS or etcd, `ready` and `live` are the same code path**                    |
+| `/minio/health/cluster`      | object layer, bucket metadata and IAM are initialized, **and every erasure set** has write quorum                                             | 503 with quorum diagnostic headers; with `?maintenance=true`, failure is **412** | each failed evaluation writes a server-side log line — do not poll it tightly         |
+| `/minio/health/cluster/read` | the read-quorum version of the above                                                                                                          | as above                                                                         |                                                                                       |
 {.wide .expand}
 
 `live` and `ready` are process-level signals and do not prove object access. The `cluster` pair checks initialization and reported erasure-set quorum, but does not guarantee that the receiving node has mounted its remote drives; see the [restart window and data-path checks](/operations/monitoring/healthcheck-probe/#startup-readiness-window). Use them for operational quorum and maintenance checks, not per-container liveness or prerequisites for peer discovery. Resuming applications also requires a bounded signed S3 write/read check.
 
 ## The distroless variant {#distroless}
 
-**Base**: `gcr.io/distroless/static-debian12` — which is sufficient because `silo` builds with `CGO_ENABLED=0`. The base ships tzdata, `/tmp`, and an `/etc/passwd` with `root`/`nonroot` entries, and [#295](https://github.com/pgsty/silo/pull/295) copies the UBI-derived `/etc/ssl/certs/ca-certificates.crt` trust bundle from the `verify` stage so the classic and distroless images share the exact same root CA trust store (for KMS/webhook/STS egress). It ships no shell, no package manager, no libc.
+**Base**: `gcr.io/distroless/static-debian12` — which is sufficient because `silo` builds with `CGO_ENABLED=0`. The base ships tzdata, `/tmp`, and an `/etc/passwd` with `root`/`nonroot` entries, and in **SILO Server 20261109** ([#295](https://github.com/pgsty/silo/pull/295)) the build copies the UBI-derived `/etc/ssl/certs/ca-certificates.crt` trust bundle so the classic and distroless images share the exact same root CA trust store (for KMS/webhook/STS egress). It ships no shell, no package manager, no libc.
 
 Sketch of the contract:
 
@@ -158,16 +158,16 @@ readinessProbe:          # when to unroute: may include hard dependencies (KMS/e
 
 Three cautions that belong next to any such config: the `cluster` endpoints must never appear in probes (liveness would restart the whole fleet on quorum loss; readiness would tangle with bootstrap — the chart's headless service correctly sets `publishNotReadyAddresses: true` for exactly that reason); `live` deliberately returns 503 under sustained request-queue saturation, so a saturated node restarts after ~90s by design; and with `scheme: HTTPS` the kubelet skips certificate verification, so self-signed deployments need nothing extra.
 
-The Silo Helm chart currently ships **no probes at all** (neither does upstream's, despite its docs). Adding the three probes above to the chart is planned as an independent follow-up — it depends on neither image track, and it is a differentiator over upstream rather than a compatibility risk.
+The Silo Helm chart currently ships **no Pod probes** (neither does upstream's, despite its docs). Adding opt-in Kubernetes liveness/readiness Pod probe templates to `helm/silo` remains tracked as an independent follow-up in [#288](https://github.com/pgsty/silo/issues/288) — it depends on neither image track, and it is a differentiator over upstream rather than a compatibility risk.
 
 ## Rollout {#rollout}
 
-| Phase | Scope | Repo |
-| --- | --- | --- |
-| **P1** | `silo healthcheck` subcommand + tests; ships in the next release binary (all images inherit the capability, no image behavior changes) | `pgsty/silo` |
-| **P2** | `Dockerfile.distroless` + CI build/health gate + publish `-distroless` tags as a pilot | `pgsty/silo` |
-| **P3** | Helm chart: add the three probes; refresh the stale default image tag | `pgsty/silo` |
-| **P4** | Docs: command reference, probe guide, distroless migration notes; pilot feedback → decide on promoting distroless to the recommended default | this site |
+| Phase  | Scope                                                                                                                                                                                                                                                                                                                              | Repo         |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| **P1** | `silo healthcheck` subcommand + tests; shipped in release binaries (all images inherit the capability, no image behavior changes)                                                                                                                                                                                                  | `pgsty/silo` |
+| **P2** | `Dockerfile.distroless` + CI build/health gate + publish `-distroless` tags (with UBI CA parity in [#295](https://github.com/pgsty/silo/pull/295), **SILO Server 20261109**)                                                                                                                                                       | `pgsty/silo` |
+| **P3** | Helm chart: default Server and `mcli` image tags refreshed to `RELEASE.2026-11-09T00-00-00Z` in `helm/silo` `7.0.4` ([`47275042f`](https://github.com/pgsty/silo/commit/47275042f), **SILO Server 20261109**); opt-in Kubernetes liveness/readiness Pod probe templates pending ([#288](https://github.com/pgsty/silo/issues/288)) | `pgsty/silo` |
+| **P4** | Docs: command reference, probe guide, `ready` probe scope ([`e21b1c3a7`](https://github.com/pgsty/silo/commit/e21b1c3a7)), distroless migration notes; pilot feedback → decide on promoting distroless to the recommended default                                                                                                  | this site    |
 {.wide .expand}
 
 Compatibility promises across all phases: the classic image's contents and examples do not change; `mc ready local` keeps working everywhere it works today; the health HTTP API is untouched (the subcommand is purely additive); and the `/minio/health/*` paths remain frozen as compatibility surface, same as every other `/minio/*` route in the fork.

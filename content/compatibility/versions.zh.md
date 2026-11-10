@@ -1,7 +1,7 @@
 ---
 title: "组件版本"
 linkTitle: "组件版本"
-description: "SILO 各组件的正式版本、独立发布的 mcli 20261109、silo-pkg 3.16.0 与升级边界。"
+description: "SILO 20261109 正式发布组件、Console 2.7.0、mcli 20261109、silo-pkg 3.16.0、KES 20261026 与升级边界。"
 url: "/zh/compatibility/versions/"
 weight: 5
 type: docs
@@ -13,15 +13,30 @@ SILO **20261109** 是当前正式服务端版本，内嵌 Console 2.7.0、mcli 2
 
 ## Server 20261109 {#server-20261109}
 
-| 组件 | 正式版本 | 固定源码 |
-| --- | --- | --- |
-| Server | `RELEASE.2026-11-09T00-00-00Z` | `d998292387ccf1d2907749e0fb1575ef5fb93fda` |
-| 内嵌 Console | `v2.7.0` | `4e91ae506e706ccdecb512b1d8b5ab4d9871d505` |
-| mcli / MC 模块 | `RELEASE.2026-11-09T00-00-00Z` | `e1d4cc5abfe00b674eb36347399e7398990be467` |
-| 公共包 | `github.com/pgsty/silo-pkg/v3 v3.16.0` | `b7aeea85e84e8888d6ab424c7123a1297711bc3f` |
+<span id="published"></span>
+
+| 组件               | 正式版本 / Go 模块                                                                                  | 固定源码                                                      |
+| ------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Server             | `RELEASE.2026-11-09T00-00-00Z`（包版本 `20261109000000.0.0`，发布于 `2026-11-09T17:01:27Z`）        | `d998292387ccf1d2907749e0fb1575ef5fb93fda`                    |
+| 内嵌与独立 Console | `v2.7.0`（`v0.0.0-20261109114619-4e91ae506e70`）                                                    | `4e91ae506e706ccdecb512b1d8b5ab4d9871d505`                    |
+| mcli / MC 模块     | `RELEASE.2026-11-09T00-00-00Z`（`v0.0.0-20261109021353-e1d4cc5abfe0`，包版本 `20261109000000.0.0`） | `e1d4cc5abfe00b674eb36347399e7398990be467`                    |
+| 公共包             | `github.com/pgsty/silo-pkg/v3 v3.16.0`                                                              | `b7aeea85e84e8888d6ab424c7123a1297711bc3f`                    |
+| 上游 S3 SDK        | `github.com/minio/minio-go/v7 v7.4.2-0.20261025165926-320af050c445`                                 | `320af050c445`（已核验上游提交）                              |
+| 可选 KES           | `RELEASE.2026-10-26T00-00-00Z`（包版本 `20261026000000.0.0`）                                       | `e9b4f1acebc11d61b42f876da8df48f548750cc9`                    |
+| Helm chart         | `helm/silo 7.0.4`                                                                                   | `d998292387ccf1d2907749e0fb1575ef5fb93fda`                    |
+| Go / 平台归档      | **Go 1.27.3**                                                                                       | Windows ZIP；Linux/macOS tar.gz（Console Windows 仅含 amd64） |
 {.wide .expand}
 
-Server 包版本为 `20261109000000.0.0`，Go 1.27.3 与上游 minio-go `v7.4.2-0.20261025165926-320af050c445` 保持不变。[发布与升级说明](/zh/blog/release/silo-20261109/)记录 batch 格式边界、混合版本恢复、锁域升级与逐节点 S3 就绪检查。普通对象／IAM 回退验证不代表旧 worker 能续跑新格式 batch 记录。
+| Docker Hub 镜像                      | 已发布标签                                              | 多架构清单摘要（Digest）                                                  |
+| ------------------------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `docker.io/pgsty/silo`               | `RELEASE.2026-11-09T00-00-00Z`、`latest`                | `sha256:08ce1505b5eacefbad1ca07159b242b9ce045a11c2817e3bc257b25f77bbc02d` |
+| `docker.io/pgsty/silo`（distroless） | `RELEASE.2026-11-09T00-00-00Z-distroless`、`distroless` | `sha256:fdf726815e38c2d1cb06c640e237daa83b3914e58099aecd073fef9d8e42cb00` |
+| `docker.io/pgsty/silo-console`       | `v2.7.0`、`latest`                                      | `sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892` |
+| `docker.io/pgsty/mc`                 | `RELEASE.2026-11-09T00-00-00Z`、`latest`                | `sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf` |
+| `docker.io/pgsty/kes`                | `RELEASE.2026-10-26T00-00-00Z`、`latest`                | `sha256:ea36fcdd260c606eb89e693b0949aea73b149359605273a98fcf13c8433049cd` |
+{.wide .expand}
+
+KES 不内嵌于 Server，独立维护版本节奏。[发布与升级说明](/zh/blog/release/silo-20261109/)记录 batch 格式边界、混合版本恢复、锁域升级与逐节点 S3 就绪检查；另见 [Server 20261109 升级检查](/zh/compatibility/server/#maintenance-20261109)与[下载页](/zh/download/)。普通对象／IAM 回退验证不代表 20261026 worker 能恢复执行绑定提交者的 v2 batch 记录。
 
 ## 独立 Console {#console}
 
@@ -40,28 +55,30 @@ Server 20261109 内嵌 Console 2.7.0；历史 Server 20261026 保留 Console 2.5
 `RELEASE.2026-11-09T00-00-00Z`，包版本为 `20261109000000.0.0`，源码为
 [`e1d4cc5abfe00b674eb36347399e7398990be467`](https://github.com/pgsty/mc/commit/e1d4cc5abfe00b674eb36347399e7398990be467)。
 该版本使用 Go 1.27.3、silo-pkg v3.16.0 与上游 minio-go
-`v7.4.2-0.20261025165926-320af050c445` 构建。既有 Server 与 Console 制品保留各自内嵌的客户端版本，需重新构建才能采用新客户端。
+`v7.4.2-0.20261025165926-320af050c445` 构建。Server 20261109 与 Console 2.7.0
+已采用 mcli 20261109；Server 20261026、Console v2.6.0 及更早二进制仍保留各自原有的内嵌客户端构建。
 
 ## 共享包 v3.16.0 {#pkg-3-16-0}
 
 [silo-pkg v3.16.0](/zh/blog/release/pkg-3.16.0/) 是独立的源码库发布，要求
 Go 1.27.3。该版本更新 JOSE、网络、CPU 检测与 YAML 依赖，保持公开 API
-和策略语义兼容。应用需选择 `github.com/pgsty/silo-pkg/v3 v3.16.0` 并重新构建。
-下列历史应用制品仍包含各自原有的依赖版本；库发布不会更新这些制品。
+和策略语义兼容。Server 20261109、Console 2.7.0 与 mcli 20261109 已使用
+`github.com/pgsty/silo-pkg/v3 v3.16.0` 构建；外部 Go 调用方需选择 `v3.16.0`
+并重新构建，Server 20261026、Console v2.6.0 及下文历史应用制品仍保留各自原有的依赖版本。
 
 ## 20261026 正式组件 {#server-20261026}
 
-<span id="server-20261025"></span><span id="published"></span>
+<span id="server-20261025"></span>
 
-| 组件 | 正式版本 | 固定源码 / 模块 |
-| --- | --- | --- |
-| Server | `RELEASE.2026-10-26T00-00-00Z` | `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3` |
-| 内嵌与独立 Console | `v2.5.1` | `v0.0.0-20261026153924-fff1618d9abb` |
-| mcli / MC 模块 | `RELEASE.2026-10-26T00-00-00Z` | `v0.0.0-20261026120214-0ceb298cdcd0` |
-| 公共包 | `github.com/pgsty/silo-pkg/v3 v3.15.2` | `0416eb1f450536ca2cc3592c2c2a06a3df88d4e0` |
-| 上游 S3 SDK | `github.com/minio/minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
-| 可选 KES | `RELEASE.2026-10-26T00-00-00Z` | `e9b4f1acebc11d61b42f876da8df48f548750cc9` |
-| Go / 平台归档 | **Go 1.27.3** | Windows ZIP；Linux/macOS tar.gz |
+| 组件               | 正式版本                               | 固定源码 / 模块                            |
+| ------------------ | -------------------------------------- | ------------------------------------------ |
+| Server             | `RELEASE.2026-10-26T00-00-00Z`         | `c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3` |
+| 内嵌与独立 Console | `v2.5.1`                               | `v0.0.0-20261026153924-fff1618d9abb`       |
+| mcli / MC 模块     | `RELEASE.2026-10-26T00-00-00Z`         | `v0.0.0-20261026120214-0ceb298cdcd0`       |
+| 公共包             | `github.com/pgsty/silo-pkg/v3 v3.15.2` | `0416eb1f450536ca2cc3592c2c2a06a3df88d4e0` |
+| 上游 S3 SDK        | `github.com/minio/minio-go/v7`         | `v7.4.2-0.20261025165926-320af050c445`     |
+| 可选 KES           | `RELEASE.2026-10-26T00-00-00Z`         | `e9b4f1acebc11d61b42f876da8df48f548750cc9` |
+| Go / 平台归档      | **Go 1.27.3**                          | Windows ZIP；Linux/macOS tar.gz            |
 {.wide .expand}
 
 20261026 的 Server、mcli 与 KES 制品使用软件包版本号 `20261026000000.0.0`。单独升级独立部署的 Console 不会替换旧版 Server 内嵌的控制台或服务端逻辑；内置策略 Reset、实时存储桶清单、生命周期过期与复制修复均需配合 Server 20261026 生效。
@@ -78,13 +95,13 @@ Go 1.27.3。该版本更新 JOSE、网络、CPU 检测与 YAML 依赖，保持�
 
 ## 10 月组件依赖图 {#october-components}
 
-| 组件 | Server 20261018 选用版本 |
-| --- | --- |
-| 嵌入式 Console | v2.4.2，`v0.0.0-20261017112417-ef2dd2c41d21` |
+| 组件                   | Server 20261018 选用版本                       |
+| ---------------------- | ---------------------------------------------- |
+| 嵌入式 Console         | v2.4.2，`v0.0.0-20261017112417-ef2dd2c41d21`   |
 | MC 模块／镜像内置 mcli | 20261018，`v0.0.0-20261017101407-fa3b8bf72458` |
-| Server 共享包 | `github.com/pgsty/silo-pkg/v3 v3.14.3` |
-| 上游 S3 SDK | `github.com/minio/minio-go/v7 v7.4.1` |
-| 构建工具链 | Go 1.27.2；Console 前端使用 Node 24.22.0 LTS |
+| Server 共享包          | `github.com/pgsty/silo-pkg/v3 v3.14.3`         |
+| 上游 S3 SDK            | `github.com/minio/minio-go/v7 v7.4.1`          |
+| 构建工具链             | Go 1.27.2；Console 前端使用 Node 24.22.0 LTS   |
 {.wide .expand}
 
 历史版本 Console v2.4.2 与 mcli 20261018 声明 pkg v3.14.2；Server 的模块图选用 v3.14.3。v3.14.2 的[依赖更新](/zh/blog/release/pkg-3.14.2/)与 v3.14.3 的 [admin action 分类优化](/zh/blog/release/pkg-3.14.3/)保持 API、策略格式和授权语义。Server 必须显式选择 Console 与 MC 的 replacement，Go 不会继承依赖的替换配置。正式支持 PGSTY 四组件组合，对原厂 MinIO/MC 兼容尽最大努力。
@@ -115,19 +132,19 @@ Console 嵌入前端已按此依赖图重新构建。历史 Go 模块路径没�
 
 以下改动已随 Server 20260916 发布；Server 20260903 不包含这些修复。实现范围可通过所链接的 PR 与源码记录核对。
 
-| 范围 | <span style="white-space:nowrap">已合并 PR</span> | 运维可见行为 |
-| --- | --- | --- |
-| <span style="white-space:nowrap">多池存储</span> | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189) | 普通单对象版本 DELETE 协调各池副本，副本协调保留标签状态；移除可选的 GET 访问频率池间分层功能。 |
-| <span style="white-space:nowrap">分片完成条件</span> | [#190](https://github.com/pgsty/silo/pull/190) | 前置条件使用所有池中的逻辑最新对象，避免旧副本接受过期 ETag，或拒绝当前 ETag。 |
-| <span style="white-space:nowrap">分片发现与取消</span> | [#198](https://github.com/pgsty/silo/pull/198)<br>[#213](https://github.com/pgsty/silo/pull/213) | Server 20260916 默认使用 legacy 列举与取消。显式启用严格模式后，跨 pool/set 发现持久上传、在原生 marker 对应上传消失后继续分页，并要求多数盘确认取消。严格模式要求所有 writer 升级并排空旧上传，见[升级契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。 |
-| <span style="white-space:nowrap">普通条件 PUT</span> | [#207](https://github.com/pgsty/silo/pull/207) | 公开写入条件使用所有池中的逻辑当前对象，包括正在退役或再平衡的池；可读性及目标版本行为变化见[下文](#conditional-put)。 |
-| <span style="white-space:nowrap">IAM 撤销</span> | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192) | 节点间删除通知重新加载已提交状态；持久化删除版本与撤销边界，防止旧站点事件重放恢复已撤销身份或旧授权。 |
-| <span style="white-space:nowrap">标签与删除标记</span> | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196) | SSE-KMS 复制保留标签修订时间；删除标签推进修订并抵御延迟事件；删除标记清除在 MRF 恢复时保留标记身份和重试状态。 |
-| <span style="white-space:nowrap">删除标记清除</span> | [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)<br>[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0)<br>[`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) | 指定版本的清除不再在缺少该标记的盘上创建标记；对已缺失版本的重试须有写仲裁多数的缺失票才确认；heal 后的标记保留复制与清除元数据；排队中的标记创建任务在发送前先在复制锁内复核源端。剩余边界见[下文](#pending)、[#217](https://github.com/pgsty/silo/issues/217) 与[复制可靠性记录第三轮](/zh/blog/design/replication-reliability/#third-round)。 |
-| <span style="white-space:nowrap">盘间分歧下的列举</span> | [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1) | 当更新的少数盘排在前面时，仍保留达到列举仲裁的 null 对象版本。滚动重启叠加并发覆盖写时，成功的 LIST 仍可能漏掉可读的 key；见[下文](#pending)、[#218](https://github.com/pgsty/silo/issues/218) 与[设计记录](/zh/blog/design/list-null-version-quorum/)。 |
-| <span style="white-space:nowrap">跨池迁移标签</span> | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303) | rebalance 与 decommission 对普通和分片写入都把对象标签及其修订字段带到目标池。此前迁移已丢失的标签不会恢复；见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/#migration-tags)。 |
-| <span style="white-space:nowrap">复制元数据</span> | [#194](https://github.com/pgsty/silo/pull/194) | 恢复复制元数据时，不再把传输用的 `aws-chunked` 编码重新写入对象元数据。 |
-| <span style="white-space:nowrap">请求头超时</span> | [#196](https://github.com/pgsty/silo/pull/196) | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` 正确传入 HTTP 服务，对 HTTP/1 请求头设置绝对读取期限，持续少量发送字节也无法延长；正文保留既有滚动空闲超时。 |
+| 范围                                                     | <span style="white-space:nowrap">已合并 PR</span>                                                                                                                                               | 运维可见行为                                                                                                                                                                                                                                                                                                                                     |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <span style="white-space:nowrap">多池存储</span>         | [#188](https://github.com/pgsty/silo/pull/188)<br>[#189](https://github.com/pgsty/silo/pull/189)                                                                                                | 普通单对象版本 DELETE 协调各池副本，副本协调保留标签状态；移除可选的 GET 访问频率池间分层功能。                                                                                                                                                                                                                                                  |
+| <span style="white-space:nowrap">分片完成条件</span>     | [#190](https://github.com/pgsty/silo/pull/190)                                                                                                                                                  | 前置条件使用所有池中的逻辑最新对象，避免旧副本接受过期 ETag，或拒绝当前 ETag。                                                                                                                                                                                                                                                                   |
+| <span style="white-space:nowrap">分片发现与取消</span>   | [#198](https://github.com/pgsty/silo/pull/198)<br>[#213](https://github.com/pgsty/silo/pull/213)                                                                                                | Server 20260916 默认使用 legacy 列举与取消。显式启用严格模式后，跨 pool/set 发现持久上传、在原生 marker 对应上传消失后继续分页，并要求多数盘确认取消。严格模式要求所有 writer 升级并排空旧上传，见[升级契约](/zh/blog/design/list-multipart-uploads/#implementation-20260916)。                                                                  |
+| <span style="white-space:nowrap">普通条件 PUT</span>     | [#207](https://github.com/pgsty/silo/pull/207)                                                                                                                                                  | 公开写入条件使用所有池中的逻辑当前对象，包括正在退役或再平衡的池；可读性及目标版本行为变化见[下文](#conditional-put)。                                                                                                                                                                                                                           |
+| <span style="white-space:nowrap">IAM 撤销</span>         | [#191](https://github.com/pgsty/silo/pull/191)<br>[#192](https://github.com/pgsty/silo/pull/192)                                                                                                | 节点间删除通知重新加载已提交状态；持久化删除版本与撤销边界，防止旧站点事件重放恢复已撤销身份或旧授权。                                                                                                                                                                                                                                           |
+| <span style="white-space:nowrap">标签与删除标记</span>   | [#193](https://github.com/pgsty/silo/pull/193)<br>[#196](https://github.com/pgsty/silo/pull/196)                                                                                                | SSE-KMS 复制保留标签修订时间；删除标签推进修订并抵御延迟事件；删除标记清除在 MRF 恢复时保留标记身份和重试状态。                                                                                                                                                                                                                                  |
+| <span style="white-space:nowrap">删除标记清除</span>     | [`eb4f5e5b3`](https://github.com/pgsty/silo/commit/eb4f5e5b3)<br>[`254b19ac0`](https://github.com/pgsty/silo/commit/254b19ac0)<br>[`358ab38fb`](https://github.com/pgsty/silo/commit/358ab38fb) | 指定版本的清除不再在缺少该标记的盘上创建标记；对已缺失版本的重试须有写仲裁多数的缺失票才确认；heal 后的标记保留复制与清除元数据；排队中的标记创建任务在发送前先在复制锁内复核源端。剩余边界见[下文](#pending)、[#217](https://github.com/pgsty/silo/issues/217) 与[复制可靠性记录第三轮](/zh/blog/design/replication-reliability/#third-round)。 |
+| <span style="white-space:nowrap">盘间分歧下的列举</span> | [`8d06424b1`](https://github.com/pgsty/silo/commit/8d06424b1)                                                                                                                                   | 当更新的少数盘排在前面时，仍保留达到列举仲裁的 null 对象版本。滚动重启叠加并发覆盖写时，成功的 LIST 仍可能漏掉可读的 key；见[下文](#pending)、[#218](https://github.com/pgsty/silo/issues/218) 与[设计记录](/zh/blog/design/list-null-version-quorum/)。                                                                                         |
+| <span style="white-space:nowrap">跨池迁移标签</span>     | [`fced86303`](https://github.com/pgsty/silo/commit/fced86303)                                                                                                                                   | rebalance 与 decommission 对普通和分片写入都把对象标签及其修订字段带到目标池。此前迁移已丢失的标签不会恢复；见[多池对象一致性](/zh/blog/design/multi-pool-object-consistency/#migration-tags)。                                                                                                                                                  |
+| <span style="white-space:nowrap">复制元数据</span>       | [#194](https://github.com/pgsty/silo/pull/194)                                                                                                                                                  | 恢复复制元数据时，不再把传输用的 `aws-chunked` 编码重新写入对象元数据。                                                                                                                                                                                                                                                                          |
+| <span style="white-space:nowrap">请求头超时</span>       | [#196](https://github.com/pgsty/silo/pull/196)                                                                                                                                                  | `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` 正确传入 HTTP 服务，对 HTTP/1 请求头设置绝对读取期限，持续少量发送字节也无法延长；正文保留既有滚动空闲超时。                                                                                                                                                                               |
 {.wide .expand}
 
 **升级与兼容性要求：**

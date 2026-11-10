@@ -66,14 +66,14 @@ deliberately preserved while the tiering feature itself went.
 
 ## What happens to stored state {#stored-state}
 
-| State | Behavior after removal |
-| --- | --- |
-| Ten old ILM keys | `access_tiering`, `access_pools`, `access_max_size`, `access_promote_watermark`, `access_bin_width`, `access_bins`, `access_flush`, `access_min_residency`, `access_workers`, `access_max_tracked` are accepted but ignored. Existing transition/expiration worker settings are preserved. |
-| Admin configuration | Deprecated keys may still appear in `mcli admin config get ilm`; setting them may succeed but has no effect, even with `access_tiering=on`. Remove obsolete environment settings from deployment manifests. |
-| Lifecycle XML | `AccessTierQuota` and `AccessTransition` are ignored when read and omitted when re-encoded. The same parser handles new PUT requests, so these extensions are also silently discarded there; access-only rules still fail action validation. |
-| Data-usage cache | Both v8 and v9 caches are read, preserving ordinary counts, sizes, histograms, and remote-tier statistics. The retired hot-tier byte count is discarded; subsequent writes use v8. No feature-driven full statistics rebuild is required. |
-| Objects already moved | Remain in their current pools with the same versions and timestamps. There is no bulk move-back or object metadata rewrite. |
-| Internal leftovers | `x-minio-internal-ilm-atier` and `.minio.sys/config/ilm/access/` counter objects may remain unused. They need no cleanup service or object scan. |
+| State                 | Behavior after removal                                                                                                                                                                                                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Ten old ILM keys      | `access_tiering`, `access_pools`, `access_max_size`, `access_promote_watermark`, `access_bin_width`, `access_bins`, `access_flush`, `access_min_residency`, `access_workers`, `access_max_tracked` are accepted but ignored. Existing transition/expiration worker settings are preserved. |
+| Admin configuration   | Deprecated keys may still appear in `mcli admin config get ilm`; setting them may succeed but has no effect, even with `access_tiering=on`. Remove obsolete environment settings from deployment manifests.                                                                                |
+| Lifecycle XML         | `AccessTierQuota` and `AccessTransition` are ignored when read and omitted when re-encoded. The same parser handles new PUT requests, so these extensions are also silently discarded there; access-only rules still fail action validation.                                               |
+| Data-usage cache      | Both v8 and v9 caches are read, preserving ordinary counts, sizes, histograms, and remote-tier statistics. The retired hot-tier byte count is discarded; subsequent writes use v8. No feature-driven full statistics rebuild is required.                                                  |
+| Objects already moved | Remain in their current pools with the same versions and timestamps. There is no bulk move-back or object metadata rewrite.                                                                                                                                                                |
+| Internal leftovers    | `x-minio-internal-ilm-atier` and `.minio.sys/config/ilm/access/` counter objects may remain unused. They need no cleanup service or object scan.                                                                                                                                           |
 {.wide .expand}
 
 Interrupted rebalance/decommission can leave the same version in more than

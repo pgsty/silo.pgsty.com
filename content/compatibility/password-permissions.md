@@ -25,10 +25,10 @@ another user's password. The same `add-user` administration endpoint and mcli
 commands continue to work; the authenticated caller and target access key
 determine which permission is checked.
 
-| Request | Permission | Evaluation |
-| --- | --- | --- |
-| Change the caller's own password | `admin:ChangeMyPassword` | Allowed for an internal user with an attached policy unless explicitly denied. |
-| Create another user or reset another user's password | `admin:CreateUser` | Requires an explicit Allow; an explicit Deny wins. |
+| Request                                              | Permission               | Evaluation                                                                     |
+| ---------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------ |
+| Change the caller's own password                     | `admin:ChangeMyPassword` | Allowed for an internal user with an attached policy unless explicitly denied. |
+| Create another user or reset another user's password | `admin:CreateUser`       | Requires an explicit Allow; an explicit Deny wins.                             |
 {.wide .expand}
 
 The Console's Change Password button uses `admin:ChangeMyPassword`.
@@ -49,14 +49,14 @@ administration independently.
 The following cases assume an internal user with an attached policy, matching
 statement conditions, and no other applicable grants or denies:
 
-| Existing policy | Own password before | Own password after | Create/reset another user, before and after |
-| --- | --- | --- | --- |
-| S3 read grant only | Allowed | Allowed | Denied |
-| `Deny admin:CreateUser` | Denied | **Allowed** | Denied |
-| `Deny admin:ChangeMyPassword` | Allowed | **Denied** | Denied |
-| `Allow admin:CreateUser` | Allowed | Allowed | Allowed |
-| `Allow admin:CreateUser` plus `Deny admin:ChangeMyPassword` | Allowed | **Denied** | Allowed |
-| Deny both actions, or `Deny admin:*` | Denied | Denied | Denied |
+| Existing policy                                             | Own password before | Own password after | Create/reset another user, before and after |
+| ----------------------------------------------------------- | ------------------- | ------------------ | ------------------------------------------- |
+| S3 read grant only                                          | Allowed             | Allowed            | Denied                                      |
+| `Deny admin:CreateUser`                                     | Denied              | **Allowed**        | Denied                                      |
+| `Deny admin:ChangeMyPassword`                               | Allowed             | **Denied**         | Denied                                      |
+| `Allow admin:CreateUser`                                    | Allowed             | Allowed            | Allowed                                     |
+| `Allow admin:CreateUser` plus `Deny admin:ChangeMyPassword` | Allowed             | **Denied**         | Allowed                                     |
+| Deny both actions, or `Deny admin:*`                        | Denied              | Denied             | Denied                                      |
 {.wide .expand}
 
 Wildcard denies that match `admin:CreateUser` but do not match

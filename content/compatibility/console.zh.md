@@ -9,11 +9,21 @@ icon: fa-solid fa-window-maximize
 ---
 
 > [!NOTE]
-> **最新正式版：** [Console v2.7.0](/zh/blog/release/console-2.7.0/)（2026-11-09，UTC+8）加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复、用量后台任务的 TLS 与调度修复、普通 HTTP 下的目录大小计算、`silo-pkg v3.16.0`、正式版 `mcli 20261109` 及 Swagger 文档更新。[Console v2.6.0](/zh/blog/release/console-2.6.0/) 新增了用量扫描、保留版本统计与存储桶管理修复。升级独立 Console 不会替换 Server 内嵌控制台；内置策略 Reset 与实时存储桶列表需配合 Server 20261026 正式版生效（Server 20261018 不包含这两项服务端缓存修复）。配套版本见[组件矩阵](/zh/compatibility/versions/)。
+> **最新正式版：** [Console v2.7.0](/zh/blog/release/console-2.7.0/)（2026-11-09，UTC+8）加入十种界面语言、阿拉伯语 RTL、容器 CA／临时目录修复、用量后台任务的 TLS 与调度修复、普通 HTTP 下的目录大小计算、`silo-pkg v3.16.0`、正式版 `mcli 20261109` 及 Swagger 文档更新。**SILO Server 20261109 内嵌 Console v2.7.0**（Server 20261026 内嵌 v2.5.1）。升级独立 Console 不会替换旧版 Server 内嵌控制台；内置策略 Reset 与实时存储桶列表需配合 Server 20261026 及后续版本生效（Server 20261018 不含这两项修复）。配套版本见[组件矩阵](/zh/compatibility/versions/)。
 
-SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
+SILO Console 是 Silo 构建的 MinIO Console；**SILO Server 20261109 内嵌 Console v2.7.0**（Server 20261026 内嵌 v2.5.1），同时也提供独立发布的制品。本页记录 SILO Console 与上游 MinIO Console 在哪些地方可以互换使用，在哪些地方存在差异。先看[三档兼容性总览](/zh/compatibility/)，再按下文核对界面与自动化接口。
 
-[`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。较早版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]、[v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0)、[v2.4.0](/zh/blog/release/console-2.4.0/)、[v2.4.1](/zh/blog/release/console-2.4.1/)、[v2.4.2](/zh/blog/release/console-2.4.2/) 与 [v2.5.1](/zh/blog/release/console-2.5.1/)。
+[`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。历次版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]、[v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0)、[v2.4.0](/zh/blog/release/console-2.4.0/)、[v2.4.1](/zh/blog/release/console-2.4.1/)、[v2.4.2](/zh/blog/release/console-2.4.2/)、[v2.5.1](/zh/blog/release/console-2.5.1/)、[v2.6.0](/zh/blog/release/console-2.6.0/) 与 [v2.7.0](/zh/blog/release/console-2.7.0/)。
+
+## 2.7.0 十种界面语言、容器 CA 信任与用量后台任务修复 {#release-270}
+
+[Console 2.7.0](/zh/blog/release/console-2.7.0/)（已内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)）交付以下改动：
+
+- **十种界面语言与阿拉伯语 RTL：** 共享语言菜单与命令面板扩展至十种内置语言，支持阿拉伯语从右向左（RTL）布局及输入框控件对齐（`a9da731c5`、`bc17e124a`）。
+- **容器 CA 证书包与 `/tmp`：** scratch 容器镜像内置 `/etc/ssl/certs/ca-certificates.crt` 与权限为 `1777` 的 `/tmp` 目录，开箱支持公共 HTTPS 端点访问及大型分片请求缓冲。
+- **普通 HTTP 浏览器操作：** **计算目录大小**与解密密钥复制按钮在普通 HTTP（如 `http://<ip>:9001`）下可直接工作，不再依赖浏览器安全上下文。
+- **用量后台任务 TLS、扫描预算与生命周期：** `console usage-worker` 支持 `--certs-dir`（同时信任系统根证书、`certs/CAs` 与 `public.crt`，`ec897252f`），`CONSOLE_USAGE_SCAN_TIMEOUT` 仅累计实际 S3 列举分片耗时（`543d3d2af`），优雅停机时持久化已接收事件与检查点，并在删除存储桶时清理历史用量记录（`49ad0dff8`..`082b23700`）。升级时须先停齐旧版 worker，再启动 2.7.0 worker。
+- **上传校验与 API 文档：** 畸形或截断的 multipart 上传返回 HTTP `400` 而不再触发 handler panic（`f1edc61fe`）；`/api/v1/docs` 加载 Redoc 3，并将 `/swagger.json` 路由至后端 API 而非前端 SPA 回退页（`77a45554a`）。
 
 ## 2.6.0 用量扫描与存储桶管理 {#release-260}
 
@@ -43,7 +53,7 @@ SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地�
 
 ### 2. 仪表盘面向 Metrics V3 {#metrics}
 
-仪表盘组件查询 **MinIO Metrics V3** 指标目录 —— 也就是当前部署实际抓取的那一套 —— 并针对其零值语义与按节点导出的语义做了保护，使面板能区分"真实的零"与"数据缺失"。映射关系记录在 [`docs/metrics-v3.md`](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md)。
+仪表盘组件查询 **MinIO Metrics V3** 指标目录 —— 也就是当前部署实际抓取的那一套 —— 并针对其零值语义与按节点导出的语义做了保护，使面板能区分"真实的零"与"数据缺失"。映射关系记录在 [`docs/metrics-v3.md`](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md)。
 
 ### 3. 更小、更安静的产物 {#payload}
 
@@ -51,51 +61,51 @@ SILO Console 是 Silo 构建的 MinIO Console。本页记录二者在哪些地�
 
 ### 4. 界面语言 {#i18n}
 
-已发布的 Console 2.6.0 提供中英文界面。2.7.0 源码通过统一菜单新增法语、德语、俄语、
-西班牙语、巴西葡萄牙语、日语、阿拉伯语和土耳其语，词典全部内置，并支持阿拉伯语 RTL。
-英语仍是默认与回退语言；文档保持中英双语，服务器消息和日志正文原样保留。
-覆盖范围与维护分层见[语言设计](/zh/blog/design/console-languages/)。
+Console 2.7.0 通过统一菜单与命令面板提供十种界面语言：英语、简体中文、法语、德语、俄语、
+西班牙语、巴西葡萄牙语、日语、阿拉伯语与土耳其语，词典全部内置，并支持阿拉伯语 RTL
+（Console 2.6.0 及更早版本提供中英文界面）。英语仍是默认与回退语言；文档保持中英双语，
+服务器消息和日志正文原样保留。覆盖范围与维护分层见[语言设计](/zh/blog/design/console-languages/)。
 
 ### 5. 对象列表按页操作 {#pagination}
 
-对应 [B02](/zh/compatibility/#b02)，自 Console v2.4.0 起使用游标分页，v2.5.1 保留该行为。默认每页 100 项，可选 50、100、250、500、1,000；提供首页、上一页与下一页，不提供“加载全部”或任意跳页。
+对应 [B02](/zh/compatibility/#b02)，自 Console v2.4.0 起使用游标分页，并延续至 v2.7.0。默认每页 100 项，可选 50、100、250、500、1,000；提供首页、上一页与下一页，不提供“加载全部”或任意跳页。
 
 **排序、名称筛选和全选只作用于当前页。** 只有首页已包含整个目录时，它们才覆盖整个目录。翻页保留筛选文本、清空选择；更换页大小回到首页，更换目录清空筛选。失败的页面保留上一页供重试。
 
-Rewind 与“显示已删除对象”没有游标，最多返回 1,000 个版本，并有时间预算；触及限制会提示结果不完整。详见[对象浏览器契约](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/ObjectBrowser.md#paging)。
+Rewind 与“显示已删除对象”没有游标，最多返回 1,000 个版本，并有时间预算；触及限制会提示结果不完整。详见[对象浏览器契约](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/ObjectBrowser.md#paging)。
 
 ### 6. API 返回与自动化 {#api-output}
 
 对应 [B04](/zh/compatibility/#b04)、[O05](/zh/compatibility/#o05)。会话响应增加 `accountAccessKey`，对象列表显式返回零字节对象的 `size: 0`；会话能力字段还会随有效权限变化。自制解析器应容忍新增字段，Console 自动化应处理分页、会话失效和 WebSocket 错误。
 
-用户启用/禁用新增独立的 `PUT /api/v1/user/{name}/status`，旧 `PUT /api/v1/user/{name}` 保留但已弃用；批量下载沿用原入口，同时接受受限表单以支持原生流式 ZIP。改密权限另见[密码权限迁移](/zh/compatibility/password-permissions/)，分享下载边界见 [v2.4.1 说明](/zh/blog/release/console-2.4.1/)；定制调用以[当前 API 定义](https://github.com/pgsty/silo-console/blob/v2.5.1/swagger.yml)为准。
+用户启用/禁用新增独立的 `PUT /api/v1/user/{name}/status`，旧 `PUT /api/v1/user/{name}` 保留但已弃用；批量下载沿用原入口，同时接受受限表单以支持原生流式 ZIP。改密权限另见[密码权限迁移](/zh/compatibility/password-permissions/)，分享下载边界见 [v2.4.1 说明](/zh/blog/release/console-2.4.1/)；定制调用以[当前 API 定义](https://github.com/pgsty/silo-console/blob/v2.7.0/swagger.yml)为准。
 
 Console v2.4.2 保留桶版本控制操作中被包装的 S3 错误；当 Object Lock 禁止暂停版本控制时，显式返回 `InvalidBucketState`，让调用方看见 Server 已有的限制。
 
 ### 7. 面向开发者：模块图 {#source}
 
-Console v2.5.1 要求 Go 1.27.3，直接 require `github.com/pgsty/silo-pkg/v3` v3.15.2 与上游 SDK
+Console v2.7.0 要求 Go 1.27.3，直接 require `github.com/pgsty/silo-pkg/v3` v3.16.0 与上游 SDK
 `v7.4.2-0.20261025165926-320af050c445`，保留历史模块路径 `github.com/minio/console`。
 嵌入方显式选择以下已发布源码：
 
 ```go
-replace github.com/minio/console => github.com/pgsty/silo-console v0.0.0-20261026153924-fff1618d9abb
-replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261026120214-0ceb298cdcd0
+replace github.com/minio/console => github.com/pgsty/silo-console v0.0.0-20261109114619-4e91ae506e70
+replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20261109021353-e1d4cc5abfe0
 ```
 
 Go 不继承依赖模块的 replacement，Server 必须同时选择 PGSTY Console 与 MC。
 go-systemd v22.6.0 保留 NetBSD 兼容，tablewriter v0.0.5 保留 MC API 兼容。
 colorjson 带入的历史 minio/pkg 传递依赖与维护中的 silo-pkg 策略实现分开；不使用旧的
 `minio/pkg => silo-pkg` 或 `minio-go => silo-go` replacement。
-详见[组件矩阵](/zh/compatibility/versions/)和[嵌入指南](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/Embedding.md)。
+详见[组件矩阵](/zh/compatibility/versions/)和[嵌入指南](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/Embedding.md)。
 
 发布门禁验证配套 SILO、Console、mcli 与 pkg；上游 MinIO/MC 探针属于非阻塞兼容信号，不要求降低 pkg 版本或复制 API。
 
 ## 迁移 {#migration}
 
-官方镜像为 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)。**已核验 v2.5.1 的 Linux amd64/arm64 匿名拉取**，签名镜像摘要见[统一维护公告](/zh/blog/release/console-2.5.1/#delivery)。也可使用已发布的 [GitHub 二进制或软件包](https://github.com/pgsty/silo-console/releases/tag/v2.5.1)。
+官方镜像为 [`docker.io/pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)。**`v2.7.0` 与 `latest` 已发布 Linux amd64/arm64 多架构镜像**（`sha256:85aeb3ce802eb4aaae33503bcb665dc72c7544db037b5cda5ffae73b26719892`），核验细节见 [v2.7.0 发布验收](/zh/blog/release/console-2.7.0/#verification)。同时提供 [GitHub 二进制与软件包](https://github.com/pgsty/silo-console/releases/tag/v2.7.0)。
 
-镜像以 UID 1000 运行且没有主目录，默认证书目录因此是 `/.console/certs`：私有 CA 证书挂载到 `/.console/certs/CAs/`，或用 `--certs-dir` 指定其他路径。v2.6.0 及更早的镜像还缺少系统 CA 证书库；用这些镜像访问使用公共证书的 HTTPS 端点（SILO、OIDC 提供方）时，请把宿主机证书库以只读方式挂载到 `/etc/ssl/certs/ca-certificates.crt`。
+镜像以 UID 1000 运行且没有主目录，默认证书目录因此是 `/.console/certs`：私有 CA 证书挂载到 `/.console/certs/CAs/`，或用 `--certs-dir` 指定其他路径。自 `v2.7.0` 起，scratch 容器镜像已内置系统 CA 证书库 `/etc/ssl/certs/ca-certificates.crt` 与权限为 `1777` 的 `/tmp` 目录，可直接访问公共 HTTPS 端点（`v2.6.0` 及更早镜像缺少上述两项，访问公共证书 HTTPS 端点时需将宿主机证书包只读挂载到 `/etc/ssl/certs/ca-certificates.crt`）。
 
 已有的 MinIO Console 部署可以原地升级。服务单元、服务账号与配置文件名称都不变，全部 `CONSOLE_*` 变量按原样读取，因此通常的做法是用 `silo-console` 软件包覆盖安装后重启。
 

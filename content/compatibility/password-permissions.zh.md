@@ -19,10 +19,10 @@ icon: fa-solid fa-code-branch
 
 服务端保留原来的 `add-user` 管理端点与 mcli 命令，按调用者和目标访问密钥是否相同选择权限：
 
-| 请求 | 新权限 | 判断规则 |
-| --- | --- | --- |
-| 修改调用者自己的密码 | `admin:ChangeMyPassword` | 已附加策略的内部用户隐式允许，显式 Deny 优先 |
-| 创建其他用户或重置其密码 | `admin:CreateUser` | 必须显式 Allow，显式 Deny 优先 |
+| 请求                     | 新权限                   | 判断规则                                     |
+| ------------------------ | ------------------------ | -------------------------------------------- |
+| 修改调用者自己的密码     | `admin:ChangeMyPassword` | 已附加策略的内部用户隐式允许，显式 Deny 优先 |
+| 创建其他用户或重置其密码 | `admin:CreateUser`       | 必须显式 Allow，显式 Deny 优先               |
 {.wide .expand}
 
 Console 的修改密码按钮使用 ChangeMyPassword，用户管理继续使用 CreateUser。
@@ -30,14 +30,14 @@ Console 的修改密码按钮使用 ChangeMyPassword，用户管理继续使用 
 
 下表假定内部用户已附加策略、条件匹配，且没有其他 Allow/Deny：
 
-| 现有策略 | 升级前修改自己的密码 | 升级后修改自己的密码 | 创建/重置其他用户，升级前后 |
-| --- | --- | --- | --- |
-| 只有 S3 读取授权 | 允许 | 允许 | 拒绝 |
-| `Deny admin:CreateUser` | 拒绝 | **允许** | 拒绝 |
-| `Deny admin:ChangeMyPassword` | 允许 | **拒绝** | 拒绝 |
-| `Allow admin:CreateUser` | 允许 | 允许 | 允许 |
-| `Allow admin:CreateUser` 加 `Deny admin:ChangeMyPassword` | 允许 | **拒绝** | 允许 |
-| 同时 Deny 两个动作，或 `Deny admin:*` | 拒绝 | 拒绝 | 拒绝 |
+| 现有策略                                                  | 升级前修改自己的密码 | 升级后修改自己的密码 | 创建/重置其他用户，升级前后 |
+| --------------------------------------------------------- | -------------------- | -------------------- | --------------------------- |
+| 只有 S3 读取授权                                          | 允许                 | 允许                 | 拒绝                        |
+| `Deny admin:CreateUser`                                   | 拒绝                 | **允许**             | 拒绝                        |
+| `Deny admin:ChangeMyPassword`                             | 允许                 | **拒绝**             | 拒绝                        |
+| `Allow admin:CreateUser`                                  | 允许                 | 允许                 | 允许                        |
+| `Allow admin:CreateUser` 加 `Deny admin:ChangeMyPassword` | 允许                 | **拒绝**             | 允许                        |
+| 同时 Deny 两个动作，或 `Deny admin:*`                     | 拒绝                 | 拒绝                 | 拒绝                        |
 {.wide .expand}
 
 只匹配 CreateUser 的通配 Deny（如 `admin:Create*`）也存在相同变化。

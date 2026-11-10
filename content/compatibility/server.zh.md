@@ -14,33 +14,42 @@ icon: fa-solid fa-server
 > **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
 
 <span id="maintenance-20261025"></span>
+<span id="post-20261026"></span>
 
-## Server 20261109 {#post-20261026}
+## Server 20261109 升级检查 {#maintenance-20261109}
 
-[Server 20261109 正式版](/zh/blog/release/silo-20261109/)（源码 `d998292387ccf1d2907749e0fb1575ef5fb93fda`）交付了这些维护改动。请先阅读发布说明中的 batch、锁域、恢复与就绪检查升级要求。下列设计记录保留各自的历史源码与验收范围；Console 和 mcli 独立发布不会使旧 Server 二进制获得服务端改动。
+[Server 20261109 正式版](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`，包版本 `20261109000000.0.0`，源码 [`d998292387cc`](https://github.com/pgsty/silo/commit/d998292387ccf1d2907749e0fb1575ef5fb93fda)）已正式发布，内嵌 Console `v2.7.0`、`mcli 20261109`、`silo-pkg v3.16.0` 并配套 Helm chart `7.0.4`（KES 保持 `20261026`）。单独升级独立 Console 或 `mcli` 不会把这些服务端修复带入旧版 Server 二进制。
 
-| 范围 | 设计与升级说明 |
-| --- | --- |
+- **锁域迁移：** 单池各纠删集未共享完全相同主机集合时（自动布局通常为 18 台及以上主机），必须先排空并停止全部旧进程，再启动新进程；禁止跨版本滚动混跑。
+- **归档恢复与多池：** 存在旧版本或不可达对端节点时，新节点的 `POST ?restore` 返回 `503`；全部服务节点升级到 `20261109` 后才具备完整的多池生命周期过期与批量删除保护。
+- **Object Lock：** S3 `DeleteObjects` 中的物理版本删除在修改锁内复查跨池保留期与 legal hold（[`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)），受保护桶的大批量版本清除改为顺序执行，耗时增加；目标端复制 `DELETE` 严格遵循目的端保留期，拒绝后进入重试。
+- **Batch 格式：** 切换版本前暂停提交 batch 作业，并排空或取消未完成任务。旧格式未完成任务须在全部节点升级后重新提交；`20261026` 拒绝绑定提交者的 v2 清单与报告。见 [Batch 升级与回滚](/zh/administration/batch-framework/#upgrade-20261109)。
+- **S3 数据面验收与 Helm：** `ready` 与 `cluster` 探针不能替代逐节点有界签名 S3 写读验证。保留启动期对端发现；以 `--reuse-values` 升级 Helm chart `7.0.4` 时，须显式指定 `image.tag=RELEASE.2026-11-09T00-00-00Z`。
+
+完整步骤见[升级与回滚流程](/zh/blog/release/silo-20261109/#upgrade)。下表设计记录保留各自的原始验证范围。
+
+| 范围                     | 设计与升级说明                                                                                                                                                                                                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 生命周期、整键删除与恢复 | [多池生命周期](/zh/blog/design/multi-pool-lifecycle-expiry/)、[精确 key 删除](/zh/blog/design/ilm-delete-all-exact-key/)、[恢复副本过期](/zh/blog/design/restored-copy-expiry/)、[两阶段恢复](/zh/blog/design/native-restore-two-phase/) |
-| 锁、读取与修复 | [单池锁域](/zh/blog/design/single-pool-lock-domains/)、[局部视图读取](/zh/blog/design/partial-view-read-404/)、[Heal 演练](/zh/blog/design/heal-dry-run-safety/)、[失败写入清理](/zh/blog/design/failed-rename-empty-prefix/) |
-| Batch 与配置重载 | [Batch 授权及重试](/zh/administration/batch-framework/#silo-lifecycle)、[Webhook peer 重载](/zh/blog/design/audit-webhook-peer-reload/)、[IAM 撤销](/zh/blog/design/iam-revocations/) |
-| 容器 | [健康检查与 distroless 镜像](/zh/compatibility/feature/healthcheck/#distroless) |
+| 锁、读取与修复           | [单池锁域](/zh/blog/design/single-pool-lock-domains/)、[局部视图读取](/zh/blog/design/partial-view-read-404/)、[Heal 演练](/zh/blog/design/heal-dry-run-safety/)、[失败写入清理](/zh/blog/design/failed-rename-empty-prefix/)            |
+| Batch 与配置重载         | [Batch 授权及重试](/zh/administration/batch-framework/#silo-lifecycle)、[Webhook peer 重载](/zh/blog/design/audit-webhook-peer-reload/)、[IAM 撤销](/zh/blog/design/iam-revocations/)                                                    |
+| 容器                     | [健康检查与 distroless 镜像](/zh/compatibility/feature/healthcheck/#distroless)                                                                                                                                                          |
 {.wide .expand}
 
 ## Server 20261026 升级检查 {#maintenance-20261026}
 
 本节对应 [Server 20261026 正式版](/zh/blog/release/silo-20261026/#server-20261026)，源码为 [`c3ad836aed0d`](https://github.com/pgsty/silo/commit/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3)。
 
-| 使用场景 | 行为变化与升级要求 |
-| --- | --- |
-| LDAP 规范化长 DN | ASCII 文件名分量超过 255 字节的缺失可选 IAM 记录不再阻断组策略登录；不可读撤销记录与真实存储故障继续按 Fail-Closed 报错，对象后端仍不支持写入超长路径记录。见 [LDAP 指南](/zh/administration/identity-access-management/ad-ldap-access-management/)。 |
-| 内置策略覆盖 | Reset 删除覆盖内容后立即恢复原生内置定义，并继续执行策略在用检查；延迟到达的对端/etcd 通知重新加载已提交状态，自定义策略仍执行真正删除。见 [Console 策略管理](/zh/administration/console/security-and-access/#minio-console-admin-policies)。 |
-| Console 创建/删除存储桶 | `account-info` 接口改为读取实时存储桶清单（旧版 Server 刷新后可能返回旧缓存）；用量统计仍由后台扫描器更新。 |
-| 存储超时与回滚 | 保留磁盘与节点间 RPC 的超时及取消传播，并在覆盖写回滚时透传内部删除控制项（草稿阶段的 mutation guard 和无界完成等待未纳入本版）。 |
-| 多池删除 | 普通与批量删除先清理非权威旧副本再删除权威副本，并保护共享远端分层引用；若中途遇到存储故障，恢复后重试即可。 |
-| 版本化远端分层过期 | 生命周期过期仅生成删除标记时保留上一版本的远端分层对象（含已暂停版本控制桶中的非 `null` 版本）；升级前已误删的历史远端数据需从备份恢复。 |
-| 分片上传复制 | 为可合并的 CRC 校验和算法透传 `FULL_OBJECT` 校验和类型；需升级发送端 Server 并核对待复制队列。 |
-| 构建与制品 | 基于 Go 1.27.3 构建，集成 Console v2.5.1、mcli 20261026、pkg v3.15.2 与固定提交的上游 `minio-go`；Windows 归档改用 ZIP。见[组件版本矩阵](/zh/compatibility/versions/#server-20261026)。 |
+| 使用场景                | 行为变化与升级要求                                                                                                                                                                                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LDAP 规范化长 DN        | ASCII 文件名分量超过 255 字节的缺失可选 IAM 记录不再阻断组策略登录；不可读撤销记录与真实存储故障继续按 Fail-Closed 报错，对象后端仍不支持写入超长路径记录。见 [LDAP 指南](/zh/administration/identity-access-management/ad-ldap-access-management/)。 |
+| 内置策略覆盖            | Reset 删除覆盖内容后立即恢复原生内置定义，并继续执行策略在用检查；延迟到达的对端/etcd 通知重新加载已提交状态，自定义策略仍执行真正删除。见 [Console 策略管理](/zh/administration/console/security-and-access/#minio-console-admin-policies)。         |
+| Console 创建/删除存储桶 | `account-info` 接口改为读取实时存储桶清单（旧版 Server 刷新后可能返回旧缓存）；用量统计仍由后台扫描器更新。                                                                                                                                           |
+| 存储超时与回滚          | 保留磁盘与节点间 RPC 的超时及取消传播，并在覆盖写回滚时透传内部删除控制项（草稿阶段的 mutation guard 和无界完成等待未纳入本版）。                                                                                                                     |
+| 多池删除                | 普通与批量删除先清理非权威旧副本再删除权威副本，并保护共享远端分层引用；若中途遇到存储故障，恢复后重试即可。                                                                                                                                          |
+| 版本化远端分层过期      | 生命周期过期仅生成删除标记时保留上一版本的远端分层对象（含已暂停版本控制桶中的非 `null` 版本）；升级前已误删的历史远端数据需从备份恢复。                                                                                                              |
+| 分片上传复制            | 为可合并的 CRC 校验和算法透传 `FULL_OBJECT` 校验和类型；需升级发送端 Server 并核对待复制队列。                                                                                                                                                        |
+| 构建与制品              | 基于 Go 1.27.3 构建，集成 Console v2.5.1、mcli 20261026、pkg v3.15.2 与固定提交的上游 `minio-go`；Windows 归档改用 ZIP。见[组件版本矩阵](/zh/compatibility/versions/#server-20261026)。                                                               |
 {.wide .expand}
 
 **读取与故障边界：** 租约失效或网络分区仍可能产生迟到提交，部分元数据更新仍可能暴露旧值或旧标签。既有读仲裁与自愈规则保持不变（更严格的 fencing、回滚与读取恢复诊断保留在 `consistency_strict` 构建标签下），升级不提供分布式 fencing，也不会自动修复存量不一致对象。下方 20261018 的 Object Lock、IAM 与 strict 分片模式退役要求继续适用。
@@ -49,13 +58,13 @@ icon: fa-solid fa-server
 
 本节针对 [20261018 正式版](/zh/blog/release/silo-20261018/)，现已正式发布；下文旧审计与 20260916 章节保留各自历史范围。
 
-| 使用场景 | 本版变化与操作 |
-| --- | --- |
-| Object Lock / 指定版本写入 | 保留期必须满足基本权限和适用的绕过权限；指定写入版本要求可信复制；目录与旧分片完成在写锁内复查保护，失败关闭。升级全部写入站点。 |
-| 服务账户 / STS / 管理自动化 | 显式自助 Deny 和会话限制生效；受限凭据不能委派更宽权限，非 root 不能修改 root 派生凭据。核对实际管理身份与外部插件。 |
-| 对象清单与备份同步 | 符合条件的不确定 LIST 条目被重新确认，无法确认则返回错误。读取完整分页，不将错误当成空清单；不保证跨页快照。 |
-| 分片列表与取消 | 默认仍为缓存／精确 key；strict 开关忽略并警告。原 strict 用户失去持久枚举与严格取消；重启遗漏、前缀／分页边界和延迟创建仍存在。 |
-| 错误处理 / OIDC | 暂存提交元数据丢失返回 `503 SlowDownWrite`；校验和消息可能变化。JOSE 拒绝超过 4096 位的 RSA JWK，升级前验证登录。 |
+| 使用场景                    | 本版变化与操作                                                                                                                   |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Object Lock / 指定版本写入  | 保留期必须满足基本权限和适用的绕过权限；指定写入版本要求可信复制；目录与旧分片完成在写锁内复查保护，失败关闭。升级全部写入站点。 |
+| 服务账户 / STS / 管理自动化 | 显式自助 Deny 和会话限制生效；受限凭据不能委派更宽权限，非 root 不能修改 root 派生凭据。核对实际管理身份与外部插件。             |
+| 对象清单与备份同步          | 符合条件的不确定 LIST 条目被重新确认，无法确认则返回错误。读取完整分页，不将错误当成空清单；不保证跨页快照。                     |
+| 分片列表与取消              | 默认仍为缓存／精确 key；strict 开关忽略并警告。原 strict 用户失去持久枚举与严格取消；重启遗漏、前缀／分页边界和延迟创建仍存在。  |
+| 错误处理 / OIDC             | 暂存提交元数据丢失返回 `503 SlowDownWrite`；校验和消息可能变化。JOSE 拒绝超过 4096 位的 RSA JWK，升级前验证登录。                |
 {.wide .expand}
 
 详细契约见 [IAM 设计](/zh/blog/design/iam-admin-authorization/)、[LIST 恢复](/zh/blog/design/listing-recovery-lock-cost/)、[分片决策](/zh/blog/design/list-multipart-uploads/#implementation)与[安全更新](/zh/blog/security/20261018-release-hardening/)。#79 和 #217 仍未解决；磁盘格式与既有配置命名不变。正式支持 PGSTY 四组件组合，上游兼容尽最大努力。
@@ -63,13 +72,13 @@ icon: fa-solid fa-server
 
 ## 审计范围与方法 {#scope}
 
-| 边界      | 审计值                                                                                                                                                 |
-|:--------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
-| 上游基线    | [`minio/minio@7aac2a2c5b7c882e68c1ce017d8256be2feea27f`](https://github.com/minio/minio/commit/7aac2a2c5b7c882e68c1ce017d8256be2feea27f)，2026-02-11 |
-| Silo 快照 | `pgsty/silo@219670d3176a5b27ded60914390d5ee7e763cf58`，2026-08-06                                                                                    |
-| 提交集合    | `7aac2a2c..219670d3`：共 96 个可达提交；审计时其中 93 个位于 `origin/main`，最后 3 个已在本地提交                                                                             |
-| 源码净差异   | 523 个文件，新增 36,715 行，删除 21,450 行                                                                                                                     |
-| 解释口径    | 记录最终快照的行为；后来被替换或删除的中间状态，不会被写成当前行为                                                                                                                   |
+| 边界       | 审计值                                                                                                                                               |
+| :--------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 上游基线   | [`minio/minio@7aac2a2c5b7c882e68c1ce017d8256be2feea27f`](https://github.com/minio/minio/commit/7aac2a2c5b7c882e68c1ce017d8256be2feea27f)，2026-02-11 |
+| Silo 快照  | `pgsty/silo@219670d3176a5b27ded60914390d5ee7e763cf58`，2026-08-06                                                                                    |
+| 提交集合   | `7aac2a2c..219670d3`：共 96 个可达提交；审计时其中 93 个位于 `origin/main`，最后 3 个已在本地提交                                                    |
+| 源码净差异 | 523 个文件，新增 36,715 行，删除 21,450 行                                                                                                           |
+| 解释口径   | 记录最终快照的行为；后来被替换或删除的中间状态，不会被写成当前行为                                                                                   |
 {.wide .expand}
 
 范围内每个提交都对照最终实现、测试、依赖图、构建配方、软件包载荷、容器入口和渲染后的 Helm 清单逐项核实。[完整提交覆盖账本](#ledger)跟踪范围内的全部提交（含文档与 CI 更新）。
@@ -80,18 +89,18 @@ icon: fa-solid fa-server
 
 ## 兼容性总览 {#matrix}
 
-| 表面            | 状态                    | 实际结论                                                                                   |
-|:--------------|:----------------------|:---------------------------------------------------------------------------------------|
-| S3 线协议        | 除明确列出的例外外保持兼容         | 路由、XML/JSON 模式、SigV4、S3 头、端口与常规错误码沿用 MinIO 契约；下列安全与正确性修复会有意拒绝部分旧代码曾接受的请求               |
-| 数据盘           | 兼容                    | `.minio.sys`、纠删码元数据、桶/对象布局、修复、复制和加密格式保留原名与模式；被污染或不可用的元数据会更早被拒绝                         |
-| 配置            | 基本兼容                  | 既有 `MINIO_*` 变量、配置键、KMS/KES、IAM、通知与存储设置都保留；用户级默认目录变为 `~/.silo`，并带有确定性的 `~/.minio` 回退   |
-| 指标与自动化 API    | 兼容                    | `minio_*` Prometheus 指标、`/minio/*` 路由、`x-minio-*` 头、管理/S3 错误标识及 release tag 语法不变       |
-| 二进制与分发        | 已改名                   | `minio` 变为 `silo`；软件包、单元、镜像、Chart、归档、校验文件及路径改用 Silo 身份；服务端二进制没有安装兼容别名                  |
-| 运行时身份         | 已改变                   | CLI 文本、启动横幅、HTTP `Server`、User-Agent 应用名、FTP 横幅、日志名、支持链接以及部分人类可读错误改为 Silo              |
-| 上游网络服务        | 已禁用                   | 原地更新、更新轮询、callhome、SUBNET 注册与诊断上传不会联系 MinIO 服务                                         |
-| 授权与安全         | 有意收紧                  | OIDC HMAC token、不安全 LDAP 失败、伪造复制元数据、对象资源对受保护桶写操作的越权、策略输入遮蔽、歧义版本 ID 以及若干畸形节点间请求均改变行为    |
+| 表面               | 状态                                               | 实际结论                                                                                                                                                      |
+| :----------------- | :------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| S3 线协议          | 除明确列出的例外外保持兼容                         | 路由、XML/JSON 模式、SigV4、S3 头、端口与常规错误码沿用 MinIO 契约；下列安全与正确性修复会有意拒绝部分旧代码曾接受的请求                                      |
+| 数据盘             | 兼容                                               | `.minio.sys`、纠删码元数据、桶/对象布局、修复、复制和加密格式保留原名与模式；被污染或不可用的元数据会更早被拒绝                                               |
+| 配置               | 基本兼容                                           | 既有 `MINIO_*` 变量、配置键、KMS/KES、IAM、通知与存储设置都保留；用户级默认目录变为 `~/.silo`，并带有确定性的 `~/.minio` 回退                                 |
+| 指标与自动化 API   | 兼容                                               | `minio_*` Prometheus 指标、`/minio/*` 路由、`x-minio-*` 头、管理/S3 错误标识及 release tag 语法不变                                                           |
+| 二进制与分发       | 已改名                                             | `minio` 变为 `silo`；软件包、单元、镜像、Chart、归档、校验文件及路径改用 Silo 身份；服务端二进制没有安装兼容别名                                              |
+| 运行时身份         | 已改变                                             | CLI 文本、启动横幅、HTTP `Server`、User-Agent 应用名、FTP 横幅、日志名、支持链接以及部分人类可读错误改为 Silo                                                 |
+| 上游网络服务       | 已禁用                                             | 原地更新、更新轮询、callhome、SUBNET 注册与诊断上传不会联系 MinIO 服务                                                                                        |
+| 授权与安全         | 有意收紧                                           | OIDC HMAC token、不安全 LDAP 失败、伪造复制元数据、对象资源对受保护桶写操作的越权、策略输入遮蔽、歧义版本 ID 以及若干畸形节点间请求均改变行为                 |
 | 内嵌 UI 与 Go 依赖 | Console 与 MCLI 走兼容 import path，pkg 走自有路径 | Silo Console 与 MCLI 由 `replace` 选中，同时保留 `github.com/minio/console` / `github.com/minio/mc` 路径；Silo Pkg 以 `github.com/pgsty/silo-pkg/v3` 直接消费 |
-| 混合版本集群        | 此迁移边界不支持              | 私有 `ReadMultiple` storage-REST 操作已删除，却没有提升 storage REST v63；所有节点应作为同一构建整体升级            |
+| 混合版本集群       | 此迁移边界不支持                                   | 私有 `ReadMultiple` storage-REST 操作已删除，却没有提升 storage REST v63；所有节点应作为同一构建整体升级                                                      |
 {.wide .expand}
 
 ## 明确保留的兼容契约 {#same}
@@ -121,10 +130,10 @@ replace github.com/minio/console => github.com/pgsty/silo-console ...
 replace github.com/minio/mc      => github.com/pgsty/mc ...
 ```
 
-公共包是刻意的例外。[pkg v3.13.0](/zh/blog/release/pkg-3.13.0/) 起它使用自己的模块路径构建，所有维护中的组件——包括服务端——都**直接**消费它：
+公共包是刻意的例外。自有模块路径直接消费始于 [pkg v3.13.0](/zh/blog/release/pkg-3.13.0/)，所有维护中的组件——包括服务端（Server 20261109 使用 `v3.16.0`）——都**直接**消费它：
 
 ```go
-require github.com/pgsty/silo-pkg/v3 v3.14.1   // 不再使用 replace 安排
+require github.com/pgsty/silo-pkg/v3 v3.16.0   // 自 v3.13.0 起直接消费，不再使用 replace 安排
 ```
 
 历史的 `replace github.com/minio/pkg/v3 => ...` 安排已退役；`github.com/minio/pkg/v3` 现在仅作为遗留的*间接*依赖出现（经 `colorjson`/`dperf`），与维护中的策略实现相互独立。上游 SDK `github.com/minio/minio-go/v7` 是另一个明确例外：以经过验证的 commit 直接消费上游，退役的 `silo-go` 分叉不属于维护依赖图。
@@ -135,21 +144,21 @@ require github.com/pgsty/silo-pkg/v3 v3.14.1   // 不再使用 replace 安排
 
 ## 身份、二进制与外联服务变化 {#identity}
 
-| 表面              | 上游基线                              | Silo 快照                                                                               | 兼容性影响                                            |
-|:----------------|:----------------------------------|:--------------------------------------------------------------------------------------|:-------------------------------------------------|
-| 服务端可执行文件        | `minio` / `minio.exe`             | `silo` / `silo.exe`                                                                   | 脚本及绝对路径必须修改；归档、软件包和镜像不会安装 `/usr/bin/minio` 服务端别名 |
-| 版本输出            | MinIO 身份                          | Silo release/commit/runtime、AGPL、上游版权、PGSTY 修改版权与 MinIO 技术沿革                          | 解析器应依赖稳定字段，不能 grep `MinIO` 文案                    |
-| 本地配置主目录         | `~/.minio`                        | 新用户主目录默认 `~/.silo`                                                                    | 见下述回退规则；与数据盘无关                                   |
-| HTTP 身份         | `Server: MinIO` 与 MinIO 应用 UA     | `Server: Silo`；内部 batch/fan-out/perf UA 使用 `silo-*` / Silo 名称                         | `x-minio-*` 等协议头保持不变；按产品身份匹配的监控需要调整              |
-| 人类可读文本          | MinIO 横幅、帮助、错误、样例、FTP 欢迎语、支持链接    | Silo 身份；样例优先 `mysilo`                                                                 | 精确匹配文本的日志解析器和快照会变化；除另行列出外，状态码/错误码不变              |
-| 集成可见标签          | MinIO NATS/Redis 连接名与 Veeam model | NATS 名 `Silo Notification`、Redis `CLIENT SETNAME Silo`、Veeam model `"Silo <release>"` | Broker 看板、连接名过滤器及 Veeam Inventory 展示会改变          |
-| KMS 校验文案        | 带 MinIO 品牌的冲突错误                   | 中性的“同时存在 KMS/KES/static-key 配置”错误                                                     | 配置规则不变；精确匹配文本的自动化会改变                             |
-| 更新器             | release 轮询与原地更新路径                 | 永久禁用                                                                                  | `MINIO_UPDATE` 会被解析但无法重新开启；管理更新路由保留并稳定失败，而不是消失   |
-| Callhome/SUBNET | 注册、callhome、支持上传、内嵌 MinIO 支持公钥    | 为迁移保留配置解析但强制关闭；不注册/上传/POST；没有兜底加密公钥                                                   | 删除依赖 MinIO 运营服务的自动化；请求方公钥的 inspect 加密仍可用         |
-| 内嵌控制台           | 上游快照已移除 Console                   | Silo Console v2.1.1，中英双语、Metrics V3、无 SUBNET UI                                       | 浏览器行为和资源发生变化；S3/Admin API 仍由服务端契约约束              |
-| OCI 内置客户端       | 没有维护分叉契约                          | `/usr/bin/mcli` 与 `/usr/bin/mc -> mcli`                                               | 这里的 `mc` 只是客户端兼容别名，从来不是服务端别名                     |
-| 温层探针            | 临时对象内容为 `MinIO`                   | 同长度探针内容为 `Silo!`                                                                      | 只可能通过后端检查或清理失败残留观察到；协议语义不变                       |
-| 日志轮转默认名         | `minio-*.log`                     | `silo-*.log`                                                                          | 按文件名匹配的采集器需要修改                                   |
+| 表面             | 上游基线                                           | Silo 快照                                                                                | 兼容性影响                                                                     |
+| :--------------- | :------------------------------------------------- | :--------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| 服务端可执行文件 | `minio` / `minio.exe`                              | `silo` / `silo.exe`                                                                      | 脚本及绝对路径必须修改；归档、软件包和镜像不会安装 `/usr/bin/minio` 服务端别名 |
+| 版本输出         | MinIO 身份                                         | Silo release/commit/runtime、AGPL、上游版权、PGSTY 修改版权与 MinIO 技术沿革             | 解析器应依赖稳定字段，不能 grep `MinIO` 文案                                   |
+| 本地配置主目录   | `~/.minio`                                         | 新用户主目录默认 `~/.silo`                                                               | 见下述回退规则；与数据盘无关                                                   |
+| HTTP 身份        | `Server: MinIO` 与 MinIO 应用 UA                   | `Server: Silo`；内部 batch/fan-out/perf UA 使用 `silo-*` / Silo 名称                     | `x-minio-*` 等协议头保持不变；按产品身份匹配的监控需要调整                     |
+| 人类可读文本     | MinIO 横幅、帮助、错误、样例、FTP 欢迎语、支持链接 | Silo 身份；样例优先 `mysilo`                                                             | 精确匹配文本的日志解析器和快照会变化；除另行列出外，状态码/错误码不变          |
+| 集成可见标签     | MinIO NATS/Redis 连接名与 Veeam model              | NATS 名 `Silo Notification`、Redis `CLIENT SETNAME Silo`、Veeam model `"Silo <release>"` | Broker 看板、连接名过滤器及 Veeam Inventory 展示会改变                         |
+| KMS 校验文案     | 带 MinIO 品牌的冲突错误                            | 中性的“同时存在 KMS/KES/static-key 配置”错误                                             | 配置规则不变；精确匹配文本的自动化会改变                                       |
+| 更新器           | release 轮询与原地更新路径                         | 永久禁用                                                                                 | `MINIO_UPDATE` 会被解析但无法重新开启；管理更新路由保留并稳定失败，而不是消失  |
+| Callhome/SUBNET  | 注册、callhome、支持上传、内嵌 MinIO 支持公钥      | 为迁移保留配置解析但强制关闭；不注册/上传/POST；没有兜底加密公钥                         | 删除依赖 MinIO 运营服务的自动化；请求方公钥的 inspect 加密仍可用               |
+| 内嵌控制台       | 上游快照已移除 Console                             | Silo Console v2.1.1，中英双语、Metrics V3、无 SUBNET UI                                  | 浏览器行为和资源发生变化；S3/Admin API 仍由服务端契约约束                      |
+| OCI 内置客户端   | 没有维护分叉契约                                   | `/usr/bin/mcli` 与 `/usr/bin/mc -> mcli`                                                 | 这里的 `mc` 只是客户端兼容别名，从来不是服务端别名                             |
+| 温层探针         | 临时对象内容为 `MinIO`                             | 同长度探针内容为 `Silo!`                                                                 | 只可能通过后端检查或清理失败残留观察到；协议语义不变                           |
+| 日志轮转默认名   | `minio-*.log`                                      | `silo-*.log`                                                                             | 按文件名匹配的采集器需要修改                                                   |
 {.wide .expand}
 
 被删除的 `/api/health/upload` 引用是一个 **出站 SUBNET URL 路径**，并不是 Silo 本地 HTTP 路由。正确的兼容性描述是“Silo 不再发起该 POST”，不能写成“删除了服务端 API”。
@@ -158,23 +167,23 @@ require github.com/pgsty/silo-pkg/v3 v3.14.1   // 不再使用 replace 安排
 
 未显式给出 `--config-dir` 时，Silo 会在启动时作一次选择：
 
-| 用户主目录状态       | 选择目录       | 提示             |
-|:--------------|:-----------|:---------------|
-| 两者都不存在        | `~/.silo`  | 无              |
-| 只有 `~/.silo`  | `~/.silo`  | 无              |
+| 用户主目录状态  | 选择目录   | 提示                         |
+| :-------------- | :--------- | :--------------------------- |
+| 两者都不存在    | `~/.silo`  | 无                           |
+| 只有 `~/.silo`  | `~/.silo`  | 无                           |
 | 只有 `~/.minio` | `~/.minio` | 旧目录提示；不会移动任何文件 |
-| 两者都存在         | `~/.silo`  | 歧义警告           |
+| 两者都存在      | `~/.silo`  | 歧义警告                     |
 {.wide .expand}
 
 `--config-dir` 始终优先。除非同时指定 `--certs-dir`，证书目录跟随所选配置目录。自动化应明确传入 `--config-dir`，不要依赖文件系统探测。
 
 分叉只新增了三个会实质改变兼容行为的服务端配置控制项；不存在一套并行的 `SILO_*` 替换命名空间：
 
-| 设置                                                                         | 用途                  | 默认值                     |
-|:---------------------------------------------------------------------------|:--------------------|:------------------------|
-| `MINIO_API_TRUSTED_PROXIES`                                                | 通用来源地址信任边界          | 未设置：精确保留历史 trust-any 行为 |
-| `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES` / LDAP key `sts_trusted_proxies` | LDAP STS 失败限流的来源分桶  | 不信任代理；使用 socket peer    |
-| `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`                                   | 受保护桶/对象 IAM 边界的临时回滚 | off                     |
+| 设置                                                                       | 用途                             | 默认值                              |
+| :------------------------------------------------------------------------- | :------------------------------- | :---------------------------------- |
+| `MINIO_API_TRUSTED_PROXIES`                                                | 通用来源地址信任边界             | 未设置：精确保留历史 trust-any 行为 |
+| `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES` / LDAP key `sts_trusted_proxies` | LDAP STS 失败限流的来源分桶      | 不信任代理；使用 socket peer        |
+| `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH`                                   | 受保护桶/对象 IAM 边界的临时回滚 | off                                 |
 {.wide .expand}
 
 通知 KV 注册修复不会重命名既有环境变量。`MINIO_UPDATE`、SUBNET 与 callhome 输入仅作为被忽略/迁移兼容的输入保留，详见下一节。`SILO_OPTS` 只出现在自动生成的 inspect helper 内，不是 `MINIO_OPTS` 的通用替代品。
@@ -267,20 +276,20 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 
 ### 认证、IAM 与请求身份 {#auth-iam}
 
-| 变化                                                           | 最终行为                                                                                                                                                      | 谁需要处理                                                                                           |
-|:-------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------|
-| OIDC JWT 校验（`d24f449e0`）                                     | client secret 不再作为验签 key。只接受非对称 JWKS 算法 `RS256/384/512`、`ES256/384/512`、`RS3256/3384/3512`、`ES3256/3384/3512`。`HS256/384/512` 失败；未知 `kid` 仍走既有 JWKS 刷新/重试 | 使用 HMAC 为 Silo token 签名的 IdP 必须迁移到非对称 JWKS key                                                  |
-| LDAP STS 错误（`3b950f8fa`）                                     | 未知用户与错误密码共享同一个外部 `InvalidParameterValue` 认证失败；LDAP 基础设施错误仍是服务端错误并记日志                                                                                      | 客户端不能再从响应文本判断账号是否存在                                                                             |
-| LDAP STS 限流（`18b712d49`、`9e10f6d9a`、`f44110890`、`5e40665ac`） | 每来源、每节点内存桶：突发 10 次，每 6 秒补 1 个 token，空闲 TTL 15 分钟。只有认证失败消耗 token，成功与基础设施失败会退回。耗尽返回 HTTP 429、`ThrottlingException`、`Retry-After: 6`                         | 代理应配置独立的 `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES`                                              |
-| LDAP 可信代理来源                                                  | socket peer 在允许列表中时，优先干净的 `X-Real-IP`；否则从右向左遍历 XFF 并跳过可信 hop。忽略 RFC 7239 `Forwarded`。代理 **必须覆盖** X-Real-IP                                                 | 审核 Ingress 头部清洗；该限流不是分布式账号锁                                                                     |
-| LDAP service-account 查找                                      | 对“User DN not found”的匹配改为大小写不敏感，依赖消息大小写变化时仍能得到预期 Admin no-such-user / login-name 错误分类                                                                     | 只有依赖偶然错误分类的脆弱客户端会观察到变化                                                                          |
-| 桶/对象 IAM 边界（`97b7d2804`）                                     | 12 个受保护桶写操作不再仅因 `arn:aws:s3:::bucket/*` Allow 而获准，必须有裸桶 ARN。Deny/NotResource 与内置 `*` 策略语义不变                                                               | 自定义策略中确实需要桶写操作时加入 `arn:aws:s3:::bucket`；或临时使用全局逃生开关 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` |
-| 受保护操作                                                        | 删除/强删桶；写/删桶策略；写复制、生命周期、对象锁、版本、CORS；删 CORS；写桶 QoS 或 Inventory 配置                                                                                           | 读/list、创建桶、标签、加密与通知仍沿用历史匹配行为                                                                    |
-| 有效策略输入（`2f55347f7`）                                          | 服务端派生条件不能被同名 header/query 遮蔽；策略包中精确 key 优先。已有/请求标签、存储类、content/copy/checksum、对象锁、签名年龄与 list 参数均来自操作实际消费的值                                                 | 误依赖攻击者可控遮蔽值的策略不再匹配                                                                              |
-| 请求标签                                                         | PutObject、CreateMultipartUpload、PutObjectTagging 把 `s3:RequestObjectTag/*` 绑定到已解析输入；ExistingObjectTag 只来自已存元数据；其他操作路径保留旧 header 回退                        | 重新测试带标签条件的写策略                                                                                   |
-| `s3:signatureAge`                                            | 只在已经验证的 presigned SigV4 请求中出现                                                                                                                             | 注入原始 `x-amz-signature-age` 不再产生该条件                                                              |
-| `s3:versionid`（`744a9dcd7`）                                  | 缺失就真正缺失；空白被归一；DeleteObject/MultiDelete 使用每个对象的有效版本。URL version 不能诱骗不同 XML version                                                                         | 重测基于版本的删除策略及依赖 Null 的策略                                                                         |
-| 复制元数据（`56fa63bfd`）                                           | 普通 PUT/COPY 不能注入内部复制状态/时间元数据；经认证的 replica 请求必须拥有 `ReplicateObjectAction`；multipart 与 Snowball 的合法复制流程保留                                                   | 自定义复制调用方必须走受授权的复制路径                                                                             |
+| 变化                                                                | 最终行为                                                                                                                                                                                  | 谁需要处理                                                                                                                   |
+| :------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| OIDC JWT 校验（`d24f449e0`）                                        | client secret 不再作为验签 key。只接受非对称 JWKS 算法 `RS256/384/512`、`ES256/384/512`、`RS3256/3384/3512`、`ES3256/3384/3512`。`HS256/384/512` 失败；未知 `kid` 仍走既有 JWKS 刷新/重试 | 使用 HMAC 为 Silo token 签名的 IdP 必须迁移到非对称 JWKS key                                                                 |
+| LDAP STS 错误（`3b950f8fa`）                                        | 未知用户与错误密码共享同一个外部 `InvalidParameterValue` 认证失败；LDAP 基础设施错误仍是服务端错误并记日志                                                                                | 客户端不能再从响应文本判断账号是否存在                                                                                       |
+| LDAP STS 限流（`18b712d49`、`9e10f6d9a`、`f44110890`、`5e40665ac`） | 每来源、每节点内存桶：突发 10 次，每 6 秒补 1 个 token，空闲 TTL 15 分钟。只有认证失败消耗 token，成功与基础设施失败会退回。耗尽返回 HTTP 429、`ThrottlingException`、`Retry-After: 6`    | 代理应配置独立的 `MINIO_IDENTITY_LDAP_STS_TRUSTED_PROXIES`                                                                   |
+| LDAP 可信代理来源                                                   | socket peer 在允许列表中时，优先干净的 `X-Real-IP`；否则从右向左遍历 XFF 并跳过可信 hop。忽略 RFC 7239 `Forwarded`。代理 **必须覆盖** X-Real-IP                                           | 审核 Ingress 头部清洗；该限流不是分布式账号锁                                                                                |
+| LDAP service-account 查找                                           | 对“User DN not found”的匹配改为大小写不敏感，依赖消息大小写变化时仍能得到预期 Admin no-such-user / login-name 错误分类                                                                    | 只有依赖偶然错误分类的脆弱客户端会观察到变化                                                                                 |
+| 桶/对象 IAM 边界（`97b7d2804`）                                     | 12 个受保护桶写操作不再仅因 `arn:aws:s3:::bucket/*` Allow 而获准，必须有裸桶 ARN。Deny/NotResource 与内置 `*` 策略语义不变                                                                | 自定义策略中确实需要桶写操作时加入 `arn:aws:s3:::bucket`；或临时使用全局逃生开关 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on` |
+| 受保护操作                                                          | 删除/强删桶；写/删桶策略；写复制、生命周期、对象锁、版本、CORS；删 CORS；写桶 QoS 或 Inventory 配置                                                                                       | 读/list、创建桶、标签、加密与通知仍沿用历史匹配行为                                                                          |
+| 有效策略输入（`2f55347f7`）                                         | 服务端派生条件不能被同名 header/query 遮蔽；策略包中精确 key 优先。已有/请求标签、存储类、content/copy/checksum、对象锁、签名年龄与 list 参数均来自操作实际消费的值                       | 误依赖攻击者可控遮蔽值的策略不再匹配                                                                                         |
+| 请求标签                                                            | PutObject、CreateMultipartUpload、PutObjectTagging 把 `s3:RequestObjectTag/*` 绑定到已解析输入；ExistingObjectTag 只来自已存元数据；其他操作路径保留旧 header 回退                        | 重新测试带标签条件的写策略                                                                                                   |
+| `s3:signatureAge`                                                   | 只在已经验证的 presigned SigV4 请求中出现                                                                                                                                                 | 注入原始 `x-amz-signature-age` 不再产生该条件                                                                                |
+| `s3:versionid`（`744a9dcd7`）                                       | 缺失就真正缺失；空白被归一；DeleteObject/MultiDelete 使用每个对象的有效版本。URL version 不能诱骗不同 XML version                                                                         | 重测基于版本的删除策略及依赖 Null 的策略                                                                                     |
+| 复制元数据（`56fa63bfd`）                                           | 普通 PUT/COPY 不能注入内部复制状态/时间元数据；经认证的 replica 请求必须拥有 `ReplicateObjectAction`；multipart 与 Snowball 的合法复制流程保留                                            | 自定义复制调用方必须走受授权的复制路径                                                                                       |
 {.wide .expand}
 
 桶边界逃生开关在启动时全局生效，而且是全有或全无；它用于迁移，不是长期混合策略模式。空或无法解析的 LDAP 来源不会被放入一个共享限流桶；在能派生出可用来源前不对它限流。
@@ -289,11 +298,11 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 
 `fe6dc4780` 新增 `MINIO_API_TRUSTED_PROXIES`，因为所选客户端地址会进入 `aws:SourceIp`、审计 `remotehost`、事件 `Host`、管理 trace 及节点间转发。
 
-| 值              | 结果                                                                                     |
-|:---------------|:---------------------------------------------------------------------------------------|
-| 未设置            | 精确保留历史行为：相信任何 peer 提供的来源头；依次选择最左 XFF、X-Real-IP、`Forwarded`                             |
-| `none` 或 `off` | 忽略三种来源地址头，使用 TCP peer                                                                  |
-| IP/CIDR 列表     | 只有 TCP peer 在列表中时才相信头；XFF 从右向左越过可信 hop（最多 100 个），随后取最后一行 X-Real-IP，再从右向左遍历 `Forwarded` |
+| 值              | 结果                                                                                                                            |
+| :-------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| 未设置          | 精确保留历史行为：相信任何 peer 提供的来源头；依次选择最左 XFF、X-Real-IP、`Forwarded`                                          |
+| `none` 或 `off` | 忽略三种来源地址头，使用 TCP peer                                                                                               |
+| IP/CIDR 列表    | 只有 TCP peer 在列表中时才相信头；XFF 从右向左越过可信 hop（最多 100 个），随后取最后一行 X-Real-IP，再从右向左遍历 `Forwarded` |
 {.wide .expand}
 
 畸形配置、非空但没有任何代理的列表，或远程 `env://` 读取失败都会 fail closed 并阻止启动，而不是回退到 trust-any。收到的链中无效值会跳过；没有可用地址时回退 peer。只在 FTP/SFTP peer bridge 中隐式信任 loopback，不会把链内任意 loopback 当成可跳过 hop。
@@ -302,17 +311,17 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 
 ### S3 请求与响应行为 {#s3-behavior}
 
-| 范围                     | 变化与兼容性影响                                                                                                                                                 |
-|:-----------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Presigned 流式认证         | query/presigned SigV4 请求声明 `STREAMING-UNSIGNED-PAYLOAD-TRAILER` 时返回 `SignatureVersionNotSupported`，不能降级为匿名授权；header SigV4 会在读取 body 前验证                  |
-| Snowball               | 先授权后解包 tar；流式 trailer 绕过无法在后续失败前写入对象                                                                                                                     |
-| S3 Select 记录限制         | CSV 输入、JSON Lines 输入和输出记录超过 1 MiB 时返回 `OverMaxRecordSize` 事件。JSON Lines 始终使用有界 reader（在支持 SIMD 的 CPU 上可能变慢），JSON 解析错误为 `JSONParsingError`，已完成记录可先于终止错误送达 |
-| 流式响应                   | tracking writer 实现 `Flush`；Write/Flush 会记录隐式 HTTP 200。ListenBucketNotification/watch 流及 S3 Select keepalive 能及时送达，审计/状态指标也能记录已提交状态                       |
+| 范围                      | 变化与兼容性影响                                                                                                                                                                                                                                                                                                                                                      |
+| :------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Presigned 流式认证        | query/presigned SigV4 请求声明 `STREAMING-UNSIGNED-PAYLOAD-TRAILER` 时返回 `SignatureVersionNotSupported`，不能降级为匿名授权；header SigV4 会在读取 body 前验证                                                                                                                                                                                                      |
+| Snowball                  | 先授权后解包 tar；流式 trailer 绕过无法在后续失败前写入对象                                                                                                                                                                                                                                                                                                           |
+| S3 Select 记录限制        | CSV 输入、JSON Lines 输入和输出记录超过 1 MiB 时返回 `OverMaxRecordSize` 事件。JSON Lines 始终使用有界 reader（在支持 SIMD 的 CPU 上可能变慢），JSON 解析错误为 `JSONParsingError`，已完成记录可先于终止错误送达                                                                                                                                                      |
+| 流式响应                  | tracking writer 实现 `Flush`；Write/Flush 会记录隐式 HTTP 200。ListenBucketNotification/watch 流及 S3 Select keepalive 能及时送达，审计/状态指标也能记录已提交状态                                                                                                                                                                                                    |
 | Multipart 整对象 checksum | FULL_OBJECT CRC32/CRC32C/CRC64NVME 完成时可完全省略每 part checksum；只要提供任意一个仍会校验；COMPOSITE 仍要求每个 part。即使不提供对象 checksum value，显式 completion type 仍会校验：不匹配返回 `BadDigest`，未知 type 返回 `InvalidArgument`。后续 #93/#96 已拒绝 CRC64NVME + COMPOSITE，修复包含在 Server 20260903 中。零字节 multipart 对象 checksum 会正确保存 |
-| CopyObject checksum 响应 | CopyObject XML 与 HTTP header 使用目标加密上下文报告已提交 checksum。SSE-C 源 key A 与目标 key B 严格分开；同对象换钥会用新 key 返回 checksum 字段。存储数据与 checksum format 均不改变 |
-| Multipart part 顺序      | 重复或非递增 part number 在组装前以 `InvalidPartOrder` 失败；允许空洞及不从 1 开始；upload 保留供重试                                                                                 |
-| 纠删码读缓冲池                | 恢复正确 shard buffer 所有权，避免池失效以及可能造成卡死、损坏或严重性能下降的错误缓冲关联                                                                                                     |
-| 更新缓冲                   | 返回的下载 buffer 具有正确所有权；公开更新器随后已禁用，所以当前受支持升级路径不会运行该代码                                                                                                       |
+| CopyObject checksum 响应  | CopyObject XML 与 HTTP header 使用目标加密上下文报告已提交 checksum。SSE-C 源 key A 与目标 key B 严格分开；同对象换钥会用新 key 返回 checksum 字段。存储数据与 checksum format 均不改变                                                                                                                                                                               |
+| Multipart part 顺序       | 重复或非递增 part number 在组装前以 `InvalidPartOrder` 失败；允许空洞及不从 1 开始；upload 保留供重试                                                                                                                                                                                                                                                                 |
+| 纠删码读缓冲池            | 恢复正确 shard buffer 所有权，避免池失效以及可能造成卡死、损坏或严重性能下降的错误缓冲关联                                                                                                                                                                                                                                                                            |
+| 更新缓冲                  | 返回的下载 buffer 具有正确所有权；公开更新器随后已禁用，所以当前受支持升级路径不会运行该代码                                                                                                                                                                                                                                                                          |
 {.wide .expand}
 
 ### 分布式存储与私有 API {#storage-rest}
@@ -347,16 +356,16 @@ Release 归档命名为 `silo_<version>_<os>_<arch>`，包含可执行文件、R
 
 重要的有意依赖决策如下：
 
-| 组件         | 最终选择                                                         | 兼容性理由/影响                                                                 |
-|:-----------|:-------------------------------------------------------------|:-------------------------------------------------------------------------|
-| Console    | `pgsty/silo-console` v2.1.1，保持 `github.com/minio/console` 路径 | 恢复内嵌 UI，应用 Silo 品牌和双语文本，加入 Metrics V3，移除 SUBNET 流程并修复指标图例未翻译问题           |
-| 客户端库       | `pgsty/mc`，保持 `github.com/minio/mc` 路径                       | Console import path 不变，同时使用维护中的 MCLI 分叉                                  |
-| 公共包        | `pgsty/silo-pkg/v3`，以自有模块路径直接消费（v3.14.1；v3.12.x 及之前经 `minio/pkg/v3` replace） | [v3.13.0](/zh/blog/release/pkg-3.13.0/) 的破坏性模块路径迁移；提供 IAM 精确匹配的一半、LDAP TLS/StartTLS/deadline/close 修复、证书 watcher 清理和 RNG 修复 |
-| Kafka      | Sarama 1.45.1                                                | 固定以避免破坏性的 broker 协商漂移                                                    |
-| PostgreSQL | lib/pq 1.10.9                                                | 固定以避免 nil `[]byte` / PostgreSQL 14 以前版本的行为回归；自动 DSN 引用在服务端代码中修复          |
-| 压缩         | klauspost/compress 1.18.7                                    | 显式安全/正确性升级                                                               |
-| Thrift     | 0.24.0                                                       | 修复 32 位构建                                                                |
-| systemd 库  | require 22.7，replace 为 22.6                                  | 在上游修复单调时钟回归前保留 NetBSD 编译能力                                               |
+| 组件       | 最终选择                                                                                        | 兼容性理由/影响                                                                                                                                            |
+| :--------- | :---------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Console    | `pgsty/silo-console` v2.1.1，保持 `github.com/minio/console` 路径                               | 恢复内嵌 UI，应用 Silo 品牌和双语文本，加入 Metrics V3，移除 SUBNET 流程并修复指标图例未翻译问题                                                           |
+| 客户端库   | `pgsty/mc`，保持 `github.com/minio/mc` 路径                                                     | Console import path 不变，同时使用维护中的 MCLI 分叉                                                                                                       |
+| 公共包     | `pgsty/silo-pkg/v3`，以自有模块路径直接消费（v3.14.1；v3.12.x 及之前经 `minio/pkg/v3` replace） | [v3.13.0](/zh/blog/release/pkg-3.13.0/) 的破坏性模块路径迁移；提供 IAM 精确匹配的一半、LDAP TLS/StartTLS/deadline/close 修复、证书 watcher 清理和 RNG 修复 |
+| Kafka      | Sarama 1.45.1                                                                                   | 固定以避免破坏性的 broker 协商漂移                                                                                                                         |
+| PostgreSQL | lib/pq 1.10.9                                                                                   | 固定以避免 nil `[]byte` / PostgreSQL 14 以前版本的行为回归；自动 DSN 引用在服务端代码中修复                                                                |
+| 压缩       | klauspost/compress 1.18.7                                                                       | 显式安全/正确性升级                                                                                                                                        |
+| Thrift     | 0.24.0                                                                                          | 修复 32 位构建                                                                                                                                             |
+| systemd 库 | require 22.7，replace 为 22.6                                                                   | 在上游修复单调时钟回归前保留 NetBSD 编译能力                                                                                                               |
 {.wide .expand}
 
 LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_insecure`，StartTLS 仍保持启用；还修复了 nil TLS panic、StartTLS deadline 以及失败后连接关闭。证书 watcher 停止时不再泄漏；Windows 上轮询可能让 reload 最多延迟约十秒。RNG subkey 熵/reset 行为也已修正，不过服务端不会走 reset 路径。
@@ -369,18 +378,18 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 
 上文各节描述的是 `219670d3` 快照。下表记录此后合并进 `main`、并在 20260903 版本中统一交付的行为变更。
 
-| 领域 | 变更 | 出处 |
-|:-----|:-----|:-----|
-| 授权 | 显式删除版本按 `s3:DeleteObjectVersion` 授权，`DeleteObjects` 逐条目授权；用户与组状态变更要求与目标状态匹配的动作；策略写入拒绝裸 ARN 前缀 | [#104](https://github.com/pgsty/silo/pull/104)、`58735ee38`、`229fe2b3c`、`eee05a17c`（SN-2026-005、-009、-010） |
-| 复制信任 | 仅当精确标记与 `s3:ReplicateObject` / `s3:ReplicateDelete` 同时成立，复制专用 header 才获得复制语义；否则在签名验证后被移除 | [#101](https://github.com/pgsty/silo/pull/101)（SN-2026-008） |
-| SSE-C | 零字节对象与 `GetObjectAttributes` 校验客户密钥；null 版本与原地换钥复制不再把对象重写成不可读密文；CopyObject 以目标密钥报告校验和 | `b73581b05`、`474cd5801`、`05df6e70d`、`ffb70eb37`、`e73436c99`（SN-2026-006、-007） |
-| 校验和 | 服务端计算分片校验和、联邦 `UploadPartCopy`、`CompleteMultipartUpload` 返回 `ChecksumType`、与 AWS 对齐的完成错误码、拒绝未知算法与 `CRC64NVME` + `COMPOSITE` | `7fea6d5a5`、`8d76a255c`、`d014a12cf`、`5d152416d`、`7c103389f`、`d28885d0e` |
-| 列表 | 对不存在的桶，`ListObjects` 在原先返回空列表的捷径路径上改为返回 `NoSuchBucket` | `e9c5340be` |
-| 桶级 CORS | 真实的 `?cors` API；桶配置覆盖全局策略；预鉴权查找只读驻留元数据，否则应用全局策略；站点复制以 last-writer-wins 寄存器收敛 CORS | [#71](https://github.com/pgsty/silo/pull/71)、[#80](https://github.com/pgsty/silo/pull/80)、[#101](https://github.com/pgsty/silo/pull/101) |
-| 桶元数据 | `metadata.lock` 串行化所有桶配置写入；`ForceCreate` 与站点 adoption 保留既有配置；启用 lock 的桶始终使用纯 Enabled 版本控制 | [#103](https://github.com/pgsty/silo/pull/103)、`dd3bdb808` |
-| 站点复制 | Object Lock 配置以独立字段复制（仍接受旧的 `Tags` 载体）；按站点统计状态；有效性探针在规则前缀下校验权限 | `3861f33cb`、`fb406fdc9`、`c9ad74673`、`5db7be4ee` |
-| 配置 | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器 | `f1ba68358`、`6b0998157`、`2aea7fe9c` |
-| 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/zh/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新 |
+| 领域         | 变更                                                                                                                                                                                                               | 出处                                                                                                                                       |
+| :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| 授权         | 显式删除版本按 `s3:DeleteObjectVersion` 授权，`DeleteObjects` 逐条目授权；用户与组状态变更要求与目标状态匹配的动作；策略写入拒绝裸 ARN 前缀                                                                        | [#104](https://github.com/pgsty/silo/pull/104)、`58735ee38`、`229fe2b3c`、`eee05a17c`（SN-2026-005、-009、-010）                           |
+| 复制信任     | 仅当精确标记与 `s3:ReplicateObject` / `s3:ReplicateDelete` 同时成立，复制专用 header 才获得复制语义；否则在签名验证后被移除                                                                                        | [#101](https://github.com/pgsty/silo/pull/101)（SN-2026-008）                                                                              |
+| SSE-C        | 零字节对象与 `GetObjectAttributes` 校验客户密钥；null 版本与原地换钥复制不再把对象重写成不可读密文；CopyObject 以目标密钥报告校验和                                                                                | `b73581b05`、`474cd5801`、`05df6e70d`、`ffb70eb37`、`e73436c99`（SN-2026-006、-007）                                                       |
+| 校验和       | 服务端计算分片校验和、联邦 `UploadPartCopy`、`CompleteMultipartUpload` 返回 `ChecksumType`、与 AWS 对齐的完成错误码、拒绝未知算法与 `CRC64NVME` + `COMPOSITE`                                                      | `7fea6d5a5`、`8d76a255c`、`d014a12cf`、`5d152416d`、`7c103389f`、`d28885d0e`                                                               |
+| 列表         | 对不存在的桶，`ListObjects` 在原先返回空列表的捷径路径上改为返回 `NoSuchBucket`                                                                                                                                    | `e9c5340be`                                                                                                                                |
+| 桶级 CORS    | 真实的 `?cors` API；桶配置覆盖全局策略；预鉴权查找只读驻留元数据，否则应用全局策略；站点复制以 last-writer-wins 寄存器收敛 CORS                                                                                    | [#71](https://github.com/pgsty/silo/pull/71)、[#80](https://github.com/pgsty/silo/pull/80)、[#101](https://github.com/pgsty/silo/pull/101) |
+| 桶元数据     | `metadata.lock` 串行化所有桶配置写入；`ForceCreate` 与站点 adoption 保留既有配置；启用 lock 的桶始终使用纯 Enabled 版本控制                                                                                        | [#103](https://github.com/pgsty/silo/pull/103)、`dd3bdb808`                                                                                |
+| 站点复制     | Object Lock 配置以独立字段复制（仍接受旧的 `Tags` 载体）；按站点统计状态；有效性探针在规则前缀下校验权限                                                                                                           | `3861f33cb`、`fb406fdc9`、`c9ad74673`、`5db7be4ee`                                                                                         |
+| 配置         | 旧版数据库通知目标必须有 DSN；`MINIO_CONFIG_ENV_FILE` 使用保留命名目标的专用解析器                                                                                                                                 | `f1ba68358`、`6b0998157`、`2aea7fe9c`                                                                                                      |
+| 工具链与组件 | Go 1.27.1；上游 `minio-go` 固定到 `0e78d3f18efe`（`silo-go` 分叉已退役）；`silo-pkg` v3.13.2；Console v2.3.0（见 [Console 页](/zh/compatibility/console/)）；捆绑 [mcli 20260903](/zh/blog/release/mcli-20260903/) | `43f4bb7ed`、`4d6e1ea8e`、最终依赖刷新                                                                                                     |
 {.wide .expand}
 
 公共包迁往自有模块路径（[v3.13.0](/zh/blog/release/pkg-3.13.0/)，对 Go 消费者是**破坏性**变更）已被正式发布的 Server 20260903 采纳：该标签直接 require `github.com/pgsty/silo-pkg/v3 v3.13.2`。9 月 13 日刷新把维护中的栈升级到 v3.14.0，Server 20260916 则要求 v3.14.1；两者都不是 Server 首次采用新路径。各构建的状态见[组件版本矩阵](/zh/compatibility/versions/)。
@@ -389,13 +398,13 @@ LDAP 包现在会在 `ldaps://` 中使用 TLS 字段；即便开启 `server_inse
 
 以下变化已随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布，**不在 Server 20260903 中**。逐项修复范围及配套组件见[版本矩阵](/zh/compatibility/versions/#source-review)，用户影响按总览编号查阅。
 
-| 范围 | 用户可见变化 | 对应分类与详情 |
-| --- | --- | --- |
-| 新增管理 API | `GET /minio/admin/v3/multipart-preflight` 只读检查分片迁移准备；站点间新增 `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` 同步修订与撤销状态。 | [O06](/zh/compatibility/#o06) / [分片预检](/zh/blog/design/list-multipart-uploads/#implementation-20260916)；[O07](/zh/compatibility/#o07) / [IAM 协议](/zh/blog/design/iam-revocations/#upgrade) |
-| S3 条件与分片列表 | 多池条件写入、分片完成及版本删除更严格地核实元数据；strict 分片分页上限为 1,000，必须显式启用并完成准备。默认仍为 legacy，其缓存路径仍可能超过请求的页长。 | [O04](/zh/compatibility/#o04)、[O06](/zh/compatibility/#o06) / [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[分片模式](/zh/blog/design/list-multipart-uploads/#implementation-20260916) |
-| 权限与持久状态 | 自助改密与创建用户使用独立权限；IAM 持久撤销和桶配置删除状态影响协调升级与恢复，通用桶配置墓碑导出默认关闭。 | [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) / [密码迁移](/zh/compatibility/password-permissions/)、[IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout) |
-| 数据与复制 | 继续修复多池副本、标签与 Object Lock 排序、删除标记恢复、SSE-C 与联邦复制；不自动重建已丢失的历史状态。 | [G07–G10](/zh/compatibility/#g07) / [复制状态检查](/zh/operations/replication/replica-metadata-audit/)、[版本说明](/zh/compatibility/versions/#source-review) |
-| HTTP 与 TLS | 请求头使用绝对读取期限；TLS 默认选择与旧代理、IdP 的互操作需要核对，正文仍使用既有滚动空闲超时。 | [O03](/zh/compatibility/#o03) / [请求头超时](/zh/blog/design/request-header-timeouts/)、[TLS/OIDC](/zh/blog/design/go127-tls-oidc-discovery/) |
+| 范围              | 用户可见变化                                                                                                                                                  | 对应分类与详情                                                                                                                                                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 新增管理 API      | `GET /minio/admin/v3/multipart-preflight` 只读检查分片迁移准备；站点间新增 `GET/PUT /minio/admin/v3/site-replication/peer/iam-revisions` 同步修订与撤销状态。 | [O06](/zh/compatibility/#o06) / [分片预检](/zh/blog/design/list-multipart-uploads/#implementation-20260916)；[O07](/zh/compatibility/#o07) / [IAM 协议](/zh/blog/design/iam-revocations/#upgrade)                                         |
+| S3 条件与分片列表 | 多池条件写入、分片完成及版本删除更严格地核实元数据；strict 分片分页上限为 1,000，必须显式启用并完成准备。默认仍为 legacy，其缓存路径仍可能超过请求的页长。    | [O04](/zh/compatibility/#o04)、[O06](/zh/compatibility/#o06) / [多池一致性](/zh/blog/design/multi-pool-object-consistency/)、[分片模式](/zh/blog/design/list-multipart-uploads/#implementation-20260916)                                  |
+| 权限与持久状态    | 自助改密与创建用户使用独立权限；IAM 持久撤销和桶配置删除状态影响协调升级与恢复，通用桶配置墓碑导出默认关闭。                                                  | [O02](/zh/compatibility/#o02)、[O07](/zh/compatibility/#o07) / [密码迁移](/zh/compatibility/password-permissions/)、[IAM 升级](/zh/operations/replication/iam-upgrade/)、[配置收敛](/zh/blog/design/bucket-metadata-convergence/#rollout) |
+| 数据与复制        | 继续修复多池副本、标签与 Object Lock 排序、删除标记恢复、SSE-C 与联邦复制；不自动重建已丢失的历史状态。                                                       | [G07–G10](/zh/compatibility/#g07) / [复制状态检查](/zh/operations/replication/replica-metadata-audit/)、[版本说明](/zh/compatibility/versions/#source-review)                                                                             |
+| HTTP 与 TLS       | 请求头使用绝对读取期限；TLS 默认选择与旧代理、IdP 的互操作需要核对，正文仍使用既有滚动空闲超时。                                                              | [O03](/zh/compatibility/#o03) / [请求头超时](/zh/blog/design/request-header-timeouts/)、[TLS/OIDC](/zh/blog/design/go127-tls-oidc-discovery/)                                                                                             |
 {.wide .expand}
 
 API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占位接口的实质启用](#since-20260806)，`ReadMultiple` 是[私有存储接口删除](#storage-rest)，在线更新是[保留入口但停用功能](#offline-services)。`silo healthcheck` 与 `mcli checksum verify` 是新增命令，分别调用既有健康端点、读取对象做本地审计。
@@ -419,9 +428,8 @@ API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占
 5. **存储路径校验为词法层面。** 不解析符号链接；未独立覆盖原生 Windows 执行。
 6. **私有 API 不是稳定兼容承诺。** `ReadMultiple` 表明即便 storage REST 协议号不变，操作仍可能消失。不要跨越该边界滚动运行混合构建。
 7. **信息性 HTTP 响应的跟踪仍不完整。** response tracking 层会把 1xx 当成最终响应；Flush/隐式 200 修复没有引入该行为，也没有声称修复它。
-8. **条件删除存在发布边界。** Server 20260903 的 `DeleteObject` 忽略 `If-Match`；Server 20260916 已通过 #145/#178 实现，提供版本时比较指定版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未实现条件所需的额外 `s3:GetObject` 授权。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
-9. **条件删除有明确版本边界。** Server 20260903 忽略 `DeleteObject` 的 `If-Match`；Server 20260916 通过 #145/#178 实现该条件，并在显式指定版本时比较该版本。`DeleteObjects` 仍忽略每项的 `<ETag>`，也没有额外引入 `s3:GetObject` 条件权限。见[已实现契约](/zh/blog/design/conditional-delete/)。
-10. **多站点删除桶配置的历史收敛限制。** 在 [PR #180](https://github.com/pgsty/silo/pull/180)（随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布）之前的版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。完整删除收敛要求全部节点升级并统一开启删除导出（`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`），详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。
+8. **条件删除存在明确的版本边界。** Server 20260903 忽略 `DeleteObject` 的 `If-Match`；Server 20260916 通过 #145/#178 实现该条件，并在显式指定版本时比较该版本。`DeleteObjects` 仍忽略逐项 `<ETag>`，也未额外引入 `s3:GetObject` 条件权限。详见[已实现的契约](/zh/blog/design/conditional-delete/)。
+9. **多站点删除桶配置的历史收敛限制。** 在 [PR #180](https://github.com/pgsty/silo/pull/180)（随 [Server 20260916](/zh/blog/release/silo-20260916/) 发布）之前的版本中，在一个站点删除桶策略、SSE、标签或配额配置后，仍持有该配置的对端可能把它恢复回来（[#77](https://github.com/pgsty/silo/issues/77)）；当时只有桶级 CORS 使用带 tombstone 的寄存器。完整删除收敛要求全部节点升级并统一开启删除导出（`MINIO_SITE_REPLICATION_METADATA_TOMBSTONES`），详见[桶配置收敛设计记录](/zh/blog/design/bucket-metadata-convergence/)。
 
 ## 迁移检查清单 {#migration}
 
@@ -435,24 +443,24 @@ API 新增、删除和行为变化需要分开理解：桶级 CORS 是[既有占
 6. 使用 Helm 时，以完整旧 values 分别渲染新旧 Chart；需要时用 `nameOverride` / `fullnameOverride` / `serviceAccount.name` 保留名称；Chart 与镜像原子切换。
 7. 删除 updater、callhome、SUBNET 注册和支持上传自动化，改用软件包/镜像/编排器滚动及自己的诊断传输渠道。
 8. 把 HMAC OIDC token 改为非对称 JWKS。分别测试 LDAP 成功、错密码、未知用户、后端故障和限流路径。
-10. 审核自定义 IAM 策略：受保护桶写操作需具备裸桶 ARN（除非启用 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`），显式版本删除需 `s3:DeleteObjectVersion`，用户/组启停动作已拆分，并核对[密码权限拆分](/zh/compatibility/password-permissions/#migration)。
-11. 设置 `MINIO_API_TRUSTED_PROXIES=none` 或精确列表，清洗三种来源地址头，并加入会转发认证请求的集群 peer。
-12. 测试超大 S3 Select 记录、流式通知、unsigned trailer 拒绝、multipart 整对象 checksum、重复 part、复制、修复、KMS、每个通知 target、审计摄取及容器优雅关停。
-13. 把分布式集群所有节点作为同一构建升级。回滚时旧 Chart 与旧镜像成对使用，绝不能只回滚一个。
+9. 审核自定义 IAM 策略：受保护桶写操作需具备裸桶 ARN（除非启用 `MINIO_API_LEGACY_BUCKET_RESOURCE_MATCH=on`），显式版本删除需 `s3:DeleteObjectVersion`，用户/组启停动作已拆分，并核对[密码权限拆分](/zh/compatibility/password-permissions/#migration)。
+10. 设置 `MINIO_API_TRUSTED_PROXIES=none` 或精确列表，清洗三种来源地址头，并加入会转发认证请求的集群 peer。
+11. 测试超大 S3 Select 记录、流式通知、unsigned trailer 拒绝、multipart 整对象 checksum、重复 part、复制、修复、KMS、每个通知 target、审计摄取及容器优雅关停。
+12. 把分布式集群所有节点作为同一构建升级。回滚时旧 Chart 与旧镜像成对使用，绝不能只回滚一个。
 {.steps}
 
 ## 验证证据 {#verification}
 
 在 2026-08-06 审计快照上完成的验证：
 
-| 检查               | 结果/边界                                                                                                                                     |
-|:-----------------|:------------------------------------------------------------------------------------------------------------------------------------------|
-| 提交枚举             | 下方账本对 96/96 个提交完成分类；`origin/main` 93 个，本地准备态 HEAD 另 3 个                                                                                   |
-| 净差异审查            | 523 个变化路径全部归入服务端运行时、内部协议、依赖、分发、文档、测试或被替代变化                                                                                                |
-| Rebrand 兼容 guard | 通过；兼容 manifest、分发/运行时断言及 Docker argv 测试保持稳定                                                                                               |
-| Go 测试            | 在 `219670d31` 上完整 `go test ./...` 通过，包括 `cmd`、OIDC、LDAP、notify、event target、Grid、handler、hash 与全部 S3 Select 包                             |
-| Helm 迁移          | `buildscripts/verify-helm-migration.sh` 通过：lint、render、旧版升级、归档及 7 个渲染资源的身份比较                                                              |
-| 软件包生命周期          | `buildscripts/package/lifecycle_test.sh` 通过；包载荷/provenance 断言覆盖空 DEB conflict 元数据、unit/default 路径与法律文件                                    |
+| 检查               | 结果/边界                                                                                                                                                                          |
+| :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 提交枚举           | 下方账本对 96/96 个提交完成分类；`origin/main` 93 个，本地准备态 HEAD 另 3 个                                                                                                      |
+| 净差异审查         | 523 个变化路径全部归入服务端运行时、内部协议、依赖、分发、文档、测试或被替代变化                                                                                                   |
+| Rebrand 兼容 guard | 通过；兼容 manifest、分发/运行时断言及 Docker argv 测试保持稳定                                                                                                                    |
+| Go 测试            | 在 `219670d31` 上完整 `go test ./...` 通过，包括 `cmd`、OIDC、LDAP、notify、event target、Grid、handler、hash 与全部 S3 Select 包                                                  |
+| Helm 迁移          | `buildscripts/verify-helm-migration.sh` 通过：lint、render、旧版升级、归档及 7 个渲染资源的身份比较                                                                                |
+| 软件包生命周期     | `buildscripts/package/lifecycle_test.sh` 通过；包载荷/provenance 断言覆盖空 DEB conflict 元数据、unit/default 路径与法律文件                                                       |
 | 站点               | 严格 `make check` 通过：模块校验、warning-fatal Hugo 渲染（617 EN / 615 ZH 页）以及 1,084 个 HTML 文件中的 388,962 个内部引用；`git diff --check`、双语锚点及 96/96 提交覆盖也通过 |
 {.wide .expand}
 
@@ -462,16 +470,16 @@ Security 文章提供更深入的威胁模型和测试向量，但其中历史�
 
 哈希按图顺序排列。Merge、文档、测试和 CI 提交也全部列入，因为分发行为和兼容性主张的证据强度同样会影响用户；“无独立运行时差异”只表示这一点，不表示没有审查。
 
-| 分类                           | 提交                                                                                                                                                                                                                                              | 验证后的净效果                                                                                                                                                         |
-|:-----------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 初始分叉、Console、CI 与依赖基线        | `d4cd4b433`、`8630937e7`、`68521b37f`、`00f3cf74f`、`5abd9a80f`、`377fc616d`、`f2f9a40dc`、`ee55e5391`、`ce1c537eb`、`68e0ba997`、`1869bd30b`、`ff58df949`、`e4fa06394`                                                                                     | Go/SDK 演进；恢复/分叉内嵌 Console；OCI 内加入 MCLI；替换 CI；修复 LDAP TLS 回归；升级安全依赖。两个 merge 提交没有超出父提交的额外差异                                                                      |
-| 四月安全系列                       | `d24f449e0`、`3b950f8fa`、`56fa63bfd`、`3252d5b7f`、`f444b6f37`、`efb6e5b00`、`db4c0fd5e`、`18b712d49`、`9e10f6d9a`、`f44110890`、`f48dbe777`                                                                                                             | OIDC、LDAP STS、复制元数据、S3 Select、unsigned trailer/Snowball、Go 1.26.2、限流计数/来源加固及安全文档                                                                                |
-| 五至六月可靠性与私有 API               | `65795ee1f`、`5e40665ac`、`fd69c89d0`、`73ac52472`、`df627ff89`、`3e61b1d3a`、`d495d30d5`                                                                                                                                                             | HTTP Flush、最终 LDAP 分桶、完整 S3 Select 边界、删除 ReadMultiple、Go 1.26.4/依赖更新及文档链接变化                                                                                     |
-| 八月前的组件集成                     | `ce01ccbdc`、`4dfc27ce3`、`b7f52ca43`、`7babc0c39`、`c1aec0518`、`15fcc3c8a`、`3f192f3f0`                                                                                                                                                             | 历史 Chart 镜像切换、安全依赖更新、通知流 merge、可移植依赖 pin、压缩库、MCLI replace、Console v2.0                                                                                          |
-| 八月运行时正确性/安全                  | `c8590413f`、`3e14733f1`、`924717926`、`89d346bf5`、`8069a32ac`、`a36fd8fff`、`ca7baa670`、`80e8eaa42`、`b6f70ab08`、`1af351a70`、`38366f654`、`22c1e41fd`、`97b7d2804`、`2f55347f7`、`744a9dcd7`、`fe6dc4780`、`162ded343`、`0c14d8151`、`9dd1dc172`、`2602177ef` | Multipart、纠删码 buffer、响应提交、panic containment、路径/元数据/分配/ReadParts containment、遗留清理、IAM/有效值/version ID/source trust、通知/libpq 与审计细节                                 |
-| Chart 加固与审计文档                | `dfe669862`、`5f4513fd4`、`b42ee4e8a`、`8eae745ab`                                                                                                                                                                                                 | 安全的 Chart 用户默认值、门户/文档路由、维护者 ignore 规则与 advisory；只有 Chart 默认值直接改变运行时分发行为                                                                                         |
-| 到 20260804 标签的发布工程           | `9c799f42d`、`10c7670b8`、`cf7df097b`、`32863c852`、`632ade111`、`1814ae52f`、`475236c79`、`11d79fddc`、`3b8a55dee`、`ca674a696`、`4c185d5a6`、`2ca4971d9`、`e064b5555`、`aa5139369`、`021110b45`、`d88f46cce`                                                 | RPM/DEB/APK、provenance、OCI 发布 gate、固定 lint/generation、修复 S3 Select 测试竞态、广泛 CI、PID 1 信号、已发布目标交叉构建、安全 release dispatch、可复现性、删除陈旧配置、systemd 路径、真实失败 gate 与运行镜像关停断言 |
-| Silo 切换与 2026-08-06 准备态 HEAD | `15def34dc`、`77bdc4c0c`、`15ab10833`、`30749911b`、`e071bb77e`、`bd8df5166`、`6613c2a3c`、`fd2ca1c6d`、`c46b16ec6`、`c47733abc`、`f1c77d5a2`、`62717d7bf`、`6740e6978`、`b57275be3`、`05be686b8`、`a6d6d9b02`、`6bd9cf77e`、`219670d31`                         | 清理未发布 MinIO 分发残留；Silo 运行身份/离线边界；改名软件包、OCI、Helm 与迁移 guard；固定 fixture；文档/仓库切换；Console 2.1.0→2.1.1；Node 24 action；DCO/法律/文档完善；重生成 CREDITS；交付 LICENSE/NOTICE        |
+| 分类                               | 提交                                                                                                                                                                                                                                                               | 验证后的净效果                                                                                                                                                                                                                |
+| :--------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 初始分叉、Console、CI 与依赖基线   | `d4cd4b433`、`8630937e7`、`68521b37f`、`00f3cf74f`、`5abd9a80f`、`377fc616d`、`f2f9a40dc`、`ee55e5391`、`ce1c537eb`、`68e0ba997`、`1869bd30b`、`ff58df949`、`e4fa06394`                                                                                            | Go/SDK 演进；恢复/分叉内嵌 Console；OCI 内加入 MCLI；替换 CI；修复 LDAP TLS 回归；升级安全依赖。两个 merge 提交没有超出父提交的额外差异                                                                                       |
+| 四月安全系列                       | `d24f449e0`、`3b950f8fa`、`56fa63bfd`、`3252d5b7f`、`f444b6f37`、`efb6e5b00`、`db4c0fd5e`、`18b712d49`、`9e10f6d9a`、`f44110890`、`f48dbe777`                                                                                                                      | OIDC、LDAP STS、复制元数据、S3 Select、unsigned trailer/Snowball、Go 1.26.2、限流计数/来源加固及安全文档                                                                                                                      |
+| 五至六月可靠性与私有 API           | `65795ee1f`、`5e40665ac`、`fd69c89d0`、`73ac52472`、`df627ff89`、`3e61b1d3a`、`d495d30d5`                                                                                                                                                                          | HTTP Flush、最终 LDAP 分桶、完整 S3 Select 边界、删除 ReadMultiple、Go 1.26.4/依赖更新及文档链接变化                                                                                                                          |
+| 八月前的组件集成                   | `ce01ccbdc`、`4dfc27ce3`、`b7f52ca43`、`7babc0c39`、`c1aec0518`、`15fcc3c8a`、`3f192f3f0`                                                                                                                                                                          | 历史 Chart 镜像切换、安全依赖更新、通知流 merge、可移植依赖 pin、压缩库、MCLI replace、Console v2.0                                                                                                                           |
+| 八月运行时正确性/安全              | `c8590413f`、`3e14733f1`、`924717926`、`89d346bf5`、`8069a32ac`、`a36fd8fff`、`ca7baa670`、`80e8eaa42`、`b6f70ab08`、`1af351a70`、`38366f654`、`22c1e41fd`、`97b7d2804`、`2f55347f7`、`744a9dcd7`、`fe6dc4780`、`162ded343`、`0c14d8151`、`9dd1dc172`、`2602177ef` | Multipart、纠删码 buffer、响应提交、panic containment、路径/元数据/分配/ReadParts containment、遗留清理、IAM/有效值/version ID/source trust、通知/libpq 与审计细节                                                            |
+| Chart 加固与审计文档               | `dfe669862`、`5f4513fd4`、`b42ee4e8a`、`8eae745ab`                                                                                                                                                                                                                 | 安全的 Chart 用户默认值、门户/文档路由、维护者 ignore 规则与 advisory；只有 Chart 默认值直接改变运行时分发行为                                                                                                                |
+| 到 20260804 标签的发布工程         | `9c799f42d`、`10c7670b8`、`cf7df097b`、`32863c852`、`632ade111`、`1814ae52f`、`475236c79`、`11d79fddc`、`3b8a55dee`、`ca674a696`、`4c185d5a6`、`2ca4971d9`、`e064b5555`、`aa5139369`、`021110b45`、`d88f46cce`                                                     | RPM/DEB/APK、provenance、OCI 发布 gate、固定 lint/generation、修复 S3 Select 测试竞态、广泛 CI、PID 1 信号、已发布目标交叉构建、安全 release dispatch、可复现性、删除陈旧配置、systemd 路径、真实失败 gate 与运行镜像关停断言 |
+| Silo 切换与 2026-08-06 准备态 HEAD | `15def34dc`、`77bdc4c0c`、`15ab10833`、`30749911b`、`e071bb77e`、`bd8df5166`、`6613c2a3c`、`fd2ca1c6d`、`c46b16ec6`、`c47733abc`、`f1c77d5a2`、`62717d7bf`、`6740e6978`、`b57275be3`、`05be686b8`、`a6d6d9b02`、`6bd9cf77e`、`219670d31`                           | 清理未发布 MinIO 分发残留；Silo 运行身份/离线边界；改名软件包、OCI、Helm 与迁移 guard；固定 fixture；文档/仓库切换；Console 2.1.0→2.1.1；Node 24 action；DCO/法律/文档完善；重生成 CREDITS；交付 LICENSE/NOTICE               |
 {.wide .expand}
 
 账本共 96 个唯一提交。范围内被替换的变化——例如 Console 2.0 → 2.1.0 → 2.1.1、历史 `pgsty/minio` 镜像/Chart 状态，以及更新器禁用后的下载 buffer 代码——只在留下最终兼容性影响时描述。
