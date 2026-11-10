@@ -8,14 +8,14 @@ url: "/blog/security/notify-keyspace-registration/"
 tags: ["Security", "Notifications", "Configuration", "NATS", "AMQP", "PostgreSQL", "MySQL", "SILO"]
 ---
 
-**`SN-2026-019`** covers a class of notification configuration defects fixed in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`162ded343` and `672c07a0f`, [`pgsty/silo#39`](https://github.com/pgsty/silo/issues/39)): notification parser and legacy-migration paths read or wrote KVS configuration keys that were missing from `Default*KVS`, while `CheckValidKeys` echoed raw key values in validation errors and `FetchEnabledTargets` aborted all active notification targets on the first validation failure. In [Server 20260903](/blog/design/notify-url/) (`f1ba68358`), the discrete PostgreSQL and MySQL host/credential keys uncovered by our AST audit were retired in favor of `connection_string` and `dsn_string`.
+**`SN-2026-019`** covers a class of notification configuration defects fixed in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`162ded343`, [`pgsty/silo#39`](https://github.com/pgsty/silo/issues/39)): notification parser and legacy-migration paths read or wrote KVS configuration keys that were missing from `Default*KVS`, while `CheckValidKeys` echoed raw key values in validation errors and `FetchEnabledTargets` aborted all active notification targets on the first validation failure. In [Server 20260903](/blog/design/notify-url/) (`f1ba68358`), the discrete PostgreSQL and MySQL host/credential keys uncovered by our AST audit were retired in favor of `connection_string` and `dsn_string`.
 
 ## Conclusions first {#summary}
 
 1. **Four uncoordinated surfaces drifted apart**: In the notification configuration subsystem, `Default*KVS` (valid key schema), `Help*` (help text and secret/sensitive classification), `GetNotify*` (parser), and `SetNotify*` (legacy config migration) were maintained by hand without a cross-check.
 2. **One invalid target disabled all notification targets**: `FetchEnabledTargets` validates every notification subsystem sequentially and returns on the first error, leaving the global notification target list `nil` across the server.
 3. **Validation errors echoed secret values**: When `CheckValidKeys` rejected an unknown or mistyped key, it formatted the error using `kv.String()`, printing `key=value`—including credentials or passwords—into logs and admin CLI responses.
-4. **AST-enforced invariant**: Server `20260804` registers the missing NATS and AMQP keys, redacts values from `CheckValidKeys` errors, expands `HasSensitiveKeys`, and enforces a compile-time AST test ensuring every key read or written by `cmd/config/notify` is registered in `Default*KVS`.
+4. **AST-enforced invariant**: Server `20260804` registers the missing NATS and AMQP keys, redacts values from `CheckValidKeys` errors, and enforces a compile-time AST test ensuring every key read or written by `cmd/config/notify` is registered in `Default*KVS`.
 
 ---
 
@@ -119,8 +119,6 @@ Before `20260804`, both `config.CheckValidKeys` and `KVS.CheckValidKeys` built t
 
 Commit `162ded343` changes both `CheckValidKeys` functions to report **only** the offending key names (`kv.Key`), never `kv.Value`.
 
-In commit `672c07a0f`, we also audited `config.HasSensitiveKeys` (`internal/config/config.go`), which masks secrets when exporting configurations via `mc admin config get` or generating health-diagnostics bundles. We expanded `HasSensitiveKeys` to cover all credential key names used across notification, identity, and KMS subsystems (`password`, `auth_token`, `secret_key`, `client_secret`, `nkey_seed`, `user_credentials`, `sasl_password`, `connection_string`, and `dsn_string`).
-
 ---
 
 ## Enforcing the Invariant with an AST Audit Test {#the-audit}
@@ -136,13 +134,13 @@ While reviewing the audit test itself, we found and closed two blind spots in ou
 
 ## What the AST Audit Caught: PostgreSQL and MySQL Discrete Keys {#followups}
 
-As soon as the AST visitor inspected `config.KVS` composite literals in `legacy.go`, it flagged `SetNotifyPostgres` and `SetNotifyMySQL`: both functions wrote five discrete keys—`host`, `port`, `username`, `password`, and `database`—that were read by `GetNotifyPostgres` / `GetNotifyMySQL` (`parse.go`) when `connection_string` / `dsn_string` was empty, yet were **completely absent** from `DefaultPostgresKVS` and `DefaultMySQLKVS`!
+As soon as the AST visitor inspected `config.KVS` composite literals in `legacy.go`, it flagged `SetNotifyPostgres` and `SetNotifyMySQL`: both functions wrote five discrete keys—`host`, `port`, `username`, `password`, and `database`—that no parser read and that were **completely absent** from `DefaultPostgresKVS` and `DefaultMySQLKVS`!
 
 In addition, because `password` was not registered in `DefaultPostgresKVS` or `DefaultMySQLKVS`, passing `password=...` or migrating a legacy PostgreSQL/MySQL config triggered `CheckValidKeys` and printed the database password in the error message prior to `162ded343`.
 
 We handled this in two steps across two releases:
-- **Short-term fix in Server 20260804 (`672c07a0f`)**: Registered `host`, `port`, `username`, `password`, and `database` in `DefaultPostgresKVS` and `DefaultMySQLKVS` (and marked `password` as `Secret` in `HelpPostgres` / `HelpMySQL`) so that existing configurations and the new AST invariant were immediately consistent.
-- **Architectural cleanup in [Server 20260903](/blog/design/notify-url/) (`f1ba68358`)**: Having two parallel ways to configure database connections (`connection_string` vs. discrete `host`/`port`/`username`/`password`/`database` keys) caused `SetNotifyPostgres` and `SetNotifyMySQL` to overwrite `connection_string` with empty discrete fields during config round-trips. Server `20260903` retired the five discrete keys across `Default*KVS`, `Help*`, `parse.go`, and `legacy.go`, standardizing exclusively on `connection_string` (PostgreSQL) and `dsn_string` (MySQL).
+- **Recorded, not registered, in Server 20260804**: The ten writes went into a shrink-only allowlist in the audit test (`knownUnregisteredWrites`), which pinned the gap and kept it from growing. Registering the five keys was tried and dropped, because those key names collide with the legacy connection-string tokenizer (`0c14d8151`). A migrated PostgreSQL or MySQL target was therefore still rejected on load in this release, with an error that names the keys and no longer prints the password.
+- **Repair in [Server 20260903](/blog/design/notify-url/) (`f1ba68358`)**: `SetNotifyPostgres` and `SetNotifyMySQL` stopped writing the five discrete keys, which emptied the allowlist. A pre-KV PostgreSQL or MySQL target without a canonical `connection_string` / `dsn_string` is now rejected with a typed migration error that stops startup, and that error carries no configuration values.
 
 ---
 
@@ -153,8 +151,8 @@ We handled this in two steps across two releases:
 
 ## Review Record {#review}
 
-Code review verified the AST audit's reverse floor assertions, untyped `config.KVS` composite literal inspection, `CheckValidKeys` value redaction (`162ded343`), and `HasSensitiveKeys` credential coverage (`672c07a0f`).
+Code review verified the AST audit's reverse floor assertions, untyped `config.KVS` composite literal inspection, and `CheckValidKeys` value redaction (`162ded343`).
 
 ## Summary {#closing}
 
-Shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`162ded343` and `672c07a0f`) with follow-up cleanup in [Server 20260903](/blog/design/notify-url/) (`f1ba68358`), all notification KVS keys are verified against `Default*KVS` by AST tests and unrecognized-key errors redact values.
+Shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`162ded343`) with follow-up cleanup in [Server 20260903](/blog/design/notify-url/) (`f1ba68358`), all notification KVS keys are verified against `Default*KVS` by AST tests and unrecognized-key errors redact values.

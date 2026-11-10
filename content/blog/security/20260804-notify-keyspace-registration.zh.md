@@ -8,14 +8,14 @@ url: "/zh/blog/security/notify-keyspace-registration/"
 tags: ["Security", "Notifications", "Configuration", "NATS", "AMQP", "PostgreSQL", "MySQL", "SILO"]
 ---
 
-**`SN-2026-019`** 涵盖了 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（提交 `162ded343` 与 `672c07a0f`，[`pgsty/silo#39`](https://github.com/pgsty/silo/issues/39)）修复的一类通知子系统配置缺陷：通知解析器与旧版配置迁移代码读写了未在 `Default*KVS` 中注册的配置键，`CheckValidKeys` 在校验失败时将包含敏感凭据的原始 `key=value` 拼入错误消息，且 `FetchEnabledTargets` 在遇到首个校验错误时会直接中止全部通知目标的加载。随后在 [Server 20260903](/zh/blog/design/notify-url/)（`f1ba68358`）中，由本次 AST 审计顺带揪出的 PostgreSQL 与 MySQL 离散连接字段被正式废弃，统一收敛为 `connection_string` 与 `dsn_string`。
+**`SN-2026-019`** 涵盖了 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（提交 `162ded343`，[`pgsty/silo#39`](https://github.com/pgsty/silo/issues/39)）修复的一类通知子系统配置缺陷：通知解析器与旧版配置迁移代码读写了未在 `Default*KVS` 中注册的配置键，`CheckValidKeys` 在校验失败时将包含敏感凭据的原始 `key=value` 拼入错误消息，且 `FetchEnabledTargets` 在遇到首个校验错误时会直接中止全部通知目标的加载。随后在 [Server 20260903](/zh/blog/design/notify-url/)（`f1ba68358`）中，由本次 AST 审计顺带揪出的 PostgreSQL 与 MySQL 离散连接字段被正式废弃，统一收敛为 `connection_string` 与 `dsn_string`。
 
 ## 结论先行 {#summary}
 
 1. **四处独立维护的代码面发生漂移**：在通知配置子系统中，`Default*KVS`（合法键集合）、`Help*`（帮助文档与敏感级别分类）、`GetNotify*`（配置解析）与 `SetNotify*`（旧配置迁移）长期靠手工同步，缺乏一致性校验。
 2. **单个目标报错会拖垮全局通知目标**：`FetchEnabledTargets` 按顺序校验所有通知子系统，一旦遇到首个错误便直接返回，导致全局通知目标列表保持为 `nil`，使正常的通知目标一并失效。
 3. **配置校验报错回显了敏感值**：当 `CheckValidKeys` 拒绝未知或拼写错误的键时，旧代码使用 `kv.String()` 格式化错误，将完整的 `key=value`（含密码或凭据内容）直接输出到日志和客户端终端。
-4. **通过 AST 审计测试锁死不变量**：Server `20260804` 补齐了 NATS 与 AMQP 缺失的配置键、在 `CheckValidKeys` 报错中剥离键值、扩展了 `HasSensitiveKeys` 脱敏范围，并新增编译期 AST 审计测试，强制要求 `cmd/config/notify` 读写的所有配置键必须在 `Default*KVS` 中注册。
+4. **通过 AST 审计测试锁死不变量**：Server `20260804` 补齐了 NATS 与 AMQP 缺失的配置键、在 `CheckValidKeys` 报错中剥离键值，并新增编译期 AST 审计测试，强制要求 `cmd/config/notify` 读写的所有配置键必须在 `Default*KVS` 中注册。
 
 ---
 
@@ -119,8 +119,6 @@ const (
 
 提交 `162ded343` 修改了这两个 `CheckValidKeys` 函数，使其在报错时**仅输出键名**（`kv.Key`），不再输出 `kv.Value`。
 
-随后在提交 `672c07a0f` 中，我们进一步审查了用于在 `mc admin config get` 导出和健康诊断包（health-diagnostics）中掩码敏感值的 `config.HasSensitiveKeys`（`internal/config/config.go`），将其匹配范围扩展至通知、身份认证与 KMS 子系统使用的全部凭据键名（`password`、`auth_token`、`secret_key`、`client_secret`、`nkey_seed`、`user_credentials`、`sasl_password`、`connection_string` 与 `dsn_string`）。
-
 ---
 
 ## 用 AST 审计测试锁死注册不变量 {#the-audit}
@@ -136,13 +134,13 @@ const (
 
 ## AST 审计顺藤摸瓜抓出的问题：PostgreSQL 与 MySQL 离散连接键 {#followups}
 
-一旦 AST 遍历器开始检查 `legacy.go` 中的 `config.KVS` 复合字面量，它当即报出 `SetNotifyPostgres` 与 `SetNotifyMySQL` 存在未注册键写入：这两个函数各自写入了 `host`、`port`、`username`、`password`、`database` 五个离散配置键，且 `GetNotifyPostgres` / `GetNotifyMySQL`（`parse.go`）在 `connection_string` / `dsn_string` 为空时也会读取这五个键，但它们**完全没有**在 `DefaultPostgresKVS` 和 `DefaultMySQLKVS` 中注册！
+一旦 AST 遍历器开始检查 `legacy.go` 中的 `config.KVS` 复合字面量，它当即报出 `SetNotifyPostgres` 与 `SetNotifyMySQL` 存在未注册键写入：这两个函数各自写入了 `host`、`port`、`username`、`password`、`database` 五个离散配置键，没有任何解析器读取这五个键，它们也**完全没有**在 `DefaultPostgresKVS` 和 `DefaultMySQLKVS` 中注册！
 
 更糟糕的是，正因为 `password` 未在 `DefaultPostgresKVS` 或 `DefaultMySQLKVS` 中注册，在 `162ded343` 之前，任何传入 `password=...` 或触发旧版 PostgreSQL/MySQL 配置迁移的操作都会撞上 `CheckValidKeys`，并在错误消息中把数据库明文密码直接打印出来。
 
 我们分两步在两个版本中彻底解决了这一历史包袱：
-- **Server 20260804（`672c07a0f`）短期止血**：在 `DefaultPostgresKVS` 和 `DefaultMySQLKVS` 中补注册 `host`、`port`、`username`、`password`、`database`（并在 `HelpPostgres` / `HelpMySQL` 中将 `password` 标记为 `Secret`），确保存量配置与新的 AST 审计不变量立即自洽。
-- **[Server 20260903](/zh/blog/design/notify-url/)（`f1ba68358`）架构清理**：同时维护两套数据库连接配置方式（`connection_string` 与离散的 `host`/`port`/`username`/`password`/`database` 字段）会导致 `SetNotifyPostgres` 和 `SetNotifyMySQL` 在配置读写往返时用空的离散字段覆盖掉合法的 `connection_string`。因此 Server `20260903` 从 `Default*KVS`、`Help*`、`parse.go` 与 `legacy.go` 中彻底退役了这五个离散字段，统一收敛为使用 `connection_string`（PostgreSQL）与 `dsn_string`（MySQL）。
+- **Server 20260804 只记录，不注册**：这十处写入被记进审计测试中只减不增的白名单（`knownUnregisteredWrites`），缺口就此固定，不会再扩大。补注册这五个键的方案试过后放弃了，因为这些键名与旧版连接串分词器冲突（`0c14d8151`）。因此在这个版本里，迁移得到的 PostgreSQL 或 MySQL 目标在加载时仍会被拒绝，但报错只列出键名，不再打印密码。
+- **[Server 20260903](/zh/blog/design/notify-url/)（`f1ba68358`）修复**：`SetNotifyPostgres` 与 `SetNotifyMySQL` 不再写入这五个离散键，白名单随之清空。旧版（KV 之前）的 PostgreSQL 或 MySQL 目标如果没有规范的 `connection_string` / `dsn_string`，现在会被带类型的迁移错误拒绝并阻止启动，且该错误不携带任何配置值。
 
 ---
 
@@ -153,8 +151,8 @@ const (
 
 ## 审查记录 {#review}
 
-代码审查验证了 AST 审计测试的反向覆盖下界断言、无类型 `config.KVS` 复合字面量扫描、`CheckValidKeys` 报错脱敏（`162ded343`）以及 `HasSensitiveKeys` 敏感凭据键覆盖（`672c07a0f`）。
+代码审查验证了 AST 审计测试的反向覆盖下界断言、无类型 `config.KVS` 复合字面量扫描以及 `CheckValidKeys` 报错脱敏（`162ded343`）。
 
 ## 总结 {#closing}
 
-随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`162ded343` 与 `672c07a0f`）发布并在 [Server 20260903](/zh/blog/design/notify-url/)（`f1ba68358`）完成离散键收敛后，所有通知子系统配置键均由 AST 静态测试锁死在 `Default*KVS` 中，且非法键报错不再回显配置值。
+随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（`162ded343`）发布并在 [Server 20260903](/zh/blog/design/notify-url/)（`f1ba68358`）完成离散键收敛后，所有通知子系统配置键均由 AST 静态测试锁死在 `Default*KVS` 中，且非法键报错不再回显配置值。
