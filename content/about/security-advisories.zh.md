@@ -10,12 +10,13 @@ icon: fa-solid fa-shield-halved
 
 本台账汇总 `pgsty/silo` 软件栈的全部安全修复与影响升级边界的安全变更。每条经过深度排查的公告均链接至[安全编年史](/zh/blog/security/)或[设计笔记](/zh/blog/design/)中的完整技术文章；本页作为编号、修复提交、暴露条件与升级边界的统一权威索引。
 
-已有公开 CVE 编号的漏洞直接使用 CVE 标识。由于上游 `minio/minio` 已归档，不再为继承代码中的新发现分配 CVE，无 CVE 的安全问题统一分配稳定的 `SN-<年份>-<序号>` 编号（`SN-2026-002` 至 `SN-2026-019`），便于发布说明、提交记录与 Issue 稳定引用。`SN-2026-001` 为 `trackingResponseWriter` 流式刷新可靠性回归（非安全问题，见 [Server 20260804 发布说明](/zh/blog/release/silo-20260804/)）。
+已有公开 CVE 编号的漏洞直接使用 CVE 标识。由于上游 `minio/minio` 已归档，不再为继承代码中的新发现分配 CVE，无 CVE 的安全问题统一分配稳定的 `SN-<年份>-<序号>` 编号（`SN-2026-002` 至 `SN-2026-021`），便于发布说明、提交记录与 Issue 稳定引用。`SN-2026-001` 为 `trackingResponseWriter` 流式刷新可靠性回归（非安全问题，见 [Server 20260804 发布说明](/zh/blog/release/silo-20260804/)）。
 
 ## 当前发布边界 {#boundary}
 
 当前生产推荐基线为 **[Server 20261109](/zh/blog/release/silo-20261109/)**，配套内嵌与独立 **[Console 2.7.0](/zh/blog/release/console-2.7.0/)**、**[mcli 20261109](/zh/blog/release/mcli-20261109/)** 与 **[silo-pkg 3.16.0](/zh/blog/release/pkg-3.16.0/)**，统一使用 Go 1.27.3 构建；**[KES 20261026](/zh/blog/release/silo-20261026/#kes)** 保持可选外部密钥服务。请按 [20261109 协同升级要求](/zh/blog/release/silo-20261109/#upgrade)实施升级。各版本首次交付的安全修复边界如下：
 
+- **Server `main` 主干（`a18293d0c`、`c11bfda8f`，待随 20261109 后续热修版发布）** 修复了 [SN-2026-020](#sn-2026-020)（单存储池 S3 `DeleteObjects` 批量删除跨桶路径穿越、`COMPLIANCE` 合规对象锁绕过及 `.minio.sys` 元数据打删除标记问题）与 [SN-2026-021](#sn-2026-021)（在状态切换及未传 `--policy` 的属性编辑操作中保留服务账号原有内联会话策略）。运行在 Server 20261109 及更早版本上的单存储池部署仍受 `SN-2026-020` 影响（Server 20261026+ 多存储池部署不受影响），所有运行在 Server 20261109 及更早版本上的部署均受 `SN-2026-021` 影响。详见 [SN-2026-020](/zh/blog/security/20261110-bulk-delete-path-traversal/) 与 [SN-2026-021](/zh/blog/security/20261110-svcacct-inline-policy-preservation/) 安全编年史。
 - **Server 20261109** 与 **Console v2.7.0** 在修改锁内强制校验 S3 `DeleteObjects` 物理版本清除（`6ef3a52fc`）、目录 `null` 版本批量删除（`aa2d79daf`）与复制删除（`7e9ee6bef`）的 Object Lock 保护；使批处理 `replicate`、`keyrotate`、`expire` 全程绑定已认证提交者的本地 S3 数据权限（`#310`、`#311`、`#318`–`#320`）；拒绝不完整的 IAM 策略加载并对持久化记录执行身份修改（`#316`、`#317`、`#321`–`#323`）；将外部授权插件响应限制在 1 MiB 与 1 分钟内；同时补齐 Console 用量 worker 的 TLS 根证书信任（`ec897252f`）、容器 CA 根证书束（`silo-console#84`、`pgsty/silo#295`）与畸形分片上传错误处理（`f1edc61fe`）。
 - **Server 20261018** 修复了 [SN-2026-015](#sn-2026-015)（`PutObjectRetention` 治理保留期授权绕过）、[SN-2026-016](#sn-2026-016)（指定版本与原地写入覆写对象锁）以及 [SN-2026-017](#sn-2026-017)（委派 IAM Admin 凭据授权边界），并新增按主体/按令牌范围吊销 STS 会话的能力（`0cd388c66`）。Server 20260916 及更早版本仍受 `SN-2026-015` 至 `SN-2026-017` 影响；请将修复部署至每一个接受写入的 Server 节点与复制站点。详见[十月安全公告](/zh/blog/security/20261018-release-hardening/)与[组件版本矩阵](/zh/compatibility/versions/)。
 - **Server 20260916** 与 **Console v2.4.1** 包含 [SN-2026-011](#sn-2026-011) 至 [SN-2026-014](#sn-2026-014) 的修复（Server 20260903 不包含）。
@@ -61,13 +62,15 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 | [`SN-2026-017`](#sn-2026-017)                                         | [`2616d43fb`](https://github.com/pgsty/silo/commit/2616d43fb29fa0e97b875948f6e595163a72f56b)、[`995439260`](https://github.com/pgsty/silo/commit/995439260)、[#242](https://github.com/pgsty/silo/pull/242)                                                                                                  | 委派 IAM Admin 凭据与策略包含性授权边界                               | [编年史](/zh/blog/security/20261018-release-hardening/#sn-2026-017) · [设计](/zh/blog/design/iam-admin-authorization/)                        |
 | [`SN-2026-018`](#sn-2026-018)                                         | [`fe6dc4780`](https://github.com/pgsty/silo/commit/fe6dc4780)                                                                                                                                                                                                                                                | 转发客户端源地址信任边界（`MINIO_API_TRUSTED_PROXIES`）               | [编年史](/zh/blog/security/source-address-trust/)                                                                                             |
 | [`SN-2026-019`](#sn-2026-019)                                         | [`672c07a0f`](https://github.com/pgsty/silo/commit/672c07a0f)、[`f1ba68358`](https://github.com/pgsty/silo/commit/f1ba68358)                                                                                                                                                                                 | 通知配置键注册与 `config.HasSensitiveKeys` 敏感凭据脱敏               | [编年史](/zh/blog/security/notify-keyspace-registration/) · [设计](/zh/blog/design/notify-url/)                                               |
+| [`SN-2026-020`](#sn-2026-020)                                         | [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d)                                                                                                                                                                                                                 | 单存储池 S3 `DeleteObjects` 跨桶路径穿越与对象锁绕过                  | [编年史](/zh/blog/security/20261110-bulk-delete-path-traversal/)                                                                              |
+| [`SN-2026-021`](#sn-2026-021)                                         | [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27)（[#331](https://github.com/pgsty/silo/pull/331)）                                                                                                                                                               | 未传策略的服务账号状态切换与编辑保留内联会话策略                      | [编年史](/zh/blog/security/20261110-svcacct-inline-policy-preservation/)                                                                      |
 {.wide .expand}
 
 ## 暴露条件与升级指引 {#exposure}
 
 ### CVE-2025-62506 — 会话策略权限提升 {#cve-2025-62506}
 
-支持远程利用（需持有附加了内联会话策略的服务账号或 STS 临时凭据）。上游在 `c1a49490`（`RELEASE.2025-10-15T17-29-55Z`）中修复了评估子策略时的 `DenyOnly` 重置遗漏；SILO 自首个版本 `RELEASE.2025-12-03T12-00-00Z` 起已继承该修复。从更旧上游版本迁移的集群应升级并审计曾由受限父会话创建的子服务账号。详见 [CVE-2025-62506 公告](/zh/blog/security/cve-2025-62506/)。
+支持远程利用（需持有附加了内联会话策略的服务账号或 STS 临时凭据）。上游在 `c1a49490`（`RELEASE.2025-10-15T17-29-55Z`）中修复了评估子策略时的 `DenyOnly` 重置遗漏；SILO 自首个版本 `RELEASE.2025-12-03T12-00-00Z` 起已继承该修复。从更旧上游版本迁移的集群应升级并审计曾由受限父会话创建的子服务账号。上游公告 [`GHSA-jjjj-jwhf-8rgr`](https://github.com/advisories/GHSA-jjjj-jwhf-8rgr) 致谢发现者 Simeon Poot（`@SimeonPoot`）。详见 [CVE-2025-62506 公告](/zh/blog/security/cve-2025-62506/)。
 
 ### CVE-2026-32285 — 误标为 `jsonparser` 的重复公告 {#cve-2026-32285}
 
@@ -75,31 +78,31 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 
 ### CVE-2026-33322 — OIDC JWT 算法混淆 {#cve-2026-33322}
 
-支持远程利用（前提为启用了 OIDC `AssumeRoleWithWebIdentity` 或 `AssumeRoleWithClientGrants`，且攻击者获知或猜中 `client_secret` 以伪造 `HS256`/`HS384`/`HS512` 令牌）。提交 `d24f449e0` 将 JWT 验签严格绑定至身份提供方的非对称 JWKS 公钥集，并从 `token.Parse` 中移除了 `client_secret` 对称 HMAC 回退。依赖对称 HMAC 签名 `id_token` 的非标准部署需在升级前将 IdP 切换为非对称签名算法（如 `RS256`、`ES256`）。
+支持远程利用（前提为启用了 OIDC `AssumeRoleWithWebIdentity` 或 `AssumeRoleWithClientGrants`，且攻击者获知或猜中 `client_secret` 以伪造 `HS256`/`HS384`/`HS512` 令牌）。提交 `d24f449e0` 将 JWT 验签严格绑定至身份提供方的非对称 JWKS 公钥集，并从 `token.Parse` 中移除了 `client_secret` 对称 HMAC 回退。依赖对称 HMAC 签名 `id_token` 的非标准部署需在升级前将 IdP 切换为非对称签名算法（如 `RS256`、`ES256`）。上游公告 [`GHSA-5cx5-wh4m-82fh`](https://github.com/advisories/GHSA-5cx5-wh4m-82fh) 致谢发现者 Sang-Hoon Choi（`@KoreaSecurity`）。
 
 ### CVE-2026-33419 — LDAP STS 枚举与拒绝服务 {#cve-2026-33419}
 
-支持远程利用（启用 `AssumeRoleWithLDAPIdentity` 时）。修复后认证失败统一返回 `400 InvalidParameterValue`，不再泄露底层目录错误；通过预留/提交/取消/退还（reserve/commit/cancel/refund）生命周期限制并发 LDAP bind 数量；并在 `RELEASE.2026-06-18` 中移除了按用户名共享的限流桶（此前攻击者只要知道受害者的 `LDAPUsername`，即可从轮换 IP 发送错误密码长期锁死该用户）。详见 [LDAP STS 编年史](/zh/blog/security/cve-2026-33419/)。
+支持远程利用（启用 `AssumeRoleWithLDAPIdentity` 时）。修复后认证失败统一返回 `400 InvalidParameterValue`，不再泄露底层目录错误；通过预留/提交/取消/退还（reserve/commit/cancel/refund）生命周期限制并发 LDAP bind 数量；并在 `RELEASE.2026-06-18` 中移除了按用户名共享的限流桶（此前攻击者只要知道受害者的 `LDAPUsername`，即可从轮换 IP 发送错误密码长期锁死该用户）。上游公告：[`GHSA-jv87-32hw-hh99`](https://github.com/advisories/GHSA-jv87-32hw-hh99)。详见 [LDAP STS 编年史](/zh/blog/security/cve-2026-33419/)。
 
 ### CVE-2026-34204 — 复制元数据注入 {#cve-2026-34204}
 
-支持远程利用。阻止普通客户端在 `PutObject` 或 `CopyObject` 请求中夹带未授权的 `X-Minio-Replication-*` 请求头写入内部复制元数据（此前会导致对象无法读取）。任何接受非授信写入的生产服务端均应升级。后续对复制请求头边界的完整收口见 [SN-2026-008](#sn-2026-008) 与[副本元数据规范化设计](/zh/blog/design/replica-metadata-normalization/)。
+支持远程利用。阻止普通客户端在 `PutObject` 或 `CopyObject` 请求中夹带未授权的 `X-Minio-Replication-*` 请求头写入内部复制元数据（此前会导致对象无法读取）。任何接受非授信写入的生产服务端均应升级。上游公告：[`GHSA-3rh2-v3gr-35p9`](https://github.com/advisories/GHSA-3rh2-v3gr-35p9)。后续对复制请求头边界的完整收口见 [SN-2026-008](#sn-2026-008) 与[副本元数据规范化设计](/zh/blog/design/replica-metadata-normalization/)。
 
 ### CVE-2026-39414 — S3 Select 超大记录内存耗尽 {#cve-2026-39414}
 
-支持远程利用（需 `s3:SelectObjectContent` 权限）。对超过 1 MiB（`maxCharsPerRecord`）的 CSV 与 JSON Lines 单条记录返回 `OverMaxRecordSize`，防止无界读入耗尽节点内存。四月补丁（`3252d5b7f`）收口了 CSV 与标准 JSON 读取器；六月后续补丁（`5dc705936`）在支持 AVX2/AVX-512 的 CPU 上同样将 JSON Lines 路由至有界 `json.PReader`（停用无行长上限的 `simdj.NewReader`），堵住了硬件相关的 SIMD 绕过路径。详见 [S3 Select 编年史](/zh/blog/security/cve-2026-39414/)。
+支持远程利用（需 `s3:SelectObjectContent` 权限）。对超过 1 MiB（`maxCharsPerRecord`）的 CSV 与 JSON Lines 单条记录返回 `OverMaxRecordSize`，防止无界读入耗尽节点内存。四月补丁（`3252d5b7f`）收口了 CSV 与标准 JSON 读取器；六月后续补丁（`5dc705936`）在支持 AVX2/AVX-512 的 CPU 上同样将 JSON Lines 路由至有界 `json.PReader`（停用无行长上限的 `simdj.NewReader`），堵住了硬件相关的 SIMD 绕过路径。上游公告 [`GHSA-h749-fxx7-pwpg`](https://github.com/advisories/GHSA-h749-fxx7-pwpg) 致谢发现者 XlabAI（`@XlabAITeam`）。详见 [S3 Select 编年史](/zh/blog/security/cve-2026-39414/)。
 
 ### CVE-2026-41145 — 无签名尾标流式请求查询参数认证绕过 {#cve-2026-41145}
 
-支持远程利用。修复了在 `PutObject` 或 `PutObjectPart` 请求中同时使用 `X-Amz-Content-Sha256: STREAMING-UNSIGNED-PAYLOAD-TRAILER` 与 URL 查询参数 SigV4 凭据时的认证绕过漏洞。
+支持远程利用。修复了在 `PutObject` 或 `PutObjectPart` 请求中同时使用 `X-Amz-Content-Sha256: STREAMING-UNSIGNED-PAYLOAD-TRAILER` 与 URL 查询参数 SigV4 凭据时的认证绕过漏洞。上游公告 [`GHSA-hv4r-mvr4-25vw`](https://github.com/advisories/GHSA-hv4r-mvr4-25vw) 致谢发现者 skull（`@ddd`）。
 
 ### CVE-2026-40344 — Snowball 自动解包无签名尾标认证绕过 {#cve-2026-40344}
 
-支持远程利用。在 `newUnsignedV4ChunkedReader()` 构造阶段即完成 SigV4 认证校验，确保 `PutObjectExtract`（Snowball 批量归档上传）在未通过认证前绝不向 `untar()` 解包器提供任何字节。
+支持远程利用。在 `newUnsignedV4ChunkedReader()` 构造阶段即完成 SigV4 认证校验，确保 `PutObjectExtract`（Snowball 批量归档上传）在未通过认证前绝不向 `untar()` 解包器提供任何字节。上游公告 [`GHSA-9c4q-hq6p-c237`](https://github.com/advisories/GHSA-9c4q-hq6p-c237) 致谢发现者 skull（`@ddd`）。
 
 ### CVE-2026-42600 — 节点间 `ReadMultiple` 路径穿越 {#cve-2026-42600}
 
-支持远程利用（需持有集群内部 JWT）。直接删除了未使用的 `/rmpl`（`xlStorage.ReadMultiple`）内部 RPC 端点，消除通过 msgpack 请求体逃逸磁盘根目录读取任意文件的路径。单节点部署不注册该路由；分布式纠删码集群应升级。
+支持远程利用（需持有集群内部 JWT）。直接删除了未使用的 `/rmpl`（`xlStorage.ReadMultiple`）内部 RPC 端点，消除通过 msgpack 请求体逃逸磁盘根目录读取任意文件的路径。单节点部署不注册该路由；分布式纠删码集群应升级。上游公告 [`GHSA-xh8f-g2qw-gcm7`](https://github.com/advisories/GHSA-xh8f-g2qw-gcm7) 致谢报告者 Adrian Denkiewicz（`@adrian-doyensec`）。
 
 ### SN-2026-002 — 节点间载荷路径与内存边界收口 {#sn-2026-002}
 
@@ -135,7 +138,7 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 
 ### SN-2026-010 — 显式对象版本删除强制要求 `s3:DeleteObjectVersion` {#sn-2026-010}
 
-支持远程利用（已认证 S3 API）。携带 `versionId` 的 `DeleteObject` 与 `DeleteObjects` 请求此前按 `s3:DeleteObject` 鉴权（仅检查是否显式 `Deny s3:DeleteObjectVersion`），与 AWS S3 规范不符。修复后显式删除指定版本必须持有 `s3:DeleteObjectVersion`。**两项策略影响：** 仅持有 `s3:DeleteObject` 的主体仍可发起不带版本的删除（创建删除标记），但不能再永久删除指定版本；原先依赖 `Allow s3:*` 配合 `Deny s3:DeleteObject` 来阻止永久删除版本的策略，必须同步加上 `Deny s3:DeleteObjectVersion`。复制目标保持 `s3:ReplicateDelete` 契约不变。详见[显式版本删除鉴权说明](/zh/blog/release/delete-object-version-authorization/)。
+支持远程利用（已认证 S3 API）。携带 `versionId` 的 `DeleteObject` 与 `DeleteObjects` 请求此前按 `s3:DeleteObject` 鉴权（仅检查是否显式 `Deny s3:DeleteObjectVersion`），与 AWS S3 规范不符。由 Fabian Schmieder（`@metaneutrons`，[#58](https://github.com/pgsty/silo/issues/58)、[#59](https://github.com/pgsty/silo/pull/59)）报告并提交初步方案。修复后显式删除指定版本必须持有 `s3:DeleteObjectVersion`。**两项策略影响：** 仅持有 `s3:DeleteObject` 的主体仍可发起不带版本的删除（创建删除标记），但不能再永久删除指定版本；原先依赖 `Allow s3:*` 配合 `Deny s3:DeleteObject` 来阻止永久删除版本的策略，必须同步加上 `Deny s3:DeleteObjectVersion`。复制目标保持 `s3:ReplicateDelete` 契约不变。详见[显式版本删除鉴权说明](/zh/blog/release/delete-object-version-authorization/)。
 
 ### SN-2026-011 — 未签名 `X-Amz-*` 操作请求头拦截 {#sn-2026-011}
 
@@ -157,7 +160,7 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 
 ### SN-2026-015 — `PutObjectRetention` 鉴权与治理保留期绕过 {#sn-2026-015}
 
-支持远程利用（已认证 S3 调用方）。`PutObjectRetentionHandler`（`cmd/object-handlers.go`）中的三处缺陷使已认证调用方能够：(1) 在未持有 `s3:PutObjectRetention` 权限时，仅凭 `s3:BypassGovernanceRetention` 并附带 `X-Amz-Bypass-Governance-Retention: true` 请求头短路基础动作鉴权并修改对象保留期；(2) 仅凭 `s3:PutObjectRetention`（无 `s3:BypassGovernanceRetention`）通过提交空模式（`Mode: ""`）清空或缩短处于有效期的 `GOVERNANCE` 锁；(3) 在清空保留期时绕过针对 `s3:object-lock-remaining-retention-days` 的 IAM `Deny` 策略。已在 **[Server 20261018](/zh/blog/security/20261018-release-hardening/#object-lock)**（PR #234、#235、`14042b5aa`）中修复：在读取对象前无条件强制校验 `s3:PutObjectRetention`；缩短、清空或降级有效 `GOVERNANCE` 锁必须同时携带 `X-Amz-Bypass-Governance-Retention: true` 并通过 `s3:BypassGovernanceRetention` 鉴权；清空保留期时将剩余天数按 `0` 注入策略上下文。详见 [SN-2026-015 / SN-2026-016 安全公告](/zh/blog/security/20260926-governance-retention-bypass/)与[修复架构设计](/zh/blog/design/governance-retention-bypass-repair/#sn-2026-015)。
+支持远程利用（已认证 S3 调用方）。`PutObjectRetentionHandler`（`cmd/object-handlers.go`）中的三处缺陷使已认证调用方能够：(1) 在未持有 `s3:PutObjectRetention` 权限时，仅凭 `s3:BypassGovernanceRetention` 并附带 `X-Amz-Bypass-Governance-Retention: true` 请求头短路基础动作鉴权并修改对象保留期；(2) 仅凭 `s3:PutObjectRetention`（无 `s3:BypassGovernanceRetention`）通过提交空模式（`Mode: ""`）清空或缩短处于有效期的 `GOVERNANCE` 锁；(3) 在清空保留期时绕过针对 `s3:object-lock-remaining-retention-days` 的 IAM `Deny` 策略。由 `@szopi00` 报告。已在 **[Server 20261018](/zh/blog/security/20261018-release-hardening/#object-lock)**（PR #234、#235、`14042b5aa`）中修复：在读取对象前无条件强制校验 `s3:PutObjectRetention`；缩短、清空或降级有效 `GOVERNANCE` 锁必须同时携带 `X-Amz-Bypass-Governance-Retention: true` 并通过 `s3:BypassGovernanceRetention` 鉴权；清空保留期时将剩余天数按 `0` 注入策略上下文。详见 [SN-2026-015 / SN-2026-016 安全公告](/zh/blog/security/20260926-governance-retention-bypass/)与[修复架构设计](/zh/blog/design/governance-retention-bypass-repair/#sn-2026-015)。
 
 ### SN-2026-016 — 指定版本与原地写入的对象锁覆写 {#sn-2026-016}
 
@@ -165,7 +168,7 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 
 ### SN-2026-017 — 委派 IAM Admin 凭据授权边界 {#sn-2026-017}
 
-支持远程利用（已认证的委派 IAM 管理员或受限派生凭据）。在 Server 20260916 及更早版本中，持有 `admin:CreateUser`、`admin:AttachUserOrGroupPolicy` 或 `admin:UpdateServiceAccount` 等权限的非 root 管理员可以分配超出自身有效权限范围的策略、修改更高权限的用户/组/服务账号，或通过自助管理路由逃逸会话策略与显式 `Deny` 限制。已在 **[Server 20261018](/zh/blog/security/20261018-release-hardening/#sn-2026-017)**（`2616d43fb`、`995439260`、PR #242）中修复：委派 IAM 写操作全面执行目标策略包含性校验（`authorizePolicyChange`、`authorizeGroupTargets`、`authorizeTargetUser`），并拦截非 root 主体对自身权限的变更（`ErrAdminChangeUserSelfPermission`）。详见[委派 IAM 管理授权设计](/zh/blog/design/iam-admin-authorization/)。
+支持远程利用（已认证的委派 IAM 管理员或受限派生凭据）。在 Server 20260916 及更早版本中，持有 `admin:CreateUser`、`admin:AttachUserOrGroupPolicy` 或 `admin:UpdateServiceAccount` 等权限的非 root 管理员可以分配超出自身有效权限范围的策略、修改更高权限的用户/组/服务账号，或通过自助管理路由逃逸会话策略与显式 `Deny` 限制。由 Sarthak Mittal（`@naiveHobo`，[#222](https://github.com/pgsty/silo/issues/222)）报告。已在 **[Server 20261018](/zh/blog/security/20261018-release-hardening/#sn-2026-017)**（`2616d43fb`、`995439260`、PR #242）中修复：委派 IAM 写操作全面执行目标策略包含性校验（`authorizePolicyChange`、`authorizeGroupTargets`、`authorizeTargetUser`），并拦截非 root 主体对自身权限的变更（`ErrAdminChangeUserSelfPermission`）。详见[委派 IAM 管理授权设计](/zh/blog/design/iam-admin-authorization/)。
 
 ### SN-2026-018 — 客户端源地址信任边界（`MINIO_API_TRUSTED_PROXIES`） {#sn-2026-018}
 
@@ -176,6 +179,14 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 ### SN-2026-019 — 通知配置键注册与敏感凭据脱敏 {#sn-2026-019}
 
 配置子系统加固（`672c07a0f` 随 [Server 20260804](/zh/blog/release/silo-20260804/) 发布，后续 `f1ba68358` 随 [Server 20260903](/zh/blog/release/silo-20260903/) 发布）。对 `notify_postgres` 与 `notify_mysql` 的审计发现，`config.HasSensitiveKeys` 未将 `password`、`dsn_string` 与 `connection_string` 标记为敏感字段（导致配置校验报错或 `GetConfigKV` 可能回显明文凭据），且 5 个离散连接参数未注册进 `Keyspace`。提交 `672c07a0f` 补齐了 `config.HasSensitiveKeys` 凭据脱敏与跨子系统键注册结构化测试；[Server 20260903](/zh/blog/design/notify-url/) 随后退役了 5 个离散字段并统一收敛至 `connection_string` 与 `dsn_string`，消除了两套配置表示在启动迁移时的静默覆盖隐患。详见[通知键空间编年史](/zh/blog/security/notify-keyspace-registration/)与[数据库通知连接串设计](/zh/blog/design/notify-url/)。
+
+### SN-2026-020 — 单存储池批量删除跨桶路径穿越 {#sn-2026-020}
+
+支持远程利用（单存储池部署下，任意在至少一个桶上持有 `s3:DeleteObject` 或 `s3:DeleteObjectVersion` 权限的已认证 S3 调用方）。在单存储池模式下，`(*erasureServerPools).DeleteObjects` 虽然对每个 XML `<Key>` 调用 `checkDelObjArgs`（`hasBadPathComponent`）检出了 `ObjectNameInvalid` 并记入 `derrs[i]`，却未拦截报错项而直接将整批名单下发磁盘，并在本地磁盘回报找到目标时将 `derrs[i]` 清零为 `nil`。由于本地 `xlStorage` 通过 `pathJoin` 将对象名拼接到请求桶目录下，含 `..` 路径段的名字可越出请求桶到达其他业务桶或 `.minio.sys`：在未开锁桶 `A` 上持有 `s3:DeleteObjectVersion` 的调用方可物理删除受害桶 `B` 中受 `COMPLIANCE` 合规保留期保护的对象版本；在开启版本控制的桶 `A` 上仅持有 `s3:DeleteObject` 的调用方无需任何版本号即可给桶 `B` 的对象或 `.minio.sys/buckets/B/.metadata.bin` 桶元数据盖上删除标记（同一批次混入指向同一目标的多个穿越别名还会触发单机批量锁自死锁）。该问题在对 Denis Babchuk（`@botdeniska`）通过私密渠道报告的 `DeleteObjects` 对象锁问题（[#330](https://github.com/pgsty/silo/pull/330)）开展后续核验时检出。已在 `main` 主干 [`a18293d0c`](https://github.com/pgsty/silo/commit/a18293d0c309b93fe9c69f45ed8f44fe558fe01d) 中修复（待随 `20261109` 后续热修版发布）：校验失败的条目保留 `XMinioInvalidObjectName` 并在加锁、查表与下盘前直接返回，同批次其余合法条目正常删除。Server 20261026+ 的多存储池（`2+` pools）集群不受影响（`3c82748e1`）。完成升级前，请在单存储池集群上收回不可信主体的删除权限。详见 [SN-2026-020 安全编年史](/zh/blog/security/20261110-bulk-delete-path-traversal/)。
+
+### SN-2026-021 — 未传策略的服务账号编辑保留内联会话策略 {#sn-2026-021}
+
+运维触发权限提升（任意已认证主体或管理员在未提供 `SessionPolicy` 字段的情况下调用 `UpdateServiceAccount` 时触发）。继承自上游 `minio/minio`（`f0462322f`、`33322e663`、`5bd27346a`）的 `UpdateServiceAccountHandler` 在解析 `UpdateServiceAccountReq` 时未从持久记录初始化 `opts.sessionPolicy`，而 `updatedServiceAccountCredentials` 在 `opts.sessionPolicy == nil` 时一律将 `cred.SessionPolicy` 清零（`cred.SessionPolicy = opts.sessionPolicy != nil`）。任何未携带 `--policy` 的日常运维命令——包括 `mcli admin user svcacct disable` 后再 `enable`、通过 `svcacct edit` 或 `accesskey edit` 修改 `--secret-key` / `--name` / `--description` / `--expiry`（未传 `--policy`），以及站点复制对端收到此类增量更新（`saveUpdatedServiceAccount` 经 `EditAccessKey`）——都会静默抹除服务账号的内联策略（`policy.json`），使内置 IAM、OIDC（`jwt`）与 LDAP（`ldap`）父身份下的受限子密钥直接回退继承父级完整权限。该问题在对 `updatedServiceAccountCredentials`（`cmd/iam-store.go`）开展内部安全审查时检出。已在 `main` 主干 [`c11bfda8f`](https://github.com/pgsty/silo/commit/c11bfda8f48153d6bc42b6eeee4a9fb39bcffd27)（[#331](https://github.com/pgsty/silo/pull/331)，待随 `20261109` 后续热修版发布）中修复：未携带 `SessionPolicy` 的编辑请求在鉴权（`extractTargetPolicy`）、落盘（`updatedServiceAccountCredentials`）与单账号站点复制全链路保留已存储的内联策略；显式传入空策略文档（`{}` 或 `{"Statement":[]}`，即 `opts.sessionPolicy.Statements` 为空）则清除内联策略。**升级二进制无法自动恢复此前已被清空的策略：** 升级后请使用 `mcli admin user svcacct info` 排查显示为 `Policy: implied` 的存量服务账号并按需通过 `--policy` 重新绑定。详见 [SN-2026-021 安全编年史](/zh/blog/security/20261110-svcacct-inline-policy-preservation/)。
 
 ## 依赖安全更新 {#dependencies}
 
@@ -216,4 +227,4 @@ SILO 首个社区版本（`RELEASE.2025-12-03T12-00-00Z`）切自已包含 `CVE-
 
 ## 台账归属 {#attribution}
 
-本页由原 `pgsty/silo` 安全台账（`docs/security/advisories.md`，更新至 `f99ed829b5eba` / `40220bd836cb`）维护演进而来，发布状态与[组件版本矩阵](/zh/compatibility/versions/)保持同步。各漏洞的排查链路、被否决方案对比与验证命令见对应的[安全编年史](/zh/blog/security/)与[设计笔记](/zh/blog/design/)文章。
+本页由原 `pgsty/silo` 安全台账（`docs/security/advisories.md`，更新至 `f99ed829b5eba` / `40220bd836cb`）维护演进而来，发布状态与[组件版本矩阵](/zh/compatibility/versions/)保持同步。各漏洞的排查链路、被否决方案对比与验证命令见对应的[安全编年史](/zh/blog/security/)与[设计笔记](/zh/blog/design/)文章；安全研究者与报告者致谢见[贡献者与致谢](/zh/about/contributors/)及[署名归属](/zh/about/attribution/#security-acknowledgments)。

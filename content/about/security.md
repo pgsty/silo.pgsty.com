@@ -40,5 +40,6 @@ Because SILO shares lineage with `minio/minio`, most vulnerabilities in inherite
 
 ## See Also {#see-also}
 
+- [Contributors](/about/contributors/)
 - [License](/about/license/)
 - [Attribution](/about/attribution/)

@@ -127,7 +127,7 @@ MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 要附加到新访问密钥的 [策略文档](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 路径，最大长度为 2048 个字符。 附加策略不能授予父用户策略中未显式允许的任何操作或资源访问权限。
 
-新策略会覆盖此前附加的任何策略。
+新策略会覆盖此前附加的任何策略。省略 `--policy` 会保留现有的内联策略；若需移除已附加的内联策略并恢复为继承父用户策略，请传入包含空策略文档（`{}` 或 `{"Version":"2012-10-17","Statement":[]}`）的文件。
 
 ##### `--secret-key` {#mc.admin.accesskey.edit.-secret-key}
 

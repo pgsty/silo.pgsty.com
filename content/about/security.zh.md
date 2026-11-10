@@ -40,5 +40,6 @@ SILO 派生自 `minio/minio`，继承代码中的缺陷通常同时影响两者�
 
 ## 参见 {#see-also}
 
+- [贡献者与致谢](/zh/about/contributors/)
 - [许可协议](/zh/about/license/)
 - [归属与署名](/zh/about/attribution/)

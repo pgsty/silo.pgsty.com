@@ -121,7 +121,7 @@ Add a human-readable name for the service account.
 
 The path to a [policy document](/administration/identity-access-management/policy-based-access-control/#minio-policy) to attach to the new access key, with a maximum size of 2048 characters. The attached policy cannot grant access to any action or resource not explicitly allowed by the parent user’s policies.
 
-The new policy overwrites any previously attached policy.
+The new policy overwrites any previously attached policy. Omitting `--policy` preserves the existing inline policy; to remove an attached inline policy and revert the service account to inheriting its parent user's policies, pass a file containing an empty policy document (`{}` or `{"Version":"2012-10-17","Statement":[]}`).
 
 ##### `--secret-key` {#mc.admin.user.svcacct.edit.-secret-key}
 
