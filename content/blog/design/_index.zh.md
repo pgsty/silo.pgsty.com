@@ -13,6 +13,10 @@ cascade:
 
 设计归档记录 PGSTY SILO 的核心工程决策：缺陷根因、S3 与 IAM 协议不变量、备选方案取舍、运维边界与回归测试索引。
 
+## 2026-11-10 发布复查中发现 {#november-10-found-in-release-review}
+
+- [生命周期版本历史：同一个版本，两个发行版写的头部](/zh/blog/design/lifecycle-history-old-headers/)（[#332](https://github.com/pgsty/silo/pull/332)）：2024-04-28 之前的 MinIO 写入的数据，在纠删集里换过一部分盘之后，生命周期过期为什么会被永久拒绝，以及为什么把两个随写入版本而变的头部字段从修订标识里拿掉就是最小而完整的修复。
+
 ## 2026-11-09 Console 多语言 {#november-9-console-languages}
 
 - [为 SILO 提供多语言支持](/zh/blog/design/console-languages/)：随 [Console 2.7.0](/zh/blog/release/console-2.7.0/) 发布并内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/) 的十语言界面（[Console 2.6.0](/zh/blog/release/console-2.6.0/) 仅含中英文；涵盖 [#83](https://github.com/pgsty/silo-console/pull/83) 葡语贡献与 [silo#277](https://github.com/pgsty/silo/issues/277) 土耳其语需求），记录维护分级、英文回退与阿拉伯语 RTL，以及支持逐语言分包、全量加载决策的 gzip 和缓存实测。
