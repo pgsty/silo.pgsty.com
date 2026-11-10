@@ -103,7 +103,7 @@ The defect needs the last-but-one row: before 2025-09-16 the Console wrote the l
 | 20261109                                         | Console v2.7.0                                | No                         |
 {.wide .expand}
 
-[SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`) embeds [Console 2.7.0](/blog/release/console-2.7.0/) ([`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)) and resolves both defects in the embedded UI (superseding the intermediate `main` bump to `v2.6.0` in [`e24831f53`](https://github.com/pgsty/silo/commit/e24831f53)). The Server tags 20260304, 20260323, and 20260330 embed a Console build from before the writer change and are not affected.
+[SILO Server 20261109](/blog/release/silo-20261109/) (`d998292387cc`) embeds [Console 2.7.0](/blog/release/console-2.7.0/) ([`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)) and resolves both defects in the embedded UI (superseding the intermediate `main` bump to `v2.6.0` in [`28a9e67ac`](https://github.com/pgsty/silo/commit/28a9e67ac)). The Server tags 20260304, 20260323, and 20260330 embed a Console build from before the writer change and are not affected.
 
 ### #73: original minio/console code {#original-code}
 

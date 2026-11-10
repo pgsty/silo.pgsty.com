@@ -103,7 +103,7 @@ url: "/zh/blog/design/console-quota-numeric-validation/"
 | 20261109                                         | Console v2.7.0                      | 否                   |
 {.wide .expand}
 
-[SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）内嵌 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)），在内嵌界面中一并修复了这两个缺陷（取代了此前 `main` 分支 [`e24831f53`](https://github.com/pgsty/silo/commit/e24831f53) 中的 `v2.6.0` 中间升级）。Server 标签 20260304、20260323 和 20260330 内嵌的是写入端改变之前的 Console 构建，不受影响。
+[SILO Server 20261109](/zh/blog/release/silo-20261109/)（`d998292387cc`）内嵌 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（[`4e91ae506e70`](https://github.com/pgsty/silo-console/commit/4e91ae506e706ccdecb512b1d8b5ab4d9871d505)），在内嵌界面中一并修复了这两个缺陷（取代了此前 `main` 分支 [`28a9e67ac`](https://github.com/pgsty/silo/commit/28a9e67ac) 中的 `v2.6.0` 中间升级）。Server 标签 20260304、20260323 和 20260330 内嵌的是写入端改变之前的 Console 构建，不受影响。
 
 ### #73：minio/console 的原有代码 {#original-code}
 

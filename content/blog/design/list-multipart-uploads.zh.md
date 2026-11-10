@@ -215,7 +215,7 @@ Issue `#198`（`2026-09-16`）与 `#213` 最初通过 `MINIO_API_MULTIPART_LISTI
 
 ## 历史记录：9 月 16 日可选 `strict` 模式（`#198`） {#implementation-20260916}
 
-Issue `#198`（提交 [`4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074cc)，并由 [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d) 与 [`0ff5b37fc`](https://github.com/pgsty/silo/commit/0ff5b37fc) 加固）在 Server `20260916` 中交付了最初的按需启用实现：
+Issue `#198`（提交 [`4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074cc)，并由 [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d) 与 [`82f0a9828`](https://github.com/pgsty/silo/commit/82f0a9828) 加固）在 Server `20260916` 中交付了最初的按需启用实现：
 
 - 新增 `MINIO_API_MULTIPART_LISTING=legacy|strict`（默认 `legacy`）及 `mcli admin config set/reset ALIAS api multipart_listing`。
 - 新增 `GET /minio/admin/v3/multipart-preflight`，供运维人员在开启 `strict` 前检查磁盘 `.minio.sys/multipart` 中是否存在缺少 `x-minio-internal-multipart-v1-bucket` 与 `x-minio-internal-multipart-v1-object` 的历史上传。

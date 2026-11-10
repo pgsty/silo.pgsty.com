@@ -8,8 +8,8 @@ url: "/zh/blog/security/s3-versionid-conditions/"
 tags: ["Security", "IAM", "S3", "Versioning", "Bucket Policy", "SILO"]
 ---
 
-**`SN-2026-003`** 与 **`SN-2026-005`** 涵盖了随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（提交 `80c2c9d03`、`2f55347f7`、`eee05a17c` 以及 [silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) 提交 `2b087a1`；[`pgsty/silo#40`](https://github.com/pgsty/silo/issues/40)、[`pgsty/silo#53`](https://github.com/pgsty/silo/issues/53)）发布的一组 S3 IAM 策略求值加固：
-1. **`SN-2026-003`（`80c2c9d03`）**：当请求未携带 `versionId` 时，`getConditionValues` 依然无条件写入了 `args.ConditionValues["versionid"] = []string{""}`，导致针对 `s3:versionid` 的 IAM `Null` 条件恒判定为“键已存在”；而如果只修改 `getConditionValues`，又会导致批量删除 `DeleteObjects` 请求体中的 XML `<VersionId>` 绕过版本条件策略，必须配合 `authorizeRequestWithTags` 中的逐条重绑定一并修复。
+**`SN-2026-003`** 与 **`SN-2026-005`** 涵盖了随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z)（提交 `744a9dcd7`、`2f55347f7`、`eee05a17c` 以及 [silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) 提交 `2b087a1`；[`pgsty/silo#40`](https://github.com/pgsty/silo/issues/40)、[`pgsty/silo#53`](https://github.com/pgsty/silo/issues/53)）发布的一组 S3 IAM 策略求值加固：
+1. **`SN-2026-003`（`744a9dcd7`）**：当请求未携带 `versionId` 时，`getConditionValues` 依然无条件写入了 `args.ConditionValues["versionid"] = []string{""}`，导致针对 `s3:versionid` 的 IAM `Null` 条件恒判定为“键已存在”；而如果只修改 `getConditionValues`，又会导致批量删除 `DeleteObjects` 请求体中的 XML `<VersionId>` 绕过版本条件策略，必须配合 `authorizeRequestWithTags` 中的逐条重绑定一并修复。
 2. **条件来源隔离（`2f55347f7`）**：严格隔离 URL 查询参数、HTTP 请求头、服务端内部派生键以及 `s3:ExistingObjectTag/<key>` 与 `s3:RequestObjectTag/<key>`，防止不可信查询串或请求头伪造内部条件键。
 3. **`SN-2026-005`（`2b087a1` / `eee05a17c`）**：新增 `ParseConfigStrict`，在策略写入路径上拒绝退化的裸 ARN 前缀（`"arn:aws:s3:::"` 与 `"*arn:aws:s3:::"`）。
 
@@ -76,9 +76,9 @@ args["versionid"] = []string{vid}
 
 ---
 
-## 完整的双边修复（`80c2c9d03`） {#the-fix}
+## 完整的双边修复（`744a9dcd7`） {#the-fix}
 
-提交 `80c2c9d03` 将两端协同闭环：
+提交 `744a9dcd7` 将两端协同闭环：
 
 1. **在 `getConditionValues` 中仅当 `vid != ""` 时写入 `"versionid"`**：
    ```go
@@ -155,7 +155,7 @@ versionID := strings.TrimSpace(r.URL.Query().Get(xhttp.VersionID))
 
 1. **`DeleteObjects` 的 Object Lock 治理模式绕过检查（`75a6734e4` / `#104`）**：在审查 `DeleteMultipleObjectsHandler` 的过程中，我们同步梳理了批量删除中请求头与逐条保留锁的交互；随后在 [Server 20260903](/zh/blog/security/20260903-server-hardening/)（`75a6734e4`，`SN-2026-008`）中收紧了 `x-amz-bypass-governance-retention` 的逐条鉴权边界。
 2. **Snowball `PutObjectExtract` 的 `minio.versionId` PAX 扩展头**：在本次 `versionId` 审计中记录归档，并已在 [Server 20261018](/zh/blog/security/20260926-governance-retention-bypass/)（`SN-2026-016`，`14042b5aa`）中彻底封堵。
-3. **其余身份条件键（`username`、`userid`、`signatureversion`、`authType`）**：`80c2c9d03` 有意将空切片省略限定在 `s3:versionid`，而不改变已认证请求上恒有定义的身份类条件键语义。
+3. **其余身份条件键（`username`、`userid`、`signatureversion`、`authType`）**：`744a9dcd7` 有意将空切片省略限定在 `s3:versionid`，而不改变已认证请求上恒有定义的身份类条件键语义。
 
 ---
 
@@ -169,10 +169,10 @@ versionID := strings.TrimSpace(r.URL.Query().Get(xhttp.VersionID))
 
 ## 源码参考 {#source}
 
-- [`80c2c9d03`](https://github.com/pgsty/silo/commit/80c2c9d03) — `s3:versionid` 空值省略、空白字符归一化与 `DeleteObjects` 逐条重绑定（`SN-2026-003`）
+- [`744a9dcd7`](https://github.com/pgsty/silo/commit/744a9dcd7) — `s3:versionid` 空值省略、空白字符归一化与 `DeleteObjects` 逐条重绑定（`SN-2026-003`）
 - [`2f55347f7`](https://github.com/pgsty/silo/commit/2f55347f7) — 请求条件键来源隔离（`#53`）
 - [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c) / [`silo-pkg@2b087a1`](https://github.com/pgsty/silo-pkg/commit/2b087a1) — `ParseConfigStrict` 拒绝退化裸 ARN 前缀（`SN-2026-005`）
 
 ## 总结 {#closing}
 
-随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 发布的 `80c2c9d03` 与 `eee05a17c`（配合 `silo-pkg v3.12.0`）修复了单对象与批量 `DeleteObjects` 路径上的 `s3:versionid` 条件求值语义，并在策略写入入口拦截了退化的裸 S3 ARN 前缀。
+随 [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) 发布的 `744a9dcd7` 与 `eee05a17c`（配合 `silo-pkg v3.12.0`）修复了单对象与批量 `DeleteObjects` 路径上的 `s3:versionid` 条件求值语义，并在策略写入入口拦截了退化的裸 S3 ARN 前缀。

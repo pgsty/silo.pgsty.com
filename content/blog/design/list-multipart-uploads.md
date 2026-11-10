@@ -215,7 +215,7 @@ Any future attempt to provide restart-durable arbitrary-prefix `ListMultipartUpl
 
 ## Historical Record: September 16 Opt-In `strict` Mode (`#198`) {#implementation-20260916}
 
-Issue `#198` (commit [`4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074cc), hardened in [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d) and [`0ff5b37fc`](https://github.com/pgsty/silo/commit/0ff5b37fc)) delivered the initial opt-in implementation for Server `20260916`:
+Issue `#198` (commit [`4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074cc), hardened in [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d) and [`82f0a9828`](https://github.com/pgsty/silo/commit/82f0a9828)) delivered the initial opt-in implementation for Server `20260916`:
 
 - Added `MINIO_API_MULTIPART_LISTING=legacy|strict` (default `legacy`) and `mcli admin config set/reset ALIAS api multipart_listing`.
 - Added `GET /minio/admin/v3/multipart-preflight` so operators could check whether pre-existing `.minio.sys/multipart` directories lacked `x-minio-internal-multipart-v1-bucket` and `x-minio-internal-multipart-v1-object` before enabling `strict`.

@@ -541,8 +541,8 @@ reports:
     what: "Discovered the S3 Select oversized record memory exhaustion vulnerability (CVE-2026-39414)"
     whatZh: "发现 S3 Select 超大记录内存耗尽漏洞（CVE-2026-39414）"
     activity: []
-    note: "Publicly credited on upstream [GHSA-h749-fxx7-pwpg](https://github.com/advisories/GHSA-h749-fxx7-pwpg); remediated in SILO in [3252d5b7f and 5dc705936](https://silo.pgsty.com/about/security-advisories/#cve-2026-39414)."
-    noteZh: "上游 [GHSA-h749-fxx7-pwpg](https://github.com/advisories/GHSA-h749-fxx7-pwpg) 公开致谢发现者；SILO 在 [3252d5b7f 与 5dc705936](https://silo.pgsty.com/zh/about/security-advisories/#cve-2026-39414) 中完成修复。"
+    note: "Publicly credited on upstream [GHSA-h749-fxx7-pwpg](https://github.com/advisories/GHSA-h749-fxx7-pwpg); remediated in SILO in [3252d5b7f and fd69c89d0](https://silo.pgsty.com/about/security-advisories/#cve-2026-39414)."
+    noteZh: "上游 [GHSA-h749-fxx7-pwpg](https://github.com/advisories/GHSA-h749-fxx7-pwpg) 公开致谢发现者；SILO 在 [3252d5b7f 与 fd69c89d0](https://silo.pgsty.com/zh/about/security-advisories/#cve-2026-39414) 中完成修复。"
   - handle: "ddd"
     name: "skull"
     featured: true

@@ -8,8 +8,8 @@ url: "/blog/security/s3-versionid-conditions/"
 tags: ["Security", "IAM", "S3", "Versioning", "Bucket Policy", "SILO"]
 ---
 
-**`SN-2026-003`** and **`SN-2026-005`** cover a set of S3 IAM policy evaluation fixes shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`80c2c9d03`, `2f55347f7`, `eee05a17c`, and [silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) commit `2b087a1`; [`pgsty/silo#40`](https://github.com/pgsty/silo/issues/40), [`pgsty/silo#53`](https://github.com/pgsty/silo/issues/53)):
-1. **`SN-2026-003` (`80c2c9d03`)**: `getConditionValues` populated `args.ConditionValues["versionid"] = []string{""}` even when a request carried no `versionId`, causing IAM `Null` conditions on `s3:versionid` to evaluate as if the key were always present; fixing that alone would have opened a `DeleteObjects` XML `<VersionId>` bypass without per-entry rebinding in `authorizeRequestWithTags`.
+**`SN-2026-003`** and **`SN-2026-005`** cover a set of S3 IAM policy evaluation fixes shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z) (`744a9dcd7`, `2f55347f7`, `eee05a17c`, and [silo-pkg `v3.12.0`](https://github.com/pgsty/silo-pkg/releases/tag/v3.12.0) commit `2b087a1`; [`pgsty/silo#40`](https://github.com/pgsty/silo/issues/40), [`pgsty/silo#53`](https://github.com/pgsty/silo/issues/53)):
+1. **`SN-2026-003` (`744a9dcd7`)**: `getConditionValues` populated `args.ConditionValues["versionid"] = []string{""}` even when a request carried no `versionId`, causing IAM `Null` conditions on `s3:versionid` to evaluate as if the key were always present; fixing that alone would have opened a `DeleteObjects` XML `<VersionId>` bypass without per-entry rebinding in `authorizeRequestWithTags`.
 2. **Condition-source isolation (`2f55347f7`)**: Separated query parameters, HTTP headers, internal server keys, and `s3:ExistingObjectTag/<key>` vs. `s3:RequestObjectTag/<key>` so untrusted query strings or headers cannot spoof internal condition keys.
 3. **`SN-2026-005` (`2b087a1` / `eee05a17c`)**: Added `ParseConfigStrict` to reject degenerate bare resource prefixes (`"arn:aws:s3:::"` and `"*arn:aws:s3:::"`) when writing IAM and bucket policies.
 
@@ -76,9 +76,9 @@ Because `authorizeRequestWithTags` calls `getConditionValues(r, ...)`—which in
 
 ---
 
-## The Two-Part Fix (`80c2c9d03`) {#the-fix}
+## The Two-Part Fix (`744a9dcd7`) {#the-fix}
 
-Commit `80c2c9d03` fixes both halves together:
+Commit `744a9dcd7` fixes both halves together:
 
 1. **Omit `"versionid"` when `vid == ""` in `getConditionValues`**:
    ```go
@@ -155,7 +155,7 @@ Exploiting the `s3:versionid` evaluation bugs required an authenticated caller o
 
 1. **Multi-Delete Object Lock governance bypass (`75a6734e4` / `#104`)**: While auditing `DeleteMultipleObjectsHandler`, we noted how per-entry headers and retention checks interact; [Server 20260903](/blog/security/20260903-server-hardening/) (`75a6734e4`, `SN-2026-008`) subsequently tightened `DeleteMultipleObjectsHandler` so `x-amz-bypass-governance-retention` is only evaluated against the specific locked entry rather than across the batch.
 2. **Snowball `PutObjectExtract` `minio.versionId` PAX header**: Noted during our `versionId` audit and closed in [Server 20261018](/blog/security/20260926-governance-retention-bypass/) (`SN-2026-016`, `14042b5aa`).
-3. **Other condition keys (`username`, `userid`, `signatureversion`, `authType`)**: We intentionally scoped `80c2c9d03` to `s3:versionid` rather than changing empty-slice semantics for identity keys that are always defined on authenticated requests.
+3. **Other condition keys (`username`, `userid`, `signatureversion`, `authType`)**: We intentionally scoped `744a9dcd7` to `s3:versionid` rather than changing empty-slice semantics for identity keys that are always defined on authenticated requests.
 
 ---
 
@@ -169,10 +169,10 @@ Regression tests in `cmd/signature-v4-utils_test.go`, `cmd/auth-handler_test.go`
 
 ## Source References {#source}
 
-- [`80c2c9d03`](https://github.com/pgsty/silo/commit/80c2c9d03) — `s3:versionid` condition omission, whitespace trimming, and `DeleteObjects` per-entry rebinding (`SN-2026-003`)
+- [`744a9dcd7`](https://github.com/pgsty/silo/commit/744a9dcd7) — `s3:versionid` condition omission, whitespace trimming, and `DeleteObjects` per-entry rebinding (`SN-2026-003`)
 - [`2f55347f7`](https://github.com/pgsty/silo/commit/2f55347f7) — request condition-source isolation (`#53`)
 - [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c) / [`silo-pkg@2b087a1`](https://github.com/pgsty/silo-pkg/commit/2b087a1) — `ParseConfigStrict` bare ARN prefix rejection (`SN-2026-005`)
 
 ## Summary {#closing}
 
-Shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z), `80c2c9d03` and `eee05a17c` (`silo-pkg v3.12.0`) ensure accurate `s3:versionid` condition evaluation across single-object and batch `DeleteObjects` operations while rejecting degenerate bare S3 ARN prefixes on policy writes.
+Shipped in [Server 20260804](https://github.com/pgsty/silo/releases/tag/RELEASE.2026-08-04T00-00-00Z), `744a9dcd7` and `eee05a17c` (`silo-pkg v3.12.0`) ensure accurate `s3:versionid` condition evaluation across single-object and batch `DeleteObjects` operations while rejecting degenerate bare S3 ARN prefixes on policy writes.
