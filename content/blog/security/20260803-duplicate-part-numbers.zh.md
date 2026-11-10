@@ -50,11 +50,11 @@ for i := 1; i < len(complMultipartUpload.Parts); i++ {
 
 通过 `git log -S` 追溯该处理函数的演进历史可以看到，这一“非递减”判断在九年间的两次代码整理中被原样保留了下来：
 
-| 时间 | PR / 提交 | 变更内容 | 为何 `[1, 1]` 未被发现 |
-|---|---|---|---|
-| 2016-08 | [`minio/minio#2490`](https://github.com/minio/minio/pull/2490) | 引入 `sort.IsSorted(completedParts(complMultipartUpload.Parts))`，其 `Less(i, j)` 定义为 `a[i].PartNumber < a[j].PartNumber`。 | `sort.IsSorted` 仅检查后一项是否小于前一项。 |
-| 2017-11 | [`minio/minio#5170`](https://github.com/minio/minio/pull/5170) | 移除具名类型 `completedParts`，改用 `sort.SliceIsSorted` 与相同的 `<` 闭包。 | 属于比较器逻辑不变的机械重构。 |
-| 2023-04 | [`minio/minio#17066`](https://github.com/minio/minio/pull/17066) | 将 `ErrInvalidPartOrder` 校验前移到 `CompleteMultipartUploadHandler` 入口（进入对象层之前）。 | 原样移动了校验代码块，未补充重复分片号用例。 |
+| 时间    | PR / 提交                                                        | 变更内容                                                                                                                       | 为何 `[1, 1]` 未被发现                       |
+| ------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| 2016-08 | [`minio/minio#2490`](https://github.com/minio/minio/pull/2490)   | 引入 `sort.IsSorted(completedParts(complMultipartUpload.Parts))`，其 `Less(i, j)` 定义为 `a[i].PartNumber < a[j].PartNumber`。 | `sort.IsSorted` 仅检查后一项是否小于前一项。 |
+| 2017-11 | [`minio/minio#5170`](https://github.com/minio/minio/pull/5170)   | 移除具名类型 `completedParts`，改用 `sort.SliceIsSorted` 与相同的 `<` 闭包。                                                   | 属于比较器逻辑不变的机械重构。               |
+| 2023-04 | [`minio/minio#17066`](https://github.com/minio/minio/pull/17066) | 将 `ErrInvalidPartOrder` 校验前移到 `CompleteMultipartUploadHandler` 入口（进入对象层之前）。                                  | 原样移动了校验代码块，未补充重复分片号用例。 |
 {.wide .expand}
 
 现有的单元测试与 mint 测试在验证 `ErrInvalidPartOrder` 时均只构造了 `[2, 1]` 这类逆序输入，从未覆盖 `[1, 1]` 这类相邻重复输入。
@@ -65,12 +65,12 @@ for i := 1; i < len(complMultipartUpload.Parts); i++ {
 
 在修复前，只需上传一个 5 MiB 的分片（`partNumber=1`），并在完成上传时提交两条同样引用 `PartNumber=1` 及其 ETag 的 `<Part>` 记录，即可复现如下行为：
 
-| 步骤 | 请求 | 修复前结果 | 修复后结果 |
-|---|---|---|---|
-| 1 | `UploadPart(partNumber=1)`（5 MiB） | `200 OK`，返回 `ETag: "e1"` | `200 OK`，返回 `ETag: "e1"` |
-| 2 | 使用 `[(1, "e1"), (1, "e1")]` 调用 `CompleteMultipartUpload` | `200 OK`，`ETag: "...-2"` | `400 Bad Request`（`InvalidPartOrder`） |
-| 3 | `HeadObject` / `GetObject` | `Content-Length: 10485760`（分片 1 被重复拼接两次） | 对象未创建，分段上传保持打开状态 |
-| 4 | 改用 `[(1, "e1")]` 重试 `CompleteMultipartUpload` | `404 NoSuchUpload`（上传状态已被消费并清理） | `200 OK`，`Content-Length: 5242880` |
+| 步骤 | 请求                                                         | 修复前结果                                          | 修复后结果                              |
+| ---- | ------------------------------------------------------------ | --------------------------------------------------- | --------------------------------------- |
+| 1    | `UploadPart(partNumber=1)`（5 MiB）                          | `200 OK`，返回 `ETag: "e1"`                         | `200 OK`，返回 `ETag: "e1"`             |
+| 2    | 使用 `[(1, "e1"), (1, "e1")]` 调用 `CompleteMultipartUpload` | `200 OK`，`ETag: "...-2"`                           | `400 Bad Request`（`InvalidPartOrder`） |
+| 3    | `HeadObject` / `GetObject`                                   | `Content-Length: 10485760`（分片 1 被重复拼接两次） | 对象未创建，分段上传保持打开状态        |
+| 4    | 改用 `[(1, "e1")]` 重试 `CompleteMultipartUpload`            | `404 NoSuchUpload`（上传状态已被消费并清理）        | `200 OK`，`Content-Length: 5242880`     |
 {.wide .expand}
 
 由于 `CompleteMultipartUpload` 一旦成功就会消费并清理该 `uploadId` 的暂存状态，如果客户端因重试逻辑缺陷（例如重试 `UploadPart` 后直接向内存切片 `append` 而未按分片号去重）在完成清单中混入了重复分片，服务端不仅会静默生成一个长度错误的损坏对象，而且客户端也无法再对该 `uploadId` 重新发起正确的 `CompleteMultipartUpload`，只能重传所有分片。

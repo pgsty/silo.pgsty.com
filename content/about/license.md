@@ -10,14 +10,14 @@ icon: fa-solid fa-scale-balanced
 
 Silo carries two separate licenses. The software and the documentation are distributed under different terms, and each inherits the license its upstream work already used.
 
-| What | License | Where |
-|:-----|:--------|:------|
-| `silo` server | AGPL-3.0-or-later | [`pgsty/silo`](https://github.com/pgsty/silo/blob/main/LICENSE) |
-| SILO Console | AGPL-3.0-or-later | [`pgsty/silo-console`](https://github.com/pgsty/silo-console/blob/main/LICENSE) |
-| `mcli` client | AGPL-3.0-or-later | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE) |
-| SILO Shared Packages | AGPL-3.0-or-later | [`pgsty/silo-pkg`](https://github.com/pgsty/silo-pkg/blob/main/LICENSE) |
-| `kes` key management server (optional) | AGPL-3.0-or-later | [`pgsty/kes`](https://github.com/pgsty/kes/blob/main/LICENSE) |
-| This documentation | CC BY 4.0 | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
+| What                                   | License           | Where                                                                               |
+| :------------------------------------- | :---------------- | :---------------------------------------------------------------------------------- |
+| `silo` server                          | AGPL-3.0-or-later | [`pgsty/silo`](https://github.com/pgsty/silo/blob/main/LICENSE)                     |
+| SILO Console                           | AGPL-3.0-or-later | [`pgsty/silo-console`](https://github.com/pgsty/silo-console/blob/main/LICENSE)     |
+| `mcli` client                          | AGPL-3.0-or-later | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE)                         |
+| SILO Shared Packages                   | AGPL-3.0-or-later | [`pgsty/silo-pkg`](https://github.com/pgsty/silo-pkg/blob/main/LICENSE)             |
+| `kes` key management server (optional) | AGPL-3.0-or-later | [`pgsty/kes`](https://github.com/pgsty/kes/blob/main/LICENSE)                       |
+| This documentation                     | CC BY 4.0         | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
 {.wide .expand}
 
 ## Software: AGPLv3 {#software}

@@ -31,16 +31,16 @@ url: "/zh/blog/design/iam-admin-authorization/"
 
 自查询和自清理在调用授权前设置 `DenyOnly: true`：普通用户无需额外 Allow 策略即可执行既有的自管理操作，但显式 Deny 依然生效；派生凭据继续执行完整 IAM 评估，其有效会话策略必须明确允许目标操作；外部插件的拒绝结果始终生效。任何 Handler 都不会再因目标属于调用者而覆盖拒绝决定。
 
-| Handler | 现有 Admin Action | 自管理语义与附加边界 |
-| --- | --- | --- |
-| `InfoServiceAccount` | `admin:ListServiceAccounts` | 比对有效用户与服务账号存储的父账号，授权通过后返回详情。 |
-| `ListServiceAccounts` | `admin:ListServiceAccounts` | 空用户参数、调用者 AccessKey、调用者父账号均视为自身别名；每次请求均执行授权，并列出父账号名下的密钥。 |
-| `ListAccessKeysBulk` | `admin:ListServiceAccounts` | 自身别名统一按父身份归一化并复用同一自管理授权辅助函数；跨用户查询和 `all=true` 保持原有权限要求。 |
-| `InfoAccessKey` | `admin:ListServiceAccounts` | 仅当目标存在、属于派生凭据且父账号相同时才视为自身；不存在的目标不触发自管理分支。 |
-| `DeleteServiceAccount` | `admin:RemoveServiceAccount` | 自清理先执行授权再检查 root 边界；目标 token 损坏时直接读取存储的身份元数据。 |
-| `RevokeTokens` | `admin:RemoveServiceAccount` | 省略用户参数或解析后等于调用者父账号时视为自身；先执行授权并保护 root 目标。 |
-| `AddServiceAccount`、`AddServiceAccountLDAP` | `admin:CreateServiceAccount` | 完成既有自身或跨用户 IAM 授权后，拒绝受有效会话策略限制的调用者及无权管理 root 的调用者。 |
-| `UpdateServiceAccount` | `admin:UpdateServiceAccount` | 完成既有 Action 授权后，拒绝受有效会话策略限制的调用者及无权管理 root 的调用者；不引入自更新特权。 |
+| Handler                                      | 现有 Admin Action            | 自管理语义与附加边界                                                                                   |
+| -------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `InfoServiceAccount`                         | `admin:ListServiceAccounts`  | 比对有效用户与服务账号存储的父账号，授权通过后返回详情。                                               |
+| `ListServiceAccounts`                        | `admin:ListServiceAccounts`  | 空用户参数、调用者 AccessKey、调用者父账号均视为自身别名；每次请求均执行授权，并列出父账号名下的密钥。 |
+| `ListAccessKeysBulk`                         | `admin:ListServiceAccounts`  | 自身别名统一按父身份归一化并复用同一自管理授权辅助函数；跨用户查询和 `all=true` 保持原有权限要求。     |
+| `InfoAccessKey`                              | `admin:ListServiceAccounts`  | 仅当目标存在、属于派生凭据且父账号相同时才视为自身；不存在的目标不触发自管理分支。                     |
+| `DeleteServiceAccount`                       | `admin:RemoveServiceAccount` | 自清理先执行授权再检查 root 边界；目标 token 损坏时直接读取存储的身份元数据。                          |
+| `RevokeTokens`                               | `admin:RemoveServiceAccount` | 省略用户参数或解析后等于调用者父账号时视为自身；先执行授权并保护 root 目标。                           |
+| `AddServiceAccount`、`AddServiceAccountLDAP` | `admin:CreateServiceAccount` | 完成既有自身或跨用户 IAM 授权后，拒绝受有效会话策略限制的调用者及无权管理 root 的调用者。              |
+| `UpdateServiceAccount`                       | `admin:UpdateServiceAccount` | 完成既有 Action 授权后，拒绝受有效会话策略限制的调用者及无权管理 root 的调用者；不引入自更新特权。     |
 {.wide .expand}
 
 即使会话策略允许创建或更新 Action，受该策略限制的调用者也不能执行这些操作。更新守卫同样拦截仅修改名称等元数据的请求，因为现有更新实现会在请求未提供新策略时清除原有内联策略。
@@ -66,10 +66,10 @@ url: "/zh/blog/design/iam-admin-authorization/"
 1. 两个创建 Handler 在复制调用者 claims 时跳过 `exp`、`policy.SessionPolicyName`、`sessionPolicyNameExtracted` 和 `iamPolicyClaimNameSA()`。新密钥使用自身的过期时间和请求策略，其余身份信息（含 LDAP/OIDC 上下文）原样保留。
 2. `commonAddServiceAccount` 仅当解析后的策略满足 `Version == "" && Statements == nil && ID == ""` 时将其归一化为继承策略，与现有服务账号评估器的空策略定义保持一致；同时清空本地策略选项和返回请求中的 Policy 字段，确保站点复制发出的创建消息与本地落盘密钥一致。
 
-| 新密钥请求中的策略 | 结果 |
-| --- | --- |
-| 省略、`null`、`{}`、`{"Statement":null}` | 继承父账号权限（含设置过期时间的密钥）。 |
-| 仅允许特定 Action 的策略 | 保留所请求的限制，未授权操作继续拒绝。 |
+| 新密钥请求中的策略                               | 结果                                                   |
+| ------------------------------------------------ | ------------------------------------------------------ |
+| 省略、`null`、`{}`、`{"Statement":null}`         | 继承父账号权限（含设置过期时间的密钥）。               |
+| 仅允许特定 Action 的策略                         | 保留所请求的限制，未授权操作继续拒绝。                 |
 | `{"Version":"2012-10-17"}` 或 `{"Statement":[]}` | 不归一化为继承策略；带过期时间的回归用例继续拒绝访问。 |
 {.wide .expand}
 
@@ -122,14 +122,14 @@ Admin 创建与更新检查可能需要额外解析一次调用者的内联策�
 
 提交 `2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6` 与后续提交 `9954392605827b213877c45262c741e638598dd8` 通过了以下测试套件：
 
-| 检查 | 结果 |
-| --- | --- |
-| 完整 `TestIAM*` / `TestSTS*`（连接真实 etcd、LDAP、两个 OIDC Provider 和外部授权插件） | 57 个顶层测试；含子测试共 380 条通过记录；0 失败、0 跳过。 |
-| `TestIAMAdmin*` 回归测试（使用签名请求及加密 Admin 请求体） | 通过。 |
-| `TestIAMAdmin*` 与 peer 删除/重载测试的定向 `-race` 检查 | 通过。 |
-| 认证、身份配置与策略配置相关包测试 | 通过。 |
-| `make verifiers` 与 `make build` | lint、生成文件、品牌与兼容性检查通过，成功构建 `silo` 二进制文件。 |
-| PR `#242` 云端 CI 检查 | DCO、漏洞扫描、格式/构建/Vet、lint/生成文件、race、交叉编译、internal 与 cmd 测试共 8 项全部通过。 |
+| 检查                                                                                   | 结果                                                                                               |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| 完整 `TestIAM*` / `TestSTS*`（连接真实 etcd、LDAP、两个 OIDC Provider 和外部授权插件） | 57 个顶层测试；含子测试共 380 条通过记录；0 失败、0 跳过。                                         |
+| `TestIAMAdmin*` 回归测试（使用签名请求及加密 Admin 请求体）                            | 通过。                                                                                             |
+| `TestIAMAdmin*` 与 peer 删除/重载测试的定向 `-race` 检查                               | 通过。                                                                                             |
+| 认证、身份配置与策略配置相关包测试                                                     | 通过。                                                                                             |
+| `make verifiers` 与 `make build`                                                       | lint、生成文件、品牌与兼容性检查通过，成功构建 `silo` 二进制文件。                                 |
+| PR `#242` 云端 CI 检查                                                                 | DCO、漏洞扫描、格式/构建/Vet、lint/生成文件、race、交叉编译、internal 与 cmd 测试共 8 项全部通过。 |
 {.wide .expand}
 
 `cmd/admin-handlers-users-authz_test.go` 覆盖了 root 空策略、无绑定策略用户自管理、父用户/组/会话/插件拒绝、带过期时间的历史 inherited 凭据、非 root 操作 root 目标、禁用或过期的损坏密钥清理、删除复制、自身别名，以及空策略子密钥签发的正反向访问验证。LDAP 测试套件额外通过 `AddServiceAccountLDAP` 签发带过期时间的子密钥并验证 S3 访问。补充边界测试验证了损坏 root 密钥的清理拦截，以及五个自管理 Handler 对 STS 显式与隐式拒绝的处理。

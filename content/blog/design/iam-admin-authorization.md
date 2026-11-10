@@ -57,16 +57,16 @@ must explicitly allow the operation. An external plugin's denial is final, and
 handlers no longer turn a denial into success when the target belongs to the
 caller.
 
-| Handler | Existing Admin action | Self behavior and additional boundary |
-| --- | --- | --- |
-| `InfoServiceAccount` | `admin:ListServiceAccounts` | Compare the effective user with the stored service account parent; authorize before returning information. |
-| `ListServiceAccounts` | `admin:ListServiceAccounts` | Empty user, caller access key, and caller parent are self aliases. Authorize every request and list the parent for these aliases. |
-| `ListAccessKeysBulk` | `admin:ListServiceAccounts` | Normalize self aliases to the parent and use the same self-service helper; cross-user and `all=true` requests retain their additional authorization requirements. |
-| `InfoAccessKey` | `admin:ListServiceAccounts` | Self requires an existing derived target with the same parent. Missing targets do not create a self exception. |
-| `DeleteServiceAccount` | `admin:RemoveServiceAccount` | Authorize self cleanup; apply the root boundary; use stored identity metadata even when the target token is damaged. |
-| `RevokeTokens` | `admin:RemoveServiceAccount` | Omitted user or the resolved caller parent is self. Authorize before revocation and protect root targets. |
-| `AddServiceAccount`, `AddServiceAccountLDAP` | `admin:CreateServiceAccount` | Retain existing self/other-user IAM authorization; then reject active session policies and unauthorized effective root targets. |
-| `UpdateServiceAccount` | `admin:UpdateServiceAccount` | Retain the existing action requirement; then reject active session policies and unauthorized root targets. No new self-update privilege. |
+| Handler                                      | Existing Admin action        | Self behavior and additional boundary                                                                                                                             |
+| -------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `InfoServiceAccount`                         | `admin:ListServiceAccounts`  | Compare the effective user with the stored service account parent; authorize before returning information.                                                        |
+| `ListServiceAccounts`                        | `admin:ListServiceAccounts`  | Empty user, caller access key, and caller parent are self aliases. Authorize every request and list the parent for these aliases.                                 |
+| `ListAccessKeysBulk`                         | `admin:ListServiceAccounts`  | Normalize self aliases to the parent and use the same self-service helper; cross-user and `all=true` requests retain their additional authorization requirements. |
+| `InfoAccessKey`                              | `admin:ListServiceAccounts`  | Self requires an existing derived target with the same parent. Missing targets do not create a self exception.                                                    |
+| `DeleteServiceAccount`                       | `admin:RemoveServiceAccount` | Authorize self cleanup; apply the root boundary; use stored identity metadata even when the target token is damaged.                                              |
+| `RevokeTokens`                               | `admin:RemoveServiceAccount` | Omitted user or the resolved caller parent is self. Authorize before revocation and protect root targets.                                                         |
+| `AddServiceAccount`, `AddServiceAccountLDAP` | `admin:CreateServiceAccount` | Retain existing self/other-user IAM authorization; then reject active session policies and unauthorized effective root targets.                                   |
+| `UpdateServiceAccount`                       | `admin:UpdateServiceAccount` | Retain the existing action requirement; then reject active session policies and unauthorized root targets. No new self-update privilege.                          |
 {.wide .expand}
 
 Creation and update are denied to session-limited callers even when their
@@ -132,10 +132,10 @@ issuance boundary:
    local policy option and the returned request's policy field so the site
    replication create message matches the local key.
 
-| Requested child policy | Result |
-| --- | --- |
-| Omitted, `null`, `{}`, `{"Statement":null}` | Inherit parent permissions, including when the new key has an expiration. |
-| A policy allowing only selected actions | Retain the requested restriction; unrelated actions remain denied. |
+| Requested child policy                           | Result                                                                            |
+| ------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Omitted, `null`, `{}`, `{"Statement":null}`      | Inherit parent permissions, including when the new key has an expiration.         |
+| A policy allowing only selected actions          | Retain the requested restriction; unrelated actions remain denied.                |
 | `{"Version":"2012-10-17"}` or `{"Statement":[]}` | Do not normalize to inheritance; the expiring-key regression cases remain denied. |
 {.wide .expand}
 
@@ -226,14 +226,14 @@ Five alternative approaches were evaluated and rejected:
 
 Commit `2616d43fbc3400a02cc1e6f9299e26ae8b2e71a6` and follow-up `9954392605827b213877c45262c741e638598dd8` were verified with the following suites:
 
-| Check | Result |
-| --- | --- |
-| Complete `TestIAM*` / `TestSTS*` selection with real etcd, LDAP, two OIDC providers, and an authorization plugin | 57 top-level tests; 380 passing records including parent tests and subtests; 0 failures, 0 skips. |
-| `TestIAMAdmin*` regression tests using signed requests and encrypted Admin payloads | Passed. |
-| Focused race run for `TestIAMAdmin*` and the peer delete/reload test | Passed. |
-| Authentication, identity configuration, and policy configuration packages | Passed. |
-| `make verifiers` and `make build` | Passed lint, generated-file checks, rebrand/compatibility checks, and binary build. |
-| Hosted CI checks on PR `#242` | All 8 checks passed (DCO, vulnerability analysis, format/build/vet, lint/generated files, race, cross compilation, internal tests, and cmd tests). |
+| Check                                                                                                            | Result                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Complete `TestIAM*` / `TestSTS*` selection with real etcd, LDAP, two OIDC providers, and an authorization plugin | 57 top-level tests; 380 passing records including parent tests and subtests; 0 failures, 0 skips.                                                  |
+| `TestIAMAdmin*` regression tests using signed requests and encrypted Admin payloads                              | Passed.                                                                                                                                            |
+| Focused race run for `TestIAMAdmin*` and the peer delete/reload test                                             | Passed.                                                                                                                                            |
+| Authentication, identity configuration, and policy configuration packages                                        | Passed.                                                                                                                                            |
+| `make verifiers` and `make build`                                                                                | Passed lint, generated-file checks, rebrand/compatibility checks, and binary build.                                                                |
+| Hosted CI checks on PR `#242`                                                                                    | All 8 checks passed (DCO, vulnerability analysis, format/build/vet, lint/generated files, race, cross compilation, internal tests, and cmd tests). |
 {.wide .expand}
 
 `cmd/admin-handlers-users-authz_test.go` covers root empty

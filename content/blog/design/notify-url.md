@@ -25,11 +25,11 @@ The pre-2020 five-field form—`host`, `port`, `username`, `password`, and `data
 
 The legacy migration contract handles three input states:
 
-| Legacy Target State | Migration Result |
-| --- | --- |
-| Disabled | Ignored; no KV target is emitted. |
-| Enabled with a non-empty `connection_string` or `dsn_string` | Migrates only the canonical connection-string key and registered target settings. |
-| Enabled with only discrete connection fields | Rejects migration and aborts server startup before activating the new configuration, logging an actionable error that names the subsystem and target without printing credentials. |
+| Legacy Target State                                          | Migration Result                                                                                                                                                                   |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Disabled                                                     | Ignored; no KV target is emitted.                                                                                                                                                  |
+| Enabled with a non-empty `connection_string` or `dsn_string` | Migrates only the canonical connection-string key and registered target settings.                                                                                                  |
+| Enabled with only discrete connection fields                 | Rejects migration and aborts server startup before activating the new configuration, logging an actionable error that names the subsystem and target without printing credentials. |
 {.wide .expand}
 
 ## Context {#context}

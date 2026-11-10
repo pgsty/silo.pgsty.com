@@ -127,14 +127,14 @@ Browser uploads larger than 5 GiB get a non-blocking warning: the console upload
 
 ### Go 1.27 baseline {#go-toolchain}
 
-| Component | 2.1.1 | 2.2.0 |
-|:--|:--|:--|
-| `go` directive, build image, CI matrix | `1.26.5` / `1.26.x` | `1.27.0` / `1.27.x` |
-| `golang.org/x/crypto` | v0.54.0 | v0.55.0 |
-| `golang.org/x/net` | v0.57.0 | v0.58.0 |
-| `golang.org/x/text` | v0.40.0 | v0.41.0 |
-| `golang.org/x/mod` | v0.37.0 | v0.40.0 (closes [CVE-2026-56864/-56865](https://pkg.go.dev/vuln/GO-2026-6180)) |
-| `golang.org/x/tools` | v0.47.0 | v0.49.0 |
+| Component                              | 2.1.1               | 2.2.0                                                                          |
+| :------------------------------------- | :------------------ | :----------------------------------------------------------------------------- |
+| `go` directive, build image, CI matrix | `1.26.5` / `1.26.x` | `1.27.0` / `1.27.x`                                                            |
+| `golang.org/x/crypto`                  | v0.54.0             | v0.55.0                                                                        |
+| `golang.org/x/net`                     | v0.57.0             | v0.58.0                                                                        |
+| `golang.org/x/text`                    | v0.40.0             | v0.41.0                                                                        |
+| `golang.org/x/mod`                     | v0.37.0             | v0.40.0 (closes [CVE-2026-56864/-56865](https://pkg.go.dev/vuln/GO-2026-6180)) |
+| `golang.org/x/tools`                   | v0.47.0             | v0.49.0                                                                        |
 {.wide .expand}
 
 ### The SILO forks {#silo-forks}
@@ -175,16 +175,16 @@ On the frontend, the vulnerability workflow now covers pushes, manual runs, and 
 
 **HTTP API contract** (console's own REST API):
 
-| Route | Change |
-|:--|:--|
-| `PUT /user/{name}` | Unchanged on the wire; now deprecated. OperationId renamed `UpdateUserInfo` → `UpdateUserInfoLegacy`, body model renamed to `legacyUpdateUser` (identical schema). Unknown status: 500 → 400. |
-| `PUT /user/{name}/status` | **New.** Status-only body (`enabled`/`disabled` enum, 422 on violation), returns a user object populated with access key and status only — clients must not read group data from it. |
-| `updateUser` model | Now status-only with enum — **breaking for generated-spec consumers**; the old shape lives on as `legacyUpdateUser`. |
-| Object download | Error semantics changed: bad ranges 500→416 (+`Content-Range: bytes */N`), range-on-empty 500→200, `Stat` failures 500→real S3 status, ZIP failures silent-partial-200→visible failure, 206 responses carry `Content-Length`. |
-| Listings & WebSocket | `size` always serialized, including `0`. Additive. |
-| `PUT /configs` | New 400 class for database DSNs the server's config grammar would corrupt. |
-| Config reset/delete | `restart` in the response now reflects the server's real answer instead of always `true`. |
-| `GET /session` | 401 for empty-credential principals; the advertised Create-Access-Key capability is computed more strictly (see [service accounts](#service-accounts)). |
+| Route                     | Change                                                                                                                                                                                                                        |
+| :------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUT /user/{name}`        | Unchanged on the wire; now deprecated. OperationId renamed `UpdateUserInfo` → `UpdateUserInfoLegacy`, body model renamed to `legacyUpdateUser` (identical schema). Unknown status: 500 → 400.                                 |
+| `PUT /user/{name}/status` | **New.** Status-only body (`enabled`/`disabled` enum, 422 on violation), returns a user object populated with access key and status only — clients must not read group data from it.                                          |
+| `updateUser` model        | Now status-only with enum — **breaking for generated-spec consumers**; the old shape lives on as `legacyUpdateUser`.                                                                                                          |
+| Object download           | Error semantics changed: bad ranges 500→416 (+`Content-Range: bytes */N`), range-on-empty 500→200, `Stat` failures 500→real S3 status, ZIP failures silent-partial-200→visible failure, 206 responses carry `Content-Length`. |
+| Listings & WebSocket      | `size` always serialized, including `0`. Additive.                                                                                                                                                                            |
+| `PUT /configs`            | New 400 class for database DSNs the server's config grammar would corrupt.                                                                                                                                                    |
+| Config reset/delete       | `restart` in the response now reflects the server's real answer instead of always `true`.                                                                                                                                     |
+| `GET /session`            | 401 for empty-credential principals; the advertised Create-Access-Key capability is computed more strictly (see [service accounts](#service-accounts)).                                                                       |
 {.wide .expand}
 
 > [!NOTE]

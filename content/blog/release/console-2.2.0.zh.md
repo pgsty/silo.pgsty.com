@@ -127,14 +127,14 @@ PostgreSQL 与 MySQL 事件目标表单围绕一个共享的 DSN 解析器/序�
 
 ### Go 1.27 基线 {#go-toolchain}
 
-| 组件 | 2.1.1 | 2.2.0 |
-|:--|:--|:--|
-| `go` 指令、构建镜像、CI 矩阵 | `1.26.5` / `1.26.x` | `1.27.0` / `1.27.x` |
-| `golang.org/x/crypto` | v0.54.0 | v0.55.0 |
-| `golang.org/x/net` | v0.57.0 | v0.58.0 |
-| `golang.org/x/text` | v0.40.0 | v0.41.0 |
-| `golang.org/x/mod` | v0.37.0 | v0.40.0（关闭 [CVE-2026-56864/-56865](https://pkg.go.dev/vuln/GO-2026-6180)）|
-| `golang.org/x/tools` | v0.47.0 | v0.49.0 |
+| 组件                         | 2.1.1               | 2.2.0                                                                         |
+| :--------------------------- | :------------------ | :---------------------------------------------------------------------------- |
+| `go` 指令、构建镜像、CI 矩阵 | `1.26.5` / `1.26.x` | `1.27.0` / `1.27.x`                                                           |
+| `golang.org/x/crypto`        | v0.54.0             | v0.55.0                                                                       |
+| `golang.org/x/net`           | v0.57.0             | v0.58.0                                                                       |
+| `golang.org/x/text`          | v0.40.0             | v0.41.0                                                                       |
+| `golang.org/x/mod`           | v0.37.0             | v0.40.0（关闭 [CVE-2026-56864/-56865](https://pkg.go.dev/vuln/GO-2026-6180)） |
+| `golang.org/x/tools`         | v0.47.0             | v0.49.0                                                                       |
 {.wide .expand}
 
 ### SILO 分支 {#silo-forks}
@@ -175,16 +175,16 @@ replace github.com/minio/mc => github.com/pgsty/mc v0.0.0-20260806055018-b0021fd
 
 **HTTP API 契约**（控制台自身的 REST API）：
 
-| 路由 | 变更 |
-|:--|:--|
-| `PUT /user/{name}` | 线协议不变；标记弃用。OperationId 由 `UpdateUserInfo` 改名 `UpdateUserInfoLegacy`，请求体模型改名 `legacyUpdateUser`（结构相同）。未知状态：500 → 400。 |
-| `PUT /user/{name}/status` | **新增。** 仅状态请求体（`enabled`/`disabled` 枚举，违反返回 422），返回的用户对象只含访问密钥与状态——客户端不得从中读取用户组数据。 |
-| `updateUser` 模型 | 变为仅状态且带枚举——**对按 spec 生成代码的消费者是破坏性变更**；旧结构以 `legacyUpdateUser` 延续。 |
-| 对象下载 | 错误语义变化：坏 range 500→416（附 `Content-Range: bytes */N`），空对象 range 500→200，`Stat` 失败 500→真实 S3 状态码，ZIP 失败从静默局部 200→可见失败，206 响应携带 `Content-Length`。 |
-| 列表与 WebSocket | `size` 总是序列化，包括 `0`。纯增量。 |
-| `PUT /configs` | 新增一类 400：拒绝服务器配置语法会破坏的数据库 DSN。 |
-| 配置重置/删除 | 响应中的 `restart` 反映服务器的真实答案，不再恒为 `true`。 |
-| `GET /session` | 空凭据主体返回 401；通告的 Create-Access-Key 能力计算更严格（见[服务账号](#service-accounts)）。 |
+| 路由                      | 变更                                                                                                                                                                                    |
+| :------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUT /user/{name}`        | 线协议不变；标记弃用。OperationId 由 `UpdateUserInfo` 改名 `UpdateUserInfoLegacy`，请求体模型改名 `legacyUpdateUser`（结构相同）。未知状态：500 → 400。                                 |
+| `PUT /user/{name}/status` | **新增。** 仅状态请求体（`enabled`/`disabled` 枚举，违反返回 422），返回的用户对象只含访问密钥与状态——客户端不得从中读取用户组数据。                                                    |
+| `updateUser` 模型         | 变为仅状态且带枚举——**对按 spec 生成代码的消费者是破坏性变更**；旧结构以 `legacyUpdateUser` 延续。                                                                                      |
+| 对象下载                  | 错误语义变化：坏 range 500→416（附 `Content-Range: bytes */N`），空对象 range 500→200，`Stat` 失败 500→真实 S3 状态码，ZIP 失败从静默局部 200→可见失败，206 响应携带 `Content-Length`。 |
+| 列表与 WebSocket          | `size` 总是序列化，包括 `0`。纯增量。                                                                                                                                                   |
+| `PUT /configs`            | 新增一类 400：拒绝服务器配置语法会破坏的数据库 DSN。                                                                                                                                    |
+| 配置重置/删除             | 响应中的 `restart` 反映服务器的真实答案，不再恒为 `true`。                                                                                                                              |
+| `GET /session`            | 空凭据主体返回 401；通告的 Create-Access-Key 能力计算更严格（见[服务账号](#service-accounts)）。                                                                                        |
 {.wide .expand}
 
 > [!NOTE]

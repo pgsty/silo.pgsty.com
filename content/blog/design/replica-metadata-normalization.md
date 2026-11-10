@@ -43,10 +43,10 @@ In `cmd/handler-utils.go`, commit [`4fcdf37ce`](https://github.com/pgsty/silo/co
 Stored `Content-Encoding` values after the fix:
 
 | Requested `Content-Encoding` | Stored `Content-Encoding` |
-| :-- | :-- |
-| `aws-chunked` | *(none)* |
-| `aws-chunked,gzip` | `gzip` |
-| `gzip` | `gzip` |
+| :--------------------------- | :------------------------ |
+| `aws-chunked`                | *(none)*                  |
+| `aws-chunked,gzip`           | `gzip`                    |
+| `gzip`                       | `gzip`                    |
 {.wide .expand}
 
 Note that `aws-chunked, gzip` (with a space after the comma) continues to store ` gzip` with a leading space, and `gzip, aws-chunked` continues to store the full string; both match pre-existing parser behavior on the ordinary `PUT` path and are pinned as status-quo test assertions.

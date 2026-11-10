@@ -54,11 +54,11 @@ shortcut input
 
 `Prefix="/"` is only one of three triggers:
 
-| Shortcut Condition | Why the Result Must Be Empty | Defect Before the Fix |
-| --- | --- | --- |
-| `marker` does not begin with `prefix` | The listing engine does not scan a disjoint range | Returns `io.EOF` without confirming bucket existence |
-| `max-keys=0` | The caller explicitly requests zero keys | Equates "zero keys requested" with "valid bucket resource" |
-| `prefix` begins with `/` | SILO's flat key space never produces keys with a leading `/` | Short-circuits on the filter before checking bucket identity |
+| Shortcut Condition                    | Why the Result Must Be Empty                                 | Defect Before the Fix                                        |
+| ------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `marker` does not begin with `prefix` | The listing engine does not scan a disjoint range            | Returns `io.EOF` without confirming bucket existence         |
+| `max-keys=0`                          | The caller explicitly requests zero keys                     | Equates "zero keys requested" with "valid bucket resource"   |
+| `prefix` begins with `/`              | SILO's flat key space never produces keys with a leading `/` | Short-circuits on the filter before checking bucket identity |
 {.wide .expand}
 
 For an existing bucket, returning an empty listing from these branches is a valid fast path. For a missing bucket, returning bare `io.EOF` masks the resource error that must take precedence.
@@ -162,11 +162,11 @@ Every case exercises `ListObjects`, `ListObjectsV2`, and `ListObjectVersions` an
 
 The HTTP handler test sends signed S3 requests across all three public listing APIs:
 
-| API | Request Shape | Assertion |
-| --- | --- | --- |
-| `ListObjects` | `GET /missing-bucket?prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
-| `ListObjectsV2` | `GET /missing-bucket?list-type=2&prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
-| `ListObjectVersions` | `GET /missing-bucket?versions&prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
+| API                  | Request Shape                              | Assertion                            |
+| -------------------- | ------------------------------------------ | ------------------------------------ |
+| `ListObjects`        | `GET /missing-bucket?prefix=/`             | HTTP 404 and XML code `NoSuchBucket` |
+| `ListObjectsV2`      | `GET /missing-bucket?list-type=2&prefix=/` | HTTP 404 and XML code `NoSuchBucket` |
+| `ListObjectVersions` | `GET /missing-bucket?versions&prefix=/`    | HTTP 404 and XML code `NoSuchBucket` |
 {.wide .expand}
 
 ### Local and CI Quality Gates {#local-gates}
@@ -179,12 +179,12 @@ The change passed the full local verification suite (`go test ./cmd -count=1` in
 
 On an existing bucket, a shortcut request previously executed a purely local branch; it now calls `GetBucketInfo`. Local microbenchmarks illustrate the relative shift:
 
-| Path | Observed Local Magnitude |
-| --- | ---: |
-| Shortcut before the fix | ~0.55 μs, 7 allocs |
+| Path                           |  Observed Local Magnitude |
+| ------------------------------ | ------------------------: |
+| Shortcut before the fix        |        ~0.55 μs, 7 allocs |
 | Repaired single-drive shortcut | ~7.8–8.1 μs, 45–47 allocs |
-| Repaired 32-drive shortcut | ~70–81 μs, 977 allocs |
-| Normal 32-drive listing | ~0.95 ms |
+| Repaired 32-drive shortcut     |     ~70–81 μs, 977 allocs |
+| Normal 32-drive listing        |                  ~0.95 ms |
 {.wide .expand}
 
 In multi-node deployments, `GetBucketInfo` includes peer network round-trips and quorum reduction. That cost is why the check is strictly confined to the three storage-bypassing shortcuts. If a misconfigured client polls `max-keys=0` or `Prefix="/"` at high frequency, S3 audit traces and metrics will surface the pattern.
@@ -228,14 +228,14 @@ Adding a TTL cache for bucket existence reduces shortcut latency, but requires i
 
 ## Complexity and Cost-Benefit Summary {#tradeoff}
 
-| Dimension | Assessment | Rationale |
-| --- | --- | --- |
-| Production code complexity | Low | Three call sites and a 7-line helper; no new state, dependency, or on-disk format |
-| Test complexity | Low–Medium | Covers V1, V2, version listings, all three shortcuts, a regular-prefix control, and HTTP 404 XML mapping |
-| Normal-path risk | None | Zero changes on the `listMerged` hot path |
-| Shortcut runtime cost | Higher on shortcuts only | Replaces a local branch with `GetBucketInfo` when a shortcut triggers |
-| Compatibility value | High | Restores HTTP 404 `NoSuchBucket`, pre-regression upgrade compatibility, and S3 test fidelity |
-| Operational complexity | None | No migration, configuration knob, feature flag, or cache invalidation |
+| Dimension                  | Assessment               | Rationale                                                                                                |
+| -------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Production code complexity | Low                      | Three call sites and a 7-line helper; no new state, dependency, or on-disk format                        |
+| Test complexity            | Low–Medium               | Covers V1, V2, version listings, all three shortcuts, a regular-prefix control, and HTTP 404 XML mapping |
+| Normal-path risk           | None                     | Zero changes on the `listMerged` hot path                                                                |
+| Shortcut runtime cost      | Higher on shortcuts only | Replaces a local branch with `GetBucketInfo` when a shortcut triggers                                    |
+| Compatibility value        | High                     | Restores HTTP 404 `NoSuchBucket`, pre-regression upgrade compatibility, and S3 test fidelity             |
+| Operational complexity     | None                     | No migration, configuration knob, feature flag, or cache invalidation                                    |
 {.wide .expand}
 
 ## Acceptance Decision {#decision}

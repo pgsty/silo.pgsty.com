@@ -16,11 +16,11 @@ SILO 通过 [PGSTY KES](https://github.com/pgsty/kes)（`MINIO_KMS_KES_ENDPOINT`
 
 ## 三个服务的职责边界 {#architecture}
 
-| 服务 | 负责内容 | 调用对象 |
-| --- | --- | --- |
-| SILO | 对象字节流与对象加密元数据；加解密对象内容 | 通过 HTTPS（mTLS）调用 KES 生成或解密数据加密密钥（DEK） |
-| PGSTY KES | 应用身份认证、密钥访问策略与密钥 API；封装或解封装数据密钥 | 通过 OpenBao KV v2 保存或读取根主密钥 |
-| OpenBao | KES 根主密钥的持久化记录、后端访问控制与自身恢复材料 | 所配置的持久化存储后端 |
+| 服务      | 负责内容                                                   | 调用对象                                                 |
+| --------- | ---------------------------------------------------------- | -------------------------------------------------------- |
+| SILO      | 对象字节流与对象加密元数据；加解密对象内容                 | 通过 HTTPS（mTLS）调用 KES 生成或解密数据加密密钥（DEK） |
+| PGSTY KES | 应用身份认证、密钥访问策略与密钥 API；封装或解封装数据密钥 | 通过 OpenBao KV v2 保存或读取根主密钥                    |
+| OpenBao   | KES 根主密钥的持久化记录、后端访问控制与自身恢复材料       | 所配置的持久化存储后端                                   |
 {.wide .expand}
 
 ```text
@@ -90,11 +90,11 @@ path "secret/metadata/kes/*" {
 
 部署时应分别配置 SILO → KES 与 KES → OpenBao 两段链路的 TLS 信任。KES 依据客户端证书的 SHA-256 摘要（`kes identity of <cert>`）授权 SILO 访问指定密钥名；OpenBao 则通过 AppRole 授权 KES 后端身份。
 
-| 层级 / 配置项 | 故障表现 | 运维处置 |
-| --- | --- | --- |
-| OpenBao 处于封存（Sealed）或中断状态 | 内存热缓存可能允许部分操作短暂继续，但未命中缓存的密钥请求或重启后的新 SILO 进程会立即失败（Fail-Closed），绝不会降级为明文存储。 | 在启动或滚动重启依赖 KMS 的 SILO 节点前先解封 OpenBao；执行恢复验证时必须重启进程清空热缓存并实际回读对象。 |
-| KV v1 与 KV v2 配置不匹配 | 对 KV v2 挂载点配置 `version: v1`（或 OpenBao ACL 策略未同时授权 `data/` 与 `metadata/` 路径）会在创建或列举密钥时返回 `403 permission denied` 或 `404`。 | 显式设置 `engine: <mount>`、`version: v2`，并在 OpenBao 策略中同时授权 `<mount>/data/<prefix>/*` 与 `<mount>/metadata/<prefix>/*`。 |
-| 客户端证书轮换 | 轮换 `MINIO_KMS_KES_CERT_FILE` 会改变客户端证书的 SHA-256 Identity。若新 Identity 未提前加入 KES 策略，SILO 启动自检将失败。 | 轮换证书前先在 KES 策略中同时保留旧、新两个 Identity；待所有 SILO 节点切换至新证书后再移除旧 Identity。 |
+| 层级 / 配置项                        | 故障表现                                                                                                                                                  | 运维处置                                                                                                                            |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| OpenBao 处于封存（Sealed）或中断状态 | 内存热缓存可能允许部分操作短暂继续，但未命中缓存的密钥请求或重启后的新 SILO 进程会立即失败（Fail-Closed），绝不会降级为明文存储。                         | 在启动或滚动重启依赖 KMS 的 SILO 节点前先解封 OpenBao；执行恢复验证时必须重启进程清空热缓存并实际回读对象。                         |
+| KV v1 与 KV v2 配置不匹配            | 对 KV v2 挂载点配置 `version: v1`（或 OpenBao ACL 策略未同时授权 `data/` 与 `metadata/` 路径）会在创建或列举密钥时返回 `403 permission denied` 或 `404`。 | 显式设置 `engine: <mount>`、`version: v2`，并在 OpenBao 策略中同时授权 `<mount>/data/<prefix>/*` 与 `<mount>/metadata/<prefix>/*`。 |
+| 客户端证书轮换                       | 轮换 `MINIO_KMS_KES_CERT_FILE` 会改变客户端证书的 SHA-256 Identity。若新 Identity 未提前加入 KES 策略，SILO 启动自检将失败。                              | 轮换证书前先在 KES 策略中同时保留旧、新两个 Identity；待所有 SILO 节点切换至新证书后再移除旧 Identity。                             |
 {.wide .expand}
 
 请妥善保管持久化密钥库备份、KES 配置、TLS 信任根、身份与策略配置以及 OpenBao 解封恢复材料，并在演练中验证恢复后的密钥名称与密钥值完全一致。KES 开发模式（内存模式）仅将密钥保存在进程内存中，严禁用于持久化加密存储。

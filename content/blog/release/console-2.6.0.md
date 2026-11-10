@@ -68,15 +68,15 @@ folder-size feature and guide were contributed by **Urbanize** in
 
 ## Runtime and security selections {#dependencies}
 
-| Component | Released selection |
-| --- | --- |
-| Go | 1.27.3 |
-| Node / Yarn | 24.22.1 / 4.13.0 |
-| `silo-pkg/v3` | v3.15.2 |
-| mcli source | Published 20261026 release, commit `0ceb298cdcd0` |
-| Upstream `minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
-| `golang.org/x/net` | v0.62.0 |
-| `golang.org/x/crypto` | `v0.58.1-0.20261009181718-2f1f834330b2` |
+| Component              | Released selection                                |
+| ---------------------- | ------------------------------------------------- |
+| Go                     | 1.27.3                                            |
+| Node / Yarn            | 24.22.1 / 4.13.0                                  |
+| `silo-pkg/v3`          | v3.15.2                                           |
+| mcli source            | Published 20261026 release, commit `0ceb298cdcd0` |
+| Upstream `minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445`            |
+| `golang.org/x/net`     | v0.62.0                                           |
+| `golang.org/x/crypto`  | `v0.58.1-0.20261009181718-2f1f834330b2`           |
 {.wide .expand}
 
 The `x/net` update includes the HTML parser/rendering fixes for

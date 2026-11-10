@@ -59,15 +59,15 @@ The recovery re-read uses a read-only metadata helper with standard version sele
 
 ## Code Changes Across Subsystems {#changes}
 
-| Subsystem | Change and Rationale |
-|---|---|
-| Directory resolution and pool merge | Carry pending names to the complete same-name group and confirm at the pool merger so per-pool decisions cannot drop live objects or resurrect shadowed copies. |
-| Metadata reading | Distinguish unanimous native `FileNotFound` from read/decode errors; reuse read-quorum and version selection without `GET` write side effects. |
-| Object locking | Acquire the pool-level lock on multi-pool clusters; on single-pool clusters with distinct source and target sets, acquire first-set and target-set read locks in fixed order to cover both `DELETE`/`COPY` and `PUT` lock domains. |
-| Pagination cache | Publish terminal scan errors before marking the cache complete so HTTP error responses do not wait on a failing remote cache RPC, and preserve the local cache ID and error if remote update fails. |
-| Waiting for missing cache blocks | Check producer state promptly after a block read failure and rotate a single online-disk probe per retry before issuing the full quorum read. |
-| Cancellation and lock contention | Make lock-acquisition retry waits context-cancelable, and grant positively identified listing-recovery lock conflicts one short 2 ms wait-and-recheck window. |
-| Regression tests and CI | Cover confirmed deletion, cross-pool migration ordering, dual-set lock routing, pagination termination, failed RPCs, context cancellation, and late lock grants under `-race`. |
+| Subsystem                           | Change and Rationale                                                                                                                                                                                                               |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Directory resolution and pool merge | Carry pending names to the complete same-name group and confirm at the pool merger so per-pool decisions cannot drop live objects or resurrect shadowed copies.                                                                    |
+| Metadata reading                    | Distinguish unanimous native `FileNotFound` from read/decode errors; reuse read-quorum and version selection without `GET` write side effects.                                                                                     |
+| Object locking                      | Acquire the pool-level lock on multi-pool clusters; on single-pool clusters with distinct source and target sets, acquire first-set and target-set read locks in fixed order to cover both `DELETE`/`COPY` and `PUT` lock domains. |
+| Pagination cache                    | Publish terminal scan errors before marking the cache complete so HTTP error responses do not wait on a failing remote cache RPC, and preserve the local cache ID and error if remote update fails.                                |
+| Waiting for missing cache blocks    | Check producer state promptly after a block read failure and rotate a single online-disk probe per retry before issuing the full quorum read.                                                                                      |
+| Cancellation and lock contention    | Make lock-acquisition retry waits context-cancelable, and grant positively identified listing-recovery lock conflicts one short 2 ms wait-and-recheck window.                                                                      |
+| Regression tests and CI             | Cover confirmed deletion, cross-pool migration ordering, dual-set lock routing, pagination termination, failed RPCs, context cancellation, and late lock grants under `-race`.                                                     |
 {.wide .expand}
 
 The low-level directory-walk callback keeps its existing signature because recovery errors originate in the merger, leaving scanner, healing, rebalance, and decommission callers unchanged.
@@ -76,26 +76,26 @@ When single-pool recovery spans two distinct lock domains, holding the first rea
 
 ## Evaluated and Rejected Alternatives {#alternatives}
 
-| Option | Benefit | Reason Rejected |
-|---|---|---|
-| Keep existing behavior | Zero additional runtime cost | HTTP 200 listings can silently omit live objects, breaking backup and sync tools. |
-| Return HTTP 503 on every disagreement | Smallest patch; no metadata re-read | Fails requests that a single re-read can resolve and repeatedly fails after healthy concurrent `DELETE`s. |
-| Lock and re-read every listed object | Uniform rule | Imposes per-object lock and disk I/O overhead on all listings, degrading large-bucket scans. |
-| Confirm only the source pool or skip locking | Fewer reads and lock acquisitions | Concurrent overwrites, deletions, and cross-pool migrations still produce silent omissions. |
-| Shorten retry intervals for all writers globally | Reduces some contention tails | Alters global write scheduling and increases cluster-wide lock RPC traffic. |
-| **Confirm eligible disagreements with a bounded short wait (selected)** | Keeps normal scans on the fast path; returns confirmed state or an explicit error | Adds targeted re-read I/O and lock handling on contended entries. |
+| Option                                                                  | Benefit                                                                           | Reason Rejected                                                                                           |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Keep existing behavior                                                  | Zero additional runtime cost                                                      | HTTP 200 listings can silently omit live objects, breaking backup and sync tools.                         |
+| Return HTTP 503 on every disagreement                                   | Smallest patch; no metadata re-read                                               | Fails requests that a single re-read can resolve and repeatedly fails after healthy concurrent `DELETE`s. |
+| Lock and re-read every listed object                                    | Uniform rule                                                                      | Imposes per-object lock and disk I/O overhead on all listings, degrading large-bucket scans.              |
+| Confirm only the source pool or skip locking                            | Fewer reads and lock acquisitions                                                 | Concurrent overwrites, deletions, and cross-pool migrations still produce silent omissions.               |
+| Shorten retry intervals for all writers globally                        | Reduces some contention tails                                                     | Alters global write scheduling and increases cluster-wide lock RPC traffic.                               |
+| **Confirm eligible disagreements with a bounded short wait (selected)** | Keeps normal scans on the fast path; returns confirmed state or an explicit error | Adds targeted re-read I/O and lock handling on contended entries.                                         |
 {.wide .expand}
 
 ## Runtime Cost Profile {#cost}
 
-| Trigger | Additional Cost |
-|---|---|
-| Ordinary listing entry | On 64-bit builds, the in-memory entry struct grows from 56 to 64 bytes (one 8-byte pointer) plus a branch check; zero extra locks or disk reads. |
-| Eligible disagreement | Concurrent per-drive metadata re-read across pending source sets; two read-lock acquisitions on single-pool split domains, or one pool-level lock on multi-pool setups. |
-| Confirmed source-set absence | Queries each pool's current target set (reusing sets already read), bounded by the deduplicated union of source and target sets rather than a bucket scan. |
-| High fraction of unresolved names | The ordered merger confirms same-name groups serially, which slows the overall scan when many keys are simultaneously under mutation. |
-| Recovery reader vs. writer lock conflict | Each identified recovery lock RPC waits once for a nominal 2 ms before rechecking, capped at 64 concurrent waiters per local locker outside its internal mutex (~264 B and 4 allocs per waiting RPC). |
-| Ordinary backoff after failed lock acquisition | Replacing `time.Sleep` with a cancelable timer/select adds a small allocation only after a lock attempt has already failed. |
+| Trigger                                        | Additional Cost                                                                                                                                                                                       |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ordinary listing entry                         | On 64-bit builds, the in-memory entry struct grows from 56 to 64 bytes (one 8-byte pointer) plus a branch check; zero extra locks or disk reads.                                                      |
+| Eligible disagreement                          | Concurrent per-drive metadata re-read across pending source sets; two read-lock acquisitions on single-pool split domains, or one pool-level lock on multi-pool setups.                               |
+| Confirmed source-set absence                   | Queries each pool's current target set (reusing sets already read), bounded by the deduplicated union of source and target sets rather than a bucket scan.                                            |
+| High fraction of unresolved names              | The ordered merger confirms same-name groups serially, which slows the overall scan when many keys are simultaneously under mutation.                                                                 |
+| Recovery reader vs. writer lock conflict       | Each identified recovery lock RPC waits once for a nominal 2 ms before rechecking, capped at 64 concurrent waiters per local locker outside its internal mutex (~264 B and 4 allocs per waiting RPC). |
+| Ordinary backoff after failed lock acquisition | Replacing `time.Sleep` with a cancelable timer/select adds a small allocation only after a lock attempt has already failed.                                                                           |
 {.wide .expand}
 
 For 1,000 simultaneously resident entries, the pointer field adds roughly 8 KiB of heap memory. Each name's recovery runs under a 5-second context budget, and any partial or late lock grants after cancellation are cleaned up immediately.
@@ -106,11 +106,11 @@ Local `make test` passed all 1,773 top-level tests alongside targeted `-race` su
 
 An independent 10-run paired benchmark against `main` (`7e9454456`)—two identical-`main` A/A controls followed by four alternating `main`/candidate pairs (20 s warmup, 120 s measurement across 8 processes, 2 pools, and 32 logical drive directories on NVMe loopback)—completed 22,410 full scans with zero omissions, duplicates, corruptions, or healthy-state HTTP errors:
 
-| Metric | Paired Candidate / Main p95 Change | 95% Confidence Interval |
-|---|---:|---:|
-| Full `LIST` page | +0.82% | −3.53% to +5.36% |
-| Same-name `DELETE` | −0.38% | −1.80% to +1.05% |
-| Different-name `DELETE` | −0.55% | −4.74% to +3.84% |
+| Metric                  | Paired Candidate / Main p95 Change | 95% Confidence Interval |
+| ----------------------- | ---------------------------------: | ----------------------: |
+| Full `LIST` page        |                             +0.82% |        −3.53% to +5.36% |
+| Same-name `DELETE`      |                             −0.38% |        −1.80% to +1.05% |
+| Different-name `DELETE` |                             −0.55% |        −4.74% to +3.84% |
 {.wide .expand}
 
 Secondary paired p95 deltas were +0.47% for complete paginated scans, +2.82% for `PUT`, −0.51% for `GET`, +12.60% for middle continuation pages (`max-keys=7`), and +18.95% for same-name `DELETE` p99 (with one isolated 327.248 ms same-name `DELETE` sample on the candidate vs. 148.186 ms in the A/A control). Aggregate 8-process CPU changed by −0.07% and summed RSS by +0.11%. Because the 95% confidence interval upper bound for full `LIST` page p95 reached +5.36% (above the strict 5.00% gate) and the two identical-`main` controls varied by ~12% on different-name `DELETE` p95, the statistical 5% gate is recorded as **inconclusive** rather than passed, while point estimates confirm minimal steady-state overhead.

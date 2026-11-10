@@ -10,14 +10,14 @@ icon: fa-solid fa-scale-balanced
 
 Silo 涉及两套彼此独立的许可协议：软件与文档的分发条款不同，各自沿用其上游作品原有的许可。
 
-| 对象 | 许可协议 | 位置 |
-|:-----|:---------|:-----|
-| `silo` 服务端 | AGPL-3.0-or-later | [`pgsty/silo`](https://github.com/pgsty/silo/blob/main/LICENSE) |
-| SILO Console | AGPL-3.0-or-later | [`pgsty/silo-console`](https://github.com/pgsty/silo-console/blob/main/LICENSE) |
-| `mcli` 客户端 | AGPL-3.0-or-later | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE) |
-| SILO 共享包 | AGPL-3.0-or-later | [`pgsty/silo-pkg`](https://github.com/pgsty/silo-pkg/blob/main/LICENSE) |
-| `kes` 密钥管理服务（可选） | AGPL-3.0-or-later | [`pgsty/kes`](https://github.com/pgsty/kes/blob/main/LICENSE) |
-| 本文档 | CC BY 4.0 | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
+| 对象                       | 许可协议          | 位置                                                                                |
+| :------------------------- | :---------------- | :---------------------------------------------------------------------------------- |
+| `silo` 服务端              | AGPL-3.0-or-later | [`pgsty/silo`](https://github.com/pgsty/silo/blob/main/LICENSE)                     |
+| SILO Console               | AGPL-3.0-or-later | [`pgsty/silo-console`](https://github.com/pgsty/silo-console/blob/main/LICENSE)     |
+| `mcli` 客户端              | AGPL-3.0-or-later | [`pgsty/mc`](https://github.com/pgsty/mc/blob/main/LICENSE)                         |
+| SILO 共享包                | AGPL-3.0-or-later | [`pgsty/silo-pkg`](https://github.com/pgsty/silo-pkg/blob/main/LICENSE)             |
+| `kes` 密钥管理服务（可选） | AGPL-3.0-or-later | [`pgsty/kes`](https://github.com/pgsty/kes/blob/main/LICENSE)                       |
+| 本文档                     | CC BY 4.0         | [`pgsty/silo.pgsty.com`](https://github.com/pgsty/silo.pgsty.com/blob/main/LICENSE) |
 {.wide .expand}
 
 ## 软件：AGPLv3 {#software}

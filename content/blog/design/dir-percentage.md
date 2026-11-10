@@ -182,14 +182,14 @@ The Go folder-download handler continues streaming Deflate-compressed ZIP archiv
 
 ## Progress State Machine {#state-machine}
 
-| State | `waitingForFile` | `percentage` | Terminal Flags | Rendered UI |
-| --- | ---: | ---: | --- | --- |
-| Queued / awaiting first progress | `true` | `0` | None | Indeterminate bar |
-| Active unknown-total transfer | `true` | `0` | None | Indeterminate bar |
-| Active known-total transfer | `false` | `0..100` | None | Determinate percentage |
-| Completed | `false` | `100` | `done = true` | Completed (`100%`) |
-| Failed | `false` | Last valid | `failed = true, done = true` | Error state |
-| Cancelled | `false` | `0` | `cancelled = true, done = true` | Cancelled state |
+| State                            | `waitingForFile` | `percentage` | Terminal Flags                  | Rendered UI            |
+| -------------------------------- | ---------------: | -----------: | ------------------------------- | ---------------------- |
+| Queued / awaiting first progress |           `true` |          `0` | None                            | Indeterminate bar      |
+| Active unknown-total transfer    |           `true` |          `0` | None                            | Indeterminate bar      |
+| Active known-total transfer      |          `false` |     `0..100` | None                            | Determinate percentage |
+| Completed                        |          `false` |        `100` | `done = true`                   | Completed (`100%`)     |
+| Failed                           |          `false` |   Last valid | `failed = true, done = true`    | Error state            |
+| Cancelled                        |          `false` |          `0` | `cancelled = true, done = true` | Cancelled state        |
 {.wide .expand}
 
 ## Why This Design Is Sufficient {#proof}
@@ -263,18 +263,18 @@ Adding `null` alongside existing `waitingForFile`, `done`, `failed`, and `cancel
 
 ### Pure Calculation Matrix {#unit-tests}
 
-| Case | `loaded` | `objectSize` | `lengthComputable` | `event.total` | Expected |
-| --- | ---: | ---: | --- | ---: | --- |
-| Ordinary file, halfway | `50` | `100` | `false` | `0` | `50` |
-| Common prefix (`folder/`) | `1024` | `0` | `false` | `0` | `null` |
-| Initial `0 / 0` | `0` | `0` | `false` | `0` | `null` |
-| Response-total fallback | `50` | `0` | `true` | `200` | `25` |
-| Zero response total | `0` | `0` | `true` | `0` | `null` |
-| Loaded exceeds total | `150` | `100` | `true` | `100` | `100` |
-| Invalid `NaN` object size | `10` | `NaN` | `false` | `0` | `null` |
-| Omitted `undefined` size | `10` | `undefined` | `false` | `0` | `null` |
-| Non-finite `Infinity` total | `10` | `0` | `true` | `Infinity` | `null` |
-| Negative `loaded` | `-1` | `100` | `true` | `100` | `null` |
+| Case                        | `loaded` | `objectSize` | `lengthComputable` | `event.total` | Expected |
+| --------------------------- | -------: | -----------: | ------------------ | ------------: | -------- |
+| Ordinary file, halfway      |     `50` |        `100` | `false`            |           `0` | `50`     |
+| Common prefix (`folder/`)   |   `1024` |          `0` | `false`            |           `0` | `null`   |
+| Initial `0 / 0`             |      `0` |          `0` | `false`            |           `0` | `null`   |
+| Response-total fallback     |     `50` |          `0` | `true`             |         `200` | `25`     |
+| Zero response total         |      `0` |          `0` | `true`             |           `0` | `null`   |
+| Loaded exceeds total        |    `150` |        `100` | `true`             |         `100` | `100`    |
+| Invalid `NaN` object size   |     `10` |        `NaN` | `false`            |           `0` | `null`   |
+| Omitted `undefined` size    |     `10` |  `undefined` | `false`            |           `0` | `null`   |
+| Non-finite `Infinity` total |     `10` |          `0` | `true`             |    `Infinity` | `null`   |
+| Negative `loaded`           |     `-1` |        `100` | `true`             |         `100` | `null`   |
 {.wide .expand}
 
 ### Reducer State Transitions {#state-tests}

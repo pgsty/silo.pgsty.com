@@ -84,23 +84,23 @@ X-Minio-Source-Replication-Request: true
 
 完成身份认证后，处理器派生出两个层次的信任决策：
 
-| 信任级别 | 准入要求 | 允许启用的内部语义 |
-| --- | --- | --- |
-| `trusted` | 原始请求已通过非匿名身份认证 + 精确标记头 + 对目标资源具备 `s3:ReplicateObject`（或 `s3:ReplicateDelete`）权限 | 保留源端 ETag/MTime 及子系统时间戳；传递分片实际大小与加密校验和；抑制重复事件通知与二次复制；固定复制删除的目标版本与存储池 |
-| `replicaTrusted` | 满足 `trusted`，且当前请求携带原始状态 `REPLICA`（或分片上传初始化时已持久化 `REPLICA` 状态） | 持久化 `REPLICA` 状态；导入复制 SSE 密封密钥；启用 SSE-C 免解密原始密文读取路径（`NoDecryption`）；启用副本专用的对象锁豁免规则 |
+| 信任级别         | 准入要求                                                                                                       | 允许启用的内部语义                                                                                                              |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `trusted`        | 原始请求已通过非匿名身份认证 + 精确标记头 + 对目标资源具备 `s3:ReplicateObject`（或 `s3:ReplicateDelete`）权限 | 保留源端 ETag/MTime 及子系统时间戳；传递分片实际大小与加密校验和；抑制重复事件通知与二次复制；固定复制删除的目标版本与存储池    |
+| `replicaTrusted` | 满足 `trusted`，且当前请求携带原始状态 `REPLICA`（或分片上传初始化时已持久化 `REPLICA` 状态）                  | 持久化 `REPLICA` 状态；导入复制 SSE 密封密钥；启用 SSE-C 免解密原始密文读取路径（`NoDecryption`）；启用副本专用的对象锁豁免规则 |
 {.wide .expand}
 
 之所以必须区分 `trusted` 与 `replicaTrusted`，是由真实线缆协议决定的：合法的分片上传（`UploadPart`）、分片完成（`CompleteMultipartUpload`）以及批量复制（Batch Replication）请求只会携带 `X-Minio-Source-Replication-Request: true`，而不会在每个子请求上重复附带 `X-Amz-Replication-Status: REPLICA`。
 
 接收端按以下矩阵处理入站请求：
 
-| 入站请求形态 | 接收端行为 |
-| --- | --- |
-| 无标记头 | 按普通 S3 请求处理 |
-| 携带标记头，但缺少复制权限 | 剥离并忽略内部复制请求头，按普通 S3 语义继续执行 |
-| 携带 `X-Amz-Replication-Status: REPLICA`，但缺少复制权限 | 直接返回 `403 AccessDenied` |
-| 精确标记头 + 具备复制权限，无 `REPLICA` 状态头 | 仅授予 `trusted` |
-| 精确标记头 + 具备复制权限 + `REPLICA` 状态头 | 同时授予 `trusted` 与 `replicaTrusted` |
+| 入站请求形态                                             | 接收端行为                                       |
+| -------------------------------------------------------- | ------------------------------------------------ |
+| 无标记头                                                 | 按普通 S3 请求处理                               |
+| 携带标记头，但缺少复制权限                               | 剥离并忽略内部复制请求头，按普通 S3 语义继续执行 |
+| 携带 `X-Amz-Replication-Status: REPLICA`，但缺少复制权限 | 直接返回 `403 AccessDenied`                      |
+| 精确标记头 + 具备复制权限，无 `REPLICA` 状态头           | 仅授予 `trusted`                                 |
+| 精确标记头 + 具备复制权限 + `REPLICA` 状态头             | 同时授予 `trusted` 与 `replicaTrusted`           |
 {.wide .expand}
 
 对未获授权却声称 `REPLICA` 的请求显式返回 `403 AccessDenied`，可以防止配置错误的副本写入被静默降级为普通新对象写入并触发反向复制循环。
@@ -132,45 +132,45 @@ X-Minio-Source-Replication-Request: true
 
 ## 真实复制线缆协议矩阵 {#wire-matrix}
 
-| 操作类型 | 标记头 | 当前请求是否携带 `REPLICA` | 接收端信任决策 |
-| --- | --- | --- | --- |
-| 常规复制 `PutObject` | 是 | 是 | `replicaTrusted` |
-| 复制 `CreateMultipartUpload` | 是 | 是 | 持久化受信任的分片上传 `REPLICA` 来源状态 |
-| 复制 `UploadPart` | 是 | 否 | `trusted`；仅当已保存的分片上传状态为 `REPLICA` 时提升为 `replicaTrusted` |
-| 复制 `CompleteMultipartUpload` | 是 | 否 | `trusted`；保留源端 ETag/MTime、实际大小与加密校验和 |
-| `CopyObject` 元数据复制 | 是 | 是 | `replicaTrusted` |
-| 复制 `DeleteObject` | 是 | 是 | `replicaTrusted`（需具备 `s3:ReplicateDelete` 与 `s3:DeleteObject`，且 `s3:DeleteObjectVersion` 未被显式拒绝） |
-| 批量复制 `PUT` / `Complete` | 是 | 否 | `trusted`（目标端凭据必须包含 `s3:ReplicateObject`） |
-| 代理转发 / 就绪检查 / 有效性探针 | 独立探针头 | 否 | 保留探针头；有效性探针在规则前缀下校验复制权限（`c9ad74673`、`5db7be4ee`） |
+| 操作类型                         | 标记头     | 当前请求是否携带 `REPLICA` | 接收端信任决策                                                                                                 |
+| -------------------------------- | ---------- | -------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 常规复制 `PutObject`             | 是         | 是                         | `replicaTrusted`                                                                                               |
+| 复制 `CreateMultipartUpload`     | 是         | 是                         | 持久化受信任的分片上传 `REPLICA` 来源状态                                                                      |
+| 复制 `UploadPart`                | 是         | 否                         | `trusted`；仅当已保存的分片上传状态为 `REPLICA` 时提升为 `replicaTrusted`                                      |
+| 复制 `CompleteMultipartUpload`   | 是         | 否                         | `trusted`；保留源端 ETag/MTime、实际大小与加密校验和                                                           |
+| `CopyObject` 元数据复制          | 是         | 是                         | `replicaTrusted`                                                                                               |
+| 复制 `DeleteObject`              | 是         | 是                         | `replicaTrusted`（需具备 `s3:ReplicateDelete` 与 `s3:DeleteObject`，且 `s3:DeleteObjectVersion` 未被显式拒绝） |
+| 批量复制 `PUT` / `Complete`      | 是         | 否                         | `trusted`（目标端凭据必须包含 `s3:ReplicateObject`）                                                           |
+| 代理转发 / 就绪检查 / 有效性探针 | 独立探针头 | 否                         | 保留探针头；有效性探针在规则前缀下校验复制权限（`c9ad74673`、`5db7be4ee`）                                     |
 {.wide .expand}
 
 ## CORS 纯内存驻留状态机 {#cors-state-machine}
 
 最外层 CORS 中间件现在调用专用的纯内存驻留（resident-only）访问器，仅获取一次内存读锁，绝不触发任何存储层 I/O：
 
-| 存储桶元数据内存状态 | CORS 决策 | 存储层 I/O |
-| --- | --- | --- |
-| 已驻留，且包含合法的桶级 CORS 配置 | 应用桶级 CORS 规则（后台刷新失败时保留上一次成功加载的配置） | 无 |
-| 已驻留，但未配置桶级 CORS | 回退使用全局 CORS 配置 | 无 |
-| 已驻留，但持久化的 CORS XML 损坏 | 失败关闭（Fail closed：不输出 CORS 响应头并记录一次日志） | 无 |
-| 未驻留，且启动期初始加载尚未完成 | 失败关闭（Fail closed） | 无 |
-| 启动完成后未驻留：磁盘上真实存在但元数据加载失败的桶 | 失败关闭（Fail closed） | 无 |
-| 启动完成后未驻留：不存在、保留名、非法名或 `.minio.sys` 命名空间 | 回退使用全局 CORS 配置 | 无 |
+| 存储桶元数据内存状态                                             | CORS 决策                                                    | 存储层 I/O |
+| ---------------------------------------------------------------- | ------------------------------------------------------------ | ---------- |
+| 已驻留，且包含合法的桶级 CORS 配置                               | 应用桶级 CORS 规则（后台刷新失败时保留上一次成功加载的配置） | 无         |
+| 已驻留，但未配置桶级 CORS                                        | 回退使用全局 CORS 配置                                       | 无         |
+| 已驻留，但持久化的 CORS XML 损坏                                 | 失败关闭（Fail closed：不输出 CORS 响应头并记录一次日志）    | 无         |
+| 未驻留，且启动期初始加载尚未完成                                 | 失败关闭（Fail closed）                                      | 无         |
+| 启动完成后未驻留：磁盘上真实存在但元数据加载失败的桶             | 失败关闭（Fail closed）                                      | 无         |
+| 启动完成后未驻留：不存在、保留名、非法名或 `.minio.sys` 命名空间 | 回退使用全局 CORS 配置                                       | 无         |
 {.wide .expand}
 
 启动加载期与已知加载失败状态均采用失败关闭（fail closed）策略：由于预签名 URL（Presigned URL）本身已在查询字符串中携带认证签名，存储桶自定义的 CORS 配置是浏览器端唯一能够约束其调用源（Origin）的边界；若在桶元数据加载失败时回退到宽松的全局 CORS 策略，泄露的预签名 URL 就可能被任意网页源跨域调用。
 
 ## 被拒绝的替代方案 {#alternatives}
 
-| 被拒绝的替代方案 | 拒绝原因 |
-| --- | --- |
-| 在调用旧 CORS 加载器前先校验桶名语法 | 攻击者仍可构造无穷多个语法合法但并不存在的桶名，依然会触发鉴权前磁盘 I/O |
-| 加载 CORS 前先调用 `GetBucketInfo` | 只是把 11 次元数据探测替换成每个伪造桶名至少 1 次不受限的后端存储探测 |
-| 为不存在的桶增加带 TTL 的负缓存 | 只能限制单条缓存存活时间，无法限制攻击者构造海量不同桶名的基数（Cardinality）与初始 I/O 放大 |
-| 在 SigV4 验签前直接剥离复制请求头 | 破坏 SigV4 规范化请求计算，导致合法请求报 `SignatureDoesNotMatch` |
-| 拒绝所有携带内部复制标记头的请求 | 会使原本应被忽略的多余请求头引发大面积客户端报错，并打断合法的仅标记（marker-only）复制调用 |
-| 要求所有受信任复制请求都携带 `REPLICA` | 破坏复制 `UploadPart`、`CompleteMultipartUpload` 与批量复制的真实线缆兼容性 |
-| 在 `ObjectOptions` 中保存布尔值，但让事件与对象锁继续读请求头 | 留下两个可能互相矛盾的信任源 |
+| 被拒绝的替代方案                                              | 拒绝原因                                                                                     |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| 在调用旧 CORS 加载器前先校验桶名语法                          | 攻击者仍可构造无穷多个语法合法但并不存在的桶名，依然会触发鉴权前磁盘 I/O                     |
+| 加载 CORS 前先调用 `GetBucketInfo`                            | 只是把 11 次元数据探测替换成每个伪造桶名至少 1 次不受限的后端存储探测                        |
+| 为不存在的桶增加带 TTL 的负缓存                               | 只能限制单条缓存存活时间，无法限制攻击者构造海量不同桶名的基数（Cardinality）与初始 I/O 放大 |
+| 在 SigV4 验签前直接剥离复制请求头                             | 破坏 SigV4 规范化请求计算，导致合法请求报 `SignatureDoesNotMatch`                            |
+| 拒绝所有携带内部复制标记头的请求                              | 会使原本应被忽略的多余请求头引发大面积客户端报错，并打断合法的仅标记（marker-only）复制调用  |
+| 要求所有受信任复制请求都携带 `REPLICA`                        | 破坏复制 `UploadPart`、`CompleteMultipartUpload` 与批量复制的真实线缆兼容性                  |
+| 在 `ObjectOptions` 中保存布尔值，但让事件与对象锁继续读请求头 | 留下两个可能互相矛盾的信任源                                                                 |
 {.wide .expand}
 
 ## 实现分层与验证矩阵 {#implementation}

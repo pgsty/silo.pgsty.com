@@ -94,13 +94,13 @@ The general rule this design establishes: **set `MinVersion` and leave the rest 
 
 Measured against the same synthetic IdP fixture, with default settings:
 
-| Build | ClientHello | ML-KEM (4588) | ML-DSA 0x0904-6 | User-Agent |
-| --- | ---: | --- | --- | --- |
-| 20260804, Go 1.26.5 — works | 1497 B | present | absent | `MinIO (…)` |
-| 20260903, Go 1.27.1 — fails | 1509 B | present | present | `Silo (…)` |
-| 20260916, Go 1.27.1 — repaired | 1509 B | present (default) | present | `Silo (…)` |
-| 20260804 with `tlsmlkem=0` | 275 B | absent | absent | `MinIO (…)` |
-| 20260903 with `tlsmlkem=0` | 1509 B | **still present** | present | `Silo (…)` |
+| Build                          | ClientHello | ML-KEM (4588)     | ML-DSA 0x0904-6 | User-Agent  |
+| ------------------------------ | ----------: | ----------------- | --------------- | ----------- |
+| 20260804, Go 1.26.5 — works    |      1497 B | present           | absent          | `MinIO (…)` |
+| 20260903, Go 1.27.1 — fails    |      1509 B | present           | present         | `Silo (…)`  |
+| 20260916, Go 1.27.1 — repaired |      1509 B | present (default) | present         | `Silo (…)`  |
+| 20260804 with `tlsmlkem=0`     |       275 B | absent            | absent          | `MinIO (…)` |
+| 20260903 with `tlsmlkem=0`     |      1509 B | **still present** | present         | `Silo (…)`  |
 {.wide .expand}
 
 Two readings matter and are easy to miss:
@@ -112,29 +112,29 @@ Two readings matter and are easy to miss:
 
 The pinned list covered both directions of every TLS path, but the consequences differ sharply:
 
-| Path | Consequence of an incompatible ingress | Visibility |
-| --- | --- | --- |
-| OIDC discovery / JWKS | Identity init blocks, Console never starts, **the node serves nothing** | Immediate, fatal |
-| KMS/KES, LDAP(S) | Encryption or directory authentication unavailable. Both already used default curves, so the GODEBUG always worked for them | Immediate |
-| Replication targets | Replication silently backs up; visible only in metrics | Easy to miss |
-| Audit/notification webhooks, Lambda checks | Audit records lost, events undelivered | Easy to miss |
-| S3 tiers / cloud backends | Transition failures, remote objects unreadable | Easy to miss |
-| etcd, internode grid | Internal traffic, rarely crosses such a device | Low |
-| Inbound S3/Console listener | Clients cannot connect; determined by the *peer's* hello | Depends on client |
+| Path                                       | Consequence of an incompatible ingress                                                                                      | Visibility        |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| OIDC discovery / JWKS                      | Identity init blocks, Console never starts, **the node serves nothing**                                                     | Immediate, fatal  |
+| KMS/KES, LDAP(S)                           | Encryption or directory authentication unavailable. Both already used default curves, so the GODEBUG always worked for them | Immediate         |
+| Replication targets                        | Replication silently backs up; visible only in metrics                                                                      | Easy to miss      |
+| Audit/notification webhooks, Lambda checks | Audit records lost, events undelivered                                                                                      | Easy to miss      |
+| S3 tiers / cloud backends                  | Transition failures, remote objects unreadable                                                                              | Easy to miss      |
+| etcd, internode grid                       | Internal traffic, rarely crosses such a device                                                                              | Low               |
+| Inbound S3/Console listener                | Clients cannot connect; determined by the *peer's* hello                                                                    | Depends on client |
 {.wide .expand}
 
 Only the identity path blocks startup, which is why it was reported first. The others degrade quietly, so a deployment can be affected without anyone filing an issue.
 
 Which deployments are exposed at all:
 
-| Situation | Why |
-| --- | --- |
-| An SSL-inspection NGFW, SASE, SWG, or IDS/IPS sits on the outbound path | The reported case, and the one with a confirmed vendor defect |
-| Egress through an enterprise VPN that inspects TLS | Same mechanism, applied to the whole egress |
-| The environment allow-lists **JA3/JA4 client fingerprints** | The fingerprint changes whenever the handshake changes, so **every toolchain upgrade can trip it**, with the same silent reset |
-| An old TLS terminator or load balancer in front of the endpoint | Intolerant of unknown extensions, or mishandles a hello split across segments |
-| **Migrating from an upstream MinIO release built with Go ≤ 1.22** | That handshake carried neither post-quantum key exchange nor ML-DSA — roughly 275 bytes against roughly 1509. This cohort makes the largest single jump and is the most exposed |
-| Regulated environments that disallow post-quantum algorithms | They need the classical profile for policy reasons, not interoperability ones |
+| Situation                                                               | Why                                                                                                                                                                             |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| An SSL-inspection NGFW, SASE, SWG, or IDS/IPS sits on the outbound path | The reported case, and the one with a confirmed vendor defect                                                                                                                   |
+| Egress through an enterprise VPN that inspects TLS                      | Same mechanism, applied to the whole egress                                                                                                                                     |
+| The environment allow-lists **JA3/JA4 client fingerprints**             | The fingerprint changes whenever the handshake changes, so **every toolchain upgrade can trip it**, with the same silent reset                                                  |
+| An old TLS terminator or load balancer in front of the endpoint         | Intolerant of unknown extensions, or mishandles a hello split across segments                                                                                                   |
+| **Migrating from an upstream MinIO release built with Go ≤ 1.22**       | That handshake carried neither post-quantum key exchange nor ML-DSA — roughly 275 bytes against roughly 1509. This cohort makes the largest single jump and is the most exposed |
+| Regulated environments that disallow post-quantum algorithms            | They need the classical profile for policy reasons, not interoperability ones                                                                                                   |
 {.wide .expand}
 
 Deployments whose outbound paths carry no inspection device are unaffected and should not set any of the compatibility options below.
@@ -145,10 +145,10 @@ Four properties combine to make the symptom nearly undiagnosable in the field: i
 
 Removing a pinned list does not restore the previous wire format; it adopts the current Go default, which is larger:
 
-| Release | `supported_groups` actually offered |
-| --- | --- |
-| 20260903 and earlier (pinned) | `X25519MLKEM768, X25519, P256, P384, P521` |
-| 20260916 (Go defaults) | `X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024, X25519, P256, P384, P521` |
+| Release                       | `supported_groups` actually offered                                               |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| 20260903 and earlier (pinned) | `X25519MLKEM768, X25519, P256, P384, P521`                                        |
+| 20260916 (Go defaults)        | `X25519MLKEM768, SecP256r1MLKEM768, SecP384r1MLKEM1024, X25519, P256, P384, P521` |
 {.wide .expand}
 
 For an operator who sets nothing, 20260916 therefore offers two additional post-quantum identifiers at every TLS endpoint, inbound and outbound. This is harmless for almost every deployment, but an ingress that allow-lists group identifiers could in principle be broken by 20260916 where 20260903 worked. `GODEBUG=tlssecpmlkem=0` disables those two while retaining `X25519MLKEM768`. For an operator who does set `tlsmlkem=0`, 20260916 produces a smaller, more conservative handshake than any prior release — which is the point of the repair.
@@ -157,11 +157,11 @@ For an operator who sets nothing, 20260916 therefore offers two additional post-
 
 The investigation reproduced three mechanisms that each produce the reported error text. The 20260916 repair addresses one of them.
 
-| Branch | Mechanism | Covered by 20260916 |
-| --- | --- | --- |
-| A | The ingress rejects ML-KEM, and the operator had `tlsmlkem=0` set before the upgrade | **Yes** — this is what the repair restores |
-| B | The ingress rejects the ML-DSA signature identifiers | No. Only a TLS 1.2 cap suppresses the offer, and no such setting is exposed |
-| C | An HTTP-layer rule rejects the changed `Silo` User-Agent after a successful handshake | No, and no TLS change is relevant to it |
+| Branch | Mechanism                                                                             | Covered by 20260916                                                         |
+| ------ | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| A      | The ingress rejects ML-KEM, and the operator had `tlsmlkem=0` set before the upgrade  | **Yes** — this is what the repair restores                                  |
+| B      | The ingress rejects the ML-DSA signature identifiers                                  | No. Only a TLS 1.2 cap suppresses the offer, and no such setting is exposed |
+| C      | An HTTP-layer rule rejects the changed `Silo` User-Agent after a successful handshake | No, and no TLS change is relevant to it                                     |
 {.wide .expand}
 
 A fourth observation explains why the `curl` control test misleads: the discovery transport disables HTTP/2 and sends no ALPN, while `curl` negotiated h2. That difference exists in both the working and failing releases.
@@ -190,23 +190,23 @@ Grouped by who has to act. Each row solves specific branches:
 
 **Ingress side — the only complete fix.**
 
-| Action | Branches | Cost |
-| --- | --- | --- |
-| Update the middlebox — threat-signature content as well as firmware — so it tolerates unknown algorithm identifiers | A, B, C | Requires the device's owner. For the identified product a content update already exists, making this the shortest path |
-| Route around it: point `MINIO_IDENTITY_OPENID_CONFIG_URL` at an endpoint that does not traverse the device, or use split-horizon DNS. The discovery document's `issuer` must not change | A, B, C | Certificate hostname and issuer consistency must hold |
-| Terminate TLS in a sidecar (stunnel, Envoy) that connects to the IdP itself | A, B, C | An extra component and its own trust chain |
-| Send the request through `HTTPS_PROXY` | none | A CONNECT tunnel forwards the same ClientHello; only a proxy that terminates TLS changes anything |
+| Action                                                                                                                                                                                  | Branches | Cost                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Update the middlebox — threat-signature content as well as firmware — so it tolerates unknown algorithm identifiers                                                                     | A, B, C  | Requires the device's owner. For the identified product a content update already exists, making this the shortest path |
+| Route around it: point `MINIO_IDENTITY_OPENID_CONFIG_URL` at an endpoint that does not traverse the device, or use split-horizon DNS. The discovery document's `issuer` must not change | A, B, C  | Certificate hostname and issuer consistency must hold                                                                  |
+| Terminate TLS in a sidecar (stunnel, Envoy) that connects to the IdP itself                                                                                                             | A, B, C  | An extra component and its own trust chain                                                                             |
+| Send the request through `HTTPS_PROXY`                                                                                                                                                  | none     | A CONNECT tunnel forwards the same ClientHello; only a proxy that terminates TLS changes anything                      |
 {.wide .expand}
 
 **Deployment side — available today.**
 
-| Action | Branches | Cost |
-| --- | --- | --- |
-| `GODEBUG=tlsmlkem=0` | A | Disables hybrid key exchange process-wide, including internode links and the inbound listener; certificate verification unaffected |
-| `GODEBUG=tlssecpmlkem=0` | the two groups added by 20260916 | Narrower; retains `X25519MLKEM768` |
-| `GODEBUG=fips140=on` | A and B | **Not recommended.** The FIPS allow-lists exclude ML-KEM and ML-DSA, but also replace cipher suites and curves and exclude Ed25519/X25519 for the entire process |
-| Remain on 20260804 | A, B, C | Forfeits every subsequent security fix; emergency measure only |
-| Allow the `Silo` User-Agent at the ingress | C | One rule change |
+| Action                                     | Branches                         | Cost                                                                                                                                                             |
+| ------------------------------------------ | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GODEBUG=tlsmlkem=0`                       | A                                | Disables hybrid key exchange process-wide, including internode links and the inbound listener; certificate verification unaffected                               |
+| `GODEBUG=tlssecpmlkem=0`                   | the two groups added by 20260916 | Narrower; retains `X25519MLKEM768`                                                                                                                               |
+| `GODEBUG=fips140=on`                       | A and B                          | **Not recommended.** The FIPS allow-lists exclude ML-KEM and ML-DSA, but also replace cipher suites and curves and exclude Ed25519/X25519 for the entire process |
+| Remain on 20260804                         | A, B, C                          | Forfeits every subsequent security fix; emergency measure only                                                                                                   |
+| Allow the `Silo` User-Agent at the ingress | C                                | One rule change                                                                                                                                                  |
 {.wide .expand}
 
 **There is no way to disable ML-DSA via GODEBUG.** Go provides no GODEBUG for signature algorithms — the `crypto/tls` entries in `internal/godebugs/table.go` are `fips140ems`, `tlsmaxrsasize`, `tlsmlkem`, `tlssecpmlkem`, and `tlssha1` — and `tls.Config` has no signature-algorithm field. The only lever is the version gate: the identifiers are TLS 1.3-only, so capping `MaxVersion` at TLS 1.2 suppresses them.

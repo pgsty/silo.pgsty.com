@@ -16,13 +16,14 @@ upstream_modified: true
 
 SILO 使用 AGPLv3。许可命令保留旧命令语法，不能购买或激活 MinIO 商业订阅。
 
-| 命令 | 行为 |
-| --- | --- |
-| `mcli license info ALIAS` | 显示本地保存的许可信息，不访问 SUBNET |
-| `mcli license unregister ALIAS` | 清除本地许可注册状态 |
+| 命令                                    | 行为                                               |
+| --------------------------------------- | -------------------------------------------------- |
+| `mcli license info ALIAS`               | 显示本地保存的许可信息，不访问 SUBNET              |
+| `mcli license unregister ALIAS`         | 清除本地许可注册状态                               |
 | `mcli license update ALIAS license.key` | 保留显式本地文件更新路径，是否接受由目标服务端决定 |
-| `mcli license update ALIAS` | 在线续订禁用，退出码 1 |
-| `mcli license register ALIAS` | 注册禁用，退出码 1 |
+| `mcli license update ALIAS`             | 在线续订禁用，退出码 1                             |
+| `mcli license register ALIAS`           | 注册禁用，退出码 1                                 |
+{.wide .expand}
 
 ## 用法 {#syntax}
 

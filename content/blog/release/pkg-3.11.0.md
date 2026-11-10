@@ -67,7 +67,7 @@ That question is the right one because of how the defect fires. Resource matchin
 **Withheld from object-only grants (twelve actions):**
 
 | Action                                                                           | Why it qualifies                                                                                                                                                                                         |
-|:---------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| :------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `PutBucketPolicy`, `DeleteBucketPolicy`                                          | Hand access to other principals, anonymous included, and can grant the caller bucket-level actions it was never given. Self-escalation and public exposure.                                              |
 | `PutBucketObjectLockConfiguration`, `PutBucketVersioning`                        | Defeat protections that exist precisely to stop a holder of write access from destroying data.                                                                                                           |
 | `PutReplicationConfiguration`, `PutLifecycleConfiguration`                       | Act under server credentials and keep acting after the caller's access is revoked.                                                                                                                       |
@@ -104,7 +104,7 @@ On the protected path the matcher now requires **both** forms to match — the b
 The property is verified rather than argued. A decision corpus of **27,000 authorization outcomes** — 15 resource patterns × 3 buckets × 5 object names × 20 actions × 6 statement forms — was generated against both the pre-hardening baseline and this release and compared entry by entry:
 
 | Transition                  |  Count |
-|:----------------------------|-------:|
+| :-------------------------- | -----: |
 | `false → true` (broadening) |  **0** |
 | `true → false` (narrowing)  |    144 |
 | unchanged                   | 26,856 |
@@ -173,7 +173,7 @@ This release restores the upstream semantics: the two switches are **additive, n
 The version number follows upstream's line and makes no claim of identical content. The measured delta, comparing action-string constants across `policy/`:
 
 |                              | Count |
-|:-----------------------------|------:|
+| :--------------------------- | ----: |
 | Upstream `minio/pkg` v3.11.0 |   291 |
 | `silo-pkg` v3.11.0           |   270 |
 {.wide .expand}
@@ -183,7 +183,7 @@ The version number follows upstream's line and makes no claim of identical conte
 **Three actions are named differently on each side.** Upstream renamed and split these; this fork retains the earlier names:
 
 | `silo-pkg` v3.11.0             | upstream `minio/pkg` v3.11.0                                 |
-|:-------------------------------|:-------------------------------------------------------------|
+| :----------------------------- | :----------------------------------------------------------- |
 | `s3tables:TagResource`         | `s3tables:TagTable`, `s3tables:TagWarehouse`                 |
 | `s3tables:UntagResource`       | `s3tables:UntagTable`, `s3tables:UntagWarehouse`             |
 | `s3tables:ListTagsForResource` | `s3tables:ListTagsForTable`, `s3tables:ListTagsForWarehouse` |

@@ -47,12 +47,12 @@ image | pdf | audio | video | none
 
 其扩展名映射表只包含多媒体格式，未收录 `.log`、`.txt`、`.json` 或 `.xml`；MIME 分类器同样忽略 `text/plain`、`application/json`、`application/xml` 与 `text/xml`。运行时验证显示前端分类与后端响应头之间存在如下分裂：
 
-| 对象 | 前端分类结果 | Console 下载响应头 |
-| --- | --- | --- |
-| `.log` / `text/plain` | `none` | `inline`，`X-Frame-Options: SAMEORIGIN` |
-| `.txt` / `text/plain` | `none` | `inline`，`X-Frame-Options: SAMEORIGIN` |
+| 对象                         | 前端分类结果          | Console 下载响应头                      |
+| ---------------------------- | --------------------- | --------------------------------------- |
+| `.log` / `text/plain`        | `none`                | `inline`，`X-Frame-Options: SAMEORIGIN` |
+| `.txt` / `text/plain`        | `none`                | `inline`，`X-Frame-Options: SAMEORIGIN` |
 | `.json` / `application/json` | “Preview unavailable” | `inline`，`X-Frame-Options: SAMEORIGIN` |
-| `.xml` / `application/xml` | `none` | `attachment`，`X-Frame-Options: DENY` |
+| `.xml` / `application/xml`   | `none`                | `attachment`，`X-Frame-Options: DENY`   |
 {.wide .expand}
 
 此外，对象详情抽屉在判断 **Preview** 按钮是否禁用时使用了错误的布尔逻辑连接词：有读取权限的用户可以对不支持预览的对象点击 **Preview** 并看到不可用提示，而在另一些权限组合下界面会放行实际上会被服务端拒绝的操作。
@@ -156,16 +156,16 @@ iframe / innerHTML / DOMParser / XML parser / 可执行文档
 
 只要命中允许的扩展名（且未被规则 1 排除）或命中允许的精确 MIME 类型，即判定为 `text`：
 
-| 文件名与 MIME | 判定结果 | 原因 |
-| --- | --- | --- |
-| `report.txt` + `image/png` | `image` | 既有媒体分类优先 |
-| `report.json` + `application/pdf` | `pdf` | 既有媒体分类优先 |
-| `server.LOG` + `application/octet-stream` | `text` | 命中允许的扩展名（大小写不敏感） |
-| 无扩展名 + `application/json; charset=utf-8` | `text` | 命中规范化后的精确 MIME |
-| `page.html` + `text/plain` | `none` | 活动文档扩展名被显式排除 |
-| `page.txt` + `text/html` | `text` | 扩展名准入；HTML 源码仅作为惰性纯文本展示 |
-| `notes.md` + `text/plain` | `text` | 精确 MIME 准入原始纯文本 |
-| `image.svg` + `image/svg+xml` | `image` | 走既有图片预览路径 |
+| 文件名与 MIME                                | 判定结果 | 原因                                      |
+| -------------------------------------------- | -------- | ----------------------------------------- |
+| `report.txt` + `image/png`                   | `image`  | 既有媒体分类优先                          |
+| `report.json` + `application/pdf`            | `pdf`    | 既有媒体分类优先                          |
+| `server.LOG` + `application/octet-stream`    | `text`   | 命中允许的扩展名（大小写不敏感）          |
+| 无扩展名 + `application/json; charset=utf-8` | `text`   | 命中规范化后的精确 MIME                   |
+| `page.html` + `text/plain`                   | `none`   | 活动文档扩展名被显式排除                  |
+| `page.txt` + `text/html`                     | `text`   | 扩展名准入；HTML 源码仅作为惰性纯文本展示 |
+| `notes.md` + `text/plain`                    | `text`   | 精确 MIME 准入原始纯文本                  |
+| `image.svg` + `image/svg+xml`                | `image`  | 走既有图片预览路径                        |
 {.wide .expand}
 
 ## 资源上限契约 {#resource-contract}

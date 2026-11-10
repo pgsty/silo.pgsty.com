@@ -11,16 +11,16 @@ Current releases: **SILO Server and mcli 20261109**, **SILO Console v2.7.0**,
 Server 20261109 embeds Console 2.7.0, mcli 20261109 and pkg v3.16.0.
 KES remains a separate, optional external key service.
 
-| Release notes | English | 简体中文 |
-| --- | --- | --- |
-| Server 20261109 | [Release notes](content/blog/release/silo-20261109.md) | [发布说明](content/blog/release/silo-20261109.zh.md) |
-| Console 2.7.0 | [Release notes](content/blog/release/console-2.7.0.md) | [发布说明](content/blog/release/console-2.7.0.zh.md) |
-| Console 2.6.0 | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |
-| mcli 20261109 | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
-| silo-pkg 3.16.0 | [Release notes](content/blog/release/pkg-3.16.0.md) | [发布说明](content/blog/release/pkg-3.16.0.zh.md) |
-| Server / mcli / KES 20261026 | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
-| Console 2.5 series, through 2.5.1 | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
-| silo-pkg 3.15 series, through 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md) | [发布说明](content/blog/release/pkg-3.15.2.zh.md) |
+| Release notes                        | English                                                | 简体中文                                             |
+| ------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------- |
+| Server 20261109                      | [Release notes](content/blog/release/silo-20261109.md) | [发布说明](content/blog/release/silo-20261109.zh.md) |
+| Console 2.7.0                        | [Release notes](content/blog/release/console-2.7.0.md) | [发布说明](content/blog/release/console-2.7.0.zh.md) |
+| Console 2.6.0                        | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |
+| mcli 20261109                        | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
+| silo-pkg 3.16.0                      | [Release notes](content/blog/release/pkg-3.16.0.md)    | [发布说明](content/blog/release/pkg-3.16.0.zh.md)    |
+| Server / mcli / KES 20261026         | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
+| Console 2.5 series, through 2.5.1    | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
+| silo-pkg 3.15 series, through 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md)    | [发布说明](content/blog/release/pkg-3.15.2.zh.md)    |
 
 See the [component matrix](content/compatibility/versions.md) for exact sources,
 upgrade order and compatibility boundaries.
@@ -166,9 +166,9 @@ See [LICENSE](LICENSE) for the full license text and [NOTICE.md](NOTICE.md) for 
 
 The same notices are published for readers under `content/about/`, rendered at [/about/](https://silo.pgsty.com/about/):
 
-| Page | Covers |
-| :-- | :-- |
-| [/about/license/](https://silo.pgsty.com/about/license/) | AGPLv3 for the software, CC BY 4.0 for the documentation |
-| [/about/trademark/](https://silo.pgsty.com/about/trademark/) | How the MinIO name is used, and the non-affiliation statement |
-| [/about/attribution/](https://silo.pgsty.com/about/attribution/) | Copyright stack, derivation, translation notice, credit line |
-| [/about/security/](https://silo.pgsty.com/about/security/) | How to report a vulnerability, and where fixes are published |
+| Page                                                             | Covers                                                        |
+| :--------------------------------------------------------------- | :------------------------------------------------------------ |
+| [/about/license/](https://silo.pgsty.com/about/license/)         | AGPLv3 for the software, CC BY 4.0 for the documentation      |
+| [/about/trademark/](https://silo.pgsty.com/about/trademark/)     | How the MinIO name is used, and the non-affiliation statement |
+| [/about/attribution/](https://silo.pgsty.com/about/attribution/) | Copyright stack, derivation, translation notice, credit line  |
+| [/about/security/](https://silo.pgsty.com/about/security/)       | How to report a vulnerability, and where fixes are published  |

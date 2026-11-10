@@ -18,14 +18,14 @@ url: "/zh/blog/design/conditional-delete/"
 
 ## 已实现的契约 {#tldr}
 
-| 请求 | 已交付行为 |
-| --- | --- |
+| 请求                                         | 已交付行为                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | 单个 `DeleteObject`，非空 `If-Match: <ETag>` | 在外层删除锁内比较客户端可见 ETag；不匹配时先返回 `412 PreconditionFailed`，不执行任何删除 |
-| `If-Match: *` | 要求选中的对象表示存在且不是删除标记（Delete Marker） |
-| 显式 `versionId` | 比较**所指定的版本**，而非无关的当前版本 |
-| 未携带 `If-Match` 或请求头值为空 | 不安装条件回调，按普通删除处理 |
-| 批量 `DeleteObjects` 的逐项 `<ETag>` | `ObjectToDelete` 结构体无 ETag 字段，该 XML 元素**不提供删除保护** |
-| 内部递归 `x-minio-force-delete` | 前缀删除先于单对象条件路径返回，不能用作条件删除 |
+| `If-Match: *`                                | 要求选中的对象表示存在且不是删除标记（Delete Marker）                                      |
+| 显式 `versionId`                             | 比较**所指定的版本**，而非无关的当前版本                                                   |
+| 未携带 `If-Match` 或请求头值为空             | 不安装条件回调，按普通删除处理                                                             |
+| 批量 `DeleteObjects` 的逐项 `<ETag>`         | `ObjectToDelete` 结构体无 ETag 字段，该 XML 元素**不提供删除保护**                         |
+| 内部递归 `x-minio-force-delete`              | 前缀删除先于单对象条件路径返回，不能用作条件删除                                           |
 {.wide .expand}
 
 条件判断不会额外增加 `s3:GetObject` 授权检查。普通删除授权仍然生效，包括显式版本对应的 `s3:DeleteObjectVersion`、Object Lock 保护检查，以及独立的可信复制路径。

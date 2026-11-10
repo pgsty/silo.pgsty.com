@@ -182,14 +182,14 @@ Go 后端的文件夹下载处理器继续通过 `io.Pipe` 流式生成 Deflate 
 
 ## 进度状态机 {#state-machine}
 
-| 状态 | `waitingForFile` | `percentage` | 终态标志 | 界面渲染 |
-| --- | ---: | ---: | --- | --- |
-| 排队中 / 尚未收到有效进度 | `true` | `0` | 无 | 不确定进度条（indeterminate） |
-| 总量未知的传输 | `true` | `0` | 无 | 不确定进度条（indeterminate） |
-| 总量已知的传输 | `false` | `0..100` | 无 | 确定百分比进度条 |
-| 已完成（Completed） | `false` | `100` | `done = true` | 成功（`100%`） |
-| 已失败（Failed） | `false` | 上次有效值 | `failed = true, done = true` | 错误状态 |
-| 已取消（Cancelled） | `false` | `0` | `cancelled = true, done = true` | 已取消状态 |
+| 状态                      | `waitingForFile` | `percentage` | 终态标志                        | 界面渲染                      |
+| ------------------------- | ---------------: | -----------: | ------------------------------- | ----------------------------- |
+| 排队中 / 尚未收到有效进度 |           `true` |          `0` | 无                              | 不确定进度条（indeterminate） |
+| 总量未知的传输            |           `true` |          `0` | 无                              | 不确定进度条（indeterminate） |
+| 总量已知的传输            |          `false` |     `0..100` | 无                              | 确定百分比进度条              |
+| 已完成（Completed）       |          `false` |        `100` | `done = true`                   | 成功（`100%`）                |
+| 已失败（Failed）          |          `false` |   上次有效值 | `failed = true, done = true`    | 错误状态                      |
+| 已取消（Cancelled）       |          `false` |          `0` | `cancelled = true, done = true` | 已取消状态                    |
 {.wide .expand}
 
 ## 完备性证明 {#proof}
@@ -263,18 +263,18 @@ Console 2.2.0 时期的旧版 `BrowserDownload` 辅助函数会在点击隐藏 `
 
 ### 纯函数计算矩阵 {#unit-tests}
 
-| 场景 | `loaded` | `objectSize` | `lengthComputable` | `event.total` | 期望返回值 |
-| --- | ---: | ---: | --- | ---: | --- |
-| 普通文件下载过半 | `50` | `100` | `false` | `0` | `50` |
-| 公共前缀（`folder/`） | `1024` | `0` | `false` | `0` | `null` |
-| 初始 `0 / 0` | `0` | `0` | `false` | `0` | `null` |
-| 响应总长度回退 | `50` | `0` | `true` | `200` | `25` |
-| 响应总长度为零 | `0` | `0` | `true` | `0` | `null` |
-| 已加载字节超过总量 | `150` | `100` | `true` | `100` | `100` |
-| 非法对象大小 `NaN` | `10` | `NaN` | `false` | `0` | `null` |
-| 省略的对象大小 `undefined` | `10` | `undefined` | `false` | `0` | `null` |
-| 非有限响应总量 `Infinity` | `10` | `0` | `true` | `Infinity` | `null` |
-| 负数 `loaded` | `-1` | `100` | `true` | `100` | `null` |
+| 场景                       | `loaded` | `objectSize` | `lengthComputable` | `event.total` | 期望返回值 |
+| -------------------------- | -------: | -----------: | ------------------ | ------------: | ---------- |
+| 普通文件下载过半           |     `50` |        `100` | `false`            |           `0` | `50`       |
+| 公共前缀（`folder/`）      |   `1024` |          `0` | `false`            |           `0` | `null`     |
+| 初始 `0 / 0`               |      `0` |          `0` | `false`            |           `0` | `null`     |
+| 响应总长度回退             |     `50` |          `0` | `true`             |         `200` | `25`       |
+| 响应总长度为零             |      `0` |          `0` | `true`             |           `0` | `null`     |
+| 已加载字节超过总量         |    `150` |        `100` | `true`             |         `100` | `100`      |
+| 非法对象大小 `NaN`         |     `10` |        `NaN` | `false`            |           `0` | `null`     |
+| 省略的对象大小 `undefined` |     `10` |  `undefined` | `false`            |           `0` | `null`     |
+| 非有限响应总量 `Infinity`  |     `10` |          `0` | `true`             |    `Infinity` | `null`     |
+| 负数 `loaded`              |     `-1` |        `100` | `true`             |         `100` | `null`     |
 {.wide .expand}
 
 ### 状态转换测试 {#state-tests}

@@ -42,12 +42,12 @@ arn:aws:s3:::
 
 对真正执行资源匹配的 Statement，实际影响取决于 `Effect`，以及前缀写在 `Resource` 还是 `NotResource`：
 
-| 语句形状 | 原有运行结果 |
-|:--|:--|
-| `Allow` + 裸 `Resource` | 什么也不授权 |
-| `Deny` + 裸 `Resource` | 本应生效的拒绝没有触发 |
+| 语句形状                   | 原有运行结果                             |
+| :------------------------- | :--------------------------------------- |
+| `Allow` + 裸 `Resource`    | 什么也不授权                             |
+| `Deny` + 裸 `Resource`     | 本应生效的拒绝没有触发                   |
 | `Allow` + 裸 `NotResource` | 没有排除任何东西，可能远比预期授权得更宽 |
-| `Deny` + 裸 `NotResource` | 可能远比预期拒绝得更宽 |
+| `Deny` + 裸 `NotResource`  | 可能远比预期拒绝得更宽                   |
 {.wide .expand}
 
 危险的两格属于依赖错误策略配置的 fail-open，而不是未认证远程漏洞，也没有 CVE。管理员、策略模板或自动化必须先提交这种错误资源，问题才会出现。同一问题也适用于已经注册的 S3 Tables 与 KMS ARN 前缀。
@@ -131,19 +131,19 @@ SILO 提交 [`eee05a17c`](https://github.com/pgsty/silo/commit/eee05a17c34a07ceb
 
 主要选中版本变化如下：
 
-| 模块 | 3.11.0 | 3.12.0 |
-|:--|:--|:--|
-| `go.etcd.io/etcd/{api,client/pkg,client}/v3` | `3.6.6` | `3.7.1` |
-| `golang.org/x/crypto` | `0.54.0` | `0.55.0` |
-| `golang.org/x/net` | `0.57.0` | `0.58.0` |
-| `golang.org/x/text` | `0.40.0` | `0.41.0` |
-| `github.com/minio/minio-go/v7` | `7.0.97` | `7.0.99` |
-| `github.com/minio/mux` | `1.8.2` | `1.9.2` |
-| `github.com/cheggaaa/pb` | `1.0.29` | `1.0.30` |
-| `github.com/lestrrat-go/jwx/v3` | `3.0.12` | `3.0.13` |
-| `github.com/lestrrat-go/httprc/v3` | `3.0.1` | `3.0.6` |
-| `github.com/grpc-ecosystem/grpc-gateway/v2` | `2.27.3` | `2.29.0` |
-| `go.uber.org/zap` | `1.27.1` | `1.28.0` |
+| 模块                                         | 3.11.0   | 3.12.0   |
+| :------------------------------------------- | :------- | :------- |
+| `go.etcd.io/etcd/{api,client/pkg,client}/v3` | `3.6.6`  | `3.7.1`  |
+| `golang.org/x/crypto`                        | `0.54.0` | `0.55.0` |
+| `golang.org/x/net`                           | `0.57.0` | `0.58.0` |
+| `golang.org/x/text`                          | `0.40.0` | `0.41.0` |
+| `github.com/minio/minio-go/v7`               | `7.0.97` | `7.0.99` |
+| `github.com/minio/mux`                       | `1.8.2`  | `1.9.2`  |
+| `github.com/cheggaaa/pb`                     | `1.0.29` | `1.0.30` |
+| `github.com/lestrrat-go/jwx/v3`              | `3.0.12` | `3.0.13` |
+| `github.com/lestrrat-go/httprc/v3`           | `3.0.1`  | `3.0.6`  |
+| `github.com/grpc-ecosystem/grpc-gateway/v2`  | `2.27.3` | `2.29.0` |
+| `go.uber.org/zap`                            | `1.27.1` | `1.28.0` |
 {.wide .expand}
 
 其它小型更新包括 `uax29` 2.3.1、`fastjson` 1.6.10、`secp256k1` 4.4.1 与 `goccy/go-json` 0.10.6。旧 `lestrrat-go/option` v1、`gogo/protobuf` 与陈旧的测试专用依赖退出选中依赖图。

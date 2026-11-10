@@ -52,14 +52,14 @@ S3 传输边界仅允许 `LIST`、`HEAD` 与 `GET`；若 mock endpoint 收到任
 
 每个候选对象只产生一个稳定的分类结果：
 
-| 结果 | 含义 |
-| :-- | :-- |
-| `MATCH` | 所有受支持的已存校验和均匹配 `GET` 返回的逻辑对象字节 |
-| `MISMATCH` | 至少一个已存校验和与逻辑对象字节不一致 |
-| `NO_CHECKSUM` | 对象没有附加校验和，不读取对象正文 |
-| `WOULD_VERIFY` | `--dry-run` 发现可校验的 `FULL_OBJECT` 校验和 |
-| `UNKNOWN_*` | MCLI 无法给出可靠校验结论（如 `COMPOSITE` 或缺失 `ChecksumType`） |
-| `SKIPPED_*` | 过滤条件排除了该对象（`SKIPPED_TOO_LARGE`、时间过滤或删除标记） |
+| 结果           | 含义                                                              |
+| :------------- | :---------------------------------------------------------------- |
+| `MATCH`        | 所有受支持的已存校验和均匹配 `GET` 返回的逻辑对象字节             |
+| `MISMATCH`     | 至少一个已存校验和与逻辑对象字节不一致                            |
+| `NO_CHECKSUM`  | 对象没有附加校验和，不读取对象正文                                |
+| `WOULD_VERIFY` | `--dry-run` 发现可校验的 `FULL_OBJECT` 校验和                     |
+| `UNKNOWN_*`    | MCLI 无法给出可靠校验结论（如 `COMPOSITE` 或缺失 `ChecksumType`） |
+| `SKIPPED_*`    | 过滤条件排除了该对象（`SKIPPED_TOO_LARGE`、时间过滤或删除标记）   |
 {.wide .expand}
 
 最终汇总（summary）携带 `objects`、`verified` 计数、每种结果状态的计数以及 `incomplete` 标志。`verified` 等于 `MATCH` 加 `MISMATCH`——只有这两种结果真正把对象正文流过了哈希器。枚举了大量对象却实际核验为零的运行，会在汇总中清晰体现。

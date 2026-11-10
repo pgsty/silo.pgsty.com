@@ -32,23 +32,23 @@ That pass uncovered real defects after the first pass and tied every conclusion 
 
 ## Review Result by Area {#review-result}
 
-| Area | Second-pass finding | Final resolution | Status |
-| :-- | :-- | :-- | :-- |
-| Bucket metadata | Independent config locks could lose updates to the shared `.metadata.bin` record ([#102](https://github.com/pgsty/silo/issues/102)) | One bounded `metadata.lock` surrounds every whole-record writer, migration, import, adoption, and healing path; changed-field replication avoids stale whole-record replacement | Closed in candidate |
-| Bucket creation | `ForceCreate` and site adoption could replace existing config with defaults | Preserve existing records and update only creation/adoption state; add regression tests for clobbering | Closed in candidate |
-| Object Lock | Comparing lock-document bytes with one canonical XML document missed valid configurations carrying a Default Retention rule | Parse Object Lock first, then derive the versioning invariant from the parsed enabled state; verify update, read-back, and disk reload | Closed in candidate |
-| Pre-auth CORS | Arbitrary path segments could cause metadata reads and cache growth | CORS lookup reads resident metadata only and does no object-layer I/O | Closed in candidate |
-| CORS startup | A nonresident name could fall back to global CORS before metadata initialization | Preserve an explicit fail-closed startup state | Closed in candidate |
-| CORS load failure | Forgetting that a real bucket failed to load made it indistinguishable from a nonexistent bucket and exposed the global fallback to pre-signed requests | Maintain a bounded failed-bucket set, clear it on every successful load/remove/refresh path, and keep those buckets fail-closed | Closed in candidate |
-| CORS recovery | A successful on-demand `GetConfig` reload did not initially clear the load-failure bit | One-line final fix `84e1580a4` plus targeted race coverage | Closed in candidate |
-| Replication trust | Presence of client-controlled internal headers enabled privileged behavior in multiple handlers | Authenticate first; require an exact marker plus `s3:ReplicateObject` or `s3:ReplicateDelete`; carry a private context decision; sanitize untrusted headers afterward | Closed in candidate |
-| Streaming uploads | The sanitized request clone did not initially share the original trailer map | Preserve the trailer map so late-arriving streaming checksums remain visible | Closed in candidate |
-| Snowball | A request-wide trust bit could leak between extracted entries | Derive and isolate trust per entry; preserve request defaults across workers | Closed in candidate |
-| SSE-C | Zero-byte reads and `GetObjectAttributes` could skip customer-key authentication | Require a successfully unsealed key, with a separate authorized-replica exception | Closed in candidate |
-| Delete authorization | Explicit version deletes checked the ordinary delete action instead of requiring `s3:DeleteObjectVersion` | Align single and multi-delete authorization, keep replication deletes on `s3:ReplicateDelete`, and preserve auth/audit context | Closed in candidate |
-| Admin authorization | User/group status changes always checked the enable action | Check the action that matches the target state | Closed in candidate |
-| Checksums | Multipart and copy paths omitted fields, accepted invalid combinations, or computed over the wrong representation | Complete algorithm/type validation, server-side part calculation, federated propagation, AWS errors, and CopyObject transform ordering | Closed in candidate |
-| Release evidence | Full acceptance initially described a tree that changed afterward | Record full acceptance at `ebac0ca73` and current-tree targeted gates separately | Closed as an evidence defect |
+| Area                 | Second-pass finding                                                                                                                                     | Final resolution                                                                                                                                                                | Status                       |
+| :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------- |
+| Bucket metadata      | Independent config locks could lose updates to the shared `.metadata.bin` record ([#102](https://github.com/pgsty/silo/issues/102))                     | One bounded `metadata.lock` surrounds every whole-record writer, migration, import, adoption, and healing path; changed-field replication avoids stale whole-record replacement | Closed in candidate          |
+| Bucket creation      | `ForceCreate` and site adoption could replace existing config with defaults                                                                             | Preserve existing records and update only creation/adoption state; add regression tests for clobbering                                                                          | Closed in candidate          |
+| Object Lock          | Comparing lock-document bytes with one canonical XML document missed valid configurations carrying a Default Retention rule                             | Parse Object Lock first, then derive the versioning invariant from the parsed enabled state; verify update, read-back, and disk reload                                          | Closed in candidate          |
+| Pre-auth CORS        | Arbitrary path segments could cause metadata reads and cache growth                                                                                     | CORS lookup reads resident metadata only and does no object-layer I/O                                                                                                           | Closed in candidate          |
+| CORS startup         | A nonresident name could fall back to global CORS before metadata initialization                                                                        | Preserve an explicit fail-closed startup state                                                                                                                                  | Closed in candidate          |
+| CORS load failure    | Forgetting that a real bucket failed to load made it indistinguishable from a nonexistent bucket and exposed the global fallback to pre-signed requests | Maintain a bounded failed-bucket set, clear it on every successful load/remove/refresh path, and keep those buckets fail-closed                                                 | Closed in candidate          |
+| CORS recovery        | A successful on-demand `GetConfig` reload did not initially clear the load-failure bit                                                                  | One-line final fix `84e1580a4` plus targeted race coverage                                                                                                                      | Closed in candidate          |
+| Replication trust    | Presence of client-controlled internal headers enabled privileged behavior in multiple handlers                                                         | Authenticate first; require an exact marker plus `s3:ReplicateObject` or `s3:ReplicateDelete`; carry a private context decision; sanitize untrusted headers afterward           | Closed in candidate          |
+| Streaming uploads    | The sanitized request clone did not initially share the original trailer map                                                                            | Preserve the trailer map so late-arriving streaming checksums remain visible                                                                                                    | Closed in candidate          |
+| Snowball             | A request-wide trust bit could leak between extracted entries                                                                                           | Derive and isolate trust per entry; preserve request defaults across workers                                                                                                    | Closed in candidate          |
+| SSE-C                | Zero-byte reads and `GetObjectAttributes` could skip customer-key authentication                                                                        | Require a successfully unsealed key, with a separate authorized-replica exception                                                                                               | Closed in candidate          |
+| Delete authorization | Explicit version deletes checked the ordinary delete action instead of requiring `s3:DeleteObjectVersion`                                               | Align single and multi-delete authorization, keep replication deletes on `s3:ReplicateDelete`, and preserve auth/audit context                                                  | Closed in candidate          |
+| Admin authorization  | User/group status changes always checked the enable action                                                                                              | Check the action that matches the target state                                                                                                                                  | Closed in candidate          |
+| Checksums            | Multipart and copy paths omitted fields, accepted invalid combinations, or computed over the wrong representation                                       | Complete algorithm/type validation, server-side part calculation, federated propagation, AWS errors, and CopyObject transform ordering                                          | Closed in candidate          |
+| Release evidence     | Full acceptance initially described a tree that changed afterward                                                                                       | Record full acceptance at `ebac0ca73` and current-tree targeted gates separately                                                                                                | Closed as an evidence defect |
 {.wide .expand}
 
 ## The Invariants That Define the Candidate {#invariants}
@@ -90,12 +90,12 @@ The lock does not cover object data I/O and is bounded to a bucket-metadata oper
 
 The CORS hot path must distinguish four states:
 
-| State | Result |
-| :-- | :-- |
-| Metadata system not initialized | No CORS headers |
-| Known real bucket whose metadata load failed | No CORS headers |
-| Resident bucket with a bucket CORS document | Evaluate that document |
-| No resident metadata and no known failure | Use the server-wide fallback |
+| State                                        | Result                       |
+| :------------------------------------------- | :--------------------------- |
+| Metadata system not initialized              | No CORS headers              |
+| Known real bucket whose metadata load failed | No CORS headers              |
+| Resident bucket with a bucket CORS document  | Evaluate that document       |
+| No resident metadata and no known failure    | Use the server-wide fallback |
 {.wide .expand}
 
 The second row is why the failed-bucket set is required. A pre-signed URL is already authorized by its signature and may access a private object without bucket-policy evaluation. In that case the bucket CORS document is the browser-origin boundary. Losing the failure bit and using a permissive global fallback would weaken that boundary.
@@ -142,13 +142,13 @@ The pre-release pass audited the diff for over-design, duplication, defensive co
 
 ## Deferrals and Why They Do Not All Have the Same Severity {#deferrals}
 
-| Item | Classification | 20260903 release decision (and subsequent status) |
-| :-- | :-- | :-- |
-| Conditional delete [#10](https://github.com/pgsty/silo/issues/10) | Inherited missing S3 feature; affects callers that assume `If-Match` / per-object ETag is enforced | Documented for 0903; single-object conditional delete later shipped in 20260916 (#145), while batch ETag deletion remains open |
-| Multi-site config deletion [#77](https://github.com/pgsty/silo/issues/77) | Inherited convergence defect for policy/SSE/tags/quota; CORS has its own fixed register | Documented deployment condition for 0903; later repaired in 20260916 |
-| `ListMultipartUploads` [#79](https://github.com/pgsty/silo/issues/79) | Inherited listing-conformance gap | Known issue; not a data-integrity blocker for ordinary multipart workflows |
-| Federated `CopyObject` [#99](https://github.com/pgsty/silo/issues/99), [#100](https://github.com/pgsty/silo/issues/100) | Legacy-backend checksum/inline-object gaps | Scoped to affected federated features in 0903; later repaired in 20260916 |
-| ILM relocation PR #60 and broad SSE issue #61 | New capability requests | Outside the release safety boundary |
+| Item                                                                                                                    | Classification                                                                                     | 20260903 release decision (and subsequent status)                                                                              |
+| :---------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| Conditional delete [#10](https://github.com/pgsty/silo/issues/10)                                                       | Inherited missing S3 feature; affects callers that assume `If-Match` / per-object ETag is enforced | Documented for 0903; single-object conditional delete later shipped in 20260916 (#145), while batch ETag deletion remains open |
+| Multi-site config deletion [#77](https://github.com/pgsty/silo/issues/77)                                               | Inherited convergence defect for policy/SSE/tags/quota; CORS has its own fixed register            | Documented deployment condition for 0903; later repaired in 20260916                                                           |
+| `ListMultipartUploads` [#79](https://github.com/pgsty/silo/issues/79)                                                   | Inherited listing-conformance gap                                                                  | Known issue; not a data-integrity blocker for ordinary multipart workflows                                                     |
+| Federated `CopyObject` [#99](https://github.com/pgsty/silo/issues/99), [#100](https://github.com/pgsty/silo/issues/100) | Legacy-backend checksum/inline-object gaps                                                         | Scoped to affected federated features in 0903; later repaired in 20260916                                                      |
+| ILM relocation PR #60 and broad SSE issue #61                                                                           | New capability requests                                                                            | Outside the release safety boundary                                                                                            |
 {.wide .expand}
 
 ## Evidence {#evidence}

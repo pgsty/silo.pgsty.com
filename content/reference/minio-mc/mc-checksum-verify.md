@@ -42,14 +42,15 @@ Selecting all versions of one object enumerates its key prefix, then filters exa
 
 Every candidate produces one stable status:
 
-| Status | Meaning |
-| :-- | :-- |
-| `MATCH` | Every supported stored checksum equals the independently calculated value. |
-| `MISMATCH` | At least one stored checksum differs from the returned logical object bytes. |
-| `NO_CHECKSUM` | The endpoint returned no additional checksum; the body is not downloaded. |
-| `WOULD_VERIFY` | A dry run found a supported full-object checksum. |
-| `UNKNOWN_*` | The command could not make a reliable statement, for example because the object changed or could not be read. |
-| `SKIPPED_*` | A requested filter intentionally excluded the candidate. |
+| Status         | Meaning                                                                                                       |
+| :------------- | :------------------------------------------------------------------------------------------------------------ |
+| `MATCH`        | Every supported stored checksum equals the independently calculated value.                                    |
+| `MISMATCH`     | At least one stored checksum differs from the returned logical object bytes.                                  |
+| `NO_CHECKSUM`  | The endpoint returned no additional checksum; the body is not downloaded.                                     |
+| `WOULD_VERIFY` | A dry run found a supported full-object checksum.                                                             |
+| `UNKNOWN_*`    | The command could not make a reliable statement, for example because the object changed or could not be read. |
+| `SKIPPED_*`    | A requested filter intentionally excluded the candidate.                                                      |
+{.wide .expand}
 
 Normal completion exits `0`; a command or selected audit failure exits `1`. The default `--fail-on any` fails on mismatches, `UNKNOWN_*`, and objects skipped by `--max-size`.
 
@@ -67,19 +68,19 @@ The final summary contains `objects`, `verified`, per-status counts, and `incomp
 
 ## Important flags {#flags}
 
-| Flag | Purpose |
-| :-- | :-- |
-| `--recursive`, `-r` | Scan every object below the bucket or prefix. |
-| `--versions` | Include all object versions. |
-| `--version-id`, `--vid` | Select one exact version. |
-| `--manifest FILE` | Read candidates from JSON Lines. Mutually exclusive with scan/version/time selection flags. |
-| `--dry-run` | LIST and HEAD candidates without downloading object bodies. |
-| `--max-workers N` | Bound concurrent reads; default `4`, range `1` through `64`. |
-| `--max-size SIZE` | Skip objects larger than values such as `10GiB`; empty or `0` means unlimited. |
-| `--older-than`, `--newer-than` | Filter by relative durations such as `7d10h31s` or supported absolute timestamps. |
-| `--enc-c KEY` | Supply one or more SSE-C prefix-to-key mappings in raw Base64 or hexadecimal form. |
-| `--report FILE` | Write object records and the summary to a new JSON Lines file. On POSIX systems it is created with mode `0600`. |
-| `--json` | Emit compact JSON Lines when stdout is not a terminal. |
+| Flag                           | Purpose                                                                                                         |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `--recursive`, `-r`            | Scan every object below the bucket or prefix.                                                                   |
+| `--versions`                   | Include all object versions.                                                                                    |
+| `--version-id`, `--vid`        | Select one exact version.                                                                                       |
+| `--manifest FILE`              | Read candidates from JSON Lines. Mutually exclusive with scan/version/time selection flags.                     |
+| `--dry-run`                    | LIST and HEAD candidates without downloading object bodies.                                                     |
+| `--max-workers N`              | Bound concurrent reads; default `4`, range `1` through `64`.                                                    |
+| `--max-size SIZE`              | Skip objects larger than values such as `10GiB`; empty or `0` means unlimited.                                  |
+| `--older-than`, `--newer-than` | Filter by relative durations such as `7d10h31s` or supported absolute timestamps.                               |
+| `--enc-c KEY`                  | Supply one or more SSE-C prefix-to-key mappings in raw Base64 or hexadecimal form.                              |
+| `--report FILE`                | Write object records and the summary to a new JSON Lines file. On POSIX systems it is created with mode `0600`. |
+| `--json`                       | Emit compact JSON Lines when stdout is not a terminal.                                                          |
 {.wide .expand}
 
 Use the global `--limit-download` flag to cap download speed. Object bodies are streamed through bounded hashers, without full buffering or disk writes. Time filters still require HEAD to obtain current object metadata.

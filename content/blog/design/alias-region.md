@@ -50,12 +50,12 @@ the reported failure does not indicate a missing SILO server API.
 The [original production patch](https://github.com/pgsty/mc/commit/7d154ca1aa5c9becabd670e486077d36359b093e)
 adds 13 lines and removes two across four files:
 
-| Layer | Change | Why it is needed |
-| --- | --- | --- |
-| Alias JSON | Add optional `region` to `aliasConfigV10` | Read, save and export the value |
-| Client configuration | Add `Config.Region` | Carry the value through the existing client interface |
-| Alias conversion | Copy the alias field in `NewS3Config` | Connect stored configuration to client construction |
-| S3 factory | Resolve the region for the SDK and cache key | Use the value and prevent reuse of a client fixed to another region |
+| Layer                | Change                                       | Why it is needed                                                    |
+| -------------------- | -------------------------------------------- | ------------------------------------------------------------------- |
+| Alias JSON           | Add optional `region` to `aliasConfigV10`    | Read, save and export the value                                     |
+| Client configuration | Add `Config.Region`                          | Carry the value through the existing client interface               |
+| Alias conversion     | Copy the alias field in `NewS3Config`        | Connect stored configuration to client construction                 |
+| S3 factory           | Resolve the region for the SDK and cache key | Use the value and prevent reuse of a client fixed to another region |
 {.wide .expand}
 
 The precedence is:
@@ -106,13 +106,13 @@ written by the old CLI normally have no region field, so ordinary upgrades
 retain their discovery and environment-override behavior. The exceptions need
 more precise treatment than a blanket claim of forward compatibility.
 
-| Situation | Consequence |
-| --- | --- |
-| An old alias has no `region` | Existing region selection continues |
-| A template or earlier experiment left a non-empty `region` in old JSON | A previously ignored field becomes active; an incorrect or stale value can break access |
-| An old unknown `region` contains a number, boolean, object or array | The new string field rejects it; parsing the whole configuration fails, including for commands targeting another alias |
-| The tested pre-change client reads a new configuration | It accepts the JSON but ignores the region and resumes its old selection behavior |
-| That old client changes any alias and saves the configuration | It rewrites the whole file and drops the unknown region from every alias |
+| Situation                                                              | Consequence                                                                                                            |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| An old alias has no `region`                                           | Existing region selection continues                                                                                    |
+| A template or earlier experiment left a non-empty `region` in old JSON | A previously ignored field becomes active; an incorrect or stale value can break access                                |
+| An old unknown `region` contains a number, boolean, object or array    | The new string field rejects it; parsing the whole configuration fails, including for commands targeting another alias |
+| The tested pre-change client reads a new configuration                 | It accepts the JSON but ignores the region and resumes its old selection behavior                                      |
+| That old client changes any alias and saves the configuration          | It rewrites the whole file and drops the unknown region from every alias                                               |
 {.wide .expand}
 
 The last case is easy to miss. Reading a new configuration with an old binary

@@ -67,11 +67,11 @@ The S3 API specification defines distinct behavior across the three operations:
 
 The algorithm and checksum-type support matrix is:
 
-| Algorithm | `FULL_OBJECT` | `COMPOSITE` |
-| --- | --- | --- |
-| CRC64NVME | Supported | Unsupported |
-| CRC32 / CRC32C | Supported | Supported |
-| SHA1 / SHA256 | Unsupported | Supported |
+| Algorithm      | `FULL_OBJECT` | `COMPOSITE` |
+| -------------- | ------------- | ----------- |
+| CRC64NVME      | Supported     | Unsupported |
+| CRC32 / CRC32C | Supported     | Supported   |
+| SHA1 / SHA256  | Unsupported   | Supported   |
 {.wide .expand}
 
 `FULL_OBJECT` applies only to linearizable CRCs, whereas SHA1 and SHA256 require per-part digests to compute the `COMPOSITE`checksum at completion.
@@ -99,14 +99,14 @@ Removing the upload check without populating part metadata would let `UploadPart
 
 ## Alternatives Considered {#alternatives}
 
-| Option | Benefit | Fatal problem | Decision |
-| --- | --- | --- | --- |
-| Delete the strict check | Smallest diff | Part metadata still lacks the checksum; completion fails with `InvalidPart` | Rejected |
-| Relax only `FULL_OBJECT` | Unblocks some default CRC clients | Leaves `COMPOSITE` and SHA1/SHA256 broken; cannot close #46 | Rejected |
-| Re-read every part at completion | Avoids storing a digest during upload | Adds $O(\text{object size})$ second-pass I/O and leaves `ListParts` and copy responses incomplete | Rejected |
-| Always return the server value from normal `UploadPart` | Simplifies federation forwarding | Violates the AWS `UploadPart` response contract | Rejected |
-| Copy the AIStor implementation directly | Commercial precedent | Supports only mergeable CRCs and attaches the hasher where streams may already be compressed or encrypted | Rejected |
-| Compute and persist in one pass over logical plaintext | Full protocol compliance, no second I/O, supports both CRC and SHA | Requires an explicit plaintext checksum reader separate from the storage reader | Accepted |
+| Option                                                  | Benefit                                                            | Fatal problem                                                                                             | Decision |
+| ------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | -------- |
+| Delete the strict check                                 | Smallest diff                                                      | Part metadata still lacks the checksum; completion fails with `InvalidPart`                               | Rejected |
+| Relax only `FULL_OBJECT`                                | Unblocks some default CRC clients                                  | Leaves `COMPOSITE` and SHA1/SHA256 broken; cannot close #46                                               | Rejected |
+| Re-read every part at completion                        | Avoids storing a digest during upload                              | Adds $O(\text{object size})$ second-pass I/O and leaves `ListParts` and copy responses incomplete         | Rejected |
+| Always return the server value from normal `UploadPart` | Simplifies federation forwarding                                   | Violates the AWS `UploadPart` response contract                                                           | Rejected |
+| Copy the AIStor implementation directly                 | Commercial precedent                                               | Supports only mergeable CRCs and attaches the hasher where streams may already be compressed or encrypted | Rejected |
+| Compute and persist in one pass over logical plaintext  | Full protocol compliance, no second I/O, supports both CRC and SHA | Requires an explicit plaintext checksum reader separate from the storage reader                           | Accepted |
 {.wide .expand}
 
 ### What Commercial AIStor Revealed {#aistor}

@@ -8,16 +8,16 @@
 
 当前版本为 **SILO Server 与 mcli 20261109**、**SILO Console v2.7.0**、**silo-pkg v3.16.0** 与 **KES 20261026**，均使用 Go 1.27.3。Server 20261109 内嵌 Console 2.7.0、mcli 20261109 与 pkg v3.16.0；KES 保持独立、可选的外部密钥服务。
 
-| 发布说明 | English | 简体中文 |
-| --- | --- | --- |
-| Server 20261109 | [Release notes](content/blog/release/silo-20261109.md) | [发布说明](content/blog/release/silo-20261109.zh.md) |
-| Console 2.7.0 | [Release notes](content/blog/release/console-2.7.0.md) | [发布说明](content/blog/release/console-2.7.0.zh.md) |
-| Console 2.6.0 | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |
-| mcli 20261109 | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
-| silo-pkg 3.16.0 | [Release notes](content/blog/release/pkg-3.16.0.md) | [发布说明](content/blog/release/pkg-3.16.0.zh.md) |
-| Server / mcli / KES 20261026 | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
-| Console 2.5 系列，含 2.5.1 | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
-| silo-pkg 3.15 系列，含 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md) | [发布说明](content/blog/release/pkg-3.15.2.zh.md) |
+| 发布说明                      | English                                                | 简体中文                                             |
+| ----------------------------- | ------------------------------------------------------ | ---------------------------------------------------- |
+| Server 20261109               | [Release notes](content/blog/release/silo-20261109.md) | [发布说明](content/blog/release/silo-20261109.zh.md) |
+| Console 2.7.0                 | [Release notes](content/blog/release/console-2.7.0.md) | [发布说明](content/blog/release/console-2.7.0.zh.md) |
+| Console 2.6.0                 | [Release notes](content/blog/release/console-2.6.0.md) | [发布说明](content/blog/release/console-2.6.0.zh.md) |
+| mcli 20261109                 | [Release notes](content/blog/release/mcli-20261109.md) | [发布说明](content/blog/release/mcli-20261109.zh.md) |
+| silo-pkg 3.16.0               | [Release notes](content/blog/release/pkg-3.16.0.md)    | [发布说明](content/blog/release/pkg-3.16.0.zh.md)    |
+| Server / mcli / KES 20261026  | [Release notes](content/blog/release/silo-20261026.md) | [发布说明](content/blog/release/silo-20261026.zh.md) |
+| Console 2.5 系列，含 2.5.1    | [Release notes](content/blog/release/console-2.5.1.md) | [发布说明](content/blog/release/console-2.5.1.zh.md) |
+| silo-pkg 3.15 系列，含 3.15.2 | [Release notes](content/blog/release/pkg-3.15.2.md)    | [发布说明](content/blog/release/pkg-3.15.2.zh.md)    |
 
 精确源码版本、升级顺序与兼容性边界见[组件矩阵](content/compatibility/versions.zh.md)。
 
@@ -94,9 +94,9 @@ upstream_modified: true # 超出格式转换范围的实质修改设为 true
 
 本站全部文档内容按 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.zh) 授权，部分内容衍生自 [MinIO Object Storage Documentation](https://github.com/minio/docs)（© 2020–Present MinIO, Inc.）并作修改。详见 [LICENSE](LICENSE)、[NOTICE.md](NOTICE.md)、[英文 README](README.md) 及 [AGENTS.md](AGENTS.md)。面向读者的说明发布在 [/zh/about/](https://silo.pgsty.com/zh/about/)：
 
-| 页面 | 内容 |
-| :-- | :-- |
-| [/zh/about/license/](https://silo.pgsty.com/zh/about/license/) | 软件采用 AGPLv3，文档采用 CC BY 4.0 |
-| [/zh/about/trademark/](https://silo.pgsty.com/zh/about/trademark/) | MinIO 名称的使用方式与非关联声明 |
+| 页面                                                                   | 内容                                   |
+| :--------------------------------------------------------------------- | :------------------------------------- |
+| [/zh/about/license/](https://silo.pgsty.com/zh/about/license/)         | 软件采用 AGPLv3，文档采用 CC BY 4.0    |
+| [/zh/about/trademark/](https://silo.pgsty.com/zh/about/trademark/)     | MinIO 名称的使用方式与非关联声明       |
 | [/zh/about/attribution/](https://silo.pgsty.com/zh/about/attribution/) | 版权层次、衍生关系、翻译声明与署名格式 |
-| [/zh/about/security/](https://silo.pgsty.com/zh/about/security/) | 漏洞报告方式与安全修复发布渠道 |
+| [/zh/about/security/](https://silo.pgsty.com/zh/about/security/)       | 漏洞报告方式与安全修复发布渠道         |

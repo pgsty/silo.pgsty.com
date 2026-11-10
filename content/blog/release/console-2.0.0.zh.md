@@ -38,14 +38,14 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 
 ## 名称与交付契约 {#naming-and-delivery}
 
-| 范围             | 旧名称或旧位置                           | 2.0.0 契约                                  |
-|:---------------|:----------------------------------|:------------------------------------------|
-| 产品             | Console / MinIO Console 的遗留表述     | **SILO Console**                          |
-| 源码仓库           | `georgmangold/console`            | `pgsty/silo-console`                      |
-| 正式二进制          | `console`                         | `silo-console`                            |
-| 二进制资产          | `console-<os>-<arch>`             | `silo-console-<os>-<arch>`                |
-| 校验和文件          | `console_<version>_checksums.txt` | `silo-console_<version>_checksums.txt`    |
-| 网站与文档          | 上游或前维护者入口                         | `silo.pgsty.com` 与 `silo.pgsty.com/docs/` |
+| 范围       | 旧名称或旧位置                     | 2.0.0 契约                                 |
+| :--------- | :--------------------------------- | :----------------------------------------- |
+| 产品       | Console / MinIO Console 的遗留表述 | **SILO Console**                           |
+| 源码仓库   | `georgmangold/console`             | `pgsty/silo-console`                       |
+| 正式二进制 | `console`                          | `silo-console`                             |
+| 二进制资产 | `console-<os>-<arch>`              | `silo-console-<os>-<arch>`                 |
+| 校验和文件 | `console_<version>_checksums.txt`  | `silo-console_<version>_checksums.txt`     |
+| 网站与文档 | 上游或前维护者入口                 | `silo.pgsty.com` 与 `silo.pgsty.com/docs/` |
 {.wide .expand}
 
 容器部署使用 [Docker Hub 的 `pgsty/silo-console`](https://hub.docker.com/r/pgsty/silo-console)，当前版本及拉取命令见 [Console v2.4.1 发布说明](/zh/blog/release/console-2.4.1/#delivery)。
@@ -56,16 +56,16 @@ SILO Console 2.0.0 是这套对象存储管理控制台以独立项目身份发�
 
 以下名称保留 `minio` 或 `console`，属于接口、协议或安装兼容层的一部分：
 
-| 兼容面             | 2.0.0 中的状态                                 | 原因                      |
-|:----------------|:-------------------------------------------|:------------------------|
-| Go 模块           | 保持 `github.com/minio/console`              | 改动会破坏全部 Go import 与生成代码 |
-| 服务端地址           | 保持 `CONSOLE_MINIO_SERVER`                  | 现有部署广泛使用的环境变量           |
-| 服务端区域           | 保持 `CONSOLE_MINIO_REGION`                  | 现有部署兼容契约                |
-| 其他配置            | 既有 `CONSOLE_*` 变量继续有效                      | 避免无收益的配置迁移              |
-| S3/Admin API 名称 | 保留 MinIO-compatible 字段与枚举                  | 它们描述实际协议和 SDK 接口        |
-| 源码开发产物          | `make console` 仍生成 `./console`             | 保持开发工作流和脚本兼容            |
-| 软件包 systemd 单元  | 保持 `minio-console.service`                 | 避免升级时出现两个服务或丢失原服务状态     |
-| systemd 用户与配置   | 保持 `console-user` 与 `/etc/default/console` | 避免不必要的账户和配置文件迁移         |
+| 兼容面              | 2.0.0 中的状态                                | 原因                                   |
+| :------------------ | :-------------------------------------------- | :------------------------------------- |
+| Go 模块             | 保持 `github.com/minio/console`               | 改动会破坏全部 Go import 与生成代码    |
+| 服务端地址          | 保持 `CONSOLE_MINIO_SERVER`                   | 现有部署广泛使用的环境变量             |
+| 服务端区域          | 保持 `CONSOLE_MINIO_REGION`                   | 现有部署兼容契约                       |
+| 其他配置            | 既有 `CONSOLE_*` 变量继续有效                 | 避免无收益的配置迁移                   |
+| S3/Admin API 名称   | 保留 MinIO-compatible 字段与枚举              | 它们描述实际协议和 SDK 接口            |
+| 源码开发产物        | `make console` 仍生成 `./console`             | 保持开发工作流和脚本兼容               |
+| 软件包 systemd 单元 | 保持 `minio-console.service`                  | 避免升级时出现两个服务或丢失原服务状态 |
+| systemd 用户与配置  | 保持 `console-user` 与 `/etc/default/console` | 避免不必要的账户和配置文件迁移         |
 {.wide .expand}
 
 因此，升级脚本不能执行全仓库或全配置的 `minio → silo`、`console → silo-console` 替换。未来若要迁移这些兼容接口，需要提供别名、弃用周期和明确的双读策略。
@@ -109,11 +109,11 @@ favicon、PWA 与 Apple Touch 图标此前仍是上一代手绘徽标的 PNG 导
 
 **Go 侧**：构建基线升级到 Go 1.26.5，`golang.org/x` 系列全部更新至最新。`govulncheck` 报告的全部可达漏洞已清零：
 
-| 依赖                                | 修复版本      | 公告                                            |
-|:----------------------------------|:----------|:----------------------------------------------|
-| `google.golang.org/grpc`          | v1.82.1   | GO-2026-6061                                  |
-| `github.com/prometheus/prometheus`| v0.311.3  | GO-2026-5710 / -5662 / -5381 / -5264（含远程读 DoS）|
-| `github.com/klauspost/compress`   | v1.18.7   | GO-2026-5841                                  |
+| 依赖                               | 修复版本 | 公告                                                 |
+| :--------------------------------- | :------- | :--------------------------------------------------- |
+| `google.golang.org/grpc`           | v1.82.1  | GO-2026-6061                                         |
+| `github.com/prometheus/prometheus` | v0.311.3 | GO-2026-5710 / -5662 / -5381 / -5264（含远程读 DoS） |
+| `github.com/klauspost/compress`    | v1.18.7  | GO-2026-5841                                         |
 {.wide .expand}
 
 唯一剩余公告位于 `golang.org/x/crypto`，官方尚未发布修复且代码路径不可达，作为已知事项记录。
@@ -136,11 +136,11 @@ favicon、PWA 与 Apple Touch 图标此前仍是上一代手绘徽标的 PNG 导
 
 正式发布包含 16 个资产：
 
-| 类型    | 覆盖范围                                                        |
-|:------|:------------------------------------------------------------|
+| 类型       | 覆盖范围                                                      |
+| :--------- | :------------------------------------------------------------ |
 | 独立二进制 | Linux `amd64/arm64/arm`、macOS `amd64/arm64`、Windows `amd64` |
-| 系统软件包 | DEB / RPM / APK × `amd64/arm64/armv6`                       |
-| 校验和   | `silo-console_2.0.0_checksums.txt`（SHA-256）                 |
+| 系统软件包 | DEB / RPM / APK × `amd64/arm64/armv6`                         |
+| 校验和     | `silo-console_2.0.0_checksums.txt`（SHA-256）                 |
 {.wide .expand}
 
 发布流水线在 tag 推送时触发，工作流的第三方 Action 已固定到具体提交，并在构建前强制执行"干净检出 + 资产重建零差异"门禁。

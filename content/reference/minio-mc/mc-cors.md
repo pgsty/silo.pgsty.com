@@ -20,11 +20,11 @@ mcli cors remove ALIAS/BUCKET
 `set` reads XML from a file or standard input (`-`) and replaces the bucket's complete CORS document. `get` displays the current configuration; `remove` deletes it.
 All three subcommands support [global flags](/reference/minio-mc/#minio-mc-global-options) and have no additional command-specific flags.
 
-| Command | Required SILO policy action |
-| --- | --- |
-| `mc cors set` | `s3:PutBucketCors` |
-| `mc cors get` | `s3:GetBucketCors` |
-| `mc cors remove` | `s3:DeleteBucketCors` |
+| Command          | Required SILO policy action |
+| ---------------- | --------------------------- |
+| `mc cors set`    | `s3:PutBucketCors`          |
+| `mc cors get`    | `s3:GetBucketCors`          |
+| `mc cors remove` | `s3:DeleteBucketCors`       |
 {.wide .expand}
 
 Grant these actions on a bucket resource, such as `arn:aws:s3:::mybucket`.

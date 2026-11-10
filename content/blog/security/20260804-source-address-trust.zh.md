@@ -22,12 +22,12 @@ tags: ["Security", "IAM", "Network", "Reverse Proxy", "aws:SourceIp", "Audit", "
 
 在 SILO 中，`handlers.GetSourceIP(r)`（位于 `silo-pkg/handlers/proxy.go`）是从入站 `*http.Request` 提取客户端 IP 地址的唯一入口。四个与安全及可观测性密切相关的子系统直接依赖其返回值：
 
-| 消费方 | 代码位置 | 安全与运维职责 |
-|---|---|---|
-| `aws:SourceIp` IAM 条件键 | `cmd/signature-v4-utils.go` (`getConditionValues`) | 评估桶策略与 IAM 策略中的 `IpAddress` 与 `NotIpAddress` 网段条件。 |
-| 审计日志 (`remotehost`) | `cmd/logger/audit.go` | 在合规审计日志中记录发起请求的客户端源 IP。 |
-| 桶事件通知 (`Host`) | `cmd/notification.go` | 填充 S3 事件通知载荷中的 `requestParameters.sourceIPAddress`。 |
-| 管理端 HTTP 追踪 (`mc admin trace`) | `cmd/http-tracer.go` | 在实时诊断追踪输出中展示客户端源 IP。 |
+| 消费方                              | 代码位置                                           | 安全与运维职责                                                     |
+| ----------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| `aws:SourceIp` IAM 条件键           | `cmd/signature-v4-utils.go` (`getConditionValues`) | 评估桶策略与 IAM 策略中的 `IpAddress` 与 `NotIpAddress` 网段条件。 |
+| 审计日志 (`remotehost`)             | `cmd/logger/audit.go`                              | 在合规审计日志中记录发起请求的客户端源 IP。                        |
+| 桶事件通知 (`Host`)                 | `cmd/notification.go`                              | 填充 S3 事件通知载荷中的 `requestParameters.sourceIPAddress`。     |
+| 管理端 HTTP 追踪 (`mc admin trace`) | `cmd/http-tracer.go`                               | 在实时诊断追踪输出中展示客户端源 IP。                              |
 {.wide .expand}
 
 值得一提的是，旧版 `handlers.GetSourceIPRaw` 在提取出第一个匹配的请求头字段后，甚至不会校验它是不是一个语法合法的 IP 地址（上游 `silo-pkg` 的单元测试里 literally 有一条断言验证传入 `X-Forwarded-For: _gazonk` 会原样返回 `"_gazonk"`！）。虽然 `IpAddress` 条件算子内部会用 `net.ParseIP` 解析，但审计日志和事件通知都会被直接注入未校验的原始字符串。
@@ -72,11 +72,11 @@ var forwardedHeaders = []string{"Forwarded", "forwarded"}
 
 为了同时解决上述两类问题，`silo-pkg v3.12.0`（`62f326d`）与 Server `20260804`（`00a8171cb`）引入了 `MINIO_API_TRUSTED_PROXIES` 环境变量：
 
-| 配置值 | 对端信任策略 | 转发头解析行为 |
-|---|---|---|
-| `MINIO_API_TRUSTED_PROXIES=off`（或 `none`） | **不信任**任何外部代理跳点 | 对所有外部连接一律采用 TCP 对端地址（`r.RemoteAddr`），完全忽略 `X-Forwarded-For`、`X-Real-IP` 与 `Forwarded`。 |
-| `MINIO_API_TRUSTED_PROXIES=10.0.1.0/24,192.168.1.10` | 仅信任显式列出的 IP/CIDR | 若 `r.RemoteAddr` 不在授信集合内，直接返回 `r.RemoteAddr`。若 `r.RemoteAddr` 受信任，则**从右向左**逆序扫描 `X-Forwarded-For`（或 `Forwarded`），返回第一个不在授信集合内的合法 IP。 |
-| 未设置、`all` 或 `*` | 历史兼容模式 | 保持 `20260804` 之前的行为（除非额外设置了 `_MINIO_API_XFF_HEADER=off`）。 |
+| 配置值                                               | 对端信任策略               | 转发头解析行为                                                                                                                                                                       |
+| ---------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MINIO_API_TRUSTED_PROXIES=off`（或 `none`）         | **不信任**任何外部代理跳点 | 对所有外部连接一律采用 TCP 对端地址（`r.RemoteAddr`），完全忽略 `X-Forwarded-For`、`X-Real-IP` 与 `Forwarded`。                                                                      |
+| `MINIO_API_TRUSTED_PROXIES=10.0.1.0/24,192.168.1.10` | 仅信任显式列出的 IP/CIDR   | 若 `r.RemoteAddr` 不在授信集合内，直接返回 `r.RemoteAddr`。若 `r.RemoteAddr` 受信任，则**从右向左**逆序扫描 `X-Forwarded-For`（或 `Forwarded`），返回第一个不在授信集合内的合法 IP。 |
+| 未设置、`all` 或 `*`                                 | 历史兼容模式               | 保持 `20260804` 之前的行为（除非额外设置了 `_MINIO_API_XFF_HEADER=off`）。                                                                                                           |
 {.wide .expand}
 
 注意：`handlers.GetSourceScheme`（读取 `X-Forwarded-Proto`）被有意保持不变，以确保在反向代理卸载 TLS 的场景下，HTTPS 重定向与预签名 URL 协议检测不受 `MINIO_API_TRUSTED_PROXIES` 影响。
@@ -117,10 +117,10 @@ SILO 内置的 FTP 与 SFTP 服务端（`cmd/ftp-server.go`、`cmd/sftp-server.g
 
 在多节点分布式 SILO 集群（如 `silo server http://node{1..4}/data`）中，负载均衡器可能将请求打到节点 1，再由节点 1 在集群内部转发给节点 2～4：
 
-| 部署拓扑 | `MINIO_API_TRUSTED_PROXIES` 应包含的地址 |
-|---|---|
-| 单节点 + 反向代理 | 仅反向代理的 IP/CIDR |
-| 多节点分布式集群 + 反向代理 | 反向代理的 IP/CIDR **以及**所有 SILO 集群节点的 IP/CIDR |
+| 部署拓扑                               | `MINIO_API_TRUSTED_PROXIES` 应包含的地址                         |
+| -------------------------------------- | ---------------------------------------------------------------- |
+| 单节点 + 反向代理                      | 仅反向代理的 IP/CIDR                                             |
+| 多节点分布式集群 + 反向代理            | 反向代理的 IP/CIDR **以及**所有 SILO 集群节点的 IP/CIDR          |
 | 客户端直连多节点集群（无外部反向代理） | 所有 SILO 集群节点的 IP/CIDR（若无跨节点转发需求则可设为 `off`） |
 {.wide .expand}
 

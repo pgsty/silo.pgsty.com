@@ -12,12 +12,12 @@ url: "/zh/blog/release/delete-object-version-authorization/"
 
 自 [Server 20260903](/zh/blog/release/silo-20260903/) 起（[pgsty/silo#104](https://github.com/pgsty/silo/pull/104)，对应 [Issue #58](https://github.com/pgsty/silo/issues/58)），SILO 按照删除请求实际执行的操作类型选择所需权限：
 
-| 请求 | 所需权限 |
-| --- | --- |
-| 未携带 `versionId` | `s3:DeleteObject` |
-| 版本 UUID | `s3:DeleteObjectVersion` |
-| 显式 `versionId=null` | `s3:DeleteObjectVersion` |
-| `DeleteObjects` | 对每个 XML 条目独立应用映射 |
+| 请求                  | 所需权限                    |
+| --------------------- | --------------------------- |
+| 未携带 `versionId`    | `s3:DeleteObject`           |
+| 版本 UUID             | `s3:DeleteObjectVersion`    |
+| 显式 `versionId=null` | `s3:DeleteObjectVersion`    |
+| `DeleteObjects`       | 对每个 XML 条目独立应用映射 |
 {.wide .expand}
 
 此前所有情况均要求 `s3:DeleteObject`，而 `s3:DeleteObjectVersion` 仅用于检查显式 Deny。这导致仅持有 `DeleteObject` 的主体可以永久移除指定的历史版本，而仅持有 `DeleteObjectVersion` 的最小权限清理主体却无法执行版本清理。

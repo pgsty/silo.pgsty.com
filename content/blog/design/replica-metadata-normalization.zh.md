@@ -43,10 +43,10 @@ url: "/zh/blog/design/replica-metadata-normalization/"
 修复后各请求编码对应的落盘结果如下：
 
 | 请求 `Content-Encoding` | 落盘存储的 `Content-Encoding` |
-| :-- | :-- |
-| `aws-chunked` | *（无）* |
-| `aws-chunked,gzip` | `gzip` |
-| `gzip` | `gzip` |
+| :---------------------- | :---------------------------- |
+| `aws-chunked`           | *（无）*                      |
+| `aws-chunked,gzip`      | `gzip`                        |
+| `gzip`                  | `gzip`                        |
 {.wide .expand}
 
 注：`aws-chunked, gzip`（逗号后带空格）仍存储带前导空格的 ` gzip`，`gzip, aws-chunked` 仍存储整串；这两者属于普通 `PUT` 路径既有的解析现状，由测试按现状固定断言。

@@ -16,11 +16,11 @@ SILO integrates with external key-management systems through [PGSTY KES](https:/
 
 ## Three services, three responsibilities {#architecture}
 
-| Service | Owns | Calls |
-| --- | --- | --- |
-| SILO | Object bytes and object encryption metadata; encrypts/decrypts object contents | KES over HTTPS (mTLS) to generate/decrypt data keys |
-| PGSTY KES | Application identities, key-access policies, and the key API; wraps/unwraps data keys | OpenBao KV v2 to store/retrieve root keys |
-| OpenBao | Persistent KES root-key records, backend access control, and its own recovery material | Its configured storage backend |
+| Service   | Owns                                                                                   | Calls                                               |
+| --------- | -------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| SILO      | Object bytes and object encryption metadata; encrypts/decrypts object contents         | KES over HTTPS (mTLS) to generate/decrypt data keys |
+| PGSTY KES | Application identities, key-access policies, and the key API; wraps/unwraps data keys  | OpenBao KV v2 to store/retrieve root keys           |
+| OpenBao   | Persistent KES root-key records, backend access control, and its own recovery material | Its configured storage backend                      |
 {.wide .expand}
 
 ```text
@@ -90,11 +90,11 @@ path "secret/metadata/kes/*" {
 
 Configure TLS trust on SILO → KES and KES → OpenBao separately. KES authorizes the SILO client certificate identity (`kes identity of <cert>`) for the required key names; OpenBao authorizes the KES AppRole backend identity.
 
-| Layer / Configuration | Failure mode | Operational resolution |
-| --- | --- | --- |
-| OpenBao sealed or unreachable | Warm caches can allow some operations to continue temporarily, but uncached key lookups and fresh SILO restarts fail closed without falling back to plaintext storage. | Unseal OpenBao before starting or rolling SILO nodes, and verify recovery with a fresh process restart and actual object readback. |
-| KV v1 vs KV v2 mismatch | Configuring `version: v1` against a KV v2 mount (or omitting `secret/data/...` and `secret/metadata/...` capabilities in the OpenBao ACL policy) returns `403 permission denied` or `404` on key creation and listing. | Set `engine: <mount>`, `version: v2`, and grant ACL capabilities on both `<mount>/data/<prefix>/*` and `<mount>/metadata/<prefix>/*`. |
-| Client certificate rotation | Rotating `MINIO_KMS_KES_CERT_FILE` changes the SHA-256 certificate identity. If the new identity is not authorized in the KES policy before rollout, SILO fails KMS startup checks. | Authorize both old and new certificate identities in KES before rotating SILO client certificates, then remove the old identity after rollout completes. |
+| Layer / Configuration         | Failure mode                                                                                                                                                                                                           | Operational resolution                                                                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OpenBao sealed or unreachable | Warm caches can allow some operations to continue temporarily, but uncached key lookups and fresh SILO restarts fail closed without falling back to plaintext storage.                                                 | Unseal OpenBao before starting or rolling SILO nodes, and verify recovery with a fresh process restart and actual object readback.                       |
+| KV v1 vs KV v2 mismatch       | Configuring `version: v1` against a KV v2 mount (or omitting `secret/data/...` and `secret/metadata/...` capabilities in the OpenBao ACL policy) returns `403 permission denied` or `404` on key creation and listing. | Set `engine: <mount>`, `version: v2`, and grant ACL capabilities on both `<mount>/data/<prefix>/*` and `<mount>/metadata/<prefix>/*`.                    |
+| Client certificate rotation   | Rotating `MINIO_KMS_KES_CERT_FILE` changes the SHA-256 certificate identity. If the new identity is not authorized in the KES policy before rollout, SILO fails KMS startup checks.                                    | Authorize both old and new certificate identities in KES before rotating SILO client certificates, then remove the old identity after rollout completes. |
 {.wide .expand}
 
 Keep persistent key-store backups, KES configuration, TLS trust roots, identity/policy definitions, and OpenBao recovery material under strict access control, and verify that backup restores preserve both key names and key material. Development mode keeps keys only in memory and must not be used for durable encrypted storage.

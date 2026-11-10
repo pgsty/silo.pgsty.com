@@ -63,12 +63,12 @@ Auditing all notification targets in `cmd/config/notify/` showed that every targ
 
 Across NATS and AMQP, four keys had drifted across those four surfaces:
 
-| Target | Key | Introduced In | `Default*KVS` | `Help*` | `GetNotify*` | `SetNotify*` | Failure Mode |
-|---|---|---|---|---|---|---|---|
-| `notify_nats` | `user_credentials` | [`#19139`](https://github.com/minio/minio/pull/19139) (2024-02) | Registered as `MINIO_NOTIFY_NATS_USER_CREDENTIALS` | Missing | Read `MINIO_NOTIFY_NATS_USER_CREDENTIALS` | Wrote `MINIO_NOTIFY_NATS_USER_CREDENTIALS` | `user_credentials` rejected on `mc admin config set` |
-| `notify_nats` | `nkey_seed` | [`#21231`](https://github.com/minio/minio/pull/21231) (2025-05) | Missing | Missing | Read `nkey_seed` | Wrote `nkey_seed` | Stored config fails `CheckValidKeys` |
-| `notify_nats` | `tls_handshake_first` | [`#21008`](https://github.com/minio/minio/pull/21008) (2025-02) | Missing | Present | Read `tls_handshake_first` | Wrote `tls_handshake_first` | Stored config fails `CheckValidKeys` |
-| `notify_amqp` | `immediate` | Initial KVS migration | Missing | Missing | Read `immediate` | Wrote `cfg.Immediate` into `AmqpInternal`! | `immediate` rejected; `SetNotifyAMQP` overwrote `internal` with `cfg.Immediate` |
+| Target        | Key                   | Introduced In                                                   | `Default*KVS`                                      | `Help*` | `GetNotify*`                              | `SetNotify*`                               | Failure Mode                                                                    |
+| ------------- | --------------------- | --------------------------------------------------------------- | -------------------------------------------------- | ------- | ----------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
+| `notify_nats` | `user_credentials`    | [`#19139`](https://github.com/minio/minio/pull/19139) (2024-02) | Registered as `MINIO_NOTIFY_NATS_USER_CREDENTIALS` | Missing | Read `MINIO_NOTIFY_NATS_USER_CREDENTIALS` | Wrote `MINIO_NOTIFY_NATS_USER_CREDENTIALS` | `user_credentials` rejected on `mc admin config set`                            |
+| `notify_nats` | `nkey_seed`           | [`#21231`](https://github.com/minio/minio/pull/21231) (2025-05) | Missing                                            | Missing | Read `nkey_seed`                          | Wrote `nkey_seed`                          | Stored config fails `CheckValidKeys`                                            |
+| `notify_nats` | `tls_handshake_first` | [`#21008`](https://github.com/minio/minio/pull/21008) (2025-02) | Missing                                            | Present | Read `tls_handshake_first`                | Wrote `tls_handshake_first`                | Stored config fails `CheckValidKeys`                                            |
+| `notify_amqp` | `immediate`           | Initial KVS migration                                           | Missing                                            | Missing | Read `immediate`                          | Wrote `cfg.Immediate` into `AmqpInternal`! | `immediate` rejected; `SetNotifyAMQP` overwrote `internal` with `cfg.Immediate` |
 {.wide .expand}
 
 Notice the AMQP bug in the last row: `SetNotifyAMQP` in `cmd/config/notify/legacy.go` had a copy-paste typo that wrote `strconv.FormatBool(cfg.Immediate)` under the key `target.AmqpInternal` and never serialized `cfg.Internal` at all.

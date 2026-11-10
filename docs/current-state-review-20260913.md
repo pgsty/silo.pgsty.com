@@ -14,13 +14,13 @@ release metadata, commit reachability and the owning workflow/source. This is a
 release-state documentation review, not a new runtime audit of every inherited
 reference command or every historical investigation.
 
-| Repository | Source baseline | Documentation PR |
-| --- | --- | --- |
-| pkg | `827f8109ff11bf6239a35d8d6d137cb5738539c3` | [pkg #8](https://github.com/pgsty/silo-pkg/pull/8) |
-| MC | `4f609a4da3bb8548446715867b68ab6c2d53a097` | [MC #43](https://github.com/pgsty/mc/pull/43) |
-| Console | `449c185a8d145a11f93b597b8989594d268ab9b4` | [Console #55](https://github.com/pgsty/silo-console/pull/55) |
-| Server | `5d955b5b7444f8a3ab550ce92713607998f89c0d` | [Server #182](https://github.com/pgsty/silo/pull/182) |
-| Website | `004581d8296dcc8e921fc3087712dd7625f21135` | This change |
+| Repository | Source baseline                            | Documentation PR                                             |
+| ---------- | ------------------------------------------ | ------------------------------------------------------------ |
+| pkg        | `827f8109ff11bf6239a35d8d6d137cb5738539c3` | [pkg #8](https://github.com/pgsty/silo-pkg/pull/8)           |
+| MC         | `4f609a4da3bb8548446715867b68ab6c2d53a097` | [MC #43](https://github.com/pgsty/mc/pull/43)                |
+| Console    | `449c185a8d145a11f93b597b8989594d268ab9b4` | [Console #55](https://github.com/pgsty/silo-console/pull/55) |
+| Server     | `5d955b5b7444f8a3ab550ce92713607998f89c0d` | [Server #182](https://github.com/pgsty/silo/pull/182)        |
+| Website    | `004581d8296dcc8e921fc3087712dd7625f21135` | This change                                                  |
 
 Public releases remain Server 20260903, Console v2.4.0, MC 20260913 and pkg
 v3.14.0. The tagged Server's Console source is `464a59d73ada` with a v2.3.0

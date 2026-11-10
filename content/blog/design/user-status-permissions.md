@@ -20,10 +20,10 @@ SILO exposes both `admin:EnableUser` and `admin:DisableUser`, but the shared `se
 
 The fix selects a single required action from the requested target state before authorization:
 
-| Requested status | Required action |
-| --- | --- |
-| `enabled` | `admin:EnableUser` |
-| `disabled` | `admin:DisableUser` |
+| Requested status   | Required action                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| `enabled`          | `admin:EnableUser`                                                                  |
+| `disabled`         | `admin:DisableUser`                                                                 |
 | invalid or unknown | `admin:EnableUser`, preserving the previous authorization-before-validation default |
 {.wide .expand}
 
@@ -31,11 +31,11 @@ The handler then calls `validateAdminReq` once. A four-way IAM integration test 
 
 The same rule applies to group status:
 
-| Requested group status | Required action |
-| --- | --- |
-| `enabled` | `admin:EnableGroup` |
-| `disabled` | `admin:DisableGroup` |
-| invalid or unknown | `admin:EnableGroup`, preserving the previous authorization-before-validation default |
+| Requested group status | Required action                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| `enabled`              | `admin:EnableGroup`                                                                  |
+| `disabled`             | `admin:DisableGroup`                                                                 |
+| invalid or unknown     | `admin:EnableGroup`, preserving the previous authorization-before-validation default |
 {.wide .expand}
 
 Before the follow-up, an EnableGroup-only principal could disable a group, while a DisableGroup-only principal received `AccessDenied` for that operation. The group repair uses the same single-selector, single-authorization structure.
@@ -74,12 +74,12 @@ Account state transitions are directional. Disabling is frequently delegated to 
 
 The authorization contract therefore enforces strict separation:
 
-| Principal policy | Disable target | Enable target |
-| --- | --- | --- |
-| `admin:DisableUser` only | allow | deny |
-| `admin:EnableUser` only | deny | allow |
-| both actions | allow | allow |
-| neither action | deny | deny |
+| Principal policy         | Disable target | Enable target |
+| ------------------------ | -------------- | ------------- |
+| `admin:DisableUser` only | allow          | deny          |
+| `admin:EnableUser` only  | deny           | allow         |
+| both actions             | allow          | allow         |
+| neither action           | deny           | deny          |
 {.wide .expand}
 
 The built-in `consoleAdmin` policy grants `admin:*`, so full administrators retain both operations. Only custom restricted policies that relied on `admin:EnableUser` to disable accounts are affected. The public PBAC reference documents the same contract for [`admin:EnableUser`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-EnableUser) and [`admin:DisableUser`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-DisableUser).
@@ -180,11 +180,11 @@ Five invariants hold after the change:
 
 The unit test covers all three selector outcomes:
 
-| Input | Expected action |
-| --- | --- |
-| `enabled` | `EnableUser` |
-| `disabled` | `DisableUser` |
-| invalid | legacy `EnableUser` default |
+| Input      | Expected action             |
+| ---------- | --------------------------- |
+| `enabled`  | `EnableUser`                |
+| `disabled` | `DisableUser`               |
+| invalid    | legacy `EnableUser` default |
 {.wide .expand}
 
 ### Four-Way IAM Authorization Matrix {#iam-test}
@@ -307,10 +307,10 @@ Upstream issue #21478 and PR #21482 remain on the archived `minio/minio` reposit
 
 ### Delivery State {#delivery}
 
-| Milestone | User repair | Group follow-up |
-| --- | --- | --- |
-| Signed-off commit | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) (merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)) | `229fe2b3c` |
-| Shipped release | [Server 20260903](/blog/release/silo-20260903/) | [Server 20260903](/blog/release/silo-20260903/) |
+| Milestone         | User repair                                                                                                                                                                                           | Group follow-up                                 |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Signed-off commit | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1) (merged as [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)) | `229fe2b3c`                                     |
+| Shipped release   | [Server 20260903](/blog/release/silo-20260903/)                                                                                                                                                       | [Server 20260903](/blog/release/silo-20260903/) |
 {.wide .expand}
 
 ## Conclusion {#conclusion}

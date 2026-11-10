@@ -84,23 +84,23 @@ The marker header `X-Minio-Source-Replication-Request` is considered present onl
 
 After authenticating the caller, the handler derives two distinct trust flags:
 
-| Decision | Requirements | Enabled Semantics |
-| --- | --- | --- |
-| `trusted` | Authenticated non-anonymous principal + exact marker + `s3:ReplicateObject` (or `s3:ReplicateDelete`) on the target resource | Source ETag/MTime and timestamps; multipart actual size and encrypted checksum transfer; notification and re-replication suppression; delete version/pool pinning |
-| `replicaTrusted` | `trusted` + raw request status `REPLICA` (or a multipart upload whose stored initiation status is `REPLICA`) | `REPLICA` status persistence; replication SSE sealed-key import; SSE-C raw ciphertext (`NoDecryption`) path; replica Object Lock exceptions |
+| Decision         | Requirements                                                                                                                 | Enabled Semantics                                                                                                                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `trusted`        | Authenticated non-anonymous principal + exact marker + `s3:ReplicateObject` (or `s3:ReplicateDelete`) on the target resource | Source ETag/MTime and timestamps; multipart actual size and encrypted checksum transfer; notification and re-replication suppression; delete version/pool pinning |
+| `replicaTrusted` | `trusted` + raw request status `REPLICA` (or a multipart upload whose stored initiation status is `REPLICA`)                 | `REPLICA` status persistence; replication SSE sealed-key import; SSE-C raw ciphertext (`NoDecryption`) path; replica Object Lock exceptions                       |
 {.wide .expand}
 
 Separating `trusted` from `replicaTrusted` is required by the wire protocol because legitimate multipart part uploads, multipart completions, and batch replication writes send `X-Minio-Source-Replication-Request: true` without repeating `X-Amz-Replication-Status: REPLICA` on every request.
 
 Incoming requests are classified as follows:
 
-| Incoming Request Shape | Receiver Outcome |
-| --- | --- |
-| No marker | Ordinary S3 operation |
-| Marker present, caller lacks replication permission | Internal replication headers stripped and ignored; request proceeds as an ordinary S3 operation |
-| `X-Amz-Replication-Status: REPLICA` without replication permission | Rejected with `403 AccessDenied` |
-| Exact marker + replication permission, no `REPLICA` | `trusted` only |
-| Exact marker + replication permission + `REPLICA` | Both `trusted` and `replicaTrusted` |
+| Incoming Request Shape                                             | Receiver Outcome                                                                                |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| No marker                                                          | Ordinary S3 operation                                                                           |
+| Marker present, caller lacks replication permission                | Internal replication headers stripped and ignored; request proceeds as an ordinary S3 operation |
+| `X-Amz-Replication-Status: REPLICA` without replication permission | Rejected with `403 AccessDenied`                                                                |
+| Exact marker + replication permission, no `REPLICA`                | `trusted` only                                                                                  |
+| Exact marker + replication permission + `REPLICA`                  | Both `trusted` and `replicaTrusted`                                                             |
 {.wide .expand}
 
 Explicitly rejecting unauthorized `REPLICA` claims with `403 AccessDenied` prevents a misconfigured replica write from silently downgrading into a new `PENDING` source object that would trigger a reverse replication loop.
@@ -132,45 +132,45 @@ The Object Lock parser no longer inspects `X-Minio-Source-Replication-Request` d
 
 ## Replication Wire Matrix {#wire-matrix}
 
-| Operation | Marker | `REPLICA` Header on Request | Receiver Decision |
-| --- | --- | --- | --- |
-| Replicated `PutObject` | Yes | Yes | `replicaTrusted` |
-| Replicated `CreateMultipartUpload` | Yes | Yes | Persist trusted multipart `REPLICA` provenance |
-| Replicated `UploadPart` | Yes | No | `trusted`; promoted to `replicaTrusted` only when stored MPU status is `REPLICA` |
-| Replicated `CompleteMultipartUpload` | Yes | No | `trusted`; preserves source ETag/MTime, actual size, and encrypted checksum |
-| `CopyObject` metadata replication | Yes | Yes | `replicaTrusted` |
-| Replicated `DeleteObject` | Yes | Yes | `replicaTrusted` (requires `s3:ReplicateDelete` plus `s3:DeleteObject`, with no explicit deny on `s3:DeleteObjectVersion`) |
-| Batch replication `PUT` / `Complete` | Yes | No | `trusted` (target credentials must hold `s3:ReplicateObject`) |
-| Proxy / readiness / validity probes | Probe headers | No | Probe headers are preserved; validity probes verify replication permissions under the rule prefix (`c9ad74673`, `5db7be4ee`) |
+| Operation                            | Marker        | `REPLICA` Header on Request | Receiver Decision                                                                                                            |
+| ------------------------------------ | ------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Replicated `PutObject`               | Yes           | Yes                         | `replicaTrusted`                                                                                                             |
+| Replicated `CreateMultipartUpload`   | Yes           | Yes                         | Persist trusted multipart `REPLICA` provenance                                                                               |
+| Replicated `UploadPart`              | Yes           | No                          | `trusted`; promoted to `replicaTrusted` only when stored MPU status is `REPLICA`                                             |
+| Replicated `CompleteMultipartUpload` | Yes           | No                          | `trusted`; preserves source ETag/MTime, actual size, and encrypted checksum                                                  |
+| `CopyObject` metadata replication    | Yes           | Yes                         | `replicaTrusted`                                                                                                             |
+| Replicated `DeleteObject`            | Yes           | Yes                         | `replicaTrusted` (requires `s3:ReplicateDelete` plus `s3:DeleteObject`, with no explicit deny on `s3:DeleteObjectVersion`)   |
+| Batch replication `PUT` / `Complete` | Yes           | No                          | `trusted` (target credentials must hold `s3:ReplicateObject`)                                                                |
+| Proxy / readiness / validity probes  | Probe headers | No                          | Probe headers are preserved; validity probes verify replication permissions under the rule prefix (`c9ad74673`, `5db7be4ee`) |
 {.wide .expand}
 
 ## CORS Resident-Only State Machine {#cors-state-machine}
 
 The outer CORS middleware calls a dedicated resident-only accessor that acquires a single in-memory read lock and performs zero storage I/O:
 
-| In-Memory Bucket Metadata State | CORS Decision | Storage I/O |
-| --- | --- | --- |
-| Resident, valid per-bucket CORS config | Apply per-bucket CORS rule (a failed background refresh retains the last valid config) | None |
-| Resident, no per-bucket CORS config | Use global CORS fallback | None |
-| Resident, corrupted stored CORS XML | Fail closed (omit CORS headers and log once) | None |
-| Non-resident while initial startup load is still running | Fail closed | None |
-| Non-resident after startup: known disk bucket whose metadata failed to load | Fail closed | None |
-| Non-resident after startup: nonexistent, reserved, invalid, or `.minio.sys` name | Use global CORS fallback | None |
+| In-Memory Bucket Metadata State                                                  | CORS Decision                                                                          | Storage I/O |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------- |
+| Resident, valid per-bucket CORS config                                           | Apply per-bucket CORS rule (a failed background refresh retains the last valid config) | None        |
+| Resident, no per-bucket CORS config                                              | Use global CORS fallback                                                               | None        |
+| Resident, corrupted stored CORS XML                                              | Fail closed (omit CORS headers and log once)                                           | None        |
+| Non-resident while initial startup load is still running                         | Fail closed                                                                            | None        |
+| Non-resident after startup: known disk bucket whose metadata failed to load      | Fail closed                                                                            | None        |
+| Non-resident after startup: nonexistent, reserved, invalid, or `.minio.sys` name | Use global CORS fallback                                                               | None        |
 {.wide .expand}
 
 Both startup-in-progress and known load-failure states fail closed: because a presigned URL carries its own credentials in the query string, the bucket's custom CORS policy is the only browser origin boundary protecting it, and falling back to the permissive global CORS policy during a metadata load failure would expose the presigned URL to arbitrary origins.
 
 ## Rejected Alternatives {#alternatives}
 
-| Rejected Alternative | Reason for Rejection |
-| --- | --- |
-| Validate bucket syntax before calling the old CORS loader | Attackers can generate an unbounded stream of syntactically valid, nonexistent bucket names that still trigger pre-auth storage I/O |
-| Call `GetBucketInfo` before loading CORS | Replaces 11 metadata probes with at least 1 unthrottled storage stat call per attacker-supplied bucket name |
-| Cache negative bucket lookups with a TTL | Bounds cache lifetime, not attacker key cardinality or initial storage I/O amplification |
-| Strip replication headers before SigV4 authentication | Breaks SigV4 canonical request verification (`SignatureDoesNotMatch`) |
-| Reject every request carrying `X-Minio-Source-Replication-Request` | Breaks legitimate marker-only batch replication and multipart replication calls |
-| Require `REPLICA` on every trusted replication call | Breaks replicated `UploadPart`, `CompleteMultipartUpload`, and batch replication wire compatibility |
-| Store a boolean in `ObjectOptions` while leaving events and Object Lock on raw headers | Leaves two authorities that can disagree |
+| Rejected Alternative                                                                   | Reason for Rejection                                                                                                                |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Validate bucket syntax before calling the old CORS loader                              | Attackers can generate an unbounded stream of syntactically valid, nonexistent bucket names that still trigger pre-auth storage I/O |
+| Call `GetBucketInfo` before loading CORS                                               | Replaces 11 metadata probes with at least 1 unthrottled storage stat call per attacker-supplied bucket name                         |
+| Cache negative bucket lookups with a TTL                                               | Bounds cache lifetime, not attacker key cardinality or initial storage I/O amplification                                            |
+| Strip replication headers before SigV4 authentication                                  | Breaks SigV4 canonical request verification (`SignatureDoesNotMatch`)                                                               |
+| Reject every request carrying `X-Minio-Source-Replication-Request`                     | Breaks legitimate marker-only batch replication and multipart replication calls                                                     |
+| Require `REPLICA` on every trusted replication call                                    | Breaks replicated `UploadPart`, `CompleteMultipartUpload`, and batch replication wire compatibility                                 |
+| Store a boolean in `ObjectOptions` while leaving events and Object Lock on raw headers | Leaves two authorities that can disagree                                                                                            |
 {.wide .expand}
 
 ## Implementation and Verification {#implementation}

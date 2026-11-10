@@ -66,12 +66,12 @@ if args.ObjectName != "" {
 
 **不再接受对象级授权的十二个动作：**
 
-| 动作                                                                            | 入选理由                                                                                        |
-|:------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------|
-| `PutBucketPolicy`、`DeleteBucketPolicy`                                        | 能把访问权发给别的主体（包括匿名），也能给调用者自己补上从未授予的桶级动作。自我提权与公开暴露。                                            |
-| `PutBucketObjectLockConfiguration`、`PutBucketVersioning`                      | 击穿的恰恰是专门用来"防住有写权限的人销毁数据"的保护。                                                                |
-| `PutReplicationConfiguration`、`PutLifecycleConfiguration`                     | 以服务端凭据运行，并在调用者权限被吊销后继续生效。                                                                   |
-| `DeleteBucket`、`ForceDeleteBucket`                                            | 不可逆地销毁桶实体及其配置。上游 issue 的原始复现动作。                                                             |
+| 动作                                                                             | 入选理由                                                                                                                                           |
+| :------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PutBucketPolicy`、`DeleteBucketPolicy`                                          | 能把访问权发给别的主体（包括匿名），也能给调用者自己补上从未授予的桶级动作。自我提权与公开暴露。                                                   |
+| `PutBucketObjectLockConfiguration`、`PutBucketVersioning`                        | 击穿的恰恰是专门用来"防住有写权限的人销毁数据"的保护。                                                                                             |
+| `PutReplicationConfiguration`、`PutLifecycleConfiguration`                       | 以服务端凭据运行，并在调用者权限被吊销后继续生效。                                                                                                 |
+| `DeleteBucket`、`ForceDeleteBucket`                                              | 不可逆地销毁桶实体及其配置。上游 issue 的原始复现动作。                                                                                            |
 | `PutBucketCors`、`DeleteBucketCors`、`PutBucketQOS`、`PutInventoryConfiguration` | 在今天的服务端没有挂任何行为——要么根本没有 handler，要么 handler 在鉴权之后直接返回 `NotImplemented`。收走它们不影响任何能用的东西，并且提前覆盖。 |
 {.wide .expand}
 
@@ -103,11 +103,11 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 
 这条性质是被验证的，不是被论证的。我们生成了一份 **27000 条鉴权判定** 的语料——15 种资源模式 × 3 个桶 × 5 种对象名 × 20 个动作 × 6 种语句形式——分别在加固前基线与本版本上执行，并逐条比对：
 
-| 迁移方向               |    条数 |
-|:-------------------|------:|
+| 迁移方向               |  条数 |
+| :--------------------- | ----: |
 | `false → true`（变宽） | **0** |
 | `true → false`（收窄） |   144 |
-| 不变                 | 26856 |
+| 不变                   | 26856 |
 {.wide .expand}
 
 那 144 条收窄全部落在设计意图之内，没有一条溢出：动作恰好是受保护的十二个；语句形式只有三种 `Allow`，`Deny`、`NotResource` 排除与 deny-`NotResource` 三种形式 **零变化**；资源模式只有四种对象级模式；请求只有桶级请求，对象级请求完全未被触碰。12 × 4 × 3 = 144，严丝合缝。
@@ -172,18 +172,18 @@ Allow s3:PutBucketPolicy on arn:aws:s3:::mybucke?
 
 版本号跟随上游的线，不声称内容一致。以 `policy/` 下的动作字符串常量为口径，实测差异如下：
 
-|                        |  数量 |
-|:-----------------------|----:|
-| 上游 `minio/pkg` v3.11.0 | 291 |
-| `silo-pkg` v3.11.0     | 270 |
+|                          | 数量 |
+| :----------------------- | ---: |
+| 上游 `minio/pkg` v3.11.0 |  291 |
+| `silo-pkg` v3.11.0       |  270 |
 {.wide .expand}
 
 **有 24 个动作只存在于上游：** 6 个 `s3:*ObjectAnnotation*`、5 个 `admin:` 动作（`DistJobStatus`、`Get`/`SetBucketCompression`、两个 `TablesReplication*`），以及 13 个覆盖函数 CRUD 与打标签的 `s3tables:` 动作。它们属于本分支刻意不采纳的 AIStor 词表，因为社区版服务端并不实现这些功能。
 
 **有 3 个动作在两侧名称不同。** 上游对它们做了改名与拆分，本分支保留较早的名称：
 
-| `silo-pkg` v3.11.0             | 上游 `minio/pkg` v3.11.0                                      |
-|:-------------------------------|:------------------------------------------------------------|
+| `silo-pkg` v3.11.0             | 上游 `minio/pkg` v3.11.0                                     |
+| :----------------------------- | :----------------------------------------------------------- |
 | `s3tables:TagResource`         | `s3tables:TagTable`、`s3tables:TagWarehouse`                 |
 | `s3tables:UntagResource`       | `s3tables:UntagTable`、`s3tables:UntagWarehouse`             |
 | `s3tables:ListTagsForResource` | `s3tables:ListTagsForTable`、`s3tables:ListTagsForWarehouse` |

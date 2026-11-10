@@ -11,10 +11,10 @@ url: "/blog/security/20260916-release-hardening/"
 
 This bulletin covers three security repairs (`SN-2026-012` through `SN-2026-014`) and adjacent dependency updates shipped in [Server 20260916](/blog/release/silo-20260916/) and [Console v2.4.1](/blog/release/console-2.4.1/). See the [security advisory ledger](/about/security-advisories/) for the complete index.
 
-| Finding | Fixed source | Delivery status |
-| --- | --- | --- |
-| `SN-2026-012`: presigned payload integrity | Server `c4b5e1cb4`, [PR #177](https://github.com/pgsty/silo/pull/177) | Shipped in [Server 20260916](/blog/release/silo-20260916/) (affected in `RELEASE.2026-09-03T13-18-01Z` and earlier) |
-| `SN-2026-013`: durable IAM revocation | Server [PR #191](https://github.com/pgsty/silo/pull/191) / [PR #192](https://github.com/pgsty/silo/pull/192) | Shipped in [Server 20260916](/blog/release/silo-20260916/); requires coordinated multi-node/multi-site upgrade |
+| Finding                                      | Fixed source                                                                                                              | Delivery status                                                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `SN-2026-012`: presigned payload integrity   | Server `c4b5e1cb4`, [PR #177](https://github.com/pgsty/silo/pull/177)                                                     | Shipped in [Server 20260916](/blog/release/silo-20260916/) (affected in `RELEASE.2026-09-03T13-18-01Z` and earlier)                  |
+| `SN-2026-013`: durable IAM revocation        | Server [PR #191](https://github.com/pgsty/silo/pull/191) / [PR #192](https://github.com/pgsty/silo/pull/192)              | Shipped in [Server 20260916](/blog/release/silo-20260916/); requires coordinated multi-node/multi-site upgrade                       |
 | `SN-2026-014`: anonymous Console share proxy | [Console PR #56](https://github.com/pgsty/silo-console/pull/56); [Server PR #209](https://github.com/pgsty/silo/pull/209) | Shipped in standalone [Console v2.4.1](/blog/release/console-2.4.1/) and embedded in [Server 20260916](/blog/release/silo-20260916/) |
 {.wide .expand}
 

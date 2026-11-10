@@ -47,12 +47,12 @@ image | pdf | audio | video | none
 
 Its extension table listed media formats but omitted `.log`, `.txt`, `.json`, and `.xml`. Its MIME classifier likewise ignored `text/plain`, `application/json`, `application/xml`, and `text/xml`. Runtime verification showed the resulting split between frontend classification and backend response headers:
 
-| Object | Frontend Classification | Console Download Response |
-| --- | --- | --- |
-| `.log` / `text/plain` | `none` | `inline`, `X-Frame-Options: SAMEORIGIN` |
-| `.txt` / `text/plain` | `none` | `inline`, `X-Frame-Options: SAMEORIGIN` |
-| `.json` / `application/json` | "Preview unavailable" | `inline`, `X-Frame-Options: SAMEORIGIN` |
-| `.xml` / `application/xml` | `none` | `attachment`, `X-Frame-Options: DENY` |
+| Object                       | Frontend Classification | Console Download Response               |
+| ---------------------------- | ----------------------- | --------------------------------------- |
+| `.log` / `text/plain`        | `none`                  | `inline`, `X-Frame-Options: SAMEORIGIN` |
+| `.txt` / `text/plain`        | `none`                  | `inline`, `X-Frame-Options: SAMEORIGIN` |
+| `.json` / `application/json` | "Preview unavailable"   | `inline`, `X-Frame-Options: SAMEORIGIN` |
+| `.xml` / `application/xml`   | `none`                  | `attachment`, `X-Frame-Options: DENY`   |
 {.wide .expand}
 
 In addition, the object-detail view used the wrong boolean conjunction when deciding whether **Preview** should be disabled: an authorized user could click **Preview** on an unsupported object only to receive an unavailable dialog, or see an enabled action that the server would reject.
@@ -156,16 +156,16 @@ Only when the legacy media classifier returns `none`:
 
 Matching either an allowed extension (when not excluded by rule 1) or an allowed exact MIME type selects `text`:
 
-| Filename and MIME | Classification | Reason |
-| --- | --- | --- |
-| `report.txt` + `image/png` | `image` | Existing media classification wins |
-| `report.json` + `application/pdf` | `pdf` | Existing media classification wins |
-| `server.LOG` + `application/octet-stream` | `text` | Allowed extension, case-insensitive |
-| No extension + `application/json; charset=utf-8` | `text` | Exact normalized MIME match |
-| `page.html` + `text/plain` | `none` | Explicit HTML extension exclusion |
-| `page.txt` + `text/html` | `text` | Extension admits it; HTML source renders as inert text |
-| `notes.md` + `text/plain` | `text` | Exact MIME admits raw text |
-| `image.svg` + `image/svg+xml` | `image` | Handled by existing image path |
+| Filename and MIME                                | Classification | Reason                                                 |
+| ------------------------------------------------ | -------------- | ------------------------------------------------------ |
+| `report.txt` + `image/png`                       | `image`        | Existing media classification wins                     |
+| `report.json` + `application/pdf`                | `pdf`          | Existing media classification wins                     |
+| `server.LOG` + `application/octet-stream`        | `text`         | Allowed extension, case-insensitive                    |
+| No extension + `application/json; charset=utf-8` | `text`         | Exact normalized MIME match                            |
+| `page.html` + `text/plain`                       | `none`         | Explicit HTML extension exclusion                      |
+| `page.txt` + `text/html`                         | `text`         | Extension admits it; HTML source renders as inert text |
+| `notes.md` + `text/plain`                        | `text`         | Exact MIME admits raw text                             |
+| `image.svg` + `image/svg+xml`                    | `image`        | Handled by existing image path                         |
 {.wide .expand}
 
 ## Resource Contract {#resource-contract}

@@ -58,14 +58,14 @@ the [migration and rollback guide](/compatibility/password-permissions/).
 
 ## Dependencies and embedding {#dependencies}
 
-| Component | Selected version |
-| --- | --- |
-| Shared package | `github.com/pgsty/silo-pkg/v3 v3.14.1` |
-| MC source | `github.com/pgsty/mc v0.0.0-20260916070421-e952aa78f10a` — mcli 20260916 |
-| Upstream minio-go | `v7.3.1-0.20260915093545-32e1f32cb176` |
-| JWX / strfmt | v3.3.0 / v0.27.2 |
-| React Router | v7.18.4 |
-| Build tools | Go 1.27.1, Node 24.21.0, Yarn 4.13.0 |
+| Component         | Selected version                                                         |
+| ----------------- | ------------------------------------------------------------------------ |
+| Shared package    | `github.com/pgsty/silo-pkg/v3 v3.14.1`                                   |
+| MC source         | `github.com/pgsty/mc v0.0.0-20260916070421-e952aa78f10a` — mcli 20260916 |
+| Upstream minio-go | `v7.3.1-0.20260915093545-32e1f32cb176`                                   |
+| JWX / strfmt      | v3.3.0 / v0.27.2                                                         |
+| React Router      | v7.18.4                                                                  |
+| Build tools       | Go 1.27.1, Node 24.21.0, Yarn 4.13.0                                     |
 {.wide .expand}
 
 The SDK handles S3 errors embedded in HTTP 200 CopyObject responses; JWX fixes

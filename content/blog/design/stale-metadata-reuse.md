@@ -18,12 +18,12 @@ This article records the design and verification of [PR #233](https://github.com
 
 Two independent code paths reused a Go struct without resetting all of its logical state, allowing fields omitted from the new input to retain values from a previous operation. The fix resets those fields directly in the decoder and response builder that know the schema of each message:
 
-| Path | Trigger | Previous state | Repaired state |
-| --- | --- | --- | --- |
-| Legacy V2 version header | Decode a V2 header into a reused struct with nonzero EC fields | `EcN` becomes zero, `EcM` retains its old value | Both absent EC fields are zeroed |
-| Legacy V1 version header | Reuse a struct containing a signature or EC fields | Fields absent from V1 retain their old values | `Signature`, `EcN`, and `EcM` are zeroed |
-| Scanner update response | Reuse an envelope that previously carried a final cache | Both `Update` and the old `Final` are serialized | Only `Update` is present |
-| Scanner final response | Reuse an envelope that previously carried a progress update | Both the old `Update` and `Final` are serialized | Only `Final` is present |
+| Path                     | Trigger                                                        | Previous state                                   | Repaired state                           |
+| ------------------------ | -------------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------- |
+| Legacy V2 version header | Decode a V2 header into a reused struct with nonzero EC fields | `EcN` becomes zero, `EcM` retains its old value  | Both absent EC fields are zeroed         |
+| Legacy V1 version header | Reuse a struct containing a signature or EC fields             | Fields absent from V1 retain their old values    | `Signature`, `EcN`, and `EcM` are zeroed |
+| Scanner update response  | Reuse an envelope that previously carried a final cache        | Both `Update` and the old `Final` are serialized | Only `Update` is present                 |
+| Scanner final response   | Reuse an envelope that previously carried a progress update    | Both the old `Update` and `Final` are serialized | Only `Final` is present                  |
 {.wide .expand}
 
 ## Legacy `xl.meta` Headers {#legacy-headers}
@@ -91,11 +91,11 @@ go test -race ./internal/grid -count=1 -timeout=5m
 
 End-to-end verification ran the merged binary as **two server processes managing eight data directories** over loopback. The harness created twelve buckets, wrote two differently sized objects into each bucket, and then deleted one object, overwrote the second, and wrote a third object in every bucket.
 
-| Checkpoint | Objects | Total logical bytes | Observed result |
-| --- | ---: | ---: | --- |
-| Initial writes | 24 | 64,740 | Bucket and cluster totals matched across three consecutive usage updates |
-| Delete, overwrite, and add | 24 | 111,960 | Bucket and cluster totals matched across three subsequent usage updates |
-| Readback verification | 24 | 111,960 | All 24 object lengths and SHA-256 digests matched |
+| Checkpoint                 | Objects | Total logical bytes | Observed result                                                          |
+| -------------------------- | ------: | ------------------: | ------------------------------------------------------------------------ |
+| Initial writes             |      24 |              64,740 | Bucket and cluster totals matched across three consecutive usage updates |
+| Delete, overwrite, and add |      24 |             111,960 | Bucket and cluster totals matched across three subsequent usage updates  |
+| Readback verification      |      24 |             111,960 | All 24 object lengths and SHA-256 digests matched                        |
 {.wide .expand}
 
 Both processes logged active bucket scans, with the non-coordinator node executing 119 `ScanBucketDrive` operations over the remote grid RPC stream.

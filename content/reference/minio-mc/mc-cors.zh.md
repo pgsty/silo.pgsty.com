@@ -20,10 +20,10 @@ mcli cors remove ALIAS/BUCKET
 `set` 从 XML 文件或标准输入 `-` 读取配置，并替换该桶的整份 CORS 文档。`get` 显示当前配置；`remove` 删除桶级配置。
 这三个子命令均支持[全局参数](/zh/reference/minio-mc/#minio-mc-global-options)，没有额外的命令专用标志。
 
-| 命令 | SILO 所需策略动作 |
-| --- | --- |
-| `mc cors set` | `s3:PutBucketCors` |
-| `mc cors get` | `s3:GetBucketCors` |
+| 命令             | SILO 所需策略动作     |
+| ---------------- | --------------------- |
+| `mc cors set`    | `s3:PutBucketCors`    |
+| `mc cors get`    | `s3:GetBucketCors`    |
 | `mc cors remove` | `s3:DeleteBucketCors` |
 {.wide .expand}
 

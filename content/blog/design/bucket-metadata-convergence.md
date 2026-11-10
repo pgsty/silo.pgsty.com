@@ -18,12 +18,12 @@ url: "/blog/design/bucket-metadata-convergence/"
 
 Earlier [release notes](/blog/release/silo-20260903/), the [20260903 hardening record](/blog/security/20260903-server-hardening/), and the [Server compatibility page](/compatibility/server/#limits) noted the [#77](https://github.com/pgsty/silo/issues/77) deletion limitation. This page records the state model, design trade-offs, and verification evidence (archived in [`docs/investigations/issue-77.md`](https://github.com/pgsty/silo/blob/114dc10529f242e1e22bafd0a08b1a096d69d4bc/docs/investigations/issue-77.md)).
 
-| Prior work | What it repaired | Remaining gap addressed by #77 |
-| :-- | :-- | :-- |
-| [PR #91](https://github.com/pgsty/silo/pull/91) | Per-site configuration counts, Policy/Quota reporting, malformed-field isolation | Accurate counts do not establish convergence of field values and source times |
-| [PR #103](https://github.com/pgsty/silo/pull/103) | Serialized writes to the whole `.metadata.bin` record | A write lock cannot validate an ordering decision made before acquiring the lock |
-| [#76](https://github.com/pgsty/silo/issues/76), [#78](https://github.com/pgsty/silo/issues/78) | Object Lock replication payload and existing-bucket adoption protection | Does not provide a unified source-state comparison across all six configuration types |
-| [CORS replication repair](/blog/design/cors-replication-trust/) | Dedicated per-bucket CORS deletion register and replication trust boundary | Specific to CORS; its semantics cannot be applied blindly to every metadata type |
+| Prior work                                                                                     | What it repaired                                                                 | Remaining gap addressed by #77                                                        |
+| :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| [PR #91](https://github.com/pgsty/silo/pull/91)                                                | Per-site configuration counts, Policy/Quota reporting, malformed-field isolation | Accurate counts do not establish convergence of field values and source times         |
+| [PR #103](https://github.com/pgsty/silo/pull/103)                                              | Serialized writes to the whole `.metadata.bin` record                            | A write lock cannot validate an ordering decision made before acquiring the lock      |
+| [#76](https://github.com/pgsty/silo/issues/76), [#78](https://github.com/pgsty/silo/issues/78) | Object Lock replication payload and existing-bucket adoption protection          | Does not provide a unified source-state comparison across all six configuration types |
+| [CORS replication repair](/blog/design/cors-replication-trust/)                                | Dedicated per-bucket CORS deletion register and replication trust boundary       | Specific to CORS; its semantics cannot be applied blindly to every metadata type      |
 {.wide .expand}
 
 This repair covers Policy, Tags, SSE, Quota, Versioning, and Object Lock. Lifecycle/expiry has its own merged-payload time semantics, and CORS retains its separate mechanism. Notification, IAM, [object replication reliability](/blog/design/replication-reliability/), MRF, resync, and public counters are separate subsystems.
@@ -32,14 +32,14 @@ This repair covers Policy, Tags, SSE, Quota, Versioning, and Object Lock. Lifecy
 
 The original regression reproduced on both `ErasureSD` and 16-disk `Erasure` ObjectLayers. A peer `PUT` originated at a past time $T$, but the receiving disk stored its local arrival time. A subsequent `DELETE` carrying $T + 1\text{ minute}$ was rejected as older than the arrival timestamp. RPC success alone therefore did not produce the intended final state.
 
-| Configuration | Pre-fix PUT preserves source time | Empty-event behavior | Pre-fix timestamp export when empty |
-| :-- | :-- | :-- | :-- |
-| Policy | No | Delete | Yes |
-| Tags | No | Delete | No |
-| SSE | No | Delete | No |
-| Quota | No | Delete; zero-value JSON has separate semantics | No |
-| Versioning | No | No operation | Not used as deletion |
-| Object Lock | No | No operation | Not used as deletion |
+| Configuration | Pre-fix PUT preserves source time | Empty-event behavior                           | Pre-fix timestamp export when empty |
+| :------------ | :-------------------------------- | :--------------------------------------------- | :---------------------------------- |
+| Policy        | No                                | Delete                                         | Yes                                 |
+| Tags          | No                                | Delete                                         | No                                  |
+| SSE           | No                                | Delete                                         | No                                  |
+| Quota         | No                                | Delete; zero-value JSON has separate semantics | No                                  |
+| Versioning    | No                                | No operation                                   | Not used as deletion                |
+| Object Lock   | No                                | No operation                                   | Not used as deletion                |
 {.wide .expand}
 
 Three further entry-point defects surfaced during investigation:
@@ -54,13 +54,13 @@ Each defect required a repair at its entry point in addition to fixing source se
 
 The state model reuses the existing payload, field `UpdatedAt`, and bucket `Created` fields in `.metadata.bin` without adding new disk formats, SDK fields, or persisted deployment IDs.
 
-| State | Conditions | Eligible source |
-| :-- | :-- | :-- |
-| Unknown or invalid | Unknown creation time, invalid payload, or field time before creation | No; missing information cannot mean deletion |
-| Empty baseline | Empty payload at zero time or `Created` | No |
-| Live baseline | Valid nonempty payload at zero time or `Created` | Yes, for historical configuration initialization |
-| Real update | Valid nonempty payload later than `Created` | Yes |
-| Real deletion | Empty payload for a deletable field, later than `Created` | Yes; this timestamped empty value is a tombstone |
+| State              | Conditions                                                            | Eligible source                                  |
+| :----------------- | :-------------------------------------------------------------------- | :----------------------------------------------- |
+| Unknown or invalid | Unknown creation time, invalid payload, or field time before creation | No; missing information cannot mean deletion     |
+| Empty baseline     | Empty payload at zero time or `Created`                               | No                                               |
+| Live baseline      | Valid nonempty payload at zero time or `Created`                      | Yes, for historical configuration initialization |
+| Real update        | Valid nonempty payload later than `Created`                           | Yes                                              |
+| Real deletion      | Empty payload for a deletable field, later than `Created`             | Yes; this timestamped empty value is a tombstone |
 {.wide .expand}
 
 Empty Versioning and Object Lock events remain no-ops; sharing an ordering helper must not give those two types deletion semantics. Zero field times use `Created` as their comparison baseline without turning historical emptiness into a deletion.
@@ -104,14 +104,14 @@ Under the existing adoption lock, the server rebases only those six fields whose
 
 ## One Rule Across Entry Points {#entry-points}
 
-| Entry point | Required behavior |
-| :-- | :-- |
-| Local S3/Admin writes | Allocate monotonic `UpdatedAt` under `metadata.lock`; build outbound events from the committed snapshot |
-| Typed peer events | Compare and persist original source `UpdatedAt` under `metadata.lock`; retain legacy Object Lock payload compatibility |
-| Bulk/import | Track explicit field presence, validate all fields, and allocate the import timestamp under the final commit lock |
+| Entry point             | Required behavior                                                                                                               |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| Local S3/Admin writes   | Allocate monotonic `UpdatedAt` under `metadata.lock`; build outbound events from the committed snapshot                         |
+| Typed peer events       | Compare and persist original source `UpdatedAt` under `metadata.lock`; retain legacy Object Lock payload compatibility          |
+| Bulk/import             | Track explicit field presence, validate all fields, and allocate the import timestamp under the final commit lock               |
 | Initial synchronization | Recover missing `Created` from physical disk probe; preserve live baselines; include real deletions when tombstones are enabled |
-| Local/remote heal | Filter valid candidates before selecting the maximum; compare canonical keys; isolate failed peers |
-| Status export | Pair value and `UpdatedAt` from one snapshot; gate newly exposed deletion timestamps behind the rollout switch |
+| Local/remote heal       | Filter valid candidates before selecting the maximum; compare canonical keys; isolate failed peers                              |
+| Status export           | Pair value and `UpdatedAt` from one snapshot; gate newly exposed deletion timestamps behind the rollout switch                  |
 {.wide .expand}
 
 Initial synchronization retains its existing five-type send path, while Versioning is initialized through `MakeBucketHook` and aligned through heal. When a bucket has no recorded `Created` time in `.metadata.bin`, `GetBucketInfo` returns the physical directory probe (matching `ListBuckets`), and initial synchronization passes that recovered timestamp to the bucket creation hook so configuration writes do not fail on metadata-free buckets.
@@ -122,13 +122,13 @@ Heal filters valid candidates before selecting the maximum state rather than see
 
 The startup environment variable `MINIO_SITE_REPLICATION_METADATA_TOMBSTONES` defaults to `off`. It controls whether newly exposed tombstone timestamps for absent Tags, SSE, and Quota payloads are exported in status and initial sync.
 
-| Behavior | `off` (default) | `on` |
-| :-- | :-- | :-- |
-| Source-time ordering and atomic apply under `metadata.lock` | Active | Active |
-| Live deletion RPC events | Replicated | Replicated |
-| Existing Policy deletion-time export | Preserved | Preserved |
-| Real deletion-time export for absent Tags/SSE/Quota | Hidden | Exported |
-| Real deletions included in initial synchronization | Policy only | Policy, Tags, SSE, and Quota |
+| Behavior                                                    | `off` (default) | `on`                         |
+| :---------------------------------------------------------- | :-------------- | :--------------------------- |
+| Source-time ordering and atomic apply under `metadata.lock` | Active          | Active                       |
+| Live deletion RPC events                                    | Replicated      | Replicated                   |
+| Existing Policy deletion-time export                        | Preserved       | Preserved                    |
+| Real deletion-time export for absent Tags/SSE/Quota         | Hidden          | Exported                     |
+| Real deletions included in initial synchronization          | Policy only     | Policy, Tags, SSE, and Quota |
 {.wide .expand}
 
 Unupgraded peers cannot safely consume all newly exposed deletion timestamps. For example, legacy Quota heal clears the raw payload while retaining an already parsed in-memory cache value. Keeping the switch `off` by default isolates rolling upgrades from that legacy behavior.
@@ -143,15 +143,15 @@ While the switch is `off`, hidden Tags, SSE, and Quota tombstones can cause peer
 
 ## Kept and Rejected Alternatives {#minimality}
 
-| Decision | Engineering reason |
-| :-- | :-- |
-| Retain one internal six-field ordering helper | All six types suffered the same arrival-time defect; one shared comparator prevents entry-point drift while preserving per-type deletion rules |
-| Keep the whole-bucket lock, persistence fields, and heal interval | Provides atomicity, durable tombstone state, and missed-event recovery without introducing an external coordination service |
-| Do more than replace `UTCNow` with source time | Replacing the timestamp alone leaves lock-external decision races, invisible deletes, equal-time ties, and initial-sync gaps unresolved |
-| Gate newly exported tombstone times behind a switch | Legacy receivers and legacy Quota cache handling remain unsafe during a mixed-version rolling upgrade |
-| Do not use deployment ID as a tie-breaker or add an HLC/schema | Existing timestamps and canonical content keys suffice for deterministic convergence without changing on-disk schemas |
-| Do not reject all zero-time typed events | Legacy Tag heal omits `UpdatedAt`; accepting zero-time events with local monotonic time preserves backward wire compatibility |
-| Do not impose one deletion rule across all bucket metadata | Versioning and Object Lock cannot be deleted, while Lifecycle and CORS have distinct merge and deletion structures |
+| Decision                                                          | Engineering reason                                                                                                                             |
+| :---------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| Retain one internal six-field ordering helper                     | All six types suffered the same arrival-time defect; one shared comparator prevents entry-point drift while preserving per-type deletion rules |
+| Keep the whole-bucket lock, persistence fields, and heal interval | Provides atomicity, durable tombstone state, and missed-event recovery without introducing an external coordination service                    |
+| Do more than replace `UTCNow` with source time                    | Replacing the timestamp alone leaves lock-external decision races, invisible deletes, equal-time ties, and initial-sync gaps unresolved        |
+| Gate newly exported tombstone times behind a switch               | Legacy receivers and legacy Quota cache handling remain unsafe during a mixed-version rolling upgrade                                          |
+| Do not use deployment ID as a tie-breaker or add an HLC/schema    | Existing timestamps and canonical content keys suffice for deterministic convergence without changing on-disk schemas                          |
+| Do not reject all zero-time typed events                          | Legacy Tag heal omits `UpdatedAt`; accepting zero-time events with local monotonic time preserves backward wire compatibility                  |
+| Do not impose one deletion rule across all bucket metadata        | Versioning and Object Lock cannot be deleted, while Lifecycle and CORS have distinct merge and deletion structures                             |
 {.wide .expand}
 
 The production change adds 729 lines and removes 692 lines of Go (+37 net lines), replacing duplicated per-type apply and heal branches with the shared state comparator. Every retained mechanism maps to a reproduced failure mode: removing whole-record locking reopens read-modify-write races, removing canonical Policy keys reintroduces permanent status/heal mismatches on negative-set policies, and removing the rollout switch exposes unupgraded Quota caches during rolling upgrades.
@@ -160,14 +160,14 @@ The production change adds 729 lines and removes 692 lines of Go (+37 net lines)
 
 Regression suites in `cmd/site-replication-metadata_test.go`, `cmd/site-replication-metadata-heal_test.go`, and `cmd/site-replication-metadata-gate_test.go` verify the contract across both `ErasureSD` and 16-disk `Erasure` backends:
 
-| Test scope | Verified behavior |
-| :-- | :-- |
-| Source time, four deletable types, duplicate/reordered events, pre-lock queuing, cross-field writes | Regressions and `-race` checks pass on both ObjectLayers |
-| Equal-time arrival in both orders, deletion priority over live values, canonical Policy keys, negative-set `GET`, bulk/import atomicity | Deterministic convergence regardless of event arrival order |
-| Creation-time recovery and legacy-order Policy status | Real-drive ObjectLayer tests stamp bucket directory mtimes and verify that metadata-free buckets recover `Created` and converge without false status mismatches |
-| Two-site process experiments (four drives per site) | Initial sync preserves `Created` across all six types; dropping an outbound `PUT` RPC and injecting reordered events converges on the next 30-second heal cycle |
-| Missed deletions across source restart | Tombstones for Policy, Tags, SSE, and Quota survive source process restart and converge after reconnection |
-| Steady-state quiescence and diagnostic deduplication | Two consecutive 65-second windows emit zero metadata RPCs after convergence; exceptional warnings deduplicate by bucket, field, and reason |
+| Test scope                                                                                                                              | Verified behavior                                                                                                                                               |
+| :-------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Source time, four deletable types, duplicate/reordered events, pre-lock queuing, cross-field writes                                     | Regressions and `-race` checks pass on both ObjectLayers                                                                                                        |
+| Equal-time arrival in both orders, deletion priority over live values, canonical Policy keys, negative-set `GET`, bulk/import atomicity | Deterministic convergence regardless of event arrival order                                                                                                     |
+| Creation-time recovery and legacy-order Policy status                                                                                   | Real-drive ObjectLayer tests stamp bucket directory mtimes and verify that metadata-free buckets recover `Created` and converge without false status mismatches |
+| Two-site process experiments (four drives per site)                                                                                     | Initial sync preserves `Created` across all six types; dropping an outbound `PUT` RPC and injecting reordered events converges on the next 30-second heal cycle |
+| Missed deletions across source restart                                                                                                  | Tombstones for Policy, Tags, SSE, and Quota survive source process restart and converge after reconnection                                                      |
+| Steady-state quiescence and diagnostic deduplication                                                                                    | Two consecutive 65-second windows emit zero metadata RPCs after convergence; exceptional warnings deduplicate by bucket, field, and reason                      |
 {.wide .expand}
 
 During test review, an early creation-time recovery test that used a stubbed ObjectLayer probe was replaced with a real-drive test that stamps bucket directories on disk—ensuring the test fails against unfixed `GetBucketInfo` code and passes only with the production repair.

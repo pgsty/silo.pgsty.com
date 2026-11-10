@@ -20,10 +20,10 @@ SILO 同时定义了 `admin:EnableUser` 与 `admin:DisableUser` 两项策略权�
 
 修复方案在鉴权前根据请求的目标状态映射出唯一对应的权限动作：
 
-| 请求状态 | 必须具备的权限 |
-| --- | --- |
-| `enabled` | `admin:EnableUser` |
-| `disabled` | `admin:DisableUser` |
+| 请求状态     | 必须具备的权限                                         |
+| ------------ | ------------------------------------------------------ |
+| `enabled`    | `admin:EnableUser`                                     |
+| `disabled`   | `admin:DisableUser`                                    |
 | 非法或未知值 | `admin:EnableUser`，保留原有的“先鉴权、后校验”默认边界 |
 {.wide .expand}
 
@@ -31,10 +31,10 @@ SILO 同时定义了 `admin:EnableUser` 与 `admin:DisableUser` 两项策略权�
 
 相同的规则也同步应用于组状态端点：
 
-| 请求的组状态 | 必须具备的权限 |
-| --- | --- |
-| `enabled` | `admin:EnableGroup` |
-| `disabled` | `admin:DisableGroup` |
+| 请求的组状态 | 必须具备的权限                                          |
+| ------------ | ------------------------------------------------------- |
+| `enabled`    | `admin:EnableGroup`                                     |
+| `disabled`   | `admin:DisableGroup`                                    |
 | 非法或未知值 | `admin:EnableGroup`，保留原有的“先鉴权、后校验”默认边界 |
 {.wide .expand}
 
@@ -74,12 +74,12 @@ objectAPI, creds := validateAdminReq(ctx, w, r, policy.EnableUserAdminAction)
 
 因此，两项权限必须严格正交：
 
-| 调用方策略 | 禁用目标 | 启用目标 |
-| --- | --- | --- |
-| 仅 `admin:DisableUser` | 允许 | 拒绝 |
-| 仅 `admin:EnableUser` | 拒绝 | 允许 |
-| 两者都有 | 允许 | 允许 |
-| 两者都没有 | 拒绝 | 拒绝 |
+| 调用方策略             | 禁用目标 | 启用目标 |
+| ---------------------- | -------- | -------- |
+| 仅 `admin:DisableUser` | 允许     | 拒绝     |
+| 仅 `admin:EnableUser`  | 拒绝     | 允许     |
+| 两者都有               | 允许     | 允许     |
+| 两者都没有             | 拒绝     | 拒绝     |
 {.wide .expand}
 
 内置的 `consoleAdmin` 策略授予 `admin:*`，完整管理员仍可执行双向操作；受影响的仅是曾依赖旧缺陷的自定义受限策略。公开的 PBAC 参考文档同样为 [`admin:EnableUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-EnableUser) 与 [`admin:DisableUser`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.admin-DisableUser) 记录了这一契约。
@@ -180,11 +180,11 @@ if objectAPI == nil {
 
 单元测试覆盖选择函数的三类输入：
 
-| 输入 | 期望权限 |
-| --- | --- |
-| `enabled` | `EnableUser` |
-| `disabled` | `DisableUser` |
-| 非法值 | 保持默认的 `EnableUser` |
+| 输入       | 期望权限                |
+| ---------- | ----------------------- |
+| `enabled`  | `EnableUser`            |
+| `disabled` | `DisableUser`           |
+| 非法值     | 保持默认的 `EnableUser` |
 {.wide .expand}
 
 ### 四向 IAM 鉴权矩阵 {#iam-test}
@@ -307,10 +307,10 @@ func setGroupStatusAdminAction(status string) policy.AdminAction {
 
 ### 交付状态 {#delivery}
 
-| 里程碑 | 用户状态修复 | 组状态善后 |
-| --- | --- | --- |
-| 带 DCO 签名的提交 | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1)（合并为 [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)） | `229fe2b3c` |
-| 发布版本 | [Server 20260903](/zh/blog/release/silo-20260903/) | [Server 20260903](/zh/blog/release/silo-20260903/) |
+| 里程碑            | 用户状态修复                                                                                                                                                                                        | 组状态善后                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| 带 DCO 签名的提交 | [`58735ee38`](https://github.com/pgsty/silo/commit/58735ee3829e36e24735587e2212b97c4149e0d1)（合并为 [`2e2377d1c`](https://github.com/pgsty/silo/commit/2e2377d1c6788d31d105c27c462ac542576b00f5)） | `229fe2b3c`                                        |
+| 发布版本          | [Server 20260903](/zh/blog/release/silo-20260903/)                                                                                                                                                  | [Server 20260903](/zh/blog/release/silo-20260903/) |
 {.wide .expand}
 
 ## 结论 {#conclusion}

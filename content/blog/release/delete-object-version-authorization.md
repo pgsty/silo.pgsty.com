@@ -12,12 +12,12 @@ url: "/blog/release/delete-object-version-authorization/"
 
 Starting in [Server 20260903](/blog/release/silo-20260903/) ([pgsty/silo#104](https://github.com/pgsty/silo/pull/104), tracking [issue #58](https://github.com/pgsty/silo/issues/58)), SILO maps object-delete authorization to the operation the request actually performs:
 
-| Request | Required action |
-| --- | --- |
-| No `versionId` | `s3:DeleteObject` |
-| Version UUID | `s3:DeleteObjectVersion` |
-| Explicit `versionId=null` | `s3:DeleteObjectVersion` |
-| `DeleteObjects` | Applied independently to each XML entry |
+| Request                   | Required action                         |
+| ------------------------- | --------------------------------------- |
+| No `versionId`            | `s3:DeleteObject`                       |
+| Version UUID              | `s3:DeleteObjectVersion`                |
+| Explicit `versionId=null` | `s3:DeleteObjectVersion`                |
+| `DeleteObjects`           | Applied independently to each XML entry |
 {.wide .expand}
 
 Previously, SILO required `s3:DeleteObject` for every delete operation and evaluated `s3:DeleteObjectVersion` only as an explicit-deny check. A principal holding only `DeleteObject` could permanently remove a specific historical version, whereas a least-privilege purge principal holding only `DeleteObjectVersion` was denied.

@@ -42,14 +42,15 @@ mc checksum verify --manifest FILE [FLAGS] ALIAS
 
 每个候选对象都会产生一个稳定状态：
 
-| 状态 | 含义 |
-| :-- | :-- |
-| `MATCH` | 所有支持的存储校验和都等于独立计算值。 |
-| `MISMATCH` | 至少一个存储校验和与返回的逻辑对象字节不同。 |
-| `NO_CHECKSUM` | 端点未返回附加校验和；不会下载 body。 |
-| `WOULD_VERIFY` | dry run 找到一个受支持的 full-object 校验和。 |
-| `UNKNOWN_*` | 命令无法给出可靠判断，例如对象变化或读取失败。 |
-| `SKIPPED_*` | 请求的过滤器有意排除了该候选对象。 |
+| 状态           | 含义                                           |
+| :------------- | :--------------------------------------------- |
+| `MATCH`        | 所有支持的存储校验和都等于独立计算值。         |
+| `MISMATCH`     | 至少一个存储校验和与返回的逻辑对象字节不同。   |
+| `NO_CHECKSUM`  | 端点未返回附加校验和；不会下载 body。          |
+| `WOULD_VERIFY` | dry run 找到一个受支持的 full-object 校验和。  |
+| `UNKNOWN_*`    | 命令无法给出可靠判断，例如对象变化或读取失败。 |
+| `SKIPPED_*`    | 请求的过滤器有意排除了该候选对象。             |
+{.wide .expand}
 
 正常完成返回 `0`；命令错误或选定的审计失败返回 `1`。默认 `--fail-on any` 会在 mismatch、`UNKNOWN_*`，以及被 `--max-size` 跳过对象时失败。
 
@@ -67,19 +68,19 @@ mc checksum verify --manifest FILE [FLAGS] ALIAS
 
 ## 重要参数 {#flags}
 
-| 参数 | 用途 |
-| :-- | :-- |
-| `--recursive`, `-r` | 扫描桶或前缀下的全部对象。 |
-| `--versions` | 纳入所有对象版本。 |
-| `--version-id`, `--vid` | 选择一个精确版本。 |
-| `--manifest FILE` | 从 JSON Lines 读取候选；不能与扫描、版本、时间选择参数混用。 |
-| `--dry-run` | 对候选执行 LIST 与 HEAD，但不下载对象 body。 |
-| `--max-workers N` | 限制并发读取数；默认 `4`，范围 `1` 至 `64`。 |
-| `--max-size SIZE` | 跳过大于 `10GiB` 等指定值的对象；空值或 `0` 表示不限。 |
-| `--older-than`, `--newer-than` | 使用 `7d10h31s` 等相对时长或受支持的绝对时间进行过滤。 |
-| `--enc-c KEY` | 提供一个或多个 SSE-C 前缀到密钥映射，使用原始 Base64 或十六进制格式。 |
-| `--report FILE` | 把对象记录与汇总写入新的 JSON Lines 文件；POSIX 系统上以 `0600` 创建。 |
-| `--json` | stdout 不是终端时输出紧凑 JSON Lines。 |
+| 参数                           | 用途                                                                   |
+| :----------------------------- | :--------------------------------------------------------------------- |
+| `--recursive`, `-r`            | 扫描桶或前缀下的全部对象。                                             |
+| `--versions`                   | 纳入所有对象版本。                                                     |
+| `--version-id`, `--vid`        | 选择一个精确版本。                                                     |
+| `--manifest FILE`              | 从 JSON Lines 读取候选；不能与扫描、版本、时间选择参数混用。           |
+| `--dry-run`                    | 对候选执行 LIST 与 HEAD，但不下载对象 body。                           |
+| `--max-workers N`              | 限制并发读取数；默认 `4`，范围 `1` 至 `64`。                           |
+| `--max-size SIZE`              | 跳过大于 `10GiB` 等指定值的对象；空值或 `0` 表示不限。                 |
+| `--older-than`, `--newer-than` | 使用 `7d10h31s` 等相对时长或受支持的绝对时间进行过滤。                 |
+| `--enc-c KEY`                  | 提供一个或多个 SSE-C 前缀到密钥映射，使用原始 Base64 或十六进制格式。  |
+| `--report FILE`                | 把对象记录与汇总写入新的 JSON Lines 文件；POSIX 系统上以 `0600` 创建。 |
+| `--json`                       | stdout 不是终端时输出紧凑 JSON Lines。                                 |
 {.wide .expand}
 
 全局 `--limit-download` 可限制下载速度。对象正文以流式方式校验，不完整缓冲或写入磁盘。时间过滤仍需 HEAD，以对象当前返回的元数据为准。

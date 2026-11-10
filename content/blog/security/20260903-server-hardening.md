@@ -14,13 +14,13 @@ This bulletin covers five security findings fixed in [SILO Server 20260903](/blo
 
 ## Summary {#summary}
 
-| ID | Required attacker position | Security failure | Released behavior |
-| :-- | :-- | :-- | :-- |
-| `SN-2026-006` | Read access to a zero-byte SSE-C object | A wrong customer key was accepted because no data block was decrypted | The object key is authenticated; wrong keys return `403 AccessDenied` |
-| `SN-2026-007` | Read access to an SSE-C object, or a client-supplied replication marker | `GetObjectAttributes` returned protected metadata without authenticating the customer key | Ordinary requests need the correct key; only an authorized replication peer uses the replica exception |
-| `SN-2026-008` | Any authenticated principal able to invoke the affected read/write/delete operation | Internal-looking headers granted replication-only effects without replication authorization | Exact marker plus `s3:ReplicateObject` or `s3:ReplicateDelete` is required |
-| `SN-2026-009` | Authenticated admin API principal holding only one status action | The enable action authorized disable, and vice versa | The requested target state selects the required admin action |
-| `SN-2026-010` | Authenticated S3 principal with `s3:DeleteObject` but not `s3:DeleteObjectVersion` | A caller could permanently delete an explicit version without the AWS-required action | Explicit version deletion requires `s3:DeleteObjectVersion` |
+| ID            | Required attacker position                                                          | Security failure                                                                            | Released behavior                                                                                      |
+| :------------ | :---------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------- |
+| `SN-2026-006` | Read access to a zero-byte SSE-C object                                             | A wrong customer key was accepted because no data block was decrypted                       | The object key is authenticated; wrong keys return `403 AccessDenied`                                  |
+| `SN-2026-007` | Read access to an SSE-C object, or a client-supplied replication marker             | `GetObjectAttributes` returned protected metadata without authenticating the customer key   | Ordinary requests need the correct key; only an authorized replication peer uses the replica exception |
+| `SN-2026-008` | Any authenticated principal able to invoke the affected read/write/delete operation | Internal-looking headers granted replication-only effects without replication authorization | Exact marker plus `s3:ReplicateObject` or `s3:ReplicateDelete` is required                             |
+| `SN-2026-009` | Authenticated admin API principal holding only one status action                    | The enable action authorized disable, and vice versa                                        | The requested target state selects the required admin action                                           |
+| `SN-2026-010` | Authenticated S3 principal with `s3:DeleteObject` but not `s3:DeleteObjectVersion`  | A caller could permanently delete an explicit version without the AWS-required action       | Explicit version deletion requires `s3:DeleteObjectVersion`                                            |
 {.wide .expand}
 
 ## SN-2026-006: zero-byte SSE-C key authentication {#sn-2026-006}
@@ -86,11 +86,11 @@ The inherited handlers checked `admin:EnableUser` or `admin:EnableGroup` before 
 
 The requested target state now selects the required admin action:
 
-| Target | Required action |
-| :-- | :-- |
-| Enable user | `admin:EnableUser` |
-| Disable user | `admin:DisableUser` |
-| Enable group | `admin:EnableGroup` |
+| Target        | Required action      |
+| :------------ | :------------------- |
+| Enable user   | `admin:EnableUser`   |
+| Disable user  | `admin:DisableUser`  |
+| Enable group  | `admin:EnableGroup`  |
 | Disable group | `admin:DisableGroup` |
 {.wide .expand}
 

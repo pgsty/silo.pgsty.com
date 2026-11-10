@@ -174,16 +174,16 @@ The embedded payload was rebuilt twice from a clean directory and confirmed byte
 
 2.1.0 closes every issue filed against 2.0.0. Each carries a comment on the tracker describing the fix, the commits, and the coverage added.
 
-| Issue | Resolution |
-| --- | --- |
-| [#1](https://github.com/pgsty/silo-console/issues/1) — unauthenticated deep routes recurse `/login` | Absolute, base-path-aware login destination; deep-link and subpath test coverage |
+| Issue                                                                                                 | Resolution                                                                                                              |
+| ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| [#1](https://github.com/pgsty/silo-console/issues/1) — unauthenticated deep routes recurse `/login`   | Absolute, base-path-aware login destination; deep-link and subpath test coverage                                        |
 | [#2](https://github.com/pgsty/silo-console/issues/2) — stale Uptime, malformed legends, cramped menus | Uptime derived from real server state, legends resolve on the V3 `name` label, 32 px chart controls, popup width floors |
-| [#3](https://github.com/pgsty/silo-console/issues/3) — 390 px viewport clips content | Scrollable metrics tab strip; bucket table with a deliberate mobile column budget |
-| [#4](https://github.com/pgsty/silo-console/issues/4) — unnamed collapsed sidebar buttons | Labels visually hidden rather than removed from the accessibility tree; named, keyboard-operable collapse toggle |
-| [#5](https://github.com/pgsty/silo-console/issues/5) — Access Key fields lack autocomplete metadata | Field-level `username` / `new-password` tokens in a dedicated autofill section |
-| [#6](https://github.com/pgsty/silo-console/issues/6) — English/Chinese localization | Hand-rolled bilingual layer, zero new dependencies, English-as-key fallback |
-| [#7](https://github.com/pgsty/silo-console/issues/7) — migrate monitoring queries to Metrics V3 | V3-only; 26 widgets, 31 queries, 29 metric names, guard taxonomy, regression suite |
-| [#8](https://github.com/pgsty/silo-console/issues/8) — replace N/A Info metrics | Erasure Health and Usage Data Age, sharing the advanced dashboard's widget results |
+| [#3](https://github.com/pgsty/silo-console/issues/3) — 390 px viewport clips content                  | Scrollable metrics tab strip; bucket table with a deliberate mobile column budget                                       |
+| [#4](https://github.com/pgsty/silo-console/issues/4) — unnamed collapsed sidebar buttons              | Labels visually hidden rather than removed from the accessibility tree; named, keyboard-operable collapse toggle        |
+| [#5](https://github.com/pgsty/silo-console/issues/5) — Access Key fields lack autocomplete metadata   | Field-level `username` / `new-password` tokens in a dedicated autofill section                                          |
+| [#6](https://github.com/pgsty/silo-console/issues/6) — English/Chinese localization                   | Hand-rolled bilingual layer, zero new dependencies, English-as-key fallback                                             |
+| [#7](https://github.com/pgsty/silo-console/issues/7) — migrate monitoring queries to Metrics V3       | V3-only; 26 widgets, 31 queries, 29 metric names, guard taxonomy, regression suite                                      |
+| [#8](https://github.com/pgsty/silo-console/issues/8) — replace N/A Info metrics                       | Erasure Health and Usage Data Age, sharing the advanced dashboard's widget results                                      |
 {.wide .expand}
 
 Three acceptance criteria are recorded as unmet rather than quietly ticked: `web-app` has no unit-test runner, so the i18n test suite (#6) and the focused `constructLabelNames` test (#2) would require introducing test tooling first, and #6's contributor documentation for adding translation keys is not yet written.

@@ -51,13 +51,13 @@ Simply deleting the condition that reselects existing objects would lose the cap
 
 The original helper inferred quorum from the `STANDARD` storage class for every write. A controlled two-pool test exposed a regression when overwriting an object with `REDUCED_REDUNDANCY` (RRS):
 
-| Condition | Test setup |
-| --- | --- |
-| Storage policy | `optimize=capacity`; `STANDARD=EC:4`, `REDUCED_REDUNDANCY=EC:2` |
-| Existing object | Created with ordinary `STANDARD` parity |
-| Existing object's set | 13 of 16 drives online; reported usage 90% |
-| Other pool | 16 drives online, ample space; an actual RRS probe write succeeded |
-| New request | Overwrite using RRS, through `PUT` or new multipart initialization |
+| Condition             | Test setup                                                         |
+| --------------------- | ------------------------------------------------------------------ |
+| Storage policy        | `optimize=capacity`; `STANDARD=EC:4`, `REDUCED_REDUNDANCY=EC:2`    |
+| Existing object       | Created with ordinary `STANDARD` parity                            |
+| Existing object's set | 13 of 16 drives online; reported usage 90%                         |
+| Other pool            | 16 drives online, ample space; an actual RRS probe write succeeded |
+| New request           | Overwrite using RRS, through `PUT` or new multipart initialization |
 {.wide .expand}
 
 The helper required 12 writers for `EC:4` and selected the original pool, whereas the actual `EC:2` write required 14 online drives and failed with `InsufficientWriteQuorum` (HTTP 503). Because lower parity leaves more data shards, RRS requires **more** online drives for a write. The baseline's reserve filter skipped the 90%-full pool, selected the healthy second pool, and succeeded across all four pool/entry-point combinations (12/12 attempts failed on the unpatched PR).
@@ -68,13 +68,13 @@ The inverse mismatch occurred with `PUT`'s internal `MaxParity` option: a write 
 
 The updated implementation passed the request's storage class and `PUT` `MaxParity` into placement, matching the writer's availability/capacity parity rules (including the extra drive required when data and parity shard counts are equal) while preserving multipart initialization parity semantics:
 
-| Existing object's target set | Action |
-| --- | --- |
-| Fully healthy, writable for this request, and enough space | Prefer that pool |
-| Degraded but still writable, with space | Use the existing capacity allocator; the original pool remains a candidate |
-| Known to be unwritable or lacking space | Exclude it before reserve filtering, then select another pool |
+| Existing object's target set                                                    | Action                                                                                       |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Fully healthy, writable for this request, and enough space                      | Prefer that pool                                                                             |
+| Degraded but still writable, with space                                         | Use the existing capacity allocator; the original pool remains a candidate                   |
+| Known to be unwritable or lacking space                                         | Exclude it before reserve filtering, then select another pool                                |
 | No alternative has space, but the original set has space and lacks write quorum | Let the original set report `InsufficientWriteQuorum` rather than misreporting `StorageFull` |
-| No usable space | Preserve the `StorageFull` result |
+| No usable space                                                                 | Preserve the `StorageFull` result                                                            |
 {.wide .expand}
 
 Health and capacity checks shared a single set-level `DiskInfo` snapshot. A drive counted as a usable writer only if it was online and returned a positive capacity result; drives with a failed `DiskInfo` call were treated as unhealthy.
@@ -85,29 +85,29 @@ Regression tests were added for request parity, known disk faults, degraded sets
 
 After the first performance round showed high version-history rewrite costs, a second branch (`codex/unversioned-pool-affinity`) narrowed the policy to ordinary unversioned overwrites:
 
-| Request or bucket state | Narrowed behavior |
-| --- | --- |
-| Ordinary unversioned `PUT` replacing a readable object | Apply the healthy-pool preference above |
-| New multipart upload over an ordinary unversioned object | Apply it only when initialization reaches pool selection; preserve existing upload binding |
-| Versioning enabled or suspended | Retain baseline allocation |
-| Explicit version ID, including `null` | Exclude from affinity |
-| Replication, replica-lock reconciliation, or data movement | Exclude from affinity |
-| Internal metadata buckets | Exclude from affinity |
-| New keys or a single pool | Retain the original path and capacity behavior |
-| Existing multipart sessions, ordinary COPY routing, latest delete markers, or read-quorum-error routing | Preserve their existing paths |
+| Request or bucket state                                                                                 | Narrowed behavior                                                                          |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Ordinary unversioned `PUT` replacing a readable object                                                  | Apply the healthy-pool preference above                                                    |
+| New multipart upload over an ordinary unversioned object                                                | Apply it only when initialization reaches pool selection; preserve existing upload binding |
+| Versioning enabled or suspended                                                                         | Retain baseline allocation                                                                 |
+| Explicit version ID, including `null`                                                                   | Exclude from affinity                                                                      |
+| Replication, replica-lock reconciliation, or data movement                                              | Exclude from affinity                                                                      |
+| Internal metadata buckets                                                                               | Exclude from affinity                                                                      |
+| New keys or a single pool                                                                               | Retain the original path and capacity behavior                                             |
+| Existing multipart sessions, ordinary COPY routing, latest delete markers, or read-quorum-error routing | Preserve their existing paths                                                              |
 {.wide .expand}
 
 Eligibility checked both the bucket's versioning configuration and the request options. A version-enabled bucket with prefix-excluded unversioned writes, or a version-suspended bucket with mixed history, remained on the baseline allocator.
 
 ## Functional validation, separated by revision {#validation}
 
-| Stage | Evidence | Scope |
-| --- | --- | --- |
-| Initial PR review | Base/head comparison reproduced normal affinity, `STANDARD` fallback, the RRS failure, and the `MaxParity` mismatch | Object-layer unit tests on macOS |
-| Improved full implementation | Full Go test suite: 52 packages, 1,823 top-level tests (8,233 with subtests) passed, 12 skipped; targeted `-race` suite: 35 top-level tests (201 with subtests) passed | Full-affinity branch on an isolated APFS test volume |
-| Full implementation through mcli | `mcli` `20261018` verified ordinary overwrite/readback, 4 distinct retained versions with historical reads, and multipart overwrite/checksum | Single-host local-directory deployment |
-| Narrowed implementation | Linux targeted suite: 37 top-level tests (209 with subtests) passed across placement, parity, health/capacity fallback, version-state exclusions, `PUT`/MPU, and conditional writes | Targeted placement and overwrite suite |
-| Build and static checks | Linux `amd64` build, `make verifiers`, lint (0 issues), and whitespace checks passed | Repository static verification |
+| Stage                            | Evidence                                                                                                                                                                            | Scope                                                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Initial PR review                | Base/head comparison reproduced normal affinity, `STANDARD` fallback, the RRS failure, and the `MaxParity` mismatch                                                                 | Object-layer unit tests on macOS                     |
+| Improved full implementation     | Full Go test suite: 52 packages, 1,823 top-level tests (8,233 with subtests) passed, 12 skipped; targeted `-race` suite: 35 top-level tests (201 with subtests) passed              | Full-affinity branch on an isolated APFS test volume |
+| Full implementation through mcli | `mcli` `20261018` verified ordinary overwrite/readback, 4 distinct retained versions with historical reads, and multipart overwrite/checksum                                        | Single-host local-directory deployment               |
+| Narrowed implementation          | Linux targeted suite: 37 top-level tests (209 with subtests) passed across placement, parity, health/capacity fallback, version-state exclusions, `PUT`/MPU, and conditional writes | Targeted placement and overwrite suite               |
+| Build and static checks          | Linux `amd64` build, `make verifiers`, lint (0 issues), and whitespace checks passed                                                                                                | Repository static verification                       |
 {.wide .expand}
 
 The targeted regression filter was:
@@ -132,16 +132,16 @@ Both variants were built with Go 1.27.3 (`linux/amd64`, `CGO_ENABLED=0`). The se
 
 Round one compared the full candidate (`0aa870115d7d`) against the baseline (`789a2327ba8c`) across 54 measured runs (243,718 completed operations, 0 failures). Basic workloads ran 3 pairs of 15-second runs, with 2 additional 60-second pairs for new-key and 4 KiB overwrite workloads, 3 fixed-count runs of 4,000 versions on a single seeded object, and a 4-run ABBA binary-switch sequence on existing dual-copy data:
 
-| Workload | Baseline → full candidate, operations/s | Change | P50, ms | P99, ms | Sample |
-| --- | --- | --- | --- | --- | --- |
-| Two pools, 4 KiB overwrite; 256 keys, concurrency 16 | 236.9 → 174.5 | **−26.3%** | 30.4 → 74.4 | 277.9 → 307.4 | 2 × 60 s per variant |
-| Two pools, 1 MiB overwrite; 64 keys, concurrency 8 | 140.9 → 132.2 | −6.2% | 34.2 → 41.3 | 169.3 → 176.2 | 3 × 15 s |
-| Two pools, 16 MiB multipart overwrite; 16 keys, concurrency 4 | 25.8 → 26.4 | +2.1% | 144.0 → 141.7 | 265.3 → 272.7 | 3 × 15 s |
-| Two pools, one 4 KiB key; concurrency 1 | 135.2 → 136.4 | +1.0% | 6.9 → 6.8 | 12.0 → 10.6 | 3 × 15 s |
-| Two pools, 4 KiB new keys; concurrency 16 | 290.7 → 296.8 | +2.1% | 46.9 → 48.7 | 170.2 → 165.9 | 2 × 60 s |
-| Single pool, 4 KiB overwrite; concurrency 16 | 166.2 → 159.2 | −4.2% | 83.9 → 89.4 | 296.8 → 293.2 | 3 × 15 s |
-| Two pools, one 4 KiB key, 4,000 new versions | 76.6 → 53.0 | **−30.8%** | 11.4 → 17.8 | 47.7 → 59.5 | 3 fixed-count runs |
-| Existing dual-copy data, binary-switch ABBA | 198.6 → 202.0 | +1.7% | — | 291.2 → 290.9 | 2 × 20 s |
+| Workload                                                      | Baseline → full candidate, operations/s | Change     | P50, ms       | P99, ms       | Sample               |
+| ------------------------------------------------------------- | --------------------------------------- | ---------- | ------------- | ------------- | -------------------- |
+| Two pools, 4 KiB overwrite; 256 keys, concurrency 16          | 236.9 → 174.5                           | **−26.3%** | 30.4 → 74.4   | 277.9 → 307.4 | 2 × 60 s per variant |
+| Two pools, 1 MiB overwrite; 64 keys, concurrency 8            | 140.9 → 132.2                           | −6.2%      | 34.2 → 41.3   | 169.3 → 176.2 | 3 × 15 s             |
+| Two pools, 16 MiB multipart overwrite; 16 keys, concurrency 4 | 25.8 → 26.4                             | +2.1%      | 144.0 → 141.7 | 265.3 → 272.7 | 3 × 15 s             |
+| Two pools, one 4 KiB key; concurrency 1                       | 135.2 → 136.4                           | +1.0%      | 6.9 → 6.8     | 12.0 → 10.6   | 3 × 15 s             |
+| Two pools, 4 KiB new keys; concurrency 16                     | 290.7 → 296.8                           | +2.1%      | 46.9 → 48.7   | 170.2 → 165.9 | 2 × 60 s             |
+| Single pool, 4 KiB overwrite; concurrency 16                  | 166.2 → 159.2                           | −4.2%      | 83.9 → 89.4   | 296.8 → 293.2 | 3 × 15 s             |
+| Two pools, one 4 KiB key, 4,000 new versions                  | 76.6 → 53.0                             | **−30.8%** | 11.4 → 17.8   | 47.7 → 59.5   | 3 fixed-count runs   |
+| Existing dual-copy data, binary-switch ABBA                   | 198.6 → 202.0                           | +1.7%      | —             | 291.2 → 290.9 | 2 × 20 s             |
 {.wide .expand}
 
 For ordinary 4 KiB overwrites, both 60-second pairs were slower (−30.7% and −21.8%), as were all three 15-second pairs, even though CPU per operation fell from 5.85 to 5.33 ms and block writes stayed near 128 KiB per operation.
@@ -162,12 +162,12 @@ Before running round two (`codex/unversioned-pool-affinity` vs. `789a2327ba8c`),
 
 Four workloads ran 5 pairs each in alternating AB/BA order (5-second warmup and 60-second measurement for timed workloads; 4,000 operations for versioned control; fresh server and data directories per run, no profilers attached):
 
-| Workload | Baseline → narrowed, operations/s | Change | P50, ms | P99, ms |
-| --- | --- | --- | --- | --- |
-| Fresh 4 KiB overwrite; 256 keys, concurrency 16 | 167.9 → 158.2 | **−5.7%** | 66.2 → 75.8 | 470.2 → 428.7 |
-| Fresh 1 MiB overwrite; 64 keys, concurrency 8 | 79.45 → 79.58 | +0.2% | 94.0 → 95.6 | 521.5 → 483.2 |
-| One 4 KiB key, 4,000 new versions; control | 48.5 → 59.6 | +22.8% | 12.7 → 12.4 | 180.9 → 135.4 |
-| New 4 KiB keys; concurrency 16; control | 289.8 → 243.1 | −16.1% | 40.4 → 49.2 | 314.9 → 170.0 |
+| Workload                                        | Baseline → narrowed, operations/s | Change    | P50, ms     | P99, ms       |
+| ----------------------------------------------- | --------------------------------- | --------- | ----------- | ------------- |
+| Fresh 4 KiB overwrite; 256 keys, concurrency 16 | 167.9 → 158.2                     | **−5.7%** | 66.2 → 75.8 | 470.2 → 428.7 |
+| Fresh 1 MiB overwrite; 64 keys, concurrency 8   | 79.45 → 79.58                     | +0.2%     | 94.0 → 95.6 | 521.5 → 483.2 |
+| One 4 KiB key, 4,000 new versions; control      | 48.5 → 59.6                       | +22.8%    | 12.7 → 12.4 | 180.9 → 135.4 |
+| New 4 KiB keys; concurrency 16; control         | 289.8 → 243.1                     | −16.1%    | 40.4 → 49.2 | 314.9 → 170.0 |
 {.wide .expand}
 
 On the primary 4 KiB overwrite workload, pairwise throughput changes across the five pairs were **+11.9%, −14.9%, −1.4%, −10.3%, and −12.8%** (median paired change −10.3%; ratio of variant medians −5.7%; P50 +14.4%). Baseline throughput ranged from 141.4 to 202.6 ops/s (CV 13.0%) and narrowed throughput from 146.3 to 176.6 ops/s.
@@ -178,10 +178,10 @@ Excluding versioned buckets eliminated the round-one `xl.meta` write amplificati
 
 Because fresh runs let the two placement policies build different on-disk layouts over time, an additional 8-run fixture test restored an identical snapshot before each run—either one pool-local copy per key (256 records) or copies in both pools (512 records)—followed by a 30-second settle period, 5-second warmup, and 60-second measurement:
 
-| Starting state, 256 keys | Baseline → narrowed, operations/s | Change | P50, ms | P99, ms | Ending pool-local records, baseline → narrowed |
-| --- | --- | --- | --- | --- | --- |
-| One copy per key | 188.0 → 160.1 | **−14.9%** | 51.9 → 68.0 | 521.0 → 466.4 | 512 → 256 |
-| Two copies per key | 185.7 → 140.1 | **−24.5%** | 37.6 → 79.7 | 460.0 → 629.9 | 512 → 512 |
+| Starting state, 256 keys | Baseline → narrowed, operations/s | Change     | P50, ms     | P99, ms       | Ending pool-local records, baseline → narrowed |
+| ------------------------ | --------------------------------- | ---------- | ----------- | ------------- | ---------------------------------------------- |
+| One copy per key         | 188.0 → 160.1                     | **−14.9%** | 51.9 → 68.0 | 521.0 → 466.4 | 512 → 256                                      |
+| Two copies per key       | 185.7 → 140.1                     | **−24.5%** | 37.6 → 79.7 | 460.0 → 629.9 | 512 → 512                                      |
 {.wide .expand}
 
 The single-copy pairs changed by −0.9% and −23.5%. The dual-copy pairs declined by **−22.6% and −26.5%**, with P50 rising **+111.9%** and P99 rising **+36.9%**, while leaving all 512 existing records on disk. On clusters that already have cross-pool duplicates, the narrowed policy paid a steep write penalty without reclaiming any existing space.
@@ -200,15 +200,15 @@ In fresh two-pool tests, 256 ordinary 4 KiB keys ended with **512 → 256** pool
 
 At the cluster level, if a fraction $f$ of logical data would otherwise accumulate two copies across two pools, avoiding the second copy reduces steady-state space by $f / (1 + f)$ (for example, ~9.1% at $f = 10\%$). Per-request write volume is unchanged: ordinary 4 KiB overwrites generated ~**128 KiB of block writes per operation** in both variants.
 
-| Aspect | Benefit | Cost or limit |
-| --- | --- | --- |
-| Capacity | Prevents new stale copies during eligible unversioned overwrites | Does not reclaim existing copies; fallback can still leave copies across pools |
-| Write performance | A healthy preferred pool skips a full capacity-selection pass | Placement alters I/O contention; small-object overwrite regressions remained (−5.7% fresh, −24.5% dual-copy fixture) |
-| Expansion and hot keys | Existing objects keep a stable pool location | Older pools retain growing/hot keys after expansion instead of shedding overwrites to newer pools |
-| API and format compatibility | No wire, configuration, dependency, or disk-format change | Pool distribution changes operational balance under the same S3 interface |
-| Availability and correctness | Request-aware quorum and fault checks avoid unsafe pool preference | Preflight state can change before write completion |
-| Maintenance | Narrow scope avoids versioned `xl.meta` amplification | Parity, bucket state, internal writes, reserve rules, `PUT`, and multipart routing must stay synchronized |
-| Rollback | Returning to baseline requires no format conversion | Stale copies created before or during rollout remain on disk |
+| Aspect                       | Benefit                                                            | Cost or limit                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Capacity                     | Prevents new stale copies during eligible unversioned overwrites   | Does not reclaim existing copies; fallback can still leave copies across pools                                       |
+| Write performance            | A healthy preferred pool skips a full capacity-selection pass      | Placement alters I/O contention; small-object overwrite regressions remained (−5.7% fresh, −24.5% dual-copy fixture) |
+| Expansion and hot keys       | Existing objects keep a stable pool location                       | Older pools retain growing/hot keys after expansion instead of shedding overwrites to newer pools                    |
+| API and format compatibility | No wire, configuration, dependency, or disk-format change          | Pool distribution changes operational balance under the same S3 interface                                            |
+| Availability and correctness | Request-aware quorum and fault checks avoid unsafe pool preference | Preflight state can change before write completion                                                                   |
+| Maintenance                  | Narrow scope avoids versioned `xl.meta` amplification              | Parity, bucket state, internal writes, reserve rules, `PUT`, and multipart routing must stay synchronized            |
+| Rollback                     | Returning to baseline requires no format conversion                | Stale copies created before or during rollout remain on disk                                                         |
 {.wide .expand}
 
 ## Final decision and conditions for revisiting it {#decision}
@@ -222,14 +222,14 @@ We therefore kept the mainline allocator unchanged and archived the benchmark re
 
 Public references: [PR #245](https://github.com/pgsty/silo/pull/245), upstream [PR #21115](https://github.com/minio/minio/pull/21115), [Multi-Pool Object Consistency](/blog/design/multi-pool-object-consistency/), and the baseline storage implementation in [`cmd/erasure-server-pool.go`](https://github.com/pgsty/silo/blob/b91e1c6f2afbaed6dacbd796a60344978b6c8547/cmd/erasure-server-pool.go), [`cmd/xl-storage-format-v2.go`](https://github.com/pgsty/silo/blob/b91e1c6f2afbaed6dacbd796a60344978b6c8547/cmd/xl-storage-format-v2.go), and [`cmd/xl-storage.go`](https://github.com/pgsty/silo/blob/b91e1c6f2afbaed6dacbd796a60344978b6c8547/cmd/xl-storage.go).
 
-| Artifact | Exact identity |
-| --- | --- |
-| Initial independently reviewed base / PR head | `856f8f4c5580d1c5adacbd8ef2aedf3a4fbc507c` / `3a9cdc731528e31bc4f9e61256025a1baae863e8` |
-| PR head observed when documenting, after rebase | `0a6cad318409451b52dfcef18efb476c3927b6f8` |
-| Baseline for both m3 rounds | `789a2327ba8c2283cda7192eb65f8374a7f919ba` |
-| Full local branch | `codex/healthy-pool-affinity` at `0aa870115d7d0904791104b25ad66f3430579de4` |
-| Narrowed local branch | `codex/unversioned-pool-affinity` at `76db3626eb9068b29e4565e78ad22f7720012e65` |
-| Narrowed benchmark's production semantics | `bb4b987825985481e5047f94c60f560be85b9c19` |
-| Round-two `results/analysis.json` SHA-256 | `68eec465749b625c691abcace90fc71f103b5826ccab4c40a120f39e29ded368` |
-| Complete candidate patch SHA-256 | `af833ec4b7bbbc22fca8539a6da40f4fe5fa93d61febabbd5b08a63ae1ecbe1c` |
+| Artifact                                        | Exact identity                                                                          |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Initial independently reviewed base / PR head   | `856f8f4c5580d1c5adacbd8ef2aedf3a4fbc507c` / `3a9cdc731528e31bc4f9e61256025a1baae863e8` |
+| PR head observed when documenting, after rebase | `0a6cad318409451b52dfcef18efb476c3927b6f8`                                              |
+| Baseline for both m3 rounds                     | `789a2327ba8c2283cda7192eb65f8374a7f919ba`                                              |
+| Full local branch                               | `codex/healthy-pool-affinity` at `0aa870115d7d0904791104b25ad66f3430579de4`             |
+| Narrowed local branch                           | `codex/unversioned-pool-affinity` at `76db3626eb9068b29e4565e78ad22f7720012e65`         |
+| Narrowed benchmark's production semantics       | `bb4b987825985481e5047f94c60f560be85b9c19`                                              |
+| Round-two `results/analysis.json` SHA-256       | `68eec465749b625c691abcace90fc71f103b5826ccab4c40a120f39e29ded368`                      |
+| Complete candidate patch SHA-256                | `af833ec4b7bbbc22fca8539a6da40f4fe5fa93d61febabbd5b08a63ae1ecbe1c`                      |
 {.wide .expand}

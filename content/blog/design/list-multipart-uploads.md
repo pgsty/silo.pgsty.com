@@ -49,22 +49,22 @@ When each upload uses a distinct object key ($H = U$):
 
 ### Provenance and Responsibility {#provenance-and-responsibility}
 
-| Change | Date / Commit | What It Did | Assessment |
-| :--- | :--- | :--- | :--- |
-| Initial `strict` mode (`#198`) | `2026-09-16` / [`4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074cc) | Added opt-in disk-backed listing behind `MINIO_API_MULTIPART_LISTING=strict`, keeping `legacy` as default | Safe opt-in boundary, but lacked a hard traversal cap |
-| Security hardening (`SN-2026-009`..`012`) | `2026-09-16` / [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d) | Added `checkUploadID`, `maxMultipartWalkEntries = 100000`, `503 SlowDown` mapping, and `readQuorum` filtering | Essential DoS protection for the disk scan, but counted raw per-drive directory entries across all `N` drives |
-| Unconditional unification (`#243`) | `2026-10-17` / [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe6) | Removed `legacy` and made the disk scan unconditional for all public `ListMultipartUploads` calls | **Overreach**: turned a 4-drive benchmark result into a mandatory path that fails at 3,126 uploads on 16-drive sets |
+| Change                                    | Date / Commit                                                                | What It Did                                                                                                   | Assessment                                                                                                          |
+| :---------------------------------------- | :--------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------ |
+| Initial `strict` mode (`#198`)            | `2026-09-16` / [`4cbb074cc`](https://github.com/pgsty/silo/commit/4cbb074cc) | Added opt-in disk-backed listing behind `MINIO_API_MULTIPART_LISTING=strict`, keeping `legacy` as default     | Safe opt-in boundary, but lacked a hard traversal cap                                                               |
+| Security hardening (`SN-2026-009`..`012`) | `2026-09-16` / [`143f6970d`](https://github.com/pgsty/silo/commit/143f6970d) | Added `checkUploadID`, `maxMultipartWalkEntries = 100000`, `503 SlowDown` mapping, and `readQuorum` filtering | Essential DoS protection for the disk scan, but counted raw per-drive directory entries across all `N` drives       |
+| Unconditional unification (`#243`)        | `2026-10-17` / [`4ed86dfe6`](https://github.com/pgsty/silo/commit/4ed86dfe6) | Removed `legacy` and made the disk scan unconditional for all public `ListMultipartUploads` calls             | **Overreach**: turned a 4-drive benchmark result into a mandatory path that fails at 3,126 uploads on 16-drive sets |
 {.wide .expand}
 
 ### Partial Rollback Trade-Off Analysis {#partial-rollback-trade-off-analysis}
 
-| Option | Public S3 Listing Fidelity | 16-Drive Capacity Behavior | Storage Format / Background I/O Impact | Decision |
-| :--- | :--- | :--- | :--- | :--- |
-| Keep `#243` unconditional disk scan | Full prefix/delimiter/marker listing up to 3,125 uploads on 16 drives | Fails with `503 SlowDown` at 3,126 distinct-key uploads across the set | `16 × (1 + H)` `ListDir` RPCs per uncached public listing | **Rejected** |
-| Raise or remove `maxMultipartWalkEntries` | Works past 3,126 uploads | Reopens unbounded O($N \times U$) disk walk and memory allocation on unindexed `.minio.sys/multipart` | High latency and FD/RPC amplification under concurrent `GET /bucket?uploads` | **Rejected** |
-| Build a persistent per-bucket multipart index | Full S3 listing without `sha256(bucket/object)` full scan | Scales with matching prefix | Requires a new distributed metadata index, heal protocol, and crash-recovery contract | **Deferred** (requires dedicated index design) |
-| Full `git revert` of `#198`, `143f6970d`, and `#243` | Restores MinIO-compatible listing | No `100,000`-entry cliff | Would also discard `checkUploadID` path-traversal protection, abort cache/peer cleanup, and `xl.meta` identity metadata | **Rejected** |
-| **Surgical partial rollback (`4733e1423` + `0f9199e0c`)** | Restores MinIO-compatible public listing (empty-prefix cache + non-empty exact-key lookup) | No cross-bucket `100,000`-entry cliff; exact-key lookup touches only `1` hash directory per drive | Preserves `xl.meta` identity fields, `checkUploadID`, abort cleanup, and empty-hash-parent removal | **Selected** |
+| Option                                                    | Public S3 Listing Fidelity                                                                 | 16-Drive Capacity Behavior                                                                            | Storage Format / Background I/O Impact                                                                                  | Decision                                       |
+| :-------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------- |
+| Keep `#243` unconditional disk scan                       | Full prefix/delimiter/marker listing up to 3,125 uploads on 16 drives                      | Fails with `503 SlowDown` at 3,126 distinct-key uploads across the set                                | `16 × (1 + H)` `ListDir` RPCs per uncached public listing                                                               | **Rejected**                                   |
+| Raise or remove `maxMultipartWalkEntries`                 | Works past 3,126 uploads                                                                   | Reopens unbounded O($N \times U$) disk walk and memory allocation on unindexed `.minio.sys/multipart` | High latency and FD/RPC amplification under concurrent `GET /bucket?uploads`                                            | **Rejected**                                   |
+| Build a persistent per-bucket multipart index             | Full S3 listing without `sha256(bucket/object)` full scan                                  | Scales with matching prefix                                                                           | Requires a new distributed metadata index, heal protocol, and crash-recovery contract                                   | **Deferred** (requires dedicated index design) |
+| Full `git revert` of `#198`, `143f6970d`, and `#243`      | Restores MinIO-compatible listing                                                          | No `100,000`-entry cliff                                                                              | Would also discard `checkUploadID` path-traversal protection, abort cache/peer cleanup, and `xl.meta` identity metadata | **Rejected**                                   |
+| **Surgical partial rollback (`4733e1423` + `0f9199e0c`)** | Restores MinIO-compatible public listing (empty-prefix cache + non-empty exact-key lookup) | No cross-bucket `100,000`-entry cliff; exact-key lookup touches only `1` hash directory per drive     | Preserves `xl.meta` identity fields, `checkUploadID`, abort cleanup, and empty-hash-parent removal                      | **Selected**                                   |
 {.wide .expand}
 
 ### What Was Retained vs Rolled Back {#what-was-retained-vs-rolled}
@@ -86,20 +86,20 @@ In `.minio.sys/multipart/<sha256(bucket/object)>/<uploadID>`, directory names ar
 
 Measured with `go test -run=^$ -bench=BenchmarkMultipartPublicListingCapacity -benchmem -benchtime=1x ./cmd`:
 
-| Scenario (`BenchmarkMultipartPublicListingCapacity`) | Before (`4ed86dfe6` Disk Scan) | After (`4733e1423` MinIO-Compatible Path) | Latency (`4733e1423`) | Memory / Allocs (`4733e1423`) |
-| :--- | :--- | :--- | :--- | :--- |
-| `4_drives_10000_distinct_keys/empty_prefix_cached` | `200 OK` (walked 80,000 entries on disk) | `200 OK` (1,000 uploads returned from cache) | `1.12 ms` | `257,104 B` / `14` allocs |
-| `16_drives_3126_distinct_keys/empty_prefix_cached` | **`503 SlowDown`** (100,032 entries > 100,000 cap) | `200 OK` (1,000 uploads returned from cache) | `0.36 ms` | `90,208 B` / `14` allocs |
-| `16_drives_3126_distinct_keys/exact_key_after_cache_clear` | **`503 SlowDown`** (walked all 3,126 hash dirs) | `200 OK` (1 upload returned from disk after cache clear) | `0.78 ms` | `30,024 B` / `389` allocs |
-| `16_drives_10000_uploads_one_key/exact_key_lookup` | **`503 SlowDown`** (at 6,250 uploads for one key) | `200 OK` (1,000 uploads returned from disk) | `383.85 ms` | `13,721,672 B` / `236,704` allocs |
+| Scenario (`BenchmarkMultipartPublicListingCapacity`)       | Before (`4ed86dfe6` Disk Scan)                     | After (`4733e1423` MinIO-Compatible Path)                | Latency (`4733e1423`) | Memory / Allocs (`4733e1423`)     |
+| :--------------------------------------------------------- | :------------------------------------------------- | :------------------------------------------------------- | :-------------------- | :-------------------------------- |
+| `4_drives_10000_distinct_keys/empty_prefix_cached`         | `200 OK` (walked 80,000 entries on disk)           | `200 OK` (1,000 uploads returned from cache)             | `1.12 ms`             | `257,104 B` / `14` allocs         |
+| `16_drives_3126_distinct_keys/empty_prefix_cached`         | **`503 SlowDown`** (100,032 entries > 100,000 cap) | `200 OK` (1,000 uploads returned from cache)             | `0.36 ms`             | `90,208 B` / `14` allocs          |
+| `16_drives_3126_distinct_keys/exact_key_after_cache_clear` | **`503 SlowDown`** (walked all 3,126 hash dirs)    | `200 OK` (1 upload returned from disk after cache clear) | `0.78 ms`             | `30,024 B` / `389` allocs         |
+| `16_drives_10000_uploads_one_key/exact_key_lookup`         | **`503 SlowDown`** (at 6,250 uploads for one key)  | `200 OK` (1,000 uploads returned from disk)              | `383.85 ms`           | `13,721,672 B` / `236,704` allocs |
 {.wide .expand}
 
 ### Related Records {#related-records}
 
-| Document | Scope |
-| :--- | :--- |
-| [S3 API Compatibility — Differences from S3 APIs for Multipart Uploads](/reference/s3-api-compatibility/#differences-from-s3-apis-for-multipart-uploads) | Canonical user-facing compatibility reference for `ListMultipartUploads` in Server `20261018` |
-| [SILO 20260916 Release Notes](/blog/release/silo-20260916/) | Published legacy default, opt-in strict behavior, UploadID validation, and cancellation boundaries |
+| Document                                                                                                                                                 | Scope                                                                                              |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| [S3 API Compatibility — Differences from S3 APIs for Multipart Uploads](/reference/s3-api-compatibility/#differences-from-s3-apis-for-multipart-uploads) | Canonical user-facing compatibility reference for `ListMultipartUploads` in Server `20261018`      |
+| [SILO 20260916 Release Notes](/blog/release/silo-20260916/)                                                                                              | Published legacy default, opt-in strict behavior, UploadID validation, and cancellation boundaries |
 {.wide .expand}
 
 ---
@@ -122,26 +122,26 @@ The October 17 experiment attempted to enforce the following invariants on `List
 
 Before `#198`, callers saw very different results depending on whether `prefix` was empty, a partial key prefix, or a full object key:
 
-| Request Example | Traditional MinIO / `legacy` Behavior | S3 Standard / Disk-Scan Behavior |
-| :--- | :--- | :--- |
-| `GET /photos?uploads` (immediately after `CreateMultipartUpload`) | Returns uploads present in the local node's in-memory cache | Returns active uploads present at read quorum on disk |
-| `GET /photos?uploads` (after server restart) | Returns empty list (`multipartUploadsCache` was cleared on restart) | Still returns active unfinished uploads from `.minio.sys/multipart` |
-| `GET /photos?uploads&prefix=2026/` (directory prefix) | Returns empty list unless an object is literally named `2026/` (`sha256("photos/2026/")`) | Returns all active uploads whose key starts with `2026/` |
-| `GET /photos?uploads&prefix=2026/trip.mov` (exact object key) | Looks up `.minio.sys/multipart/<sha256("photos/2026/trip.mov")>` on disk (survives restart) | Returns uploads whose key starts with `2026/trip.mov` |
+| Request Example                                                   | Traditional MinIO / `legacy` Behavior                                                       | S3 Standard / Disk-Scan Behavior                                    |
+| :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------ | :------------------------------------------------------------------ |
+| `GET /photos?uploads` (immediately after `CreateMultipartUpload`) | Returns uploads present in the local node's in-memory cache                                 | Returns active uploads present at read quorum on disk               |
+| `GET /photos?uploads` (after server restart)                      | Returns empty list (`multipartUploadsCache` was cleared on restart)                         | Still returns active unfinished uploads from `.minio.sys/multipart` |
+| `GET /photos?uploads&prefix=2026/` (directory prefix)             | Returns empty list unless an object is literally named `2026/` (`sha256("photos/2026/")`)   | Returns all active uploads whose key starts with `2026/`            |
+| `GET /photos?uploads&prefix=2026/trip.mov` (exact object key)     | Looks up `.minio.sys/multipart/<sha256("photos/2026/trip.mov")>` on disk (survives restart) | Returns uploads whose key starts with `2026/trip.mov`               |
 {.wide .expand}
 
 Issues `#198` (`2026-09-16`) and `#213` initially kept both behaviors behind `MINIO_API_MULTIPART_LISTING=legacy|strict` so upgrades with pre-existing legacy uploads would not break silently. PR `#243` (`2026-10-17`) sought to eliminate the two-mode configuration surface after adding lazy backfill for older uploads.
 
 ### Alternatives Evaluated During `#243` {#decision-alternatives}
 
-| Candidate | Restart Survival | Prefix & Marker Support | Extra Index Maintenance | Why Chosen / Why It Later Failed |
-| :--- | :--- | :--- | :--- | :--- |
-| 1. Keep `legacy` + `strict` dual mode | Only in `strict` | Only in `strict` | None | Rejected in `#243` to remove mode split; revisited in `4733e1423` |
-| 2. In-memory cache only | No | Yes (while cached) | None | Rejected: loses all visibility on restart |
-| 3. Scan `.minio.sys/multipart` + `xl.meta` identity (`#243`) | Yes | Yes | None | Chosen in `#243`; **rolled back in `4733e1423`** because O($N \times (H+U)$) walk hits 100k cap at 3,126 uploads on 16 drives |
-| 4. Sidecar JSON file per upload | Yes | Yes | Extra file create/delete per upload | Rejected: doubles metadata file operations on create/abort |
-| 5. Per-bucket on-disk multipart index tree | Yes | Yes (O(matching prefix)) | Requires distributed index heal & cleanup | Deferred: only viable long-term path for large erasure sets, but requires its own crash/heal protocol |
-| 6. External KV / SQLite index | Yes | Yes | External state outside erasure coding | Rejected: violates self-contained erasure-set architecture |
+| Candidate                                                    | Restart Survival | Prefix & Marker Support  | Extra Index Maintenance                   | Why Chosen / Why It Later Failed                                                                                              |
+| :----------------------------------------------------------- | :--------------- | :----------------------- | :---------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| 1. Keep `legacy` + `strict` dual mode                        | Only in `strict` | Only in `strict`         | None                                      | Rejected in `#243` to remove mode split; revisited in `4733e1423`                                                             |
+| 2. In-memory cache only                                      | No               | Yes (while cached)       | None                                      | Rejected: loses all visibility on restart                                                                                     |
+| 3. Scan `.minio.sys/multipart` + `xl.meta` identity (`#243`) | Yes              | Yes                      | None                                      | Chosen in `#243`; **rolled back in `4733e1423`** because O($N \times (H+U)$) walk hits 100k cap at 3,126 uploads on 16 drives |
+| 4. Sidecar JSON file per upload                              | Yes              | Yes                      | Extra file create/delete per upload       | Rejected: doubles metadata file operations on create/abort                                                                    |
+| 5. Per-bucket on-disk multipart index tree                   | Yes              | Yes (O(matching prefix)) | Requires distributed index heal & cleanup | Deferred: only viable long-term path for large erasure sets, but requires its own crash/heal protocol                         |
+| 6. External KV / SQLite index                                | Yes              | Yes                      | External state outside erasure coding     | Rejected: violates self-contained erasure-set architecture                                                                    |
 {.wide .expand}
 
 ### On-Disk Storage Layout and `xl.meta` Identity Fields {#decision-storage}
@@ -180,9 +180,9 @@ On an `N`-drive erasure set with `H` active `<sha256(bucket/object)>` directorie
 
 In `#243`, `BenchmarkMultipartListingCapacity` was run only on a **4-drive** single-set fixture (`N = 4`), where `10,000` uploads for a single key ($H = 1, U = 10{,}000$) produced $4 \times (1 + 10{,}000) = 40{,}004$ directory entries:
 
-| 4-Drive Fixture (`BenchmarkMultipartListingCapacity` on `4ed86dfe6`) | Active Uploads | Wall Time | Memory Allocated | Allocations |
-| :--- | ---: | ---: | ---: | ---: |
-| Single object key ($H = 1, U = 10{,}000, N = 4$) | `10,000` | `101.6 ms` | `3.58 MB` | `61,210` |
+| 4-Drive Fixture (`BenchmarkMultipartListingCapacity` on `4ed86dfe6`) | Active Uploads |  Wall Time | Memory Allocated | Allocations |
+| :------------------------------------------------------------------- | -------------: | ---------: | ---------------: | ----------: |
+| Single object key ($H = 1, U = 10{,}000, N = 4$)                     |       `10,000` | `101.6 ms` |        `3.58 MB` |    `61,210` |
 {.wide .expand}
 
 That single-key, 4-drive benchmark masked the two multiplicative factors that broke on 16-drive sets the following day: $N = 16$ drives ($4\times$ multiplier) and distinct object keys $H = U$ ($2\times$ entry multiplier and $U\times$ `ListDir` multiplier), which together pushed `3,126` uploads over `maxMultipartWalkEntries = 100000`.
@@ -289,11 +289,11 @@ Because `.minio.sys/multipart/<sha256(bucket/object)>/<uploadID>/xl.meta` histor
 
 ### Structural Complexity {#complexity}
 
-| Layer | What It Assumes | Consequence |
-| :--- | :--- | :--- |
-| S3 HTTP API (`ListMultipartUploadsHandler`) | `prefix` is a key prefix; `delimiter` groups common prefixes; markers paginate sorted keys | Expects ordered `(Key, Initiated, UploadID)` candidates per bucket |
+| Layer                                                           | What It Assumes                                                                              | Consequence                                                                        |
+| :-------------------------------------------------------------- | :------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| S3 HTTP API (`ListMultipartUploadsHandler`)                     | `prefix` is a key prefix; `delimiter` groups common prefixes; markers paginate sorted keys   | Expects ordered `(Key, Initiated, UploadID)` candidates per bucket                 |
 | On-Disk Layout (`.minio.sys/multipart/<sha256(bucket/object)>`) | Callers always supply the exact `bucket` and `object` (`PutObjectPart`, `Complete`, `Abort`) | O(1) lookup by exact key, but no bucket partition and no lexicographical key order |
-| In-Memory Cache (`multipartUploadsCache`) | Tracks uploads observed since process start | Fast O(bucket) listing for empty `prefix`, but ephemeral across restarts |
+| In-Memory Cache (`multipartUploadsCache`)                       | Tracks uploads observed since process start                                                  | Fast O(bucket) listing for empty `prefix`, but ephemeral across restarts           |
 {.wide .expand}
 
 ### Operational Impact {#impact}

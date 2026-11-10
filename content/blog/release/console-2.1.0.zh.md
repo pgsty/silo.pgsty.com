@@ -174,16 +174,16 @@ install -m 0755 silo-console-linux-amd64 /usr/local/bin/silo-console
 
 2.1.0 关闭了针对 2.0.0 提出的全部 issue。每个 issue 在 tracker 上都留有一条评论，说明修复方式、涉及的提交，以及补充的测试覆盖。
 
-| Issue | 解决方式 |
-| --- | --- |
-| [#1](https://github.com/pgsty/silo-console/issues/1) — 未认证深链无限递归 `/login` | 改为绝对且感知 base path 的登录目标；补充深链与子路径部署的测试 |
-| [#2](https://github.com/pgsty/silo-console/issues/2) — Uptime 陈旧、图例畸形、菜单局促 | Uptime 取自真实服务器状态，图例改用 V3 的 `name` 标签解析，图表控件 32 px，弹出菜单设最小宽度 |
-| [#3](https://github.com/pgsty/silo-console/issues/3) — 390 px 视口裁切内容 | 指标标签页改为可横向滚动；桶列表在移动端使用明确的列宽预算 |
-| [#4](https://github.com/pgsty/silo-console/issues/4) — 收起态侧边栏按钮无名称 | 标签改为视觉隐藏而非从可访问性树中移除；折叠开关具名且可键盘操作 |
-| [#5](https://github.com/pgsty/silo-console/issues/5) — 访问密钥字段缺少 autocomplete 元数据 | 在独立的自动填充 section 中声明 `username` / `new-password` 字段级 token |
-| [#6](https://github.com/pgsty/silo-console/issues/6) — 中英文本地化 | 手写双语层，零新增依赖，以英文原文为 key 兜底 |
-| [#7](https://github.com/pgsty/silo-console/issues/7) — 监控查询迁移到 Metrics V3 | 仅 V3；26 个部件、31 条查询、29 个指标名，配套守卫分类与回归测试 |
-| [#8](https://github.com/pgsty/silo-console/issues/8) — 用可用的 V3 健康信号替换 N/A | Erasure Health 与 Usage Data Age，与高级仪表盘共用同一份部件数据 |
+| Issue                                                                                       | 解决方式                                                                                      |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| [#1](https://github.com/pgsty/silo-console/issues/1) — 未认证深链无限递归 `/login`          | 改为绝对且感知 base path 的登录目标；补充深链与子路径部署的测试                               |
+| [#2](https://github.com/pgsty/silo-console/issues/2) — Uptime 陈旧、图例畸形、菜单局促      | Uptime 取自真实服务器状态，图例改用 V3 的 `name` 标签解析，图表控件 32 px，弹出菜单设最小宽度 |
+| [#3](https://github.com/pgsty/silo-console/issues/3) — 390 px 视口裁切内容                  | 指标标签页改为可横向滚动；桶列表在移动端使用明确的列宽预算                                    |
+| [#4](https://github.com/pgsty/silo-console/issues/4) — 收起态侧边栏按钮无名称               | 标签改为视觉隐藏而非从可访问性树中移除；折叠开关具名且可键盘操作                              |
+| [#5](https://github.com/pgsty/silo-console/issues/5) — 访问密钥字段缺少 autocomplete 元数据 | 在独立的自动填充 section 中声明 `username` / `new-password` 字段级 token                      |
+| [#6](https://github.com/pgsty/silo-console/issues/6) — 中英文本地化                         | 手写双语层，零新增依赖，以英文原文为 key 兜底                                                 |
+| [#7](https://github.com/pgsty/silo-console/issues/7) — 监控查询迁移到 Metrics V3            | 仅 V3；26 个部件、31 条查询、29 个指标名，配套守卫分类与回归测试                              |
+| [#8](https://github.com/pgsty/silo-console/issues/8) — 用可用的 V3 健康信号替换 N/A         | Erasure Health 与 Usage Data Age，与高级仪表盘共用同一份部件数据                              |
 {.wide .expand}
 
 有三项验收标准如实记为未达成，而不是含糊勾掉：`web-app` 目前没有单元测试运行器，因此 #6 的 i18n 测试套件与 #2 中针对 `constructLabelNames` 的专项测试都需要先引入测试工具链；另外 #6 要求的"如何新增翻译 key"的贡献者文档尚未编写。

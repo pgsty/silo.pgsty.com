@@ -40,14 +40,14 @@ url: "/zh/blog/release/console-2.4.1/"
 
 ## 依赖与嵌入 {#dependencies}
 
-| 组件 | 选择的版本 |
-| --- | --- |
-| 共享包 | `github.com/pgsty/silo-pkg/v3 v3.14.1` |
-| MC 源码 | `github.com/pgsty/mc v0.0.0-20260916070421-e952aa78f10a`，对应 mcli 20260916 |
-| 上游 minio-go | `v7.3.1-0.20260915093545-32e1f32cb176` |
-| JWX / strfmt | v3.3.0 / v0.27.2 |
-| React Router | v7.18.4 |
-| 构建工具 | Go 1.27.1、Node 24.21.0、Yarn 4.13.0 |
+| 组件          | 选择的版本                                                                   |
+| ------------- | ---------------------------------------------------------------------------- |
+| 共享包        | `github.com/pgsty/silo-pkg/v3 v3.14.1`                                       |
+| MC 源码       | `github.com/pgsty/mc v0.0.0-20260916070421-e952aa78f10a`，对应 mcli 20260916 |
+| 上游 minio-go | `v7.3.1-0.20260915093545-32e1f32cb176`                                       |
+| JWX / strfmt  | v3.3.0 / v0.27.2                                                             |
+| React Router  | v7.18.4                                                                      |
+| 构建工具      | Go 1.27.1、Node 24.21.0、Yarn 4.13.0                                         |
 {.wide .expand}
 
 SDK 正确处理 CopyObject HTTP 200 响应内嵌的 S3 错误；JWX 修复自定义 JSON 字段名转义，

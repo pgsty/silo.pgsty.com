@@ -22,12 +22,12 @@ tags: ["Security", "IAM", "Network", "Reverse Proxy", "aws:SourceIp", "Audit", "
 
 In SILO, `handlers.GetSourceIP(r)` (`silo-pkg/handlers/proxy.go`) is the single function responsible for extracting the client IP address from an incoming `*http.Request`. Four security- and observability-sensitive subsystems depend on its return value:
 
-| Consumer | Location | Security / Operational Role |
-|---|---|---|
-| `aws:SourceIp` IAM condition | `cmd/signature-v4-utils.go` (`getConditionValues`) | Evaluates `IpAddress` and `NotIpAddress` policy conditions on bucket and IAM policies. |
-| Audit logging (`remotehost`) | `cmd/logger/audit.go` | Records the client IP in structured compliance audit logs. |
-| Bucket notification events (`Host`) | `cmd/notification.go` | Populates `requestParameters.sourceIPAddress` in S3 event notifications. |
-| Admin HTTP trace (`mc admin trace`) | `cmd/http-tracer.go` | Displays the client IP in live diagnostic traces. |
+| Consumer                            | Location                                           | Security / Operational Role                                                            |
+| ----------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `aws:SourceIp` IAM condition        | `cmd/signature-v4-utils.go` (`getConditionValues`) | Evaluates `IpAddress` and `NotIpAddress` policy conditions on bucket and IAM policies. |
+| Audit logging (`remotehost`)        | `cmd/logger/audit.go`                              | Records the client IP in structured compliance audit logs.                             |
+| Bucket notification events (`Host`) | `cmd/notification.go`                              | Populates `requestParameters.sourceIPAddress` in S3 event notifications.               |
+| Admin HTTP trace (`mc admin trace`) | `cmd/http-tracer.go`                               | Displays the client IP in live diagnostic traces.                                      |
 {.wide .expand}
 
  Note that `handlers.GetSourceIPRaw` returned the first matched header token without validating whether it was even a syntactically valid IP address (a unit test in upstream `silo-pkg` literally asserted that `X-Forwarded-For: _gazonk` returned `"_gazonk"`!). While `IpAddress` condition evaluation parses the string with `net.ParseIP`, audit logs and notification payloads received the raw string.
@@ -72,11 +72,11 @@ A common misconception is that forwarded-header spoofing only matters when SILO 
 
 To solve both problems cleanly, `silo-pkg v3.12.0` (`62f326d`) and Server `20260804` (`00a8171cb`) introduce `MINIO_API_TRUSTED_PROXIES`:
 
-| Setting | Peer Trust | Header Evaluation |
-|---|---|---|
-| `MINIO_API_TRUSTED_PROXIES=off` (or `none`) | Trust **no** proxy hops | Always uses the direct TCP peer (`r.RemoteAddr`) for external peers; ignores `X-Forwarded-For`, `X-Real-IP`, and `Forwarded`. |
+| Setting                                              | Peer Trust                  | Header Evaluation                                                                                                                                                                                                               |
+| ---------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MINIO_API_TRUSTED_PROXIES=off` (or `none`)          | Trust **no** proxy hops     | Always uses the direct TCP peer (`r.RemoteAddr`) for external peers; ignores `X-Forwarded-For`, `X-Real-IP`, and `Forwarded`.                                                                                                   |
 | `MINIO_API_TRUSTED_PROXIES=10.0.1.0/24,192.168.1.10` | Trust only listed IPs/CIDRs | If `r.RemoteAddr` is not in the trusted set, returns `r.RemoteAddr` immediately. If `r.RemoteAddr` is trusted, walks `X-Forwarded-For` (or `Forwarded`) **from right to left** and returns the first IP not in the trusted set. |
-| Unset, `all`, or `*` | Legacy compatibility mode | Preserves pre-`20260804` behavior (unless `_MINIO_API_XFF_HEADER=off` is set). |
+| Unset, `all`, or `*`                                 | Legacy compatibility mode   | Preserves pre-`20260804` behavior (unless `_MINIO_API_XFF_HEADER=off` is set).                                                                                                                                                  |
 {.wide .expand}
 
 Note that `handlers.GetSourceScheme` (`X-Forwarded-Proto`) is intentionally left untouched so TLS redirect and presigned URL scheme detection behind reverse proxies continue to work regardless of `MINIO_API_TRUSTED_PROXIES`.
@@ -117,10 +117,10 @@ If an operator sets `MINIO_API_TRUSTED_PROXIES=10.0.0.0/8` when ordinary applica
 
 In a multi-node SILO cluster (`silo server http://node{1..4}/data`), a load balancer may route a client request to Node 1, which internally proxies or forwards sub-requests to Nodes 2–4:
 
-| Topology | What `MINIO_API_TRUSTED_PROXIES` Must Include |
-|---|---|
-| Single node behind reverse proxy | Reverse proxy IPs/CIDRs only |
-| Multi-node cluster behind reverse proxy | Reverse proxy IPs/CIDRs **and** all SILO cluster node IPs/CIDRs |
+| Topology                                                       | What `MINIO_API_TRUSTED_PROXIES` Must Include                                                           |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Single node behind reverse proxy                               | Reverse proxy IPs/CIDRs only                                                                            |
+| Multi-node cluster behind reverse proxy                        | Reverse proxy IPs/CIDRs **and** all SILO cluster node IPs/CIDRs                                         |
 | Direct client access to multi-node cluster (no external proxy) | All SILO cluster node IPs/CIDRs (or `off` if clients always hit nodes directly without peer forwarding) |
 {.wide .expand}
 

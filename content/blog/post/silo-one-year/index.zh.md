@@ -20,14 +20,14 @@ url: "/zh/blog/post/silo-one-year/"
 
 先把核心结论摊在桌面上：**SILO 没有改动 MinIO 的纠删码存储引擎、`xl.meta` 磁盘格式与基本读写仲裁规则；这一年的全部工程火力，都花在安全边界、S3 协议与校验和正确性、复制与生命周期收敛、失败写入与多池保护，以及恢复完整的管理控制台与客户端体验上。**
 
-| 领域 | 最重要的实质变化（`2025-10-15` → `2026-10-26`） |
-| --- | --- |
-| **安全与授权边界** | 修复分叉后披露的 **7 个 CVE**（OIDC 算法混淆、LDAP STS 枚举爆破、复制头注入、S3 Select 内存耗尽、无符号 Trailer 漏验签、Snowball 越权解压、`/rmpl` 路径穿越），并完成 **18 项 `SN-2026-*` 安全边界加固**（SigV4 操作头强制签名、策略条件键防伪造、桶级写权限收紧、服务账户授权上限、Object Lock 绕过校验、IAM 持久化撤销与防旧事件复活） |
-| **S3 协议与校验和** | 将上游返回 `NotImplemented` 的桶级 CORS 补齐为完整持久化与预检实现；支持条件 `DELETE`（`If-Match`）与跨池条件 `PUT`/`CompleteMultipartUpload`；补齐分段上传、`CopyObject`、SSE-C 与压缩对象的明文逻辑校验和及分片逻辑大小；将加密元数据篡改错误从 HTTP `206` 修正为 `500` |
-| **复制与生命周期** | 修复分片上传复制丢失 `FULL_OBJECT` 校验和类型（`#255`）；支持可信对端 SSE-C 原始密文与封套复制；为对象标签与 Object Lock 保留期引入修改时间戳以保证乱序与删除收敛；版本桶生命周期过期仅写入删除标记时保留远端分层数据（`#253`） |
-| **存储正确性与多池** | 实现两阶段多池批量删除（`#257`）、迁移版本保护与盘间分歧下的 `LIST` 恢复（`#239`），转发覆盖回滚所需的存储 RPC 删除选项；保留既有超时与取消语义，迟到提交、延迟回滚和陈旧读取仍是故障边界 |
-| **Console 与 mcli** | 恢复并重写完整管理控制台 **SILO Console v2.5.1**（`<3 MB` 零遥测前端、中英双语、游标分页、任务中心、Metrics V3、高延迟诊断流修复）；发布 **mcli 20261026**，新增只读 `checksum verify`，修正 `admin info --json`、`mirror`、`mv`、`retention`、`legalhold`、`sql` 的错误退出码与重启行为 |
-| **参数、运维与分发** | 让 `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` 真正生效（默认 30 秒绝对请求头期限）；新增可信代理配置（`MINIO_API_TRUSTED_PROXIES`）与原生 `silo healthcheck` 子命令；彻底移除原地自更新与 `SUBNET`/call-home；构建 Go 1.27.3、UBI 9.8 / distroless 镜像、RPM/DEB/APK、Windows ZIP 归档及 GPG/SBOM/Sigstore 完整供应链 |
+| 领域                 | 最重要的实质变化（`2025-10-15` → `2026-10-26`）                                                                                                                                                                                                                                                                                          |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **安全与授权边界**   | 修复分叉后披露的 **7 个 CVE**（OIDC 算法混淆、LDAP STS 枚举爆破、复制头注入、S3 Select 内存耗尽、无符号 Trailer 漏验签、Snowball 越权解压、`/rmpl` 路径穿越），并完成 **18 项 `SN-2026-*` 安全边界加固**（SigV4 操作头强制签名、策略条件键防伪造、桶级写权限收紧、服务账户授权上限、Object Lock 绕过校验、IAM 持久化撤销与防旧事件复活） |
+| **S3 协议与校验和**  | 将上游返回 `NotImplemented` 的桶级 CORS 补齐为完整持久化与预检实现；支持条件 `DELETE`（`If-Match`）与跨池条件 `PUT`/`CompleteMultipartUpload`；补齐分段上传、`CopyObject`、SSE-C 与压缩对象的明文逻辑校验和及分片逻辑大小；将加密元数据篡改错误从 HTTP `206` 修正为 `500`                                                                |
+| **复制与生命周期**   | 修复分片上传复制丢失 `FULL_OBJECT` 校验和类型（`#255`）；支持可信对端 SSE-C 原始密文与封套复制；为对象标签与 Object Lock 保留期引入修改时间戳以保证乱序与删除收敛；版本桶生命周期过期仅写入删除标记时保留远端分层数据（`#253`）                                                                                                          |
+| **存储正确性与多池** | 实现两阶段多池批量删除（`#257`）、迁移版本保护与盘间分歧下的 `LIST` 恢复（`#239`），转发覆盖回滚所需的存储 RPC 删除选项；保留既有超时与取消语义，迟到提交、延迟回滚和陈旧读取仍是故障边界                                                                                                                                                |
+| **Console 与 mcli**  | 恢复并重写完整管理控制台 **SILO Console v2.5.1**（`<3 MB` 零遥测前端、中英双语、游标分页、任务中心、Metrics V3、高延迟诊断流修复）；发布 **mcli 20261026**，新增只读 `checksum verify`，修正 `admin info --json`、`mirror`、`mv`、`retention`、`legalhold`、`sql` 的错误退出码与重启行为                                                 |
+| **参数、运维与分发** | 让 `--read-header-timeout` / `MINIO_READ_HEADER_TIMEOUT` 真正生效（默认 30 秒绝对请求头期限）；新增可信代理配置（`MINIO_API_TRUSTED_PROXIES`）与原生 `silo healthcheck` 子命令；彻底移除原地自更新与 `SUBNET`/call-home；构建 Go 1.27.3、UBI 9.8 / distroless 镜像、RPM/DEB/APK、Windows ZIP 归档及 GPG/SBOM/Sigstore 完整供应链         |
 {.wide .expand}
 
 同时，有一说一，下面这些边界我们同样在文档与发布验收里写得明明白白：
@@ -53,14 +53,14 @@ url: "/zh/blog/post/silo-one-year/"
 
 上游归档后，单靠一个服务端仓库无法交付完整的对象存储系统——因为服务端内嵌了 Console 前端与 `mc` 管理模块，又直接依赖共享策略与加密库。SILO 将维护范围收敛为四个协同演进的核心仓库（加可选外部密钥服务 KES）：
 
-| 组件 | 上游 `2025-10-15` 状态 | SILO `20261026` 状态 | 关键演进说明 |
-| --- | --- | --- | --- |
-| **Server (`pgsty/silo`)** | Go 1.24.0，`minio` 二进制 | **Go 1.27.3**，`silo` 二进制（[`c3ad836aed0d`](https://github.com/pgsty/silo/commit/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3)） | 模块路径保留 `github.com/minio/minio`；修复 7 个 CVE + 18 项安全边界加固与多项存储/复制缺陷 |
-| **Console (`pgsty/silo-console`)** | 内嵌裁剪版 `v1.7.7`（仅剩对象浏览器） | **[v2.5.1](https://github.com/pgsty/silo-console/releases/tag/v2.5.1)**（[`fff1618d9abb`](https://github.com/pgsty/silo-console/commit/fff1618d9abbf1f6125f1914bd50818e2bc347ed)） | 上游已删除 `minio/console` 仓库；SILO 恢复完整管理台，重构为 `<3 MB` 零遥测双语前端 |
-| **Client (`pgsty/mc`)** | `mc` `cf909e1063a9` | **[mcli 20261026](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-26T00-00-00Z)**（[`0ceb298cdcd0`](https://github.com/pgsty/mc/commit/0ceb298cdcd05f2ffdc4ea62d7d01a3666c3e8cc)） | 产物命名为 `mcli`（避免与 Midnight Commander `mc` 冲突），新增 `checksum verify` 并修复退出码 |
-| **Shared Pkg (`pgsty/silo-pkg`)** | `minio/pkg/v3 v3.1.3` | **[v3.15.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.15.2)**（[`0416eb1f4505`](https://github.com/pgsty/silo-pkg/commit/0416eb1f450536ca2cc3592c2c2a06a3df88d4e0)） | 独立模块路径 `github.com/pgsty/silo-pkg/v3`，承载 IAM 策略判定、条件键隔离、证书与 KMS 客户端 |
-| **S3 SDK (`minio/minio-go/v7`)** | `v7.0.91` | **`v7.4.2-0.20261025165926-320af050c445`** | 唯一直接沿用上游的模块，固定在经验证的提交（含分片截短流、负偏移与批量删除修复） |
-| **KMS (`pgsty/kes`)** | 外部可选依赖 | **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**（[`e9b4f1acebc1`](https://github.com/pgsty/kes/commit/e9b4f1acebc11d61b42f876da8df48f548750cc9)） | Go 1.27.3，验证 OpenBao KV v2 与本地 Moto Secrets Manager 协议；更新 AWS/GCP 客户端 |
+| 组件                               | 上游 `2025-10-15` 状态                | SILO `20261026` 状态                                                                                                                                                                        | 关键演进说明                                                                                  |
+| ---------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Server (`pgsty/silo`)**          | Go 1.24.0，`minio` 二进制             | **Go 1.27.3**，`silo` 二进制（[`c3ad836aed0d`](https://github.com/pgsty/silo/commit/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3)）                                                             | 模块路径保留 `github.com/minio/minio`；修复 7 个 CVE + 18 项安全边界加固与多项存储/复制缺陷   |
+| **Console (`pgsty/silo-console`)** | 内嵌裁剪版 `v1.7.7`（仅剩对象浏览器） | **[v2.5.1](https://github.com/pgsty/silo-console/releases/tag/v2.5.1)**（[`fff1618d9abb`](https://github.com/pgsty/silo-console/commit/fff1618d9abbf1f6125f1914bd50818e2bc347ed)）          | 上游已删除 `minio/console` 仓库；SILO 恢复完整管理台，重构为 `<3 MB` 零遥测双语前端           |
+| **Client (`pgsty/mc`)**            | `mc` `cf909e1063a9`                   | **[mcli 20261026](https://github.com/pgsty/mc/releases/tag/RELEASE.2026-10-26T00-00-00Z)**（[`0ceb298cdcd0`](https://github.com/pgsty/mc/commit/0ceb298cdcd05f2ffdc4ea62d7d01a3666c3e8cc)） | 产物命名为 `mcli`（避免与 Midnight Commander `mc` 冲突），新增 `checksum verify` 并修复退出码 |
+| **Shared Pkg (`pgsty/silo-pkg`)**  | `minio/pkg/v3 v3.1.3`                 | **[v3.15.2](https://github.com/pgsty/silo-pkg/releases/tag/v3.15.2)**（[`0416eb1f4505`](https://github.com/pgsty/silo-pkg/commit/0416eb1f450536ca2cc3592c2c2a06a3df88d4e0)）                | 独立模块路径 `github.com/pgsty/silo-pkg/v3`，承载 IAM 策略判定、条件键隔离、证书与 KMS 客户端 |
+| **S3 SDK (`minio/minio-go/v7`)**   | `v7.0.91`                             | **`v7.4.2-0.20261025165926-320af050c445`**                                                                                                                                                  | 唯一直接沿用上游的模块，固定在经验证的提交（含分片截短流、负偏移与批量删除修复）              |
+| **KMS (`pgsty/kes`)**              | 外部可选依赖                          | **[KES 20261026](/zh/blog/release/silo-20261026/#kes)**（[`e9b4f1acebc1`](https://github.com/pgsty/kes/commit/e9b4f1acebc11d61b42f876da8df48f548750cc9)）                                   | Go 1.27.3，验证 OpenBao KV v2 与本地 Moto Secrets Manager 协议；更新 AWS/GCP 客户端           |
 {.wide .expand}
 
 ### 刻意保持不变的底层基石 {#foundations-intentionally-preserved}
@@ -80,15 +80,15 @@ url: "/zh/blog/post/silo-one-year/"
 
 我们先把账算清楚：诸如 `CVE-2025-62506`（服务账户绕过）、`CVE-2025-31489`、`CVE-2025-27414` 在上游 `2025-10-15` 基线中**已经修复**；而以下 **7 个 CVE** 是在 `2025-10-15` 之后才披露、上游拒绝为开源版提供补丁、由 SILO 独立修复并验证的真实漏洞：
 
-| CVE / 公告 | 严重度 | 漏洞本质与攻击后果 | SILO 修复方案与源码证据 |
-| --- | --- | --- | --- |
-| **[CVE-2026-33322](/zh/blog/security/cve-2026-33322/)** | Critical (9.8) | OIDC JWT 算法混淆：当 JWT 头部声明 `HS256` 等对称算法时，上游将 OIDC `ClientSecret` 当作 HMAC 密钥验签，知道 `ClientSecret` 的攻击者可伪造任意身份（含 `consoleAdmin`） | 严格限定 JWKS 非对称公钥验签，彻底拒绝 HMAC 对称算法（`cmd/jwt.go`、`internal/config/identity/openid/`） |
-| **[CVE-2026-33419](/zh/blog/security/cve-2026-33419/)** | High | LDAP STS 接口可枚举有效用户名，且无登录速率限制，可被直接爆破换取 STS 凭据 | 统一绑定失败的认证错误响应，并按“可信源 IP + 归一化用户名”双维度施加滑动窗口限流，成功登录不消耗配额（`cmd/sts-handlers.go`） |
-| **[CVE-2026-34204](/zh/blog/security/cve-2026-34204/)** | High | 普通客户端在 `PUT`/`COPY` 请求中夹带未授权的 `X-Minio-Replication-*` 头，可污染加密元数据导致对象永久不可读 | 在请求入口剥离未获复制授权的内部复制头与 SSE 复制元数据（`cmd/auth-handler.go`、`cmd/object-handlers-common.go`） |
-| **[CVE-2026-39414](/zh/blog/security/cve-2026-39414/)** | High | S3 Select 处理无换行符的超大 CSV 或 JSON Lines 流时无界累积单条记录，单请求即可打穿进程内存（OOM） | 为 CSV 与 JSON 解析器设置严格的单记录最大字节上限，超限立即终止流并返回规范错误（`internal/s3select/`） |
-| **[CVE-2026-41145](/zh/blog/security/cve-2026-41145/)** | High | `STREAMING-UNSIGNED-PAYLOAD-TRAILER` 流式写入路径在特定处理分支漏掉签名校验，允许未授权或伪造签名请求写入对象 | 在所有 `aws-chunked` 与 unsigned-trailer 入口强制执行完整的请求认证与权限检查（`cmd/auth-handler.go`） |
-| **[CVE-2026-40344](/zh/blog/security/cve-2026-40344/)** | High | Snowball 归档批量解压上传接口存在入口认证缺失与归档内部条目越权写入 | 强制校验入口身份，并对归档内展开的每一个目标对象键逐一执行目标路径与桶策略鉴权（`cmd/bucket-handlers.go`、`cmd/object-handlers.go`） |
-| **[CVE-2026-42600](/zh/blog/security/cve-2026-42600/)** | High | 节点间内部存储接口 `/rmpl`（`ReadMultiple`）缺少磁盘根目录路径边界约束，存在路径穿越读取风险 | 直接从内部存储 REST 路由与协议中移除未使用的 `ReadMultiple` 接口，并对全部保留的内部磁盘 RPC 实施严格的盘内路径校验（`cmd/storage-rest-server.go`） |
+| CVE / 公告                                              | 严重度         | 漏洞本质与攻击后果                                                                                                                                                      | SILO 修复方案与源码证据                                                                                                                             |
+| ------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[CVE-2026-33322](/zh/blog/security/cve-2026-33322/)** | Critical (9.8) | OIDC JWT 算法混淆：当 JWT 头部声明 `HS256` 等对称算法时，上游将 OIDC `ClientSecret` 当作 HMAC 密钥验签，知道 `ClientSecret` 的攻击者可伪造任意身份（含 `consoleAdmin`） | 严格限定 JWKS 非对称公钥验签，彻底拒绝 HMAC 对称算法（`cmd/jwt.go`、`internal/config/identity/openid/`）                                            |
+| **[CVE-2026-33419](/zh/blog/security/cve-2026-33419/)** | High           | LDAP STS 接口可枚举有效用户名，且无登录速率限制，可被直接爆破换取 STS 凭据                                                                                              | 统一绑定失败的认证错误响应，并按“可信源 IP + 归一化用户名”双维度施加滑动窗口限流，成功登录不消耗配额（`cmd/sts-handlers.go`）                       |
+| **[CVE-2026-34204](/zh/blog/security/cve-2026-34204/)** | High           | 普通客户端在 `PUT`/`COPY` 请求中夹带未授权的 `X-Minio-Replication-*` 头，可污染加密元数据导致对象永久不可读                                                             | 在请求入口剥离未获复制授权的内部复制头与 SSE 复制元数据（`cmd/auth-handler.go`、`cmd/object-handlers-common.go`）                                   |
+| **[CVE-2026-39414](/zh/blog/security/cve-2026-39414/)** | High           | S3 Select 处理无换行符的超大 CSV 或 JSON Lines 流时无界累积单条记录，单请求即可打穿进程内存（OOM）                                                                      | 为 CSV 与 JSON 解析器设置严格的单记录最大字节上限，超限立即终止流并返回规范错误（`internal/s3select/`）                                             |
+| **[CVE-2026-41145](/zh/blog/security/cve-2026-41145/)** | High           | `STREAMING-UNSIGNED-PAYLOAD-TRAILER` 流式写入路径在特定处理分支漏掉签名校验，允许未授权或伪造签名请求写入对象                                                           | 在所有 `aws-chunked` 与 unsigned-trailer 入口强制执行完整的请求认证与权限检查（`cmd/auth-handler.go`）                                              |
+| **[CVE-2026-40344](/zh/blog/security/cve-2026-40344/)** | High           | Snowball 归档批量解压上传接口存在入口认证缺失与归档内部条目越权写入                                                                                                     | 强制校验入口身份，并对归档内展开的每一个目标对象键逐一执行目标路径与桶策略鉴权（`cmd/bucket-handlers.go`、`cmd/object-handlers.go`）                |
+| **[CVE-2026-42600](/zh/blog/security/cve-2026-42600/)** | High           | 节点间内部存储接口 `/rmpl`（`ReadMultiple`）缺少磁盘根目录路径边界约束，存在路径穿越读取风险                                                                            | 直接从内部存储 REST 路由与协议中移除未使用的 `ReadMultiple` 接口，并对全部保留的内部磁盘 RPC 实施严格的盘内路径校验（`cmd/storage-rest-server.go`） |
 {.wide .expand}
 
 ### 18 项 `SN-2026-*` 安全边界加固 {#18-sn-2026-security-boundary}
@@ -115,18 +115,18 @@ url: "/zh/blog/post/silo-one-year/"
 
 在 S3 协议层，SILO 这一年重点解决了三件事：**把上游留下的空壳 API 补齐、把多池条件读写语义拉齐、把分片与加密场景下的校验和及逻辑大小算准。**
 
-| 特性 / 场景 | 上游 MinIO (`2025-10-15`) | SILO (`20261026`) | 相关设计记录 |
-| --- | --- | --- | --- |
-| **桶级 CORS 配置** | `GetBucketCors`/`PutBucketCors`/`DeleteBucketCors` 直接返回 `NotImplemented` | 完整实现桶级 CORS XML 持久化（最多 100 条规则、64 KiB）、`OPTIONS` 预检匹配、跨站复制与桶元数据导入导出 | [按桶配置 CORS](/zh/blog/release/silo-20260903/#cors-trust) |
-| **条件 `DELETE`** | 不支持 `If-Match` 条件删除 | 单对象 `DELETE` 支持 `If-Match: "<etag>"` 与 `If-Match: *`，在共享对象锁内校验；批量 `DeleteObjects` 尚不支持逐项 ETag 条件 | [条件删除设计](/zh/blog/design/conditional-delete/) |
-| **多池条件 `PUT` 与分片完成** | 只检查目标写入池，可能被旧池的过期 ETag 误放行或误拒绝 | 跨所有存储池（含正在退役/排空的池）解析逻辑当前对象后再校验 `If-Match` / `If-None-Match` | [多池对象一致性](/zh/blog/design/multi-pool-object-consistency/) |
-| **服务端分片校验和** | 已声明校验和算法的分片上传在分片请求省略校验和头时失败，复制分片也受影响 | 按上传初始化时声明的算法，在压缩或加密前计算明文分片校验和，并持久化到 `xl.meta`；未声明算法的上传不会因此默认启用 `CRC32C` | [分片校验和](/zh/blog/design/uploadpart-checksum/) |
-| **`CompleteMultipartUpload` 校验** | 对重复 part 号、缺失校验和或 `FULL_OBJECT` 类型匹配检查不严 | 严格要求 part 号单调递增（重复返回 `InvalidPartOrder`），严格校验分片校验和与 `FULL_OBJECT`/`COMPOSITE` 汇总值 | [校验和完整性修复](/zh/blog/design/complete-multipart-checksum-errors/) |
-| **`CopyObject` / `UploadPartCopy` 校验和** | 服务端复制加密或压缩对象时可能直接拷贝底层密文 bitrot 哈希，且响应漏返 `ChecksumType` | 统一按明文逻辑字节重算或验证校验和，并在 `CopyObjectResult` / `CopyPartResult` 中返回准确的 `ChecksumType` | [校验和完整性修复](/zh/blog/design/copyobject-ssec-checksum-response/) |
-| **SSE-C 同对象密钥轮换与零字节** | 用新 SSE-C 密钥原地 `CopyObject` 只改元数据不重加密数据，导致对象损坏；零字节 SSE-C 对象与分片属性未解封校验 | 同对象换钥时强制重写底层密文；零字节 SSE-C 对象及 `GetObjectAttributes` 分片列表均执行完整密钥解封验证 | [SSE-C 密钥轮换](/zh/blog/release/silo-20260903/#copyobject-ssec)、[零字节验证](/zh/blog/security/20260903-server-hardening/#sn-2026-006) |
-| **加密/压缩分片逻辑大小** | `GetObjectAttributes` 与 `?partNumber=N` 可能返回含加密/压缩开销的物理分片大小 | 解密/解压路径与元数据属性统一返回真实的明文逻辑分片大小 | [分片逻辑大小](/zh/blog/release/silo-20260916/#encryption) |
-| **加密元数据篡改状态码** | `ObjectTampered` 被映射为 HTTP `206 Partial Content` | 修正为 HTTP `500` (`XMinioObjectTampered`)，避免客户端把损坏对象当成正常部分响应缓存或续传 | [ObjectTampered 500](/zh/blog/release/silo-20260916/#encryption) |
-| **DNS 联邦 `CopyObject`** | 跨集群联邦复制可能直接流式传输 `.minio.sys` 底层密文导致目标对象无法解密 | 改为通过标准 S3 客户端流式读取明文并在目标端重新封存 | [联邦 CopyObject](/zh/blog/design/federated-copy-object/) |
+| 特性 / 场景                                | 上游 MinIO (`2025-10-15`)                                                                                    | SILO (`20261026`)                                                                                                           | 相关设计记录                                                                                                                              |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **桶级 CORS 配置**                         | `GetBucketCors`/`PutBucketCors`/`DeleteBucketCors` 直接返回 `NotImplemented`                                 | 完整实现桶级 CORS XML 持久化（最多 100 条规则、64 KiB）、`OPTIONS` 预检匹配、跨站复制与桶元数据导入导出                     | [按桶配置 CORS](/zh/blog/release/silo-20260903/#cors-trust)                                                                               |
+| **条件 `DELETE`**                          | 不支持 `If-Match` 条件删除                                                                                   | 单对象 `DELETE` 支持 `If-Match: "<etag>"` 与 `If-Match: *`，在共享对象锁内校验；批量 `DeleteObjects` 尚不支持逐项 ETag 条件 | [条件删除设计](/zh/blog/design/conditional-delete/)                                                                                       |
+| **多池条件 `PUT` 与分片完成**              | 只检查目标写入池，可能被旧池的过期 ETag 误放行或误拒绝                                                       | 跨所有存储池（含正在退役/排空的池）解析逻辑当前对象后再校验 `If-Match` / `If-None-Match`                                    | [多池对象一致性](/zh/blog/design/multi-pool-object-consistency/)                                                                          |
+| **服务端分片校验和**                       | 已声明校验和算法的分片上传在分片请求省略校验和头时失败，复制分片也受影响                                     | 按上传初始化时声明的算法，在压缩或加密前计算明文分片校验和，并持久化到 `xl.meta`；未声明算法的上传不会因此默认启用 `CRC32C` | [分片校验和](/zh/blog/design/uploadpart-checksum/)                                                                                        |
+| **`CompleteMultipartUpload` 校验**         | 对重复 part 号、缺失校验和或 `FULL_OBJECT` 类型匹配检查不严                                                  | 严格要求 part 号单调递增（重复返回 `InvalidPartOrder`），严格校验分片校验和与 `FULL_OBJECT`/`COMPOSITE` 汇总值              | [校验和完整性修复](/zh/blog/design/complete-multipart-checksum-errors/)                                                                   |
+| **`CopyObject` / `UploadPartCopy` 校验和** | 服务端复制加密或压缩对象时可能直接拷贝底层密文 bitrot 哈希，且响应漏返 `ChecksumType`                        | 统一按明文逻辑字节重算或验证校验和，并在 `CopyObjectResult` / `CopyPartResult` 中返回准确的 `ChecksumType`                  | [校验和完整性修复](/zh/blog/design/copyobject-ssec-checksum-response/)                                                                    |
+| **SSE-C 同对象密钥轮换与零字节**           | 用新 SSE-C 密钥原地 `CopyObject` 只改元数据不重加密数据，导致对象损坏；零字节 SSE-C 对象与分片属性未解封校验 | 同对象换钥时强制重写底层密文；零字节 SSE-C 对象及 `GetObjectAttributes` 分片列表均执行完整密钥解封验证                      | [SSE-C 密钥轮换](/zh/blog/release/silo-20260903/#copyobject-ssec)、[零字节验证](/zh/blog/security/20260903-server-hardening/#sn-2026-006) |
+| **加密/压缩分片逻辑大小**                  | `GetObjectAttributes` 与 `?partNumber=N` 可能返回含加密/压缩开销的物理分片大小                               | 解密/解压路径与元数据属性统一返回真实的明文逻辑分片大小                                                                     | [分片逻辑大小](/zh/blog/release/silo-20260916/#encryption)                                                                                |
+| **加密元数据篡改状态码**                   | `ObjectTampered` 被映射为 HTTP `206 Partial Content`                                                         | 修正为 HTTP `500` (`XMinioObjectTampered`)，避免客户端把损坏对象当成正常部分响应缓存或续传                                  | [ObjectTampered 500](/zh/blog/release/silo-20260916/#encryption)                                                                          |
+| **DNS 联邦 `CopyObject`**                  | 跨集群联邦复制可能直接流式传输 `.minio.sys` 底层密文导致目标对象无法解密                                     | 改为通过标准 S3 客户端流式读取明文并在目标端重新封存                                                                        | [联邦 CopyObject](/zh/blog/design/federated-copy-object/)                                                                                 |
 {.wide .expand}
 
 ---
@@ -135,14 +135,14 @@ url: "/zh/blog/post/silo-one-year/"
 
 在开启了跨站复制（Bucket / Site Replication）或远端分层（ILM Tiering）的生产集群中，最危险的缺陷往往不是“请求直接报错”，而是**源端与备端静默不一致**，或者**生命周期规则误删了仍在引用的底层数据**。过去一年里，SILO 围绕复制与生命周期修复了六类核心问题：
 
-| 问题领域 | 上游旧行为与风险 | SILO 修复后的行为 |
-| --- | --- | --- |
-| **分片对象 `FULL_OBJECT` 校验和复制（`#255`）** | 源端分片上传使用 `CRC32`/`CRC32C` `FULL_OBJECT` 校验和时，复制发起端调用 `NewMultipartUpload` 漏传 `x-amz-checksum-type: FULL_OBJECT`，导致目标端按 `COMPOSITE` 校验并在 `CompleteMultipartUpload` 时以 `BadDigest` 失败 | 在 `putReplicationOpts` 中显式携带 `ChecksumType`，使分片复制与 `CopyObject` 共享完整的 `FULL_OBJECT` 校验和头（[设计记录](/zh/blog/design/replication-full-object-checksum/)） |
-| **SSE-C 加密对象复制** | 复制 SSE-C 对象时重新生成随机 KMS/DARE 封套或破坏原始客户密钥封存，导致备端副本无法用原 SSE-C 密钥读取 | 在受信任的复制通道上原样保留 SSE-C 原始密文、随机 IV 与加密封套元数据（[设计记录](/zh/blog/design/ssec-replica-integrity/)） |
-| **对象标签删除与乱序复制** | 删除对象标签时旧版本只传空字符串而不推进修订时间，迟到的旧复制事件会把已删除的标签重新写回；SSE-KMS 复制还会丢失标签修订时间 | 引入 `replication-tag-modtime` 时间戳与删除墓碑，SSE-KMS 复制保留标签修订时间，乱序到达的旧标签事件自动被高水位时间戳拦截（[设计记录](/zh/blog/design/replicated-tag-ordering/)） |
-| **Object Lock 保留期复制排序** | 跨站并发更新同一对象版本的 Object Lock 保留期时，缺乏统一顺序判定，旧保留期可能覆盖新保留期 | 引入 `replication-retention-modtime` 时间戳并在持久化锁保护下按时间戳收敛（[设计记录](/zh/blog/design/object-lock-replication-ordering/)） |
-| **删除标记复制与版本清除（Purge）** | 指定版本永久删除（Purge）在缺盘时可能反而在盘上新建删除标记；MRF 重试队列可能混淆“新建删除标记”与“永久清除版本” | 严格区分删除标记创建与指定版本清除，排队的创建任务在发送前先在复制锁内复核源端状态，缺版本清除需写仲裁多数确认（[设计记录](/zh/blog/design/replication-reliability/)） |
-| **版本桶生命周期过期与远端分层（`#253`）** | 启用版本控制（或暂停版本控制但含非 `null` 历史版本）的桶触发 `Expiration` 规则时，若操作仅仅是追加一个删除标记，旧逻辑仍可能连带删除已分层到远端存储的底层数据，导致历史版本永久无法读回 | 明确区分“仅创建删除标记的当前版本过期”与“真正销毁历史版本的过期动作”；前者完整保留远端分层数据，只有真正清除对应版本时才回收远端对象 |
+| 问题领域                                        | 上游旧行为与风险                                                                                                                                                                                                         | SILO 修复后的行为                                                                                                                                                                 |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **分片对象 `FULL_OBJECT` 校验和复制（`#255`）** | 源端分片上传使用 `CRC32`/`CRC32C` `FULL_OBJECT` 校验和时，复制发起端调用 `NewMultipartUpload` 漏传 `x-amz-checksum-type: FULL_OBJECT`，导致目标端按 `COMPOSITE` 校验并在 `CompleteMultipartUpload` 时以 `BadDigest` 失败 | 在 `putReplicationOpts` 中显式携带 `ChecksumType`，使分片复制与 `CopyObject` 共享完整的 `FULL_OBJECT` 校验和头（[设计记录](/zh/blog/design/replication-full-object-checksum/)）   |
+| **SSE-C 加密对象复制**                          | 复制 SSE-C 对象时重新生成随机 KMS/DARE 封套或破坏原始客户密钥封存，导致备端副本无法用原 SSE-C 密钥读取                                                                                                                   | 在受信任的复制通道上原样保留 SSE-C 原始密文、随机 IV 与加密封套元数据（[设计记录](/zh/blog/design/ssec-replica-integrity/)）                                                      |
+| **对象标签删除与乱序复制**                      | 删除对象标签时旧版本只传空字符串而不推进修订时间，迟到的旧复制事件会把已删除的标签重新写回；SSE-KMS 复制还会丢失标签修订时间                                                                                             | 引入 `replication-tag-modtime` 时间戳与删除墓碑，SSE-KMS 复制保留标签修订时间，乱序到达的旧标签事件自动被高水位时间戳拦截（[设计记录](/zh/blog/design/replicated-tag-ordering/)） |
+| **Object Lock 保留期复制排序**                  | 跨站并发更新同一对象版本的 Object Lock 保留期时，缺乏统一顺序判定，旧保留期可能覆盖新保留期                                                                                                                              | 引入 `replication-retention-modtime` 时间戳并在持久化锁保护下按时间戳收敛（[设计记录](/zh/blog/design/object-lock-replication-ordering/)）                                        |
+| **删除标记复制与版本清除（Purge）**             | 指定版本永久删除（Purge）在缺盘时可能反而在盘上新建删除标记；MRF 重试队列可能混淆“新建删除标记”与“永久清除版本”                                                                                                          | 严格区分删除标记创建与指定版本清除，排队的创建任务在发送前先在复制锁内复核源端状态，缺版本清除需写仲裁多数确认（[设计记录](/zh/blog/design/replication-reliability/)）            |
+| **版本桶生命周期过期与远端分层（`#253`）**      | 启用版本控制（或暂停版本控制但含非 `null` 历史版本）的桶触发 `Expiration` 规则时，若操作仅仅是追加一个删除标记，旧逻辑仍可能连带删除已分层到远端存储的底层数据，导致历史版本永久无法读回                                 | 明确区分“仅创建删除标记的当前版本过期”与“真正销毁历史版本的过期动作”；前者完整保留远端分层数据，只有真正清除对应版本时才回收远端对象                                              |
 {.wide .expand}
 
 此外，在复制重同步（Resync）与站点桶配置同步上，SILO 为每个 Resync 任务与目标端拆分了独立的取消上下文并修正了 `ReplicatedCount`/`FailedCount` 统计（[复制重同步正确性](/zh/blog/design/replication-reliability/#resync)），同时为桶级元数据（CORS、生命周期、加密、复制、锁配置）重载加装了逐桶互斥锁与可选的字段级删除墓碑（[桶配置收敛](/zh/blog/design/bucket-metadata-convergence/)）。
@@ -182,14 +182,14 @@ url: "/zh/blog/post/silo-one-year/"
 
 SILO 在社区开发者 Georg Mangold（`@gmangold`）恢复的历史分支基础上，从 `v2.0.0` 持续迭代至 `v2.5.1`，交出了一份不仅恢复全功能、而且比原版更轻量可靠的管理控制台：
 
-| 维度 | 上游 `2025-10-15` 内嵌 Console (`v1.7.7`) | SILO Console `v2.5.1` |
-| --- | --- | --- |
-| **管理功能范围** | 仅剩基础桶与对象浏览，移除全部管理面板 | **完整管理面**：Overview 概览、存储桶、对象浏览器、生命周期、跨站复制、分层存储、事件通知、IAM（用户/组/服务账号/策略及内置策略 Reset）、IDP（OIDC/LDAP）、KMS、集群诊断（Health/Trace/Logs/Watch/Speedtest/Profile）与后台任务中心（Tasks） |
-| **前端体积与遥测** | 约 10 MB，含外部字体/脚本与运营服务调用 | **`< 3 MB`**，逐字节可复现构建，零遥测、零外部网络依赖，响应式明暗主题 |
-| **多语言支持** | 仅英文 | **原生中英双语切换**（含界面、错误提示与文档跳转） |
-| **监控指标体系** | 旧版接口或缺失 | 原生对接 **Metrics V3**，区分“真实零值”与“节点未上报数据” |
-| **大桶浏览与文件预览** | 易在大目录下全量拉取卡死 | **游标分页**（默认 100 项，最高 1,000 项）、1 MiB 有界文本/Markdown/CSV/代码预览、原生流式 ZIP 批量下载 |
-| **高延迟网络诊断（`#63`）** | 跨地域或高延迟链路下下载健康报告易触发 WebSocket `1006` / `1011` 截断 | 修复六类诊断流的 WebSocket 关闭握手与 `madmin v3` 帧解码器预读吞字节缺陷，双向叠加 250 ms 延迟仍稳定输出完整健康报告 |
+| 维度                        | 上游 `2025-10-15` 内嵌 Console (`v1.7.7`)                             | SILO Console `v2.5.1`                                                                                                                                                                                                                        |
+| --------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **管理功能范围**            | 仅剩基础桶与对象浏览，移除全部管理面板                                | **完整管理面**：Overview 概览、存储桶、对象浏览器、生命周期、跨站复制、分层存储、事件通知、IAM（用户/组/服务账号/策略及内置策略 Reset）、IDP（OIDC/LDAP）、KMS、集群诊断（Health/Trace/Logs/Watch/Speedtest/Profile）与后台任务中心（Tasks） |
+| **前端体积与遥测**          | 约 10 MB，含外部字体/脚本与运营服务调用                               | **`< 3 MB`**，逐字节可复现构建，零遥测、零外部网络依赖，响应式明暗主题                                                                                                                                                                       |
+| **多语言支持**              | 仅英文                                                                | **原生中英双语切换**（含界面、错误提示与文档跳转）                                                                                                                                                                                           |
+| **监控指标体系**            | 旧版接口或缺失                                                        | 原生对接 **Metrics V3**，区分“真实零值”与“节点未上报数据”                                                                                                                                                                                    |
+| **大桶浏览与文件预览**      | 易在大目录下全量拉取卡死                                              | **游标分页**（默认 100 项，最高 1,000 项）、1 MiB 有界文本/Markdown/CSV/代码预览、原生流式 ZIP 批量下载                                                                                                                                      |
+| **高延迟网络诊断（`#63`）** | 跨地域或高延迟链路下下载健康报告易触发 WebSocket `1006` / `1011` 截断 | 修复六类诊断流的 WebSocket 关闭握手与 `madmin v3` 帧解码器预读吞字节缺陷，双向叠加 250 ms 延迟仍稳定输出完整健康报告                                                                                                                         |
 {.wide .expand}
 
 Console 2.5.1 进一步修复切换组状态时丢失成员、OIDC 组权限、TLS 代理会话 Cookie、凭据导出及键盘焦点问题，完整变化见 [Console 2.5 系列发布说明](/zh/blog/release/console-2.5.1/)。

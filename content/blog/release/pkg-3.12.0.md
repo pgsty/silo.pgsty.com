@@ -42,12 +42,12 @@ That string names no bucket or object. The existing parser normalized it to the 
 
 For statements that actually perform resource matching, the impact depends on `Effect` and on whether the prefix appears in `Resource` or `NotResource`:
 
-| Statement shape | Existing runtime result |
-|:--|:--|
-| `Allow` + bare `Resource` | Grants nothing |
-| `Deny` + bare `Resource` | The intended denial does not fire |
+| Statement shape              | Existing runtime result                               |
+| :--------------------------- | :---------------------------------------------------- |
+| `Allow` + bare `Resource`    | Grants nothing                                        |
+| `Deny` + bare `Resource`     | The intended denial does not fire                     |
 | `Allow` + bare `NotResource` | Excludes nothing and can grant far more than intended |
-| `Deny` + bare `NotResource` | Can deny far more than intended |
+| `Deny` + bare `NotResource`  | Can deny far more than intended                       |
 {.wide .expand}
 
 The dangerous cases are policy-dependent fail-open behavior, not an unauthenticated remote exploit and not a CVE. A policy author, template, or automation must first submit the malformed resource. The same issue applies to registered S3 Tables and KMS ARN prefixes.
@@ -131,19 +131,19 @@ The `go` and `toolchain` directives have separate purposes:
 
 Key selected versions change as follows:
 
-| Module | 3.11.0 | 3.12.0 |
-|:--|:--|:--|
-| `go.etcd.io/etcd/{api,client/pkg,client}/v3` | `3.6.6` | `3.7.1` |
-| `golang.org/x/crypto` | `0.54.0` | `0.55.0` |
-| `golang.org/x/net` | `0.57.0` | `0.58.0` |
-| `golang.org/x/text` | `0.40.0` | `0.41.0` |
-| `github.com/minio/minio-go/v7` | `7.0.97` | `7.0.99` |
-| `github.com/minio/mux` | `1.8.2` | `1.9.2` |
-| `github.com/cheggaaa/pb` | `1.0.29` | `1.0.30` |
-| `github.com/lestrrat-go/jwx/v3` | `3.0.12` | `3.0.13` |
-| `github.com/lestrrat-go/httprc/v3` | `3.0.1` | `3.0.6` |
-| `github.com/grpc-ecosystem/grpc-gateway/v2` | `2.27.3` | `2.29.0` |
-| `go.uber.org/zap` | `1.27.1` | `1.28.0` |
+| Module                                       | 3.11.0   | 3.12.0   |
+| :------------------------------------------- | :------- | :------- |
+| `go.etcd.io/etcd/{api,client/pkg,client}/v3` | `3.6.6`  | `3.7.1`  |
+| `golang.org/x/crypto`                        | `0.54.0` | `0.55.0` |
+| `golang.org/x/net`                           | `0.57.0` | `0.58.0` |
+| `golang.org/x/text`                          | `0.40.0` | `0.41.0` |
+| `github.com/minio/minio-go/v7`               | `7.0.97` | `7.0.99` |
+| `github.com/minio/mux`                       | `1.8.2`  | `1.9.2`  |
+| `github.com/cheggaaa/pb`                     | `1.0.29` | `1.0.30` |
+| `github.com/lestrrat-go/jwx/v3`              | `3.0.12` | `3.0.13` |
+| `github.com/lestrrat-go/httprc/v3`           | `3.0.1`  | `3.0.6`  |
+| `github.com/grpc-ecosystem/grpc-gateway/v2`  | `2.27.3` | `2.29.0` |
+| `go.uber.org/zap`                            | `1.27.1` | `1.28.0` |
 {.wide .expand}
 
 Smaller selected updates include `uax29` 2.3.1, `fastjson` 1.6.10, `secp256k1` 4.4.1, and `goccy/go-json` 0.10.6. The old `lestrrat-go/option` v1, `gogo/protobuf`, and stale test-only requirements leave the selected graph.

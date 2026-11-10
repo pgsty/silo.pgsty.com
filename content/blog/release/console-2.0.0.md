@@ -39,7 +39,7 @@ The migration strategy is "clear external identity, restrained internal compatib
 ## Naming and Delivery Contracts {#naming-and-delivery}
 
 | Scope            | Previous name or location         | 2.0.0 contract                              |
-|:-----------------|:----------------------------------|:--------------------------------------------|
+| :--------------- | :-------------------------------- | :------------------------------------------ |
 | Product          | Console / legacy MinIO Console    | **SILO Console**                            |
 | Repository       | `georgmangold/console`            | `pgsty/silo-console`                        |
 | Release binary   | `console`                         | `silo-console`                              |
@@ -57,7 +57,7 @@ CLI authorship, usage text, and project descriptions now identify Pigsty and SIL
 The following names retain `minio` or `console` as part of interface, protocol, or installation compatibility:
 
 | Surface                 | State in 2.0.0                              | Reason                                      |
-|:------------------------|:--------------------------------------------|:--------------------------------------------|
+| :---------------------- | :------------------------------------------ | :------------------------------------------ |
 | Go module               | `github.com/minio/console` retained         | changing it breaks every Go import          |
 | Server endpoint         | `CONSOLE_MINIO_SERVER` retained             | widely used by existing deployments         |
 | Server region           | `CONSOLE_MINIO_REGION` retained             | existing compatibility contract             |
@@ -110,7 +110,7 @@ Release binaries (all frontend assets included, stripped) weigh roughly 35–40M
 **Go:** the build baseline moves to Go 1.26.5 and the `golang.org/x` family is fully refreshed. Every reachable vulnerability reported by `govulncheck` is resolved:
 
 | Dependency                         | Fixed version | Advisories                                                   |
-|:-----------------------------------|:--------------|:-------------------------------------------------------------|
+| :--------------------------------- | :------------ | :----------------------------------------------------------- |
 | `google.golang.org/grpc`           | v1.82.1       | GO-2026-6061                                                 |
 | `github.com/prometheus/prometheus` | v0.311.3      | GO-2026-5710 / -5662 / -5381 / -5264 (incl. remote-read DoS) |
 | `github.com/klauspost/compress`    | v1.18.7       | GO-2026-5841                                                 |
@@ -136,11 +136,11 @@ Automatic updates will be reconsidered once signed release assets and a tested r
 
 The release ships 16 assets:
 
-| Type              | Coverage                                                        |
-|:------------------|:----------------------------------------------------------------|
-| Standalone binary | Linux `amd64/arm64/arm`, macOS `amd64/arm64`, Windows `amd64`   |
-| System packages   | DEB / RPM / APK × `amd64/arm64/armv6`                           |
-| Checksums         | `silo-console_2.0.0_checksums.txt` (SHA-256)                    |
+| Type              | Coverage                                                      |
+| :---------------- | :------------------------------------------------------------ |
+| Standalone binary | Linux `amd64/arm64/arm`, macOS `amd64/arm64`, Windows `amd64` |
+| System packages   | DEB / RPM / APK × `amd64/arm64/armv6`                         |
+| Checksums         | `silo-console_2.0.0_checksums.txt` (SHA-256)                  |
 {.wide .expand}
 
 The pipeline triggers on tag pushes, pins third-party Actions to commit SHAs, and enforces the clean-checkout and zero-diff asset-rebuild gates before GoReleaser runs.

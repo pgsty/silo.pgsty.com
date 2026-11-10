@@ -22,11 +22,11 @@ This article records the root-cause analysis, design tradeoffs, and validation a
 
 Each fix repairs the reproduced invariant at the smallest boundary that owns it, preserves existing background recovery mechanisms, and proves convergence with deterministic tests.
 
-| Issue | Confirmed defect in SILO | Selected repair |
-| :-- | :-- | :-- |
-| #153: delete-marker purge | Single-object DELETE classified a permanent deletion as marker replication; the remote marker disappeared while source purge remained `PENDING` | Classify by purge status, matching bulk delete, scanner/heal, and resync |
-| #152: invisible MRF drops | The queue was already bounded, but internal drop counters did not reach administration or monitoring; object and delete worker arguments were reversed | Expose existing counters, warn at actual drop sites with deduplication, and align worker routing |
-| #137: unreliable resync cancellation | One shared token could not stop multiple runs; blocking phases missed cancellation; stale runs could overwrite terminal state | Give each run an owned context, cancel by resync ID, and constrain registration, finalization, and state updates |
+| Issue                                | Confirmed defect in SILO                                                                                                                               | Selected repair                                                                                                  |
+| :----------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
+| #153: delete-marker purge            | Single-object DELETE classified a permanent deletion as marker replication; the remote marker disappeared while source purge remained `PENDING`        | Classify by purge status, matching bulk delete, scanner/heal, and resync                                         |
+| #152: invisible MRF drops            | The queue was already bounded, but internal drop counters did not reach administration or monitoring; object and delete worker arguments were reversed | Expose existing counters, warn at actual drop sites with deduplication, and align worker routing                 |
+| #137: unreliable resync cancellation | One shared token could not stop multiple runs; blocking phases missed cancellation; stale runs could overwrite terminal state                          | Give each run an owned context, cancel by resync ID, and constrain registration, finalization, and state updates |
 {.wide .expand}
 
 Two earlier fixes in the same series addressed adjacent invariants:
@@ -45,12 +45,12 @@ The original issue described a sustained HTTP 405 storm involving ILM and replic
 
 Starting from baseline [`450dcb848`](https://github.com/pgsty/silo/commit/450dcb8484bc1337deba0cf608cc893a6691d794), the reproduction used two locally built SILO servers, separate data directories, and `mcli` / `minio-go` clients. A key finding was that **`mcli` uses bulk DELETE even for a single key, and the bulk-delete path was already classified properly.** Exercising the faulty entry point required issuing a direct single-object S3 DELETE.
 
-| Observation | Single-object DELETE before the fix | After the fix |
-| :-- | :-- | :-- |
-| Matching delete-marker version at the target | Removed | Removed |
+| Observation                                      | Single-object DELETE before the fix                                | After the fix                                      |
+| :----------------------------------------------- | :----------------------------------------------------------------- | :------------------------------------------------- |
+| Matching delete-marker version at the target     | Removed                                                            | Removed                                            |
 | Purge state for that version in source `xl.meta` | Still `PENDING`, although ordinary replication status was complete | Cleanup completed on the first replication attempt |
-| Original data version | Retained | Retained |
-| Scanner needed to finish this cleanup | Required later recovery | No scanner assistance needed |
+| Original data version                            | Retained                                                           | Retained                                           |
+| Scanner needed to finish this cleanup            | Required later recovery                                            | No scanner assistance needed                       |
 {.wide .expand}
 
 Checking only that the remote version disappeared would miss the lingering `PENDING` state in source `xl.meta`. The reproduction confirmed the misclassified initial purge, the wrong completion state, and an unnecessary `HEAD` probe, without triggering a sustained 405 storm because the scanner/heal and resync paths already selected the purge branch.
@@ -92,12 +92,12 @@ The defect was that `TotalDroppedCount` and `TotalDroppedBytes` incremented inte
 3. Log deduplicated warnings at the two **actual drop sites** (retry exhaustion and a full MRF channel) using static messages and deduplication keys so changing counter values do not defeat log deduplication. Normal worker-queue overflow into MRF does not drop the entry and does not log a drop warning.
 4. Route ordinary object replication, healing, and deletion consistently by `(bucket, objectName)` to preserve per-object worker affinity.
 
-| Interface | New metric |
-| :-- | :-- |
+| Interface     | New metric                                            |
+| :------------ | :---------------------------------------------------- |
 | Prometheus v2 | `minio_node_replication_mrf_dropped_operations_total` |
-| Prometheus v2 | `minio_node_replication_mrf_dropped_bytes_total` |
-| Prometheus v3 | `minio_replication_mrf_dropped_operations_total` |
-| Prometheus v3 | `minio_replication_mrf_dropped_bytes_total` |
+| Prometheus v2 | `minio_node_replication_mrf_dropped_bytes_total`      |
+| Prometheus v3 | `minio_replication_mrf_dropped_operations_total`      |
+| Prometheus v3 | `minio_replication_mrf_dropped_bytes_total`           |
 {.wide .expand}
 
 These counters accumulate since Server startup and reset on restart. **Operations count dropped queue entries**, so repeated failures on the same object increment the counter multiple times; bytes sum known object sizes, with delete entries contributing zero bytes. Operators should monitor the rate of increase alongside replication backlog and target health.
@@ -149,15 +149,15 @@ On the restart recovery path, `loadResync` previously spawned recovery goroutine
 
 ## Design Review and Complexity Decisions {#review}
 
-| Proposal or review point | Final decision |
-| :-- | :-- |
-| Treat a purge's 405 probe as completion | Rejected: marker existence does not prove permanent deletion |
-| Add bounded retries, backoff, and a persistent MRF scheduler | Not introduced: the existing queue and scanner already provide recovery; the demonstrated gap is visibility |
-| Send more shared cancellation tokens | Rejected: this still cannot guarantee identity routing, broadcast, or isolation from later tasks |
-| Add a separate cancellation tombstone registry | Unnecessary: existing target status and resync ID under one lock close the registration race |
-| Give each run an owned context and cancelable blocking operations | Retained: full-queue deadlock and walker leaks have deterministic reproductions |
-| Protect `finish` with `sync.Once` | Narrowed: a single deferred call site makes `sync.Once` unnecessary |
-| Wait for resumed runs before releasing leader context | Retained: SILO's leader context cancel is active, so the `WaitGroup` is required and covered by leadership-loss tests |
+| Proposal or review point                                          | Final decision                                                                                                        |
+| :---------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| Treat a purge's 405 probe as completion                           | Rejected: marker existence does not prove permanent deletion                                                          |
+| Add bounded retries, backoff, and a persistent MRF scheduler      | Not introduced: the existing queue and scanner already provide recovery; the demonstrated gap is visibility           |
+| Send more shared cancellation tokens                              | Rejected: this still cannot guarantee identity routing, broadcast, or isolation from later tasks                      |
+| Add a separate cancellation tombstone registry                    | Unnecessary: existing target status and resync ID under one lock close the registration race                          |
+| Give each run an owned context and cancelable blocking operations | Retained: full-queue deadlock and walker leaks have deterministic reproductions                                       |
+| Protect `finish` with `sync.Once`                                 | Narrowed: a single deferred call site makes `sync.Once` unnecessary                                                   |
+| Wait for resumed runs before releasing leader context             | Retained: SILO's leader context cancel is active, so the `WaitGroup` is required and covered by leadership-loss tests |
 {.wide .expand}
 
 Two additional details were kept simple: the infrequent resync start operation reads and writes configuration under the status lock (matching terminal saves), and the active registry keys on `resyncOpts` (including `resyncBefore`).
@@ -166,16 +166,16 @@ Two additional details were kept simple: the infrequent resync start operation r
 
 Regression tests were written against the unmodified baseline and verified to fail before applying the fixes. The test suite exercises the production HTTP handlers, erasure storage, Prometheus metric registries, and `resyncBucket`.
 
-| Validation area | Result and evidence |
-| :-- | :-- |
-| Single-delete purge | ErasureSD and Erasure source/target cleanup; legacy `PENDING` recovery; marker idempotency; real 403/405/503 failure semantics |
-| MRF | Actual capacity-one overflow and retry exhaustion; administration JSON; registered v2/v3 counter types and values; object/delete worker affinity |
-| Resync | `testing/synctest` coverage for blocked `Walk`, full worker queues, user and queued cancellation, unrelated IDs, later tasks, terminal races, stale IDs, slot release, and leader recovery |
-| Complete local suite | `go test ./... -count=1 -timeout=30m` passed across all 50 tested packages |
-| Concurrency and repetition | Focused replication race tests passed; cancellation regressions passed 100 repetitions |
-| Tooling and contracts | Local build, vet, lint, generated-file checks, rebrand compatibility guard, and `git diff --check` passed |
-| Two native servers | Built from local source; direct single-object DELETE removed the target marker and source `xl.meta` entry while retaining the original data version |
-| Remote integration | All eight PR checks passed, followed by all six main Go CI jobs and VulnCheck |
+| Validation area            | Result and evidence                                                                                                                                                                        |
+| :------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Single-delete purge        | ErasureSD and Erasure source/target cleanup; legacy `PENDING` recovery; marker idempotency; real 403/405/503 failure semantics                                                             |
+| MRF                        | Actual capacity-one overflow and retry exhaustion; administration JSON; registered v2/v3 counter types and values; object/delete worker affinity                                           |
+| Resync                     | `testing/synctest` coverage for blocked `Walk`, full worker queues, user and queued cancellation, unrelated IDs, later tasks, terminal races, stale IDs, slot release, and leader recovery |
+| Complete local suite       | `go test ./... -count=1 -timeout=30m` passed across all 50 tested packages                                                                                                                 |
+| Concurrency and repetition | Focused replication race tests passed; cancellation regressions passed 100 repetitions                                                                                                     |
+| Tooling and contracts      | Local build, vet, lint, generated-file checks, rebrand compatibility guard, and `git diff --check` passed                                                                                  |
+| Two native servers         | Built from local source; direct single-object DELETE removed the target marker and source `xl.meta` entry while retaining the original data version                                        |
+| Remote integration         | All eight PR checks passed, followed by all six main Go CI jobs and VulnCheck                                                                                                              |
 {.wide .expand}
 
 Regression test files at the merged commit: [delete markers](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-delete-marker_test.go), [MRF visibility](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-mrf-observability_test.go), and [cancellation lifecycle](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-resync-cancel_test.go). Reproducible test commands:
@@ -187,13 +187,13 @@ go test ./cmd -run '^TestResyncCancel' -count=100
 go test ./... -count=1 -timeout=30m
 ```
 
-| Evidence point | Exact identity |
-| :-- | :-- |
-| Baseline | `450dcb8484bc1337deba0cf608cc893a6691d794` |
-| Final PR head | `66fe61ff65c83d68b74baa637a11623015c7aa21` |
-| Merged main | `d1105bbb3d4a0afa33b3a4ac11b821235038ed0e` |
-| PR Go CI | [34320440012](https://github.com/pgsty/silo/actions/runs/34320440012) |
-| Main Go CI | [34321319278](https://github.com/pgsty/silo/actions/runs/34321319278) |
+| Evidence point | Exact identity                                                        |
+| :------------- | :-------------------------------------------------------------------- |
+| Baseline       | `450dcb8484bc1337deba0cf608cc893a6691d794`                            |
+| Final PR head  | `66fe61ff65c83d68b74baa637a11623015c7aa21`                            |
+| Merged main    | `d1105bbb3d4a0afa33b3a4ac11b821235038ed0e`                            |
+| PR Go CI       | [34320440012](https://github.com/pgsty/silo/actions/runs/34320440012) |
+| Main Go CI     | [34321319278](https://github.com/pgsty/silo/actions/runs/34321319278) |
 | Main VulnCheck | [34321319274](https://github.com/pgsty/silo/actions/runs/34321319274) |
 {.wide .expand}
 

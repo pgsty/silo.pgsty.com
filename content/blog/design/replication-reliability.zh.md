@@ -22,11 +22,11 @@ url: "/zh/blog/design/replication-reliability/"
 
 本系列修复遵循同一工程准则：在拥有对应不变量的最小模块边界内修复已复现的缺陷，复用现有后台恢复机制，并用确定性测试验证收敛。
 
-| 问题 | SILO 中确认的缺陷 | 选定修复 |
-| :-- | :-- | :-- |
-| #153：删除标记 purge | 单对象 DELETE 将永久删除误判为删除标记复制，导致远端已删除而源端 purge 状态长期停留在 `PENDING` | 按 purge 状态分类，与批量删除、scanner/heal、resync 保持一致 |
-| #152：MRF 丢弃不可见 | 队列已设容量上限，但内部丢弃计数未输出到管理接口与监控指标；对象与删除的 worker 路由参数顺序不一致 | 暴露现有丢弃计数、在实际丢弃点输出去重告警、统一 worker 路由键 |
-| #137：resync 取消不可靠 | 单个共享 token 无法取消并发的多桶任务；阻塞阶段不响应取消；旧任务收尾可能覆盖新状态 | 为每次运行分配专属 context，按 resync ID 取消，并串行化注册、收尾与状态写回 |
+| 问题                    | SILO 中确认的缺陷                                                                                  | 选定修复                                                                    |
+| :---------------------- | :------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| #153：删除标记 purge    | 单对象 DELETE 将永久删除误判为删除标记复制，导致远端已删除而源端 purge 状态长期停留在 `PENDING`    | 按 purge 状态分类，与批量删除、scanner/heal、resync 保持一致                |
+| #152：MRF 丢弃不可见    | 队列已设容量上限，但内部丢弃计数未输出到管理接口与监控指标；对象与删除的 worker 路由参数顺序不一致 | 暴露现有丢弃计数、在实际丢弃点输出去重告警、统一 worker 路由键              |
+| #137：resync 取消不可靠 | 单个共享 token 无法取消并发的多桶任务；阻塞阶段不响应取消；旧任务收尾可能覆盖新状态                | 为每次运行分配专属 context，按 resync ID 取消，并串行化注册、收尾与状态写回 |
 {.wide .expand}
 
 这一系列此前已分别闭合另外两项复制不变量：
@@ -45,12 +45,12 @@ url: "/zh/blog/design/replication-reliability/"
 
 以 [`450dcb848`](https://github.com/pgsty/silo/commit/450dcb8484bc1337deba0cf608cc893a6691d794) 为基线，测试启动两个本地构建的 SILO 服务端实例，配合 `mcli` 与 `minio-go` 客户端进行验证。排查发现：**`mcli` 即使只删除单个对象键，也会调用批量 DELETE 接口；而批量删除的分类逻辑原本就是正确的。** 因此必须直接发送单对象 S3 DELETE 请求才能触发故障路径。
 
-| 检查点 | 修复前的单对象 DELETE | 修复后 |
-| :-- | :-- | :-- |
-| 目标端对应删除标记版本 | 已删除 | 已删除 |
+| 检查点                                 | 修复前的单对象 DELETE                    | 修复后               |
+| :------------------------------------- | :--------------------------------------- | :------------------- |
+| 目标端对应删除标记版本                 | 已删除                                   | 已删除               |
 | 源端 `xl.meta` 中同一版本的 purge 状态 | 仍为 `PENDING`，普通复制状态却被标为完成 | 首次复制后即完成清理 |
-| 原始数据版本 | 保留 | 保留 |
-| 是否需要等待 scanner 补做清理 | 依赖后续后台恢复 | 无需 scanner 介入 |
+| 原始数据版本                           | 保留                                     | 保留                 |
+| 是否需要等待 scanner 补做清理          | 依赖后续后台恢复                         | 无需 scanner 介入    |
 {.wide .expand}
 
 如果只检查远端版本是否消失，就会漏掉源端 `xl.meta` 残留的 `PENDING` 状态。本地实验复现了首次 purge 的分类错误、完成状态误写以及一次多余的 `HEAD` 探测；但由于现有的 scanner/heal 与 resync 已经按 purge 状态走正确分支，并不会产生持续的 405 风暴。
@@ -92,12 +92,12 @@ MRF（Most Recent Failures）队列用于暂存近期失败的复制任务，以
 3. 在重试超限与 MRF 通道已满这两个**实际丢弃点**记录去重警告，使用固定的日志消息与去重键，避免因计数值变化使日志去重失效。普通工作队列溢出转入 MRF 时并未丢弃任务，不在该处触发丢弃告警。
 4. 普通对象复制、自愈与删除路径统一按 `(bucket, objectName)` 计算工作协程哈希，保证同一对象的操作路由到同一个 worker。
 
-| 接口 | 新增指标 |
-| :-- | :-- |
+| 接口          | 新增指标                                              |
+| :------------ | :---------------------------------------------------- |
 | Prometheus v2 | `minio_node_replication_mrf_dropped_operations_total` |
-| Prometheus v2 | `minio_node_replication_mrf_dropped_bytes_total` |
-| Prometheus v3 | `minio_replication_mrf_dropped_operations_total` |
-| Prometheus v3 | `minio_replication_mrf_dropped_bytes_total` |
+| Prometheus v2 | `minio_node_replication_mrf_dropped_bytes_total`      |
+| Prometheus v3 | `minio_replication_mrf_dropped_operations_total`      |
+| Prometheus v3 | `minio_replication_mrf_dropped_bytes_total`           |
 {.wide .expand}
 
 这组指标统计服务端启动以来的累计丢弃量，重启后归零。**操作数按队列条目计数**，同一对象的多次失败会重复累加；字节数统计已知的对象大小，删除条目记为零字节。运维监控应关注其增长速率，并结合复制积压量与目标站点健康状态综合判断。
@@ -153,14 +153,14 @@ MRF（Most Recent Failures）队列用于暂存近期失败的复制任务，以
 
 针对基线复现与备选方案的评审结论汇总如下：
 
-| 方案或评审意见 | 最终判断 |
-| :-- | :-- |
-| 将 purge 的 405 探测响应直接判为完成 | 否决：删除标记存在不代表永久删除已完成 |
-| 为 MRF 新增持久化的退避重试调度器 | 不引入：现有队列与后台 scanner 已提供完整恢复链路，实际缺口在于可观测性 |
-| 向共享通道发送更多取消 token | 否决：无法解决按 ID 路由、多桶广播及后续任务串扰问题 |
-| 为取消操作维护独立的墓碑注册表 | 不引入：在同一把状态锁下结合目标状态与 resync ID 即可闭合注册竞态 |
-| 为每次运行分配专属 context 并改造阻塞点 | 采用：满队列死锁与遍历器泄漏均有确定性复现用例 |
-| 用 `sync.Once` 保护 `finish` | 收窄：合并为单一 `defer` 调用点后，无需额外引入 `sync.Once` |
+| 方案或评审意见                          | 最终判断                                                                                   |
+| :-------------------------------------- | :----------------------------------------------------------------------------------------- |
+| 将 purge 的 405 探测响应直接判为完成    | 否决：删除标记存在不代表永久删除已完成                                                     |
+| 为 MRF 新增持久化的退避重试调度器       | 不引入：现有队列与后台 scanner 已提供完整恢复链路，实际缺口在于可观测性                    |
+| 向共享通道发送更多取消 token            | 否决：无法解决按 ID 路由、多桶广播及后续任务串扰问题                                       |
+| 为取消操作维护独立的墓碑注册表          | 不引入：在同一把状态锁下结合目标状态与 resync ID 即可闭合注册竞态                          |
+| 为每次运行分配专属 context 并改造阻塞点 | 采用：满队列死锁与遍历器泄漏均有确定性复现用例                                             |
+| 用 `sync.Once` 保护 `finish`            | 收窄：合并为单一 `defer` 调用点后，无需额外引入 `sync.Once`                                |
 | 等待恢复任务结束后再释放 leader context | 采用：SILO 的 leader context 取消会立即生效，需通过 `WaitGroup` 延长生命周期并补齐失主测试 |
 {.wide .expand}
 
@@ -170,16 +170,16 @@ MRF（Most Recent Failures）队列用于暂存近期失败的复制任务，以
 
 所有修复均遵循“先在未修改基线上编写失败回归测试，再提交生产修复”的流程。新增测试直接驱动生产环境处理函数、纠删码存储层、Prometheus 指标注册表与 `resyncBucket` 完整流程。
 
-| 验收范围 | 结果与证据 |
-| :-- | :-- |
-| 单对象删除 purge | 在单盘（ErasureSD）与多盘纠删码（Erasure）下验证源端与目标端同步清理；覆盖存量 `PENDING` 恢复、删除标记幂等，以及 403/405/503 错误处理 |
-| MRF 可观测性 | 容量为 1 的队列溢出与重试超限测试；校验管理接口 JSON、Prometheus v2/v3 注册计数器的类型与数值、对象与删除的 worker 路由一致性 |
-| resync 取消 | 使用 `testing/synctest` 覆盖 `Walk` 阻塞、满 worker 队列、主动取消、排队期取消、跨 ID 隔离、后续任务启动、终态并发竞争、过期 ID 忽略、槽位释放与 leader 恢复 |
-| 本地完整套件 | `go test ./... -count=1 -timeout=30m` 全量通过（共 50 个含测试的包） |
-| 并发与重复测试 | 复制相关定向 `-race` 测试通过；取消回归用例连续运行 100 次全部通过 |
-| 工具与契约守卫 | 本地编译、`go vet`、静态检查、生成文件检查、`rebrand-guard` 与 `git diff --check` 全部通过 |
-| 双实例联调 | 基于本地源码构建两个服务端实例，直接发送单对象 DELETE：目标端删除标记消失，源端 `xl.meta` 完成清理，原始数据版本完整保留 |
-| 远端 CI | PR 八项检查通过；合入主干后 Go CI 六项任务与 VulnCheck 全部通过 |
+| 验收范围         | 结果与证据                                                                                                                                                   |
+| :--------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 单对象删除 purge | 在单盘（ErasureSD）与多盘纠删码（Erasure）下验证源端与目标端同步清理；覆盖存量 `PENDING` 恢复、删除标记幂等，以及 403/405/503 错误处理                       |
+| MRF 可观测性     | 容量为 1 的队列溢出与重试超限测试；校验管理接口 JSON、Prometheus v2/v3 注册计数器的类型与数值、对象与删除的 worker 路由一致性                                |
+| resync 取消      | 使用 `testing/synctest` 覆盖 `Walk` 阻塞、满 worker 队列、主动取消、排队期取消、跨 ID 隔离、后续任务启动、终态并发竞争、过期 ID 忽略、槽位释放与 leader 恢复 |
+| 本地完整套件     | `go test ./... -count=1 -timeout=30m` 全量通过（共 50 个含测试的包）                                                                                         |
+| 并发与重复测试   | 复制相关定向 `-race` 测试通过；取消回归用例连续运行 100 次全部通过                                                                                           |
+| 工具与契约守卫   | 本地编译、`go vet`、静态检查、生成文件检查、`rebrand-guard` 与 `git diff --check` 全部通过                                                                   |
+| 双实例联调       | 基于本地源码构建两个服务端实例，直接发送单对象 DELETE：目标端删除标记消失，源端 `xl.meta` 完成清理，原始数据版本完整保留                                     |
+| 远端 CI          | PR 八项检查通过；合入主干后 Go CI 六项任务与 VulnCheck 全部通过                                                                                              |
 {.wide .expand}
 
 固定提交上的回归测试文件：[删除标记](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-delete-marker_test.go)、[MRF 可见性](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-mrf-observability_test.go)、[取消生命周期](https://github.com/pgsty/silo/blob/d1105bbb3d4a0afa33b3a4ac11b821235038ed0e/cmd/replication-resync-cancel_test.go)。复现与验证命令：
@@ -191,13 +191,13 @@ go test ./cmd -run '^TestResyncCancel' -count=100
 go test ./... -count=1 -timeout=30m
 ```
 
-| 证据点 | 精确标识 |
-| :-- | :-- |
-| 修复前基线 | `450dcb8484bc1337deba0cf608cc893a6691d794` |
-| 最终 PR head | `66fe61ff65c83d68b74baa637a11623015c7aa21` |
-| 合并主干 | `d1105bbb3d4a0afa33b3a4ac11b821235038ed0e` |
-| PR Go CI | [34320440012](https://github.com/pgsty/silo/actions/runs/34320440012) |
-| 主干 Go CI | [34321319278](https://github.com/pgsty/silo/actions/runs/34321319278) |
+| 证据点         | 精确标识                                                              |
+| :------------- | :-------------------------------------------------------------------- |
+| 修复前基线     | `450dcb8484bc1337deba0cf608cc893a6691d794`                            |
+| 最终 PR head   | `66fe61ff65c83d68b74baa637a11623015c7aa21`                            |
+| 合并主干       | `d1105bbb3d4a0afa33b3a4ac11b821235038ed0e`                            |
+| PR Go CI       | [34320440012](https://github.com/pgsty/silo/actions/runs/34320440012) |
+| 主干 Go CI     | [34321319278](https://github.com/pgsty/silo/actions/runs/34321319278) |
 | 主干 VulnCheck | [34321319274](https://github.com/pgsty/silo/actions/runs/34321319274) |
 {.wide .expand}
 

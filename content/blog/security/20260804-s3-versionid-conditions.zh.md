@@ -118,12 +118,12 @@ versionID := strings.TrimSpace(r.URL.Query().Get(xhttp.VersionID))
 
 ## 调用链影响与请求条件来源隔离（`2f55347f7`） {#impact}
 
-| 操作类型 | `s3:versionid` 来源 | `20260804` 之前行为 | Server `20260804` 行为 |
-|---|---|---|---|
-| `GetObject` / `DeleteObject`（未传 `versionId`） | 无 | `["versionid"] = [""]`（`Null:true` 失败） | 省略该键（`Null:true` 正常命中） |
-| `GetObject` / `DeleteObject`（`?versionId=v1%20`） | URL 查询参数 `versionId` | 策略看到 `"v1 "`，Handler 实际操作 `"v1"` | 策略与 Handler 均归一化为 `"v1"` |
-| `CopyObject`（`x-amz-copy-source: /b/k?versionId=v1`） | `x-amz-copy-source` 查询参数 | 未去除首尾空白 | 统一去除首尾空白 |
-| `DeleteObjects`（`POST /?delete` 含 `<VersionId>`） | 逐条 `ReqInfo.VersionID` | 忽略 XML `<VersionId>`，误读 URL 查询串 | 按 XML 条目逐条重绑定，忽略 URL 诱饵参数 |
+| 操作类型                                               | `s3:versionid` 来源          | `20260804` 之前行为                        | Server `20260804` 行为                   |
+| ------------------------------------------------------ | ---------------------------- | ------------------------------------------ | ---------------------------------------- |
+| `GetObject` / `DeleteObject`（未传 `versionId`）       | 无                           | `["versionid"] = [""]`（`Null:true` 失败） | 省略该键（`Null:true` 正常命中）         |
+| `GetObject` / `DeleteObject`（`?versionId=v1%20`）     | URL 查询参数 `versionId`     | 策略看到 `"v1 "`，Handler 实际操作 `"v1"`  | 策略与 Handler 均归一化为 `"v1"`         |
+| `CopyObject`（`x-amz-copy-source: /b/k?versionId=v1`） | `x-amz-copy-source` 查询参数 | 未去除首尾空白                             | 统一去除首尾空白                         |
+| `DeleteObjects`（`POST /?delete` 含 `<VersionId>`）    | 逐条 `ReqInfo.VersionID`     | 忽略 XML `<VersionId>`，误读 URL 查询串    | 按 XML 条目逐条重绑定，忽略 URL 诱饵参数 |
 {.wide .expand}
 
 在配套提交 `2f55347f7`（[`pgsty/silo#53`](https://github.com/pgsty/silo/issues/53)）中，我们还对 `getConditionValues` 中的其余请求条件键实施了来源隔离加固：

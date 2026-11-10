@@ -48,7 +48,7 @@ The consensus in the international community is clear:
 Looking back at the timeline over the past years, this wasn't a sudden death. It was a slow, deliberate wind-down:
 
 | Date    | Event                               | Nature              |
-|---------|-------------------------------------|---------------------|
+| ------- | ----------------------------------- | ------------------- |
 | 2021-05 | Apache 2.0 → AGPL v3                | License change      |
 | 2022-07 | Legal action against Nutanix        | License enforcement |
 | 2023-03 | Legal action against Weka           | License enforcement |

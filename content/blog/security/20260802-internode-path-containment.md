@@ -28,12 +28,12 @@ Following the removal of `/rmpl` (`ReadMultiple`) in [CVE-2026-42600](/blog/secu
 
 Earlier spot checks kept counting individual handlers—arriving at 19, then 21, then 22—while missing an entire protocol surface each time. Grouping internode calls by how their arguments reach `xlStorage` reveals four distinct surfaces:
 
-| Protocol surface | Entries | Covered by global HTTP query middleware |
-| :-- | :-- | :-- |
-| Storage-REST HTTP **query arguments** | 9 | **Yes** — previously misclassified as unprotected |
-| Storage-REST HTTP **msgpack body** | 4 | No; `r.Form` is never populated from a msgpack body |
-| **Storage Grid RPC** (`/minio/grid/v1`) | 18 | No; after the initial WebSocket upgrade, frames never re-enter the HTTP middleware chain |
-| **Peer-S3 Grid RPC** | 5 | No; and it bypasses `getStorage()` to call `xlStorage` drives directly |
+| Protocol surface                        | Entries | Covered by global HTTP query middleware                                                  |
+| :-------------------------------------- | :------ | :--------------------------------------------------------------------------------------- |
+| Storage-REST HTTP **query arguments**   | 9       | **Yes** — previously misclassified as unprotected                                        |
+| Storage-REST HTTP **msgpack body**      | 4       | No; `r.Form` is never populated from a msgpack body                                      |
+| **Storage Grid RPC** (`/minio/grid/v1`) | 18      | No; after the initial WebSocket upgrade, frames never re-enter the HTTP middleware chain |
+| **Peer-S3 Grid RPC**                    | 5       | No; and it bypasses `getStorage()` to call `xlStorage` drives directly                   |
 {.wide .expand}
 
 The first row corrects an earlier misconception: audits that grepped exclusively inside handler functions missed that the 9 query-parameter endpoints are already guarded by the global HTTP middleware (`url.ParseQuery(RawQuery)` in `r.Form`). Conversely, the fourth row (`peer-S3 Grid RPC`) bypasses `storageRESTServer.getStorage()` completely, meaning no amount of hardening limited to `storage-rest-server.go` could protect `DeleteBucket` or peer bucket metadata calls.
@@ -54,17 +54,17 @@ One timeline interaction escalated a DoS bug from a failed request into a full p
 
 Every vector below was reproduced against a live `xlStorage` instance through the storage-REST and Grid RPC clients using planted sentinel files:
 
-| Vector | Surface | Observed effect |
-| :-- | :-- | :-- |
-| `WriteAll("vol", "../../x")` | Storage Grid RPC | **Arbitrary file write** outside the drive root |
-| `RenameFile(".minio.sys", "", "bucket", "x")` | Storage Grid RPC | **Relocates the entire `.minio.sys` system volume** (IAM, cluster config) into a readable S3 bucket **with no `..` sequence** |
-| `DeleteBucket("../victim", force)` | Peer-S3 Grid RPC | **Recursive deletion of a directory tree** outside the drive root |
-| `DeleteBulk("vol", "")` | Storage-REST body | Moves an entire volume into the drive trash directory |
-| `ReadAll(volume: "../")` | Any surface | Trailing slash bypasses `getVolDir`'s exact `".."` check |
-| `CheckParts` with zero `Erasure` (`DataBlocks = 0`) | Storage Grid RPC | Divide-by-zero panic in `WithDeadline` **terminates the server process** |
-| `AppendFile` declaring `Content-Length: 64 GiB` | Storage-REST HTTP | **Allocates 68,719,574,840 bytes** for an empty request body |
-| `DeleteVersions` declaring `100,000,000` entries | Storage-REST body | A 10-byte msgpack header **allocates a 10.4 GB slice** |
-| Part metadata with `Size = -2` | Storage Grid / `AddVersion` | **Truncated shard is reported healthy**; healing silently skips repair |
+| Vector                                              | Surface                     | Observed effect                                                                                                               |
+| :-------------------------------------------------- | :-------------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| `WriteAll("vol", "../../x")`                        | Storage Grid RPC            | **Arbitrary file write** outside the drive root                                                                               |
+| `RenameFile(".minio.sys", "", "bucket", "x")`       | Storage Grid RPC            | **Relocates the entire `.minio.sys` system volume** (IAM, cluster config) into a readable S3 bucket **with no `..` sequence** |
+| `DeleteBucket("../victim", force)`                  | Peer-S3 Grid RPC            | **Recursive deletion of a directory tree** outside the drive root                                                             |
+| `DeleteBulk("vol", "")`                             | Storage-REST body           | Moves an entire volume into the drive trash directory                                                                         |
+| `ReadAll(volume: "../")`                            | Any surface                 | Trailing slash bypasses `getVolDir`'s exact `".."` check                                                                      |
+| `CheckParts` with zero `Erasure` (`DataBlocks = 0`) | Storage Grid RPC            | Divide-by-zero panic in `WithDeadline` **terminates the server process**                                                      |
+| `AppendFile` declaring `Content-Length: 64 GiB`     | Storage-REST HTTP           | **Allocates 68,719,574,840 bytes** for an empty request body                                                                  |
+| `DeleteVersions` declaring `100,000,000` entries    | Storage-REST body           | A 10-byte msgpack header **allocates a 10.4 GB slice**                                                                        |
+| Part metadata with `Size = -2`                      | Storage Grid / `AddVersion` | **Truncated shard is reported healthy**; healing silently skips repair                                                        |
 {.wide .expand}
 
 Two vectors deserve specific attention:
@@ -78,10 +78,10 @@ The security invariant has two parts: **every file path in an internode payload 
 
 Because `pathJoin` folds leading slashes and backslashes under `volumeDir` via `path.Clean`, only `..` segments can escape a volume directory, and only volume-root aliases (`""`, `"/"`, `"."`, and Windows trailing-space/period components) can target the volume directory itself. Commit [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) enforces those two rules at two chokepoints:
 
-| Chokepoint | Location | Coverage |
-| :-- | :-- | :-- |
-| **Volume axis** | `getVolDir` + explicit guard in `NSScanner` | Every `xlStorage` caller, **including peer-S3 Grid RPC** |
-| **Path axis** | `getStorage()` decorator (`guardPaths`, `isVolumeRootAlias`) | All 31 remote storage-REST and Storage Grid RPC methods plus nested struct slices |
+| Chokepoint      | Location                                                     | Coverage                                                                          |
+| :-------------- | :----------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| **Volume axis** | `getVolDir` + explicit guard in `NSScanner`                  | Every `xlStorage` caller, **including peer-S3 Grid RPC**                          |
+| **Path axis**   | `getStorage()` decorator (`guardPaths`, `isVolumeRootAlias`) | All 31 remote storage-REST and Storage Grid RPC methods plus nested struct slices |
 {.wide .expand}
 
 Two implementation details are critical to preserve during future refactors:
@@ -110,12 +110,12 @@ Writing the reproduction and regression tests exposed three testing pitfalls:
 
 ## Reused semantics vs. invented rules {#pattern}
 
-| Guard component | Source of semantics | Regressions introduced during development |
-| :-- | :-- | :-- |
-| `guardPaths` | Reused existing `hasBadPathComponent` (`IsValidObjectPrefix`) | **0** |
-| `getVolDir` guard | Reused existing `hasBadPathComponent` | **0** |
-| `isVolumeRootAlias` | Newly written predicate | **3** |
-| `guardErasureParams` | Newly written predicate | **1** |
+| Guard component      | Source of semantics                                           | Regressions introduced during development |
+| :------------------- | :------------------------------------------------------------ | :---------------------------------------- |
+| `guardPaths`         | Reused existing `hasBadPathComponent` (`IsValidObjectPrefix`) | **0**                                     |
+| `getVolDir` guard    | Reused existing `hasBadPathComponent`                         | **0**                                     |
+| `isVolumeRootAlias`  | Newly written predicate                                       | **3**                                     |
+| `guardErasureParams` | Newly written predicate                                       | **1**                                     |
 {.wide .expand}
 
 `hasBadPathComponent` had already been exercised by production S3 traffic via `IsValidObjectPrefix` for years and structurally cannot reject any object key creatable through the S3 API. Every regression came from newly invented predicates where edge cases (`" "`, `"\\"`, `"..."`, `Size = -2`) diverged from S3 or OS semantics.

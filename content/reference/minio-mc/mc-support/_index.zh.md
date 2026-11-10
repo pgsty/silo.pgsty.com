@@ -18,16 +18,16 @@ upstream_modified: true
 
 ## 子命令 {#subcommands}
 
-| 命令 | SILO 行为 |
-| --- | --- |
-| `diag` | 生成本地健康报告 |
-| `perf` | 性能测试，结果在本地处理 |
-| `profile` | 服务端性能剖析与本地输出 |
-| `inspect` | 对象元数据诊断 |
-| `top` | 实时观察服务端活动 |
+| 命令              | SILO 行为                               |
+| ----------------- | --------------------------------------- |
+| `diag`            | 生成本地健康报告                        |
+| `perf`            | 性能测试，结果在本地处理                |
+| `profile`         | 服务端性能剖析与本地输出                |
+| `inspect`         | 对象元数据诊断                          |
+| `top`             | 实时观察服务端活动                      |
 | `callhome enable` | 禁用并返回退出码 1；disable/status 保留 |
-| `proxy set` | 禁用并返回退出码 1；remove 保留 |
-| `upload` | 禁用并返回退出码 1 |
+| `proxy set`       | 禁用并返回退出码 1；remove 保留         |
+| `upload`          | 禁用并返回退出码 1                      |
 
 用 `mcli support COMMAND --help` 查看参数。各诊断命令需要目标 SILO 的相应管理授权。
 参考 [diag](/zh/reference/minio-mc/mc-support-diag/)、[perf](/zh/reference/minio-mc/mc-support-perf/)、

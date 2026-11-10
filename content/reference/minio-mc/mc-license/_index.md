@@ -16,13 +16,14 @@ upstream_modified: true
 SILO uses AGPLv3. License commands preserve legacy command syntax and cannot
 purchase or activate a MinIO commercial subscription.
 
-| Command | Behavior |
-| --- | --- |
-| `mcli license info ALIAS` | Display locally stored license information without SUBNET access |
-| `mcli license unregister ALIAS` | Clear local license registration state |
+| Command                                 | Behavior                                                                     |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| `mcli license info ALIAS`               | Display locally stored license information without SUBNET access             |
+| `mcli license unregister ALIAS`         | Clear local license registration state                                       |
 | `mcli license update ALIAS license.key` | Retain the explicit local-file path; acceptance depends on the target server |
-| `mcli license update ALIAS` | Online renewal disabled, exit 1 |
-| `mcli license register ALIAS` | Registration disabled, exit 1 |
+| `mcli license update ALIAS`             | Online renewal disabled, exit 1                                              |
+| `mcli license register ALIAS`           | Registration disabled, exit 1                                                |
+{.wide .expand}
 
 ## Syntax {#syntax}
 

@@ -28,12 +28,12 @@ url: "/zh/blog/security/internode-path-containment/"
 
 早期的局部排查一直在数 handler 个数，先后数出 19、21、22 个端点，却每次都漏掉整片协议面。按参数到达底层 `xlStorage` 的通道来划分，内部节点通信共有四个协议面：
 
-| 协议面 | 入口数 | 是否受全局 HTTP 查询参数中间件保护 |
-| :-- | :-- | :-- |
-| Storage-REST HTTP **查询参数（query）** | 9 | **是**——此前曾被误判为无保护 |
-| Storage-REST HTTP **msgpack 请求体** | 4 | 否；`r.Form` 从不读取 msgpack 请求体 |
-| **Storage Grid RPC**（`/minio/grid/v1`） | 18 | 否；完成一次 WebSocket 升级后，后续帧不再进入 HTTP 中间件链 |
-| **Peer-S3 Grid RPC** | 5 | 否；不仅绕过 HTTP 中间件，还绕过 `getStorage()` 直达底层磁盘 |
+| 协议面                                   | 入口数 | 是否受全局 HTTP 查询参数中间件保护                           |
+| :--------------------------------------- | :----- | :----------------------------------------------------------- |
+| Storage-REST HTTP **查询参数（query）**  | 9      | **是**——此前曾被误判为无保护                                 |
+| Storage-REST HTTP **msgpack 请求体**     | 4      | 否；`r.Form` 从不读取 msgpack 请求体                         |
+| **Storage Grid RPC**（`/minio/grid/v1`） | 18     | 否；完成一次 WebSocket 升级后，后续帧不再进入 HTTP 中间件链  |
+| **Peer-S3 Grid RPC**                     | 5      | 否；不仅绕过 HTTP 中间件，还绕过 `getStorage()` 直达底层磁盘 |
 {.wide .expand}
 
 第一行纠正了此前的误判：只在 handler 函数体内部 grep 校验函数的排查方式，忽略了 9 个 query 参数接口其实已被全局 HTTP 中间件（`url.ParseQuery(RawQuery)` 填充 `r.Form`）保护。而第四行（`Peer-S3 Grid RPC`）则说明：任何只修补 `storage-rest-server.go` 的方案都碰不到直接操作底层磁盘的 `DeleteBucket` 等跨节点桶级 RPC。
@@ -54,17 +54,17 @@ url: "/zh/blog/security/internode-path-containment/"
 
 以下所有向量均在真实 `xlStorage` 实例上，通过真实的 REST / Grid 客户端配合植入哨兵文件实测复现：
 
-| 攻击向量 | 协议面 | 实测结果 |
-| :-- | :-- | :-- |
-| `WriteAll("vol", "../../x")` | Storage Grid RPC | 磁盘根目录（drive root）外 **任意文件写入** |
-| `RenameFile(".minio.sys", "", "bucket", "x")` | Storage Grid RPC | **将整个 `.minio.sys` 系统卷**（IAM、集群配置）搬入普通可读 S3 桶，**全程无需 `..`** |
-| `DeleteBucket("../victim", force)` | Peer-S3 Grid RPC | 磁盘根目录外 **整棵目录树递归删除** |
-| `DeleteBulk("vol", "")` | Storage-REST 请求体 | 整个卷被移入回收站目录 |
-| `ReadAll(volume: "../")` | 任意协议面 | 追加一个尾斜杠即可绕过 `getVolDir` 的 `".."` 精确匹配检查 |
-| `CheckParts` 传入零值 `Erasure`（`DataBlocks = 0`） | Storage Grid RPC | `WithDeadline` 内除零 panic，**节点进程直接终止** |
-| `AppendFile` 声明 `Content-Length: 64 GiB` | Storage-REST HTTP | **空请求体直接触发 68,719,574,840 字节内存分配** |
-| `DeleteVersions` 声明 1 亿条元素 | Storage-REST 请求体 | 10 字节 msgpack 头部 **触发 10.4 GB 切片预分配** |
-| 分片元数据 `Size = -2` | Storage Grid / `AddVersion` | **被截断的损坏分片被报告为健康**，后台自愈静默跳过修复 |
+| 攻击向量                                            | 协议面                      | 实测结果                                                                             |
+| :-------------------------------------------------- | :-------------------------- | :----------------------------------------------------------------------------------- |
+| `WriteAll("vol", "../../x")`                        | Storage Grid RPC            | 磁盘根目录（drive root）外 **任意文件写入**                                          |
+| `RenameFile(".minio.sys", "", "bucket", "x")`       | Storage Grid RPC            | **将整个 `.minio.sys` 系统卷**（IAM、集群配置）搬入普通可读 S3 桶，**全程无需 `..`** |
+| `DeleteBucket("../victim", force)`                  | Peer-S3 Grid RPC            | 磁盘根目录外 **整棵目录树递归删除**                                                  |
+| `DeleteBulk("vol", "")`                             | Storage-REST 请求体         | 整个卷被移入回收站目录                                                               |
+| `ReadAll(volume: "../")`                            | 任意协议面                  | 追加一个尾斜杠即可绕过 `getVolDir` 的 `".."` 精确匹配检查                            |
+| `CheckParts` 传入零值 `Erasure`（`DataBlocks = 0`） | Storage Grid RPC            | `WithDeadline` 内除零 panic，**节点进程直接终止**                                    |
+| `AppendFile` 声明 `Content-Length: 64 GiB`          | Storage-REST HTTP           | **空请求体直接触发 68,719,574,840 字节内存分配**                                     |
+| `DeleteVersions` 声明 1 亿条元素                    | Storage-REST 请求体         | 10 字节 msgpack 头部 **触发 10.4 GB 切片预分配**                                     |
+| 分片元数据 `Size = -2`                              | Storage Grid / `AddVersion` | **被截断的损坏分片被报告为健康**，后台自愈静默跳过修复                               |
 {.wide .expand}
 
 其中两条此前从未被发现的向量尤其关键：
@@ -78,10 +78,10 @@ url: "/zh/blog/security/internode-path-containment/"
 
 由于绝对路径与反斜杠前缀会被 `pathJoin` 的 `path.Clean` 折回 `volumeDir` 之下，能够突破前半句的只有 `..` 路径段，能够突破后半句的只有**卷根别名**（空串、纯斜杠、`.` 以及 Windows 下的尾随空格/句点组件）。提交 [`ca7baa670`](https://github.com/pgsty/silo/commit/ca7baa670) 在两处收口点执行这两条规则：
 
-| 收口点 | 源码位置 | 覆盖范围 |
-| :-- | :-- | :-- |
-| **卷名轴（Volume axis）** | `getVolDir` + `NSScanner` 显式守卫 | 全部 `xlStorage` 调用方，**含 Peer-S3 Grid RPC** |
-| **路径轴（Path axis）** | `getStorage()` 装饰器（`guardPaths`、`isVolumeRootAlias`） | 31 个远程 storage-REST / Storage Grid RPC 方法及其嵌套结构体字段 |
+| 收口点                    | 源码位置                                                   | 覆盖范围                                                         |
+| :------------------------ | :--------------------------------------------------------- | :--------------------------------------------------------------- |
+| **卷名轴（Volume axis）** | `getVolDir` + `NSScanner` 显式守卫                         | 全部 `xlStorage` 调用方，**含 Peer-S3 Grid RPC**                 |
+| **路径轴（Path axis）**   | `getStorage()` 装饰器（`guardPaths`、`isVolumeRootAlias`） | 31 个远程 storage-REST / Storage Grid RPC 方法及其嵌套结构体字段 |
 {.wide .expand}
 
 核心逻辑不到 40 行，不修改具体 handler，也不触碰本地纠删码热路径。有两处实现细节必须在未来的重构中保持：
@@ -110,12 +110,12 @@ url: "/zh/blog/security/internode-path-containment/"
 
 ## 复用既有语义与自造规则的回归对比 {#pattern}
 
-| 守卫组件 | 语义来源 | 开发期间引入的回归数 |
-| :-- | :-- | :-- |
-| `guardPaths` | 复用对象层既有的 `hasBadPathComponent`（`IsValidObjectPrefix`） | **0** |
-| `getVolDir` 守卫 | 复用对象层既有的 `hasBadPathComponent` | **0** |
-| `isVolumeRootAlias` | 新编写的规则 | **3** |
-| `guardErasureParams` | 新编写的规则 | **1** |
+| 守卫组件             | 语义来源                                                        | 开发期间引入的回归数 |
+| :------------------- | :-------------------------------------------------------------- | :------------------- |
+| `guardPaths`         | 复用对象层既有的 `hasBadPathComponent`（`IsValidObjectPrefix`） | **0**                |
+| `getVolDir` 守卫     | 复用对象层既有的 `hasBadPathComponent`                          | **0**                |
+| `isVolumeRootAlias`  | 新编写的规则                                                    | **3**                |
+| `guardErasureParams` | 新编写的规则                                                    | **1**                |
 {.wide .expand}
 
 `hasBadPathComponent` 作为对象层自身的校验规则（经 `IsValidObjectPrefix`），早已在多年真实 S3 流量下验证过，结构上不可能拒绝任何可通过 S3 API 合法创建的对象名；而全部 4 次回归都出在新造规则与 S3 / 操作系统边角语义不一致的地方。
