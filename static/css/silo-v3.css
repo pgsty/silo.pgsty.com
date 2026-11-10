@@ -370,7 +370,7 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
-/* Five rows travelling against each other — left, right, left, right, left. Durations
+/* Eight rows travelling against each other — left, right, left, right... Durations
    are staggered so the rows never lock step into a single moving block. */
 .key-metrics .adoption-logos {
   display: flex;
@@ -380,12 +380,15 @@ html[data-theme="light"] .silo-chip { box-shadow: var(--shadow-md), inset 0 0 0 
 .adoption-logos .logos-marquee-content {
   gap: 0;
   /* Duration covers the whole strip, so it scales with the number of logos. */
-  animation-duration: 110s;
+  animation-duration: 142s;
 }
-.adoption-logos .logos-marquee-row:nth-of-type(2) .logos-marquee-content { animation-duration: 124s; }
-.adoption-logos .logos-marquee-row:nth-of-type(3) .logos-marquee-content { animation-duration: 116s; }
-.adoption-logos .logos-marquee-row:nth-of-type(4) .logos-marquee-content { animation-duration: 131s; }
-.adoption-logos .logos-marquee-row:nth-of-type(5) .logos-marquee-content { animation-duration: 120s; }
+.adoption-logos .logos-marquee-row:nth-of-type(2) .logos-marquee-content { animation-duration: 158s; }
+.adoption-logos .logos-marquee-row:nth-of-type(3) .logos-marquee-content { animation-duration: 148s; }
+.adoption-logos .logos-marquee-row:nth-of-type(4) .logos-marquee-content { animation-duration: 166s; }
+.adoption-logos .logos-marquee-row:nth-of-type(5) .logos-marquee-content { animation-duration: 152s; }
+.adoption-logos .logos-marquee-row:nth-of-type(6) .logos-marquee-content { animation-duration: 162s; }
+.adoption-logos .logos-marquee-row:nth-of-type(7) .logos-marquee-content { animation-duration: 146s; }
+.adoption-logos .logos-marquee-row:nth-of-type(8) .logos-marquee-content { animation-duration: 156s; }
 .evidence-logo-set {
   display: flex;
   align-items: center;

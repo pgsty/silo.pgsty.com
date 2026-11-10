@@ -1470,9 +1470,9 @@ a.stat-item:hover { transform: translateY(-3px); border-color: var(--card-hover-
   animation: scroll-left var(--dur, 220s) linear infinite;
 }
 .testimonials-row[data-direction="right"] .testimonials-content { animation-name: scroll-right; }
-.testimonials-row:nth-of-type(1) .testimonials-content { --dur: 62s; }
-.testimonials-row:nth-of-type(2) .testimonials-content { --dur: 70s; }
-.testimonials-row:nth-of-type(3) .testimonials-content { --dur: 66s; }
+.testimonials-row:nth-of-type(1) .testimonials-content { --dur: 114s; }
+.testimonials-row:nth-of-type(2) .testimonials-content { --dur: 126s; }
+.testimonials-row:nth-of-type(3) .testimonials-content { --dur: 120s; }
 .testimonials-row:hover .testimonials-content { animation-play-state: paused; }
 
 .testimonial-card {

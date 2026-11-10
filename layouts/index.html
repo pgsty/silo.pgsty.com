@@ -337,13 +337,13 @@
         <div class="section-head" data-reveal>
           <p class="section-eyebrow"><span class="silkscreen">{{ if $zh }}用户之声{{ else }}THIRD-PARTY REPORTS{{ end }}</span><span class="eyebrow-trace" aria-hidden="true"></span></p>
           <h2 class="section-title">{{ if $zh }}人们怎么说 SILO{{ else }}What people say about SILO{{ end }}</h2>
-          <p class="section-subtitle">{{ if $zh }}2026 年 2–7 月的公开发言，原文引用。{{ else }}Public posts from February to July 2026, quoted verbatim.{{ end }}</p>
+          <p class="section-subtitle">{{ if $zh }}2026 年 1–11 月的公开发言，原文引用。{{ else }}Public posts from January to November 2026, quoted verbatim.{{ end }}</p>
         </div>
       </div>
 
       <div class="testimonials-marquee voice-wall" data-reveal aria-label="{{ if $zh }}第三方公开提及 SILO 的记录{{ else }}Public third-party mentions of SILO{{ end }}">
         {{ range $i, $row := $voices.rows }}
-        <div class="testimonials-row" data-direction="{{ cond (eq $i 0) "left" "right" }}">
+        <div class="testimonials-row" data-direction="{{ cond (eq (mod $i 2) 0) "left" "right" }}">
           <div class="testimonials-content">
             <div class="voice-set">
               {{ range $row }}{{ partial "voice-card.html" (dict "voice" . "static" false) }}{{ end }}
