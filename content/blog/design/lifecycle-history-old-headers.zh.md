@@ -14,7 +14,7 @@ url: "/zh/blog/design/lifecycle-history-old-headers/"
 
 本记录说明维护者复查 `RELEASE.2026-11-09T00-00-00Z`（[d99829238](https://github.com/pgsty/silo/commit/d998292387ccf1d2907749e0fb1575ef5fb93fda)）时发现的一个缺陷。它由该版本中的 [9f7b49369](https://github.com/pgsty/silo/commit/9f7b49369d4cbc1a5506af4bff05df05c8c8b6d3) 引入，这个提交是多池生命周期修复（[#278](https://github.com/pgsty/silo/issues/278)）的一部分。修复见 [PR #332](https://github.com/pgsty/silo/pull/332)，没有单独的 GitHub issue。
 
-**状态：**修复和回归测试在 [PR #332](https://github.com/pgsty/silo/pull/332) 中，已在第二轮对抗评审中获得通过；第一轮评审改动了修复方案，见[评审记录](#review)。尚未合并或发布。
+**状态：**已通过 [PR #332](https://github.com/pgsty/silo/pull/332) 合并到 main，提交为 [36c8d1683](https://github.com/pgsty/silo/commit/36c8d1683a6498bbfeb526ce58ae7bdac9f1c373)；合并前在第二轮对抗评审中获得通过，第一轮评审改动了修复方案，见[评审记录](#review)。尚未发布：`RELEASE.2026-11-09T00-00-00Z` 受影响。
 
 ## 简短回答 {#tldr}
 
@@ -184,7 +184,7 @@ case ObjectType:
 
 `cmd/erasure-server-pool-lifecycle-authority_test.go` 新增两个测试。`TestPoolsLifecycleHeaderEras` 针对两种旧头部、自愈盘数从 0 到 16 的每一种情况，构造 16 块盘的版本列表。`TestPoolsLifecycleHealedOldHeaders` 写入两个版本，先检查它们的标识带的就是盘上的头部，再给它们换上旧头部，清空并自愈一半的盘，先确认读取正常、自愈无事可做，然后在两个池上过期一个非当前版本，在一个池上过期全部版本。两个测试在 20261109 上和方案 5 下都失败，修复后通过。同时间版本和数据目录标志位这两行是一次性的探针，没有并入测试集。
 
-生命周期、恢复、delete-all、分层、迁移和 `xl.meta` 格式这几组共 192 个既有测试在修复后通过，`go vet` 无告警。完整测试集没有跑，也没有用旧版 MinIO 的真实数据跑过。
+生命周期、恢复、delete-all、分层、迁移和 `xl.meta` 格式这几组共 192 个既有测试在修复后通过，`go vet` 无告警。PR #332 的 CI 跑了完整的 `cmd` 测试集、race 选集和交叉编译，全部通过。没有用旧版 MinIO 的真实数据跑过。
 
 ## 评审记录 {#review}
 

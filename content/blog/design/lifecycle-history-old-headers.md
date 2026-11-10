@@ -14,7 +14,7 @@ url: "/blog/design/lifecycle-history-old-headers/"
 
 This record covers a defect found in a maintainer review of `RELEASE.2026-11-09T00-00-00Z` ([d99829238](https://github.com/pgsty/silo/commit/d998292387ccf1d2907749e0fb1575ef5fb93fda)). That release introduced it with [9f7b49369](https://github.com/pgsty/silo/commit/9f7b49369d4cbc1a5506af4bff05df05c8c8b6d3), part of the multi-pool lifecycle fix ([#278](https://github.com/pgsty/silo/issues/278)). The fix is [PR #332](https://github.com/pgsty/silo/pull/332); there is no separate GitHub issue.
 
-**Status:** the fix and its regression tests are in [PR #332](https://github.com/pgsty/silo/pull/332), approved by an adversarial review in its second round; the first round changed the fix, see [Review history](#review). Not merged or released.
+**Status:** merged to main as [36c8d1683](https://github.com/pgsty/silo/commit/36c8d1683a6498bbfeb526ce58ae7bdac9f1c373) through [PR #332](https://github.com/pgsty/silo/pull/332), after an adversarial review approved it in its second round; the first round changed the fix, see [Review history](#review). Not released yet: `RELEASE.2026-11-09T00-00-00Z` is affected.
 
 ## Short answer {#tldr}
 
@@ -184,7 +184,7 @@ The history that `authoritativeHistory` returns carries the header of the accept
 
 Two tests are added to `cmd/erasure-server-pool-lifecycle-authority_test.go`. `TestPoolsLifecycleHeaderEras` builds the version lists of 16 drives for every count of healed drives and both old headers. `TestPoolsLifecycleHealedOldHeaders` writes two versions, checks that their keys carry the stored headers, gives them old headers, wipes and heals half of the drives, checks that reads work and heal has nothing left to do, and then expires a noncurrent version with two pools and all versions with one. Both fail on 20261109 and with Option 5, and pass with the fix. The two rows on equal times and on the data-directory flag were run as one-off probes and are not part of the suite.
 
-The 192 existing tests of the lifecycle, restore, delete-all, tier, migration and `xl.meta` format suites pass with the fix, and `go vet` is clean. The full test suite and a run against data from an old MinIO release were not done.
+The 192 existing tests of the lifecycle, restore, delete-all, tier, migration and `xl.meta` format suites pass with the fix, and `go vet` is clean. The CI of PR #332 ran the full `cmd` suite, the race selection and the cross compile, and all passed. A run against data from an old MinIO release was not done.
 
 ## Review history {#review}
 
