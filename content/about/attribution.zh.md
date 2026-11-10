@@ -57,6 +57,13 @@ PGSTY SILO 软件本身另行授权，参见[许可协议](/zh/about/license/)�
 [PGSTY SILO Documentation](https://silo.pgsty.com) by PGSTY and MinIO, Inc., licensed under CC BY 4.0.
 ```
 
+## 安全研究致谢 {#security-acknowledgments}
+
+感谢通过私密渠道披露、Issue 报告、补丁提交或上游安全公告推动 SILO 软件栈安全加固的研究者与贡献者（完整参与记录见[贡献者名录](/zh/about/contributors/)与[安全公告台账](/zh/about/security-advisories/)）：
+
+- **SILO 安全报告与修复贡献者：** [Denis Babchuk（`@botdeniska`）](https://github.com/botdeniska)（多项 Object Lock、签名校验、复制与鉴权私密安全报告，含推动 [#330](https://github.com/pgsty/silo/pull/330) 及关联排查 [SN-2026-020](/zh/about/security-advisories/#sn-2026-020) 的报告）、[Eduardo Andrade Machado（`@EduardoAndradeMachado`）](https://github.com/EduardoAndradeMachado)（私密安全报告）、[adminsun（`@sun1024`）](https://github.com/sun1024)（私密安全报告）、[Oren Yomtov（`@orenyomtov`）](https://github.com/orenyomtov)（[SN-2026-011](/zh/about/security-advisories/#sn-2026-011)）、[Dominik Klug（`@nik0xFF`）](https://github.com/nik0xFF)（私密邮件安全报告）、[`@szopi00`](https://github.com/szopi00)（[SN-2026-015](/zh/about/security-advisories/#sn-2026-015)）、[Jiri Pejchal（`@jiri-pejchal`）](https://github.com/jiri-pejchal)（[SN-2026-014](/zh/about/security-advisories/#sn-2026-014) 与 `CVE-2026-79921`）、[Fabian Schmieder（`@metaneutrons`）](https://github.com/metaneutrons)（[SN-2026-010](/zh/about/security-advisories/#sn-2026-010)）、[Sarthak Mittal（`@naiveHobo`）](https://github.com/naiveHobo)（[SN-2026-017](/zh/about/security-advisories/#sn-2026-017)）、[`@AEGEGE`](https://github.com/AEGEGE)（[#196](https://github.com/pgsty/silo/pull/196)）、[`@ZouhairCharef`](https://github.com/ZouhairCharef)（`CVE-2026-34986`）以及 [Mario Fredenhagen（`@mfredenhagen`）](https://github.com/mfredenhagen)（`CVE-2026-39883`）。
+- **上游 MinIO 安全公告发现者（已在 SILO 中修复）：** [Simeon Poot（`@SimeonPoot`）](https://github.com/SimeonPoot)（[`CVE-2025-62506`](/zh/about/security-advisories/#cve-2025-62506) / [`GHSA-jjjj-jwhf-8rgr`](https://github.com/advisories/GHSA-jjjj-jwhf-8rgr)）、[Sang-Hoon Choi（`@KoreaSecurity`）](https://github.com/KoreaSecurity)（[`CVE-2026-33322`](/zh/about/security-advisories/#cve-2026-33322) / [`GHSA-5cx5-wh4m-82fh`](https://github.com/advisories/GHSA-5cx5-wh4m-82fh)）、[XlabAI（`@XlabAITeam`）](https://github.com/XlabAITeam)（[`CVE-2026-39414`](/zh/about/security-advisories/#cve-2026-39414) / [`GHSA-h749-fxx7-pwpg`](https://github.com/advisories/GHSA-h749-fxx7-pwpg)）、[skull（`@ddd`）](https://github.com/ddd)（[`CVE-2026-40344`](/zh/about/security-advisories/#cve-2026-40344) / [`GHSA-9c4q-hq6p-c237`](https://github.com/advisories/GHSA-9c4q-hq6p-c237) 与 [`CVE-2026-41145`](/zh/about/security-advisories/#cve-2026-41145) / [`GHSA-hv4r-mvr4-25vw`](https://github.com/advisories/GHSA-hv4r-mvr4-25vw)）以及 [Adrian Denkiewicz（`@adrian-doyensec`）](https://github.com/adrian-doyensec)（[`CVE-2026-42600`](/zh/about/security-advisories/#cve-2026-42600) / [`GHSA-xh8f-g2qw-gcm7`](https://github.com/advisories/GHSA-xh8f-g2qw-gcm7)）。
+
 ## 声明 {#disclaimer}
 
 除许可人另行承诺外，在法律允许的范围内，许可人按“现状”与“现有”方式提供许可材料，
@@ -66,5 +73,7 @@ PGSTY SILO 软件本身另行授权，参见[许可协议](/zh/about/license/)�
 
 ## 参见 {#see-also}
 
+- [贡献者与致谢](/zh/about/contributors/) —— 社区代码、方案、问题报告与安全研究贡献者名录
+- [安全公告台账](/zh/about/security-advisories/) —— CVE 与 `SN-2026-*` 安全修复的统一索引
 - [许可协议](/zh/about/license/) —— 软件采用 AGPLv3，文档采用 CC BY 4.0
 - [商标声明](/zh/about/trademark/) —— MinIO 这一名称在本站的使用方式

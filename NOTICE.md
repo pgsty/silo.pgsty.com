@@ -80,6 +80,20 @@ endorsed by, or sponsored by MinIO, Inc. "MinIO" is a trademark of MinIO, Inc.,
 used here solely for attribution and to identify the upstream project, its
 APIs, commands, compatibility surface, and historical documentation.
 
+## Security Research Acknowledgments
+
+Security disclosures, upstream advisory research, and security fixes across the
+Silo stack are credited in <https://silo.pgsty.com/about/contributors/> and
+<https://silo.pgsty.com/about/security-advisories/>, including direct reports
+and contributions by Denis Babchuk (`@botdeniska`), Eduardo Andrade Machado
+(`@EduardoAndradeMachado`), adminsun (`@sun1024`), Oren Yomtov (`@orenyomtov`),
+Dominik Klug (`@nik0xFF`), `@szopi00`, Jiri Pejchal (`@jiri-pejchal`), Fabian
+Schmieder (`@metaneutrons`), Sarthak Mittal (`@naiveHobo`), `@AEGEGE`,
+`@ZouhairCharef`, and Mario Fredenhagen (`@mfredenhagen`), as well as upstream
+MinIO advisory researchers Simeon Poot (`@SimeonPoot`), Sang-Hoon Choi
+(`@KoreaSecurity`), XlabAI (`@XlabAITeam`), skull (`@ddd`), and Adrian
+Denkiewicz (`@adrian-doyensec`).
+
 ## Disclaimer
 
 Unless otherwise separately undertaken by the Licensor, to the extent possible,

@@ -142,7 +142,7 @@ def record(data, zh=False, repo=None, website=False):
         subject = 'SILO and related projects' if repo is None else f'`{repo}`'
         noun = 'contributor' if count == 1 else 'contributors'
         verb = 'is' if count == 1 else 'are'
-        intro = f'As of **{date}**, **{count} community {noun}** {verb} credited in {subject}. The roll includes maintainers and every human issue / PR author' + (', along with security reporters who have agreed to be acknowledged.' if repo is None else '.')
+        intro = f'As of **{date}**, **{count} community {noun}** {verb} credited in {subject}. The roll includes maintainers and every human issue / PR author' + (', along with acknowledged security reporters.' if repo is None else '.')
         policy = 'Opening an issue or PR counts, whether open, closed, draft, or unmerged. Each account appears once. Merged PR authors come first, followed by other PR authors and reporters. Within each group, significant fixes, adopted proposals, and reports that led to fixes take priority, followed by first participation. Gold rings highlight significant contributions.'
         caveat = 'When a proposal was incorporated through a later repair, its adoption is credited alongside the original PR status. Automated accounts are excluded. Upstream authorship remains in Git history and copyright notices.'
     sections = [intro, policy, caveat, wall(entries, zh, repo, website), tables(data, zh, repo, website)]

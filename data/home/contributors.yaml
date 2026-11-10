@@ -245,17 +245,17 @@ code:
         merged: [11]
     firstContribution: "2026-10-17"
     what: "Contributed multi-pool migration, deletion and lifecycle safety, conditional multipart checks, native restore reports and verification,\
-      \ LDAP login and storage cleanup fixes, replication checksum repairs, and faster policy evaluation"
-    whatZh: "贡献多池迁移、删除与生命周期安全修复，条件分片上传检查，原生恢复问题报告与验证，LDAP 登录与存储清理修复，复制校验和修复及策略求值性能优化"
+      \ LDAP login and storage cleanup fixes, replication checksum repairs, faster policy evaluation, and private security disclosures"
+    whatZh: "贡献多池迁移、删除与生命周期安全修复，条件分片上传检查，原生恢复问题报告与验证，LDAP 登录与存储清理修复，复制校验和修复、策略求值性能优化及多项私密安全披露"
     featured: true
     name: "Denis Babchuk"
     note: "The migration repair from [#248](https://github.com/pgsty/silo/pull/248) was incorporated in [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020),\
       \ retaining the original authorship and DCO. The mixed-EC listing proposal in [#262](https://github.com/pgsty/silo/pull/262)\
       \ was superseded by [#267](https://github.com/pgsty/silo/pull/267). The author closed [#290](https://github.com/pgsty/silo/pull/290)\
-      \ after verifying the native-restore rework covered the reported defects."
+      \ after verifying the native-restore rework covered the reported defects. Also privately reported security issues in inherited Object Lock, signature verification, replication, and authorization paths (including the bulk-delete Object Lock report behind [#330](https://github.com/pgsty/silo/pull/330) and [SN-2026-020](https://silo.pgsty.com/about/security-advisories/#sn-2026-020))."
     noteZh: "[#248](https://github.com/pgsty/silo/pull/248) 的迁移修复已纳入 [60c7179dd](https://github.com/pgsty/silo/commit/60c7179ddbfcbd41a1fe67707230f5b360a43020)，保留原作者与\
       \ DCO。 [#262](https://github.com/pgsty/silo/pull/262) 的混合 EC 列举方案由 [#267](https://github.com/pgsty/silo/pull/267)\
-      \ 替代。作者验证原生恢复重构已覆盖报告的问题后，关闭了 [#290](https://github.com/pgsty/silo/pull/290)。"
+      \ 替代。作者验证原生恢复重构已覆盖报告的问题后，关闭了 [#290](https://github.com/pgsty/silo/pull/290)。另通过私密渠道报告了继承代码中的多项 Object Lock、签名校验、复制与鉴权安全问题（含推动 [#330](https://github.com/pgsty/silo/pull/330) 及关联排查 [SN-2026-020](https://silo.pgsty.com/zh/about/security-advisories/#sn-2026-020) 的批量删除对象锁报告）。"
   - handle: "910patin"
     activity:
       - repo: "pgsty/silo"
@@ -519,6 +519,46 @@ reports:
     activity: []
     note: "Acknowledged with the reporter's agreement; private report details are not included here."
     noteZh: "经报告者同意公开署名；此处不包含私密报告的技术细节。"
+  - handle: "SimeonPoot"
+    name: "Simeon Poot"
+    featured: true
+    what: "Discovered the session-policy privilege escalation in service accounts and STS (CVE-2025-62506)"
+    whatZh: "发现服务账号与 STS 会话策略权限提升漏洞（CVE-2025-62506）"
+    activity: []
+    note: "Publicly credited on upstream [GHSA-jjjj-jwhf-8rgr](https://github.com/advisories/GHSA-jjjj-jwhf-8rgr); inherited in SILO from [c1a49490](https://silo.pgsty.com/about/security-advisories/#cve-2025-62506)."
+    noteZh: "上游 [GHSA-jjjj-jwhf-8rgr](https://github.com/advisories/GHSA-jjjj-jwhf-8rgr) 公开致谢发现者；SILO 自 [c1a49490](https://silo.pgsty.com/zh/about/security-advisories/#cve-2025-62506) 继承该修复。"
+  - handle: "KoreaSecurity"
+    name: "Sang-Hoon Choi"
+    featured: true
+    what: "Discovered the OIDC JWT algorithm confusion vulnerability (CVE-2026-33322)"
+    whatZh: "发现 OIDC JWT 算法混淆漏洞（CVE-2026-33322）"
+    activity: []
+    note: "Publicly credited on upstream [GHSA-5cx5-wh4m-82fh](https://github.com/advisories/GHSA-5cx5-wh4m-82fh); remediated in SILO in [d24f449e0](https://silo.pgsty.com/about/security-advisories/#cve-2026-33322)."
+    noteZh: "上游 [GHSA-5cx5-wh4m-82fh](https://github.com/advisories/GHSA-5cx5-wh4m-82fh) 公开致谢发现者；SILO 在 [d24f449e0](https://silo.pgsty.com/zh/about/security-advisories/#cve-2026-33322) 中独立完成修复。"
+  - handle: "XlabAITeam"
+    name: "XlabAI"
+    featured: true
+    what: "Discovered the S3 Select oversized record memory exhaustion vulnerability (CVE-2026-39414)"
+    whatZh: "发现 S3 Select 超大记录内存耗尽漏洞（CVE-2026-39414）"
+    activity: []
+    note: "Publicly credited on upstream [GHSA-h749-fxx7-pwpg](https://github.com/advisories/GHSA-h749-fxx7-pwpg); remediated in SILO in [3252d5b7f and 5dc705936](https://silo.pgsty.com/about/security-advisories/#cve-2026-39414)."
+    noteZh: "上游 [GHSA-h749-fxx7-pwpg](https://github.com/advisories/GHSA-h749-fxx7-pwpg) 公开致谢发现者；SILO 在 [3252d5b7f 与 5dc705936](https://silo.pgsty.com/zh/about/security-advisories/#cve-2026-39414) 中完成修复。"
+  - handle: "ddd"
+    name: "skull"
+    featured: true
+    what: "Discovered the Snowball auto-extract and unsigned-trailer query authentication bypasses (CVE-2026-40344, CVE-2026-41145)"
+    whatZh: "发现 Snowball 自动解包与无签名尾标查询参数认证绕过漏洞（CVE-2026-40344、CVE-2026-41145）"
+    activity: []
+    note: "Publicly credited on upstream [GHSA-9c4q-hq6p-c237](https://github.com/advisories/GHSA-9c4q-hq6p-c237) and [GHSA-hv4r-mvr4-25vw](https://github.com/advisories/GHSA-hv4r-mvr4-25vw); remediated in SILO in [efb6e5b00](https://silo.pgsty.com/about/security-advisories/#cve-2026-40344) and [f444b6f37](https://silo.pgsty.com/about/security-advisories/#cve-2026-41145)."
+    noteZh: "上游 [GHSA-9c4q-hq6p-c237](https://github.com/advisories/GHSA-9c4q-hq6p-c237) 与 [GHSA-hv4r-mvr4-25vw](https://github.com/advisories/GHSA-hv4r-mvr4-25vw) 公开致谢发现者；SILO 在 [efb6e5b00](https://silo.pgsty.com/zh/about/security-advisories/#cve-2026-40344) 与 [f444b6f37](https://silo.pgsty.com/zh/about/security-advisories/#cve-2026-41145) 中完成修复。"
+  - handle: "adrian-doyensec"
+    name: "Adrian Denkiewicz"
+    featured: true
+    what: "Reported the internode ReadMultiple msgpack path traversal (CVE-2026-42600)"
+    whatZh: "报告节点间 ReadMultiple msgpack 路径穿越漏洞（CVE-2026-42600）"
+    activity: []
+    note: "Publicly credited on upstream [GHSA-xh8f-g2qw-gcm7](https://github.com/advisories/GHSA-xh8f-g2qw-gcm7); remediated in SILO in [73ac52472](https://silo.pgsty.com/about/security-advisories/#cve-2026-42600) and followed by the [SN-2026-002](https://silo.pgsty.com/about/security-advisories/#sn-2026-002) internode containment audit."
+    noteZh: "上游 [GHSA-xh8f-g2qw-gcm7](https://github.com/advisories/GHSA-xh8f-g2qw-gcm7) 公开致谢报告者；SILO 在 [73ac52472](https://silo.pgsty.com/zh/about/security-advisories/#cve-2026-42600) 中移除该接口，并进一步完成 [SN-2026-002](https://silo.pgsty.com/zh/about/security-advisories/#sn-2026-002) 内部节点路径包含审计。"
   - handle: "mosesdd"
     what: "Requested a maintained Helm chart"
     whatZh: "提出维护 Helm Chart 的需求"
