@@ -37,26 +37,26 @@ The MinIO Kubernetes Operator provides three approaches for configuring TLS on M
 
 **Automatic TLS using Cluster Signing API**
 
-> For Kubernetes clusters with a valid [TLS Cluster Signing Certificate](/operations/deployments/k8s-minio-operator/#minio-k8s-deploy-operator-tls),the MinIO Kubernetes Operator can automatically generate TLS certificates while [deploying](/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant-security) or [modifying](/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/#minio-k8s-modify-minio-tenant-security) a MinIO Tenant.
+For Kubernetes clusters with a valid [TLS Cluster Signing Certificate](/operations/deployments/k8s-minio-operator/#minio-k8s-deploy-operator-tls), the MinIO Kubernetes Operator can automatically generate TLS certificates while [deploying](/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant-security) or [modifying](/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/#minio-k8s-modify-minio-tenant-security) a MinIO Tenant.
+
+The Kubernetes TLS API uses the Kubernetes cluster Certificate Authority (CA) signature algorithm when generating new TLS certificates. See [Supported TLS Cipher Suites](#minio-tls-supported-cipher-suites) for a complete list of MinIO’s supported TLS Cipher Suites and recommended signature algorithms.
+
+Before using the CA bundle at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` to connect to a Tenant, verify that it contains the actual issuer of the Tenant TLS certificate; do not assume the issuers always match. If they differ, supply the correct CA certificate to clients separately, and ensure the certificate covers the [Service DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) used by the client.
+
+> [!NOTE]
+> **Subject Alternative Name Certificates**
 >
-> The Kubernetes TLS API uses the Kubernetes cluster Certificate Authority (CA) signature algorithm when generating new TLS certificates. See [Supported TLS Cipher Suites](#minio-tls-supported-cipher-suites) for a complete list of MinIO’s supported TLS Cipher Suites and recommended signature algorithms.
->
-> Before using the CA bundle at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` to connect to a Tenant, verify that it contains the actual issuer of the Tenant TLS certificate; do not assume the issuers always match. If they differ, supply the correct CA certificate to clients separately, and ensure the certificate covers the [Service DNS name](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) used by the client.
->
-> > [!NOTE]
-> > **Subject Alternative Name Certificates**
-> >
-> > If you have a custom Subject Alternative Name (SAN) certificate that is *not* also a wildcard cert, the TLS certificate SAN **must** apply to the hostname for its parent node. Without a wildcard, the SAN must match exactly to be able to connect to the tenant.
+> If you have a custom Subject Alternative Name (SAN) certificate that is *not* also a wildcard cert, the TLS certificate SAN **must** apply to the hostname for its parent node. Without a wildcard, the SAN must match exactly to be able to connect to the tenant.
 
 **cert-manager Certificate Management**
 
-> The MinIO Operator supports using [cert-manager](https://cert-manager.io/) as a full replacement for its built-in automatic certificate management *or* user-driven manual certificate management. For instructions for deploying the MinIO Operator and tenants using cert-manager, refer to the [cert-manager page](/operations/network-encryption/cert-manager/#minio-certmanager).
+The MinIO Operator supports using [cert-manager](https://cert-manager.io/) as a full replacement for its built-in automatic certificate management *or* user-driven manual certificate management. For instructions for deploying the MinIO Operator and tenants using cert-manager, refer to the [cert-manager page](/operations/network-encryption/cert-manager/#minio-certmanager).
 
 **Manual Certificate Management**
 
-> The Tenant CRD field `spec.externalCertsSecret` references the TLS certificate [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types). Use the Secret type and certificate/key filenames required by your Operator version.
->
-> You can specify multiple certificates to support Tenants which have multiple assigned hostnames.
+The Tenant CRD field `spec.externalCertsSecret` references the TLS certificate [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types). Use the Secret type and certificate/key filenames required by your Operator version.
+
+You can specify multiple certificates to support Tenants which have multiple assigned hostnames.
 
 ### Self-signed, Internal, Private Certificates, and Public CAs with Intermediate Certificates {#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates}
 
@@ -185,18 +185,18 @@ Place the certificate file for each CA into the `/CAs` subdirectory. Ensure all 
 
 MinIO recommends generating ECDSA (e.g. [NIST P-256 curve](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)) or EdDSA (e.g. <a id="index-0" data-td-print-local></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)) TLS private keys/certificates due to their lower computation requirements compared to RSA.
 
-MinIO supports the following TLS 1.2 and 1.3 cipher suites as supported by [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17.1:src/crypto/tls/cipher_suites.go;l=52). The lists mark recommended algorithms with a <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> icon:
+MinIO supports the following TLS 1.2 and 1.3 cipher suites as supported by [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17.1:src/crypto/tls/cipher_suites.go;l=52). Recommended algorithms are marked with **(Recommended)**:
 
 {{< tabs group="tls-13-tls-12" >}}
 {{< tab label="TLS 1.3" value="tls-13" >}}
-- `TLS_CHACHA20_POLY1305_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
+- `TLS_CHACHA20_POLY1305_SHA256` **(Recommended)**
 - `TLS_AES_128_GCM_SHA256`
 - `TLS_AES_256_GCM_SHA384`
 {{< /tab >}}
 {{< tab label="TLS 1.2" value="tls-12" >}}
-- `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
-- `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
-- `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
+- `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305` **(Recommended)**
+- `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256` **(Recommended)**
+- `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384` **(Recommended)**
 - `TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305`
 - `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`
 - `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`

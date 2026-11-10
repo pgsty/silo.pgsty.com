@@ -8,18 +8,17 @@ upstream_modified: true
 
 <a id="minio-object-retention"></a>
 <a id="minio-object-locking"></a>
-<a id="id1" data-td-print-local></a>
 
 - [Object locking and retention overview](https://youtu.be/Hk9Z-sltUu8?ref=docs)
 - [Object locking and retention lab](https://youtu.be/thNus-DL1u4?ref=docs)
 
 ## Overview {#overview}
 
-**SILO 20261018 upgrade:** the [release](/blog/release/silo-20261018/#security) repairs retention authorization and protected-version overwrites (SN-2026-015/016). Server 20260916 remains affected. Every retention update requires `s3:PutObjectRetention`; weakening active GOVERNANCE additionally requires the bypass header and `s3:BypassGovernanceRetention`. Upgrade every write-accepting Server and replication site. Updating a client or Console does not patch the Server, and upgrading does not restore previously overwritten data or retention. See the [security advisory](/blog/security/20260926-governance-retention-bypass/) for affected paths and mitigations.
+**SILO 20261109 update:** [SILO 20261109](/blog/release/silo-20261109/) enforces Object Lock checks across bulk deletion, multi-pool versions, directory `null` versions, replicated purges, lifecycle delete-all rules, and batch jobs; upgrade all serving nodes so every pool and site enforces the same lock rules. Earlier, [SILO 20261018](/blog/release/silo-20261018/#security) repaired retention authorization and protected-version overwrites (SN-2026-015/016; Server 20260916 remains affected): every retention update requires `s3:PutObjectRetention`, and weakening active `GOVERNANCE` retention additionally requires `x-amz-bypass-governance-retention: true` and `s3:BypassGovernanceRetention`. Updating a client or Console does not patch the Server, and upgrading does not restore previously overwritten data or retention. See the [security advisory](/blog/security/20260926-governance-retention-bypass/) for affected paths and mitigations.
 
 MinIO Object Locking (“Object Retention”) enforces Write-Once Read-Many (WORM) immutability to protect [versioned objects](/administration/object-management/object-versioning/#minio-bucket-versioning) from deletion. MinIO supports both [duration based object retention](#minio-object-locking-retention-modes) and [indefinite legal hold retention](#minio-object-locking-legalhold).
 
-MinIO Object Locking provides key data retention compliance and meets SEC17a-4(f), FINRA 4511(C), and CFTC 1.31(c)-(d) requirements as per [Cohasset Associates](https://min.io/cohasset?ref-docs).
+Historical upstream MinIO Object Locking received a third-party compliance assessment for SEC 17a-4(f), FINRA 4511(c), and CFTC 1.31(c)-(d) from [Cohasset Associates](https://min.io/cohasset?ref-docs). That assessment applies only to the evaluated historical upstream MinIO release and has not been independently re-certified for PGSTY SILO.
 
 {{< cards >}}
 {{< card title="Bucket Without Locking" image="/images/retention/minio-versioning-delete-object.svg" image_alt="Deleting an Object" >}}
@@ -44,7 +43,7 @@ You can only enable object locking during bucket creation as per [S3 behavior](h
 
 ### Interaction with Versioning {#interaction-with-versioning}
 
-Objects held under WORM locked are immutable until the lock expires or is explicitly lifted. Locking is per-object version, where each version is independently immutable.
+Objects held under a WORM lock are immutable until the lock expires or is explicitly lifted. Locking is per-object version, where each version is independently immutable.
 
 If an application performs an unversioned delete operation on a locked object, the operation produces a [delete marker](/administration/object-management/object-versioning/#minio-bucket-versioning-delete). Attempts to explicitly delete any WORM-locked object fail with an error. Delete Markers are *not* eligible for protection under WORM locking. See the S3 documentation on [Managing delete markers and object lifecycles](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-managing.html#object-lock-managing-lifecycle) for more information.
 
@@ -110,6 +109,16 @@ $ mc ls --versions play/locking-guide
 
 However, an expiration rule for *non-current* objects older than 7 days would only take effect *after* the configured WORM lock expires. Since the bucket has a 45 day `GOVERNANCE` retention set, only the `v1` version of `data.csv` is unlocked and therefore eligible for deletion.
 
+In [SILO 20261109](/blog/release/silo-20261109/), lifecycle delete-all actions (`ExpiredObjectAllVersions` and `DelMarkerExpiration`, [#297](https://github.com/pgsty/silo/issues/297)) and batch `expire` and `keyrotate` jobs ([#310](https://github.com/pgsty/silo/issues/310)) also preserve Object Lock protected versions instead of bypassing active retention or legal holds.
+
+### Interaction with Bulk Deletion and Replication {#interaction-with-bulk-deletion-and-replication}
+
+Starting in [SILO 20261109](/blog/release/silo-20261109/), bulk deletion and replication enforce the following Object Lock guarantees:
+
+- **Sequential mutation-locked version purges (`DeleteObjects`):** S3 `DeleteObjects` checks physical version removals sequentially under the same mutation lock used for retention and legal-hold updates, merging protection state across all server pools (commit [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)). Large version-purge batches in Object Lock buckets therefore take longer, while delete-marker creation and ordinary buckets retain the concurrent bulk path.
+- **Directory `null`-version protection:** Bulk deletion checks Object Lock retention and legal hold on directory objects before removing a directory `null` version (commit [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)).
+- **Target protection on replicated deletes:** Bucket and site replication preserve the target's legal hold and retention on replicated deletes (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)). A source purge that bypassed `GOVERNANCE` retention does not bypass retention on a target copy that still carries active protection; the target refuses the purge and the source retries.
+
 ## Tutorials {#tutorials}
 
 ### Create Bucket with Object Locking Enabled {#create-bucket-with-object-locking-enabled}
@@ -137,7 +146,7 @@ Use the [`mc retention set`](/reference/minio-mc/mc-retention-set/#command-mc.re
 mc retention set --recursive --default MODE DURATION ALIAS/BUCKET
 ```
 
-- Replace [`MODE`](/reference/minio-mc/mc-retention-set/#mc.retention.set.MODE) with either either [COMPLIANCE](#minio-object-locking-compliance) or [GOVERNANCE](#minio-object-locking-governance).
+- Replace [`MODE`](/reference/minio-mc/mc-retention-set/#mc.retention.set.MODE) with either [COMPLIANCE](#minio-object-locking-compliance) or [GOVERNANCE](#minio-object-locking-governance).
 - Replace [`DURATION`](/reference/minio-mc/mc-retention-set/#mc.retention.set.VALIDITY) with the duration for which the object lock remains in effect.
 - Replace [`ALIAS`](/reference/minio-mc/mc-retention-set/#mc.retention.set.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of a configured MinIO deployment.
 - Replace [`BUCKET`](/reference/minio-mc/mc-retention-set/#mc.retention.set.ALIAS) with the name of the bucket on which to set the default retention rule.
@@ -163,30 +172,11 @@ mc legalhold set ALIAS/PATH
 
 MinIO implements the following [S3 Object Locking Modes](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html):
 
-<table>
-  <thead>
-    <tr>
-      <th><p>Mode</p></th>
-      <th><p>Summary</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><a href="#minio-object-locking-governance">GOVERNANCE Mode</a></p></td>
-      <td><p>Prevents any operation that would mutate or modify the object or its
-locking settings by non-privileged users.</p><p>Users with the <a href="/administration/identity-access-management/policy-based-access-control/#policy-action.s3-BypassGovernanceRetention"><code>s3:BypassGovernanceRetention</code></a> permission
-on the bucket or object can modify the object or its locking settings.</p><p>MinIO lifts the lock automatically after the configured retention rule
-duration has passed.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="#minio-object-locking-compliance">COMPLIANCE Mode</a></p></td>
-      <td><p>Prevents any operation that would mutate or modify the object or its
-locking settings.</p><p>No MinIO user can modify the object or its settings, including the
-<a href="/administration/identity-access-management/minio-user-management/#minio-users-root">MinIO root</a> user.</p><p>MinIO lifts the lock automatically after the configured retention rule
-duration has passed.</p></td>
-    </tr>
-  </tbody>
-</table>
+| Mode                                                | Summary                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [GOVERNANCE Mode](#minio-object-locking-governance) | Prevents non-privileged users from mutating or modifying the object or its locking settings. Users with [`s3:BypassGovernanceRetention`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-BypassGovernanceRetention) on the bucket or object can modify the object or its locking settings when passing the bypass header. SILO lifts the lock automatically after the configured retention duration expires. |
+| [COMPLIANCE Mode](#minio-object-locking-compliance) | Prevents any operation that mutates or modifies the object or its locking settings. No user can modify the object or shorten its retention before expiration, including the [root](/administration/identity-access-management/minio-user-management/#minio-users-root) user. SILO lifts the lock automatically after the configured retention duration expires.                                                                                       |
+{.wide .expand}
 
 <a id="minio-object-locking-governance"></a>
 

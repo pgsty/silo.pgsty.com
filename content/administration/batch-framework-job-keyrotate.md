@@ -21,7 +21,7 @@ The `keyrotate` batch job type cycles the [sse-s3 or sse-kms keys](/operations/s
 The YAML configuration supports filters to restrict key rotation to a specific set of objects by creation date, tags, metadata, or kms key. You can also define retry attempts or set a notification endpoint and token.
 
 > [!NOTE]
-> **Next-release SILO lifecycle (`pgsty/silo` `main`):** Batch `keyrotate` revalidates the submitting principal's credentials and permissions while running (`461a7df`), pauses and retries on temporary IAM errors, incomplete bucket listings, or pool rebalance/decommission conflicts (`5ce52c5`), and reports refused objects (`keysRefused`, `complete-with-skips`) separately from clean completions. See [SILO batch job lifecycle](/administration/batch-framework/#silo-lifecycle).
+> **[SILO 20261109](/blog/release/silo-20261109/) lifecycle and multi-pool safety:** Batch `keyrotate` enforces the authenticated submitter's local data permissions throughout execution and preserves Object Lock retention and legal holds ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)), scopes pool updates so object copies on other server pools remain readable ([#312](https://github.com/pgsty/silo/issues/312)), pauses and retries on temporary IAM or authorization outages, incomplete bucket listings, or pool rebalance and decommission conflicts ([#313](https://github.com/pgsty/silo/issues/313)), and reports skipped or refused work (`versionsSkippedLocked`, `keysRefused`, `complete-with-skips`) separately from clean completions. See [SILO batch job lifecycle](/administration/batch-framework/#silo-lifecycle).
 
 <a id="minio-batch-framework-keyrotate-job-ref"></a>
 

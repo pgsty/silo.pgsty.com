@@ -33,7 +33,7 @@ MinIO also requires the following administrative permissions on the cluster in w
 - [`admin:SetTier`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-SetTier)
 - [`admin:ListTier`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-ListTier)
 
-For example, the following policy provides permission for configuring object transition lifecycle management rules on any bucket in the cluster:.
+For example, the following policy provides permission for configuring object transition lifecycle management rules on any bucket in the cluster:
 
 ```json
 {
@@ -108,7 +108,15 @@ MinIO tiering behavior depends on the remote storage returning objects immediate
 
 MinIO creates metadata for each transitioned object that identifies its location on the remote storage. Applications cannot trivially identify and access a transitioned object independent of MinIO. Availability of the transitioned data therefore depends on the same core protections that [erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding) and distributed deployment topologies provide for all objects on the MinIO deployment. Using object transition does not provide any additional business continuity or disaster recovery benefits.
 
-Workloads that require <abbr title="Business Continuity/Disaster Recovery">BC/DR</abbr> protections should implement MinIO [Server-Side replication](/administration/bucket-replication/#minio-bucket-replication-serverside). Replication ensures objects remains preserved on the remote replication site, such that you can resynchronize from the remote in the event of partial or total data loss. See [Resynchronization (Disaster Recovery)](/administration/bucket-replication/#minio-replication-behavior-resync) for more complete documentation on using replication to recover after partial or total data loss.
+Workloads that require <abbr title="Business Continuity/Disaster Recovery">BC/DR</abbr> protections should implement MinIO [Server-Side replication](/administration/bucket-replication/#minio-bucket-replication-serverside). Replication ensures objects remain preserved on the remote replication site, such that you can resynchronize from the remote in the event of partial or total data loss. See [Resynchronization (Disaster Recovery)](/administration/bucket-replication/#minio-replication-behavior-resync) for more complete documentation on using replication to recover after partial or total data loss.
+
+### Restore, Expiry, and Pool Decommissioning {#restore-expiry-and-pool-decommissioning}
+
+Starting in [SILO 20261109](/blog/release/silo-20261109/), remote-tier operations enforce the following behavior:
+
+- **Two-phase in-place native restore:** Native restore (`POST ?restore`) downloads remote-tier data outside the object write lock ([#284](https://github.com/pgsty/silo/issues/284)) and restores the exact addressed version in place without changing version ordering or hanging across multiple pools ([#289](https://github.com/pgsty/silo/issues/289)). See [`mc ilm restore`](/reference/minio-mc/mc-ilm-restore/).
+- **Restored-copy and cross-pool retention:** Expiring a restored copy removes only the temporary local cache while keeping the object version and its remote-tier data intact ([#281](https://github.com/pgsty/silo/issues/281)). SILO retains remote-tier payloads while another server pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)).
+- **Pool decommissioning:** Keep configured remote tiers registered until pool decommissioning completes so SILO can migrate or verify tiered object versions cleanly across buckets ([#307](https://github.com/pgsty/silo/issues/307)).
 
 ## Procedure {#procedure}
 
@@ -206,7 +214,7 @@ Use the [`mc ilm rule add`](/reference/minio-mc/mc-ilm-rule-add/#command-mc.ilm.
 mc ilm rule add ALIAS/BUCKET \
 --transition-tier TIERNAME \
 --transition-days DAYS \
---noncurrent-transition-days NONCURRENT_DAYS
+--noncurrent-transition-days NONCURRENT_DAYS \
 --noncurrent-transition-tier TIERNAME
 ```
 

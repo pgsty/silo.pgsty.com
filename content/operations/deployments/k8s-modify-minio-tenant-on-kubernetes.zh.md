@@ -7,6 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio-tenant" data-td-print-local></a>
+<a id="modify-a-minio-tenant"></a>
 <a id="minio-k8s-modify-minio-tenant-security"></a>
 <a id="minio-k8s-modify-minio-tenant"></a>
 
@@ -31,9 +32,9 @@ kubectl apply -k ~/kustomization/TENANT-NAME/
 helm upgrade TENANT-NAME minio-operator/tenant -f values.yaml -n TENANT-NAMESPACE
 ```
 
-上述命令默认使用的是 MinIO Operator Chart 仓库。 如果你是手动安装 Chart，或使用了不同的仓库名称，请在命令中指定相应的 chart 或名称。
+上述命令默认使用 MinIO Operator Chart 仓库（`v7.1.1`）。请确保 `tenant.image` 保持固定在已验证的 `docker.io/pgsty/silo` 版本，例如 `RELEASE.2026-11-09T00-00-00Z`（[SILO 20261109](/zh/blog/release/silo-20261109/)）。如果你管理的是独立 [`helm/silo` Chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo) 部署（[#296](https://github.com/pgsty/silo/issues/296)）并使用 `helm upgrade --reuse-values`，请显式传入 `--set image.tag=RELEASE.2026-11-09T00-00-00Z`，避免 Helm 继续保留此前存储的标签。
 
-分别将 `TENANT-NAME` 和 `TENANT-NAMESPACE` 替换为租户的名称和命名空间。 你可以使用 `helm list -n TENANT-NAMESPACE` 验证租户名称。
+分别将 `TENANT-NAME` 和 `TENANT-NAMESPACE` 替换为租户的名称和命名空间。你可以使用 `helm list -n TENANT-NAMESPACE` 验证租户名称。
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -45,9 +46,13 @@ helm upgrade TENANT-NAME minio-operator/tenant -f values.yaml -n TENANT-NAMESPAC
 >
 > 如果 MinIO 租户无法在容器操作系统的信任库 *或* 显式挂载的 CA 中匹配到传入客户端 TLS 证书的签发者，MinIO 会将该连接视为无效并拒绝。
 
-## 管理租户 Pool {#pool}
+<a id="pool" data-td-print-local></a>
 
-### 指定 Runtime Class {#runtime-class}
+## 管理租户 Pool {#manage-tenant-pools}
+
+<a id="runtime-class" data-td-print-local></a>
+
+### 指定 Runtime Class {#specify-runtime-class}
 
 > [!NOTE]
 > **新增: Console**
@@ -56,9 +61,11 @@ helm upgrade TENANT-NAME minio-operator/tenant -f values.yaml -n TENANT-NAMESPAC
 
 在为租户添加新 pool 或修改现有 pool 时，你可以为这些 pool 指定 [Runtime Class Name](https://kubernetes.io/docs/concepts/containers/runtime-class/)。
 
-### 退役租户 服务器池 {#id2}
+<a id="id2" data-td-print-local></a>
 
-MinIO Operator 4.4.13 及更高版本支持退役租户中的 服务器池。 具体而言，你可以遵循 [Decommission a Server pool](https://silo.pgsty.com/zh/operations/deployments/baremetal-decommission-server-pool/) 步骤先从租户中移除该 pool，然后编辑租户 YAML，将该 pool 从 StatefulSet 中移除。 移除租户 pool 时，请确保所有剩余 pool 的 `spec.pools.[n].name` 字段都具有明确取值。
+### 退役租户 服务器池 {#decommission-a-tenant-server-pool}
+
+MinIO Operator 4.4.13 及更高版本支持退役租户中的服务器池。请按照[退役服务器池](/zh/operations/deployments/baremetal-decommission-server-pool/)流程先将该 pool 从租户中排空，再编辑租户 YAML 将该 pool 从 StatefulSet 中移除。移除租户 pool 时，请确保所有剩余 pool 的 `spec.pools[n].name` 字段都具有明确取值。
 
 > [!NOTE]
 > **先下线再新增时保持 pool 顺序**

@@ -16,7 +16,7 @@ upstream_modified: true
 
 Use MinIO Object Lifecycle Management to create rules for time or date based automatic transition or expiry of objects. For object transition, MinIO automatically moves the object to a configured remote storage tier. For expiration, SILO applies the configured deletion action: this can create a delete marker or permanently remove a version, depending on bucket versioning and the rule.
 
-MinIO derives it’s behavior and syntax from [S3 lifecycle](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html) for compatibility in migrating workloads and lifecycle rules from S3 to MinIO. For example, you can export S3 lifecycle management rules and import them into MinIO or vice-versa. MinIO uses JSON to describe lifecycle management rules and may require conversion to or from XML as part of importing S3 lifecycle rules.
+MinIO derives its behavior and syntax from [S3 lifecycle](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html) for compatibility in migrating workloads and lifecycle rules from S3 to MinIO. For example, you can export S3 lifecycle management rules and import them into MinIO or vice-versa. MinIO uses JSON to describe lifecycle management rules and may require conversion to or from XML as part of importing S3 lifecycle rules.
 
 <a id="minio-lifecycle-management-tiering"></a>
 
@@ -77,7 +77,7 @@ MinIO tiering behavior depends on the remote storage returning objects immediate
 
 MinIO creates metadata for each transitioned object that identifies its location on the remote storage. Applications cannot trivially identify and access a transitioned object independent of MinIO. Availability of the transitioned data therefore depends on the same core protections that [erasure coding](/operations/concepts/erasure-coding/#minio-erasure-coding) and distributed deployment topologies provide for all objects on the MinIO deployment. Using object transition does not provide any additional business continuity or disaster recovery benefits.
 
-Workloads that require <abbr title="Business Continuity/Disaster Recovery">BC/DR</abbr> protections should implement MinIO [Server-Side replication](/administration/bucket-replication/#minio-bucket-replication-serverside). Replication ensures objects remains preserved on the remote replication site, such that you can resynchronize from the remote in the event of partial or total data loss. See [Resynchronization (Disaster Recovery)](/administration/bucket-replication/#minio-replication-behavior-resync) for more complete documentation on using replication to recover after partial or total data loss.
+Workloads that require <abbr title="Business Continuity/Disaster Recovery">BC/DR</abbr> protections should implement MinIO [Server-Side replication](/administration/bucket-replication/#minio-bucket-replication-serverside). Replication ensures objects remain preserved on the remote replication site, such that you can resynchronize from the remote in the event of partial or total data loss. See [Resynchronization (Disaster Recovery)](/administration/bucket-replication/#minio-replication-behavior-resync) for more complete documentation on using replication to recover after partial or total data loss.
 
 ### Versioned Buckets {#versioned-buckets}
 
@@ -85,19 +85,26 @@ MinIO adopts [S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide
 
 To transition noncurrent object versions, specify the [`--noncurrent-transition-days`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-days) and [`--noncurrent-transition-tier`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-tier) options when creating the transition rule.
 
+Starting in [SILO 20261109](/blog/release/silo-20261109/), remote-tier management and [`mc ilm restore`](/reference/minio-mc/mc-ilm-restore/) include the following updates:
+
+- **Two-phase in-place native restore:** Native restore (`POST ?restore`, commit [`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)) stages remote-tier downloads outside the object write lock ([#284](https://github.com/pgsty/silo/issues/284)) and validates ownership under a short lock before publishing the restored copy in place without changing version ordering or getting stuck across multiple pools ([#289](https://github.com/pgsty/silo/issues/289)).
+- **Restored-copy and remote-tier safety:** Expiring a restored copy removes only the temporary local cache while keeping the object version and its remote-tier data intact ([#281](https://github.com/pgsty/silo/issues/281)). SILO excludes tier free-version markers from ordinary version history ([#263](https://github.com/pgsty/silo/issues/263)) and retains remote-tier data while another server pool still references it ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)).
+
 <a id="minio-lifecycle-management-expiration"></a>
 
 ## Object Expiration {#object-expiration}
 
-**20261026 release change:** In the [Server 20261026](/blog/release/silo-20261026/#server-20261026), when lifecycle expiration only writes a delete marker (including on non-null versions in versioning-suspended buckets), SILO preserves the prior version's remote-tier payload until that specific version is permanently deleted and no longer held by retention or surviving references. Server 20261018 does not include this fix; remote payloads deleted on earlier releases must be restored from backups.
+**SILO 20261109 release changes:** In [SILO 20261109](/blog/release/silo-20261109/), lifecycle expiration evaluates under the object lock across all server pools and requires an authoritative quorum before removing versions ([#278](https://github.com/pgsty/silo/issues/278)). Delete-all actions (`ExpiredObjectAllVersions` and `DelMarkerExpiration`) act only on the exact expired key rather than child keys below that prefix and refuse keys with tiered or Object Lock protected versions ([#297](https://github.com/pgsty/silo/issues/297)). Rules whose sole action is `DelMarkerExpiration` execute as configured ([#268](https://github.com/pgsty/silo/issues/268)), and lifecycle accounting reports only removals that actually occurred ([#305](https://github.com/pgsty/silo/issues/305)). Upgrade all serving nodes to enforce full multi-pool lifecycle protection.
+
+**20261026 release change:** In [Server 20261026](/blog/release/silo-20261026/#server-20261026), when lifecycle expiration only writes a delete marker (including on non-null versions in versioning-suspended buckets), SILO preserves the prior version's remote-tier payload until that specific version is permanently deleted and no longer held by retention or surviving references. Server 20261018 does not include this fix; remote payloads deleted on earlier releases must be restored from backups.
 
 MinIO lifecycle management supports expiring objects on a bucket. Object “expiration” involves performing a `DELETE` operation on the object. For example, you can create a lifecycle management rule to expire any object older than 365 days.
 
 Use [`mc ilm rule add --expire-days`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-days) to expire objects after a specified number of calendar days.
 
-For buckets with [replication](/administration/bucket-replication/#minio-bucket-replication) configured, MinIO does not replicate objects deleted by a lifecycle management expiration rule. See [Replication of Delete Operations](/administration/bucket-replication/#minio-replication-behavior-delete) for more information.
+For buckets with [bucket replication](/administration/bucket-replication/#minio-bucket-replication) or [site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview) configured, SILO does not replicate delete markers or version purges generated by lifecycle expiration rules (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), matching AWS S3 semantics. Configure lifecycle rules on both source and target buckets when consistent expiration is required across replicas. See [Replication of Delete Operations](/administration/bucket-replication/#minio-replication-behavior-delete) for more information.
 
-### Versioned Buckets {#id1}
+### Versioned Buckets {#expiration-versioned-buckets}
 
 MinIO adopts [S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide/intro-lifecycle-rules.html#intro-lifecycle-rules-actions) for expiration rules on [versioned buckets](/administration/object-management/object-versioning/#minio-bucket-versioning). MinIO has several default behaviors for versioned buckets:
 

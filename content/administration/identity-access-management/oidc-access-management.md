@@ -68,12 +68,12 @@ The login flow for an application using <abbr title="OpenID Connect">OIDC</abbr>
 3. MinIO returns temporary credentials in the STS API response in the form of an access key, secret key, and session token. The credentials have permissions matching those policies specified in the JWT claim.
 4. Applications use the temporary credentials returned by the STS endpoint to perform authenticated S3 operations on MinIO.
 
-SILO provides an example Go application [web-identity.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-26T00-00-00Z/docs/sts/web-identity.go) that handles the full login flow.
+SILO provides an example Go application [web-identity.go](https://github.com/pgsty/silo/blob/RELEASE.2026-11-09T00-00-00Z/docs/sts/web-identity.go) that handles the full login flow.
 
 > [!NOTE]
-> **OIDC JWK Key Size and Group Claim Parsing**
+> **OIDC JWK Validation, JOSE Hardening, and Group Claim Parsing**
 >
-> Starting with `silo-pkg v3.14.2` and [Server 20261018](/blog/release/silo-20261018/), OIDC JWKS validation rejects RSA public keys larger than 4096 bits and enforces bounded JWK key parameters. Starting with [Console v2.5.1](/blog/release/silo-20261026/), embedded Console OIDC login also parses string-array group claims alongside comma-separated strings. See [TLS and OIDC Discovery](/blog/design/go127-tls-oidc-discovery/).
+> [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) adopts `github.com/go-jose/go-jose/v4 v4.1.9` via [`silo-pkg v3.16.0`](/blog/release/pkg-3.16.0/), hardening RSA certificate-verification limits, JWS signature and JWE recipient bounds, and JWE protected/unprotected header handling. Since `silo-pkg v3.14.2` and [SILO 20261018](/blog/release/silo-20261018/), OIDC JWKS validation rejects RSA public keys larger than 4096 bits and enforces bounded JWK key parameters. Embedded Console ([Console v2.7.0](/blog/release/console-2.7.0/) in SILO 20261109; introduced in [Console v2.5.1](/blog/release/console-2.5.1/)) parses string-array group claims alongside comma-separated strings. See [TLS and OIDC Discovery](/blog/design/go127-tls-oidc-discovery/).
 
 #### Identifying the JWT Claim Value {#identifying-the-jwt-claim-value}
 
@@ -95,30 +95,30 @@ The following table contains a list of supported policy variables for use in aut
 
 Each variable corresponds to a claim returned as part of the authenticated user’s JWT token:
 
-| Variable | Description |
-| --- | --- |
-| `jwt:sub` | Returns the `sub` claim for the user. |
-| `jwt:iss` | Returns the Issuer Identifier claim from the ID token. |
-| `jwt:aud` | Returns the Audience claim from the ID token. |
-| `jwt:jti` | Returns the JWT ID claim from the client authentication information. |
-| `jwt:upn` | Returns the User Principal Name claim from the client authentication information. |
-| `jwt:name` | Returns the `name` claim for the user. |
-| `jwt:groups` | Returns the `groups` claim for the user. |
-| `jwt:given_name` | Returns the `given_name` claim for the user. |
-| `jwt:family_name` | Returns the `family_name` claim for the user. |
-| `jwt:middle_name` | Returns the `middle_name` claim for the user. |
-| `jwt:nickname` | Returns the `nickname` claim for the user. |
-| `jwt:preferred_username` | Returns the `preferred_username` claim for the user. |
-| `jwt:profile` | Returns the `profile` claim for the user. |
-| `jwt:picture` | Returns the `picture` claim for the user. |
-| `jwt:website` | Returns the `website` claim for the user. |
-| `jwt:email` | Returns the `email` claim for the user. |
-| `jwt:gender` | Returns the `gender` claim for the user. |
-| `jwt:birthdate` | Returns the `birthdate` claim for the user. |
-| `jwt:phone_number` | Returns the `phone_number` claim for the user. |
-| `jwt:address` | Returns the `address` claim for the user. |
-| `jwt:scope` | Returns the `scope` claim for the user. |
-| `jwt:client_id` | Returns the `client_id` claim for the user. |
+| Variable                 | Description                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `jwt:sub`                | Returns the `sub` claim for the user.                                             |
+| `jwt:iss`                | Returns the Issuer Identifier claim from the ID token.                            |
+| `jwt:aud`                | Returns the Audience claim from the ID token.                                     |
+| `jwt:jti`                | Returns the JWT ID claim from the client authentication information.              |
+| `jwt:upn`                | Returns the User Principal Name claim from the client authentication information. |
+| `jwt:name`               | Returns the `name` claim for the user.                                            |
+| `jwt:groups`             | Returns the `groups` claim for the user.                                          |
+| `jwt:given_name`         | Returns the `given_name` claim for the user.                                      |
+| `jwt:family_name`        | Returns the `family_name` claim for the user.                                     |
+| `jwt:middle_name`        | Returns the `middle_name` claim for the user.                                     |
+| `jwt:nickname`           | Returns the `nickname` claim for the user.                                        |
+| `jwt:preferred_username` | Returns the `preferred_username` claim for the user.                              |
+| `jwt:profile`            | Returns the `profile` claim for the user.                                         |
+| `jwt:picture`            | Returns the `picture` claim for the user.                                         |
+| `jwt:website`            | Returns the `website` claim for the user.                                         |
+| `jwt:email`              | Returns the `email` claim for the user.                                           |
+| `jwt:gender`             | Returns the `gender` claim for the user.                                          |
+| `jwt:birthdate`          | Returns the `birthdate` claim for the user.                                       |
+| `jwt:phone_number`       | Returns the `phone_number` claim for the user.                                    |
+| `jwt:address`            | Returns the `address` claim for the user.                                         |
+| `jwt:scope`              | Returns the `scope` claim for the user.                                           |
+| `jwt:client_id`          | Returns the `client_id` claim for the user.                                       |
 {.wide .expand}
 
 See the [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) document for more information on these scopes. Your OIDC provider of choice may have more specific documentation.

@@ -6,13 +6,13 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261109/#upgrade).
 
 <a id="deploy-a-minio-tenant"></a>
 <a id="deploy-minio-tenant-redhat-openshift"></a>
 <a id="minio-k8s-deploy-minio-tenant"></a>
 
-This procedure deploys a Silo server image as a Tenant managed by MinIO Operator v7.1.1. The upstream Operator repository was archived and made read-only on 2026-03-20, so this is a frozen compatibility baseline rather than an actively maintained Operator path. `MinIO Operator`, `Tenant`, the `minio.min.io` API group, and the CRD field names are upstream Kubernetes contracts and therefore retain their original names.
+This procedure deploys a Silo server image as a Tenant managed by MinIO Operator v7.1.1. The upstream Operator repository was archived and made read-only on 2026-03-20, so this is a frozen compatibility baseline rather than an actively maintained Operator path. `MinIO Operator`, `Tenant`, the `minio.min.io` API group, and the CRD field names are upstream Kubernetes contracts and therefore retain their original names. For standalone Kubernetes deployments without the MinIO Operator, SILO provides the maintained [`helm/silo` chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo), which deploys SILO and `mcli` `RELEASE.2026-11-09T00-00-00Z` by default ([#296](https://github.com/pgsty/silo/issues/296)).
 
 The verified baseline below creates a four-server Tenant. A single-node topology is useful for local testing, but its production failure model and storage layout are outside the scope of this procedure.
 
@@ -48,7 +48,7 @@ This procedure is not exhaustive of all possible configuration options available
 
    ```yaml
    spec:
-     image: docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z
+     image: docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z
      env:
        - name: MINIO_UPDATE
          value: "off"
@@ -221,6 +221,7 @@ TENANT-NAMESPACE-hl                ClusterIP      None             <none>       
 
 - The `minio` service exposes the Tenant S3 API. Applications should use this service for S3 operations against Silo.
 - The `*-console` service exposes the [Silo Console](/administration/minio-console/). Administrators can use this service for browser-based management.
+- The headless `*-hl` service provides peer discovery across Tenant pods and must retain `publishNotReadyAddresses: true` so pods resolve peers during startup (see [Healthcheck API](/operations/monitoring/healthcheck-probe/#native-probe)).
 
 The remaining services support Tenant operations and are not intended for consumption by users or administrators.
 

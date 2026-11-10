@@ -6,10 +6,13 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="access-management"></a>
 <a id="minio-policy"></a>
 <a id="id1" data-td-print-local></a>
 
-## 概述 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 概述 {#overview}
 
 MinIO 使用 基于策略的访问控制 (PBAC) 来定义已认证用户可访问的授权操作和资源。 每个策略描述一条或多条 [actions](#minio-policy-actions) 与 [conditions](#minio-policy-conditions)，用于说明某个 [user](/zh/administration/identity-access-management/minio-user-management/#minio-users) 或 [group](/zh/administration/identity-access-management/minio-group-management/#minio-groups) 中用户的权限。
 
@@ -17,7 +20,9 @@ MinIO PBAC 在设计上兼容 AWS IAM 策略语法、结构和行为。 MinIO �
 
 [`mc admin policy`](/zh/reference/minio-mc-admin/mc-admin-policy/#command-mc.admin.policy) 命令支持在 MinIO 部署上创建和管理策略。 用法示例请参见命令参考。
 
-## 基于标签的策略条件 {#id4}
+<a id="id4" data-td-print-local></a>
+
+## 基于标签的策略条件 {#tag-based-policy-conditions}
 
 > [!NOTE]
 > **变更: RELEASE.2022-10-02T19-29-29Z**
@@ -29,8 +34,9 @@ MinIO PBAC 在设计上兼容 AWS IAM 策略语法、结构和行为。 MinIO �
 > 存储桶标签与对象标签不是同一类数据。`PutBucketTagging` 不会从 XML 正文填充 `s3:RequestObjectTag*` 条件键。
 
 <a id="id5" data-td-print-local></a>
+<a id="minio-policy-built-in"></a>
 
-## 内置策略 {#minio-policy-built-in}
+## 内置策略 {#built-in-policies}
 
 MinIO 提供以下内置策略，可分配给 [users](/zh/administration/identity-access-management/minio-user-management/#minio-users) 或 [groups](/zh/administration/identity-access-management/minio-group-management/#minio-groups)：
 
@@ -129,8 +135,9 @@ MinIO 提供以下内置策略，可分配给 [users](/zh/administration/identit
 > 有关 IAM 策略求值逻辑的更多信息，请参见 IAM 文档中的 [Determining Whether a Request is Allowed or Denied Within an Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html#policy-eval-denyallow)。
 
 <a id="id6" data-td-print-local></a>
+<a id="minio-policy-document"></a>
 
-## 策略文档结构 {#minio-policy-document}
+## 策略文档结构 {#policy-document-structure}
 
 MinIO 策略文档使用与 [AWS IAM Policy](https://docs.aws.amazon.com/IAM/latest/UserGuide/access.html) 文档相同的模式。
 
@@ -193,8 +200,9 @@ MinIO 策略文档使用与 [AWS IAM Policy](https://docs.aws.amazon.com/IAM/lat
 其余行为一律不变。`ListBucket`、`GetBucketLocation`、各类存储桶配置 **读取** 以及 `CreateBucket` 仍然可以通过对象模式获得授权，因此按这种写法配置的列举与供应流程照常工作。`Deny` 语句与 `NotResource` 排除的匹配方式一如既往，所以任何写在 `mybucket/*` 上的限制都不会被削弱。内置的 `readwrite`、`readonly`、`writeonly`、`diagnostics` 策略使用 `arn:aws:s3:::*`，不受影响。
 
 <a id="minio-policy-actions"></a>
+<a id="s3-action" data-td-print-local></a>
 
-## 受支持的 S3 策略 Action {#s3-action}
+## 受支持的 S3 策略 Action {#supported-s3-policy-actions}
 
 MinIO 策略文档支持 IAM [S3 Action keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/list_amazons3.html#amazons3-actions-as-permissions) 的一个子集。 本节还包括特定 action 在通用受支持键之外额外支持的任何 [condition keys](#minio-policy-conditions)。
 
@@ -413,7 +421,9 @@ s3:versionid
 s3:ExistingObjectTag/<key>
 ```
 
-### 存储桶配置 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 存储桶配置 {#bucket-configuration}
 
 <a id="policy-action.s3:GetBucketPolicy"></a>
 
@@ -472,7 +482,9 @@ s3:RequestObjectTag/<key>
 
 控制对 [GetBucketPolicyStatus](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketPolicyStatus.html) S3 API 操作的访问。
 
-### 分段上传 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 分段上传 {#multipart-upload}
 
 <a id="policy-action.s3:AbortMultipartUpload"></a>
 
@@ -498,7 +510,9 @@ s3:RequestObjectTag/<key>
 
 控制对 [ListMultipartUploads](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListMultipartUploads.html) S3 API 操作的访问。
 
-### 版本控制与保留 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 版本控制与保留 {#versioning-and-retention}
 
 <a id="policy-action.s3:PutBucketVersioning"></a>
 
@@ -724,7 +738,9 @@ s3:versionid
 
 控制对 [PutObjectLockConfiguration](https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObjectLockConfiguration.html) S3 API 操作的访问。
 
-### 存储桶通知 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 存储桶通知 {#bucket-notifications}
 
 <a id="policy-action.s3:GetBucketNotification"></a>
 
@@ -762,7 +778,9 @@ s3:versionid
 
 此 action **不** 用于其他兼容 S3 的服务。
 
-### 对象生命周期管理 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 对象生命周期管理 {#object-lifecycle-management}
 
 <a id="policy-action.s3:PutLifecycleConfiguration"></a>
 
@@ -780,7 +798,9 @@ s3:versionid
 
 控制对 [GetLifecycleConfiguration](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketLifecycleConfiguration.html) S3 API 操作的访问。
 
-### 对象加密 {#id12}
+<a id="id12" data-td-print-local></a>
+
+### 对象加密 {#object-encryption}
 
 <a id="policy-action.s3:PutEncryptionConfiguration"></a>
 
@@ -798,7 +818,9 @@ s3:versionid
 
 控制对 [GetEncryptionConfiguration](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketEncryption.html) S3 API 操作的访问。
 
-### 存储桶复制 {#id13}
+<a id="id13" data-td-print-local></a>
+
+### 存储桶复制 {#bucket-replication}
 
 <a id="policy-action.s3:GetReplicationConfiguration"></a>
 
@@ -843,6 +865,8 @@ s3:ExistingObjectTag/<key>
 
 作为 MinIO 服务器端复制的一部分，在同步 [删除操作](/zh/administration/object-management/object-delete/#minio-object-delete) 时需要此权限。
 
+自 [SILO 20261109](/zh/blog/release/silo-20261109/)（`7e9ee6bef`）起，复制删除会严格遵守目标对象版本上的 Object Lock 法律保留（legal hold）与保留期（retention）。源端绕过 `GOVERNANCE` 保留期执行的物理版本删除不会在目标端绕过仍在生效的保留期，受保护的目标副本会拒绝复制删除，源端将持续重试直至目标端保护到期或解除。
+
 支持以下附加 [condition keys](#minio-policy-conditions)：
 
 ```shell
@@ -886,8 +910,9 @@ s3:ExistingObjectTag/<key>
 
 <a id="minio-selected-conditional-actions"></a>
 <a id="minio-policy-conditions"></a>
+<a id="s3" data-td-print-local></a>
 
-## 受支持的 S3 策略条件键 {#s3}
+## 受支持的 S3 策略条件键 {#supported-s3-policy-condition-keys}
 
 MinIO 策略文档支持 IAM [条件语句](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html)。
 
@@ -923,62 +948,63 @@ MinIO 策略文档支持 IAM [条件语句](https://docs.aws.amazon.com/IAM/late
 
 Silo 按请求字段的实际语义来源构造条件值映射，而不是把所有请求头与查询参数混为一谈。原始请求头或查询参数即使与内部条件键同名，也不能覆盖服务端计算出的值，或伪造服务端没有提供的值。
 
-| 条件键类别 | 策略求值使用的来源 | 优先级与兼容性 |
-| :-- | :-- | :-- |
-| 身份、时间、传输、认证、`s3:versionid`、`s3:LocationConstraint`、LDAP 与 JWT 值 | 已认证的凭据与声明、服务端时钟与传输状态，或该操作解析出的 API 字段 | 同名原始请求头与查询参数不能增加或覆盖这些值。`aws:Referer` 与 `aws:UserAgent` 按定义仍由客户端控制；`aws:SourceIp` 的限制见上方警告。 |
-| `s3:signatureAge` | 自 SigV4 预签名请求的 `X-Amz-Date` 起经过的毫秒数 | 仅对日期可解析的 SigV4 预签名请求提供；接受请求前仍须通过签名校验。客户端传入的 `x-amz-signature-age` 头不参与求值。 |
-| `s3:prefix`、`s3:delimiter`、`s3:max-keys` | 仅查询字符串 | 同名请求头不会参与这些列表条件的求值。 |
-| `s3:x-amz-content-sha256` | 与验签和正文校验相同的单一有效哈希 | 仅当 `X-Amz-Content-Sha256` 请求头存在时提供此条件键。预签名查询值优先于请求头；否则使用请求头的第一个值。只有查询参数而没有该请求头时，此条件键缺失。 |
-| `s3:x-amz-copy-source`、`s3:x-amz-metadata-directive` 与服务端加密条件键 | 仅对应的 HTTP 请求头 | 查询字符串中的同名字段不能代替这些条件值。 |
-| `s3:x-amz-storage-class` | `X-Amz-Storage-Class` 请求头，兼容回退到查询字符串 | 只要请求头存在就优先，即使它是空值。查询形式继续保留，以兼容现有上传路径。 |
-| `s3:RequestObjectTag/<key>` 与 `s3:RequestObjectTagKeys` | 默认来自 `X-Amz-Tagging` Header；标签感知处理器可显式传入实际标签集 | `PutObject` 与 `CreateMultipartUpload` 从 Header 或兼容查询形式取值，Header 存在时优先；`PutObjectTagging` 使用解析后的 XML 请求正文。无关操作会忽略 query 标签。对于策略映射允许这些键的 action，历史 Header 回退仍为兼容性保留，因此在上述三个处理器之外，请求标签条件本身不能证明该操作会消费或持久化这些标签。 |
-| `s3:ExistingObjectTag/<key>` | 从目标对象存储状态加载的标签 | 请求头与查询参数永远不能提供已有对象标签。只有在授权前加载这些标签的 API 路径上才有该值，包括对象 GET/HEAD 与对象标签处理器。 |
-| 对象锁条件键 | 对象锁请求头，或处理器计算出的保留值 | 查询字符串中的同名字段会被忽略。 |
+| 条件键类别                                                                      | 策略求值使用的来源                                                  | 优先级与兼容性                                                                                                                                                                                                                                                                                                     |
+| :------------------------------------------------------------------------------ | :------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 身份、时间、传输、认证、`s3:versionid`、`s3:LocationConstraint`、LDAP 与 JWT 值 | 已认证的凭据与声明、服务端时钟与传输状态，或该操作解析出的 API 字段 | 同名原始请求头与查询参数不能增加或覆盖这些值。`aws:Referer` 与 `aws:UserAgent` 按定义仍由客户端控制；`aws:SourceIp` 的限制见上方警告。                                                                                                                                                                             |
+| `s3:signatureAge`                                                               | 自 SigV4 预签名请求的 `X-Amz-Date` 起经过的毫秒数                   | 仅对日期可解析的 SigV4 预签名请求提供；接受请求前仍须通过签名校验。客户端传入的 `x-amz-signature-age` 头不参与求值。                                                                                                                                                                                               |
+| `s3:prefix`、`s3:delimiter`、`s3:max-keys`                                      | 仅查询字符串                                                        | 同名请求头不会参与这些列表条件的求值。                                                                                                                                                                                                                                                                             |
+| `s3:x-amz-content-sha256`                                                       | 与验签和正文校验相同的单一有效哈希                                  | 仅当 `X-Amz-Content-Sha256` 请求头存在时提供此条件键。预签名查询值优先于请求头；否则使用请求头的第一个值。只有查询参数而没有该请求头时，此条件键缺失。                                                                                                                                                             |
+| `s3:x-amz-copy-source`、`s3:x-amz-metadata-directive` 与服务端加密条件键        | 仅对应的 HTTP 请求头                                                | 查询字符串中的同名字段不能代替这些条件值。                                                                                                                                                                                                                                                                         |
+| `s3:x-amz-storage-class`                                                        | `X-Amz-Storage-Class` 请求头，兼容回退到查询字符串                  | 只要请求头存在就优先，即使它是空值。查询形式继续保留，以兼容现有上传路径。                                                                                                                                                                                                                                         |
+| `s3:RequestObjectTag/<key>` 与 `s3:RequestObjectTagKeys`                        | 默认来自 `X-Amz-Tagging` Header；标签感知处理器可显式传入实际标签集 | `PutObject` 与 `CreateMultipartUpload` 从 Header 或兼容查询形式取值，Header 存在时优先；`PutObjectTagging` 使用解析后的 XML 请求正文。无关操作会忽略 query 标签。对于策略映射允许这些键的 action，历史 Header 回退仍为兼容性保留，因此在上述三个处理器之外，请求标签条件本身不能证明该操作会消费或持久化这些标签。 |
+| `s3:ExistingObjectTag/<key>`                                                    | 从目标对象存储状态加载的标签                                        | 请求头与查询参数永远不能提供已有对象标签。只有在授权前加载这些标签的 API 路径上才有该值，包括对象 GET/HEAD 与对象标签处理器。                                                                                                                                                                                      |
+| 对象锁条件键                                                                    | 对象锁请求头，或处理器计算出的保留值                                | 查询字符串中的同名字段会被忽略。                                                                                                                                                                                                                                                                                   |
 {.wide .expand}
 
 如果某条 API 路径没有加载或计算上述来源，相应条件键就是缺失的，其结果由所用策略操作符的语义决定。不要因为某个动作列出了条件键，就假定服务端一定会为它合成一个值。
 
 对于特定 S3 action 支持的其他键，请参见该 action 的参考文档。
 
-### MinIO 扩展条件键 {#minio}
+<a id="minio" data-td-print-local></a>
+
+### MinIO 扩展条件键 {#minio-extended-condition-keys}
 
 MinIO 在 S3 标准条件键基础上扩展了以下键：
 
 `sts:DurationSeconds`
 
-> > [!NOTE]
-> > **新增: MinIO**
-> >
-> > SERVER RELEASE.2024-02-06T21-36-22Z
->
-> 指定一个以秒为单位的时间，用于限制由 [AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) 生成的 *所有* Security Token Service 凭证的有效期。
->
-> 此值会覆盖客户端指定的 `DurationSeconds` 字段。
->
-> 例如：
->
-> ```json
-> {
->    "Version": "2012-10-17",
->    "Statement": [
->       {
->             "Effect": "Allow",
->             "Action": [
->                "sts:AssumeRoleWithWebIdentity"
->             ],
->             "Condition": {
->                "NumericLessThanEquals": {
->                   "sts:DurationSeconds": "300"
->                }
->             }
->       }
->    ]
-> }
-> ```
+> [!NOTE]
+> **新增: MinIO `RELEASE.2024-02-06T21-36-22Z`**
+
+指定一个以秒为单位的时间，用于限制由 [AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) 生成的 *所有* Security Token Service 凭证的有效期。
+
+此值会覆盖客户端指定的 `DurationSeconds` 字段。
+
+例如：
+
+```json
+{
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+            "Effect": "Allow",
+            "Action": [
+               "sts:AssumeRoleWithWebIdentity"
+            ],
+            "Condition": {
+               "NumericLessThanEquals": {
+                  "sts:DurationSeconds": "300"
+               }
+            }
+      }
+   ]
+}
+```
 
 <a id="minio-policy-mc-admin-actions"></a>
+<a id="mc-admin-action" data-td-print-local></a>
 
-## `mc admin` 策略 Action 键 {#mc-admin-action}
+## `mc admin` 策略 Action 键 {#mc-admin-policy-action-keys}
 
 MinIO 支持以下 action，用于为 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) 操作定义策略。 这些 action *仅* 对 MinIO 部署有效，*不* 用于其他兼容 S3 的服务：
 
@@ -1379,6 +1405,8 @@ SILO 配合 Console v2.4.1 与 pkg v3.14.1 后，修改自己的密码检查此�
 
 允许用户启动批处理作业运行。
 
+自 [SILO 20261109](/zh/blog/release/silo-20261109/)（[#310](https://github.com/pgsty/silo/issues/310)）起，批处理 `expire` 与 `keyrotate` 作业会绑定已认证提交者的身份，并在整个执行期间持续校验该提交者在本地具备相应的 S3 数据操作权限，同时保留受 Object Lock 保护的版本。提交者凭证被吊销或禁用会终止作业；临时 IAM 或外部授权服务中断则会使作业暂停并在受限范围内重试。批处理鉴权会跳过策略映射中仍引用的已删除策略，仅当命中的 `Deny` 语句依赖后台执行时不存在的请求期上下文时才拒绝作业，并且在保持提交者凭证有效的元数据编辑与 LDAP 组成员刷新后继续正常运行（[#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)）。
+
 <a id="policy-action.admin:CancelBatchJob"></a>
 
 #### `admin:CancelBatchJob` {#policy-action.admin-CancelBatchJob}
@@ -1395,7 +1423,9 @@ SILO 配合 Console v2.4.1 与 pkg v3.14.1 后，修改自己的密码检查此�
 
 允许访问并启动、查询或停止跨不同可用存储空间池的对象重平衡。
 
-## KMS 策略 action 键 {#kms-action}
+<a id="kms-action" data-td-print-local></a>
+
+## KMS 策略 action 键 {#kms-policy-action-keys}
 
 MinIO 支持通过策略限制密钥管理服务 (KMS) action。
 
@@ -1486,7 +1516,9 @@ MinIO 支持通过策略限制密钥管理服务 (KMS) action。
 > }
 > ```
 
-## `mc admin` 策略条件键 {#mc-admin}
+<a id="mc-admin" data-td-print-local></a>
+
+## `mc admin` 策略条件键 {#mc-admin-policy-condition-keys}
 
 MinIO 支持以下条件，用于为 [`mc admin`](/zh/reference/minio-mc-admin/#command-mc.admin) [actions](#minio-policy-mc-admin-actions) 定义策略。
 
@@ -1499,7 +1531,9 @@ MinIO 支持以下条件，用于为 [`mc admin`](/zh/reference/minio-mc-admin/#
 
 有关任何列出条件键的完整信息，请参见 [IAM Condition Element Documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_condition.html)。
 
-## 策略变量 {#id14}
+<a id="id14" data-td-print-local></a>
+
+## 策略变量 {#policy-variables}
 
 MinIO 支持使用策略变量，将来自已认证用户和/或操作的上下文自动替换到分配给该用户的一个或多个策略中。 使用 `${POLICYVARIABLE}` 格式在策略的 `Condition` 或 `Resource` 定义中指定变量。 MinIO 策略变量的工作方式类似于 [AWS IAM policy elements: Variables and tags](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_variables.html)。
 
@@ -1510,16 +1544,18 @@ MinIO 支持使用策略变量，将来自已认证用户和/或操作的上下�
 - [Active Directory / LDAP 策略变量](#minio-policy-variables-ad-ldap)
 
 <a id="id15"></a>
+<a id="minio-policy-variables-internal"></a>
 
-### MinIO 策略变量 {#minio-policy-variables-internal}
+### MinIO 策略变量 {#minio-policy-variables}
 
 下表列出了用于授权 [MinIO-managed users](/zh/administration/identity-access-management/minio-identity-management/#minio-internal-idp) 的推荐策略变量：
 
-| 变量 | 说明 |
-| --- | --- |
-| [aws:referrer](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-referer) | 已认证 API 调用的 HTTP 头中的 referrer。 |
-| [aws:SourceIp](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-sourceip) | 已认证 API 调用的 HTTP 头中的源 IP。 |
-| [aws:username](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-username) | 与已认证 API 调用关联的用户名。 |
+| 变量                                                                                                                            | 说明                                     |
+| ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| [aws:referrer](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-referer)  | 已认证 API 调用的 HTTP 头中的 referrer。 |
+| [aws:SourceIp](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-sourceip) | 已认证 API 调用的 HTTP 头中的源 IP。     |
+| [aws:username](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-username) | 与已认证 API 调用关联的用户名。          |
+{.wide .expand}
 
 例如，以下策略使用变量将已认证用户的用户名替换到 `Resource` 字段中，使该用户只能访问与其用户名匹配的那些前缀：
 
@@ -1548,37 +1584,38 @@ MinIO 支持使用策略变量，将来自已认证用户和/或操作的上下�
 MinIO 会将 `Resource` 字段中的 `${aws:username}` 变量替换为用户名。 随后 MinIO 对策略进行求值，并授予或撤销对所请求 API 和资源的访问。
 
 <a id="minio-policy-variables-oidc"></a>
+<a id="openid" data-td-print-local></a>
 
-### OpenID 策略变量 {#openid}
+### OpenID 策略变量 {#openid-policy-variables}
 
 下表列出了用于授权 [OIDC 管理用户](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) 的受支持策略变量。
 
 每个变量都对应认证用户 JWT token 中返回的一项 claim：
 
-| 变量 | 说明 |
-| --- | --- |
-| `jwt:sub` | 返回用户的 `sub` claim。 |
-| `jwt:iss` | 返回 ID token 中的 Issuer Identifier claim。 |
-| `jwt:aud` | 返回 ID token 中的 Audience claim。 |
-| `jwt:jti` | 返回客户端认证信息中的 JWT ID claim。 |
-| `jwt:upn` | 返回客户端认证信息中的 User Principal Name claim。 |
-| `jwt:name` | 返回用户的 `name` claim。 |
-| `jwt:groups` | 返回用户的 `groups` claim。 |
-| `jwt:given_name` | 返回用户的 `given_name` claim。 |
-| `jwt:family_name` | 返回用户的 `family_name` claim。 |
-| `jwt:middle_name` | 返回用户的 `middle_name` claim。 |
-| `jwt:nickname` | 返回用户的 `nickname` claim。 |
-| `jwt:preferred_username` | 返回用户的 `preferred_username` claim。 |
-| `jwt:profile` | 返回用户的 `profile` claim。 |
-| `jwt:picture` | 返回用户的 `picture` claim。 |
-| `jwt:website` | 返回用户的 `website` claim。 |
-| `jwt:email` | 返回用户的 `email` claim。 |
-| `jwt:gender` | 返回用户的 `gender` claim。 |
-| `jwt:birthdate` | 返回用户的 `birthdate` claim。 |
-| `jwt:phone_number` | 返回用户的 `phone_number` claim。 |
-| `jwt:address` | 返回用户的 `address` claim。 |
-| `jwt:scope` | 返回用户的 `scope` claim。 |
-| `jwt:client_id` | 返回用户的 `client_id` claim。 |
+| 变量                     | 说明                                               |
+| ------------------------ | -------------------------------------------------- |
+| `jwt:sub`                | 返回用户的 `sub` claim。                           |
+| `jwt:iss`                | 返回 ID token 中的 Issuer Identifier claim。       |
+| `jwt:aud`                | 返回 ID token 中的 Audience claim。                |
+| `jwt:jti`                | 返回客户端认证信息中的 JWT ID claim。              |
+| `jwt:upn`                | 返回客户端认证信息中的 User Principal Name claim。 |
+| `jwt:name`               | 返回用户的 `name` claim。                          |
+| `jwt:groups`             | 返回用户的 `groups` claim。                        |
+| `jwt:given_name`         | 返回用户的 `given_name` claim。                    |
+| `jwt:family_name`        | 返回用户的 `family_name` claim。                   |
+| `jwt:middle_name`        | 返回用户的 `middle_name` claim。                   |
+| `jwt:nickname`           | 返回用户的 `nickname` claim。                      |
+| `jwt:preferred_username` | 返回用户的 `preferred_username` claim。            |
+| `jwt:profile`            | 返回用户的 `profile` claim。                       |
+| `jwt:picture`            | 返回用户的 `picture` claim。                       |
+| `jwt:website`            | 返回用户的 `website` claim。                       |
+| `jwt:email`              | 返回用户的 `email` claim。                         |
+| `jwt:gender`             | 返回用户的 `gender` claim。                        |
+| `jwt:birthdate`          | 返回用户的 `birthdate` claim。                     |
+| `jwt:phone_number`       | 返回用户的 `phone_number` claim。                  |
+| `jwt:address`            | 返回用户的 `address` claim。                       |
+| `jwt:scope`              | 返回用户的 `scope` claim。                         |
+| `jwt:client_id`          | 返回用户的 `client_id` claim。                     |
 {.wide .expand}
 
 关于这些 scope 的更多信息，请参阅 [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) 文档。 你所选的 OIDC 提供方也可能有更具体的补充文档。
@@ -1610,8 +1647,9 @@ MinIO 会将 `Resource` 字段中的 `${aws:username}` 变量替换为用户名�
 MinIO 会将 `Resource` 字段中的 `${jwt:preferred_username}` 变量， 替换为 JWT token 中 `preferred_username` 的值。 随后，MinIO 会评估该策略，并对请求的 API 和资源授予或撤销访问权限。
 
 <a id="minio-policy-variables-ad-ldap"></a>
+<a id="active-directory-ldap" data-td-print-local></a>
 
-### Active Directory / LDAP 策略变量 {#active-directory-ldap}
+### Active Directory / LDAP 策略变量 {#active-directory-ldap-policy-variables}
 
 下表列出了用于授权 [AD/LDAP users](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) 的受支持策略变量：
 

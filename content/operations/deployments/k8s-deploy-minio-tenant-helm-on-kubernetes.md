@@ -6,21 +6,21 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261109/#upgrade).
 
 <a id="deploy-a-minio-tenant-with-helm-charts"></a>
 <a id="deploy-tenant-helm"></a>
 
 ## Overview {#overview}
 
-Helm is a tool for automating the deployment of applications to Kubernetes clusters. A [Helm chart](https://helm.sh/docs/topics/charts/) is a set of YAML files, templates, and other files that define the deployment details. The following procedure uses a Helm Chart to deploy a Tenant managed by the MinIO Operator.
+Helm automates application deployment on Kubernetes clusters. A [Helm chart](https://helm.sh/docs/topics/charts/) packages YAML templates and default values for a deployment. The following procedure uses the archived MinIO Operator Tenant Helm chart (`v7.1.1`) to deploy a Tenant managed by the MinIO Operator.
 
-This procedure requires the Kubernetes cluster have a valid [Operator](/operations/deployments/kubernetes/#deploy-operator-kubernetes) deployment. You cannot use the MinIO Operator Tenant chart to deploy a Tenant independent of the Operator.
+This procedure requires an existing [Operator](/operations/deployments/kubernetes/#deploy-operator-kubernetes) deployment in the Kubernetes cluster. You cannot use the MinIO Operator Tenant chart to deploy a Tenant without the Operator. For standalone Kubernetes deployments without the MinIO Operator, SILO ships the maintained [`helm/silo` chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo), which deploys `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` and `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` by default ([#296](https://github.com/pgsty/silo/issues/296)).
 
 > [!WARNING]
 > **Important**
 >
-> The MinIO Operator Tenant Chart is distinct from the server repository's legacy community [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio). This guide uses the Operator Tenant Chart because it exposes an explicit Tenant image override. The upstream Operator repository was archived on March 20, 2026, so this guide pins its final `v7.1.1` chart as a frozen compatibility baseline. Silo does not inherit upstream vendor support commitments.
+> The MinIO Operator Tenant Chart is distinct from SILO's standalone [`helm/silo` chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo) (inherited from the server repository's `helm/minio` chart). When upgrading `helm/silo` releases with `helm upgrade --reuse-values`, Helm keeps the previously stored `image.tag`, so pass `--set image.tag=RELEASE.2026-11-09T00-00-00Z` explicitly. In this Operator guide, the upstream Operator repository was archived on March 20, 2026, so this procedure pins its final `v7.1.1` chart as a frozen compatibility baseline and overrides `tenant.image` to `docker.io/pgsty/silo`. Silo does not inherit upstream vendor support commitments.
 
 ## Prerequisites {#prerequisites}
 
@@ -92,7 +92,7 @@ This procedure is not exhaustive of all possible configuration options available
    tenant:
      image:
        repository: docker.io/pgsty/silo
-       tag: RELEASE.2026-10-26T00-00-00Z
+       tag: RELEASE.2026-11-09T00-00-00Z
        pullPolicy: IfNotPresent
      env:
        - name: MINIO_UPDATE
@@ -302,12 +302,13 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
 
    The MinIO Tenant CRD provides the following fields from which you can configure tenant TLS network encryption:
 
-   | Field | Description |
-   | --- | --- |
-   | `tenant.certificate.requestAutoCert` | Enables or disables MinIO [automatic TLS certificate generation](/operations/network-encryption/#minio-tls) |
-   | `tenant.certificate.certConfig` | Controls the settings for [automatic TLS](/operations/network-encryption/#minio-tls). Requires `spec.requestAutoCert: true` |
-   | `tenant.certificate.externalCertSecret` | Specify one or more Kubernetes secrets of type `kubernetes.io/tls` or `cert-manager`. MinIO uses these certificates for performing TLS handshakes based on hostname (Server Name Indication). |
-   | `tenant.certificate.externalCACertSecret` | Specify one or more Kubernetes secrets of type `kubernetes.io/tls` with the Certificate Authority (CA) chains which the Tenant must trust for allowing client TLS connections. |
+   | Field                                     | Description                                                                                                                                                                                   |
+   | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `tenant.certificate.requestAutoCert`      | Enables or disables MinIO [automatic TLS certificate generation](/operations/network-encryption/#minio-tls)                                                                                   |
+   | `tenant.certificate.certConfig`           | Controls the settings for [automatic TLS](/operations/network-encryption/#minio-tls). Requires `spec.requestAutoCert: true`                                                                   |
+   | `tenant.certificate.externalCertSecret`   | Specify one or more Kubernetes secrets of type `kubernetes.io/tls` or `cert-manager`. MinIO uses these certificates for performing TLS handshakes based on hostname (Server Name Indication). |
+   | `tenant.certificate.externalCACertSecret` | Specify one or more Kubernetes secrets of type `kubernetes.io/tls` with the Certificate Authority (CA) chains which the Tenant must trust for allowing client TLS connections.                |
+   {.wide .expand}
 
 5. Configure Silo Environment Variables
 
@@ -349,8 +350,8 @@ The following procedure deploys a Tenant using a local copy of the Helm Charts. 
 
    You can use [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb) to create a bucket on the Tenant:
 
-   > ```shell
-   > mc mb myminio/mybucket --insecure
-   > ```
+   ```shell
+   mc mb myminio/mybucket --insecure
+   ```
 
 See [Connect to the Tenant](/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#create-tenant-connect-tenant) for additional documentation on external connectivity to the Tenant.

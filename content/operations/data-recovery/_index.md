@@ -14,11 +14,12 @@ Distributed MinIO deployments rely on [Erasure Coding](/operations/concepts/eras
 
 The following table lists the typical types of failure in a MinIO deployment and links to procedures for recovering from each:
 
-| Failure Type | Description |
-| --- | --- |
-| [Drive Failure](/operations/data-recovery/recover-after-drive-failure/#minio-restore-hardware-failure-drive) | MinIO supports hot-swapping failed drives with new healthy drives. |
-| [Node Failure](/operations/data-recovery/recover-after-node-failure/#minio-restore-hardware-failure-node) | MinIO detects when a node rejoins the deployment and begins proactively [healing](/operations/concepts/healing/#minio-concepts-healing) the node shortly after it is joined back to the cluster healing data previously stored on that node. |
-| [Site Failure](/operations/data-recovery/recover-after-site-failure/#minio-restore-hardware-failure-site) | MinIO Site Replication supports complete resynchronization of buckets, objects, and replication-eligible configuration settings after total site loss. |
+| Failure Type                                                                                                 | Description                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Drive Failure](/operations/data-recovery/recover-after-drive-failure/#minio-restore-hardware-failure-drive) | MinIO supports hot-swapping failed drives with new healthy drives.                                                                                                                                                                           |
+| [Node Failure](/operations/data-recovery/recover-after-node-failure/#minio-restore-hardware-failure-node)    | MinIO detects when a node rejoins the deployment and begins proactively [healing](/operations/concepts/healing/#minio-concepts-healing) the node shortly after it is joined back to the cluster healing data previously stored on that node. |
+| [Site Failure](/operations/data-recovery/recover-after-site-failure/#minio-restore-hardware-failure-site)    | MinIO Site Replication supports complete resynchronization of buckets, objects, and replication-eligible configuration settings after total site loss.                                                                                       |
+{.wide .expand}
 
 Since MinIO can operate in a degraded state without significant performance loss, administrators can schedule hardware replacement in proportion to the rate of hardware failure. “Normal” failure rates (single drive or node failure) may allow for a more reasonable replacement timeframe, while “critical” failure rates (multiple drives or nodes) may require a faster response.
 

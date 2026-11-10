@@ -6,6 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="batch-expiration"></a>
 <a id="minio-batch-framework-expire-job"></a>
 <a id="id1" data-td-print-local></a>
 
@@ -42,13 +43,15 @@ MinIO 批处理框架允许你使用 YAML 格式的作业定义文件（“batch
 
 批量过期作业只会使用每个对象的最新版本或“current”版本来匹配各条批量过期规则。
 
-### SILO 下一版本生命周期与已分层版本 {#silo-lifecycle}
+### SILO 20261109 生命周期、权限与 Object Lock {#silo-lifecycle}
 
-在下一版本 SILO 构建（`20261026` 之后的 `pgsty/silo` `main`）中：
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中：
 
-- 批量 `expire` 会在运行期间持续重新校验提交主体的凭据与权限（`461a7df`）。禁用、删除或使提交者过期，或移除所需的 `admin:StartBatchJob`、`s3:ListBucket`、`s3:ListBucketVersions` 或 `s3:DeleteObject` 权限都会停止该作业。
-- 临时 IAM 错误、不完整的存储桶列举，以及存储池再平衡或退役冲突会暂停并重试，而不会把中断扫描记录为已完成（`5ce52c5`）。
-- 当 `purge` 规则遇到远端分层未配置或不可达的已迁移对象版本时（`07b89b98f`），SILO 会拒绝删除该版本，而不是仅删除本地存根而留下远端层孤儿数据（计入 `keysRefused`，终态为 `complete-with-skips`）。详见 [SILO 批处理作业生命周期](/zh/administration/batch-framework/#silo-lifecycle)与[无分层下的版本语义](/zh/blog/design/tier-free-version-semantics/)。
+- 提交批量 `expire` 作业需要 `admin:StartBatchJob`、`s3:ListBucket` 与 `s3:ListBucketVersions`。运行期间，SILO 会持续重新校验提交者凭据，并对每个目标版本强制检查 `s3:GetObject`、`s3:GetObjectVersion`、`s3:DeleteObject` 与 `s3:DeleteObjectVersion`（当任一规则按标签过滤时还需 `s3:GetObjectTagging` 与 `s3:GetObjectVersionTagging`，[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。禁用、删除、过期或撤销提交者，或移除上述必需权限，都会以 `failureReason` 停止该作业。
+- 临时 IAM 或授权故障以及不完整的存储桶列举会使作业进入暂停（`pausedReason`）并自动重试，而不会把中断扫描记录为已完成（[#313](https://github.com/pgsty/silo/issues/313)）。
+- 逐版本过期（`retainVersions > 0`）会保留 Object Lock 保留期与法定保留保护，跳过受保护版本而不予删除（计入 `versionsSkippedLocked`，终态为 `complete-with-skips`，[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。
+- 全版本清除（`retainVersions: 0`）仅删除匹配键自身的各个版本，不会误删该前缀下的子键；若任一版本已迁移到远端分层或受 Object Lock 保护，SILO 会整键拒绝删除（计入 `keysRefused`，终态为 `complete-with-skips`，[#297](https://github.com/pgsty/silo/issues/297)）。详见 [SILO 批处理作业生命周期](/zh/administration/batch-framework/#silo-lifecycle)与[无分层下的版本语义](/zh/blog/design/tier-free-version-semantics/)。
+- 已完成的 `expire` 作业在服务重启后仍保持完成状态，即使提交者凭据此后过期或变更也不会重跑或报错（[#315](https://github.com/pgsty/silo/issues/315)）。
 
 <a id="minio-batch-framework-expire-job-ref"></a>
 
@@ -152,7 +155,7 @@ expire:
   bucket: mybucket # Bucket where this job will expire matching objects from
   prefix: myprefix # (Optional) Prefix under which this job will expire objects matching the rules below.
   rules:
-    - type: object  # objects with zero ore more older versions
+    - type: object  # objects with zero or more older versions
       name: NAME # match object names that satisfy the wildcard expression.
       olderThan: 70h # match objects older than this value
       createdBefore: "2006-01-02T15:04:05.00Z" # match objects created before this date and time in RFC3339 format

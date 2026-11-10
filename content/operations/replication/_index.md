@@ -5,7 +5,7 @@ url: "/operations/replication/"
 weight: 20
 ---
 
-Operate site replication and verify identity and object state during upgrades and recovery.
+Operate site replication and verify identity and object state during upgrades and recovery, including coordinated upgrades to [SILO 20261109](/blog/release/silo-20261109/).
 
 - [Site replication overview](/operations/replication/multi-site-replication/)
 - [Bucket replication](/administration/bucket-replication/)

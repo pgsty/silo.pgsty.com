@@ -20,7 +20,7 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
 
 ## Before You Upgrade {#prerequisites}
 
-**Upgrading to 20261109:**
+**Upgrading to [SILO 20261109](/blog/release/silo-20261109/):**
 
 - Stop batch submissions and drain or cancel every unfinished job, including paused jobs. New manifests and progress reports use formats unsupported by 20261026; unfinished legacy jobs need resubmission after every node upgrades, while completed jobs remain completed. Do not roll back with new jobs pending. Reconcile completed work using the [batch upgrade and rollback checklist](/administration/batch-framework/#upgrade-20261109).
 - A single pool whose erasure sets do not all share the same hosts (typically 18 or more hosts with automatic layout) requires draining and stopping every old process before starting new ones. Rolling upgrades are unsafe because old and new nodes use different lock domains for deletes and copies.
@@ -80,7 +80,7 @@ This page covers `systemctl`-managed and manually managed bare-metal deployments
    ```
 
    Native packages use `silo.service`; otherwise coordinate `systemctl restart silo` across all nodes through your automation. Custom installations should use their actual unit name. Do not improvise a rolling mixed-version deployment unless the target release explicitly supports it.
-5. Validate the deployment with [`mc admin info`](/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info), then test representative S3 reads and writes, console access, identity login, and any configured replication or notifications.
+5. Check cluster status with [`mc admin info`](/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info), and run a bounded signed S3 write and readback check through each restarted node before you resume application traffic; see [Startup Readiness Window](/operations/monitoring/healthcheck-probe/#startup-readiness-window). Then verify Console access, identity login, and any configured replication or notifications.
 6. Upgrade the client separately from [Download & Install](/download/#client). Standalone artifacts use `mcli`; source builds and the container retain `mc`.
 
 <a id="minio-upgrade-mc-admin-update"></a>

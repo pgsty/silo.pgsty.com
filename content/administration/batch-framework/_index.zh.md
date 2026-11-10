@@ -7,8 +7,12 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="batch-framework"></a>
 <a id="minio-batch-framework"></a>
 <a id="id1" data-td-print-local></a>
+
+> [!NOTE]
+> **版本范围：** [SILO 20261109](/zh/blog/release/silo-20261109/) 与 [mcli 20261109](/zh/blog/release/mcli-20261109/) 实现了下述授权、Object Lock 与恢复规则。Server `20261026` 不包含这些服务端规则，单独升级 `mcli` 也不会更新服务端作业执行逻辑。
 
 ## 概述 {#overview}
 
@@ -22,24 +26,30 @@ MinIO 批处理框架允许使用 YAML 格式的作业定义文件（“batch fi
 
 MinIO 批处理框架支持以下作业类型：
 
-| 作业类型 | 说明 |
-| --- | --- |
-| [replicate](/zh/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job) | 执行一次性复制流程，将数据从一个 MinIO 位置复制到另一个 MinIO 位置。 |
+| 作业类型                                                                                           | 说明                                                                                                                          |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| [replicate](/zh/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job) | 执行一次性复制流程，将数据从一个 MinIO 位置复制到另一个 MinIO 位置。                                                          |
 | [keyrotate](/zh/administration/batch-framework-job-keyrotate/#minio-batch-framework-keyrotate-job) | 执行一次性流程，轮换对象上的 [sse-s3 or sse-kms](/zh/operations/server-side-encryption/#minio-sse-data-encryption) 加密密钥。 |
-| [expire](/zh/administration/batch-framework-job-expire/#minio-batch-framework-expire-job) | 对存储桶中的对象执行一次性立即过期操作。 |
+| [expire](/zh/administration/batch-framework-job-expire/#minio-batch-framework-expire-job)          | 对存储桶中的对象执行一次性立即过期操作。                                                                                      |
 {.wide .expand}
 
 ## SILO 20261109：授权与重试 {#silo-lifecycle}
 
-SILO 创建作业时，把本地批处理操作绑定到经过认证的提交者。定义中的凭据用于远端连接，不会授予本地服务器权限；执行动作时再次检查当时的 IAM 权限。显式拒绝、凭据过期或撤销、提交者绑定发生变化，都会以 `failureReason` 结束作业。策略依赖后台作业无法取得的请求上下文时，也会拒绝相应动作。
+[SILO 20261109](/zh/blog/release/silo-20261109/) 在创建作业时将本地批处理操作绑定到已认证提交者，并在执行全程强制校验提交者的数据权限（[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。作业定义中的凭据仅用于授权远端连接，不会授予本地服务器权限。SILO 在每次执行动作前都会重新评估当前 IAM 状态：
 
-IAM 尚未加载、策略资料暂时不可用、授权插件无法给出有效决定，都属于临时故障。提交阶段无法决定授权时返回 `503`。过期和密钥轮换作业通过 `pausedReason` 记录暂停，保留已完成进度，并在当前进程内通过有上限的指数退避与随机抖动重试。列举在开始时或流中途失败，也会暂停这两类作业。轮换选中的源位于正在迁移的池时先暂停，冲突解除后继续。每次重试重新解析当前身份与权限。等待或暂停的作业不是完成或失败报告，不会被终态报告清理器删除。管理员取消优先于队列和重试。
+- 显式拒绝、凭据过期/禁用/撤销，或凭据密钥、会话令牌、父级身份发生变更时，作业会以 `failureReason` 结束。
+- 保留提交者凭据本身的身份元数据编辑（如描述或延后过期时间）与 LDAP 组刷新不会中断作业；每次检查都会重新解析当前状态、组与策略（[#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)）。
+- 策略评估会跳过 IAM 映射仍引用但已删除的策略；依赖后台作业无法获取的请求上下文的 `Allow` 语句不会授予任何权限，仅当可能适用的 `Deny` 语句需要批处理执行无法提供的请求时上下文时才拒绝该作业（[#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)）。
+- 批处理作业在过期、密钥轮换与拉取复制中均保留 Object Lock 保护，跳过受保留期或法定保留保护的版本而非绕过保护；当仍有受保护版本或被拒绝键留存时，作业终态为 `complete-with-skips`（[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。
+- 多存储池 `keyrotate` 作业按目标存储池限定复制操作范围，使其他存储池中的对象副本保持可读（[#312](https://github.com/pgsty/silo/issues/312)）。
 
-Push、Pull 和 Snowball 复制作业在必要的授权依赖或报告读取暂时不可用时（包括对象处理过程中发生的故障）也会通过 `pausedReason` 进入暂停，并在重试时从头重新扫描源端；详见[批量复制](/zh/administration/batch-framework-job-replicate/#silo-retry)。复制中途的其他故障仍遵循原有的有限对象重试，可能以失败结束。
+IAM 尚未加载、策略资料暂时不可用、授权插件无法给出有效决定，都属于临时故障。提交阶段无法决定授权时返回 `503`。过期和密钥轮换作业通过 `pausedReason` 记录暂停，保留已完成进度，并在当前进程内通过有上限的指数退避与随机抖动重试（[#313](https://github.com/pgsty/silo/issues/313)）。列举在开始时或流中途失败，也会暂停这两类作业。密钥轮换选中的源位于正在迁移的存储池时先暂停，冲突解除后继续。每次重试都会重新解析当前身份与权限。等待或暂停的作业不是完成或失败报告，不会被终态报告清理器删除。管理员取消优先于队列和重试。
 
-启动发现作业时，清单列举或存储读取失败也会按有上限的退避重试。发现过程会记住已经入队的清单，避免后续扫描重新执行在等待期间已经结束的作业；取消状态会阻止旧扫描结果重新入队。已经不存在、格式损坏或版本不受支持的清单不会入队，后两类保留在磁盘上供检查。启动发现期间的存储故障恢复后，无需再次重启即可继续发现作业。
+Push、Pull 和 Snowball 复制作业在必要的授权依赖或报告读取暂时不可用时（包括对象处理过程中发生的故障）也会通过 `pausedReason` 进入暂停，并在重试时从头重新扫描源端（[#324](https://github.com/pgsty/silo/issues/324)）；详见[批量复制](/zh/administration/batch-framework-job-replicate/#silo-retry)。复制中途的其他故障遵循作业定义中的有限对象重试上限，可能以失败结束。
 
-已完成作业在重启后仍保持完成，包括旧格式作业和完成后凭据过期或变更的作业。来自不记录提交者绑定的旧版本、且尚未完成的作业需要重新提交。新绑定定义和已授权进度报告采用旧执行器会拒绝的格式。这可以阻止旧程序接管这些记录，但不能保证混合版本集群安全：旧节点仍能接收和执行自己的旧格式作业。切换版本前停止提交，并排空或取消旧作业；仍有等待执行的授权作业时不要降级。
+启动发现作业时，清单列举或存储读取失败会按有上限的退避重试（[#314](https://github.com/pgsty/silo/issues/314)），并恢复未完成作业（包括运行中的复制作业，[#324](https://github.com/pgsty/silo/issues/324)）。发现过程会记住当前轮次已经入队的清单，避免后续扫描重新执行在等待期间已经结束的作业；取消状态会阻止旧扫描结果重新入队。已经不存在、格式损坏或版本不受支持的清单不会入队，后两类保留在磁盘上供检查。启动发现期间的存储故障恢复后，无需再次重启即可继续发现作业。
+
+已完成作业——包括已完成的 `expire` 过期作业（[#315](https://github.com/pgsty/silo/issues/315)）、旧格式作业以及完成后提交者凭据过期或变更的作业——在服务重启后仍保持完成状态。来自不记录提交者绑定的旧版本、且尚未完成的作业需要重新提交。新绑定定义和已授权进度报告采用旧执行器会拒绝的格式。这可以阻止旧程序接管这些记录，但不能保证混合版本集群安全：旧节点仍能接收和执行自己的旧格式作业。切换版本前停止提交，并排空或取消旧作业；仍有等待执行的授权作业时不要降级。
 
 ### 20261109 升级与回退 {#upgrade-20261109}
 
@@ -61,34 +71,20 @@ Push、Pull 和 Snowball 复制作业在必要的授权依赖或报告读取暂�
 
 [`mc batch`](/zh/reference/minio-mc/mc-batch/#command-mc.batch) 命令包括：
 
-<table>
-  <tbody>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate"><code>mc batch generate</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate"><code>mc batch generate</code></a> 命令会为指定作业类型创建一个基础的 YAML 格式模板文件。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-start/#command-mc.batch.start"><code>mc batch start</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-start/#command-mc.batch.start"><code>mc batch start</code></a> 命令根据批处理作业 YAML 文件启动一个批处理作业。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-list/#command-mc.batch.list"><code>mc batch list</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-list/#command-mc.batch.list"><code>mc batch list</code></a> 命令会输出部署中当前正在进行的批处理作业列表。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-status/#command-mc.batch.status"><code>mc batch status</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-status/#command-mc.batch.status"><code>mc batch status</code></a> 命令会输出 MinIO 服务器上作业事件的汇总信息。</p><aside class="alert alert-info"><p><strong>变更: mc</strong></p><p>RELEASE.2024-07-03T20-17-25Z</p><p>Batch status 会显示活动且正在进行的作业，或前 3（三）天内已完成的任意批处理作业的汇总信息。</p></aside></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe"><code>mc batch describe</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe"><code>mc batch describe</code></a> 命令会输出指定作业 ID 的作业定义。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel"><code>mc batch cancel</code></a></p></td>
-      <td><p><a href="/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel"><code>mc batch cancel</code></a> 可停止正在进行的批处理作业。</p></td>
-    </tr>
-  </tbody>
-</table>
+| 命令                                                                                       | 说明                                         |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| [`mc batch generate`](/zh/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate) | 为指定作业类型创建基础 YAML 格式模板文件。   |
+| [`mc batch start`](/zh/reference/minio-mc/mc-batch-start/#command-mc.batch.start)          | 根据批处理作业 YAML 定义文件启动批处理作业。 |
+| [`mc batch list`](/zh/reference/minio-mc/mc-batch-list/#command-mc.batch.list)             | 输出部署上当前正在进行的批处理作业列表。     |
+| [`mc batch status`](/zh/reference/minio-mc/mc-batch-status/#command-mc.batch.status)       | 输出服务器上作业事件的汇总信息。             |
+| [`mc batch describe`](/zh/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe) | 输出指定作业 ID 的作业定义。                 |
+| [`mc batch cancel`](/zh/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel)       | 停止正在进行的批处理作业。                   |
+{.wide .expand}
+
+> [!NOTE]
+> **变更: mc `RELEASE.2024-07-03T20-17-25Z`**
+>
+> [`mc batch status`](/zh/reference/minio-mc/mc-batch-status/#command-mc.batch.status) 会显示活动且正在进行的作业，以及过去三（3）天内完成的任意批处理作业的汇总信息。
 
 <a id="minio-batch-framework-access"></a>
 
@@ -102,7 +98,7 @@ Push、Pull 和 Snowball 复制作业在必要的授权依赖或报告读取暂�
 
 > 授予用户查看当前正在处理的批处理作业的能力。
 
-**`admin:DescribeBatchJobs`**
+**`admin:DescribeBatchJob`**
 
 > 授予用户查看当前正在处理的批处理作业定义详情的能力。
 

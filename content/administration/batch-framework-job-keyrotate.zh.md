@@ -6,6 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="batch-key-rotation"></a>
 <a id="minio-batch-framework-keyrotate-job"></a>
 <a id="id1" data-td-print-local></a>
 
@@ -21,7 +22,7 @@ MinIO Batch Framework 允许你使用 YAML 格式的作业定义文件（“批�
 YAML 配置支持按创建日期、标签、元数据或 kms key 进行过滤，将密钥轮换限制在特定对象集合上。 你还可以定义重试次数，或设置通知 endpoint 和 token。
 
 > [!NOTE]
-> **下一版本 SILO 生命周期（`pgsty/silo` `main`）：** 批量 `keyrotate` 会在运行期间持续重新校验提交主体的凭据与权限（`461a7df`），在遇到临时 IAM 错误、不完整存储桶列举或存储池再平衡/退役冲突时暂停并重试（`5ce52c5`），并将被拒绝的对象（`keysRefused`、`complete-with-skips`）与完全成功的作业区分报告。详见 [SILO 批处理作业生命周期](/zh/administration/batch-framework/#silo-lifecycle)。
+> **[SILO 20261109](/zh/blog/release/silo-20261109/) 生命周期与多存储池安全：** 批量 `keyrotate` 会在执行全程强制校验已认证提交者的本地数据权限并保留 Object Lock 保留期与法定保留保护（[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)），按目标存储池限定复制更新范围以确保其他服务器存储池上的对象副本保持可读（[#312](https://github.com/pgsty/silo/issues/312)），在遇到临时 IAM 或授权故障、不完整存储桶列举或存储池再平衡与退役冲突时自动暂停并重试（[#313](https://github.com/pgsty/silo/issues/313)），并将跳过或拒绝的对象（`versionsSkippedLocked`、`keysRefused`、`complete-with-skips`）与完全成功的作业区分报告。详见 [SILO 批处理作业生命周期](/zh/administration/batch-framework/#silo-lifecycle)。
 
 <a id="id3" data-td-print-local></a>
 

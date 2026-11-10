@@ -10,6 +10,9 @@ upstream_modified: true
 <a id="batch-framework"></a>
 <a id="minio-batch-framework"></a>
 
+> [!NOTE]
+> **Version scope:** [SILO 20261109](/blog/release/silo-20261109/) and [mcli 20261109](/blog/release/mcli-20261109/) implement the authorization, Object Lock, and recovery rules below. Server `20261026` does not implement these server-side rules, and updating `mcli` alone does not update server-side job execution.
+
 ## Overview {#overview}
 
 The MinIO Batch Framework allows you to create, manage, monitor, and execute jobs using a YAML-formatted job definition file (a “batch file”). The batch jobs run directly on the MinIO deployment to take advantage of the server-side processing power without constraints of the local machine where you run the [MinIO Client](/reference/minio-mc/#minio-client).
@@ -22,24 +25,30 @@ Ordinary job failures use the retry limits in the definition. SILO 20261109 dist
 
 The MinIO Batch Framework supports the following job types:
 
-| Job Type | Description |
-| --- | --- |
-| [replicate](/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job) | Perform a one-time replication procedure from one MinIO location to another MinIO location. |
+| Job Type                                                                                        | Description                                                                                                                                               |
+| ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [replicate](/administration/batch-framework-job-replicate/#minio-batch-framework-replicate-job) | Perform a one-time replication procedure from one MinIO location to another MinIO location.                                                               |
 | [keyrotate](/administration/batch-framework-job-keyrotate/#minio-batch-framework-keyrotate-job) | Perform a one-time process to cycle the [sse-s3 or sse-kms](/operations/server-side-encryption/#minio-sse-data-encryption) cryptographic keys on objects. |
-| [expire](/administration/batch-framework-job-expire/#minio-batch-framework-expire-job) | Perform a one-time immediate expiration of objects in a bucket. |
+| [expire](/administration/batch-framework-job-expire/#minio-batch-framework-expire-job)          | Perform a one-time immediate expiration of objects in a bucket.                                                                                           |
 {.wide .expand}
 
 ## SILO 20261109: authorization and retries {#silo-lifecycle}
 
-SILO binds local batch operations to the authenticated submitter at job creation. The credentials in a definition are used for its remote connections; they do not grant local server authority. IAM changes are checked again when actions are taken. An explicit denial, expired or revoked credential, or changed submitter binding ends the job with `failureReason`. Statements that need request context unavailable to a background job refuse the action.
+[SILO 20261109](/blog/release/silo-20261109/) binds local batch operations to the authenticated submitter at job creation and enforces the submitter's data permissions throughout execution ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)). Credentials in a job definition authorize remote connections only and do not grant local server authority. SILO re-evaluates IAM state before each action:
 
-IAM startup, unavailable policy material, and an authorization plugin that cannot return a valid decision are temporary failures. Submission returns `503` when authorization cannot be decided. Expiration and key rotation pause with `pausedReason`, preserve completed progress, and retry in the same process with bounded exponential backoff and jitter. Immediate or streamed listing failures also pause these jobs. Rotation pauses when its selected source is in a moving pool and resumes after the conflict clears. Every retry resolves current identity and policies again. A pending or paused job is not a completed or failed report and is not removed by terminal-report cleanup. Administrator cancellation takes precedence over queued work and retries.
+- An explicit denial, an expired, disabled, or revoked credential, or a changed credential secret, session token, or parent identity ends the job with `failureReason`.
+- Identity metadata edits (such as descriptions or extended expiration dates) and LDAP group refreshes that keep the submitter's credential intact do not stop the job; each check resolves current status, groups, and policies ([#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)).
+- Policy evaluation skips deleted policies that an IAM mapping still names, grants nothing from `Allow` statements that depend on unavailable request-time context, and refuses the job only when an applicable `Deny` statement requires request-time context that batch execution cannot supply ([#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)).
+- Batch jobs preserve Object Lock protection across expiration, key rotation, and pull replication, skipping retention-locked or legal-hold-protected versions instead of bypassing protection and finishing as `complete-with-skips` when protected or refused work remains ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)).
+- Multi-pool `keyrotate` jobs scope copy operations to the target pool so object copies in other pools remain readable ([#312](https://github.com/pgsty/silo/issues/312)).
 
-Push, pull, and Snowball replication also pause with `pausedReason` when a required authorization dependency or report read is temporarily unavailable, including an outage that begins during object processing, and restart their source scan from the beginning on retry; see [Batch Replication](/administration/batch-framework-job-replicate/#silo-retry). Other mid-run replication failures follow the existing finite object retry behavior and can end the run as failed.
+IAM startup, unavailable policy material, and an authorization plugin that cannot return a valid decision are temporary failures. Submission returns `503` when authorization cannot be decided. Expiration and key rotation pause with `pausedReason`, preserve completed progress, and retry in the same process with bounded exponential backoff and jitter ([#313](https://github.com/pgsty/silo/issues/313)). Immediate or streamed listing failures also pause these jobs. Key rotation pauses when its selected source is in a moving pool and resumes after the conflict clears. Every retry resolves current identity and policies again. A pending or paused job is not a completed or failed report and is not removed by terminal-report cleanup. Administrator cancellation takes precedence over queued work and retries.
 
-Startup discovery also retries failed manifest listings and storage reads with bounded backoff. It remembers manifests already admitted during that discovery, so a later scan cannot rerun a job that finished while waiting. Cancellation fences stale discovery results. Missing, malformed, or unsupported manifests are not queued; malformed and unsupported definitions remain on disk for inspection. A storage outage during discovery does not require a restart once storage recovers.
+Push, pull, and Snowball replication also pause with `pausedReason` when a required authorization dependency or report read is temporarily unavailable, including an outage that begins during object processing, and restart their source scan from the beginning on retry ([#324](https://github.com/pgsty/silo/issues/324)); see [Batch Replication](/administration/batch-framework-job-replicate/#silo-retry). Other mid-run replication failures follow the finite object retry limits in the definition and can end the run as failed.
 
-Completed jobs remain completed after restart, including legacy jobs and jobs whose credentials later expire or change. Unfinished jobs from releases without submitter binding require resubmission. New bound definitions and authorized progress reports use formats rejected by older executors. This fences those records on rollback, but does not make a mixed cluster safe: an old node can still accept and execute its own old-format jobs. Stop submissions and drain or cancel old jobs before changing versions, and do not downgrade with pending authorized jobs.
+Startup discovery retries failed manifest listings and storage reads with bounded backoff ([#314](https://github.com/pgsty/silo/issues/314)) and resumes unfinished jobs, including running replication jobs ([#324](https://github.com/pgsty/silo/issues/324)). Discovery remembers manifests already admitted during that pass, so a later scan cannot rerun a job that finished while waiting. Cancellation fences stale discovery results. Missing, malformed, or unsupported manifests are not queued; malformed and unsupported definitions remain on disk for inspection. A storage outage during discovery does not require a restart once storage recovers.
+
+Completed jobs—including completed `expire` jobs ([#315](https://github.com/pgsty/silo/issues/315)), legacy jobs, and jobs whose submitter credentials later expire or change—stay completed after a server restart. Unfinished jobs from releases without submitter binding require resubmission. New bound definitions and authorized progress reports use formats rejected by older executors. This fences those records on rollback, but does not make a mixed cluster safe: an old node can still accept and execute its own old-format jobs. Stop submissions and drain or cancel old jobs before changing versions, and do not downgrade with pending authorized jobs.
 
 ### Upgrading and rolling back 20261109 {#upgrade-20261109}
 
@@ -57,36 +66,22 @@ Use [mcli batch status](/reference/minio-mc/mc-batch-status/#silo-job-outcomes) 
 - Install the [MinIO Client](/reference/minio-mc/#minio-client)
 - Define an [`alias`](/reference/minio-mc/mc-alias-set/#command-mc.alias.set) for the MinIO deployment
 
-The [`mc batch`](/reference/minio-mc/mc-batch/#command-mc.batch) commands include
+The [`mc batch`](/reference/minio-mc/mc-batch/#command-mc.batch) commands include:
 
-<table>
-  <tbody>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate"><code>mc batch generate</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate"><code>mc batch generate</code></a> command creates a basic YAML-formatted template file for the specified job type.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-batch-start/#command-mc.batch.start"><code>mc batch start</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-batch-start/#command-mc.batch.start"><code>mc batch start</code></a> command launches a batch job from a job batch YAML file.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-batch-list/#command-mc.batch.list"><code>mc batch list</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-batch-list/#command-mc.batch.list"><code>mc batch list</code></a> command outputs a list of the batch jobs currently in progress on a deployment.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-batch-status/#command-mc.batch.status"><code>mc batch status</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-batch-status/#command-mc.batch.status"><code>mc batch status</code></a> command outputs summaries of job events on a MinIO server.</p><aside class="alert alert-info"><p><strong>Changed: mc</strong></p><p>RELEASE.2024-07-03T20-17-25Z</p><p>Batch status displays summaries for active, in-progress jobs or any batch job completed in the previous three (3) days.</p></aside></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe"><code>mc batch describe</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe"><code>mc batch describe</code></a> command outputs the job definition for a specified job ID.</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel"><code>mc batch cancel</code></a></p></td>
-      <td><p>The <a href="/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel"><code>mc batch cancel</code></a> stops an ongoing batch job.</p></td>
-    </tr>
-  </tbody>
-</table>
+| Command                                                                                 | Description                                                              |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [`mc batch generate`](/reference/minio-mc/mc-batch-generate/#command-mc.batch.generate) | Creates a basic YAML-formatted template file for the specified job type. |
+| [`mc batch start`](/reference/minio-mc/mc-batch-start/#command-mc.batch.start)          | Starts a batch job from a YAML job definition file.                      |
+| [`mc batch list`](/reference/minio-mc/mc-batch-list/#command-mc.batch.list)             | Outputs a list of batch jobs currently in progress on a deployment.      |
+| [`mc batch status`](/reference/minio-mc/mc-batch-status/#command-mc.batch.status)       | Outputs summaries of job events on a server.                             |
+| [`mc batch describe`](/reference/minio-mc/mc-batch-describe/#command-mc.batch.describe) | Outputs the job definition for a specified job ID.                       |
+| [`mc batch cancel`](/reference/minio-mc/mc-batch-cancel/#command-mc.batch.cancel)       | Stops an ongoing batch job.                                              |
+{.wide .expand}
+
+> [!NOTE]
+> **Changed: mc `RELEASE.2024-07-03T20-17-25Z`**
+>
+> [`mc batch status`](/reference/minio-mc/mc-batch-status/#command-mc.batch.status) displays summaries for active, in-progress jobs and for batch jobs completed within the previous three (3) days.
 
 <a id="minio-batch-framework-access"></a>
 
@@ -100,9 +95,9 @@ The user executing the batch job must have the following permissions. You can al
 
 > Grants the user the ability to see batch jobs currently in process.
 
-**`admin:DescribeBatchJobs`**
+**`admin:DescribeBatchJob`**
 
-> Grants the user the ability to see the definition details of batch job currently in process.
+> Grants the user the ability to see the definition details of a batch job currently in process.
 
 **`admin:StartBatchJob`**
 

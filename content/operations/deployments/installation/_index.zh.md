@@ -8,6 +8,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="installation-and-management"></a>
 <a id="minio-snsd"></a>
 <a id="minio-snmd"></a>
 <a id="minio-installation"></a>
@@ -17,7 +18,7 @@ upstream_modified: true
 
 本节介绍如何在 [Kubernetes](/zh/operations/deployments/kubernetes/#minio-kubernetes) 和 [裸机或虚拟化](/zh/operations/deployments/baremetal/#minio-baremetal) 基础设施上安装与管理采用 AGPLv3 许可的 Silo 对象存储服务端。
 
-`minio` 可执行文件、`MINIO_*` 环境变量、S3 与 Admin API、盘上格式，以及 MinIO Operator 资源名都是兼容契约。叙述使用 Silo 品牌，命令和标识符则保留兼容名称。
+SILO 的服务端可执行文件、Linux 软件包、`systemd` 服务（`silo.service`）与容器镜像（`docker.io/pgsty/silo`）均使用 `silo` 名称，独立客户端制品使用 `mcli` 名称；`MINIO_*` 环境变量、`/etc/default/silo` 不存在时的 `/etc/default/minio` 兼容回退、S3 与 Admin 线协议 API、磁盘纠删码格式，以及已归档 MinIO Operator 的资源名称则保留 MinIO 兼容名称。
 
 Silo 是兼容 S3 的软件定义分布式对象存储服务端。[下载页面](/zh/download/) 是当前已发布操作系统与架构制品的事实来源。
 
@@ -55,7 +56,9 @@ Silo 使用 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-co
 - [部署 MinIO Operator](/zh/operations/deployments/k8s-deploy-operator-helm-on-kubernetes/)
 - [查看 Kubernetes 部署说明](/zh/operations/deployments/kubernetes/)
 
-## 裸金属 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 裸金属 {#baremetal}
 
 Silo 可以运行在物理机、虚拟化主机或容器中。请查阅当前下载矩阵和各平台页面，确认已验证的制品与范围。
 

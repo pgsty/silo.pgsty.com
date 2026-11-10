@@ -6,6 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="managing-your-deployment"></a>
 <a id="minio-console-managing-deployment"></a>
 <a id="id1" data-td-print-local></a>
 
@@ -24,20 +25,25 @@ upstream_modified: true
 > 它与 MinIO Kubernetes Operator Console 相互独立，二者并不相同；后者已在 Operator 6.0.0 起废弃并移除。
 
 <a id="id3" data-td-print-local></a>
+<a id="minio-console-monitoring"></a>
 
-## 监控 {#minio-console-monitoring}
+## 监控 {#monitoring}
 
 **Monitoring** 部分提供用于监控 MinIO 部署的界面。
 
 该部分包含以下子部分： 如果已认证用户不具备 [所需的管理权限](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions)，则某些子部分可能不可见。
 
-### 指标 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 指标 {#metrics}
 
 Console 的 **Dashboard** 部分显示 MinIO 部署的指标。 默认视图提供部署状态的高层概览，包括各个服务器和驱动器的运行时长与可用性。
 
 Console 还支持通过查询已配置为抓取 MinIO 部署数据的 [Prometheus](https://prometheus.io/docs/prometheus/latest/getting_started/) 服务来显示时间序列和历史数据。 具体来说，MinIO Console 使用 [Prometheus query API](https://prometheus.io/docs/prometheus/latest/querying/api/) 获取已存储的指标数据并显示历史指标。 有关将 MinIO 指标抓取到 Prometheus 的更多信息，请参见 [使用 Prometheus 进行监控与告警](/zh/operations/monitoring/collect-minio-metrics-using-prometheus/#minio-metrics-collect-using-prometheus)。
 
-### 日志 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 日志 {#logs}
 
 Console 的 **Logs** 部分显示 MinIO 部署生成的 [服务器日志](/zh/operations/monitoring/minio-logging/#minio-logging)。
 
@@ -47,7 +53,9 @@ Console 的 **Logs** 部分显示 MinIO 部署生成的 [服务器日志](/zh/op
 
 选择 **Start Logs** 按钮，开始使用所选过滤器和设置采集日志。
 
-### 审计 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 审计 {#audit}
 
 > [!WARNING]
 > **重要**
@@ -56,7 +64,9 @@ Console 的 **Logs** 部分显示 MinIO 部署生成的 [服务器日志](/zh/op
 
 Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审计日志](/zh/operations/monitoring/minio-logging/#minio-logging) 的界面。
 
-### 追踪 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 追踪 {#trace}
 
 **Trace** 部分为部署中的一个或多个存储桶提供 HTTP 追踪功能。 该部分提供与 [`mc admin trace`](/zh/reference/minio-mc-admin/mc-admin-trace/#command-mc.admin.trace) 类似的功能。
 
@@ -64,17 +74,22 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 
 选择 **Filters** 可打开附加过滤器并应用到追踪输出，例如将追踪适用的 **Path** 限制为某个特定存储桶或存储桶前缀。
 
-### 观察 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 观察 {#watch}
 
 **Watch** 部分显示所选存储桶上发生的 S3 事件。 该部分提供与 [`mc watch`](/zh/reference/minio-mc/mc-watch/#command-mc.watch) 类似的功能。
 
-### 加密 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 加密 {#encryption}
 
 **Encryption** 部分允许你查看已配置 [Key Encryption Service](https://github.com/minio/kes-docs/blob/67cc5e56909035aad851f2d031a295a8ad9efe57/content/_index.md) 提供方的状态和指标。
 
 <a id="id10" data-td-print-local></a>
+<a id="minio-console-notifications"></a>
 
-## 事件 {#minio-console-notifications}
+## 事件 {#events}
 
 > [!NOTE]
 > **变更: Console**
@@ -92,8 +107,9 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 你可以从列表中选择现有通知目标，查看其详细信息或删除该目标。
 
 <a id="id11" data-td-print-local></a>
+<a id="minio-console-site-replication"></a>
 
-## 站点复制 {#minio-console-site-replication}
+## 站点复制 {#site-replication}
 
 **Site Replication** 部分提供用于添加和管理部署 [站点复制](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 配置的界面。
 
@@ -113,8 +129,9 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 > 删除密钥会导致 MinIO 无法解密任何受该密钥保护的对象。 如果该密钥不存在备份，删除密钥将使对象永久不可读。 更多信息请参见 [安全擦除与锁定](/zh/administration/server-side-encryption/#minio-encryption-sse-secure-erasure-locking)。
 
 <a id="id13"></a>
+<a id="minio-console-settings"></a>
 
-## 配置 {#minio-console-settings}
+## 配置 {#configuration}
 
 **Settings** 部分提供用于查看和获取部署中所有 MinIO Server 的 [配置设置](/zh/reference/minio-server/settings/#minio-server-configuration-settings) 的界面。 使用 **Export** 和 **Import** 按钮可在不同部署之间导出和导入设置。
 
@@ -126,16 +143,13 @@ Audit Log 部分提供用于查看由已配置 PostgreSQL 服务采集的 [审�
 - Heal
 - Scanner
 - Etcd
-- Logger Webhook
-- Audit [Webhook](/zh/administration/monitoring/publish-events-to-webhook/#minio-bucket-notifications-publish-webhook)
-- Audit [Kafka](/zh/administration/monitoring/publish-events-to-kafka/#minio-bucket-notifications-publish-kafka)
+- [Logger Webhook](/zh/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-regular)
+- Audit [Webhook](/zh/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-audit)
+- Audit [Kafka](/zh/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-audit-kafka)
 
 > [!NOTE]
-> **新增: Console**
->
-> v0.24.0
->
-> 环境变量中的配置设置会覆盖在 MinIO Console 中添加的任何自定义内容。 将鼠标悬停在配置字段上方，可显示工具提示，说明该设置是否由环境变量控制。
+> - **环境变量覆盖（Console v0.24.0+）：** 环境变量中的配置设置会覆盖在 MinIO Console 中保存的自定义值。将鼠标悬停在配置字段上方，可显示工具提示，说明该设置是否由环境变量控制。
+> - **对端重载保持 Webhook 生效（[SILO 20261109](/zh/blog/release/silo-20261109/)，[#259](https://github.com/pgsty/silo/issues/259)）：** 节点间重新加载配置后，已配置的 `audit_webhook` 和 `logger_webhook` 目标在部署的所有服务器节点上保持活跃。
 
 如果已认证用户不具备 [所需的管理权限](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions)，则某些子部分可能不可见。
 

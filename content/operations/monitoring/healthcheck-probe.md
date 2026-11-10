@@ -11,25 +11,50 @@ upstream_modified: true
 
 MinIO exposes unauthenticated endpoints for probing node uptime and cluster [high availability](/operations/concepts/erasure-coding/#minio-ec-parity) for simple healthchecks. These endpoints return an HTTP status code indicating whether the underlying resource is healthy or satisfies read/write quorum. MinIO exposes no other data through these endpoints.
 
-## Native probes and application startup {#native-probe}
+## Native Probes and Application Startup {#native-probe}
 
-`silo healthcheck ready` calls `/minio/health/ready`: it checks the process and configured KMS/etcd, and can succeed before storage and IAM finish loading. This behavior preserves distributed peer bootstrap; Kubernetes headless services must retain `publishNotReadyAddresses: true`. Do not make `cluster` a container liveness probe or a prerequisite for peer connectivity.
+SILO includes a built-in `silo healthcheck` subcommand that probes the local `/minio/health/*` HTTP endpoints without requiring `curl`, `mc`, or a shell inside the container:
 
-The distroless image's built-in `HEALTHCHECK` uses `ready`. Compose `depends_on: condition: service_healthy` therefore confirms that probe, not S3 availability. Switching to `cluster` still leaves the remote-drive reconnection window described below. A dependent application that immediately accesses objects should run a separate signed S3 write/read check with a fixed deadline, stopping startup or rollout on failure. Use a dedicated bucket and unique probe keys, and remove them after verification.
+```shell
+silo healthcheck [FLAGS] [live|ready|cluster|cluster-read]
+```
+
+- `CHECK` selects the target endpoint: `live` (default), `ready`, `cluster`, or `cluster-read`.
+- `--address` (or `MINIO_ADDRESS`, default `:9000` with an empty host resolved to `127.0.0.1`) sets the target `HOST:PORT` and switches to HTTPS automatically when `public.crt` and `private.key` exist in `--certs-dir`.
+- `--url` (or `MINIO_HEALTHCHECK_URL`) overrides `--address` and TLS auto-detection with an explicit `http[s]://HOST:PORT` base URL.
+- `--maintenance` applies to `cluster` only, appends `?maintenance=true`, and exits `1` when the server returns HTTP `412 Precondition Failed`.
+- `--timeout` sets the probe deadline (`5s` by default for `live` and `ready`; `15s` by default for `cluster` and `cluster-read`).
+- Global flags `--certs-dir`, `--json`, and `--quiet` control certificate lookup and output formatting. The command exits `0` when healthy and `1` otherwise.
+
+`silo healthcheck ready` calls `/minio/health/ready`. That endpoint checks HTTP queue capacity plus configured KMS and `etcd` reachability, and can return `200 OK` before storage and IAM finish loading. This behavior preserves distributed peer bootstrap; Kubernetes headless services must keep `publishNotReadyAddresses: true`. Do not configure `cluster` as a container liveness probe or as a prerequisite for peer connectivity.
+
+The `-distroless` container image sets its built-in `HEALTHCHECK` to `/usr/bin/silo healthcheck ready`. Docker Compose `depends_on: condition: service_healthy` therefore confirms only that readiness probe, not S3 data-path availability. Switching to `cluster` still leaves the remote-drive reconnection window described below. Any dependent application that immediately accesses objects must run a bounded signed S3 write and readback check and stop startup or rollout on failure. Use a dedicated bucket and unique probe keys, and delete them after verification.
 
 ## Node Liveness {#node-liveness}
 
-Use the following endpoint to test if a MinIO server is online:
+Use the following endpoint to test whether a SILO server HTTP listener is serving requests:
 
 ```shell
 curl -I https://minio.example.net:9000/minio/health/live
 ```
 
-Replace `https://minio.example.net:9000` with the DNS hostname of the MinIO server to check.
+Replace `https://minio.example.net:9000` with the DNS hostname and port of the server to check.
 
-A response code of `200 OK` indicates the MinIO server is online and functional. Any other HTTP codes indicate an issue with reaching the server, such as a transient network issue or potential downtime.
+`/minio/health/live` returns `200 OK` as soon as the HTTP listener starts, even before the object layer loads. While storage initializes, the response includes `x-minio-server-status: offline`. The endpoint returns `503 Service Unavailable` when queued requests exceed the API request pool capacity. Because a failed liveness check restarts pods in Kubernetes, `/minio/health/live` contacts no external systems (neither KMS nor `etcd`), preventing restarts during slow drive initialization or external service outages.
 
-The healthcheck probe alone cannot determine if a MinIO server is offline. Instead, the probe determines whether the current host machine can reach the server. Consider configuring a Prometheus [alert](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) using `minio_cluster_health_nodes_offline_count` for [metrics v3](/operations/monitoring/metrics-and-alerts/#minio-available-v3-cluster-metrics) or `minio_cluster_nodes_offline_total` for [metrics v2](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics) to detect whether one or more MinIO nodes are offline.
+The liveness probe checks only whether the current client can reach the server HTTP listener and whether its request queue has capacity. Configure a Prometheus [alert](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) using `minio_cluster_health_nodes_offline_count` for [metrics v3](/operations/monitoring/metrics-and-alerts/#minio-available-v3-cluster-metrics) or `minio_cluster_nodes_offline_total` for [metrics v2](/operations/monitoring/metrics-v2/#minio-available-cluster-metrics) to detect offline cluster nodes.
+
+## Node Readiness {#node-readiness}
+
+Use the following endpoint to test process readiness and configured external dependencies:
+
+```shell
+curl -I https://minio.example.net:9000/minio/health/ready
+```
+
+Replace `https://minio.example.net:9000` with the DNS hostname and port of the server to check.
+
+`/minio/health/ready` checks the same HTTP request queue capacity as `/minio/health/live`, and also verifies KMS key generation and `etcd` health when KMS or `etcd` is configured. When neither KMS nor `etcd` is configured, `/minio/health/ready` follows the same check path as `/minio/health/live`. Like `/minio/health/live`, `/minio/health/ready` can return `200 OK` (with `x-minio-server-status: offline`) before the object layer or IAM finishes loading, so peer discovery can proceed during cluster startup.
 
 <a id="minio-cluster-write-quorum"></a>
 
@@ -80,8 +105,17 @@ The healthcheck probe alone cannot determine if a MinIO server is offline - only
 
 ## Startup Readiness Window {#startup-readiness-window}
 
-SILO 20261026 retains this distinction: the [cluster health implementation](https://github.com/pgsty/silo/blob/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3/cmd/erasure-server-pool.go#L3054) evaluates reported drive quorum. Check both cluster endpoints, then validate actual reads and writes before resuming an upgrade workload. For the full SILO probe contract, see [Healthcheck Probe Semantics](/compatibility/feature/healthcheck/).
+[SILO 20261109](/blog/release/silo-20261109/) retains this behavior: the [cluster health implementation](https://github.com/pgsty/silo/blob/d998292387ccf1d2907749e0fb1575ef5fb93fda/cmd/erasure-server-pool.go#L3162) evaluates reported drive quorum across peers. Check both cluster endpoints, then verify actual S3 reads and writes before you resume application workloads. For the full probe specification, see [Healthcheck Probe Semantics](/compatibility/feature/healthcheck/).
 
-None of the endpoints above proves that the node which received the request can already serve the data path after a restart. Each node connects its erasure drives to its peers in a monitor loop: a remote drive that could not be connected during startup stays uninstalled on that node until a later pass, and the monitor waits 15 seconds after each completed pass, so that interval is a floor between attempts, not a bound on recovery. While a drive is uninstalled, the node's liveness endpoint answers `200 OK`, both cluster endpoints, `mc admin info` and `mcli ready` can report healthy as well, because the cluster endpoints aggregate every peer's report of its own local drives rather than the drives this node has installed. Yet a PUT through that node can fail with `503 SlowDownWrite` for lack of write quorum, and a GET through it of an object another node just wrote can answer `404 NoSuchKey`. In the review runs that established this, sampled I/O began succeeding roughly 13 to 15 seconds after the administrative views became healthy on a four-node loopback cluster, consistent with the reconnect interval, and every object acknowledged by other nodes during the window was readable afterwards; these are observations, not guarantees, since reconnection can keep failing.
+None of the HTTP health endpoints proves that the receiving node can serve object I/O immediately after a restart. Each node connects to remote peer drives in a background monitor loop. If a remote drive is unreachable at startup, it remains uninstalled on that node until a later monitor pass. The monitor waits 15 seconds after each completed pass, so 15 seconds is a minimum interval between retries rather than an upper bound on recovery.
 
-Automation that restarts a cluster and then immediately writes to it, such as an upgrade or failover runbook, should gate on a bounded data-path check rather than on these endpoints: one small PUT through each node followed by a read of each object through every node, repeated until every request returns the correct bytes and the acknowledged version within one fixed deadline, with each request budgeted from the remaining deadline and SDK retries disabled, and with the acknowledged objects re-read afterwards. Record the time to first usable I/O separately from the endpoint result. Such a check proves sampled I/O at that moment for the erasure sets those keys hash to; it proves neither that every set is complete nor that there is headroom for a further node loss, since a set can admit writes with fewer than all of its drives installed. The endpoints remain the right signal for their stated purpose, process liveness and quorum membership.
+While remote drives remain uninstalled on a restarted node, `/minio/health/live`, `/minio/health/ready`, both `/minio/health/cluster*` endpoints, `mc admin info`, and `mcli ready` can all report healthy. The cluster endpoints aggregate each peer's report of its own local drives rather than checking which remote drives the receiving node has mounted. During this window, a `PUT` through that node can fail with `503 SlowDownWrite`, and a `GET` for a newly written object on another node can fail until remote drives reconnect.
+
+Upgrade and failover automation must gate traffic on a bounded S3 data-path check rather than on HTTP health endpoints alone:
+
+1. Set one fixed overall deadline and disable automatic SDK retries.
+2. Write one small signed test object through each restarted node, budgeting each request timeout from the remaining deadline.
+3. Read every acknowledged test object back through every node and verify both payload bytes and version IDs.
+4. Record the time to first usable S3 I/O separately from HTTP probe readiness, and remove the test objects after verification.
+
+This check confirms sampled S3 read and write paths for the erasure sets reached by those keys. It does not prove that every erasure set has all drives online or can tolerate another node loss. Use the HTTP health endpoints for process liveness, external-dependency readiness, and reported quorum checks.

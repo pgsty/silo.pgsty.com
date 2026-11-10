@@ -57,7 +57,7 @@ firewall-cmd --reload
 
 If you set a static [MinIO Console](/administration/minio-console/#minio-console) port (e.g. `:9001`) you must *also* grant access to that port to ensure connectivity from external clients.
 
-MinIO **strongly recomends** using a load balancer to manage connectivity to the cluster. The Load Balancer should use a “Least Connections” algorithm for routing requests to the MinIO deployment, since any MinIO node in the deployment can receive, route, or process client requests.
+MinIO **strongly recommends** using a load balancer to manage connectivity to the cluster. The Load Balancer should use a “Least Connections” algorithm for routing requests to the MinIO deployment, since any MinIO node in the deployment can receive, route, or process client requests.
 
 The following load balancers are known to work well with MinIO:
 
@@ -74,25 +74,12 @@ Use the [Erasure Code Calculator](https://min.io/product/erasure-code-calculator
 
 For example, consider a deployment with the following distribution of used and free storage:
 
-<table>
-  <tbody>
-    <tr>
-      <td><p>Pool 1</p></td>
-      <td><p>100TB Used</p></td>
-      <td><p>200TB Total</p></td>
-    </tr>
-    <tr>
-      <td><p>Pool 2</p></td>
-      <td><p>100TB Used</p></td>
-      <td><p>200TB Total</p></td>
-    </tr>
-    <tr>
-      <td><p>Pool 3</p></td>
-      <td><p>100TB Used</p></td>
-      <td><p>200TB Total</p></td>
-    </tr>
-  </tbody>
-</table>
+| Pool   | Used Capacity | Total Capacity |
+| ------ | ------------- | -------------- |
+| Pool 1 | 100 TB Used   | 200 TB Total   |
+| Pool 2 | 100 TB Used   | 200 TB Total   |
+| Pool 3 | 100 TB Used   | 200 TB Total   |
+{.wide .expand}
 
 Decommissioning Pool 1 requires distributing the 100TB of used storage across the remaining pools. Pool 2 and Pool 3 each have 100TB of unused storage space and can safely absorb the data stored on Pool 1.
 
@@ -126,9 +113,17 @@ Do **not** perform “rolling” (e.g. one node at a time) restarts.
 
 ### Delete Markers, Expiration, and Migration Verification {#decommissioning-ignores-expired-objects-and-trailing-deletemarker}
 
-SILO Server 20261018 and 20261026 migrate both null and UUID delete markers, including a marker that is the only remaining version in the source pool. Another pool may still contain older data for that key, so a marker cannot be discarded merely because no other version remains in its own pool. This replaces the older upstream behavior that skipped isolated markers.
+SILO Server 20261018 and later migrate both null and UUID delete markers, including a marker that is the only remaining version in the source pool. Another pool may still contain older data for that key, so a marker cannot be discarded merely because no other version remains in its own pool. This replaces the older upstream behavior that skipped isolated markers.
 
-Decommissioning still evaluates [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration), queues eligible expired objects or versions for expiration, and skips their migration. In next-release SILO builds (`04d7d9197`), pool decommission and rebalance evaluate ILM rules only when `scanner` is enabled in `MINIO_SCANNER_SUBSYSTEMS` and evaluate lifecycle actions (`evalActionFromLifecycle`) before tier transition (`evalScannerTransition`); see [ILM Migration Ordering](/blog/design/ilm-migration-ordering/). Use [`mc admin trace --call decommission`](/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) to inspect migration and skip reasons.
+Decommissioning evaluates [lifecycle rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration), queues eligible expired objects or versions for expiration when safe across all pools, and skips unnecessary payload copies. [SILO 20261109](/blog/release/silo-20261109/) evaluates ILM rules during pool decommission and rebalance only when `scanner` is enabled in `MINIO_SCANNER_SUBSYSTEMS`, evaluates lifecycle actions (`evalActionFromLifecycle`) before tier transition (`evalScannerTransition`) (see [ILM Migration Ordering](/blog/design/ilm-migration-ordering/)), and includes the following decommissioning fixes:
+
+- Moves objects whose copies across pools have different erasure layouts ([#261](https://github.com/pgsty/silo/issues/261)).
+- Moves ILM-expired current versions instead of skipping or stranding them in the draining pool ([#265](https://github.com/pgsty/silo/issues/265)).
+- Moves versions whose lifecycle expiry cannot safely complete across pools—for example, when cross-pool version history or Object Lock protection lacks an authoritative quorum—instead of dropping them ([#278](https://github.com/pgsty/silo/issues/278), [`5cb91e7d7`](https://github.com/pgsty/silo/commit/5cb91e7d7)).
+- Preserves remote-tier objects while another pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)).
+- Continues decommissioning later buckets when one bucket cannot finish, while preserving operator cancellation ([#307](https://github.com/pgsty/silo/issues/307)).
+
+Use [`mc admin trace --call decommission`](/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) to inspect migration and skip reasons.
 
 Current versions preserve tags and their revision fields and recheck migrated versions before source cleanup. Upgrading does not recover tags lost during earlier migrations. See the [pool migration contract](/blog/design/multi-pool-object-consistency/#migration-20261018).
 
@@ -147,16 +142,16 @@ If decommissioning fails, preserve the logs, inspect pool health and available c
 > [!NOTE]
 > **Changed: RELEASE.2023-03-20T20-16-18Z**
 
-For deployments with tiering enabled and active, decommissioning moves the object references to a new active pool. Applications can continue issuing GET requests against those objects where MinIO handles transparently retrieving them from the remote tier.
+For deployments with tiering enabled and active, decommissioning moves the object references to a new active pool, and [SILO 20261109](/blog/release/silo-20261109/) retains remote-tier objects whenever another pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)). Applications can continue issuing `GET` requests against those objects while SILO retrieves them from the remote tier.
 
 In older MinIO versions, tiering configurations prevent decommissioning.
 
 > [!WARNING]
-> **Keep every remote tier configured until the decommission completes**
+> **Keep every remote tier configured until decommissioning completes**
 >
-> A tier free version is the internal record of a remote object that still has to be deleted. Decommission removes the remote object before it removes the record, so it needs the tier the record names. If that tier was removed from the configuration, the decommission fails and the record stays in the pool. Releases after Server 20261026 first move every other bucket, and the error names the free version, its remote object, and the tier.
+> A tier free version is an internal record of a remote object that still requires deletion. Decommissioning removes the remote object (when no other pool references it) before removing the record, so the configured tier named in that record must remain available until pool decommissioning finishes. If that tier was removed from configuration, decommissioning fails and the record stays in the pool. [SILO 20261109](/blog/release/silo-20261109/) continues decommissioning all other buckets first and reports the free version, remote object, and missing tier in the error ([#307](https://github.com/pgsty/silo/issues/307)).
 >
-> Re-add the tier under the same name with [`mcli ilm tier add`](/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add), then re-run [`mcli admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) to resume with the buckets that are left. See [Tier Free Versions Are Internal Cleanup Records](/blog/design/tier-free-version-semantics/#operations).
+> Re-add the tier under the same name with [`mcli ilm tier add`](/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add), then re-run [`mcli admin decommission start`](/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) to resume the remaining buckets. See [Tier Free Versions Are Internal Cleanup Records](/blog/design/tier-free-version-semantics/#operations).
 
 <a id="minio-decommissioning-server-pool"></a>
 
@@ -336,17 +331,17 @@ The command returns output similar to the following:
 └─────┴────────────────────────────────────────────────────────────────┴──────────────────────────────────┴────────┘
 ```
 
-The example deployment above has three pools. Each pool has four servers with four drives each.
+The example deployment above has four pools. Each pool has four servers with four drives each.
 
-Identify the target pool for decommissioning and review the current capacity. The remaining pools in the deployment *must* have sufficient total capacity to migrate all object stored in the decommissioned pool.
+Identify the target pools for decommissioning and review the current capacity. The remaining pools in the deployment *must* have sufficient total capacity to migrate all objects stored in the decommissioned pools.
 
-In the example above, the deployment has 1110TiB total storage with 145TiB used.
+In the example above, the deployment has 1110 TiB total storage with 145 TiB used.
 
 - The first pool (`minio-{01...04}`) is the first decommissioning target, as it was provisioned when the MinIO deployment was created and is completely full.
 - The second pool (`minio-{05...08}`) is the second decommissioning target, as it was also provisioned when the MinIO deployment was created and is nearly full.
 - The fourth pool (`minio-{13...16}`) is a newly added pool with new hardware from a completed server expansion.
 
-The third and fourth pools can absorb all objects stored on the first pool without significantly impacting total available storage.
+The third and fourth pools can absorb all objects stored on the first and second pools without significantly impacting total available storage.
 
 > [!WARNING]
 > **Important**
@@ -433,13 +428,17 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 
 Edit the environment file and remove the decommissioned pools from the `MINIO_VOLUMES` value.
 
-### 5) Update Network Control Plane {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 5) Update Network Control Plane {#update-network-control-plane-multiple}
 
 Update any load balancers, reverse proxies, or other network control planes to remove the decommissioned server pools from the connection configuration for the MinIO deployment.
 
 Specific instructions for configuring network control plane components is out of scope for this procedure.
 
-### 6) Restart the MinIO Deployment {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 6) Restart the MinIO Deployment {#restart-the-minio-deployment-multiple}
 
 Issue the following commands on each node **simultaneously** in the deployment to restart the MinIO service:
 

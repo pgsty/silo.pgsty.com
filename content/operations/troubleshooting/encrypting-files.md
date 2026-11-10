@@ -31,10 +31,10 @@ If you provide `support_public.pem`, keep the matching private key safe. Quote p
 
 <a id="go"></a>
 
-Build the `inspect` decryption utility from the maintained SILO source repository using the Go toolchain version required by that release:
+Build the `inspect` decryption utility from the maintained SILO source repository using the Go toolchain version required by that release (Go `1.27.3` for [SILO 20261109](/blog/release/silo-20261109/)):
 
 ```shell
-git clone --branch RELEASE.2026-10-26T00-00-00Z --depth 1 https://github.com/pgsty/silo.git
+git clone --branch RELEASE.2026-11-09T00-00-00Z --depth 1 https://github.com/pgsty/silo.git
 cd silo/docs/debugging/inspect
 go build -o inspect .
 ```

@@ -33,10 +33,10 @@ mcli support inspect 'mysilo/mybucket/myobject/xl.meta'
 
 <a id="go"></a>
 
-从维护中的 SILO 源码仓库构建 `inspect` 解密工具（需使用该版本要求的 Go 工具链）：
+从维护中的 SILO 源码仓库构建 `inspect` 解密工具（需使用该版本要求的 Go 工具链；[SILO 20261109](/zh/blog/release/silo-20261109/) 要求 Go `1.27.3`）：
 
 ```shell
-git clone --branch RELEASE.2026-10-26T00-00-00Z --depth 1 https://github.com/pgsty/silo.git
+git clone --branch RELEASE.2026-11-09T00-00-00Z --depth 1 https://github.com/pgsty/silo.git
 cd silo/docs/debugging/inspect
 go build -o inspect .
 ```

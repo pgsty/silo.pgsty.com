@@ -9,10 +9,11 @@ upstream_modified: true
 
 <a id="minio" data-td-print-local></a>
 <a id="minio-console"></a>
+<a id="id1" data-td-print-local></a>
 
 MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具类似的功能。
 
-<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console 登录页为已认证用户提供 Object Browser 视图" style="max-width: 600px; height: auto;" />
+![Silo Console 登录页为已认证用户提供 Object Browser 视图](/images/silo-console/console-object-browser.webp){width="600"}
 
 本页面概述了 MinIO Console，并说明其配置选项和登录方法。
 
@@ -22,9 +23,9 @@ MinIO Console 是一个功能丰富的图形用户界面，提供与 [`mc`](/zh/
 
 您可以使用 MinIO Console 执行多种管理任务，例如身份与访问管理、指标与日志监控或服务器配置。
 
-SILO 在服务端内嵌持续维护的 Silo Console。[Silo Console 仓库](https://github.com/pgsty/silo-console)记录下游源码、版本发布与兼容性变化；独立部署属于高级集成路径，必须选择与目标服务端版本兼容的 Console 版本。
+[SILO 20261109](/zh/blog/release/silo-20261109/) 在服务端内嵌 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）。[Silo Console 仓库](https://github.com/pgsty/silo-console)记录下游源码、版本发布与兼容性变化；独立部署属于高级集成路径，必须选择与目标服务端版本兼容的 Console 版本。
 
-自 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 起，Console 界面提供十种语言（英语、简体中文、法语、德语、俄语、西班牙语、巴西葡萄牙语、日语、阿拉伯语（从右向左布局）与土耳其语），可通过语言菜单或命令面板切换（详见[设计记录](/zh/blog/design/console-languages/)）。独立容器镜像（`v2.7.0+`）还内置系统根证书包（`/etc/ssl/certs/ca-certificates.crt`）与可写 `/tmp` 目录（权限 `1777`），用于外部 HTTPS 连接与临时文件操作。
+在 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 中，Console 界面提供十种语言（英语、简体中文、法语、德语、俄语、西班牙语、巴西葡萄牙语、日语、带从右向左布局的阿拉伯语与土耳其语），可通过语言菜单或命令面板切换（详见[设计记录](/zh/blog/design/console-languages/)）。Console 在 `/api/v1/docs` 提供基于 Redoc 3 的交互式 API 文档，其中 `/swagger.json` 直接路由至后端 API 而非前端 SPA 回退页。独立容器镜像 `docker.io/pgsty/silo-console:v2.7.0` 内置 UBI 系统根证书包（`/etc/ssl/certs/ca-certificates.crt`）与可写 `/tmp` 目录（权限 `1777`），支持出站 HTTPS 连接与大请求临时文件落盘。
 
 <a id="id3" data-td-print-local></a>
 
@@ -114,20 +115,25 @@ MinIO Console 会向未认证用户显示登录页面。 默认情况下，Conso
 对于配置了多个 [identity managers](/zh/administration/identity-access-management/#minio-authentication-and-identity-management) 的部署， 请选择 **Other Authentication Methods** 下拉菜单，以选择其他已配置的身份提供商之一。 您也可以使用通过 [Security Token Service (STS)](/zh/developers/security-token-service/#minio-security-token-service) API 生成的凭证登录。
 
 > [!NOTE]
-> **使用 MinIO 的 Play 测试环境体验 Console**
+> **使用本地 `docker.io/pgsty/silo` 容器评估体验 Console**
 >
-> 您可以通过 [https://play.min.io:9443](https://play.min.io:9443) 体验 Console。 请使用以下凭证登录：
+> 运行一次性本地容器即可体验内嵌 Console：
 >
-> - 用户名：`Q3AM3UQ867SPQQA43P2F`
-> - 密码：`zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG`
+> ```shell
+> docker run --rm -p 9000:9000 -p 9001:9001 \
+>   -e MINIO_ROOT_USER=silo-admin \
+>   -e MINIO_ROOT_PASSWORD=change-me-strong-secret \
+>   docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z \
+>   server /data --console-address ":9001"
+> ```
 >
-> Play Console 连接到位于 [https://play.min.io](https://play.min.io) 的 MinIO Play 部署。 您也可以通过 [`mc`](/zh/reference/minio-mc/#command-mc) 使用 `play` 别名访问该部署。
+> 在浏览器中打开 `http://127.0.0.1:9001`，使用配置的 root 凭证登录；也可以通过 [`mc`](/zh/reference/minio-mc/#command-mc)（`mcli`）连接 `http://127.0.0.1:9000`。
 
 <a id="id7" data-td-print-local></a>
 
 ## 文档 {#documentation}
 
-**Documentation** 选项卡会在单独的浏览器窗口或标签页中打开此文档站点。
+**Documentation** 链接会在新浏览器标签页中按界面语言打开本文档站点：当界面选择简体中文时打开 `/zh/` 中文文档，其余界面语言均打开英文文档。Console 同时在 `/api/v1/docs` 提供基于 Redoc 3 的 API 文档（由 `/swagger.json` 驱动）。
 
 <a id="id8" data-td-print-local></a>
 
@@ -137,5 +143,5 @@ MinIO Console 会向未认证用户显示登录页面。 默认情况下，Conso
 
 - [管理对象](/zh/administration/console/managing-objects/#minio-console-managing-objects)，包括浏览或上传对象、管理存储桶设置或创建层。
 - [查看或修改身份与安全配置](/zh/administration/console/security-and-access/#minio-console-security-access)，包括访问密钥、策略和身份提供商设置。
-- [监控健康状态与活动](/zh/administration/console/managing-deployment/#minio-console-managing-deployment)，包括指标、通知或站点复制
-- [管理部署许可证](/zh/administration/console/subnet-registration/#minio-console-subscription)
+- [监控健康状态与活动](/zh/administration/console/managing-deployment/#minio-console-managing-deployment)，包括指标、通知或站点复制。
+- [运行本地诊断并下载健康报告](/zh/administration/console/subnet-registration/#minio-console-subscription)，无需上传外部遥测数据或注册商业许可证。

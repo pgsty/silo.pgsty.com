@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261026 / Console 2.5.1:** The Console Metrics page queries Metrics V3, aggregating across nodes while distinguishing true zero values from missing data. Overview capacity shows the raw capacity reported by the Server (rather than an erasure-coded usable capacity estimate); the bucket list is read live, whereas object counts and usage statistics come from the background scanner. See the [Console release notes](/blog/release/console-2.5.1/#interface) and [metric mapping reference](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md).
+**[SILO 20261109](/blog/release/silo-20261109/) / [Console 2.7.0](/blog/release/console-2.7.0/):** The Console Metrics page queries Metrics V3, aggregating across nodes while distinguishing true zero values from missing data. Overview capacity shows the raw capacity reported by the Server (rather than an erasure-coded usable capacity estimate); the bucket list is read live, whereas object counts and usage statistics come from the background scanner (or optional `console usage-worker` in Console 2.7.0). In SILO 20261109, replication worker metrics handle an absent replication pool without panicking while retaining historical averages and peak counts ([`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)), and live batch job metrics preserve pause reasons alongside skipped or refused counts ([#325](https://github.com/pgsty/silo/issues/325)). See the [Console 2.7.0 release notes](/blog/release/console-2.7.0/) and [Metrics V3 mapping reference](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md).
 
 <a id="monitoring-and-alerting-using-prometheus"></a>
 <a id="minio-metrics-collect-using-prometheus"></a>
@@ -19,9 +19,9 @@ MinIO publishes cluster, node, bucket, and resource metrics using the [Prometheu
 - Configuring a Prometheus service to scrape and display metrics from a MinIO deployment
 - Configuring an Alert Rule on a MinIO Metric to trigger an AlertManager action
 
-## Recommended Metrics V3 scraping for 20261026 {#metrics-v3}
+## Recommended Metrics V3 Scraping for 20261109 {#metrics-v3}
 
-New deployments and the Console 2.5 Metrics page should scrape Metrics V3. Pass `--api-version v3` explicitly with mcli 20261026:
+New deployments and the Console 2.7.0 Metrics page should scrape Metrics V3. Pass `--api-version v3` explicitly with [mcli 20261109](/blog/release/mcli-20261109/):
 
 ```shell
 mcli admin prometheus generate mysilo --api-version v3
@@ -266,19 +266,19 @@ MinIO recommends the following as a basic set of metrics to monitor.
 
 See [Metrics and alerts](/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts) for information about all available metrics.
 
-| Metric | Description |
-| --- | --- |
-| `minio_node_drive_free_bytes` | Total storage available on a drive. |
-| `minio_node_drive_free_inodes` | Total free inodes. |
-| `minio_node_drive_latency_us` | Average last minute latency in µs for drive API storage operations. |
-| `minio_node_drive_offline_total` | Total drives offline in this node. |
-| `minio_node_drive_online_total` | Total drives online in this node. |
-| `minio_node_drive_total` | Total drives in this node. |
-| `minio_node_drive_total_bytes` | Total storage on a drive. |
-| `minio_node_drive_used_bytes` | Total storage used on a drive. |
-| `minio_node_drive_errors_timeout` | Total number of drive timeout errors since server start. |
+| Metric                                 | Description                                                                          |
+| -------------------------------------- | ------------------------------------------------------------------------------------ |
+| `minio_node_drive_free_bytes`          | Total storage available on a drive.                                                  |
+| `minio_node_drive_free_inodes`         | Total free inodes.                                                                   |
+| `minio_node_drive_latency_us`          | Average last minute latency in µs for drive API storage operations.                  |
+| `minio_node_drive_offline_total`       | Total drives offline in this node.                                                   |
+| `minio_node_drive_online_total`        | Total drives online in this node.                                                    |
+| `minio_node_drive_total`               | Total drives in this node.                                                           |
+| `minio_node_drive_total_bytes`         | Total storage on a drive.                                                            |
+| `minio_node_drive_used_bytes`          | Total storage used on a drive.                                                       |
+| `minio_node_drive_errors_timeout`      | Total number of drive timeout errors since server start.                             |
 | `minio_node_drive_errors_availability` | Total number of drive I/O errors, permission denied and timeouts since server start. |
-| `minio_node_drive_io_waiting` | Total number of I/O operations waiting on drive. |
+| `minio_node_drive_io_waiting`          | Total number of I/O operations waiting on drive.                                     |
 {.wide .expand}
 {{< /tab >}}
 {{< /tabs >}}

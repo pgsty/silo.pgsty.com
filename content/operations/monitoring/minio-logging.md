@@ -16,40 +16,36 @@ MinIO also supports publishing server logs and audit logs to an HTTP webhook.
 - [Server logs](#minio-logging-publish-server-logs) contain the same [`silo server`](/reference/minio-server/#command-minio.server) operations logged to the system console. Server logs support general monitoring and troubleshooting of operations.
 - [Audit logs](#minio-logging-publish-audit-logs) are more granular descriptions of each operation on the MinIO deployment. Audit logging supports security standards and regulations which require detailed tracking of operations.
 
-MinIO publishes logs as a JSON document as a `PUT` request to each configured endpoint. The endpoint server is responsible for processing each JSON document. MinIO requires explicit configuration of each webhook endpoint and does *not* publish logs to a webhook by default.
+MinIO publishes logs as a JSON document in a `PUT` request to each configured endpoint. The endpoint server processes each JSON document. MinIO requires explicit configuration of each webhook endpoint and does *not* publish logs to a webhook by default.
+
+When configured through [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set), SILO dynamically reloads `logger_webhook`, `audit_webhook`, and `audit_kafka` targets across all cluster nodes without requiring a full cluster restart (environment variables set at process startup take precedence and still require a restart when changed). In [SILO 20261109](/blog/release/silo-20261109/), peer configuration reloads keep active `audit_webhook`, `logger_webhook`, and `audit_kafka` targets running on every server node under the server process lifecycle instead of stopping target workers on peer nodes after the reload call returns ([#259](https://github.com/pgsty/silo/issues/259)).
 
 <a id="minio-logging-publish-server-logs"></a>
 
 ## Publish Server Logs to HTTP Webhook {#publish-server-logs-to-http-webhook}
 
-You can configure a new HTTP webhook endpoint to which MinIO publishes [`silo server`](/reference/minio-server/#command-minio.server) logs using either environment variables *or* by setting runtime configuration settings.
+You can configure a new HTTP webhook endpoint to which MinIO publishes [`silo server`](/reference/minio-server/#command-minio.server) logs using either environment variables *or* runtime configuration settings.
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
 MinIO supports specifying the [`silo server`](/reference/minio-server/#command-minio.server) log HTTP webhook endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-regular).
 
-The following example code sets *all* environment variables related to configuring a log HTTP webhook endpoint. The minimum *required* variables are:
+The following example sets *all* environment variables related to configuring a log HTTP webhook endpoint. The minimum *required* variables are:
 
 - [`MINIO_LOGGER_WEBHOOK_ENABLE`](/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_LOGGER_WEBHOOK_ENABLE)
 - [`MINIO_LOGGER_WEBHOOK_ENDPOINT`](/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_LOGGER_WEBHOOK_ENDPOINT)
 
-> [!NOTE]
-> **Windows**
->
-> ```shell
->    set MINIO_LOGGER_WEBHOOK_ENABLE_<IDENTIFIER>="on"
->    set MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
->    set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
-> ```
+```shell {tab="Linux / macOS" group="os" value="unix"}
+export MINIO_LOGGER_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+export MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
+export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
+```
 
-> [!NOTE]
-> **Linux and macOS**
->
-> ```shell
->    export MINIO_LOGGER_WEBHOOK_ENABLE_<IDENTIFIER>="on"
->    export MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
->    export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
-> ```
+```powershell {tab="Windows" value="windows"}
+set MINIO_LOGGER_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+set MINIO_LOGGER_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
+set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
+```
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the HTTP webhook endpoint. Use the same `<IDENTIFIER>` for all environment variables related to the new log HTTP webhook.
 
@@ -59,46 +55,34 @@ The following example code sets *all* environment variables related to configuri
 
 To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
 
-For example: for a Bearer token, prepend `Bearer`:
+For example, for a Bearer token, prepend `Bearer`:
 
-> [!NOTE]
-> **Windows**
->
-> ```shell
-> set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-> ```
+```shell {tab="Linux / macOS" group="os" value="unix"}
+export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-> [!NOTE]
-> **Linux and macOS**
->
-> ```shell
-> export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-> ```
+```powershell {tab="Windows" value="windows"}
+set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
+Modify the value according to the endpoint requirements. A custom authentication format resembles the following:
 
-> [!NOTE]
-> **Windows**
->
-> ```shell
-> set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-> ```
+```shell {tab="Linux / macOS" group="os" value="unix"}
+export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-> [!NOTE]
-> **Linux and macOS**
->
-> ```shell
-> export MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-> ```
+```powershell {tab="Windows" value="windows"}
+set MINIO_LOGGER_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-Consult the documenation for the desired service for more details.
+Consult the documentation for the target service for more details.
 
-Restart the MinIO server to apply the new configuration settings. You must specify the same environment variables and settings on *all* MinIO servers in the deployment.
+Restart the SILO server to apply environment variable changes. Specify identical environment variables on *all* SILO servers in the deployment.
 {{< /tab >}}
 {{< tab label="Configuration Settings" value="configuration-settings" >}}
-MinIO supports adding or updating log HTTP webhook endpoints on a MinIO deployment using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`logger_webhook`](/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook) configuration key. You must restart the MinIO deployment to apply any new or updated configuration settings.
+SILO supports adding or updating log HTTP webhook endpoints using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`logger_webhook`](/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook) configuration key. When not overridden by `MINIO_LOGGER_WEBHOOK_*` environment variables, SILO reloads `logger_webhook` dynamically across all cluster nodes without a full restart; in [SILO 20261109](/blog/release/silo-20261109/), peer nodes keep reloaded targets running continuously ([#259](https://github.com/pgsty/silo/issues/259)).
 
-The following example code sets *all* settings related to configuring a log HTTP webhook endpoint. The minimum *required* setting is [`logger_webhook endpoint`](/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook.endpoint):
+The following example sets *all* settings related to configuring a log HTTP webhook endpoint. The minimum *required* setting is [`logger_webhook endpoint`](/reference/minio-server/settings/metrics-and-logging/#mc-conf.logger_webhook.endpoint):
 
 ```shell
 mc admin config set ALIAS/ logger_webhook:IDENTIFIER  \
@@ -106,23 +90,23 @@ mc admin config set ALIAS/ logger_webhook:IDENTIFIER  \
    auth_token="TOKEN"
 ```
 
-- Replace `<IDENTIFIER>` with a unique descriptive string for the HTTP webhook endpoint. Use the same `<IDENTIFIER>` for all environment variables related to the new log HTTP webhook.
+- Replace `IDENTIFIER` with a unique descriptive string for the HTTP webhook endpoint.
 
-  If the specified `<IDENTIFIER>` matches an existing log endpoint, the new settings *override* any existing settings for that endpoint. Use [`mc admin config get logger_webhook`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) to review the currently configured log HTTP webhook endpoints.
+  If the specified `IDENTIFIER` matches an existing log endpoint, the new settings *override* any existing settings for that endpoint. Use [`mc admin config get logger_webhook`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) to review the currently configured log HTTP webhook endpoints.
 - Replace `https://webhook-1.example.net` with the URL of the HTTP webhook endpoint.
 - Replace `TOKEN` with an authentication token of the appropriate type for the endpoint. Omit for endpoints which do not require authentication.
 
   To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
 
-  For example: for a Bearer token, prepend `Bearer`:
+  For example, for a Bearer token, prepend `Bearer`:
 
   ```shell
-   mc admin config set ALIAS/ logger_webhook    \
-      endpoint="https://webhook-1.example.net"  \
-      auth_token="Bearer 1a2b3c4f5e"
+  mc admin config set ALIAS/ logger_webhook    \
+     endpoint="https://webhook-1.example.net"  \
+     auth_token="Bearer 1a2b3c4f5e"
   ```
 
-  Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
+  Modify the value according to the endpoint requirements. A custom authentication format resembles the following:
 
   ```shell
   mc admin config set ALIAS/ logger_webhook    \
@@ -130,7 +114,7 @@ mc admin config set ALIAS/ logger_webhook:IDENTIFIER  \
      auth_token="ServiceXYZ 1a2b3c4f5e"
   ```
 
-  Consult the documenation for the desired service for more details.
+  Consult the documentation for the target service for more details.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -138,38 +122,32 @@ mc admin config set ALIAS/ logger_webhook:IDENTIFIER  \
 
 ## Publish Audit Logs to HTTP Webhook {#publish-audit-logs-to-http-webhook}
 
-You can configure a new HTTP webhook endpoint to which MinIO publishes audit logs using either environment variables *or* by setting runtime configuration settings:
+You can configure a new HTTP webhook endpoint to which MinIO publishes audit logs using either environment variables *or* runtime configuration settings:
 
 {{< tabs group="environment-variables-configuration-settings" >}}
 {{< tab label="Environment Variables" value="environment-variables" >}}
 MinIO supports specifying the audit log HTTP webhook endpoint and associated configuration settings using [environment variables](/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-audit).
 
-The following example code sets *all* environment variables related to configuring a audit log HTTP webhook endpoint. The minimum *required* variables are:
+The following example sets *all* environment variables related to configuring an audit log HTTP webhook endpoint. The minimum *required* variables are:
 
 - [`MINIO_AUDIT_WEBHOOK_ENABLE`](/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_AUDIT_WEBHOOK_ENABLE)
 - [`MINIO_AUDIT_WEBHOOK_ENDPOINT`](/reference/minio-server/settings/metrics-and-logging/#envvar.MINIO_AUDIT_WEBHOOK_ENDPOINT)
 
-> [!NOTE]
-> **Windows**
->
-> ```shell
-> set MINIO_AUDIT_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-> set MINIO_AUDIT_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
-> set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
-> set MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
-> set MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
-> ```
+```shell {tab="Linux / macOS" group="os" value="unix"}
+export MINIO_AUDIT_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+export MINIO_AUDIT_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
+export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
+export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
+export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
+```
 
-> [!NOTE]
-> **Linux and macOS**
->
-> ```shell
-> export MINIO_AUDIT_WEBHOOK_ENABLE_<IDENTIFIER>="on"
-> export MINIO_AUDIT_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
-> export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
-> export MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
-> export MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
-> ```
+```powershell {tab="Windows" value="windows"}
+set MINIO_AUDIT_WEBHOOK_ENABLE_<IDENTIFIER>="on"
+set MINIO_AUDIT_WEBHOOK_ENDPOINT_<IDENTIFIER>="https://webhook-1.example.net"
+set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_<IDENTIFIER>="TOKEN"
+set MINIO_AUDIT_WEBHOOK_CLIENT_CERT_<IDENTIFIER>="cert.pem"
+set MINIO_AUDIT_WEBHOOK_CLIENT_KEY_<IDENTIFIER>="cert.key"
+```
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the HTTP webhook endpoint. Use the same `<IDENTIFIER>` for all environment variables related to the new audit log HTTP webhook.
 
@@ -179,47 +157,35 @@ The following example code sets *all* environment variables related to configuri
 
 To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
 
-For example: for a Bearer token, prepend `Bearer`:
+For example, for a Bearer token, prepend `Bearer`:
 
-> [!NOTE]
-> **Windows**
->
-> ```shell
-> set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-> ```
+```shell {tab="Linux / macOS" group="os" value="unix"}
+export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-> [!NOTE]
-> **Linux and macOS**
->
-> ```shell
-> export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
-> ```
+```powershell {tab="Windows" value="windows"}
+set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_myendpoint="Bearer 1a2b3c4f5e"
+```
 
-Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
+Modify the value according to the endpoint requirements. A custom authentication format resembles the following:
 
-> [!NOTE]
-> **Windows**
->
-> ```shell
-> set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-> ```
+```shell {tab="Linux / macOS" group="os" value="unix"}
+export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-> [!NOTE]
-> **Linux and macOS**
->
-> ```shell
-> export MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
-> ```
+```powershell {tab="Windows" value="windows"}
+set MINIO_AUDIT_WEBHOOK_AUTH_TOKEN_xyz="ServiceXYZ 1a2b3c4f5e"
+```
 
-Consult the documenation for the desired service for more details.
-- Replace `cert.pem` and `cert.key` with the public and private key of the x.509 TLS certificates to present to the HTTP webhook server. Omit for endpoints which do not require clients to present TLS certificates.
+Consult the documentation for the target service for more details.
+- Replace `cert.pem` and `cert.key` with the public and private key of the X.509 TLS certificates to present to the HTTP webhook server. Omit for endpoints which do not require clients to present TLS certificates.
 
-Restart the MinIO server to apply the new configuration settings. You must specify the same environment variables and settings on *all* MinIO servers in the deployment.
+Restart the SILO server to apply environment variable changes. Specify identical environment variables on *all* SILO servers in the deployment.
 {{< /tab >}}
 {{< tab label="Configuration Settings" value="configuration-settings" >}}
-MinIO supports adding or updating audit log HTTP webhook endpoints on a MinIO deployment using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`audit_webhook`](/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook) configuration key. You must restart the MinIO deployment to apply any new or updated configuration settings.
+SILO supports adding or updating audit log HTTP webhook endpoints using the [`mc admin config set`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) command and the [`audit_webhook`](/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook) configuration key (and similarly reloads `audit_kafka` audit targets dynamically). When not overridden by `MINIO_AUDIT_WEBHOOK_*` environment variables, SILO applies `audit_webhook` changes dynamically across all cluster nodes without restarting the deployment; in [SILO 20261109](/blog/release/silo-20261109/), peer configuration reloads preserve active `audit_webhook` and `audit_kafka` workers and `queue_dir` delivery queues on every node ([#259](https://github.com/pgsty/silo/issues/259)).
 
-The following example code sets *all* settings related to configuring a audit log HTTP webhook endpoint. The minimum *required* setting is [`audit_webhook endpoint`](/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook.endpoint):
+The following example sets *all* settings related to configuring an audit log HTTP webhook endpoint. The minimum *required* setting is [`audit_webhook endpoint`](/reference/minio-server/settings/metrics-and-logging/#mc-conf.audit_webhook.endpoint):
 
 ```shell
 mc admin config set ALIAS/ audit_webhook:IDENTIFIER  \
@@ -229,23 +195,23 @@ mc admin config set ALIAS/ audit_webhook:IDENTIFIER  \
    client_key="cert.key"
 ```
 
-- Replace `<IDENTIFIER>` with a unique descriptive string for the HTTP webhook endpoint. Use the same `<IDENTIFIER>` for all environment variables related to the new audit log HTTP webhook.
+- Replace `IDENTIFIER` with a unique descriptive string for the HTTP webhook endpoint.
 
-  If the specified `<IDENTIFIER>` matches an existing log endpoint, the new settings *override* any existing settings for that endpoint. Use [`mc admin config get audit_webhook`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) to review the currently configured audit log HTTP webhook endpoints.
+  If the specified `IDENTIFIER` matches an existing log endpoint, the new settings *override* any existing settings for that endpoint. Use [`mc admin config get audit_webhook`](/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) to review the currently configured audit log HTTP webhook endpoints.
 - Replace `https://webhook-1.example.net` with the URL of the HTTP webhook endpoint.
 - Replace `TOKEN` with an authentication token of the appropriate type for the endpoint. Omit for endpoints which do not require authentication.
 
   To allow for a variety of token types, MinIO creates the request authentication header using the value *exactly as specified*. Depending on the endpoint, you may need to include additional information.
 
-  For example: for a Bearer token, prepend `Bearer`:
+  For example, for a Bearer token, prepend `Bearer`:
 
   ```shell
-   mc admin config set ALIAS/ audit_webhook     \
-      endpoint="https://webhook-1.example.net"  \
-      auth_token="Bearer 1a2b3c4f5e"
+  mc admin config set ALIAS/ audit_webhook     \
+     endpoint="https://webhook-1.example.net"  \
+     auth_token="Bearer 1a2b3c4f5e"
   ```
 
-  Modify the value according to the endpoint requirements. A custom authentication format could resemble the following:
+  Modify the value according to the endpoint requirements. A custom authentication format resembles the following:
 
   ```shell
   mc admin config set ALIAS/ audit_webhook     \
@@ -253,8 +219,8 @@ mc admin config set ALIAS/ audit_webhook:IDENTIFIER  \
      auth_token="ServiceXYZ 1a2b3c4f5e"
   ```
 
-  Consult the documenation for the desired service for more details.
-- Replace `cert.pem` and `cert.key` with the public and private key of the x.509 TLS certificates to present to the HTTP webhook server. Omit for endpoints which do not require clients to present TLS certificates.
+  Consult the documentation for the target service for more details.
+- Replace `cert.pem` and `cert.key` with the public and private key of the X.509 TLS certificates to present to the HTTP webhook server. Omit for endpoints which do not require clients to present TLS certificates.
 {{< /tab >}}
 {{< /tabs >}}
 

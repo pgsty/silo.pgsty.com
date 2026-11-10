@@ -7,22 +7,17 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+**SILO 20261109 正式版变化：** [SILO 20261109](/zh/blog/release/silo-20261109/) 在复制删除中保留目标端 Object Lock 保留期与 legal hold（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)），不再复制生命周期规则产生的删除标记与版本清除以匹配 AWS S3 语义（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），并防止在复制工作线程池缺失时采集复制工作线程指标触发 panic，同时保留历史均值与峰值计数（提交 [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)）。
+
 **20261026 正式版变化：** 分片上传复制现已为可合并的 CRC 校验和算法保留 `FULL_OBJECT` 校验和类型（旧版未传递该头部，导致目标端默认创建 `COMPOSITE` 分片上传并在完成阶段拒绝整对象 CRC）。该修复位于 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)中，升级发送端 Server 后请核对待处理/失败副本及目标端校验和。
 
+<a id="bucket-replication"></a>
 <a id="minio-bucket-replication"></a>
-<a id="id1" data-td-print-local></a>
 
 MinIO 支持在源存储桶与目标存储桶之间进行服务端和客户端对象复制。
 
-**[Server-Side Bucket Replication](#minio-bucket-replication-serverside)**
-
-> 为每个存储桶配置规则，以便在 MinIO 部署之间自动同步对象。 配置存储桶复制规则的部署充当“源”，而配置的远端部署充当“目标”。 MinIO 会在对象写入操作（例如 `PUT`）期间应用规则，并自动同步新对象以及对象变更，例如新的对象版本或对象元数据的变更。
->
-> MinIO 服务端存储桶复制仅支持将处于相同发行版本的 MinIO 集群作为远端复制目标。
-
-**客户端存储桶复制**
-
-> 使用命令流程在同一 S3 兼容集群内的存储桶之间，或在两个相互独立的 S3 兼容集群之间同步对象。 使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 的客户端复制支持 MinIO 到 S3 以及类似的复制配置。
+- **[服务端存储桶复制](#minio-bucket-replication-serverside)：** 为每个存储桶配置规则，以便在部署之间自动同步对象。配置存储桶复制规则的部署充当“源”，而配置的远端部署充当“目标”。SILO 会在对象写入操作（例如 `PUT`）期间应用规则，并自动同步新对象及对象变更（例如新对象版本或对象元数据更新）。服务端存储桶复制要求源集群和远端目标集群运行相同版本。
+- **客户端存储桶复制：** 使用 [`mc mirror`](/zh/reference/minio-mc/mc-mirror/#command-mc.mirror) 在同一 S3 兼容集群内的存储桶之间，或在两个相互独立的 S3 兼容集群之间同步对象（包括 SILO 到 S3 等配置）。
 
 > [!NOTE]
 > **存储桶复制与站点复制**
@@ -36,9 +31,9 @@ MinIO 支持在源存储桶与目标存储桶之间进行服务端和客户端�
 >
 >   站点复制通常在最初部署 MinIO 对等站点时配置。 在初始配置时，任意存储桶或对象只能由一个站点持有。
 
-<a id="id3" data-td-print-local></a>
+<a id="minio-bucket-replication-serverside"></a>
 
-## 服务端存储桶复制 {#minio-bucket-replication-serverside}
+## 服务端存储桶复制 {#server-side-bucket-replication}
 
 MinIO 服务端存储桶复制是一种自动化的存储桶级配置，用于在源存储桶和目标存储桶之间同步对象。 MinIO 服务端复制 *要求* 源存储桶和目标存储桶分别位于两个独立的 MinIO 集群中，且运行相同的 MinIO 服务端版本。
 
@@ -51,9 +46,9 @@ MinIO 服务端存储桶复制在功能上类似于 Amazon S3 replication，同�
 - 支持源存储桶与目标存储桶之间对象的 Active-Active（双向）复制。
 - 支持在三个或更多 MinIO 部署之间进行对象的多站点复制
 
-<a id="id4" data-td-print-local></a>
+<a id="minio-replication-behavior-resync"></a>
 
-### 重新同步（灾难恢复） {#minio-replication-behavior-resync}
+### 重新同步（灾难恢复） {#resynchronization-disaster-recovery}
 
 重新同步主要用于在副本配置中利用健康部署，在某个 MinIO 部署发生部分或全部数据丢失后进行恢复。 使用 [`mc replicate resync`](/zh/reference/minio-mc/mc-replicate-resync/#command-mc.replicate.resync) 命令，可基于指定的源存储桶对远端目标（[`mc admin bucket remote`](/zh/reference/deprecated/mc-admin-bucket-remote/#command-mc.admin.bucket.remote)）执行完整重新同步。
 
@@ -65,9 +60,9 @@ MinIO 服务端存储桶复制在功能上类似于 Amazon S3 replication，同�
 
 对于已配置 [对象转换（分层）](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-tiering) 的存储桶，复制重新同步会以未转换状态恢复对象，且不包含任何关联的转换元数据。 因此，任何先前已转换到远端存储的数据都会与远端 MinIO 部署永久断开关联。 对于在远端配置中将明确的人类可读前缀作为一部分指定的分层配置，你可以安全地清除该前缀中的已转换数据，以避免与这些“丢失”数据相关的成本。
 
-<a id="id5" data-td-print-local></a>
+<a id="minio-replication-behavior-delete"></a>
 
-### 删除操作的复制 {#minio-replication-behavior-delete}
+### 删除操作的复制 {#replication-of-delete-operations}
 
 MinIO 支持复制 [删除](/zh/administration/object-management/object-delete/#minio-object-delete) 操作，即同步删除特定对象版本以及新的 [删除标记](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-marker-replication.html)。删除操作复制使用与其他所有复制操作相同的 [复制流程](#minio-replication-process)。
 
@@ -77,7 +72,9 @@ MinIO 要求显式启用带版本的删除和删除标记复制。 使用 [`mc r
 
 对于复制删除某个特定对象版本的操作，在复制完成之前，MinIO 会将该对象版本标记为 `PENDING`。 一旦远端目标删除了该对象版本，MinIO 就会删除源端上的该对象。 虽然这一过程可确保接近同步的版本删除，但它可能导致在初始删除操作之后，列表操作仍返回该对象版本。 MinIO 使用 `X-Minio-Replication-Delete-Status` 跟踪删除版本的复制状态。
 
-MinIO 仅复制由客户端显式发起的删除操作。 MinIO *不会* 复制因应用 [生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 而删除的对象。 对于 [active-active](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 配置，请在 *所有* 复制存储桶上设置相同的过期规则，以确保对象过期行为一致。
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，复制删除保留目标端的 Object Lock legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）。源端绕过 `GOVERNANCE` 保留期发起的物理清除不会赋予目标端绕过权限；只要目标端版本仍受有效保留期或 legal hold 保护，目标端就会拒绝复制清除并由源端重试。
+
+SILO 仅复制由客户端显式发起的删除操作；由[生命周期管理过期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)生成的删除标记与版本清除**不会**被复制（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），行为与 AWS S3 一致。如需副本存储桶保持一致的对象过期行为，请在源存储桶与目标存储桶上独立配置生命周期规则（在 [active-active](/zh/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) 配置中请在所有复制存储桶上配置相同的过期规则）。
 
 > [!DETAILS]- MinIO 会在源存储桶和远端存储桶上裁剪空对象前缀
 > 如果删除操作移除了某个存储桶前缀中的最后一个对象，MinIO 会递归删除该前缀中所有为空的部分，直到存储桶根目录。 MinIO 仅对在对象写入过程中 *隐式* 创建的前缀应用这种递归删除行为，也就是说，该前缀不是通过 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 之类的显式目录创建命令创建的。
@@ -92,13 +89,13 @@ MinIO 仅复制由客户端显式发起的删除操作。 MinIO *不会* 复制�
 >
 > `photos/NYE21` 是 *唯一一个* 使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 显式创建的前缀。 其他所有前缀都是在写入位于该前缀下的对象时 *隐式* 创建的。
 >
-> - 某个命令删除了 `myphoto.jpg`。MinIO 会自动裁剪空的 `/janaury` 前缀。
+> - 某个命令删除了 `myphoto.jpg`。MinIO 会自动裁剪空的 `/january` 前缀。
 > - 随后某个命令删除了 `myotherphoto.jpg`。MinIO 会自动裁剪 `/february` 前缀以及此时已为空的 `/2021` 前缀。
 > - 某个命令删除了 `NewYears.jpg` 对象。MinIO 会保留 `/NYE21` 前缀，因为它是 *显式* 创建的。
 
-<a id="id6" data-td-print-local></a>
+<a id="minio-replication-behavior-existing-objects"></a>
 
-### 现有对象的复制 {#minio-replication-behavior-existing-objects}
+### 现有对象的复制 {#replication-of-existing-objects}
 
 默认情况下，MinIO 会将源存储桶中的现有对象复制到配置好的远端，类似于 [AWS: Replicating existing objects between S3 buckets](https://aws.amazon.com/blogs/storage/replicating-existing-objects-between-s3-buckets/)，但无需联系技术支持的额外成本。
 
@@ -111,7 +108,7 @@ MinIO 会将所有满足复制规则的对象或对象前缀标记为可同步�
 
 禁用现有对象复制不会移除任何已经复制到远端存储桶的对象。
 
-### 同步复制与异步复制 {#id7}
+### 同步复制与异步复制 {#synchronous-vs-asynchronous-replication}
 
 对于给定的远端目标，MinIO 支持指定异步复制（默认）或同步复制。
 
@@ -121,57 +118,31 @@ MinIO 会将所有满足复制规则的对象或对象前缀标记为可同步�
 
 在使用 [`mc admin bucket remote add`](/zh/reference/deprecated/mc-admin-bucket-remote/#mc.admin.bucket.remote.add) 命令配置远端目标时，你必须通过 [`add`](/zh/reference/deprecated/mc-admin-bucket-remote/#mc.admin.bucket.remote.add) 标志显式启用同步复制。
 
-### 复制内部机制 {#id8}
+### 复制内部机制 {#replication-internals}
 
 本节记录复制的内部行为，对使用或实现复制而言并非关键。 本文档仅用于学习和教育目的。
 
-<a id="id9" data-td-print-local></a>
+<a id="minio-replication-process"></a>
 
-#### 复制流程 {#minio-replication-process}
+#### 复制流程 {#replication-process}
 
-MinIO 使用一个复制排队系统，并由多个并发复制工作线程处理该队列。 MinIO 会持续执行复制并从队列中移除对象，同时扫描新的未复制对象并将其加入队列。
-
-> [!NOTE]
-> **变更: RELEASE.2022-07-18T17-49-40Z**
->
-> MinIO 会将失败的复制操作加入队列，并最多重试三（3）次。
->
-> 对于在三次尝试后仍复制失败的操作，MinIO 会将其移出队列。 扫描器稍后可以再次发现这些受影响对象，并将其重新加入复制队列。
+MinIO 使用一个复制排队系统，并由多个并发复制工作线程处理该队列。MinIO 会持续执行复制并从队列中移除对象，同时扫描新的未复制对象并将其加入队列。在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，当复制工作线程池不存在时，复制工作线程指标不再触发 panic，并继续保留历史平均值与峰值计数（提交 [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)）。
 
 > [!NOTE]
-> **变更: RELEASE.2022-08-11T04-37-28Z**
+> **队列重试与重新入队行为**
 >
-> 在执行列表操作或任何 `GET`、`HEAD` API 方法时，失败或待处理的复制会自动重新入队。 例如，在远端位置恢复在线后，使用 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)、[`mc cat`](/zh/reference/minio-mc/mc-cat/#command-mc.cat) 或 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls) 会使复制重新入队。
+> - **重试上限（`RELEASE.2022-07-18T17-49-40Z`）：** SILO 会将失败的复制操作加入队列，并在移出队列前最多重试三（3）次。扫描器稍后可再次发现这些受影响对象并将其重新加入复制队列。
+> - **读取触发重新入队（`RELEASE.2022-08-11T04-37-28Z`）：** 在执行列表操作或任意 `GET`、`HEAD` API 请求时，失败或待处理的复制会自动重新入队（例如远端恢复在线后执行 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)、[`mc cat`](/zh/reference/minio-mc/mc-cat/#command-mc.cat) 或 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls)）。
 
 MinIO 会根据对象的复制状态设置 `X-Amz-Replication-Status` 元数据字段：
 
-<table>
-  <thead>
-    <tr>
-      <th><p>复制状态</p></th>
-      <th><p>说明</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><code>PENDING</code></p></td>
-      <td><p>该对象尚未被复制。如果对象满足该存储桶上配置的某条复制规则，MinIO 就会应用此状态。
-MinIO 会持续扫描尚未进入复制队列的 <code>PENDING</code> 对象，并在队列有可用空间时将其加入队列。</p><p>对于多站点复制，对象会一直保持 <code>PENDING</code> 状态，直到复制到该存储桶或存储桶前缀配置的 <em>所有</em> 远端。</p></td>
-    </tr>
-    <tr>
-      <td><p><code>COMPLETED</code></p></td>
-      <td><p>该对象已成功复制到远端集群。</p></td>
-    </tr>
-    <tr>
-      <td><p><code>FAILED</code></p></td>
-      <td><p>该对象复制到远端集群失败。</p><p>MinIO 会持续扫描尚未进入复制队列的 <code>FAILED</code> 对象，并在队列有可用空间时将其加入队列。</p></td>
-    </tr>
-    <tr>
-      <td><p><code>REPLICA</code></p></td>
-      <td><p>该对象本身就是来自远端源的副本。</p></td>
-    </tr>
-  </tbody>
-</table>
+| 复制状态    | 说明                                                                                                                                                                                                                          |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PENDING`   | 该对象尚未完成复制。当对象满足存储桶上的复制规则时，SILO 会设置此状态，持续扫描尚未入队的 `PENDING` 对象并在队列有空间时将其加入队列。对于多站点复制，对象会保持 `PENDING` 状态直至复制到该存储桶或前缀配置的*所有*远端目标。 |
+| `COMPLETED` | 该对象已成功复制到远端集群。                                                                                                                                                                                                  |
+| `FAILED`    | 该对象复制到远端集群失败。SILO 会持续扫描尚未入队的 `FAILED` 对象并在队列有空间时将其加入队列。                                                                                                                               |
+| `REPLICA`   | 该对象本身是接收自远端源的副本。                                                                                                                                                                                              |
+{.wide .expand}
 
 复制流程通常具有以下几种流转路径之一：
 

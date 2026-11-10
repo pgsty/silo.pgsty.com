@@ -32,15 +32,17 @@ Starting with the MinIO Server `RELEASE.2023-05-04T21-44-30Z`, the other deploym
 
 ## Behavior {#behavior}
 
-### SILO changes after 20261026 (unreleased) {#silo-retry}
+### SILO 20261109: authorization, Object Lock, and retries {#silo-retry}
 
-Push, pull, and Snowball replication pause when a required authorization dependency is temporarily unavailable, including an outage that begins during object processing. The server saves `pausedReason` and retains ownership of the job for automatic retry. An explicit authorization denial remains a terminal failure with `failureReason`; retry does not bypass authorization.
+In [SILO 20261109](/blog/release/silo-20261109/), push, pull, and Snowball replication enforce the authenticated submitter's local data permissions throughout execution and preserve Object Lock protection ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)). Pull replication validates copied Object Lock headers, applies destination default retention when needed, and skips destination versions protected by Object Lock (`versionsSkippedLocked`, terminal state `complete-with-skips`). Replicated deletes also honor the target's Object Lock retention and legal holds.
+
+Push, pull, and Snowball replication pause when a required authorization dependency or report read is temporarily unavailable, including an outage that begins during object processing ([#324](https://github.com/pgsty/silo/issues/324)). The server saves `pausedReason` and retains ownership of the job for automatic retry, and startup discovery resumes unfinished replication jobs after a server restart ([#314](https://github.com/pgsty/silo/issues/314), [#324](https://github.com/pgsty/silo/issues/324)). An explicit authorization denial remains a terminal failure with `failureReason`; retry does not bypass authorization.
 
 An interrupted replication attempt restarts its source scan from the beginning and recomputes its progress counters. The last object completed by concurrent workers is only a progress display, not a safe resume cursor. This also protects recovery when the final paused report could not be saved. Replaying completed work costs additional reads and writes. Replication that preserves source version IDs reuses those IDs; generic S3 transfers can create additional destination versions on replay. Batch replication does not promise exactly-once delivery.
 
 ### Access Control and Requirements {#access-control-and-requirements}
 
-For the next SILO release, the authenticated submitter needs `admin:StartBatchJob` and the local data permissions required by the job. Credentials in the definition authorize remote connections; they do not replace the submitter's local permissions. See [authorization and retries](/administration/batch-framework/#silo-lifecycle) for revocation, pause, and version-transition behavior.
+In [SILO 20261109](/blog/release/silo-20261109/), the authenticated submitter needs `admin:StartBatchJob` and the local data permissions required by the job. Credentials in the definition authorize remote connections; they do not replace the submitter's local permissions. See [authorization and retries](/administration/batch-framework/#silo-lifecycle) for revocation, pause, and version-transition behavior.
 
 Batch replication shares similar access and permission requirements as [bucket replication](/administration/bucket-replication/bucket-replication-requirements/#minio-bucket-replication-requirements).
 
@@ -164,28 +166,20 @@ The YAML **must** define the source and target deployments. If the *source* depl
 > [!NOTE]
 > **Changed: MinIO**
 >
-> RELEASE.2023-04-07T05-28-58Z
+> - `RELEASE.2023-04-07T05-28-58Z`: You can replicate from a remote MinIO deployment to the local deployment that runs the batch job.
+> - `RELEASE.2024-08-03T04-33-23Z`: Batch Job Replicate API `v2` allows listing multiple prefixes on the source to replicate from. To replicate multiple prefixes from a source, specify `replicate.apiVersion` as `v2`:
 >
-> You can replicate from a remote MinIO deployment to the local deployment that runs the batch job.
-
-> [!NOTE]
-> **Changed: MinIO**
->
-> RELEASE.2024-08-03T04-33-23Z
->
-> This release introduces a new version of the Batch Job Replicate API, `v2`. The updated API allows you to list multiple prefixes on the source to replicate from. To replicate multiple prefixes from a source, specify `replicate.apiVersion` as `v2`.
->
-> ```text
-> replicate:
->   apiVersion: v1
->   source:
->     type: minio
->     bucket: mybucket
->     prefix:
->       - prefix1
->       - prefix2
-> ...
-> ```
+>   ```yaml
+>   replicate:
+>     apiVersion: v2
+>     source:
+>       type: minio
+>       bucket: mybucket
+>       prefix:
+>         - prefix1
+>         - prefix2
+>   ...
+>   ```
 
 For the **source deployment**
 

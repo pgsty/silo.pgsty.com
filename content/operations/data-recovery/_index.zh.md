@@ -4,7 +4,7 @@ url: "/zh/operations/data-recovery/"
 weight: 90
 icon: fa-solid fa-life-ring
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/operations/data-recovery.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-restore-hardware-failure"></a>
@@ -14,11 +14,12 @@ upstream_modified: false
 
 下表列出了 MinIO 部署中的典型故障类型，以及对应的恢复流程链接：
 
-| 故障类型 | 说明 |
-| --- | --- |
-| [驱动器故障](/zh/operations/data-recovery/recover-after-drive-failure/#minio-restore-hardware-failure-drive) | MinIO 支持将故障驱动器热替换为新的健康驱动器。 |
-| [节点故障](/zh/operations/data-recovery/recover-after-node-failure/#minio-restore-hardware-failure-node) | MinIO 会检测节点何时重新加入部署，并在其重新并入集群后不久主动开始对该节点执行 [自愈](/zh/operations/concepts/healing/#minio-concepts-healing)，恢复此前存储在该节点上的数据。 |
-| [站点故障](/zh/operations/data-recovery/recover-after-site-failure/#minio-restore-hardware-failure-site) | MinIO Site Replication 支持在站点完全丢失后，对存储桶、对象以及可复制的配置项执行完整重同步。 |
+| 故障类型                                                                                                     | 说明                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [驱动器故障](/zh/operations/data-recovery/recover-after-drive-failure/#minio-restore-hardware-failure-drive) | MinIO 支持将故障驱动器热替换为新的健康驱动器。                                                                                                                                 |
+| [节点故障](/zh/operations/data-recovery/recover-after-node-failure/#minio-restore-hardware-failure-node)     | MinIO 会检测节点何时重新加入部署，并在其重新并入集群后不久主动开始对该节点执行 [自愈](/zh/operations/concepts/healing/#minio-concepts-healing)，恢复此前存储在该节点上的数据。 |
+| [站点故障](/zh/operations/data-recovery/recover-after-site-failure/#minio-restore-hardware-failure-site)     | MinIO Site Replication 支持在站点完全丢失后，对存储桶、对象以及可复制的配置项执行完整重同步。                                                                                  |
+{.wide .expand}
 
 由于 MinIO 即使处于降级状态也通常不会出现显著性能损失，管理员可以根据硬件故障速率来安排替换窗口。 “正常”故障率（单个驱动器或节点故障）通常允许采用更从容的替换节奏，而“关键”故障率（多个驱动器或节点故障）则可能需要更快响应。
 

@@ -7,19 +7,24 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO 升级说明：** 九月 IAM 修复要求所有参与节点协调升级，并备份完整删除历史。请先阅读 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)及[历史复制状态检查](/zh/operations/replication/replica-metadata-audit/)，并按[组件版本表](/zh/compatibility/versions/)区分主分支修复与已发布制品。
+> [!IMPORTANT]
+> **SILO 20261109 站点复制更新与升级要求**
+>
+> - **IAM 与 Server 协调升级：** [SILO 20261109](/zh/blog/release/silo-20261109/) 拒绝不完整的 IAM 策略加载，在惰性加载期间保持缓存认证可用，并直接基于持久化记录执行 IAM 编辑、LDAP 组刷新与服务账户创建，使陈旧对等节点无法恢复旧凭据或复活已删除身份（[#316](https://github.com/pgsty/silo/issues/316)、[#317](https://github.com/pgsty/silo/issues/317)、[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）。升级前请阅读 [IAM 升级与恢复](/zh/operations/replication/iam-upgrade/)、[历史复制状态检查](/zh/operations/replication/replica-metadata-audit/)及[组件版本表](/zh/compatibility/versions/)。
+> - **Object Lock、生命周期删除与指标：** 复制删除保留目标端 legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)），生命周期规则创建的删除标记与版本清除不跨站点复制（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），且复制工作线程指标在复制线程池缺失时不再触发 panic 并保留历史均值与峰值计数（提交 [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)）。
+> - **已知限制：** 多站点删除标记清除顺序（[#217](https://github.com/pgsty/silo/issues/217)）与重放创建存储桶（[#241](https://github.com/pgsty/silo/pull/241)）仍为已知未解决限制。
 
+<a id="site-replication-overview"></a>
 <a id="minio-site-replication-overview"></a>
-<a id="id1" data-td-print-local></a>
 
 站点复制将多个相互独立的 MinIO 部署配置为一个由副本组成的集群，这些副本称为对等站点。
 
-> <figure>
->   <img src="/images/architecture/architecture-load-balancer-multi-site.svg" alt="Diagram of a site replication deployment with two sites" />
->   <figcaption>一个包含两个对等站点的站点复制部署。
-> 负载均衡器负责将操作路由到两个站点中的任意一个。
-> 写入一个站点的数据会自动复制到另一个对等站点。</figcaption>
-> </figure>
+<figure>
+  <img src="/images/architecture/architecture-load-balancer-multi-site.svg" alt="Diagram of a site replication deployment with two sites" />
+  <figcaption>一个包含两个对等站点的站点复制部署。
+负载均衡器负责将操作路由到两个站点中的任意一个。
+写入一个站点的数据会自动复制到另一个对等站点。</figcaption>
+</figure>
 
 站点复制要求使用内置的 MinIO Identity Provider (IDP) *或* 外部 IDP。 所有已配置的部署都必须使用同一个 IDP。 使用外部 IDP 的部署必须在各站点之间使用相同的配置。
 
@@ -27,11 +32,11 @@ upstream_modified: true
 
 除早期开发、评估或一般性实验外，MinIO 不建议在站点复制中使用 macOS、Windows 或未编排的容器部署。生产环境请使用受支持的 [Linux](/zh/operations/deployments/baremetal/) 或 [Kubernetes](/zh/operations/deployments/kubernetes/) 部署，并按照本页的站点复制流程操作。
 
-## 概览 {#id3}
+## 概览 {#overview}
 
-<a id="id4" data-td-print-local></a>
+<a id="minio-site-replication-what-replicates"></a>
 
-### 所有站点之间会复制哪些内容 {#minio-site-replication-what-replicates}
+### 所有站点之间会复制哪些内容 {#what-replicates-across-all-sites}
 
 每个 MinIO 部署（“对等站点”）都会将以下变更同步到其他对等站点：
 
@@ -48,22 +53,22 @@ upstream_modified: true
 
 站点复制会在所有复制站点上，为所有新建和现有存储桶启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)。
 
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，复制删除保留目标站点的 Object Lock legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）：源站点绕过 `GOVERNANCE` 保留期发起的物理清除不会赋予仍处于有效保护下的对等副本绕过权限，目标站点会拒绝清除并由源站点重试。
+
 > [!NOTE]
-> **新增: mc**
+> **生命周期过期删除不跨站点复制（`SILO 20261109`）**
 >
-> RELEASE.2023-12-02T02-03-28Z
+> 自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，即使配置中曾设置旧版 ILM 过期复制标志（[`--replicate-ilm-expiry`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add.-replicate-ilm-expiry) 或 [`--enable-ilm-expiry-replication`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-enable-ilm-expiry-replication)），生命周期规则创建的删除标记与版本清除也**不会**跨站点复制（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），行为与 AWS S3 一致。请在每个对等站点独立配置生命周期过期规则。
 
-你可以选择在对等站点之间复制 ILM 过期规则。 对于新的站点复制配置，可使用带有 [`--replicate-ilm-expiry`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add.-replicate-ilm-expiry) 标志的 [`mc admin replicate add`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add)。 对于现有站点复制配置，则可根据需要使用 [`mc admin replicate update`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update) 配合 [`--enable-ilm-expiry-replication`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-enable-ilm-expiry-replication) 或 [`--disable-ilm-expiry-replication`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-disable-ilm-expiry-replication) 标志启用或禁用该行为。
-
-### 哪些内容不会在站点之间复制 {#id5}
+### 哪些内容不会在站点之间复制 {#what-does-not-replicate-across-sites}
 
 处于站点复制配置中的 MinIO 部署 *不会* 复制以下项目的创建或修改：
 
 - [存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)
-- [生命周期管理（ILM）配置](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management)
+- [生命周期管理（ILM）配置](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management)及生命周期生成的删除标记或版本清除（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)）
 - [站点配置设置](/zh/reference/minio-mc-admin/mc-admin-config/#minio-mc-admin-config)
 
-### 站点复制的初始流程 {#id6}
+### 站点复制的初始流程 {#initial-site-replication-process}
 
 启用站点复制后，身份与访问管理（IAM）设置会按以下顺序同步：
 
@@ -95,30 +100,20 @@ upstream_modified: true
 
 在对等站点之间完成初始数据同步后，MinIO 会持续在所有站点之间复制并同步任何站点上新发生的 [可复制数据](#minio-site-replication-what-replicates)。
 
-### 站点自愈 {#id7}
+### 站点自愈 {#site-healing}
 
 站点复制配置中的任意 MinIO 部署，都可以从拥有该数据最新版本的对等站点重新同步受损的 [可复制数据](#minio-site-replication-what-replicates)。
 
 > [!NOTE]
-> **变更: RELEASE.2023-07-18T17-49-40Z**
+> **重试、重新入队与手动重同步行为**
 >
-> 站点复制操作最多重试三（3）次。
->
-> 对于重试三次后仍复制失败的操作，MinIO 会将其移出队列。 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 会在稍后重新扫描这些受影响对象，并将其重新加入复制队列。
-
-> [!NOTE]
-> **变更: RELEASE.2022-08-11T04-37-28Z**
->
-> 执行任意 `GET` 或 `HEAD` API 方法时，失败或待处理的复制会自动重新入队。 例如，某个站点恢复在线后，使用 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)、[`mc cat`](/zh/reference/minio-mc/mc-cat/#command-mc.cat) 或 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls) 命令会触发自愈重新入队。
-
-> [!NOTE]
-> **变更: RELEASE.2022-12-02T23-48-47Z**
->
-> 如果某个站点因任何原因丢失数据，可使用 [`mc admin replicate resync`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.resync) 从另一个健康站点重新同步数据。 这会启动一个主动进程来重新同步数据，而无需等待被动的 [MinIO scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 识别缺失数据。
+> - **重试上限（`RELEASE.2023-07-18T17-49-40Z`）：** 站点复制操作在移出队列前最多重试三（3）次；[scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 会在稍后重新扫描受影响对象并将其重新加入复制队列。
+> - **读取触发重新入队（`RELEASE.2022-08-11T04-37-28Z`）：** 执行任意 `GET` 或 `HEAD` API 请求时，失败或待处理的复制会自动重新入队（例如站点恢复在线后执行 [`mc stat`](/zh/reference/minio-mc/mc-stat/#command-mc.stat)、[`mc cat`](/zh/reference/minio-mc/mc-cat/#command-mc.cat) 或 [`mc ls`](/zh/reference/minio-mc/mc-ls/#command-mc.ls)）。
+> - **主动重同步（`RELEASE.2022-12-02T23-48-47Z`）：** 若某个站点丢失数据，可执行 [`mc admin replicate resync`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.resync) 立即从健康对等站点重新同步数据，而无需等待被动的 [MinIO scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner)。
 
 你可以使用 [`MINIO_SCANNER_SPEED`](/zh/reference/minio-server/settings/core/#envvar.MINIO_SCANNER_SPEED) 环境变量或 [`scanner speed`](/zh/reference/minio-server/settings/core/#mc-conf.scanner.speed) 配置项， 调整 MinIO 在扫描器性能与读写操作之间的平衡方式。
 
-### 同步复制与异步复制 {#id8}
+### 同步复制与异步复制 {#synchronous-vs-asynchronous-replication}
 
 对于给定的远端目标，MinIO 支持指定异步复制（默认）或同步复制。
 
@@ -128,7 +123,7 @@ upstream_modified: true
 
 MinIO 强烈建议使用默认的异步站点复制。 同步站点复制的性能高度依赖站点之间的延迟，较高的延迟可能导致更低的 PUT 性能和复制滞后。 要配置同步站点复制，请使用 [`mc admin replicate update`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update) 并带上 [`--mode`](/zh/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-mode) 选项。
 
-### 代理到其他站点 {#id9}
+### 代理到其他站点 {#proxy-to-other-sites}
 
 MinIO 对等站点可以将对象的 `GET/HEAD` 请求代理到其他对等站点，以检查该对象是否存在。 这样一来，即使某个站点正在自愈或落后于其他对等站点，仍然可以返回已持久化到其他站点的对象。
 
@@ -144,47 +139,47 @@ MinIO 对等站点可以将对象的 `GET/HEAD` 请求代理到其他对等站�
 
 MinIO 不会代理 `LIST`、`DELETE` 和 `PUT` 操作。
 
-## 前提条件 {#id10}
+## 前提条件 {#prerequisites}
 
-### 先备份集群设置 {#id11}
+### 先备份集群设置 {#back-up-cluster-settings-first}
 
 在配置站点复制之前，使用 [`mc admin cluster bucket export`](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) 和 [`mc admin cluster iam export`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) 命令分别对存储桶元数据和 IAM 配置进行快照。 如果在配置站点复制过程中发生误配置，可以使用这些快照恢复存储桶/IAM 设置。
 
-### 初始化时仅允许一个站点包含数据 {#id12}
+### 初始化时仅允许一个站点包含数据 {#one-site-with-data-at-setup}
 
 在初始化时，只允许 *一个* 站点包含数据。 其他站点必须不包含任何存储桶和对象。
 
 配置站点复制后，第一个部署上的所有数据都会复制到其他站点。
 
-### 所有站点必须使用相同的 IDP {#idp}
+### 所有站点必须使用相同的 IDP {#all-sites-must-use-the-same-idp}
 
 所有站点都必须使用相同的 [Identity Provider](/zh/administration/identity-access-management/#minio-authentication-and-identity-management)。 站点复制支持内置的 MinIO IDP、OIDC 或 LDAP。
 
-### 所有站点必须使用相同的 MinIO 服务端版本 {#minio}
+### 所有站点必须使用相同的 MinIO 服务端版本 {#all-sites-must-use-the-same-minio-server-version}
 
 所有站点都必须使用一致且匹配的 MinIO 服务端版本。 在 MinIO 服务端版本不匹配的站点之间配置复制，可能导致意外或不符合预期的复制行为。
 
 还应确保用于配置复制的 [`mc`](/zh/reference/minio-mc/#command-mc) 版本尽量与服务器版本保持接近。
 
-### 访问同一个加密服务 {#id13}
+### 访问同一个加密服务 {#access-to-the-same-encryption-service}
 
 如果通过 Key Management Service (KMS) 使用 [SSE-S3](/zh/administration/server-side-encryption/server-side-encryption-sse-s3/#minio-encryption-sse-s3) 或 [SSE-KMS](/zh/administration/server-side-encryption/server-side-encryption-sse-kms/#minio-encryption-sse-kms) 加密，则所有站点都必须能够访问同一个中心化 KMS 部署。
 
 可以通过一个中心化 KES 服务器，或多个 KES 服务器（例如每个站点一个）连接到同一个受支持的中心化 [key vault server](/zh/administration/server-side-encryption/#minio-sse) 来实现。
 
-### 复制要求启用版本控制 {#id14}
+### 复制要求启用版本控制 {#replication-requires-versioning}
 
 站点复制 *要求* 启用 [存储桶版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)，并会自动为所有新建存储桶启用该功能。 在站点复制部署中，不能禁用版本控制。
 
 对于存储桶中被排除在版本控制之外的前缀，MinIO 无法复制其中的对象。
 
-### 每个站点都应部署负载均衡器 {#id15}
+### 每个站点都应部署负载均衡器 {#load-balancers-installed-on-each-site}
 
 指定该站点的负载均衡器、反向代理或类似网络控制平面组件的 URL 或 IP 地址。 请求会自动路由到部署中的各个节点。
 
 MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点故障：如果该节点离线，复制就会失败。
 
-### 从存储桶复制切换到站点复制 {#id16}
+### 从存储桶复制切换到站点复制 {#switch-to-site-replication-from-bucket-replication}
 
 [存储桶复制](/zh/administration/bucket-replication/#minio-bucket-replication) 与多站点复制是互斥的。 不能在同一组部署上同时使用这两种复制方式。
 
@@ -192,11 +187,11 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
 
 设置站点复制时，只允许一个站点包含数据。 其他所有站点都必须为空。
 
-## 教程 {#id17}
+## 教程 {#tutorials}
 
-<a id="id18" data-td-print-local></a>
+<a id="minio-configure-site-replication"></a>
 
-### 配置站点复制 {#minio-configure-site-replication}
+### 配置站点复制 {#configure-site-replication}
 
 以下步骤将为三个 [分布式部署](/zh/operations/deployments/installation/#deploy-minio-distributed) 创建一个新的站点复制配置。 其中一个站点包含 [可复制数据](#minio-site-replication-what-replicates)。
 
@@ -271,9 +266,9 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
 
    有关检查站点复制的更多信息，请参阅 [站点复制状态教程](#minio-site-replication-status-tutorial)。
 
-<a id="id19"></a>
+<a id="minio-expand-site-replication"></a>
 
-### 扩展站点复制 {#minio-expand-site-replication}
+### 扩展站点复制 {#expand-site-replication}
 
 可以向现有站点复制配置中添加更多站点。
 
@@ -325,7 +320,7 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
    mc admin replicate info minio1
    ```
 
-### 修改站点的端点 {#id20}
+### 修改站点的端点 {#modify-a-site-s-endpoint}
 
 如果某个对等站点变更了主机名，可以修改复制配置以反映新的主机名。
 
@@ -349,7 +344,7 @@ MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点�
 
    MinIO 不建议为对等站点使用单个节点主机名。 这会形成单点故障：如果该节点离线，复制就会失败。
 
-### 从复制中移除站点 {#id21}
+### 从复制中移除站点 {#remove-a-site-from-replication}
 
 可以随时将某个站点从复制中移除。 后续也可以重新添加该站点，但必须先彻底清除该站点上的存储桶和对象数据。
 
@@ -366,9 +361,9 @@ mc admin replicate rm ALIAS PEER_TO_REMOVE --force
 
 MinIO 要求使用 `--force` 标志，才能将该对等站点从站点复制配置中移除。
 
-<a id="id22"></a>
+<a id="minio-site-replication-status-tutorial"></a>
 
-### 查看复制状态 {#minio-site-replication-status-tutorial}
+### 查看复制状态 {#review-replication-status}
 
 MinIO 提供跨站点的用户、组、策略或存储桶复制信息。
 

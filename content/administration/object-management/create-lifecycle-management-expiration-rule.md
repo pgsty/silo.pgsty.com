@@ -3,7 +3,7 @@ title: "Automatic Object Expiration"
 url: "/administration/object-management/create-lifecycle-management-expiration-rule/"
 weight: 50
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/create-lifecycle-management-expiration-rule.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="automatic-object-expiration"></a>
@@ -33,7 +33,7 @@ MinIO also requires the following administrative permissions on the cluster in w
 - [`admin:SetTier`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-SetTier)
 - [`admin:ListTier`](/administration/identity-access-management/policy-based-access-control/#policy-action.admin-ListTier)
 
-For example, the following policy provides permission for configuring object transition lifecycle management rules on any bucket in the cluster:.
+For example, the following policy provides permission for configuring object transition lifecycle management rules on any bucket in the cluster:
 
 ```json
 {
@@ -76,7 +76,7 @@ mc ilm rule add ALIAS/PATH --expire-days "DAYS"
 
 ## Expire Versioned Objects {#expire-versioned-objects}
 
-Use [`mc ilm rule add`](/reference/minio-mc/mc-ilm-rule-add/#command-mc.ilm.rule.add) to expiring noncurrent object versions and object delete markers:
+Use [`mc ilm rule add`](/reference/minio-mc/mc-ilm-rule-add/#command-mc.ilm.rule.add) to expire noncurrent object versions and object delete markers:
 
 - To expire noncurrent object versions after a specific duration in days, include [`--noncurrent-expire-days`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-expire-days).
 - To expire delete markers for objects with no remaining versions, include [`--expire-delete-marker`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-delete-marker).
@@ -87,13 +87,23 @@ mc ilm rule add ALIAS/PATH \
    --expire-delete-marker
 ```
 
-- To expire all versions of an object, include [`--expire-all-object-versions`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-all-object-versions). This expiration only applies to objects without a `DeleteMarker` as the latest or current version.
+- To expire all versions of an object, include [`--expire-all-object-versions`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-all-object-versions) together with [`--expire-days`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-days). This expiration applies only to objects whose latest or current version is not a `DeleteMarker`.
 
   ```shell
   mc ilm rule add ALIAS/PATH \
+     --expire-days "DAYS" \
      --expire-all-object-versions
   ```
 
 - Replace [`ALIAS`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.ALIAS) with the [`alias`](/reference/minio-mc/mc-alias/#command-mc.alias) of the S3-compatible host.
 - Replace [`PATH`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.ALIAS) with the path to the bucket on the S3-compatible host.
 - Replace [`NONCURRENT_DAYS`](/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-expire-days) with the number of days after which to expire noncurrent object versions. For example, specify `30d` to expire a version after it has been noncurrent for at least 30 days.
+
+## Expiration Behavior {#expiration-behavior}
+
+Starting in [SILO 20261109](/blog/release/silo-20261109/), lifecycle expiration enforces the following behavior (see [Object Lifecycle Management](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) for details):
+
+- **Multi-pool quorum recheck:** Expiry evaluates under the object lock across all server pools and requires an authoritative quorum before removing versions ([#278](https://github.com/pgsty/silo/issues/278)). Upgrade all serving nodes so every pool applies the same check.
+- **Exact-key delete-all and marker-only rules:** `ExpiredObjectAllVersions` and `DelMarkerExpiration` act only on the exact expired key rather than child keys below its prefix, and refuse keys with tiered or Object Lock protected versions ([#297](https://github.com/pgsty/silo/issues/297)). Rules whose sole action is `DelMarkerExpiration` execute as configured ([#268](https://github.com/pgsty/silo/issues/268)).
+- **Restored copies and remote tiers:** Expiring a restored copy removes only the temporary local cache while keeping the object version and its remote-tier data intact ([#281](https://github.com/pgsty/silo/issues/281)). SILO excludes tier free-version markers from ordinary version history ([#263](https://github.com/pgsty/silo/issues/263)) and retains remote-tier objects while another server pool still references them ([#306](https://github.com/pgsty/silo/issues/306), [#308](https://github.com/pgsty/silo/issues/308)).
+- **Non-replicated lifecycle deletes:** Delete markers and version purges created by lifecycle rules do not replicate across bucket or site replication (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), matching AWS S3 semantics. Configure expiration rules on both source and target buckets when needed.

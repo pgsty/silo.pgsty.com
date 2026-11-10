@@ -6,9 +6,10 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`，制品版本 `20261109000000.0.0`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
 
 <a id="macos-minio"></a>
+<a id="deploy-minio-on-macos"></a>
 <a id="deploy-minio-macos"></a>
 
 - [Object Storage Essentials](https://www.youtube.com/playlist?list=PLFOIsHSSYIK3WitnqhqfpeZ6fRFKHxIr7)
@@ -22,13 +23,19 @@ Silo 分别为 Intel 与 Apple Silicon 发布 macOS 归档。当前项目 CI 在
 
 本指南没有验证 macOS 主机上的多机多盘（MNMD）分布式配置。
 
-## 注意事项 {#id1}
+<a id="id1" data-td-print-local></a>
 
-### 检查清单 {#id2}
+## 注意事项 {#considerations}
+
+<a id="id2" data-td-print-local></a>
+
+### 检查清单 {#review-checklists}
 
 在执行本步骤前，请先阅读我们发布的硬件、软件和安全检查清单。
 
-### 纠删码校验 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 纠删码校验 {#erasure-coding-parity}
 
 SILO 根据**每个纠删集合的盘数**选择默认校验块数量，而非按集群总盘数计算；8–16 盘集合默认 `EC:4`，较小集合使用不同默认值。完整对应关系与可配置范围见[存储类设置](/zh/reference/minio-server/settings/storage-class/)。校验布局按对象保存，可用性须按该对象所在集合和实际布局评估。
 
@@ -36,21 +43,27 @@ SILO 根据**每个纠删集合的盘数**选择默认校验块数量，而非�
 
 虽然你可以随时更改纠删码校验设置，但以既有校验值写入的对象 **不会** 自动更新为新的校验设置。
 
-## 步骤 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 1. 下载 Silo 二进制文件 {#minio}
+## 步骤 {#procedure}
 
-从[下载与安装](/zh/download/#server)选择 Intel（`darwin_amd64`）或 Apple Silicon（`darwin_arm64`）归档。使用同一发布随附的校验和核验后，解压并安装 `silo` 二进制：
+<a id="minio" data-td-print-local></a>
+
+### 1. 下载 Silo 二进制文件 {#download-the-minio-binary}
+
+从[下载与安装](/zh/download/#server)选择版本 `20261109000000.0.0` 的 Intel（`darwin_amd64`）或 Apple Silicon（`darwin_arm64`）归档。使用同一发布随附的 SHA-256 校验和核验后，解压并安装 `silo` 二进制：
 
 ```shell
-tar -xzf silo_*_darwin_*.tar.gz
+tar -xzf silo_20261109000000.0.0_darwin_*.tar.gz
 sudo install -m 0755 ./silo /usr/local/bin/silo
 silo --version
 ```
 
 本页原有 Homebrew 命令安装的是上游 MinIO formula，而不是 Silo，因此已经删除。
 
-### 2. 启用 TLS 连接 {#tls}
+<a id="tls" data-td-print-local></a>
+
+### 2. 启用 TLS 连接 {#enable-tls-connectivity}
 
 你可以跳过此步骤，以在未启用 TLS 的情况下部署。 MinIO 强烈 *不建议* 在早期开发之外的场景中进行非 TLS 部署。
 
@@ -78,7 +91,9 @@ SILO 连接其他节点、复制目标等服务时，使用操作系统信任库
 >
 > 将生成的 `public.crt` 和 `private.key` 放入 `/path/to/certs` 目录，以为 MinIO 部署启用 TLS。 应用程序可以将 `public.crt` 作为受信任的证书颁发机构，从而在不禁用证书校验的情况下连接到 MinIO 部署。
 
-### 3. 创建 MinIO 环境文件 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 3. 创建 MinIO 环境文件 {#create-the-minio-environment-file}
 
 在 `/etc/default/silo` 创建环境文件。下面的启动命令通过 `MINIO_CONFIG_ENV_FILE` 读取它；macOS 不使用 Linux 的 systemd 服务。
 
@@ -165,7 +180,9 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 
 `MINIO_CONFIG_ENV_FILE` 由服务器自行解析，并不会作为 shell 脚本 source。需要保留 value 首尾空格时必须加引号；命名配置 target 可以包含 `my-hook` 这样的可见标点。畸形键、NUL 与不可见字符会阻止启动，并返回不含 value 的文件/行号错误。详见[配置环境文件不是 Shell 脚本](/zh/blog/design/config-env-file/)。
 
-### 4. 启动 MinIO Server {#minio-server}
+<a id="minio-server" data-td-print-local></a>
+
+### 4. 启动 MinIO Server {#start-the-minio-server}
 
 以下命令会启动附着在当前终端/shell 窗口上的 MinIO Server：
 
@@ -177,15 +194,11 @@ silo server --console-address :9001
 命令输出类似如下：
 
 ```shell
-
-```
-
-```shell
 Silo 对象存储服务端
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-10-26T00-00-00Z (go1.27.3 darwin/arm64)
+Version: RELEASE.2026-11-09T00-00-00Z (go1.27.3 darwin/arm64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin
@@ -206,7 +219,9 @@ Status:         1 Online, 0 Offline.
 
 若要在后台运行 MinIO server 进程或以守护进程方式运行，请参阅 macOS 文档中的最佳实践和操作步骤。
 
-### 5. 连接到部署 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 5. 连接到部署 {#connect-to-the-deployment}
 
 {{< tabs group="console-cli" >}}
 {{< tab label="Console" value="console" >}}
@@ -214,7 +229,7 @@ Status:         1 Online, 0 Offline.
 
 使用上一步中的 **MINIO_ROOT_USER** 和 **MINIO_ROOT_PASSWORD** 登录。
 
-<img src="/images/silo-console/console-login.webp" alt="MinIO Console 登录页" style="max-width: 600px; height: auto;" />
+![Silo Console 登录页](/images/silo-console/console-login.webp){width="600"}
 
 你可以使用 MinIO Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。 每个 MinIO server 都包含自身内嵌的 MinIO Console。
 {{< /tab >}}
@@ -233,7 +248,9 @@ mc alias set myminio https://minio-1.example.net:9000 USERNAME PASSWORD
 {{< /tab >}}
 {{< /tabs >}}
 
-### 6. 后续步骤 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 6. 后续步骤 {#next-steps}
 
 - 在可信开发网络之外暴露服务前，先[启用 TLS](/zh/operations/network-encryption/enable-minio-tls/)。
 - 通过[身份与访问管理](/zh/administration/identity-access-management/)创建最小权限用户和策略。

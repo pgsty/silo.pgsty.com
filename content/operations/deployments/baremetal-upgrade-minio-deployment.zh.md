@@ -7,6 +7,7 @@ upstream_modified: true
 ---
 
 <a id="minio" data-td-print-local></a>
+<a id="upgrade-a-minio-deployment"></a>
 <a id="minio-upgrade"></a>
 
 > [!WARNING]
@@ -18,9 +19,11 @@ upstream_modified: true
 
 本页覆盖由 `systemctl` 管理和手工管理的裸机部署。若服务由 Ansible、Terraform、容器或其他编排器管理，请通过该工具落实同样的发布、校验与重启边界，不要手工修改其管理的文件。
 
-## 升级前准备 {#id2}
+<a id="id2" data-td-print-local></a>
 
-**升级到 20261109：**
+## 升级前准备 {#prerequisites}
+
+**升级到 [SILO 20261109](/zh/blog/release/silo-20261109/)：**
 
 - 先停止 batch 提交，排空或取消全部未完成作业（包括暂停的作业）。新作业清单和进度报告采用 20261026 不支持的格式；旧格式未完成作业在全部节点升级后需要重新提交，已完成作业保持完成。仍有新作业待执行时不要回退。按[批处理升级与回退清单](/zh/administration/batch-framework/#upgrade-20261109)核对已完成工作。
 - 单池的各纠删集不全在同一组主机上时（自动布局通常为 18 台及以上），必须排空并停止所有旧进程后再启动新版本，不能滚动升级。旧、新节点的删除和复制锁域不同。
@@ -44,8 +47,9 @@ upstream_modified: true
 > 当前 SILO 拒绝原地更新，不再从上游下载服务端。`MINIO_UPDATE` 仅为配置兼容保留。请按下文替换经过验证的软件包或二进制；客户端 [`mc update`](/zh/reference/minio-mc/mc-update/#command-mc.update) 也已禁用。
 
 <a id="minio-upgrade-systemctl"></a>
+<a id="systemctl-minio" data-td-print-local></a>
 
-## `systemctl` 管理的部署 {#systemctl-minio}
+## `systemctl` 管理的部署 {#update-systemctl-managed-minio-deployments}
 
 1. 从[下载与安装](/zh/download/#server)为每个节点下载同一个公开服务端版本，并校验其摘要。
 2. 在 **不单独重启部分集群** 的前提下，在每个节点安装软件包或替换二进制：
@@ -80,12 +84,13 @@ upstream_modified: true
    ```
 
    原生软件包使用 `silo.service`；否则通过自动化在所有节点协调执行 `systemctl restart silo`。自定义部署应使用其实际服务单元。除非目标发布明确支持混合版本，否则不要临时改成滚动升级。
-5. 使用 [`mc admin info`](/zh/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) 验证部署，然后测试代表性的 S3 读写、控制台访问、身份登录以及已配置的复制或通知。
+5. 使用 [`mc admin info`](/zh/reference/minio-mc-admin/mc-admin-info/#command-mc.admin.info) 检查集群状态，并在恢复业务流量前对每个重启节点执行有界超时的签名 S3 写入与回读校验，详见[重启后的就绪窗口](/zh/operations/monitoring/healthcheck-probe/#startup-readiness-window)。随后验证控制台访问、身份登录以及已配置的复制或通知。
 6. 从[下载与安装](/zh/download/#client)单独升级客户端。独立制品使用 `mcli`，源码构建与容器保留 `mc`。
 
 <a id="id8" data-td-print-local></a>
+<a id="minio-upgrade-mc-admin-update"></a>
 
-## 手工管理的部署 {#minio-upgrade-mc-admin-update}
+## 手工管理的部署 {#update-non-system-managed-minio-deployments}
 
 对于由用户脚本或其他 supervisor 管理的进程，请在每个节点下载并校验同一个 Silo 二进制，替换 supervisor 实际使用路径上的可执行文件，确认 `silo --version`，再把所有节点作为一次协调操作重启。服务账户必须能够执行新二进制，执行替换的运维用户必须能够写入安装路径。
 

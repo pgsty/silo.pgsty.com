@@ -6,10 +6,11 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="active-directory-ldap-access-management"></a>
 <a id="active-directory-ldap"></a>
 <a id="minio-external-identity-management-ad-ldap"></a>
 
-MinIO 支持配置单个 Active Directory 或 LDAP (AD/LDAP) 服务，用于对用户身份进行外部管理。 启用 AD/LDAP 外部身份管理会禁用 [MinIO 内部 IDP](/zh/administration/identity-access-management/minio-identity-management/#minio-internal-idp)。
+MinIO 支持配置单个 Active Directory 或 LDAP (AD/LDAP) 服务，用于对用户身份进行外部管理。启用 AD/LDAP 外部身份管理会禁用普通用户的 [MinIO 内部 IDP](/zh/administration/identity-access-management/minio-identity-management/#minio-internal-idp)，但 [`root` 用户](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 仍然保持有效；自 [SILO 20261109](/zh/blog/release/silo-20261109/)（[#272](https://github.com/pgsty/silo/issues/272)）起，启用 AD/LDAP 后 `root` 用户也可以登录内嵌 Console。
 
 对于由外部 AD/LDAP 提供方管理的身份，SILO 加载显式关联到用户 Distinguished Name（DN）的现有[策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。策略名称不需要与 DN 相同。
 
@@ -32,7 +33,9 @@ MinIO 用于认证用户并获取其组成员关系的具体 AD/LDAP 查询，�
    如果配置为执行组查询，MinIO 还会查询该用户所属的 AD/LDAP 组列表。 SILO 加入显式关联到各个返回的组 DN 的策略。
 4. MinIO 会在 STS API 响应中返回临时凭证，其形式为 access key、 secret key 和 session token。这些凭证的权限来自显式关联到已认证用户 DN *或* 组 DN 的策略。
 
-MinIO 提供了一个示例 Go 应用程序 [ldap.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-26T00-00-00Z/docs/sts/ldap.go)，用于处理完整的 登录流程。
+自 [SILO 20261109](/zh/blog/release/silo-20261109/)（[#275](https://github.com/pgsty/silo/issues/275)）起，`AssumeRoleWithLDAPIdentity` 会区分凭证认证失败与上游目录服务故障：无效的 LDAP 凭证返回 `InvalidParameterValue`（`HTTP 400`，并计入按来源地址限制的登录节流额度），而上游 LDAP 目录连接或服务错误返回 `InternalError`（`HTTP 500`，在服务端记录错误日志且不消耗登录节流配额）。
+
+SILO 提供了一个示例 Go 应用程序 [ldap.go](https://github.com/pgsty/silo/blob/RELEASE.2026-11-09T00-00-00Z/docs/sts/ldap.go)，用于处理完整的登录流程。
 
 AD/LDAP 用户也可以创建与其 AD/LDAP 用户 Distinguished Name 关联的 [访问密钥](/zh/administration/identity-access-management/minio-user-management/#minio-idp-service-account)。 访问密钥是长期有效的凭证，会继承父用户的权限。 父用户在创建访问密钥时还可以进一步限制这些权限。 使用以下方法之一创建新的访问密钥：
 
@@ -75,8 +78,8 @@ mc idp ldap policy attach myminio diagnostics \
 
 ## 规范化长 DN {#long-distinguished-names}
 
-[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)合入了 [LDAP 长 DN 修复](/zh/blog/design/ldap-long-dn/)（Server 20261018 不包含此修复）。当用户仅依赖组策略登录、但其规范化 DN 长度超过对象存储后端的文件名上限时，服务端会将纯 ASCII 路径分量超过 255 字节所触发的文件名超长错误视为“无个人策略映射记录”并继续加载组策略；完整路径超限（`PATH_MAX`）、不可读撤销记录及其他存储错误仍按 Fail-Closed 报错，对象后端也仍不支持写入超长路径记录。
+[SILO 20261026](/zh/blog/release/silo-20261026/#server-20261026) 引入了 [LDAP 长 DN 修复](/zh/blog/design/ldap-long-dn/)，[SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`，[#271](https://github.com/pgsty/silo/issues/271)）进一步将其扩展到多盘纠删码集合部署。当用户依赖组策略授权、且其规范化 DN 在对象存储 IAM 后端中的纯 ASCII 单段文件名超过 255 字节时，服务端会将触发的文件名超长错误视为“无个人策略映射记录”并继续评估组策略；完整路径超限（`PATH_MAX`）、不可读撤销记录及其他存储错误仍按 Fail-Closed 拒绝访问，对象后端也仍不支持写入超长路径记录。
 
 ### 存储身份记录的组关系刷新 {#stored-record-group-refresh}
 
-在下一版本 SILO 构建（`a0de92fcb`）中，当 LDAP 用户通过存储的身份记录（`fromStored`）进行认证或刷新时，只要缓存的组列表超过 1 小时（`ldapStoredGroupRefreshInterval = 1h`），服务端就会重新向 LDAP 查询组成员关系，并在刷新失败时按 Fail-Closed 拒绝访问。参见 [LDAP 规范化长 DN](/zh/blog/design/ldap-long-dn/)。
+自 [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）起，当 LDAP 用户通过已存储的身份记录（`fromStored`）进行认证或刷新时，只要缓存的组列表超过 1 小时（`ldapStoredGroupRefreshInterval = 1h`），服务端就会重新向 LDAP 查询组成员关系，并在刷新失败时按 Fail-Closed 拒绝访问。组关系刷新会直接更新持久化身份记录（[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)），防止过期的节点缓存恢复已被移除的组成员关系；同时，只要提交者的凭证仍然有效，正在运行的批处理作业不会因 LDAP 组刷新而中断（[#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)）。参见 [LDAP 规范化长 DN](/zh/blog/design/ldap-long-dn/)。

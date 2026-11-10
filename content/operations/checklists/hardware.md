@@ -211,21 +211,21 @@ To calculate the amount of RAM used for each request, use this formula:
 The following table lists the maximum concurrent requests on a node based on the number of host drives and the *free* system RAM:
 
 | Number of Drives | 32 GiB of RAM | 64 GiB of RAM | 128 GiB of RAM | 256 GiB of RAM | 512 GiB of RAM |
-| --- | --- | --- | --- | --- | --- |
-| 4 Drives | 1,074 | 2,149 | 4,297 | 8,595 | 17,190 |
-| 8 Drives | 840 | 1,680 | 3,361 | 6,722 | 13,443 |
-| 16 Drives | 585 | 1,170 | 2.341 | 4,681 | 9,362 |
+| ---------------- | ------------- | ------------- | -------------- | -------------- | -------------- |
+| 4 Drives         | 1,074         | 2,149         | 4,297          | 8,595          | 17,190         |
+| 8 Drives         | 840           | 1,680         | 3,361          | 6,722          | 13,443         |
+| 16 Drives        | 585           | 1,170         | 2.341          | 4,681          | 9,362          |
 {.wide .expand}
 
 The following table provides general guidelines for allocating memory for use by MinIO based on the total amount of local storage on the node:
 
-| Total Host Storage | Recommended Host Memory |
-| --- | --- |
-| Up to 1 Tebibyte (Ti) | 8GiB |
-| Up to 10 Tebibyte (Ti) | 16GiB |
-| Up to 100 Tebibyte (Ti) | 32GiB |
-| Up to 1 Pebibyte (Pi) | 64GiB |
-| More than 1 Pebibyte (Pi) | 128GiB |
+| Total Host Storage        | Recommended Host Memory |
+| ------------------------- | ----------------------- |
+| Up to 1 Tebibyte (Ti)     | 8GiB                    |
+| Up to 10 Tebibyte (Ti)    | 16GiB                   |
+| Up to 100 Tebibyte (Ti)   | 32GiB                   |
+| Up to 1 Pebibyte (Pi)     | 64GiB                   |
+| More than 1 Pebibyte (Pi) | 128GiB                  |
 
 > [!WARNING]
 > **Important**

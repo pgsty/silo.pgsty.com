@@ -8,6 +8,7 @@ math: true
 ---
 
 <a id="minio" data-td-print-local></a>
+<a id="expand-a-distributed-minio-deployment"></a>
 <a id="expand-minio-distributed"></a>
 
 Silo 支持通过添加新的[服务器池](/zh/operations/concepts/#minio-intro-server-pool)扩展现有分布式部署。每个 pool 都会增加集群的总可用存储容量。
@@ -26,10 +27,13 @@ Silo 支持通过添加新的[服务器池](/zh/operations/concepts/#minio-intro
 > MinIO 不支持扩展 单机单盘 拓扑。
 
 <a id="id2" data-td-print-local></a>
+<a id="expand-minio-distributed-prereqs"></a>
 
-## 前提条件 {#expand-minio-distributed-prereqs}
+## 前提条件 {#prerequisites}
 
-### 网络与防火墙 {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 网络与防火墙 {#networking-and-firewalls}
 
 部署中的每个节点都应当与其他所有节点具备完整的双向网络访问能力。 对于容器化或编排式基础设施，这可能需要针对 Ingress、负载均衡器等网络和路由组件进行专门配置。 某些操作系统还可能需要设置防火墙规则。 例如，以下命令会在使用 `firewalld` 的服务器上显式开放 MinIO server 默认 API 端口 `9000`：
 
@@ -51,7 +55,9 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 如何配置防火墙或负载均衡器以支持 MinIO 不在本步骤范围内。 [为 MinIO Server 配置 NGINX 代理](/zh/integrations/setup-nginx-proxy-with-minio/#integrations-nginx-proxy) 参考页提供了一个将 NGINX 作为反向代理并启用基础负载均衡的基线配置。
 
-### 连续主机名 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 连续主机名 {#sequential-hostnames}
 
 MinIO 在创建 服务器池 时，*要求* 使用扩展表示法 `{x...y}` 来表示一组连续的 MinIO 主机。 因此，MinIO *要求* 使用连续编号的主机名来表示 pool 中的每个 [`silo server`](/zh/reference/minio-server/#command-minio.server) 进程。
 
@@ -66,7 +72,9 @@ MinIO 在创建 服务器池 时，*要求* 使用扩展表示法 `{x...y}` 来�
 
 如何配置 DNS 以支持 MinIO 不在本步骤范围内。
 
-### 存储要求 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 存储要求 {#storage-requirements}
 
 以下要求概括了 MinIO 硬件建议中的 [存储](/zh/operations/checklists/hardware/#minio-hardware-checklist-storage) 一节：
 
@@ -105,31 +113,40 @@ MinIO 在创建 服务器池 时，*要求* 使用扩展表示法 `{x...y}` 来�
 > [!NOTE]
 > **磁盘独占访问**
 >
-> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。 任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷， 或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
+> MinIO **要求** 对用于对象存储的磁盘或卷拥有 *独占* 访问权限。任何其他进程、软件、脚本或人员都不应直接对提供给 MinIO 的磁盘或卷，或 MinIO 在其上放置的对象或文件执行 *任何* 操作。
 >
-> 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
+> 切勿使用脚本或工具直接修改、删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件（包括在磁盘或节点之间迁移这些文件）。直接改动底层文件系统极有可能导致大范围损坏和永久数据丢失，超出 SILO 的自愈能力。
 
-### 满足纠删码校验的最小驱动器数量 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 满足纠删码校验的最小驱动器数量 {#minimum-drives-for-erasure-code-parity}
 
 MinIO 要求每个 pool 都满足部署的 [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) 设置。 具体来说，新 pool 的拓扑必须为每个 [纠删码集合](/zh/operations/concepts/erasure-coding/#minio-ec-erasure-set) 提供至少 `2 x EC:N` 个驱动器，其中 `EC:N` 是该部署的 [Standard](/zh/reference/minio-server/settings/storage-class/#minio-ec-storage-class) 校验存储类。 这一要求可确保新的 服务器池 满足该部署预期的 <abbr title="Service Level Agreement">SLA</abbr>。
 
 你可以使用 [MinIO Erasure Code Calculator](https://min.io/product/erasure-code-calculator?ref=docs) 检查新 pool 的 **Erasure Code Stripe Size (K+M)**。 如果列出的最大值至少为 `2 x EC:N`，则该 pool 支持部署当前的纠删码校验设置。
 
-### 时间同步 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 时间同步 {#time-synchronization}
 
 多节点系统必须保持时间和日期同步，才能维持稳定的节点间操作与交互。 请确保所有节点都定期同步到同一时间服务器。 不同操作系统可采用不同方式同步时间和日期，例如 `ntp`、`timedatectl` 或 `timesyncd`。
 
 请查阅所用操作系统的文档，了解如何在各节点之间建立并维护准确且一致的系统时钟。
 
-### 先备份集群设置 {#id8}
+<a id="id8" data-td-print-local></a>
 
-在开始扩容前，使用 [`mc admin cluster bucket export`](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) 和 [`mc admin cluster iam export`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) 命令分别为存储桶元数据和 IAM 配置创建快照。 必要时，你可以使用这些快照恢复 [存储桶](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-import/#minio-mc-admin-cluster-bucket-import) 和 [IAM](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-import/#minio-mc-admin-cluster-iam-import) 设置，以从用户错误或流程错误中恢复。
+### 先备份集群设置 {#back-up-cluster-settings-first}
 
-## 注意事项 {#id9}
+在开始集群扩容前，使用 [`mc admin cluster bucket export`](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) 和 [`mc admin cluster iam export`](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) 命令分别为存储桶元数据和 IAM 配置创建快照。必要时，你可以使用这些快照恢复 [存储桶](/zh/reference/minio-mc-admin/mc-admin-cluster-bucket-import/#minio-mc-admin-cluster-bucket-import) 和 [IAM](/zh/reference/minio-mc-admin/mc-admin-cluster-iam-import/#minio-mc-admin-cluster-iam-import) 设置，以从用户错误或流程错误中恢复。
+
+<a id="id9" data-td-print-local></a>
+
+## 注意事项 {#considerations}
 
 <a id="id10" data-td-print-local></a>
+<a id="minio-writing-files"></a>
 
-### 写入文件 {#minio-writing-files}
+### 写入文件 {#writing-files}
 
 SILO 不会因增加新池而自动重平衡已有对象。需要为新对象选择池时，按各可用池的剩余容量加权随机选择；剩余容量越多，被选中的概率越高，并非每次都写入空闲空间最多的池。
 
@@ -151,11 +168,17 @@ MinIO 计算各 pool 被用于写入操作的概率如下：
 
 除空闲空间计算外，如果某次写入（含校验）会导致驱动器使用率超过 99%，或已知剩余 inode 数量低于 1000，MinIO 也不会写入该 pool。
 
-如有需要，你可以使用 [`mc admin rebalance`](/zh/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance) 手动启动重平衡过程。 有关重平衡工作方式的更多信息，请参阅 [跨部署管理对象](/zh/operations/concepts/#minio-rebalance)。
+如有需要，你可以使用 [`mc admin rebalance`](/zh/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance) 手动启动重平衡过程。有关重平衡工作方式的更多信息，请参阅[跨部署管理对象](/zh/operations/concepts/#minio-rebalance)。[SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）包含多项重平衡修复：
+
+- 支持迁移跨存储池副本具有不同纠删码布局的对象（[#261](https://github.com/pgsty/silo/issues/261)），并迁移已被 ILM 判定过期的当前版本（[#265](https://github.com/pgsty/silo/issues/265)）。
+- 对无法在所有存储池上安全完成生命周期过期的版本改为迁移而非丢弃（[#278](https://github.com/pgsty/silo/issues/278)）。
+- 单个存储桶无法完成重平衡时继续处理后续存储桶并保持取消能力（[#307](https://github.com/pgsty/silo/issues/307)），且在不存在重平衡元数据时执行 `mc admin rebalance stop` 不再触发 panic（[#270](https://github.com/pgsty/silo/issues/270)）。
 
 同样地，MinIO 不会向正在退役中的 pool 执行写入。
 
-### 扩容需要协调重启 {#id11}
+<a id="id11" data-td-print-local></a>
+
+### 扩容需要协调重启 {#expansion-is-non-disruptive}
 
 新增 服务器池 需要在大致同一时间重启部署中的 *所有* MinIO server 进程。
 
@@ -163,7 +186,9 @@ MinIO 计算各 pool 被用于写入操作的概率如下：
 
 **不要** 执行“滚动”重启（例如一次只重启一个节点）。
 
-### 基于容量的规划 {#id12}
+<a id="id12" data-td-print-local></a>
+
+### 基于容量的规划 {#capacity-based-planning}
 
 MinIO 建议预先规划足以存放 **至少** 2 年数据的存储容量，并在使用率达到 70% 之前完成准备。 如果过于频繁地执行 [服务器池 扩容](#expand-minio-distributed)，或按“just-in-time”方式扩容，通常意味着架构或规划存在问题。
 
@@ -171,13 +196,16 @@ MinIO 建议预先规划足以存放 **至少** 2 年数据的存储容量，并
 
 由于 MinIO [纠删码](/zh/operations/concepts/erasure-coding/#minio-erasure-coding) 需要预留部分存储用于校验，因此总 **原始** 存储容量必须高于计划中的 **可用** 容量。 建议使用 MinIO [纠删码计算器](https://min.io/product/erasure-code-calculator)，围绕具体纠删码设置进行容量规划。
 
-### 推荐的操作系统 {#id13}
+<a id="id13" data-td-print-local></a>
+
+### 推荐的操作系统 {#recommended-operating-systems}
 
 本教程默认所有运行 MinIO 的主机都使用 [推荐的 Linux 操作系统](/zh/operations/deployments/baremetal/#minio-installation-platform-support)。
 
 部署中的所有主机都应采用一致的 [软件配置](/zh/operations/checklists/software/#minio-software-checklists)。
 
 <a id="id14"></a>
+<a id="id1" data-td-print-local></a>
 
 ## 扩展分布式 MinIO 部署 {#expand-minio-distributed-baremetal}
 
@@ -189,26 +217,28 @@ MinIO 建议预先规划足以存放 **至少** 2 年数据的存储容量，并
 
 在 [退役旧硬件 pool](/zh/operations/deployments/baremetal-decommission-server-pool/#minio-decommissioning) 之前，请先完成所有计划中的硬件扩容。
 
-### 1) 在新服务器池的每个节点上安装 Silo 二进制 {#id15}
+<a id="id15" data-td-print-local></a>
 
-安装与现有 pool **完全相同的公开 Silo 版本**。从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 的 RPM、DEB 或独立归档，并在安装前校验摘要。当前 Silo 发布只提供这两种 Linux 架构，因此已删除继承文档中指向未发布 `ppc64le` 与 `s390x` 制品的说明。
+### 1) 在新服务器池的每个节点上安装 Silo 二进制 {#install-the-minio-binary-on-each-node-in-the-new-server-pool}
+
+安装与现有 pool **完全相同的公开 Silo 版本**（例如 [SILO 20261109](/zh/blog/release/silo-20261109/)，标签 `RELEASE.2026-11-09T00-00-00Z`，软件包版本 `20261109000000.0.0`）。从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 的 RPM、DEB 或独立归档，并在安装前校验 SHA-256 摘要。当前 Silo 发布只提供这两种 Linux 架构，因此已删除继承文档中指向未发布 `ppc64le` 与 `s390x` 制品的说明。
 
 {{< tabs group="rpmrhel-debdebianubuntu-tab3" >}}
 {{< tab label="RPM（RHEL 系）" value="rpmrhel" >}}
 ```shell
-sudo dnf install ./silo-*.rpm
+sudo dnf install ./silo-20261109000000.0.0-*.rpm
 ```
 {{< /tab >}}
 {{< tab label="DEB（Debian/Ubuntu）" value="debdebianubuntu" >}}
 ```shell
-sudo dpkg -i ./silo_*_amd64.deb
+sudo dpkg -i ./silo_20261109000000.0.0_amd64.deb
 ```
 
 ARM64 主机请使用名称中带 `arm64` 的软件包。
 {{< /tab >}}
 {{< tab label="独立归档" value="tab3" >}}
 ```shell
-tar -xzf silo_*_linux_*.tar.gz
+tar -xzf silo_20261109000000.0.0_linux_*.tar.gz
 sudo install -m 0755 ./silo /usr/local/bin/silo
 silo --version
 ```
@@ -217,7 +247,9 @@ silo --version
 
 在每个新节点运行 `silo --version` 并与现有 pool 比对；不要把版本不同的节点加入集群。需要升级时，请遵循[`systemctl` 管理的 Silo 升级流程](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl)。
 
-### 2) 添加 TLS/SSL 证书 {#tls-ssl}
+<a id="tls-ssl" data-td-print-local></a>
+
+### 2) 添加 TLS/SSL 证书 {#add-tls-ssl-certificates}
 
 对于由 `systemd` 管理的 SILO 部署，建议显式配置证书目录，例如 `/etc/silo/certs`，避免依赖服务账户的主目录。在每个节点放置 `public.crt` 和 `private.key`；需要信任内部 CA 时，将 **CA 公共证书** 放入 `/etc/silo/certs/CAs`。私钥只应允许所需的服务账户读取。
 
@@ -229,7 +261,9 @@ MINIO_OPTS="--certs-dir /etc/silo/certs --console-address :9001"
 
 SILO 软件包使用 `silo` 用户和组，该账户不保证有可用的主目录。确保该账户能够遍历证书目录并读取所需文件。手工安装归档时，先按下一步创建服务账户。有关默认目录的兼容规则和多域名证书，请参阅[网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)与[`--certs-dir`](/zh/reference/minio-server/#minio.server.-certs-dir)。
 
-### 3) 创建 `systemd` 服务文件 {#systemd}
+<a id="systemd" data-td-print-local></a>
+
+### 3) 创建 `systemd` 服务文件 {#create-the-systemd-service-file}
 
 SILO 的 RPM/DEB 软件包安装以下文件，并创建 `silo` 系统用户和组：
 
@@ -239,7 +273,7 @@ SILO 的 RPM/DEB 软件包安装以下文件，并创建 `silo` 系统用户和�
 
 服务以 `silo:silo` 身份运行。为兼容已有部署，服务单元先读取 `/etc/default/minio`，再读取 `/etc/default/silo`，后者的同名配置覆盖前者；单元还声明与 `minio.service` 冲突，避免两个服务同时访问同一份数据。详见[安装布局](/zh/compatibility/binary/#layout)。
 
-手工安装归档时，创建专用的 `silo` 用户和组，并授予其数据目录和证书目录所需权限。以[当前 SILO 服务单元](https://github.com/pgsty/silo/blob/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3/silo.service)为模板，将本地单元安装到 `/etc/systemd/system/silo.service`。如果可执行文件安装在 `/usr/local/bin/silo`，同时调整 `AssertFileIsExecutable` 和 `ExecStart`，不要照搬软件包的 `/usr/bin/silo` 路径。
+手工安装归档时，创建专用的 `silo` 用户和组，并授予其数据目录和证书目录所需权限。以[当前 SILO 服务单元](https://github.com/pgsty/silo/blob/RELEASE.2026-11-09T00-00-00Z/silo.service)为模板，将本地单元安装到 `/etc/systemd/system/silo.service`。如果可执行文件安装在 `/usr/local/bin/silo`，同时调整 `AssertFileIsExecutable` 和 `ExecStart`，不要照搬软件包的 `/usr/bin/silo` 路径。
 
 检查实际生效的单元及覆盖配置，修改后重新加载：
 
@@ -250,7 +284,9 @@ sudo systemctl daemon-reload
 
 保留既有数据路径；不要因可执行文件或服务改名而重命名对象数据目录。有关版本升级，请参阅[由 systemctl 管理的升级流程](/zh/operations/deployments/baremetal-upgrade-minio-deployment/#minio-upgrade-systemctl)。
 
-### 4) 创建服务环境文件 {#id16}
+<a id="id16" data-td-print-local></a>
+
+### 4) 创建服务环境文件 {#create-the-service-environment-file}
 
 在 `/etc/default/silo` 创建环境文件。 MinIO 服务会将该文件作为 MinIO *以及* `silo.service` 文件所用全部 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 的来源。
 
@@ -297,16 +333,16 @@ sudo systemctl daemon-reload
 # The command uses MinIO expansion notation {x...y} to denote a
 # sequential series.
 #
-# The following example starts the MinIO server with two 服务器池s.
+# The following example starts the MinIO server with two server pools.
 #
-# The space delimiter indicates a seperate 服务器池
+# The space delimiter indicates a separate server pool
 #
 # The second set of hostnames and volumes is the newly added pool.
 # The pool has sufficient stripe size to meet the existing erasure code
 # parity of the deployment (2 x EC:4)
 #
 # The command includes the port on which the MinIO servers listen for each
-# 服务器池.
+# server pool.
 
 MINIO_VOLUMES="https://minio{1...4}.example.net:9000/mnt/disk{1...4}/minio https://minio{5...12}.example.net:9000/mnt/disk{1...8}/minio"
 
@@ -336,7 +372,9 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 
 你可以根据部署需要指定其他 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 或 server 命令行选项。 部署中的所有 MinIO 节点都应包含相同且取值一致的环境变量。
 
-### 5) 使用扩展后的配置重启 MinIO 部署 {#id17}
+<a id="id17" data-td-print-local></a>
+
+### 5) 使用扩展后的配置重启 MinIO 部署 {#restart-the-minio-deployment-with-expanded-configuration}
 
 在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 
@@ -344,20 +382,22 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 sudo systemctl restart silo.service
 ```
 
-Use the following commands to confirm the service is online and functional:
+使用以下命令确认服务已上线并正常运行：
 
 ```shell
 sudo systemctl status silo.service
 journalctl -f -u silo.service
 ```
 
-MinIO may log an increased number of non-critical warnings while the server processes connect and synchronize. These warnings are typically transient and should resolve as the deployment comes online.
+在服务端进程连接与同步期间，SILO 可能会记录较多非致命告警。这些告警通常是暂时性的，待部署完全上线后即会恢复正常。
 
 扩容需要协调重启全部 SILO 服务端，使它们使用一致的池配置。全量重启期间服务会暂时不可用，正在进行的请求可能失败；请安排维护窗口，并让客户端按操作语义重试和核验结果。重启不构成“无中断”保证。
 
 **不要** 执行“滚动”重启（例如一次只重启一个节点）。
 
-### 6) 后续步骤 {#id18}
+<a id="id18" data-td-print-local></a>
+
+### 6) 后续步骤 {#next-steps}
 
 - 更新所有负载均衡器、反向代理或其他网络控制平面，使客户端请求能够路由到 MinIO 分布式部署中的新主机。 虽然 MinIO 会在内部自动管理路由，但由控制平面处理初始连接通常可以减少网络跳数并提升效率。
 - 查看 [MinIO Console](/zh/administration/minio-console/#minio-console)，确认更新后的集群拓扑并监控性能。

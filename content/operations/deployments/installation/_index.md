@@ -17,7 +17,7 @@ upstream_modified: true
 
 This section documents installing and managing the AGPLv3-licensed Silo object storage server on [Kubernetes](/operations/deployments/kubernetes/#minio-kubernetes) and [bare-metal or virtualized](/operations/deployments/baremetal/#minio-baremetal) infrastructure.
 
-The `minio` executable, `MINIO_*` environment variables, S3 and Admin APIs, on-disk format, and MinIO Operator resource names are compatibility contracts. The prose uses the Silo brand, while commands and identifiers retain their compatible names.
+SILO ships the server executable, Linux packages, `systemd` service (`silo.service`), and container image (`docker.io/pgsty/silo`) under the `silo` name, and standalone client packages under `mcli`. `MINIO_*` environment variables, `/etc/default/minio` fallback when `/etc/default/silo` is absent, S3 and Admin wire APIs, the on-disk erasure format, and archived MinIO Operator resource names retain MinIO-compatible names.
 
 Silo is an S3-compatible, software-defined distributed object storage server. The [download page](/download/) is the source of truth for currently published operating-system and architecture artifacts.
 

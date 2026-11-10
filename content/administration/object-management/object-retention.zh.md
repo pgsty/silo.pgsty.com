@@ -6,20 +6,19 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio" data-td-print-local></a>
 <a id="minio-object-retention"></a>
 <a id="minio-object-locking"></a>
 
 - [Object locking and retention overview](https://youtu.be/Hk9Z-sltUu8?ref=docs)
 - [Object locking and retention lab](https://youtu.be/thNus-DL1u4?ref=docs)
 
-## 概述 {#id2}
+## 概述 {#overview}
 
-**SILO 20261018 升级：** [正式版](/zh/blog/release/silo-20261018/#security)修复保留期授权与受保护版本覆盖问题（SN-2026-015/016），Server 20260916 仍受影响。每次保留期修改都需要 `s3:PutObjectRetention`；削弱未到期的 GOVERNANCE 还需要绕过头和 `s3:BypassGovernanceRetention`。必须升级所有接受写入的 Server 和复制站点，更新客户端或 Console 不能修复 Server；升级也不会恢复此前被覆盖的数据或保留期。受影响路径与缓解措施见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
+**SILO 20261109 更新：** [SILO 20261109](/zh/blog/release/silo-20261109/) 在批量删除、多池版本、目录 `null` 版本、复制清除、生命周期整键删除规则以及批处理作业中统一执行 Object Lock 检查；请升级所有服务节点，使每个池和站点执行一致的锁定规则。此前，[SILO 20261018](/zh/blog/release/silo-20261018/#security) 修复了保留期授权与受保护版本覆盖问题（SN-2026-015/016，Server 20260916 仍受影响）：每次保留期更新均要求 `s3:PutObjectRetention`，削弱生效中的 `GOVERNANCE` 保留期还要求携带 `x-amz-bypass-governance-retention: true` 请求头及 `s3:BypassGovernanceRetention` 权限。单独升级客户端或 Console 不会修补 Server，升级也不会恢复此前已被覆盖的数据或保留期。受影响路径与缓解措施见[安全公告](/zh/blog/security/20260926-governance-retention-bypass/)。
 
 MinIO 对象锁定（“对象保留”）通过强制执行一次写入、多次读取（WORM）不可变性，防止 [已启用版本控制的对象](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 被删除。MinIO 同时支持 [基于时长的对象保留](#minio-object-locking-retention-modes) 和 [无限期 legal hold 保留](#minio-object-locking-legalhold)。
 
-根据 [Cohasset Associates](https://min.io/cohasset?ref-docs) 的说明，MinIO 对象锁定 提供关键的数据保留合规能力，并满足 SEC17a-4(f)、FINRA 4511(C) 和 CFTC 1.31(c)-(d) 的要求。
+历史上游 MinIO 的对象锁定曾获 [Cohasset Associates](https://min.io/cohasset?ref-docs) 针对 SEC 17a-4(f)、FINRA 4511(c) 和 CFTC 1.31(c)-(d) 的第三方合规评估。该评估仅适用于受评的历史上游 MinIO 版本，尚未针对 PGSTY SILO 进行独立重新认证。
 
 {{< cards >}}
 {{< card title="未启用锁定的存储桶" image="/images/retention/minio-versioning-delete-object.svg" image_alt="删除对象" >}}
@@ -40,9 +39,9 @@ MinIO 对象锁定在功能和 API 层面与 AWS S3 [兼容](https://docs.aws.am
 
 按照 [S3 的行为](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html#object-lock-bucket-config)， 只能在创建存储桶时启用对象锁定。对于创建时未启用锁定的存储桶，之后无法再启用对象锁定。启用后，你可以在任意时刻配置对象保留规则。对象锁定依赖 [版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning)，并会隐式启用该特性。
 
-<a id="id3" data-td-print-local></a>
+<a id="minio-bucket-locking-interactions-versioning"></a>
 
-### 与版本控制的交互 {#minio-bucket-locking-interactions-versioning}
+### 与版本控制的交互 {#interaction-with-versioning}
 
 受 WORM 锁定保护的对象在锁过期或被显式解除之前均不可变更。锁定以对象版本为粒度，每个版本都独立保持不可变。
 
@@ -80,7 +79,7 @@ $ mc rm play/locking-guide/data.csv
   [DATETIME]    23B c6b581ca-2883-41e2-9905-0a1867b535b8 v1 PUT data.csv
 ```
 
-### 与生命周期管理的交互 {#id4}
+### 与生命周期管理的交互 {#interaction-with-lifecycle-management}
 
 对于受过期规则覆盖的对象，MinIO [对象过期](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) 会遵循所有生效中的对象锁定和保留设置。
 
@@ -110,9 +109,19 @@ $ mc ls --versions play/locking-guide
 
 不过，对于超过 7 天的 *非当前* 对象，过期规则只有在已配置的 WORM 锁过期 *之后* 才会生效。由于该存储桶设置了 45 天的 `GOVERNANCE` 保留，因此只有 `data.csv` 的 `v1` 版本已解锁，因而可被删除。
 
-## 教程 {#id5}
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，生命周期整键删除动作（`ExpiredObjectAllVersions` 与 `DelMarkerExpiration`，[#297](https://github.com/pgsty/silo/issues/297)）以及批处理 `expire` 和 `keyrotate` 作业（[#310](https://github.com/pgsty/silo/issues/310)）同样会保留受 Object Lock 保护的版本，而不会绕过生效中的保留期或 legal hold。
 
-### 创建启用对象锁定的存储桶 {#id6}
+### 与批量删除和复制的交互 {#interaction-with-bulk-deletion-and-replication}
+
+自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，批量删除与复制执行以下 Object Lock 保护机制：
+
+- **持变更锁串行核验物理版本清除（`DeleteObjects`）：** S3 `DeleteObjects` 在执行物理版本移除时，会使用与保留期和 legal hold 更新相同的变更锁逐项串行核验，并合并所有存储池的保护状态（提交 [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)）。因此在启用 Object Lock 的存储桶中，大批量物理版本清除耗时更长；创建删除标记以及普通存储桶仍保持并发批量路径。
+- **目录 `null` 版本保护：** 批量删除在移除目录对象的 `null` 版本前，会检查该目录对象的 Object Lock 保留期与 legal hold 状态（提交 [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）。
+- **复制删除保留目标端锁保护：** 存储桶复制与站点复制在执行复制删除时保留目标端的 legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）。源端绕过 `GOVERNANCE` 保留期执行的物理清除不会赋予目标端绕过权限；只要目标端副本仍受有效保护，目标端就会拒绝清除并由源端重试。
+
+## 教程 {#tutorials}
+
+### 创建启用对象锁定的存储桶 {#create-bucket-with-object-locking-enabled}
 
 按照 S3 的行为，必须在创建存储桶时启用对象锁定。 你可以使用 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) CLI 或 S3 兼容 SDK 创建启用了对象锁定的存储桶。
 
@@ -125,7 +134,7 @@ mc mb --with-lock ALIAS/BUCKET
 - 将 `ALIAS` 替换为已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 `BUCKET` 替换为要创建的存储桶 [`名称`](/zh/reference/minio-mc/mc-mb/#mc.mb.ALIAS)。
 
-### 配置存储桶默认对象保留 {#id7}
+### 配置存储桶默认对象保留 {#configure-bucket-default-object-retention}
 
 你可以使用 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) CLI 或 S3 兼容 SDK 配置对象锁定规则（“对象保留”）。
 
@@ -142,7 +151,7 @@ mc retention set --recursive --default MODE DURATION ALIAS/BUCKET
 - 将 [`ALIAS`](/zh/reference/minio-mc/mc-retention-set/#mc.retention.set.ALIAS) 替换为已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`BUCKET`](/zh/reference/minio-mc/mc-retention-set/#mc.retention.set.ALIAS) 替换为要设置默认保留规则的存储桶名称。
 
-### 启用 Legal Hold 保留 {#legal-hold}
+### 启用 Legal Hold 保留 {#enable-legal-hold-retention}
 
 你可以使用 MinIO [`mc`](/zh/reference/minio-mc/#command-mc) CLI 或 S3 兼容 SDK，为对象启用或禁用无限期 legal hold 保留。
 
@@ -157,34 +166,21 @@ mc legalhold set ALIAS/PATH
 - 将 [`ALIAS`](/zh/reference/minio-mc/mc-legalhold-set/#mc.legalhold.set.ALIAS) 替换为已配置 MinIO 部署的 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 - 将 [`PATH`](/zh/reference/minio-mc/mc-legalhold-set/#mc.legalhold.set.ALIAS) 替换为要启用 legal hold 的对象路径。
 
-<a id="id8" data-td-print-local></a>
+<a id="minio-object-locking-retention-modes"></a>
 
-## 对象保留模式 {#minio-object-locking-retention-modes}
+## 对象保留模式 {#object-retention-modes}
 
 MinIO 实现了以下 [S3 对象锁定模式](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html)：
 
-<table>
-  <thead>
-    <tr>
-      <th><p>模式</p></th>
-      <th><p>说明</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><a href="#minio-object-locking-governance">GOVERNANCE 模式</a></p></td>
-      <td><p>阻止非特权用户执行任何会变更对象或其锁定设置的操作。</p><p>在存储桶或对象上拥有 <a href="/zh/administration/identity-access-management/policy-based-access-control/#policy-action.s3-BypassGovernanceRetention"><code>s3:BypassGovernanceRetention</code></a> 权限的用户，可以修改对象或其锁定设置。</p><p>在配置的保留规则持续时间结束后，MinIO 会自动解除该锁。</p></td>
-    </tr>
-    <tr>
-      <td><p><a href="#minio-object-locking-compliance">COMPLIANCE 模式</a></p></td>
-      <td><p>阻止任何会变更对象或其锁定设置的操作。</p><p>包括 <a href="/zh/administration/identity-access-management/minio-user-management/#minio-users-root">MinIO root</a> 用户在内的任何 MinIO 用户都无法修改对象或其设置。</p><p>在配置的保留规则持续时间结束后，MinIO 会自动解除该锁。</p></td>
-    </tr>
-  </tbody>
-</table>
+| 模式                                                | 说明                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [GOVERNANCE 模式](#minio-object-locking-governance) | 阻止非特权用户修改或变更对象及其锁定设置。在存储桶或对象上拥有 [`s3:BypassGovernanceRetention`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.s3-BypassGovernanceRetention) 权限的用户携带绕过请求头时，可以修改对象或其锁定设置。配置的保留时长到期后，SILO 会自动解除该锁。 |
+| [COMPLIANCE 模式](#minio-object-locking-compliance) | 阻止任何修改或变更对象及其锁定设置的操作。在保留期届满前，包括 [root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户在内的任何用户都无法修改对象或缩短保留期。配置的保留时长到期后，SILO 会自动解除该锁。                                                                   |
+{.wide .expand}
 
 <a id="minio-object-locking-governance"></a>
 
-### GOVERNANCE 模式 {#governance}
+### GOVERNANCE 模式 {#governance-mode}
 
 处于 `GOVERNANCE` 锁定下的对象可防止非特权用户执行写操作。
 
@@ -194,7 +190,7 @@ MinIO 的 `GOVERNANCE` 锁在功能上与 [S3 GOVERNANCE 模式](https://docs.aw
 
 <a id="minio-object-locking-compliance"></a>
 
-### COMPLIANCE 模式 {#compliance}
+### COMPLIANCE 模式 {#compliance-mode}
 
 处于 `COMPLIANCE` 锁定下的对象可防止 *所有* 用户执行写操作，包括 [MinIO root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户。
 
@@ -202,9 +198,9 @@ MinIO 的 `GOVERNANCE` 锁在功能上与 [S3 GOVERNANCE 模式](https://docs.aw
 
 MinIO 的 `COMPLIANCE` 锁在功能上与 [S3 COMPLIANCE 模式](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html#object-lock-retention-modes) 完全一致。
 
-<a id="id9" data-td-print-local></a>
+<a id="minio-object-locking-legalhold"></a>
 
-## Legal Hold {#minio-object-locking-legalhold}
+## Legal Hold {#legal-hold}
 
 处于 legal hold 状态下的对象可防止 *所有* 用户执行写操作，包括 [MinIO root](/zh/administration/identity-access-management/minio-user-management/#minio-users-root) 用户。
 

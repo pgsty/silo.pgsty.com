@@ -7,19 +7,24 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **SILO upgrade requirements:** the September IAM repairs require a coordinated upgrade of all participating nodes and a backup containing deletion history. Read [IAM Upgrade and Recovery](/operations/replication/iam-upgrade/) and [Audit Historical Replica State](/operations/replication/replica-metadata-audit/), and use the [component matrix](/compatibility/versions/) to distinguish main from published artifacts.
+> [!IMPORTANT]
+> **SILO 20261109 site-replication updates and upgrade requirements**
+>
+> - **Coordinated IAM and Server upgrades:** [SILO 20261109](/blog/release/silo-20261109/) refuses incomplete IAM policy loads, keeps cached authentication available during lazy loads, and applies IAM edits, LDAP group refreshes, and service-account creation directly to persisted records so stale peers cannot restore old credentials or resurrect deleted identities ([#316](https://github.com/pgsty/silo/issues/316), [#317](https://github.com/pgsty/silo/issues/317), [#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)). Read [IAM Upgrade and Recovery](/operations/replication/iam-upgrade/), [Audit Historical Replica State](/operations/replication/replica-metadata-audit/), and the [component matrix](/compatibility/versions/) before upgrading.
+> - **Object Lock, lifecycle deletes, and metrics:** Replicated deletes preserve target legal hold and retention (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)), lifecycle-created delete markers and version purges are not replicated across sites (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), and replication worker metrics no longer panic when the replication pool is absent while retaining historical averages and peak counts (commit [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)).
+> - **Known limitations:** Multi-site delete-marker purge ordering ([#217](https://github.com/pgsty/silo/issues/217)) and replayed bucket creation ([#241](https://github.com/pgsty/silo/pull/241)) remain open limitations.
 
 <a id="site-replication-overview"></a>
 <a id="minio-site-replication-overview"></a>
 
 Site replication configures multiple independent MinIO deployments as a cluster of replicas called peer sites.
 
-> <figure>
->   <img src="/images/architecture/architecture-load-balancer-multi-site.svg" alt="Diagram of a site replication deployment with two sites" />
->   <figcaption>A site replication deployment with two peer sites.
-> A load balancer manages routing operations to either of the two sites.
-> Data written to one site automatically replicates to the other peer site.</figcaption>
-> </figure>
+<figure>
+  <img src="/images/architecture/architecture-load-balancer-multi-site.svg" alt="Diagram of a site replication deployment with two sites" />
+  <figcaption>A site replication deployment with two peer sites.
+A load balancer manages routing operations to either of the two sites.
+Data written to one site automatically replicates to the other peer site.</figcaption>
+</figure>
 
 Site replication assumes the use of either the included MinIO identity provider (IDP) *or* an external IDP. All configured deployments must use the same IDP. Deployments using an external IDP must use the same configuration across sites.
 
@@ -48,19 +53,19 @@ Each MinIO deployment (“peer site”) synchronizes the following changes acros
 
 Site replication enables [bucket versioning](/administration/object-management/object-versioning/#minio-bucket-versioning) for all new and existing buckets on all replicated sites.
 
-> [!NOTE]
-> **Added: mc**
->
-> RELEASE.2023-12-02T02-03-28Z
+In [SILO 20261109](/blog/release/silo-20261109/), replicated deletes preserve the target site's Object Lock legal hold and retention (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)): a source purge that bypassed `GOVERNANCE` retention does not grant a bypass on a peer copy that still carries active protection, so the target site refuses the purge and the source retries.
 
-You can choose to replicate ILM expiration rules across peer sites. For new site replication configurations, use the [`mc admin replicate add`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add) with the [`--replicate-ilm-expiry`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add.-replicate-ilm-expiry) flag. For existing site replication configurations, you can enable or disable the behavior using [`mc admin replicate update`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update) with either the [`--enable-ilm-expiry-replication`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-enable-ilm-expiry-replication) or [`--disable-ilm-expiry-replication`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-disable-ilm-expiry-replication) flag, as appropriate.
+> [!NOTE]
+> **Lifecycle expiration deletes do not replicate (`SILO 20261109`)**
+>
+> Starting in [SILO 20261109](/blog/release/silo-20261109/), delete markers and version purges created by lifecycle rules are **not** replicated across sites (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), matching AWS S3 semantics even if legacy ILM expiry replication flags ([`--replicate-ilm-expiry`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.add.-replicate-ilm-expiry) or [`--enable-ilm-expiry-replication`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.update.-enable-ilm-expiry-replication)) were set on the configuration. Configure lifecycle expiration rules on each peer site independently.
 
 ### What Does Not Replicate Across Sites {#what-does-not-replicate-across-sites}
 
 MinIO deployments in a site replication configuration do *not* replicate the creation or modification of the following items:
 
 - [Bucket notifications](/administration/monitoring/bucket-notifications/#minio-bucket-notifications)
-- [Lifecycle management (ILM) configurations](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management)
+- [Lifecycle management (ILM) configurations](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management) and lifecycle-generated delete markers or version purges (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04))
 - [Site configuration settings](/reference/minio-mc-admin/mc-admin-config/#minio-mc-admin-config)
 
 ### Initial Site Replication Process {#initial-site-replication-process}
@@ -100,21 +105,11 @@ After the initial synchronization of data across peer sites, MinIO continually r
 Any MinIO deployment in the site replication configuration can resynchronize damaged [replica-eligible data](#minio-site-replication-what-replicates) from the peer with the most updated (“latest”) version of that data.
 
 > [!NOTE]
-> **Changed: RELEASE.2023-07-18T17-49-40Z**
+> **Retry, requeue, and manual resync behavior**
 >
-> Site replication operations retry up to three (3) times.
->
-> MinIO dequeues replication operations that fail to replicate after three attempts. The [scanner](/operations/concepts/scanner/#minio-concepts-scanner) picks up those affected objects at a later time and requeues them for replication.
-
-> [!NOTE]
-> **Changed: RELEASE.2022-08-11T04-37-28Z**
->
-> Failed or pending replications requeue automatically when performing any `GET` or `HEAD` API method. For example, using [`mc stat`](/reference/minio-mc/mc-stat/#command-mc.stat), [`mc cat`](/reference/minio-mc/mc-cat/#command-mc.cat), or [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) commands after a site comes back online prompts healing to requeue.
-
-> [!NOTE]
-> **Changed: RELEASE.2022-12-02T23-48-47Z**
->
-> If one site loses data for any reason, resynchronize the data from another healthy site with [`mc admin replicate resync`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.resync). This launches an active process that resynchronizes the data without waiting for the passive [MinIO scanner](/operations/concepts/scanner/#minio-concepts-scanner) to recognize the missing data.
+> - **Retry limit (`RELEASE.2023-07-18T17-49-40Z`):** Site replication retries failed operations up to three (3) times before dequeuing them. The [scanner](/operations/concepts/scanner/#minio-concepts-scanner) later picks up affected objects and requeues them for replication.
+> - **Read-triggered requeue (`RELEASE.2022-08-11T04-37-28Z`):** Failed or pending replications requeue automatically during `GET` or `HEAD` requests (for example, running [`mc stat`](/reference/minio-mc/mc-stat/#command-mc.stat), [`mc cat`](/reference/minio-mc/mc-cat/#command-mc.cat), or [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) after a site returns online).
+> - **Active resynchronization (`RELEASE.2022-12-02T23-48-47Z`):** If one site loses data, run [`mc admin replicate resync`](/reference/minio-mc-admin/mc-admin-replicate/#mc.admin.replicate.resync) to resynchronize from a healthy peer site immediately without waiting for the passive [scanner](/operations/concepts/scanner/#minio-concepts-scanner).
 
 You can adjust how MinIO balances the scanner performance with read/write operations using either the [`MINIO_SCANNER_SPEED`](/reference/minio-server/settings/core/#envvar.MINIO_SCANNER_SPEED) environment variable or the [`scanner speed`](/reference/minio-server/settings/core/#mc-conf.scanner.speed) configuration setting.
 

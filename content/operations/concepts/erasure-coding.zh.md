@@ -20,7 +20,9 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 <a id="minio-ec-basics"></a>
 <a id="id3" data-td-print-local></a>
 
-## 纠删码基础 {#minio-read-quorum}
+<a id="minio-read-quorum" data-td-print-local></a>
+
+## 纠删码基础 {#erasure-coding-basics}
 
 > [!NOTE]
 > **说明**
@@ -122,22 +124,26 @@ MinIO 将纠删码作为提供数据冗余和可用性的核心组件。 本页�
 
 <a id="id4" data-td-print-local></a>
 
-## 纠删码校验与存储效率 {#minio-ec-parity}
+<a id="minio-ec-parity" data-td-print-local></a>
+
+## 纠删码校验与存储效率 {#erasure-parity-and-storage-efficiency}
 
 为部署设置校验值，本质上是在可用性与总可用存储之间做平衡。 更高的校验值会提高对驱动器或节点故障的容忍度，但会减少可用存储；更低的校验值则提供更高的可用存储，但对驱动器或节点故障的容忍度也更低。 你可以使用 MinIO [纠删码计算器](https://min.io/product/erasure-code-calculator?ref=docs)，查看不同校验值对计划中集群部署的影响。
 
 下表列出了由 1 个节点和 16 块 1TB 驱动器组成的 MinIO 部署在不同纠删码校验级别下的结果：
 
-| 校验 | 总存储 | 存储比例 | 读操作所需最少驱动器 | 写操作所需最少驱动器 |
-| --- | --- | --- | --- | --- |
-| `EC: 4` (默认) | 12 Tebibytes | 0.750 | 12 | 12 |
-| `EC: 6` | 10 Tebibytes | 0.625 | 10 | 10 |
-| `EC: 8` | 8 Tebibytes | 0.500 | 8 | 9 |
+| 校验           | 总存储       | 存储比例 | 读操作所需最少驱动器 | 写操作所需最少驱动器 |
+| -------------- | ------------ | -------- | -------------------- | -------------------- |
+| `EC: 4` (默认) | 12 Tebibytes | 0.750    | 12                   | 12                   |
+| `EC: 6`        | 10 Tebibytes | 0.625    | 10                   | 10                   |
+| `EC: 8`        | 8 Tebibytes  | 0.500    | 8                    | 9                    |
 {.wide .expand}
 
 <a id="id5" data-td-print-local></a>
 
-## 位腐化防护 {#minio-ec-bitrot}
+<a id="minio-ec-bitrot" data-td-print-local></a>
+
+## 位腐化防护 {#bit-rot-protection}
 
 [Bit rot](https://en.wikipedia.org/wiki/Data_degradation) 是一种静默数据损坏，由存储介质层面的随机变化引起。 对于数据驱动器而言，它通常来自表示数据的电荷衰减或磁取向变化。 成因可以从停电时的微小电流尖峰，到导致比特翻转的随机宇宙射线。 这种“bit rot”会在不触发监控工具或硬件告警的情况下，对数据介质造成细微错误或损坏。
 

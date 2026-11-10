@@ -11,7 +11,10 @@ upstream_modified: true
 
 This page documents deploying Silo as a container on an operating system that supports containerized processes.
 
-This documentation assumes installation of Docker, Podman, or a similar runtime which supports the standard container image format. Published `docker.io/pgsty/silo` release images use [Red Hat Universal Base Image 9 Micro](https://catalog.redhat.com/software/container-stacks/detail/609560d9e2b160d361d24f98).
+This documentation assumes installation of Docker, Podman, or a similar runtime that supports the OCI container image format. Published `docker.io/pgsty/silo` releases provide two multi-architecture (`linux/amd64`, `linux/arm64`) image variants:
+
+- **Standard image (`docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z`):** Built on [Red Hat Universal Base Image 9 Micro](https://catalog.redhat.com/software/container-stacks/detail/609560d9e2b160d361d24f98). Bundles `silo`, `mcli` (with an `mc` symlink), static `curl`, the POSIX entrypoint script, SILO legal files under `/licenses/`, and `mcli` legal files under `/licenses/mcli` ([#295](https://github.com/pgsty/silo/pull/295)).
+- **Distroless image (`docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z-distroless`):** Built on `gcr.io/distroless/static-debian12` with only the `silo` binary and `/licenses/` (no shell, `mcli`, `curl`, or entrypoint script). It ships the same UBI-derived CA root bundle (`/etc/ssl/certs/ca-certificates.crt`) as the standard UBI image ([#295](https://github.com/pgsty/silo/pull/295)) and configures a built-in `HEALTHCHECK` that runs `/usr/bin/silo healthcheck ready` (see [Healthcheck API](/operations/monitoring/healthcheck-probe/#native-probe)). Standard image deployments can also invoke `silo healthcheck` directly as a container probe.
 
 Functionality and performance of the Silo container may be constrained by the base OS.
 
@@ -22,7 +25,7 @@ The procedure includes guidance for deploying Single-Node Multi-Drive (SNMD) and
 >
 > These examples cover Single-Node Single-Drive and Single-Node Multi-Drive development or evaluation deployments. They do not define a production Multi-Node Multi-Drive topology or an upgrade contract for Docker Compose, Docker Swarm, or another container orchestrator. For a production distributed deployment, use a tested [Kubernetes tenant workflow](/operations/deployments/k8s-deploy-minio-tenant-helm-on-kubernetes/) and validate persistence, networking, failure domains, and upgrades for your environment.
 >
-> The examples target [Server 20261026](/blog/release/silo-20261026/), now publicly available. Validate the version with your workload and record the image digest for rollback.
+> The examples target [Server 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`). Validate the version with your workload and record the image digest for rollback.
 >
 > SILO disables in-place self-update; `MINIO_UPDATE=off` does not re-enable it. Upgrade containers by replacing the image with a verified SILO tag or digest, not with `mc admin update`.
 
@@ -48,15 +51,15 @@ Data stored on ephemeral container paths is lost when the container restarts or 
 
 ## Procedure {#procedure}
 
-1. Start the Container
+### 1. Start the Container {#start-the-container}
 
-This procedure provides instructions for Podman and Docker in rootfull mode. For rootless deployments, defer to documentation by each runtime for configuration and container startup.
+This procedure provides instructions for Podman and Docker in rootful mode. For rootless deployments, consult your container runtime documentation for user-namespace and volume ownership settings. In the `-distroless` image, `ENTRYPOINT` is `/usr/bin/silo`, `/data` is pre-created with mode `0777`, and privilege dropping uses `--user` rather than `MINIO_USERNAME`.
 
 For all other container runtimes, follow the documentation for that runtime and specify the equivalent options, parameters, or configurations.
 
 {{< tabs group="podman-docker" >}}
 {{< tab label="Podman" value="podman" >}}
-The following command creates a folder in your home directory, then starts the Silo container using Podman:
+The following command creates a local data directory in your home folder and starts the Silo container with Podman:
 
 ```shell
 mkdir -p ~/silo/data
@@ -69,36 +72,36 @@ podman run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z server /data --console-address ":9001"
 ```
 
-The command binds ports `9000` and `9001` to the S3 API and Web Console respectively.
+The command binds port `9000` for the S3 API and port `9001` for the Web Console. To run the distroless image instead, replace the image reference with `docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z-distroless`.
 
-The local drive `~/silo/data` is mounted to the `/data` folder on the container. You can modify the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) variables to change the root login as needed.
+The host directory `~/silo/data` mounts to `/data` inside the container. Change [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) to set your root credentials.
 
-For multi-drive deployments, bind each local drive or folder it’s on sequentially-numbered path on the remote. You can then modify the [`silo server`](/reference/minio-server/#command-minio.server) startup to specify those paths:
+For multi-drive deployments, mount each host drive or directory to a sequentially numbered path in the container, and pass the ellipsis range to [`silo server`](/reference/minio-server/#command-minio.server):
 
 ```shell
-mkdir -p ~/minio/data-{1..4}
+mkdir -p ~/silo/data-{1..4}
 
 podman run \
    -p 9000:9000 \
    -p 9001:9001 \
    --name silo \
-   -v /mnt/drive-1:/mnt/drive-1 \
-   -v /mnt/drive-2:/mnt/drive-2 \
-   -v /mnt/drive-3:/mnt/drive-3 \
-   -v /mnt/drive-4:/mnt/drive-4 \
+   -v ~/silo/data-1:/mnt/drive-1 \
+   -v ~/silo/data-2:/mnt/drive-2 \
+   -v ~/silo/data-3:/mnt/drive-3 \
+   -v ~/silo/data-4:/mnt/drive-4 \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
-For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.
+Replace `~/silo/data-1` through `~/silo/data-4` with dedicated mounted host drives (such as `/mnt/drive-1:/mnt/drive-1`) when testing drive-level isolation. For Windows hosts, use Windows path syntax for the host directory, such as `C:\silo\data:/data`.
 {{< /tab >}}
 {{< tab label="Docker" value="docker" >}}
-The following command creates a folder in your home directory, then starts the Silo container using Docker:
+The following command creates a local data directory in your home folder and starts the Silo container with Docker:
 
 ```shell
 mkdir -p ~/silo/data
@@ -111,33 +114,33 @@ docker run \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /data --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z server /data --console-address ":9001"
 ```
 
-The command binds ports `9000` and `9001` to the S3 API and Web Console respectively.
+The command binds port `9000` for the S3 API and port `9001` for the Web Console. To run the distroless image instead, replace the image reference with `docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z-distroless`.
 
-The local drive `~/silo/data` is mounted to the `/data` folder on the container. You can modify the [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) variables to change the root login as needed.
+The host directory `~/silo/data` mounts to `/data` inside the container. Change [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER) and [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD) to set your root credentials.
 
-For multi-drive deployments, bind each local drive or folder it’s on sequentially-numbered path on the remote. You can then modify the [`silo server`](/reference/minio-server/#command-minio.server) startup to specify those paths:
+For multi-drive deployments, mount each host drive or directory to a sequentially numbered path in the container, and pass the ellipsis range to [`silo server`](/reference/minio-server/#command-minio.server):
 
 ```shell
-mkdir -p ~/minio/data-{1..4}
+mkdir -p ~/silo/data-{1..4}
 
 docker run \
    -p 9000:9000 \
    -p 9001:9001 \
    --name silo \
-   -v /mnt/drive-1:/mnt/drive-1 \
-   -v /mnt/drive-2:/mnt/drive-2 \
-   -v /mnt/drive-3:/mnt/drive-3 \
-   -v /mnt/drive-4:/mnt/drive-4 \
+   -v ~/silo/data-1:/mnt/drive-1 \
+   -v ~/silo/data-2:/mnt/drive-2 \
+   -v ~/silo/data-3:/mnt/drive-3 \
+   -v ~/silo/data-4:/mnt/drive-4 \
    -e "MINIO_UPDATE=off" \
    -e "MINIO_ROOT_USER=ROOTNAME" \
    -e "MINIO_ROOT_PASSWORD=CHANGEME123" \
-   docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
+   docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z server /mnt/drive-{1...4} --console-address ":9001"
 ```
 
-For Windows hosts, specify the local folder path using Windows filesystem semantics `C:\minio\:/data`.
+Replace `~/silo/data-1` through `~/silo/data-4` with dedicated mounted host drives (such as `/mnt/drive-1:/mnt/drive-1`) when testing drive-level isolation. For Windows hosts, use Windows path syntax for the host directory, such as `C:\silo\data:/data`.
 {{< /tab >}}
 {{< /tabs >}}
 
@@ -149,7 +152,7 @@ Open your browser to [http://localhost:9001](http://localhost:9001) to open the 
 
 Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previous step.
 
-<img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: 600px; height: auto;" />
+![Silo Console Login Page](/images/silo-console/console-login.webp){width="600"}
 
 You can use the embedded Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration.
 {{< /tab >}}

@@ -42,7 +42,7 @@ All MinIO servers in the deployment *must* use the same listen port.
 
 If you set a static [MinIO Console](/administration/minio-console/#minio-console) port (e.g. `:9001`) you must *also* grant access to that port to ensure connectivity from external clients.
 
-MinIO **strongly recomends** using a load balancer to manage connectivity to the cluster. The Load Balancer should use a “Least Connections” algorithm for routing requests to the MinIO deployment, since any MinIO node in the deployment can receive, route, or process client requests.
+MinIO **strongly recommends** using a load balancer to manage connectivity to the cluster. The Load Balancer should use a “Least Connections” algorithm for routing requests to the MinIO deployment, since any MinIO node in the deployment can receive, route, or process client requests.
 
 The following load balancers are known to work well with MinIO:
 
@@ -107,7 +107,7 @@ The following requirements summarize the [Storage](/operations/checklists/hardwa
 >
 > MinIO **requires** *exclusive* access to the drives or volumes provided for object storage. No other processes, software, scripts, or persons should perform *any* actions directly on the drives or volumes provided to MinIO or the objects or files MinIO places on them.
 >
-> Unless directed by MinIO Engineering, do not use scripts or tools to directly modify, delete, or move any of the data shards, parity shards, or metadata files on the provided drives, including from one drive or node to another. Such operations are very likely to result in widespread corruption and data loss beyond MinIO’s ability to heal.
+> Do not use scripts or tools to directly modify, delete, or move any data shards, parity shards, or metadata files on the provided drives, including across drives or nodes. Direct filesystem modifications can cause corruption and permanent data loss beyond SILO’s ability to heal.
 
 ### Minimum Drives for Erasure Code Parity {#minimum-drives-for-erasure-code-parity}
 
@@ -123,7 +123,7 @@ Check the documentation for your operating system for how to set up and maintain
 
 ### Back Up Cluster Settings First {#back-up-cluster-settings-first}
 
-Use the [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) and [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) commands to take a snapshot of the bucket metadata and IAM configurations respectively prior to starting decommissioning. You can use these snapshots to restore [bucket](/reference/minio-mc-admin/mc-admin-cluster-bucket-import/#minio-mc-admin-cluster-bucket-import) and [IAM](/reference/minio-mc-admin/mc-admin-cluster-iam-import/#minio-mc-admin-cluster-iam-import) settings to recover from user or process errors as necessary.
+Use the [`mc admin cluster bucket export`](/reference/minio-mc-admin/mc-admin-cluster-bucket-export/#command-mc.admin.cluster.bucket.export) and [`mc admin cluster iam export`](/reference/minio-mc-admin/mc-admin-cluster-iam-export/#command-mc.admin.cluster.iam.export) commands to take a snapshot of the bucket metadata and IAM configurations before starting cluster expansion. You can use these snapshots to restore [bucket](/reference/minio-mc-admin/mc-admin-cluster-bucket-import/#minio-mc-admin-cluster-bucket-import) and [IAM](/reference/minio-mc-admin/mc-admin-cluster-iam-import/#minio-mc-admin-cluster-iam-import) settings to recover from user or process errors as necessary.
 
 ## Considerations {#considerations}
 
@@ -151,13 +151,17 @@ MinIO calculates the probability of a write operation to each of the pools as:
 
 In addition to the free space calculation, if a write option (with parity) would bring a drive usage above 99% or a known free inode count below 1000, MinIO does not write to the pool.
 
-If desired, you can manually initiate a rebalance procedure with [`mc admin rebalance`](/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance). For more about how rebalancing works, see [managing objects across a deployment](/operations/concepts/#minio-rebalance).
+If desired, you can manually initiate a rebalance procedure with [`mc admin rebalance`](/reference/minio-mc-admin/mc-admin-rebalance/#command-mc.admin.rebalance). For more about how rebalancing works, see [managing objects across a deployment](/operations/concepts/#minio-rebalance). [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) includes several rebalance fixes:
+
+- Moves objects whose copies across pools have different erasure layouts ([#261](https://github.com/pgsty/silo/issues/261)) and moves ILM-expired current versions ([#265](https://github.com/pgsty/silo/issues/265)).
+- Moves versions whose lifecycle expiry cannot safely complete across pools instead of dropping them ([#278](https://github.com/pgsty/silo/issues/278)).
+- Continues rebalancing later buckets when one bucket cannot finish while preserving cancellation ([#307](https://github.com/pgsty/silo/issues/307)), and prevents `mc admin rebalance stop` from panicking when rebalance metadata is absent ([#270](https://github.com/pgsty/silo/issues/270)).
 
 Likewise, MinIO does not write to pools in a decommissioning process.
 
 ### Expansion Requires a Coordinated Restart {#expansion-is-non-disruptive}
 
-Adding a new server pool requires restarting *all* MinIO server processes in the deployment at around same time.
+Adding a new server pool requires restarting *all* MinIO server processes in the deployment at around the same time.
 
 Expansion requires a coordinated restart of all SILO server processes with the same pool configuration. A full restart temporarily interrupts service and can fail in-flight requests. Schedule a maintenance window, and have clients retry and verify results according to each operation’s semantics. Restarting does not guarantee uninterrupted service.
 
@@ -191,24 +195,24 @@ Complete any planned hardware expansion prior to [decommissioning older hardware
 
 ### 1) Install the Silo Binary on Each Node in the New Server Pool {#install-the-minio-binary-on-each-node-in-the-new-server-pool}
 
-Install the **same published Silo release** used by the existing pool. Download the x86-64 or ARM64 RPM, DEB, or standalone archive from [Download & Install](/download/#server), and verify its checksum before installation. The Silo release currently publishes those two Linux architectures; inherited references to unsupported `ppc64le` and `s390x` downloads have been removed.
+Install the **same published Silo release** used by the existing pool (for example, [SILO 20261109](/blog/release/silo-20261109/), tag `RELEASE.2026-11-09T00-00-00Z`, package `20261109000000.0.0`). Download the x86-64 or ARM64 RPM, DEB, or standalone archive from [Download & Install](/download/#server), and verify its SHA-256 checksum before installation. The Silo release publishes those two Linux architectures; inherited references to unsupported `ppc64le` and `s390x` downloads have been removed.
 
 {{< tabs group="tabs-0082ddfa" >}}
 {{< tab label="RPM (RHEL family)" value="rpm-rhel-family" >}}
 ```shell
-sudo dnf install ./silo-*.rpm
+sudo dnf install ./silo-20261109000000.0.0-*.rpm
 ```
 {{< /tab >}}
 {{< tab label="DEB (Debian/Ubuntu)" value="deb-debianubuntu" >}}
 ```shell
-sudo dpkg -i ./silo_*_amd64.deb
+sudo dpkg -i ./silo_20261109000000.0.0_amd64.deb
 ```
 
 Use the `arm64` package name on ARM64 hosts.
 {{< /tab >}}
 {{< tab label="Standalone archive" value="standalone-archive" >}}
 ```shell
-tar -xzf silo_*_linux_*.tar.gz
+tar -xzf silo_20261109000000.0.0_linux_*.tar.gz
 sudo install -m 0755 ./silo /usr/local/bin/silo
 silo --version
 ```
@@ -239,7 +243,7 @@ SILO RPM/DEB packages install the following files and create the `silo` system u
 
 The service runs as `silo:silo`. For existing deployments, the unit reads `/etc/default/minio` first, then `/etc/default/silo`; values in the latter override matching keys in the former. It also declares a conflict with `minio.service` so the two services do not access the same data concurrently. See the [installation layout](/compatibility/binary/#layout).
 
-For a manual archive installation, create a dedicated `silo` user and group and grant the required access to data and certificate directories. Use the [current SILO unit](https://github.com/pgsty/silo/blob/c3ad836aed0d8a7d23c2e44a5eaa3009d08525e3/silo.service) as a template and install the local unit at `/etc/systemd/system/silo.service`. If the executable is installed at `/usr/local/bin/silo`, adjust both `AssertFileIsExecutable` and `ExecStart` instead of retaining the package's `/usr/bin/silo` path.
+For a manual archive installation, create a dedicated `silo` user and group and grant the required access to data and certificate directories. Use the [current SILO unit](https://github.com/pgsty/silo/blob/RELEASE.2026-11-09T00-00-00Z/silo.service) as a template and install the local unit at `/etc/systemd/system/silo.service`. If the executable is installed at `/usr/local/bin/silo`, adjust both `AssertFileIsExecutable` and `ExecStart` instead of retaining the package's `/usr/bin/silo` path.
 
 Inspect the effective unit and any overrides, then reload after changes:
 
@@ -299,7 +303,7 @@ Modify the example to reflect your deployment topology:
 #
 # The following example starts the MinIO server with two server pools.
 #
-# The space delimiter indicates a seperate server pool
+# The space delimiter indicates a separate server pool
 #
 # The second set of hostnames and volumes is the newly added pool.
 # The pool has sufficient stripe size to meet the existing erasure code

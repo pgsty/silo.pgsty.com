@@ -845,6 +845,8 @@ MinIO Extension for controlling API operations related to [Server-Side Bucket Re
 
 Required for synchronizing [delete operations](/administration/object-management/object-delete/#minio-object-delete) as part of MinIO server-side replication.
 
+Since [SILO 20261109](/blog/release/silo-20261109/) (`7e9ee6bef`), replicated deletes honor Object Lock legal hold and retention on the target object version. A source version purge that bypassed `GOVERNANCE` retention does not bypass active retention on the target, so protected target copies refuse the replicated delete and the source retries until target protection expires or is cleared.
+
 Supports the following additional [condition keys](#minio-policy-conditions):
 
 ```shell
@@ -925,17 +927,17 @@ MinIO supports the following condition keys for all supported [actions](#minio-p
 
 Silo constructs the condition-value map from semantic request sources instead of treating every header and query parameter as interchangeable. A raw header or query parameter whose name resembles an internal condition key cannot replace a value calculated by the server or create one that the server did not provide.
 
-| Condition family | Source used for policy evaluation | Precedence and compatibility |
-| :-- | :-- | :-- |
-| Identity, time, transport, authentication, `s3:versionid`, `s3:LocationConstraint`, LDAP, and JWT values | Authenticated credentials and claims, the server clock and transport, or the API field parsed for that operation | Same-named raw headers and query parameters cannot add or replace these values. `aws:Referer` and `aws:UserAgent` remain client-controlled by definition; see the warning above for `aws:SourceIp`. |
-| `s3:signatureAge` | Elapsed milliseconds since the SigV4 presigned request's `X-Amz-Date` | Available for a SigV4 presigned request with a parseable date; the request must still pass signature verification before acceptance. A client-supplied `x-amz-signature-age` header is ignored. |
-| `s3:prefix`, `s3:delimiter`, `s3:max-keys` | Query string only | A similarly named request header is ignored for these list conditions. |
-| `s3:x-amz-content-sha256` | The single effective hash used by signature and body verification | The condition key exists only when the `X-Amz-Content-Sha256` header is present. A presigned query value takes precedence over the header; otherwise the first header value is used. A query value alone, without the header, leaves this condition key absent. |
-| `s3:x-amz-copy-source`, `s3:x-amz-metadata-directive`, and server-side-encryption keys | Their corresponding HTTP headers only | Same-named query-string fields cannot substitute for these condition values. |
-| `s3:x-amz-storage-class` | `X-Amz-Storage-Class` header, with a compatible query-string fallback | Header presence wins even when the header value is empty. The query form remains available for compatibility with existing upload paths. |
-| `s3:RequestObjectTag/<key>` and `s3:RequestObjectTagKeys` | The `X-Amz-Tagging` Header by default; an explicitly supplied effective tag set on tag-aware handlers | `PutObject` and `CreateMultipartUpload` accept the Header or their compatible query fallback, with Header presence winning. `PutObjectTagging` uses the parsed XML request body. Query tagging is ignored on unrelated operations. The historical Header fallback remains for compatibility on actions whose policy map admits these keys, so outside the three handlers above a request-tag condition does not by itself prove that the operation consumes or stores those tags. |
-| `s3:ExistingObjectTag/<key>` | Tags loaded from the stored target object | Request headers and query parameters never provide existing-object tags. The value is available only on API paths that load those tags before authorization, including object GET/HEAD and object-tagging handlers. |
-| Object-lock condition keys | Object-lock request headers or retention values calculated by the handler | Query-string fields with the same names are ignored. |
+| Condition family                                                                                         | Source used for policy evaluation                                                                                | Precedence and compatibility                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Identity, time, transport, authentication, `s3:versionid`, `s3:LocationConstraint`, LDAP, and JWT values | Authenticated credentials and claims, the server clock and transport, or the API field parsed for that operation | Same-named raw headers and query parameters cannot add or replace these values. `aws:Referer` and `aws:UserAgent` remain client-controlled by definition; see the warning above for `aws:SourceIp`.                                                                                                                                                                                                                                                                               |
+| `s3:signatureAge`                                                                                        | Elapsed milliseconds since the SigV4 presigned request's `X-Amz-Date`                                            | Available for a SigV4 presigned request with a parseable date; the request must still pass signature verification before acceptance. A client-supplied `x-amz-signature-age` header is ignored.                                                                                                                                                                                                                                                                                   |
+| `s3:prefix`, `s3:delimiter`, `s3:max-keys`                                                               | Query string only                                                                                                | A similarly named request header is ignored for these list conditions.                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `s3:x-amz-content-sha256`                                                                                | The single effective hash used by signature and body verification                                                | The condition key exists only when the `X-Amz-Content-Sha256` header is present. A presigned query value takes precedence over the header; otherwise the first header value is used. A query value alone, without the header, leaves this condition key absent.                                                                                                                                                                                                                   |
+| `s3:x-amz-copy-source`, `s3:x-amz-metadata-directive`, and server-side-encryption keys                   | Their corresponding HTTP headers only                                                                            | Same-named query-string fields cannot substitute for these condition values.                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `s3:x-amz-storage-class`                                                                                 | `X-Amz-Storage-Class` header, with a compatible query-string fallback                                            | Header presence wins even when the header value is empty. The query form remains available for compatibility with existing upload paths.                                                                                                                                                                                                                                                                                                                                          |
+| `s3:RequestObjectTag/<key>` and `s3:RequestObjectTagKeys`                                                | The `X-Amz-Tagging` Header by default; an explicitly supplied effective tag set on tag-aware handlers            | `PutObject` and `CreateMultipartUpload` accept the Header or their compatible query fallback, with Header presence winning. `PutObjectTagging` uses the parsed XML request body. Query tagging is ignored on unrelated operations. The historical Header fallback remains for compatibility on actions whose policy map admits these keys, so outside the three handlers above a request-tag condition does not by itself prove that the operation consumes or stores those tags. |
+| `s3:ExistingObjectTag/<key>`                                                                             | Tags loaded from the stored target object                                                                        | Request headers and query parameters never provide existing-object tags. The value is available only on API paths that load those tags before authorization, including object GET/HEAD and object-tagging handlers.                                                                                                                                                                                                                                                               |
+| Object-lock condition keys                                                                               | Object-lock request headers or retention values calculated by the handler                                        | Query-string fields with the same names are ignored.                                                                                                                                                                                                                                                                                                                                                                                                                              |
 {.wide .expand}
 
 If an API path does not load or calculate a listed source, that condition key is absent. Its result then follows the semantics of the policy operator in use; do not assume that merely listing a key for an action causes the server to synthesize a value.
@@ -948,35 +950,33 @@ MinIO extends the S3 standard condition keys with the following extended key:
 
 `sts:DurationSeconds`
 
-> > [!NOTE]
-> > **Added: MinIO**
-> >
-> > SERVER RELEASE.2024-02-06T21-36-22Z
->
-> Specify a time in seconds to limit the duration of *all* Security Token Service credentials generated by [AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity).
->
-> This value overrides the `DurationSeconds` field specified to the client.
->
-> For example:
->
-> ```json
-> {
->    "Version": "2012-10-17",
->    "Statement": [
->       {
->             "Effect": "Allow",
->             "Action": [
->                "sts:AssumeRoleWithWebIdentity"
->             ],
->             "Condition": {
->                "NumericLessThanEquals": {
->                   "sts:DurationSeconds": "300"
->                }
->             }
->       }
->    ]
-> }
-> ```
+> [!NOTE]
+> **Added: MinIO `RELEASE.2024-02-06T21-36-22Z`**
+
+Specify a time in seconds to limit the duration of *all* Security Token Service credentials generated by [AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity).
+
+This value overrides the `DurationSeconds` field specified by the client.
+
+For example:
+
+```json
+{
+   "Version": "2012-10-17",
+   "Statement": [
+      {
+            "Effect": "Allow",
+            "Action": [
+               "sts:AssumeRoleWithWebIdentity"
+            ],
+            "Condition": {
+               "NumericLessThanEquals": {
+                  "sts:DurationSeconds": "300"
+               }
+            }
+      }
+   ]
+}
+```
 
 <a id="minio-policy-mc-admin-actions"></a>
 
@@ -1383,7 +1383,9 @@ Allows access to the see the definition details of a running batch job.
 
 *policy-action*
 
-Allows user to begin a batch job run.
+Allows a user to start a batch job run.
+
+Since [SILO 20261109](/blog/release/silo-20261109/) ([#310](https://github.com/pgsty/silo/issues/310)), batch `expire` and `keyrotate` jobs bind to the authenticated submitter and enforce the submitter's local S3 data permissions throughout execution, while leaving Object Lock protected versions intact. Revoked or disabled submitter credentials stop the job; transient IAM or external authorization outages pause execution with bounded retry. Batch authorization skips deleted policies still named in a policy mapping, refuses a job only when a matching `Deny` statement requires request-time context unavailable during background execution, and survives metadata edits and LDAP group refreshes that retain the submitter's credential ([#318](https://github.com/pgsty/silo/issues/318)–[#320](https://github.com/pgsty/silo/issues/320)).
 
 <a id="policy-action.admin:CancelBatchJob"></a>
 
@@ -1521,11 +1523,12 @@ Each MinIO [identity provider](/administration/identity-access-management/#minio
 
 The following table contains a list of recommended policy variables for use in authorizing [MinIO-managed users](/administration/identity-access-management/minio-identity-management/#minio-internal-idp):
 
-| Variable | Description |
-| --- | --- |
-| [aws:referrer](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-referer) | The referrer in the HTTP header for the authenticated API call. |
+| Variable                                                                                                                        | Description                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| [aws:referrer](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-referer)  | The referrer in the HTTP header for the authenticated API call.  |
 | [aws:SourceIp](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-sourceip) | The source IP in the HTTP header for the authenticated API call. |
 | [aws:username](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-username) | The name of the user associated with the authenticated API call. |
+{.wide .expand}
 
 For example, the following policy uses variables to substitute the authenticated user’s username as part of the `Resource` field such that the user can only access those prefixes which match their username:
 
@@ -1561,30 +1564,30 @@ The following table contains a list of supported policy variables for use in aut
 
 Each variable corresponds to a claim returned as part of the authenticated user’s JWT token:
 
-| Variable | Description |
-| --- | --- |
-| `jwt:sub` | Returns the `sub` claim for the user. |
-| `jwt:iss` | Returns the Issuer Identifier claim from the ID token. |
-| `jwt:aud` | Returns the Audience claim from the ID token. |
-| `jwt:jti` | Returns the JWT ID claim from the client authentication information. |
-| `jwt:upn` | Returns the User Principal Name claim from the client authentication information. |
-| `jwt:name` | Returns the `name` claim for the user. |
-| `jwt:groups` | Returns the `groups` claim for the user. |
-| `jwt:given_name` | Returns the `given_name` claim for the user. |
-| `jwt:family_name` | Returns the `family_name` claim for the user. |
-| `jwt:middle_name` | Returns the `middle_name` claim for the user. |
-| `jwt:nickname` | Returns the `nickname` claim for the user. |
-| `jwt:preferred_username` | Returns the `preferred_username` claim for the user. |
-| `jwt:profile` | Returns the `profile` claim for the user. |
-| `jwt:picture` | Returns the `picture` claim for the user. |
-| `jwt:website` | Returns the `website` claim for the user. |
-| `jwt:email` | Returns the `email` claim for the user. |
-| `jwt:gender` | Returns the `gender` claim for the user. |
-| `jwt:birthdate` | Returns the `birthdate` claim for the user. |
-| `jwt:phone_number` | Returns the `phone_number` claim for the user. |
-| `jwt:address` | Returns the `address` claim for the user. |
-| `jwt:scope` | Returns the `scope` claim for the user. |
-| `jwt:client_id` | Returns the `client_id` claim for the user. |
+| Variable                 | Description                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `jwt:sub`                | Returns the `sub` claim for the user.                                             |
+| `jwt:iss`                | Returns the Issuer Identifier claim from the ID token.                            |
+| `jwt:aud`                | Returns the Audience claim from the ID token.                                     |
+| `jwt:jti`                | Returns the JWT ID claim from the client authentication information.              |
+| `jwt:upn`                | Returns the User Principal Name claim from the client authentication information. |
+| `jwt:name`               | Returns the `name` claim for the user.                                            |
+| `jwt:groups`             | Returns the `groups` claim for the user.                                          |
+| `jwt:given_name`         | Returns the `given_name` claim for the user.                                      |
+| `jwt:family_name`        | Returns the `family_name` claim for the user.                                     |
+| `jwt:middle_name`        | Returns the `middle_name` claim for the user.                                     |
+| `jwt:nickname`           | Returns the `nickname` claim for the user.                                        |
+| `jwt:preferred_username` | Returns the `preferred_username` claim for the user.                              |
+| `jwt:profile`            | Returns the `profile` claim for the user.                                         |
+| `jwt:picture`            | Returns the `picture` claim for the user.                                         |
+| `jwt:website`            | Returns the `website` claim for the user.                                         |
+| `jwt:email`              | Returns the `email` claim for the user.                                           |
+| `jwt:gender`             | Returns the `gender` claim for the user.                                          |
+| `jwt:birthdate`          | Returns the `birthdate` claim for the user.                                       |
+| `jwt:phone_number`       | Returns the `phone_number` claim for the user.                                    |
+| `jwt:address`            | Returns the `address` claim for the user.                                         |
+| `jwt:scope`              | Returns the `scope` claim for the user.                                           |
+| `jwt:client_id`          | Returns the `client_id` claim for the user.                                       |
 {.wide .expand}
 
 See the [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) document for more information on these scopes. Your OIDC provider of choice may have more specific documentation.

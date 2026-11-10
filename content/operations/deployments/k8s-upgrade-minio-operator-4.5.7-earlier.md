@@ -11,13 +11,13 @@ upstream_modified: true
 
 MinIO supports the following upgrade paths for older versions of the MinIO Operator:
 
-| Current Version | Supported Upgrade Target |
-| --- | --- |
-| 5.0.15 or later | 7.1.1 |
-| 5.0.0 to 5.0.14 | 5.0.15 |
-| 4.2.3 to 4.5.7 | 4.5.8 |
-| 4.0.0 through 4.2.2 | 4.2.3 |
-| 3.X.X | 4.2.2 |
+| Current Version     | Supported Upgrade Target |
+| ------------------- | ------------------------ |
+| 5.0.15 or later     | 7.1.1                    |
+| 5.0.0 to 5.0.14     | 5.0.15                   |
+| 4.2.3 to 4.5.7      | 4.5.8                    |
+| 4.0.0 through 4.2.2 | 4.2.3                    |
+| 3.X.X               | 4.2.2                    |
 
 To upgrade from Operator to 7.1.1 from version 4.5.7 or earlier, you must first upgrade to version 4.5.8, then upgrade to 5.0.15. Depending on your current version, you may need to do one or more intermediate upgrades to reach v4.5.8.
 

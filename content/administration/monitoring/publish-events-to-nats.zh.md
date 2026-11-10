@@ -18,17 +18,25 @@ MinIO 支持将 [存储桶通知](/zh/administration/monitoring/bucket-notificat
 >
 > 相关的 MinIO 配置选项和环境变量也已弃用。
 
-## 向 MinIO 部署添加 NATS 端点 {#minio-nats}
+<a id="minio-nats" data-td-print-local></a>
+
+## 向 MinIO 部署添加 NATS 端点 {#add-a-nats-endpoint-to-a-minio-deployment}
 
 以下过程会在 MinIO 部署中添加一个新的 NATS 服务端点，以支持 [存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
 
-### 前提条件 {#id2}
+### 前提条件 {#prerequisites}
 
-#### MinIO `mc` 命令行工具 {#minio-mc}
+<a id="minio-mc" data-td-print-local></a>
+
+#### MinIO `mc` 命令行工具 {#minio-mc-command-line-tool}
 
 此过程中的某些操作需要使用 [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具。 安装说明请参见 `mc` [快速入门](/zh/reference/minio-mc/#mc-install)。
 
-### 1) 将 NATS 端点添加到 MinIO {#nats-minio}
+[SILO 20261109](/zh/blog/release/silo-20261109/) 将 `github.com/nats-io/jwt/v2` 升级至 `v2.8.3`、将 `github.com/nats-io/nkeys` 升级至 `v0.4.17`（并已针对 `nats-server v2.15.2` 完成集成验证），在解析 NATS 凭据时拒绝单位元点（identity-point）与小阶（small-order）Ed25519 公钥。
+
+<a id="nats-minio" data-td-print-local></a>
+
+### 1) 将 NATS 端点添加到 MinIO {#add-the-nats-endpoint-to-minio}
 
 你可以通过环境变量 *或* 运行时配置设置来配置新的 NATS 服务端点。
 
@@ -38,49 +46,47 @@ MinIO 支持使用 [环境变量](/zh/reference/minio-server/settings/notificati
 
 以下示例代码设置了与配置 NATS 服务端点相关的 *全部* 环境变量。 最低 *必需* 的变量是 [`MINIO_NOTIFY_NATS_ADDRESS`](/zh/reference/minio-server/settings/notifications/nats/#envvar.MINIO_NOTIFY_NATS_ADDRESS) 和 [`MINIO_NOTIFY_NATS_SUBJECT`](/zh/reference/minio-server/settings/notifications/nats/#envvar.MINIO_NOTIFY_NATS_SUBJECT)：
 
-> [!NOTE]
-> **Windows**
->
-> ```shell
->    set MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
->    set MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
-> ```
+**Windows**
 
-> [!NOTE]
-> **Linux 与 macOS**
->
-> ```shell
->    export MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
->    export MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
-> ```
+```shell
+set MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
+set MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
+```
+
+**Linux 与 macOS**
+
+```shell
+export MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
+export MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
+```
 
 - 将 `<IDENTIFIER>` 替换为该 NATS 服务端点的唯一描述性字符串。 对新目标服务端点相关的所有环境变量使用相同的 `<IDENTIFIER>` 值。 以下示例假设标识符为 `PRIMARY`。
 
@@ -122,7 +128,9 @@ mc admin config set ALIAS/ notify_nats:IDENTIFIER \
 {{< /tab >}}
 {{< /tabs >}}
 
-### 1) 重启 MinIO 部署 {#minio}
+<a id="minio" data-td-print-local></a>
+
+### 1) 重启 MinIO 部署 {#restart-the-minio-deployment}
 
 你必须重启 MinIO 部署以应用配置更改。 使用 [`mc admin service restart`](/zh/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) 命令重启部署。
 
@@ -170,7 +178,7 @@ SQS ARNs: arn:minio:sqs::primary:nats
 >
 >    该命令会返回用于通知的 ARN，例如 `arn:minio:sqs::primary:nats`。
 
-### 3) 将 NATS 端点作为目标来配置存储桶通知 {#id3}
+### 3) 将 NATS 端点作为目标来配置存储桶通知 {#configure-bucket-notifications-using-the-nats-endpoint-as-a-target}
 
 使用 [`mc event add`](/zh/reference/minio-mc/mc-event-add/#command-mc.event.add) 命令添加新的存储桶通知事件，并将已配置的 NATS 服务作为目标：
 
@@ -189,7 +197,7 @@ mc event add ALIAS/BUCKET arn:minio:sqs::primary:nats \
 mc event ls ALIAS/BUCKET arn:minio:sqs::primary:nats
 ```
 
-### 4) 验证已配置的事件 {#id4}
+### 4) 验证已配置的事件 {#validate-the-configured-events}
 
 对已配置新事件的存储桶执行某个操作，并检查 NATS 服务中的通知数据。 所需操作取决于在配置存储桶通知时指定了哪些 [`事件`](/zh/reference/minio-mc/mc-event-add/#mc.event.add.-event)。
 
@@ -199,17 +207,17 @@ mc event ls ALIAS/BUCKET arn:minio:sqs::primary:nats
 mc cp ~/data/new-object.txt ALIAS/BUCKET
 ```
 
-## 更新 MinIO 部署中的 NATS 端点 {#id5}
+## 更新 MinIO 部署中的 NATS 端点 {#update-an-nats-endpoint-in-a-minio-deployment}
 
 以下过程会更新 MinIO 部署中现有的 NATS 服务端点，以支持 [存储桶通知](/zh/administration/monitoring/bucket-notifications/#minio-bucket-notifications)。
 
-### 前提条件 {#id6}
+### 前提条件 {#id1}
 
-#### MinIO `mc` 命令行工具 {#id7}
+#### MinIO `mc` 命令行工具 {#id2}
 
 此过程中的某些操作需要使用 [`mc`](/zh/reference/minio-mc/#command-mc) 命令行工具。 安装说明请参见 `mc` [快速入门](/zh/reference/minio-mc/#mc-install)。
 
-### 1) 列出部署中已配置的 NATS 端点 {#id8}
+### 1) 列出部署中已配置的 NATS 端点 {#list-configured-nats-endpoints-in-the-deployment}
 
 使用 [`mc admin config get`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.get) 命令列出部署中当前配置的 NATS 服务端点：
 
@@ -230,7 +238,7 @@ notify_nats:secondary password="yoursecret" subject="" address="nats-endpoint.ex
 
 记下你要更新的 NATS 服务端点标识符，以便在下一步中使用。
 
-### 2) 更新 NATS 端点 {#id9}
+### 2) 更新 NATS 端点 {#update-the-nats-endpoint}
 
 使用 [`mc admin config set`](/zh/reference/minio-mc-admin/mc-admin-config/#mc.admin.config.set) 命令为 NATS 服务端点设置新配置：
 
@@ -255,7 +263,7 @@ mc admin config set ALIAS/ notify_nats:IDENTIFIER \
 
 [`notify_nats address`](/zh/reference/minio-server/settings/notifications/nats/#mc-conf.notify_nats.address) 配置设置是 NATS 服务端点的 *最低* 必需项。 所有其他配置设置均为 *可选*。 有关 NATS 配置设置的完整列表，请参见 [NATS 通知设置](/zh/reference/minio-server/settings/notifications/nats/#minio-server-config-bucket-notification-nats)。
 
-### 3) 重启 MinIO 部署 {#id10}
+### 3) 重启 MinIO 部署 {#id3}
 
 你必须重启 MinIO 部署以应用配置更改。 使用 [`mc admin service restart`](/zh/reference/minio-mc-admin/mc-admin-service/#mc.admin.service.restart) 命令重启部署。
 
@@ -271,7 +279,7 @@ mc admin service restart ALIAS
 SQS ARNs: arn:minio:sqs::primary:nats
 ```
 
-### 4) 验证更改 {#id11}
+### 4) 验证更改 {#validate-the-changes}
 
 对使用更新后 NATS 服务端点进行事件配置的存储桶执行某个操作， 并检查 NATS 服务中的通知数据。 所需操作取决于在配置存储桶通知时指定了哪些 [`事件`](/zh/reference/minio-mc/mc-event-add/#mc.event.add.-event)。
 

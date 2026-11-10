@@ -6,7 +6,13 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **Console 2.5.1 updates:** Toggling a group's enabled/disabled status preserves its existing members (passing an explicit member array still replaces them); OIDC string-array group claims are properly parsed; session cookies retain the `Secure` attribute under configured HTTPS or a trusted TLS proxy; newly created access keys export clean UTF-8 JSON credentials; and the built-in policy **Reset** action requires [Server 20261026](/blog/release/silo-20261026/#server-20261026). See the [Console 2.5.1 release notes](/blog/release/console-2.5.1/).
+> [!NOTE]
+> **SILO 20261109 and Console v2.7.0 updates:**
+> - **Console root login with LDAP ([#272](https://github.com/pgsty/silo/issues/272)):** The `root` user can sign in to the embedded Console when Active Directory / LDAP is enabled.
+> - **Long-DN LDAP login on erasure sets ([#271](https://github.com/pgsty/silo/issues/271)):** LDAP users whose normalized DN exceeds the 255-byte single-component limit can sign in on multi-drive erasure-set deployments.
+> - **Persisted IAM mutations and complete policy loads ([#316](https://github.com/pgsty/silo/issues/316), [#317](https://github.com/pgsty/silo/issues/317), [#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)):** IAM user, group, policy, LDAP group refresh, and service-account edits apply directly to stored records, and IAM refuses incomplete policy loads while keeping cached authentication active during lazy reloads so stale nodes cannot restore old credentials or deleted identities.
+> - **Arabic RTL field controls ([Console v2.7.0](/blog/release/console-2.7.0/)):** Password reveal buttons and field unit selectors stay beside input text instead of overlapping it in Arabic right-to-left layout.
+> - **Earlier Console 2.5.1 / Server 20261026 updates:** Toggling group status preserves existing members, OIDC string-array group claims are parsed, session cookies retain `Secure` under HTTPS or a trusted TLS proxy, newly created access keys export clean UTF-8 JSON credentials, and built-in policy **Reset** requires [SILO 20261026](/blog/release/silo-20261026/#server-20261026) or later ([Console 2.5.1](/blog/release/console-2.5.1/)).
 
 <a id="security-and-access"></a>
 <a id="minio-console-security-access"></a>
@@ -29,16 +35,16 @@ For deployments using an external identity manager such as Active Directory or a
 
 - You can select the access key row to view its custom policy, if one exists.
 
-  > You can create or modify the policy from this screen. Access key policies cannot exceed the permissions granted to the parent user.
+  You can create or modify the policy from this screen. Access key policies cannot exceed the permissions granted to the parent user.
 - You can create a new access key by selecting **Create access key**.
 
-  > The Console auto-generates an access key and password. You can select the eye <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-eye" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path></svg> icon on the password field to reveal the value. You can override these values as needed.
-  >
-  > You can set a custom policy for the access key that further restricts the permissions granted to users authenticating with that key. Select **Restrict beyond user policy** to open the policy editor and modify as necessary.
-  >
-  > Ensure you have saved the access key password to a secure location before selecting **Create** to create the access key. You cannot retrieve or reset the password value after creating the access key.
-  >
-  > To rotate credentials for an application, create a new access key and delete the old one once the application updates to using the new credentials.
+  The Console auto-generates an access key and password. Select the password reveal icon on the password field to show the value, or override these values as needed.
+
+  You can set a custom policy for the access key that further restricts the permissions granted to users authenticating with that key. Select **Restrict beyond user policy** to open the policy editor and modify as necessary.
+
+  Ensure you have saved the access key password to a secure location before selecting **Create** to create the access key. You cannot retrieve or reset the password value after creating the access key.
+
+  To rotate credentials for an application, create a new access key and delete the old one once the application updates to using the new credentials.
 
 <a id="minio-console-admin-policies"></a>
 
@@ -133,4 +139,4 @@ MinIO supports using an [Active Directory or LDAP (AD/LDAP)](/administration/ide
 
 Use the screens in this section to view, add, or edit an LDAP configuration for the deployment. MinIO only supports one active LDAP configuration.
 
-MinIO queries the Active Directory / LDAP server to verify the client-specified credentials. MinIO also performs a group lookup on the AD/LDAP server if configured to do so.
+MinIO queries the Active Directory / LDAP server to verify the client-specified credentials. MinIO also performs a group lookup on the AD/LDAP server if configured to do so. Since [SILO 20261109](/blog/release/silo-20261109/), the `root` user can sign in to the embedded Console when LDAP is enabled ([#272](https://github.com/pgsty/silo/issues/272)), and group-authorized LDAP users with long normalized DNs (> 255-byte component) can log in on multi-drive erasure-set deployments ([#271](https://github.com/pgsty/silo/issues/271)).

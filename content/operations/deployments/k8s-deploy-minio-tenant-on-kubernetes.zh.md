@@ -6,21 +6,23 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
 
 <a id="minio-tenant" data-td-print-local></a>
+<a id="deploy-a-minio-tenant"></a>
 <a id="deploy-minio-tenant-redhat-openshift"></a>
 <a id="minio-k8s-deploy-minio-tenant"></a>
 
-本步骤说明如何使用 MinIO Operator v7.1.1 管理运行 Silo 服务端镜像的 Tenant。上游 Operator 仓库已于 2026-03-20 归档并设为只读，因此这是一份冻结的兼容基线，而不是仍在维护的 Operator 路径。`MinIO Operator`、`Tenant`、`minio.min.io` API 组以及 CRD 字段名属于上游 Kubernetes 契约，因此保留原名。
+本步骤说明如何使用 MinIO Operator v7.1.1 管理运行 Silo 服务端镜像的 Tenant。上游 Operator 仓库已于 2026-03-20 归档并设为只读，因此这是一份冻结的兼容基线，而不是仍在维护的 Operator 路径。`MinIO Operator`、`Tenant`、`minio.min.io` API 组以及 CRD 字段名属于上游 Kubernetes 契约，因此保留原名。若需在不依赖 MinIO Operator 的情况下在 Kubernetes 上直接部署，可使用 SILO 维护的独立 [`helm/silo` Chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo)，默认部署 SILO 与 `mcli` `RELEASE.2026-11-09T00-00-00Z`（[#296](https://github.com/pgsty/silo/issues/296)）。
 
 下文验证过的基线会创建一个四服务端 Tenant。单节点拓扑适合本地测试，但其生产故障模型与存储布局不在本文档覆盖范围内。
 
 本文档默认你已经熟悉所有被引用的 Kubernetes 概念、工具和操作流程。 虽然本文档 *可能* 会以 best-effort 方式提供 Kubernetes 相关资源的配置或部署指导，但它不能替代官方 [Kubernetes Documentation](https://kubernetes.io/docs/)。
 
 <a id="minio-k8s-deploy-minio-tenant-security"></a>
+<a id="kustomize-minio-tenant" data-td-print-local></a>
 
-## 使用 Kustomize 部署 Silo Tenant {#kustomize-minio-tenant}
+## 使用 Kustomize 部署 Silo Tenant {#deploy-a-minio-tenant-using-kustomize}
 
 以下步骤使用 [MinIO Operator v7.1.1 仓库](https://github.com/minio/operator/tree/v7.1.1/examples/kustomization/base) 中的 `base` Kustomization 模板，然后将其中默认的上游 MinIO 镜像替换为固定版本的 Silo 镜像。
 
@@ -48,7 +50,7 @@ upstream_modified: true
 
    ```yaml
    spec:
-     image: docker.io/pgsty/silo:RELEASE.2026-10-26T00-00-00Z
+     image: docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z
      env:
        - name: MINIO_UPDATE
          value: "off"
@@ -201,8 +203,9 @@ upstream_modified: true
    具体说明请参阅 [连接到 Tenant](#create-tenant-connect-tenant)。
 
 <a id="create-tenant-connect-tenant"></a>
+<a id="tenant" data-td-print-local></a>
 
-## 连接到 Tenant {#tenant}
+## 连接到 Tenant {#connect-to-the-tenant}
 
 MinIO Operator 会为 Silo Tenant 创建 Kubernetes Service；这些生成名称仍属于 Operator 契约。
 
@@ -221,6 +224,7 @@ TENANT-NAMESPACE-hl                ClusterIP      None             <none>       
 
 - `minio` 服务暴露 Tenant S3 API。应用程序应通过该服务对 Silo 执行 S3 操作。
 - `*-console` 服务暴露 [Silo Console](/zh/administration/minio-console/)。管理员可以通过该服务进行浏览器管理。
+- 无头服务 `*-hl` 用于 Tenant Pod 之间的对端发现，必须保留 `publishNotReadyAddresses: true`，确保启动阶段各 Pod 能解析对端地址（见[健康检查 API](/zh/operations/monitoring/healthcheck-probe/#native-probe)）。
 
 其余服务用于支撑 Tenant 内部操作，并不面向用户或管理员直接使用。
 

@@ -34,13 +34,15 @@ To capture any new objects eligible for expiration, re-run the batch job.
 
 The batch expiration job only checks the latest or “current” version of each object against each batch expiration rule.
 
-### SILO Next-Release Lifecycle and Transitioned Versions {#silo-lifecycle}
+### SILO 20261109 Lifecycle, Permissions, and Object Lock {#silo-lifecycle}
 
-In next-release SILO builds (`pgsty/silo` `main` after `20261026`):
+In [SILO 20261109](/blog/release/silo-20261109/):
 
-- Batch `expire` revalidates the submitting principal's credentials and permissions while running (`461a7df`). Disabling, deleting, or expiring the submitter, or removing required `admin:StartBatchJob`, `s3:ListBucket`, `s3:ListBucketVersions`, or `s3:DeleteObject` permissions stops the job.
-- Temporary IAM errors, incomplete bucket listings, and pool rebalance or decommission conflicts pause and retry instead of recording a completed pass (`5ce52c5`).
-- When a `purge` rule hits a transitioned object version whose remote tier is unconfigured or unreachable (`07b89b98f`), SILO refuses that version instead of deleting only the local stub (`keysRefused`, terminal state `complete-with-skips`). See [SILO batch job lifecycle](/administration/batch-framework/#silo-lifecycle) and [Tier-free version semantics](/blog/design/tier-free-version-semantics/).
+- Submitting a batch `expire` job requires `admin:StartBatchJob`, `s3:ListBucket`, and `s3:ListBucketVersions`. During execution, SILO continuously revalidates the submitter's credential and enforces `s3:GetObject`, `s3:GetObjectVersion`, `s3:DeleteObject`, and `s3:DeleteObjectVersion` on each target version (plus `s3:GetObjectTagging` and `s3:GetObjectVersionTagging` when any rule filters by tags) ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)). Disabling, deleting, expiring, or revoking the submitter, or removing these required permissions, stops the job with `failureReason`.
+- Temporary IAM or authorization outages and incomplete bucket listings pause the job (`pausedReason`) and retry automatically instead of recording an interrupted scan as complete ([#313](https://github.com/pgsty/silo/issues/313)).
+- Version-by-version expiration (`retainVersions > 0`) preserves Object Lock retention and legal holds, leaving protected versions in place (`versionsSkippedLocked`, terminal state `complete-with-skips`) ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)).
+- Delete-all expiration (`retainVersions: 0`) deletes only versions of the expired key rather than child keys below that prefix, and refuses the entire key (`keysRefused`, terminal state `complete-with-skips`) when any version is transitioned to a remote tier or protected by Object Lock ([#297](https://github.com/pgsty/silo/issues/297)). See [SILO batch job lifecycle](/administration/batch-framework/#silo-lifecycle) and [Tier-free version semantics](/blog/design/tier-free-version-semantics/).
+- Completed `expire` jobs stay completed across server restarts, even when the submitter's credentials later expire or change ([#315](https://github.com/pgsty/silo/issues/315)).
 
 <a id="minio-batch-framework-expire-job-ref"></a>
 
@@ -140,7 +142,7 @@ expire:
   bucket: mybucket # Bucket where this job will expire matching objects from
   prefix: myprefix # (Optional) Prefix under which this job will expire objects matching the rules below.
   rules:
-    - type: object  # objects with zero ore more older versions
+    - type: object  # objects with zero or more older versions
       name: NAME # match object names that satisfy the wildcard expression.
       olderThan: 70h # match objects older than this value
       createdBefore: "2006-01-02T15:04:05.00Z" # match objects created before this date and time in RFC3339 format

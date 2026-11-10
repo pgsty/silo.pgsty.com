@@ -6,6 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="openid-connect-access-management"></a>
 <a id="openid-connect"></a>
 <a id="minio-external-identity-management-openid-access-control"></a>
 <a id="minio-external-identity-management-openid"></a>
@@ -72,12 +73,12 @@ MinIO 支持多个 OIDC 提供方配置。 但是，每个部署只能配置 **�
 3. MinIO 在 STS API 响应中返回临时凭证，形式为 access key、secret key 和 session token。这些凭证的权限与 JWT claim 中指定的策略一致。
 4. 应用程序使用 STS 端点返回的临时凭证，在 MinIO 上执行已认证的 S3 操作。
 
-SILO 提供了一个示例 Go 应用 [web-identity.go](https://github.com/pgsty/silo/blob/RELEASE.2026-10-26T00-00-00Z/docs/sts/web-identity.go)，用于处理完整登录流程。
+SILO 提供了一个示例 Go 应用 [web-identity.go](https://github.com/pgsty/silo/blob/RELEASE.2026-11-09T00-00-00Z/docs/sts/web-identity.go)，用于处理完整登录流程。
 
 > [!NOTE]
-> **OIDC JWK 密钥长度与组 Claim 解析**
+> **OIDC JWK 校验、JOSE 加固与组 Claim 解析**
 >
-> 自 `silo-pkg v3.14.2` 及 [Server 20261018](/zh/blog/release/silo-20261018/) 起，OIDC JWKS 校验会拒绝超过 4096 位的 RSA 公钥并强制限制 JWK 密钥参数范围。自 [Console v2.5.1](/zh/blog/release/silo-20261026/) 起，内嵌 Console OIDC 登录除逗号分隔字符串外，也支持解析字符串数组形式的组 claim。参见 [TLS 与 OIDC 发现](/zh/blog/design/go127-tls-oidc-discovery/)。
+> [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）通过 [`silo-pkg v3.16.0`](/zh/blog/release/pkg-3.16.0/) 升级采用 `github.com/go-jose/go-jose/v4 v4.1.9`，进一步加固 RSA 证书校验限制、JWS 签名与 JWE 接收方数量上限以及 JWE 受保护/非受保护头部处理。自 `silo-pkg v3.14.2` 及 [SILO 20261018](/zh/blog/release/silo-20261018/) 起，OIDC JWKS 校验拒绝超过 4096 位的 RSA 公钥并强制限制 JWK 密钥参数范围。内嵌 Console（SILO 20261109 内嵌 [Console v2.7.0](/zh/blog/release/console-2.7.0/)；自 [Console v2.5.1](/zh/blog/release/console-2.5.1/) 引入）除逗号分隔字符串外，也支持解析字符串数组形式的组 claim。参见 [TLS 与 OIDC 发现](/zh/blog/design/go127-tls-oidc-discovery/)。
 
 <a id="jwt-claim" data-td-print-local></a>
 
@@ -105,30 +106,30 @@ MinIO 使用 OIDC 认证流程返回的 JWT token，识别要分配给已认证�
 
 每个变量都对应认证用户 JWT token 中返回的一项 claim：
 
-| 变量 | 说明 |
-| --- | --- |
-| `jwt:sub` | 返回用户的 `sub` claim。 |
-| `jwt:iss` | 返回 ID token 中的 Issuer Identifier claim。 |
-| `jwt:aud` | 返回 ID token 中的 Audience claim。 |
-| `jwt:jti` | 返回客户端认证信息中的 JWT ID claim。 |
-| `jwt:upn` | 返回客户端认证信息中的 User Principal Name claim。 |
-| `jwt:name` | 返回用户的 `name` claim。 |
-| `jwt:groups` | 返回用户的 `groups` claim。 |
-| `jwt:given_name` | 返回用户的 `given_name` claim。 |
-| `jwt:family_name` | 返回用户的 `family_name` claim。 |
-| `jwt:middle_name` | 返回用户的 `middle_name` claim。 |
-| `jwt:nickname` | 返回用户的 `nickname` claim。 |
-| `jwt:preferred_username` | 返回用户的 `preferred_username` claim。 |
-| `jwt:profile` | 返回用户的 `profile` claim。 |
-| `jwt:picture` | 返回用户的 `picture` claim。 |
-| `jwt:website` | 返回用户的 `website` claim。 |
-| `jwt:email` | 返回用户的 `email` claim。 |
-| `jwt:gender` | 返回用户的 `gender` claim。 |
-| `jwt:birthdate` | 返回用户的 `birthdate` claim。 |
-| `jwt:phone_number` | 返回用户的 `phone_number` claim。 |
-| `jwt:address` | 返回用户的 `address` claim。 |
-| `jwt:scope` | 返回用户的 `scope` claim。 |
-| `jwt:client_id` | 返回用户的 `client_id` claim。 |
+| 变量                     | 说明                                               |
+| ------------------------ | -------------------------------------------------- |
+| `jwt:sub`                | 返回用户的 `sub` claim。                           |
+| `jwt:iss`                | 返回 ID token 中的 Issuer Identifier claim。       |
+| `jwt:aud`                | 返回 ID token 中的 Audience claim。                |
+| `jwt:jti`                | 返回客户端认证信息中的 JWT ID claim。              |
+| `jwt:upn`                | 返回客户端认证信息中的 User Principal Name claim。 |
+| `jwt:name`               | 返回用户的 `name` claim。                          |
+| `jwt:groups`             | 返回用户的 `groups` claim。                        |
+| `jwt:given_name`         | 返回用户的 `given_name` claim。                    |
+| `jwt:family_name`        | 返回用户的 `family_name` claim。                   |
+| `jwt:middle_name`        | 返回用户的 `middle_name` claim。                   |
+| `jwt:nickname`           | 返回用户的 `nickname` claim。                      |
+| `jwt:preferred_username` | 返回用户的 `preferred_username` claim。            |
+| `jwt:profile`            | 返回用户的 `profile` claim。                       |
+| `jwt:picture`            | 返回用户的 `picture` claim。                       |
+| `jwt:website`            | 返回用户的 `website` claim。                       |
+| `jwt:email`              | 返回用户的 `email` claim。                         |
+| `jwt:gender`             | 返回用户的 `gender` claim。                        |
+| `jwt:birthdate`          | 返回用户的 `birthdate` claim。                     |
+| `jwt:phone_number`       | 返回用户的 `phone_number` claim。                  |
+| `jwt:address`            | 返回用户的 `address` claim。                       |
+| `jwt:scope`              | 返回用户的 `scope` claim。                         |
+| `jwt:client_id`          | 返回用户的 `client_id` claim。                     |
 {.wide .expand}
 
 关于这些 scope 的更多信息，请参阅 [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html) 文档。 你所选的 OIDC 提供方也可能有更具体的补充文档。

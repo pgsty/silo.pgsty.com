@@ -6,23 +6,28 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
 
 <a id="helm-charts-minio-tenant"></a>
+<a id="deploy-a-minio-tenant-with-helm-charts"></a>
 <a id="deploy-tenant-helm"></a>
 
-## 概览 {#id2}
+<a id="id2" data-td-print-local></a>
 
-Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm chart](https://helm.sh/docs/topics/charts/) 是一组定义部署细节的 YAML 文件、模板和其他文件。 以下步骤使用 Helm Chart 部署由 MinIO Operator 管理的 Tenant。
+## 概览 {#overview}
 
-本步骤要求 Kubernetes 集群中已存在一个有效的 [Operator](/zh/operations/deployments/kubernetes/#deploy-operator-kubernetes) 部署。 你不能使用 MinIO Operator Tenant chart 在脱离 Operator 的情况下独立部署 Tenant。
+Helm 用于在 Kubernetes 集群上自动部署应用。[Helm chart](https://helm.sh/docs/topics/charts/) 将部署所需的 YAML 模板与默认配置打包在一起。以下步骤使用已归档的 MinIO Operator Tenant Helm Chart（`v7.1.1`）部署由 MinIO Operator 管理的 Tenant。
+
+本步骤要求 Kubernetes 集群中已部署有效的 [Operator](/zh/operations/deployments/kubernetes/#deploy-operator-kubernetes)；不能脱离 Operator 单独使用 MinIO Operator Tenant Chart。若需在不安装 MinIO Operator 的情况下直接部署 Kubernetes 集群，可使用 SILO 维护的独立 [`helm/silo` Chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo)，该版本默认部署 `pgsty/silo:RELEASE.2026-11-09T00-00-00Z` 与 `pgsty/mc:RELEASE.2026-11-09T00-00-00Z`（[#296](https://github.com/pgsty/silo/issues/296)）。
 
 > [!WARNING]
 > **重要**
 >
-> MinIO Operator Tenant Chart 与服务端仓库中的旧社区 [MinIO Chart](https://github.com/minio/minio/tree/master/helm/minio) *不同*。本指南使用 Operator Tenant Chart，因为它提供明确的 Tenant 镜像覆盖。上游 Operator 仓库已于 2026 年 3 月 20 日归档，因此本文固定其最终 `v7.1.1` Chart，仅作为冻结的兼容基线；Silo 不继承上游厂商的支持承诺。
+> MinIO Operator Tenant Chart 与 SILO 独立的 [`helm/silo` Chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo)（继承自服务端仓库原 `helm/minio` Chart）*不同*。对 `helm/silo` 使用 `helm upgrade --reuse-values` 升级时，Helm 会保留此前存储的 `image.tag`，因此必须显式传入 `--set image.tag=RELEASE.2026-11-09T00-00-00Z`。在本指南的 Operator 路线中，上游 Operator 仓库已于 2026 年 3 月 20 日归档，因此本文固定其最终 `v7.1.1` Chart 作为冻结兼容基线，并将 `tenant.image` 覆盖为 `docker.io/pgsty/silo`；Silo 不继承上游厂商的支持承诺。
 
-## 前提条件 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 前提条件 {#prerequisites}
 
 要使用 Helm 安装 MinIO Tenant，你必须满足以下要求：
 
@@ -38,13 +43,16 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 
 本步骤默认你已经熟悉相关 Kubernetes 概念和工具。 虽然本文档可能会以 best-effort 方式提供 Kubernetes 相关资源的配置或部署指导，但它不能替代官方 [Kubernetes Documentation](https://kubernetes.io/docs/)。
 
-### 命名空间 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 命名空间 {#namespace}
 
 租户必须使用自己的命名空间，不能与其他租户共享命名空间。 此外，MinIO 强烈建议为租户使用专用命名空间，且该命名空间内不要运行其他应用。
 
 <a id="id5" data-td-print-local></a>
+<a id="deploy-tenant-helm-repo"></a>
 
-## 使用 Helm Charts 部署 Silo Tenant {#deploy-tenant-helm-repo}
+## 使用 Helm Charts 部署 Silo Tenant {#deploy-a-minio-tenant-using-helm-charts}
 
 以下步骤使用 MinIO Operator Chart Repository 部署 MinIO Tenant。 与 [本地 chart 安装](#deploy-tenant-helm-local) 相比，这种方式的安装路径更简单。
 
@@ -92,7 +100,7 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
    tenant:
      image:
        repository: docker.io/pgsty/silo
-       tag: RELEASE.2026-10-26T00-00-00Z
+       tag: RELEASE.2026-11-09T00-00-00Z
        pullPolicy: IfNotPresent
      env:
        - name: MINIO_UPDATE
@@ -240,8 +248,9 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
    有关连接 Tenant 的更多文档，请参阅 [连接到 Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#create-tenant-connect-tenant)。
 
 <a id="deploy-tenant-helm-local"></a>
+<a id="helm-chart-tenant" data-td-print-local></a>
 
-## 使用本地 Helm Chart 部署 Tenant {#helm-chart-tenant}
+## 使用本地 Helm Chart 部署 Tenant {#deploy-a-tenant-using-a-local-helm-chart}
 
 以下步骤使用 Helm Charts 的本地副本部署 Tenant。 与 [基于仓库的安装](#deploy-tenant-helm-repo) 相比，这种方式可能更便于在安装前完成 Tenant 预配置。
 
@@ -302,12 +311,13 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 
    MinIO Tenant CRD 提供了以下字段，你可以通过它们配置租户的 TLS 网络加密：
 
-   | 字段 | 描述 |
-   | --- | --- |
-   | `tenant.certificate.requestAutoCert` | 启用或禁用 MinIO [自动 TLS 证书生成](/zh/operations/network-encryption/#minio-tls) |
-   | `tenant.certificate.certConfig` | 控制 [自动 TLS](/zh/operations/network-encryption/#minio-tls) 的设置。 需要 `spec.requestAutoCert: true` |
-   | `tenant.certificate.externalCertSecret` | 指定一个或多个类型为 `kubernetes.io/tls` 或 `cert-manager` 的 Kubernetes secret。 MinIO 会基于主机名（Server Name Indication）使用这些证书执行 TLS 握手。 |
-   | `tenant.certificate.externalCACertSecret` | 指定一个或多个类型为 `kubernetes.io/tls` 的 Kubernetes secret，其中包含 Tenant 为允许客户端 TLS 连接而必须信任的 Certificate Authority (CA) 证书链。 |
+   | 字段                                      | 描述                                                                                                                                                      |
+   | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `tenant.certificate.requestAutoCert`      | 启用或禁用 MinIO [自动 TLS 证书生成](/zh/operations/network-encryption/#minio-tls)                                                                        |
+   | `tenant.certificate.certConfig`           | 控制 [自动 TLS](/zh/operations/network-encryption/#minio-tls) 的设置。 需要 `spec.requestAutoCert: true`                                                  |
+   | `tenant.certificate.externalCertSecret`   | 指定一个或多个类型为 `kubernetes.io/tls` 或 `cert-manager` 的 Kubernetes secret。 MinIO 会基于主机名（Server Name Indication）使用这些证书执行 TLS 握手。 |
+   | `tenant.certificate.externalCACertSecret` | 指定一个或多个类型为 `kubernetes.io/tls` 的 Kubernetes secret，其中包含 Tenant 为允许客户端 TLS 连接而必须信任的 Certificate Authority (CA) 证书链。      |
+   {.wide .expand}
 
 5. 配置 Silo 环境变量
 
@@ -349,8 +359,8 @@ Helm 是一个用于将应用自动部署到 Kubernetes 集群的工具。 [Helm
 
    你可以使用 [`mc mb`](/zh/reference/minio-mc/mc-mb/#command-mc.mb) 在 Tenant 上创建存储桶：
 
-   > ```shell
-   > mc mb myminio/mybucket --insecure
-   > ```
+   ```shell
+   mc mb myminio/mybucket --insecure
+   ```
 
 有关连接 Tenant 的更多文档，请参阅 [连接到 Tenant](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#create-tenant-connect-tenant)。

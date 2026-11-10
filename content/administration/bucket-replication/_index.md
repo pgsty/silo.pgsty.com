@@ -7,22 +7,17 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**20261026 release change:** Multipart replication now preserves the `FULL_OBJECT` checksum type for composite CRC algorithms (earlier versions omitted the header, causing the destination to initialize a `COMPOSITE` multipart upload and reject the full-object CRC at completion). This fix is in the [Server 20261026](/blog/release/silo-20261026/#server-20261026); after upgrading the sending Server, verify pending/failed replicas and destination checksums.
+**SILO 20261109 release changes:** [SILO 20261109](/blog/release/silo-20261109/) preserves target Object Lock retention and legal hold on replicated deletes (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)), stops replicating lifecycle-created delete markers and version purges to match AWS S3 semantics (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), and prevents replication worker metrics from panicking when the replication pool is absent while retaining historical averages and peak counts (commit [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)).
+
+**20261026 release change:** Multipart replication now preserves the `FULL_OBJECT` checksum type for composite CRC algorithms (earlier versions omitted the header, causing the destination to initialize a `COMPOSITE` multipart upload and reject the full-object CRC at completion). This fix is in [Server 20261026](/blog/release/silo-20261026/#server-20261026); after upgrading the sending Server, verify pending/failed replicas and destination checksums.
 
 <a id="bucket-replication"></a>
 <a id="minio-bucket-replication"></a>
 
 MinIO supports server-side and client-side replication of objects between source and destination buckets.
 
-**[Server-Side Bucket Replication](#minio-bucket-replication-serverside)**
-
-> Configure per-bucket rules for automatically synchronizing objects between MinIO deployments. The deployment where you configure the bucket replication rule acts as the “source” while the configured remote deployment acts as the “target”. MinIO applies rules as part of object write operations (e.g. `PUT`) and automatically synchronizes new objects *and* object mutations, such as new object versions or changes to object metadata.
->
-> MinIO server-side bucket replication only supports a MinIO cluster on an identical release for the remote replication target.
-
-**Client-side Bucket Replication**
-
-> Use the command process to synchronize objects between buckets within the same S3-compatible cluster *or* between two independent S3-compatible clusters. Client-side replication using [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) supports MinIO-to-S3 and similar replication configurations.
+- **[Server-Side Bucket Replication](#minio-bucket-replication-serverside):** Configure per-bucket rules to synchronize objects automatically between deployments. The deployment where you configure the bucket replication rule acts as the “source” while the configured remote deployment acts as the “target”. SILO applies rules during object write operations (for example, `PUT`) and synchronizes new objects and object mutations, including new object versions and metadata updates. Server-side bucket replication requires an identical release on the source and remote target clusters.
+- **Client-Side Bucket Replication:** Use [`mc mirror`](/reference/minio-mc/mc-mirror/#command-mc.mirror) to synchronize objects between buckets within the same S3-compatible cluster or between two independent S3-compatible clusters, including SILO-to-S3 configurations.
 
 > [!NOTE]
 > **Bucket vs Site Replication**
@@ -77,7 +72,9 @@ For delete marker replication, MinIO begins the replication process after a dele
 
 For replicating the deletion of a specific object version, MinIO marks the object version as `PENDING` until replication completes. Once the remote target deletes that object version, MinIO deletes the object on the source. While this process ensures near-synchronized version deletion, it may result in listing operations returning the object version after the initial delete operation. MinIO uses the `X-Minio-Replication-Delete-Status` for tracking delete version replication status.
 
-MinIO only replicates explicit client-driven delete operations. MinIO does *not* replicate objects deleted from the application of [lifecycle management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration). For [active-active](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) configurations, set the same expiration rules on *all* of the replication buckets to ensure consistent application of object expiration.
+In [SILO 20261109](/blog/release/silo-20261109/), replicated deletes preserve the target's Object Lock legal hold and retention (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)). A source purge that bypassed `GOVERNANCE` retention does not grant a bypass on the target; if the target version still carries active retention or a legal hold, the target refuses the replicated purge and the source retries.
+
+SILO replicates only explicit client-driven delete operations. Lifecycle-created delete markers and version purges from [lifecycle management expiration rules](/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration) are **not** replicated (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), matching AWS S3 semantics. Configure expiration rules independently on source and target buckets—and identically across all buckets in [active-active](/administration/bucket-replication/enable-server-side-two-way-bucket-replication/#minio-bucket-replication-serverside-twoway) configurations—when replicas require consistent expiration.
 
 > [!DETAILS]- MinIO Trims Empty Object Prefixes on Source and Remote Bucket
 > If a delete operation removes the last object in a bucket prefix, MinIO recursively removes each empty part of the prefix up to the bucket root. MinIO only applies the recursive removal to prefixes created *implicitly* as part of object write operations - that is, the prefix was not created using an explicit directory creation command such as [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb).
@@ -92,9 +89,9 @@ MinIO only replicates explicit client-driven delete operations. MinIO does *not*
 >
 > `photos/NYE21` is the *only* prefix explicitly created using [`mc mb`](/reference/minio-mc/mc-mb/#command-mc.mb). All other prefixes were *implicitly* created as part of writing the object located at that prefix.
 >
-> - A command removes `myphoto.jpg`. MinIO automatically trims the empty `/janaury` prefix.
+> - A command removes `myphoto.jpg`. MinIO automatically trims the empty `/january` prefix.
 > - A command then removes the `myotherphoto.jpg`. MinIO automatically trims the `/february` prefix *and* the now-empty `/2021` prefix.
-> - A command removes the `NewYears.jpg` object. MinIO leaves the `/NYE21` prefix remains in place since it was *explicitly* created.
+> - A command removes the `NewYears.jpg` object. MinIO leaves the `/NYE21` prefix in place since it was *explicitly* created.
 
 <a id="minio-replication-behavior-existing-objects"></a>
 
@@ -119,7 +116,7 @@ With asynchronous replication, MinIO completes the originating `PUT` operation *
 
 With synchronous replication, MinIO attempts to replicate the object *prior* to completing the originating `PUT` operation. MinIO returns a successful `PUT` operation whether or not the replication attempt succeeds. This reduces the risk of slow write operations at a possible cost of stale or missing objects on the remote location.
 
-You must explicitly enable synchronous replication when configuring the remote target target using the [`mc admin bucket remote add`](/reference/deprecated/mc-admin-bucket-remote/#mc.admin.bucket.remote.add) command with the [`add`](/reference/deprecated/mc-admin-bucket-remote/#mc.admin.bucket.remote.add) flag.
+You must explicitly enable synchronous replication when configuring the remote target using the [`mc admin bucket remote add`](/reference/deprecated/mc-admin-bucket-remote/#mc.admin.bucket.remote.add) command with the [`add`](/reference/deprecated/mc-admin-bucket-remote/#mc.admin.bucket.remote.add) flag.
 
 ### Replication Internals {#replication-internals}
 
@@ -129,54 +126,23 @@ This section documents internal replication behavior and is not critical to usin
 
 #### Replication Process {#replication-process}
 
-MinIO uses a replication queuing system with multiple concurrent replication workers operating on that queue. MinIO continuously works to replicate and remove objects from the queue while scanning for new unreplicated objects to add to the queue.
+MinIO uses a replication queuing system with multiple concurrent replication workers operating on that queue. MinIO continuously works to replicate and remove objects from the queue while scanning for new unreplicated objects to add to the queue. In [SILO 20261109](/blog/release/silo-20261109/), replication worker metrics no longer panic when the replication worker pool is absent and continue to retain historical averages and peak counts (commit [`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf3)).
 
 > [!NOTE]
-> **Changed: RELEASE.2022-07-18T17-49-40Z**
+> **Queue retry and requeue behavior**
 >
-> MinIO queues failed replication operations and retries those operations up to three (3) times.
->
-> MinIO dequeues replication operations that fail to replicate after three attempts. The scanner can pick up those affected objects at a later time and requeue them for replication.
-
-> [!NOTE]
-> **Changed: RELEASE.2022-08-11T04-37-28Z**
->
-> Failed or pending replications requeue automatically when performing a list or any `GET` or `HEAD` API method. For example, using [`mc stat`](/reference/minio-mc/mc-stat/#command-mc.stat), [`mc cat`](/reference/minio-mc/mc-cat/#command-mc.cat), or [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) after a remote location comes back online requeues replication.
+> - **Retry limit (`RELEASE.2022-07-18T17-49-40Z`):** SILO queues failed replication operations and retries each operation up to three (3) times before dequeuing it. The scanner later picks up affected objects and requeues them for replication.
+> - **Read-triggered requeue (`RELEASE.2022-08-11T04-37-28Z`):** Failed or pending replications requeue automatically during list, `GET`, or `HEAD` requests (for example, running [`mc stat`](/reference/minio-mc/mc-stat/#command-mc.stat), [`mc cat`](/reference/minio-mc/mc-cat/#command-mc.cat), or [`mc ls`](/reference/minio-mc/mc-ls/#command-mc.ls) after a remote target returns online).
 
 MinIO sets the `X-Amz-Replication-Status` metadata field according to the replication state of the object:
 
-<table>
-  <thead>
-    <tr>
-      <th><p>Replication State</p></th>
-      <th><p>Description</p></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><p><code>PENDING</code></p></td>
-      <td><p>The object has not yet been replicated. MinIO applies this state
-if the object meets one of the configured replication rules on the
-bucket. MinIO continuously scans for <code>PENDING</code> objects not yet in the
-replication queue and adds them to the queue as space is available.</p><p>For multi-site replication, objects remain
-in the <code>PENDING</code> state until replicated to <em>all</em> configured
-remotes for that bucket or bucket prefix.</p></td>
-    </tr>
-    <tr>
-      <td><p><code>COMPLETED</code></p></td>
-      <td><p>The object has successfully replicated to the remote cluster.</p></td>
-    </tr>
-    <tr>
-      <td><p><code>FAILED</code></p></td>
-      <td><p>The object failed to replicate to the remote cluster.</p><p>MinIO continuously scans for <code>FAILED</code> objects not yet in the
-replication queue and adds them to the queue as space is available.</p></td>
-    </tr>
-    <tr>
-      <td><p><code>REPLICA</code></p></td>
-      <td><p>The object is itself a replica from a remote source.</p></td>
-    </tr>
-  </tbody>
-</table>
+| Replication State | Description                                                                                                                                                                                                                                                                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PENDING`         | The object has not yet replicated. SILO sets this state when the object matches a configured replication rule on the bucket, scans for `PENDING` objects not yet in the queue, and enqueues them as space is available. For multi-site replication, objects remain `PENDING` until replicated to *all* configured remotes for that bucket or prefix. |
+| `COMPLETED`       | The object replicated to the remote cluster.                                                                                                                                                                                                                                                                                                         |
+| `FAILED`          | The object failed to replicate to the remote cluster. SILO scans for `FAILED` objects not yet in the replication queue and enqueues them as space is available.                                                                                                                                                                                      |
+| `REPLICA`         | The object is a replica received from a remote source.                                                                                                                                                                                                                                                                                               |
+{.wide .expand}
 
 The replication process generally has one of the following flows:
 

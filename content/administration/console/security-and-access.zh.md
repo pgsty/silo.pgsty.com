@@ -6,8 +6,15 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-> **Console 2.5.1 更新：** 单独切换用户组启用/禁用状态时保留现有成员列表（显式传入成员数组时仍替换成员）；支持解析 OIDC 字符串数组形式的组声明（group claims）；在配置 HTTPS 或可信 TLS 反向代理后自动为会话 Cookie 启用 `Secure` 属性；新创建的访问密钥支持导出标准 UTF-8 JSON 凭据文件；内置策略的 **Reset** 按钮需配合 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 使用。详见 [Console 2.5.1 发布说明](/zh/blog/release/console-2.5.1/)。
+> [!NOTE]
+> **SILO 20261109 与 Console v2.7.0 更新：**
+> - **启用 LDAP 时的 Console root 登录（[#272](https://github.com/pgsty/silo/issues/272)）：** 启用 Active Directory / LDAP 后，`root` 用户仍可登录内嵌 Console。
+> - **多盘纠删集上的长 DN LDAP 登录（[#271](https://github.com/pgsty/silo/issues/271)）：** 规范化 DN 单段超过 255 字节的 LDAP 用户可在多盘纠删码集合部署上正常登录。
+> - **持久化 IAM 变更与完整策略加载（[#316](https://github.com/pgsty/silo/issues/316)、[#317](https://github.com/pgsty/silo/issues/317)、[#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)）：** IAM 用户、用户组、策略、LDAP 组成员刷新及服务账户修改直接作用于持久化记录，且 IAM 拒绝不完整的策略加载并在惰性重载期间保持缓存认证可用，防止过期节点恢复旧凭据或已删除身份。
+> - **阿拉伯语 RTL 表单控件（[Console v2.7.0](/zh/blog/release/console-2.7.0/)）：** 阿拉伯语从右向左（RTL）界面下，密码显示按钮与字段单位选择器保持在输入文本旁，不再遮挡输入内容。
+> - **此前 Console 2.5.1 / Server 20261026 更新：** 切换用户组启用/禁用状态时保留现有成员；支持解析 OIDC 字符串数组形式的组声明；配置 HTTPS 或可信 TLS 反向代理后会话 Cookie 自动带 `Secure` 属性；新建访问密钥导出标准 UTF-8 JSON 凭据文件；内置策略 **Reset** 需配合 [SILO 20261026](/zh/blog/release/silo-20261026/#server-20261026) 及更高版本使用（[Console 2.5.1](/zh/blog/release/console-2.5.1/)）。
 
+<a id="security-and-access"></a>
 <a id="minio-console-security-access"></a>
 <a id="id1" data-td-print-local></a>
 
@@ -18,8 +25,9 @@ upstream_modified: true
 - 使用内置的 MinIO IDP 创建和管理 [用户凭证](#minio-console-admin-identity) 或组，连接一个或多个 OIDC provider，或添加 AD/LDAP provider 以实现 SSO。
 
 <a id="id3" data-td-print-local></a>
+<a id="minio-console-user-access-keys"></a>
 
-## 访问密钥 {#minio-console-user-access-keys}
+## 访问密钥 {#access-keys}
 
 **Access Keys** 或 *Service Accounts* 部分会显示与已认证用户关联的所有 [访问密钥](/zh/administration/identity-access-management/minio-user-management/#minio-id-access-keys)。 某个用户已有访问密钥的摘要列表包括访问密钥、过期时间、状态、名称和描述。
 
@@ -29,20 +37,21 @@ upstream_modified: true
 
 - 你可以选择访问密钥所在行查看其自定义策略（如果存在）。
 
-  > 你可以在此页面创建或修改策略。 访问密钥策略不能超过父用户被授予的权限。
+  你可以在此页面创建或修改策略。 访问密钥策略不能超过父用户被授予的权限。
 - 你可以选择 **Create access key** 创建新的访问密钥。
 
-  > Console 会自动生成访问密钥和密码。 你可以选择密码字段上的眼睛 <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-eye" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M1.679 7.932c.412-.621 1.242-1.75 2.366-2.717C5.175 4.242 6.527 3.5 8 3.5c1.473 0 2.824.742 3.955 1.715 1.124.967 1.954 2.096 2.366 2.717a.119.119 0 010 .136c-.412.621-1.242 1.75-2.366 2.717C10.825 11.758 9.473 12.5 8 12.5c-1.473 0-2.824-.742-3.955-1.715C2.92 9.818 2.09 8.69 1.679 8.068a.119.119 0 010-.136zM8 2c-1.981 0-3.67.992-4.933 2.078C1.797 5.169.88 6.423.43 7.1a1.619 1.619 0 000 1.798c.45.678 1.367 1.932 2.637 3.024C4.329 13.008 6.019 14 8 14c1.981 0 3.67-.992 4.933-2.078 1.27-1.091 2.187-2.345 2.637-3.023a1.619 1.619 0 000-1.798c-.45-.678-1.367-1.932-2.637-3.023C11.671 2.992 9.981 2 8 2zm0 8a2 2 0 100-4 2 2 0 000 4z"></path></svg> 图标以显示该值。 你也可以根据需要覆盖这些值。
-  >
-  > 你可以为访问密钥设置自定义策略，进一步限制使用该密钥进行认证的用户所拥有的权限。 选择 **Restrict beyond user policy** 打开策略编辑器，并按需修改。
-  >
-  > 在选择 **Create** 创建访问密钥之前，请确保你已将访问密钥密码保存到安全位置。 创建访问密钥后，你无法再次获取或重置该密码值。
-  >
-  > 如需轮换应用程序凭证，请创建新的访问密钥，并在应用程序切换为使用新凭证后删除旧密钥。
+  Console 会自动生成访问密钥和密码。你可以选择密码字段上的密码显示图标查看该值，也可以按需覆盖这些值。
+
+  你可以为访问密钥设置自定义策略，进一步限制使用该密钥进行认证的用户所拥有的权限。 选择 **Restrict beyond user policy** 打开策略编辑器，并按需修改。
+
+  在选择 **Create** 创建访问密钥之前，请确保你已将访问密钥密码保存到安全位置。 创建访问密钥后，你无法再次获取或重置该密码值。
+
+  如需轮换应用程序凭证，请创建新的访问密钥，并在应用程序切换为使用新凭证后删除旧密钥。
 
 <a id="id4" data-td-print-local></a>
+<a id="minio-console-admin-policies"></a>
 
-## 策略 {#minio-console-admin-policies}
+## 策略 {#policies}
 
 Console v2.5.1 对内置策略提供 **Reset**（重置），对自定义策略提供 **Delete**（删除）。**Reset** 会移除管理员对内置策略的自定义覆盖并恢复 SILO 原生定义。[Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)使恢复后的内置定义立即可读，并在收到对端/etcd 通知时重新加载已提交状态以防延迟通知抹去后续编辑（仍会执行策略在用检查）。
 
@@ -68,6 +77,7 @@ Console v2.5.1 对内置策略提供 **Reset**（重置），对自定义策略�
 使用 **Users** 和 **Groups** 视图，可分别将已创建的策略分配给用户和组。
 
 <a id="id5" data-td-print-local></a>
+<a id="identity"></a>
 
 ## 身份 {#minio-console-admin-identity}
 
@@ -75,7 +85,9 @@ Console v2.5.1 对内置策略提供 **Reset**（重置），对自定义策略�
 
 该部分包含以下子部分。 如果已认证用户没有 [所需的管理权限](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions)，某些子部分可能不可见。
 
-### 用户 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 用户 {#users}
 
 **Users** 部分显示部署中的所有 MinIO 管理 [用户](/zh/administration/identity-access-management/minio-user-management/#minio-users)。
 
@@ -90,7 +102,9 @@ Console v2.5.1 对内置策略提供 **Reset**（重置），对自定义策略�
 
   你还可以查看和管理与该用户关联的所有 [访问密钥](/zh/administration/identity-access-management/minio-user-management/#minio-idp-service-account)。
 
-### 组 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 组 {#groups}
 
 **Groups** 部分显示 MinIO 部署上的所有 [组](/zh/administration/identity-access-management/minio-group-management/#minio-groups)。
 
@@ -133,4 +147,4 @@ MinIO 支持使用 [Active Directory 或 LDAP (AD/LDAP)](/zh/administration/iden
 
 使用本节中的界面可以查看、添加或编辑部署的 LDAP 配置。 MinIO 仅支持一个活动 LDAP 配置。
 
-MinIO 会查询 Active Directory / LDAP 服务器，以验证客户端指定的凭证。 如果进行了相应配置，MinIO 还会在 AD/LDAP 服务器上执行组查找。
+MinIO 会查询 Active Directory / LDAP 服务器，以验证客户端指定的凭证。 如果进行了相应配置，MinIO 还会在 AD/LDAP 服务器上执行组查找。自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，启用 LDAP 后 `root` 用户仍可登录内嵌 Console（[#272](https://github.com/pgsty/silo/issues/272)），且规范化 DN 单段超过 255 字节的组授权 LDAP 用户可在多盘纠删码集合部署上正常登录（[#271](https://github.com/pgsty/silo/issues/271)）。

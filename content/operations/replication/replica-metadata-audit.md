@@ -58,12 +58,13 @@ the scan completed without ambiguous rows, **not** that it found no affected
 headers; `2` means ambiguous rows remain, and `1` means listing failed. An
 interruption or any unexpected failure without a complete summary is incomplete.
 
-| Classification | Meaning and next action |
-| --- | --- |
-| `confirmed-header` | HEAD returned a well-formed encoding list containing the exact `aws-chunked` token. The proposed header only removes that token. Raw bytes and a supported repair operation still need verification. |
-| `ambiguous` | HEAD failed, LIST/HEAD identity or state changed, or encoding tokens are malformed, duplicated or noncanonical. Investigate; never turn a failed HEAD into an empty-header success. |
-| `unaffected-header` | This successful exact-version HEAD did not contain the transport token. This says nothing about historical tags, purges, body integrity or another version. |
-| `delete-marker` | A listed marker identity, retained for separate purge analysis. It has no object body to normalize. |
+| Classification      | Meaning and next action                                                                                                                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `confirmed-header`  | HEAD returned a well-formed encoding list containing the exact `aws-chunked` token. The proposed header only removes that token. Raw bytes and a supported repair operation still need verification. |
+| `ambiguous`         | HEAD failed, LIST/HEAD identity or state changed, or encoding tokens are malformed, duplicated or noncanonical. Investigate; never turn a failed HEAD into an empty-header success.                  |
+| `unaffected-header` | This successful exact-version HEAD did not contain the transport token. This says nothing about historical tags, purges, body integrity or another version.                                          |
+| `delete-marker`     | A listed marker identity, retained for separate purge analysis. It has no object body to normalize.                                                                                                  |
+{.wide .expand}
 
 Matching is token-based: `gzip, aws-chunked` is a candidate; `my-aws-chunked`
 is not the transport token. Mixed encoding retains the other tokens in order.
@@ -181,11 +182,12 @@ version IDs, raw gzip bytes, metadata and tags; the source reported replication
 from the replacement versions. An untouched control retained SSE-S3,
 GOVERNANCE retention and legal hold throughout.
 
-| Phase | Observed exact-version inventory at each site |
-| --- | --- |
-| Old storage and upgraded clone | Three affected original versions. |
-| Replacement, offline-site catch-up and cold restart | Two corrected current versions plus the three affected original versions. |
+| Phase                                                        | Observed exact-version inventory at each site                                |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Old storage and upgraded clone                               | Three affected original versions.                                            |
+| Replacement, offline-site catch-up and cold restart          | Two corrected current versions plus the three affected original versions.    |
 | Delete only the two new unlocked versions, then cold restart | The three original versions remain; both replacement version IDs are absent. |
+{.wide .expand}
 
 The completed run checked signed write/read canaries on every process before
 both COPY and rollback. Earlier attempts are retained: health/read checks

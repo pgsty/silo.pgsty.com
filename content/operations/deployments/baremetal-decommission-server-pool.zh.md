@@ -10,9 +10,10 @@ upstream_modified: true
 
 下方桶／IAM 导出只覆盖配置，不是完整恢复快照。使用持久 IAM 撤销时，还须保留后端删除历史与必要加密材料，见 [IAM 恢复](/zh/operations/replication/iam-upgrade/)。
 
+<a id="decommission-server-pools"></a>
 <a id="minio-decommissioning"></a>
 
-MinIO 支持从包含两个或更多 pool 的部署中退役并移除 [服务器池s](/zh/operations/concepts/#minio-intro-server-pool)。 执行退役前，至少必须保留一个具有足够可用空间的 pool，以接收被退役 pool 中的对象。
+MinIO 支持从包含两个或更多 pool 的部署中退役并移除 [服务器池](/zh/operations/concepts/#minio-intro-server-pool)。执行退役前，至少必须保留一个具有足够可用空间的 pool，以接收被退役 pool 中的对象。
 
 从 `RELEASE.2023-01-18T04-36-38Z` 起，MinIO 支持在一条退役命令中排队 [多个 pool](#minio-decommission-multiple-pools)。 每个被列出的 pool 会立即进入只读状态，但实际排空过程一次只处理一个 pool。
 
@@ -73,25 +74,12 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 例如，假设某个部署的已用和空闲存储分布如下：
 
-<table>
-  <tbody>
-    <tr>
-      <td><p>Pool 1</p></td>
-      <td><p>100TB 已用</p></td>
-      <td><p>200TB 总计</p></td>
-    </tr>
-    <tr>
-      <td><p>Pool 2</p></td>
-      <td><p>100TB 已用</p></td>
-      <td><p>200TB 总计</p></td>
-    </tr>
-    <tr>
-      <td><p>Pool 3</p></td>
-      <td><p>100TB 已用</p></td>
-      <td><p>200TB 总计</p></td>
-    </tr>
-  </tbody>
-</table>
+| 存储池 | 已用容量    | 总容量      |
+| ------ | ----------- | ----------- |
+| Pool 1 | 100 TB 已用 | 200 TB 总计 |
+| Pool 2 | 100 TB 已用 | 200 TB 总计 |
+| Pool 3 | 100 TB 已用 | 200 TB 总计 |
+{.wide .expand}
 
 退役 Pool 1 需要将这 100TB 已用存储分散到其余 pool 上。 Pool 2 和 Pool 3 各自都有 100TB 未使用存储空间，因此可以安全接收 Pool 1 上的数据。
 
@@ -135,9 +123,17 @@ MinIO **强烈建议** 使用负载均衡器管理到集群的连接。 由于�
 
 ### 删除标记、过期对象与迁移验证 {#decommissioning-ignores-expired-objects-and-trailing-deletemarker}
 
-SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标记，包括源池中唯一剩下的删除标记。其他池可能仍保留同名对象的旧数据版本，因此不能仅因本池没有其他版本就丢弃标记。这替代了旧版上游跳过孤立删除标记的行为。
+SILO Server 20261018 及更高版本会迁移 `null` 和 UUID 删除标记，包括源池中唯一剩下的删除标记。其他池可能仍保留同名对象的旧数据版本，因此不能仅因本池没有其他版本就丢弃标记。这替代了旧版上游跳过孤立删除标记的行为。
 
-退役过程仍会评估[生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)，将符合条件的过期对象或版本送入过期处理，并跳过其迁移。在下一版本 SILO 构建（`04d7d9197`）中，池退役与再平衡仅在 `MINIO_SCANNER_SUBSYSTEMS` 启用 `scanner` 时才评估 ILM 规则，并会先执行生命周期动作评估（`evalActionFromLifecycle`）再评估分层转移（`evalScannerTransition`）；详见 [ILM 迁移顺序](/zh/blog/design/ilm-migration-ordering/)。可使用 [`mc admin trace --call decommission`](/zh/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) 查看迁移与跳过原因。
+退役过程会评估[生命周期规则](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-expiration)，对跨全部存储池确认可安全过期的对象或版本执行过期处理，并跳过不必要的载荷迁移。[SILO 20261109](/zh/blog/release/silo-20261109/) 在池退役与再平衡期间仅当 `MINIO_SCANNER_SUBSYSTEMS` 启用 `scanner` 时才评估 ILM 规则，先评估生命周期动作（`evalActionFromLifecycle`）再评估分层转移（`evalScannerTransition`）（见 [ILM 迁移顺序](/zh/blog/design/ilm-migration-ordering/)），并包含以下池退役修复：
+
+- 支持迁移跨存储池副本具有不同纠删码布局的对象（[#261](https://github.com/pgsty/silo/issues/261)）。
+- 迁移已被 ILM 判定过期的当前版本，避免跳过或将其遗留在退役池中（[#265](https://github.com/pgsty/silo/issues/265)）。
+- 对无法在所有存储池上安全完成生命周期过期的版本（例如跨池版本历史或 Object Lock 保护状态缺少权威仲裁）改为迁移而非丢弃（[#278](https://github.com/pgsty/silo/issues/278)，[`5cb91e7d7`](https://github.com/pgsty/silo/commit/5cb91e7d7)）。
+- 只要其他存储池仍引用远端分层对象，就保留该远端对象（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）。
+- 单个存储桶无法完成退役时继续迁移后续存储桶，并保留取消能力（[#307](https://github.com/pgsty/silo/issues/307)）。
+
+可使用 [`mc admin trace --call decommission`](/zh/reference/minio-mc-admin/mc-admin-trace/#mc.admin.trace.-call) 查看迁移与跳过原因。
 
 当前版本保留对象标签及其修订字段，并在清理源副本前重新核对已迁移的版本。升级不会恢复早期迁移已经丢失的标签。详见[跨池迁移契约](/zh/blog/design/multi-pool-object-consistency/#migration-20261018)。
 
@@ -162,16 +158,16 @@ SILO Server 20261018 及 20261026 正式版会迁移 `null` 和 UUID 删除标�
 > [!NOTE]
 > **变更: RELEASE.2023-03-20T20-16-18Z**
 
-对于已启用并处于活动状态的 tiering 部署，退役会将对象引用迁移到新的 active pool。 应用程序仍可继续对这些对象发出 GET 请求，MinIO 会透明地从远端 tier 中检索对象。
+对于已启用并处于活动状态的 tiering 部署，退役会将对象引用迁移到新的 active pool，并且 [SILO 20261109](/zh/blog/release/silo-20261109/) 在其他存储池仍引用远端对象时保留该远端数据（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）。应用程序可继续对这些对象发出 `GET` 请求，由 SILO 透明地从远端 tier 检索数据。
 
 在旧版本 MinIO 中，tiering 配置会阻止退役操作。
 
 > [!WARNING]
 > **退役完成前，保留所有远端 tier 的配置**
 >
-> tier free version 是某个仍需删除的远端对象的内部记录。退役会先删除远端对象再删除该记录，因此需要记录所指向的 tier。如果该 tier 已从配置中删除，退役会失败，该记录仍留在 pool 中。Server 20261026 之后的版本会先搬迁其他所有桶，错误信息会指出该 free version、它的远端对象和 tier。
+> tier free version 是某个仍待删除远端对象的内部记录。退役会在确认没有其他存储池引用后先删除远端对象、再移除该记录，因此在池退役完成前必须保留记录所指向的远端 tier 配置。若该 tier 已从配置中移除，退役会失败且记录仍留在退役池中。[SILO 20261109](/zh/blog/release/silo-20261109/) 会先继续迁移其余所有存储桶，并在错误信息中列出该 free version、对应的远端对象和缺失的 tier（[#307](https://github.com/pgsty/silo/issues/307)）。
 >
-> 使用 [`mcli ilm tier add`](/zh/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add) 以相同名称重新添加该 tier，然后重新运行 [`mcli admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start)，从剩下的桶继续。参见 [Tier free version 是内部清理记录](/zh/blog/design/tier-free-version-semantics/#operations)。
+> 请使用 [`mcli ilm tier add`](/zh/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add) 以相同名称重新添加该 tier，然后重新运行 [`mcli admin decommission start`](/zh/reference/minio-mc-admin/mc-admin-decommission/#mc.admin.decommission.start) 继续处理剩余存储桶。参见[分层游离版本是内部清理记录](/zh/blog/design/tier-free-version-semantics/#operations)。
 
 <a id="id13"></a>
 
@@ -369,17 +365,17 @@ mc admin decommission status myminio
 └─────┴────────────────────────────────────────────────────────────────┴──────────────────────────────────┴────────┘
 ```
 
-上例部署共有三个 pool。 每个 pool 都有四台服务器，每台服务器有四块驱动器。
+上例部署共有四个 pool。每个 pool 都有四台服务器，每台服务器有四块驱动器。
 
-确定要退役的目标 pool，并检查当前容量。 部署中其余 pool 的总容量 *必须* 足以迁移被退役 pool 中存储的所有对象。
+确定要退役的目标 pool，并检查当前容量。部署中其余 pool 的总容量 *必须* 足以迁移被退役 pool 中存储的所有对象。
 
-在上述示例中，该部署总存储为 1110TiB，其中已使用 145TiB。
+在上述示例中，该部署总存储为 1110 TiB，其中已使用 145 TiB。
 
 - 第一个 pool（`minio-{01...04}`）是第一个退役目标，因为它是在 MinIO 部署创建时配置的，并且已经完全写满。
 - 第二个 pool（`minio-{05...08}`）是第二个退役目标，因为它同样是在部署创建时配置的，并且已接近写满。
 - 第四个 pool（`minio-{13...16}`）是一个刚通过 server 扩容加入的新硬件 pool。
 
-第三个和第四个 pool 可以吸收第一个 pool 上的全部对象，而不会显著影响总可用存储。
+第三个和第四个 pool 可以吸收第一个与第二个 pool 上的全部对象，而不会显著影响总可用存储。
 
 > [!WARNING]
 > **重要**
@@ -472,13 +468,17 @@ MINIO_VOLUMES="https://minio-{1...4}.example.net:9000/mnt/disk{1...4}/minio http
 
 编辑该环境文件，并从 `MINIO_VOLUMES` 的值中移除已退役 pool。
 
-### 5) 更新网络控制平面 {#id23}
+<a id="id23" data-td-print-local></a>
+
+### 5) 更新网络控制平面 {#update-network-control-plane-multiple}
 
 更新所有负载均衡器、反向代理或其他网络控制平面，从 MinIO 部署的连接配置中移除已退役的 服务器池。
 
 网络控制平面组件的具体配置说明不在本步骤范围内。
 
-### 6) 重启 MinIO 部署 {#id24}
+<a id="id24" data-td-print-local></a>
+
+### 6) 重启 MinIO 部署 {#restart-the-minio-deployment-multiple}
 
 在部署中的每个节点上 **同时** 执行以下命令，以重启 MinIO 服务：
 

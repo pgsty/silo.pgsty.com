@@ -10,4 +10,4 @@ upstream_modified: true
 <a id="install-the-minio-server"></a>
 <a id="deploy-minio-standalone"></a>
 
-Install Silo on a physical machine or virtualized host using the current [server artifacts](/download/#server) and the platform-specific instructions in this section. The executable, service, package, and environment-variable contracts retain their MinIO-compatible names.
+Install Silo on a physical machine or virtualized host using the current [server artifacts](/download/#server) and the platform-specific instructions in this section. SILO ships the server executable (`silo`), Linux packages (`silo`), `systemd` unit (`silo.service`), and container image (`docker.io/pgsty/silo`) under the `silo` name, while `MINIO_*` environment variables, `/etc/default/minio` fallback when `/etc/default/silo` is absent, S3 and Admin wire APIs, and the on-disk erasure format retain MinIO-compatible names.

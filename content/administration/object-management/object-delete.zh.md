@@ -3,13 +3,13 @@ title: "对象删除"
 url: "/zh/administration/object-management/object-delete/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-delete.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
+<a id="object-deletion"></a>
 <a id="minio-object-delete"></a>
-<a id="id1" data-td-print-local></a>
 
-## 概述 {#id3}
+## 概述 {#overview}
 
 本页概述 `DELETE` 操作会如何影响对象，具体取决于包含该对象的存储桶配置。
 
@@ -22,29 +22,30 @@ upstream_modified: false
 - [站点](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 或 [存储桶](/zh/administration/bucket-replication/#minio-replication-behavior-delete) 复制
 - [扫描器](/zh/operations/concepts/scanner/#minio-concepts-scanner)
 
-## 权限 {#id4}
+## 权限 {#permissions}
 
 MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy) 系统进行访问管理。 用户或服务账户必须提供正确的策略操作和条件，才能对该存储桶和对象执行 `DELETE`。
 
 所需权限由请求是否显式指定版本决定，而不是仅由存储桶是否启用版本控制决定：
 
-| 请求 | 所需权限 |
-| --- | --- |
-| 未携带 `versionId` 的 `DELETE` | `s3:DeleteObject` |
-| 携带版本 UUID 的 `DELETE` | `s3:DeleteObjectVersion` |
-| 携带 `versionId=null` 的 `DELETE` | `s3:DeleteObjectVersion` |
-| `DeleteObjects` | 对 XML 中的每个条目独立判定 |
+| 请求                              | 所需权限                    |
+| --------------------------------- | --------------------------- |
+| 未携带 `versionId` 的 `DELETE`    | `s3:DeleteObject`           |
+| 携带版本 UUID 的 `DELETE`         | `s3:DeleteObjectVersion`    |
+| 携带 `versionId=null` 的 `DELETE` | `s3:DeleteObjectVersion`    |
+| `DeleteObjects`                   | 对 XML 中的每个条目独立判定 |
+{.wide .expand}
 
 显式 `Deny` 始终优先。`s3:versionid` 条件读取当前条目实际删除的版本 ID；外层
 `DeleteObjects` 请求上的查询参数不能覆盖条目自己的 `VersionId`。
 
-## 未启用版本控制的对象 {#id5}
+## 未启用版本控制的对象 {#unversioned-objects}
 
 如果对未启用版本控制的存储桶中的对象执行 `DELETE` 操作，其行为比较直接。 在确认用户或服务账户具有执行 `DELETE` 操作的权限后，MinIO 会永久删除该对象。
 
 请求删除操作的用户或服务账户必须对该存储桶和对象具有 [`s3:DeleteObject`](/zh/administration/identity-access-management/policy-based-access-control/#policy-action.s3-DeleteObject) 操作权限。
 
-## 已启用版本控制的对象 {#id6}
+## 已启用版本控制的对象 {#versioned-objects}
 
 启用版本控制后，`DELETE` 操作的行为会有所不同。
 
@@ -53,7 +54,7 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 权限。未指定版本 ID 的删除仍需要 `s3:DeleteObject`，它会创建 delete marker，
 而不会移除现有版本。
 
-### 删除当前版本 {#id7}
+### 删除当前版本 {#delete-operations-on-the-current-version}
 
 如果对已启用版本控制的对象执行 `DELETE` 操作，但未指定版本 UUID，则会创建一个 `DeleteMarker`，并将其置为该对象的 `head`。
 
@@ -68,7 +69,7 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 >
 > 在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且 **无法** 恢复。
 
-### 删除先前版本 {#id8}
+### 删除先前版本 {#delete-operations-on-a-prior-version}
 
 如需删除对象的先前版本，请指定该版本的 UUID。 可以使用 [`mc ls --versions`](/zh/reference/minio-mc/mc-ls/#mc.ls.-versions) 获取版本 UUID。 当 `DELETE` 请求指定 `version-id`，且用户具有删除该对象版本的正确权限时，MinIO 会从驱动器中永久删除指定版本。
 
@@ -77,11 +78,11 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 >
 > 在 DELETE 操作中指定 `version-id` 是不可逆的。 MinIO 会从驱动器中删除指定版本，并且 **无法** 恢复。
 
-### 删除所有版本 {#id9}
+### 删除所有版本 {#delete-all-versions}
 
 使用 [`mc rm --versions`](/zh/reference/minio-mc/mc-rm/#mc.rm.-versions) 删除对象的 *所有* 版本。 此操作不可逆。
 
-## 生命周期管理过期 {#id10}
+## 生命周期管理过期 {#lifecycle-management-expiration}
 
 可以定义一个或多个 [生命周期管理过期规则](/zh/administration/object-management/create-lifecycle-management-expiration-rule/#minio-lifecycle-management-create-expiry-rule)，使对象在达到指定的版本数量或经过指定时间后过期。 当版本数量超过规则指定值，或某个版本的时间早于指定阈值时，MinIO 会从驱动器中永久删除该对象版本。
 
@@ -98,7 +99,13 @@ MinIO 使用 [基于策略的访问控制](/zh/administration/identity-access-ma
 
 使用 `JSON` 时，生命周期规则可以在指定天数后删除已删除对象的所有版本。
 
-## 受保留规则保护的对象 {#id11}
+自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，生命周期过期执行以下保护机制：
+
+- **整键删除精确限定于当前对象键：** `ExpiredObjectAllVersions` 和 `DelMarkerExpiration` 仅作用于已过期的精确对象键，而不会影响该前缀下的子键；若对象键仍包含已分层版本或受 Object Lock 保护的版本，则拒绝执行整键删除（[#297](https://github.com/pgsty/silo/issues/297)）。
+- **仅含 `DelMarkerExpiration` 的规则：** 唯一动作为 `DelMarkerExpiration` 的生命周期规则可正常执行（[#268](https://github.com/pgsty/silo/issues/268)）。
+- **多池法定人数核验与恢复副本过期：** 多池部署下的生命周期过期会在对象锁内跨所有存储池评估，并要求取得权威法定人数后才允许删除（[#278](https://github.com/pgsty/silo/issues/278)）。已恢复副本到期时仅移除本地临时缓存，同时保留对象版本及其远程层数据（[#281](https://github.com/pgsty/silo/issues/281)）。
+
+## 受保留规则保护的对象 {#retained-objects}
 
 MinIO 会保护受 [锁定规则](/zh/administration/object-management/object-retention/#minio-object-locking) 约束的对象，防止其被覆盖或删除。 这些规则要求对象在规则过期或被移除之前必须予以保留。
 
@@ -106,19 +113,23 @@ MinIO 会保护受 [锁定规则](/zh/administration/object-management/object-re
 
 指定对象版本的 `DELETE` 操作受保留规则约束。 对于受锁定保护的对象版本，MinIO 会在锁定过期或被移除之前防止其被覆盖或删除。
 
-## 已复制对象 {#id12}
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，批量 `DeleteObjects` 请求在执行物理版本移除时会使用与保留期和 legal hold 更新相同的变更锁逐项串行复核，并合并所有存储池的保护状态（提交 [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc)；因此在启用 Object Lock 的存储桶中，大批量物理版本清除耗时更长，而创建删除标记及普通存储桶仍保持并发批量路径）。批量删除在移除目录对象的 `null` 版本前，同样会检查该目录对象的 Object Lock 保留期与 legal hold 状态（提交 [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)）。
+
+## 已复制对象 {#replicated-objects}
 
 复制会将对象从一个位置复制到另一个位置。 MinIO 支持存储桶级别或集群（“site”）级别的复制。
 
 删除操作是否会被复制，取决于复制类型以及复制配置方式。
 
-### 站点复制 {#id13}
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，复制删除会保留目标端的 legal hold 与保留期（提交 [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)）：源端绕过 `GOVERNANCE` 保留期的物理清除不会赋予目标端副本绕过权限，目标端会拒绝清除并由源端重试。此外，生命周期规则创建的删除标记与版本清除**不会**通过存储桶复制或站点复制传播（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），与 AWS S3 语义一致，每个副本存储桶独立应用各自的生命周期配置。
 
-对于启用了 [多站点复制](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 的集群，MinIO 会将任一集群上执行的所有 `delete` 操作复制到对等组中的其他每个集群。
+### 站点复制 {#site-replication}
 
-任一单个对等节点上的删除行为，都遵循普通 MinIO 部署相同的处理流程。
+对于启用了 [多站点复制](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 的集群，SILO 会将任一集群上由客户端显式发起的 `DELETE` 操作复制到对等组中的其他站点。生命周期产生的删除标记与版本清除不会跨站点复制（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)）。
 
-### 存储桶复制 {#id14}
+任一单个对等节点上的删除行为，都遵循普通 SILO 部署相同的处理流程。
+
+### 存储桶复制 {#bucket-replication}
 
 通过 [存储桶复制](/zh/administration/bucket-replication/#minio-bucket-replication)，MinIO 支持在源存储桶与配置好的远程存储桶之间复制删除操作。 MinIO 会同步删除特定对象版本以及新的 [delete markers](https://docs.aws.amazon.com/AmazonS3/latest/userguide/delete-marker-replication.html)。 删除操作复制使用与其他所有复制操作相同的 [复制流程](/zh/administration/bucket-replication/#minio-replication-process)。
 

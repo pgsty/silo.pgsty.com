@@ -6,7 +6,7 @@ weight: 25
 icon: fa-solid fa-user-shield
 ---
 
-**The current upgrade target is [Server 20261109](/blog/release/silo-20261109/).** The 20260916/20261018 revocation-history and authorization requirements below still apply. Server 20261109 edits persisted IAM records and adds batch submitter authorization; drain or cancel unfinished batch jobs before upgrading, following the [batch checklist](/administration/batch-framework/#upgrade-20261109). Coordinate every participating node using the [component matrix](/compatibility/versions/).
+**The current upgrade target is [SILO 20261109](/blog/release/silo-20261109/).** The 20260916, 20261018, and 20261026 revocation-history and authorization requirements below still apply. In [SILO 20261109](/blog/release/silo-20261109/), IAM refuses incomplete policy loads ([#316](https://github.com/pgsty/silo/issues/316)), keeps cached authentication available during lazy loads ([#317](https://github.com/pgsty/silo/issues/317)), and applies IAM edits, LDAP group refreshes, and service-account creation directly to persisted records so stale peers cannot restore old credentials or resurrect deleted identities ([#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)). This release also adds batch submitter authorization; drain or cancel unfinished batch jobs before upgrading, following the [batch checklist](/administration/batch-framework/#upgrade-20261109). Coordinate every participating node using the [component matrix](/compatibility/versions/).
 
 **STS revocation verification:** 20261018 also adds [durable enumeration and propagation](/blog/design/iam-revocations/#scoped-sts-20261018). After revoking the actual parent/token type, check old-token rejection and fresh-token validity at every node and site, including a reconnecting peer. Tokens never received from an isolated site are outside the requesting cluster snapshot; one successful response does not establish instantaneous global invalidation during a partition.
 
@@ -20,9 +20,8 @@ revoked identities and older grants. They require a coordinated upgrade of all
 participating servers, including nodes without site replication that share an
 IAM backend. Mixed old/new nodes on that backend and rolling downgrade are unsupported.
 
-**Release status:** these repairs shipped in [Server 20260916](/blog/release/silo-20260916/)
-and are absent from Server 20260903. This procedure covers coordinated upgrades
-and recovery for the repaired version. Isolated upgrade/restore observations and remaining recovery checks are
+**Release status:** the baseline revocation-history repairs shipped in [Server 20260916](/blog/release/silo-20260916/) (absent from Server 20260903), built-in policy override deletion shipped in [Server 20261026](/blog/release/silo-20261026/#server-20261026), and persisted-record IAM edits and incomplete-load protections shipped in [SILO 20261109](/blog/release/silo-20261109/). This procedure covers coordinated upgrades
+and recovery across these releases. Isolated upgrade/restore observations and remaining recovery checks are
 tracked in [#200](https://github.com/pgsty/silo/issues/200); see the
 [validation scope](#validation). Publication of this page does not establish
 production upgrade acceptance.
@@ -69,7 +68,7 @@ live replication group merely to inspect its contents.
 Before upgrading, follow the [password-policy migration](/compatibility/password-permissions/).
 Where an existing `Deny admin:CreateUser` also meant to prohibit changing one's own
 password, add `admin:ChangeMyPassword` to the same Deny with its existing scope and
-conditions; retain both through rollback. Server 20260916 keeps multipart listing in
+conditions; retain both through rollback. [SILO 20261109](/blog/release/silo-20261109/) (like releases since Server 20260916) keeps multipart listing in
 `legacy` by default. An ordinary upgrade does not require strict mode; only an
 explicit opt-in needs the [multipart preflight and drain procedure](/blog/design/list-multipart-uploads/#implementation-20260916).
 
@@ -86,11 +85,11 @@ sudo systemctl stop "$SILO_UNIT"
 systemctl is-active "$SILO_UNIT" # expected: inactive; nonzero exit is normal
 ```
 
-| Backend | Required recovery material | Verification before proceeding |
-| --- | --- | --- |
-| Object storage | A consistent, restorable backup of the complete IAM store, including revisions, deletion records and retained parent boundaries. Use the deployment's tested full-storage snapshot/backup procedure with all required pool/set/drive mappings. | Restore to an isolated clone with the matching topology and confirm IAM loads. Copying a visible user directory or one erasure-coded drive is insufficient. |
-| etcd | A complete etcd snapshot, member/topology configuration, certificates and authentication material, plus SILO's endpoint/prefix and encryption configuration. | Check the snapshot, then restore to an isolated etcd cluster using the documented procedure for that etcd version. Do not restore a shared etcd cluster over unrelated workloads. |
-| Both | Exact binaries/images, deployment configuration, root-secret references, KMS/key recovery material and the revocation/change ledger since the backup. | Verify access to the required keys independently of the cluster being replaced. Store secret material separately from review logs. |
+| Backend        | Required recovery material                                                                                                                                                                                                                     | Verification before proceeding                                                                                                                                                    |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Object storage | A consistent, restorable backup of the complete IAM store, including revisions, deletion records and retained parent boundaries. Use the deployment's tested full-storage snapshot/backup procedure with all required pool/set/drive mappings. | Restore to an isolated clone with the matching topology and confirm IAM loads. Copying a visible user directory or one erasure-coded drive is insufficient.                       |
+| etcd           | A complete etcd snapshot, member/topology configuration, certificates and authentication material, plus SILO's endpoint/prefix and encryption configuration.                                                                                   | Check the snapshot, then restore to an isolated etcd cluster using the documented procedure for that etcd version. Do not restore a shared etcd cluster over unrelated workloads. |
+| Both           | Exact binaries/images, deployment configuration, root-secret references, KMS/key recovery material and the revocation/change ledger since the backup.                                                                                          | Verify access to the required keys independently of the cluster being replaced. Store secret material separately from review logs.                                                |
 {.wide .expand}
 
 For etcd, use the deployment's authenticated TLS configuration and a supported
@@ -146,7 +145,7 @@ restore separately.
    records. Rebuild stale offline peers from approved state before reconnecting
    them. Repeat the credential checks after restart and peer catch-up.
 
-In the [Server 20261026](/blog/release/silo-20261026/#server-20261026), deleting an explicit built-in policy override immediately restores the native definition while retaining the deletion revision to reject stale overrides (absent from Server 20261018). Verify built-in policy Reset on each node and again after restart and peer catch-up, and confirm that in-use rejection and custom-policy deletion behave as expected. Ordinary legacy group-member removal during an outage remains outside the durable parent-deletion guarantee.
+In [SILO 20261109](/blog/release/silo-20261109/), IAM refuses incomplete policy loads ([#316](https://github.com/pgsty/silo/issues/316)), keeps cached authentication available during lazy loads ([#317](https://github.com/pgsty/silo/issues/317)), and applies edits, LDAP group refreshes, and service-account creation directly to persisted records so stale peers cannot restore old credentials or resurrect deleted identities ([#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)). Since [Server 20261026](/blog/release/silo-20261026/#server-20261026), deleting an explicit built-in policy override immediately restores the native definition while retaining the deletion revision to reject stale overrides (absent from Server 20261018). Verify built-in policy Reset, credential edits, LDAP group refreshes, and deleted-identity rejection on each node and again after restart and peer catch-up, and confirm that in-use policy rejection and custom-policy deletion behave as expected. Ordinary legacy group-member removal during an outage remains outside the durable parent-deletion guarantee.
 
 Reopen access only after version identity, backend recovery, IAM loading,
 replication and both credential checks pass. If a stale credential succeeds,
@@ -166,12 +165,13 @@ neither successful issuance nor proof of a revoked credential.
 
 Collect these from every process at `/minio/metrics/v3/cluster/iam`:
 
-| Metric | Meaning |
-| --- | --- |
-| `minio_cluster_iam_revocation_records` | Persistent revocation records observed by this process |
-| `minio_cluster_iam_revocation_heal_failures` | IAM reconciliation failure count |
-| `minio_cluster_iam_revocation_heal_duration_millis` | Latest reconciliation duration |
-| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | Unix time of the last successful reconciliation |
+| Metric                                                             | Meaning                                                |
+| ------------------------------------------------------------------ | ------------------------------------------------------ |
+| `minio_cluster_iam_revocation_records`                             | Persistent revocation records observed by this process |
+| `minio_cluster_iam_revocation_heal_failures`                       | IAM reconciliation failure count                       |
+| `minio_cluster_iam_revocation_heal_duration_millis`                | Latest reconciliation duration                         |
+| `minio_cluster_iam_revocation_heal_last_success_timestamp_seconds` | Unix time of the last successful reconciliation        |
+{.wide .expand}
 
 These are process metrics, not additive unique-record counts. The three `heal_*`
 metrics advance only with site replication enabled and on the node holding the
@@ -289,10 +289,11 @@ credential work again, confirming the rollback hazard above. A subsequent
 rehearsal applied the [bounded reconciliation policy](#reconcile), then restored
 the reconciled backup using the matching old binary:
 
-| Backend | Observed result after reconciliation and full restore |
-| --- | --- |
-| etcd 3.6.13 | All six processes rejected the retired user, service key, revoked mapping and retired parent's sessions; replacement users, service accounts and newly issued STS credentials worked. The isolated client-access checks passed. |
+| Backend      | Observed result after reconciliation and full restore                                                                                                                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| etcd 3.6.13  | All six processes rejected the retired user, service key, revoked mapping and retired parent's sessions; replacement users, service accounts and newly issued STS credentials worked. The isolated client-access checks passed.                                     |
 | Object store | The completed continuation from the same pre-upgrade backup rejected retired users, service keys, revoked grants and the retired parent's STS. Replacement users, service accounts and fresh STS worked on all six processes after reconciliation and full restore. |
+{.wide .expand}
 
 The object-store laboratory also observed temporary STS write and cross-site
 authentication failures after startup checks passed. A control using only

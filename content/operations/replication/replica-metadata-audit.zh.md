@@ -48,12 +48,13 @@ audit-venv/bin/python replica-metadata-audit.py \
 **不表示没有发现错误头部**；`2` 表示存在待核查记录，`1` 表示列表失败。
 中断或其他异常导致没有完整 summary 时，该清单均不完整。
 
-| 分类 | 含义与后续动作 |
-| --- | --- |
-| `confirmed-header` | HEAD 返回格式正常且包含精确 `aws-chunked` token 的编码列表。建议值仅移除此 token，仍须核验原始字节和受支持的修复操作。 |
-| `ambiguous` | HEAD 失败、LIST/HEAD 身份或状态变化，或编码 token 格式异常、重复、拼写不规范。人工核查，不能把 HEAD 失败当成空头部成功。 |
-| `unaffected-header` | 本次成功的精确版本 HEAD 不含该传输 token。不代表历史标签、清除任务、正文完整性或其他版本正常。 |
-| `delete-marker` | 列表中的删除标记身份，留待独立清除分析；没有需要规范化的正文。 |
+| 分类                | 含义与后续动作                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `confirmed-header`  | HEAD 返回格式正常且包含精确 `aws-chunked` token 的编码列表。建议值仅移除此 token，仍须核验原始字节和受支持的修复操作。   |
+| `ambiguous`         | HEAD 失败、LIST/HEAD 身份或状态变化，或编码 token 格式异常、重复、拼写不规范。人工核查，不能把 HEAD 失败当成空头部成功。 |
+| `unaffected-header` | 本次成功的精确版本 HEAD 不含该传输 token。不代表历史标签、清除任务、正文完整性或其他版本正常。                           |
+| `delete-marker`     | 列表中的删除标记身份，留待独立清除分析；没有需要规范化的正文。                                                           |
+{.wide .expand}
 
 检查按 token 匹配：`gzip, aws-chunked` 是候选，`my-aws-chunked` 不是该传输 token。
 混合编码保留其他 token 的顺序，大小写变体及重复 token 留给人工核查。
@@ -127,11 +128,12 @@ audit-venv/bin/python replica-metadata-audit.py \
 随后对历史版本的标签更新没有改变替代版本的标签。
 未参与改写的对照对象始终保留 SSE-S3、GOVERNANCE 保留期和法律保留。
 
-| 阶段 | 每个站点观察到的精确版本清单 |
-| --- | --- |
-| 旧版存储与升级后的克隆 | 三个原版本的头部均受影响。 |
+| 阶段                               | 每个站点观察到的精确版本清单                   |
+| ---------------------------------- | ---------------------------------------------- |
+| 旧版存储与升级后的克隆             | 三个原版本的头部均受影响。                     |
 | 创建替代版本、离线站点追赶及冷重启 | 两个已纠正的当前版本，加上三个原有受影响版本。 |
-| 仅删除两个新建未锁版本，再冷重启 | 三个原版本保留，两个替代版本 ID 均不再出现。 |
+| 仅删除两个新建未锁版本，再冷重启   | 三个原版本保留，两个替代版本 ID 均不再出现。   |
+{.wide .expand}
 
 通过的演练在 COPY 和回退之前，均对每个进程执行了实际签名写入/读取探针。
 早期失败记录仍保留：健康检查和读取成功时，写入曾返回 `SlowDownWrite`；
@@ -146,4 +148,4 @@ audit-venv/bin/python replica-metadata-audit.py \
 清单工具用于准备，不执行修复。具体 Object Lock/SSE/复制配置的验证仍由
 [#201](https://github.com/pgsty/silo/issues/201) 跟踪。生产清单扫描与写入应针对选定部署和经评审的变更清单分别记录。
 
-对 `confirmed-header` 行，`proposed_content_encoding: null` 表示移除整个 Content-Encoding 字段，不是写入空字符串。其它分类的 null 不代表修复建议。设计背景见[副本元数据规范化](/blog/design/replica-metadata-normalization/)。
+对 `confirmed-header` 行，`proposed_content_encoding: null` 表示移除整个 Content-Encoding 字段，不是写入空字符串。其它分类的 null 不代表修复建议。设计背景见[副本元数据规范化](/zh/blog/design/replica-metadata-normalization/)。

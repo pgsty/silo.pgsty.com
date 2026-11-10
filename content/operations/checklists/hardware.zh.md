@@ -12,7 +12,9 @@ math: true
 
 在为生产级分布式 MinIO 部署规划硬件配置时，请使用以下检查清单。
 
-## 考虑因素 {#id3}
+<a id="id3" data-td-print-local></a>
+
+## 考虑因素 {#considerations}
 
 在为 MinIO 选型硬件时，请考虑以下因素：
 
@@ -25,7 +27,9 @@ math: true
 
 <a id="id4" data-td-print-local></a>
 
-## 生产硬件建议 {#deploy-minio-distributed-recommendations}
+<a id="deploy-minio-distributed-recommendations" data-td-print-local></a>
+
+## 生产硬件建议 {#production-hardware-recommendations}
 
 以下检查清单遵循 MinIO 面向生产部署的 [Recommended Configuration](https://min.io/product/reference-hardware?ref-docs)。 这里提供的指导仅作为基线，不能替代 [MinIO SUBNET](https://min.io/pricing?jmp=docs) Performance Diagnostics、Architecture Reviews 以及 direct-to-engineering 支持。
 
@@ -157,7 +161,9 @@ math: true
 
 <a id="id5" data-td-print-local></a>
 
-### 网络 {#minio-hardware-checklist-network}
+<a id="minio-hardware-checklist-network" data-td-print-local></a>
+
+### 网络 {#networking}
 
 MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、存储控制器和 PCIe 总线）的最大可能吞吐量。 下表给出了不同物理或虚拟网络接口可支撑的最大存储吞吐量的一般参考值。 该表假设所有网络基础设施组件（例如路由器、交换机和物理线缆）同样支持对应的 NIC 带宽。
 
@@ -194,7 +200,9 @@ MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、�
 
 <a id="id6" data-td-print-local></a>
 
-### 内存 {#minio-hardware-checklist-memory}
+<a id="minio-hardware-checklist-memory" data-td-print-local></a>
+
+### 内存 {#memory}
 
 内存主要限制每个节点可同时处理的并发连接数。
 
@@ -211,21 +219,21 @@ MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、�
 下表根据主机驱动器数量和系统 *可用* RAM，列出节点上的最大并发请求数：
 
 | 驱动器数量 | 32 GiB RAM | 64 GiB RAM | 128 GiB RAM | 256 GiB RAM | 512 GiB RAM |
-| --- | --- | --- | --- | --- | --- |
-| 4 Drives | 1,074 | 2,149 | 4,297 | 8,595 | 17,190 |
-| 8 Drives | 840 | 1,680 | 3,361 | 6,722 | 13,443 |
-| 16 Drives | 585 | 1,170 | 2.341 | 4,681 | 9,362 |
+| ---------- | ---------- | ---------- | ----------- | ----------- | ----------- |
+| 4 Drives   | 1,074      | 2,149      | 4,297       | 8,595       | 17,190      |
+| 8 Drives   | 840        | 1,680      | 3,361       | 6,722       | 13,443      |
+| 16 Drives  | 585        | 1,170      | 2.341       | 4,681       | 9,362       |
 {.wide .expand}
 
 下表根据节点本地存储总量，给出为 MinIO 分配内存的一般建议：
 
-| 主机总存储量 | 建议的主机内存 |
-| --- | --- |
-| 不超过 1 Tebibyte (Ti) | 8GiB |
-| 不超过 10 Tebibyte (Ti) | 16GiB |
-| 不超过 100 Tebibyte (Ti) | 32GiB |
-| 不超过 1 Pebibyte (Pi) | 64GiB |
-| 超过 1 Pebibyte (Pi) | 128GiB |
+| 主机总存储量             | 建议的主机内存 |
+| ------------------------ | -------------- |
+| 不超过 1 Tebibyte (Ti)   | 8GiB           |
+| 不超过 10 Tebibyte (Ti)  | 16GiB          |
+| 不超过 100 Tebibyte (Ti) | 32GiB          |
+| 不超过 1 Pebibyte (Pi)   | 64GiB          |
+| 超过 1 Pebibyte (Pi)     | 128GiB         |
 
 > [!WARNING]
 > **重要**
@@ -234,7 +242,9 @@ MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、�
 
 <a id="id7" data-td-print-local></a>
 
-### 存储 {#minio-hardware-checklist-storage}
+<a id="minio-hardware-checklist-storage" data-td-print-local></a>
+
+### 存储 {#storage}
 
 > [!NOTE]
 > **磁盘独占访问**
@@ -243,7 +253,9 @@ MinIO 建议使用高速网络，以支撑所连接存储（聚合驱动器、�
 >
 > 除非得到 MinIO Engineering 的明确指示，否则不要使用脚本或工具直接修改、 删除或移动这些磁盘上的任何数据分片、校验分片或元数据文件，包括在磁盘或节点 之间迁移这些文件。 这类操作极有可能导致大范围损坏和数据丢失，超出 MinIO 的自愈能力。
 
-#### 推荐的存储介质 {#id8}
+<a id="id8" data-td-print-local></a>
+
+#### 推荐的存储介质 {#recommended-storage-mediums}
 
 {{< tabs group="kubernetes-tab2" >}}
 {{< tab label="Kubernetes" value="kubernetes" >}}
@@ -262,7 +274,9 @@ MinIO 不建议在生产环境中使用 HDD 存储。 HDD 存储通常无法提�
 {{< /tab >}}
 {{< /tabs >}}
 
-#### 优先使用直连“本地”存储（DAS） {#das}
+<a id="das" data-td-print-local></a>
+
+#### 优先使用直连“本地”存储（DAS） {#prefer-direct-attached-local-storage-das}
 
 <abbr title="Direct-Attached Storage">DAS</abbr>，例如本地直连的 <abbr title="Just a Bunch of Disks">JBOD</abbr> 阵列，相比网络存储（NAS、SAN、NFS）在性能和一致性方面具有显著优势。
 
@@ -284,7 +298,9 @@ MinIO 强烈建议使用能够将存储配置到 Kubernetes 调度 MinIO pods �
 > [!DETAILS]- 网络文件系统卷会破坏一致性保证
 > MinIO 严格的 **read-after-write** 和 **list-after-write** 一致性模型要求使用本地驱动器文件系统。 如果底层存储卷是 NFS 或类似的网络挂载存储卷，MinIO 无法提供一致性保证。
 
-#### 使用 XFS 格式化驱动器并保持一致挂载 {#xfs}
+<a id="xfs" data-td-print-local></a>
+
+#### 使用 XFS 格式化驱动器并保持一致挂载 {#use-xfs-formatted-drives-with-consistent-mounting}
 
 {{< tabs group="kubernetes-tab2" >}}
 {{< tab label="Kubernetes" value="kubernetes" >}}
@@ -335,7 +351,9 @@ MinIO **强烈建议** 使用基于标签的挂载规则，而不是基于 UUID 
 {{< /tab >}}
 {{< /tabs >}}
 
-#### 禁用 XFS 的出错重试 {#id9}
+<a id="id9" data-td-print-local></a>
+
+#### 禁用 XFS 的出错重试 {#disable-xfs-retry-on-error}
 
 MinIO **强烈建议** 通过 `max_retries` 配置禁用 [retry-on-error](https://docs.kernel.org/admin-guide/xfs.html?highlight=xfs#error-handling) 行为，至少针对以下错误类别：
 
@@ -374,15 +392,21 @@ exit 0
 {{< /tab >}}
 {{< /tabs >}}
 
-#### 统一驱动器类型与容量 {#id10}
+<a id="id10" data-td-print-local></a>
+
+#### 统一驱动器类型与容量 {#use-consistent-drive-type-and-capacity}
 
 请确保 MinIO 部署底层存储的驱动器类型（NVMe、SSD、HDD）一致。 MinIO 不区分存储类型，也不支持在单一部署内部配置“热”或“温”驱动器。 混用不同驱动器类型通常会导致性能下降，因为无论更快驱动器能力如何，部署中最慢的驱动器都会成为瓶颈。
 
 请在每个 MinIO [服务器池](/zh/operations/concepts/#minio-intro-server-pool) 的所有节点上使用相同容量和类型的驱动器。 MinIO 会将每块驱动器的最大可用容量限制为部署中最小的那块驱动器容量。 例如，如果某个部署中有 15 块 10TB 驱动器和 1 块 1TB 驱动器，MinIO 会将每块驱动器的可用容量限制为 1TB。
 
-## 推荐的硬件测试 {#id11}
+<a id="id11" data-td-print-local></a>
 
-### 操作系统诊断工具 {#id12}
+## 推荐的硬件测试 {#recommended-hardware-tests}
+
+<a id="id12" data-td-print-local></a>
+
+### 操作系统诊断工具 {#operating-system-diagnostic-tools}
 
 如果你无法运行 [`mc support diag`](/zh/reference/minio-mc/mc-support-diag/#command-mc.support.diag)，或者其结果出现异常，可以改用操作系统默认提供的工具。
 
@@ -493,7 +517,9 @@ exit 0
 
    该操作会返回已读取文件数量、总读取字节数、操作总耗时（秒）以及某种字节每秒表示的读取速度。
 
-### 第三方诊断工具 {#id13}
+<a id="id13" data-td-print-local></a>
+
+### 第三方诊断工具 {#third-party-diagnostic-tools}
 
 I/O 控制器测试
 
@@ -532,7 +558,9 @@ iozone -s 1g -r 4m -i 0 -i 1 -i 2 -I -t 160 -F /mnt/sdb1/tmpfile.{1..16} /mnt/sd
   </tbody>
 </table>
 
-## SILO 本地诊断工具 {#minio}
+<a id="minio" data-td-print-local></a>
+
+## SILO 本地诊断工具 {#recommended-tools-for-minio-subscriptions}
 
 > SILO 的本地诊断工具不要求 MinIO 订阅，也不会自动上传。管理员自行检查和分享结果。
 

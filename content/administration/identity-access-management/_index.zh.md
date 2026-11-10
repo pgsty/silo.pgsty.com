@@ -4,7 +4,7 @@ url: "/zh/administration/identity-access-management/"
 weight: 140
 icon: fa-solid fa-users-gear
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/identity-access-management.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="minio-authentication-and-identity-management"></a>
@@ -24,13 +24,14 @@ MinIO 要求客户端在每次发起新操作时同时完成认证与授权。
 
 MinIO 同时支持内部和外部身份管理：
 
-| IDentity Provider (IDP) | 说明 |
-| --- | --- |
-| [MinIO Internal IDP](/zh/administration/identity-access-management/minio-identity-management/#minio-internal-idp) | 提供内置身份管理功能。 |
-| [OpenID](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid) | 支持通过兼容 OpenID Connect (OIDC) 的服务管理身份。 |
-| [MinIO Authentication Plugin](/zh/administration/identity-access-management/pluggable-authentication/#minio-external-identity-management-plugin) | 支持使用 MinIO Authentication Plugin 扩展对接自定义外部身份管理器。 |
-| [Active Directory / LDAP](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap) | 支持通过 Active Directory 或 LDAP 服务管理身份。 |
-| [Access Management Plugin](/zh/administration/identity-access-management/pluggable-authorization/#minio-external-access-management-plugin) | 支持使用 MinIO Access Management Plugin 扩展对接自定义外部访问管理器。 |
+| IDentity Provider (IDP)                                                                                                                          | 说明                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| [MinIO Internal IDP](/zh/administration/identity-access-management/minio-identity-management/#minio-internal-idp)                                | 提供内置身份管理功能。                                                 |
+| [OpenID](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid)                        | 支持通过兼容 OpenID Connect (OIDC) 的服务管理身份。                    |
+| [MinIO Authentication Plugin](/zh/administration/identity-access-management/pluggable-authentication/#minio-external-identity-management-plugin) | 支持使用 MinIO Authentication Plugin 扩展对接自定义外部身份管理器。    |
+| [Active Directory / LDAP](/zh/administration/identity-access-management/ad-ldap-access-management/#minio-external-identity-management-ad-ldap)   | 支持通过 Active Directory 或 LDAP 服务管理身份。                       |
+| [Access Management Plugin](/zh/administration/identity-access-management/pluggable-authorization/#minio-external-access-management-plugin)       | 支持使用 MinIO Access Management Plugin 扩展对接自定义外部访问管理器。 |
+{.wide .expand}
 
 完成认证后，MinIO 会根据该已认证身份是否 *有权* 对指定资源执行该操作，决定允许还是拒绝客户端请求。
 

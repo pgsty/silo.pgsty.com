@@ -6,9 +6,10 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**SILO 20261026 / Console 2.5.1：** Console 的 Metrics 页面使用 Metrics V3 指标，按节点聚合并明确区分“真实零值”与“缺失数据”。Overview 页面展示的是 Server 上报的裸盘总容量（而非扣除纠删码开销后的可用容量估算）；存储桶列表为实时读取，对象数量与空间占用则由后台扫描器统计，查看时请留意扫描时间。详见[Console 发布说明](/zh/blog/release/console-2.5.1/#interface)与[指标映射文档](https://github.com/pgsty/silo-console/blob/v2.5.1/docs/metrics-v3.md)。
+**[SILO 20261109](/zh/blog/release/silo-20261109/) / [Console 2.7.0](/zh/blog/release/console-2.7.0/)：** Console 的 Metrics 页面使用 Metrics V3 指标，按节点聚合并明确区分“真实零值”与“缺失数据”。Overview 页面展示的是 Server 上报的裸盘总容量（而非扣除纠删码开销后的可用容量估算）；存储桶列表为实时读取，对象数量与空间占用则由后台扫描器（或 Console 2.7.0 可选的 `console usage-worker`）统计。在 SILO 20261109 中，复制工作协程指标在复制工作池不存在时不会触发 panic，并继续保留历史均值和峰值计数（[`099b7ddf3`](https://github.com/pgsty/silo/commit/099b7ddf37b5a5e6d672604f1190fbab26448c20)）；实时批处理指标则保留暂停原因以及跳过或拒绝计数（[#325](https://github.com/pgsty/silo/issues/325)）。详见 [Console 2.7.0 发布说明](/zh/blog/release/console-2.7.0/)与 [Metrics V3 指标映射参考](https://github.com/pgsty/silo-console/blob/v2.7.0/docs/metrics-v3.md)。
 
 <a id="prometheus"></a>
+<a id="monitoring-and-alerting-using-prometheus"></a>
 <a id="minio-metrics-collect-using-prometheus"></a>
 
 - [使用 MinIO 和 Prometheus 进行监控：概览](https://youtu.be/A3vCDaFWNNs?ref=docs)
@@ -19,9 +20,9 @@ MinIO 使用 [Prometheus 数据模型](https://prometheus.io/docs/concepts/data_
 - 配置 Prometheus 服务，抓取并展示 MinIO 部署的指标
 - 基于某个 MinIO 指标配置 Alert Rule，以触发 AlertManager 动作
 
-## 20261026 推荐的 Metrics V3 抓取 {#metrics-v3}
+## 20261109 推荐的 Metrics V3 抓取 {#metrics-v3}
 
-新部署以及 Console 2.5 的 Metrics 页面建议抓取 V3 指标。使用 mcli 20261026 显式指定 API 版本即可生成配置：
+新部署以及 Console 2.7.0 的 Metrics 页面应抓取 Metrics V3 指标。使用 [mcli 20261109](/zh/blog/release/mcli-20261109/) 显式传入 `--api-version v3` 即可生成配置：
 
 ```shell
 mcli admin prometheus generate mysilo --api-version v3
@@ -44,9 +45,13 @@ mcli admin prometheus generate mysilo --api-version v3
 > - 已有可通过网络访问 Prometheus 部署的 MinIO 部署
 > - 本地主机已安装 [`mc`](/zh/reference/minio-mc/#command-mc)，并已配置为可 [访问](/zh/reference/minio-mc/mc-alias-set/#alias) MinIO 部署
 
-## 配置 Prometheus 收集 MinIO 指标并触发告警 {#prometheus-minio}
+<a id="prometheus-minio" data-td-print-local></a>
 
-### 1) 生成抓取配置 {#id2}
+## 配置 Prometheus 收集 MinIO 指标并触发告警 {#configure-prometheus-to-collect-and-alert-using-minio-metrics}
+
+<a id="id2" data-td-print-local></a>
+
+### 1) 生成抓取配置 {#generate-the-scrape-configuration}
 
 使用 [`mc admin prometheus generate`](/zh/reference/minio-mc-admin/mc-admin-prometheus-generate/#command-mc.admin.prometheus.generate) 命令生成 Prometheus 执行抓取请求所需的 scrape 配置：
 
@@ -160,7 +165,9 @@ scrape_configs:
 
   对于 Kubernetes 基础设施上的 MinIO Tenant，如果使用的是同一集群中的 Prometheus 集群，则可以指定 `minio` service 的 DNS 名称。 否则，你可以指定已配置为向 MinIO Tenant 路由连接的 ingress 或 load balancer 端点。
 
-### 2) 使用更新后的配置重启 Prometheus {#id3}
+<a id="id3" data-td-print-local></a>
+
+### 2) 使用更新后的配置重启 Prometheus {#restart-prometheus-with-the-updated-configuration}
 
 将上一步生成的目标 `scrape_configs` job 追加到配置文件中：
 
@@ -233,7 +240,9 @@ scrape_configs:
 prometheus --config.file=prometheus.yaml
 ```
 
-### 3) 分析已采集指标 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 3) 分析已采集指标 {#analyze-collected-metrics}
 
 Prometheus 内置 [expression browser](https://prometheus.io/docs/prometheus/latest/getting_started/#using-the-expression-browser)。 你可以在其中执行查询，以分析已采集的指标。
 
@@ -266,24 +275,26 @@ MinIO 建议将以下指标作为基础监控项。
 
 所有可用指标的信息请参见 [指标与告警](/zh/operations/monitoring/metrics-and-alerts/#minio-metrics-and-alerts)。
 
-| 指标 | 说明 |
-| --- | --- |
-| `minio_node_drive_free_bytes` | 驱动器上的总可用存储空间。 |
-| `minio_node_drive_free_inodes` | 总空闲 inode 数量。 |
-| `minio_node_drive_latency_us` | 最近一分钟内驱动器 API 存储操作的平均延迟，单位为 µs。 |
-| `minio_node_drive_offline_total` | 该节点中离线驱动器的总数。 |
-| `minio_node_drive_online_total` | 该节点中在线驱动器的总数。 |
-| `minio_node_drive_total` | 该节点中的驱动器总数。 |
-| `minio_node_drive_total_bytes` | 驱动器上的总存储空间。 |
-| `minio_node_drive_used_bytes` | 驱动器上已使用的存储空间总量。 |
-| `minio_node_drive_errors_timeout` | 自 server 启动以来驱动器超时错误的总数。 |
+| 指标                                   | 说明                                                      |
+| -------------------------------------- | --------------------------------------------------------- |
+| `minio_node_drive_free_bytes`          | 驱动器上的总可用存储空间。                                |
+| `minio_node_drive_free_inodes`         | 总空闲 inode 数量。                                       |
+| `minio_node_drive_latency_us`          | 最近一分钟内驱动器 API 存储操作的平均延迟，单位为 µs。    |
+| `minio_node_drive_offline_total`       | 该节点中离线驱动器的总数。                                |
+| `minio_node_drive_online_total`        | 该节点中在线驱动器的总数。                                |
+| `minio_node_drive_total`               | 该节点中的驱动器总数。                                    |
+| `minio_node_drive_total_bytes`         | 驱动器上的总存储空间。                                    |
+| `minio_node_drive_used_bytes`          | 驱动器上已使用的存储空间总量。                            |
+| `minio_node_drive_errors_timeout`      | 自 server 启动以来驱动器超时错误的总数。                  |
 | `minio_node_drive_errors_availability` | 自 server 启动以来驱动器 I/O 错误、权限拒绝和超时的总数。 |
-| `minio_node_drive_io_waiting` | 驱动器上等待中的 I/O 操作总数。 |
+| `minio_node_drive_io_waiting`          | 驱动器上等待中的 I/O 操作总数。                           |
 {.wide .expand}
 {{< /tab >}}
 {{< /tabs >}}
 
-### 4) 使用 MinIO 指标配置告警规则 {#minio}
+<a id="minio" data-td-print-local></a>
+
+### 4) 使用 MinIO 指标配置告警规则 {#configure-an-alert-rule-using-minio-metrics}
 
 你必须在 Prometheus 部署上配置 [Alert Rules](https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/)，以根据已采集的 MinIO 指标触发告警。
 
@@ -321,6 +332,8 @@ rule_files:
 
 一旦触发，Prometheus 会将告警发送到已配置的 AlertManager 服务。
 
-## 仪表板 {#id5}
+<a id="id5" data-td-print-local></a>
+
+## 仪表板 {#dashboards}
 
 MinIO 提供 Grafana 仪表板，用于展示由 Prometheus 采集的指标。 更多信息请参见 [使用 Grafana 监控 MinIO Server](/zh/operations/monitoring/grafana/#minio-grafana)

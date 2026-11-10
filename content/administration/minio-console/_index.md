@@ -12,7 +12,7 @@ upstream_modified: true
 
 The MinIO Console is a rich graphical user interface that provides similar functionality to the [`mc`](/reference/minio-mc/#command-mc) command line tool.
 
-<img src="/images/silo-console/console-object-browser.webp" alt="MinIO Console Landing Page provides a view of the Object Browser for the authenticated user" style="max-width: 600px; height: auto;" />
+![Silo Console Landing Page provides a view of the Object Browser for the authenticated user](/images/silo-console/console-object-browser.webp){width="600"}
 
 This page provides an overview of the MinIO Console and describes configuration options and instructions for logging in.
 
@@ -20,9 +20,9 @@ This page provides an overview of the MinIO Console and describes configuration 
 
 You can use the MinIO Console for administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration.
 
-SILO embeds the maintained Silo Console in the server. The [Silo Console repository](https://github.com/pgsty/silo-console) documents the downstream source, releases, and compatibility changes; standalone deployment is an advanced integration path and must use a Console version compatible with the target server release.
+[SILO 20261109](/blog/release/silo-20261109/) embeds [Console v2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`). The [Silo Console repository](https://github.com/pgsty/silo-console) documents the downstream source, releases, and compatibility changes; standalone deployment is an advanced integration path and must use a Console version compatible with the target server release.
 
-Since [Console v2.7.0](/blog/release/console-2.7.0/), the Console UI offers ten languages (English, Simplified Chinese, French, German, Russian, Spanish, Brazilian Portuguese, Japanese, Arabic with a right-to-left layout, and Turkish), selectable from the language menu or the command palette ([design record](/blog/design/console-languages/)). Standalone container images (`v2.7.0+`) also include the root CA bundle (`/etc/ssl/certs/ca-certificates.crt`) and a writable `/tmp` directory (`1777`) for outbound HTTPS and temporary file operations.
+In [Console v2.7.0](/blog/release/console-2.7.0/), the Console UI provides ten languages (English, Simplified Chinese, French, German, Russian, Spanish, Brazilian Portuguese, Japanese, Arabic with a right-to-left layout, and Turkish), selectable from the language menu or the command palette ([design record](/blog/design/console-languages/)). Console serves interactive API documentation with Redoc 3 at `/api/v1/docs`, where `/swagger.json` routes directly to the API instead of the frontend SPA fallback. Standalone `docker.io/pgsty/silo-console:v2.7.0` includes the UBI system CA bundle (`/etc/ssl/certs/ca-certificates.crt`) and a writable `/tmp` directory (`1777`) for outbound HTTPS and temporary file operations.
 
 ### Supported Browsers {#supported-browsers}
 
@@ -107,18 +107,23 @@ The MinIO Console displays a login screen for unauthenticated users. The Console
 For deployments configured with multiple [identity managers](/administration/identity-access-management/#minio-authentication-and-identity-management), select the **Other Authentication Methods** dropdown to select one of the other configured identity providers. You can also log in using credentials generated using a [Security Token Service (STS)](/developers/security-token-service/#minio-security-token-service) API.
 
 > [!NOTE]
-> **Try out the Console using MinIO’s Play testing environment**
+> **Evaluate the Console locally with `docker.io/pgsty/silo`**
 >
-> You can explore the Console using [https://play.min.io:9443](https://play.min.io:9443). Log in with the following credentials:
+> Run a disposable local container to test the embedded Console:
 >
-> - Username: `Q3AM3UQ867SPQQA43P2F`
-> - Password: `zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG`
+> ```shell
+> docker run --rm -p 9000:9000 -p 9001:9001 \
+>   -e MINIO_ROOT_USER=silo-admin \
+>   -e MINIO_ROOT_PASSWORD=change-me-strong-secret \
+>   docker.io/pgsty/silo:RELEASE.2026-11-09T00-00-00Z \
+>   server /data --console-address ":9001"
+> ```
 >
-> The Play Console connects to the MinIO Play deployment at [https://play.min.io](https://play.min.io). You can also access this deployment using [`mc`](/reference/minio-mc/#command-mc) and using the `play` alias.
+> Open `http://127.0.0.1:9001` in a browser and sign in with the configured root credentials. You can also connect [`mc`](/reference/minio-mc/#command-mc) (`mcli`) to `http://127.0.0.1:9000`.
 
 ## Documentation {#documentation}
 
-The **Documentation** tab opens this documentation site in a separate browser window or tab.
+The **Documentation** link opens this documentation site in a separate browser tab using locale-aware routing: Simplified Chinese opens `/zh/` pages, and all other UI languages open the English documentation. Console also exposes Redoc 3 API documentation at `/api/v1/docs` (backed by `/swagger.json`).
 
 ## Available Tasks {#available-tasks}
 
@@ -126,5 +131,5 @@ Once logged in to the MinIO Console, users can perform many kinds of tasks.
 
 - [Manage objects](/administration/console/managing-objects/#minio-console-managing-objects) by browsing or uploading objects, managing bucket settings, or creating tiers.
 - [Review or modify identity and security](/administration/console/security-and-access/#minio-console-security-access) with access keys, policies, and Identity Provider settings.
-- [Monitor the health and activities](/administration/console/managing-deployment/#minio-console-managing-deployment) with metrics, notifications, or site replication
-- [Manage your deployment’s license](/administration/console/subnet-registration/#minio-console-subscription)
+- [Monitor the health and activities](/administration/console/managing-deployment/#minio-console-managing-deployment) with metrics, notifications, or site replication.
+- [Run local diagnostics and download health reports](/administration/console/subnet-registration/#minio-console-subscription) without external telemetry or commercial subscription registration.

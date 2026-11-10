@@ -126,16 +126,13 @@ This section contains the following subsections.
 - Heal
 - Scanner
 - Etcd
-- Logger Webhook
-- Audit [Webhook](/administration/monitoring/publish-events-to-webhook/#minio-bucket-notifications-publish-webhook)
-- Audit [Kafka](/administration/monitoring/publish-events-to-kafka/#minio-bucket-notifications-publish-kafka)
+- [Logger Webhook](/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-regular)
+- Audit [Webhook](/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-audit)
+- Audit [Kafka](/reference/minio-server/settings/metrics-and-logging/#minio-server-envvar-logging-audit-kafka)
 
 > [!NOTE]
-> **Added: Console**
->
-> v0.24.0
->
-> Environment variable configuration settings override any customizations added in the MinIO Console. Hover your mouse cover over a configuration field to display a tooltip that indicates whether an environment variable controls the setting.
+> - **Environment overrides (Console v0.24.0+):** Environment variable configuration settings override customizations saved in the MinIO Console. Hover over a configuration field to display a tooltip indicating whether an environment variable controls that setting.
+> - **Webhook reload persistence ([SILO 20261109](/blog/release/silo-20261109/), [#259](https://github.com/pgsty/silo/issues/259)):** Peer configuration reloads keep configured `audit_webhook` and `logger_webhook` targets active across all server nodes in the deployment.
 
 Some subsections may not be visible if the authenticated user does not have the [required administrative permissions](/administration/identity-access-management/policy-based-access-control/#minio-policy-mc-admin-actions).
 

@@ -28,6 +28,8 @@ The following procedure adds a new NATS service endpoint for supporting [bucket 
 
 This procedure uses the [`mc`](/reference/minio-mc/#command-mc) command line tool for certain actions. See the `mc` [Quickstart](/reference/minio-mc/#mc-install) for installation instructions.
 
+[SILO 20261109](/blog/release/silo-20261109/) updates `github.com/nats-io/jwt/v2` to `v2.8.3` and `github.com/nats-io/nkeys` to `v0.4.17` (validated against `nats-server v2.15.2`), rejecting identity-point and small-order Ed25519 public keys in NATS credentials.
+
 ### 1) Add the NATS Endpoint to MinIO {#add-the-nats-endpoint-to-minio}
 
 You can configure a new NATS service endpoint using either environment variables *or* by setting runtime configuration settings.
@@ -38,49 +40,47 @@ MinIO supports specifying the NATS service endpoint and associated configuration
 
 The following example code sets *all* environment variables related to configuring an NATS service endpoint. The minimum *required* variables are [`MINIO_NOTIFY_NATS_ADDRESS`](/reference/minio-server/settings/notifications/nats/#envvar.MINIO_NOTIFY_NATS_ADDRESS) and [`MINIO_NOTIFY_NATS_SUBJECT`](/reference/minio-server/settings/notifications/nats/#envvar.MINIO_NOTIFY_NATS_SUBJECT):
 
-> [!NOTE]
-> **Windows**
->
-> ```shell
->    set MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
->    set MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
->    set MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
-> ```
+**Windows**
 
-> [!NOTE]
-> **Linux and macOS**
->
-> ```shell
->    export MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
->    export MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
->    export MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
-> ```
+```shell
+set MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
+set MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
+set MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
+```
+
+**Linux and macOS**
+
+```shell
+export MINIO_NOTIFY_NATS_ENABLE_<IDENTIFIER>="on"
+export MINIO_NOTIFY_NATS_ADDRESS_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_SUBJECT_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_USERNAME_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_PASSWORD_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_TOKEN_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_TLS_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_TLS_SKIP_VERIFY_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_PING_INTERVAL_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_QUEUE_DIR_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_QUEUE_LIMIT_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_CERT_AUTHORITY_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_CLIENT_CERT_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_CLIENT_KEY_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_COMMENT_<IDENTIFIER>="<string>"
+export MINIO_NOTIFY_NATS_JETSTREAM_<IDENTIFIER>="<string>"
+```
 
 - Replace `<IDENTIFIER>` with a unique descriptive string for the NATS service endpoint. Use the same `<IDENTIFIER>` value for all environment variables related to the new target service endpoint. The following examples assume an identifier of `PRIMARY`.
 

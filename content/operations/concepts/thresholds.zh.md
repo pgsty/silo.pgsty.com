@@ -14,7 +14,9 @@ math: true
 
 有关相关建议和要求，请参阅 [hardware](/zh/operations/checklists/hardware/#minio-hardware-checklist) 和 [software](/zh/operations/checklists/software/#minio-software-checklists)。
 
-## S3 API 限制 {#s3-api}
+<a id="s3-api" data-td-print-local></a>
+
+## S3 API 限制 {#s3-api-limits}
 
 <table>
   <thead>
@@ -75,25 +77,32 @@ math: true
   </tbody>
 </table>
 
-## 纠删码限制 {#id3}
+<a id="id3" data-td-print-local></a>
 
-| 项目 | 规格 |
-| --- | --- |
-| 每个集群的最大服务器数 | 无限制 |
-| 最小服务器数 | 1 |
-| 当服务器数为 1 时，每台服务器的最少驱动器数 | 1（适用于 <abbr title="单机单盘">SNSD</abbr> 部署，此类部署不提供额外可靠性或可用性） |
-| 当服务器数为 2 或更多时，每台服务器的最少驱动器数 | 1 |
-| 每台服务器的最大驱动器数 | 无限制 |
-| 每个多盘纠删集合的最少磁盘数 | 2 |
-| 每个纠删集合的最多磁盘数 | 16 |
-| 对象读仲裁 | `K=N-M` |
-| 对象写仲裁 | `K>M` 时为 `K`；`K=M` 时为 `K+1` |
+## 纠删码限制 {#erasure-code-limits}
+
+| 项目                                              | 规格                                                                                  |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 每个集群的最大服务器数                            | 无限制                                                                                |
+| 最小服务器数                                      | 1                                                                                     |
+| 当服务器数为 1 时，每台服务器的最少驱动器数       | 1（适用于 <abbr title="单机单盘">SNSD</abbr> 部署，此类部署不提供额外可靠性或可用性） |
+| 当服务器数为 2 或更多时，每台服务器的最少驱动器数 | 1                                                                                     |
+| 每台服务器的最大驱动器数                          | 无限制                                                                                |
+| 每个多盘纠删集合的最少磁盘数                      | 2                                                                                     |
+| 每个纠删集合的最多磁盘数                          | 16                                                                                    |
+| 对象读仲裁                                        | `K=N-M`                                                                               |
+| 对象写仲裁                                        | `K>M` 时为 `K`；`K=M` 时为 `K+1`                                                      |
+{.wide .expand}
 
 其中，`N` 是单个纠删集合的磁盘数，`M` 是对象的校验分片数，`K` 是数据分片数。上述公式用于保存在本地的普通非空对象；读取还要求分片完好并满足相应的 [元数据仲裁](/zh/operations/concepts/availability-and-resiliency/#minio-availability-resiliency)。降级集合中的新写入可能采用更高的校验值。只有在 `K=M=N/2` 时，读写仲裁才分别为 `N/2` 和 `N/2+1`。单盘 `EC:0` 不提供纠删码冗余；双盘 `EC:1` 读取需要 1 盘，写入需要 2 盘。
 
-## 对象名称限制 {#id4}
+<a id="id4" data-td-print-local></a>
 
-### 文件系统和操作系统限制 {#id5}
+## 对象名称限制 {#object-name-limitations}
+
+<a id="id5" data-td-print-local></a>
+
+### 文件系统和操作系统限制 {#filesystem-and-operating-system-restrictions}
 
 MinIO 中的对象名称主要受本地操作系统和文件系统限制。 Windows 和某些其他操作系统会限制包含特定特殊字符的文件系统名称，例如 `^`、`*`、`|`、`\`、`/`、`&`、`"` 或 `;`。
 
@@ -105,7 +114,9 @@ MinIO 中的对象名称主要受本地操作系统和文件系统限制。 Wind
 
 MinIO 建议生产工作负载使用基于 XFS 文件系统的 Linux 操作系统。
 
-### 冲突对象 {#id6}
+<a id="id6" data-td-print-local></a>
+
+### 冲突对象 {#conflicting-objects}
 
 应用必须为所有对象分配不冲突的唯一键。 这包括避免创建与父对象或同级对象名称发生冲突的对象。 当名称发生冲突时，MinIO 在该位置的 LIST 操作会返回空结果集。
 

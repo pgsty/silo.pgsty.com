@@ -3,7 +3,7 @@ title: "Object Deletion"
 url: "/administration/object-management/object-delete/"
 weight: 30
 upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e2c7026d2dd/source/administration/object-management/object-delete.rst
-upstream_modified: false
+upstream_modified: true
 ---
 
 <a id="object-deletion"></a>
@@ -29,12 +29,13 @@ MinIO uses a [policy based access control](/administration/identity-access-manag
 The required action is selected from the request, not merely from whether the
 bucket has versioning enabled:
 
-| Request | Required action |
-| --- | --- |
-| `DELETE` without `versionId` | `s3:DeleteObject` |
-| `DELETE` with a version UUID | `s3:DeleteObjectVersion` |
-| `DELETE` with `versionId=null` | `s3:DeleteObjectVersion` |
-| `DeleteObjects` | Evaluated independently for each XML entry |
+| Request                        | Required action                            |
+| ------------------------------ | ------------------------------------------ |
+| `DELETE` without `versionId`   | `s3:DeleteObject`                          |
+| `DELETE` with a version UUID   | `s3:DeleteObjectVersion`                   |
+| `DELETE` with `versionId=null` | `s3:DeleteObjectVersion`                   |
+| `DeleteObjects`                | Evaluated independently for each XML entry |
+{.wide .expand}
 
 An explicit deny always takes precedence. Conditions using `s3:versionid` see
 the effective version ID of the object being deleted; a query parameter on the
@@ -44,7 +45,7 @@ outer `DeleteObjects` request does not replace an entry's `VersionId`.
 
 When performing a `DELETE` operation on an object in a bucket that does not have versioning enabled, the operation is straightforward. After verifying the user or service account has permission to perform the `DELETE` operation, MinIO permanently removes the object.
 
-The user or service account requesting the delete action the action must have the [`s3:DeleteObject`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-DeleteObject) action permission for the bucket and object.
+The user or service account requesting the delete action must have the [`s3:DeleteObject`](/administration/identity-access-management/policy-based-access-control/#policy-action.s3-DeleteObject) action permission for the bucket and object.
 
 ## Versioned Objects {#versioned-objects}
 
@@ -100,6 +101,12 @@ See the [scanner](/operations/concepts/scanner/#minio-concepts-scanner) page for
 
 With `JSON`, lifecycle rules can remove all versions of a deleted object after a specified number of days.
 
+Starting in [SILO 20261109](/blog/release/silo-20261109/), lifecycle expiration enforces the following safeguards:
+
+- **Exact-key delete-all scope:** `ExpiredObjectAllVersions` and `DelMarkerExpiration` act only on the expired object key rather than child keys below that prefix, and refuse deletion when the key still holds tiered or Object Lock protected versions ([#297](https://github.com/pgsty/silo/issues/297)).
+- **`DelMarkerExpiration`-only rules:** Rules whose sole action is `DelMarkerExpiration` execute as configured ([#268](https://github.com/pgsty/silo/issues/268)).
+- **Multi-pool quorum and restored-copy expiry:** Lifecycle expiry evaluates under the object lock across all server pools and requires an authoritative quorum before deleting ([#278](https://github.com/pgsty/silo/issues/278)). Expiring a restored copy removes only the temporary local cache while keeping the object version and its remote-tier data intact ([#281](https://github.com/pgsty/silo/issues/281)).
+
 ## Retained Objects {#retained-objects}
 
 MinIO protects objects subject to a [locking rule](/administration/object-management/object-retention/#minio-object-locking) from being overwritten or deleted. These rules require that objects be retained until either the rule expires or is removed.
@@ -108,17 +115,21 @@ MinIO protects objects subject to a [locking rule](/administration/object-manage
 
 `DELETE` operations that specify an object version are subject to the retention rules. MinIO protects object versions subject to a lock from being overwritten or deleted until the lock expires or is removed.
 
+In [SILO 20261109](/blog/release/silo-20261109/), bulk `DeleteObjects` requests check physical version removals sequentially under the same mutation lock used for retention and legal-hold updates, merging protection across all server pools (commit [`6ef3a52fc`](https://github.com/pgsty/silo/commit/6ef3a52fc); large version-purge batches in Object Lock buckets therefore take longer, while delete-marker creation and ordinary buckets retain the concurrent bulk path). Bulk deletion also checks Object Lock retention and legal hold on directory objects before removing a directory `null` version (commit [`aa2d79daf`](https://github.com/pgsty/silo/commit/aa2d79daf)).
+
 ## Replicated Objects {#replicated-objects}
 
 Replication duplicates objects from one location to another. MinIO supports replication at the bucket level or the cluster (“site”) level.
 
 Delete operations may or may not replicate, depending on the type of replication and how the replication is configured.
 
+In [SILO 20261109](/blog/release/silo-20261109/), replicated deletes preserve the target's legal hold and retention (commit [`7e9ee6bef`](https://github.com/pgsty/silo/commit/7e9ee6bef)): a source purge that bypassed `GOVERNANCE` retention does not bypass active protection on the target copy, so the target refuses the purge and the source retries. In addition, lifecycle-created delete markers and version purges are **not** replicated across bucket or site replication (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)), matching AWS S3 semantics where each replica bucket applies its own lifecycle configuration independently.
+
 ### Site Replication {#site-replication}
 
-For clusters with [multi-site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview) enabled, MinIO replicates all `delete` operations performed on any cluster to each of the other clusters in the peer group.
+For clusters with [multi-site replication](/operations/replication/multi-site-replication/#minio-site-replication-overview) enabled, SILO replicates explicit client `DELETE` operations performed on any cluster to each peer site in the group. Lifecycle-created delete markers and version purges do not replicate across sites (commit [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)).
 
-Delete behavior on any single peer follows the same processes as any MinIO deployment.
+Delete behavior on any single peer follows the same processes as any SILO deployment.
 
 ### Bucket Replication {#bucket-replication}
 
@@ -147,4 +158,4 @@ MinIO only replicates explicit client-driven delete operations. MinIO does *not*
 >
 > - A command removes `myphoto.jpg`. MinIO automatically trims the empty `/january/` prefix.
 > - A command then removes the `myotherphoto.jpg`. MinIO automatically trims the `/february/` prefix *and* the now-empty `/2021` prefix.
-> - A command removes the `NewYears.jpg` object. MinIO leaves the `/NYE21/` prefix remains in place since it was *explicitly* created.
+> - A command removes the `NewYears.jpg` object. MinIO leaves the `/NYE21/` prefix in place since it was *explicitly* created.

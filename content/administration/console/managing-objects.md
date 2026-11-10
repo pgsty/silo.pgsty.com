@@ -7,7 +7,7 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **Console 2.5.1 – 2.7.0 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page ([Console 2.5.1](/blog/release/console-2.5.1/#objects)). [Console 2.6.0](/blog/release/console-2.6.0/) adds on-demand folder size scans, bucket usage refresh with optional PostgreSQL worker persistence, pre-create bucket validation, and exact integer quota math; [Console 2.7.0](/blog/release/console-2.7.0/) expands the interface to ten languages and fixes usage-worker TLS, scheduling and folder sizes over plain HTTP.
+> **Console 2.5.1 – 2.7.0 updates:** The Tasks drawer tracks bounded transfers and bulk operations (canceling a task stops remaining batches without rolling back completed mutations); Text/Markdown/CSV previews display a notice when truncated at `1 MiB`; ZIP preview failures before the first response byte preserve the upstream S3 error status; and sorting, filtering, and Select All operate on the currently loaded page ([Console 2.5.1](/blog/release/console-2.5.1/#objects)). [Console 2.6.0](/blog/release/console-2.6.0/) adds on-demand folder size scans, bucket usage refresh with optional PostgreSQL worker persistence, pre-create bucket validation, and exact integer quota math. [Console 2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`, embedded in [SILO Server 20261109](/blog/release/silo-20261109/)) expands the interface to ten languages, enables **Calculate folder sizes** and SSE-C decryption-key copy over plain HTTP (`http://<ip>:9001`), rejects malformed or truncated multipart uploads with HTTP `400`, and fixes `console usage-worker` TLS trust, slice-summed scan budgets, shutdown/deletion persistence, and `HTTP 429` busy-scanner retries.
 
 <a id="managing-objects"></a>
 <a id="minio-console-managing-objects"></a>
@@ -22,7 +22,9 @@ You can use the MinIO Console to perform several of the bucket and object manage
 
 ## Object Browser {#object-browser}
 
-In the [Server 20261026](/blog/release/silo-20261026/#server-20261026), Console's `account-info` request reads the live bucket inventory so refreshing after creating or deleting a bucket immediately reflects the updated list (bucket usage totals remain scanner-derived). Server 20261018 serves a cached bucket inventory.
+In [SILO Server 20261026](/blog/release/silo-20261026/#server-20261026) and later, Console's `account-info` request reads the live bucket inventory so refreshing after creating or deleting a bucket immediately reflects the updated list (bucket usage totals remain scanner-derived). Server 20261018 serves a cached bucket inventory.
+
+In [Console v2.7.0](/blog/release/console-2.7.0/) (embedded in [SILO Server 20261109](/blog/release/silo-20261109/)), **Calculate folder sizes** and the SSE-C decryption-key copy button work over plain HTTP (`http://<ip>:9001`) without requiring a browser secure context, and malformed or truncated multipart uploads return a `400` client error instead of panicking the request handler.
 
 The Object Browser lists the buckets and objects the authenticated user has access to on the deployment.
 
@@ -47,18 +49,8 @@ The user can perform actions on the bucket’s objects, depending on the policie
 - [Delete](/administration/object-management/object-delete/#minio-object-delete)
 
 > [!NOTE]
-> **Added: Console**
->
-> v0.24.0
->
-> View the status of uploading or downloading objects with the object manager button available on the top right corner of the Console. If you have not uploaded or downloaded any objects during the current session, the button does not appear.
-
-> [!NOTE]
-> **Changed: Console**
->
-> v0.35.0
->
-> If you select multiple objects to download, MinIO creates a ZIP archive of those objects for downloading. You must unzip or uncompress this archive after downloading to access the files.
+> - **Added in Console v0.24.0:** View the status of uploading or downloading objects with the object manager button in the top-right corner of the Console. The button appears only after you upload or download objects during the current session.
+> - **Changed in Console v0.35.0:** Selecting multiple objects to download creates a ZIP archive of those objects. Decompress the archive after downloading to access the files.
 
 ### Multi-object downloads and sharing {#silo-downloads}
 
@@ -133,13 +125,13 @@ The tiering tab allows users with the appropriate permissions to:
 
 - Review the status and summary information for all configured remote tiers.
 - Create a tier for a new remote target to storage on another MinIO deployment, Google Cloud Storage, Amazon’s AWS S3, or Azure.
-- Cycle the access credentials for any of the configured tiers with the tier’s <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-pencil" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg> icon.
+- Cycle the access credentials for any of the configured tiers with the tier's edit icon.
 
 
 ## Usage scans (Console v2.6.0+) {#usage-scans}
 
 > [!NOTE]
-> **Component availability:** This section describes the usage scan and bucket refresh functionality shipped in [Console v2.6.0](/blog/release/console-2.6.0/) ([PR #70](https://github.com/pgsty/silo-console/pull/70)) and retained in [Console v2.7.0](/blog/release/console-2.7.0/), which also fixes the worker issues noted below. Server `20261026` embeds Console `v2.5.1`; `pgsty/silo` `main` embeds Console `v2.6.0` for the next Server release. A Console release and the corresponding embedded-Console dependency update in SILO Server are separate delivery steps. The supported integration target is `pgsty/silo`; upstream MinIO compatibility is best effort.
+> **Component availability:** This section describes the usage scan and bucket refresh functionality shipped in [Console v2.6.0](/blog/release/console-2.6.0/) ([PR #70](https://github.com/pgsty/silo-console/pull/70)) and updated in [Console v2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`). [SILO Server 20261109](/blog/release/silo-20261109/) embeds [Console v2.7.0](/blog/release/console-2.7.0/) (`4e91ae506e70`); Server `20261026` embeds Console `v2.5.1`. Updating standalone Console does not replace the Console embedded in an older `silo` binary. The supported integration target is `pgsty/silo`; upstream MinIO compatibility is best effort.
 
 <!-- Adapted from pgsty/silo-console PR #70, docs/FolderSizes.md.
 Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
@@ -149,7 +141,7 @@ Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
 The object browser lists S3 prefixes as folders. S3 does not attach a size to a
 prefix. **Calculate folder sizes** performs one recursive metadata scan of the
 current directory and fills its immediate folder rows with current-object
-sizes. It never downloads object contents. Opening a folder does not start a scan; the folder Refresh button starts one explicitly.
+sizes. It never downloads object contents, and in Console 2.7.0+ it works over plain HTTP (`http://<ip>:9001`) as well as HTTPS. Opening a folder does not start a scan; the folder Refresh button starts one explicitly.
 Use a folder's actions menu → **Calculate size** to narrow a large scan.
 
 **Include retained versions** additionally lists older object versions and delete
@@ -180,13 +172,14 @@ use server administrator credentials, change objects or expose anonymous scans.
 
 Operators can configure each Console process using these environment variables:
 
-| Variable | Default | Accepted range |
-| --- | --- | --- |
-| `CONSOLE_PREFIX_USAGE_TIMEOUT` | `10m` | `1s`–`1h` |
-| `CONSOLE_PREFIX_USAGE_MAX_ENTRIES` | `10000000` | 1–1000000000000 |
-| `CONSOLE_PREFIX_USAGE_MAX_FOLDERS` | `1000` | 1–10000 |
-| `CONSOLE_PREFIX_USAGE_MAX_CONCURRENT` | `2` | 1–64 |
-| `CONSOLE_PREFIX_USAGE_PROGRESS_INTERVAL` | `1s` | `100ms`–`30s` |
+| Variable                                 | Default    | Accepted range  |
+| ---------------------------------------- | ---------- | --------------- |
+| `CONSOLE_PREFIX_USAGE_TIMEOUT`           | `10m`      | `1s`–`1h`       |
+| `CONSOLE_PREFIX_USAGE_MAX_ENTRIES`       | `10000000` | 1–1000000000000 |
+| `CONSOLE_PREFIX_USAGE_MAX_FOLDERS`       | `1000`     | 1–10000         |
+| `CONSOLE_PREFIX_USAGE_MAX_CONCURRENT`    | `2`        | 1–64            |
+| `CONSOLE_PREFIX_USAGE_PROGRESS_INTERVAL` | `1s`       | `100ms`–`30s`   |
+{.wide .expand}
 
 Concurrency is per process. A busy process returns HTTP 429; the UI permits one
 active scan per browser view. A time, entry or child-folder limit returns a
@@ -257,8 +250,9 @@ Set `CONSOLE_USAGE_S3_ACCESS_KEY`, `CONSOLE_USAGE_S3_SECRET_KEY` and optionally
 ```
 
 No object-read, object-write or administrative action is needed. Console API
-requests independently probe the caller's root listing permissions before
-returning or refreshing any saved aggregate. A denied version-list request omits
+requests independently probe the caller's root listing permissions using a
+non-canceled authorization probe context (`8610671c1`) before returning or
+refreshing any saved aggregate. A denied version-list request omits
 retained bytes/counts, delete markers and version scan progress. SILO currently
 permits ListBucket as a compatibility fallback for ListBucketVersions; the API
 honors the permissions the storage server actually grants. Prefix-restricted
@@ -268,16 +262,16 @@ on every status request. API responses are `Cache-Control: no-store`.
 The worker subscribes to authenticated storage mutation notifications. Creates,
 overwrites, completed multipart uploads and removals invalidate the affected
 bucket. Since Console 2.7.0, deleting a bucket, including a force delete that
-emits no object events, also discards its saved totals at once, so a bucket
-re-created under the same name never shows them. Repeated or reordered events coalesce into one queued scan, rather than
+emits no object events, discards its saved totals immediately (`2ee525a7e`), so a bucket
+re-created under the same name never shows stale values. Repeated or reordered events coalesce into one queued scan, rather than
 adding or subtracting potentially duplicated byte deltas. Changes during a scan
 request a follow-up generation. Requests are durable in PostgreSQL, prioritized
 for explicit refreshes and claimed with expiring, fenced leases. Workers yield
 between bounded time slices; pagination resumes only after a whole object key
 and all its versions, so a key spanning multiple version pages is not skipped.
-Stopping a worker returns its in-progress scans to the queue with their
-checkpoints; another worker resumes them at once. When upgrading, stop all
-older workers before starting new ones: since 2.7.0 the scan budget is saved
+Stopping a worker persists pending bucket mutations (`082b23700`) and returns in-progress scans to the queue with their
+checkpoints so another worker resumes them immediately. When upgrading, stop all
+older workers before starting `2.7.0` workers: since 2.7.0 the active listing budget (`CONSOLE_USAGE_SCAN_TIMEOUT`, summed across slices without counting queue wait) is saved
 in the checkpoint, and older workers discard it.
 
 The live notification subscription has **no durable replay guarantee**. Startup
@@ -298,29 +292,29 @@ retries for about 30 seconds before reporting a bucket as failed.
 All names below start with `CONSOLE_USAGE_`. Durations use Go duration syntax.
 Invalid, missing required or incompatible settings fail closed.
 
-| Suffix | Default | Purpose |
-| --- | --- | --- |
-| `DATABASE_URL` | unset | PostgreSQL URI; opts web processes into persistent mode |
-| `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_SESSION_TOKEN` | unset | Dedicated worker identity; token optional |
-| `HTTP_ADDRESS` | `:9091` | Internal worker health/metrics listener |
-| `POOL_MAX_CONNECTIONS` | 4 | Connections per process |
-| `CONCURRENT_SCANS` | 1 | Concurrent worker scan slices |
-| `MAX_ENTRIES` | 100000000 | Maximum entries per full bucket scan |
-| `SCAN_TIMEOUT` | `30m` | Maximum listing time per full bucket scan, summed across slices; time queued behind other buckets is not counted (before 2.7.0: elapsed wall-clock time) |
-| `SCAN_SLICE` | `5s` | Fair scheduling slice, completed at a whole-key boundary |
-| `LEASE` | `2m` | Scan and observer lease lifetime |
-| `HEARTBEAT` | `15s` | Lease/coverage heartbeat and operation budget |
-| `PROGRESS_INTERVAL` | `1s` | Progress persistence cadence |
-| `POLL_INTERVAL` | `1s` | Queue and event flush cadence |
-| `EVENT_DEBOUNCE` | `5s` | Combine bursts of mutation events |
-| `MIN_SCAN_INTERVAL` | `1m` | Minimum spacing for automatic rescans; manual refresh bypasses it |
-| `RECONCILE_INTERVAL` | `15m` | Cheap new-bucket inventory check |
-| `FULL_RECONCILE_INTERVAL` | `24h` | Full safety-net scan, independent of immediate event/refresh work |
-| `RETRY_INTERVAL`, `MAX_RETRY_INTERVAL` | `30s`, `15m` | Exponential retry bounds |
-| `AUTH_CONCURRENCY` | 4 | Caller permission probes per API request |
-| `API_MAX_REQUESTS` | 8 | Concurrent usage API requests per Console process |
-| `REQUEST_TIMEOUT` | `15s` | Usage API deadline |
-| `UI_POLL_INTERVAL` | `2s` | Pending-work status polling; idle views poll at ten times this interval, capped at one minute |
+| Suffix                                               | Default      | Purpose                                                                                                                                                  |
+| ---------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                       | unset        | PostgreSQL URI; opts web processes into persistent mode                                                                                                  |
+| `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_SESSION_TOKEN` | unset        | Dedicated worker identity; token optional                                                                                                                |
+| `HTTP_ADDRESS`                                       | `:9091`      | Internal worker health/metrics listener                                                                                                                  |
+| `POOL_MAX_CONNECTIONS`                               | 4            | Connections per process                                                                                                                                  |
+| `CONCURRENT_SCANS`                                   | 1            | Concurrent worker scan slices                                                                                                                            |
+| `MAX_ENTRIES`                                        | 100000000    | Maximum entries per full bucket scan                                                                                                                     |
+| `SCAN_TIMEOUT`                                       | `30m`        | Maximum listing time per full bucket scan, summed across slices; time queued behind other buckets is not counted (before 2.7.0: elapsed wall-clock time) |
+| `SCAN_SLICE`                                         | `5s`         | Fair scheduling slice, completed at a whole-key boundary                                                                                                 |
+| `LEASE`                                              | `2m`         | Scan and observer lease lifetime                                                                                                                         |
+| `HEARTBEAT`                                          | `15s`        | Lease/coverage heartbeat and operation budget                                                                                                            |
+| `PROGRESS_INTERVAL`                                  | `1s`         | Progress persistence cadence                                                                                                                             |
+| `POLL_INTERVAL`                                      | `1s`         | Queue and event flush cadence                                                                                                                            |
+| `EVENT_DEBOUNCE`                                     | `5s`         | Combine bursts of mutation events                                                                                                                        |
+| `MIN_SCAN_INTERVAL`                                  | `1m`         | Minimum spacing for automatic rescans; manual refresh bypasses it                                                                                        |
+| `RECONCILE_INTERVAL`                                 | `15m`        | Cheap new-bucket inventory check                                                                                                                         |
+| `FULL_RECONCILE_INTERVAL`                            | `24h`        | Full safety-net scan, independent of immediate event/refresh work                                                                                        |
+| `RETRY_INTERVAL`, `MAX_RETRY_INTERVAL`               | `30s`, `15m` | Exponential retry bounds                                                                                                                                 |
+| `AUTH_CONCURRENCY`                                   | 4            | Caller permission probes per API request                                                                                                                 |
+| `API_MAX_REQUESTS`                                   | 8            | Concurrent usage API requests per Console process                                                                                                        |
+| `REQUEST_TIMEOUT`                                    | `15s`        | Usage API deadline                                                                                                                                       |
+| `UI_POLL_INTERVAL`                                   | `2s`         | Pending-work status polling; idle views poll at ten times this interval, capped at one minute                                                            |
 {.wide .expand}
 
 Entry counts, scan duration, concurrency and request budgets have validated

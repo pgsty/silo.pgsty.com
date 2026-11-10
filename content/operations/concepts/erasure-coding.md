@@ -128,11 +128,11 @@ Setting the parity for a deployment is a balance between availability and total 
 
 The following table lists the outcome of varying erasure code parity levels on a MinIO deployment consisting of 1 node and 16 1TB drives:
 
-| Parity | Total Storage | Storage Ratio | Minimum Drives for Read Operations | Minimum Drives for Write Operations |
-| --- | --- | --- | --- | --- |
-| `EC: 4` (Default) | 12 Tebibytes | 0.750 | 12 | 12 |
-| `EC: 6` | 10 Tebibytes | 0.625 | 10 | 10 |
-| `EC: 8` | 8 Tebibytes | 0.500 | 8 | 9 |
+| Parity            | Total Storage | Storage Ratio | Minimum Drives for Read Operations | Minimum Drives for Write Operations |
+| ----------------- | ------------- | ------------- | ---------------------------------- | ----------------------------------- |
+| `EC: 4` (Default) | 12 Tebibytes  | 0.750         | 12                                 | 12                                  |
+| `EC: 6`           | 10 Tebibytes  | 0.625         | 10                                 | 10                                  |
+| `EC: 8`           | 8 Tebibytes   | 0.500         | 8                                  | 9                                   |
 {.wide .expand}
 
 <a id="minio-ec-bitrot"></a>

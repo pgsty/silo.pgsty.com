@@ -6,9 +6,10 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**版本说明：** 本页命令与输出示例以 [Server 20261026](/zh/blog/release/silo-20261026/) 为蓝本，现已公开发布；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261026/#upgrade)。
+**版本说明：** 本页命令与输出示例以 [Server 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`，软件包版本 `20261109000000.0.0`）为基准；下载与升级要求见[下载页](/zh/download/)和[发布说明](/zh/blog/release/silo-20261109/#upgrade)。
 
 <a id="redhat-linux-minio"></a>
+<a id="deploy-minio-on-redhat-linux"></a>
 <a id="deploy-minio-rhel"></a>
 
 本页介绍如何在 RHEL 及其二进制兼容 Linux 发行版上部署 Silo。
@@ -19,13 +20,19 @@ Silo 为 x86-64 与 ARM64 发布 RPM 软件包和独立 Linux 归档。项目没
 
 本步骤也包含对 单机多盘 (SNMD) 和 单机单盘 (SNSD) 拓扑的指导，适用于早期开发和评估环境。
 
-## 注意事项 {#id2}
+<a id="id2" data-td-print-local></a>
 
-### 检查清单 {#id3}
+## 注意事项 {#considerations}
+
+<a id="id3" data-td-print-local></a>
+
+### 检查清单 {#review-checklists}
 
 在执行本步骤前，请先阅读我们发布的硬件、软件和安全检查清单。
 
-### 纠删码校验 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 纠删码校验 {#erasure-coding-parity}
 
 SILO 根据**每个纠删集合的盘数**选择默认校验块数量，而非按集群总盘数计算；8–16 盘集合默认 `EC:4`，较小集合使用不同默认值。完整对应关系与可配置范围见[存储类设置](/zh/reference/minio-server/settings/storage-class/)。校验布局按对象保存，可用性须按该对象所在集合和实际布局评估。
 
@@ -33,7 +40,9 @@ SILO 根据**每个纠删集合的盘数**选择默认校验块数量，而非�
 
 虽然你可以随时更改纠删码校验设置，但以既有校验值写入的对象 **不会** 自动更新为新的校验设置。
 
-### 基于容量的规划 {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 基于容量的规划 {#capacity-based-planning}
 
 MinIO 建议在存储使用率达到 70% 之前，预先规划足以存放 **至少** 2 年数据的存储容量。 过于频繁地执行 [服务器池 扩容](/zh/operations/deployments/baremetal-expand-minio-deployment/#expand-minio-distributed)，或按“just-in-time”方式扩容，通常说明架构或规划存在问题。
 
@@ -41,21 +50,25 @@ MinIO 建议在存储使用率达到 70% 之前，预先规划足以存放 **至
 
 建议使用 MinIO [纠删码计算器](https://min.io/product/erasure-code-calculator)，围绕具体纠删码设置进行容量规划。
 
-<a id="procedure"></a>
+<a id="id6" data-td-print-local></a>
 
-## 步骤 {#id6}
+## 步骤 {#procedure}
 
-### 1. 下载 Silo RPM 包 {#minio-rpm}
+<a id="minio-rpm" data-td-print-local></a>
 
-从[下载与安装](/zh/download/#server)获取 x86-64 或 ARM64 RPM，校验发布摘要后安装：
+### 1. 下载 Silo RPM 包 {#download-the-minio-rpm}
+
+从[下载与安装](/zh/download/#server)获取版本 `20261109000000.0.0` 的 x86-64 或 ARM64 RPM，校验发布 SHA-256 摘要后安装：
 
 ```shell
-sudo dnf install ./silo-*.rpm
+sudo dnf install ./silo-20261109000000.0.0-*.rpm
 ```
 
 当前 Silo 发布不提供继承文档中提到的 `ppc64le` 或 `s390x` 软件包变体。
 
-### 2. 查看 `systemd` 服务文件 {#systemd}
+<a id="systemd" data-td-print-local></a>
+
+### 2. 查看 `systemd` 服务文件 {#review-the-systemd-service-file}
 
 `.rpm` 软件包会将以下 [systemd](https://www.freedesktop.org/wiki/Software/systemd/) 服务文件安装到 `/usr/lib/systemd/system/silo.service`：
 
@@ -109,7 +122,9 @@ WantedBy=multi-user.target
 
 从 MinIO 迁移时，保留现有数据所有者；按[软件包迁移说明](/zh/compatibility/binary/#user)为 `silo.service` 设置现有用户/组的 drop-in，不要为了改名递归修改已有数据。下列步骤的 `silo:silo` 适用于新部署；迁移部署应使用选定的实际服务账户。
 
-### 4. 启用 TLS 连接 {#tls}
+<a id="tls" data-td-print-local></a>
+
+### 4. 启用 TLS 连接 {#enable-tls-connectivity}
 
 为 MinIO 创建或提供 [传输层安全 (TLS)](/zh/operations/network-encryption/#minio-tls) 证书，以自动启用 server 与客户端之间的 HTTPS 安全连接。
 
@@ -133,7 +148,9 @@ SILO 连接其他节点、复制目标等服务时，使用操作系统信任库
 
 有关为 MinIO 配置 TLS 的更具体指导，包括通过 Server Name Indication (SNI) 支持多域名，请参阅 [网络加密（TLS）](/zh/operations/network-encryption/#minio-tls)。 你也可以跳过此步骤，以在未启用 TLS 的情况下部署。MinIO 强烈 *不建议* 在早期开发之外的场景中进行非 TLS 部署。
 
-### 5. 创建 MinIO 环境文件 {#id7}
+<a id="id7" data-td-print-local></a>
+
+### 5. 创建 MinIO 环境文件 {#create-the-minio-environment-file}
 
 在 `/etc/default/silo` 创建环境文件。 MinIO 服务将该文件作为 MinIO *以及* `silo.service` 文件所用全部 [环境变量](/zh/reference/minio-server/settings/#minio-server-environment-variables) 的来源。
 
@@ -266,7 +283,9 @@ MINIO_ROOT_PASSWORD=minio-secret-key-CHANGE-ME
 
 对于分布式部署，所有节点的 `/etc/default/silo` 环境文件 **必须** 完全一致。 可在每个节点上使用 `shasum -a 256 /etc/default/silo` 等工具验证其是否完全匹配。
 
-### 6. 启动 MinIO 部署 {#id8}
+<a id="id8" data-td-print-local></a>
+
+### 6. 启动 MinIO 部署 {#start-the-minio-deployment}
 
 使用 `systemctl start silo` 启动部署中的每个节点。
 
@@ -279,7 +298,7 @@ Silo 对象存储服务端
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-10-26T00-00-00Z (go1.27.3 linux/amd64)
+Version: RELEASE.2026-11-09T00-00-00Z (go1.27.3 linux/amd64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin
@@ -307,7 +326,9 @@ Status:         16 Online, 0 Offline.
 
 遵循我们的检查清单通常可以降低遇到这些或类似问题的风险。
 
-### 7. 连接到部署 {#id9}
+<a id="id9" data-td-print-local></a>
+
+### 7. 连接到部署 {#connect-to-the-deployment}
 
 {{< tabs group="console-cli" >}}
 {{< tab label="Console" value="console" >}}
@@ -315,7 +336,7 @@ Status:         16 Online, 0 Offline.
 
 使用上一步中的 **MINIO_ROOT_USER** 和 **MINIO_ROOT_PASSWORD** 登录。
 
-<img src="/images/silo-console/console-login.webp" alt="MinIO Console 登录页" style="max-width: 600px; height: auto;" />
+![Silo Console 登录页](/images/silo-console/console-login.webp){width="600"}
 
 你可以使用 MinIO Console 执行常规管理任务，例如身份与访问管理、指标和日志监控，或 Server 配置。 每个 MinIO server 都包含自身内嵌的 MinIO Console。
 {{< /tab >}}
@@ -334,7 +355,9 @@ mc alias set myminio https://minio-1.example.net:9000 USERNAME PASSWORD
 {{< /tab >}}
 {{< /tabs >}}
 
-### 8. 后续步骤 {#id10}
+<a id="id10" data-td-print-local></a>
+
+### 8. 后续步骤 {#next-steps}
 
 - 在可信网络之外暴露服务前，先[启用 TLS](/zh/operations/network-encryption/enable-minio-tls/)。
 - 通过[身份与访问管理](/zh/administration/identity-access-management/)创建最小权限用户和策略。

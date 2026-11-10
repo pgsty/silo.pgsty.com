@@ -7,8 +7,9 @@ upstream_modified: true
 ---
 
 > [!NOTE]
-> **Console 2.5.1 – 2.7.0 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页（[Console 2.5.1](/zh/blog/release/console-2.5.1/#objects)）。[Console 2.6.0](/zh/blog/release/console-2.6.0/) 新增按需文件夹大小扫描、带可选 PostgreSQL worker 持久化的存储桶用量刷新、创建前存储桶校验以及精确整数配额换算；[Console 2.7.0](/zh/blog/release/console-2.7.0/) 将界面扩展为十种语言，并修复用量后台任务的 TLS、调度以及普通 HTTP 下的目录大小计算。
+> **Console 2.5.1 – 2.7.0 更新：** 新增 Tasks 抽屉用于跟踪分批传输与批量操作进度（取消任务会停止后续批次，但不会回滚已完成的修改）；文本/Markdown/CSV 预览超过 `1 MiB` 时会显示截断提示；ZIP 归档预览在输出首字节前失败时会保留原始 S3 错误状态；对象列表的排序、筛选与全选作用于当前已加载的分页（[Console 2.5.1](/zh/blog/release/console-2.5.1/#objects)）。[Console 2.6.0](/zh/blog/release/console-2.6.0/) 新增按需文件夹大小扫描、带可选 PostgreSQL worker 持久化的存储桶用量刷新、创建前存储桶校验以及精确整数配额换算。[Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`，已内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)）将界面扩展为十种语言，支持在普通 HTTP（`http://<ip>:9001`）下执行**计算文件夹大小**与复制 SSE-C 解密密钥，对畸形或截断的分段上传返回 HTTP `400` 错误，并修复 `console usage-worker` 的 TLS 证书信任、跨时间片累计扫描预算、关停/删桶状态持久化以及 `HTTP 429` 繁忙重试。
 
+<a id="managing-objects"></a>
 <a id="minio-console-managing-objects"></a>
 <a id="id1" data-td-print-local></a>
 
@@ -24,7 +25,9 @@ upstream_modified: true
 
 ## 对象浏览器 {#object-browser}
 
-在 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)中，Console 的 `account-info` 请求改为读取实时存储桶清单，创建或删除存储桶后刷新即可获取最新列表（存储桶容量统计仍由后台扫描器更新）。此前的 Server 20261018 返回缓存的存储桶列表。
+自 [SILO Server 20261026](/zh/blog/release/silo-20261026/#server-20261026) 起，Console 的 `account-info` 请求改为读取实时存储桶清单，创建或删除存储桶后刷新即可获取最新列表（存储桶容量统计仍由后台扫描器更新）。此前的 Server 20261018 返回缓存的存储桶列表。
+
+在 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)）中，**计算文件夹大小**与 SSE-C 解密密钥复制按钮在普通 HTTP（`http://<ip>:9001`）下无需浏览器安全上下文即可正常工作；畸形或截断的分段上传会返回 `400` 客户端错误，而不会导致请求处理器 panic。
 
 对象浏览器会列出已认证用户在该部署上有权访问的存储桶和对象。
 
@@ -49,18 +52,8 @@ upstream_modified: true
 - [删除](/zh/administration/object-management/object-delete/#minio-object-delete)
 
 > [!NOTE]
-> **新增: Console**
->
-> v0.24.0
->
-> 可通过 Console 右上角的对象管理器按钮查看对象上传或下载状态。 如果你在当前会话期间未上传或下载任何对象，则不会显示该按钮。
-
-> [!NOTE]
-> **变更: Console**
->
-> v0.35.0
->
-> 如果你选择下载多个对象，MinIO 会将这些对象打包为一个 ZIP 归档供下载。 下载后你必须解压该归档，才能访问其中的文件。
+> - **Console v0.24.0 新增：** 可通过 Console 右上角的对象管理器按钮查看对象上传或下载状态。若当前会话期间未上传或下载任何对象，则不显示该按钮。
+> - **Console v0.35.0 变更：** 选择下载多个对象时，Console 会将这些对象打包为一个 ZIP 归档供下载。下载后解压该归档即可访问其中的文件。
 
 ### 多对象下载与分享 {#silo-downloads}
 
@@ -138,12 +131,12 @@ MinIO 不限制单个部署允许创建的存储桶总数。 不过，作为通�
 
 - 查看所有已配置远程层的状态和摘要信息。
 - 为新的远程目标存储创建层，目标可以是另一个 MinIO 部署、Google Cloud Storage、Amazon 的 AWS S3 或 Azure。
-- 使用层上的 <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-pencil" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M11.013 1.427a1.75 1.75 0 012.474 0l1.086 1.086a1.75 1.75 0 010 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 01-.927-.928l.929-3.25a1.75 1.75 0 01.445-.758l8.61-8.61zm1.414 1.06a.25.25 0 00-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 000-.354l-1.086-1.086zM11.189 6.25L9.75 4.81l-6.286 6.287a.25.25 0 00-.064.108l-.558 1.953 1.953-.558a.249.249 0 00.108-.064l6.286-6.286z"></path></svg> 图标轮换任意已配置层的访问凭证。
+- 使用层上的编辑图标轮换任意已配置层的访问凭证。
 
 ## 用量扫描（Console v2.6.0+） {#usage-scans}
 
 > [!NOTE]
-> **组件可用性：** 本节介绍随 [Console v2.6.0](/zh/blog/release/console-2.6.0/)（[PR #70](https://github.com/pgsty/silo-console/pull/70)）发布并在 [Console v2.7.0](/zh/blog/release/console-2.7.0/) 中继续保留的用量扫描与存储桶刷新功能；2.7.0 同时修复了下文提到的后台任务问题。Server `20261026` 内嵌 Console `v2.5.1`；`pgsty/silo` `main` 已内嵌 Console `v2.6.0` 供下一版 Server 发布使用。Console 发布与 SILO Server 更新内嵌 Console 依赖是两个独立的交付步骤。正式支持的集成目标是 `pgsty/silo`；与上游 MinIO 的兼容性属于尽力而为。
+> **组件可用性：** 本节介绍随 [Console v2.6.0](/zh/blog/release/console-2.6.0/)（[PR #70](https://github.com/pgsty/silo-console/pull/70)）发布并在 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）中更新的用量扫描与存储桶刷新功能。[SILO Server 20261109](/zh/blog/release/silo-20261109/) 内嵌 [Console v2.7.0](/zh/blog/release/console-2.7.0/)（`4e91ae506e70`）；Server `20261026` 内嵌 Console `v2.5.1`。单独更新独立部署的 Console 不会替换旧版 `silo` 二进制内嵌的 Console。正式支持的集成目标是 `pgsty/silo`；与上游 MinIO 的兼容性属于尽力而为。
 
 <!-- 改编自 pgsty/silo-console PR #70 的 docs/FolderSizes.md。
 Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
@@ -152,7 +145,7 @@ Copyright (c) 2026 Urbanize. SPDX-License-Identifier: AGPL-3.0-or-later. -->
 
 对象浏览器将 S3 前缀显示为文件夹，但 S3 本身并不记录前缀大小。
 **计算文件夹大小**会递归扫描当前目录的对象元数据，将当前对象的大小填入直接下级文件夹的列表行，
-不会下载对象内容。打开文件夹不会自动扫描；文件夹的 **刷新** 按钮才会启动扫描。
+不会下载对象内容；自 Console 2.7.0 起，该操作在普通 HTTP（`http://<ip>:9001`）与 HTTPS 下均可正常工作。打开文件夹不会自动扫描；文件夹的 **刷新** 按钮才会启动扫描。
 也可以从某个文件夹的操作菜单选择 **计算大小**，缩小扫描范围。
 
 启用 **包含保留版本** 后，还会列出历史对象版本与删除标记。
@@ -179,13 +172,14 @@ API 始终使用当前会话的 S3 凭据，包括 STS 会话令牌，不借用�
 
 每个 Console 进程可配置以下环境变量：
 
-| 变量 | 默认值 | 允许范围 |
-| --- | --- | --- |
-| `CONSOLE_PREFIX_USAGE_TIMEOUT` | `10m` | `1s`–`1h` |
-| `CONSOLE_PREFIX_USAGE_MAX_ENTRIES` | `10000000` | 1–1000000000000 |
-| `CONSOLE_PREFIX_USAGE_MAX_FOLDERS` | `1000` | 1–10000 |
-| `CONSOLE_PREFIX_USAGE_MAX_CONCURRENT` | `2` | 1–64 |
-| `CONSOLE_PREFIX_USAGE_PROGRESS_INTERVAL` | `1s` | `100ms`–`30s` |
+| 变量                                     | 默认值     | 允许范围        |
+| ---------------------------------------- | ---------- | --------------- |
+| `CONSOLE_PREFIX_USAGE_TIMEOUT`           | `10m`      | `1s`–`1h`       |
+| `CONSOLE_PREFIX_USAGE_MAX_ENTRIES`       | `10000000` | 1–1000000000000 |
+| `CONSOLE_PREFIX_USAGE_MAX_FOLDERS`       | `1000`     | 1–10000         |
+| `CONSOLE_PREFIX_USAGE_MAX_CONCURRENT`    | `2`        | 1–64            |
+| `CONSOLE_PREFIX_USAGE_PROGRESS_INTERVAL` | `1s`       | `100ms`–`30s`   |
+{.wide .expand}
 
 并发限制按进程计算；进程繁忙时返回 HTTP 429。每个浏览器视图只允许一个活动扫描。
 达到时间、条目数或下级文件夹数量限制时，会返回表示部分结果的终止帧，并取消后续列表请求。
@@ -242,20 +236,20 @@ worker 只读取该目录，既不创建目录，也不加载 `private.key`。Co
 ```
 
 worker 不需要读取对象内容、写入对象或执行管理操作的权限。
-Console API 在返回或刷新已保存的汇总前，会独立验证当前调用者对桶根目录的列表权限。
+Console API 在返回或刷新已保存的汇总前，会使用不受客户端取消影响的授权探测上下文（`8610671c1`）独立验证当前调用者对桶根目录的列表权限。
 版本列表请求被拒绝时，不返回保留字节数、保留版本数、删除标记数或版本扫描进度。
 SILO 当前允许将 ListBucket 作为 ListBucketVersions 的兼容性回退，API 以存储服务器实际授予的权限为准。
 只有部分前缀权限的调用者无法获取整个桶的汇总；每次状态请求都会重新验证权限撤销。
 API 响应使用 `Cache-Control: no-store`。
 
 worker 订阅经过认证的存储变更通知。创建、覆盖、完成分段上传和删除操作会使相关桶的统计失效。
-自 Console 2.7.0 起，删除桶（包括不产生对象事件的强制删除）也会立即丢弃其已保存的统计，同名重建的桶不会显示旧数据。
+自 Console 2.7.0 起，删除桶（包括不产生对象事件的强制删除）也会立即丢弃其已保存的统计（`2ee525a7e`），同名重建的桶不会显示旧数据。
 重复或乱序事件合并为一个待扫描任务，不直接加减可能重复的字节差值；扫描期间发生变更则安排下一代任务。
 任务持久化在 PostgreSQL 中，显式刷新优先处理，通过带过期时间和归属校验的租约领取。
 worker 在受限时间片之间让出执行权，只在完整对象键及其所有版本处理完毕后保存恢复位置，
 因此同一个键跨越多个版本分页时不会漏计。
-停止 worker 时，进行中的扫描带着检查点回到队列，由其他 worker 立即续扫。
-升级时先停止所有旧版本 worker 再启动新版本：自 2.7.0 起扫描预算保存在检查点中，旧版本 worker 会丢弃这一信息。
+停止 worker 时，会先持久化尚未刷盘的存储桶变更事件（`082b23700`），并将进行中的扫描连同检查点放回队列，由其他 worker 立即从检查点续扫。
+升级时请先停止所有旧版本 worker，再启动 `2.7.0` worker：自 2.7.0 起，有效列举预算（`CONSOLE_USAGE_SCAN_TIMEOUT` 仅累计活跃列举时间而不计入排队等待）保存在检查点中，旧版本 worker 会丢弃该信息。
 
 实时通知订阅**不保证持久化重放**。启动或重新连接后，会将已有统计标为需要校准。
 较频繁的桶清单检查仅发现新桶，不重扫未变化的桶；独立的完整校准负责补偿事件流缺口和未通知的变化。
@@ -270,29 +264,29 @@ worker 在受限时间片之间让出执行权，只在完整对象键及其所�
 以下名称均以 `CONSOLE_USAGE_` 为前缀。时长采用 Go duration 语法。
 缺少必需配置、配置无效或互不兼容时，拒绝启用相应功能。
 
-| 后缀 | 默认值 | 用途 |
-| --- | --- | --- |
-| `DATABASE_URL` | 未设置 | PostgreSQL URI；使 Web 进程启用持久化模式 |
-| `S3_ACCESS_KEY`、`S3_SECRET_KEY`、`S3_SESSION_TOKEN` | 未设置 | worker 专用身份；令牌可选 |
-| `HTTP_ADDRESS` | `:9091` | worker 内部健康与指标监听地址 |
-| `POOL_MAX_CONNECTIONS` | 4 | 每进程最大连接数 |
-| `CONCURRENT_SCANS` | 1 | 并发扫描时间片数量 |
-| `MAX_ENTRIES` | 100000000 | 每次完整桶扫描最多处理的条目数 |
-| `SCAN_TIMEOUT` | `30m` | 单个桶完整扫描的列举时间上限，跨时间片累计；排队等待其他桶的时间不计入（2.7.0 之前按墙钟时间计算） |
-| `SCAN_SLICE` | `5s` | 公平调度时间片，在完整键边界让出执行权 |
-| `LEASE` | `2m` | 扫描与事件观察者的租约期限 |
-| `HEARTBEAT` | `15s` | 租约/覆盖状态心跳间隔与单次操作时间预算 |
-| `PROGRESS_INTERVAL` | `1s` | 进度持久化间隔 |
-| `POLL_INTERVAL` | `1s` | 任务队列轮询与事件写入间隔 |
-| `EVENT_DEBOUNCE` | `5s` | 合并突发变更事件的等待时间 |
-| `MIN_SCAN_INTERVAL` | `1m` | 自动重扫的最小间隔，手动刷新不受此限制 |
-| `RECONCILE_INTERVAL` | `15m` | 轻量的新桶清单检查间隔 |
-| `FULL_RECONCILE_INTERVAL` | `24h` | 独立于即时事件/刷新任务的完整校准间隔 |
-| `RETRY_INTERVAL`、`MAX_RETRY_INTERVAL` | `30s`、`15m` | 指数退避的初始与最大重试间隔 |
-| `AUTH_CONCURRENCY` | 4 | 每个 API 请求的并发调用者权限探测数 |
-| `API_MAX_REQUESTS` | 8 | 每个 Console 进程的并发用量 API 请求数 |
-| `REQUEST_TIMEOUT` | `15s` | 用量 API 截止时间 |
-| `UI_POLL_INTERVAL` | `2s` | 有待处理任务时的轮询间隔；空闲视图使用十倍间隔，最多一分钟 |
+| 后缀                                                 | 默认值       | 用途                                                                                               |
+| ---------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                       | 未设置       | PostgreSQL URI；使 Web 进程启用持久化模式                                                          |
+| `S3_ACCESS_KEY`、`S3_SECRET_KEY`、`S3_SESSION_TOKEN` | 未设置       | worker 专用身份；令牌可选                                                                          |
+| `HTTP_ADDRESS`                                       | `:9091`      | worker 内部健康与指标监听地址                                                                      |
+| `POOL_MAX_CONNECTIONS`                               | 4            | 每进程最大连接数                                                                                   |
+| `CONCURRENT_SCANS`                                   | 1            | 并发扫描时间片数量                                                                                 |
+| `MAX_ENTRIES`                                        | 100000000    | 每次完整桶扫描最多处理的条目数                                                                     |
+| `SCAN_TIMEOUT`                                       | `30m`        | 单个桶完整扫描的列举时间上限，跨时间片累计；排队等待其他桶的时间不计入（2.7.0 之前按墙钟时间计算） |
+| `SCAN_SLICE`                                         | `5s`         | 公平调度时间片，在完整键边界让出执行权                                                             |
+| `LEASE`                                              | `2m`         | 扫描与事件观察者的租约期限                                                                         |
+| `HEARTBEAT`                                          | `15s`        | 租约/覆盖状态心跳间隔与单次操作时间预算                                                            |
+| `PROGRESS_INTERVAL`                                  | `1s`         | 进度持久化间隔                                                                                     |
+| `POLL_INTERVAL`                                      | `1s`         | 任务队列轮询与事件写入间隔                                                                         |
+| `EVENT_DEBOUNCE`                                     | `5s`         | 合并突发变更事件的等待时间                                                                         |
+| `MIN_SCAN_INTERVAL`                                  | `1m`         | 自动重扫的最小间隔，手动刷新不受此限制                                                             |
+| `RECONCILE_INTERVAL`                                 | `15m`        | 轻量的新桶清单检查间隔                                                                             |
+| `FULL_RECONCILE_INTERVAL`                            | `24h`        | 独立于即时事件/刷新任务的完整校准间隔                                                              |
+| `RETRY_INTERVAL`、`MAX_RETRY_INTERVAL`               | `30s`、`15m` | 指数退避的初始与最大重试间隔                                                                       |
+| `AUTH_CONCURRENCY`                                   | 4            | 每个 API 请求的并发调用者权限探测数                                                                |
+| `API_MAX_REQUESTS`                                   | 8            | 每个 Console 进程的并发用量 API 请求数                                                             |
+| `REQUEST_TIMEOUT`                                    | `15s`        | 用量 API 截止时间                                                                                  |
+| `UI_POLL_INTERVAL`                                   | `2s`         | 有待处理任务时的轮询间隔；空闲视图使用十倍间隔，最多一分钟                                         |
 {.wide .expand}
 
 条目数、扫描时长、并发数和请求预算均有明确上限，详见 `pkg/usage/config.go`。

@@ -7,6 +7,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="network-encryption-tls"></a>
 <a id="tls"></a>
 <a id="minio-tls-user-generated"></a>
 <a id="minio-tls-third-party-ca"></a>
@@ -17,7 +18,7 @@ upstream_modified: true
 >
 > TLS 是 Secure Socket Layer（SSL）加密的后继方案。 自 2018 年 6 月 30 日起，SSL 已被完全 [弃用](https://tools.ietf.org/html/rfc7568)。
 
-## 概览 {#id2}
+## 概览 {#overview}
 
 MinIO 支持使用 Transport Layer Security (TLS) 1.2+ 对入站和出站流量进行加密。 MinIO 可以自动检测默认或自定义搜索路径中的证书，并为所有连接启用 TLS。 MinIO 支持客户端发起的 Server Name Indication (SNI) 请求，此时 MinIO 会尝试为客户端指定的主机名定位合适的 TLS 证书。
 
@@ -30,37 +31,38 @@ MinIO *至少* 需要一张默认 TLS 证书，并且可以通过多张 TLS 证�
 你也可以按域名拆分配置多张 TLS 证书，并为所有未匹配主机名请求保留一张默认证书。 这种配置需要更多设置，但只会暴露返回证书的 TLS SAN 数组中所配置的主机名。
 
 <a id="minio-tls-kubernetes"></a>
+<a id="kubernetes-minio-tls" data-td-print-local></a>
 
-## Kubernetes 上的 MinIO TLS {#kubernetes-minio-tls}
+## Kubernetes 上的 MinIO TLS {#minio-tls-on-kubernetes}
 
 MinIO Kubernetes Operator 为 MinIO 租户提供三种 TLS 配置方式：
 
 **使用 Cluster Signing API 自动启用 TLS**
 
-> 对于具备有效 [TLS Cluster Signing Certificate](/zh/operations/deployments/k8s-minio-operator/#minio-k8s-deploy-operator-tls) 的 Kubernetes 集群，MinIO Kubernetes Operator 可以在 [部署](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant-security) 或 [修改](/zh/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/#minio-k8s-modify-minio-tenant-security) MinIO 租户时自动生成 TLS 证书。
+对于具备有效 [TLS Cluster Signing Certificate](/zh/operations/deployments/k8s-minio-operator/#minio-k8s-deploy-operator-tls) 的 Kubernetes 集群，MinIO Kubernetes Operator 可以在 [部署](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant-security) 或 [修改](/zh/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/#minio-k8s-modify-minio-tenant-security) MinIO 租户时自动生成 TLS 证书。
+
+Kubernetes TLS API 在生成新的 TLS 证书时，会使用 Kubernetes 集群 Certificate Authority (CA) 的签名算法。 MinIO 支持的 TLS Cipher Suite 和推荐签名算法完整列表，请参见 [支持的 TLS Cipher Suite](#minio-tls-supported-cipher-suites)。
+
+使用 `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` 中的 CA bundle 连接租户前，先确认它确实包含租户 TLS 证书的签发 CA；不要假定两者始终相同。如果签发 CA 不同，应向客户端单独提供正确的 CA 证书，并确保证书覆盖客户端使用的 [Service DNS 名称](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)。
+
+> [!NOTE]
+> **Subject Alternative Name 证书**
 >
-> Kubernetes TLS API 在生成新的 TLS 证书时，会使用 Kubernetes 集群 Certificate Authority (CA) 的签名算法。 MinIO 支持的 TLS Cipher Suite 和推荐签名算法完整列表，请参见 [支持的 TLS Cipher Suite](#minio-tls-supported-cipher-suites)。
->
-> 使用 `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt` 中的 CA bundle 连接租户前，先确认它确实包含租户 TLS 证书的签发 CA；不要假定两者始终相同。如果签发 CA 不同，应向客户端单独提供正确的 CA 证书，并确保证书覆盖客户端使用的 [Service DNS 名称](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)。
->
-> > [!NOTE]
-> > **Subject Alternative Name 证书**
-> >
-> > 如果你使用的是自定义 Subject Alternative Name (SAN) 证书，并且它 *不是* 通配符证书，那么 TLS 证书的 SAN **必须** 覆盖其父节点主机名。 在没有通配符的情况下，SAN 必须精确匹配，才能成功连接到该租户。
+> 如果你使用的是自定义 Subject Alternative Name (SAN) 证书，并且它 *不是* 通配符证书，那么 TLS 证书的 SAN **必须** 覆盖其父节点主机名。 在没有通配符的情况下，SAN 必须精确匹配，才能成功连接到该租户。
 
 **cert-manager 证书管理**
 
-> MinIO Operator 支持使用 [cert-manager](https://cert-manager.io/) 作为其内置自动证书管理或用户手动证书管理的完整替代方案。 关于如何使用 cert-manager 部署 MinIO Operator 和租户，请参见 [cert-manager 页面](/zh/operations/network-encryption/cert-manager/#minio-certmanager)。
+MinIO Operator 支持使用 [cert-manager](https://cert-manager.io/) 作为其内置自动证书管理或用户手动证书管理的完整替代方案。 关于如何使用 cert-manager 部署 MinIO Operator 和租户，请参见 [cert-manager 页面](/zh/operations/network-encryption/cert-manager/#minio-certmanager)。
 
 **手动证书管理**
 
-> Tenant CRD 字段 `spec.externalCertsSecret` 引用 TLS 证书 [Secret](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types)。请按所用 Operator 版本的要求选择 Secret 类型和证书、私钥文件名。
->
-> 你可以指定多张证书，以支持分配了多个主机名的租户。
+Tenant CRD 字段 `spec.externalCertsSecret` 引用 TLS 证书 [Secret](https://kubernetes.io/docs/concepts/configuration/secret/#secret-types)。请按所用 Operator 版本的要求选择 Secret 类型和证书、私钥文件名。
 
-<a id="self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates"></a>
+你可以指定多张证书，以支持分配了多个主机名的租户。
 
-### 自签名、内部、私有证书以及带中间证书的公共 CA {#ca}
+<a id="ca" data-td-print-local></a>
+
+### 自签名、内部、私有证书以及带中间证书的公共 CA {#self-signed-internal-private-certificates-and-public-cas-with-intermediate-certificates}
 
 如果你为 MinIO 租户部署的是由非全球或非公共 Certificate Authority 签发的证书，*或者* 使用了需要中间证书的公共 CA，则必须将这些 CA 提供给 Operator，以确保它能够信任这些证书。
 
@@ -86,7 +88,9 @@ MinIO Kubernetes Operator 为 MinIO 租户提供三种 TLS 配置方式：
    kubectl rollout restart deployments.apps/minio-operator -n minio-operator
    ```
 
-### 第三方 Certificate Authority {#certificate-authority}
+<a id="certificate-authority" data-td-print-local></a>
+
+### 第三方 Certificate Authority {#third-party-certificate-authorities}
 
 MinIO Kubernetes Operator 可以在 [部署](/zh/operations/deployments/k8s-deploy-minio-tenant-on-kubernetes/#minio-k8s-deploy-minio-tenant-security) 或 [修改](/zh/operations/deployments/k8s-modify-minio-tenant-on-kubernetes/#minio-k8s-modify-minio-tenant-security) MinIO 租户时自动挂载第三方 Certificate Authority。
 
@@ -97,8 +101,9 @@ Operator 会将指定的 CA 放置到每个 MinIO Server pod 上，从而确保�
 如果 MinIO Server 无法将传入客户端的 TLS 证书签发者与任一可用 CA 匹配，则会将该连接视为无效并拒绝。
 
 <a id="id3" data-td-print-local></a>
+<a id="minio-tls-baremetal"></a>
 
-## 裸金属上的 MinIO TLS {#minio-tls-baremetal}
+## 裸金属上的 MinIO TLS {#minio-tls-on-baremetal}
 
 MinIO Server 会为每个节点搜索 TLS 私钥和证书，并使用这些凭据启用 TLS。 MinIO 会在发现并验证证书后自动启用 TLS。 搜索位置取决于你的 MinIO 配置：
 
@@ -131,7 +136,9 @@ silo server --certs-dir /opt/minio/certs ...
 
 对于分布式 MinIO 部署，部署中的每个节点都必须具有一致的 TLS 证书配置。
 
-### 自签名、内部、私有证书以及带中间证书的公共 CA {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 自签名、内部、私有证书以及带中间证书的公共 CA {#id1}
 
 如果你使用的是由非全球或非公共 Certificate Authority 签发的证书，*或者* 使用了需要中间证书的公共 CA，则必须将这些 CA 提供给 MinIO Server。 如果 MinIO server 不具备这些必要 CA，在连接其他服务时可能会返回与 TLS 校验相关的警告或错误。
 
@@ -158,7 +165,9 @@ mv myCA.crt /opt/minio/certs/CAs/
 
 如果提供的文件不是 X.509 证书，MinIO 会忽略它，并可能在校验由该 CA 签发的证书时返回错误。
 
-### 第三方 Certificate Authority {#id5}
+<a id="id5" data-td-print-local></a>
+
+### 第三方 Certificate Authority {#id2}
 
 SILO 使用主机系统的受信任根证书和 `CAs` 目录中的证书，校验其连接的对等节点及外部服务的 TLS 服务端证书。添加 CA 证书本身不会启用 S3 客户端证书认证。
 
@@ -182,23 +191,24 @@ mv myCA.crt /opt/minio/certs/CAs/
 请将每个 CA 的证书文件放入 `/CAs` 子目录。 确保 MinIO 部署中的所有主机在该目录下拥有一致的受信任 CA 集合。 如果 MinIO Server 无法将传入客户端的 TLS 证书签发者与任一可用 CA 匹配，则会将该连接视为无效并拒绝。
 
 <a id="minio-tls-supported-cipher-suites"></a>
+<a id="tls-cipher-suite" data-td-print-local></a>
 
-### 支持的 TLS Cipher Suite {#tls-cipher-suite}
+### 支持的 TLS Cipher Suite {#supported-tls-cipher-suites}
 
 与 RSA 相比，MinIO 更推荐生成 ECDSA（例如 [NIST P-256 曲线](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)）或 EdDSA（例如 <a id="index-0" data-td-print-local></a>[**Curve25519**](https://datatracker.ietf.org/doc/html/rfc7748.html)）TLS 私钥/证书，因为它们的计算开销更低。
 
-MinIO 支持以下由 [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17.1:src/crypto/tls/cipher_suites.go;l=52) 支持的 TLS 1.2 和 TLS 1.3 cipher suite。列表中使用 <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg> 标记推荐算法：
+MinIO 支持以下由 [Go](https://cs.opensource.google/go/go/+/refs/tags/go1.17.1:src/crypto/tls/cipher_suites.go;l=52) 支持的 TLS 1.2 和 TLS 1.3 cipher suite。推荐算法在列表中标有 **（推荐）**：
 
 {{< tabs group="tls-13-tls-12" >}}
 {{< tab label="TLS 1.3" value="tls-13" >}}
-- `TLS_CHACHA20_POLY1305_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
+- `TLS_CHACHA20_POLY1305_SHA256` **（推荐）**
 - `TLS_AES_128_GCM_SHA256`
 - `TLS_AES_256_GCM_SHA384`
 {{< /tab >}}
 {{< tab label="TLS 1.2" value="tls-12" >}}
-- `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
-- `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
-- `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384` <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-star-fill" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
+- `TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305` **（推荐）**
+- `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256` **（推荐）**
+- `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384` **（推荐）**
 - `TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305`
 - `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256`
 - `TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384`

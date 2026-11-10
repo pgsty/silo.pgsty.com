@@ -26,7 +26,8 @@ This procedure is generic for OIDC compatible providers. Defer to the documentat
 
 ### OpenID-Connect (OIDC) Compatible IDentity Provider {#openid-connect-oidc-compatible-identity-provider}
 
-**SILO 20261026 compatibility:** the [release](/blog/release/silo-20261026/) retains go-jose v4.1.6. Since SILO 20261018, this dependency rejects RSA JWKs larger than **4096 bits** while repairing excessive CPU consumption from crafted keys. Check the provider's signing keys, discovery, JWKS refresh and a complete login before upgrading; rotate incompatible keys at the provider. See the [dependency security note](/blog/security/20261018-release-hardening/#dependencies).
+> [!NOTE]
+> **SILO 20261109 OIDC and JWT compatibility:** [SILO 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`) adopts `github.com/go-jose/go-jose/v4 v4.1.9` via [`silo-pkg v3.16.0`](/blog/release/pkg-3.16.0/), hardening OIDC/JWT token verification limits (RSA certificate-verification bounds and JWS signature / JWE recipient limits) and JWS/JWE header validation. Since [SILO 20261018](/blog/release/silo-20261018/), `go-jose` also rejects RSA JWKs larger than **4096 bits** to prevent excessive CPU consumption from crafted keys. Verify the provider's signing keys, discovery endpoint, JWKS refresh, and a complete login before upgrading; rotate incompatible keys at the provider. See the [dependency security note](/blog/security/20261018-release-hardening/#dependencies).
 
 This procedure assumes an existing OIDC provider such as Okta, KeyCloak, Dex, Google, or Facebook. Instructions on configuring these services are out of scope for this procedure.
 
@@ -71,7 +72,7 @@ This procedure uses [`mc`](/reference/minio-mc/#command-mc) for performing opera
 
    Applications can generate temporary access credentials as-needed using the [AssumeRoleWithWebIdentity](/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) Security Token Service (STS) API endpoint and the JSON Web Token (JWT) returned by the <abbr title="OpenID Connect">OIDC</abbr> provider.
 
-   The application must provide a workflow for logging into the <abbr title="OpenID Connect">OIDC</abbr> provider and retrieving the JSON Web Token (JWT) associated to the authentication session. Defer to the provider documentation for obtaining and parsing the JWT token after successful authentication. MinIO provides an example Go application [web-identity.go](https://github.com/minio/minio/blob/master/docs/sts/web-identity.go) with an example of managing this workflow.
+   The application must provide a workflow for logging into the <abbr title="OpenID Connect">OIDC</abbr> provider and retrieving the JSON Web Token (JWT) associated to the authentication session. Defer to the provider documentation for obtaining and parsing the JWT token after successful authentication. SILO provides an example Go application [web-identity.go](https://github.com/pgsty/silo/blob/RELEASE.2026-11-09T00-00-00Z/docs/sts/web-identity.go) with an example of managing this workflow.
 
    Once the application retrieves the JWT token, use the `AssumeRoleWithWebIdentity` endpoint to generate the temporary credentials:
 

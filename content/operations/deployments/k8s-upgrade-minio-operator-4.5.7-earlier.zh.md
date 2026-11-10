@@ -11,13 +11,13 @@ upstream_modified: true
 
 MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
-| 当前版本 | 支持升级到 |
-| --- | --- |
-| 5.0.15 及更高版本 | 7.1.1 |
-| 5.0.0 到 5.0.14 | 5.0.15 |
-| 4.2.3 到 4.5.7 | 4.5.8 |
-| 4.0.0 到 4.2.2 | 4.2.3 |
-| 3.X.X | 4.2.2 |
+| 当前版本          | 支持升级到 |
+| ----------------- | ---------- |
+| 5.0.15 及更高版本 | 7.1.1      |
+| 5.0.0 到 5.0.14   | 5.0.15     |
+| 4.2.3 到 4.5.7    | 4.5.8      |
+| 4.0.0 到 4.2.2    | 4.2.3      |
+| 3.X.X             | 4.2.2      |
 
 如果要从 4.5.7 或更早版本升级到 7.1.1，你必须先升级到 4.5.8，然后再升级到 5.0.15。 根据你当前的版本，可能需要经过一个或多个中间升级步骤才能到达 v4.5.8。
 
@@ -25,7 +25,9 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
 <a id="minio-k8s-upgrade-minio-operator-to-5-0-15"></a>
 
-## 将 MinIO Operator 4.5.8 及更高版本升级到 5.0.15 {#minio-operator-4-5-8-5-0-15}
+<a id="minio-operator-4-5-8-5-0-15" data-td-print-local></a>
+
+## 将 MinIO Operator 4.5.8 及更高版本升级到 5.0.15 {#upgrade-minio-operator-4-5-8-and-later-to-5-0-15}
 
 > [!NOTE]
 > **前提条件**
@@ -38,7 +40,9 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
 本流程将 MinIO Operator 从任意 4.5.8 及以上版本升级到 5.0.15
 
-### Tenant 自定义资源定义变更 {#tenant}
+<a id="tenant" data-td-print-local></a>
+
+### Tenant 自定义资源定义变更 {#tenant-custom-resource-definition-changes}
 
 以下变更适用于 Operator v5.0.0 或更高版本：
 
@@ -53,7 +57,9 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
   >
   > MinIO 建议你后续创建单独的 YAML 文件来管理这些部署。
 
-### Log Search 和 Prometheus {#log-search-prometheus}
+<a id="log-search-prometheus" data-td-print-local></a>
+
+### Log Search 和 Prometheus {#log-search-and-prometheus}
 
 最新版本的 Operator 已将 Log Search 和 Prometheus 从内置工具中移除。 以下步骤会备份现有 YAML 文件、执行一些清理操作，并给出继续使用其中一个或两个功能的方法。
 
@@ -106,7 +112,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
    - 将 `name` 或 `value` 行中的 `<TENANT_NAME>` 替换为你的 tenant 名称。
 
-### 操作步骤 {#id2}
+### 操作步骤 {#procedure}
 
 {{< tabs group="kustomize-helm" >}}
 {{< tab label="使用 Kustomize 升级" value="kustomize" >}}
@@ -278,9 +284,11 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
 <a id="minio-k8s-upgrade-minio-operator-to-4-5-8"></a>
 
-## 将 MinIO Operator 4.2.3 到 4.5.7 升级到 4.5.8 {#minio-operator-4-2-3-4-5-7-4-5-8}
+<a id="minio-operator-4-2-3-4-5-7-4-5-8" data-td-print-local></a>
 
-### 前提条件 {#id3}
+## 将 MinIO Operator 4.2.3 到 4.5.7 升级到 4.5.8 {#upgrade-minio-operator-4-2-3-through-4-5-7-to-4-5-8}
+
+### 前提条件 {#prerequisites}
 
 本流程需要满足以下条件：
 
@@ -288,7 +296,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 - 你的 Kubernetes 集群版本为 1.19.0 或更高
 - 你的本地主机已安装 `kubectl`，并已配置好对 Kubernetes 集群的访问
 
-### 操作步骤 {#id4}
+### 操作步骤 {#id1}
 
 本流程会将 MinIO Operator 从 4.2.3 到 4.5.7 升级到 4.5.8。 随后你可以再从 4.5.8 升级到 5.0.15。
 
@@ -403,9 +411,11 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
 <a id="minio-k8s-upgrade-minio-operator-4-2-2-procedure"></a>
 
-## 将 MinIO Operator 4.0.0 到 4.2.2 升级到 4.2.3 {#minio-operator-4-0-0-4-2-2-4-2-3}
+<a id="minio-operator-4-0-0-4-2-2-4-2-3" data-td-print-local></a>
 
-### 前提条件 {#id5}
+## 将 MinIO Operator 4.0.0 到 4.2.2 升级到 4.2.3 {#upgrade-minio-operator-4-0-0-through-4-2-2-to-4-2-3}
+
+### 前提条件 {#id2}
 
 本流程假定满足以下条件：
 
@@ -413,7 +423,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 - 你的 Kubernetes 集群版本为 1.19.0 或更高
 - 你的本地主机已安装 `kubectl`，并已配置好对 Kubernetes 集群的访问
 
-### 操作步骤 {#id6}
+### 操作步骤 {#id3}
 
 本流程涵盖将运行 4.0.0 到 4.2.2 任意版本的 MinIO Operator 部署升级到 4.2.3 所需的步骤。 随后你可以执行 [将 MinIO Operator 从 5.0.15 升级到 7.1.1](/zh/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure)，完成升级到 7.1.1。
 
@@ -479,9 +489,11 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 
    按照 [将 MinIO Operator 从 5.0.15 升级到 7.1.1](/zh/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure) 中的流程，升级到仓库归档前的最终上游版本 `v7.1.1`。
 
-## 将 MinIO Operator 3.0.0 到 3.0.29 升级到 4.2.2 {#minio-operator-3-0-0-3-0-29-4-2-2}
+<a id="minio-operator-3-0-0-3-0-29-4-2-2" data-td-print-local></a>
 
-### 前提条件 {#id7}
+## 将 MinIO Operator 3.0.0 到 3.0.29 升级到 4.2.2 {#upgrade-minio-operator-3-0-0-through-3-0-29-to-4-2-2}
+
+### 前提条件 {#id4}
 
 本流程假定满足以下条件：
 
@@ -489,7 +501,7 @@ MinIO 为旧版 MinIO Operator 支持以下升级路径：
 - 你的 Kubernetes 集群版本为 1.19.0 或更高
 - 你的本地主机已安装 `kubectl`，并已配置好对 Kubernetes 集群的访问
 
-### 操作步骤 {#id8}
+### 操作步骤 {#id5}
 
 本流程涵盖将运行 3.0.0 到 3.2.9 任意版本的 MinIO Operator 部署升级到 4.2.2 所需的步骤。 随后你可以执行 [将 MinIO Operator 4.0.0 到 4.2.2 升级到 4.2.3](#minio-k8s-upgrade-minio-operator-4-2-2-procedure)，再执行 [将 MinIO Operator 从 5.0.15 升级到 7.1.1](/zh/operations/deployments/k8s-upgrade-minio-operator-kubernetes/#minio-k8s-upgrade-minio-operator-procedure)。
 

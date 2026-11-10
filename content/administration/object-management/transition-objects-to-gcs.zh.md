@@ -6,14 +6,14 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-<a id="minio-gcs"></a>
+<a id="transition-objects-from-minio-to-gcs"></a>
 <a id="minio-lifecycle-management-transition-to-gcs"></a>
 
 本页中的过程会创建一条新的对象生命周期管理规则，将对象从 MinIO 存储桶迁移到 Google Cloud Storage 后端上的远程存储层。该过程适用于这类场景：在达到特定时间周期或日历日期后， 将陈旧数据迁移到低成本的公有云存储方案。
 
-## 要求 {#id2}
+## 要求 {#requirements}
 
-### 安装并配置 `mc` {#mc}
+### 安装并配置 `mc` {#install-and-configure-mc}
 
 该过程使用 [`mc`](/zh/reference/minio-mc/#command-mc) 在 MinIO 集群上执行操作。 请在一台可同时通过网络访问源集群和目标集群的机器上安装 [`mc`](/zh/reference/minio-mc/#command-mc)。 有关下载和安装 `mc` 的说明，请参见 `mc` [Installation Quickstart](/zh/reference/minio-mc/#mc-install)。
 
@@ -21,7 +21,7 @@ upstream_modified: true
 
 <a id="minio-lifecycle-management-transition-to-gcs-permissions"></a>
 
-### 所需的 MinIO 权限 {#minio}
+### 所需的 MinIO 权限 {#required-minio-permissions}
 
 MinIO 要求在您为其创建生命周期管理规则的一个或多个存储桶范围内，具备以下权限。
 
@@ -64,25 +64,25 @@ MinIO 要求在您为其创建生命周期管理规则的一个或多个存储�
 
 <a id="minio-lifecycle-management-transition-to-gcs-permissions-remote"></a>
 
-### 所需的 GCS 权限 {#gcs}
+### 所需的 GCS 权限 {#required-gcs-permissions}
 
 对象迁移生命周期管理规则要求在远程存储层上具备额外权限。 具体来说，MinIO 要求 <abbr title="Google Cloud Storage">GCS</abbr> 凭证对远程存储桶具备读取、写入、列出和删除权限。
 
 有关配置所需权限的更完整说明，请参见 [GCS IAM permissions](https://cloud.google.com/storage/docs/access-control/iam-permissions) 文档。
 
-### 远程存储桶必须已存在 {#id3}
+### 远程存储桶必须已存在 {#remote-bucket-must-exist}
 
 在配置以该存储桶为目标的生命周期管理层或规则之前，请先创建远程 GCS 存储桶。
 
 如果您设置了默认的 GCS [storage class](https://cloud.google.com/storage/docs/storage-classes)，那么在定义远程层时，如果未指定 [`storage class`](/zh/reference/minio-mc/mc-ilm-tier-add/#mc.ilm.tier.add.-storage-class)，MinIO 就会使用该默认值。 请确保记录您的 GCS 存储桶设置以及 MinIO 分层配置，以避免潜在的混淆、错误配置或其他意外结果。
 
-## 注意事项 {#id4}
+## 注意事项 {#considerations}
 
-### 生命周期管理对象扫描器 {#id5}
+### 生命周期管理对象扫描器 {#lifecycle-management-object-scanner}
 
 MinIO 使用 [scanner process](/zh/operations/concepts/scanner/#minio-concepts-scanner) 根据所有已配置的生命周期管理规则检查对象。 高 IO 工作负载或有限的系统资源导致的扫描缓慢，可能会延迟生命周期管理规则的应用。 更多信息请参见 [生命周期管理对象扫描器](/zh/administration/object-management/object-lifecycle-management/#minio-lifecycle-management-scanner)。
 
-### 对远程数据的独占访问 {#id6}
+### 对远程数据的独占访问 {#exclusive-access-to-remote-data}
 
 MinIO 要求对远程存储层上的已转移数据拥有独占访问权限。 “hot” MinIO 源端上的对象元数据与远程 “warm/cold” 层上的对象数据紧密关联。 如果无法访问远程层，MinIO 就无法检索对象数据； 同样，远程层也不能用于恢复源端丢失的元数据。
 
@@ -97,7 +97,7 @@ MinIO 会将所有已转移对象存储在远程存储桶或资源下、 每个�
 
 对于包含其他数据的远程存储层， 包括来自其他 MinIO 部署的已转移对象， MinIO 建议指定此可选前缀。 本教程包含设置此前缀所需的语法。
 
-### 远程数据的可用性 {#id7}
+### 远程数据的可用性 {#availability-of-remote-data}
 
 MinIO 分层行为依赖远程存储在收到请求后立即返回对象 （毫秒到秒级）。 因此，MinIO 不支持需要 rehydration、等待窗口 或人工干预的远程存储。
 
@@ -105,9 +105,17 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 
 需要 <abbr title="Business Continuity/Disaster Recovery">BC/DR</abbr> 保护的工作负载应实现 MinIO [Server-Side replication](/zh/administration/bucket-replication/#minio-bucket-replication-serverside)。 复制可确保对象保存在远程复制站点上， 从而使用户能够在发生部分或全部数据丢失时从远端重新同步。 有关如何使用复制在部分或全部数据丢失后恢复的更完整文档， 请参见 [重新同步（灾难恢复）](/zh/administration/bucket-replication/#minio-replication-behavior-resync)。
 
-## 过程 {#id8}
+### 恢复、过期与存储池下线 {#restore-expiry-and-pool-decommissioning}
 
-### 1) 配置生命周期管理的用户账户和策略 {#id9}
+自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，远程层操作遵循以下行为：
+
+- **两阶段原地原生恢复：** 原生恢复（`POST ?restore`）在对象写锁之外下载远程层数据（[#284](https://github.com/pgsty/silo/issues/284)），并原地恢复指定版本，不会改变版本顺序，多池部署下也不再挂起（[#289](https://github.com/pgsty/silo/issues/289)）。详见 [`mc ilm restore`](/zh/reference/minio-mc/mc-ilm-restore/)。
+- **恢复副本过期与跨池保留：** 已恢复副本到期时仅清理本地临时缓存，同时保留对象版本及其远程层数据（[#281](https://github.com/pgsty/silo/issues/281)）。只要其他存储池仍引用某份远程层对象，SILO 就会保留该远程数据（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）。
+- **存储池下线：** 在存储池下线（decommission）全部完成前，请保留已注册的远程存储层配置，以便 SILO 跨存储桶迁移或核验已分层对象版本（[#307](https://github.com/pgsty/silo/issues/307)）。
+
+## 过程 {#procedure}
+
+### 1) 配置生命周期管理的用户账户和策略 {#configure-user-accounts-and-policies-for-lifecycle-management}
 
 此步骤会在 MinIO 部署上创建用于支持生命周期管理操作的用户和策略。 如果该部署已经存在具备所需 [permissions](#minio-lifecycle-management-transition-to-gcs-permissions) 的用户，则可以跳过此步骤。
 
@@ -122,7 +130,7 @@ mc admin policy attach Alpha LifecycleAdminPolicy --user=alphaLifecycleAdmin
 
 此示例假定所指定的 alias 具有在该部署上创建策略和用户所需的权限。 有关 MinIO 用户和策略的更完整文档， 请分别参见 [用户管理](/zh/administration/identity-access-management/minio-user-management/#minio-users) 和 [MinIO Policy Based Access Control](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。
 
-### 2) 配置远程存储层 {#id10}
+### 2) 配置远程存储层 {#configure-the-remote-storage-tier}
 
 使用 [`mc ilm tier add`](/zh/reference/minio-mc/mc-ilm-tier-add/#command-mc.ilm.tier.add) 命令将新的 Google Cloud Storage 服务添加为远程存储层：
 
@@ -180,7 +188,7 @@ MinIO 建议指定此可选前缀。该前缀应能清晰映射到源 MinIO 部�
   </tbody>
 </table>
 
-### 3) 创建并应用迁移规则 {#id11}
+### 3) 创建并应用迁移规则 {#create-and-apply-the-transition-rule}
 
 使用 [`mc ilm rule add`](/zh/reference/minio-mc/mc-ilm-rule-add/#command-mc.ilm.rule.add) 命令为存储桶创建新的转移规则。 以下示例将对象配置为在指定的日历天数后执行转移：
 
@@ -188,7 +196,7 @@ MinIO 建议指定此可选前缀。该前缀应能清晰映射到源 MinIO 部�
 mc ilm rule add ALIAS/BUCKET \
 --transition-tier TIERNAME \
 --transition-days DAYS \
---noncurrent-transition-days NONCURRENT_DAYS
+--noncurrent-transition-days NONCURRENT_DAYS \
 --noncurrent-transition-tier TIERNAME
 ```
 
@@ -233,7 +241,7 @@ MinIO 具体计算的是对象变为非当前版本后的时间，
   </tbody>
 </table>
 
-### 4) 验证迁移规则 {#id12}
+### 4) 验证迁移规则 {#verify-the-transition-rule}
 
 使用 [`mc ilm rule ls`](/zh/reference/minio-mc/mc-ilm-rule-ls/#command-mc.ilm.rule.ls) 命令查看已配置的迁移规则：
 

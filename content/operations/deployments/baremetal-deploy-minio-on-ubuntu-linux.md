@@ -6,7 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Version scope:** commands and illustrative output target [Server 20261026](/blog/release/silo-20261026/), now publicly available. See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261026/#upgrade).
+**Version scope:** commands and illustrative output target [Server 20261109](/blog/release/silo-20261109/) (`RELEASE.2026-11-09T00-00-00Z`, package `20261109000000.0.0`). See [downloads](/download/) and the [release upgrade requirements](/blog/release/silo-20261109/#upgrade).
 
 <a id="deploy-minio-on-ubuntu-linux"></a>
 <a id="deploy-minio-ubuntu"></a>
@@ -48,15 +48,15 @@ Consider using the MinIO [Erasure Code Calculator](https://min.io/product/erasur
 
 ### 1. Download the Silo DEB {#download-the-minio-rpm}
 
-Download the DEB for your architecture from [Download & Install](/download/#server), verify its published checksum, and install it. Use the `arm64` filename on ARM64 hosts.
+Download the `20261109000000.0.0` DEB for your architecture from [Download & Install](/download/#server), verify its published SHA-256 checksum, and install it. Use the `arm64` filename on ARM64 hosts.
 
 ```shell
-sudo dpkg -i ./silo_*_amd64.deb
+sudo dpkg -i ./silo_20261109000000.0.0_amd64.deb
 ```
 
 ### 2. Review the `systemd` Service File {#review-the-systemd-service-file}
 
-The `.deb` package install the following [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/usr/lib/systemd/system/silo.service`:
+The `.deb` package installs the following [systemd](https://www.freedesktop.org/wiki/Software/systemd/) service file to `/usr/lib/systemd/system/silo.service`:
 
 ```ini
 [Unit]
@@ -281,7 +281,7 @@ Silo Object Storage Server
 Copyright: 2015-2025 MinIO, Inc.
 Modifications: Copyright 2025-2026 PGSTY
 License: GNU AGPLv3 - https://www.gnu.org/licenses/agpl-3.0.html
-Version: RELEASE.2026-10-26T00-00-00Z (go1.27.3 linux/amd64)
+Version: RELEASE.2026-11-09T00-00-00Z (go1.27.3 linux/amd64)
 
 API: https://minio-1.example.net:9000 https://203.0.113.10:9000 https://127.0.0.1:9000
    RootUser: minioadmin
@@ -317,14 +317,14 @@ Open your browser and access any of the MinIO hostnames at port `:9001` to open 
 
 Log in with the **MINIO_ROOT_USER** and **MINIO_ROOT_PASSWORD** from the previous step.
 
-<img src="/images/silo-console/console-login.webp" alt="MinIO Console Login Page" style="max-width: 600px; height: auto;" />
+![Silo Console Login Page](/images/silo-console/console-login.webp){width="600"}
 
 You can use the MinIO Console for general administration tasks like Identity and Access Management, Metrics and Log Monitoring, or Server Configuration. Each MinIO server includes its own embedded MinIO Console.
 {{< /tab >}}
 {{< tab label="CLI" value="cli" >}}
 Follow the [installation instructions](/reference/minio-mc/#mc-install) for `mcli` on your local host. Run `mcli --version` to verify the installation. Substitute the installed `mcli` for the `mc` examples below; the arguments are unchanged.
 
-If your MinIO deployment uses third-party or self-signed TLS certificates, copy the <abbr title="Certificate Authority">CA</abbr> files to `~/.mc/certs/CAs` to allow `mc`
+If your MinIO deployment uses third-party or self-signed TLS certificates, copy the <abbr title="Certificate Authority">CA</abbr> files to `~/.mc/certs/CAs` to allow `mc` to trust the certificate chain.
 
 Once installed, create an alias for the MinIO deployment:
 

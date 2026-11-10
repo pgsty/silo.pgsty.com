@@ -31,7 +31,7 @@ For Helm-deployed Tenants, you can modify the base `values.yaml` and upgrade the
 helm upgrade TENANT-NAME minio-operator/tenant -f values.yaml -n TENANT-NAMESPACE
 ```
 
-The command above assumes use of the MinIO Operator Chart repository. If you installed the Chart manually or by using a different repository name, specify that chart or name in the command.
+The command above assumes use of the MinIO Operator Chart repository (`v7.1.1`). Keep `tenant.image` pinned to a verified `docker.io/pgsty/silo` release such as `RELEASE.2026-11-09T00-00-00Z` ([SILO 20261109](/blog/release/silo-20261109/)). If you manage a standalone [`helm/silo` chart `7.0.4`](https://github.com/pgsty/silo/tree/RELEASE.2026-11-09T00-00-00Z/helm/silo) deployment instead ([#296](https://github.com/pgsty/silo/issues/296)) and run `helm upgrade --reuse-values`, pass `--set image.tag=RELEASE.2026-11-09T00-00-00Z` explicitly so Helm does not keep the previously stored tag.
 
 Replace `TENANT-NAME` and `TENANT-NAMESPACE` with the name and namespace of the Tenant, respectively. You can use `helm list -n TENANT-NAMESPACE` to validate the Tenant name.
 {{< /tab >}}
@@ -58,7 +58,7 @@ When adding a new pool or modifying an existing pool for a tenant, you can speci
 
 ### Decommission a Tenant Server Pool {#decommission-a-tenant-server-pool}
 
-MinIO Operator 4.4.13 and later support decommissioning a server pool in a Tenant. Specifically, you can follow the [Decommission a Server pool](https://silo.pgsty.com/operations/deployments/baremetal-decommission-server-pool/) procedure to remove the pool from the tenant, then edit the tenant YAML to drop the pool from the StatefulSet. When removing the Tenant pool, ensure the `spec.pools.[n].name` fields have values for all remaining pools.
+MinIO Operator 4.4.13 and later support decommissioning a server pool in a Tenant. Follow the [Decommission Server Pools](/operations/deployments/baremetal-decommission-server-pool/) procedure to drain the pool from the Tenant, then edit the Tenant YAML to remove the pool from the StatefulSet. When removing the Tenant pool, ensure the `spec.pools[n].name` fields have values for all remaining pools.
 
 > [!NOTE]
 > **Maintain pool order when decommissioning and then adding**

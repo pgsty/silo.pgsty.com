@@ -6,6 +6,7 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="batch-replication"></a>
 <a id="minio-batch-framework-replicate-job"></a>
 <a id="id1" data-td-print-local></a>
 
@@ -34,9 +35,11 @@ MinIO 批处理框架允许您使用 YAML 格式的作业定义文件（“批�
 
 ## 行为 {#behavior}
 
-### SILO 在 20261026 之后的变更（尚未发布） {#silo-retry}
+### SILO 20261109：授权、Object Lock 与重试 {#silo-retry}
 
-Push、Pull 和 Snowball 复制在必要的授权依赖暂时不可用时进入暂停，包括对象处理过程中发生的故障。服务端保存 `pausedReason`，保留作业所有权并自动重试。明确的授权拒绝仍是带有 `failureReason` 的终态失败；重试不会绕过授权。
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，Push、Pull 和 Snowball 复制会在执行全程强制校验已认证提交者的本地数据权限，并保留 Object Lock 保护（[#310](https://github.com/pgsty/silo/issues/310)、[#311](https://github.com/pgsty/silo/issues/311)）。Pull 复制会校验复制过来的 Object Lock 头部，在需要时应用目标端默认保留策略，并跳过目标端受 Object Lock 保护的版本（计入 `versionsSkippedLocked`，终态为 `complete-with-skips`）；复制删除操作同样遵守目标端的 Object Lock 保留期与法定保留设置。
+
+Push、Pull 和 Snowball 复制在必要的授权依赖或报告读取暂时不可用时（包括对象处理过程中发生的故障）进入暂停（[#324](https://github.com/pgsty/silo/issues/324)）。服务端会保存 `pausedReason` 并保留作业所有权以便自动重试；服务重启后，启动发现过程也会自动恢复未完成的复制作业（[#314](https://github.com/pgsty/silo/issues/314)、[#324](https://github.com/pgsty/silo/issues/324)）。明确的授权拒绝仍是带有 `failureReason` 的终态失败；重试不会绕过授权。
 
 复制尝试中断后，会从头重新扫描源端并重新统计进度。并发 worker 最后完成的对象仅用于展示进度，不能作为安全的恢复游标。这也覆盖最终暂停报告未能写入的恢复情形。重新执行已完成的工作会增加读取和写入成本；保留源版本 ID 的复制会复用这些 ID，通用 S3 传输重放时则可能在目标端新增版本。批量复制不承诺恰好一次交付。
 
@@ -44,7 +47,7 @@ Push、Pull 和 Snowball 复制在必要的授权依赖暂时不可用时进入�
 
 ### 访问控制与要求 {#access-control-and-requirements}
 
-下一个 SILO 版本要求通过认证的提交者具备 `admin:StartBatchJob` 和作业所需的本地数据权限。定义中的凭据用于远端连接，不能代替提交者的本地权限。撤销、暂停与版本切换的行为见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。
+在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，已认证的提交者必须具备 `admin:StartBatchJob` 和作业所需的本地数据权限。定义中的凭据用于远端连接，不能代替提交者的本地权限。撤销、暂停与版本切换的行为见[授权与重试](/zh/administration/batch-framework/#silo-lifecycle)。
 
 批量复制与 [bucket replication](/zh/administration/bucket-replication/bucket-replication-requirements/#minio-bucket-replication-requirements) 具有类似的访问和权限要求。
 
@@ -174,28 +177,20 @@ YAML **必须** 定义源部署和目标部署。 如果 *source* 部署是远�
 > [!NOTE]
 > **变更: MinIO**
 >
-> RELEASE.2023-04-07T05-28-58Z
+> - `RELEASE.2023-04-07T05-28-58Z`：支持从远程 MinIO 部署复制到运行该批处理作业的本地部署。
+> - `RELEASE.2024-08-03T04-33-23Z`：Batch Job Replicate API `v2` 支持在源端列出多个要复制的前缀。若要从一个源端复制多个前缀，请将 `replicate.apiVersion` 指定为 `v2`：
 >
-> 您可以从远程 MinIO 部署复制到运行该批处理作业的本地部署。
-
-> [!NOTE]
-> **变更: MinIO**
->
-> RELEASE.2024-08-03T04-33-23Z
->
-> 此版本引入了 Batch Job Replicate API 的新版本 `v2`。 更新后的 API 允许您在源端列出多个要复制的前缀。 若要从一个源端复制多个前缀，请将 `replicate.apiVersion` 指定为 `v2`。
->
-> ```text
-> replicate:
->   apiVersion: v1
->   source:
->     type: minio
->     bucket: mybucket
->     prefix:
->       - prefix1
->       - prefix2
-> ...
-> ```
+>   ```yaml
+>   replicate:
+>     apiVersion: v2
+>     source:
+>       type: minio
+>       bucket: mybucket
+>       prefix:
+>         - prefix1
+>         - prefix2
+>   ...
+>   ```
 
 对于 **源部署**
 

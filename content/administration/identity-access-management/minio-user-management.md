@@ -6,7 +6,9 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
-**Server 20261018 authorization change:** Self inspection/cleanup must respect explicit denies, session restrictions and authorization-plugin decisions. Built-in authorization rejects service-account creation/update by restricted derived credentials and protects root-derived credentials. Ordinary users retain established self rights; bulk self aliases resolve to the parent. No new action or storage migration is required. Review the [Admin authorization contract](/blog/design/iam-admin-authorization/) and [SN-2026-017](/blog/security/20261018-release-hardening/#sn-2026-017). Older client command names do not change Server authorization rules.
+> [!NOTE]
+> - **SILO 20261109 IAM persistence and policy-load safety ([#316](https://github.com/pgsty/silo/issues/316), [#317](https://github.com/pgsty/silo/issues/317), [#321](https://github.com/pgsty/silo/issues/321)–[#323](https://github.com/pgsty/silo/issues/323)):** [SILO 20261109](/blog/release/silo-20261109/) refuses incomplete policy loads instead of publishing partial policy sets, keeps cached authentication available during lazy reloads, and applies user, group, policy, and service-account mutations directly to persisted records so a stale peer cannot restore rotated credentials or resurrect deleted identities.
+> - **SILO 20261018 self-administration rules:** Self inspection and cleanup respect explicit denies, session restrictions, and authorization-plugin decisions. Built-in authorization rejects service-account creation or update by restricted derived credentials and protects root-derived credentials. Ordinary users retain established self rights, and bulk self aliases resolve to the parent identity. Review the [Admin authorization contract](/blog/design/iam-admin-authorization/) and [SN-2026-017](/blog/security/20261018-release-hardening/#sn-2026-017).
 
 <a id="user-management"></a>
 <a id="minio-users"></a>
@@ -46,7 +48,7 @@ You can also create [security token service](/developers/security-token-service/
 
 ## MinIO `root` User {#minio-root-user}
 
-MinIO deployments have a `root` user with access to all actions and resources on the deployment, regardless of the configured [identity manager](/administration/identity-access-management/#minio-authentication-and-identity-management). When a [`minio`](/reference/minio-server/#command-minio) server first starts, it sets the `root` user credentials by checking the value of the following environment variables:
+MinIO deployments have a `root` user with access to all actions and resources on the deployment, regardless of the configured [identity manager](/administration/identity-access-management/#minio-authentication-and-identity-management) (including embedded Console sign-in when AD/LDAP is enabled in [SILO 20261109](/blog/release/silo-20261109/), [#272](https://github.com/pgsty/silo/issues/272)). When a [`silo`](/reference/minio-server/#command-minio) server first starts, it sets the `root` user credentials by checking the value of the following environment variables:
 
 - [`MINIO_ROOT_USER`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_USER)
 - [`MINIO_ROOT_PASSWORD`](/reference/minio-server/settings/root-credentials/#envvar.MINIO_ROOT_PASSWORD)
@@ -56,7 +58,7 @@ Rotating the root user credentials requires updating either or both variables fo
 - MinIO *strongly discourages* using the `root` user for regular client access regardless of the environment (development, staging, or production).
 - MinIO *strongly recommends* creating users such that each client has access to the minimal set of actions and resources required to perform their assigned workloads.
 
-If these variables are unset, [`minio`](/reference/minio-server/#command-minio) defaults to `minioadmin` and `minioadmin` as the access key and secret key respectively. MinIO *strongly discourages* use of the default credentials regardless of deployment environment.
+If these variables are unset, [`silo`](/reference/minio-server/#command-minio) defaults to `minioadmin` and `minioadmin` as the access key and secret key respectively. MinIO *strongly discourages* use of the default credentials regardless of deployment environment.
 
 > [!DETAILS]- Deprecation of Legacy Root User Environment Variables
 > MinIO [RELEASE.2021-04-22T15-44-28Z](https://github.com/minio/minio/releases/tag/RELEASE.2021-04-22T15-44-28Z) and later deprecates the following variables used for setting or updating root user credentials:

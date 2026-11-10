@@ -7,8 +7,8 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="object-lifecycle-management"></a>
 <a id="minio-lifecycle-management"></a>
-<a id="id1" data-td-print-local></a>
 
 - [MinIO Object Lifecycle Management Part I](https://youtu.be/Exg2KsfzHzI?ref=docs)
 - [MinIO Object Lifecycle Management Part II](https://youtu.be/5fz3rE3wjGg?ref=docs)
@@ -20,7 +20,7 @@ upstream_modified: true
 
 <a id="minio-lifecycle-management-tiering"></a>
 
-## 对象迁移（”Tiering”） {#tiering}
+## 对象迁移（”Tiering”） {#object-transition-tiering}
 
 MinIO 支持创建对象迁移生命周期管理规则，使 MinIO 可以自动将对象移动到远程存储“层”。 MinIO 支持以下任意一种远程层目标：
 
@@ -56,7 +56,7 @@ $ mc ls play/mybucket
 >
 > 如需支持备份/恢复或 <abbr title="Business Continuity / Disaster Recovery">BC/DR</abbr> 需求，请使用 [site replication](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 或 [bucket replication](/zh/administration/bucket-replication/#minio-bucket-replication)。
 
-### 对远程数据的独占访问 {#id3}
+### 对远程数据的独占访问 {#exclusive-access-to-remote-data}
 
 MinIO 要求对远程存储层上的已转移数据拥有独占访问权限。 “hot” MinIO 源端上的对象元数据与远程 “warm/cold” 层上的对象数据紧密关联。 如果无法访问远程层，MinIO 就无法检索对象数据； 同样，远程层也不能用于恢复源端丢失的元数据。
 
@@ -71,7 +71,7 @@ MinIO 会将所有已转移对象存储在远程存储桶或资源下、 每个�
 
 对于包含其他数据的远程存储层， 包括来自其他 MinIO 部署的已转移对象， MinIO 建议指定此可选前缀。 本教程包含设置此前缀所需的语法。
 
-### 远程数据的可用性 {#id4}
+### 远程数据的可用性 {#availability-of-remote-data}
 
 MinIO 分层行为依赖远程存储在收到请求后立即返回对象 （毫秒到秒级）。 因此，MinIO 不支持需要 rehydration、等待窗口 或人工干预的远程存储。
 
@@ -79,15 +79,22 @@ MinIO 会为每个已转移对象创建元数据，用于标识其在远程存�
 
 需要 <abbr title="Business Continuity/Disaster Recovery">BC/DR</abbr> 保护的工作负载应实现 MinIO [Server-Side replication](/zh/administration/bucket-replication/#minio-bucket-replication-serverside)。 复制可确保对象保存在远程复制站点上， 从而使用户能够在发生部分或全部数据丢失时从远端重新同步。 有关如何使用复制在部分或全部数据丢失后恢复的更完整文档， 请参见 [重新同步（灾难恢复）](/zh/administration/bucket-replication/#minio-replication-behavior-resync)。
 
-### 启用版本控制的存储桶 {#id5}
+### 启用版本控制的存储桶 {#versioned-buckets}
 
 对于已启用 [版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 的存储桶迁移规则，MinIO 采用 [S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide/intro-lifecycle-rules.html#intro-lifecycle-rules-actions)。 具体来说，MinIO 默认将迁移操作应用于对象的 *当前* 版本。
 
 如需迁移对象的非当前版本，请在创建迁移规则时指定 [`--noncurrent-transition-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-days) 和 [`--noncurrent-transition-tier`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-noncurrent-transition-tier) 选项。
 
-<a id="id6" data-td-print-local></a>
+自 [SILO 20261109](/zh/blog/release/silo-20261109/) 起，远端分层管理与 [`mc ilm restore`](/zh/reference/minio-mc/mc-ilm-restore/) 包含以下更新：
 
-## 对象过期 {#minio-lifecycle-management-expiration}
+- **两阶段原地原生恢复：** 原生恢复（`POST ?restore`，提交 [`86dc6ee2e`](https://github.com/pgsty/silo/commit/86dc6ee2e)）在对象写锁之外下载并暂存远程层数据（[#284](https://github.com/pgsty/silo/issues/284)），随后在短暂持锁下核验所有权并原地发布恢复副本，不会改变版本顺序，多池部署下也不再挂起或卡住（[#289](https://github.com/pgsty/silo/issues/289)）。
+- **恢复副本与远程层安全：** 已恢复副本到期时仅清理本地临时缓存，同时保留对象版本及其远程层数据（[#281](https://github.com/pgsty/silo/issues/281)）。SILO 在普通版本历史中排除分层 free-version 标记（[#263](https://github.com/pgsty/silo/issues/263)），且只要其他存储池仍引用某份远程层数据，就会保留该远程对象（[#306](https://github.com/pgsty/silo/issues/306)、[#308](https://github.com/pgsty/silo/issues/308)）。
+
+<a id="minio-lifecycle-management-expiration"></a>
+
+## 对象过期 {#object-expiration}
+
+**SILO 20261109 正式版变化：** 在 [SILO 20261109](/zh/blog/release/silo-20261109/) 中，生命周期过期会在对象锁内跨所有存储池评估，并要求取得权威法定人数后才移除版本（[#278](https://github.com/pgsty/silo/issues/278)）。整键删除动作（`ExpiredObjectAllVersions` 与 `DelMarkerExpiration`）仅作用于已过期的精确对象键而不再波及前缀下的子键，且在对象键包含已分层版本或受 Object Lock 保护的版本时拒绝整键删除（[#297](https://github.com/pgsty/silo/issues/297)）。唯一动作为 `DelMarkerExpiration` 的规则可正常执行（[#268](https://github.com/pgsty/silo/issues/268)），且生命周期统计仅计入实际发生的移除（[#305](https://github.com/pgsty/silo/issues/305)）。请升级全部服务节点以启用完整的多池生命周期保护。
 
 **20261026 正式版变化：** 在 [Server 20261026](/zh/blog/release/silo-20261026/#server-20261026)中，当生命周期过期仅写入删除标记时（包括已暂停版本控制桶中的非 `null` 版本），SILO 会保留上一版本的远端分层对象数据，直至该特定版本被永久删除且不再受保留期或共享引用保护。Server 20261018 不包含此修复；升级前已被误删的历史远端数据需从备份恢复。
 
@@ -95,9 +102,9 @@ MinIO 生命周期管理支持对存储桶中的对象执行过期操作。 对�
 
 使用 [`mc ilm rule add --expire-days`](/zh/reference/minio-mc/mc-ilm-rule-add/#mc.ilm.rule.add.-expire-days) 可以让对象在指定的日历天数后过期。
 
-对于已配置 [replication](/zh/administration/bucket-replication/#minio-bucket-replication) 的存储桶，MinIO 不会复制由生命周期管理过期规则删除的对象。 更多信息请参见 [删除操作的复制](/zh/administration/bucket-replication/#minio-replication-behavior-delete)。
+对于已配置 [存储桶复制](/zh/administration/bucket-replication/#minio-bucket-replication) 或 [站点复制](/zh/operations/replication/multi-site-replication/#minio-site-replication-overview) 的存储桶，SILO 不会复制由生命周期过期规则产生的删除标记与版本清除（提交 [`1bd0b1b04`](https://github.com/pgsty/silo/commit/1bd0b1b04)），行为与 AWS S3 一致。如需各副本保持一致的过期行为，请同时在源存储桶与目标存储桶上配置生命周期规则。更多信息请参见 [删除操作的复制](/zh/administration/bucket-replication/#minio-replication-behavior-delete)。
 
-### 启用版本控制的存储桶 {#id7}
+### 启用版本控制的存储桶 {#expiration-versioned-buckets}
 
 对于已启用 [版本控制](/zh/administration/object-management/object-versioning/#minio-bucket-versioning) 的存储桶过期规则，MinIO 采用 [S3 behavior](https://docs.aws.amazon.com/AmazonS3/latest/userguide/intro-lifecycle-rules.html#intro-lifecycle-rules-actions)。 对于启用版本控制的存储桶，MinIO 具有以下默认行为：
 
@@ -116,9 +123,9 @@ MinIO 生命周期管理支持对存储桶中的对象执行过期操作。 对�
   >
   > 此标志仅适用于没有删除标记的对象。
 
-<a id="id8" data-td-print-local></a>
+<a id="minio-lifecycle-management-scanner"></a>
 
-## 生命周期管理对象扫描器 {#minio-lifecycle-management-scanner}
+## 生命周期管理对象扫描器 {#lifecycle-management-object-scanner}
 
 MinIO 使用内置的 [scanner](/zh/operations/concepts/scanner/#minio-concepts-scanner) 主动检查对象是否符合所有已配置的生命周期管理规则。
 

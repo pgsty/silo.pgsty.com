@@ -6,10 +6,13 @@ upstream_link: https://github.com/minio/docs/blob/35f2bb81280a3573c64947e8bd979e
 upstream_modified: true
 ---
 
+<a id="configure-minio-for-authentication-using-openid"></a>
 <a id="minio-openid"></a>
 <a id="minio-authenticate-using-openid-generic"></a>
 
-## 概览 {#id2}
+<a id="id2" data-td-print-local></a>
+
+## 概览 {#overview}
 
 MinIO 支持使用兼容 OpenID Connect (OIDC) 的 Identity Provider (IDP) 来管理外部用户身份，例如 Okta、KeyCloak、Dex、Google 或 Facebook。
 
@@ -22,29 +25,39 @@ MinIO 支持使用兼容 OpenID Connect (OIDC) 的 Identity Provider (IDP) 来�
 
 本流程是面向兼容 OIDC 提供方的通用配置流程。 有关认证与 JWT 获取的具体说明，请以你所选 OIDC 提供方的文档为准。
 
-## 前提条件 {#id3}
+<a id="id3" data-td-print-local></a>
 
-### 兼容 OpenID-Connect (OIDC) 的 Identity Provider {#openid-connect-oidc-identity-provider}
+## 前提条件 {#prerequisites}
 
-**SILO 20261026 兼容性：** [正式版](/zh/blog/release/silo-20261026/)继续使用 go-jose v4.1.6。该依赖自 SILO 20261018 起用于修复特制密钥导致的过量 CPU 消耗，并拒绝超过 **4096 位**的 RSA JWK。升级前应检查提供方的签名密钥、discovery、JWKS 刷新和完整登录流程；不兼容的密钥需在身份提供方轮换。参见[依赖安全说明](/zh/blog/security/20261018-release-hardening/#dependencies)。
+<a id="openid-connect-oidc-identity-provider" data-td-print-local></a>
+
+### 兼容 OpenID-Connect (OIDC) 的 Identity Provider {#openid-connect-oidc-compatible-identity-provider}
+
+> [!NOTE]
+> **SILO 20261109 OIDC 与 JWT 兼容性：** [SILO 20261109](/zh/blog/release/silo-20261109/)（`RELEASE.2026-11-09T00-00-00Z`）通过 [`silo-pkg v3.16.0`](/zh/blog/release/pkg-3.16.0/) 采用 `github.com/go-jose/go-jose/v4 v4.1.9`，进一步加固 OIDC/JWT 令牌验证上限（包括 RSA 证书校验边界及 JWS 签名与 JWE 接收方数量限制）以及 JWS/JWE 头部校验。自 [SILO 20261018](/zh/blog/release/silo-20261018/) 起，`go-jose` 还会拒绝超过 **4096 位**的 RSA JWK，防止特制密钥引发过量 CPU 消耗。升级前请检查身份提供方的签名密钥、discovery 端点、JWKS 刷新与完整登录流程；不兼容的密钥需在身份提供方轮换。参见[依赖安全说明](/zh/blog/security/20261018-release-hardening/#dependencies)。
 
 本流程假定你已经拥有一个现成的 OIDC 提供方，例如 Okta、KeyCloak、Dex、Google 或 Facebook。 这些服务本身的配置不在本流程范围内。
 
 MinIO 集群必须与 OIDC 提供方保持双向连通。
 
-### 检查访问管理行为 {#id4}
+<a id="id4" data-td-print-local></a>
+
+### 检查访问管理行为 {#review-access-management-behavior}
 
 请确保每个打算与 MinIO 配合使用的用户身份，都配置了合适的 [claim](/zh/administration/identity-access-management/oidc-access-management/#minio-external-identity-management-openid-access-control)，以便 MinIO 能将认证用户关联到某个 [策略](/zh/administration/identity-access-management/policy-based-access-control/#minio-policy)。 未分配任何策略的 OpenID 用户，无权访问 MinIO 集群中的任何操作或资源。
 
 对于基于 JWT claim 的认证，MinIO 仅支持使用 [OpenID Authorization Code Flow](https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth) 的 OIDC 流程。
 
-### 访问 MinIO 集群 {#minio}
+<a id="minio" data-td-print-local></a>
+
+### 访问 MinIO 集群 {#access-to-minio-cluster}
 
 本流程使用 [`mc`](/zh/reference/minio-mc/#command-mc) 对 MinIO 集群执行操作。 请在一台能够访问该集群网络的机器上安装 `mc`。 关于如何下载和安装 `mc`，请参见 `mc` [安装快速开始](/zh/reference/minio-mc/#mc-install)。 本流程假定已为 MinIO 集群配置 [`alias`](/zh/reference/minio-mc/mc-alias/#command-mc.alias)。
 
 <a id="id5" data-td-print-local></a>
+<a id="minio-external-identity-management-openid-configure"></a>
 
-## 为 MinIO 配置 OpenID 外部身份管理 {#minio-external-identity-management-openid-configure}
+## 为 MinIO 配置 OpenID 外部身份管理 {#configure-minio-with-openid-external-identity-management}
 
 1. 创建新的 OpenID 配置
 
@@ -71,7 +84,7 @@ MinIO 集群必须与 OIDC 提供方保持双向连通。
 
    应用程序可以按需使用 [AssumeRoleWithWebIdentity](/zh/developers/security-token-service/AssumeRoleWithWebIdentity/#minio-sts-assumerolewithwebidentity) Security Token Service (STS) API 端点，以及 <abbr title="OpenID Connect">OIDC</abbr> 提供方返回的 JSON Web Token (JWT)，生成临时访问凭证。
 
-   应用程序必须提供一个工作流，用于登录 <abbr title="OpenID Connect">OIDC</abbr> 提供方，并获取与该认证会话关联的 JSON Web Token (JWT)。 关于认证成功后如何获取和解析 JWT token，请以提供方文档为准。MinIO 提供了一个示例 Go 应用 [web-identity.go](https://github.com/minio/minio/blob/master/docs/sts/web-identity.go)，展示了如何管理这一工作流。
+   应用程序必须提供一个工作流，用于登录 <abbr title="OpenID Connect">OIDC</abbr> 提供方，并获取与该认证会话关联的 JSON Web Token (JWT)。关于认证成功后如何获取和解析 JWT token，请以提供方文档为准。SILO 提供了一个示例 Go 应用 [web-identity.go](https://github.com/pgsty/silo/blob/RELEASE.2026-11-09T00-00-00Z/docs/sts/web-identity.go)，展示了如何管理这一工作流。
 
    应用程序获取到 JWT token 后，使用 `AssumeRoleWithWebIdentity` 端点生成临时凭证：
 
