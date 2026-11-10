@@ -9,7 +9,7 @@ weight: 1
 url: "/zh/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**`SN-2026-015`** 与 **`SN-2026-016`** 涵盖了在 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 中通过 PR [`#234`](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 PR [`#235`](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）修复的两组 S3 Object Lock 合规保留与不可变性漏洞（配套[修复设计方案](/zh/blog/design/governance-retention-bypass-repair/)）。虽然删除路径此前已按 [CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63) 正确校验 `s3:BypassGovernanceRetention`，但保留期修改路径（`PutObjectRetention`）与四条原地版本覆写路径仍存在绕过缺陷。
+**`SN-2026-015`** 与 **`SN-2026-016`** 涵盖了在 [SILO Server 20261018](/zh/blog/release/silo-20261018/) 中通过 PR [`#234`](https://github.com/pgsty/silo/pull/234)（`14042b5aa`）与 PR [`#235`](https://github.com/pgsty/silo/pull/235)（`0d3ba5d4c`）修复的两组 S3 Object Lock 合规保留与不可变性漏洞（配套[修复设计方案](/zh/blog/design/governance-retention-bypass-repair/)）。虽然单对象删除路径此前已按 [CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63) 校验 `s3:BypassGovernanceRetention`，但保留期修改路径（`PutObjectRetention`）与四条原地版本覆写路径仍存在绕过缺陷；[SILO Server 20261109](/zh/blog/release/silo-20261109/#authorization)（`7e9ee6bef`、`aa2d79daf`、`6ef3a52fc`）随后进一步补齐了复制 `DELETE`、目录 `null` 版本批量删除与并发 S3 `DeleteObjects` 物理版本清除的删除路径保护。
 
 ## 漏洞范围：`SN-2026-015` 与 `SN-2026-016` {#advisory-scope-sn-2026-015}
 
@@ -34,13 +34,13 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 
 按照 AWS S3 Object Lock 规范，`PutObjectRetention` 必须同时守护两条相互正交的权限边界：
 
-| 目标对象当前状态 | 请求提交的 `<Retention>` 变更 | 必需的 IAM 权限 | 必需的请求头 |
-|---|---|---|---|
-| 未加锁，或原保留期已过期 | 设置未来的 `GOVERNANCE` 或 `COMPLIANCE` 保留期 | `s3:PutObjectRetention` | 无 |
-| 处于有效 `GOVERNANCE` 锁定期 | 在同模式下将 `RetainUntilDate` 延长至更晚时间 | `s3:PutObjectRetention` | 无 |
+| 目标对象当前状态             | 请求提交的 `<Retention>` 变更                                             | 必需的 IAM 权限                                               | 必需的请求头                              |
+| ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------- |
+| 未加锁，或原保留期已过期     | 设置未来的 `GOVERNANCE` 或 `COMPLIANCE` 保留期                            | `s3:PutObjectRetention`                                       | 无                                        |
+| 处于有效 `GOVERNANCE` 锁定期 | 在同模式下将 `RetainUntilDate` 延长至更晚时间                             | `s3:PutObjectRetention`                                       | 无                                        |
 | 处于有效 `GOVERNANCE` 锁定期 | 清空（`<Retention/>`）、缩短 `RetainUntilDate`，或将模式改为 `COMPLIANCE` | `s3:PutObjectRetention` **且** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
-| 处于有效 `COMPLIANCE` 锁定期 | 在 `COMPLIANCE` 模式下将 `RetainUntilDate` 延长至更晚时间 | `s3:PutObjectRetention` | 无 |
-| 处于有效 `COMPLIANCE` 锁定期 | 清空、缩短保留期，或降级为 `GOVERNANCE` | **任何身份均绝对禁止** | 禁止（返回 `AccessDenied`） |
+| 处于有效 `COMPLIANCE` 锁定期 | 在 `COMPLIANCE` 模式下将 `RetainUntilDate` 延长至更晚时间                 | `s3:PutObjectRetention`                                       | 无                                        |
+| 处于有效 `COMPLIANCE` 锁定期 | 清空、缩短保留期，或降级为 `GOVERNANCE`                                   | **任何身份均绝对禁止**                                        | 禁止（返回 `AccessDenied`）               |
 {.wide .expand}
 
 ---
@@ -53,22 +53,22 @@ url: "/zh/blog/security/20260926-governance-retention-bypass/"
 
 假设用户 `nobypass` 仅被授予 `s3:PutObjectRetention` 与 `s3:DeleteObjectVersion`，**没有** `s3:BypassGovernanceRetention` 权限：
 
-| 步骤 | `nobypass` 发起的请求 | `20261018` 之前结果 | Server `20261018` 结果 |
-|---|---|---|---|
-| 1 | 对象 `doc.txt`（版本 `v1`）处于 `GOVERNANCE` 锁定状态，保留至 `2030-01-01` | 受保护状态 | 受保护状态 |
-| 2 | `DELETE /bucket/doc.txt?versionId=v1` | `403 AccessDenied` | `403 AccessDenied` |
-| 3 | `PUT /bucket/doc.txt?retention&versionId=v1`，附带请求头 `x-amz-bypass-governance-retention: true` 与空请求体 `<Retention/>` | **`200 OK`（治理锁被直接清空！）** | `403 AccessDenied` |
-| 4 | 再次执行 `DELETE /bucket/doc.txt?versionId=v1` | **`204 No Content`（受保护版本被永久删除！）** | 对象保持锁定，拒绝删除 |
+| 步骤 | `nobypass` 发起的请求                                                                                                        | `20261018` 之前结果                            | Server `20261018` 结果 |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ---------------------- |
+| 1    | 对象 `doc.txt`（版本 `v1`）处于 `GOVERNANCE` 锁定状态，保留至 `2030-01-01`                                                   | 受保护状态                                     | 受保护状态             |
+| 2    | `DELETE /bucket/doc.txt?versionId=v1`                                                                                        | `403 AccessDenied`                             | `403 AccessDenied`     |
+| 3    | `PUT /bucket/doc.txt?retention&versionId=v1`，附带请求头 `x-amz-bypass-governance-retention: true` 与空请求体 `<Retention/>` | **`200 OK`（治理锁被直接清空！）**             | `403 AccessDenied`     |
+| 4    | 再次执行 `DELETE /bucket/doc.txt?versionId=v1`                                                                               | **`204 No Content`（受保护版本被永久删除！）** | 对象保持锁定，拒绝删除 |
 {.wide .expand}
 
 ### 复现 2：零保留权限账号对未加锁对象强加合规锁（F1） {#reproduction-2-locking-an-object}
 
 假设用户 `zeroperm` **既没有** `s3:PutObjectRetention` **也没有** `s3:BypassGovernanceRetention` 权限：
 
-| 步骤 | `zeroperm` 发起的请求 | `20261018` 之前结果 | Server `20261018` 结果 |
-|---|---|---|---|
-| 1 | `PUT /bucket/unlocked.txt?retention`（不带 bypass 头），请求体设为 `<Mode>COMPLIANCE</Mode><RetainUntilDate>2099-01-01T00:00:00Z</RetainUntilDate>` | `403 AccessDenied` | `403 AccessDenied` |
-| 2 | 发送完全相同的请求，仅**额外附带请求头 `x-amz-bypass-governance-retention: true`** | **`200 OK`（成功打上不可撤销的 2099 年合规死锁！）** | `403 AccessDenied` |
+| 步骤 | `zeroperm` 发起的请求                                                                                                                               | `20261018` 之前结果                                  | Server `20261018` 结果 |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------- |
+| 1    | `PUT /bucket/unlocked.txt?retention`（不带 bypass 头），请求体设为 `<Mode>COMPLIANCE</Mode><RetainUntilDate>2099-01-01T00:00:00Z</RetainUntilDate>` | `403 AccessDenied`                                   | `403 AccessDenied`     |
+| 2    | 发送完全相同的请求，仅**额外附带请求头 `x-amz-bypass-governance-retention: true`**                                                                  | **`200 OK`（成功打上不可撤销的 2099 年合规死锁！）** | `403 AccessDenied`     |
 {.wide .expand}
 
 ### 复现 3：绕过 `s3:object-lock-remaining-retention-days` 最短保留天数条件（F3） {#reproduction-3-bypassing-s3-object}
@@ -129,15 +129,15 @@ func isPutRetentionAllowed(ctx context.Context, r *http.Request, bucket, object 
 
 ### `PutObjectRetention` 完整判定真值表 {#decision-table}
 
-| 行号 | 现有锁状态 | 请求的变更动作 | `x-amz-bypass-governance-retention` | `retOK` (`s3:PutObjectRetention`) | `bypassOK` (`s3:BypassGovernanceRetention`) | 最终结果 |
-|---|---|---|---|---|---|---|
-| 1 | 任意状态 | 任意变更 | `false` 或 `true` | `false` | 任意 | **`403 AccessDenied`**（封堵 F1 与 F3） |
-| 2 | 未加锁或已过期 | 设置未来保留期 | `false` 或 `true` | `true` | 不要求 | **`200 OK`** |
-| 3 | 有效 `GOVERNANCE` | 延长 `RetainUntilDate` | `false` 或 `true` | `true` | 不要求 | **`200 OK`** |
-| 4 | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `false` | `true` | 任意 | **`403 AccessDenied`** |
-| 5 | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `true` | `true` | `false` | **`403 AccessDenied`**（封堵 F2） |
-| 6 | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `true` | `true` | `true` | **`200 OK`** |
-| 7 | 有效 `COMPLIANCE` | 清空、缩短或降级为 `GOVERNANCE` | `false` 或 `true` | 任意 | 任意 | **`403 AccessDenied`** |
+| 行号 | 现有锁状态        | 请求的变更动作                                 | `x-amz-bypass-governance-retention` | `retOK` (`s3:PutObjectRetention`) | `bypassOK` (`s3:BypassGovernanceRetention`) | 最终结果                                |
+| ---- | ----------------- | ---------------------------------------------- | ----------------------------------- | --------------------------------- | ------------------------------------------- | --------------------------------------- |
+| 1    | 任意状态          | 任意变更                                       | `false` 或 `true`                   | `false`                           | 任意                                        | **`403 AccessDenied`**（封堵 F1 与 F3） |
+| 2    | 未加锁或已过期    | 设置未来保留期                                 | `false` 或 `true`                   | `true`                            | 不要求                                      | **`200 OK`**                            |
+| 3    | 有效 `GOVERNANCE` | 延长 `RetainUntilDate`                         | `false` 或 `true`                   | `true`                            | 不要求                                      | **`200 OK`**                            |
+| 4    | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `false`                             | `true`                            | 任意                                        | **`403 AccessDenied`**                  |
+| 5    | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `true`                              | `true`                            | `false`                                     | **`403 AccessDenied`**（封堵 F2）       |
+| 6    | 有效 `GOVERNANCE` | 清空（`<Retention/>`）或缩短 `RetainUntilDate` | `true`                              | `true`                            | `true`                                      | **`200 OK`**                            |
+| 7    | 有效 `COMPLIANCE` | 清空、缩短或降级为 `GOVERNANCE`                | `false` 或 `true`                   | 任意                              | 任意                                        | **`403 AccessDenied`**                  |
 {.wide .expand}
 
 ### 五个被否决的替代方案 {#alternatives}

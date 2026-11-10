@@ -17,6 +17,6 @@ aliases:
 
 Release notes track feature updates, security fixes, dependency upgrades, compatibility requirements, and artifact delivery across the SILO stack.
 
-[Console 2.7.0](/blog/release/console-2.7.0/) adds ten UI languages and usage-worker, plain-HTTP and upload fixes; it is the published stable version, succeeding [Console 2.6.0](/blog/release/console-2.6.0/). 2.7.0 adopts the separately released [mcli 20261109](/blog/release/mcli-20261109/) and [silo-pkg 3.16.0](/blog/release/pkg-3.16.0/).
+The **[20261109 coordinated release](/blog/release/silo-20261109/)** ships SILO Server 20261109 alongside embedded and standalone **[Console 2.7.0](/blog/release/console-2.7.0/)**, **[mcli 20261109](/blog/release/mcli-20261109/)**, and **[silo-pkg 3.16.0](/blog/release/pkg-3.16.0/)**, delivering multi-pool lifecycle and two-phase restore repairs, S3 `DeleteObjects` and replicated Object Lock enforcement, submitter-bound batch job authorization, ten UI languages with Arabic RTL, and usage-worker and container fixes.
 
-The **[20261026 coordinated release](/blog/release/silo-20261026/)** consolidates all SILO Server, mcli, and KES changes since 20261018 alongside **[Console 2.5.1](/blog/release/console-2.5.1/)** and **[silo-pkg 3.15.2](/blog/release/pkg-3.15.2/)** (the October 24–25 maintenance drafts have been folded into the final release notes, with their URLs redirecting automatically).
+Earlier **[20261026](/blog/release/silo-20261026/)** notes consolidate SILO Server, mcli, and optional external **KES 20261026** alongside **[Console 2.5.1](/blog/release/console-2.5.1/)** and **[silo-pkg 3.15.2](/blog/release/pkg-3.15.2/)** (folding the October 24–25 maintenance drafts with automatic redirects).

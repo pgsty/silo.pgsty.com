@@ -45,18 +45,18 @@ Console 2.7.0 将管理界面扩展到十种语言，修复容器 HTTPS 与临�
 
 登录页、公开页面和登录后的控制台共用语言菜单，命令面板提供同样的选择：
 
-| 语言 | 菜单名称 |
-| --- | --- |
-| 英语 | English |
-| 简体中文 | 简体中文 |
-| 法语 | Français |
-| 德语 | Deutsch |
-| 俄语 | Русский |
-| 西班牙语 | Español |
+| 语言         | 菜单名称           |
+| ------------ | ------------------ |
+| 英语         | English            |
+| 简体中文     | 简体中文           |
+| 法语         | Français           |
+| 德语         | Deutsch            |
+| 俄语         | Русский            |
+| 西班牙语     | Español            |
 | 巴西葡萄牙语 | Português (Brasil) |
-| 日语 | 日本語 |
-| 阿拉伯语 | العربية |
-| 土耳其语 | Türkçe |
+| 日语         | 日本語             |
+| 阿拉伯语     | العربية            |
+| 土耳其语     | Türkçe             |
 {.wide .expand}
 
 英语仍是默认与回退语言。Console 记住用户的显式选择，不按浏览器设置自动切换。
@@ -114,16 +114,16 @@ Console 2.7.0 将管理界面扩展到十种语言，修复容器 HTTPS 与临�
 
 2.7.0 采用 [PR #86](https://github.com/pgsty/silo-console/pull/86) 已验证的正式组件：
 
-| 组件 | 已核对的源码选择 |
-| --- | --- |
-| Go | 1.27.3 |
-| Node / Yarn | 24.22.1 / 4.13.0 |
-| `github.com/pgsty/silo-pkg/v3` | v3.16.0，提交 `b7aeea85e84e8888d6ab424c7123a1297711bc3f` |
-| 维护的 MC 源码 | mcli 20261109，提交 `e1d4cc5abfe00b674eb36347399e7398990be467` |
-| 上游 `github.com/minio/minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
-| go-swagger / runtime / server-middleware | v0.36.7 / v0.33.4 / v0.33.4 |
-| `golang.org/x/net` | v0.62.0 |
-| `golang.org/x/crypto` | `v0.58.1-0.20261009181718-2f1f834330b2` |
+| 组件                                     | 已核对的源码选择                                               |
+| ---------------------------------------- | -------------------------------------------------------------- |
+| Go                                       | 1.27.3                                                         |
+| Node / Yarn                              | 24.22.1 / 4.13.0                                               |
+| `github.com/pgsty/silo-pkg/v3`           | v3.16.0，提交 `b7aeea85e84e8888d6ab424c7123a1297711bc3f`       |
+| 维护的 MC 源码                           | mcli 20261109，提交 `e1d4cc5abfe00b674eb36347399e7398990be467` |
+| 上游 `github.com/minio/minio-go/v7`      | `v7.4.2-0.20261025165926-320af050c445`                         |
+| go-swagger / runtime / server-middleware | v0.36.7 / v0.33.4 / v0.33.4                                    |
+| `golang.org/x/net`                       | v0.62.0                                                        |
+| `golang.org/x/crypto`                    | `v0.58.1-0.20261009181718-2f1f834330b2`                        |
 {.wide .expand}
 
 [mcli 20261109](/zh/blog/release/mcli-20261109/) 的标签
@@ -137,7 +137,7 @@ Console 2.7.0 将管理界面扩展到十种语言，修复容器 HTTPS 与临�
 模块图还采用 go-jose v4.1.9，但独立 Console 的包依赖集合没有 JOSE，因此不宣称修复了该程序的可达 JOSE 漏洞。
 既有 tablewriter、runewidth、go-systemd replace 和已验证的 pgx/puddle 版本继续保留。
 
-SILO Server 20261026 内嵌 Console 2.5.1。升级独立 Console 不会替换内嵌前端，也不会补充新的服务端 API。
+已发布的 [SILO Server 20261109](/zh/blog/release/silo-20261109/#components) 内嵌本次正式 Console 源码 `4e91ae506e70`（Go 伪版本 `v0.0.0-20261109114619-4e91ae506e70`）；历史版本 Server 20261026 仍保留 Console 2.5.1。升级独立 Console 不会替换旧版 Server 内嵌前端，也不会补充新的服务端 API。
 嵌入方需选择相应 Console 源码并复制其维护的 MC replacement；Go 不会继承依赖模块的 replacement。
 正式支持的管理目标仍是 **pgsty/silo**，对未经修改的上游 MinIO 尽最大努力兼容。
 

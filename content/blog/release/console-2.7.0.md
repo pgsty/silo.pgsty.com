@@ -67,18 +67,18 @@ consistently.
 The login page, public pages and signed-in Console share a language menu.
 The command palette offers the same choices:
 
-| Language | Menu label |
-| --- | --- |
-| English | English |
-| Simplified Chinese | 简体中文 |
-| French | Français |
-| German | Deutsch |
-| Russian | Русский |
-| Spanish | Español |
+| Language             | Menu label         |
+| -------------------- | ------------------ |
+| English              | English            |
+| Simplified Chinese   | 简体中文           |
+| French               | Français           |
+| German               | Deutsch            |
+| Russian              | Русский            |
+| Spanish              | Español            |
 | Brazilian Portuguese | Português (Brasil) |
-| Japanese | 日本語 |
-| Arabic | العربية |
-| Turkish | Türkçe |
+| Japanese             | 日本語             |
+| Arabic               | العربية            |
+| Turkish              | Türkçe             |
 {.wide .expand}
 
 English remains the default and fallback. Console remembers an explicit
@@ -162,16 +162,16 @@ needed only for that optional worker, not for the language or container changes.
 2.7.0 adopts the released components verified in
 [PR #86](https://github.com/pgsty/silo-console/pull/86):
 
-| Component | Reviewed source selection |
-| --- | --- |
-| Go | 1.27.3 |
-| Node / Yarn | 24.22.1 / 4.13.0 |
-| `github.com/pgsty/silo-pkg/v3` | v3.16.0, commit `b7aeea85e84e8888d6ab424c7123a1297711bc3f` |
-| Maintained MC source | mcli 20261109, commit `e1d4cc5abfe00b674eb36347399e7398990be467` |
-| Upstream `github.com/minio/minio-go/v7` | `v7.4.2-0.20261025165926-320af050c445` |
-| go-swagger / runtime / server-middleware | v0.36.7 / v0.33.4 / v0.33.4 |
-| `golang.org/x/net` | v0.62.0 |
-| `golang.org/x/crypto` | `v0.58.1-0.20261009181718-2f1f834330b2` |
+| Component                                | Reviewed source selection                                        |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| Go                                       | 1.27.3                                                           |
+| Node / Yarn                              | 24.22.1 / 4.13.0                                                 |
+| `github.com/pgsty/silo-pkg/v3`           | v3.16.0, commit `b7aeea85e84e8888d6ab424c7123a1297711bc3f`       |
+| Maintained MC source                     | mcli 20261109, commit `e1d4cc5abfe00b674eb36347399e7398990be467` |
+| Upstream `github.com/minio/minio-go/v7`  | `v7.4.2-0.20261025165926-320af050c445`                           |
+| go-swagger / runtime / server-middleware | v0.36.7 / v0.33.4 / v0.33.4                                      |
+| `golang.org/x/net`                       | v0.62.0                                                          |
+| `golang.org/x/crypto`                    | `v0.58.1-0.20261009181718-2f1f834330b2`                          |
 {.wide .expand}
 
 The [mcli 20261109](/blog/release/mcli-20261109/) tag
@@ -188,8 +188,8 @@ but JOSE is absent from the standalone Console package dependency set; this is
 not a claim of a reachable JOSE vulnerability fix. Existing tablewriter,
 runewidth and go-systemd replacements and the reviewed pgx/puddle versions remain.
 
-SILO Server 20261026 embeds Console 2.5.1. Updating standalone Console does not
-replace that embedded frontend or supply newer server APIs. Embedders must
+[SILO Server 20261109](/blog/release/silo-20261109/#components) embeds this published Console source `4e91ae506e70` (`v0.0.0-20261109114619-4e91ae506e70`); historical Server 20261026 retains Console 2.5.1. Updating standalone Console does not
+replace an older Server's embedded frontend or supply newer server APIs. Embedders must
 select the corresponding Console source and copy its maintained MC replacement;
 Go does not inherit replacements from dependencies. The supported administration
 target remains **pgsty/silo**; compatibility with unmodified upstream MinIO is

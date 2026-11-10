@@ -13,6 +13,10 @@ published_server:
   tag: RELEASE.2026-11-09T00-00-00Z
   build: 20261109000000.0.0
   date: "2026-11-09"
+  published: true
+  go_version: "1.27.3"
+  windows_archive_format: zip
+  source: d998292387ccf1d2907749e0fb1575ef5fb93fda
 client:
   tag: RELEASE.2026-11-09T00-00-00Z
   go_version: "1.27.3"

@@ -17,6 +17,6 @@ aliases:
 
 发布日志记录各版本的功能演进、安全修复、依赖更新、兼容性要求与交付制品。
 
-[Console 2.7.0](/zh/blog/release/console-2.7.0/) 加入十种界面语言，以及用量后台任务、普通 HTTP 与上传修复；它是当前已公开的稳定版本，接替 [Console 2.6.0](/zh/blog/release/console-2.6.0/)。2.7.0 采用已独立发布的 [mcli 20261109](/zh/blog/release/mcli-20261109/) 与 [silo-pkg 3.16.0](/zh/blog/release/pkg-3.16.0/)。
+最新的 **[20261109 联合发布](/zh/blog/release/silo-20261109/)** 交付 SILO Server 20261109，配套内嵌与独立版 **[Console 2.7.0](/zh/blog/release/console-2.7.0/)**、**[mcli 20261109](/zh/blog/release/mcli-20261109/)** 与 **[silo-pkg 3.16.0](/zh/blog/release/pkg-3.16.0/)**，涵盖多池生命周期与两阶段恢复修复、S3 `DeleteObjects` 与复制删除的 Object Lock 保护、绑定提交者权限的批处理授权、十种界面语言（含阿拉伯语 RTL），以及用量后台任务与容器修复。
 
-最新的 **[20261026 联合发布](/zh/blog/release/silo-20261026/)** 汇总了 SILO Server、mcli 与 KES 自 20261018 正式版以来的全部更新，并配套发布 **[Console 2.5.1](/zh/blog/release/console-2.5.1/)** 与 **[silo-pkg 3.15.2](/zh/blog/release/pkg-3.15.2/)**（10 月 24—25 日的阶段性维护记录已并入正式发布日志，原链接自动重定向至新页面）。
+此前的 **[20261026 联合发布](/zh/blog/release/silo-20261026/)** 汇总了 SILO Server、mcli 与可选外部 **KES 20261026** 自 20261018 以来的更新，配套 **[Console 2.5.1](/zh/blog/release/console-2.5.1/)** 与 **[silo-pkg 3.15.2](/zh/blog/release/pkg-3.15.2/)**（10 月 24—25 日的阶段性维护记录已并入正式发布日志并自动重定向）。

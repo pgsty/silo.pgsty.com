@@ -9,17 +9,17 @@ weight: 3
 url: "/blog/release/pkg-3.16.0/"
 ---
 
-**silo-pkg v3.16.0** is a source-only maintenance release of `github.com/pgsty/silo-pkg/v3`. It requires **Go 1.27.3** and remains API-compatible with v3.15.2. Server, Console and mcli receive the changes only after adopting this version and rebuilding; their existing release artifacts are not replaced by a library release.
+**silo-pkg v3.16.0** is a source-only maintenance release of `github.com/pgsty/silo-pkg/v3`. It requires **Go 1.27.3** and remains API-compatible with v3.15.2. [SILO Server 20261109](/blog/release/silo-20261109/), [Console 2.7.0](/blog/release/console-2.7.0/), and [mcli 20261109](/blog/release/mcli-20261109/) ship with v3.16.0; older application artifacts are not replaced by a library release.
 
 ## Dependency updates {#dependencies}
 
-| Module | v3.15.2 | v3.16.0 |
-| --- | --- | --- |
-| `github.com/go-jose/go-jose/v4` | `v4.1.6` | `v4.1.9` |
-| `golang.org/x/net` | `v0.61.0` | `v0.62.0` |
-| `golang.org/x/crypto` | `v0.58.0` | `v0.58.1-0.20261009181718-2f1f834330b2` |
-| `github.com/klauspost/cpuid/v2` | `v2.4.1` | `v2.4.2` |
-| `go.yaml.in/yaml/v3` | `v3.0.5` | `v3.0.6` |
+| Module                          | v3.15.2   | v3.16.0                                 |
+| ------------------------------- | --------- | --------------------------------------- |
+| `github.com/go-jose/go-jose/v4` | `v4.1.6`  | `v4.1.9`                                |
+| `golang.org/x/net`              | `v0.61.0` | `v0.62.0`                               |
+| `golang.org/x/crypto`           | `v0.58.0` | `v0.58.1-0.20261009181718-2f1f834330b2` |
+| `github.com/klauspost/cpuid/v2` | `v2.4.1`  | `v2.4.2`                                |
+| `go.yaml.in/yaml/v3`            | `v3.0.5`  | `v3.0.6`                                |
 {.wide .expand}
 
 The JOSE update includes the five security fixes in [go-jose v4.1.7](https://github.com/go-jose/go-jose/releases/tag/v4.1.7): invalid RSA thumbprints, JSON decoding of embedded unexported fields, JWE protected/unprotected header handling, RSA certificate-verification limits, and limits on JWS signatures/JWE recipients. Version 4.1.9 also restores OpaqueSigner support for unrecognized public-key types and improves unsupported-key errors. These are dependency advisories; their applicability depends on which operations a consuming application exposes.

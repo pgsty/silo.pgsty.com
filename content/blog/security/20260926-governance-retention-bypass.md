@@ -9,7 +9,7 @@ weight: 1
 url: "/blog/security/20260926-governance-retention-bypass/"
 ---
 
-**`SN-2026-015`** and **`SN-2026-016`** cover two S3 Object Lock retention and immutability vulnerabilities fixed in [SILO Server 20261018](/blog/release/silo-20261018/) via PR [`#234`](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and PR [`#235`](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`), as detailed in the companion [repair design note](/blog/design/governance-retention-bypass-repair/). While the delete path already enforced `s3:BypassGovernanceRetention` ([CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63)), the retention-write path (`PutObjectRetention`) and four in-place version overwrite paths remained bypassable.
+**`SN-2026-015`** and **`SN-2026-016`** cover two S3 Object Lock retention and immutability vulnerabilities fixed in [SILO Server 20261018](/blog/release/silo-20261018/) via PR [`#234`](https://github.com/pgsty/silo/pull/234) (`14042b5aa`) and PR [`#235`](https://github.com/pgsty/silo/pull/235) (`0d3ba5d4c`), as detailed in the companion [repair design note](/blog/design/governance-retention-bypass-repair/). While the single-object delete path already enforced `s3:BypassGovernanceRetention` ([CVE-2023-25812](https://github.com/minio/minio/security/advisories/GHSA-c8fc-mjj8-fc63)), the retention-write path (`PutObjectRetention`) and four in-place version overwrite paths remained bypassable; [SILO Server 20261109](/blog/release/silo-20261109/#authorization) (`7e9ee6bef`, `aa2d79daf`, `6ef3a52fc`) subsequently closed companion delete-path gaps on replicated `DELETE` requests, directory `null`-version bulk deletes, and concurrent S3 `DeleteObjects` physical version purges.
 
 ## Advisory Scope: `SN-2026-015` and `SN-2026-016` {#advisory-scope-sn-2026-015}
 
@@ -34,13 +34,13 @@ While auditing every write path that can mutate an existing object version in pl
 
 Under the AWS S3 Object Lock specification, `PutObjectRetention` must enforce two independent orthogonal boundaries:
 
-| Target Object State | Proposed `<Retention>` Change | Required IAM Permissions | Required Request Header |
-|---|---|---|---|
-| Unlocked, or retention expired | Set `GOVERNANCE` or `COMPLIANCE` with future date | `s3:PutObjectRetention` | None |
-| Active `GOVERNANCE` lock | Extend `RetainUntilDate` to a strictly later date (same mode) | `s3:PutObjectRetention` | None |
-| Active `GOVERNANCE` lock | Clear (`<Retention/>`), shorten `RetainUntilDate`, or switch `GOVERNANCE` -> `COMPLIANCE` | `s3:PutObjectRetention` **AND** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
-| Active `COMPLIANCE` lock | Extend `RetainUntilDate` to a strictly later date (`COMPLIANCE` mode) | `s3:PutObjectRetention` | None |
-| Active `COMPLIANCE` lock | Clear, shorten, or switch `COMPLIANCE` -> `GOVERNANCE` | **Forbidden for all principals** | Forbidden (`AccessDenied`) |
+| Target Object State            | Proposed `<Retention>` Change                                                             | Required IAM Permissions                                       | Required Request Header                   |
+| ------------------------------ | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------- |
+| Unlocked, or retention expired | Set `GOVERNANCE` or `COMPLIANCE` with future date                                         | `s3:PutObjectRetention`                                        | None                                      |
+| Active `GOVERNANCE` lock       | Extend `RetainUntilDate` to a strictly later date (same mode)                             | `s3:PutObjectRetention`                                        | None                                      |
+| Active `GOVERNANCE` lock       | Clear (`<Retention/>`), shorten `RetainUntilDate`, or switch `GOVERNANCE` -> `COMPLIANCE` | `s3:PutObjectRetention` **AND** `s3:BypassGovernanceRetention` | `x-amz-bypass-governance-retention: true` |
+| Active `COMPLIANCE` lock       | Extend `RetainUntilDate` to a strictly later date (`COMPLIANCE` mode)                     | `s3:PutObjectRetention`                                        | None                                      |
+| Active `COMPLIANCE` lock       | Clear, shorten, or switch `COMPLIANCE` -> `GOVERNANCE`                                    | **Forbidden for all principals**                               | Forbidden (`AccessDenied`)                |
 {.wide .expand}
 
 ---
@@ -53,22 +53,22 @@ The three `SN-2026-015` failures can be reproduced directly against pre-`2026101
 
 Assume user `nobypass` has `Allow` on `s3:PutObjectRetention` and `s3:DeleteObjectVersion`, and **no** `s3:BypassGovernanceRetention` grant:
 
-| Step | Action by `nobypass` | Pre-`20261018` Result | Server `20261018` Result |
-|---|---|---|---|
-| 1 | Object `doc.txt` (version `v1`) is locked in `GOVERNANCE` mode until `2030-01-01` | Locked | Locked |
-| 2 | `DELETE /bucket/doc.txt?versionId=v1` | `403 AccessDenied` | `403 AccessDenied` |
-| 3 | `PUT /bucket/doc.txt?retention&versionId=v1` with header `x-amz-bypass-governance-retention: true` and body `<Retention/>` | **`200 OK` (lock cleared!)** | `403 AccessDenied` |
-| 4 | `DELETE /bucket/doc.txt?versionId=v1` | **`204 No Content` (version permanently deleted!)** | Object remains locked and protected |
+| Step | Action by `nobypass`                                                                                                       | Pre-`20261018` Result                               | Server `20261018` Result            |
+| ---- | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------------------- |
+| 1    | Object `doc.txt` (version `v1`) is locked in `GOVERNANCE` mode until `2030-01-01`                                          | Locked                                              | Locked                              |
+| 2    | `DELETE /bucket/doc.txt?versionId=v1`                                                                                      | `403 AccessDenied`                                  | `403 AccessDenied`                  |
+| 3    | `PUT /bucket/doc.txt?retention&versionId=v1` with header `x-amz-bypass-governance-retention: true` and body `<Retention/>` | **`200 OK` (lock cleared!)**                        | `403 AccessDenied`                  |
+| 4    | `DELETE /bucket/doc.txt?versionId=v1`                                                                                      | **`204 No Content` (version permanently deleted!)** | Object remains locked and protected |
 {.wide .expand}
 
 ### Reproduction 2: Locking an Object with Zero Retention Permissions (F1) {#reproduction-2-locking-an-object}
 
 Assume user `zeroperm` has an empty/unrelated policy with **neither** `s3:PutObjectRetention` **nor** `s3:BypassGovernanceRetention`:
 
-| Step | Action by `zeroperm` | Pre-`20261018` Result | Server `20261018` Result |
-|---|---|---|---|
-| 1 | `PUT /bucket/unlocked.txt?retention` (without bypass header), body `<Mode>COMPLIANCE</Mode><RetainUntilDate>2099-01-01T00:00:00Z</RetainUntilDate>` | `403 AccessDenied` | `403 AccessDenied` |
-| 2 | Repeat the exact same `PUT /bucket/unlocked.txt?retention` **adding header `x-amz-bypass-governance-retention: true`** | **`200 OK` (irreversible 2099 COMPLIANCE lock applied!)** | `403 AccessDenied` |
+| Step | Action by `zeroperm`                                                                                                                                | Pre-`20261018` Result                                     | Server `20261018` Result |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------ |
+| 1    | `PUT /bucket/unlocked.txt?retention` (without bypass header), body `<Mode>COMPLIANCE</Mode><RetainUntilDate>2099-01-01T00:00:00Z</RetainUntilDate>` | `403 AccessDenied`                                        | `403 AccessDenied`       |
+| 2    | Repeat the exact same `PUT /bucket/unlocked.txt?retention` **adding header `x-amz-bypass-governance-retention: true`**                              | **`200 OK` (irreversible 2099 COMPLIANCE lock applied!)** | `403 AccessDenied`       |
 {.wide .expand}
 
 ### Reproduction 3: Bypassing `s3:object-lock-remaining-retention-days` Conditions (F3) {#reproduction-3-bypassing-s3-object}
@@ -129,15 +129,15 @@ In `PutObjectRetentionHandler` and `enforceRetentionBypassForPut`:
 
 ### Complete Decision Table for `PutObjectRetention` {#decision-table}
 
-| Row | Existing Lock State | Requested Mutation | `x-amz-bypass-governance-retention` | `retOK` (`s3:PutObjectRetention`) | `bypassOK` (`s3:BypassGovernanceRetention`) | Outcome |
-|---|---|---|---|---|---|---|
-| 1 | Any | Any | `false` or `true` | `false` | Any | **`403 AccessDenied`** (closes F1 & F3) |
-| 2 | Unlocked or expired | Set future retention | `false` or `true` | `true` | Not required | **`200 OK`** |
-| 3 | Active `GOVERNANCE` | Extend `RetainUntilDate` (same mode or upgrade to `COMPLIANCE` with `>=` date) | `false` or `true` | `true` | Not required | **`200 OK`** |
-| 4 | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate` | `false` | `true` | Any | **`403 AccessDenied`** |
-| 5 | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate` | `true` | `true` | `false` | **`403 AccessDenied`** (closes F2) |
-| 6 | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate` | `true` | `true` | `true` | **`200 OK`** |
-| 7 | Active `COMPLIANCE` | Clear, shorten, or downgrade to `GOVERNANCE` | `false` or `true` | Any | Any | **`403 AccessDenied`** |
+| Row | Existing Lock State | Requested Mutation                                                             | `x-amz-bypass-governance-retention` | `retOK` (`s3:PutObjectRetention`) | `bypassOK` (`s3:BypassGovernanceRetention`) | Outcome                                 |
+| --- | ------------------- | ------------------------------------------------------------------------------ | ----------------------------------- | --------------------------------- | ------------------------------------------- | --------------------------------------- |
+| 1   | Any                 | Any                                                                            | `false` or `true`                   | `false`                           | Any                                         | **`403 AccessDenied`** (closes F1 & F3) |
+| 2   | Unlocked or expired | Set future retention                                                           | `false` or `true`                   | `true`                            | Not required                                | **`200 OK`**                            |
+| 3   | Active `GOVERNANCE` | Extend `RetainUntilDate` (same mode or upgrade to `COMPLIANCE` with `>=` date) | `false` or `true`                   | `true`                            | Not required                                | **`200 OK`**                            |
+| 4   | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate`                            | `false`                             | `true`                            | Any                                         | **`403 AccessDenied`**                  |
+| 5   | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate`                            | `true`                              | `true`                            | `false`                                     | **`403 AccessDenied`** (closes F2)      |
+| 6   | Active `GOVERNANCE` | Clear (`<Retention/>`) or shorten `RetainUntilDate`                            | `true`                              | `true`                            | `true`                                      | **`200 OK`**                            |
+| 7   | Active `COMPLIANCE` | Clear, shorten, or downgrade to `GOVERNANCE`                                   | `false` or `true`                   | Any                               | Any                                         | **`403 AccessDenied`**                  |
 {.wide .expand}
 
 ### Five Rejected Alternatives {#alternatives}

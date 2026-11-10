@@ -9,17 +9,17 @@ weight: 3
 url: "/zh/blog/release/pkg-3.16.0/"
 ---
 
-**silo-pkg v3.16.0** 是 `github.com/pgsty/silo-pkg/v3` 的源码维护版本，要求 **Go 1.27.3**，与 v3.15.2 保持 API 兼容。Server、Console 与 mcli 只有在采用新版本并重新构建后才会获得更新；库发布不会替换这些应用已有的发布制品。
+**silo-pkg v3.16.0** 是 `github.com/pgsty/silo-pkg/v3` 的源码维护版本，要求 **Go 1.27.3**，与 v3.15.2 保持 API 兼容。[SILO Server 20261109](/zh/blog/release/silo-20261109/)、[Console 2.7.0](/zh/blog/release/console-2.7.0/) 与 [mcli 20261109](/zh/blog/release/mcli-20261109/) 已采用 v3.16.0 构建发布；库发布本身不会替换更早的应用制品。
 
 ## 依赖更新 {#dependencies}
 
-| 模块 | v3.15.2 | v3.16.0 |
-| --- | --- | --- |
-| `github.com/go-jose/go-jose/v4` | `v4.1.6` | `v4.1.9` |
-| `golang.org/x/net` | `v0.61.0` | `v0.62.0` |
-| `golang.org/x/crypto` | `v0.58.0` | `v0.58.1-0.20261009181718-2f1f834330b2` |
-| `github.com/klauspost/cpuid/v2` | `v2.4.1` | `v2.4.2` |
-| `go.yaml.in/yaml/v3` | `v3.0.5` | `v3.0.6` |
+| 模块                            | v3.15.2   | v3.16.0                                 |
+| ------------------------------- | --------- | --------------------------------------- |
+| `github.com/go-jose/go-jose/v4` | `v4.1.6`  | `v4.1.9`                                |
+| `golang.org/x/net`              | `v0.61.0` | `v0.62.0`                               |
+| `golang.org/x/crypto`           | `v0.58.0` | `v0.58.1-0.20261009181718-2f1f834330b2` |
+| `github.com/klauspost/cpuid/v2` | `v2.4.1`  | `v2.4.2`                                |
+| `go.yaml.in/yaml/v3`            | `v3.0.5`  | `v3.0.6`                                |
 {.wide .expand}
 
 JOSE 更新包含 [go-jose v4.1.7](https://github.com/go-jose/go-jose/releases/tag/v4.1.7) 的五项安全修复：无效 RSA 密钥指纹、嵌入未导出字段的 JSON 解码、JWE 受保护与未受保护头处理、RSA 证书验证限制，以及 JWS 签名数/JWE 接收者数限制。v4.1.9 还修复了 OpaqueSigner 对未识别公钥类型的兼容回归，并改进不支持密钥的错误返回。上述公告针对依赖库，是否影响某个应用取决于它实际暴露的操作。
