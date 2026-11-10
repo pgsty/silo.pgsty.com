@@ -52,7 +52,7 @@ icon: fa-solid fa-server
 | 构建与制品              | 基于 Go 1.27.3 构建，集成 Console v2.5.1、mcli 20261026、pkg v3.15.2 与固定提交的上游 `minio-go`；Windows 归档改用 ZIP。见[组件版本矩阵](/zh/compatibility/versions/#server-20261026)。                                                               |
 {.wide .expand}
 
-**读取与故障边界：** 租约失效或网络分区仍可能产生迟到提交，部分元数据更新仍可能暴露旧值或旧标签。既有读仲裁与自愈规则保持不变（更严格的 fencing、回滚与读取恢复诊断保留在 `consistency_strict` 构建标签下），升级不提供分布式 fencing，也不会自动修复存量不一致对象。下方 20261018 的 Object Lock、IAM 与 strict 分片模式退役要求继续适用。
+**读取与故障边界：** 超时不证明 I/O 已停止，延迟回滚仍可能发生。租约失效或网络分区仍可能产生迟到提交，部分元数据更新仍可能暴露旧值或旧标签。既有读仲裁与自愈规则保持不变（更严格的 fencing、回滚与读取恢复诊断保留在 `consistency_strict` 构建标签下），升级不提供分布式 fencing，也不会自动修复存量不一致对象。下方 20261018 的 Object Lock、IAM 与 strict 分片模式退役要求继续适用。
 
 ## Server 20261018 升级检查 {#october-2026}
 

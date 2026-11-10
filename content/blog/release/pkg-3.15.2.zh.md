@@ -38,7 +38,7 @@ aliases:
 
 为保持既有 CLI 输出格式与 NetBSD 编译兼容，下游应用继续固定 `go-humanize v1.0.1`、`go-runewidth v0.0.29` 与 `go-systemd/v22 v22.6.0`。由于 Go 不会传递继承依赖模块的 `replace` 指令，各嵌入方需在自身 `go.mod` 中显式声明所需的模块替换。
 
-`v3.15.2` 已通过含 LDAP 集成在内的全量 lint 与 `-race` 竞态测试、模块校验及三项 CI 流水线（[Go](https://github.com/pgsty/silo-pkg/actions/runs/40318147518)、[LDAP](https://github.com/pgsty/silo-pkg/actions/runs/40318147326)、[VulnCheck](https://github.com/pgsty/silo-pkg/actions/runs/40318147298)）。HTTP 协议夹具验证了两个复制移除入口均同时接受 `200`/`204` 并保留 `403` 错误；此前的 3.15 依赖回归测试亦覆盖了 JWT 校验边界、本地 etcd 认证/Watch/租约持久化及 CLI 输出格式。模块级扫描中的 `GO-2026-5932` 位于未被导入的弃用 OpenPGP 包中，不影响运行代码（详见[统一安全审计清单](/zh/blog/release/silo-20261026/#runtime-fixes)）。
+`v3.15.2` 已通过含 LDAP 集成在内的全量 lint 与 `-race` 竞态测试、模块校验及三项 CI 流水线（[Go](https://github.com/pgsty/silo-pkg/actions/runs/40318147518)、[LDAP](https://github.com/pgsty/silo-pkg/actions/runs/40318147326)、[VulnCheck](https://github.com/pgsty/silo-pkg/actions/runs/40318147298)）。HTTP 协议夹具验证了两个复制移除入口均同时接受 `200`/`204` 并保留 `403` 错误；此前的 3.15 依赖回归测试亦覆盖了 JWT 校验边界、本地 etcd 认证/Watch/租约持久化及 CLI 输出格式。SDK 补丁不宣称新的 CVE 修复。模块级扫描中的 `GO-2026-5932` 位于未被导入的弃用 OpenPGP 包中，不影响运行代码（详见[统一安全审计清单](/zh/blog/release/silo-20261026/#runtime-fixes)）。
 
 ```go
 require github.com/pgsty/silo-pkg/v3 v3.15.2

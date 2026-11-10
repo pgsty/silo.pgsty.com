@@ -27,6 +27,7 @@ test: .venv-check/installed
 	$(CHECK_PYTHON) -m unittest discover -s bin -p 'test_*.py'
 
 check: test
+	-@git rev-parse HEAD && git status --short --branch
 	go mod verify
 	$(HUGO) build --minify --cleanDestinationDir --printPathWarnings --printI18nWarnings
 	python3 bin/check_internal_links.py public
