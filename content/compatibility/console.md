@@ -15,6 +15,12 @@ SILO Console is Silo's build of the MinIO Console; **SILO Server 20261109 embeds
 
 [`pgsty/silo-console`](https://github.com/pgsty/silo-console) continues the upstream `minio/console` history from its final commit, [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563) (2026-04-16); the rebrand begins at `50797deb` (2026-08-04). The upstream repository is no longer published — `github.com/minio/console` now returns 404, where `minio/mc` was merely archived — so the source lineage survives only in this fork. The Go module path still resolves, because the module proxy continues to serve the versions it already cached. Release records: [v2.0.0](/blog/release/console-2.0.0/), [v2.1.0](/blog/release/console-2.1.0/), [v2.1.1], [v2.2.0](/blog/release/console-2.2.0/), [v2.2.1], [v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0), [v2.4.0](/blog/release/console-2.4.0/), [v2.4.1](/blog/release/console-2.4.1/), [v2.4.2](/blog/release/console-2.4.2/), [v2.5.1](/blog/release/console-2.5.1/), [v2.6.0](/blog/release/console-2.6.0/), and [v2.7.0](/blog/release/console-2.7.0/).
 
+## Candidate service-account policy editing (unreleased) {#candidate-policy-edit}
+
+The next Console candidate tracks inherited and inline policies separately, so changing an access key's name, description or status preserves inheritance instead of saving a copy of its parent's policy. To remove an existing inline restriction, turn off **Restrict beyond user policy**; the Console sends an explicit empty policy and restores inheritance. Clearing the editor while restriction remains enabled prevents saving. Entering an explicit empty document such as `{}` also requests a reset.
+
+This requires the matching [Server policy semantics](/compatibility/server/): omitted/null means preserve, explicit empty means reset, and a nonempty document without Version receives the default. It is not included in Console v2.7.0 or Server 20261109. Standalone Console and the Server's embedded Console must each select the repaired component when released.
+
 ## 2.7.0 ten-language UI, container CA trust and usage-worker repairs {#release-270}
 
 [Console 2.7.0](/blog/release/console-2.7.0/) (embedded in [SILO Server 20261109](/blog/release/silo-20261109/)) delivers:

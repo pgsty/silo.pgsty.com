@@ -15,6 +15,12 @@ SILO Console 是 Silo 构建的 MinIO Console；**SILO Server 20261109 内嵌 Co
 
 [`pgsty/silo-console`](https://github.com/pgsty/silo-console) 延续上游 `minio/console` 的历史，起点是其最终提交 [`feff71e4`](https://github.com/pgsty/silo-console/commit/feff71e48e39547834399a84a9460edb4fb50563)（2026-04-16），品牌重塑自 `50797deb`（2026-08-04）开始。上游仓库已不再公开 —— `github.com/minio/console` 现在返回 404，而 `minio/mc` 只是归档 —— 因此源码谱系只在这个分支中留存。Go 模块路径仍可解析，因为模块代理继续提供它此前缓存的版本。历次版本记录：[v2.0.0](/zh/blog/release/console-2.0.0/)、[v2.1.0](/zh/blog/release/console-2.1.0/)、[v2.1.1]、[v2.2.0](/zh/blog/release/console-2.2.0/)、[v2.2.1]、[v2.3.0](https://github.com/pgsty/silo-console/releases/tag/v2.3.0)、[v2.4.0](/zh/blog/release/console-2.4.0/)、[v2.4.1](/zh/blog/release/console-2.4.1/)、[v2.4.2](/zh/blog/release/console-2.4.2/)、[v2.5.1](/zh/blog/release/console-2.5.1/)、[v2.6.0](/zh/blog/release/console-2.6.0/) 与 [v2.7.0](/zh/blog/release/console-2.7.0/)。
 
+## 服务账号策略编辑候选修复（未发布） {#candidate-policy-edit}
+
+下一 Console 候选版本区分继承与 inline policy，因此修改访问密钥的名称、描述或状态会保留继承关系，不会把父账号策略保存成一份 inline policy 副本。要移除已有的 inline 限制，关闭 **Restrict beyond user policy** 开关；Console 会发送显式空策略以恢复继承。限制仍启用时清空编辑器会阻止保存；显式输入 `{}` 等空文档也可请求重置。
+
+这需要配套的 [Server 策略语义](/zh/compatibility/server/)：省略/null 表示保留，显式空文档表示重置，非空文档缺少 Version 时补默认值。修复不包含在 Console v2.7.0 或 Server 20261109 中；发布时，独立 Console 与 Server 内嵌 Console 都需要选定修复后的组件。
+
 ## 2.7.0 十种界面语言、容器 CA 信任与用量后台任务修复 {#release-270}
 
 [Console 2.7.0](/zh/blog/release/console-2.7.0/)（已内嵌于 [SILO Server 20261109](/zh/blog/release/silo-20261109/)）交付以下改动：

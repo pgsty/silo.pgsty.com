@@ -15,6 +15,12 @@ icon: fa-solid fa-terminal
 > [!TIP]
 > **当前正式版：** [mcli 20261109](/zh/blog/release/mcli-20261109/)，标签 `RELEASE.2026-11-09T00-00-00Z`，包版本 `20261109000000.0.0`，源码 `e1d4cc5abfe0`，Docker Hub `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` 与 `latest`（`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`）。Windows 使用 ZIP；Linux/macOS 使用 tar.gz，提供 Linux RPM/DEB/APK。
 
+## 服务账号策略编辑候选修复（未发布） {#candidate-policy-edit}
+
+下一 mcli 候选版本的 `admin user svcacct edit --policy` 与 `idp ldap accesskey edit --policy` 接受显式空策略文档，例如 `{}` 或 `{"Statement":[]}`。配合 [Server 修复](/zh/compatibility/server/) 后，这会清除 inline policy 并恢复继承。省略 `--policy` 会保留已有策略；创建账号与写入命名策略仍拒绝空策略。
+
+此改动不包含在 mcli 20261109 中。重置行为需要配套发布修复后的客户端与 Server；只替换客户端二进制无法修复旧版 Server。
+
 <span id="next-release"></span><span id="current-release"></span>
 
 ## 当前版本变化 {#release-20261109}

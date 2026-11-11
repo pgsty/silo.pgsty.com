@@ -15,6 +15,12 @@ icon: fa-solid fa-terminal
 > [!TIP]
 > **Current release:** [mcli 20261109](/blog/release/mcli-20261109/), tag `RELEASE.2026-11-09T00-00-00Z`, package `20261109000000.0.0`, source `e1d4cc5abfe0`, Docker Hub `pgsty/mc:RELEASE.2026-11-09T00-00-00Z` & `latest` (`sha256:82b1c51de77aa7687d4d2c1a2b388dc7752528a64377c48a3e1271dcac39dbcf`). Windows uses ZIP; Linux/macOS use tar.gz, with Linux RPM/DEB/APK.
 
+## Candidate service-account policy editing (unreleased) {#candidate-policy-edit}
+
+The next mcli candidate accepts an explicit empty policy document, such as `{}` or `{"Statement":[]}`, with `admin user svcacct edit --policy` and `idp ldap accesskey edit --policy`. With the matching [Server repair](/compatibility/server/), this removes the inline policy and returns the key to inheritance. Omitting `--policy` preserves the existing policy; account creation and named-policy writes continue to reject empty policies.
+
+This change is not in mcli 20261109. The repaired client and Server must be released together for the reset behavior; changing a client binary alone does not fix an older Server.
+
 <span id="next-release"></span><span id="current-release"></span>
 
 ## Current release changes {#release-20261109}

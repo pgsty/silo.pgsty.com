@@ -23,6 +23,12 @@ The YAML configuration supports filters to restrict key rotation to a specific s
 > [!NOTE]
 > **[SILO 20261109](/blog/release/silo-20261109/) lifecycle and multi-pool safety:** Batch `keyrotate` enforces the authenticated submitter's local data permissions throughout execution and preserves Object Lock retention and legal holds ([#310](https://github.com/pgsty/silo/issues/310), [#311](https://github.com/pgsty/silo/issues/311)), scopes pool updates so object copies on other server pools remain readable ([#312](https://github.com/pgsty/silo/issues/312)), pauses and retries on temporary IAM or authorization outages, incomplete bucket listings, or pool rebalance and decommission conflicts ([#313](https://github.com/pgsty/silo/issues/313)), and reports skipped or refused work (`versionsSkippedLocked`, `keysRefused`, `complete-with-skips`) separately from clean completions. See [SILO batch job lifecycle](/administration/batch-framework/#silo-lifecycle).
 
+## Candidate KMS context repair (unreleased) {#candidate-context}
+
+In the candidate after Server 20261109, `encryption.context` is decoded from the saved job configuration for execution, retry and restart. It accepts a base64-encoded JSON object of string keys and string values, such as the encoding of `{"tenant":"acme"}`. An omitted value or the base64 encoding of `{}` or JSON `null` means an empty context; malformed base64, invalid JSON and non-string values are rejected.
+
+Rotation uses this context as KMS associated data and stores it with the object. Validation-probe fields are not added to the object's context. Temporary KMS errors remain eligible for the job's retry handling. This repair is not included in Server 20261109; see [candidate compatibility notes](/compatibility/server/).
+
 <a id="minio-batch-framework-keyrotate-job-ref"></a>
 
 ## Key Rotate Batch Job Reference {#key-rotate-batch-job-reference}

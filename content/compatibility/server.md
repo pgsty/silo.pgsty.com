@@ -14,6 +14,20 @@ icon: fa-solid fa-server
 > [!WARNING]
 > **Read this before replacing a MinIO deployment.** The binary, package, service account, systemd unit, default local configuration directory, container path, Helm resource names, embedded Console, update behavior, several authorization decisions, and some error responses changed. Data disks and the `MINIO_*` configuration namespace did not receive a matching rename.
 
+## Candidate changes after 20261109 (unreleased) {#candidate-after-20261109}
+
+The following repairs are prepared for the next coordinated SILO release. They are not included in the published Server 20261109, Console v2.7.0 or mcli 20261109 artifacts. No new component versions are assigned yet; the candidate Server source still pins the previously released Console and mcli. Deploying these client/UI repairs requires selecting and releasing the matching components as well.
+
+- **Read authorization:** `GetObjectAttributes` checks both Attributes and GetObject permissions against the addressed version's actual tags, using the version-specific actions when `versionId` is supplied. Missing-object masking still uses `s3:ListBucket`; an authorized request whose metadata cannot be read retains its storage error.
+- **ZIP reads:** GET, HEAD and member listing authorize the ZIP object's actual tags. Listing members requires both `s3:ListBucket` on the bucket and `s3:GetObject` on the ZIP. These reads build a missing index in memory without persisting it or changing the ZIP metadata, so they need no additional write permission.
+- **Object Lock and request authentication:** replica writes/copies reconcile the destination version's lock and tag state, preserving COMPLIANCE protection across pool order while retaining authorized GOVERNANCE and legal-hold changes. Tagging proxies authorize every addressed destination. Authenticated unsigned-trailer uploads enforce the time window; bucket-policy-authorized anonymous uploads remain supported.
+- **Bulk-delete cost:** every explicit version removal in `DeleteObjects` follows the sequential single-object path, including buckets without Object Lock, so large version purges can take longer. Entries without a version ID retain bulk execution.
+- **Pools and restore:** historical-version self-copy can create a readable new version when the source and destination are in different pools, including encrypted and compressed objects. Restore expiry and healing no longer split revision quorum solely because a cached data-directory flag changes with time. Decommission stops scans without physical progress, returns cancellation errors and rescans hidden child keys; see the [decommission procedure](/operations/deployments/baremetal-decommission-server-pool/).
+- **IAM and site replication:** omitted or null service-account policy preserves the inline policy; `{}` or `{"Statement":[]}` removes it and restores inheritance; a nonempty policy without Version receives the default. Import preserves disabled accounts/groups and reports group failures. Replicated/exported credentials exclude derived policy claims, and healing releases its state lock before storage reads and hooks. Matching [Console](/compatibility/console/) and [mcli](/compatibility/mcli/) changes are separate deliverables.
+- **Batch jobs:** [key rotation](/administration/batch-framework-job-keyrotate/) preserves the configured KMS context on execution, retry and reload. Variable preflight follows the pinned policy evaluator: unsupported `${...}` sequences remain literal, while genuinely unavailable request context still restricts the job. This does not implement AWS special-variable escape expansion.
+
+The 20261109 upgrade checks below remain the record for that released version. These candidate fixes do not relax the existing lock-domain, mixed-node restore or batch-manifest upgrade requirements.
+
 <span id="maintenance-20261025"></span>
 <span id="post-20261026"></span>
 

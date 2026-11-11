@@ -13,6 +13,20 @@ icon: fa-solid fa-server
 > [!WARNING]
 > **替换 MinIO 部署前请先阅读本页。** 二进制、软件包、服务账号、systemd 单元、默认本地配置目录、容器路径、Helm 资源名、内嵌控制台、更新行为、若干授权判定及部分错误响应已经改变；数据盘和 `MINIO_*` 配置命名空间没有随产品改名。
 
+## 20261109 之后的候选改动（未发布） {#candidate-after-20261109}
+
+以下修复已为下一次 SILO 配套发布准备，**不包含在已发布的 Server 20261109、Console v2.7.0 或 mcli 20261109 制品中**。目前尚未分配新组件版本；候选 Server 源码仍固定依赖此前已发布的 Console 和 mcli，因此交付客户端与界面修复还需要选定并发布对应组件。
+
+- **读取授权：** `GetObjectAttributes` 使用目标版本的实际标签，同时检查 Attributes 与 GetObject 权限；显式提供 `versionId` 时使用对应的版本动作。对象不存在时仍依据 `s3:ListBucket` 决定错误掩码；已获授权但无法读取元数据的请求保留存储错误。
+- **ZIP 读取：** GET、HEAD 与成员列举均按 ZIP 对象的实际标签授权。列举成员同时要求桶上的 `s3:ListBucket` 和 ZIP 上的 `s3:GetObject`。缺失的索引只在内存中构建，不再回写索引或改变 ZIP 元数据，因此读取不需要额外写权限。
+- **对象锁与请求认证：** 副本写入和复制会核对目标版本的锁与标签状态，跨池合并 COMPLIANCE 保护不再依赖池顺序，并保留已授权的 GOVERNANCE 与法定保留变更。标签代理校验每个实际访问的目标；已认证的 unsigned-trailer 上传校验请求时间窗，桶策略允许的匿名上传继续受支持。
+- **批量删除成本：** `DeleteObjects` 中每个显式版本删除都走逐项执行的单对象路径，包括未启用 Object Lock 的桶，大批版本清理可能变慢。未指定版本 ID 的条目继续使用批量路径。
+- **存储池与恢复：** 历史版本自身复制可以在源与目标位于不同池时创建可读的新版本，覆盖加密及压缩对象。恢复到期与 healing 不再仅因随时间变化的数据目录缓存标志而拆散版本仲裁。退役扫描无物理进展时停止、取消时返回错误，并重新扫描此前被父键遮蔽的子键；详见[存储池退役流程](/zh/operations/deployments/baremetal-decommission-server-pool/)。
+- **IAM 与站点复制：** 服务账号策略省略或为 null 时保留 inline policy；显式 `{}` 或 `{"Statement":[]}` 清除它并恢复继承；非空策略缺少 Version 时补默认值。导入保留账号和组的禁用状态，并报告组失败；导出及复制的凭据移除派生策略声明，healing 在读取存储与调用 hook 前释放状态锁。配套 [Console](/zh/compatibility/console/) 和 [mcli](/zh/compatibility/mcli/) 修复独立交付。
+- **批处理：** [密钥轮换](/zh/administration/batch-framework-job-keyrotate/) 在执行、重试与重新加载时保留配置的 KMS 上下文。变量预检与当前固定版本的策略 evaluator 一致：不支持的 `${...}` 序列保持字面量，真正缺失的请求上下文仍然限制作业。这不意味着实现了 AWS 特殊变量的转义展开。
+
+下方 20261109 升级检查仍描述该正式版本。候选修复不会放宽既有的锁域、混合节点 restore 或批处理清单升级要求。
+
 <span id="maintenance-20261025"></span>
 <span id="post-20261026"></span>
 
